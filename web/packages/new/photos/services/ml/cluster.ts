@@ -121,7 +121,7 @@ export interface ClusteringOpts {
     earlyExitThreshold: number;
     batchSize: number;
     offsetIncrement: number;
-    filterBadFaces: boolean;
+    badFaceHeuristics: boolean;
 }
 
 export interface ClusteringProgress {

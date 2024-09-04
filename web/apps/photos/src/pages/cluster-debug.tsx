@@ -74,7 +74,7 @@ export default function ClusterDebug() {
             earlyExitThreshold: 0.9,
             batchSize: 10000,
             offsetIncrement: 7500,
-            filterBadFaces: true,
+            badFaceHeuristics: true,
         },
         onSubmit: (values) =>
             cluster(
@@ -86,7 +86,7 @@ export default function ClusterDebug() {
                     earlyExitThreshold: toFloat(values.earlyExitThreshold),
                     batchSize: toFloat(values.batchSize),
                     offsetIncrement: toFloat(values.offsetIncrement),
-                    filterBadFaces: values.filterBadFaces,
+                    badFaceHeuristics: values.badFaceHeuristics,
                 },
                 (progress: ClusteringProgress) =>
                     onProgressRef.current?.(progress),
@@ -235,12 +235,17 @@ const MemoizedForm = memo(
                     <FormControlLabel
                         control={
                             <Checkbox
-                                name={"filterBadFaces"}
-                                checked={values.filterBadFaces}
+                                name={"badFaceHeuristics"}
+                                checked={values.badFaceHeuristics}
+                                size="small"
                                 onChange={handleChange}
                             />
                         }
-                        label="filterBadFaces"
+                        label={
+                            <Typography color="text.secondary">
+                                Bad face heuristics
+                            </Typography>
+                        }
                     />
                     <Button
                         color="secondary"
