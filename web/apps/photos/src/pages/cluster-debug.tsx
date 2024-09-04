@@ -70,7 +70,7 @@ export default function ClusterDebug() {
             minBlur: 10,
             minScore: 0.8,
             minClusterSize: 2,
-            joinThreshold: 0.6,
+            joinThreshold: 0.76,
             earlyExitThreshold: 0.9,
             batchSize: 10000,
             offsetIncrement: 7500,
@@ -344,7 +344,7 @@ const ClusterList: React.FC<React.PropsWithChildren<ClusterListProps>> = ({
         index === 0
             ? 140
             : index === 1
-              ? 130
+              ? 110
               : Array.isArray(items[index - 2])
                 ? listItemHeight
                 : 36;
@@ -466,13 +466,10 @@ const ClusterResHeader: React.FC<ClusterResHeaderProps> = ({ clusterRes }) => {
             </Typography>
             <Typography variant="small" color="text.muted">
                 For each cluster showing only up to 50 faces, sorted by cosine
-                similarity to highest scoring face in the cluster.
+                similarity to its highest scoring face.
             </Typography>
             <Typography variant="small" color="text.muted">
-                Below each face is its{" "}
-                <b>blur - score - cosineSimilarity - direction</b>.
-            </Typography>
-            <Typography variant="small" color="text.muted">
+                Below each face is its blur, score, cosineSimilarity, direction.
                 Bad faces are outlined.
             </Typography>
         </Stack>
@@ -544,7 +541,7 @@ const FaceItem: React.FC<FaceItemProps> = ({ faceWithFile }) => {
     return (
         <FaceChip
             style={{
-                outline: isBadFace ? `1px solid wheat` : undefined,
+                outline: isBadFace ? `1px solid rosybrown` : undefined,
                 outlineOffset: "2px",
             }}
         >

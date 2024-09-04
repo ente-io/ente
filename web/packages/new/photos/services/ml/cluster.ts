@@ -195,6 +195,7 @@ export const clusterFaces = (
         earlyExitThreshold,
         batchSize,
         offsetIncrement,
+        badFaceHeuristics,
     } = opts;
     const t = Date.now();
 
@@ -256,6 +257,7 @@ export const clusterFaces = (
             oldState,
             joinThreshold,
             earlyExitThreshold,
+            badFaceHeuristics,
             ({ completed }: ClusteringProgress) =>
                 onProgress({
                     completed: offset + completed,
@@ -432,6 +434,7 @@ const clusterBatchLinear = (
     oldState: ClusteringState,
     joinThreshold: number,
     earlyExitThreshold: number,
+    badFaceHeuristics: boolean,
     onProgress: (progress: ClusteringProgress) => void,
 ) => {
     const state: ClusteringState = {
@@ -454,7 +457,7 @@ const clusterBatchLinear = (
 
         // Find the nearest neighbour among the previous faces in this batch.
         let nnIndex: number | undefined;
-        let nnCosineSimilarity = joinThreshold;
+        let nnCosineSimilarity = 0;
         for (let j = i - 1; j >= 0; j--) {
             // ! This is an O(n^2) loop, be careful when adding more code here.
 
@@ -464,13 +467,15 @@ const clusterBatchLinear = (
             // The vectors are already normalized, so we can directly use their
             // dot product as their cosine similarity.
             const csim = dotProduct(fi.embedding, fj.embedding);
-            if (csim > nnCosineSimilarity) {
+            const threshold =
+                badFaceHeuristics && fj.isBadFace ? 0.84 : joinThreshold;
+            if (csim > nnCosineSimilarity && csim >= threshold) {
                 nnIndex = j;
                 nnCosineSimilarity = csim;
 
                 // If we've found something "near enough", stop looking for a
                 // better match (A heuristic to speed up clustering).
-                if (earlyExitThreshold > 0 && csim > earlyExitThreshold) break;
+                if (earlyExitThreshold > 0 && csim >= earlyExitThreshold) break;
             }
         }
 
