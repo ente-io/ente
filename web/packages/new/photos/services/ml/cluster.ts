@@ -3,7 +3,7 @@ import { newNonSecureID } from "@/base/id-worker";
 import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
 import type { EnteFile } from "../../types/file";
-import type { Face, FaceIndex } from "./face";
+import { faceDirection, type Face, type FaceIndex } from "./face";
 import { dotProduct } from "./math";
 
 /**
@@ -482,4 +482,9 @@ const clusterBatchLinear = (
  * We apply a higher threshold when clustering such faces.
  */
 const isBadFace = (face: Face) =>
-    face.blur < 50 || (face.blur < 200 && face.blur < 0.85) || false; //face.isSideways,
+    face.blur < 50 ||
+    (face.blur < 200 && face.blur < 0.85) ||
+    isSidewaysFace(face);
+
+const isSidewaysFace = (face: Face) =>
+    faceDirection(face.detection) != "straight";
