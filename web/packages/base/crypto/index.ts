@@ -89,10 +89,16 @@ const assertInWorker = <T>(x: T): T => {
 };
 
 /**
- * Generate a new randomly generated 256-bit key suitable for use with the *Box
+ * Return a new randomly generated 256-bit key suitable for use with the *Box
  * encryption functions.
  */
-export const generateBoxKey = libsodium.generateBoxKey;
+export const generateNewBoxKey = libsodium.generateNewBoxKey;
+
+/**
+ * Return a new randomly generated 256-bit key suitable for use with the *Blob
+ * or *Stream encryption functions.
+ */
+export const generateNewBlobOrStreamKey = libsodium.generateNewBlobOrStreamKey;
 
 /**
  * Encrypt the given data, returning a box containing the encrypted data and a

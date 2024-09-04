@@ -2,7 +2,7 @@ import {
     decryptBlob,
     decryptBoxB64,
     encryptBoxB64,
-    generateBoxKey,
+    generateNewBlobOrStreamKey,
 } from "@/base/crypto";
 import { authenticatedRequestHeaders, ensureOk, HTTPError } from "@/base/http";
 import { getKV, getKVN, setKV } from "@/base/kv";
@@ -201,16 +201,15 @@ const getOrCreateEntityKeyB64 = async (type: EntityType) => {
     }
 
     // Nada. Create a new one, put it to remote, save it locally, and return.
-    // TODO-Cluster Keep this read only, only add the writeable bits after other
-    // stuff has been tested.
-    throw new Error("Not implemented");
-    // const generatedKeyB64 = await worker.generateEncryptionKey();
-    // const encryptedNewKey = await worker.encryptToB64(
-    //     generatedKeyB64,
-    //     encryptionKeyB64,
-    // );
-    // await postUserEntityKey(type, newKey);
-    // return decrypt(newKey);
+
+    // As a sanity check, genarate the key but immediately encrypt it as if it
+    // were fetched from remote and then try to decrypt it before doing anything
+    // with it.
+    const generated = await generateNewEncryptedEntityKey();
+    const result = decryptEntityKey(generated);
+    await postUserEntityKey(type, generated);
+    await saveRemoteUserEntityKey(type, generated);
+    return result;
 };
 
 const entityKeyKey = (type: EntityType) => `entityKey/${type}`;
@@ -235,12 +234,17 @@ const saveRemoteUserEntityKey = (
 ) => setKV(entityKeyKey(type), JSON.stringify(entityKey));
 
 /**
- * Generate a new entity key and return it after encrypting it using the user's
- * master key.
+ * Generate a new entity key and return it in the shape of an
+ * {@link RemoteUserEntityKey} after encrypting it using the user's master key.
  */
-// TODO: Temporary export to silence lint
-export const generateEncryptedEntityKey = async () =>
-    encryptBoxB64(await generateBoxKey(), await masterKeyFromSession());
+const generateNewEncryptedEntityKey = async () => {
+    const { encryptedData, nonce } = await encryptBoxB64(
+        await generateNewBlobOrStreamKey(),
+        await masterKeyFromSession(),
+    );
+    // Remote calls it the header, but it really is the nonce.
+    return { encryptedKey: encryptedData, header: nonce };
+};
 
 /**
  * Decrypt an encrypted entity key using the user's master key.
@@ -283,7 +287,9 @@ const getUserEntityKey = async (
 };
 
 const RemoteUserEntityKey = z.object({
+    /** Base64 encoded entity key, encrypted with the user's master key. */
     encryptedKey: z.string(),
+    /** Base64 encoded nonce used during encryption of this entity key. */
     header: z.string(),
 });
 
@@ -294,8 +300,7 @@ type RemoteUserEntityKey = z.infer<typeof RemoteUserEntityKey>;
  *
  * See: [Note: User entity keys]
  */
-// TODO-Cluster remove export
-export const postUserEntityKey = async (
+const postUserEntityKey = async (
     type: EntityType,
     entityKey: RemoteUserEntityKey,
 ) => {

@@ -118,6 +118,7 @@ export const syncCGroups = () => {
     //
     // The user can see both the cgroups and clusters in the UI, but only the
     // cgroups are synced.
+    // const syncCGroupsWithRemote()
     /*
      * After clustering, we also do some routine cleanup. Faces belonging to files
      * that have been deleted (including those in Trash) should be pruned off.
