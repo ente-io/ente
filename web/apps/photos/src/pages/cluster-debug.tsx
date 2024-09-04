@@ -6,9 +6,9 @@ import {
     type ClusterDebugPageContents,
 } from "@/new/photos/services/ml";
 import {
+    type ClusterFace,
     type ClusteringOpts,
     type ClusteringProgress,
-    type FaceF32,
     type OnClusteringProgress,
 } from "@/new/photos/services/ml/cluster";
 import { faceDirection } from "@/new/photos/services/ml/face";
@@ -72,6 +72,7 @@ export default function ClusterDebug() {
             earlyExitThreshold: 0.9,
             batchSize: 10000,
             offsetIncrement: 7500,
+            filterBadFaces: true,
         },
         onSubmit: (values) =>
             cluster(
@@ -83,6 +84,7 @@ export default function ClusterDebug() {
                     earlyExitThreshold: toFloat(values.earlyExitThreshold),
                     batchSize: toFloat(values.batchSize),
                     offsetIncrement: toFloat(values.offsetIncrement),
+                    filterBadFaces: values.filterBadFaces,
                 },
                 (progress: ClusteringProgress) =>
                     onProgressRef.current?.(progress),
@@ -454,8 +456,7 @@ const ClusterResHeader: React.FC<ClusterResHeaderProps> = ({ clusterRes }) => {
                 <b>blur - score - cosineSimilarity - direction</b>.
             </Typography>
             <Typography variant="small" color="text.muted">
-                Faces added to the cluster as a result of next batch merging are
-                outlined.
+                Bad faces are outlined.
             </Typography>
         </Stack>
     );
@@ -494,15 +495,15 @@ interface FaceItemProps {
 }
 
 interface FaceWithFile {
-    face: FaceF32;
+    face: ClusterFace;
     enteFile: EnteFile;
     cosineSimilarity?: number;
     wasMerged?: boolean;
 }
 
 const FaceItem: React.FC<FaceItemProps> = ({ faceWithFile }) => {
-    const { face, enteFile, cosineSimilarity, wasMerged } = faceWithFile;
-    const { faceID } = face;
+    const { face, enteFile, cosineSimilarity } = faceWithFile;
+    const { faceID, isBadFace } = face;
 
     const [objectURL, setObjectURL] = useState<string | undefined>();
 
@@ -526,7 +527,7 @@ const FaceItem: React.FC<FaceItemProps> = ({ faceWithFile }) => {
     return (
         <FaceChip
             style={{
-                outline: wasMerged ? `1px solid gray` : undefined,
+                outline: isBadFace ? `1px solid wheat` : undefined,
                 outlineOffset: "2px",
             }}
         >
