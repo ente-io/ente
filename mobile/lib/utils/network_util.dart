@@ -1,5 +1,4 @@
 import "package:connectivity_plus/connectivity_plus.dart";
-import "package:flutter/foundation.dart" show debugPrint;
 import "package:photos/core/configuration.dart";
 
 Future<bool> canUseHighBandwidth() async {
@@ -11,10 +10,6 @@ Future<bool> canUseHighBandwidth() async {
   if (!Configuration.instance.shouldBackupOverMobileData()) {
     if (connections.any((element) => element == ConnectivityResult.mobile)) {
       canUploadUnderCurrentNetworkConditions = false;
-    } else {
-      debugPrint(
-        "[canUseHighBandwidth] mobileBackupDisabled, backing up with connections: ${connections.map((e) => e.name).toString()}",
-      );
     }
   }
   final canDownloadOverMobileData =
