@@ -69,7 +69,7 @@ class _CollectPhotosCardWidgetState extends State<CollectPhotosCardWidget> {
     return Stack(
       children: [
         Positioned(
-          bottom: 22,
+          bottom: 22.5,
           left: 14.5,
           child: Container(
             height: 125,
