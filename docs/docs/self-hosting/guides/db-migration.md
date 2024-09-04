@@ -7,7 +7,7 @@ description: Migrating your self hosted Postgre 12 database to Postgres 16
 
 The old sample docker compose file used Postgres 12, which is now nearing end of
 life, so we've updated it to Postgres 16. Postgres major versions require a
-migration step. This document outlines one possible approach.
+migration step. This document mentions some approaches.
 
 > [!TIP]
 >
@@ -45,13 +45,13 @@ goes amiss with the actual migration.
 
 At the high level, the steps are
 
-1. Stop your cluster
+1. Stop your cluster.
 
 2. Start just the postgres container after changing the image to
-   `pgautoupgrade/pgautoupgrade:16-bookworm'
+   `pgautoupgrade/pgautoupgrade:16-bookworm'.
 
 3. Once the in-place migration completes, stop the container, and change the
-   image to `postgres:16`
+   image to `postgres:16`.
 
 #### 1. Stop the cluster
 
@@ -136,11 +136,11 @@ As another example, here is how one can migrate 12 to 16 when running Postgres
 on macOS, installed using Homebrew.
 
 1. Stop your postgres. Make sure there are no more commands shown by
-   `ps aux | grep '[p]ostgres'`
+   `ps aux | grep '[p]ostgres'`.
 
 2. Install postgres16.
 
-3. Migrate data using pg_upgrade
+3. Migrate data using `pg_upgrade`:
 
     ```sh
     /opt/homebrew/Cellar/postgresql@16/16.4/bin/pg_upgrade -b /opt/homebrew/Cellar/postgresql@12/12.18_1/bin -B /opt/homebrew/Cellar/postgresql@16/16.4/bin/ -d /opt/homebrew/var/postgresql@12 -D /opt/homebrew/var/postgresql@16
