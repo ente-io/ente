@@ -130,7 +130,8 @@ export interface ClusteringProgress {
 
 export type OnClusteringProgress = (progress: ClusteringProgress) => void;
 
-export type FaceF32 = Omit<Face, "embedding"> & {
+/** A {@link Face} annotated with data needed during clustering. */
+export type ClusterFace = Omit<Face, "embedding"> & {
     embedding: Float32Array;
 };
 
@@ -140,7 +141,7 @@ export interface ClusterPreview {
 }
 
 export interface ClusterPreviewFace {
-    face: FaceF32;
+    face: ClusterFace;
     cosineSimilarity: number;
     wasMerged: boolean;
 }
@@ -403,7 +404,7 @@ interface ClusteringState {
 }
 
 const clusterBatchLinear = (
-    faces: FaceF32[],
+    faces: ClusterFace[],
     oldState: ClusteringState,
     joinThreshold: number,
     earlyExitThreshold: number,
