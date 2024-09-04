@@ -75,7 +75,7 @@ class MLUserDeveloperOptions extends StatelessWidget {
     try {
       final Set<int> emptyFileIDs = await MLDataDB.instance.getErroredFileIDs();
       await MLDataDB.instance.deleteFaceIndexForFiles(emptyFileIDs.toList());
-      await MLDataDB.instance.deleteEmbeddings(emptyFileIDs.toList());
+      await MLDataDB.instance.deleteClipEmbeddings(emptyFileIDs.toList());
       showShortToast(context, "Deleted ${emptyFileIDs.length} entries");
     } catch (e) {
       // ignore: unawaited_futures

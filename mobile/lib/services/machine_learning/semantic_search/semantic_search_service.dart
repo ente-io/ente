@@ -6,6 +6,7 @@ import "dart:ui" show Image;
 import "package:computer/computer.dart";
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
+import "package:ml_linalg/vector.dart";
 import "package:photos/core/cache/lru_map.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
@@ -15,9 +16,9 @@ import 'package:photos/events/embedding_updated_event.dart';
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/clip.dart";
 import "package:photos/models/ml/ml_versions.dart";
+import "package:photos/models/ml/vector.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
-import "package:photos/services/machine_learning/face_ml/face_clustering/cosine_distance.dart";
 import "package:photos/services/machine_learning/ml_computer.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
@@ -31,13 +32,13 @@ class SemanticSearchService {
       SemanticSearchService._privateConstructor();
 
   static final Computer _computer = Computer.shared();
-  final LRUMap<String, List<double>> _queryCache = LRUMap(20);
+  final LRUMap<String, List<double>> _queryEmbeddingCache = LRUMap(20);
   static const kMinimumSimilarityThreshold = 0.175;
 
   bool _hasInitialized = false;
   bool _textModelIsLoaded = false;
 
-  Future<List<ClipEmbedding>>? _cachedImageEmbeddings;
+  Future<List<EmbeddingVector>>? _cachedImageEmbeddingVectors;
   Future<(String, List<EnteFile>)>? _searchScreenRequest;
   String? _latestPendingQuery;
 
@@ -53,10 +54,10 @@ class SemanticSearchService {
 
     // call getClipEmbeddings after 5 seconds
     Future.delayed(const Duration(seconds: 5), () async {
-      await getClipEmbeddings();
+      await getClipVectors();
     });
     Bus.instance.on<EmbeddingUpdatedEvent>().listen((event) {
-      _cachedImageEmbeddings = null;
+      _cachedImageEmbeddingVectors = null;
     });
 
     unawaited(_loadTextModel(delay: true));
@@ -72,7 +73,7 @@ class SemanticSearchService {
     if (!isMagicSearchEnabledAndReady()) {
       if (flagService.internalUser) {
         _logger.info(
-          "Magic search enabled ${localSettings.isMLIndexingEnabled}, loaded $_textModelIsLoaded ",
+          "Magic search enabled: ${localSettings.isMLIndexingEnabled}, loaded: $_textModelIsLoaded ",
         );
       }
       return (query, <EnteFile>[]);
@@ -106,31 +107,31 @@ class SemanticSearchService {
     _logger.info("Indexes cleared");
   }
 
-  Future<List<ClipEmbedding>> getClipEmbeddings() async {
-    _logger.info("Pulling cached embeddings");
-    _cachedImageEmbeddings ??= MLDataDB.instance.getAll();
-    return _cachedImageEmbeddings!;
+  Future<List<EmbeddingVector>> getClipVectors() async {
+    _logger.info("Pulling cached clip embeddings");
+    _cachedImageEmbeddingVectors ??= MLDataDB.instance.getAllClipVectors();
+    return _cachedImageEmbeddingVectors!;
   }
 
   Future<List<EnteFile>> getMatchingFiles(
     String query, {
-    double? scoreThreshold,
+    double? similarityThreshold,
   }) async {
-    bool showScore = false;
+    bool showThreshold = false;
     // if the query starts with 0.xxx, the split the query to get score threshold and actual query
     if (query.startsWith(RegExp(r"0\.\d+"))) {
       final parts = query.split(" ");
       if (parts.length > 1) {
-        scoreThreshold = double.parse(parts[0]);
+        similarityThreshold = double.parse(parts[0]);
         query = parts.sublist(1).join(" ");
-        showScore = true;
+        showThreshold = true;
       }
     }
     final textEmbedding = await _getTextEmbedding(query);
 
     final queryResults = await _getSimilarities(
       textEmbedding,
-      minimumSimilarity: scoreThreshold,
+      minimumSimilarity: similarityThreshold,
     );
 
     // print query for top ten scores
@@ -156,7 +157,7 @@ class SemanticSearchService {
     for (final result in queryResults) {
       final file = filesMap[result.id];
       if (file != null && !ignoredCollections.contains(file.collectionID)) {
-        if (showScore) {
+        if (showThreshold) {
           file.debugCaption =
               "${fileIDToScoreMap[result.id]?.toStringAsFixed(3)}";
         }
@@ -171,7 +172,7 @@ class SemanticSearchService {
     _logger.info(results.length.toString() + " results");
 
     if (deletedEntries.isNotEmpty) {
-      unawaited(MLDataDB.instance.deleteEmbeddings(deletedEntries));
+      unawaited(MLDataDB.instance.deleteClipEmbeddings(deletedEntries));
     }
 
     return results;
@@ -181,41 +182,8 @@ class SemanticSearchService {
     String query,
     double minimumSimilarity,
   ) async {
-    final textEmbedding = await _getTextEmbedding(query);
-
-    final queryResults = await _getSimilarities(
-      textEmbedding,
-      minimumSimilarity: minimumSimilarity,
-    );
-
-    final queryResultIds = <int>[];
-    for (QueryResult result in queryResults) {
-      queryResultIds.add(result.id);
-    }
-
-    final filesMap = await FilesDB.instance.getFilesFromIDs(
-      queryResultIds,
-    );
-    final results = <EnteFile>[];
-
-    final ignoredCollections =
-        CollectionsService.instance.getHiddenCollectionIds();
-    final deletedEntries = <int>[];
-    for (final result in queryResults) {
-      final file = filesMap[result.id];
-      if (file != null && !ignoredCollections.contains(file.collectionID)) {
-        results.add(file);
-      }
-      if (file == null) {
-        deletedEntries.add(result.id);
-      }
-    }
-
-    _logger.info(results.length.toString() + " results");
-
-    if (deletedEntries.isNotEmpty) {
-      unawaited(MLDataDB.instance.deleteEmbeddings(deletedEntries));
-    }
+    final results =
+        await getMatchingFiles(query, similarityThreshold: minimumSimilarity);
 
     final matchingFileIDs = <int>[];
     for (EnteFile file in results) {
@@ -253,12 +221,12 @@ class SemanticSearchService {
 
   Future<List<double>> _getTextEmbedding(String query) async {
     _logger.info("Searching for " + query);
-    final cachedResult = _queryCache.get(query);
+    final cachedResult = _queryEmbeddingCache.get(query);
     if (cachedResult != null) {
       return cachedResult;
     }
     final textEmbedding = await MLComputer.instance.runClipText(query);
-    _queryCache.put(query, textEmbedding);
+    _queryEmbeddingCache.put(query, textEmbedding);
     return textEmbedding;
   }
 
@@ -267,19 +235,19 @@ class SemanticSearchService {
     double? minimumSimilarity,
   }) async {
     final startTime = DateTime.now();
-    final embeddings = await getClipEmbeddings();
+    final imageEmbeddings = await getClipVectors();
     final List<QueryResult> queryResults = await _computer.compute(
       computeBulkSimilarities,
       param: {
-        "imageEmbeddings": embeddings,
+        "imageEmbeddings": imageEmbeddings,
         "textEmbedding": textEmbedding,
         "minimumSimilarity": minimumSimilarity,
       },
-      taskName: "computeBulkScore",
+      taskName: "computeBulkSimilarities",
     );
     final endTime = DateTime.now();
     _logger.info(
-      "computingScores took: " +
+      "computingSimilarities took: " +
           (endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)
               .toString() +
           "ms",
@@ -308,25 +276,33 @@ class SemanticSearchService {
 
 List<QueryResult> computeBulkSimilarities(Map args) {
   final queryResults = <QueryResult>[];
-  final imageEmbeddings = args["imageEmbeddings"] as List<ClipEmbedding>;
+  final imageEmbeddings = args["imageEmbeddings"] as List<EmbeddingVector>;
   final textEmbedding = args["textEmbedding"] as List<double>;
   final minimumSimilarity = args["minimumSimilarity"] ??
       SemanticSearchService.kMinimumSimilarityThreshold;
-  double bestScore = 0.0;
-  for (final imageEmbedding in imageEmbeddings) {
-    final score = computeCosineSimilarity(
-      imageEmbedding.embedding,
-      textEmbedding,
-    );
-    if (score >= minimumSimilarity) {
-      queryResults.add(QueryResult(imageEmbedding.fileID, score));
+
+  final Vector textVector = Vector.fromList(textEmbedding);
+  if (!kDebugMode) {
+    for (final imageEmbedding in imageEmbeddings) {
+      final similarity = imageEmbedding.vector.dot(textVector);
+      if (similarity >= minimumSimilarity) {
+        queryResults.add(QueryResult(imageEmbedding.fileID, similarity));
+      }
     }
-    if (score > bestScore) {
-      bestScore = score;
+  } else {
+    double bestScore = 0.0;
+    for (final imageEmbedding in imageEmbeddings) {
+      final similarity = imageEmbedding.vector.dot(textVector);
+      if (similarity >= minimumSimilarity) {
+        queryResults.add(QueryResult(imageEmbedding.fileID, similarity));
+      }
+      if (similarity > bestScore) {
+        bestScore = similarity;
+      }
     }
-  }
-  if (kDebugMode && queryResults.isEmpty) {
-    dev.log("No results found for query with best score: $bestScore");
+    if (kDebugMode && queryResults.isEmpty) {
+      dev.log("No results found for query with best score: $bestScore");
+    }
   }
 
   queryResults.sort((first, second) => second.score.compareTo(first.score));
