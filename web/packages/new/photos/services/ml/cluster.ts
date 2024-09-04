@@ -199,11 +199,8 @@ export const clusterFaces = (
 
     const localFileByID = new Map(localFiles.map((f) => [f.id, f]));
 
-    // A flattened array of faces.
-    const allFaces = [...enumerateFaces(faceIndexes)];
-    const filteredFaces = allFaces
-        .filter((f) => f.blur > minBlur)
-        .filter((f) => f.score > minScore);
+    // A flattened array of filtered and annotated faces.
+    const filteredFaces = [...enumerateFaces(faceIndexes, minBlur, minScore)];
 
     const fileForFaceID = new Map(
         filteredFaces.map(({ faceID }) => [
@@ -329,7 +326,9 @@ export const clusterFaces = (
         });
     }
 
-    const totalFaceCount = allFaces.length;
+    // TODO-Cluster the total face count is only needed during debugging
+    let totalFaceCount = 0;
+    for (const fi of faceIndexes) totalFaceCount += fi.faces.length;
     const filteredFaceCount = faces.length;
     const clusteredFaceCount = clusterIDForFaceID.size;
     const unclusteredFaceCount = filteredFaceCount - clusteredFaceCount;
@@ -358,24 +357,36 @@ export const clusterFaces = (
 };
 
 /**
- * A generator function that returns a stream of {@link ClusterFace}s by
- * flattening all the the faces present in the given {@link faceIndices}.
+ * A generator function that returns a stream of eligible {@link ClusterFace}s
+ * by flattening all the the faces present in the given {@link faceIndices}.
  *
  * During this, it also converts the embeddings to Float32Arrays to speed up the
  * dot product calculations that will happen during clustering and attaches
  * other information that the clustering algorithm needs.
  */
-function* enumerateFaces(faceIndices: FaceIndex[]) {
+function* enumerateFaces(
+    faceIndices: FaceIndex[],
+    minBlur: number,
+    minScore: number,
+) {
     for (const fi of faceIndices) {
         for (const f of fi.faces) {
-            yield {
-                ...f,
-                embedding: new Float32Array(f.embedding),
-                isBadFace: isBadFace(f),
-            };
+            if (shouldIncludeFace(f, minBlur, minScore)) {
+                yield {
+                    ...f,
+                    embedding: new Float32Array(f.embedding),
+                    isBadFace: isBadFace(f),
+                };
+            }
         }
     }
 }
+
+/**
+ * Return true if the given face is above the minimum inclusion thresholds.
+ */
+const shouldIncludeFace = (face: Face, minBlur: number, minScore: number) =>
+    face.blur > minBlur && face.score > minScore;
 
 /**
  * Return true if the given face is above the minimum inclusion thresholds, but
