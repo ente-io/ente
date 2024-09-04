@@ -16,8 +16,8 @@ const (
 	FreePlanProductID = "free"
 	// FreePlanTransactionID is the dummy transaction ID for the free plan
 	FreePlanTransactionID = "none"
-	// TrialPeriodDuration is the duration of the free trial
-	TrialPeriodDuration = 365
+	// TrialPeriodDuration is the duration (in years) of the free trial
+	TrialPeriodDuration = 100
 	// TrialPeriod is the unit for the duration of the free trial
 	TrialPeriod = "days"
 
