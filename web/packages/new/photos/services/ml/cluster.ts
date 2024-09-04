@@ -133,6 +133,7 @@ export type OnClusteringProgress = (progress: ClusteringProgress) => void;
 /** A {@link Face} annotated with data needed during clustering. */
 export type ClusterFace = Omit<Face, "embedding"> & {
     embedding: Float32Array;
+    isBadFace: boolean;
 };
 
 export interface ClusterPreview {
@@ -149,25 +150,17 @@ export interface ClusterPreviewFace {
 /**
  * Cluster faces into groups.
  *
- * [Note: Face clustering algorithm]
- *
  * A cgroup (cluster group) consists of clusters, each of which itself is a set
  * of faces.
  *
  *     cgroup << cluster << face
  *
- * The clusters are generated locally by clients using the following algorithm:
+ * This function generates clusters locally using a batched form of linear
+ * clustering, with a bit of lookback (and a dollop of heuristics) to get the
+ * clusters to merge across batches.
  *
- * 1.  clusters = [] initially, or fetched from remote.
- *
- * 2.  For each face, find its nearest neighbour in the embedding space.
- *
- * 3.  If no such neighbour is found within our threshold, create a new cluster.
- *
- * 4.  Otherwise assign this face to the same cluster as its nearest neighbour.
- *
- * This user can then tweak the output of the algorithm by performing the
- * following actions to the list of clusters that they can see:
+ * This user can later tweak these clusters by performing the following actions
+ * to the list of clusters that they can see:
  *
  * -   They can provide a name for a cluster ("name a person"). This upgrades a
  *     cluster into a "cgroup", which is an entity that gets synced via remote
@@ -365,19 +358,38 @@ export const clusterFaces = (
 };
 
 /**
- * A generator function that returns a stream of {faceID, embedding} values,
+ * A generator function that returns a stream of {@link ClusterFace}s by
  * flattening all the the faces present in the given {@link faceIndices}.
  *
- * It also converts the embeddings to Float32Arrays to speed up the dot product
- * calculations that will happen during clustering.
+ * During this, it also converts the embeddings to Float32Arrays to speed up the
+ * dot product calculations that will happen during clustering and attaches
+ * other information that the clustering algorithm needs.
  */
 function* enumerateFaces(faceIndices: FaceIndex[]) {
     for (const fi of faceIndices) {
         for (const f of fi.faces) {
-            yield { ...f, embedding: new Float32Array(f.embedding) };
+            yield {
+                ...f,
+                embedding: new Float32Array(f.embedding),
+                isBadFace: isBadFace(f),
+            };
         }
     }
 }
+
+/**
+ * Return true if the given face is above the minimum inclusion thresholds, but
+ * is otherwise heuristically determined to be possibly spurious face detection.
+ *
+ * We apply a higher threshold when clustering such faces.
+ */
+const isBadFace = (face: Face) =>
+    face.blur < 50 ||
+    (face.blur < 200 && face.blur < 0.85) ||
+    isSidewaysFace(face);
+
+const isSidewaysFace = (face: Face) =>
+    faceDirection(face.detection) != "straight";
 
 /** Generate a new cluster ID. */
 const newClusterID = () => newNonSecureID("cluster_");
@@ -475,17 +487,3 @@ const clusterBatchLinear = (
 
     return state;
 };
-
-/**
- * Return true if the given face is above the minimum inclusion thresholds, but
- * is otherwise heuristically determined to be possibly spurious face detection.
- *
- * We apply a higher threshold when clustering such faces.
- */
-const isBadFace = (face: Face) =>
-    face.blur < 50 ||
-    (face.blur < 200 && face.blur < 0.85) ||
-    isSidewaysFace(face);
-
-const isSidewaysFace = (face: Face) =>
-    faceDirection(face.detection) != "straight";
