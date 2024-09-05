@@ -1,3 +1,4 @@
+import { SearchOption } from "@/new/photos/services/search/types";
 import {
     FreeFlowText,
     SpaceBetweenFlex,
@@ -6,7 +7,6 @@ import { Box, Divider, Stack, Typography } from "@mui/material";
 import CollectionCard from "components/Collections/CollectionCard";
 import { ResultPreviewTile } from "components/Collections/styledComponents";
 import { t } from "i18next";
-import { SearchOption } from "types/search";
 
 import { components } from "react-select";
 

@@ -7,6 +7,12 @@ import {
     getLocalTrashedFiles,
 } from "@/new/photos/services/files";
 import { wipHasSwitchedOnceCmpAndSet } from "@/new/photos/services/ml";
+import { search, setSearchableFiles } from "@/new/photos/services/search";
+import {
+    SearchQuery,
+    SearchResultSummary,
+    UpdateSearch,
+} from "@/new/photos/services/search/types";
 import { EnteFile } from "@/new/photos/types/file";
 import { mergeMetadata } from "@/new/photos/utils/file";
 import { CenteredFlex } from "@ente/shared/components/Container";
@@ -31,7 +37,6 @@ import {
     getKey,
 } from "@ente/shared/storage/sessionStorage";
 import type { User } from "@ente/shared/user/types";
-import { isPromise } from "@ente/shared/utils";
 import { Typography, styled } from "@mui/material";
 import AuthenticateUserModal from "components/AuthenticateUserModal";
 import Collections from "components/Collections";
@@ -106,7 +111,6 @@ import {
     SetFilesDownloadProgressAttributes,
     SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
-import { Search, SearchResultSummary, UpdateSearch } from "types/search";
 import { FamilyData } from "types/user";
 import { checkSubscriptionPurchase } from "utils/billing";
 import {
@@ -119,7 +123,6 @@ import {
     hasNonSystemCollections,
     splitNormalAndHiddenCollections,
 } from "utils/collection";
-import ComlinkSearchWorker from "utils/comlink/ComlinkSearchWorker";
 import {
     FILE_OPS_TYPE,
     constructFileToCollectionMap,
@@ -193,7 +196,7 @@ export default function Gallery() {
     const [collectionNamerAttributes, setCollectionNamerAttributes] =
         useState<CollectionNamerAttributes>(null);
     const [collectionNamerView, setCollectionNamerView] = useState(false);
-    const [search, setSearch] = useState<Search>(null);
+    const [searchQuery, setSearchQuery] = useState<SearchQuery>(null);
     const [shouldDisableDropzone, setShouldDisableDropzone] = useState(false);
     const [isPhotoSwipeOpen, setIsPhotoSwipeOpen] = useState(false);
     // TODO(MR): This is never true currently, this is the WIP ability to show
@@ -400,13 +403,7 @@ export default function Gallery() {
         };
     }, []);
 
-    useEffectSingleThreaded(
-        async ([files]: [files: EnteFile[]]) => {
-            const searchWorker = await ComlinkSearchWorker.getInstance();
-            await searchWorker.setFiles(files);
-        },
-        [files],
-    );
+    useEffect(() => setSearchableFiles(files), [files]);
 
     useEffect(() => {
         if (!user || !files || !collections || !hiddenFiles || !trashedFiles) {
@@ -523,11 +520,9 @@ export default function Gallery() {
             ]);
         }
 
-        const searchWorker = await ComlinkSearchWorker.getInstance();
-
         let filteredFiles: EnteFile[] = [];
         if (isInSearchMode) {
-            filteredFiles = getUniqueFiles(await searchWorker.search(search));
+            filteredFiles = getUniqueFiles(await search(searchQuery));
         } else {
             filteredFiles = getUniqueFiles(
                 (isInHiddenSection ? hiddenFiles : files).filter((item) => {
@@ -587,9 +582,9 @@ export default function Gallery() {
                 }),
             );
         }
-        if (search?.clip) {
+        if (searchQuery?.clip) {
             return filteredFiles.sort((a, b) => {
-                return search.clip.get(b.id) - search.clip.get(a.id);
+                return searchQuery.clip.get(b.id) - searchQuery.clip.get(a.id);
             });
         }
         const sortAsc = activeCollection?.pubMagicMetadata?.data?.asc ?? false;
@@ -605,7 +600,7 @@ export default function Gallery() {
         tempDeletedFileIds,
         tempHiddenFileIds,
         hiddenFileIds,
-        search,
+        searchQuery,
         activeCollectionID,
         archivedCollections,
     ]);
@@ -975,7 +970,7 @@ export default function Gallery() {
         if (newSearch?.collection) {
             setActiveCollectionID(newSearch?.collection);
         } else {
-            setSearch(newSearch);
+            setSearchQuery(newSearch);
         }
         setIsClipSearchResult(!!newSearch?.clip);
         if (!newSearch?.collection) {
@@ -1241,37 +1236,6 @@ export default function Gallery() {
             </FullScreenDropZone>
         </GalleryContext.Provider>
     );
-}
-
-// useEffectSingleThreaded is a useEffect that will only run one at a time, and will
-// caches the latest deps of requests that come in while it is running, and will
-// run that after the current run is complete.
-function useEffectSingleThreaded(
-    fn: (deps) => void | Promise<void>,
-    deps: any[],
-): void {
-    const updateInProgress = useRef(false);
-    const nextRequestDepsRef = useRef<any[]>(null);
-    useEffect(() => {
-        const main = async (deps) => {
-            if (updateInProgress.current) {
-                nextRequestDepsRef.current = deps;
-                return;
-            }
-            updateInProgress.current = true;
-            const result = fn(deps);
-            if (isPromise(result)) {
-                await result;
-            }
-            updateInProgress.current = false;
-            if (nextRequestDepsRef.current) {
-                const deps = nextRequestDepsRef.current;
-                nextRequestDepsRef.current = null;
-                setTimeout(() => main(deps), 0);
-            }
-        };
-        main(deps);
-    }, deps);
 }
 
 /**

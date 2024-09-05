@@ -8,26 +8,27 @@ import {
     mlStatusSnapshot,
     wipSearchPersons,
 } from "@/new/photos/services/ml";
-import { parseDateComponents } from "@/new/photos/services/search";
+import { parseDateComponents, search } from "@/new/photos/services/search";
 import type {
     SearchDateComponents,
     SearchPerson,
 } from "@/new/photos/services/search/types";
+import {
+    City,
+    ClipSearchScores,
+    LocationTagData,
+    SearchOption,
+    SearchQuery,
+    Suggestion,
+    SuggestionType,
+} from "@/new/photos/services/search/types";
 import { EnteFile } from "@/new/photos/types/file";
 import { t } from "i18next";
 import { Collection } from "types/collection";
-import { EntityType, LocationTag, LocationTagData } from "types/entity";
-import {
-    ClipSearchScores,
-    Search,
-    SearchOption,
-    Suggestion,
-    SuggestionType,
-} from "types/search";
-import ComlinkSearchWorker from "utils/comlink/ComlinkSearchWorker";
+import { EntityType, LocationTag } from "types/entity";
 import { getUniqueFiles } from "utils/file";
 import { getLatestEntities } from "./entityService";
-import locationSearchService, { City } from "./locationSearchService";
+import locationSearchService from "./locationSearchService";
 
 export const getDefaultOptions = async () => {
     return [
@@ -64,13 +65,10 @@ export const getAutoCompleteSuggestions =
 async function convertSuggestionsToOptions(
     suggestions: Suggestion[],
 ): Promise<SearchOption[]> {
-    const searchWorker = await ComlinkSearchWorker.getInstance();
     const previewImageAppendedOptions: SearchOption[] = [];
     for (const suggestion of suggestions) {
         const searchQuery = convertSuggestionToSearchQuery(suggestion);
-        const resultFiles = getUniqueFiles(
-            await searchWorker.search(searchQuery),
-        );
+        const resultFiles = getUniqueFiles(await search(searchQuery));
         if (searchQuery?.clip) {
             resultFiles.sort((a, b) => {
                 const aScore = searchQuery.clip.get(a.id);
@@ -304,7 +302,7 @@ const searchClip = async (
     return matches;
 };
 
-function convertSuggestionToSearchQuery(option: Suggestion): Search {
+function convertSuggestionToSearchQuery(option: Suggestion): SearchQuery {
     switch (option.type) {
         case SuggestionType.DATE:
             return {

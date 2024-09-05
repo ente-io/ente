@@ -4,13 +4,13 @@ import { CustomHead } from "@/base/components/Head";
 import { AppNavbar } from "@/base/components/Navbar";
 import { setupI18n } from "@/base/i18n";
 import log from "@/base/log";
-import { runMigrations } from "@/new/photos/services/migrations";
 import {
     logStartupBanner,
     logUnhandledErrorsAndRejections,
 } from "@/base/log-web";
 import { AppUpdate } from "@/base/types/ipc";
 import DownloadManager from "@/new/photos/services/download";
+import { runMigrations } from "@/new/photos/services/migrations";
 import { initML, isMLSupported } from "@/new/photos/services/ml";
 import { ensure } from "@/utils/ensure";
 import { Overlay } from "@ente/shared/components/Container";

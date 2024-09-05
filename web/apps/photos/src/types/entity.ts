@@ -1,3 +1,5 @@
+import type { LocationTagData } from "@/new/photos/services/search/types";
+
 export enum EntityType {
     LOCATION_TAG = "location",
 }
@@ -23,19 +25,6 @@ export interface EncryptedEntity {
     createdAt: number;
     updatedAt: number;
     userID: number;
-}
-
-export interface Location {
-    latitude: number | null;
-    longitude: number | null;
-}
-
-export interface LocationTagData {
-    name: string;
-    radius: number;
-    aSquare: number;
-    bSquare: number;
-    centerPoint: Location;
 }
 
 export type LocationTag = Entity<LocationTagData>;

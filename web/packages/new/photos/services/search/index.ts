@@ -2,7 +2,44 @@ import { nullToUndefined } from "@/utils/transform";
 import type { Component } from "chrono-node";
 import * as chrono from "chrono-node";
 import i18n, { t } from "i18next";
-import type { SearchDateComponents } from "./types";
+import type { SearchDateComponents, SearchQuery } from "./types";
+
+import { ComlinkWorker } from "@/base/worker/comlink-worker";
+import type { EnteFile } from "../../types/file";
+import type { SearchWorker } from "./worker";
+
+/**
+ * Cached instance of the {@link ComlinkWorker} that wraps our web worker.
+ */
+let _comlinkWorker: ComlinkWorker<typeof SearchWorker> | undefined;
+
+/**
+ * Lazily created, cached, instance of {@link SearchWorker}.
+ */
+const worker = () => (_comlinkWorker ??= createComlinkWorker()).remote;
+
+/**
+ * Create a new instance of a comlink worker that wraps a {@link SearchWorker}
+ * web worker.
+ */
+const createComlinkWorker = () =>
+    new ComlinkWorker<typeof SearchWorker>(
+        "search",
+        new Worker(new URL("worker.ts", import.meta.url)),
+    );
+
+/**
+ * Set the files over which we will search.
+ */
+export const setSearchableFiles = (enteFiles: EnteFile[]) =>
+    void worker().then((w) => w.setEnteFiles(enteFiles));
+
+/**
+ * Search for and return the list of {@link EnteFile}s that match the given
+ * {@link search} query.
+ */
+export const search = async (search: SearchQuery) =>
+    worker().then((w) => w.search(search));
 
 interface DateSearchResult {
     components: SearchDateComponents;

@@ -1,8 +1,8 @@
+import { SearchResultSummary } from "@/new/photos/services/search/types";
 import { Typography } from "@mui/material";
 import { CollectionInfo } from "components/Collections/CollectionInfo";
 import { CollectionInfoBarWrapper } from "components/Collections/styledComponents";
 import { t } from "i18next";
-import { SearchResultSummary } from "types/search";
 
 interface Iprops {
     searchResultSummary: SearchResultSummary;
