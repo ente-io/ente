@@ -1,6 +1,7 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import "dart:collection";
 
+import "package:collection/collection.dart";
 import 'package:flutter/material.dart';
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/backup_updated_event.dart";
@@ -37,7 +38,9 @@ class _BackupStatusScreenState extends State<BackupStatusScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final List<BackupItem> items = this.items.values.toList();
+    final List<BackupItem> items = this.items.values.toList().sorted(
+          (a, b) => a.status.index.compareTo(b.status.index),
+        );
 
     return Scaffold(
       body: CustomScrollView(
