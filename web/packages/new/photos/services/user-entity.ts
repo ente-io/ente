@@ -11,6 +11,7 @@ import { masterKeyFromSession } from "@/base/session-store";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import { nullToUndefined } from "@/utils/transform";
+import localForage from "@ente/shared/storage/localForage";
 import { z } from "zod";
 import { gunzip } from "./gzip";
 import type { CGroup } from "./ml/cgroups";
@@ -40,9 +41,27 @@ export type EntityType =
  * each subsequent sync is a lightweight diff.
  */
 export const syncUserEntities = async () => {
+    // TODO-cgroup: Call me
+    await Promise.allSettled([
+        // removeLegacyDBState(),
+    ]);
+
     return wait(0);
 };
 
+// TODO-cgroup: Call me
+export const removeLegacyDBState = async () => {
+    // Older versions of the code kept the diff related state in a different
+    // place. These entries are not needed anymore.
+    //
+    // This code was added Sep 2024 and can be removed soon after a few builds
+    // have gone out (tag: Migration).
+    await Promise.allSettled([
+        localForage.removeItem("location_tags"),
+        localForage.removeItem("location_tags_key"),
+        localForage.removeItem("location_tags_key"),
+    ]);
+};
 /**
  * The maximum number of items to fetch in a single diff
  *
