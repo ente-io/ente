@@ -106,8 +106,6 @@ interface FileStatus {
 let _mlDB: ReturnType<typeof openMLDB> | undefined;
 
 const openMLDB = async () => {
-    deleteLegacyDB();
-
     const db = await openDB<MLDBSchema>("ml", 1, {
         upgrade(db, oldVersion, newVersion) {
             log.info(`Upgrading ML DB ${oldVersion} => ${newVersion}`);
