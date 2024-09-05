@@ -111,6 +111,12 @@ diff a/server/compose.yaml b/server/compose.yaml
      ports:
 ```
 
+And cleanup the temporary containers by
+
+```sh
+docker compose down --remove-orphans
+```
+
 Migration is now complete. You can start your Ente cluster normally.
 
 ```sh
