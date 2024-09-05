@@ -70,7 +70,7 @@ export const setLSUser = async (user: object) => {
 export const migrateKVToken = async (user: unknown) => {
     // Throw an error if the data is in local storage but not in IndexedDB. This
     // is a pre-cursor to inlining this code.
-    const hadMismatch =
+    const wasMissing =
         user &&
         typeof user == "object" &&
         "token" in user &&
@@ -91,7 +91,7 @@ export const migrateKVToken = async (user: unknown) => {
         ? await setKV("token", user.token)
         : await removeKV("token");
 
-    if (hadMismatch)
+    if (wasMissing)
         throw new Error(
             "The user's token was present in local storage but not in IndexedDB",
         );
