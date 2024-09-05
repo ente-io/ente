@@ -60,4 +60,7 @@ const m0 = () =>
 
         // Delete the legacy face DB v2.
         deleteDB("face"),
-    ]);
+    ]).then(() => {
+        // Delete legacy ML keys.
+        localStorage.removeItem("faceIndexingEnabled");
+    });

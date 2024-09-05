@@ -1,6 +1,4 @@
-import { removeKV } from "@/base/kv";
 import log from "@/base/log";
-import localForage from "@ente/shared/storage/localForage";
 import { deleteDB, openDB, type DBSchema } from "idb";
 import type { CGroup } from "./cgroups";
 import type { LocalCLIPIndex } from "./clip";
@@ -143,44 +141,6 @@ const openMLDB = async () => {
     return db;
 };
 
-const deleteLegacyDB = () => {
-    // Delete the legacy face DB v1.
-    //
-    // This code was added June 2024 (v1.7.1-rc) and can be removed at some
-    // point when most clients have migrated (tag: Migration).
-    void deleteDB("mldata");
-
-    // Delete the legacy CLIP (mostly) related keys from LocalForage.
-    //
-    // This code was added July 2024 (v1.7.2-rc) and can be removed at some
-    // point when most clients have migrated (tag: Migration).
-    void Promise.all([
-        localForage.removeItem("embeddings"),
-        localForage.removeItem("embedding_sync_time"),
-        localForage.removeItem("embeddings_v2"),
-        localForage.removeItem("file_embeddings"),
-        localForage.removeItem("onnx-clip-embedding_sync_time"),
-        localForage.removeItem("file-ml-clip-face-embedding_sync_time"),
-    ]);
-
-    // Delete keys for the legacy diff based sync.
-    //
-    // This code was added July 2024 (v1.7.3-beta). These keys were never
-    // enabled outside of the nightly builds, so this cleanup is not a hard
-    // need. Either ways, it can be removed at some point when most clients have
-    // migrated (tag: Migration).
-    void Promise.all([
-        removeKV("embeddingSyncTime:onnx-clip"),
-        removeKV("embeddingSyncTime:file-ml-clip-face"),
-    ]);
-
-    // Delete the legacy face DB v2.
-    //
-    // This code was added Aug 2024 (v1.7.3-beta) and can be removed at some
-    // point when most clients have migrated (tag: Migration).
-    void deleteDB("face");
-};
-
 /**
  * @returns a lazily created, cached connection to the ML DB.
  */
@@ -192,8 +152,6 @@ const mlDB = () => (_mlDB ??= openMLDB());
  * This is meant to be called during logout on the main thread.
  */
 export const clearMLDB = async () => {
-    deleteLegacyDB();
-
     try {
         if (_mlDB) (await _mlDB).close();
     } catch (e) {

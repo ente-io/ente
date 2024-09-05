@@ -4,6 +4,7 @@ import { CustomHead } from "@/base/components/Head";
 import { AppNavbar } from "@/base/components/Navbar";
 import { setupI18n } from "@/base/i18n";
 import log from "@/base/log";
+import { runMigrations } from "@/new/photos/services/migrations";
 import {
     logStartupBanner,
     logUnhandledErrorsAndRejections,
@@ -141,6 +142,7 @@ export default function App({ Component, pageProps }: AppProps) {
         logStartupBanner(user?.id);
         HTTPService.setHeaders({ "X-Client-Package": clientPackageName });
         logUnhandledErrorsAndRejections(true);
+        void runMigrations();
         return () => logUnhandledErrorsAndRejections(false);
     }, []);
 
