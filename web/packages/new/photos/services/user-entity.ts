@@ -9,6 +9,7 @@ import { getKV, getKVN, setKV } from "@/base/kv";
 import { apiURL } from "@/base/origins";
 import { masterKeyFromSession } from "@/base/session-store";
 import { ensure } from "@/utils/ensure";
+import { wait } from "@/utils/promise";
 import { nullToUndefined } from "@/utils/transform";
 import localForage from "@ente/shared/storage/localForage";
 import { z } from "zod";
@@ -24,12 +25,22 @@ import { applyCGroupDiff } from "./ml/db";
  */
 export type EntityType =
     /**
+     * A location tag.
+     *
+     * The entity data is base64(encrypt(json))
+     */
+    | "location"
+    /**
      * A cluster group.
      *
-     * Format: An encrypted string containing a gzipped JSON string representing
-     * the cgroup data.
+     * The entity data is base64(encrypt(gzip(json)))
      */
-    "cgroup";
+    | "cgroup";
+
+interface LocationTag {
+    id: string;
+    name: string;
+}
 
 /**
  * Sync our local location tags with those on remote.
@@ -39,31 +50,25 @@ export type EntityType =
  * synced, so each subsequent sync is a lightweight diff.
  */
 export const syncLocationTags = async () => {
-    // TODO-cgroup: Implement me
-    const parse = async (id: string, data: Uint8Array): Promise<CGroup> => {
-        const rp = RemoteCGroup.parse(JSON.parse(await gunzip(data)));
+    const decoder = new TextDecoder();
+    const parse = (id: string, data: Uint8Array): LocationTag => {
+        const rl = RemoteLocation.parse(JSON.parse(decoder.decode(data)));
         return {
             id,
-            name: rp.name,
-            clusterIDs: rp.assigned.map(({ id }) => id),
-            isHidden: rp.isHidden,
-            avatarFaceID: rp.avatarFaceID,
-            displayFaceID: undefined,
+            name: rl.name,
         };
     };
 
-    const processBatch = async (entities: UserEntityChange[]) =>
-        await applyCGroupDiff(
-            await Promise.all(
-                entities.map(async ({ id, data }) =>
-                    data ? await parse(id, data) : id,
-                ),
-            ),
+    const processBatch = async (entities: UserEntityChange[]) => {
+        console.log(
+            entities.map(({ id, data }) => (data ? parse(id, data) : id)),
         );
+        await wait(0);
+    };
 
     // TODO-cgroup: Call me
     // await removeLegacyDBState();
-    return syncUserEntity("cgroup", processBatch);
+    return syncUserEntity("location", processBatch);
 };
 
 // TODO-cgroup: Call me
@@ -79,6 +84,17 @@ export const removeLegacyDBState = async () => {
         localForage.removeItem("location_tags_time"),
     ]);
 };
+
+const RemoteLocation = z.object({
+    name: z.string(),
+    radius: z.number(),
+    aSquare: z.number(),
+    bSquare: z.number(),
+    centerPoint: z.object({
+        latitude: z.number().nullish().transform(nullToUndefined),
+        longitude: z.number().nullish().transform(nullToUndefined),
+    }),
+});
 
 /**
  * Sync the {@link CGroup} entities that we have locally with remote.
@@ -114,7 +130,6 @@ export const syncCGroups = () => {
     return syncUserEntity("cgroup", processBatch);
 };
 
-/** Zod schema for the {@link RemoteCGroup} type. */
 const RemoteCGroup = z.object({
     name: z.string().nullish().transform(nullToUndefined),
     assigned: z.array(
@@ -126,11 +141,6 @@ const RemoteCGroup = z.object({
     isHidden: z.boolean(),
     avatarFaceID: z.string().nullish().transform(nullToUndefined),
 });
-
-/**
- * Contents of a "cgroup" user entity, as synced via remote.
- */
-type RemoteCGroup = z.infer<typeof RemoteCGroup>;
 
 /**
  * The maximum number of items to fetch in a single diff
