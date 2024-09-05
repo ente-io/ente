@@ -40,7 +40,7 @@ export const runMigrations = async () => {
 // Some of these (indicated by "Prunable") can be no-oped in the future when
 // almost all clients would've migrated over.
 
-// Last used: Aug 2024. Prunable.
+// Added: Aug 2024 (v1.7.3). Prunable.
 const m0 = () =>
     Promise.allSettled([
         // Delete the legacy face DB v1.
