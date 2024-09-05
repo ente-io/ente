@@ -538,6 +538,8 @@ class FileUploader {
         : '$tempDirectory$uploadTempFilePrefix${uniqueID}_file.encrypted';
     final encryptedThumbnailPath =
         '$tempDirectory$uploadTempFilePrefix${uniqueID}_thumb.encrypted';
+    late final int encFileSize;
+    late final int encThumbSize;
 
     var uploadCompleted = false;
     // This flag is used to decide whether to clear the iOS origin file cache
@@ -585,7 +587,7 @@ class FileUploader {
       final encryptedFileExists = File(encryptedFilePath).existsSync();
 
       // If the multipart entry exists but the encrypted file doesn't, it means
-      // that we'll have to reupload as the nonce is lost
+      // that we'll have to re-upload as the nonce is lost
       if (multipartEntryExists) {
         final bool updateWithDiffKey = isUpdatedFile &&
             multiPartFileEncResult != null &&
@@ -623,6 +625,7 @@ class FileUploader {
       } else {
         thumbnailData = mediaUploadData.thumbnail;
       }
+      encFileSize = await encryptedFile.length();
 
       final EncryptionResult encryptedThumbnailData =
           await CryptoUtil.encryptChaCha(
@@ -635,21 +638,24 @@ class FileUploader {
       final encryptedThumbnailFile = File(encryptedThumbnailPath);
       await encryptedThumbnailFile
           .writeAsBytes(encryptedThumbnailData.encryptedData!);
+      encThumbSize = await encryptedThumbnailFile.length();
 
       // Calculate the number of parts for the file.
-      final count = await _multiPartUploader.calculatePartCount(
-        await encryptedFile.length(),
-      );
+      final count = await _multiPartUploader.calculatePartCount(encFileSize);
 
       late String fileObjectKey;
       late String thumbnailObjectKey;
 
       if (count <= 1) {
         final thumbnailUploadURL = await _getUploadURL();
-        thumbnailObjectKey =
-            await _putFile(thumbnailUploadURL, encryptedThumbnailFile);
+        thumbnailObjectKey = await _putFile(
+          thumbnailUploadURL,
+          encryptedThumbnailFile,
+          encThumbSize,
+        );
         final fileUploadURL = await _getUploadURL();
-        fileObjectKey = await _putFile(fileUploadURL, encryptedFile);
+        fileObjectKey =
+            await _putFile(fileUploadURL, encryptedFile, encFileSize);
       } else {
         isMultipartUpload = true;
         _logger.finest(
@@ -672,7 +678,7 @@ class FileUploader {
             collectionID,
             fileUploadURLs,
             encFileName,
-            await encryptedFile.length(),
+            encFileSize,
             fileAttributes.key!,
             fileAttributes.header!,
           );
@@ -686,8 +692,11 @@ class FileUploader {
         // In regular upload, always upload the thumbnail first to keep existing behaviour
         //
         final thumbnailUploadURL = await _getUploadURL();
-        thumbnailObjectKey =
-            await _putFile(thumbnailUploadURL, encryptedThumbnailFile);
+        thumbnailObjectKey = await _putFile(
+          thumbnailUploadURL,
+          encryptedThumbnailFile,
+          encThumbSize,
+        );
       }
 
       final metadata = await file.getMetadataForUpload(mediaUploadData);
@@ -713,10 +722,10 @@ class FileUploader {
           file,
           fileObjectKey,
           fileDecryptionHeader,
-          await encryptedFile.length(),
+          encFileSize,
           thumbnailObjectKey,
           thumbnailDecryptionHeader,
-          await encryptedThumbnailFile.length(),
+          encThumbSize,
           encryptedMetadata,
           metadataDecryptionHeader,
         );
@@ -762,10 +771,10 @@ class FileUploader {
           fileAttributes,
           fileObjectKey,
           fileDecryptionHeader,
-          await encryptedFile.length(),
+          encFileSize,
           thumbnailObjectKey,
           thumbnailDecryptionHeader,
-          await encryptedThumbnailFile.length(),
+          encThumbSize,
           encryptedMetadata,
           metadataDecryptionHeader,
           pubMetadata: pubMetadataRequest,
@@ -1266,11 +1275,10 @@ class FileUploader {
 
   Future<String> _putFile(
     UploadURL uploadURL,
-    File file, {
-    int? contentLength,
+    File file,
+    int fileSize, {
     int attempt = 1,
   }) async {
-    final fileSize = contentLength ?? await file.length();
     _logger.info(
       "Putting object for " +
           file.toString() +
@@ -1304,7 +1312,7 @@ class FileUploader {
         return _putFile(
           newUploadURL,
           file,
-          contentLength: fileSize,
+          fileSize,
           attempt: attempt + 1,
         );
       } else {
