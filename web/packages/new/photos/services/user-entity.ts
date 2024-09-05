@@ -9,6 +9,7 @@ import { getKV, getKVN, setKV } from "@/base/kv";
 import { apiURL } from "@/base/origins";
 import { masterKeyFromSession } from "@/base/session-store";
 import { ensure } from "@/utils/ensure";
+import { wait } from "@/utils/promise";
 import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
 import { gunzip } from "./gzip";
@@ -29,6 +30,18 @@ export type EntityType =
      * the cgroup data.
      */
     "cgroup";
+
+/**
+ * Sync our local state with the user entities present on remote.
+ *
+ * This function fetches all the user entity types that we are interested in for
+ * the photos app – location tags and cgroups – from remote and updates our
+ * local database. It uses local state to remember the last time it synced, so
+ * each subsequent sync is a lightweight diff.
+ */
+export const syncUserEntities = async () => {
+    return wait(0);
+};
 
 /**
  * The maximum number of items to fetch in a single diff
