@@ -531,7 +531,8 @@ class FileUploader {
             : null;
     bool multipartEntryExists = existingMultipartEncFileName != null;
 
-    final String uniqueID = const Uuid().v4().toString();
+    final String uniqueID =
+        '${const Uuid().v4().toString()}_${file.generatedID}';
 
     final encryptedFilePath = multipartEntryExists
         ? '$tempDirectory$existingMultipartEncFileName'
