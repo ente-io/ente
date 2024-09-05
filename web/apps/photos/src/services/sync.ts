@@ -16,9 +16,14 @@ export const triggerPreFileInfoSync = () => {
 };
 
 /**
- * Perform a soft "refresh" by making various API calls to fetch state from
- * remote, using it to update our local state, and triggering periodic jobs that
- * depend on the local state.
+ * Sync our local state with remote on page load for web and focus for desktop.
+ *
+ * This function makes various API calls to fetch state from remote, using it to
+ * update our local state, and triggering periodic jobs that depend on the local
+ * state.
+ *
+ * This runs on initial page load (on both web and desktop). In addition for
+ * desktop, it also runs each time the desktop app gains focus.
  *
  * TODO: This is called after we've synced the local files DBs with remote. That
  * code belongs here, but currently that state is persisted in the top level
