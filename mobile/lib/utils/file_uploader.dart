@@ -1304,7 +1304,7 @@ class FileUploader {
         return _putFile(
           newUploadURL,
           file,
-          contentLength: (await file.readAsBytes()).length,
+          contentLength: fileSize,
           attempt: attempt + 1,
         );
       } else {
