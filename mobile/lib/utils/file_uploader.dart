@@ -1297,16 +1297,8 @@ class FileUploader {
 
       return uploadURL.objectKey;
     } on DioError catch (e) {
-      if (e.message.startsWith(
-            "HttpException: Content size exceeds specified contentLength.",
-          ) &&
-          attempt == 1) {
-        return _putFile(
-          uploadURL,
-          file,
-          contentLength: (await file.readAsBytes()).length,
-          attempt: 2,
-        );
+      if (e.message.startsWith("HttpException: Content size")) {
+        rethrow;
       } else if (attempt < kMaximumUploadAttempts) {
         final newUploadURL = await _getUploadURL();
         return _putFile(
