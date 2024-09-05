@@ -4,7 +4,7 @@ import {
     triggerMLStatusSync,
     triggerMLSync,
 } from "@/new/photos/services/ml";
-import { syncUserEntities } from "@/new/photos/services/user-entity";
+import { syncLocationTags } from "@/new/photos/services/user-entity";
 import { syncEntities } from "services/entityService";
 import { syncMapEnabled } from "services/userService";
 
@@ -38,7 +38,7 @@ export const triggerPreFileInfoSync = () => {
 export const sync = async () => {
     await Promise.allSettled([
         syncEntities(),
-        syncUserEntities(),
+        syncLocationTags(),
         syncMapEnabled(),
     ]);
     if (isMLSupported) triggerMLSync();

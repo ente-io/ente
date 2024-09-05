@@ -9,7 +9,6 @@ import { getKV, getKVN, setKV } from "@/base/kv";
 import { apiURL } from "@/base/origins";
 import { masterKeyFromSession } from "@/base/session-store";
 import { ensure } from "@/utils/ensure";
-import { wait } from "@/utils/promise";
 import { nullToUndefined } from "@/utils/transform";
 import localForage from "@ente/shared/storage/localForage";
 import { z } from "zod";
@@ -33,20 +32,38 @@ export type EntityType =
     "cgroup";
 
 /**
- * Sync our local state with the user entities present on remote.
+ * Sync our local location tags with those on remote.
  *
- * This function fetches all the user entity types that we are interested in for
- * the photos app – location tags and cgroups – from remote and updates our
- * local database. It uses local state to remember the last time it synced, so
- * each subsequent sync is a lightweight diff.
+ * This function fetches all the location tag user entities from remote and
+ * updates our local database. It uses local state to remember the last time it
+ * synced, so each subsequent sync is a lightweight diff.
  */
-export const syncUserEntities = async () => {
-    // TODO-cgroup: Call me
-    await Promise.allSettled([
-        // removeLegacyDBState(),
-    ]);
+export const syncLocationTags = async () => {
+    // TODO-cgroup: Implement me
+    const parse = async (id: string, data: Uint8Array): Promise<CGroup> => {
+        const rp = RemoteCGroup.parse(JSON.parse(await gunzip(data)));
+        return {
+            id,
+            name: rp.name,
+            clusterIDs: rp.assigned.map(({ id }) => id),
+            isHidden: rp.isHidden,
+            avatarFaceID: rp.avatarFaceID,
+            displayFaceID: undefined,
+        };
+    };
 
-    return wait(0);
+    const processBatch = async (entities: UserEntityChange[]) =>
+        await applyCGroupDiff(
+            await Promise.all(
+                entities.map(async ({ id, data }) =>
+                    data ? await parse(id, data) : id,
+                ),
+            ),
+        );
+
+    // TODO-cgroup: Call me
+    // await removeLegacyDBState();
+    return syncUserEntity("cgroup", processBatch);
 };
 
 // TODO-cgroup: Call me
@@ -59,9 +76,62 @@ export const removeLegacyDBState = async () => {
     await Promise.allSettled([
         localForage.removeItem("location_tags"),
         localForage.removeItem("location_tags_key"),
-        localForage.removeItem("location_tags_key"),
+        localForage.removeItem("location_tags_time"),
     ]);
 };
+
+/**
+ * Sync the {@link CGroup} entities that we have locally with remote.
+ *
+ * This fetches all the user entities corresponding to the "cgroup" entity type
+ * from remote that have been created, updated or deleted since the last time we
+ * checked.
+ *
+ * This diff is then applied to the data we have persisted locally.
+ */
+export const syncCGroups = () => {
+    const parse = async (id: string, data: Uint8Array): Promise<CGroup> => {
+        const rp = RemoteCGroup.parse(JSON.parse(await gunzip(data)));
+        return {
+            id,
+            name: rp.name,
+            clusterIDs: rp.assigned.map(({ id }) => id),
+            isHidden: rp.isHidden,
+            avatarFaceID: rp.avatarFaceID,
+            displayFaceID: undefined,
+        };
+    };
+
+    const processBatch = async (entities: UserEntityChange[]) =>
+        await applyCGroupDiff(
+            await Promise.all(
+                entities.map(async ({ id, data }) =>
+                    data ? await parse(id, data) : id,
+                ),
+            ),
+        );
+
+    return syncUserEntity("cgroup", processBatch);
+};
+
+/** Zod schema for the {@link RemoteCGroup} type. */
+const RemoteCGroup = z.object({
+    name: z.string().nullish().transform(nullToUndefined),
+    assigned: z.array(
+        z.object({
+            id: z.string(),
+            faces: z.string().array(),
+        }),
+    ),
+    isHidden: z.boolean(),
+    avatarFaceID: z.string().nullish().transform(nullToUndefined),
+});
+
+/**
+ * Contents of a "cgroup" user entity, as synced via remote.
+ */
+type RemoteCGroup = z.infer<typeof RemoteCGroup>;
+
 /**
  * The maximum number of items to fetch in a single diff
  *
@@ -113,6 +183,37 @@ interface UserEntityChange {
      */
     updatedAt: number;
 }
+
+/**
+ * Sync of the given {@link type} entities that we have locally with remote.
+ *
+ * This fetches all the user entities of {@link type} from remote that have been
+ * created, updated or deleted since the last time we checked.
+ *
+ * For each diff response, the {@link processBatch} is invoked to give a chance
+ * to caller to apply the updates to the data we have persisted locally.
+ */
+const syncUserEntity = async (
+    type: EntityType,
+    processBatch: (entities: UserEntityChange[]) => Promise<void>,
+) => {
+    const entityKeyB64 = await getOrCreateEntityKeyB64(type);
+
+    let sinceTime = (await savedLatestUpdatedAt(type)) ?? 0;
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, no-constant-condition
+    while (true) {
+        const entities = await userEntityDiff(type, sinceTime, entityKeyB64);
+        if (entities.length == 0) break;
+
+        await processBatch(entities);
+
+        sinceTime = entities.reduce(
+            (max, entity) => Math.max(max, entity.updatedAt),
+            sinceTime,
+        );
+        await saveLatestUpdatedAt(type, sinceTime);
+    }
+};
 
 /**
  * Zod schema for a item in the user entity diff.
@@ -362,69 +463,3 @@ const savedLatestUpdatedAt = (type: EntityType) =>
  */
 const saveLatestUpdatedAt = (type: EntityType, value: number) =>
     setKV(latestUpdatedAtKey(type), value);
-
-/**
- * Sync the {@link CGroup} entities that we have locally with remote.
- *
- * This fetches all the user entities corresponding to the "cgroup" entity type
- * from remote that have been created, updated or deleted since the last time we
- * checked.
- *
- * This diff is then applied to the data we have persisted locally.
- */
-export const syncCGroupsWithRemote = async () => {
-    const type: EntityType = "cgroup";
-
-    const entityKeyB64 = await getOrCreateEntityKeyB64(type);
-
-    const parse = async (id: string, data: Uint8Array): Promise<CGroup> => {
-        const rp = RemoteCGroup.parse(JSON.parse(await gunzip(data)));
-        return {
-            id,
-            name: rp.name,
-            clusterIDs: rp.assigned.map(({ id }) => id),
-            isHidden: rp.isHidden,
-            avatarFaceID: rp.avatarFaceID,
-            displayFaceID: undefined,
-        };
-    };
-
-    let sinceTime = (await savedLatestUpdatedAt(type)) ?? 0;
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, no-constant-condition
-    while (true) {
-        const entities = await userEntityDiff(type, sinceTime, entityKeyB64);
-        if (entities.length == 0) break;
-
-        await applyCGroupDiff(
-            await Promise.all(
-                entities.map(async ({ id, data }) =>
-                    data ? await parse(id, data) : id,
-                ),
-            ),
-        );
-
-        sinceTime = entities.reduce(
-            (max, entity) => Math.max(max, entity.updatedAt),
-            sinceTime,
-        );
-        await saveLatestUpdatedAt(type, sinceTime);
-    }
-};
-
-/** Zod schema for the {@link RemoteCGroup} type. */
-const RemoteCGroup = z.object({
-    name: z.string().nullish().transform(nullToUndefined),
-    assigned: z.array(
-        z.object({
-            id: z.string(),
-            faces: z.string().array(),
-        }),
-    ),
-    isHidden: z.boolean(),
-    avatarFaceID: z.string().nullish().transform(nullToUndefined),
-});
-
-/**
- * Contents of a "cgroup" user entity, as synced via remote.
- */
-type RemoteCGroup = z.infer<typeof RemoteCGroup>;
