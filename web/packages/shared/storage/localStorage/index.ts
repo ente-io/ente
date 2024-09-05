@@ -1,4 +1,4 @@
-import { removeKV, setKV } from "@/base/kv";
+import { getKV, removeKV, setKV } from "@/base/kv";
 import log from "@/base/log";
 
 export enum LS_KEYS {
@@ -68,6 +68,15 @@ export const setLSUser = async (user: object) => {
  * inlined into `setLSUser` (tag: Migration).
  */
 export const migrateKVToken = async (user: unknown) => {
+    // Throw an error if the data is in local storage but not in IndexedDB. This
+    // is a pre-cursor to inlining this code.
+    const hadMismatch =
+        user &&
+        typeof user == "object" &&
+        "token" in user &&
+        typeof user.token == "string" &&
+        !(await getKV("token"));
+
     user &&
     typeof user == "object" &&
     "id" in user &&
@@ -81,4 +90,9 @@ export const migrateKVToken = async (user: unknown) => {
     typeof user.token == "string"
         ? await setKV("token", user.token)
         : await removeKV("token");
+
+    if (hadMismatch)
+        throw new Error(
+            "The user's token was present in local storage but not in IndexedDB",
+        );
 };
