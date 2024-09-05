@@ -685,6 +685,7 @@ class FileUploader {
           fileObjectKey = await _multiPartUploader.putMultipartFile(
             fileUploadURLs,
             encryptedFile,
+            encFileSize,
           );
         }
         // in case of multipart, upload the thumbnail towards the end to avoid
