@@ -58,8 +58,6 @@ export interface SearchPerson {
     displayFaceFile: EnteFile;
 }
 
-// TODO-cgroup: Audit below
-
 /**
  * A city as identified by a static dataset.
  *
@@ -67,11 +65,11 @@ export interface SearchPerson {
  * have information about the city's estimated radius.
  */
 export type City = Location & {
-    /**
-     * Name of the city.
-     */
+    /** Name of the city. */
     name: string;
 };
+
+// TODO-cgroup: Audit below
 
 export enum SuggestionType {
     DATE = "DATE",

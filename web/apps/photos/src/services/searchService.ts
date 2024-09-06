@@ -16,18 +16,16 @@ import type {
 import {
     City,
     ClipSearchScores,
-    LocationTagData,
     SearchOption,
     SearchQuery,
     Suggestion,
     SuggestionType,
 } from "@/new/photos/services/search/types";
+import type { LocationTag } from "@/new/photos/services/user-entity";
 import { EnteFile } from "@/new/photos/types/file";
 import { t } from "i18next";
 import { Collection } from "types/collection";
-import { EntityType, LocationTag } from "types/entity";
 import { getUniqueFiles } from "utils/file";
-import { getLatestEntities } from "./entityService";
 
 // Suggestions shown in the search dropdown's empty state, i.e. when the user
 // selects the search bar but does not provide any input.
@@ -56,7 +54,6 @@ export const getAutoCompleteSuggestions =
                 ...getCollectionSuggestion(searchPhrase, collections),
                 getFileNameSuggestion(searchPhrase, files),
                 getFileCaptionSuggestion(searchPhrase, files),
-                ...(await getLocationSuggestions(searchPhrase)),
             ].filter((suggestion) => !!suggestion);
 
             return convertSuggestionsToOptions(suggestions);
@@ -242,21 +239,6 @@ function searchFilesByCaption(searchPhrase: string, files: EnteFile[]) {
     );
 }
 
-async function searchLocationTag(searchPhrase: string): Promise<LocationTag[]> {
-    const locationTags = await getLatestEntities<LocationTagData>(
-        EntityType.LOCATION_TAG,
-    );
-    const matchedLocationTags = locationTags.filter((locationTag) =>
-        locationTag.data.name.toLowerCase().includes(searchPhrase),
-    );
-    if (matchedLocationTags.length > 0) {
-        log.info(
-            `Found ${matchedLocationTags.length} location tags for search phrase`,
-        );
-    }
-    return matchedLocationTags;
-}
-
 const searchClip = async (
     searchPhrase: string,
 ): Promise<ClipSearchScores | undefined> => {
@@ -275,7 +257,7 @@ function convertSuggestionToSearchQuery(option: Suggestion): SearchQuery {
 
         case SuggestionType.LOCATION:
             return {
-                location: option.value as LocationTagData,
+                location: option.value as LocationTag,
             };
 
         case SuggestionType.CITY:

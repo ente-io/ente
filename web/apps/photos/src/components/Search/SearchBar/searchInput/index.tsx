@@ -2,7 +2,6 @@ import { FileType } from "@/media/file-type";
 import { isMLEnabled } from "@/new/photos/services/ml";
 import type {
     City,
-    LocationTagData,
     SearchDateComponents,
     SearchPerson,
 } from "@/new/photos/services/search/types";
@@ -13,6 +12,7 @@ import {
     SuggestionType,
     UpdateSearch,
 } from "@/new/photos/services/search/types";
+import type { LocationTag } from "@/new/photos/services/user-entity";
 import { EnteFile } from "@/new/photos/types/file";
 import CloseIcon from "@mui/icons-material/Close";
 import { IconButton } from "@mui/material";
@@ -126,7 +126,7 @@ export default function SearchInput(props: Iprops) {
                 break;
             case SuggestionType.LOCATION:
                 search = {
-                    location: selectedOption.value as LocationTagData,
+                    location: selectedOption.value as LocationTag,
                 };
                 props.setIsOpen(true);
                 break;

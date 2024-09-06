@@ -327,6 +327,11 @@ const defaultCityRadius = 10;
 const kmsPerDegree = 111.16;
 
 const isInsideLocationTag = (location: Location, locationTag: LocationTag) =>
+    // This code is included in the photos app which currently doesn't have
+    // strict mode, and causes a spurious linter warning (but only when included
+    // in photos!), so we need to ts-ignore.
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment, @typescript-eslint/prefer-ts-expect-error
+    // @ts-ignore
     isWithinRadius(location, locationTag.centerPoint, locationTag.radius);
 
 const isInsideCity = (location: Location, city: City) =>

@@ -1,4 +1,5 @@
 import type { UserVerificationResponse } from "@/accounts/types/user";
+import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
@@ -42,7 +43,6 @@ import {
 import { configureSRP } from "../services/srp";
 import type { PageProps } from "../types/page";
 import type { SRPSetupAttributes } from "../types/srp";
-import log from "@/base/log";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
     const { logout, showNavBar, setDialogBoxAttributesV2 } = appContext;

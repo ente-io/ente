@@ -5,8 +5,6 @@ import {
     triggerMLSync,
 } from "@/new/photos/services/ml";
 import { triggerSearchDataSync } from "@/new/photos/services/search";
-import { syncLocationTags } from "@/new/photos/services/user-entity";
-import { syncEntities } from "services/entityService";
 import { syncMapEnabled } from "services/userService";
 
 /**
@@ -37,11 +35,7 @@ export const triggerPreFileInfoSync = () => {
  * before doing the file sync and thus should run immediately after login.
  */
 export const sync = async () => {
-    await Promise.allSettled([
-        syncEntities(),
-        syncLocationTags(),
-        syncMapEnabled(),
-    ]);
+    await Promise.allSettled([syncMapEnabled()]);
     triggerSearchDataSync();
     if (isMLSupported) triggerMLSync();
 };
