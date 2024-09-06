@@ -50,7 +50,7 @@ export class SearchWorker {
      * Fetch any state we might need when the actual search happens.
      */
     async sync() {
-        return Promise.allSettled([
+        return Promise.all([
             syncLocationTags()
                 .then(() => savedLocationTags())
                 .then((ts) => {

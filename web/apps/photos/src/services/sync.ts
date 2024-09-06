@@ -35,7 +35,7 @@ export const triggerPreFileInfoSync = () => {
  * before doing the file sync and thus should run immediately after login.
  */
 export const sync = async () => {
-    await Promise.allSettled([syncMapEnabled()]);
+    await Promise.all([syncMapEnabled()]);
     triggerSearchDataSync();
     if (isMLSupported) triggerMLSync();
 };

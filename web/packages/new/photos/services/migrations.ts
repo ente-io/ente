@@ -43,7 +43,7 @@ export const runMigrations = async () => {
 
 // Added: Aug 2024 (v1.7.3). Prunable.
 const m0 = () =>
-    Promise.allSettled([
+    Promise.all([
         // Delete the legacy face DB v1.
         deleteDB("mldata"),
 
@@ -71,7 +71,7 @@ const m1 = () =>
     // Older versions of the user-entities code kept the diff related state
     // in a different place. These entries are not needed anymore (the tags
     // themselves will get resynced).
-    Promise.allSettled([
+    Promise.all([
         localForage.removeItem("location_tags"),
         localForage.removeItem("location_tags_key"),
         localForage.removeItem("location_tags_time"),
