@@ -28,7 +28,6 @@ import { Collection } from "types/collection";
 import { EntityType, LocationTag } from "types/entity";
 import { getUniqueFiles } from "utils/file";
 import { getLatestEntities } from "./entityService";
-import locationSearchService from "./locationSearchService";
 
 // Suggestions shown in the search dropdown's empty state, i.e. when the user
 // selects the search bar but does not provide any input.
@@ -216,8 +215,9 @@ async function getLocationSuggestions(searchPhrase: string) {
         locationTagSuggestions.map((result) => result.label),
     );
 
-    const citySearchResults =
-        await locationSearchService.searchCities(searchPhrase);
+    const citySearchResults: City[] = [];
+    // TODO-cgroup
+    // await locationSearchService.searchCities(searchPhrase);
 
     const nonConflictingCityResult = citySearchResults.filter(
         (city) => !locationTagNames.has(city.name),

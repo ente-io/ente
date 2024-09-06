@@ -99,7 +99,6 @@ import {
     getSectionSummaries,
 } from "services/collectionService";
 import { syncFiles } from "services/fileService";
-import locationSearchService from "services/locationSearchService";
 import { sync, triggerPreFileInfoSync } from "services/sync";
 import { syncTrash } from "services/trashService";
 import uploadManager from "services/upload/uploadManager";
