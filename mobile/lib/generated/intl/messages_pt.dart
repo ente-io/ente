@@ -452,20 +452,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Verifique sua caixa de entrada (e spam) para concluir a verificação"),
         "checkStatus": MessageLookupByLibrary.simpleMessage("Verificar status"),
         "checking": MessageLookupByLibrary.simpleMessage("Verificando..."),
-        "cl_guest_view_call_to_action": MessageLookupByLibrary.simpleMessage(
-            "Selecione fotos e confira \"Visão de convidado\"."),
-        "cl_guest_view_description": MessageLookupByLibrary.simpleMessage(
-            "Passar o telefone para mostrar fotos para um amigo? Não se preocupe com eles deslizando demais. A visualização de convidado irá bloqueá-los nas fotos que você selecionar."),
-        "cl_guest_view_title":
-            MessageLookupByLibrary.simpleMessage("Visão de Convidado"),
-        "cl_panorama_viewer_description": MessageLookupByLibrary.simpleMessage(
-            "Adicionamos suporte para visualizar fotos panorama com visualização de 360 graus. A experiência é envolvida com a navegação baseada em movimentos!"),
-        "cl_panorama_viewer_title":
-            MessageLookupByLibrary.simpleMessage("Visualizador de Panoramas"),
-        "cl_video_player_description": MessageLookupByLibrary.simpleMessage(
-            "Apresentando um novo reprodutor de vídeo, com melhores controles de reprodução e suporte para vídeos HDR."),
-        "cl_video_player_title":
-            MessageLookupByLibrary.simpleMessage("Reprodutor de Vídeo"),
         "claimFreeStorage": MessageLookupByLibrary.simpleMessage(
             "Reivindicar armazenamento gratuito"),
         "claimMore": MessageLookupByLibrary.simpleMessage("Reivindique mais!"),

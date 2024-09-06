@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 0.9.33+933
+version: 0.9.35+935
 publish_to: none
 
 environment:
@@ -173,7 +173,7 @@ dependencies:
   tuple: ^2.0.0
   uni_links: ^0.5.1
   url_launcher: ^6.0.3
-  uuid: ^3.0.7
+  uuid: ^4.5.0
   video_editor:
     git:
       url: https://github.com/prateekmedia/video_editor.git

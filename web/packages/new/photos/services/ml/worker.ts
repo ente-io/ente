@@ -19,6 +19,7 @@ import {
     type ImageBitmapAndData,
 } from "./blob";
 import {
+    clearCachedCLIPIndexes,
     clipIndexingVersion,
     clipMatches,
     indexCLIP,
@@ -355,6 +356,9 @@ const indexNextBatch = async (
 
     // Wait for the pending tasks to drain out.
     await Promise.all(tasks);
+
+    // Clear any cached CLIP indexes, since now we might have new ones.
+    clearCachedCLIPIndexes();
 
     // Return true if nothing failed.
     return allSuccess;

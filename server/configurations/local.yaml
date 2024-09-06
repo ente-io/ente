@@ -5,12 +5,13 @@
 #    load one of the files from the `configurations/` directory. If not present,
 #    then by default `local.yaml` (this file) will get loaded.
 #
-# 2. Then, museum will look for a file named `museum.yaml` in the current
-#    working directory. If found, this file will also be loaded, and entries
-#    specified therein will override the defaults specified here.
+# 2. If the "credentials-file" config option is set then museum will look for
+#    that file. If found, that file will also be loaded, and entries specified
+#    therein will override the defaults specified here.
 #
-# 3. If the "credentials-file" config option is set, then museum will also load
-#    that and merge it in.
+# 3. Then, museum will look for a file named `museum.yaml` (gitignored) in the
+#    current working directory. If found, this file will also be loaded and
+#    merged.
 #
 # 4. Config can be overridden with via environment variables (details below).
 #

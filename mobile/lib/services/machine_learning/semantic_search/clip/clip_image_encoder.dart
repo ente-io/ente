@@ -4,7 +4,6 @@ import "dart:ui" show Image;
 import "package:logging/logging.dart";
 import "package:onnx_dart/onnx_dart.dart";
 import "package:onnxruntime/onnxruntime.dart";
-import "package:photos/extensions/stop_watch.dart";
 import "package:photos/services/machine_learning/ml_model.dart";
 import "package:photos/utils/image_ml_util.dart";
 import "package:photos/utils/ml_util.dart";
@@ -31,21 +30,42 @@ class ClipImageEncoder extends MlModel {
   static Future<List<double>> predict(
     Image image,
     ByteData imageByteData,
-    int sessionAddress,
-  ) async {
+    int sessionAddress, [
+    int? enteFileID,
+  ]) async {
+    final startTime = DateTime.now();
     final inputList = await preprocessImageClip(image, imageByteData);
-    if (MlModel.usePlatformPlugin) {
-      return await _runPlatformPluginPredict(inputList);
-    } else {
-      return _runFFIBasedPredict(inputList, sessionAddress);
+    final preprocessingTime = DateTime.now();
+    final preprocessingMs =
+        preprocessingTime.difference(startTime).inMilliseconds;
+    late List<double> result;
+    try {
+      if (MlModel.usePlatformPlugin) {
+        result = await _runPlatformPluginPredict(inputList);
+      } else {
+        result = _runFFIBasedPredict(inputList, sessionAddress);
+      }
+    } catch (e, stackTrace) {
+      _logger.severe(
+        "Clip image inference failed${enteFileID != null ? " with fileID $enteFileID" : ""}  (PlatformPlugin: ${MlModel.usePlatformPlugin})",
+        e,
+        stackTrace,
+      );
+      rethrow;
     }
+    final inferTime = DateTime.now();
+    final inferenceMs = inferTime.difference(preprocessingTime).inMilliseconds;
+    final totalMs = inferTime.difference(startTime).inMilliseconds;
+    _logger.info(
+      "Clip image predict took $totalMs ms${enteFileID != null ? " with fileID $enteFileID" : ""} (inference: $inferenceMs ms, preprocessing: $preprocessingMs ms)",
+    );
+    return result;
   }
 
   static List<double> _runFFIBasedPredict(
     Float32List inputList,
     int sessionAddress,
   ) {
-    final w = EnteWatch("ClipImageEncoder._runFFIBasedPredict")..start();
     final inputOrt =
         OrtValueTensor.createTensorWithDataList(inputList, [1, 3, 256, 256]);
     final inputs = {'input': inputOrt};
@@ -59,14 +79,12 @@ class ClipImageEncoder extends MlModel {
       element?.release();
     }
     normalizeEmbedding(embedding);
-    w.stopWithLog("done");
     return embedding;
   }
 
   static Future<List<double>> _runPlatformPluginPredict(
     Float32List inputImageList,
   ) async {
-    final w = EnteWatch("ClipImageEncoder._runEntePlugin")..start();
     final OnnxDart plugin = OnnxDart();
     final result = await plugin.predict(
       inputImageList,
@@ -74,7 +92,6 @@ class ClipImageEncoder extends MlModel {
     );
     final List<double> embedding = result!.sublist(0, 512);
     normalizeEmbedding(embedding);
-    w.stopWithLog("done");
     return embedding;
   }
 }

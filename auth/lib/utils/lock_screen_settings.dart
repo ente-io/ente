@@ -24,7 +24,7 @@ class LockScreenSettings {
   static const keyHasMigratedLockScreenChanges =
       "ls_has_migrated_lock_screen_changes";
   final List<Duration> autoLockDurations = const [
-    Duration(seconds: 0),
+    Duration(milliseconds: 650),
     Duration(seconds: 5),
     Duration(seconds: 15),
     Duration(minutes: 1),
