@@ -1,8 +1,7 @@
 import "dart:async";
-import "dart:developer" show log;
 import "dart:io" show File, Platform;
 import "dart:math" show max, min;
-import "dart:typed_data" show Float32List, Uint8List, ByteData;
+import "dart:typed_data" show Float32List, Uint8List;
 import "dart:ui";
 
 import 'package:flutter/painting.dart' as paint show decodeImageFromList;
@@ -21,12 +20,18 @@ import 'package:photos/services/machine_learning/face_ml/face_filtering/blur_det
 
 final _logger = Logger("ImageMlUtil");
 
-Future<(Image, ByteData)> decodeImageFromPath(String imagePath) async {
+/// These are 8 bit unsigned integers in range 0-255 for each RGB channel
+typedef RGB = (int, int, int);
+
+const maxKernelSize = 5;
+const maxKernelRadius = maxKernelSize ~/ 2;
+
+Future<(Image, Uint8List)> decodeImageFromPath(String imagePath) async {
   try {
     final imageData = await File(imagePath).readAsBytes();
     final image = await decodeImageFromData(imageData);
-    final ByteData imageByteData = await getByteDataFromImage(image);
-    return (image, imageByteData);
+    final rawRgbaBytes = await _getRawRgbaBytes(image);
+    return (image, rawRgbaBytes);
   } catch (e, s) {
     final format = imagePath.split('.').last;
     if (Platform.isAndroid) {
@@ -37,8 +42,8 @@ Future<(Image, ByteData)> decodeImageFromPath(String imagePath) async {
         _logger.info('Conversion successful, decoding JPG');
         final imageData = await File(jpgPath).readAsBytes();
         final image = await decodeImageFromData(imageData);
-        final ByteData imageByteData = await getByteDataFromImage(image);
-        return (image, imageByteData);
+        final rawRgbaBytes = await _getRawRgbaBytes(image);
+        return (image, rawRgbaBytes);
       }
       _logger.info('Unable to convert $format to JPG');
     }
@@ -78,25 +83,31 @@ Future<Image> decodeImageFromData(Uint8List imageData) async {
   // final Image image = await completer.future;
   // stream.removeListener(listener);
   // return image;
+}
 
-  // // Decoding using the ImageProvider from material.Image. This is not faster than the above, and also the code below is not finished!
-  // final materialImage = material.Image.memory(imageData);
-  // final ImageProvider uiImage = await materialImage.image;
+Future<Uint8List> _getRawRgbaBytes(Image image) async {
+  return await _getByteDataFromImage(image, format: ImageByteFormat.rawRgba);
+}
+
+/// Encodes an [Image] object to a [Uint8List], in the png format.
+/// Can be used with `Image.memory()`.
+Future<Uint8List> _encodeImageToPng(Image image) async {
+  return await _getByteDataFromImage(image, format: ImageByteFormat.png);
 }
 
 /// Returns the [ByteData] object of the image, in rawRgba format.
 ///
 /// Throws an exception if the image could not be converted to ByteData.
-Future<ByteData> getByteDataFromImage(
+Future<Uint8List> _getByteDataFromImage(
   Image image, {
-  ImageByteFormat format = ImageByteFormat.rawRgba,
+  required ImageByteFormat format,
 }) async {
-  final ByteData? byteDataRgba = await image.toByteData(format: format);
-  if (byteDataRgba == null) {
-    log('[ImageMlUtils] Could not convert image to ByteData');
-    throw Exception('Could not convert image to ByteData');
+  final byteData = await image.toByteData(format: format);
+  if (byteData == null) {
+    _logger.severe('Failed to get byte data in $format from image');
+    throw Exception('Failed to get byte data in $format from image');
   }
-  return byteDataRgba;
+  return byteData.buffer.asUint8List();
 }
 
 /// Generates a face thumbnail from [imageData] and [faceBoxes].
@@ -161,11 +172,11 @@ Future<List<Uint8List>> generateFaceThumbnailsUsingCanvas(
 
 Future<(Float32List, Dimensions)> preprocessImageToFloat32ChannelsFirst(
   Image image,
-  ByteData imgByteData, {
+  Uint8List rawRgbaBytes, {
   required int normalization,
   required int requiredWidth,
   required int requiredHeight,
-  Color Function(num, num, Image, ByteData) getPixel = _getPixelBilinear,
+  RGB Function(num, num, Image, Uint8List) getPixel = _getPixelBilinear,
   maintainAspectRatio = true,
 }) async {
   final normFunction = normalization == 2
@@ -193,20 +204,20 @@ Future<(Float32List, Dimensions)> preprocessImageToFloat32ChannelsFirst(
   final int channelOffsetBlue = 2 * requiredHeight * requiredWidth;
   for (var h = 0; h < requiredHeight; h++) {
     for (var w = 0; w < requiredWidth; w++) {
-      late Color pixel;
+      late RGB pixel;
       if (w >= scaledWidth || h >= scaledHeight) {
-        pixel = const Color.fromRGBO(114, 114, 114, 1.0);
+        pixel = const (114, 114, 114);
       } else {
         pixel = getPixel(
           w / scaleW,
           h / scaleH,
           image,
-          imgByteData,
+          rawRgbaBytes,
         );
       }
-      buffer[pixelIndex] = normFunction(pixel.red);
-      buffer[pixelIndex + channelOffsetGreen] = normFunction(pixel.green);
-      buffer[pixelIndex + channelOffsetBlue] = normFunction(pixel.blue);
+      buffer[pixelIndex] = normFunction(pixel.$1);
+      buffer[pixelIndex + channelOffsetGreen] = normFunction(pixel.$2);
+      buffer[pixelIndex + channelOffsetBlue] = normFunction(pixel.$3);
       pixelIndex++;
     }
   }
@@ -216,7 +227,7 @@ Future<(Float32List, Dimensions)> preprocessImageToFloat32ChannelsFirst(
 
 Future<Float32List> preprocessImageClip(
   Image image,
-  ByteData imgByteData,
+  Uint8List rawRgbaBytes,
 ) async {
   const int requiredWidth = 256;
   const int requiredHeight = 256;
@@ -234,15 +245,15 @@ Future<Float32List> preprocessImageClip(
   const int blueOff = 2 * requiredHeight * requiredWidth;
   for (var h = 0 + heightOffset; h < scaledHeight - heightOffset; h++) {
     for (var w = 0 + widthOffset; w < scaledWidth - widthOffset; w++) {
-      final Color pixel = _getPixelBilinear(
+      final RGB pixel = _getPixelBilinear(
         w / scale,
         h / scale,
         image,
-        imgByteData,
+        rawRgbaBytes,
       );
-      buffer[pixelIndex] = pixel.red / 255;
-      buffer[pixelIndex + greenOff] = pixel.green / 255;
-      buffer[pixelIndex + blueOff] = pixel.blue / 255;
+      buffer[pixelIndex] = pixel.$1 / 255;
+      buffer[pixelIndex + greenOff] = pixel.$2 / 255;
+      buffer[pixelIndex + blueOff] = pixel.$3 / 255;
       pixelIndex++;
     }
   }
@@ -253,7 +264,7 @@ Future<Float32List> preprocessImageClip(
 Future<(Float32List, List<AlignmentResult>, List<bool>, List<double>, Size)>
     preprocessToMobileFaceNetFloat32List(
   Image image,
-  ByteData imageByteData,
+  Uint8List rawRgbaBytes,
   List<FaceDetectionRelative> relativeFaces, {
   int width = 112,
   int height = 112,
@@ -290,7 +301,7 @@ Future<(Float32List, List<AlignmentResult>, List<bool>, List<double>, Size)>
 
     _warpAffineFloat32List(
       image,
-      imageByteData,
+      rawRgbaBytes,
       alignmentResult.affineMatrix,
       alignedImagesFloat32List,
       alignedImageIndex,
@@ -320,29 +331,30 @@ Future<(Float32List, List<AlignmentResult>, List<bool>, List<double>, Size)>
 }
 
 /// Reads the pixel color at the specified coordinates.
-Color _readPixelColor(
-  Image image,
-  ByteData byteData,
+RGB _readPixelColor(
   int x,
   int y,
+  Image image,
+  Uint8List rgbaBytes,
 ) {
-  if (x < 0 || x >= image.width || y < 0 || y >= image.height) {
-    // throw ArgumentError('Invalid pixel coordinates.');
-    if (y != -1) {
-      log('[WARNING] `readPixelColor`: Invalid pixel coordinates, out of bounds');
-    }
-    return const Color.fromARGB(0, 0, 0, 0);
+  if (y < -maxKernelRadius ||
+      y >= image.height + maxKernelRadius ||
+      x < -maxKernelRadius ||
+      x >= image.width + maxKernelRadius) {
+    _logger.severe(
+      '`readPixelColor`: Invalid pixel coordinates, out of bounds. x: $x, y: $y',
+    );
+    return const (114, 114, 114);
   }
-  assert(byteData.lengthInBytes == 4 * image.width * image.height);
+
+  assert(rgbaBytes.lengthInBytes == 4 * image.width * image.height);
 
   final int byteOffset = 4 * (image.width * y + x);
-  return Color(_rgbaToArgb(byteData.getUint32(byteOffset)));
-}
-
-int _rgbaToArgb(int rgbaColor) {
-  final int a = rgbaColor & 0xFF;
-  final int rgb = rgbaColor >> 8;
-  return rgb + (a << 24);
+  return (
+    rgbaBytes[byteOffset], // red
+    rgbaBytes[byteOffset + 1], // green
+    rgbaBytes[byteOffset + 2] // blue
+  );
 }
 
 List<List<int>> _createGrayscaleIntMatrixFromNormalized2List(
@@ -398,20 +410,6 @@ double _normalizePixelNoRange(num pixelValue) {
   return pixelValue.toDouble();
 }
 
-/// Encodes an [Image] object to a [Uint8List], by default in the png format.
-///
-/// Note that the result can be used with `Image.memory()` only if the [format] is png.
-Future<Uint8List> _encodeImageToUint8List(
-  Image image, {
-  ImageByteFormat format = ImageByteFormat.png,
-}) async {
-  final ByteData byteDataPng =
-      await getByteDataFromImage(image, format: format);
-  final encodedImage = byteDataPng.buffer.asUint8List();
-
-  return encodedImage;
-}
-
 Future<Image> _cropImage(
   Image image, {
   required double x,
@@ -447,7 +445,7 @@ Future<Image> _cropImage(
 
 void _warpAffineFloat32List(
   Image inputImage,
-  ByteData imgByteDataRgba,
+  Uint8List rawRgbaBytes,
   List<List<double>> affineMatrix,
   Float32List outputList,
   int startIndex, {
@@ -501,16 +499,16 @@ void _warpAffineFloat32List(
       final num xOrigin = (xTrans - b00) * a00Prime + (yTrans - b10) * a01Prime;
       final num yOrigin = (xTrans - b00) * a10Prime + (yTrans - b10) * a11Prime;
 
-      final Color pixel =
-          _getPixelBicubic(xOrigin, yOrigin, inputImage, imgByteDataRgba);
+      final RGB pixel =
+          _getPixelBicubic(xOrigin, yOrigin, inputImage, rawRgbaBytes);
 
       // Set the new pixel
       outputList[startIndex + 3 * (yTrans * width + xTrans)] =
-          _normalizePixelRange2(pixel.red);
+          _normalizePixelRange2(pixel.$1);
       outputList[startIndex + 3 * (yTrans * width + xTrans) + 1] =
-          _normalizePixelRange2(pixel.green);
+          _normalizePixelRange2(pixel.$2);
       outputList[startIndex + 3 * (yTrans * width + xTrans) + 2] =
-          _normalizePixelRange2(pixel.blue);
+          _normalizePixelRange2(pixel.$3);
     }
   }
 }
@@ -529,13 +527,10 @@ Future<Uint8List> _cropAndEncodeCanvas(
     width: width,
     height: height,
   );
-  return await _encodeImageToUint8List(
-    croppedImage,
-    format: ImageByteFormat.png,
-  );
+  return await _encodeImageToPng(croppedImage);
 }
 
-Color _getPixelBilinear(num fx, num fy, Image image, ByteData byteDataRgba) {
+RGB _getPixelBilinear(num fx, num fy, Image image, Uint8List rawRgbaBytes) {
   // Clamp to image boundaries
   fx = fx.clamp(0, image.width - 1);
   fy = fy.clamp(0, image.height - 1);
@@ -551,10 +546,10 @@ Color _getPixelBilinear(num fx, num fy, Image image, ByteData byteDataRgba) {
   final dy1 = 1.0 - dy;
 
   // Get the original pixels
-  final Color pixel1 = _readPixelColor(image, byteDataRgba, x0, y0);
-  final Color pixel2 = _readPixelColor(image, byteDataRgba, x1, y0);
-  final Color pixel3 = _readPixelColor(image, byteDataRgba, x0, y1);
-  final Color pixel4 = _readPixelColor(image, byteDataRgba, x1, y1);
+  final RGB pixel1 = _readPixelColor(x0, y0, image, rawRgbaBytes);
+  final RGB pixel2 = _readPixelColor(x1, y0, image, rawRgbaBytes);
+  final RGB pixel3 = _readPixelColor(x0, y1, image, rawRgbaBytes);
+  final RGB pixel4 = _readPixelColor(x1, y1, image, rawRgbaBytes);
 
   int bilinear(
     num val1,
@@ -566,16 +561,15 @@ Color _getPixelBilinear(num fx, num fy, Image image, ByteData byteDataRgba) {
           .round();
 
   // Calculate the weighted sum of pixels
-  final int r = bilinear(pixel1.red, pixel2.red, pixel3.red, pixel4.red);
-  final int g =
-      bilinear(pixel1.green, pixel2.green, pixel3.green, pixel4.green);
-  final int b = bilinear(pixel1.blue, pixel2.blue, pixel3.blue, pixel4.blue);
+  final int r = bilinear(pixel1.$1, pixel2.$1, pixel3.$1, pixel4.$1);
+  final int g = bilinear(pixel1.$2, pixel2.$2, pixel3.$2, pixel4.$2);
+  final int b = bilinear(pixel1.$3, pixel2.$3, pixel3.$3, pixel4.$3);
 
-  return Color.fromRGBO(r, g, b, 1.0);
+  return (r, g, b);
 }
 
 /// Get the pixel value using Bicubic Interpolation. Code taken mainly from https://github.com/brendan-duncan/image/blob/6e407612752ffdb90b28cd5863c7f65856349348/lib/src/image/image.dart#L697
-Color _getPixelBicubic(num fx, num fy, Image image, ByteData byteDataRgba) {
+RGB _getPixelBicubic(num fx, num fy, Image image, Uint8List rawRgbaBytes) {
   fx = fx.clamp(0, image.width - 1);
   fy = fy.clamp(0, image.height - 1);
 
@@ -596,66 +590,66 @@ Color _getPixelBicubic(num fx, num fy, Image image, ByteData byteDataRgba) {
               dx * dx * (2 * ipp - 5 * icp + 4 * inp - iap) +
               dx * dx * dx * (-ipp + 3 * icp - 3 * inp + iap));
 
-  final icc = _readPixelColor(image, byteDataRgba, x, y);
+  final icc = _readPixelColor(x, y, image, rawRgbaBytes);
 
   final ipp =
-      px < 0 || py < 0 ? icc : _readPixelColor(image, byteDataRgba, px, py);
-  final icp = px < 0 ? icc : _readPixelColor(image, byteDataRgba, x, py);
+      px < 0 || py < 0 ? icc : _readPixelColor(px, py, image, rawRgbaBytes);
+  final icp = px < 0 ? icc : _readPixelColor(x, py, image, rawRgbaBytes);
   final inp = py < 0 || nx >= image.width
       ? icc
-      : _readPixelColor(image, byteDataRgba, nx, py);
+      : _readPixelColor(nx, py, image, rawRgbaBytes);
   final iap = ax >= image.width || py < 0
       ? icc
-      : _readPixelColor(image, byteDataRgba, ax, py);
+      : _readPixelColor(ax, py, image, rawRgbaBytes);
 
-  final ip0 = cubic(dx, ipp.red, icp.red, inp.red, iap.red);
-  final ip1 = cubic(dx, ipp.green, icp.green, inp.green, iap.green);
-  final ip2 = cubic(dx, ipp.blue, icp.blue, inp.blue, iap.blue);
+  final ip0 = cubic(dx, ipp.$1, icp.$1, inp.$1, iap.$1);
+  final ip1 = cubic(dx, ipp.$2, icp.$2, inp.$2, iap.$2);
+  final ip2 = cubic(dx, ipp.$3, icp.$3, inp.$3, iap.$3);
   // final ip3 = cubic(dx, ipp.a, icp.a, inp.a, iap.a);
 
-  final ipc = px < 0 ? icc : _readPixelColor(image, byteDataRgba, px, y);
+  final ipc = px < 0 ? icc : _readPixelColor(px, y, image, rawRgbaBytes);
   final inc =
-      nx >= image.width ? icc : _readPixelColor(image, byteDataRgba, nx, y);
+      nx >= image.width ? icc : _readPixelColor(nx, y, image, rawRgbaBytes);
   final iac =
-      ax >= image.width ? icc : _readPixelColor(image, byteDataRgba, ax, y);
+      ax >= image.width ? icc : _readPixelColor(ax, y, image, rawRgbaBytes);
 
-  final ic0 = cubic(dx, ipc.red, icc.red, inc.red, iac.red);
-  final ic1 = cubic(dx, ipc.green, icc.green, inc.green, iac.green);
-  final ic2 = cubic(dx, ipc.blue, icc.blue, inc.blue, iac.blue);
+  final ic0 = cubic(dx, ipc.$1, icc.$1, inc.$1, iac.$1);
+  final ic1 = cubic(dx, ipc.$2, icc.$2, inc.$2, iac.$2);
+  final ic2 = cubic(dx, ipc.$3, icc.$3, inc.$3, iac.$3);
   // final ic3 = cubic(dx, ipc.a, icc.a, inc.a, iac.a);
 
   final ipn = px < 0 || ny >= image.height
       ? icc
-      : _readPixelColor(image, byteDataRgba, px, ny);
+      : _readPixelColor(px, ny, image, rawRgbaBytes);
   final icn =
-      ny >= image.height ? icc : _readPixelColor(image, byteDataRgba, x, ny);
+      ny >= image.height ? icc : _readPixelColor(x, ny, image, rawRgbaBytes);
   final inn = nx >= image.width || ny >= image.height
       ? icc
-      : _readPixelColor(image, byteDataRgba, nx, ny);
+      : _readPixelColor(nx, ny, image, rawRgbaBytes);
   final ian = ax >= image.width || ny >= image.height
       ? icc
-      : _readPixelColor(image, byteDataRgba, ax, ny);
+      : _readPixelColor(ax, ny, image, rawRgbaBytes);
 
-  final in0 = cubic(dx, ipn.red, icn.red, inn.red, ian.red);
-  final in1 = cubic(dx, ipn.green, icn.green, inn.green, ian.green);
-  final in2 = cubic(dx, ipn.blue, icn.blue, inn.blue, ian.blue);
+  final in0 = cubic(dx, ipn.$1, icn.$1, inn.$1, ian.$1);
+  final in1 = cubic(dx, ipn.$2, icn.$2, inn.$2, ian.$2);
+  final in2 = cubic(dx, ipn.$3, icn.$3, inn.$3, ian.$3);
   // final in3 = cubic(dx, ipn.a, icn.a, inn.a, ian.a);
 
   final ipa = px < 0 || ay >= image.height
       ? icc
-      : _readPixelColor(image, byteDataRgba, px, ay);
+      : _readPixelColor(px, ay, image, rawRgbaBytes);
   final ica =
-      ay >= image.height ? icc : _readPixelColor(image, byteDataRgba, x, ay);
+      ay >= image.height ? icc : _readPixelColor(x, ay, image, rawRgbaBytes);
   final ina = nx >= image.width || ay >= image.height
       ? icc
-      : _readPixelColor(image, byteDataRgba, nx, ay);
+      : _readPixelColor(nx, ay, image, rawRgbaBytes);
   final iaa = ax >= image.width || ay >= image.height
       ? icc
-      : _readPixelColor(image, byteDataRgba, ax, ay);
+      : _readPixelColor(ax, ay, image, rawRgbaBytes);
 
-  final ia0 = cubic(dx, ipa.red, ica.red, ina.red, iaa.red);
-  final ia1 = cubic(dx, ipa.green, ica.green, ina.green, iaa.green);
-  final ia2 = cubic(dx, ipa.blue, ica.blue, ina.blue, iaa.blue);
+  final ia0 = cubic(dx, ipa.$1, ica.$1, ina.$1, iaa.$1);
+  final ia1 = cubic(dx, ipa.$2, ica.$2, ina.$2, iaa.$2);
+  final ia2 = cubic(dx, ipa.$3, ica.$3, ina.$3, iaa.$3);
   // final ia3 = cubic(dx, ipa.a, ica.a, ina.a, iaa.a);
 
   final c0 = cubic(dy, ip0, ic0, in0, ia0).clamp(0, 255).toInt();
@@ -663,5 +657,5 @@ Color _getPixelBicubic(num fx, num fy, Image image, ByteData byteDataRgba) {
   final c2 = cubic(dy, ip2, ic2, in2, ia2).clamp(0, 255).toInt();
   // final c3 = cubic(dy, ip3, ic3, in3, ia3);
 
-  return Color.fromRGBO(c0, c1, c2, 1.0);
+  return (c0, c1, c2); // (red, green, blue)
 }

@@ -396,7 +396,7 @@ Future<MLResult> analyzeImageStatic(Map args) async {
     final startTime = DateTime.now();
 
     // Decode the image once to use for both face detection and alignment
-    final (image, imageByteData) = await decodeImageFromPath(imagePath);
+    final (image, rawRgbaBytes) = await decodeImageFromPath(imagePath);
     final decodedImageSize =
         Dimensions(height: image.height, width: image.width);
     final result = MLResult.fromEnteFileID(enteFileID);
@@ -408,7 +408,7 @@ Future<MLResult> analyzeImageStatic(Map args) async {
       final resultFaces = await FaceRecognitionService.runFacesPipeline(
         enteFileID,
         image,
-        imageByteData,
+        rawRgbaBytes,
         faceDetectionAddress,
         faceEmbeddingAddress,
       );
@@ -426,7 +426,7 @@ Future<MLResult> analyzeImageStatic(Map args) async {
       final clipResult = await SemanticSearchService.runClipImage(
         enteFileID,
         image,
-        imageByteData,
+        rawRgbaBytes,
         clipImageAddress,
       );
       result.clip = clipResult;
