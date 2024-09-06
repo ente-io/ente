@@ -2,6 +2,7 @@ package filedata
 
 import (
 	"fmt"
+
 	"github.com/ente-io/museum/ente"
 )
 
@@ -76,6 +77,11 @@ type PreviewUploadUrlRequest struct {
 	Type   ente.ObjectType `form:"type" binding:"required"`
 }
 
+type PreviewUploadUrl struct {
+	Id  string `json:"id" binding:"required"`
+	Url string `json:"url" binding:"required"`
+}
+
 func (g *PreviewUploadUrlRequest) Validate() error {
 	if g.Type != ente.PreviewVideo && g.Type != ente.PreviewImage {
 		return ente.NewBadRequestWithMessage(fmt.Sprintf("unsupported object type %s", g.Type))
@@ -106,18 +112,16 @@ func (r *Row) S3FileMetadataObjectKey() string {
 	if r.Type == ente.MlData {
 		return derivedMetaPath(r.FileID, r.UserID)
 	}
-	if r.Type == ente.PreviewVideo {
-		return previewVideoPlaylist(r.FileID, r.UserID)
-	}
+
 	panic(fmt.Sprintf("S3FileMetadata should not be written for %s type", r.Type))
 }
 
 // GetS3FileObjectKey returns the object key for the file data stored in the S3 bucket.
 func (r *Row) GetS3FileObjectKey() string {
-	if r.Type == ente.PreviewVideo {
-		return previewVideoPath(r.FileID, r.UserID)
-	} else if r.Type == ente.PreviewImage {
-		return previewImagePath(r.FileID, r.UserID)
-	}
+	//if r.Type == ente.PreviewVideo {
+	//	return previewVideoPath(r.FileID, r.UserID)
+	//} else if r.Type == ente.PreviewImage {
+	//	return previewImagePath(r.FileID, r.UserID)
+	//}
 	panic(fmt.Sprintf("unsupported object type %s", r.Type))
 }

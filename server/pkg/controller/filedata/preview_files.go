@@ -1,7 +1,6 @@
 package filedata
 
 import (
-	"fmt"
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/ente/filedata"
 	"github.com/ente-io/museum/pkg/utils/auth"
@@ -31,7 +30,7 @@ func (c *Controller) GetPreviewUrl(ctx *gin.Context, request filedata.GetPreview
 	return &enteUrl.URL, nil
 }
 
-func (c *Controller) PreviewUploadURL(ctx *gin.Context, request filedata.PreviewUploadUrlRequest) (*string, error) {
+func (c *Controller) PreviewUploadURL(ctx *gin.Context, request filedata.PreviewUploadUrlRequest) (*filedata.PreviewUploadUrl, error) {
 	if err := request.Validate(); err != nil {
 		return nil, err
 	}
@@ -43,12 +42,16 @@ func (c *Controller) PreviewUploadURL(ctx *gin.Context, request filedata.Preview
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}
+	id := filedata.NewUploadID(request.Type)
 	// note: instead of the final url, give a temp url for upload purpose.
-	uploadUrl := fmt.Sprintf("%s_temp_upload", filedata.PreviewUrl(request.FileID, fileOwnerID, request.Type))
+	uploadUrl := filedata.CompleteObjectKey(request.FileID, fileOwnerID, request.Type, id)
 	bucketID := c.S3Config.GetBucketID(request.Type)
 	enteUrl, err := c.getUploadURL(bucketID, uploadUrl)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}
-	return &enteUrl.URL, nil
+	return &filedata.PreviewUploadUrl{
+		Id:  id,
+		Url: enteUrl.URL,
+	}, nil
 }

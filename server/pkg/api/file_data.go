@@ -70,14 +70,12 @@ func (h *FileHandler) GetPreviewUploadURL(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("Request binding failed %s", err)))
 		return
 	}
-	url, err := h.FileDataCtrl.PreviewUploadURL(c, request)
+	resp, err := h.FileDataCtrl.PreviewUploadURL(c, request)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"url": url,
-	})
+	c.JSON(http.StatusOK, resp)
 }
 
 func (h *FileHandler) GetPreviewURL(c *gin.Context) {
