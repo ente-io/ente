@@ -2,6 +2,7 @@
 
 import { ensureElectron } from "@/base/electron";
 import { nameAndExtension } from "@/base/file";
+import { type Location } from "@/base/location";
 import log from "@/base/log";
 import type { UploadItem } from "@/new/photos/services/upload/types";
 import { readStream } from "@/new/photos/utils/native-stream";
@@ -16,7 +17,7 @@ import { readStream } from "@/new/photos/utils/native-stream";
 export interface ParsedMetadataJSON {
     creationTime?: number;
     modificationTime?: number;
-    location?: { latitude: number; longitude: number };
+    location?: Location;
 }
 
 export const MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT = 46;
@@ -112,51 +113,58 @@ const parseMetadataJSONText = (text: string) => {
 
     const parsedMetadataJSON: ParsedMetadataJSON = {};
 
-    // The metadata provided by Google does not include the time zone where the
-    // photo was taken, it only has an epoch seconds value.
-    if (
-        metadataJSON["photoTakenTime"] &&
-        metadataJSON["photoTakenTime"]["timestamp"]
-    ) {
-        parsedMetadataJSON.creationTime =
-            metadataJSON["photoTakenTime"]["timestamp"] * 1e6;
-    } else if (
-        metadataJSON["creationTime"] &&
-        metadataJSON["creationTime"]["timestamp"]
-    ) {
-        parsedMetadataJSON.creationTime =
-            metadataJSON["creationTime"]["timestamp"] * 1e6;
-    }
+    parsedMetadataJSON.creationTime =
+        parseGTTimestamp(metadataJSON["photoTakenTime"]) ??
+        parseGTTimestamp(metadataJSON["creationTime"]);
 
-    if (
-        metadataJSON["modificationTime"] &&
-        metadataJSON["modificationTime"]["timestamp"]
-    ) {
-        parsedMetadataJSON.modificationTime =
-            metadataJSON["modificationTime"]["timestamp"] * 1e6;
-    }
+    parsedMetadataJSON.modificationTime = parseGTTimestamp(
+        metadataJSON["modificationTime"],
+    );
 
-    if (
-        metadataJSON["geoData"] &&
-        (metadataJSON["geoData"]["latitude"] !== 0.0 ||
-            metadataJSON["geoData"]["longitude"] !== 0.0)
-    ) {
-        parsedMetadataJSON.location = {
-            latitude: metadataJSON["geoData"]["latitude"],
-            longitude: metadataJSON["geoData"]["longitude"],
-        };
-    } else if (
-        metadataJSON["geoDataExif"] &&
-        (metadataJSON["geoDataExif"]["latitude"] !== 0.0 ||
-            metadataJSON["geoDataExif"]["longitude"] !== 0.0)
-    ) {
-        parsedMetadataJSON.location = {
-            latitude: metadataJSON["geoDataExif"]["latitude"],
-            longitude: metadataJSON["geoDataExif"]["longitude"],
-        };
-    }
+    parsedMetadataJSON.location =
+        parseGTLocation(metadataJSON["geoData"]) ??
+        parseGTLocation(metadataJSON["geoDataExif"]);
 
     return parsedMetadataJSON;
+};
+
+/**
+ * Parse a nullish epoch seconds timestamp from a field in a Google Takeout
+ * JSON, converting it into epoch microseconds if it is found.
+ *
+ * Note that the metadata provided by Google does not include the time zone
+ * where the photo was taken, it only has an epoch seconds value.
+ */
+const parseGTTimestamp = (o: unknown) => {
+    if (
+        o &&
+        typeof o == "object" &&
+        "timestamp" in o &&
+        typeof o.timestamp == "number"
+    ) {
+        const { timestamp } = o;
+        if (timestamp) return timestamp * 1e6;
+    }
+    return undefined;
+};
+
+/**
+ * A custom parser (instead of parseLatLng) that retains the existing behaviour
+ * of ignoring (0, 0) lat lng pairs when reading Google Takeout JSONs.
+ */
+const parseGTLocation = (o: unknown) => {
+    if (
+        o &&
+        typeof o == "object" &&
+        "latitude" in o &&
+        typeof o.latitude == "number" &&
+        "longitude" in o &&
+        typeof o.longitude == "number"
+    ) {
+        const { latitude, longitude } = o;
+        if (latitude !== 0 || longitude !== 0) return { latitude, longitude };
+    }
+    return undefined;
 };
 
 /**

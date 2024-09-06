@@ -2,9 +2,11 @@ import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
 import { EllipsizedTypography } from "@/base/components/Typography";
 import { nameAndExtension } from "@/base/file";
+import type { Location } from "@/base/location";
 import log from "@/base/log";
 import type { ParsedMetadata } from "@/media/file-metadata";
 import {
+    fileLocation,
     getUICreationDate,
     updateRemotePublicMagicMetadata,
     type ParsedMetadataDate,
@@ -97,16 +99,9 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     const [openRawExif, setOpenRawExif] = useState(false);
 
     const location = useMemo(() => {
-        if (file && file.metadata) {
-            if (
-                (file.metadata.latitude || file.metadata.latitude === 0) &&
-                !(file.metadata.longitude === 0 && file.metadata.latitude === 0)
-            ) {
-                return {
-                    latitude: file.metadata.latitude,
-                    longitude: file.metadata.longitude,
-                };
-            }
+        if (file) {
+            const location = fileLocation(file);
+            if (location) return location;
         }
         return exif?.parsed?.location;
     }, [file, exif]);
@@ -181,7 +176,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                                 !mapEnabled ||
                                 publicCollectionGalleryContext.accessedThroughSharedURL ? (
                                     <Link
-                                        href={getOpenStreetMapLink(location)}
+                                        href={openStreetMapLink(location)}
                                         target="_blank"
                                         rel="noopener"
                                         sx={{ fontWeight: "bold" }}
@@ -205,7 +200,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                             }
                             customEndButton={
                                 <CopyButton
-                                    code={getOpenStreetMapLink(location)}
+                                    code={openStreetMapLink(location)}
                                     color="secondary"
                                     size="medium"
                                 />
@@ -531,11 +526,8 @@ const BasicDeviceCamera: React.FC<{ parsedExif: ExifInfo }> = ({
     );
 };
 
-const getOpenStreetMapLink = (location: {
-    latitude: number;
-    longitude: number;
-}) =>
-    `https://www.openstreetmap.org/?mlat=${location.latitude}&mlon=${location.longitude}#map=15/${location.latitude}/${location.longitude}`;
+const openStreetMapLink = ({ latitude, longitude }: Location) =>
+    `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=15/${latitude}/${longitude}`;
 
 interface RawExifProps {
     open: boolean;

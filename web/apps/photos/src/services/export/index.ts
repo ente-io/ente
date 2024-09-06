@@ -1,6 +1,6 @@
 import { ensureElectron } from "@/base/electron";
 import log from "@/base/log";
-import type { Metadata } from "@/media/file-metadata";
+import { fileLocation, type Metadata } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import downloadManager from "@/new/photos/services/download";
@@ -1383,6 +1383,7 @@ const getGoogleLikeMetadataFile = (fileExportName: string, file: EnteFile) => {
         (metadata.modificationTime ?? metadata.creationTime) / 1000000,
     );
     const captionValue: string = file?.pubMagicMetadata?.data?.caption;
+    const geoData = fileLocation(file);
     return JSON.stringify(
         {
             title: fileExportName,
@@ -1395,10 +1396,7 @@ const getGoogleLikeMetadataFile = (fileExportName: string, file: EnteFile) => {
                 timestamp: modificationTime,
                 formatted: formatDateTimeShort(modificationTime * 1000),
             },
-            geoData: {
-                latitude: metadata.latitude,
-                longitude: metadata.longitude,
-            },
+            geoData,
         },
         null,
         2,
