@@ -1,6 +1,10 @@
 import { ensureElectron } from "@/base/electron";
 import log from "@/base/log";
-import { fileLocation, type Metadata } from "@/media/file-metadata";
+import {
+    fileLocation,
+    getUICreationDate,
+    type Metadata,
+} from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import downloadManager from "@/new/photos/services/download";
@@ -17,12 +21,12 @@ import { writeStream } from "@/new/photos/utils/native-stream";
 import { wait } from "@/utils/promise";
 import { CustomError } from "@ente/shared/error";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
-import { formatDateTimeShort } from "@ente/shared/time/format";
 import type { User } from "@ente/shared/user/types";
 import QueueProcessor, {
     CancellationStatus,
     RequestCanceller,
 } from "@ente/shared/utils/queueProcessor";
+import i18n from "i18next";
 import { Collection } from "types/collection";
 import {
     CollectionExportNames,
@@ -100,6 +104,7 @@ class ExportService {
         success: 0,
         failed: 0,
     };
+    private cachedMetadataDateTimeFormatter: Intl.DateTimeFormat;
 
     getExportSettings(): ExportSettings {
         try {
@@ -1076,10 +1081,36 @@ class ExportService {
         fileExportName: string,
         file: EnteFile,
     ) {
+        const formatter = this.metadataDateTimeFormatter();
         await ensureElectron().fs.writeFile(
             getFileMetadataExportPath(collectionExportPath, fileExportName),
-            getGoogleLikeMetadataFile(fileExportName, file),
+            getGoogleLikeMetadataFile(fileExportName, file, formatter),
         );
+    }
+
+    /**
+     * Lazily created, cached instance of the date time formatter that should be
+     * used for formatting the dates added to the metadata file.
+     */
+    private metadataDateTimeFormatter() {
+        if (this.cachedMetadataDateTimeFormatter)
+            return this.cachedMetadataDateTimeFormatter;
+
+        // AFAIK, Google's format is not documented. It also seems to vary with
+        // locale. This is a best attempt at constructing a formatter that
+        // mirrors the format used by the timestamps in the takeout JSON.
+        const formatter = new Intl.DateTimeFormat(i18n.language, {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+            hour: "numeric",
+            minute: "numeric",
+            second: "numeric",
+            timeZoneName: "short",
+            timeZone: "UTC",
+        });
+        this.cachedMetadataDateTimeFormatter = formatter;
+        return formatter;
     }
 
     isExportInProgress = () => {
@@ -1376,7 +1407,11 @@ const getCollectionExportedFiles = (
     return collectionExportedFiles;
 };
 
-const getGoogleLikeMetadataFile = (fileExportName: string, file: EnteFile) => {
+const getGoogleLikeMetadataFile = (
+    fileExportName: string,
+    file: EnteFile,
+    dateTimeFormatter: Intl.DateTimeFormat,
+) => {
     const metadata: Metadata = file.metadata;
     const creationTime = Math.floor(metadata.creationTime / 1000000);
     const modificationTime = Math.floor(
@@ -1386,11 +1421,13 @@ const getGoogleLikeMetadataFile = (fileExportName: string, file: EnteFile) => {
         title: fileExportName,
         creationTime: {
             timestamp: creationTime,
-            formatted: formatDateTimeShort(creationTime * 1000),
+            formatted: dateTimeFormatter.format(
+                getUICreationDate(file, file.pubMagicMetadata?.data),
+            ),
         },
         modificationTime: {
             timestamp: modificationTime,
-            formatted: formatDateTimeShort(modificationTime * 1000),
+            formatted: dateTimeFormatter.format(modificationTime * 1000),
         },
     };
     const caption = file?.pubMagicMetadata?.data?.caption;
