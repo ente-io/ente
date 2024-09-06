@@ -1,6 +1,6 @@
 import "dart:async";
 import "dart:io" show File, Platform;
-import "dart:math" show max, min;
+import "dart:math" show exp, max, min, pi;
 import "dart:typed_data" show Float32List, Uint8List;
 import "dart:ui";
 
@@ -23,7 +23,13 @@ final _logger = Logger("ImageMlUtil");
 /// These are 8 bit unsigned integers in range 0-255 for each RGB channel
 typedef RGB = (int, int, int);
 
-const maxKernelSize = 5;
+const gaussianKernelSize = 5;
+const gaussianKernelRadius = gaussianKernelSize ~/ 2;
+const gaussianSigma = 10.0;
+final List<List<double>> gaussianKernel =
+    create2DGaussianKernel(gaussianKernelSize, gaussianSigma);
+
+const maxKernelSize = gaussianKernelSize;
 const maxKernelRadius = maxKernelSize ~/ 2;
 
 Future<(Image, Uint8List)> decodeImageFromPath(String imagePath) async {
@@ -245,7 +251,7 @@ Future<Float32List> preprocessImageClip(
   const int blueOff = 2 * requiredHeight * requiredWidth;
   for (var h = 0 + heightOffset; h < scaledHeight - heightOffset; h++) {
     for (var w = 0 + widthOffset; w < scaledWidth - widthOffset; w++) {
-      final RGB pixel = _getPixelBilinear(
+      final RGB pixel = _getPixelBilinearAntialias(
         w / scale,
         h / scale,
         image,
@@ -355,6 +361,29 @@ RGB _readPixelColor(
     rgbaBytes[byteOffset + 1], // green
     rgbaBytes[byteOffset + 2] // blue
   );
+}
+
+RGB _getPixelBlurred(
+  int x,
+  int y,
+  Image image,
+  Uint8List rgbaBytes,
+) {
+  double r = 0, g = 0, b = 0;
+  for (int ky = 0; ky < gaussianKernelSize; ky++) {
+    for (int kx = 0; kx < gaussianKernelSize; kx++) {
+      final int px = (x - gaussianKernelRadius + kx);
+      final int py = (y - gaussianKernelRadius + ky);
+
+      final RGB pixelRgbTuple = _readPixelColor(px, py, image, rgbaBytes);
+      final double weight = gaussianKernel[ky][kx];
+
+      r += pixelRgbTuple.$1 * weight;
+      g += pixelRgbTuple.$2 * weight;
+      b += pixelRgbTuple.$3 * weight;
+    }
+  }
+  return (r.round(), g.round(), b.round());
 }
 
 List<List<int>> _createGrayscaleIntMatrixFromNormalized2List(
@@ -568,6 +597,49 @@ RGB _getPixelBilinear(num fx, num fy, Image image, Uint8List rawRgbaBytes) {
   return (r, g, b);
 }
 
+RGB _getPixelBilinearAntialias(
+  num fx,
+  num fy,
+  Image image,
+  Uint8List rawRgbaBytes,
+) {
+  // Clamp to image boundaries
+  fx = fx.clamp(0, image.width - 1);
+  fy = fy.clamp(0, image.height - 1);
+
+  // Get the surrounding coordinates and their weights
+  final int x0 = fx.floor();
+  final int x1 = fx.ceil();
+  final int y0 = fy.floor();
+  final int y1 = fy.ceil();
+  final dx = fx - x0;
+  final dy = fy - y0;
+  final dx1 = 1.0 - dx;
+  final dy1 = 1.0 - dy;
+
+  // Get the original pixels
+  final RGB pixel1 = _getPixelBlurred(x0, y0, image, rawRgbaBytes);
+  final RGB pixel2 = _getPixelBlurred(x1, y0, image, rawRgbaBytes);
+  final RGB pixel3 = _getPixelBlurred(x0, y1, image, rawRgbaBytes);
+  final RGB pixel4 = _getPixelBlurred(x1, y1, image, rawRgbaBytes);
+
+  int bilinear(
+    num val1,
+    num val2,
+    num val3,
+    num val4,
+  ) =>
+      (val1 * dx1 * dy1 + val2 * dx * dy1 + val3 * dx1 * dy + val4 * dx * dy)
+          .round();
+
+  // Calculate the weighted sum of pixels
+  final int r = bilinear(pixel1.$1, pixel2.$1, pixel3.$1, pixel4.$1);
+  final int g = bilinear(pixel1.$2, pixel2.$2, pixel3.$2, pixel4.$2);
+  final int b = bilinear(pixel1.$3, pixel2.$3, pixel3.$3, pixel4.$3);
+
+  return (r, g, b);
+}
+
 /// Get the pixel value using Bicubic Interpolation. Code taken mainly from https://github.com/brendan-duncan/image/blob/6e407612752ffdb90b28cd5863c7f65856349348/lib/src/image/image.dart#L697
 RGB _getPixelBicubic(num fx, num fy, Image image, Uint8List rawRgbaBytes) {
   fx = fx.clamp(0, image.width - 1);
@@ -658,4 +730,31 @@ RGB _getPixelBicubic(num fx, num fy, Image image, Uint8List rawRgbaBytes) {
   // final c3 = cubic(dy, ip3, ic3, in3, ia3);
 
   return (c0, c1, c2); // (red, green, blue)
+}
+
+List<List<double>> create2DGaussianKernel(int size, double sigma) {
+  final List<List<double>> kernel =
+      List.generate(size, (_) => List<double>.filled(size, 0));
+  double sum = 0.0;
+  final int center = size ~/ 2;
+
+  for (int y = 0; y < size; y++) {
+    for (int x = 0; x < size; x++) {
+      final int dx = x - center;
+      final int dy = y - center;
+      final double g = (1 / (2 * pi * sigma * sigma)) *
+          exp(-(dx * dx + dy * dy) / (2 * sigma * sigma));
+      kernel[y][x] = g;
+      sum += g;
+    }
+  }
+
+  // Normalize the kernel
+  for (int y = 0; y < size; y++) {
+    for (int x = 0; x < size; x++) {
+      kernel[y][x] /= sum;
+    }
+  }
+
+  return kernel;
 }
