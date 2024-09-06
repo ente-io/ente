@@ -373,29 +373,6 @@ List<List<int>> _createGrayscaleIntMatrixFromNormalized2List(
   );
 }
 
-Float32List _createFloat32ListFromImageChannelsFirst(
-  Image image,
-  ByteData byteDataRgba, {
-  double Function(num) normFunction = _normalizePixelRange2,
-}) {
-  final convertedBytes = Float32List(3 * image.height * image.width);
-  final buffer = Float32List.view(convertedBytes.buffer);
-
-  int pixelIndex = 0;
-  final int channelOffsetGreen = image.height * image.width;
-  final int channelOffsetBlue = 2 * image.height * image.width;
-  for (var h = 0; h < image.height; h++) {
-    for (var w = 0; w < image.width; w++) {
-      final pixel = _readPixelColor(image, byteDataRgba, w, h);
-      buffer[pixelIndex] = normFunction(pixel.red);
-      buffer[pixelIndex + channelOffsetGreen] = normFunction(pixel.green);
-      buffer[pixelIndex + channelOffsetBlue] = normFunction(pixel.blue);
-      pixelIndex++;
-    }
-  }
-  return convertedBytes.buffer.asFloat32List();
-}
-
 /// Function normalizes the pixel value to be in range [-1, 1].
 ///
 /// It assumes that the pixel value is originally in range [0, 255]
