@@ -220,7 +220,7 @@ async function getLocationSuggestions(searchPhrase: string) {
         await locationSearchService.searchCities(searchPhrase);
 
     const nonConflictingCityResult = citySearchResults.filter(
-        (city) => !locationTagNames.has(city.city),
+        (city) => !locationTagNames.has(city.name),
     );
 
     const citySearchSuggestions = nonConflictingCityResult.map(
@@ -228,7 +228,7 @@ async function getLocationSuggestions(searchPhrase: string) {
             ({
                 type: SuggestionType.CITY,
                 value: city,
-                label: city.city,
+                label: city.name,
             }) as Suggestion,
     );
 

@@ -1,6 +1,7 @@
 // TODO-cgroups
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
+import { HTTPError } from "@/base/http";
 import { fileCreationPhotoDate, fileLocation } from "@/media/file-metadata";
 import type { EnteFile } from "@/new/photos/types/file";
 import { wait } from "@/utils/promise";
@@ -9,6 +10,7 @@ import { getPublicMagicMetadataSync } from "@ente/shared/file-metadata";
 import type { Component } from "chrono-node";
 import * as chrono from "chrono-node";
 import { expose } from "comlink";
+import { z } from "zod";
 import type {
     City,
     DateSearchResult,
@@ -26,6 +28,8 @@ import { SuggestionType } from "./types";
  */
 export class SearchWorker {
     private enteFiles: EnteFile[] = [];
+    private cities: City[] = [];
+    private citiesPromise: Promise<void> | undefined;
 
     /**
      * Set the files that we should search across.
@@ -42,7 +46,18 @@ export class SearchWorker {
         locale: string,
         holidays: DateSearchResult[],
     ) {
-        return createSearchQuery(searchString, locale, holidays);
+        this.triggerCityFetchIfNeeded();
+        return createSearchQuery(searchString, locale, holidays, this.cities);
+    }
+
+    /**
+     * Lazily trigger a fetch of city data, but don't wait for it to complete.
+     */
+    triggerCityFetchIfNeeded() {
+        if (this.citiesPromise) return;
+        this.citiesPromise = fetchCities().then((cs) => {
+            this.cities = cs;
+        });
     }
 
     /**
@@ -59,6 +74,7 @@ const createSearchQuery = async (
     searchString: string,
     locale: string,
     holidays: DateSearchResult[],
+    cities: City[],
 ): Promise<Suggestion[]> => {
     // Normalize it by trimming whitespace and converting to lowercase.
     const s = searchString.trim().toLowerCase();
@@ -66,10 +82,10 @@ const createSearchQuery = async (
 
     // TODO Temp
     await wait(0);
-    return [dateSuggestion(s, locale, holidays)].flat();
+    return [dateSuggestions(s, locale, holidays)].flat();
 };
 
-const dateSuggestion = (
+const dateSuggestions = (
     s: string,
     locale: string,
     holidays: DateSearchResult[],
@@ -154,6 +170,40 @@ const parseYearComponents = (s: string): DateSearchResult[] => {
 const parseHolidayComponents = (s: string, holidays: DateSearchResult[]) =>
     holidays.filter(({ label }) => label.toLowerCase().includes(s));
 
+/**
+ * Zod schema describing world_cities.json.
+ *
+ * The entries also have a country field which we don't currently use.
+ */
+const RemoteWorldCities = z.object({
+    data: z.array(
+        z.object({
+            city: z.string(),
+            lat: z.number(),
+            lng: z.number(),
+        }),
+    ),
+});
+
+const fetchCities = async () => {
+    const res = await fetch("https://static.ente.io/world_cities.json");
+    if (!res.ok) throw new HTTPError(res);
+    return RemoteWorldCities.parse(await res.json()).data.map(
+        ({ city, lat, lng }) => ({
+            name: city,
+            lowercasedName: city.toLowerCase(),
+            latitude: lat,
+            longitude: lng,
+        }),
+    );
+};
+
+/**
+ * Return all cities whose name begins with the given search string.
+ */
+const matchingCities = (s: string, cities: City[]) =>
+    cities.filter(({ lowercasedName }) => lowercasedName.startsWith(s));
+
 const isMatch = (file: EnteFile, query: SearchQuery) => {
     if (query?.collection) {
         return query.collection === file.collectionID;
@@ -226,11 +276,7 @@ const isInsideLocationTag = (
 ) => isWithinRadius(location, locationTag.centerPoint, locationTag.radius);
 
 const isInsideCity = (location: LocationOld, city: City) =>
-    isWithinRadius(
-        { latitude: city.lat, longitude: city.lng },
-        location,
-        defaultCityRadius,
-    );
+    isWithinRadius(city, location, defaultCityRadius);
 
 const isWithinRadius = (
     centerPoint: LocationOld,

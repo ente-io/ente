@@ -31,7 +31,7 @@ class LocationSearchService {
             }
             await this.citiesPromise;
             return this.cities.filter((city) => {
-                return city.city
+                return city.name
                     .toLowerCase()
                     .startsWith(searchTerm.toLowerCase());
             });
