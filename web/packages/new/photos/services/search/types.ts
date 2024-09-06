@@ -83,12 +83,6 @@ export type City = Location & {
      * Name of the city.
      */
     name: string;
-    /**
-     * Name of the city, lowercased.
-     *
-     * Precomputing this save an lowercasing during the search itself.
-     */
-    lowercasedName: string;
 };
 
 export enum SuggestionType {

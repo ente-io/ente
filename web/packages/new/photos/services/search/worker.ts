@@ -11,6 +11,11 @@ import type { Component } from "chrono-node";
 import * as chrono from "chrono-node";
 import { expose } from "comlink";
 import { z } from "zod";
+import {
+    savedLocationTags,
+    syncLocationTags,
+    type LocationTag,
+} from "../user-entity";
 import type {
     City,
     DateSearchResult,
@@ -22,20 +27,47 @@ import type {
 } from "./types";
 import { SuggestionType } from "./types";
 
+type SearchableCity = City & {
+    /**
+     * Name of the city, lowercased. Precomputed to save an op during search.
+     */
+    lowercasedName: string;
+};
+
+type SearchableLocationTag = LocationTag & {
+    /**
+     * Name of the location tag, lowercased. Precomputed to save an op during
+     * search.
+     */
+    lowercasedName: string;
+};
+
 /**
  * A web worker that runs the search asynchronously so that the main thread
  * remains responsive.
  */
 export class SearchWorker {
     private enteFiles: EnteFile[] = [];
-    private cities: City[] = [];
-    private citiesPromise: Promise<void> | undefined;
+    private locationTags: SearchableLocationTag[] = [];
+    private cities: SearchableCity[] = [];
 
     /**
-     * Prefetch any data that we might need when the actual search happens.
+     * Fetch any state we might need when the actual search happens.
      */
-    prefetchIfNeeded() {
-        this.triggerCityFetchIfNeeded();
+    async sync() {
+        return Promise.allSettled([
+            syncLocationTags()
+                .then(() => savedLocationTags())
+                .then((ts) => {
+                    this.locationTags = ts.map((t) => ({
+                        ...t,
+                        lowercasedName: t.name.toLowerCase(),
+                    }));
+                }),
+            fetchCities().then((cs) => {
+                this.cities = cs;
+            }),
+        ]);
     }
 
     /**
@@ -53,18 +85,13 @@ export class SearchWorker {
         locale: string,
         holidays: DateSearchResult[],
     ) {
-        this.prefetchIfNeeded();
-        return createSearchQuery(searchString, locale, holidays, this.cities);
-    }
-
-    /**
-     * Lazily trigger a fetch of city data, but don't wait for it to complete.
-     */
-    triggerCityFetchIfNeeded() {
-        if (this.citiesPromise) return;
-        this.citiesPromise = fetchCities().then((cs) => {
-            this.cities = cs;
-        });
+        return createSearchQuery(
+            searchString,
+            locale,
+            holidays,
+            this.locationTags,
+            this.cities,
+        );
     }
 
     /**
@@ -81,7 +108,8 @@ const createSearchQuery = async (
     searchString: string,
     locale: string,
     holidays: DateSearchResult[],
-    cities: City[],
+    locationTags: SearchableLocationTag[],
+    cities: SearchableCity[],
 ): Promise<Suggestion[]> => {
     // Normalize it by trimming whitespace and converting to lowercase.
     const s = searchString.trim().toLowerCase();

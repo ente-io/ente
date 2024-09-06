@@ -61,8 +61,6 @@ export const syncLocationTags = async () => {
         return saveLocationTags([...existingTagsByID.values()]);
     };
 
-    // TODO-cgroup: Call me
-    // await removeLegacyDBState();
     return syncUserEntity("location", processBatch);
 };
 
