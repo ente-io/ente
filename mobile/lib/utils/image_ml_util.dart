@@ -343,13 +343,15 @@ RGB _readPixelColor(
   Image image,
   Uint8List rgbaBytes,
 ) {
-  if (y < -maxKernelRadius ||
-      y >= image.height + maxKernelRadius ||
-      x < -maxKernelRadius ||
-      x >= image.width + maxKernelRadius) {
-    _logger.severe(
-      '`readPixelColor`: Invalid pixel coordinates, out of bounds. x: $x, y: $y',
-    );
+  if (y < 0 || y >= image.height || x < 0 || x >= image.width) {
+    if (y < -maxKernelRadius ||
+        y >= image.height + maxKernelRadius ||
+        x < -maxKernelRadius ||
+        x >= image.width + maxKernelRadius) {
+      _logger.severe(
+        '`readPixelColor`: Invalid pixel coordinates, out of bounds. x: $x, y: $y',
+      );
+    }
     return const (114, 114, 114);
   }
 
