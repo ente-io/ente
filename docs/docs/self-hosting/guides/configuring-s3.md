@@ -83,8 +83,8 @@ clients (e.g. the mobile app) and also from within the Docker compose cluster.
 
 ### Example
 
-An example `museum.yaml` when you're trying to connect to museum running on your computer from your
-phone on the same WiFi network:
+An example `museum.yaml` when you're trying to connect to museum running on your
+computer from your phone on the same WiFi network:
 
 ```
 s3:

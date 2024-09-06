@@ -74,8 +74,8 @@ items, in case the original owner were to delete it from their own library.
 We plan to tackle these complexities in the future, by copying a reference to
 the item that was shared, instead of the actual file, so that your storage will
 only get consumed if the original owner deletes it from their library. If this
-sounds useful to you, please participate in [this
-discussion](https://github.com/ente-io/ente/discussions/790).
+sounds useful to you, please participate in
+[this discussion](https://github.com/ente-io/ente/discussions/790).
 
 ## Technical details
 
