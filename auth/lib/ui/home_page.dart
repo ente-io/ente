@@ -288,6 +288,9 @@ class _HomePageState extends State<HomePage> {
                     },
                   )
                 : const SizedBox.shrink(),
+            const SizedBox(
+              width: 4,
+            ),
             IconButton(
               icon: _showSearchBox
                   ? const Icon(Icons.clear)
