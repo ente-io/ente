@@ -8,7 +8,7 @@ import {
     mlStatusSnapshot,
     wipSearchPersons,
 } from "@/new/photos/services/ml";
-import { parseDateComponents, search } from "@/new/photos/services/search";
+import { createSearchQuery, search } from "@/new/photos/services/search";
 import type {
     SearchDateComponents,
     SearchPerson,
@@ -51,7 +51,9 @@ export const getAutoCompleteSuggestions =
             const suggestions: Suggestion[] = [
                 await getClipSuggestion(searchPhrase),
                 ...getFileTypeSuggestion(searchPhrase),
-                ...getDateSuggestion(searchPhrase),
+                // The following functionality has moved to createSearchQuery
+                // - getDateSuggestion(searchPhrase),
+                ...(await createSearchQuery(searchPhrase)),
                 ...getCollectionSuggestion(searchPhrase, collections),
                 getFileNameSuggestion(searchPhrase, files),
                 getFileCaptionSuggestion(searchPhrase, files),

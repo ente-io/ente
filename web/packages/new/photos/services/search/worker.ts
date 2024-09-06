@@ -12,6 +12,7 @@ import * as chrono from "chrono-node";
 import { expose } from "comlink";
 import type {
     City,
+    DateSearchResult,
     Location,
     LocationTagData,
     SearchDateComponents,
@@ -80,11 +81,6 @@ const dateSuggestion = (
         label,
     }));
 
-interface DateSearchResult {
-    components: SearchDateComponents;
-    label: string;
-}
-
 /**
  * Try to parse an arbitrary search string into sets of date components.
  *
@@ -99,7 +95,7 @@ interface DateSearchResult {
  * In addition, also return a formatted representation of the "best" guess at
  * the date that was intended by the search string.
  */
-export const parseDateComponents = (
+const parseDateComponents = (
     s: string,
     locale: string,
     holidays: DateSearchResult[],
@@ -136,9 +132,6 @@ const parseChrono = (s: string, locale: string): DateSearchResult[] =>
                 format.hour = "numeric";
                 format.dayPeriod = "short";
             }
-
-            // TODO Temp
-            console.log("locale", locale);
 
             const formatter = new Intl.DateTimeFormat(locale, format);
             const label = formatter.format(p.date());

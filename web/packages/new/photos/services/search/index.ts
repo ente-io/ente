@@ -51,14 +51,10 @@ export const search = async (search: SearchQuery) =>
 /**
  * A list of holidays - their yearly dates and localized names.
  *
- * ---
- *
- * We keep this on the main thread since it uses the t() function for
+ * We need to keep this on the main thread since it uses the t() function for
  * localization (although I haven't tried that in a web worker, it might work
- * there too).
- *
- * Also, this cannot be a const since it needs to be evaluated lazily for the
- * t() to work.
+ * there too). Also, it cannot be a const since it needs to be evaluated lazily
+ * for the t() to work.
  */
 const holidays = (): DateSearchResult[] => [
     { components: { month: 12, day: 25 }, label: t("CHRISTMAS") },
