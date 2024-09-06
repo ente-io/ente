@@ -10,14 +10,10 @@ import 'package:photos/events/user_logged_out_event.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection_items.dart';
 import 'package:photos/services/collections_service.dart';
-import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/collections/album/row_item.dart";
 import "package:photos/ui/collections/collection_list_page.dart";
 import 'package:photos/ui/common/loading_widget.dart';
-import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
-import "package:photos/ui/components/divider_widget.dart";
-import "package:photos/ui/components/models/button_type.dart";
 import 'package:photos/ui/tabs/section_title.dart';
 import "package:photos/ui/tabs/shared/all_quick_links_page.dart";
 import "package:photos/ui/tabs/shared/empty_state.dart";
@@ -26,7 +22,6 @@ import "package:photos/ui/viewer/gallery/collect_photos_card_widget.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/utils/debouncer.dart";
 import "package:photos/utils/navigation_util.dart";
-import "package:photos/utils/share_util.dart";
 
 class SharedCollectionsTab extends StatefulWidget {
   const SharedCollectionsTab({super.key});
@@ -295,32 +290,7 @@ class _SharedCollectionsTabState extends State<SharedCollectionsTab>
                     ),
                   )
                 : const SizedBox.shrink(),
-            collections.incoming.isNotEmpty
-                ? Column(
-                    children: [
-                      const DividerWidget(dividerType: DividerType.bottomBar),
-                      const SizedBox(height: 32),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
-                        child: ButtonWidget(
-                          buttonType: numberOfQuickLinks == 0 &&
-                                  collections.outgoing.isEmpty
-                              ? ButtonType.trailingIconSecondary
-                              : ButtonType.trailingIconPrimary,
-                          labelText: S.of(context).inviteYourFriendsToEnte,
-                          icon: Icons.ios_share_outlined,
-                          onTap: () async {
-                            // ignore: unawaited_futures
-                            shareText(
-                              S.of(context).shareTextRecommendUsingEnte,
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  )
-                : const SizedBox.shrink(),
-            Divider(color: getEnteColorScheme(context).strokeFaint),
+            const SizedBox(height: 4),
             const CollectPhotosCardWidget(),
             const SizedBox(height: 32),
           ],
