@@ -47,16 +47,16 @@ func ConfigureViper(environment string) error {
 		return err
 	}
 
-	err = mergeConfigFileIfExists("museum.yaml")
-	if err != nil {
-		return err
-	}
-
 	credentialsFile := viper.GetString("credentials-file")
 	if credentialsFile == "" {
 		credentialsFile = "credentials.yaml"
 	}
 	err = mergeConfigFileIfExists(credentialsFile)
+	if err != nil {
+		return err
+	}
+
+	err = mergeConfigFileIfExists("museum.yaml")
 	if err != nil {
 		return err
 	}

@@ -61,10 +61,13 @@ export const migrateLegacyWatchStoreIfNeeded = () => {
         // this'll be undefined, so tell ESLint to calm down.
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (!collectionMapping) {
+            // eslint-disable-next-line @typescript-eslint/no-deprecated
             collectionMapping = watch.uploadStrategy == 1 ? "parent" : "root";
             needsUpdate = true;
         }
+        // eslint-disable-next-line @typescript-eslint/no-deprecated
         if (watch.rootFolderName) {
+            // eslint-disable-next-line @typescript-eslint/no-deprecated
             delete watch.rootFolderName;
             needsUpdate = true;
         }
