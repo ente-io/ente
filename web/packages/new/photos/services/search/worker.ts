@@ -1,6 +1,5 @@
 // TODO-cgroups
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-/* eslint-disable @typescript-eslint/prefer-includes */
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 import { fileCreationPhotoDate, fileLocation } from "@/media/file-metadata";
 import type { EnteFile } from "@/new/photos/types/file";
@@ -182,11 +181,11 @@ const isMatch = (file: EnteFile, query: SearchQuery) => {
     }
 
     if (query?.files) {
-        return query.files.indexOf(file.id) !== -1;
+        return query.files.includes(file.id);
     }
 
     if (query?.person) {
-        return query.person.files.indexOf(file.id) !== -1;
+        return query.person.files.includes(file.id);
     }
 
     if (typeof query?.fileType !== "undefined") {
