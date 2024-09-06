@@ -129,13 +129,15 @@ const parseMetadataJSONText = (text: string) => {
 };
 
 /**
- * Parse a nullish epoch seconds timestamp from a field in a Google Takeout
- * JSON, converting it into epoch microseconds if it is found.
+ * Parse a nullish epoch seconds timestamp string from a field in a Google
+ * Takeout JSON, converting it into epoch microseconds if it is found.
  *
  * Note that the metadata provided by Google does not include the time zone
- * where the photo was taken, it only has an epoch seconds value.
+ * where the photo was taken, it only has an epoch seconds value. There is an
+ * associated formatted date value (e.g. "17 Feb 2021, 03:22:16 UTC") but that
+ * seems to be in UTC and doesn't have the time zone either.
  */
-const parseGTTimestamp = (o: unknown) => {
+const parseGTTimestamp = (o: unknown): number | undefined => {
     if (
         o &&
         typeof o == "object" &&
@@ -143,16 +145,18 @@ const parseGTTimestamp = (o: unknown) => {
         typeof o.timestamp == "string"
     ) {
         const { timestamp } = o;
-        if (timestamp) return parseInt(timestamp) * 1e6;
+        if (timestamp) return parseInt(timestamp, 10) * 1e6;
     }
     return undefined;
 };
 
 /**
- * A custom parser (instead of parseLatLng) that retains the existing behaviour
- * of ignoring (0, 0) lat lng pairs when reading Google Takeout JSONs.
+ * Parse a (latitude, longitude) location pair field in a Google Takeout JSON.
+ *
+ * Apparently Google puts in (0, 0) to indicate missing data, so this function
+ * only returns a parsed result if both components are present and non-zero.
  */
-const parseGTLocation = (o: unknown) => {
+const parseGTLocation = (o: unknown): Location | undefined => {
     if (
         o &&
         typeof o == "object" &&
