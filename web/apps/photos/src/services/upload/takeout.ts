@@ -2,8 +2,8 @@
 
 import { ensureElectron } from "@/base/electron";
 import { nameAndExtension } from "@/base/file";
-import { type Location } from "@/base/location";
 import log from "@/base/log";
+import { type Location } from "@/base/types";
 import type { UploadItem } from "@/new/photos/services/upload/types";
 import { readStream } from "@/new/photos/utils/native-stream";
 

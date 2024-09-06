@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/prefer-includes */
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
-import { getUICreationDate } from "@/media/file-metadata";
+import { fileLocation, getUICreationDate } from "@/media/file-metadata";
 import type { EnteFile } from "@/new/photos/types/file";
 import { wait } from "@/utils/promise";
 import { nullToUndefined } from "@/utils/transform";
@@ -167,38 +167,36 @@ const isMatch = (file: EnteFile, query: SearchQuery) => {
         );
     }
 
-    const [latitude, longitude] = [file.metadata.latitude, file.metadata.longitude];
-    if (latitude !== undefined && longitude !== undefined )
     if (query?.location) {
-        return isInsideLocationTag(
-            {
-                latitude: ?? null,
-                longitude: file.metadata.longitude ?? null,
-            },
-            query.location,
-        );
+        const location = fileLocation(file);
+        if (!location) return false;
+
+        return isInsideLocationTag(location, query.location);
     }
+
     if (query?.city) {
-        return isInsideCity(
-            {
-                latitude: file.metadata.latitude ?? null,
-                longitude: file.metadata.longitude ?? null,
-            },
-            query.city,
-        );
+        const location = fileLocation(file);
+        if (!location) return false;
+
+        return isInsideCity(location, query.city);
     }
+
     if (query?.files) {
         return query.files.indexOf(file.id) !== -1;
     }
+
     if (query?.person) {
         return query.person.files.indexOf(file.id) !== -1;
     }
+
     if (typeof query?.fileType !== "undefined") {
         return query.fileType === file.metadata.fileType;
     }
+
     if (typeof query?.clip !== "undefined") {
         return query.clip.has(file.id);
     }
+
     return false;
 };
 

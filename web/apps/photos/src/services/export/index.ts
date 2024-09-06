@@ -1382,25 +1382,22 @@ const getGoogleLikeMetadataFile = (fileExportName: string, file: EnteFile) => {
     const modificationTime = Math.floor(
         (metadata.modificationTime ?? metadata.creationTime) / 1000000,
     );
-    const captionValue: string = file?.pubMagicMetadata?.data?.caption;
-    const geoData = fileLocation(file);
-    return JSON.stringify(
-        {
-            title: fileExportName,
-            caption: captionValue,
-            creationTime: {
-                timestamp: creationTime,
-                formatted: formatDateTimeShort(creationTime * 1000),
-            },
-            modificationTime: {
-                timestamp: modificationTime,
-                formatted: formatDateTimeShort(modificationTime * 1000),
-            },
-            geoData,
+    const result: Record<string, unknown> = {
+        title: fileExportName,
+        creationTime: {
+            timestamp: creationTime,
+            formatted: formatDateTimeShort(creationTime * 1000),
         },
-        null,
-        2,
-    );
+        modificationTime: {
+            timestamp: modificationTime,
+            formatted: formatDateTimeShort(modificationTime * 1000),
+        },
+    };
+    const caption = file?.pubMagicMetadata?.data?.caption;
+    if (caption) result.caption = caption;
+    const geoData = fileLocation(file);
+    if (geoData) result.geoData = geoData;
+    return JSON.stringify(result, null, 2);
 };
 
 export const getMetadataFolderExportPath = (collectionExportPath: string) =>

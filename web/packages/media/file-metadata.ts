@@ -1,13 +1,14 @@
 import { decryptMetadataJSON, encryptMetadataJSON } from "@/base/crypto";
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
-import type { Location } from "@/base/location";
 import { apiURL } from "@/base/origins";
+import { type Location } from "@/base/types";
 import {
     type EnteFile,
     type FilePublicMagicMetadata,
 } from "@/new/photos/types/file";
 import { mergeMetadata1 } from "@/new/photos/utils/file";
 import { ensure } from "@/utils/ensure";
+import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
 import { FileType } from "./file-type";
 
@@ -772,4 +773,11 @@ export const fileLocation = (enteFile: EnteFile): Location | undefined => {
 
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (!enteFile.metadata) return undefined;
+
+    const latitude = nullToUndefined(enteFile.metadata.latitude);
+    const longitude = nullToUndefined(enteFile.metadata.longitude);
+
+    if (latitude === undefined || longitude === undefined) return undefined;
+
+    return { latitude, longitude };
 };

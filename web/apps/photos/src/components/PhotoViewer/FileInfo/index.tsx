@@ -2,8 +2,8 @@ import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
 import { EllipsizedTypography } from "@/base/components/Typography";
 import { nameAndExtension } from "@/base/file";
-import type { Location } from "@/base/location";
 import log from "@/base/log";
+import type { Location } from "@/base/types";
 import type { ParsedMetadata } from "@/media/file-metadata";
 import {
     fileLocation,
