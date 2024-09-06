@@ -140,10 +140,10 @@ const parseGTTimestamp = (o: unknown) => {
         o &&
         typeof o == "object" &&
         "timestamp" in o &&
-        typeof o.timestamp == "number"
+        typeof o.timestamp == "string"
     ) {
         const { timestamp } = o;
-        if (timestamp) return timestamp * 1e6;
+        if (timestamp) return parseInt(timestamp) * 1e6;
     }
     return undefined;
 };
