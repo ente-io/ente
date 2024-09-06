@@ -30,6 +30,8 @@ import { getUniqueFiles } from "utils/file";
 import { getLatestEntities } from "./entityService";
 import locationSearchService from "./locationSearchService";
 
+// Suggestions shown in the search dropdown's empty state, i.e. when the user
+// selects the search bar but does not provide any input.
 export const getDefaultOptions = async () => {
     return [
         await getMLStatusSuggestion(),
@@ -37,6 +39,7 @@ export const getDefaultOptions = async () => {
     ].filter((t) => !!t);
 };
 
+// Suggestions shown in the search dropdown when the user has typed something.
 export const getAutoCompleteSuggestions =
     (files: EnteFile[], collections: Collection[]) =>
     async (searchPhrase: string): Promise<SearchOption[]> => {
@@ -156,13 +159,6 @@ export async function getMLStatusSuggestion(): Promise<Suggestion> {
         hide: true,
     };
 }
-
-const getDateSuggestion = (searchPhrase: string): Suggestion[] =>
-    parseDateComponents(searchPhrase).map(({ components, label }) => ({
-        type: SuggestionType.DATE,
-        value: components,
-        label,
-    }));
 
 function getCollectionSuggestion(
     searchPhrase: string,

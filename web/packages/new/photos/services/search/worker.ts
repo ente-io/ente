@@ -3,15 +3,22 @@
 /* eslint-disable @typescript-eslint/prefer-includes */
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 import { getUICreationDate } from "@/media/file-metadata";
+import type { EnteFile } from "@/new/photos/types/file";
+import { wait } from "@/utils/promise";
+import { nullToUndefined } from "@/utils/transform";
+import { getPublicMagicMetadataSync } from "@ente/shared/file-metadata";
+import type { Component } from "chrono-node";
+import * as chrono from "chrono-node";
+import { expose } from "comlink";
 import type {
     City,
     Location,
     LocationTagData,
-} from "@/new/photos/services/search/types";
-import type { EnteFile } from "@/new/photos/types/file";
-import { getPublicMagicMetadataSync } from "@ente/shared/file-metadata";
-import { expose } from "comlink";
-import type { SearchDateComponents, SearchQuery } from "./types";
+    SearchDateComponents,
+    SearchQuery,
+    Suggestion,
+} from "./types";
+import { SuggestionType } from "./types";
 
 /**
  * A web worker that runs the search asynchronously so that the main thread
@@ -28,8 +35,18 @@ export class SearchWorker {
     }
 
     /**
-     * Return {@link EnteFile}s that satisfy the given {@link searchQuery}
-     * query.
+     * Convert a search string into a reusable query.
+     */
+    async createSearchQuery(
+        searchString: string,
+        locale: string,
+        holidays: DateSearchResult[],
+    ) {
+        return createSearchQuery(searchString, locale, holidays);
+    }
+
+    /**
+     * Return {@link EnteFile}s that satisfy the given {@link searchQuery}.
      */
     search(searchQuery: SearchQuery) {
         return this.enteFiles.filter((f) => isMatch(f, searchQuery));
@@ -37,6 +54,113 @@ export class SearchWorker {
 }
 
 expose(SearchWorker);
+
+const createSearchQuery = async (
+    searchString: string,
+    locale: string,
+    holidays: DateSearchResult[],
+): Promise<Suggestion[]> => {
+    // Normalize it by trimming whitespace and converting to lowercase.
+    const s = searchString.trim().toLowerCase();
+    if (s.length == 0) return [];
+
+    // TODO Temp
+    await wait(0);
+    return [dateSuggestion(s, locale, holidays)].flat();
+};
+
+const dateSuggestion = (
+    s: string,
+    locale: string,
+    holidays: DateSearchResult[],
+) =>
+    parseDateComponents(s, locale, holidays).map(({ components, label }) => ({
+        type: SuggestionType.DATE,
+        value: components,
+        label,
+    }));
+
+interface DateSearchResult {
+    components: SearchDateComponents;
+    label: string;
+}
+
+/**
+ * Try to parse an arbitrary search string into sets of date components.
+ *
+ * e.g. "December 2022" will be parsed into a
+ *
+ *     [(year 2022, month 12, day undefined)]
+ *
+ * while "22 December 2022" will be parsed into
+ *
+ *     [(year 2022, month 12, day 22)]
+ *
+ * In addition, also return a formatted representation of the "best" guess at
+ * the date that was intended by the search string.
+ */
+export const parseDateComponents = (
+    s: string,
+    locale: string,
+    holidays: DateSearchResult[],
+): DateSearchResult[] =>
+    [
+        parseChrono(s, locale),
+        parseYearComponents(s),
+        parseHolidayComponents(s, holidays),
+    ].flat();
+
+const parseChrono = (s: string, locale: string): DateSearchResult[] =>
+    chrono
+        .parse(s)
+        .map((result) => {
+            const p = result.start;
+            const component = (s: Component) =>
+                p.isCertain(s) ? nullToUndefined(p.get(s)) : undefined;
+
+            const year = component("year");
+            const month = component("month");
+            const day = component("day");
+            const weekday = component("weekday");
+            const hour = component("hour");
+
+            if (!year && !month && !day && !weekday && !hour) return undefined;
+            const components = { year, month, day, weekday, hour };
+
+            const format: Intl.DateTimeFormatOptions = {};
+            if (year) format.year = "numeric";
+            if (month) format.month = "long";
+            if (day) format.day = "numeric";
+            if (weekday) format.weekday = "long";
+            if (hour) {
+                format.hour = "numeric";
+                format.dayPeriod = "short";
+            }
+
+            // TODO Temp
+            console.log("locale", locale);
+
+            const formatter = new Intl.DateTimeFormat(locale, format);
+            const label = formatter.format(p.date());
+            return { components, label };
+        })
+        .filter((x) => x !== undefined);
+
+/** chrono does not parse years like "2024", so do it manually. */
+const parseYearComponents = (s: string): DateSearchResult[] => {
+    // s is already trimmed.
+    if (s.length == 4) {
+        const year = parseInt(s);
+        if (year && year <= 9999) {
+            const components = { year };
+            return [{ components, label: s }];
+        }
+    }
+    return [];
+};
+
+const parseHolidayComponents = (s: string, holidays: DateSearchResult[]) =>
+    holidays.filter(({ label }) => label.toLowerCase().includes(s));
 
 function isMatch(file: EnteFile, query: SearchQuery) {
     if (query?.collection) {

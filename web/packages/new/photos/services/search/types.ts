@@ -7,6 +7,11 @@ import { FileType } from "@/media/file-type";
 import type { MLStatus } from "@/new/photos/services/ml";
 import type { EnteFile } from "@/new/photos/types/file";
 
+export interface DateSearchResult {
+    components: SearchDateComponents;
+    label: string;
+}
+
 /**
  * A parsed version of a potential natural language date time string.
  *
