@@ -7,6 +7,7 @@ import type { Location } from "@/base/types";
 import { FileType } from "@/media/file-type";
 import type { MLStatus } from "@/new/photos/services/ml";
 import type { EnteFile } from "@/new/photos/types/file";
+import type { LocationTag } from "../user-entity";
 
 export interface DateSearchResult {
     components: SearchDateComponents;
@@ -59,19 +60,6 @@ export interface SearchPerson {
 
 // TODO-cgroup: Audit below
 
-export interface LocationOld {
-    latitude: number | null;
-    longitude: number | null;
-}
-
-export interface LocationTagData {
-    name: string;
-    radius: number;
-    aSquare: number;
-    bSquare: number;
-    centerPoint: LocationOld;
-}
-
 /**
  * A city as identified by a static dataset.
  *
@@ -106,7 +94,7 @@ export interface Suggestion {
         | number[]
         | SearchPerson
         | MLStatus
-        | LocationTagData
+        | LocationTag
         | City
         | FileType
         | ClipSearchScores;
@@ -115,7 +103,7 @@ export interface Suggestion {
 
 export interface SearchQuery {
     date?: SearchDateComponents;
-    location?: LocationTagData;
+    location?: LocationTag;
     city?: City;
     collection?: number;
     files?: number[];

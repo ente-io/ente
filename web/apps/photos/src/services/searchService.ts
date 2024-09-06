@@ -201,40 +201,6 @@ function getFileCaptionSuggestion(
     };
 }
 
-async function getLocationSuggestions(searchPhrase: string) {
-    const locationTagResults = await searchLocationTag(searchPhrase);
-    const locationTagSuggestions = locationTagResults.map(
-        (locationTag) =>
-            ({
-                type: SuggestionType.LOCATION,
-                value: locationTag.data,
-                label: locationTag.data.name,
-            }) as Suggestion,
-    );
-    const locationTagNames = new Set(
-        locationTagSuggestions.map((result) => result.label),
-    );
-
-    const citySearchResults: City[] = [];
-    // TODO-cgroup
-    // await locationSearchService.searchCities(searchPhrase);
-
-    const nonConflictingCityResult = citySearchResults.filter(
-        (city) => !locationTagNames.has(city.name),
-    );
-
-    const citySearchSuggestions = nonConflictingCityResult.map(
-        (city) =>
-            ({
-                type: SuggestionType.CITY,
-                value: city,
-                label: city.name,
-            }) as Suggestion,
-    );
-
-    return [...locationTagSuggestions, ...citySearchSuggestions];
-}
-
 async function getClipSuggestion(
     searchPhrase: string,
 ): Promise<Suggestion | undefined> {

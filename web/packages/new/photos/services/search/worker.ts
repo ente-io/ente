@@ -1,10 +1,7 @@
-// TODO-cgroups
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 import { HTTPError } from "@/base/http";
+import type { Location } from "@/base/types";
 import { fileCreationPhotoDate, fileLocation } from "@/media/file-metadata";
 import type { EnteFile } from "@/new/photos/types/file";
-import { wait } from "@/utils/promise";
 import { nullToUndefined } from "@/utils/transform";
 import { getPublicMagicMetadataSync } from "@ente/shared/file-metadata";
 import type { Component } from "chrono-node";
@@ -19,8 +16,6 @@ import {
 import type {
     City,
     DateSearchResult,
-    LocationOld,
-    LocationTagData,
     SearchDateComponents,
     SearchQuery,
     Suggestion,
@@ -65,7 +60,10 @@ export class SearchWorker {
                     }));
                 }),
             fetchCities().then((cs) => {
-                this.cities = cs;
+                this.cities = cs.map((c) => ({
+                    ...c,
+                    lowercasedName: c.name.toLowerCase(),
+                }));
             }),
         ]);
     }
@@ -80,7 +78,7 @@ export class SearchWorker {
     /**
      * Convert a search string into a reusable query.
      */
-    async createSearchQuery(
+    createSearchQuery(
         searchString: string,
         locale: string,
         holidays: DateSearchResult[],
@@ -104,20 +102,21 @@ export class SearchWorker {
 
 expose(SearchWorker);
 
-const createSearchQuery = async (
+const createSearchQuery = (
     searchString: string,
     locale: string,
     holidays: DateSearchResult[],
     locationTags: SearchableLocationTag[],
     cities: SearchableCity[],
-): Promise<Suggestion[]> => {
+): Suggestion[] => {
     // Normalize it by trimming whitespace and converting to lowercase.
     const s = searchString.trim().toLowerCase();
     if (s.length == 0) return [];
 
-    // TODO Temp
-    await wait(0);
-    return [dateSuggestions(s, locale, holidays)].flat();
+    return [
+        dateSuggestions(s, locale, holidays),
+        locationSuggestions(s, locationTags, cities),
+    ].flat();
 };
 
 const dateSuggestions = (
@@ -224,60 +223,82 @@ const fetchCities = async () => {
     const res = await fetch("https://static.ente.io/world_cities.json");
     if (!res.ok) throw new HTTPError(res);
     return RemoteWorldCities.parse(await res.json()).data.map(
-        ({ city, lat, lng }) => ({
-            name: city,
-            lowercasedName: city.toLowerCase(),
-            latitude: lat,
-            longitude: lng,
-        }),
+        ({ city, lat, lng }) => ({ name: city, latitude: lat, longitude: lng }),
     );
 };
 
-/**
- * Return all cities whose name begins with the given search string.
- */
-const matchingCities = (s: string, cities: City[]) =>
-    cities.filter(({ lowercasedName }) => lowercasedName.startsWith(s));
+const locationSuggestions = (
+    s: string,
+    locationTags: SearchableLocationTag[],
+    cities: SearchableCity[],
+) => {
+    const matchingLocationTags = locationTags.filter((t) =>
+        t.lowercasedName.includes(s),
+    );
+
+    const matchingLocationTagLNames = new Set(
+        matchingLocationTags.map((t) => t.lowercasedName),
+    );
+
+    const matchingCities = cities.filter(
+        (c) =>
+            c.lowercasedName.startsWith(s) &&
+            !matchingLocationTagLNames.has(c.lowercasedName),
+    );
+
+    return [
+        matchingLocationTags.map((t) => ({
+            type: SuggestionType.LOCATION,
+            value: t,
+            label: t.name,
+        })),
+        matchingCities.map((c) => ({
+            type: SuggestionType.CITY,
+            value: c,
+            label: c.name,
+        })),
+    ].flat();
+};
 
 const isMatch = (file: EnteFile, query: SearchQuery) => {
-    if (query?.collection) {
+    if (query.collection) {
         return query.collection === file.collectionID;
     }
 
-    if (query?.date) {
+    if (query.date) {
         return isDateComponentsMatch(
             query.date,
             fileCreationPhotoDate(file, getPublicMagicMetadataSync(file)),
         );
     }
 
-    if (query?.location) {
+    if (query.location) {
         const location = fileLocation(file);
         if (!location) return false;
 
         return isInsideLocationTag(location, query.location);
     }
 
-    if (query?.city) {
+    if (query.city) {
         const location = fileLocation(file);
         if (!location) return false;
 
         return isInsideCity(location, query.city);
     }
 
-    if (query?.files) {
+    if (query.files) {
         return query.files.includes(file.id);
     }
 
-    if (query?.person) {
+    if (query.person) {
         return query.person.files.includes(file.id);
     }
 
-    if (typeof query?.fileType !== "undefined") {
+    if (typeof query.fileType !== "undefined") {
         return query.fileType === file.metadata.fileType;
     }
 
-    if (typeof query?.clip !== "undefined") {
+    if (typeof query.clip !== "undefined") {
         return query.clip.has(file.id);
     }
 
@@ -305,24 +326,21 @@ const isDateComponentsMatch = (
 const defaultCityRadius = 10;
 const kmsPerDegree = 111.16;
 
-const isInsideLocationTag = (
-    location: LocationOld,
-    locationTag: LocationTagData,
-) => isWithinRadius(location, locationTag.centerPoint, locationTag.radius);
+const isInsideLocationTag = (location: Location, locationTag: LocationTag) =>
+    isWithinRadius(location, locationTag.centerPoint, locationTag.radius);
 
-const isInsideCity = (location: LocationOld, city: City) =>
-    isWithinRadius(city, location, defaultCityRadius);
+const isInsideCity = (location: Location, city: City) =>
+    isWithinRadius(location, city, defaultCityRadius);
 
 const isWithinRadius = (
-    centerPoint: LocationOld,
-    location: LocationOld,
+    location: Location,
+    center: Location,
     radius: number,
 ) => {
-    const a =
-        (radius * radiusScaleFactor(centerPoint.latitude!)) / kmsPerDegree;
+    const a = (radius * radiusScaleFactor(center.latitude)) / kmsPerDegree;
     const b = radius / kmsPerDegree;
-    const x = centerPoint.latitude! - location.latitude!;
-    const y = centerPoint.longitude! - location.longitude!;
+    const x = center.latitude - location.latitude;
+    const y = center.longitude - location.longitude;
     return (x * x) / (a * a) + (y * y) / (b * b) <= 1;
 };
 
@@ -331,7 +349,7 @@ const isWithinRadius = (
  * search.
  *
  * The area bounded by the location tag becomes more elliptical with increase in
- * the magnitude of the latitude on the caritesian plane. When latitude is 0
+ * the magnitude of the latitude on the cartesian plane. When latitude is 0
  * degrees, the ellipse is a circle with a = b = r. When latitude incrases, the
  * major axis (a) has to be scaled by the secant of the latitude.
  */
