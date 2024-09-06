@@ -13,7 +13,7 @@ import { expose } from "comlink";
 import type {
     City,
     DateSearchResult,
-    Location,
+    LocationOld,
     LocationTagData,
     SearchDateComponents,
     SearchQuery,
@@ -166,10 +166,13 @@ const isMatch = (file: EnteFile, query: SearchQuery) => {
             getUICreationDate(file, getPublicMagicMetadataSync(file)),
         );
     }
+
+    const [latitude, longitude] = [file.metadata.latitude, file.metadata.longitude];
+    if (latitude !== undefined && longitude !== undefined )
     if (query?.location) {
         return isInsideLocationTag(
             {
-                latitude: file.metadata.latitude ?? null,
+                latitude: ?? null,
                 longitude: file.metadata.longitude ?? null,
             },
             query.location,
@@ -221,11 +224,11 @@ const defaultCityRadius = 10;
 const kmsPerDegree = 111.16;
 
 const isInsideLocationTag = (
-    location: Location,
+    location: LocationOld,
     locationTag: LocationTagData,
 ) => isWithinRadius(location, locationTag.centerPoint, locationTag.radius);
 
-const isInsideCity = (location: Location, city: City) =>
+const isInsideCity = (location: LocationOld, city: City) =>
     isWithinRadius(
         { latitude: city.lat, longitude: city.lng },
         location,
@@ -233,8 +236,8 @@ const isInsideCity = (location: Location, city: City) =>
     );
 
 const isWithinRadius = (
-    centerPoint: Location,
-    location: Location,
+    centerPoint: LocationOld,
+    location: LocationOld,
     radius: number,
 ) => {
     const a =

@@ -58,7 +58,7 @@ export interface SearchPerson {
 
 // TODO-cgroup: Audit below
 
-export interface Location {
+export interface LocationOld {
     latitude: number | null;
     longitude: number | null;
 }
@@ -68,7 +68,7 @@ export interface LocationTagData {
     radius: number;
     aSquare: number;
     bSquare: number;
-    centerPoint: Location;
+    centerPoint: LocationOld;
 }
 
 export interface City {

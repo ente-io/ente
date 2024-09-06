@@ -1,12 +1,14 @@
 import { decryptMetadataJSON, encryptMetadataJSON } from "@/base/crypto";
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { apiURL } from "@/base/origins";
+import type { Location } from "@/base/types";
 import {
     type EnteFile,
     type FilePublicMagicMetadata,
 } from "@/new/photos/types/file";
 import { mergeMetadata1 } from "@/new/photos/utils/file";
 import { ensure } from "@/utils/ensure";
+import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
 import { FileType } from "./file-type";
 
@@ -559,7 +561,7 @@ export interface ParsedMetadata {
      */
     creationDate?: ParsedMetadataDate;
     /** The GPS coordinates where the photo was taken. */
-    location?: { latitude: number; longitude: number };
+    location?: Location;
 }
 
 /**
@@ -759,4 +761,23 @@ export const toUIDate = (dateLike: ParsedMetadataDate | string | number) => {
             // A UTC epoch microseconds value.
             return new Date(dateLike / 1000);
     }
+};
+
+/**
+ * Return the GPS coordinates (if any) present in the given {@link EnteFile}.
+ */
+export const fileLocation = (enteFile: EnteFile): Location | undefined => {
+    // TODO: EnteFile types. Need to verify that metadata itself, and
+    // metadata.lat/lng can not be null (I think they likely can, if so need to
+    // update the types). Need to supress the linter meanwhile.
+
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (!enteFile.metadata) return undefined;
+
+    const latitude = nullToUndefined(enteFile.metadata.latitude);
+    const longitude = nullToUndefined(enteFile.metadata.longitude);
+
+    if (latitude === undefined || longitude === undefined) return undefined;
+
+    return { latitude, longitude };
 };
