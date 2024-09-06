@@ -205,6 +205,15 @@ export const sidebar = [
                     },
                 ],
             },
+            {
+                text: "Troubleshooting",
+                items: [
+                    {
+                        text: "Windows login",
+                        link: "/auth/troubleshooting/windows-login",
+                    },
+                ],
+            },
         ],
     },
     {
@@ -258,6 +267,10 @@ export const sidebar = [
                     {
                         text: "Shared albums",
                         link: "/self-hosting/faq/sharing",
+                    },
+                    {
+                        text: "Backups",
+                        link: "/self-hosting/faq/backup",
                     },
                 ],
             },

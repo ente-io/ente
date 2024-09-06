@@ -3,9 +3,12 @@ import "dart:io" show File;
 import "dart:math";
 
 import "package:html_unescape/html_unescape.dart";
+import "package:logging/logging.dart";
 import "package:tuple/tuple.dart";
 
 class ClipTextTokenizer {
+  final _logger = Logger("ClipTextTokenizer");
+
   static const int totalTokens = 77;
 
   late String vocabulary;
@@ -75,6 +78,7 @@ class ClipTextTokenizer {
 
     sot = encoder['<|startoftext|>']!;
     eot = encoder['<|endoftext|>']!;
+    _logger.info("Clip text tokenizer initialized");
     _isInitialized = true;
   }
 

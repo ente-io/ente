@@ -1,13 +1,16 @@
+import "dart:async";
+
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
-import "package:photos/l10n/l10n.dart";
 import 'package:photos/services/update_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
+import "package:photos/ui/growth/referral_screen.dart";
 import 'package:photos/ui/notification/update/change_log_entry.dart';
+import "package:photos/utils/navigation_util.dart";
 
 class ChangeLogPage extends StatefulWidget {
   const ChangeLogPage({
@@ -92,11 +95,16 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
                     ButtonWidget(
                       buttonType: ButtonType.trailingIconSecondary,
                       buttonSize: ButtonSize.large,
-                      labelText: S.of(context).rateTheApp,
-                      icon: Icons.favorite_rounded,
+                      labelText: 'Claim referral code',
+                      icon: Icons.arrow_forward_outlined,
                       iconColor: enteColorScheme.primary500,
                       onTap: () async {
-                        await UpdateService.instance.launchReviewUrl();
+                        unawaited(
+                          routeToPage(
+                            context,
+                            const ReferralScreen(),
+                          ),
+                        );
                       },
                     ),
                     const SizedBox(height: 8),
@@ -115,16 +123,20 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
     final List<ChangeLogEntry> items = [];
     items.addAll([
       ChangeLogEntry(
-        ctx.l10n.cl_guest_view_title,
-        '${ctx.l10n.cl_guest_view_description}\n\n${ctx.l10n.cl_guest_view_call_to_action}',
+        'Personal referral codes',
+        'Claim your personal code to invite friends now. Earn 10GB free for every successful referral.',
       ),
       ChangeLogEntry(
-        ctx.l10n.cl_panorama_viewer_title,
-        ctx.l10n.cl_panorama_viewer_description,
+        'Resumable uploads',
+        'We\'ve added support for resuming uploads across app sessions. Please enable this from Backup settings.',
       ),
       ChangeLogEntry(
-        ctx.l10n.cl_video_player_title,
-        ctx.l10n.cl_video_player_description,
+        'Quick links',
+        'Created too many links to share? You can select and clear multiple in one go now.',
+      ),
+      ChangeLogEntry(
+        'App lock',
+        'We\'ve introduced an option to hide Ente from your app switcher. Check out Security > App lock.',
       ),
     ]);
 

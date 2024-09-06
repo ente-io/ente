@@ -12,7 +12,7 @@
   "deleteAccountFeedbackPrompt": "We are sorry to see you go. Please share your feedback to help us improve.",
   "feedback": "Feedback",
   "kindlyHelpUsWithThisInformation": "Kindly help us with this information",
-  "confirmDeletePrompt": "Yes, I want to permanently delete this account and all its data.",
+  "confirmDeletePrompt": "Yes, I want to permanently delete this account and its data across all apps.",
   "confirmAccountDeletion": "Confirm Account Deletion",
   "deleteAccountPermanentlyButton": "Delete Account Permanently",
   "yourAccountHasBeenDeleted": "Your account has been deleted",
@@ -453,6 +453,8 @@
   "showMemories": "Show memories",
   "yearsAgo": "{count, plural, one{{count} year ago} other{{count} years ago}}",
   "backupSettings": "Backup settings",
+  "backupStatus": "Backup status",
+  "backupStatusDescription": "Items that have been backed up will show up here",
   "backupOverMobileData": "Backup over mobile data",
   "backupVideos": "Backup videos",
   "disableAutoLock": "Disable auto lock",
@@ -935,6 +937,8 @@
   "encryptingBackup": "Encrypting backup...",
   "syncStopped": "Sync stopped",
   "syncProgress": "{completed}/{total} memories preserved",
+  "uploadingMultipleMemories" : "Preserving {count} memories...",
+  "uploadingSingleMemory": "Preserving 1 memory...",
   "@syncProgress": {
     "description": "Text to tell user how many memories have been preserved",
     "placeholders": {
@@ -1306,14 +1310,9 @@
   "thisWillRemovePublicLinksOfAllSelectedQuickLinks": "This will remove public links of all selected quick links.",
   "guestView": "Guest view",
   "guestViewEnablePreSteps": "To enable guest view, please setup device passcode or screen lock in your system settings.",
-  "cl_guest_view_title": "Guest View",
-  "cl_guest_view_description": "Handing over your phone to show photos to a friend? Don't worry about them swiping too far. Guest view will lock them into the photos you select.",
-  "cl_guest_view_call_to_action": "Select photos and check out \"Guest view\".",
-  "cl_panorama_viewer_title": "Panorama Viewer",
-  "cl_panorama_viewer_description": "We've added support for viewing panorama photos with 360 degree views. The experience is immersive with motion-based navigation!",
-  "cl_video_player_title": "Video Player",
-  "cl_video_player_description": "Introducing a fresh new video player, with better playback controls and support for HDR videos.",
   "appLockDescriptions": "Choose between your device's default lock screen and a custom lock screen with a PIN or password.",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "To enable app lock, please setup device passcode or screen lock in your system settings.",
-  "authToViewPasskey": "Please authenticate to view your passkey"
+  "authToViewPasskey": "Please authenticate to view your passkey",
+  "loopVideoOn": "Loop video on",
+  "loopVideoOff": "Loop video off"
 }

@@ -1,4 +1,3 @@
-import 'dart:developer' as dev show log;
 import 'dart:math' as math show max, min;
 
 import 'package:photos/services/machine_learning/face_ml/face_detection/detection.dart';
@@ -33,9 +32,6 @@ List<FaceDetectionRelative> yoloOnnxFilterExtractDetections(
         maxScore = result[4];
       }
     }
-    dev.log(
-      'No face detections found above the minScoreSigmoidThreshold of $minScoreSigmoidThreshold. The max score was $maxScore.',
-    );
   }
 
   for (final List<double> rawDetection in output) {

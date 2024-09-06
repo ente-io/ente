@@ -19,13 +19,20 @@ import {
     type ImageBitmapAndData,
 } from "./blob";
 import {
+    clearCachedCLIPIndexes,
     clipIndexingVersion,
     clipMatches,
     indexCLIP,
     type CLIPIndex,
 } from "./clip";
+import {
+    clusterFaces,
+    type ClusteringOpts,
+    type OnClusteringProgress,
+} from "./cluster";
 import { saveFaceCrops } from "./crop";
 import {
+    faceIndexes,
     indexableFileIDs,
     markIndexingFailed,
     saveIndexes,
@@ -246,14 +253,14 @@ export class MLWorker {
     private async backfillQ() {
         const userID = ensure(await getKVN("userID"));
         // Find files that our local DB thinks need syncing.
-        const filesByID = await syncWithLocalFilesAndGetFilesToIndex(
+        const fileByID = await syncWithLocalFilesAndGetFilesToIndex(
             userID,
             200,
         );
-        if (!filesByID.size) return [];
+        if (!fileByID.size) return [];
 
         // Fetch their existing ML data (if any).
-        const mlDataByID = await fetchMLData(filesByID);
+        const mlDataByID = await fetchMLData(fileByID);
 
         // If the number of files for which remote gave us data is more than 50%
         // of what we asked of it, assume we are "fetching", not "indexing".
@@ -263,14 +270,24 @@ export class MLWorker {
         if (this.state != "indexing" && this.state != "fetching")
             assertionFailed(`Unexpected state ${this.state}`);
         this.state =
-            mlDataByID.size * 2 > filesByID.size ? "fetching" : "indexing";
+            mlDataByID.size * 2 > fileByID.size ? "fetching" : "indexing";
 
         // Return files after annotating them with their existing ML data.
-        return Array.from(filesByID, ([id, file]) => ({
+        return Array.from(fileByID, ([id, file]) => ({
             enteFile: file,
             uploadItem: undefined,
             remoteMLData: mlDataByID.get(id),
         }));
+    }
+
+    // TODO-Cluster
+    async clusterFaces(opts: ClusteringOpts, onProgress: OnClusteringProgress) {
+        return clusterFaces(
+            await faceIndexes(),
+            await getAllLocalFiles(),
+            opts,
+            onProgress,
+        );
     }
 }
 
@@ -340,6 +357,9 @@ const indexNextBatch = async (
     // Wait for the pending tasks to drain out.
     await Promise.all(tasks);
 
+    // Clear any cached CLIP indexes, since now we might have new ones.
+    clearCachedCLIPIndexes();
+
     // Return true if nothing failed.
     return allSuccess;
 };
@@ -364,20 +384,20 @@ const syncWithLocalFilesAndGetFilesToIndex = async (
     const isIndexable = (f: EnteFile) => f.ownerID == userID;
 
     const localFiles = await getAllLocalFiles();
-    const localFilesByID = new Map(
+    const localFileByID = new Map(
         localFiles.filter(isIndexable).map((f) => [f.id, f]),
     );
 
     const localTrashFileIDs = (await getLocalTrashedFiles()).map((f) => f.id);
 
     await updateAssumingLocalFiles(
-        Array.from(localFilesByID.keys()),
+        Array.from(localFileByID.keys()),
         localTrashFileIDs,
     );
 
     const fileIDsToIndex = await indexableFileIDs(count);
     return new Map(
-        fileIDsToIndex.map((id) => [id, ensure(localFilesByID.get(id))]),
+        fileIDsToIndex.map((id) => [id, ensure(localFileByID.get(id))]),
     );
 };
 

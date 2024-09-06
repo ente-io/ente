@@ -201,7 +201,7 @@ class OnnxDartPlugin: FlutterPlugin, MethodCallHandler {
             inputs["input"] = inputTensor
         }
         val outputs = session.run(inputs)
-        Log.d(TAG, "Output shape: ${outputs.size()}")
+        // Log.d(TAG, "Output shape: ${outputs.size()}")
         if (modelType == ModelType.YOLOv5Face) {
           val outputTensor = (outputs[0].value as Array<Array<FloatArray>>).get(0)
           val flatList = outputTensor.flattenToFloatArray()

@@ -385,14 +385,14 @@ class MLService {
   }
 
   Future<bool> processImage(FileMLInstruction instruction) async {
-    _logger.info(
-      "`processImage` start processing image with uploadedFileID: ${instruction.file.uploadedFileID}",
-    );
     bool actuallyRanML = false;
 
     try {
+      final String filePath = await getImagePathForML(instruction.file);
+
       final MLResult? result = await MLIndexingIsolate.instance.analyzeImage(
         instruction,
+        filePath,
       );
       // Check if there's no result simply because MLController paused indexing
       if (result == null) {
@@ -417,7 +417,6 @@ class MLService {
       if (result.facesRan) {
         if (result.faces!.isEmpty) {
           faces.add(Face.empty(result.fileId));
-          _logger.info("no face detected, storing empty for ${result.fileId}");
         }
         if (result.faces!.isNotEmpty) {
           for (int i = 0; i < result.faces!.length; ++i) {
@@ -429,7 +428,6 @@ class MLService {
               ),
             );
           }
-          _logger.info("storing ${faces.length} faces for ${result.fileId}");
         }
         dataEntity.putFace(
           RemoteFaceEmbedding(
@@ -456,7 +454,7 @@ class MLService {
         instruction.file,
         dataEntity,
       );
-      _logger.info("Results for file ${result.fileId} stored on remote");
+      _logger.info("ML results for fileID ${result.fileId} stored on remote");
       // Storing results locally
       if (result.facesRan) await MLDataDB.instance.bulkInsertFaces(faces);
       if (result.clipRan) {
@@ -464,28 +462,23 @@ class MLService {
           result.clip!,
         );
       }
-      _logger.info("Results for file ${result.fileId} stored locally");
+      _logger.info("ML results for fileID ${result.fileId} stored locally");
       return actuallyRanML;
     } catch (e, s) {
-      bool acceptedIssue = false;
       final String errorString = e.toString();
-      if (errorString.contains('ThumbnailRetrievalException')) {
-        _logger.severe(
-          'ThumbnailRetrievalException while processing image with ID ${instruction.file.uploadedFileID}, storing empty results so indexing does not get stuck',
-          e,
-          s,
-        );
-        acceptedIssue = true;
-      }
-      if (errorString.contains('InvalidImageFormatException')) {
-        _logger.severe(
-          '$errorString with ID ${instruction.file.uploadedFileID}, storing empty results so indexing does not get stuck',
-          e,
-          s,
-        );
-        acceptedIssue = true;
-      }
+      final String format = instruction.file.displayName.split('.').last;
+      final int? size = instruction.file.fileSize;
+      final fileType = instruction.file.fileType;
+      final bool acceptedIssue =
+          errorString.contains('ThumbnailRetrievalException') ||
+              errorString.contains('InvalidImageFormatException') ||
+              errorString.contains('FileSizeTooLargeForMobileIndexing');
       if (acceptedIssue) {
+        _logger.severe(
+          '$errorString for fileID ${instruction.file.uploadedFileID} (format $format, type $fileType, size $size), storing empty results so indexing does not get stuck',
+          e,
+          s,
+        );
         await MLDataDB.instance.bulkInsertFaces(
           [Face.empty(instruction.file.uploadedFileID!, error: true)],
         );
@@ -495,7 +488,7 @@ class MLService {
         return true;
       }
       _logger.severe(
-        "Failed to analyze using FaceML for image with ID: ${instruction.file.uploadedFileID}. Not storing any results locally, which means it will be automatically retried later.",
+        "Failed to index file for fileID ${instruction.file.uploadedFileID} (format $format, type $fileType, size $size). Not storing any results locally, which means it will be automatically retried later.",
         e,
         s,
       );

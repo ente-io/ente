@@ -41,6 +41,7 @@
     "REFERRAL_CODE_HINT": "Come hai conosciuto Ente? (opzionale)",
     "REFERRAL_INFO": "",
     "PASSPHRASE_MATCH_ERROR": "Le password non corrispondono",
+    "create_albums": "",
     "CREATE_COLLECTION": "Nuovo album",
     "ENTER_ALBUM_NAME": "Nome album",
     "CLOSE_OPTION": "Chiudi (Esc)",

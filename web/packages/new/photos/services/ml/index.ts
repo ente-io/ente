@@ -6,6 +6,7 @@ import { isDesktop } from "@/base/app";
 import { assertionFailed } from "@/base/assert";
 import { blobCache } from "@/base/blob-cache";
 import { ensureElectron } from "@/base/electron";
+import { isDevBuild } from "@/base/env";
 import log from "@/base/log";
 import type { Electron } from "@/base/types/ipc";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
@@ -14,8 +15,17 @@ import type { EnteFile } from "@/new/photos/types/file";
 import { ensure } from "@/utils/ensure";
 import { throttled } from "@/utils/promise";
 import { proxy, transfer } from "comlink";
+import { isInternalUser } from "../feature-flags";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
+import type { SearchPerson } from "../search/types";
 import type { UploadItem } from "../upload/types";
+import {
+    type ClusteringOpts,
+    type ClusterPreviewFace,
+    type FaceCluster,
+    type FaceF32,
+    type OnClusteringProgress,
+} from "./cluster";
 import { regenerateFaceCrops } from "./crop";
 import { clearMLDB, faceIndex, indexableAndIndexedCounts } from "./db";
 import { MLWorker } from "./worker";
@@ -315,66 +325,128 @@ export const indexNewUpload = (enteFile: EnteFile, uploadItem: UploadItem) => {
     void worker().then((w) => w.onUpload(enteFile, uploadItem));
 };
 
-// // TODO-Cluster temporary import here
-// let last: SearchPerson[] | undefined;
+/**
+ * WIP! Don't enable, dragon eggs are hatching here.
+ */
+export const wipClusterEnable = async (): Promise<boolean> =>
+    (!!process.env.NEXT_PUBLIC_ENTE_WIP_CL && isDevBuild) ||
+    (await isInternalUser());
 
-// /**
-//  * WIP! Don't enable, dragon eggs are hatching here.
-//  */
-// export const wipClusterEnable = async () => {
-//     if (!process.env.NEXT_PUBLIC_ENTE_WIP_CL) return false;
-//     if (!isDevBuild || !(await isInternalUser())) return false;
-//     return true;
-// };
+// // TODO-Cluster temporary state here
+let _wip_isClustering = false;
+let _wip_searchPersons: SearchPerson[] | undefined;
+let _wip_hasSwitchedOnce = false;
 
-// export const wipCluster = async () => {
-//     if (!(await wipClusterEnable())) return;
+export const wipHasSwitchedOnceCmpAndSet = () => {
+    if (_wip_hasSwitchedOnce) return true;
+    _wip_hasSwitchedOnce = true;
+    return false;
+};
 
-//     if (last) return last;
+export const wipSearchPersons = async () => {
+    if (!(await wipClusterEnable())) return [];
+    return _wip_searchPersons ?? [];
+};
 
-//     const { clusters, cgroups } = await clusterFaces(await faceIndexes());
-//     const clusterByID = new Map(
-//         clusters.map((cluster) => [cluster.id, cluster]),
-//     );
+export interface ClusterPreviewWithFile {
+    clusterSize: number;
+    faces: ClusterPreviewFaceWithFile[];
+}
 
-//     const localFiles = await getAllLocalFiles();
-//     const localFilesByID = new Map(localFiles.map((f) => [f.id, f]));
+export type ClusterPreviewFaceWithFile = ClusterPreviewFace & {
+    enteFile: EnteFile;
+};
 
-//     const result: SearchPerson[] = [];
-//     for (const cgroup of cgroups) {
-//         let avatarFaceID = cgroup.avatarFaceID;
-//         // TODO-Cluster
-//         // Temp
-//         if (!avatarFaceID) {
-//             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-//             avatarFaceID = cgroup.clusterIDs
-//                 .map((id) => clusterByID.get(id))
-//                 .flatMap((cluster) => cluster?.faceIDs ?? [])[0]!;
-//         }
-//         cgroup.clusterIDs;
-//         const avatarFaceFileID = fileIDFromFaceID(avatarFaceID);
-//         const avatarFaceFile = localFilesByID.get(avatarFaceFileID ?? 0);
-//         if (!avatarFaceFileID || !avatarFaceFile) {
-//             assertionFailed(`Face ID ${avatarFaceID} without local file`);
-//             continue;
-//         }
-//         const files = cgroup.clusterIDs
-//             .map((id) => clusterByID.get(id))
-//             .flatMap((cluster) => cluster?.faceIDs ?? [])
-//             .map((faceID) => fileIDFromFaceID(faceID))
-//             .filter((fileID) => fileID !== undefined);
-//         result.push({
-//             id: cgroup.id,
-//             name: cgroup.name,
-//             files,
-//             displayFaceID: avatarFaceID,
-//             displayFaceFile: avatarFaceFile,
-//         });
-//     }
+export interface ClusterDebugPageContents {
+    totalFaceCount: number;
+    filteredFaceCount: number;
+    clusteredFaceCount: number;
+    unclusteredFaceCount: number;
+    timeTakenMs: number;
+    clusters: FaceCluster[];
+    clusterPreviewsWithFile: ClusterPreviewWithFile[];
+    unclusteredFacesWithFile: {
+        face: FaceF32;
+        enteFile: EnteFile;
+    }[];
+}
 
-//     last = result;
-//     return result;
-// };
+export const wipClusterDebugPageContents = async (
+    opts: ClusteringOpts,
+    onProgress: OnClusteringProgress,
+): Promise<ClusterDebugPageContents> => {
+    if (!(await wipClusterEnable())) throw new Error("Not implemented");
+
+    log.info("clustering", opts);
+    _wip_isClustering = true;
+    _wip_searchPersons = undefined;
+    triggerStatusUpdate();
+
+    const {
+        localFileByID,
+        clusterPreviews,
+        clusters,
+        cgroups,
+        unclusteredFaces,
+        ...rest
+    } = await worker().then((w) => w.clusterFaces(opts, proxy(onProgress)));
+
+    const fileForFace = ({ faceID }: { faceID: string }) =>
+        ensure(localFileByID.get(ensure(fileIDFromFaceID(faceID))));
+
+    const clusterPreviewsWithFile = clusterPreviews.map(
+        ({ clusterSize, faces }) => ({
+            clusterSize,
+            faces: faces.map(({ face, ...rest }) => ({
+                face,
+                enteFile: fileForFace(face),
+                ...rest,
+            })),
+        }),
+    );
+
+    const unclusteredFacesWithFile = unclusteredFaces.map((face) => ({
+        face,
+        enteFile: fileForFace(face),
+    }));
+
+    const clusterByID = new Map(clusters.map((c) => [c.id, c]));
+
+    const searchPersons = cgroups
+        .map((cgroup) => {
+            const faceID = ensure(cgroup.displayFaceID);
+            const fileID = ensure(fileIDFromFaceID(faceID));
+            const file = ensure(localFileByID.get(fileID));
+
+            const faceIDs = cgroup.clusterIDs
+                .map((id) => ensure(clusterByID.get(id)))
+                .flatMap((cluster) => cluster.faceIDs);
+            const fileIDs = faceIDs
+                .map((faceID) => fileIDFromFaceID(faceID))
+                .filter((fileID) => fileID !== undefined);
+
+            return {
+                id: cgroup.id,
+                name: cgroup.name,
+                faceIDs,
+                files: [...new Set(fileIDs)],
+                displayFaceID: faceID,
+                displayFaceFile: file,
+            };
+        })
+        .sort((a, b) => b.faceIDs.length - a.faceIDs.length);
+
+    _wip_isClustering = false;
+    _wip_searchPersons = searchPersons;
+    triggerStatusUpdate();
+
+    return {
+        clusters,
+        clusterPreviewsWithFile,
+        unclusteredFacesWithFile,
+        ...rest,
+    };
+};
 
 export type MLStatus =
     | { phase: "disabled" /* The ML remote flag is off */ }
@@ -475,6 +547,8 @@ const getMLStatus = async (): Promise<MLStatus> => {
     const state = await (await worker()).state;
     if (state == "indexing" || state == "fetching") {
         phase = state;
+    } else if (_wip_isClustering) {
+        phase = "clustering";
     } else if (state == "init" || indexableCount > 0) {
         phase = "scheduled";
     } else {
@@ -543,8 +617,7 @@ export const unidentifiedFaceIDs = async (
  * Extract the fileID of the {@link EnteFile} to which the face belongs from its
  * faceID.
  */
-// TODO-Cluster: temporary export to supress linter
-export const fileIDFromFaceID = (faceID: string) => {
+const fileIDFromFaceID = (faceID: string) => {
     const fileID = parseInt(faceID.split("_")[0] ?? "");
     if (isNaN(fileID)) {
         assertionFailed(`Ignoring attempt to parse invalid faceID ${faceID}`);

@@ -86,7 +86,8 @@ const (
 	UPDATE AddOnAction = "UPDATE"
 )
 
-type UpdateBlackFridayDeal struct {
+type SupportUpdateBonus struct {
+	BonusType   string      `json:"bonusType" binding:"required"`
 	Action      AddOnAction `json:"action" binding:"required"`
 	UserID      int64       `json:"userID" binding:"required"`
 	Year        int         `json:"year"`
@@ -96,26 +97,40 @@ type UpdateBlackFridayDeal struct {
 	Minute      int64       `json:"minute"`
 }
 
-func (u UpdateBlackFridayDeal) UpdateLog() string {
+func (u SupportUpdateBonus) UpdateLog() string {
 	if u.Testing {
-		return fmt.Sprintf("BF_UPDATE_TESTING: %s, storageInMB: %d, minute: %d", u.Action, u.StorageInMB, u.Minute)
+		return fmt.Sprintf("SupportUpdateBonus: %s, storageInMB: %d, minute: %d", u.Action, u.StorageInMB, u.Minute)
 	} else {
-		return fmt.Sprintf("BF_UPDATE: %s, storageInGB: %d, year: %d", u.Action, u.StorageInGB, u.Year)
+		return fmt.Sprintf("%s: %s, storageInGB: %d, year: %d", u.BonusType, u.Action, u.StorageInGB, u.Year)
 	}
 }
 
-func (u UpdateBlackFridayDeal) Validate() error {
+func (u SupportUpdateBonus) Validate() error {
+	isSupportBonus := u.BonusType == "ADD_ON_SUPPORT"
+	if u.BonusType != "ADD_ON_SUPPORT" && u.BonusType != "ADD_ON_BF_2023" {
+		return errors.New("invalid bonus type")
+	}
 	if u.Action == ADD || u.Action == UPDATE {
 		if u.Testing {
 			if u.StorageInMB == 0 && u.Minute == 0 {
 				return errors.New("invalid input, set in MB and minute for test")
 			}
 		} else {
-			if u.StorageInGB != 100 && u.StorageInGB != 2000 && u.StorageInGB != 500 {
-				return errors.New("invalid input for deal, only 100, 500, 2000 allowed")
-			}
-			if u.Year != 3 && u.Year != 5 {
-				return errors.New("invalid input for year, only 3 or 5")
+
+			if isSupportBonus {
+				if u.Year == 0 || u.Year > 100 {
+					return errors.New("invalid input for year, only 1-100")
+				}
+				if u.StorageInGB == 0 || u.StorageInGB > 2000 {
+					return errors.New("invalid GB storage, only 1-2000")
+				}
+			} else {
+				if u.StorageInGB != 200 && u.StorageInGB != 2000 && u.StorageInGB != 1000 && u.StorageInGB != 50 {
+					return errors.New("invalid input for deal, only 50, 200, 1000, 2000 allowed")
+				}
+				if u.Year != 3 && u.Year != 5 {
+					return errors.New("invalid input for year, only 3 or 5")
+				}
 			}
 		}
 	}

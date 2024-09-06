@@ -41,6 +41,7 @@
     "REFERRAL_CODE_HINT": "Πώς ακούσατε για το Ente; (προαιρετικό)",
     "REFERRAL_INFO": "Δεν παρακολουθούμε τις εγκαταστάσεις εφαρμογών. Θα μας βοηθούσε αν μας λέγατε που μας βρήκατε!",
     "PASSPHRASE_MATCH_ERROR": "Οι κωδικοί πρόσβασης δεν ταιριάζουν",
+    "create_albums": "",
     "CREATE_COLLECTION": "Νέο άλμπουμ",
     "ENTER_ALBUM_NAME": "Όνομα άλμπουμ",
     "CLOSE_OPTION": "Κλείσιμο (Esc)",
