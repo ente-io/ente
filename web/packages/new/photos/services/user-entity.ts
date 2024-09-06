@@ -9,9 +9,7 @@ import { getKV, getKVN, setKV } from "@/base/kv";
 import { apiURL } from "@/base/origins";
 import { masterKeyFromSession } from "@/base/session-store";
 import { ensure } from "@/utils/ensure";
-import { wait } from "@/utils/promise";
 import { nullToUndefined } from "@/utils/transform";
-import localForage from "@ente/shared/storage/localForage";
 import { z } from "zod";
 import { gunzip } from "./gzip";
 import type { CGroup } from "./ml/cgroups";
@@ -37,11 +35,6 @@ export type EntityType =
      */
     | "cgroup";
 
-interface LocationTag {
-    id: string;
-    name: string;
-}
-
 /**
  * Sync our local location tags with those on remote.
  *
@@ -51,19 +44,21 @@ interface LocationTag {
  */
 export const syncLocationTags = async () => {
     const decoder = new TextDecoder();
-    const parse = (id: string, data: Uint8Array): LocationTag => {
-        const rl = RemoteLocation.parse(JSON.parse(decoder.decode(data)));
-        return {
-            id,
-            name: rl.name,
-        };
-    };
+    const parse = (id: string, data: Uint8Array): LocationTag => ({
+        id,
+        ...RemoteLocationTag.parse(JSON.parse(decoder.decode(data))),
+    });
 
     const processBatch = async (entities: UserEntityChange[]) => {
-        console.log(
-            entities.map(({ id, data }) => (data ? parse(id, data) : id)),
+        const existingTagsByID = new Map(
+            (await savedLocationTags()).map((t) => [t.id, t]),
         );
-        await wait(0);
+        entities.forEach(({ id, data }) =>
+            data
+                ? existingTagsByID.set(id, parse(id, data))
+                : existingTagsByID.delete(id),
+        );
+        return saveLocationTags([...existingTagsByID.values()]);
     };
 
     // TODO-cgroup: Call me
@@ -71,30 +66,37 @@ export const syncLocationTags = async () => {
     return syncUserEntity("location", processBatch);
 };
 
-// TODO-cgroup: Call me
-export const removeLegacyDBState = async () => {
-    // Older versions of the code kept the diff related state in a different
-    // place. These entries are not needed anymore.
-    //
-    // This code was added Sep 2024 and can be removed soon after a few builds
-    // have gone out (tag: Migration).
-    await Promise.allSettled([
-        localForage.removeItem("location_tags"),
-        localForage.removeItem("location_tags_key"),
-        localForage.removeItem("location_tags_time"),
-    ]);
-};
-
-const RemoteLocation = z.object({
+/** Zod schema for the tag that we get from or put to remote. */
+const RemoteLocationTag = z.object({
     name: z.string(),
     radius: z.number(),
     aSquare: z.number(),
     bSquare: z.number(),
     centerPoint: z.object({
-        latitude: z.number().nullish().transform(nullToUndefined),
-        longitude: z.number().nullish().transform(nullToUndefined),
+        latitude: z.number(),
+        longitude: z.number(),
     }),
 });
+
+/** Zod schema for the tag that we persist locally. */
+const LocalLocationTag = RemoteLocationTag.extend({
+    id: z.string(),
+});
+
+export type LocationTag = z.infer<typeof LocalLocationTag>;
+
+const saveLocationTags = (tags: LocationTag[]) =>
+    setKV("locationTags", JSON.stringify(tags));
+
+/**
+ * Return all the location tags that are present locally.
+ *
+ * Use {@link syncLocationTags} to sync this list with remote.
+ */
+export const savedLocationTags = async () =>
+    LocalLocationTag.array().parse(
+        JSON.parse((await getKV("locationTags")) ?? "[]"),
+    );
 
 /**
  * Sync the {@link CGroup} entities that we have locally with remote.

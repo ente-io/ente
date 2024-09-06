@@ -29,10 +29,11 @@ import { deleteDB } from "idb";
  */
 export const runMigrations = async () => {
     const m = (await getKVN("migrationLevel")) ?? 0;
-    const latest = 1;
+    const latest = 2;
     if (m < latest) {
         log.info(`Running migrations ${m} => ${latest}`);
         if (m < 1 && isDesktop) await m0();
+        if (m < 2) await m1();
         await setKV("migrationLevel", latest);
     }
 };
@@ -64,3 +65,14 @@ const m0 = () =>
         // Delete legacy ML keys.
         localStorage.removeItem("faceIndexingEnabled");
     });
+
+// Added: Sep 2024 (v1.7.5-beta). Prunable.
+const m1 = () =>
+    // Older versions of the user-entities code kept the diff related state
+    // in a different place. These entries are not needed anymore (the tags
+    // themselves will get resynced).
+    Promise.allSettled([
+        localForage.removeItem("location_tags"),
+        localForage.removeItem("location_tags_key"),
+        localForage.removeItem("location_tags_time"),
+    ]);
