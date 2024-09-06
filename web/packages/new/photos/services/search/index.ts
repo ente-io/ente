@@ -25,6 +25,15 @@ const createComlinkWorker = () =>
     );
 
 /**
+ * Preload any data that would be needed if the user were to search.
+ *
+ * This is an optimization to try and ensure we always have the latest state
+ * by the time the user gets around to searching.
+ */
+export const triggerSearchDataPrefetchIfNeeded = () =>
+    void worker().then((w) => w.prefetchIfNeeded());
+
+/**
  * Set the files over which we will search.
  */
 export const setSearchableFiles = (enteFiles: EnteFile[]) =>

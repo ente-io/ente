@@ -387,7 +387,6 @@ export default function Gallery() {
             setIsFirstLoad(false);
             setJustSignedUp(false);
             setIsFirstFetch(false);
-            locationSearchService.loadCities();
             syncInterval.current = setInterval(() => {
                 syncWithRemote(false, true);
             }, SYNC_INTERVAL_IN_MICROSECONDS);

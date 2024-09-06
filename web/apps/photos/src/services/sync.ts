@@ -4,6 +4,7 @@ import {
     triggerMLStatusSync,
     triggerMLSync,
 } from "@/new/photos/services/ml";
+import { triggerSearchDataPrefetchIfNeeded } from "@/new/photos/services/search";
 import { syncLocationTags } from "@/new/photos/services/user-entity";
 import { syncEntities } from "services/entityService";
 import { syncMapEnabled } from "services/userService";
@@ -42,4 +43,5 @@ export const sync = async () => {
         syncMapEnabled(),
     ]);
     if (isMLSupported) triggerMLSync();
+    triggerSearchDataPrefetchIfNeeded();
 };

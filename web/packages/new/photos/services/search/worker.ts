@@ -32,6 +32,13 @@ export class SearchWorker {
     private citiesPromise: Promise<void> | undefined;
 
     /**
+     * Prefetch any data that we might need when the actual search happens.
+     */
+    prefetchIfNeeded() {
+        this.triggerCityFetchIfNeeded();
+    }
+
+    /**
      * Set the files that we should search across.
      */
     setEnteFiles(enteFiles: EnteFile[]) {
@@ -46,7 +53,7 @@ export class SearchWorker {
         locale: string,
         holidays: DateSearchResult[],
     ) {
-        this.triggerCityFetchIfNeeded();
+        this.prefetchIfNeeded();
         return createSearchQuery(searchString, locale, holidays, this.cities);
     }
 
