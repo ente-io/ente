@@ -1413,9 +1413,9 @@ const getGoogleLikeMetadataFile = (
     dateTimeFormatter: Intl.DateTimeFormat,
 ) => {
     const metadata: Metadata = file.metadata;
-    const creationTime = Math.floor(metadata.creationTime / 1000000);
+    const creationTime = Math.floor(metadata.creationTime / 1e6);
     const modificationTime = Math.floor(
-        (metadata.modificationTime ?? metadata.creationTime) / 1000000,
+        (metadata.modificationTime ?? metadata.creationTime) / 1e6,
     );
     const result: Record<string, unknown> = {
         title: fileExportName,
