@@ -70,8 +70,6 @@ export const syncLocationTags = async () => {
 const RemoteLocationTag = z.object({
     name: z.string(),
     radius: z.number(),
-    aSquare: z.number(),
-    bSquare: z.number(),
     centerPoint: z.object({
         latitude: z.number(),
         longitude: z.number(),
