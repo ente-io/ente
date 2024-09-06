@@ -155,7 +155,7 @@ const parseYearComponents = (s: string): DateSearchResult[] => {
 const parseHolidayComponents = (s: string, holidays: DateSearchResult[]) =>
     holidays.filter(({ label }) => label.toLowerCase().includes(s));
 
-function isMatch(file: EnteFile, query: SearchQuery) {
+const isMatch = (file: EnteFile, query: SearchQuery) => {
     if (query?.collection) {
         return query.collection === file.collectionID;
     }
@@ -197,7 +197,7 @@ function isMatch(file: EnteFile, query: SearchQuery) {
         return query.clip.has(file.id);
     }
     return false;
-}
+};
 
 const isDateComponentsMatch = (
     { year, month, day, weekday, hour }: SearchDateComponents,
@@ -217,47 +217,41 @@ const isDateComponentsMatch = (
     return match;
 };
 
-export function isInsideLocationTag(
+const defaultCityRadius = 10;
+const kmsPerDegree = 111.16;
+
+const isInsideLocationTag = (
     location: Location,
     locationTag: LocationTagData,
-) {
-    return isLocationCloseToPoint(
-        location,
-        locationTag.centerPoint,
-        locationTag.radius,
-    );
-}
+) => isWithinRadius(location, locationTag.centerPoint, locationTag.radius);
 
-const DEFAULT_CITY_RADIUS = 10;
-const KMS_PER_DEGREE = 111.16;
-
-export function isInsideCity(location: Location, city: City) {
-    return isLocationCloseToPoint(
+const isInsideCity = (location: Location, city: City) =>
+    isWithinRadius(
         { latitude: city.lat, longitude: city.lng },
         location,
-        DEFAULT_CITY_RADIUS,
+        defaultCityRadius,
     );
-}
 
-function isLocationCloseToPoint(
+const isWithinRadius = (
     centerPoint: Location,
     location: Location,
     radius: number,
-) {
-    const a = (radius * _scaleFactor(centerPoint.latitude!)) / KMS_PER_DEGREE;
-    const b = radius / KMS_PER_DEGREE;
+) => {
+    const a =
+        (radius * radiusScaleFactor(centerPoint.latitude!)) / kmsPerDegree;
+    const b = radius / kmsPerDegree;
     const x = centerPoint.latitude! - location.latitude!;
     const y = centerPoint.longitude! - location.longitude!;
-    if ((x * x) / (a * a) + (y * y) / (b * b) <= 1) {
-        return true;
-    }
-    return false;
-}
+    return (x * x) / (a * a) + (y * y) / (b * b) <= 1;
+};
 
-///The area bounded by the location tag becomes more elliptical with increase
-///in the magnitude of the latitude on the caritesian plane. When latitude is
-///0 degrees, the ellipse is a circle with a = b = r. When latitude incrases,
-///the major axis (a) has to be scaled by the secant of the latitude.
-function _scaleFactor(lat: number) {
-    return 1 / Math.cos(lat * (Math.PI / 180));
-}
+/**
+ * A latitude specific scaling factor to apply to the radius of a location
+ * search.
+ *
+ * The area bounded by the location tag becomes more elliptical with increase in
+ * the magnitude of the latitude on the caritesian plane. When latitude is 0
+ * degrees, the ellipse is a circle with a = b = r. When latitude incrases, the
+ * major axis (a) has to be scaled by the secant of the latitude.
+ */
+const radiusScaleFactor = (lat: number) => 1 / Math.cos(lat * (Math.PI / 180));
