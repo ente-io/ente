@@ -1,8 +1,8 @@
 import { ensureElectron } from "@/base/electron";
 import log from "@/base/log";
 import {
+    fileCreationPhotoDate,
     fileLocation,
-    getUICreationDate,
     type Metadata,
 } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
@@ -1422,7 +1422,7 @@ const getGoogleLikeMetadataFile = (
         creationTime: {
             timestamp: creationTime,
             formatted: dateTimeFormatter.format(
-                getUICreationDate(file, file.pubMagicMetadata?.data),
+                fileCreationPhotoDate(file, file.pubMagicMetadata?.data),
             ),
         },
         modificationTime: {

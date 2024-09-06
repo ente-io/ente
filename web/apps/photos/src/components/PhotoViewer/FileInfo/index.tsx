@@ -6,8 +6,8 @@ import log from "@/base/log";
 import type { Location } from "@/base/types";
 import type { ParsedMetadata } from "@/media/file-metadata";
 import {
+    fileCreationPhotoDate,
     fileLocation,
-    getUICreationDate,
     updateRemotePublicMagicMetadata,
     type ParsedMetadataDate,
 } from "@/media/file-metadata";
@@ -362,7 +362,7 @@ export const CreationTime: React.FC<CreationTimeProps> = ({
     const closeEditMode = () => setIsInEditMode(false);
 
     const publicMagicMetadata = getPublicMagicMetadataSync(enteFile);
-    const originalDate = getUICreationDate(enteFile, publicMagicMetadata);
+    const originalDate = fileCreationPhotoDate(enteFile, publicMagicMetadata);
 
     const saveEdits = async (pickedTime: ParsedMetadataDate) => {
         try {

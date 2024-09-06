@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/prefer-includes */
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
-import { fileLocation, getUICreationDate } from "@/media/file-metadata";
+import { fileCreationPhotoDate, fileLocation } from "@/media/file-metadata";
 import type { EnteFile } from "@/new/photos/types/file";
 import { wait } from "@/utils/promise";
 import { nullToUndefined } from "@/utils/transform";
@@ -163,7 +163,7 @@ const isMatch = (file: EnteFile, query: SearchQuery) => {
     if (query?.date) {
         return isDateComponentsMatch(
             query.date,
-            getUICreationDate(file, getPublicMagicMetadataSync(file)),
+            fileCreationPhotoDate(file, getPublicMagicMetadataSync(file)),
         );
     }
 
