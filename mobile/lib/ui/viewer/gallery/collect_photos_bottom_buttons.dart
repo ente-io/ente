@@ -102,7 +102,7 @@ class _EmptyAlbumStateNewState extends State<CollectPhotosBottomButtons> {
                 color: getEnteColorScheme(context).backgroundElevated,
               ),
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 18),
+                padding: const EdgeInsets.fromLTRB(16, 15, 16, 18),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
