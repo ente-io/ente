@@ -42,6 +42,7 @@ import {
 import { configureSRP } from "../services/srp";
 import type { PageProps } from "../types/page";
 import type { SRPSetupAttributes } from "../types/srp";
+import log from "@/base/log";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
     const { logout, showNavBar, setDialogBoxAttributesV2 } = appContext;
@@ -159,6 +160,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     setFieldError(t("EXPIRED_CODE"));
                 }
             } else {
+                log.error("OTT verification failed", e);
                 setFieldError(`${t("UNKNOWN_ERROR")} ${JSON.stringify(e)}`);
             }
         }
