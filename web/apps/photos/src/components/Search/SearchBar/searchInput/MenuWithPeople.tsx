@@ -40,7 +40,7 @@ const MenuWithPeople = (props) => {
                     indexStatus &&
                     (people && people.length > 0 ? (
                         <Box>
-                            <Legend>{t("PEOPLE")}</Legend>
+                            <Legend>{t("people")}</Legend>
                         </Box>
                     ) : (
                         <Box height={6} />

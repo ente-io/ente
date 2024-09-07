@@ -194,7 +194,7 @@ export default function SearchInput(props: Iprops) {
                 ref={selectRef}
                 value={value}
                 components={components}
-                placeholder={<span>{t("SEARCH_HINT")}</span>}
+                placeholder={<span>{t("search_hint")}</span>}
                 loadOptions={getOptions}
                 onChange={handleChange}
                 onFocus={handleOnFocus}

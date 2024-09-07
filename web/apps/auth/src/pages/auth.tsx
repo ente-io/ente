@@ -93,7 +93,7 @@ const Page: React.FC = () => {
                     <TextField
                         id="search"
                         name="search"
-                        label={t("SEARCH")}
+                        label={t("search")}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         variant="filled"
                         style={{ width: "350px" }}
@@ -121,7 +121,7 @@ const Page: React.FC = () => {
                             }}
                         >
                             {searchTerm.length > 0 ? (
-                                <p>{t("NO_RESULTS")}</p>
+                                <p>{t("no_results")}</p>
                             ) : (
                                 <></>
                             )}
