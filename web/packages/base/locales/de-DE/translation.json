@@ -213,7 +213,7 @@
     "search_results": "Ergebnisse durchsuchen",
     "no_results": "Keine Ergebnisse gefunden",
     "search_hint": "Suche nach Alben, Datum, Beschreibungen, ...",
-    "album": "Album",
+    "album": "",
     "date": "Datum",
     "description": "Beschreibung",
     "file_type": "Dateityp",
