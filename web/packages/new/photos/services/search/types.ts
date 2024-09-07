@@ -14,6 +14,21 @@ export interface DateSearchResult {
     label: string;
 }
 
+export interface LabelledFileType {
+    fileType: FileType;
+    label: string;
+}
+
+/**
+ * Various bits of static but locale specific data that the search worker needs
+ * during searching.
+ */
+export interface LocalizedSearchData {
+    locale: string;
+    holidays: DateSearchResult[];
+    labelledFileTypes: LabelledFileType[];
+}
+
 /**
  * A parsed version of a potential natural language date time string.
  *

@@ -16,6 +16,7 @@ import {
 import type {
     City,
     DateSearchResult,
+    LocalizedSearchData,
     SearchDateComponents,
     SearchQuery,
     Suggestion,
@@ -81,11 +82,10 @@ export class SearchWorker {
     /**
      * Convert a search string into a reusable query.
      */
-    createSearchQuery(s: string, locale: string, holidays: DateSearchResult[]) {
+    createSearchQuery(s: string, localizedSearchData: LocalizedSearchData) {
         return createSearchQuery(
             s,
-            locale,
-            holidays,
+            localizedSearchData,
             this.locationTags,
             this.cities,
         );
@@ -103,8 +103,7 @@ expose(SearchWorker);
 
 const createSearchQuery = (
     s: string,
-    locale: string,
-    holidays: DateSearchResult[],
+    { locale, holidays }: LocalizedSearchData,
     locationTags: SearchableLocationTag[],
     cities: SearchableCity[],
 ): Suggestion[] =>

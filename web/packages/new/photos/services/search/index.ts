@@ -1,12 +1,15 @@
 import { isDesktop } from "@/base/app";
 import { masterKeyFromSession } from "@/base/session-store";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
+import { FileType } from "@/media/file-type";
 import i18n, { t } from "i18next";
 import type { EnteFile } from "../../types/file";
 import { clipMatches, isMLEnabled } from "../ml";
 import {
     SuggestionType,
     type DateSearchResult,
+    type LabelledFileType,
+    type LocalizedSearchData,
     type SearchQuery,
 } from "./types";
 import type { SearchWorker } from "./worker";
@@ -30,6 +33,17 @@ const createComlinkWorker = () =>
         "search",
         new Worker(new URL("worker.ts", import.meta.url)),
     );
+
+/**
+ * Perform any logout specific cleanup for the search subsystem.
+ */
+export const logoutSearch = () => {
+    if (_comlinkWorker) {
+        _comlinkWorker.terminate();
+        _comlinkWorker = undefined;
+    }
+    _localizedSearchData = undefined;
+};
 
 /**
  * Fetch any data that would be needed if the user were to search.
@@ -59,7 +73,7 @@ export const createSearchQuery = async (searchString: string) => {
     // the search worker, then combine the two.
     const results = await Promise.all([
         clipSuggestions(s, searchString).then((s) => s ?? []),
-        worker().then((w) => w.createSearchQuery(s, i18n.language, holidays())),
+        worker().then((w) => w.createSearchQuery(s, localizedSearchData())),
     ]);
     return results.flat();
 };
@@ -85,16 +99,47 @@ export const search = async (search: SearchQuery) =>
     worker().then((w) => w.search(search));
 
 /**
- * A list of holidays - their yearly dates and localized names.
+ * Cached value of {@link localizedSearchData}.
+ */
+let _localizedSearchData: LocalizedSearchData | undefined;
+
+/*
+ * For searching, the web worker needs a bunch of otherwise static data that has
+ * names and labels formed by localized strings.
  *
- * We need to keep this on the main thread since it uses the t() function for
- * localization (although I haven't tried that in a web worker, it might work
- * there too). Also, it cannot be a const since it needs to be evaluated lazily
- * for the t() to work.
+ * Since it would be tricky to get the t() function to work in a web worker, we
+ * instead pass this from the main thread (lazily initialized and cached).
+ *
+ * Note that these need to be evaluated at runtime, and cannot be static
+ * constants since t() depends on the user's locale.
+ *
+ * We currently clear the cached data on logout, but this is not necessary. The
+ * only point we necessarily need to clear this data is if the user changes their
+ * preferred locale, but currently we reload the page in such cases so any in
+ * memory state would be reset that way.
+ */
+const localizedSearchData = () =>
+    (_localizedSearchData ??= {
+        locale: i18n.language,
+        holidays: holidays(),
+        labelledFileTypes: labelledFileTypes(),
+    });
+
+/**
+ * A list of holidays - their yearly dates and localized names.
  */
 const holidays = (): DateSearchResult[] => [
     { components: { month: 12, day: 25 }, label: t("CHRISTMAS") },
     { components: { month: 12, day: 24 }, label: t("CHRISTMAS_EVE") },
     { components: { month: 1, day: 1 }, label: t("NEW_YEAR") },
     { components: { month: 12, day: 31 }, label: t("NEW_YEAR_EVE") },
+];
+
+/**
+ * A list of file types with their localized names.
+ */
+const labelledFileTypes = (): LabelledFileType[] => [
+    { fileType: FileType.image, label: t("IMAGE") },
+    { fileType: FileType.video, label: t("VIDEO") },
+    { fileType: FileType.livePhoto, label: t("LIVE_PHOTO") },
 ];
