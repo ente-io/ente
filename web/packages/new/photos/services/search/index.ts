@@ -1,3 +1,4 @@
+import { masterKeyFromSession } from "@/base/session-store";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
 import i18n, { t } from "i18next";
 import type { EnteFile } from "../../types/file";
@@ -27,7 +28,8 @@ const createComlinkWorker = () =>
 /**
  * Fetch any data that would be needed if the user were to search.
  */
-export const triggerSearchDataSync = () => void worker().then((w) => w.sync());
+export const triggerSearchDataSync = () =>
+    void worker().then((w) => masterKeyFromSession().then((k) => w.sync(k)));
 
 /**
  * Set the files over which we will search.

@@ -7,7 +7,6 @@ import {
 import { authenticatedRequestHeaders, ensureOk, HTTPError } from "@/base/http";
 import { getKV, getKVN, setKV } from "@/base/kv";
 import { apiURL } from "@/base/origins";
-import { masterKeyFromSession } from "@/base/session-store";
 import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
@@ -41,8 +40,11 @@ export type EntityType =
  * This function fetches all the location tag user entities from remote and
  * updates our local database. It uses local state to remember the last time it
  * synced, so each subsequent sync is a lightweight diff.
+ *
+ * @param masterKey The user's master key. This is used to encrypt and decrypt
+ * the location tags specific entity key.
  */
-export const syncLocationTags = async () => {
+export const syncLocationTags = async (masterKey: Uint8Array) => {
     const decoder = new TextDecoder();
     const parse = (id: string, data: Uint8Array): LocationTag => ({
         id,
@@ -61,7 +63,7 @@ export const syncLocationTags = async () => {
         return saveLocationTags([...existingTagsByID.values()]);
     };
 
-    return syncUserEntity("location", processBatch);
+    return syncUserEntity("location", masterKey, processBatch);
 };
 
 /** Zod schema for the tag that we get from or put to remote. */
@@ -102,8 +104,11 @@ export const savedLocationTags = async () =>
  * checked.
  *
  * This diff is then applied to the data we have persisted locally.
+ *
+ * @param masterKey The user's master key. This is used to encrypt and decrypt
+ * the cgroup specific entity key.
  */
-export const syncCGroups = () => {
+export const syncCGroups = (masterKey: Uint8Array) => {
     const parse = async (id: string, data: Uint8Array): Promise<CGroup> => {
         const rp = RemoteCGroup.parse(JSON.parse(await gunzip(data)));
         return {
@@ -125,7 +130,7 @@ export const syncCGroups = () => {
             ),
         );
 
-    return syncUserEntity("cgroup", processBatch);
+    return syncUserEntity("cgroup", masterKey, processBatch);
 };
 
 const RemoteCGroup = z.object({
@@ -200,12 +205,16 @@ interface UserEntityChange {
  *
  * For each diff response, the {@link processBatch} is invoked to give a chance
  * to caller to apply the updates to the data we have persisted locally.
+ *
+ * The user's {@link masterKey} is used to decrypt (or encrypt, when generating
+ * a new one) the entity key.
  */
 const syncUserEntity = async (
     type: EntityType,
+    masterKey: Uint8Array,
     processBatch: (entities: UserEntityChange[]) => Promise<void>,
 ) => {
-    const entityKeyB64 = await getOrCreateEntityKeyB64(type);
+    const entityKeyB64 = await getOrCreateEntityKeyB64(type, masterKey);
 
     let sinceTime = (await savedLatestUpdatedAt(type)) ?? 0;
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, no-constant-condition
@@ -326,10 +335,10 @@ const userEntityDiff = async (
  *
  * See also, [Note: User entity keys].
  */
-const getOrCreateEntityKeyB64 = async (type: EntityType) => {
-    // Get the user's master key (we need it to encrypt/decrypt the entity key).
-    const masterKey = await masterKeyFromSession();
-
+const getOrCreateEntityKeyB64 = async (
+    type: EntityType,
+    masterKey: Uint8Array,
+) => {
     // See if we already have it locally.
     const saved = await savedRemoteUserEntityKey(type);
     if (saved) return decryptEntityKey(saved, masterKey);

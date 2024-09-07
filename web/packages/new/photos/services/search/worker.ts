@@ -48,10 +48,13 @@ export class SearchWorker {
 
     /**
      * Fetch any state we might need when the actual search happens.
+     *
+     * @param masterKey The user's master key. Web workers do not have access to
+     * session storage so this key needs to be passed to us explicitly.
      */
-    async sync() {
+    async sync(masterKey: Uint8Array) {
         return Promise.all([
-            syncLocationTags()
+            syncLocationTags(masterKey)
                 .then(() => savedLocationTags())
                 .then((ts) => {
                     this.locationTags = ts.map((t) => ({
