@@ -10,7 +10,6 @@ import { UPLOAD_STAGES } from "@/new/photos/services/upload/types";
 import { firstNonEmpty } from "@/utils/array";
 import { ensure } from "@/utils/ensure";
 import { CustomError } from "@ente/shared/error";
-import { isPromise } from "@ente/shared/utils";
 import DiscFullIcon from "@mui/icons-material/DiscFull";
 import UserNameInputDialog from "components/UserNameInputDialog";
 import { t } from "i18next";
@@ -199,7 +198,7 @@ export default function Uploader({
      */
     const pickedUploadType = useRef<PICKED_UPLOAD_TYPE>(null);
 
-    const currentUploadPromise = useRef<Promise<void>>(null);
+    const currentUploadPromise = useRef<Promise<void> | undefined>();
     const uploadRunning = useRef(false);
     const uploaderNameRef = useRef<string>(null);
     const isDragAndDrop = useRef(false);
@@ -555,15 +554,14 @@ export default function Uploader({
         uploaderName?: string,
     ) => {
         const currentPromise = currentUploadPromise.current;
-        currentUploadPromise.current = waitAndRun(
-            currentPromise,
-            async () =>
-                await uploadFiles(
-                    uploadItemsWithCollection,
-                    collections,
-                    uploaderName,
-                ),
-        );
+        currentUploadPromise.current = (async () => {
+            if (currentPromise) await currentPromise;
+            return uploadFiles(
+                uploadItemsWithCollection,
+                collections,
+                uploaderName,
+            );
+        })();
         await currentUploadPromise.current;
     };
 
@@ -800,16 +798,6 @@ export default function Uploader({
             />
         </>
     );
-}
-
-async function waitAndRun(
-    waitPromise: Promise<void>,
-    task: () => Promise<void>,
-) {
-    if (waitPromise && isPromise(waitPromise)) {
-        await waitPromise;
-    }
-    await task();
 }
 
 const desktopFilesAndZipItems = async (electron: Electron, files: File[]) => {

@@ -1,3 +1,4 @@
+import { stashRedirect } from "@/accounts/services/redirect";
 import log from "@/base/log";
 import { WhatsNew } from "@/new/photos/components/WhatsNew";
 import { shouldShowWhatsNew } from "@/new/photos/services/changelog";
@@ -22,7 +23,6 @@ import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import { CustomError } from "@ente/shared/error";
 import { useFileInput } from "@ente/shared/hooks/useFileInput";
 import useMemoSingleThreaded from "@ente/shared/hooks/useMemoSingleThreaded";
-import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import {
     getToken,
@@ -342,7 +342,7 @@ export default function Gallery() {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         const token = getToken();
         if (!key || !token) {
-            InMemoryStore.set(MS_KEYS.REDIRECT_URL, PAGES.GALLERY);
+            stashRedirect(PAGES.GALLERY);
             router.push("/");
             return;
         }

@@ -190,7 +190,7 @@ export class MLWorker {
     }
 
     /**
-     * Find {@link CLIPMatches} for a given {@link searchPhrase}.
+     * Find {@link CLIPMatches} for a given normalized {@link searchPhrase}.
      */
     async clipMatches(searchPhrase: string): Promise<CLIPMatches | undefined> {
         return clipMatches(searchPhrase, ensure(this.electron));
