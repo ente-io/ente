@@ -2,11 +2,13 @@ package secrets
 
 import (
 	"crypto/rand"
+	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/ente-io/cli/utils/constants"
 	"log"
 	"os"
+
+	"github.com/ente-io/cli/utils/constants"
 
 	"github.com/zalando/go-keyring"
 )
@@ -44,14 +46,20 @@ func GetOrCreateClISecret() []byte {
 		if err != nil {
 			log.Fatal(fmt.Errorf("error generating key: %w", err))
 		}
-		secret = string(key)
-		keySetErr := keyring.Set(secretService, secretUser, string(secret))
+		secret = base64.StdEncoding.EncodeToString(key)
+		keySetErr := keyring.Set(secretService, secretUser, secret)
 		if keySetErr != nil {
 			log.Fatal(fmt.Errorf("error setting password in keyring: %w", keySetErr))
 		}
 
 	}
-	return []byte(secret)
+
+	result, err := base64.StdEncoding.DecodeString(secret)
+	if err != nil {
+		log.Fatal(fmt.Errorf("error decoding secret: %w", err))
+	}
+
+	return result
 }
 
 // GetSecretFromSecretText reads the scecret from the secret text file.
