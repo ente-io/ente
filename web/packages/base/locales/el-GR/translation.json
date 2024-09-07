@@ -215,8 +215,6 @@
     "search_hint": "",
     "SEARCH_TYPE": {
         "COLLECTION": "Άλμπουμ",
-        "LOCATION": "Τοποθεσία",
-        "CITY": "Τοποθεσία",
         "DATE": "Ημερομηνία",
         "FILE_NAME": "Όνομα αρχείου",
         "THING": "Περιεχόμενο",

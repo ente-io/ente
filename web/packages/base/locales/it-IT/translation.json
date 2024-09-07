@@ -215,8 +215,6 @@
     "search_hint": "",
     "SEARCH_TYPE": {
         "COLLECTION": "Album",
-        "LOCATION": "Posizione",
-        "CITY": "Posizione",
         "DATE": "Data",
         "FILE_NAME": "Nome file",
         "THING": "Contenuto",

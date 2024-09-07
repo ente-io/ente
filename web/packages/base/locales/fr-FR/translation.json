@@ -215,8 +215,6 @@
     "search_hint": "Recherche d'albums, dates, descriptions, ...",
     "SEARCH_TYPE": {
         "COLLECTION": "l'album",
-        "LOCATION": "Emplacement",
-        "CITY": "Adresse",
         "DATE": "Date",
         "FILE_NAME": "Nom de fichier",
         "THING": "Chose",

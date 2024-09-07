@@ -215,8 +215,6 @@
     "search_hint": "Zoeken naar albums, datums ...",
     "SEARCH_TYPE": {
         "COLLECTION": "Album",
-        "LOCATION": "Locatie",
-        "CITY": "Locatie",
         "DATE": "Datum",
         "FILE_NAME": "Bestandsnaam",
         "THING": "Inhoud",

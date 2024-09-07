@@ -215,8 +215,6 @@
     "search_hint": "Telusuri album, tanggal, keterangan, ...",
     "SEARCH_TYPE": {
         "COLLECTION": "Album",
-        "LOCATION": "",
-        "CITY": "",
         "DATE": "Tanggal",
         "FILE_NAME": "Nama file",
         "THING": "",
