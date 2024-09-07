@@ -216,7 +216,6 @@
     "SEARCH_TYPE": {
         "COLLECTION": "آلبوم",
         "DATE": "تاریخ",
-        "THING": "محتوا",
         "FILE_CAPTION": "توضیحات",
         "FILE_TYPE": "نوع پرونده",
         "CLIP": ""

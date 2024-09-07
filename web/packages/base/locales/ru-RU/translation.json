@@ -216,7 +216,6 @@
     "SEARCH_TYPE": {
         "COLLECTION": "Альбом",
         "DATE": "Дата",
-        "THING": "Содержимое",
         "FILE_CAPTION": "Описание",
         "FILE_TYPE": "Тип файла",
         "CLIP": "Магия"

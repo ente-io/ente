@@ -216,7 +216,6 @@
     "SEARCH_TYPE": {
         "COLLECTION": "Album",
         "DATE": "Tanggal",
-        "THING": "",
         "FILE_CAPTION": "Keterangan",
         "FILE_TYPE": "Jenis file",
         "CLIP": "Ajaib"

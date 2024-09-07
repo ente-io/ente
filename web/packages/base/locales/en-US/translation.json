@@ -216,7 +216,6 @@
     "SEARCH_TYPE": {
         "COLLECTION": "Album",
         "DATE": "Date",
-        "THING": "Content",
         "FILE_CAPTION": "Description",
         "FILE_TYPE": "File type",
         "CLIP": "Magic"

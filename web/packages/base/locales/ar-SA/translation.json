@@ -216,7 +216,6 @@
     "SEARCH_TYPE": {
         "COLLECTION": "ألبوم",
         "DATE": "تاريخ",
-        "THING": "المحتوى",
         "FILE_CAPTION": "وصف",
         "FILE_TYPE": "نوع الملف",
         "CLIP": "سحر"

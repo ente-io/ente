@@ -216,7 +216,6 @@
     "SEARCH_TYPE": {
         "COLLECTION": "Album",
         "DATE": "Datum",
-        "THING": "",
         "FILE_CAPTION": "Beskrivning",
         "FILE_TYPE": "Filtyp",
         "CLIP": ""

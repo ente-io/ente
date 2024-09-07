@@ -216,7 +216,6 @@
     "SEARCH_TYPE": {
         "COLLECTION": "Άλμπουμ",
         "DATE": "Ημερομηνία",
-        "THING": "Περιεχόμενο",
         "FILE_CAPTION": "Περιγραφή",
         "FILE_TYPE": "Τύπος αρχείου",
         "CLIP": ""
