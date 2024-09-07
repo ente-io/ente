@@ -224,7 +224,7 @@
     "TERMS_AND_CONDITIONS": "Ik ga akkoord met de <a>gebruiksvoorwaarden</a> en <b>privacybeleid</b>",
     "ADD_TO_COLLECTION": "Toevoegen aan album",
     "SELECTED": "geselecteerd",
-    "PEOPLE": "Personen",
+    "people": "Personen",
     "indexing_scheduled": "Indexering is gepland...",
     "indexing_photos": "Analyseren van foto's ({{nSyncedFiles, number}} / {{nTotalFiles, number}})",
     "indexing_fetching": "Indexen ophalen ({{nSyncedFiles, number}} / {{nTotalFiles, number}})",

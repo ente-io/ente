@@ -224,7 +224,7 @@
     "TERMS_AND_CONDITIONS": "我同意 <a>条款</a> 和 <b>隐私政策</b>",
     "ADD_TO_COLLECTION": "添加到相册",
     "SELECTED": "已选",
-    "PEOPLE": "人物",
+    "people": "人物",
     "indexing_scheduled": "索引已安排...",
     "indexing_photos": "正在索引照片 ({{nSyncedFiles, number}} / {{nTotalFiles, number}})",
     "indexing_fetching": "获取索引中 ({{nSyncedFiles, number}} / {{nTotalFiles, number}})",

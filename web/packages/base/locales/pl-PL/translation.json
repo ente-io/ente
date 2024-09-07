@@ -224,7 +224,7 @@
     "TERMS_AND_CONDITIONS": "Akceptuję <a>warunki korzystania z usługi</a> i <b>politykę prywatności</b>",
     "ADD_TO_COLLECTION": "Dodaj do albumu",
     "SELECTED": "wybrane",
-    "PEOPLE": "Ludzie",
+    "people": "Ludzie",
     "indexing_scheduled": "Indeksowanie jest zaplanowane...",
     "indexing_photos": "Indeksowanie zdjęć ({{nSyncedFiles, number}} / {{nTotalFiles, number}})",
     "indexing_fetching": "Pobieranie indeksów ({{nSyncedFiles, number}} / {{nTotalFiles, number}})",

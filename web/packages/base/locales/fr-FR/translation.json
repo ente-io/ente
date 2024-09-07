@@ -224,7 +224,7 @@
     "TERMS_AND_CONDITIONS": "J'accepte les <a>conditions</a> et la <b>politique de confidentialité</b>",
     "ADD_TO_COLLECTION": "Ajouter à l'album",
     "SELECTED": "Sélectionné",
-    "PEOPLE": "Visages",
+    "people": "Visages",
     "indexing_scheduled": "L'indexation est planifiée...",
     "indexing_photos": "Indexation des photos ({{nSyncedFiles, number}} / {{nTotalFiles, number}})",
     "indexing_fetching": "Récupération des index ({{nSyncedFiles, number}} / {{nTotalFiles, number}})",
