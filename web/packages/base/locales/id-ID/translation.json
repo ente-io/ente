@@ -216,7 +216,6 @@
     "SEARCH_TYPE": {
         "COLLECTION": "Album",
         "DATE": "Tanggal",
-        "FILE_NAME": "Nama file",
         "THING": "",
         "FILE_CAPTION": "Keterangan",
         "FILE_TYPE": "Jenis file",

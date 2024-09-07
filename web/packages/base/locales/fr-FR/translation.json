@@ -216,7 +216,6 @@
     "SEARCH_TYPE": {
         "COLLECTION": "l'album",
         "DATE": "Date",
-        "FILE_NAME": "Nom de fichier",
         "THING": "Chose",
         "FILE_CAPTION": "Description",
         "FILE_TYPE": "Type de fichier",

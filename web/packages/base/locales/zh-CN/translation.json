@@ -216,7 +216,6 @@
     "SEARCH_TYPE": {
         "COLLECTION": "相册",
         "DATE": "日期",
-        "FILE_NAME": "文件名",
         "THING": "内容",
         "FILE_CAPTION": "说明",
         "FILE_TYPE": "文件类型",

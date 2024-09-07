@@ -216,7 +216,6 @@
     "SEARCH_TYPE": {
         "COLLECTION": "ألبوم",
         "DATE": "تاريخ",
-        "FILE_NAME": "إسم الملف",
         "THING": "المحتوى",
         "FILE_CAPTION": "وصف",
         "FILE_TYPE": "نوع الملف",

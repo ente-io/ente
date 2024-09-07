@@ -216,7 +216,6 @@
     "SEARCH_TYPE": {
         "COLLECTION": "Album",
         "DATE": "Datum",
-        "FILE_NAME": "Bestandsnaam",
         "THING": "Inhoud",
         "FILE_CAPTION": "Omschrijving",
         "FILE_TYPE": "Bestandstype",
