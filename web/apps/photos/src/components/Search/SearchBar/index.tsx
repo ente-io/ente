@@ -18,6 +18,7 @@ import { labelForSuggestionType } from "@/new/photos/services/search/ui";
 import type { LocationTag } from "@/new/photos/services/user-entity";
 import { EnteFile } from "@/new/photos/types/file";
 import {
+    CenteredFlex,
     FlexWrapper,
     FluidContainer,
     FreeFlowText,
@@ -32,6 +33,7 @@ import LocationIcon from "@mui/icons-material/LocationOn";
 import SearchIcon from "@mui/icons-material/Search";
 import {
     Box,
+    css,
     Divider,
     IconButton,
     Stack,
@@ -40,6 +42,7 @@ import {
 } from "@mui/material";
 import CollectionCard from "components/Collections/CollectionCard";
 import { ResultPreviewTile } from "components/Collections/styledComponents";
+import { IMAGE_CONTAINER_MAX_WIDTH, MIN_COLUMNS } from "constants/gallery";
 import { t } from "i18next";
 import memoize from "memoize-one";
 import pDebounce from "p-debounce";
@@ -55,11 +58,6 @@ import {
 } from "services/searchService";
 import { Collection } from "types/collection";
 import { SelectStyles } from "../../../styles/search";
-import {
-    SearchBarWrapper,
-    SearchInputWrapper,
-    SearchMobileBox,
-} from "./styledComponents";
 
 const { Option, ValueContainer, Menu } = components;
 
@@ -92,6 +90,13 @@ export default function SearchBar({
         </SearchBarWrapper>
     );
 }
+
+const SearchBarWrapper = styled(FlexWrapper)`
+    padding: 0 24px;
+    @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * MIN_COLUMNS}px) {
+        padding: 0 4px;
+    }
+`;
 
 interface SearchInputProps {
     isOpen: boolean;
@@ -270,6 +275,21 @@ export const SearchInput: React.FC<SearchInputProps> = (props) => {
     );
 };
 
+const SearchInputWrapper = styled(CenteredFlex, {
+    shouldForwardProp: (propName) => propName != "isOpen",
+})<{ isOpen: boolean }>`
+    background: ${({ theme }) => theme.colors.background.base};
+    max-width: 484px;
+    margin: auto;
+    ${(props) =>
+        !props.isOpen &&
+        css`
+            @media (max-width: 624px) {
+                display: none;
+            }
+        `}
+`;
+
 const OptionWithInfo = (props) => (
     <Option {...props}>
         <LabelWithInfo data={props.data} />
@@ -427,3 +447,13 @@ function SearchBarMobile({ show, showSearchInput }) {
         </SearchMobileBox>
     );
 }
+
+const SearchMobileBox = styled(FluidContainer)`
+    display: flex;
+    cursor: pointer;
+    align-items: center;
+    justify-content: flex-end;
+    @media (min-width: 625px) {
+        display: none;
+    }
+`;
