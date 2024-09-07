@@ -1,34 +1,33 @@
+import { stashRedirect } from "@/accounts/services/redirect";
 import { getLocalFiles } from "@/new/photos/services/files";
-import PhotoFrame from "components/PhotoFrame";
-import { ALL_SECTION } from "constants/collection";
-import { t } from "i18next";
-import { AppContext } from "pages/_app";
-import { createContext, useContext, useEffect, useState } from "react";
-import { Duplicate, getDuplicates } from "services/deduplicationService";
-import { syncFiles, trashFiles } from "services/fileService";
-import { SelectedState } from "types/gallery";
-
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { ApiError } from "@ente/shared/error";
 import useMemoSingleThreaded from "@ente/shared/hooks/useMemoSingleThreaded";
-import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import { SESSION_KEYS, getKey } from "@ente/shared/storage/sessionStorage";
 import { styled } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import { HttpStatusCode } from "axios";
 import DeduplicateOptions from "components/pages/dedupe/SelectedFileOptions";
+import PhotoFrame from "components/PhotoFrame";
+import { ALL_SECTION } from "constants/collection";
+import { t } from "i18next";
 import { default as Router, default as router } from "next/router";
+import { AppContext } from "pages/_app";
+import { createContext, useContext, useEffect, useState } from "react";
 import {
     getAllLatestCollections,
     getLocalCollections,
 } from "services/collectionService";
+import { Duplicate, getDuplicates } from "services/deduplicationService";
+import { syncFiles, trashFiles } from "services/fileService";
 import { syncTrash } from "services/trashService";
 import {
     DeduplicateContextType,
     DefaultDeduplicateContext,
 } from "types/deduplicate";
+import { SelectedState } from "types/gallery";
 import { constructFileToCollectionMap, getSelectedFiles } from "utils/file";
 
 export const DeduplicateContext = createContext<DeduplicateContextType>(
@@ -57,7 +56,7 @@ export default function Deduplicate() {
     useEffect(() => {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         if (!key) {
-            InMemoryStore.set(MS_KEYS.REDIRECT_URL, PAGES.DEDUPLICATE);
+            stashRedirect(PAGES.DEDUPLICATE);
             router.push("/");
             return;
         }
