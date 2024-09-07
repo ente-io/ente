@@ -1,9 +1,11 @@
 import { UpdateSearch } from "@/new/photos/services/search/types";
 import { EnteFile } from "@/new/photos/types/file";
+import { FluidContainer } from "@ente/shared/components/Container";
+import SearchIcon from "@mui/icons-material/Search";
+import { IconButton } from "@mui/material";
 import { Collection } from "types/collection";
-import { SearchBarMobile } from "./searchBarMobile";
 import { SearchInput } from "./SearchInput";
-import { SearchBarWrapper } from "./styledComponents";
+import { SearchBarWrapper, SearchMobileBox } from "./styledComponents";
 
 interface Props {
     updateSearch: UpdateSearch;
@@ -32,5 +34,20 @@ export default function SearchBar({
                 showSearchInput={showSearchInput}
             />
         </SearchBarWrapper>
+    );
+}
+
+function SearchBarMobile({ show, showSearchInput }) {
+    if (!show) {
+        return <></>;
+    }
+    return (
+        <SearchMobileBox>
+            <FluidContainer justifyContent="flex-end" ml={1.5}>
+                <IconButton onClick={showSearchInput}>
+                    <SearchIcon />
+                </IconButton>
+            </FluidContainer>
+        </SearchMobileBox>
     );
 }
