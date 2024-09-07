@@ -81,13 +81,9 @@ export class SearchWorker {
     /**
      * Convert a search string into a reusable query.
      */
-    createSearchQuery(
-        searchString: string,
-        locale: string,
-        holidays: DateSearchResult[],
-    ) {
+    createSearchQuery(s: string, locale: string, holidays: DateSearchResult[]) {
         return createSearchQuery(
-            searchString,
+            s,
             locale,
             holidays,
             this.locationTags,
@@ -99,28 +95,23 @@ export class SearchWorker {
      * Return {@link EnteFile}s that satisfy the given {@link searchQuery}.
      */
     search(searchQuery: SearchQuery) {
-        return this.enteFiles.filter((f) => isMatch(f, searchQuery));
+        return this.enteFiles.filter((f) => isMatchingFile(f, searchQuery));
     }
 }
 
 expose(SearchWorker);
 
 const createSearchQuery = (
-    searchString: string,
+    s: string,
     locale: string,
     holidays: DateSearchResult[],
     locationTags: SearchableLocationTag[],
     cities: SearchableCity[],
-): Suggestion[] => {
-    // Normalize it by trimming whitespace and converting to lowercase.
-    const s = searchString.trim().toLowerCase();
-    if (s.length == 0) return [];
-
-    return [
+): Suggestion[] =>
+    [
         dateSuggestions(s, locale, holidays),
         locationSuggestions(s, locationTags, cities),
     ].flat();
-};
 
 const dateSuggestions = (
     s: string,
@@ -263,7 +254,10 @@ const locationSuggestions = (
     ].flat();
 };
 
-const isMatch = (file: EnteFile, query: SearchQuery) => {
+/**
+ * Return true if file satisfies the given {@link query}.
+ */
+const isMatchingFile = (file: EnteFile, query: SearchQuery) => {
     if (query.collection) {
         return query.collection === file.collectionID;
     }

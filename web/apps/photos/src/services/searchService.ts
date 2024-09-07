@@ -1,9 +1,6 @@
-import { isDesktop } from "@/base/app";
 import log from "@/base/log";
 import { FileType } from "@/media/file-type";
 import {
-    clipMatches,
-    isMLEnabled,
     isMLSupported,
     mlStatusSnapshot,
     wipSearchPersons,
@@ -46,11 +43,12 @@ export const getAutoCompleteSuggestions =
                 return [];
             }
             const suggestions: Suggestion[] = [
-                await getClipSuggestion(searchPhrase),
-                ...getFileTypeSuggestion(searchPhrase),
                 // The following functionality has moved to createSearchQuery
+                // - getClipSuggestion(searchPhrase)
                 // - getDateSuggestion(searchPhrase),
+                // - getLocationSuggestion(searchPhrase),
                 ...(await createSearchQuery(searchPhrase)),
+                ...getFileTypeSuggestion(searchPhrase),
                 ...getCollectionSuggestion(searchPhrase, collections),
                 getFileNameSuggestion(searchPhrase, files),
                 getFileCaptionSuggestion(searchPhrase, files),
@@ -198,20 +196,6 @@ function getFileCaptionSuggestion(
     };
 }
 
-async function getClipSuggestion(
-    searchPhrase: string,
-): Promise<Suggestion | undefined> {
-    if (!isDesktop) return undefined;
-
-    const clipResults = await searchClip(searchPhrase);
-    if (!clipResults) return undefined;
-    return {
-        type: SuggestionType.CLIP,
-        value: clipResults,
-        label: searchPhrase,
-    };
-}
-
 function searchCollection(
     searchPhrase: string,
     collections: Collection[],
@@ -238,15 +222,6 @@ function searchFilesByCaption(searchPhrase: string, files: EnteFile[]) {
                 .includes(searchPhrase),
     );
 }
-
-const searchClip = async (
-    searchPhrase: string,
-): Promise<ClipSearchScores | undefined> => {
-    if (!isMLEnabled()) return undefined;
-    const matches = await clipMatches(searchPhrase);
-    log.debug(() => ["clip/scores", matches]);
-    return matches;
-};
 
 function convertSuggestionToSearchQuery(option: Suggestion): SearchQuery {
     switch (option.type) {

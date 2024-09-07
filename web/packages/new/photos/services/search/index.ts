@@ -1,8 +1,14 @@
+import { isDesktop } from "@/base/app";
 import { masterKeyFromSession } from "@/base/session-store";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
 import i18n, { t } from "i18next";
 import type { EnteFile } from "../../types/file";
-import type { DateSearchResult, SearchQuery } from "./types";
+import { clipMatches, isMLEnabled } from "../ml";
+import {
+    SuggestionType,
+    type DateSearchResult,
+    type SearchQuery,
+} from "./types";
 import type { SearchWorker } from "./worker";
 
 /**
@@ -43,10 +49,33 @@ export const setSearchableFiles = (enteFiles: EnteFile[]) =>
  *
  * @param searchString The string we want to search for.
  */
-export const createSearchQuery = (searchString: string) =>
-    worker().then((w) =>
-        w.createSearchQuery(searchString, i18n.language, holidays()),
-    );
+export const createSearchQuery = async (searchString: string) => {
+    // Normalize it by trimming whitespace and converting to lowercase.
+    const s = searchString.trim().toLowerCase();
+    if (s.length == 0) return [];
+
+    // The CLIP matching code already runs in the ML worker, so let that run
+    // separately, in parallel with the rest of the search query construction in
+    // the search worker, then combine the two.
+    const results = await Promise.all([
+        clipSuggestions(s, searchString).then((s) => s ?? []),
+        worker().then((w) => w.createSearchQuery(s, i18n.language, holidays())),
+    ]);
+    return results.flat();
+};
+
+const clipSuggestions = async (s: string, searchString: string) => {
+    if (!isDesktop) return undefined;
+    if (!isMLEnabled()) return undefined;
+
+    const matches = await clipMatches(s);
+    if (!matches) return undefined;
+    return {
+        type: SuggestionType.CLIP,
+        value: matches,
+        label: searchString,
+    };
+};
 
 /**
  * Search for and return the list of {@link EnteFile}s that match the given

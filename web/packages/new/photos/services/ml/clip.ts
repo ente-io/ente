@@ -193,8 +193,8 @@ let _cachedCLIPIndexes:
     | undefined;
 
 /**
- * Cache the CLIP indexes for the duration of a "search session" to avoid
- * converting them from number[] to Float32Array during the match.
+ * Cache the CLIP indexes when possible to avoid converting them from number[]
+ * to Float32Array during the match for-loop itself.
  *
  * Converting them to Float32Array gives a big performance boost (See: [Note:
  * Dot product performance]). But doing that each time loses out on the
