@@ -20,10 +20,6 @@ export function downloadUsingAnchor(link: string, name: string) {
     a.remove();
 }
 
-export function isPromise<T>(obj: T | Promise<T>): obj is Promise<T> {
-    return obj && typeof (obj as any).then === "function";
-}
-
 export async function retryAsyncFunction<T>(
     request: (abort?: () => void) => Promise<T>,
     waitTimeBeforeNextTry?: number[],
