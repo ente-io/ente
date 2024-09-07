@@ -15,7 +15,7 @@ export const labelForSuggestionType = (type: SuggestionType) => {
         case SuggestionType.COLLECTION:
             return t("SEARCH_TYPE.COLLECTION");
         case SuggestionType.FILE_NAME:
-            return t("FILE_NAME");
+            return t("file_name");
         case SuggestionType.PERSON:
             return t("SEARCH_TYPE.PERSON");
         case SuggestionType.INDEX_STATUS:

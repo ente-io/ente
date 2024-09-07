@@ -238,7 +238,7 @@
     "TEXT": "نص",
     "INFO": "معلومات ",
     "INFO_OPTION": "معلومات (I)",
-    "FILE_NAME": "إسم الملف",
+    "file_name": "إسم الملف",
     "CAPTION_PLACEHOLDER": "إضافة وصف",
     "location": "الموقع",
     "SHOW_ON_MAP": "عرض على OpenStreetMap",

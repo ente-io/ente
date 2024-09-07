@@ -238,7 +238,7 @@
     "TEXT": "",
     "INFO": "",
     "INFO_OPTION": "",
-    "FILE_NAME": "Filnamn",
+    "file_name": "Filnamn",
     "CAPTION_PLACEHOLDER": "Lägg till en beskrivning",
     "location": "",
     "SHOW_ON_MAP": "",

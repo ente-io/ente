@@ -238,7 +238,7 @@
     "TEXT": "",
     "INFO": "Info ",
     "INFO_OPTION": "Informasi (I)",
-    "FILE_NAME": "Nama file",
+    "file_name": "Nama file",
     "CAPTION_PLACEHOLDER": "Tambah keterangan",
     "location": "",
     "SHOW_ON_MAP": "Lihat di OpenStreetMap",

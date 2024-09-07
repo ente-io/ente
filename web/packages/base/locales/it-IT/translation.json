@@ -238,7 +238,7 @@
     "TEXT": "testo",
     "INFO": "Info ",
     "INFO_OPTION": "",
-    "FILE_NAME": "Nome file",
+    "file_name": "Nome file",
     "CAPTION_PLACEHOLDER": "Aggiungi una descrizione",
     "location": "Posizione",
     "SHOW_ON_MAP": "Guarda su OpenStreetMap",

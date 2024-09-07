@@ -238,7 +238,7 @@
     "TEXT": "tekst",
     "INFO": "Info ",
     "INFO_OPTION": "Info (I)",
-    "FILE_NAME": "Bestandsnaam",
+    "file_name": "Bestandsnaam",
     "CAPTION_PLACEHOLDER": "Voeg een beschrijving toe",
     "location": "Locatie",
     "SHOW_ON_MAP": "Bekijk op OpenStreetMap",

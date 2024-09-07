@@ -238,7 +238,7 @@
     "TEXT": "文本",
     "INFO": "图片信息 ",
     "INFO_OPTION": "图片信息 (I)",
-    "FILE_NAME": "文件名",
+    "file_name": "文件名",
     "CAPTION_PLACEHOLDER": "添加说明",
     "location": "地理位置",
     "SHOW_ON_MAP": "在 OpenStreetMap 上查看",
