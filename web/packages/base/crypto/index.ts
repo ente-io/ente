@@ -193,7 +193,8 @@ export const encryptMetadataJSON = async (r: {
         : sharedCryptoWorker().then((w) => w.encryptMetadataJSON(r));
 
 /**
- * Decrypt a box encrypted using {@link encryptBoxB64}.
+ * Decrypt a box encrypted using {@link encryptBoxB64} and returns the decrypted
+ * bytes.
  */
 export const decryptBox = (box: EncryptedBox, key: BytesOrB64) =>
     inWorker()

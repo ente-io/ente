@@ -390,7 +390,7 @@ export async function encryptFileChunk(
 }
 
 /**
- * Decrypt the result of {@link encryptBoxB64}.
+ * Decrypt the result of {@link encryptBoxB64} and return the decrypted bytes.
  */
 export const decryptBox = async (
     { encryptedData, nonce }: EncryptedBox,
