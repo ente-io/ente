@@ -35,16 +35,16 @@ export type EntityType =
     | "cgroup";
 
 /**
- * Sync our local location tags with those on remote.
+ * Update our local location tags with changes from remote.
  *
  * This function fetches all the location tag user entities from remote and
- * updates our local database. It uses local state to remember the last time it
- * synced, so each subsequent sync is a lightweight diff.
+ * updates our local database. It uses local state to remember the latest entry
+ * the last time it did a pull, so each subsequent pull is a lightweight diff.
  *
  * @param masterKey The user's master key. This is used to encrypt and decrypt
  * the location tags specific entity key.
  */
-export const syncLocationTags = async (masterKey: Uint8Array) => {
+export const pullLocationTags = async (masterKey: Uint8Array) => {
     const decoder = new TextDecoder();
     const parse = (id: string, data: Uint8Array): LocationTag => ({
         id,
@@ -63,7 +63,7 @@ export const syncLocationTags = async (masterKey: Uint8Array) => {
         return saveLocationTags([...existingTagsByID.values()]);
     };
 
-    return syncUserEntity("location", masterKey, processBatch);
+    return pullUserEntities("location", masterKey, processBatch);
 };
 
 /** Zod schema for the tag that we get from or put to remote. */
@@ -89,7 +89,7 @@ const saveLocationTags = (tags: LocationTag[]) =>
 /**
  * Return all the location tags that are present locally.
  *
- * Use {@link syncLocationTags} to sync this list with remote.
+ * Use {@link pullLocationTags} to synchronize this list with remote.
  */
 export const savedLocationTags = async () =>
     LocalLocationTag.array().parse(
@@ -97,7 +97,7 @@ export const savedLocationTags = async () =>
     );
 
 /**
- * Sync the {@link CGroup} entities that we have locally with remote.
+ * Update our local cgroups with changes from remote.
  *
  * This fetches all the user entities corresponding to the "cgroup" entity type
  * from remote that have been created, updated or deleted since the last time we
@@ -108,7 +108,7 @@ export const savedLocationTags = async () =>
  * @param masterKey The user's master key. This is used to encrypt and decrypt
  * the cgroup specific entity key.
  */
-export const syncCGroups = (masterKey: Uint8Array) => {
+export const pullCGroups = (masterKey: Uint8Array) => {
     const parse = async (id: string, data: Uint8Array): Promise<CGroup> => {
         const rp = RemoteCGroup.parse(JSON.parse(await gunzip(data)));
         return {
@@ -130,7 +130,7 @@ export const syncCGroups = (masterKey: Uint8Array) => {
             ),
         );
 
-    return syncUserEntity("cgroup", masterKey, processBatch);
+    return pullUserEntities("cgroup", masterKey, processBatch);
 };
 
 const RemoteCGroup = z.object({
@@ -209,7 +209,7 @@ interface UserEntityChange {
  * The user's {@link masterKey} is used to decrypt (or encrypt, when generating
  * a new one) the entity key.
  */
-const syncUserEntity = async (
+const pullUserEntities = async (
     type: EntityType,
     masterKey: Uint8Array,
     processBatch: (entities: UserEntityChange[]) => Promise<void>,

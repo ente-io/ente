@@ -1,3 +1,6 @@
+import { masterKeyFromSession } from "@/base/session-store";
+import { pullCGroups } from "../user-entity";
+
 /**
  * A cgroup ("cluster group") is a group of clusters (possibly containing a
  * single cluster) that the user has interacted with.
@@ -109,7 +112,7 @@ export interface CGroup {
  * -   They can hide a cluster. This creates an unnamed cgroup so that the
  *     user's other clients know not to show it.
  */
-export const syncCGroups = () => {
+export const syncCGroups = async () => {
     // 1. Fetch existing cgroups for the user from remote.
     // 2. Save them to DB.
     // 3. Prune stale faceIDs from the clusters in the DB.
@@ -118,7 +121,10 @@ export const syncCGroups = () => {
     //
     // The user can see both the cgroups and clusters in the UI, but only the
     // cgroups are synced.
-    // const syncCGroupsWithRemote()
+
+    const masterKey = await masterKeyFromSession();
+    await pullCGroups(masterKey);
+
     /*
      * After clustering, we also do some routine cleanup. Faces belonging to files
      * that have been deleted (including those in Trash) should be pruned off.
