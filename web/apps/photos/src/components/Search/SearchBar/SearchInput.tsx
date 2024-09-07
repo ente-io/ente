@@ -53,8 +53,8 @@ import {
     getDefaultOptions,
 } from "services/searchService";
 import { Collection } from "types/collection";
-import { SelectStyles } from "../../../../styles/search";
-import { SearchInputWrapper } from "../styledComponents";
+import { SelectStyles } from "../../../styles/search";
+import { SearchInputWrapper } from "./styledComponents";
 
 const { Option, ValueContainer, Menu } = components;
 
@@ -73,7 +73,7 @@ const createComponents = memoize((Option, ValueContainer, Menu, Input) => ({
     Input,
 }));
 
-export default function SearchInput(props: SearchInputProps) {
+export const SearchInput: React.FC<SearchInputProps> = (props) => {
     const selectRef = useRef(null);
     const [value, setValue] = useState<SearchOption>(null);
     const appContext = useContext(AppContext);
@@ -233,7 +233,7 @@ export default function SearchInput(props: SearchInputProps) {
             )}
         </SearchInputWrapper>
     );
-}
+};
 
 const OptionWithInfo = (props) => (
     <Option {...props}>

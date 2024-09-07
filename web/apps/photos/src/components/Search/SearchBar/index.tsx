@@ -1,9 +1,8 @@
-import { Collection } from "types/collection";
-import { SearchBarMobile } from "./searchBarMobile";
-
 import { UpdateSearch } from "@/new/photos/services/search/types";
 import { EnteFile } from "@/new/photos/types/file";
-import SearchInput from "./searchInput";
+import { Collection } from "types/collection";
+import { SearchBarMobile } from "./searchBarMobile";
+import { SearchInput } from "./SearchInput";
 import { SearchBarWrapper } from "./styledComponents";
 
 interface Props {
