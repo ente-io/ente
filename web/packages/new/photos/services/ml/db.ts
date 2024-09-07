@@ -32,17 +32,17 @@ import type { LocalFaceIndex } from "./face";
  * In tandem, these serve as the underlying storage for the indexes maintained
  * in the ML database.
  *
- * The cluster related object stores are the following:
+ * The face clustering related object stores are the following:
  *
  * -   "face-cluster": Contains {@link FaceCluster} objects, one for each
  *     cluster of faces that either the clustering algorithm produced locally or
- *     were synced from remote. It is indexed by the (cluster) ID.
+ *     were synced from remote. It is indexed by the cluster ID.
  *
  * -   "cluster-group": Contains {@link CGroup} objects, one for each group of
  *     clusters that were synced from remote. The client can also locally
  *     generate cluster groups on certain user interactions, but these too will
  *     eventually get synced with remote. This object store is indexed by the
- *     (cgroup) ID.
+ *     cgroup ID.
  */
 interface MLDBSchema extends DBSchema {
     "file-status": {
@@ -440,25 +440,4 @@ export const applyCGroupDiff = async (diff: (string | CGroup)[]) => {
         ),
     );
     return tx.done;
-};
-
-/**
- * Add or overwrite the entry for the given {@link cgroup}, as identified by
- * their {@link id}.
- */
-// TODO-Cluster: Remove me
-export const saveClusterGroup = async (cgroup: CGroup) => {
-    const db = await mlDB();
-    const tx = db.transaction("cluster-group", "readwrite");
-    await Promise.all([tx.store.put(cgroup), tx.done]);
-};
-
-/**
- * Delete the entry (if any) for the cluster group with the given {@link id}.
- */
-// TODO-Cluster: Remove me
-export const deleteClusterGroup = async (id: string) => {
-    const db = await mlDB();
-    const tx = db.transaction("cluster-group", "readwrite");
-    await Promise.all([tx.store.delete(id), tx.done]);
 };

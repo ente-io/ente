@@ -9,33 +9,21 @@ import * as chrono from "chrono-node";
 import { expose } from "comlink";
 import { z } from "zod";
 import {
+    pullLocationTags,
     savedLocationTags,
-    syncLocationTags,
     type LocationTag,
 } from "../user-entity";
 import type {
     City,
     DateSearchResult,
+    LabelledFileType,
+    LocalizedSearchData,
+    Searchable,
     SearchDateComponents,
     SearchQuery,
     Suggestion,
 } from "./types";
 import { SuggestionType } from "./types";
-
-type SearchableCity = City & {
-    /**
-     * Name of the city, lowercased. Precomputed to save an op during search.
-     */
-    lowercasedName: string;
-};
-
-type SearchableLocationTag = LocationTag & {
-    /**
-     * Name of the location tag, lowercased. Precomputed to save an op during
-     * search.
-     */
-    lowercasedName: string;
-};
 
 /**
  * A web worker that runs the search asynchronously so that the main thread
@@ -43,8 +31,8 @@ type SearchableLocationTag = LocationTag & {
  */
 export class SearchWorker {
     private enteFiles: EnteFile[] = [];
-    private locationTags: SearchableLocationTag[] = [];
-    private cities: SearchableCity[] = [];
+    private locationTags: Searchable<LocationTag>[] = [];
+    private cities: Searchable<City>[] = [];
 
     /**
      * Fetch any state we might need when the actual search happens.
@@ -54,7 +42,7 @@ export class SearchWorker {
      */
     async sync(masterKey: Uint8Array) {
         return Promise.all([
-            syncLocationTags(masterKey)
+            pullLocationTags(masterKey)
                 .then(() => savedLocationTags())
                 .then((ts) => {
                     this.locationTags = ts.map((t) => ({
@@ -81,11 +69,10 @@ export class SearchWorker {
     /**
      * Convert a search string into a reusable query.
      */
-    createSearchQuery(s: string, locale: string, holidays: DateSearchResult[]) {
+    createSearchQuery(s: string, localizedSearchData: LocalizedSearchData) {
         return createSearchQuery(
             s,
-            locale,
-            holidays,
+            localizedSearchData,
             this.locationTags,
             this.cities,
         );
@@ -103,20 +90,20 @@ expose(SearchWorker);
 
 const createSearchQuery = (
     s: string,
-    locale: string,
-    holidays: DateSearchResult[],
-    locationTags: SearchableLocationTag[],
-    cities: SearchableCity[],
+    { locale, holidays, labelledFileTypes }: LocalizedSearchData,
+    locationTags: Searchable<LocationTag>[],
+    cities: Searchable<City>[],
 ): Suggestion[] =>
     [
         dateSuggestions(s, locale, holidays),
         locationSuggestions(s, locationTags, cities),
+        fileTypeSuggestions(s, labelledFileTypes),
     ].flat();
 
 const dateSuggestions = (
     s: string,
     locale: string,
-    holidays: DateSearchResult[],
+    holidays: Searchable<DateSearchResult>[],
 ) =>
     parseDateComponents(s, locale, holidays).map(({ components, label }) => ({
         type: SuggestionType.DATE,
@@ -141,12 +128,12 @@ const dateSuggestions = (
 const parseDateComponents = (
     s: string,
     locale: string,
-    holidays: DateSearchResult[],
+    holidays: Searchable<DateSearchResult>[],
 ): DateSearchResult[] =>
     [
         parseChrono(s, locale),
         parseYearComponents(s),
-        parseHolidayComponents(s, holidays),
+        holidays.filter(searchableIncludes(s)),
     ].flat();
 
 const parseChrono = (s: string, locale: string): DateSearchResult[] =>
@@ -195,8 +182,13 @@ const parseYearComponents = (s: string): DateSearchResult[] => {
     return [];
 };
 
-const parseHolidayComponents = (s: string, holidays: DateSearchResult[]) =>
-    holidays.filter(({ label }) => label.toLowerCase().includes(s));
+/**
+ * A helper function to directly pass to filters on Searchable<T>[].
+ */
+const searchableIncludes =
+    (s: string) =>
+    ({ lowercasedName }: { lowercasedName: string }) =>
+        lowercasedName.includes(s);
 
 /**
  * Zod schema describing world_cities.json.
@@ -223,12 +215,10 @@ const fetchCities = async () => {
 
 const locationSuggestions = (
     s: string,
-    locationTags: SearchableLocationTag[],
-    cities: SearchableCity[],
+    locationTags: Searchable<LocationTag>[],
+    cities: Searchable<City>[],
 ) => {
-    const matchingLocationTags = locationTags.filter((t) =>
-        t.lowercasedName.includes(s),
-    );
+    const matchingLocationTags = locationTags.filter(searchableIncludes(s));
 
     const matchingLocationTagLNames = new Set(
         matchingLocationTags.map((t) => t.lowercasedName),
@@ -253,6 +243,18 @@ const locationSuggestions = (
         })),
     ].flat();
 };
+
+const fileTypeSuggestions = (
+    s: string,
+    labelledFileTypes: Searchable<LabelledFileType>[],
+) =>
+    labelledFileTypes
+        .filter(searchableIncludes(s))
+        .map(({ fileType, label }) => ({
+            label,
+            value: fileType,
+            type: SuggestionType.FILE_TYPE,
+        }));
 
 /**
  * Return true if file satisfies the given {@link query}.

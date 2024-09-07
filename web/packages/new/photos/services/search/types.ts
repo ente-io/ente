@@ -14,6 +14,35 @@ export interface DateSearchResult {
     label: string;
 }
 
+export interface LabelledFileType {
+    fileType: FileType;
+    label: string;
+}
+
+/**
+ * An annotated version of {@link T} that includes its searchable "lowercased"
+ * label or name.
+ *
+ * Precomputing these lowercased values saves us from doing the lowercasing
+ * during the search itself.
+ */
+export type Searchable<T> = T & {
+    /**
+     * The name or label of T, lowercased.
+     */
+    lowercasedName: string;
+};
+
+/**
+ * Various bits of static but locale specific data that the search worker needs
+ * during searching.
+ */
+export interface LocalizedSearchData {
+    locale: string;
+    holidays: Searchable<DateSearchResult>[];
+    labelledFileTypes: Searchable<LabelledFileType>[];
+}
+
 /**
  * A parsed version of a potential natural language date time string.
  *

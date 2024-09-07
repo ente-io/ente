@@ -3,6 +3,7 @@ import log from "@/base/log";
 import DownloadManager from "@/new/photos/services/download";
 import { clearFeatureFlagSessionState } from "@/new/photos/services/feature-flags";
 import { logoutML, terminateMLWorker } from "@/new/photos/services/ml";
+import { logoutSearch } from "@/new/photos/services/search";
 import exportService from "./export";
 
 /**
@@ -18,13 +19,13 @@ export const photosLogout = async () => {
 
     // - Workers
 
-    // Terminate any workers before clearing persistent state.
-    // See: [Note: Caching IDB instances in separate execution contexts].
+    // Terminate any workers that might access the DB before clearing persistent
+    // state. See: [Note: Caching IDB instances in separate execution contexts].
 
     try {
         await terminateMLWorker();
     } catch (e) {
-        ignoreError("face", e);
+        ignoreError("ml/worker", e);
     }
 
     // - Remote logout and clear state
@@ -45,6 +46,12 @@ export const photosLogout = async () => {
         DownloadManager.logout();
     } catch (e) {
         ignoreError("download", e);
+    }
+
+    try {
+        logoutSearch();
+    } catch (e) {
+        ignoreError("search", e);
     }
 
     // - Desktop

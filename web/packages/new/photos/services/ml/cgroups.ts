@@ -1,3 +1,6 @@
+import { masterKeyFromSession } from "@/base/session-store";
+import { pullCGroups } from "../user-entity";
+
 /**
  * A cgroup ("cluster group") is a group of clusters (possibly containing a
  * single cluster) that the user has interacted with.
@@ -18,11 +21,14 @@
  * cluster, or they may hide an named {@link CGroup}. In both cases, we promote
  * the cluster to a CGroup if needed so that their request to hide gets synced.
  *
+ * cgroups are synced with remote.
+ *
  * While in our local representation we separately maintain clusters and link to
  * them from within CGroups by their clusterID, in the remote representation
- * clusters themselves don't get synced. Instead, the "cgroup" entities synced
- * with remote contain the clusters within themselves. So a group that gets
- * synced with remote looks something like:
+ * clusters themselves don't get synced. Instead, the cgroup entities synced
+ * with remote contain the clusters within themselves.
+ *
+ * That is, a cgroup that gets synced with remote looks something like:
  *
  *     { id, name, clusters: [{ clusterID, faceIDs }] }
  *
@@ -63,7 +69,7 @@ export interface CGroup {
     isHidden: boolean;
     /**
      * The ID of the face that should be used as the cover photo for this
-     * cluster group (if the user has set one).
+     * cluster group. Optional.
      *
      * This is similar to the [@link displayFaceID}, the difference being:
      *
@@ -73,6 +79,13 @@ export interface CGroup {
      *     into effect if the user has not explicitly selected a face.
      */
     avatarFaceID: string | undefined;
+}
+
+/**
+ * A {@link CGroup} annotated with various in-memory state to make it easier for
+ * the upper layers of our code to directly use it.
+ */
+export type AnnotatedCGroup = CGroup & {
     /**
      * Locally determined ID of the "best" face that should be used as the
      * display face, to represent this cluster group in the UI.
@@ -81,7 +94,7 @@ export interface CGroup {
      * {@link avatarFaceID}.
      */
     displayFaceID: string | undefined;
-}
+};
 
 /**
  * Syncronize the user's cluster groups with remote, running local clustering if
@@ -109,7 +122,7 @@ export interface CGroup {
  * -   They can hide a cluster. This creates an unnamed cgroup so that the
  *     user's other clients know not to show it.
  */
-export const syncCGroups = () => {
+export const syncCGroups = async () => {
     // 1. Fetch existing cgroups for the user from remote.
     // 2. Save them to DB.
     // 3. Prune stale faceIDs from the clusters in the DB.
@@ -118,7 +131,10 @@ export const syncCGroups = () => {
     //
     // The user can see both the cgroups and clusters in the UI, but only the
     // cgroups are synced.
-    // const syncCGroupsWithRemote()
+
+    const masterKey = await masterKeyFromSession();
+    await pullCGroups(masterKey);
+
     /*
      * After clustering, we also do some routine cleanup. Faces belonging to files
      * that have been deleted (including those in Trash) should be pruned off.

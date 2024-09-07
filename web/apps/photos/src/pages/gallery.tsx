@@ -40,12 +40,14 @@ import type { User } from "@ente/shared/user/types";
 import { Typography, styled } from "@mui/material";
 import AuthenticateUserModal from "components/AuthenticateUserModal";
 import Collections from "components/Collections";
+import { CollectionInfo } from "components/Collections/CollectionInfo";
 import CollectionNamer, {
     CollectionNamerAttributes,
 } from "components/Collections/CollectionNamer";
 import CollectionSelector, {
     CollectionSelectorAttributes,
 } from "components/Collections/CollectionSelector";
+import { CollectionInfoBarWrapper } from "components/Collections/styledComponents";
 import ExportModal from "components/ExportModal";
 import {
     FilesDownloadProgress,
@@ -59,7 +61,6 @@ import GalleryEmptyState from "components/GalleryEmptyState";
 import { LoadingOverlay } from "components/LoadingOverlay";
 import PhotoFrame from "components/PhotoFrame";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
-import SearchResultInfo from "components/Search/SearchResultInfo";
 import Sidebar from "components/Sidebar";
 import type { UploadTypeSelectorIntent } from "components/Upload/UploadTypeSelector";
 import Uploader from "components/Upload/Uploader";
@@ -480,7 +481,7 @@ export default function Gallery() {
             setPhotoListHeader({
                 height: 104,
                 item: (
-                    <SearchResultInfo
+                    <SearchResultSummaryHeader
                         searchResultSummary={searchResultSummary}
                     />
                 ),
@@ -1251,4 +1252,27 @@ const mergeMaps = <K, V>(map1: Map<K, V>, map2: Map<K, V>) => {
         mergedMap.set(key, value);
     });
     return mergedMap;
+};
+
+interface SearchResultSummaryHeaderProps {
+    searchResultSummary: SearchResultSummary;
+}
+
+const SearchResultSummaryHeader: React.FC<SearchResultSummaryHeaderProps> = ({
+    searchResultSummary,
+}) => {
+    if (!searchResultSummary) {
+        return <></>;
+    }
+
+    const { optionName, fileCount } = searchResultSummary;
+
+    return (
+        <CollectionInfoBarWrapper>
+            <Typography color="text.muted" variant="large">
+                {t("search_results")}
+            </Typography>
+            <CollectionInfo name={optionName} fileCount={fileCount} />
+        </CollectionInfoBarWrapper>
+    );
 };
