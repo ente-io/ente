@@ -7,24 +7,24 @@ import { SuggestionType } from "./types";
 export const labelForSuggestionType = (type: SuggestionType) => {
     switch (type) {
         case SuggestionType.DATE:
-            return t("SEARCH_TYPE.DATE");
+            return t("date");
         case SuggestionType.LOCATION:
             return t("location");
         case SuggestionType.CITY:
             return t("location");
         case SuggestionType.COLLECTION:
-            return t("SEARCH_TYPE.COLLECTION");
+            return t("album");
         case SuggestionType.FILE_NAME:
             return t("file_name");
         case SuggestionType.PERSON:
-            return t("SEARCH_TYPE.PERSON");
+            return t("person");
         case SuggestionType.INDEX_STATUS:
-            return t("SEARCH_TYPE.INDEX_STATUS");
+            throw new Error("Not a displayable key");
         case SuggestionType.FILE_CAPTION:
-            return t("SEARCH_TYPE.FILE_CAPTION");
+            return t("description");
         case SuggestionType.FILE_TYPE:
-            return t("SEARCH_TYPE.FILE_TYPE");
+            return t("file_type");
         case SuggestionType.CLIP:
-            return t("SEARCH_TYPE.CLIP");
+            return t("magic");
     }
 };
