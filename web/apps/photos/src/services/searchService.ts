@@ -38,8 +38,8 @@ export const getAutoCompleteSuggestions =
     (files: EnteFile[], collections: Collection[]) =>
     async (searchPhrase: string): Promise<SearchOption[]> => {
         try {
-            searchPhrase = searchPhrase.trim().toLowerCase();
-            if (!searchPhrase?.length) {
+            const searchPhrase2 = searchPhrase.trim().toLowerCase();
+            if (!searchPhrase2?.length) {
                 return [];
             }
             const suggestions: Suggestion[] = [
@@ -48,10 +48,10 @@ export const getAutoCompleteSuggestions =
                 // - getDateSuggestion(searchPhrase),
                 // - getLocationSuggestion(searchPhrase),
                 ...(await createSearchQuery(searchPhrase)),
-                ...getFileTypeSuggestion(searchPhrase),
-                ...getCollectionSuggestion(searchPhrase, collections),
-                getFileNameSuggestion(searchPhrase, files),
-                getFileCaptionSuggestion(searchPhrase, files),
+                ...getFileTypeSuggestion(searchPhrase2),
+                ...getCollectionSuggestion(searchPhrase2, collections),
+                getFileNameSuggestion(searchPhrase2, files),
+                getFileCaptionSuggestion(searchPhrase2, files),
             ].filter((suggestion) => !!suggestion);
 
             return convertSuggestionsToOptions(suggestions);
