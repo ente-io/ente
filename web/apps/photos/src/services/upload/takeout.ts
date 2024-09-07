@@ -6,6 +6,7 @@ import log from "@/base/log";
 import { type Location } from "@/base/types";
 import type { UploadItem } from "@/new/photos/services/upload/types";
 import { readStream } from "@/new/photos/utils/native-stream";
+import { maybeParseInt } from "@/utils/parse";
 
 /**
  * The data we read from the JSON metadata sidecar files.
@@ -144,8 +145,8 @@ const parseGTTimestamp = (o: unknown): number | undefined => {
         "timestamp" in o &&
         typeof o.timestamp == "string"
     ) {
-        const { timestamp } = o;
-        if (timestamp) return parseInt(timestamp, 10) * 1e6;
+        const timestamp = maybeParseInt(o.timestamp);
+        if (timestamp) return timestamp * 1e6;
     }
     return undefined;
 };
