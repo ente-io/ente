@@ -213,13 +213,11 @@
     "search_results": "Hasil penelusuran",
     "no_results": "Tidak ditemukan hasil",
     "search_hint": "Telusuri album, tanggal, keterangan, ...",
-    "SEARCH_TYPE": {
     "album": "Album",
     "date": "Tanggal",
     "description": "Keterangan",
     "file_type": "Jenis file",
-    "magic": "Ajaib"
-    },
+    "magic": "Ajaib",
     "photos_count_zero": "Tidak ada kenangan",
     "photos_count_one": "1 kenangan",
     "photos_count": "{{count, number}} kenangan",

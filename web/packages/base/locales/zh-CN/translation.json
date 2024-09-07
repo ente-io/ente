@@ -213,13 +213,11 @@
     "search_results": "搜索结果",
     "no_results": "未找到任何结果",
     "search_hint": "搜索相册、日期、描述，...",
-    "SEARCH_TYPE": {
     "album": "相册",
     "date": "日期",
     "description": "说明",
     "file_type": "文件类型",
-    "magic": "魔法"
-    },
+    "magic": "魔法",
     "photos_count_zero": "没有回忆",
     "photos_count_one": "1个回忆",
     "photos_count": "{{count, number}} 个回忆",

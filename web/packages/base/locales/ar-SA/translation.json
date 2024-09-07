@@ -213,13 +213,11 @@
     "search_results": "نتائج البحث",
     "no_results": "لا توجد نتائج",
     "search_hint": "البحث عن الألبومات، التواريخ، والأوصاف...",
-    "SEARCH_TYPE": {
     "album": "ألبوم",
     "date": "تاريخ",
     "description": "وصف",
     "file_type": "نوع الملف",
-    "magic": "سحر"
-    },
+    "magic": "سحر",
     "photos_count_zero": "لا توجد ذكريات",
     "photos_count_one": "ذكرى واحدة",
     "photos_count": "{{count, number}} ذكريات",

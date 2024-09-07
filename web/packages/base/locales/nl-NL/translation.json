@@ -213,13 +213,11 @@
     "search_results": "Zoekresultaten",
     "no_results": "Geen resultaten gevonden",
     "search_hint": "Zoeken naar albums, datums ...",
-    "SEARCH_TYPE": {
     "album": "Album",
     "date": "Datum",
     "description": "Omschrijving",
     "file_type": "Bestandstype",
-    "magic": "Magische"
-    },
+    "magic": "Magische",
     "photos_count_zero": "Geen herinneringen",
     "photos_count_one": "1 herinnering",
     "photos_count": "{{count, number}} herinneringen",

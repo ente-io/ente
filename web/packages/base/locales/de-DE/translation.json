@@ -213,13 +213,11 @@
     "search_results": "Ergebnisse durchsuchen",
     "no_results": "Keine Ergebnisse gefunden",
     "search_hint": "Suche nach Alben, Datum, Beschreibungen, ...",
-    "SEARCH_TYPE": {
     "album": "Album",
     "date": "Datum",
     "description": "Beschreibung",
     "file_type": "Dateityp",
-    "magic": "Magie"
-    },
+    "magic": "Magie",
     "photos_count_zero": "Keine Erinnerungen",
     "photos_count_one": "Eine Erinnerung",
     "photos_count": "{{count, number}} Erinnerungen",

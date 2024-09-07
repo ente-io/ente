@@ -213,13 +213,11 @@
     "search_results": "Αποτελέσματα αναζήτησης",
     "no_results": "Δε βρέθηκαν αποτελέσματα",
     "search_hint": "",
-    "SEARCH_TYPE": {
     "album": "Άλμπουμ",
     "date": "Ημερομηνία",
     "description": "Περιγραφή",
     "file_type": "Τύπος αρχείου",
-    "magic": ""
-    },
+    "magic": "",
     "photos_count_zero": "",
     "photos_count_one": "1 ανάμνηση",
     "photos_count": "{{count, number}} αναμνήσεις",

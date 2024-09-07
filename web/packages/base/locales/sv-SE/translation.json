@@ -213,13 +213,11 @@
     "search_results": "Sökresultat",
     "no_results": "Inga resultat hittades",
     "search_hint": "",
-    "SEARCH_TYPE": {
     "album": "Album",
     "date": "Datum",
     "description": "Beskrivning",
     "file_type": "Filtyp",
-    "magic": ""
-    },
+    "magic": "",
     "photos_count_zero": "Inga minnen",
     "photos_count_one": "1 minne",
     "photos_count": "",

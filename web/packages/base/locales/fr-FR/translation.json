@@ -213,13 +213,11 @@
     "search_results": "Résultats de la recherche",
     "no_results": "Aucun résultat trouvé",
     "search_hint": "Recherche d'albums, dates, descriptions, ...",
-    "SEARCH_TYPE": {
     "album": "l'album",
     "date": "Date",
     "description": "Description",
     "file_type": "Type de fichier",
-    "magic": "Magique"
-    },
+    "magic": "Magique",
     "photos_count_zero": "Pas de souvenirs",
     "photos_count_one": "1 souvenir",
     "photos_count": "{{count, number}} souvenirs",

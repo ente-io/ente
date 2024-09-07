@@ -213,13 +213,11 @@
     "search_results": "Результаты поиска",
     "no_results": "Ничего не найдено",
     "search_hint": "Поиск альбомов, дат, описаний, ...",
-    "SEARCH_TYPE": {
     "album": "Альбом",
     "date": "Дата",
     "description": "Описание",
     "file_type": "Тип файла",
-    "magic": "Магия"
-    },
+    "magic": "Магия",
     "photos_count_zero": "Воспоминания отсутствуют",
     "photos_count_one": "1 память",
     "photos_count": "{{count, number}} воспоминания",

@@ -213,13 +213,11 @@
     "search_results": "Risultati della ricerca",
     "no_results": "Nessun risultato trovato",
     "search_hint": "",
-    "SEARCH_TYPE": {
     "album": "Album",
     "date": "Data",
     "description": "Descrizione",
     "file_type": "Tipo del file",
-    "magic": ""
-    },
+    "magic": "",
     "photos_count_zero": "Nessuna memoria",
     "photos_count_one": "",
     "photos_count": "",

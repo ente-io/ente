@@ -213,13 +213,11 @@
     "search_results": "Resultados de pesquisa",
     "no_results": "Nenhum resultado encontrado",
     "search_hint": "Pesquisar por álbuns, datas, descrições, ...",
-    "SEARCH_TYPE": {
     "album": "Álbum",
     "date": "Data",
     "description": "Descrição",
     "file_type": "Tipo de arquivo",
-    "magic": "Mágica"
-    },
+    "magic": "Mágica",
     "photos_count_zero": "Sem memórias",
     "photos_count_one": "1 memória",
     "photos_count": "{{count, number}} memórias",
