@@ -14,8 +14,14 @@ import {
 } from "@/new/photos/services/search/types";
 import type { LocationTag } from "@/new/photos/services/user-entity";
 import { EnteFile } from "@/new/photos/types/file";
+import { FlexWrapper } from "@ente/shared/components/Container";
+import CalendarIcon from "@mui/icons-material/CalendarMonth";
 import CloseIcon from "@mui/icons-material/Close";
-import { IconButton } from "@mui/material";
+import FolderIcon from "@mui/icons-material/Folder";
+import ImageIcon from "@mui/icons-material/Image";
+import LocationIcon from "@mui/icons-material/LocationOn";
+import SearchIcon from "@mui/icons-material/SearchOutlined";
+import { Box, IconButton } from "@mui/material";
 import { t } from "i18next";
 import memoize from "memoize-one";
 import pDebounce from "p-debounce";
@@ -23,6 +29,7 @@ import { AppContext } from "pages/_app";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { components } from "react-select";
 import AsyncSelect from "react-select/async";
+import { SelectComponents } from "react-select/src/components";
 import { InputActionMeta } from "react-select/src/types";
 import {
     getAutoCompleteSuggestions,
@@ -33,7 +40,8 @@ import { SelectStyles } from "../../../../styles/search";
 import { SearchInputWrapper } from "../styledComponents";
 import MenuWithPeople from "./MenuWithPeople";
 import { OptionWithInfo } from "./optionWithInfo";
-import { ValueContainerWithIcon } from "./valueContainerWithIcon";
+
+const { ValueContainer } = components;
 
 interface Iprops {
     isOpen: boolean;
@@ -215,3 +223,37 @@ export default function SearchInput(props: Iprops) {
         </SearchInputWrapper>
     );
 }
+
+const getIconByType = (type: SuggestionType) => {
+    switch (type) {
+        case SuggestionType.DATE:
+            return <CalendarIcon />;
+        case SuggestionType.LOCATION:
+        case SuggestionType.CITY:
+            return <LocationIcon />;
+        case SuggestionType.COLLECTION:
+            return <FolderIcon />;
+        case SuggestionType.FILE_NAME:
+            return <ImageIcon />;
+        default:
+            return <SearchIcon />;
+    }
+};
+
+const ValueContainerWithIcon: SelectComponents<
+    SearchOption,
+    false
+>["ValueContainer"] = (props) => (
+    <ValueContainer {...props}>
+        <FlexWrapper>
+            <Box
+                style={{ display: "inline-flex" }}
+                mr={1.5}
+                color={(theme) => theme.colors.stroke.muted}
+            >
+                {getIconByType(props.getValue()[0]?.type)}
+            </Box>
+            {props.children}
+        </FlexWrapper>
+    </ValueContainer>
+);

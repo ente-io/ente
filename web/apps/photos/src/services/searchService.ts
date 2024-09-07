@@ -47,6 +47,7 @@ export const getAutoCompleteSuggestions =
                 // - getClipSuggestion(searchPhrase)
                 // - getDateSuggestion(searchPhrase),
                 // - getLocationSuggestion(searchPhrase),
+                // - getFileTypeSuggestion(searchPhrase),
                 ...(await createSearchQuery(searchPhrase)),
                 ...getCollectionSuggestion(searchPhrase2, collections),
                 getFileNameSuggestion(searchPhrase2, files),
