@@ -110,14 +110,13 @@ export const savedLocationTags = async () =>
  */
 export const pullCGroups = (masterKey: Uint8Array) => {
     const parse = async (id: string, data: Uint8Array): Promise<CGroup> => {
-        const rp = RemoteCGroup.parse(JSON.parse(await gunzip(data)));
+        const r = RemoteCGroup.parse(JSON.parse(await gunzip(data)));
         return {
             id,
-            name: rp.name,
-            clusterIDs: rp.assigned.map(({ id }) => id),
-            isHidden: rp.isHidden,
-            avatarFaceID: rp.avatarFaceID,
-            displayFaceID: undefined,
+            name: r.name,
+            clusterIDs: r.assigned.map(({ id }) => id),
+            isHidden: r.isHidden,
+            avatarFaceID: r.avatarFaceID,
         };
     };
 
@@ -141,6 +140,8 @@ const RemoteCGroup = z.object({
             faces: z.string().array(),
         }),
     ),
+    // The remote cgroup also has a "rejected" property, but that is not
+    // currently used by any of the clients.
     isHidden: z.boolean(),
     avatarFaceID: z.string().nullish().transform(nullToUndefined),
 });

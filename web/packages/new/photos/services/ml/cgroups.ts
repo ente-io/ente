@@ -21,11 +21,14 @@ import { pullCGroups } from "../user-entity";
  * cluster, or they may hide an named {@link CGroup}. In both cases, we promote
  * the cluster to a CGroup if needed so that their request to hide gets synced.
  *
+ * cgroups are synced with remote.
+ *
  * While in our local representation we separately maintain clusters and link to
  * them from within CGroups by their clusterID, in the remote representation
- * clusters themselves don't get synced. Instead, the "cgroup" entities synced
- * with remote contain the clusters within themselves. So a group that gets
- * synced with remote looks something like:
+ * clusters themselves don't get synced. Instead, the cgroup entities synced
+ * with remote contain the clusters within themselves.
+ *
+ * That is, a cgroup that gets synced with remote looks something like:
  *
  *     { id, name, clusters: [{ clusterID, faceIDs }] }
  *
@@ -66,7 +69,7 @@ export interface CGroup {
     isHidden: boolean;
     /**
      * The ID of the face that should be used as the cover photo for this
-     * cluster group (if the user has set one).
+     * cluster group. Optional.
      *
      * This is similar to the [@link displayFaceID}, the difference being:
      *
@@ -76,6 +79,13 @@ export interface CGroup {
      *     into effect if the user has not explicitly selected a face.
      */
     avatarFaceID: string | undefined;
+}
+
+/**
+ * A {@link CGroup} annotated with various in-memory state to make it easier for
+ * the upper layers of our code to directly use it.
+ */
+export type AnnotatedCGroup = CGroup & {
     /**
      * Locally determined ID of the "best" face that should be used as the
      * display face, to represent this cluster group in the UI.
@@ -84,7 +94,7 @@ export interface CGroup {
      * {@link avatarFaceID}.
      */
     displayFaceID: string | undefined;
-}
+};
 
 /**
  * Syncronize the user's cluster groups with remote, running local clustering if
