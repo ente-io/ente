@@ -3,7 +3,7 @@ import { newNonSecureID } from "@/base/id-worker";
 import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
 import type { EnteFile } from "../../types/file";
-import type { CGroup } from "./cgroups";
+import type { AnnotatedCGroup } from "./cgroups";
 import { faceDirection, type Face, type FaceIndex } from "./face";
 import { dotProduct } from "./math";
 
@@ -199,7 +199,7 @@ export const clusterFaces = (
     // locally, so cgroups will be empty. Create a temporary (unsaved, unsynced)
     // cgroup, one per cluster.
 
-    const cgroups: CGroup[] = [];
+    const cgroups: AnnotatedCGroup[] = [];
     for (const cluster of sortedClusters) {
         const faces = cluster.faceIDs.map((id) =>
             ensure(faceForFaceID.get(id)),
