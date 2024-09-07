@@ -1,4 +1,5 @@
 import { FileType } from "@/media/file-type";
+import { PeopleList } from "@/new/photos/components/PeopleList";
 import { isMLEnabled } from "@/new/photos/services/ml";
 import type {
     City,
@@ -9,6 +10,7 @@ import {
     ClipSearchScores,
     SearchOption,
     SearchQuery,
+    Suggestion,
     SuggestionType,
     UpdateSearch,
 } from "@/new/photos/services/search/types";
@@ -18,6 +20,7 @@ import { EnteFile } from "@/new/photos/types/file";
 import {
     FlexWrapper,
     FreeFlowText,
+    Row,
     SpaceBetweenFlex,
 } from "@ente/shared/components/Container";
 import CalendarIcon from "@mui/icons-material/CalendarMonth";
@@ -26,7 +29,14 @@ import FolderIcon from "@mui/icons-material/Folder";
 import ImageIcon from "@mui/icons-material/Image";
 import LocationIcon from "@mui/icons-material/LocationOn";
 import SearchIcon from "@mui/icons-material/SearchOutlined";
-import { Box, Divider, IconButton, Stack, Typography } from "@mui/material";
+import {
+    Box,
+    Divider,
+    IconButton,
+    Stack,
+    styled,
+    Typography,
+} from "@mui/material";
 import CollectionCard from "components/Collections/CollectionCard";
 import { ResultPreviewTile } from "components/Collections/styledComponents";
 import { t } from "i18next";
@@ -45,9 +55,8 @@ import {
 import { Collection } from "types/collection";
 import { SelectStyles } from "../../../../styles/search";
 import { SearchInputWrapper } from "../styledComponents";
-import MenuWithPeople from "./MenuWithPeople";
 
-const { Option, ValueContainer } = components;
+const { Option, ValueContainer, Menu } = components;
 
 interface SearchInputProps {
     isOpen: boolean;
@@ -63,10 +72,6 @@ const createComponents = memoize((Option, ValueContainer, Menu, Input) => ({
     Menu,
     Input,
 }));
-
-const VisibleInput = (props) => (
-    <components.Input {...props} isHidden={false} />
-);
 
 export default function SearchInput(props: SearchInputProps) {
     const selectRef = useRef(null);
@@ -307,3 +312,68 @@ const getIconByType = (type: SuggestionType) => {
             return <SearchIcon />;
     }
 };
+
+export const MenuWithPeople = (props) => {
+    // log.info("props.selectProps.options: ", selectRef);
+    const peopleSuggestions = props.selectProps.options.filter(
+        (o) => o.type === SuggestionType.PERSON,
+    );
+    const people = peopleSuggestions.map((o) => o.value);
+
+    const indexStatusSuggestion = props.selectProps.options.filter(
+        (o) => o.type === SuggestionType.INDEX_STATUS,
+    )[0] as Suggestion;
+
+    const indexStatus = indexStatusSuggestion?.value;
+    return (
+        <Menu {...props}>
+            <Box my={1}>
+                {isMLEnabled() &&
+                    indexStatus &&
+                    (people && people.length > 0 ? (
+                        <Box>
+                            <Legend>{t("people")}</Legend>
+                        </Box>
+                    ) : (
+                        <Box height={6} />
+                    ))}
+
+                {isMLEnabled() && indexStatus && (
+                    <Box>
+                        <Caption>{indexStatusSuggestion.label}</Caption>
+                    </Box>
+                )}
+                {people && people.length > 0 && (
+                    <Row>
+                        <PeopleList
+                            people={people}
+                            maxRows={2}
+                            onSelect={(_, index) => {
+                                props.selectRef.current.blur();
+                                props.setValue(peopleSuggestions[index]);
+                            }}
+                        />
+                    </Row>
+                )}
+            </Box>
+            {props.children}
+        </Menu>
+    );
+};
+
+const Legend = styled("span")`
+    font-size: 20px;
+    color: #ddd;
+    display: inline;
+    padding: 0px 12px;
+`;
+
+const Caption = styled("span")`
+    font-size: 12px;
+    display: inline;
+    padding: 0px 12px;
+`;
+
+const VisibleInput = (props) => (
+    <components.Input {...props} isHidden={false} />
+);
