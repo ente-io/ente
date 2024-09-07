@@ -327,16 +327,19 @@ const userEntityDiff = async (
  * See also, [Note: User entity keys].
  */
 const getOrCreateEntityKeyB64 = async (type: EntityType) => {
+    // Get the user's master key (we need it to encrypt/decrypt the entity key).
+    const masterKey = await masterKeyFromSession();
+
     // See if we already have it locally.
     const saved = await savedRemoteUserEntityKey(type);
-    if (saved) return decryptEntityKey(saved);
+    if (saved) return decryptEntityKey(saved, masterKey);
 
     // See if remote already has it.
     const existing = await getUserEntityKey(type);
     if (existing) {
         // Only save it if we can decrypt it to avoid corrupting our local state
         // in unforeseen circumstances.
-        const result = await decryptEntityKey(existing);
+        const result = await decryptEntityKey(existing, masterKey);
         await saveRemoteUserEntityKey(type, existing);
         return result;
     }
@@ -346,8 +349,8 @@ const getOrCreateEntityKeyB64 = async (type: EntityType) => {
     // As a sanity check, genarate the key but immediately encrypt it as if it
     // were fetched from remote and then try to decrypt it before doing anything
     // with it.
-    const generated = await generateNewEncryptedEntityKey();
-    const result = decryptEntityKey(generated);
+    const generated = await generateNewEncryptedEntityKey(masterKey);
+    const result = decryptEntityKey(generated, masterKey);
     await postUserEntityKey(type, generated);
     await saveRemoteUserEntityKey(type, generated);
     return result;
@@ -378,10 +381,10 @@ const saveRemoteUserEntityKey = (
  * Generate a new entity key and return it in the shape of an
  * {@link RemoteUserEntityKey} after encrypting it using the user's master key.
  */
-const generateNewEncryptedEntityKey = async () => {
+const generateNewEncryptedEntityKey = async (masterKey: Uint8Array) => {
     const { encryptedData, nonce } = await encryptBoxB64(
         await generateNewBlobOrStreamKey(),
-        await masterKeyFromSession(),
+        masterKey,
     );
     // Remote calls it the header, but it really is the nonce.
     return { encryptedKey: encryptedData, header: nonce };
@@ -390,14 +393,17 @@ const generateNewEncryptedEntityKey = async () => {
 /**
  * Decrypt an encrypted entity key using the user's master key.
  */
-const decryptEntityKey = async (remote: RemoteUserEntityKey) =>
+const decryptEntityKey = async (
+    remote: RemoteUserEntityKey,
+    masterKey: Uint8Array,
+) =>
     decryptBoxB64(
         {
             encryptedData: remote.encryptedKey,
             // Remote calls it the header, but it really is the nonce.
             nonce: remote.header,
         },
-        await masterKeyFromSession(),
+        masterKey,
     );
 
 /**
