@@ -9,7 +9,9 @@ export const labelForSuggestionType = (type: SuggestionType) => {
         case SuggestionType.DATE:
             return t("SEARCH_TYPE.DATE");
         case SuggestionType.LOCATION:
-            return t("SEARCH_TYPE.LOCATION");
+            return t("location");
+        case SuggestionType.CITY:
+            return t("location");
         case SuggestionType.COLLECTION:
             return t("SEARCH_TYPE.COLLECTION");
         case SuggestionType.FILE_NAME:
@@ -24,7 +26,5 @@ export const labelForSuggestionType = (type: SuggestionType) => {
             return t("SEARCH_TYPE.FILE_TYPE");
         case SuggestionType.CLIP:
             return t("SEARCH_TYPE.CLIP");
-        case SuggestionType.CITY:
-            return t("SEARCH_TYPE.CITY");
     }
 };

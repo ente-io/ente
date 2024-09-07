@@ -241,7 +241,7 @@
     "INFO_OPTION": "",
     "FILE_NAME": "Filnamn",
     "CAPTION_PLACEHOLDER": "Lägg till en beskrivning",
-    "LOCATION": "",
+    "location": "",
     "SHOW_ON_MAP": "",
     "MAP": "Karta",
     "MAP_SETTINGS": "",

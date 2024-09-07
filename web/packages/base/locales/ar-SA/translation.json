@@ -241,7 +241,7 @@
     "INFO_OPTION": "معلومات (I)",
     "FILE_NAME": "إسم الملف",
     "CAPTION_PLACEHOLDER": "إضافة وصف",
-    "LOCATION": "الموقع",
+    "location": "الموقع",
     "SHOW_ON_MAP": "عرض على OpenStreetMap",
     "MAP": "خريطة",
     "MAP_SETTINGS": "إعدادات الخريطة",

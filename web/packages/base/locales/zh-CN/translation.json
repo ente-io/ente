@@ -241,7 +241,7 @@
     "INFO_OPTION": "图片信息 (I)",
     "FILE_NAME": "文件名",
     "CAPTION_PLACEHOLDER": "添加说明",
-    "LOCATION": "地理位置",
+    "location": "地理位置",
     "SHOW_ON_MAP": "在 OpenStreetMap 上查看",
     "MAP": "地图",
     "MAP_SETTINGS": "地图设置",

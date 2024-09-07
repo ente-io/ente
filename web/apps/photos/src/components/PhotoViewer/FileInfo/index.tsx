@@ -171,7 +171,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                     <>
                         <InfoItem
                             icon={<LocationOnOutlined />}
-                            title={t("LOCATION")}
+                            title={t("location")}
                             caption={
                                 !mapEnabled ||
                                 publicCollectionGalleryContext.accessedThroughSharedURL ? (

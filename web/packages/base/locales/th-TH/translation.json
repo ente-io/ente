@@ -241,7 +241,7 @@
     "INFO_OPTION": "",
     "FILE_NAME": "",
     "CAPTION_PLACEHOLDER": "",
-    "LOCATION": "",
+    "location": "",
     "SHOW_ON_MAP": "",
     "MAP": "",
     "MAP_SETTINGS": "",

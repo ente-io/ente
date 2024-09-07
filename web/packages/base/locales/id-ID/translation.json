@@ -241,7 +241,7 @@
     "INFO_OPTION": "Informasi (I)",
     "FILE_NAME": "Nama file",
     "CAPTION_PLACEHOLDER": "Tambah keterangan",
-    "LOCATION": "",
+    "location": "",
     "SHOW_ON_MAP": "Lihat di OpenStreetMap",
     "MAP": "Peta",
     "MAP_SETTINGS": "Pengaturan Peta",

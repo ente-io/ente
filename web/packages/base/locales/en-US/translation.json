@@ -241,7 +241,7 @@
     "INFO_OPTION": "Info (I)",
     "FILE_NAME": "File name",
     "CAPTION_PLACEHOLDER": "Add a description",
-    "LOCATION": "Location",
+    "location": "Location",
     "SHOW_ON_MAP": "View on OpenStreetMap",
     "MAP": "Map",
     "MAP_SETTINGS": "Map Settings",

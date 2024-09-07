@@ -241,7 +241,7 @@
     "INFO_OPTION": "Πληροφορίες (I)",
     "FILE_NAME": "Όνομα αρχείου",
     "CAPTION_PLACEHOLDER": "Προσθήκη περιγραφής",
-    "LOCATION": "Τοποθεσία",
+    "location": "Τοποθεσία",
     "SHOW_ON_MAP": "Προβολή στο OpenStreetMap",
     "MAP": "Χάρτης",
     "MAP_SETTINGS": "Ρυθμίσεις Χάρτη",
