@@ -10,6 +10,7 @@ import {
 } from "@/base/log-web";
 import { AppUpdate } from "@/base/types/ipc";
 import DownloadManager from "@/new/photos/services/download";
+import { runMigrations } from "@/new/photos/services/migrations";
 import { initML, isMLSupported } from "@/new/photos/services/ml";
 import { ensure } from "@/utils/ensure";
 import { Overlay } from "@ente/shared/components/Container";
@@ -141,6 +142,7 @@ export default function App({ Component, pageProps }: AppProps) {
         logStartupBanner(user?.id);
         HTTPService.setHeaders({ "X-Client-Package": clientPackageName });
         logUnhandledErrorsAndRejections(true);
+        void runMigrations();
         return () => logUnhandledErrorsAndRejections(false);
     }, []);
 

@@ -1,4 +1,5 @@
 import type { UserVerificationResponse } from "@/accounts/types/user";
+import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
@@ -159,6 +160,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     setFieldError(t("EXPIRED_CODE"));
                 }
             } else {
+                log.error("OTT verification failed", e);
                 setFieldError(`${t("UNKNOWN_ERROR")} ${JSON.stringify(e)}`);
             }
         }

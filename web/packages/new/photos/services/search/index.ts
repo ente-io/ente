@@ -1,86 +1,71 @@
-import { nullToUndefined } from "@/utils/transform";
-import type { Component } from "chrono-node";
-import * as chrono from "chrono-node";
+import { masterKeyFromSession } from "@/base/session-store";
+import { ComlinkWorker } from "@/base/worker/comlink-worker";
 import i18n, { t } from "i18next";
-import type { SearchDateComponents } from "./types";
-
-interface DateSearchResult {
-    components: SearchDateComponents;
-    label: string;
-}
+import type { EnteFile } from "../../types/file";
+import type { DateSearchResult, SearchQuery } from "./types";
+import type { SearchWorker } from "./worker";
 
 /**
- * Try to parse an arbitrary search string into sets of date components.
- *
- * e.g. "December 2022" will be parsed into a
- *
- *     [(year 2022, month 12, day undefined)]
- *
- * while "22 December 2022" will be parsed into
- *
- *     [(year 2022, month 12, day 22)]
- *
- * In addition, also return a formatted representation of the "best" guess at
- * the date that was intended by the search string.
+ * Cached instance of the {@link ComlinkWorker} that wraps our web worker.
  */
-export const parseDateComponents = (s: string): DateSearchResult[] =>
-    parseChrono(s)
-        .concat(parseYearComponents(s))
-        .concat(parseHolidayComponents(s));
+let _comlinkWorker: ComlinkWorker<typeof SearchWorker> | undefined;
 
-export const parseChrono = (s: string): DateSearchResult[] =>
-    chrono
-        .parse(s)
-        .map((result) => {
-            const p = result.start;
-            const component = (s: Component) =>
-                p.isCertain(s) ? nullToUndefined(p.get(s)) : undefined;
+/**
+ * Lazily created, cached, instance of {@link SearchWorker}.
+ */
+const worker = () => (_comlinkWorker ??= createComlinkWorker()).remote;
 
-            const year = component("year");
-            const month = component("month");
-            const day = component("day");
-            const weekday = component("weekday");
-            const hour = component("hour");
+/**
+ * Create a new instance of a comlink worker that wraps a {@link SearchWorker}
+ * web worker.
+ */
+const createComlinkWorker = () =>
+    new ComlinkWorker<typeof SearchWorker>(
+        "search",
+        new Worker(new URL("worker.ts", import.meta.url)),
+    );
 
-            if (!year && !month && !day && !weekday && !hour) return undefined;
-            const components = { year, month, day, weekday, hour };
+/**
+ * Fetch any data that would be needed if the user were to search.
+ */
+export const triggerSearchDataSync = () =>
+    void worker().then((w) => masterKeyFromSession().then((k) => w.sync(k)));
 
-            const format: Intl.DateTimeFormatOptions = {};
-            if (year) format.year = "numeric";
-            if (month) format.month = "long";
-            if (day) format.day = "numeric";
-            if (weekday) format.weekday = "long";
-            if (hour) {
-                format.hour = "numeric";
-                format.dayPeriod = "short";
-            }
+/**
+ * Set the files over which we will search.
+ */
+export const setSearchableFiles = (enteFiles: EnteFile[]) =>
+    void worker().then((w) => w.setEnteFiles(enteFiles));
 
-            const formatter = new Intl.DateTimeFormat(i18n.language, format);
-            const label = formatter.format(p.date());
-            return { components, label };
-        })
-        .filter((x) => x !== undefined);
+/**
+ * Convert a search string into a reusable "search query" that can be passed on
+ * to the {@link search} function.
+ *
+ * @param searchString The string we want to search for.
+ */
+export const createSearchQuery = (searchString: string) =>
+    worker().then((w) =>
+        w.createSearchQuery(searchString, i18n.language, holidays()),
+    );
 
-/** chrono does not parse years like "2024", so do it manually. */
-const parseYearComponents = (s: string): DateSearchResult[] => {
-    // s is already trimmed.
-    if (s.length == 4) {
-        const year = parseInt(s);
-        if (year && year <= 9999) {
-            const components = { year };
-            return [{ components, label: s }];
-        }
-    }
-    return [];
-};
+/**
+ * Search for and return the list of {@link EnteFile}s that match the given
+ * {@link search} query.
+ */
+export const search = async (search: SearchQuery) =>
+    worker().then((w) => w.search(search));
 
-// This cannot be a const, it needs to be evaluated lazily for the t() to work.
+/**
+ * A list of holidays - their yearly dates and localized names.
+ *
+ * We need to keep this on the main thread since it uses the t() function for
+ * localization (although I haven't tried that in a web worker, it might work
+ * there too). Also, it cannot be a const since it needs to be evaluated lazily
+ * for the t() to work.
+ */
 const holidays = (): DateSearchResult[] => [
     { components: { month: 12, day: 25 }, label: t("CHRISTMAS") },
     { components: { month: 12, day: 24 }, label: t("CHRISTMAS_EVE") },
     { components: { month: 1, day: 1 }, label: t("NEW_YEAR") },
     { components: { month: 12, day: 31 }, label: t("NEW_YEAR_EVE") },
 ];
-
-const parseHolidayComponents = (s: string) =>
-    holidays().filter(({ label }) => label.toLowerCase().includes(s));

@@ -8,27 +8,27 @@ import {
     mlStatusSnapshot,
     wipSearchPersons,
 } from "@/new/photos/services/ml";
-import { parseDateComponents } from "@/new/photos/services/search";
+import { createSearchQuery, search } from "@/new/photos/services/search";
 import type {
     SearchDateComponents,
     SearchPerson,
 } from "@/new/photos/services/search/types";
+import {
+    City,
+    ClipSearchScores,
+    SearchOption,
+    SearchQuery,
+    Suggestion,
+    SuggestionType,
+} from "@/new/photos/services/search/types";
+import type { LocationTag } from "@/new/photos/services/user-entity";
 import { EnteFile } from "@/new/photos/types/file";
 import { t } from "i18next";
 import { Collection } from "types/collection";
-import { EntityType, LocationTag, LocationTagData } from "types/entity";
-import {
-    ClipSearchScores,
-    Search,
-    SearchOption,
-    Suggestion,
-    SuggestionType,
-} from "types/search";
-import ComlinkSearchWorker from "utils/comlink/ComlinkSearchWorker";
 import { getUniqueFiles } from "utils/file";
-import { getLatestEntities } from "./entityService";
-import locationSearchService, { City } from "./locationSearchService";
 
+// Suggestions shown in the search dropdown's empty state, i.e. when the user
+// selects the search bar but does not provide any input.
 export const getDefaultOptions = async () => {
     return [
         await getMLStatusSuggestion(),
@@ -36,6 +36,7 @@ export const getDefaultOptions = async () => {
     ].filter((t) => !!t);
 };
 
+// Suggestions shown in the search dropdown when the user has typed something.
 export const getAutoCompleteSuggestions =
     (files: EnteFile[], collections: Collection[]) =>
     async (searchPhrase: string): Promise<SearchOption[]> => {
@@ -47,11 +48,12 @@ export const getAutoCompleteSuggestions =
             const suggestions: Suggestion[] = [
                 await getClipSuggestion(searchPhrase),
                 ...getFileTypeSuggestion(searchPhrase),
-                ...getDateSuggestion(searchPhrase),
+                // The following functionality has moved to createSearchQuery
+                // - getDateSuggestion(searchPhrase),
+                ...(await createSearchQuery(searchPhrase)),
                 ...getCollectionSuggestion(searchPhrase, collections),
                 getFileNameSuggestion(searchPhrase, files),
                 getFileCaptionSuggestion(searchPhrase, files),
-                ...(await getLocationSuggestions(searchPhrase)),
             ].filter((suggestion) => !!suggestion);
 
             return convertSuggestionsToOptions(suggestions);
@@ -64,13 +66,10 @@ export const getAutoCompleteSuggestions =
 async function convertSuggestionsToOptions(
     suggestions: Suggestion[],
 ): Promise<SearchOption[]> {
-    const searchWorker = await ComlinkSearchWorker.getInstance();
     const previewImageAppendedOptions: SearchOption[] = [];
     for (const suggestion of suggestions) {
         const searchQuery = convertSuggestionToSearchQuery(suggestion);
-        const resultFiles = getUniqueFiles(
-            await searchWorker.search(searchQuery),
-        );
+        const resultFiles = getUniqueFiles(await search(searchQuery));
         if (searchQuery?.clip) {
             resultFiles.sort((a, b) => {
                 const aScore = searchQuery.clip.get(a.id);
@@ -159,13 +158,6 @@ export async function getMLStatusSuggestion(): Promise<Suggestion> {
     };
 }
 
-const getDateSuggestion = (searchPhrase: string): Suggestion[] =>
-    parseDateComponents(searchPhrase).map(({ components, label }) => ({
-        type: SuggestionType.DATE,
-        value: components,
-        label,
-    }));
-
 function getCollectionSuggestion(
     searchPhrase: string,
     collections: Collection[],
@@ -204,39 +196,6 @@ function getFileCaptionSuggestion(
         value: matchedFiles.map((file) => file.id),
         label: searchPhrase,
     };
-}
-
-async function getLocationSuggestions(searchPhrase: string) {
-    const locationTagResults = await searchLocationTag(searchPhrase);
-    const locationTagSuggestions = locationTagResults.map(
-        (locationTag) =>
-            ({
-                type: SuggestionType.LOCATION,
-                value: locationTag.data,
-                label: locationTag.data.name,
-            }) as Suggestion,
-    );
-    const locationTagNames = new Set(
-        locationTagSuggestions.map((result) => result.label),
-    );
-
-    const citySearchResults =
-        await locationSearchService.searchCities(searchPhrase);
-
-    const nonConflictingCityResult = citySearchResults.filter(
-        (city) => !locationTagNames.has(city.city),
-    );
-
-    const citySearchSuggestions = nonConflictingCityResult.map(
-        (city) =>
-            ({
-                type: SuggestionType.CITY,
-                value: city,
-                label: city.city,
-            }) as Suggestion,
-    );
-
-    return [...locationTagSuggestions, ...citySearchSuggestions];
 }
 
 async function getClipSuggestion(
@@ -280,21 +239,6 @@ function searchFilesByCaption(searchPhrase: string, files: EnteFile[]) {
     );
 }
 
-async function searchLocationTag(searchPhrase: string): Promise<LocationTag[]> {
-    const locationTags = await getLatestEntities<LocationTagData>(
-        EntityType.LOCATION_TAG,
-    );
-    const matchedLocationTags = locationTags.filter((locationTag) =>
-        locationTag.data.name.toLowerCase().includes(searchPhrase),
-    );
-    if (matchedLocationTags.length > 0) {
-        log.info(
-            `Found ${matchedLocationTags.length} location tags for search phrase`,
-        );
-    }
-    return matchedLocationTags;
-}
-
 const searchClip = async (
     searchPhrase: string,
 ): Promise<ClipSearchScores | undefined> => {
@@ -304,7 +248,7 @@ const searchClip = async (
     return matches;
 };
 
-function convertSuggestionToSearchQuery(option: Suggestion): Search {
+function convertSuggestionToSearchQuery(option: Suggestion): SearchQuery {
     switch (option.type) {
         case SuggestionType.DATE:
             return {
@@ -313,7 +257,7 @@ function convertSuggestionToSearchQuery(option: Suggestion): Search {
 
         case SuggestionType.LOCATION:
             return {
-                location: option.value as LocationTagData,
+                location: option.value as LocationTag,
             };
 
         case SuggestionType.CITY:

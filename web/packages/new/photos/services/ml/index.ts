@@ -229,11 +229,6 @@ const mlLocalKey = "mlEnabled";
  * that is synced with remote.
  */
 const isMLEnabledLocal = () => {
-    // Delete legacy ML keys.
-    //
-    // This code was added August 2024 (v1.7.3-beta) and can be removed at some
-    // point when most clients have migrated (tag: Migration).
-    localStorage.removeItem("faceIndexingEnabled");
     return localStorage.getItem(mlLocalKey) == "1";
 };
 

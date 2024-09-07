@@ -1,10 +1,10 @@
 import { PeopleList } from "@/new/photos/components/PeopleList";
 import { isMLEnabled } from "@/new/photos/services/ml";
+import { Suggestion, SuggestionType } from "@/new/photos/services/search/types";
 import { Row } from "@ente/shared/components/Container";
 import { Box, styled } from "@mui/material";
 import { t } from "i18next";
 import { components } from "react-select";
-import { Suggestion, SuggestionType } from "types/search";
 
 const { Menu } = components;
 

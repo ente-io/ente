@@ -1,3 +1,7 @@
+import {
+    SearchOption,
+    SuggestionType,
+} from "@/new/photos/services/search/types";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import CalendarIcon from "@mui/icons-material/CalendarMonth";
 import FolderIcon from "@mui/icons-material/Folder";
@@ -7,7 +11,6 @@ import SearchIcon from "@mui/icons-material/SearchOutlined";
 import { Box } from "@mui/material";
 import { components } from "react-select";
 import { SelectComponents } from "react-select/src/components";
-import { SearchOption, SuggestionType } from "types/search";
 
 const { ValueContainer } = components;
 

@@ -1,9 +1,18 @@
 import { FileType } from "@/media/file-type";
 import { isMLEnabled } from "@/new/photos/services/ml";
 import type {
+    City,
     SearchDateComponents,
     SearchPerson,
 } from "@/new/photos/services/search/types";
+import {
+    ClipSearchScores,
+    SearchOption,
+    SearchQuery,
+    SuggestionType,
+    UpdateSearch,
+} from "@/new/photos/services/search/types";
+import type { LocationTag } from "@/new/photos/services/user-entity";
 import { EnteFile } from "@/new/photos/types/file";
 import CloseIcon from "@mui/icons-material/Close";
 import { IconButton } from "@mui/material";
@@ -15,20 +24,11 @@ import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { components } from "react-select";
 import AsyncSelect from "react-select/async";
 import { InputActionMeta } from "react-select/src/types";
-import { City } from "services/locationSearchService";
 import {
     getAutoCompleteSuggestions,
     getDefaultOptions,
 } from "services/searchService";
 import { Collection } from "types/collection";
-import { LocationTagData } from "types/entity";
-import {
-    ClipSearchScores,
-    Search,
-    SearchOption,
-    SuggestionType,
-    UpdateSearch,
-} from "types/search";
 import { SelectStyles } from "../../../../styles/search";
 import { SearchInputWrapper } from "../styledComponents";
 import MenuWithPeople from "./MenuWithPeople";
@@ -116,7 +116,7 @@ export default function SearchInput(props: Iprops) {
         if (!selectedOption) {
             return;
         }
-        let search: Search;
+        let search: SearchQuery;
         switch (selectedOption.type) {
             case SuggestionType.DATE:
                 search = {
@@ -126,7 +126,7 @@ export default function SearchInput(props: Iprops) {
                 break;
             case SuggestionType.LOCATION:
                 search = {
-                    location: selectedOption.value as LocationTagData,
+                    location: selectedOption.value as LocationTag,
                 };
                 props.setIsOpen(true);
                 break;
