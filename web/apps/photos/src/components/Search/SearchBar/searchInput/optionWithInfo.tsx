@@ -1,4 +1,5 @@
 import { SearchOption } from "@/new/photos/services/search/types";
+import { labelForSuggestionType } from "@/new/photos/services/search/ui";
 import {
     FreeFlowText,
     SpaceBetweenFlex,
@@ -24,7 +25,7 @@ const LabelWithInfo = ({ data }: { data: SearchOption }) => {
             <>
                 <Box className="main" px={2} py={1}>
                     <Typography variant="mini" mb={1}>
-                        {t(`SEARCH_TYPE.${data.type}`)}
+                        {labelForSuggestionType(data.type)}
                     </Typography>
                     <SpaceBetweenFlex>
                         <Box mr={1}>
