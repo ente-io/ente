@@ -214,11 +214,11 @@
     "no_results": "Nenhum resultado encontrado",
     "search_hint": "Pesquisar por álbuns, datas, descrições, ...",
     "SEARCH_TYPE": {
-        "COLLECTION": "Álbum",
-        "DATE": "Data",
-        "FILE_CAPTION": "Descrição",
-        "FILE_TYPE": "Tipo de arquivo",
-        "CLIP": "Mágica"
+    "album": "Álbum",
+    "date": "Data",
+    "description": "Descrição",
+    "file_type": "Tipo de arquivo",
+    "magic": "Mágica"
     },
     "photos_count_zero": "Sem memórias",
     "photos_count_one": "1 memória",

@@ -214,11 +214,11 @@
     "no_results": "لا توجد نتائج",
     "search_hint": "البحث عن الألبومات، التواريخ، والأوصاف...",
     "SEARCH_TYPE": {
-        "COLLECTION": "ألبوم",
-        "DATE": "تاريخ",
-        "FILE_CAPTION": "وصف",
-        "FILE_TYPE": "نوع الملف",
-        "CLIP": "سحر"
+    "album": "ألبوم",
+    "date": "تاريخ",
+    "description": "وصف",
+    "file_type": "نوع الملف",
+    "magic": "سحر"
     },
     "photos_count_zero": "لا توجد ذكريات",
     "photos_count_one": "ذكرى واحدة",

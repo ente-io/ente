@@ -214,11 +214,11 @@
     "no_results": "Nie znaleziono wyników",
     "search_hint": "Szukaj albumów, dat, opisów, ...",
     "SEARCH_TYPE": {
-        "COLLECTION": "Album",
-        "DATE": "Data",
-        "FILE_CAPTION": "Opis",
-        "FILE_TYPE": "Rodzaj pliku",
-        "CLIP": "Magia"
+    "album": "Album",
+    "date": "Data",
+    "description": "Opis",
+    "file_type": "Rodzaj pliku",
+    "magic": "Magia"
     },
     "photos_count_zero": "Brak wspomnień",
     "photos_count_one": "1 wspomnienie",

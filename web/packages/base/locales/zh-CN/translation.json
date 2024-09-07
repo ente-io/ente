@@ -214,11 +214,11 @@
     "no_results": "未找到任何结果",
     "search_hint": "搜索相册、日期、描述，...",
     "SEARCH_TYPE": {
-        "COLLECTION": "相册",
-        "DATE": "日期",
-        "FILE_CAPTION": "说明",
-        "FILE_TYPE": "文件类型",
-        "CLIP": "魔法"
+    "album": "相册",
+    "date": "日期",
+    "description": "说明",
+    "file_type": "文件类型",
+    "magic": "魔法"
     },
     "photos_count_zero": "没有回忆",
     "photos_count_one": "1个回忆",

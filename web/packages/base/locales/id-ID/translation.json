@@ -214,11 +214,11 @@
     "no_results": "Tidak ditemukan hasil",
     "search_hint": "Telusuri album, tanggal, keterangan, ...",
     "SEARCH_TYPE": {
-        "COLLECTION": "Album",
-        "DATE": "Tanggal",
-        "FILE_CAPTION": "Keterangan",
-        "FILE_TYPE": "Jenis file",
-        "CLIP": "Ajaib"
+    "album": "Album",
+    "date": "Tanggal",
+    "description": "Keterangan",
+    "file_type": "Jenis file",
+    "magic": "Ajaib"
     },
     "photos_count_zero": "Tidak ada kenangan",
     "photos_count_one": "1 kenangan",

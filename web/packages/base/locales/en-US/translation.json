@@ -214,11 +214,11 @@
     "no_results": "No results found",
     "search_hint": "Search for albums, dates, descriptions, ...",
     "SEARCH_TYPE": {
-        "COLLECTION": "Album",
-        "DATE": "Date",
-        "FILE_CAPTION": "Description",
-        "FILE_TYPE": "File type",
-        "CLIP": "Magic"
+    "album": "Album",
+    "date": "Date",
+    "description": "Description",
+    "file_type": "File type",
+    "magic": "Magic"
     },
     "photos_count_zero": "No memories",
     "photos_count_one": "1 memory",

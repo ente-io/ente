@@ -214,11 +214,11 @@
     "no_results": "Ничего не найдено",
     "search_hint": "Поиск альбомов, дат, описаний, ...",
     "SEARCH_TYPE": {
-        "COLLECTION": "Альбом",
-        "DATE": "Дата",
-        "FILE_CAPTION": "Описание",
-        "FILE_TYPE": "Тип файла",
-        "CLIP": "Магия"
+    "album": "Альбом",
+    "date": "Дата",
+    "description": "Описание",
+    "file_type": "Тип файла",
+    "magic": "Магия"
     },
     "photos_count_zero": "Воспоминания отсутствуют",
     "photos_count_one": "1 память",

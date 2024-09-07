@@ -214,11 +214,11 @@
     "no_results": "Nessun risultato trovato",
     "search_hint": "",
     "SEARCH_TYPE": {
-        "COLLECTION": "Album",
-        "DATE": "Data",
-        "FILE_CAPTION": "Descrizione",
-        "FILE_TYPE": "Tipo del file",
-        "CLIP": ""
+    "album": "Album",
+    "date": "Data",
+    "description": "Descrizione",
+    "file_type": "Tipo del file",
+    "magic": ""
     },
     "photos_count_zero": "Nessuna memoria",
     "photos_count_one": "",

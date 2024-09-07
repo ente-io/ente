@@ -214,11 +214,11 @@
     "no_results": "Inga resultat hittades",
     "search_hint": "",
     "SEARCH_TYPE": {
-        "COLLECTION": "Album",
-        "DATE": "Datum",
-        "FILE_CAPTION": "Beskrivning",
-        "FILE_TYPE": "Filtyp",
-        "CLIP": ""
+    "album": "Album",
+    "date": "Datum",
+    "description": "Beskrivning",
+    "file_type": "Filtyp",
+    "magic": ""
     },
     "photos_count_zero": "Inga minnen",
     "photos_count_one": "1 minne",

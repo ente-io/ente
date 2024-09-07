@@ -214,11 +214,11 @@
     "no_results": "Keine Ergebnisse gefunden",
     "search_hint": "Suche nach Alben, Datum, Beschreibungen, ...",
     "SEARCH_TYPE": {
-        "COLLECTION": "Album",
-        "DATE": "Datum",
-        "FILE_CAPTION": "Beschreibung",
-        "FILE_TYPE": "Dateityp",
-        "CLIP": "Magie"
+    "album": "Album",
+    "date": "Datum",
+    "description": "Beschreibung",
+    "file_type": "Dateityp",
+    "magic": "Magie"
     },
     "photos_count_zero": "Keine Erinnerungen",
     "photos_count_one": "Eine Erinnerung",

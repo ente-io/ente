@@ -214,11 +214,11 @@
     "no_results": "Aucun résultat trouvé",
     "search_hint": "Recherche d'albums, dates, descriptions, ...",
     "SEARCH_TYPE": {
-        "COLLECTION": "l'album",
-        "DATE": "Date",
-        "FILE_CAPTION": "Description",
-        "FILE_TYPE": "Type de fichier",
-        "CLIP": "Magique"
+    "album": "l'album",
+    "date": "Date",
+    "description": "Description",
+    "file_type": "Type de fichier",
+    "magic": "Magique"
     },
     "photos_count_zero": "Pas de souvenirs",
     "photos_count_one": "1 souvenir",
