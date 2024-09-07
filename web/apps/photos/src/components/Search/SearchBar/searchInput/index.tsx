@@ -49,7 +49,7 @@ import MenuWithPeople from "./MenuWithPeople";
 
 const { Option, ValueContainer } = components;
 
-interface Iprops {
+interface SearchInputProps {
     isOpen: boolean;
     updateSearch: UpdateSearch;
     setIsOpen: (value: boolean) => void;
@@ -68,7 +68,7 @@ const VisibleInput = (props) => (
     <components.Input {...props} isHidden={false} />
 );
 
-export default function SearchInput(props: Iprops) {
+export default function SearchInput(props: SearchInputProps) {
     const selectRef = useRef(null);
     const [value, setValue] = useState<SearchOption>(null);
     const appContext = useContext(AppContext);
