@@ -121,8 +121,14 @@ let _localizedSearchData: LocalizedSearchData | undefined;
 const localizedSearchData = () =>
     (_localizedSearchData ??= {
         locale: i18n.language,
-        holidays: holidays(),
-        labelledFileTypes: labelledFileTypes(),
+        holidays: holidays().map((h) => ({
+            ...h,
+            lowercasedName: h.label.toLowerCase(),
+        })),
+        labelledFileTypes: labelledFileTypes().map((t) => ({
+            ...t,
+            lowercasedName: t.label.toLowerCase(),
+        })),
     });
 
 /**

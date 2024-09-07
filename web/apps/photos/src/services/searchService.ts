@@ -48,7 +48,6 @@ export const getAutoCompleteSuggestions =
                 // - getDateSuggestion(searchPhrase),
                 // - getLocationSuggestion(searchPhrase),
                 ...(await createSearchQuery(searchPhrase)),
-                ...getFileTypeSuggestion(searchPhrase2),
                 ...getCollectionSuggestion(searchPhrase2, collections),
                 getFileNameSuggestion(searchPhrase2, files),
                 getFileCaptionSuggestion(searchPhrase2, files),
@@ -84,27 +83,6 @@ async function convertSuggestionsToOptions(
         }
     }
     return previewImageAppendedOptions;
-}
-function getFileTypeSuggestion(searchPhrase: string): Suggestion[] {
-    return [
-        {
-            label: t("IMAGE"),
-            value: FileType.image,
-            type: SuggestionType.FILE_TYPE,
-        },
-        {
-            label: t("VIDEO"),
-            value: FileType.video,
-            type: SuggestionType.FILE_TYPE,
-        },
-        {
-            label: t("LIVE_PHOTO"),
-            value: FileType.livePhoto,
-            type: SuggestionType.FILE_TYPE,
-        },
-    ].filter((suggestion) =>
-        suggestion.label.toLowerCase().includes(searchPhrase),
-    );
 }
 
 export async function getAllPeopleSuggestion(): Promise<Array<Suggestion>> {
