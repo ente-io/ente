@@ -57,7 +57,7 @@ import {
     getDefaultOptions,
 } from "services/searchService";
 import { Collection } from "types/collection";
-import { SelectStyles } from "../../styles/search";
+import { SelectStyles } from "../styles/search";
 
 const { Option, ValueContainer, Menu } = components;
 
