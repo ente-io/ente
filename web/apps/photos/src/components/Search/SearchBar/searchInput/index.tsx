@@ -12,16 +12,23 @@ import {
     SuggestionType,
     UpdateSearch,
 } from "@/new/photos/services/search/types";
+import { labelForSuggestionType } from "@/new/photos/services/search/ui";
 import type { LocationTag } from "@/new/photos/services/user-entity";
 import { EnteFile } from "@/new/photos/types/file";
-import { FlexWrapper } from "@ente/shared/components/Container";
+import {
+    FlexWrapper,
+    FreeFlowText,
+    SpaceBetweenFlex,
+} from "@ente/shared/components/Container";
 import CalendarIcon from "@mui/icons-material/CalendarMonth";
 import CloseIcon from "@mui/icons-material/Close";
 import FolderIcon from "@mui/icons-material/Folder";
 import ImageIcon from "@mui/icons-material/Image";
 import LocationIcon from "@mui/icons-material/LocationOn";
 import SearchIcon from "@mui/icons-material/SearchOutlined";
-import { Box, IconButton } from "@mui/material";
+import { Box, Divider, IconButton, Stack, Typography } from "@mui/material";
+import CollectionCard from "components/Collections/CollectionCard";
+import { ResultPreviewTile } from "components/Collections/styledComponents";
 import { t } from "i18next";
 import memoize from "memoize-one";
 import pDebounce from "p-debounce";
@@ -39,9 +46,8 @@ import { Collection } from "types/collection";
 import { SelectStyles } from "../../../../styles/search";
 import { SearchInputWrapper } from "../styledComponents";
 import MenuWithPeople from "./MenuWithPeople";
-import { OptionWithInfo } from "./optionWithInfo";
 
-const { ValueContainer } = components;
+const { Option, ValueContainer } = components;
 
 interface Iprops {
     isOpen: boolean;
@@ -224,20 +230,48 @@ export default function SearchInput(props: Iprops) {
     );
 }
 
-const getIconByType = (type: SuggestionType) => {
-    switch (type) {
-        case SuggestionType.DATE:
-            return <CalendarIcon />;
-        case SuggestionType.LOCATION:
-        case SuggestionType.CITY:
-            return <LocationIcon />;
-        case SuggestionType.COLLECTION:
-            return <FolderIcon />;
-        case SuggestionType.FILE_NAME:
-            return <ImageIcon />;
-        default:
-            return <SearchIcon />;
-    }
+const OptionWithInfo = (props) => (
+    <Option {...props}>
+        <LabelWithInfo data={props.data} />
+    </Option>
+);
+
+const LabelWithInfo = ({ data }: { data: SearchOption }) => {
+    return (
+        !data.hide && (
+            <>
+                <Box className="main" px={2} py={1}>
+                    <Typography variant="mini" mb={1}>
+                        {labelForSuggestionType(data.type)}
+                    </Typography>
+                    <SpaceBetweenFlex>
+                        <Box mr={1}>
+                            <FreeFlowText>
+                                <Typography fontWeight={"bold"}>
+                                    {data.label}
+                                </Typography>
+                            </FreeFlowText>
+                            <Typography color="text.muted">
+                                {t("photos_count", { count: data.fileCount })}
+                            </Typography>
+                        </Box>
+
+                        <Stack direction={"row"} spacing={1}>
+                            {data.previewFiles.map((file) => (
+                                <CollectionCard
+                                    key={file.id}
+                                    coverFile={file}
+                                    onClick={() => null}
+                                    collectionTile={ResultPreviewTile}
+                                />
+                            ))}
+                        </Stack>
+                    </SpaceBetweenFlex>
+                </Box>
+                <Divider sx={{ mx: 2, my: 1 }} />
+            </>
+        )
+    );
 };
 
 const ValueContainerWithIcon: SelectComponents<
@@ -257,3 +291,19 @@ const ValueContainerWithIcon: SelectComponents<
         </FlexWrapper>
     </ValueContainer>
 );
+
+const getIconByType = (type: SuggestionType) => {
+    switch (type) {
+        case SuggestionType.DATE:
+            return <CalendarIcon />;
+        case SuggestionType.LOCATION:
+        case SuggestionType.CITY:
+            return <LocationIcon />;
+        case SuggestionType.COLLECTION:
+            return <FolderIcon />;
+        case SuggestionType.FILE_NAME:
+            return <ImageIcon />;
+        default:
+            return <SearchIcon />;
+    }
+};
