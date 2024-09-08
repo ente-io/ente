@@ -239,8 +239,7 @@ Future<Float32List> preprocessImageClip(
   const int requiredHeight = 256;
   const int requiredSize = 3 * requiredWidth * requiredHeight;
   final scale = max(requiredWidth / image.width, requiredHeight / image.height);
-  final RGB Function(num, num, Image, Uint8List) getPixel =
-      (scale < 0.8) ? _getPixelBilinearAntialias : _getPixelBilinear;
+  final bool useAntiAlias = scale < 0.8;
   final scaledWidth = (image.width * scale).round();
   final scaledHeight = (image.height * scale).round();
   final widthOffset = max(0, scaledWidth - requiredWidth) / 2;
@@ -253,11 +252,12 @@ Future<Float32List> preprocessImageClip(
   const int blueOff = 2 * requiredHeight * requiredWidth;
   for (var h = 0 + heightOffset; h < scaledHeight - heightOffset; h++) {
     for (var w = 0 + widthOffset; w < scaledWidth - widthOffset; w++) {
-      final RGB pixel = getPixel(
+      final RGB pixel = _getPixelBilinear(
         w / scale,
         h / scale,
         image,
         rawRgbaBytes,
+        antiAlias: useAntiAlias,
       );
       buffer[pixelIndex] = pixel.$1 / 255;
       buffer[pixelIndex + greenOff] = pixel.$2 / 255;
@@ -563,50 +563,13 @@ Future<Uint8List> _cropAndEncodeCanvas(
   return await _encodeImageToPng(croppedImage);
 }
 
-RGB _getPixelBilinear(num fx, num fy, Image image, Uint8List rawRgbaBytes) {
-  // Clamp to image boundaries
-  fx = fx.clamp(0, image.width - 1);
-  fy = fy.clamp(0, image.height - 1);
-
-  // Get the surrounding coordinates and their weights
-  final int x0 = fx.floor();
-  final int x1 = fx.ceil();
-  final int y0 = fy.floor();
-  final int y1 = fy.ceil();
-  final dx = fx - x0;
-  final dy = fy - y0;
-  final dx1 = 1.0 - dx;
-  final dy1 = 1.0 - dy;
-
-  // Get the original pixels
-  final RGB pixel1 = _readPixelColor(x0, y0, image, rawRgbaBytes);
-  final RGB pixel2 = _readPixelColor(x1, y0, image, rawRgbaBytes);
-  final RGB pixel3 = _readPixelColor(x0, y1, image, rawRgbaBytes);
-  final RGB pixel4 = _readPixelColor(x1, y1, image, rawRgbaBytes);
-
-  int bilinear(
-    num val1,
-    num val2,
-    num val3,
-    num val4,
-  ) =>
-      (val1 * dx1 * dy1 + val2 * dx * dy1 + val3 * dx1 * dy + val4 * dx * dy)
-          .round();
-
-  // Calculate the weighted sum of pixels
-  final int r = bilinear(pixel1.$1, pixel2.$1, pixel3.$1, pixel4.$1);
-  final int g = bilinear(pixel1.$2, pixel2.$2, pixel3.$2, pixel4.$2);
-  final int b = bilinear(pixel1.$3, pixel2.$3, pixel3.$3, pixel4.$3);
-
-  return (r, g, b);
-}
-
-RGB _getPixelBilinearAntialias(
+RGB _getPixelBilinear(
   num fx,
   num fy,
   Image image,
-  Uint8List rawRgbaBytes,
-) {
+  Uint8List rawRgbaBytes, {
+  bool antiAlias = false,
+}) {
   // Clamp to image boundaries
   fx = fx.clamp(0, image.width - 1);
   fy = fy.clamp(0, image.height - 1);
@@ -621,11 +584,13 @@ RGB _getPixelBilinearAntialias(
   final dx1 = 1.0 - dx;
   final dy1 = 1.0 - dy;
 
-  // Get the original pixels with (gaussian) blur
-  final RGB pixel1 = _getPixelBlurred(x0, y0, image, rawRgbaBytes);
-  final RGB pixel2 = _getPixelBlurred(x1, y0, image, rawRgbaBytes);
-  final RGB pixel3 = _getPixelBlurred(x0, y1, image, rawRgbaBytes);
-  final RGB pixel4 = _getPixelBlurred(x1, y1, image, rawRgbaBytes);
+  // Get the original pixels (with gaussian blur if antialias)
+  final RGB Function(int, int, Image, Uint8List) readPixel =
+      antiAlias ? _getPixelBlurred : _readPixelColor;
+  final RGB pixel1 = readPixel(x0, y0, image, rawRgbaBytes);
+  final RGB pixel2 = readPixel(x1, y0, image, rawRgbaBytes);
+  final RGB pixel3 = readPixel(x0, y1, image, rawRgbaBytes);
+  final RGB pixel4 = readPixel(x1, y1, image, rawRgbaBytes);
 
   int bilinear(
     num val1,
