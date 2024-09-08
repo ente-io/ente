@@ -239,6 +239,8 @@ Future<Float32List> preprocessImageClip(
   const int requiredHeight = 256;
   const int requiredSize = 3 * requiredWidth * requiredHeight;
   final scale = max(requiredWidth / image.width, requiredHeight / image.height);
+  final RGB Function(num, num, Image, Uint8List) getPixel =
+      (scale < 0.8) ? _getPixelBilinearAntialias : _getPixelBilinear;
   final scaledWidth = (image.width * scale).round();
   final scaledHeight = (image.height * scale).round();
   final widthOffset = max(0, scaledWidth - requiredWidth) / 2;
@@ -251,7 +253,7 @@ Future<Float32List> preprocessImageClip(
   const int blueOff = 2 * requiredHeight * requiredWidth;
   for (var h = 0 + heightOffset; h < scaledHeight - heightOffset; h++) {
     for (var w = 0 + widthOffset; w < scaledWidth - widthOffset; w++) {
-      final RGB pixel = _getPixelBilinearAntialias(
+      final RGB pixel = getPixel(
         w / scale,
         h / scale,
         image,
