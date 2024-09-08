@@ -32,7 +32,7 @@ files. Plain text files must be in the following format:
 
 `otpauth://totp/provider.com:you@email.com?secret=YOUR_SECRET`
 
-The codes can be seperated by a comma or a new line.
+The codes can be separated by a comma or a new line.
 
 So if your provider is not specifically listed, you might be still able to
 import from them by first converting the data from your old provider into these
