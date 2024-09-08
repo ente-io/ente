@@ -621,7 +621,7 @@ RGB _getPixelBilinearAntialias(
   final dx1 = 1.0 - dx;
   final dy1 = 1.0 - dy;
 
-  // Get the original pixels
+  // Get the original pixels with (gaussian) blur
   final RGB pixel1 = _getPixelBlurred(x0, y0, image, rawRgbaBytes);
   final RGB pixel2 = _getPixelBlurred(x1, y0, image, rawRgbaBytes);
   final RGB pixel3 = _getPixelBlurred(x0, y1, image, rawRgbaBytes);
