@@ -20,6 +20,7 @@ import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_auth/utils/totp_util.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_context_menu/flutter_context_menu.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -114,6 +115,16 @@ class _CodeWidgetState extends State<CodeWidget> {
               child: CustomPaint(
                 painter: PinBgPainter(
                   color: colorScheme.pinnedBgColor,
+                ),
+                size: const Size(39, 39),
+              ),
+            ),
+          if (widget.code.isTrashed && kDebugMode)
+            Align(
+              alignment: Alignment.topLeft,
+              child: CustomPaint(
+                painter: PinBgPainter(
+                  color: colorScheme.warning700,
                 ),
                 size: const Size(39, 39),
               ),
@@ -222,10 +233,14 @@ class _CodeWidgetState extends State<CodeWidget> {
                   ),
                   const MenuDivider(),
                   MenuItem(
-                    label: l10n.delete,
+                    label: widget.code.isTrashed ? l10n.delete : l10n.trash,
                     value: "Delete",
-                    icon: Icons.delete,
-                    onSelected: () => _onDeletePressed(null),
+                    icon: widget.code.isTrashed
+                        ? Icons.delete_forever
+                        : Icons.delete,
+                    onSelected: () => widget.code.isTrashed
+                        ? _onDeletePressed(null)
+                        : _onTrashPressed(null),
                   ),
                 ],
                 padding: const EdgeInsets.all(8.0),
@@ -308,12 +323,16 @@ class _CodeWidgetState extends State<CodeWidget> {
                   width: 14,
                 ),
                 SlidableAction(
-                  onPressed: _onDeletePressed,
+                  onPressed: widget.code.isTrashed
+                      ? _onDeletePressed
+                      : _onTrashPressed,
                   backgroundColor: Colors.grey.withOpacity(0.1),
                   borderRadius: const BorderRadius.all(Radius.circular(8)),
                   foregroundColor: colorScheme.deleteCodeTextColor,
-                  icon: Icons.delete,
-                  label: l10n.delete,
+                  icon: widget.code.isTrashed
+                      ? Icons.delete_forever
+                      : Icons.delete,
+                  label: widget.code.isTrashed ? l10n.delete : l10n.trash,
                   padding: const EdgeInsets.only(left: 0, right: 0),
                   spacing: 8,
                 ),
@@ -559,6 +578,10 @@ class _CodeWidgetState extends State<CodeWidget> {
   }
 
   void _onDeletePressed(_) async {
+    if (!widget.code.isTrashed) {
+      showToast(context, 'Code can only be deleted from trash');
+      return;
+    }
     bool isAuthSuccessful =
         await LocalAuthenticationService.instance.requestLocalAuthentication(
       context,
@@ -577,6 +600,43 @@ class _CodeWidgetState extends State<CodeWidget> {
       isCritical: true,
       firstButtonOnTap: () async {
         await CodeStore.instance.removeCode(widget.code);
+      },
+    );
+  }
+
+  void _onTrashPressed(_) async {
+    if (widget.code.isTrashed) {
+      showToast(context, 'Code is already trashed');
+      return;
+    }
+    bool isAuthSuccessful =
+        await LocalAuthenticationService.instance.requestLocalAuthentication(
+      context,
+      context.l10n.deleteCodeAuthMessage,
+    );
+    if (!isAuthSuccessful) {
+      return;
+    }
+    FocusScope.of(context).requestFocus();
+    final l10n = context.l10n;
+    await showChoiceActionSheet(
+      context,
+      title: l10n.trashCode,
+      body: l10n
+          .trashCodeMessage('${widget.code.issuer} (${widget.code.account})'),
+      firstButtonLabel: l10n.trash,
+      isCritical: true,
+      firstButtonOnTap: () async {
+        try {
+          final display = widget.code.display;
+          final Code code = widget.code.copyWith(
+            display: display.copyWith(trashed: true),
+          );
+          await CodeStore.instance.addCode(code);
+        } catch (e) {
+          logger.severe('Failed to trash code: ${e.toString()}');
+          showGenericErrorDialog(context: context, error: e).ignore();
+        }
       },
     );
   }
