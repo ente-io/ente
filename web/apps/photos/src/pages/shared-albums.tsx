@@ -34,7 +34,7 @@ import FullScreenDropZone from "components/FullScreenDropZone";
 import { LoadingOverlay } from "components/LoadingOverlay";
 import PhotoFrame from "components/PhotoFrame";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
-import UploadButton from "components/Upload/UploadButton";
+import { UploadButton } from "components/Upload/UploadButton";
 import Uploader from "components/Upload/Uploader";
 import { UploadSelectorInputs } from "components/UploadSelectorInputs";
 import SharedAlbumNavbar from "components/pages/sharedAlbum/Navbar";

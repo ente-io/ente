@@ -69,7 +69,7 @@ import PhotoFrame from "components/PhotoFrame";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
 import { SearchBar, type UpdateSearch } from "components/SearchBar";
 import Sidebar from "components/Sidebar";
-import UploadButton from "components/Upload/UploadButton";
+import { UploadButton } from "components/Upload/UploadButton";
 import type { UploadTypeSelectorIntent } from "components/Upload/UploadTypeSelector";
 import Uploader from "components/Upload/Uploader";
 import { UploadSelectorInputs } from "components/UploadSelectorInputs";

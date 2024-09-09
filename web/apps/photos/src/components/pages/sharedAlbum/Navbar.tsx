@@ -3,7 +3,7 @@ import { useIsTouchscreen } from "@/base/hooks";
 import { FluidContainer } from "@ente/shared/components/Container";
 import AddPhotoAlternateOutlined from "@mui/icons-material/AddPhotoAlternateOutlined";
 import { Box, Button } from "@mui/material";
-import UploadButton from "components/Upload/UploadButton";
+import { UploadButton } from "components/Upload/UploadButton";
 import { t } from "i18next";
 
 export default function SharedAlbumNavbar({ showUploadButton, openUploader }) {
