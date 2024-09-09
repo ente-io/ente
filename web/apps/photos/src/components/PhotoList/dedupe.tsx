@@ -2,15 +2,6 @@ import { EnteFile } from "@/new/photos/types/file";
 import { formattedByteSize } from "@/new/photos/utils/units";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import { Box, styled } from "@mui/material";
-import {
-    DATE_CONTAINER_HEIGHT,
-    GAP_BTW_TILES,
-    IMAGE_CONTAINER_MAX_HEIGHT,
-    IMAGE_CONTAINER_MAX_WIDTH,
-    MIN_COLUMNS,
-    SIZE_AND_COUNT_CONTAINER_HEIGHT,
-    SPACE_BTW_DATES,
-} from "constants/gallery";
 import { t } from "i18next";
 import memoize from "memoize-one";
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -20,6 +11,15 @@ import {
     areEqual,
 } from "react-window";
 import { Duplicate } from "services/deduplicationService";
+import {
+    DATE_CONTAINER_HEIGHT,
+    GAP_BTW_TILES,
+    IMAGE_CONTAINER_MAX_HEIGHT,
+    IMAGE_CONTAINER_MAX_WIDTH,
+    MIN_COLUMNS,
+    SIZE_AND_COUNT_CONTAINER_HEIGHT,
+    SPACE_BTW_DATES,
+} from ".";
 
 export enum ITEM_TYPE {
     TIME = "TIME",

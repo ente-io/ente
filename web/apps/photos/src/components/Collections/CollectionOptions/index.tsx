@@ -4,11 +4,6 @@ import { HorizontalFlex } from "@ente/shared/components/Container";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
 import { Box } from "@mui/material";
-import {
-    ALL_SECTION,
-    CollectionSummaryType,
-    HIDDEN_ITEMS_SECTION,
-} from "constants/collection";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";
@@ -20,11 +15,14 @@ import * as TrashService from "services/trashService";
 import { Collection } from "types/collection";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
 import {
+    ALL_SECTION,
     changeCollectionOrder,
     changeCollectionSortOrder,
     changeCollectionVisibility,
+    CollectionSummaryType,
     downloadCollectionHelper,
     downloadDefaultHiddenCollectionHelper,
+    HIDDEN_ITEMS_SECTION,
     isHiddenCollection,
 } from "utils/collection";
 import { isArchivedCollection, isPinnedCollection } from "utils/magicMetadata";

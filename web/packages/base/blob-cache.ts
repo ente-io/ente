@@ -237,9 +237,8 @@ export const clearBlobCaches = async () => {
     return isElectron() ? clearOPFSCaches() : clearWebCaches();
 };
 
-const clearWebCaches = async () => {
-    await Promise.allSettled(blobCacheNames.map((name) => caches.delete(name)));
-};
+const clearWebCaches = () =>
+    Promise.all(blobCacheNames.map((name) => caches.delete(name)));
 
 const clearOPFSCaches = async () => {
     const root = await navigator.storage.getDirectory();

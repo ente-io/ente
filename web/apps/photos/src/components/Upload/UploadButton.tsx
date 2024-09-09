@@ -4,45 +4,24 @@ import { type UploadTypeSelectorIntent } from "components/Upload/UploadTypeSelec
 import { t } from "i18next";
 import uploadManager from "services/upload/uploadManager";
 
-const Wrapper = styled("div")<{ $disableShrink: boolean }>`
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: opacity 1s ease;
-    cursor: pointer;
-    & .mobile-button {
-        display: none;
-    }
-    ${({ $disableShrink }) =>
-        !$disableShrink &&
-        `@media (max-width: 624px) {
-        & .mobile-button {
-            display: inline-flex;
-        }
-        & .desktop-button {
-            display: none;
-        }
-    }`}
-`;
-
-interface Iprops {
+interface UploadButtonProps {
     openUploader: (intent?: UploadTypeSelectorIntent) => void;
     text?: string;
     color?: ButtonProps["color"];
     disableShrink?: boolean;
     icon?: JSX.Element;
 }
-function UploadButton({
+export const UploadButton: React.FC<UploadButtonProps> = ({
     openUploader,
     text,
     color,
     disableShrink,
     icon,
-}: Iprops) {
+}) => {
     const onClickHandler = () => openUploader();
 
     return (
-        <Wrapper
+        <UploadButton_
             $disableShrink={disableShrink}
             style={{
                 cursor: !uploadManager.shouldAllowNewUpload() && "not-allowed",
@@ -66,8 +45,27 @@ function UploadButton({
             >
                 {icon ?? <FileUploadOutlinedIcon />}
             </IconButton>
-        </Wrapper>
+        </UploadButton_>
     );
-}
+};
 
-export default UploadButton;
+const UploadButton_ = styled("div")<{ $disableShrink: boolean }>`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 1s ease;
+    cursor: pointer;
+    & .mobile-button {
+        display: none;
+    }
+    ${({ $disableShrink }) =>
+        !$disableShrink &&
+        `@media (max-width: 624px) {
+        & .mobile-button {
+            display: inline-flex;
+        }
+        & .desktop-button {
+            display: none;
+        }
+    }`}
+`;

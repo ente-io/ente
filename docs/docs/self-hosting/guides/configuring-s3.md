@@ -33,7 +33,7 @@ and put your custom configuration there (in your case, you can put an entire
 
 > [!TIP]
 >
-> For more details about these configuration objects, see the documentaion for
+> For more details about these configuration objects, see the documentation for
 > the `s3` object in
 > [configurations/local.yaml](https://github.com/ente-io/ente/blob/main/server/configurations/local.yaml).
 
@@ -83,8 +83,8 @@ clients (e.g. the mobile app) and also from within the Docker compose cluster.
 
 ### Example
 
-An example `museum.yaml` when you're trying to connect to museum running on your computer from your
-phone on the same WiFi network:
+An example `museum.yaml` when you're trying to connect to museum running on your
+computer from your phone on the same WiFi network:
 
 ```
 s3:

@@ -32,7 +32,6 @@ import {
     Tabs,
     Typography,
 } from "@mui/material";
-import { CORNER_THRESHOLD, FILTER_DEFAULT_VALUES } from "constants/photoEditor";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import type { Dispatch, MutableRefObject, SetStateAction } from "react";
@@ -51,6 +50,17 @@ interface IProps {
     onClose: () => void;
     closePhotoViewer: () => void;
 }
+
+const FILTER_DEFAULT_VALUES = {
+    brightness: 100,
+    contrast: 100,
+    blur: 0,
+    saturation: 100,
+    invert: false,
+};
+
+// CORNER_THRESHOLD defines the threshold near the corners of the crop box in which dragging is assumed as not the intention
+const CORNER_THRESHOLD = 20;
 
 export const ImageEditorOverlayContext = createContext(
     {} as {

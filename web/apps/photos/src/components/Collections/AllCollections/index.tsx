@@ -3,8 +3,8 @@ import {
     AllCollectionDialog,
     Transition,
 } from "components/Collections/AllCollections/dialog";
-import { COLLECTION_LIST_SORT_BY } from "constants/collection";
 import { CollectionSummary } from "types/collection";
+import { COLLECTION_LIST_SORT_BY } from "utils/collection";
 import AllCollectionContent from "./content";
 import AllCollectionsHeader from "./header";
 

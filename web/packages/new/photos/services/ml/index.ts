@@ -229,11 +229,6 @@ const mlLocalKey = "mlEnabled";
  * that is synced with remote.
  */
 const isMLEnabledLocal = () => {
-    // Delete legacy ML keys.
-    //
-    // This code was added August 2024 (v1.7.3-beta) and can be removed at some
-    // point when most clients have migrated (tag: Migration).
-    localStorage.removeItem("faceIndexingEnabled");
     return localStorage.getItem(mlLocalKey) == "1";
 };
 
@@ -589,7 +584,7 @@ const workerDidProcessFileOrIdle = throttled(updateMLStatusSnapshot, 2000);
 /**
  * Use CLIP to perform a natural language search over image embeddings.
  *
- * @param searchPhrase The text entered by the user in the search box.
+ * @param searchPhrase Normalized (trimmed and lowercased) search phrase.
  *
  * It returns file (IDs) that should be shown in the search results, along with
  * their scores.

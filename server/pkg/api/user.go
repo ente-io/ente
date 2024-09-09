@@ -146,30 +146,6 @@ func (h *UserHandler) GetPublicKey(c *gin.Context) {
 	})
 }
 
-// GetRoadmapURL redirects the user to the feedback page
-func (h *UserHandler) GetRoadmapURL(c *gin.Context) {
-	userID := auth.GetUserID(c.Request.Header)
-	redirectURL, err := h.UserController.GetRoadmapURL(userID)
-	if err != nil {
-		handler.Error(c, stacktrace.Propagate(err, ""))
-		return
-	}
-	c.Redirect(http.StatusTemporaryRedirect, redirectURL)
-}
-
-// GetRoadmapURLV2 returns the jwt token attached redirect url to roadmap
-func (h *UserHandler) GetRoadmapURLV2(c *gin.Context) {
-	userID := auth.GetUserID(c.Request.Header)
-	roadmapURL, err := h.UserController.GetRoadmapURL(userID)
-	if err != nil {
-		handler.Error(c, stacktrace.Propagate(err, ""))
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{
-		"url": roadmapURL,
-	})
-}
-
 // GetSessionValidityV2 verifies the user's session token and returns if the user has set their keys or not
 func (h *UserHandler) GetSessionValidityV2(c *gin.Context) {
 	userID := auth.GetUserID(c.Request.Header)

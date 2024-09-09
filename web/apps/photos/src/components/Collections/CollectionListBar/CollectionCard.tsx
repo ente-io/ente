@@ -5,8 +5,8 @@ import PeopleIcon from "@mui/icons-material/People";
 import PushPin from "@mui/icons-material/PushPin";
 import { Box, Typography, styled } from "@mui/material";
 import Tooltip from "@mui/material/Tooltip";
-import { CollectionSummaryType } from "constants/collection";
 import { CollectionSummary } from "types/collection";
+import { CollectionSummaryType } from "utils/collection";
 import CollectionCard from "../CollectionCard";
 import {
     ActiveIndicator,

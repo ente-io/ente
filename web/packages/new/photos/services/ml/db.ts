@@ -1,9 +1,8 @@
-import { removeKV } from "@/base/kv";
 import log from "@/base/log";
-import localForage from "@ente/shared/storage/localForage";
 import { deleteDB, openDB, type DBSchema } from "idb";
+import type { CGroup } from "./cgroups";
 import type { LocalCLIPIndex } from "./clip";
-import type { CGroup, FaceCluster } from "./cluster";
+import type { FaceCluster } from "./cluster";
 import type { LocalFaceIndex } from "./face";
 
 /**
@@ -33,17 +32,17 @@ import type { LocalFaceIndex } from "./face";
  * In tandem, these serve as the underlying storage for the indexes maintained
  * in the ML database.
  *
- * The cluster related object stores are the following:
+ * The face clustering related object stores are the following:
  *
  * -   "face-cluster": Contains {@link FaceCluster} objects, one for each
  *     cluster of faces that either the clustering algorithm produced locally or
- *     were synced from remote. It is indexed by the (cluster) ID.
+ *     were synced from remote. It is indexed by the cluster ID.
  *
  * -   "cluster-group": Contains {@link CGroup} objects, one for each group of
  *     clusters that were synced from remote. The client can also locally
  *     generate cluster groups on certain user interactions, but these too will
  *     eventually get synced with remote. This object store is indexed by the
- *     (cgroup) ID.
+ *     cgroup ID.
  */
 interface MLDBSchema extends DBSchema {
     "file-status": {
@@ -107,8 +106,6 @@ interface FileStatus {
 let _mlDB: ReturnType<typeof openMLDB> | undefined;
 
 const openMLDB = async () => {
-    deleteLegacyDB();
-
     const db = await openDB<MLDBSchema>("ml", 1, {
         upgrade(db, oldVersion, newVersion) {
             log.info(`Upgrading ML DB ${oldVersion} => ${newVersion}`);
@@ -142,44 +139,6 @@ const openMLDB = async () => {
     return db;
 };
 
-const deleteLegacyDB = () => {
-    // Delete the legacy face DB v1.
-    //
-    // This code was added June 2024 (v1.7.1-rc) and can be removed at some
-    // point when most clients have migrated (tag: Migration).
-    void deleteDB("mldata");
-
-    // Delete the legacy CLIP (mostly) related keys from LocalForage.
-    //
-    // This code was added July 2024 (v1.7.2-rc) and can be removed at some
-    // point when most clients have migrated (tag: Migration).
-    void Promise.all([
-        localForage.removeItem("embeddings"),
-        localForage.removeItem("embedding_sync_time"),
-        localForage.removeItem("embeddings_v2"),
-        localForage.removeItem("file_embeddings"),
-        localForage.removeItem("onnx-clip-embedding_sync_time"),
-        localForage.removeItem("file-ml-clip-face-embedding_sync_time"),
-    ]);
-
-    // Delete keys for the legacy diff based sync.
-    //
-    // This code was added July 2024 (v1.7.3-beta). These keys were never
-    // enabled outside of the nightly builds, so this cleanup is not a hard
-    // need. Either ways, it can be removed at some point when most clients have
-    // migrated (tag: Migration).
-    void Promise.all([
-        removeKV("embeddingSyncTime:onnx-clip"),
-        removeKV("embeddingSyncTime:file-ml-clip-face"),
-    ]);
-
-    // Delete the legacy face DB v2.
-    //
-    // This code was added Aug 2024 (v1.7.3-beta) and can be removed at some
-    // point when most clients have migrated (tag: Migration).
-    void deleteDB("face");
-};
-
 /**
  * @returns a lazily created, cached connection to the ML DB.
  */
@@ -191,8 +150,6 @@ const mlDB = () => (_mlDB ??= openMLDB());
  * This is meant to be called during logout on the main thread.
  */
 export const clearMLDB = async () => {
-    deleteLegacyDB();
-
     try {
         if (_mlDB) (await _mlDB).close();
     } catch (e) {
@@ -483,25 +440,4 @@ export const applyCGroupDiff = async (diff: (string | CGroup)[]) => {
         ),
     );
     return tx.done;
-};
-
-/**
- * Add or overwrite the entry for the given {@link cgroup}, as identified by
- * their {@link id}.
- */
-// TODO-Cluster: Remove me
-export const saveClusterGroup = async (cgroup: CGroup) => {
-    const db = await mlDB();
-    const tx = db.transaction("cluster-group", "readwrite");
-    await Promise.all([tx.store.put(cgroup), tx.done]);
-};
-
-/**
- * Delete the entry (if any) for the cluster group with the given {@link id}.
- */
-// TODO-Cluster: Remove me
-export const deleteClusterGroup = async (id: string) => {
-    const db = await mlDB();
-    const tx = db.transaction("cluster-group", "readwrite");
-    await Promise.all([tx.store.delete(id), tx.done]);
 };

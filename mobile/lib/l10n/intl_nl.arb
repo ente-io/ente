@@ -937,6 +937,8 @@
   "encryptingBackup": "Back-up versleutelen...",
   "syncStopped": "Synchronisatie gestopt",
   "syncProgress": "{completed}/{total} herinneringen bewaard",
+  "uploadingMultipleMemories": "{count} herinneringen veiligstellen...",
+  "uploadingSingleMemory": "1 herinnering veiligstellen...",
   "@syncProgress": {
     "description": "Text to tell user how many memories have been preserved",
     "placeholders": {
@@ -1308,16 +1310,9 @@
   "thisWillRemovePublicLinksOfAllSelectedQuickLinks": "Hiermee worden openbare links van alle geselecteerde snelle links verwijderd.",
   "guestView": "Gasten weergave",
   "guestViewEnablePreSteps": "Om gasten weergave in te schakelen, moet u een toegangscode of schermvergrendeling instellen in uw systeeminstellingen.",
-  "cl_guest_view_title": "Gastweergave",
-  "cl_guest_view_description": "Geeft u een vriend uw telefoon om foto's te laten zien? Maakt u zich geen zorgen dat ze te ver swipen. Gastweergave zal diegene beperken tot de foto's die u selecteert.",
-  "cl_guest_view_call_to_action": "Selecteer foto's en bekijk \"Gastweergave\".",
-  "cl_panorama_viewer_title": "Panoramakijker",
-  "cl_panorama_viewer_description": "We hebben ondersteuning toegevoegd voor het bekijken van panoramafoto's met 360 graden weergave. De ervaring is immersief met op beweging gebaseerde navigatie!",
-  "cl_video_player_title": "Videospeler",
-  "cl_video_player_description": "Een verfrissende nieuwe videospeler, met betere afspeelknoppen en ondersteuning voor HDR-video's.",
   "appLockDescriptions": "Kies tussen het standaard vergrendelscherm van uw apparaat en een aangepast vergrendelscherm met een pincode of wachtwoord.",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Om appvergrendeling in te schakelen, moet u een toegangscode of schermvergrendeling instellen in uw systeeminstellingen.",
   "authToViewPasskey": "Verifieer uzelf om uw toegangssleutel te bekijken",
-  "loopVideoOn": "Loop video on",
-  "loopVideoOff": "Loop video off"
+  "loopVideoOn": "Video in lus afspelen aan",
+  "loopVideoOff": "Video in lus afspelen uit"
 }

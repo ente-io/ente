@@ -9,7 +9,6 @@ import { ensure } from "@/utils/ensure";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import { CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
-import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import {
     getData,
     LS_KEYS,
@@ -17,6 +16,7 @@ import {
     setLSUser,
 } from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
+import { unstashRedirect } from "./redirect";
 
 /**
  * Construct a redirect URL to take the user to Ente accounts app to
@@ -266,10 +266,5 @@ export const saveCredentialsAndNavigateTo = async (
     });
     setData(LS_KEYS.KEY_ATTRIBUTES, ensure(keyAttributes));
 
-    // TODO(MR): Remove the cast.
-    const redirectURL = InMemoryStore.get(MS_KEYS.REDIRECT_URL) as
-        | string
-        | undefined;
-    InMemoryStore.delete(MS_KEYS.REDIRECT_URL);
-    return redirectURL ?? "/credentials";
+    return unstashRedirect() ?? "/credentials";
 };

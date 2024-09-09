@@ -1,7 +1,7 @@
 import { UPLOAD_STAGES } from "@/new/photos/services/upload/types";
 import { Box, Divider, LinearProgress } from "@mui/material";
-import UploadProgressContext from "contexts/uploadProgress";
 import { useContext } from "react";
+import UploadProgressContext from "./context";
 
 export function UploadProgressBar() {
     const { uploadStage, percentComplete } = useContext(UploadProgressContext);

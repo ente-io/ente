@@ -3,8 +3,10 @@
 import { ensureElectron } from "@/base/electron";
 import { nameAndExtension } from "@/base/file";
 import log from "@/base/log";
+import { type Location } from "@/base/types";
 import type { UploadItem } from "@/new/photos/services/upload/types";
 import { readStream } from "@/new/photos/utils/native-stream";
+import { maybeParseInt } from "@/utils/parse";
 
 /**
  * The data we read from the JSON metadata sidecar files.
@@ -16,7 +18,7 @@ import { readStream } from "@/new/photos/utils/native-stream";
 export interface ParsedMetadataJSON {
     creationTime?: number;
     modificationTime?: number;
-    location?: { latitude: number; longitude: number };
+    location?: Location;
 }
 
 export const MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT = 46;
@@ -112,51 +114,62 @@ const parseMetadataJSONText = (text: string) => {
 
     const parsedMetadataJSON: ParsedMetadataJSON = {};
 
-    // The metadata provided by Google does not include the time zone where the
-    // photo was taken, it only has an epoch seconds value.
-    if (
-        metadataJSON["photoTakenTime"] &&
-        metadataJSON["photoTakenTime"]["timestamp"]
-    ) {
-        parsedMetadataJSON.creationTime =
-            metadataJSON["photoTakenTime"]["timestamp"] * 1e6;
-    } else if (
-        metadataJSON["creationTime"] &&
-        metadataJSON["creationTime"]["timestamp"]
-    ) {
-        parsedMetadataJSON.creationTime =
-            metadataJSON["creationTime"]["timestamp"] * 1e6;
-    }
+    parsedMetadataJSON.creationTime =
+        parseGTTimestamp(metadataJSON["photoTakenTime"]) ??
+        parseGTTimestamp(metadataJSON["creationTime"]);
 
-    if (
-        metadataJSON["modificationTime"] &&
-        metadataJSON["modificationTime"]["timestamp"]
-    ) {
-        parsedMetadataJSON.modificationTime =
-            metadataJSON["modificationTime"]["timestamp"] * 1e6;
-    }
+    parsedMetadataJSON.modificationTime = parseGTTimestamp(
+        metadataJSON["modificationTime"],
+    );
 
-    if (
-        metadataJSON["geoData"] &&
-        (metadataJSON["geoData"]["latitude"] !== 0.0 ||
-            metadataJSON["geoData"]["longitude"] !== 0.0)
-    ) {
-        parsedMetadataJSON.location = {
-            latitude: metadataJSON["geoData"]["latitude"],
-            longitude: metadataJSON["geoData"]["longitude"],
-        };
-    } else if (
-        metadataJSON["geoDataExif"] &&
-        (metadataJSON["geoDataExif"]["latitude"] !== 0.0 ||
-            metadataJSON["geoDataExif"]["longitude"] !== 0.0)
-    ) {
-        parsedMetadataJSON.location = {
-            latitude: metadataJSON["geoDataExif"]["latitude"],
-            longitude: metadataJSON["geoDataExif"]["longitude"],
-        };
-    }
+    parsedMetadataJSON.location =
+        parseGTLocation(metadataJSON["geoData"]) ??
+        parseGTLocation(metadataJSON["geoDataExif"]);
 
     return parsedMetadataJSON;
+};
+
+/**
+ * Parse a nullish epoch seconds timestamp string from a field in a Google
+ * Takeout JSON, converting it into epoch microseconds if it is found.
+ *
+ * Note that the metadata provided by Google does not include the time zone
+ * where the photo was taken, it only has an epoch seconds value. There is an
+ * associated formatted date value (e.g. "17 Feb 2021, 03:22:16 UTC") but that
+ * seems to be in UTC and doesn't have the time zone either.
+ */
+const parseGTTimestamp = (o: unknown): number | undefined => {
+    if (
+        o &&
+        typeof o == "object" &&
+        "timestamp" in o &&
+        typeof o.timestamp == "string"
+    ) {
+        const timestamp = maybeParseInt(o.timestamp);
+        if (timestamp) return timestamp * 1e6;
+    }
+    return undefined;
+};
+
+/**
+ * Parse a (latitude, longitude) location pair field in a Google Takeout JSON.
+ *
+ * Apparently Google puts in (0, 0) to indicate missing data, so this function
+ * only returns a parsed result if both components are present and non-zero.
+ */
+const parseGTLocation = (o: unknown): Location | undefined => {
+    if (
+        o &&
+        typeof o == "object" &&
+        "latitude" in o &&
+        typeof o.latitude == "number" &&
+        "longitude" in o &&
+        typeof o.longitude == "number"
+    ) {
+        const { latitude, longitude } = o;
+        if (latitude !== 0 || longitude !== 0) return { latitude, longitude };
+    }
+    return undefined;
 };
 
 /**

@@ -185,7 +185,6 @@ s3:
     #         primaryBucket:
     #         replicaBuckets: []
 
-
 # Key used for encrypting customer emails before storing them in DB
 #
 # To make it easy to get started, some randomly generated values are provided
@@ -259,17 +258,6 @@ webauthn:
     # See: https://github.com/go-webauthn/webauthn
     rporigins:
         - "http://localhost:3001"
-
-# Roadmap SSO (optional)
-#
-# Allow the user to sign into an hosted roadmap service using their ente.io
-# credentials. Here we can can configure the URL prefix and service levels
-# credentials for SSO.
-roadmap:
-    # The prefix of the URL the user should be redirected to
-    url-prefix:
-    # This secret can be obtained from the roadmap dashboard
-    sso-secret:
 
 # Discord config (optional)
 # Use case: Devops

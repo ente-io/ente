@@ -3,7 +3,7 @@ import {
     decryptPublicMagicMetadata,
     type PublicMagicMetadata,
 } from "@/media/file-metadata";
-import { EnteFile } from "@/new/photos/types/file";
+import type { EnteFile } from "@/new/photos/types/file";
 import { fileLogID } from "@/new/photos/utils/file";
 
 /**

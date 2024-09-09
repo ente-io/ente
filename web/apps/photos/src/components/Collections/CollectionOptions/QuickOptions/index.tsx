@@ -1,7 +1,7 @@
 import { FlexWrapper } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
-import { CollectionSummaryType } from "constants/collection";
 import {
+    CollectionSummaryType,
     showDownloadQuickOption,
     showEmptyTrashQuickOption,
     showShareQuickOption,

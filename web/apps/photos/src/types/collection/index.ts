@@ -5,7 +5,7 @@ import {
     MagicMetadataCore,
     SUB_TYPE,
 } from "@/new/photos/types/magicMetadata";
-import { CollectionSummaryType, CollectionType } from "constants/collection";
+import { CollectionSummaryType, CollectionType } from "utils/collection";
 
 export enum COLLECTION_ROLE {
     VIEWER = "VIEWER",

@@ -4,7 +4,7 @@ import {
     triggerMLStatusSync,
     triggerMLSync,
 } from "@/new/photos/services/ml";
-import { syncEntities } from "services/entityService";
+import { triggerSearchDataSync } from "@/new/photos/services/search";
 import { syncMapEnabled } from "services/userService";
 
 /**
@@ -16,9 +16,14 @@ export const triggerPreFileInfoSync = () => {
 };
 
 /**
- * Perform a soft "refresh" by making various API calls to fetch state from
- * remote, using it to update our local state, and triggering periodic jobs that
- * depend on the local state.
+ * Sync our local state with remote on page load for web and focus for desktop.
+ *
+ * This function makes various API calls to fetch state from remote, using it to
+ * update our local state, and triggering periodic jobs that depend on the local
+ * state.
+ *
+ * This runs on initial page load (on both web and desktop). In addition for
+ * desktop, it also runs each time the desktop app gains focus.
  *
  * TODO: This is called after we've synced the local files DBs with remote. That
  * code belongs here, but currently that state is persisted in the top level
@@ -30,7 +35,7 @@ export const triggerPreFileInfoSync = () => {
  * before doing the file sync and thus should run immediately after login.
  */
 export const sync = async () => {
-    await syncEntities();
-    await syncMapEnabled();
+    await Promise.all([syncMapEnabled()]);
+    triggerSearchDataSync();
     if (isMLSupported) triggerMLSync();
 };
