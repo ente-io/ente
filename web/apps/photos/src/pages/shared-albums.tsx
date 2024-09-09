@@ -1,5 +1,6 @@
-import { SelectionBar } from "@/base/components/Navbar";
+import { NavbarBase, SelectionBar } from "@/base/components/Navbar";
 import { sharedCryptoWorker } from "@/base/crypto";
+import { useIsTouchscreen } from "@/base/hooks";
 import log from "@/base/log";
 import downloadManager from "@/new/photos/services/download";
 import { EnteFile } from "@/new/photos/types/file";
@@ -26,11 +27,12 @@ import CloseIcon from "@mui/icons-material/Close";
 import DownloadIcon from "@mui/icons-material/Download";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
-import { Box, IconButton, Stack, Tooltip } from "@mui/material";
+import { Box, Button, IconButton, Stack, Tooltip } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import bs58 from "bs58";
 import { CollectionInfo } from "components/Collections/CollectionInfo";
 import { CollectionInfoBarWrapper } from "components/Collections/styledComponents";
+import { EnteLogo } from "components/EnteLogo";
 import {
     FilesDownloadProgress,
     FilesDownloadProgressAttributes,
@@ -42,7 +44,6 @@ import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
 import { UploadButton } from "components/Upload/UploadButton";
 import Uploader from "components/Upload/Uploader";
 import { UploadSelectorInputs } from "components/UploadSelectorInputs";
-import SharedAlbumNavbar from "components/pages/sharedAlbum/Navbar";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { AppContext } from "pages/_app";
@@ -608,6 +609,55 @@ export default function PublicCollectionGallery() {
         </PublicCollectionGalleryContext.Provider>
     );
 }
+
+function SharedAlbumNavbar({ showUploadButton, openUploader }) {
+    return (
+        <NavbarBase>
+            <FluidContainer>
+                <EnteLinkLogo />
+            </FluidContainer>
+            {showUploadButton ? (
+                <UploadButton
+                    openUploader={openUploader}
+                    icon={<AddPhotoAlternateOutlined />}
+                    text={t("ADD_PHOTOS")}
+                />
+            ) : (
+                <GoToEnte />
+            )}
+        </NavbarBase>
+    );
+}
+
+const EnteLinkLogo: React.FC = () => {
+    return (
+        <a href="https://ente.io">
+            <Box
+                sx={(theme) => ({
+                    ":hover": {
+                        cursor: "pointer",
+                        svg: {
+                            fill: theme.colors.text.faint,
+                        },
+                    },
+                })}
+            >
+                <EnteLogo />
+            </Box>
+        </a>
+    );
+};
+
+const GoToEnte: React.FC = () => {
+    // Touchscreen devices are overwhemingly likely to be Android or iOS.
+    const isTouchscreen = useIsTouchscreen();
+
+    return (
+        <Button color="accent" href="https://ente.io">
+            {isTouchscreen ? t("INSTALL") : t("SIGN_UP")}
+        </Button>
+    );
+};
 
 interface SelectedFileOptionsProps {
     count: number;
