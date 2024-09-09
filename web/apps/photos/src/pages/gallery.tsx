@@ -1308,7 +1308,7 @@ export const UploadButton: React.FC<UploadButtonProps> = ({ onClick }) => {
     const isMobileWidth = useIsMobileWidth();
 
     return (
-        <Box sx={{ cursor: disabled ? "not-allowed" : "pointer" }}>
+        <Box>
             {isMobileWidth ? (
                 <IconButton onClick={onClick} disabled={disabled}>
                     {<FileUploadOutlinedIcon />}
