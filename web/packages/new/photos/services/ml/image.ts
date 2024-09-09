@@ -5,9 +5,17 @@ import { ensure } from "@/utils/ensure";
 import { Matrix, inverse } from "ml-matrix";
 import { clamp } from "./math";
 
+const gaussianKernelSize = 5;
+const gaussianKernelRadius = Math.floor(gaussianKernelSize / 2);
+const gaussianSigma = 10.0;
+const gaussianKernel: number[][] = create2DGaussianKernel(
+    gaussianKernelSize,
+    gaussianSigma,
+);
+
 /**
  * Returns the pixel value (RGB) at the given coordinates ({@link fx},
- * {@link fy}) using bilinear interpolation.
+ * {@link fy}) using bilinear interpolation (optionally with antialias)
  */
 export function pixelRGBBilinear(
     fx: number,
@@ -15,6 +23,7 @@ export function pixelRGBBilinear(
     imageData: Uint8ClampedArray,
     imageWidth: number,
     imageHeight: number,
+    useAntiAlias = false,
 ) {
     // Clamp to image boundaries.
     fx = clamp(fx, 0, imageWidth - 1);
@@ -31,10 +40,11 @@ export function pixelRGBBilinear(
     const dy1 = 1.0 - dy;
 
     // Get the original pixels.
-    const pixel1 = pixelRGBA(imageData, imageWidth, imageHeight, x0, y0);
-    const pixel2 = pixelRGBA(imageData, imageWidth, imageHeight, x1, y0);
-    const pixel3 = pixelRGBA(imageData, imageWidth, imageHeight, x0, y1);
-    const pixel4 = pixelRGBA(imageData, imageWidth, imageHeight, x1, y1);
+    const getPixelRGBA: Function = useAntiAlias ? pixelRGBABlurred : pixelRGBA;
+    const pixel1 = getPixelRGBA(imageData, imageWidth, imageHeight, x0, y0);
+    const pixel2 = getPixelRGBA(imageData, imageWidth, imageHeight, x1, y0);
+    const pixel3 = getPixelRGBA(imageData, imageWidth, imageHeight, x0, y1);
+    const pixel4 = getPixelRGBA(imageData, imageWidth, imageHeight, x1, y1);
 
     const bilinear = (val1: number, val2: number, val3: number, val4: number) =>
         Math.round(
@@ -60,7 +70,7 @@ const pixelRGBA = (
     y: number,
 ) => {
     if (x < 0 || x >= width || y < 0 || y >= height) {
-        return { r: 0, g: 0, b: 0, a: 0 };
+        return { r: 114, g: 114, b: 114, a: 0 };
     }
     const index = (y * width + x) * 4;
     return {
@@ -69,6 +79,32 @@ const pixelRGBA = (
         b: ensure(imageData[index + 2]),
         a: ensure(imageData[index + 3]),
     };
+};
+
+const pixelRGBABlurred = (
+    imageData: Uint8ClampedArray,
+    width: number,
+    height: number,
+    x: number,
+    y: number,
+) => {
+    let r = 0,
+        g = 0,
+        b = 0;
+    for (let ky = 0; ky < gaussianKernelSize; ky++) {
+        for (let kx = 0; kx < gaussianKernelSize; kx++) {
+            const px = x - gaussianKernelRadius + kx;
+            const py = y - gaussianKernelRadius + ky;
+
+            const pixelRgbTuple = pixelRGBA(imageData, width, height, px, py);
+            const weight = gaussianKernel[ky][kx];
+
+            r += pixelRgbTuple.r * weight;
+            g += pixelRgbTuple.g * weight;
+            b += pixelRgbTuple.b * weight;
+        }
+    }
+    return { r: Math.round(r), g: Math.round(g), b: Math.round(b), a: 255 };
 };
 
 /**
@@ -287,3 +323,30 @@ export const grayscaleIntMatrixFromNormalized2List = (
         }),
     );
 };
+
+function create2DGaussianKernel(size: number, sigma: number): number[][] {
+    const kernel: number[][] = Array(size).map(() => Array(size).fill(0));
+    let sum = 0.0;
+    const center = Math.floor(size / 2);
+
+    for (let y = 0; y < size; y++) {
+        for (let x = 0; x < size; x++) {
+            const dx = x - center;
+            const dy = y - center;
+            const g =
+                (1 / (2 * Math.PI * sigma * sigma)) *
+                Math.exp(-(dx * dx + dy * dy) / (2 * sigma * sigma));
+            kernel[y][x] = g;
+            sum += g;
+        }
+    }
+
+    // Normalize the kernel
+    for (let y = 0; y < size; y++) {
+        for (let x = 0; x < size; x++) {
+            kernel[y][x] /= sum;
+        }
+    }
+
+    return kernel;
+}
