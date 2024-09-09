@@ -687,12 +687,19 @@ function ManageSubscription({
     closeModal,
     setLoading,
 }: ManageSubscriptionProps) {
+    const { setDialogMessage } = useContext(AppContext);
+
     const openFamilyPortal = async () => {
         setLoading(true);
         try {
             openURL(await getFamilyPortalRedirectURL());
         } catch (e) {
             log.error("Could not redirect to family portal", e);
+            setDialogMessage({
+                title: t("ERROR"),
+                content: t("UNKNOWN_ERROR"),
+                close: { variant: "critical" },
+            });
         }
         setLoading(false);
     };
