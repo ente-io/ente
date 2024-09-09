@@ -7,7 +7,15 @@ import useComponentScroll, {
 } from "@ente/shared/hooks/useComponentScroll";
 import useWindowSize from "@ente/shared/hooks/useWindowSize";
 import ExpandMore from "@mui/icons-material/ExpandMore";
-import { Box, IconButton, Typography, useMediaQuery } from "@mui/material";
+import NavigateNextIcon from "@mui/icons-material/NavigateNext";
+import {
+    Box,
+    IconButton,
+    Typography,
+    css,
+    styled,
+    useMediaQuery,
+} from "@mui/material";
 import CollectionListBarCard from "components/Collections/CollectionListBar/CollectionCard";
 import {
     CollectionListBarWrapper,
@@ -25,7 +33,6 @@ import {
 import { CollectionSummary } from "types/collection";
 import { ALL_SECTION, COLLECTION_LIST_SORT_BY } from "utils/collection";
 import CollectionListSortBy from "../CollectionListSortBy";
-import ScrollButton from "./ScrollButton";
 
 interface IProps {
     activeCollectionID?: number;
@@ -202,3 +209,46 @@ const CollectionListBar = (props: IProps) => {
 };
 
 export default CollectionListBar;
+
+const Wrapper = styled("button")<{ direction: SCROLL_DIRECTION }>`
+    position: absolute;
+    z-index: 2;
+    top: 7px;
+    height: 50px;
+    width: 50px;
+    border: none;
+    padding: 0;
+    margin: 0;
+
+    border-radius: 50%;
+    background-color: ${({ theme }) => theme.colors.backdrop.muted};
+    color: ${({ theme }) => theme.colors.stroke.base};
+
+    ${(props) =>
+        props.direction === SCROLL_DIRECTION.LEFT
+            ? css`
+                  left: 0;
+                  text-align: right;
+                  transform: translate(-50%, 0%);
+              `
+            : css`
+                  right: 0;
+                  text-align: left;
+                  transform: translate(50%, 0%);
+              `}
+
+    & > svg {
+        ${(props) =>
+            props.direction === SCROLL_DIRECTION.LEFT &&
+            "transform:rotate(180deg);"}
+        border-radius: 50%;
+        height: 30px;
+        width: 30px;
+    }
+`;
+
+const ScrollButton = ({ scrollDirection, ...rest }) => (
+    <Wrapper direction={scrollDirection} {...rest}>
+        <NavigateNextIcon />
+    </Wrapper>
+);
