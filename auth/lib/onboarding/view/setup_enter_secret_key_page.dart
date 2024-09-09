@@ -98,7 +98,6 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
     _streamSubscription?.cancel();
     _issuerController.dispose();
     _accountController.dispose();
-    _accountController.dispose();
     _notesController.dispose();
     super.dispose();
   }
