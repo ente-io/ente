@@ -265,13 +265,15 @@ function useComponentScroll({ dependencies }: { dependencies: any[] }) {
     };
 }
 
-const ScrollButton = ({ scrollDirection, ...rest }) => (
-    <ScrollButtonWrapper direction={scrollDirection} {...rest}>
+const ScrollButtonBase: React.FC<
+    React.ButtonHTMLAttributes<HTMLButtonElement>
+> = (props) => (
+    <ScrollButtonBase_ {...props}>
         <NavigateNextIcon />
-    </ScrollButtonWrapper>
+    </ScrollButtonBase_>
 );
 
-const ScrollButtonBase = styled("button")`
+const ScrollButtonBase_ = styled("button")`
     position: absolute;
     z-index: 2;
     top: 7px;
