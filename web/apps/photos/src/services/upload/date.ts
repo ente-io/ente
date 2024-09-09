@@ -53,14 +53,14 @@ const parseEpochMicrosecondsFromFileName = (fileName: string) => {
 
 export function validateAndGetCreationUnixTimeInMicroSeconds(dateTime: Date) {
     if (!dateTime || isNaN(dateTime.getTime())) {
-        return null;
+        return undefined;
     }
     const unixTime = dateTime.getTime() * 1000;
     //ignoring dateTimeString = "0000:00:00 00:00:00"
     if (unixTime === Date.UTC(0, 0, 0, 0, 0, 0, 0) || unixTime === 0) {
-        return null;
+        return undefined;
     } else if (unixTime > Date.now() * 1000) {
-        return null;
+        return undefined;
     } else {
         return unixTime;
     }
@@ -126,34 +126,25 @@ export const parseDateFromDigitGroups = (s: string) => {
     });
 };
 
-function validateAndGetDateFromComponents(
-    dateComponents: DateComponents,
-    options = { minYear: 1990, maxYear: currentYear + 1 },
-) {
-    let date = getDateFromComponents(dateComponents);
-    if (
-        hasTimeValues(dateComponents) &&
-        !isTimePartValid(date, dateComponents)
-    ) {
+const validateAndGetDateFromComponents = (components: DateComponents) => {
+    let date = dateFromComponents(components);
+    if (hasTimeValues(components) && !isTimePartValid(date, components)) {
         // If the date has time values but they are not valid then remove them.
-        date = getDateFromComponents({
-            ...dateComponents,
+        date = dateFromComponents({
+            ...components,
             hour: 0,
             minute: 0,
             second: 0,
         });
     }
-    if (!isDatePartValid(date, dateComponents)) {
-        return null;
+    if (!isDatePartValid(date, components)) {
+        return undefined;
     }
-    if (
-        date.getFullYear() < options.minYear ||
-        date.getFullYear() > options.maxYear
-    ) {
-        return null;
+    if (date.getFullYear() < 1990 || date.getFullYear() > currentYear + 1) {
+        return undefined;
     }
     return date;
-}
+};
 
 const isDatePartValid = (date: Date, { year, month, day }: DateComponents) =>
     date.getFullYear() === year &&
@@ -168,7 +159,7 @@ const isTimePartValid = (
     date.getMinutes() === minute &&
     date.getSeconds() === second;
 
-const getDateFromComponents = (dateComponents: DateComponents) => {
+const dateFromComponents = (dateComponents: DateComponents) => {
     const { year, month, day, hour, minute, second } = dateComponents;
     if (hasTimeValues(dateComponents)) {
         return new Date(year, month, day, hour, minute, second);
