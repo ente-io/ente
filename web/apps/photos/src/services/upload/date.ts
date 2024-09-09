@@ -59,43 +59,37 @@ export function validateAndGetCreationUnixTimeInMicroSeconds(dateTime: Date) {
     }
 }
 
-interface DateComponent<T = number> {
-    year: T;
-    month: T;
-    day: T;
-    hour: T;
-    minute: T;
-    second: T;
-}
-
 const currentYear = new Date().getFullYear();
 
 /**
- * Parse a date from a string of the format YYYYMMDD-HHMMSS.
+ * An intermediate data structure we use for the functions in this file. It
+ * stores the various components of a JavaScript date.
+ *
+ * In particular, the month is 0-indexed, as it is for the JavaScript Date's
+ * `getMonth`.
+ */
+interface DateComponents {
+    year: number;
+    month: number;
+    day: number;
+    hour: number;
+    minute: number;
+    second: number;
+}
+
+/**
+ * Parse a date from a string of the form "YYYYMMDD-HHMMSS".
  */
 const parseDateFromFusedDateString = (s: string) =>
-    validateAndGetDateFromComponents(
-        dateComponentsStringToNumber({
-            year: s.slice(0, 4),
-            month: s.slice(4, 6),
-            day: s.slice(6, 8),
-            hour: s.slice(9, 11),
-            minute: s.slice(11, 13),
-            second: s.slice(13, 15),
-        }),
-    );
-
-const dateComponentsStringToNumber = (
-    dateComponent: DateComponent<string>,
-): DateComponent<number> => ({
-    year: Number(dateComponent.year),
-    // Month argument to Javascript Date constructor is 0-indexed (i.e 0 to 11).
-    month: Number(dateComponent.month) - 1,
-    day: Number(dateComponent.day),
-    hour: Number(dateComponent.hour),
-    minute: Number(dateComponent.minute),
-    second: Number(dateComponent.second),
-});
+    validateAndGetDateFromComponents({
+        year: Number(s.slice(0, 4)),
+        // JavaScript Date's month is 0-indexed.
+        month: Number(s.slice(4, 6)) - 1,
+        day: Number(s.slice(6, 8)),
+        hour: Number(s.slice(9, 11)),
+        minute: Number(s.slice(11, 13)),
+        second: Number(s.slice(13, 15)),
+    });
 
 /**
  * Try to see if we can parse an date from a string with arbitrary separators.
@@ -107,31 +101,38 @@ const dateComponentsStringToNumber = (
 export const parseDateFromDigitGroups = (s: string) => {
     const [year, month, day, hour, minute, second] = s.match(/\d+/g) ?? [];
 
-    const dateComponent = { year, month, day, hour, minute, second };
-
-    if (dateComponent.year?.length === 8 && dateComponent.month?.length === 6) {
-        // If the filename has size 8 consecutive and then 6 consecutive digits,
-        // then there is a high possibility that the it is a date in format
-        // "YYYYMMDD-HHMMSS".
-        const possibleDateTime = dateComponent.year + "-" + dateComponent.month;
-        return parseDateFromFusedDateString(possibleDateTime);
+    // If the filename has 8 consecutive and then 6 consecutive digits, then
+    // there is a high possibility that it is a date of the form
+    // "YYYYMMDD-HHMMSS".
+    if (year?.length == 8 && month?.length == 6) {
+        return parseDateFromFusedDateString(year + "-" + month);
     }
-    return validateAndGetDateFromComponents(
-        dateComponentsStringToNumber(dateComponent),
-    );
+
+    return validateAndGetDateFromComponents({
+        year: Number(year),
+        // JavaScript Date's month is 0-indexed.
+        month: Number(month) - 1,
+        day: Number(day),
+        hour: Number(hour),
+        minute: Number(minute),
+        second: Number(second),
+    });
 };
 
 function validateAndGetDateFromComponents(
-    dateComponent: DateComponent<number>,
+    dateComponents: DateComponents,
     options = { minYear: 1990, maxYear: currentYear + 1 },
 ) {
-    let date = getDateFromComponents(dateComponent);
-    if (hasTimeValues(dateComponent) && !isTimePartValid(date, dateComponent)) {
+    let date = getDateFromComponents(dateComponents);
+    if (
+        hasTimeValues(dateComponents) &&
+        !isTimePartValid(date, dateComponents)
+    ) {
         // if the date has time values but they are not valid
         // then we remove the time values and try to validate the date
-        date = getDateFromComponents(removeTimeValues(dateComponent));
+        date = getDateFromComponents(removeTimeValues(dateComponents));
     }
-    if (!isDatePartValid(date, dateComponent)) {
+    if (!isDatePartValid(date, dateComponents)) {
         return null;
     }
     if (
@@ -143,38 +144,36 @@ function validateAndGetDateFromComponents(
     return date;
 }
 
-function isTimePartValid(date: Date, dateComponent: DateComponent<number>) {
+function isTimePartValid(date: Date, dateComponents: DateComponents) {
     return (
-        date.getHours() === dateComponent.hour &&
-        date.getMinutes() === dateComponent.minute &&
-        date.getSeconds() === dateComponent.second
+        date.getHours() === dateComponents.hour &&
+        date.getMinutes() === dateComponents.minute &&
+        date.getSeconds() === dateComponents.second
     );
 }
 
-function isDatePartValid(date: Date, dateComponent: DateComponent<number>) {
+function isDatePartValid(date: Date, dateComponents: DateComponents) {
     return (
-        date.getFullYear() === dateComponent.year &&
-        date.getMonth() === dateComponent.month &&
-        date.getDate() === dateComponent.day
+        date.getFullYear() === dateComponents.year &&
+        date.getMonth() === dateComponents.month &&
+        date.getDate() === dateComponents.day
     );
 }
 
-function getDateFromComponents(dateComponent: DateComponent<number>) {
-    const { year, month, day, hour, minute, second } = dateComponent;
-    if (hasTimeValues(dateComponent)) {
+function getDateFromComponents(dateComponents: DateComponents) {
+    const { year, month, day, hour, minute, second } = dateComponents;
+    if (hasTimeValues(dateComponents)) {
         return new Date(year, month, day, hour, minute, second);
     } else {
         return new Date(year, month, day);
     }
 }
 
-function hasTimeValues(dateComponent: DateComponent<number>) {
-    const { hour, minute, second } = dateComponent;
+function hasTimeValues(dateComponents: DateComponents) {
+    const { hour, minute, second } = dateComponents;
     return !isNaN(hour) && !isNaN(minute) && !isNaN(second);
 }
 
-function removeTimeValues(
-    dateComponent: DateComponent<number>,
-): DateComponent<number> {
-    return { ...dateComponent, hour: 0, minute: 0, second: 0 };
+function removeTimeValues(dateComponents: DateComponents): DateComponents {
+    return { ...dateComponents, hour: 0, minute: 0, second: 0 };
 }
