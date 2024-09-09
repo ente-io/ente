@@ -104,9 +104,7 @@ const CollectionListBar = (props: IProps) => {
         scrollComponent,
         onFarLeft,
         onFarRight,
-    } = useComponentScroll({
-        dependencies: [windowSize, collectionSummaries],
-    });
+    } = useComponentScroll([windowSize, collectionSummaries]);
 
     const collectionListRef = React.useRef(null);
 
@@ -200,7 +198,7 @@ const CollectionListBar = (props: IProps) => {
 
 export default CollectionListBar;
 
-function useComponentScroll({ dependencies }: { dependencies: any[] }) {
+const useComponentScroll = (deps: React.DependencyList) => {
     const componentRef = useRef<HTMLDivElement>(null);
 
     const [scrollObj, setScrollObj] = useState<{
@@ -236,7 +234,7 @@ function useComponentScroll({ dependencies }: { dependencies: any[] }) {
 
     useEffect(() => {
         updateScrollObj();
-    }, [...dependencies]);
+    }, deps);
 
     const scrollComponent = (direction: number) => () => {
         componentRef.current.scrollBy(250 * direction, 0);
@@ -254,7 +252,7 @@ function useComponentScroll({ dependencies }: { dependencies: any[] }) {
         scrollComponent,
         componentRef,
     };
-}
+};
 
 const ScrollButtonBase: React.FC<
     React.ButtonHTMLAttributes<HTMLButtonElement>
