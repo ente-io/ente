@@ -30,7 +30,7 @@ import { CollectionSummary } from "types/collection";
 import { ALL_SECTION, COLLECTION_LIST_SORT_BY } from "utils/collection";
 import CollectionListSortBy from "../CollectionListSortBy";
 
-interface IProps {
+interface CollectionListBarProps {
     activeCollectionID?: number;
     isInHiddenSection: boolean;
     setActiveCollectionID: (id?: number) => void;
@@ -39,6 +39,156 @@ interface IProps {
     collectionListSortBy: COLLECTION_LIST_SORT_BY;
     setCollectionListSortBy: (v: COLLECTION_LIST_SORT_BY) => void;
 }
+
+export const CollectionListBar: React.FC<CollectionListBarProps> = ({
+    activeCollectionID,
+    setActiveCollectionID,
+    collectionSummaries,
+    showAllCollections,
+    isInHiddenSection,
+    setCollectionListSortBy,
+    collectionListSortBy,
+}) => {
+    const windowSize = useWindowSize();
+    const isMobile = useMediaQuery("(max-width: 428px)");
+
+    const collectionListWrapperRef = useRef<HTMLDivElement>(null);
+    const collectionListRef = React.useRef(null);
+
+    const [scrollObj, setScrollObj] = useState<{
+        scrollLeft?: number;
+        scrollWidth?: number;
+        clientWidth?: number;
+    }>({});
+
+    const updateScrollObj = () => {
+        if (!collectionListWrapperRef.current) {
+            return;
+        }
+        const { scrollLeft, scrollWidth, clientWidth } =
+            collectionListWrapperRef.current;
+        setScrollObj({ scrollLeft, scrollWidth, clientWidth });
+    };
+
+    useEffect(() => {
+        if (!collectionListWrapperRef.current) {
+            return;
+        }
+        // Add event listener
+        collectionListWrapperRef.current?.addEventListener(
+            "scroll",
+            updateScrollObj,
+        );
+
+        // Call handler right away so state gets updated with initial window size
+        updateScrollObj();
+        // Remove event listener on cleanup
+        return () =>
+            collectionListWrapperRef.current?.removeEventListener(
+                "resize",
+                updateScrollObj,
+            );
+    }, [collectionListWrapperRef.current]);
+
+    useEffect(() => {
+        updateScrollObj();
+    }, [windowSize, collectionSummaries]);
+
+    const scrollComponent = (direction: number) => () => {
+        collectionListWrapperRef.current.scrollBy(250 * direction, 0);
+    };
+
+    const onFarLeft = scrollObj.scrollLeft === 0;
+    const onFarRight =
+        scrollObj.scrollLeft + scrollObj.clientWidth === scrollObj.scrollWidth;
+
+    useEffect(() => {
+        if (!collectionListRef.current) {
+            return;
+        }
+        // scroll the active collection into view
+        const activeCollectionIndex = collectionSummaries.findIndex(
+            (item) => item.id === activeCollectionID,
+        );
+        collectionListRef.current.scrollToItem(activeCollectionIndex, "smart");
+    }, [activeCollectionID]);
+
+    const onCollectionClick = (collectionID?: number) => {
+        setActiveCollectionID(collectionID ?? ALL_SECTION);
+    };
+
+    const itemData = createItemData(
+        collectionSummaries,
+        activeCollectionID,
+        onCollectionClick,
+    );
+
+    return (
+        <CollectionListBarWrapper>
+            <SpaceBetweenFlex mb={1}>
+                <Typography>
+                    {isInHiddenSection ? t("HIDDEN_ALBUMS") : t("ALBUMS")}
+                </Typography>
+                {isMobile && (
+                    <Box display="flex" alignItems={"center"} gap={1}>
+                        <CollectionListSortBy
+                            setSortBy={setCollectionListSortBy}
+                            activeSortBy={collectionListSortBy}
+                            disableBG
+                        />
+                        <IconButton onClick={showAllCollections}>
+                            <ExpandMore />
+                        </IconButton>
+                    </Box>
+                )}
+            </SpaceBetweenFlex>
+            <Box display="flex" alignItems="flex-start" gap={2}>
+                <CollectionListWrapper>
+                    {!onFarLeft && (
+                        <ScrollButtonLeft onClick={scrollComponent(-1)} />
+                    )}
+                    <AutoSizer disableHeight>
+                        {({ width }) => (
+                            <List
+                                ref={collectionListRef}
+                                outerRef={collectionListWrapperRef}
+                                itemData={itemData}
+                                layout="horizontal"
+                                width={width}
+                                height={110}
+                                itemKey={getItemKey}
+                                itemCount={collectionSummaries.length}
+                                itemSize={CollectionListBarCardWidth}
+                                useIsScrolling
+                            >
+                                {CollectionCardContainer}
+                            </List>
+                        )}
+                    </AutoSizer>
+                    {!onFarRight && (
+                        <ScrollButtonRight onClick={scrollComponent(+1)} />
+                    )}
+                </CollectionListWrapper>
+                {!isMobile && (
+                    <Box
+                        display="flex"
+                        alignItems={"center"}
+                        gap={1}
+                        height={"64px"}
+                    >
+                        <CollectionListSortBy
+                            setSortBy={setCollectionListSortBy}
+                            activeSortBy={collectionListSortBy}
+                        />
+                        <IconButtonWithBG onClick={showAllCollections}>
+                            <ExpandMore />
+                        </IconButtonWithBG>
+                    </Box>
+                )}
+            </Box>
+        </CollectionListBarWrapper>
+    );
+};
 
 interface ItemData {
     collectionSummaries: CollectionSummary[];
@@ -85,173 +235,6 @@ const CollectionCardContainer = React.memo(
 
 const getItemKey = (index: number, data: ItemData) => {
     return `${data.collectionSummaries[index].id}-${data.collectionSummaries[index].coverFile?.id}`;
-};
-
-const CollectionListBar = (props: IProps) => {
-    const {
-        activeCollectionID,
-        setActiveCollectionID,
-        collectionSummaries,
-        showAllCollections,
-        isInHiddenSection,
-    } = props;
-
-    const windowSize = useWindowSize();
-    const isMobile = useMediaQuery("(max-width: 428px)");
-
-    const {
-        componentRef: collectionListWrapperRef,
-        scrollComponent,
-        onFarLeft,
-        onFarRight,
-    } = useComponentScroll([windowSize, collectionSummaries]);
-
-    const collectionListRef = React.useRef(null);
-
-    useEffect(() => {
-        if (!collectionListRef.current) {
-            return;
-        }
-        // scroll the active collection into view
-        const activeCollectionIndex = collectionSummaries.findIndex(
-            (item) => item.id === activeCollectionID,
-        );
-        collectionListRef.current.scrollToItem(activeCollectionIndex, "smart");
-    }, [activeCollectionID]);
-
-    const onCollectionClick = (collectionID?: number) => {
-        setActiveCollectionID(collectionID ?? ALL_SECTION);
-    };
-
-    const itemData = createItemData(
-        collectionSummaries,
-        activeCollectionID,
-        onCollectionClick,
-    );
-
-    return (
-        <CollectionListBarWrapper>
-            <SpaceBetweenFlex mb={1}>
-                <Typography>
-                    {isInHiddenSection ? t("HIDDEN_ALBUMS") : t("ALBUMS")}
-                </Typography>
-                {isMobile && (
-                    <Box display="flex" alignItems={"center"} gap={1}>
-                        <CollectionListSortBy
-                            setSortBy={props.setCollectionListSortBy}
-                            activeSortBy={props.collectionListSortBy}
-                            disableBG
-                        />
-                        <IconButton onClick={showAllCollections}>
-                            <ExpandMore />
-                        </IconButton>
-                    </Box>
-                )}
-            </SpaceBetweenFlex>
-            <Box display="flex" alignItems="flex-start" gap={2}>
-                <CollectionListWrapper>
-                    {!onFarLeft && (
-                        <ScrollButtonLeft onClick={scrollComponent(-1)} />
-                    )}
-                    <AutoSizer disableHeight>
-                        {({ width }) => (
-                            <List
-                                ref={collectionListRef}
-                                outerRef={collectionListWrapperRef}
-                                itemData={itemData}
-                                layout="horizontal"
-                                width={width}
-                                height={110}
-                                itemKey={getItemKey}
-                                itemCount={collectionSummaries.length}
-                                itemSize={CollectionListBarCardWidth}
-                                useIsScrolling
-                            >
-                                {CollectionCardContainer}
-                            </List>
-                        )}
-                    </AutoSizer>
-                    {!onFarRight && (
-                        <ScrollButtonRight onClick={scrollComponent(+1)} />
-                    )}
-                </CollectionListWrapper>
-                {!isMobile && (
-                    <Box
-                        display="flex"
-                        alignItems={"center"}
-                        gap={1}
-                        height={"64px"}
-                    >
-                        <CollectionListSortBy
-                            setSortBy={props.setCollectionListSortBy}
-                            activeSortBy={props.collectionListSortBy}
-                        />
-                        <IconButtonWithBG onClick={showAllCollections}>
-                            <ExpandMore />
-                        </IconButtonWithBG>
-                    </Box>
-                )}
-            </Box>
-        </CollectionListBarWrapper>
-    );
-};
-
-export default CollectionListBar;
-
-const useComponentScroll = (deps: React.DependencyList) => {
-    const componentRef = useRef<HTMLDivElement>(null);
-
-    const [scrollObj, setScrollObj] = useState<{
-        scrollLeft?: number;
-        scrollWidth?: number;
-        clientWidth?: number;
-    }>({});
-
-    const updateScrollObj = () => {
-        if (!componentRef.current) {
-            return;
-        }
-        const { scrollLeft, scrollWidth, clientWidth } = componentRef.current;
-        setScrollObj({ scrollLeft, scrollWidth, clientWidth });
-    };
-
-    useEffect(() => {
-        if (!componentRef.current) {
-            return;
-        }
-        // Add event listener
-        componentRef.current?.addEventListener("scroll", updateScrollObj);
-
-        // Call handler right away so state gets updated with initial window size
-        updateScrollObj();
-        // Remove event listener on cleanup
-        return () =>
-            componentRef.current?.removeEventListener(
-                "resize",
-                updateScrollObj,
-            );
-    }, [componentRef.current]);
-
-    useEffect(() => {
-        updateScrollObj();
-    }, deps);
-
-    const scrollComponent = (direction: number) => () => {
-        componentRef.current.scrollBy(250 * direction, 0);
-    };
-
-    const hasScrollBar = scrollObj.scrollWidth > scrollObj.clientWidth;
-    const onFarLeft = scrollObj.scrollLeft === 0;
-    const onFarRight =
-        scrollObj.scrollLeft + scrollObj.clientWidth === scrollObj.scrollWidth;
-
-    return {
-        hasScrollBar,
-        onFarLeft,
-        onFarRight,
-        scrollComponent,
-        componentRef,
-    };
 };
 
 const ScrollButtonBase: React.FC<
