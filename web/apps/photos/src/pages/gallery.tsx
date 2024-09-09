@@ -1,5 +1,6 @@
 import { stashRedirect } from "@/accounts/services/redirect";
 import { NavbarBase } from "@/base/components/Navbar";
+import { useIsMobileWidth } from "@/base/hooks";
 import log from "@/base/log";
 import { WhatsNew } from "@/new/photos/components/WhatsNew";
 import { shouldShowWhatsNew } from "@/new/photos/services/changelog";
@@ -42,8 +43,9 @@ import {
 } from "@ente/shared/storage/sessionStorage";
 import type { User } from "@ente/shared/user/types";
 import ArrowBack from "@mui/icons-material/ArrowBack";
+import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
-import { IconButton, Typography, styled } from "@mui/material";
+import { Box, Button, IconButton, Typography, styled } from "@mui/material";
 import AuthenticateUserModal from "components/AuthenticateUserModal";
 import Collections from "components/Collections";
 import { CollectionInfo } from "components/Collections/CollectionInfo";
@@ -69,8 +71,7 @@ import PhotoFrame from "components/PhotoFrame";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
 import { SearchBar, type UpdateSearch } from "components/SearchBar";
 import Sidebar from "components/Sidebar";
-import UploadButton from "components/Upload/UploadButton";
-import type { UploadTypeSelectorIntent } from "components/Upload/UploadTypeSelector";
+import { type UploadTypeSelectorIntent } from "components/Upload/UploadTypeSelector";
 import Uploader from "components/Upload/Uploader";
 import { UploadSelectorInputs } from "components/UploadSelectorInputs";
 import PlanSelector from "components/pages/gallery/PlanSelector";
@@ -1294,8 +1295,35 @@ const NormalNavbarContents: React.FC<NormalNavbarContentsProps> = ({
                 files={files}
                 updateSearch={updateSearch}
             />
-            {!isInSearchMode && <UploadButton openUploader={openUploader} />}
+            {!isInSearchMode && <UploadButton onClick={openUploader} />}
         </>
+    );
+};
+
+interface UploadButtonProps {
+    onClick: () => void;
+}
+export const UploadButton: React.FC<UploadButtonProps> = ({ onClick }) => {
+    const disabled = !uploadManager.shouldAllowNewUpload();
+    const isMobileWidth = useIsMobileWidth();
+
+    return (
+        <Box>
+            {isMobileWidth ? (
+                <IconButton onClick={onClick} disabled={disabled}>
+                    {<FileUploadOutlinedIcon />}
+                </IconButton>
+            ) : (
+                <Button
+                    onClick={onClick}
+                    disabled={disabled}
+                    color={"secondary"}
+                    startIcon={<FileUploadOutlinedIcon />}
+                >
+                    {t("upload")}
+                </Button>
+            )}
+        </Box>
     );
 };
 
@@ -1305,24 +1333,22 @@ interface HiddenSectionNavbarContentsProps {
 
 const HiddenSectionNavbarContents: React.FC<
     HiddenSectionNavbarContentsProps
-> = ({ onBack }) => {
-    return (
-        <HorizontalFlex
-            gap={"24px"}
-            sx={{
-                width: "100%",
-                background: (theme) => theme.palette.background.default,
-            }}
-        >
-            <IconButton onClick={onBack}>
-                <ArrowBack />
-            </IconButton>
-            <FlexWrapper>
-                <Typography>{t("HIDDEN")}</Typography>
-            </FlexWrapper>
-        </HorizontalFlex>
-    );
-};
+> = ({ onBack }) => (
+    <HorizontalFlex
+        gap={"24px"}
+        sx={{
+            width: "100%",
+            background: (theme) => theme.palette.background.default,
+        }}
+    >
+        <IconButton onClick={onBack}>
+            <ArrowBack />
+        </IconButton>
+        <FlexWrapper>
+            <Typography>{t("HIDDEN")}</Typography>
+        </FlexWrapper>
+    </HorizontalFlex>
+);
 
 interface SearchResultSummaryHeaderProps {
     searchResultSummary: SearchResultSummary;

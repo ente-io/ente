@@ -2,7 +2,7 @@ import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import { LS_KEYS } from "@ente/shared/storage/localStorage";
 import AllCollections from "components/Collections/AllCollections";
 import CollectionInfoWithOptions from "components/Collections/CollectionInfoWithOptions";
-import CollectionListBar from "components/Collections/CollectionListBar";
+import { CollectionListBar } from "components/Collections/CollectionListBar";
 import { SetCollectionNamerAttributes } from "components/Collections/CollectionNamer";
 import CollectionShare from "components/Collections/CollectionShare";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
