@@ -9,7 +9,6 @@ import {
     Box,
     IconButton,
     Typography,
-    css,
     styled,
     useMediaQuery,
 } from "@mui/material";
@@ -154,8 +153,7 @@ const CollectionListBar = (props: IProps) => {
             <Box display="flex" alignItems="flex-start" gap={2}>
                 <CollectionListWrapper>
                     {!onFarLeft && (
-                        <ScrollButton
-                            scrollDirection={SCROLL_DIRECTION.LEFT}
+                        <ScrollButtonLeft
                             onClick={scrollComponent(SCROLL_DIRECTION.LEFT)}
                         />
                     )}
@@ -178,8 +176,7 @@ const CollectionListBar = (props: IProps) => {
                         )}
                     </AutoSizer>
                     {!onFarRight && (
-                        <ScrollButton
-                            scrollDirection={SCROLL_DIRECTION.RIGHT}
+                        <ScrollButtonRight
                             onClick={scrollComponent(SCROLL_DIRECTION.RIGHT)}
                         />
                     )}
@@ -274,7 +271,7 @@ const ScrollButton = ({ scrollDirection, ...rest }) => (
     </ScrollButtonWrapper>
 );
 
-const ScrollButtonWrapper = styled("button")<{ direction: SCROLL_DIRECTION }>`
+const ScrollButtonBase = styled("button")`
     position: absolute;
     z-index: 2;
     top: 7px;
@@ -288,25 +285,25 @@ const ScrollButtonWrapper = styled("button")<{ direction: SCROLL_DIRECTION }>`
     background-color: ${({ theme }) => theme.colors.backdrop.muted};
     color: ${({ theme }) => theme.colors.stroke.base};
 
-    ${(props) =>
-        props.direction === SCROLL_DIRECTION.LEFT
-            ? css`
-                  left: 0;
-                  text-align: right;
-                  transform: translate(-50%, 0%);
-              `
-            : css`
-                  right: 0;
-                  text-align: left;
-                  transform: translate(50%, 0%);
-              `}
-
     & > svg {
-        ${(props) =>
-            props.direction === SCROLL_DIRECTION.LEFT &&
-            "transform:rotate(180deg);"}
         border-radius: 50%;
         height: 30px;
         width: 30px;
     }
+`;
+
+const ScrollButtonLeft = styled(ScrollButtonBase)`
+    left: 0;
+    text-align: right;
+    transform: translate(-50%, 0%);
+
+    & > svg {
+        transform: rotate(180deg);
+    }
+`;
+
+const ScrollButtonRight = styled(ScrollButtonBase)`
+    right: 0;
+    text-align: left;
+    transform: translate(50%, 0%);
 `;
