@@ -1,8 +1,8 @@
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ItemList from "components/ItemList";
-import UploadProgressContext from "contexts/uploadProgress";
 import { t } from "i18next";
 import { useContext } from "react";
+import UploadProgressContext from "./context";
 import {
     SectionInfo,
     UploadProgressSection,
