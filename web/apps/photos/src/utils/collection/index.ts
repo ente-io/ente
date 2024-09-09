@@ -577,6 +577,8 @@ export function constructCollectionNameMap(
     );
 }
 
+const DEFAULT_HIDDEN_COLLECTION_USER_FACING_NAME = "Hidden";
+
 export const getCollectionUserFacingName = (collection: Collection) => {
     if (isDefaultHiddenCollection(collection)) {
         return DEFAULT_HIDDEN_COLLECTION_USER_FACING_NAME;

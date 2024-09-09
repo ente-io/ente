@@ -3,7 +3,6 @@ export const TRASH_SECTION = -2;
 export const DUMMY_UNCATEGORIZED_COLLECTION = -3;
 export const HIDDEN_ITEMS_SECTION = -4;
 export const ALL_SECTION = 0;
-export const DEFAULT_HIDDEN_COLLECTION_USER_FACING_NAME = "Hidden";
 
 export enum CollectionType {
     folder = "folder",
@@ -34,10 +33,6 @@ export enum COLLECTION_LIST_SORT_BY {
     CREATION_TIME_ASCENDING,
     UPDATION_TIME_DESCENDING,
 }
-
-export const COLLECTION_SHARE_DEFAULT_VALID_DURATION =
-    10 * 24 * 60 * 60 * 1000 * 1000;
-export const COLLECTION_SHARE_DEFAULT_DEVICE_LIMIT = 4;
 
 export const COLLECTION_SORT_ORDER = new Map([
     [CollectionSummaryType.all, 0],
