@@ -44,13 +44,7 @@ import type { User } from "@ente/shared/user/types";
 import ArrowBack from "@mui/icons-material/ArrowBack";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
-import {
-    Button,
-    ButtonProps,
-    IconButton,
-    Typography,
-    styled,
-} from "@mui/material";
+import { Button, IconButton, Typography, styled } from "@mui/material";
 import AuthenticateUserModal from "components/AuthenticateUserModal";
 import Collections from "components/Collections";
 import { CollectionInfo } from "components/Collections/CollectionInfo";
@@ -1300,57 +1294,46 @@ const NormalNavbarContents: React.FC<NormalNavbarContentsProps> = ({
                 files={files}
                 updateSearch={updateSearch}
             />
-            {!isInSearchMode && <UploadButton openUploader={openUploader} />}
+            {!isInSearchMode && <UploadButton onClick={openUploader} />}
         </>
     );
 };
 
 interface UploadButtonProps {
-    openUploader: (intent?: UploadTypeSelectorIntent) => void;
-    text?: string;
-    color?: ButtonProps["color"];
-    disableShrink?: boolean;
-    icon?: JSX.Element;
+    onClick: () => void;
 }
-export const UploadButton: React.FC<UploadButtonProps> = ({
-    openUploader,
-    text,
-    color,
-    disableShrink,
-    icon,
-}) => {
-    const onClickHandler = () => openUploader();
+export const UploadButton: React.FC<UploadButtonProps> = ({ onClick }) => {
+    const disabled = !uploadManager.shouldAllowNewUpload();
 
     return (
         <UploadButton_
-            $disableShrink={disableShrink}
             style={{
-                cursor: !uploadManager.shouldAllowNewUpload() && "not-allowed",
+                cursor: disabled && "not-allowed",
             }}
         >
             <Button
                 sx={{ whiteSpace: "nowrap" }}
-                onClick={onClickHandler}
-                disabled={!uploadManager.shouldAllowNewUpload()}
+                onClick={onClick}
+                disabled={disabled}
                 className="desktop-button"
-                color={color ?? "secondary"}
-                startIcon={icon ?? <FileUploadOutlinedIcon />}
+                color={"secondary"}
+                startIcon={<FileUploadOutlinedIcon />}
             >
-                {text ?? t("upload")}
+                {t("upload")}
             </Button>
 
             <IconButton
-                onClick={onClickHandler}
-                disabled={!uploadManager.shouldAllowNewUpload()}
+                onClick={onClick}
+                disabled={disabled}
                 className="mobile-button"
             >
-                {icon ?? <FileUploadOutlinedIcon />}
+                {<FileUploadOutlinedIcon />}
             </IconButton>
         </UploadButton_>
     );
 };
 
-const UploadButton_ = styled("div")<{ $disableShrink: boolean }>`
+const UploadButton_ = styled("div")`
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1359,16 +1342,14 @@ const UploadButton_ = styled("div")<{ $disableShrink: boolean }>`
     & .mobile-button {
         display: none;
     }
-    ${({ $disableShrink }) =>
-        !$disableShrink &&
-        `@media (max-width: 624px) {
+    @media (max-width: 624px) {
         & .mobile-button {
             display: inline-flex;
         }
         & .desktop-button {
             display: none;
         }
-    }`}
+    }
 `;
 
 interface HiddenSectionNavbarContentsProps {
