@@ -5,6 +5,7 @@ import type {
     City,
     SearchDateComponents,
     SearchPerson,
+    SearchResultSummary,
 } from "@/new/photos/services/search/types";
 import {
     ClipSearchScores,
@@ -12,7 +13,6 @@ import {
     SearchQuery,
     Suggestion,
     SuggestionType,
-    UpdateSearch,
 } from "@/new/photos/services/search/types";
 import { labelForSuggestionType } from "@/new/photos/services/search/ui";
 import type { LocationTag } from "@/new/photos/services/user-entity";
@@ -62,12 +62,17 @@ import { SelectStyles } from "../styles/search";
 const { Option, ValueContainer, Menu } = components;
 
 interface SearchBarProps {
-    updateSearch: UpdateSearch;
-    collections: Collection[];
-    files: EnteFile[];
     isInSearchMode: boolean;
     setIsInSearchMode: (v: boolean) => void;
+    collections: Collection[];
+    updateSearch: UpdateSearch;
+    files: EnteFile[];
 }
+
+export type UpdateSearch = (
+    search: SearchQuery,
+    summary: SearchResultSummary,
+) => void;
 
 export const SearchBar: React.FC<SearchBarProps> = ({
     setIsInSearchMode,

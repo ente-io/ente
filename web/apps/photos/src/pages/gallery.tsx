@@ -13,7 +13,6 @@ import { search, setSearchableFiles } from "@/new/photos/services/search";
 import {
     SearchQuery,
     SearchResultSummary,
-    UpdateSearch,
 } from "@/new/photos/services/search/types";
 import { EnteFile } from "@/new/photos/types/file";
 import { mergeMetadata } from "@/new/photos/utils/file";
@@ -68,7 +67,7 @@ import GalleryEmptyState from "components/GalleryEmptyState";
 import { LoadingOverlay } from "components/LoadingOverlay";
 import PhotoFrame from "components/PhotoFrame";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
-import { SearchBar } from "components/SearchBar";
+import { SearchBar, type UpdateSearch } from "components/SearchBar";
 import Sidebar from "components/Sidebar";
 import UploadButton from "components/Upload/UploadButton";
 import type { UploadTypeSelectorIntent } from "components/Upload/UploadTypeSelector";

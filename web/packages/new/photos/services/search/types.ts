@@ -149,9 +149,4 @@ export interface SearchOption extends Suggestion {
     previewFiles: EnteFile[];
 }
 
-export type UpdateSearch = (
-    search: SearchQuery,
-    summary: SearchResultSummary,
-) => void;
-
 export type ClipSearchScores = Map<number, number>;
