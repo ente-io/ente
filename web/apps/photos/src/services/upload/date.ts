@@ -43,10 +43,25 @@ const parseEpochMicrosecondsFromFileName = (fileName: string) => {
         );
     } else if (fileName.startsWith("signal-")) {
         // Signal images
-        // - e.g. "signal-2018-08-21-100217.jpg"
+        //
+        // Signal Android uses "yyyy-MM-dd-HH-mm-ss-SSS"
+        // https://github.com/signalapp/Signal-Android/commit/39e14e922bf3f5f11b796455355f69e2189d482f
+        //
+        // e.g. "signal-2024-08-17-21-58-10-982-1.jpg"
+        //
+        // Signal Desktop uses "YYYY-MM-DD-HHmmss"
+        // https://github.com/signalapp/Signal-Desktop/blob/41216f1378899709d03507649e4a602cebb0d064/js/views/attachment_view.js#L97
+        //
+        // e.g. "signal-2018-08-21-100217.jpg"
+        //
         const p = fileName.split("-");
-        const dateString = `${p[1]}${p[2]}${p[3]}-${p[4]}`;
-        date = parseDateFromFusedDateString(dateString);
+        if (p.length > 5) {
+            const dateString = `${p[1]}${p[2]}${p[3]}-${p[4]}${p[5]}${p[6]}`;
+            date = parseDateFromFusedDateString(dateString);
+        } else {
+            const dateString = `${p[1]}${p[2]}${p[3]}-${p[4]}`;
+            date = parseDateFromFusedDateString(dateString);
+        }
     }
 
     // Generic pattern.
