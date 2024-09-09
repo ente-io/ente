@@ -2,11 +2,13 @@ import "dart:async";
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import "package:logging/logging.dart";
 import 'package:photo_manager/photo_manager.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/services/sync_service.dart';
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/utils/debouncer.dart";
+import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/email_util.dart";
 import "package:photos/utils/photo_manager_util.dart";
 import "package:styled_text/styled_text.dart";
@@ -20,6 +22,7 @@ class GrantPermissionsWidget extends StatefulWidget {
 
 class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
   final _debouncer = Debouncer(const Duration(milliseconds: 500));
+  final Logger _logger = Logger("_GrantPermissionsWidgetState");
 
   @override
   void dispose() {
@@ -124,42 +127,55 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
           key: const ValueKey("grantPermissionButton"),
           child: Text(S.of(context).grantPermission),
           onPressed: () async {
-            final state = await requestPhotoMangerPermissions();
-            if (state == PermissionState.authorized ||
-                state == PermissionState.limited) {
-              await SyncService.instance.onPermissionGranted(state);
-            } else if (state == PermissionState.denied) {
-              final AlertDialog alert = AlertDialog(
-                title: Text(S.of(context).pleaseGrantPermissions),
-                content: Text(
-                  S.of(context).enteCanEncryptAndPreserveFilesOnlyIfYouGrant,
-                ),
-                actions: [
-                  TextButton(
-                    child: Text(
-                      S.of(context).ok,
-                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                          ),
-                    ),
-                    onPressed: () {
-                      Navigator.of(context, rootNavigator: true).pop('dialog');
-                      if (Platform.isIOS) {
-                        PhotoManager.openSetting();
-                      }
-                    },
+            try {
+              final state = await requestPhotoMangerPermissions();
+              _logger.info("Permission state: $state");
+              if (state == PermissionState.authorized ||
+                  state == PermissionState.limited) {
+                await SyncService.instance.onPermissionGranted(state);
+              } else if (state == PermissionState.denied) {
+                final AlertDialog alert = AlertDialog(
+                  title: Text(S.of(context).pleaseGrantPermissions),
+                  content: Text(
+                    S.of(context).enteCanEncryptAndPreserveFilesOnlyIfYouGrant,
                   ),
-                ],
+                  actions: [
+                    TextButton(
+                      child: Text(
+                        S.of(context).ok,
+                        style:
+                            Theme.of(context).textTheme.titleMedium!.copyWith(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context, rootNavigator: true)
+                            .pop('dialog');
+                        if (Platform.isIOS) {
+                          PhotoManager.openSetting();
+                        }
+                      },
+                    ),
+                  ],
+                );
+                // ignore: unawaited_futures
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return alert;
+                  },
+                  barrierColor: Colors.black12,
+                );
+              } else {
+                throw Exception("Unknown permission state: $state");
+              }
+            } catch (e) {
+              _logger.severe(
+                "Failed to request permission: ${e.toString()}",
+                e,
               );
-              // ignore: unawaited_futures
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return alert;
-                },
-                barrierColor: Colors.black12,
-              );
+              showGenericErrorDialog(context: context, error: e).ignore();
             }
           },
         ),
