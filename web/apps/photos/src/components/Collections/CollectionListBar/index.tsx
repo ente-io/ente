@@ -2,9 +2,6 @@ import {
     IconButtonWithBG,
     SpaceBetweenFlex,
 } from "@ente/shared/components/Container";
-import useComponentScroll, {
-    SCROLL_DIRECTION,
-} from "@ente/shared/hooks/useComponentScroll";
 import useWindowSize from "@ente/shared/hooks/useWindowSize";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
@@ -23,7 +20,7 @@ import {
 } from "components/Collections/styledComponents";
 import { t } from "i18next";
 import memoize from "memoize-one";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import {
     FixedSizeList as List,
@@ -210,7 +207,74 @@ const CollectionListBar = (props: IProps) => {
 
 export default CollectionListBar;
 
-const Wrapper = styled("button")<{ direction: SCROLL_DIRECTION }>`
+enum SCROLL_DIRECTION {
+    LEFT = -1,
+    RIGHT = +1,
+}
+
+function useComponentScroll({ dependencies }: { dependencies: any[] }) {
+    const componentRef = useRef<HTMLDivElement>(null);
+
+    const [scrollObj, setScrollObj] = useState<{
+        scrollLeft?: number;
+        scrollWidth?: number;
+        clientWidth?: number;
+    }>({});
+
+    const updateScrollObj = () => {
+        if (!componentRef.current) {
+            return;
+        }
+        const { scrollLeft, scrollWidth, clientWidth } = componentRef.current;
+        setScrollObj({ scrollLeft, scrollWidth, clientWidth });
+    };
+
+    useEffect(() => {
+        if (!componentRef.current) {
+            return;
+        }
+        // Add event listener
+        componentRef.current?.addEventListener("scroll", updateScrollObj);
+
+        // Call handler right away so state gets updated with initial window size
+        updateScrollObj();
+        // Remove event listener on cleanup
+        return () =>
+            componentRef.current?.removeEventListener(
+                "resize",
+                updateScrollObj,
+            );
+    }, [componentRef.current]);
+
+    useEffect(() => {
+        updateScrollObj();
+    }, [...dependencies]);
+
+    const scrollComponent = (direction: SCROLL_DIRECTION) => () => {
+        componentRef.current.scrollBy(250 * direction, 0);
+    };
+
+    const hasScrollBar = scrollObj.scrollWidth > scrollObj.clientWidth;
+    const onFarLeft = scrollObj.scrollLeft === 0;
+    const onFarRight =
+        scrollObj.scrollLeft + scrollObj.clientWidth === scrollObj.scrollWidth;
+
+    return {
+        hasScrollBar,
+        onFarLeft,
+        onFarRight,
+        scrollComponent,
+        componentRef,
+    };
+}
+
+const ScrollButton = ({ scrollDirection, ...rest }) => (
+    <ScrollButtonWrapper direction={scrollDirection} {...rest}>
+        <NavigateNextIcon />
+    </ScrollButtonWrapper>
+);
+
+const ScrollButtonWrapper = styled("button")<{ direction: SCROLL_DIRECTION }>`
     position: absolute;
     z-index: 2;
     top: 7px;
@@ -246,9 +310,3 @@ const Wrapper = styled("button")<{ direction: SCROLL_DIRECTION }>`
         width: 30px;
     }
 `;
-
-const ScrollButton = ({ scrollDirection, ...rest }) => (
-    <Wrapper direction={scrollDirection} {...rest}>
-        <NavigateNextIcon />
-    </Wrapper>
-);
