@@ -1,4 +1,5 @@
 import { stashRedirect } from "@/accounts/services/redirect";
+import { NavbarBase } from "@/base/components/Navbar";
 import log from "@/base/log";
 import { WhatsNew } from "@/new/photos/components/WhatsNew";
 import { shouldShowWhatsNew } from "@/new/photos/services/changelog";
@@ -16,7 +17,11 @@ import {
 } from "@/new/photos/services/search/types";
 import { EnteFile } from "@/new/photos/types/file";
 import { mergeMetadata } from "@/new/photos/utils/file";
-import { CenteredFlex } from "@ente/shared/components/Container";
+import {
+    CenteredFlex,
+    FlexWrapper,
+    HorizontalFlex,
+} from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
@@ -37,7 +42,9 @@ import {
     getKey,
 } from "@ente/shared/storage/sessionStorage";
 import type { User } from "@ente/shared/user/types";
-import { Typography, styled } from "@mui/material";
+import ArrowBack from "@mui/icons-material/ArrowBack";
+import MenuIcon from "@mui/icons-material/Menu";
+import { IconButton, Typography, styled } from "@mui/material";
 import AuthenticateUserModal from "components/AuthenticateUserModal";
 import Collections from "components/Collections";
 import { CollectionInfo } from "components/Collections/CollectionInfo";
@@ -61,11 +68,12 @@ import GalleryEmptyState from "components/GalleryEmptyState";
 import { LoadingOverlay } from "components/LoadingOverlay";
 import PhotoFrame from "components/PhotoFrame";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
+import { SearchBar } from "components/SearchBar";
 import Sidebar from "components/Sidebar";
+import UploadButton from "components/Upload/UploadButton";
 import type { UploadTypeSelectorIntent } from "components/Upload/UploadTypeSelector";
 import Uploader from "components/Upload/Uploader";
 import { UploadSelectorInputs } from "components/UploadSelectorInputs";
-import { GalleryNavbar } from "components/pages/gallery/Navbar";
 import PlanSelector from "components/pages/gallery/PlanSelector";
 import SelectedFileOptions from "components/pages/gallery/SelectedFileOptions";
 import {
@@ -1252,6 +1260,70 @@ const mergeMaps = <K, V>(map1: Map<K, V>, map2: Map<K, V>) => {
         mergedMap.set(key, value);
     });
     return mergedMap;
+};
+
+interface GalleryNavbarProps {
+    openSidebar: () => void;
+    isFirstFetch: boolean;
+    openUploader: () => void;
+    isInSearchMode: boolean;
+    isInHiddenSection: boolean;
+    setIsInSearchMode: (v: boolean) => void;
+    collections: Collection[];
+    files: EnteFile[];
+    updateSearch: UpdateSearch;
+    exitHiddenSection: () => void;
+}
+
+const GalleryNavbar: React.FC<GalleryNavbarProps> = ({
+    openSidebar,
+    openUploader,
+    isInSearchMode,
+    isInHiddenSection,
+    collections,
+    files,
+    updateSearch,
+    setIsInSearchMode,
+    exitHiddenSection,
+}) => {
+    return (
+        <NavbarBase sx={{ background: "transparent", position: "absolute" }}>
+            {isInHiddenSection ? (
+                <HorizontalFlex
+                    gap={"24px"}
+                    sx={{
+                        width: "100%",
+                        background: (theme) => theme.palette.background.default,
+                    }}
+                >
+                    <IconButton onClick={exitHiddenSection}>
+                        <ArrowBack />
+                    </IconButton>
+                    <FlexWrapper>
+                        <Typography>{t("HIDDEN")}</Typography>
+                    </FlexWrapper>
+                </HorizontalFlex>
+            ) : (
+                <>
+                    {!isInSearchMode && (
+                        <IconButton onClick={openSidebar}>
+                            <MenuIcon />
+                        </IconButton>
+                    )}
+                    <SearchBar
+                        isInSearchMode={isInSearchMode}
+                        setIsInSearchMode={setIsInSearchMode}
+                        collections={collections}
+                        files={files}
+                        updateSearch={updateSearch}
+                    />
+                    {!isInSearchMode && (
+                        <UploadButton openUploader={openUploader} />
+                    )}
+                </>
+            )}
+        </NavbarBase>
+    );
 };
 
 interface SearchResultSummaryHeaderProps {
