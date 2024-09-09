@@ -45,7 +45,7 @@ import type { User } from "@ente/shared/user/types";
 import ArrowBack from "@mui/icons-material/ArrowBack";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
-import { Button, IconButton, Typography, styled } from "@mui/material";
+import { Box, Button, IconButton, Typography, styled } from "@mui/material";
 import AuthenticateUserModal from "components/AuthenticateUserModal";
 import Collections from "components/Collections";
 import { CollectionInfo } from "components/Collections/CollectionInfo";
@@ -1308,7 +1308,7 @@ export const UploadButton: React.FC<UploadButtonProps> = ({ onClick }) => {
     const isMobileWidth = useIsMobileWidth();
 
     return (
-        <UploadButton_ sx={{ cursor: disabled ? "not-allowed" : "pointer" }}>
+        <Box sx={{ cursor: disabled ? "not-allowed" : "pointer" }}>
             {isMobileWidth ? (
                 <IconButton onClick={onClick} disabled={disabled}>
                     {<FileUploadOutlinedIcon />}
@@ -1323,15 +1323,9 @@ export const UploadButton: React.FC<UploadButtonProps> = ({ onClick }) => {
                     {t("upload")}
                 </Button>
             )}
-        </UploadButton_>
+        </Box>
     );
 };
-
-const UploadButton_ = styled("div")`
-    display: flex;
-    align-items: center;
-    justify-content: center;
-`;
 
 interface HiddenSectionNavbarContentsProps {
     onBack: () => void;
