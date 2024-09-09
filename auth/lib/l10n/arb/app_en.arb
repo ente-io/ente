@@ -364,6 +364,7 @@
   "sigInBackupReminder": "Please export your codes to ensure that you have a backup you can restore from.",
   "offlineModeWarning": "You have chosen to proceed without backups. Please take manual backups to make sure your codes are safe.",
   "showLargeIcons": "Show large icons",
+  "compactMode": "Compact mode",
   "shouldHideCode": "Hide codes",
   "doubleTapToViewHiddenCode": "You can double tap on an entry to view code",
   "focusOnSearchBar": "Focus search on app start",

@@ -76,6 +76,7 @@ class _HomePageState extends State<HomePage> {
   String selectedTag = "";
   bool _isTrashOpen = false;
   bool hasTrashedCodes = false;
+  bool isCompactMode = false;
 
   @override
   void initState() {
@@ -244,6 +245,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    isCompactMode = PreferenceService.instance.isCompactMode();
 
     return PopScope(
       onPopInvokedWithResult: (_, result) async {
@@ -446,6 +448,7 @@ class _HomePageState extends State<HomePage> {
                     child: CodeWidget(
                       key: ValueKey(code.hashCode),
                       code,
+                      isCompactMode: isCompactMode,
                     ),
                   );
                 }),
@@ -476,6 +479,7 @@ class _HomePageState extends State<HomePage> {
                           final codeState = _filteredCodes[index];
                           return CodeWidget(
                             codeState,
+                            isCompactMode: isCompactMode,
                           );
                         }),
                         itemCount: _filteredCodes.length,

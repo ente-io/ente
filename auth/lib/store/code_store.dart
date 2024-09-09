@@ -48,6 +48,9 @@ class CodeStore {
       code.generatedID = entity.generatedID;
       code.hasSynced = entity.hasSynced;
       codes.add(code);
+      codes.add(code);
+      codes.add(code);
+      codes.add(code);
     }
 
     if (sortCodes) {

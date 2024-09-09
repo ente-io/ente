@@ -30,10 +30,12 @@ import 'package:move_to_background/move_to_background.dart';
 
 class CodeWidget extends StatefulWidget {
   final Code code;
+  final bool isCompactMode;
 
   const CodeWidget(
     this.code, {
     super.key,
+    required this.isCompactMode,
   });
 
   @override
@@ -50,12 +52,14 @@ class _CodeWidgetState extends State<CodeWidget> {
   late bool _shouldShowLargeIcon;
   late bool _hideCode;
   bool isMaskingEnabled = false;
+  bool isCompactMode = true;
   int _codeTimeStep = -1;
 
   @override
   void initState() {
     super.initState();
     isMaskingEnabled = PreferenceService.instance.shouldHideCodes();
+
     _hideCode = isMaskingEnabled;
     _everySecondTimer =
         Timer.periodic(const Duration(milliseconds: 500), (Timer t) {
@@ -116,7 +120,7 @@ class _CodeWidgetState extends State<CodeWidget> {
                 painter: PinBgPainter(
                   color: colorScheme.pinnedBgColor,
                 ),
-                size: const Size(39, 39),
+                size: isCompactMode ? const Size(24, 24) : const Size(39, 39),
               ),
             ),
           if (widget.code.isTrashed && kDebugMode)
@@ -137,7 +141,9 @@ class _CodeWidgetState extends State<CodeWidget> {
                 CodeTimerProgressCache.getCachedWidget(
                   widget.code.period,
                 ),
-              const SizedBox(height: 28),
+              widget.isCompactMode
+                  ? const SizedBox(height: 4)
+                  : const SizedBox(height: 28),
               Row(
                 children: [
                   _shouldShowLargeIcon ? _getIcon() : const SizedBox.shrink(),
@@ -145,22 +151,32 @@ class _CodeWidgetState extends State<CodeWidget> {
                     child: Column(
                       children: [
                         _getTopRow(),
-                        const SizedBox(height: 4),
+                        widget.isCompactMode
+                            ? const SizedBox.shrink()
+                            : const SizedBox(height: 4),
                         _getBottomRow(l10n),
                       ],
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 32),
+              isCompactMode
+                  ? const SizedBox(height: 4)
+                  : const SizedBox(height: 32),
             ],
           ),
           if (widget.code.isPinned) ...[
             Align(
               alignment: Alignment.topRight,
               child: Padding(
-                padding: const EdgeInsets.only(right: 6, top: 6),
-                child: SvgPicture.asset("assets/svg/pin-card.svg"),
+                padding: widget.isCompactMode
+                    ? const EdgeInsets.only(right: 2, top: 2)
+                    : const EdgeInsets.only(right: 6, top: 6),
+                child: SvgPicture.asset(
+                  "assets/svg/pin-card.svg",
+                  width: widget.isCompactMode ? 8 : null,
+                  height: widget.isCompactMode ? 8 : null,
+                ),
               ),
             ),
           ],
@@ -207,7 +223,9 @@ class _CodeWidgetState extends State<CodeWidget> {
     }
 
     return Container(
-      margin: const EdgeInsets.only(left: 16, right: 16, bottom: 8, top: 8),
+      margin: widget.isCompactMode
+          ? const EdgeInsets.only(left: 16, right: 16, bottom: 6, top: 6)
+          : const EdgeInsets.only(left: 16, right: 16, bottom: 8, top: 8),
       child: Builder(
         builder: (context) {
           if (PlatformUtil.isDesktop()) {
@@ -248,6 +266,7 @@ class _CodeWidgetState extends State<CodeWidget> {
               child: clippedCard(l10n),
             );
           }
+          double slideSpace = isCompactMode ? 4 : 8;
 
           return Slidable(
             key: ValueKey(widget.code.hashCode),
@@ -255,9 +274,7 @@ class _CodeWidgetState extends State<CodeWidget> {
               extentRatio: 0.90,
               motion: const ScrollMotion(),
               children: [
-                const SizedBox(
-                  width: 14,
-                ),
+                SizedBox(width: slideSpace),
                 SlidableAction(
                   onPressed: _onShowQrPressed,
                   backgroundColor: Colors.grey.withOpacity(0.1),
@@ -269,9 +286,7 @@ class _CodeWidgetState extends State<CodeWidget> {
                   padding: const EdgeInsets.only(left: 4, right: 0),
                   spacing: 8,
                 ),
-                const SizedBox(
-                  width: 14,
-                ),
+                SizedBox(width: slideSpace),
                 CustomSlidableAction(
                   onPressed: _onPinPressed,
                   backgroundColor: Colors.grey.withOpacity(0.1),
@@ -305,9 +320,7 @@ class _CodeWidgetState extends State<CodeWidget> {
                   ),
                   padding: const EdgeInsets.only(left: 4, right: 0),
                 ),
-                const SizedBox(
-                  width: 14,
-                ),
+                SizedBox(width: slideSpace),
                 SlidableAction(
                   onPressed: _onEditPressed,
                   backgroundColor: Colors.grey.withOpacity(0.1),
@@ -319,9 +332,7 @@ class _CodeWidgetState extends State<CodeWidget> {
                   padding: const EdgeInsets.only(left: 4, right: 0),
                   spacing: 8,
                 ),
-                const SizedBox(
-                  width: 14,
-                ),
+                SizedBox(width: slideSpace),
                 SlidableAction(
                   onPressed: widget.code.isTrashed
                       ? _onDeletePressed
@@ -362,7 +373,7 @@ class _CodeWidgetState extends State<CodeWidget> {
                   type: MaterialType.transparency,
                   child: AutoSizeText(
                     _getFormattedCode(value),
-                    style: const TextStyle(fontSize: 24),
+                    style: TextStyle(fontSize: widget.isCompactMode ? 14 : 24),
                     maxLines: 1,
                   ),
                 );
@@ -389,8 +400,8 @@ class _CodeWidgetState extends State<CodeWidget> {
                             type: MaterialType.transparency,
                             child: Text(
                               _getFormattedCode(value),
-                              style: const TextStyle(
-                                fontSize: 18,
+                              style: TextStyle(
+                                fontSize: widget.isCompactMode ? 12 : 18,
                                 color: Colors.grey,
                               ),
                             ),
@@ -423,6 +434,7 @@ class _CodeWidgetState extends State<CodeWidget> {
   }
 
   Widget _getTopRow() {
+    bool isCompactMode = widget.isCompactMode;
     return Padding(
       padding: const EdgeInsets.only(left: 16, right: 16),
       child: Row(
@@ -434,13 +446,15 @@ class _CodeWidgetState extends State<CodeWidget> {
               children: [
                 Text(
                   safeDecode(widget.code.issuer).trim(),
-                  style: Theme.of(context).textTheme.titleLarge,
+                  style: isCompactMode
+                      ? Theme.of(context).textTheme.bodyMedium
+                      : Theme.of(context).textTheme.titleLarge,
                 ),
-                const SizedBox(height: 2),
+                if (!isCompactMode) const SizedBox(height: 2),
                 Text(
                   safeDecode(widget.code.account).trim(),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontSize: 12,
+                        fontSize: isCompactMode ? 12 : 12,
                         color: Colors.grey,
                       ),
                 ),
@@ -471,12 +485,14 @@ class _CodeWidgetState extends State<CodeWidget> {
   Widget _getIcon() {
     return Padding(
       padding: _shouldShowLargeIcon
-          ? const EdgeInsets.only(left: 16)
+          ? EdgeInsets.only(left: widget.isCompactMode ? 12 : 16)
           : const EdgeInsets.all(0),
       child: IconUtils.instance.getIcon(
         context,
         safeDecode(widget.code.issuer).trim(),
-        width: _shouldShowLargeIcon ? 42 : 24,
+        width: widget.isCompactMode
+            ? (_shouldShowLargeIcon ? 32 : 24)
+            : (_shouldShowLargeIcon ? 42 : 24),
       ),
     );
   }
