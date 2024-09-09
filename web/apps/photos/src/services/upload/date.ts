@@ -26,45 +26,54 @@ export const tryParseEpochMicrosecondsFromFileName = (
 // that it doesn't indeed throw, move out the actual logic into this separate
 // and more readable function.
 const parseEpochMicrosecondsFromFileName = (fileName: string) => {
+    let date: Date;
+
     fileName = fileName.trim();
-    let parsedDate: Date;
+
+    // Known patterns.
     if (fileName.startsWith("IMG-") || fileName.startsWith("VID-")) {
         // WhatsApp media files
-        // Sample name: IMG-20171218-WA0028.jpg
-        parsedDate = parseDateFromFusedDateString(fileName.split("-")[1]);
+        // - e.g. "IMG-20171218-WA0028.jpg"
+        date = parseDateFromFusedDateString(fileName.split("-")[1]);
     } else if (fileName.startsWith("Screenshot_")) {
         // Screenshots on Android
-        // Sample name: Screenshot_20181227-152914.jpg
-        parsedDate = parseDateFromFusedDateString(
+        // - e.g. "Screenshot_20181227-152914.jpg"
+        date = parseDateFromFusedDateString(
             fileName.replaceAll("Screenshot_", ""),
         );
     } else if (fileName.startsWith("signal-")) {
         // Signal images
-        // Sample name: signal-2018-08-21-100217.jpg
+        // - e.g. "signal-2018-08-21-100217.jpg"
         const p = fileName.split("-");
         const dateString = `${p[1]}${p[2]}${p[3]}-${p[4]}`;
-        parsedDate = parseDateFromFusedDateString(dateString);
+        date = parseDateFromFusedDateString(dateString);
     }
-    if (!parsedDate) {
-        parsedDate = parseDateFromDigitGroups(fileName);
-    }
-    return validateAndGetCreationUnixTimeInMicroSeconds(parsedDate);
-};
 
-export function validateAndGetCreationUnixTimeInMicroSeconds(dateTime: Date) {
-    if (!dateTime || isNaN(dateTime.getTime())) {
+    // Generic pattern.
+    if (!date) {
+        date = parseDateFromDigitGroups(fileName);
+    }
+
+    // Ignore invalid.
+    if (!date || isNaN(date.getTime())) {
         return undefined;
     }
-    const unixTime = dateTime.getTime() * 1000;
-    //ignoring dateTimeString = "0000:00:00 00:00:00"
+
+    // Convert to epoch microseconds.
+    const unixTime = date.getTime() * 1000;
     if (unixTime === Date.UTC(0, 0, 0, 0, 0, 0, 0) || unixTime === 0) {
+        // Ignore dateTimeStrings of the form "0000:00:00 00:00:00". We do
+        // encounter such missing data in the wild.
         return undefined;
     } else if (unixTime > Date.now() * 1000) {
+        // We shouldn't be ignoring future dates, but since this is a file name
+        // parser, a future date usually indicates that we parsed some unrelated
+        // number that shouldn't have been parsed.
         return undefined;
     } else {
         return unixTime;
     }
-}
+};
 
 const currentYear = new Date().getFullYear();
 

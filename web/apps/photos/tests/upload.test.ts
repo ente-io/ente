@@ -1,7 +1,7 @@
 import { FileType } from "@/media/file-type";
 import { getLocalFiles } from "@/new/photos/services/files";
 import { getLocalCollections } from "services/collectionService";
-import { maybeParseArbitraryDate, parseDateFromDigitGroups } from "services/upload/date";
+import { parseDateFromDigitGroups } from "services/upload/date";
 import {
     MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT,
     getClippedMetadataJSONMapKeyForFile,
@@ -394,7 +394,7 @@ function parseDateTimeFromFileNameTest() {
         },
     );
     DATE_TIME_PARSING_TEST_FILE_NAMES_MUST_FAIL.forEach((fileName) => {
-        const dateTime = maybeParseArbitraryDate(fileName);
+        const dateTime = parseDateFromDigitGroups(fileName);
         if (dateTime) {
             throw Error(
                 `parseDateTimeFromFileNameTest failed ❌ ,
