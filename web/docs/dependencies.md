@@ -133,6 +133,8 @@ For more details, see [translations.md](translations.md).
     abstraction for dealing with form state, validation and submission states
     when using React.
 
+-   [react-select](https://react-select.com/) is used for search dropdowns.
+
 ## Utilities
 
 -   [comlink](https://github.com/GoogleChromeLabs/comlink) provides a minimal
