@@ -15,6 +15,7 @@ import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/models/button_result.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
+import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_auth/utils/totp_util.dart';
 import "package:flutter/material.dart";
 
@@ -34,6 +35,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
   late TextEditingController _issuerController;
   late TextEditingController _accountController;
   late TextEditingController _secretController;
+  late TextEditingController _notesController;
   late bool _secretKeyObscured;
   late List<String> tags = [...?widget.code?.display.tags];
   List<String> allTags = [];
@@ -51,10 +53,22 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
     _secretController = TextEditingController(
       text: widget.code?.secret,
     );
+    _notesController = TextEditingController(
+      text: widget.code?.display.note,
+    );
     _secretKeyObscured = widget.code != null;
     _loadTags();
     _streamSubscription = Bus.instance.on<CodesUpdatedEvent>().listen((event) {
       _loadTags();
+    });
+    _notesController.addListener(() {
+      if (_notesController.text.length > _notesLimit) {
+        _notesController.text = _notesController.text.substring(0, _notesLimit);
+        _notesController.selection = TextSelection.fromPosition(
+          TextPosition(offset: _notesController.text.length),
+        );
+        showToast(context, context.l10n.notesLengthLimit(_notesLimit));
+      }
     });
 
     if (widget.code == null ||
@@ -82,6 +96,10 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
   @override
   void dispose() {
     _streamSubscription?.cancel();
+    _issuerController.dispose();
+    _accountController.dispose();
+    _accountController.dispose();
+    _notesController.dispose();
     super.dispose();
   }
 
@@ -188,10 +206,57 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                   ),
                 ],
               ),
-              const SizedBox(height: 40),
-              const SizedBox(
-                height: 20,
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: Theme(
+                      data: Theme.of(context).copyWith(
+                        dividerColor: Colors
+                            .transparent, // Removes the default divider color
+                      ),
+                      child: ExpansionTile(
+                        title: Text(
+                          l10n.advance,
+                          style: getEnteTextTheme(context).bodyMuted,
+                        ),
+                        children: <Widget>[
+                          Row(
+                            children: [
+                              FieldLabel(l10n.notes),
+                              Expanded(
+                                child: TextFormField(
+                                  // The validator receives the text that the user has entered.
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return "Please enter some text";
+                                    }
+                                    if (value.length > _notesLimit) {
+                                      return "Notes can't be more than 1000 characters";
+                                    }
+                                    return null;
+                                  },
+                                  maxLength: _notesLimit,
+                                  minLines: 1,
+                                  maxLines: 5,
+                                  decoration: const InputDecoration(
+                                    contentPadding:
+                                        EdgeInsets.symmetric(vertical: 12.0),
+                                  ),
+                                  style: getEnteTextTheme(context).small,
+                                  controller: _notesController,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
+              const SizedBox(height: 24),
               Text(
                 l10n.tags,
                 style: const TextStyle(
@@ -281,6 +346,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
       final account = _accountController.text.trim();
       final issuer = _issuerController.text.trim();
       final secret = _secretController.text.trim().replaceAll(' ', '');
+      final notes = _notesController.text.trim();
       final isStreamCode = issuer.toLowerCase() == "steam" ||
           issuer.toLowerCase().contains('steampowered.com');
       if (widget.code != null && widget.code!.secret != secret) {
@@ -299,6 +365,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
       }
       final CodeDisplay display =
           widget.code?.display.copyWith(tags: tags) ?? CodeDisplay(tags: tags);
+      display.note = notes;
       final Code newCode = widget.code == null
           ? Code.fromAccountAndSecret(
               isStreamCode ? Type.steam : Type.totp,

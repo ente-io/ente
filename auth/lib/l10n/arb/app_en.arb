@@ -21,6 +21,19 @@
   "codeSecretKeyHint": "Secret Key",
   "secret": "Secret",
   "account": "Account",
+  "advance": "Advance",
+  "notes": "Notes",
+  "notesLengthLimit": "Notes can be at most {count} characters long",
+    "@notesLengthLimit": {
+        "description": "Text to indicate the maximum number of characters allowed for notes",
+        "placeholders": {
+        "count": {
+            "description": "The maximum number of characters allowed for notes",
+            "type": "int",
+            "example": "100"
+        }
+        }
+    },
   "codeAccountHint": "Account (you@domain.com)",
   "codeTagHint": "Tag",
   "accountKeyType": "Type of key",
