@@ -1,5 +1,6 @@
 import { stashRedirect } from "@/accounts/services/redirect";
 import { NavbarBase } from "@/base/components/Navbar";
+import { useIsMobileWidth } from "@/base/hooks";
 import log from "@/base/log";
 import { WhatsNew } from "@/new/photos/components/WhatsNew";
 import { shouldShowWhatsNew } from "@/new/photos/services/changelog";
@@ -1304,31 +1305,24 @@ interface UploadButtonProps {
 }
 export const UploadButton: React.FC<UploadButtonProps> = ({ onClick }) => {
     const disabled = !uploadManager.shouldAllowNewUpload();
+    const isMobileWidth = useIsMobileWidth();
 
     return (
-        <UploadButton_
-            style={{
-                cursor: disabled && "not-allowed",
-            }}
-        >
-            <Button
-                sx={{ whiteSpace: "nowrap" }}
-                onClick={onClick}
-                disabled={disabled}
-                className="desktop-button"
-                color={"secondary"}
-                startIcon={<FileUploadOutlinedIcon />}
-            >
-                {t("upload")}
-            </Button>
-
-            <IconButton
-                onClick={onClick}
-                disabled={disabled}
-                className="mobile-button"
-            >
-                {<FileUploadOutlinedIcon />}
-            </IconButton>
+        <UploadButton_ sx={{ cursor: disabled ? "not-allowed" : "pointer" }}>
+            {isMobileWidth ? (
+                <IconButton onClick={onClick} disabled={disabled}>
+                    {<FileUploadOutlinedIcon />}
+                </IconButton>
+            ) : (
+                <Button
+                    onClick={onClick}
+                    disabled={disabled}
+                    color={"secondary"}
+                    startIcon={<FileUploadOutlinedIcon />}
+                >
+                    {t("upload")}
+                </Button>
+            )}
         </UploadButton_>
     );
 };
@@ -1337,19 +1331,6 @@ const UploadButton_ = styled("div")`
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: opacity 1s ease;
-    cursor: pointer;
-    & .mobile-button {
-        display: none;
-    }
-    @media (max-width: 624px) {
-        & .mobile-button {
-            display: inline-flex;
-        }
-        & .desktop-button {
-            display: none;
-        }
-    }
 `;
 
 interface HiddenSectionNavbarContentsProps {
