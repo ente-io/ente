@@ -75,7 +75,6 @@ import Uploader from "components/Upload/Uploader";
 import { UploadSelectorInputs } from "components/UploadSelectorInputs";
 import PlanSelector from "components/pages/gallery/PlanSelector";
 import SelectedFileOptions from "components/pages/gallery/SelectedFileOptions";
-import { SYNC_INTERVAL_IN_MICROSECONDS } from "constants/gallery";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { AppContext } from "pages/_app";
@@ -139,6 +138,8 @@ import {
 import { isArchivedFile } from "utils/magicMetadata";
 import { getSessionExpiredMessage } from "utils/ui";
 import { getLocalFamilyData } from "utils/user/family";
+
+const SYNC_INTERVAL_IN_MICROSECONDS = 1000 * 60 * 5; // 5 minutes
 
 export const DeadCenter = styled("div")`
     flex: 1;
