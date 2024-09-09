@@ -29,6 +29,8 @@ class SetupEnterSecretKeyPage extends StatefulWidget {
 }
 
 class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
+  final int _notesLimit = 500;
+  final int _otherTextLimit = 200;
   late TextEditingController _issuerController;
   late TextEditingController _accountController;
   late TextEditingController _secretController;
@@ -54,7 +56,27 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
     _streamSubscription = Bus.instance.on<CodesUpdatedEvent>().listen((event) {
       _loadTags();
     });
+
+    if (widget.code == null ||
+        (widget.code!.issuer.length < _otherTextLimit &&
+            widget.code!.account.length < _otherTextLimit &&
+            widget.code!.secret.length < _otherTextLimit)) {
+      _limitTextLength(_issuerController, _otherTextLimit);
+      _limitTextLength(_accountController, _otherTextLimit);
+      _limitTextLength(_secretController, _otherTextLimit);
+    }
     super.initState();
+  }
+
+  void _limitTextLength(TextEditingController controller, int limit) {
+    controller.addListener(() {
+      if (controller.text.length > limit) {
+        controller.text = controller.text.substring(0, limit);
+        controller.selection = TextSelection.fromPosition(
+          TextPosition(offset: controller.text.length),
+        );
+      }
+    });
   }
 
   @override
