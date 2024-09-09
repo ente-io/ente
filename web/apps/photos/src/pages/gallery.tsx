@@ -972,16 +972,13 @@ export default function Gallery() {
     const updateSearch: UpdateSearch = (newSearch, summary) => {
         if (newSearch?.collection) {
             setActiveCollectionID(newSearch?.collection);
+            setIsInSearchMode(false);
         } else {
             setSearchQuery(newSearch);
-        }
-        setIsClipSearchResult(!!newSearch?.clip);
-        if (!newSearch?.collection) {
             setIsInSearchMode(!!newSearch);
             setSetSearchResultSummary(summary);
-        } else {
-            setIsInSearchMode(false);
         }
+        setIsClipSearchResult(!!newSearch?.clip);
     };
 
     const openUploader = (intent?: UploadTypeSelectorIntent) => {

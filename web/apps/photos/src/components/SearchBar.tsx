@@ -65,8 +65,8 @@ interface SearchBarProps {
     isInSearchMode: boolean;
     setIsInSearchMode: (v: boolean) => void;
     collections: Collection[];
-    updateSearch: UpdateSearch;
     files: EnteFile[];
+    updateSearch: UpdateSearch;
 }
 
 export type UpdateSearch = (
