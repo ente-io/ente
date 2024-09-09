@@ -23,7 +23,6 @@ import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { MessageContainer } from "@ente/shared/components/MessageContainer";
-import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import HTTPService from "@ente/shared/network/HTTPService";
 import {
@@ -43,7 +42,6 @@ import ArrowForward from "@mui/icons-material/ArrowForward";
 import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import Notification from "components/Notification";
-import { REDIRECTS } from "constants/redirects";
 import { t } from "i18next";
 import isElectron from "is-electron";
 import type { AppProps } from "next/app";
@@ -66,8 +64,6 @@ import {
     getUpdateAvailableForDownloadMessage,
     getUpdateReadyToInstallMessage,
 } from "utils/ui";
-
-const redirectMap = new Map([[REDIRECTS.FAMILIES, getFamilyPortalRedirectURL]]);
 
 /**
  * Properties available via {@link AppContext} to the Photos app's React tree.
@@ -105,7 +101,6 @@ export default function App({ Component, pageProps }: AppProps) {
         typeof window !== "undefined" && !window.navigator.onLine,
     );
     const [showNavbar, setShowNavBar] = useState(false);
-    const [redirectName, setRedirectName] = useState<string>(null);
     const [mapEnabled, setMapEnabled] = useState(false);
     const isLoadingBarRunning = useRef(false);
     const loadingBar = useRef(null);
@@ -203,44 +198,23 @@ export default function App({ Component, pageProps }: AppProps) {
     const setUserOffline = () => setOffline(true);
 
     useEffect(() => {
-        const redirectTo = async (redirect) => {
-            if (
-                redirectMap.has(redirect) &&
-                typeof redirectMap.get(redirect) === "function"
-            ) {
-                const redirectAction = redirectMap.get(redirect);
-                window.location.href = await redirectAction();
-            } else {
-                log.error(`invalid redirection ${redirect}`);
-            }
-        };
-
         const query = new URLSearchParams(window.location.search);
-        const redirectName = query.get("redirect");
-        if (redirectName) {
-            const user = getData(LS_KEYS.USER);
-            if (user?.token) {
-                redirectTo(redirectName);
-            } else {
-                setRedirectName(redirectName);
-            }
-        }
+        const needsFamilyRedirect = query.get("redirect") == "families";
+        if (needsFamilyRedirect && getData(LS_KEYS.USER)?.token)
+            redirectToFamilyPortal();
 
         router.events.on("routeChangeStart", (url: string) => {
-            const newPathname = url.split("?")[0] as PAGES;
+            const newPathname = url.split("?")[0];
             if (window.location.pathname !== newPathname) {
                 setLoading(true);
             }
 
-            if (redirectName) {
-                const user = getData(LS_KEYS.USER);
-                if (user?.token) {
-                    redirectTo(redirectName);
+            if (needsFamilyRedirect && getData(LS_KEYS.USER)?.token) {
+                redirectToFamilyPortal();
 
-                    // https://github.com/vercel/next.js/issues/2476#issuecomment-573460710
-                    // eslint-disable-next-line no-throw-literal
-                    throw "Aborting route change, redirection in process....";
-                }
+                // https://github.com/vercel/next.js/issues/2476#issuecomment-573460710
+                // eslint-disable-next-line no-throw-literal
+                throw "Aborting route change, redirection in process....";
             }
         });
 
@@ -255,7 +229,7 @@ export default function App({ Component, pageProps }: AppProps) {
             window.removeEventListener("online", setUserOnline);
             window.removeEventListener("offline", setUserOffline);
         };
-    }, [redirectName]);
+    }, []);
 
     useEffect(() => {
         setMessageDialogView(true);
@@ -384,3 +358,8 @@ export default function App({ Component, pageProps }: AppProps) {
         </>
     );
 }
+
+const redirectToFamilyPortal = () =>
+    void getFamilyPortalRedirectURL().then((url) => {
+        window.location.href = url;
+    });
