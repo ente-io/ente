@@ -69,11 +69,11 @@ interface SearchBarProps {
     setIsInSearchMode: (v: boolean) => void;
 }
 
-export default function SearchBar({
+export const SearchBar: React.FC<SearchBarProps> = ({
     setIsInSearchMode,
     isInSearchMode,
     ...props
-}: SearchBarProps) {
+}) => {
     const showSearchInput = () => setIsInSearchMode(true);
 
     return (
@@ -89,7 +89,7 @@ export default function SearchBar({
             />
         </SearchBarWrapper>
     );
-}
+};
 
 const SearchBarWrapper = styled(FlexWrapper)`
     padding: 0 24px;
@@ -113,7 +113,7 @@ const createComponents = memoize((Option, ValueContainer, Menu, Input) => ({
     Input,
 }));
 
-export const SearchInput: React.FC<SearchInputProps> = (props) => {
+const SearchInput: React.FC<SearchInputProps> = (props) => {
     const selectRef = useRef(null);
     const [value, setValue] = useState<SearchOption>(null);
     const appContext = useContext(AppContext);
@@ -368,7 +368,7 @@ const getIconByType = (type: SuggestionType) => {
     }
 };
 
-export const MenuWithPeople = (props) => {
+const MenuWithPeople = (props) => {
     // log.info("props.selectProps.options: ", selectRef);
     const peopleSuggestions = props.selectProps.options.filter(
         (o) => o.type === SuggestionType.PERSON,
