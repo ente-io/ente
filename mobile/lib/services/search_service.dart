@@ -67,6 +67,7 @@ class SearchService {
 
   Future<List<EnteFile>> getAllFiles() async {
     if (_cachedFilesFuture != null) {
+      _logger.fine("Reading all files from cache");
       return _cachedFilesFuture!;
     }
     _logger.fine("Reading all files from db");

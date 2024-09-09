@@ -318,7 +318,7 @@ class FileUploader {
       );
       _queue.remove(localID)!.completer.complete(uploadedFile);
       _allBackups[localID] =
-          _allBackups[localID]!.copyWith(status: BackupItemStatus.completed);
+          _allBackups[localID]!.copyWith(status: BackupItemStatus.uploaded);
       Bus.instance.fire(BackupUpdatedEvent(_allBackups));
       return uploadedFile;
     } catch (e) {
@@ -446,7 +446,7 @@ class FileUploader {
       final result = await _tryToUpload(file, collectionID, true);
       if (isInQueue) {
         _allBackups[file.localID!] = _allBackups[file.localID]!.copyWith(
-          status: BackupItemStatus.completed,
+          status: BackupItemStatus.uploaded,
         );
         Bus.instance.fire(BackupUpdatedEvent(_allBackups));
       }
@@ -1343,7 +1343,7 @@ class FileUploader {
           _logger.info("Background upload success detected");
           completer?.complete(dbFile);
           _allBackups[upload.key] = _allBackups[upload.key]!
-              .copyWith(status: BackupItemStatus.completed);
+              .copyWith(status: BackupItemStatus.uploaded);
         } else {
           _logger.info("Background upload failure detected");
           completer?.completeError(SilentlyCancelUploadsError());
