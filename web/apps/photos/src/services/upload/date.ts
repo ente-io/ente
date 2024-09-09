@@ -66,20 +66,32 @@ interface DateComponent<T = number> {
 
 const currentYear = new Date().getFullYear();
 
-/*
-generates data component for date in format YYYYMMDD-HHMMSS
+/**
+ * Parse a date from a string of the format YYYYMMDD-HHMMSS.
  */
-function parseDateFromFusedDateString(dateTime: string) {
-    const dateComponent: DateComponent<number> = convertDateComponentToNumber({
-        year: dateTime.slice(0, 4),
-        month: dateTime.slice(4, 6),
-        day: dateTime.slice(6, 8),
-        hour: dateTime.slice(9, 11),
-        minute: dateTime.slice(11, 13),
-        second: dateTime.slice(13, 15),
-    });
-    return validateAndGetDateFromComponents(dateComponent);
-}
+const parseDateFromFusedDateString = (s: string) =>
+    validateAndGetDateFromComponents(
+        dateComponentsStringToNumber({
+            year: s.slice(0, 4),
+            month: s.slice(4, 6),
+            day: s.slice(6, 8),
+            hour: s.slice(9, 11),
+            minute: s.slice(11, 13),
+            second: s.slice(13, 15),
+        }),
+    );
+
+const dateComponentsStringToNumber = (
+    dateComponent: DateComponent<string>,
+): DateComponent<number> => ({
+    year: Number(dateComponent.year),
+    // Month argument to Javascript Date constructor is 0-indexed (i.e 0 to 11).
+    month: Number(dateComponent.month) - 1,
+    day: Number(dateComponent.day),
+    hour: Number(dateComponent.hour),
+    minute: Number(dateComponent.minute),
+    second: Number(dateComponent.second),
+});
 
 /* sample date format = 2018-08-19 12:34:45
  the date has six symbol separated number values
@@ -94,7 +106,7 @@ export function tryToParseDateTime(dateTime: string): Date {
         return parseDateFromFusedDateString(possibleDateTime);
     }
     return validateAndGetDateFromComponents(
-        convertDateComponentToNumber(dateComponent),
+        dateComponentsStringToNumber(dateComponent),
     );
 }
 
@@ -143,20 +155,6 @@ function isDatePartValid(date: Date, dateComponent: DateComponent<number>) {
         date.getMonth() === dateComponent.month &&
         date.getDate() === dateComponent.day
     );
-}
-
-function convertDateComponentToNumber(
-    dateComponent: DateComponent<string>,
-): DateComponent<number> {
-    return {
-        year: Number(dateComponent.year),
-        // https://stackoverflow.com/questions/2552483/why-does-the-month-argument-range-from-0-to-11-in-javascripts-date-constructor
-        month: Number(dateComponent.month) - 1,
-        day: Number(dateComponent.day),
-        hour: Number(dateComponent.hour),
-        minute: Number(dateComponent.minute),
-        second: Number(dateComponent.second),
-    };
 }
 
 function getDateFromComponents(dateComponent: DateComponent<number>) {
