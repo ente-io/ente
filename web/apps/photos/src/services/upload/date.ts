@@ -4,8 +4,12 @@ import log from "@/base/log";
  * Try to extract a date (as epoch microseconds) from a file name by matching it
  * against certain known patterns for media files.
  *
- * If it doesn't match a known pattern, or if there is some error during the
- * parsing, return `undefined`.
+ * This uses all sorts of arbitrary heuristics gathered over time from feedback
+ * by users. In particular, this is meant to capture the dates from screenshots
+ * and chat app forwards.
+ *
+ * If the filename doesn't match a known pattern, or if there is some error
+ * during the parsing, return `undefined`.
  */
 export const tryParseEpochMicrosecondsFromFileName = (
     fileName: string,
@@ -31,7 +35,7 @@ export const tryParseEpochMicrosecondsFromFileName = (
             parsedDate = parseDateFromFusedDateString(dateString);
         }
         if (!parsedDate) {
-            parsedDate = tryToParseDateTime(fileName);
+            parsedDate = parseDateFromDigitGroups(fileName);
         }
         return validateAndGetCreationUnixTimeInMicroSeconds(parsedDate);
     } catch (e) {
@@ -93,31 +97,29 @@ const dateComponentsStringToNumber = (
     second: Number(dateComponent.second),
 });
 
-/* sample date format = 2018-08-19 12:34:45
- the date has six symbol separated number values
- which we would extract and use to form the date
+/**
+ * Try to see if we can parse an date from a string with arbitrary separators.
+ *
+ * For example, consider a string like "2018-08-19 12:34:45". We see if it is
+ * possible to extract six symbol separated digit groups from the string. If so,
+ * we use them to form a date.
  */
-export function tryToParseDateTime(dateTime: string): Date {
-    const dateComponent = getDateComponentsFromSymbolJoinedString(dateTime);
+export const parseDateFromDigitGroups = (s: string) => {
+    const [year, month, day, hour, minute, second] = s.match(/\d+/g) ?? [];
+
+    const dateComponent = { year, month, day, hour, minute, second };
+
     if (dateComponent.year?.length === 8 && dateComponent.month?.length === 6) {
-        // the filename has size 8 consecutive and then 6 consecutive digits
-        // high possibility that the it is a date in format YYYYMMDD-HHMMSS
+        // If the filename has size 8 consecutive and then 6 consecutive digits,
+        // then there is a high possibility that the it is a date in format
+        // "YYYYMMDD-HHMMSS".
         const possibleDateTime = dateComponent.year + "-" + dateComponent.month;
         return parseDateFromFusedDateString(possibleDateTime);
     }
     return validateAndGetDateFromComponents(
         dateComponentsStringToNumber(dateComponent),
     );
-}
-
-function getDateComponentsFromSymbolJoinedString(
-    dateTime: string,
-): DateComponent<string> {
-    const [year, month, day, hour, minute, second] =
-        dateTime.match(/\d+/g) ?? [];
-
-    return { year, month, day, hour, minute, second };
-}
+};
 
 function validateAndGetDateFromComponents(
     dateComponent: DateComponent<number>,
