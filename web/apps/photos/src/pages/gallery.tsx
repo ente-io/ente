@@ -190,7 +190,6 @@ export default function Gallery() {
     const [favItemIds, setFavItemIds] = useState<Set<number>>();
 
     const [isFirstLoad, setIsFirstLoad] = useState(false);
-    const [isFirstFetch, setIsFirstFetch] = useState(false);
     const [selected, setSelected] = useState<SelectedState>({
         ownCount: 0,
         count: 0,
@@ -366,7 +365,6 @@ export default function Gallery() {
             setupSelectAllKeyBoardShortcutHandler();
             setActiveCollectionID(ALL_SECTION);
             setIsFirstLoad(isFirstLogin());
-            setIsFirstFetch(true);
             if (justSignedUp()) {
                 setPlanModalView(true);
             }
@@ -394,7 +392,6 @@ export default function Gallery() {
             await syncWithRemote(true);
             setIsFirstLoad(false);
             setJustSignedUp(false);
-            setIsFirstFetch(false);
             syncInterval.current = setInterval(() => {
                 syncWithRemote(false, true);
             }, SYNC_INTERVAL_IN_MICROSECONDS);
@@ -1091,7 +1088,6 @@ export default function Gallery() {
                     ) : (
                         <NormalNavbarContents
                             openSidebar={openSidebar}
-                            isFirstFetch={isFirstFetch}
                             setIsInSearchMode={setIsInSearchMode}
                             openUploader={openUploader}
                             isInSearchMode={isInSearchMode}
@@ -1272,7 +1268,6 @@ const mergeMaps = <K, V>(map1: Map<K, V>, map2: Map<K, V>) => {
 
 interface NormalNavbarContentsProps {
     openSidebar: () => void;
-    isFirstFetch: boolean;
     openUploader: () => void;
     isInSearchMode: boolean;
     setIsInSearchMode: (v: boolean) => void;
