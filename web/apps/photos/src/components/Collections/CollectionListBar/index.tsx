@@ -1,3 +1,4 @@
+import { useIsMobileWidth } from "@/base/hooks";
 import {
     IconButtonWithBG,
     SpaceBetweenFlex,
@@ -5,13 +6,7 @@ import {
 import useWindowSize from "@ente/shared/hooks/useWindowSize";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
-import {
-    Box,
-    IconButton,
-    Typography,
-    styled,
-    useMediaQuery,
-} from "@mui/material";
+import { Box, IconButton, Typography, styled } from "@mui/material";
 import CollectionListBarCard from "components/Collections/CollectionListBar/CollectionCard";
 import {
     CollectionListBarWrapper,
@@ -50,7 +45,7 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
     collectionListSortBy,
 }) => {
     const windowSize = useWindowSize();
-    const isMobile = useMediaQuery("(max-width: 428px)");
+    const isMobile = useIsMobileWidth();
 
     const collectionListWrapperRef = useRef<HTMLDivElement>(null);
     const collectionListRef = React.useRef(null);
