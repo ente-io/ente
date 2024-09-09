@@ -1,3 +1,4 @@
+import { SelectionBar } from "@/base/components/Navbar";
 import { sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
 import downloadManager from "@/new/photos/services/download";
@@ -5,6 +6,7 @@ import { EnteFile } from "@/new/photos/types/file";
 import { mergeMetadata } from "@/new/photos/utils/file";
 import {
     CenteredFlex,
+    FluidContainer,
     SpaceBetweenFlex,
     VerticallyCentered,
 } from "@ente/shared/components/Container";
@@ -20,8 +22,11 @@ import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { CustomError, parseSharingErrorCodes } from "@ente/shared/error";
 import { useFileInput } from "@ente/shared/hooks/useFileInput";
 import AddPhotoAlternateOutlined from "@mui/icons-material/AddPhotoAlternateOutlined";
+import CloseIcon from "@mui/icons-material/Close";
+import DownloadIcon from "@mui/icons-material/Download";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
+import { Box, IconButton, Stack, Tooltip } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import bs58 from "bs58";
 import { CollectionInfo } from "components/Collections/CollectionInfo";
@@ -38,7 +43,6 @@ import { UploadButton } from "components/Upload/UploadButton";
 import Uploader from "components/Upload/Uploader";
 import { UploadSelectorInputs } from "components/UploadSelectorInputs";
 import SharedAlbumNavbar from "components/pages/sharedAlbum/Navbar";
-import SelectedFileOptions from "components/pages/sharedAlbum/SelectedFileOptions";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { AppContext } from "pages/_app";
@@ -69,6 +73,7 @@ import {
     isHiddenCollection,
 } from "utils/collection";
 import { downloadSelectedFiles, getSelectedFiles, sortFiles } from "utils/file";
+import { formatNumber } from "utils/number/format";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 
 export default function PublicCollectionGallery() {
@@ -603,3 +608,35 @@ export default function PublicCollectionGallery() {
         </PublicCollectionGalleryContext.Provider>
     );
 }
+
+interface SelectedFileOptionsProps {
+    count: number;
+    clearSelection: () => void;
+    downloadFilesHelper: () => void;
+}
+
+const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
+    downloadFilesHelper,
+    count,
+    clearSelection,
+}) => {
+    return (
+        <SelectionBar>
+            <FluidContainer>
+                <IconButton onClick={clearSelection}>
+                    <CloseIcon />
+                </IconButton>
+                <Box ml={1.5}>
+                    {formatNumber(count)} {t("SELECTED")}{" "}
+                </Box>
+            </FluidContainer>
+            <Stack spacing={2} direction="row" mr={2}>
+                <Tooltip title={t("DOWNLOAD")}>
+                    <IconButton onClick={downloadFilesHelper}>
+                        <DownloadIcon />
+                    </IconButton>
+                </Tooltip>
+            </Stack>
+        </SelectionBar>
+    );
+};
