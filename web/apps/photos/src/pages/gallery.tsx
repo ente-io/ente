@@ -75,13 +75,6 @@ import Uploader from "components/Upload/Uploader";
 import { UploadSelectorInputs } from "components/UploadSelectorInputs";
 import PlanSelector from "components/pages/gallery/PlanSelector";
 import SelectedFileOptions from "components/pages/gallery/SelectedFileOptions";
-import {
-    ALL_SECTION,
-    ARCHIVE_SECTION,
-    CollectionSummaryType,
-    HIDDEN_ITEMS_SECTION,
-    TRASH_SECTION,
-} from "constants/collection";
 import { SYNC_INTERVAL_IN_MICROSECONDS } from "constants/gallery";
 import { t } from "i18next";
 import { useRouter } from "next/router";
@@ -121,7 +114,12 @@ import {
 import { FamilyData } from "types/user";
 import { checkSubscriptionPurchase } from "utils/billing";
 import {
+    ALL_SECTION,
+    ARCHIVE_SECTION,
     COLLECTION_OPS_TYPE,
+    CollectionSummaryType,
+    HIDDEN_ITEMS_SECTION,
+    TRASH_SECTION,
     constructCollectionNameMap,
     getArchivedCollections,
     getDefaultHiddenCollectionIDs,

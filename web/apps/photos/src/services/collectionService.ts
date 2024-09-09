@@ -17,17 +17,6 @@ import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { getActualKey } from "@ente/shared/user";
 import type { User } from "@ente/shared/user/types";
-import {
-    ALL_SECTION,
-    ARCHIVE_SECTION,
-    COLLECTION_LIST_SORT_BY,
-    COLLECTION_SORT_ORDER,
-    CollectionSummaryType,
-    CollectionType,
-    DUMMY_UNCATEGORIZED_COLLECTION,
-    HIDDEN_ITEMS_SECTION,
-    TRASH_SECTION,
-} from "constants/collection";
 import { t } from "i18next";
 import {
     AddToCollectionRequest,
@@ -50,6 +39,15 @@ import {
 } from "types/collection";
 import { FamilyData } from "types/user";
 import {
+    ALL_SECTION,
+    ARCHIVE_SECTION,
+    COLLECTION_LIST_SORT_BY,
+    COLLECTION_SORT_ORDER,
+    CollectionSummaryType,
+    CollectionType,
+    DUMMY_UNCATEGORIZED_COLLECTION,
+    HIDDEN_ITEMS_SECTION,
+    TRASH_SECTION,
     changeCollectionSubType,
     getHiddenCollections,
     getNonHiddenCollections,

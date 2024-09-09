@@ -13,7 +13,6 @@ import {
     CollectionListBarWrapper,
     CollectionListWrapper,
 } from "components/Collections/styledComponents";
-import { ALL_SECTION, COLLECTION_LIST_SORT_BY } from "constants/collection";
 import { t } from "i18next";
 import memoize from "memoize-one";
 import React, { useEffect } from "react";
@@ -24,6 +23,7 @@ import {
     areEqual,
 } from "react-window";
 import { CollectionSummary } from "types/collection";
+import { ALL_SECTION, COLLECTION_LIST_SORT_BY } from "utils/collection";
 import CollectionListSortBy from "../CollectionListSortBy";
 import ScrollButton from "./ScrollButton";
 
