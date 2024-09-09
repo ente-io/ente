@@ -32,6 +32,7 @@ import { GalleryContext } from "pages/gallery";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { Trans } from "react-i18next";
 import billingService, { type PlansResponse } from "services/billingService";
+import { getFamilyPortalRedirectURL } from "services/userService";
 import { Plan, Subscription } from "types/billing";
 import { SetLoading } from "types/gallery";
 import { BonusData } from "types/user";
@@ -686,8 +687,15 @@ function ManageSubscription({
     closeModal,
     setLoading,
 }: ManageSubscriptionProps) {
-    const openFamilyPortal = () =>
-        openURL("https://web.ente.io?redirect=families");
+    const openFamilyPortal = async () => {
+        setLoading(true);
+        try {
+            openURL(await getFamilyPortalRedirectURL());
+        } catch (e) {
+            log.error("Could not redirect to family portal", e);
+        }
+        setLoading(false);
+    };
 
     return (
         <Stack spacing={1}>
