@@ -42,8 +42,15 @@ import {
 } from "@ente/shared/storage/sessionStorage";
 import type { User } from "@ente/shared/user/types";
 import ArrowBack from "@mui/icons-material/ArrowBack";
+import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
-import { IconButton, Typography, styled } from "@mui/material";
+import {
+    Button,
+    ButtonProps,
+    IconButton,
+    Typography,
+    styled,
+} from "@mui/material";
 import AuthenticateUserModal from "components/AuthenticateUserModal";
 import Collections from "components/Collections";
 import { CollectionInfo } from "components/Collections/CollectionInfo";
@@ -69,8 +76,7 @@ import PhotoFrame from "components/PhotoFrame";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
 import { SearchBar, type UpdateSearch } from "components/SearchBar";
 import Sidebar from "components/Sidebar";
-import { UploadButton } from "components/Upload/UploadButton";
-import type { UploadTypeSelectorIntent } from "components/Upload/UploadTypeSelector";
+import { type UploadTypeSelectorIntent } from "components/Upload/UploadTypeSelector";
 import Uploader from "components/Upload/Uploader";
 import { UploadSelectorInputs } from "components/UploadSelectorInputs";
 import PlanSelector from "components/pages/gallery/PlanSelector";
@@ -1298,6 +1304,72 @@ const NormalNavbarContents: React.FC<NormalNavbarContentsProps> = ({
         </>
     );
 };
+
+interface UploadButtonProps {
+    openUploader: (intent?: UploadTypeSelectorIntent) => void;
+    text?: string;
+    color?: ButtonProps["color"];
+    disableShrink?: boolean;
+    icon?: JSX.Element;
+}
+export const UploadButton: React.FC<UploadButtonProps> = ({
+    openUploader,
+    text,
+    color,
+    disableShrink,
+    icon,
+}) => {
+    const onClickHandler = () => openUploader();
+
+    return (
+        <UploadButton_
+            $disableShrink={disableShrink}
+            style={{
+                cursor: !uploadManager.shouldAllowNewUpload() && "not-allowed",
+            }}
+        >
+            <Button
+                sx={{ whiteSpace: "nowrap" }}
+                onClick={onClickHandler}
+                disabled={!uploadManager.shouldAllowNewUpload()}
+                className="desktop-button"
+                color={color ?? "secondary"}
+                startIcon={icon ?? <FileUploadOutlinedIcon />}
+            >
+                {text ?? t("upload")}
+            </Button>
+
+            <IconButton
+                onClick={onClickHandler}
+                disabled={!uploadManager.shouldAllowNewUpload()}
+                className="mobile-button"
+            >
+                {icon ?? <FileUploadOutlinedIcon />}
+            </IconButton>
+        </UploadButton_>
+    );
+};
+
+const UploadButton_ = styled("div")<{ $disableShrink: boolean }>`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 1s ease;
+    cursor: pointer;
+    & .mobile-button {
+        display: none;
+    }
+    ${({ $disableShrink }) =>
+        !$disableShrink &&
+        `@media (max-width: 624px) {
+        & .mobile-button {
+            display: inline-flex;
+        }
+        & .desktop-button {
+            display: none;
+        }
+    }`}
+`;
 
 interface HiddenSectionNavbarContentsProps {
     onBack: () => void;
