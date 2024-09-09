@@ -1305,24 +1305,22 @@ interface HiddenSectionNavbarContentsProps {
 
 const HiddenSectionNavbarContents: React.FC<
     HiddenSectionNavbarContentsProps
-> = ({ onBack }) => {
-    return (
-        <HorizontalFlex
-            gap={"24px"}
-            sx={{
-                width: "100%",
-                background: (theme) => theme.palette.background.default,
-            }}
-        >
-            <IconButton onClick={onBack}>
-                <ArrowBack />
-            </IconButton>
-            <FlexWrapper>
-                <Typography>{t("HIDDEN")}</Typography>
-            </FlexWrapper>
-        </HorizontalFlex>
-    );
-};
+> = ({ onBack }) => (
+    <HorizontalFlex
+        gap={"24px"}
+        sx={{
+            width: "100%",
+            background: (theme) => theme.palette.background.default,
+        }}
+    >
+        <IconButton onClick={onBack}>
+            <ArrowBack />
+        </IconButton>
+        <FlexWrapper>
+            <Typography>{t("HIDDEN")}</Typography>
+        </FlexWrapper>
+    </HorizontalFlex>
+);
 
 interface SearchResultSummaryHeaderProps {
     searchResultSummary: SearchResultSummary;

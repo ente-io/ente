@@ -58,7 +58,6 @@ import {
 } from "services/searchService";
 import { Collection } from "types/collection";
 
-
 const { Option, ValueContainer, Menu } = components;
 
 interface SearchBarProps {
@@ -291,7 +290,7 @@ const SearchInputWrapper = styled(CenteredFlex, {
         `}
 `;
 
-export const SelectStyles = {
+const SelectStyles = {
     container: (style) => ({
         ...style,
         flex: 1,
