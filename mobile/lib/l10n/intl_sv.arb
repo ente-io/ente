@@ -357,6 +357,8 @@
   "close": "Stäng",
   "incorrectRecoveryKey": "Felaktig återställningsnyckel",
   "theRecoveryKeyYouEnteredIsIncorrect": "Återställningsnyckeln du angav är felaktig",
+  "uploadingMultipleMemories": "Bevarar {count} minnen...",
+  "uploadingSingleMemory": "Bevarar 1 minne...",
   "viewLogs": "Visa loggar",
   "copyEmailAddress": "Kopiera e-postadress",
   "language": "Språk",
@@ -421,9 +423,5 @@
     }
   },
   "next": "Nästa",
-  "guestView": "Gästvy",
-  "cl_guest_view_title": "Gästvy",
-  "cl_video_player_title": "Videospelare",
-  "loopVideoOn": "Loop video on",
-  "loopVideoOff": "Loop video off"
+  "guestView": "Gästvy"
 }

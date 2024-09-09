@@ -41,7 +41,7 @@
   "recoverButton": "恢复",
   "recoverySuccessful": "恢复成功!",
   "decrypting": "解密中...",
-  "incorrectRecoveryKeyTitle": "不正确的恢复密钥",
+  "incorrectRecoveryKeyTitle": "恢复密钥不正确",
   "incorrectRecoveryKeyBody": "您输入的恢复密钥不正确",
   "forgotPassword": "忘记密码",
   "enterYourRecoveryKey": "输入您的恢复密钥",
@@ -1310,16 +1310,9 @@
   "thisWillRemovePublicLinksOfAllSelectedQuickLinks": "这将删除所有选定的快速链接的公共链接。",
   "guestView": "访客视图",
   "guestViewEnablePreSteps": "要启用访客视图，请在系统设置中设置设备密码或屏幕锁。",
-  "cl_guest_view_title": "访客视图",
-  "cl_guest_view_description": "把手机交给朋友看照片？不用担心 Ta 们滑动屏幕乱看照片。访客视图会将 Ta 们锁定在您选择的照片中。",
-  "cl_guest_view_call_to_action": "选择照片并使用“访客视图”。",
-  "cl_panorama_viewer_title": "全景图查看器",
-  "cl_panorama_viewer_description": "我们添加了对 360 度全景照片的支持。通过基于动作的导航，用户可获得身临其境的体验！",
-  "cl_video_player_title": "视频播放器",
-  "cl_video_player_description": "推出全新的视频播放器，提供更好的播放控制并添加了对 HDR 视频的支持。",
   "appLockDescriptions": "在设备的默认锁定屏幕和带有 PIN 或密码的自定义锁定屏幕之间进行选择。",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "要启用应用锁，请在系统设置中设置设备密码或屏幕锁。",
   "authToViewPasskey": "请验证身份以查看您的通行密钥",
-  "loopVideoOn": "Loop video on",
-  "loopVideoOff": "Loop video off"
+  "loopVideoOn": "循环播放视频开启",
+  "loopVideoOff": "循环播放视频关闭"
 }
