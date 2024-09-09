@@ -55,7 +55,6 @@ import { resumeExportsIfNeeded } from "services/export";
 import { photosLogout } from "services/logout";
 import {
     getFamilyPortalRedirectURL,
-    getRoadmapRedirectURL,
     updateMapEnabledStatus,
 } from "services/userService";
 import "styles/global.css";
@@ -68,10 +67,7 @@ import {
     getUpdateReadyToInstallMessage,
 } from "utils/ui";
 
-const redirectMap = new Map([
-    [REDIRECTS.ROADMAP, getRoadmapRedirectURL],
-    [REDIRECTS.FAMILIES, getFamilyPortalRedirectURL],
-]);
+const redirectMap = new Map([[REDIRECTS.FAMILIES, getFamilyPortalRedirectURL]]);
 
 /**
  * Properties available via {@link AppContext} to the Photos app's React tree.

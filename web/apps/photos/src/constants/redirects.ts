@@ -1,5 +1,4 @@
 export enum REDIRECTS {
-    ROADMAP = "roadmap",
     FAMILIES = "families",
 }
 
