@@ -1,3 +1,4 @@
+import { useIsMobileWidth } from "@/base/hooks";
 import { FileType } from "@/media/file-type";
 import { PeopleList } from "@/new/photos/components/PeopleList";
 import { isMLEnabled } from "@/new/photos/services/ml";
@@ -33,7 +34,6 @@ import LocationIcon from "@mui/icons-material/LocationOn";
 import SearchIcon from "@mui/icons-material/Search";
 import {
     Box,
-    css,
     Divider,
     IconButton,
     Stack,
@@ -79,18 +79,22 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     ...props
 }) => {
     const showSearchInput = () => setIsInSearchMode(true);
+    const isMobileWidth = useIsMobileWidth();
 
     return (
         <SearchBarWrapper>
-            <SearchInput
-                {...props}
-                isOpen={isInSearchMode}
-                setIsOpen={setIsInSearchMode}
-            />
-            <SearchBarMobile
-                show={!isInSearchMode}
-                showSearchInput={showSearchInput}
-            />
+            {isMobileWidth ? (
+                <SearchBarMobile
+                    show={!isInSearchMode}
+                    showSearchInput={showSearchInput}
+                />
+            ) : (
+                <SearchInput
+                    {...props}
+                    isOpen={isInSearchMode}
+                    setIsOpen={setIsInSearchMode}
+                />
+            )}
         </SearchBarWrapper>
     );
 };
@@ -248,7 +252,7 @@ const SearchInput: React.FC<SearchInputProps> = (props) => {
     );
 
     return (
-        <SearchInputWrapper isOpen={props.isOpen}>
+        <SearchInputWrapper>
             <AsyncSelect
                 ref={selectRef}
                 value={value}
@@ -275,19 +279,10 @@ const SearchInput: React.FC<SearchInputProps> = (props) => {
     );
 };
 
-const SearchInputWrapper = styled(CenteredFlex, {
-    shouldForwardProp: (propName) => propName != "isOpen",
-})<{ isOpen: boolean }>`
+const SearchInputWrapper = styled(CenteredFlex)`
     background: ${({ theme }) => theme.colors.background.base};
     max-width: 484px;
     margin: auto;
-    ${(props) =>
-        !props.isOpen &&
-        css`
-            @media (max-width: 624px) {
-                display: none;
-            }
-        `}
 `;
 
 const SelectStyles = {
@@ -519,7 +514,4 @@ const SearchMobileBox = styled(FluidContainer)`
     cursor: pointer;
     align-items: center;
     justify-content: flex-end;
-    @media (min-width: 625px) {
-        display: none;
-    }
 `;
