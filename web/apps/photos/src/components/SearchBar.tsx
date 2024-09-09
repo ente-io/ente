@@ -119,22 +119,22 @@ const createComponents = memoize((Option, ValueContainer, Menu, Input) => ({
 }));
 
 const SearchInput: React.FC<SearchInputProps> = (props) => {
-    const selectRef = useRef(null);
-    const [value, setValue] = useState<SearchOption>(null);
     const appContext = useContext(AppContext);
+    const [value, setValue] = useState<SearchOption>(null);
+    const selectRef = useRef(null);
+    const [defaultOptions, setDefaultOptions] = useState([]);
+    const [query, setQuery] = useState("");
+
     const handleChange = (value: SearchOption) => {
         setValue(value);
         setQuery(value?.label);
-
-        blur();
+        selectRef.current?.blur();
     };
     const handleInputChange = (value: string, actionMeta: InputActionMeta) => {
         if (actionMeta.action === "input-change") {
             setQuery(value);
         }
     };
-    const [defaultOptions, setDefaultOptions] = useState([]);
-    const [query, setQuery] = useState("");
 
     useEffect(() => {
         search(value);
@@ -171,10 +171,6 @@ const SearchInput: React.FC<SearchInputProps> = (props) => {
         ),
         [props.files, props.collections],
     );
-
-    const blur = () => {
-        selectRef.current?.blur();
-    };
 
     const search = (selectedOption: SearchOption) => {
         if (!selectedOption) {
