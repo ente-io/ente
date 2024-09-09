@@ -41,6 +41,8 @@ type S3Config struct {
 	// Indicates if local minio buckets are being used. Enables various
 	// debugging workarounds; not tested/intended for production.
 	areLocalBuckets bool
+	// Indicates if want to use minio for cold storage, whilst using other (external) providers for hot storage
+	minioColdStorage bool
 
 	// FileDataConfig is the configuration for various file data.
 	// If for particular object type, the bucket is not specified, it will
@@ -273,4 +275,10 @@ func (config *S3Config) WasabiComplianceDC() string {
 // various workarounds for debugging locally; not meant for production use.
 func (config *S3Config) AreLocalBuckets() bool {
 	return config.areLocalBuckets
+}
+
+// Return true if we're using local minio buckets. This can then be used to add
+// various workarounds for debugging locally; not meant for production use.
+func (config *S3Config) MinioColdStorage() bool {
+	return config.minioColdStorage
 }
