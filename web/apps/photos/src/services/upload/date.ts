@@ -135,9 +135,13 @@ function validateAndGetDateFromComponents(
         hasTimeValues(dateComponents) &&
         !isTimePartValid(date, dateComponents)
     ) {
-        // if the date has time values but they are not valid
-        // then we remove the time values and try to validate the date
-        date = getDateFromComponents(removeTimeValues(dateComponents));
+        // If the date has time values but they are not valid then remove them.
+        date = getDateFromComponents({
+            ...dateComponents,
+            hour: 0,
+            minute: 0,
+            second: 0,
+        });
     }
     if (!isDatePartValid(date, dateComponents)) {
         return null;
@@ -151,36 +155,27 @@ function validateAndGetDateFromComponents(
     return date;
 }
 
-function isTimePartValid(date: Date, dateComponents: DateComponents) {
-    return (
-        date.getHours() === dateComponents.hour &&
-        date.getMinutes() === dateComponents.minute &&
-        date.getSeconds() === dateComponents.second
-    );
-}
+const isDatePartValid = (date: Date, { year, month, day }: DateComponents) =>
+    date.getFullYear() === year &&
+    date.getMonth() === month &&
+    date.getDate() === day;
 
-function isDatePartValid(date: Date, dateComponents: DateComponents) {
-    return (
-        date.getFullYear() === dateComponents.year &&
-        date.getMonth() === dateComponents.month &&
-        date.getDate() === dateComponents.day
-    );
-}
+const isTimePartValid = (
+    date: Date,
+    { hour, minute, second }: DateComponents,
+) =>
+    date.getHours() === hour &&
+    date.getMinutes() === minute &&
+    date.getSeconds() === second;
 
-function getDateFromComponents(dateComponents: DateComponents) {
+const getDateFromComponents = (dateComponents: DateComponents) => {
     const { year, month, day, hour, minute, second } = dateComponents;
     if (hasTimeValues(dateComponents)) {
         return new Date(year, month, day, hour, minute, second);
     } else {
         return new Date(year, month, day);
     }
-}
+};
 
-function hasTimeValues(dateComponents: DateComponents) {
-    const { hour, minute, second } = dateComponents;
-    return !isNaN(hour) && !isNaN(minute) && !isNaN(second);
-}
-
-function removeTimeValues(dateComponents: DateComponents): DateComponents {
-    return { ...dateComponents, hour: 0, minute: 0, second: 0 };
-}
+const hasTimeValues = ({ hour, minute, second }: DateComponents) =>
+    !isNaN(hour) && !isNaN(minute) && !isNaN(second);
