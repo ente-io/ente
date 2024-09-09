@@ -18,13 +18,13 @@ import { mergeMetadata } from "@/new/photos/utils/file";
 import { batch } from "@/utils/array";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
-import { REQUEST_BATCH_SIZE } from "constants/api";
 import exportService from "services/export";
 import { Collection } from "types/collection";
 import { SetFiles } from "types/gallery";
 import { decryptFile, getLatestVersionFiles, sortFiles } from "utils/file";
 import {
     getCollectionLastSyncTime,
+    REQUEST_BATCH_SIZE,
     setCollectionLastSyncTime,
 } from "./collectionService";
 

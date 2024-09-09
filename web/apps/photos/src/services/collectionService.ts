@@ -17,7 +17,6 @@ import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { getActualKey } from "@ente/shared/user";
 import type { User } from "@ente/shared/user/types";
-import { REQUEST_BATCH_SIZE } from "constants/api";
 import {
     ALL_SECTION,
     ARCHIVE_SECTION,
@@ -83,6 +82,8 @@ const HIDDEN_COLLECTION_IDS = "hidden-collection-ids";
 const UNCATEGORIZED_COLLECTION_NAME = "Uncategorized";
 export const HIDDEN_COLLECTION_NAME = ".hidden";
 const FAVORITE_COLLECTION_NAME = "Favorites";
+
+export const REQUEST_BATCH_SIZE = 1000;
 
 export const getCollectionLastSyncTime = async (collection: Collection) =>
     (await localForage.getItem<number>(`${collection.id}-time`)) ?? 0;
