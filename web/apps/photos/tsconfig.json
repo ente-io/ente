@@ -4,7 +4,6 @@
         "baseUrl": "./src",
         "downlevelIteration": true,
         "jsx": "preserve",
-        "jsxImportSource": "@emotion/react",
         "lib": ["dom", "dom.iterable", "esnext", "webworker"],
         "noImplicitAny": false,
         "noUnusedLocals": false,
