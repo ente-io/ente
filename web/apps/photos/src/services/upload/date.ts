@@ -15,33 +15,40 @@ export const tryParseEpochMicrosecondsFromFileName = (
     fileName: string,
 ): number | undefined => {
     try {
-        fileName = fileName.trim();
-        let parsedDate: Date;
-        if (fileName.startsWith("IMG-") || fileName.startsWith("VID-")) {
-            // WhatsApp media files
-            // Sample name: IMG-20171218-WA0028.jpg
-            parsedDate = parseDateFromFusedDateString(fileName.split("-")[1]);
-        } else if (fileName.startsWith("Screenshot_")) {
-            // Screenshots on Android
-            // Sample name: Screenshot_20181227-152914.jpg
-            parsedDate = parseDateFromFusedDateString(
-                fileName.replaceAll("Screenshot_", ""),
-            );
-        } else if (fileName.startsWith("signal-")) {
-            // Signal images
-            // Sample name: signal-2018-08-21-100217.jpg
-            const p = fileName.split("-");
-            const dateString = `${p[1]}${p[2]}${p[3]}-${p[4]}`;
-            parsedDate = parseDateFromFusedDateString(dateString);
-        }
-        if (!parsedDate) {
-            parsedDate = parseDateFromDigitGroups(fileName);
-        }
-        return validateAndGetCreationUnixTimeInMicroSeconds(parsedDate);
+        return parseEpochMicrosecondsFromFileName(fileName);
     } catch (e) {
         log.error(`Could not extract date from file name ${fileName}`, e);
         return undefined;
     }
+};
+
+// Not sure why we have a try catch, but until there is a chance to validate
+// that it doesn't indeed throw, move out the actual logic into this separate
+// and more readable function.
+const parseEpochMicrosecondsFromFileName = (fileName: string) => {
+    fileName = fileName.trim();
+    let parsedDate: Date;
+    if (fileName.startsWith("IMG-") || fileName.startsWith("VID-")) {
+        // WhatsApp media files
+        // Sample name: IMG-20171218-WA0028.jpg
+        parsedDate = parseDateFromFusedDateString(fileName.split("-")[1]);
+    } else if (fileName.startsWith("Screenshot_")) {
+        // Screenshots on Android
+        // Sample name: Screenshot_20181227-152914.jpg
+        parsedDate = parseDateFromFusedDateString(
+            fileName.replaceAll("Screenshot_", ""),
+        );
+    } else if (fileName.startsWith("signal-")) {
+        // Signal images
+        // Sample name: signal-2018-08-21-100217.jpg
+        const p = fileName.split("-");
+        const dateString = `${p[1]}${p[2]}${p[3]}-${p[4]}`;
+        parsedDate = parseDateFromFusedDateString(dateString);
+    }
+    if (!parsedDate) {
+        parsedDate = parseDateFromDigitGroups(fileName);
+    }
+    return validateAndGetCreationUnixTimeInMicroSeconds(parsedDate);
 };
 
 export function validateAndGetCreationUnixTimeInMicroSeconds(dateTime: Date) {
