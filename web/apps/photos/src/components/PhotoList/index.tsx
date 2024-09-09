@@ -3,16 +3,6 @@ import { formattedByteSize } from "@/new/photos/utils/units";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import { formatDate } from "@ente/shared/time/format";
 import { Box, Checkbox, Link, Typography, styled } from "@mui/material";
-import {
-    DATE_CONTAINER_HEIGHT,
-    GAP_BTW_TILES,
-    IMAGE_CONTAINER_MAX_HEIGHT,
-    IMAGE_CONTAINER_MAX_WIDTH,
-    MIN_COLUMNS,
-    SIZE_AND_COUNT_CONTAINER_HEIGHT,
-    SPACE_BTW_DATES,
-    SPACE_BTW_DATES_TO_IMAGE_CONTAINER_WIDTH_RATIO,
-} from "constants/gallery";
 import { t } from "i18next";
 import memoize from "memoize-one";
 import { GalleryContext } from "pages/gallery";
@@ -29,6 +19,15 @@ import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 const FOOTER_HEIGHT = 90;
 const ALBUM_FOOTER_HEIGHT = 75;
 const ALBUM_FOOTER_HEIGHT_WITH_REFERRAL = 113;
+
+export const GAP_BTW_TILES = 4;
+export const DATE_CONTAINER_HEIGHT = 48;
+export const SIZE_AND_COUNT_CONTAINER_HEIGHT = 72;
+export const IMAGE_CONTAINER_MAX_HEIGHT = 180;
+export const IMAGE_CONTAINER_MAX_WIDTH = 180;
+export const MIN_COLUMNS = 4;
+export const SPACE_BTW_DATES = 44;
+export const SPACE_BTW_DATES_TO_IMAGE_CONTAINER_WIDTH_RATIO = 0.244;
 
 export enum ITEM_TYPE {
     TIME = "TIME",

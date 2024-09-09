@@ -1,14 +1,13 @@
-import { Dialog, DialogContent, Link } from "@mui/material";
-import { t } from "i18next";
-
 import {
     UPLOAD_RESULT,
     UPLOAD_STAGES,
 } from "@/new/photos/services/upload/types";
 import { dialogCloseHandler } from "@ente/shared/components/DialogBox/TitleWithCloseButton";
-import UploadProgressContext from "contexts/uploadProgress";
+import { Dialog, DialogContent, Link } from "@mui/material";
+import { t } from "i18next";
 import { useContext, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
+import UploadProgressContext from "./context";
 import { UploadProgressFooter } from "./footer";
 import { UploadProgressHeader } from "./header";
 import { InProgressSection } from "./inProgressSection";

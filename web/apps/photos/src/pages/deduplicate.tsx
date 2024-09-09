@@ -11,7 +11,6 @@ import Typography from "@mui/material/Typography";
 import { HttpStatusCode } from "axios";
 import DeduplicateOptions from "components/pages/dedupe/SelectedFileOptions";
 import PhotoFrame from "components/PhotoFrame";
-import { ALL_SECTION } from "constants/collection";
 import { t } from "i18next";
 import { default as Router, default as router } from "next/router";
 import { AppContext } from "pages/_app";
@@ -28,6 +27,7 @@ import {
     DefaultDeduplicateContext,
 } from "types/deduplicate";
 import { SelectedState } from "types/gallery";
+import { ALL_SECTION } from "utils/collection";
 import { constructFileToCollectionMap, getSelectedFiles } from "utils/file";
 
 export const DeduplicateContext = createContext<DeduplicateContextType>(

@@ -25,7 +25,6 @@ import {
 } from "@mui/material";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import { PLAN_PERIOD } from "constants/gallery";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";
@@ -33,7 +32,7 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import { Trans } from "react-i18next";
 import billingService, { type PlansResponse } from "services/billingService";
 import { getFamilyPortalRedirectURL } from "services/userService";
-import { Plan, Subscription } from "types/billing";
+import { Plan, PLAN_PERIOD, Subscription } from "types/billing";
 import { SetLoading } from "types/gallery";
 import { BonusData } from "types/user";
 import {

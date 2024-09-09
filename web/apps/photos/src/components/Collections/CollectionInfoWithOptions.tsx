@@ -5,11 +5,10 @@ import LinkIcon from "@mui/icons-material/Link";
 import PeopleIcon from "@mui/icons-material/People";
 import { SetCollectionNamerAttributes } from "components/Collections/CollectionNamer";
 import CollectionOptions from "components/Collections/CollectionOptions";
-import { CollectionSummaryType } from "constants/collection";
 import type { Dispatch, SetStateAction } from "react";
 import { Collection, CollectionSummary } from "types/collection";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
-import { shouldShowOptions } from "utils/collection";
+import { CollectionSummaryType, shouldShowOptions } from "utils/collection";
 import { CollectionInfo } from "./CollectionInfo";
 import { CollectionInfoBarWrapper } from "./styledComponents";
 

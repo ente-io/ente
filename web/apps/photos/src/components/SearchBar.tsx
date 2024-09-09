@@ -5,6 +5,7 @@ import type {
     City,
     SearchDateComponents,
     SearchPerson,
+    SearchResultSummary,
 } from "@/new/photos/services/search/types";
 import {
     ClipSearchScores,
@@ -12,7 +13,6 @@ import {
     SearchQuery,
     Suggestion,
     SuggestionType,
-    UpdateSearch,
 } from "@/new/photos/services/search/types";
 import { labelForSuggestionType } from "@/new/photos/services/search/ui";
 import type { LocationTag } from "@/new/photos/services/user-entity";
@@ -42,7 +42,7 @@ import {
 } from "@mui/material";
 import CollectionCard from "components/Collections/CollectionCard";
 import { ResultPreviewTile } from "components/Collections/styledComponents";
-import { IMAGE_CONTAINER_MAX_WIDTH, MIN_COLUMNS } from "constants/gallery";
+import { IMAGE_CONTAINER_MAX_WIDTH, MIN_COLUMNS } from "components/PhotoList";
 import { t } from "i18next";
 import memoize from "memoize-one";
 import pDebounce from "p-debounce";
@@ -62,18 +62,23 @@ import { SelectStyles } from "../styles/search";
 const { Option, ValueContainer, Menu } = components;
 
 interface SearchBarProps {
-    updateSearch: UpdateSearch;
-    collections: Collection[];
-    files: EnteFile[];
     isInSearchMode: boolean;
     setIsInSearchMode: (v: boolean) => void;
+    collections: Collection[];
+    files: EnteFile[];
+    updateSearch: UpdateSearch;
 }
 
-export default function SearchBar({
+export type UpdateSearch = (
+    search: SearchQuery,
+    summary: SearchResultSummary,
+) => void;
+
+export const SearchBar: React.FC<SearchBarProps> = ({
     setIsInSearchMode,
     isInSearchMode,
     ...props
-}: SearchBarProps) {
+}) => {
     const showSearchInput = () => setIsInSearchMode(true);
 
     return (
@@ -89,7 +94,7 @@ export default function SearchBar({
             />
         </SearchBarWrapper>
     );
-}
+};
 
 const SearchBarWrapper = styled(FlexWrapper)`
     padding: 0 24px;
@@ -113,23 +118,23 @@ const createComponents = memoize((Option, ValueContainer, Menu, Input) => ({
     Input,
 }));
 
-export const SearchInput: React.FC<SearchInputProps> = (props) => {
-    const selectRef = useRef(null);
-    const [value, setValue] = useState<SearchOption>(null);
+const SearchInput: React.FC<SearchInputProps> = (props) => {
     const appContext = useContext(AppContext);
+    const [value, setValue] = useState<SearchOption>(null);
+    const selectRef = useRef(null);
+    const [defaultOptions, setDefaultOptions] = useState([]);
+    const [query, setQuery] = useState("");
+
     const handleChange = (value: SearchOption) => {
         setValue(value);
         setQuery(value?.label);
-
-        blur();
+        selectRef.current?.blur();
     };
     const handleInputChange = (value: string, actionMeta: InputActionMeta) => {
         if (actionMeta.action === "input-change") {
             setQuery(value);
         }
     };
-    const [defaultOptions, setDefaultOptions] = useState([]);
-    const [query, setQuery] = useState("");
 
     useEffect(() => {
         search(value);
@@ -166,10 +171,6 @@ export const SearchInput: React.FC<SearchInputProps> = (props) => {
         ),
         [props.files, props.collections],
     );
-
-    const blur = () => {
-        selectRef.current?.blur();
-    };
 
     const search = (selectedOption: SearchOption) => {
         if (!selectedOption) {
@@ -368,7 +369,7 @@ const getIconByType = (type: SuggestionType) => {
     }
 };
 
-export const MenuWithPeople = (props) => {
+const MenuWithPeople = (props) => {
     // log.info("props.selectProps.options: ", selectRef);
     const peopleSuggestions = props.selectProps.options.filter(
         (o) => o.type === SuggestionType.PERSON,

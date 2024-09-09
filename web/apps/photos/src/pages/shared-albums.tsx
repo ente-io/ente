@@ -39,7 +39,6 @@ import Uploader from "components/Upload/Uploader";
 import { UploadSelectorInputs } from "components/UploadSelectorInputs";
 import SharedAlbumNavbar from "components/pages/sharedAlbum/Navbar";
 import SelectedFileOptions from "components/pages/sharedAlbum/SelectedFileOptions";
-import { ALL_SECTION } from "constants/collection";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { AppContext } from "pages/_app";
@@ -64,7 +63,11 @@ import {
     SetFilesDownloadProgressAttributes,
     SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
-import { downloadCollectionFiles, isHiddenCollection } from "utils/collection";
+import {
+    ALL_SECTION,
+    downloadCollectionFiles,
+    isHiddenCollection,
+} from "utils/collection";
 import { downloadSelectedFiles, getSelectedFiles, sortFiles } from "utils/file";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 
