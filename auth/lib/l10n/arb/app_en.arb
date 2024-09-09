@@ -19,6 +19,8 @@
   "pleaseVerifyDetails": "Please verify the details and try again",
   "codeIssuerHint": "Issuer",
   "codeSecretKeyHint": "Secret Key",
+  "secret": "Secret",
+  "account": "Account",
   "codeAccountHint": "Account (you@domain.com)",
   "codeTagHint": "Tag",
   "accountKeyType": "Type of key",
