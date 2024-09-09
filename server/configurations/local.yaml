@@ -162,6 +162,12 @@ s3:
     #    not support them, specifically it doesn't support GLACIER).
     #
     #are_local_buckets: true
+
+    # Allow use of Minio (Configured with TLS) as cold storage, as Minio does not support glacier
+    # we need to disable the glacier storage class for using this, this allows a mixed used of 
+    # publicly available hot storage, and local hosted/private cold storage.
+    # minio_cold_storage: true
+
     # Uncomment this to use "path" style S3 URLs.
     #
     # By default the bucket name is part of the (sub)domain, e.g.

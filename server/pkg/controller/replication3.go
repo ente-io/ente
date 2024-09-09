@@ -196,7 +196,7 @@ func (c *ReplicationController3) createDestinations() {
 		Label:    "scaleway",
 		// should be true, except when running in a local cluster (since minio doesn't
 		// support specifying the GLACIER storage class).
-		IsGlacier: !config.AreLocalBuckets() || !config.MinioColdStorage(),
+		IsGlacier: !( !config.AreLocalBuckets() || !config.MinioColdStorage() ),
 	}
 }
 
