@@ -1081,18 +1081,26 @@ export default function Gallery() {
                     hide={() => setFixCreationTimeView(false)}
                     attributes={fixCreationTimeAttributes}
                 />
-                <GalleryNavbar
-                    openSidebar={openSidebar}
-                    isFirstFetch={isFirstFetch}
-                    setIsInSearchMode={setIsInSearchMode}
-                    isInHiddenSection={isInHiddenSection}
-                    openUploader={openUploader}
-                    isInSearchMode={isInSearchMode}
-                    collections={collections}
-                    files={files}
-                    updateSearch={updateSearch}
-                    exitHiddenSection={exitHiddenSection}
-                />
+                <NavbarBase
+                    sx={{ background: "transparent", position: "absolute" }}
+                >
+                    {isInHiddenSection ? (
+                        <HiddenSectionNavbarContents
+                            onBack={exitHiddenSection}
+                        />
+                    ) : (
+                        <NormalNavbarContents
+                            openSidebar={openSidebar}
+                            isFirstFetch={isFirstFetch}
+                            setIsInSearchMode={setIsInSearchMode}
+                            openUploader={openUploader}
+                            isInSearchMode={isInSearchMode}
+                            collections={collections}
+                            files={files}
+                            updateSearch={updateSearch}
+                        />
+                    )}
+                </NavbarBase>
 
                 <Collections
                     activeCollection={activeCollection}
@@ -1262,67 +1270,67 @@ const mergeMaps = <K, V>(map1: Map<K, V>, map2: Map<K, V>) => {
     return mergedMap;
 };
 
-interface GalleryNavbarProps {
+interface NormalNavbarContentsProps {
     openSidebar: () => void;
     isFirstFetch: boolean;
     openUploader: () => void;
     isInSearchMode: boolean;
-    isInHiddenSection: boolean;
     setIsInSearchMode: (v: boolean) => void;
     collections: Collection[];
     files: EnteFile[];
     updateSearch: UpdateSearch;
-    exitHiddenSection: () => void;
 }
 
-const GalleryNavbar: React.FC<GalleryNavbarProps> = ({
+const NormalNavbarContents: React.FC<NormalNavbarContentsProps> = ({
     openSidebar,
     openUploader,
     isInSearchMode,
-    isInHiddenSection,
     collections,
     files,
     updateSearch,
     setIsInSearchMode,
-    exitHiddenSection,
 }) => {
     return (
-        <NavbarBase sx={{ background: "transparent", position: "absolute" }}>
-            {isInHiddenSection ? (
-                <HorizontalFlex
-                    gap={"24px"}
-                    sx={{
-                        width: "100%",
-                        background: (theme) => theme.palette.background.default,
-                    }}
-                >
-                    <IconButton onClick={exitHiddenSection}>
-                        <ArrowBack />
-                    </IconButton>
-                    <FlexWrapper>
-                        <Typography>{t("HIDDEN")}</Typography>
-                    </FlexWrapper>
-                </HorizontalFlex>
-            ) : (
-                <>
-                    {!isInSearchMode && (
-                        <IconButton onClick={openSidebar}>
-                            <MenuIcon />
-                        </IconButton>
-                    )}
-                    <SearchBar
-                        isInSearchMode={isInSearchMode}
-                        setIsInSearchMode={setIsInSearchMode}
-                        collections={collections}
-                        files={files}
-                        updateSearch={updateSearch}
-                    />
-                    {!isInSearchMode && (
-                        <UploadButton openUploader={openUploader} />
-                    )}
-                </>
+        <>
+            {!isInSearchMode && (
+                <IconButton onClick={openSidebar}>
+                    <MenuIcon />
+                </IconButton>
             )}
-        </NavbarBase>
+            <SearchBar
+                isInSearchMode={isInSearchMode}
+                setIsInSearchMode={setIsInSearchMode}
+                collections={collections}
+                files={files}
+                updateSearch={updateSearch}
+            />
+            {!isInSearchMode && <UploadButton openUploader={openUploader} />}
+        </>
+    );
+};
+
+interface HiddenSectionNavbarContentsProps {
+    onBack: () => void;
+}
+
+const HiddenSectionNavbarContents: React.FC<
+    HiddenSectionNavbarContentsProps
+> = ({ onBack }) => {
+    return (
+        <HorizontalFlex
+            gap={"24px"}
+            sx={{
+                width: "100%",
+                background: (theme) => theme.palette.background.default,
+            }}
+        >
+            <IconButton onClick={onBack}>
+                <ArrowBack />
+            </IconButton>
+            <FlexWrapper>
+                <Typography>{t("HIDDEN")}</Typography>
+            </FlexWrapper>
+        </HorizontalFlex>
     );
 };
 
