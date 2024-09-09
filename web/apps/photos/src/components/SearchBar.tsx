@@ -42,7 +42,7 @@ import {
 } from "@mui/material";
 import CollectionCard from "components/Collections/CollectionCard";
 import { ResultPreviewTile } from "components/Collections/styledComponents";
-import { IMAGE_CONTAINER_MAX_WIDTH, MIN_COLUMNS } from "constants/gallery";
+import { IMAGE_CONTAINER_MAX_WIDTH, MIN_COLUMNS } from "components/PhotoList";
 import { t } from "i18next";
 import memoize from "memoize-one";
 import pDebounce from "p-debounce";

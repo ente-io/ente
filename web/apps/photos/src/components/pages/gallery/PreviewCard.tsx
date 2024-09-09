@@ -8,11 +8,11 @@ import useLongPress from "@ente/shared/hooks/useLongPress";
 import AlbumOutlined from "@mui/icons-material/AlbumOutlined";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
 import { Tooltip, styled } from "@mui/material";
+import { GAP_BTW_TILES, IMAGE_CONTAINER_MAX_WIDTH } from "components/PhotoList";
 import {
     LoadingThumbnail,
     StaticThumbnail,
 } from "components/PlaceholderThumbnails";
-import { GAP_BTW_TILES, IMAGE_CONTAINER_MAX_WIDTH } from "constants/gallery";
 import i18n from "i18next";
 import { DeduplicateContext } from "pages/deduplicate";
 import { GalleryContext } from "pages/gallery";
