@@ -43,7 +43,6 @@ import ArrowForward from "@mui/icons-material/ArrowForward";
 import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import Notification from "components/Notification";
-import { REDIRECTS } from "constants/redirects";
 import { t } from "i18next";
 import isElectron from "is-electron";
 import type { AppProps } from "next/app";
@@ -66,8 +65,6 @@ import {
     getUpdateAvailableForDownloadMessage,
     getUpdateReadyToInstallMessage,
 } from "utils/ui";
-
-const redirectMap = new Map([[REDIRECTS.FAMILIES, getFamilyPortalRedirectURL]]);
 
 /**
  * Properties available via {@link AppContext} to the Photos app's React tree.
@@ -202,25 +199,17 @@ export default function App({ Component, pageProps }: AppProps) {
     const setUserOnline = () => setOffline(false);
     const setUserOffline = () => setOffline(true);
 
-    useEffect(() => {
-        const redirectTo = async (redirect) => {
-            if (
-                redirectMap.has(redirect) &&
-                typeof redirectMap.get(redirect) === "function"
-            ) {
-                const redirectAction = redirectMap.get(redirect);
-                window.location.href = await redirectAction();
-            } else {
-                log.error(`invalid redirection ${redirect}`);
-            }
-        };
+    const redirectToFamilyPortal = void getFamilyPortalRedirectURL().then(
+        (url) => (window.location.href = url),
+    );
 
+    useEffect(() => {
         const query = new URLSearchParams(window.location.search);
         const redirectName = query.get("redirect");
-        if (redirectName) {
+        if (redirectName == "families") {
             const user = getData(LS_KEYS.USER);
             if (user?.token) {
-                redirectTo(redirectName);
+                redirectToFamilyPortal();
             } else {
                 setRedirectName(redirectName);
             }
@@ -235,7 +224,7 @@ export default function App({ Component, pageProps }: AppProps) {
             if (redirectName) {
                 const user = getData(LS_KEYS.USER);
                 if (user?.token) {
-                    redirectTo(redirectName);
+                    redirectToFamilyPortal();
 
                     // https://github.com/vercel/next.js/issues/2476#issuecomment-573460710
                     // eslint-disable-next-line no-throw-literal

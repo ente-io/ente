@@ -1,5 +1,4 @@
 import log from "@/base/log";
-import { openURL } from "@/new/photos/utils/web";
 import { SetDialogBoxAttributes } from "@ente/shared/components/DialogBox/types";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { t } from "i18next";
@@ -243,25 +242,6 @@ export async function updatePaymentMethod(
             content: t("UNKNOWN_ERROR"),
             close: { variant: "critical" },
         });
-    }
-}
-
-export async function manageFamilyMethod(
-    setDialogMessage: SetDialogBoxAttributes,
-    setLoading: SetLoading,
-) {
-    try {
-        setLoading(true);
-        ;
-    } catch (e) {
-        log.error("failed to redirect to family portal", e);
-        setDialogMessage({
-            title: t("ERROR"),
-            content: t("UNKNOWN_ERROR"),
-            close: { variant: "critical" },
-        });
-    } finally {
-        setLoading(false);
     }
 }
 
