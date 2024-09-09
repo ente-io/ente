@@ -153,9 +153,7 @@ const CollectionListBar = (props: IProps) => {
             <Box display="flex" alignItems="flex-start" gap={2}>
                 <CollectionListWrapper>
                     {!onFarLeft && (
-                        <ScrollButtonLeft
-                            onClick={scrollComponent(SCROLL_DIRECTION.LEFT)}
-                        />
+                        <ScrollButtonLeft onClick={scrollComponent(-1)} />
                     )}
                     <AutoSizer disableHeight>
                         {({ width }) => (
@@ -176,9 +174,7 @@ const CollectionListBar = (props: IProps) => {
                         )}
                     </AutoSizer>
                     {!onFarRight && (
-                        <ScrollButtonRight
-                            onClick={scrollComponent(SCROLL_DIRECTION.RIGHT)}
-                        />
+                        <ScrollButtonRight onClick={scrollComponent(+1)} />
                     )}
                 </CollectionListWrapper>
                 {!isMobile && (
@@ -203,11 +199,6 @@ const CollectionListBar = (props: IProps) => {
 };
 
 export default CollectionListBar;
-
-enum SCROLL_DIRECTION {
-    LEFT = -1,
-    RIGHT = +1,
-}
 
 function useComponentScroll({ dependencies }: { dependencies: any[] }) {
     const componentRef = useRef<HTMLDivElement>(null);
@@ -247,7 +238,7 @@ function useComponentScroll({ dependencies }: { dependencies: any[] }) {
         updateScrollObj();
     }, [...dependencies]);
 
-    const scrollComponent = (direction: SCROLL_DIRECTION) => () => {
+    const scrollComponent = (direction: number) => () => {
         componentRef.current.scrollBy(250 * direction, 0);
     };
 
