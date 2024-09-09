@@ -1,5 +1,5 @@
 {
-  "account": "حسابي",
+  "account": "الحساب",
   "unlock": "فتح القفل",
   "recoveryKey": "مفتاح الاسترداد",
   "counterAppBarTitle": "العداد",
@@ -79,7 +79,7 @@
   "data": "البيانات",
   "importCodes": "استورد شيفرات",
   "importTypePlainText": "نص بسيط",
-  "importTypeEnteEncrypted": "تصدير Ente Ecrypted",
+  "importTypeEnteEncrypted": "تصدير مشفر ente",
   "passwordForDecryptingExport": "كلمة المرور لفك تشفير التصدير",
   "passwordEmptyError": "لا يمكن أن تكون كلمة المرور فارغة",
   "importFromApp": "استورد الشيفرات من {appName}",
@@ -182,6 +182,7 @@
   "security": "الأمان",
   "lockscreen": "شاشة القفل",
   "authToChangeLockscreenSetting": "الرجاء المصادقة لتغيير إعدادات شاشة القفل",
+  "deviceLockEnablePreSteps": "لتمكين قفل التطبيق، فضلا أعد شيفرة مرور للجهاز أو قفل الشاشة في إعدادات نظامك.",
   "viewActiveSessions": "عرض الجلسات النشطة",
   "authToViewYourActiveSessions": "الرجاء المصادقة لعرض جلساتك النشطة",
   "searchHint": "بحث...",
