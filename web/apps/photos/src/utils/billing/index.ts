@@ -2,7 +2,6 @@ import log from "@/base/log";
 import { openURL } from "@/new/photos/utils/web";
 import { SetDialogBoxAttributes } from "@ente/shared/components/DialogBox/types";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
-import { REDIRECTS, getRedirectURL } from "constants/redirects";
 import { t } from "i18next";
 import type { NextRouter } from "next/router";
 import billingService from "services/billingService";
@@ -253,8 +252,7 @@ export async function manageFamilyMethod(
 ) {
     try {
         setLoading(true);
-        const familyPortalRedirectURL = getRedirectURL(REDIRECTS.FAMILIES);
-        openURL(familyPortalRedirectURL);
+        ;
     } catch (e) {
         log.error("failed to redirect to family portal", e);
         setDialogMessage({

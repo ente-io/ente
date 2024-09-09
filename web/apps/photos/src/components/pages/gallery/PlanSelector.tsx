@@ -1,5 +1,6 @@
 import log from "@/base/log";
 import { bytesInGB, formattedStorageByteSize } from "@/new/photos/utils/units";
+import { openURL } from "@/new/photos/utils/web";
 import {
     FlexWrapper,
     FluidContainer,
@@ -46,7 +47,6 @@ import {
     isSubscriptionActive,
     isSubscriptionCancelled,
     isUserSubscribedPlan,
-    manageFamilyMethod,
     planForSubscription,
     planSelectionOutcome,
     updatePaymentMethod,
@@ -686,9 +686,8 @@ function ManageSubscription({
     closeModal,
     setLoading,
 }: ManageSubscriptionProps) {
-    const appContext = useContext(AppContext);
     const openFamilyPortal = () =>
-        manageFamilyMethod(appContext.setDialogMessage, setLoading);
+        openURL("https://web.ente.io?redirect=families");
 
     return (
         <Stack spacing={1}>
