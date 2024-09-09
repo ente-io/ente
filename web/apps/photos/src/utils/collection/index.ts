@@ -11,14 +11,9 @@ import { getUnixTimeInMicroSecondsWithDelta } from "@ente/shared/time";
 import type { User } from "@ente/shared/user/types";
 import bs58 from "bs58";
 import {
-    ADD_TO_NOT_ALLOWED_COLLECTION,
     CollectionSummaryType,
     CollectionType,
     DEFAULT_HIDDEN_COLLECTION_USER_FACING_NAME,
-    HIDE_FROM_COLLECTION_BAR_TYPES,
-    MOVE_TO_NOT_ALLOWED_COLLECTION,
-    OPTIONS_NOT_HAVING_COLLECTION_TYPES,
-    SYSTEM_COLLECTION_TYPES,
 } from "constants/collection";
 import { t } from "i18next";
 import {
@@ -45,6 +40,48 @@ import {
 import { SetFilesDownloadProgressAttributes } from "types/gallery";
 import { downloadFilesWithProgress } from "utils/file";
 import { isArchivedCollection, updateMagicMetadata } from "utils/magicMetadata";
+
+const SYSTEM_COLLECTION_TYPES = new Set([
+    CollectionSummaryType.all,
+    CollectionSummaryType.archive,
+    CollectionSummaryType.trash,
+    CollectionSummaryType.uncategorized,
+    CollectionSummaryType.hiddenItems,
+    CollectionSummaryType.defaultHidden,
+]);
+
+const ADD_TO_NOT_ALLOWED_COLLECTION = new Set([
+    CollectionSummaryType.all,
+    CollectionSummaryType.archive,
+    CollectionSummaryType.incomingShareViewer,
+    CollectionSummaryType.trash,
+    CollectionSummaryType.uncategorized,
+    CollectionSummaryType.defaultHidden,
+    CollectionSummaryType.hiddenItems,
+]);
+
+const MOVE_TO_NOT_ALLOWED_COLLECTION = new Set([
+    CollectionSummaryType.all,
+    CollectionSummaryType.archive,
+    CollectionSummaryType.incomingShareViewer,
+    CollectionSummaryType.incomingShareCollaborator,
+    CollectionSummaryType.trash,
+    CollectionSummaryType.uncategorized,
+    CollectionSummaryType.defaultHidden,
+    CollectionSummaryType.hiddenItems,
+]);
+
+const OPTIONS_NOT_HAVING_COLLECTION_TYPES = new Set([
+    CollectionSummaryType.all,
+    CollectionSummaryType.archive,
+]);
+
+const HIDE_FROM_COLLECTION_BAR_TYPES = new Set([
+    CollectionSummaryType.trash,
+    CollectionSummaryType.archive,
+    CollectionSummaryType.uncategorized,
+    CollectionSummaryType.defaultHidden,
+]);
 
 export enum COLLECTION_OPS_TYPE {
     ADD,
