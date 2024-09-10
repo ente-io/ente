@@ -19,7 +19,6 @@ import { labelForSuggestionType } from "@/new/photos/services/search/ui";
 import type { LocationTag } from "@/new/photos/services/user-entity";
 import { EnteFile } from "@/new/photos/types/file";
 import {
-    CenteredFlex,
     FlexWrapper,
     FreeFlowText,
     Row,
@@ -281,7 +280,11 @@ const SearchInput: React.FC<SearchInputProps> = (props) => {
     );
 };
 
-const SearchInputWrapper = styled(CenteredFlex)`
+const SearchInputWrapper = styled(Box)`
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
     background: ${({ theme }) => theme.colors.background.base};
     max-width: 484px;
     margin: auto;
