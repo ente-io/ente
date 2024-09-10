@@ -213,6 +213,7 @@ class _LockScreenState extends State<LockScreen>
       isCritical: true,
       firstButtonOnTap: () async {
         await UserService.instance.logout(context);
+        Process.killPid(pid, ProcessSignal.sigkill);
       },
     );
   }
