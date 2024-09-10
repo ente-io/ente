@@ -10,6 +10,7 @@ import 'package:ente_auth/onboarding/view/common/add_chip.dart';
 import 'package:ente_auth/onboarding/view/common/add_tag.dart';
 import 'package:ente_auth/onboarding/view/common/field_label.dart';
 import 'package:ente_auth/onboarding/view/common/tag_chip.dart';
+import 'package:ente_auth/onboarding/view/view_qr_page.dart';
 import 'package:ente_auth/store/code_display_store.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
@@ -115,6 +116,22 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.importAccountPageTitle),
+        actions: [
+          if (widget.code != null)
+            IconButton(
+              icon: const Icon(Icons.qr_code_2_outlined),
+              enableFeedback: true,
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (BuildContext context) {
+                      return ViewQrPage(code: widget.code);
+                    },
+                  ),
+                ).ignore();
+              },
+            ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -348,6 +365,9 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
       final notes = _notesController.text.trim();
       final isStreamCode = issuer.toLowerCase() == "steam" ||
           issuer.toLowerCase().contains('steampowered.com');
+      final CodeDisplay display =
+          widget.code?.display.copyWith(tags: tags) ?? CodeDisplay(tags: tags);
+      display.note = notes;
       if (widget.code != null && widget.code!.secret != secret) {
         ButtonResult? result = await showChoiceActionSheet(
           context,
@@ -362,9 +382,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
           return;
         }
       }
-      final CodeDisplay display =
-          widget.code?.display.copyWith(tags: tags) ?? CodeDisplay(tags: tags);
-      display.note = notes;
+
       final Code newCode = widget.code == null
           ? Code.fromAccountAndSecret(
               isStreamCode ? Type.steam : Type.totp,
