@@ -87,10 +87,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     return (
         <SearchBarWrapper>
             {isMobileWidth && !isInSearchMode ? (
-                <SearchBarMobile
-                    show={true}
-                    showSearchInput={showSearchInput}
-                />
+                <MobileSearchArea onSearch={showSearchInput} />
             ) : (
                 <SearchInput
                     {...props}
@@ -497,20 +494,22 @@ const VisibleInput = (props) => (
     <components.Input {...props} isHidden={false} />
 );
 
-function SearchBarMobile({ show, showSearchInput }) {
-    if (!show) {
-        return <></>;
-    }
+interface MobileSearchAreaProps {
+    /** Called when the user presses the search button. */
+    onSearch: () => void;
+}
+
+const MobileSearchArea: React.FC<MobileSearchAreaProps> = ({ onSearch }) => {
     return (
         <SearchMobileBox>
             <FluidContainer justifyContent="flex-end" ml={1.5}>
-                <IconButton onClick={showSearchInput}>
+                <IconButton onClick={onSearch}>
                     <SearchIcon />
                 </IconButton>
             </FluidContainer>
         </SearchMobileBox>
     );
-}
+};
 
 const SearchMobileBox = styled(FluidContainer)`
     display: flex;
