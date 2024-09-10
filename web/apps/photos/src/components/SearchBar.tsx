@@ -49,6 +49,7 @@ import {
     components as SelectComponents,
     type InputActionMeta,
     type OptionProps,
+    type StylesConfig,
     type ValueContainerProps,
 } from "react-select";
 import AsyncSelect from "react-select/async";
@@ -58,7 +59,7 @@ import {
 } from "services/searchService";
 import { Collection } from "types/collection";
 
-const { Option, ValueContainer, Menu, Input } = SelectComponents;
+const { Option, Menu, Input } = SelectComponents;
 
 interface SearchBarProps {
     isInSearchMode: boolean;
@@ -293,7 +294,7 @@ const SearchInputWrapper = styled(Box)`
     margin: auto;
 `;
 
-const SelectStyles = {
+const SelectStyles: StylesConfig<SearchOption, false> = {
     container: (style) => ({
         ...style,
         flex: 1,
@@ -406,7 +407,7 @@ const LabelWithInfo = ({ data }: { data: SearchOption }) => {
 const ValueContainerWithIcon: React.FC<ValueContainerProps<SearchOption>> = (
     props,
 ) => (
-    <ValueContainer {...props}>
+    <SelectComponents.ValueContainer {...props}>
         <FlexWrapper>
             <Box
                 style={{ display: "inline-flex" }}
@@ -417,7 +418,7 @@ const ValueContainerWithIcon: React.FC<ValueContainerProps<SearchOption>> = (
             </Box>
             {props.children}
         </FlexWrapper>
-    </ValueContainer>
+    </SelectComponents.ValueContainer>
 );
 
 const getIconByType = (type: SuggestionType) => {
