@@ -258,12 +258,12 @@ class SemanticSearchService {
   static Future<ClipResult> runClipImage(
     int enteFileID,
     Image image,
-    ByteData imageByteData,
+    Uint8List rawRgbaBytes,
     int clipImageAddress,
   ) async {
     final embedding = await ClipImageEncoder.predict(
       image,
-      imageByteData,
+      rawRgbaBytes,
       clipImageAddress,
       enteFileID,
     );
