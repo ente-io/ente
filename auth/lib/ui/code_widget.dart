@@ -232,23 +232,33 @@ class _CodeWidgetState extends State<CodeWidget> {
             return ContextMenuRegion(
               contextMenu: ContextMenu(
                 entries: <ContextMenuEntry>[
-                  MenuItem(
-                    label: 'QR',
-                    icon: Icons.qr_code_2_outlined,
-                    onSelected: () => _onShowQrPressed(null),
-                  ),
-                  MenuItem(
-                    label: widget.code.isPinned ? l10n.unpinText : l10n.pinText,
-                    icon: widget.code.isPinned
-                        ? Icons.push_pin
-                        : Icons.push_pin_outlined,
-                    onSelected: () => _onPinPressed(null),
-                  ),
-                  MenuItem(
-                    label: l10n.edit,
-                    icon: Icons.edit,
-                    onSelected: () => _onEditPressed(null),
-                  ),
+                  if (!widget.code.isTrashed)
+                    MenuItem(
+                      label: 'QR',
+                      icon: Icons.qr_code_2_outlined,
+                      onSelected: () => _onShowQrPressed(null),
+                    ),
+                  if (!widget.code.isTrashed)
+                    MenuItem(
+                      label:
+                          widget.code.isPinned ? l10n.unpinText : l10n.pinText,
+                      icon: widget.code.isPinned
+                          ? Icons.push_pin
+                          : Icons.push_pin_outlined,
+                      onSelected: () => _onPinPressed(null),
+                    ),
+                  if (!widget.code.isTrashed)
+                    MenuItem(
+                      label: l10n.edit,
+                      icon: Icons.edit,
+                      onSelected: () => _onEditPressed(null),
+                    ),
+                  if (widget.code.isTrashed)
+                    MenuItem(
+                      label: l10n.restore,
+                      icon: Icons.restore_outlined,
+                      onSelected: () => _onRestoreClicked(null),
+                    ),
                   const MenuDivider(),
                   MenuItem(
                     label: widget.code.isTrashed ? l10n.delete : l10n.trash,
@@ -267,7 +277,10 @@ class _CodeWidgetState extends State<CodeWidget> {
             );
           }
           final double slideSpace = isCompactMode ? 4 : 8;
-          final double extendRatio = isCompactMode ? 0.70 : 0.90;
+          double extendRatio = isCompactMode ? 0.70 : 0.90;
+          if (widget.code.isTrashed) {
+            extendRatio = 0.50;
+          }
 
           return Slidable(
             key: ValueKey(widget.code.hashCode),
@@ -275,64 +288,80 @@ class _CodeWidgetState extends State<CodeWidget> {
               extentRatio: extendRatio,
               motion: const ScrollMotion(),
               children: [
-                SizedBox(width: slideSpace),
-                SlidableAction(
-                  onPressed: _onShowQrPressed,
-                  backgroundColor: Colors.grey.withOpacity(0.1),
-                  borderRadius: const BorderRadius.all(Radius.circular(8)),
-                  foregroundColor:
-                      Theme.of(context).colorScheme.inverseBackgroundColor,
-                  icon: Icons.qr_code_2_outlined,
-                  label: "QR",
-                  padding: const EdgeInsets.only(left: 4, right: 0),
-                  spacing: 8,
-                ),
-                SizedBox(width: slideSpace),
-                CustomSlidableAction(
-                  onPressed: _onPinPressed,
-                  backgroundColor: Colors.grey.withOpacity(0.1),
-                  borderRadius: const BorderRadius.all(Radius.circular(8)),
-                  foregroundColor:
-                      Theme.of(context).colorScheme.inverseBackgroundColor,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      if (widget.code.isPinned)
-                        SvgPicture.asset(
-                          "assets/svg/pin-active.svg",
-                          colorFilter: ui.ColorFilter.mode(
-                            Theme.of(context).colorScheme.primary,
-                            BlendMode.srcIn,
-                          ),
-                        )
-                      else
-                        SvgPicture.asset(
-                          "assets/svg/pin-inactive.svg",
-                          colorFilter: ui.ColorFilter.mode(
-                            Theme.of(context).colorScheme.primary,
-                            BlendMode.srcIn,
-                          ),
-                        ),
-                      const SizedBox(height: 8),
-                      Text(
-                        widget.code.isPinned ? l10n.unpinText : l10n.pinText,
-                      ),
-                    ],
+                if (!widget.code.isTrashed) SizedBox(width: slideSpace),
+                if (!widget.code.isTrashed)
+                  SlidableAction(
+                    onPressed: _onShowQrPressed,
+                    backgroundColor: Colors.grey.withOpacity(0.1),
+                    borderRadius: const BorderRadius.all(Radius.circular(8)),
+                    foregroundColor:
+                        Theme.of(context).colorScheme.inverseBackgroundColor,
+                    icon: Icons.qr_code_2_outlined,
+                    label: "QR",
+                    padding: const EdgeInsets.only(left: 4, right: 0),
+                    spacing: 8,
                   ),
-                  padding: const EdgeInsets.only(left: 4, right: 0),
-                ),
-                SizedBox(width: slideSpace),
-                SlidableAction(
-                  onPressed: _onEditPressed,
-                  backgroundColor: Colors.grey.withOpacity(0.1),
-                  borderRadius: const BorderRadius.all(Radius.circular(8)),
-                  foregroundColor:
-                      Theme.of(context).colorScheme.inverseBackgroundColor,
-                  icon: Icons.edit_outlined,
-                  label: l10n.edit,
-                  padding: const EdgeInsets.only(left: 4, right: 0),
-                  spacing: 8,
-                ),
+                if (!widget.code.isTrashed) SizedBox(width: slideSpace),
+                if (!widget.code.isTrashed)
+                  CustomSlidableAction(
+                    onPressed: _onPinPressed,
+                    backgroundColor: Colors.grey.withOpacity(0.1),
+                    borderRadius: const BorderRadius.all(Radius.circular(8)),
+                    foregroundColor:
+                        Theme.of(context).colorScheme.inverseBackgroundColor,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if (widget.code.isPinned)
+                          SvgPicture.asset(
+                            "assets/svg/pin-active.svg",
+                            colorFilter: ui.ColorFilter.mode(
+                              Theme.of(context).colorScheme.primary,
+                              BlendMode.srcIn,
+                            ),
+                          )
+                        else
+                          SvgPicture.asset(
+                            "assets/svg/pin-inactive.svg",
+                            colorFilter: ui.ColorFilter.mode(
+                              Theme.of(context).colorScheme.primary,
+                              BlendMode.srcIn,
+                            ),
+                          ),
+                        const SizedBox(height: 8),
+                        Text(
+                          widget.code.isPinned ? l10n.unpinText : l10n.pinText,
+                        ),
+                      ],
+                    ),
+                    padding: const EdgeInsets.only(left: 4, right: 0),
+                  ),
+                if (!widget.code.isTrashed) SizedBox(width: slideSpace),
+                if (!widget.code.isTrashed)
+                  SlidableAction(
+                    onPressed: _onEditPressed,
+                    backgroundColor: Colors.grey.withOpacity(0.1),
+                    borderRadius: const BorderRadius.all(Radius.circular(8)),
+                    foregroundColor:
+                        Theme.of(context).colorScheme.inverseBackgroundColor,
+                    icon: Icons.edit_outlined,
+                    label: l10n.edit,
+                    padding: const EdgeInsets.only(left: 4, right: 0),
+                    spacing: 8,
+                  ),
+                if (widget.code.isTrashed) SizedBox(width: slideSpace),
+                if (widget.code.isTrashed)
+                  SlidableAction(
+                    onPressed: _onRestoreClicked,
+                    backgroundColor: Colors.grey.withOpacity(0.1),
+                    borderRadius: const BorderRadius.all(Radius.circular(8)),
+                    foregroundColor:
+                        Theme.of(context).colorScheme.inverseBackgroundColor,
+                    icon: Icons.restore_outlined,
+                    label: l10n.restore,
+                    padding: const EdgeInsets.only(left: 4, right: 0),
+                    spacing: 8,
+                  ),
                 SizedBox(width: slideSpace),
                 SlidableAction(
                   onPressed: widget.code.isTrashed
@@ -656,6 +685,27 @@ class _CodeWidgetState extends State<CodeWidget> {
         }
       },
     );
+  }
+
+  void _onRestoreClicked(_) async {
+    if (!widget.code.isTrashed) {
+      showToast(context, 'Code is already restored');
+      return;
+    }
+    FocusScope.of(context).requestFocus();
+
+    try {
+      final display = widget.code.display;
+      final Code code = widget.code.copyWith(
+        display: display.copyWith(trashed: false),
+      );
+      await CodeStore.instance.addCode(code);
+    } catch (e) {
+      logger.severe('Failed to restore code: ${e.toString()}');
+      if (mounted) {
+        showGenericErrorDialog(context: context, error: e).ignore();
+      }
+    }
   }
 
   String _getCurrentOTP() {

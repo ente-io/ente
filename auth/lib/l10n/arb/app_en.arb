@@ -211,6 +211,7 @@
   "scanAQrCode": "Scan a QR code",
   "enterDetailsManually": "Enter details manually",
   "edit": "Edit",
+  "restore": "Restore",
   "copiedToClipboard": "Copied to clipboard",
   "copiedNextToClipboard": "Copied next code to clipboard",
   "error": "Error",
