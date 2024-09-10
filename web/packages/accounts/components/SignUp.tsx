@@ -120,7 +120,7 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
 
     return (
         <>
-            <FormPaperTitle> {t("SIGN_UP")}</FormPaperTitle>
+            <FormPaperTitle> {t("sign_up")}</FormPaperTitle>
             <Formik<FormValues>
                 initialValues={{
                     email: "",
