@@ -15,7 +15,7 @@ export function pixelRGBBilinear(
     imageData: Uint8ClampedArray,
     imageWidth: number,
     imageHeight: number,
-    antiAlias: boolean,
+    antialias: boolean,
 ) {
     // Clamp to image boundaries.
     fx = clamp(fx, 0, imageWidth - 1);
@@ -32,7 +32,7 @@ export function pixelRGBBilinear(
     const dy1 = 1.0 - dy;
 
     // Get the original pixels.
-    const getPixelRGBA = antiAlias ? pixelRGBABlurred : pixelRGBA;
+    const getPixelRGBA = antialias ? pixelRGBABlurred : pixelRGBA;
     const pixel1 = getPixelRGBA(imageData, imageWidth, imageHeight, x0, y0);
     const pixel2 = getPixelRGBA(imageData, imageWidth, imageHeight, x1, y0);
     const pixel3 = getPixelRGBA(imageData, imageWidth, imageHeight, x0, y1);

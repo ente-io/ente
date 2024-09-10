@@ -129,7 +129,7 @@ const convertToCLIPInput = (imageData: ImageData) => {
     const scale = Math.max(requiredWidth / width, requiredHeight / height);
 
     // Perform antialiasing if downscaling.
-    const antiAlias = scale < 0.8;
+    const antialias = scale < 0.8;
 
     const scaledWidth = Math.round(width * scale);
     const scaledHeight = Math.round(height * scale);
@@ -150,7 +150,7 @@ const convertToCLIPInput = (imageData: ImageData) => {
                 pixelData,
                 width,
                 height,
-                antiAlias,
+                antialias,
             );
             clipInput[pi] = r / 255.0;
             clipInput[pi + cOffsetG] = g / 255.0;
