@@ -1307,18 +1307,20 @@ export const UploadButton: React.FC<ButtonProps & IconButtonProps> = (
     const disabled = !uploadManager.shouldAllowNewUpload();
     const isMobileWidth = useIsMobileWidth();
 
+    const icon = <FileUploadOutlinedIcon />;
+
     return (
         <Box>
             {isMobileWidth ? (
                 <IconButton {...props} disabled={disabled}>
-                    {<FileUploadOutlinedIcon />}
+                    {icon}
                 </IconButton>
             ) : (
                 <Button
                     {...props}
                     disabled={disabled}
                     color={"secondary"}
-                    startIcon={<FileUploadOutlinedIcon />}
+                    startIcon={icon}
                 >
                     {t("upload")}
                 </Button>
