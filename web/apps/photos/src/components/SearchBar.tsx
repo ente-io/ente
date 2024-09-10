@@ -19,9 +19,6 @@ import { labelForSuggestionType } from "@/new/photos/services/search/ui";
 import type { LocationTag } from "@/new/photos/services/user-entity";
 import { EnteFile } from "@/new/photos/types/file";
 import {
-    CenteredFlex,
-    FlexWrapper,
-    FluidContainer,
     FreeFlowText,
     Row,
     SpaceBetweenFlex,
@@ -42,33 +39,40 @@ import {
 } from "@mui/material";
 import CollectionCard from "components/Collections/CollectionCard";
 import { ResultPreviewTile } from "components/Collections/styledComponents";
-import {
-    IMAGE_CONTAINER_MAX_WIDTH,
-    MIN_COLUMNS,
-} from "components/PhotoList/constants";
 import { t } from "i18next";
-import memoize from "memoize-one";
 import pDebounce from "p-debounce";
 import { AppContext } from "pages/_app";
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
-import { components } from "react-select";
+import {
+    useCallback,
+    useContext,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
+import {
+    components as SelectComponents,
+    type ControlProps,
+    type InputActionMeta,
+    type InputProps,
+    type MenuProps,
+    type OptionProps,
+    type SelectInstance,
+    type StylesConfig,
+} from "react-select";
 import AsyncSelect from "react-select/async";
-import { SelectComponents } from "react-select/src/components";
-import { InputActionMeta } from "react-select/src/types";
 import {
     getAutoCompleteSuggestions,
     getDefaultOptions,
 } from "services/searchService";
 import { Collection } from "types/collection";
 
-const { Option, ValueContainer, Menu } = components;
-
 interface SearchBarProps {
     isInSearchMode: boolean;
     setIsInSearchMode: (v: boolean) => void;
+    updateSearch: UpdateSearch;
     collections: Collection[];
     files: EnteFile[];
-    updateSearch: UpdateSearch;
 }
 
 export type UpdateSearch = (
@@ -81,16 +85,14 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     isInSearchMode,
     ...props
 }) => {
-    const showSearchInput = () => setIsInSearchMode(true);
     const isMobileWidth = useIsMobileWidth();
 
+    const showSearchInput = () => setIsInSearchMode(true);
+
     return (
-        <SearchBarWrapper>
+        <Box sx={{ flex: 1, px: ["4px", "24px"] }}>
             {isMobileWidth && !isInSearchMode ? (
-                <SearchBarMobile
-                    show={true}
-                    showSearchInput={showSearchInput}
-                />
+                <MobileSearchArea onSearch={showSearchInput} />
             ) : (
                 <SearchInput
                     {...props}
@@ -98,49 +100,48 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                     setIsOpen={setIsInSearchMode}
                 />
             )}
-        </SearchBarWrapper>
+        </Box>
     );
 };
 
-const SearchBarWrapper = styled(FlexWrapper)`
-    padding: 0 24px;
-    @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * MIN_COLUMNS}px) {
-        padding: 0 4px;
-    }
-`;
+interface MobileSearchAreaProps {
+    /** Called when the user presses the search button. */
+    onSearch: () => void;
+}
+
+const MobileSearchArea: React.FC<MobileSearchAreaProps> = ({ onSearch }) => (
+    <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+        <IconButton onClick={onSearch}>
+            <SearchIcon />
+        </IconButton>
+    </Box>
+);
 
 interface SearchInputProps {
     isOpen: boolean;
-    updateSearch: UpdateSearch;
     setIsOpen: (value: boolean) => void;
+    updateSearch: UpdateSearch;
     files: EnteFile[];
     collections: Collection[];
 }
 
-const createComponents = memoize((Option, ValueContainer, Menu, Input) => ({
-    Option,
-    ValueContainer,
-    Menu,
-    Input,
-}));
-
-const SearchInput: React.FC<SearchInputProps> = (props) => {
+const SearchInput: React.FC<SearchInputProps> = ({
+    isOpen,
+    setIsOpen,
+    updateSearch,
+    files,
+    collections,
+}) => {
     const appContext = useContext(AppContext);
-    const [value, setValue] = useState<SearchOption>(null);
-    const selectRef = useRef(null);
-    const [defaultOptions, setDefaultOptions] = useState([]);
-    const [query, setQuery] = useState("");
 
-    const handleChange = (value: SearchOption) => {
-        setValue(value);
-        setQuery(value?.label);
-        selectRef.current?.blur();
-    };
-    const handleInputChange = (value: string, actionMeta: InputActionMeta) => {
-        if (actionMeta.action === "input-change") {
-            setQuery(value);
-        }
-    };
+    // A ref to the top level Select.
+    const selectRef = useRef(null);
+    // The currently selected option.
+    const [value, setValue] = useState<SearchOption | undefined>();
+    // The contents of the input field associated with the select.
+    const [query, setQuery] = useState("");
+    // The default options shown in the select menu when nothing has been typed.
+    const [defaultOptions, setDefaultOptions] = useState([]);
 
     useEffect(() => {
         search(value);
@@ -152,30 +153,43 @@ const SearchInput: React.FC<SearchInputProps> = (props) => {
         return () => clearInterval(t);
     }, []);
 
-    async function refreshDefaultOptions() {
-        const defaultOptions = await getDefaultOptions();
-        setDefaultOptions(defaultOptions);
-    }
+    const handleChange = (value: SearchOption) => {
+        setValue(value);
+        setQuery(value?.label);
+        // The Select has a blurInputOnSelect prop, but that makes the input
+        // field lose focus, not the entire menu (e.g. when pressing twice).
+        //
+        // We anyways need the ref so that we can blur on selecting a person
+        // from the default options.
+        selectRef.current?.blur();
+    };
+
+    const handleInputChange = (value: string, actionMeta: InputActionMeta) => {
+        if (actionMeta.action === "input-change") {
+            setQuery(value);
+        }
+    };
+
+    const refreshDefaultOptions = async () => {
+        setDefaultOptions(await getDefaultOptions());
+    };
 
     const resetSearch = () => {
-        if (props.isOpen) {
+        if (isOpen) {
             appContext.startLoading();
-            props.updateSearch(null, null);
+            updateSearch(null, null);
             setTimeout(() => {
                 appContext.finishLoading();
             }, 10);
-            props.setIsOpen(false);
+            setIsOpen(false);
             setValue(null);
             setQuery("");
         }
     };
 
     const getOptions = useCallback(
-        pDebounce(
-            getAutoCompleteSuggestions(props.files, props.collections),
-            250,
-        ),
-        [props.files, props.collections],
+        pDebounce(getAutoCompleteSuggestions(files, collections), 250),
+        [files, collections],
     );
 
     const search = (selectedOption: SearchOption) => {
@@ -188,19 +202,19 @@ const SearchInput: React.FC<SearchInputProps> = (props) => {
                 search = {
                     date: selectedOption.value as SearchDateComponents,
                 };
-                props.setIsOpen(true);
+                setIsOpen(true);
                 break;
             case SuggestionType.LOCATION:
                 search = {
                     location: selectedOption.value as LocationTag,
                 };
-                props.setIsOpen(true);
+                setIsOpen(true);
                 break;
             case SuggestionType.CITY:
                 search = {
                     city: selectedOption.value as City,
                 };
-                props.setIsOpen(true);
+                setIsOpen(true);
                 break;
             case SuggestionType.COLLECTION:
                 search = { collection: selectedOption.value as number };
@@ -222,7 +236,7 @@ const SearchInput: React.FC<SearchInputProps> = (props) => {
             case SuggestionType.CLIP:
                 search = { clip: selectedOption.value as ClipSearchScores };
         }
-        props.updateSearch(search, {
+        updateSearch(search, {
             optionName: selectedOption.label,
             fileCount: selectedOption.fileCount,
         });
@@ -236,22 +250,9 @@ const SearchInput: React.FC<SearchInputProps> = (props) => {
         refreshDefaultOptions();
     };
 
-    const MemoizedMenuWithPeople = useCallback(
-        (props) => (
-            <MenuWithPeople
-                {...props}
-                setValue={setValue}
-                selectRef={selectRef}
-            />
-        ),
-        [setValue, selectRef],
-    );
-
-    const components = createComponents(
-        OptionWithInfo,
-        ValueContainerWithIcon,
-        MemoizedMenuWithPeople,
-        VisibleInput,
+    const components = useMemo(
+        () => ({ Option, Control, Menu: CustomMenu, Input: Input }),
+        [],
     );
 
     return (
@@ -259,21 +260,23 @@ const SearchInput: React.FC<SearchInputProps> = (props) => {
             <AsyncSelect
                 ref={selectRef}
                 value={value}
+                // @ts-expect-error Type of the Menu is not what Select expects
                 components={components}
-                placeholder={<span>{t("search_hint")}</span>}
+                placeholder={t("search_hint")}
                 loadOptions={getOptions}
                 onChange={handleChange}
                 onFocus={handleOnFocus}
+                isMulti={false}
                 isClearable
+                escapeClearsValue
                 inputValue={query}
                 onInputChange={handleInputChange}
-                escapeClearsValue
                 styles={SelectStyles}
-                defaultOptions={isMLEnabled() ? defaultOptions : null}
+                defaultOptions={isMLEnabled() ? defaultOptions : []}
                 noOptionsMessage={() => null}
             />
 
-            {props.isOpen && (
+            {isOpen && (
                 <IconButton onClick={() => resetSearch()} sx={{ ml: 1 }}>
                     <CloseIcon />
                 </IconButton>
@@ -282,32 +285,29 @@ const SearchInput: React.FC<SearchInputProps> = (props) => {
     );
 };
 
-const SearchInputWrapper = styled(CenteredFlex)`
+const SearchInputWrapper = styled(Box)`
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
     background: ${({ theme }) => theme.colors.background.base};
     max-width: 484px;
     margin: auto;
 `;
 
-const SelectStyles = {
-    container: (style) => ({
-        ...style,
-        flex: 1,
-    }),
+const SelectStyles: StylesConfig<SearchOption, false> = {
+    container: (style) => ({ ...style, flex: 1 }),
     control: (style, { isFocused }) => ({
         ...style,
         backgroundColor: "rgba(255, 255, 255, 0.1)",
-
-        borderColor: isFocused ? "#1dba54" : "transparent",
+        borderColor: isFocused ? "#1DB954" : "transparent",
         boxShadow: "none",
         ":hover": {
-            borderColor: "#1dba54",
+            borderColor: "#01DE4D",
             cursor: "text",
         },
     }),
-    input: (style) => ({
-        ...style,
-        color: "#fff",
-    }),
+    input: (styles) => ({ ...styles, color: "#fff" }),
     menu: (style) => ({
         ...style,
         marginTop: "1px",
@@ -327,37 +327,55 @@ const SelectStyles = {
             display: "none",
         },
     }),
-    dropdownIndicator: (style) => ({
-        ...style,
-        display: "none",
-    }),
-    indicatorSeparator: (style) => ({
-        ...style,
-        display: "none",
-    }),
-    clearIndicator: (style) => ({
-        ...style,
-        display: "none",
-    }),
-    singleValue: (style) => ({
-        ...style,
-        backgroundColor: "transparent",
-        color: "#d1d1d1",
-        marginLeft: "36px",
-    }),
+    dropdownIndicator: (style) => ({ ...style, display: "none" }),
+    indicatorSeparator: (style) => ({ ...style, display: "none" }),
+    clearIndicator: (style) => ({ ...style, display: "none" }),
     placeholder: (style) => ({
         ...style,
         color: "rgba(255, 255, 255, 0.7)",
-        wordSpacing: "2px",
         whiteSpace: "nowrap",
-        marginLeft: "40px",
     }),
 };
 
-const OptionWithInfo = (props) => (
-    <Option {...props}>
+const Control = ({ children, ...props }: ControlProps<SearchOption, false>) => (
+    <SelectComponents.Control {...props}>
+        <Stack direction="row" sx={{ alignItems: "center" }}>
+            <Box
+                sx={{
+                    display: "inline-flex",
+                    // Match the default padding of the ValueContainer to make
+                    // the icon look properly spaced and aligned.
+                    pl: "8px",
+                    color: (theme) => theme.colors.stroke.muted,
+                }}
+            >
+                {iconForOptionType(props.getValue()[0]?.type)}
+            </Box>
+            {children}
+        </Stack>
+    </SelectComponents.Control>
+);
+
+const iconForOptionType = (type: SuggestionType | undefined) => {
+    switch (type) {
+        case SuggestionType.DATE:
+            return <CalendarIcon />;
+        case SuggestionType.LOCATION:
+        case SuggestionType.CITY:
+            return <LocationIcon />;
+        case SuggestionType.COLLECTION:
+            return <FolderIcon />;
+        case SuggestionType.FILE_NAME:
+            return <ImageIcon />;
+        default:
+            return <SearchIcon />;
+    }
+};
+
+const Option: React.FC<OptionProps<SearchOption, false>> = (props) => (
+    <SelectComponents.Option {...props}>
         <LabelWithInfo data={props.data} />
-    </Option>
+    </SelectComponents.Option>
 );
 
 const LabelWithInfo = ({ data }: { data: SearchOption }) => {
@@ -398,54 +416,33 @@ const LabelWithInfo = ({ data }: { data: SearchOption }) => {
     );
 };
 
-const ValueContainerWithIcon: SelectComponents<
-    SearchOption,
-    false
->["ValueContainer"] = (props) => (
-    <ValueContainer {...props}>
-        <FlexWrapper>
-            <Box
-                style={{ display: "inline-flex" }}
-                mr={1.5}
-                color={(theme) => theme.colors.stroke.muted}
-            >
-                {getIconByType(props.getValue()[0]?.type)}
-            </Box>
-            {props.children}
-        </FlexWrapper>
-    </ValueContainer>
-);
-
-const getIconByType = (type: SuggestionType) => {
-    switch (type) {
-        case SuggestionType.DATE:
-            return <CalendarIcon />;
-        case SuggestionType.LOCATION:
-        case SuggestionType.CITY:
-            return <LocationIcon />;
-        case SuggestionType.COLLECTION:
-            return <FolderIcon />;
-        case SuggestionType.FILE_NAME:
-            return <ImageIcon />;
-        default:
-            return <SearchIcon />;
-    }
+type CustomMenuProps = MenuProps<SearchOption, false> & {
+    selectRef: React.RefObject<SelectInstance>;
+    // Cannot call it setValue since the menu itself already has that.
+    setSelectedValue: (value: SearchOption) => void;
 };
 
-const MenuWithPeople = (props) => {
-    // log.info("props.selectProps.options: ", selectRef);
-    const peopleSuggestions = props.selectProps.options.filter(
+const CustomMenu: React.FC<CustomMenuProps> = ({
+    selectRef,
+    setSelectedValue,
+    ...props
+}) => {
+    // Need to cast here, otherwise the react-select types think selectProps can
+    // also be something that supports multiple selection groups.
+    const options = props.selectProps.options as SearchOption[];
+
+    const peopleSuggestions = options.filter(
         (o) => o.type === SuggestionType.PERSON,
     );
-    const people = peopleSuggestions.map((o) => o.value);
+    const people = peopleSuggestions.map((o) => o.value as SearchPerson);
 
-    const indexStatusSuggestion = props.selectProps.options.filter(
+    const indexStatusSuggestion = options.filter(
         (o) => o.type === SuggestionType.INDEX_STATUS,
     )[0] as Suggestion;
 
     const indexStatus = indexStatusSuggestion?.value;
     return (
-        <Menu {...props}>
+        <SelectComponents.Menu {...props}>
             <Box my={1}>
                 {isMLEnabled() &&
                     indexStatus &&
@@ -468,15 +465,15 @@ const MenuWithPeople = (props) => {
                             people={people}
                             maxRows={2}
                             onSelect={(_, index) => {
-                                props.selectRef.current.blur();
-                                props.setValue(peopleSuggestions[index]);
+                                selectRef.current?.blur();
+                                setSelectedValue(peopleSuggestions[index]);
                             }}
                         />
                     </Row>
                 )}
             </Box>
             {props.children}
-        </Menu>
+        </SelectComponents.Menu>
     );
 };
 
@@ -493,28 +490,9 @@ const Caption = styled("span")`
     padding: 0px 12px;
 `;
 
-const VisibleInput = (props) => (
-    <components.Input {...props} isHidden={false} />
+// A custom input for react-select that is always visible. This is a roundabout
+// hack the existing code used to display the search string when showing the
+// results page; likely there should be a better way.
+const Input: React.FC<InputProps<SearchOption, false>> = (props) => (
+    <SelectComponents.Input {...props} isHidden={false} />
 );
-
-function SearchBarMobile({ show, showSearchInput }) {
-    if (!show) {
-        return <></>;
-    }
-    return (
-        <SearchMobileBox>
-            <FluidContainer justifyContent="flex-end" ml={1.5}>
-                <IconButton onClick={showSearchInput}>
-                    <SearchIcon />
-                </IconButton>
-            </FluidContainer>
-        </SearchMobileBox>
-    );
-}
-
-const SearchMobileBox = styled(FluidContainer)`
-    display: flex;
-    cursor: pointer;
-    align-items: center;
-    justify-content: flex-end;
-`;
