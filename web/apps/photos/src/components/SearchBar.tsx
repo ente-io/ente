@@ -21,7 +21,6 @@ import { EnteFile } from "@/new/photos/types/file";
 import {
     CenteredFlex,
     FlexWrapper,
-    FluidContainer,
     FreeFlowText,
     Row,
     SpaceBetweenFlex,
@@ -95,6 +94,19 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         </Box>
     );
 };
+
+interface MobileSearchAreaProps {
+    /** Called when the user presses the search button. */
+    onSearch: () => void;
+}
+
+const MobileSearchArea: React.FC<MobileSearchAreaProps> = ({ onSearch }) => (
+    <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+        <IconButton onClick={onSearch}>
+            <SearchIcon />
+        </IconButton>
+    </Box>
+);
 
 interface SearchInputProps {
     isOpen: boolean;
@@ -483,27 +495,3 @@ const Caption = styled("span")`
 const VisibleInput = (props) => (
     <components.Input {...props} isHidden={false} />
 );
-
-interface MobileSearchAreaProps {
-    /** Called when the user presses the search button. */
-    onSearch: () => void;
-}
-
-const MobileSearchArea: React.FC<MobileSearchAreaProps> = ({ onSearch }) => {
-    return (
-        <SearchMobileBox>
-            <FluidContainer justifyContent="flex-end" ml={1.5}>
-                <IconButton onClick={onSearch}>
-                    <SearchIcon />
-                </IconButton>
-            </FluidContainer>
-        </SearchMobileBox>
-    );
-};
-
-const SearchMobileBox = styled(FluidContainer)`
-    display: flex;
-    cursor: pointer;
-    align-items: center;
-    justify-content: flex-end;
-`;
