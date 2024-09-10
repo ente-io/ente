@@ -545,7 +545,7 @@ export function PhotoList({
                 <FooterContainer span={columns}>
                     <Typography variant="small">
                         <Trans
-                            i18nKey={"INSTALL_MOBILE_APP"}
+                            i18nKey={"install_mobile_app"}
                             components={{
                                 a: (
                                     <Link

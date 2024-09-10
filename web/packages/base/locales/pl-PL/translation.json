@@ -138,7 +138,7 @@
     "ERROR": "Błąd",
     "MESSAGE": "Wiadomość",
     "OFFLINE_MSG": "Jesteś offline, wyświetlane są wspomnienia z pamięci podręcznej",
-    "INSTALL_MOBILE_APP": "Zainstaluj naszą aplikację na system <a>Android</a> lub <b>iOS</b>, aby automatycznie wykonać kopię zapasową wszystkich zdjęć",
+    "install_mobile_app": "Zainstaluj naszą aplikację na system <a>Android</a> lub <b>iOS</b>, aby automatycznie wykonać kopię zapasową wszystkich zdjęć",
     "DOWNLOAD_APP_MESSAGE": "Przepraszamy, ta operacja jest obecnie obsługiwana tylko w naszej aplikacji komputerowej",
     "DOWNLOAD_APP": "Pobierz aplikację komputerową",
     "EXPORT": "Eksportuj Dane",

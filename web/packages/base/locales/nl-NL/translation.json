@@ -138,7 +138,7 @@
     "ERROR": "Foutmelding",
     "MESSAGE": "Melding",
     "OFFLINE_MSG": "Je bent offline, lokaal opgeslagen herinneringen worden getoond",
-    "INSTALL_MOBILE_APP": "Installeer onze <a>Android</a> of <b>iOS</b> app om automatisch een back-up te maken van al uw foto's",
+    "install_mobile_app": "Installeer onze <a>Android</a> of <b>iOS</b> app om automatisch een back-up te maken van al uw foto's",
     "DOWNLOAD_APP_MESSAGE": "Sorry, deze bewerking wordt momenteel alleen ondersteund op onze desktop app",
     "DOWNLOAD_APP": "Download de desktop app",
     "EXPORT": "Data exporteren",

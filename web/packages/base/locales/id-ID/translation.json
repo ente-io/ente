@@ -138,7 +138,7 @@
     "ERROR": "Kesalahan",
     "MESSAGE": "",
     "OFFLINE_MSG": "",
-    "INSTALL_MOBILE_APP": "Instal app <a>Android</a> atau <b>iOS</b> kami untuk mencadangkan seluruh foto kamu secara otomatis",
+    "install_mobile_app": "Instal app <a>Android</a> atau <b>iOS</b> kami untuk mencadangkan seluruh foto kamu secara otomatis",
     "DOWNLOAD_APP_MESSAGE": "",
     "DOWNLOAD_APP": "Unduh app desktop",
     "EXPORT": "Ekspor Data",

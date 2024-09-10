@@ -138,7 +138,7 @@
     "ERROR": "",
     "MESSAGE": "Meddelande",
     "OFFLINE_MSG": "",
-    "INSTALL_MOBILE_APP": "Installera vår <a>Android</a> eller <b>iOS</b>-app för att automatiskt säkerhetskopiera alla dina foton",
+    "install_mobile_app": "Installera vår <a>Android</a> eller <b>iOS</b>-app för att automatiskt säkerhetskopiera alla dina foton",
     "DOWNLOAD_APP_MESSAGE": "",
     "DOWNLOAD_APP": "",
     "EXPORT": "Exportera data",

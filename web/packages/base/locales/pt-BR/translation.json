@@ -138,7 +138,7 @@
     "ERROR": "Erro",
     "MESSAGE": "Mensagem",
     "OFFLINE_MSG": "Você está offline, memórias em cache estão sendo mostradas",
-    "INSTALL_MOBILE_APP": "Instale nosso aplicativo <a>Android</a> ou <b>iOS</b> para fazer backup automático de todas as suas fotos",
+    "install_mobile_app": "Instale nosso aplicativo <a>Android</a> ou <b>iOS</b> para fazer backup automático de todas as suas fotos",
     "DOWNLOAD_APP_MESSAGE": "Desculpe, esta operação só é suportada em nosso aplicativo para computador",
     "DOWNLOAD_APP": "Baixar aplicativo para computador",
     "EXPORT": "Exportar dados",

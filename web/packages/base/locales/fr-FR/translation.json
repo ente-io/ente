@@ -138,7 +138,7 @@
     "ERROR": "Erreur",
     "MESSAGE": "Message",
     "OFFLINE_MSG": "Vous êtes hors-ligne, les mémoires cache sont affichées",
-    "INSTALL_MOBILE_APP": "Installez notre application <a>Android</a> or <b>iOS</b> pour sauvegarder automatiquement toutes vos photos",
+    "install_mobile_app": "Installez notre application <a>Android</a> or <b>iOS</b> pour sauvegarder automatiquement toutes vos photos",
     "DOWNLOAD_APP_MESSAGE": "Désolé, cette opération est actuellement supportée uniquement sur notre appli pour ordinateur",
     "DOWNLOAD_APP": "Télécharger l'appli pour ordinateur",
     "EXPORT": "Exporter des données",

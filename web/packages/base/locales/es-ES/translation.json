@@ -138,7 +138,7 @@
     "ERROR": "Error",
     "MESSAGE": "Mensaje",
     "OFFLINE_MSG": "Estás desconectado, se están mostrando recuerdos en caché",
-    "INSTALL_MOBILE_APP": "Instala nuestra aplicación <a>Android</a> o <b>iOS</b> para hacer una copia de seguridad automática de todas usted fotos",
+    "install_mobile_app": "Instala nuestra aplicación <a>Android</a> o <b>iOS</b> para hacer una copia de seguridad automática de todas usted fotos",
     "DOWNLOAD_APP_MESSAGE": "Lo sentimos, esta operación sólo es compatible con nuestra aplicación de computadora",
     "DOWNLOAD_APP": "Descargar aplicación de computadora",
     "EXPORT": "Exportar datos",

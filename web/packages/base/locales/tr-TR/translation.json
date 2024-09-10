@@ -138,7 +138,7 @@
     "ERROR": "Hata",
     "MESSAGE": "Mesaj",
     "OFFLINE_MSG": "Çevrimdışısın, önbelleğe alınmış anılar gösteriliyor",
-    "INSTALL_MOBILE_APP": "Tüm fotoğraflarını otomatik olarak yedeklemek için <a>Android</a> veya <b>iOS</b> uygulamamızı yükle",
+    "install_mobile_app": "Tüm fotoğraflarını otomatik olarak yedeklemek için <a>Android</a> veya <b>iOS</b> uygulamamızı yükle",
     "DOWNLOAD_APP_MESSAGE": "Üzgünüz, bu işlem şu anda yalnızca masaüstü uygulamamızda destekleniyor",
     "DOWNLOAD_APP": "Masaüstü uygulamasını indir",
     "EXPORT": "Verileri Dışarı Aktar",

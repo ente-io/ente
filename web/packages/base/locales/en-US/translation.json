@@ -138,7 +138,7 @@
     "ERROR": "Error",
     "MESSAGE": "Message",
     "OFFLINE_MSG": "You are offline, cached memories are being shown",
-    "INSTALL_MOBILE_APP": "Install our <a>Android</a> or <b>iOS</b> app to automatically backup all your photos",
+    "install_mobile_app": "Install our <a>Android</a> or <b>iOS</b> app to automatically backup all your photos",
     "DOWNLOAD_APP_MESSAGE": "Sorry, this operation is currently only supported on our desktop app",
     "DOWNLOAD_APP": "Download desktop app",
     "EXPORT": "Export Data",

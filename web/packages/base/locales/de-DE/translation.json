@@ -138,7 +138,7 @@
     "ERROR": "Fehler",
     "MESSAGE": "Nachricht",
     "OFFLINE_MSG": "Du bist offline, gecachte Erinnerungen werden angezeigt",
-    "INSTALL_MOBILE_APP": "Installiere unsere <a>Android</a> oder <b>iOS</b> App, um automatisch alle deine Fotos zu sichern",
+    "install_mobile_app": "Installiere unsere <a>Android</a> oder <b>iOS</b> App, um automatisch alle deine Fotos zu sichern",
     "DOWNLOAD_APP_MESSAGE": "Entschuldigung, dieser Vorgang wird derzeit nur von unserer Desktop-App unterstützt",
     "DOWNLOAD_APP": "Desktopanwendung herunterladen",
     "EXPORT": "Daten exportieren",

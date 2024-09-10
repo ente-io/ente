@@ -138,7 +138,7 @@
     "ERROR": "错误",
     "MESSAGE": "消息",
     "OFFLINE_MSG": "您处于离线状态，正在显示已缓存的回忆",
-    "INSTALL_MOBILE_APP": "安装我们的 <a>Android</a> 或 <b>iOS</b> 应用程序来自动备份您的所有照片",
+    "install_mobile_app": "安装我们的 <a>Android</a> 或 <b>iOS</b> 应用程序来自动备份您的所有照片",
     "DOWNLOAD_APP_MESSAGE": "抱歉，目前只有我们的桌面应用程序支持此操作",
     "DOWNLOAD_APP": "下载桌面应用程序",
     "EXPORT": "导出数据",
