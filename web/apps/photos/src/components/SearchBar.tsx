@@ -59,8 +59,6 @@ import {
 } from "services/searchService";
 import { Collection } from "types/collection";
 
-const { Option, Menu, Input } = SelectComponents;
-
 interface SearchBarProps {
     isInSearchMode: boolean;
     setIsInSearchMode: (v: boolean) => void;
@@ -133,17 +131,6 @@ const SearchInput: React.FC<SearchInputProps> = (props) => {
     const [defaultOptions, setDefaultOptions] = useState([]);
     const [query, setQuery] = useState("");
 
-    const handleChange = (value: SearchOption) => {
-        setValue(value);
-        setQuery(value?.label);
-        selectRef.current?.blur();
-    };
-    const handleInputChange = (value: string, actionMeta: InputActionMeta) => {
-        if (actionMeta.action === "input-change") {
-            setQuery(value);
-        }
-    };
-
     useEffect(() => {
         search(value);
     }, [value]);
@@ -154,10 +141,21 @@ const SearchInput: React.FC<SearchInputProps> = (props) => {
         return () => clearInterval(t);
     }, []);
 
-    async function refreshDefaultOptions() {
-        const defaultOptions = await getDefaultOptions();
-        setDefaultOptions(defaultOptions);
-    }
+    const handleChange = (value: SearchOption) => {
+        setValue(value);
+        setQuery(value?.label);
+        selectRef.current?.blur();
+    };
+
+    const handleInputChange = (value: string, actionMeta: InputActionMeta) => {
+        if (actionMeta.action === "input-change") {
+            setQuery(value);
+        }
+    };
+
+    const refreshDefaultOptions = async () => {
+        setDefaultOptions(await getDefaultOptions());
+    };
 
     const resetSearch = () => {
         if (props.isOpen) {
@@ -295,14 +293,10 @@ const SearchInputWrapper = styled(Box)`
 `;
 
 const SelectStyles: StylesConfig<SearchOption, false> = {
-    container: (style) => ({
-        ...style,
-        flex: 1,
-    }),
+    container: (style) => ({ ...style, flex: 1 }),
     control: (style, { isFocused }) => ({
         ...style,
         backgroundColor: "rgba(255, 255, 255, 0.1)",
-
         borderColor: isFocused ? "#1dba54" : "transparent",
         boxShadow: "none",
         ":hover": {
@@ -310,10 +304,7 @@ const SelectStyles: StylesConfig<SearchOption, false> = {
             cursor: "text",
         },
     }),
-    input: (style) => ({
-        ...style,
-        color: "#fff",
-    }),
+    input: (styles) => ({ ...styles, color: "#fff" }),
     menu: (style) => ({
         ...style,
         marginTop: "1px",
@@ -333,18 +324,9 @@ const SelectStyles: StylesConfig<SearchOption, false> = {
             display: "none",
         },
     }),
-    dropdownIndicator: (style) => ({
-        ...style,
-        display: "none",
-    }),
-    indicatorSeparator: (style) => ({
-        ...style,
-        display: "none",
-    }),
-    clearIndicator: (style) => ({
-        ...style,
-        display: "none",
-    }),
+    dropdownIndicator: (style) => ({ ...style, display: "none" }),
+    indicatorSeparator: (style) => ({ ...style, display: "none" }),
+    clearIndicator: (style) => ({ ...style, display: "none" }),
     singleValue: (style) => ({
         ...style,
         backgroundColor: "transparent",
@@ -361,9 +343,9 @@ const SelectStyles: StylesConfig<SearchOption, false> = {
 };
 
 const OptionWithInfo: React.FC<OptionProps<SearchOption>> = (props) => (
-    <Option {...props}>
+    <SelectComponents.Option {...props}>
         <LabelWithInfo data={props.data} />
-    </Option>
+    </SelectComponents.Option>
 );
 
 const LabelWithInfo = ({ data }: { data: SearchOption }) => {
@@ -450,7 +432,7 @@ const MenuWithPeople = (props) => {
 
     const indexStatus = indexStatusSuggestion?.value;
     return (
-        <Menu {...props}>
+        <SelectComponents.Menu {...props}>
             <Box my={1}>
                 {isMLEnabled() &&
                     indexStatus &&
@@ -481,7 +463,7 @@ const MenuWithPeople = (props) => {
                 )}
             </Box>
             {props.children}
-        </Menu>
+        </SelectComponents.Menu>
     );
 };
 
@@ -498,4 +480,6 @@ const Caption = styled("span")`
     padding: 0px 12px;
 `;
 
-const VisibleInput = (props) => <Input {...props} isHidden={false} />;
+const VisibleInput = (props) => (
+    <SelectComponents.Input {...props} isHidden={false} />
+);
