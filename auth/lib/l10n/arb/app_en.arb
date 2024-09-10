@@ -50,7 +50,7 @@
   "deleteCodeTitle": "Delete code?",
   "deleteCodeMessage": "Are you sure you want to delete this code? This action is irreversible.",
   "trashCode": "Trash code?",
-  "trashCodeMessage": "Are you sure you want to trash code for {account}?.",
+  "trashCodeMessage": "Are you sure you want to trash code for {account}?",
   "trash": "Trash",
   "viewLogsAction": "View logs",
   "sendLogsDescription": "This will send across logs to help us debug your issue. While we take precautions to ensure that sensitive information is not logged, we encourage you to view these logs before sharing them.",

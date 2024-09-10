@@ -106,11 +106,15 @@ class _HomePageState extends State<HomePage> {
   void _loadCodes() {
     CodeStore.instance.getAllCodes().then((codes) {
       _allCodes = codes;
+      hasTrashedCodes = false;
       for (final c in _allCodes ?? []) {
         if (c.isTrashed) {
           hasTrashedCodes = true;
           break;
         }
+      }
+      if (!hasTrashedCodes) {
+        _isTrashOpen = false;
       }
 
       CodeDisplayStore.instance.getAllTags(allCodes: _allCodes).then((value) {
