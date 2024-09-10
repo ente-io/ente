@@ -306,10 +306,10 @@ const SelectStyles: StylesConfig<SearchOption, false> = {
     control: (style, { isFocused }) => ({
         ...style,
         backgroundColor: "rgba(255, 255, 255, 0.1)",
-        borderColor: isFocused ? "#1dba54" : "transparent",
+        borderColor: isFocused ? "#1DB954" : "transparent",
         boxShadow: "none",
         ":hover": {
-            borderColor: "#1dba54",
+            borderColor: "#01DE4D",
             cursor: "text",
         },
     }),
