@@ -1,15 +1,14 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/l10n/l10n.dart';
-import 'package:ente_auth/onboarding/view/onboarding_page.dart';
 import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/tools/app_lock.dart';
 import 'package:ente_auth/utils/auth_util.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/lock_screen_settings.dart';
-import 'package:ente_auth/utils/navigation_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -195,10 +194,7 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
       isCritical: true,
       firstButtonOnTap: () async {
         await UserService.instance.logout(context);
-        await routeToPage(
-          context,
-          const OnboardingPage(),
-        );
+        Process.killPid(pid, ProcessSignal.sigkill);
       },
     );
   }
