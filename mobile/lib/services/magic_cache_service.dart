@@ -196,31 +196,24 @@ class MagicCacheService {
     return json["prompts"];
   }
 
-  ///Returns random non-empty magic results from magicPromptsData
+  ///Returns non-empty magic results from magicPromptsData
   ///Length is number of prompts, can be less if there are not enough non-empty
   ///results
   Future<List<MagicCache>> _nonEmptyMagicResults(
     List<dynamic> magicPromptsData,
   ) async {
     final results = <MagicCache>[];
-    final randomIndexes = List.generate(
-      magicPromptsData.length,
-      (index) => index,
-      growable: false,
-    )..shuffle();
-    for (final index in randomIndexes) {
-      final files =
-          await _getMatchingFileIDsForPromptData(magicPromptsData[index]);
+    for (dynamic prompt in magicPromptsData) {
+      final files = await _getMatchingFileIDsForPromptData(
+        prompt as Map<String, dynamic>,
+      );
       if (files.isNotEmpty) {
         results.add(
           MagicCache(
-            magicPromptsData[index]["title"] as String,
+            prompt["title"] as String,
             files,
           ),
         );
-      }
-      if (results.length >= magicPromptsData.length) {
-        break;
       }
     }
     return results;
