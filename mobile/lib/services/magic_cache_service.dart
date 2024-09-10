@@ -160,7 +160,7 @@ class MagicCacheService {
       _logger.info("No magic cache found");
       return null;
     }
-    final jsonString = await file.readAsString();
+    final jsonString = file.readAsStringSync();
     return MagicCache.decodeJsonToList(jsonString);
   }
 
