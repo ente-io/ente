@@ -219,7 +219,6 @@ const decryptEnteFile = async (
                 decryptionHeaderB64: magicMetadata.header,
                 keyB64: fileKey,
             }),
-
         };
     }
     if (pubMagicMetadata?.data) {
