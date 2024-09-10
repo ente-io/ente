@@ -42,7 +42,6 @@ import FullScreenDropZone from "components/FullScreenDropZone";
 import { LoadingOverlay } from "components/LoadingOverlay";
 import PhotoFrame from "components/PhotoFrame";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
-import { UploadButton } from "components/Upload/UploadButton";
 import Uploader from "components/Upload/Uploader";
 import { UploadSelectorInputs } from "components/UploadSelectorInputs";
 import { t } from "i18next";
@@ -340,13 +339,7 @@ export default function PublicCollectionGallery() {
                 ? {
                       item: (
                           <CenteredFlex sx={{ marginTop: "56px" }}>
-                              <UploadButton
-                                  disableShrink
-                                  openUploader={onAddPhotos}
-                                  text={t("ADD_MORE_PHOTOS")}
-                                  color="accent"
-                                  icon={<AddPhotoAlternateOutlined />}
-                              />
+                              <AddMorePhotosButton onClick={onAddPhotos} />
                           </CenteredFlex>
                       ),
                       itemType: ITEM_TYPE.FOOTER,
@@ -673,6 +666,26 @@ const AddPhotosButton: React.FC<ButtonProps & IconButtonProps> = (props) => {
                     {t("ADD_PHOTOS")}
                 </Button>
             )}
+        </Box>
+    );
+};
+
+/**
+ * A visually different variation of {@link AddPhotosButton}. It also does not
+ * shrink on mobile sized screens.
+ */
+const AddMorePhotosButton: React.FC<ButtonProps> = (props) => {
+    const disabled = !uploadManager.shouldAllowNewUpload();
+    return (
+        <Box>
+            <Button
+                {...props}
+                disabled={disabled}
+                color={"accent"}
+                startIcon={<AddPhotoAlternateOutlined />}
+            >
+                {t("ADD_MORE_PHOTOS")}
+            </Button>
         </Box>
     );
 };
