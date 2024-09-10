@@ -13,7 +13,7 @@
         "bip39": "^3.0.4",
         "bs58": "^5.0.0",
         "chrono-node": "^2.7.6",
-        "debounce": "^2.0.0",
+        "debounce": "^2.1.1",
         "exifreader": "^4",
         "fast-srp-hap": "^2.0.4",
         "ffmpeg-wasm": "file:./thirdparty/ffmpeg-wasm",
