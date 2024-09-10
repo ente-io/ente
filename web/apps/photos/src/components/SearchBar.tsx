@@ -253,7 +253,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
     const components = useMemo(
         () => ({
             Option: OptionWithInfo,
-            Control: CustomControl,
+            Control: Control,
             Menu: CustomMenu,
             Input: VisibleInput,
         }),
@@ -342,7 +342,7 @@ const SelectStyles: StylesConfig<SearchOption, false> = {
     }),
 };
 
-const CustomControl: React.FC<ControlProps<SearchOption, false>> = (props) => (
+const Control = ({ children, ...props }: ControlProps<SearchOption, false>) => (
     <SelectComponents.Control {...props}>
         <Stack direction="row" sx={{ alignItems: "center" }}>
             <Box
@@ -356,7 +356,7 @@ const CustomControl: React.FC<ControlProps<SearchOption, false>> = (props) => (
             >
                 {iconForOptionType(props.getValue()[0]?.type)}
             </Box>
-            {props.children}
+            {children}
         </Stack>
     </SelectComponents.Control>
 );
