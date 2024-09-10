@@ -139,7 +139,8 @@ class MagicCacheService {
       if (!file.existsSync()) {
         file.createSync(recursive: true);
       }
-      file.writeAsBytesSync(MagicCache.encodeListToJson(magicCaches).codeUnits);
+      await file
+          .writeAsBytes(MagicCache.encodeListToJson(magicCaches).codeUnits);
       unawaited(
         _resetLastMagicCacheUpdateTime().onError((error, stackTrace) {
           _logger.warning(
@@ -159,12 +160,12 @@ class MagicCacheService {
       _logger.info("No magic cache found");
       return null;
     }
-    final jsonString = file.readAsStringSync();
+    final jsonString = await file.readAsString();
     return MagicCache.decodeJsonToList(jsonString);
   }
 
   Future<void> clearMagicCache() async {
-    File(await _getCachePath()).deleteSync();
+    await File(await _getCachePath()).delete();
   }
 
   Future<List<GenericSearchResult>> getMagicGenericSearchResult() async {
