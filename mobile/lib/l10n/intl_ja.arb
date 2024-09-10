@@ -433,7 +433,7 @@
   "selectAll": "全て選択",
   "skip": "スキップ",
   "updatingFolderSelection": "フォルダの選択をアップデート中",
-  "itemCount": "{count, plural, one{{{count} アイテム} other {{count} アイテム}}",
+  "itemCount": "{count, plural, one{{count} アイテム} other {{count} アイテム}}",
   "deleteItemCount": "{count, plural,=1 {{count} 個の項目を削除} other {{count} 個の項目を削除}}",
   "duplicateItemsGroup": "{count} 個のファイル、それぞれ{formattedSize}",
   "@duplicateItemsGroup": {
