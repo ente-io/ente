@@ -81,14 +81,15 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     isInSearchMode,
     ...props
 }) => {
+    console.log({ isInSearchMode }, props);
     const showSearchInput = () => setIsInSearchMode(true);
     const isMobileWidth = useIsMobileWidth();
 
     return (
         <SearchBarWrapper>
-            {isMobileWidth ? (
+            {isMobileWidth && !isInSearchMode ? (
                 <SearchBarMobile
-                    show={!isInSearchMode}
+                    show={true}
                     showSearchInput={showSearchInput}
                 />
             ) : (
