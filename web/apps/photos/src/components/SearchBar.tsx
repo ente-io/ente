@@ -335,11 +335,6 @@ const SelectStyles: StylesConfig<SearchOption, false> = {
     dropdownIndicator: (style) => ({ ...style, display: "none" }),
     indicatorSeparator: (style) => ({ ...style, display: "none" }),
     clearIndicator: (style) => ({ ...style, display: "none" }),
-    singleValue: (style) => ({
-        ...style,
-        backgroundColor: "transparent",
-        color: "#d1d1d1",
-    }),
     placeholder: (style) => ({
         ...style,
         color: "rgba(255, 255, 255, 0.7)",
