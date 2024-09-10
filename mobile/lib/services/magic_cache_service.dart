@@ -139,7 +139,8 @@ class MagicCacheService {
       if (!file.existsSync()) {
         file.createSync(recursive: true);
       }
-      file.writeAsBytesSync(MagicCache.encodeListToJson(magicCaches).codeUnits);
+      await file
+          .writeAsBytes(MagicCache.encodeListToJson(magicCaches).codeUnits);
       unawaited(
         _resetLastMagicCacheUpdateTime().onError((error, stackTrace) {
           _logger.warning(
@@ -164,7 +165,7 @@ class MagicCacheService {
   }
 
   Future<void> clearMagicCache() async {
-    File(await _getCachePath()).deleteSync();
+    await File(await _getCachePath()).delete();
   }
 
   Future<List<GenericSearchResult>> getMagicGenericSearchResult() async {
@@ -195,33 +196,24 @@ class MagicCacheService {
     return json["prompts"];
   }
 
-  ///Returns random non-empty magic results from magicPromptsData
-  ///Length is capped at [limit], can be less than [limit] if there are not enough
-  ///non-empty results
+  ///Returns non-empty magic results from magicPromptsData
+  ///Length is number of prompts, can be less if there are not enough non-empty
+  ///results
   Future<List<MagicCache>> _nonEmptyMagicResults(
     List<dynamic> magicPromptsData,
   ) async {
-    //Show all magic prompts to internal users for feedback on results
-    final limit = flagService.internalUser ? magicPromptsData.length : 4;
     final results = <MagicCache>[];
-    final randomIndexes = List.generate(
-      magicPromptsData.length,
-      (index) => index,
-      growable: false,
-    )..shuffle();
-    for (final index in randomIndexes) {
-      final files =
-          await _getMatchingFileIDsForPromptData(magicPromptsData[index]);
+    for (dynamic prompt in magicPromptsData) {
+      final files = await _getMatchingFileIDsForPromptData(
+        prompt as Map<String, dynamic>,
+      );
       if (files.isNotEmpty) {
         results.add(
           MagicCache(
-            magicPromptsData[index]["title"] as String,
+            prompt["title"] as String,
             files,
           ),
         );
-      }
-      if (results.length >= limit) {
-        break;
       }
     }
     return results;
