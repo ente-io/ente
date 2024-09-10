@@ -663,7 +663,7 @@ const AddPhotosButton: React.FC<ButtonProps & IconButtonProps> = (props) => {
                     color={"secondary"}
                     startIcon={icon}
                 >
-                    {t("ADD_PHOTOS")}
+                    {t("add_photos")}
                 </Button>
             )}
         </Box>
@@ -684,7 +684,7 @@ const AddMorePhotosButton: React.FC<ButtonProps> = (props) => {
                 color={"accent"}
                 startIcon={<AddPhotoAlternateOutlined />}
             >
-                {t("ADD_MORE_PHOTOS")}
+                {t("add_more_photos")}
             </Button>
         </Box>
     );
@@ -696,7 +696,7 @@ const GoToEnte: React.FC = () => {
 
     return (
         <Button color="accent" href="https://ente.io">
-            {isTouchscreen ? t("INSTALL") : t("SIGN_UP")}
+            {isTouchscreen ? t("install") : t("SIGN_UP")}
         </Button>
     );
 };
