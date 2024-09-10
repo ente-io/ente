@@ -339,7 +339,14 @@ const SelectStyles: StylesConfig<SearchOption, false> = {
 
 const Control = ({ children, ...props }: ControlProps<SearchOption, false>) => (
     <SelectComponents.Control {...props}>
-        <Stack direction="row" sx={{ alignItems: "center" }}>
+        <Stack
+            direction="row"
+            sx={{
+                alignItems: "center",
+                // Fill the entire control (the control uses display flex).
+                flex: 1,
+            }}
+        >
             <Box
                 sx={{
                     display: "inline-flex",
