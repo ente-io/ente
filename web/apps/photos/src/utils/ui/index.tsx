@@ -128,7 +128,7 @@ export const getSessionExpiredMessage = (
 
     nonClosable: true,
     proceed: {
-        text: t("LOGIN"),
+        text: t("login"),
         action,
         variant: "accent",
     },

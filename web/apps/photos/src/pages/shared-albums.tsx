@@ -188,7 +188,7 @@ export default function PublicCollectionGallery() {
 
             nonClosable: true,
             proceed: {
-                text: t("LOGIN"),
+                text: t("login"),
                 action: () => router.push("/"),
                 variant: "accent",
             },
@@ -696,7 +696,7 @@ const GoToEnte: React.FC = () => {
 
     return (
         <Button color="accent" href="https://ente.io">
-            {isTouchscreen ? t("install") : t("SIGN_UP")}
+            {isTouchscreen ? t("install") : t("sign_up")}
         </Button>
     );
 };

@@ -128,7 +128,7 @@ const passwordChangedElsewhereDialogAttributes = (
     title: t("password_changed_elsewhere"),
     content: t("password_changed_elsewhere_message"),
     proceed: {
-        text: t("LOGIN"),
+        text: t("login"),
         action: onLogin,
         variant: "accent",
     },
