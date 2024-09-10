@@ -45,6 +45,7 @@ import type { User } from "@ente/shared/user/types";
 import ArrowBack from "@mui/icons-material/ArrowBack";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
+import type { ButtonProps, IconButtonProps } from "@mui/material";
 import { Box, Button, IconButton, Typography, styled } from "@mui/material";
 import AuthenticateUserModal from "components/AuthenticateUserModal";
 import Collections from "components/Collections";
@@ -1300,22 +1301,21 @@ const NormalNavbarContents: React.FC<NormalNavbarContentsProps> = ({
     );
 };
 
-interface UploadButtonProps {
-    onClick: () => void;
-}
-export const UploadButton: React.FC<UploadButtonProps> = ({ onClick }) => {
+export const UploadButton: React.FC<ButtonProps & IconButtonProps> = (
+    props,
+) => {
     const disabled = !uploadManager.shouldAllowNewUpload();
     const isMobileWidth = useIsMobileWidth();
 
     return (
         <Box>
             {isMobileWidth ? (
-                <IconButton onClick={onClick} disabled={disabled}>
+                <IconButton {...props} disabled={disabled}>
                     {<FileUploadOutlinedIcon />}
                 </IconButton>
             ) : (
                 <Button
-                    onClick={onClick}
+                    {...props}
                     disabled={disabled}
                     color={"secondary"}
                     startIcon={<FileUploadOutlinedIcon />}
