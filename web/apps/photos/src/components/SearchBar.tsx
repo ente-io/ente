@@ -48,6 +48,7 @@ import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import {
     components as SelectComponents,
     type InputActionMeta,
+    type InputProps,
     type OptionProps,
     type StylesConfig,
     type ValueContainerProps,
@@ -124,12 +125,23 @@ const createComponents = memoize((Option, ValueContainer, Menu, Input) => ({
     Input,
 }));
 
-const SearchInput: React.FC<SearchInputProps> = (props) => {
+const SearchInput: React.FC<SearchInputProps> = ({
+    isOpen,
+    setIsOpen,
+    updateSearch,
+    files,
+    collections,
+}) => {
     const appContext = useContext(AppContext);
-    const [value, setValue] = useState<SearchOption>(null);
+
+    // A ref to the top level Select.
     const selectRef = useRef(null);
-    const [defaultOptions, setDefaultOptions] = useState([]);
+    // The currently selected option.
+    const [value, setValue] = useState<SearchOption | undefined>();
+    // The contents of the input field associated with the select.
     const [query, setQuery] = useState("");
+    // The default options shown in the select menu when nothing has been typed.
+    const [defaultOptions, setDefaultOptions] = useState([]);
 
     useEffect(() => {
         search(value);
@@ -144,6 +156,11 @@ const SearchInput: React.FC<SearchInputProps> = (props) => {
     const handleChange = (value: SearchOption) => {
         setValue(value);
         setQuery(value?.label);
+        // The Select has a blurInputOnSelect prop, but that makes the input
+        // field lose focus, not the entire menu (e.g. when pressing twice).
+        //
+        // We anyways need the ref so that we can blur on selecting a person
+        // from the default options.
         selectRef.current?.blur();
     };
 
@@ -158,24 +175,21 @@ const SearchInput: React.FC<SearchInputProps> = (props) => {
     };
 
     const resetSearch = () => {
-        if (props.isOpen) {
+        if (isOpen) {
             appContext.startLoading();
-            props.updateSearch(null, null);
+            updateSearch(null, null);
             setTimeout(() => {
                 appContext.finishLoading();
             }, 10);
-            props.setIsOpen(false);
+            setIsOpen(false);
             setValue(null);
             setQuery("");
         }
     };
 
     const getOptions = useCallback(
-        pDebounce(
-            getAutoCompleteSuggestions(props.files, props.collections),
-            250,
-        ),
-        [props.files, props.collections],
+        pDebounce(getAutoCompleteSuggestions(files, collections), 250),
+        [files, collections],
     );
 
     const search = (selectedOption: SearchOption) => {
@@ -188,19 +202,19 @@ const SearchInput: React.FC<SearchInputProps> = (props) => {
                 search = {
                     date: selectedOption.value as SearchDateComponents,
                 };
-                props.setIsOpen(true);
+                setIsOpen(true);
                 break;
             case SuggestionType.LOCATION:
                 search = {
                     location: selectedOption.value as LocationTag,
                 };
-                props.setIsOpen(true);
+                setIsOpen(true);
                 break;
             case SuggestionType.CITY:
                 search = {
                     city: selectedOption.value as City,
                 };
-                props.setIsOpen(true);
+                setIsOpen(true);
                 break;
             case SuggestionType.COLLECTION:
                 search = { collection: selectedOption.value as number };
@@ -222,7 +236,7 @@ const SearchInput: React.FC<SearchInputProps> = (props) => {
             case SuggestionType.CLIP:
                 search = { clip: selectedOption.value as ClipSearchScores };
         }
-        props.updateSearch(search, {
+        updateSearch(search, {
             optionName: selectedOption.label,
             fileCount: selectedOption.fileCount,
         });
@@ -265,15 +279,15 @@ const SearchInput: React.FC<SearchInputProps> = (props) => {
                 onChange={handleChange}
                 onFocus={handleOnFocus}
                 isClearable
+                escapeClearsValue
                 inputValue={query}
                 onInputChange={handleInputChange}
-                escapeClearsValue
                 styles={SelectStyles}
-                defaultOptions={isMLEnabled() ? defaultOptions : null}
+                defaultOptions={isMLEnabled() ? defaultOptions : []}
                 noOptionsMessage={() => null}
             />
 
-            {props.isOpen && (
+            {isOpen && (
                 <IconButton onClick={() => resetSearch()} sx={{ ml: 1 }}>
                     <CloseIcon />
                 </IconButton>
@@ -480,6 +494,6 @@ const Caption = styled("span")`
     padding: 0px 12px;
 `;
 
-const VisibleInput = (props) => (
+const VisibleInput: React.FC<InputProps<SearchOption>> = (props) => (
     <SelectComponents.Input {...props} isHidden={false} />
 );
