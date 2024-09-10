@@ -10,6 +10,9 @@ import 'package:photos/events/sync_status_update_event.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/ui/common/bottom_shadow.dart';
+import "package:photos/ui/components/buttons/button_widget.dart";
+import "package:photos/ui/components/dialog_widget.dart";
+import "package:photos/ui/components/models/button_type.dart";
 import 'package:photos/ui/settings/backup/backup_folder_selection_page.dart';
 import "package:photos/utils/debouncer.dart";
 import "package:photos/utils/email_util.dart";
@@ -33,10 +36,14 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
   final List<String> _messages = [];
   final _debouncer = Debouncer(const Duration(milliseconds: 500));
   late final Timer _didYouKnowTimer;
+  final fortySecondsOnScreen = ValueNotifier(false);
 
   @override
   void initState() {
     super.initState();
+    Future.delayed(const Duration(seconds: 40), () {
+      fortySecondsOnScreen.value = true;
+    });
     _firstImportEvent =
         Bus.instance.on<SyncStatusUpdate>().listen((event) async {
       if (mounted && event.status == SyncStatus.completedFirstGalleryImport) {
@@ -88,6 +95,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
     _importProgressEvent.cancel();
     _debouncer.cancelDebounceTimer();
     _didYouKnowTimer.cancel();
+    fortySecondsOnScreen.dispose();
     super.dispose();
   }
 
@@ -197,6 +205,45 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
             ),
           ),
         ),
+      ),
+      appBar: AppBar(
+        actions: [
+          ValueListenableBuilder(
+            valueListenable: fortySecondsOnScreen,
+            builder: (context, value, _) {
+              return value
+                  ? IconButton(
+                      icon: const Icon(Icons.help_outline_outlined),
+                      onPressed: () {
+                        showDialogWidget(
+                          context: context,
+                          title: S.of(context).oops,
+                          icon: Icons.error_outline_outlined,
+                          body:
+                              "Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team",
+                          isDismissible: true,
+                          buttons: [
+                            ButtonWidget(
+                              buttonType: ButtonType.primary,
+                              labelText: S.of(context).contactSupport,
+                              buttonAction: ButtonAction.second,
+                              onTap: () async {
+                                await sendLogs(
+                                  context,
+                                  S.of(context).contactSupport,
+                                  "support@ente.io",
+                                  postShare: () {},
+                                );
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    )
+                  : const SizedBox.shrink();
+            },
+          ),
+        ],
       ),
     );
   }
