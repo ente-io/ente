@@ -206,18 +206,18 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m66(count) =>
       "${Intl.plural(count, zero: '', one: '1 day', other: '${count} days')}";
 
-  static String m72(count) => "Preserving ${count} memories...";
+  static String m67(count) => "Preserving ${count} memories...";
 
-  static String m67(endDate) => "Valid till ${endDate}";
+  static String m68(endDate) => "Valid till ${endDate}";
 
-  static String m68(email) => "Verify ${email}";
+  static String m69(email) => "Verify ${email}";
 
-  static String m69(email) => "We have sent a mail to <green>${email}</green>";
+  static String m70(email) => "We have sent a mail to <green>${email}</green>";
 
-  static String m70(count) =>
+  static String m71(count) =>
       "${Intl.plural(count, one: '${count} year ago', other: '${count} years ago')}";
 
-  static String m71(storageSaved) =>
+  static String m72(storageSaved) =>
       "You have successfully freed up ${storageSaved}!";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -936,6 +936,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "loadingModel":
             MessageLookupByLibrary.simpleMessage("Downloading models..."),
         "localGallery": MessageLookupByLibrary.simpleMessage("Local gallery"),
+        "localSyncErrorMessage": MessageLookupByLibrary.simpleMessage(
+            "Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team"),
         "location": MessageLookupByLibrary.simpleMessage("Location"),
         "locationName": MessageLookupByLibrary.simpleMessage("Location name"),
         "locationTagFeatureDescription": MessageLookupByLibrary.simpleMessage(
@@ -1597,7 +1599,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "upgrade": MessageLookupByLibrary.simpleMessage("Upgrade"),
         "uploadingFilesToAlbum":
             MessageLookupByLibrary.simpleMessage("Uploading files to album..."),
-        "uploadingMultipleMemories": m72,
+        "uploadingMultipleMemories": m67,
         "uploadingSingleMemory":
             MessageLookupByLibrary.simpleMessage("Preserving 1 memory..."),
         "upto50OffUntil4thDec": MessageLookupByLibrary.simpleMessage(
@@ -1613,7 +1615,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "useSelectedPhoto":
             MessageLookupByLibrary.simpleMessage("Use selected photo"),
         "usedSpace": MessageLookupByLibrary.simpleMessage("Used space"),
-        "validTill": m67,
+        "validTill": m68,
         "verificationFailedPleaseTryAgain":
             MessageLookupByLibrary.simpleMessage(
                 "Verification failed, please try again"),
@@ -1621,7 +1623,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Verification ID"),
         "verify": MessageLookupByLibrary.simpleMessage("Verify"),
         "verifyEmail": MessageLookupByLibrary.simpleMessage("Verify email"),
-        "verifyEmailID": m68,
+        "verifyEmailID": m69,
         "verifyIDLabel": MessageLookupByLibrary.simpleMessage("Verify"),
         "verifyPasskey": MessageLookupByLibrary.simpleMessage("Verify passkey"),
         "verifyPassword":
@@ -1656,12 +1658,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "weDontSupportEditingPhotosAndAlbumsThatYouDont":
             MessageLookupByLibrary.simpleMessage(
                 "We don\'t support editing photos and albums that you don\'t own yet"),
-        "weHaveSendEmailTo": m69,
+        "weHaveSendEmailTo": m70,
         "weakStrength": MessageLookupByLibrary.simpleMessage("Weak"),
         "welcomeBack": MessageLookupByLibrary.simpleMessage("Welcome back!"),
         "whatsNew": MessageLookupByLibrary.simpleMessage("What\'s new"),
         "yearly": MessageLookupByLibrary.simpleMessage("Yearly"),
-        "yearsAgo": m70,
+        "yearsAgo": m71,
         "yes": MessageLookupByLibrary.simpleMessage("Yes"),
         "yesCancel": MessageLookupByLibrary.simpleMessage("Yes, cancel"),
         "yesConvertToViewer":
@@ -1691,7 +1693,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "You cannot share with yourself"),
         "youDontHaveAnyArchivedItems": MessageLookupByLibrary.simpleMessage(
             "You don\'t have any archived items."),
-        "youHaveSuccessfullyFreedUp": m71,
+        "youHaveSuccessfullyFreedUp": m72,
         "yourAccountHasBeenDeleted": MessageLookupByLibrary.simpleMessage(
             "Your account has been deleted"),
         "yourMap": MessageLookupByLibrary.simpleMessage("Your map"),

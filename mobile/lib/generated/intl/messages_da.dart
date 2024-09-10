@@ -94,12 +94,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "invite": MessageLookupByLibrary.simpleMessage("Inviter"),
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
             "Hjælp os venligst med disse oplysninger"),
+        "localSyncErrorMessage": MessageLookupByLibrary.simpleMessage(
+            "Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team"),
         "loggingOut": MessageLookupByLibrary.simpleMessage("Logger ud..."),
         "longPressAnEmailToVerifyEndToEndEncryption":
             MessageLookupByLibrary.simpleMessage(
                 "Langt tryk på en e-mail for at bekræfte slutningen af krypteringen."),
-        "loopVideoOff": MessageLookupByLibrary.simpleMessage("Loop video off"),
-        "loopVideoOn": MessageLookupByLibrary.simpleMessage("Loop video on"),
         "manage": MessageLookupByLibrary.simpleMessage("Administrér"),
         "memoryCount": m0,
         "mlIndexingDescription": MessageLookupByLibrary.simpleMessage(

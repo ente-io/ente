@@ -41,8 +41,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("مفتاح الاسترداد غير صحيح"),
         "invalidEmailAddress": MessageLookupByLibrary.simpleMessage(
             "عنوان البريد الإلكتروني غير صالح"),
-        "loopVideoOff": MessageLookupByLibrary.simpleMessage("Loop video off"),
-        "loopVideoOn": MessageLookupByLibrary.simpleMessage("Loop video on"),
+        "localSyncErrorMessage": MessageLookupByLibrary.simpleMessage(
+            "Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team"),
         "noRecoveryKey":
             MessageLookupByLibrary.simpleMessage("ما من مفتاح استرداد؟"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(

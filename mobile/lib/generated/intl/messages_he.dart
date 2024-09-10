@@ -119,14 +119,14 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m65(email) => "זה מזהה האימות של ${email}";
 
-  static String m68(email) => "אמת ${email}";
+  static String m69(email) => "אמת ${email}";
 
-  static String m69(email) => "שלחנו דוא\"ל ל<green>${email}</green>";
+  static String m70(email) => "שלחנו דוא\"ל ל<green>${email}</green>";
 
-  static String m70(count) =>
+  static String m71(count) =>
       "${Intl.plural(count, one: 'לפני ${count} שנה', two: 'לפני ${count} שנים', many: 'לפני ${count} שנים', other: 'לפני ${count} שנים')}";
 
-  static String m71(storageSaved) => "הצלחת לפנות ${storageSaved}!";
+  static String m72(storageSaved) => "הצלחת לפנות ${storageSaved}!";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -544,6 +544,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "linkHasExpired":
             MessageLookupByLibrary.simpleMessage("הקישור פג תוקף"),
         "linkNeverExpires": MessageLookupByLibrary.simpleMessage("לעולם לא"),
+        "localSyncErrorMessage": MessageLookupByLibrary.simpleMessage(
+            "Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team"),
         "location": MessageLookupByLibrary.simpleMessage("מקום"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("נעל"),
         "lockscreen": MessageLookupByLibrary.simpleMessage("מסך נעילה"),
@@ -555,8 +557,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "longpressOnAnItemToViewInFullscreen":
             MessageLookupByLibrary.simpleMessage(
                 "לחץ לחיצה ארוכה על פריט על מנת לראות אותו במסך מלא"),
-        "loopVideoOff": MessageLookupByLibrary.simpleMessage("Loop video off"),
-        "loopVideoOn": MessageLookupByLibrary.simpleMessage("Loop video on"),
         "lostDevice": MessageLookupByLibrary.simpleMessage("איבדת את המכשיר?"),
         "manage": MessageLookupByLibrary.simpleMessage("נהל"),
         "manageDeviceStorage":
@@ -908,7 +908,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "verificationId": MessageLookupByLibrary.simpleMessage("מזהה אימות"),
         "verify": MessageLookupByLibrary.simpleMessage("אמת"),
         "verifyEmail": MessageLookupByLibrary.simpleMessage("אימות דוא\"ל"),
-        "verifyEmailID": m68,
+        "verifyEmailID": m69,
         "verifyIDLabel": MessageLookupByLibrary.simpleMessage("אמת"),
         "verifyPassword": MessageLookupByLibrary.simpleMessage("אמת סיסמא"),
         "verifyingRecoveryKey":
@@ -925,11 +925,11 @@ class MessageLookup extends MessageLookupByLibrary {
             "אנא בקר ב-web.ente.io על מנת לנהל את המנוי שלך"),
         "weAreOpenSource":
             MessageLookupByLibrary.simpleMessage("הקוד שלנו פתוח!"),
-        "weHaveSendEmailTo": m69,
+        "weHaveSendEmailTo": m70,
         "weakStrength": MessageLookupByLibrary.simpleMessage("חלשה"),
         "welcomeBack": MessageLookupByLibrary.simpleMessage("ברוך שובך!"),
         "yearly": MessageLookupByLibrary.simpleMessage("שנתי"),
-        "yearsAgo": m70,
+        "yearsAgo": m71,
         "yes": MessageLookupByLibrary.simpleMessage("כן"),
         "yesCancel": MessageLookupByLibrary.simpleMessage("כן, בטל"),
         "yesConvertToViewer":
@@ -952,7 +952,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "אתה לא יכול לשנמך לתוכנית הזו"),
         "youCannotShareWithYourself":
             MessageLookupByLibrary.simpleMessage("אתה לא יכול לשתף עם עצמך"),
-        "youHaveSuccessfullyFreedUp": m71,
+        "youHaveSuccessfullyFreedUp": m72,
         "yourAccountHasBeenDeleted":
             MessageLookupByLibrary.simpleMessage("החשבון שלך נמחק"),
         "yourPlanWasSuccessfullyDowngraded":

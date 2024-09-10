@@ -203,16 +203,16 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m66(count) =>
       "${Intl.plural(count, zero: '', one: '1 день', other: '${count} дней')}";
 
-  static String m67(endDate) => "Действителен по ${endDate}";
+  static String m68(endDate) => "Действителен по ${endDate}";
 
-  static String m68(email) => "Подтвердить ${email}";
+  static String m69(email) => "Подтвердить ${email}";
 
-  static String m69(email) => "Мы отправили письмо на <green>${email}</green>";
+  static String m70(email) => "Мы отправили письмо на <green>${email}</green>";
 
-  static String m70(count) =>
+  static String m71(count) =>
       "${Intl.plural(count, one: '${count} год назад', other: '${count} лет назад')}";
 
-  static String m71(storageSaved) => "Вы успешно освободили ${storageSaved}!";
+  static String m72(storageSaved) => "Вы успешно освободили ${storageSaved}!";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -953,6 +953,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Загрузка моделей..."),
         "localGallery":
             MessageLookupByLibrary.simpleMessage("Локальная галерея"),
+        "localSyncErrorMessage": MessageLookupByLibrary.simpleMessage(
+            "Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team"),
         "location": MessageLookupByLibrary.simpleMessage("Местоположение"),
         "locationName":
             MessageLookupByLibrary.simpleMessage("Название локации"),
@@ -978,8 +980,6 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Длительное нажатие на email для подтверждения сквозного шифрования."),
         "longpressOnAnItemToViewInFullscreen": MessageLookupByLibrary.simpleMessage(
             "Удерживайте нажатие на элемент для просмотра в полноэкранном режиме"),
-        "loopVideoOff": MessageLookupByLibrary.simpleMessage("Loop video off"),
-        "loopVideoOn": MessageLookupByLibrary.simpleMessage("Loop video on"),
         "lostDevice":
             MessageLookupByLibrary.simpleMessage("Потеряли свое устройство?"),
         "machineLearning":
@@ -1663,7 +1663,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "useSelectedPhoto":
             MessageLookupByLibrary.simpleMessage("Использовать выбранное фото"),
         "usedSpace": MessageLookupByLibrary.simpleMessage("Использовано места"),
-        "validTill": m67,
+        "validTill": m68,
         "verificationFailedPleaseTryAgain":
             MessageLookupByLibrary.simpleMessage(
                 "Проверка не удалась, попробуйте еще раз"),
@@ -1672,7 +1672,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "verify": MessageLookupByLibrary.simpleMessage("Подтвердить"),
         "verifyEmail": MessageLookupByLibrary.simpleMessage(
             "Подтвердить электронную почту"),
-        "verifyEmailID": m68,
+        "verifyEmailID": m69,
         "verifyIDLabel": MessageLookupByLibrary.simpleMessage("Подтверждение"),
         "verifyPasskey":
             MessageLookupByLibrary.simpleMessage("Подтвердить ключ"),
@@ -1707,12 +1707,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "weDontSupportEditingPhotosAndAlbumsThatYouDont":
             MessageLookupByLibrary.simpleMessage(
                 "Мы не можем поддержать редактирование фотографий и альбомов, которыми вы не владеете"),
-        "weHaveSendEmailTo": m69,
+        "weHaveSendEmailTo": m70,
         "weakStrength": MessageLookupByLibrary.simpleMessage("Слабый"),
         "welcomeBack": MessageLookupByLibrary.simpleMessage("С возвращением!"),
         "whatsNew": MessageLookupByLibrary.simpleMessage("Что нового"),
         "yearly": MessageLookupByLibrary.simpleMessage("Ежегодно"),
-        "yearsAgo": m70,
+        "yearsAgo": m71,
         "yes": MessageLookupByLibrary.simpleMessage("Да"),
         "yesCancel": MessageLookupByLibrary.simpleMessage("Да, отменить"),
         "yesConvertToViewer":
@@ -1742,7 +1742,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Вы не можете поделиться с самим собой"),
         "youDontHaveAnyArchivedItems": MessageLookupByLibrary.simpleMessage(
             "У вас нет архивных элементов."),
-        "youHaveSuccessfullyFreedUp": m71,
+        "youHaveSuccessfullyFreedUp": m72,
         "yourAccountHasBeenDeleted": MessageLookupByLibrary.simpleMessage(
             "Ваша учетная запись была удалена"),
         "yourMap": MessageLookupByLibrary.simpleMessage("Ваша карта"),

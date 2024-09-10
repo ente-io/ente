@@ -75,8 +75,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("अमान्य ईमेल ऐड्रेस"),
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
             "कृपया हमें इस जानकारी के लिए सहायता करें"),
-        "loopVideoOff": MessageLookupByLibrary.simpleMessage("Loop video off"),
-        "loopVideoOn": MessageLookupByLibrary.simpleMessage("Loop video on"),
+        "localSyncErrorMessage": MessageLookupByLibrary.simpleMessage(
+            "Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team"),
         "noRecoveryKey":
             MessageLookupByLibrary.simpleMessage("रिकवरी कुंजी नहीं है?"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(

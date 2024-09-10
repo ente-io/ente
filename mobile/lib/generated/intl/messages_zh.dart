@@ -189,18 +189,18 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m66(count) =>
       "${Intl.plural(count, zero: '', one: '1天', other: '${count} 天')}";
 
-  static String m72(count) => "正在保存 ${count} 个回忆...";
+  static String m67(count) => "正在保存 ${count} 个回忆...";
 
-  static String m67(endDate) => "有效期至 ${endDate}";
+  static String m68(endDate) => "有效期至 ${endDate}";
 
-  static String m68(email) => "验证 ${email}";
+  static String m69(email) => "验证 ${email}";
 
-  static String m69(email) => "我们已经发送邮件到 <green>${email}</green>";
+  static String m70(email) => "我们已经发送邮件到 <green>${email}</green>";
 
-  static String m70(count) =>
+  static String m71(count) =>
       "${Intl.plural(count, one: '${count} 年前', other: '${count} 年前')}";
 
-  static String m71(storageSaved) => "您已成功释放了 ${storageSaved}！";
+  static String m72(storageSaved) => "您已成功释放了 ${storageSaved}！";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -724,7 +724,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "incorrectRecoveryKeyBody":
             MessageLookupByLibrary.simpleMessage("您输入的恢复密钥不正确"),
         "incorrectRecoveryKeyTitle":
-            MessageLookupByLibrary.simpleMessage("不正确的恢复密钥"),
+            MessageLookupByLibrary.simpleMessage("恢复密钥不正确"),
         "indexedItems": MessageLookupByLibrary.simpleMessage("已索引项目"),
         "indexingIsPaused":
             MessageLookupByLibrary.simpleMessage("索引已暂停。当设备准备就绪时，它将自动恢复。"),
@@ -797,6 +797,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "loadingMessage": MessageLookupByLibrary.simpleMessage("正在加载您的照片..."),
         "loadingModel": MessageLookupByLibrary.simpleMessage("正在下载模型..."),
         "localGallery": MessageLookupByLibrary.simpleMessage("本地相册"),
+        "localSyncErrorMessage": MessageLookupByLibrary.simpleMessage(
+            "Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team"),
         "location": MessageLookupByLibrary.simpleMessage("地理位置"),
         "locationName": MessageLookupByLibrary.simpleMessage("地点名称"),
         "locationTagFeatureDescription":
@@ -818,8 +820,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("长按电子邮件以验证端到端加密。"),
         "longpressOnAnItemToViewInFullscreen":
             MessageLookupByLibrary.simpleMessage("长按一个项目来全屏查看"),
-        "loopVideoOff": MessageLookupByLibrary.simpleMessage("Loop video off"),
-        "loopVideoOn": MessageLookupByLibrary.simpleMessage("Loop video on"),
+        "loopVideoOff": MessageLookupByLibrary.simpleMessage("循环播放视频关闭"),
+        "loopVideoOn": MessageLookupByLibrary.simpleMessage("循环播放视频开启"),
         "lostDevice": MessageLookupByLibrary.simpleMessage("设备丢失？"),
         "machineLearning": MessageLookupByLibrary.simpleMessage("机器学习"),
         "magicSearch": MessageLookupByLibrary.simpleMessage("魔法搜索"),
@@ -1342,7 +1344,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "upgrade": MessageLookupByLibrary.simpleMessage("升级"),
         "uploadingFilesToAlbum":
             MessageLookupByLibrary.simpleMessage("正在将文件上传到相册..."),
-        "uploadingMultipleMemories": m72,
+        "uploadingMultipleMemories": m67,
         "uploadingSingleMemory":
             MessageLookupByLibrary.simpleMessage("正在保存 1 个回忆..."),
         "upto50OffUntil4thDec":
@@ -1355,13 +1357,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "useRecoveryKey": MessageLookupByLibrary.simpleMessage("使用恢复密钥"),
         "useSelectedPhoto": MessageLookupByLibrary.simpleMessage("使用所选照片"),
         "usedSpace": MessageLookupByLibrary.simpleMessage("已用空间"),
-        "validTill": m67,
+        "validTill": m68,
         "verificationFailedPleaseTryAgain":
             MessageLookupByLibrary.simpleMessage("验证失败，请重试"),
         "verificationId": MessageLookupByLibrary.simpleMessage("验证 ID"),
         "verify": MessageLookupByLibrary.simpleMessage("验证"),
         "verifyEmail": MessageLookupByLibrary.simpleMessage("验证电子邮件"),
-        "verifyEmailID": m68,
+        "verifyEmailID": m69,
         "verifyIDLabel": MessageLookupByLibrary.simpleMessage("验证"),
         "verifyPasskey": MessageLookupByLibrary.simpleMessage("验证通行密钥"),
         "verifyPassword": MessageLookupByLibrary.simpleMessage("验证密码"),
@@ -1389,12 +1391,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "weAreOpenSource": MessageLookupByLibrary.simpleMessage("我们是开源的 ！"),
         "weDontSupportEditingPhotosAndAlbumsThatYouDont":
             MessageLookupByLibrary.simpleMessage("我们不支持编辑您尚未拥有的照片和相册"),
-        "weHaveSendEmailTo": m69,
+        "weHaveSendEmailTo": m70,
         "weakStrength": MessageLookupByLibrary.simpleMessage("弱"),
         "welcomeBack": MessageLookupByLibrary.simpleMessage("欢迎回来！"),
         "whatsNew": MessageLookupByLibrary.simpleMessage("更新日志"),
         "yearly": MessageLookupByLibrary.simpleMessage("每年"),
-        "yearsAgo": m70,
+        "yearsAgo": m71,
         "yes": MessageLookupByLibrary.simpleMessage("是"),
         "yesCancel": MessageLookupByLibrary.simpleMessage("是的，取消"),
         "yesConvertToViewer": MessageLookupByLibrary.simpleMessage("是的，转换为查看者"),
@@ -1420,7 +1422,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("莫开玩笑，您不能与自己分享"),
         "youDontHaveAnyArchivedItems":
             MessageLookupByLibrary.simpleMessage("您没有任何存档的项目。"),
-        "youHaveSuccessfullyFreedUp": m71,
+        "youHaveSuccessfullyFreedUp": m72,
         "yourAccountHasBeenDeleted":
             MessageLookupByLibrary.simpleMessage("您的账户已删除"),
         "yourMap": MessageLookupByLibrary.simpleMessage("您的地图"),

@@ -1275,5 +1275,6 @@
   "guestViewEnablePreSteps": "Per abilitare la vista ospite, configura il codice di accesso del dispositivo o il blocco schermo nelle impostazioni di sistema.",
   "appLockDescriptions": "Scegli tra la schermata di blocco predefinita del dispositivo e una schermata di blocco personalizzata con PIN o password.",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Per abilitare il blocco dell'app, configura il codice di accesso del dispositivo o il blocco schermo nelle impostazioni di sistema.",
-  "authToViewPasskey": "Autenticati per visualizzare le tue passkey"
+  "authToViewPasskey": "Autenticati per visualizzare le tue passkey",
+  "localSyncErrorMessage": "Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team"
 }

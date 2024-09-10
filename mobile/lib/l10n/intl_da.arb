@@ -84,5 +84,6 @@
   "longPressAnEmailToVerifyEndToEndEncryption": "Langt tryk på en e-mail for at bekræfte slutningen af krypteringen.",
   "developerSettingsWarning": "Er du sikker på, at du vil ændre udviklerindstillingerne?",
   "next": "Næste",
-  "enterPin": "Indtast PIN"
+  "enterPin": "Indtast PIN",
+  "localSyncErrorMessage": "Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team"
 }

@@ -1310,5 +1310,6 @@
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Pour activer le verrouillage d'application, veuillez configurer le code d'accès de l'appareil ou le verrouillage de l'écran dans les paramètres de votre système.",
   "authToViewPasskey": "Veuillez vous authentifier pour afficher votre clé de récupération",
   "loopVideoOn": "Vidéo en boucle activée",
-  "loopVideoOff": "Vidéo en boucle désactivée"
+  "loopVideoOff": "Vidéo en boucle désactivée",
+  "localSyncErrorMessage": "Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team"
 }
