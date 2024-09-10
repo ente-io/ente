@@ -9445,16 +9445,6 @@ class S {
     );
   }
 
-  /// `Choose between your device's default lock screen and a custom lock screen with a PIN or password.`
-  String get appLockDescriptions {
-    return Intl.message(
-      'Choose between your device\'s default lock screen and a custom lock screen with a PIN or password.',
-      name: 'appLockDescriptions',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Create a link where your friends can upload photos in original quality.`
   String get collectPhotosDescription {
     return Intl.message(
@@ -9465,21 +9455,31 @@ class S {
     );
   }
 
-  /// `To enable app lock, please setup device passcode or screen lock in your system settings.`
-  String get toEnableAppLockPleaseSetupDevicePasscodeOrScreen {
-    return Intl.message(
-      'To enable app lock, please setup device passcode or screen lock in your system settings.',
-      name: 'toEnableAppLockPleaseSetupDevicePasscodeOrScreen',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Collect`
   String get collect {
     return Intl.message(
       'Collect',
       name: 'collect',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Choose between your device's default lock screen and a custom lock screen with a PIN or password.`
+  String get appLockDescriptions {
+    return Intl.message(
+      'Choose between your device\'s default lock screen and a custom lock screen with a PIN or password.',
+      name: 'appLockDescriptions',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `To enable app lock, please setup device passcode or screen lock in your system settings.`
+  String get toEnableAppLockPleaseSetupDevicePasscodeOrScreen {
+    return Intl.message(
+      'To enable app lock, please setup device passcode or screen lock in your system settings.',
+      name: 'toEnableAppLockPleaseSetupDevicePasscodeOrScreen',
       desc: '',
       args: [],
     );
@@ -9520,6 +9520,16 @@ class S {
     return Intl.message(
       'Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team',
       name: 'localSyncErrorMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Show person`
+  String get showPerson {
+    return Intl.message(
+      'Show person',
+      name: 'showPerson',
       desc: '',
       args: [],
     );

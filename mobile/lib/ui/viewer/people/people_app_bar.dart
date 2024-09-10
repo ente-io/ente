@@ -199,15 +199,15 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
     } else {
       items.addAll(
         [
-          const PopupMenuItem(
+          PopupMenuItem(
             value: PeoplePopupAction.unignore,
             child: Row(
               children: [
-                Icon(Icons.visibility_outlined),
-                Padding(
+                const Icon(Icons.visibility_outlined),
+                const Padding(
                   padding: EdgeInsets.all(8),
                 ),
-                Text("Show person"),
+                Text(S.of(context).showPerson),
               ],
             ),
           ),

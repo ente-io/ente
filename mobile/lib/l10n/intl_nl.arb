@@ -1318,5 +1318,6 @@
   "authToViewPasskey": "Verifieer uzelf om uw toegangssleutel te bekijken",
   "loopVideoOn": "Video in lus afspelen aan",
   "loopVideoOff": "Video in lus afspelen uit",
-  "localSyncErrorMessage": "Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team"
+  "localSyncErrorMessage": "Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team",
+  "showPerson": "Show person"
 }

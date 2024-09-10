@@ -25,6 +25,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "enterYourEmailAddress": MessageLookupByLibrary.simpleMessage(
             "Εισάγετε την διεύθυνση ηλ. ταχυδρομείου σας"),
         "localSyncErrorMessage": MessageLookupByLibrary.simpleMessage(
-            "Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team")
+            "Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team"),
+        "showPerson": MessageLookupByLibrary.simpleMessage("Show person")
       };
 }

@@ -20,6 +20,12 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'cs';
 
+  static String m0(count) =>
+      "${Intl.plural(count, zero: 'Add collaborator', one: 'Add collaborator', other: 'Add collaborators')}";
+
+  static String m1(count) =>
+      "${Intl.plural(count, zero: 'Add viewer', one: 'Add viewer', other: 'Add viewers')}";
+
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "addCollaborators": m0,
@@ -27,8 +33,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Add to hidden album"),
         "addViewers": m1,
         "appLock": MessageLookupByLibrary.simpleMessage("App lock"),
-        "appLockDescription": MessageLookupByLibrary.simpleMessage(
-            "Choose between your device\\\'s default lock screen and a custom lock screen with a PIN or password."),
         "autoLock": MessageLookupByLibrary.simpleMessage("Auto lock"),
         "autoLockFeatureDescription": MessageLookupByLibrary.simpleMessage(
             "Time after which the app locks after being put in the background"),
@@ -70,6 +74,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "indexingIsPaused": MessageLookupByLibrary.simpleMessage(
             "Indexing is paused, will automatically resume when device is ready"),
         "joinDiscord": MessageLookupByLibrary.simpleMessage("Join Discord"),
+        "localSyncErrorMessage": MessageLookupByLibrary.simpleMessage(
+            "Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team"),
         "locations": MessageLookupByLibrary.simpleMessage("Locations"),
         "longPressAnEmailToVerifyEndToEndEncryption":
             MessageLookupByLibrary.simpleMessage(
@@ -106,6 +112,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "setNewPassword":
             MessageLookupByLibrary.simpleMessage("Set new password"),
         "setNewPin": MessageLookupByLibrary.simpleMessage("Set new PIN"),
+        "showPerson": MessageLookupByLibrary.simpleMessage("Show person"),
         "tapToUnlock": MessageLookupByLibrary.simpleMessage("Tap to unlock"),
         "thisWillRemovePublicLinksOfAllSelectedQuickLinks":
             MessageLookupByLibrary.simpleMessage(
@@ -116,7 +123,5 @@ class MessageLookup extends MessageLookupByLibrary {
         "tooManyIncorrectAttempts":
             MessageLookupByLibrary.simpleMessage("Too many incorrect attempts"),
         "yourMap": MessageLookupByLibrary.simpleMessage("Your map")
-        "localSyncErrorMessage": MessageLookupByLibrary.simpleMessage(
-            "Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team")
       };
 }

@@ -20,7 +20,7 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'th';
 
-  static String m4(count) => "${Intl.plural(count, other: 'เพิ่มรายการ')}";
+  static String m5(count) => "${Intl.plural(count, other: 'เพิ่มรายการ')}";
 
   static String m10(versionValue) => "รุ่น: ${versionValue}";
 
@@ -60,7 +60,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "addANewEmail": MessageLookupByLibrary.simpleMessage("เพิ่มอีเมลใหม่"),
         "addCollaborator":
             MessageLookupByLibrary.simpleMessage("เพิ่มผู้ทำงานร่วมกัน"),
-        "addItem": m4,
+        "addItem": m5,
         "addMore": MessageLookupByLibrary.simpleMessage("เพิ่มอีก"),
         "addToAlbum": MessageLookupByLibrary.simpleMessage("เพิ่มไปยังอัลบั้ม"),
         "addViewer": MessageLookupByLibrary.simpleMessage("เพิ่มผู้ชม"),
@@ -299,6 +299,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "share": MessageLookupByLibrary.simpleMessage("แชร์"),
         "shareALink": MessageLookupByLibrary.simpleMessage("แชร์​ลิงก์"),
         "shareLink": MessageLookupByLibrary.simpleMessage("แชร์​ลิงก์"),
+        "showPerson": MessageLookupByLibrary.simpleMessage("Show person"),
         "signUpTerms": MessageLookupByLibrary.simpleMessage(
             "ฉันยอมรับ<u-terms>เงื่อนไขการให้บริการ</u-terms>และ<u-policy>นโยบายความเป็นส่วนตัว</u-policy>"),
         "skip": MessageLookupByLibrary.simpleMessage("ข้าม"),

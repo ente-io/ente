@@ -344,6 +344,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "عکس‌های جدید به اشتراک گذاشته شده"),
         "sharedPhotoNotificationsExplanation": MessageLookupByLibrary.simpleMessage(
             "هنگامی که شخصی عکسی را به آلبوم مشترکی که شما بخشی از آن هستید اضافه می‌کند، آگاه‌سازی دریافت می‌کنید"),
+        "showPerson": MessageLookupByLibrary.simpleMessage("Show person"),
         "signUpTerms": MessageLookupByLibrary.simpleMessage(
             "من با <u-terms>شرایط خدمات</u-terms> و <u-policy>سیاست حفظ حریم خصوصی</u-policy> موافقم"),
         "skip": MessageLookupByLibrary.simpleMessage("رد کردن"),
