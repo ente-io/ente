@@ -20,13 +20,15 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
   final _logger = Logger("NotificationService");
 
-  Future<void> init(
+  void init(SharedPreferences preferences) {
+    _preferences = preferences;
+  }
+
+  Future<void> initialize(
     void Function(
       NotificationResponse notificationResponse,
     ) onNotificationTapped,
-    SharedPreferences preferences,
   ) async {
-    _preferences = preferences;
     const androidSettings = AndroidInitializationSettings('notification_icon');
     const iosSettings = DarwinInitializationSettings(
       requestAlertPermission: false,

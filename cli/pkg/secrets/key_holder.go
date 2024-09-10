@@ -18,6 +18,9 @@ type KeyHolder struct {
 }
 
 func NewKeyHolder(deviceKey []byte) *KeyHolder {
+	if len(deviceKey) != 32 {
+		panic(fmt.Sprintf("device key must be 32 bytes, found: %d bytes", len(deviceKey)))
+	}
 	return &KeyHolder{
 		AccountSecrets: make(map[string]*model.AccSecretInfo),
 		CollectionKeys: make(map[string][]byte),

@@ -9,6 +9,7 @@ import "package:photos/db/upload_locks_db.dart";
 import "package:photos/models/encryption_result.dart";
 import "package:photos/module/upload/model/multipart.dart";
 import "package:photos/module/upload/model/xml.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/utils/crypto_util.dart";
 
@@ -51,16 +52,13 @@ class MultiPartUploader {
   }
 
   int get multipartPartSizeForUpload {
-    if (_featureFlagService.internalUser) {
-      return multipartPartSizeInternal;
-    }
     return multipartPartSize;
   }
 
   Future<int> calculatePartCount(int fileSize) async {
-    // Multipart upload is only enabled for internal users
-    // and debug builds till it's battle tested.
-    if (!_featureFlagService.internalUser) return 1;
+    // If the feature flag is disabled, return 1
+    if (!_featureFlagService.enableMobMultiPart) return 1;
+    if (!localSettings.userEnabledMultiplePart) return 1;
 
     final partCount = (fileSize / multipartPartSizeForUpload).ceil();
     return partCount;
@@ -150,10 +148,11 @@ class MultiPartUploader {
   Future<String> putMultipartFile(
     MultipartUploadURLs urls,
     File encryptedFile,
+    int fileSize,
   ) async {
     // upload individual parts and get their etags
     final etags = await _uploadParts(
-      MultipartInfo(urls: urls),
+      MultipartInfo(urls: urls, encFileSize: fileSize),
       encryptedFile,
     );
 
@@ -182,6 +181,11 @@ class MultiPartUploader {
     }
 
     final int encFileLength = encryptedFile.lengthSync();
+    if (encFileLength != partInfo.encFileSize) {
+      throw Exception(
+        "File size mismatch. Expected ${partInfo.encFileSize} but got $encFileLength",
+      );
+    }
     // Start parts upload
     int count = 0;
     while (i < partsLength) {

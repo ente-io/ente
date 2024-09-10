@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import "package:photos/face/model/person.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/gallery_type.dart';
+import "package:photos/models/ml/face/person.dart";
 import 'package:photos/models/selected_files.dart';
 import "package:photos/theme/effects.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -14,7 +14,7 @@ class FileSelectionOverlayBar extends StatefulWidget {
   final Collection? collection;
   final Color? backgroundColor;
   final PersonEntity? person;
-  final int? clusterID;
+  final String? clusterID;
 
   const FileSelectionOverlayBar(
     this.galleryType,

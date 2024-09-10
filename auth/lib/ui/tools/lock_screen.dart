@@ -40,10 +40,6 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
     invalidAttemptCount = _lockscreenSetting.getInvalidAttemptCount();
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      if (isNonMobileIOSDevice()) {
-        _logger.info('ignore init for non mobile iOS device');
-        return;
-      }
       _showLockScreen(source: "postFrameInit");
     });
     _platformBrightness =
@@ -190,14 +186,6 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
     );
   }
 
-  bool isNonMobileIOSDevice() {
-    if (Platform.isAndroid) {
-      return false;
-    }
-    var shortestSide = MediaQuery.of(context).size.shortestSide;
-    return shortestSide > 600 ? true : false;
-  }
-
   void _onLogoutTapped(BuildContext context) {
     showChoiceActionSheet(
       context,
@@ -206,6 +194,8 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
       isCritical: true,
       firstButtonOnTap: () async {
         await UserService.instance.logout(context);
+        // To start the app afresh, resetting all state.
+        Process.killPid(pid, ProcessSignal.sigkill);
       },
     );
   }

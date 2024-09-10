@@ -34,6 +34,21 @@ func (t BonusType) ExtendsExpiry() bool {
 	}
 }
 
+func BonusFromType(bonusType string) BonusType {
+	switch bonusType {
+	case "REFERRAL":
+		return Referral
+	case "SIGN_UP":
+		return SignUp
+	case "ADD_ON_SUPPORT":
+		return AddOnSupport
+	case "ADD_ON_BF_2023":
+		return AddOnBf2023
+	default:
+		return ""
+	}
+}
+
 // RestrictToDoublingStorage returns true if the bonus type restricts the doubling of storage.
 // This indicates, the usable bonus storage should not exceed the current plan storage.
 // Note: Current plan storage includes both base subscription and storage bonus that can ExtendsExpiry

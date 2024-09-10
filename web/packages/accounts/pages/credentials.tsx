@@ -1,5 +1,6 @@
 import { sharedCryptoWorker } from "@/base/crypto";
 import type { B64EncryptionResult } from "@/base/crypto/libsodium";
+import { clearLocalStorage } from "@/base/local-storage";
 import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
@@ -22,10 +23,8 @@ import {
     saveKeyInSessionStore,
 } from "@ente/shared/crypto/helpers";
 import { CustomError } from "@ente/shared/error";
-import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import {
     LS_KEYS,
-    clearData,
     getData,
     setData,
     setLSUser,
@@ -52,7 +51,11 @@ import {
     openPasskeyVerificationURL,
     passkeyVerificationRedirectURL,
 } from "../services/passkey";
-import { appHomeRoute } from "../services/redirect";
+import {
+    appHomeRoute,
+    stashRedirect,
+    unstashRedirect,
+} from "../services/redirect";
 import { checkSessionValidity } from "../services/session";
 import {
     configureSRP,
@@ -125,9 +128,9 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             const electron = globalThis.electron;
             if (!key && electron) {
                 try {
-                    key = await electron.encryptionKey();
+                    key = await electron.masterKeyB64();
                 } catch (e) {
-                    log.error("Failed to get encryption key from electron", e);
+                    log.error("Failed to read master key from safe storage", e);
                 }
                 if (key) {
                     await saveKeyInSessionStore(
@@ -177,7 +180,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     (!user?.token && !user?.encryptedToken) ||
                     (keyAttributes && !keyAttributes.memLimit)
                 ) {
-                    clearData();
+                    clearLocalStorage();
                     router.push("/");
                     return;
                 }
@@ -231,7 +234,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                         isTwoFactorEnabled: true,
                         isTwoFactorPasskeysEnabled: true,
                     });
-                    InMemoryStore.set(MS_KEYS.REDIRECT_URL, "/");
+                    stashRedirect("/");
                     const url =
                         passkeyVerificationRedirectURL(passkeySessionID);
                     setPasskeyVerificationData({ passkeySessionID, url });
@@ -312,9 +315,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             } catch (e) {
                 log.error("migrate to srp failed", e);
             }
-            const redirectURL = InMemoryStore.get(MS_KEYS.REDIRECT_URL);
-            InMemoryStore.delete(MS_KEYS.REDIRECT_URL);
-            router.push(redirectURL ?? appHomeRoute);
+            router.push(unstashRedirect() ?? appHomeRoute);
         } catch (e) {
             log.error("useMasterPassword failed", e);
         }

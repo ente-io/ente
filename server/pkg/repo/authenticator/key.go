@@ -21,6 +21,9 @@ func (r *Repository) CreateKey(ctx context.Context, userID int64, entry model.Cr
 		entry.Header)
 
 	if err != nil {
+		if err.Error() == "pq: duplicate key value violates unique constraint \"authenticator_key_pkey\"" {
+			return ente.NewConflictError("Key already exists")
+		}
 		return stacktrace.Propagate(err, "Failed to createTotpEntry")
 	}
 	return nil

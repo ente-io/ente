@@ -2,7 +2,7 @@ import "dart:typed_data" show Uint8List;
 
 class FaceDbInfoForClustering {
   final String faceID;
-  int? clusterId;
+  String? clusterId;
   final Uint8List embeddingBytes;
   final double faceScore;
   final double blurValue;

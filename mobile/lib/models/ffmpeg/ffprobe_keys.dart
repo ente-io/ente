@@ -73,6 +73,7 @@ class FFProbeKeys {
   static const sideDataList = 'side_data_list';
   static const rotation = 'rotation';
   static const sideDataType = 'side_data_type';
+  static const sampleAspectRatio = 'sample_aspect_ratio';
 }
 
 class MediaStreamTypes {

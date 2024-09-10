@@ -1,21 +1,28 @@
 import { expose } from "comlink";
-import type { StateAddress } from "libsodium-wrappers";
+import type { StateAddress } from "libsodium-wrappers-sumo";
 import * as ei from "./ente-impl";
 import * as libsodium from "./libsodium";
 
 /**
  * A web worker that exposes some of the functions defined in either the Ente
- * specific layer (crypto/ente.ts) or the libsodium layer (crypto/libsodium.ts).
+ * specific layer (@/base/crypto) or the libsodium layer
+ * (@/base/crypto/libsodium.ts).
  *
  * See: [Note: Crypto code hierarchy].
  *
  * Note: Keep these methods logic free. They are meant to be trivial proxies.
  */
 export class CryptoWorker {
+    encryptBoxB64 = ei._encryptBoxB64;
     encryptThumbnail = ei._encryptThumbnail;
+    encryptMetadataJSON_New = ei._encryptMetadataJSON_New;
     encryptMetadataJSON = ei._encryptMetadataJSON;
+    decryptBox = ei._decryptBox;
+    decryptBoxB64 = ei._decryptBoxB64;
+    decryptBlob = ei._decryptBlob;
+    decryptBlobB64 = ei._decryptBlobB64;
     decryptThumbnail = ei._decryptThumbnail;
-    decryptAssociatedB64Data = ei._decryptAssociatedB64Data;
+    decryptMetadataJSON_New = ei._decryptMetadataJSON_New;
     decryptMetadataJSON = ei._decryptMetadataJSON;
 
     // TODO: -- AUDIT BELOW --

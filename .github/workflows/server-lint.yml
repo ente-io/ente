@@ -1,9 +1,8 @@
 name: "Lint (server)"
 
 on:
-    # Run on every push to a branch other than main that changes server/
-    push:
-        branches-ignore: [main]
+    # Run on every pull request (open or push to it) that changes server/
+    pull_request:
         paths:
             - "server/**"
             - ".github/workflows/server-lint.yml"
@@ -21,7 +20,8 @@ jobs:
             - name: Setup go
               uses: actions/setup-go@v5
               with:
-                  go-version-file: "server/go.mod"
+                  go-version-file: server/go.mod
+                  cache-dependency-path: server/go.sum
                   cache: true
 
             - name: Install dependencies

@@ -3,8 +3,8 @@ import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option"
 import TickIcon from "@mui/icons-material/Done";
 import SortIcon from "@mui/icons-material/Sort";
 import SvgIcon from "@mui/material/SvgIcon";
-import { COLLECTION_LIST_SORT_BY } from "constants/collection";
 import { t } from "i18next";
+import { COLLECTION_LIST_SORT_BY } from "utils/collection";
 
 interface CollectionSortProps {
     setSortBy: (sortBy: COLLECTION_LIST_SORT_BY) => void;

@@ -12,3 +12,7 @@ func ShouldRetrySync(err error) bool {
 	return strings.Contains(err.Error(), "read tcp") ||
 		strings.Contains(err.Error(), "dial tcp")
 }
+
+func IsBadTimeStampError(err error) bool {
+	return strings.Contains(err.Error(), "year outside of range ")
+}

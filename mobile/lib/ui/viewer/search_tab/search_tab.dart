@@ -8,6 +8,7 @@ import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/index_of_indexed_stack.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/models/search/search_types.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/states/all_sections_examples_state.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/search/result/no_result_widget.dart";
@@ -21,7 +22,6 @@ import "package:photos/ui/viewer/search_tab/locations_section.dart";
 import "package:photos/ui/viewer/search_tab/magic_section.dart";
 import "package:photos/ui/viewer/search_tab/moments_section.dart";
 import "package:photos/ui/viewer/search_tab/people_section.dart";
-import "package:photos/utils/local_settings.dart";
 
 class SearchTab extends StatefulWidget {
   const SearchTab({Key? key}) : super(key: key);
@@ -115,7 +115,7 @@ class _AllSearchSectionsState extends State<AllSearchSections> {
                   itemBuilder: (context, index) {
                     switch (searchTypes[index]) {
                       case SectionType.face:
-                        if (!LocalSettings.instance.isFaceIndexingEnabled) {
+                        if (!localSettings.isMLIndexingEnabled) {
                           return const SizedBox.shrink();
                         }
                         return PeopleSection(

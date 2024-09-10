@@ -1,9 +1,7 @@
 package ente
 
 const (
-	PhotosOTTTemplate = "ott_photos.html"
-
-	AuthOTTTemplate = "ott_auth.html"
+	OTTTemplate = "ott.html"
 
 	ChangeEmailOTTTemplate = "ott_change_email.html"
 	EmailChangedTemplate   = "email_changed.html"

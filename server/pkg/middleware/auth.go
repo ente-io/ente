@@ -1,7 +1,10 @@
 package middleware
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"net/http"
 	"strconv"
 
@@ -48,6 +51,11 @@ func (m *AuthMiddleware) TokenAuthMiddleware(jwtClaimScope *jwt.ClaimScope) gin.
 				userID, err = m.UserController.ValidateJWTToken(token, *jwtClaimScope)
 			} else {
 				userID, err = m.UserAuthRepo.GetUserIDWithToken(token, app)
+				if err != nil && !errors.Is(err, sql.ErrNoRows) {
+					logrus.Errorf("Failed to validate token: %s", err)
+					c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "failed to validate token"})
+					return
+				}
 			}
 			if err != nil {
 				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
@@ -79,6 +87,14 @@ func (m *AuthMiddleware) AdminAuthMiddleware() gin.HandlerFunc {
 		admins := viper.GetIntSlice("internal.admins")
 		for _, admin := range admins {
 			if int64(admin) == userID {
+				c.Next()
+				return
+			}
+		}
+		// if no admins are set, then check if the user is first user in the system
+		if len(admins) == 0 {
+			id, err := m.UserAuthRepo.GetMinUserID()
+			if err != nil && id == userID {
 				c.Next()
 				return
 			}

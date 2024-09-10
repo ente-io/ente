@@ -141,6 +141,12 @@ var ErrNotFoundError = ApiError{
 	HttpStatusCode: http.StatusNotFound,
 }
 
+var ErrUserNotFound = &ApiError{
+	Code:           "USER_NOT_FOUND",
+	Message:        "User is either deleted or not found",
+	HttpStatusCode: http.StatusNotFound,
+}
+
 var ErrMaxPasskeysReached = ApiError{
 	Code:           MaxPasskeysReached,
 	Message:        "Max passkeys limit reached",
@@ -178,6 +184,8 @@ const (
 
 	FileNotFoundInAlbum ErrorCode = "FILE_NOT_FOUND_IN_ALBUM"
 
+	AuthKeyNotCreated ErrorCode = "AUTH_KEY_NOT_CREATED"
+
 	// PublicCollectDisabled error code indicates that the user has not enabled public collect
 	PublicCollectDisabled ErrorCode = "PUBLIC_COLLECT_DISABLED"
 
@@ -187,6 +195,8 @@ const (
 
 	// MaxPasskeysReached is thrown when user attempts to create more than max allowed passkeys
 	MaxPasskeysReached ErrorCode = "MAX_PASSKEYS_REACHED"
+
+	SessionExpired ErrorCode = "SESSION_EXPIRED"
 )
 
 type ApiError struct {

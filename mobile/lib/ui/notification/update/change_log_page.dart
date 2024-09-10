@@ -1,3 +1,5 @@
+import "dart:async";
+
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/services/update_service.dart';
@@ -6,7 +8,9 @@ import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
+import "package:photos/ui/growth/referral_screen.dart";
 import 'package:photos/ui/notification/update/change_log_entry.dart';
+import "package:photos/utils/navigation_util.dart";
 
 class ChangeLogPage extends StatefulWidget {
   const ChangeLogPage({
@@ -43,7 +47,7 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
             const SizedBox(
               height: 24,
             ),
-            Expanded(child: _getChangeLog()),
+            Expanded(child: _getChangeLog(context)),
             const DividerWidget(
               dividerType: DividerType.solid,
             ),
@@ -91,11 +95,16 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
                     ButtonWidget(
                       buttonType: ButtonType.trailingIconSecondary,
                       buttonSize: ButtonSize.large,
-                      labelText: S.of(context).rateTheApp,
-                      icon: Icons.favorite_rounded,
+                      labelText: 'Claim referral code',
+                      icon: Icons.arrow_forward_outlined,
                       iconColor: enteColorScheme.primary500,
                       onTap: () async {
-                        await UpdateService.instance.launchReviewUrl();
+                        unawaited(
+                          routeToPage(
+                            context,
+                            const ReferralScreen(),
+                          ),
+                        );
                       },
                     ),
                     const SizedBox(height: 8),
@@ -109,21 +118,25 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
     );
   }
 
-  Widget _getChangeLog() {
+  Widget _getChangeLog(BuildContext ctx) {
     final scrollController = ScrollController();
     final List<ChangeLogEntry> items = [];
     items.addAll([
       ChangeLogEntry(
-        "Custom App Lock ✨",
-        'Now choose from PIN, password or the default system lock to lock the app. You can set this up in Settings > Security > App lock.',
+        'Personal referral codes',
+        'Claim your personal code to invite friends now. Earn 10GB free for every successful referral.',
       ),
       ChangeLogEntry(
-        "Select All ✨",
-        "Selecting all files from gallery made easy with just one click! Select any item from gallery to see the option.",
+        'Resumable uploads',
+        'We\'ve added support for resuming uploads across app sessions. Please enable this from Backup settings.',
       ),
       ChangeLogEntry(
-        "Bug Fixes",
-        "Many a bugs were squashed in this release. If you run into any bugs, please write to team@ente.io, or let us know on Discord! 🙏",
+        'Quick links',
+        'Created too many links to share? You can select and clear multiple in one go now.',
+      ),
+      ChangeLogEntry(
+        'App lock',
+        'We\'ve introduced an option to hide Ente from your app switcher. Check out Security > App lock.',
       ),
     ]);
 

@@ -383,6 +383,7 @@ const convertToYOLOInputFloat32ChannelsFirst = (imageData: ImageData) => {
                           pixelData,
                           width,
                           height,
+                          false,
                       );
             yoloInput[pi] = r / 255.0;
             yoloInput[pi + channelOffsetGreen] = g / 255.0;
@@ -714,7 +715,7 @@ const detectBlur = (
 
 type FaceDirection = "left" | "right" | "straight";
 
-const faceDirection = ({ landmarks }: FaceDetection): FaceDirection => {
+export const faceDirection = ({ landmarks }: FaceDetection): FaceDirection => {
     const leftEye = landmarks[0]!;
     const rightEye = landmarks[1]!;
     const nose = landmarks[2]!;

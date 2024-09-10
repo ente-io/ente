@@ -2,6 +2,7 @@ import "package:dio/dio.dart";
 import "package:ente_cast/ente_cast.dart";
 import "package:ente_cast_normal/ente_cast_normal.dart";
 import "package:ente_feature_flag/ente_feature_flag.dart";
+import "package:photos/utils/local_settings.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class ServiceLocator {
@@ -20,7 +21,6 @@ class ServiceLocator {
 }
 
 FlagService? _flagService;
-
 FlagService get flagService {
   _flagService ??= FlagService(
     ServiceLocator.instance.prefs,
@@ -33,4 +33,10 @@ CastService? _castService;
 CastService get castService {
   _castService ??= CastServiceImpl();
   return _castService!;
+}
+
+LocalSettings? _localSettings;
+LocalSettings get localSettings {
+  _localSettings ??= LocalSettings(ServiceLocator.instance.prefs);
+  return _localSettings!;
 }

@@ -6,6 +6,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network/network.dart';
 import 'package:photos/events/notification_event.dart';
+import "package:photos/service_locator.dart";
 import 'package:photos/services/user_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -21,6 +22,7 @@ class UserRemoteFlagService {
 
   static const String recoveryVerificationFlag = "recoveryKeyVerified";
   static const String mapEnabled = "mapEnabled";
+  static const String mlEnabled = "faceSearchEnabled";
   static const String needRecoveryKeyVerification =
       "needRecoveryKeyVerification";
 
@@ -44,15 +46,13 @@ class UserRemoteFlagService {
   }
 
   bool getCachedBoolValue(String key) {
-    return _prefs.getBool(key) ?? false;
-  }
-
-  Future<bool> getBoolValue(String key) async {
-    if (_prefs.containsKey(key)) {
-      return _prefs.getBool(key)!;
+    bool defaultValue = false;
+    if (key == mapEnabled) {
+      defaultValue = flagService.mapEnabled;
+    } else if (key == mlEnabled) {
+      defaultValue = flagService.hasGrantedMLConsent;
     }
-    return _getValue(key, "false")
-        .then((value) => value.toLowerCase() == "true");
+    return _prefs.getBool(key) ?? defaultValue;
   }
 
   Future<bool> setBoolValue(String key, bool value) async {

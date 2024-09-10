@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/backup_status.dart";
 import "package:photos/models/duplicate_files.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/deduplication_service.dart";
 import "package:photos/services/sync_service.dart";
 import "package:photos/services/update_service.dart";
@@ -23,7 +24,6 @@ import "package:photos/ui/tools/free_space_page.dart";
 import "package:photos/ui/viewer/gallery/large_files_page.dart";
 import "package:photos/utils/data_util.dart";
 import "package:photos/utils/dialog_util.dart";
-import 'package:photos/utils/local_settings.dart';
 import 'package:photos/utils/navigation_util.dart';
 import "package:photos/utils/toast_util.dart";
 
@@ -202,9 +202,9 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
                                   onTap: () async {
                                     await routeToPage(
                                       context,
-                                    LargeFilesPagePage(),
+                                      LargeFilesPagePage(),
                                     );
-                                    },
+                                  },
                                 ),
                                 MenuSectionDescriptionWidget(
                                   content: S.of(context).viewLargeFilesDesc,
@@ -227,9 +227,9 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
   }
 
   void _showSpaceFreedDialog(BackupStatus status) {
-    if (LocalSettings.instance.shouldPromptToRateUs()) {
-      LocalSettings.instance.setRateUsShownCount(
-        LocalSettings.instance.getRateUsShownCount() + 1,
+    if (localSettings.shouldPromptToRateUs()) {
+      localSettings.setRateUsShownCount(
+        localSettings.getRateUsShownCount() + 1,
       );
       showChoiceDialog(
         context,

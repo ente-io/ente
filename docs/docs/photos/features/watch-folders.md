@@ -26,33 +26,15 @@ allows you to automate backups to ente's cloud.
    where you can add and remove watched folders.
 
 2. To start watching a folder, press the **Add folder** button and select the
-   folder on your laptop that you want to watch for any changes. You can also
+   folder on your system that you want to watch for any changes. You can also
    drag and drop the folder here.
 
 3. If the folder has nesting, you will see two options - **A single album** and
-   **Separate albums**.
-
-    - **Single album** will create a new Ente album with the same name as the
-      folder's name, and will then sync all the changes in the folder (and any
-      nested folders) to this single album.
-
-    - **Separate albums** will create separate albums for each nested folder of
-      the selected folder, and will then sync the changes in each nested folder
-      separately.
-
-    - For example, suppose you have a folder name `Photos` on your computer, and
-      inside that folder you have two nested folders named `New Year` and
-      `Summer`. In the single album mode, the app will create an Ente album
-      named "Photos" and put all the files from both `New Year` and `Summer`
-      there. In the separate album mode, the app will create two Ente albums,
-      "New Year" and "Summer", each only containing the respective files.
-
-    - In separate album mode, only nested folders that have at least one file
-      will result in the creation of a new album – empty folders (or folders
-      that only contain other folders) will be ignored.
+   **Separate albums**. This work similarly to the
+   [options you see when you drag and drop a folder with nested folders](/photos/features/albums#preserving-folder-structure).
 
 4. After choosing any of the above options, the folder will be initially synced
-   to ente's cloud and monitored for any changes. You can now close the dialog
+   to Ente's cloud and monitored for any changes. You can now close the dialog
    and the sync will continue in background.
 
 5. When the app is syncing in the background it'll show a small progress status

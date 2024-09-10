@@ -10,7 +10,6 @@ import (
 	"github.com/ente-io/museum/pkg/utils/handler"
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 // UserEntityHandler expose request handlers for various operations on user entity
@@ -24,6 +23,10 @@ func (h *UserEntityHandler) CreateKey(c *gin.Context) {
 	if err := c.ShouldBindJSON(&request); err != nil {
 		handler.Error(c,
 			stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("Request binding failed %s", err)))
+		return
+	}
+	if err := request.Type.IsValid(); err != nil {
+		handler.Error(c, stacktrace.Propagate(err, "Invalid EntityType"))
 		return
 	}
 	err := h.Controller.CreateKey(c, request)
@@ -58,6 +61,10 @@ func (h *UserEntityHandler) CreateEntity(c *gin.Context) {
 			stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("Request binding failed %s", err)))
 		return
 	}
+	if err := request.Type.IsValid(); err != nil {
+		handler.Error(c, stacktrace.Propagate(err, "Invalid EntityType"))
+		return
+	}
 	resp, err := h.Controller.CreateEntity(c, request)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, "Failed to create CreateEntity"))
@@ -84,12 +91,8 @@ func (h *UserEntityHandler) UpdateEntity(c *gin.Context) {
 
 // DeleteEntity...
 func (h *UserEntityHandler) DeleteEntity(c *gin.Context) {
-	id, err := uuid.Parse(c.Query("id"))
-	if err != nil {
-		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "failed to find id"))
-		return
-	}
-	_, err = h.Controller.Delete(c, id)
+	id := c.Query("id")
+	_, err := h.Controller.Delete(c, id)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, "Failed to delete DeleteEntity"))
 		return

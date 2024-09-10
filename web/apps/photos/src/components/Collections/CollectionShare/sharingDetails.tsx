@@ -9,11 +9,11 @@ import ModeEditIcon from "@mui/icons-material/ModeEdit";
 import Photo from "@mui/icons-material/Photo";
 import { Stack } from "@mui/material";
 import Avatar from "components/pages/gallery/Avatar";
-import { CollectionSummaryType } from "constants/collection";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
 import { useContext } from "react";
 import { COLLECTION_ROLE } from "types/collection";
+import { CollectionSummaryType } from "utils/collection";
 
 export default function SharingDetails({ collection, type }) {
     const galleryContext = useContext(GalleryContext);

@@ -10,7 +10,6 @@ import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
 import FormTitle from "@ente/shared/components/Form/FormPaper/Title";
 import LinkButton from "@ente/shared/components/LinkButton";
 import { ApiError } from "@ente/shared/error";
-import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import {
     LS_KEYS,
     getData,
@@ -22,6 +21,7 @@ import { HttpStatusCode } from "axios";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { unstashRedirect } from "../../services/redirect";
 import type { PageProps } from "../../types/page";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
@@ -59,9 +59,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 id,
             });
             setData(LS_KEYS.KEY_ATTRIBUTES, ensure(keyAttributes));
-            const redirectURL = InMemoryStore.get(MS_KEYS.REDIRECT_URL);
-            InMemoryStore.delete(MS_KEYS.REDIRECT_URL);
-            router.push(redirectURL ?? PAGES.CREDENTIALS);
+            router.push(unstashRedirect() ?? PAGES.CREDENTIALS);
         } catch (e) {
             if (
                 e instanceof ApiError &&

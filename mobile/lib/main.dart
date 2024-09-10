@@ -8,19 +8,21 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import "package:flutter/rendering.dart";
+import "package:flutter/services.dart";
 import "package:flutter_displaymode/flutter_displaymode.dart";
 import 'package:logging/logging.dart';
 import "package:media_kit/media_kit.dart";
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/app.dart';
+import "package:photos/audio_session_handler.dart";
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/error-reporting/super_logging.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/network/network.dart';
+import "package:photos/db/ml/db.dart";
 import 'package:photos/db/upload_locks_db.dart';
 import 'package:photos/ente_theme_data.dart';
-import "package:photos/face/db.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
@@ -28,17 +30,18 @@ import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/entity_service.dart";
 import 'package:photos/services/favorites_service.dart';
+import "package:photos/services/filedata/filedata_service.dart";
 import 'package:photos/services/home_widget_service.dart';
 import 'package:photos/services/local_file_update_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import "package:photos/services/location_service.dart";
-import 'package:photos/services/machine_learning/face_ml/face_ml_service.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
-import 'package:photos/services/machine_learning/file_ml/remote_fileml_service.dart';
 import "package:photos/services/machine_learning/machine_learning_controller.dart";
+import 'package:photos/services/machine_learning/ml_service.dart';
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
 import "package:photos/services/magic_cache_service.dart";
 import 'package:photos/services/memories_service.dart';
+import "package:photos/services/notification_service.dart";
 import 'package:photos/services/push_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/services/search_service.dart';
@@ -53,7 +56,6 @@ import 'package:photos/ui/tools/lock_screen.dart';
 import 'package:photos/utils/crypto_util.dart';
 import "package:photos/utils/email_util.dart";
 import 'package:photos/utils/file_uploader.dart';
-import 'package:photos/utils/local_settings.dart';
 import "package:photos/utils/lock_screen_settings.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -72,12 +74,27 @@ const kFGTaskDeathTimeoutInMicroseconds = 5000000;
 void main() async {
   debugRepaintRainbowEnabled = false;
   WidgetsFlutterBinding.ensureInitialized();
+  //For audio to work on vidoes in iOS when in silent mode.
+  if (Platform.isIOS) {
+    unawaited(AudioSessionHandler.setAudioSessionCategory());
+  }
   MediaKit.ensureInitialized();
 
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
   await _runInForeground(savedThemeMode);
   unawaited(BackgroundFetch.registerHeadlessTask(_headlessTaskHandler));
   if (Platform.isAndroid) FlutterDisplayMode.setHighRefreshRate().ignore();
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      systemNavigationBarColor: Color(0x00010000),
+    ),
+  );
+
+  unawaited(
+    SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.edgeToEdge,
+    ),
+  );
 }
 
 Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
@@ -184,7 +201,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     Future.delayed(const Duration(seconds: 15), () {
       if (!initComplete && !isBackground) {
         _logger.severe("Stuck on splash screen for >= 15 seconds");
-        sendLogsForInit(
+        triggerSendLogs(
           "support@ente.io",
           "Stuck on splash screen for >= 15 seconds on ${Platform.operatingSystem}",
           null,
@@ -198,6 +215,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     await _logFGHeartBeatInfo();
     _logger.info("_logFGHeartBeatInfo done");
     unawaited(_scheduleHeartBeat(preferences, isBackground));
+    NotificationService.instance.init(preferences);
     AppLifecycleService.instance.init(preferences);
     if (isBackground) {
       AppLifecycleService.instance.onAppInBackground('init via: $via');
@@ -267,11 +285,10 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _logger.info("SyncService init done");
 
     MemoriesService.instance.init(preferences);
-    LocalSettings.instance.init(preferences);
     LocalFileUpdateService.instance.init(preferences);
     SearchService.instance.init();
     StorageBonusService.instance.init(preferences);
-    RemoteFileMLService.instance.init(preferences);
+    FileDataService.instance.init(preferences);
     _logger.info("RemoteFileMLService done");
     if (!isBackground &&
         Platform.isAndroid &&
@@ -292,16 +309,10 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     MachineLearningController.instance.init();
 
     _logger.info("MachineLearningController done");
-    if (flagService.faceSearchEnabled) {
-      unawaited(FaceMlService.instance.init());
-    } else {
-      if (LocalSettings.instance.isFaceIndexingEnabled) {
-        unawaited(LocalSettings.instance.toggleFaceIndexing());
-      }
-    }
+    unawaited(MLService.instance.init());
     PersonService.init(
       EntityService.instance,
-      FaceMLDataDB.instance,
+      MLDataDB.instance,
       preferences,
     );
 

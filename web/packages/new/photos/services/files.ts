@@ -1,3 +1,5 @@
+import { blobCache } from "@/base/blob-cache";
+import { FileType } from "@/media/file-type";
 import localForage from "@ente/shared/storage/localForage";
 import { type EnteFile, type Trash } from "../types/file";
 import { mergeMetadata } from "../utils/file";
@@ -72,4 +74,61 @@ const sortTrashFiles = (files: EnteFile[]) => {
         }
         return (a.deleteBy ?? 0) - (b.deleteBy ?? 0);
     });
+};
+
+/**
+ * Clear cached thumbnails for existing files if the thumbnail data has changed.
+ *
+ * This function in expected to be called when we are processing a collection
+ * diff, updating our local state to reflect files that were updated on remote.
+ * We use this as an opportune moment to invalidate any cached thumbnails which
+ * have changed.
+ *
+ * An example of when such invalidation is necessary:
+ *
+ * 1. Take a photo on mobile, and let it sync via the mobile app to us (web).
+ * 2. Edit the photo outside of Ente (e.g. using Apple Photos).
+ * 3. When the Ente mobile client next comes into foreground, it'll update the
+ *    remote thumbnail for the existing file to reflect the changes.
+ *
+ * @param existingFiles The {@link EnteFile}s we had in our local database
+ * before processing the diff response.
+ *
+ * @param newFiles The {@link EnteFile}s which we got in the diff response.
+ */
+export const clearCachedThumbnailsIfChanged = async (
+    existingFiles: EnteFile[],
+    newFiles: EnteFile[],
+) => {
+    if (newFiles.length == 0) {
+        // Fastpath to no-op if nothing changes.
+        return;
+    }
+
+    // TODO: This should be constructed once, at the caller (currently the
+    // caller doesn't need this, but we'll only know for sure after we
+    // consolidate all processing that happens during a diff parse).
+    const existingFileByID = new Map(existingFiles.map((f) => [f.id, f]));
+
+    for (const newFile of newFiles) {
+        const existingFile = existingFileByID.get(newFile.id);
+        const m1 = existingFile?.metadata;
+        const m2 = newFile.metadata;
+        // TODO: Add an extra truthy check the EnteFile type is null safe
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        if (!m1 || !m2) continue;
+        // Both files exist, have metadata, but their (appropriate) hashes
+        // differ, which indicates that the change was in the file's contents,
+        // not the metadata itself, and thus we should refresh the thumbnail.
+        if (
+            m1.fileType == FileType.livePhoto
+                ? m1.imageHash != m2.imageHash
+                : m1.hash != m2.hash
+        ) {
+            // This is an infrequent occurrence, so we lazily get the cache.
+            const thumbnailCache = await blobCache("thumbs");
+            const key = newFile.id.toString();
+            await thumbnailCache.delete(key);
+        }
+    }
 };

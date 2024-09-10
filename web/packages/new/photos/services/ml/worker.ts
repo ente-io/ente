@@ -1,4 +1,5 @@
 import { clientPackageName } from "@/base/app";
+import { assertionFailed } from "@/base/assert";
 import { isHTTP4xxError } from "@/base/http";
 import { getKVN } from "@/base/kv";
 import { ensureAuthToken } from "@/base/local-user";
@@ -18,13 +19,20 @@ import {
     type ImageBitmapAndData,
 } from "./blob";
 import {
+    clearCachedCLIPIndexes,
     clipIndexingVersion,
     clipMatches,
     indexCLIP,
     type CLIPIndex,
 } from "./clip";
+import {
+    clusterFaces,
+    type ClusteringOpts,
+    type OnClusteringProgress,
+} from "./cluster";
 import { saveFaceCrops } from "./crop";
 import {
+    faceIndexes,
     indexableFileIDs,
     markIndexingFailed,
     saveIndexes,
@@ -38,6 +46,21 @@ import {
     type RemoteMLData,
 } from "./ml-data";
 import type { CLIPMatches, MLWorkerDelegate } from "./worker-types";
+
+/**
+ * A rough hint at what the worker is up to.
+ *
+ * -   "init": Worker has been created but hasn't done anything yet.
+ * -   "idle": Not doing anything
+ * -   "tick": Transitioning to a new state
+ * -   "indexing": Indexing
+ * -   "fetching": A subset of indexing
+ *
+ * During indexing, the state is set to "fetching" whenever remote provided us
+ * data for more than 50% of the files that we requested from it in the last
+ * fetch during indexing.
+ */
+export type WorkerState = "init" | "idle" | "tick" | "indexing" | "fetching";
 
 const idleDurationStart = 5; /* 5 seconds */
 const idleDurationMax = 16 * 60; /* 16 minutes */
@@ -76,9 +99,11 @@ interface IndexableItem {
  * particular, for finding the closest CLIP match when the user does a search.
  */
 export class MLWorker {
+    /** The last known state of the worker. */
+    public state: WorkerState = "init";
+
     private electron: ElectronMLWorker | undefined;
     private delegate: MLWorkerDelegate | undefined;
-    private state: "idle" | "tick" | "pull" | "indexing" = "idle";
     private liveQ: IndexableItem[] = [];
     private idleTimeout: ReturnType<typeof setTimeout> | undefined;
     private idleDuration = idleDurationStart; /* unit: seconds */
@@ -121,7 +146,7 @@ export class MLWorker {
 
     /** Invoked in response to external events. */
     private wakeUp() {
-        if (this.state == "idle") {
+        if (this.state == "init" || this.state == "idle") {
             // We are currently paused. Get back to work.
             if (this.idleTimeout) clearTimeout(this.idleTimeout);
             this.idleTimeout = undefined;
@@ -165,14 +190,7 @@ export class MLWorker {
     }
 
     /**
-     * Return true if we're currently indexing.
-     */
-    isIndexing() {
-        return this.state == "indexing";
-    }
-
-    /**
-     * Find {@link CLIPMatches} for a given {@link searchPhrase}.
+     * Find {@link CLIPMatches} for a given normalized {@link searchPhrase}.
      */
     async clipMatches(searchPhrase: string): Promise<CLIPMatches | undefined> {
         return clipMatches(searchPhrase, ensure(this.electron));
@@ -192,7 +210,12 @@ export class MLWorker {
 
         const liveQ = this.liveQ;
         this.liveQ = [];
-        this.state = "indexing";
+
+        // Retain the previous state if it was one of the indexing states. This
+        // prevents jumping between "fetching" and "indexing" being shown in the
+        // UI during the initial load.
+        if (this.state != "fetching" && this.state != "indexing")
+            this.state = "indexing";
 
         // Use the liveQ if present, otherwise get the next batch to backfill.
         const items = liveQ.length ? liveQ : await this.backfillQ();
@@ -223,25 +246,48 @@ export class MLWorker {
         this.state = "idle";
         this.idleDuration = Math.min(this.idleDuration * 2, idleDurationMax);
         this.idleTimeout = setTimeout(scheduleTick, this.idleDuration * 1000);
+        this.delegate?.workerDidProcessFileOrIdle();
     }
 
     /** Return the next batch of items to backfill (if any). */
     private async backfillQ() {
         const userID = ensure(await getKVN("userID"));
         // Find files that our local DB thinks need syncing.
-        const filesByID = await syncWithLocalFilesAndGetFilesToIndex(
+        const fileByID = await syncWithLocalFilesAndGetFilesToIndex(
             userID,
             200,
         );
-        if (!filesByID.size) return [];
+        if (!fileByID.size) return [];
+
         // Fetch their existing ML data (if any).
-        const mlDataByID = await fetchMLData(filesByID);
+        const mlDataByID = await fetchMLData(fileByID);
+
+        // If the number of files for which remote gave us data is more than 50%
+        // of what we asked of it, assume we are "fetching", not "indexing".
+        // This is a heuristic to try and show a better indexing state in the UI
+        // (so that the user does not think that their files are being
+        // unnecessarily reindexed).
+        if (this.state != "indexing" && this.state != "fetching")
+            assertionFailed(`Unexpected state ${this.state}`);
+        this.state =
+            mlDataByID.size * 2 > fileByID.size ? "fetching" : "indexing";
+
         // Return files after annotating them with their existing ML data.
-        return Array.from(filesByID, ([id, file]) => ({
+        return Array.from(fileByID, ([id, file]) => ({
             enteFile: file,
             uploadItem: undefined,
             remoteMLData: mlDataByID.get(id),
         }));
+    }
+
+    // TODO-Cluster
+    async clusterFaces(opts: ClusteringOpts, onProgress: OnClusteringProgress) {
+        return clusterFaces(
+            await faceIndexes(),
+            await getAllLocalFiles(),
+            opts,
+            onProgress,
+        );
     }
 }
 
@@ -282,14 +328,17 @@ const indexNextBatch = async (
     while (i < items.length) {
         for (let j = 0; j < tasks.length; j++) {
             if (i < items.length && !tasks[j]) {
-                tasks[j] = index(ensure(items[i++]), electron)
-                    .then(() => {
-                        tasks[j] = undefined;
-                    })
-                    .catch(() => {
-                        allSuccess = false;
-                        tasks[j] = undefined;
-                    });
+                // Use an IIFE to capture the value of j at the time of
+                // invocation.
+                tasks[j] = ((item: IndexableItem, j: number) =>
+                    index(item, electron)
+                        .then(() => {
+                            tasks[j] = undefined;
+                        })
+                        .catch(() => {
+                            allSuccess = false;
+                            tasks[j] = undefined;
+                        }))(ensure(items[i++]), j);
             }
         }
 
@@ -298,7 +347,7 @@ const indexNextBatch = async (
         await Promise.race(tasks);
 
         // Let the main thread now we're doing something.
-        delegate?.workerDidProcessFile();
+        delegate?.workerDidProcessFileOrIdle();
 
         // Let us drain the microtask queue. This also gives a chance for other
         // interactive tasks like `clipMatches` to run.
@@ -308,6 +357,9 @@ const indexNextBatch = async (
     // Wait for the pending tasks to drain out.
     await Promise.all(tasks);
 
+    // Clear any cached CLIP indexes, since now we might have new ones.
+    clearCachedCLIPIndexes();
+
     // Return true if nothing failed.
     return allSuccess;
 };
@@ -316,6 +368,8 @@ const indexNextBatch = async (
  * Sync face DB with the local (and potentially indexable) files that we know
  * about. Then return the next {@link count} files that still need to be
  * indexed.
+ *
+ * When returning from amongst pending files, prefer the most recent ones first.
  *
  * For specifics of what a "sync" entails, see {@link updateAssumingLocalFiles}.
  *
@@ -330,20 +384,20 @@ const syncWithLocalFilesAndGetFilesToIndex = async (
     const isIndexable = (f: EnteFile) => f.ownerID == userID;
 
     const localFiles = await getAllLocalFiles();
-    const localFilesByID = new Map(
+    const localFileByID = new Map(
         localFiles.filter(isIndexable).map((f) => [f.id, f]),
     );
 
     const localTrashFileIDs = (await getLocalTrashedFiles()).map((f) => f.id);
 
     await updateAssumingLocalFiles(
-        Array.from(localFilesByID.keys()),
+        Array.from(localFileByID.keys()),
         localTrashFileIDs,
     );
 
     const fileIDsToIndex = await indexableFileIDs(count);
     return new Map(
-        fileIDsToIndex.map((id) => [id, ensure(localFilesByID.get(id))]),
+        fileIDsToIndex.map((id) => [id, ensure(localFileByID.get(id))]),
     );
 };
 

@@ -8,7 +8,6 @@ import "package:photos/events/event.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/recent_searches.dart";
 import "package:photos/models/search/search_types.dart";
-import "package:photos/services/machine_learning/semantic_search/frameworks/ml_framework.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
@@ -37,15 +36,11 @@ class _MagicSectionState extends State<MagicSection> {
     for (Stream<Event> stream in streamsToListenTo) {
       streamSubscriptions.add(
         stream.listen((event) async {
-          final mlFrameWorkEvent =
-              event as MLFrameworkInitializationUpdateEvent;
-          if (mlFrameWorkEvent.state == InitializationState.initialized) {
-            _magicSearchResults = (await SectionType.magic.getData(
-              context,
-              limit: kSearchSectionLimit,
-            )) as List<GenericSearchResult>;
-            setState(() {});
-          }
+          _magicSearchResults = (await SectionType.magic.getData(
+            context,
+            limit: kSearchSectionLimit,
+          )) as List<GenericSearchResult>;
+          setState(() {});
         }),
       );
     }

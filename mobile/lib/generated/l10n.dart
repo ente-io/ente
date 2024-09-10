@@ -170,10 +170,10 @@ class S {
     );
   }
 
-  /// `Yes, I want to permanently delete this account and all its data.`
+  /// `Yes, I want to permanently delete this account and its data across all apps.`
   String get confirmDeletePrompt {
     return Intl.message(
-      'Yes, I want to permanently delete this account and all its data.',
+      'Yes, I want to permanently delete this account and its data across all apps.',
       name: 'confirmDeletePrompt',
       desc: '',
       args: [],
@@ -2056,6 +2056,56 @@ class S {
     );
   }
 
+  /// `Change your referral code`
+  String get changeYourReferralCode {
+    return Intl.message(
+      'Change your referral code',
+      name: 'changeYourReferralCode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Change`
+  String get change {
+    return Intl.message(
+      'Change',
+      name: 'change',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sorry, this code is unavailable.`
+  String get unavailableReferralCode {
+    return Intl.message(
+      'Sorry, this code is unavailable.',
+      name: 'unavailableReferralCode',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sorry, you've reached the limit of code changes.`
+  String get codeChangeLimitReached {
+    return Intl.message(
+      'Sorry, you\'ve reached the limit of code changes.',
+      name: 'codeChangeLimitReached',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please contact {familyAdminEmail} to change your code.`
+  String onlyFamilyAdminCanChangeCode(Object familyAdminEmail) {
+    return Intl.message(
+      'Please contact $familyAdminEmail to change your code.',
+      name: 'onlyFamilyAdminCanChangeCode',
+      desc: '',
+      args: [familyAdminEmail],
+    );
+  }
+
   /// `{storageAmountInGB} GB`
   String storageInGB(Object storageAmountInGB) {
     return Intl.message(
@@ -2866,6 +2916,56 @@ class S {
     );
   }
 
+  /// `Enable machine learning`
+  String get mlConsent {
+    return Intl.message(
+      'Enable machine learning',
+      name: 'mlConsent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enable machine learning?`
+  String get mlConsentTitle {
+    return Intl.message(
+      'Enable machine learning?',
+      name: 'mlConsentTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `If you enable machine learning, Ente will extract information like face geometry from files, including those shared with you.\n\nThis will happen on your device, and any generated biometric information will be end-to-end encrypted.`
+  String get mlConsentDescription {
+    return Intl.message(
+      'If you enable machine learning, Ente will extract information like face geometry from files, including those shared with you.\n\nThis will happen on your device, and any generated biometric information will be end-to-end encrypted.',
+      name: 'mlConsentDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please click here for more details about this feature in our privacy policy`
+  String get mlConsentPrivacy {
+    return Intl.message(
+      'Please click here for more details about this feature in our privacy policy',
+      name: 'mlConsentPrivacy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `I understand, and wish to enable machine learning`
+  String get mlConsentConfirmation {
+    return Intl.message(
+      'I understand, and wish to enable machine learning',
+      name: 'mlConsentConfirmation',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Magic search`
   String get magicSearch {
     return Intl.message(
@@ -2876,10 +2976,10 @@ class S {
     );
   }
 
-  /// `Please note that machine learning will result in a higher bandwidth and battery usage until all items are indexed.`
+  /// `Please note that machine learning will result in a higher bandwidth and battery usage until all items are indexed. Consider using the desktop app for faster indexing, all results will be synced automatically.`
   String get mlIndexingDescription {
     return Intl.message(
-      'Please note that machine learning will result in a higher bandwidth and battery usage until all items are indexed.',
+      'Please note that machine learning will result in a higher bandwidth and battery usage until all items are indexed. Consider using the desktop app for faster indexing, all results will be synced automatically.',
       name: 'mlIndexingDescription',
       desc: '',
       args: [],
@@ -3067,6 +3167,26 @@ class S {
     return Intl.message(
       'Backup settings',
       name: 'backupSettings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Backup status`
+  String get backupStatus {
+    return Intl.message(
+      'Backup status',
+      name: 'backupStatus',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Items that have been backed up will show up here`
+  String get backupStatusDescription {
+    return Intl.message(
+      'Items that have been backed up will show up here',
+      name: 'backupStatusDescription',
       desc: '',
       args: [],
     );
@@ -3502,10 +3622,10 @@ class S {
     );
   }
 
-  /// `View files that are consuming the most amount of storage`
+  /// `View files that are consuming the most amount of storage.`
   String get viewLargeFilesDesc {
     return Intl.message(
-      'View files that are consuming the most amount of storage',
+      'View files that are consuming the most amount of storage.',
       name: 'viewLargeFilesDesc',
       desc: '',
       args: [],
@@ -6449,6 +6569,26 @@ class S {
     );
   }
 
+  /// `Preserving {count} memories...`
+  String uploadingMultipleMemories(Object count) {
+    return Intl.message(
+      'Preserving $count memories...',
+      name: 'uploadingMultipleMemories',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Preserving 1 memory...`
+  String get uploadingSingleMemory {
+    return Intl.message(
+      'Preserving 1 memory...',
+      name: 'uploadingSingleMemory',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Archiving...`
   String get archiving {
     return Intl.message(
@@ -7965,6 +8105,16 @@ class S {
     );
   }
 
+  /// `Resumable uploads`
+  String get resumableUploads {
+    return Intl.message(
+      'Resumable uploads',
+      name: 'resumableUploads',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Add to hidden album`
   String get addToHiddenAlbum {
     return Intl.message(
@@ -8965,6 +9115,56 @@ class S {
     );
   }
 
+  /// `Enable`
+  String get enable {
+    return Intl.message(
+      'Enable',
+      name: 'enable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enabled`
+  String get enabled {
+    return Intl.message(
+      'Enabled',
+      name: 'enabled',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `More details`
+  String get moreDetails {
+    return Intl.message(
+      'More details',
+      name: 'moreDetails',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Ente supports on-device machine learning for face recognition, magic search and other advanced search features`
+  String get enableMLIndexingDesc {
+    return Intl.message(
+      'Ente supports on-device machine learning for face recognition, magic search and other advanced search features',
+      name: 'enableMLIndexingDesc',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Magic search allows to search photos by their contents, e.g. 'flower', 'red car', 'identity documents'`
+  String get magicSearchHint {
+    return Intl.message(
+      'Magic search allows to search photos by their contents, e.g. \'flower\', \'red car\', \'identity documents\'',
+      name: 'magicSearchHint',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Panorama`
   String get panorama {
     return Intl.message(
@@ -9075,16 +9275,6 @@ class S {
     );
   }
 
-  /// `To enable app lock, please setup device passcode or screen lock in your system settings.`
-  String get toEnableAppLockPleaseSetupDevicePasscodeOrScreen {
-    return Intl.message(
-      'To enable app lock, please setup device passcode or screen lock in your system settings.',
-      name: 'toEnableAppLockPleaseSetupDevicePasscodeOrScreen',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Tap to unlock`
   String get tapToUnlock {
     return Intl.message(
@@ -9110,16 +9300,6 @@ class S {
     return Intl.message(
       'Video Info',
       name: 'videoInfo',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Choose between your device\'s default lock screen and a custom lock screen with a PIN or password.`
-  String get appLockDescription {
-    return Intl.message(
-      'Choose between your device\\\'s default lock screen and a custom lock screen with a PIN or password.',
-      name: 'appLockDescription',
       desc: '',
       args: [],
     );
@@ -9265,11 +9445,31 @@ class S {
     );
   }
 
+  /// `Choose between your device's default lock screen and a custom lock screen with a PIN or password.`
+  String get appLockDescriptions {
+    return Intl.message(
+      'Choose between your device\'s default lock screen and a custom lock screen with a PIN or password.',
+      name: 'appLockDescriptions',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Create a link where your friends can upload photos in original quality.`
   String get collectPhotosDescription {
     return Intl.message(
       'Create a link where your friends can upload photos in original quality.',
       name: 'collectPhotosDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `To enable app lock, please setup device passcode or screen lock in your system settings.`
+  String get toEnableAppLockPleaseSetupDevicePasscodeOrScreen {
+    return Intl.message(
+      'To enable app lock, please setup device passcode or screen lock in your system settings.',
+      name: 'toEnableAppLockPleaseSetupDevicePasscodeOrScreen',
       desc: '',
       args: [],
     );
@@ -9284,6 +9484,46 @@ class S {
       args: [],
     );
   }
+
+  /// `Please authenticate to view your passkey`
+  String get authToViewPasskey {
+    return Intl.message(
+      'Please authenticate to view your passkey',
+      name: 'authToViewPasskey',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Loop video on`
+  String get loopVideoOn {
+    return Intl.message(
+      'Loop video on',
+      name: 'loopVideoOn',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Loop video off`
+  String get loopVideoOff {
+    return Intl.message(
+      'Loop video off',
+      name: 'loopVideoOff',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team`
+  String get localSyncErrorMessage {
+    return Intl.message(
+      'Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team',
+      name: 'localSyncErrorMessage',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
@@ -9292,17 +9532,35 @@ class AppLocalizationDelegate extends LocalizationsDelegate<S> {
   List<Locale> get supportedLocales {
     return const <Locale>[
       Locale.fromSubtags(languageCode: 'en'),
+      Locale.fromSubtags(languageCode: 'ar'),
+      Locale.fromSubtags(languageCode: 'bg'),
+      Locale.fromSubtags(languageCode: 'ca'),
       Locale.fromSubtags(languageCode: 'cs'),
+      Locale.fromSubtags(languageCode: 'da'),
       Locale.fromSubtags(languageCode: 'de'),
+      Locale.fromSubtags(languageCode: 'el'),
       Locale.fromSubtags(languageCode: 'es'),
+      Locale.fromSubtags(languageCode: 'et'),
+      Locale.fromSubtags(languageCode: 'fa'),
       Locale.fromSubtags(languageCode: 'fr'),
+      Locale.fromSubtags(languageCode: 'gu'),
+      Locale.fromSubtags(languageCode: 'he'),
+      Locale.fromSubtags(languageCode: 'hi'),
+      Locale.fromSubtags(languageCode: 'id'),
       Locale.fromSubtags(languageCode: 'it'),
+      Locale.fromSubtags(languageCode: 'ja'),
+      Locale.fromSubtags(languageCode: 'km'),
       Locale.fromSubtags(languageCode: 'ko'),
       Locale.fromSubtags(languageCode: 'nl'),
       Locale.fromSubtags(languageCode: 'no'),
       Locale.fromSubtags(languageCode: 'pl'),
       Locale.fromSubtags(languageCode: 'pt'),
       Locale.fromSubtags(languageCode: 'ru'),
+      Locale.fromSubtags(languageCode: 'sv'),
+      Locale.fromSubtags(languageCode: 'ta'),
+      Locale.fromSubtags(languageCode: 'te'),
+      Locale.fromSubtags(languageCode: 'th'),
+      Locale.fromSubtags(languageCode: 'ti'),
       Locale.fromSubtags(languageCode: 'tr'),
       Locale.fromSubtags(languageCode: 'zh'),
     ];

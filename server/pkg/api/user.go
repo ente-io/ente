@@ -35,7 +35,7 @@ func (h *UserHandler) SendOTT(c *gin.Context) {
 		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Email id is missing"))
 		return
 	}
-	err := h.UserController.SendEmailOTT(c, email, request.Client, request.Purpose)
+	err := h.UserController.SendEmailOTT(c, email, request.Purpose)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
@@ -52,18 +52,6 @@ func (h *UserHandler) Logout(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{})
-}
-
-// GetDetails returns details about the requesting user
-func (h *UserHandler) GetDetails(c *gin.Context) {
-	details, err := h.UserController.GetDetails(c)
-	if err != nil {
-		handler.Error(c, stacktrace.Propagate(err, ""))
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{
-		"details": details,
-	})
 }
 
 // GetDetailsV2 returns details about the requesting user
@@ -158,37 +146,13 @@ func (h *UserHandler) GetPublicKey(c *gin.Context) {
 	})
 }
 
-// GetRoadmapURL redirects the user to the feedback page
-func (h *UserHandler) GetRoadmapURL(c *gin.Context) {
-	userID := auth.GetUserID(c.Request.Header)
-	redirectURL, err := h.UserController.GetRoadmapURL(userID)
-	if err != nil {
-		handler.Error(c, stacktrace.Propagate(err, ""))
-		return
-	}
-	c.Redirect(http.StatusTemporaryRedirect, redirectURL)
-}
-
-// GetRoadmapURLV2 returns the jwt token attached redirect url to roadmap
-func (h *UserHandler) GetRoadmapURLV2(c *gin.Context) {
-	userID := auth.GetUserID(c.Request.Header)
-	roadmapURL, err := h.UserController.GetRoadmapURL(userID)
-	if err != nil {
-		handler.Error(c, stacktrace.Propagate(err, ""))
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{
-		"url": roadmapURL,
-	})
-}
-
 // GetSessionValidityV2 verifies the user's session token and returns if the user has set their keys or not
 func (h *UserHandler) GetSessionValidityV2(c *gin.Context) {
 	userID := auth.GetUserID(c.Request.Header)
 	keyAttributes, err := h.UserController.GetAttributes(userID)
 	if err == nil {
 		c.JSON(http.StatusOK, gin.H{
-			"hasSetKeys": true,
+			"hasSetKeys":    true,
 			"keyAttributes": keyAttributes,
 		})
 	} else {
@@ -368,7 +332,7 @@ func (h *UserHandler) FinishPasskeyAuthenticationCeremony(c *gin.Context) {
 		return
 	}
 
-	user, err := h.UserController.UserRepo.Get(userID)
+	user, err := h.UserController.GetUser(userID)
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return

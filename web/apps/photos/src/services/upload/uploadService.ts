@@ -750,7 +750,7 @@ const extractImageOrVideoMetadata = async (
     const fileName = uploadItemFileName(uploadItem);
     const { fileType } = fileTypeInfo;
 
-    let parsedMetadata: ParsedMetadata;
+    let parsedMetadata: ParsedMetadata | undefined;
     if (fileType == FileType.image) {
         parsedMetadata = await tryExtractImageMetadata(
             uploadItem,
@@ -763,6 +763,10 @@ const extractImageOrVideoMetadata = async (
     }
 
     const hash = await computeHash(uploadItem, worker);
+
+    // Some of this logic is duplicated below in `uploadItemCreationDate`.
+    //
+    // See: [Note: Duplicate retrieval of creation date for live photo clubbing]
 
     const parsedMetadataJSON = matchTakeoutMetadata(
         fileName,
@@ -778,7 +782,7 @@ const extractImageOrVideoMetadata = async (
     let creationTime: number;
     if (parsedMetadataJSON?.creationTime) {
         creationTime = parsedMetadataJSON.creationTime;
-    } else if (parsedMetadata.creationDate) {
+    } else if (parsedMetadata?.creationDate) {
         const { dateTime, offset, timestamp } = parsedMetadata.creationDate;
         creationTime = timestamp;
         publicMagicMetadata.dateTime = dateTime;
@@ -796,22 +800,24 @@ const extractImageOrVideoMetadata = async (
         hash,
     };
 
-    const location = parsedMetadataJSON?.location ?? parsedMetadata.location;
+    const location = parsedMetadataJSON?.location ?? parsedMetadata?.location;
     if (location) {
         metadata.latitude = location.latitude;
         metadata.longitude = location.longitude;
     }
 
-    const { width: w, height: h } = parsedMetadata;
-    if (w) publicMagicMetadata.w = w;
-    if (h) publicMagicMetadata.h = h;
+    if (parsedMetadata) {
+        const { width: w, height: h } = parsedMetadata;
+        if (w) publicMagicMetadata.w = w;
+        if (h) publicMagicMetadata.h = h;
+    }
 
     return { metadata, publicMagicMetadata };
 };
 
 const tryExtractImageMetadata = async (
     uploadItem: UploadItem,
-    lastModifiedMs: number,
+    lastModifiedMs: number | undefined,
 ): Promise<ParsedMetadata> => {
     let file: File;
     if (typeof uploadItem == "string" || Array.isArray(uploadItem)) {
@@ -820,9 +826,8 @@ const tryExtractImageMetadata = async (
         // reasonable to read the entire stream into memory here.
         const { response } = await readStream(ensureElectron(), uploadItem);
         const path = typeof uploadItem == "string" ? uploadItem : uploadItem[1];
-        file = new File([await response.arrayBuffer()], basename(path), {
-            lastModified: lastModifiedMs,
-        });
+        const opts = lastModifiedMs ? { lastModified: lastModifiedMs } : {};
+        file = new File([await response.arrayBuffer()], basename(path), opts);
     } else if (uploadItem instanceof File) {
         file = uploadItem;
     } else {
@@ -844,6 +849,66 @@ const tryExtractVideoMetadata = async (uploadItem: UploadItem) => {
         log.error(`Failed to extract video metadata for ${uploadItem}`, e);
         return undefined;
     }
+};
+
+/**
+ * Return the creation date for the given {@link uploadItem}.
+ *
+ * [Note: Duplicate retrieval of creation date for live photo clubbing]
+ *
+ * This function duplicates some logic of {@link extractImageOrVideoMetadata}.
+ * This duplication, while not good, is currently unavoidable with the way the
+ * code is structured since the live photo clubbing happens at an earlier time
+ * in the pipeline when we don't have the Exif data, but the Exif data is needed
+ * to determine the file's creation time (to ensure that we only club photos and
+ * videos with close by creation times, instead of just relying on file names).
+ *
+ * Note that unlike {@link extractImageOrVideoMetadata}, we don't try to
+ * fallback to the file's modification time. This is because for the purpose of
+ * live photo clubbing, we wish to use the creation date only in cases where we
+ * have it.
+ */
+export const uploadItemCreationDate = async (
+    uploadItem: UploadItem,
+    fileType: FileType,
+    collectionID: number,
+    parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
+) => {
+    const fileName = uploadItemFileName(uploadItem);
+
+    const parsedMetadataJSON = matchTakeoutMetadata(
+        fileName,
+        collectionID,
+        parsedMetadataJSONMap,
+    );
+
+    if (parsedMetadataJSON?.creationTime)
+        return parsedMetadataJSON?.creationTime;
+
+    let parsedMetadata: ParsedMetadata | undefined;
+    if (fileType == FileType.image) {
+        parsedMetadata = await tryExtractImageMetadata(uploadItem, undefined);
+    } else if (fileType == FileType.video) {
+        parsedMetadata = await tryExtractVideoMetadata(uploadItem);
+    } else {
+        throw new Error(`Unexpected file type ${fileType} for ${uploadItem}`);
+    }
+
+    return parsedMetadata?.creationDate?.timestamp;
+};
+
+/**
+ * Return the size of the given {@link uploadItem}.
+ */
+export const uploadItemSize = async (
+    uploadItem: UploadItem,
+): Promise<number> => {
+    if (uploadItem instanceof File) return uploadItem.size;
+    if (typeof uploadItem == "string")
+        return ensureElectron().pathOrZipItemSize(uploadItem);
+    if (Array.isArray(uploadItem))
+        return ensureElectron().pathOrZipItemSize(uploadItem);
+    return uploadItem.file.size;
 };
 
 const computeHash = async (uploadItem: UploadItem, worker: CryptoWorker) => {
@@ -1043,22 +1108,19 @@ const withThumbnail = async (
             //
             // We can only get here when we're running in our desktop app (since
             // only that works with non-File uploadItems), and the thumbnail
-            // generation failed. The scenarios are:
+            // generation failed.
             //
-            // 1. We're trying to generate an image thumbnail on Windows or on
-            //    ARM64 Linux. This won't be possible since the bundled
-            //    imagemagick doesn't yet support these OS/arch combinations.
-            //
-            // 2. We're trying to generate a video thumbnail on Intel macOS.
-            //    This won't be possible since the bundled ffmpeg doesn't
-            //    support Rosetta.
-            //
-            // 3. Some other arbitrary exception happened.
+            // The only know scenario is when we're trying to generate an image
+            // thumbnail on Windows or on ARM64 Linux, or are trying to
+            // generated the thumbnail for an HEIC file on Linux. This won't be
+            // possible since the bundled imagemagick doesn't yet support these
+            // OS/arch combinations.
             //
             // The fallback in this case involves reading the entire stream into
             // memory, and passing that data across the IPC boundary in a single
             // go (i.e. not in a streaming manner). This is risky for videos of
-            // unbounded sizes, so we can only apply this fallback for images.
+            // unbounded sizes, and since anyways we are not expected to come
+            // here for videos, soo we only apply this fallback for images.
 
             if (fileTypeInfo.fileType == FileType.image) {
                 const data = await readEntireStream(fileStream.stream);
@@ -1119,11 +1181,8 @@ const encryptFile = async (
 
     const {
         encryptedData: thumbEncryptedData,
-        decryptionHeaderB64: thumbDecryptionHeader,
-    } = await worker.encryptThumbnail({
-        data: file.thumbnail,
-        keyB64: fileKey,
-    });
+        decryptionHeader: thumbDecryptionHeader,
+    } = await worker.encryptThumbnail(file.thumbnail, fileKey);
     const encryptedThumbnail = {
         encryptedData: thumbEncryptedData,
         decryptionHeader: thumbDecryptionHeader,

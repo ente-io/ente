@@ -5,12 +5,13 @@
 #    load one of the files from the `configurations/` directory. If not present,
 #    then by default `local.yaml` (this file) will get loaded.
 #
-# 2. Then, museum will look for a file named `museum.yaml` in the current
-#    working directory. If found, this file will also be loaded, and entries
-#    specified therein will override the defaults specified here.
+# 2. If the "credentials-file" config option is set then museum will look for
+#    that file. If found, that file will also be loaded, and entries specified
+#    therein will override the defaults specified here.
 #
-# 3. If the "credentials-file" config option is set, then museum will also load
-#    that and merge it in.
+# 3. Then, museum will look for a file named `museum.yaml` (gitignored) in the
+#    current working directory. If found, this file will also be loaded and
+#    merged.
 #
 # 4. Config can be overridden with via environment variables (details below).
 #
@@ -184,7 +185,6 @@ s3:
     #         primaryBucket:
     #         replicaBuckets: []
 
-
 # Key used for encrypting customer emails before storing them in DB
 #
 # To make it easy to get started, some randomly generated values are provided
@@ -259,17 +259,6 @@ webauthn:
     rporigins:
         - "http://localhost:3001"
 
-# Roadmap SSO (optional)
-#
-# Allow the user to sign into an hosted roadmap service using their ente.io
-# credentials. Here we can can configure the URL prefix and service levels
-# credentials for SSO.
-roadmap:
-    # The prefix of the URL the user should be redirected to
-    url-prefix:
-    # This secret can be obtained from the roadmap dashboard
-    sso-secret:
-
 # Discord config (optional)
 # Use case: Devops
 discord:
@@ -323,6 +312,7 @@ internal:
     #     local-domain-suffix: "@example.org"
     #     local-domain-value: 123456
     # List of user IDs that can use the admin API endpoints.
+    # If this is not set, as a fallback, the first user is considered an admin.
     admins: []
 
 # Replication config

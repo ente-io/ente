@@ -47,6 +47,7 @@ Future<Uint8List?> getThumbnail(EnteFile file) async {
 Future<File?> getThumbnailForUploadedFile(EnteFile file) async {
   final cachedThumbnail = cachedThumbnailPath(file);
   if (await cachedThumbnail.exists()) {
+    _logger.info("Thumbnail already exists for ${file.uploadedFileID}");
     return cachedThumbnail;
   }
   final thumbnail = await getThumbnail(file);
@@ -55,8 +56,10 @@ Future<File?> getThumbnailForUploadedFile(EnteFile file) async {
     if (!await cachedThumbnail.exists()) {
       await cachedThumbnail.writeAsBytes(thumbnail, flush: true);
     }
+    _logger.info("Thumbnail obtained for ${file.uploadedFileID}");
     return cachedThumbnail;
   }
+  _logger.severe("Failed to get thumbnail for ${file.uploadedFileID}");
   return null;
 }
 

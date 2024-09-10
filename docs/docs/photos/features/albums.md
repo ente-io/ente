@@ -5,8 +5,54 @@ description: Using albums in Ente Photos
 
 # Albums
 
-Make the most of your albums and personalize them to your preferences with these
-simple yet effective features.
+## Preserving folder structure
+
+When you upload photos and videos into Ente using the desktop app - whether by
+dragging and dropping a folder or zip file (or selecting it in the "Upload"
+selector), or by setting up a [folder watch](/photos/features/watch-folders) -
+the app will provide you various options.
+
+### Uploading files or a folder without nesting
+
+If you are trying to just upload some files, then the app will provide you a
+selector where you can choose to (a) uploads all the files to an existing Ente
+album, or (b) create a new album.
+
+Similarly, if you upload a folder without any nested folders, than the app will
+ask if you want to upload them to an existing Ente album, or create a new album.
+
+The app will also try to intelligently determine the name of the new album.
+
+### Uploading a nested folder
+
+If the folder you're trying to upload has nesting and you select the option to
+create a new album, you will see two options - **A single album** and **Separate
+albums**.
+
+-   **Single album** will create a new Ente album with the same name as the
+    folder's name, and will then sync all the changes in the folder (and any
+    nested folders) to this single album.
+
+-   **Separate albums** will create separate albums for each nested folder of
+    the selected folder, and will then sync the changes in each nested folder
+    separately.
+
+-   For example, suppose you have a folder name `Photos` on your computer, and
+    inside that folder you have two nested folders named `New Year` and
+    `Summer`. In the single album mode, the app will create an Ente album named
+    "Photos" and put all the files from both `New Year` and `Summer` there. In
+    the separate album mode, the app will create two Ente albums, "New Year" and
+    "Summer", each only containing the respective files.
+
+-   In separate album mode, only nested folders that have at least one file will
+    result in the creation of a new album – empty folders (or folders that only
+    contain other folders) will be ignored.
+
+> [!NOTE]
+>
+> Ente albums cannot be nested currently. That is, in the **separate album**
+> mode described above, Ente will create a separate album for each nested
+> folder, but these Ente albums themselves will not be nested.
 
 ## Rename album
 

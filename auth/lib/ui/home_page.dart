@@ -22,11 +22,15 @@ import 'package:ente_auth/ui/account/logout_dialog.dart';
 import 'package:ente_auth/ui/code_error_widget.dart';
 import 'package:ente_auth/ui/code_widget.dart';
 import 'package:ente_auth/ui/common/loading_widget.dart';
+import 'package:ente_auth/ui/components/buttons/button_widget.dart';
+import 'package:ente_auth/ui/components/dialog_widget.dart';
+import 'package:ente_auth/ui/components/models/button_type.dart';
 import 'package:ente_auth/ui/home/coach_mark_widget.dart';
 import 'package:ente_auth/ui/home/home_empty_state.dart';
 import 'package:ente_auth/ui/home/speed_dial_label_widget.dart';
 import 'package:ente_auth/ui/scanner_page.dart';
 import 'package:ente_auth/ui/settings_page.dart';
+import 'package:ente_auth/ui/tools/app_lock.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_auth/utils/totp_util.dart';
@@ -54,6 +58,9 @@ class _HomePageState extends State<HomePage> {
   bool _isSettingsOpen = false;
   final Logger _logger = Logger("HomePage");
   final scaffoldKey = GlobalKey<ScaffoldState>();
+
+  // Used to request focus on the search box when clicked the search icon
+  late FocusNode searchBoxFocusNode;
 
   final TextEditingController _textController = TextEditingController();
   final bool _autoFocusSearch =
@@ -89,6 +96,8 @@ class _HomePageState extends State<HomePage> {
       setState(() {});
     });
     _showSearchBox = _autoFocusSearch;
+
+    searchBoxFocusNode = FocusNode();
   }
 
   void _loadCodes() {
@@ -158,6 +167,9 @@ class _HomePageState extends State<HomePage> {
     _triggerLogoutEvent?.cancel();
     _iconsChangedEvent?.cancel();
     _textController.removeListener(_applyFilteringAndRefresh);
+
+    searchBoxFocusNode.dispose();
+
     super.dispose();
   }
 
@@ -188,6 +200,28 @@ class _HomePageState extends State<HomePage> {
     );
     if (code != null) {
       await CodeStore.instance.addCode(code);
+    }
+  }
+
+  Future<void> navigateToLockScreen() async {
+    final bool shouldShowLockScreen =
+        await Configuration.instance.shouldShowLockScreen();
+    if (shouldShowLockScreen) {
+      await AppLock.of(context)!.showLockScreen();
+    } else {
+      await showDialogWidget(
+        context: context,
+        title: context.l10n.appLockNotEnabled,
+        body: context.l10n.appLockNotEnabledDescription,
+        isDismissible: true,
+        buttons: const [
+          ButtonWidget(
+            buttonType: ButtonType.secondary,
+            labelText: "OK",
+            isInAlert: true,
+          ),
+        ],
+      );
     }
   }
 
@@ -241,9 +275,22 @@ class _HomePageState extends State<HomePage> {
                     border: InputBorder.none,
                     focusedBorder: InputBorder.none,
                   ),
+                  focusNode: searchBoxFocusNode,
                 ),
-          centerTitle: true,
+          centerTitle: PlatformUtil.isDesktop() ? false : true,
           actions: <Widget>[
+            PlatformUtil.isDesktop()
+                ? IconButton(
+                    icon: const Icon(Icons.lock),
+                    tooltip: l10n.appLock,
+                    onPressed: () async {
+                      await navigateToLockScreen();
+                    },
+                  )
+                : const SizedBox.shrink(),
+            const SizedBox(
+              width: 4,
+            ),
             IconButton(
               icon: _showSearchBox
                   ? const Icon(Icons.clear)
@@ -258,6 +305,12 @@ class _HomePageState extends State<HomePage> {
                       _searchText = "";
                     } else {
                       _searchText = _textController.text;
+
+                      // Request focus on the search box
+                      // For Windows only for now. "Platform.isWindows" can be removed if other platforms has been tested.
+                      if (Platform.isWindows) {
+                        searchBoxFocusNode.requestFocus();
+                      }
                     }
                     _applyFilteringAndRefresh();
                   },
@@ -409,7 +462,7 @@ class _HomePageState extends State<HomePage> {
     final appLinks = AppLinks();
     try {
       String? initialLink;
-      initialLink = await appLinks.getInitialAppLinkString();
+      initialLink = await appLinks.getInitialLinkString();
       // Parse the link and warn the user, if it is not correct,
       // but keep in mind it could be `null`.
       if (initialLink != null) {

@@ -9,15 +9,18 @@ import AlbumOutlined from "@mui/icons-material/AlbumOutlined";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
 import { Tooltip, styled } from "@mui/material";
 import {
+    GAP_BTW_TILES,
+    IMAGE_CONTAINER_MAX_WIDTH,
+} from "components/PhotoList/constants";
+import {
     LoadingThumbnail,
     StaticThumbnail,
 } from "components/PlaceholderThumbnails";
-import { TRASH_SECTION } from "constants/collection";
-import { GAP_BTW_TILES, IMAGE_CONTAINER_MAX_WIDTH } from "constants/gallery";
 import i18n from "i18next";
 import { DeduplicateContext } from "pages/deduplicate";
 import { GalleryContext } from "pages/gallery";
 import React, { useContext, useEffect, useRef, useState } from "react";
+import { TRASH_SECTION } from "utils/collection";
 import { shouldShowAvatar } from "utils/file";
 import Avatar from "./Avatar";
 

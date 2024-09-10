@@ -1,12 +1,14 @@
-import { decryptMetadataJSON, encryptMetadataJSON } from "@/base/crypto/ente";
+import { decryptMetadataJSON, encryptMetadataJSON } from "@/base/crypto";
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { apiURL } from "@/base/origins";
+import { type Location } from "@/base/types";
 import {
     type EnteFile,
     type FilePublicMagicMetadata,
 } from "@/new/photos/types/file";
 import { mergeMetadata1 } from "@/new/photos/utils/file";
 import { ensure } from "@/utils/ensure";
+import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
 import { FileType } from "./file-type";
 
@@ -327,15 +329,16 @@ const withoutNullAndUndefinedValues = (o: object) =>
     );
 
 /**
- * Return the file's creation date in a form suitable for using in the UI.
+ * Return the file's creation date as a Date in the hypothetical "timezone of
+ * the photo".
  *
- * For all the details and nuance, see {@link toUIDate}.
+ * For all the details and nuance, see {@link createPhotoDate}.
  */
-export const getUICreationDate = (
+export const fileCreationPhotoDate = (
     enteFile: EnteFile,
     publicMagicMetadata: PublicMagicMetadata | undefined,
 ) =>
-    toUIDate(
+    createPhotoDate(
         publicMagicMetadata?.dateTime ??
             publicMagicMetadata?.editedTime ??
             enteFile.metadata.creationTime,
@@ -559,7 +562,7 @@ export interface ParsedMetadata {
      */
     creationDate?: ParsedMetadataDate;
     /** The GPS coordinates where the photo was taken. */
-    location?: { latitude: number; longitude: number };
+    location?: Location;
 }
 
 /**
@@ -724,9 +727,9 @@ export const parseMetadataDate = (
 const dropLast = (s: string) => (s ? s.substring(0, s.length - 1) : s);
 
 /**
- * Return a date that can be used on the UI by constructing it from a
- * {@link ParsedMetadataDate}, or its {@link dateTime} component, or a UTC epoch
- * timestamp.
+ * Return a date that can be used on the represent a photo on the UI, by
+ * constructing it from a {@link ParsedMetadataDate}, or its {@link dateTime}
+ * component, or a UTC epoch timestamp.
  *
  * These dates are all hypothetically in the timezone of the place where the
  * photo was taken. Different photos might've been taken in different timezones,
@@ -745,7 +748,9 @@ const dropLast = (s: string) => (s ? s.substring(0, s.length - 1) : s);
  *
  * See also: [Note: Photos are always in local date/time].
  */
-export const toUIDate = (dateLike: ParsedMetadataDate | string | number) => {
+export const createPhotoDate = (
+    dateLike: ParsedMetadataDate | string | number,
+) => {
     switch (typeof dateLike) {
         case "object":
             // A ISO 8601 string without a timezone. The Date constructor will
@@ -759,4 +764,23 @@ export const toUIDate = (dateLike: ParsedMetadataDate | string | number) => {
             // A UTC epoch microseconds value.
             return new Date(dateLike / 1000);
     }
+};
+
+/**
+ * Return the GPS coordinates (if any) present in the given {@link EnteFile}.
+ */
+export const fileLocation = (enteFile: EnteFile): Location | undefined => {
+    // TODO: EnteFile types. Need to verify that metadata itself, and
+    // metadata.lat/lng can not be null (I think they likely can, if so need to
+    // update the types). Need to supress the linter meanwhile.
+
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (!enteFile.metadata) return undefined;
+
+    const latitude = nullToUndefined(enteFile.metadata.latitude);
+    const longitude = nullToUndefined(enteFile.metadata.longitude);
+
+    if (latitude === undefined || longitude === undefined) return undefined;
+
+    return { latitude, longitude };
 };

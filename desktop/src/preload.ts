@@ -103,10 +103,10 @@ const logout = () => {
     return ipcRenderer.invoke("logout");
 };
 
-const encryptionKey = () => ipcRenderer.invoke("encryptionKey");
+const masterKeyB64 = () => ipcRenderer.invoke("masterKeyB64");
 
-const saveEncryptionKey = (encryptionKey: string) =>
-    ipcRenderer.invoke("saveEncryptionKey", encryptionKey);
+const saveMasterKeyB64 = (masterKeyB64: string) =>
+    ipcRenderer.invoke("saveMasterKeyB64", masterKeyB64);
 
 const lastShownChangelogVersion = () =>
     ipcRenderer.invoke("lastShownChangelogVersion");
@@ -342,8 +342,8 @@ contextBridge.exposeInMainWorld("electron", {
     openLogDirectory,
     selectDirectory,
     logout,
-    encryptionKey,
-    saveEncryptionKey,
+    masterKeyB64,
+    saveMasterKeyB64,
     lastShownChangelogVersion,
     setLastShownChangelogVersion,
     onMainWindowFocus,

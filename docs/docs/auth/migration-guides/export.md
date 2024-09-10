@@ -65,7 +65,7 @@ using user provided password & kdf params. For encryption, we are using
 -   **Ente Authenticator app**: You can directly import the codes in the Ente
     Authenticator app.
 
-    > Settings -> Data -> Import Codes -> ente Encrypted export.
+    > Settings -> Data -> Import Codes -> Ente Encrypted export.
 
 -   **Decrypt using Ente CLI** : Download the latest version of
     [Ente CLI](https://github.com/ente-io/ente/releases?q=tag%3Acli-v0), and run

@@ -581,7 +581,9 @@ class RemoteSyncService {
     _ignoredUploads = 0;
     final int toBeUploaded = filesToBeUploaded.length + updatedFileIDs.length;
     if (toBeUploaded > 0) {
-      Bus.instance.fire(SyncStatusUpdate(SyncStatus.preparingForUpload));
+      Bus.instance.fire(
+        SyncStatusUpdate(SyncStatus.preparingForUpload, total: toBeUploaded),
+      );
       await _uploader.verifyMediaLocationAccess();
       await _uploader.checkNetworkForUpload();
       // verify if files upload is allowed based on their subscription plan and

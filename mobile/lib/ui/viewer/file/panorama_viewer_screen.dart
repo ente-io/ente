@@ -127,6 +127,7 @@ class _PanoramaViewerScreenState extends State<PanoramaViewerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: isVisible ? AppBar() : null,
       body: Stack(
         children: [
           Panorama(
@@ -172,10 +173,10 @@ class _PanoramaViewerScreenState extends State<PanoramaViewerScreen> {
                       fixedSize: const Size(44, 44),
                     ),
                     icon: Icon(
-                      Icons.explore,
-                      color: control != SensorControl.none
-                          ? Colors.white
-                          : Colors.white.withOpacity(0.4),
+                      control == SensorControl.none
+                          ? Icons.explore_outlined
+                          : Icons.explore_off_outlined,
+                      color: Colors.white,
                       size: 26,
                     ),
                     onPressed: () async {

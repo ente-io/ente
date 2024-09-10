@@ -16,5 +16,11 @@
   },
   "pleaseLoginAgain": "Torna a iniciar sessió",
   "verifyPassword": "Verifica la contrasenya",
-  "pleaseWait": "Si us plau, espera..."
+  "pleaseWait": "Si us plau, espera...",
+  "incorrectPasswordTitle": "Contrasenya incorrecta",
+  "welcomeBack": "Benvingut de nou!",
+  "madeWithLoveAtPrefix": "fet amb ❤️ a ",
+  "changeEmail": "Canvia el correu electrònic",
+  "changePassword": "Canvia la contrasenya",
+  "importTypePlainText": "Text pla"
 }

@@ -125,6 +125,10 @@ export const sidebar = [
                         text: "Hide vs archive",
                         link: "/photos/faq/hidden-and-archive",
                     },
+                    {
+                        text: "Photo dates",
+                        link: "/photos/faq/photo-dates",
+                    },
                 ],
             },
             {
@@ -142,6 +146,14 @@ export const sidebar = [
                     {
                         text: "Missing thumbnails",
                         link: "/photos/troubleshooting/thumbnails",
+                    },
+                    {
+                        text: "Large uploads",
+                        link: "/photos/troubleshooting/large-uploads",
+                    },
+                    {
+                        text: "Network drives",
+                        link: "/photos/troubleshooting/nas",
                     },
                     {
                         text: "Sharing debug logs",
@@ -190,6 +202,15 @@ export const sidebar = [
                     {
                         text: "Exporting your data",
                         link: "/auth/migration-guides/export",
+                    },
+                ],
+            },
+            {
+                text: "Troubleshooting",
+                items: [
+                    {
+                        text: "Windows login",
+                        link: "/auth/troubleshooting/windows-login",
                     },
                 ],
             },
@@ -246,6 +267,10 @@ export const sidebar = [
                     {
                         text: "Shared albums",
                         link: "/self-hosting/faq/sharing",
+                    },
+                    {
+                        text: "Backups",
+                        link: "/self-hosting/faq/backup",
                     },
                 ],
             },

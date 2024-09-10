@@ -1,6 +1,10 @@
 import { Overlay } from "@ente/shared/components/Container";
 import { Box, styled } from "@mui/material";
-import { IMAGE_CONTAINER_MAX_WIDTH, MIN_COLUMNS } from "constants/gallery";
+import {
+    IMAGE_CONTAINER_MAX_WIDTH,
+    MIN_COLUMNS,
+} from "components/PhotoList/constants";
+
 export const CollectionListWrapper = styled(Box)`
     position: relative;
     overflow: hidden;

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:ente_auth/models/code_display.dart';
 import 'package:ente_auth/utils/totp_util.dart';
+import 'package:logging/logging.dart';
 
 class Code {
   static const defaultDigits = 6;
@@ -123,10 +124,11 @@ class Code {
   static Code fromOTPAuthUrl(String rawData, {CodeDisplay? display}) {
     Uri uri = Uri.parse(rawData);
     final issuer = _getIssuer(uri);
+    final account = _getAccount(uri);
 
     try {
       final code = Code(
-        _getAccount(uri),
+        account,
         issuer,
         _getDigits(uri),
         _getPeriod(uri),
@@ -144,6 +146,10 @@ class Code {
       if (rawData.contains("#")) {
         return Code.fromOTPAuthUrl(rawData.replaceAll("#", '%23'));
       } else {
+        Logger("Code").warning(
+          'Error while parsing code for issuer $issuer, $account',
+          e,
+        );
         rethrow;
       }
     }

@@ -10,6 +10,7 @@ import (
 
 	"github.com/ente-io/museum/pkg/controller/family"
 
+	bonusEntity "github.com/ente-io/museum/ente/storagebonus"
 	"github.com/ente-io/museum/pkg/repo/storagebonus"
 
 	gTime "time"
@@ -243,7 +244,7 @@ func (h *AdminHandler) UpdateReferral(c *gin.Context) {
 	}
 	go h.DiscordController.NotifyAdminAction(
 		fmt.Sprintf("Admin (%d) updating referral code for %d to %s", auth.GetUserID(c.Request.Header), request.UserID, request.Code))
-	err := h.StorageBonusCtl.UpdateReferralCode(c, request.UserID, request.Code)
+	err := h.StorageBonusCtl.UpdateReferralCode(c, request.UserID, request.Code, true)
 	if err != nil {
 		logrus.WithError(err).Error("Failed to disable 2FA")
 		handler.Error(c, stacktrace.Propagate(err, ""))
@@ -278,6 +279,67 @@ func (h *AdminHandler) RemovePasskeys(c *gin.Context) {
 		return
 	}
 	logger.Info("Passkeys successfully removed")
+	c.JSON(http.StatusOK, gin.H{})
+}
+
+func (h *AdminHandler) UpdateEmailMFA(c *gin.Context) {
+	var request ente.AdminOpsForUserRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Bad request"))
+		return
+	}
+	if request.EmailMFA == nil {
+		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage("emailMFA is required"), ""))
+		return
+	}
+
+	go h.DiscordController.NotifyAdminAction(
+		fmt.Sprintf("Admin (%d) updating email mfa (%v) for account %d", auth.GetUserID(c.Request.Header), request.EmailMFA, request.UserID))
+	logger := logrus.WithFields(logrus.Fields{
+		"user_id":  request.UserID,
+		"admin_id": auth.GetUserID(c.Request.Header),
+		"req_id":   requestid.Get(c),
+		"req_ctx":  "disable_email_mfa",
+	})
+	logger.Info("Initiate remove passkeys")
+	err := h.UserController.UpdateEmailMFA(c, request.UserID, *request.EmailMFA)
+	if err != nil {
+		logger.WithError(err).Error("Failed to update email mfa")
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	logger.Info("Email MFA successfully updated")
+	c.JSON(http.StatusOK, gin.H{})
+}
+
+func (h *AdminHandler) AddOtt(c *gin.Context) {
+	var request ente.AdminOttReq
+	if err := c.ShouldBindJSON(&request); err != nil {
+		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Bad request"))
+		return
+	}
+	if err := request.Validate(); err != nil {
+		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage(err.Error()), "Bad request"))
+		return
+	}
+
+	go h.DiscordController.NotifyAdminAction(
+		fmt.Sprintf("Admin (%d) adding custom ott", auth.GetUserID(c.Request.Header)))
+	logger := logrus.WithFields(logrus.Fields{
+		"user_id":  request.Email,
+		"code":     request.Code,
+		"admin_id": auth.GetUserID(c.Request.Header),
+		"req_id":   requestid.Get(c),
+		"req_ctx":  "custom_ott",
+	})
+
+	err := h.UserController.AddAdminOtt(request)
+	if err != nil {
+		logger.WithError(err).Error("Failed to add ott")
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	logger.Info("Success added ott")
 	c.JSON(http.StatusOK, gin.H{})
 }
 
@@ -390,8 +452,8 @@ func (h *AdminHandler) ReQueueItem(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{})
 }
 
-func (h *AdminHandler) UpdateBFDeal(c *gin.Context) {
-	var r ente.UpdateBlackFridayDeal
+func (h *AdminHandler) UpdateBonus(c *gin.Context) {
+	var r ente.SupportUpdateBonus
 	if err := c.ShouldBindJSON(&r); err != nil {
 		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Bad request"))
 		return
@@ -410,13 +472,14 @@ func (h *AdminHandler) UpdateBFDeal(c *gin.Context) {
 		validTill = gTime.Now().AddDate(r.Year, 0, 0).UnixMicro()
 	}
 	var err error
+	bonusType := bonusEntity.BonusType(r.BonusType)
 	switch r.Action {
 	case ente.ADD:
-		err = h.StorageBonusRepo.InsertBFBonus(c, r.UserID, validTill, storage)
+		err = h.StorageBonusRepo.InsertAddOnBonus(c, bonusType, r.UserID, validTill, storage)
 	case ente.UPDATE:
-		err = h.StorageBonusRepo.UpdateBFBonus(c, r.UserID, validTill, storage)
+		err = h.StorageBonusRepo.UpdateAddOnBonus(c, bonusType, r.UserID, validTill, storage)
 	case ente.REMOVE:
-		_, err = h.StorageBonusRepo.RemoveBFBonus(c, r.UserID)
+		_, err = h.StorageBonusRepo.RemoveAddOnBonus(c, bonusType, r.UserID)
 	}
 	if err != nil {
 		handler.Error(c, stacktrace.Propagate(err, ""))

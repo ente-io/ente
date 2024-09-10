@@ -1,5 +1,4 @@
-import { sharedCryptoWorker } from "@/base/crypto";
-import { encryptMetadataJSON } from "@/base/crypto/ente";
+import { encryptMetadataJSON, sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
 import { ItemVisibility } from "@/media/file-metadata";
@@ -18,18 +17,6 @@ import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { getActualKey } from "@ente/shared/user";
 import type { User } from "@ente/shared/user/types";
-import { REQUEST_BATCH_SIZE } from "constants/api";
-import {
-    ALL_SECTION,
-    ARCHIVE_SECTION,
-    COLLECTION_LIST_SORT_BY,
-    COLLECTION_SORT_ORDER,
-    CollectionSummaryType,
-    CollectionType,
-    DUMMY_UNCATEGORIZED_COLLECTION,
-    HIDDEN_ITEMS_SECTION,
-    TRASH_SECTION,
-} from "constants/collection";
 import { t } from "i18next";
 import {
     AddToCollectionRequest,
@@ -52,6 +39,15 @@ import {
 } from "types/collection";
 import { FamilyData } from "types/user";
 import {
+    ALL_SECTION,
+    ARCHIVE_SECTION,
+    COLLECTION_LIST_SORT_BY,
+    COLLECTION_SORT_ORDER,
+    CollectionSummaryType,
+    CollectionType,
+    DUMMY_UNCATEGORIZED_COLLECTION,
+    HIDDEN_ITEMS_SECTION,
+    TRASH_SECTION,
     changeCollectionSubType,
     getHiddenCollections,
     getNonHiddenCollections,
@@ -84,6 +80,8 @@ const HIDDEN_COLLECTION_IDS = "hidden-collection-ids";
 const UNCATEGORIZED_COLLECTION_NAME = "Uncategorized";
 export const HIDDEN_COLLECTION_NAME = ".hidden";
 const FAVORITE_COLLECTION_NAME = "Favorites";
+
+export const REQUEST_BATCH_SIZE = 1000;
 
 export const getCollectionLastSyncTime = async (collection: Collection) =>
     (await localForage.getItem<number>(`${collection.id}-time`)) ?? 0;

@@ -328,6 +328,10 @@ func (r *Repository) FinishRegistration(user *ente.User, friendlyName string, re
 
 	credential, err := r.webAuthnInstance.FinishRegistration(passkeyUser, *sessionData, req)
 	if err != nil {
+		if strings.Contains(err.Error(), "Error parsing attestation response") {
+			err = stacktrace.Propagate(ente.NewBadRequestWithMessage(err.Error()), "")
+			return
+		}
 		err = stacktrace.Propagate(err, "")
 		return
 	}
@@ -377,7 +381,7 @@ func (r *Repository) FinishAuthentication(user *ente.User, req *http.Request, se
 	}
 
 	if time.Now().After(sessionData.Expires) {
-		err = stacktrace.NewError("session expired")
+		err = &ente.ApiError{Code: ente.SessionExpired, Message: "Session expired", HttpStatusCode: http.StatusGone}
 		return
 	}
 

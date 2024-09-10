@@ -20,12 +20,6 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'cs';
 
-  static String m0(count) =>
-      "${Intl.plural(count, zero: 'Add collaborator', one: 'Add collaborator', other: 'Add collaborators')}";
-
-  static String m1(count) =>
-      "${Intl.plural(count, zero: 'Add viewer', one: 'Add viewer', other: 'Add viewers')}";
-
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "addCollaborators": m0,
@@ -122,5 +116,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "tooManyIncorrectAttempts":
             MessageLookupByLibrary.simpleMessage("Too many incorrect attempts"),
         "yourMap": MessageLookupByLibrary.simpleMessage("Your map")
+        "localSyncErrorMessage": MessageLookupByLibrary.simpleMessage(
+            "Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team")
       };
 }

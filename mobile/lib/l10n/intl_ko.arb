@@ -1,4 +1,5 @@
 {
+  "@@locale ": "en",
   "addToHiddenAlbum": "Add to hidden album",
   "moveToHiddenAlbum": "Move to hidden album",
   "fileTypes": "File types",
@@ -58,5 +59,19 @@
   "nameTheAlbum": "Name the album",
   "collectPhotos": "Collect photos",
   "collectPhotosDescription": "Create a link where your friends can upload photos in original quality.",
-  "collect": "Collect"
+  "collect": "Collect",
+  "enterYourEmailAddress": "이메일을 입력하세요",
+  "accountWelcomeBack": "다시 오신 것을 환영합니다!",
+  "email": "이메일",
+  "cancel": "닫기",
+  "verify": "인증",
+  "invalidEmailAddress": "잘못된 이메일 주소",
+  "enterValidEmail": "올바른 이메일 주소를 입력하세요.",
+  "deleteAccount": "계정 삭제",
+  "askDeleteReason": "계정을 삭제하는 가장 큰 이유가 무엇인가요?",
+  "feedback": "피드백",
+  "confirmAccountDeletion": "계정 삭제 확인",
+  "deleteAccountPermanentlyButton": "계정을 영구적으로 삭제",
+  "yourAccountHasBeenDeleted": "계정이 삭제되었습니다.",
+  "localSyncErrorMessage": "Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team"
 }

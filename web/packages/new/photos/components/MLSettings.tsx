@@ -1,12 +1,14 @@
 import { EnteDrawer } from "@/base/components/EnteDrawer";
-import { MenuItemGroup } from "@/base/components/Menu";
+import { MenuItemGroup, MenuSectionTitle } from "@/base/components/Menu";
 import { Titlebar } from "@/base/components/Titlebar";
+import { pt, ut } from "@/base/i18n";
 import log from "@/base/log";
 import {
     disableML,
     enableML,
     mlStatusSnapshot,
     mlStatusSubscribe,
+    wipClusterEnable,
     type MLStatus,
 } from "@/new/photos/services/ml";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
@@ -25,6 +27,7 @@ import {
     type DialogProps,
 } from "@mui/material";
 import { t } from "i18next";
+import { useRouter } from "next/router";
 import React, { useEffect, useState, useSyncExternalStore } from "react";
 import { Trans } from "react-i18next";
 import type { NewAppContextPhotos } from "../types/context";
@@ -295,19 +298,28 @@ const ManageML: React.FC<ManageMLProps> = ({
     onDisableML,
     setDialogBoxAttributesV2,
 }) => {
+    const [showClusterOpt, setShowClusterOpt] = useState(false);
     const { phase, nSyncedFiles, nTotalFiles } = mlStatus;
+
+    useEffect(() => void wipClusterEnable().then(setShowClusterOpt), []);
 
     let status: string;
     switch (phase) {
-        case "indexing":
-            status = "running";
-            break;
         case "scheduled":
-            status = "scheduled";
+            status = t("indexing_status_scheduled");
             break;
-        // TODO: Clustering
+        case "fetching":
+            status = t("indexing_status_fetching");
+            break;
+        case "indexing":
+            status = t("indexing_status_running");
+            break;
+        case "clustering":
+            // TODO-Cluster
+            status = pt("Grouping faces");
+            break;
         default:
-            status = "done";
+            status = t("indexing_status_done");
             break;
     }
     const processed = `${nSyncedFiles} / ${nTotalFiles}`;
@@ -325,6 +337,10 @@ const ManageML: React.FC<ManageMLProps> = ({
             buttonDirection: "row",
         });
     };
+
+    // TODO-Cluster
+    const router = useRouter();
+    const wipClusterDebug = () => router.push("/cluster-debug");
 
     return (
         <Stack px={"16px"} py={"20px"} gap={4}>
@@ -351,9 +367,7 @@ const ManageML: React.FC<ManageMLProps> = ({
                         <Typography color="text.faint">
                             {t("indexing")}
                         </Typography>
-                        <Typography>
-                            {t("indexing_status", { context: status })}
-                        </Typography>
+                        <Typography>{status}</Typography>
                     </Stack>
                     <Divider sx={{ marginInlineStart: 2 }} />
                     <Stack
@@ -371,6 +385,23 @@ const ManageML: React.FC<ManageMLProps> = ({
                     </Stack>
                 </Stack>
             </Paper>
+            {showClusterOpt && (
+                <Box>
+                    <MenuItemGroup>
+                        <EnteMenuItem
+                            label={ut(
+                                "Create clusters   • internal only option",
+                            )}
+                            onClick={wipClusterDebug}
+                        />
+                    </MenuItemGroup>
+                    <MenuSectionTitle
+                        title={ut(
+                            "Create and show in-memory clusters (not saved or synced). You can also view them in the search dropdown later.",
+                        )}
+                    />
+                </Box>
+            )}
         </Stack>
     );
 };

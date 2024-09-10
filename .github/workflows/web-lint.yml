@@ -1,12 +1,16 @@
 name: "Lint (web)"
 
 on:
-    # Run on every push to a branch other than main that changes web/
-    push:
-        branches-ignore: [main]
+    # Run on every pull request (open or push to it) that changes web/
+    pull_request:
         paths:
             - "web/**"
             - ".github/workflows/web-lint.yml"
+
+# Cancel in-progress lint runs when a new commit is pushed.
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
 
 jobs:
     lint:

@@ -1,4 +1,7 @@
-import { PLAN_PERIOD } from "constants/gallery";
+export enum PLAN_PERIOD {
+    MONTH = "month",
+    YEAR = "year",
+}
 
 export interface Subscription {
     id: number;

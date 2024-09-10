@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/service_locator.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
@@ -92,7 +93,35 @@ class BackupSettingsScreen extends StatelessWidget {
                               alignCaptionedTextToLeft: true,
                               isTopBorderRadiusRemoved: true,
                               isGestureDetectorDisabled: true,
+                              isBottomBorderRadiusRemoved:
+                                  flagService.enableMobMultiPart,
                             ),
+                            if (flagService.enableMobMultiPart)
+                              DividerWidget(
+                                dividerType: DividerType.menuNoIcon,
+                                bgColor: colorScheme.fillFaint,
+                              ),
+                            if (flagService.enableMobMultiPart)
+                              MenuItemWidget(
+                                captionedTextWidget: CaptionedTextWidget(
+                                  title: S.of(context).resumableUploads,
+                                ),
+                                menuItemColor: colorScheme.fillFaint,
+                                singleBorderRadius: 8,
+                                trailingWidget: ToggleSwitchWidget(
+                                  value: () =>
+                                      localSettings.userEnabledMultiplePart,
+                                  onChanged: () async {
+                                    await localSettings
+                                        .setUserEnabledMultiplePart(
+                                      !localSettings.userEnabledMultiplePart,
+                                    );
+                                  },
+                                ),
+                                alignCaptionedTextToLeft: true,
+                                isTopBorderRadiusRemoved: true,
+                                isGestureDetectorDisabled: true,
+                              ),
                           ],
                         ),
                         const SizedBox(height: 24),

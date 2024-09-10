@@ -48,25 +48,13 @@ The root `package.json` also has a convenience dev dependency:
 
 ## Cryptography
 
-We use [libsodium](https://libsodium.gitbook.io/doc/) for encryption, key
-generation etc. Specifically, we use its WebAssembly and JS wrappers made using
-Emscripten, maintained by the original authors of libsodium themselves -
+We use [libsodium](https://libsodium.gitbook.io/doc/) for our cryptography
+primitives. We use its WebAssembly target, accessible via JavaScript wrappers
+maintained by the original authors of libsodium themselves -
 [libsodium-wrappers](https://github.com/jedisct1/libsodium.js).
 
-Currently, we've pinned the version to 0.7.9 since later versions remove the
-`crypto_pwhash_*` functionality that we use (they've not been deprecated,
-they've just been moved to a different NPM package). From the (upstream)
-[release notes](https://github.com/jedisct1/libsodium/releases/tag/1.0.19-RELEASE):
-
-> Emscripten: the `crypto_pwhash_*()` functions have been removed from Sumo
-> builds, as they reserve a substantial amount of JavaScript memory, even when
-> not used.
-
-This wording is a bit incorrect, they've actually been _added_ to the sumo
-builds (See this [issue](https://github.com/jedisct1/libsodium.js/issues/326)).
-
-Updating it is not a big problem, it is just a pending chore - we want to test a
-bit more exhaustively when changing the crypto layer.
+More precisely, we use the sumo variant, "libsodium-wrappers-sumo", since the
+standard variant does not provide the `crypto_pwhash_*` functions.
 
 ## Meta frameworks
 
@@ -102,51 +90,16 @@ DOM.
 ### MUI and Material Icons
 
 We use [MUI](https://mui.com)'s
+[@mui/material](https://mui.com/material-ui/getting-started/installation/) as
+our base React component library.
 
--   [@mui/material](https://mui.com/material-ui/getting-started/installation/),
-    which is a React component library, to get a base set of components; and
+MUI uses [Emotion](https://emotion.sh/) as its preferred CSS-in-JS library, for
+which we need to install install two Emotion packages (`@emotion/react` and
+`@emotion/styled`) as peer dependencies.
 
--   [@mui/material-icons](https://mui.com/material-ui/material-icons/). which
-    provides Material icons exported as React components (a `SvgIcon`).
-
-### Emotion
-
-MUI uses [Emotion](https://emotion.sh/) (a styled-component variant) as its
-preferred CSS-in-JS library, so we use the same in our code too to reduce moving
-parts.
-
-Emotion itself comes in many parts, of which we need the following:
-
--   [@emotion/react](https://github.com/emotion-js/emotion) - React interface to
-    Emotion. In particular, we set this as the package that handles the
-    transformation of JSX into JS (via the `jsxImportSource` property in
-    `tsconfig.json`).
-
--   [@emotion/styled](https://github.com/emotion-js/emotion) - Provides the
-    `styled` utility, a la styled-components. We don't use it directly, instead
-    we import it from `@mui/material`. However, MUI docs
-    [mention](https://mui.com/material-ui/integrations/interoperability/#styled-components)
-    that
-
-    > Keep `@emotion/styled` as a dependency of your project. Even if you never
-    > use it explicitly, it's a peer dependency of `@mui/material`.
-
-#### Component selectors
-
-Note that currently the SWC plugin doesn't allow the use of the component
-selectors API (i.e using `styled.div` instead of `styled("div")`).
-
-> I think the transform for component selectors is not implemented in the swc
-> plugin.
->
-> https://github.com/vercel/next.js/issues/46973
-
-There is a way of enabling it by installing the `@emotion/babel-plugin` and
-specifying the import map as mentioned
-[here](https://mui.com/system/styled/#how-to-use-components-selector-api)
-([full example](https://github.com/mui/material-ui/issues/27380#issuecomment-928973157)),
-but that disables the SWC integration altogether, so we live with this
-infelicity for now.
+We also use MUI's
+[@mui/material-icons](https://mui.com/material-ui/material-icons/) package,
+which provides Material icons exported as React components (a `SvgIcon`).
 
 ### Date pickers
 
@@ -179,6 +132,8 @@ For more details, see [translations.md](translations.md).
 -   [formik](https://github.com/jaredpalmer/formik) provides an easier to use
     abstraction for dealing with form state, validation and submission states
     when using React.
+
+-   [react-select](https://react-select.com/) is used for search dropdowns.
 
 ## Utilities
 
@@ -229,6 +184,9 @@ For more details, see [translations.md](translations.md).
 -   [sanitize-filename](https://github.com/parshap/node-sanitize-filename) is
     for converting arbitrary strings into strings that are suitable for being
     used as filenames.
+
+-   [chrono-node](https://github.com/wanasit/chrono) is used for parsing natural
+    language queries into dates for showing search results.
 
 ### Face search
 

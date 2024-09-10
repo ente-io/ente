@@ -3,11 +3,9 @@
     "version": "0.0.0",
     "private": true,
     "dependencies": {
-        "libsodium-wrappers": "0.7.9",
         "yup": "^1.4"
     },
     "devDependencies": {
-        "@/build-config": "*",
-        "@types/libsodium-wrappers": "0.7.9"
+        "@/build-config": "*"
     }
 }

@@ -1,37 +1,31 @@
-import { isDesktop } from "@/base/app";
 import log from "@/base/log";
 import { FileType } from "@/media/file-type";
 import {
-    clipMatches,
-    isMLEnabled,
     isMLSupported,
     mlStatusSnapshot,
-    wipCluster,
-    wipClusterEnable,
+    wipSearchPersons,
 } from "@/new/photos/services/ml";
-import type { Person } from "@/new/photos/services/ml/people";
-import { personDiff } from "@/new/photos/services/user-entity";
-import { EnteFile } from "@/new/photos/types/file";
-import * as chrono from "chrono-node";
-import { t } from "i18next";
-import { Collection } from "types/collection";
-import { EntityType, LocationTag, LocationTagData } from "types/entity";
+import { createSearchQuery, search } from "@/new/photos/services/search";
+import type {
+    SearchDateComponents,
+    SearchPerson,
+} from "@/new/photos/services/search/types";
 import {
+    City,
     ClipSearchScores,
-    DateValue,
-    Search,
     SearchOption,
+    SearchQuery,
     Suggestion,
     SuggestionType,
-} from "types/search";
-import ComlinkSearchWorker from "utils/comlink/ComlinkSearchWorker";
+} from "@/new/photos/services/search/types";
+import type { LocationTag } from "@/new/photos/services/user-entity";
+import { EnteFile } from "@/new/photos/types/file";
+import { t } from "i18next";
+import { Collection } from "types/collection";
 import { getUniqueFiles } from "utils/file";
-import { getFormattedDate } from "utils/search";
-import { getEntityKey, getLatestEntities } from "./entityService";
-import locationSearchService, { City } from "./locationSearchService";
 
-const DIGITS = new Set(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]);
-
+// Suggestions shown in the search dropdown's empty state, i.e. when the user
+// selects the search bar but does not provide any input.
 export const getDefaultOptions = async () => {
     return [
         await getMLStatusSuggestion(),
@@ -39,24 +33,25 @@ export const getDefaultOptions = async () => {
     ].filter((t) => !!t);
 };
 
+// Suggestions shown in the search dropdown when the user has typed something.
 export const getAutoCompleteSuggestions =
     (files: EnteFile[], collections: Collection[]) =>
     async (searchPhrase: string): Promise<SearchOption[]> => {
         try {
-            searchPhrase = searchPhrase.trim().toLowerCase();
-            if (!searchPhrase?.length) {
+            const searchPhrase2 = searchPhrase.trim().toLowerCase();
+            if (!searchPhrase2?.length) {
                 return [];
             }
             const suggestions: Suggestion[] = [
-                await getClipSuggestion(searchPhrase),
-                ...getFileTypeSuggestion(searchPhrase),
-                ...getHolidaySuggestion(searchPhrase),
-                ...getYearSuggestion(searchPhrase),
-                ...getDateSuggestion(searchPhrase),
-                ...getCollectionSuggestion(searchPhrase, collections),
-                getFileNameSuggestion(searchPhrase, files),
-                getFileCaptionSuggestion(searchPhrase, files),
-                ...(await getLocationSuggestions(searchPhrase)),
+                // The following functionality has moved to createSearchQuery
+                // - getClipSuggestion(searchPhrase)
+                // - getDateSuggestion(searchPhrase),
+                // - getLocationSuggestion(searchPhrase),
+                // - getFileTypeSuggestion(searchPhrase),
+                ...(await createSearchQuery(searchPhrase)),
+                ...getCollectionSuggestion(searchPhrase2, collections),
+                getFileNameSuggestion(searchPhrase2, files),
+                getFileCaptionSuggestion(searchPhrase2, files),
             ].filter((suggestion) => !!suggestion);
 
             return convertSuggestionsToOptions(suggestions);
@@ -69,13 +64,10 @@ export const getAutoCompleteSuggestions =
 async function convertSuggestionsToOptions(
     suggestions: Suggestion[],
 ): Promise<SearchOption[]> {
-    const searchWorker = await ComlinkSearchWorker.getInstance();
     const previewImageAppendedOptions: SearchOption[] = [];
     for (const suggestion of suggestions) {
         const searchQuery = convertSuggestionToSearchQuery(suggestion);
-        const resultFiles = getUniqueFiles(
-            await searchWorker.search(searchQuery),
-        );
+        const resultFiles = getUniqueFiles(await search(searchQuery));
         if (searchQuery?.clip) {
             resultFiles.sort((a, b) => {
                 const aScore = searchQuery.clip.get(a.id);
@@ -92,74 +84,6 @@ async function convertSuggestionsToOptions(
         }
     }
     return previewImageAppendedOptions;
-}
-function getFileTypeSuggestion(searchPhrase: string): Suggestion[] {
-    return [
-        {
-            label: t("IMAGE"),
-            value: FileType.image,
-            type: SuggestionType.FILE_TYPE,
-        },
-        {
-            label: t("VIDEO"),
-            value: FileType.video,
-            type: SuggestionType.FILE_TYPE,
-        },
-        {
-            label: t("LIVE_PHOTO"),
-            value: FileType.livePhoto,
-            type: SuggestionType.FILE_TYPE,
-        },
-    ].filter((suggestion) =>
-        suggestion.label.toLowerCase().includes(searchPhrase),
-    );
-}
-
-function getHolidaySuggestion(searchPhrase: string): Suggestion[] {
-    return [
-        {
-            label: t("CHRISTMAS"),
-            value: { month: 11, date: 25 },
-            type: SuggestionType.DATE,
-        },
-        {
-            label: t("CHRISTMAS_EVE"),
-            value: { month: 11, date: 24 },
-            type: SuggestionType.DATE,
-        },
-        {
-            label: t("NEW_YEAR"),
-            value: { month: 0, date: 1 },
-            type: SuggestionType.DATE,
-        },
-        {
-            label: t("NEW_YEAR_EVE"),
-            value: { month: 11, date: 31 },
-            type: SuggestionType.DATE,
-        },
-    ].filter((suggestion) =>
-        suggestion.label.toLowerCase().includes(searchPhrase),
-    );
-}
-
-function getYearSuggestion(searchPhrase: string): Suggestion[] {
-    if (searchPhrase.length === 4) {
-        try {
-            const year = parseInt(searchPhrase);
-            if (year >= 1970 && year <= new Date().getFullYear()) {
-                return [
-                    {
-                        label: searchPhrase,
-                        value: { year },
-                        type: SuggestionType.DATE,
-                    },
-                ];
-            }
-        } catch (e) {
-            log.error("getYearSuggestion failed", e);
-        }
-    }
-    return [];
 }
 
 export async function getAllPeopleSuggestion(): Promise<Array<Suggestion>> {
@@ -192,6 +116,9 @@ export async function getMLStatusSuggestion(): Promise<Suggestion> {
         case "indexing":
             label = t("indexing_photos", status);
             break;
+        case "fetching":
+            label = t("indexing_fetching", status);
+            break;
         case "clustering":
             label = t("indexing_people", status);
             break;
@@ -206,16 +133,6 @@ export async function getMLStatusSuggestion(): Promise<Suggestion> {
         value: status,
         hide: true,
     };
-}
-
-function getDateSuggestion(searchPhrase: string): Suggestion[] {
-    const searchedDates = parseHumanDate(searchPhrase);
-
-    return searchedDates.map((searchedDate) => ({
-        type: SuggestionType.DATE,
-        value: searchedDate,
-        label: getFormattedDate(searchedDate),
-    }));
 }
 
 function getCollectionSuggestion(
@@ -258,53 +175,6 @@ function getFileCaptionSuggestion(
     };
 }
 
-async function getLocationSuggestions(searchPhrase: string) {
-    const locationTagResults = await searchLocationTag(searchPhrase);
-    const locationTagSuggestions = locationTagResults.map(
-        (locationTag) =>
-            ({
-                type: SuggestionType.LOCATION,
-                value: locationTag.data,
-                label: locationTag.data.name,
-            }) as Suggestion,
-    );
-    const locationTagNames = new Set(
-        locationTagSuggestions.map((result) => result.label),
-    );
-
-    const citySearchResults =
-        await locationSearchService.searchCities(searchPhrase);
-
-    const nonConflictingCityResult = citySearchResults.filter(
-        (city) => !locationTagNames.has(city.city),
-    );
-
-    const citySearchSuggestions = nonConflictingCityResult.map(
-        (city) =>
-            ({
-                type: SuggestionType.CITY,
-                value: city,
-                label: city.city,
-            }) as Suggestion,
-    );
-
-    return [...locationTagSuggestions, ...citySearchSuggestions];
-}
-
-async function getClipSuggestion(
-    searchPhrase: string,
-): Promise<Suggestion | undefined> {
-    if (!isDesktop) return undefined;
-
-    const clipResults = await searchClip(searchPhrase);
-    if (!clipResults) return undefined;
-    return {
-        type: SuggestionType.CLIP,
-        value: clipResults,
-        label: searchPhrase,
-    };
-}
-
 function searchCollection(
     searchPhrase: string,
     collections: Collection[],
@@ -332,65 +202,16 @@ function searchFilesByCaption(searchPhrase: string, files: EnteFile[]) {
     );
 }
 
-function parseHumanDate(humanDate: string): DateValue[] {
-    const date = chrono.parseDate(humanDate);
-    const date1 = chrono.parseDate(`${humanDate} 1`);
-    if (date !== null) {
-        const dates = [
-            { month: date.getMonth() },
-            { date: date.getDate(), month: date.getMonth() },
-        ];
-        let reverse = false;
-        humanDate.split("").forEach((c) => {
-            if (DIGITS.has(c)) {
-                reverse = true;
-            }
-        });
-        if (reverse) {
-            return dates.reverse();
-        }
-        return dates;
-    }
-    if (date1) {
-        return [{ month: date1.getMonth() }];
-    }
-    return [];
-}
-
-async function searchLocationTag(searchPhrase: string): Promise<LocationTag[]> {
-    const locationTags = await getLatestEntities<LocationTagData>(
-        EntityType.LOCATION_TAG,
-    );
-    const matchedLocationTags = locationTags.filter((locationTag) =>
-        locationTag.data.name.toLowerCase().includes(searchPhrase),
-    );
-    if (matchedLocationTags.length > 0) {
-        log.info(
-            `Found ${matchedLocationTags.length} location tags for search phrase`,
-        );
-    }
-    return matchedLocationTags;
-}
-
-const searchClip = async (
-    searchPhrase: string,
-): Promise<ClipSearchScores | undefined> => {
-    if (!isMLEnabled()) return undefined;
-    const matches = await clipMatches(searchPhrase);
-    log.debug(() => ["clip/scores", matches]);
-    return matches;
-};
-
-function convertSuggestionToSearchQuery(option: Suggestion): Search {
+function convertSuggestionToSearchQuery(option: Suggestion): SearchQuery {
     switch (option.type) {
         case SuggestionType.DATE:
             return {
-                date: option.value as DateValue,
+                date: option.value as SearchDateComponents,
             };
 
         case SuggestionType.LOCATION:
             return {
-                location: option.value as LocationTagData,
+                location: option.value as LocationTag,
             };
 
         case SuggestionType.CITY:
@@ -406,7 +227,7 @@ function convertSuggestionToSearchQuery(option: Suggestion): Search {
             return { files: option.value as number[] };
 
         case SuggestionType.PERSON:
-            return { person: option.value as Person };
+            return { person: option.value as SearchPerson };
 
         case SuggestionType.FILE_TYPE:
             return { fileType: option.value as FileType };
@@ -417,28 +238,27 @@ function convertSuggestionToSearchQuery(option: Suggestion): Search {
 }
 
 async function getAllPeople(limit: number = undefined) {
-    if (!(await wipClusterEnable())) return [];
+    return (await wipSearchPersons()).slice(0, limit);
+    // TODO-Clustetr
+    // if (done) return [];
 
-    if (process.env.NEXT_PUBLIC_ENTE_WIP_CL_FETCH) {
-        const entityKey = await getEntityKey("person" as EntityType);
-        const peopleR = await personDiff(entityKey.data);
-        const r = peopleR.length;
-        log.debug(() => ["people", peopleR]);
+    // done = true;
+    // if (process.env.NEXT_PUBLIC_ENTE_WIP_CL_FETCH) {
+    //     await syncCGroups();
+    //     const people = await clusterGroups();
+    //     log.debug(() => ["people", { people }]);
+    // }
 
-        if (r) return [];
-        return [];
-    }
+    // let people: Array<SearchPerson> = []; // await mlIDbStorage.getAllPeople();
+    // people = await wipCluster();
+    // // await mlPeopleStore.iterate<Person, void>((person) => {
+    // //     people.push(person);
+    // // });
+    // people = people ?? [];
+    // const result = people
+    //     .sort((p1, p2) => p2.files.length - p1.files.length)
+    //     .slice(0, limit);
+    // // log.debug(() => ["getAllPeople", result]);
 
-    let people: Array<Person> = []; // await mlIDbStorage.getAllPeople();
-    people = await wipCluster();
-    // await mlPeopleStore.iterate<Person, void>((person) => {
-    //     people.push(person);
-    // });
-    people = people ?? [];
-    const result = people
-        .sort((p1, p2) => p2.files.length - p1.files.length)
-        .slice(0, limit);
-    // log.debug(() => ["getAllPeople", result]);
-
-    return result;
+    // return result;
 }

@@ -1,11 +1,11 @@
 import { clearBlobCaches } from "@/base/blob-cache";
 import { clearKVDB } from "@/base/kv";
+import { clearLocalStorage } from "@/base/local-storage";
 import log from "@/base/log";
-import InMemoryStore from "@ente/shared/storage/InMemoryStore";
 import localForage from "@ente/shared/storage/localForage";
-import { clearData } from "@ente/shared/storage/localStorage";
 import { clearKeys } from "@ente/shared/storage/sessionStorage";
 import { logout as remoteLogout } from "../api/user";
+import { clearStashedRedirect } from "./redirect";
 
 /**
  * Logout sequence common to all apps that rely on the accounts package.
@@ -21,13 +21,15 @@ export const accountLogout = async () => {
     const ignoreError = (label: string, e: unknown) =>
         log.error(`Ignoring error during logout (${label})`, e);
 
+    log.info("logout (account)");
+
     try {
         await remoteLogout();
     } catch (e) {
         ignoreError("Remote", e);
     }
     try {
-        InMemoryStore.clear();
+        clearStashedRedirect();
     } catch (e) {
         ignoreError("In-memory store", e);
     }
@@ -37,7 +39,7 @@ export const accountLogout = async () => {
         ignoreError("Session storage", e);
     }
     try {
-        clearData();
+        clearLocalStorage();
     } catch (e) {
         ignoreError("Local storage", e);
     }
