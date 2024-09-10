@@ -71,7 +71,6 @@ class Configuration {
       "has_selected_all_folders_for_backup";
   static const anonymousUserIDKey = "anonymous_user_id";
   static const endPointKey = "endpoint";
-  static const guestViewKey = "key_guest_view";
   static final _logger = Logger("Configuration");
 
   String? _cachedToken;
@@ -632,14 +631,6 @@ class Configuration {
 
   Future<void> setSystemLockScreen(bool value) {
     return _preferences.setBool(keyShowSystemLockScreen, value);
-  }
-
-  Future<void> setGuestView(bool value) {
-    return _preferences.setBool(guestViewKey, value);
-  }
-
-  bool getGuestView() {
-    return _preferences.getBool(guestViewKey) ?? false;
   }
 
   void setVolatilePassword(String volatilePassword) {

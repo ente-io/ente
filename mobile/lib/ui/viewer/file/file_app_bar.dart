@@ -6,7 +6,6 @@ import "package:flutter_svg/flutter_svg.dart";
 import "package:local_auth/local_auth.dart";
 import 'package:logging/logging.dart';
 import 'package:media_extension/media_extension.dart';
-import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/guest_view_event.dart";
 import "package:photos/generated/l10n.dart";
@@ -476,7 +475,7 @@ class FileAppBarState extends State<FileAppBar> {
   Future<void> _onTapGuestView() async {
     if (await LocalAuthentication().isDeviceSupported()) {
       Bus.instance.fire(GuestViewEvent(true, true));
-      await Configuration.instance.setGuestView(true);
+      await localSettings.setOnGuestView(true);
     } else {
       await showErrorDialog(
         context,
@@ -494,7 +493,7 @@ class FileAppBarState extends State<FileAppBar> {
     );
     if (hasAuthenticated) {
       Bus.instance.fire(GuestViewEvent(false, false));
-      await Configuration.instance.setGuestView(false);
+      await localSettings.setOnGuestView(false);
     }
   }
 }
