@@ -251,18 +251,11 @@ const SearchInput: React.FC<SearchInputProps> = ({
         refreshDefaultOptions();
     };
 
-    const MemoizedCustomMenu = useCallback(
-        (props: CustomMenuProps) => (
-            <CustomMenu {...props} setValue={setValue} selectRef={selectRef} />
-        ),
-        [setValue, selectRef],
-    );
-
     const components = useMemo(
         () => ({
             Option: OptionWithInfo,
             ValueContainer: ValueContainerWithIcon,
-            Menu: MemoizedCustomMenu,
+            Menu: CustomMenu,
             Input: VisibleInput,
         }),
         [],
