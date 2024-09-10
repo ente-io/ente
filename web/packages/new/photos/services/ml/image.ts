@@ -5,17 +5,9 @@ import { ensure } from "@/utils/ensure";
 import { Matrix, inverse } from "ml-matrix";
 import { clamp } from "./math";
 
-const gaussianKernelSize = 5;
-const gaussianKernelRadius = Math.floor(gaussianKernelSize / 2);
-const gaussianSigma = 10.0;
-const gaussianKernel: number[][] = create2DGaussianKernel(
-    gaussianKernelSize,
-    gaussianSigma,
-);
-
 /**
  * Returns the pixel value (RGB) at the given coordinates ({@link fx},
- * {@link fy}) using bilinear interpolation (optionally with antialias)
+ * {@link fy}) using bilinear interpolation (optionally anti-aliased).
  */
 export function pixelRGBBilinear(
     fx: number,
@@ -23,7 +15,7 @@ export function pixelRGBBilinear(
     imageData: Uint8ClampedArray,
     imageWidth: number,
     imageHeight: number,
-    useAntiAlias = false,
+    antiAlias: boolean,
 ) {
     // Clamp to image boundaries.
     fx = clamp(fx, 0, imageWidth - 1);
@@ -40,7 +32,7 @@ export function pixelRGBBilinear(
     const dy1 = 1.0 - dy;
 
     // Get the original pixels.
-    const getPixelRGBA: Function = useAntiAlias ? pixelRGBABlurred : pixelRGBA;
+    const getPixelRGBA = antiAlias ? pixelRGBABlurred : pixelRGBA;
     const pixel1 = getPixelRGBA(imageData, imageWidth, imageHeight, x0, y0);
     const pixel2 = getPixelRGBA(imageData, imageWidth, imageHeight, x1, y0);
     const pixel3 = getPixelRGBA(imageData, imageWidth, imageHeight, x0, y1);
@@ -97,7 +89,7 @@ const pixelRGBABlurred = (
             const py = y - gaussianKernelRadius + ky;
 
             const pixelRgbTuple = pixelRGBA(imageData, width, height, px, py);
-            const weight = gaussianKernel[ky][kx];
+            const weight = gaussianKernel[ky]![kx]!;
 
             r += pixelRgbTuple.r * weight;
             g += pixelRgbTuple.g * weight;
@@ -324,8 +316,12 @@ export const grayscaleIntMatrixFromNormalized2List = (
     );
 };
 
-function create2DGaussianKernel(size: number, sigma: number): number[][] {
-    const kernel: number[][] = Array(size).map(() => Array(size).fill(0));
+const gaussianKernelSize = 5;
+const gaussianKernelRadius = Math.floor(gaussianKernelSize / 2);
+const gaussianSigma = 10.0;
+
+const create2DGaussianKernel = (size: number, sigma: number): number[][] => {
+    const kernel = Array(size).map(() => Array(size).fill(0) as number[]);
     let sum = 0.0;
     const center = Math.floor(size / 2);
 
@@ -336,7 +332,7 @@ function create2DGaussianKernel(size: number, sigma: number): number[][] {
             const g =
                 (1 / (2 * Math.PI * sigma * sigma)) *
                 Math.exp(-(dx * dx + dy * dy) / (2 * sigma * sigma));
-            kernel[y][x] = g;
+            kernel[y]![x] = g;
             sum += g;
         }
     }
@@ -344,9 +340,14 @@ function create2DGaussianKernel(size: number, sigma: number): number[][] {
     // Normalize the kernel
     for (let y = 0; y < size; y++) {
         for (let x = 0; x < size; x++) {
-            kernel[y][x] /= sum;
+            kernel[y]![x]! /= sum;
         }
     }
 
     return kernel;
-}
+};
+
+const gaussianKernel: number[][] = create2DGaussianKernel(
+    gaussianKernelSize,
+    gaussianSigma,
+);
