@@ -442,12 +442,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Пожалуйста, проверьте свой почтовый ящик (и спам) для завершения верификации"),
         "checkStatus": MessageLookupByLibrary.simpleMessage("Проверить статус"),
         "checking": MessageLookupByLibrary.simpleMessage("Проверка..."),
-        "cl_guest_view_title":
-            MessageLookupByLibrary.simpleMessage("Гостевой вид"),
-        "cl_panorama_viewer_title":
-            MessageLookupByLibrary.simpleMessage("Просмотр Панорамы"),
-        "cl_video_player_title":
-            MessageLookupByLibrary.simpleMessage("Видеоплеер"),
         "claimFreeStorage": MessageLookupByLibrary.simpleMessage(
             "Получить бесплатное хранилище"),
         "claimMore": MessageLookupByLibrary.simpleMessage("Получите больше!"),

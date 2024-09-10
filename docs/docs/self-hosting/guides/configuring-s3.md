@@ -81,6 +81,22 @@ Set the S3 bucket `endpoint` in `credentials.yaml` to a `yourserverip:3200` or
 some such IP/hostname that accessible from both where you are running the Ente
 clients (e.g. the mobile app) and also from within the Docker compose cluster.
 
+### Example
+
+An example `museum.yaml` when you're trying to connect to museum running on your
+computer from your phone on the same WiFi network:
+
+```
+s3:
+    are_local_buckets: true
+    b2-eu-cen:
+        key: test
+        secret: testtest
+        endpoint: http://<YOUR-WIFI-IP>:3200
+        region: eu-central-2
+        bucket: b2-eu-cen
+```
+
 ### 403 Forbidden
 
 If museum (`2`) is able to make a network connection to your S3 bucket (`3`) but

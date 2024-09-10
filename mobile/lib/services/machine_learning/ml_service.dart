@@ -385,9 +385,6 @@ class MLService {
   }
 
   Future<bool> processImage(FileMLInstruction instruction) async {
-    _logger.info(
-      "`processImage` start processing image with uploadedFileID: ${instruction.file.uploadedFileID}",
-    );
     bool actuallyRanML = false;
 
     try {
@@ -420,7 +417,6 @@ class MLService {
       if (result.facesRan) {
         if (result.faces!.isEmpty) {
           faces.add(Face.empty(result.fileId));
-          _logger.info("no face detected, storing empty for ${result.fileId}");
         }
         if (result.faces!.isNotEmpty) {
           for (int i = 0; i < result.faces!.length; ++i) {
@@ -432,7 +428,6 @@ class MLService {
               ),
             );
           }
-          _logger.info("storing ${faces.length} faces for ${result.fileId}");
         }
         dataEntity.putFace(
           RemoteFaceEmbedding(
@@ -459,7 +454,7 @@ class MLService {
         instruction.file,
         dataEntity,
       );
-      _logger.info("Results for file ${result.fileId} stored on remote");
+      _logger.info("ML results for fileID ${result.fileId} stored on remote");
       // Storing results locally
       if (result.facesRan) await MLDataDB.instance.bulkInsertFaces(faces);
       if (result.clipRan) {
@@ -467,7 +462,7 @@ class MLService {
           result.clip!,
         );
       }
-      _logger.info("Results for file ${result.fileId} stored locally");
+      _logger.info("ML results for fileID ${result.fileId} stored locally");
       return actuallyRanML;
     } catch (e, s) {
       final String errorString = e.toString();
@@ -480,7 +475,7 @@ class MLService {
               errorString.contains('FileSizeTooLargeForMobileIndexing');
       if (acceptedIssue) {
         _logger.severe(
-          '$errorString with ID ${instruction.file.uploadedFileID} (format $format, type $fileType, size $size), storing empty results so indexing does not get stuck',
+          '$errorString for fileID ${instruction.file.uploadedFileID} (format $format, type $fileType, size $size), storing empty results so indexing does not get stuck',
           e,
           s,
         );
@@ -493,7 +488,7 @@ class MLService {
         return true;
       }
       _logger.severe(
-        "Failed to index file with ID: ${instruction.file.uploadedFileID} (format $format, type $fileType, size $size). Not storing any results locally, which means it will be automatically retried later.",
+        "Failed to index file for fileID ${instruction.file.uploadedFileID} (format $format, type $fileType, size $size). Not storing any results locally, which means it will be automatically retried later.",
         e,
         s,
       );

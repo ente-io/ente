@@ -123,11 +123,17 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
     //https://github.com/fluttercandies/flutter_photo_manager/blob/8afba2745ebaac6af8af75de9cbded9157bc2690/README.md#clear-caches
     if (_shouldClearCache) {
       _logger.info("Clearing cache");
-      File(_filePath!).delete().then(
-        (value) {
-          _logger.info("Cache cleared");
-        },
-      );
+      final file = File(_filePath!);
+
+      /// Checking if exists to avoid observed PathNotFoundException. Didn't find
+      /// root cause.
+      if (file.existsSync()) {
+        file.delete().then(
+          (value) {
+            _logger.info("Cache cleared");
+          },
+        );
+      }
     }
     _guestViewEventSubscription.cancel();
     pauseVideoSubscription.cancel();
@@ -194,10 +200,12 @@ class _VideoWidgetNativeState extends State<VideoWidgetNative>
                       ),
                       GestureDetector(
                         behavior: HitTestBehavior.opaque,
-                        onTap: () {
-                          _showControls.value = !_showControls.value;
-                          widget.playbackCallback!(!_showControls.value);
-                        },
+                        onTap: widget.playbackCallback != null
+                            ? () {
+                                _showControls.value = !_showControls.value;
+                                widget.playbackCallback!(!_showControls.value);
+                              }
+                            : null,
                         child: Container(
                           constraints: const BoxConstraints.expand(),
                         ),

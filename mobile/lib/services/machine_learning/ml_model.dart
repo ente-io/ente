@@ -9,7 +9,7 @@ import "package:photos/utils/network_util.dart";
 import "package:synchronized/synchronized.dart";
 
 abstract class MlModel {
-  static final Logger isolateLogger = Logger("MlModelInIsolate");
+  static final Logger isolateLogger = Logger("MlModel");
   Logger get logger;
 
   String get kModelBucketEndpoint => "https://models.ente.io/";
@@ -95,10 +95,28 @@ abstract class MlModel {
     String modelName,
     String modelPath,
   ) async {
-    if (usePlatformPlugin) {
-      return await _loadModelWithPlatformPlugin(modelName, modelPath);
-    } else {
-      return await _loadModelWithFFI(modelName, modelPath);
+    isolateLogger
+        .info('Start loading $modelName (platformPlugin: $usePlatformPlugin)');
+    final time = DateTime.now();
+    try {
+      late int result;
+      if (usePlatformPlugin) {
+        result = await _loadModelWithPlatformPlugin(modelName, modelPath);
+      } else {
+        result = await _loadModelWithFFI(modelName, modelPath);
+      }
+      final timeMs = DateTime.now().difference(time).inMilliseconds;
+      isolateLogger.info(
+        "$modelName model loaded in $timeMs ms (platformPlugin: $usePlatformPlugin)",
+      );
+      return result;
+    } catch (e, s) {
+      isolateLogger.severe(
+        "Failed to load model $modelName (platformPlugin: $usePlatformPlugin)",
+        e,
+        s,
+      );
+      rethrow;
     }
   }
 
@@ -106,18 +124,12 @@ abstract class MlModel {
     String modelName,
     String modelPath,
   ) async {
-    final startTime = DateTime.now();
-    isolateLogger.info('Initializing $modelName with EntePlugin');
     final OnnxDart plugin = OnnxDart();
     final bool? initResult = await plugin.init(modelName, modelPath);
     if (initResult == null || !initResult) {
       isolateLogger.severe("Failed to initialize $modelName with EntePlugin.");
       throw Exception("Failed to initialize $modelName with EntePlugin.");
     }
-    final endTime = DateTime.now();
-    isolateLogger.info(
-      "$modelName loaded via EntePlugin in ${endTime.difference(startTime).inMilliseconds}ms",
-    );
     return 0;
   }
 
@@ -125,10 +137,8 @@ abstract class MlModel {
     String modelName,
     String modelPath,
   ) async {
-    isolateLogger.info('Initializing $modelName with FFI');
     ONNXEnvFFI.instance.initONNX(modelName);
     try {
-      final startTime = DateTime.now();
       final sessionOptions = OrtSessionOptions()
         ..setInterOpNumThreads(1)
         ..setIntraOpNumThreads(1)
@@ -136,21 +146,26 @@ abstract class MlModel {
           GraphOptimizationLevel.ortEnableAll,
         );
       final session = OrtSession.fromFile(File(modelPath), sessionOptions);
-      final endTime = DateTime.now();
-      isolateLogger.info(
-        "$modelName loaded with FFI, took: ${endTime.difference(startTime).inMilliseconds}ms",
-      );
       return session.address;
-    } catch (e) {
+    } catch (e, s) {
+      isolateLogger.severe("Failed to load model $modelName with FFI", e, s);
       rethrow;
     }
   }
 
   static Future<void> releaseModel(String modelName, int sessionAddress) async {
-    if (usePlatformPlugin) {
-      await _releaseModelWithPlatformPlugin(modelName);
-    } else {
-      await _releaseModelWithFFI(modelName, sessionAddress);
+    try {
+      if (usePlatformPlugin) {
+        await _releaseModelWithPlatformPlugin(modelName);
+      } else {
+        await _releaseModelWithFFI(modelName, sessionAddress);
+      }
+    } catch (e, s) {
+      isolateLogger.severe(
+        "Failed to release model $modelName (platformPlugin: $usePlatformPlugin)",
+        e,
+        s,
+      );
     }
   }
 
@@ -158,7 +173,6 @@ abstract class MlModel {
     final OnnxDart plugin = OnnxDart();
     final bool? initResult = await plugin.release(modelName);
     if (initResult == null || !initResult) {
-      isolateLogger.severe("Failed to release $modelName with PlatformPlugin.");
       throw Exception("Failed to release $modelName with PlatformPlugin.");
     }
   }

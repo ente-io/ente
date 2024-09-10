@@ -14,7 +14,10 @@ storage namespace. The same user account works for both of them.
 
 Yes, if you wish, you can self-host the server and use it only for the 2FA auth
 app. The starter Docker compose will work fine for either Photos or Auth (or
-both!)
+both!).
+
+> You currently don't need to configure the S3 object storage (e.g. minio
+> containers) if you're only using your self hosted Ente instance for auth.
 
 ### Can I use the server with _X_ as the object storage?
 

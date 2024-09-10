@@ -33,6 +33,7 @@ class MultipartInfo {
   final List<bool>? partUploadStatus;
   final Map<int, String>? partETags;
   final int? partSize;
+  final int encFileSize;
   final MultipartUploadURLs urls;
   final MultipartStatus status;
 
@@ -41,6 +42,7 @@ class MultipartInfo {
     this.partETags,
     this.partSize,
     this.status = MultipartStatus.pending,
+    required this.encFileSize,
     required this.urls,
   });
 }

@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:math';
 
 import 'package:ente_auth/core/configuration.dart';
@@ -42,10 +41,6 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
     invalidAttemptCount = _lockscreenSetting.getInvalidAttemptCount();
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      if (isNonMobileIOSDevice()) {
-        _logger.info('ignore init for non mobile iOS device');
-        return;
-      }
       _showLockScreen(source: "postFrameInit");
     });
     _platformBrightness =
@@ -190,14 +185,6 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
         ),
       ),
     );
-  }
-
-  bool isNonMobileIOSDevice() {
-    if (Platform.isAndroid) {
-      return false;
-    }
-    var shortestSide = MediaQuery.of(context).size.shortestSide;
-    return shortestSide > 600 ? true : false;
   }
 
   void _onLogoutTapped(BuildContext context) {
