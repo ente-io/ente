@@ -339,14 +339,11 @@ const SelectStyles: StylesConfig<SearchOption, false> = {
         ...style,
         backgroundColor: "transparent",
         color: "#d1d1d1",
-        marginLeft: "36px",
     }),
     placeholder: (style) => ({
         ...style,
         color: "rgba(255, 255, 255, 0.7)",
-        wordSpacing: "2px",
         whiteSpace: "nowrap",
-        marginLeft: "40px",
     }),
 };
 
@@ -354,9 +351,13 @@ const CustomControl: React.FC<ControlProps<SearchOption, false>> = (props) => (
     <SelectComponents.Control {...props}>
         <Stack direction="row" sx={{ alignItems: "center" }}>
             <Box
-                style={{ display: "inline-flex" }}
-                mr={1.5}
-                color={(theme) => theme.colors.stroke.muted}
+                sx={{
+                    display: "inline-flex",
+                    // Match the default padding of the ValueContainer to make
+                    // the icon look properly spaced and aligned.
+                    pl: "8px",
+                    color: (theme) => theme.colors.stroke.muted,
+                }}
             >
                 {iconForOptionType(props.getValue()[0]?.type)}
             </Box>
