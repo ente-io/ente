@@ -50,6 +50,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "recoverButton": MessageLookupByLibrary.simpleMessage("استرداد"),
         "recoverySuccessful":
             MessageLookupByLibrary.simpleMessage("نجح الاسترداد!"),
+        "showPerson": MessageLookupByLibrary.simpleMessage("Show person"),
         "sorry": MessageLookupByLibrary.simpleMessage("المعذرة"),
         "terminate": MessageLookupByLibrary.simpleMessage("إنهاء"),
         "terminateSession":

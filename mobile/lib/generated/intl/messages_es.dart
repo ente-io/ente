@@ -20,16 +20,16 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'es';
 
-  static String m3(count) =>
+  static String m0(count) =>
       "${Intl.plural(count, zero: 'Añadir colaborador', one: 'Añadir colaborador', other: 'Añadir colaboradores')}";
 
-  static String m4(count) =>
+  static String m5(count) =>
       "${Intl.plural(count, one: 'Agregar elemento', other: 'Agregar elementos')}";
 
-  static String m5(storageAmount, endDate) =>
+  static String m6(storageAmount, endDate) =>
       "Tu ${storageAmount} adicional es válido hasta ${endDate}";
 
-  static String m6(count) =>
+  static String m1(count) =>
       "${Intl.plural(count, zero: 'Añadir espectador', one: 'Añadir espectador', other: 'Añadir espectadores')}";
 
   static String m7(emailOrName) => "Añadido por ${emailOrName}";
@@ -121,7 +121,7 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m36(expiryTime) => "El enlace caducará en ${expiryTime}";
 
-  static String m0(count, formattedCount) =>
+  static String m2(count, formattedCount) =>
       "${Intl.plural(count, zero: 'sin recuerdos', one: '${formattedCount} recuerdo', other: '${formattedCount} recuerdos')}";
 
   static String m37(count) =>
@@ -158,7 +158,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m50(count) =>
       "${Intl.plural(count, one: '${count} resultado encontrado', other: '${count} resultados encontrados')}";
 
-  static String m1(count) => "${count} seleccionados";
+  static String m3(count) => "${count} seleccionados";
 
   static String m51(count, yourCount) =>
       "${count} seleccionados (${yourCount} tuyos)";
@@ -166,7 +166,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m52(verificationID) =>
       "Aquí está mi ID de verificación: ${verificationID} para ente.io.";
 
-  static String m2(verificationID) =>
+  static String m4(verificationID) =>
       "Hola, ¿puedes confirmar que esta es tu ID de verificación ente.io: ${verificationID}?";
 
   static String m53(referralCode, referralStorageInGB) =>
@@ -236,10 +236,10 @@ class MessageLookup extends MessageLookupByLibrary {
             "Agregar nuevo correo electrónico"),
         "addCollaborator":
             MessageLookupByLibrary.simpleMessage("Agregar colaborador"),
-        "addCollaborators": m3,
+        "addCollaborators": m0,
         "addFromDevice": MessageLookupByLibrary.simpleMessage(
             "Agregar desde el dispositivo"),
-        "addItem": m4,
+        "addItem": m5,
         "addLocation":
             MessageLookupByLibrary.simpleMessage("Agregar ubicación"),
         "addLocationButton": MessageLookupByLibrary.simpleMessage("Añadir"),
@@ -247,7 +247,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "addNew": MessageLookupByLibrary.simpleMessage("Añadir nuevo"),
         "addOnPageSubtitle": MessageLookupByLibrary.simpleMessage(
             "Detalles de los complementos"),
-        "addOnValidTill": m5,
+        "addOnValidTill": m6,
         "addOns": MessageLookupByLibrary.simpleMessage("Complementos"),
         "addPhotos": MessageLookupByLibrary.simpleMessage("Agregar fotos"),
         "addSelected":
@@ -257,7 +257,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "addToHiddenAlbum":
             MessageLookupByLibrary.simpleMessage("Añadir al álbum oculto"),
         "addViewer": MessageLookupByLibrary.simpleMessage("Añadir espectador"),
-        "addViewers": m6,
+        "addViewers": m1,
         "addYourPhotosNow":
             MessageLookupByLibrary.simpleMessage("Añade tus fotos ahora"),
         "addedAs": MessageLookupByLibrary.simpleMessage("Agregado como"),
@@ -1012,7 +1012,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "maps": MessageLookupByLibrary.simpleMessage("Mapas"),
         "mastodon": MessageLookupByLibrary.simpleMessage("Mastodon"),
         "matrix": MessageLookupByLibrary.simpleMessage("Matrix"),
-        "memoryCount": m0,
+        "memoryCount": m2,
         "merchandise": MessageLookupByLibrary.simpleMessage("Mercancías"),
         "mobileWebDesktop":
             MessageLookupByLibrary.simpleMessage("Celular, Web, Computadora"),
@@ -1390,7 +1390,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "selectedItemsWillBeDeletedFromAllAlbumsAndMoved":
             MessageLookupByLibrary.simpleMessage(
                 "Los archivos seleccionados serán eliminados de todos los álbumes y movidos a la papelera."),
-        "selectedPhotos": m1,
+        "selectedPhotos": m3,
         "selectedPhotosWithYours": m51,
         "send": MessageLookupByLibrary.simpleMessage("Enviar"),
         "sendEmail":
@@ -1426,7 +1426,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "shareMyVerificationID": m52,
         "shareOnlyWithThePeopleYouWant": MessageLookupByLibrary.simpleMessage(
             "Comparte sólo con la gente que quieres"),
-        "shareTextConfirmOthersVerificationID": m2,
+        "shareTextConfirmOthersVerificationID": m4,
         "shareTextRecommendUsingEnte": MessageLookupByLibrary.simpleMessage(
             "Descarga Ente para que podamos compartir fácilmente fotos y videos en calidad original.\n\nhttps://ente.io"),
         "shareTextReferralCode": m53,
@@ -1452,6 +1452,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharing": MessageLookupByLibrary.simpleMessage("Compartiendo..."),
         "showMemories":
             MessageLookupByLibrary.simpleMessage("Mostrar recuerdos"),
+        "showPerson": MessageLookupByLibrary.simpleMessage("Show person"),
         "signOutFromOtherDevices": MessageLookupByLibrary.simpleMessage(
             "Cerrar sesión de otros dispositivos"),
         "signOutOtherBody": MessageLookupByLibrary.simpleMessage(
@@ -1589,6 +1590,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "thisWillRemovePublicLinksOfAllSelectedQuickLinks":
             MessageLookupByLibrary.simpleMessage(
                 "Esto eliminará los enlaces públicos de todos los enlaces rápidos seleccionados."),
+        "toEnableAppLockPleaseSetupDevicePasscodeOrScreen":
+            MessageLookupByLibrary.simpleMessage(
+                "To enable app lock, please setup device passcode or screen lock in your system settings."),
         "toHideAPhotoOrVideo": MessageLookupByLibrary.simpleMessage(
             "Para ocultar una foto o video"),
         "toResetVerifyEmail": MessageLookupByLibrary.simpleMessage(

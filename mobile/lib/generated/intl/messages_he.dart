@@ -20,7 +20,7 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'he';
 
-  static String m4(count) =>
+  static String m5(count) =>
       "${Intl.plural(count, one: 'הוסף פריט', two: 'הוסף פריטים', many: 'הוסף פריטים', other: 'הוסף פריטים')}";
 
   static String m9(count) =>
@@ -73,7 +73,7 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m36(expiryTime) => "תוקף הקישור יפוג ב-${expiryTime}";
 
-  static String m0(count, formattedCount) =>
+  static String m2(count, formattedCount) =>
       "${Intl.plural(count, one: '${formattedCount} זכרון', two: '${formattedCount} זכרונות', many: '${formattedCount} זכרונות', other: '${formattedCount} זכרונות')}";
 
   static String m37(count) =>
@@ -92,14 +92,14 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m48(userEmail) =>
       "${userEmail} יוסר מהאלבום המשותף הזה\n\nגם תמונות שנוספו על ידיהם יוסרו מהאלבום";
 
-  static String m1(count) => "${count} נבחרו";
+  static String m3(count) => "${count} נבחרו";
 
   static String m51(count, yourCount) => "${count} נבחרו (${yourCount} שלך)";
 
   static String m52(verificationID) =>
       "הנה מזהה האימות שלי: ${verificationID} עבור ente.io.";
 
-  static String m2(verificationID) =>
+  static String m4(verificationID) =>
       "היי, תוכל לוודא שזה מזהה האימות שלך של ente.io: ${verificationID}";
 
   static String m54(numberOfPeople) =>
@@ -141,7 +141,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "addANewEmail": MessageLookupByLibrary.simpleMessage("הוסף דוא\"ל חדש"),
         "addCollaborator":
             MessageLookupByLibrary.simpleMessage("הוסף משתף פעולה"),
-        "addItem": m4,
+        "addItem": m5,
         "addLocationButton": MessageLookupByLibrary.simpleMessage("הוסף"),
         "addMore": MessageLookupByLibrary.simpleMessage("הוסף עוד"),
         "addPhotos": MessageLookupByLibrary.simpleMessage("הוסף תמונות"),
@@ -569,7 +569,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "maps": MessageLookupByLibrary.simpleMessage("מפות"),
         "mastodon": MessageLookupByLibrary.simpleMessage("Mastodon"),
         "matrix": MessageLookupByLibrary.simpleMessage("Matrix"),
-        "memoryCount": m0,
+        "memoryCount": m2,
         "merchandise": MessageLookupByLibrary.simpleMessage("סחורה"),
         "mobileWebDesktop":
             MessageLookupByLibrary.simpleMessage("פלאפון, דפדפן, שולחן עבודה"),
@@ -756,7 +756,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "selectedFoldersWillBeEncryptedAndBackedUp":
             MessageLookupByLibrary.simpleMessage(
                 "התיקיות שנבחרו יוצפנו ויגובו"),
-        "selectedPhotos": m1,
+        "selectedPhotos": m3,
         "selectedPhotosWithYours": m51,
         "send": MessageLookupByLibrary.simpleMessage("שלח"),
         "sendEmail": MessageLookupByLibrary.simpleMessage("שלח דוא\"ל"),
@@ -779,7 +779,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "shareMyVerificationID": m52,
         "shareOnlyWithThePeopleYouWant":
             MessageLookupByLibrary.simpleMessage("שתף רק אם אנשים שאתה בוחר"),
-        "shareTextConfirmOthersVerificationID": m2,
+        "shareTextConfirmOthersVerificationID": m4,
         "shareTextRecommendUsingEnte": MessageLookupByLibrary.simpleMessage(
             "הורד את ente על מנת שנוכל לשתף תמונות וסרטונים באיכות המקור באופן קל\n\nhttps://ente.io"),
         "shareWithNonenteUsers": MessageLookupByLibrary.simpleMessage(
@@ -799,6 +799,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharedWithMe": MessageLookupByLibrary.simpleMessage("שותף איתי"),
         "sharing": MessageLookupByLibrary.simpleMessage("משתף..."),
         "showMemories": MessageLookupByLibrary.simpleMessage("הצג זכרונות"),
+        "showPerson": MessageLookupByLibrary.simpleMessage("Show person"),
         "signUpTerms": MessageLookupByLibrary.simpleMessage(
             "אני מסכים ל<u-terms>תנאי שירות</u-terms> ול<u-policy>מדיניות הפרטיות</u-policy>"),
         "singleFileDeleteFromDevice": m56,

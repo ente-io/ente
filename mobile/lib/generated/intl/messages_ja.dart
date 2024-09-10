@@ -20,16 +20,16 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'ja';
 
-  static String m3(count) =>
+  static String m0(count) =>
       "${Intl.plural(count, zero: '共同編集者を追加', one: '共同編集者を追加', other: '共同編集者を追加')}";
 
-  static String m4(count) =>
+  static String m5(count) =>
       "${Intl.plural(count, one: '項目を追加', other: '項目を追加')}";
 
-  static String m5(storageAmount, endDate) =>
+  static String m6(storageAmount, endDate) =>
       "あなたの ${storageAmount} アドオンは ${endDate} まで有効です";
 
-  static String m6(count) =>
+  static String m1(count) =>
       "${Intl.plural(count, zero: 'ビューアーを追加', one: 'ビューアーを追加', other: 'ビューアーを追加')}";
 
   static String m7(emailOrName) => "${emailOrName} が追加";
@@ -112,11 +112,11 @@ class MessageLookup extends MessageLookupByLibrary {
       "${currentlyProcessing} / ${totalCount} を処理中";
 
   static String m35(count) =>
-      "{count, plural, one{{${count} アイテム} other {${count} アイテム}}";
+      "${Intl.plural(count, one: '${count} アイテム', other: '${count} アイテム')}";
 
   static String m36(expiryTime) => "リンクは ${expiryTime} に期限切れになります";
 
-  static String m0(count, formattedCount) =>
+  static String m2(count, formattedCount) =>
       "${Intl.plural(count, zero: '思い出なし', one: '${formattedCount} 思い出', other: '${formattedCount} 思い出')}";
 
   static String m37(count) =>
@@ -153,13 +153,13 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m50(count) =>
       "${Intl.plural(count, one: '${count} 個の結果', other: '${count} 個の結果')}";
 
-  static String m1(count) => "${count} 個を選択";
+  static String m3(count) => "${count} 個を選択";
 
   static String m51(count, yourCount) => "${count} 個選択中（${yourCount} あなた）";
 
   static String m52(verificationID) => "私の確認ID: ente.ioの ${verificationID}";
 
-  static String m2(verificationID) =>
+  static String m4(verificationID) =>
       "これがあなたのente.io確認用IDであることを確認できますか？ ${verificationID}";
 
   static String m53(referralCode, referralStorageInGB) =>
@@ -222,15 +222,15 @@ class MessageLookup extends MessageLookupByLibrary {
         "addAName": MessageLookupByLibrary.simpleMessage("名前を追加"),
         "addANewEmail": MessageLookupByLibrary.simpleMessage("新しいEメールアドレスを追加"),
         "addCollaborator": MessageLookupByLibrary.simpleMessage("コラボレーターを追加"),
-        "addCollaborators": m3,
+        "addCollaborators": m0,
         "addFromDevice": MessageLookupByLibrary.simpleMessage("デバイスから追加"),
-        "addItem": m4,
+        "addItem": m5,
         "addLocation": MessageLookupByLibrary.simpleMessage("位置情報を追加"),
         "addLocationButton": MessageLookupByLibrary.simpleMessage("追加"),
         "addMore": MessageLookupByLibrary.simpleMessage("さらに追加"),
         "addNew": MessageLookupByLibrary.simpleMessage("新規追加"),
         "addOnPageSubtitle": MessageLookupByLibrary.simpleMessage("アドオンの詳細"),
-        "addOnValidTill": m5,
+        "addOnValidTill": m6,
         "addOns": MessageLookupByLibrary.simpleMessage("アドオン"),
         "addPhotos": MessageLookupByLibrary.simpleMessage("写真を追加"),
         "addSelected": MessageLookupByLibrary.simpleMessage("追加選択"),
@@ -238,7 +238,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "addToEnte": MessageLookupByLibrary.simpleMessage("Enteに追加"),
         "addToHiddenAlbum": MessageLookupByLibrary.simpleMessage("非表示アルバムに追加"),
         "addViewer": MessageLookupByLibrary.simpleMessage("ビューアーを追加"),
-        "addViewers": m6,
+        "addViewers": m1,
         "addYourPhotosNow": MessageLookupByLibrary.simpleMessage("写真を今すぐ追加する"),
         "addedAs": MessageLookupByLibrary.simpleMessage("追加:"),
         "addedBy": m7,
@@ -882,7 +882,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "maps": MessageLookupByLibrary.simpleMessage("地図"),
         "mastodon": MessageLookupByLibrary.simpleMessage("Mastodon"),
         "matrix": MessageLookupByLibrary.simpleMessage("Matrix"),
-        "memoryCount": m0,
+        "memoryCount": m2,
         "merchandise": MessageLookupByLibrary.simpleMessage("グッズ"),
         "mlConsent": MessageLookupByLibrary.simpleMessage("機械学習を有効にする"),
         "mlConsentConfirmation":
@@ -1206,7 +1206,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "selectedItemsWillBeDeletedFromAllAlbumsAndMoved":
             MessageLookupByLibrary.simpleMessage(
                 "選択したアイテムはすべてのアルバムから削除され、ゴミ箱に移動されます。"),
-        "selectedPhotos": m1,
+        "selectedPhotos": m3,
         "selectedPhotosWithYours": m51,
         "send": MessageLookupByLibrary.simpleMessage("送信"),
         "sendEmail": MessageLookupByLibrary.simpleMessage("メールを送信する"),
@@ -1232,7 +1232,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "shareMyVerificationID": m52,
         "shareOnlyWithThePeopleYouWant":
             MessageLookupByLibrary.simpleMessage("選んだ人と共有します"),
-        "shareTextConfirmOthersVerificationID": m2,
+        "shareTextConfirmOthersVerificationID": m4,
         "shareTextRecommendUsingEnte": MessageLookupByLibrary.simpleMessage(
             "Enteをダウンロードして、写真や動画の共有を簡単にしよう\n\nhttps://ente.io"),
         "shareTextReferralCode": m53,
@@ -1254,6 +1254,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharedWithYou": MessageLookupByLibrary.simpleMessage("あなたと共有されています"),
         "sharing": MessageLookupByLibrary.simpleMessage("共有中..."),
         "showMemories": MessageLookupByLibrary.simpleMessage("思い出を表示"),
+        "showPerson": MessageLookupByLibrary.simpleMessage("Show person"),
         "signOutFromOtherDevices":
             MessageLookupByLibrary.simpleMessage("他のデバイスからサインアウトする"),
         "signOutOtherBody": MessageLookupByLibrary.simpleMessage(

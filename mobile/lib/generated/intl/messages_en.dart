@@ -20,16 +20,16 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'en';
 
-  static String m3(count) =>
+  static String m0(count) =>
       "${Intl.plural(count, zero: 'Add collaborator', one: 'Add collaborator', other: 'Add collaborators')}";
 
-  static String m4(count) =>
+  static String m5(count) =>
       "${Intl.plural(count, one: 'Add item', other: 'Add items')}";
 
-  static String m5(storageAmount, endDate) =>
+  static String m6(storageAmount, endDate) =>
       "Your ${storageAmount} add-on is valid till ${endDate}";
 
-  static String m6(count) =>
+  static String m1(count) =>
       "${Intl.plural(count, zero: 'Add viewer', one: 'Add viewer', other: 'Add viewers')}";
 
   static String m7(emailOrName) => "Added by ${emailOrName}";
@@ -117,7 +117,7 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m36(expiryTime) => "Link will expire on ${expiryTime}";
 
-  static String m0(count, formattedCount) =>
+  static String m2(count, formattedCount) =>
       "${Intl.plural(count, zero: 'no memories', one: '${formattedCount} memory', other: '${formattedCount} memories')}";
 
   static String m37(count) =>
@@ -156,7 +156,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m50(count) =>
       "${Intl.plural(count, one: '${count} result found', other: '${count} results found')}";
 
-  static String m1(count) => "${count} selected";
+  static String m3(count) => "${count} selected";
 
   static String m51(count, yourCount) =>
       "${count} selected (${yourCount} yours)";
@@ -164,7 +164,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m52(verificationID) =>
       "Here\'s my verification ID: ${verificationID} for ente.io.";
 
-  static String m2(verificationID) =>
+  static String m4(verificationID) =>
       "Hey, can you confirm that this is your ente.io verification ID: ${verificationID}";
 
   static String m53(referralCode, referralStorageInGB) =>
@@ -236,17 +236,17 @@ class MessageLookup extends MessageLookupByLibrary {
         "addANewEmail": MessageLookupByLibrary.simpleMessage("Add a new email"),
         "addCollaborator":
             MessageLookupByLibrary.simpleMessage("Add collaborator"),
-        "addCollaborators": m3,
+        "addCollaborators": m0,
         "addFromDevice":
             MessageLookupByLibrary.simpleMessage("Add from device"),
-        "addItem": m4,
+        "addItem": m5,
         "addLocation": MessageLookupByLibrary.simpleMessage("Add location"),
         "addLocationButton": MessageLookupByLibrary.simpleMessage("Add"),
         "addMore": MessageLookupByLibrary.simpleMessage("Add more"),
         "addNew": MessageLookupByLibrary.simpleMessage("Add new"),
         "addOnPageSubtitle":
             MessageLookupByLibrary.simpleMessage("Details of add-ons"),
-        "addOnValidTill": m5,
+        "addOnValidTill": m6,
         "addOns": MessageLookupByLibrary.simpleMessage("Add-ons"),
         "addPhotos": MessageLookupByLibrary.simpleMessage("Add photos"),
         "addSelected": MessageLookupByLibrary.simpleMessage("Add selected"),
@@ -255,7 +255,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "addToHiddenAlbum":
             MessageLookupByLibrary.simpleMessage("Add to hidden album"),
         "addViewer": MessageLookupByLibrary.simpleMessage("Add viewer"),
-        "addViewers": m6,
+        "addViewers": m1,
         "addYourPhotosNow":
             MessageLookupByLibrary.simpleMessage("Add your photos now"),
         "addedAs": MessageLookupByLibrary.simpleMessage("Added as"),
@@ -987,7 +987,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "maps": MessageLookupByLibrary.simpleMessage("Maps"),
         "mastodon": MessageLookupByLibrary.simpleMessage("Mastodon"),
         "matrix": MessageLookupByLibrary.simpleMessage("Matrix"),
-        "memoryCount": m0,
+        "memoryCount": m2,
         "merchandise": MessageLookupByLibrary.simpleMessage("Merchandise"),
         "mlConsent":
             MessageLookupByLibrary.simpleMessage("Enable machine learning"),
@@ -1362,7 +1362,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "selectedItemsWillBeDeletedFromAllAlbumsAndMoved":
             MessageLookupByLibrary.simpleMessage(
                 "Selected items will be deleted from all albums and moved to trash."),
-        "selectedPhotos": m1,
+        "selectedPhotos": m3,
         "selectedPhotosWithYours": m51,
         "send": MessageLookupByLibrary.simpleMessage("Send"),
         "sendEmail": MessageLookupByLibrary.simpleMessage("Send email"),
@@ -1393,7 +1393,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "shareMyVerificationID": m52,
         "shareOnlyWithThePeopleYouWant": MessageLookupByLibrary.simpleMessage(
             "Share only with the people you want"),
-        "shareTextConfirmOthersVerificationID": m2,
+        "shareTextConfirmOthersVerificationID": m4,
         "shareTextRecommendUsingEnte": MessageLookupByLibrary.simpleMessage(
             "Download Ente so we can easily share original quality photos and videos\n\nhttps://ente.io"),
         "shareTextReferralCode": m53,
@@ -1416,6 +1416,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Shared with you"),
         "sharing": MessageLookupByLibrary.simpleMessage("Sharing..."),
         "showMemories": MessageLookupByLibrary.simpleMessage("Show memories"),
+        "showPerson": MessageLookupByLibrary.simpleMessage("Show person"),
         "signOutFromOtherDevices":
             MessageLookupByLibrary.simpleMessage("Sign out from other devices"),
         "signOutOtherBody": MessageLookupByLibrary.simpleMessage(

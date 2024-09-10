@@ -20,12 +20,12 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'id';
 
-  static String m3(count) =>
+  static String m0(count) =>
       "${Intl.plural(count, other: 'Tambahkan kolaborator')}";
 
-  static String m4(count) => "${Intl.plural(count, other: 'Tambahkan item')}";
+  static String m5(count) => "${Intl.plural(count, other: 'Tambahkan item')}";
 
-  static String m5(storageAmount, endDate) =>
+  static String m6(storageAmount, endDate) =>
       "Add-on ${storageAmount} kamu berlaku sampai ${endDate}";
 
   static String m7(emailOrName) => "Ditambahkan oleh ${emailOrName}";
@@ -110,7 +110,7 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m36(expiryTime) => "Link akan kedaluwarsa pada ${expiryTime}";
 
-  static String m0(count, formattedCount) =>
+  static String m2(count, formattedCount) =>
       "${Intl.plural(count, zero: 'tanpa kenangan', one: '${formattedCount} kenangan', other: '${formattedCount} kenangan')}";
 
   static String m37(count) => "${Intl.plural(count, other: 'Pindahkan item')}";
@@ -146,7 +146,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m50(count) =>
       "${Intl.plural(count, other: '${count} hasil ditemukan')}";
 
-  static String m1(count) => "${count} terpilih";
+  static String m3(count) => "${count} terpilih";
 
   static String m51(count, yourCount) =>
       "${count} dipilih (${yourCount} milikmu)";
@@ -154,7 +154,7 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m52(verificationID) =>
       "Ini ID Verifikasi saya di ente.io: ${verificationID}.";
 
-  static String m2(verificationID) =>
+  static String m4(verificationID) =>
       "Halo, bisakah kamu pastikan bahwa ini adalah ID Verifikasi ente.io milikmu: ${verificationID}";
 
   static String m53(referralCode, referralStorageInGB) =>
@@ -222,14 +222,14 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Tambah email baru"),
         "addCollaborator":
             MessageLookupByLibrary.simpleMessage("Tambah kolaborator"),
-        "addCollaborators": m3,
+        "addCollaborators": m0,
         "addFromDevice":
             MessageLookupByLibrary.simpleMessage("Tambahkan dari perangkat"),
-        "addItem": m4,
+        "addItem": m5,
         "addLocation": MessageLookupByLibrary.simpleMessage("Tambah tempat"),
         "addLocationButton": MessageLookupByLibrary.simpleMessage("Tambah"),
         "addMore": MessageLookupByLibrary.simpleMessage("Tambah lagi"),
-        "addOnValidTill": m5,
+        "addOnValidTill": m6,
         "addPhotos": MessageLookupByLibrary.simpleMessage("Tambah foto"),
         "addSelected":
             MessageLookupByLibrary.simpleMessage("Tambahkan yang dipilih"),
@@ -872,7 +872,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "maps": MessageLookupByLibrary.simpleMessage("Peta"),
         "mastodon": MessageLookupByLibrary.simpleMessage("Mastodon"),
         "matrix": MessageLookupByLibrary.simpleMessage("Matrix"),
-        "memoryCount": m0,
+        "memoryCount": m2,
         "merchandise": MessageLookupByLibrary.simpleMessage("Barang Dagangan"),
         "mlConsent":
             MessageLookupByLibrary.simpleMessage("Aktifkan pemelajaran mesin"),
@@ -1191,7 +1191,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "selectedItemsWillBeDeletedFromAllAlbumsAndMoved":
             MessageLookupByLibrary.simpleMessage(
                 "Item terpilih akan dihapus dari semua album dan dipindahkan ke sampah."),
-        "selectedPhotos": m1,
+        "selectedPhotos": m3,
         "selectedPhotosWithYours": m51,
         "send": MessageLookupByLibrary.simpleMessage("Kirim"),
         "sendEmail": MessageLookupByLibrary.simpleMessage("Kirim email"),
@@ -1216,7 +1216,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "shareMyVerificationID": m52,
         "shareOnlyWithThePeopleYouWant": MessageLookupByLibrary.simpleMessage(
             "Bagikan hanya dengan orang yang kamu inginkan"),
-        "shareTextConfirmOthersVerificationID": m2,
+        "shareTextConfirmOthersVerificationID": m4,
         "shareTextRecommendUsingEnte": MessageLookupByLibrary.simpleMessage(
             "Unduh Ente agar kita bisa berbagi foto dan video kualitas asli dengan mudah\n\nhttps://ente.io"),
         "shareTextReferralCode": m53,
@@ -1242,6 +1242,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Dibagikan dengan kamu"),
         "sharing": MessageLookupByLibrary.simpleMessage("Membagikan..."),
         "showMemories": MessageLookupByLibrary.simpleMessage("Lihat kenangan"),
+        "showPerson": MessageLookupByLibrary.simpleMessage("Show person"),
         "signOutFromOtherDevices": MessageLookupByLibrary.simpleMessage(
             "Keluarkan akun dari perangkat lain"),
         "signOutOtherBody": MessageLookupByLibrary.simpleMessage(

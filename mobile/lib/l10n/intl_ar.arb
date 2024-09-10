@@ -24,5 +24,6 @@
   "verifyEmail": "التحقق من البريد الإلكتروني",
   "toResetVerifyEmail": "لإعادة تعيين كلمة المرور، يرجى التحقق من بريدك الإلكتروني أولاً.",
   "ackPasswordLostWarning": "أُدركُ أنّني فقدتُ كلمة مروري، فقد أفقد بياناتي لأن بياناتي <underline>مشفرة تشفيرًا تامًّا من النهاية إلى النهاية</underline>.",
-  "localSyncErrorMessage": "Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team"
+  "localSyncErrorMessage": "Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team",
+  "showPerson": "Show person"
 }
