@@ -19,7 +19,6 @@ import { labelForSuggestionType } from "@/new/photos/services/search/ui";
 import type { LocationTag } from "@/new/photos/services/user-entity";
 import { EnteFile } from "@/new/photos/types/file";
 import {
-    FlexWrapper,
     FreeFlowText,
     Row,
     SpaceBetweenFlex,
@@ -353,7 +352,7 @@ const SelectStyles: StylesConfig<SearchOption, false> = {
 
 const CustomControl: React.FC<ControlProps<SearchOption, false>> = (props) => (
     <SelectComponents.Control {...props}>
-        <FlexWrapper>
+        <Stack direction="row" sx={{ alignItems: "center" }}>
             <Box
                 style={{ display: "inline-flex" }}
                 mr={1.5}
@@ -362,7 +361,7 @@ const CustomControl: React.FC<ControlProps<SearchOption, false>> = (props) => (
                 {iconForOptionType(props.getValue()[0]?.type)}
             </Box>
             {props.children}
-        </FlexWrapper>
+        </Stack>
     </SelectComponents.Control>
 );
 
