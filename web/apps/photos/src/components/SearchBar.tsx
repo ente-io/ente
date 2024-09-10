@@ -53,13 +53,13 @@ import {
 } from "react";
 import {
     components as SelectComponents,
+    type ControlProps,
     type InputActionMeta,
     type InputProps,
     type MenuProps,
     type OptionProps,
     type SelectInstance,
     type StylesConfig,
-    type ValueContainerProps,
 } from "react-select";
 import AsyncSelect from "react-select/async";
 import {
@@ -254,7 +254,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
     const components = useMemo(
         () => ({
             Option: OptionWithInfo,
-            ValueContainer: ValueContainerWithIcon,
+            Control: CustomControl,
             Menu: CustomMenu,
             Input: VisibleInput,
         }),
@@ -351,6 +351,37 @@ const SelectStyles: StylesConfig<SearchOption, false> = {
     }),
 };
 
+const CustomControl: React.FC<ControlProps<SearchOption, false>> = (props) => (
+    <SelectComponents.Control {...props}>
+        <FlexWrapper>
+            <Box
+                style={{ display: "inline-flex" }}
+                mr={1.5}
+                color={(theme) => theme.colors.stroke.muted}
+            >
+                {iconForOptionType(props.getValue()[0]?.type)}
+            </Box>
+            {props.children}
+        </FlexWrapper>
+    </SelectComponents.Control>
+);
+
+const iconForOptionType = (type: SuggestionType | undefined) => {
+    switch (type) {
+        case SuggestionType.DATE:
+            return <CalendarIcon />;
+        case SuggestionType.LOCATION:
+        case SuggestionType.CITY:
+            return <LocationIcon />;
+        case SuggestionType.COLLECTION:
+            return <FolderIcon />;
+        case SuggestionType.FILE_NAME:
+            return <ImageIcon />;
+        default:
+            return <SearchIcon />;
+    }
+};
+
 const OptionWithInfo: React.FC<OptionProps<SearchOption, false>> = (props) => (
     <SelectComponents.Option {...props}>
         <LabelWithInfo data={props.data} />
@@ -393,39 +424,6 @@ const LabelWithInfo = ({ data }: { data: SearchOption }) => {
             </>
         )
     );
-};
-
-const ValueContainerWithIcon: React.FC<
-    ValueContainerProps<SearchOption, false>
-> = (props) => (
-    <SelectComponents.ValueContainer {...props}>
-        <FlexWrapper>
-            <Box
-                style={{ display: "inline-flex" }}
-                mr={1.5}
-                color={(theme) => theme.colors.stroke.muted}
-            >
-                {getIconByType(props.getValue()[0]?.type)}
-            </Box>
-            {props.children}
-        </FlexWrapper>
-    </SelectComponents.ValueContainer>
-);
-
-const getIconByType = (type: SuggestionType) => {
-    switch (type) {
-        case SuggestionType.DATE:
-            return <CalendarIcon />;
-        case SuggestionType.LOCATION:
-        case SuggestionType.CITY:
-            return <LocationIcon />;
-        case SuggestionType.COLLECTION:
-            return <FolderIcon />;
-        case SuggestionType.FILE_NAME:
-            return <ImageIcon />;
-        default:
-            return <SearchIcon />;
-    }
 };
 
 type CustomMenuProps = MenuProps<SearchOption, false> & {
