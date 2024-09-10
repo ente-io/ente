@@ -42,10 +42,6 @@ import {
 } from "@mui/material";
 import CollectionCard from "components/Collections/CollectionCard";
 import { ResultPreviewTile } from "components/Collections/styledComponents";
-import {
-    IMAGE_CONTAINER_MAX_WIDTH,
-    MIN_COLUMNS,
-} from "components/PhotoList/constants";
 import { t } from "i18next";
 import memoize from "memoize-one";
 import pDebounce from "p-debounce";
@@ -85,7 +81,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     const isMobileWidth = useIsMobileWidth();
 
     return (
-        <SearchBarWrapper>
+        <Box sx={{ flex: 1, px: ["4px", "24px"] }}>
             {isMobileWidth && !isInSearchMode ? (
                 <MobileSearchArea onSearch={showSearchInput} />
             ) : (
@@ -95,16 +91,9 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                     setIsOpen={setIsInSearchMode}
                 />
             )}
-        </SearchBarWrapper>
+        </Box>
     );
 };
-
-const SearchBarWrapper = styled(FlexWrapper)`
-    padding: 0 24px;
-    @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * MIN_COLUMNS}px) {
-        padding: 0 4px;
-    }
-`;
 
 interface SearchInputProps {
     isOpen: boolean;
