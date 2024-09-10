@@ -48,21 +48,21 @@ require you to clone the repository or build any images.
 4. Create an (empty) configuration file. You can later put your custom
    configuration in this if needed.
 
-   ```sh
-   touch museum.yaml
-   ```
+    ```sh
+    touch museum.yaml
+    ```
 
 5. That is all. You can now start everything.
 
-   ```sh
-   docker compose up
-   ```
+    ```sh
+    docker compose up
+    ```
 
 This will start a cluster containing:
 
-* Ente's own server
-* PostgresQL (DB)
-* MinIO (the S3 layer)
+-   Ente's own server
+-   PostgresQL (DB)
+-   MinIO (the S3 layer)
 
 For each of these, it'll use the latest published Docker image.
 
@@ -81,3 +81,8 @@ and run the image from **`ghcr.io/ente-io/server`**.
 ```sh
 docker pull ghcr.io/ente-io/server
 ```
+
+> [!TIP]
+>
+> For more documentation around self-hosting, see
+> **[help.ente.io/self-hosting](https://help.ente.io/self-hosting)**.
