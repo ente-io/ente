@@ -1,17 +1,9 @@
 import "package:figma_squircle/figma_squircle.dart";
 import 'package:flutter/material.dart';
-import "package:intl/intl.dart";
-import "package:logging/logging.dart";
-import "package:photos/generated/l10n.dart";
-import "package:photos/models/collection/collection.dart";
-import "package:photos/models/collection/collection_items.dart";
-import "package:photos/services/collections_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
-import "package:photos/ui/viewer/gallery/collection_page.dart";
-import "package:photos/utils/dialog_util.dart";
-import "package:photos/utils/navigation_util.dart";
+import "package:photos/utils/collection_util.dart";
 
 class CollectPhotosCardWidget extends StatefulWidget {
   const CollectPhotosCardWidget({super.key});
@@ -22,46 +14,6 @@ class CollectPhotosCardWidget extends StatefulWidget {
 }
 
 class _CollectPhotosCardWidgetState extends State<CollectPhotosCardWidget> {
-  Future<void> _onTapCreateAlbum() async {
-    final String currentDate =
-        DateFormat('MMMM d, yyyy').format(DateTime.now());
-    final result = await showTextInputDialog(
-      context,
-      title: "Name the album",
-      submitButtonLabel: S.of(context).create,
-      hintText: S.of(context).enterAlbumName,
-      alwaysShowSuccessState: false,
-      initialValue: currentDate,
-      textCapitalization: TextCapitalization.words,
-      onSubmit: (String text) async {
-        // indicates user cancelled the rename request
-        if (text.trim() == "") {
-          return;
-        }
-
-        try {
-          final Collection c =
-              await CollectionsService.instance.createAlbum(text);
-          // ignore: unawaited_futures
-          routeToPage(
-            context,
-            CollectionPage(
-              isFromCollectPhotos: true,
-              CollectionWithThumbnail(c, null),
-            ),
-          );
-        } catch (e, s) {
-          Logger("CollectPhotosCardWidget")
-              .severe("Failed to rename album", e, s);
-          rethrow;
-        }
-      },
-    );
-    if (result is Exception) {
-      await showGenericErrorDialog(context: context, error: result);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
@@ -94,7 +46,7 @@ class _CollectPhotosCardWidgetState extends State<CollectPhotosCardWidget> {
           ),
         ),
         GestureDetector(
-          onTap: () => _onTapCreateAlbum(),
+          onTap: () => onTapCollectEventPhotos(context),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
             child: Container(
@@ -144,7 +96,7 @@ class _CollectPhotosCardWidgetState extends State<CollectPhotosCardWidget> {
                           icon: Icons.add_photo_alternate_outlined,
                           shouldShowSuccessConfirmation: false,
                           shouldSurfaceExecutionStates: false,
-                          onTap: () => _onTapCreateAlbum(),
+                          onTap: () => onTapCollectEventPhotos(context),
                         ),
                       ],
                     ),
