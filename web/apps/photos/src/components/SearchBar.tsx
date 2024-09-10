@@ -41,15 +41,23 @@ import {
 import CollectionCard from "components/Collections/CollectionCard";
 import { ResultPreviewTile } from "components/Collections/styledComponents";
 import { t } from "i18next";
-import memoize from "memoize-one";
 import pDebounce from "p-debounce";
 import { AppContext } from "pages/_app";
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import {
+    useCallback,
+    useContext,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import {
     components as SelectComponents,
     type InputActionMeta,
     type InputProps,
+    type MenuProps,
     type OptionProps,
+    type SelectInstance,
     type StylesConfig,
     type ValueContainerProps,
 } from "react-select";
@@ -117,13 +125,6 @@ interface SearchInputProps {
     files: EnteFile[];
     collections: Collection[];
 }
-
-const createComponents = memoize((Option, ValueContainer, Menu, Input) => ({
-    Option,
-    ValueContainer,
-    Menu,
-    Input,
-}));
 
 const SearchInput: React.FC<SearchInputProps> = ({
     isOpen,
@@ -250,22 +251,21 @@ const SearchInput: React.FC<SearchInputProps> = ({
         refreshDefaultOptions();
     };
 
-    const MemoizedMenuWithPeople = useCallback(
-        (props) => (
-            <MenuWithPeople
-                {...props}
-                setValue={setValue}
-                selectRef={selectRef}
-            />
+    const MemoizedCustomMenu = useCallback(
+        (props: CustomMenuProps) => (
+            <CustomMenu {...props} setValue={setValue} selectRef={selectRef} />
         ),
         [setValue, selectRef],
     );
 
-    const components = createComponents(
-        OptionWithInfo,
-        ValueContainerWithIcon,
-        MemoizedMenuWithPeople,
-        VisibleInput,
+    const components = useMemo(
+        () => ({
+            Option: OptionWithInfo,
+            ValueContainer: ValueContainerWithIcon,
+            Menu: MemoizedCustomMenu,
+            Input: VisibleInput,
+        }),
+        [],
     );
 
     return (
@@ -273,11 +273,13 @@ const SearchInput: React.FC<SearchInputProps> = ({
             <AsyncSelect
                 ref={selectRef}
                 value={value}
+                // @ts-expect-error Type of the Menu is not what Select expects
                 components={components}
                 placeholder={<span>{t("search_hint")}</span>}
                 loadOptions={getOptions}
                 onChange={handleChange}
                 onFocus={handleOnFocus}
+                isMulti={false}
                 isClearable
                 escapeClearsValue
                 inputValue={query}
@@ -356,7 +358,7 @@ const SelectStyles: StylesConfig<SearchOption, false> = {
     }),
 };
 
-const OptionWithInfo: React.FC<OptionProps<SearchOption>> = (props) => (
+const OptionWithInfo: React.FC<OptionProps<SearchOption, false>> = (props) => (
     <SelectComponents.Option {...props}>
         <LabelWithInfo data={props.data} />
     </SelectComponents.Option>
@@ -400,9 +402,9 @@ const LabelWithInfo = ({ data }: { data: SearchOption }) => {
     );
 };
 
-const ValueContainerWithIcon: React.FC<ValueContainerProps<SearchOption>> = (
-    props,
-) => (
+const ValueContainerWithIcon: React.FC<
+    ValueContainerProps<SearchOption, false>
+> = (props) => (
     <SelectComponents.ValueContainer {...props}>
         <FlexWrapper>
             <Box
@@ -433,14 +435,27 @@ const getIconByType = (type: SuggestionType) => {
     }
 };
 
-const MenuWithPeople = (props) => {
-    // log.info("props.selectProps.options: ", selectRef);
-    const peopleSuggestions = props.selectProps.options.filter(
+type CustomMenuProps = MenuProps<SearchOption, false> & {
+    selectRef: React.RefObject<SelectInstance>;
+    // Cannot call it setValue since the menu itself already has that.
+    setSelectedValue: (value: SearchOption) => void;
+};
+
+const CustomMenu: React.FC<CustomMenuProps> = ({
+    selectRef,
+    setSelectedValue,
+    ...props
+}) => {
+    // Need to cast here, otherwise the react-select types think selectProps can
+    // also be something that supports multiple selection groups.
+    const options = props.selectProps.options as SearchOption[];
+
+    const peopleSuggestions = options.filter(
         (o) => o.type === SuggestionType.PERSON,
     );
-    const people = peopleSuggestions.map((o) => o.value);
+    const people = peopleSuggestions.map((o) => o.value as SearchPerson);
 
-    const indexStatusSuggestion = props.selectProps.options.filter(
+    const indexStatusSuggestion = options.filter(
         (o) => o.type === SuggestionType.INDEX_STATUS,
     )[0] as Suggestion;
 
@@ -469,8 +484,8 @@ const MenuWithPeople = (props) => {
                             people={people}
                             maxRows={2}
                             onSelect={(_, index) => {
-                                props.selectRef.current.blur();
-                                props.setValue(peopleSuggestions[index]);
+                                selectRef.current?.blur();
+                                setSelectedValue(peopleSuggestions[index]);
                             }}
                         />
                     </Row>
@@ -494,6 +509,6 @@ const Caption = styled("span")`
     padding: 0px 12px;
 `;
 
-const VisibleInput: React.FC<InputProps<SearchOption>> = (props) => (
+const VisibleInput: React.FC<InputProps<SearchOption, false>> = (props) => (
     <SelectComponents.Input {...props} isHidden={false} />
 );
