@@ -13,7 +13,7 @@ Future<void> onTapCollectEventPhotos(BuildContext context) async {
   final String currentDate = DateFormat('MMMM d, yyyy').format(DateTime.now());
   final result = await showTextInputDialog(
     context,
-    title: "Name the album",
+    title: S.of(context).nameTheAlbum,
     submitButtonLabel: S.of(context).create,
     hintText: S.of(context).enterAlbumName,
     alwaysShowSuccessState: false,

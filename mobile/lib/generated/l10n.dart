@@ -9254,6 +9254,36 @@ class S {
       args: [],
     );
   }
+
+  /// `Name the album`
+  String get nameTheAlbum {
+    return Intl.message(
+      'Name the album',
+      name: 'nameTheAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Create a link where your friends can upload photos in original quality.`
+  String get collectPhotosDescription {
+    return Intl.message(
+      'Create a link where your friends can upload photos in original quality.',
+      name: 'collectPhotosDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Collect`
+  String get collect {
+    return Intl.message(
+      'Collect',
+      name: 'collect',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

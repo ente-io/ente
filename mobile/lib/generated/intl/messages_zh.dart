@@ -409,8 +409,11 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("协作者可以将照片和视频添加到共享相册中。"),
         "collageLayout": MessageLookupByLibrary.simpleMessage("布局"),
         "collageSaved": MessageLookupByLibrary.simpleMessage("拼贴已保存到相册"),
+        "collect": MessageLookupByLibrary.simpleMessage("Collect"),
         "collectEventPhotos": MessageLookupByLibrary.simpleMessage("收集活动照片"),
         "collectPhotos": MessageLookupByLibrary.simpleMessage("收集照片"),
+        "collectPhotosDescription": MessageLookupByLibrary.simpleMessage(
+            "Create a link where your friends can upload photos in original quality."),
         "color": MessageLookupByLibrary.simpleMessage("颜色"),
         "confirm": MessageLookupByLibrary.simpleMessage("确认"),
         "confirm2FADisable":
@@ -834,6 +837,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "movingFilesToAlbum":
             MessageLookupByLibrary.simpleMessage("正在将文件移动到相册..."),
         "name": MessageLookupByLibrary.simpleMessage("名称"),
+        "nameTheAlbum": MessageLookupByLibrary.simpleMessage("Name the album"),
         "networkConnectionRefusedErr": MessageLookupByLibrary.simpleMessage(
             "无法连接到 Ente，请稍后重试。如果错误仍然存在，请联系支持人员。"),
         "networkHostLookUpErr": MessageLookupByLibrary.simpleMessage(

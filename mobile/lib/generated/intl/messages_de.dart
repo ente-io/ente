@@ -484,9 +484,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "collageLayout": MessageLookupByLibrary.simpleMessage("Layout"),
         "collageSaved": MessageLookupByLibrary.simpleMessage(
             "Collage in Galerie gespeichert"),
+        "collect": MessageLookupByLibrary.simpleMessage("Collect"),
         "collectEventPhotos": MessageLookupByLibrary.simpleMessage(
             "Gemeinsam Event-Fotos sammeln"),
         "collectPhotos": MessageLookupByLibrary.simpleMessage("Fotos sammeln"),
+        "collectPhotosDescription": MessageLookupByLibrary.simpleMessage(
+            "Create a link where your friends can upload photos in original quality."),
         "color": MessageLookupByLibrary.simpleMessage("Farbe"),
         "confirm": MessageLookupByLibrary.simpleMessage("Bestätigen"),
         "confirm2FADisable": MessageLookupByLibrary.simpleMessage(
@@ -825,9 +828,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Zugriff gewähren"),
         "groupNearbyPhotos": MessageLookupByLibrary.simpleMessage(
             "Fotos in der Nähe gruppieren"),
-        "guestView": MessageLookupByLibrary.simpleMessage("Guest view"),
+        "guestView": MessageLookupByLibrary.simpleMessage("Gastansicht"),
         "guestViewEnablePreSteps": MessageLookupByLibrary.simpleMessage(
-            "To enable guest view, please setup device passcode or screen lock in your system settings."),
+            "Bitte richte einen Gerätepasscode oder eine Bildschirmsperre ein, um die Gastansicht zu nutzen."),
         "hearUsExplanation": MessageLookupByLibrary.simpleMessage(
             "Wir tracken keine App-Installationen. Es würde uns jedoch helfen, wenn du uns mitteilst, wie du von uns erfahren hast!"),
         "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(
@@ -1023,6 +1026,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "movingFilesToAlbum": MessageLookupByLibrary.simpleMessage(
             "Verschiebe Dateien in Album..."),
         "name": MessageLookupByLibrary.simpleMessage("Name"),
+        "nameTheAlbum": MessageLookupByLibrary.simpleMessage("Name the album"),
         "networkConnectionRefusedErr": MessageLookupByLibrary.simpleMessage(
             "Ente ist im Moment nicht erreichbar. Bitte versuchen Sie es später erneut. Sollte das Problem bestehen bleiben, wenden Sie sich bitte an den Support."),
         "networkHostLookUpErr": MessageLookupByLibrary.simpleMessage(

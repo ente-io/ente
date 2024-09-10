@@ -1157,5 +1157,8 @@
   "removePublicLinks": "Remove public links",
   "thisWillRemovePublicLinksOfAllSelectedQuickLinks": "This will remove public links of all selected quick links.",
   "guestView": "Guest view",
-  "guestViewEnablePreSteps": "To enable guest view, please setup device passcode or screen lock in your system settings."
+  "guestViewEnablePreSteps": "To enable guest view, please setup device passcode or screen lock in your system settings.",
+  "nameTheAlbum": "Name the album",
+  "collectPhotosDescription": "Create a link where your friends can upload photos in original quality.",
+  "collect": "Collect"
 }

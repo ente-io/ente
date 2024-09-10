@@ -1291,5 +1291,8 @@
   "removePublicLinks": "Remover link público",
   "thisWillRemovePublicLinksOfAllSelectedQuickLinks": "Isto removerá links públicos de todos os links rápidos selecionados.",
   "guestView": "Visão de convidado",
-  "guestViewEnablePreSteps": "Para ativar a visão de convidado, por favor ative um método de autenticação nas configurações do sistema do seu dispositivo."
+  "guestViewEnablePreSteps": "Para ativar a visão de convidado, por favor ative um método de autenticação nas configurações do sistema do seu dispositivo.",
+  "nameTheAlbum": "Name the album",
+  "collectPhotosDescription": "Create a link where your friends can upload photos in original quality.",
+  "collect": "Collect"
 }

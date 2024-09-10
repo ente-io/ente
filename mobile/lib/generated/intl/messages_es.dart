@@ -482,10 +482,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "collageLayout": MessageLookupByLibrary.simpleMessage("Disposición"),
         "collageSaved": MessageLookupByLibrary.simpleMessage(
             "Collage guardado en la galería"),
+        "collect": MessageLookupByLibrary.simpleMessage("Collect"),
         "collectEventPhotos":
             MessageLookupByLibrary.simpleMessage("Recopilar fotos del evento"),
         "collectPhotos":
             MessageLookupByLibrary.simpleMessage("Recolectar fotos"),
+        "collectPhotosDescription": MessageLookupByLibrary.simpleMessage(
+            "Create a link where your friends can upload photos in original quality."),
         "color": MessageLookupByLibrary.simpleMessage("Color"),
         "confirm": MessageLookupByLibrary.simpleMessage("Confirmar"),
         "confirm2FADisable": MessageLookupByLibrary.simpleMessage(
@@ -1028,6 +1031,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "movingFilesToAlbum": MessageLookupByLibrary.simpleMessage(
             "Moviendo archivos al álbum..."),
         "name": MessageLookupByLibrary.simpleMessage("Nombre"),
+        "nameTheAlbum": MessageLookupByLibrary.simpleMessage("Name the album"),
         "networkConnectionRefusedErr": MessageLookupByLibrary.simpleMessage(
             "No se puede conectar a Ente. Por favor, vuelve a intentarlo pasado un tiempo. Si el error persiste, ponte en contacto con el soporte técnico."),
         "networkHostLookUpErr": MessageLookupByLibrary.simpleMessage(

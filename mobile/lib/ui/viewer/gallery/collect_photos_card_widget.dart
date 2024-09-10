@@ -1,5 +1,6 @@
 import "package:figma_squircle/figma_squircle.dart";
 import 'package:flutter/material.dart';
+import "package:photos/generated/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
@@ -73,14 +74,14 @@ class _CollectPhotosCardWidgetState extends State<CollectPhotosCardWidget> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "Collect photos",
+                      S.of(context).collectPhotos,
                       style: textTheme.bodyBold,
                     ),
                     const SizedBox(
                       height: 16,
                     ),
                     Text(
-                      "Create a link where your friends can upload photos in original quality.",
+                      S.of(context).collectPhotosDescription,
                       style: textTheme.smallMuted,
                     ),
                     const SizedBox(
@@ -92,7 +93,7 @@ class _CollectPhotosCardWidgetState extends State<CollectPhotosCardWidget> {
                         ButtonWidget(
                           buttonType: ButtonType.primary,
                           buttonSize: ButtonSize.small,
-                          labelText: "Collect",
+                          labelText: S.of(context).collect,
                           icon: Icons.add_photo_alternate_outlined,
                           shouldShowSuccessConfirmation: false,
                           shouldSurfaceExecutionStates: false,

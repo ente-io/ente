@@ -478,10 +478,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "collageLayout": MessageLookupByLibrary.simpleMessage("Разметка"),
         "collageSaved":
             MessageLookupByLibrary.simpleMessage("Коллаж сохранен в галерее"),
+        "collect": MessageLookupByLibrary.simpleMessage("Collect"),
         "collectEventPhotos":
             MessageLookupByLibrary.simpleMessage("Собрать фото события"),
         "collectPhotos":
             MessageLookupByLibrary.simpleMessage("Собрать фотографии"),
+        "collectPhotosDescription": MessageLookupByLibrary.simpleMessage(
+            "Create a link where your friends can upload photos in original quality."),
         "color": MessageLookupByLibrary.simpleMessage("Цвет"),
         "confirm": MessageLookupByLibrary.simpleMessage("Подтвердить"),
         "confirm2FADisable": MessageLookupByLibrary.simpleMessage(
@@ -1012,6 +1015,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "movingFilesToAlbum": MessageLookupByLibrary.simpleMessage(
             "Перемещение файлов в альбом..."),
         "name": MessageLookupByLibrary.simpleMessage("Имя"),
+        "nameTheAlbum": MessageLookupByLibrary.simpleMessage("Name the album"),
         "networkConnectionRefusedErr": MessageLookupByLibrary.simpleMessage(
             "Не удается подключиться к Ente, пожалуйста, повторите попытку через некоторое время. Если ошибка не устраняется, обратитесь в службу поддержки."),
         "networkHostLookUpErr": MessageLookupByLibrary.simpleMessage(

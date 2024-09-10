@@ -1291,5 +1291,8 @@
   "removePublicLinks": "Usuń linki publiczne",
   "thisWillRemovePublicLinksOfAllSelectedQuickLinks": "Spowoduje to usunięcie publicznych linków wszystkich zaznaczonych szybkich linków.",
   "guestView": "Widok gościa",
-  "guestViewEnablePreSteps": "Aby włączyć widok gościa, należy skonfigurować hasło urządzenia lub blokadę ekranu w ustawieniach Twojego systemu."
+  "guestViewEnablePreSteps": "Aby włączyć widok gościa, należy skonfigurować hasło urządzenia lub blokadę ekranu w ustawieniach Twojego systemu.",
+  "nameTheAlbum": "Name the album",
+  "collectPhotosDescription": "Create a link where your friends can upload photos in original quality.",
+  "collect": "Collect"
 }

@@ -47,6 +47,10 @@ class MessageLookup extends MessageLookupByLibrary {
             "Change location of selected items?"),
         "clusteringProgress":
             MessageLookupByLibrary.simpleMessage("Clustering progress"),
+        "collect": MessageLookupByLibrary.simpleMessage("Collect"),
+        "collectPhotos": MessageLookupByLibrary.simpleMessage("Collect photos"),
+        "collectPhotosDescription": MessageLookupByLibrary.simpleMessage(
+            "Create a link where your friends can upload photos in original quality."),
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("Bekreft sletting av konto"),
         "confirmDeletePrompt": MessageLookupByLibrary.simpleMessage(
@@ -103,6 +107,7 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Modify your query, or try searching for"),
         "moveToHiddenAlbum":
             MessageLookupByLibrary.simpleMessage("Move to hidden album"),
+        "nameTheAlbum": MessageLookupByLibrary.simpleMessage("Name the album"),
         "next": MessageLookupByLibrary.simpleMessage("Next"),
         "noQuickLinksSelected":
             MessageLookupByLibrary.simpleMessage("No quick links selected"),

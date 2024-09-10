@@ -483,9 +483,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "collageLayout": MessageLookupByLibrary.simpleMessage("Układ"),
         "collageSaved":
             MessageLookupByLibrary.simpleMessage("Kolaż zapisano w galerii"),
+        "collect": MessageLookupByLibrary.simpleMessage("Collect"),
         "collectEventPhotos":
             MessageLookupByLibrary.simpleMessage("Zbierz zdjęcia z wydarzenia"),
         "collectPhotos": MessageLookupByLibrary.simpleMessage("Zbierz zdjęcia"),
+        "collectPhotosDescription": MessageLookupByLibrary.simpleMessage(
+            "Create a link where your friends can upload photos in original quality."),
         "color": MessageLookupByLibrary.simpleMessage("Kolor"),
         "confirm": MessageLookupByLibrary.simpleMessage("Potwierdź"),
         "confirm2FADisable": MessageLookupByLibrary.simpleMessage(
@@ -752,7 +755,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "failedToRenew":
             MessageLookupByLibrary.simpleMessage("Nie udało się odnowić"),
         "failedToVerifyPaymentStatus": MessageLookupByLibrary.simpleMessage(
-            "Nie udało się zweryfikować statusu płatności"),
+            "Nie udało się zweryfikować stanu płatności"),
         "familyPlanOverview": MessageLookupByLibrary.simpleMessage(
             "Dodaj 5 członków rodziny do istniejącego planu bez dodatkowego płacenia.\n\nKażdy członek otrzymuje własną przestrzeń prywatną i nie widzi wzajemnie swoich plików, chyba że są one udostępnione.\n\nPlany rodzinne są dostępne dla klientów, którzy mają płatną subskrypcję Ente.\n\nSubskrybuj teraz, aby rozpocząć!"),
         "familyPlanPortalTitle":
@@ -818,9 +821,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Przyznaj uprawnienie"),
         "groupNearbyPhotos":
             MessageLookupByLibrary.simpleMessage("Grupuj pobliskie zdjęcia"),
-        "guestView": MessageLookupByLibrary.simpleMessage("Guest view"),
+        "guestView": MessageLookupByLibrary.simpleMessage("Widok gościa"),
         "guestViewEnablePreSteps": MessageLookupByLibrary.simpleMessage(
-            "To enable guest view, please setup device passcode or screen lock in your system settings."),
+            "Aby włączyć widok gościa, należy skonfigurować hasło urządzenia lub blokadę ekranu w ustawieniach Twojego systemu."),
         "hearUsExplanation": MessageLookupByLibrary.simpleMessage(
             "Nie śledzimy instalacji aplikacji. Pomogłyby nam, gdybyś powiedział/a nam, gdzie nas znalazłeś/aś!"),
         "hearUsWhereTitle": MessageLookupByLibrary.simpleMessage(
@@ -1017,6 +1020,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "movingFilesToAlbum": MessageLookupByLibrary.simpleMessage(
             "Przenoszenie plików do albumów..."),
         "name": MessageLookupByLibrary.simpleMessage("Nazwa"),
+        "nameTheAlbum": MessageLookupByLibrary.simpleMessage("Name the album"),
         "networkConnectionRefusedErr": MessageLookupByLibrary.simpleMessage(
             "Nie można połączyć się z Ente, spróbuj ponownie po pewnym czasie. Jeśli błąd będzie się powtarzał, skontaktuj się z pomocą techniczną."),
         "networkHostLookUpErr": MessageLookupByLibrary.simpleMessage(
