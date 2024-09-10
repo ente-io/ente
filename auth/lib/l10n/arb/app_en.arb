@@ -466,5 +466,7 @@
   "pinLock": "Pin lock",
   "enterPin": "Enter PIN",
   "setNewPin": "Set new PIN",
-  "importFailureDescNew": "Could not parse the selected file."
+  "importFailureDescNew": "Could not parse the selected file.",
+  "appLockNotEnabled": "App lock not enabled",
+  "appLockNotEnabledDescription": "Please enable app lock from Security > App Lock"
 }

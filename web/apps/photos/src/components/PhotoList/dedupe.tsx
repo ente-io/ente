@@ -19,7 +19,7 @@ import {
     MIN_COLUMNS,
     SIZE_AND_COUNT_CONTAINER_HEIGHT,
     SPACE_BTW_DATES,
-} from ".";
+} from "./constants";
 
 export enum ITEM_TYPE {
     TIME = "TIME",

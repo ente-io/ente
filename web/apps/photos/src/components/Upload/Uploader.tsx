@@ -292,6 +292,7 @@ export default function Uploader({
         }
 
         let files: File[];
+        isDragAndDrop.current = false;
 
         switch (pickedUploadType.current) {
             case PICKED_UPLOAD_TYPE.FILES:
@@ -307,6 +308,7 @@ export default function Uploader({
                 break;
 
             default:
+                isDragAndDrop.current = true;
                 files = dragAndDropFiles;
                 break;
         }

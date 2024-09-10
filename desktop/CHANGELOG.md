@@ -2,6 +2,7 @@
 
 ## v1.7.5 (Unreleased)
 
+-   Directly upload to selected album on drag and drop.
 -   .
 
 ## v1.7.4

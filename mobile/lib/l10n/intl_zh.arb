@@ -1314,5 +1314,10 @@
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "要启用应用锁，请在系统设置中设置设备密码或屏幕锁。",
   "authToViewPasskey": "请验证身份以查看您的通行密钥",
   "loopVideoOn": "循环播放视频开启",
-  "loopVideoOff": "循环播放视频关闭"
+  "loopVideoOff": "循环播放视频关闭",
+  "nameTheAlbum": "Name the album",
+  "collectPhotosDescription": "Create a link where your friends can upload photos in original quality.",
+  "collect": "Collect",
+  "localSyncErrorMessage": "Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team",
+  "showPerson": "Show person"
 }

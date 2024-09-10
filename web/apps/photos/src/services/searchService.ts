@@ -37,6 +37,7 @@ export const getDefaultOptions = async () => {
 export const getAutoCompleteSuggestions =
     (files: EnteFile[], collections: Collection[]) =>
     async (searchPhrase: string): Promise<SearchOption[]> => {
+        log.debug(() => ["getAutoCompleteSuggestions", { searchPhrase }]);
         try {
             const searchPhrase2 = searchPhrase.trim().toLowerCase();
             if (!searchPhrase2?.length) {

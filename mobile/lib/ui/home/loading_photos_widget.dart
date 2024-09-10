@@ -10,8 +10,10 @@ import 'package:photos/events/sync_status_update_event.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/ui/common/bottom_shadow.dart';
+import "package:photos/ui/components/buttons/button_widget.dart";
+import "package:photos/ui/components/dialog_widget.dart";
+import "package:photos/ui/components/models/button_type.dart";
 import 'package:photos/ui/settings/backup/backup_folder_selection_page.dart';
-import "package:photos/utils/debouncer.dart";
 import "package:photos/utils/email_util.dart";
 import 'package:photos/utils/navigation_util.dart';
 
@@ -31,12 +33,15 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
     initialPage: 0,
   );
   final List<String> _messages = [];
-  final _debouncer = Debouncer(const Duration(milliseconds: 500));
   late final Timer _didYouKnowTimer;
+  final fortySecondsOnScreen = ValueNotifier(false);
 
   @override
   void initState() {
     super.initState();
+    Future.delayed(const Duration(seconds: 40), () {
+      fortySecondsOnScreen.value = true;
+    });
     _firstImportEvent =
         Bus.instance.on<SyncStatusUpdate>().listen((event) async {
       if (mounted && event.status == SyncStatus.completedFirstGalleryImport) {
@@ -86,8 +91,8 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
   void dispose() {
     _firstImportEvent.cancel();
     _importProgressEvent.cancel();
-    _debouncer.cancelDebounceTimer();
     _didYouKnowTimer.cancel();
+    fortySecondsOnScreen.dispose();
     super.dispose();
   }
 
@@ -98,105 +103,128 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
     return Scaffold(
       body: SingleChildScrollView(
         child: Center(
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onScaleEnd: (details) {
-              _debouncer.run(() async {
-                unawaited(
-                  triggerSendLogs(
-                    "support@ente.io",
-                    "Stuck on loading local photos screen on ${Platform.operatingSystem}",
-                    null,
-                  ),
-                );
-              });
-            },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      isLightMode
-                          ? Image.asset(
-                              'assets/loading_photos_background.png',
-                              color: Colors.white.withOpacity(0.5),
-                              colorBlendMode: BlendMode.modulate,
-                            )
-                          : Image.asset(
-                              'assets/loading_photos_background_dark.png',
-                              color: Colors.white.withOpacity(0.25),
-                              colorBlendMode: BlendMode.modulate,
-                            ),
-                      Column(
-                        children: [
-                          const SizedBox(height: 24),
-                          Lottie.asset(
-                            'assets/loadingGalleryLottie.json',
-                            height: 400,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    isLightMode
+                        ? Image.asset(
+                            'assets/loading_photos_background.png',
+                            color: Colors.white.withOpacity(0.5),
+                            colorBlendMode: BlendMode.modulate,
+                          )
+                        : Image.asset(
+                            'assets/loading_photos_background_dark.png',
+                            color: Colors.white.withOpacity(0.25),
+                            colorBlendMode: BlendMode.modulate,
                           ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  Text(
-                    _loadingMessage,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.subTextColor,
-                    ),
-                  ),
-                  const SizedBox(height: 54),
-                  Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Text(
-                            S.of(context).didYouKnow,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleLarge!
-                                .copyWith(
-                                  color:
-                                      Theme.of(context).colorScheme.greenText,
-                                ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 16,
-                      ),
-                      SizedBox(
-                        height: 175,
-                        child: Stack(
-                          children: [
-                            PageView.builder(
-                              scrollDirection: Axis.vertical,
-                              controller: _pageController,
-                              itemBuilder: (context, index) {
-                                return _getMessage(_messages[index]);
-                              },
-                              itemCount: _messages.length,
-                              physics: const NeverScrollableScrollPhysics(),
-                            ),
-                            const Positioned(
-                              bottom: 0,
-                              left: 0,
-                              right: 0,
-                              child: BottomShadowWidget(),
-                            ),
-                          ],
+                    Column(
+                      children: [
+                        const SizedBox(height: 24),
+                        Lottie.asset(
+                          'assets/loadingGalleryLottie.json',
+                          height: 400,
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
+                  ],
+                ),
+                Text(
+                  _loadingMessage,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.subTextColor,
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 54),
+                Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(
+                          S.of(context).didYouKnow,
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleLarge!
+                              .copyWith(
+                                color: Theme.of(context).colorScheme.greenText,
+                              ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 16,
+                    ),
+                    SizedBox(
+                      height: 175,
+                      child: Stack(
+                        children: [
+                          PageView.builder(
+                            scrollDirection: Axis.vertical,
+                            controller: _pageController,
+                            itemBuilder: (context, index) {
+                              return _getMessage(_messages[index]);
+                            },
+                            itemCount: _messages.length,
+                            physics: const NeverScrollableScrollPhysics(),
+                          ),
+                          const Positioned(
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            child: BottomShadowWidget(),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ),
+      ),
+      appBar: AppBar(
+        actions: [
+          ValueListenableBuilder(
+            valueListenable: fortySecondsOnScreen,
+            builder: (context, value, _) {
+              return value
+                  ? IconButton(
+                      icon: const Icon(Icons.help_outline_outlined),
+                      onPressed: () {
+                        showDialogWidget(
+                          context: context,
+                          title: S.of(context).oops,
+                          icon: Icons.error_outline_outlined,
+                          body: S.of(context).localSyncErrorMessage,
+                          isDismissible: true,
+                          buttons: [
+                            ButtonWidget(
+                              buttonType: ButtonType.primary,
+                              labelText: S.of(context).contactSupport,
+                              buttonAction: ButtonAction.second,
+                              onTap: () async {
+                                await sendLogs(
+                                  context,
+                                  S.of(context).contactSupport,
+                                  "support@ente.io",
+                                  postShare: () {},
+                                );
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    )
+                  : const SizedBox.shrink();
+            },
+          ),
+        ],
       ),
     );
   }

@@ -5,8 +5,8 @@
     "HERO_SLIDE_2": "مصممة لتدوم",
     "HERO_SLIDE_3_TITLE": "<div>متاح</div><div> في كل مكان</div>",
     "HERO_SLIDE_3": "أندرويد، آي أو إس، ويب، سطح المكتب",
-    "LOGIN": "تسجيل الدخول",
-    "SIGN_UP": "تسجيل",
+    "login": "تسجيل الدخول",
+    "sign_up": "تسجيل",
     "NEW_USER": "جديد في Ente",
     "EXISTING_USER": "مستخدم موجود",
     "ENTER_NAME": "أدخل الاسم",
@@ -51,8 +51,8 @@
     "NOTHING_HERE": "لا شيء يمكن رؤيته هنا بعد 👀",
     "upload": "تحميل",
     "import": "استيراد",
-    "ADD_PHOTOS": "إضافة صور",
-    "ADD_MORE_PHOTOS": "إضافة المزيد من الصور",
+    "add_photos": "إضافة صور",
+    "add_more_photos": "إضافة المزيد من الصور",
     "add_photos_count_one": "إضافة 1 عنصر",
     "add_photos_count": "إضافة {{count, number}} عناصر",
     "select_photos": "تحديد الصور",
@@ -138,9 +138,10 @@
     "ERROR": "خطأ",
     "MESSAGE": "رسالة",
     "OFFLINE_MSG": "",
-    "INSTALL_MOBILE_APP": "",
-    "DOWNLOAD_APP_MESSAGE": "",
-    "DOWNLOAD_APP": "تنزيل تطبيق سطح المكتب",
+    "install": "",
+    "install_mobile_app": "",
+    "download_app": "تنزيل تطبيق سطح المكتب",
+    "download_app_message": "",
     "EXPORT": "تصدير البيانات",
     "SUBSCRIPTION": "اشتراك",
     "SUBSCRIBE": "اشترك",
@@ -356,7 +357,6 @@
     "CUSTOM_TIME": "",
     "REOPEN_PLAN_SELECTOR_MODAL": "",
     "OPEN_PLAN_SELECTOR_MODAL_FAILED": "",
-    "INSTALL": "",
     "SHARING_DETAILS": "",
     "MODIFY_SHARING": "",
     "ADD_COLLABORATORS": "",
@@ -406,7 +406,6 @@
     "DISABLE_PASSWORD_MESSAGE": "",
     "PASSWORD_LOCK": "",
     "LOCK": "",
-    "DOWNLOAD_UPLOAD_LOGS": "",
     "file": "",
     "folder": "",
     "google_takeout": "",
@@ -452,6 +451,7 @@
     "YES_STOP": "",
     "CHANGE_FOLDER": "",
     "FAMILY_PLAN": "",
+    "debug_logs": "",
     "DOWNLOAD_LOGS": "",
     "DOWNLOAD_LOGS_MESSAGE": "",
     "WEAK_DEVICE": "",

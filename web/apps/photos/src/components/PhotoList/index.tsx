@@ -20,14 +20,16 @@ const FOOTER_HEIGHT = 90;
 const ALBUM_FOOTER_HEIGHT = 75;
 const ALBUM_FOOTER_HEIGHT_WITH_REFERRAL = 113;
 
-export const GAP_BTW_TILES = 4;
-export const DATE_CONTAINER_HEIGHT = 48;
-export const SIZE_AND_COUNT_CONTAINER_HEIGHT = 72;
-export const IMAGE_CONTAINER_MAX_HEIGHT = 180;
-export const IMAGE_CONTAINER_MAX_WIDTH = 180;
-export const MIN_COLUMNS = 4;
-export const SPACE_BTW_DATES = 44;
-export const SPACE_BTW_DATES_TO_IMAGE_CONTAINER_WIDTH_RATIO = 0.244;
+import {
+    DATE_CONTAINER_HEIGHT,
+    GAP_BTW_TILES,
+    IMAGE_CONTAINER_MAX_HEIGHT,
+    IMAGE_CONTAINER_MAX_WIDTH,
+    MIN_COLUMNS,
+    SIZE_AND_COUNT_CONTAINER_HEIGHT,
+    SPACE_BTW_DATES,
+    SPACE_BTW_DATES_TO_IMAGE_CONTAINER_WIDTH_RATIO,
+} from "./constants";
 
 export enum ITEM_TYPE {
     TIME = "TIME",
@@ -543,7 +545,7 @@ export function PhotoList({
                 <FooterContainer span={columns}>
                     <Typography variant="small">
                         <Trans
-                            i18nKey={"INSTALL_MOBILE_APP"}
+                            i18nKey={"install_mobile_app"}
                             components={{
                                 a: (
                                     <Link

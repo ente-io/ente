@@ -1,4 +1,4 @@
-import "dart:typed_data";
+import "dart:typed_data" show Uint8List, Float32List;
 import "dart:ui" show Image;
 
 import "package:logging/logging.dart";
@@ -29,12 +29,12 @@ class ClipImageEncoder extends MlModel {
 
   static Future<List<double>> predict(
     Image image,
-    ByteData imageByteData,
+    Uint8List rawRgbaBytes,
     int sessionAddress, [
     int? enteFileID,
   ]) async {
     final startTime = DateTime.now();
-    final inputList = await preprocessImageClip(image, imageByteData);
+    final inputList = await preprocessImageClip(image, rawRgbaBytes);
     final preprocessingTime = DateTime.now();
     final preprocessingMs =
         preprocessingTime.difference(startTime).inMilliseconds;

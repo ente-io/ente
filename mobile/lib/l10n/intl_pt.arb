@@ -1310,9 +1310,14 @@
   "thisWillRemovePublicLinksOfAllSelectedQuickLinks": "Isto removerá links públicos de todos os links rápidos selecionados.",
   "guestView": "Visão de convidado",
   "guestViewEnablePreSteps": "Para ativar a visão de convidado, por favor ative um método de autenticação nas configurações do sistema do seu dispositivo.",
+  "nameTheAlbum": "Name the album",
+  "collectPhotosDescription": "Create a link where your friends can upload photos in original quality.",
+  "collect": "Collect",
   "appLockDescriptions": "Escolha entre a tela de bloqueio padrão do seu dispositivo e uma tela de bloqueio personalizada com PIN ou senha.",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Para ativar o bloqueio do app, configure uma senha no dispositivo ou tela de bloqueio nas configurações do sistema.",
   "authToViewPasskey": "Por favor, autentique-se para ver sua chave de acesso",
   "loopVideoOn": "Repetir vídeo ligado",
-  "loopVideoOff": "Repetir vídeo desligado"
+  "loopVideoOff": "Repetir vídeo desligado",
+  "localSyncErrorMessage": "Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team",
+  "showPerson": "Show person"
 }

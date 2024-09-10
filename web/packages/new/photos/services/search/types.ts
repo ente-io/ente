@@ -144,6 +144,9 @@ export interface SearchResultSummary {
     fileCount: number;
 }
 
+/**
+ * An option shown in the the search bar's select dropdown.
+ */
 export interface SearchOption extends Suggestion {
     fileCount: number;
     previewFiles: EnteFile[];

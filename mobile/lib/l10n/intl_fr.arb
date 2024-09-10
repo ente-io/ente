@@ -1222,6 +1222,12 @@
   "joinDiscord": "Rejoindre Discord",
   "locations": "Emplacements",
   "descriptions": "Descriptions",
+  "faceRecognitionIndexingDescription": "Please note that this will result in a higher bandwidth and battery usage until all items are indexed.",
+  "appLockDescription": "Choose between your device\\'s default lock screen and a custom lock screen with a PIN or password.",
+  "swipeLockEnablePreSteps": "To enable swipe lock, please setup device passcode or screen lock in your system settings.",
+  "nameTheAlbum": "Name the album",
+  "collectPhotosDescription": "Create a link where your friends can upload photos in original quality.",
+  "collect": "Collect",
   "addAName": "Ajouter un nom",
   "findPeopleByName": "Trouver des personnes rapidement par leur nom",
   "addViewers": "{count, plural, zero {Ajouter un lecteur} one {Ajouter un lecteur} other {Ajouter des lecteurs}}",
@@ -1310,5 +1316,7 @@
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Pour activer le verrouillage d'application, veuillez configurer le code d'accès de l'appareil ou le verrouillage de l'écran dans les paramètres de votre système.",
   "authToViewPasskey": "Veuillez vous authentifier pour afficher votre clé de récupération",
   "loopVideoOn": "Vidéo en boucle activée",
-  "loopVideoOff": "Vidéo en boucle désactivée"
+  "loopVideoOff": "Vidéo en boucle désactivée",
+  "localSyncErrorMessage": "Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team",
+  "showPerson": "Show person"
 }

@@ -383,6 +383,7 @@ const convertToYOLOInputFloat32ChannelsFirst = (imageData: ImageData) => {
                           pixelData,
                           width,
                           height,
+                          false,
                       );
             yoloInput[pi] = r / 255.0;
             yoloInput[pi + channelOffsetGreen] = g / 255.0;

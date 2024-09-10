@@ -396,7 +396,7 @@ Future<MLResult> analyzeImageStatic(Map args) async {
     final startTime = DateTime.now();
 
     // Decode the image once to use for both face detection and alignment
-    final (image, imageByteData) = await decodeImageFromPath(imagePath);
+    final (image, rawRgbaBytes) = await decodeImageFromPath(imagePath);
     final decodedImageSize =
         Dimensions(height: image.height, width: image.width);
     final result = MLResult.fromEnteFileID(enteFileID);
@@ -437,6 +437,7 @@ Future<MLResult> analyzeImageStatic(Map args) async {
     if (pipelines[1] != null) result.clip = pipelines[1] as ClipResult;
 
     final totalMs = DateTime.now().difference(startTime).inMilliseconds;
+
     _logger.info(
       'Finished analyzeImageStatic for fileID $enteFileID, in $totalMs ms (decode: $decodeMs ms$faceMsString$clipMsString)',
     );

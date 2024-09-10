@@ -9435,6 +9435,36 @@ class S {
     );
   }
 
+  /// `Name the album`
+  String get nameTheAlbum {
+    return Intl.message(
+      'Name the album',
+      name: 'nameTheAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Create a link where your friends can upload photos in original quality.`
+  String get collectPhotosDescription {
+    return Intl.message(
+      'Create a link where your friends can upload photos in original quality.',
+      name: 'collectPhotosDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Collect`
+  String get collect {
+    return Intl.message(
+      'Collect',
+      name: 'collect',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Choose between your device's default lock screen and a custom lock screen with a PIN or password.`
   String get appLockDescriptions {
     return Intl.message(
@@ -9480,6 +9510,26 @@ class S {
     return Intl.message(
       'Loop video off',
       name: 'loopVideoOff',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team`
+  String get localSyncErrorMessage {
+    return Intl.message(
+      'Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team',
+      name: 'localSyncErrorMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Show person`
+  String get showPerson {
+    return Intl.message(
+      'Show person',
+      name: 'showPerson',
       desc: '',
       args: [],
     );

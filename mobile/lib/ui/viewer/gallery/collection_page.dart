@@ -12,6 +12,7 @@ import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
+import "package:photos/ui/viewer/gallery/collect_photos_bottom_buttons.dart";
 import "package:photos/ui/viewer/gallery/empty_album_state.dart";
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
@@ -22,11 +23,13 @@ class CollectionPage extends StatelessWidget {
   final CollectionWithThumbnail c;
   final String tagPrefix;
   final bool? hasVerifiedLock;
+  final bool isFromCollectPhotos;
 
   CollectionPage(
     this.c, {
     this.tagPrefix = "collection",
     this.hasVerifiedLock = false,
+    this.isFromCollectPhotos = false,
     Key? key,
   }) : super(key: key);
 
@@ -86,8 +89,14 @@ class CollectionPage extends StatelessWidget {
       sortAsyncFn: () => c.collection.pubMagicMetadata.asc ?? false,
       showSelectAllByDefault: galleryType != GalleryType.sharedCollection,
       emptyState: galleryType == GalleryType.ownedCollection
-          ? EmptyAlbumState(c.collection)
+          ? EmptyAlbumState(
+              c.collection,
+              isFromCollectPhotos: isFromCollectPhotos,
+            )
           : const EmptyState(),
+      footer: isFromCollectPhotos
+          ? const SizedBox(height: 20)
+          : const SizedBox(height: 212),
     );
     return Scaffold(
       appBar: PreferredSize(
@@ -97,8 +106,15 @@ class CollectionPage extends StatelessWidget {
           c.collection.displayName,
           _selectedFiles,
           collection: c.collection,
+          isFromCollectPhotos: isFromCollectPhotos,
         ),
       ),
+      bottomNavigationBar: isFromCollectPhotos
+          ? CollectPhotosBottomButtons(
+              c.collection,
+              selectedFiles: _selectedFiles,
+            )
+          : const SizedBox.shrink(),
       body: SelectionState(
         selectedFiles: _selectedFiles,
         child: Stack(
