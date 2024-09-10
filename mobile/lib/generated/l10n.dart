@@ -9435,6 +9435,16 @@ class S {
     );
   }
 
+  /// `Name the album`
+  String get nameTheAlbum {
+    return Intl.message(
+      'Name the album',
+      name: 'nameTheAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Choose between your device's default lock screen and a custom lock screen with a PIN or password.`
   String get appLockDescriptions {
     return Intl.message(
@@ -9445,11 +9455,31 @@ class S {
     );
   }
 
+  /// `Create a link where your friends can upload photos in original quality.`
+  String get collectPhotosDescription {
+    return Intl.message(
+      'Create a link where your friends can upload photos in original quality.',
+      name: 'collectPhotosDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `To enable app lock, please setup device passcode or screen lock in your system settings.`
   String get toEnableAppLockPleaseSetupDevicePasscodeOrScreen {
     return Intl.message(
       'To enable app lock, please setup device passcode or screen lock in your system settings.',
       name: 'toEnableAppLockPleaseSetupDevicePasscodeOrScreen',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Collect`
+  String get collect {
+    return Intl.message(
+      'Collect',
+      name: 'collect',
       desc: '',
       args: [],
     );

@@ -1249,6 +1249,12 @@
   "right": "Derecha",
   "whatsNew": "Qué hay de nuevo",
   "reviewSuggestions": "Revisar sugerencias",
+  "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "To enable app lock, please setup device passcode or screen lock in your system settings.",
+  "appLockDescription": "Choose between your device\\'s default lock screen and a custom lock screen with a PIN or password.",
+  "swipeLockEnablePreSteps": "To enable swipe lock, please setup device passcode or screen lock in your system settings.",
+  "nameTheAlbum": "Name the album",
+  "collectPhotosDescription": "Create a link where your friends can upload photos in original quality.",
+  "collect": "Collect",
   "useAsCover": "Usar como cubierta",
   "notPersonLabel": "¿No es {name}?",
   "@notPersonLabel": {

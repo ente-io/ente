@@ -425,10 +425,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "collageLayout": MessageLookupByLibrary.simpleMessage("Düzen"),
         "collageSaved": MessageLookupByLibrary.simpleMessage(
             "Kolajınız galeriye kaydedildi"),
+        "collect": MessageLookupByLibrary.simpleMessage("Collect"),
         "collectEventPhotos": MessageLookupByLibrary.simpleMessage(
             "Etkinlik fotoğraflarını topla"),
         "collectPhotos":
             MessageLookupByLibrary.simpleMessage("Fotoğrafları topla"),
+        "collectPhotosDescription": MessageLookupByLibrary.simpleMessage(
+            "Create a link where your friends can upload photos in original quality."),
         "color": MessageLookupByLibrary.simpleMessage("Renk"),
         "confirm": MessageLookupByLibrary.simpleMessage("Onayla"),
         "confirm2FADisable": MessageLookupByLibrary.simpleMessage(
@@ -902,6 +905,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "movingFilesToAlbum": MessageLookupByLibrary.simpleMessage(
             "Dosyalar albüme taşınıyor..."),
         "name": MessageLookupByLibrary.simpleMessage("İsim"),
+        "nameTheAlbum": MessageLookupByLibrary.simpleMessage("Name the album"),
         "networkConnectionRefusedErr": MessageLookupByLibrary.simpleMessage(
             "Ente\'ye bağlanılamıyor. Lütfen bir süre sonra tekrar deneyin. Hata devam ederse lütfen desteğe başvurun."),
         "networkHostLookUpErr": MessageLookupByLibrary.simpleMessage(

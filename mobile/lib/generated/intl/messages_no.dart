@@ -108,6 +108,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "authToViewYourRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "Vennligst autentiser deg for å se gjennopprettingsnøkkelen din"),
         "cancel": MessageLookupByLibrary.simpleMessage("Avbryt"),
+        "changeLocationOfSelectedItems": MessageLookupByLibrary.simpleMessage(
+            "Change location of selected items?"),
+        "clusteringProgress":
+            MessageLookupByLibrary.simpleMessage("Clustering progress"),
+        "collect": MessageLookupByLibrary.simpleMessage("Collect"),
+        "collectPhotos": MessageLookupByLibrary.simpleMessage("Collect photos"),
+        "collectPhotosDescription": MessageLookupByLibrary.simpleMessage(
+            "Create a link where your friends can upload photos in original quality."),
         "cannotAddMorePhotosAfterBecomingViewer": m13,
         "changeEmail":
             MessageLookupByLibrary.simpleMessage("Endre e-postadresse"),
@@ -352,6 +360,36 @@ class MessageLookup extends MessageLookupByLibrary {
         "scanThisBarcodeWithnyourAuthenticatorApp":
             MessageLookupByLibrary.simpleMessage(
                 "Skann denne strekkoden med\nautentiseringsappen din"),
+        "moveToHiddenAlbum":
+            MessageLookupByLibrary.simpleMessage("Move to hidden album"),
+        "nameTheAlbum": MessageLookupByLibrary.simpleMessage("Name the album"),
+        "next": MessageLookupByLibrary.simpleMessage("Next"),
+        "noQuickLinksSelected":
+            MessageLookupByLibrary.simpleMessage("No quick links selected"),
+        "noSystemLockFound":
+            MessageLookupByLibrary.simpleMessage("No system lock found"),
+        "passwordLock": MessageLookupByLibrary.simpleMessage("Password lock"),
+        "passwordStrengthInfo": MessageLookupByLibrary.simpleMessage(
+            "Password strength is calculated considering the length of the password, used characters, and whether or not the password appears in the top 10,000 most used passwords"),
+        "pinLock": MessageLookupByLibrary.simpleMessage("PIN lock"),
+        "pleaseSelectQuickLinksToRemove": MessageLookupByLibrary.simpleMessage(
+            "Please select quick links to remove"),
+        "reenterPassword":
+            MessageLookupByLibrary.simpleMessage("Re-enter password"),
+        "reenterPin": MessageLookupByLibrary.simpleMessage("Re-enter PIN"),
+        "removePersonLabel":
+            MessageLookupByLibrary.simpleMessage("Remove person label"),
+        "removePublicLinks":
+            MessageLookupByLibrary.simpleMessage("Remove public links"),
+        "search": MessageLookupByLibrary.simpleMessage("Search"),
+        "selectALocation":
+            MessageLookupByLibrary.simpleMessage("Select a location"),
+        "selectALocationFirst":
+            MessageLookupByLibrary.simpleMessage("Select a location first"),
+        "setNewPassword":
+            MessageLookupByLibrary.simpleMessage("Set new password"),
+        "setNewPin": MessageLookupByLibrary.simpleMessage("Set new PIN"),
+        "tapToUnlock": MessageLookupByLibrary.simpleMessage("Tap to unlock"),
         "security": MessageLookupByLibrary.simpleMessage("Sikkerhet"),
         "selectAll": MessageLookupByLibrary.simpleMessage("Velg alle"),
         "selectFoldersForBackup": MessageLookupByLibrary.simpleMessage(
