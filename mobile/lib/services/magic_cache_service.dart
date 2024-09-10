@@ -197,13 +197,11 @@ class MagicCacheService {
   }
 
   ///Returns random non-empty magic results from magicPromptsData
-  ///Length is capped at [limit], can be less than [limit] if there are not enough
-  ///non-empty results
+  ///Length is number of prompts, can be less if there are not enough non-empty
+  ///results
   Future<List<MagicCache>> _nonEmptyMagicResults(
     List<dynamic> magicPromptsData,
   ) async {
-    //Show all magic prompts to internal users for feedback on results
-    final limit = flagService.internalUser ? magicPromptsData.length : 4;
     final results = <MagicCache>[];
     final randomIndexes = List.generate(
       magicPromptsData.length,
@@ -221,7 +219,7 @@ class MagicCacheService {
           ),
         );
       }
-      if (results.length >= limit) {
+      if (results.length >= magicPromptsData.length) {
         break;
       }
     }
