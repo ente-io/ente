@@ -1085,9 +1085,9 @@ export default function Gallery() {
                     ) : (
                         <NormalNavbarContents
                             openSidebar={openSidebar}
-                            setIsInSearchMode={setIsInSearchMode}
                             openUploader={openUploader}
                             isInSearchMode={isInSearchMode}
+                            setIsInSearchMode={setIsInSearchMode}
                             collections={collections}
                             files={files}
                             updateSearch={updateSearch}
@@ -1277,33 +1277,31 @@ const NormalNavbarContents: React.FC<NormalNavbarContentsProps> = ({
     openSidebar,
     openUploader,
     isInSearchMode,
+    setIsInSearchMode,
     collections,
     files,
     updateSearch,
-    setIsInSearchMode,
-}) => {
-    return (
-        <>
-            {!isInSearchMode && (
-                <IconButton onClick={openSidebar}>
-                    <MenuIcon />
-                </IconButton>
-            )}
-            <SearchBar
-                isInSearchMode={isInSearchMode}
-                setIsInSearchMode={setIsInSearchMode}
-                collections={collections}
-                files={files}
-                updateSearch={updateSearch}
-            />
-            {!isInSearchMode && <UploadButton onClick={openUploader} />}
-        </>
-    );
-};
+}) => (
+    <>
+        {!isInSearchMode && <SidebarButton onClick={openSidebar} />}
+        <SearchBar
+            isInSearchMode={isInSearchMode}
+            setIsInSearchMode={setIsInSearchMode}
+            collections={collections}
+            files={files}
+            updateSearch={updateSearch}
+        />
+        {!isInSearchMode && <UploadButton onClick={openUploader} />}
+    </>
+);
 
-export const UploadButton: React.FC<ButtonProps & IconButtonProps> = (
-    props,
-) => {
+const SidebarButton: React.FC<IconButtonProps> = (props) => (
+    <IconButton {...props}>
+        <MenuIcon />
+    </IconButton>
+);
+
+const UploadButton: React.FC<ButtonProps & IconButtonProps> = (props) => {
     const disabled = !uploadManager.shouldAllowNewUpload();
     const isMobileWidth = useIsMobileWidth();
 
