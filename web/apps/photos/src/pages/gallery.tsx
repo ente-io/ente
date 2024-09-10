@@ -1088,9 +1088,9 @@ export default function Gallery() {
                             openUploader={openUploader}
                             isInSearchMode={isInSearchMode}
                             setIsInSearchMode={setIsInSearchMode}
+                            updateSearch={updateSearch}
                             collections={collections}
                             files={files}
-                            updateSearch={updateSearch}
                         />
                     )}
                 </NavbarBase>
@@ -1268,9 +1268,9 @@ interface NormalNavbarContentsProps {
     openUploader: () => void;
     isInSearchMode: boolean;
     setIsInSearchMode: (v: boolean) => void;
+    updateSearch: UpdateSearch;
     collections: Collection[];
     files: EnteFile[];
-    updateSearch: UpdateSearch;
 }
 
 const NormalNavbarContents: React.FC<NormalNavbarContentsProps> = ({
@@ -1278,18 +1278,18 @@ const NormalNavbarContents: React.FC<NormalNavbarContentsProps> = ({
     openUploader,
     isInSearchMode,
     setIsInSearchMode,
+    updateSearch,
     collections,
     files,
-    updateSearch,
 }) => (
     <>
         {!isInSearchMode && <SidebarButton onClick={openSidebar} />}
         <SearchBar
             isInSearchMode={isInSearchMode}
             setIsInSearchMode={setIsInSearchMode}
+            updateSearch={updateSearch}
             collections={collections}
             files={files}
-            updateSearch={updateSearch}
         />
         {!isInSearchMode && <UploadButton onClick={openUploader} />}
     </>

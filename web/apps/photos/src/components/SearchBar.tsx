@@ -62,9 +62,9 @@ const { Option, ValueContainer, Menu } = components;
 interface SearchBarProps {
     isInSearchMode: boolean;
     setIsInSearchMode: (v: boolean) => void;
+    updateSearch: UpdateSearch;
     collections: Collection[];
     files: EnteFile[];
-    updateSearch: UpdateSearch;
 }
 
 export type UpdateSearch = (
@@ -77,8 +77,9 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     isInSearchMode,
     ...props
 }) => {
-    const showSearchInput = () => setIsInSearchMode(true);
     const isMobileWidth = useIsMobileWidth();
+
+    const showSearchInput = () => setIsInSearchMode(true);
 
     return (
         <Box sx={{ flex: 1, px: ["4px", "24px"] }}>
@@ -97,8 +98,8 @@ export const SearchBar: React.FC<SearchBarProps> = ({
 
 interface SearchInputProps {
     isOpen: boolean;
-    updateSearch: UpdateSearch;
     setIsOpen: (value: boolean) => void;
+    updateSearch: UpdateSearch;
     files: EnteFile[];
     collections: Collection[];
 }
