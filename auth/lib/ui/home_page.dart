@@ -22,11 +22,15 @@ import 'package:ente_auth/ui/account/logout_dialog.dart';
 import 'package:ente_auth/ui/code_error_widget.dart';
 import 'package:ente_auth/ui/code_widget.dart';
 import 'package:ente_auth/ui/common/loading_widget.dart';
+import 'package:ente_auth/ui/components/buttons/button_widget.dart';
+import 'package:ente_auth/ui/components/dialog_widget.dart';
+import 'package:ente_auth/ui/components/models/button_type.dart';
 import 'package:ente_auth/ui/home/coach_mark_widget.dart';
 import 'package:ente_auth/ui/home/home_empty_state.dart';
 import 'package:ente_auth/ui/home/speed_dial_label_widget.dart';
 import 'package:ente_auth/ui/scanner_page.dart';
 import 'package:ente_auth/ui/settings_page.dart';
+import 'package:ente_auth/ui/tools/app_lock.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_auth/utils/totp_util.dart';
@@ -199,6 +203,28 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future<void> navigateToLockScreen() async {
+    final bool shouldShowLockScreen =
+        await Configuration.instance.shouldShowLockScreen();
+    if (shouldShowLockScreen) {
+      await AppLock.of(context)!.showLockScreen();
+    } else {
+      await showDialogWidget(
+        context: context,
+        title: context.l10n.appLockNotEnabled,
+        body: context.l10n.appLockNotEnabledDescription,
+        isDismissible: true,
+        buttons: const [
+          ButtonWidget(
+            buttonType: ButtonType.secondary,
+            labelText: "OK",
+            isInAlert: true,
+          ),
+        ],
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -251,8 +277,20 @@ class _HomePageState extends State<HomePage> {
                   ),
                   focusNode: searchBoxFocusNode,
                 ),
-          centerTitle: true,
+          centerTitle: PlatformUtil.isDesktop() ? false : true,
           actions: <Widget>[
+            PlatformUtil.isDesktop()
+                ? IconButton(
+                    icon: const Icon(Icons.lock),
+                    tooltip: l10n.appLock,
+                    onPressed: () async {
+                      await navigateToLockScreen();
+                    },
+                  )
+                : const SizedBox.shrink(),
+            const SizedBox(
+              width: 4,
+            ),
             IconButton(
               icon: _showSearchBox
                   ? const Icon(Icons.clear)
