@@ -710,7 +710,7 @@ const DebugSection: React.FC = () => {
             <EnteMenuItem
                 onClick={confirmLogDownload}
                 variant="mini"
-                label={t("DOWNLOAD_UPLOAD_LOGS")}
+                label={t("debug_logs")}
             />
             <Stack py={"14px"} px={"16px"} gap={"24px"} color="text.muted">
                 {appVersion && (
