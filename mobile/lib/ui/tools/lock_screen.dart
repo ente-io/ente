@@ -9,6 +9,7 @@ import 'package:logging/logging.dart';
 import "package:photos/core/configuration.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/user_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
@@ -346,6 +347,7 @@ class _LockScreenState extends State<LockScreen>
           lockedTimeInSeconds = 15;
           isTimerRunning = false;
         });
+        await localSettings.setOnGuestView(false);
       } else {
         if (!_hasPlacedAppInBackground) {
           if (_lockscreenSetting.getInvalidAttemptCount() > 4 &&

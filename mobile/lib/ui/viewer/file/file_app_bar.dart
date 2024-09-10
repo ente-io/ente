@@ -475,6 +475,7 @@ class FileAppBarState extends State<FileAppBar> {
   Future<void> _onTapGuestView() async {
     if (await LocalAuthentication().isDeviceSupported()) {
       Bus.instance.fire(GuestViewEvent(true, true));
+      await localSettings.setOnGuestView(true);
     } else {
       await showErrorDialog(
         context,
@@ -492,6 +493,7 @@ class FileAppBarState extends State<FileAppBar> {
     );
     if (hasAuthenticated) {
       Bus.instance.fire(GuestViewEvent(false, false));
+      await localSettings.setOnGuestView(false);
     }
   }
 }
