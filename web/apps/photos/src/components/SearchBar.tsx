@@ -45,17 +45,20 @@ import memoize from "memoize-one";
 import pDebounce from "p-debounce";
 import { AppContext } from "pages/_app";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
-import { components } from "react-select";
+import {
+    components as SelectComponents,
+    type InputActionMeta,
+    type OptionProps,
+    type ValueContainerProps,
+} from "react-select";
 import AsyncSelect from "react-select/async";
-import { SelectComponents } from "react-select/src/components";
-import { InputActionMeta } from "react-select/src/types";
 import {
     getAutoCompleteSuggestions,
     getDefaultOptions,
 } from "services/searchService";
 import { Collection } from "types/collection";
 
-const { Option, ValueContainer, Menu } = components;
+const { Option, ValueContainer, Menu, Input } = SelectComponents;
 
 interface SearchBarProps {
     isInSearchMode: boolean;
@@ -356,7 +359,7 @@ const SelectStyles = {
     }),
 };
 
-const OptionWithInfo = (props) => (
+const OptionWithInfo: React.FC<OptionProps<SearchOption>> = (props) => (
     <Option {...props}>
         <LabelWithInfo data={props.data} />
     </Option>
@@ -400,10 +403,9 @@ const LabelWithInfo = ({ data }: { data: SearchOption }) => {
     );
 };
 
-const ValueContainerWithIcon: SelectComponents<
-    SearchOption,
-    false
->["ValueContainer"] = (props) => (
+const ValueContainerWithIcon: React.FC<ValueContainerProps<SearchOption>> = (
+    props,
+) => (
     <ValueContainer {...props}>
         <FlexWrapper>
             <Box
@@ -495,6 +497,4 @@ const Caption = styled("span")`
     padding: 0px 12px;
 `;
 
-const VisibleInput = (props) => (
-    <components.Input {...props} isHidden={false} />
-);
+const VisibleInput = (props) => <Input {...props} isHidden={false} />;
