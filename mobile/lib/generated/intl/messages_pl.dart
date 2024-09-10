@@ -208,17 +208,20 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m66(count) =>
       "${Intl.plural(count, zero: '', one: '${count} dzień', few: '${count} dni', other: '${count} dni')}";
 
-  static String m67(endDate) => "Ważne do ${endDate}";
+  static String m67(count) =>
+      "${Intl.plural(count, one: 'Zachowywanie ${count} wspomnienia...', few: 'Zachowywanie ${count} wspomnienia...', many: 'Zachowywanie ${count} wspomnień...', other: 'Zachowywanie ${count} wspomnień...')}";
 
-  static String m68(email) => "Zweryfikuj ${email}";
+  static String m68(endDate) => "Ważne do ${endDate}";
 
-  static String m69(email) =>
+  static String m69(email) => "Zweryfikuj ${email}";
+
+  static String m70(email) =>
       "Wysłaliśmy wiadomość na adres <green>${email}</green>";
 
-  static String m70(count) =>
+  static String m71(count) =>
       "${Intl.plural(count, one: '${count} rok temu', few: '${count} lata temu', many: '${count} lat temu', other: '${count} lata temu')}";
 
-  static String m71(storageSaved) => "Pomyślnie zwolniłeś/aś ${storageSaved}!";
+  static String m72(storageSaved) => "Pomyślnie zwolniłeś/aś ${storageSaved}!";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -965,6 +968,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "loadingModel":
             MessageLookupByLibrary.simpleMessage("Pobieranie modeli..."),
         "localGallery": MessageLookupByLibrary.simpleMessage("Galeria lokalna"),
+        "localSyncErrorMessage": MessageLookupByLibrary.simpleMessage(
+            "Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team"),
         "location": MessageLookupByLibrary.simpleMessage("Lokalizacja"),
         "locationName":
             MessageLookupByLibrary.simpleMessage("Nazwa lokalizacji"),
@@ -990,8 +995,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "longpressOnAnItemToViewInFullscreen":
             MessageLookupByLibrary.simpleMessage(
                 "Długo naciśnij element, aby wyświetlić go na pełnym ekranie"),
-        "loopVideoOff": MessageLookupByLibrary.simpleMessage("Loop video off"),
-        "loopVideoOn": MessageLookupByLibrary.simpleMessage("Loop video on"),
+        "loopVideoOff":
+            MessageLookupByLibrary.simpleMessage("Pętla wideo wyłączona"),
+        "loopVideoOn":
+            MessageLookupByLibrary.simpleMessage("Pętla wideo włączona"),
         "lostDevice":
             MessageLookupByLibrary.simpleMessage("Utracono urządzenie?"),
         "machineLearning":
@@ -1659,6 +1666,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "upgrade": MessageLookupByLibrary.simpleMessage("Ulepsz"),
         "uploadingFilesToAlbum": MessageLookupByLibrary.simpleMessage(
             "Przesyłanie plików do albumu..."),
+        "uploadingMultipleMemories": m67,
+        "uploadingSingleMemory": MessageLookupByLibrary.simpleMessage(
+            "Zachowywanie 1 wspomnienia..."),
         "upto50OffUntil4thDec": MessageLookupByLibrary.simpleMessage(
             "Do 50% zniżki, do 4 grudnia."),
         "usableReferralStorageInfo": MessageLookupByLibrary.simpleMessage(
@@ -1672,7 +1682,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "useSelectedPhoto":
             MessageLookupByLibrary.simpleMessage("Użyj zaznaczone zdjęcie"),
         "usedSpace": MessageLookupByLibrary.simpleMessage("Zajęta przestrzeń"),
-        "validTill": m67,
+        "validTill": m68,
         "verificationFailedPleaseTryAgain":
             MessageLookupByLibrary.simpleMessage(
                 "Weryfikacja nie powiodła się, spróbuj ponownie"),
@@ -1681,7 +1691,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "verify": MessageLookupByLibrary.simpleMessage("Zweryfikuj"),
         "verifyEmail":
             MessageLookupByLibrary.simpleMessage("Zweryfikuj adres e-mail"),
-        "verifyEmailID": m68,
+        "verifyEmailID": m69,
         "verifyIDLabel": MessageLookupByLibrary.simpleMessage("Zweryfikuj"),
         "verifyPasskey":
             MessageLookupByLibrary.simpleMessage("Zweryfikuj klucz dostępu"),
@@ -1718,12 +1728,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "weDontSupportEditingPhotosAndAlbumsThatYouDont":
             MessageLookupByLibrary.simpleMessage(
                 "Nie wspieramy edycji zdjęć i albumów, których jeszcze nie posiadasz"),
-        "weHaveSendEmailTo": m69,
+        "weHaveSendEmailTo": m70,
         "weakStrength": MessageLookupByLibrary.simpleMessage("Słabe"),
         "welcomeBack": MessageLookupByLibrary.simpleMessage("Witaj ponownie!"),
         "whatsNew": MessageLookupByLibrary.simpleMessage("Co nowego"),
         "yearly": MessageLookupByLibrary.simpleMessage("Rocznie"),
-        "yearsAgo": m70,
+        "yearsAgo": m71,
         "yes": MessageLookupByLibrary.simpleMessage("Tak"),
         "yesCancel": MessageLookupByLibrary.simpleMessage("Tak, anuluj"),
         "yesConvertToViewer":
@@ -1753,7 +1763,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Nie możesz udostępnić samemu sobie"),
         "youDontHaveAnyArchivedItems": MessageLookupByLibrary.simpleMessage(
             "Nie masz żadnych zarchiwizowanych elementów."),
-        "youHaveSuccessfullyFreedUp": m71,
+        "youHaveSuccessfullyFreedUp": m72,
         "yourAccountHasBeenDeleted": MessageLookupByLibrary.simpleMessage(
             "Twoje konto zostało usunięte"),
         "yourMap": MessageLookupByLibrary.simpleMessage("Twoja mapa"),

@@ -64,9 +64,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m65(email) => "Dette er ${email} sin verifiserings-ID";
 
-  static String m68(email) => "Verifiser ${email}";
+  static String m69(email) => "Verifiser ${email}";
 
-  static String m69(email) =>
+  static String m70(email) =>
       "Vi har sendt en e-post til <green>${email}</green>";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -257,12 +257,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "linkHasExpired":
             MessageLookupByLibrary.simpleMessage("Lenken har utløpt"),
         "linkNeverExpires": MessageLookupByLibrary.simpleMessage("Aldri"),
+        "localSyncErrorMessage": MessageLookupByLibrary.simpleMessage(
+            "Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("Lås"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Logg inn"),
         "loginTerms": MessageLookupByLibrary.simpleMessage(
             "Ved å klikke Logg inn, godtar jeg <u-terms>brukervilkårene</u-terms> og <u-policy>personvernreglene</u-policy>"),
-        "loopVideoOff": MessageLookupByLibrary.simpleMessage("Loop video off"),
-        "loopVideoOn": MessageLookupByLibrary.simpleMessage("Loop video on"),
         "lostDevice": MessageLookupByLibrary.simpleMessage("Mistet enhet?"),
         "machineLearning": MessageLookupByLibrary.simpleMessage("Maskinlæring"),
         "magicSearch": MessageLookupByLibrary.simpleMessage("Magisk søk"),
@@ -438,7 +438,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "verify": MessageLookupByLibrary.simpleMessage("Bekreft"),
         "verifyEmail":
             MessageLookupByLibrary.simpleMessage("Bekreft e-postadresse"),
-        "verifyEmailID": m68,
+        "verifyEmailID": m69,
         "verifyPassword":
             MessageLookupByLibrary.simpleMessage("Bekreft passord"),
         "verifyingRecoveryKey": MessageLookupByLibrary.simpleMessage(
@@ -447,7 +447,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "viewRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Vis gjenopprettingsnøkkel"),
         "viewer": MessageLookupByLibrary.simpleMessage("Seer"),
-        "weHaveSendEmailTo": m69,
+        "weHaveSendEmailTo": m70,
         "weakStrength": MessageLookupByLibrary.simpleMessage("Svakt"),
         "welcomeBack":
             MessageLookupByLibrary.simpleMessage("Velkommen tilbake!"),

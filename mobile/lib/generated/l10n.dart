@@ -9484,6 +9484,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team`
+  String get localSyncErrorMessage {
+    return Intl.message(
+      'Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team',
+      name: 'localSyncErrorMessage',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

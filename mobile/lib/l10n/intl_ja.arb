@@ -1314,5 +1314,6 @@
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "アプリのロックを有効にするには、システム設定でデバイスのパスコードまたは画面ロックを設定してください。",
   "authToViewPasskey": "パスキーを表示するには認証してください",
   "loopVideoOn": "ビデオのループをオン",
-  "loopVideoOff": "ビデオのループをオフ"
+  "loopVideoOff": "ビデオのループをオフ",
+  "localSyncErrorMessage": "Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team"
 }

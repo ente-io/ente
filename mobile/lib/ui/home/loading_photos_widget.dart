@@ -201,8 +201,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
                           context: context,
                           title: S.of(context).oops,
                           icon: Icons.error_outline_outlined,
-                          body:
-                              "Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team",
+                          body: S.of(context).localSyncErrorMessage,
                           isDismissible: true,
                           buttons: [
                             ButtonWidget(

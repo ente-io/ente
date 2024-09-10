@@ -207,17 +207,19 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m66(count) =>
       "${Intl.plural(count, zero: '', one: '1 Tag', other: '${count} Tage')}";
 
-  static String m67(endDate) => "Gültig bis ${endDate}";
+  static String m67(count) => "Sichere ${count} Erinnerungsstücke...";
 
-  static String m68(email) => "Verifiziere ${email}";
+  static String m68(endDate) => "Gültig bis ${endDate}";
 
-  static String m69(email) =>
+  static String m69(email) => "Verifiziere ${email}";
+
+  static String m70(email) =>
       "Wir haben eine E-Mail an <green>${email}</green> gesendet";
 
-  static String m70(count) =>
+  static String m71(count) =>
       "${Intl.plural(count, one: 'vor einem Jahr', other: 'vor ${count} Jahren')}";
 
-  static String m71(storageSaved) =>
+  static String m72(storageSaved) =>
       "Du hast ${storageSaved} erfolgreich freigegeben!";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -404,6 +406,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Über mobile Daten sichern"),
         "backupSettings":
             MessageLookupByLibrary.simpleMessage("Backup-Einstellungen"),
+        "backupStatus":
+            MessageLookupByLibrary.simpleMessage("Sicherungsstatus"),
+        "backupStatusDescription": MessageLookupByLibrary.simpleMessage(
+            "Gesicherte Elemente werden hier angezeigt"),
         "backupVideos": MessageLookupByLibrary.simpleMessage("Videos sichern"),
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Black-Friday-Aktion"),
@@ -972,6 +978,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "loadingModel":
             MessageLookupByLibrary.simpleMessage("Lade Modelle herunter..."),
         "localGallery": MessageLookupByLibrary.simpleMessage("Lokale Galerie"),
+        "localSyncErrorMessage": MessageLookupByLibrary.simpleMessage(
+            "Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team"),
         "location": MessageLookupByLibrary.simpleMessage("Standort"),
         "locationName": MessageLookupByLibrary.simpleMessage("Standortname"),
         "locationTagFeatureDescription": MessageLookupByLibrary.simpleMessage(
@@ -995,8 +1003,9 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Lange auf eine E-Mail drücken, um die Ende-zu-Ende-Verschlüsselung zu überprüfen."),
         "longpressOnAnItemToViewInFullscreen": MessageLookupByLibrary.simpleMessage(
             "Drücken Sie lange auf ein Element, um es im Vollbildmodus anzuzeigen"),
-        "loopVideoOff": MessageLookupByLibrary.simpleMessage("Loop video off"),
-        "loopVideoOn": MessageLookupByLibrary.simpleMessage("Loop video on"),
+        "loopVideoOff":
+            MessageLookupByLibrary.simpleMessage("Videoschleife aus"),
+        "loopVideoOn": MessageLookupByLibrary.simpleMessage("Videoschleife an"),
         "lostDevice": MessageLookupByLibrary.simpleMessage("Gerät verloren?"),
         "machineLearning":
             MessageLookupByLibrary.simpleMessage("Maschinelles Lernen"),
@@ -1665,6 +1674,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "upgrade": MessageLookupByLibrary.simpleMessage("Upgrade"),
         "uploadingFilesToAlbum": MessageLookupByLibrary.simpleMessage(
             "Dateien werden ins Album hochgeladen..."),
+        "uploadingMultipleMemories": m67,
+        "uploadingSingleMemory": MessageLookupByLibrary.simpleMessage(
+            "Sichere ein Erinnerungsstück..."),
         "upto50OffUntil4thDec": MessageLookupByLibrary.simpleMessage(
             "Bis zu 50% Rabatt bis zum 4. Dezember."),
         "usableReferralStorageInfo": MessageLookupByLibrary.simpleMessage(
@@ -1679,7 +1691,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Ausgewähltes Foto verwenden"),
         "usedSpace":
             MessageLookupByLibrary.simpleMessage("Belegter Speicherplatz"),
-        "validTill": m67,
+        "validTill": m68,
         "verificationFailedPleaseTryAgain":
             MessageLookupByLibrary.simpleMessage(
                 "Verifizierung fehlgeschlagen, bitte versuchen Sie es erneut"),
@@ -1688,7 +1700,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "verify": MessageLookupByLibrary.simpleMessage("Überprüfen"),
         "verifyEmail":
             MessageLookupByLibrary.simpleMessage("E-Mail-Adresse verifizieren"),
-        "verifyEmailID": m68,
+        "verifyEmailID": m69,
         "verifyIDLabel": MessageLookupByLibrary.simpleMessage("Überprüfen"),
         "verifyPasskey":
             MessageLookupByLibrary.simpleMessage("Passkey verifizieren"),
@@ -1709,6 +1721,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "viewAllExifData":
             MessageLookupByLibrary.simpleMessage("Alle Exif-Daten anzeigen"),
         "viewLargeFiles": MessageLookupByLibrary.simpleMessage("Große Dateien"),
+        "viewLargeFilesDesc": MessageLookupByLibrary.simpleMessage(
+            "Dateien anzeigen, die den meisten Speicherplatz belegen."),
         "viewLogs": MessageLookupByLibrary.simpleMessage("Protokolle anzeigen"),
         "viewRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "Wiederherstellungsschlüssel anzeigen"),
@@ -1724,13 +1738,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "weDontSupportEditingPhotosAndAlbumsThatYouDont":
             MessageLookupByLibrary.simpleMessage(
                 "Wir unterstützen keine Bearbeitung von Fotos und Alben, die du noch nicht besitzt"),
-        "weHaveSendEmailTo": m69,
+        "weHaveSendEmailTo": m70,
         "weakStrength": MessageLookupByLibrary.simpleMessage("Schwach"),
         "welcomeBack":
             MessageLookupByLibrary.simpleMessage("Willkommen zurück!"),
         "whatsNew": MessageLookupByLibrary.simpleMessage("Neue Funktionen"),
         "yearly": MessageLookupByLibrary.simpleMessage("Jährlich"),
-        "yearsAgo": m70,
+        "yearsAgo": m71,
         "yes": MessageLookupByLibrary.simpleMessage("Ja"),
         "yesCancel": MessageLookupByLibrary.simpleMessage("Ja, kündigen"),
         "yesConvertToViewer": MessageLookupByLibrary.simpleMessage(
@@ -1760,7 +1774,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Du kannst nicht mit dir selbst teilen"),
         "youDontHaveAnyArchivedItems": MessageLookupByLibrary.simpleMessage(
             "Du hast keine archivierten Elemente."),
-        "youHaveSuccessfullyFreedUp": m71,
+        "youHaveSuccessfullyFreedUp": m72,
         "yourAccountHasBeenDeleted": MessageLookupByLibrary.simpleMessage(
             "Dein Benutzerkonto wurde gelöscht"),
         "yourMap": MessageLookupByLibrary.simpleMessage("Deine Karte"),

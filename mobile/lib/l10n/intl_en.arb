@@ -937,7 +937,7 @@
   "encryptingBackup": "Encrypting backup...",
   "syncStopped": "Sync stopped",
   "syncProgress": "{completed}/{total} memories preserved",
-  "uploadingMultipleMemories" : "Preserving {count} memories...",
+  "uploadingMultipleMemories": "Preserving {count} memories...",
   "uploadingSingleMemory": "Preserving 1 memory...",
   "@syncProgress": {
     "description": "Text to tell user how many memories have been preserved",
@@ -1314,5 +1314,6 @@
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "To enable app lock, please setup device passcode or screen lock in your system settings.",
   "authToViewPasskey": "Please authenticate to view your passkey",
   "loopVideoOn": "Loop video on",
-  "loopVideoOff": "Loop video off"
+  "loopVideoOff": "Loop video off",
+  "localSyncErrorMessage": "Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team"
 }
