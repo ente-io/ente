@@ -11,8 +11,8 @@ import { Subscription } from "types/billing";
 
 export const getDownloadAppMessage = (): DialogBoxAttributes => {
     return {
-        title: t("DOWNLOAD_APP"),
-        content: t("DOWNLOAD_APP_MESSAGE"),
+        title: t("download_app"),
+        content: t("download_app_message"),
 
         proceed: {
             text: t("DOWNLOAD"),
