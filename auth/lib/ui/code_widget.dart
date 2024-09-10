@@ -266,12 +266,13 @@ class _CodeWidgetState extends State<CodeWidget> {
               child: clippedCard(l10n),
             );
           }
-          double slideSpace = isCompactMode ? 4 : 8;
+          final double slideSpace = isCompactMode ? 4 : 8;
+          final double extendRatio = isCompactMode ? 0.70 : 0.90;
 
           return Slidable(
             key: ValueKey(widget.code.hashCode),
             endActionPane: ActionPane(
-              extentRatio: 0.90,
+              extentRatio: extendRatio,
               motion: const ScrollMotion(),
               children: [
                 SizedBox(width: slideSpace),
