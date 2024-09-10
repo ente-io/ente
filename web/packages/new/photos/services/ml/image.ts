@@ -321,7 +321,10 @@ const gaussianKernelRadius = Math.floor(gaussianKernelSize / 2);
 const gaussianSigma = 10.0;
 
 const create2DGaussianKernel = (size: number, sigma: number): number[][] => {
-    const kernel = Array(size).map(() => Array(size).fill(0) as number[]);
+    const kernel = Array(size)
+        .fill(0)
+        .map(() => Array(size).fill(0) as number[]);
+
     let sum = 0.0;
     const center = Math.floor(size / 2);
 
@@ -337,7 +340,7 @@ const create2DGaussianKernel = (size: number, sigma: number): number[][] => {
         }
     }
 
-    // Normalize the kernel
+    // Normalize the kernel.
     for (let y = 0; y < size; y++) {
         for (let x = 0; x < size; x++) {
             kernel[y]![x]! /= sum;
