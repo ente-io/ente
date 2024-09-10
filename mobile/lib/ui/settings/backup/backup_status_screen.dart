@@ -9,6 +9,7 @@ import "package:photos/events/file_uploaded_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/backup/backup_item.dart";
 import "package:photos/models/backup/backup_item_status.dart";
+import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/ui/components/title_bar_widget.dart";
 import "package:photos/ui/settings/backup/backup_item_card.dart";
@@ -35,6 +36,9 @@ class _BackupStatusScreenState extends State<BackupStatusScreen> {
 
   Future<void> getAllFiles() async {
     result = (await SearchService.instance.getAllFiles())
+        .where(
+          (e) => e.uploadedFileID != null && e.isOwner,
+        )
         .map(
           (e) {
             return BackupItem(
@@ -45,11 +49,10 @@ class _BackupStatusScreenState extends State<BackupStatusScreen> {
             );
           },
         )
-        .toList()
         .sorted(
-          (a, b) => (a.file.uploadedFileID ?? 0)
-              .compareTo(b.file.uploadedFileID ?? 0),
-        );
+          (a, b) => (a.file.uploadedFileID!).compareTo(b.file.uploadedFileID!),
+        )
+        .toList();
     Bus.instance.on<FileUploadedEvent>().listen((event) {
       setState(() {
         result!.insert(
