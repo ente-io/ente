@@ -16,7 +16,7 @@ providers specifically listed in the documentation, the supported providers are:
 -   Aegis Authenticator
 -   Bitwarden
 -   Google Authenticator
--   Ravio OTP
+-   Raivo OTP
 -   LastPass
 
 Details as to how codes may be imported from these providers may be found within
