@@ -45,6 +45,7 @@ import type { User } from "@ente/shared/user/types";
 import ArrowBack from "@mui/icons-material/ArrowBack";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
+import type { ButtonProps, IconButtonProps } from "@mui/material";
 import { Box, Button, IconButton, Typography, styled } from "@mui/material";
 import AuthenticateUserModal from "components/AuthenticateUserModal";
 import Collections from "components/Collections";
@@ -1084,9 +1085,9 @@ export default function Gallery() {
                     ) : (
                         <NormalNavbarContents
                             openSidebar={openSidebar}
-                            setIsInSearchMode={setIsInSearchMode}
                             openUploader={openUploader}
                             isInSearchMode={isInSearchMode}
+                            setIsInSearchMode={setIsInSearchMode}
                             collections={collections}
                             files={files}
                             updateSearch={updateSearch}
@@ -1276,49 +1277,48 @@ const NormalNavbarContents: React.FC<NormalNavbarContentsProps> = ({
     openSidebar,
     openUploader,
     isInSearchMode,
+    setIsInSearchMode,
     collections,
     files,
     updateSearch,
-    setIsInSearchMode,
-}) => {
-    return (
-        <>
-            {!isInSearchMode && (
-                <IconButton onClick={openSidebar}>
-                    <MenuIcon />
-                </IconButton>
-            )}
-            <SearchBar
-                isInSearchMode={isInSearchMode}
-                setIsInSearchMode={setIsInSearchMode}
-                collections={collections}
-                files={files}
-                updateSearch={updateSearch}
-            />
-            {!isInSearchMode && <UploadButton onClick={openUploader} />}
-        </>
-    );
-};
+}) => (
+    <>
+        {!isInSearchMode && <SidebarButton onClick={openSidebar} />}
+        <SearchBar
+            isInSearchMode={isInSearchMode}
+            setIsInSearchMode={setIsInSearchMode}
+            collections={collections}
+            files={files}
+            updateSearch={updateSearch}
+        />
+        {!isInSearchMode && <UploadButton onClick={openUploader} />}
+    </>
+);
 
-interface UploadButtonProps {
-    onClick: () => void;
-}
-export const UploadButton: React.FC<UploadButtonProps> = ({ onClick }) => {
+const SidebarButton: React.FC<IconButtonProps> = (props) => (
+    <IconButton {...props}>
+        <MenuIcon />
+    </IconButton>
+);
+
+const UploadButton: React.FC<ButtonProps & IconButtonProps> = (props) => {
     const disabled = !uploadManager.shouldAllowNewUpload();
     const isMobileWidth = useIsMobileWidth();
+
+    const icon = <FileUploadOutlinedIcon />;
 
     return (
         <Box>
             {isMobileWidth ? (
-                <IconButton onClick={onClick} disabled={disabled}>
-                    {<FileUploadOutlinedIcon />}
+                <IconButton {...props} disabled={disabled}>
+                    {icon}
                 </IconButton>
             ) : (
                 <Button
-                    onClick={onClick}
+                    {...props}
                     disabled={disabled}
                     color={"secondary"}
-                    startIcon={<FileUploadOutlinedIcon />}
+                    startIcon={icon}
                 >
                     {t("upload")}
                 </Button>

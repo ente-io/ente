@@ -1,6 +1,6 @@
 import { NavbarBase, SelectionBar } from "@/base/components/Navbar";
 import { sharedCryptoWorker } from "@/base/crypto";
-import { useIsTouchscreen } from "@/base/hooks";
+import { useIsMobileWidth, useIsTouchscreen } from "@/base/hooks";
 import log from "@/base/log";
 import downloadManager from "@/new/photos/services/download";
 import { EnteFile } from "@/new/photos/types/file";
@@ -27,6 +27,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import DownloadIcon from "@mui/icons-material/Download";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
+import type { ButtonProps, IconButtonProps } from "@mui/material";
 import { Box, Button, IconButton, Stack, Tooltip } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import bs58 from "bs58";
@@ -41,7 +42,6 @@ import FullScreenDropZone from "components/FullScreenDropZone";
 import { LoadingOverlay } from "components/LoadingOverlay";
 import PhotoFrame from "components/PhotoFrame";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
-import { UploadButton } from "components/Upload/UploadButton";
 import Uploader from "components/Upload/Uploader";
 import { UploadSelectorInputs } from "components/UploadSelectorInputs";
 import { t } from "i18next";
@@ -62,6 +62,7 @@ import {
     syncPublicFiles,
     verifyPublicCollectionPassword,
 } from "services/publicCollectionService";
+import uploadManager from "services/upload/uploadManager";
 import { Collection } from "types/collection";
 import {
     SelectedState,
@@ -170,9 +171,11 @@ export default function PublicCollectionGallery() {
             return updater;
         };
 
-    const openUploader = () => {
-        setUploadTypeSelectorView(true);
-    };
+    const onAddPhotos = useMemo(() => {
+        return publicCollection?.publicURLs?.[0]?.enableCollect
+            ? () => setUploadTypeSelectorView(true)
+            : undefined;
+    }, [publicCollection]);
 
     const closeUploadTypeSelectorView = () => {
         setUploadTypeSelectorView(false);
@@ -331,26 +334,20 @@ export default function PublicCollectionGallery() {
     }, [publicCollection, publicFiles]);
 
     useEffect(() => {
-        if (publicCollection?.publicURLs?.[0]?.enableCollect) {
-            setPhotoListFooter({
-                item: (
-                    <CenteredFlex sx={{ marginTop: "56px" }}>
-                        <UploadButton
-                            disableShrink
-                            openUploader={openUploader}
-                            text={t("ADD_MORE_PHOTOS")}
-                            color="accent"
-                            icon={<AddPhotoAlternateOutlined />}
-                        />
-                    </CenteredFlex>
-                ),
-                itemType: ITEM_TYPE.FOOTER,
-                height: 104,
-            });
-        } else {
-            setPhotoListFooter(null);
-        }
-    }, [publicCollection]);
+        setPhotoListFooter(
+            onAddPhotos
+                ? {
+                      item: (
+                          <CenteredFlex sx={{ marginTop: "56px" }}>
+                              <AddMorePhotosButton onClick={onAddPhotos} />
+                          </CenteredFlex>
+                      ),
+                      itemType: ITEM_TYPE.FOOTER,
+                      height: 104,
+                  }
+                : null,
+        );
+    }, [onAddPhotos]);
 
     const syncWithRemote = async () => {
         const collectionUID = getPublicCollectionUID(token.current);
@@ -551,12 +548,7 @@ export default function PublicCollectionGallery() {
                         getFolderSelectorInputProps,
                     }}
                 />
-                <SharedAlbumNavbar
-                    showUploadButton={
-                        publicCollection?.publicURLs?.[0]?.enableCollect
-                    }
-                    openUploader={openUploader}
-                />
+                <SharedAlbumNavbar onAddPhotos={onAddPhotos} />
                 <PhotoFrame
                     page={PAGES.SHARED_ALBUMS}
                     files={publicFiles}
@@ -610,24 +602,28 @@ export default function PublicCollectionGallery() {
     );
 }
 
-function SharedAlbumNavbar({ showUploadButton, openUploader }) {
+interface SharedAlbumNavbarProps {
+    /**
+     * If provided, then an "Add Photos" button will be shown in the navbar.
+     */
+    onAddPhotos: React.MouseEventHandler<HTMLButtonElement> | undefined;
+}
+const SharedAlbumNavbar: React.FC<SharedAlbumNavbarProps> = ({
+    onAddPhotos,
+}) => {
     return (
         <NavbarBase>
             <FluidContainer>
                 <EnteLinkLogo />
             </FluidContainer>
-            {showUploadButton ? (
-                <UploadButton
-                    openUploader={openUploader}
-                    icon={<AddPhotoAlternateOutlined />}
-                    text={t("ADD_PHOTOS")}
-                />
+            {onAddPhotos ? (
+                <AddPhotosButton onClick={onAddPhotos} />
             ) : (
                 <GoToEnte />
             )}
         </NavbarBase>
     );
-}
+};
 
 const EnteLinkLogo: React.FC = () => {
     return (
@@ -645,6 +641,52 @@ const EnteLinkLogo: React.FC = () => {
                 <EnteLogo />
             </Box>
         </a>
+    );
+};
+
+const AddPhotosButton: React.FC<ButtonProps & IconButtonProps> = (props) => {
+    const disabled = !uploadManager.shouldAllowNewUpload();
+    const isMobileWidth = useIsMobileWidth();
+
+    const icon = <AddPhotoAlternateOutlined />;
+
+    return (
+        <Box>
+            {isMobileWidth ? (
+                <IconButton {...props} disabled={disabled}>
+                    {icon}
+                </IconButton>
+            ) : (
+                <Button
+                    {...props}
+                    disabled={disabled}
+                    color={"secondary"}
+                    startIcon={icon}
+                >
+                    {t("ADD_PHOTOS")}
+                </Button>
+            )}
+        </Box>
+    );
+};
+
+/**
+ * A visually different variation of {@link AddPhotosButton}. It also does not
+ * shrink on mobile sized screens.
+ */
+const AddMorePhotosButton: React.FC<ButtonProps> = (props) => {
+    const disabled = !uploadManager.shouldAllowNewUpload();
+    return (
+        <Box>
+            <Button
+                {...props}
+                disabled={disabled}
+                color={"accent"}
+                startIcon={<AddPhotoAlternateOutlined />}
+            >
+                {t("ADD_MORE_PHOTOS")}
+            </Button>
+        </Box>
     );
 };
 
