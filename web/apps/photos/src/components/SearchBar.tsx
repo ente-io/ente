@@ -268,7 +268,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
                 value={value}
                 // @ts-expect-error Type of the Menu is not what Select expects
                 components={components}
-                placeholder={<span>{t("search_hint")}</span>}
+                placeholder={t("search_hint")}
                 loadOptions={getOptions}
                 onChange={handleChange}
                 onFocus={handleOnFocus}
