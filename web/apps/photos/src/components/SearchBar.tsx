@@ -251,12 +251,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
     };
 
     const components = useMemo(
-        () => ({
-            Option: OptionWithInfo,
-            Control: Control,
-            Menu: CustomMenu,
-            Input: VisibleInput,
-        }),
+        () => ({ Option, Control, Menu: CustomMenu, Input: Input }),
         [],
     );
 
@@ -377,7 +372,7 @@ const iconForOptionType = (type: SuggestionType | undefined) => {
     }
 };
 
-const OptionWithInfo: React.FC<OptionProps<SearchOption, false>> = (props) => (
+const Option: React.FC<OptionProps<SearchOption, false>> = (props) => (
     <SelectComponents.Option {...props}>
         <LabelWithInfo data={props.data} />
     </SelectComponents.Option>
@@ -495,6 +490,9 @@ const Caption = styled("span")`
     padding: 0px 12px;
 `;
 
-const VisibleInput: React.FC<InputProps<SearchOption, false>> = (props) => (
+// A custom input for react-select that is always visible. This is a roundabout
+// hack the existing code used to display the search string when showing the
+// results page; likely there should be a better way.
+const Input: React.FC<InputProps<SearchOption, false>> = (props) => (
     <SelectComponents.Input {...props} isHidden={false} />
 );
