@@ -39,8 +39,8 @@ enum ResultType {
 
 enum SectionType {
   face,
-  location,
   magic,
+  location,
   // includes year, month , day, event ResultType
   moment,
   album,
