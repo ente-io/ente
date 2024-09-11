@@ -139,6 +139,8 @@ const SearchInput: React.FC<SearchInputProps> = ({
     // The contents of the input field associated with the select.
     const [inputValue, setInputValue] = useState("");
 
+    const styles = useSelectStyles();
+
     useEffect(() => {
         search(value);
     }, [value]);
@@ -242,6 +244,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
                 ref={selectRef}
                 value={value}
                 components={components}
+                styles={styles}
                 placeholder={t("search_hint")}
                 loadOptions={getOptions}
                 onChange={handleChange}
@@ -250,7 +253,6 @@ const SearchInput: React.FC<SearchInputProps> = ({
                 escapeClearsValue
                 inputValue={inputValue}
                 onInputChange={handleInputChange}
-                styles={SelectStyles}
                 noOptionsMessage={({ inputValue }) =>
                     shouldShowEmptyState(inputValue) ? (
                         <EmptyState onSelectCGroup={handleSelectCGroup} />
@@ -277,51 +279,54 @@ const SearchInputWrapper = styled(Box)`
     margin: auto;
 `;
 
-const SelectStyles: StylesConfig<SearchOption, false> = {
-    container: (style) => ({ ...style, flex: 1 }),
-    control: (style, { isFocused }) => ({
-        ...style,
-        // Give a solid background color.
-        backgroundColor: "rgb(26, 26, 26)",
-        borderColor: isFocused ? "#1DB954" : "transparent",
-        boxShadow: "none",
-        ":hover": {
-            borderColor: "#01DE4D",
-            cursor: "text",
-        },
-    }),
-    input: (styles) => ({ ...styles, color: "#fff" }),
-    menu: (style) => ({
-        ...style,
-        // Suppress the default margin at the top.
-        marginTop: "1px",
-        // Same background color as the control (must be solid, otherwise the
-        // content behind the menu shows through).
-        backgroundColor: "rgb(26, 26, 26)",
-    }),
-    option: (style, { isFocused }) => ({
-        ...style,
-        padding: 0,
-        backgroundColor: "transparent !important",
-        "& :hover": {
-            cursor: "pointer",
-        },
-        "& .main": {
-            backgroundColor: isFocused && "#202020",
-        },
-        "&:last-child .MuiDivider-root": {
-            display: "none",
-        },
-    }),
-    placeholder: (style) => ({
-        ...style,
-        color: "rgba(255, 255, 255, 0.7)",
-        whiteSpace: "nowrap",
-    }),
-    // Hide some things we don't need.
-    dropdownIndicator: (style) => ({ ...style, display: "none" }),
-    indicatorSeparator: (style) => ({ ...style, display: "none" }),
-    clearIndicator: (style) => ({ ...style, display: "none" }),
+const useSelectStyles = (): StylesConfig<SearchOption, false> => {
+    console.log("useSelectStyles");
+    return {
+        container: (style) => ({ ...style, flex: 1 }),
+        control: (style, { isFocused }) => ({
+            ...style,
+            // Give a solid background color.
+            backgroundColor: "rgb(26, 26, 26)",
+            borderColor: isFocused ? "#1DB954" : "transparent",
+            boxShadow: "none",
+            ":hover": {
+                borderColor: "#01DE4D",
+                cursor: "text",
+            },
+        }),
+        input: (styles) => ({ ...styles, color: "#fff" }),
+        menu: (style) => ({
+            ...style,
+            // Suppress the default margin at the top.
+            marginTop: "1px",
+            // Same background color as the control (must be solid, otherwise the
+            // content behind the menu shows through).
+            backgroundColor: "rgb(26, 26, 26)",
+        }),
+        option: (style, { isFocused }) => ({
+            ...style,
+            padding: 0,
+            backgroundColor: "transparent !important",
+            "& :hover": {
+                cursor: "pointer",
+            },
+            "& .main": {
+                backgroundColor: isFocused && "#202020",
+            },
+            "&:last-child .MuiDivider-root": {
+                display: "none",
+            },
+        }),
+        placeholder: (style) => ({
+            ...style,
+            color: "rgba(255, 255, 255, 0.7)",
+            whiteSpace: "nowrap",
+        }),
+        // Hide some things we don't need.
+        dropdownIndicator: (style) => ({ ...style, display: "none" }),
+        indicatorSeparator: (style) => ({ ...style, display: "none" }),
+        clearIndicator: (style) => ({ ...style, display: "none" }),
+    };
 };
 
 const Control = ({ children, ...props }: ControlProps<SearchOption, false>) => (
