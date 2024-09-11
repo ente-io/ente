@@ -139,7 +139,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
     // The currently selected option.
     const [value, setValue] = useState<SearchOption | undefined>();
     // The contents of the input field associated with the select.
-    const [query, setQuery] = useState("");
+    const [inputValue, setInputValue] = useState("");
     // The default options shown in the select menu when nothing has been typed.
     const [defaultOptions, setDefaultOptions] = useState([]);
 
@@ -155,7 +155,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
 
     const handleChange = (value: SearchOption) => {
         setValue(value);
-        setQuery(value?.label);
+        setInputValue(value?.label);
         // The Select has a blurInputOnSelect prop, but that makes the input
         // field lose focus, not the entire menu (e.g. when pressing twice).
         //
@@ -166,7 +166,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
 
     const handleInputChange = (value: string, actionMeta: InputActionMeta) => {
         if (actionMeta.action === "input-change") {
-            setQuery(value);
+            setInputValue(value);
         }
     };
 
@@ -183,7 +183,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
             }, 10);
             setIsOpen(false);
             setValue(null);
-            setQuery("");
+            setInputValue("");
         }
     };
 
@@ -219,7 +219,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
             case SuggestionType.COLLECTION:
                 search = { collection: selectedOption.value as number };
                 setValue(null);
-                setQuery("");
+                setInputValue("");
                 break;
             case SuggestionType.FILE_NAME:
                 search = { files: selectedOption.value as number[] };
@@ -250,6 +250,8 @@ const SearchInput: React.FC<SearchInputProps> = ({
         refreshDefaultOptions();
     };
 
+    const handleSelectCGroup = (cgroup: SearchPerson) => {};
+
     const components = useMemo(
         () => ({ Option, Control, Menu: CustomMenu, Input: Input }),
         [],
@@ -269,11 +271,16 @@ const SearchInput: React.FC<SearchInputProps> = ({
                 isMulti={false}
                 isClearable
                 escapeClearsValue
-                inputValue={query}
+                inputValue={inputValue}
                 onInputChange={handleInputChange}
                 styles={SelectStyles}
                 defaultOptions={isMLEnabled() ? defaultOptions : []}
-                noOptionsMessage={() => null}
+                noOptionsMessage={({ inputValue }) => (
+                    console.log(inputValue),
+                    !inputValue && (
+                        <EmptyState onSelectCGroup={handleSelectCGroup} />
+                    )
+                )}
             />
 
             {isOpen && (
@@ -377,6 +384,73 @@ const iconForOptionType = (type: SuggestionType | undefined) => {
         default:
             return <SearchIcon />;
     }
+};
+
+interface EmptyStateProps {
+    /** Called when the user selects a cgroup shown in the empty state view. */
+    onSelectCGroup: (cgroup: SearchPerson) => void;
+}
+
+/**
+ * The view shown in the menu area when the user has not typed anything in the
+ * search box.
+ */
+const EmptyState: React.FC<EmptyStateProps> = (props) => {
+    // Need to cast here, otherwise the react-select types think selectProps can
+    // also be something that supports multiple selection groups.
+    // const options = props.selectProps.options as SearchOption[];
+
+    // const peopleSuggestions = options.filter(
+    //     (o) => o.type === SuggestionType.PERSON,
+    // );
+    // const people = peopleSuggestions.map((o) => o.value as SearchPerson);
+
+    // const indexStatusSuggestion = options.filter(
+    //     (o) => o.type === SuggestionType.INDEX_STATUS,
+    // )[0] as Suggestion;
+
+    // const indexStatus = indexStatusSuggestion?.value;
+    // return (
+    //     <SelectComponents.Menu {...props}>
+    //         <Box my={1}>
+    //             {isMLEnabled() &&
+    //                 indexStatus &&
+    //                 (people && people.length > 0 ? (
+    //                     <Box>
+    //                         <Legend>{t("people")}</Legend>
+    //                     </Box>
+    //                 ) : (
+    //                     <Box height={6} />
+    //                 ))}
+
+    //             {isMLEnabled() && indexStatus && (
+    //                 <Box>
+    //                     <Caption>{indexStatusSuggestion.label}</Caption>
+    //                 </Box>
+    //             )}
+    //             {people && people.length > 0 && (
+    //                 <Row>
+    //                     <PeopleList
+    //                         people={people}
+    //                         maxRows={2}
+    //                         onSelect={(_, index) => {
+    //                             selectRef.current?.blur();
+    //                             setSelectedValue(peopleSuggestions[index]);
+    //                         }}
+    //                     />
+    //                 </Row>
+    //             )}
+    //         </Box>
+    //         {props.children}
+    //     </SelectComponents.Menu>
+    // );
+
+    return (
+        <div>
+            <h1>Hello</h1>
+            <p>{(console.log(props), props.toString())}</p>
+        </div>
+    );
 };
 
 const Option: React.FC<OptionProps<SearchOption, false>> = (props) => (
