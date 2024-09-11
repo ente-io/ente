@@ -313,12 +313,12 @@ export const decryptPublicMagicMetadata = async (
     // -@ts-expect-error [Note: Zod doesn't work with `exactOptionalPropertyTypes` yet]
     // We can't use -@ts-expect-error since this code is also included in the
     // packages which don't have strict mode enabled (and thus don't error).
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment, @typescript-eslint/prefer-ts-expect-error
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     envelope.data = result;
 
     // -@ts-expect-error [Note: Zod doesn't work with `exactOptionalPropertyTypes` yet]
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment, @typescript-eslint/prefer-ts-expect-error
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     return result;
 };
