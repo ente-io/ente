@@ -1,3 +1,4 @@
+import { assertionFailed } from "@/base/assert";
 import { useIsMobileWidth } from "@/base/hooks";
 import { FileType } from "@/media/file-type";
 import { PeopleList } from "@/new/photos/components/PeopleList";
@@ -425,11 +426,13 @@ interface EmptyStateProps {
  * The view shown in the menu area when the user has not typed anything in the
  * search box.
  */
-const EmptyState: React.FC<EmptyStateProps> = (props) => {
-    const status = isMLSupported && mlStatusSnapshot();
+const EmptyState: React.FC<EmptyStateProps> = () => {
+    const status = mlStatusSnapshot();
 
-    if (!isMLSupported) return null;
-    if (!status || status.phase == "disabled") return null;
+    if (!status || status.phase == "disabled") {
+        assertionFailed();
+        return <></>;
+    }
 
     let label: string;
     switch (status.phase) {
@@ -502,17 +505,7 @@ const EmptyState: React.FC<EmptyStateProps> = (props) => {
     //         {props.children}
     //     </SelectComponents.Menu>
     // );
-
-    return <></>;
-    return (
-        <div>
-            <h1>Hello</h1>
-            <p>{(console.log(props), props.toString())}</p>
-        </div>
-    );
 };
-
-export async function getMLStatusSuggestion(): Promise<Suggestion> {}
 
 const Option: React.FC<OptionProps<SearchOption, false>> = (props) => (
     <SelectComponents.Option {...props}>
