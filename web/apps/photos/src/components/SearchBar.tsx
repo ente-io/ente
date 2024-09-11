@@ -1,6 +1,5 @@
 import { assertionFailed } from "@/base/assert";
 import { useIsMobileWidth } from "@/base/hooks";
-import type { Collection } from "@/media/collection";
 import { FileType } from "@/media/file-type";
 import {
     isMLSupported,
@@ -22,7 +21,6 @@ import {
 } from "@/new/photos/services/search/types";
 import { labelForSuggestionType } from "@/new/photos/services/search/ui";
 import type { LocationTag } from "@/new/photos/services/user-entity";
-import { EnteFile } from "@/new/photos/types/file";
 import {
     FreeFlowText,
     SpaceBetweenFlex,
@@ -76,8 +74,6 @@ interface SearchBarProps {
     /** Enter or exit search mode. */
     setIsInSearchMode: (v: boolean) => void;
     updateSearch: UpdateSearch;
-    collections: Collection[];
-    files: EnteFile[];
 }
 
 export type UpdateSearch = (
@@ -140,16 +136,12 @@ interface SearchInputProps {
     isOpen: boolean;
     setIsOpen: (value: boolean) => void;
     updateSearch: UpdateSearch;
-    files: EnteFile[];
-    collections: Collection[];
 }
 
 const SearchInput: React.FC<SearchInputProps> = ({
     isOpen,
     setIsOpen,
     updateSearch,
-    files,
-    collections,
 }) => {
     const appContext = useContext(AppContext);
 
@@ -199,8 +191,8 @@ const SearchInput: React.FC<SearchInputProps> = ({
     };
 
     const getOptions = useCallback(
-        pDebounce(getAutoCompleteSuggestions(files, collections), 250),
-        [files, collections],
+        pDebounce(getAutoCompleteSuggestions(), 250),
+        [],
     );
 
     const search = (selectedOption: SearchOption) => {

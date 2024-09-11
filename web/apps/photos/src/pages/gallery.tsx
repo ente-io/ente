@@ -1099,8 +1099,6 @@ export default function Gallery() {
                             isInSearchMode={isInSearchMode}
                             setIsInSearchMode={setIsInSearchMode}
                             updateSearch={updateSearch}
-                            collections={collections}
-                            files={files}
                         />
                     )}
                 </NavbarBase>
@@ -1279,8 +1277,6 @@ interface NormalNavbarContentsProps {
     isInSearchMode: boolean;
     setIsInSearchMode: (v: boolean) => void;
     updateSearch: UpdateSearch;
-    collections: Collection[];
-    files: EnteFile[];
 }
 
 const NormalNavbarContents: React.FC<NormalNavbarContentsProps> = ({
@@ -1289,8 +1285,6 @@ const NormalNavbarContents: React.FC<NormalNavbarContentsProps> = ({
     isInSearchMode,
     setIsInSearchMode,
     updateSearch,
-    collections,
-    files,
 }) => (
     <>
         {!isInSearchMode && <SidebarButton onClick={openSidebar} />}
@@ -1298,8 +1292,6 @@ const NormalNavbarContents: React.FC<NormalNavbarContentsProps> = ({
             isInSearchMode={isInSearchMode}
             setIsInSearchMode={setIsInSearchMode}
             updateSearch={updateSearch}
-            collections={collections}
-            files={files}
         />
         {!isInSearchMode && <UploadButton onClick={openUploader} />}
     </>

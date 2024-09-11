@@ -2,11 +2,9 @@ import { isDesktop } from "@/base/app";
 import log from "@/base/log";
 import { masterKeyFromSession } from "@/base/session-store";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
-import type { Collection } from "@/media/collection";
 import { FileType } from "@/media/file-type";
 import type { LocationTag } from "@/new/photos/services/user-entity";
 import i18n, { t } from "i18next";
-import type { EnteFile } from "../../types/file";
 import { clipMatches, isMLEnabled } from "../ml";
 import type {
     City,
@@ -166,12 +164,9 @@ const labelledFileTypes = (): LabelledFileType[] => [
 
 // Suggestions shown in the search dropdown when the user has typed something.
 export const getAutoCompleteSuggestions =
-    (files: EnteFile[], collections: Collection[]) =>
+    () =>
     async (searchPhrase: string): Promise<SearchOption[]> => {
-        log.debug(() => [
-            "getAutoCompleteSuggestions",
-            { searchPhrase, files, collections },
-        ]);
+        log.debug(() => ["getAutoCompleteSuggestions"]);
         try {
             const suggestions: Suggestion[] =
                 await suggestionsForString(searchPhrase);
