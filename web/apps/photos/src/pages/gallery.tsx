@@ -11,7 +11,7 @@ import {
     getLocalTrashedFiles,
 } from "@/new/photos/services/files";
 import { wipHasSwitchedOnceCmpAndSet } from "@/new/photos/services/ml";
-import { search, setSearchableFiles } from "@/new/photos/services/search";
+import { search, setSearchableData } from "@/new/photos/services/search";
 import {
     SearchQuery,
     SearchResultSummary,
@@ -407,8 +407,11 @@ export default function Gallery() {
         };
     }, []);
 
-    // TODO: Is this uniquing necessary? Doesn't seem like.
-    useEffect(() => setSearchableFiles(getUniqueFiles(files)), [files]);
+    useEffect(
+        // TODO: Try to set things up so that this uniquing is not needed.
+        () => setSearchableData({ collections, files: getUniqueFiles(files) }),
+        [collections, files],
+    );
 
     useEffect(() => {
         if (!user || !files || !collections || !hiddenFiles || !trashedFiles) {

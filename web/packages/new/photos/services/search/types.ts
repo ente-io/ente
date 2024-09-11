@@ -4,9 +4,18 @@
  */
 
 import type { Location } from "@/base/types";
+import type { Collection } from "@/media/collection";
 import { FileType } from "@/media/file-type";
 import type { EnteFile } from "@/new/photos/types/file";
 import type { LocationTag } from "../user-entity";
+
+/**
+ * The base data over which we should search.
+ */
+export interface SearchableData {
+    collections: Collection[];
+    files: EnteFile[];
+}
 
 export interface DateSearchResult {
     components: SearchDateComponents;

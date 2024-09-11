@@ -8,19 +8,20 @@ import type { LocationTag } from "@/new/photos/services/user-entity";
 import i18n, { t } from "i18next";
 import type { EnteFile } from "../../types/file";
 import { clipMatches, isMLEnabled } from "../ml";
-import {
-    SuggestionType,
-    type City,
-    type ClipSearchScores,
-    type DateSearchResult,
-    type LabelledFileType,
-    type LocalizedSearchData,
-    type SearchDateComponents,
-    type SearchOption,
-    type SearchPerson,
-    type SearchQuery,
-    type Suggestion,
+import type {
+    City,
+    ClipSearchScores,
+    DateSearchResult,
+    LabelledFileType,
+    LocalizedSearchData,
+    SearchableData,
+    SearchDateComponents,
+    SearchOption,
+    SearchPerson,
+    SearchQuery,
+    Suggestion,
 } from "./types";
+import { SuggestionType } from "./types";
 import type { SearchWorker } from "./worker";
 
 /**
@@ -61,10 +62,10 @@ export const triggerSearchDataSync = () =>
     void worker().then((w) => masterKeyFromSession().then((k) => w.sync(k)));
 
 /**
- * Set the files over which we will search.
+ * Set the collections and files over which we should search.
  */
-export const setSearchableFiles = (enteFiles: EnteFile[]) =>
-    void worker().then((w) => w.setEnteFiles(enteFiles));
+export const setSearchableData = (data: SearchableData) =>
+    void worker().then((w) => w.setSearchableData(data));
 
 /**
  * Convert a search string into a reusable "search query" that can be passed on

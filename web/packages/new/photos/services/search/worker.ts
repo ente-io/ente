@@ -19,6 +19,7 @@ import type {
     LabelledFileType,
     LocalizedSearchData,
     Searchable,
+    SearchableData,
     SearchDateComponents,
     SearchQuery,
     Suggestion,
@@ -30,7 +31,7 @@ import { SuggestionType } from "./types";
  * remains responsive.
  */
 export class SearchWorker {
-    private enteFiles: EnteFile[] = [];
+    private searchableData: SearchableData = { collections: [], files: [] };
     private locationTags: Searchable<LocationTag>[] = [];
     private cities: Searchable<City>[] = [];
 
@@ -60,10 +61,10 @@ export class SearchWorker {
     }
 
     /**
-     * Set the files that we should search across.
+     * Set the data that we should search across.
      */
-    setEnteFiles(enteFiles: EnteFile[]) {
-        this.enteFiles = enteFiles;
+    setSearchableData(data: SearchableData) {
+        this.searchableData = data;
     }
 
     /**
@@ -82,7 +83,9 @@ export class SearchWorker {
      * Return {@link EnteFile}s that satisfy the given {@link searchQuery}.
      */
     search(searchQuery: SearchQuery) {
-        return this.enteFiles.filter((f) => isMatchingFile(f, searchQuery));
+        return this.searchableData.files.filter((f) =>
+            isMatchingFile(f, searchQuery),
+        );
     }
 }
 
