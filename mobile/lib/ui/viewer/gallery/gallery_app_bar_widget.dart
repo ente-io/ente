@@ -10,6 +10,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import "package:photos/core/network/network.dart";
 import "package:photos/db/files_db.dart";
+import "package:photos/events/magic_sort_change_event.dart";
 import 'package:photos/events/subscription_purchased_event.dart';
 import "package:photos/gateways/cast_gw.dart";
 import "package:photos/generated/l10n.dart";
@@ -58,11 +59,11 @@ class GalleryAppBarWidget extends StatefulWidget {
     this.type,
     this.title,
     this.selectedFiles, {
-    Key? key,
+    super.key,
     this.deviceCollection,
     this.collection,
     this.isFromCollectPhotos = false,
-  }) : super(key: key);
+  });
 
   @override
   State<GalleryAppBarWidget> createState() => _GalleryAppBarWidgetState();
@@ -84,6 +85,8 @@ enum AlbumPopupAction {
   pinAlbum,
   removeLink,
   cleanUncategorized,
+  sortByMostRecent,
+  sortByMostRelevant
 }
 
 class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
@@ -293,6 +296,39 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         !Configuration.instance.hasConfiguredAccount()) {
       return actions;
     }
+
+    if (galleryType == GalleryType.magic) {
+      actions.add(
+        Tooltip(
+          message: "Sort",
+          child: PopupMenuButton(
+            icon: const Icon(Icons.sort_rounded),
+            itemBuilder: (context) {
+              return const [
+                PopupMenuItem(
+                  value: AlbumPopupAction.sortByMostRecent,
+                  child: Text("Most recent"),
+                ),
+                PopupMenuItem(
+                  value: AlbumPopupAction.sortByMostRelevant,
+                  child: Text("Most relevant"),
+                ),
+              ];
+            },
+            onSelected: (AlbumPopupAction value) {
+              if (value == AlbumPopupAction.sortByMostRecent) {
+                Bus.instance
+                    .fire(MagicSortChangeEvent(MagicSortType.mostRecent));
+              } else if (value == AlbumPopupAction.sortByMostRelevant) {
+                Bus.instance
+                    .fire(MagicSortChangeEvent(MagicSortType.mostRelevant));
+              }
+            },
+          ),
+        ),
+      );
+    }
+
     final int userID = Configuration.instance.getUserID()!;
     isQuickLink = widget.collection?.isQuickLinkCollection() ?? false;
     if (galleryType.canAddFiles(widget.collection, userID)) {

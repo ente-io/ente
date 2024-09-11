@@ -11,6 +11,8 @@ import "package:photos/models/search/search_types.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import "package:photos/services/remote_assets_service.dart";
+import "package:photos/ui/viewer/search/result/magic_result_screen.dart";
+import "package:photos/utils/navigation_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class MagicCache {
@@ -59,6 +61,15 @@ extension MagicCacheServiceExtension on MagicCache {
       ResultType.magic,
       title,
       enteFilesInMagicCache,
+      onResultTap: (ctx) {
+        routeToPage(
+          ctx,
+          MagicResultScreen(
+            enteFilesInMagicCache,
+            name: title,
+          ),
+        );
+      },
     );
   }
 }
