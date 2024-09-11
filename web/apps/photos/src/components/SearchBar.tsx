@@ -279,7 +279,6 @@ const SearchInput: React.FC<SearchInputProps> = ({
                 inputValue={inputValue}
                 onInputChange={handleInputChange}
                 styles={SelectStyles}
-                defaultOptions={isMLEnabled() ? defaultOptions : []}
                 noOptionsMessage={({ inputValue }) =>
                     shouldShowEmptyState(inputValue) ? (
                         <EmptyState onSelectCGroup={handleSelectCGroup} />
