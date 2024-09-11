@@ -5,7 +5,6 @@
 
 import type { Location } from "@/base/types";
 import { FileType } from "@/media/file-type";
-import type { MLStatus } from "@/new/photos/services/ml";
 import type { EnteFile } from "@/new/photos/types/file";
 import type { LocationTag } from "../user-entity";
 
@@ -106,7 +105,6 @@ export enum SuggestionType {
     COLLECTION = "COLLECTION",
     FILE_NAME = "FILE_NAME",
     PERSON = "PERSON",
-    INDEX_STATUS = "INDEX_STATUS",
     FILE_CAPTION = "FILE_CAPTION",
     FILE_TYPE = "FILE_TYPE",
     CLIP = "CLIP",
@@ -120,12 +118,10 @@ export interface Suggestion {
         | SearchDateComponents
         | number[]
         | SearchPerson
-        | MLStatus
         | LocationTag
         | City
         | FileType
         | ClipSearchScores;
-    hide?: boolean;
 }
 
 export interface SearchQuery {

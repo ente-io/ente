@@ -431,9 +431,6 @@ const EmptyState: React.FC<EmptyStateProps> = () => {
             </Typography>
         </Box>
     );
-    // const indexStatusSuggestion = options.filter(
-    //     (o) => o.type === SuggestionType.INDEX_STATUS,
-    // )[0] as Suggestion;
 
     // TODO-Cluster
     // const options = props.selectProps.options as SearchOption[];
@@ -482,6 +479,52 @@ const EmptyState: React.FC<EmptyStateProps> = () => {
 //     padding: 0px 12px;
 // `;
 
+/*
+TODO: Cluster
+
+export async function getAllPeopleSuggestion(): Promise<Array<Suggestion>> {
+    try {
+        const people = await getAllPeople(200);
+        return people.map((person) => ({
+            label: person.name,
+            type: SuggestionType.PERSON,
+            value: person,
+            hide: true,
+        }));
+    } catch (e) {
+        log.error("getAllPeopleSuggestion failed", e);
+        return [];
+    }
+}
+
+async function getAllPeople(limit: number = undefined) {
+    return (await wipSearchPersons()).slice(0, limit);
+    // TODO-Clustetr
+    // if (done) return [];
+
+    // done = true;
+    // if (process.env.NEXT_PUBLIC_ENTE_WIP_CL_FETCH) {
+    //     await syncCGroups();
+    //     const people = await clusterGroups();
+    //     log.debug(() => ["people", { people }]);
+    // }
+
+    // let people: Array<SearchPerson> = []; // await mlIDbStorage.getAllPeople();
+    // people = await wipCluster();
+    // // await mlPeopleStore.iterate<Person, void>((person) => {
+    // //     people.push(person);
+    // // });
+    // people = people ?? [];
+    // const result = people
+    //     .sort((p1, p2) => p2.files.length - p1.files.length)
+    //     .slice(0, limit);
+    // // log.debug(() => ["getAllPeople", result]);
+
+    // return result;
+}
+
+*/
+
 const Option: React.FC<OptionProps<SearchOption, false>> = (props) => (
     <SelectComponents.Option {...props}>
         <LabelWithInfo data={props.data} />
@@ -490,39 +533,37 @@ const Option: React.FC<OptionProps<SearchOption, false>> = (props) => (
 
 const LabelWithInfo = ({ data }: { data: SearchOption }) => {
     return (
-        !data.hide && (
-            <>
-                <Box className="main" px={2} py={1}>
-                    <Typography variant="mini" mb={1}>
-                        {labelForSuggestionType(data.type)}
-                    </Typography>
-                    <SpaceBetweenFlex>
-                        <Box mr={1}>
-                            <FreeFlowText>
-                                <Typography fontWeight={"bold"}>
-                                    {data.label}
-                                </Typography>
-                            </FreeFlowText>
-                            <Typography color="text.muted">
-                                {t("photos_count", { count: data.fileCount })}
+        <>
+            <Box className="main" px={2} py={1}>
+                <Typography variant="mini" mb={1}>
+                    {labelForSuggestionType(data.type)}
+                </Typography>
+                <SpaceBetweenFlex>
+                    <Box mr={1}>
+                        <FreeFlowText>
+                            <Typography fontWeight={"bold"}>
+                                {data.label}
                             </Typography>
-                        </Box>
+                        </FreeFlowText>
+                        <Typography color="text.muted">
+                            {t("photos_count", { count: data.fileCount })}
+                        </Typography>
+                    </Box>
 
-                        <Stack direction={"row"} spacing={1}>
-                            {data.previewFiles.map((file) => (
-                                <CollectionCard
-                                    key={file.id}
-                                    coverFile={file}
-                                    onClick={() => null}
-                                    collectionTile={ResultPreviewTile}
-                                />
-                            ))}
-                        </Stack>
-                    </SpaceBetweenFlex>
-                </Box>
-                <Divider sx={{ mx: 2, my: 1 }} />
-            </>
-        )
+                    <Stack direction={"row"} spacing={1}>
+                        {data.previewFiles.map((file) => (
+                            <CollectionCard
+                                key={file.id}
+                                coverFile={file}
+                                onClick={() => null}
+                                collectionTile={ResultPreviewTile}
+                            />
+                        ))}
+                    </Stack>
+                </SpaceBetweenFlex>
+            </Box>
+            <Divider sx={{ mx: 2, my: 1 }} />
+        </>
     );
 };
 

@@ -18,8 +18,6 @@ export const labelForSuggestionType = (type: SuggestionType) => {
             return t("file_name");
         case SuggestionType.PERSON:
             return t("person");
-        case SuggestionType.INDEX_STATUS:
-            throw new Error("Not a displayable key");
         case SuggestionType.FILE_CAPTION:
             return t("description");
         case SuggestionType.FILE_TYPE:

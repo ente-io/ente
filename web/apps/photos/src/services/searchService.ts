@@ -1,10 +1,5 @@
 import log from "@/base/log";
 import { FileType } from "@/media/file-type";
-import {
-    isMLSupported,
-    mlStatusSnapshot,
-    wipSearchPersons,
-} from "@/new/photos/services/ml";
 import { createSearchQuery, search } from "@/new/photos/services/search";
 import type {
     SearchDateComponents,
@@ -20,18 +15,8 @@ import {
 } from "@/new/photos/services/search/types";
 import type { LocationTag } from "@/new/photos/services/user-entity";
 import { EnteFile } from "@/new/photos/types/file";
-import { t } from "i18next";
 import { Collection } from "types/collection";
 import { getUniqueFiles } from "utils/file";
-
-// Suggestions shown in the search dropdown's empty state, i.e. when the user
-// selects the search bar but does not provide any input.
-export const getDefaultOptions = async () => {
-    return [
-        await getMLStatusSuggestion(),
-        ...(await convertSuggestionsToOptions(await getAllPeopleSuggestion())),
-    ].filter((t) => !!t);
-};
 
 // Suggestions shown in the search dropdown when the user has typed something.
 export const getAutoCompleteSuggestions =
@@ -85,55 +70,6 @@ async function convertSuggestionsToOptions(
         }
     }
     return previewImageAppendedOptions;
-}
-
-export async function getAllPeopleSuggestion(): Promise<Array<Suggestion>> {
-    try {
-        const people = await getAllPeople(200);
-        return people.map((person) => ({
-            label: person.name,
-            type: SuggestionType.PERSON,
-            value: person,
-            hide: true,
-        }));
-    } catch (e) {
-        log.error("getAllPeopleSuggestion failed", e);
-        return [];
-    }
-}
-
-export async function getMLStatusSuggestion(): Promise<Suggestion> {
-    if (!isMLSupported) return undefined;
-
-    const status = mlStatusSnapshot();
-
-    if (!status || status.phase == "disabled") return undefined;
-
-    let label: string;
-    switch (status.phase) {
-        case "scheduled":
-            label = t("indexing_scheduled");
-            break;
-        case "indexing":
-            label = t("indexing_photos", status);
-            break;
-        case "fetching":
-            label = t("indexing_fetching", status);
-            break;
-        case "clustering":
-            label = t("indexing_people", status);
-            break;
-        case "done":
-            label = t("indexing_done", status);
-            break;
-    }
-
-    return {
-        label,
-        type: SuggestionType.INDEX_STATUS,
-        value: status,
-        hide: true,
-    };
 }
 
 function getCollectionSuggestion(
@@ -236,30 +172,4 @@ function convertSuggestionToSearchQuery(option: Suggestion): SearchQuery {
         case SuggestionType.CLIP:
             return { clip: option.value as ClipSearchScores };
     }
-}
-
-async function getAllPeople(limit: number = undefined) {
-    return (await wipSearchPersons()).slice(0, limit);
-    // TODO-Clustetr
-    // if (done) return [];
-
-    // done = true;
-    // if (process.env.NEXT_PUBLIC_ENTE_WIP_CL_FETCH) {
-    //     await syncCGroups();
-    //     const people = await clusterGroups();
-    //     log.debug(() => ["people", { people }]);
-    // }
-
-    // let people: Array<SearchPerson> = []; // await mlIDbStorage.getAllPeople();
-    // people = await wipCluster();
-    // // await mlPeopleStore.iterate<Person, void>((person) => {
-    // //     people.push(person);
-    // // });
-    // people = people ?? [];
-    // const result = people
-    //     .sort((p1, p2) => p2.files.length - p1.files.length)
-    //     .slice(0, limit);
-    // // log.debug(() => ["getAllPeople", result]);
-
-    // return result;
 }
