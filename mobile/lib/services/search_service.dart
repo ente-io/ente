@@ -38,6 +38,7 @@ import "package:photos/ui/viewer/location/add_location_sheet.dart";
 import "package:photos/ui/viewer/location/location_screen.dart";
 import "package:photos/ui/viewer/people/cluster_page.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
+import "package:photos/ui/viewer/search/result/magic_result_screen.dart";
 import 'package:photos/utils/date_time_util.dart';
 import "package:photos/utils/navigation_util.dart";
 import 'package:tuple/tuple.dart';
@@ -1027,7 +1028,24 @@ class SearchService {
       return searchResults;
     }
     if (files.isNotEmpty && resultForQuery == query) {
-      searchResults.add(GenericSearchResult(ResultType.magic, query, files));
+      searchResults.add(
+        GenericSearchResult(
+          ResultType.magic,
+          query,
+          files,
+          onResultTap: (context) {
+            routeToPage(
+              context,
+              MagicResultScreen(
+                files,
+                name: query,
+                heroTag: GenericSearchResult(ResultType.magic, query, files)
+                    .heroTag(),
+              ),
+            );
+          },
+        ),
+      );
     }
     return searchResults;
   }
