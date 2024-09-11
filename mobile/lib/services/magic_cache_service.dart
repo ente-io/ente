@@ -67,6 +67,11 @@ extension MagicCacheServiceExtension on MagicCache {
           MagicResultScreen(
             enteFilesInMagicCache,
             name: title,
+            heroTag: GenericSearchResult(
+              ResultType.magic,
+              title,
+              enteFilesInMagicCache,
+            ).heroTag(),
           ),
         );
       },
