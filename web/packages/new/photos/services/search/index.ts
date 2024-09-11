@@ -166,7 +166,10 @@ const labelledFileTypes = (): LabelledFileType[] => [
 export const getAutoCompleteSuggestions =
     (files: EnteFile[], collections: Collection[]) =>
     async (searchPhrase: string): Promise<SearchOption[]> => {
-        log.debug(() => ["getAutoCompleteSuggestions", { searchPhrase }]);
+        log.debug(() => [
+            "getAutoCompleteSuggestions",
+            { searchPhrase, collections },
+        ]);
         try {
             const searchPhrase2 = searchPhrase.trim().toLowerCase();
             // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
@@ -180,7 +183,6 @@ export const getAutoCompleteSuggestions =
                 // - getLocationSuggestion(searchPhrase),
                 // - getFileTypeSuggestion(searchPhrase),
                 ...(await createSearchQuery(searchPhrase)),
-                ...getCollectionSuggestion(searchPhrase2, collections),
                 getFileNameSuggestion(searchPhrase2, files),
                 getFileCaptionSuggestion(searchPhrase2, files),
                 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
@@ -217,22 +219,6 @@ async function convertSuggestionsToOptions(
         }
     }
     return previewImageAppendedOptions;
-}
-
-function getCollectionSuggestion(
-    searchPhrase: string,
-    collections: Collection[],
-): Suggestion[] {
-    const collectionResults = searchCollection(searchPhrase, collections);
-
-    return collectionResults.map(
-        (searchResult) =>
-            ({
-                type: SuggestionType.COLLECTION,
-                value: searchResult.id,
-                label: searchResult.name,
-            }) as Suggestion,
-    );
 }
 
 function getFileNameSuggestion(

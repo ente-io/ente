@@ -1,5 +1,6 @@
 import { HTTPError } from "@/base/http";
 import type { Location } from "@/base/types";
+import type { Collection } from "@/media/collection";
 import { fileCreationPhotoDate, fileLocation } from "@/media/file-metadata";
 import type { EnteFile } from "@/new/photos/types/file";
 import { nullToUndefined } from "@/utils/transform";
@@ -73,6 +74,7 @@ export class SearchWorker {
     createSearchQuery(s: string, localizedSearchData: LocalizedSearchData) {
         return createSearchQuery(
             s,
+            this.searchableData,
             localizedSearchData,
             this.locationTags,
             this.cities,
@@ -93,15 +95,26 @@ expose(SearchWorker);
 
 const createSearchQuery = (
     s: string,
+    { collections }: SearchableData,
     { locale, holidays, labelledFileTypes }: LocalizedSearchData,
     locationTags: Searchable<LocationTag>[],
     cities: Searchable<City>[],
 ): Suggestion[] =>
     [
+        collectionSuggestions(s, collections),
         dateSuggestions(s, locale, holidays),
         locationSuggestions(s, locationTags, cities),
         fileTypeSuggestions(s, labelledFileTypes),
     ].flat();
+
+const collectionSuggestions = (s: string, collections: Collection[]) =>
+    collections
+        .filter(({ name }) => name.toLowerCase().includes(s))
+        .map(({ id, name }) => ({
+            type: SuggestionType.COLLECTION,
+            value: id,
+            label: name,
+        }));
 
 const dateSuggestions = (
     s: string,
