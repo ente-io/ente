@@ -7,6 +7,7 @@ import {
     mlStatusSnapshot,
     mlStatusSubscribe,
 } from "@/new/photos/services/ml";
+import { getAutoCompleteSuggestions } from "@/new/photos/services/search";
 import type {
     City,
     SearchDateComponents,
@@ -65,7 +66,6 @@ import {
     type StylesConfig,
 } from "react-select";
 import AsyncSelect from "react-select/async";
-import { getAutoCompleteSuggestions } from "services/searchService";
 
 interface SearchBarProps {
     /**
