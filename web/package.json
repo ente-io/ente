@@ -33,8 +33,9 @@
         "preview:staff": "yarn workspace staff preview"
     },
     "resolutions": {
-        "@emotion/cache": "11.11.0",
-        "@emotion/react": "11.11.3"
+        "@emotion/cache": "11.13.1",
+        "@emotion/react": "^11.13.3",
+        "@emotion/styled": "^11.13.0"
     },
     "devDependencies": {
         "concurrently": "^8.2.2",
