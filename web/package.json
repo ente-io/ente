@@ -40,7 +40,7 @@
     "devDependencies": {
         "concurrently": "^8.2.2",
         "eslint": "^8",
-        "prettier": "^3",
+        "prettier": "^3.3.3",
         "typescript": "^5"
     },
     "packageManager": "yarn@1.22.22"

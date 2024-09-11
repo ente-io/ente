@@ -21,7 +21,7 @@ const AvatarBase = styled("div")<{
     width: ${({ size }) => `${size}px`};
     height: ${({ size }) => `${size}px`};
     background-color: ${({ colorCode, opacity }) =>
-        `${colorCode}${opacity === 100 ? "" : opacity ?? 95}`};
+        `${colorCode}${opacity === 100 ? "" : (opacity ?? 95)}`};
     border-radius: 50%;
     display: flex;
     justify-content: center;
