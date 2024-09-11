@@ -6,9 +6,13 @@ import PeopleIcon from "@mui/icons-material/People";
 import { SetCollectionNamerAttributes } from "components/Collections/CollectionNamer";
 import CollectionOptions from "components/Collections/CollectionOptions";
 import type { Dispatch, SetStateAction } from "react";
-import { Collection, CollectionSummary } from "types/collection";
+import {
+    Collection,
+    CollectionSummary,
+    CollectionSummaryType,
+} from "types/collection";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
-import { CollectionSummaryType, shouldShowOptions } from "utils/collection";
+import { shouldShowOptions } from "utils/collection";
 import { CollectionInfo } from "./CollectionInfo";
 import { CollectionInfoBarWrapper } from "./styledComponents";
 

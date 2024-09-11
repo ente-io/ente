@@ -105,7 +105,11 @@ import { sync, triggerPreFileInfoSync } from "services/sync";
 import { syncTrash } from "services/trashService";
 import uploadManager from "services/upload/uploadManager";
 import { isTokenValid } from "services/userService";
-import { Collection, CollectionSummaries } from "types/collection";
+import {
+    Collection,
+    CollectionSummaries,
+    CollectionSummaryType,
+} from "types/collection";
 import {
     GalleryContextType,
     SelectedState,
@@ -118,7 +122,6 @@ import {
     ALL_SECTION,
     ARCHIVE_SECTION,
     COLLECTION_OPS_TYPE,
-    CollectionSummaryType,
     HIDDEN_ITEMS_SECTION,
     TRASH_SECTION,
     constructCollectionNameMap,

@@ -5,7 +5,31 @@ import {
     MagicMetadataCore,
     SUB_TYPE,
 } from "@/new/photos/types/magicMetadata";
-import { CollectionSummaryType, CollectionType } from "utils/collection";
+
+export enum CollectionType {
+    folder = "folder",
+    favorites = "favorites",
+    album = "album",
+    uncategorized = "uncategorized",
+}
+
+export enum CollectionSummaryType {
+    folder = "folder",
+    favorites = "favorites",
+    album = "album",
+    archive = "archive",
+    trash = "trash",
+    uncategorized = "uncategorized",
+    all = "all",
+    outgoingShare = "outgoingShare",
+    incomingShareViewer = "incomingShareViewer",
+    incomingShareCollaborator = "incomingShareCollaborator",
+    sharedOnlyViaLink = "sharedOnlyViaLink",
+    archived = "archived",
+    defaultHidden = "defaultHidden",
+    hiddenItems = "hiddenItems",
+    pinned = "pinned",
+}
 
 export enum COLLECTION_ROLE {
     VIEWER = "VIEWER",

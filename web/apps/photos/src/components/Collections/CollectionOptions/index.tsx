@@ -12,14 +12,13 @@ import { useContext, useRef, useState } from "react";
 import { Trans } from "react-i18next";
 import * as CollectionAPI from "services/collectionService";
 import * as TrashService from "services/trashService";
-import { Collection } from "types/collection";
+import { Collection, CollectionSummaryType } from "types/collection";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
 import {
     ALL_SECTION,
     changeCollectionOrder,
     changeCollectionSortOrder,
     changeCollectionVisibility,
-    CollectionSummaryType,
     downloadCollectionHelper,
     downloadDefaultHiddenCollectionHelper,
     HIDDEN_ITEMS_SECTION,

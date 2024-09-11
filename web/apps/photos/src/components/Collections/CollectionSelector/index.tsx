@@ -9,11 +9,11 @@ import {
     Collection,
     CollectionSummaries,
     CollectionSummary,
+    CollectionSummaryType,
 } from "types/collection";
 import { CollectionSelectorIntent } from "types/gallery";
 import {
     COLLECTION_SORT_ORDER,
-    CollectionSummaryType,
     DUMMY_UNCATEGORIZED_COLLECTION,
     isAddToAllowedCollection,
     isMoveToAllowedCollection,
