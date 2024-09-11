@@ -68,7 +68,12 @@ import { getAutoCompleteSuggestions } from "services/searchService";
 import { type Collection } from "types/collection";
 
 interface SearchBarProps {
+    /**
+     * `true` if the search bar is being shown when the gallery is already in
+     * "search mode".
+     */
     isInSearchMode: boolean;
+    /** Enter or exit search mode. */
     setIsInSearchMode: (v: boolean) => void;
     updateSearch: UpdateSearch;
     collections: Collection[];
@@ -80,6 +85,20 @@ export type UpdateSearch = (
     summary: SearchResultSummary,
 ) => void;
 
+/**
+ * The search bar is a styled "select" element that allow the user to type in
+ * the attached input field, and shows a list of matching options in a dropdown.
+ *
+ * When the search input is empty, it shows some general information in the
+ * dropdown instead (e.g. the ML indexing status).
+ *
+ * When the search input is not empty, it shows various {@link SearchOption}s,
+ * each of which is a possible suggestion for a search that the user might've
+ * intended. Each suggestion shows a count of matching files, and some previews.
+ *
+ * Selecting one of the these options causes the gallery to enter a "search
+ * mode", where it shows a filtered list of files that match that option.
+ */
 export const SearchBar: React.FC<SearchBarProps> = ({
     setIsInSearchMode,
     isInSearchMode,

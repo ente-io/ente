@@ -142,6 +142,10 @@ export interface SearchResultSummary {
 
 /**
  * An option shown in the the search bar's select dropdown.
+ *
+ * The option includes essential data that is necessary to show a corresponding
+ * entry in the dropdown. If the user selects the option, then we will re-run
+ * the search, using the data to filter the list of files shown to the user.
  */
 export interface SearchOption extends Suggestion {
     fileCount: number;
