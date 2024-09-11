@@ -277,7 +277,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
                 defaultOptions={isMLEnabled() ? defaultOptions : []}
                 noOptionsMessage={({ inputValue }) => (
                     console.log(inputValue),
-                    !inputValue && (
+                    inputValue ? null : (
                         <EmptyState onSelectCGroup={handleSelectCGroup} />
                     )
                 )}
@@ -306,7 +306,7 @@ const SelectStyles: StylesConfig<SearchOption, false> = {
     container: (style) => ({ ...style, flex: 1 }),
     control: (style, { isFocused }) => ({
         ...style,
-        backgroundColor: "rgba(255, 255, 255, 0.1)",
+        backgroundColor: "rgb(26, 26, 26)",
         borderColor: isFocused ? "#1DB954" : "transparent",
         boxShadow: "none",
         ":hover": {
@@ -317,8 +317,9 @@ const SelectStyles: StylesConfig<SearchOption, false> = {
     input: (styles) => ({ ...styles, color: "#fff" }),
     menu: (style) => ({
         ...style,
-        marginTop: "1px",
-        backgroundColor: "#1b1b1b",
+        // marginTop: "1px",
+        backgroundColor: "rgb(26, 26, 26)",
+        border: "1px solid green",
     }),
     option: (style, { isFocused }) => ({
         ...style,
@@ -445,6 +446,7 @@ const EmptyState: React.FC<EmptyStateProps> = (props) => {
     //     </SelectComponents.Menu>
     // );
 
+    return <></>;
     return (
         <div>
             <h1>Hello</h1>
