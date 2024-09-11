@@ -97,6 +97,11 @@ MUI uses [Emotion](https://emotion.sh/) as its preferred CSS-in-JS library, for
 which we need to install install two Emotion packages (`@emotion/react` and
 `@emotion/styled`) as peer dependencies.
 
+We need to pin the emotion version (using the "resolutions" field in
+`package.json`) to those used by MUI since react-select (another package we use)
+specify a different emotion version directly instead of as a peer dependency,
+and we end up with two emotions at runtime otherwise.
+
 We also use MUI's
 [@mui/material-icons](https://mui.com/material-ui/material-icons/) package,
 which provides Material icons exported as React components (a `SvgIcon`).

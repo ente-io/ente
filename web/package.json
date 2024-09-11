@@ -32,6 +32,10 @@
         "preview:photos": "yarn build:photos && python3 -m http.server -d apps/photos/out 3000",
         "preview:staff": "yarn workspace staff preview"
     },
+    "resolutions": {
+        "@emotion/cache": "11.11.0",
+        "@emotion/react": "11.11.3"
+    },
     "devDependencies": {
         "concurrently": "^8.2.2",
         "eslint": "^8",
