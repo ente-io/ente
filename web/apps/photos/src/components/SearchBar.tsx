@@ -1,5 +1,6 @@
 import { assertionFailed } from "@/base/assert";
 import { useIsMobileWidth } from "@/base/hooks";
+import type { Collection } from "@/media/collection";
 import { FileType } from "@/media/file-type";
 import {
     isMLSupported,
@@ -65,7 +66,6 @@ import {
 } from "react-select";
 import AsyncSelect from "react-select/async";
 import { getAutoCompleteSuggestions } from "services/searchService";
-import { type Collection } from "types/collection";
 
 interface SearchBarProps {
     /**

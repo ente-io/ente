@@ -1,5 +1,12 @@
 import { ensureElectron } from "@/base/electron";
 import log from "@/base/log";
+import {
+    COLLECTION_ROLE,
+    type Collection,
+    CollectionMagicMetadataProps,
+    CollectionPublicMagicMetadataProps,
+    CollectionType,
+} from "@/media/collection";
 import { ItemVisibility } from "@/media/file-metadata";
 import { getAllLocalFiles, getLocalFiles } from "@/new/photos/services/files";
 import { EnteFile } from "@/new/photos/types/file";
@@ -25,13 +32,7 @@ import {
     updatePublicCollectionMagicMetadata,
     updateSharedCollectionMagicMetadata,
 } from "services/collectionService";
-import {
-    COLLECTION_ROLE,
-    Collection,
-    CollectionMagicMetadataProps,
-    CollectionPublicMagicMetadataProps,
-    CollectionSummaries,
-} from "types/collection";
+import { CollectionSummaries, CollectionSummaryType } from "types/collection";
 import { SetFilesDownloadProgressAttributes } from "types/gallery";
 import { downloadFilesWithProgress } from "utils/file";
 import { isArchivedCollection, updateMagicMetadata } from "utils/magicMetadata";

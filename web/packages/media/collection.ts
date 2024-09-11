@@ -1,34 +1,18 @@
 import { ItemVisibility } from "@/media/file-metadata";
-import { EnteFile } from "@/new/photos/types/file";
+import type { EnteFile } from "@/new/photos/types/file";
 import {
-    EncryptedMagicMetadata,
-    MagicMetadataCore,
+    type EncryptedMagicMetadata,
+    type MagicMetadataCore,
     SUB_TYPE,
 } from "@/new/photos/types/magicMetadata";
+
+// TODO: Audit this file
 
 export enum CollectionType {
     folder = "folder",
     favorites = "favorites",
     album = "album",
     uncategorized = "uncategorized",
-}
-
-export enum CollectionSummaryType {
-    folder = "folder",
-    favorites = "favorites",
-    album = "album",
-    archive = "archive",
-    trash = "trash",
-    uncategorized = "uncategorized",
-    all = "all",
-    outgoingShare = "outgoingShare",
-    incomingShareViewer = "incomingShareViewer",
-    incomingShareCollaborator = "incomingShareCollaborator",
-    sharedOnlyViaLink = "sharedOnlyViaLink",
-    archived = "archived",
-    defaultHidden = "defaultHidden",
-    hiddenItems = "hiddenItems",
-    pinned = "pinned",
 }
 
 export enum COLLECTION_ROLE {
@@ -164,17 +148,3 @@ export interface CollectionPublicMagicMetadataProps {
 
 export type CollectionPublicMagicMetadata =
     MagicMetadataCore<CollectionPublicMagicMetadataProps>;
-
-export interface CollectionSummary {
-    id: number;
-    name: string;
-    type: CollectionSummaryType;
-    coverFile: EnteFile;
-    latestFile: EnteFile;
-    fileCount: number;
-    updationTime: number;
-    order?: number;
-}
-
-export type CollectionSummaries = Map<number, CollectionSummary>;
-export type CollectionFilesCount = Map<number, number>;

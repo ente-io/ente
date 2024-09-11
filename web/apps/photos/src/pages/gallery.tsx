@@ -2,6 +2,7 @@ import { stashRedirect } from "@/accounts/services/redirect";
 import { NavbarBase } from "@/base/components/Navbar";
 import { useIsMobileWidth } from "@/base/hooks";
 import log from "@/base/log";
+import type { Collection } from "@/media/collection";
 import { WhatsNew } from "@/new/photos/components/WhatsNew";
 import { shouldShowWhatsNew } from "@/new/photos/services/changelog";
 import downloadManager from "@/new/photos/services/download";
@@ -105,11 +106,7 @@ import { sync, triggerPreFileInfoSync } from "services/sync";
 import { syncTrash } from "services/trashService";
 import uploadManager from "services/upload/uploadManager";
 import { isTokenValid } from "services/userService";
-import {
-    Collection,
-    CollectionSummaries,
-    CollectionSummaryType,
-} from "types/collection";
+import { CollectionSummaries, CollectionSummaryType } from "types/collection";
 import {
     GalleryContextType,
     SelectedState,

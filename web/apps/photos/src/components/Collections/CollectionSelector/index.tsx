@@ -1,3 +1,4 @@
+import type { Collection } from "@/media/collection";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleWithCloseButton";
 import { DialogContent, useMediaQuery } from "@mui/material";
@@ -6,7 +7,6 @@ import { t } from "i18next";
 import { useEffect, useState } from "react";
 import { createUnCategorizedCollection } from "services/collectionService";
 import {
-    Collection,
     CollectionSummaries,
     CollectionSummary,
     CollectionSummaryType,

@@ -1,12 +1,16 @@
 import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { MenuItemDivider, MenuItemGroup } from "@/base/components/Menu";
 import { Titlebar } from "@/base/components/Titlebar";
+import type {
+    Collection,
+    PublicURL,
+    UpdatePublicURL,
+} from "@/media/collection";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import { DialogProps, Stack } from "@mui/material";
 import { t } from "i18next";
 import { useMemo, useState } from "react";
-import { Collection, PublicURL, UpdatePublicURL } from "types/collection";
 import { getDeviceLimitOptions } from "utils/collection";
 
 interface Iprops {

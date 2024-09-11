@@ -1,8 +1,8 @@
 import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
+import { COLLECTION_ROLE, type Collection } from "@/media/collection";
 import { DialogProps, Stack } from "@mui/material";
 import { t } from "i18next";
-import { COLLECTION_ROLE, Collection } from "types/collection";
 
 import { GalleryContext } from "pages/gallery";
 import { useContext, useMemo } from "react";

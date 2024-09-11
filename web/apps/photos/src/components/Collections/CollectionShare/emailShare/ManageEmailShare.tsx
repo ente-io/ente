@@ -5,6 +5,11 @@ import {
     MenuSectionTitle,
 } from "@/base/components/Menu";
 import { Titlebar } from "@/base/components/Titlebar";
+import {
+    COLLECTION_ROLE,
+    type Collection,
+    type CollectionUser,
+} from "@/media/collection";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import Add from "@mui/icons-material/Add";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
@@ -18,7 +23,6 @@ import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";
 import { useContext, useRef, useState } from "react";
 import { unshareCollection } from "services/collectionService";
-import { COLLECTION_ROLE, Collection, CollectionUser } from "types/collection";
 import AddParticipant from "./AddParticipant";
 import ManageParticipant from "./ManageParticipant";
 

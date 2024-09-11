@@ -1,5 +1,6 @@
 import { ensureElectron } from "@/base/electron";
 import log from "@/base/log";
+import type { Collection } from "@/media/collection";
 import {
     fileCreationPhotoDate,
     fileLocation,
@@ -27,7 +28,6 @@ import QueueProcessor, {
     RequestCanceller,
 } from "@ente/shared/utils/queueProcessor";
 import i18n from "i18next";
-import { Collection } from "types/collection";
 import {
     CollectionExportNames,
     ExportProgress,

@@ -1,6 +1,7 @@
 import { ensureElectron } from "@/base/electron";
 import { nameAndExtension } from "@/base/file";
 import log from "@/base/log";
+import type { Collection } from "@/media/collection";
 import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import downloadManager from "@/new/photos/services/download";
@@ -17,7 +18,6 @@ import { wait } from "@/utils/promise";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";
 import { getLocalCollections } from "services/collectionService";
-import { Collection } from "types/collection";
 import {
     CollectionExportNames,
     ExportProgress,

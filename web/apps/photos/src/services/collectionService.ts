@@ -1,6 +1,23 @@
 import { encryptMetadataJSON, sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
+import {
+    AddToCollectionRequest,
+    Collection,
+    CollectionMagicMetadata,
+    CollectionMagicMetadataProps,
+    CollectionPublicMagicMetadata,
+    CollectionShareeMagicMetadata,
+    CollectionToFileMap,
+    CollectionType,
+    CreatePublicAccessTokenRequest,
+    EncryptedCollection,
+    EncryptedFileKey,
+    MoveToCollectionRequest,
+    PublicURL,
+    RemoveFromCollectionRequest,
+    UpdatePublicURL,
+} from "@/media/collection";
 import { ItemVisibility } from "@/media/file-metadata";
 import { getLocalFiles } from "@/new/photos/services/files";
 import { EnteFile } from "@/new/photos/types/file";
@@ -19,25 +36,10 @@ import { getActualKey } from "@ente/shared/user";
 import type { User } from "@ente/shared/user/types";
 import { t } from "i18next";
 import {
-    AddToCollectionRequest,
-    Collection,
     CollectionFilesCount,
-    CollectionMagicMetadata,
-    CollectionMagicMetadataProps,
-    CollectionPublicMagicMetadata,
-    CollectionShareeMagicMetadata,
     CollectionSummaries,
     CollectionSummary,
     CollectionSummaryType,
-    CollectionToFileMap,
-    CollectionType,
-    CreatePublicAccessTokenRequest,
-    EncryptedCollection,
-    EncryptedFileKey,
-    MoveToCollectionRequest,
-    PublicURL,
-    RemoveFromCollectionRequest,
-    UpdatePublicURL,
 } from "types/collection";
 import { FamilyData } from "types/user";
 import {

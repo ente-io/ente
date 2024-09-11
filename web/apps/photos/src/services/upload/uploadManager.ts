@@ -4,6 +4,7 @@ import { lowercaseExtension, nameAndExtension } from "@/base/file";
 import log from "@/base/log";
 import type { Electron } from "@/base/types/ipc";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
+import type { Collection } from "@/media/collection";
 import { FileType } from "@/media/file-type";
 import { potentialFileTypeFromExtension } from "@/media/live-photo";
 import { getLocalFiles } from "@/new/photos/services/files";
@@ -26,7 +27,6 @@ import {
 } from "services/publicCollectionService";
 import { getDisableCFUploadProxyFlag } from "services/userService";
 import watcher from "services/watch";
-import { Collection } from "types/collection";
 import { SetFiles } from "types/gallery";
 import { decryptFile, getUserOwnedFiles, sortFiles } from "utils/file";
 import {

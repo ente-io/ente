@@ -1,4 +1,5 @@
 import log from "@/base/log";
+import type { Collection } from "@/media/collection";
 import { FileType } from "@/media/file-type";
 import { createSearchQuery, search } from "@/new/photos/services/search";
 import type {
@@ -15,7 +16,6 @@ import {
 } from "@/new/photos/services/search/types";
 import type { LocationTag } from "@/new/photos/services/user-entity";
 import { type EnteFile } from "@/new/photos/types/file";
-import { type Collection } from "types/collection";
 
 // Suggestions shown in the search dropdown when the user has typed something.
 export const getAutoCompleteSuggestions =

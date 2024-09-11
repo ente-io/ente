@@ -1,6 +1,11 @@
 import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { MenuItemDivider, MenuItemGroup } from "@/base/components/Menu";
 import { Titlebar } from "@/base/components/Titlebar";
+import type {
+    Collection,
+    PublicURL,
+    UpdatePublicURL,
+} from "@/media/collection";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import RemoveCircleOutline from "@mui/icons-material/RemoveCircleOutline";
@@ -12,7 +17,6 @@ import {
     deleteShareableURL,
     updateShareableURL,
 } from "services/collectionService";
-import { Collection, PublicURL, UpdatePublicURL } from "types/collection";
 import { SetPublicShareProp } from "types/publicCollection";
 import { handleSharingErrors } from "utils/error/ui";
 import { ManageDeviceLimit } from "./deviceLimit";
