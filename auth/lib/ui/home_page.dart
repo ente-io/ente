@@ -407,9 +407,12 @@ class _HomePageState extends State<HomePage> {
                   }
                   final newIndex = index - indexOffset;
 
+                  final code = _filteredCodes[newIndex];
+
                   return ClipRect(
                     child: CodeWidget(
-                      _filteredCodes[newIndex],
+                      key: ValueKey(code.hashCode),
+                      code,
                     ),
                   );
                 }),
