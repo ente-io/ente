@@ -1,6 +1,7 @@
 import { assertionFailed } from "@/base/assert";
 import { useIsMobileWidth } from "@/base/hooks";
 import { FileType } from "@/media/file-type";
+import { useTheme, type Theme } from "@mui/material";
 import {
     isMLSupported,
     mlStatusSnapshot,
@@ -139,7 +140,9 @@ const SearchInput: React.FC<SearchInputProps> = ({
     // The contents of the input field associated with the select.
     const [inputValue, setInputValue] = useState("");
 
-    const styles = useSelectStyles();
+    const theme = useTheme();
+
+    const styles = useMemo(() => useSelectStyles(theme), [theme]);
 
     useEffect(() => {
         search(value);
@@ -279,8 +282,8 @@ const SearchInputWrapper = styled(Box)`
     margin: auto;
 `;
 
-const useSelectStyles = (): StylesConfig<SearchOption, false> => {
-    console.log("useSelectStyles");
+const useSelectStyles = (theme: Theme): StylesConfig<SearchOption, false> => {
+    console.log("useSelectStyles", theme);
     return {
         container: (style) => ({ ...style, flex: 1 }),
         control: (style, { isFocused }) => ({
