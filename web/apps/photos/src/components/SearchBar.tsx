@@ -1,7 +1,6 @@
 import { assertionFailed } from "@/base/assert";
 import { useIsMobileWidth } from "@/base/hooks";
 import { FileType } from "@/media/file-type";
-import { useTheme, type Theme } from "@mui/material";
 import {
     isMLSupported,
     mlStatusSnapshot,
@@ -39,6 +38,8 @@ import {
     Stack,
     styled,
     Typography,
+    useTheme,
+    type Theme,
 } from "@mui/material";
 import CollectionCard from "components/Collections/CollectionCard";
 import { ResultPreviewTile } from "components/Collections/styledComponents";
@@ -282,29 +283,27 @@ const SearchInputWrapper = styled(Box)`
     margin: auto;
 `;
 
-const useSelectStyles = (theme: Theme): StylesConfig<SearchOption, false> => {
-    console.log("useSelectStyles", theme);
+const useSelectStyles = ({
+    colors,
+}: Theme): StylesConfig<SearchOption, false> => {
     return {
         container: (style) => ({ ...style, flex: 1 }),
         control: (style, { isFocused }) => ({
             ...style,
-            // Give a solid background color.
-            backgroundColor: "rgb(26, 26, 26)",
-            borderColor: isFocused ? "#1DB954" : "transparent",
+            backgroundColor: colors.background.elevated,
+            borderColor: isFocused ? colors.accent.A500 : "transparent",
             boxShadow: "none",
             ":hover": {
-                borderColor: "#01DE4D",
+                borderColor: colors.accent.A300,
                 cursor: "text",
             },
         }),
-        input: (styles) => ({ ...styles, color: "#fff" }),
+        input: (styles) => ({ ...styles, color: colors.text.base }),
         menu: (style) => ({
             ...style,
             // Suppress the default margin at the top.
             marginTop: "1px",
-            // Same background color as the control (must be solid, otherwise the
-            // content behind the menu shows through).
-            backgroundColor: "rgb(26, 26, 26)",
+            backgroundColor: colors.background.elevated,
         }),
         option: (style, { isFocused }) => ({
             ...style,
@@ -322,7 +321,7 @@ const useSelectStyles = (theme: Theme): StylesConfig<SearchOption, false> => {
         }),
         placeholder: (style) => ({
             ...style,
-            color: "rgba(255, 255, 255, 0.7)",
+            color: colors.text.muted,
             whiteSpace: "nowrap",
         }),
         // Hide some things we don't need.
