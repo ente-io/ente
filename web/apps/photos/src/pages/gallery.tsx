@@ -408,8 +408,11 @@ export default function Gallery() {
     }, []);
 
     useEffect(
-        // TODO: Try to set things up so that this uniquing is not needed.
-        () => setSearchableData({ collections, files: getUniqueFiles(files) }),
+        () =>
+            setSearchableData({
+                collections: collections ?? [],
+                files: getUniqueFiles(files ?? []),
+            }),
         [collections, files],
     );
 
