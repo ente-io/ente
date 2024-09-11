@@ -23,7 +23,6 @@ import type {
     SearchableData,
     SearchDateComponents,
     SearchQuery,
-    SearchSuggestion,
     Suggestion,
 } from "./types";
 import { SuggestionType } from "./types";
@@ -90,7 +89,7 @@ export class SearchWorker {
     /**
      * Return {@link EnteFile}s that satisfy the given {@link suggestion}.
      */
-    filterSearchableFiles(suggestion: SearchSuggestion) {
+    filterSearchableFiles(suggestion: SearchQuery) {
         return this.searchableData.files.filter((f) =>
             isMatchingFile(f, suggestion),
         );

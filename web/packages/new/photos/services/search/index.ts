@@ -19,7 +19,6 @@ import type {
     SearchOption,
     SearchPerson,
     SearchQuery,
-    SearchSuggestion,
     Suggestion,
 } from "./types";
 import { SuggestionType } from "./types";
@@ -108,7 +107,7 @@ const clipSuggestions = async (s: string, searchString: string) => {
  * Return the list of {@link EnteFile}s (from amongst the previously set
  * {@link SearchableData}) that match the given search {@link suggestion}.
  */
-export const filterSearchableFiles = async (suggestion: SearchSuggestion) =>
+export const filterSearchableFiles = async (suggestion: SearchQuery) =>
     worker().then((w) => w.filterSearchableFiles(suggestion));
 
 /**

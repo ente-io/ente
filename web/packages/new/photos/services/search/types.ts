@@ -134,6 +134,7 @@ export interface Suggestion {
 }
 
 export interface SearchQuery {
+    suggestion?: SearchSuggestion;
     date?: SearchDateComponents;
     location?: LocationTag;
     city?: City;
