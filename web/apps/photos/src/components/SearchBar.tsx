@@ -45,10 +45,8 @@ import CollectionCard from "components/Collections/CollectionCard";
 import { ResultPreviewTile } from "components/Collections/styledComponents";
 import { t } from "i18next";
 import pDebounce from "p-debounce";
-import { AppContext } from "pages/_app";
 import {
     useCallback,
-    useContext,
     useEffect,
     useMemo,
     useRef,
@@ -67,11 +65,24 @@ import AsyncSelect from "react-select/async";
 
 interface SearchBarProps {
     /**
-     * `true` if the search bar is being shown when the gallery is already in
-     * "search mode".
+     * [Note: "Search mode"]
+     *
+     * On mobile sized screens, normally the search input areas is not
+     * displayed. Clicking the search icon enters the "search mode", where we
+     * show the search input area.
+     *
+     * On other screens, the search input is always shown even if we are not in
+     * search mode.
+     *
+     * When we're in search mode,
+     *
+     * 1. Other icons from the navbar are hidden
+     * 2. Next to the search input there is a cancel button to exit search mode.
      */
     isInSearchMode: boolean;
-    /** Enter or exit search mode. */
+    /**
+     * Enter or exit "search mode".
+     */
     setIsInSearchMode: (v: boolean) => void;
     updateSearch: UpdateSearch;
 }
@@ -83,17 +94,18 @@ export type UpdateSearch = (
 
 /**
  * The search bar is a styled "select" element that allow the user to type in
- * the attached input field, and shows a list of matching options in a dropdown.
+ * the attached input field, and shows a list of matching suggestions in a
+ * dropdown.
  *
  * When the search input is empty, it shows some general information in the
  * dropdown instead (e.g. the ML indexing status).
  *
- * When the search input is not empty, it shows various {@link SearchOption}s,
- * each of which is a possible suggestion for a search that the user might've
- * intended. Each suggestion shows a count of matching files, and some previews.
+ * When the search input is not empty, it shows these {@link SearchSuggestion}s.
+ * Alongside each suggestion is shows a count of matching files, and some
+ * previews.
  *
- * Selecting one of the these options causes the gallery to enter a "search
- * mode", where it shows a filtered list of files that match that option.
+ * Selecting one of the these suggestions causes the gallery to shows a filtered
+ * list of files that match that suggestion.
  */
 export const SearchBar: React.FC<SearchBarProps> = ({
     setIsInSearchMode,
@@ -109,11 +121,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
             {isMobileWidth && !isInSearchMode ? (
                 <MobileSearchArea onSearch={showSearchInput} />
             ) : (
-                <SearchInput
-                    {...props}
-                    isOpen={isInSearchMode}
-                    setIsOpen={setIsInSearchMode}
-                />
+                <SearchInput {...props} isInSearchMode={isInSearchMode} />
             )}
         </Box>
     );
@@ -133,18 +141,14 @@ const MobileSearchArea: React.FC<MobileSearchAreaProps> = ({ onSearch }) => (
 );
 
 interface SearchInputProps {
-    isOpen: boolean;
-    setIsOpen: (value: boolean) => void;
+    isInSearchMode: boolean;
     updateSearch: UpdateSearch;
 }
 
 const SearchInput: React.FC<SearchInputProps> = ({
-    isOpen,
-    setIsOpen,
+    isInSearchMode,
     updateSearch,
 }) => {
-    const appContext = useContext(AppContext);
-
     // A ref to the top level Select.
     const selectRef = useRef(null);
     // The currently selected option.
@@ -178,16 +182,9 @@ const SearchInput: React.FC<SearchInputProps> = ({
     };
 
     const resetSearch = () => {
-        if (isOpen) {
-            appContext.startLoading();
-            updateSearch(null, null);
-            setTimeout(() => {
-                appContext.finishLoading();
-            }, 10);
-            setIsOpen(false);
-            setValue(null);
-            setInputValue("");
-        }
+        updateSearch(null, null);
+        setValue(null);
+        setInputValue("");
     };
 
     const getOptions = useCallback(
@@ -205,19 +202,16 @@ const SearchInput: React.FC<SearchInputProps> = ({
                 search = {
                     date: selectedOption.value as SearchDateComponents,
                 };
-                setIsOpen(true);
                 break;
             case SuggestionType.LOCATION:
                 search = {
                     location: selectedOption.value as LocationTag,
                 };
-                setIsOpen(true);
                 break;
             case SuggestionType.CITY:
                 search = {
                     city: selectedOption.value as City,
                 };
-                setIsOpen(true);
                 break;
             case SuggestionType.COLLECTION:
                 search = { collection: selectedOption.value as number };
@@ -275,7 +269,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
                 }
             />
 
-            {isOpen && (
+            {isInSearchMode && (
                 <IconButton onClick={() => resetSearch()} sx={{ ml: 1 }}>
                     <CloseIcon />
                 </IconButton>
