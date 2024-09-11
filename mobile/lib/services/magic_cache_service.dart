@@ -97,9 +97,9 @@ class MagicCacheService {
     if (!localSettings.isMLIndexingEnabled) {
       return;
     }
-    final jsonFile = await RemoteAssetsService.instance
+    final updatedJSONFile = await RemoteAssetsService.instance
         .getAssetIfUpdated(_kMagicPromptsDataUrl);
-    if (jsonFile != null) {
+    if (updatedJSONFile != null) {
       Future.delayed(_kCacheUpdateDelay, () {
         unawaited(_updateCache());
       });
@@ -204,14 +204,14 @@ class MagicCacheService {
   ) async {
     final results = <MagicCache>[];
     for (dynamic prompt in magicPromptsData) {
-      final files = await _getMatchingFileIDsForPromptData(
+      final fileUploadedIDs = await _getMatchingFileIDsForPromptData(
         prompt as Map<String, dynamic>,
       );
-      if (files.isNotEmpty) {
+      if (fileUploadedIDs.isNotEmpty) {
         results.add(
           MagicCache(
             prompt["title"] as String,
-            files,
+            fileUploadedIDs,
           ),
         );
       }
