@@ -65,7 +65,7 @@ import {
 } from "react-select";
 import AsyncSelect from "react-select/async";
 import { getAutoCompleteSuggestions } from "services/searchService";
-import { Collection } from "types/collection";
+import { type Collection } from "types/collection";
 
 interface SearchBarProps {
     isInSearchMode: boolean;
@@ -285,51 +285,49 @@ const SearchInputWrapper = styled(Box)`
 
 const useSelectStyles = ({
     colors,
-}: Theme): StylesConfig<SearchOption, false> => {
-    return {
-        container: (style) => ({ ...style, flex: 1 }),
-        control: (style, { isFocused }) => ({
-            ...style,
-            backgroundColor: colors.background.elevated,
-            borderColor: isFocused ? colors.accent.A500 : "transparent",
-            boxShadow: "none",
-            ":hover": {
-                borderColor: colors.accent.A300,
-                cursor: "text",
-            },
-        }),
-        input: (styles) => ({ ...styles, color: colors.text.base }),
-        menu: (style) => ({
-            ...style,
-            // Suppress the default margin at the top.
-            marginTop: "1px",
-            backgroundColor: colors.background.elevated,
-        }),
-        option: (style, { isFocused }) => ({
-            ...style,
-            padding: 0,
-            backgroundColor: "transparent !important",
-            "& :hover": {
-                cursor: "pointer",
-            },
-            "& .main": {
-                backgroundColor: isFocused && "#202020",
-            },
-            "&:last-child .MuiDivider-root": {
-                display: "none",
-            },
-        }),
-        placeholder: (style) => ({
-            ...style,
-            color: colors.text.muted,
-            whiteSpace: "nowrap",
-        }),
-        // Hide some things we don't need.
-        dropdownIndicator: (style) => ({ ...style, display: "none" }),
-        indicatorSeparator: (style) => ({ ...style, display: "none" }),
-        clearIndicator: (style) => ({ ...style, display: "none" }),
-    };
-};
+}: Theme): StylesConfig<SearchOption, false> => ({
+    container: (style) => ({ ...style, flex: 1 }),
+    control: (style, { isFocused }) => ({
+        ...style,
+        backgroundColor: colors.background.elevated,
+        borderColor: isFocused ? colors.accent.A500 : "transparent",
+        boxShadow: "none",
+        ":hover": {
+            borderColor: colors.accent.A300,
+            cursor: "text",
+        },
+    }),
+    input: (styles) => ({ ...styles, color: colors.text.base }),
+    menu: (style) => ({
+        ...style,
+        // Suppress the default margin at the top.
+        marginTop: "1px",
+        backgroundColor: colors.background.elevated,
+    }),
+    option: (style, { isFocused }) => ({
+        ...style,
+        padding: 0,
+        backgroundColor: "transparent !important",
+        "& :hover": {
+            cursor: "pointer",
+        },
+        "& .main": {
+            backgroundColor: isFocused && colors.background.elevated2,
+        },
+        "&:last-child .MuiDivider-root": {
+            display: "none",
+        },
+    }),
+    placeholder: (style) => ({
+        ...style,
+        color: colors.text.muted,
+        whiteSpace: "nowrap",
+    }),
+    // Hide some things we don't need.
+    dropdownIndicator: (style) => ({ ...style, display: "none" }),
+    indicatorSeparator: (style) => ({ ...style, display: "none" }),
+    clearIndicator: (style) => ({ ...style, display: "none" }),
+});
 
 const Control = ({ children, ...props }: ControlProps<SearchOption, false>) => (
     <SelectComponents.Control {...props}>
