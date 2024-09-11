@@ -183,7 +183,6 @@ export const getAutoCompleteSuggestions =
                 // - getLocationSuggestion(searchPhrase),
                 // - getFileTypeSuggestion(searchPhrase),
                 ...(await createSearchQuery(searchPhrase)),
-                getFileNameSuggestion(searchPhrase2, files),
                 getFileCaptionSuggestion(searchPhrase2, files),
                 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             ].filter((suggestion) => !!suggestion);
@@ -221,18 +220,6 @@ async function convertSuggestionsToOptions(
     return previewImageAppendedOptions;
 }
 
-function getFileNameSuggestion(
-    searchPhrase: string,
-    files: EnteFile[],
-): Suggestion {
-    const matchedFiles = searchFilesByName(searchPhrase, files);
-    return {
-        type: SuggestionType.FILE_NAME,
-        value: matchedFiles.map((file) => file.id),
-        label: searchPhrase,
-    };
-}
-
 function getFileCaptionSuggestion(
     searchPhrase: string,
     files: EnteFile[],
@@ -243,23 +230,6 @@ function getFileCaptionSuggestion(
         value: matchedFiles.map((file) => file.id),
         label: searchPhrase,
     };
-}
-
-function searchCollection(
-    searchPhrase: string,
-    collections: Collection[],
-): Collection[] {
-    return collections.filter((collection) =>
-        collection.name.toLowerCase().includes(searchPhrase),
-    );
-}
-
-function searchFilesByName(searchPhrase: string, files: EnteFile[]) {
-    return files.filter(
-        (file) =>
-            file.id.toString().includes(searchPhrase) ||
-            file.metadata.title.toLowerCase().includes(searchPhrase),
-    );
 }
 
 function searchFilesByCaption(searchPhrase: string, files: EnteFile[]) {

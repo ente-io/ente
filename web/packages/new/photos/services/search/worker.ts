@@ -95,15 +95,16 @@ expose(SearchWorker);
 
 const createSearchQuery = (
     s: string,
-    { collections }: SearchableData,
+    { collections, files }: SearchableData,
     { locale, holidays, labelledFileTypes }: LocalizedSearchData,
     locationTags: Searchable<LocationTag>[],
     cities: Searchable<City>[],
 ): Suggestion[] =>
     [
-        collectionSuggestions(s, collections),
         dateSuggestions(s, locale, holidays),
         locationSuggestions(s, locationTags, cities),
+        collectionSuggestions(s, collections),
+        fileNameSuggestions(s, files),
         fileTypeSuggestions(s, labelledFileTypes),
     ].flat();
 
@@ -115,6 +116,24 @@ const collectionSuggestions = (s: string, collections: Collection[]) =>
             value: id,
             label: name,
         }));
+
+const fileNameSuggestions = (s: string, files: EnteFile[]) => {
+    // Convert the search string to a number. This allows searching a file by
+    // its exact (integral) ID.
+    const sn = Number(s) || undefined;
+
+    const matchingFiles = files.filter(
+        ({ id, metadata }) =>
+            id === sn || metadata.title.toLowerCase().includes(s),
+    );
+    return matchingFiles.length
+        ? {
+              type: SuggestionType.FILE_NAME,
+              value: matchingFiles.map((f) => f.id),
+              label: s,
+          }
+        : [];
+};
 
 const dateSuggestions = (
     s: string,
