@@ -62,10 +62,7 @@ import {
     type StylesConfig,
 } from "react-select";
 import AsyncSelect from "react-select/async";
-import {
-    getAutoCompleteSuggestions,
-    getDefaultOptions,
-} from "services/searchService";
+import { getAutoCompleteSuggestions } from "services/searchService";
 import { Collection } from "types/collection";
 
 interface SearchBarProps {
@@ -141,18 +138,10 @@ const SearchInput: React.FC<SearchInputProps> = ({
     const [value, setValue] = useState<SearchOption | undefined>();
     // The contents of the input field associated with the select.
     const [inputValue, setInputValue] = useState("");
-    // The default options shown in the select menu when nothing has been typed.
-    const [defaultOptions, setDefaultOptions] = useState([]);
 
     useEffect(() => {
         search(value);
     }, [value]);
-
-    useEffect(() => {
-        refreshDefaultOptions();
-        const t = setInterval(() => refreshDefaultOptions(), 2000);
-        return () => clearInterval(t);
-    }, []);
 
     const handleChange = (value: SearchOption) => {
         setValue(value);
@@ -169,10 +158,6 @@ const SearchInput: React.FC<SearchInputProps> = ({
         if (actionMeta.action === "input-change") {
             setInputValue(value);
         }
-    };
-
-    const refreshDefaultOptions = async () => {
-        setDefaultOptions(await getDefaultOptions());
     };
 
     const resetSearch = () => {
@@ -243,14 +228,6 @@ const SearchInput: React.FC<SearchInputProps> = ({
         });
     };
 
-    // TODO: HACK as AsyncSelect does not support default options reloading on focus/click
-    // unwanted side effect: placeholder is not shown on focus/click
-    // https://github.com/JedWatson/react-select/issues/1879
-    // for correct fix AsyncSelect can be extended to support default options reloading on focus/click
-    const handleOnFocus = () => {
-        refreshDefaultOptions();
-    };
-
     const handleSelectCGroup = (value: SearchOption) => {
         // Dismiss the search menu.
         selectRef.current?.blur();
@@ -268,7 +245,6 @@ const SearchInput: React.FC<SearchInputProps> = ({
                 placeholder={t("search_hint")}
                 loadOptions={getOptions}
                 onChange={handleChange}
-                onFocus={handleOnFocus}
                 isMulti={false}
                 isClearable
                 escapeClearsValue
