@@ -1,7 +1,11 @@
 import { useIsMobileWidth } from "@/base/hooks";
 import { FileType } from "@/media/file-type";
 import { PeopleList } from "@/new/photos/components/PeopleList";
-import { isMLEnabled } from "@/new/photos/services/ml";
+import {
+    isMLEnabled,
+    isMLSupported,
+    mlStatusSnapshot,
+} from "@/new/photos/services/ml";
 import type {
     City,
     SearchDateComponents,
@@ -250,19 +254,19 @@ const SearchInput: React.FC<SearchInputProps> = ({
         refreshDefaultOptions();
     };
 
-    const handleSelectCGroup = (cgroup: SearchPerson) => {};
+    const handleSelectCGroup = (value: SearchOption) => {
+        // Dismiss the search menu.
+        selectRef.current?.blur();
+        setValue(value);
+    };
 
-    const components = useMemo(
-        () => ({ Option, Control, Menu: CustomMenu, Input: Input }),
-        [],
-    );
+    const components = useMemo(() => ({ Option, Control, Input }), []);
 
     return (
         <SearchInputWrapper>
             <AsyncSelect
                 ref={selectRef}
                 value={value}
-                // @ts-expect-error Type of the Menu is not what Select expects
                 components={components}
                 placeholder={t("search_hint")}
                 loadOptions={getOptions}
@@ -275,12 +279,11 @@ const SearchInput: React.FC<SearchInputProps> = ({
                 onInputChange={handleInputChange}
                 styles={SelectStyles}
                 defaultOptions={isMLEnabled() ? defaultOptions : []}
-                noOptionsMessage={({ inputValue }) => (
-                    console.log(inputValue),
-                    inputValue ? null : (
+                noOptionsMessage={({ inputValue }) =>
+                    shouldShowEmptyState(inputValue) ? (
                         <EmptyState onSelectCGroup={handleSelectCGroup} />
-                    )
-                )}
+                    ) : null
+                }
             />
 
             {isOpen && (
@@ -306,6 +309,7 @@ const SelectStyles: StylesConfig<SearchOption, false> = {
     container: (style) => ({ ...style, flex: 1 }),
     control: (style, { isFocused }) => ({
         ...style,
+        // Give a solid background color.
         backgroundColor: "rgb(26, 26, 26)",
         borderColor: isFocused ? "#1DB954" : "transparent",
         boxShadow: "none",
@@ -317,9 +321,11 @@ const SelectStyles: StylesConfig<SearchOption, false> = {
     input: (styles) => ({ ...styles, color: "#fff" }),
     menu: (style) => ({
         ...style,
-        // marginTop: "1px",
+        // Suppress the default margin at the top.
+        marginTop: "1px",
+        // Same background color as the control (must be solid, otherwise the
+        // content behind the menu shows through).
         backgroundColor: "rgb(26, 26, 26)",
-        border: "1px solid green",
     }),
     option: (style, { isFocused }) => ({
         ...style,
@@ -335,14 +341,15 @@ const SelectStyles: StylesConfig<SearchOption, false> = {
             display: "none",
         },
     }),
-    dropdownIndicator: (style) => ({ ...style, display: "none" }),
-    indicatorSeparator: (style) => ({ ...style, display: "none" }),
-    clearIndicator: (style) => ({ ...style, display: "none" }),
     placeholder: (style) => ({
         ...style,
         color: "rgba(255, 255, 255, 0.7)",
         whiteSpace: "nowrap",
     }),
+    // Hide some things we don't need.
+    dropdownIndicator: (style) => ({ ...style, display: "none" }),
+    indicatorSeparator: (style) => ({ ...style, display: "none" }),
+    clearIndicator: (style) => ({ ...style, display: "none" }),
 };
 
 const Control = ({ children, ...props }: ControlProps<SearchOption, false>) => (
@@ -387,9 +394,31 @@ const iconForOptionType = (type: SuggestionType | undefined) => {
     }
 };
 
+/**
+ * A preflight check for whether or not we should show the EmptyState.
+ *
+ * react-select seems to only suppress showing anything at all in the menu if we
+ * return `null` from the function passed to `noOptionsMessage`. Returning
+ * `false`, or returning `null` from the EmptyState itself doesn't work and
+ * causes a empty div to be shown instead.
+ */
+const shouldShowEmptyState = (inputValue: string) => {
+    // Don't show empty state if the user has entered search input.
+    if (inputValue) return false;
+
+    // Don't show empty state if there is no ML related information.
+    if (!isMLSupported) return false;
+
+    const status = isMLSupported && mlStatusSnapshot();
+    if (!status || status.phase == "disabled") return false;
+
+    // Show it otherwise.
+    return true;
+};
+
 interface EmptyStateProps {
     /** Called when the user selects a cgroup shown in the empty state view. */
-    onSelectCGroup: (cgroup: SearchPerson) => void;
+    onSelectCGroup: (value: SearchOption) => void;
 }
 
 /**
@@ -397,8 +426,36 @@ interface EmptyStateProps {
  * search box.
  */
 const EmptyState: React.FC<EmptyStateProps> = (props) => {
-    // Need to cast here, otherwise the react-select types think selectProps can
-    // also be something that supports multiple selection groups.
+    const status = isMLSupported && mlStatusSnapshot();
+
+    if (!isMLSupported) return null;
+    if (!status || status.phase == "disabled") return null;
+
+    let label: string;
+    switch (status.phase) {
+        case "scheduled":
+            label = t("indexing_scheduled");
+            break;
+        case "indexing":
+            label = t("indexing_photos", status);
+            break;
+        case "fetching":
+            label = t("indexing_fetching", status);
+            break;
+        case "clustering":
+            label = t("indexing_people", status);
+            break;
+        case "done":
+            label = t("indexing_done", status);
+            break;
+    }
+
+    return (
+        <Box>
+            <Caption>{label}</Caption>
+        </Box>
+    );
+
     // const options = props.selectProps.options as SearchOption[];
 
     // const peopleSuggestions = options.filter(
@@ -454,6 +511,8 @@ const EmptyState: React.FC<EmptyStateProps> = (props) => {
         </div>
     );
 };
+
+export async function getMLStatusSuggestion(): Promise<Suggestion> {}
 
 const Option: React.FC<OptionProps<SearchOption, false>> = (props) => (
     <SelectComponents.Option {...props}>
