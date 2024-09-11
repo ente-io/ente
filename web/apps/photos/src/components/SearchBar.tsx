@@ -1,7 +1,11 @@
 import { assertionFailed } from "@/base/assert";
 import { useIsMobileWidth } from "@/base/hooks";
 import { FileType } from "@/media/file-type";
-import { isMLSupported, mlStatusSnapshot } from "@/new/photos/services/ml";
+import {
+    isMLSupported,
+    mlStatusSnapshot,
+    mlStatusSubscribe,
+} from "@/new/photos/services/ml";
 import type {
     City,
     SearchDateComponents,
@@ -47,6 +51,7 @@ import {
     useMemo,
     useRef,
     useState,
+    useSyncExternalStore,
 } from "react";
 import {
     components as SelectComponents,
@@ -417,29 +422,29 @@ interface EmptyStateProps {
  * search box.
  */
 const EmptyState: React.FC<EmptyStateProps> = () => {
-    const status = mlStatusSnapshot();
+    const mlStatus = useSyncExternalStore(mlStatusSubscribe, mlStatusSnapshot);
 
-    if (!status || status.phase == "disabled") {
+    if (!mlStatus || mlStatus.phase == "disabled") {
         assertionFailed();
         return <></>;
     }
 
     let label: string;
-    switch (status.phase) {
+    switch (mlStatus.phase) {
         case "scheduled":
             label = t("indexing_scheduled");
             break;
         case "indexing":
-            label = t("indexing_photos", status);
+            label = t("indexing_photos", mlStatus);
             break;
         case "fetching":
-            label = t("indexing_fetching", status);
+            label = t("indexing_fetching", mlStatus);
             break;
         case "clustering":
-            label = t("indexing_people", status);
+            label = t("indexing_people", mlStatus);
             break;
         case "done":
-            label = t("indexing_done", status);
+            label = t("indexing_done", mlStatus);
             break;
     }
 
