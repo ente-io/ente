@@ -1,12 +1,7 @@
 import { assertionFailed } from "@/base/assert";
 import { useIsMobileWidth } from "@/base/hooks";
 import { FileType } from "@/media/file-type";
-import { PeopleList } from "@/new/photos/components/PeopleList";
-import {
-    isMLEnabled,
-    isMLSupported,
-    mlStatusSnapshot,
-} from "@/new/photos/services/ml";
+import { isMLSupported, mlStatusSnapshot } from "@/new/photos/services/ml";
 import type {
     City,
     SearchDateComponents,
@@ -17,7 +12,6 @@ import {
     ClipSearchScores,
     SearchOption,
     SearchQuery,
-    Suggestion,
     SuggestionType,
 } from "@/new/photos/services/search/types";
 import { labelForSuggestionType } from "@/new/photos/services/search/ui";
@@ -25,7 +19,6 @@ import type { LocationTag } from "@/new/photos/services/user-entity";
 import { EnteFile } from "@/new/photos/types/file";
 import {
     FreeFlowText,
-    Row,
     SpaceBetweenFlex,
 } from "@ente/shared/components/Container";
 import CalendarIcon from "@mui/icons-material/CalendarMonth";
@@ -60,9 +53,7 @@ import {
     type ControlProps,
     type InputActionMeta,
     type InputProps,
-    type MenuProps,
     type OptionProps,
-    type SelectInstance,
     type StylesConfig,
 } from "react-select";
 import AsyncSelect from "react-select/async";
@@ -454,22 +445,21 @@ const EmptyState: React.FC<EmptyStateProps> = () => {
 
     return (
         <Box>
-            <Caption>{label}</Caption>
+            <Typography variant="mini" sx={{ textAlign: "left" }}>
+                {label}
+            </Typography>
         </Box>
     );
-
-    // const options = props.selectProps.options as SearchOption[];
-
-    // const peopleSuggestions = options.filter(
-    //     (o) => o.type === SuggestionType.PERSON,
-    // );
-    // const people = peopleSuggestions.map((o) => o.value as SearchPerson);
-
     // const indexStatusSuggestion = options.filter(
     //     (o) => o.type === SuggestionType.INDEX_STATUS,
     // )[0] as Suggestion;
 
-    // const indexStatus = indexStatusSuggestion?.value;
+    // TODO-Cluster
+    // const options = props.selectProps.options as SearchOption[];
+    // const peopleSuggestions = options.filter(
+    //     (o) => o.type === SuggestionType.PERSON,
+    // );
+    // const people = peopleSuggestions.map((o) => o.value as SearchPerson);
     // return (
     //     <SelectComponents.Menu {...props}>
     //         <Box my={1}>
@@ -482,20 +472,17 @@ const EmptyState: React.FC<EmptyStateProps> = () => {
     //                 ) : (
     //                     <Box height={6} />
     //                 ))}
-
     //             {isMLEnabled() && indexStatus && (
     //                 <Box>
     //                     <Caption>{indexStatusSuggestion.label}</Caption>
     //                 </Box>
     //             )}
     //             {people && people.length > 0 && (
-    //                 <Row>
-    //                     <PeopleList
+    //                 <Row> // "@ente/shared/components/Container"
+    //                     <PeopleList // @/new/photos/components/PeopleList
     //                         people={people}
     //                         maxRows={2}
     //                         onSelect={(_, index) => {
-    //                             selectRef.current?.blur();
-    //                             setSelectedValue(peopleSuggestions[index]);
     //                         }}
     //                     />
     //                 </Row>
@@ -505,6 +492,14 @@ const EmptyState: React.FC<EmptyStateProps> = () => {
     //     </SelectComponents.Menu>
     // );
 };
+
+// TODO-Cluster
+// const Legend = styled("span")`
+//     font-size: 20px;
+//     color: #ddd;
+//     display: inline;
+//     padding: 0px 12px;
+// `;
 
 const Option: React.FC<OptionProps<SearchOption, false>> = (props) => (
     <SelectComponents.Option {...props}>
@@ -549,80 +544,6 @@ const LabelWithInfo = ({ data }: { data: SearchOption }) => {
         )
     );
 };
-
-type CustomMenuProps = MenuProps<SearchOption, false> & {
-    selectRef: React.RefObject<SelectInstance>;
-    // Cannot call it setValue since the menu itself already has that.
-    setSelectedValue: (value: SearchOption) => void;
-};
-
-const CustomMenu: React.FC<CustomMenuProps> = ({
-    selectRef,
-    setSelectedValue,
-    ...props
-}) => {
-    // Need to cast here, otherwise the react-select types think selectProps can
-    // also be something that supports multiple selection groups.
-    const options = props.selectProps.options as SearchOption[];
-
-    const peopleSuggestions = options.filter(
-        (o) => o.type === SuggestionType.PERSON,
-    );
-    const people = peopleSuggestions.map((o) => o.value as SearchPerson);
-
-    const indexStatusSuggestion = options.filter(
-        (o) => o.type === SuggestionType.INDEX_STATUS,
-    )[0] as Suggestion;
-
-    const indexStatus = indexStatusSuggestion?.value;
-    return (
-        <SelectComponents.Menu {...props}>
-            <Box my={1}>
-                {isMLEnabled() &&
-                    indexStatus &&
-                    (people && people.length > 0 ? (
-                        <Box>
-                            <Legend>{t("people")}</Legend>
-                        </Box>
-                    ) : (
-                        <Box height={6} />
-                    ))}
-
-                {isMLEnabled() && indexStatus && (
-                    <Box>
-                        <Caption>{indexStatusSuggestion.label}</Caption>
-                    </Box>
-                )}
-                {people && people.length > 0 && (
-                    <Row>
-                        <PeopleList
-                            people={people}
-                            maxRows={2}
-                            onSelect={(_, index) => {
-                                selectRef.current?.blur();
-                                setSelectedValue(peopleSuggestions[index]);
-                            }}
-                        />
-                    </Row>
-                )}
-            </Box>
-            {props.children}
-        </SelectComponents.Menu>
-    );
-};
-
-const Legend = styled("span")`
-    font-size: 20px;
-    color: #ddd;
-    display: inline;
-    padding: 0px 12px;
-`;
-
-const Caption = styled("span")`
-    font-size: 12px;
-    display: inline;
-    padding: 0px 12px;
-`;
 
 // A custom input for react-select that is always visible. This is a roundabout
 // hack the existing code used to display the search string when showing the
