@@ -25,7 +25,7 @@ class MagicResultScreen extends StatefulWidget {
   const MagicResultScreen(
     this.files, {
     required this.name,
-    this.enableGrouping = true,
+    this.enableGrouping = false,
     super.key,
   });
 
