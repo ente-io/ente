@@ -75,7 +75,7 @@ class HomeEmptyStateWidget extends StatelessWidget {
                       onTap: () {
                         showModalBottomSheet<void>(
                           backgroundColor:
-                              Theme.of(context).colorScheme.background,
+                              Theme.of(context).colorScheme.surface,
                           barrierColor: Colors.black87,
                           context: context,
                           builder: (context) {

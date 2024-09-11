@@ -230,7 +230,7 @@ class _HomePageState extends State<HomePage> {
     final l10n = context.l10n;
 
     return PopScope(
-      onPopInvoked: (_) async {
+      onPopInvokedWithResult: (_, result) async {
         if (_isSettingsOpen) {
           scaffoldKey.currentState!.closeDrawer();
           return;
@@ -537,7 +537,7 @@ class _HomePageState extends State<HomePage> {
       foregroundColor: Theme.of(context).colorScheme.fabForegroundColor,
       backgroundColor: Theme.of(context).colorScheme.fabBackgroundColor,
       overlayOpacity: 0.5,
-      overlayColor: Theme.of(context).colorScheme.background,
+      overlayColor: Theme.of(context).colorScheme.surface,
       elevation: 8.0,
       animationCurve: Curves.elasticInOut,
       children: [

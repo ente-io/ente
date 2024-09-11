@@ -44,7 +44,7 @@ class _SupportSectionWidgetState extends State<SupportSectionWidget> {
           onTap: () async {
             // ignore: unawaited_futures
             showModalBottomSheet<void>(
-              backgroundColor: Theme.of(context).colorScheme.background,
+              backgroundColor: Theme.of(context).colorScheme.surface,
               barrierColor: Colors.black87,
               context: context,
               builder: (context) {
