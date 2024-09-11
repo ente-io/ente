@@ -14,8 +14,8 @@ import {
     SuggestionType,
 } from "@/new/photos/services/search/types";
 import type { LocationTag } from "@/new/photos/services/user-entity";
-import { EnteFile } from "@/new/photos/types/file";
-import { Collection } from "types/collection";
+import { type EnteFile } from "@/new/photos/types/file";
+import { type Collection } from "types/collection";
 import { getUniqueFiles } from "utils/file";
 
 // Suggestions shown in the search dropdown when the user has typed something.

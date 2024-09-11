@@ -140,6 +140,17 @@ export interface SearchResultSummary {
     fileCount: number;
 }
 
+export type SearchSuggestion = { label: string } & (
+    | { type: "collection"; collectionID: number }
+    | { type: "files"; fileIDs: number[] }
+    | { type: "fileType"; fileType: FileType }
+    | { type: "date"; dateComponents: SearchDateComponents }
+    | { type: "location"; locationTag: LocationTag }
+    | { type: "city"; city: City }
+    | { type: "clip"; clipScoreForFileID: Map<number, number> }
+    | { type: "cgroup"; cgroup: SearchPerson }
+);
+
 /**
  * An option shown in the the search bar's select dropdown.
  *
