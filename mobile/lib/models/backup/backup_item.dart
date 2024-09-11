@@ -7,7 +7,7 @@ class BackupItem {
   final BackupItemStatus status;
   final EnteFile file;
   final int collectionID;
-  final Completer<EnteFile> completer;
+  final Completer<EnteFile>? completer;
   final Object? error;
 
   BackupItem({
