@@ -23,6 +23,7 @@ import type {
     SearchableData,
     SearchDateComponents,
     SearchQuery,
+    SearchSuggestion,
     Suggestion,
 } from "./types";
 import { SuggestionType } from "./types";
@@ -69,11 +70,16 @@ export class SearchWorker {
     }
 
     /**
-     * Convert a search string into a reusable query.
+     * Convert a search string into a list of {@link SearchSuggestion}s.
      */
-    createSearchQuery(s: string, localizedSearchData: LocalizedSearchData) {
-        return createSearchQuery(
+    suggestionsForString(
+        s: string,
+        searchString: string,
+        localizedSearchData: LocalizedSearchData,
+    ) {
+        return suggestionsForString(
             s,
+            searchString,
             this.searchableData,
             localizedSearchData,
             this.locationTags,
@@ -82,19 +88,24 @@ export class SearchWorker {
     }
 
     /**
-     * Return {@link EnteFile}s that satisfy the given {@link searchQuery}.
+     * Return {@link EnteFile}s that satisfy the given {@link suggestion}.
      */
-    search(searchQuery: SearchQuery) {
+    filterSearchableFiles(suggestion: SearchSuggestion) {
         return this.searchableData.files.filter((f) =>
-            isMatchingFile(f, searchQuery),
+            isMatchingFile(f, suggestion),
         );
     }
 }
 
 expose(SearchWorker);
 
-const createSearchQuery = (
+/**
+ * @param s The normalized form of {@link searchString}.
+ * @param searchString The original search string.
+ */
+const suggestionsForString = (
     s: string,
+    searchString: string,
     { collections, files }: SearchableData,
     { locale, holidays, labelledFileTypes }: LocalizedSearchData,
     locationTags: Searchable<LocationTag>[],
@@ -105,8 +116,8 @@ const createSearchQuery = (
         dateSuggestions(s, locale, holidays),
         locationSuggestions(s, locationTags, cities),
         collectionSuggestions(s, collections),
-        fileNameSuggestions(s, files),
-        fileCaptionSuggestions(s, files),
+        suggestionForFiles(fileNameMatches(s, files), searchString),
+        suggestionForFiles(fileCaptionMatches(s, files), searchString),
     ].flat();
 
 const collectionSuggestions = (s: string, collections: Collection[]) =>
@@ -118,37 +129,31 @@ const collectionSuggestions = (s: string, collections: Collection[]) =>
             label: name,
         }));
 
-const fileNameSuggestions = (s: string, files: EnteFile[]) => {
+const fileNameMatches = (s: string, files: EnteFile[]) => {
     // Convert the search string to a number. This allows searching a file by
     // its exact (integral) ID.
     const sn = Number(s) || undefined;
 
-    const matchingFiles = files.filter(
+    return files.filter(
         ({ id, metadata }) =>
             id === sn || metadata.title.toLowerCase().includes(s),
     );
-    return matchingFiles.length
+};
+
+const suggestionForFiles = (matchingFiles: EnteFile[], searchString: string) =>
+    matchingFiles.length
         ? {
               type: SuggestionType.FILE_NAME,
               value: matchingFiles.map((f) => f.id),
-              label: s,
+              label: searchString,
           }
         : [];
-};
 
-const fileCaptionSuggestions = (s: string, files: EnteFile[]) => {
-    const matchingFiles = files.filter((file) =>
+const fileCaptionMatches = (s: string, files: EnteFile[]) =>
+    files.filter((file) =>
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         file.pubMagicMetadata?.data?.caption?.toLowerCase().includes(s),
     );
-    return matchingFiles.length
-        ? {
-              type: SuggestionType.FILE_CAPTION,
-              value: matchingFiles.map((f) => f.id),
-              label: s,
-          }
-        : [];
-};
 
 const dateSuggestions = (
     s: string,

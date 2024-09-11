@@ -11,7 +11,10 @@ import {
     getLocalTrashedFiles,
 } from "@/new/photos/services/files";
 import { wipHasSwitchedOnceCmpAndSet } from "@/new/photos/services/ml";
-import { search, setSearchableData } from "@/new/photos/services/search";
+import {
+    filterSearchableFiles,
+    setSearchableData,
+} from "@/new/photos/services/search";
 import {
     SearchQuery,
     SearchResultSummary,
@@ -533,7 +536,7 @@ export default function Gallery() {
 
         let filteredFiles: EnteFile[] = [];
         if (isInSearchMode) {
-            filteredFiles = await search(searchQuery);
+            filteredFiles = await filterSearchableFiles(searchQuery);
         } else {
             filteredFiles = getUniqueFiles(
                 (isInHiddenSection ? hiddenFiles : files).filter((item) => {

@@ -19,6 +19,7 @@ import type {
     SearchOption,
     SearchPerson,
     SearchQuery,
+    SearchSuggestion,
     Suggestion,
 } from "./types";
 import { SuggestionType } from "./types";
@@ -68,12 +69,12 @@ export const setSearchableData = (data: SearchableData) =>
     void worker().then((w) => w.setSearchableData(data));
 
 /**
- * Convert a search string into a reusable "search query" that can be passed on
- * to the {@link search} function.
+ * Convert a search string into a suggestions that can be shown in the search
+ * results, and can also be used filter the searchable files.
  *
  * @param searchString The string we want to search for.
  */
-export const createSearchQuery = async (searchString: string) => {
+export const suggestionsForString = async (searchString: string) => {
     // Normalize it by trimming whitespace and converting to lowercase.
     const s = searchString.trim().toLowerCase();
     if (s.length == 0) return [];
@@ -83,7 +84,9 @@ export const createSearchQuery = async (searchString: string) => {
     // the search worker, then combine the two.
     const results = await Promise.all([
         clipSuggestions(s, searchString).then((s) => s ?? []),
-        worker().then((w) => w.createSearchQuery(s, localizedSearchData())),
+        worker().then((w) =>
+            w.suggestionsForString(s, searchString, localizedSearchData()),
+        ),
     ]);
     return results.flat();
 };
@@ -102,11 +105,11 @@ const clipSuggestions = async (s: string, searchString: string) => {
 };
 
 /**
- * Search for and return the list of {@link EnteFile}s that match the given
- * {@link search} query.
+ * Return the list of {@link EnteFile}s (from amongst the previously set
+ * {@link SearchableData}) that match the given search {@link suggestion}.
  */
-export const search = async (search: SearchQuery) =>
-    worker().then((w) => w.search(search));
+export const filterSearchableFiles = async (suggestion: SearchSuggestion) =>
+    worker().then((w) => w.filterSearchableFiles(suggestion));
 
 /**
  * Cached value of {@link localizedSearchData}.
@@ -172,7 +175,7 @@ export const getAutoCompleteSuggestions =
         ]);
         try {
             const suggestions: Suggestion[] =
-                await createSearchQuery(searchPhrase);
+                await suggestionsForString(searchPhrase);
             return convertSuggestionsToOptions(suggestions);
         } catch (e) {
             log.error("getAutoCompleteSuggestions failed", e);
@@ -186,7 +189,7 @@ async function convertSuggestionsToOptions(
     const previewImageAppendedOptions: SearchOption[] = [];
     for (const suggestion of suggestions) {
         const searchQuery = convertSuggestionToSearchQuery(suggestion);
-        const resultFiles = await search(searchQuery);
+        const resultFiles = await filterSearchableFiles(searchQuery);
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (searchQuery?.clip) {
             resultFiles.sort((a, b) => {
