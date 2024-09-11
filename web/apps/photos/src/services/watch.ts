@@ -11,6 +11,7 @@ import type {
     FolderWatch,
     FolderWatchSyncedFile,
 } from "@/base/types/ipc";
+import type { Collection } from "@/media/collection";
 import { getLocalFiles } from "@/new/photos/services/files";
 import { UPLOAD_RESULT } from "@/new/photos/services/upload/types";
 import { EncryptedEnteFile } from "@/new/photos/types/file";
@@ -19,7 +20,6 @@ import debounce from "debounce";
 import uploadManager, {
     type UploadItemWithCollection,
 } from "services/upload/uploadManager";
-import { Collection } from "types/collection";
 import { groupFilesBasedOnCollectionID } from "utils/file";
 import { removeFromCollection } from "./collectionService";
 

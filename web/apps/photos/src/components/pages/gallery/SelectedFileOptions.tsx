@@ -1,4 +1,5 @@
 import { SelectionBar } from "@/base/components/Navbar";
+import type { Collection } from "@/media/collection";
 import { FluidContainer } from "@ente/shared/components/Container";
 import ClockIcon from "@mui/icons-material/AccessTime";
 import AddIcon from "@mui/icons-material/Add";
@@ -16,7 +17,6 @@ import { Box, IconButton, Stack, Tooltip } from "@mui/material";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import { useContext } from "react";
-import { Collection } from "types/collection";
 import {
     CollectionSelectorIntent,
     SetCollectionSelectorAttributes,

@@ -6,6 +6,7 @@ import {
     mlStatusSnapshot,
     mlStatusSubscribe,
 } from "@/new/photos/services/ml";
+import { getAutoCompleteSuggestions } from "@/new/photos/services/search";
 import type {
     City,
     SearchDateComponents,
@@ -20,7 +21,6 @@ import {
 } from "@/new/photos/services/search/types";
 import { labelForSuggestionType } from "@/new/photos/services/search/ui";
 import type { LocationTag } from "@/new/photos/services/user-entity";
-import { EnteFile } from "@/new/photos/types/file";
 import {
     FreeFlowText,
     SpaceBetweenFlex,
@@ -38,15 +38,15 @@ import {
     Stack,
     styled,
     Typography,
+    useTheme,
+    type Theme,
 } from "@mui/material";
 import CollectionCard from "components/Collections/CollectionCard";
 import { ResultPreviewTile } from "components/Collections/styledComponents";
 import { t } from "i18next";
 import pDebounce from "p-debounce";
-import { AppContext } from "pages/_app";
 import {
     useCallback,
-    useContext,
     useEffect,
     useMemo,
     useRef,
@@ -62,15 +62,29 @@ import {
     type StylesConfig,
 } from "react-select";
 import AsyncSelect from "react-select/async";
-import { getAutoCompleteSuggestions } from "services/searchService";
-import { Collection } from "types/collection";
 
 interface SearchBarProps {
+    /**
+     * [Note: "Search mode"]
+     *
+     * On mobile sized screens, normally the search input areas is not
+     * displayed. Clicking the search icon enters the "search mode", where we
+     * show the search input area.
+     *
+     * On other screens, the search input is always shown even if we are not in
+     * search mode.
+     *
+     * When we're in search mode,
+     *
+     * 1. Other icons from the navbar are hidden
+     * 2. Next to the search input there is a cancel button to exit search mode.
+     */
     isInSearchMode: boolean;
+    /**
+     * Enter or exit "search mode".
+     */
     setIsInSearchMode: (v: boolean) => void;
     updateSearch: UpdateSearch;
-    collections: Collection[];
-    files: EnteFile[];
 }
 
 export type UpdateSearch = (
@@ -78,6 +92,21 @@ export type UpdateSearch = (
     summary: SearchResultSummary,
 ) => void;
 
+/**
+ * The search bar is a styled "select" element that allow the user to type in
+ * the attached input field, and shows a list of matching suggestions in a
+ * dropdown.
+ *
+ * When the search input is empty, it shows some general information in the
+ * dropdown instead (e.g. the ML indexing status).
+ *
+ * When the search input is not empty, it shows these {@link SearchSuggestion}s.
+ * Alongside each suggestion is shows a count of matching files, and some
+ * previews.
+ *
+ * Selecting one of the these suggestions causes the gallery to shows a filtered
+ * list of files that match that suggestion.
+ */
 export const SearchBar: React.FC<SearchBarProps> = ({
     setIsInSearchMode,
     isInSearchMode,
@@ -92,11 +121,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
             {isMobileWidth && !isInSearchMode ? (
                 <MobileSearchArea onSearch={showSearchInput} />
             ) : (
-                <SearchInput
-                    {...props}
-                    isOpen={isInSearchMode}
-                    setIsOpen={setIsInSearchMode}
-                />
+                <SearchInput {...props} isInSearchMode={isInSearchMode} />
             )}
         </Box>
     );
@@ -116,28 +141,24 @@ const MobileSearchArea: React.FC<MobileSearchAreaProps> = ({ onSearch }) => (
 );
 
 interface SearchInputProps {
-    isOpen: boolean;
-    setIsOpen: (value: boolean) => void;
+    isInSearchMode: boolean;
     updateSearch: UpdateSearch;
-    files: EnteFile[];
-    collections: Collection[];
 }
 
 const SearchInput: React.FC<SearchInputProps> = ({
-    isOpen,
-    setIsOpen,
+    isInSearchMode,
     updateSearch,
-    files,
-    collections,
 }) => {
-    const appContext = useContext(AppContext);
-
     // A ref to the top level Select.
     const selectRef = useRef(null);
     // The currently selected option.
     const [value, setValue] = useState<SearchOption | undefined>();
     // The contents of the input field associated with the select.
     const [inputValue, setInputValue] = useState("");
+
+    const theme = useTheme();
+
+    const styles = useMemo(() => useSelectStyles(theme), [theme]);
 
     useEffect(() => {
         search(value);
@@ -161,21 +182,14 @@ const SearchInput: React.FC<SearchInputProps> = ({
     };
 
     const resetSearch = () => {
-        if (isOpen) {
-            appContext.startLoading();
-            updateSearch(null, null);
-            setTimeout(() => {
-                appContext.finishLoading();
-            }, 10);
-            setIsOpen(false);
-            setValue(null);
-            setInputValue("");
-        }
+        updateSearch(null, null);
+        setValue(null);
+        setInputValue("");
     };
 
     const getOptions = useCallback(
-        pDebounce(getAutoCompleteSuggestions(files, collections), 250),
-        [files, collections],
+        pDebounce(getAutoCompleteSuggestions(), 250),
+        [],
     );
 
     const search = (selectedOption: SearchOption) => {
@@ -188,19 +202,16 @@ const SearchInput: React.FC<SearchInputProps> = ({
                 search = {
                     date: selectedOption.value as SearchDateComponents,
                 };
-                setIsOpen(true);
                 break;
             case SuggestionType.LOCATION:
                 search = {
                     location: selectedOption.value as LocationTag,
                 };
-                setIsOpen(true);
                 break;
             case SuggestionType.CITY:
                 search = {
                     city: selectedOption.value as City,
                 };
-                setIsOpen(true);
                 break;
             case SuggestionType.COLLECTION:
                 search = { collection: selectedOption.value as number };
@@ -242,6 +253,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
                 ref={selectRef}
                 value={value}
                 components={components}
+                styles={styles}
                 placeholder={t("search_hint")}
                 loadOptions={getOptions}
                 onChange={handleChange}
@@ -250,7 +262,6 @@ const SearchInput: React.FC<SearchInputProps> = ({
                 escapeClearsValue
                 inputValue={inputValue}
                 onInputChange={handleInputChange}
-                styles={SelectStyles}
                 noOptionsMessage={({ inputValue }) =>
                     shouldShowEmptyState(inputValue) ? (
                         <EmptyState onSelectCGroup={handleSelectCGroup} />
@@ -258,7 +269,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
                 }
             />
 
-            {isOpen && (
+            {isInSearchMode && (
                 <IconButton onClick={() => resetSearch()} sx={{ ml: 1 }}>
                     <CloseIcon />
                 </IconButton>
@@ -277,27 +288,26 @@ const SearchInputWrapper = styled(Box)`
     margin: auto;
 `;
 
-const SelectStyles: StylesConfig<SearchOption, false> = {
+const useSelectStyles = ({
+    colors,
+}: Theme): StylesConfig<SearchOption, false> => ({
     container: (style) => ({ ...style, flex: 1 }),
     control: (style, { isFocused }) => ({
         ...style,
-        // Give a solid background color.
-        backgroundColor: "rgb(26, 26, 26)",
-        borderColor: isFocused ? "#1DB954" : "transparent",
+        backgroundColor: colors.background.elevated,
+        borderColor: isFocused ? colors.accent.A500 : "transparent",
         boxShadow: "none",
         ":hover": {
-            borderColor: "#01DE4D",
+            borderColor: colors.accent.A300,
             cursor: "text",
         },
     }),
-    input: (styles) => ({ ...styles, color: "#fff" }),
+    input: (styles) => ({ ...styles, color: colors.text.base }),
     menu: (style) => ({
         ...style,
         // Suppress the default margin at the top.
         marginTop: "1px",
-        // Same background color as the control (must be solid, otherwise the
-        // content behind the menu shows through).
-        backgroundColor: "rgb(26, 26, 26)",
+        backgroundColor: colors.background.elevated,
     }),
     option: (style, { isFocused }) => ({
         ...style,
@@ -307,7 +317,7 @@ const SelectStyles: StylesConfig<SearchOption, false> = {
             cursor: "pointer",
         },
         "& .main": {
-            backgroundColor: isFocused && "#202020",
+            backgroundColor: isFocused && colors.background.elevated2,
         },
         "&:last-child .MuiDivider-root": {
             display: "none",
@@ -315,14 +325,14 @@ const SelectStyles: StylesConfig<SearchOption, false> = {
     }),
     placeholder: (style) => ({
         ...style,
-        color: "rgba(255, 255, 255, 0.7)",
+        color: colors.text.muted,
         whiteSpace: "nowrap",
     }),
     // Hide some things we don't need.
     dropdownIndicator: (style) => ({ ...style, display: "none" }),
     indicatorSeparator: (style) => ({ ...style, display: "none" }),
     clearIndicator: (style) => ({ ...style, display: "none" }),
-};
+});
 
 const Control = ({ children, ...props }: ControlProps<SearchOption, false>) => (
     <SelectComponents.Control {...props}>

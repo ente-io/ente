@@ -3,6 +3,7 @@ import {
     MenuItemGroup,
     MenuSectionTitle,
 } from "@/base/components/Menu";
+import { COLLECTION_ROLE } from "@/media/collection";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import ModeEditIcon from "@mui/icons-material/ModeEdit";
@@ -12,8 +13,7 @@ import Avatar from "components/pages/gallery/Avatar";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
 import { useContext } from "react";
-import { COLLECTION_ROLE } from "types/collection";
-import { CollectionSummaryType } from "utils/collection";
+import { CollectionSummaryType } from "types/collection";
 
 export default function SharingDetails({ collection, type }) {
     const galleryContext = useContext(GalleryContext);

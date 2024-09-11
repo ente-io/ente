@@ -2,6 +2,7 @@ import { NavbarBase, SelectionBar } from "@/base/components/Navbar";
 import { sharedCryptoWorker } from "@/base/crypto";
 import { useIsMobileWidth, useIsTouchscreen } from "@/base/hooks";
 import log from "@/base/log";
+import type { Collection } from "@/media/collection";
 import downloadManager from "@/new/photos/services/download";
 import { EnteFile } from "@/new/photos/types/file";
 import { mergeMetadata } from "@/new/photos/utils/file";
@@ -63,7 +64,6 @@ import {
     verifyPublicCollectionPassword,
 } from "services/publicCollectionService";
 import uploadManager from "services/upload/uploadManager";
-import { Collection } from "types/collection";
 import {
     SelectedState,
     SetFilesDownloadProgressAttributes,

@@ -1,5 +1,12 @@
 import { ensureElectron } from "@/base/electron";
 import log from "@/base/log";
+import {
+    COLLECTION_ROLE,
+    type Collection,
+    CollectionMagicMetadataProps,
+    CollectionPublicMagicMetadataProps,
+    CollectionType,
+} from "@/media/collection";
 import { ItemVisibility } from "@/media/file-metadata";
 import { getAllLocalFiles, getLocalFiles } from "@/new/photos/services/files";
 import { EnteFile } from "@/new/photos/types/file";
@@ -25,13 +32,7 @@ import {
     updatePublicCollectionMagicMetadata,
     updateSharedCollectionMagicMetadata,
 } from "services/collectionService";
-import {
-    COLLECTION_ROLE,
-    Collection,
-    CollectionMagicMetadataProps,
-    CollectionPublicMagicMetadataProps,
-    CollectionSummaries,
-} from "types/collection";
+import { CollectionSummaries, CollectionSummaryType } from "types/collection";
 import { SetFilesDownloadProgressAttributes } from "types/gallery";
 import { downloadFilesWithProgress } from "utils/file";
 import { isArchivedCollection, updateMagicMetadata } from "utils/magicMetadata";
@@ -42,30 +43,6 @@ export const DUMMY_UNCATEGORIZED_COLLECTION = -3;
 export const HIDDEN_ITEMS_SECTION = -4;
 export const ALL_SECTION = 0;
 
-export enum CollectionType {
-    folder = "folder",
-    favorites = "favorites",
-    album = "album",
-    uncategorized = "uncategorized",
-}
-
-export enum CollectionSummaryType {
-    folder = "folder",
-    favorites = "favorites",
-    album = "album",
-    archive = "archive",
-    trash = "trash",
-    uncategorized = "uncategorized",
-    all = "all",
-    outgoingShare = "outgoingShare",
-    incomingShareViewer = "incomingShareViewer",
-    incomingShareCollaborator = "incomingShareCollaborator",
-    sharedOnlyViaLink = "sharedOnlyViaLink",
-    archived = "archived",
-    defaultHidden = "defaultHidden",
-    hiddenItems = "hiddenItems",
-    pinned = "pinned",
-}
 export enum COLLECTION_LIST_SORT_BY {
     NAME,
     CREATION_TIME_ASCENDING,

@@ -1,7 +1,7 @@
 import PeopleIcon from "@mui/icons-material/People";
 import { IconButton, Tooltip } from "@mui/material";
 import { t } from "i18next";
-import { CollectionSummaryType } from "utils/collection";
+import { CollectionSummaryType } from "types/collection";
 import { CollectionActions } from "..";
 
 interface Iprops {

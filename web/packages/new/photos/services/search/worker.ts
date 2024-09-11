@@ -1,5 +1,6 @@
 import { HTTPError } from "@/base/http";
 import type { Location } from "@/base/types";
+import type { Collection } from "@/media/collection";
 import { fileCreationPhotoDate, fileLocation } from "@/media/file-metadata";
 import type { EnteFile } from "@/new/photos/types/file";
 import { nullToUndefined } from "@/utils/transform";
@@ -19,6 +20,7 @@ import type {
     LabelledFileType,
     LocalizedSearchData,
     Searchable,
+    SearchableData,
     SearchDateComponents,
     SearchQuery,
     Suggestion,
@@ -30,7 +32,7 @@ import { SuggestionType } from "./types";
  * remains responsive.
  */
 export class SearchWorker {
-    private enteFiles: EnteFile[] = [];
+    private searchableData: SearchableData = { collections: [], files: [] };
     private locationTags: Searchable<LocationTag>[] = [];
     private cities: Searchable<City>[] = [];
 
@@ -60,18 +62,24 @@ export class SearchWorker {
     }
 
     /**
-     * Set the files that we should search across.
+     * Set the data that we should search across.
      */
-    setEnteFiles(enteFiles: EnteFile[]) {
-        this.enteFiles = enteFiles;
+    setSearchableData(data: SearchableData) {
+        this.searchableData = data;
     }
 
     /**
-     * Convert a search string into a reusable query.
+     * Convert a search string into a list of {@link SearchSuggestion}s.
      */
-    createSearchQuery(s: string, localizedSearchData: LocalizedSearchData) {
-        return createSearchQuery(
+    suggestionsForString(
+        s: string,
+        searchString: string,
+        localizedSearchData: LocalizedSearchData,
+    ) {
+        return suggestionsForString(
             s,
+            searchString,
+            this.searchableData,
             localizedSearchData,
             this.locationTags,
             this.cities,
@@ -79,26 +87,72 @@ export class SearchWorker {
     }
 
     /**
-     * Return {@link EnteFile}s that satisfy the given {@link searchQuery}.
+     * Return {@link EnteFile}s that satisfy the given {@link suggestion}.
      */
-    search(searchQuery: SearchQuery) {
-        return this.enteFiles.filter((f) => isMatchingFile(f, searchQuery));
+    filterSearchableFiles(suggestion: SearchQuery) {
+        return this.searchableData.files.filter((f) =>
+            isMatchingFile(f, suggestion),
+        );
     }
 }
 
 expose(SearchWorker);
 
-const createSearchQuery = (
+/**
+ * @param s The normalized form of {@link searchString}.
+ * @param searchString The original search string.
+ */
+const suggestionsForString = (
     s: string,
+    searchString: string,
+    { collections, files }: SearchableData,
     { locale, holidays, labelledFileTypes }: LocalizedSearchData,
     locationTags: Searchable<LocationTag>[],
     cities: Searchable<City>[],
 ): Suggestion[] =>
     [
+        fileTypeSuggestions(s, labelledFileTypes),
         dateSuggestions(s, locale, holidays),
         locationSuggestions(s, locationTags, cities),
-        fileTypeSuggestions(s, labelledFileTypes),
+        collectionSuggestions(s, collections),
+        suggestionForFiles(fileNameMatches(s, files), searchString),
+        suggestionForFiles(fileCaptionMatches(s, files), searchString),
     ].flat();
+
+const collectionSuggestions = (s: string, collections: Collection[]) =>
+    collections
+        .filter(({ name }) => name.toLowerCase().includes(s))
+        .map(({ id, name }) => ({
+            type: SuggestionType.COLLECTION,
+            value: id,
+            label: name,
+        }));
+
+const fileNameMatches = (s: string, files: EnteFile[]) => {
+    // Convert the search string to a number. This allows searching a file by
+    // its exact (integral) ID.
+    const sn = Number(s) || undefined;
+
+    return files.filter(
+        ({ id, metadata }) =>
+            id === sn || metadata.title.toLowerCase().includes(s),
+    );
+};
+
+const suggestionForFiles = (matchingFiles: EnteFile[], searchString: string) =>
+    matchingFiles.length
+        ? {
+              type: SuggestionType.FILE_NAME,
+              value: matchingFiles.map((f) => f.id),
+              label: searchString,
+          }
+        : [];
+
+const fileCaptionMatches = (s: string, files: EnteFile[]) =>
+    files.filter((file) =>
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        file.pubMagicMetadata?.data?.caption?.toLowerCase().includes(s),
+    );
 
 const dateSuggestions = (
     s: string,

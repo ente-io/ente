@@ -1,7 +1,6 @@
 import log from "@/base/log";
 import { EnteFile } from "@/new/photos/types/file";
-import { styled } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
+import { styled, useTheme } from "@mui/material";
 import { GalleryContext } from "pages/gallery";
 import React, { useContext, useLayoutEffect, useState } from "react";
 

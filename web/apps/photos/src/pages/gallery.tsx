@@ -2,6 +2,7 @@ import { stashRedirect } from "@/accounts/services/redirect";
 import { NavbarBase } from "@/base/components/Navbar";
 import { useIsMobileWidth } from "@/base/hooks";
 import log from "@/base/log";
+import type { Collection } from "@/media/collection";
 import { WhatsNew } from "@/new/photos/components/WhatsNew";
 import { shouldShowWhatsNew } from "@/new/photos/services/changelog";
 import downloadManager from "@/new/photos/services/download";
@@ -10,7 +11,10 @@ import {
     getLocalTrashedFiles,
 } from "@/new/photos/services/files";
 import { wipHasSwitchedOnceCmpAndSet } from "@/new/photos/services/ml";
-import { search, setSearchableFiles } from "@/new/photos/services/search";
+import {
+    filterSearchableFiles,
+    setSearchableData,
+} from "@/new/photos/services/search";
 import {
     SearchQuery,
     SearchResultSummary,
@@ -105,7 +109,7 @@ import { sync, triggerPreFileInfoSync } from "services/sync";
 import { syncTrash } from "services/trashService";
 import uploadManager from "services/upload/uploadManager";
 import { isTokenValid } from "services/userService";
-import { Collection, CollectionSummaries } from "types/collection";
+import { CollectionSummaries, CollectionSummaryType } from "types/collection";
 import {
     GalleryContextType,
     SelectedState,
@@ -118,7 +122,6 @@ import {
     ALL_SECTION,
     ARCHIVE_SECTION,
     COLLECTION_OPS_TYPE,
-    CollectionSummaryType,
     HIDDEN_ITEMS_SECTION,
     TRASH_SECTION,
     constructCollectionNameMap,
@@ -407,7 +410,14 @@ export default function Gallery() {
         };
     }, []);
 
-    useEffect(() => setSearchableFiles(files), [files]);
+    useEffect(
+        () =>
+            setSearchableData({
+                collections: collections ?? [],
+                files: getUniqueFiles(files ?? []),
+            }),
+        [collections, files],
+    );
 
     useEffect(() => {
         if (!user || !files || !collections || !hiddenFiles || !trashedFiles) {
@@ -526,7 +536,7 @@ export default function Gallery() {
 
         let filteredFiles: EnteFile[] = [];
         if (isInSearchMode) {
-            filteredFiles = getUniqueFiles(await search(searchQuery));
+            filteredFiles = await filterSearchableFiles(searchQuery);
         } else {
             filteredFiles = getUniqueFiles(
                 (isInHiddenSection ? hiddenFiles : files).filter((item) => {
@@ -1089,8 +1099,6 @@ export default function Gallery() {
                             isInSearchMode={isInSearchMode}
                             setIsInSearchMode={setIsInSearchMode}
                             updateSearch={updateSearch}
-                            collections={collections}
-                            files={files}
                         />
                     )}
                 </NavbarBase>
@@ -1269,8 +1277,6 @@ interface NormalNavbarContentsProps {
     isInSearchMode: boolean;
     setIsInSearchMode: (v: boolean) => void;
     updateSearch: UpdateSearch;
-    collections: Collection[];
-    files: EnteFile[];
 }
 
 const NormalNavbarContents: React.FC<NormalNavbarContentsProps> = ({
@@ -1279,8 +1285,6 @@ const NormalNavbarContents: React.FC<NormalNavbarContentsProps> = ({
     isInSearchMode,
     setIsInSearchMode,
     updateSearch,
-    collections,
-    files,
 }) => (
     <>
         {!isInSearchMode && <SidebarButton onClick={openSidebar} />}
@@ -1288,8 +1292,6 @@ const NormalNavbarContents: React.FC<NormalNavbarContentsProps> = ({
             isInSearchMode={isInSearchMode}
             setIsInSearchMode={setIsInSearchMode}
             updateSearch={updateSearch}
-            collections={collections}
-            files={files}
         />
         {!isInSearchMode && <UploadButton onClick={openUploader} />}
     </>
