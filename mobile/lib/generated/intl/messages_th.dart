@@ -215,6 +215,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "map": MessageLookupByLibrary.simpleMessage("แผนที่"),
         "maps": MessageLookupByLibrary.simpleMessage("แผนที่"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("ปานกลาง"),
+        "mostRecent": MessageLookupByLibrary.simpleMessage("Most recent"),
+        "mostRelevant": MessageLookupByLibrary.simpleMessage("Most relevant"),
         "moveItem": m37,
         "moveToAlbum": MessageLookupByLibrary.simpleMessage("ย้ายไปยังอัลบั้ม"),
         "name": MessageLookupByLibrary.simpleMessage("ชื่อ"),
@@ -307,6 +309,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "มีบางอย่างผิดพลาด โปรดลองอีกครั้ง"),
         "sorry": MessageLookupByLibrary.simpleMessage("ขออภัย"),
+        "sort": MessageLookupByLibrary.simpleMessage("Sort"),
         "status": MessageLookupByLibrary.simpleMessage("สถานะ"),
         "storageBreakupFamily":
             MessageLookupByLibrary.simpleMessage("ครอบครัว"),

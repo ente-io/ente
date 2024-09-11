@@ -259,6 +259,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "matrix": MessageLookupByLibrary.simpleMessage("ماتریس"),
         "merchandise": MessageLookupByLibrary.simpleMessage("کالا"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("متوسط"),
+        "mostRecent": MessageLookupByLibrary.simpleMessage("Most recent"),
+        "mostRelevant": MessageLookupByLibrary.simpleMessage("Most relevant"),
         "never": MessageLookupByLibrary.simpleMessage("هرگز"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("کاربر جدید Ente"),
         "no": MessageLookupByLibrary.simpleMessage("خیر"),
@@ -356,6 +358,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "با عرض پوزش، ما نمی‌توانیم کلیدهای امن را در این دستگاه تولید کنیم.\n\nلطفا از دستگاه دیگری ثبت نام کنید."),
+        "sort": MessageLookupByLibrary.simpleMessage("Sort"),
         "sortAlbumsBy":
             MessageLookupByLibrary.simpleMessage("مرتب‌سازی براساس"),
         "sortNewestFirst":

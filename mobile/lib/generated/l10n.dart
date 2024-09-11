@@ -9534,6 +9534,36 @@ class S {
       args: [],
     );
   }
+
+  /// `Sort`
+  String get sort {
+    return Intl.message(
+      'Sort',
+      name: 'sort',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Most recent`
+  String get mostRecent {
+    return Intl.message(
+      'Most recent',
+      name: 'mostRecent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Most relevant`
+  String get mostRelevant {
+    return Intl.message(
+      'Most relevant',
+      name: 'mostRelevant',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

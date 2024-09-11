@@ -77,6 +77,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "कृपया हमें इस जानकारी के लिए सहायता करें"),
         "localSyncErrorMessage": MessageLookupByLibrary.simpleMessage(
             "Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team"),
+        "mostRecent": MessageLookupByLibrary.simpleMessage("Most recent"),
+        "mostRelevant": MessageLookupByLibrary.simpleMessage("Most relevant"),
         "noRecoveryKey":
             MessageLookupByLibrary.simpleMessage("रिकवरी कुंजी नहीं है?"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
@@ -94,6 +96,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "कुछ गड़बड़ हुई है। कृपया दोबारा प्रयास करें।"),
         "sorry": MessageLookupByLibrary.simpleMessage("क्षमा करें!"),
+        "sort": MessageLookupByLibrary.simpleMessage("Sort"),
         "terminate": MessageLookupByLibrary.simpleMessage("रद्द करें"),
         "terminateSession":
             MessageLookupByLibrary.simpleMessage("सेशन रद्द करें?"),

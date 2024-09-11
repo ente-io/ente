@@ -902,6 +902,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "moments": MessageLookupByLibrary.simpleMessage("モーメント"),
         "monthly": MessageLookupByLibrary.simpleMessage("月額"),
         "moreDetails": MessageLookupByLibrary.simpleMessage("さらに詳細を表示"),
+        "mostRecent": MessageLookupByLibrary.simpleMessage("Most recent"),
+        "mostRelevant": MessageLookupByLibrary.simpleMessage("Most relevant"),
         "moveItem": m37,
         "moveToAlbum": MessageLookupByLibrary.simpleMessage("アルバムに移動"),
         "moveToHiddenAlbum": MessageLookupByLibrary.simpleMessage("隠しアルバムに移動"),
@@ -1293,6 +1295,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "このデバイスでは安全な鍵を生成することができませんでした。\n\n他のデバイスからサインアップを試みてください。"),
+        "sort": MessageLookupByLibrary.simpleMessage("Sort"),
         "sortAlbumsBy": MessageLookupByLibrary.simpleMessage("並び替え"),
         "sortNewestFirst": MessageLookupByLibrary.simpleMessage("新しい順"),
         "sortOldestFirst": MessageLookupByLibrary.simpleMessage("古い順"),

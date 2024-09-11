@@ -300,18 +300,18 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     if (galleryType == GalleryType.magic) {
       actions.add(
         Tooltip(
-          message: "Sort",
+          message: S.of(context).sort,
           child: PopupMenuButton(
             icon: const Icon(Icons.sort_rounded),
             itemBuilder: (context) {
-              return const [
+              return [
                 PopupMenuItem(
                   value: AlbumPopupAction.sortByMostRecent,
-                  child: Text("Most recent"),
+                  child: Text(S.of(context).mostRecent),
                 ),
                 PopupMenuItem(
                   value: AlbumPopupAction.sortByMostRelevant,
-                  child: Text("Most relevant"),
+                  child: Text(S.of(context).mostRelevant),
                 ),
               ];
             },

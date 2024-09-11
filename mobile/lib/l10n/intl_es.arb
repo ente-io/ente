@@ -1294,5 +1294,8 @@
   "guestView": "Vista de invitado",
   "guestViewEnablePreSteps": "Para habilitar la vista de invitados, por favor configure el código de acceso del dispositivo o el bloqueo de pantalla en los ajustes de su sistema.",
   "localSyncErrorMessage": "Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team",
-  "showPerson": "Show person"
+  "showPerson": "Show person",
+  "sort": "Sort",
+  "mostRecent": "Most recent",
+  "mostRelevant": "Most relevant"
 }

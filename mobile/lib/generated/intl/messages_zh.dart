@@ -862,6 +862,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "moments": MessageLookupByLibrary.simpleMessage("瞬间"),
         "monthly": MessageLookupByLibrary.simpleMessage("每月"),
         "moreDetails": MessageLookupByLibrary.simpleMessage("更多详情"),
+        "mostRecent": MessageLookupByLibrary.simpleMessage("Most recent"),
+        "mostRelevant": MessageLookupByLibrary.simpleMessage("Most relevant"),
         "moveItem": m37,
         "moveToAlbum": MessageLookupByLibrary.simpleMessage("移动到相册"),
         "moveToHiddenAlbum": MessageLookupByLibrary.simpleMessage("移至隐藏相册"),
@@ -1225,6 +1227,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "抱歉，我们无法在此设备上生成安全密钥。\n\n请使用其他设备注册。"),
+        "sort": MessageLookupByLibrary.simpleMessage("Sort"),
         "sortAlbumsBy": MessageLookupByLibrary.simpleMessage("排序方式"),
         "sortNewestFirst": MessageLookupByLibrary.simpleMessage("最新在前"),
         "sortOldestFirst": MessageLookupByLibrary.simpleMessage("最旧在前"),

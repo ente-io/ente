@@ -575,6 +575,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("פלאפון, דפדפן, שולחן עבודה"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("מתונה"),
         "monthly": MessageLookupByLibrary.simpleMessage("חודשי"),
+        "mostRecent": MessageLookupByLibrary.simpleMessage("Most recent"),
+        "mostRelevant": MessageLookupByLibrary.simpleMessage("Most relevant"),
         "moveItem": m37,
         "moveToAlbum": MessageLookupByLibrary.simpleMessage("הזז לאלבום"),
         "movedToTrash": MessageLookupByLibrary.simpleMessage("הועבר לאשפה"),
@@ -823,6 +825,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "אנחנו מצטערים, לא הצלחנו ליצור מפתחות מאובטחים על מכשיר זה.\n\nאנא הירשם ממכשיר אחר."),
+        "sort": MessageLookupByLibrary.simpleMessage("Sort"),
         "sortAlbumsBy": MessageLookupByLibrary.simpleMessage("מיין לפי"),
         "sortOldestFirst":
             MessageLookupByLibrary.simpleMessage("הישן ביותר קודם"),
