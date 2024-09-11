@@ -16,7 +16,6 @@ import {
 import type { LocationTag } from "@/new/photos/services/user-entity";
 import { type EnteFile } from "@/new/photos/types/file";
 import { type Collection } from "types/collection";
-import { getUniqueFiles } from "utils/file";
 
 // Suggestions shown in the search dropdown when the user has typed something.
 export const getAutoCompleteSuggestions =
@@ -53,7 +52,7 @@ async function convertSuggestionsToOptions(
     const previewImageAppendedOptions: SearchOption[] = [];
     for (const suggestion of suggestions) {
         const searchQuery = convertSuggestionToSearchQuery(suggestion);
-        const resultFiles = getUniqueFiles(await search(searchQuery));
+        const resultFiles = await search(searchQuery);
         if (searchQuery?.clip) {
             resultFiles.sort((a, b) => {
                 const aScore = searchQuery.clip.get(a.id);

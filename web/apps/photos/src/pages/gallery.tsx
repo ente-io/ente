@@ -407,7 +407,8 @@ export default function Gallery() {
         };
     }, []);
 
-    useEffect(() => setSearchableFiles(files), [files]);
+    // TODO: Is this uniquing necessary? Doesn't seem like.
+    useEffect(() => setSearchableFiles(getUniqueFiles(files)), [files]);
 
     useEffect(() => {
         if (!user || !files || !collections || !hiddenFiles || !trashedFiles) {
@@ -526,7 +527,7 @@ export default function Gallery() {
 
         let filteredFiles: EnteFile[] = [];
         if (isInSearchMode) {
-            filteredFiles = getUniqueFiles(await search(searchQuery));
+            filteredFiles = await search(searchQuery);
         } else {
             filteredFiles = getUniqueFiles(
                 (isInHiddenSection ? hiddenFiles : files).filter((item) => {
