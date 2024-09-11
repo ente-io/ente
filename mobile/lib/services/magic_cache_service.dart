@@ -4,13 +4,13 @@ import "dart:io";
 
 import "package:logging/logging.dart";
 import "package:path_provider/path_provider.dart";
+import "package:photos/db/files_db.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import "package:photos/services/remote_assets_service.dart";
-import "package:photos/services/search_service.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class MagicCache {
@@ -45,14 +45,16 @@ class MagicCache {
 
 extension MagicCacheServiceExtension on MagicCache {
   Future<GenericSearchResult> toGenericSearchResult() async {
-    final allEnteFiles = await SearchService.instance.getAllFiles();
     final enteFilesInMagicCache = <EnteFile>[];
-    for (EnteFile file in allEnteFiles) {
-      if (file.uploadedFileID != null &&
-          fileUploadedIDs.contains(file.uploadedFileID as int)) {
-        enteFilesInMagicCache.add(file);
+    await FilesDB.instance
+        .getFilesFromIDs(fileUploadedIDs)
+        .then((idToEnteFile) {
+      for (int uploadedID in fileUploadedIDs) {
+        if (idToEnteFile[uploadedID] != null) {
+          enteFilesInMagicCache.add(idToEnteFile[uploadedID]!);
+        }
       }
-    }
+    });
     return GenericSearchResult(
       ResultType.magic,
       title,
