@@ -101,11 +101,12 @@ const createSearchQuery = (
     cities: Searchable<City>[],
 ): Suggestion[] =>
     [
+        fileTypeSuggestions(s, labelledFileTypes),
         dateSuggestions(s, locale, holidays),
         locationSuggestions(s, locationTags, cities),
         collectionSuggestions(s, collections),
         fileNameSuggestions(s, files),
-        fileTypeSuggestions(s, labelledFileTypes),
+        fileCaptionSuggestions(s, files),
     ].flat();
 
 const collectionSuggestions = (s: string, collections: Collection[]) =>
@@ -129,6 +130,20 @@ const fileNameSuggestions = (s: string, files: EnteFile[]) => {
     return matchingFiles.length
         ? {
               type: SuggestionType.FILE_NAME,
+              value: matchingFiles.map((f) => f.id),
+              label: s,
+          }
+        : [];
+};
+
+const fileCaptionSuggestions = (s: string, files: EnteFile[]) => {
+    const matchingFiles = files.filter((file) =>
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        file.pubMagicMetadata?.data?.caption?.toLowerCase().includes(s),
+    );
+    return matchingFiles.length
+        ? {
+              type: SuggestionType.FILE_CAPTION,
               value: matchingFiles.map((f) => f.id),
               label: s,
           }

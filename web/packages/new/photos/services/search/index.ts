@@ -168,25 +168,11 @@ export const getAutoCompleteSuggestions =
     async (searchPhrase: string): Promise<SearchOption[]> => {
         log.debug(() => [
             "getAutoCompleteSuggestions",
-            { searchPhrase, collections },
+            { searchPhrase, files, collections },
         ]);
         try {
-            const searchPhrase2 = searchPhrase.trim().toLowerCase();
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-            if (!searchPhrase2?.length) {
-                return [];
-            }
-            const suggestions: Suggestion[] = [
-                // The following functionality has moved to createSearchQuery
-                // - getClipSuggestion(searchPhrase)
-                // - getDateSuggestion(searchPhrase),
-                // - getLocationSuggestion(searchPhrase),
-                // - getFileTypeSuggestion(searchPhrase),
-                ...(await createSearchQuery(searchPhrase)),
-                getFileCaptionSuggestion(searchPhrase2, files),
-                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-            ].filter((suggestion) => !!suggestion);
-
+            const suggestions: Suggestion[] =
+                await createSearchQuery(searchPhrase);
             return convertSuggestionsToOptions(suggestions);
         } catch (e) {
             log.error("getAutoCompleteSuggestions failed", e);
@@ -218,29 +204,6 @@ async function convertSuggestionsToOptions(
         }
     }
     return previewImageAppendedOptions;
-}
-
-function getFileCaptionSuggestion(
-    searchPhrase: string,
-    files: EnteFile[],
-): Suggestion {
-    const matchedFiles = searchFilesByCaption(searchPhrase, files);
-    return {
-        type: SuggestionType.FILE_CAPTION,
-        value: matchedFiles.map((file) => file.id),
-        label: searchPhrase,
-    };
-}
-
-function searchFilesByCaption(searchPhrase: string, files: EnteFile[]) {
-    return files.filter(
-        (file) =>
-            // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
-            file.pubMagicMetadata &&
-            file.pubMagicMetadata.data.caption
-                ?.toLowerCase()
-                .includes(searchPhrase),
-    );
 }
 
 function convertSuggestionToSearchQuery(option: Suggestion): SearchQuery {
