@@ -22,8 +22,7 @@ import type {
     Searchable,
     SearchableData,
     SearchDateComponents,
-    SearchQuery,
-    Suggestion,
+    SearchSuggestion,
 } from "./types";
 
 /**
@@ -88,7 +87,7 @@ export class SearchWorker {
     /**
      * Return {@link EnteFile}s that satisfy the given {@link suggestion}.
      */
-    filterSearchableFiles(suggestion: SearchQuery) {
+    filterSearchableFiles(suggestion: SearchSuggestion) {
         return this.searchableData.files.filter((f) =>
             isMatchingFile(f, suggestion),
         );
@@ -108,7 +107,7 @@ const suggestionsForString = (
     { locale, holidays, labelledFileTypes }: LocalizedSearchData,
     locationTags: Searchable<LocationTag>[],
     cities: Searchable<City>[],
-): Suggestion[] =>
+): SearchSuggestion[] =>
     [
         // <-- caption suggestions will be inserted here by our caller.
         fileTypeSuggestions(s, labelledFileTypes),
@@ -119,7 +118,10 @@ const suggestionsForString = (
         fileCaptionSuggestion(s, searchString, files),
     ].flat();
 
-const collectionSuggestions = (s: string, collections: Collection[]) =>
+const collectionSuggestions = (
+    s: string,
+    collections: Collection[],
+): SearchSuggestion[] =>
     collections
         .filter(({ name }) => name.toLowerCase().includes(s))
         .map(({ id, name }) => ({
@@ -131,7 +133,7 @@ const collectionSuggestions = (s: string, collections: Collection[]) =>
 const fileTypeSuggestions = (
     s: string,
     labelledFileTypes: Searchable<LabelledFileType>[],
-) =>
+): SearchSuggestion[] =>
     labelledFileTypes
         .filter(({ lowercasedName }) => lowercasedName.startsWith(s))
         .map(({ fileType, label }) => ({ type: "fileType", fileType, label }));
@@ -140,7 +142,7 @@ const fileNameSuggestion = (
     s: string,
     searchString: string,
     files: EnteFile[],
-) => {
+): SearchSuggestion[] => {
     // Convert the search string to a number. This allows searching a file by
     // its exact (integral) ID.
     const sn = Number(s) || undefined;
@@ -153,7 +155,7 @@ const fileNameSuggestion = (
         .map((f) => f.id);
 
     return fileIDs.length
-        ? { type: "fileName", fileIDs, label: searchString }
+        ? [{ type: "fileName", fileIDs, label: searchString }]
         : [];
 };
 
@@ -161,7 +163,7 @@ const fileCaptionSuggestion = (
     s: string,
     searchString: string,
     files: EnteFile[],
-) => {
+): SearchSuggestion[] => {
     const fileIDs = files
         .filter((file) =>
             // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
@@ -170,7 +172,7 @@ const fileCaptionSuggestion = (
         .map((f) => f.id);
 
     return fileIDs.length
-        ? { type: "fileCaption", fileIDs, label: searchString }
+        ? [{ type: "fileCaption", fileIDs, label: searchString }]
         : [];
 };
 
@@ -178,7 +180,7 @@ const dateSuggestions = (
     s: string,
     locale: string,
     holidays: Searchable<DateSearchResult>[],
-) =>
+): SearchSuggestion[] =>
     parseDateComponents(s, locale, holidays).map(({ components, label }) => ({
         type: "date",
         dateComponents: components,
@@ -291,7 +293,7 @@ const locationSuggestions = (
     s: string,
     locationTags: Searchable<LocationTag>[],
     cities: Searchable<City>[],
-) => {
+): SearchSuggestion[] => {
     const matchingLocationTags = locationTags.filter(searchableIncludes(s));
 
     const matchingLocationTagLNames = new Set(
@@ -305,65 +307,68 @@ const locationSuggestions = (
     );
 
     return [
-        matchingLocationTags.map((locationTag) => ({
-            type: "location",
-            locationTag,
-            label: locationTag.name,
-        })),
-        matchingCities.map((city) => ({
-            type: "city",
-            city,
-            label: city.name,
-        })),
+        matchingLocationTags.map(
+            (locationTag): SearchSuggestion => ({
+                type: "location",
+                locationTag,
+                label: locationTag.name,
+            }),
+        ),
+        matchingCities.map(
+            (city): SearchSuggestion => ({
+                type: "city",
+                city,
+                label: city.name,
+            }),
+        ),
     ].flat();
 };
 
 /**
  * Return true if file satisfies the given {@link query}.
  */
-const isMatchingFile = (file: EnteFile, query: SearchQuery) => {
-    if (query.collection) {
-        return query.collection === file.collectionID;
+const isMatchingFile = (file: EnteFile, suggestion: SearchSuggestion) => {
+    switch (suggestion.type) {
+        case "collection":
+            return suggestion.collectionID === file.collectionID;
+
+        case "fileType":
+            return suggestion.fileType === file.metadata.fileType;
+
+        case "fileName":
+            return suggestion.fileIDs.includes(file.id);
+
+        case "fileCaption":
+            return suggestion.fileIDs.includes(file.id);
+
+        case "date":
+            return isDateComponentsMatch(
+                suggestion.dateComponents,
+                fileCreationPhotoDate(file, getPublicMagicMetadataSync(file)),
+            );
+
+        case "location": {
+            const location = fileLocation(file);
+            if (!location) return false;
+
+            return isInsideLocationTag(location, suggestion.locationTag);
+        }
+
+        case "city": {
+            const location = fileLocation(file);
+            if (!location) return false;
+
+            return isInsideCity(location, suggestion.city);
+        }
+
+        case "clip":
+            return suggestion.clipScoreForFileID.has(file.id);
+
+        case "cgroup":
+            // return query.person.files.includes(file.id);
+            // TODO-Cluster implement me
+            return false;
     }
-
-    if (query.date) {
-        return isDateComponentsMatch(
-            query.date,
-            fileCreationPhotoDate(file, getPublicMagicMetadataSync(file)),
-        );
-    }
-
-    if (query.location) {
-        const location = fileLocation(file);
-        if (!location) return false;
-
-        return isInsideLocationTag(location, query.location);
-    }
-
-    if (query.city) {
-        const location = fileLocation(file);
-        if (!location) return false;
-
-        return isInsideCity(location, query.city);
-    }
-
-    if (query.files) {
-        return query.files.includes(file.id);
-    }
-
-    if (query.person) {
-        return query.person.files.includes(file.id);
-    }
-
-    if (typeof query.fileType !== "undefined") {
-        return query.fileType === file.metadata.fileType;
-    }
-
-    if (typeof query.clip !== "undefined") {
-        return query.clip.has(file.id);
-    }
-
-    return false;
 };
 
 const isDateComponentsMatch = (
