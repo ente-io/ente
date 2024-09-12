@@ -6,6 +6,7 @@
 import type { Location } from "@/base/types";
 import type { Collection } from "@/media/collection";
 import { FileType } from "@/media/file-type";
+import type { Person } from "@/new/photos/services/ml";
 import type { EnteFile } from "@/new/photos/types/file";
 import type { LocationTag } from "../user-entity";
 
@@ -24,7 +25,7 @@ export type SearchSuggestion = { label: string } & (
     | { type: "location"; locationTag: LocationTag }
     | { type: "city"; city: City }
     | { type: "clip"; clipScoreForFileID: Map<number, number> }
-    | { type: "cgroup"; cgroup: SearchPerson }
+    | { type: "person"; person: Person }
 );
 
 /**
@@ -115,18 +116,6 @@ export interface SearchDateComponents {
      * specified one.
      */
     hour?: number;
-}
-
-/**
- * A massaged version of {@link CGroup} suitable for being shown in search
- * results.
- */
-export interface SearchPerson {
-    id: string;
-    name?: string;
-    files: number[];
-    displayFaceID: string;
-    displayFaceFile: EnteFile;
 }
 
 /**

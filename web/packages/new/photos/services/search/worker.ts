@@ -385,7 +385,7 @@ const isMatchingFile = (file: EnteFile, suggestion: SearchSuggestion) => {
         case "clip":
             return suggestion.clipScoreForFileID.has(file.id);
 
-        case "cgroup":
+        case "person":
             // return query.person.files.includes(file.id);
             // TODO-Cluster implement me
             return false;
