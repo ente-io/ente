@@ -109,14 +109,14 @@ String parseErrorForUI(
       final DioException dioError = error;
       if (dioError.type == DioExceptionType.badResponse) {
         if (dioError.response?.data["code"] != null) {
-          errorInfo = "Reason: " + dioError.response!.data["code"];
+          errorInfo = "Reason: ${dioError.response!.data["code"]}";
         } else {
-          errorInfo = "Reason: " + dioError.response!.data.toString();
+          errorInfo = "Reason: ${dioError.response!.data}";
         }
       } else if (dioError.type == DioExceptionType.unknown) {
-        errorInfo = "Reason: " + dioError.error.toString();
+        errorInfo = "Reason: $dioError.error";
       } else {
-        errorInfo = "Reason: " + dioError.type.toString();
+        errorInfo = "Reason: $dioError.type";
       }
     } else {
       if (kDebugMode) {

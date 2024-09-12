@@ -66,24 +66,25 @@ final lightThemeData = ThemeData(
       color: Colors.black,
       width: 2,
     ),
-    fillColor: MaterialStateProperty.resolveWith((states) {
-      return states.contains(MaterialState.selected)
+    fillColor: WidgetStateProperty.resolveWith((states) {
+      return states.contains(WidgetState.selected)
           ? const Color.fromRGBO(0, 0, 0, 1)
           : const Color.fromRGBO(255, 255, 255, 1);
     }),
-    checkColor: MaterialStateProperty.resolveWith((states) {
-      return states.contains(MaterialState.selected)
+    checkColor: WidgetStateProperty.resolveWith((states) {
+      return states.contains(WidgetState.selected)
           ? const Color.fromRGBO(255, 255, 255, 1)
           : const Color.fromRGBO(0, 0, 0, 1);
     }),
   ),
+
   radioTheme: RadioThemeData(
     fillColor:
-        MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+        WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return null;
       }
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         return const Color.fromRGBO(102, 187, 106, 1);
       }
       return null;
@@ -91,21 +92,21 @@ final lightThemeData = ThemeData(
   ),
   switchTheme: SwitchThemeData(
     thumbColor:
-        MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+        WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return null;
       }
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         return const Color.fromRGBO(102, 187, 106, 1);
       }
       return null;
     }),
     trackColor:
-        MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+        WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return null;
       }
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         return const Color.fromRGBO(102, 187, 106, 1);
       }
       return null;
@@ -114,7 +115,7 @@ final lightThemeData = ThemeData(
   colorScheme: const ColorScheme.light(
     primary: Colors.black,
     secondary: Color.fromARGB(255, 163, 163, 163),
-  ).copyWith(background: const Color.fromRGBO(255, 255, 255, 1)),
+  ).copyWith(surface: const Color.fromRGBO(255, 255, 255, 1)),
 );
 
 final darkThemeData = ThemeData(
@@ -176,15 +177,15 @@ final darkThemeData = ThemeData(
       color: Colors.grey,
       width: 2,
     ),
-    fillColor: MaterialStateProperty.resolveWith((states) {
-      if (states.contains(MaterialState.selected)) {
+    fillColor: WidgetStateProperty.resolveWith((states) {
+      if (states.contains(WidgetState.selected)) {
         return const Color.fromRGBO(158, 158, 158, 1);
       } else {
         return const Color.fromRGBO(0, 0, 0, 1);
       }
     }),
-    checkColor: MaterialStateProperty.resolveWith((states) {
-      if (states.contains(MaterialState.selected)) {
+    checkColor: WidgetStateProperty.resolveWith((states) {
+      if (states.contains(WidgetState.selected)) {
         return const Color.fromRGBO(0, 0, 0, 1);
       } else {
         return const Color.fromRGBO(158, 158, 158, 1);
@@ -193,11 +194,11 @@ final darkThemeData = ThemeData(
   ),
   radioTheme: RadioThemeData(
     fillColor:
-        MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+        WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return null;
       }
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         return const Color.fromRGBO(102, 187, 106, 1);
       }
       return null;
@@ -205,28 +206,28 @@ final darkThemeData = ThemeData(
   ),
   switchTheme: SwitchThemeData(
     thumbColor:
-        MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+        WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return null;
       }
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         return const Color.fromRGBO(102, 187, 106, 1);
       }
       return null;
     }),
     trackColor:
-        MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
-      if (states.contains(MaterialState.disabled)) {
+        WidgetStateProperty.resolveWith<Color?>((Set<WidgetState> states) {
+      if (states.contains(WidgetState.disabled)) {
         return null;
       }
-      if (states.contains(MaterialState.selected)) {
+      if (states.contains(WidgetState.selected)) {
         return const Color.fromRGBO(102, 187, 106, 1);
       }
       return null;
     }),
   ),
   colorScheme: const ColorScheme.dark(primary: Colors.white)
-      .copyWith(background: const Color.fromRGBO(0, 0, 0, 1)),
+      .copyWith(surface: const Color.fromRGBO(0, 0, 0, 1)),
 );
 
 TextTheme _buildTextTheme(Color textColor) {
@@ -458,17 +459,17 @@ OutlinedButtonThemeData buildOutlinedButtonThemeData({
         fontSize: 18,
       ),
     ).copyWith(
-      backgroundColor: MaterialStateProperty.resolveWith<Color>(
-        (Set<MaterialState> states) {
-          if (states.contains(MaterialState.disabled)) {
+      backgroundColor: WidgetStateProperty.resolveWith<Color>(
+        (Set<WidgetState> states) {
+          if (states.contains(WidgetState.disabled)) {
             return bgDisabled;
           }
           return bgEnabled;
         },
       ),
-      foregroundColor: MaterialStateProperty.resolveWith<Color>(
-        (Set<MaterialState> states) {
-          if (states.contains(MaterialState.disabled)) {
+      foregroundColor: WidgetStateProperty.resolveWith<Color>(
+        (Set<WidgetState> states) {
+          if (states.contains(WidgetState.disabled)) {
             return fgDisabled;
           }
           return fgEnabled;

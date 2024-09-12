@@ -585,9 +585,8 @@ class UserService {
         final clientS = client.calculateSecret(serverB);
         final clientM = client.calculateClientEvidenceMessage();
 
-        late Response _;
         if (setKeysRequest == null) {
-          _ = await _enteDio.post(
+          await _enteDio.post(
             "/users/srp/complete",
             data: {
               'setupID': setupSRPResponse.setupID,
@@ -595,7 +594,7 @@ class UserService {
             },
           );
         } else {
-          _ = await _enteDio.post(
+          await _enteDio.post(
             "/users/srp/update",
             data: {
               'setupID': setupSRPResponse.setupID,
