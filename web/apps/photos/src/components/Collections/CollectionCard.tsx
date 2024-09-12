@@ -1,9 +1,9 @@
-import downloadManager from "@/new/photos/services/download";
-import { EnteFile } from "@/new/photos/types/file";
 import {
     LoadingThumbnail,
     StaticThumbnail,
 } from "@/new/photos/components/PlaceholderThumbnails";
+import downloadManager from "@/new/photos/services/download";
+import { EnteFile } from "@/new/photos/types/file";
 import { useEffect, useState } from "react";
 
 /** See also: {@link ItemCard}. */

@@ -1,5 +1,9 @@
 import log from "@/base/log";
 import { FileType } from "@/media/file-type";
+import {
+    LoadingThumbnail,
+    StaticThumbnail,
+} from "@/new/photos/components/PlaceholderThumbnails";
 import DownloadManager from "@/new/photos/services/download";
 import { EnteFile } from "@/new/photos/types/file";
 import { Overlay } from "@ente/shared/components/Container";
@@ -12,10 +16,6 @@ import {
     GAP_BTW_TILES,
     IMAGE_CONTAINER_MAX_WIDTH,
 } from "components/PhotoList/constants";
-import {
-    LoadingThumbnail,
-    StaticThumbnail,
-} from "@/new/photos/components/PlaceholderThumbnails";
 import i18n from "i18next";
 import { DeduplicateContext } from "pages/deduplicate";
 import { GalleryContext } from "pages/gallery";

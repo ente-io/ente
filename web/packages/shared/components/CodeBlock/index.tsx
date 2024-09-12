@@ -8,10 +8,7 @@ type Iprops = React.PropsWithChildren<{
     code: string | null;
 }>;
 
-export default function CodeBlock({
-    code,
-    ...props
-}: BoxProps<"div", Iprops>) {
+export default function CodeBlock({ code, ...props }: BoxProps<"div", Iprops>) {
     if (!code) {
         return (
             <Wrapper>
