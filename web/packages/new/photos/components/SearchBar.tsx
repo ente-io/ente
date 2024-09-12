@@ -383,6 +383,9 @@ const EmptyState: React.FC<EmptyStateProps> = () => {
             break;
     }
 
+    // TODO-Cluster this is where it'll go.
+    // const people = wipPersons();
+
     return (
         <Box>
             <Typography variant="mini" sx={{ textAlign: "left" }}>
@@ -547,7 +550,7 @@ const labelForOption = (option: SearchOption) => {
         case "clip":
             return t("magic");
 
-        case "cgroup":
+        case "person":
             return t("person");
     }
 };
