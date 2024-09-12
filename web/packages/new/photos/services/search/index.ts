@@ -2,6 +2,8 @@ import log from "@/base/log";
 import { masterKeyFromSession } from "@/base/session-store";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
 import { FileType } from "@/media/file-type";
+import type { EnteFile } from "@/new/photos/types/file";
+import { ensure } from "@/utils/ensure";
 import i18n, { t } from "i18next";
 import { clipMatches, isMLEnabled, isMLSupported } from "../ml";
 import type {
@@ -9,7 +11,6 @@ import type {
     LabelledSearchDateComponents,
     LocalizedSearchData,
     SearchableData,
-    SearchOption,
     SearchSuggestion,
 } from "./types";
 import type { SearchWorker } from "./worker";
@@ -63,47 +64,16 @@ export const setSearchableData = (data: SearchableData) =>
  *
  * @param searchString The string we want to search for.
  */
-const searchOptionsForString = async (searchString: string) => {
+export const searchOptionsForString = async (searchString: string) => {
     const t = Date.now();
     const suggestions = await suggestionsForString(searchString);
     const options = await suggestionsToOptions(suggestions);
-    log.debug(() => [        "search",        {searchString, options, timeMs: Date.now() - t}    ]);
+    log.debug(() => [
+        "search",
+        { searchString, options, duration: `${Date.now() - t} ms` },
+    ]);
     return options;
 };
-
-const sortMatchesIfNeeded = (files: EnteFile[], suggestion: SearchSuggestion) => {
-    if (suggestion.type != "clip") return files;
-    // Sort CLIP matches by their corresponding scores.
-    const score = (fileID: number)=>ensure(suggestion.clipScoreForFileID.get(fileID))
-    return files.sort((a, b) => score(b) - score(a));
-}
-const suggestionsToOptions = async (suggestions: SearchSuggestion[]) =>
-    Promise.all(suggestions.map((suggestion) => {
-        const matchingFiles = await filterSearchableFiles(suggestion);
-        const files = sortMatchesIfNeeded(matchingFiles);
-        return { suggestion, fileCount: files.length, previewFiles: files.slice(0, 3)}
-    }));
-    for (const suggestion of suggestions) {
-        const searchQuery = convertSuggestionToSearchQuery(suggestion);
-        const resultFiles = await filterSearchableFiles(searchQuery);
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        if (searchQuery?.clip) {
-            resultFiles.sort((a, b) => {
-                const aScore = searchQuery.clip?.get(a.id) ?? 0;
-                const bScore = searchQuery.clip?.get(b.id) ?? 0;
-                return bScore - aScore;
-            });
-        }
-        if (resultFiles.length) {
-            previewImageAppendedOptions.push({
-                ...suggestion,
-                fileCount: resultFiles.length,
-                previewFiles: resultFiles.slice(0, 3),
-            });
-        }
-    }
-    return previewImageAppendedOptions;
-}
 
 const suggestionsForString = async (searchString: string) => {
     // Normalize it by trimming whitespace and converting to lowercase.
@@ -132,6 +102,30 @@ const clipSuggestion = async (
     const matches = await clipMatches(s);
     if (!matches) return undefined;
     return { type: "clip", clipScoreForFileID: matches, label: searchString };
+};
+
+const suggestionsToOptions = async (suggestions: SearchSuggestion[]) =>
+    Promise.all(
+        suggestions.map(async (suggestion) => {
+            const matchingFiles = await filterSearchableFiles(suggestion);
+            const files = sortMatchesIfNeeded(matchingFiles, suggestion);
+            return {
+                suggestion,
+                fileCount: files.length,
+                previewFiles: files.slice(0, 3),
+            };
+        }),
+    );
+
+const sortMatchesIfNeeded = (
+    files: EnteFile[],
+    suggestion: SearchSuggestion,
+) => {
+    if (suggestion.type != "clip") return files;
+    // Sort CLIP matches by their corresponding scores.
+    const score = ({ id }: EnteFile) =>
+        ensure(suggestion.clipScoreForFileID.get(id));
+    return files.sort((a, b) => score(b) - score(a));
 };
 
 /**
