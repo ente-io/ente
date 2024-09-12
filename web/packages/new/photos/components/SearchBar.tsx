@@ -129,10 +129,18 @@ const SearchInput: React.FC<Omit<SearchBarProps, "setIsInSearchMode">> = ({
     const components = useMemo(() => ({ Control, Input, Option }), []);
 
     const handleChange = (value: SearchOption | null | undefined) => {
-        setValue(value ?? undefined);
-        setInputValue(value?.suggestion.label ?? "");
-        // TODO-Cluster:
-        if (value) onSelectSearchOption(value);
+        // Collection suggestions are handled differently - our caller will
+        // switch to the collection view, dismissing search.
+        if (value?.suggestion.type == "collection") {
+            setValue(undefined);
+            setInputValue("");
+        } else {
+            setValue(value ?? undefined);
+            setInputValue(value?.suggestion.label ?? "");
+        }
+
+        // Let our parent know the selection was changed.
+        onSelectSearchOption(value ?? undefined);
 
         // The Select has a blurInputOnSelect prop, but that makes the input
         // field lose focus, not the entire menu (e.g. when pressing twice).
