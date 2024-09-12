@@ -34,13 +34,13 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
   );
   final List<String> _messages = [];
   late final Timer _didYouKnowTimer;
-  final fortySecondsOnScreen = ValueNotifier(false);
+  final oneMinuteOnScreen = ValueNotifier(false);
 
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 40), () {
-      fortySecondsOnScreen.value = true;
+    Future.delayed(const Duration(seconds: 60), () {
+      oneMinuteOnScreen.value = true;
     });
     _firstImportEvent =
         Bus.instance.on<SyncStatusUpdate>().listen((event) async {
@@ -92,7 +92,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
     _firstImportEvent.cancel();
     _importProgressEvent.cancel();
     _didYouKnowTimer.cancel();
-    fortySecondsOnScreen.dispose();
+    oneMinuteOnScreen.dispose();
     super.dispose();
   }
 
@@ -191,7 +191,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
       appBar: AppBar(
         actions: [
           ValueListenableBuilder(
-            valueListenable: fortySecondsOnScreen,
+            valueListenable: oneMinuteOnScreen,
             builder: (context, value, _) {
               return value
                   ? IconButton(
