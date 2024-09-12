@@ -3,6 +3,10 @@ import { NavbarBase } from "@/base/components/Navbar";
 import { useIsMobileWidth } from "@/base/hooks";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
+import {
+    SearchBar,
+    type UpdateSearch,
+} from "@/new/photos/components/SearchBar";
 import { WhatsNew } from "@/new/photos/components/WhatsNew";
 import { shouldShowWhatsNew } from "@/new/photos/services/changelog";
 import downloadManager from "@/new/photos/services/download";
@@ -74,7 +78,6 @@ import GalleryEmptyState from "components/GalleryEmptyState";
 import { LoadingOverlay } from "components/LoadingOverlay";
 import PhotoFrame from "components/PhotoFrame";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
-import { SearchBar, type UpdateSearch } from "components/SearchBar";
 import Sidebar from "components/Sidebar";
 import { type UploadTypeSelectorIntent } from "components/Upload/UploadTypeSelector";
 import Uploader from "components/Upload/Uploader";

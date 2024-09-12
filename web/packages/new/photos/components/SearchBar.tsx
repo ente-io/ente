@@ -10,16 +10,14 @@ import {
 import { getAutoCompleteSuggestions } from "@/new/photos/services/search";
 import type {
     City,
+    ClipSearchScores,
     SearchDateComponents,
+    SearchOption,
     SearchPerson,
+    SearchQuery,
     SearchResultSummary,
 } from "@/new/photos/services/search/types";
-import {
-    ClipSearchScores,
-    SearchOption,
-    SearchQuery,
-    SuggestionType,
-} from "@/new/photos/services/search/types";
+import { SuggestionType } from "@/new/photos/services/search/types";
 import { labelForSuggestionType } from "@/new/photos/services/search/ui";
 import type { LocationTag } from "@/new/photos/services/user-entity";
 import CalendarIcon from "@mui/icons-material/CalendarMonth";
@@ -40,7 +38,7 @@ import {
 } from "@mui/material";
 import { t } from "i18next";
 import pDebounce from "p-debounce";
-import {
+import React, {
     useCallback,
     useEffect,
     useMemo,
@@ -83,8 +81,8 @@ interface SearchBarProps {
 }
 
 export type UpdateSearch = (
-    search: SearchQuery,
-    summary: SearchResultSummary,
+    search: SearchQuery | null,
+    summary: SearchResultSummary | null,
 ) => void;
 
 /**
@@ -145,15 +143,15 @@ const SearchInput: React.FC<SearchInputProps> = ({
     updateSearch,
 }) => {
     // A ref to the top level Select.
-    const selectRef = useRef(null);
+    const selectRef = useRef<AsyncSelect>(null);
     // The currently selected option.
-    const [value, setValue] = useState<SearchOption | undefined>();
+    const [value, setValue] = useState<SearchOption | undefined | null>();
     // The contents of the input field associated with the select.
-    const [inputValue, setInputValue] = useState("");
+    const [inputValue, setInputValue] = useState<string | null>("");
 
     const theme = useTheme();
 
-    const styles = useMemo(() => useSelectStyles(theme), [theme]);
+    const styles = useMemo(() => createSelectStyles(theme), [theme]);
     const components = useMemo(() => ({ Control, Input, Option }), []);
 
     useEffect(() => {
@@ -292,7 +290,7 @@ const SearchInputWrapper = styled(Box)`
     margin: auto;
 `;
 
-const useSelectStyles = ({
+const createSelectStyles = ({
     colors,
 }: Theme): StylesConfig<SearchOption, false> => ({
     container: (style) => ({ ...style, flex: 1 }),
