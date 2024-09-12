@@ -106,13 +106,15 @@ const suggestionsToOptions = async (suggestions: SearchSuggestion[]) =>
     Promise.all(
         suggestions.map(async (suggestion) => {
             const matchingFiles = await filterSearchableFiles(suggestion);
-            return {
-                suggestion,
-                fileCount: matchingFiles.length,
-                previewFiles: matchingFiles.slice(0, 3),
-            };
+            return matchingFiles.length
+                ? {
+                      suggestion,
+                      fileCount: matchingFiles.length,
+                      previewFiles: matchingFiles.slice(0, 3),
+                  }
+                : undefined;
         }),
-    );
+    ).then((r) => r.filter((o) => !!o));
 
 /**
  * Return the list of {@link EnteFile}s (from amongst the previously set
