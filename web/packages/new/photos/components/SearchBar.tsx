@@ -52,6 +52,7 @@ import {
     type InputActionMeta,
     type InputProps,
     type OptionProps,
+    type SelectInstance,
     type StylesConfig,
 } from "react-select";
 import AsyncSelect from "react-select/async";
@@ -143,11 +144,11 @@ const SearchInput: React.FC<SearchInputProps> = ({
     updateSearch,
 }) => {
     // A ref to the top level Select.
-    const selectRef = useRef<Select>(null);
+    const selectRef = useRef<SelectInstance<SearchOption> | null>(null);
     // The currently selected option.
     const [value, setValue] = useState<SearchOption | undefined | null>();
     // The contents of the input field associated with the select.
-    const [inputValue, setInputValue] = useState<string | null>("");
+    const [inputValue, setInputValue] = useState<string | null | undefined>("");
 
     const theme = useTheme();
 
@@ -158,7 +159,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
         search(value);
     }, [value]);
 
-    const handleChange = (value: SearchOption) => {
+    const handleChange = (value: SearchOption | null) => {
         setValue(value);
         setInputValue(value?.label);
         // The Select has a blurInputOnSelect prop, but that makes the input
@@ -184,7 +185,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
         [],
     );
 
-    const search = (selectedOption: SearchOption) => {
+    const search = (selectedOption: SearchOption | null | undefined) => {
         if (!selectedOption) {
             return;
         }
@@ -242,8 +243,8 @@ const SearchInput: React.FC<SearchInputProps> = ({
         // search string if the user focuses back on the input field after
         // moving focus elsewhere.
         if (inputValue) {
-            selectRef?.current.onInputChange(inputValue, {
-                action: "select-value",
+            selectRef.current?.onInputChange(inputValue, {
+                action: "set-value",
                 prevInputValue: "",
             });
         }
@@ -258,7 +259,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
                 styles={styles}
                 loadOptions={loadOptions}
                 onChange={handleChange}
-                inputValue={inputValue}
+                inputValue={inputValue ?? ""}
                 onInputChange={handleInputChange}
                 isClearable
                 escapeClearsValue
