@@ -17,7 +17,6 @@ import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 class MagicResultScreen extends StatefulWidget {
   final List<EnteFile> files;
   final String name;
-  final bool enableGrouping;
   final String heroTag;
 
   static const GalleryType appBarType = GalleryType.magic;
@@ -26,7 +25,6 @@ class MagicResultScreen extends StatefulWidget {
   const MagicResultScreen(
     this.files, {
     required this.name,
-    this.enableGrouping = false,
     this.heroTag = "",
     super.key,
   });
@@ -40,12 +38,11 @@ class _MagicResultScreenState extends State<MagicResultScreen> {
   late final List<EnteFile> files;
   late final StreamSubscription<LocalPhotosUpdatedEvent> _filesUpdatedEvent;
   late final StreamSubscription<MagicSortChangeEvent> _magicSortChangeEvent;
-  late bool _enableGrouping;
+  bool _enableGrouping = false;
 
   @override
   void initState() {
     super.initState();
-    _enableGrouping = widget.enableGrouping;
     files = widget.files;
     _filesUpdatedEvent =
         Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
