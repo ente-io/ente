@@ -37,7 +37,7 @@ import {
 } from "react-select";
 import AsyncSelect from "react-select/async";
 
-interface SearchBarProps {
+export interface SearchBarProps {
     /**
      * [Note: "Search mode"]
      *

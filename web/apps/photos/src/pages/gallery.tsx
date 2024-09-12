@@ -5,7 +5,7 @@ import log from "@/base/log";
 import type { Collection } from "@/media/collection";
 import {
     SearchBar,
-    type UpdateSearch,
+    type SearchBarProps,
 } from "@/new/photos/components/SearchBar";
 import { WhatsNew } from "@/new/photos/components/WhatsNew";
 import { shouldShowWhatsNew } from "@/new/photos/services/changelog";
@@ -19,10 +19,7 @@ import {
     filterSearchableFiles,
     setSearchableData,
 } from "@/new/photos/services/search";
-import {
-    SearchQuery,
-    SearchResultSummary,
-} from "@/new/photos/services/search/types";
+import type { SearchOption } from "@/new/photos/services/search/types";
 import { EnteFile } from "@/new/photos/types/file";
 import { mergeMetadata } from "@/new/photos/utils/file";
 import {
@@ -253,8 +250,9 @@ export default function Gallery() {
     });
 
     const [isInSearchMode, setIsInSearchMode] = useState(false);
-    const [searchResultSummary, setSetSearchResultSummary] =
-        useState<SearchResultSummary>(null);
+    const [selectedSearchOption, setSelectedSearchOption] = useState<
+        SearchOption | undefined
+    >();
     const syncInProgress = useRef(true);
     const syncInterval = useRef<NodeJS.Timeout>();
     const resync = useRef<{ force: boolean; silent: boolean }>();
@@ -495,18 +493,18 @@ export default function Gallery() {
     }, [router.isReady]);
 
     useEffect(() => {
-        if (isInSearchMode && searchResultSummary) {
+        if (isInSearchMode && selectedSearchOption) {
             setPhotoListHeader({
                 height: 104,
                 item: (
-                    <SearchResultSummaryHeader
-                        searchResultSummary={searchResultSummary}
+                    <SearchResultsHeader
+                        selectedOption={selectedSearchOption}
                     />
                 ),
                 itemType: ITEM_TYPE.HEADER,
             });
         }
-    }, [isInSearchMode, searchResultSummary]);
+    }, [isInSearchMode, selectedSearchOption]);
 
     const activeCollection = useMemo(() => {
         if (!collections || !hiddenCollections) {
@@ -1274,29 +1272,20 @@ const mergeMaps = <K, V>(map1: Map<K, V>, map2: Map<K, V>) => {
     return mergedMap;
 };
 
-interface NormalNavbarContentsProps {
+type NormalNavbarContentsProps = SearchBarProps & {
     openSidebar: () => void;
     openUploader: () => void;
-    isInSearchMode: boolean;
-    setIsInSearchMode: (v: boolean) => void;
-    updateSearch: UpdateSearch;
-}
+};
 
 const NormalNavbarContents: React.FC<NormalNavbarContentsProps> = ({
     openSidebar,
     openUploader,
-    isInSearchMode,
-    setIsInSearchMode,
-    updateSearch,
+    ...props
 }) => (
     <>
-        {!isInSearchMode && <SidebarButton onClick={openSidebar} />}
-        <SearchBar
-            isInSearchMode={isInSearchMode}
-            setIsInSearchMode={setIsInSearchMode}
-            updateSearch={updateSearch}
-        />
-        {!isInSearchMode && <UploadButton onClick={openUploader} />}
+        {!props.isInSearchMode && <SidebarButton onClick={openSidebar} />}
+        <SearchBar {...props} />
+        {!props.isInSearchMode && <UploadButton onClick={openUploader} />}
     </>
 );
 
@@ -1355,25 +1344,20 @@ const HiddenSectionNavbarContents: React.FC<
     </HorizontalFlex>
 );
 
-interface SearchResultSummaryHeaderProps {
-    searchResultSummary: SearchResultSummary;
+interface SearchResultsHeaderProps {
+    selectedOption: SearchOption;
 }
 
-const SearchResultSummaryHeader: React.FC<SearchResultSummaryHeaderProps> = ({
-    searchResultSummary,
-}) => {
-    if (!searchResultSummary) {
-        return <></>;
-    }
-
-    const { optionName, fileCount } = searchResultSummary;
-
-    return (
-        <CollectionInfoBarWrapper>
-            <Typography color="text.muted" variant="large">
-                {t("search_results")}
-            </Typography>
-            <CollectionInfo name={optionName} fileCount={fileCount} />
-        </CollectionInfoBarWrapper>
-    );
-};
+const SearchResultsHeader: React.FC<SearchResultsHeaderProps> = ({
+    selectedOption,
+}) => (
+    <CollectionInfoBarWrapper>
+        <Typography color="text.muted" variant="large">
+            {t("search_results")}
+        </Typography>
+        <CollectionInfo
+            name={selectedOption.suggestion.label}
+            fileCount={selectedOption.fileCount}
+        />
+    </CollectionInfoBarWrapper>
+);
