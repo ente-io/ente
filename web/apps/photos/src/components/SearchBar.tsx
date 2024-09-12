@@ -159,6 +159,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
     const theme = useTheme();
 
     const styles = useMemo(() => useSelectStyles(theme), [theme]);
+    const components = useMemo(() => ({ Option, Control, Input }), []);
 
     useEffect(() => {
         search(value);
@@ -176,9 +177,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
     };
 
     const handleInputChange = (value: string, actionMeta: InputActionMeta) => {
-        if (actionMeta.action === "input-change") {
-            setInputValue(value);
-        }
+        if (actionMeta.action == "input-change") setInputValue(value);
     };
 
     const resetSearch = () => {
@@ -187,8 +186,8 @@ const SearchInput: React.FC<SearchInputProps> = ({
         setInputValue("");
     };
 
-    const getOptions = useCallback(
-        pDebounce(getAutoCompleteSuggestions(), 250),
+    const loadOptions = useCallback(
+        pDebounce(getAutoCompleteSuggestions, 250),
         [],
     );
 
@@ -245,8 +244,6 @@ const SearchInput: React.FC<SearchInputProps> = ({
         setValue(value);
     };
 
-    const components = useMemo(() => ({ Option, Control, Input }), []);
-
     return (
         <SearchInputWrapper>
             <AsyncSelect
@@ -254,14 +251,13 @@ const SearchInput: React.FC<SearchInputProps> = ({
                 value={value}
                 components={components}
                 styles={styles}
-                placeholder={t("search_hint")}
-                loadOptions={getOptions}
+                loadOptions={loadOptions}
                 onChange={handleChange}
-                isMulti={false}
-                isClearable
-                escapeClearsValue
                 inputValue={inputValue}
                 onInputChange={handleInputChange}
+                isClearable
+                escapeClearsValue
+                placeholder={t("search_hint")}
                 noOptionsMessage={({ inputValue }) =>
                     shouldShowEmptyState(inputValue) ? (
                         <EmptyState onSelectCGroup={handleSelectCGroup} />

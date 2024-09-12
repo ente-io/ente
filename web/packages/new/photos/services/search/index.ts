@@ -163,19 +163,19 @@ const labelledFileTypes = (): LabelledFileType[] => [
 // TODO-Cluster -- AUDIT BELOW THIS
 
 // Suggestions shown in the search dropdown when the user has typed something.
-export const getAutoCompleteSuggestions =
-    () =>
-    async (searchPhrase: string): Promise<SearchOption[]> => {
-        log.debug(() => ["getAutoCompleteSuggestions"]);
-        try {
-            const suggestions: Suggestion[] =
-                await suggestionsForString(searchPhrase);
-            return convertSuggestionsToOptions(suggestions);
-        } catch (e) {
-            log.error("getAutoCompleteSuggestions failed", e);
-            return [];
-        }
-    };
+export const getAutoCompleteSuggestions = async (
+    searchPhrase: string,
+): Promise<SearchOption[]> => {
+    log.debug(() => ["getAutoCompleteSuggestions"]);
+    try {
+        const suggestions: Suggestion[] =
+            await suggestionsForString(searchPhrase);
+        return convertSuggestionsToOptions(suggestions);
+    } catch (e) {
+        log.error("getAutoCompleteSuggestions failed", e);
+        return [];
+    }
+};
 
 async function convertSuggestionsToOptions(
     suggestions: Suggestion[],
