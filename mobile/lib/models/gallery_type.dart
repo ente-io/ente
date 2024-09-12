@@ -172,20 +172,20 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.homepage:
       case GalleryType.uncategorized:
       case GalleryType.quickLink:
+      case GalleryType.searchResults:
+      case GalleryType.locationTag:
+      case GalleryType.magic:
+      case GalleryType.peopleTag:
         return true;
 
       case GalleryType.hiddenSection:
-      case GalleryType.peopleTag:
       case GalleryType.hiddenOwnedCollection:
       case GalleryType.favorite:
-      case GalleryType.searchResults:
       case GalleryType.archive:
       case GalleryType.localFolder:
       case GalleryType.trash:
       case GalleryType.sharedCollection:
-      case GalleryType.locationTag:
       case GalleryType.cluster:
-      case GalleryType.magic:
         return false;
     }
   }
