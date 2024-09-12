@@ -50,7 +50,7 @@ class _BackupStatusScreenState extends State<BackupStatusScreen> {
           },
         )
         .sorted(
-          (a, b) => (a.file.uploadedFileID!).compareTo(b.file.uploadedFileID!),
+          (a, b) => (b.file.uploadedFileID!).compareTo(a.file.uploadedFileID!),
         )
         .toList();
     Bus.instance.on<FileUploadedEvent>().listen((event) {
