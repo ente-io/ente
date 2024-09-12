@@ -2,18 +2,14 @@ import log from "@/base/log";
 import { masterKeyFromSession } from "@/base/session-store";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
 import { FileType } from "@/media/file-type";
-import type { LocationTag } from "@/new/photos/services/user-entity";
 import i18n, { t } from "i18next";
 import { clipMatches, isMLEnabled, isMLSupported } from "../ml";
 import type {
-    City,
     LabelledFileType,
     LabelledSearchDateComponents,
     LocalizedSearchData,
     SearchableData,
-    SearchDateComponents,
     SearchOption,
-    SearchPerson,
     SearchSuggestion,
 } from "./types";
 import type { SearchWorker } from "./worker";
@@ -62,12 +58,54 @@ export const setSearchableData = (data: SearchableData) =>
     void worker().then((w) => w.setSearchableData(data));
 
 /**
- * Convert a search string into a suggestions that can be shown in the search
- * results, and can also be used filter the searchable files.
+ * Convert a search string into (annotated) suggestions that can be shown in the
+ * search results dropdown.
  *
  * @param searchString The string we want to search for.
  */
-export const suggestionsForString = async (searchString: string) => {
+const searchOptionsForString = async (searchString: string) => {
+    const t = Date.now();
+    const suggestions = await suggestionsForString(searchString);
+    const options = await suggestionsToOptions(suggestions);
+    log.debug(() => [        "search",        {searchString, options, timeMs: Date.now() - t}    ]);
+    return options;
+};
+
+const sortMatchesIfNeeded = (files: EnteFile[], suggestion: SearchSuggestion) => {
+    if (suggestion.type != "clip") return files;
+    // Sort CLIP matches by their corresponding scores.
+    const score = (fileID: number)=>ensure(suggestion.clipScoreForFileID.get(fileID))
+    return files.sort((a, b) => score(b) - score(a));
+}
+const suggestionsToOptions = async (suggestions: SearchSuggestion[]) =>
+    Promise.all(suggestions.map((suggestion) => {
+        const matchingFiles = await filterSearchableFiles(suggestion);
+        const files = sortMatchesIfNeeded(matchingFiles);
+        return { suggestion, fileCount: files.length, previewFiles: files.slice(0, 3)}
+    }));
+    for (const suggestion of suggestions) {
+        const searchQuery = convertSuggestionToSearchQuery(suggestion);
+        const resultFiles = await filterSearchableFiles(searchQuery);
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        if (searchQuery?.clip) {
+            resultFiles.sort((a, b) => {
+                const aScore = searchQuery.clip?.get(a.id) ?? 0;
+                const bScore = searchQuery.clip?.get(b.id) ?? 0;
+                return bScore - aScore;
+            });
+        }
+        if (resultFiles.length) {
+            previewImageAppendedOptions.push({
+                ...suggestion,
+                fileCount: resultFiles.length,
+                previewFiles: resultFiles.slice(0, 3),
+            });
+        }
+    }
+    return previewImageAppendedOptions;
+}
+
+const suggestionsForString = async (searchString: string) => {
     // Normalize it by trimming whitespace and converting to lowercase.
     const s = searchString.trim().toLowerCase();
     if (s.length == 0) return [];
@@ -154,81 +192,3 @@ const labelledFileTypes = (): LabelledFileType[] => [
     { fileType: FileType.video, label: t("VIDEO") },
     { fileType: FileType.livePhoto, label: t("LIVE_PHOTO") },
 ];
-
-// TODO-Cluster -- AUDIT BELOW THIS
-
-// Suggestions shown in the search dropdown when the user has typed something.
-export const getAutoCompleteSuggestions = async (
-    searchPhrase: string,
-): Promise<SearchOption[]> => {
-    log.debug(() => ["getAutoCompleteSuggestions"]);
-    try {
-        const suggestions: Suggestion[] =
-            await suggestionsForString(searchPhrase);
-        return convertSuggestionsToOptions(suggestions);
-    } catch (e) {
-        log.error("getAutoCompleteSuggestions failed", e);
-        return [];
-    }
-};
-
-async function convertSuggestionsToOptions(
-    suggestions: Suggestion[],
-): Promise<SearchOption[]> {
-    const previewImageAppendedOptions: SearchOption[] = [];
-    for (const suggestion of suggestions) {
-        const searchQuery = convertSuggestionToSearchQuery(suggestion);
-        const resultFiles = await filterSearchableFiles(searchQuery);
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        if (searchQuery?.clip) {
-            resultFiles.sort((a, b) => {
-                const aScore = searchQuery.clip?.get(a.id) ?? 0;
-                const bScore = searchQuery.clip?.get(b.id) ?? 0;
-                return bScore - aScore;
-            });
-        }
-        if (resultFiles.length) {
-            previewImageAppendedOptions.push({
-                ...suggestion,
-                fileCount: resultFiles.length,
-                previewFiles: resultFiles.slice(0, 3),
-            });
-        }
-    }
-    return previewImageAppendedOptions;
-}
-
-function convertSuggestionToSearchQuery(option: Suggestion): SearchSuggestion {
-    switch (option.type) {
-        case SuggestionType.DATE:
-            return {
-                date: option.value as SearchDateComponents,
-            };
-
-        case SuggestionType.LOCATION:
-            return {
-                location: option.value as LocationTag,
-            };
-
-        case SuggestionType.CITY:
-            return { city: option.value as City };
-
-        case SuggestionType.COLLECTION:
-            return { collection: option.value as number };
-
-        case SuggestionType.FILE_NAME:
-            return { files: option.value as number[] };
-
-        case SuggestionType.FILE_CAPTION:
-            return { files: option.value as number[] };
-
-        case SuggestionType.PERSON:
-            return { person: option.value as SearchPerson };
-
-        case SuggestionType.FILE_TYPE:
-            return { fileType: option.value as FileType };
-
-        case SuggestionType.CLIP:
-            return { clip: option.value as ClipSearchScores };
-    }
-}
