@@ -8,6 +8,7 @@ import {
 } from "@/new/photos/services/ml";
 import { searchOptionsForString } from "@/new/photos/services/search";
 import type { SearchOption } from "@/new/photos/services/search/types";
+import { nullToUndefined } from "@/utils/transform";
 import CalendarIcon from "@mui/icons-material/CalendarMonth";
 import CloseIcon from "@mui/icons-material/Close";
 import ImageIcon from "@mui/icons-material/Image";
@@ -119,7 +120,11 @@ const SearchInput: React.FC<Omit<SearchBarProps, "setIsInSearchMode">> = ({
     // A ref to the top level Select.
     const selectRef = useRef<SelectInstance<SearchOption> | null>(null);
     // The currently selected option.
-    const [value, setValue] = useState<SearchOption | undefined>();
+    //
+    // We need to use `null` instead of `undefined` to indicate missing values,
+    // because using `undefined` instead moves the Select from being a controlled
+    // component to an uncontrolled component.
+    const [value, setValue] = useState<SearchOption | null>(null);
     // The contents of the input field associated with the select.
     const [inputValue, setInputValue] = useState("");
 
@@ -128,19 +133,19 @@ const SearchInput: React.FC<Omit<SearchBarProps, "setIsInSearchMode">> = ({
     const styles = useMemo(() => createSelectStyles(theme), [theme]);
     const components = useMemo(() => ({ Control, Input, Option }), []);
 
-    const handleChange = (value: SearchOption | null | undefined) => {
+    const handleChange = (value: SearchOption | null) => {
         // Collection suggestions are handled differently - our caller will
         // switch to the collection view, dismissing search.
         if (value?.suggestion.type == "collection") {
-            setValue(undefined);
+            setValue(null);
             setInputValue("");
         } else {
-            setValue(value ?? undefined);
+            setValue(value);
             setInputValue(value?.suggestion.label ?? "");
         }
 
         // Let our parent know the selection was changed.
-        onSelectSearchOption(value ?? undefined);
+        onSelectSearchOption(nullToUndefined(value));
 
         // The Select has a blurInputOnSelect prop, but that makes the input
         // field lose focus, not the entire menu (e.g. when pressing twice).
@@ -156,7 +161,7 @@ const SearchInput: React.FC<Omit<SearchBarProps, "setIsInSearchMode">> = ({
     };
 
     const resetSearch = () => {
-        setValue(undefined);
+        setValue(null);
         setInputValue("");
         onSelectSearchOption(undefined);
     };
@@ -191,8 +196,6 @@ const SearchInput: React.FC<Omit<SearchBarProps, "setIsInSearchMode">> = ({
                 onChange={handleChange}
                 inputValue={inputValue}
                 onInputChange={handleInputChange}
-                // Needed to get the placeholder to reset on `resetSearch`.
-                controlShouldRenderValue={false}
                 isClearable
                 escapeClearsValue
                 onFocus={handleFocus}
