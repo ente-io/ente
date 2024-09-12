@@ -208,7 +208,7 @@ const SearchInput: React.FC<Omit<SearchBarProps, "setIsInSearchMode">> = ({
             />
 
             {isInSearchMode && (
-                <IconButton onClick={() => resetSearch()} sx={{ ml: 1 }}>
+                <IconButton onClick={resetSearch}>
                     <CloseIcon />
                 </IconButton>
             )}
@@ -221,6 +221,7 @@ const SearchInputWrapper = styled(Box)`
     width: 100%;
     align-items: center;
     justify-content: center;
+    gap: 8px;
     background: ${({ theme }) => theme.colors.background.base};
     max-width: 484px;
     margin: auto;
