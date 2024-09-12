@@ -61,7 +61,7 @@ export interface SearchBarProps {
     /**
      * Set or clear the selected {@link SearchOption}.
      */
-    setSelectedSearchOption: (o: SearchOption | undefined) => void;
+    onSelectSearchOption: (o: SearchOption | undefined) => void;
 }
 
 /**
@@ -82,7 +82,7 @@ export interface SearchBarProps {
 export const SearchBar: React.FC<SearchBarProps> = ({
     setIsInSearchMode,
     isInSearchMode,
-    setSelectedSearchOption,
+    onSelectSearchOption,
 }) => {
     const isMobileWidth = useIsMobileWidth();
 
@@ -93,7 +93,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
             {isMobileWidth && !isInSearchMode ? (
                 <MobileSearchArea onSearch={showSearchInput} />
             ) : (
-                <SearchInput {...{ isInSearchMode, setSelectedSearchOption }} />
+                <SearchInput {...{ isInSearchMode, onSelectSearchOption }} />
             )}
         </Box>
     );
@@ -114,7 +114,7 @@ const MobileSearchArea: React.FC<MobileSearchAreaProps> = ({ onSearch }) => (
 
 const SearchInput: React.FC<Omit<SearchBarProps, "setIsInSearchMode">> = ({
     isInSearchMode,
-    setSelectedSearchOption,
+    onSelectSearchOption,
 }) => {
     // A ref to the top level Select.
     const selectRef = useRef<SelectInstance<SearchOption> | null>(null);
@@ -132,7 +132,7 @@ const SearchInput: React.FC<Omit<SearchBarProps, "setIsInSearchMode">> = ({
         setValue(value ?? undefined);
         setInputValue(value?.suggestion.label ?? "");
         // TODO-Cluster:
-        if (value) setSelectedSearchOption(value);
+        if (value) onSelectSearchOption(value);
 
         // The Select has a blurInputOnSelect prop, but that makes the input
         // field lose focus, not the entire menu (e.g. when pressing twice).
@@ -150,14 +150,14 @@ const SearchInput: React.FC<Omit<SearchBarProps, "setIsInSearchMode">> = ({
     const resetSearch = () => {
         setValue(undefined);
         setInputValue("");
-        setSelectedSearchOption(undefined);
+        onSelectSearchOption(undefined);
     };
 
     const handleSelectCGroup = (value: SearchOption) => {
         // Dismiss the search menu.
         selectRef.current?.blur();
         setValue(value);
-        setSelectedSearchOption(undefined);
+        onSelectSearchOption(undefined);
     };
 
     const handleFocus = () => {

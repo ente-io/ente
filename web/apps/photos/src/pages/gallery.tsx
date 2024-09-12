@@ -980,16 +980,18 @@ export default function Gallery() {
             });
     };
 
-    const updateSearch: UpdateSearch = (newSearch, summary) => {
-        if (newSearch?.collection) {
-            setActiveCollectionID(newSearch?.collection);
+    const handleSelectSearchOption = (
+        searchOption: SearchOption | undefined,
+    ) => {
+        if (searchOption?.suggestion.type == "collection") {
             setIsInSearchMode(false);
+            setSelectedSearchOption(undefined);
+            setActiveCollectionID(searchOption.suggestion.collectionID);
         } else {
-            setSearchQuery(newSearch);
-            setIsInSearchMode(!!newSearch);
-            setSetSearchResultSummary(summary);
+            setIsInSearchMode(!!searchOption);
+            setSelectedSearchOption(searchOption);
         }
-        setIsClipSearchResult(!!newSearch?.clip);
+        setIsClipSearchResult(searchOption?.suggestion.type == "clip");
     };
 
     const openUploader = (intent?: UploadTypeSelectorIntent) => {
@@ -1098,7 +1100,7 @@ export default function Gallery() {
                             openUploader={openUploader}
                             isInSearchMode={isInSearchMode}
                             setIsInSearchMode={setIsInSearchMode}
-                            updateSearch={updateSearch}
+                            onSelectSearchOption={handleSelectSearchOption}
                         />
                     )}
                 </NavbarBase>
