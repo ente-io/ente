@@ -244,6 +244,18 @@ const SearchInput: React.FC<SearchInputProps> = ({
         setValue(value);
     };
 
+    const handleFocus = () => {
+        // A workaround to show the suggestions again for the current non-empty
+        // search string if the user focuses back on the input field after
+        // moving focus elsewhere.
+        if (inputValue) {
+            selectRef?.current.onInputChange(inputValue, {
+                action: "select-value",
+                prevInputValue: "",
+            });
+        }
+    };
+
     return (
         <SearchInputWrapper>
             <AsyncSelect
@@ -257,6 +269,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
                 onInputChange={handleInputChange}
                 isClearable
                 escapeClearsValue
+                onFocus={handleFocus}
                 placeholder={t("search_hint")}
                 noOptionsMessage={({ inputValue }) =>
                     shouldShowEmptyState(inputValue) ? (
@@ -573,9 +586,12 @@ const LabelWithInfo = ({ data }: { data: SearchOption }) => {
     );
 };
 
-// A custom input for react-select that is always visible. This is a roundabout
-// hack the existing code used to display the search string when showing the
-// results page; likely there should be a better way.
+/**
+ * A custom input for react-select that is always visible.
+ *
+ * This is a workaround to allow the search string to be always displayed, and
+ * editable, even after the user has moved focus away from it.
+ */
 const Input: React.FC<InputProps<SearchOption, false>> = (props) => (
     <SelectComponents.Input {...props} isHidden={false} />
 );
