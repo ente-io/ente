@@ -1,14 +1,14 @@
+import type { Person } from "@/new/photos/services/ml";
 import { faceCrop, unidentifiedFaceIDs } from "@/new/photos/services/ml";
 import type { EnteFile } from "@/new/photos/types/file";
 import { Skeleton, Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
-import type { SearchPerson } from "../services/search/types";
 
 export interface PeopleListProps {
-    people: SearchPerson[];
+    people: Person[];
     maxRows: number;
-    onSelect?: (person: SearchPerson, index: number) => void;
+    onSelect?: (person: Person, index: number) => void;
 }
 
 export const PeopleList: React.FC<PeopleListProps> = ({
@@ -60,7 +60,7 @@ const FaceChip = styled("div")<{ clickable?: boolean }>`
 
 export interface PhotoPeopleListProps {
     file: EnteFile;
-    onSelect?: (person: SearchPerson, index: number) => void;
+    onSelect?: (person: Person, index: number) => void;
 }
 
 export function PhotoPeopleList() {

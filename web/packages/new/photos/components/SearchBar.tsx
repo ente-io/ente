@@ -396,7 +396,7 @@ const EmptyState: React.FC<EmptyStateProps> = () => {
     // const peopleSuggestions = options.filter(
     //     (o) => o.type === SuggestionType.PERSON,
     // );
-    // const people = peopleSuggestions.map((o) => o.value as SearchPerson);
+    // const people = peopleSuggestions.map((o) => o.value as Person);
     // return (
     //     <SelectComponents.Menu {...props}>
     //         <Box my={1}>
@@ -457,7 +457,7 @@ export async function getAllPeopleSuggestion(): Promise<Array<Suggestion>> {
 }
 
 async function getAllPeople(limit: number = undefined) {
-    return (await wipSearchPersons()).slice(0, limit);
+    return (await wipPersons()).slice(0, limit);
     // TODO-Clustetr
     // if (done) return [];
 
@@ -468,7 +468,7 @@ async function getAllPeople(limit: number = undefined) {
     //     log.debug(() => ["people", { people }]);
     // }
 
-    // let people: Array<SearchPerson> = []; // await mlIDbStorage.getAllPeople();
+    // let people: Array<Person> = []; // await mlIDbStorage.getAllPeople();
     // people = await wipCluster();
     // // await mlPeopleStore.iterate<Person, void>((person) => {
     // //     people.push(person);

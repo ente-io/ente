@@ -17,7 +17,7 @@ import { throttled } from "@/utils/promise";
 import { proxy, transfer } from "comlink";
 import { isInternalUser } from "../feature-flags";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
-import type { SearchPerson } from "../search/types";
+import type { Person } from "../search/types";
 import type { UploadItem } from "../upload/types";
 import {
     type ClusterFace,
@@ -329,7 +329,7 @@ export const wipClusterEnable = async (): Promise<boolean> =>
 
 // // TODO-Cluster temporary state here
 let _wip_isClustering = false;
-let _wip_searchPersons: SearchPerson[] | undefined;
+let _wip_Persons: Person[] | undefined;
 let _wip_hasSwitchedOnce = false;
 
 export const wipHasSwitchedOnceCmpAndSet = () => {
@@ -338,9 +338,9 @@ export const wipHasSwitchedOnceCmpAndSet = () => {
     return false;
 };
 
-export const wipSearchPersons = async () => {
+export const wipPersons = async () => {
     if (!(await wipClusterEnable())) return [];
-    return _wip_searchPersons ?? [];
+    return _wip_Persons ?? [];
 };
 
 export interface ClusterPreviewWithFile {
@@ -374,7 +374,7 @@ export const wipClusterDebugPageContents = async (
 
     log.info("clustering", opts);
     _wip_isClustering = true;
-    _wip_searchPersons = undefined;
+    _wip_Persons = undefined;
     triggerStatusUpdate();
 
     const {
@@ -407,7 +407,7 @@ export const wipClusterDebugPageContents = async (
 
     const clusterByID = new Map(clusters.map((c) => [c.id, c]));
 
-    const searchPersons = cgroups
+    const Persons = cgroups
         .map((cgroup) => {
             const faceID = ensure(cgroup.displayFaceID);
             const fileID = ensure(fileIDFromFaceID(faceID));
@@ -432,7 +432,7 @@ export const wipClusterDebugPageContents = async (
         .sort((a, b) => b.faceIDs.length - a.faceIDs.length);
 
     _wip_isClustering = false;
-    _wip_searchPersons = searchPersons;
+    _wip_Persons = Persons;
     triggerStatusUpdate();
 
     return {
@@ -580,6 +580,39 @@ const setInterimScheduledStatus = () => {
 };
 
 const workerDidProcessFileOrIdle = throttled(updateMLStatusSnapshot, 2000);
+
+/**
+ * A massaged version of {@link CGroup} suitable for being shown in the UI.
+ *
+ * While cgroups are synced with remote, they do not directly correspond to
+ * "people" (this is ignoring the other issue that the cluster groups may be for
+ * non-human faces too). CGroups represent both positive and negative feedback,
+ * and the negations are specifically meant so that they're not shown in the UI.
+ *
+ * So while each Person has an underlying cgroups, not all cgroups have a
+ * corresponding Person.
+ *
+ * Beyond this, a {@link Person} object has data converted into a format that
+ * the UI can use directly and efficiently (as compared to a {@link CGroup},
+ * which is tailored for transmission and storage).
+ */
+export interface Person {
+    /** Unique ID (nanoid) of the underlying {@link CGroup}. */
+    id: string;
+    /** If this is a named person, then their name. */
+    name?: string;
+    /** The files in which this face occurs. */
+    files: number[];
+    /**
+     * The face that should be used as the "cover" face to represent this {@link
+     * Person} in the UI.
+     */
+    displayFaceID: string;
+    /**
+     * The {@link EnteFile} which contains the display face.
+     */
+    displayFaceFile: EnteFile;
+}
 
 /**
  * Use CLIP to perform a natural language search over image embeddings.
