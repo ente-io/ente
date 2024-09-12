@@ -17,8 +17,9 @@ import type { LocationTag } from "../user-entity";
  */
 export type SearchSuggestion = { label: string } & (
     | { type: "collection"; collectionID: number }
-    | { type: "files"; fileIDs: number[] }
     | { type: "fileType"; fileType: FileType }
+    | { type: "fileName"; fileIDs: number[] }
+    | { type: "fileCaption"; fileIDs: number[] }
     | { type: "date"; dateComponents: SearchDateComponents }
     | { type: "location"; locationTag: LocationTag }
     | { type: "city"; city: City }

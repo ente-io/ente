@@ -25,7 +25,6 @@ import type {
     SearchQuery,
     Suggestion,
 } from "./types";
-import { SuggestionType } from "./types";
 
 /**
  * A web worker that runs the search asynchronously so that the main thread
@@ -111,48 +110,23 @@ const suggestionsForString = (
     cities: Searchable<City>[],
 ): Suggestion[] =>
     [
+        // <-- caption suggestions will be inserted here by our caller.
         fileTypeSuggestions(s, labelledFileTypes),
         dateSuggestions(s, locale, holidays),
         locationSuggestions(s, locationTags, cities),
         collectionSuggestions(s, collections),
-        suggestionForFiles(fileNameMatches(s, files), searchString),
-        suggestionForFiles(fileCaptionMatches(s, files), searchString),
+        fileNameSuggestion(s, searchString, files),
+        fileCaptionSuggestion(s, searchString, files),
     ].flat();
 
 const collectionSuggestions = (s: string, collections: Collection[]) =>
     collections
         .filter(({ name }) => name.toLowerCase().includes(s))
         .map(({ id, name }) => ({
-            type: SuggestionType.COLLECTION,
-            value: id,
+            type: "collection",
+            collectionID: id,
             label: name,
         }));
-
-const fileNameMatches = (s: string, files: EnteFile[]) => {
-    // Convert the search string to a number. This allows searching a file by
-    // its exact (integral) ID.
-    const sn = Number(s) || undefined;
-
-    return files.filter(
-        ({ id, metadata }) =>
-            id === sn || metadata.title.toLowerCase().includes(s),
-    );
-};
-
-const suggestionForFiles = (matchingFiles: EnteFile[], searchString: string) =>
-    matchingFiles.length
-        ? {
-              type: SuggestionType.FILE_NAME,
-              value: matchingFiles.map((f) => f.id),
-              label: searchString,
-          }
-        : [];
-
-const fileCaptionMatches = (s: string, files: EnteFile[]) =>
-    files.filter((file) =>
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        file.pubMagicMetadata?.data?.caption?.toLowerCase().includes(s),
-    );
 
 const fileTypeSuggestions = (
     s: string,
@@ -160,11 +134,45 @@ const fileTypeSuggestions = (
 ) =>
     labelledFileTypes
         .filter(({ lowercasedName }) => lowercasedName.startsWith(s))
-        .map(({ fileType, label }) => ({
-            type: SuggestionType.FILE_TYPE,
-            value: fileType,
-            label,
-        }));
+        .map(({ fileType, label }) => ({ type: "fileType", fileType, label }));
+
+const fileNameSuggestion = (
+    s: string,
+    searchString: string,
+    files: EnteFile[],
+) => {
+    // Convert the search string to a number. This allows searching a file by
+    // its exact (integral) ID.
+    const sn = Number(s) || undefined;
+
+    const fileIDs = files
+        .filter(
+            ({ id, metadata }) =>
+                id === sn || metadata.title.toLowerCase().includes(s),
+        )
+        .map((f) => f.id);
+
+    return fileIDs.length
+        ? { type: "fileName", fileIDs, label: searchString }
+        : [];
+};
+
+const fileCaptionSuggestion = (
+    s: string,
+    searchString: string,
+    files: EnteFile[],
+) => {
+    const fileIDs = files
+        .filter((file) =>
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+            file.pubMagicMetadata?.data?.caption?.toLowerCase().includes(s),
+        )
+        .map((f) => f.id);
+
+    return fileIDs.length
+        ? { type: "fileCaption", fileIDs, label: searchString }
+        : [];
+};
 
 const dateSuggestions = (
     s: string,
@@ -172,8 +180,8 @@ const dateSuggestions = (
     holidays: Searchable<DateSearchResult>[],
 ) =>
     parseDateComponents(s, locale, holidays).map(({ components, label }) => ({
-        type: SuggestionType.DATE,
-        value: components,
+        type: "date",
+        dateComponents: components,
         label,
     }));
 
@@ -297,15 +305,15 @@ const locationSuggestions = (
     );
 
     return [
-        matchingLocationTags.map((t) => ({
-            type: SuggestionType.LOCATION,
-            value: t,
-            label: t.name,
+        matchingLocationTags.map((locationTag) => ({
+            type: "location",
+            locationTag,
+            label: locationTag.name,
         })),
-        matchingCities.map((c) => ({
-            type: SuggestionType.CITY,
-            value: c,
-            label: c.name,
+        matchingCities.map((city) => ({
+            type: "city",
+            city,
+            label: city.name,
         })),
     ].flat();
 };
