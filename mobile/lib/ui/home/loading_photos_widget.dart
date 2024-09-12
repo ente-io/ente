@@ -25,7 +25,7 @@ class LoadingPhotosWidget extends StatefulWidget {
 
 class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
   late StreamSubscription<SyncStatusUpdate> _firstImportEvent;
-  late StreamSubscription<LocalImportProgressEvent> _importProgressEvent;
+  StreamSubscription<LocalImportProgressEvent>? _importProgressEvent;
   int _currentPage = 0;
   late String _loadingMessage;
   final PageController _pageController = PageController(
@@ -38,7 +38,6 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
   @override
   void initState() {
     super.initState();
-    _loadingMessage = S.of(context).loadingYourPhotos;
     Future.delayed(const Duration(seconds: 60), () {
       oneMinuteOnScreen.value = true;
     });
@@ -51,21 +50,15 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
           // ignore: unawaited_futures
           routeToPage(
             context,
-            BackupFolderSelectionPage(
+            const BackupFolderSelectionPage(
               isOnboarding: true,
-              buttonText: S.of(context).startBackup,
+              isFirstBackup: true,
             ),
           );
         }
       }
     });
-    _importProgressEvent =
-        Bus.instance.on<LocalImportProgressEvent>().listen((event) {
-      _loadingMessage = S.of(context).processingImport(event.folderName);
-      if (mounted) {
-        setState(() {});
-      }
-    });
+
     _didYouKnowTimer =
         Timer.periodic(const Duration(seconds: 5), (Timer timer) {
       if (!mounted) {
@@ -86,9 +79,25 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_importProgressEvent != null) {
+      _importProgressEvent!.cancel();
+    } else {
+      _importProgressEvent =
+          Bus.instance.on<LocalImportProgressEvent>().listen((event) {
+        _loadingMessage = S.of(context).processingImport(event.folderName);
+        if (mounted) {
+          setState(() {});
+        }
+      });
+    }
+  }
+
+  @override
   void dispose() {
     _firstImportEvent.cancel();
-    _importProgressEvent.cancel();
+    _importProgressEvent?.cancel();
     _didYouKnowTimer.cancel();
     oneMinuteOnScreen.dispose();
     super.dispose();
@@ -96,6 +105,9 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
 
   @override
   Widget build(BuildContext context) {
+    if (_importProgressEvent == null) {
+      _loadingMessage = S.of(context).loadingYourPhotos;
+    }
     _setupLoadingMessages(context);
     final isLightMode = Theme.of(context).brightness == Brightness.light;
     return Scaffold(
