@@ -15,7 +15,7 @@ import {
 import {
     LoadingThumbnail,
     StaticThumbnail,
-} from "components/PlaceholderThumbnails";
+} from "@/new/photos/components/PlaceholderThumbnails";
 import i18n from "i18next";
 import { DeduplicateContext } from "pages/deduplicate";
 import { GalleryContext } from "pages/gallery";

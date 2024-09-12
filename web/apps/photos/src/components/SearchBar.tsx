@@ -1,6 +1,7 @@
 import { assertionFailed } from "@/base/assert";
 import { useIsMobileWidth } from "@/base/hooks";
 import { FileType } from "@/media/file-type";
+import { ItemCard } from "@/new/photos/components/ItemCards";
 import {
     isMLSupported,
     mlStatusSnapshot,
@@ -37,7 +38,6 @@ import {
     useTheme,
     type Theme,
 } from "@mui/material";
-import CollectionCard from "components/Collections/CollectionCard";
 import { ResultPreviewTile } from "components/Collections/styledComponents";
 import { t } from "i18next";
 import pDebounce from "p-debounce";
@@ -580,11 +580,10 @@ const OptionContents = ({ data }: { data: SearchOption }) => (
 
             <Stack direction={"row"} gap={1}>
                 {data.previewFiles.map((file) => (
-                    <CollectionCard
+                    <ItemCard
                         key={file.id}
                         coverFile={file}
-                        onClick={() => null}
-                        collectionTile={ResultPreviewTile}
+                        TileComponent={ResultPreviewTile}
                     />
                 ))}
             </Stack>

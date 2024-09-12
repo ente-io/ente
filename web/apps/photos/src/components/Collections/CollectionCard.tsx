@@ -3,7 +3,7 @@ import { EnteFile } from "@/new/photos/types/file";
 import {
     LoadingThumbnail,
     StaticThumbnail,
-} from "components/PlaceholderThumbnails";
+} from "@/new/photos/components/PlaceholderThumbnails";
 import { useEffect, useState } from "react";
 
 export default function CollectionCard(props: {
