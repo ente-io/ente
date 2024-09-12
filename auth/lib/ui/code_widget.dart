@@ -235,6 +235,13 @@ class _CodeWidgetState extends State<CodeWidget> {
             return ContextMenuRegion(
               contextMenu: ContextMenu(
                 entries: <ContextMenuEntry>[
+                  if (!widget.code.isTrashed &&
+                      widget.code.type.isTOTPCompatible)
+                    MenuItem(
+                      label: context.l10n.share,
+                      icon: Icons.adaptive.share_outlined,
+                      onSelected: () => _onSharePressed(null),
+                    ),
                   if (!widget.code.isTrashed)
                     MenuItem(
                       label: 'QR',
@@ -291,8 +298,9 @@ class _CodeWidgetState extends State<CodeWidget> {
               extentRatio: extendRatio,
               motion: const ScrollMotion(),
               children: [
-                if (!widget.code.isTrashed) SizedBox(width: slideSpace),
-                if (!widget.code.isTrashed)
+                if (!widget.code.isTrashed && widget.code.type.isTOTPCompatible)
+                  SizedBox(width: slideSpace),
+                if (!widget.code.isTrashed && widget.code.type.isTOTPCompatible)
                   SlidableAction(
                     onPressed: _onSharePressed,
                     backgroundColor: Colors.grey.withOpacity(0.1),
