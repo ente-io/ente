@@ -143,6 +143,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m45(toEmail) => "Please send the logs to \n${toEmail}";
 
+  static String m73(folderName) => "Processing ${folderName}...";
+
   static String m46(storeName) => "Rate us on ${storeName}";
 
   static String m47(storageInGB) =>
@@ -938,6 +940,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Loading your photos..."),
         "loadingModel":
             MessageLookupByLibrary.simpleMessage("Downloading models..."),
+        "loadingYourPhotos":
+            MessageLookupByLibrary.simpleMessage("Loading your photos..."),
         "localGallery": MessageLookupByLibrary.simpleMessage("Local gallery"),
         "localSyncErrorMessage": MessageLookupByLibrary.simpleMessage(
             "Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team"),
@@ -1182,6 +1186,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Private backups"),
         "privateSharing":
             MessageLookupByLibrary.simpleMessage("Private sharing"),
+        "processingImport": m73,
         "publicLinkCreated":
             MessageLookupByLibrary.simpleMessage("Public link created"),
         "publicLinkEnabled":

@@ -1322,5 +1322,7 @@
   "showPerson": "Show person",
   "sort": "Sort",
   "mostRecent": "Most recent",
-  "mostRelevant": "Most relevant"
+  "mostRelevant": "Most relevant",
+  "loadingYourPhotos": "Loading your photos...",
+  "processingImport": "Processing {folderName}..."
 }

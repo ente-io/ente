@@ -9564,6 +9564,26 @@ class S {
       args: [],
     );
   }
+
+  /// `Loading your photos...`
+  String get loadingYourPhotos {
+    return Intl.message(
+      'Loading your photos...',
+      name: 'loadingYourPhotos',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Processing {folderName}...`
+  String processingImport(Object folderName) {
+    return Intl.message(
+      'Processing $folderName...',
+      name: 'processingImport',
+      desc: '',
+      args: [folderName],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

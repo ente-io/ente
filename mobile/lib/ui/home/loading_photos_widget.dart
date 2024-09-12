@@ -27,7 +27,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
   late StreamSubscription<SyncStatusUpdate> _firstImportEvent;
   late StreamSubscription<LocalImportProgressEvent> _importProgressEvent;
   int _currentPage = 0;
-  String _loadingMessage = "Loading your photos...";
+  late String _loadingMessage;
   final PageController _pageController = PageController(
     initialPage: 0,
   );
@@ -38,6 +38,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
   @override
   void initState() {
     super.initState();
+    _loadingMessage = S.of(context).loadingYourPhotos;
     Future.delayed(const Duration(seconds: 60), () {
       oneMinuteOnScreen.value = true;
     });
@@ -60,7 +61,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
     });
     _importProgressEvent =
         Bus.instance.on<LocalImportProgressEvent>().listen((event) {
-      _loadingMessage = 'Processing ${event.folderName}...';
+      _loadingMessage = S.of(context).processingImport(event.folderName);
       if (mounted) {
         setState(() {});
       }
