@@ -9,8 +9,8 @@ import { clipMatches, isMLEnabled } from "../ml";
 import type {
     City,
     ClipSearchScores,
-    DateSearchResult,
     LabelledFileType,
+    LabelledSearchDateComponents,
     LocalizedSearchData,
     SearchableData,
     SearchDateComponents,
@@ -144,7 +144,7 @@ const localizedSearchData = () =>
 /**
  * A list of holidays - their yearly dates and localized names.
  */
-const holidays = (): DateSearchResult[] => [
+const holidays = (): LabelledSearchDateComponents[] => [
     { components: { month: 12, day: 25 }, label: t("CHRISTMAS") },
     { components: { month: 12, day: 24 }, label: t("CHRISTMAS_EVE") },
     { components: { month: 1, day: 1 }, label: t("NEW_YEAR") },

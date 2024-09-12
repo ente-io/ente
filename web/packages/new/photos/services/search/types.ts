@@ -51,9 +51,7 @@ export interface SearchableData {
     files: EnteFile[];
 }
 
-// TODO-cgroup: Audit below
-
-export interface DateSearchResult {
+export interface LabelledSearchDateComponents {
     components: SearchDateComponents;
     label: string;
 }
@@ -83,7 +81,7 @@ export type Searchable<T> = T & {
  */
 export interface LocalizedSearchData {
     locale: string;
-    holidays: Searchable<DateSearchResult>[];
+    holidays: Searchable<LabelledSearchDateComponents>[];
     labelledFileTypes: Searchable<LabelledFileType>[];
 }
 

@@ -16,8 +16,8 @@ import {
 } from "../user-entity";
 import type {
     City,
-    DateSearchResult,
     LabelledFileType,
+    LabelledSearchDateComponents,
     LocalizedSearchData,
     Searchable,
     SearchableData,
@@ -179,7 +179,7 @@ const fileCaptionSuggestion = (
 const dateSuggestions = (
     s: string,
     locale: string,
-    holidays: Searchable<DateSearchResult>[],
+    holidays: Searchable<LabelledSearchDateComponents>[],
 ): SearchSuggestion[] =>
     parseDateComponents(s, locale, holidays).map(({ components, label }) => ({
         type: "date",
@@ -204,15 +204,18 @@ const dateSuggestions = (
 const parseDateComponents = (
     s: string,
     locale: string,
-    holidays: Searchable<DateSearchResult>[],
-): DateSearchResult[] =>
+    holidays: Searchable<LabelledSearchDateComponents>[],
+): LabelledSearchDateComponents[] =>
     [
         parseChrono(s, locale),
         parseYearComponents(s),
         holidays.filter(searchableIncludes(s)),
     ].flat();
 
-const parseChrono = (s: string, locale: string): DateSearchResult[] =>
+const parseChrono = (
+    s: string,
+    locale: string,
+): LabelledSearchDateComponents[] =>
     chrono
         .parse(s)
         .map((result) => {
@@ -246,7 +249,7 @@ const parseChrono = (s: string, locale: string): DateSearchResult[] =>
         .filter((x) => x !== undefined);
 
 /** chrono does not parse years like "2024", so do it manually. */
-const parseYearComponents = (s: string): DateSearchResult[] => {
+const parseYearComponents = (s: string): LabelledSearchDateComponents[] => {
     // s is already trimmed.
     if (s.length == 4) {
         const year = parseInt(s);
