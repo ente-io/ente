@@ -1,14 +1,12 @@
-import { isDesktop } from "@/base/app";
 import log from "@/base/log";
 import { masterKeyFromSession } from "@/base/session-store";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
 import { FileType } from "@/media/file-type";
 import type { LocationTag } from "@/new/photos/services/user-entity";
 import i18n, { t } from "i18next";
-import { clipMatches, isMLEnabled } from "../ml";
+import { clipMatches, isMLEnabled, isMLSupported } from "../ml";
 import type {
     City,
-    ClipSearchScores,
     LabelledFileType,
     LabelledSearchDateComponents,
     LocalizedSearchData,
@@ -16,10 +14,8 @@ import type {
     SearchDateComponents,
     SearchOption,
     SearchPerson,
-    SearchQuery,
-    Suggestion,
+    SearchSuggestion,
 } from "./types";
-import { SuggestionType } from "./types";
 import type { SearchWorker } from "./worker";
 
 /**
@@ -80,7 +76,7 @@ export const suggestionsForString = async (searchString: string) => {
     // separately, in parallel with the rest of the search query construction in
     // the search worker, then combine the two.
     const results = await Promise.all([
-        clipSuggestions(s, searchString).then((s) => s ?? []),
+        clipSuggestion(s, searchString).then((s) => s ?? []),
         worker().then((w) =>
             w.suggestionsForString(s, searchString, localizedSearchData()),
         ),
@@ -88,24 +84,23 @@ export const suggestionsForString = async (searchString: string) => {
     return results.flat();
 };
 
-const clipSuggestions = async (s: string, searchString: string) => {
-    if (!isDesktop) return undefined;
+const clipSuggestion = async (
+    s: string,
+    searchString: string,
+): Promise<SearchSuggestion | undefined> => {
+    if (!isMLSupported) return undefined;
     if (!isMLEnabled()) return undefined;
 
     const matches = await clipMatches(s);
     if (!matches) return undefined;
-    return {
-        type: SuggestionType.CLIP,
-        value: matches,
-        label: searchString,
-    };
+    return { type: "clip", clipScoreForFileID: matches, label: searchString };
 };
 
 /**
  * Return the list of {@link EnteFile}s (from amongst the previously set
  * {@link SearchableData}) that match the given search {@link suggestion}.
  */
-export const filterSearchableFiles = async (suggestion: SearchQuery) =>
+export const filterSearchableFiles = async (suggestion: SearchSuggestion) =>
     worker().then((w) => w.filterSearchableFiles(suggestion));
 
 /**
@@ -203,7 +198,7 @@ async function convertSuggestionsToOptions(
     return previewImageAppendedOptions;
 }
 
-function convertSuggestionToSearchQuery(option: Suggestion): SearchQuery {
+function convertSuggestionToSearchQuery(option: Suggestion): SearchSuggestion {
     switch (option.type) {
         case SuggestionType.DATE:
             return {
