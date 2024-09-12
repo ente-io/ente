@@ -63,12 +63,12 @@ String getNextTotp(Code code) {
   final List<String> codes = [];
   if (code.type == Type.steam || code.issuer.toLowerCase() == 'steam') {
     final SteamTOTP steamTotp = SteamTOTP(secret: code.secret);
-    for (int i = 1; i <= count; i++) {
+    for (int i = 0; i < count; i++) {
       int generatedTime = startTime + code.period * 1000 * i;
       codes.add(steamTotp.generate(generatedTime ~/ 1000));
     }
   } else {
-    for (int i = 1; i <= count; i++) {
+    for (int i = 0; i < count; i++) {
       int generatedTime = startTime + code.period * 1000 * i;
       final genCode = otp.OTP.generateTOTPCodeString(
         secret,
