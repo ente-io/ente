@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import "package:photos/models/backup/backup_item.dart";
 import "package:photos/models/backup/backup_item_status.dart";
 import 'package:photos/theme/ente_theme.dart';
+import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/utils/file_uploader.dart";
-import "package:photos/utils/thumbnail_util.dart";
 
 class BackupItemCard extends StatefulWidget {
   const BackupItemCard({
@@ -20,29 +20,17 @@ class BackupItemCard extends StatefulWidget {
 }
 
 class _BackupItemCardState extends State<BackupItemCard> {
-  Uint8List? thumbnail;
   String? folderName;
 
   @override
   void initState() {
     super.initState();
-    _getThumbnail();
-    _getFolderName();
+    folderName = widget.item.file.deviceFolder ?? '';
   }
 
   @override
   void dispose() {
     super.dispose();
-  }
-
-  _getThumbnail() async {
-    thumbnail = await getThumbnail(widget.item.file);
-    setState(() {});
-  }
-
-  _getFolderName() async {
-    folderName = widget.item.file.deviceFolder ?? '';
-    setState(() {});
   }
 
   @override
@@ -67,12 +55,10 @@ class _BackupItemCardState extends State<BackupItemCard> {
             height: 60,
             child: ClipRRect(
               borderRadius: BorderRadius.circular(4),
-              child: thumbnail != null
-                  ? Image.memory(
-                      thumbnail!,
-                      fit: BoxFit.cover,
-                    )
-                  : const SizedBox(),
+              child: ThumbnailWidget(
+                widget.item.file,
+                shouldShowSyncStatus: false,
+              ),
             ),
           ),
           const SizedBox(width: 12),
