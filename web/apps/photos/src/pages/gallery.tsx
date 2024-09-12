@@ -526,7 +526,7 @@ export default function Gallery() {
             return;
         }
 
-        if (activeCollectionID === TRASH_SECTION && !isInSearchMode) {
+        if (activeCollectionID === TRASH_SECTION && !selectedSearchOption) {
             return getUniqueFiles([
                 ...trashedFiles,
                 ...files.filter((file) => tempDeletedFileIds?.has(file.id)),
@@ -610,7 +610,6 @@ export default function Gallery() {
         tempDeletedFileIds,
         tempHiddenFileIds,
         hiddenFileIds,
-        isInSearchMode,
         selectedSearchOption,
         activeCollectionID,
         archivedCollections,
