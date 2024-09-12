@@ -21,7 +21,6 @@ import {
 } from "@/new/photos/services/search/types";
 import { labelForSuggestionType } from "@/new/photos/services/search/ui";
 import type { LocationTag } from "@/new/photos/services/user-entity";
-import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import CalendarIcon from "@mui/icons-material/CalendarMonth";
 import CloseIcon from "@mui/icons-material/Close";
 import FolderIcon from "@mui/icons-material/Folder";
@@ -322,7 +321,7 @@ const useSelectStyles = ({
         "& :hover": {
             cursor: "pointer",
         },
-        "& .main": {
+        "& .option-contents": {
             backgroundColor: isFocused && colors.background.elevated2,
         },
         "&:last-child .MuiDivider-root": {
@@ -543,46 +542,45 @@ async function getAllPeople(limit: number = undefined) {
 
 const Option: React.FC<OptionProps<SearchOption, false>> = (props) => (
     <SelectComponents.Option {...props}>
-        <LabelWithInfo data={props.data} />
+        <OptionContents data={props.data} />
+        <Divider sx={{ mx: 2, my: 1 }} />
     </SelectComponents.Option>
 );
 
-const LabelWithInfo = ({ data }: { data: SearchOption }) => {
-    return (
-        <>
-            <Box className="main" px={2} py={1}>
-                <Typography variant="mini" mb={1}>
-                    {labelForSuggestionType(data.type)}
+const OptionContents = ({ data }: { data: SearchOption }) => (
+    <Stack className="option-contents" gap={1} px={2} py={1}>
+        <Typography variant="mini">
+            {labelForSuggestionType(data.type)}
+        </Typography>
+        <Stack
+            direction="row"
+            gap={1}
+            sx={{ alignItems: "center", justifyContent: "space-between" }}
+        >
+            <Box>
+                <Typography
+                    sx={{ fontWeight: "bold", wordBreak: "break-word" }}
+                >
+                    {data.label}
                 </Typography>
-                <SpaceBetweenFlex>
-                    <Box mr={1}>
-                        <Typography
-                            sx={{ fontWeight: "bold", wordBreak: "break-word" }}
-                        >
-                            {data.label}
-                        </Typography>
-
-                        <Typography color="text.muted">
-                            {t("photos_count", { count: data.fileCount })}
-                        </Typography>
-                    </Box>
-
-                    <Stack direction={"row"} spacing={1}>
-                        {data.previewFiles.map((file) => (
-                            <CollectionCard
-                                key={file.id}
-                                coverFile={file}
-                                onClick={() => null}
-                                collectionTile={ResultPreviewTile}
-                            />
-                        ))}
-                    </Stack>
-                </SpaceBetweenFlex>
+                <Typography color="text.muted">
+                    {t("photos_count", { count: data.fileCount })}
+                </Typography>
             </Box>
-            <Divider sx={{ mx: 2, my: 1 }} />
-        </>
-    );
-};
+
+            <Stack direction={"row"} gap={1}>
+                {data.previewFiles.map((file) => (
+                    <CollectionCard
+                        key={file.id}
+                        coverFile={file}
+                        onClick={() => null}
+                        collectionTile={ResultPreviewTile}
+                    />
+                ))}
+            </Stack>
+        </Stack>
+    </Stack>
+);
 
 /**
  * A custom input for react-select that is always visible.
