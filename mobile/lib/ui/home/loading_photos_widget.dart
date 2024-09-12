@@ -50,10 +50,9 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
           // ignore: unawaited_futures
           routeToPage(
             context,
-            BackupFolderSelectionPage(
+            const BackupFolderSelectionPage(
               isOnboarding: true,
-              //Move this from here?
-              buttonText: S.of(context).startBackup,
+              isFirstBackup: true,
             ),
           );
         }

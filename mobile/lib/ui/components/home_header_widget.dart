@@ -86,8 +86,8 @@ class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
               unawaited(
                 routeToPage(
                   context,
-                  BackupFolderSelectionPage(
-                    buttonText: S.of(context).backup,
+                  const BackupFolderSelectionPage(
+                    isFirstBackup: false,
                   ),
                 ),
               );
