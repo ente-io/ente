@@ -54,26 +54,31 @@ class _BackupStatusScreenState extends State<BackupStatusScreen> {
         )
         .toList();
     Bus.instance.on<FileUploadedEvent>().listen((event) {
-      setState(() {
-        result!.insert(
-          0,
-          BackupItem(
-            status: BackupItemStatus.uploaded,
-            file: event.file,
-            collectionID: event.file.collectionID ?? 0,
-            completer: null,
-          ),
-        );
-      });
+      result!.insert(
+        0,
+        BackupItem(
+          status: BackupItemStatus.uploaded,
+          file: event.file,
+          collectionID: event.file.collectionID ?? 0,
+          completer: null,
+        ),
+      );
+      safeSetState();
     });
-    setState(() {});
+    safeSetState();
   }
 
   void checkBackupUpdatedEvent() {
     Bus.instance.on<BackupUpdatedEvent>().listen((event) {
       items = event.items;
-      setState(() {});
+      safeSetState();
     });
+  }
+
+  void safeSetState() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
