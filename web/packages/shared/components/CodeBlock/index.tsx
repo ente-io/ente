@@ -1,6 +1,5 @@
-import { FreeFlowText } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
-import type { BoxProps } from "@mui/material";
+import { type BoxProps, styled } from "@mui/material";
 import React from "react";
 import CopyButton from "./CopyButton";
 import { CodeWrapper, CopyButtonWrapper, Wrapper } from "./styledComponents";
@@ -35,3 +34,9 @@ export default function CodeBlock({
         </Wrapper>
     );
 }
+
+const FreeFlowText = styled("div")`
+    word-break: break-word;
+    min-width: 30%;
+    text-align: left;
+`;

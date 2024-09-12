@@ -21,10 +21,7 @@ import {
 } from "@/new/photos/services/search/types";
 import { labelForSuggestionType } from "@/new/photos/services/search/ui";
 import type { LocationTag } from "@/new/photos/services/user-entity";
-import {
-    FreeFlowText,
-    SpaceBetweenFlex,
-} from "@ente/shared/components/Container";
+import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import CalendarIcon from "@mui/icons-material/CalendarMonth";
 import CloseIcon from "@mui/icons-material/Close";
 import FolderIcon from "@mui/icons-material/Folder";
@@ -559,11 +556,12 @@ const LabelWithInfo = ({ data }: { data: SearchOption }) => {
                 </Typography>
                 <SpaceBetweenFlex>
                     <Box mr={1}>
-                        <FreeFlowText>
-                            <Typography fontWeight={"bold"}>
-                                {data.label}
-                            </Typography>
-                        </FreeFlowText>
+                        <Typography
+                            sx={{ fontWeight: "bold", wordBreak: "break-word" }}
+                        >
+                            {data.label}
+                        </Typography>
+
                         <Typography color="text.muted">
                             {t("photos_count", { count: data.fileCount })}
                         </Typography>
