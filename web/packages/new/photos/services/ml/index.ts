@@ -59,18 +59,30 @@ class MLState {
     comlinkWorker: Promise<ComlinkWorker<typeof MLWorker>> | undefined;
 
     /**
-     * Subscriptions to {@link MLStatus}.
+     * Subscriptions to {@link MLStatus} updates.
      *
      * See {@link mlStatusSubscribe}.
      */
     mlStatusListeners: (() => void)[] = [];
 
     /**
-     * Snapshot of {@link MLStatus}.
-     *
-     * See {@link mlStatusSnapshot}.
+     * Snapshot of the {@link MLStatus} returned by the {@link mlStatusSnapshot}
+     * function.
      */
     mlStatusSnapshot: MLStatus | undefined;
+
+    /**
+     * Subscriptions to updates to the list of {@link Person}s we know about.
+     *
+     * See {@link peopleSubscribe}.
+     */
+    peopleListeners: (() => void)[] = [];
+
+    /**
+     * Snapshot of the {@link Person}s returned by the {@link peopleSnapshot}
+     * function.
+     */
+    peopleSnapshot: Person[] | undefined;
 
     /**
      * In flight face crop regeneration promises indexed by the IDs of the files
