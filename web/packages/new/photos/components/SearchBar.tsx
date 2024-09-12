@@ -1,28 +1,15 @@
 import { assertionFailed } from "@/base/assert";
 import { useIsMobileWidth } from "@/base/hooks";
-import { FileType } from "@/media/file-type";
 import { ItemCard, ResultPreviewTile } from "@/new/photos/components/ItemCards";
 import {
     isMLSupported,
     mlStatusSnapshot,
     mlStatusSubscribe,
 } from "@/new/photos/services/ml";
-import { getAutoCompleteSuggestions } from "@/new/photos/services/search";
-import type {
-    City,
-    ClipSearchScores,
-    SearchDateComponents,
-    SearchOption,
-    SearchPerson,
-    SearchQuery,
-    SearchResultSummary,
-} from "@/new/photos/services/search/types";
-import { SuggestionType } from "@/new/photos/services/search/types";
-import { labelForSuggestionType } from "@/new/photos/services/search/ui";
-import type { LocationTag } from "@/new/photos/services/user-entity";
+import { searchOptionsForString } from "@/new/photos/services/search";
+import type { SearchOption } from "@/new/photos/services/search/types";
 import CalendarIcon from "@mui/icons-material/CalendarMonth";
 import CloseIcon from "@mui/icons-material/Close";
-import FolderIcon from "@mui/icons-material/Folder";
 import ImageIcon from "@mui/icons-material/Image";
 import LocationIcon from "@mui/icons-material/LocationOn";
 import SearchIcon from "@mui/icons-material/Search";
@@ -38,14 +25,7 @@ import {
 } from "@mui/material";
 import { t } from "i18next";
 import pDebounce from "p-debounce";
-import React, {
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-    useSyncExternalStore,
-} from "react";
+import React, { useMemo, useRef, useState, useSyncExternalStore } from "react";
 import {
     components as SelectComponents,
     type ControlProps,
@@ -70,21 +50,19 @@ interface SearchBarProps {
      *
      * When we're in search mode,
      *
-     * 1. Other icons from the navbar are hidden
+     * 1. Other icons from the navbar are hidden.
      * 2. Next to the search input there is a cancel button to exit search mode.
      */
     isInSearchMode: boolean;
     /**
      * Enter or exit "search mode".
      */
-    setIsInSearchMode: (v: boolean) => void;
-    updateSearch: UpdateSearch;
+    setIsInSearchMode: (b: boolean) => void;
+    /**
+     * Set or clear the selected {@link SearchOption}.
+     */
+    setSelectedSearchOption: (o: SearchOption | undefined) => void;
 }
-
-export type UpdateSearch = (
-    search: SearchQuery | null,
-    summary: SearchResultSummary | null,
-) => void;
 
 /**
  * The search bar is a styled "select" element that allow the user to type in
@@ -104,7 +82,7 @@ export type UpdateSearch = (
 export const SearchBar: React.FC<SearchBarProps> = ({
     setIsInSearchMode,
     isInSearchMode,
-    ...props
+    setSelectedSearchOption,
 }) => {
     const isMobileWidth = useIsMobileWidth();
 
@@ -115,7 +93,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
             {isMobileWidth && !isInSearchMode ? (
                 <MobileSearchArea onSearch={showSearchInput} />
             ) : (
-                <SearchInput {...props} isInSearchMode={isInSearchMode} />
+                <SearchInput {...{ isInSearchMode, setSelectedSearchOption }} />
             )}
         </Box>
     );
@@ -134,39 +112,34 @@ const MobileSearchArea: React.FC<MobileSearchAreaProps> = ({ onSearch }) => (
     </Box>
 );
 
-interface SearchInputProps {
-    isInSearchMode: boolean;
-    updateSearch: UpdateSearch;
-}
-
-const SearchInput: React.FC<SearchInputProps> = ({
+const SearchInput: React.FC<Omit<SearchBarProps, "setIsInSearchMode">> = ({
     isInSearchMode,
-    updateSearch,
+    setSelectedSearchOption,
 }) => {
     // A ref to the top level Select.
     const selectRef = useRef<SelectInstance<SearchOption> | null>(null);
     // The currently selected option.
-    const [value, setValue] = useState<SearchOption | undefined | null>();
+    const [value, setValue] = useState<SearchOption | undefined>();
     // The contents of the input field associated with the select.
-    const [inputValue, setInputValue] = useState<string | null | undefined>("");
+    const [inputValue, setInputValue] = useState("");
 
     const theme = useTheme();
 
     const styles = useMemo(() => createSelectStyles(theme), [theme]);
     const components = useMemo(() => ({ Control, Input, Option }), []);
 
-    useEffect(() => {
-        search(value);
-    }, [value]);
+    const handleChange = (value: SearchOption | null | undefined) => {
+        setValue(value ?? undefined);
+        setInputValue(value?.suggestion.label ?? "");
+        // TODO-Cluster:
+        if (value) setSelectedSearchOption(value);
 
-    const handleChange = (value: SearchOption | null) => {
-        setValue(value);
-        setInputValue(value?.label);
         // The Select has a blurInputOnSelect prop, but that makes the input
         // field lose focus, not the entire menu (e.g. when pressing twice).
         //
         // We anyways need the ref so that we can blur on selecting a person
-        // from the default options.
+        // from the default options. So also use it to blur the entire Select
+        // (including the menu) when the user selects an option.
         selectRef.current?.blur();
     };
 
@@ -175,67 +148,16 @@ const SearchInput: React.FC<SearchInputProps> = ({
     };
 
     const resetSearch = () => {
-        updateSearch(null, null);
-        setValue(null);
+        setValue(undefined);
         setInputValue("");
-    };
-
-    const loadOptions = useCallback(
-        pDebounce(getAutoCompleteSuggestions, 250),
-        [],
-    );
-
-    const search = (selectedOption: SearchOption | null | undefined) => {
-        if (!selectedOption) {
-            return;
-        }
-        let search: SearchQuery;
-        switch (selectedOption.type) {
-            case SuggestionType.DATE:
-                search = {
-                    date: selectedOption.value as SearchDateComponents,
-                };
-                break;
-            case SuggestionType.LOCATION:
-                search = {
-                    location: selectedOption.value as LocationTag,
-                };
-                break;
-            case SuggestionType.CITY:
-                search = {
-                    city: selectedOption.value as City,
-                };
-                break;
-            case SuggestionType.COLLECTION:
-                search = { collection: selectedOption.value as number };
-                setValue(null);
-                setInputValue("");
-                break;
-            case SuggestionType.FILE_NAME:
-                search = { files: selectedOption.value as number[] };
-                break;
-            case SuggestionType.FILE_CAPTION:
-                search = { files: selectedOption.value as number[] };
-                break;
-            case SuggestionType.PERSON:
-                search = { person: selectedOption.value as SearchPerson };
-                break;
-            case SuggestionType.FILE_TYPE:
-                search = { fileType: selectedOption.value as FileType };
-                break;
-            case SuggestionType.CLIP:
-                search = { clip: selectedOption.value as ClipSearchScores };
-        }
-        updateSearch(search, {
-            optionName: selectedOption.label,
-            fileCount: selectedOption.fileCount,
-        });
+        setSelectedSearchOption(undefined);
     };
 
     const handleSelectCGroup = (value: SearchOption) => {
         // Dismiss the search menu.
         selectRef.current?.blur();
         setValue(value);
+        setSelectedSearchOption(undefined);
     };
 
     const handleFocus = () => {
@@ -259,7 +181,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
                 styles={styles}
                 loadOptions={loadOptions}
                 onChange={handleChange}
-                inputValue={inputValue ?? ""}
+                inputValue={inputValue}
                 onInputChange={handleInputChange}
                 isClearable
                 escapeClearsValue
@@ -290,6 +212,8 @@ const SearchInputWrapper = styled(Box)`
     max-width: 484px;
     margin: auto;
 `;
+
+const loadOptions = pDebounce(searchOptionsForString, 250);
 
 const createSelectStyles = ({
     colors,
@@ -356,24 +280,22 @@ const Control = ({ children, ...props }: ControlProps<SearchOption, false>) => (
                     color: (theme) => theme.colors.stroke.muted,
                 }}
             >
-                {iconForOptionType(props.getValue()[0]?.type)}
+                {iconForOption(props.getValue()[0])}
             </Box>
             {children}
         </Stack>
     </SelectComponents.Control>
 );
 
-const iconForOptionType = (type: SuggestionType | undefined) => {
-    switch (type) {
-        case SuggestionType.DATE:
-            return <CalendarIcon />;
-        case SuggestionType.LOCATION:
-        case SuggestionType.CITY:
-            return <LocationIcon />;
-        case SuggestionType.COLLECTION:
-            return <FolderIcon />;
-        case SuggestionType.FILE_NAME:
+const iconForOption = (option: SearchOption | undefined) => {
+    switch (option?.suggestion.type) {
+        case "fileName":
             return <ImageIcon />;
+        case "date":
+            return <CalendarIcon />;
+        case "location":
+        case "city":
+            return <LocationIcon />;
         default:
             return <SearchIcon />;
     }
@@ -554,11 +476,9 @@ const Option: React.FC<OptionProps<SearchOption, false>> = (props) => (
     </SelectComponents.Option>
 );
 
-const OptionContents = ({ data }: { data: SearchOption }) => (
+const OptionContents = ({ data: option }: { data: SearchOption }) => (
     <Stack className="option-contents" gap={1} px={2} py={1}>
-        <Typography variant="mini">
-            {labelForSuggestionType(data.type)}
-        </Typography>
+        <Typography variant="mini">{labelForOption(option)}</Typography>
         <Stack
             direction="row"
             gap={1}
@@ -568,15 +488,15 @@ const OptionContents = ({ data }: { data: SearchOption }) => (
                 <Typography
                     sx={{ fontWeight: "bold", wordBreak: "break-word" }}
                 >
-                    {data.label}
+                    {option.suggestion.label}
                 </Typography>
                 <Typography color="text.muted">
-                    {t("photos_count", { count: data.fileCount })}
+                    {t("photos_count", { count: option.fileCount })}
                 </Typography>
             </Box>
 
             <Stack direction={"row"} gap={1}>
-                {data.previewFiles.map((file) => (
+                {option.previewFiles.map((file) => (
                     <ItemCard
                         key={file.id}
                         coverFile={file}
@@ -587,3 +507,33 @@ const OptionContents = ({ data }: { data: SearchOption }) => (
         </Stack>
     </Stack>
 );
+
+const labelForOption = (option: SearchOption) => {
+    switch (option.suggestion.type) {
+        case "collection":
+            return t("album");
+
+        case "fileType":
+            return t("file_type");
+
+        case "fileName":
+            return t("file_name");
+
+        case "fileCaption":
+            return t("description");
+
+        case "date":
+            return t("date");
+        case "location":
+            return t("location");
+
+        case "city":
+            return t("location");
+
+        case "clip":
+            return t("magic");
+
+        case "cgroup":
+            return t("person");
+    }
+};
