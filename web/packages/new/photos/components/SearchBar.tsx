@@ -183,6 +183,8 @@ const SearchInput: React.FC<Omit<SearchBarProps, "setIsInSearchMode">> = ({
                 onChange={handleChange}
                 inputValue={inputValue}
                 onInputChange={handleInputChange}
+                // Needed to get the placeholder to reset on `resetSearch`.
+                controlShouldRenderValue={false}
                 isClearable
                 escapeClearsValue
                 onFocus={handleFocus}
