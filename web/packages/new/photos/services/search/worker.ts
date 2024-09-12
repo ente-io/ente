@@ -96,6 +96,17 @@ export class SearchWorker {
             suggestion,
         );
     }
+
+    filterSearchableFiles2(suggestions: SearchSuggestion[]) {
+        return suggestions.map((suggestion) => {
+            return sortMatchesIfNeeded(
+                this.searchableData.files.filter((f) =>
+                    isMatchingFile(f, suggestion),
+                ),
+                suggestion,
+            );
+        });
+    }
 }
 
 expose(SearchWorker);

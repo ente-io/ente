@@ -102,19 +102,31 @@ const clipSuggestion = async (
     return { type: "clip", clipScoreForFileID: matches, label: searchString };
 };
 
-const suggestionsToOptions = async (suggestions: SearchSuggestion[]) =>
-    Promise.all(
-        suggestions.map(async (suggestion) => {
-            const matchingFiles = await filterSearchableFiles(suggestion);
-            return matchingFiles.length
-                ? {
-                      suggestion,
-                      fileCount: matchingFiles.length,
-                      previewFiles: matchingFiles.slice(0, 3),
-                  }
-                : undefined;
-        }),
-    ).then((r) => r.filter((o) => !!o));
+// const suggestionsToOptions = async (suggestions: SearchSuggestion[]) =>
+//     Promise.all(
+//         suggestions.map(async (suggestion) => {
+//             const matchingFiles = await filterSearchableFiles(suggestion);
+//             return matchingFiles.length
+//                 ? {
+//                       suggestion,
+//                       fileCount: matchingFiles.length,
+//                       previewFiles: matchingFiles.slice(0, 3),
+//                   }
+//                 : undefined;
+//         }),
+//     ).then((r) => r.filter((o) => !!o));
+    const suggestionsToOptions = async (suggestions: SearchSuggestion[]) => {
+        const filess = await filterSearchableFiles2(suggestions);
+        const f2 = filess.map((f, i) => [f, suggestions[i]!] as const);
+        return f2
+            .filter(([fs]) => fs.length)
+            .map(([f, s]) => ({
+                // suggestion: suggestions[i],
+                suggestion: s,
+                fileCount: f.length,
+                previewFiles: f.slice(0, 3),
+            }));
+    };
 
 /**
  * Return the list of {@link EnteFile}s (from amongst the previously set
@@ -122,6 +134,9 @@ const suggestionsToOptions = async (suggestions: SearchSuggestion[]) =>
  */
 export const filterSearchableFiles = async (suggestion: SearchSuggestion) =>
     worker().then((w) => w.filterSearchableFiles(suggestion));
+
+export const filterSearchableFiles2 = async (suggestion: SearchSuggestion[]) =>
+    worker().then((w) => w.filterSearchableFiles2(suggestion));
 
 /**
  * Cached value of {@link localizedSearchData}.
