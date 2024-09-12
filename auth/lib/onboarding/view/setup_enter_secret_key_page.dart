@@ -31,7 +31,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
   late TextEditingController _accountController;
   late TextEditingController _secretController;
   late bool _secretKeyObscured;
-  late List<String> tags = [...?widget.code?.display.tags];
+  late List<String> selectedTags = [...?widget.code?.display.tags];
   List<String> allTags = [];
   StreamSubscription<CodesUpdatedEvent>? _streamSubscription;
 
@@ -164,14 +164,14 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                       (e) => TagChip(
                         label: e,
                         action: TagChipAction.check,
-                        state: tags.contains(e)
+                        state: selectedTags.contains(e)
                             ? TagChipState.selected
                             : TagChipState.unselected,
                         onTap: () {
-                          if (tags.contains(e)) {
-                            tags.remove(e);
+                          if (selectedTags.contains(e)) {
+                            selectedTags.remove(e);
                           } else {
-                            tags.add(e);
+                            selectedTags.add(e);
                           }
                           setState(() {});
                         },
@@ -184,12 +184,12 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                           builder: (BuildContext context) {
                             return AddTagDialog(
                               onTap: (tag) {
-                                if (allTags.contains(tag) &&
-                                    tags.contains(tag)) {
-                                  return;
+                                final exist = allTags.contains(tag);
+                                if (exist && selectedTags.contains(tag)) {
+                                  return Navigator.pop(context);
                                 }
-                                allTags.add(tag);
-                                tags.add(tag);
+                                if (!exist) allTags.add(tag);
+                                selectedTags.add(tag);
                                 setState(() {});
                                 Navigator.pop(context);
                               },
@@ -240,7 +240,8 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
       final account = _accountController.text.trim();
       final issuer = _issuerController.text.trim();
       final secret = _secretController.text.trim().replaceAll(' ', '');
-      final isStreamCode = issuer.toLowerCase() == "steam" || issuer.toLowerCase().contains('steampowered.com');
+      final isStreamCode = issuer.toLowerCase() == "steam" ||
+          issuer.toLowerCase().contains('steampowered.com');
       if (widget.code != null && widget.code!.secret != secret) {
         ButtonResult? result = await showChoiceActionSheet(
           context,
@@ -256,7 +257,8 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
         }
       }
       final CodeDisplay display =
-          widget.code?.display.copyWith(tags: tags) ?? CodeDisplay(tags: tags);
+          widget.code?.display.copyWith(tags: selectedTags) ??
+              CodeDisplay(tags: selectedTags);
       final Code newCode = widget.code == null
           ? Code.fromAccountAndSecret(
               isStreamCode ? Type.steam : Type.totp,
