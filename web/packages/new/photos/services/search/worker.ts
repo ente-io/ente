@@ -154,6 +154,18 @@ const fileCaptionMatches = (s: string, files: EnteFile[]) =>
         file.pubMagicMetadata?.data?.caption?.toLowerCase().includes(s),
     );
 
+const fileTypeSuggestions = (
+    s: string,
+    labelledFileTypes: Searchable<LabelledFileType>[],
+) =>
+    labelledFileTypes
+        .filter(({ lowercasedName }) => lowercasedName.startsWith(s))
+        .map(({ fileType, label }) => ({
+            type: SuggestionType.FILE_TYPE,
+            value: fileType,
+            label,
+        }));
+
 const dateSuggestions = (
     s: string,
     locale: string,
@@ -297,18 +309,6 @@ const locationSuggestions = (
         })),
     ].flat();
 };
-
-const fileTypeSuggestions = (
-    s: string,
-    labelledFileTypes: Searchable<LabelledFileType>[],
-) =>
-    labelledFileTypes
-        .filter(searchableIncludes(s))
-        .map(({ fileType, label }) => ({
-            label,
-            value: fileType,
-            type: SuggestionType.FILE_TYPE,
-        }));
 
 /**
  * Return true if file satisfies the given {@link query}.
