@@ -586,8 +586,8 @@ const workerDidProcessFileOrIdle = throttled(updateMLStatusSnapshot, 2000);
  *
  * @param searchPhrase Normalized (trimmed and lowercased) search phrase.
  *
- * It returns file (IDs) that should be shown in the search results, along with
- * their scores.
+ * It returns file (IDs) that should be shown in the search results, each
+ * annotated with its score.
  *
  * The result can also be `undefined`, which indicates that the download for the
  * ML model is still in progress (trying again later should succeed).

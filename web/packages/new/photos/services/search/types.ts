@@ -10,6 +10,40 @@ import type { EnteFile } from "@/new/photos/types/file";
 import type { LocationTag } from "../user-entity";
 
 /**
+ * A search suggestion.
+ *
+ * These (wrapped up in {@link SearchOption}s) are shown in the search results
+ * dropdown, and can also be used to filter the list of files that are shown.
+ */
+export type SearchSuggestion = { label: string } & (
+    | { type: "collection"; collectionID: number }
+    | { type: "fileType"; fileType: FileType }
+    | { type: "fileName"; fileIDs: number[] }
+    | { type: "fileCaption"; fileIDs: number[] }
+    | { type: "date"; dateComponents: SearchDateComponents }
+    | { type: "location"; locationTag: LocationTag }
+    | { type: "city"; city: City }
+    | { type: "clip"; clipScoreForFileID: Map<number, number> }
+    | { type: "cgroup"; cgroup: SearchPerson }
+);
+
+/**
+ * An option shown in the the search bar's select dropdown.
+ *
+ * The {@link SearchOption} wraps a {@link SearchSuggestion} with some metadata
+ * used when showing a corresponding entry in the dropdown, and in the results
+ * header.
+ *
+ * If the user selects the option, then we will re-run the search using the
+ * {@link suggestion} to filter the list of files shown to the user.
+ */
+export interface SearchOption {
+    suggestion: SearchSuggestion;
+    fileCount: number;
+    previewFiles: EnteFile[];
+}
+
+/**
  * The base data over which we should search.
  */
 export interface SearchableData {
@@ -17,7 +51,7 @@ export interface SearchableData {
     files: EnteFile[];
 }
 
-export interface DateSearchResult {
+export interface LabelledSearchDateComponents {
     components: SearchDateComponents;
     label: string;
 }
@@ -47,7 +81,7 @@ export type Searchable<T> = T & {
  */
 export interface LocalizedSearchData {
     locale: string;
-    holidays: Searchable<DateSearchResult>[];
+    holidays: Searchable<LabelledSearchDateComponents>[];
     labelledFileTypes: Searchable<LabelledFileType>[];
 }
 
@@ -105,72 +139,3 @@ export type City = Location & {
     /** Name of the city. */
     name: string;
 };
-
-// TODO-cgroup: Audit below
-
-export enum SuggestionType {
-    DATE = "DATE",
-    LOCATION = "LOCATION",
-    COLLECTION = "COLLECTION",
-    FILE_NAME = "FILE_NAME",
-    PERSON = "PERSON",
-    FILE_CAPTION = "FILE_CAPTION",
-    FILE_TYPE = "FILE_TYPE",
-    CLIP = "CLIP",
-    CITY = "CITY",
-}
-
-export interface Suggestion {
-    type: SuggestionType;
-    label: string;
-    value:
-        | SearchDateComponents
-        | number[]
-        | SearchPerson
-        | LocationTag
-        | City
-        | FileType
-        | ClipSearchScores;
-}
-
-export interface SearchQuery {
-    suggestion?: SearchSuggestion;
-    date?: SearchDateComponents;
-    location?: LocationTag;
-    city?: City;
-    collection?: number;
-    files?: number[];
-    person?: SearchPerson;
-    fileType?: FileType;
-    clip?: ClipSearchScores;
-}
-
-export interface SearchResultSummary {
-    optionName: string;
-    fileCount: number;
-}
-
-export type SearchSuggestion = { label: string } & (
-    | { type: "collection"; collectionID: number }
-    | { type: "files"; fileIDs: number[] }
-    | { type: "fileType"; fileType: FileType }
-    | { type: "date"; dateComponents: SearchDateComponents }
-    | { type: "location"; locationTag: LocationTag }
-    | { type: "city"; city: City }
-    | { type: "clip"; clipScoreForFileID: Map<number, number> }
-    | { type: "cgroup"; cgroup: SearchPerson }
-);
-
-/**
- * An option shown in the the search bar's select dropdown.
- *
- * The option includes essential data that is necessary to show a corresponding
- * entry in the dropdown. If the user selects the option, then we will re-run
- * the search, using the data to filter the list of files shown to the user.
- */
-export interface SearchOption extends Suggestion {
-    fileCount: number;
-    previewFiles: EnteFile[];
-}
-
-export type ClipSearchScores = Map<number, number>;

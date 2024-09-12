@@ -35,6 +35,7 @@ export const ScrollContainer = styled("div")`
     gap: 4px;
 `;
 
+/** See also: {@link ItemTile}. */
 export const CollectionTile = styled("div")`
     display: flex;
     position: relative;
@@ -65,11 +66,6 @@ export const CollectionBarTile = styled(CollectionTile)`
 export const AllCollectionTile = styled(CollectionTile)`
     width: 150px;
     height: 150px;
-`;
-
-export const ResultPreviewTile = styled(CollectionTile)`
-    width: 48px;
-    height: 48px;
 `;
 
 export const CollectionBarTileText = styled(Overlay)`

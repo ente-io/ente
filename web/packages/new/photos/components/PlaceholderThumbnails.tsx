@@ -3,6 +3,7 @@ import { Overlay } from "@ente/shared/components/Container";
 import PhotoOutlined from "@mui/icons-material/PhotoOutlined";
 import PlayCircleOutlineOutlined from "@mui/icons-material/PlayCircleOutlineOutlined";
 import { styled } from "@mui/material";
+import React from "react";
 
 interface Iprops {
     fileType: FileType;
@@ -14,7 +15,7 @@ const CenteredOverlay = styled(Overlay)`
     align-items: center;
 `;
 
-export const StaticThumbnail = (props: Iprops) => {
+export const StaticThumbnail: React.FC<Iprops> = (props) => {
     return (
         <CenteredOverlay
             sx={(theme) => ({
