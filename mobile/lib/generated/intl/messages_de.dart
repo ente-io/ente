@@ -1053,6 +1053,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "moments": MessageLookupByLibrary.simpleMessage("Momente"),
         "monthly": MessageLookupByLibrary.simpleMessage("Monatlich"),
         "moreDetails": MessageLookupByLibrary.simpleMessage("Weitere Details"),
+        "mostRecent": MessageLookupByLibrary.simpleMessage("Most recent"),
+        "mostRelevant": MessageLookupByLibrary.simpleMessage("Most relevant"),
         "moveItem": m37,
         "moveToAlbum":
             MessageLookupByLibrary.simpleMessage("Zum Album verschieben"),
@@ -1522,6 +1524,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "Es tut uns leid, wir konnten keine sicheren Schlüssel auf diesem Gerät generieren.\n\nBitte starte die Registrierung auf einem anderen Gerät."),
+        "sort": MessageLookupByLibrary.simpleMessage("Sort"),
         "sortAlbumsBy": MessageLookupByLibrary.simpleMessage("Sortieren nach"),
         "sortNewestFirst":
             MessageLookupByLibrary.simpleMessage("Neueste zuerst"),

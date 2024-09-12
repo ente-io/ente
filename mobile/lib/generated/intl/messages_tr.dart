@@ -940,6 +940,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Sorgunuzu değiştirin veya aramayı deneyin"),
         "moments": MessageLookupByLibrary.simpleMessage("Anlar"),
         "monthly": MessageLookupByLibrary.simpleMessage("Aylık"),
+        "mostRecent": MessageLookupByLibrary.simpleMessage("Most recent"),
+        "mostRelevant": MessageLookupByLibrary.simpleMessage("Most relevant"),
         "moveItem": m37,
         "moveToAlbum": MessageLookupByLibrary.simpleMessage("Albüme taşı"),
         "moveToHiddenAlbum":
@@ -1374,6 +1376,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "Üzgünüm, bu cihazda güvenli anahtarlarını oluşturamadık.\n\nLütfen başka bir cihazdan giriş yapmayı deneyiniz."),
+        "sort": MessageLookupByLibrary.simpleMessage("Sort"),
         "sortAlbumsBy": MessageLookupByLibrary.simpleMessage("Sırala"),
         "sortNewestFirst":
             MessageLookupByLibrary.simpleMessage("Yeniden eskiye"),

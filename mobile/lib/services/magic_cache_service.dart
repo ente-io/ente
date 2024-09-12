@@ -4,13 +4,15 @@ import "dart:io";
 
 import "package:logging/logging.dart";
 import "package:path_provider/path_provider.dart";
+import "package:photos/db/files_db.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import "package:photos/services/remote_assets_service.dart";
-import "package:photos/services/search_service.dart";
+import "package:photos/ui/viewer/search/result/magic_result_screen.dart";
+import "package:photos/utils/navigation_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class MagicCache {
@@ -45,18 +47,34 @@ class MagicCache {
 
 extension MagicCacheServiceExtension on MagicCache {
   Future<GenericSearchResult> toGenericSearchResult() async {
-    final allEnteFiles = await SearchService.instance.getAllFiles();
     final enteFilesInMagicCache = <EnteFile>[];
-    for (EnteFile file in allEnteFiles) {
-      if (file.uploadedFileID != null &&
-          fileUploadedIDs.contains(file.uploadedFileID as int)) {
-        enteFilesInMagicCache.add(file);
+    await FilesDB.instance
+        .getFilesFromIDs(fileUploadedIDs)
+        .then((idToEnteFile) {
+      for (int uploadedID in fileUploadedIDs) {
+        if (idToEnteFile[uploadedID] != null) {
+          enteFilesInMagicCache.add(idToEnteFile[uploadedID]!);
+        }
       }
-    }
+    });
     return GenericSearchResult(
       ResultType.magic,
       title,
       enteFilesInMagicCache,
+      onResultTap: (ctx) {
+        routeToPage(
+          ctx,
+          MagicResultScreen(
+            enteFilesInMagicCache,
+            name: title,
+            heroTag: GenericSearchResult(
+              ResultType.magic,
+              title,
+              enteFilesInMagicCache,
+            ).heroTag(),
+          ),
+        );
+      },
     );
   }
 }
@@ -97,9 +115,9 @@ class MagicCacheService {
     if (!localSettings.isMLIndexingEnabled) {
       return;
     }
-    final jsonFile = await RemoteAssetsService.instance
+    final updatedJSONFile = await RemoteAssetsService.instance
         .getAssetIfUpdated(_kMagicPromptsDataUrl);
-    if (jsonFile != null) {
+    if (updatedJSONFile != null) {
       Future.delayed(_kCacheUpdateDelay, () {
         unawaited(_updateCache());
       });
@@ -204,14 +222,14 @@ class MagicCacheService {
   ) async {
     final results = <MagicCache>[];
     for (dynamic prompt in magicPromptsData) {
-      final files = await _getMatchingFileIDsForPromptData(
+      final fileUploadedIDs = await _getMatchingFileIDsForPromptData(
         prompt as Map<String, dynamic>,
       );
-      if (files.isNotEmpty) {
+      if (fileUploadedIDs.isNotEmpty) {
         results.add(
           MagicCache(
             prompt["title"] as String,
-            files,
+            fileUploadedIDs,
           ),
         );
       }

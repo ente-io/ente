@@ -17,5 +17,8 @@
   "deleteAccountPermanentlyButton": "கணக்கை நிரந்தரமாக நீக்கவும்",
   "deleteReason1": "எனக்கு தேவையான ஒரு முக்கிய அம்சம் இதில் இல்லை",
   "localSyncErrorMessage": "Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team",
-  "showPerson": "Show person"
+  "showPerson": "Show person",
+  "sort": "Sort",
+  "mostRecent": "Most recent",
+  "mostRelevant": "Most relevant"
 }

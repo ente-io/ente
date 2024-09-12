@@ -891,6 +891,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Sedang"),
         "moments": MessageLookupByLibrary.simpleMessage("Momen"),
         "monthly": MessageLookupByLibrary.simpleMessage("Bulanan"),
+        "mostRecent": MessageLookupByLibrary.simpleMessage("Most recent"),
+        "mostRelevant": MessageLookupByLibrary.simpleMessage("Most relevant"),
         "moveItem": m37,
         "moveToHiddenAlbum": MessageLookupByLibrary.simpleMessage(
             "Pindahkan ke album tersembunyi"),
@@ -1281,6 +1283,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "Maaf, kami tidak dapat menghasilkan kunci yang aman di perangkat ini.\n\nHarap mendaftar dengan perangkat lain."),
+        "sort": MessageLookupByLibrary.simpleMessage("Sort"),
         "sortAlbumsBy":
             MessageLookupByLibrary.simpleMessage("Urut berdasarkan"),
         "sortNewestFirst": MessageLookupByLibrary.simpleMessage("Terbaru dulu"),

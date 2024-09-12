@@ -83,6 +83,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "modifyYourQueryOrTrySearchingFor":
             MessageLookupByLibrary.simpleMessage(
                 "Modify your query, or try searching for"),
+        "mostRecent": MessageLookupByLibrary.simpleMessage("Most recent"),
+        "mostRelevant": MessageLookupByLibrary.simpleMessage("Most relevant"),
         "moveToHiddenAlbum":
             MessageLookupByLibrary.simpleMessage("Move to hidden album"),
         "nameTheAlbum": MessageLookupByLibrary.simpleMessage("Name the album"),
@@ -113,6 +115,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Set new password"),
         "setNewPin": MessageLookupByLibrary.simpleMessage("Set new PIN"),
         "showPerson": MessageLookupByLibrary.simpleMessage("Show person"),
+        "sort": MessageLookupByLibrary.simpleMessage("Sort"),
         "tapToUnlock": MessageLookupByLibrary.simpleMessage("Tap to unlock"),
         "thisWillRemovePublicLinksOfAllSelectedQuickLinks":
             MessageLookupByLibrary.simpleMessage(

@@ -43,6 +43,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "عنوان البريد الإلكتروني غير صالح"),
         "localSyncErrorMessage": MessageLookupByLibrary.simpleMessage(
             "Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team"),
+        "mostRecent": MessageLookupByLibrary.simpleMessage("Most recent"),
+        "mostRelevant": MessageLookupByLibrary.simpleMessage("Most relevant"),
         "noRecoveryKey":
             MessageLookupByLibrary.simpleMessage("ما من مفتاح استرداد؟"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
@@ -52,6 +54,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("نجح الاسترداد!"),
         "showPerson": MessageLookupByLibrary.simpleMessage("Show person"),
         "sorry": MessageLookupByLibrary.simpleMessage("المعذرة"),
+        "sort": MessageLookupByLibrary.simpleMessage("Sort"),
         "terminate": MessageLookupByLibrary.simpleMessage("إنهاء"),
         "terminateSession":
             MessageLookupByLibrary.simpleMessage("إنهاء الجلسة؟"),

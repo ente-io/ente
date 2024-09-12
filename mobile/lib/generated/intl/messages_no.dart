@@ -332,6 +332,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "modifyYourQueryOrTrySearchingFor":
             MessageLookupByLibrary.simpleMessage(
                 "Modify your query, or try searching for"),
+        "mostRecent": MessageLookupByLibrary.simpleMessage("Most recent"),
+        "mostRelevant": MessageLookupByLibrary.simpleMessage("Most relevant"),
         "moveToHiddenAlbum":
             MessageLookupByLibrary.simpleMessage("Move to hidden album"),
         "movedToTrash":
@@ -483,6 +485,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "Beklager, vi kunne ikke generere sikre nøkler på denne enheten.\n\nvennligst registrer deg fra en annen enhet."),
+        "sort": MessageLookupByLibrary.simpleMessage("Sort"),
         "sparkleSuccess": MessageLookupByLibrary.simpleMessage("✨ Suksess"),
         "status": MessageLookupByLibrary.simpleMessage("Status"),
         "strongStrength": MessageLookupByLibrary.simpleMessage("Sterkt"),

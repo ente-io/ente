@@ -105,6 +105,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "mlIndexingDescription": MessageLookupByLibrary.simpleMessage(
             "Bemærk venligst, at maskinindlæring vil resultere i en højere båndbredde og batteriforbrug, indtil alle elementer er indekseret. Overvej at bruge desktop app til hurtigere indeksering, vil alle resultater blive synkroniseret automatisk."),
         "moments": MessageLookupByLibrary.simpleMessage("Øjeblikke"),
+        "mostRecent": MessageLookupByLibrary.simpleMessage("Most recent"),
+        "mostRelevant": MessageLookupByLibrary.simpleMessage("Most relevant"),
         "next": MessageLookupByLibrary.simpleMessage("Næste"),
         "ok": MessageLookupByLibrary.simpleMessage("Ok"),
         "oops": MessageLookupByLibrary.simpleMessage("Ups"),
@@ -126,6 +128,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "somethingWentWrongPleaseTryAgain":
             MessageLookupByLibrary.simpleMessage(
                 "Noget gik galt, prøv venligst igen"),
+        "sort": MessageLookupByLibrary.simpleMessage("Sort"),
         "subscribe": MessageLookupByLibrary.simpleMessage("Abonner"),
         "terminateSession":
             MessageLookupByLibrary.simpleMessage("Afslut session?"),
