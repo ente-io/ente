@@ -47,6 +47,10 @@ func sendViaSMTP(toEmails []string, fromName string, fromEmail string, subject s
 	smtpEmail := viper.GetString("smtp.email")
 
 	var emailMessage string
+	var auth smtp.Auth = nil
+	if smtpUsername != "" && smtpPassword != "" {
+		auth = smtp.PlainAuth("", smtpUsername, smtpPassword, smtpServer)
+	}
 
 	// Construct 'emailAddresses' with comma-separated email addresses
 	var emailAddresses string
@@ -94,7 +98,6 @@ func sendViaSMTP(toEmails []string, fromName string, fromEmail string, subject s
 
 	// Send the email to each recipient
 	for _, toEmail := range toEmails {
-		auth := smtp.PlainAuth("", smtpUsername, smtpPassword, smtpServer)
 		err := smtp.SendMail(smtpServer+":"+smtpPort, auth, fromEmail, []string{toEmail}, []byte(emailMessage))
 		if err != nil {
 			errMsg := err.Error()
