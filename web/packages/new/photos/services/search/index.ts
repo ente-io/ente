@@ -102,31 +102,14 @@ const clipSuggestion = async (
     return { type: "clip", clipScoreForFileID: matches, label: searchString };
 };
 
-// const suggestionsToOptions = async (suggestions: SearchSuggestion[]) =>
-//     Promise.all(
-//         suggestions.map(async (suggestion) => {
-//             const matchingFiles = await filterSearchableFiles(suggestion);
-//             return matchingFiles.length
-//                 ? {
-//                       suggestion,
-//                       fileCount: matchingFiles.length,
-//                       previewFiles: matchingFiles.slice(0, 3),
-//                   }
-//                 : undefined;
-//         }),
-//     ).then((r) => r.filter((o) => !!o));
-    const suggestionsToOptions = async (suggestions: SearchSuggestion[]) => {
-        const filess = await filterSearchableFiles2(suggestions);
-        const f2 = filess.map((f, i) => [f, suggestions[i]!] as const);
-        return f2
-            .filter(([fs]) => fs.length)
-            .map(([f, s]) => ({
-                // suggestion: suggestions[i],
-                suggestion: s,
-                fileCount: f.length,
-                previewFiles: f.slice(0, 3),
-            }));
-    };
+const suggestionsToOptions = (suggestions: SearchSuggestion[]) =>
+    filterSearchableFilesMulti(suggestions).then((res) =>
+        res.map(([files, suggestion]) => ({
+            suggestion,
+            fileCount: files.length,
+            previewFiles: files.slice(0, 3),
+        })),
+    );
 
 /**
  * Return the list of {@link EnteFile}s (from amongst the previously set
@@ -135,8 +118,15 @@ const clipSuggestion = async (
 export const filterSearchableFiles = async (suggestion: SearchSuggestion) =>
     worker().then((w) => w.filterSearchableFiles(suggestion));
 
-export const filterSearchableFiles2 = async (suggestion: SearchSuggestion[]) =>
-    worker().then((w) => w.filterSearchableFiles2(suggestion));
+/**
+ * A batched variant of {@link filterSearchableFiles}.
+ *
+ * This has drastically (10x) better performance when filtering files for a
+ * large number of suggestions (e.g. single letter searches that lead to a large
+ * number of city prefix matches), likely because of reduced worker IPC.
+ */
+const filterSearchableFilesMulti = async (suggestions: SearchSuggestion[]) =>
+    worker().then((w) => w.filterSearchableFilesMulti(suggestions));
 
 /**
  * Cached value of {@link localizedSearchData}.

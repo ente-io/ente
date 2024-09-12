@@ -89,23 +89,17 @@ export class SearchWorker {
      * Return {@link EnteFile}s that satisfy the given {@link suggestion}.
      */
     filterSearchableFiles(suggestion: SearchSuggestion) {
-        return sortMatchesIfNeeded(
-            this.searchableData.files.filter((f) =>
-                isMatchingFile(f, suggestion),
-            ),
-            suggestion,
-        );
+        return filterSearchableFiles(this.searchableData.files, suggestion);
     }
 
-    filterSearchableFiles2(suggestions: SearchSuggestion[]) {
-        return suggestions.map((suggestion) => {
-            return sortMatchesIfNeeded(
-                this.searchableData.files.filter((f) =>
-                    isMatchingFile(f, suggestion),
-                ),
-                suggestion,
-            );
-        });
+    /**
+     * Batched variant of {@link filterSearchableFiles}.
+     */
+    filterSearchableFilesMulti(suggestions: SearchSuggestion[]) {
+        const files = this.searchableData.files;
+        return suggestions
+            .map((sg) => [filterSearchableFiles(files, sg), sg] as const)
+            .filter(([files]) => files.length);
     }
 }
 
@@ -341,6 +335,15 @@ const locationSuggestions = (
         ),
     ].flat();
 };
+
+const filterSearchableFiles = (
+    files: EnteFile[],
+    suggestion: SearchSuggestion,
+) =>
+    sortMatchesIfNeeded(
+        files.filter((f) => isMatchingFile(f, suggestion)),
+        suggestion,
+    );
 
 /**
  * Return true if file satisfies the given {@link query}.
