@@ -132,17 +132,23 @@ class _BackupStatusScreenState extends State<BackupStatusScreen> {
                 ],
               ),
             )
-          : ListView.builder(
-              padding: const EdgeInsets.symmetric(
-                vertical: 20,
-                horizontal: 16,
+          : Scrollbar(
+              child: ListView.builder(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 20,
+                  horizontal: 16,
+                ),
+                shrinkWrap: false,
+                primary: true,
+                prototypeItem: Container(height: 70),
+                itemBuilder: (context, index) {
+                  return BackupItemCard(
+                    item: allItems[index],
+                    key: ValueKey(allItems[index].file.uploadedFileID),
+                  );
+                },
+                itemCount: allItems.length,
               ),
-              shrinkWrap: true,
-              primary: false,
-              itemBuilder: (context, index) {
-                return BackupItemCard(item: allItems[index]);
-              },
-              itemCount: allItems.length,
             ),
     );
   }
