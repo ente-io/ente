@@ -13,11 +13,10 @@ import { ComlinkWorker } from "@/base/worker/comlink-worker";
 import { FileType } from "@/media/file-type";
 import type { EnteFile } from "@/new/photos/types/file";
 import { ensure } from "@/utils/ensure";
-import { throttled, wait } from "@/utils/promise";
+import { throttled } from "@/utils/promise";
 import { proxy, transfer } from "comlink";
 import { isInternalUser } from "../feature-flags";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
-import type { Person } from "../search/types";
 import type { UploadItem } from "../upload/types";
 import {
     type ClusterFace,
@@ -341,18 +340,13 @@ export const wipClusterEnable = async (): Promise<boolean> =>
 
 // // TODO-Cluster temporary state here
 let _wip_isClustering = false;
-let _wip_Persons: Person[] | undefined;
+let _wip_people: Person[] | undefined;
 let _wip_hasSwitchedOnce = false;
 
 export const wipHasSwitchedOnceCmpAndSet = () => {
     if (_wip_hasSwitchedOnce) return true;
     _wip_hasSwitchedOnce = true;
     return false;
-};
-
-export const wipPersons = async () => {
-    if (!(await wipClusterEnable())) return [];
-    return _wip_Persons ?? [];
 };
 
 export interface ClusterPreviewWithFile {
@@ -386,7 +380,7 @@ export const wipClusterDebugPageContents = async (
 
     log.info("clustering", opts);
     _wip_isClustering = true;
-    _wip_Persons = undefined;
+    _wip_people = undefined;
     triggerStatusUpdate();
 
     const {
@@ -419,7 +413,7 @@ export const wipClusterDebugPageContents = async (
 
     const clusterByID = new Map(clusters.map((c) => [c.id, c]));
 
-    const Persons = cgroups
+    const people = cgroups
         .map((cgroup) => {
             const faceID = ensure(cgroup.displayFaceID);
             const fileID = ensure(fileIDFromFaceID(faceID));
@@ -444,7 +438,7 @@ export const wipClusterDebugPageContents = async (
         .sort((a, b) => b.faceIDs.length - a.faceIDs.length);
 
     _wip_isClustering = false;
-    _wip_Persons = Persons;
+    _wip_people = people;
     triggerStatusUpdate();
 
     return {
@@ -601,8 +595,8 @@ const workerDidProcessFileOrIdle = throttled(updateMLStatusSnapshot, 2000);
  * non-human faces too). CGroups represent both positive and negative feedback,
  * and the negations are specifically meant so that they're not shown in the UI.
  *
- * So while each Person has an underlying cgroups, not all cgroups have a
- * corresponding Person.
+ * So while each person has an underlying cgroups, not all cgroups have a
+ * corresponding person.
  *
  * Beyond this, a {@link Person} object has data converted into a format that
  * the UI can use directly and efficiently (as compared to a {@link CGroup},
@@ -616,8 +610,8 @@ export interface Person {
     /** The files in which this face occurs. */
     files: number[];
     /**
-     * The face that should be used as the "cover" face to represent this {@link
-     * Person} in the UI.
+     * The face that should be used as the "cover" face to represent this
+     * {@link Person} in the UI.
      */
     displayFaceID: string;
     /**
@@ -672,7 +666,7 @@ const triggerPeopleUpdate = () => void updatePeopleSnapshot();
 /** Unconditional update of the people snapshot. */
 const updatePeopleSnapshot = async () => setPeopleSnapshot(await getPeople());
 
-const setPeopleSnapshot = (snapshot: Person[]) => {
+const setPeopleSnapshot = (snapshot: Person[] | undefined) => {
     _state.peopleSnapshot = snapshot;
     _state.peopleListeners.forEach((l) => l());
 };
@@ -683,9 +677,11 @@ const setPeopleSnapshot = (snapshot: Person[]) => {
  * TODO-Cluster this is a placeholder function and might not be needed since
  * people might be updated in a push based manner.
  */
-const getPeople = async (): Promise<Person[]> => {
+const getPeople = async (): Promise<Person[] | undefined> => {
     if (!_state.isMLEnabled) return undefined;
-    await wait(0);
+    // TODO-Cluster additional check for now as it is heavily WIP.
+    if (!process.env.NEXT_PUBLIC_ENTE_WIP_CL) return undefined;
+    if (!(await wipClusterEnable())) return [];
     return _wip_people;
 };
 
