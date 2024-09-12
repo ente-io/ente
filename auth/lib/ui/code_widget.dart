@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:auto_size_text/auto_size_text.dart';
@@ -15,6 +17,7 @@ import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/code_timer_progress.dart';
+import 'package:ente_auth/ui/share/code_share.dart';
 import 'package:ente_auth/ui/utils/icon_utils.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/platform_util.dart';
@@ -291,13 +294,13 @@ class _CodeWidgetState extends State<CodeWidget> {
                 if (!widget.code.isTrashed) SizedBox(width: slideSpace),
                 if (!widget.code.isTrashed)
                   SlidableAction(
-                    onPressed: _onShowQrPressed,
+                    onPressed: _onSharePressed,
                     backgroundColor: Colors.grey.withOpacity(0.1),
                     borderRadius: const BorderRadius.all(Radius.circular(8)),
                     foregroundColor:
                         Theme.of(context).colorScheme.inverseBackgroundColor,
-                    icon: Icons.qr_code_2_outlined,
-                    label: "QR",
+                    icon: Icons.adaptive.share_outlined,
+                    label: l10n.share,
                     padding: const EdgeInsets.only(left: 4, right: 0),
                     spacing: 8,
                   ),
@@ -603,6 +606,16 @@ class _CodeWidgetState extends State<CodeWidget> {
         },
       ),
     );
+  }
+
+  Future<void> _onSharePressed(_) async {
+    bool isAuthSuccessful = await LocalAuthenticationService.instance
+        .requestLocalAuthentication(context, context.l10n.authenticateGeneric);
+    await PlatformUtil.refocusWindows();
+    if (!isAuthSuccessful) {
+      return;
+    }
+    showShareDialog(context, widget.code);
   }
 
   Future<void> _onPinPressed(_) async {
