@@ -1,7 +1,7 @@
 import { assertionFailed } from "@/base/assert";
 import { useIsMobileWidth } from "@/base/hooks";
 import { FileType } from "@/media/file-type";
-import { ItemCard } from "@/new/photos/components/ItemCards";
+import { ItemCard, ResultPreviewTile } from "@/new/photos/components/ItemCards";
 import {
     isMLSupported,
     mlStatusSnapshot,
@@ -38,7 +38,6 @@ import {
     useTheme,
     type Theme,
 } from "@mui/material";
-import { ResultPreviewTile } from "components/Collections/styledComponents";
 import { t } from "i18next";
 import pDebounce from "p-debounce";
 import {
@@ -547,7 +546,6 @@ async function getAllPeople(limit: number = undefined) {
 
     // return result;
 }
-
 */
 
 const Option: React.FC<OptionProps<SearchOption, false>> = (props) => (

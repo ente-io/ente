@@ -6,6 +6,7 @@ import {
 } from "@/new/photos/components/PlaceholderThumbnails";
 import { useEffect, useState } from "react";
 
+/** See also: {@link ItemCard}. */
 export default function CollectionCard(props: {
     children?: any;
     coverFile: EnteFile;
