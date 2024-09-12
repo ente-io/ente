@@ -13,7 +13,7 @@ import { ComlinkWorker } from "@/base/worker/comlink-worker";
 import { FileType } from "@/media/file-type";
 import type { EnteFile } from "@/new/photos/types/file";
 import { ensure } from "@/utils/ensure";
-import { throttled } from "@/utils/promise";
+import { throttled, wait } from "@/utils/promise";
 import { proxy, transfer } from "comlink";
 import { isInternalUser } from "../feature-flags";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
@@ -526,7 +526,7 @@ export const mlStatusSnapshot = (): MLStatus | undefined => {
  */
 const triggerStatusUpdate = () => void updateMLStatusSnapshot();
 
-/** Unconditionally update of the {@link MLStatus} snapshot. */
+/** Unconditional update of the {@link MLStatus} snapshot. */
 const updateMLStatusSnapshot = async () =>
     setMLStatusSnapshot(await getMLStatus());
 
@@ -625,6 +625,69 @@ export interface Person {
      */
     displayFaceFile: EnteFile;
 }
+
+/**
+ * A function that can be used to subscribe to updates to {@link Person}s.
+ *
+ * This, along with {@link peopleSnapshot}, is meant to be used as arguments to
+ * React's {@link useSyncExternalStore}.
+ *
+ * @param callback A function that will be invoked whenever the result of
+ * {@link peopleSnapshot} changes.
+ *
+ * @returns A function that can be used to clear the subscription.
+ */
+export const peopleSubscribe = (onChange: () => void): (() => void) => {
+    _state.peopleListeners.push(onChange);
+    return () => {
+        _state.peopleListeners = _state.peopleListeners.filter(
+            (l) => l != onChange,
+        );
+    };
+};
+
+/**
+ * Return the last known, cached {@link people}.
+ *
+ * This, along with {@link peopleSnapshot}, is meant to be used as arguments to
+ * React's {@link useSyncExternalStore}.
+ *
+ * A return value of `undefined` indicates that we're either still loading the
+ * initial list of people, or that the user has ML disabled and thus doesn't
+ * have any people (this is distinct from the case where the user has ML enabled
+ * but doesn't have any named "person" clusters so far).
+ */
+export const peopleSnapshot = (): Person[] | undefined => {
+    const result = _state.peopleSnapshot;
+    // We don't have it yet, trigger an update.
+    if (!result) triggerPeopleUpdate();
+    return result;
+};
+
+/**
+ * Trigger an asynchronous and unconditional update of the people snapshot.
+ */
+const triggerPeopleUpdate = () => void updatePeopleSnapshot();
+
+/** Unconditional update of the people snapshot. */
+const updatePeopleSnapshot = async () => setPeopleSnapshot(await getPeople());
+
+const setPeopleSnapshot = (snapshot: Person[]) => {
+    _state.peopleSnapshot = snapshot;
+    _state.peopleListeners.forEach((l) => l());
+};
+
+/**
+ * Compute the list of people.
+ *
+ * TODO-Cluster this is a placeholder function and might not be needed since
+ * people might be updated in a push based manner.
+ */
+const getPeople = async (): Promise<Person[]> => {
+    if (!_state.isMLEnabled) return undefined;
+    await wait(0);
+    return _wip_people;
+};
 
 /**
  * Use CLIP to perform a natural language search over image embeddings.
