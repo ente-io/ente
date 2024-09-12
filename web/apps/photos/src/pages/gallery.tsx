@@ -208,9 +208,6 @@ export default function Gallery() {
     const [collectionNamerView, setCollectionNamerView] = useState(false);
     const [shouldDisableDropzone, setShouldDisableDropzone] = useState(false);
     const [isPhotoSwipeOpen, setIsPhotoSwipeOpen] = useState(false);
-    // TODO(MR): This is never true currently, this is the WIP ability to show
-    // what's new dialog on desktop app updates. The UI is done, need to hook
-    // this up to logic to trigger it.
     const [openWhatsNew, setOpenWhatsNew] = useState(false);
 
     const {
