@@ -6,12 +6,10 @@ import { CodeWrapper, CopyButtonWrapper, Wrapper } from "./styledComponents";
 
 type Iprops = React.PropsWithChildren<{
     code: string | null;
-    wordBreak?: "normal" | "break-all" | "keep-all" | "break-word";
 }>;
 
 export default function CodeBlock({
     code,
-    wordBreak,
     ...props
 }: BoxProps<"div", Iprops>) {
     if (!code) {
@@ -24,9 +22,7 @@ export default function CodeBlock({
     return (
         <Wrapper {...props}>
             <CodeWrapper>
-                <FreeFlowText style={{ wordBreak: wordBreak }}>
-                    {code}
-                </FreeFlowText>
+                <FreeFlowText>{code}</FreeFlowText>
             </CodeWrapper>
             <CopyButtonWrapper>
                 <CopyButton code={code} />
