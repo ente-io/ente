@@ -155,7 +155,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
     const theme = useTheme();
 
     const styles = useMemo(() => useSelectStyles(theme), [theme]);
-    const components = useMemo(() => ({ Option, Control, Input }), []);
+    const components = useMemo(() => ({ Control, Input, Option }), []);
 
     useEffect(() => {
         search(value);
@@ -382,6 +382,16 @@ const iconForOptionType = (type: SuggestionType | undefined) => {
 };
 
 /**
+ * A custom input for react-select that is always visible.
+ *
+ * This is a workaround to allow the search string to be always displayed, and
+ * editable, even after the user has moved focus away from it.
+ */
+const Input: React.FC<InputProps<SearchOption, false>> = (props) => (
+    <SelectComponents.Input {...props} isHidden={false} />
+);
+
+/**
  * A preflight check for whether or not we should show the EmptyState.
  *
  * react-select seems to only suppress showing anything at all in the menu if we
@@ -580,14 +590,4 @@ const OptionContents = ({ data }: { data: SearchOption }) => (
             </Stack>
         </Stack>
     </Stack>
-);
-
-/**
- * A custom input for react-select that is always visible.
- *
- * This is a workaround to allow the search string to be always displayed, and
- * editable, even after the user has moved focus away from it.
- */
-const Input: React.FC<InputProps<SearchOption, false>> = (props) => (
-    <SelectComponents.Input {...props} isHidden={false} />
 );
