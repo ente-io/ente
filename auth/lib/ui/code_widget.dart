@@ -562,7 +562,7 @@ class _CodeWidgetState extends State<CodeWidget> {
     bool isAuthSuccessful =
         await LocalAuthenticationService.instance.requestLocalAuthentication(
       context,
-      context.l10n.deleteCodeAuthMessage,
+      context.l10n.deleteCodeAuthMessage(widget.code.issuer),
     );
     if (!isAuthSuccessful) {
       return;
@@ -571,7 +571,7 @@ class _CodeWidgetState extends State<CodeWidget> {
     final l10n = context.l10n;
     await showChoiceActionSheet(
       context,
-      title: l10n.deleteCodeTitle,
+      title: l10n.deleteCodeTitle(widget.code.issuer),
       body: l10n.deleteCodeMessage,
       firstButtonLabel: l10n.delete,
       isCritical: true,

@@ -32,7 +32,17 @@
   "counterBasedKeyType": "Counter based (HOTP)",
   "saveAction": "Save",
   "nextTotpTitle": "next",
-  "deleteCodeTitle": "Delete code?",
+  "deleteCodeTitle": "Delete code \"{name}\"?",
+  "@deleteCodeTitle": {
+    "description": "Title of the dialog when the user tries to delete a code",
+    "placeholders": {
+      "name": {
+        "description": "The name of the code",
+        "type": "String",
+        "example": "Google"
+      }
+    }
+  },
   "deleteCodeMessage": "Are you sure you want to delete this code? This action is irreversible.",
   "viewLogsAction": "View logs",
   "sendLogsDescription": "This will send across logs to help us debug your issue. While we take precautions to ensure that sensitive information is not logged, we encourage you to view these logs before sharing them.",
@@ -352,7 +362,17 @@
   "confirmUpdatingkey": "Are you sure you want to update the secret key?",
   "minimizeAppOnCopy": "Minimize app on copy",
   "editCodeAuthMessage": "Authenticate to edit code",
-  "deleteCodeAuthMessage": "Authenticate to delete code",
+  "deleteCodeAuthMessage": "Authenticate to delete code \"{name}\"",
+  "@deleteCodeAuthMessage": {
+    "description": "Message to show the user when they try to delete a code",
+    "placeholders": {
+      "name": {
+        "description": "The name of the code",
+        "type": "String",
+        "example": "Google"
+      }
+    }
+  },
   "showQRAuthMessage": "Authenticate to show QR code",
   "confirmAccountDeleteTitle": "Confirm account deletion",
   "confirmAccountDeleteMessage": "This account is linked to other Ente apps, if you use any.\n\nYour uploaded data, across all Ente apps, will be scheduled for deletion, and your account will be permanently deleted.",
