@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
@@ -61,11 +60,9 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
     });
     _importProgressEvent =
         Bus.instance.on<LocalImportProgressEvent>().listen((event) {
-      if (Platform.isAndroid) {
-        _loadingMessage = 'Processing ${event.folderName}...';
-        if (mounted) {
-          setState(() {});
-        }
+      _loadingMessage = 'Processing ${event.folderName}...';
+      if (mounted) {
+        setState(() {});
       }
     });
     _didYouKnowTimer =
