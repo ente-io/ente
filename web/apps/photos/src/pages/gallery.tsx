@@ -206,7 +206,6 @@ export default function Gallery() {
     const [collectionNamerAttributes, setCollectionNamerAttributes] =
         useState<CollectionNamerAttributes>(null);
     const [collectionNamerView, setCollectionNamerView] = useState(false);
-    const [searchQuery, setSearchQuery] = useState<SearchQuery>(null);
     const [shouldDisableDropzone, setShouldDisableDropzone] = useState(false);
     const [isPhotoSwipeOpen, setIsPhotoSwipeOpen] = useState(false);
     // TODO(MR): This is never true currently, this is the WIP ability to show
@@ -249,7 +248,9 @@ export default function Gallery() {
         accept: ".zip",
     });
 
+    // If we're in "search mode". See: [Note: "search mode"].
     const [isInSearchMode, setIsInSearchMode] = useState(false);
+    // The option selected by the user selected from the search bar dropdown.
     const [selectedSearchOption, setSelectedSearchOption] = useState<
         SearchOption | undefined
     >();
@@ -536,8 +537,10 @@ export default function Gallery() {
         }
 
         let filteredFiles: EnteFile[] = [];
-        if (isInSearchMode) {
-            filteredFiles = await filterSearchableFiles(searchQuery);
+        if (selectedSearchOption) {
+            filteredFiles = await filterSearchableFiles(
+                selectedSearchOption.suggestion,
+            );
         } else {
             filteredFiles = getUniqueFiles(
                 (isInHiddenSection ? hiddenFiles : files).filter((item) => {
@@ -597,11 +600,6 @@ export default function Gallery() {
                 }),
             );
         }
-        if (searchQuery?.clip) {
-            return filteredFiles.sort((a, b) => {
-                return searchQuery.clip.get(b.id) - searchQuery.clip.get(a.id);
-            });
-        }
         const sortAsc = activeCollection?.pubMagicMetadata?.data?.asc ?? false;
         if (sortAsc) {
             return sortFiles(filteredFiles, true);
@@ -615,7 +613,8 @@ export default function Gallery() {
         tempDeletedFileIds,
         tempHiddenFileIds,
         hiddenFileIds,
-        searchQuery,
+        isInSearchMode,
+        selectedSearchOption,
         activeCollectionID,
         archivedCollections,
     ]);

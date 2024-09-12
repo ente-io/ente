@@ -3,6 +3,7 @@ import type { Location } from "@/base/types";
 import type { Collection } from "@/media/collection";
 import { fileCreationPhotoDate, fileLocation } from "@/media/file-metadata";
 import type { EnteFile } from "@/new/photos/types/file";
+import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";
 import { getPublicMagicMetadataSync } from "@ente/shared/file-metadata";
 import type { Component } from "chrono-node";
@@ -88,8 +89,11 @@ export class SearchWorker {
      * Return {@link EnteFile}s that satisfy the given {@link suggestion}.
      */
     filterSearchableFiles(suggestion: SearchSuggestion) {
-        return this.searchableData.files.filter((f) =>
-            isMatchingFile(f, suggestion),
+        return sortMatchesIfNeeded(
+            this.searchableData.files.filter((f) =>
+                isMatchingFile(f, suggestion),
+            ),
+            suggestion,
         );
     }
 }
@@ -428,3 +432,21 @@ const isWithinRadius = (
  * major axis (a) has to be scaled by the secant of the latitude.
  */
 const radiusScaleFactor = (lat: number) => 1 / Math.cos(lat * (Math.PI / 180));
+
+/**
+ * Sort the files if necessary.
+ *
+ * Currently, only the CLIP results are sorted (by their score), in the other
+ * cases the files are displayed chronologically (when displaying them in search
+ * results) or arbitrarily (when showing them in the search option preview).
+ */
+const sortMatchesIfNeeded = (
+    files: EnteFile[],
+    suggestion: SearchSuggestion,
+) => {
+    if (suggestion.type != "clip") return files;
+    // Sort CLIP matches by their corresponding scores.
+    const score = ({ id }: EnteFile) =>
+        ensure(suggestion.clipScoreForFileID.get(id));
+    return files.sort((a, b) => score(b) - score(a));
+};

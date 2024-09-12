@@ -2,8 +2,6 @@ import log from "@/base/log";
 import { masterKeyFromSession } from "@/base/session-store";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
 import { FileType } from "@/media/file-type";
-import type { EnteFile } from "@/new/photos/types/file";
-import { ensure } from "@/utils/ensure";
 import i18n, { t } from "i18next";
 import { clipMatches, isMLEnabled, isMLSupported } from "../ml";
 import type {
@@ -108,25 +106,13 @@ const suggestionsToOptions = async (suggestions: SearchSuggestion[]) =>
     Promise.all(
         suggestions.map(async (suggestion) => {
             const matchingFiles = await filterSearchableFiles(suggestion);
-            const files = sortMatchesIfNeeded(matchingFiles, suggestion);
             return {
                 suggestion,
-                fileCount: files.length,
-                previewFiles: files.slice(0, 3),
+                fileCount: matchingFiles.length,
+                previewFiles: matchingFiles.slice(0, 3),
             };
         }),
     );
-
-const sortMatchesIfNeeded = (
-    files: EnteFile[],
-    suggestion: SearchSuggestion,
-) => {
-    if (suggestion.type != "clip") return files;
-    // Sort CLIP matches by their corresponding scores.
-    const score = ({ id }: EnteFile) =>
-        ensure(suggestion.clipScoreForFileID.get(id));
-    return files.sort((a, b) => score(b) - score(a));
-};
 
 /**
  * Return the list of {@link EnteFile}s (from amongst the previously set
