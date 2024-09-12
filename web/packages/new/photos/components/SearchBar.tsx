@@ -143,7 +143,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
     updateSearch,
 }) => {
     // A ref to the top level Select.
-    const selectRef = useRef<AsyncSelect>(null);
+    const selectRef = useRef<Select>(null);
     // The currently selected option.
     const [value, setValue] = useState<SearchOption | undefined | null>();
     // The contents of the input field associated with the select.
@@ -318,9 +318,9 @@ const createSelectStyles = ({
         "& :hover": {
             cursor: "pointer",
         },
-        "& .option-contents": {
-            backgroundColor: isFocused && colors.background.elevated2,
-        },
+        "& .option-contents": isFocused
+            ? { backgroundColor: colors.background.elevated2 }
+            : {},
         "&:last-child .MuiDivider-root": {
             display: "none",
         },
@@ -403,7 +403,7 @@ const shouldShowEmptyState = (inputValue: string) => {
     // Don't show empty state if there is no ML related information.
     if (!isMLSupported) return false;
 
-    const status = isMLSupported && mlStatusSnapshot();
+    const status = mlStatusSnapshot();
     if (!status || status.phase == "disabled") return false;
 
     // Show it otherwise.
