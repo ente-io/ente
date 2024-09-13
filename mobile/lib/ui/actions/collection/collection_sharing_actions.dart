@@ -51,7 +51,7 @@ class CollectionActions {
       return true;
     } catch (e) {
       if (e is SharingNotPermittedForFreeAccountsError) {
-        _showUnSupportedAlert(context);
+        await _showUnSupportedAlert(context);
       } else {
         logger.severe("Failed to update shareUrl collection", e);
         await showGenericErrorDialog(context: context, error: e);
@@ -139,8 +139,12 @@ class CollectionActions {
       await CollectionsService.instance.createShareUrl(collection);
       return collection;
     } catch (e, s) {
-      await showGenericErrorDialog(context: context, error: e);
-      logger.severe("Failing to create link for selected files", e, s);
+      if (e is SharingNotPermittedForFreeAccountsError) {
+        await _showUnSupportedAlert(context);
+      } else {
+        logger.severe("Failing to create link for selected files", e, s);
+        await showGenericErrorDialog(context: context, error: e);
+      }
     }
     return null;
   }
@@ -327,7 +331,7 @@ class CollectionActions {
       } catch (e) {
         await dialog?.hide();
         if (e is SharingNotPermittedForFreeAccountsError) {
-          _showUnSupportedAlert(context);
+          await _showUnSupportedAlert(context);
         } else {
           logger.severe("failed to share collection", e);
           await showGenericErrorDialog(context: context, error: e);
@@ -641,7 +645,7 @@ class CollectionActions {
     return true;
   }
 
-  void _showUnSupportedAlert(BuildContext context) {
+  Future<void> _showUnSupportedAlert(BuildContext context) async {
     final AlertDialog alert = AlertDialog(
       title: Text(S.of(context).sorry),
       content: Text(
@@ -680,7 +684,7 @@ class CollectionActions {
       ],
     );
 
-    showDialog(
+    return showDialog(
       context: context,
       builder: (BuildContext context) {
         return alert;
