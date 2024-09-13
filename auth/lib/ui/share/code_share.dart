@@ -115,16 +115,15 @@ class _ShareCodeDialogState extends State<ShareCodeDialog> {
       'step': widget.code.period,
       'codes': result.$2.join(","),
     };
+    final Uint8List key = _generate256BitKey();
+    Uint8List input = utf8.encode(jsonEncode(data));
+    final encResult = await CryptoUtil.encryptData(input, key);
+    String url =
+        'https://auth.ente.io/share?data=${_uint8ListToUrlSafeBase64(encResult.encryptedData!)}&header=${_uint8ListToUrlSafeBase64(encResult.header!)}#${_uint8ListToUrlSafeBase64(key)}';
     try {
-      final Uint8List key = _generate256BitKey();
-      Uint8List input = utf8.encode(jsonEncode(data));
-      final encResult = await CryptoUtil.encryptData(input, key);
-      String url =
-          'https://auth.ente.io/share?data=${_uint8ListToUrlSafeBase64(encResult.encryptedData!)}&header=${_uint8ListToUrlSafeBase64(encResult.header!)}#${_uint8ListToUrlSafeBase64(key)}';
-      shareText(url, context: context).ignore();
+      await shareText(url, context: context);
     } catch (e) {
-      logger.severe('Failed to encrypt data: ${e.toString()}');
-      await showGenericErrorDialog(context: context, error: e);
+      logger.warning('Failed to share code: ${e.toString()}');
     }
   }
 
