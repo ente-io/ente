@@ -652,34 +652,33 @@ class CollectionActions {
         S.of(context).subscribeToEnableSharing,
       ),
       actions: [
-        TextButton(
-          child: Text(
-            S.of(context).subscribe,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.greenAlternative,
-            ),
-          ),
-          onPressed: () {
-            Navigator.of(context, rootNavigator: true).pop();
+        ButtonWidget(
+          buttonType: ButtonType.primary,
+          isInAlert: true,
+          shouldStickToDarkTheme: false,
+          buttonAction: ButtonAction.first,
+          shouldSurfaceExecutionStates: true,
+          labelText: S.of(context).subscribe,
+          onTap: () async {
+            // for quickLink collection, we need to trash the collection
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (BuildContext context) {
                   return getSubscriptionPage();
                 },
               ),
-            );
+            ).ignore();
           },
         ),
-        TextButton(
-          child: Text(
-            S.of(context).ok,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
+        Padding(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: ButtonWidget(
+            buttonType: ButtonType.secondary,
+            buttonAction: ButtonAction.cancel,
+            isInAlert: true,
+            shouldStickToDarkTheme: false,
+            labelText: S.of(context).ok,
           ),
-          onPressed: () {
-            Navigator.of(context, rootNavigator: true).pop();
-          },
         ),
       ],
     );
@@ -689,6 +688,7 @@ class CollectionActions {
       builder: (BuildContext context) {
         return alert;
       },
+      barrierDismissible: true,
     );
   }
 }
