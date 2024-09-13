@@ -2452,10 +2452,10 @@ class S {
     );
   }
 
-  /// `Looks like your subscription has expired. Please subscribe to enable sharing.`
+  /// `You need an active paid subscription to enable sharing.`
   String get subscribeToEnableSharing {
     return Intl.message(
-      'Looks like your subscription has expired. Please subscribe to enable sharing.',
+      'You need an active paid subscription to enable sharing.',
       name: 'subscribeToEnableSharing',
       desc: '',
       args: [],

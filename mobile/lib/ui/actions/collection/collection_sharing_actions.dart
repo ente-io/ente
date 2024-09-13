@@ -5,7 +5,6 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import "package:photos/core/errors.dart";
 import 'package:photos/db/files_db.dart';
-import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/api/collection/create_request.dart';
 import "package:photos/models/api/collection/user.dart";
@@ -51,7 +50,7 @@ class CollectionActions {
       return true;
     } catch (e) {
       if (e is SharingNotPermittedForFreeAccountsError) {
-        _showUnSupportedAlert(context);
+        await _showUnSupportedAlert(context);
       } else {
         logger.severe("Failed to update shareUrl collection", e);
         await showGenericErrorDialog(context: context, error: e);
@@ -110,6 +109,7 @@ class CollectionActions {
     BuildContext context,
     List<EnteFile> files,
   ) async {
+    late final Collection newCollection;
     try {
       // create album with emptyName, use collectionCreationTime on UI to
       // show name
@@ -133,14 +133,29 @@ class CollectionActions {
       final collection = await collectionsService.createAndCacheCollection(
         req,
       );
+      newCollection = collection;
       logger.finest("adding files to share to new album");
       await collectionsService.addOrCopyToCollection(collection.id, files);
       logger.finest("creating public link for the newly created album");
-      await CollectionsService.instance.createShareUrl(collection);
+      try {
+        await CollectionsService.instance.createShareUrl(collection);
+      } catch (e) {
+        if (e is SharingNotPermittedForFreeAccountsError) {
+          if (newCollection.isQuickLinkCollection() &&
+              !newCollection.hasSharees) {
+            await trashCollectionKeepingPhotos(newCollection, context);
+          }
+          rethrow;
+        }
+      }
       return collection;
     } catch (e, s) {
-      await showGenericErrorDialog(context: context, error: e);
-      logger.severe("Failing to create link for selected files", e, s);
+      if (e is SharingNotPermittedForFreeAccountsError) {
+        await _showUnSupportedAlert(context);
+      } else {
+        logger.severe("Failing to create link for selected files", e, s);
+        await showGenericErrorDialog(context: context, error: e);
+      }
     }
     return null;
   }
@@ -327,7 +342,7 @@ class CollectionActions {
       } catch (e) {
         await dialog?.hide();
         if (e is SharingNotPermittedForFreeAccountsError) {
-          _showUnSupportedAlert(context);
+          await _showUnSupportedAlert(context);
         } else {
           logger.severe("failed to share collection", e);
           await showGenericErrorDialog(context: context, error: e);
@@ -641,50 +656,50 @@ class CollectionActions {
     return true;
   }
 
-  void _showUnSupportedAlert(BuildContext context) {
+  Future<void> _showUnSupportedAlert(BuildContext context) async {
     final AlertDialog alert = AlertDialog(
       title: Text(S.of(context).sorry),
       content: Text(
         S.of(context).subscribeToEnableSharing,
       ),
       actions: [
-        TextButton(
-          child: Text(
-            S.of(context).subscribe,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.greenAlternative,
-            ),
-          ),
-          onPressed: () {
-            Navigator.of(context, rootNavigator: true).pop();
-            Navigator.of(context).pushReplacement(
+        ButtonWidget(
+          buttonType: ButtonType.primary,
+          isInAlert: true,
+          shouldStickToDarkTheme: false,
+          buttonAction: ButtonAction.first,
+          shouldSurfaceExecutionStates: true,
+          labelText: S.of(context).subscribe,
+          onTap: () async {
+            // for quickLink collection, we need to trash the collection
+            Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (BuildContext context) {
                   return getSubscriptionPage();
                 },
               ),
-            );
+            ).ignore();
           },
         ),
-        TextButton(
-          child: Text(
-            S.of(context).ok,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
+        Padding(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: ButtonWidget(
+            buttonType: ButtonType.secondary,
+            buttonAction: ButtonAction.cancel,
+            isInAlert: true,
+            shouldStickToDarkTheme: false,
+            labelText: S.of(context).ok,
           ),
-          onPressed: () {
-            Navigator.of(context, rootNavigator: true).pop();
-          },
         ),
       ],
     );
 
-    showDialog(
+    return showDialog(
       context: context,
       builder: (BuildContext context) {
         return alert;
       },
+      barrierDismissible: true,
     );
   }
 }
