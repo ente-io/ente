@@ -5,7 +5,6 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import "package:photos/core/errors.dart";
 import 'package:photos/db/files_db.dart';
-import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/api/collection/create_request.dart';
 import "package:photos/models/api/collection/user.dart";
@@ -110,6 +109,7 @@ class CollectionActions {
     BuildContext context,
     List<EnteFile> files,
   ) async {
+    late final Collection newCollection;
     try {
       // create album with emptyName, use collectionCreationTime on UI to
       // show name
@@ -133,10 +133,21 @@ class CollectionActions {
       final collection = await collectionsService.createAndCacheCollection(
         req,
       );
+      newCollection = collection;
       logger.finest("adding files to share to new album");
       await collectionsService.addOrCopyToCollection(collection.id, files);
       logger.finest("creating public link for the newly created album");
-      await CollectionsService.instance.createShareUrl(collection);
+      try {
+        await CollectionsService.instance.createShareUrl(collection);
+      } catch (e) {
+        if (e is SharingNotPermittedForFreeAccountsError) {
+          if (newCollection.isQuickLinkCollection() &&
+              !newCollection.hasSharees) {
+            await trashCollectionKeepingPhotos(newCollection, context);
+          }
+          rethrow;
+        }
+      }
       return collection;
     } catch (e, s) {
       if (e is SharingNotPermittedForFreeAccountsError) {
