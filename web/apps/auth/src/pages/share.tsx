@@ -1,151 +1,241 @@
-import { decryptMetadataJSON_New } from '@/base/crypto';
-import React, { useState, useEffect } from 'react';
+import { decryptMetadataJSON_New } from "@/base/crypto";
+import React, { useEffect, useMemo, useState } from "react";
 
-interface SharedCodes {
-  startTime: number;
-  step: number;
-  codes: string;
+interface SharedCode {
+    startTime: number;
+    step: number;
+    codes: string;
+}
+
+interface CodeDisplay {
+    currentCode: string;
+    nextCode: string;
+    progress: number;
 }
 
 const Share: React.FC = () => {
-  const [decryptedData, setDecryptedData] = useState<SharedCodes | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [timeStatus, setTimeStatus] = useState(-10);
-  const [currentCode, setCurrentCode] = useState('');
-  const [nextCode, setNextCode] = useState('');
-  const [progress, setProgress] = useState(0);
+    const [sharedCode, setSharedCode] = useState<SharedCode | null>(null);
+    const [error, setError] = useState<string | null>(null);
+    const [timeStatus, setTimeStatus] = useState<number>(-10);
+    const [codeDisplay, setCodeDisplay] = useState<CodeDisplay>({
+        currentCode: "",
+        nextCode: "",
+        progress: 0,
+    });
 
-  const base64UrlToByteArray = (base64Url: string): Uint8Array => {
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const binaryString = atob(base64);
-    const len = binaryString.length;
-    const bytes = new Uint8Array(len);
-    for (let i = 0; i < len; i++) {
-      bytes[i] = binaryString.charCodeAt(i);
-    }
-    return bytes;
-  };
-
-  const getCurrentAndNextCode = (
-    codes: string[],
-    startTime: number,
-    stepDuration: number
-  ): { currentCode: string; nextCode: string } => {
-    const currentTime = Date.now();
-    const elapsedTime = Math.floor((currentTime - startTime) / 1000);
-    const index = Math.floor(elapsedTime / stepDuration);
-    const currentCode = codes[index] || '';
-    const nextCode = codes[index + 1] || '';
-    return { currentCode, nextCode };
-  };
-
-  const getTimeStatus = (
-    currentTime: number,
-    startTime: number,
-    codes: string[],
-    stepDuration: number
-  ): number => {
-    if (currentTime < startTime) return -1;
-    const totalDuration = codes.length * stepDuration * 1000;
-    if (currentTime > startTime + totalDuration) return 1;
-    return 0;
-  };
-
-  useEffect(() => {
-    const decryptData = async () => {
-      const queryParams = new URLSearchParams(window.location.search);
-      const dataParam = queryParams.get('data');
-      const headerParam = queryParams.get('header');
-      const keyParam = window.location.hash.substring(1);
-      if (dataParam && headerParam && keyParam) {
-        try {
-          const decryptedCode: SharedCodes = await decryptMetadataJSON_New(
-            {
-              encryptedData: base64UrlToByteArray(dataParam),
-              decryptionHeader: base64UrlToByteArray(headerParam),
-            },
-            base64UrlToByteArray(keyParam)
-          ) as SharedCodes;
-          setDecryptedData(decryptedCode);
-        } catch (error) {
-          console.error('Failed to decrypt data:', error);
-          setError('Failed to get the data. Please check the URL and try again.');
-        }
-      }
+    const base64UrlToByteArray = (base64Url: string): Uint8Array => {
+        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+        return Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
     };
-    decryptData();
-  }, []);
 
-  useEffect(() => {
-    if (decryptedData) {
-      const interval = setInterval(() => {
+    const formatCode = (code: string): string =>
+        code.replace(/(.{3})/g, "$1 ").trim();
+
+    const getCodeDisplay = (
+        codes: string[],
+        startTime: number,
+        stepDuration: number,
+    ): CodeDisplay => {
         const currentTime = Date.now();
-        const timeStatus = getTimeStatus(
-          currentTime,
-          decryptedData.startTime,
-          decryptedData.codes.split(','),
-          decryptedData.step
-        );
-        setTimeStatus(timeStatus);
-        if (timeStatus === 0) {
-          const { currentCode, nextCode } = getCurrentAndNextCode(
-            decryptedData.codes.split(','),
-            decryptedData.startTime,
-            decryptedData.step
-          );
-          setCurrentCode(currentCode);
-          setNextCode(nextCode);
+        const elapsedTime = (currentTime - startTime) / 1000;
+        const index = Math.floor(elapsedTime / stepDuration);
+        const progress = ((elapsedTime % stepDuration) / stepDuration) * 100;
 
-          const elapsedTime = (currentTime - decryptedData.startTime) / 1000;
-          const progress = (elapsedTime % decryptedData.step) / decryptedData.step * 100;
-          setProgress(progress);
-        }
-      }, 1000);
+        return {
+            currentCode: formatCode(codes[index] || ""),
+            nextCode: formatCode(codes[index + 1] || ""),
+            progress,
+        };
+    };
 
-      return () => clearInterval(interval);
-    }
-  }, [decryptedData]);
+    const getTimeStatus = (
+        currentTime: number,
+        startTime: number,
+        codesLength: number,
+        stepDuration: number,
+    ): number => {
+        if (currentTime < startTime) return -1;
+        const totalDuration = codesLength * stepDuration * 1000;
+        if (currentTime > startTime + totalDuration) return 1;
+        return 0;
+    };
 
-  return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', flexDirection: 'column', textAlign: 'center' }}>
-      <h1>Ente.io</h1>
-      <div>
-        {error && <p>{error}</p>}
-        {timeStatus === -10 && error === null && <p>Decrypting...</p>}
-        {timeStatus === -1 && <p>Your or the person who shared the code has out of sync time.</p>}
-        {timeStatus === 1 && (
-          <p>
-            The code has expired.
-          </p>
-        )}
-        {timeStatus === 0 && (
-          <div style={{ border: '0.01px solid #000000',
-            backgroundColor: "rgba(40, 40, 40, 0.6)",
-            borderRadius: "4px",
-            overflow: "hidden", width: '300px', position: 'relative' }}>
-            <div style={{ width: '100%', backgroundColor: '#e0e0e0', height: '4px', borderRadius: '5px', overflow: 'hidden' }}>
-              <div
-                style={{
-                  width: `${progress}%`,
-                  height: '100%',
-                  backgroundColor: progress > 0.4 ? "green" : "orange",
-                  transition: 'width 1s linear',
-                }}
-              />
+    useEffect(() => {
+        const decryptCode = async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const data = urlParams.get("data");
+            const header = urlParams.get("header");
+            const key = window.location.hash.substring(1);
+
+            if (!(data && header && key)) {
+                setError("Invalid URL. Please check the URL.");
+                return;
+            }
+
+            try {
+                const decryptedCode = (await decryptMetadataJSON_New(
+                    {
+                        encryptedData: base64UrlToByteArray(data),
+                        decryptionHeader: base64UrlToByteArray(header),
+                    },
+                    base64UrlToByteArray(key),
+                )) as SharedCode;
+                setSharedCode(decryptedCode);
+            } catch (error) {
+                console.error("Failed to decrypt data:", error);
+                setError(
+                    "Failed to get the data. Please check the URL and try again.",
+                );
+            }
+        };
+        decryptCode();
+    }, []);
+
+    useEffect(() => {
+        if (!sharedCode) return;
+
+        const updateCode = () => {
+            const currentTime = Date.now();
+            const codes = sharedCode.codes.split(",");
+            const status = getTimeStatus(
+                currentTime,
+                sharedCode.startTime,
+                codes.length,
+                sharedCode.step,
+            );
+            setTimeStatus(status);
+
+            if (status === 0) {
+                setCodeDisplay(
+                    getCodeDisplay(
+                        codes,
+                        sharedCode.startTime,
+                        sharedCode.step,
+                    ),
+                );
+            }
+        };
+
+        const interval = setInterval(updateCode, 100);
+        return () => clearInterval(interval);
+    }, [sharedCode]);
+
+    const progressBarColor = useMemo(
+        () => (100 - codeDisplay.progress > 40 ? "#8E2DE2" : "#FFC107"),
+        [codeDisplay.progress],
+    );
+
+    const Message: React.FC<{ text: string }> = ({ text }) => (
+        <p style={{ textAlign: "center", fontSize: "24px" }}>{text}</p>
+    );
+
+    return (
+        <div
+            style={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                alignItems: "center",
+                height: "100vh",
+                backgroundColor: "#000000",
+                color: "#FFFFFF",
+                padding: "20px",
+            }}
+        >
+            <div style={{ fontSize: "24px", fontWeight: "bold" }}>ente</div>
+
+            <div style={{ width: "100%", maxWidth: "300px" }}>
+                {error && <p style={{ color: "red" }}>{error}</p>}
+                {timeStatus === -10 && !error && (
+                    <Message text="Decrypting..." />
+                )}
+                {timeStatus === -1 && (
+                    <Message text="Your or the person who shared the code has out of sync time." />
+                )}
+                {timeStatus === 1 && <Message text="The code has expired." />}
+                {timeStatus === 0 && (
+                    <div
+                        style={{
+                            backgroundColor: "#1C1C1E",
+                            borderRadius: "10px",
+                            paddingBottom: "20px",
+                            position: "relative",
+                        }}
+                    >
+                        <div
+                            style={{
+                                width: "100%",
+                                height: "4px",
+                                backgroundColor: "#333333",
+                                borderRadius: "2px",
+                            }}
+                        >
+                            <div
+                                style={{
+                                    width: `${100 - codeDisplay.progress}%`,
+                                    height: "100%",
+                                    backgroundColor: progressBarColor,
+                                    borderRadius: "2px",
+                                }}
+                            />
+                        </div>
+                        <div
+                            style={{
+                                fontSize: "36px",
+                                fontWeight: "bold",
+                                margin: "10px",
+                            }}
+                        >
+                            {codeDisplay.currentCode}
+                        </div>
+                        <div
+                            style={{
+                                position: "absolute",
+                                right: "20px",
+                                bottom: "20px",
+                                fontSize: "12px",
+                                opacity: 0.6,
+                            }}
+                        >
+                            <p style={{ margin: 0 }}>
+                                {codeDisplay.nextCode === ""
+                                    ? "Last code"
+                                    : "next"}
+                            </p>
+                            {codeDisplay.nextCode !== "" && (
+                                <p style={{ margin: 0 }}>
+                                    {codeDisplay.nextCode}
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                )}
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '15px', margin:'15px', position: 'relative' }}>
-              <div style={{ alignSelf: 'center', fontSize: '24px', fontWeight: 'bold' }}>{currentCode}</div>
-              <div style={{ position: 'absolute', right: 0, bottom: 0, textAlign: 'right', fontSize: '10px', opacity: 0.6 }}>
-                <p style={{ margin: 0 }}>Next</p>
-                <p style={{ margin: 0 }}>{nextCode}</p>
-              </div>
-            </div>
-    
-          </div>
-        )}
-      </div>
-    </div>
-  );
+
+            <a
+                href="https://ente.io/auth"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                <button
+                    style={{
+                        backgroundColor: "#8E2DE2",
+                        color: "#FFFFFF",
+                        border: "none",
+                        borderRadius: "25px",
+                        padding: "15px 30px",
+                        fontSize: "16px",
+                        fontWeight: "bold",
+                        cursor: "pointer",
+                        width: "100%",
+                        maxWidth: "300px",
+                    }}
+                >
+                    Try Ente Auth
+                </button>
+            </a>
+        </div>
+    );
 };
 
 export default Share;
