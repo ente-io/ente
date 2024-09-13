@@ -661,7 +661,7 @@ class CollectionActions {
           ),
           onPressed: () {
             Navigator.of(context, rootNavigator: true).pop();
-            Navigator.of(context).pushReplacement(
+            Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (BuildContext context) {
                   return getSubscriptionPage();
