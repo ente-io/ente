@@ -88,7 +88,6 @@ class _ShareCodeDialogState extends State<ShareCodeDialog> {
           onTap: () async {
             try {
               await shareCode();
-
               Navigator.of(context).pop();
             } catch (e) {
               logger.warning('Failed to share code: ${e.toString()}');
@@ -111,32 +110,30 @@ class _ShareCodeDialogState extends State<ShareCodeDialog> {
 
   Future<void> shareCode() async {
     final result = generateFutureTotpCodes(widget.code, 30);
-    // show toast with total time taken
     Map<String, dynamic> data = {
       'startTime': result.$1,
       'step': widget.code.period,
       'codes': result.$2.join(","),
     };
     try {
-      // generated 128 bit crypto secure random key
-      final Uint8List key = generate256BitKey();
+      final Uint8List key = _generate256BitKey();
       Uint8List input = utf8.encode(jsonEncode(data));
-      final encResult = CryptoUtil.encryptSync(input, key);
+      final encResult = await CryptoUtil.encryptData(input, key);
       String url =
-          'https://auth.io/share?data=${uint8ListToUrlSafeBase64(encResult.encryptedData!)}&nonce=${uint8ListToUrlSafeBase64(encResult.nonce!)}#key=${uint8ListToUrlSafeBase64(key)}';
-      logger.info('url: $url');
+          'https://auth.ente.io/share?data=${_uint8ListToUrlSafeBase64(encResult.encryptedData!)}&header=${_uint8ListToUrlSafeBase64(encResult.header!)}#${_uint8ListToUrlSafeBase64(key)}';
       shareText(url, context: context).ignore();
     } catch (e) {
-      logger.warning('Failed to encrypt data: ${e.toString()}');
+      logger.severe('Failed to encrypt data: ${e.toString()}');
+      await showGenericErrorDialog(context: context, error: e);
     }
   }
 
-  String uint8ListToUrlSafeBase64(Uint8List data) {
+  String _uint8ListToUrlSafeBase64(Uint8List data) {
     String base64Str = base64UrlEncode(data);
     return base64Str.replaceAll('=', '');
   }
 
-  Uint8List generate256BitKey() {
+  Uint8List _generate256BitKey() {
     final random = Random.secure();
     final bytes = Uint8List(32); // 32 bytes = 32 * 8 bits = 256 bits
     for (int i = 0; i < bytes.length; i++) {
