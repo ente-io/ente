@@ -36,7 +36,7 @@ jobs:
               uses: timheuer/base64-to-file@v1
               with:
                   fileName: "keystore/ente_auth_key.jks"
-                  encodedString: ${{ secrets.SIGNING_KEY_PHOTOS }}
+                  encodedString: ${{ secrets.SIGNING_KEY }}
 
             - name: Build PlayStore AAB
               run: |
