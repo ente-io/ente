@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
-import "package:photos/service_locator.dart";
 import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/components/captioned_text_widget.dart";
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
@@ -48,22 +47,21 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           );
         },
       ),
-      if (flagService.internalUser) sectionOptionSpacing,
-      if (flagService.internalUser)
-        MenuItemWidget(
-          captionedTextWidget: CaptionedTextWidget(
-            title: S.of(context).backupStatus,
-          ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
-          trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
-          onTap: () async {
-            await routeToPage(
-              context,
-              const BackupStatusScreen(),
-            );
-          },
+      sectionOptionSpacing,
+      MenuItemWidget(
+        captionedTextWidget: CaptionedTextWidget(
+          title: S.of(context).backupStatus,
         ),
+        pressedColor: getEnteColorScheme(context).fillFaint,
+        trailingIcon: Icons.chevron_right_outlined,
+        trailingIconIsMuted: true,
+        onTap: () async {
+          await routeToPage(
+            context,
+            const BackupStatusScreen(),
+          );
+        },
+      ),
       sectionOptionSpacing,
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
