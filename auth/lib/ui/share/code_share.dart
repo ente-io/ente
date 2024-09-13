@@ -25,6 +25,7 @@ class ShareCodeDialog extends StatefulWidget {
 class _ShareCodeDialogState extends State<ShareCodeDialog> {
   final Logger logger = Logger('_ShareCodeDialogState');
   final List<int> _durationInMins = [2, 5, 15, 30, 60];
+  late int selectedValue;
 
   String getItemLabel(int min) {
     if (min == 60) return '1 hour';
@@ -37,8 +38,6 @@ class _ShareCodeDialogState extends State<ShareCodeDialog> {
     return '$min min';
   }
 
-  late final int selectedValue;
-
   @override
   void initState() {
     super.initState();
@@ -48,14 +47,12 @@ class _ShareCodeDialogState extends State<ShareCodeDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Share codes'),
+      title: Text(context.l10n.shareCodes),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Select the duration for which you want to share codes.',
-          ),
+          Text(context.l10n.shareCodesDuration),
           const SizedBox(height: 10),
           DropdownButtonHideUnderline(
             child: DropdownButton2(
@@ -88,7 +85,7 @@ class _ShareCodeDialogState extends State<ShareCodeDialog> {
           labelText: context.l10n.share,
           onTap: () async {
             try {
-              await shareCode();
+              await shareCode(selectedValue);
               Navigator.of(context).pop();
             } catch (e, s) {
               logger.severe('Failed to generate shared codes', e, s);
@@ -109,8 +106,9 @@ class _ShareCodeDialogState extends State<ShareCodeDialog> {
     );
   }
 
-  Future<void> shareCode() async {
-    final result = generateFutureTotpCodes(widget.code, 30);
+  Future<void> shareCode(int durationInMin) async {
+    final int count = ((durationInMin * 60.0) / widget.code.period).ceil();
+    final result = generateFutureTotpCodes(widget.code, count);
     Map<String, dynamic> data = {
       'startTime': result.$1,
       'step': widget.code.period,

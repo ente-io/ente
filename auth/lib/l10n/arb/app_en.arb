@@ -213,6 +213,8 @@
   "enterDetailsManually": "Enter details manually",
   "edit": "Edit",
   "share": "Share",
+  "shareCodes": "Share codes",
+  "shareCodesDuration": "Select the duration for which you want to share codes.",
   "restore": "Restore",
   "copiedToClipboard": "Copied to clipboard",
   "copiedNextToClipboard": "Copied next code to clipboard",
