@@ -6,6 +6,7 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/collection_updated_event.dart";
 import "package:photos/events/event.dart";
 import "package:photos/events/location_tag_updated_event.dart";
+import "package:photos/events/magic_cache_updated_event.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection/collection.dart";
@@ -291,6 +292,8 @@ extension SectionTypeExtensions on SectionType {
     switch (this) {
       case SectionType.location:
         return [Bus.instance.on<LocationTagUpdatedEvent>()];
+      case SectionType.magic:
+        return [Bus.instance.on<MagicCacheUpdatedEvent>()];
       default:
         return [];
     }

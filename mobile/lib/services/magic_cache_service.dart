@@ -8,6 +8,7 @@ import "package:logging/logging.dart";
 import "package:path_provider/path_provider.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/file_uploaded_event.dart";
+import "package:photos/events/magic_cache_updated_event.dart";
 import "package:photos/extensions/stop_watch.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
@@ -177,10 +178,12 @@ class MagicCacheService {
       w?.log("cacheWritten");
       await _resetLastMagicCacheUpdateTime();
       w?.logAndReset('done');
+      Bus.instance.fire(MagicCacheUpdatedEvent());
     } catch (e, s) {
       _logger.info("Error updating magic cache", e, s);
     } finally {
       _isUpdateInProgress = false;
+      Bus.instance.fire(MagicCacheUpdatedEvent());
     }
   }
 
