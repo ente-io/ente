@@ -19,6 +19,21 @@
   "pleaseVerifyDetails": "Please verify the details and try again",
   "codeIssuerHint": "Issuer",
   "codeSecretKeyHint": "Secret Key",
+  "secret": "Secret",
+  "account": "Account",
+  "advance": "Advance",
+  "notes": "Notes",
+  "notesLengthLimit": "Notes can be at most {count} characters long",
+    "@notesLengthLimit": {
+        "description": "Text to indicate the maximum number of characters allowed for notes",
+        "placeholders": {
+        "count": {
+            "description": "The maximum number of characters allowed for notes",
+            "type": "int",
+            "example": "100"
+        }
+        }
+    },
   "codeAccountHint": "Account (you@domain.com)",
   "codeTagHint": "Tag",
   "accountKeyType": "Type of key",
@@ -34,6 +49,9 @@
   "nextTotpTitle": "next",
   "deleteCodeTitle": "Delete code?",
   "deleteCodeMessage": "Are you sure you want to delete this code? This action is irreversible.",
+  "trashCode": "Trash code?",
+  "trashCodeMessage": "Are you sure you want to trash code for {account}?",
+  "trash": "Trash",
   "viewLogsAction": "View logs",
   "sendLogsDescription": "This will send across logs to help us debug your issue. While we take precautions to ensure that sensitive information is not logged, we encourage you to view these logs before sharing them.",
   "preparingLogsTitle": "Preparing logs...",
@@ -100,6 +118,7 @@
   "emailVerificationToggle": "Email verification",
   "emailVerificationEnableWarning": "To avoid getting locked out of your account, be sure to store a copy of your email 2FA outside of Ente Auth before enabling email verification.",
   "authToChangeEmailVerificationSetting": "Please authenticate to change email verification",
+  "authenticateGeneric": "Please authenticate",
   "authToViewYourRecoveryKey": "Please authenticate to view your recovery key",
   "authToChangeYourEmail": "Please authenticate to change your email",
   "authToChangeYourPassword": "Please authenticate to change your password",
@@ -193,6 +212,10 @@
   "scanAQrCode": "Scan a QR code",
   "enterDetailsManually": "Enter details manually",
   "edit": "Edit",
+  "share": "Share",
+  "shareCodes": "Share codes",
+  "shareCodesDuration": "Select the duration for which you want to share codes.",
+  "restore": "Restore",
   "copiedToClipboard": "Copied to clipboard",
   "copiedNextToClipboard": "Copied next code to clipboard",
   "error": "Error",
@@ -346,6 +369,7 @@
   "sigInBackupReminder": "Please export your codes to ensure that you have a backup you can restore from.",
   "offlineModeWarning": "You have chosen to proceed without backups. Please take manual backups to make sure your codes are safe.",
   "showLargeIcons": "Show large icons",
+  "compactMode": "Compact mode",
   "shouldHideCode": "Hide codes",
   "doubleTapToViewHiddenCode": "You can double tap on an entry to view code",
   "focusOnSearchBar": "Focus search on app start",

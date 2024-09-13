@@ -15,11 +15,13 @@ import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/code_timer_progress.dart';
+import 'package:ente_auth/ui/share/code_share.dart';
 import 'package:ente_auth/ui/utils/icon_utils.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_auth/utils/totp_util.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_context_menu/flutter_context_menu.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -29,10 +31,12 @@ import 'package:move_to_background/move_to_background.dart';
 
 class CodeWidget extends StatefulWidget {
   final Code code;
+  final bool isCompactMode;
 
   const CodeWidget(
     this.code, {
     super.key,
+    required this.isCompactMode,
   });
 
   @override
@@ -49,12 +53,14 @@ class _CodeWidgetState extends State<CodeWidget> {
   late bool _shouldShowLargeIcon;
   late bool _hideCode;
   bool isMaskingEnabled = false;
+  bool isCompactMode = true;
   int _codeTimeStep = -1;
 
   @override
   void initState() {
     super.initState();
     isMaskingEnabled = PreferenceService.instance.shouldHideCodes();
+
     _hideCode = isMaskingEnabled;
     _everySecondTimer =
         Timer.periodic(const Duration(milliseconds: 500), (Timer t) {
@@ -115,6 +121,16 @@ class _CodeWidgetState extends State<CodeWidget> {
                 painter: PinBgPainter(
                   color: colorScheme.pinnedBgColor,
                 ),
+                size: isCompactMode ? const Size(24, 24) : const Size(39, 39),
+              ),
+            ),
+          if (widget.code.isTrashed && kDebugMode)
+            Align(
+              alignment: Alignment.topLeft,
+              child: CustomPaint(
+                painter: PinBgPainter(
+                  color: colorScheme.warning700,
+                ),
                 size: const Size(39, 39),
               ),
             ),
@@ -126,7 +142,9 @@ class _CodeWidgetState extends State<CodeWidget> {
                 CodeTimerProgressCache.getCachedWidget(
                   widget.code.period,
                 ),
-              const SizedBox(height: 28),
+              widget.isCompactMode
+                  ? const SizedBox(height: 4)
+                  : const SizedBox(height: 28),
               Row(
                 children: [
                   _shouldShowLargeIcon ? _getIcon() : const SizedBox.shrink(),
@@ -134,22 +152,32 @@ class _CodeWidgetState extends State<CodeWidget> {
                     child: Column(
                       children: [
                         _getTopRow(),
-                        const SizedBox(height: 4),
+                        widget.isCompactMode
+                            ? const SizedBox.shrink()
+                            : const SizedBox(height: 4),
                         _getBottomRow(l10n),
                       ],
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 32),
+              isCompactMode
+                  ? const SizedBox(height: 4)
+                  : const SizedBox(height: 32),
             ],
           ),
           if (widget.code.isPinned) ...[
             Align(
               alignment: Alignment.topRight,
               child: Padding(
-                padding: const EdgeInsets.only(right: 6, top: 6),
-                child: SvgPicture.asset("assets/svg/pin-card.svg"),
+                padding: widget.isCompactMode
+                    ? const EdgeInsets.only(right: 2, top: 2)
+                    : const EdgeInsets.only(right: 6, top: 6),
+                child: SvgPicture.asset(
+                  "assets/svg/pin-card.svg",
+                  width: widget.isCompactMode ? 8 : null,
+                  height: widget.isCompactMode ? 8 : null,
+                ),
               ),
             ),
           ],
@@ -196,36 +224,59 @@ class _CodeWidgetState extends State<CodeWidget> {
     }
 
     return Container(
-      margin: const EdgeInsets.only(left: 16, right: 16, bottom: 8, top: 8),
+      margin: widget.isCompactMode
+          ? const EdgeInsets.only(left: 16, right: 16, bottom: 6, top: 6)
+          : const EdgeInsets.only(left: 16, right: 16, bottom: 8, top: 8),
       child: Builder(
         builder: (context) {
           if (PlatformUtil.isDesktop()) {
             return ContextMenuRegion(
               contextMenu: ContextMenu(
                 entries: <ContextMenuEntry>[
-                  MenuItem(
-                    label: 'QR',
-                    icon: Icons.qr_code_2_outlined,
-                    onSelected: () => _onShowQrPressed(null),
-                  ),
-                  MenuItem(
-                    label: widget.code.isPinned ? l10n.unpinText : l10n.pinText,
-                    icon: widget.code.isPinned
-                        ? Icons.push_pin
-                        : Icons.push_pin_outlined,
-                    onSelected: () => _onPinPressed(null),
-                  ),
-                  MenuItem(
-                    label: l10n.edit,
-                    icon: Icons.edit,
-                    onSelected: () => _onEditPressed(null),
-                  ),
+                  if (!widget.code.isTrashed &&
+                      widget.code.type.isTOTPCompatible)
+                    MenuItem(
+                      label: context.l10n.share,
+                      icon: Icons.adaptive.share_outlined,
+                      onSelected: () => _onSharePressed(null),
+                    ),
+                  if (!widget.code.isTrashed)
+                    MenuItem(
+                      label: 'QR',
+                      icon: Icons.qr_code_2_outlined,
+                      onSelected: () => _onShowQrPressed(null),
+                    ),
+                  if (!widget.code.isTrashed)
+                    MenuItem(
+                      label:
+                          widget.code.isPinned ? l10n.unpinText : l10n.pinText,
+                      icon: widget.code.isPinned
+                          ? Icons.push_pin
+                          : Icons.push_pin_outlined,
+                      onSelected: () => _onPinPressed(null),
+                    ),
+                  if (!widget.code.isTrashed)
+                    MenuItem(
+                      label: l10n.edit,
+                      icon: Icons.edit,
+                      onSelected: () => _onEditPressed(null),
+                    ),
+                  if (widget.code.isTrashed)
+                    MenuItem(
+                      label: l10n.restore,
+                      icon: Icons.restore_outlined,
+                      onSelected: () => _onRestoreClicked(null),
+                    ),
                   const MenuDivider(),
                   MenuItem(
-                    label: l10n.delete,
+                    label: widget.code.isTrashed ? l10n.delete : l10n.trash,
                     value: "Delete",
-                    icon: Icons.delete,
-                    onSelected: () => _onDeletePressed(null),
+                    icon: widget.code.isTrashed
+                        ? Icons.delete_forever
+                        : Icons.delete,
+                    onSelected: () => widget.code.isTrashed
+                        ? _onDeletePressed(null)
+                        : _onTrashPressed(null),
                   ),
                 ],
                 padding: const EdgeInsets.all(8.0),
@@ -233,87 +284,105 @@ class _CodeWidgetState extends State<CodeWidget> {
               child: clippedCard(l10n),
             );
           }
+          final double slideSpace = isCompactMode ? 4 : 8;
+          double extendRatio = isCompactMode ? 0.70 : 0.90;
+          if (widget.code.isTrashed) {
+            extendRatio = 0.50;
+          }
 
           return Slidable(
             key: ValueKey(widget.code.hashCode),
             endActionPane: ActionPane(
-              extentRatio: 0.90,
+              extentRatio: extendRatio,
               motion: const ScrollMotion(),
               children: [
-                const SizedBox(
-                  width: 14,
-                ),
-                SlidableAction(
-                  onPressed: _onShowQrPressed,
-                  backgroundColor: Colors.grey.withOpacity(0.1),
-                  borderRadius: const BorderRadius.all(Radius.circular(8)),
-                  foregroundColor:
-                      Theme.of(context).colorScheme.inverseBackgroundColor,
-                  icon: Icons.qr_code_2_outlined,
-                  label: "QR",
-                  padding: const EdgeInsets.only(left: 4, right: 0),
-                  spacing: 8,
-                ),
-                const SizedBox(
-                  width: 14,
-                ),
-                CustomSlidableAction(
-                  onPressed: _onPinPressed,
-                  backgroundColor: Colors.grey.withOpacity(0.1),
-                  borderRadius: const BorderRadius.all(Radius.circular(8)),
-                  foregroundColor:
-                      Theme.of(context).colorScheme.inverseBackgroundColor,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      if (widget.code.isPinned)
-                        SvgPicture.asset(
-                          "assets/svg/pin-active.svg",
-                          colorFilter: ui.ColorFilter.mode(
-                            Theme.of(context).colorScheme.primary,
-                            BlendMode.srcIn,
-                          ),
-                        )
-                      else
-                        SvgPicture.asset(
-                          "assets/svg/pin-inactive.svg",
-                          colorFilter: ui.ColorFilter.mode(
-                            Theme.of(context).colorScheme.primary,
-                            BlendMode.srcIn,
-                          ),
-                        ),
-                      const SizedBox(height: 8),
-                      Text(
-                        widget.code.isPinned ? l10n.unpinText : l10n.pinText,
-                      ),
-                    ],
+                if (!widget.code.isTrashed && widget.code.type.isTOTPCompatible)
+                  SizedBox(width: slideSpace),
+                if (!widget.code.isTrashed && widget.code.type.isTOTPCompatible)
+                  SlidableAction(
+                    onPressed: _onSharePressed,
+                    backgroundColor: Colors.grey.withOpacity(0.1),
+                    borderRadius: const BorderRadius.all(Radius.circular(8)),
+                    foregroundColor:
+                        Theme.of(context).colorScheme.inverseBackgroundColor,
+                    icon: Icons.adaptive.share_outlined,
+                    label: l10n.share,
+                    padding: const EdgeInsets.only(left: 4, right: 0),
+                    spacing: 8,
                   ),
-                  padding: const EdgeInsets.only(left: 4, right: 0),
-                ),
-                const SizedBox(
-                  width: 14,
-                ),
+                if (!widget.code.isTrashed) SizedBox(width: slideSpace),
+                if (!widget.code.isTrashed)
+                  CustomSlidableAction(
+                    onPressed: _onPinPressed,
+                    backgroundColor: Colors.grey.withOpacity(0.1),
+                    borderRadius: const BorderRadius.all(Radius.circular(8)),
+                    foregroundColor:
+                        Theme.of(context).colorScheme.inverseBackgroundColor,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if (widget.code.isPinned)
+                          SvgPicture.asset(
+                            "assets/svg/pin-active.svg",
+                            colorFilter: ui.ColorFilter.mode(
+                              Theme.of(context).colorScheme.primary,
+                              BlendMode.srcIn,
+                            ),
+                          )
+                        else
+                          SvgPicture.asset(
+                            "assets/svg/pin-inactive.svg",
+                            colorFilter: ui.ColorFilter.mode(
+                              Theme.of(context).colorScheme.primary,
+                              BlendMode.srcIn,
+                            ),
+                          ),
+                        const SizedBox(height: 8),
+                        Text(
+                          widget.code.isPinned ? l10n.unpinText : l10n.pinText,
+                        ),
+                      ],
+                    ),
+                    padding: const EdgeInsets.only(left: 4, right: 0),
+                  ),
+                if (!widget.code.isTrashed) SizedBox(width: slideSpace),
+                if (!widget.code.isTrashed)
+                  SlidableAction(
+                    onPressed: _onEditPressed,
+                    backgroundColor: Colors.grey.withOpacity(0.1),
+                    borderRadius: const BorderRadius.all(Radius.circular(8)),
+                    foregroundColor:
+                        Theme.of(context).colorScheme.inverseBackgroundColor,
+                    icon: Icons.edit_outlined,
+                    label: l10n.edit,
+                    padding: const EdgeInsets.only(left: 4, right: 0),
+                    spacing: 8,
+                  ),
+                if (widget.code.isTrashed) SizedBox(width: slideSpace),
+                if (widget.code.isTrashed)
+                  SlidableAction(
+                    onPressed: _onRestoreClicked,
+                    backgroundColor: Colors.grey.withOpacity(0.1),
+                    borderRadius: const BorderRadius.all(Radius.circular(8)),
+                    foregroundColor:
+                        Theme.of(context).colorScheme.inverseBackgroundColor,
+                    icon: Icons.restore_outlined,
+                    label: l10n.restore,
+                    padding: const EdgeInsets.only(left: 4, right: 0),
+                    spacing: 8,
+                  ),
+                SizedBox(width: slideSpace),
                 SlidableAction(
-                  onPressed: _onEditPressed,
-                  backgroundColor: Colors.grey.withOpacity(0.1),
-                  borderRadius: const BorderRadius.all(Radius.circular(8)),
-                  foregroundColor:
-                      Theme.of(context).colorScheme.inverseBackgroundColor,
-                  icon: Icons.edit_outlined,
-                  label: l10n.edit,
-                  padding: const EdgeInsets.only(left: 4, right: 0),
-                  spacing: 8,
-                ),
-                const SizedBox(
-                  width: 14,
-                ),
-                SlidableAction(
-                  onPressed: _onDeletePressed,
+                  onPressed: widget.code.isTrashed
+                      ? _onDeletePressed
+                      : _onTrashPressed,
                   backgroundColor: Colors.grey.withOpacity(0.1),
                   borderRadius: const BorderRadius.all(Radius.circular(8)),
                   foregroundColor: colorScheme.deleteCodeTextColor,
-                  icon: Icons.delete,
-                  label: l10n.delete,
+                  icon: widget.code.isTrashed
+                      ? Icons.delete_forever
+                      : Icons.delete,
+                  label: widget.code.isTrashed ? l10n.delete : l10n.trash,
                   padding: const EdgeInsets.only(left: 0, right: 0),
                   spacing: 8,
                 ),
@@ -343,7 +412,7 @@ class _CodeWidgetState extends State<CodeWidget> {
                   type: MaterialType.transparency,
                   child: AutoSizeText(
                     _getFormattedCode(value),
-                    style: const TextStyle(fontSize: 24),
+                    style: TextStyle(fontSize: widget.isCompactMode ? 14 : 24),
                     maxLines: 1,
                   ),
                 );
@@ -370,8 +439,8 @@ class _CodeWidgetState extends State<CodeWidget> {
                             type: MaterialType.transparency,
                             child: Text(
                               _getFormattedCode(value),
-                              style: const TextStyle(
-                                fontSize: 18,
+                              style: TextStyle(
+                                fontSize: widget.isCompactMode ? 12 : 18,
                                 color: Colors.grey,
                               ),
                             ),
@@ -404,6 +473,7 @@ class _CodeWidgetState extends State<CodeWidget> {
   }
 
   Widget _getTopRow() {
+    bool isCompactMode = widget.isCompactMode;
     return Padding(
       padding: const EdgeInsets.only(left: 16, right: 16),
       child: Row(
@@ -415,13 +485,15 @@ class _CodeWidgetState extends State<CodeWidget> {
               children: [
                 Text(
                   safeDecode(widget.code.issuer).trim(),
-                  style: Theme.of(context).textTheme.titleLarge,
+                  style: isCompactMode
+                      ? Theme.of(context).textTheme.bodyMedium
+                      : Theme.of(context).textTheme.titleLarge,
                 ),
-                const SizedBox(height: 2),
+                if (!isCompactMode) const SizedBox(height: 2),
                 Text(
                   safeDecode(widget.code.account).trim(),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontSize: 12,
+                        fontSize: isCompactMode ? 12 : 12,
                         color: Colors.grey,
                       ),
                 ),
@@ -452,12 +524,14 @@ class _CodeWidgetState extends State<CodeWidget> {
   Widget _getIcon() {
     return Padding(
       padding: _shouldShowLargeIcon
-          ? const EdgeInsets.only(left: 16)
+          ? EdgeInsets.only(left: widget.isCompactMode ? 12 : 16)
           : const EdgeInsets.all(0),
       child: IconUtils.instance.getIcon(
         context,
         safeDecode(widget.code.issuer).trim(),
-        width: _shouldShowLargeIcon ? 42 : 24,
+        width: widget.isCompactMode
+            ? (_shouldShowLargeIcon ? 32 : 24)
+            : (_shouldShowLargeIcon ? 42 : 24),
       ),
     );
   }
@@ -540,6 +614,16 @@ class _CodeWidgetState extends State<CodeWidget> {
     );
   }
 
+  Future<void> _onSharePressed(_) async {
+    bool isAuthSuccessful = await LocalAuthenticationService.instance
+        .requestLocalAuthentication(context, context.l10n.authenticateGeneric);
+    await PlatformUtil.refocusWindows();
+    if (!isAuthSuccessful) {
+      return;
+    }
+    showShareDialog(context, widget.code);
+  }
+
   Future<void> _onPinPressed(_) async {
     bool currentlyPinned = widget.code.isPinned;
     final display = widget.code.display;
@@ -559,6 +643,10 @@ class _CodeWidgetState extends State<CodeWidget> {
   }
 
   void _onDeletePressed(_) async {
+    if (!widget.code.isTrashed) {
+      showToast(context, 'Code can only be deleted from trash');
+      return;
+    }
     bool isAuthSuccessful =
         await LocalAuthenticationService.instance.requestLocalAuthentication(
       context,
@@ -579,6 +667,64 @@ class _CodeWidgetState extends State<CodeWidget> {
         await CodeStore.instance.removeCode(widget.code);
       },
     );
+  }
+
+  void _onTrashPressed(_) async {
+    if (widget.code.isTrashed) {
+      showToast(context, 'Code is already trashed');
+      return;
+    }
+    bool isAuthSuccessful =
+        await LocalAuthenticationService.instance.requestLocalAuthentication(
+      context,
+      context.l10n.deleteCodeAuthMessage,
+    );
+    if (!isAuthSuccessful) {
+      return;
+    }
+    FocusScope.of(context).requestFocus();
+    final l10n = context.l10n;
+    await showChoiceActionSheet(
+      context,
+      title: l10n.trashCode,
+      body: l10n
+          .trashCodeMessage('${widget.code.issuer} (${widget.code.account})'),
+      firstButtonLabel: l10n.trash,
+      isCritical: true,
+      firstButtonOnTap: () async {
+        try {
+          final display = widget.code.display;
+          final Code code = widget.code.copyWith(
+            display: display.copyWith(trashed: true),
+          );
+          await CodeStore.instance.addCode(code);
+        } catch (e) {
+          logger.severe('Failed to trash code: ${e.toString()}');
+          showGenericErrorDialog(context: context, error: e).ignore();
+        }
+      },
+    );
+  }
+
+  void _onRestoreClicked(_) async {
+    if (!widget.code.isTrashed) {
+      showToast(context, 'Code is already restored');
+      return;
+    }
+    FocusScope.of(context).requestFocus();
+
+    try {
+      final display = widget.code.display;
+      final Code code = widget.code.copyWith(
+        display: display.copyWith(trashed: false),
+      );
+      await CodeStore.instance.addCode(code);
+    } catch (e) {
+      logger.severe('Failed to restore code: ${e.toString()}');
+      if (mounted) {
+        showGenericErrorDialog(context: context, error: e).ignore();
+      }
+    }
   }
 
   String _getCurrentOTP() {

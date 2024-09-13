@@ -74,6 +74,10 @@ class _HomePageState extends State<HomePage> {
   StreamSubscription<TriggerLogoutEvent>? _triggerLogoutEvent;
   StreamSubscription<IconsChangedEvent>? _iconsChangedEvent;
   String selectedTag = "";
+  bool _isTrashOpen = false;
+  bool hasTrashedCodes = false;
+  bool hasNonTrashedCodes = false;
+  bool isCompactMode = false;
 
   @override
   void initState() {
@@ -103,10 +107,27 @@ class _HomePageState extends State<HomePage> {
   void _loadCodes() {
     CodeStore.instance.getAllCodes().then((codes) {
       _allCodes = codes;
+      hasTrashedCodes = false;
+      hasNonTrashedCodes = false;
+      for (final c in _allCodes ?? []) {
+        if (c.isTrashed) {
+          hasTrashedCodes = true;
+        } else {
+          hasNonTrashedCodes = true;
+        }
+        if (hasNonTrashedCodes && hasTrashedCodes) {
+          break;
+        }
+      }
+      if (!hasTrashedCodes) {
+        _isTrashOpen = false;
+      }
+      if (!hasNonTrashedCodes && hasTrashedCodes) {
+        _isTrashOpen = true;
+      }
 
       CodeDisplayStore.instance.getAllTags(allCodes: _allCodes).then((value) {
         tags = value;
-
         if (mounted) {
           if (!tags.contains(selectedTag)) {
             selectedTag = "";
@@ -133,7 +154,8 @@ class _HomePageState extends State<HomePage> {
       for (final Code codeState in _allCodes!) {
         if (codeState.hasError ||
             selectedTag != "" &&
-                !codeState.display.tags.contains(selectedTag)) {
+                !codeState.display.tags.contains(selectedTag) ||
+            (codeState.isTrashed != _isTrashOpen)) {
           continue;
         }
 
@@ -145,11 +167,19 @@ class _HomePageState extends State<HomePage> {
       }
       _filteredCodes = issuerMatch;
       _filteredCodes.addAll(accountMatch);
+    } else if (_isTrashOpen) {
+      _filteredCodes = _allCodes
+              ?.where(
+                (element) => !element.hasError && element.isTrashed,
+              )
+              .toList() ??
+          [];
     } else {
       _filteredCodes = _allCodes
               ?.where(
                 (element) =>
                     !element.hasError &&
+                    !element.isTrashed &&
                     (selectedTag == "" ||
                         element.display.tags.contains(selectedTag)),
               )
@@ -228,6 +258,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    isCompactMode = PreferenceService.instance.isCompactMode();
 
     return PopScope(
       onPopInvokedWithResult: (_, result) async {
@@ -340,6 +371,8 @@ class _HomePageState extends State<HomePage> {
         final anyCodeHasError =
             _allCodes?.firstWhereOrNull((element) => element.hasError) != null;
         final indexOffset = anyCodeHasError ? 1 : 0;
+        final itemCount = (hasNonTrashedCodes ? tags.length + 1 : 0) +
+            (hasTrashedCodes ? 1 : 0);
 
         final list = Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -353,16 +386,31 @@ class _HomePageState extends State<HomePage> {
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
                   separatorBuilder: (context, index) =>
                       const SizedBox(width: 8),
-                  itemCount: tags.length + 1,
+                  itemCount: itemCount,
                   itemBuilder: (context, index) {
-                    if (index == 0) {
+                    if (index == 0 && hasNonTrashedCodes) {
                       return TagChip(
                         label: "All",
-                        state: selectedTag == ""
+                        state: selectedTag == "" && _isTrashOpen == false
                             ? TagChipState.selected
                             : TagChipState.unselected,
                         onTap: () {
                           selectedTag = "";
+                          _isTrashOpen = false;
+                          setState(() {});
+                          _applyFilteringAndRefresh();
+                        },
+                      );
+                    }
+                    if (index == itemCount - 1 && hasTrashedCodes) {
+                      return TagChip(
+                        label: '🗑️ Trash',
+                        state: _isTrashOpen
+                            ? TagChipState.selected
+                            : TagChipState.unselected,
+                        onTap: () {
+                          selectedTag = "";
+                          _isTrashOpen = !_isTrashOpen;
                           setState(() {});
                           _applyFilteringAndRefresh();
                         },
@@ -375,6 +423,7 @@ class _HomePageState extends State<HomePage> {
                           ? TagChipState.selected
                           : TagChipState.unselected,
                       onTap: () {
+                        _isTrashOpen = false;
                         if (selectedTag == tags[index - 1]) {
                           selectedTag = "";
                           setState(() {});
@@ -413,6 +462,7 @@ class _HomePageState extends State<HomePage> {
                     child: CodeWidget(
                       key: ValueKey(code.hashCode),
                       code,
+                      isCompactMode: isCompactMode,
                     ),
                   );
                 }),
@@ -443,6 +493,7 @@ class _HomePageState extends State<HomePage> {
                           final codeState = _filteredCodes[index];
                           return CodeWidget(
                             codeState,
+                            isCompactMode: isCompactMode,
                           );
                         }),
                         itemCount: _filteredCodes.length,

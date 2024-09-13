@@ -27,6 +27,8 @@ class Code {
 
   bool get isPinned => display.pinned;
 
+  bool get isTrashed => display.trashed;
+
   final Object? err;
   bool get hasError => err != null;
 
