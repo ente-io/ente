@@ -3,6 +3,7 @@ package repo
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 
 	"github.com/ente-io/stacktrace"
 
@@ -106,6 +107,43 @@ func (repo *BillingRepository) LogAppStorePush(userID int64, notification appsto
 	_, err := repo.DB.Exec(`INSERT INTO subscription_logs(user_id, payment_provider, notification, verification_response) VALUES($1, $2, $3, $4)`,
 		userID, ente.AppStore, notificationJSON, responseJSON)
 	return stacktrace.Propagate(err, "")
+}
+
+func (repo *BillingRepository) IsUserOnPaidPlan(userID int64) (bool, error) {
+	query := `
+		SELECT CASE
+            WHEN NOT EXISTS (
+                SELECT 1
+                FROM users u
+                WHERE u.user_id = 1
+            ) THEN true
+            ELSE EXISTS (
+                SELECT 1
+                FROM users u
+                WHERE u.user_id = $1
+                AND (
+                    EXISTS (
+                        SELECT 1
+                        FROM subscriptions s
+                        WHERE s.user_id = COALESCE(u.family_admin_id, u.user_id)
+                        AND s.product_id <> 'free'
+                    )
+                    OR EXISTS (
+                        SELECT 1
+                        FROM storage_bonus sb
+                        WHERE sb.user_id = COALESCE(u.family_admin_id, u.user_id)
+                        AND sb.type NOT IN ('SIGN_UP', 'REFERRAL')
+                    )
+                )
+            )
+        END
+	`
+	var isPaidPlan bool
+	err := repo.DB.QueryRow(query, userID).Scan(&isPaidPlan)
+	if err != nil {
+		return false, fmt.Errorf("error checking paid plan status: %v", err)
+	}
+	return isPaidPlan, nil
 }
 
 // LogStripePush logs a notification from Stripe
