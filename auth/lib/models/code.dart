@@ -83,6 +83,7 @@ class Code {
     final Type updatedType = type ?? this.type;
     final int updatedCounter = counter ?? this.counter;
     final CodeDisplay updatedDisplay = display ?? this.display;
+    final String encodedIssuer = Uri.encodeQueryComponent(updateIssuer);
 
     return Code(
       updateAccount,
@@ -94,7 +95,7 @@ class Code {
       updatedType,
       updatedCounter,
       "otpauth://${updatedType.name}/$updateIssuer:$updateAccount?algorithm=${updatedAlgo.name}"
-      "&digits=$updatedDigits&issuer=$updateIssuer"
+      "&digits=$updatedDigits&issuer=$encodedIssuer"
       "&period=$updatePeriod&secret=$updatedSecret${updatedType == Type.hotp ? "&counter=$updatedCounter" : ""}",
       generatedID: generatedID,
       display: updatedDisplay,
@@ -109,6 +110,7 @@ class Code {
     CodeDisplay? display,
     int digits,
   ) {
+    final String encodedIssuer = Uri.encodeQueryComponent(issuer);
     return Code(
       account,
       issuer,
@@ -118,7 +120,7 @@ class Code {
       Algorithm.sha1,
       type,
       0,
-      "otpauth://${type.name}/$issuer:$account?algorithm=SHA1&digits=$digits&issuer=$issuer&period=30&secret=$secret",
+      "otpauth://${type.name}/$issuer:$account?algorithm=SHA1&digits=$digits&issuer=$encodedIssuer&period=30&secret=$secret",
       display: display ?? CodeDisplay(),
     );
   }

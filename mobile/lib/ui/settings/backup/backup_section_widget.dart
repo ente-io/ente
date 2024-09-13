@@ -42,8 +42,8 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
         onTap: () async {
           await routeToPage(
             context,
-            BackupFolderSelectionPage(
-              buttonText: S.of(context).backup,
+            const BackupFolderSelectionPage(
+              isFirstBackup: false,
             ),
           );
         },

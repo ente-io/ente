@@ -31,12 +31,6 @@ export const FlexWrapper = styled(Box)`
     align-items: center;
 `;
 
-export const FreeFlowText = styled("div")`
-    word-break: break-word;
-    min-width: 30%;
-    text-align: left;
-`;
-
 export const SpaceBetweenFlex = styled(FlexWrapper)`
     justify-content: space-between;
 `;

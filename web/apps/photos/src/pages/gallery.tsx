@@ -3,6 +3,10 @@ import { NavbarBase } from "@/base/components/Navbar";
 import { useIsMobileWidth } from "@/base/hooks";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
+import {
+    SearchBar,
+    type SearchBarProps,
+} from "@/new/photos/components/SearchBar";
 import { WhatsNew } from "@/new/photos/components/WhatsNew";
 import { shouldShowWhatsNew } from "@/new/photos/services/changelog";
 import downloadManager from "@/new/photos/services/download";
@@ -15,10 +19,7 @@ import {
     filterSearchableFiles,
     setSearchableData,
 } from "@/new/photos/services/search";
-import {
-    SearchQuery,
-    SearchResultSummary,
-} from "@/new/photos/services/search/types";
+import type { SearchOption } from "@/new/photos/services/search/types";
 import { EnteFile } from "@/new/photos/types/file";
 import { mergeMetadata } from "@/new/photos/utils/file";
 import {
@@ -74,7 +75,6 @@ import GalleryEmptyState from "components/GalleryEmptyState";
 import { LoadingOverlay } from "components/LoadingOverlay";
 import PhotoFrame from "components/PhotoFrame";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
-import { SearchBar, type UpdateSearch } from "components/SearchBar";
 import Sidebar from "components/Sidebar";
 import { type UploadTypeSelectorIntent } from "components/Upload/UploadTypeSelector";
 import Uploader from "components/Upload/Uploader";
@@ -206,12 +206,8 @@ export default function Gallery() {
     const [collectionNamerAttributes, setCollectionNamerAttributes] =
         useState<CollectionNamerAttributes>(null);
     const [collectionNamerView, setCollectionNamerView] = useState(false);
-    const [searchQuery, setSearchQuery] = useState<SearchQuery>(null);
     const [shouldDisableDropzone, setShouldDisableDropzone] = useState(false);
     const [isPhotoSwipeOpen, setIsPhotoSwipeOpen] = useState(false);
-    // TODO(MR): This is never true currently, this is the WIP ability to show
-    // what's new dialog on desktop app updates. The UI is done, need to hook
-    // this up to logic to trigger it.
     const [openWhatsNew, setOpenWhatsNew] = useState(false);
 
     const {
@@ -249,9 +245,12 @@ export default function Gallery() {
         accept: ".zip",
     });
 
+    // If we're in "search mode". See: [Note: "search mode"].
     const [isInSearchMode, setIsInSearchMode] = useState(false);
-    const [searchResultSummary, setSetSearchResultSummary] =
-        useState<SearchResultSummary>(null);
+    // The option selected by the user selected from the search bar dropdown.
+    const [selectedSearchOption, setSelectedSearchOption] = useState<
+        SearchOption | undefined
+    >();
     const syncInProgress = useRef(true);
     const syncInterval = useRef<NodeJS.Timeout>();
     const resync = useRef<{ force: boolean; silent: boolean }>();
@@ -492,18 +491,18 @@ export default function Gallery() {
     }, [router.isReady]);
 
     useEffect(() => {
-        if (isInSearchMode && searchResultSummary) {
+        if (isInSearchMode && selectedSearchOption) {
             setPhotoListHeader({
                 height: 104,
                 item: (
-                    <SearchResultSummaryHeader
-                        searchResultSummary={searchResultSummary}
+                    <SearchResultsHeader
+                        selectedOption={selectedSearchOption}
                     />
                 ),
                 itemType: ITEM_TYPE.HEADER,
             });
         }
-    }, [isInSearchMode, searchResultSummary]);
+    }, [isInSearchMode, selectedSearchOption]);
 
     const activeCollection = useMemo(() => {
         if (!collections || !hiddenCollections) {
@@ -527,7 +526,7 @@ export default function Gallery() {
             return;
         }
 
-        if (activeCollectionID === TRASH_SECTION && !isInSearchMode) {
+        if (activeCollectionID === TRASH_SECTION && !selectedSearchOption) {
             return getUniqueFiles([
                 ...trashedFiles,
                 ...files.filter((file) => tempDeletedFileIds?.has(file.id)),
@@ -535,8 +534,10 @@ export default function Gallery() {
         }
 
         let filteredFiles: EnteFile[] = [];
-        if (isInSearchMode) {
-            filteredFiles = await filterSearchableFiles(searchQuery);
+        if (selectedSearchOption) {
+            filteredFiles = await filterSearchableFiles(
+                selectedSearchOption.suggestion,
+            );
         } else {
             filteredFiles = getUniqueFiles(
                 (isInHiddenSection ? hiddenFiles : files).filter((item) => {
@@ -596,11 +597,6 @@ export default function Gallery() {
                 }),
             );
         }
-        if (searchQuery?.clip) {
-            return filteredFiles.sort((a, b) => {
-                return searchQuery.clip.get(b.id) - searchQuery.clip.get(a.id);
-            });
-        }
         const sortAsc = activeCollection?.pubMagicMetadata?.data?.asc ?? false;
         if (sortAsc) {
             return sortFiles(filteredFiles, true);
@@ -614,7 +610,7 @@ export default function Gallery() {
         tempDeletedFileIds,
         tempHiddenFileIds,
         hiddenFileIds,
-        searchQuery,
+        selectedSearchOption,
         activeCollectionID,
         archivedCollections,
     ]);
@@ -980,16 +976,18 @@ export default function Gallery() {
             });
     };
 
-    const updateSearch: UpdateSearch = (newSearch, summary) => {
-        if (newSearch?.collection) {
-            setActiveCollectionID(newSearch?.collection);
+    const handleSelectSearchOption = (
+        searchOption: SearchOption | undefined,
+    ) => {
+        if (searchOption?.suggestion.type == "collection") {
             setIsInSearchMode(false);
+            setSelectedSearchOption(undefined);
+            setActiveCollectionID(searchOption.suggestion.collectionID);
         } else {
-            setSearchQuery(newSearch);
-            setIsInSearchMode(!!newSearch);
-            setSetSearchResultSummary(summary);
+            setIsInSearchMode(!!searchOption);
+            setSelectedSearchOption(searchOption);
         }
-        setIsClipSearchResult(!!newSearch?.clip);
+        setIsClipSearchResult(searchOption?.suggestion.type == "clip");
     };
 
     const openUploader = (intent?: UploadTypeSelectorIntent) => {
@@ -1098,7 +1096,7 @@ export default function Gallery() {
                             openUploader={openUploader}
                             isInSearchMode={isInSearchMode}
                             setIsInSearchMode={setIsInSearchMode}
-                            updateSearch={updateSearch}
+                            onSelectSearchOption={handleSelectSearchOption}
                         />
                     )}
                 </NavbarBase>
@@ -1271,29 +1269,20 @@ const mergeMaps = <K, V>(map1: Map<K, V>, map2: Map<K, V>) => {
     return mergedMap;
 };
 
-interface NormalNavbarContentsProps {
+type NormalNavbarContentsProps = SearchBarProps & {
     openSidebar: () => void;
     openUploader: () => void;
-    isInSearchMode: boolean;
-    setIsInSearchMode: (v: boolean) => void;
-    updateSearch: UpdateSearch;
-}
+};
 
 const NormalNavbarContents: React.FC<NormalNavbarContentsProps> = ({
     openSidebar,
     openUploader,
-    isInSearchMode,
-    setIsInSearchMode,
-    updateSearch,
+    ...props
 }) => (
     <>
-        {!isInSearchMode && <SidebarButton onClick={openSidebar} />}
-        <SearchBar
-            isInSearchMode={isInSearchMode}
-            setIsInSearchMode={setIsInSearchMode}
-            updateSearch={updateSearch}
-        />
-        {!isInSearchMode && <UploadButton onClick={openUploader} />}
+        {!props.isInSearchMode && <SidebarButton onClick={openSidebar} />}
+        <SearchBar {...props} />
+        {!props.isInSearchMode && <UploadButton onClick={openUploader} />}
     </>
 );
 
@@ -1352,25 +1341,20 @@ const HiddenSectionNavbarContents: React.FC<
     </HorizontalFlex>
 );
 
-interface SearchResultSummaryHeaderProps {
-    searchResultSummary: SearchResultSummary;
+interface SearchResultsHeaderProps {
+    selectedOption: SearchOption;
 }
 
-const SearchResultSummaryHeader: React.FC<SearchResultSummaryHeaderProps> = ({
-    searchResultSummary,
-}) => {
-    if (!searchResultSummary) {
-        return <></>;
-    }
-
-    const { optionName, fileCount } = searchResultSummary;
-
-    return (
-        <CollectionInfoBarWrapper>
-            <Typography color="text.muted" variant="large">
-                {t("search_results")}
-            </Typography>
-            <CollectionInfo name={optionName} fileCount={fileCount} />
-        </CollectionInfoBarWrapper>
-    );
-};
+const SearchResultsHeader: React.FC<SearchResultsHeaderProps> = ({
+    selectedOption,
+}) => (
+    <CollectionInfoBarWrapper>
+        <Typography color="text.muted" variant="large">
+            {t("search_results")}
+        </Typography>
+        <CollectionInfo
+            name={selectedOption.suggestion.label}
+            fileCount={selectedOption.fileCount}
+        />
+    </CollectionInfoBarWrapper>
+);

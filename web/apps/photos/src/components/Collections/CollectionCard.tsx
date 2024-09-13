@@ -1,11 +1,12 @@
-import downloadManager from "@/new/photos/services/download";
-import { EnteFile } from "@/new/photos/types/file";
 import {
     LoadingThumbnail,
     StaticThumbnail,
-} from "components/PlaceholderThumbnails";
+} from "@/new/photos/components/PlaceholderThumbnails";
+import downloadManager from "@/new/photos/services/download";
+import { EnteFile } from "@/new/photos/types/file";
 import { useEffect, useState } from "react";
 
+/** See also: {@link ItemCard}. */
 export default function CollectionCard(props: {
     children?: any;
     coverFile: EnteFile;

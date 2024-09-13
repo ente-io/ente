@@ -1,25 +1,16 @@
-import { isDesktop } from "@/base/app";
 import log from "@/base/log";
 import { masterKeyFromSession } from "@/base/session-store";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
 import { FileType } from "@/media/file-type";
-import type { LocationTag } from "@/new/photos/services/user-entity";
 import i18n, { t } from "i18next";
-import { clipMatches, isMLEnabled } from "../ml";
+import { clipMatches, isMLEnabled, isMLSupported } from "../ml";
 import type {
-    City,
-    ClipSearchScores,
-    DateSearchResult,
     LabelledFileType,
+    LabelledSearchDateComponents,
     LocalizedSearchData,
     SearchableData,
-    SearchDateComponents,
-    SearchOption,
-    SearchPerson,
-    SearchQuery,
-    Suggestion,
+    SearchSuggestion,
 } from "./types";
-import { SuggestionType } from "./types";
 import type { SearchWorker } from "./worker";
 
 /**
@@ -66,12 +57,23 @@ export const setSearchableData = (data: SearchableData) =>
     void worker().then((w) => w.setSearchableData(data));
 
 /**
- * Convert a search string into a suggestions that can be shown in the search
- * results, and can also be used filter the searchable files.
+ * Convert a search string into (annotated) suggestions that can be shown in the
+ * search results dropdown.
  *
  * @param searchString The string we want to search for.
  */
-export const suggestionsForString = async (searchString: string) => {
+export const searchOptionsForString = async (searchString: string) => {
+    const t = Date.now();
+    const suggestions = await suggestionsForString(searchString);
+    const options = await suggestionsToOptions(suggestions);
+    log.debug(() => [
+        "search",
+        { searchString, options, duration: `${Date.now() - t} ms` },
+    ]);
+    return options;
+};
+
+const suggestionsForString = async (searchString: string) => {
     // Normalize it by trimming whitespace and converting to lowercase.
     const s = searchString.trim().toLowerCase();
     if (s.length == 0) return [];
@@ -80,7 +82,7 @@ export const suggestionsForString = async (searchString: string) => {
     // separately, in parallel with the rest of the search query construction in
     // the search worker, then combine the two.
     const results = await Promise.all([
-        clipSuggestions(s, searchString).then((s) => s ?? []),
+        clipSuggestion(s, searchString).then((s) => s ?? []),
         worker().then((w) =>
             w.suggestionsForString(s, searchString, localizedSearchData()),
         ),
@@ -88,25 +90,43 @@ export const suggestionsForString = async (searchString: string) => {
     return results.flat();
 };
 
-const clipSuggestions = async (s: string, searchString: string) => {
-    if (!isDesktop) return undefined;
+const clipSuggestion = async (
+    s: string,
+    searchString: string,
+): Promise<SearchSuggestion | undefined> => {
+    if (!isMLSupported) return undefined;
     if (!isMLEnabled()) return undefined;
 
     const matches = await clipMatches(s);
     if (!matches) return undefined;
-    return {
-        type: SuggestionType.CLIP,
-        value: matches,
-        label: searchString,
-    };
+    return { type: "clip", clipScoreForFileID: matches, label: searchString };
 };
+
+const suggestionsToOptions = (suggestions: SearchSuggestion[]) =>
+    filterSearchableFilesMulti(suggestions).then((res) =>
+        res.map(([files, suggestion]) => ({
+            suggestion,
+            fileCount: files.length,
+            previewFiles: files.slice(0, 3),
+        })),
+    );
 
 /**
  * Return the list of {@link EnteFile}s (from amongst the previously set
  * {@link SearchableData}) that match the given search {@link suggestion}.
  */
-export const filterSearchableFiles = async (suggestion: SearchQuery) =>
+export const filterSearchableFiles = async (suggestion: SearchSuggestion) =>
     worker().then((w) => w.filterSearchableFiles(suggestion));
+
+/**
+ * A batched variant of {@link filterSearchableFiles}.
+ *
+ * This has drastically (10x) better performance when filtering files for a
+ * large number of suggestions (e.g. single letter searches that lead to a large
+ * number of city prefix matches), likely because of reduced worker IPC.
+ */
+const filterSearchableFilesMulti = async (suggestions: SearchSuggestion[]) =>
+    worker().then((w) => w.filterSearchableFilesMulti(suggestions));
 
 /**
  * Cached value of {@link localizedSearchData}.
@@ -144,7 +164,7 @@ const localizedSearchData = () =>
 /**
  * A list of holidays - their yearly dates and localized names.
  */
-const holidays = (): DateSearchResult[] => [
+const holidays = (): LabelledSearchDateComponents[] => [
     { components: { month: 12, day: 25 }, label: t("CHRISTMAS") },
     { components: { month: 12, day: 24 }, label: t("CHRISTMAS_EVE") },
     { components: { month: 1, day: 1 }, label: t("NEW_YEAR") },
@@ -159,81 +179,3 @@ const labelledFileTypes = (): LabelledFileType[] => [
     { fileType: FileType.video, label: t("VIDEO") },
     { fileType: FileType.livePhoto, label: t("LIVE_PHOTO") },
 ];
-
-// TODO-Cluster -- AUDIT BELOW THIS
-
-// Suggestions shown in the search dropdown when the user has typed something.
-export const getAutoCompleteSuggestions =
-    () =>
-    async (searchPhrase: string): Promise<SearchOption[]> => {
-        log.debug(() => ["getAutoCompleteSuggestions"]);
-        try {
-            const suggestions: Suggestion[] =
-                await suggestionsForString(searchPhrase);
-            return convertSuggestionsToOptions(suggestions);
-        } catch (e) {
-            log.error("getAutoCompleteSuggestions failed", e);
-            return [];
-        }
-    };
-
-async function convertSuggestionsToOptions(
-    suggestions: Suggestion[],
-): Promise<SearchOption[]> {
-    const previewImageAppendedOptions: SearchOption[] = [];
-    for (const suggestion of suggestions) {
-        const searchQuery = convertSuggestionToSearchQuery(suggestion);
-        const resultFiles = await filterSearchableFiles(searchQuery);
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        if (searchQuery?.clip) {
-            resultFiles.sort((a, b) => {
-                const aScore = searchQuery.clip?.get(a.id) ?? 0;
-                const bScore = searchQuery.clip?.get(b.id) ?? 0;
-                return bScore - aScore;
-            });
-        }
-        if (resultFiles.length) {
-            previewImageAppendedOptions.push({
-                ...suggestion,
-                fileCount: resultFiles.length,
-                previewFiles: resultFiles.slice(0, 3),
-            });
-        }
-    }
-    return previewImageAppendedOptions;
-}
-
-function convertSuggestionToSearchQuery(option: Suggestion): SearchQuery {
-    switch (option.type) {
-        case SuggestionType.DATE:
-            return {
-                date: option.value as SearchDateComponents,
-            };
-
-        case SuggestionType.LOCATION:
-            return {
-                location: option.value as LocationTag,
-            };
-
-        case SuggestionType.CITY:
-            return { city: option.value as City };
-
-        case SuggestionType.COLLECTION:
-            return { collection: option.value as number };
-
-        case SuggestionType.FILE_NAME:
-            return { files: option.value as number[] };
-
-        case SuggestionType.FILE_CAPTION:
-            return { files: option.value as number[] };
-
-        case SuggestionType.PERSON:
-            return { person: option.value as SearchPerson };
-
-        case SuggestionType.FILE_TYPE:
-            return { fileType: option.value as FileType };
-
-        case SuggestionType.CLIP:
-            return { clip: option.value as ClipSearchScores };
-    }
-}

@@ -1,33 +1,16 @@
 import { assertionFailed } from "@/base/assert";
 import { useIsMobileWidth } from "@/base/hooks";
-import { FileType } from "@/media/file-type";
+import { ItemCard, ResultPreviewTile } from "@/new/photos/components/ItemCards";
 import {
     isMLSupported,
     mlStatusSnapshot,
     mlStatusSubscribe,
 } from "@/new/photos/services/ml";
-import { getAutoCompleteSuggestions } from "@/new/photos/services/search";
-import type {
-    City,
-    SearchDateComponents,
-    SearchPerson,
-    SearchResultSummary,
-} from "@/new/photos/services/search/types";
-import {
-    ClipSearchScores,
-    SearchOption,
-    SearchQuery,
-    SuggestionType,
-} from "@/new/photos/services/search/types";
-import { labelForSuggestionType } from "@/new/photos/services/search/ui";
-import type { LocationTag } from "@/new/photos/services/user-entity";
-import {
-    FreeFlowText,
-    SpaceBetweenFlex,
-} from "@ente/shared/components/Container";
+import { searchOptionsForString } from "@/new/photos/services/search";
+import type { SearchOption } from "@/new/photos/services/search/types";
+import { nullToUndefined } from "@/utils/transform";
 import CalendarIcon from "@mui/icons-material/CalendarMonth";
 import CloseIcon from "@mui/icons-material/Close";
-import FolderIcon from "@mui/icons-material/Folder";
 import ImageIcon from "@mui/icons-material/Image";
 import LocationIcon from "@mui/icons-material/LocationOn";
 import SearchIcon from "@mui/icons-material/Search";
@@ -41,29 +24,21 @@ import {
     useTheme,
     type Theme,
 } from "@mui/material";
-import CollectionCard from "components/Collections/CollectionCard";
-import { ResultPreviewTile } from "components/Collections/styledComponents";
 import { t } from "i18next";
 import pDebounce from "p-debounce";
-import {
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-    useSyncExternalStore,
-} from "react";
+import React, { useMemo, useRef, useState, useSyncExternalStore } from "react";
 import {
     components as SelectComponents,
     type ControlProps,
     type InputActionMeta,
     type InputProps,
     type OptionProps,
+    type SelectInstance,
     type StylesConfig,
 } from "react-select";
 import AsyncSelect from "react-select/async";
 
-interface SearchBarProps {
+export interface SearchBarProps {
     /**
      * [Note: "Search mode"]
      *
@@ -76,21 +51,19 @@ interface SearchBarProps {
      *
      * When we're in search mode,
      *
-     * 1. Other icons from the navbar are hidden
+     * 1. Other icons from the navbar are hidden.
      * 2. Next to the search input there is a cancel button to exit search mode.
      */
     isInSearchMode: boolean;
     /**
      * Enter or exit "search mode".
      */
-    setIsInSearchMode: (v: boolean) => void;
-    updateSearch: UpdateSearch;
+    setIsInSearchMode: (b: boolean) => void;
+    /**
+     * Set or clear the selected {@link SearchOption}.
+     */
+    onSelectSearchOption: (o: SearchOption | undefined) => void;
 }
-
-export type UpdateSearch = (
-    search: SearchQuery,
-    summary: SearchResultSummary,
-) => void;
 
 /**
  * The search bar is a styled "select" element that allow the user to type in
@@ -110,7 +83,7 @@ export type UpdateSearch = (
 export const SearchBar: React.FC<SearchBarProps> = ({
     setIsInSearchMode,
     isInSearchMode,
-    ...props
+    onSelectSearchOption,
 }) => {
     const isMobileWidth = useIsMobileWidth();
 
@@ -121,7 +94,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
             {isMobileWidth && !isInSearchMode ? (
                 <MobileSearchArea onSearch={showSearchInput} />
             ) : (
-                <SearchInput {...props} isInSearchMode={isInSearchMode} />
+                <SearchInput {...{ isInSearchMode, onSelectSearchOption }} />
             )}
         </Box>
     );
@@ -140,112 +113,77 @@ const MobileSearchArea: React.FC<MobileSearchAreaProps> = ({ onSearch }) => (
     </Box>
 );
 
-interface SearchInputProps {
-    isInSearchMode: boolean;
-    updateSearch: UpdateSearch;
-}
-
-const SearchInput: React.FC<SearchInputProps> = ({
+const SearchInput: React.FC<Omit<SearchBarProps, "setIsInSearchMode">> = ({
     isInSearchMode,
-    updateSearch,
+    onSelectSearchOption,
 }) => {
     // A ref to the top level Select.
-    const selectRef = useRef(null);
+    const selectRef = useRef<SelectInstance<SearchOption> | null>(null);
     // The currently selected option.
-    const [value, setValue] = useState<SearchOption | undefined>();
+    //
+    // We need to use `null` instead of `undefined` to indicate missing values,
+    // because using `undefined` instead moves the Select from being a controlled
+    // component to an uncontrolled component.
+    const [value, setValue] = useState<SearchOption | null>(null);
     // The contents of the input field associated with the select.
     const [inputValue, setInputValue] = useState("");
 
     const theme = useTheme();
 
-    const styles = useMemo(() => useSelectStyles(theme), [theme]);
+    const styles = useMemo(() => createSelectStyles(theme), [theme]);
+    const components = useMemo(() => ({ Control, Input, Option }), []);
 
-    useEffect(() => {
-        search(value);
-    }, [value]);
+    const handleChange = (value: SearchOption | null) => {
+        // Collection suggestions are handled differently - our caller will
+        // switch to the collection view, dismissing search.
+        if (value?.suggestion.type == "collection") {
+            setValue(null);
+            setInputValue("");
+        } else {
+            setValue(value);
+            setInputValue(value?.suggestion.label ?? "");
+        }
 
-    const handleChange = (value: SearchOption) => {
-        setValue(value);
-        setInputValue(value?.label);
+        // Let our parent know the selection was changed.
+        onSelectSearchOption(nullToUndefined(value));
+
         // The Select has a blurInputOnSelect prop, but that makes the input
         // field lose focus, not the entire menu (e.g. when pressing twice).
         //
         // We anyways need the ref so that we can blur on selecting a person
-        // from the default options.
+        // from the default options. So also use it to blur the entire Select
+        // (including the menu) when the user selects an option.
         selectRef.current?.blur();
     };
 
     const handleInputChange = (value: string, actionMeta: InputActionMeta) => {
-        if (actionMeta.action === "input-change") {
-            setInputValue(value);
-        }
+        if (actionMeta.action == "input-change") setInputValue(value);
     };
 
     const resetSearch = () => {
-        updateSearch(null, null);
         setValue(null);
         setInputValue("");
-    };
-
-    const getOptions = useCallback(
-        pDebounce(getAutoCompleteSuggestions(), 250),
-        [],
-    );
-
-    const search = (selectedOption: SearchOption) => {
-        if (!selectedOption) {
-            return;
-        }
-        let search: SearchQuery;
-        switch (selectedOption.type) {
-            case SuggestionType.DATE:
-                search = {
-                    date: selectedOption.value as SearchDateComponents,
-                };
-                break;
-            case SuggestionType.LOCATION:
-                search = {
-                    location: selectedOption.value as LocationTag,
-                };
-                break;
-            case SuggestionType.CITY:
-                search = {
-                    city: selectedOption.value as City,
-                };
-                break;
-            case SuggestionType.COLLECTION:
-                search = { collection: selectedOption.value as number };
-                setValue(null);
-                setInputValue("");
-                break;
-            case SuggestionType.FILE_NAME:
-                search = { files: selectedOption.value as number[] };
-                break;
-            case SuggestionType.FILE_CAPTION:
-                search = { files: selectedOption.value as number[] };
-                break;
-            case SuggestionType.PERSON:
-                search = { person: selectedOption.value as SearchPerson };
-                break;
-            case SuggestionType.FILE_TYPE:
-                search = { fileType: selectedOption.value as FileType };
-                break;
-            case SuggestionType.CLIP:
-                search = { clip: selectedOption.value as ClipSearchScores };
-        }
-        updateSearch(search, {
-            optionName: selectedOption.label,
-            fileCount: selectedOption.fileCount,
-        });
+        onSelectSearchOption(undefined);
     };
 
     const handleSelectCGroup = (value: SearchOption) => {
         // Dismiss the search menu.
         selectRef.current?.blur();
         setValue(value);
+        onSelectSearchOption(undefined);
     };
 
-    const components = useMemo(() => ({ Option, Control, Input }), []);
+    const handleFocus = () => {
+        // A workaround to show the suggestions again for the current non-empty
+        // search string if the user focuses back on the input field after
+        // moving focus elsewhere.
+        if (inputValue) {
+            selectRef.current?.onInputChange(inputValue, {
+                action: "set-value",
+                prevInputValue: "",
+            });
+        }
+    };
 
     return (
         <SearchInputWrapper>
@@ -254,14 +192,14 @@ const SearchInput: React.FC<SearchInputProps> = ({
                 value={value}
                 components={components}
                 styles={styles}
-                placeholder={t("search_hint")}
-                loadOptions={getOptions}
+                loadOptions={loadOptions}
                 onChange={handleChange}
-                isMulti={false}
-                isClearable
-                escapeClearsValue
                 inputValue={inputValue}
                 onInputChange={handleInputChange}
+                isClearable
+                escapeClearsValue
+                onFocus={handleFocus}
+                placeholder={t("search_hint")}
                 noOptionsMessage={({ inputValue }) =>
                     shouldShowEmptyState(inputValue) ? (
                         <EmptyState onSelectCGroup={handleSelectCGroup} />
@@ -270,7 +208,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
             />
 
             {isInSearchMode && (
-                <IconButton onClick={() => resetSearch()} sx={{ ml: 1 }}>
+                <IconButton onClick={resetSearch}>
                     <CloseIcon />
                 </IconButton>
             )}
@@ -283,12 +221,15 @@ const SearchInputWrapper = styled(Box)`
     width: 100%;
     align-items: center;
     justify-content: center;
+    gap: 8px;
     background: ${({ theme }) => theme.colors.background.base};
     max-width: 484px;
     margin: auto;
 `;
 
-const useSelectStyles = ({
+const loadOptions = pDebounce(searchOptionsForString, 250);
+
+const createSelectStyles = ({
     colors,
 }: Theme): StylesConfig<SearchOption, false> => ({
     container: (style) => ({ ...style, flex: 1 }),
@@ -316,9 +257,9 @@ const useSelectStyles = ({
         "& :hover": {
             cursor: "pointer",
         },
-        "& .main": {
-            backgroundColor: isFocused && colors.background.elevated2,
-        },
+        "& .option-contents": isFocused
+            ? { backgroundColor: colors.background.elevated2 }
+            : {},
         "&:last-child .MuiDivider-root": {
             display: "none",
         },
@@ -353,28 +294,36 @@ const Control = ({ children, ...props }: ControlProps<SearchOption, false>) => (
                     color: (theme) => theme.colors.stroke.muted,
                 }}
             >
-                {iconForOptionType(props.getValue()[0]?.type)}
+                {iconForOption(props.getValue()[0])}
             </Box>
             {children}
         </Stack>
     </SelectComponents.Control>
 );
 
-const iconForOptionType = (type: SuggestionType | undefined) => {
-    switch (type) {
-        case SuggestionType.DATE:
-            return <CalendarIcon />;
-        case SuggestionType.LOCATION:
-        case SuggestionType.CITY:
-            return <LocationIcon />;
-        case SuggestionType.COLLECTION:
-            return <FolderIcon />;
-        case SuggestionType.FILE_NAME:
+const iconForOption = (option: SearchOption | undefined) => {
+    switch (option?.suggestion.type) {
+        case "fileName":
             return <ImageIcon />;
+        case "date":
+            return <CalendarIcon />;
+        case "location":
+        case "city":
+            return <LocationIcon />;
         default:
             return <SearchIcon />;
     }
 };
+
+/**
+ * A custom input for react-select that is always visible.
+ *
+ * This is a workaround to allow the search string to be always displayed, and
+ * editable, even after the user has moved focus away from it.
+ */
+const Input: React.FC<InputProps<SearchOption, false>> = (props) => (
+    <SelectComponents.Input {...props} isHidden={false} />
+);
 
 /**
  * A preflight check for whether or not we should show the EmptyState.
@@ -391,7 +340,7 @@ const shouldShowEmptyState = (inputValue: string) => {
     // Don't show empty state if there is no ML related information.
     if (!isMLSupported) return false;
 
-    const status = isMLSupported && mlStatusSnapshot();
+    const status = mlStatusSnapshot();
     if (!status || status.phase == "disabled") return false;
 
     // Show it otherwise.
@@ -434,6 +383,9 @@ const EmptyState: React.FC<EmptyStateProps> = () => {
             break;
     }
 
+    // TODO-Cluster this is where it'll go.
+    // const people = wipPersons();
+
     return (
         <Box>
             <Typography variant="mini" sx={{ textAlign: "left" }}>
@@ -447,7 +399,7 @@ const EmptyState: React.FC<EmptyStateProps> = () => {
     // const peopleSuggestions = options.filter(
     //     (o) => o.type === SuggestionType.PERSON,
     // );
-    // const people = peopleSuggestions.map((o) => o.value as SearchPerson);
+    // const people = peopleSuggestions.map((o) => o.value as Person);
     // return (
     //     <SelectComponents.Menu {...props}>
     //         <Box my={1}>
@@ -508,7 +460,7 @@ export async function getAllPeopleSuggestion(): Promise<Array<Suggestion>> {
 }
 
 async function getAllPeople(limit: number = undefined) {
-    return (await wipSearchPersons()).slice(0, limit);
+    return (await wipPersons()).slice(0, limit);
     // TODO-Clustetr
     // if (done) return [];
 
@@ -519,7 +471,7 @@ async function getAllPeople(limit: number = undefined) {
     //     log.debug(() => ["people", { people }]);
     // }
 
-    // let people: Array<SearchPerson> = []; // await mlIDbStorage.getAllPeople();
+    // let people: Array<Person> = []; // await mlIDbStorage.getAllPeople();
     // people = await wipCluster();
     // // await mlPeopleStore.iterate<Person, void>((person) => {
     // //     people.push(person);
@@ -532,54 +484,73 @@ async function getAllPeople(limit: number = undefined) {
 
     // return result;
 }
-
 */
 
 const Option: React.FC<OptionProps<SearchOption, false>> = (props) => (
     <SelectComponents.Option {...props}>
-        <LabelWithInfo data={props.data} />
+        <OptionContents data={props.data} />
+        <Divider sx={{ mx: 2, my: 1 }} />
     </SelectComponents.Option>
 );
 
-const LabelWithInfo = ({ data }: { data: SearchOption }) => {
-    return (
-        <>
-            <Box className="main" px={2} py={1}>
-                <Typography variant="mini" mb={1}>
-                    {labelForSuggestionType(data.type)}
+const OptionContents = ({ data: option }: { data: SearchOption }) => (
+    <Stack className="option-contents" gap={1} px={2} py={1}>
+        <Typography variant="mini">{labelForOption(option)}</Typography>
+        <Stack
+            direction="row"
+            gap={1}
+            sx={{ alignItems: "center", justifyContent: "space-between" }}
+        >
+            <Box>
+                <Typography
+                    sx={{ fontWeight: "bold", wordBreak: "break-word" }}
+                >
+                    {option.suggestion.label}
                 </Typography>
-                <SpaceBetweenFlex>
-                    <Box mr={1}>
-                        <FreeFlowText>
-                            <Typography fontWeight={"bold"}>
-                                {data.label}
-                            </Typography>
-                        </FreeFlowText>
-                        <Typography color="text.muted">
-                            {t("photos_count", { count: data.fileCount })}
-                        </Typography>
-                    </Box>
-
-                    <Stack direction={"row"} spacing={1}>
-                        {data.previewFiles.map((file) => (
-                            <CollectionCard
-                                key={file.id}
-                                coverFile={file}
-                                onClick={() => null}
-                                collectionTile={ResultPreviewTile}
-                            />
-                        ))}
-                    </Stack>
-                </SpaceBetweenFlex>
+                <Typography color="text.muted">
+                    {t("photos_count", { count: option.fileCount })}
+                </Typography>
             </Box>
-            <Divider sx={{ mx: 2, my: 1 }} />
-        </>
-    );
-};
 
-// A custom input for react-select that is always visible. This is a roundabout
-// hack the existing code used to display the search string when showing the
-// results page; likely there should be a better way.
-const Input: React.FC<InputProps<SearchOption, false>> = (props) => (
-    <SelectComponents.Input {...props} isHidden={false} />
+            <Stack direction={"row"} gap={1}>
+                {option.previewFiles.map((file) => (
+                    <ItemCard
+                        key={file.id}
+                        coverFile={file}
+                        TileComponent={ResultPreviewTile}
+                    />
+                ))}
+            </Stack>
+        </Stack>
+    </Stack>
 );
+
+const labelForOption = (option: SearchOption) => {
+    switch (option.suggestion.type) {
+        case "collection":
+            return t("album");
+
+        case "fileType":
+            return t("file_type");
+
+        case "fileName":
+            return t("file_name");
+
+        case "fileCaption":
+            return t("description");
+
+        case "date":
+            return t("date");
+        case "location":
+            return t("location");
+
+        case "city":
+            return t("location");
+
+        case "clip":
+            return t("magic");
+
+        case "person":
+            return t("person");
+    }
+};
