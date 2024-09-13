@@ -24,7 +24,7 @@ class ShareCodeDialog extends StatefulWidget {
 
 class _ShareCodeDialogState extends State<ShareCodeDialog> {
   final Logger logger = Logger('_ShareCodeDialogState');
-  List<int> items = [5, 15, 30, 60];
+  final List<int> _durationInMins = [2, 5, 15, 30, 60];
 
   String getItemLabel(int min) {
     if (min == 60) return '1 hour';
@@ -37,11 +37,12 @@ class _ShareCodeDialogState extends State<ShareCodeDialog> {
     return '$min min';
   }
 
-  int selectedValue = 15;
+  late final int selectedValue;
 
   @override
   void initState() {
     super.initState();
+    selectedValue = _durationInMins[2];
   }
 
   @override
@@ -59,7 +60,7 @@ class _ShareCodeDialogState extends State<ShareCodeDialog> {
           DropdownButtonHideUnderline(
             child: DropdownButton2(
               hint: const Text('Select an option'),
-              items: items
+              items: _durationInMins
                   .map(
                     (item) => DropdownMenuItem<int>(
                       value: item,
@@ -89,8 +90,8 @@ class _ShareCodeDialogState extends State<ShareCodeDialog> {
             try {
               await shareCode();
               Navigator.of(context).pop();
-            } catch (e) {
-              logger.warning('Failed to share code: ${e.toString()}');
+            } catch (e, s) {
+              logger.severe('Failed to generate shared codes', e, s);
               showGenericErrorDialog(context: context, error: e).ignore();
             }
           },
