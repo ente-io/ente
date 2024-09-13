@@ -1488,7 +1488,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "subWillBeCancelledOn": m62,
         "subscribe": MessageLookupByLibrary.simpleMessage("Subscribe"),
         "subscribeToEnableSharing": MessageLookupByLibrary.simpleMessage(
-            "Looks like your subscription has expired. Please subscribe to enable sharing."),
+            "You need an active paid subscription to enable sharing."),
         "subscription": MessageLookupByLibrary.simpleMessage("Subscription"),
         "success": MessageLookupByLibrary.simpleMessage("Success"),
         "successfullyArchived":
