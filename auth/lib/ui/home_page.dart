@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:app_links/app_links.dart';
 import 'package:collection/collection.dart';
@@ -76,6 +77,7 @@ class _HomePageState extends State<HomePage> {
   String selectedTag = "";
   bool _isTrashOpen = false;
   bool hasTrashedCodes = false;
+  bool hasNonTrashedCodes = false;
   bool isCompactMode = false;
 
   @override
@@ -107,14 +109,22 @@ class _HomePageState extends State<HomePage> {
     CodeStore.instance.getAllCodes().then((codes) {
       _allCodes = codes;
       hasTrashedCodes = false;
+      hasNonTrashedCodes = false;
       for (final c in _allCodes ?? []) {
         if (c.isTrashed) {
           hasTrashedCodes = true;
+        } else {
+          hasNonTrashedCodes = true;
+        }
+        if (hasNonTrashedCodes && hasTrashedCodes) {
           break;
         }
       }
       if (!hasTrashedCodes) {
         _isTrashOpen = false;
+      }
+      if (!hasNonTrashedCodes && hasTrashedCodes) {
+        _isTrashOpen = true;
       }
 
       CodeDisplayStore.instance.getAllTags(allCodes: _allCodes).then((value) {
@@ -362,7 +372,8 @@ class _HomePageState extends State<HomePage> {
         final anyCodeHasError =
             _allCodes?.firstWhereOrNull((element) => element.hasError) != null;
         final indexOffset = anyCodeHasError ? 1 : 0;
-        final itemCount = tags.length + 1 + (hasTrashedCodes ? 1 : 0);
+        final itemCount = (hasNonTrashedCodes ? tags.length + 1 : 0) +
+            (hasTrashedCodes ? 1 : 0);
 
         final list = Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -378,7 +389,7 @@ class _HomePageState extends State<HomePage> {
                       const SizedBox(width: 8),
                   itemCount: itemCount,
                   itemBuilder: (context, index) {
-                    if (index == 0) {
+                    if (index == 0 && hasNonTrashedCodes) {
                       return TagChip(
                         label: "All",
                         state: selectedTag == "" && _isTrashOpen == false
