@@ -230,6 +230,7 @@ const Share: React.FC = () => {
                         cursor: "pointer",
                         width: "100%",
                         maxWidth: "300px",
+                        marginBottom: "42px",
                     }}
                 >
                     Try Ente Auth
