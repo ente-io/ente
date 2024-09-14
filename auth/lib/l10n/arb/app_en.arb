@@ -20,7 +20,7 @@
   "codeIssuerHint": "Issuer",
   "codeSecretKeyHint": "Secret Key",
   "secret": "Secret",
-  "account": "Account",
+  "all": "All",
   "advance": "Advance",
   "notes": "Notes",
   "notesLengthLimit": "Notes can be at most {count} characters long",

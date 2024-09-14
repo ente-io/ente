@@ -306,7 +306,6 @@ class _CodeWidgetState extends State<CodeWidget> {
                     foregroundColor:
                         Theme.of(context).colorScheme.inverseBackgroundColor,
                     icon: Icons.adaptive.share_outlined,
-                    label: l10n.share,
                     padding: const EdgeInsets.only(left: 4, right: 0),
                     spacing: 8,
                   ),
@@ -337,10 +336,6 @@ class _CodeWidgetState extends State<CodeWidget> {
                               BlendMode.srcIn,
                             ),
                           ),
-                        const SizedBox(height: 8),
-                        Text(
-                          widget.code.isPinned ? l10n.unpinText : l10n.pinText,
-                        ),
                       ],
                     ),
                     padding: const EdgeInsets.only(left: 4, right: 0),
@@ -354,7 +349,6 @@ class _CodeWidgetState extends State<CodeWidget> {
                     foregroundColor:
                         Theme.of(context).colorScheme.inverseBackgroundColor,
                     icon: Icons.edit_outlined,
-                    label: l10n.edit,
                     padding: const EdgeInsets.only(left: 4, right: 0),
                     spacing: 8,
                   ),
@@ -367,7 +361,6 @@ class _CodeWidgetState extends State<CodeWidget> {
                     foregroundColor:
                         Theme.of(context).colorScheme.inverseBackgroundColor,
                     icon: Icons.restore_outlined,
-                    label: l10n.restore,
                     padding: const EdgeInsets.only(left: 4, right: 0),
                     spacing: 8,
                   ),
@@ -382,7 +375,6 @@ class _CodeWidgetState extends State<CodeWidget> {
                   icon: widget.code.isTrashed
                       ? Icons.delete_forever
                       : Icons.delete,
-                  label: widget.code.isTrashed ? l10n.delete : l10n.trash,
                   padding: const EdgeInsets.only(left: 0, right: 0),
                   spacing: 8,
                 ),

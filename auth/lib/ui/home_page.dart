@@ -390,7 +390,7 @@ class _HomePageState extends State<HomePage> {
                   itemBuilder: (context, index) {
                     if (index == 0 && hasNonTrashedCodes) {
                       return TagChip(
-                        label: "All",
+                        label: l10n.all,
                         state: selectedTag == "" && _isTrashOpen == false
                             ? TagChipState.selected
                             : TagChipState.unselected,
@@ -404,7 +404,7 @@ class _HomePageState extends State<HomePage> {
                     }
                     if (index == itemCount - 1 && hasTrashedCodes) {
                       return TagChip(
-                        label: '🗑️ Trash',
+                        label: l10n.trash,
                         state: _isTrashOpen
                             ? TagChipState.selected
                             : TagChipState.unselected,
@@ -414,6 +414,7 @@ class _HomePageState extends State<HomePage> {
                           setState(() {});
                           _applyFilteringAndRefresh();
                         },
+                        iconData: Icons.delete,
                       );
                     }
                     return TagChip(
