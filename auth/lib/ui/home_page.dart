@@ -404,7 +404,7 @@ class _HomePageState extends State<HomePage> {
                     }
                     if (index == itemCount - 1 && hasTrashedCodes) {
                       return TagChip(
-                        label: '🗑️ Trash',
+                        label: 'Trash',
                         state: _isTrashOpen
                             ? TagChipState.selected
                             : TagChipState.unselected,
@@ -414,6 +414,7 @@ class _HomePageState extends State<HomePage> {
                           setState(() {});
                           _applyFilteringAndRefresh();
                         },
+                        iconData: Icons.delete,
                       );
                     }
                     return TagChip(
