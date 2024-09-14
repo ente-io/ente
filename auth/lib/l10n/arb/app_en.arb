@@ -21,7 +21,6 @@
   "codeSecretKeyHint": "Secret Key",
   "secret": "Secret",
   "all": "All",
-  "advance": "Advance",
   "notes": "Notes",
   "notesLengthLimit": "Notes can be at most {count} characters long",
     "@notesLengthLimit": {

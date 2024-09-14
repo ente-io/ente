@@ -225,54 +225,32 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
               const SizedBox(height: 12),
               Row(
                 children: [
+                  FieldLabel(l10n.notes),
                   Expanded(
-                    child: Theme(
-                      data: Theme.of(context).copyWith(
-                        dividerColor: Colors
-                            .transparent, // Removes the default divider color
+                    child: TextFormField(
+                      // The validator receives the text that the user has entered.
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Please enter some text";
+                        }
+                        if (value.length > _notesLimit) {
+                          return "Notes can't be more than 1000 characters";
+                        }
+                        return null;
+                      },
+                      maxLength: _notesLimit,
+                      minLines: 1,
+                      maxLines: 5,
+                      decoration: const InputDecoration(
+                        contentPadding: EdgeInsets.symmetric(vertical: 12.0),
                       ),
-                      child: ExpansionTile(
-                        title: Text(
-                          l10n.advance,
-                          style: getEnteTextTheme(context).bodyMuted,
-                        ),
-                        children: <Widget>[
-                          Row(
-                            children: [
-                              FieldLabel(l10n.notes),
-                              Expanded(
-                                child: TextFormField(
-                                  // The validator receives the text that the user has entered.
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return "Please enter some text";
-                                    }
-                                    if (value.length > _notesLimit) {
-                                      return "Notes can't be more than 1000 characters";
-                                    }
-                                    return null;
-                                  },
-                                  maxLength: _notesLimit,
-                                  minLines: 1,
-                                  maxLines: 5,
-                                  decoration: const InputDecoration(
-                                    contentPadding:
-                                        EdgeInsets.symmetric(vertical: 12.0),
-                                  ),
-                                  style: getEnteTextTheme(context).small,
-                                  controller: _notesController,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                        ],
-                      ),
+                      style: getEnteTextTheme(context).small,
+                      controller: _notesController,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 12),
               Wrap(
                 spacing: 12,
                 alignment: WrapAlignment.start,
