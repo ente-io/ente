@@ -1,4 +1,5 @@
 import { decryptMetadataJSON_New } from "@/base/crypto";
+import { EnteLogo } from "@ente/shared/components/EnteLogo";
 import React, { useEffect, useMemo, useState } from "react";
 
 interface SharedCode {
@@ -142,7 +143,7 @@ const Share: React.FC = () => {
                 padding: "20px",
             }}
         >
-            <div style={{ fontSize: "24px", fontWeight: "bold" }}>ente</div>
+            <EnteLogo />
 
             <div style={{ width: "100%", maxWidth: "300px" }}>
                 {error && <p style={{ color: "red" }}>{error}</p>}
@@ -229,6 +230,7 @@ const Share: React.FC = () => {
                         cursor: "pointer",
                         width: "100%",
                         maxWidth: "300px",
+                        marginBottom: "42px",
                     }}
                 >
                     Try Ente Auth
