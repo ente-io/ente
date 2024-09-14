@@ -1,7 +1,7 @@
 import { Button, styled, type ButtonProps } from "@mui/material";
 import React from "react";
 
-export const RippleDisabledButton: React.FC<ButtonProps> = (...props) => (
+export const RippleDisabledButton: React.FC<ButtonProps> = (props) => (
     <Button disableRipple {...props} />
 );
 
@@ -11,6 +11,6 @@ export const RippleDisabledButton: React.FC<ButtonProps> = (...props) => (
  */
 export const FocusVisibleButton = styled(RippleDisabledButton)`
     &.Mui-focusVisible {
-        outline: 1px solid #fff;
+        outline: 1px solid ${(props) => props.theme.colors.stroke.base};
     }
 `;
