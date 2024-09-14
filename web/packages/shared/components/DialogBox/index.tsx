@@ -1,6 +1,6 @@
+import { FocusVisibleButton } from "@/new/photos/components/FocusVisibleButton";
 import {
     Breakpoint,
-    Button,
     DialogActions,
     DialogContent,
     DialogProps,
@@ -73,7 +73,7 @@ export default function DialogBox({
                 <DialogActions>
                     <>
                         {attributes.close && (
-                            <Button
+                            <FocusVisibleButton
                                 size="large"
                                 color={attributes.close?.variant ?? "secondary"}
                                 onClick={() => {
@@ -83,10 +83,10 @@ export default function DialogBox({
                                 }}
                             >
                                 {attributes.close?.text ?? t("OK")}
-                            </Button>
+                            </FocusVisibleButton>
                         )}
                         {attributes.proceed && (
-                            <Button
+                            <FocusVisibleButton
                                 size="large"
                                 color={attributes.proceed?.variant}
                                 onClick={() => {
@@ -95,13 +95,12 @@ export default function DialogBox({
                                 }}
                                 disabled={attributes.proceed.disabled}
                                 autoFocus={attributes.proceed?.autoFocus}
-                                disableFocusRipple={attributes.proceed?.autoFocus}
                             >
                                 {attributes.proceed.text}
-                            </Button>
+                            </FocusVisibleButton>
                         )}
                         {attributes.secondary && (
-                            <Button
+                            <FocusVisibleButton
                                 size="large"
                                 color={attributes.secondary?.variant}
                                 onClick={() => {
@@ -111,7 +110,7 @@ export default function DialogBox({
                                 disabled={attributes.secondary.disabled}
                             >
                                 {attributes.secondary.text}
-                            </Button>
+                            </FocusVisibleButton>
                         )}
                     </>
                 </DialogActions>

@@ -177,7 +177,6 @@ const Form: React.FC<FormProps> = ({ initialAPIOrigin, onClose }) => {
                     color="accent"
                     fullWidth
                     disabled={form.isSubmitting}
-                    disableRipple
                 >
                     {t("save")}
                 </FocusVisibleButton>
@@ -185,7 +184,6 @@ const Form: React.FC<FormProps> = ({ initialAPIOrigin, onClose }) => {
                     onClick={onClose}
                     color="secondary"
                     fullWidth
-                    disableRipple
                 >
                     {t("cancel")}
                 </FocusVisibleButton>

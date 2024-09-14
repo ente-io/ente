@@ -58,7 +58,6 @@ export const WhatsNew: React.FC<WhatsNewProps> = ({ open, onClose }) => {
                         onClick={onClose}
                         color="accent"
                         fullWidth
-                        disableRipple
                         endIcon={<ArrowForward />}
                     >
                         <ButtonContents>{ut("Continue")}</ButtonContents>
