@@ -1,10 +1,16 @@
-import { Button, styled } from "@mui/material";
+import { Button, styled, type ButtonProps } from "@mui/material";
+import React from "react";
 
-/** A MUI {@link Button} that shows a keyboard focus indicator. */
-export const FocusVisibleButton = styled(Button)`
-    /* Show an outline when the button gains keyboard focus, e.g. when the user
-       tabs to it. */
+export const RippleDisabledButton: React.FC<ButtonProps> = (props) => (
+    <Button disableRipple {...props} />
+);
+
+/**
+ * A MUI {@link Button} that shows a keyboard focus indicator, e.g. when the
+ * user tabs to it
+ */
+export const FocusVisibleButton = styled(RippleDisabledButton)`
     &.Mui-focusVisible {
-        outline: 1px solid #aaa;
+        outline: 1px solid ${(props) => props.theme.colors.stroke.base};
     }
 `;
