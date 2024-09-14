@@ -94,6 +94,8 @@ export default function DialogBox({
                                     onClose();
                                 }}
                                 disabled={attributes.proceed.disabled}
+                                autoFocus={attributes.proceed?.autoFocus}
+                                disableFocusRipple={attributes.proceed?.autoFocus}
                             >
                                 {attributes.proceed.text}
                             </Button>

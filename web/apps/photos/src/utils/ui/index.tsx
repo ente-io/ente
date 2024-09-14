@@ -47,6 +47,7 @@ export const getTrashFileMessage = (deleteFileHelper): DialogBoxAttributes => ({
         action: deleteFileHelper,
         text: t("MOVE_TO_TRASH"),
         variant: "critical",
+        autoFocus: true,
     },
     close: { text: t("cancel") },
 });
