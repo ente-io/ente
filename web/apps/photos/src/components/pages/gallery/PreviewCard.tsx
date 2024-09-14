@@ -45,7 +45,6 @@ const Check = styled("input")<{ $active: boolean }>`
     position: absolute;
     z-index: 10;
     left: 0;
-    opacity: 0;
     outline: none;
     cursor: pointer;
     @media (pointer: coarse) {
@@ -93,8 +92,10 @@ const Check = styled("input")<{ $active: boolean }>`
         border-right: 2px solid #ddd;
         border-bottom: 2px solid #ddd;
     }
-    ${(props) => props.$active && "opacity: 0.5 "};
+    visibility: hidden;
+    ${(props) => props.$active && "visibility: visible; opacity: 0.5;"};
     &:checked {
+        visibility: visible;
         opacity: 1 !important;
     }
 `;
