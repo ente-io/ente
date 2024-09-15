@@ -11,6 +11,7 @@ import 'package:ente_auth/ui/components/action_sheet_widget.dart';
 import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/components_constants.dart';
 import 'package:ente_auth/ui/components/dialog_widget.dart';
+import 'package:ente_auth/ui/components/grid_action_sheet_widget.dart';
 import 'package:ente_auth/ui/components/models/button_result.dart';
 import 'package:ente_auth/ui/components/models/button_type.dart';
 import 'package:ente_auth/utils/email_util.dart';
@@ -422,5 +423,77 @@ Future<dynamic> showTextInputDialog(
         ),
       );
     },
+  );
+}
+
+///Will return null if dismissed by tapping outside
+Future<ButtonResult?> showOptionsForCode(
+  BuildContext context, {
+  FutureVoidCallback? onShare,
+  FutureVoidCallback? onPin,
+  FutureVoidCallback? onShowQR,
+  FutureVoidCallback? onEdit,
+  FutureVoidCallback? onRestore,
+  FutureVoidCallback? onDelete,
+  FutureVoidCallback? onTrashed,
+  bool isPinned = false,
+  bool isTrashed = false,
+}) async {
+  final buttons = [
+    ButtonWidget(
+      buttonType: ButtonType.neutral,
+      labelText: context.l10n.share,
+      isInAlert: true,
+      icon: Icons.adaptive.share_outlined,
+      onTap: onShare,
+      buttonAction: ButtonAction.first,
+    ),
+    ButtonWidget(
+      buttonType: ButtonType.neutral,
+      isInAlert: true,
+      labelText: 'QR',
+      icon: Icons.qr_code_2_outlined,
+      onTap: onShowQR,
+      buttonAction: ButtonAction.second,
+    ),
+    ButtonWidget(
+      buttonType: ButtonType.neutral,
+      isInAlert: true,
+      labelText: isPinned ? context.l10n.unpinText : context.l10n.pinText,
+      icon: isPinned ? Icons.push_pin : Icons.push_pin_outlined,
+      onTap: onPin,
+      buttonAction: ButtonAction.third,
+    ),
+    if (isTrashed)
+      ButtonWidget(
+        isInAlert: true,
+        buttonType: ButtonType.neutral,
+        labelText: context.l10n.restore,
+        icon: Icons.restore_outlined,
+        onTap: onRestore,
+        buttonAction: ButtonAction.fourth,
+      )
+    else
+      ButtonWidget(
+        isInAlert: true,
+        buttonType: ButtonType.neutral,
+        labelText: context.l10n.edit,
+        icon: Icons.edit,
+        onTap: onEdit,
+        buttonAction: ButtonAction.fourth,
+      ),
+    ButtonWidget(
+      isInAlert: true,
+      buttonType: ButtonType.neutral,
+      labelText: isTrashed ? context.l10n.delete : context.l10n.trash,
+      icon: isTrashed ? Icons.delete_forever : Icons.delete,
+      onTap: isTrashed ? onDelete : onTrashed,
+      buttonAction: ButtonAction.fifth,
+    ),
+  ];
+  return showGridActionSheet(
+    context: context,
+    buttons: buttons,
+    isDismissible: true,
   );
 }

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:ui' as ui;
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:clipboard/clipboard.dart';
@@ -24,7 +23,6 @@ import 'package:ente_auth/utils/totp_util.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_context_menu/flutter_context_menu.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:logging/logging.dart';
 import 'package:move_to_background/move_to_background.dart';
@@ -214,7 +212,48 @@ class _CodeWidgetState extends State<CodeWidget> {
                     }
                   : null,
               onLongPress: () {
-                _copyCurrentOTPToClipboard();
+                showOptionsForCode(
+                  context,
+                  isPinned: widget.code.isPinned,
+                  isTrashed: widget.code.isTrashed,
+                  onEdit: () async {
+                    Future.delayed(
+                      const Duration(milliseconds: 200),
+                      () => _onEditPressed(null),
+                    );
+                  },
+                  onShare: () async {
+                    Future.delayed(
+                      const Duration(milliseconds: 200),
+                      () => _onSharePressed(null),
+                    );
+                  },
+                  onPin: () async {
+                    await _onPinPressed(null);
+                  },
+                  onTrashed: () async {
+                    Future.delayed(
+                      const Duration(milliseconds: 200),
+                      () => _onTrashPressed(null),
+                    );
+                  },
+                  onDelete: () async {
+                    Future.delayed(
+                      const Duration(milliseconds: 200),
+                      () => _onDeletePressed(null),
+                    );
+                  },
+                  onRestore: () async {
+                    _onRestoreClicked(null);
+                  },
+                  onShowQR: () async {
+                    Future.delayed(
+                      const Duration(milliseconds: 200),
+                      () => _onShowQrPressed(null),
+                    );
+                  },
+                );
+                // _copyCurrentOTPToClipboard();
               },
               child: getCardContents(l10n),
             ),
@@ -260,8 +299,8 @@ class _CodeWidgetState extends State<CodeWidget> {
                       label: l10n.edit,
                       icon: Icons.edit,
                       onSelected: () => _onEditPressed(null),
-                    ),
-                  if (widget.code.isTrashed)
+                    )
+                  else
                     MenuItem(
                       label: l10n.restore,
                       icon: Icons.restore_outlined,
@@ -284,106 +323,8 @@ class _CodeWidgetState extends State<CodeWidget> {
               child: clippedCard(l10n),
             );
           }
-          final double slideSpace = isCompactMode ? 4 : 8;
-          double extendRatio = isCompactMode ? 0.70 : 0.90;
-          if (widget.code.isTrashed) {
-            extendRatio = 0.50;
-          }
 
-          return Slidable(
-            key: ValueKey(widget.code.hashCode),
-            endActionPane: ActionPane(
-              extentRatio: extendRatio,
-              motion: const ScrollMotion(),
-              children: [
-                if (!widget.code.isTrashed && widget.code.type.isTOTPCompatible)
-                  SizedBox(width: slideSpace),
-                if (!widget.code.isTrashed && widget.code.type.isTOTPCompatible)
-                  SlidableAction(
-                    onPressed: _onSharePressed,
-                    backgroundColor: Colors.grey.withOpacity(0.1),
-                    borderRadius: const BorderRadius.all(Radius.circular(8)),
-                    foregroundColor:
-                        Theme.of(context).colorScheme.inverseBackgroundColor,
-                    icon: Icons.adaptive.share_outlined,
-                    padding: const EdgeInsets.only(left: 4, right: 0),
-                    spacing: 8,
-                  ),
-                if (!widget.code.isTrashed) SizedBox(width: slideSpace),
-                if (!widget.code.isTrashed)
-                  CustomSlidableAction(
-                    onPressed: _onPinPressed,
-                    backgroundColor: Colors.grey.withOpacity(0.1),
-                    borderRadius: const BorderRadius.all(Radius.circular(8)),
-                    foregroundColor:
-                        Theme.of(context).colorScheme.inverseBackgroundColor,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        if (widget.code.isPinned)
-                          SvgPicture.asset(
-                            "assets/svg/pin-active.svg",
-                            colorFilter: ui.ColorFilter.mode(
-                              Theme.of(context).colorScheme.primary,
-                              BlendMode.srcIn,
-                            ),
-                          )
-                        else
-                          SvgPicture.asset(
-                            "assets/svg/pin-inactive.svg",
-                            colorFilter: ui.ColorFilter.mode(
-                              Theme.of(context).colorScheme.primary,
-                              BlendMode.srcIn,
-                            ),
-                          ),
-                      ],
-                    ),
-                    padding: const EdgeInsets.only(left: 4, right: 0),
-                  ),
-                if (!widget.code.isTrashed) SizedBox(width: slideSpace),
-                if (!widget.code.isTrashed)
-                  SlidableAction(
-                    onPressed: _onEditPressed,
-                    backgroundColor: Colors.grey.withOpacity(0.1),
-                    borderRadius: const BorderRadius.all(Radius.circular(8)),
-                    foregroundColor:
-                        Theme.of(context).colorScheme.inverseBackgroundColor,
-                    icon: Icons.edit_outlined,
-                    padding: const EdgeInsets.only(left: 4, right: 0),
-                    spacing: 8,
-                  ),
-                if (widget.code.isTrashed) SizedBox(width: slideSpace),
-                if (widget.code.isTrashed)
-                  SlidableAction(
-                    onPressed: _onRestoreClicked,
-                    backgroundColor: Colors.grey.withOpacity(0.1),
-                    borderRadius: const BorderRadius.all(Radius.circular(8)),
-                    foregroundColor:
-                        Theme.of(context).colorScheme.inverseBackgroundColor,
-                    icon: Icons.restore_outlined,
-                    padding: const EdgeInsets.only(left: 4, right: 0),
-                    spacing: 8,
-                  ),
-                SizedBox(width: slideSpace),
-                SlidableAction(
-                  onPressed: widget.code.isTrashed
-                      ? _onDeletePressed
-                      : _onTrashPressed,
-                  backgroundColor: Colors.grey.withOpacity(0.1),
-                  borderRadius: const BorderRadius.all(Radius.circular(8)),
-                  foregroundColor: colorScheme.deleteCodeTextColor,
-                  icon: widget.code.isTrashed
-                      ? Icons.delete_forever
-                      : Icons.delete,
-                  padding: const EdgeInsets.only(left: 0, right: 0),
-                  spacing: 8,
-                ),
-              ],
-            ),
-            child: Builder(
-              builder: (context) => clippedCard(l10n),
-            ),
-          );
+          return clippedCard(l10n);
         },
       ),
     );
