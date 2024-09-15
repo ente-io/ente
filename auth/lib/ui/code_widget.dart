@@ -14,6 +14,7 @@ import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/code_timer_progress.dart';
+import 'package:ente_auth/ui/components/bottom_action_bar_widget.dart';
 import 'package:ente_auth/ui/share/code_share.dart';
 import 'package:ente_auth/ui/utils/icon_utils.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
@@ -212,47 +213,27 @@ class _CodeWidgetState extends State<CodeWidget> {
                     }
                   : null,
               onLongPress: () {
-                showOptionsForCode(
-                  context,
-                  isPinned: widget.code.isPinned,
-                  isTrashed: widget.code.isTrashed,
-                  onEdit: () async {
-                    Future.delayed(
-                      const Duration(milliseconds: 200),
-                      () => _onEditPressed(null),
-                    );
-                  },
-                  onShare: () async {
-                    Future.delayed(
-                      const Duration(milliseconds: 200),
-                      () => _onSharePressed(null),
-                    );
-                  },
-                  onPin: () async {
-                    await _onPinPressed(null);
-                  },
-                  onTrashed: () async {
-                    Future.delayed(
-                      const Duration(milliseconds: 200),
-                      () => _onTrashPressed(null),
-                    );
-                  },
-                  onDelete: () async {
-                    Future.delayed(
-                      const Duration(milliseconds: 200),
-                      () => _onDeletePressed(null),
-                    );
-                  },
-                  onRestore: () async {
-                    _onRestoreClicked(null);
-                  },
-                  onShowQR: () async {
-                    Future.delayed(
-                      const Duration(milliseconds: 200),
-                      () => _onShowQrPressed(null),
+                showModalBottomSheet(
+                  context: context,
+                  builder: (_) {
+                    return BottomActionBarWidget(
+                      code: widget.code,
+                      onEdit: () => _onEditPressed(true),
+                      onShare: () => _onSharePressed(true),
+                      onPin: () => _onPinPressed(true),
+                      onTrashed: () => _onTrashPressed(true),
+                      onDelete: () => _onDeletePressed(true),
+                      onRestore: () => _onRestoreClicked(true),
+                      onShowQR: () => _onShowQrPressed(true),
+                      onCancel: () => Navigator.of(context).pop(),
                     );
                   },
                 );
+                // showOptionsForCode(
+                //   context,
+                //   isPinned: widget.code.isPinned,
+                //   isTrashed: widget.code.isTrashed,
+                // );
                 // _copyCurrentOTPToClipboard();
               },
               child: getCardContents(l10n),
@@ -509,7 +490,10 @@ class _CodeWidgetState extends State<CodeWidget> {
     }
   }
 
-  Future<void> _onEditPressed(_) async {
+  Future<void> _onEditPressed([bool? pop]) async {
+    if (mounted && pop == true) {
+      Navigator.of(context).pop();
+    }
     bool isAuthSuccessful = await LocalAuthenticationService.instance
         .requestLocalAuthentication(context, context.l10n.editCodeAuthMessage);
     await PlatformUtil.refocusWindows();
@@ -530,7 +514,10 @@ class _CodeWidgetState extends State<CodeWidget> {
     }
   }
 
-  Future<void> _onShowQrPressed(_) async {
+  Future<void> _onShowQrPressed([bool? pop]) async {
+    if (mounted && pop == true) {
+      Navigator.of(context).pop();
+    }
     bool isAuthSuccessful = await LocalAuthenticationService.instance
         .requestLocalAuthentication(context, context.l10n.showQRAuthMessage);
     await PlatformUtil.refocusWindows();
@@ -547,7 +534,10 @@ class _CodeWidgetState extends State<CodeWidget> {
     );
   }
 
-  Future<void> _onSharePressed(_) async {
+  Future<void> _onSharePressed([bool? pop]) async {
+    if (mounted && pop == true) {
+      Navigator.of(context).pop();
+    }
     bool isAuthSuccessful = await LocalAuthenticationService.instance
         .requestLocalAuthentication(context, context.l10n.authenticateGeneric);
     await PlatformUtil.refocusWindows();
@@ -557,7 +547,10 @@ class _CodeWidgetState extends State<CodeWidget> {
     showShareDialog(context, widget.code);
   }
 
-  Future<void> _onPinPressed(_) async {
+  Future<void> _onPinPressed([bool? pop]) async {
+    if (mounted && pop == true) {
+      Navigator.of(context).pop();
+    }
     bool currentlyPinned = widget.code.isPinned;
     final display = widget.code.display;
     final Code code = widget.code.copyWith(
@@ -575,7 +568,10 @@ class _CodeWidgetState extends State<CodeWidget> {
     );
   }
 
-  void _onDeletePressed(_) async {
+  void _onDeletePressed([bool? pop]) async {
+    if (mounted && pop == true) {
+      Navigator.of(context).pop();
+    }
     if (!widget.code.isTrashed) {
       showToast(context, 'Code can only be deleted from trash');
       return;
@@ -602,7 +598,10 @@ class _CodeWidgetState extends State<CodeWidget> {
     );
   }
 
-  void _onTrashPressed(_) async {
+  void _onTrashPressed([bool? pop]) async {
+    if (mounted && pop == true) {
+      Navigator.of(context).pop();
+    }
     if (widget.code.isTrashed) {
       showToast(context, 'Code is already trashed');
       return;
@@ -639,7 +638,10 @@ class _CodeWidgetState extends State<CodeWidget> {
     );
   }
 
-  void _onRestoreClicked(_) async {
+  void _onRestoreClicked([bool? pop]) async {
+    if (mounted && pop == true) {
+      Navigator.of(context).pop();
+    }
     if (!widget.code.isTrashed) {
       showToast(context, 'Code is already restored');
       return;
