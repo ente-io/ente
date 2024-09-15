@@ -113,17 +113,18 @@ class _CodeWidgetState extends State<CodeWidget> {
     Widget getCardContents(AppLocalizations l10n) {
       return Stack(
         children: [
-          Align(
-            alignment: Alignment.topRight,
-            child: CustomPaint(
-              painter: PinBgPainter(
-                color: colorScheme.pinnedBgColor,
+          if (widget.code.isPinned)
+            Align(
+              alignment: Alignment.topRight,
+              child: CustomPaint(
+                painter: PinBgPainter(
+                  color: colorScheme.pinnedBgColor,
+                ),
+                size: widget.isCompactMode
+                    ? const Size(24, 24)
+                    : const Size(39, 39),
               ),
-              size: widget.isCompactMode
-                  ? const Size(24, 24)
-                  : const Size(39, 39),
             ),
-          ),
           if (widget.code.isTrashed && kDebugMode)
             Align(
               alignment: Alignment.topLeft,
