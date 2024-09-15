@@ -229,12 +229,6 @@ class _CodeWidgetState extends State<CodeWidget> {
                     );
                   },
                 );
-                // showOptionsForCode(
-                //   context,
-                //   isPinned: widget.code.isPinned,
-                //   isTrashed: widget.code.isTrashed,
-                // );
-                // _copyCurrentOTPToClipboard();
               },
               child: getCardContents(l10n),
             ),
