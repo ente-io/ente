@@ -14,7 +14,7 @@ import 'package:flutter/scheduler.dart';
 
 enum ButtonSize { small, large }
 
-enum ButtonAction { first, second, third, fourth, fifth, cancel, error }
+enum ButtonAction { first, second, third, fourth, cancel, error }
 
 class ButtonWidget extends StatelessWidget {
   final IconData? icon;
