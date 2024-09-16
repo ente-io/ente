@@ -52,7 +52,6 @@ class _CodeWidgetState extends State<CodeWidget> {
   late bool _shouldShowLargeIcon;
   late bool _hideCode;
   bool isMaskingEnabled = false;
-  bool isCompactMode = true;
   int _codeTimeStep = -1;
 
   @override
@@ -120,7 +119,9 @@ class _CodeWidgetState extends State<CodeWidget> {
                 painter: PinBgPainter(
                   color: colorScheme.pinnedBgColor,
                 ),
-                size: isCompactMode ? const Size(24, 24) : const Size(39, 39),
+                size: widget.isCompactMode
+                    ? const Size(24, 24)
+                    : const Size(39, 39),
               ),
             ),
           if (widget.code.isTrashed && kDebugMode)
@@ -160,7 +161,7 @@ class _CodeWidgetState extends State<CodeWidget> {
                   ),
                 ],
               ),
-              isCompactMode
+              widget.isCompactMode
                   ? const SizedBox(height: 4)
                   : const SizedBox(height: 32),
             ],
@@ -170,7 +171,7 @@ class _CodeWidgetState extends State<CodeWidget> {
               alignment: Alignment.topRight,
               child: Padding(
                 padding: widget.isCompactMode
-                    ? const EdgeInsets.only(right: 2, top: 2)
+                    ? const EdgeInsets.only(right: 4, top: 4)
                     : const EdgeInsets.only(right: 6, top: 6),
                 child: SvgPicture.asset(
                   "assets/svg/pin-card.svg",
