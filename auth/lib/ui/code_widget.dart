@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:ui' as ui;
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:clipboard/clipboard.dart';
@@ -15,6 +14,7 @@ import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/code_timer_progress.dart';
+import 'package:ente_auth/ui/components/bottom_action_bar_widget.dart';
 import 'package:ente_auth/ui/share/code_share.dart';
 import 'package:ente_auth/ui/utils/icon_utils.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
@@ -24,7 +24,6 @@ import 'package:ente_auth/utils/totp_util.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_context_menu/flutter_context_menu.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:logging/logging.dart';
 import 'package:move_to_background/move_to_background.dart';
@@ -215,7 +214,22 @@ class _CodeWidgetState extends State<CodeWidget> {
                     }
                   : null,
               onLongPress: () {
-                _copyCurrentOTPToClipboard();
+                showModalBottomSheet(
+                  context: context,
+                  builder: (_) {
+                    return BottomActionBarWidget(
+                      code: widget.code,
+                      onEdit: () => _onEditPressed(true),
+                      onShare: () => _onSharePressed(true),
+                      onPin: () => _onPinPressed(true),
+                      onTrashed: () => _onTrashPressed(true),
+                      onDelete: () => _onDeletePressed(true),
+                      onRestore: () => _onRestoreClicked(true),
+                      onShowQR: () => _onShowQrPressed(true),
+                      onCancel: () => Navigator.of(context).pop(),
+                    );
+                  },
+                );
               },
               child: getCardContents(l10n),
             ),
@@ -261,8 +275,8 @@ class _CodeWidgetState extends State<CodeWidget> {
                       label: l10n.edit,
                       icon: Icons.edit,
                       onSelected: () => _onEditPressed(null),
-                    ),
-                  if (widget.code.isTrashed)
+                    )
+                  else
                     MenuItem(
                       label: l10n.restore,
                       icon: Icons.restore_outlined,
@@ -285,106 +299,8 @@ class _CodeWidgetState extends State<CodeWidget> {
               child: clippedCard(l10n),
             );
           }
-          final double slideSpace = widget.isCompactMode ? 4 : 8;
-          double extendRatio = widget.isCompactMode ? 0.70 : 0.90;
-          if (widget.code.isTrashed) {
-            extendRatio = 0.50;
-          }
 
-          return Slidable(
-            key: ValueKey(widget.code.hashCode),
-            endActionPane: ActionPane(
-              extentRatio: extendRatio,
-              motion: const ScrollMotion(),
-              children: [
-                if (!widget.code.isTrashed && widget.code.type.isTOTPCompatible)
-                  SizedBox(width: slideSpace),
-                if (!widget.code.isTrashed && widget.code.type.isTOTPCompatible)
-                  SlidableAction(
-                    onPressed: _onSharePressed,
-                    backgroundColor: Colors.grey.withOpacity(0.1),
-                    borderRadius: const BorderRadius.all(Radius.circular(8)),
-                    foregroundColor:
-                        Theme.of(context).colorScheme.inverseBackgroundColor,
-                    icon: Icons.adaptive.share_outlined,
-                    padding: const EdgeInsets.only(left: 4, right: 0),
-                    spacing: 8,
-                  ),
-                if (!widget.code.isTrashed) SizedBox(width: slideSpace),
-                if (!widget.code.isTrashed)
-                  CustomSlidableAction(
-                    onPressed: _onPinPressed,
-                    backgroundColor: Colors.grey.withOpacity(0.1),
-                    borderRadius: const BorderRadius.all(Radius.circular(8)),
-                    foregroundColor:
-                        Theme.of(context).colorScheme.inverseBackgroundColor,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        if (widget.code.isPinned)
-                          SvgPicture.asset(
-                            "assets/svg/pin-active.svg",
-                            colorFilter: ui.ColorFilter.mode(
-                              Theme.of(context).colorScheme.primary,
-                              BlendMode.srcIn,
-                            ),
-                          )
-                        else
-                          SvgPicture.asset(
-                            "assets/svg/pin-inactive.svg",
-                            colorFilter: ui.ColorFilter.mode(
-                              Theme.of(context).colorScheme.primary,
-                              BlendMode.srcIn,
-                            ),
-                          ),
-                      ],
-                    ),
-                    padding: const EdgeInsets.only(left: 4, right: 0),
-                  ),
-                if (!widget.code.isTrashed) SizedBox(width: slideSpace),
-                if (!widget.code.isTrashed)
-                  SlidableAction(
-                    onPressed: _onEditPressed,
-                    backgroundColor: Colors.grey.withOpacity(0.1),
-                    borderRadius: const BorderRadius.all(Radius.circular(8)),
-                    foregroundColor:
-                        Theme.of(context).colorScheme.inverseBackgroundColor,
-                    icon: Icons.edit_outlined,
-                    padding: const EdgeInsets.only(left: 4, right: 0),
-                    spacing: 8,
-                  ),
-                if (widget.code.isTrashed) SizedBox(width: slideSpace),
-                if (widget.code.isTrashed)
-                  SlidableAction(
-                    onPressed: _onRestoreClicked,
-                    backgroundColor: Colors.grey.withOpacity(0.1),
-                    borderRadius: const BorderRadius.all(Radius.circular(8)),
-                    foregroundColor:
-                        Theme.of(context).colorScheme.inverseBackgroundColor,
-                    icon: Icons.restore_outlined,
-                    padding: const EdgeInsets.only(left: 4, right: 0),
-                    spacing: 8,
-                  ),
-                SizedBox(width: slideSpace),
-                SlidableAction(
-                  onPressed: widget.code.isTrashed
-                      ? _onDeletePressed
-                      : _onTrashPressed,
-                  backgroundColor: Colors.grey.withOpacity(0.1),
-                  borderRadius: const BorderRadius.all(Radius.circular(8)),
-                  foregroundColor: colorScheme.deleteCodeTextColor,
-                  icon: widget.code.isTrashed
-                      ? Icons.delete_forever
-                      : Icons.delete,
-                  padding: const EdgeInsets.only(left: 0, right: 0),
-                  spacing: 8,
-                ),
-              ],
-            ),
-            child: Builder(
-              builder: (context) => clippedCard(l10n),
-            ),
-          );
+          return clippedCard(l10n);
         },
       ),
     );
@@ -569,7 +485,10 @@ class _CodeWidgetState extends State<CodeWidget> {
     }
   }
 
-  Future<void> _onEditPressed(_) async {
+  Future<void> _onEditPressed([bool? pop]) async {
+    if (mounted && pop == true) {
+      Navigator.of(context).pop();
+    }
     bool isAuthSuccessful = await LocalAuthenticationService.instance
         .requestLocalAuthentication(context, context.l10n.editCodeAuthMessage);
     await PlatformUtil.refocusWindows();
@@ -590,7 +509,10 @@ class _CodeWidgetState extends State<CodeWidget> {
     }
   }
 
-  Future<void> _onShowQrPressed(_) async {
+  Future<void> _onShowQrPressed([bool? pop]) async {
+    if (mounted && pop == true) {
+      Navigator.of(context).pop();
+    }
     bool isAuthSuccessful = await LocalAuthenticationService.instance
         .requestLocalAuthentication(context, context.l10n.showQRAuthMessage);
     await PlatformUtil.refocusWindows();
@@ -607,7 +529,10 @@ class _CodeWidgetState extends State<CodeWidget> {
     );
   }
 
-  Future<void> _onSharePressed(_) async {
+  Future<void> _onSharePressed([bool? pop]) async {
+    if (mounted && pop == true) {
+      Navigator.of(context).pop();
+    }
     bool isAuthSuccessful = await LocalAuthenticationService.instance
         .requestLocalAuthentication(context, context.l10n.authenticateGeneric);
     await PlatformUtil.refocusWindows();
@@ -617,7 +542,10 @@ class _CodeWidgetState extends State<CodeWidget> {
     showShareDialog(context, widget.code);
   }
 
-  Future<void> _onPinPressed(_) async {
+  Future<void> _onPinPressed([bool? pop]) async {
+    if (mounted && pop == true) {
+      Navigator.of(context).pop();
+    }
     bool currentlyPinned = widget.code.isPinned;
     final display = widget.code.display;
     final Code code = widget.code.copyWith(
@@ -635,7 +563,10 @@ class _CodeWidgetState extends State<CodeWidget> {
     );
   }
 
-  void _onDeletePressed(_) async {
+  void _onDeletePressed([bool? pop]) async {
+    if (mounted && pop == true) {
+      Navigator.of(context).pop();
+    }
     if (!widget.code.isTrashed) {
       showToast(context, 'Code can only be deleted from trash');
       return;
@@ -662,7 +593,10 @@ class _CodeWidgetState extends State<CodeWidget> {
     );
   }
 
-  void _onTrashPressed(_) async {
+  void _onTrashPressed([bool? pop]) async {
+    if (mounted && pop == true) {
+      Navigator.of(context).pop();
+    }
     if (widget.code.isTrashed) {
       showToast(context, 'Code is already trashed');
       return;
@@ -699,7 +633,10 @@ class _CodeWidgetState extends State<CodeWidget> {
     );
   }
 
-  void _onRestoreClicked(_) async {
+  void _onRestoreClicked([bool? pop]) async {
+    if (mounted && pop == true) {
+      Navigator.of(context).pop();
+    }
     if (!widget.code.isTrashed) {
       showToast(context, 'Code is already restored');
       return;
