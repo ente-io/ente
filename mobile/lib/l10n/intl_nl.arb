@@ -327,7 +327,6 @@
   "removingFromFavorites": "Verwijderen uit favorieten...",
   "sorryCouldNotAddToFavorites": "Sorry, kon niet aan favorieten worden toegevoegd!",
   "sorryCouldNotRemoveFromFavorites": "Sorry, kon niet uit favorieten worden verwijderd!",
-  "subscribeToEnableSharing": "Het lijkt erop dat je abonnement is verlopen. Abonneer om delen mogelijk te maken.",
   "subscribe": "Abonneer",
   "canOnlyRemoveFilesOwnedByYou": "Kan alleen bestanden verwijderen die jouw eigendom zijn",
   "deleteSharedAlbum": "Gedeeld album verwijderen?",
@@ -1304,9 +1303,6 @@
   "hideContentDescriptionAndroid": "Verbergt app-inhoud in de app-schakelaar en schakelt schermopnamen uit",
   "hideContentDescriptionIos": "Verbergt de inhoud van de app in de app-schakelaar",
   "passwordStrengthInfo": "De wachtwoordsterkte wordt berekend aan de hand van de lengte van het wachtwoord, de gebruikte tekens en of het wachtwoord al dan niet in de top 10.000 van meest gebruikte wachtwoorden staat",
-  "nameTheAlbum": "Name the album",
-  "collectPhotosDescription": "Create a link where your friends can upload photos in original quality.",
-  "collect": "Collect",
   "noQuickLinksSelected": "Geen snelle links geselecteerd",
   "pleaseSelectQuickLinksToRemove": "Selecteer snelle links om te verwijderen",
   "removePublicLinks": "Verwijder publieke link",
@@ -1317,10 +1313,5 @@
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Om appvergrendeling in te schakelen, moet u een toegangscode of schermvergrendeling instellen in uw systeeminstellingen.",
   "authToViewPasskey": "Verifieer uzelf om uw toegangssleutel te bekijken",
   "loopVideoOn": "Video in lus afspelen aan",
-  "loopVideoOff": "Video in lus afspelen uit",
-  "localSyncErrorMessage": "Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team",
-  "showPerson": "Show person",
-  "sort": "Sort",
-  "mostRecent": "Most recent",
-  "mostRelevant": "Most relevant"
+  "loopVideoOff": "Video in lus afspelen uit"
 }

@@ -296,10 +296,5 @@
     "description": "Label for the map view"
   },
   "maps": "แผนที่",
-  "enableMaps": "เปิดใช้งานแผนที่",
-  "localSyncErrorMessage": "Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team",
-  "showPerson": "Show person",
-  "sort": "Sort",
-  "mostRecent": "Most recent",
-  "mostRelevant": "Most relevant"
+  "enableMaps": "เปิดใช้งานแผนที่"
 }
