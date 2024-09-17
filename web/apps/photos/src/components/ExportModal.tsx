@@ -154,8 +154,7 @@ export default function ExportModal(props: Props) {
         });
         setIncludeShared(newIncludeShared);
 
-        const exportRecord =
-                await exportService.getExportRecord(exportFolder);
+        const exportRecord = await exportService.getExportRecord(exportFolder);
         const pendingExports =
             await exportService.getPendingExports(exportRecord);
         setPendingExports(pendingExports);
@@ -262,7 +261,9 @@ function IncludeShared({ exportStage, includeShared, toggleIncludeShared }) {
         case ExportStage.FINISHED:
             return (
                 <SpaceBetweenFlex minHeight={"48px"}>
-                    <Typography color="text.muted">{t("INCLUDE_SHARED")}</Typography>
+                    <Typography color="text.muted">
+                        {t("INCLUDE_SHARED")}
+                    </Typography>
                     <Box>
                         <EnteSwitch
                             color="accent"
