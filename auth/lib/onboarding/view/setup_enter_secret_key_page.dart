@@ -117,23 +117,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
     final l10n = context.l10n;
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.importAccountPageTitle),
-        actions: [
-          if (widget.code != null)
-            IconButton(
-              icon: const Icon(Icons.qr_code_2_outlined),
-              enableFeedback: true,
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (BuildContext context) {
-                      return ViewQrPage(code: widget.code);
-                    },
-                  ),
-                ).ignore();
-              },
-            ),
-        ],
+        title: Text(l10n.importAccountPageTitle)
       ),
       body: SingleChildScrollView(
         child: Padding(
