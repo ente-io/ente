@@ -178,18 +178,20 @@ class SemanticSearchService {
     return results;
   }
 
-  Future<List<int>> getMatchingFileIDs(
+  Future<Set<int>> getMatchingFileIDs(
     String query,
     double minimumSimilarity,
   ) async {
-    final results =
-        await getMatchingFiles(query, similarityThreshold: minimumSimilarity);
-    final matchingFileIDs = <int>[];
-    for (EnteFile file in results) {
-      matchingFileIDs.add(file.uploadedFileID!);
+    final textEmbedding = await _getTextEmbedding(query);
+    final queryResults = await _getSimilarities(
+      textEmbedding,
+      minimumSimilarity: minimumSimilarity,
+    );
+    final result = <int>{};
+    for (final r in queryResults) {
+      result.add(r.id);
     }
-
-    return matchingFileIDs;
+    return result;
   }
 
   Future<void> _loadTextModel({bool delay = false}) async {

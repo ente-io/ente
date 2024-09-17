@@ -33,7 +33,7 @@ class MagicCache {
   Map<String, dynamic> toJson() {
     return {
       'title': title,
-      'fileUploadedIDs': fileUploadedIDs,
+      'fileUploadedIDs': fileUploadedIDs.toList(),
     };
   }
 
@@ -137,7 +137,7 @@ class MagicCacheService {
     return (await getApplicationSupportDirectory()).path + "/cache/magic_cache";
   }
 
-  Future<List<int>> _getMatchingFileIDsForPromptData(
+  Future<Set<int>> _getMatchingFileIDsForPromptData(
     Prompt promptData,
   ) async {
     final result = await SemanticSearchService.instance.getMatchingFileIDs(
@@ -272,10 +272,7 @@ class MagicCacheService {
       );
       if (fileUploadedIDs.isNotEmpty) {
         results.add(
-          MagicCache(
-            prompt.title,
-            fileUploadedIDs.toSet(),
-          ),
+          MagicCache(prompt.title, fileUploadedIDs),
         );
       }
     }
