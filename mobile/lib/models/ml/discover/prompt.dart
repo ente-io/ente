@@ -18,5 +18,5 @@ class Prompt {
         position = json['position'] ?? 0,
         title = json['title'],
         bestFirst = json['bestFirst'] ?? false,
-        showVideo = json['showVideo'] ?? false;
+        showVideo = json['showVideo'] ?? true;
 }

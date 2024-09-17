@@ -7,6 +7,7 @@ import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:path_provider/path_provider.dart";
 import "package:photos/extensions/stop_watch.dart";
+import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/discover/prompt.dart";
 import "package:photos/models/search/generic_search_result.dart";
@@ -79,7 +80,7 @@ extension MagicCacheServiceExtension on MagicCache {
 
 class MagicCacheService {
   static const _lastMagicCacheUpdateTime = "last_magic_cache_update_time";
-  static const _kMagicPromptsDataUrl = "https://discover.ente.io/v1.json";
+  static const _kMagicPromptsDataUrl = "https://discover.ente.io/v2.json";
 
   /// Delay is for cache update to be done not during app init, during which a
   /// lot of other things are happening.
@@ -90,6 +91,7 @@ class MagicCacheService {
   MagicCacheService._privateConstructor();
 
   Future<List<MagicCache>>? _magicCacheFuture;
+  Future<List<Prompt>>? _promptFuture;
 
   static final MagicCacheService instance =
       MagicCacheService._privateConstructor();
@@ -142,14 +144,7 @@ class MagicCacheService {
       _logger.info("updating magic cache");
       final EnteWatch? w = kDebugMode ? EnteWatch("magicCacheWatch") : null;
       w?.start();
-      final String path = await RemoteAssetsService.instance
-          .getAssetPath(_kMagicPromptsDataUrl);
-      final magicPromptsData = await Computer.shared().compute(
-        _loadMagicPrompts,
-        param: <String, dynamic>{
-          "path": path,
-        },
-      );
+      final magicPromptsData = await getPrompts();
       w?.log("loadedPrompts");
       final List<MagicCache> magicCaches =
           await _nonEmptyMagicResults(magicPromptsData);
@@ -169,12 +164,31 @@ class MagicCacheService {
     }
   }
 
+  Future<List<Prompt>> getPrompts() async {
+    if (_promptFuture != null) {
+      return _promptFuture!;
+    }
+    _promptFuture = _readPromptFromDiskOrNetwork();
+    return _promptFuture!;
+  }
+
   Future<List<MagicCache>> _getMagicCache() async {
     if (_magicCacheFuture != null) {
       return _magicCacheFuture!;
     }
     _magicCacheFuture = _readResultFromDisk();
     return _magicCacheFuture!;
+  }
+
+  Future<List<Prompt>> _readPromptFromDiskOrNetwork() async {
+    final String path =
+        await RemoteAssetsService.instance.getAssetPath(_kMagicPromptsDataUrl);
+    return Computer.shared().compute(
+      _loadMagicPrompts,
+      param: <String, dynamic>{
+        "path": path,
+      },
+    );
   }
 
   Future<List<MagicCache>> _readResultFromDisk() async {
@@ -198,16 +212,20 @@ class MagicCacheService {
           kDebugMode ? EnteWatch("magicGenericSearchResult") : null;
       w?.start();
       final magicCaches = await _getMagicCache();
+      final List<Prompt> prompts = await getPrompts();
       if (magicCaches.isEmpty) {
-        w?.log("noCacheFound");
-        _logger.info("No magic cache found");
+        w?.log("No magic cache found");
         return [];
       } else {
         w?.log("cacheFound");
       }
       final Map<String, List<EnteFile>> magicIdToFiles = {};
+      final Map<String, Prompt> promptMap = {};
       for (MagicCache c in magicCaches) {
         magicIdToFiles[c.title] = [];
+      }
+      for (final p in prompts) {
+        promptMap[p.title] = p;
       }
       final List<GenericSearchResult> genericSearchResults = [];
       final List<EnteFile> files = await SearchService.instance.getAllFiles();
@@ -215,6 +233,10 @@ class MagicCacheService {
         if (!file.isUploaded) continue;
         for (MagicCache magicCache in magicCaches) {
           if (magicCache.fileUploadedIDs.contains(file.uploadedFileID!)) {
+            if (file.isVideo &&
+                (promptMap[magicCache.title]?.showVideo ?? true) == false) {
+              continue;
+            }
             magicIdToFiles[magicCache.title]!.add(file);
           }
         }
