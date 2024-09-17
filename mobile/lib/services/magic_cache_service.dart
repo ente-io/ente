@@ -49,7 +49,7 @@ class MagicCache {
 }
 
 extension MagicCacheServiceExtension on MagicCache {
-  Future<GenericSearchResult> toGenericSearchResult() async {
+  Future<GenericSearchResult?> toGenericSearchResult() async {
     final enteFilesInMagicCache = <EnteFile>[];
     await FilesDB.instance
         .getFilesFromIDs(fileUploadedIDs)
@@ -60,6 +60,9 @@ extension MagicCacheServiceExtension on MagicCache {
         }
       }
     });
+    if (enteFilesInMagicCache.isEmpty) {
+      return null;
+    }
     return GenericSearchResult(
       ResultType.magic,
       title,
@@ -93,6 +96,8 @@ class MagicCacheService {
   late SharedPreferences _prefs;
   final Logger _logger = Logger((MagicCacheService).toString());
   MagicCacheService._privateConstructor();
+
+  Future<List<MagicCache>>? _magicCacheFuture;
 
   static final MagicCacheService instance =
       MagicCacheService._privateConstructor();
@@ -172,6 +177,7 @@ class MagicCacheService {
       if (!file.existsSync()) {
         file.createSync(recursive: true);
       }
+      _magicCacheFuture = Future.value(magicCaches);
       await file
           .writeAsBytes(MagicCache.encodeListToJson(magicCaches).codeUnits);
       w?.log("cacheWritten");
@@ -182,11 +188,20 @@ class MagicCacheService {
     }
   }
 
-  Future<List<MagicCache>?> _getMagicCache() async {
+  Future<List<MagicCache>> _getMagicCache() async {
+    if (_magicCacheFuture != null) {
+      return _magicCacheFuture!;
+    }
+    _magicCacheFuture = _readResultFromDisk();
+    return _magicCacheFuture!;
+  }
+
+  Future<List<MagicCache>> _readResultFromDisk() async {
+    _logger.info("Reading magic cache result from disk");
     final file = File(await _getCachePath());
     if (!file.existsSync()) {
       _logger.info("No magic cache found");
-      return null;
+      return [];
     }
     final jsonString = file.readAsStringSync();
     return MagicCache.decodeJsonToList(jsonString);
@@ -202,15 +217,20 @@ class MagicCacheService {
           kDebugMode ? EnteWatch("magicGenericSearchResult") : null;
       w?.start();
       final magicCaches = await _getMagicCache();
-      if (magicCaches == null) {
+      if (magicCaches.isEmpty) {
+        w?.log("noCacheFound");
         _logger.info("No magic cache found");
         return [];
+      } else {
+        w?.log("cacheFound");
       }
 
       final List<GenericSearchResult> genericSearchResults = [];
       for (MagicCache magicCache in magicCaches) {
         final genericSearchResult = await magicCache.toGenericSearchResult();
-        genericSearchResults.add(genericSearchResult);
+        if (genericSearchResult != null) {
+          genericSearchResults.add(genericSearchResult);
+        }
       }
       w?.logAndReset("done");
       return genericSearchResults;
