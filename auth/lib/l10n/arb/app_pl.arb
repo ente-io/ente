@@ -19,6 +19,20 @@
   "pleaseVerifyDetails": "Prosimy zweryfikować szczegóły i spróbować ponownie",
   "codeIssuerHint": "Wydawca",
   "codeSecretKeyHint": "Tajny Klucz",
+  "secret": "Sekret",
+  "all": "Wszystko",
+  "notes": "Notatki",
+  "notesLengthLimit": "Notatki mogą mieć maksymalnie {count} znaków",
+  "@notesLengthLimit": {
+    "description": "Text to indicate the maximum number of characters allowed for notes",
+    "placeholders": {
+      "count": {
+        "description": "The maximum number of characters allowed for notes",
+        "type": "int",
+        "example": "100"
+      }
+    }
+  },
   "codeAccountHint": "Konto (ty@domena.com)",
   "codeTagHint": "Oznacz",
   "accountKeyType": "Rodzaj klucza",
@@ -34,6 +48,9 @@
   "nextTotpTitle": "dalej",
   "deleteCodeTitle": "Usunąć kod?",
   "deleteCodeMessage": "Czy na pewno chcesz usunąć ten kod? Ta akcja jest nieodwracalna.",
+  "trashCode": "Przenieść kod do kosza?",
+  "trashCodeMessage": "Czy na pewno chcesz przenieść do kosza kod dla {account}?",
+  "trash": "Kosz",
   "viewLogsAction": "Wyświetl logi",
   "sendLogsDescription": "Spowoduje to przesłanie logów, które pomogą nam rozwiązać Twój problem. Chociaż podejmujemy środki ostrożności, aby zapewnić, że wrażliwe informacje nie są rejestrowane, zachęcamy do obejrzenia tych dzienników przed ich udostępnieniem.",
   "preparingLogsTitle": "Przygotowywanie logów...",
@@ -100,6 +117,7 @@
   "emailVerificationToggle": "Weryfikacja e-mail",
   "emailVerificationEnableWarning": "Aby uniknąć zablokowania się z konta, upewnij się, że przed włączeniem weryfikacji e-mail przechowujesz kopię 2FA dla swojego adresu e-mail poza Ente Auth.",
   "authToChangeEmailVerificationSetting": "Prosimy uwierzytelnić się, aby zmienić weryfikację e-mail",
+  "authenticateGeneric": "Prosimy się uwierzytelnić",
   "authToViewYourRecoveryKey": "Prosimy uwierzytelnić się, aby wyświetlić swój klucz odzyskiwania",
   "authToChangeYourEmail": "Prosimy uwierzytelnić się, aby zmienić swój adres e-mail",
   "authToChangeYourPassword": "Prosimy uwierzytelnić się, aby zmienić hasło",
@@ -193,6 +211,10 @@
   "scanAQrCode": "Zeskanuj kod QR",
   "enterDetailsManually": "Wprowadź dane ręcznie",
   "edit": "Edytuj",
+  "share": "Udostępnij",
+  "shareCodes": "Udostępnij kody",
+  "shareCodesDuration": "Wybierz okres, przez który chcesz udostępniać kody.",
+  "restore": "Przywróć",
   "copiedToClipboard": "Skopiowano do schowka",
   "copiedNextToClipboard": "Skopiowano następny kod do schowka",
   "error": "Błąd",
@@ -346,6 +368,7 @@
   "sigInBackupReminder": "Prosimy wyeksportować swoje kody, aby upewnić się, że masz kopię zapasową, z której możesz przywrócić swoje kody.",
   "offlineModeWarning": "Zdecydowano się kontynuować bez kopii zapasowych. Prosimy wykonywać ręczne kopie zapasowe, aby upewnić się, że Twoje kody są bezpieczne.",
   "showLargeIcons": "Pokaż duże ikony",
+  "compactMode": "Tryb kompaktowy",
   "shouldHideCode": "Ukryj kody",
   "doubleTapToViewHiddenCode": "Możesz kliknąć dwukrotnie na wpis, aby wyświetlić kod",
   "focusOnSearchBar": "Uaktywnij wyszukiwanie przy uruchamianiu aplikacji",
@@ -466,5 +489,7 @@
   "pinLock": "Blokada PIN",
   "enterPin": "Wprowadź kod PIN",
   "setNewPin": "Ustaw nowy kod PIN",
-  "importFailureDescNew": "Nie udało się przetworzyć wybranego pliku."
+  "importFailureDescNew": "Nie udało się przetworzyć wybranego pliku.",
+  "appLockNotEnabled": "Blokada aplikacji nie jest włączona",
+  "appLockNotEnabledDescription": "Prosimy włączyć blokadę aplikacji z Zabezpieczenia > Blokada Aplikacji"
 }

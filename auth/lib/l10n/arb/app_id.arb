@@ -2,6 +2,10 @@
   "account": "Akun",
   "unlock": "Buka",
   "recoveryKey": "Kunci pemulihan",
+  "counterAppBarTitle": "Penghitung",
+  "@counterAppBarTitle": {
+    "description": "Text shown in the AppBar of the Counter Page"
+  },
   "onBoardingBody": "Cadangkan kode 2FA kamu dengan aman",
   "onBoardingGetStarted": "Mulai",
   "setupFirstAccount": "Siapkan akun pertama kamu",
@@ -9,12 +13,29 @@
   "qrCode": "Kode QR",
   "importEnterSetupKey": "Masukkan kunci penyiapan",
   "importAccountPageTitle": "Masukkan detail akun",
+  "secretCanNotBeEmpty": "Rahasia tidak boleh kosong",
+  "bothIssuerAndAccountCanNotBeEmpty": "Nama penerbit dan akun tidak boleh kosong",
   "incorrectDetails": "Rincian salah",
   "pleaseVerifyDetails": "Periksa kembali data kamu dan coba lagi",
   "codeIssuerHint": "Penerbit",
   "codeSecretKeyHint": "Kunci Rahasia",
+  "secret": "Rahasia",
+  "all": "Semua",
+  "notes": "Catatan",
+  "notesLengthLimit": "Catatan diperbolehkan sebanyak maksimal {count} karakter",
+  "@notesLengthLimit": {
+    "description": "Text to indicate the maximum number of characters allowed for notes",
+    "placeholders": {
+      "count": {
+        "description": "The maximum number of characters allowed for notes",
+        "type": "int",
+        "example": "100"
+      }
+    }
+  },
   "codeAccountHint": "Akun (kamu@domain.com)",
   "codeTagHint": "Tag",
+  "accountKeyType": "Tipe kunci",
   "sessionExpired": "Sesi berakhir",
   "@sessionExpired": {
     "description": "Title of the dialog when the users current session is invalid/expired"
@@ -26,16 +47,38 @@
   "nextTotpTitle": "berikutnya",
   "deleteCodeTitle": "Hapus kode?",
   "deleteCodeMessage": "Apakah kamu yakin ingin menghapus kode ini? Tindakan ini tidak dapat dikembalikan ke semula.",
+  "trashCode": "Hapus kode?",
+  "trashCodeMessage": "Apakah anda yakin ingin menghapus kode untuk {account}?",
+  "trash": "Hapus",
   "viewLogsAction": "Lihat log",
   "sendLogsDescription": "Langkah ini akan mengirimkan log untuk membantu kami menganalisa masalah kamu. Meskipun kami melakukan tindakan pencegahan untuk memastikan bahwa informasi sensitif tidak dicatat, kami menganjurkan kamu untuk melihat log ini sebelum membagikannya.",
   "preparingLogsTitle": "Menyiapkan log...",
+  "emailLogsTitle": "Log email",
+  "emailLogsMessage": "Harap kirim log ke {email}",
+  "@emailLogsMessage": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
   "copyEmailAction": "Salin email",
   "exportLogsAction": "Ekspor log",
   "reportABug": "Laporkan bug",
+  "crashAndErrorReporting": "Pelaporan Error dan Crash",
   "reportBug": "Laporkan bug",
+  "emailUsMessage": "Harap email kami di {email}",
+  "@emailUsMessage": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
   "contactSupport": "Hubungi dukungan",
   "rateUsOnStore": "Nilai kami di {storeName}",
   "blog": "Blog",
+  "merchandise": "Merchandise",
   "verifyPassword": "Verifikasi sandi",
   "pleaseWait": "Harap tunggu...",
   "generatingEncryptionKeysTitle": "Membuat kunci enkripsi...",
@@ -52,11 +95,16 @@
   "data": "Data",
   "importCodes": "Impor kode",
   "importTypePlainText": "Teks biasa",
+  "importTypeEnteEncrypted": "Eksport enkripsi ente",
   "passwordForDecryptingExport": "Kata sandi untuk mendekripsi ekspor",
   "passwordEmptyError": "Kata sandi tidak boleh kosong",
   "importFromApp": "Impor kode dari {appName}",
   "importSelectJsonFile": "Pilih File JSON",
   "importSelectAppExport": "Pilih file ekspor dari {appName}",
+  "importEnteEncGuide": "Pilih file enkripsi JSON yang telah diekspor dari Ente",
+  "importRaivoGuide": "Gunakan opsi \"Export OTPs to Zip archive\" pada pengaturan Raivo.\n\nEkstrak file zip dan impor file JSON tersebut.",
+  "importBitwardenGuide": "Gunakan opsi \"Export vault\" didalam fitur Bitwarden Tools dan impor file JSON yang tidak terenkripsi.",
+  "importAegisGuide": "Gunakan opsi \"Export vault\" didalam fitur Bitwarden Tools dan impor file JSON yang tidak terenkripsi.",
   "selectFile": "Pilih file",
   "emailVerificationToggle": "Verifikasi email",
   "emailVerificationEnableWarning": "Untuk menghindari akun kamu terkunci, pastikan untuk menyimpan salinan 2FA email kamu di luar Ente Auth sebelum mengaktifkan verifikasi email.",

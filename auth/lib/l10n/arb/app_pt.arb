@@ -19,6 +19,20 @@
   "pleaseVerifyDetails": "Por favor, verifique os detalhes e tente novamente",
   "codeIssuerHint": "Emissor",
   "codeSecretKeyHint": "Chave secreta",
+  "secret": "Secreto",
+  "all": "Todos",
+  "notes": "Notas",
+  "notesLengthLimit": "Notas tem um limite de até {count} caracteres",
+  "@notesLengthLimit": {
+    "description": "Text to indicate the maximum number of characters allowed for notes",
+    "placeholders": {
+      "count": {
+        "description": "The maximum number of characters allowed for notes",
+        "type": "int",
+        "example": "100"
+      }
+    }
+  },
   "codeAccountHint": "Conta (você@domínio.com)",
   "codeTagHint": "Etiqueta",
   "accountKeyType": "Tipo de chave",
@@ -34,6 +48,9 @@
   "nextTotpTitle": "avançar",
   "deleteCodeTitle": "Apagar código?",
   "deleteCodeMessage": "Deseja mesmo excluir este código? Esta ação é irreversível.",
+  "trashCode": "Excluir código?",
+  "trashCodeMessage": "Você tem certeza de que quer excluir o código para {account}?",
+  "trash": "Excluir",
   "viewLogsAction": "Ver logs",
   "sendLogsDescription": "Isto compartilhará seus dados para nos ajudarmos a resolver seu problema. Enquanto tomamos precauções para ter certeza que as informações sensíveis não estejam registradas, nós encorajamos você a visualizar esses dados antes de compartilhá-los.",
   "preparingLogsTitle": "Preparando logs...",
@@ -100,6 +117,7 @@
   "emailVerificationToggle": "Verificação por e-mail",
   "emailVerificationEnableWarning": "Para evitar ficar bloqueado do acesso a sua conta, certifique-se de armazenar uma cópia do código 2FA do seu e-mail fora do Ente Auth antes de habilitar a verificação por e-mail.",
   "authToChangeEmailVerificationSetting": "Por favor, autentique-se para alterar a verificação por e-mail",
+  "authenticateGeneric": "Por favor, autentique",
   "authToViewYourRecoveryKey": "Por favor, autentique-se para visualizar sua chave de recuperação",
   "authToChangeYourEmail": "Por favor, autentique-se para alterar o seu e-mail",
   "authToChangeYourPassword": "Por favor, autentique-se para alterar sua senha",
@@ -193,6 +211,10 @@
   "scanAQrCode": "Escanear QR code",
   "enterDetailsManually": "Inserir dados manualmente",
   "edit": "Editar",
+  "share": "Compartilhar",
+  "shareCodes": "Compartilhar códigos",
+  "shareCodesDuration": "Selecione a duração em que você queira compartilhar os códigos.",
+  "restore": "Restaurar",
   "copiedToClipboard": "Copiado para a área de transferência",
   "copiedNextToClipboard": "Próximo código copiado para a área de transferência",
   "error": "Erro",
@@ -346,6 +368,7 @@
   "sigInBackupReminder": "Por favor, exporte seus códigos para garantir que você tenha um backup do qual você possa restaurar.",
   "offlineModeWarning": "Você escolheu prosseguir sem backups. Por favor, faça backups manuais para ter certeza de que seus códigos estão seguros.",
   "showLargeIcons": "Mostrar ícones grandes",
+  "compactMode": "Modo compacto",
   "shouldHideCode": "Ocultar códigos",
   "doubleTapToViewHiddenCode": "Você pode tocar duas vezes em uma entrada para ver o código",
   "focusOnSearchBar": "Foco na busca ao iniciar o app",
@@ -466,5 +489,7 @@
   "pinLock": "Bloqueio PIN",
   "enterPin": "Insira o PIN",
   "setNewPin": "Definir novo PIN",
-  "importFailureDescNew": "Não foi possível analisar o arquivo selecionado."
+  "importFailureDescNew": "Não foi possível analisar o arquivo selecionado.",
+  "appLockNotEnabled": "Bloqueio de aplicativo não ativado",
+  "appLockNotEnabledDescription": "Ative o bloqueio de aplicativo em Segurança > Bloqueio de aplicativo"
 }

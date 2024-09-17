@@ -4,6 +4,8 @@ import 'package:ente_auth/core/event_bus.dart';
 import 'package:ente_auth/events/codes_updated_event.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/services/preference_service.dart';
+import 'package:ente_auth/utils/platform_util.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class CoachMarkWidget extends StatelessWidget {
@@ -33,14 +35,16 @@ class CoachMarkWidget extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const Icon(
-                          Icons.swipe_left,
+                          Icons.info_outline,
                           size: 42,
                         ),
                         const SizedBox(
                           height: 24,
                         ),
                         Text(
-                          l10n.swipeHint,
+                          PlatformUtil.isDesktop()
+                              ? l10n.hintForDesktop
+                              : l10n.hintForMobile,
                           style: Theme.of(context).textTheme.titleLarge,
                         ),
                         const SizedBox(
