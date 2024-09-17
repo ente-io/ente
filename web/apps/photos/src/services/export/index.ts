@@ -224,11 +224,9 @@ class ExportService {
             );
 
             const includeShared = this.getExportSettings()?.includeShared;
-            const userPersonalFiles = includeShared ? files : getPersonalFiles(
-                files,
-                user,
-                collectionIdToOwnerIDMap,
-            );
+            const userPersonalFiles = includeShared
+                ? files
+                : getPersonalFiles(files, user, collectionIdToOwnerIDMap);
 
             const unExportedFiles = getUnExportedFiles(
                 userPersonalFiles,
@@ -352,11 +350,9 @@ class ExportService {
             );
 
             const includeShared = this.getExportSettings()?.includeShared;
-            const personalFiles = includeShared ? files : getPersonalFiles(
-                files,
-                user,
-                collectionIdToOwnerIDMap,
-            );
+            const personalFiles = includeShared
+                ? files
+                : getPersonalFiles(files, user, collectionIdToOwnerIDMap);
 
             const nonEmptyPersonalCollections = getNonEmptyPersonalCollections(
                 collections,
