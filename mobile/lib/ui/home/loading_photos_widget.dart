@@ -27,7 +27,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
   late StreamSubscription<SyncStatusUpdate> _firstImportEvent;
   StreamSubscription<LocalImportProgressEvent>? _importProgressEvent;
   int _currentPage = 0;
-  late String _loadingMessage;
+  String? _loadingMessage;
   final PageController _pageController = PageController(
     initialPage: 0,
   );
@@ -105,9 +105,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (_importProgressEvent == null) {
-      _loadingMessage = S.of(context).loadingYourPhotos;
-    }
+    _loadingMessage ??= S.of(context).loadingYourPhotos;
     _setupLoadingMessages(context);
     final isLightMode = Theme.of(context).brightness == Brightness.light;
     return Scaffold(
@@ -144,7 +142,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
                   ],
                 ),
                 Text(
-                  _loadingMessage,
+                  _loadingMessage!,
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.subTextColor,
                   ),
