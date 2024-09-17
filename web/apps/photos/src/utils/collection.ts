@@ -23,7 +23,6 @@ import {
     createAlbum,
     getAllLocalCollections,
     getLocalCollections,
-    getNonEmptyCollections,
     moveToCollection,
     removeFromCollection,
     restoreToCollection,
@@ -544,24 +543,6 @@ export function getCollectionNameMap(
     return new Map<number, string>(
         collections.map((collection) => [collection.id, collection.name]),
     );
-}
-
-export function getNonEmptyPersonalCollections(
-    collections: Collection[],
-    personalFiles: EnteFile[],
-    user: User,
-): Collection[] {
-    if (!user?.id) {
-        throw Error("user missing");
-    }
-    const nonEmptyCollections = getNonEmptyCollections(
-        collections,
-        personalFiles,
-    );
-    const personalCollections = nonEmptyCollections.filter(
-        (collection) => collection.owner.id === user?.id,
-    );
-    return personalCollections;
 }
 
 export function getNonHiddenCollections(

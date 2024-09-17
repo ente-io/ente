@@ -140,19 +140,12 @@ async function totalFileCountCheck(expectedState) {
 
 async function totalCollectionCountCheck(expectedState) {
     const collections = await getLocalCollections();
-    const files = await getLocalFiles();
-    const nonEmptyCollectionIds = new Set(
-        files.map((file) => file.collectionID),
-    );
-    const nonEmptyCollections = collections.filter((collection) =>
-        nonEmptyCollectionIds.has(collection.id),
-    );
-    if (expectedState["collection_count"] === nonEmptyCollections.length) {
+    if (expectedState["collection_count"] === collections.length) {
         console.log("collection count check passed ✅");
     } else {
         throw Error(
             `total Collection count check failed ❌
-                expected : ${expectedState["collection_count"]},  got: ${nonEmptyCollections.length}`,
+                expected : ${expectedState["collection_count"]},  got: ${collections.length}`,
         );
     }
 }

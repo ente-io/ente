@@ -28,7 +28,6 @@ import {
     ExportedCollectionPaths,
     FileExportNames,
 } from "types/export";
-import { getNonEmptyPersonalCollections } from "utils/collection";
 import { getIDBasedSortedFiles, getPersonalFiles } from "utils/file";
 import {
     getCollectionIDFromFileUID,
@@ -111,13 +110,11 @@ async function migrationV0ToV1(
     const personalFiles = getIDBasedSortedFiles(
         getPersonalFiles(localFiles, user),
     );
-    const nonEmptyPersonalCollections = getNonEmptyPersonalCollections(
-        localCollections,
-        personalFiles,
-        user,
+    const personalCollections = localCollections.filter(
+        (collection) => collection.owner.id === user?.id,
     );
     await migrateCollectionFolders(
-        nonEmptyPersonalCollections,
+        personalCollections,
         exportDir,
         collectionIDPathMap,
     );
