@@ -19,6 +19,7 @@ import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_auth/utils/totp_util.dart';
 import "package:flutter/material.dart";
+import 'package:logging/logging.dart';
 
 class SetupEnterSecretKeyPage extends StatefulWidget {
   final Code? code;
@@ -31,6 +32,7 @@ class SetupEnterSecretKeyPage extends StatefulWidget {
 }
 
 class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
+  final Logger _logger = Logger('_SetupEnterSecretKeyPageState');
   final int _notesLimit = 500;
   final int _otherTextLimit = 200;
   late TextEditingController _issuerController;
@@ -374,7 +376,8 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
       // Verify the validity of the code
       getOTP(newCode);
       Navigator.of(context).pop(newCode);
-    } catch (e) {
+    } catch (e, s) {
+      _logger.severe("Error saving code", e, s);
       _showIncorrectDetailsDialog(context);
     }
   }
