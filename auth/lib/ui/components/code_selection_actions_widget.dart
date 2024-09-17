@@ -54,13 +54,6 @@ class _CodeSelectionActionsWidgetState
           onTap: widget.onShare,
         ),
       );
-      items.add(
-        SelectionActionButton(
-          labelText: 'QR',
-          icon: Icons.qr_code_2_outlined,
-          onTap: widget.onShowQR,
-        ),
-      );
 
       items.add(
         SelectionActionButton(
@@ -69,6 +62,14 @@ class _CodeSelectionActionsWidgetState
               : context.l10n.pinText,
           icon: widget.code.isPinned ? Icons.push_pin : Icons.push_pin_outlined,
           onTap: widget.onPin,
+        ),
+      );
+
+      items.add(
+        SelectionActionButton(
+          labelText: 'QR',
+          icon: Icons.qr_code_2_outlined,
+          onTap: widget.onShowQR,
         ),
       );
     }
