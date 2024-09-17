@@ -33,6 +33,7 @@ class CodeSelectionActionsWidget extends StatefulWidget {
 class _CodeSelectionActionsWidgetState
     extends State<CodeSelectionActionsWidget> {
   late final scrollController = ScrollController();
+
   // static final _logger = Logger("CodeSelectionActionsWidget");
 
   @override
@@ -45,30 +46,32 @@ class _CodeSelectionActionsWidgetState
   Widget build(BuildContext context) {
     final List<SelectionActionButton> items = [];
 
-    items.add(
-      SelectionActionButton(
-        labelText: context.l10n.share,
-        icon: Icons.adaptive.share_outlined,
-        onTap: widget.onShare,
-      ),
-    );
-    items.add(
-      SelectionActionButton(
-        labelText: 'QR',
-        icon: Icons.qr_code_2_outlined,
-        onTap: widget.onShowQR,
-      ),
-    );
+    if (!widget.code.isTrashed) {
+      items.add(
+        SelectionActionButton(
+          labelText: context.l10n.share,
+          icon: Icons.adaptive.share_outlined,
+          onTap: widget.onShare,
+        ),
+      );
+      items.add(
+        SelectionActionButton(
+          labelText: 'QR',
+          icon: Icons.qr_code_2_outlined,
+          onTap: widget.onShowQR,
+        ),
+      );
 
-    items.add(
-      SelectionActionButton(
-        labelText: widget.code.isPinned
-            ? context.l10n.unpinText
-            : context.l10n.pinText,
-        icon: widget.code.isPinned ? Icons.push_pin : Icons.push_pin_outlined,
-        onTap: widget.onPin,
-      ),
-    );
+      items.add(
+        SelectionActionButton(
+          labelText: widget.code.isPinned
+              ? context.l10n.unpinText
+              : context.l10n.pinText,
+          icon: widget.code.isPinned ? Icons.push_pin : Icons.push_pin_outlined,
+          onTap: widget.onPin,
+        ),
+      );
+    }
 
     if (widget.code.isTrashed) {
       items.add(
