@@ -24,7 +24,7 @@ class ShareCodeDialog extends StatefulWidget {
 
 class _ShareCodeDialogState extends State<ShareCodeDialog> {
   final Logger logger = Logger('_ShareCodeDialogState');
-  final List<int> _durationInMins = [2, 5, 15, 30, 60];
+  final List<int> _durationInMins = [2, 5, 10];
   late int selectedValue;
 
   String getItemLabel(int min) {
@@ -41,7 +41,7 @@ class _ShareCodeDialogState extends State<ShareCodeDialog> {
   @override
   void initState() {
     super.initState();
-    selectedValue = _durationInMins[2];
+    selectedValue = _durationInMins[1];
   }
 
   @override
@@ -71,7 +71,7 @@ class _ShareCodeDialogState extends State<ShareCodeDialog> {
               value: selectedValue,
               onChanged: (value) {
                 setState(() {
-                  selectedValue = value ?? 15;
+                  selectedValue = value ?? 2;
                 });
               },
             ),
