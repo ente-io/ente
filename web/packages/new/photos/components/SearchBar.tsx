@@ -12,6 +12,7 @@ import { searchOptionsForString } from "@/new/photos/services/search";
 import type { SearchOption } from "@/new/photos/services/search/types";
 import { nullToUndefined } from "@/utils/transform";
 import CalendarIcon from "@mui/icons-material/CalendarMonth";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
 import ImageIcon from "@mui/icons-material/Image";
 import LocationIcon from "@mui/icons-material/LocationOn";
@@ -397,9 +398,7 @@ const EmptyState: React.FC<EmptyStateProps> = () => {
         <Box sx={{ textAlign: "left" }}>
             {people && people.length > 0 && (
                 <>
-                    <Typography color="text.base" variant="large">
-                        {t("people")}
-                    </Typography>
+                    <PeopleHeader />
                     <PeopleList
                         people={people}
                         maxRows={2}
@@ -449,6 +448,18 @@ const EmptyState: React.FC<EmptyStateProps> = () => {
     //         {props.children}
     //     </SelectComponents.Menu>
     // );
+};
+
+const PeopleHeader: React.FC = () => {
+    const handleClick = () => console.log("click");
+    return (
+        <Stack direction="row" sx={{ cursor: "pointer" }} onClick={handleClick}>
+            <Typography color="text.base" variant="large">
+                {t("people")}
+            </Typography>
+            <ChevronRightIcon />
+        </Stack>
+    );
 };
 
 // TODO-Cluster
