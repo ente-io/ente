@@ -1,15 +1,19 @@
 import { assertionFailed } from "@/base/assert";
 import { useIsMobileWidth } from "@/base/hooks";
+import log from "@/base/log";
 import { ItemCard, ResultPreviewTile } from "@/new/photos/components/ItemCards";
 import {
     isMLSupported,
     mlStatusSnapshot,
     mlStatusSubscribe,
+    peopleSnapshot,
+    peopleSubscribe,
 } from "@/new/photos/services/ml";
 import { searchOptionsForString } from "@/new/photos/services/search";
 import type { SearchOption } from "@/new/photos/services/search/types";
 import { nullToUndefined } from "@/utils/transform";
 import CalendarIcon from "@mui/icons-material/CalendarMonth";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
 import ImageIcon from "@mui/icons-material/Image";
 import LocationIcon from "@mui/icons-material/LocationOn";
@@ -37,6 +41,7 @@ import {
     type StylesConfig,
 } from "react-select";
 import AsyncSelect from "react-select/async";
+import { PeopleList } from "./PeopleList";
 
 export interface SearchBarProps {
     /**
@@ -243,7 +248,11 @@ const createSelectStyles = ({
             cursor: "text",
         },
     }),
-    input: (styles) => ({ ...styles, color: colors.text.base }),
+    input: (styles) => ({
+        ...styles,
+        color: colors.text.base,
+        overflowX: "hidden",
+    }),
     menu: (style) => ({
         ...style,
         // Suppress the default margin at the top.
@@ -268,6 +277,7 @@ const createSelectStyles = ({
         ...style,
         color: colors.text.muted,
         whiteSpace: "nowrap",
+        overflowX: "hidden",
     }),
     // Hide some things we don't need.
     dropdownIndicator: (style) => ({ ...style, display: "none" }),
@@ -358,7 +368,10 @@ interface EmptyStateProps {
  */
 const EmptyState: React.FC<EmptyStateProps> = () => {
     const mlStatus = useSyncExternalStore(mlStatusSubscribe, mlStatusSnapshot);
+    const people = useSyncExternalStore(peopleSubscribe, peopleSnapshot);
 
+    log.debug(() => ["EmptyState", { mlStatus, people }]);
+    // TODO-Cluster
     if (!mlStatus || mlStatus.phase == "disabled") {
         assertionFailed();
         return <></>;
@@ -383,108 +396,35 @@ const EmptyState: React.FC<EmptyStateProps> = () => {
             break;
     }
 
-    // TODO-Cluster this is where it'll go.
-    // const people = wipPersons();
-
     return (
-        <Box>
-            <Typography variant="mini" sx={{ textAlign: "left" }}>
-                {label}
-            </Typography>
+        <Box sx={{ textAlign: "left" }}>
+            {people && people.length > 0 && (
+                <>
+                    <PeopleHeader />
+                    <PeopleList
+                        people={people}
+                        maxRows={2}
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        onSelect={(...args: any) => console.log(args)}
+                    />
+                </>
+            )}
+            <Typography variant="mini">{label}</Typography>
         </Box>
     );
-
-    // TODO-Cluster
-    // const options = props.selectProps.options as SearchOption[];
-    // const peopleSuggestions = options.filter(
-    //     (o) => o.type === SuggestionType.PERSON,
-    // );
-    // const people = peopleSuggestions.map((o) => o.value as Person);
-    // return (
-    //     <SelectComponents.Menu {...props}>
-    //         <Box my={1}>
-    //             {isMLEnabled() &&
-    //                 indexStatus &&
-    //                 (people && people.length > 0 ? (
-    //                     <Box>
-    //                         <Legend>{t("people")}</Legend>
-    //                     </Box>
-    //                 ) : (
-    //                     <Box height={6} />
-    //                 ))}
-    //             {isMLEnabled() && indexStatus && (
-    //                 <Box>
-    //                     <Caption>{indexStatusSuggestion.label}</Caption>
-    //                 </Box>
-    //             )}
-    //             {people && people.length > 0 && (
-    //                 <Row> // "@ente/shared/components/Container"
-    //                     <PeopleList // @/new/photos/components/PeopleList
-    //                         people={people}
-    //                         maxRows={2}
-    //                         onSelect={(_, index) => {
-    //                         }}
-    //                     />
-    //                 </Row>
-    //             )}
-    //         </Box>
-    //         {props.children}
-    //     </SelectComponents.Menu>
-    // );
 };
 
-// TODO-Cluster
-// const Legend = styled("span")`
-//     font-size: 20px;
-//     color: #ddd;
-//     display: inline;
-//     padding: 0px 12px;
-// `;
-
-/*
-TODO: Cluster
-
-export async function getAllPeopleSuggestion(): Promise<Array<Suggestion>> {
-    try {
-        const people = await getAllPeople(200);
-        return people.map((person) => ({
-            label: person.name,
-            type: SuggestionType.PERSON,
-            value: person,
-            hide: true,
-        }));
-    } catch (e) {
-        log.error("getAllPeopleSuggestion failed", e);
-        return [];
-    }
-}
-
-async function getAllPeople(limit: number = undefined) {
-    return (await wipPersons()).slice(0, limit);
-    // TODO-Clustetr
-    // if (done) return [];
-
-    // done = true;
-    // if (process.env.NEXT_PUBLIC_ENTE_WIP_CL_FETCH) {
-    //     await syncCGroups();
-    //     const people = await clusterGroups();
-    //     log.debug(() => ["people", { people }]);
-    // }
-
-    // let people: Array<Person> = []; // await mlIDbStorage.getAllPeople();
-    // people = await wipCluster();
-    // // await mlPeopleStore.iterate<Person, void>((person) => {
-    // //     people.push(person);
-    // // });
-    // people = people ?? [];
-    // const result = people
-    //     .sort((p1, p2) => p2.files.length - p1.files.length)
-    //     .slice(0, limit);
-    // // log.debug(() => ["getAllPeople", result]);
-
-    // return result;
-}
-*/
+const PeopleHeader: React.FC = () => {
+    const handleClick = () => console.log("click");
+    return (
+        <Stack direction="row" sx={{ cursor: "pointer" }} onClick={handleClick}>
+            <Typography color="text.base" variant="large">
+                {t("people")}
+            </Typography>
+            <ChevronRightIcon />
+        </Stack>
+    );
+};
 
 const Option: React.FC<OptionProps<SearchOption, false>> = (props) => (
     <SelectComponents.Option {...props}>

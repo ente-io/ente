@@ -440,6 +440,7 @@ export const wipClusterDebugPageContents = async (
     _wip_isClustering = false;
     _wip_people = people;
     triggerStatusUpdate();
+    triggerPeopleUpdate();
 
     return {
         clusters,
@@ -654,7 +655,7 @@ export const peopleSubscribe = (onChange: () => void): (() => void) => {
 export const peopleSnapshot = (): Person[] | undefined => {
     const result = _state.peopleSnapshot;
     // We don't have it yet, trigger an update.
-    if (!result) triggerPeopleUpdate();
+    // if (!result) triggerPeopleUpdate();
     return result;
 };
 
@@ -678,9 +679,9 @@ const setPeopleSnapshot = (snapshot: Person[] | undefined) => {
  * people might be updated in a push based manner.
  */
 const getPeople = async (): Promise<Person[] | undefined> => {
-    if (!_state.isMLEnabled) return undefined;
+    if (!_state.isMLEnabled) return [];
     // TODO-Cluster additional check for now as it is heavily WIP.
-    if (!process.env.NEXT_PUBLIC_ENTE_WIP_CL) return undefined;
+    if (!process.env.NEXT_PUBLIC_ENTE_WIP_CL) return [];
     if (!(await wipClusterEnable())) return [];
     return _wip_people;
 };
