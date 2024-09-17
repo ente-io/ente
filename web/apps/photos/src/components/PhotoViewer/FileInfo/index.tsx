@@ -270,7 +270,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
 
                 {isMLEnabled() && (
                     <>
-                        {/* <PhotoPeopleList file={file} /> */}
+                        {/* TODO-Cluster <PhotoPeopleList file={file} /> */}
                         <UnidentifiedFaces enteFile={file} />
                     </>
                 )}

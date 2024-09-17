@@ -5,6 +5,8 @@ import {
     isMLSupported,
     mlStatusSnapshot,
     mlStatusSubscribe,
+    peopleSnapshot,
+    peopleSubscribe,
 } from "@/new/photos/services/ml";
 import { searchOptionsForString } from "@/new/photos/services/search";
 import type { SearchOption } from "@/new/photos/services/search/types";
@@ -37,6 +39,7 @@ import {
     type StylesConfig,
 } from "react-select";
 import AsyncSelect from "react-select/async";
+import { PeopleList } from "./PeopleList";
 
 export interface SearchBarProps {
     /**
@@ -358,7 +361,9 @@ interface EmptyStateProps {
  */
 const EmptyState: React.FC<EmptyStateProps> = () => {
     const mlStatus = useSyncExternalStore(mlStatusSubscribe, mlStatusSnapshot);
+    const people = useSyncExternalStore(peopleSubscribe, peopleSnapshot);
 
+    // TODO-Cluster
     if (!mlStatus || mlStatus.phase == "disabled") {
         assertionFailed();
         return <></>;
@@ -383,11 +388,16 @@ const EmptyState: React.FC<EmptyStateProps> = () => {
             break;
     }
 
-    // TODO-Cluster this is where it'll go.
-    // const people = wipPersons();
-
     return (
         <Box>
+            {people && (
+                <PeopleList
+                    people={people}
+                    maxRows={2}
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    onSelect={(...args: any) => console.log(args)}
+                />
+            )}
             <Typography variant="mini" sx={{ textAlign: "left" }}>
                 {label}
             </Typography>

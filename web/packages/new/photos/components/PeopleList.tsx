@@ -6,11 +6,16 @@ import { t } from "i18next";
 import React, { useEffect, useState } from "react";
 
 export interface PeopleListProps {
+    /** The list of {@link Person} entities to show. */
     people: Person[];
+    /** Limit to display to whatever fits within {@link maxRows} rows. */
     maxRows: number;
+    /** Optional callback invoked when a particular person is selected. */
     onSelect?: (person: Person, index: number) => void;
 }
-
+/**
+ * Shows a list of {@link Person} (named cluster groups).
+ */
 export const PeopleList: React.FC<PeopleListProps> = ({
     people,
     maxRows,
