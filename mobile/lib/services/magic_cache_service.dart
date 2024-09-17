@@ -198,6 +198,9 @@ class MagicCacheService {
 
   Future<List<GenericSearchResult>> getMagicGenericSearchResult() async {
     try {
+      final EnteWatch? w =
+          kDebugMode ? EnteWatch("magicGenericSearchResult") : null;
+      w?.start();
       final magicCaches = await _getMagicCache();
       if (magicCaches == null) {
         _logger.info("No magic cache found");
@@ -209,6 +212,7 @@ class MagicCacheService {
         final genericSearchResult = await magicCache.toGenericSearchResult();
         genericSearchResults.add(genericSearchResult);
       }
+      w?.logAndReset("done");
       return genericSearchResults;
     } catch (e) {
       _logger.info("Error getting magic generic search result", e);
