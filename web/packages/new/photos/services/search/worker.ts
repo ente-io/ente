@@ -1,4 +1,5 @@
 import { HTTPError } from "@/base/http";
+import log from "@/base/log";
 import type { Location } from "@/base/types";
 import type { Collection } from "@/media/collection";
 import { fileCreationPhotoDate, fileLocation } from "@/media/file-metadata";
@@ -77,7 +78,7 @@ export class SearchWorker {
     /**
      * Set the cgroups that we should search across.
      */
-    setSearchableCGroups(cgroups: CGroup[]) {
+    setCGroups(cgroups: CGroup[]) {
         this.searchableCGroups = cgroups
             .map((cgroup) => {
                 const name = cgroup.name;
@@ -86,6 +87,7 @@ export class SearchWorker {
                 return { ...cgroup, name, lowercasedName: name.toLowerCase() };
             })
             .filter((c) => !!c);
+        log.debug(() => ["searchableCGroups", this.searchableCGroups]);
     }
 
     /**

@@ -3,8 +3,13 @@ import {
     isMLSupported,
     triggerMLStatusSync,
     triggerMLSync,
+    wipClusterEnable,
 } from "@/new/photos/services/ml";
-import { triggerSearchDataSync } from "@/new/photos/services/search";
+import { syncCGroups } from "@/new/photos/services/ml/cgroups";
+import {
+    rereadCGroups,
+    triggerSearchDataSync,
+} from "@/new/photos/services/search";
 import { syncMapEnabled } from "services/userService";
 
 /**
@@ -35,7 +40,13 @@ export const triggerPreFileInfoSync = () => {
  * before doing the file sync and thus should run immediately after login.
  */
 export const sync = async () => {
-    await Promise.all([syncMapEnabled()]);
+    await Promise.all([
+        syncMapEnabled(),
+        process.env.NEXT_PUBLIC_ENTE_WIP_CL &&
+            wipClusterEnable().then((enable) =>
+                enable ? syncCGroups().then(rereadCGroups) : undefined,
+            ),
+    ]);
     triggerSearchDataSync();
     if (isMLSupported) triggerMLSync();
 };
