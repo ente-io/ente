@@ -221,7 +221,7 @@ class SemanticSearchService {
   }
 
   Future<List<double>> _getTextEmbedding(String query) async {
-    _logger.info("Searching for " + query);
+    _logger.info("Searching for ${kDebugMode ? query : ''}");
     final cachedResult = _queryEmbeddingCache.get(query);
     if (cachedResult != null) {
       return cachedResult;
