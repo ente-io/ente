@@ -2,6 +2,7 @@ import { HTTPError } from "@/base/http";
 import type { Location } from "@/base/types";
 import type { Collection } from "@/media/collection";
 import { fileCreationPhotoDate, fileLocation } from "@/media/file-metadata";
+import type { CGroup } from "@/new/photos/services/ml/cgroups";
 import type { EnteFile } from "@/new/photos/types/file";
 import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";
@@ -31,12 +32,15 @@ import type {
  * remains responsive.
  */
 export class SearchWorker {
+    private locationTags: Searchable<LocationTag>[] = [];
+    private cities: Searchable<City>[] = [];
     private searchableCollectionsAndFiles: SearchableCollectionsAndFiles = {
         collections: [],
         files: [],
     };
-    private locationTags: Searchable<LocationTag>[] = [];
-    private cities: Searchable<City>[] = [];
+    private searchableCGroups: Searchable<
+        Omit<CGroup, "name"> & { name: string }
+    >[] = [];
 
     /**
      * Fetch any state we might need when the actual search happens.
@@ -68,6 +72,20 @@ export class SearchWorker {
      */
     setSearchableCollectionsAndFiles(data: SearchableCollectionsAndFiles) {
         this.searchableCollectionsAndFiles = data;
+    }
+
+    /**
+     * Set the cgroups that we should search across.
+     */
+    setSearchableCGroups(cgroups: CGroup[]) {
+        this.searchableCGroups = cgroups
+            .map((cgroup) => {
+                const name = cgroup.name;
+                if (!name) return undefined;
+                if (cgroup.isHidden) return undefined;
+                return { ...cgroup, name, lowercasedName: name.toLowerCase() };
+            })
+            .filter((c) => !!c);
     }
 
     /**
