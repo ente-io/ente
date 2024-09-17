@@ -49,6 +49,7 @@ export default function ExportModal(props: Props) {
     });
     const [pendingExports, setPendingExports] = useState<EnteFile[]>([]);
     const [lastExportTime, setLastExportTime] = useState(0);
+    const [includeShared, setIncludeShared] = useState(false);
 
     // ====================
     // SIDE EFFECTS
@@ -68,6 +69,7 @@ export default function ExportModal(props: Props) {
                 exportService.getExportSettings();
             setExportFolder(exportSettings?.folder ?? null);
             setContinuousExport(exportSettings?.continuousExport ?? false);
+            setIncludeShared(exportSettings?.includeShared ?? false);
             void syncExportRecord(exportSettings?.folder);
         } catch (e) {
             log.error("export on mount useEffect failed", e);
@@ -145,6 +147,20 @@ export default function ExportModal(props: Props) {
         setContinuousExport(newContinuousExport);
     };
 
+    const toggleIncludeShared = async () => {
+        const newIncludeShared = !includeShared;
+        exportService.updateExportSettings({
+            includeShared: newIncludeShared,
+        });
+        setIncludeShared(newIncludeShared);
+
+        const exportRecord =
+                await exportService.getExportRecord(exportFolder);
+        const pendingExports =
+            await exportService.getPendingExports(exportRecord);
+        setPendingExports(pendingExports);
+    };
+
     const startExport = async (opts?: ExportOpts) => {
         if (!(await verifyExportFolderExists())) return;
 
@@ -170,6 +186,11 @@ export default function ExportModal(props: Props) {
                     exportFolder={exportFolder}
                     changeExportDirectory={handleChangeExportDirectoryClick}
                     exportStage={exportStage}
+                />
+                <IncludeShared
+                    exportStage={exportStage}
+                    includeShared={includeShared}
+                    toggleIncludeShared={toggleIncludeShared}
                 />
                 <ContinuousExport
                     continuousExport={continuousExport}
@@ -233,6 +254,28 @@ function ContinuousExport({ continuousExport, toggleContinuousExport }) {
             </Box>
         </SpaceBetweenFlex>
     );
+}
+
+function IncludeShared({ exportStage, includeShared, toggleIncludeShared }) {
+    switch (exportStage) {
+        case ExportStage.INIT:
+        case ExportStage.FINISHED:
+            return (
+                <SpaceBetweenFlex minHeight={"48px"}>
+                    <Typography color="text.muted">{t("INCLUDE_SHARED")}</Typography>
+                    <Box>
+                        <EnteSwitch
+                            color="accent"
+                            checked={includeShared}
+                            onChange={toggleIncludeShared}
+                        />
+                    </Box>
+                </SpaceBetweenFlex>
+            );
+
+        default:
+            return <></>;
+    }
 }
 
 const ExportDynamicContent = ({
