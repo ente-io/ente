@@ -222,7 +222,9 @@ class ExportService {
                     collection.owner.id,
                 ]),
             );
-            const userPersonalFiles = getPersonalFiles(
+
+            const includeShared = this.getExportSettings()?.includeShared;
+            const userPersonalFiles = includeShared ? files : getPersonalFiles(
                 files,
                 user,
                 collectionIdToOwnerIDMap,
@@ -348,7 +350,9 @@ class ExportService {
                     collection.owner.id,
                 ]),
             );
-            const personalFiles = getPersonalFiles(
+
+            const includeShared = this.getExportSettings()?.includeShared;
+            const personalFiles = includeShared ? files : getPersonalFiles(
                 files,
                 user,
                 collectionIdToOwnerIDMap,
