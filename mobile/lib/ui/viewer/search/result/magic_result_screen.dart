@@ -20,6 +20,7 @@ class MagicResultScreen extends StatefulWidget {
   final List<EnteFile> files;
   final String name;
   final String heroTag;
+  final bool enableGrouping;
 
   static const GalleryType appBarType = GalleryType.magic;
   static const GalleryType overlayType = GalleryType.magic;
@@ -27,6 +28,7 @@ class MagicResultScreen extends StatefulWidget {
   const MagicResultScreen(
     this.files, {
     required this.name,
+    this.enableGrouping = false,
     this.heroTag = "",
     super.key,
   });
@@ -46,6 +48,7 @@ class _MagicResultScreenState extends State<MagicResultScreen> {
   void initState() {
     super.initState();
     files = widget.files;
+    _enableGrouping = widget.enableGrouping;
     _filesUpdatedEvent =
         Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
       if (event.type == EventType.deletedFromDevice ||

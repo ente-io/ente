@@ -52,6 +52,7 @@ class MagicCache {
 extension MagicCacheServiceExtension on MagicCache {
   Future<GenericSearchResult?> toGenericSearchResult(
     List<EnteFile> enteFilesInMagicCache,
+    bool showRecentFirst,
   ) async {
     if (enteFilesInMagicCache.isEmpty) {
       return null;
@@ -66,6 +67,7 @@ extension MagicCacheServiceExtension on MagicCache {
           MagicResultScreen(
             enteFilesInMagicCache,
             name: title,
+            enableGrouping: showRecentFirst,
             heroTag: GenericSearchResult(
               ResultType.magic,
               title,
@@ -244,6 +246,7 @@ class MagicCacheService {
       for (MagicCache magicCache in magicCaches) {
         final genericSearchResult = await magicCache.toGenericSearchResult(
           magicIdToFiles[magicCache.title]!,
+          (promptMap[magicCache.title]?.recentFirst ?? false),
         );
         if (genericSearchResult != null) {
           genericSearchResults.add(genericSearchResult);

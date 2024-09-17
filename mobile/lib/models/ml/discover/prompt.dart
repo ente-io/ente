@@ -7,7 +7,7 @@ class Prompt {
   final double minSize;
   final String title;
   final bool showVideo;
-  final bool bestFirst;
+  final bool recentFirst;
 
   // fromJson
   Prompt.fromJson(Map<String, dynamic> json)
@@ -17,6 +17,6 @@ class Prompt {
         minSize = json['minSize'] ?? json['minimumSize'] ?? 0.0,
         position = json['position'] ?? 0,
         title = json['title'],
-        bestFirst = json['bestFirst'] ?? false,
+        recentFirst = json['recentFirst'] ?? false,
         showVideo = json['showVideo'] ?? true;
 }
