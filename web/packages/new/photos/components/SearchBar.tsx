@@ -1,5 +1,6 @@
 import { assertionFailed } from "@/base/assert";
 import { useIsMobileWidth } from "@/base/hooks";
+import log from "@/base/log";
 import { ItemCard, ResultPreviewTile } from "@/new/photos/components/ItemCards";
 import {
     isMLSupported,
@@ -369,6 +370,7 @@ const EmptyState: React.FC<EmptyStateProps> = () => {
     const mlStatus = useSyncExternalStore(mlStatusSubscribe, mlStatusSnapshot);
     const people = useSyncExternalStore(peopleSubscribe, peopleSnapshot);
 
+    log.debug(() => ["EmptyState", { mlStatus, people }]);
     // TODO-Cluster
     if (!mlStatus || mlStatus.phase == "disabled") {
         assertionFailed();
@@ -410,44 +412,6 @@ const EmptyState: React.FC<EmptyStateProps> = () => {
             <Typography variant="mini">{label}</Typography>
         </Box>
     );
-
-    // TODO-Cluster
-    // const options = props.selectProps.options as SearchOption[];
-    // const peopleSuggestions = options.filter(
-    //     (o) => o.type === SuggestionType.PERSON,
-    // );
-    // const people = peopleSuggestions.map((o) => o.value as Person);
-    // return (
-    //     <SelectComponents.Menu {...props}>
-    //         <Box my={1}>
-    //             {isMLEnabled() &&
-    //                 indexStatus &&
-    //                 (people && people.length > 0 ? (
-    //                     <Box>
-    //                         <Legend>{t("people")}</Legend>
-    //                     </Box>
-    //                 ) : (
-    //                     <Box height={6} />
-    //                 ))}
-    //             {isMLEnabled() && indexStatus && (
-    //                 <Box>
-    //                     <Caption>{indexStatusSuggestion.label}</Caption>
-    //                 </Box>
-    //             )}
-    //             {people && people.length > 0 && (
-    //                 <Row> // "@ente/shared/components/Container"
-    //                     <PeopleList // @/new/photos/components/PeopleList
-    //                         people={people}
-    //                         maxRows={2}
-    //                         onSelect={(_, index) => {
-    //                         }}
-    //                     />
-    //                 </Row>
-    //             )}
-    //         </Box>
-    //         {props.children}
-    //     </SelectComponents.Menu>
-    // );
 };
 
 const PeopleHeader: React.FC = () => {
@@ -461,59 +425,6 @@ const PeopleHeader: React.FC = () => {
         </Stack>
     );
 };
-
-// TODO-Cluster
-// const Legend = styled("span")`
-//     font-size: 20px;
-//     color: #ddd;
-//     display: inline;
-//     padding: 0px 12px;
-// `;
-
-/*
-TODO: Cluster
-
-export async function getAllPeopleSuggestion(): Promise<Array<Suggestion>> {
-    try {
-        const people = await getAllPeople(200);
-        return people.map((person) => ({
-            label: person.name,
-            type: SuggestionType.PERSON,
-            value: person,
-            hide: true,
-        }));
-    } catch (e) {
-        log.error("getAllPeopleSuggestion failed", e);
-        return [];
-    }
-}
-
-async function getAllPeople(limit: number = undefined) {
-    return (await wipPersons()).slice(0, limit);
-    // TODO-Clustetr
-    // if (done) return [];
-
-    // done = true;
-    // if (process.env.NEXT_PUBLIC_ENTE_WIP_CL_FETCH) {
-    //     await syncCGroups();
-    //     const people = await clusterGroups();
-    //     log.debug(() => ["people", { people }]);
-    // }
-
-    // let people: Array<Person> = []; // await mlIDbStorage.getAllPeople();
-    // people = await wipCluster();
-    // // await mlPeopleStore.iterate<Person, void>((person) => {
-    // //     people.push(person);
-    // // });
-    // people = people ?? [];
-    // const result = people
-    //     .sort((p1, p2) => p2.files.length - p1.files.length)
-    //     .slice(0, limit);
-    // // log.debug(() => ["getAllPeople", result]);
-
-    // return result;
-}
-*/
 
 const Option: React.FC<OptionProps<SearchOption, false>> = (props) => (
     <SelectComponents.Option {...props}>
