@@ -51,35 +51,33 @@ class MagicCache {
   }
 }
 
-extension MagicCacheServiceExtension on MagicCache {
-  Future<GenericSearchResult?> toGenericSearchResult(
-    List<EnteFile> enteFilesInMagicCache,
-    bool showRecentFirst,
-  ) async {
-    if (enteFilesInMagicCache.isEmpty) {
-      return null;
-    }
-    return GenericSearchResult(
-      ResultType.magic,
-      title,
-      enteFilesInMagicCache,
-      onResultTap: (ctx) {
-        routeToPage(
-          ctx,
-          MagicResultScreen(
-            enteFilesInMagicCache,
-            name: title,
-            enableGrouping: showRecentFirst,
-            heroTag: GenericSearchResult(
-              ResultType.magic,
-              title,
-              enteFilesInMagicCache,
-            ).heroTag(),
-          ),
-        );
-      },
-    );
+GenericSearchResult? toGenericSearchResult(
+  Prompt prompt,
+  List<EnteFile> enteFilesInMagicCache,
+) {
+  if (enteFilesInMagicCache.isEmpty) {
+    return null;
   }
+  return GenericSearchResult(
+    ResultType.magic,
+    prompt.title,
+    enteFilesInMagicCache,
+    onResultTap: (ctx) {
+      routeToPage(
+        ctx,
+        MagicResultScreen(
+          enteFilesInMagicCache,
+          name: prompt.title,
+          enableGrouping: prompt.recentFirst,
+          heroTag: GenericSearchResult(
+            ResultType.magic,
+            prompt.title,
+            enteFilesInMagicCache,
+          ).heroTag(),
+        ),
+      );
+    },
+  );
 }
 
 class MagicCacheService {
@@ -264,10 +262,10 @@ class MagicCacheService {
           }
         }
       }
-      for (MagicCache magicCache in magicCaches) {
-        final genericSearchResult = await magicCache.toGenericSearchResult(
-          magicIdToFiles[magicCache.title]!,
-          (promptMap[magicCache.title]?.recentFirst ?? false),
+      for (final p in prompts) {
+        final genericSearchResult = toGenericSearchResult(
+          p,
+          magicIdToFiles[p.title] ?? [],
         );
         if (genericSearchResult != null) {
           genericSearchResults.add(genericSearchResult);

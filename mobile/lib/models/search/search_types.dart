@@ -117,7 +117,7 @@ extension SectionTypeExtensions on SectionType {
     }
   }
 
-  bool get sortByName => this != SectionType.face;
+  bool get sortByName => this != SectionType.face && this != SectionType.magic;
 
   bool get isEmptyCTAVisible {
     switch (this) {
