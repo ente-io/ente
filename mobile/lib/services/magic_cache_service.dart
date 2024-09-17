@@ -6,6 +6,8 @@ import "package:computer/computer.dart";
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:path_provider/path_provider.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/file_uploaded_event.dart";
 import "package:photos/extensions/stop_watch.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
@@ -94,6 +96,8 @@ class MagicCacheService {
 
   Future<List<MagicCache>>? _magicCacheFuture;
   Future<List<Prompt>>? _promptFuture;
+  final Set<String> _pendingUpdateReason = {};
+  bool _isUpdateInProgress = false;
 
   static final MagicCacheService instance =
       MagicCacheService._privateConstructor();
@@ -104,7 +108,9 @@ class MagicCacheService {
     Future.delayed(_kCacheUpdateDelay, () {
       _updateCacheIfTheTimeHasCome();
     });
-    _updateCacheIfTheTimeHasCome();
+    Bus.instance.on<FileUploadedEvent>().listen((event) {
+      _pendingUpdateReason.add("File uploaded");
+    });
   }
 
   Future<void> _resetLastMagicCacheUpdateTime() async {
@@ -125,14 +131,14 @@ class MagicCacheService {
     final updatedJSONFile = await RemoteAssetsService.instance
         .getAssetIfUpdated(_kMagicPromptsDataUrl);
     if (updatedJSONFile != null) {
-      unawaited(updateCache());
-      return;
-    }
-    if (lastMagicCacheUpdateTime <
-        DateTime.now()
-            .subtract(const Duration(days: 3))
-            .millisecondsSinceEpoch) {
-      unawaited(updateCache());
+      _pendingUpdateReason.add("Prompts data updated");
+    } else {
+      if (lastMagicCacheUpdateTime <
+          DateTime.now()
+              .subtract(const Duration(days: 3))
+              .millisecondsSinceEpoch) {
+        _pendingUpdateReason.add("Cache is old");
+      }
     }
   }
 
@@ -142,7 +148,15 @@ class MagicCacheService {
 
   Future<void> updateCache() async {
     try {
-      _logger.info("updating magic cache");
+      if (_pendingUpdateReason.isEmpty || _isUpdateInProgress) {
+        _logger.info(
+          "No update needed as ${_pendingUpdateReason.toList()} and isUpdateInProgress $_isUpdateInProgress",
+        );
+        return;
+      }
+      _logger.info("updating magic cache ${_pendingUpdateReason.toList()}");
+      _pendingUpdateReason.clear();
+      _isUpdateInProgress = true;
       final EnteWatch? w = kDebugMode ? EnteWatch("magicCacheWatch") : null;
       w?.start();
       final magicPromptsData = await getPrompts();
@@ -162,6 +176,8 @@ class MagicCacheService {
       w?.logAndReset('done');
     } catch (e, s) {
       _logger.info("Error updating magic cache", e, s);
+    } finally {
+      _isUpdateInProgress = false;
     }
   }
 
