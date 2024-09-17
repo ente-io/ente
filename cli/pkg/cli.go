@@ -17,7 +17,7 @@ type ClICtrl struct {
 }
 
 func (c *ClICtrl) Init() error {
-	tempPath := filepath.Join(os.TempDir(), "ente-download")
+	tempPath := filepath.Join(GetCLITempPath(), "ente-download")
 	// create temp folder if not exists
 	if _, err := os.Stat(tempPath); os.IsNotExist(err) {
 		err = os.Mkdir(tempPath, 0755)
@@ -33,4 +33,11 @@ func (c *ClICtrl) Init() error {
 		}
 		return nil
 	})
+}
+
+func GetCLITempPath() (string) {
+	if os.Getenv("ENTE_CLI_TMP_PATH") != "" {
+		return os.Getenv("ENTE_CLI_TMP_PATH")
+	}
+	return os.TempDir()
 }
