@@ -17,13 +17,16 @@ class EmptyAlbumState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isLightMode = Theme.of(context).brightness == Brightness.light;
     return isFromCollectPhotos
         ? Stack(
             children: [
               Center(
                 child: Opacity(
                   opacity: 0.5,
-                  child: Image.asset('assets/new_empty_album.png'),
+                  child: isLightMode
+                      ? Image.asset('assets/new_empty_album.png')
+                      : Image.asset('assets/new_empty_album_dark.png'),
                 ),
               ),
             ],
