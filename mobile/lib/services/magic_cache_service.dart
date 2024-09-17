@@ -29,7 +29,6 @@ class MagicCache {
       List<int>.from(json['fileUploadedIDs']),
     );
   }
-
   Map<String, dynamic> toJson() {
     return {
       'title': title,
@@ -175,14 +174,7 @@ class MagicCacheService {
       await file
           .writeAsBytes(MagicCache.encodeListToJson(magicCaches).codeUnits);
       w?.log("cacheWritten");
-      unawaited(
-        _resetLastMagicCacheUpdateTime().onError((error, stackTrace) {
-          _logger.warning(
-            "Error resetting last magic cache update time",
-            error,
-          );
-        }),
-      );
+      await _resetLastMagicCacheUpdateTime();
       w?.logAndReset('done');
     } catch (e) {
       _logger.info("Error updating magic cache", e);
