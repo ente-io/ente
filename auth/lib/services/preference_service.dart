@@ -9,7 +9,7 @@ class PreferenceService {
 
   late final SharedPreferences _prefs;
 
-  static const kHasShownCoachMarkKey = "has_shown_coach_mark";
+  static const kHasShownCoachMarkKey = "has_shown_coach_mark_v2";
   static const kShouldShowLargeIconsKey = "should_show_large_icons";
   static const kShouldHideCodesKey = "should_hide_codes";
   static const kShouldAutoFocusOnSearchBar = "should_auto_focus_on_search_bar";
