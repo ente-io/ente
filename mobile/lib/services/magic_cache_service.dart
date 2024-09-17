@@ -101,6 +101,9 @@ class MagicCacheService {
   void init(SharedPreferences preferences) {
     _logger.info("Initializing MagicCacheService");
     _prefs = preferences;
+    Future.delayed(_kCacheUpdateDelay, () {
+      _updateCacheIfTheTimeHasCome();
+    });
     _updateCacheIfTheTimeHasCome();
   }
 
@@ -122,18 +125,14 @@ class MagicCacheService {
     final updatedJSONFile = await RemoteAssetsService.instance
         .getAssetIfUpdated(_kMagicPromptsDataUrl);
     if (updatedJSONFile != null) {
-      Future.delayed(_kCacheUpdateDelay, () {
-        unawaited(updateCache());
-      });
+      unawaited(updateCache());
       return;
     }
     if (lastMagicCacheUpdateTime <
         DateTime.now()
             .subtract(const Duration(days: 3))
             .millisecondsSinceEpoch) {
-      Future.delayed(_kCacheUpdateDelay, () {
-        unawaited(updateCache());
-      });
+      unawaited(updateCache());
     }
   }
 
