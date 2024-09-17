@@ -2,9 +2,12 @@ import "dart:async";
 import "dart:convert";
 import "dart:io";
 
+import "package:computer/computer.dart";
+import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:path_provider/path_provider.dart";
 import "package:photos/db/files_db.dart";
+import "package:photos/extensions/stop_watch.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/search_types.dart";
@@ -119,7 +122,7 @@ class MagicCacheService {
         .getAssetIfUpdated(_kMagicPromptsDataUrl);
     if (updatedJSONFile != null) {
       Future.delayed(_kCacheUpdateDelay, () {
-        unawaited(_updateCache());
+        unawaited(updateCache());
       });
       return;
     }
@@ -128,7 +131,7 @@ class MagicCacheService {
             .subtract(const Duration(days: 3))
             .millisecondsSinceEpoch) {
       Future.delayed(_kCacheUpdateDelay, () {
-        unawaited(_updateCache());
+        unawaited(updateCache());
       });
     }
   }
@@ -148,17 +151,30 @@ class MagicCacheService {
     return result;
   }
 
-  Future<void> _updateCache() async {
+  Future<void> updateCache() async {
     try {
       _logger.info("updating magic cache");
-      final magicPromptsData = await _loadMagicPrompts();
-      final magicCaches = await _nonEmptyMagicResults(magicPromptsData);
+      final EnteWatch? w = kDebugMode ? EnteWatch("magicCacheWatch") : null;
+      w?.start();
+      final String path = await RemoteAssetsService.instance
+          .getAssetPath(_kMagicPromptsDataUrl);
+      final magicPromptsData = await Computer.shared().compute(
+        _loadMagicPrompts,
+        param: <String, dynamic>{
+          "path": path,
+        },
+      );
+      w?.log("loadedPrompts");
+      final List<MagicCache> magicCaches =
+          await _nonEmptyMagicResults(magicPromptsData);
+      w?.log("resultComputed");
       final file = File(await _getCachePath());
       if (!file.existsSync()) {
         file.createSync(recursive: true);
       }
       await file
           .writeAsBytes(MagicCache.encodeListToJson(magicCaches).codeUnits);
+      w?.log("cacheWritten");
       unawaited(
         _resetLastMagicCacheUpdateTime().onError((error, stackTrace) {
           _logger.warning(
@@ -167,6 +183,7 @@ class MagicCacheService {
           );
         }),
       );
+      w?.logAndReset('done');
     } catch (e) {
       _logger.info("Error updating magic cache", e);
     }
@@ -206,10 +223,11 @@ class MagicCacheService {
     }
   }
 
-  Future<List<dynamic>> _loadMagicPrompts() async {
-    final file =
-        await RemoteAssetsService.instance.getAsset(_kMagicPromptsDataUrl);
-
+  static Future<List<dynamic>> _loadMagicPrompts(
+    Map<String, dynamic> args,
+  ) async {
+    final String path = args["path"] as String;
+    final File file = File(path);
     final json = jsonDecode(await file.readAsString());
     return json["prompts"];
   }
