@@ -62,6 +62,7 @@ GenericSearchResult? toGenericSearchResult(
     ResultType.magic,
     prompt.title,
     enteFilesInMagicCache,
+    params: {"enableGrouping": prompt.recentFirst},
     onResultTap: (ctx) {
       routeToPage(
         ctx,
@@ -133,13 +134,11 @@ class MagicCacheService {
         .getAssetIfUpdated(_kMagicPromptsDataUrl);
     if (updatedJSONFile != null) {
       _pendingUpdateReason.add("Prompts data updated");
-    } else {
-      if (lastMagicCacheUpdateTime <
-          DateTime.now()
-              .subtract(const Duration(days: 3))
-              .millisecondsSinceEpoch) {
-        _pendingUpdateReason.add("Cache is old");
-      }
+    } else if (lastMagicCacheUpdateTime <
+        DateTime.now()
+            .subtract(const Duration(days: 1))
+            .millisecondsSinceEpoch) {
+      _pendingUpdateReason.add("Cache is old");
     }
   }
 

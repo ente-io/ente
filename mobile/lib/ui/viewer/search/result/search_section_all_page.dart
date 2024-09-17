@@ -170,12 +170,10 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
                                 MagicResultScreen(
                                   magicSectionResult.resultFiles(),
                                   name: magicSectionResult.name(),
+                                  enableGrouping: magicSectionResult
+                                      .params["enableGrouping"]! as bool,
                                   heroTag: "searchable_item" +
-                                      GenericSearchResult(
-                                        ResultType.magic,
-                                        magicSectionResult.name(),
-                                        magicSectionResult.resultFiles(),
-                                      ).heroTag(),
+                                      magicSectionResult.heroTag(),
                                 ),
                               );
                             },
