@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -140,7 +141,8 @@ func (h *PublicCollectionHandler) ReportAbuse(c *gin.Context) {
 func (h *PublicCollectionHandler) GetDiff(c *gin.Context) {
 	sinceTime, err := strconv.ParseInt(c.Query("sinceTime"), 10, 64)
 	if err != nil {
-		handler.Error(c, stacktrace.Propagate(err, ""))
+		errorMessage := fmt.Sprintf("invalid sinceTime val: %s", c.Query("sinceTime"))
+		handler.Error(c, stacktrace.Propagate(ente.NewBadRequestWithMessage(errorMessage), err.Error()))
 		return
 	}
 	files, hasMore, err := h.CollectionCtrl.GetPublicDiff(c, sinceTime)
