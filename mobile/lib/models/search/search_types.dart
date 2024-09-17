@@ -57,7 +57,7 @@ extension SectionTypeExtensions on SectionType {
       case SectionType.face:
         return S.of(context).people;
       case SectionType.magic:
-        return "Magic";
+        return "Discover";
       case SectionType.moment:
         return S.of(context).moments;
       case SectionType.location:
@@ -78,7 +78,7 @@ extension SectionTypeExtensions on SectionType {
       case SectionType.face:
         return S.of(context).searchFaceEmptySection;
       case SectionType.magic:
-        return "Magic";
+        return "Discover";
       case SectionType.moment:
         return S.of(context).searchDatesEmptySection;
       case SectionType.location:
