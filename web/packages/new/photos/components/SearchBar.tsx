@@ -246,7 +246,11 @@ const createSelectStyles = ({
             cursor: "text",
         },
     }),
-    input: (styles) => ({ ...styles, color: colors.text.base }),
+    input: (styles) => ({
+        ...styles,
+        color: colors.text.base,
+        overflowX: "hidden",
+    }),
     menu: (style) => ({
         ...style,
         // Suppress the default margin at the top.
@@ -271,6 +275,7 @@ const createSelectStyles = ({
         ...style,
         color: colors.text.muted,
         whiteSpace: "nowrap",
+        overflowX: "hidden",
     }),
     // Hide some things we don't need.
     dropdownIndicator: (style) => ({ ...style, display: "none" }),
