@@ -137,17 +137,6 @@ class MagicCacheService {
     return (await getApplicationSupportDirectory()).path + "/cache/magic_cache";
   }
 
-  Future<Set<int>> _getMatchingFileIDsForPromptData(
-    Prompt promptData,
-  ) async {
-    final result = await SemanticSearchService.instance.getMatchingFileIDs(
-      promptData.query,
-      promptData.minScore,
-    );
-
-    return result;
-  }
-
   Future<void> updateCache() async {
     try {
       _logger.info("updating magic cache");
@@ -267,8 +256,10 @@ class MagicCacheService {
   ) async {
     final results = <MagicCache>[];
     for (Prompt prompt in magicPromptsData) {
-      final fileUploadedIDs = await _getMatchingFileIDsForPromptData(
-        prompt,
+      final fileUploadedIDs =
+          await SemanticSearchService.instance.getMatchingFileIDs(
+        prompt.query,
+        prompt.minScore,
       );
       if (fileUploadedIDs.isNotEmpty) {
         results.add(
