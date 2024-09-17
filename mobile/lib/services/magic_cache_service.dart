@@ -9,6 +9,7 @@ import "package:path_provider/path_provider.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/extensions/stop_watch.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/models/ml/discover/prompt.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/service_locator.dart";
@@ -140,11 +141,11 @@ class MagicCacheService {
   }
 
   Future<List<int>> _getMatchingFileIDsForPromptData(
-    Map<String, dynamic> promptData,
+    Prompt promptData,
   ) async {
     final result = await SemanticSearchService.instance.getMatchingFileIDs(
-      promptData["prompt"] as String,
-      promptData["minimumScore"] as double,
+      promptData.query,
+      promptData.minScore,
     );
 
     return result;
@@ -176,8 +177,8 @@ class MagicCacheService {
       w?.log("cacheWritten");
       await _resetLastMagicCacheUpdateTime();
       w?.logAndReset('done');
-    } catch (e) {
-      _logger.info("Error updating magic cache", e);
+    } catch (e, s) {
+      _logger.info("Error updating magic cache", e, s);
     }
   }
 
@@ -215,30 +216,34 @@ class MagicCacheService {
     }
   }
 
-  static Future<List<dynamic>> _loadMagicPrompts(
+  static Future<List<Prompt>> _loadMagicPrompts(
     Map<String, dynamic> args,
   ) async {
     final String path = args["path"] as String;
     final File file = File(path);
-    final json = jsonDecode(await file.readAsString());
-    return json["prompts"];
+    final String contents = await file.readAsString();
+    final Map<String, dynamic> promptsJson = jsonDecode(contents);
+    final List<dynamic> promptData = promptsJson['prompts'];
+    return promptData
+        .map<Prompt>((jsonItem) => Prompt.fromJson(jsonItem))
+        .toList();
   }
 
   ///Returns non-empty magic results from magicPromptsData
   ///Length is number of prompts, can be less if there are not enough non-empty
   ///results
   Future<List<MagicCache>> _nonEmptyMagicResults(
-    List<dynamic> magicPromptsData,
+    List<Prompt> magicPromptsData,
   ) async {
     final results = <MagicCache>[];
-    for (dynamic prompt in magicPromptsData) {
+    for (Prompt prompt in magicPromptsData) {
       final fileUploadedIDs = await _getMatchingFileIDsForPromptData(
-        prompt as Map<String, dynamic>,
+        prompt,
       );
       if (fileUploadedIDs.isNotEmpty) {
         results.add(
           MagicCache(
-            prompt["title"] as String,
+            prompt.title,
             fileUploadedIDs,
           ),
         );
