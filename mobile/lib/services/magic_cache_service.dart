@@ -124,8 +124,11 @@ class MagicCacheService {
     return _prefs.getInt(_lastMagicCacheUpdateTime) ?? 0;
   }
 
+  bool get enableDiscover =>
+      localSettings.isMLIndexingEnabled && flagService.internalUser;
+
   Future<void> _updateCacheIfTheTimeHasCome() async {
-    if (!localSettings.isMLIndexingEnabled) {
+    if (!enableDiscover) {
       return;
     }
     final updatedJSONFile = await RemoteAssetsService.instance
@@ -147,6 +150,9 @@ class MagicCacheService {
   }
 
   Future<void> updateCache() async {
+    if (!enableDiscover) {
+      return;
+    }
     try {
       if (_pendingUpdateReason.isEmpty || _isUpdateInProgress) {
         _logger.info(

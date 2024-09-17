@@ -27,6 +27,7 @@ import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
 import 'package:photos/services/machine_learning/ml_result.dart';
 import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
+import "package:photos/services/magic_cache_service.dart";
 import "package:photos/utils/ml_util.dart";
 import "package:photos/utils/network_util.dart";
 import "package:synchronized/synchronized.dart";
@@ -133,6 +134,10 @@ class MLService {
       await indexAllImages();
       if ((await MLDataDB.instance.getUnclusteredFaceCount()) > 0) {
         await clusterAllImages();
+      }
+      if (_mlControllerStatus == true) {
+        // refresh discover section
+        MagicCacheService.instance.updateCache().ignore();
       }
     } catch (e, s) {
       _logger.severe("runAllML failed", e, s);
