@@ -48,12 +48,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("தவறான மின்னஞ்சல் முகவரி"),
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
             "இந்த தகவலுடன் தயவுசெய்து எங்களுக்கு உதவுங்கள்"),
-        "localSyncErrorMessage": MessageLookupByLibrary.simpleMessage(
-            "Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team"),
-        "mostRecent": MessageLookupByLibrary.simpleMessage("Most recent"),
-        "mostRelevant": MessageLookupByLibrary.simpleMessage("Most relevant"),
-        "showPerson": MessageLookupByLibrary.simpleMessage("Show person"),
-        "sort": MessageLookupByLibrary.simpleMessage("Sort"),
         "verify": MessageLookupByLibrary.simpleMessage("சரிபார்க்கவும்")
       };
 }
