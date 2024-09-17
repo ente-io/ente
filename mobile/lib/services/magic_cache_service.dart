@@ -6,7 +6,6 @@ import "package:computer/computer.dart";
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:path_provider/path_provider.dart";
-import "package:photos/db/files_db.dart";
 import "package:photos/extensions/stop_watch.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/discover/prompt.dart";
@@ -15,19 +14,20 @@ import "package:photos/models/search/search_types.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import "package:photos/services/remote_assets_service.dart";
+import "package:photos/services/search_service.dart";
 import "package:photos/ui/viewer/search/result/magic_result_screen.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class MagicCache {
   final String title;
-  final List<int> fileUploadedIDs;
+  final Set<int> fileUploadedIDs;
   MagicCache(this.title, this.fileUploadedIDs);
 
   factory MagicCache.fromJson(Map<String, dynamic> json) {
     return MagicCache(
       json['title'],
-      List<int>.from(json['fileUploadedIDs']),
+      Set<int>.from(json['fileUploadedIDs']),
     );
   }
   Map<String, dynamic> toJson() {
@@ -49,17 +49,9 @@ class MagicCache {
 }
 
 extension MagicCacheServiceExtension on MagicCache {
-  Future<GenericSearchResult?> toGenericSearchResult() async {
-    final enteFilesInMagicCache = <EnteFile>[];
-    await FilesDB.instance
-        .getFilesFromIDs(fileUploadedIDs)
-        .then((idToEnteFile) {
-      for (int uploadedID in fileUploadedIDs) {
-        if (idToEnteFile[uploadedID] != null) {
-          enteFilesInMagicCache.add(idToEnteFile[uploadedID]!);
-        }
-      }
-    });
+  Future<GenericSearchResult?> toGenericSearchResult(
+    List<EnteFile> enteFilesInMagicCache,
+  ) async {
     if (enteFilesInMagicCache.isEmpty) {
       return null;
     }
@@ -224,18 +216,32 @@ class MagicCacheService {
       } else {
         w?.log("cacheFound");
       }
-
+      final Map<String, List<EnteFile>> magicIdToFiles = {};
+      for (MagicCache c in magicCaches) {
+        magicIdToFiles[c.title] = [];
+      }
       final List<GenericSearchResult> genericSearchResults = [];
+      final List<EnteFile> files = await SearchService.instance.getAllFiles();
+      for (EnteFile file in files) {
+        if (!file.isUploaded) continue;
+        for (MagicCache magicCache in magicCaches) {
+          if (magicCache.fileUploadedIDs.contains(file.uploadedFileID!)) {
+            magicIdToFiles[magicCache.title]!.add(file);
+          }
+        }
+      }
       for (MagicCache magicCache in magicCaches) {
-        final genericSearchResult = await magicCache.toGenericSearchResult();
+        final genericSearchResult = await magicCache.toGenericSearchResult(
+          magicIdToFiles[magicCache.title]!,
+        );
         if (genericSearchResult != null) {
           genericSearchResults.add(genericSearchResult);
         }
       }
       w?.logAndReset("done");
       return genericSearchResults;
-    } catch (e) {
-      _logger.info("Error getting magic generic search result", e);
+    } catch (e, s) {
+      _logger.info("Error getting magic generic search result", e, s);
       return [];
     }
   }
@@ -268,7 +274,7 @@ class MagicCacheService {
         results.add(
           MagicCache(
             prompt.title,
-            fileUploadedIDs,
+            fileUploadedIDs.toSet(),
           ),
         );
       }
