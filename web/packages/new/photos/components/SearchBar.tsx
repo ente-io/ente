@@ -394,18 +394,21 @@ const EmptyState: React.FC<EmptyStateProps> = () => {
     }
 
     return (
-        <Box>
-            {people && (
-                <PeopleList
-                    people={people}
-                    maxRows={2}
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    onSelect={(...args: any) => console.log(args)}
-                />
+        <Box sx={{ textAlign: "left" }}>
+            {people && people.length > 0 && (
+                <>
+                    <Typography color="text.base" variant="large">
+                        {t("people")}
+                    </Typography>
+                    <PeopleList
+                        people={people}
+                        maxRows={2}
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        onSelect={(...args: any) => console.log(args)}
+                    />
+                </>
             )}
-            <Typography variant="mini" sx={{ textAlign: "left" }}>
-                {label}
-            </Typography>
+            <Typography variant="mini">{label}</Typography>
         </Box>
     );
 

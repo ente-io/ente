@@ -1,3 +1,4 @@
+import { useIsMobileWidth } from "@/base/hooks";
 import type { Person } from "@/new/photos/services/ml";
 import { faceCrop, unidentifiedFaceIDs } from "@/new/photos/services/ml";
 import type { EnteFile } from "@/new/photos/types/file";
@@ -21,23 +22,48 @@ export const PeopleList: React.FC<PeopleListProps> = ({
     maxRows,
     onSelect,
 }) => {
+    const isMobileWidth = useIsMobileWidth();
+    // TODO-Cluster: FaceCropImageView has hardcoded placeholder dimensions
     return (
-        <FaceChipContainer style={{ maxHeight: maxRows * 122 + 28 }}>
-            {people.map((person, index) => (
-                <FaceChip
+        <SearchFaceChipContainer style={{ maxHeight: maxRows * 87 + 28 }}>
+            {people.slice(0, isMobileWidth ? 6 : 7).map((person, index) => (
+                <SearchFaceChip
                     key={person.id}
-                    clickable={!!onSelect}
                     onClick={() => onSelect && onSelect(person, index)}
                 >
                     <FaceCropImageView
                         faceID={person.displayFaceID}
                         enteFile={person.displayFaceFile}
                     />
-                </FaceChip>
+                </SearchFaceChip>
             ))}
-        </FaceChipContainer>
+        </SearchFaceChipContainer>
     );
 };
+
+const SearchFaceChipContainer = styled("div")`
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    margin-block: 16px;
+    /* On very small (~ < 375px) mobile screens 6 faces won't fit in 2 rows.
+       Clip the third one. */
+    overflow: hidden;
+`;
+
+const SearchFaceChip = styled("div")`
+    width: 87px;
+    height: 87px;
+    border-radius: 50%;
+    overflow: hidden;
+    cursor: "pointer";
+    & > img {
+        width: 100%;
+        height: 100%;
+    }
+`;
 
 const FaceChipContainer = styled("div")`
     display: flex;
