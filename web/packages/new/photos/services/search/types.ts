@@ -45,9 +45,9 @@ export interface SearchOption {
 }
 
 /**
- * The base data over which we should search.
+ * The collections and files which we should search.
  */
-export interface SearchableData {
+export interface SearchableCollectionsAndFiles {
     collections: Collection[];
     files: EnteFile[];
 }

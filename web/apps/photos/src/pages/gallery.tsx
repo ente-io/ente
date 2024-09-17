@@ -17,7 +17,7 @@ import {
 import { wipHasSwitchedOnceCmpAndSet } from "@/new/photos/services/ml";
 import {
     filterSearchableFiles,
-    setSearchableData,
+    setSearchableCollectionsAndFiles,
 } from "@/new/photos/services/search";
 import type { SearchOption } from "@/new/photos/services/search/types";
 import { EnteFile } from "@/new/photos/types/file";
@@ -411,7 +411,7 @@ export default function Gallery() {
 
     useEffect(
         () =>
-            setSearchableData({
+            setSearchableCollectionsAndFiles({
                 collections: collections ?? [],
                 files: getUniqueFiles(files ?? []),
             }),

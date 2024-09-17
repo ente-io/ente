@@ -21,7 +21,7 @@ import type {
     LabelledSearchDateComponents,
     LocalizedSearchData,
     Searchable,
-    SearchableData,
+    SearchableCollectionsAndFiles,
     SearchDateComponents,
     SearchSuggestion,
 } from "./types";
@@ -31,7 +31,10 @@ import type {
  * remains responsive.
  */
 export class SearchWorker {
-    private searchableData: SearchableData = { collections: [], files: [] };
+    private searchableCollectionsAndFiles: SearchableCollectionsAndFiles = {
+        collections: [],
+        files: [],
+    };
     private locationTags: Searchable<LocationTag>[] = [];
     private cities: Searchable<City>[] = [];
 
@@ -61,10 +64,10 @@ export class SearchWorker {
     }
 
     /**
-     * Set the data that we should search across.
+     * Set the collections and files that we should search across.
      */
-    setSearchableData(data: SearchableData) {
-        this.searchableData = data;
+    setSearchableCollectionsAndFiles(data: SearchableCollectionsAndFiles) {
+        this.searchableCollectionsAndFiles = data;
     }
 
     /**
@@ -78,7 +81,7 @@ export class SearchWorker {
         return suggestionsForString(
             s,
             searchString,
-            this.searchableData,
+            this.searchableCollectionsAndFiles,
             localizedSearchData,
             this.locationTags,
             this.cities,
@@ -89,14 +92,17 @@ export class SearchWorker {
      * Return {@link EnteFile}s that satisfy the given {@link suggestion}.
      */
     filterSearchableFiles(suggestion: SearchSuggestion) {
-        return filterSearchableFiles(this.searchableData.files, suggestion);
+        return filterSearchableFiles(
+            this.searchableCollectionsAndFiles.files,
+            suggestion,
+        );
     }
 
     /**
      * Batched variant of {@link filterSearchableFiles}.
      */
     filterSearchableFilesMulti(suggestions: SearchSuggestion[]) {
-        const files = this.searchableData.files;
+        const files = this.searchableCollectionsAndFiles.files;
         return suggestions
             .map((sg) => [filterSearchableFiles(files, sg), sg] as const)
             .filter(([files]) => files.length);
@@ -112,7 +118,7 @@ expose(SearchWorker);
 const suggestionsForString = (
     s: string,
     searchString: string,
-    { collections, files }: SearchableData,
+    { collections, files }: SearchableCollectionsAndFiles,
     { locale, holidays, labelledFileTypes }: LocalizedSearchData,
     locationTags: Searchable<LocationTag>[],
     cities: Searchable<City>[],

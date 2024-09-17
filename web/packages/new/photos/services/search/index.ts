@@ -8,7 +8,7 @@ import type {
     LabelledFileType,
     LabelledSearchDateComponents,
     LocalizedSearchData,
-    SearchableData,
+    SearchableCollectionsAndFiles,
     SearchSuggestion,
 } from "./types";
 import type { SearchWorker } from "./worker";
@@ -53,8 +53,9 @@ export const triggerSearchDataSync = () =>
 /**
  * Set the collections and files over which we should search.
  */
-export const setSearchableData = (data: SearchableData) =>
-    void worker().then((w) => w.setSearchableData(data));
+export const setSearchableCollectionsAndFiles = (
+    data: SearchableCollectionsAndFiles,
+) => void worker().then((w) => w.setSearchableCollectionsAndFiles(data));
 
 /**
  * Convert a search string into (annotated) suggestions that can be shown in the
@@ -113,7 +114,7 @@ const suggestionsToOptions = (suggestions: SearchSuggestion[]) =>
 
 /**
  * Return the list of {@link EnteFile}s (from amongst the previously set
- * {@link SearchableData}) that match the given search {@link suggestion}.
+ * {@link SearchableCollectionsAndFiles}) that match the given search {@link suggestion}.
  */
 export const filterSearchableFiles = async (suggestion: SearchSuggestion) =>
     worker().then((w) => w.filterSearchableFiles(suggestion));
