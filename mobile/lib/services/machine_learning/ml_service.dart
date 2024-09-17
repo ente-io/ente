@@ -131,7 +131,9 @@ class MLService {
         await clusterAllImages();
       }
       await indexAllImages();
-      await clusterAllImages();
+      if ((await MLDataDB.instance.getUnclusteredFaceCount()) > 0) {
+        await clusterAllImages();
+      }
     } catch (e, s) {
       _logger.severe("runAllML failed", e, s);
       rethrow;
