@@ -39,7 +39,6 @@ import {
 import {
     constructCollectionNameMap,
     getCollectionUserFacingName,
-    getNonEmptyPersonalCollections,
 } from "utils/collection";
 import { getPersonalFiles } from "utils/file";
 import { getAllLocalCollections } from "../collectionService";
@@ -354,10 +353,8 @@ class ExportService {
                 collectionIdToOwnerIDMap,
             );
 
-            const nonEmptyPersonalCollections = getNonEmptyPersonalCollections(
-                collections,
-                personalFiles,
-                user,
+            const personalCollections = collections.filter(
+                (collection) => collection.owner.id === user?.id,
             );
 
             const exportRecord = await this.getExportRecord(exportFolder);
@@ -365,12 +362,11 @@ class ExportService {
                 convertCollectionIDExportNameObjectToMap(
                     exportRecord.collectionExportNames,
                 );
-            const collectionIDNameMap = constructCollectionNameMap(
-                nonEmptyPersonalCollections,
-            );
+            const collectionIDNameMap =
+                constructCollectionNameMap(personalCollections);
 
             const renamedCollections = getRenamedExportedCollections(
-                nonEmptyPersonalCollections,
+                personalCollections,
                 exportRecord,
             );
 
@@ -396,7 +392,7 @@ class ExportService {
             );
 
             const deletedExportedCollections = getDeletedExportedCollections(
-                nonEmptyPersonalCollections,
+                personalCollections,
                 exportRecord,
             );
 

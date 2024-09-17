@@ -1069,19 +1069,6 @@ export const getFavCollection = async () => {
     }
 };
 
-export const getNonEmptyCollections = (
-    collections: Collection[],
-    files: EnteFile[],
-) => {
-    const nonEmptyCollectionsIds = new Set<number>();
-    for (const file of files) {
-        nonEmptyCollectionsIds.add(file.collectionID);
-    }
-    return collections.filter((collection) =>
-        nonEmptyCollectionsIds.has(collection.id),
-    );
-};
-
 export function sortCollectionSummaries(
     collectionSummaries: CollectionSummary[],
     sortBy: COLLECTION_LIST_SORT_BY,
@@ -1141,51 +1128,46 @@ export function getCollectionSummaries(
         ) {
             hasUncategorizedCollection = true;
         }
-        if (
-            collectionFilesCount.get(collection.id) ||
-            collection.type === CollectionType.uncategorized
-        ) {
-            let type: CollectionSummaryType;
-            if (isIncomingShare(collection, user)) {
-                if (isIncomingCollabShare(collection, user)) {
-                    type = CollectionSummaryType.incomingShareCollaborator;
-                } else {
-                    type = CollectionSummaryType.incomingShareViewer;
-                }
-            } else if (isOutgoingShare(collection, user)) {
-                type = CollectionSummaryType.outgoingShare;
-            } else if (isSharedOnlyViaLink(collection)) {
-                type = CollectionSummaryType.sharedOnlyViaLink;
-            } else if (isArchivedCollection(collection)) {
-                type = CollectionSummaryType.archived;
-            } else if (isDefaultHiddenCollection(collection)) {
-                type = CollectionSummaryType.defaultHidden;
-            } else if (isPinnedCollection(collection)) {
-                type = CollectionSummaryType.pinned;
+        let type: CollectionSummaryType;
+        if (isIncomingShare(collection, user)) {
+            if (isIncomingCollabShare(collection, user)) {
+                type = CollectionSummaryType.incomingShareCollaborator;
             } else {
-                type = CollectionSummaryType[collection.type];
+                type = CollectionSummaryType.incomingShareViewer;
             }
-
-            let CollectionSummaryItemName: string;
-            if (type === CollectionSummaryType.uncategorized) {
-                CollectionSummaryItemName = t("UNCATEGORIZED");
-            } else if (type === CollectionSummaryType.favorites) {
-                CollectionSummaryItemName = t("FAVORITES");
-            } else {
-                CollectionSummaryItemName = collection.name;
-            }
-
-            collectionSummaries.set(collection.id, {
-                id: collection.id,
-                name: CollectionSummaryItemName,
-                latestFile: collectionLatestFiles.get(collection.id),
-                coverFile: collectionCoverFiles.get(collection.id),
-                fileCount: collectionFilesCount.get(collection.id) ?? 0,
-                updationTime: collection.updationTime,
-                type: type,
-                order: collection.magicMetadata?.data?.order ?? 0,
-            });
+        } else if (isOutgoingShare(collection, user)) {
+            type = CollectionSummaryType.outgoingShare;
+        } else if (isSharedOnlyViaLink(collection)) {
+            type = CollectionSummaryType.sharedOnlyViaLink;
+        } else if (isArchivedCollection(collection)) {
+            type = CollectionSummaryType.archived;
+        } else if (isDefaultHiddenCollection(collection)) {
+            type = CollectionSummaryType.defaultHidden;
+        } else if (isPinnedCollection(collection)) {
+            type = CollectionSummaryType.pinned;
+        } else {
+            type = CollectionSummaryType[collection.type];
         }
+
+        let CollectionSummaryItemName: string;
+        if (type === CollectionSummaryType.uncategorized) {
+            CollectionSummaryItemName = t("UNCATEGORIZED");
+        } else if (type === CollectionSummaryType.favorites) {
+            CollectionSummaryItemName = t("FAVORITES");
+        } else {
+            CollectionSummaryItemName = collection.name;
+        }
+
+        collectionSummaries.set(collection.id, {
+            id: collection.id,
+            name: CollectionSummaryItemName,
+            latestFile: collectionLatestFiles.get(collection.id),
+            coverFile: collectionCoverFiles.get(collection.id),
+            fileCount: collectionFilesCount.get(collection.id) ?? 0,
+            updationTime: collection.updationTime,
+            type: type,
+            order: collection.magicMetadata?.data?.order ?? 0,
+        });
     }
     if (!hasUncategorizedCollection) {
         collectionSummaries.set(
