@@ -279,14 +279,12 @@ const updateIsMLEnabledRemote = (enabled: boolean) =>
  * It checks with remote if the ML flag is set, and updates our local flag to
  * reflect that value.
  *
- * To trigger the actual ML sync, use {@link triggerMLSync}.
+ * To perform the actual ML sync, use {@link mlSync}.
  */
-export const triggerMLStatusSync = () => void mlStatusSync();
-
-const mlStatusSync = async () => {
+export const mlStatusSync = async () => {
     _state.isMLEnabled = await getIsMLEnabledRemote();
     setIsMLEnabledLocal(_state.isMLEnabled);
-    triggerStatusUpdate();
+    return updateMLStatusSnapshot();
 };
 
 /**
@@ -298,7 +296,7 @@ const mlStatusSync = async () => {
  * If ML is enabled, it pulls any missing embeddings from remote and starts
  * indexing to backfill any missing values.
  *
- * This will only have an effect if {@link triggerMLSync} has been called at
+ * This will only have an effect if {@link mlStatusSync} has been called at
  * least once prior to calling this in the sync sequence.
  */
 export const triggerMLSync = () => void mlSync();

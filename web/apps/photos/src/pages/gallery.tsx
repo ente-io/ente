@@ -105,7 +105,7 @@ import {
     getSectionSummaries,
 } from "services/collectionService";
 import { syncFiles } from "services/fileService";
-import { sync, triggerPreFileInfoSync } from "services/sync";
+import { preFileInfoSync, sync } from "services/sync";
 import { syncTrash } from "services/trashService";
 import uploadManager from "services/upload/uploadManager";
 import { isTokenValid } from "services/userService";
@@ -720,7 +720,7 @@ export default function Gallery() {
                 throw new Error(CustomError.SESSION_EXPIRED);
             }
             !silent && startLoading();
-            triggerPreFileInfoSync();
+            await preFileInfoSync();
             const collections = await getAllLatestCollections();
             const { normalCollections, hiddenCollections } =
                 await splitNormalAndHiddenCollections(collections);
