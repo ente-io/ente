@@ -1,5 +1,5 @@
-display_name: Auth
-package_name: auth
+display_name: Ente Auth
+package_name: enteauth
 maintainer:
   name: Ente.io Developers
   email: auth@ente.io

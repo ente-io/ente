@@ -1,4 +1,4 @@
-display_name: Auth
+display_name: Ente Auth
 license: GPLv3
 
 metainfo: linux/packaging/ente_auth.appdata.xml
