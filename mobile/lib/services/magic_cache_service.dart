@@ -25,13 +25,13 @@ import "package:shared_preferences/shared_preferences.dart";
 
 class MagicCache {
   final String title;
-  final Set<int> fileUploadedIDs;
+  final List<int> fileUploadedIDs;
   MagicCache(this.title, this.fileUploadedIDs);
 
   factory MagicCache.fromJson(Map<String, dynamic> json) {
     return MagicCache(
       json['title'],
-      Set<int>.from(json['fileUploadedIDs']),
+      List<int>.from(json['fileUploadedIDs']),
     );
   }
   Map<String, dynamic> toJson() {
