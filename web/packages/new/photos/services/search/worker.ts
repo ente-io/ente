@@ -2,6 +2,7 @@ import { HTTPError } from "@/base/http";
 import type { Location } from "@/base/types";
 import type { Collection } from "@/media/collection";
 import { fileCreationPhotoDate, fileLocation } from "@/media/file-metadata";
+import type { Person } from "@/new/photos/services/ml/cgroups";
 import type { EnteFile } from "@/new/photos/types/file";
 import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";
@@ -20,8 +21,7 @@ import type {
     LabelledFileType,
     LabelledSearchDateComponents,
     LocalizedSearchData,
-    Searchable,
-    SearchableData,
+    SearchCollectionsAndFiles,
     SearchDateComponents,
     SearchSuggestion,
 } from "./types";
@@ -31,9 +31,13 @@ import type {
  * remains responsive.
  */
 export class SearchWorker {
-    private searchableData: SearchableData = { collections: [], files: [] };
-    private locationTags: Searchable<LocationTag>[] = [];
-    private cities: Searchable<City>[] = [];
+    private locationTags: LocationTag[] = [];
+    private cities: City[] = [];
+    private collectionsAndFiles: SearchCollectionsAndFiles = {
+        collections: [],
+        files: [],
+    };
+    private people: Person[] = [];
 
     /**
      * Fetch any state we might need when the actual search happens.
@@ -45,26 +49,23 @@ export class SearchWorker {
         return Promise.all([
             pullLocationTags(masterKey)
                 .then(() => savedLocationTags())
-                .then((ts) => {
-                    this.locationTags = ts.map((t) => ({
-                        ...t,
-                        lowercasedName: t.name.toLowerCase(),
-                    }));
-                }),
-            fetchCities().then((cs) => {
-                this.cities = cs.map((c) => ({
-                    ...c,
-                    lowercasedName: c.name.toLowerCase(),
-                }));
-            }),
+                .then((ts) => (this.locationTags = ts)),
+            fetchCities().then((cs) => (this.cities = cs)),
         ]);
     }
 
     /**
-     * Set the data that we should search across.
+     * Set the collections and files that we should search across.
      */
-    setSearchableData(data: SearchableData) {
-        this.searchableData = data;
+    setCollectionsAndFiles(cf: SearchCollectionsAndFiles) {
+        this.collectionsAndFiles = cf;
+    }
+
+    /**
+     * Set the people that we should search across.
+     */
+    setPeople(people: Person[]) {
+        this.people = people;
     }
 
     /**
@@ -77,8 +78,12 @@ export class SearchWorker {
     ) {
         return suggestionsForString(
             s,
+            // Case insensitive word prefix match, considering underscores also
+            // as a word separator.
+            new RegExp("(\\b|_)" + s, "i"),
             searchString,
-            this.searchableData,
+            this.collectionsAndFiles,
+            this.people,
             localizedSearchData,
             this.locationTags,
             this.cities,
@@ -89,14 +94,17 @@ export class SearchWorker {
      * Return {@link EnteFile}s that satisfy the given {@link suggestion}.
      */
     filterSearchableFiles(suggestion: SearchSuggestion) {
-        return filterSearchableFiles(this.searchableData.files, suggestion);
+        return filterSearchableFiles(
+            this.collectionsAndFiles.files,
+            suggestion,
+        );
     }
 
     /**
      * Batched variant of {@link filterSearchableFiles}.
      */
     filterSearchableFilesMulti(suggestions: SearchSuggestion[]) {
-        const files = this.searchableData.files;
+        const files = this.collectionsAndFiles.files;
         return suggestions
             .map((sg) => [filterSearchableFiles(files, sg), sg] as const)
             .filter(([files]) => files.length);
@@ -111,28 +119,32 @@ expose(SearchWorker);
  */
 const suggestionsForString = (
     s: string,
+    re: RegExp,
     searchString: string,
-    { collections, files }: SearchableData,
+    { collections, files }: SearchCollectionsAndFiles,
+    people: Person[],
     { locale, holidays, labelledFileTypes }: LocalizedSearchData,
-    locationTags: Searchable<LocationTag>[],
-    cities: Searchable<City>[],
-): SearchSuggestion[] =>
+    locationTags: LocationTag[],
+    cities: City[],
+): [SearchSuggestion[], SearchSuggestion[]] => [
+    [peopleSuggestions(re, people)].flat(),
+    // . <-- clip suggestions will be inserted here by our caller.
     [
-        // <-- caption suggestions will be inserted here by our caller.
-        fileTypeSuggestions(s, labelledFileTypes),
-        dateSuggestions(s, locale, holidays),
-        locationSuggestions(s, locationTags, cities),
-        collectionSuggestions(s, collections),
-        fileNameSuggestion(s, searchString, files),
-        fileCaptionSuggestion(s, searchString, files),
-    ].flat();
+        fileTypeSuggestions(re, labelledFileTypes),
+        dateSuggestions(s, re, locale, holidays),
+        locationSuggestions(re, locationTags, cities),
+        collectionSuggestions(re, collections),
+        fileNameSuggestion(s, re, searchString, files),
+        fileCaptionSuggestion(re, searchString, files),
+    ].flat(),
+];
 
 const collectionSuggestions = (
-    s: string,
+    re: RegExp,
     collections: Collection[],
 ): SearchSuggestion[] =>
     collections
-        .filter(({ name }) => name.toLowerCase().includes(s))
+        .filter((c) => re.test(c.name))
         .map(({ id, name }) => ({
             type: "collection",
             collectionID: id,
@@ -140,15 +152,16 @@ const collectionSuggestions = (
         }));
 
 const fileTypeSuggestions = (
-    s: string,
-    labelledFileTypes: Searchable<LabelledFileType>[],
+    re: RegExp,
+    labelledFileTypes: LabelledFileType[],
 ): SearchSuggestion[] =>
     labelledFileTypes
-        .filter(({ lowercasedName }) => lowercasedName.startsWith(s))
+        .filter(({ label }) => re.test(label))
         .map(({ fileType, label }) => ({ type: "fileType", fileType, label }));
 
 const fileNameSuggestion = (
     s: string,
+    re: RegExp,
     searchString: string,
     files: EnteFile[],
 ): SearchSuggestion[] => {
@@ -157,10 +170,7 @@ const fileNameSuggestion = (
     const sn = Number(s) || undefined;
 
     const fileIDs = files
-        .filter(
-            ({ id, metadata }) =>
-                id === sn || metadata.title.toLowerCase().includes(s),
-        )
+        .filter(({ id, metadata }) => id === sn || re.test(metadata.title))
         .map((f) => f.id);
 
     return fileIDs.length
@@ -169,15 +179,16 @@ const fileNameSuggestion = (
 };
 
 const fileCaptionSuggestion = (
-    s: string,
+    re: RegExp,
     searchString: string,
     files: EnteFile[],
 ): SearchSuggestion[] => {
     const fileIDs = files
-        .filter((file) =>
+        .filter((file) => {
             // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-            file.pubMagicMetadata?.data?.caption?.toLowerCase().includes(s),
-        )
+            const caption = file.pubMagicMetadata?.data?.caption;
+            return caption && re.test(caption);
+        })
         .map((f) => f.id);
 
     return fileIDs.length
@@ -185,16 +196,24 @@ const fileCaptionSuggestion = (
         : [];
 };
 
+const peopleSuggestions = (re: RegExp, people: Person[]): SearchSuggestion[] =>
+    people
+        .filter((p) => re.test(p.name))
+        .map((person) => ({ type: "person", person, label: person.name }));
+
 const dateSuggestions = (
     s: string,
+    re: RegExp,
     locale: string,
-    holidays: Searchable<LabelledSearchDateComponents>[],
+    holidays: LabelledSearchDateComponents[],
 ): SearchSuggestion[] =>
-    parseDateComponents(s, locale, holidays).map(({ components, label }) => ({
-        type: "date",
-        dateComponents: components,
-        label,
-    }));
+    parseDateComponents(s, re, locale, holidays).map(
+        ({ components, label }) => ({
+            type: "date",
+            dateComponents: components,
+            label,
+        }),
+    );
 
 /**
  * Try to parse an arbitrary search string into sets of date components.
@@ -212,13 +231,14 @@ const dateSuggestions = (
  */
 const parseDateComponents = (
     s: string,
+    re: RegExp,
     locale: string,
-    holidays: Searchable<LabelledSearchDateComponents>[],
+    holidays: LabelledSearchDateComponents[],
 ): LabelledSearchDateComponents[] =>
     [
         parseChrono(s, locale),
         parseYearComponents(s),
-        holidays.filter(searchableIncludes(s)),
+        holidays.filter((h) => re.test(h.label)),
     ].flat();
 
 const parseChrono = (
@@ -271,14 +291,6 @@ const parseYearComponents = (s: string): LabelledSearchDateComponents[] => {
 };
 
 /**
- * A helper function to directly pass to filters on Searchable<T>[].
- */
-const searchableIncludes =
-    (s: string) =>
-    ({ lowercasedName }: { lowercasedName: string }) =>
-        lowercasedName.includes(s);
-
-/**
  * Zod schema describing world_cities.json.
  *
  * The entries also have a country field which we don't currently use.
@@ -302,21 +314,19 @@ const fetchCities = async () => {
 };
 
 const locationSuggestions = (
-    s: string,
-    locationTags: Searchable<LocationTag>[],
-    cities: Searchable<City>[],
+    re: RegExp,
+    locationTags: LocationTag[],
+    cities: City[],
 ): SearchSuggestion[] => {
-    const matchingLocationTags = locationTags.filter(searchableIncludes(s));
+    const matchingLocationTags = locationTags.filter((t) => re.test(t.name));
 
     const matchingLocationTagLNames = new Set(
-        matchingLocationTags.map((t) => t.lowercasedName),
+        matchingLocationTags.map((t) => t.name.toLowerCase()),
     );
 
-    const matchingCities = cities.filter(
-        (c) =>
-            c.lowercasedName.startsWith(s) &&
-            !matchingLocationTagLNames.has(c.lowercasedName),
-    );
+    const matchingCities = cities
+        .filter((c) => re.test(c.name))
+        .filter((c) => !matchingLocationTagLNames.has(c.name.toLowerCase()));
 
     return [
         matchingLocationTags.map(
@@ -386,9 +396,7 @@ const isMatchingFile = (file: EnteFile, suggestion: SearchSuggestion) => {
             return suggestion.clipScoreForFileID.has(file.id);
 
         case "person":
-            // return query.person.files.includes(file.id);
-            // TODO-Cluster implement me
-            return false;
+            return suggestion.person.fileIDs.includes(file.id);
     }
 };
 
@@ -414,9 +422,8 @@ const defaultCityRadius = 10;
 const kmsPerDegree = 111.16;
 
 const isInsideLocationTag = (location: Location, locationTag: LocationTag) =>
-    // This code is included in the photos app which currently doesn't have
-    // strict mode, and causes a spurious linter warning (but only when included
-    // in photos!), so we need to ts-ignore.
+    // See: [Note: strict mode migration]
+    //
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     isWithinRadius(location, locationTag.centerPoint, locationTag.radius);

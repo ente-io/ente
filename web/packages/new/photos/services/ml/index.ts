@@ -17,7 +17,9 @@ import { throttled } from "@/utils/promise";
 import { proxy, transfer } from "comlink";
 import { isInternalUser } from "../feature-flags";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
+import { setSearchPeople } from "../search";
 import type { UploadItem } from "../upload/types";
+import { syncCGroups, updatedPeople, type Person } from "./cgroups";
 import {
     type ClusterFace,
     type ClusteringOpts,
@@ -26,7 +28,7 @@ import {
     type OnClusteringProgress,
 } from "./cluster";
 import { regenerateFaceCrops } from "./crop";
-import { clearMLDB, faceIndex, indexableAndIndexedCounts } from "./db";
+import { clearMLDB, getFaceIndex, getIndexableAndIndexedCounts } from "./db";
 import { MLWorker } from "./worker";
 import type { CLIPMatches } from "./worker-types";
 
@@ -207,8 +209,8 @@ export const enableML = async () => {
     setIsMLEnabledLocal(true);
     _state.isMLEnabled = true;
     setInterimScheduledStatus();
-    triggerStatusUpdate();
-    triggerMLSync();
+    // Trigger updates, but don't wait for them to finish.
+    void updateMLStatusSnapshot().then(mlSync);
 };
 
 /**
@@ -279,32 +281,34 @@ const updateIsMLEnabledRemote = (enabled: boolean) =>
  * It checks with remote if the ML flag is set, and updates our local flag to
  * reflect that value.
  *
- * To trigger the actual ML sync, use {@link triggerMLSync}.
+ * To perform the actual ML sync, use {@link mlSync}.
  */
-export const triggerMLStatusSync = () => void mlStatusSync();
-
-const mlStatusSync = async () => {
+export const mlStatusSync = async () => {
     _state.isMLEnabled = await getIsMLEnabledRemote();
     setIsMLEnabledLocal(_state.isMLEnabled);
-    triggerStatusUpdate();
+    return updateMLStatusSnapshot();
 };
 
 /**
- * Trigger a ML sync.
+ * Perform a ML sync, whatever is applicable.
  *
  * This is called during the global sync sequence, after files information have
  * been synced with remote.
  *
  * If ML is enabled, it pulls any missing embeddings from remote and starts
- * indexing to backfill any missing values.
+ * indexing to backfill any missing values. It also syncs cgroups and updates
+ * the search service to use the latest values. Finally, it uses the latest
+ * files, faces and cgroups to update the people shown in the UI.
  *
- * This will only have an effect if {@link triggerMLSync} has been called at
+ * This will only have an effect if {@link mlStatusSync} has been called at
  * least once prior to calling this in the sync sequence.
  */
-export const triggerMLSync = () => void mlSync();
-
-const mlSync = async () => {
-    if (_state.isMLEnabled) await worker().then((w) => w.sync());
+export const mlSync = async () => {
+    if (_state.isMLEnabled) {
+        await Promise.all([worker().then((w) => w.sync()), syncCGroups()]).then(
+            updatePeople,
+        );
+    }
 };
 
 /**
@@ -414,14 +418,17 @@ export const wipClusterDebugPageContents = async (
     const clusterByID = new Map(clusters.map((c) => [c.id, c]));
 
     const people = cgroups
+        // TODO-Cluster
+        .map((cgroup) => ({ ...cgroup, name: cgroup.id }))
         .map((cgroup) => {
+            if (!cgroup.name) return undefined;
             const faceID = ensure(cgroup.displayFaceID);
             const fileID = ensure(fileIDFromFaceID(faceID));
             const file = ensure(localFileByID.get(fileID));
 
-            const faceIDs = cgroup.clusterIDs
-                .map((id) => ensure(clusterByID.get(id)))
-                .flatMap((cluster) => cluster.faceIDs);
+            const faceIDs = cgroup.assigned
+                .map(({ id }) => ensure(clusterByID.get(id)))
+                .flatMap((cluster) => cluster.faces);
             const fileIDs = faceIDs
                 .map((faceID) => fileIDFromFaceID(faceID))
                 .filter((fileID) => fileID !== undefined);
@@ -430,11 +437,12 @@ export const wipClusterDebugPageContents = async (
                 id: cgroup.id,
                 name: cgroup.name,
                 faceIDs,
-                files: [...new Set(fileIDs)],
+                fileIDs: [...new Set(fileIDs)],
                 displayFaceID: faceID,
                 displayFaceFile: file,
             };
         })
+        .filter((c) => !!c)
         .sort((a, b) => b.faceIDs.length - a.faceIDs.length);
 
     _wip_isClustering = false;
@@ -516,12 +524,12 @@ export const mlStatusSnapshot = (): MLStatus | undefined => {
 };
 
 /**
- * Trigger an asynchronous and unconditional update of the {@link MLStatus}
- * snapshot.
+ * Trigger an asynchronous update of the {@link MLStatus} snapshot, and return
+ * without waiting for it to finish.
  */
 const triggerStatusUpdate = () => void updateMLStatusSnapshot();
 
-/** Unconditional update of the {@link MLStatus} snapshot. */
+/** Unconditionally update of the {@link MLStatus} snapshot. */
 const updateMLStatusSnapshot = async () =>
     setMLStatusSnapshot(await getMLStatus());
 
@@ -536,7 +544,8 @@ const setMLStatusSnapshot = (snapshot: MLStatus) => {
 const getMLStatus = async (): Promise<MLStatus> => {
     if (!_state.isMLEnabled) return { phase: "disabled" };
 
-    const { indexedCount, indexableCount } = await indexableAndIndexedCounts();
+    const { indexedCount, indexableCount } =
+        await getIndexableAndIndexedCounts();
 
     // During live uploads, the indexable count remains zero even as the indexer
     // is processing the newly uploaded items. This is because these "live
@@ -587,39 +596,6 @@ const setInterimScheduledStatus = () => {
 };
 
 const workerDidProcessFileOrIdle = throttled(updateMLStatusSnapshot, 2000);
-
-/**
- * A massaged version of {@link CGroup} suitable for being shown in the UI.
- *
- * While cgroups are synced with remote, they do not directly correspond to
- * "people" (this is ignoring the other issue that the cluster groups may be for
- * non-human faces too). CGroups represent both positive and negative feedback,
- * and the negations are specifically meant so that they're not shown in the UI.
- *
- * So while each person has an underlying cgroups, not all cgroups have a
- * corresponding person.
- *
- * Beyond this, a {@link Person} object has data converted into a format that
- * the UI can use directly and efficiently (as compared to a {@link CGroup},
- * which is tailored for transmission and storage).
- */
-export interface Person {
-    /** Unique ID (nanoid) of the underlying {@link CGroup}. */
-    id: string;
-    /** If this is a named person, then their name. */
-    name?: string;
-    /** The files in which this face occurs. */
-    files: number[];
-    /**
-     * The face that should be used as the "cover" face to represent this
-     * {@link Person} in the UI.
-     */
-    displayFaceID: string;
-    /**
-     * The {@link EnteFile} which contains the display face.
-     */
-    displayFaceFile: EnteFile;
-}
 
 /**
  * A function that can be used to subscribe to updates to {@link Person}s.
@@ -687,6 +663,17 @@ const getPeople = async (): Promise<Person[] | undefined> => {
 };
 
 /**
+ * Update our in-memory list of people, also notifying the search subsystem of
+ * the update.
+ */
+const updatePeople = async () => {
+    const people = await updatedPeople();
+    // TODO-Cluster:
+    // _wip_people = people;
+    setSearchPeople(people);
+};
+
+/**
  * Use CLIP to perform a natural language search over image embeddings.
  *
  * @param searchPhrase Normalized (trimmed and lowercased) search phrase.
@@ -709,7 +696,7 @@ export const clipMatches = (
 export const unidentifiedFaceIDs = async (
     enteFile: EnteFile,
 ): Promise<string[]> => {
-    const index = await faceIndex(enteFile.id);
+    const index = await getFaceIndex(enteFile.id);
     return index?.faces.map((f) => f.faceID) ?? [];
 };
 
@@ -717,7 +704,8 @@ export const unidentifiedFaceIDs = async (
  * Extract the fileID of the {@link EnteFile} to which the face belongs from its
  * faceID.
  */
-const fileIDFromFaceID = (faceID: string) => {
+// TODO-Cluster
+export const fileIDFromFaceID = (faceID: string) => {
     const fileID = parseInt(faceID.split("_")[0] ?? "");
     if (isNaN(fileID)) {
         assertionFailed(`Ignoring attempt to parse invalid faceID ${faceID}`);
@@ -753,7 +741,7 @@ export const faceCrop = async (faceID: string, enteFile: EnteFile) => {
  * the file (updating the "face-crops" {@link BlobCache}).
  */
 const regenerateFaceCropsIfNeeded = async (enteFile: EnteFile) => {
-    const index = await faceIndex(enteFile.id);
+    const index = await getFaceIndex(enteFile.id);
     if (!index) return;
 
     const cache = await blobCache("face-crops");

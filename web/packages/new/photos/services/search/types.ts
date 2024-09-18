@@ -6,7 +6,7 @@
 import type { Location } from "@/base/types";
 import type { Collection } from "@/media/collection";
 import { FileType } from "@/media/file-type";
-import type { Person } from "@/new/photos/services/ml";
+import type { Person } from "@/new/photos/services/ml/cgroups";
 import type { EnteFile } from "@/new/photos/types/file";
 import type { LocationTag } from "../user-entity";
 
@@ -45,9 +45,9 @@ export interface SearchOption {
 }
 
 /**
- * The base data over which we should search.
+ * The collections and files over which we should search.
  */
-export interface SearchableData {
+export interface SearchCollectionsAndFiles {
     collections: Collection[];
     files: EnteFile[];
 }
@@ -63,27 +63,13 @@ export interface LabelledFileType {
 }
 
 /**
- * An annotated version of {@link T} that includes its searchable "lowercased"
- * label or name.
- *
- * Precomputing these lowercased values saves us from doing the lowercasing
- * during the search itself.
- */
-export type Searchable<T> = T & {
-    /**
-     * The name or label of T, lowercased.
-     */
-    lowercasedName: string;
-};
-
-/**
  * Various bits of static but locale specific data that the search worker needs
  * during searching.
  */
 export interface LocalizedSearchData {
     locale: string;
-    holidays: Searchable<LabelledSearchDateComponents>[];
-    labelledFileTypes: Searchable<LabelledFileType>[];
+    holidays: LabelledSearchDateComponents[];
+    labelledFileTypes: LabelledFileType[];
 }
 
 /**

@@ -34,7 +34,7 @@ let _haveFetched = false;
  *    the default. Otherwise the now fetched result is saved to local storage
  *    and the corresponding value returned.
  */
-export const fetchAndSaveFeatureFlagsIfNeeded = () => {
+export const triggerFeatureFlagsFetchIfNeeded = () => {
     if (_haveFetched) return;
     if (_fetchTimeout) return;
     // Not critical, so fetch these after some delay.

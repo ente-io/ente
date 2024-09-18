@@ -1,6 +1,6 @@
 import { useIsMobileWidth } from "@/base/hooks";
-import type { Person } from "@/new/photos/services/ml";
 import { faceCrop, unidentifiedFaceIDs } from "@/new/photos/services/ml";
+import type { Person } from "@/new/photos/services/ml/cgroups";
 import type { EnteFile } from "@/new/photos/types/file";
 import { Skeleton, Typography, styled } from "@mui/material";
 import { t } from "i18next";
@@ -14,6 +14,7 @@ export interface PeopleListProps {
     /** Optional callback invoked when a particular person is selected. */
     onSelect?: (person: Person, index: number) => void;
 }
+
 /**
  * Shows a list of {@link Person} (named cluster groups).
  */

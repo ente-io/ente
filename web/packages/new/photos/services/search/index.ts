@@ -4,11 +4,12 @@ import { ComlinkWorker } from "@/base/worker/comlink-worker";
 import { FileType } from "@/media/file-type";
 import i18n, { t } from "i18next";
 import { clipMatches, isMLEnabled, isMLSupported } from "../ml";
+import type { Person } from "../ml/cgroups";
 import type {
     LabelledFileType,
     LabelledSearchDateComponents,
     LocalizedSearchData,
-    SearchableData,
+    SearchCollectionsAndFiles,
     SearchSuggestion,
 } from "./types";
 import type { SearchWorker } from "./worker";
@@ -47,14 +48,20 @@ export const logoutSearch = () => {
 /**
  * Fetch any data that would be needed if the user were to search.
  */
-export const triggerSearchDataSync = () =>
-    void worker().then((w) => masterKeyFromSession().then((k) => w.sync(k)));
+export const searchDataSync = () =>
+    worker().then((w) => masterKeyFromSession().then((k) => w.sync(k)));
 
 /**
  * Set the collections and files over which we should search.
  */
-export const setSearchableData = (data: SearchableData) =>
-    void worker().then((w) => w.setSearchableData(data));
+export const setSearchCollectionsAndFiles = (cf: SearchCollectionsAndFiles) =>
+    void worker().then((w) => w.setCollectionsAndFiles(cf));
+
+/**
+ * Set the people that we should search across.
+ */
+export const setSearchPeople = (people: Person[]) =>
+    void worker().then((w) => w.setPeople(people));
 
 /**
  * Convert a search string into (annotated) suggestions that can be shown in the
@@ -81,13 +88,13 @@ const suggestionsForString = async (searchString: string) => {
     // The CLIP matching code already runs in the ML worker, so let that run
     // separately, in parallel with the rest of the search query construction in
     // the search worker, then combine the two.
-    const results = await Promise.all([
+    const [clip, [restPre, restPost]] = await Promise.all([
         clipSuggestion(s, searchString).then((s) => s ?? []),
         worker().then((w) =>
             w.suggestionsForString(s, searchString, localizedSearchData()),
         ),
     ]);
-    return results.flat();
+    return [restPre, clip, restPost].flat();
 };
 
 const clipSuggestion = async (
@@ -113,7 +120,7 @@ const suggestionsToOptions = (suggestions: SearchSuggestion[]) =>
 
 /**
  * Return the list of {@link EnteFile}s (from amongst the previously set
- * {@link SearchableData}) that match the given search {@link suggestion}.
+ * {@link SearchCollectionsAndFiles}) that match the given search {@link suggestion}.
  */
 export const filterSearchableFiles = async (suggestion: SearchSuggestion) =>
     worker().then((w) => w.filterSearchableFiles(suggestion));
@@ -151,14 +158,8 @@ let _localizedSearchData: LocalizedSearchData | undefined;
 const localizedSearchData = () =>
     (_localizedSearchData ??= {
         locale: i18n.language,
-        holidays: holidays().map((h) => ({
-            ...h,
-            lowercasedName: h.label.toLowerCase(),
-        })),
-        labelledFileTypes: labelledFileTypes().map((t) => ({
-            ...t,
-            lowercasedName: t.label.toLowerCase(),
-        })),
+        holidays: holidays(),
+        labelledFileTypes: labelledFileTypes(),
     });
 
 /**

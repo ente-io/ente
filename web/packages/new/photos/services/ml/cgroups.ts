@@ -1,8 +1,13 @@
 import { masterKeyFromSession } from "@/base/session-store";
+import { fileIDFromFaceID, wipClusterEnable } from ".";
+import type { EnteFile } from "../../types/file";
+import { getLocalFiles } from "../files";
 import { pullCGroups } from "../user-entity";
+import type { FaceCluster } from "./cluster";
+import { getClusterGroups, getFaceIndexes } from "./db";
 
 /**
- * A cgroup ("cluster group") is a group of clusters (possibly containing a
+ * A cgroup ("cluster group") is a group of clusters (possibly containing just a
  * single cluster) that the user has interacted with.
  *
  * Interactions include hiding, merging and giving a name and/or a cover photo.
@@ -21,17 +26,8 @@ import { pullCGroups } from "../user-entity";
  * cluster, or they may hide an named {@link CGroup}. In both cases, we promote
  * the cluster to a CGroup if needed so that their request to hide gets synced.
  *
+ * The user can see both the cgroups and clusters in the UI, but only the
  * cgroups are synced with remote.
- *
- * While in our local representation we separately maintain clusters and link to
- * them from within CGroups by their clusterID, in the remote representation
- * clusters themselves don't get synced. Instead, the cgroup entities synced
- * with remote contain the clusters within themselves.
- *
- * That is, a cgroup that gets synced with remote looks something like:
- *
- *     { id, name, clusters: [{ clusterID, faceIDs }] }
- *
  */
 export interface CGroup {
     /**
@@ -51,12 +47,12 @@ export interface CGroup {
      */
     name: string | undefined;
     /**
-     * An unordered set of ids of the clusters that belong to this group.
+     * An unordered set ofe clusters that have been assigned to this group.
      *
-     * For ergonomics of transportation and persistence this is an array, but it
+     * For ease of transportation and persistence this is an array, but it
      * should conceptually be thought of as a set.
      */
-    clusterIDs: string[];
+    assigned: FaceCluster[];
     /**
      * True if this cluster group should be hidden.
      *
@@ -82,6 +78,47 @@ export interface CGroup {
 }
 
 /**
+ * A massaged version of {@link CGroup} suitable for being shown in the UI.
+ *
+ * The cgroups synced with remote do not directly correspond to "people".
+ * CGroups represent both positive and negative feedback, where the negations
+ * are specifically feedback meant so that we do not show the corresponding
+ * cluster in the UI.
+ *
+ * So while each person has an underlying cgroups, not all cgroups have a
+ * corresponding person.
+ *
+ * Beyond this semantic difference, there is also data massaging: a
+ * {@link Person} has data converted into a format that the UI can directly and
+ * efficiently use, as compared to a {@link CGroup}, which is tailored for
+ * transmission and storage.
+ */
+export interface Person {
+    /**
+     * Nanoid of the underlying {@link CGroup}.
+     */
+    id: string;
+    /**
+     * The name of the person.
+     */
+    name: string;
+    /**
+     * IDs of the (unique) files in which this face occurs.
+     */
+    fileIDs: number[];
+    /**
+     * The face that should be used as the "cover" face to represent this
+     * {@link Person} in the UI.
+     */
+    displayFaceID: string;
+    /**
+     * The {@link EnteFile} which contains the display face.
+     */
+    displayFaceFile: EnteFile;
+}
+
+// TODO-Cluster remove me
+/**
  * A {@link CGroup} annotated with various in-memory state to make it easier for
  * the upper layers of our code to directly use it.
  */
@@ -97,53 +134,111 @@ export type AnnotatedCGroup = CGroup & {
 };
 
 /**
- * Syncronize the user's cluster groups with remote, running local clustering if
- * needed.
- *
- * A cgroup (cluster group) consists of clusters, each of which itself is a set
- * of faces.
- *
- *     cgroup << cluster << face
- *
- * CGroups are synced with remote, while clusters are a local only (though the
- * clusters that are part of a cgroup do get synced with remote).
- *
- * Clusters are generated locally using {@link clusterFaces} function. These
- * generated clusters are then mapped to cgroups based on various user actions:
- *
- * -   The user can provide a name for a cluster ("name a person"). This
- *     upgrades a cluster into a cgroup, and it then gets synced via remote to
- *     the user's other clients.
- *
- * -   They can attach more clusters to a cgroup ("merge clusters").
- *
- * -   They can remove a cluster from a cgroup ("break clusters").
- *
- * -   They can hide a cluster. This creates an unnamed cgroup so that the
- *     user's other clients know not to show it.
+ * Fetch existing cgroups for the user from remote and save them to DB.
  */
 export const syncCGroups = async () => {
-    // 1. Fetch existing cgroups for the user from remote.
-    // 2. Save them to DB.
-    // 3. Prune stale faceIDs from the clusters in the DB.
-    // 4. Rerun clustering using the cgroups and clusters in DB.
-    // 5. Save the generated clusters to DB.
-    //
-    // The user can see both the cgroups and clusters in the UI, but only the
-    // cgroups are synced.
+    if (!process.env.NEXT_PUBLIC_ENTE_WIP_CL) return;
+    if (!(await wipClusterEnable())) return;
 
     const masterKey = await masterKeyFromSession();
     await pullCGroups(masterKey);
+};
 
-    /*
-     * After clustering, we also do some routine cleanup. Faces belonging to files
-     * that have been deleted (including those in Trash) should be pruned off.
-     *
-     * We should not make strict assumptions about the clusters we get from remote.
-     * In particular, the same face ID can be in different clusters. In such cases
-     * we should assign it arbitrarily assign it to the last cluster we find it in.
-     * Such leeway is intentionally provided to allow clients some slack in how they
-     * implement the sync without needing to make an blocking API request for every
-     * user interaction.
-     */
+/**
+ * Construct in-memory "people" from the cgroups present locally.
+ *
+ * This function is meant to run after files, cgroups and faces have been synced
+ * with remote. It then uses all the information in the local DBs to construct
+ * an in-memory list of {@link Person}s on which the UI will operate.
+ *
+ * @return A list of {@link Person}s, sorted by the number of files that they
+ * reference.
+ */
+export const updatedPeople = async () => {
+    if (!process.env.NEXT_PUBLIC_ENTE_WIP_CL) return [];
+    if (!(await wipClusterEnable())) return [];
+
+    // Ignore faces belonging to deleted (incl Trash) and hidden files.
+    //
+    // More generally, we should not make strict assumptions about the clusters
+    // we get from remote. In particular, the same face ID can be in different
+    // clusters. In such cases we should assign it arbitrarily assign it to the
+    // last cluster we find it in. Such leeway is intentionally provided to
+    // allow clients some slack in how they implement the sync without needing
+    // to make an blocking API request for every user interaction.
+
+    const files = await getLocalFiles("normal");
+    const fileByID = new Map(files.map((f) => [f.id, f]));
+
+    const faceIndexes = await getFaceIndexes();
+    const personFaceByID = new Map<
+        string,
+        { faceID: string; file: EnteFile; score: number }
+    >();
+    for (const { faces } of faceIndexes) {
+        for (const { faceID, score } of faces) {
+            const fileID = fileIDFromFaceID(faceID);
+            if (!fileID) continue;
+            const file = fileByID.get(fileID);
+            if (!file) continue;
+            personFaceByID.set(faceID, { faceID, file, score });
+        }
+    }
+
+    // Convert cgroups to people.
+    const cgroups = await getClusterGroups();
+    return cgroups
+        .map((cgroup) => {
+            // Hidden cgroups are clusters specifically marked so as to not be shown
+            // in the UI.
+            if (cgroup.isHidden) return undefined;
+
+            // Unnamed groups are also not shown.
+            const name = cgroup.name;
+            if (!name) return undefined;
+
+            // Person faces from all the clusters assigned to this cgroup, sorted by
+            // their score.
+            const faces = cgroup.assigned
+                .map(({ faces }) =>
+                    faces
+                        .map((id) => personFaceByID.get(id))
+                        .filter((f) => !!f),
+                )
+                .flat()
+                .sort((a, b) => b.score - a.score);
+
+            // Ignore this cgroup if we don't have eligible faces left in it.
+            const highestScoringFace = faces[0];
+            if (!highestScoringFace) return undefined;
+
+            // IDs of the files containing this face.
+            const fileIDs = [...new Set(faces.map((f) => f.file.id))];
+
+            // Avatar face ID, or the highest scoring face.
+            const avatarFaceID = cgroup.avatarFaceID;
+            let avatarFile: EnteFile | undefined;
+            if (avatarFaceID) {
+                const avatarFileID = fileIDFromFaceID(avatarFaceID);
+                if (avatarFileID) {
+                    avatarFile = fileByID.get(avatarFileID);
+                }
+            }
+
+            let displayFaceID: string;
+            let displayFaceFile: EnteFile;
+            if (avatarFaceID && avatarFile) {
+                displayFaceID = avatarFaceID;
+                displayFaceFile = avatarFile;
+            } else {
+                displayFaceID = highestScoringFace.faceID;
+                displayFaceFile = highestScoringFace.file;
+            }
+
+            const id = cgroup.id;
+
+            return { id, name, fileIDs, displayFaceID, displayFaceFile };
+        })
+        .filter((c) => !!c)
+        .sort((a, b) => b.fileIDs.length - a.fileIDs.length);
 };

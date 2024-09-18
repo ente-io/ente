@@ -434,8 +434,10 @@ const Option: React.FC<OptionProps<SearchOption, false>> = (props) => (
 );
 
 const OptionContents = ({ data: option }: { data: SearchOption }) => (
-    <Stack className="option-contents" gap={1} px={2} py={1}>
-        <Typography variant="mini">{labelForOption(option)}</Typography>
+    <Stack className="option-contents" gap="4px" px={2} py={1}>
+        <Typography variant="mini" color="text.muted">
+            {labelForOption(option)}
+        </Typography>
         <Stack
             direction="row"
             gap={1}
@@ -481,6 +483,7 @@ const labelForOption = (option: SearchOption) => {
 
         case "date":
             return t("date");
+
         case "location":
             return t("location");
 
@@ -491,6 +494,6 @@ const labelForOption = (option: SearchOption) => {
             return t("magic");
 
         case "person":
-            return t("person");
+            return t("people");
     }
 };
