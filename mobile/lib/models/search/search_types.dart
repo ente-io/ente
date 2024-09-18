@@ -250,7 +250,7 @@ extension SectionTypeExtensions on SectionType {
       case SectionType.face:
         return SearchService.instance.getAllFace(limit);
       case SectionType.magic:
-        return SearchService.instance.getMagicSectionResutls(context);
+        return SearchService.instance.getMagicSectionResults(context);
 
       case SectionType.moment:
         return SearchService.instance.getRandomMomentsSearchResults(context);
