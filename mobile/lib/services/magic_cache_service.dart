@@ -85,7 +85,7 @@ GenericSearchResult? toGenericSearchResult(
     enteFilesInMagicCache,
     params: {
       "enableGrouping": prompt.recentFirst,
-      "fileIdToPosMap": fileIdToPositionMap
+      "fileIdToPosMap": fileIdToPositionMap,
     },
     onResultTap: (ctx) {
       routeToPage(
