@@ -92,8 +92,11 @@ export class SearchWorker {
         searchString: string,
         localizedSearchData: LocalizedSearchData,
     ) {
+        // Case insensitive word prefix match.
+        const re = new RegExp("\\b" + s, "i");
         return suggestionsForString(
             s,
+            re,
             searchString,
             this.collectionsAndFiles,
             this.searchablePeople,
@@ -132,6 +135,7 @@ expose(SearchWorker);
  */
 const suggestionsForString = (
     s: string,
+    re: RegExp,
     searchString: string,
     { collections, files }: SearchCollectionsAndFiles,
     searchablePeople: Searchable<Person>[],
@@ -139,7 +143,7 @@ const suggestionsForString = (
     locationTags: Searchable<LocationTag>[],
     cities: Searchable<City>[],
 ): [SearchSuggestion[], SearchSuggestion[]] => [
-    [peopleSuggestions(s, searchablePeople)].flat(),
+    [peopleSuggestions(re, searchablePeople)].flat(),
     // . <-- clip suggestions will be inserted here by our caller.
     [
         fileTypeSuggestions(s, labelledFileTypes),
@@ -218,11 +222,11 @@ const fileCaptionSuggestion = (
 };
 
 const peopleSuggestions = (
-    s: string,
+    re: RegExp,
     searchablePeople: Searchable<Person>[],
 ): SearchSuggestion[] =>
     searchablePeople
-        .filter(searchableMatch(s))
+        .filter(({ name }) => re.test(name))
         .map((person) => ({ type: "person", person, label: person.name }));
 
 const dateSuggestions = (
