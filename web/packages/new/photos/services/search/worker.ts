@@ -92,8 +92,9 @@ export class SearchWorker {
         searchString: string,
         localizedSearchData: LocalizedSearchData,
     ) {
-        // Case insensitive word prefix match.
-        const re = new RegExp("\\b" + s, "i");
+        // Case insensitive word prefix match, considering underscores also as a
+        // word separator.
+        const re = new RegExp("(\\b|_)" + s, "i");
         return suggestionsForString(
             s,
             re,
