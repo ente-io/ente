@@ -137,7 +137,6 @@
   "leaveFamily": "Abbandona il piano famiglia",
   "leaveFamilyMessage": "Sei sicuro di voler uscire dal piano famiglia?",
   "inFamilyPlanMessage": "Sei un utente con piano famiglia!",
-  "swipeHint": "Scorri a sinistra per modificare o rimuovere i codici",
   "scan": "Scansiona",
   "scanACode": "Scansiona un codice",
   "verify": "Verifica",

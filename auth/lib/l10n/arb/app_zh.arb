@@ -20,6 +20,7 @@
   "codeIssuerHint": "发行人",
   "codeSecretKeyHint": "私钥",
   "secret": "秘密",
+  "all": "全部",
   "notes": "备注",
   "notesLengthLimit": "备注最多可以包含 {count} 个字符",
   "@notesLengthLimit": {
@@ -154,7 +155,6 @@
   "leaveFamily": "离开家庭",
   "leaveFamilyMessage": "您确定要离开家庭计划吗？",
   "inFamilyPlanMessage": "你在一个家庭计划中！",
-  "swipeHint": "向左滑动以编辑或删除代码",
   "scan": "扫描",
   "scanACode": "扫描代码",
   "verify": "验证",
