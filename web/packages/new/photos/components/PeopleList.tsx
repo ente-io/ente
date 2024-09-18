@@ -6,31 +6,26 @@ import { Skeleton, Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
 
-export interface PeopleListProps {
-    /** The list of {@link Person} entities to show. */
+export interface SearchPeopleListProps {
     people: Person[];
-    /** Limit to display to whatever fits within {@link maxRows} rows. */
-    maxRows: number;
-    /** Optional callback invoked when a particular person is selected. */
-    onSelect?: (person: Person, index: number) => void;
+    onSelectPerson: (person: Person) => void;
 }
 
 /**
- * Shows a list of {@link Person} (named cluster groups).
+ * Shows a list of {@link Person}s in the empty state of the search bar.
  */
-export const PeopleList: React.FC<PeopleListProps> = ({
+export const SearchPeopleList: React.FC<SearchPeopleListProps> = ({
     people,
-    maxRows,
-    onSelect,
+    onSelectPerson,
 }) => {
     const isMobileWidth = useIsMobileWidth();
     // TODO-Cluster: FaceCropImageView has hardcoded placeholder dimensions
     return (
-        <SearchFaceChipContainer style={{ maxHeight: maxRows * 87 + 28 }}>
-            {people.slice(0, isMobileWidth ? 6 : 7).map((person, index) => (
+        <SearchFaceChipContainer>
+            {people.slice(0, isMobileWidth ? 6 : 7).map((person) => (
                 <SearchFaceChip
                     key={person.id}
-                    onClick={() => onSelect && onSelect(person, index)}
+                    onClick={() => onSelectPerson(person)}
                 >
                     <FaceCropImageView
                         faceID={person.displayFaceID}
@@ -59,7 +54,7 @@ const SearchFaceChip = styled("div")`
     height: 87px;
     border-radius: 50%;
     overflow: hidden;
-    cursor: "pointer";
+    cursor: pointer;
     & > img {
         width: 100%;
         height: 100%;

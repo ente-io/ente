@@ -8,6 +8,7 @@ import {
     peopleSnapshot,
     peopleSubscribe,
 } from "@/new/photos/services/ml";
+import type { Person } from "@/new/photos/services/ml/cgroups";
 import { searchOptionsForString } from "@/new/photos/services/search";
 import type { SearchOption } from "@/new/photos/services/search/types";
 import { nullToUndefined } from "@/utils/transform";
@@ -40,7 +41,7 @@ import {
     type StylesConfig,
 } from "react-select";
 import AsyncSelect from "react-select/async";
-import { PeopleList } from "./PeopleList";
+import { SearchPeopleList } from "./PeopleList";
 
 export interface SearchBarProps {
     /**
@@ -394,20 +395,22 @@ const EmptyState: React.FC<EmptyStateProps> = () => {
             break;
     }
 
+    const handleSelectPerson = (person: Person) => console.log(person);
+
     return (
         <Box sx={{ textAlign: "left" }}>
             {people && people.length > 0 && (
                 <>
                     <PeopleHeader />
-                    <PeopleList
+                    <SearchPeopleList
                         people={people}
-                        maxRows={2}
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        onSelect={(...args: any) => console.log(args)}
+                        onSelectPerson={handleSelectPerson}
                     />
                 </>
             )}
-            <Typography variant="mini">{label}</Typography>
+            <Typography variant="mini" sx={{ my: "2px" }}>
+                {label}
+            </Typography>
         </Box>
     );
 };
