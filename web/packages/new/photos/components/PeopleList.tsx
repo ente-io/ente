@@ -19,7 +19,6 @@ export const SearchPeopleList: React.FC<SearchPeopleListProps> = ({
     onSelectPerson,
 }) => {
     const isMobileWidth = useIsMobileWidth();
-    // TODO-Cluster: FaceCropImageView has hardcoded placeholder dimensions
     return (
         <SearchFaceChipContainer>
             {people.slice(0, isMobileWidth ? 6 : 7).map((person) => (
@@ -30,6 +29,7 @@ export const SearchPeopleList: React.FC<SearchPeopleListProps> = ({
                     <FaceCropImageView
                         faceID={person.displayFaceID}
                         enteFile={person.displayFaceFile}
+                        placeholderDimension={87}
                     />
                 </SearchFaceChip>
             ))}
@@ -132,7 +132,10 @@ export const UnidentifiedFaces: React.FC<UnidentifiedFacesProps> = ({
             <FaceChipContainer>
                 {faceIDs.map((faceID) => (
                     <FaceChip key={faceID}>
-                        <FaceCropImageView {...{ enteFile, faceID }} />
+                        <FaceCropImageView
+                            placeholderDimension={112}
+                            {...{ enteFile, faceID }}
+                        />
                     </FaceChip>
                 ))}
             </FaceChipContainer>
@@ -145,6 +148,8 @@ interface FaceCropImageViewProps {
     faceID: string;
     /** The {@link EnteFile} which contains this face. */
     enteFile: EnteFile;
+    /** Width and height for the placeholder. */
+    placeholderDimension: number;
 }
 
 /**
@@ -159,6 +164,7 @@ interface FaceCropImageViewProps {
 const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
     faceID,
     enteFile,
+    placeholderDimension,
 }) => {
     const [objectURL, setObjectURL] = useState<string | undefined>();
 
@@ -180,6 +186,10 @@ const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
     return objectURL ? (
         <img style={{ objectFit: "cover" }} src={objectURL} />
     ) : (
-        <Skeleton variant="circular" height={120} width={120} />
+        <Skeleton
+            variant="circular"
+            width={placeholderDimension}
+            height={placeholderDimension}
+        />
     );
 };
