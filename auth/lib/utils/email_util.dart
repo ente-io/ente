@@ -10,6 +10,7 @@ import 'package:ente_auth/ui/components/dialog_widget.dart';
 import 'package:ente_auth/ui/components/models/button_type.dart';
 import 'package:ente_auth/ui/tools/debug/log_file_viewer.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
+import 'package:ente_auth/utils/directory_utils.dart';
 import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_auth/utils/share_utils.dart';
 import 'package:ente_auth/utils/toast_util.dart';
@@ -146,7 +147,7 @@ Future<String> getZippedLogsFile(BuildContext context) async {
   await dialog.show();
   final logsPath = (await getApplicationSupportDirectory()).path;
   final logsDirectory = Directory("$logsPath/logs");
-  final tempPath = (await getTemporaryDirectory()).path;
+  final tempPath = (await DirectoryUtils.getTempsDir()).path;
   final zipFilePath =
       "$tempPath/logs-${Configuration.instance.getUserID() ?? 0}.zip";
   final encoder = ZipFileEncoder();

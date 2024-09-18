@@ -1792,7 +1792,7 @@ packages:
     source: hosted
     version: "0.4.2"
   xdg_directories:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: xdg_directories
       sha256: faea9dee56b520b55a566385b84f2e8de55e7496104adada9962e0bd11bcff1d

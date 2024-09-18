@@ -105,6 +105,7 @@ dependencies:
   uuid: ^4.2.2
   win32: ^5.1.1
   window_manager: ^0.4.2
+  xdg_directories: ^1.0.4
 
 dependency_overrides:
   flutter_secure_storage_linux:
