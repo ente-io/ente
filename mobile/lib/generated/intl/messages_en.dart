@@ -641,6 +641,26 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Disabling two-factor authentication..."),
         "discord": MessageLookupByLibrary.simpleMessage("Discord"),
+        "discover": MessageLookupByLibrary.simpleMessage("Discover"),
+        "discover_babies": MessageLookupByLibrary.simpleMessage("Babies"),
+        "discover_celebrations":
+            MessageLookupByLibrary.simpleMessage("Celebrations"),
+        "discover_food": MessageLookupByLibrary.simpleMessage("Food"),
+        "discover_greenery": MessageLookupByLibrary.simpleMessage("Greenery"),
+        "discover_hills": MessageLookupByLibrary.simpleMessage("Hills"),
+        "discover_identity": MessageLookupByLibrary.simpleMessage("Identity"),
+        "discover_memes": MessageLookupByLibrary.simpleMessage("Memes"),
+        "discover_notes": MessageLookupByLibrary.simpleMessage("Notes"),
+        "discover_pets": MessageLookupByLibrary.simpleMessage("Pets"),
+        "discover_receipts": MessageLookupByLibrary.simpleMessage("Receipts"),
+        "discover_screenshots":
+            MessageLookupByLibrary.simpleMessage("Screenshots"),
+        "discover_selfies": MessageLookupByLibrary.simpleMessage("Selfies"),
+        "discover_sunset": MessageLookupByLibrary.simpleMessage("Sunset"),
+        "discover_visiting_cards":
+            MessageLookupByLibrary.simpleMessage("Visiting Cards"),
+        "discover_wallpapers":
+            MessageLookupByLibrary.simpleMessage("Wallpapers"),
         "dismiss": MessageLookupByLibrary.simpleMessage("Dismiss"),
         "distanceInKMUnit": MessageLookupByLibrary.simpleMessage("km"),
         "doNotSignOut": MessageLookupByLibrary.simpleMessage("Do not sign out"),

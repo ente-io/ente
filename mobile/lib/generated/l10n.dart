@@ -2976,6 +2976,167 @@ class S {
     );
   }
 
+  /// `Discover`
+  String get discover {
+    return Intl.message(
+      'Discover',
+      name: 'discover',
+      desc:
+          'The text to display for the discover section under which we show receipts, screenshots, sunsets, greenery, etc.',
+      args: [],
+    );
+  }
+
+  /// `Identity`
+  String get discover_identity {
+    return Intl.message(
+      'Identity',
+      name: 'discover_identity',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Screenshots`
+  String get discover_screenshots {
+    return Intl.message(
+      'Screenshots',
+      name: 'discover_screenshots',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Receipts`
+  String get discover_receipts {
+    return Intl.message(
+      'Receipts',
+      name: 'discover_receipts',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Notes`
+  String get discover_notes {
+    return Intl.message(
+      'Notes',
+      name: 'discover_notes',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Memes`
+  String get discover_memes {
+    return Intl.message(
+      'Memes',
+      name: 'discover_memes',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Visiting Cards`
+  String get discover_visiting_cards {
+    return Intl.message(
+      'Visiting Cards',
+      name: 'discover_visiting_cards',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Babies`
+  String get discover_babies {
+    return Intl.message(
+      'Babies',
+      name: 'discover_babies',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pets`
+  String get discover_pets {
+    return Intl.message(
+      'Pets',
+      name: 'discover_pets',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Selfies`
+  String get discover_selfies {
+    return Intl.message(
+      'Selfies',
+      name: 'discover_selfies',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Wallpapers`
+  String get discover_wallpapers {
+    return Intl.message(
+      'Wallpapers',
+      name: 'discover_wallpapers',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Food`
+  String get discover_food {
+    return Intl.message(
+      'Food',
+      name: 'discover_food',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Celebrations`
+  String get discover_celebrations {
+    return Intl.message(
+      'Celebrations',
+      name: 'discover_celebrations',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sunset`
+  String get discover_sunset {
+    return Intl.message(
+      'Sunset',
+      name: 'discover_sunset',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hills`
+  String get discover_hills {
+    return Intl.message(
+      'Hills',
+      name: 'discover_hills',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Greenery`
+  String get discover_greenery {
+    return Intl.message(
+      'Greenery',
+      name: 'discover_greenery',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Please note that machine learning will result in a higher bandwidth and battery usage until all items are indexed. Consider using the desktop app for faster indexing, all results will be synced automatically.`
   String get mlIndexingDescription {
     return Intl.message(

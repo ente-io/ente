@@ -58,7 +58,7 @@ extension SectionTypeExtensions on SectionType {
       case SectionType.face:
         return S.of(context).people;
       case SectionType.magic:
-        return "Discover";
+        return S.of(context).discover;
       case SectionType.moment:
         return S.of(context).moments;
       case SectionType.location:
@@ -250,7 +250,7 @@ extension SectionTypeExtensions on SectionType {
       case SectionType.face:
         return SearchService.instance.getAllFace(limit);
       case SectionType.magic:
-        return SearchService.instance.getMagicSectionResutls();
+        return SearchService.instance.getMagicSectionResutls(context);
 
       case SectionType.moment:
         return SearchService.instance.getRandomMomentsSearchResults(context);

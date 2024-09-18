@@ -4,12 +4,14 @@ import "dart:io";
 
 import "package:computer/computer.dart";
 import "package:flutter/foundation.dart";
+import "package:flutter/widgets.dart";
 import "package:logging/logging.dart";
 import "package:path_provider/path_provider.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/file_uploaded_event.dart";
 import "package:photos/events/magic_cache_updated_event.dart";
 import "package:photos/extensions/stop_watch.dart";
+import "package:photos/l10n/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/discover/prompt.dart";
@@ -65,7 +67,45 @@ class MagicCache {
   }
 }
 
+String getLocalizedTitle(BuildContext context, String title) {
+  switch (title) {
+    case 'Identity':
+      return context.l10n.discover_identity;
+    case 'Screenshots':
+      return context.l10n.discover_screenshots;
+    case 'Receipts':
+      return context.l10n.discover_receipts;
+    case 'Notes':
+      return context.l10n.discover_notes;
+    case 'Memes':
+      return context.l10n.discover_memes;
+    case 'Visiting Cards':
+      return context.l10n.discover_visiting_cards;
+    case 'Babies':
+      return context.l10n.discover_babies;
+    case 'Pets':
+      return context.l10n.discover_pets;
+    case 'Selfies':
+      return context.l10n.discover_selfies;
+    case 'Wallpapers':
+      return context.l10n.discover_wallpapers;
+    case 'Food':
+      return context.l10n.discover_food;
+    case 'Celebrations':
+      return context.l10n.discover_celebrations;
+    case 'Sunset':
+      return context.l10n.discover_sunset;
+    case 'Hills':
+      return context.l10n.discover_hills;
+    case 'Greenery':
+      return context.l10n.discover_greenery;
+    default:
+      return title; // If no match, return the original string
+  }
+}
+
 GenericSearchResult? toGenericSearchResult(
+  BuildContext context,
   Prompt prompt,
   List<EnteFile> enteFilesInMagicCache,
   Map<int, int> fileIdToPositionMap,
@@ -79,9 +119,10 @@ GenericSearchResult? toGenericSearchResult(
           .compareTo(fileIdToPositionMap[b.uploadedFileID!]!);
     });
   }
+  final String title = getLocalizedTitle(context, prompt.title);
   return GenericSearchResult(
     ResultType.magic,
-    prompt.title,
+    title,
     enteFilesInMagicCache,
     params: {
       "enableGrouping": prompt.recentFirst,
@@ -92,12 +133,12 @@ GenericSearchResult? toGenericSearchResult(
         ctx,
         MagicResultScreen(
           enteFilesInMagicCache,
-          name: prompt.title,
+          name: title,
           enableGrouping: prompt.recentFirst,
           fileIdToPosMap: fileIdToPositionMap,
           heroTag: GenericSearchResult(
             ResultType.magic,
-            prompt.title,
+            title,
             enteFilesInMagicCache,
           ).heroTag(),
         ),
@@ -255,7 +296,8 @@ class MagicCacheService {
     await File(await _getCachePath()).delete();
   }
 
-  Future<List<GenericSearchResult>> getMagicGenericSearchResult() async {
+  Future<List<GenericSearchResult>> getMagicGenericSearchResult(
+      BuildContext context) async {
     try {
       final EnteWatch? w =
           kDebugMode ? EnteWatch("magicGenericSearchResult") : null;
@@ -296,6 +338,7 @@ class MagicCacheService {
       }
       for (final p in prompts) {
         final genericSearchResult = toGenericSearchResult(
+          context,
           p,
           magicIdToFiles[p.title] ?? [],
           promptFileOrder[p.title] ?? {},
