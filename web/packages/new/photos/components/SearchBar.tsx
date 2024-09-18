@@ -493,6 +493,6 @@ const labelForOption = (option: SearchOption) => {
             return t("magic");
 
         case "person":
-            return t("person");
+            return t("people");
     }
 };
