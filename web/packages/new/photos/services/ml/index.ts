@@ -597,46 +597,6 @@ const setInterimScheduledStatus = () => {
 const workerDidProcessFileOrIdle = throttled(updateMLStatusSnapshot, 2000);
 
 /**
- * A massaged version of {@link CGroup} suitable for being shown in the UI.
- *
- * The cgroups synced with remote do not directly correspond to "people".
- * CGroups represent both positive and negative feedback, where the negations
- * are specifically feedback meant so that we do not show the corresponding
- * cluster in the UI.
- *
- * So while each person has an underlying cgroups, not all cgroups have a
- * corresponding person.
- *
- * Beyond this semantic difference, there is also data massaging: a
- * {@link Person} has data converted into a format that the UI can directly and
- * efficiently use, as compared to a {@link CGroup}, which is tailored for
- * transmission and storage.
- */
-export interface Person {
-    /**
-     * Nanoid of the underlying {@link CGroup}.
-     */
-    id: string;
-    /**
-     * The name of the person.
-     */
-    name: string;
-    /**
-     * IDs of the (unique) files in which this face occurs.
-     */
-    fileIDs: number[];
-    /**
-     * The face that should be used as the "cover" face to represent this
-     * {@link Person} in the UI.
-     */
-    displayFaceID: string;
-    /**
-     * The {@link EnteFile} which contains the display face.
-     */
-    displayFaceFile: EnteFile;
-}
-
-/**
  * A function that can be used to subscribe to updates to {@link Person}s.
  *
  * This, along with {@link peopleSnapshot}, is meant to be used as arguments to

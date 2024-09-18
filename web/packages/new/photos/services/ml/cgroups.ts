@@ -2,7 +2,6 @@ import { masterKeyFromSession } from "@/base/session-store";
 import { fileIDFromFaceID, wipClusterEnable } from ".";
 import type { EnteFile } from "../../types/file";
 import { getLocalFiles } from "../files";
-import { setCGroups } from "../search";
 import { pullCGroups } from "../user-entity";
 import type { FaceCluster } from "./cluster";
 import { getClusterGroups, getFaceIndexes } from "./db";
@@ -79,6 +78,47 @@ export interface CGroup {
 }
 
 /**
+ * A massaged version of {@link CGroup} suitable for being shown in the UI.
+ *
+ * The cgroups synced with remote do not directly correspond to "people".
+ * CGroups represent both positive and negative feedback, where the negations
+ * are specifically feedback meant so that we do not show the corresponding
+ * cluster in the UI.
+ *
+ * So while each person has an underlying cgroups, not all cgroups have a
+ * corresponding person.
+ *
+ * Beyond this semantic difference, there is also data massaging: a
+ * {@link Person} has data converted into a format that the UI can directly and
+ * efficiently use, as compared to a {@link CGroup}, which is tailored for
+ * transmission and storage.
+ */
+export interface Person {
+    /**
+     * Nanoid of the underlying {@link CGroup}.
+     */
+    id: string;
+    /**
+     * The name of the person.
+     */
+    name: string;
+    /**
+     * IDs of the (unique) files in which this face occurs.
+     */
+    fileIDs: number[];
+    /**
+     * The face that should be used as the "cover" face to represent this
+     * {@link Person} in the UI.
+     */
+    displayFaceID: string;
+    /**
+     * The {@link EnteFile} which contains the display face.
+     */
+    displayFaceFile: EnteFile;
+}
+
+// TODO-Cluster remove me
+/**
  * A {@link CGroup} annotated with various in-memory state to make it easier for
  * the upper layers of our code to directly use it.
  */
@@ -110,10 +150,13 @@ export const syncCGroups = async () => {
  * This function is meant to run after files, cgroups and faces have been synced
  * with remote. It then uses all the information in the local DBs to construct
  * an in-memory list of {@link Person}s on which the UI will operate.
+ *
+ * @return A list of {@link Person}s, sorted by the number of files that they
+ * reference.
  */
-export const updatePeople = async () => {
-    if (!process.env.NEXT_PUBLIC_ENTE_WIP_CL) return;
-    if (!(await wipClusterEnable())) return;
+export const updatedPeople = async () => {
+    if (!process.env.NEXT_PUBLIC_ENTE_WIP_CL) return [];
+    if (!(await wipClusterEnable())) return [];
 
     // Ignore faces belonging to deleted (incl Trash) and hidden files.
     //
@@ -144,7 +187,7 @@ export const updatePeople = async () => {
 
     // Convert cgroups to people.
     const cgroups = await getClusterGroups();
-    const people = cgroups
+    return cgroups
         .map((cgroup) => {
             // Hidden cgroups are clusters specifically marked so as to not be shown
             // in the UI.
@@ -196,15 +239,6 @@ export const updatePeople = async () => {
 
             return { id, name, fileIDs, displayFaceID, displayFaceFile };
         })
-        .filter((c) => !!c);
-
-    // Read all the latest cluster groups, locally present files, local faces
-
-    // Re-read the cgroups across which we should search from the local ML DB.
-    //
-    // This DB read can happen in the search worker too, but that would cause
-    // another handle to the DB to be opened (from the search worker's context).
-    // Making the DB call here avoids that (not that we noticed any issues, but
-    // preemptively trying not to poke IndexedDB too much lest it be flaky).
-    await setCGroups();
+        .filter((c) => !!c)
+        .sort((a, b) => b.fileIDs.length - a.fileIDs.length);
 };

@@ -6,7 +6,7 @@
 import type { Location } from "@/base/types";
 import type { Collection } from "@/media/collection";
 import { FileType } from "@/media/file-type";
-import type { Person } from "@/new/photos/services/ml";
+import type { Person } from "@/new/photos/services/ml/cgroups";
 import type { EnteFile } from "@/new/photos/types/file";
 import type { LocationTag } from "../user-entity";
 
@@ -45,9 +45,9 @@ export interface SearchOption {
 }
 
 /**
- * The collections and files which we should search.
+ * The collections and files over which we should search.
  */
-export interface SearchableCollectionsAndFiles {
+export interface SearchCollectionsAndFiles {
     collections: Collection[];
     files: EnteFile[];
 }

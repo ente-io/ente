@@ -1,9 +1,8 @@
 import { HTTPError } from "@/base/http";
-import log from "@/base/log";
 import type { Location } from "@/base/types";
 import type { Collection } from "@/media/collection";
 import { fileCreationPhotoDate, fileLocation } from "@/media/file-metadata";
-import type { CGroup } from "@/new/photos/services/ml/cgroups";
+import type { Person } from "@/new/photos/services/ml/cgroups";
 import type { EnteFile } from "@/new/photos/types/file";
 import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";
@@ -23,12 +22,10 @@ import type {
     LabelledSearchDateComponents,
     LocalizedSearchData,
     Searchable,
-    SearchableCollectionsAndFiles,
+    SearchCollectionsAndFiles,
     SearchDateComponents,
     SearchSuggestion,
 } from "./types";
-
-type SearchableCGroup = Searchable<Omit<CGroup, "name"> & { name: string }>;
 
 /**
  * A web worker that runs the search asynchronously so that the main thread
@@ -37,11 +34,11 @@ type SearchableCGroup = Searchable<Omit<CGroup, "name"> & { name: string }>;
 export class SearchWorker {
     private locationTags: Searchable<LocationTag>[] = [];
     private cities: Searchable<City>[] = [];
-    private searchableCollectionsAndFiles: SearchableCollectionsAndFiles = {
+    private collectionsAndFiles: SearchCollectionsAndFiles = {
         collections: [],
         files: [],
     };
-    private searchableCGroups: SearchableCGroup[] = [];
+    private searchablePeople: Searchable<Person>[] = [];
 
     /**
      * Fetch any state we might need when the actual search happens.
@@ -71,23 +68,17 @@ export class SearchWorker {
     /**
      * Set the collections and files that we should search across.
      */
-    setSearchableCollectionsAndFiles(data: SearchableCollectionsAndFiles) {
-        this.searchableCollectionsAndFiles = data;
+    setCollectionsAndFiles(cf: SearchCollectionsAndFiles) {
+        this.collectionsAndFiles = cf;
     }
 
     /**
-     * Set the cgroups that we should search across.
+     * Set the people that we should search across.
      */
-    setCGroups(cgroups: CGroup[]) {
-        this.searchableCGroups = cgroups
-            .map((cgroup) => {
-                const name = cgroup.name;
-                if (!name) return undefined;
-                if (cgroup.isHidden) return undefined;
-                return { ...cgroup, name, lowercasedName: name.toLowerCase() };
-            })
-            .filter((c) => !!c);
-        log.debug(() => ["searchableCGroups", this.searchableCGroups]);
+    setPeople(people: Person[]) {
+        this.searchablePeople = people.map((person) => {
+            return { ...person, lowercasedName: person.name.toLowerCase() };
+        });
     }
 
     /**
@@ -101,8 +92,8 @@ export class SearchWorker {
         return suggestionsForString(
             s,
             searchString,
-            this.searchableCollectionsAndFiles,
-            this.searchableCGroups,
+            this.collectionsAndFiles,
+            this.searchablePeople,
             localizedSearchData,
             this.locationTags,
             this.cities,
@@ -114,7 +105,7 @@ export class SearchWorker {
      */
     filterSearchableFiles(suggestion: SearchSuggestion) {
         return filterSearchableFiles(
-            this.searchableCollectionsAndFiles.files,
+            this.collectionsAndFiles.files,
             suggestion,
         );
     }
@@ -123,7 +114,7 @@ export class SearchWorker {
      * Batched variant of {@link filterSearchableFiles}.
      */
     filterSearchableFilesMulti(suggestions: SearchSuggestion[]) {
-        const files = this.searchableCollectionsAndFiles.files;
+        const files = this.collectionsAndFiles.files;
         return suggestions
             .map((sg) => [filterSearchableFiles(files, sg), sg] as const)
             .filter(([files]) => files.length);
@@ -139,15 +130,15 @@ expose(SearchWorker);
 const suggestionsForString = (
     s: string,
     searchString: string,
-    { collections, files }: SearchableCollectionsAndFiles,
-    searchableCGroups: SearchableCGroup[],
+    { collections, files }: SearchCollectionsAndFiles,
+    searchablePeople: Searchable<Person>[],
     { locale, holidays, labelledFileTypes }: LocalizedSearchData,
     locationTags: Searchable<LocationTag>[],
     cities: Searchable<City>[],
 ): SearchSuggestion[] =>
     [
         // . <-- clip suggestions will be inserted here by our caller.
-        peopleSuggestions(s, searchableCGroups),
+        peopleSuggestions(s, searchablePeople),
         fileTypeSuggestions(s, labelledFileTypes),
         dateSuggestions(s, locale, holidays),
         locationSuggestions(s, locationTags, cities),
@@ -216,21 +207,11 @@ const fileCaptionSuggestion = (
 
 const peopleSuggestions = (
     s: string,
-    searchableCGroups: SearchableCGroup[],
-): SearchSuggestion[] => {
-    // Suppress the unused warning during WIP
-    if (process.env.NEXT_PUBLIC_ENTE_WIP_CL) {
-        console.log({ s, searchableCGroups });
-    }
-    return [];
-    // searchableCGroups
-    //     .filter(({ lowercasedName }) => lowercasedName.startsWith(s))
-    //     .map((scgroup) => ({
-    //         type: "person",
-    //         person: scgroup,
-    //         label: scgroup.name,
-    //     }));
-};
+    searchablePeople: Searchable<Person>[],
+): SearchSuggestion[] =>
+    searchablePeople
+        .filter(({ lowercasedName }) => lowercasedName.startsWith(s))
+        .map((person) => ({ type: "person", person, label: person.name }));
 
 const dateSuggestions = (
     s: string,
