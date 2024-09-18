@@ -146,21 +146,21 @@ const suggestionsForString = (
     [peopleSuggestions(re, searchablePeople)].flat(),
     // . <-- clip suggestions will be inserted here by our caller.
     [
-        fileTypeSuggestions(s, labelledFileTypes),
-        dateSuggestions(s, locale, holidays),
-        locationSuggestions(s, locationTags, cities),
-        collectionSuggestions(s, collections),
-        fileNameSuggestion(s, searchString, files),
-        fileCaptionSuggestion(s, searchString, files),
+        fileTypeSuggestions(re, labelledFileTypes),
+        dateSuggestions(s, re, locale, holidays),
+        locationSuggestions(re, locationTags, cities),
+        collectionSuggestions(re, collections),
+        fileNameSuggestion(s, re, searchString, files),
+        fileCaptionSuggestion(re, searchString, files),
     ].flat(),
 ];
 
 const collectionSuggestions = (
-    s: string,
+    re: RegExp,
     collections: Collection[],
 ): SearchSuggestion[] =>
     collections
-        .filter(({ name }) => name.toLowerCase().includes(s))
+        .filter((c) => re.test(c.name))
         .map(({ id, name }) => ({
             type: "collection",
             collectionID: id,
@@ -168,23 +168,16 @@ const collectionSuggestions = (
         }));
 
 const fileTypeSuggestions = (
-    s: string,
+    re: RegExp,
     labelledFileTypes: Searchable<LabelledFileType>[],
 ): SearchSuggestion[] =>
     labelledFileTypes
-        .filter(searchableMatch(s))
+        .filter(({ label }) => re.test(label))
         .map(({ fileType, label }) => ({ type: "fileType", fileType, label }));
-
-/**
- * A helper function to directly pass to filters on Searchable<T>[].
- */
-const searchableMatch =
-    (s: string) =>
-    ({ searchTerms }: { searchTerms: string[] }) =>
-        searchTerms.some((t) => t.startsWith(s));
 
 const fileNameSuggestion = (
     s: string,
+    re: RegExp,
     searchString: string,
     files: EnteFile[],
 ): SearchSuggestion[] => {
@@ -193,10 +186,7 @@ const fileNameSuggestion = (
     const sn = Number(s) || undefined;
 
     const fileIDs = files
-        .filter(
-            ({ id, metadata }) =>
-                id === sn || metadata.title.toLowerCase().includes(s),
-        )
+        .filter(({ id, metadata }) => id === sn || re.test(metadata.title))
         .map((f) => f.id);
 
     return fileIDs.length
@@ -205,15 +195,16 @@ const fileNameSuggestion = (
 };
 
 const fileCaptionSuggestion = (
-    s: string,
+    re: RegExp,
     searchString: string,
     files: EnteFile[],
 ): SearchSuggestion[] => {
     const fileIDs = files
-        .filter((file) =>
+        .filter((file) => {
             // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-            file.pubMagicMetadata?.data?.caption?.toLowerCase().includes(s),
-        )
+            const caption = file.pubMagicMetadata?.data?.caption;
+            return caption && re.test(caption);
+        })
         .map((f) => f.id);
 
     return fileIDs.length
@@ -226,19 +217,22 @@ const peopleSuggestions = (
     searchablePeople: Searchable<Person>[],
 ): SearchSuggestion[] =>
     searchablePeople
-        .filter(({ name }) => re.test(name))
+        .filter((p) => re.test(p.name))
         .map((person) => ({ type: "person", person, label: person.name }));
 
 const dateSuggestions = (
     s: string,
+    re: RegExp,
     locale: string,
     holidays: Searchable<LabelledSearchDateComponents>[],
 ): SearchSuggestion[] =>
-    parseDateComponents(s, locale, holidays).map(({ components, label }) => ({
-        type: "date",
-        dateComponents: components,
-        label,
-    }));
+    parseDateComponents(s, re, locale, holidays).map(
+        ({ components, label }) => ({
+            type: "date",
+            dateComponents: components,
+            label,
+        }),
+    );
 
 /**
  * Try to parse an arbitrary search string into sets of date components.
@@ -256,13 +250,14 @@ const dateSuggestions = (
  */
 const parseDateComponents = (
     s: string,
+    re: RegExp,
     locale: string,
     holidays: Searchable<LabelledSearchDateComponents>[],
 ): LabelledSearchDateComponents[] =>
     [
         parseChrono(s, locale),
         parseYearComponents(s),
-        holidays.filter(searchableMatch(s)),
+        holidays.filter((h) => re.test(h.label)),
     ].flat();
 
 const parseChrono = (
@@ -338,19 +333,19 @@ const fetchCities = async () => {
 };
 
 const locationSuggestions = (
-    s: string,
+    re: RegExp,
     locationTags: Searchable<LocationTag>[],
     cities: Searchable<City>[],
 ): SearchSuggestion[] => {
-    const matchingLocationTags = locationTags.filter(searchableMatch(s));
+    const matchingLocationTags = locationTags.filter((t) => re.test(t.name));
 
     const matchingLocationTagLNames = new Set(
-        matchingLocationTags.map((t) => t.searchTerms),
+        matchingLocationTags.map((t) => t.name),
     );
 
     const matchingCities = cities
-        .filter(searchableMatch(s))
-        .filter((c) => !matchingLocationTagLNames.has(c.searchTerms));
+        .filter((c) => re.test(c.name))
+        .filter((c) => !matchingLocationTagLNames.has(c.name.toLowerCase()));
 
     return [
         matchingLocationTags.map(
