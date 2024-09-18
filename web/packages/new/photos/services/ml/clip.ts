@@ -1,6 +1,6 @@
 import type { ElectronMLWorker } from "@/base/types/ipc";
 import type { ImageBitmapAndData } from "./blob";
-import { clipIndexes } from "./db";
+import { getCLIPIndexes } from "./db";
 import { pixelRGBBilinear } from "./image";
 import { dotProduct, norm } from "./math";
 import type { CLIPMatches } from "./worker-types";
@@ -208,7 +208,7 @@ let _cachedCLIPIndexes:
  * produces potentially new CLIP indexes).
  */
 const cachedOrReadCLIPIndexes = async () =>
-    (_cachedCLIPIndexes ??= (await clipIndexes()).map(
+    (_cachedCLIPIndexes ??= (await getCLIPIndexes()).map(
         ({ fileID, embedding }) => ({
             fileID,
             embedding: new Float32Array(embedding),

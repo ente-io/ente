@@ -18,7 +18,7 @@ import { proxy, transfer } from "comlink";
 import { isInternalUser } from "../feature-flags";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
 import type { UploadItem } from "../upload/types";
-import { syncCGroups } from "./cgroups";
+import { syncCGroups, updatePeople } from "./cgroups";
 import {
     type ClusterFace,
     type ClusteringOpts,
@@ -27,7 +27,7 @@ import {
     type OnClusteringProgress,
 } from "./cluster";
 import { regenerateFaceCrops } from "./crop";
-import { clearMLDB, faceIndex, indexableAndIndexedCounts } from "./db";
+import { clearMLDB, getFaceIndex, getIndexableAndIndexedCounts } from "./db";
 import { MLWorker } from "./worker";
 import type { CLIPMatches } from "./worker-types";
 
@@ -296,23 +296,18 @@ export const mlStatusSync = async () => {
  *
  * If ML is enabled, it pulls any missing embeddings from remote and starts
  * indexing to backfill any missing values. It also syncs cgroups and updates
- * the search service to use the latest values.
+ * the search service to use the latest values. Finally, it uses the latest
+ * files, faces and cgroups to update the people shown in the UI.
  *
  * This will only have an effect if {@link mlStatusSync} has been called at
  * least once prior to calling this in the sync sequence.
  */
 export const mlSync = async () => {
-    if (_state.isMLEnabled) {
-        await Promise.all([
-            // On-device ML, if supported.
-            isMLSupported && worker().then((w) => w.sync()),
-            // "People".
-            process.env.NEXT_PUBLIC_ENTE_WIP_CL &&
-                wipClusterEnable().then((enable) =>
-                    enable ? syncCGroups() : undefined,
-                ),
-        ]);
-    }
+    if (!isMLSupported) return;
+    if (!_state.isMLEnabled) return;
+    await Promise.all([worker().then((w) => w.sync()), syncCGroups()]).then(
+        () => updatePeople(),
+    );
 };
 
 /**
@@ -548,7 +543,8 @@ const setMLStatusSnapshot = (snapshot: MLStatus) => {
 const getMLStatus = async (): Promise<MLStatus> => {
     if (!_state.isMLEnabled) return { phase: "disabled" };
 
-    const { indexedCount, indexableCount } = await indexableAndIndexedCounts();
+    const { indexedCount, indexableCount } =
+        await getIndexableAndIndexedCounts();
 
     // During live uploads, the indexable count remains zero even as the indexer
     // is processing the newly uploaded items. This is because these "live
@@ -617,12 +613,18 @@ const workerDidProcessFileOrIdle = throttled(updateMLStatusSnapshot, 2000);
  * transmission and storage.
  */
 export interface Person {
-    /** Unique ID (nanoid) of the underlying {@link CGroup}. */
+    /**
+     * Nanoid of the underlying {@link CGroup}.
+     */
     id: string;
-    /** The name of the person. */
+    /**
+     * The name of the person.
+     */
     name: string;
-    /** The files in which this face occurs. */
-    files: number[];
+    /**
+     * IDs of the (unique) files in which this face occurs.
+     */
+    fileIDs: number[];
     /**
      * The face that should be used as the "cover" face to represent this
      * {@link Person} in the UI.
@@ -722,7 +724,7 @@ export const clipMatches = (
 export const unidentifiedFaceIDs = async (
     enteFile: EnteFile,
 ): Promise<string[]> => {
-    const index = await faceIndex(enteFile.id);
+    const index = await getFaceIndex(enteFile.id);
     return index?.faces.map((f) => f.faceID) ?? [];
 };
 
@@ -730,7 +732,8 @@ export const unidentifiedFaceIDs = async (
  * Extract the fileID of the {@link EnteFile} to which the face belongs from its
  * faceID.
  */
-const fileIDFromFaceID = (faceID: string) => {
+// TODO-Cluster
+export const fileIDFromFaceID = (faceID: string) => {
     const fileID = parseInt(faceID.split("_")[0] ?? "");
     if (isNaN(fileID)) {
         assertionFailed(`Ignoring attempt to parse invalid faceID ${faceID}`);
@@ -766,7 +769,7 @@ export const faceCrop = async (faceID: string, enteFile: EnteFile) => {
  * the file (updating the "face-crops" {@link BlobCache}).
  */
 const regenerateFaceCropsIfNeeded = async (enteFile: EnteFile) => {
-    const index = await faceIndex(enteFile.id);
+    const index = await getFaceIndex(enteFile.id);
     if (!index) return;
 
     const cache = await blobCache("face-crops");
