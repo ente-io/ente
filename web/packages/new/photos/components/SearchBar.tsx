@@ -1,6 +1,5 @@
 import { assertionFailed } from "@/base/assert";
 import { useIsMobileWidth } from "@/base/hooks";
-import log from "@/base/log";
 import { ItemCard, ResultPreviewTile } from "@/new/photos/components/ItemCards";
 import {
     isMLSupported,
@@ -370,9 +369,8 @@ const EmptyState: React.FC<EmptyStateProps> = () => {
     const mlStatus = useSyncExternalStore(mlStatusSubscribe, mlStatusSnapshot);
     const people = useSyncExternalStore(peopleSubscribe, peopleSnapshot);
 
-    log.debug(() => ["EmptyState", { mlStatus, people }]);
-    // TODO-Cluster
     if (!mlStatus || mlStatus.phase == "disabled") {
+        // The preflight check should've prevented us from coming here.
         assertionFailed();
         return <></>;
     }
@@ -415,6 +413,7 @@ const EmptyState: React.FC<EmptyStateProps> = () => {
 };
 
 const PeopleHeader: React.FC = () => {
+    // TODO-Cluster
     const handleClick = () => console.log("click");
     return (
         <Stack direction="row" sx={{ cursor: "pointer" }} onClick={handleClick}>
