@@ -26,7 +26,20 @@ import "package:shared_preferences/shared_preferences.dart";
 class MagicCache {
   final String title;
   final List<int> fileUploadedIDs;
+  Map<int, int>? _fileIdToPositionMap;
+
   MagicCache(this.title, this.fileUploadedIDs);
+
+  // Get map of uploadID to index in fileUploadedIDs
+  Map<int, int> get fileIdToPositionMap {
+    if (_fileIdToPositionMap == null) {
+      _fileIdToPositionMap = {};
+      for (int i = 0; i < fileUploadedIDs.length; i++) {
+        _fileIdToPositionMap![fileUploadedIDs[i]] = i;
+      }
+    }
+    return _fileIdToPositionMap!;
+  }
 
   factory MagicCache.fromJson(Map<String, dynamic> json) {
     return MagicCache(
@@ -55,15 +68,25 @@ class MagicCache {
 GenericSearchResult? toGenericSearchResult(
   Prompt prompt,
   List<EnteFile> enteFilesInMagicCache,
+  Map<int, int> fileIdToPositionMap,
 ) {
   if (enteFilesInMagicCache.isEmpty) {
     return null;
+  }
+  if (!prompt.recentFirst) {
+    enteFilesInMagicCache.sort((a, b) {
+      return fileIdToPositionMap[a.uploadedFileID!]!
+          .compareTo(fileIdToPositionMap[b.uploadedFileID!]!);
+    });
   }
   return GenericSearchResult(
     ResultType.magic,
     prompt.title,
     enteFilesInMagicCache,
-    params: {"enableGrouping": prompt.recentFirst},
+    params: {
+      "enableGrouping": prompt.recentFirst,
+      "fileIdToPosMap": fileIdToPositionMap
+    },
     onResultTap: (ctx) {
       routeToPage(
         ctx,
@@ -71,6 +94,7 @@ GenericSearchResult? toGenericSearchResult(
           enteFilesInMagicCache,
           name: prompt.title,
           enableGrouping: prompt.recentFirst,
+          fileIdToPosMap: fileIdToPositionMap,
           heroTag: GenericSearchResult(
             ResultType.magic,
             prompt.title,
@@ -246,9 +270,12 @@ class MagicCacheService {
         w?.log("cacheFound");
       }
       final Map<String, List<EnteFile>> magicIdToFiles = {};
+
       final Map<String, Prompt> promptMap = {};
+      final Map<String, Map<int, int>> promptFileOrder = {};
       for (MagicCache c in magicCaches) {
         magicIdToFiles[c.title] = [];
+        promptFileOrder[c.title] = c.fileIdToPositionMap;
       }
       for (final p in prompts) {
         promptMap[p.title] = p;
@@ -258,7 +285,8 @@ class MagicCacheService {
       for (EnteFile file in files) {
         if (!file.isUploaded) continue;
         for (MagicCache magicCache in magicCaches) {
-          if (magicCache.fileUploadedIDs.contains(file.uploadedFileID!)) {
+          if (magicCache.fileIdToPositionMap
+              .containsKey(file.uploadedFileID!)) {
             if (file.isVideo &&
                 (promptMap[magicCache.title]?.showVideo ?? true) == false) {
               continue;
@@ -271,6 +299,7 @@ class MagicCacheService {
         final genericSearchResult = toGenericSearchResult(
           p,
           magicIdToFiles[p.title] ?? [],
+          promptFileOrder[p.title] ?? {},
         );
         if (genericSearchResult != null) {
           genericSearchResults.add(genericSearchResult);

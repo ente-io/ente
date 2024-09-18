@@ -172,6 +172,9 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
                                   name: magicSectionResult.name(),
                                   enableGrouping: magicSectionResult
                                       .params["enableGrouping"]! as bool,
+                                  fileIdToPosMap: magicSectionResult
+                                          .params["fileIdToPosMap"]
+                                      as Map<int, int>,
                                   heroTag: "searchable_item" +
                                       magicSectionResult.heroTag(),
                                 ),
