@@ -2,7 +2,7 @@ import { triggerFeatureFlagsFetchIfNeeded } from "@/new/photos/services/feature-
 import {
     isMLSupported,
     mlStatusSync,
-    triggerMLSync,
+    mlSync,
     wipClusterEnable,
 } from "@/new/photos/services/ml";
 import { syncCGroups } from "@/new/photos/services/ml/cgroups";
@@ -46,7 +46,7 @@ export const sync = async () => {
             wipClusterEnable().then((enable) =>
                 enable ? syncCGroups().then(rereadCGroups) : undefined,
             ),
+        isMLSupported && mlSync(),
     ]);
     triggerSearchDataSync();
-    if (isMLSupported) triggerMLSync();
 };

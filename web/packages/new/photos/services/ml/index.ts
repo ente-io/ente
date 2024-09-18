@@ -207,8 +207,8 @@ export const enableML = async () => {
     setIsMLEnabledLocal(true);
     _state.isMLEnabled = true;
     setInterimScheduledStatus();
-    triggerStatusUpdate();
-    triggerMLSync();
+    // Trigger updates, but don't wait for them to finish.
+    void updateMLStatusSnapshot().then(mlSync);
 };
 
 /**
@@ -288,7 +288,7 @@ export const mlStatusSync = async () => {
 };
 
 /**
- * Trigger a ML sync.
+ * Perform a ML sync.
  *
  * This is called during the global sync sequence, after files information have
  * been synced with remote.
@@ -299,9 +299,7 @@ export const mlStatusSync = async () => {
  * This will only have an effect if {@link mlStatusSync} has been called at
  * least once prior to calling this in the sync sequence.
  */
-export const triggerMLSync = () => void mlSync();
-
-const mlSync = async () => {
+export const mlSync = async () => {
     if (_state.isMLEnabled) await worker().then((w) => w.sync());
 };
 
@@ -514,12 +512,12 @@ export const mlStatusSnapshot = (): MLStatus | undefined => {
 };
 
 /**
- * Trigger an asynchronous and unconditional update of the {@link MLStatus}
- * snapshot.
+ * Trigger an asynchronous update of the {@link MLStatus} snapshot, and return
+ * without waiting for it to finish.
  */
 const triggerStatusUpdate = () => void updateMLStatusSnapshot();
 
-/** Unconditional update of the {@link MLStatus} snapshot. */
+/** Unconditionally update of the {@link MLStatus} snapshot. */
 const updateMLStatusSnapshot = async () =>
     setMLStatusSnapshot(await getMLStatus());
 
