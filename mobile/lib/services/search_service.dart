@@ -177,7 +177,7 @@ class SearchService {
     return searchResults;
   }
 
-  Future<List<GenericSearchResult>> getMagicSectionResutls(
+  Future<List<GenericSearchResult>> getMagicSectionResults(
     BuildContext context,
   ) async {
     if (localSettings.isMLIndexingEnabled && flagService.internalUser) {
