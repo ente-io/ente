@@ -297,7 +297,8 @@ class MagicCacheService {
   }
 
   Future<List<GenericSearchResult>> getMagicGenericSearchResult(
-      BuildContext context) async {
+    BuildContext context,
+  ) async {
     try {
       final EnteWatch? w =
           kDebugMode ? EnteWatch("magicGenericSearchResult") : null;
