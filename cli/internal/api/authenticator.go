@@ -21,7 +21,7 @@ func (c *Client) GetAuthKey(ctx context.Context) (*models.AuthKey, error) {
 	return &res, err
 }
 
-func (c *Client) GetDiff(ctx context.Context, sinceTime int64, limit int64) ([]models.AuthEntity, error) {
+func (c *Client) GetAuthDiff(ctx context.Context, sinceTime int64, limit int64) ([]models.AuthEntity, error) {
 	var res struct {
 		Diff []models.AuthEntity `json:"diff"`
 	}

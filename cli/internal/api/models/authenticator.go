@@ -7,10 +7,10 @@ type AuthKey struct {
 }
 
 type AuthEntity struct {
-	ID           string  `json:"id" binding:"required"`
-	EncryptedKey *string `json:"encryptedKey"`
-	Header       *string `json:"header"`
-	IsDeleted    bool    `json:"isDeleted" binding:"required"`
-	CreatedAt    int64   `json:"createdAt" binding:"required"`
-	UpdatedAt    int64   `json:"updatedAt" binding:"required"`
+	ID            string  `json:"id" binding:"required"`
+	EncryptedData *string `json:"encryptedData"`
+	Header        *string `json:"header"`
+	IsDeleted     bool    `json:"isDeleted" binding:"required"`
+	CreatedAt     int64   `json:"createdAt" binding:"required"`
+	UpdatedAt     int64   `json:"updatedAt" binding:"required"`
 }
