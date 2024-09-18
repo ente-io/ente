@@ -6,10 +6,7 @@ import {
     wipClusterEnable,
 } from "@/new/photos/services/ml";
 import { syncCGroups } from "@/new/photos/services/ml/cgroups";
-import {
-    rereadCGroups,
-    triggerSearchDataSync,
-} from "@/new/photos/services/search";
+import { rereadCGroups, searchDataSync } from "@/new/photos/services/search";
 import { syncMapEnabled } from "services/userService";
 
 /**
@@ -39,14 +36,13 @@ export const preFileInfoSync = async () => {
  * libraries after initial login), and the `preFileInfoSync`, which is called
  * before doing the file sync and thus should run immediately after login.
  */
-export const sync = async () => {
-    await Promise.all([
+export const sync = () =>
+    Promise.all([
         syncMapEnabled(),
         process.env.NEXT_PUBLIC_ENTE_WIP_CL &&
             wipClusterEnable().then((enable) =>
                 enable ? syncCGroups().then(rereadCGroups) : undefined,
             ),
         isMLSupported && mlSync(),
+        searchDataSync(),
     ]);
-    triggerSearchDataSync();
-};

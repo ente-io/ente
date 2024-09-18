@@ -48,8 +48,8 @@ export const logoutSearch = () => {
 /**
  * Fetch any data that would be needed if the user were to search.
  */
-export const triggerSearchDataSync = () =>
-    void worker().then((w) => masterKeyFromSession().then((k) => w.sync(k)));
+export const searchDataSync = () =>
+    worker().then((w) => masterKeyFromSession().then((k) => w.sync(k)));
 
 /**
  * Set the collections and files over which we should search.
