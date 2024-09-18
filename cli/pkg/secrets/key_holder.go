@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/ente-io/cli/internal/api"
+	"github.com/ente-io/cli/internal/api/models"
 	eCrypto "github.com/ente-io/cli/internal/crypto"
 	"github.com/ente-io/cli/pkg/model"
 	"github.com/ente-io/cli/utils/encoding"
@@ -75,4 +76,20 @@ func (k *KeyHolder) GetCollectionKey(ctx context.Context, collection api.Collect
 		}
 		return collKey, nil
 	}
+}
+
+func (k *KeyHolder) GetAuthenticatorKey(ctx context.Context, authKey models.AuthKey) ([]byte, error) {
+	accSecretInfo := k.GetAccountSecretInfo(ctx)
+	userID := ctx.Value("user_id").(int64)
+	if authKey.UserID == userID {
+		key, keyErr := eCrypto.SecretBoxOpen(
+			encoding.DecodeBase64(authKey.EncryptedKey),
+			encoding.DecodeBase64(authKey.Header),
+			accSecretInfo.MasterKey)
+		if keyErr != nil {
+			return nil, fmt.Errorf("auth key %d drive failed %s", authKey.UserID, keyErr)
+		}
+		return key, nil
+	}
+	return nil, fmt.Errorf("accountSecInfo not found for user  %d", authKey.UserID)
 }
