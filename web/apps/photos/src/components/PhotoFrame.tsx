@@ -66,6 +66,7 @@ interface Props {
     setIsPhotoSwipeOpen?: (value: boolean) => void;
     isInHiddenSection?: boolean;
     setFilesDownloadProgressAttributesCreator?: SetFilesDownloadProgressAttributesCreator;
+    selectable?: boolean;
 }
 
 const PhotoFrame = ({
@@ -86,6 +87,7 @@ const PhotoFrame = ({
     setIsPhotoSwipeOpen,
     isInHiddenSection,
     setFilesDownloadProgressAttributesCreator,
+    selectable,
 }: Props) => {
     const [open, setOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
@@ -277,7 +279,7 @@ const PhotoFrame = ({
             file={item}
             updateURL={updateURL(index)}
             onClick={onThumbnailClick(index)}
-            selectable={enableDownload}
+            selectable={selectable}
             onSelect={handleSelect(
                 item.id,
                 item.ownerID === galleryContext.user?.id,
