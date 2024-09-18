@@ -8,6 +8,7 @@ import "package:logging/logging.dart";
 import "package:path_provider/path_provider.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/file_uploaded_event.dart";
+import "package:photos/events/magic_cache_updated_event.dart";
 import "package:photos/extensions/stop_watch.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
@@ -24,13 +25,26 @@ import "package:shared_preferences/shared_preferences.dart";
 
 class MagicCache {
   final String title;
-  final Set<int> fileUploadedIDs;
+  final List<int> fileUploadedIDs;
+  Map<int, int>? _fileIdToPositionMap;
+
   MagicCache(this.title, this.fileUploadedIDs);
+
+  // Get map of uploadID to index in fileUploadedIDs
+  Map<int, int> get fileIdToPositionMap {
+    if (_fileIdToPositionMap == null) {
+      _fileIdToPositionMap = {};
+      for (int i = 0; i < fileUploadedIDs.length; i++) {
+        _fileIdToPositionMap![fileUploadedIDs[i]] = i;
+      }
+    }
+    return _fileIdToPositionMap!;
+  }
 
   factory MagicCache.fromJson(Map<String, dynamic> json) {
     return MagicCache(
       json['title'],
-      Set<int>.from(json['fileUploadedIDs']),
+      List<int>.from(json['fileUploadedIDs']),
     );
   }
   Map<String, dynamic> toJson() {
@@ -54,14 +68,25 @@ class MagicCache {
 GenericSearchResult? toGenericSearchResult(
   Prompt prompt,
   List<EnteFile> enteFilesInMagicCache,
+  Map<int, int> fileIdToPositionMap,
 ) {
   if (enteFilesInMagicCache.isEmpty) {
     return null;
+  }
+  if (!prompt.recentFirst) {
+    enteFilesInMagicCache.sort((a, b) {
+      return fileIdToPositionMap[a.uploadedFileID!]!
+          .compareTo(fileIdToPositionMap[b.uploadedFileID!]!);
+    });
   }
   return GenericSearchResult(
     ResultType.magic,
     prompt.title,
     enteFilesInMagicCache,
+    params: {
+      "enableGrouping": prompt.recentFirst,
+      "fileIdToPosMap": fileIdToPositionMap
+    },
     onResultTap: (ctx) {
       routeToPage(
         ctx,
@@ -69,6 +94,7 @@ GenericSearchResult? toGenericSearchResult(
           enteFilesInMagicCache,
           name: prompt.title,
           enableGrouping: prompt.recentFirst,
+          fileIdToPosMap: fileIdToPositionMap,
           heroTag: GenericSearchResult(
             ResultType.magic,
             prompt.title,
@@ -122,8 +148,7 @@ class MagicCacheService {
     return _prefs.getInt(_lastMagicCacheUpdateTime) ?? 0;
   }
 
-  bool get enableDiscover =>
-      localSettings.isMLIndexingEnabled && flagService.internalUser;
+  bool get enableDiscover => localSettings.isMLIndexingEnabled;
 
   Future<void> _updateCacheIfTheTimeHasCome() async {
     if (!enableDiscover) {
@@ -133,13 +158,11 @@ class MagicCacheService {
         .getAssetIfUpdated(_kMagicPromptsDataUrl);
     if (updatedJSONFile != null) {
       _pendingUpdateReason.add("Prompts data updated");
-    } else {
-      if (lastMagicCacheUpdateTime <
-          DateTime.now()
-              .subtract(const Duration(days: 3))
-              .millisecondsSinceEpoch) {
-        _pendingUpdateReason.add("Cache is old");
-      }
+    } else if (lastMagicCacheUpdateTime <
+        DateTime.now()
+            .subtract(const Duration(days: 1))
+            .millisecondsSinceEpoch) {
+      _pendingUpdateReason.add("Cache is old");
     }
   }
 
@@ -147,9 +170,12 @@ class MagicCacheService {
     return (await getApplicationSupportDirectory()).path + "/cache/magic_cache";
   }
 
-  Future<void> updateCache() async {
+  Future<void> updateCache({bool forced = false}) async {
     if (!enableDiscover) {
       return;
+    }
+    if (forced) {
+      _pendingUpdateReason.add("Forced update");
     }
     try {
       if (_pendingUpdateReason.isEmpty || _isUpdateInProgress) {
@@ -178,10 +204,12 @@ class MagicCacheService {
       w?.log("cacheWritten");
       await _resetLastMagicCacheUpdateTime();
       w?.logAndReset('done');
+      Bus.instance.fire(MagicCacheUpdatedEvent());
     } catch (e, s) {
       _logger.info("Error updating magic cache", e, s);
     } finally {
       _isUpdateInProgress = false;
+      Bus.instance.fire(MagicCacheUpdatedEvent());
     }
   }
 
@@ -241,9 +269,12 @@ class MagicCacheService {
         w?.log("cacheFound");
       }
       final Map<String, List<EnteFile>> magicIdToFiles = {};
+
       final Map<String, Prompt> promptMap = {};
+      final Map<String, Map<int, int>> promptFileOrder = {};
       for (MagicCache c in magicCaches) {
         magicIdToFiles[c.title] = [];
+        promptFileOrder[c.title] = c.fileIdToPositionMap;
       }
       for (final p in prompts) {
         promptMap[p.title] = p;
@@ -253,7 +284,8 @@ class MagicCacheService {
       for (EnteFile file in files) {
         if (!file.isUploaded) continue;
         for (MagicCache magicCache in magicCaches) {
-          if (magicCache.fileUploadedIDs.contains(file.uploadedFileID!)) {
+          if (magicCache.fileIdToPositionMap
+              .containsKey(file.uploadedFileID!)) {
             if (file.isVideo &&
                 (promptMap[magicCache.title]?.showVideo ?? true) == false) {
               continue;
@@ -266,6 +298,7 @@ class MagicCacheService {
         final genericSearchResult = toGenericSearchResult(
           p,
           magicIdToFiles[p.title] ?? [],
+          promptFileOrder[p.title] ?? {},
         );
         if (genericSearchResult != null) {
           genericSearchResults.add(genericSearchResult);

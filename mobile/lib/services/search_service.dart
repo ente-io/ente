@@ -1039,6 +1039,7 @@ class SearchService {
               MagicResultScreen(
                 files,
                 name: query,
+                enableGrouping: false,
                 heroTag: GenericSearchResult(ResultType.magic, query, files)
                     .heroTag(),
               ),

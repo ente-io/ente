@@ -21,6 +21,7 @@ class MagicResultScreen extends StatefulWidget {
   final String name;
   final String heroTag;
   final bool enableGrouping;
+  final Map<int, int> fileIdToPosMap;
 
   static const GalleryType appBarType = GalleryType.magic;
   static const GalleryType overlayType = GalleryType.magic;
@@ -29,6 +30,7 @@ class MagicResultScreen extends StatefulWidget {
     this.files, {
     required this.name,
     this.enableGrouping = false,
+    this.fileIdToPosMap = const {},
     this.heroTag = "",
     super.key,
   });
@@ -65,10 +67,20 @@ class _MagicResultScreenState extends State<MagicResultScreen> {
     _magicSortChangeEvent =
         Bus.instance.on<MagicSortChangeEvent>().listen((event) {
       if (event.sortType == MagicSortType.mostRelevant) {
+        if (_enableGrouping) {
+          files.sort(
+            (a, b) =>
+                widget.fileIdToPosMap[a.uploadedFileID]! -
+                widget.fileIdToPosMap[b.uploadedFileID]!,
+          );
+        }
         setState(() {
           _enableGrouping = false;
         });
       } else if (event.sortType == MagicSortType.mostRecent) {
+        if (!_enableGrouping) {
+          files.sort((a, b) => b.creationTime!.compareTo(a.creationTime!));
+        }
         setState(() {
           _enableGrouping = true;
         });
