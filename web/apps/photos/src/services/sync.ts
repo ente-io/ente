@@ -1,12 +1,6 @@
 import { triggerFeatureFlagsFetchIfNeeded } from "@/new/photos/services/feature-flags";
-import {
-    isMLSupported,
-    mlStatusSync,
-    mlSync,
-    wipClusterEnable,
-} from "@/new/photos/services/ml";
-import { syncCGroups } from "@/new/photos/services/ml/cgroups";
-import { rereadCGroups, searchDataSync } from "@/new/photos/services/search";
+import { isMLSupported, mlStatusSync, mlSync } from "@/new/photos/services/ml";
+import { searchDataSync } from "@/new/photos/services/search";
 import { syncMapEnabled } from "services/userService";
 
 /**
@@ -37,12 +31,4 @@ export const preFileInfoSync = async () => {
  * before doing the file sync and thus should run immediately after login.
  */
 export const sync = () =>
-    Promise.all([
-        syncMapEnabled(),
-        process.env.NEXT_PUBLIC_ENTE_WIP_CL &&
-            wipClusterEnable().then((enable) =>
-                enable ? syncCGroups().then(rereadCGroups) : undefined,
-            ),
-        isMLSupported && mlSync(),
-        searchDataSync(),
-    ]);
+    Promise.all([syncMapEnabled(), mlSync(), searchDataSync()]);

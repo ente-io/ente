@@ -18,6 +18,7 @@ import { proxy, transfer } from "comlink";
 import { isInternalUser } from "../feature-flags";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
 import type { UploadItem } from "../upload/types";
+import { syncCGroups } from "./cgroups";
 import {
     type ClusterFace,
     type ClusteringOpts,
@@ -288,19 +289,30 @@ export const mlStatusSync = async () => {
 };
 
 /**
- * Perform a ML sync.
+ * Perform a ML sync, whatever is applicable.
  *
  * This is called during the global sync sequence, after files information have
  * been synced with remote.
  *
  * If ML is enabled, it pulls any missing embeddings from remote and starts
- * indexing to backfill any missing values.
+ * indexing to backfill any missing values. It also syncs cgroups and updates
+ * the search service to use the latest values.
  *
  * This will only have an effect if {@link mlStatusSync} has been called at
  * least once prior to calling this in the sync sequence.
  */
 export const mlSync = async () => {
-    if (_state.isMLEnabled) await worker().then((w) => w.sync());
+    if (_state.isMLEnabled) {
+        await Promise.all([
+            // On-device ML, if supported.
+            isMLSupported && worker().then((w) => w.sync()),
+            // "People".
+            process.env.NEXT_PUBLIC_ENTE_WIP_CL &&
+                wipClusterEnable().then((enable) =>
+                    enable ? syncCGroups() : undefined,
+                ),
+        ]);
+    }
 };
 
 /**

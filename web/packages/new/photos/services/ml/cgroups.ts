@@ -1,5 +1,7 @@
 import { masterKeyFromSession } from "@/base/session-store";
+import { setCGroups } from "../search";
 import { pullCGroups } from "../user-entity";
+import { clusterGroups } from "./db";
 
 /**
  * A cgroup ("cluster group") is a group of clusters (possibly containing a
@@ -146,4 +148,12 @@ export const syncCGroups = async () => {
      * implement the sync without needing to make an blocking API request for every
      * user interaction.
      */
+
+    // Re-read the cgroups across which we should search from the local ML DB.
+    //
+    // This DB read can happen in the search worker too, but that would cause
+    // another handle to the DB to be opened (from the search worker's context).
+    // Making the DB call here avoids that (not that we noticed any issues, but
+    // preemptively trying not to poke IndexedDB too much lest it be flaky).
+    await setCGroups(await clusterGroups());
 };

@@ -4,7 +4,7 @@ import { ComlinkWorker } from "@/base/worker/comlink-worker";
 import { FileType } from "@/media/file-type";
 import i18n, { t } from "i18next";
 import { clipMatches, isMLEnabled, isMLSupported } from "../ml";
-import { clusterGroups } from "../ml/db";
+import type { CGroup } from "../ml/cgroups";
 import type {
     LabelledFileType,
     LabelledSearchDateComponents,
@@ -59,16 +59,10 @@ export const setSearchableCollectionsAndFiles = (
 ) => void worker().then((w) => w.setSearchableCollectionsAndFiles(data));
 
 /**
- * Re-read the cgroups across which we should search from the local ML DB.
+ * Set the cgroups that we should search across.
  */
-export const rereadCGroups = async () => {
-    const w = await worker();
-    // This DB read can happen in the search worker too, but that would cause
-    // another handle to the DB to be opened (from the search worker's context).
-    // Make the DB call here to avoid that (not that we noticed any issues, but
-    // preemptively trying not to poke IndexedDB too much lest it be flaky).
-    return w.setCGroups(await clusterGroups());
-};
+export const setCGroups = (data: CGroup[]) =>
+    worker().then((w) => w.setCGroups(data));
 
 /**
  * Convert a search string into (annotated) suggestions that can be shown in the
