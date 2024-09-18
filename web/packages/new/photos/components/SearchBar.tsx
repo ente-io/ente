@@ -1,6 +1,5 @@
 import { assertionFailed } from "@/base/assert";
 import { useIsMobileWidth } from "@/base/hooks";
-import log from "@/base/log";
 import { ItemCard, ResultPreviewTile } from "@/new/photos/components/ItemCards";
 import {
     isMLSupported,
@@ -9,6 +8,7 @@ import {
     peopleSnapshot,
     peopleSubscribe,
 } from "@/new/photos/services/ml";
+import type { Person } from "@/new/photos/services/ml/cgroups";
 import { searchOptionsForString } from "@/new/photos/services/search";
 import type { SearchOption } from "@/new/photos/services/search/types";
 import { nullToUndefined } from "@/utils/transform";
@@ -41,7 +41,7 @@ import {
     type StylesConfig,
 } from "react-select";
 import AsyncSelect from "react-select/async";
-import { PeopleList } from "./PeopleList";
+import { SearchPeopleList } from "./PeopleList";
 
 export interface SearchBarProps {
     /**
@@ -370,9 +370,8 @@ const EmptyState: React.FC<EmptyStateProps> = () => {
     const mlStatus = useSyncExternalStore(mlStatusSubscribe, mlStatusSnapshot);
     const people = useSyncExternalStore(peopleSubscribe, peopleSnapshot);
 
-    log.debug(() => ["EmptyState", { mlStatus, people }]);
-    // TODO-Cluster
     if (!mlStatus || mlStatus.phase == "disabled") {
+        // The preflight check should've prevented us from coming here.
         assertionFailed();
         return <></>;
     }
@@ -396,25 +395,28 @@ const EmptyState: React.FC<EmptyStateProps> = () => {
             break;
     }
 
+    const handleSelectPerson = (person: Person) => console.log(person);
+
     return (
         <Box sx={{ textAlign: "left" }}>
             {people && people.length > 0 && (
                 <>
                     <PeopleHeader />
-                    <PeopleList
+                    <SearchPeopleList
                         people={people}
-                        maxRows={2}
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        onSelect={(...args: any) => console.log(args)}
+                        onSelectPerson={handleSelectPerson}
                     />
                 </>
             )}
-            <Typography variant="mini">{label}</Typography>
+            <Typography variant="mini" sx={{ my: "2px" }}>
+                {label}
+            </Typography>
         </Box>
     );
 };
 
 const PeopleHeader: React.FC = () => {
+    // TODO-Cluster
     const handleClick = () => console.log("click");
     return (
         <Stack direction="row" sx={{ cursor: "pointer" }} onClick={handleClick}>
