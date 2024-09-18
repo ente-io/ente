@@ -8,12 +8,9 @@ import { faceDirection, type Face, type FaceIndex } from "./face";
 import { dotProduct } from "./math";
 
 /**
- * A face cluster is an set of faces.
+ * A face cluster is an set of faces, and a nanoid to uniquely identify it.
  *
- * Each cluster has an id so that a {@link CGroup} can refer to it.
- *
- * The cluster is not directly synced to remote. Only clusters that the user
- * interacts with get synced to remote, as part of a {@link CGroup}.
+ * A cluster may be local only, or synced to remote as part of a {@link CGroup}.
  */
 export interface FaceCluster {
     /**
@@ -26,7 +23,7 @@ export interface FaceCluster {
      * For ergonomics of transportation and persistence this is an array, but it
      * should conceptually be thought of as a set.
      */
-    faceIDs: string[];
+    faces: string[];
 }
 
 export interface ClusteringOpts {
@@ -164,11 +161,11 @@ export const clusterFaces = (
 
     // Prune clusters that are smaller than the threshold.
     const validClusters = clusters.filter(
-        (cs) => cs.faceIDs.length > minClusterSize,
+        (cs) => cs.faces.length > minClusterSize,
     );
 
     const sortedClusters = validClusters.sort(
-        (a, b) => b.faceIDs.length - a.faceIDs.length,
+        (a, b) => b.faces.length - a.faces.length,
     );
 
     // Convert into the data structure we're using to debug/visualize.
@@ -177,9 +174,7 @@ export const clusterFaces = (
             ? sortedClusters
             : sortedClusters.slice(0, 30).concat(sortedClusters.slice(-30));
     const clusterPreviews = clusterPreviewClusters.map((cluster) => {
-        const faces = cluster.faceIDs.map((id) =>
-            ensure(faceForFaceID.get(id)),
-        );
+        const faces = cluster.faces.map((id) => ensure(faceForFaceID.get(id)));
         const topFace = faces.reduce((top, face) =>
             top.score > face.score ? top : face,
         );
@@ -188,7 +183,7 @@ export const clusterFaces = (
             return { face, cosineSimilarity: csim, wasMerged: false };
         });
         return {
-            clusterSize: cluster.faceIDs.length,
+            clusterSize: cluster.faces.length,
             faces: previewFaces
                 .sort((a, b) => b.cosineSimilarity - a.cosineSimilarity)
                 .slice(0, 50),
@@ -201,9 +196,7 @@ export const clusterFaces = (
 
     const cgroups: AnnotatedCGroup[] = [];
     for (const cluster of sortedClusters) {
-        const faces = cluster.faceIDs.map((id) =>
-            ensure(faceForFaceID.get(id)),
-        );
+        const faces = cluster.faces.map((id) => ensure(faceForFaceID.get(id)));
         const topFace = faces.reduce((top, face) =>
             top.score > face.score ? top : face,
         );
@@ -377,12 +370,12 @@ const clusterBatchLinear = (
 
             state.clusterIDForFaceID.set(fi.faceID, nnCluster.id);
             state.clusterIndexForFaceID.set(fi.faceID, nnClusterIndex);
-            nnCluster.faceIDs.push(fi.faceID);
+            nnCluster.faces.push(fi.faceID);
         } else {
             // No neighbour within the threshold. Create a new cluster.
             const clusterID = newClusterID();
             const clusterIndex = state.clusters.length;
-            const cluster = { id: clusterID, faceIDs: [fi.faceID] };
+            const cluster = { id: clusterID, faces: [fi.faceID] };
 
             state.clusterIDForFaceID.set(fi.faceID, cluster.id);
             state.clusterIndexForFaceID.set(fi.faceID, clusterIndex);

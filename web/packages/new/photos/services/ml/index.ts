@@ -429,7 +429,7 @@ export const wipClusterDebugPageContents = async (
 
             const faceIDs = cgroup.clusterIDs
                 .map((id) => ensure(clusterByID.get(id)))
-                .flatMap((cluster) => cluster.faceIDs);
+                .flatMap((cluster) => cluster.faces);
             const fileIDs = faceIDs
                 .map((faceID) => fileIDFromFaceID(faceID))
                 .filter((fileID) => fileID !== undefined);

@@ -132,14 +132,14 @@ export const pullCGroups = (masterKey: Uint8Array) => {
     return pullUserEntities("cgroup", masterKey, processBatch);
 };
 
+const RemoteFaceCluster = z.object({
+    id: z.string(),
+    faces: z.string().array(),
+});
+
 const RemoteCGroup = z.object({
     name: z.string().nullish().transform(nullToUndefined),
-    assigned: z.array(
-        z.object({
-            id: z.string(),
-            faces: z.string().array(),
-        }),
-    ),
+    assigned: z.array(RemoteFaceCluster),
     // The remote cgroup also has a "rejected" property, but that is not
     // currently used by any of the clients.
     isHidden: z.boolean(),
