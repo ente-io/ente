@@ -21,7 +21,6 @@ import type {
     LabelledFileType,
     LabelledSearchDateComponents,
     LocalizedSearchData,
-    Searchable,
     SearchCollectionsAndFiles,
     SearchDateComponents,
     SearchSuggestion,
@@ -32,13 +31,13 @@ import type {
  * remains responsive.
  */
 export class SearchWorker {
-    private locationTags: Searchable<LocationTag>[] = [];
-    private cities: Searchable<City>[] = [];
+    private locationTags: LocationTag[] = [];
+    private cities: City[] = [];
     private collectionsAndFiles: SearchCollectionsAndFiles = {
         collections: [],
         files: [],
     };
-    private searchablePeople: Searchable<Person>[] = [];
+    private people: Person[] = [];
 
     /**
      * Fetch any state we might need when the actual search happens.
@@ -50,18 +49,8 @@ export class SearchWorker {
         return Promise.all([
             pullLocationTags(masterKey)
                 .then(() => savedLocationTags())
-                .then((ts) => {
-                    this.locationTags = ts.map((t) => ({
-                        ...t,
-                        searchTerms: t.name.toLowerCase().split(" "),
-                    }));
-                }),
-            fetchCities().then((cs) => {
-                this.cities = cs.map((c) => ({
-                    ...c,
-                    searchTerms: c.name.toLowerCase().split(" "),
-                }));
-            }),
+                .then((ts) => (this.locationTags = ts)),
+            fetchCities().then((cs) => (this.cities = cs)),
         ]);
     }
 
@@ -76,12 +65,7 @@ export class SearchWorker {
      * Set the people that we should search across.
      */
     setPeople(people: Person[]) {
-        this.searchablePeople = people.map((person) => {
-            return {
-                ...person,
-                searchTerms: person.name.toLowerCase().split(" "),
-            };
-        });
+        this.people = people;
     }
 
     /**
@@ -92,15 +76,14 @@ export class SearchWorker {
         searchString: string,
         localizedSearchData: LocalizedSearchData,
     ) {
-        // Case insensitive word prefix match, considering underscores also as a
-        // word separator.
-        const re = new RegExp("(\\b|_)" + s, "i");
         return suggestionsForString(
             s,
-            re,
+            // Case insensitive word prefix match, considering underscores also
+            // as a word separator.
+            new RegExp("(\\b|_)" + s, "i"),
             searchString,
             this.collectionsAndFiles,
-            this.searchablePeople,
+            this.people,
             localizedSearchData,
             this.locationTags,
             this.cities,
@@ -139,12 +122,12 @@ const suggestionsForString = (
     re: RegExp,
     searchString: string,
     { collections, files }: SearchCollectionsAndFiles,
-    searchablePeople: Searchable<Person>[],
+    people: Person[],
     { locale, holidays, labelledFileTypes }: LocalizedSearchData,
-    locationTags: Searchable<LocationTag>[],
-    cities: Searchable<City>[],
+    locationTags: LocationTag[],
+    cities: City[],
 ): [SearchSuggestion[], SearchSuggestion[]] => [
-    [peopleSuggestions(re, searchablePeople)].flat(),
+    [peopleSuggestions(re, people)].flat(),
     // . <-- clip suggestions will be inserted here by our caller.
     [
         fileTypeSuggestions(re, labelledFileTypes),
@@ -170,7 +153,7 @@ const collectionSuggestions = (
 
 const fileTypeSuggestions = (
     re: RegExp,
-    labelledFileTypes: Searchable<LabelledFileType>[],
+    labelledFileTypes: LabelledFileType[],
 ): SearchSuggestion[] =>
     labelledFileTypes
         .filter(({ label }) => re.test(label))
@@ -213,11 +196,8 @@ const fileCaptionSuggestion = (
         : [];
 };
 
-const peopleSuggestions = (
-    re: RegExp,
-    searchablePeople: Searchable<Person>[],
-): SearchSuggestion[] =>
-    searchablePeople
+const peopleSuggestions = (re: RegExp, people: Person[]): SearchSuggestion[] =>
+    people
         .filter((p) => re.test(p.name))
         .map((person) => ({ type: "person", person, label: person.name }));
 
@@ -225,7 +205,7 @@ const dateSuggestions = (
     s: string,
     re: RegExp,
     locale: string,
-    holidays: Searchable<LabelledSearchDateComponents>[],
+    holidays: LabelledSearchDateComponents[],
 ): SearchSuggestion[] =>
     parseDateComponents(s, re, locale, holidays).map(
         ({ components, label }) => ({
@@ -253,7 +233,7 @@ const parseDateComponents = (
     s: string,
     re: RegExp,
     locale: string,
-    holidays: Searchable<LabelledSearchDateComponents>[],
+    holidays: LabelledSearchDateComponents[],
 ): LabelledSearchDateComponents[] =>
     [
         parseChrono(s, locale),
@@ -335,8 +315,8 @@ const fetchCities = async () => {
 
 const locationSuggestions = (
     re: RegExp,
-    locationTags: Searchable<LocationTag>[],
-    cities: Searchable<City>[],
+    locationTags: LocationTag[],
+    cities: City[],
 ): SearchSuggestion[] => {
     const matchingLocationTags = locationTags.filter((t) => re.test(t.name));
 
