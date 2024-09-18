@@ -148,8 +148,7 @@ class MagicCacheService {
     return _prefs.getInt(_lastMagicCacheUpdateTime) ?? 0;
   }
 
-  bool get enableDiscover =>
-      localSettings.isMLIndexingEnabled && flagService.internalUser;
+  bool get enableDiscover => localSettings.isMLIndexingEnabled;
 
   Future<void> _updateCacheIfTheTimeHasCome() async {
     if (!enableDiscover) {
