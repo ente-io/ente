@@ -1028,6 +1028,14 @@ export default function Gallery() {
         setActiveCollectionID(ALL_SECTION);
     };
 
+    const handleSelectPeople = () => {
+        console.log("onSelectPeople");
+    };
+
+    if (person) {
+        log.debug(() => ["person", person]);
+    }
+
     return (
         <GalleryContext.Provider
             value={{
@@ -1110,6 +1118,8 @@ export default function Gallery() {
                             isInSearchMode={isInSearchMode}
                             setIsInSearchMode={setIsInSearchMode}
                             onSelectSearchOption={handleSelectSearchOption}
+                            onSelectPeople={handleSelectPeople}
+                            onSelectPerson={setPerson}
                         />
                     )}
                 </NavbarBase>

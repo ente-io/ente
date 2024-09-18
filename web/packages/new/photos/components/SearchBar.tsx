@@ -68,6 +68,14 @@ export interface SearchBarProps {
      * Set or clear the selected {@link SearchOption}.
      */
     onSelectSearchOption: (o: SearchOption | undefined) => void;
+    /**
+     * Select a option to view details about all people.
+     */
+    onSelectPeople: () => void;
+    /**
+     * Select a person.
+     */
+    onSelectPerson: (person: Person) => void;
 }
 
 /**
@@ -88,7 +96,7 @@ export interface SearchBarProps {
 export const SearchBar: React.FC<SearchBarProps> = ({
     setIsInSearchMode,
     isInSearchMode,
-    onSelectSearchOption,
+    ...rest
 }) => {
     const isMobileWidth = useIsMobileWidth();
 
@@ -99,7 +107,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
             {isMobileWidth && !isInSearchMode ? (
                 <MobileSearchArea onSearch={showSearchInput} />
             ) : (
-                <SearchInput {...{ isInSearchMode, onSelectSearchOption }} />
+                <SearchInput {...{ isInSearchMode }} {...rest} />
             )}
         </Box>
     );
@@ -121,6 +129,8 @@ const MobileSearchArea: React.FC<MobileSearchAreaProps> = ({ onSearch }) => (
 const SearchInput: React.FC<Omit<SearchBarProps, "setIsInSearchMode">> = ({
     isInSearchMode,
     onSelectSearchOption,
+    onSelectPeople,
+    onSelectPerson,
 }) => {
     // A ref to the top level Select.
     const selectRef = useRef<SelectInstance<SearchOption> | null>(null);
@@ -171,11 +181,18 @@ const SearchInput: React.FC<Omit<SearchBarProps, "setIsInSearchMode">> = ({
         onSelectSearchOption(undefined);
     };
 
-    const handleSelectCGroup = (value: SearchOption) => {
+    const handleSelectPeople = () => {
         // Dismiss the search menu.
         selectRef.current?.blur();
-        setValue(value);
-        onSelectSearchOption(undefined);
+        resetSearch();
+        onSelectPeople();
+    };
+
+    const handleSelectPerson = (person: Person) => {
+        // Dismiss the search menu.
+        selectRef.current?.blur();
+        resetSearch();
+        onSelectPerson(person);
     };
 
     const handleFocus = () => {
@@ -207,7 +224,10 @@ const SearchInput: React.FC<Omit<SearchBarProps, "setIsInSearchMode">> = ({
                 placeholder={t("search_hint")}
                 noOptionsMessage={({ inputValue }) =>
                     shouldShowEmptyState(inputValue) ? (
-                        <EmptyState onSelectCGroup={handleSelectCGroup} />
+                        <EmptyState
+                            onSelectPeople={handleSelectPeople}
+                            onSelectPerson={handleSelectPerson}
+                        />
                     ) : null
                 }
             />
@@ -358,15 +378,24 @@ const shouldShowEmptyState = (inputValue: string) => {
 };
 
 interface EmptyStateProps {
-    /** Called when the user selects a cgroup shown in the empty state view. */
-    onSelectCGroup: (value: SearchOption) => void;
+    /**
+     * Called when the user selects the people banner in the empty state view.
+     */
+    onSelectPeople: () => void;
+    /**
+     * Called when the user selects a particular person shown in the empty state
+     * view. */
+    onSelectPerson: (person: Person) => void;
 }
 
 /**
  * The view shown in the menu area when the user has not typed anything in the
  * search box.
  */
-const EmptyState: React.FC<EmptyStateProps> = () => {
+const EmptyState: React.FC<EmptyStateProps> = ({
+    onSelectPeople,
+    onSelectPerson,
+}) => {
     const mlStatus = useSyncExternalStore(mlStatusSubscribe, mlStatusSnapshot);
     const people = useSyncExternalStore(peopleSubscribe, peopleSnapshot);
 
@@ -395,17 +424,12 @@ const EmptyState: React.FC<EmptyStateProps> = () => {
             break;
     }
 
-    const handleSelectPerson = (person: Person) => console.log(person);
-
     return (
         <Box sx={{ textAlign: "left" }}>
             {people && people.length > 0 && (
                 <>
-                    <PeopleHeader />
-                    <SearchPeopleList
-                        people={people}
-                        onSelectPerson={handleSelectPerson}
-                    />
+                    <PeopleHeader onClick={onSelectPeople} />
+                    <SearchPeopleList {...{ people, onSelectPerson }} />
                 </>
             )}
             <Typography variant="mini" sx={{ my: "2px" }}>
@@ -415,18 +439,18 @@ const EmptyState: React.FC<EmptyStateProps> = () => {
     );
 };
 
-const PeopleHeader: React.FC = () => {
-    // TODO-Cluster
-    const handleClick = () => console.log("click");
-    return (
-        <Stack direction="row" sx={{ cursor: "pointer" }} onClick={handleClick}>
-            <Typography color="text.base" variant="large">
-                {t("people")}
-            </Typography>
-            <ChevronRightIcon />
-        </Stack>
-    );
-};
+interface PeopleHeaderProps {
+    onClick: () => void;
+}
+
+const PeopleHeader: React.FC<PeopleHeaderProps> = ({ onClick }) => (
+    <Stack direction="row" sx={{ cursor: "pointer" }} {...{ onClick }}>
+        <Typography color="text.base" variant="large">
+            {t("people")}
+        </Typography>
+        <ChevronRightIcon />
+    </Stack>
+);
 
 const Option: React.FC<OptionProps<SearchOption, false>> = (props) => (
     <SelectComponents.Option {...props}>
