@@ -28,6 +28,8 @@ import type {
     SearchSuggestion,
 } from "./types";
 
+type SearchableCGroup = Searchable<Omit<CGroup, "name"> & { name: string }>;
+
 /**
  * A web worker that runs the search asynchronously so that the main thread
  * remains responsive.
@@ -39,9 +41,7 @@ export class SearchWorker {
         collections: [],
         files: [],
     };
-    private searchableCGroups: Searchable<
-        Omit<CGroup, "name"> & { name: string }
-    >[] = [];
+    private searchableCGroups: SearchableCGroup[] = [];
 
     /**
      * Fetch any state we might need when the actual search happens.
@@ -102,6 +102,7 @@ export class SearchWorker {
             s,
             searchString,
             this.searchableCollectionsAndFiles,
+            this.searchableCGroups,
             localizedSearchData,
             this.locationTags,
             this.cities,
@@ -139,12 +140,14 @@ const suggestionsForString = (
     s: string,
     searchString: string,
     { collections, files }: SearchableCollectionsAndFiles,
+    searchableCGroups: SearchableCGroup[],
     { locale, holidays, labelledFileTypes }: LocalizedSearchData,
     locationTags: Searchable<LocationTag>[],
     cities: Searchable<City>[],
 ): SearchSuggestion[] =>
     [
-        // <-- caption suggestions will be inserted here by our caller.
+        // . <-- clip suggestions will be inserted here by our caller.
+        peopleSuggestions(s, searchableCGroups),
         fileTypeSuggestions(s, labelledFileTypes),
         dateSuggestions(s, locale, holidays),
         locationSuggestions(s, locationTags, cities),
@@ -209,6 +212,24 @@ const fileCaptionSuggestion = (
     return fileIDs.length
         ? [{ type: "fileCaption", fileIDs, label: searchString }]
         : [];
+};
+
+const peopleSuggestions = (
+    s: string,
+    searchableCGroups: SearchableCGroup[],
+): SearchSuggestion[] => {
+    // Suppress the unused warning during WIP
+    if (process.env.NEXT_PUBLIC_ENTE_WIP_CL) {
+        console.log({ s, searchableCGroups });
+    }
+    return [];
+    // searchableCGroups
+    //     .filter(({ lowercasedName }) => lowercasedName.startsWith(s))
+    //     .map((scgroup) => ({
+    //         type: "person",
+    //         person: scgroup,
+    //         label: scgroup.name,
+    //     }));
 };
 
 const dateSuggestions = (
