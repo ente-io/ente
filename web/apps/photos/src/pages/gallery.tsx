@@ -15,6 +15,7 @@ import {
     getLocalTrashedFiles,
 } from "@/new/photos/services/files";
 import { wipHasSwitchedOnceCmpAndSet } from "@/new/photos/services/ml";
+import type { Person } from "@/new/photos/services/ml/cgroups";
 import {
     filterSearchableFiles,
     setSearchCollectionsAndFiles,
@@ -314,22 +315,24 @@ export default function Gallery() {
     const closeAuthenticateUserModal = () =>
         setAuthenticateUserModalView(false);
 
+    // `true` if we're displaying the hidden section.
+    //
+    // - The search bar is replaced by a navbar with a back button.
+    // - The collections bar shows only the hidden collections.
+    // - The gallery itself shows hidden items.
     const [isInHiddenSection, setIsInHiddenSection] = useState(false);
+
+    // If set, then display files belonging to this person.
+    //
+    // - The search bar is replaced by a navbar with a back button.
+    // - The collections bar is hidden.
+    // - The gallery itself shows files which contain this person.
+    const [person, setPerson] = useState<Person | undefined>();
 
     const [
         filesDownloadProgressAttributesList,
         setFilesDownloadProgressAttributesList,
     ] = useState<FilesDownloadProgressAttributes[]>([]);
-
-    const openHiddenSection: GalleryContextType["openHiddenSection"] = (
-        callback,
-    ) => {
-        authenticateUser(() => {
-            setIsInHiddenSection(true);
-            setActiveCollectionID(HIDDEN_ITEMS_SECTION);
-            callback?.();
-        });
-    };
 
     const [isClipSearchResult, setIsClipSearchResult] =
         useState<boolean>(false);
@@ -1008,6 +1011,16 @@ export default function Gallery() {
 
     const closeExportModal = () => {
         setExportModalView(false);
+    };
+
+    const openHiddenSection: GalleryContextType["openHiddenSection"] = (
+        callback,
+    ) => {
+        authenticateUser(() => {
+            setIsInHiddenSection(true);
+            setActiveCollectionID(HIDDEN_ITEMS_SECTION);
+            callback?.();
+        });
     };
 
     const exitHiddenSection = () => {
