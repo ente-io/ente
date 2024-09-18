@@ -109,6 +109,10 @@ export const savedLocationTags = async () =>
  * the cgroup specific entity key.
  */
 export const pullCGroups = (masterKey: Uint8Array) => {
+    // See: [Note: strict mode migration]
+    //
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     const parse = async (id: string, data: Uint8Array): Promise<CGroup> => ({
         id,
         name: undefined,

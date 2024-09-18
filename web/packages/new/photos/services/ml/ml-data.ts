@@ -172,9 +172,8 @@ export const fetchMLData = async (
         }
 
         try {
-            // TODO: This line is included in the photos app which currently
-            // doesn't have strict mode enabled, and where it causes a spurious
-            // error, so we unfortunately need to turn off typechecking.
+            // See: [Note: strict mode migration]
+            //
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             const decryptedBytes = await decryptBlob(remoteFileData, file.key);
@@ -194,8 +193,11 @@ export const fetchMLData = async (
 const remoteMLDataFromJSONString = (jsonString: string) => {
     const raw = RawRemoteMLData.parse(JSON.parse(jsonString));
     const parseResult = ParsedRemoteMLData.safeParse(raw);
-    // This code is included in apps/photos, which currently does not have the
-    // TypeScript strict mode enabled, which causes a spurious tsc failure.
+    // TODO: [Note: strict mode migration]
+    //
+    // This code is included in apps/photos where it causes spurious tsc failure
+    // since the photos app currently does not have the TypeScript strict mode
+    // enabled (unlike the current file).
     //
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
