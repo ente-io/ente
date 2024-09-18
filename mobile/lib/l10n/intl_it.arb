@@ -327,6 +327,7 @@
   "removingFromFavorites": "Rimosso dai preferiti...",
   "sorryCouldNotAddToFavorites": "Spiacenti, non è stato possibile aggiungere ai preferiti!",
   "sorryCouldNotRemoveFromFavorites": "Siamo spiacenti, non è stato possibile rimuovere dai preferiti!",
+  "subscribeToEnableSharing": "È necessario un abbonamento a pagamento attivo per abilitare la condivisione.",
   "subscribe": "Iscriviti",
   "canOnlyRemoveFilesOwnedByYou": "Puoi rimuovere solo i file di tua proprietà",
   "deleteSharedAlbum": "Eliminare l'album condiviso?",

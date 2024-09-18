@@ -293,6 +293,8 @@
   "machineLearning": "Maskininlärning",
   "mlConsent": "Aktivera maskininlärning",
   "mlConsentTitle": "Aktivera maskininlärning?",
+  "discover_receipts": "Kvitton",
+  "discover_notes": "Anteckningar",
   "status": "Status",
   "skip": "Hoppa över",
   "itemCount": "{count, plural, one{{count} objekt} other{{count} objekt}}",
