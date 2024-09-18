@@ -48,4 +48,48 @@ class DirectoryUtils {
   static Future<Directory> getTempsDir() async {
     return await getTemporaryDirectory();
   }
+
+  static migrateNamingChanges() async {
+    final databaseFile = File(
+      p.join(
+        (await getApplicationDocumentsDirectory()).path,
+        "ente",
+        ".ente.authenticator.db",
+      ),
+    );
+    final offlineDatabaseFile = File(
+      p.join(
+        (await getApplicationDocumentsDirectory()).path,
+        "ente",
+        ".ente.offline_authenticator.db",
+      ),
+    );
+
+    final oldDataDir = Directory(
+      p.join(dataHome.path, "ente_auth"),
+    );
+    final newDir = Directory(
+      p.join(dataHome.path, "enteauth"),
+    );
+    await newDir.create(recursive: true);
+
+    if (await databaseFile.exists()) {
+      await databaseFile.rename(
+        p.join(newDir.path, ".ente.authenticator.db"),
+      );
+    }
+
+    if (await offlineDatabaseFile.exists()) {
+      await offlineDatabaseFile.rename(
+        p.join(newDir.path, ".ente.offline_authenticator.db"),
+      );
+    }
+
+    if (await oldDataDir.exists()) {
+      await oldDataDir.list().forEach((file) async {
+        await file.rename(p.join(newDir.path, p.basename(file.path)));
+      });
+      await oldDataDir.delete(recursive: true);
+    }
+  }
 }

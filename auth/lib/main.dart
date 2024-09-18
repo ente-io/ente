@@ -23,6 +23,7 @@ import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/tools/app_lock.dart';
 import 'package:ente_auth/ui/tools/lock_screen.dart';
 import 'package:ente_auth/ui/utils/icon_utils.dart';
+import 'package:ente_auth/utils/directory_utils.dart';
 import 'package:ente_auth/utils/lock_screen_settings.dart';
 import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_auth/utils/window_protocol_handler.dart';
@@ -67,6 +68,10 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   if (Platform.isWindows) {
     HttpOverrides.global = WindowsHttpOverrides();
+  }
+
+  if (Platform.isLinux) {
+    await DirectoryUtils.migrateNamingChanges();
   }
 
   if (PlatformUtil.isDesktop()) {
