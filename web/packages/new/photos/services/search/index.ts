@@ -60,7 +60,7 @@ export const setSearchCollectionsAndFiles = (cf: SearchCollectionsAndFiles) =>
 /**
  * Set the people that we should search across.
  */
-export const setPeople = (people: Person[]) =>
+export const setSearchPeople = (people: Person[]) =>
     void worker().then((w) => w.setPeople(people));
 
 /**

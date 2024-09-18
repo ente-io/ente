@@ -17,8 +17,9 @@ import { throttled } from "@/utils/promise";
 import { proxy, transfer } from "comlink";
 import { isInternalUser } from "../feature-flags";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
+import { setSearchPeople } from "../search";
 import type { UploadItem } from "../upload/types";
-import { syncCGroups, updatePeople } from "./cgroups";
+import { syncCGroups, updatedPeople, type Person } from "./cgroups";
 import {
     type ClusterFace,
     type ClusteringOpts,
@@ -303,11 +304,11 @@ export const mlStatusSync = async () => {
  * least once prior to calling this in the sync sequence.
  */
 export const mlSync = async () => {
-    if (!isMLSupported) return;
-    if (!_state.isMLEnabled) return;
-    await Promise.all([worker().then((w) => w.sync()), syncCGroups()]).then(
-        () => updatePeople(),
-    );
+    if (_state.isMLEnabled) {
+        await Promise.all([worker().then((w) => w.sync()), syncCGroups()]).then(
+            updatePeople,
+        );
+    }
 };
 
 /**
@@ -436,7 +437,7 @@ export const wipClusterDebugPageContents = async (
                 id: cgroup.id,
                 name: cgroup.name,
                 faceIDs,
-                files: [...new Set(fileIDs)],
+                fileIDs: [...new Set(fileIDs)],
                 displayFaceID: faceID,
                 displayFaceFile: file,
             };
@@ -659,6 +660,17 @@ const getPeople = async (): Promise<Person[] | undefined> => {
     if (!process.env.NEXT_PUBLIC_ENTE_WIP_CL) return [];
     if (!(await wipClusterEnable())) return [];
     return _wip_people;
+};
+
+/**
+ * Update our in-memory list of people, also notifying the search subsystem of
+ * the update.
+ */
+const updatePeople = async () => {
+    const people = await updatedPeople();
+    // TODO-Cluster:
+    // _wip_people = people;
+    setSearchPeople(people);
 };
 
 /**
