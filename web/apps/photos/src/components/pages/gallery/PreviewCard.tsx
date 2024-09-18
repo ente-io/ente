@@ -211,6 +211,7 @@ const Cont = styled("div")<{ disabled: boolean }>`
 
     &:hover {
         input[type="checkbox"] {
+            visibility: visible;
             opacity: 0.5;
         }
 
