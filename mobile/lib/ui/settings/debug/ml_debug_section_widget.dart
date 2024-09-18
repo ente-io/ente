@@ -222,7 +222,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           trailingIconIsMuted: true,
           onTap: () async {
             try {
-              await MagicCacheService.instance.updateCache();
+              await MagicCacheService.instance.updateCache(forced: true);
             } catch (e, s) {
               logger.warning('Update discover failed', e, s);
               await showGenericErrorDialog(context: context, error: e);

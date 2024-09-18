@@ -147,9 +147,12 @@ class MagicCacheService {
     return (await getApplicationSupportDirectory()).path + "/cache/magic_cache";
   }
 
-  Future<void> updateCache() async {
+  Future<void> updateCache({bool forced = false}) async {
     if (!enableDiscover) {
       return;
+    }
+    if (forced) {
+      _pendingUpdateReason.add("Forced update");
     }
     try {
       if (_pendingUpdateReason.isEmpty || _isUpdateInProgress) {
