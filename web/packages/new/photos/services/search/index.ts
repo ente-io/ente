@@ -88,13 +88,13 @@ const suggestionsForString = async (searchString: string) => {
     // The CLIP matching code already runs in the ML worker, so let that run
     // separately, in parallel with the rest of the search query construction in
     // the search worker, then combine the two.
-    const results = await Promise.all([
+    const [clip, [restPre, restPost]] = await Promise.all([
         clipSuggestion(s, searchString).then((s) => s ?? []),
         worker().then((w) =>
             w.suggestionsForString(s, searchString, localizedSearchData()),
         ),
     ]);
-    return results.flat();
+    return [restPre, clip, restPost].flat();
 };
 
 const clipSuggestion = async (

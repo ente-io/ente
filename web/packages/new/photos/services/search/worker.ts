@@ -135,17 +135,18 @@ const suggestionsForString = (
     { locale, holidays, labelledFileTypes }: LocalizedSearchData,
     locationTags: Searchable<LocationTag>[],
     cities: Searchable<City>[],
-): SearchSuggestion[] =>
+): [SearchSuggestion[], SearchSuggestion[]] => [
+    [peopleSuggestions(s, searchablePeople)].flat(),
+    // . <-- clip suggestions will be inserted here by our caller.
     [
-        // . <-- clip suggestions will be inserted here by our caller.
-        peopleSuggestions(s, searchablePeople),
         fileTypeSuggestions(s, labelledFileTypes),
         dateSuggestions(s, locale, holidays),
         locationSuggestions(s, locationTags, cities),
         collectionSuggestions(s, collections),
         fileNameSuggestion(s, searchString, files),
         fileCaptionSuggestion(s, searchString, files),
-    ].flat();
+    ].flat(),
+];
 
 const collectionSuggestions = (
     s: string,
