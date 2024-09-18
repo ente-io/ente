@@ -483,6 +483,7 @@ const labelForOption = (option: SearchOption) => {
 
         case "date":
             return t("date");
+
         case "location":
             return t("location");
 

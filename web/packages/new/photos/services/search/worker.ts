@@ -53,13 +53,13 @@ export class SearchWorker {
                 .then((ts) => {
                     this.locationTags = ts.map((t) => ({
                         ...t,
-                        lowercasedName: t.name.toLowerCase(),
+                        searchTerms: t.name.toLowerCase().split(" "),
                     }));
                 }),
             fetchCities().then((cs) => {
                 this.cities = cs.map((c) => ({
                     ...c,
-                    lowercasedName: c.name.toLowerCase(),
+                    searchTerms: c.name.toLowerCase().split(" "),
                 }));
             }),
         ]);
@@ -77,7 +77,10 @@ export class SearchWorker {
      */
     setPeople(people: Person[]) {
         this.searchablePeople = people.map((person) => {
-            return { ...person, lowercasedName: person.name.toLowerCase() };
+            return {
+                ...person,
+                searchTerms: person.name.toLowerCase().split(" "),
+            };
         });
     }
 
@@ -165,8 +168,16 @@ const fileTypeSuggestions = (
     labelledFileTypes: Searchable<LabelledFileType>[],
 ): SearchSuggestion[] =>
     labelledFileTypes
-        .filter(({ lowercasedName }) => lowercasedName.startsWith(s))
+        .filter(searchableMatch(s))
         .map(({ fileType, label }) => ({ type: "fileType", fileType, label }));
+
+/**
+ * A helper function to directly pass to filters on Searchable<T>[].
+ */
+const searchableMatch =
+    (s: string) =>
+    ({ searchTerms }: { searchTerms: string[] }) =>
+        searchTerms.some((t) => t.startsWith(s));
 
 const fileNameSuggestion = (
     s: string,
@@ -211,7 +222,7 @@ const peopleSuggestions = (
     searchablePeople: Searchable<Person>[],
 ): SearchSuggestion[] =>
     searchablePeople
-        .filter(({ lowercasedName }) => lowercasedName.startsWith(s))
+        .filter(searchableMatch(s))
         .map((person) => ({ type: "person", person, label: person.name }));
 
 const dateSuggestions = (
@@ -247,7 +258,7 @@ const parseDateComponents = (
     [
         parseChrono(s, locale),
         parseYearComponents(s),
-        holidays.filter(searchableIncludes(s)),
+        holidays.filter(searchableMatch(s)),
     ].flat();
 
 const parseChrono = (
@@ -300,14 +311,6 @@ const parseYearComponents = (s: string): LabelledSearchDateComponents[] => {
 };
 
 /**
- * A helper function to directly pass to filters on Searchable<T>[].
- */
-const searchableIncludes =
-    (s: string) =>
-    ({ lowercasedName }: { lowercasedName: string }) =>
-        lowercasedName.includes(s);
-
-/**
  * Zod schema describing world_cities.json.
  *
  * The entries also have a country field which we don't currently use.
@@ -335,17 +338,15 @@ const locationSuggestions = (
     locationTags: Searchable<LocationTag>[],
     cities: Searchable<City>[],
 ): SearchSuggestion[] => {
-    const matchingLocationTags = locationTags.filter(searchableIncludes(s));
+    const matchingLocationTags = locationTags.filter(searchableMatch(s));
 
     const matchingLocationTagLNames = new Set(
-        matchingLocationTags.map((t) => t.lowercasedName),
+        matchingLocationTags.map((t) => t.searchTerms),
     );
 
-    const matchingCities = cities.filter(
-        (c) =>
-            c.lowercasedName.startsWith(s) &&
-            !matchingLocationTagLNames.has(c.lowercasedName),
-    );
+    const matchingCities = cities
+        .filter(searchableMatch(s))
+        .filter((c) => !matchingLocationTagLNames.has(c.searchTerms));
 
     return [
         matchingLocationTags.map(

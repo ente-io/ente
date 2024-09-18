@@ -63,17 +63,17 @@ export interface LabelledFileType {
 }
 
 /**
- * An annotated version of {@link T} that includes its searchable "lowercased"
- * label or name.
+ * An annotated version of {@link T} that includes a list of lowercased words
+ * that it should match.
  *
  * Precomputing these lowercased values saves us from doing the lowercasing
  * during the search itself.
  */
 export type Searchable<T> = T & {
     /**
-     * The name or label of T, lowercased.
+     * The name or label of T, split into words and lowercased.
      */
-    lowercasedName: string;
+    searchTerms: string[];
 };
 
 /**

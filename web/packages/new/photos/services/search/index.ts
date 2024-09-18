@@ -160,11 +160,11 @@ const localizedSearchData = () =>
         locale: i18n.language,
         holidays: holidays().map((h) => ({
             ...h,
-            lowercasedName: h.label.toLowerCase(),
+            searchTerms: h.label.toLowerCase().split(" "),
         })),
         labelledFileTypes: labelledFileTypes().map((t) => ({
             ...t,
-            lowercasedName: t.label.toLowerCase(),
+            searchTerms: t.label.toLowerCase().split(" "),
         })),
     });
 
