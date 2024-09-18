@@ -176,21 +176,23 @@ const SearchInput: React.FC<Omit<SearchBarProps, "setIsInSearchMode">> = ({
     };
 
     const resetSearch = () => {
+        // Dismiss the search menu if it is open.
+        selectRef.current?.blur();
+
+        // Clear all our state.
         setValue(null);
         setInputValue("");
+
+        // Let our parent know.
         onSelectSearchOption(undefined);
     };
 
     const handleSelectPeople = () => {
-        // Dismiss the search menu.
-        selectRef.current?.blur();
         resetSearch();
         onSelectPeople();
     };
 
     const handleSelectPerson = (person: Person) => {
-        // Dismiss the search menu.
-        selectRef.current?.blur();
         resetSearch();
         onSelectPerson(person);
     };
