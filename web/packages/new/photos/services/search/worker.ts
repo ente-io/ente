@@ -321,7 +321,7 @@ const locationSuggestions = (
     const matchingLocationTags = locationTags.filter((t) => re.test(t.name));
 
     const matchingLocationTagLNames = new Set(
-        matchingLocationTags.map((t) => t.name),
+        matchingLocationTags.map((t) => t.name.toLowerCase()),
     );
 
     const matchingCities = cities
