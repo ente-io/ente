@@ -20,7 +20,7 @@ export interface FaceCluster {
     /**
      * An unordered set of ids of the faces that belong to this cluster.
      *
-     * For ergonomics of transportation and persistence this is an array, but it
+     * For ease of transportation and persistence this is an array, but it
      * should conceptually be thought of as a set.
      */
     faces: string[];
@@ -203,7 +203,7 @@ export const clusterFaces = (
         cgroups.push({
             id: cluster.id,
             name: undefined,
-            clusterIDs: [cluster.id],
+            assigned: [cluster],
             isHidden: false,
             avatarFaceID: undefined,
             displayFaceID: topFace.faceID,

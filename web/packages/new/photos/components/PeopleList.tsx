@@ -14,6 +14,7 @@ export interface PeopleListProps {
     /** Optional callback invoked when a particular person is selected. */
     onSelect?: (person: Person, index: number) => void;
 }
+
 /**
  * Shows a list of {@link Person} (named cluster groups).
  */

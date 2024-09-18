@@ -109,16 +109,12 @@ export const savedLocationTags = async () =>
  * the cgroup specific entity key.
  */
 export const pullCGroups = (masterKey: Uint8Array) => {
-    const parse = async (id: string, data: Uint8Array): Promise<CGroup> => {
-        const r = RemoteCGroup.parse(JSON.parse(await gunzip(data)));
-        return {
-            id,
-            name: r.name,
-            clusterIDs: r.assigned.map(({ id }) => id),
-            isHidden: r.isHidden,
-            avatarFaceID: r.avatarFaceID,
-        };
-    };
+    const parse = async (id: string, data: Uint8Array): Promise<CGroup> => ({
+        id,
+        name: undefined,
+        avatarFaceID: undefined,
+        ...RemoteCGroup.parse(JSON.parse(await gunzip(data))),
+    });
 
     const processBatch = async (entities: UserEntityChange[]) =>
         await applyCGroupDiff(

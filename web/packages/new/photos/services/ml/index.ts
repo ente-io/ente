@@ -422,13 +422,16 @@ export const wipClusterDebugPageContents = async (
     const clusterByID = new Map(clusters.map((c) => [c.id, c]));
 
     const people = cgroups
+        // TODO-Cluster
+        .map((cgroup) => ({ ...cgroup, name: cgroup.id }))
         .map((cgroup) => {
+            if (!cgroup.name) return undefined;
             const faceID = ensure(cgroup.displayFaceID);
             const fileID = ensure(fileIDFromFaceID(faceID));
             const file = ensure(localFileByID.get(fileID));
 
-            const faceIDs = cgroup.clusterIDs
-                .map((id) => ensure(clusterByID.get(id)))
+            const faceIDs = cgroup.assigned
+                .map(({ id }) => ensure(clusterByID.get(id)))
                 .flatMap((cluster) => cluster.faces);
             const fileIDs = faceIDs
                 .map((faceID) => fileIDFromFaceID(faceID))
@@ -443,6 +446,7 @@ export const wipClusterDebugPageContents = async (
                 displayFaceFile: file,
             };
         })
+        .filter((c) => !!c)
         .sort((a, b) => b.faceIDs.length - a.faceIDs.length);
 
     _wip_isClustering = false;
@@ -599,23 +603,24 @@ const workerDidProcessFileOrIdle = throttled(updateMLStatusSnapshot, 2000);
 /**
  * A massaged version of {@link CGroup} suitable for being shown in the UI.
  *
- * While cgroups are synced with remote, they do not directly correspond to
- * "people" (this is ignoring the other issue that the cluster groups may be for
- * non-human faces too). CGroups represent both positive and negative feedback,
- * and the negations are specifically meant so that they're not shown in the UI.
+ * The cgroups synced with remote do not directly correspond to "people".
+ * CGroups represent both positive and negative feedback, where the negations
+ * are specifically feedback meant so that we do not show the corresponding
+ * cluster in the UI.
  *
  * So while each person has an underlying cgroups, not all cgroups have a
  * corresponding person.
  *
- * Beyond this, a {@link Person} object has data converted into a format that
- * the UI can use directly and efficiently (as compared to a {@link CGroup},
- * which is tailored for transmission and storage).
+ * Beyond this semantic difference, there is also data massaging: a
+ * {@link Person} has data converted into a format that the UI can directly and
+ * efficiently use, as compared to a {@link CGroup}, which is tailored for
+ * transmission and storage.
  */
 export interface Person {
     /** Unique ID (nanoid) of the underlying {@link CGroup}. */
     id: string;
-    /** If this is a named person, then their name. */
-    name?: string;
+    /** The name of the person. */
+    name: string;
     /** The files in which this face occurs. */
     files: number[];
     /**

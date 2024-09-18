@@ -1,10 +1,11 @@
 import { masterKeyFromSession } from "@/base/session-store";
 import { setCGroups } from "../search";
 import { pullCGroups } from "../user-entity";
+import type { FaceCluster } from "./cluster";
 import { clusterGroups } from "./db";
 
 /**
- * A cgroup ("cluster group") is a group of clusters (possibly containing a
+ * A cgroup ("cluster group") is a group of clusters (possibly containing just a
  * single cluster) that the user has interacted with.
  *
  * Interactions include hiding, merging and giving a name and/or a cover photo.
@@ -25,15 +26,6 @@ import { clusterGroups } from "./db";
  *
  * cgroups are synced with remote.
  *
- * While in our local representation we separately maintain clusters and link to
- * them from within CGroups by their clusterID, in the remote representation
- * clusters themselves don't get synced. Instead, the cgroup entities synced
- * with remote contain the clusters within themselves.
- *
- * That is, a cgroup that gets synced with remote looks something like:
- *
- *     { id, name, clusters: [{ clusterID, faceIDs }] }
- *
  */
 export interface CGroup {
     /**
@@ -53,12 +45,12 @@ export interface CGroup {
      */
     name: string | undefined;
     /**
-     * An unordered set of ids of the clusters that belong to this group.
+     * An unordered set ofe clusters that have been assigned to this group.
      *
-     * For ergonomics of transportation and persistence this is an array, but it
+     * For ease of transportation and persistence this is an array, but it
      * should conceptually be thought of as a set.
      */
-    clusterIDs: string[];
+    assigned: FaceCluster[];
     /**
      * True if this cluster group should be hidden.
      *
