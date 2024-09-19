@@ -7,9 +7,7 @@ import 'package:photo_manager/photo_manager.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/services/sync_service.dart';
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/utils/debouncer.dart";
 import "package:photos/utils/dialog_util.dart";
-import "package:photos/utils/email_util.dart";
 import "package:photos/utils/photo_manager_util.dart";
 import "package:styled_text/styled_text.dart";
 
@@ -21,14 +19,7 @@ class GrantPermissionsWidget extends StatefulWidget {
 }
 
 class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
-  final _debouncer = Debouncer(const Duration(milliseconds: 500));
   final Logger _logger = Logger("_GrantPermissionsWidgetState");
-
-  @override
-  void dispose() {
-    _debouncer.cancelDebounceTimer();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
