@@ -60,7 +60,7 @@ export default function DialogBox({
     });
 
     const handleDialogEnter = () => {
-        if (attributes.proceed.autoFocus)
+        if (attributes.proceed?.autoFocus)
             proceedButtonRef?.current.focusVisible();
     };
 
