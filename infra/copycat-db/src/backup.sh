@@ -18,10 +18,9 @@ EXPIRY="$(date -Iseconds --utc --date "@$EXPIRYS")"
 
 if test -z "$SCW_RDB_INSTANCE_ID"
 then
-    # A required SCW related environment variable hasn't been specified. This is
-    # expected when running the script locally for testing. Fallback to using
-    # pg_dump for creating the backup.
-    pg_dump -Fc ente_db > $BACKUP_FILE
+    # A required SCW related environment variable hasn't been specified.
+    echo "Missing SCW_RDB_INSTANCE_ID"
+    exit 1
 else
     # We need to export a backup first after creating it, before it can be
     # downloaded.
