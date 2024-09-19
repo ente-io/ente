@@ -3,6 +3,12 @@ FROM ubuntu:latest
 RUN apt-get update && apt-get install -y curl gnupg
 RUN apt-get install -y tini
 
+# Install Postgres client (needed for restores, and for local testing)
+# https://www.postgresql.org/download/linux/ubuntu/
+#
+# We don't have specific dependencies on Postgres, so just use the latest.
+RUN apt-get update && apt-get -y install postgresql-client
+
 # Install SCW CLI
 # Latest release: https://github.com/scaleway/scaleway-cli/releases/latest
 RUN \
