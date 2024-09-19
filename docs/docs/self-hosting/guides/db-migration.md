@@ -23,8 +23,8 @@ can use it to run the `pg_dumpall` command on the postgres container to create a
 plaintext backup.
 
 Assuming your cluster is already running, and you are in the `ente/server`
-directiory, you can run the following (this command uses the default
-credentials, you'll need to change these to match your setup):
+directory, you can run the following (this command uses the default credentials,
+you'll need to change these to match your setup):
 
 ```sh
 docker compose exec postgres env PGPASSWORD=pgpass PGUSER=pguser PG_DB=ente_db pg_dumpall >pg12.backup.sql
@@ -51,7 +51,7 @@ At the high level, the steps are
 1. Stop your cluster.
 
 2. Start just the postgres container after changing the image to
-   `pgautoupgrade/pgautoupgrade:15-bookworm'.
+   `pgautoupgrade/pgautoupgrade:15-bookworm`.
 
 3. Once the in-place migration completes, stop the container, and change the
    image to `postgres:15`.
