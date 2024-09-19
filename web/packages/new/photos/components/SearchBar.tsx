@@ -446,12 +446,14 @@ interface PeopleHeaderProps {
 }
 
 const PeopleHeader: React.FC<PeopleHeaderProps> = ({ onClick }) => (
-    <Stack direction="row" sx={{ cursor: "pointer" }} {...{ onClick }}>
-        <Typography color="text.base" variant="large">
-            {t("people")}
-        </Typography>
-        <ChevronRightIcon />
-    </Stack>
+    <button {...{ onClick }}>
+        <Stack direction="row">
+            <Typography color="text.base" variant="large">
+                {t("people")}
+            </Typography>
+            <ChevronRightIcon />
+        </Stack>
+    </button>
 );
 
 const Option: React.FC<OptionProps<SearchOption, false>> = (props) => (
