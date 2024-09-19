@@ -344,7 +344,8 @@ export const wipClusterEnable = async (): Promise<boolean> =>
 
 // // TODO-Cluster temporary state here
 let _wip_isClustering = false;
-let _wip_people: Person[] | undefined;
+let _wip_peopleLocal: Person[] | undefined;
+let _wip_peopleRemote: Person[] | undefined;
 let _wip_hasSwitchedOnce = false;
 
 export const wipHasSwitchedOnceCmpAndSet = () => {
@@ -384,7 +385,7 @@ export const wipClusterDebugPageContents = async (
 
     log.info("clustering", opts);
     _wip_isClustering = true;
-    _wip_people = undefined;
+    _wip_peopleLocal = undefined;
     triggerStatusUpdate();
 
     const {
@@ -446,9 +447,9 @@ export const wipClusterDebugPageContents = async (
         .sort((a, b) => b.faceIDs.length - a.faceIDs.length);
 
     _wip_isClustering = false;
-    _wip_people = people;
+    _wip_peopleLocal = people;
     triggerStatusUpdate();
-    triggerPeopleUpdate();
+    setPeopleSnapshot((_wip_peopleRemote ?? []).concat(people));
 
     return {
         clusters,
@@ -628,20 +629,7 @@ export const peopleSubscribe = (onChange: () => void): (() => void) => {
  * have any people (this is distinct from the case where the user has ML enabled
  * but doesn't have any named "person" clusters so far).
  */
-export const peopleSnapshot = (): Person[] | undefined => {
-    const result = _state.peopleSnapshot;
-    // We don't have it yet, trigger an update.
-    // if (!result) triggerPeopleUpdate();
-    return result;
-};
-
-/**
- * Trigger an asynchronous and unconditional update of the people snapshot.
- */
-const triggerPeopleUpdate = () => void updatePeopleSnapshot();
-
-/** Unconditional update of the people snapshot. */
-const updatePeopleSnapshot = async () => setPeopleSnapshot(await getPeople());
+export const peopleSnapshot = () => _state.peopleSnapshot;
 
 const setPeopleSnapshot = (snapshot: Person[] | undefined) => {
     _state.peopleSnapshot = snapshot;
@@ -649,27 +637,13 @@ const setPeopleSnapshot = (snapshot: Person[] | undefined) => {
 };
 
 /**
- * Compute the list of people.
- *
- * TODO-Cluster this is a placeholder function and might not be needed since
- * people might be updated in a push based manner.
- */
-const getPeople = async (): Promise<Person[] | undefined> => {
-    if (!_state.isMLEnabled) return [];
-    // TODO-Cluster additional check for now as it is heavily WIP.
-    if (!process.env.NEXT_PUBLIC_ENTE_WIP_CL) return [];
-    if (!(await wipClusterEnable())) return [];
-    return _wip_people;
-};
-
-/**
- * Update our in-memory list of people, also notifying the search subsystem of
- * the update.
+ * Update our in-memory snapshot of people, also notifying the search subsystem
+ * of the update.
  */
 const updatePeople = async () => {
     const people = await updatedPeople();
-    // TODO-Cluster:
-    // _wip_people = people;
+    _wip_peopleRemote = people;
+    setPeopleSnapshot(people.concat(_wip_peopleLocal ?? []));
     setSearchPeople(people);
 };
 
