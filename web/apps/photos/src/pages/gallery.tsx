@@ -324,8 +324,7 @@ export default function Gallery() {
 
     // If set, then display files belonging to this person.
     //
-    // - The search bar is replaced by a navbar with a back button.
-    // - The collections bar is hidden.
+    // - The collections bar is replaced with a people bar.
     // - The gallery itself shows files which contain this person.
     const [person, setPerson] = useState<Person | undefined>();
 
@@ -541,6 +540,9 @@ export default function Gallery() {
             filteredFiles = await filterSearchableFiles(
                 selectedSearchOption.suggestion,
             );
+        } else if (person) {
+            const pfSet = new Set(person.fileIDs);
+            filteredFiles = files.filter((f) => pfSet.has(f.id));
         } else {
             filteredFiles = getUniqueFiles(
                 (isInHiddenSection ? hiddenFiles : files).filter((item) => {
@@ -616,6 +618,7 @@ export default function Gallery() {
         selectedSearchOption,
         activeCollectionID,
         archivedCollections,
+        person,
     ]);
 
     const selectAll = (e: KeyboardEvent) => {
