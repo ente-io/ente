@@ -60,6 +60,17 @@ As mentioned above, the auth data is encrypted using a key that's derived by
 using user provided password & kdf params. For encryption, we are using
 `XChaCha20-Poly1305` algorithm.
 
+## Automated backup
+
+You can use ente cli to automate backup of your authenticator codes. 
+To export the auth code, add an account using `ente account add` command. In the first step, specify `auth` as the app name. At a later point, CLI will also ask you specify the path where it should write the exported codes.
+
+You can change the export directory using following command
+
+```
+ente account update --app auth --email <email> --dir <path>
+```
+
 ## How to use the exported data
 
 -   **Ente Authenticator app**: You can directly import the codes in the Ente
