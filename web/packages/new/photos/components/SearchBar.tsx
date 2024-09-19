@@ -434,7 +434,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
                     <SearchPeopleList {...{ people, onSelectPerson }} />
                 </>
             )}
-            <Typography variant="mini" sx={{ my: "2px" }}>
+            <Typography variant="mini" sx={{ my: "4px" }}>
                 {label}
             </Typography>
         </Box>
