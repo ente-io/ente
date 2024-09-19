@@ -5,9 +5,10 @@ import {
     DialogContent,
     DialogProps,
     Typography,
+    type ButtonBaseActions,
 } from "@mui/material";
 import { t } from "i18next";
-import React from "react";
+import React, { useRef } from "react";
 import DialogIcon from "./DialogIcon";
 import DialogTitleWithCloseButton, {
     dialogCloseHandler,
@@ -33,6 +34,21 @@ export default function DialogBox({
     titleCloseButton,
     ...props
 }: IProps) {
+    // Sometimes we wish to autoFocus on the primary action button in the dialog
+    // (e.g. in the delete confirmation) so that the user can use their keyboard
+    // to quickly select it.
+    //
+    // To allow this, MUI buttons provide an `autoFocus` prop. However, while
+    // the button does get auto focused, it doesn't show the visual
+    // focus-visible state until the user does an keyboard action.
+    //
+    // Below is the current best workaround to get the focused button to also
+    // show the focus-visible state. It uses the onEnter callback of the
+    // transition to focus on the ref to the auto focused button (if any).
+    //
+    // https://github.com/mui/material-ui/issues/8438
+    const proceedButtonRef = useRef<ButtonBaseActions | null>(null);
+
     if (!attributes) {
         return <></>;
     }
@@ -43,11 +59,17 @@ export default function DialogBox({
         onClose: onClose,
     });
 
+    const handleDialogEnter = () => {
+        if (attributes.proceed.autoFocus)
+            proceedButtonRef?.current.focusVisible();
+    };
+
     return (
         <DialogBoxBase
             open={open}
             maxWidth={size}
             onClose={handleClose}
+            TransitionProps={{ onEnter: handleDialogEnter }}
             {...props}
         >
             {attributes.icon && <DialogIcon icon={attributes.icon} />}
@@ -87,6 +109,7 @@ export default function DialogBox({
                         )}
                         {attributes.proceed && (
                             <FocusVisibleButton
+                                action={proceedButtonRef}
                                 size="large"
                                 color={attributes.proceed?.variant}
                                 onClick={() => {
