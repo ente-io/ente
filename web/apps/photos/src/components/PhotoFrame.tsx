@@ -269,6 +269,7 @@ const PhotoFrame = ({
             )(!checked);
         }
     };
+
     const getThumbnail = (
         item: EnteFile,
         index: number,
