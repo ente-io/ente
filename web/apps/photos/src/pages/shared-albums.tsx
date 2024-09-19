@@ -562,6 +562,7 @@ export default function PublicCollectionGallery() {
                     setFilesDownloadProgressAttributesCreator={
                         setFilesDownloadProgressAttributesCreator
                     }
+                    selectable={downloadEnabled}
                 />
                 {blockingLoad && (
                     <LoadingOverlay>

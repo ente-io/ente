@@ -1195,6 +1195,7 @@ export default function Gallery() {
                         setFilesDownloadProgressAttributesCreator={
                             setFilesDownloadProgressAttributesCreator
                         }
+                        selectable={true}
                     />
                 )}
                 {selected.count > 0 &&

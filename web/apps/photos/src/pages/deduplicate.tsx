@@ -196,6 +196,7 @@ export default function Deduplicate() {
                     activeCollectionID={ALL_SECTION}
                     fileToCollectionsMap={fileToCollectionsMap}
                     collectionNameMap={collectionNameMap}
+                    selectable={true}
                 />
             )}
             <DeduplicateOptions
