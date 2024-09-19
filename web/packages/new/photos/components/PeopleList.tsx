@@ -20,9 +20,9 @@ export const SearchPeopleList: React.FC<SearchPeopleListProps> = ({
 }) => {
     const isMobileWidth = useIsMobileWidth();
     return (
-        <SearchFaceChipContainer>
+        <SearchPeopleContainer>
             {people.slice(0, isMobileWidth ? 6 : 7).map((person) => (
-                <SearchFaceChip
+                <SearchPeopleButton
                     key={person.id}
                     onClick={() => onSelectPerson(person)}
                 >
@@ -31,35 +31,49 @@ export const SearchPeopleList: React.FC<SearchPeopleListProps> = ({
                         enteFile={person.displayFaceFile}
                         placeholderDimension={87}
                     />
-                </SearchFaceChip>
+                </SearchPeopleButton>
             ))}
-        </SearchFaceChipContainer>
+        </SearchPeopleContainer>
     );
 };
 
-const SearchFaceChipContainer = styled("div")`
+const SearchPeopleContainer = styled("div")`
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
     gap: 5px;
-    margin-block: 16px;
+    margin-block-start: 16px;
+    margin-block-end: 14px;
     /* On very small (~ < 375px) mobile screens 6 faces won't fit in 2 rows.
        Clip the third one. */
     overflow: hidden;
+    /* Keep enough space for the button outline (since we overflow hidden). */
+    padding-inline: 2px;
+    padding-block: 4px;
 `;
 
-const SearchFaceChip = styled("div")`
+const SearchPeopleButton = styled("button")(
+    ({ theme }) => `
+    /* Reset some button defaults */
+    border: 0;
+    padding: 0;
+    /* Button should do this for us, but it isn't working inside the select */
+    cursor: pointer;
     width: 87px;
     height: 87px;
     border-radius: 50%;
     overflow: hidden;
-    cursor: pointer;
     & > img {
         width: 100%;
         height: 100%;
     }
-`;
+    :hover {
+        outline: 1px solid ${theme.colors.stroke.faint};
+        outline-offset: 2px;
+    }
+`,
+);
 
 const FaceChipContainer = styled("div")`
     display: flex;
