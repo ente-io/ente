@@ -893,14 +893,14 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, publicCollectionR
 		}
 	})
 
-	schedule(c, "@every 2m", func() {
+	schedule(c, "@every 10m", func() {
 		fileController.CleanupDeletedFiles()
 	})
 	schedule(c, "@every 101s", func() {
 		embeddingCtrl.CleanupDeletedEmbeddings()
 	})
 
-	schedule(c, "@every 10m", func() {
+	schedule(c, "@every 17m", func() {
 		trashController.DropFileMetadataCron()
 	})
 
@@ -926,7 +926,7 @@ func setupAndStartCrons(userAuthRepo *repo.UserAuthRepository, publicCollectionR
 		trashController.ProcessEmptyTrashRequests()
 	})
 
-	schedule(c, "@every 30m", func() {
+	schedule(c, "@every 45m", func() {
 		// delete unclaimed codes older than 60 minutes
 		_ = castDb.DeleteUnclaimedCodes(context.Background(), timeUtil.MicrosecondsBeforeMinutes(60))
 		dataCleanupCtrl.DeleteDataCron()
