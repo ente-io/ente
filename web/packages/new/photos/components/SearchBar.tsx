@@ -446,14 +446,32 @@ interface PeopleHeaderProps {
 }
 
 const PeopleHeader: React.FC<PeopleHeaderProps> = ({ onClick }) => (
-    <button {...{ onClick }}>
-        <Stack direction="row">
+    <PeopleHeaderButton {...{ onClick }}>
+        <Stack direction="row" color="text.muted">
             <Typography color="text.base" variant="large">
                 {t("people")}
             </Typography>
             <ChevronRightIcon />
         </Stack>
-    </button>
+    </PeopleHeaderButton>
+);
+
+const PeopleHeaderButton = styled("button")(
+    ({ theme }) => `
+    /* Reset some button defaults that are affecting us */
+    background: transparent;
+    border: 0;
+    padding: 0;
+    font: inherit;
+    /* Button should do this for us, but it isn't working inside the select */
+    cursor: pointer;
+    /* The color for the chevron */
+    color: ${theme.colors.stroke.muted};
+    /* Hover indication */
+    && :hover {
+        color: ${theme.colors.stroke.base};
+    }
+`,
 );
 
 const Option: React.FC<OptionProps<SearchOption, false>> = (props) => (
