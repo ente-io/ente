@@ -23,11 +23,7 @@ import { t } from "i18next";
 import memoize from "memoize-one";
 import React, { useEffect, useRef, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
-import {
-    FixedSizeList as List,
-    ListChildComponentProps,
-    areEqual,
-} from "react-window";
+import { FixedSizeList, ListChildComponentProps, areEqual } from "react-window";
 import { CollectionSummary, CollectionSummaryType } from "types/collection";
 import { ALL_SECTION, COLLECTION_LIST_SORT_BY } from "utils/collection";
 import CollectionCard from "./CollectionCard";
@@ -152,7 +148,7 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
                     )}
                     <AutoSizer disableHeight>
                         {({ width }) => (
-                            <List
+                            <FixedSizeList
                                 ref={collectionListRef}
                                 outerRef={collectionListWrapperRef}
                                 itemData={itemData}
@@ -165,7 +161,7 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
                                 useIsScrolling
                             >
                                 {CollectionCardContainer}
-                            </List>
+                            </FixedSizeList>
                         )}
                     </AutoSizer>
                     {!onFarRight && (
