@@ -6,7 +6,7 @@ RUN apt-get install -y tini
 # Install SCW CLI
 # Latest release: https://github.com/scaleway/scaleway-cli/releases/latest
 RUN \
-    export VERSION="2.32.1" && \
+    export VERSION="2.34.0" && \
     curl -o /usr/local/bin/scw -L "https://github.com/scaleway/scaleway-cli/releases/download/v${VERSION}/scaleway-cli_${VERSION}_linux_amd64" && \
     chmod +x /usr/local/bin/scw
 
