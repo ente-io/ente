@@ -4,10 +4,15 @@ import {
     SpaceBetweenFlex,
 } from "@ente/shared/components/Container";
 import useWindowSize from "@ente/shared/hooks/useWindowSize";
+import ArchiveIcon from "@mui/icons-material/Archive";
 import ExpandMore from "@mui/icons-material/ExpandMore";
+import Favorite from "@mui/icons-material/FavoriteRounded";
+import LinkIcon from "@mui/icons-material/Link";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
+import PeopleIcon from "@mui/icons-material/People";
+import PushPin from "@mui/icons-material/PushPin";
 import { Box, IconButton, Typography, styled } from "@mui/material";
-import CollectionListBarCard from "components/Collections/CollectionListBar/CollectionCard";
+import Tooltip from "@mui/material/Tooltip";
 import {
     CollectionListBarWrapper,
     CollectionListWrapper,
@@ -21,9 +26,16 @@ import {
     ListChildComponentProps,
     areEqual,
 } from "react-window";
-import { CollectionSummary } from "types/collection";
+import { CollectionSummary, CollectionSummaryType } from "types/collection";
 import { ALL_SECTION, COLLECTION_LIST_SORT_BY } from "utils/collection";
-import CollectionListSortBy from "../CollectionListSortBy";
+import CollectionCard from "./CollectionCard";
+import CollectionListSortBy from "./CollectionListSortBy";
+import {
+    ActiveIndicator,
+    CollectionBarTile,
+    CollectionBarTileIcon,
+    CollectionBarTileText,
+} from "./styledComponents";
 
 interface CollectionListBarProps {
     activeCollectionID?: number;
@@ -275,4 +287,87 @@ const ScrollButtonRight = styled(ScrollButtonBase)`
     right: 0;
     text-align: left;
     transform: translate(50%, 0%);
+`;
+
+interface CollectionListBarCardProps {
+    collectionSummary: CollectionSummary;
+    activeCollectionID: number;
+    onCollectionClick: (collectionID: number) => void;
+    isScrolling?: boolean;
+}
+
+const CollectionListBarCard = (props: CollectionListBarCardProps) => {
+    const { activeCollectionID, collectionSummary, onCollectionClick } = props;
+
+    return (
+        <Box>
+            <CollectionCard
+                collectionTile={CollectionBarTile}
+                coverFile={collectionSummary.coverFile}
+                onClick={() => {
+                    onCollectionClick(collectionSummary.id);
+                }}
+            >
+                <CollectionCardText collectionName={collectionSummary.name} />
+                <CollectionCardIcon collectionType={collectionSummary.type} />
+            </CollectionCard>
+            {activeCollectionID === collectionSummary.id && <ActiveIndicator />}
+        </Box>
+    );
+};
+
+function CollectionCardText({ collectionName }) {
+    return (
+        <CollectionBarTileText>
+            <TruncateText text={collectionName} />
+        </CollectionBarTileText>
+    );
+}
+
+function CollectionCardIcon({ collectionType }) {
+    return (
+        <CollectionBarTileIcon>
+            {collectionType === CollectionSummaryType.favorites && <Favorite />}
+            {collectionType === CollectionSummaryType.archived && (
+                <ArchiveIcon
+                    sx={(theme) => ({
+                        color: theme.colors.white.muted,
+                    })}
+                />
+            )}
+            {collectionType === CollectionSummaryType.outgoingShare && (
+                <PeopleIcon />
+            )}
+            {(collectionType === CollectionSummaryType.incomingShareViewer ||
+                collectionType ===
+                    CollectionSummaryType.incomingShareCollaborator) && (
+                <PeopleIcon />
+            )}
+            {collectionType === CollectionSummaryType.sharedOnlyViaLink && (
+                <LinkIcon />
+            )}
+            {collectionType === CollectionSummaryType.pinned && <PushPin />}
+        </CollectionBarTileIcon>
+    );
+}
+
+const TruncateText = ({ text }) => {
+    return (
+        <Tooltip title={text}>
+            <Box height={"2.1em"} overflow="hidden">
+                <Ellipse variant="small" sx={{ wordBreak: "break-word" }}>
+                    {text}
+                </Ellipse>
+            </Box>
+        </Tooltip>
+    );
+};
+
+const Ellipse = styled(Typography)`
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; //number of lines to show
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
 `;
