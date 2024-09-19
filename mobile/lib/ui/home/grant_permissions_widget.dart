@@ -35,74 +35,60 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
     final isLightMode = Theme.of(context).brightness == Brightness.light;
     return Scaffold(
       body: SingleChildScrollView(
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onScaleEnd: (details) {
-            _debouncer.run(() async {
-              unawaited(
-                triggerSendLogs(
-                  "support@ente.io",
-                  "Stuck on grant permission screen on ${Platform.operatingSystem}",
-                  null,
-                ),
-              );
-            });
-          },
-          child: Padding(
-            padding: const EdgeInsets.only(top: 20, bottom: 120),
-            child: Column(
-              children: [
-                const SizedBox(
-                  height: 24,
-                ),
-                Center(
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      isLightMode
-                          ? Image.asset(
-                              'assets/loading_photos_background.png',
-                              color: Colors.white.withOpacity(0.4),
-                              colorBlendMode: BlendMode.modulate,
-                            )
-                          : Image.asset(
-                              'assets/loading_photos_background_dark.png',
-                            ),
-                      Center(
-                        child: Column(
-                          children: [
-                            const SizedBox(height: 42),
-                            Image.asset(
-                              "assets/gallery_locked.png",
-                              height: 160,
-                            ),
-                          ],
-                        ),
+        child: Padding(
+          padding: const EdgeInsets.only(top: 20, bottom: 120),
+          child: Column(
+            children: [
+              const SizedBox(
+                height: 24,
+              ),
+              Center(
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    isLightMode
+                        ? Image.asset(
+                            'assets/loading_photos_background.png',
+                            color: Colors.white.withOpacity(0.4),
+                            colorBlendMode: BlendMode.modulate,
+                          )
+                        : Image.asset(
+                            'assets/loading_photos_background_dark.png',
+                          ),
+                    Center(
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 42),
+                          Image.asset(
+                            "assets/gallery_locked.png",
+                            height: 160,
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 36),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(40, 0, 40, 0),
-                  child: StyledText(
-                    text: S.of(context).entePhotosPerm,
-                    style: Theme.of(context)
-                        .textTheme
-                        .headlineSmall!
-                        .copyWith(fontWeight: FontWeight.w700),
-                    tags: {
-                      'i': StyledTextTag(
-                        style: Theme.of(context)
-                            .textTheme
-                            .headlineSmall!
-                            .copyWith(fontWeight: FontWeight.w400),
-                      ),
-                    },
-                  ),
+              ),
+              const SizedBox(height: 36),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(40, 0, 40, 0),
+                child: StyledText(
+                  text: S.of(context).entePhotosPerm,
+                  style: Theme.of(context)
+                      .textTheme
+                      .headlineSmall!
+                      .copyWith(fontWeight: FontWeight.w700),
+                  tags: {
+                    'i': StyledTextTag(
+                      style: Theme.of(context)
+                          .textTheme
+                          .headlineSmall!
+                          .copyWith(fontWeight: FontWeight.w400),
+                    ),
+                  },
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
