@@ -510,6 +510,7 @@ export function PhotoList({
             height: height - 48,
         };
     };
+
     const getVacuumItem = (timeStampList) => {
         let footerHeight;
         if (publicCollectionGalleryContext.accessedThroughSharedURL) {
@@ -619,6 +620,7 @@ export function PhotoList({
             ),
         };
     };
+
     /**
      * Checks and merge multiple dates into a single row.
      *

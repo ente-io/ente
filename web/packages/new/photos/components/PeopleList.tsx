@@ -43,14 +43,7 @@ const SearchPeopleContainer = styled("div")`
     justify-content: center;
     align-items: center;
     gap: 5px;
-    margin-block-start: 16px;
-    margin-block-end: 14px;
-    /* On very small (~ < 375px) mobile screens 6 faces won't fit in 2 rows.
-       Clip the third one. */
-    overflow: hidden;
-    /* Keep enough space for the button outline (since we overflow hidden). */
-    padding-inline: 2px;
-    padding-block: 4px;
+    margin-block: 12px;
 `;
 
 const SearchPeopleButton = styled("button")(

@@ -150,12 +150,12 @@ export default function Collections(props: Iprops) {
                 isInHiddenSection={isInHiddenSection}
                 activeCollectionID={activeCollectionID}
                 setActiveCollectionID={setActiveCollectionID}
+                onShowAllCollections={openAllCollections}
+                collectionListSortBy={collectionListSortBy}
+                setCollectionListSortBy={setCollectionListSortBy}
                 collectionSummaries={sortedCollectionSummaries.filter((x) =>
                     shouldBeShownOnCollectionBar(x.type),
                 )}
-                showAllCollections={openAllCollections}
-                setCollectionListSortBy={setCollectionListSortBy}
-                collectionListSortBy={collectionListSortBy}
             />
 
             <AllCollections

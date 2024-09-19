@@ -1,48 +1,75 @@
 import { useIsMobileWidth } from "@/base/hooks";
 import {
     IconButtonWithBG,
+    Overlay,
     SpaceBetweenFlex,
 } from "@ente/shared/components/Container";
 import useWindowSize from "@ente/shared/hooks/useWindowSize";
+import ArchiveIcon from "@mui/icons-material/Archive";
 import ExpandMore from "@mui/icons-material/ExpandMore";
+import Favorite from "@mui/icons-material/FavoriteRounded";
+import LinkIcon from "@mui/icons-material/Link";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
+import PeopleIcon from "@mui/icons-material/People";
+import PushPin from "@mui/icons-material/PushPin";
 import { Box, IconButton, Typography, styled } from "@mui/material";
-import CollectionListBarCard from "components/Collections/CollectionListBar/CollectionCard";
+import Tooltip from "@mui/material/Tooltip";
+import { CollectionTile } from "components/Collections/styledComponents";
 import {
-    CollectionListBarWrapper,
-    CollectionListWrapper,
-} from "components/Collections/styledComponents";
+    IMAGE_CONTAINER_MAX_WIDTH,
+    MIN_COLUMNS,
+} from "components/PhotoList/constants";
 import { t } from "i18next";
 import memoize from "memoize-one";
 import React, { useEffect, useRef, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
-import {
-    FixedSizeList as List,
-    ListChildComponentProps,
-    areEqual,
-} from "react-window";
-import { CollectionSummary } from "types/collection";
+import { FixedSizeList, ListChildComponentProps, areEqual } from "react-window";
+import { CollectionSummary, CollectionSummaryType } from "types/collection";
 import { ALL_SECTION, COLLECTION_LIST_SORT_BY } from "utils/collection";
-import CollectionListSortBy from "../CollectionListSortBy";
+import CollectionCard from "./CollectionCard";
+import CollectionListSortBy from "./CollectionListSortBy";
 
 interface CollectionListBarProps {
-    activeCollectionID?: number;
+    /**
+     * `true` if we're currently in the hidden section.
+     */
     isInHiddenSection: boolean;
+    /**
+     * The ID of the currently active collection (if any)
+     */
+    activeCollectionID?: number;
+    /**
+     * Called when the user changes the active collection.
+     */
     setActiveCollectionID: (id?: number) => void;
-    collectionSummaries: CollectionSummary[];
-    showAllCollections: () => void;
+    /**
+     * Called when the user selects the option to show a modal with all the
+     * collections.
+     */
+    onShowAllCollections: () => void;
+    /**
+     * The sort order that should be used for showing the collections in the
+     * bar.
+     */
     collectionListSortBy: COLLECTION_LIST_SORT_BY;
+    /**
+     * Called when the user changes the sort order.
+     */
     setCollectionListSortBy: (v: COLLECTION_LIST_SORT_BY) => void;
+    /**
+     * Massaged data about the collections that should be shown in the bar.
+     */
+    collectionSummaries: CollectionSummary[];
 }
 
 export const CollectionListBar: React.FC<CollectionListBarProps> = ({
+    isInHiddenSection,
     activeCollectionID,
     setActiveCollectionID,
-    collectionSummaries,
-    showAllCollections,
-    isInHiddenSection,
-    setCollectionListSortBy,
+    onShowAllCollections,
     collectionListSortBy,
+    setCollectionListSortBy,
+    collectionSummaries,
 }) => {
     const windowSize = useWindowSize();
     const isMobile = useIsMobileWidth();
@@ -131,7 +158,7 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
                             activeSortBy={collectionListSortBy}
                             disableBG
                         />
-                        <IconButton onClick={showAllCollections}>
+                        <IconButton onClick={onShowAllCollections}>
                             <ExpandMore />
                         </IconButton>
                     </Box>
@@ -144,7 +171,7 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
                     )}
                     <AutoSizer disableHeight>
                         {({ width }) => (
-                            <List
+                            <FixedSizeList
                                 ref={collectionListRef}
                                 outerRef={collectionListWrapperRef}
                                 itemData={itemData}
@@ -157,7 +184,7 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
                                 useIsScrolling
                             >
                                 {CollectionCardContainer}
-                            </List>
+                            </FixedSizeList>
                         )}
                     </AutoSizer>
                     {!onFarRight && (
@@ -175,7 +202,7 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
                             setSortBy={setCollectionListSortBy}
                             activeSortBy={collectionListSortBy}
                         />
-                        <IconButtonWithBG onClick={showAllCollections}>
+                        <IconButtonWithBG onClick={onShowAllCollections}>
                             <ExpandMore />
                         </IconButtonWithBG>
                     </Box>
@@ -184,6 +211,22 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
         </CollectionListBarWrapper>
     );
 };
+
+const CollectionListWrapper = styled(Box)`
+    position: relative;
+    overflow: hidden;
+    height: 86px;
+    width: 100%;
+`;
+
+const CollectionListBarWrapper = styled(Box)`
+    padding: 0 24px;
+    @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * MIN_COLUMNS}px) {
+        padding: 0 4px;
+    }
+    margin-bottom: 16px;
+    border-bottom: 1px solid ${({ theme }) => theme.palette.divider};
+`;
 
 interface ItemData {
     collectionSummaries: CollectionSummary[];
@@ -275,4 +318,118 @@ const ScrollButtonRight = styled(ScrollButtonBase)`
     right: 0;
     text-align: left;
     transform: translate(50%, 0%);
+`;
+
+interface CollectionListBarCardProps {
+    collectionSummary: CollectionSummary;
+    activeCollectionID: number;
+    onCollectionClick: (collectionID: number) => void;
+    isScrolling?: boolean;
+}
+
+const CollectionListBarCard = (props: CollectionListBarCardProps) => {
+    const { activeCollectionID, collectionSummary, onCollectionClick } = props;
+
+    return (
+        <Box>
+            <CollectionCard
+                collectionTile={CollectionBarTile}
+                coverFile={collectionSummary.coverFile}
+                onClick={() => {
+                    onCollectionClick(collectionSummary.id);
+                }}
+            >
+                <CollectionCardText collectionName={collectionSummary.name} />
+                <CollectionCardIcon collectionType={collectionSummary.type} />
+            </CollectionCard>
+            {activeCollectionID === collectionSummary.id && <ActiveIndicator />}
+        </Box>
+    );
+};
+
+const ActiveIndicator = styled("div")`
+    height: 3px;
+    background-color: ${({ theme }) => theme.palette.primary.main};
+    margin-top: 18px;
+    border-radius: 2px;
+`;
+
+const CollectionBarTile = styled(CollectionTile)`
+    width: 90px;
+    height: 64px;
+`;
+
+const CollectionBarTileText = styled(Overlay)`
+    padding: 4px;
+    background: linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.1) 0%,
+        rgba(0, 0, 0, 0.5) 86.46%
+    );
+`;
+
+const CollectionBarTileIcon = styled(Overlay)`
+    padding: 4px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-end;
+    & > .MuiSvgIcon-root {
+        font-size: 20px;
+    }
+`;
+
+function CollectionCardText({ collectionName }) {
+    return (
+        <CollectionBarTileText>
+            <TruncateText text={collectionName} />
+        </CollectionBarTileText>
+    );
+}
+
+function CollectionCardIcon({ collectionType }) {
+    return (
+        <CollectionBarTileIcon>
+            {collectionType === CollectionSummaryType.favorites && <Favorite />}
+            {collectionType === CollectionSummaryType.archived && (
+                <ArchiveIcon
+                    sx={(theme) => ({
+                        color: theme.colors.white.muted,
+                    })}
+                />
+            )}
+            {collectionType === CollectionSummaryType.outgoingShare && (
+                <PeopleIcon />
+            )}
+            {(collectionType === CollectionSummaryType.incomingShareViewer ||
+                collectionType ===
+                    CollectionSummaryType.incomingShareCollaborator) && (
+                <PeopleIcon />
+            )}
+            {collectionType === CollectionSummaryType.sharedOnlyViaLink && (
+                <LinkIcon />
+            )}
+            {collectionType === CollectionSummaryType.pinned && <PushPin />}
+        </CollectionBarTileIcon>
+    );
+}
+
+const TruncateText = ({ text }) => {
+    return (
+        <Tooltip title={text}>
+            <Box height={"2.1em"} overflow="hidden">
+                <Ellipse variant="small" sx={{ wordBreak: "break-word" }}>
+                    {text}
+                </Ellipse>
+            </Box>
+        </Tooltip>
+    );
+};
+
+const Ellipse = styled(Typography)`
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; //number of lines to show
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
 `;
