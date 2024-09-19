@@ -14,11 +14,11 @@ import PeopleIcon from "@mui/icons-material/People";
 import PushPin from "@mui/icons-material/PushPin";
 import { Box, IconButton, Typography, styled } from "@mui/material";
 import Tooltip from "@mui/material/Tooltip";
+import { CollectionTile } from "components/Collections/styledComponents";
 import {
-    CollectionListBarWrapper,
-    CollectionListWrapper,
-    CollectionTile,
-} from "components/Collections/styledComponents";
+    IMAGE_CONTAINER_MAX_WIDTH,
+    MIN_COLUMNS,
+} from "components/PhotoList/constants";
 import { t } from "i18next";
 import memoize from "memoize-one";
 import React, { useEffect, useRef, useState } from "react";
@@ -192,6 +192,22 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
         </CollectionListBarWrapper>
     );
 };
+
+const CollectionListWrapper = styled(Box)`
+    position: relative;
+    overflow: hidden;
+    height: 86px;
+    width: 100%;
+`;
+
+const CollectionListBarWrapper = styled(Box)`
+    padding: 0 24px;
+    @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * MIN_COLUMNS}px) {
+        padding: 0 4px;
+    }
+    margin-bottom: 16px;
+    border-bottom: 1px solid ${({ theme }) => theme.palette.divider};
+`;
 
 interface ItemData {
     collectionSummaries: CollectionSummary[];

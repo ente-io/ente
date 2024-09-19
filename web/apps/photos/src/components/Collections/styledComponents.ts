@@ -1,25 +1,6 @@
 import { Overlay } from "@ente/shared/components/Container";
 import { Box, styled } from "@mui/material";
-import {
-    IMAGE_CONTAINER_MAX_WIDTH,
-    MIN_COLUMNS,
-} from "components/PhotoList/constants";
 
-export const CollectionListWrapper = styled(Box)`
-    position: relative;
-    overflow: hidden;
-    height: 86px;
-    width: 100%;
-`;
-
-export const CollectionListBarWrapper = styled(Box)`
-    padding: 0 24px;
-    @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * MIN_COLUMNS}px) {
-        padding: 0 4px;
-    }
-    margin-bottom: 16px;
-    border-bottom: 1px solid ${({ theme }) => theme.palette.divider};
-`;
 
 export const CollectionInfoBarWrapper = styled(Box)`
     width: 100%;
