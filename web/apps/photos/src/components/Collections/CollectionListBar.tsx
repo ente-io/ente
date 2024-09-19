@@ -1,6 +1,7 @@
 import { useIsMobileWidth } from "@/base/hooks";
 import {
     IconButtonWithBG,
+    Overlay,
     SpaceBetweenFlex,
 } from "@ente/shared/components/Container";
 import useWindowSize from "@ente/shared/hooks/useWindowSize";
@@ -16,6 +17,7 @@ import Tooltip from "@mui/material/Tooltip";
 import {
     CollectionListBarWrapper,
     CollectionListWrapper,
+    CollectionTile,
 } from "components/Collections/styledComponents";
 import { t } from "i18next";
 import memoize from "memoize-one";
@@ -30,12 +32,6 @@ import { CollectionSummary, CollectionSummaryType } from "types/collection";
 import { ALL_SECTION, COLLECTION_LIST_SORT_BY } from "utils/collection";
 import CollectionCard from "./CollectionCard";
 import CollectionListSortBy from "./CollectionListSortBy";
-import {
-    ActiveIndicator,
-    CollectionBarTile,
-    CollectionBarTileIcon,
-    CollectionBarTileText,
-} from "./styledComponents";
 
 interface CollectionListBarProps {
     activeCollectionID?: number;
@@ -315,6 +311,37 @@ const CollectionListBarCard = (props: CollectionListBarCardProps) => {
         </Box>
     );
 };
+
+const ActiveIndicator = styled("div")`
+    height: 3px;
+    background-color: ${({ theme }) => theme.palette.primary.main};
+    margin-top: 18px;
+    border-radius: 2px;
+`;
+
+const CollectionBarTile = styled(CollectionTile)`
+    width: 90px;
+    height: 64px;
+`;
+
+const CollectionBarTileText = styled(Overlay)`
+    padding: 4px;
+    background: linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.1) 0%,
+        rgba(0, 0, 0, 0.5) 86.46%
+    );
+`;
+
+const CollectionBarTileIcon = styled(Overlay)`
+    padding: 4px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-end;
+    & > .MuiSvgIcon-root {
+        font-size: 20px;
+    }
+`;
 
 function CollectionCardText({ collectionName }) {
     return (
