@@ -1,7 +1,6 @@
 import { Overlay } from "@ente/shared/components/Container";
 import { Box, styled } from "@mui/material";
 
-
 export const CollectionInfoBarWrapper = styled(Box)`
     width: 100%;
     margin-bottom: 12px;
