@@ -30,23 +30,46 @@ import CollectionCard from "./CollectionCard";
 import CollectionListSortBy from "./CollectionListSortBy";
 
 interface CollectionListBarProps {
-    activeCollectionID?: number;
+    /**
+     * `true` if we're currently in the hidden section.
+     */
     isInHiddenSection: boolean;
+    /**
+     * The ID of the currently active collection (if any)
+     */
+    activeCollectionID?: number;
+    /**
+     * Called when the user changes the active collection.
+     */
     setActiveCollectionID: (id?: number) => void;
-    collectionSummaries: CollectionSummary[];
-    showAllCollections: () => void;
+    /**
+     * Called when the user selects the option to show a modal with all the
+     * collections.
+     */
+    onShowAllCollections: () => void;
+    /**
+     * The sort order that should be used for showing the collections in the
+     * bar.
+     */
     collectionListSortBy: COLLECTION_LIST_SORT_BY;
+    /**
+     * Called when the user changes the sort order.
+     */
     setCollectionListSortBy: (v: COLLECTION_LIST_SORT_BY) => void;
+    /**
+     * Massaged data about the collections that should be shown in the bar.
+     */
+    collectionSummaries: CollectionSummary[];
 }
 
 export const CollectionListBar: React.FC<CollectionListBarProps> = ({
+    isInHiddenSection,
     activeCollectionID,
     setActiveCollectionID,
-    collectionSummaries,
-    showAllCollections,
-    isInHiddenSection,
-    setCollectionListSortBy,
+    onShowAllCollections,
     collectionListSortBy,
+    setCollectionListSortBy,
+    collectionSummaries,
 }) => {
     const windowSize = useWindowSize();
     const isMobile = useIsMobileWidth();
@@ -135,7 +158,7 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
                             activeSortBy={collectionListSortBy}
                             disableBG
                         />
-                        <IconButton onClick={showAllCollections}>
+                        <IconButton onClick={onShowAllCollections}>
                             <ExpandMore />
                         </IconButton>
                     </Box>
@@ -179,7 +202,7 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
                             setSortBy={setCollectionListSortBy}
                             activeSortBy={collectionListSortBy}
                         />
-                        <IconButtonWithBG onClick={showAllCollections}>
+                        <IconButtonWithBG onClick={onShowAllCollections}>
                             <ExpandMore />
                         </IconButtonWithBG>
                     </Box>
