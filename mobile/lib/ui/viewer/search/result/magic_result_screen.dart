@@ -1,6 +1,7 @@
 import "dart:async";
 
 import 'package:flutter/material.dart';
+import "package:logging/logging.dart";
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
@@ -44,6 +45,7 @@ class _MagicResultScreenState extends State<MagicResultScreen> {
   late final List<EnteFile> files;
   late final StreamSubscription<LocalPhotosUpdatedEvent> _filesUpdatedEvent;
   late final StreamSubscription<MagicSortChangeEvent> _magicSortChangeEvent;
+  late final Logger _logger = Logger("_MagicResultScreenState");
   bool _enableGrouping = false;
 
   @override
@@ -68,11 +70,17 @@ class _MagicResultScreenState extends State<MagicResultScreen> {
         Bus.instance.on<MagicSortChangeEvent>().listen((event) {
       if (event.sortType == MagicSortType.mostRelevant) {
         if (_enableGrouping) {
-          files.sort(
-            (a, b) =>
-                widget.fileIdToPosMap[a.uploadedFileID]! -
-                widget.fileIdToPosMap[b.uploadedFileID]!,
-          );
+          if (widget.fileIdToPosMap.isNotEmpty) {
+            files.sort(
+              (a, b) =>
+                  widget.fileIdToPosMap[a.uploadedFileID]! -
+                  widget.fileIdToPosMap[b.uploadedFileID]!,
+            );
+          } else {
+            _logger.warning(
+              "fileIdToPosMap is empty, cannot sort by most relevant.",
+            );
+          }
         }
         setState(() {
           _enableGrouping = false;
