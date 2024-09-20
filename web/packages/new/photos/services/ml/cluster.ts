@@ -2,6 +2,7 @@ import { assertionFailed } from "@/base/assert";
 import { newNonSecureID } from "@/base/id-worker";
 import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
+import { wait } from "@/utils/promise";
 import type { EnteFile } from "../../types/file";
 import type { AnnotatedCGroup } from "./cgroups";
 import { faceDirection, type Face, type FaceIndex } from "./face";
@@ -63,8 +64,15 @@ export interface ClusterPreviewFace {
  * Generates clusters from the given faces using a batched form of linear
  * clustering, with a bit of lookback (and a dollop of heuristics) to get the
  * clusters to merge across batches.
+ *
+ * [Note: Draining the event loop during clustering]
+ *
+ * The clustering is a synchronous operation, but we make it async to
+ * artificially drain the worker's event loop after each mini-batch so that
+ * other interactions with the worker (where this code runs) do not get stalled
+ * while clustering is in progress.
  */
-export const clusterFaces = (
+export const clusterFaces = async (
     faceIndexes: FaceIndex[],
     localFiles: EnteFile[],
     onProgress: (progress: ClusteringProgress) => void,
@@ -134,7 +142,7 @@ export const clusterFaces = (
             clusters,
         };
 
-        const newState = clusterBatchLinear(
+        const newState = await clusterBatchLinear(
             batch,
             oldState,
             joinThreshold,
@@ -307,7 +315,7 @@ interface ClusteringState {
     clusters: FaceCluster[];
 }
 
-const clusterBatchLinear = (
+const clusterBatchLinear = async (
     faces: ClusterFace[],
     oldState: ClusteringState,
     joinThreshold: number,
@@ -328,7 +336,11 @@ const clusterBatchLinear = (
 
     // For each face in the batch
     for (const [i, fi] of faces.entries()) {
-        if (i % 100 == 0) onProgress({ completed: i, total: faces.length });
+        if (i % 100 == 0) {
+            onProgress({ completed: i, total: faces.length });
+            // See: [Note: Draining the event loop during clustering]
+            await wait(0);
+        }
 
         // If the face is already part of a cluster, then skip it.
         if (state.clusterIDForFaceID.has(fi.faceID)) continue;

@@ -285,16 +285,18 @@ export class MLWorker {
      * with remote) is complete so that we cluster the latest set of faces.
      */
     async clusterFaces() {
-        const result = clusterFaces(
+        const result = await clusterFaces(
             await getFaceIndexes(),
             await getAllLocalFiles(),
-            (progress) => {
-                this.clusteringProgess = progress;
-                this.delegate?.workerDidUpdateStatus();
-            },
+            (progress) => this.updateClusteringProgress(progress),
         );
-        this.clusteringProgess = undefined;
+        this.updateClusteringProgress(undefined);
         return result;
+    }
+
+    private updateClusteringProgress(progress: ClusteringProgress | undefined) {
+        this.clusteringProgess = progress;
+        this.delegate?.workerDidUpdateStatus();
     }
 }
 
