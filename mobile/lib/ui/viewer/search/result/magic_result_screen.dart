@@ -46,6 +46,7 @@ class _MagicResultScreenState extends State<MagicResultScreen> {
   late final StreamSubscription<LocalPhotosUpdatedEvent> _filesUpdatedEvent;
   late final StreamSubscription<MagicSortChangeEvent> _magicSortChangeEvent;
   late final Logger _logger = Logger("_MagicResultScreenState");
+  late final Map<int, int> fileIDToRelevantPos;
   bool _enableGrouping = false;
 
   @override
@@ -53,6 +54,7 @@ class _MagicResultScreenState extends State<MagicResultScreen> {
     super.initState();
     files = widget.files;
     _enableGrouping = widget.enableGrouping;
+    fileIDToRelevantPos = getFileIDToRelevantPos();
     _filesUpdatedEvent =
         Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
       if (event.type == EventType.deletedFromDevice ||
@@ -70,11 +72,11 @@ class _MagicResultScreenState extends State<MagicResultScreen> {
         Bus.instance.on<MagicSortChangeEvent>().listen((event) {
       if (event.sortType == MagicSortType.mostRelevant) {
         if (_enableGrouping) {
-          if (widget.fileIdToPosMap.isNotEmpty) {
+          if (fileIDToRelevantPos.isNotEmpty) {
             files.sort(
               (a, b) =>
-                  widget.fileIdToPosMap[a.uploadedFileID]! -
-                  widget.fileIdToPosMap[b.uploadedFileID]!,
+                  fileIDToRelevantPos[a.uploadedFileID]! -
+                  fileIDToRelevantPos[b.uploadedFileID]!,
             );
           } else {
             _logger.warning(
@@ -94,6 +96,25 @@ class _MagicResultScreenState extends State<MagicResultScreen> {
         });
       }
     });
+  }
+
+  Map<int, int> getFileIDToRelevantPos() {
+    if (widget.fileIdToPosMap.isNotEmpty) {
+      return widget.fileIdToPosMap;
+    } else if (widget.enableGrouping == false) {
+      _logger.warning(
+          "fileIdToPosMap is empty, assuming existing list of files is sorted by most relevant.");
+      var map = <int, int>{};
+      for (int i = 0; i < files.length; i++) {
+        map[files[i].uploadedFileID!] = i;
+      }
+      return map;
+    } else {
+      _logger.warning(
+        "fileIdToPosMap is empty, cannot sort by most relevant.",
+      );
+      return <int, int>{};
+    }
   }
 
   @override
