@@ -1,7 +1,7 @@
 import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { MenuItemGroup, MenuSectionTitle } from "@/base/components/Menu";
 import { Titlebar } from "@/base/components/Titlebar";
-import { pt, ut } from "@/base/i18n";
+import { ut } from "@/base/i18n";
 import log from "@/base/log";
 import {
     disableML,
@@ -316,7 +316,7 @@ const ManageML: React.FC<ManageMLProps> = ({
             break;
         case "clustering":
             // TODO-Cluster
-            status = pt("Grouping faces");
+            status = t("people");
             break;
         default:
             status = t("indexing_status_done");
