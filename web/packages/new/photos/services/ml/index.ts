@@ -100,9 +100,7 @@ const worker = () =>
 
 const createComlinkWorker = async () => {
     const electron = ensureElectron();
-    const delegate = {
-        workerDidProcessFileOrIdle,
-    };
+    const delegate = { workerDidUpdateStatus };
 
     // Obtain a message port from the Electron layer.
     const messagePort = await createMLWorker(electron);
@@ -593,7 +591,7 @@ const setInterimScheduledStatus = () => {
     setMLStatusSnapshot({ phase: "scheduled", nSyncedFiles, nTotalFiles });
 };
 
-const workerDidProcessFileOrIdle = throttled(updateMLStatusSnapshot, 2000);
+const workerDidUpdateStatus = throttled(updateMLStatusSnapshot, 2000);
 
 /**
  * A function that can be used to subscribe to updates to {@link Person}s.
