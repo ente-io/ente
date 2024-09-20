@@ -4,10 +4,7 @@ import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import { LS_KEYS } from "@ente/shared/storage/localStorage";
 import AllCollections from "components/Collections/AllCollections";
 import CollectionInfoWithOptions from "components/Collections/CollectionInfoWithOptions";
-import {
-    CollectionListBar,
-    type CollectionListBarProps,
-} from "components/Collections/CollectionListBar";
+import { CollectionListBar } from "components/Collections/CollectionListBar";
 import { SetCollectionNamerAttributes } from "components/Collections/CollectionNamer";
 import CollectionShare from "components/Collections/CollectionShare";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
@@ -29,8 +26,17 @@ import {
 } from "../FilesDownloadProgress";
 import AlbumCastDialog from "./CollectionOptions/AlbumCastDialog";
 
+/**
+ * Specifies what the bar is displaying currently.
+ */
+export type GalleryBarMode = "albums" | "hidden-albums" | "people";
+
 interface CollectionsProps {
-    mode: CollectionListBarProps["mode"] | "search";
+    /** `true` if the bar should be hidden altogether. */
+    shouldHide: boolean;
+    /** otherwise show stuff that belongs to this mode. */
+    mode: GalleryBarMode;
+    setMode: (mode: GalleryBarMode) => void;
     collectionSummaries: CollectionSummaries;
     activeCollection: Collection;
     activeCollectionID?: number;
@@ -38,7 +44,7 @@ interface CollectionsProps {
     hiddenCollectionSummaries: CollectionSummaries;
     people: Person[];
     activePerson: Person | undefined;
-    setActivePerson: (id: Person | undefined) => void;
+    onSelectPerson: (person: Person) => void;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
     setPhotoListHeader: (value: TimeStampListItem) => void;
     filesDownloadProgressAttributesList: FilesDownloadProgressAttributes[];
@@ -46,7 +52,9 @@ interface CollectionsProps {
 }
 
 export const Collections: React.FC<CollectionsProps> = ({
+    shouldHide,
     mode,
+    setMode,
     collectionSummaries,
     activeCollection,
     activeCollectionID,
@@ -54,7 +62,7 @@ export const Collections: React.FC<CollectionsProps> = ({
     hiddenCollectionSummaries,
     people,
     activePerson,
-    setActivePerson,
+    onSelectPerson,
     setCollectionNamerAttributes,
     setPhotoListHeader,
     filesDownloadProgressAttributesList,
@@ -82,10 +90,10 @@ export const Collections: React.FC<CollectionsProps> = ({
 
     const shouldBeHidden = useMemo(
         () =>
-            mode == "search" ||
+            shouldHide ||
             (!hasNonSystemCollections(toShowCollectionSummaries) &&
                 activeCollectionID === ALL_SECTION),
-        [mode, toShowCollectionSummaries, activeCollectionID],
+        [shouldHide, toShowCollectionSummaries, activeCollectionID],
     );
 
     const sortedCollectionSummaries = useMemo(
@@ -109,7 +117,7 @@ export const Collections: React.FC<CollectionsProps> = ({
     }, [activeCollectionID, filesDownloadProgressAttributesList]);
 
     useEffect(() => {
-        if (mode == "search") return;
+        if (shouldHide) return;
 
         setPhotoListHeader({
             item: (
@@ -136,13 +144,12 @@ export const Collections: React.FC<CollectionsProps> = ({
             height: 68,
         });
     }, [
-        mode,
+        shouldHide,
         toShowCollectionSummaries,
         activeCollectionID,
         isActiveCollectionDownloadInProgress,
     ]);
 
-    if (mode == "search") return <></>;
     if (shouldBeHidden) {
         return <></>;
     }
@@ -157,11 +164,12 @@ export const Collections: React.FC<CollectionsProps> = ({
             <CollectionListBar
                 {...{
                     mode,
+                    setMode,
                     activeCollectionID,
                     setActiveCollectionID,
                     people,
                     activePerson,
-                    setActivePerson,
+                    onSelectPerson,
                     collectionListSortBy,
                     setCollectionListSortBy,
                 }}

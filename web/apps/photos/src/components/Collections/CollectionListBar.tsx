@@ -27,6 +27,7 @@ import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeList, ListChildComponentProps, areEqual } from "react-window";
 import { CollectionSummary, CollectionSummaryType } from "types/collection";
 import { ALL_SECTION, COLLECTION_LIST_SORT_BY } from "utils/collection";
+import type { GalleryBarMode } from ".";
 import CollectionCard from "./CollectionCard";
 import CollectionListSortBy from "./CollectionListSortBy";
 
@@ -34,7 +35,11 @@ export interface CollectionListBarProps {
     /**
      * What are we displaying currently.
      */
-    mode: "albums" | "hidden-albums" | "people";
+    mode: GalleryBarMode;
+    /**
+     * Called when the user switches to a different view.
+     */
+    setMode: (mode: GalleryBarMode) => void;
     /**
      * Massaged data about the collections that should be shown in the bar.
      */
@@ -70,9 +75,9 @@ export interface CollectionListBarProps {
      */
     activePerson: Person | undefined;
     /**
-     * Called when the user changes the active person.
+     * Called when the user selects the given person in the bar.
      */
-    setActivePerson: (id: Person | undefined) => void;
+    onSelectPerson: (person: Person) => void;
 }
 
 export const CollectionListBar: React.FC<CollectionListBarProps> = ({
@@ -85,7 +90,7 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
     setCollectionListSortBy,
     // people,
     // activePerson,
-    // setActivePerson
+    // onSelectPerson
 }) => {
     const windowSize = useWindowSize();
     const isMobile = useIsMobileWidth();
@@ -258,6 +263,25 @@ const CollectionListBarWrapper = styled(Box)`
     margin-bottom: 16px;
     border-bottom: 1px solid ${({ theme }) => theme.palette.divider};
 `;
+
+// // TODO-Cluster
+// const PeopleHeaderButton = styled("button")(
+//     ({ theme }) => `
+//     /* Reset some button defaults that are affecting us */
+//     background: transparent;
+//     border: 0;
+//     padding: 0;
+//     font: inherit;
+//     /* Button should do this for us, but it isn't working inside the select */
+//     cursor: pointer;
+//     /* The color for the chevron */
+//     color: ${theme.colors.stroke.muted};
+//     /* Hover indication */
+//     && :hover {
+//         color: ${theme.colors.stroke.base};
+//     }
+// `,
+// );
 
 interface ItemData {
     collectionSummaries: CollectionSummary[];

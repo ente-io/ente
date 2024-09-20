@@ -42,9 +42,10 @@ export type MergedSourceURL = {
 export type GalleryContextType = {
     showPlanSelectorModal: () => void;
     setActiveCollectionID: (collectionID: number) => void;
+    /** Newer and almost equivalent alternative to setActiveCollectionID. */
+    onShowCollection: (collectionID: number) => void;
     syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;
     setBlockingLoad: (value: boolean) => void;
-    setIsInSearchMode: (value: boolean) => void;
     photoListHeader: TimeStampListItem;
     openExportModal: () => void;
     authenticateUser: (callback: () => void) => void;
