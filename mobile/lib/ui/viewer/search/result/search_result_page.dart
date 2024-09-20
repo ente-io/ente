@@ -12,6 +12,8 @@ import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
+import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
+import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 
 class SearchResultPage extends StatefulWidget {
@@ -91,26 +93,29 @@ class _SearchResultPageState extends State<SearchResultPage> {
       enableFileGrouping: widget.enableGrouping,
       initialFiles: [widget.searchResult.resultFiles().first],
     );
-    return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(50.0),
-        child: GalleryAppBarWidget(
-          SearchResultPage.appBarType,
-          widget.searchResult.name(),
-          _selectedFiles,
+    return InheritedSearchFilterData(
+      searchFilterDataProvider: SearchFilterDataProvider(),
+      child: Scaffold(
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(50.0),
+          child: GalleryAppBarWidget(
+            SearchResultPage.appBarType,
+            widget.searchResult.name(),
+            _selectedFiles,
+          ),
         ),
-      ),
-      body: SelectionState(
-        selectedFiles: _selectedFiles,
-        child: Stack(
-          alignment: Alignment.bottomCenter,
-          children: [
-            gallery,
-            FileSelectionOverlayBar(
-              SearchResultPage.overlayType,
-              _selectedFiles,
-            ),
-          ],
+        body: SelectionState(
+          selectedFiles: _selectedFiles,
+          child: Stack(
+            alignment: Alignment.bottomCenter,
+            children: [
+              gallery,
+              FileSelectionOverlayBar(
+                SearchResultPage.overlayType,
+                _selectedFiles,
+              ),
+            ],
+          ),
         ),
       ),
     );

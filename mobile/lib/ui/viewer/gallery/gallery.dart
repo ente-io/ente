@@ -16,8 +16,10 @@ import "package:photos/ui/viewer/gallery/component/group/type.dart";
 import "package:photos/ui/viewer/gallery/component/multiple_groups_gallery_view.dart";
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import "package:photos/ui/viewer/gallery/state/gallery_context_state.dart";
+import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 import "package:photos/utils/debouncer.dart";
+import "package:photos/utils/hierarchical_search_util.dart";
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 typedef GalleryLoader = Future<FileLoadResult> Function(
@@ -205,6 +207,17 @@ class GalleryState extends State<Gallery> {
             duration.inMilliseconds.toString() +
             "ms",
       );
+
+      if (!result.hasMore) {
+        //There is a possility that this won't work if hasMore is never true.
+        final searchFilterDataProvider =
+            InheritedSearchFilterData.maybeOf(context)
+                ?.searchFilterDataProvider;
+        if (searchFilterDataProvider != null) {
+          curateAlbumFilters(searchFilterDataProvider, result.files);
+        }
+      }
+
       return result;
     } catch (e, s) {
       _logger.severe("failed to load files", e, s);
