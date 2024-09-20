@@ -18,7 +18,7 @@ import { isInternalUser } from "../feature-flags";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
 import { setSearchPeople } from "../search";
 import type { UploadItem } from "../upload/types";
-import { peopleFromCGroups, syncCGroups, type Person } from "./cgroups";
+import { namedPeopleFromCGroups, syncCGroups, type Person } from "./cgroups";
 import { regenerateFaceCrops } from "./crop";
 import { clearMLDB, getFaceIndex, getIndexableAndIndexedCounts } from "./db";
 import { MLWorker } from "./worker";
@@ -335,7 +335,7 @@ export const mlSync = async () => {
     wipClusterLocalOnce();
 
     // Update our in-memory snapshot of people.
-    const namedPeople = await peopleFromCGroups();
+    const namedPeople = await namedPeopleFromCGroups();
     _state.peopleRemote = namedPeople;
     updatePeopleSnapshot();
 

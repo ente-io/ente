@@ -134,8 +134,12 @@ export const syncCGroups = async () => {
     await pullCGroups(masterKey);
 };
 
+export type NamedPerson = Omit<Person, "name"> & {
+    name: string;
+};
+
 /**
- * Construct in-memory "people" from the cgroups present locally.
+ * Construct in-memory {@link NamedPerson}s from the cgroups present locally.
  *
  * This function is meant to run after files, cgroups and faces have been synced
  * with remote. It then uses all the information in the local DBs to construct
@@ -144,7 +148,7 @@ export const syncCGroups = async () => {
  * @return A list of {@link Person}s, sorted by the number of files that they
  * reference.
  */
-export const peopleFromCGroups = async () => {
+export const namedPeopleFromCGroups = async (): Promise<NamedPerson[]> => {
     if (!process.env.NEXT_PUBLIC_ENTE_WIP_CL) return [];
     if (!(await wipClusterEnable())) return [];
 
