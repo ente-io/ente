@@ -14,7 +14,7 @@ import {
     getLocalFiles,
     getLocalTrashedFiles,
 } from "@/new/photos/services/files";
-import { wipHasSwitchedOnceCmpAndSet } from "@/new/photos/services/ml";
+import { wipClusterLocalOnce } from "@/new/photos/services/ml";
 import type { Person } from "@/new/photos/services/ml/cgroups";
 import {
     filterSearchableFiles,
@@ -681,15 +681,7 @@ export default function Gallery() {
         };
     }, [selectAll, clearSelection]);
 
-    useEffect(() => {
-        // TODO-Cluster
-        if (process.env.NEXT_PUBLIC_ENTE_WIP_CL_AUTO) {
-            setTimeout(() => {
-                if (!wipHasSwitchedOnceCmpAndSet())
-                    router.push("cluster-debug");
-            }, 2000);
-        }
-    }, []);
+    useEffect(() => wipClusterLocalOnce(), []);
 
     const fileToCollectionsMap = useMemoSingleThreaded(() => {
         return constructFileToCollectionMap(files);

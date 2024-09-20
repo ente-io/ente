@@ -343,10 +343,11 @@ let _wip_peopleLocal: Person[] | undefined;
 let _wip_peopleRemote: Person[] | undefined;
 let _wip_hasSwitchedOnce = false;
 
-export const wipHasSwitchedOnceCmpAndSet = () => {
-    if (_wip_hasSwitchedOnce) return true;
+export const wipClusterLocalOnce = () => {
+    if (!process.env.NEXT_PUBLIC_ENTE_WIP_CL_AUTO) return;
+    if (_wip_hasSwitchedOnce) return;
     _wip_hasSwitchedOnce = true;
-    return false;
+    void wipCluster();
 };
 
 export interface ClusterPreviewWithFile {
