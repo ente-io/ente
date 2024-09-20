@@ -144,7 +144,7 @@ export const syncCGroups = async () => {
  * @return A list of {@link Person}s, sorted by the number of files that they
  * reference.
  */
-export const updatedPeople = async () => {
+export const peopleFromCGroups = async () => {
     if (!process.env.NEXT_PUBLIC_ENTE_WIP_CL) return [];
     if (!(await wipClusterEnable())) return [];
 

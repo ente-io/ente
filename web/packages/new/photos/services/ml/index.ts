@@ -18,7 +18,7 @@ import { isInternalUser } from "../feature-flags";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
 import { setSearchPeople } from "../search";
 import type { UploadItem } from "../upload/types";
-import { syncCGroups, updatedPeople, type Person } from "./cgroups";
+import { peopleFromCGroups, syncCGroups, type Person } from "./cgroups";
 import { regenerateFaceCrops } from "./crop";
 import { clearMLDB, getFaceIndex, getIndexableAndIndexedCounts } from "./db";
 import { MLWorker } from "./worker";
@@ -50,6 +50,11 @@ class MLState {
      * Cached instance of the {@link ComlinkWorker} that wraps our web worker.
      */
     comlinkWorker: Promise<ComlinkWorker<typeof MLWorker>> | undefined;
+
+    /**
+     * `true` if a sync is currently in progress.
+     */
+    isSyncing = false;
 
     /**
      * Subscriptions to {@link MLStatus} updates.
@@ -227,6 +232,7 @@ export const disableML = async () => {
     await updateIsMLEnabledRemote(false);
     setIsMLEnabledLocal(false);
     _state.isMLEnabled = false;
+    _state.isSyncing = false;
     await terminateMLWorker();
     triggerStatusUpdate();
 };
@@ -308,11 +314,36 @@ export const mlStatusSync = async () => {
  * least once prior to calling this in the sync sequence.
  */
 export const mlSync = async () => {
-    if (_state.isMLEnabled) {
-        await Promise.all([worker().then((w) => w.sync()), syncCGroups()]).then(
-            updatePeople,
-        );
-    }
+    if (!_state.isMLEnabled) return;
+    if (_state.isSyncing) return;
+    _state.isSyncing = true;
+
+    // Dependency order for the sync
+    //
+    //     files -> faces -> cgroups -> clusters
+    //
+
+    // Fetch indexes, or index locally if needed.
+    await worker().then((w) => w.sync());
+
+    // Fetch existing cgroups.
+    await syncCGroups();
+
+    // Generate local clusters
+    // TODO-Cluster
+    // Warning - this is heavily WIP
+    wipClusterLocalOnce();
+
+    // Update our in-memory snapshot of people.
+    const namedPeople = await peopleFromCGroups();
+    _state.peopleRemote = namedPeople;
+    updatePeopleSnapshot();
+
+    // Notify the search subsystem of the update. Since the search only used
+    // named cgroups, we only give it the people we got from cgroups.
+    setSearchPeople(namedPeople);
+
+    _state.isSyncing = false;
 };
 
 /**
@@ -557,17 +588,6 @@ const updatePeopleSnapshot = () =>
 const setPeopleSnapshot = (snapshot: Person[] | undefined) => {
     _state.peopleSnapshot = snapshot;
     _state.peopleListeners.forEach((l) => l());
-};
-
-/**
- * Update our in-memory snapshot of people, also notifying the search subsystem
- * of the update.
- */
-const updatePeople = async () => {
-    const people = await updatedPeople();
-    _state.peopleRemote = people;
-    updatePeopleSnapshot();
-    setSearchPeople(people);
 };
 
 /**
