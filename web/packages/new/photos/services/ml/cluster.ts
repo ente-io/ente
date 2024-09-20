@@ -193,16 +193,10 @@ export const clusterFaces = async (
         });
     }
 
-    // TODO-Cluster the total face count is only needed during debugging
-    let totalFaceCount = 0;
-    for (const fi of faceIndexes) totalFaceCount += fi.faces.length;
-    const filteredFaceCount = faces.length;
     const clusteredFaceCount = clusterIDForFaceID.size;
-    const unclusteredFaceCount = filteredFaceCount - clusteredFaceCount;
-
     const timeTakenMs = Date.now() - t;
     log.info(
-        `Generated ${sortedClusters.length} clusters from ${totalFaceCount} faces (${filteredFaceCount} filtered ${clusteredFaceCount} clustered ${unclusteredFaceCount} unclustered) (${timeTakenMs} ms)`,
+        `Generated ${sortedClusters.length} clusters from ${faces.length} faces (${clusteredFaceCount} clustered ${faces.length - clusteredFaceCount} unclustered) (${timeTakenMs} ms)`,
     );
 
     return {
