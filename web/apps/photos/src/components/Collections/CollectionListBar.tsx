@@ -1,4 +1,5 @@
 import { useIsMobileWidth } from "@/base/hooks";
+import type { Person } from "@/new/photos/services/ml/cgroups";
 import {
     IconButtonWithBG,
     Overlay,
@@ -29,11 +30,15 @@ import { ALL_SECTION, COLLECTION_LIST_SORT_BY } from "utils/collection";
 import CollectionCard from "./CollectionCard";
 import CollectionListSortBy from "./CollectionListSortBy";
 
-interface CollectionListBarProps {
+export interface CollectionListBarProps {
     /**
-     * `true` if we're currently in the hidden section.
+     * What are we displaying currently.
      */
-    isInHiddenSection: boolean;
+    mode: "albums" | "hidden-albums" | "people";
+    /**
+     * Massaged data about the collections that should be shown in the bar.
+     */
+    collectionSummaries: CollectionSummary[];
     /**
      * The ID of the currently active collection (if any)
      */
@@ -42,14 +47,6 @@ interface CollectionListBarProps {
      * Called when the user changes the active collection.
      */
     setActiveCollectionID: (id?: number) => void;
-    /**
-     * The ID of the currently selected person (if any).
-     */
-    activePersonID: string | undefined;
-    /**
-     * Called when the user changes the active person.
-     */
-    setActivePersonID: (id: string | undefined) => void;
     /**
      * Called when the user selects the option to show a modal with all the
      * collections.
@@ -65,21 +62,30 @@ interface CollectionListBarProps {
      */
     setCollectionListSortBy: (v: COLLECTION_LIST_SORT_BY) => void;
     /**
-     * Massaged data about the collections that should be shown in the bar.
+     * The list of people that should be shown in the bar.
      */
-    collectionSummaries: CollectionSummary[];
+    people: Person[];
+    /**
+     * The ID of the currently selected person (if any).
+     */
+    activePersonID: string | undefined;
+    /**
+     * Called when the user changes the active person.
+     */
+    setActivePersonID: (id: string | undefined) => void;
 }
 
 export const CollectionListBar: React.FC<CollectionListBarProps> = ({
-    isInHiddenSection,
+    mode,
+    collectionSummaries,
     activeCollectionID,
     setActiveCollectionID,
-    activePersonID,
-    // setActivePersonID
     onShowAllCollections,
     collectionListSortBy,
     setCollectionListSortBy,
-    collectionSummaries,
+    // people,
+    // activePersonID,
+    // setActivePersonID
 }) => {
     const windowSize = useWindowSize();
     const isMobile = useIsMobileWidth();
@@ -155,16 +161,26 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
         onCollectionClick,
     );
 
-    const mode = activePersonID ? "people" : "albums";
-
     return (
         <CollectionListBarWrapper>
             <SpaceBetweenFlex mb={1}>
                 <Stack direction="row" gap={1}>
-                    <Typography color={mode == "people" ? "text.muted" : "text.base"}>
-                        {isInHiddenSection ? t("HIDDEN_ALBUMS") : t("ALBUMS")}
+                    <Typography
+                        color={mode == "people" ? "text.muted" : "text.base"}
+                    >
+                        {mode == "hidden-albums"
+                            ? t("HIDDEN_ALBUMS")
+                            : t("ALBUMS")}
                     </Typography>
-                    {mode == "people" && <Typography>{t("people")}</Typography>}
+                    {process.env.NEXT_PUBLIC_ENTE_WIP_CL && (
+                        <Typography
+                            color={
+                                mode == "people" ? "text.base" : "text.muted"
+                            }
+                        >
+                            {t("people")}
+                        </Typography>
+                    )}
                 </Stack>
                 {isMobile && (
                     <Box display="flex" alignItems={"center"} gap={1}>

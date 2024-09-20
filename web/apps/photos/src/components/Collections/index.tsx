@@ -1,9 +1,13 @@
 import type { Collection } from "@/media/collection";
+import type { Person } from "@/new/photos/services/ml/cgroups";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import { LS_KEYS } from "@ente/shared/storage/localStorage";
 import AllCollections from "components/Collections/AllCollections";
 import CollectionInfoWithOptions from "components/Collections/CollectionInfoWithOptions";
-import { CollectionListBar } from "components/Collections/CollectionListBar";
+import {
+    CollectionListBar,
+    type CollectionListBarProps,
+} from "components/Collections/CollectionListBar";
 import { SetCollectionNamerAttributes } from "components/Collections/CollectionNamer";
 import CollectionShare from "components/Collections/CollectionShare";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
@@ -25,29 +29,33 @@ import {
 } from "../FilesDownloadProgress";
 import AlbumCastDialog from "./CollectionOptions/AlbumCastDialog";
 
-interface Iprops {
+interface CollectionsProps {
+    mode: CollectionListBarProps["mode"] | "search";
+    collectionSummaries: CollectionSummaries;
     activeCollection: Collection;
     activeCollectionID?: number;
     setActiveCollectionID: (id?: number) => void;
-    isInSearchMode: boolean;
-    isInHiddenSection: boolean;
-    collectionSummaries: CollectionSummaries;
     hiddenCollectionSummaries: CollectionSummaries;
+    people: Person[];
+    activePersonID: string | undefined;
+    setActivePersonID: (id: string | undefined) => void;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
     setPhotoListHeader: (value: TimeStampListItem) => void;
     filesDownloadProgressAttributesList: FilesDownloadProgressAttributes[];
     setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
 }
 
-export default function Collections(props: Iprops) {
+export default function Collections(props: CollectionsProps) {
     const {
+        mode,
+        collectionSummaries,
         activeCollection,
-        isInSearchMode,
-        isInHiddenSection,
         activeCollectionID,
         setActiveCollectionID,
-        collectionSummaries,
         hiddenCollectionSummaries,
+        people,
+        activePersonID,
+        setActivePersonID,
         setCollectionNamerAttributes,
         setPhotoListHeader,
         filesDownloadProgressAttributesList,
@@ -68,16 +76,18 @@ export default function Collections(props: Iprops) {
 
     const toShowCollectionSummaries = useMemo(
         () =>
-            isInHiddenSection ? hiddenCollectionSummaries : collectionSummaries,
-        [isInHiddenSection, hiddenCollectionSummaries, collectionSummaries],
+            mode == "hidden-albums"
+                ? hiddenCollectionSummaries
+                : collectionSummaries,
+        [mode, hiddenCollectionSummaries, collectionSummaries],
     );
 
     const shouldBeHidden = useMemo(
         () =>
-            isInSearchMode ||
+            mode == "search" ||
             (!hasNonSystemCollections(toShowCollectionSummaries) &&
                 activeCollectionID === ALL_SECTION),
-        [isInSearchMode, toShowCollectionSummaries, activeCollectionID],
+        [mode, toShowCollectionSummaries, activeCollectionID],
     );
 
     const sortedCollectionSummaries = useMemo(
@@ -101,9 +111,8 @@ export default function Collections(props: Iprops) {
     }, [activeCollectionID, filesDownloadProgressAttributesList]);
 
     useEffect(() => {
-        if (isInSearchMode) {
-            return;
-        }
+        if (mode == "search") return;
+
         setPhotoListHeader({
             item: (
                 <CollectionInfoWithOptions
@@ -129,12 +138,13 @@ export default function Collections(props: Iprops) {
             height: 68,
         });
     }, [
+        mode,
         toShowCollectionSummaries,
         activeCollectionID,
-        isInSearchMode,
         isActiveCollectionDownloadInProgress,
     ]);
 
+    if (mode == "search") return <></>;
     if (shouldBeHidden) {
         return <></>;
     }
@@ -147,16 +157,17 @@ export default function Collections(props: Iprops) {
     return (
         <>
             <CollectionListBar
-                isInHiddenSection={isInHiddenSection}
-                activeCollectionID={activeCollectionID}
-                setActiveCollectionID={setActiveCollectionID}
-                activePersonID={
-                    process.env.NEXT_PUBLIC_ENTE_WIP_CL ? "test" : undefined
-                }
-                setActivePersonID={(id) => console.log(id)}
+                {...{
+                    mode,
+                    activeCollectionID,
+                    setActiveCollectionID,
+                    people,
+                    activePersonID,
+                    setActivePersonID,
+                    collectionListSortBy,
+                    setCollectionListSortBy,
+                }}
                 onShowAllCollections={openAllCollections}
-                collectionListSortBy={collectionListSortBy}
-                setCollectionListSortBy={setCollectionListSortBy}
                 collectionSummaries={sortedCollectionSummaries.filter((x) =>
                     shouldBeShownOnCollectionBar(x.type),
                 )}
@@ -171,7 +182,7 @@ export default function Collections(props: Iprops) {
                 setActiveCollectionID={setActiveCollectionID}
                 setCollectionListSortBy={setCollectionListSortBy}
                 collectionListSortBy={collectionListSortBy}
-                isInHiddenSection={isInHiddenSection}
+                isInHiddenSection={mode == "hidden-albums"}
             />
 
             <CollectionShare
