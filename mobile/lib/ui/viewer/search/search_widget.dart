@@ -61,13 +61,15 @@ class SearchWidgetState extends State<SearchWidget> {
       //This buffer is for doing this operation only after SearchWidget's
       //animation is complete.
       Future.delayed(const Duration(milliseconds: 300), () {
-        final RenderBox box =
-            widgetKey.currentContext!.findRenderObject() as RenderBox;
-        final heightOfWidget = box.size.height;
-        final offsetPosition = box.localToGlobal(Offset.zero);
-        final y = offsetPosition.dy;
-        final heightOfScreen = MediaQuery.sizeOf(context).height;
-        _distanceOfWidgetFromBottom = heightOfScreen - (y + heightOfWidget);
+        if (mounted) {
+          final RenderBox box =
+              widgetKey.currentContext!.findRenderObject() as RenderBox;
+          final heightOfWidget = box.size.height;
+          final offsetPosition = box.localToGlobal(Offset.zero);
+          final y = offsetPosition.dy;
+          final heightOfScreen = MediaQuery.sizeOf(context).height;
+          _distanceOfWidgetFromBottom = heightOfScreen - (y + heightOfWidget);
+        }
       });
 
       textController.addListener(textControllerListener);
