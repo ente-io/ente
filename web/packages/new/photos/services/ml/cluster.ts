@@ -1,11 +1,15 @@
-import { assertionFailed } from "@/base/assert";
 import { newNonSecureID } from "@/base/id-worker";
 import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import type { EnteFile } from "../../types/file";
-import type { AnnotatedCGroup } from "./cgroups";
-import { faceDirection, type Face, type FaceIndex } from "./face";
+import type { Person } from "./cgroups";
+import {
+    faceDirection,
+    fileIDFromFaceID,
+    type Face,
+    type FaceIndex,
+} from "./face";
 import { dotProduct } from "./math";
 
 /**
@@ -236,21 +240,6 @@ const isSidewaysFace = (face: Face) =>
 /** Generate a new cluster ID. */
 const newClusterID = () => newNonSecureID("cluster_");
 
-/**
- * Extract the fileID of the {@link EnteFile} to which the face belongs from its
- * faceID.
- *
- * TODO-Cluster - duplicated with ml/index.ts
- */
-const fileIDFromFaceID = (faceID: string) => {
-    const fileID = parseInt(faceID.split("_")[0] ?? "");
-    if (isNaN(fileID)) {
-        assertionFailed(`Ignoring attempt to parse invalid faceID ${faceID}`);
-        return undefined;
-    }
-    return fileID;
-};
-
 interface ClusteringState {
     clusterIDForFaceID: Map<string, string>;
     clusterIndexForFaceID: Map<string, number>;
@@ -344,56 +333,35 @@ const toPeople = (
     clusters: FaceCluster[],
     localFileByID: Map<number, EnteFile>,
     faceForFaceID: Map<string, ClusterFace>,
-) => {
-    // TODO-Cluster - Currently we're not syncing with remote or saving anything
-    // locally, so cgroups will be empty. Create a temporary (unsaved, unsynced)
-    // cgroup, one per cluster.
+): Person[] =>
+    clusters
+        .map((cluster) => {
+            const faces = cluster.faces.map((id) =>
+                ensure(faceForFaceID.get(id)),
+            );
 
-    const cgroups: AnnotatedCGroup[] = [];
-    for (const cluster of clusters) {
-        const faces = cluster.faces.map((id) => ensure(faceForFaceID.get(id)));
-        const topFace = faces.reduce((top, face) =>
-            top.score > face.score ? top : face,
-        );
-        cgroups.push({
-            id: cluster.id,
-            name: undefined,
-            assigned: [cluster],
-            isHidden: false,
-            avatarFaceID: undefined,
-            displayFaceID: topFace.faceID,
-        });
-    }
+            const faceIDs = cluster.faces;
+            const fileIDs = faceIDs.map((faceID) =>
+                ensure(fileIDFromFaceID(faceID)),
+            );
 
-    const clusterByID = new Map(clusters.map((c) => [c.id, c]));
+            const topFace = faces.reduce((top, face) =>
+                top.score > face.score ? top : face,
+            );
 
-    const people = cgroups
-        // TODO-Cluster
-        .map((cgroup) => ({ ...cgroup, name: cgroup.id }))
-        .map((cgroup) => {
-            if (!cgroup.name) return undefined;
-            const faceID = ensure(cgroup.displayFaceID);
-            const fileID = ensure(fileIDFromFaceID(faceID));
-            const file = ensure(localFileByID.get(fileID));
-
-            const faceIDs = cgroup.assigned
-                .map(({ id }) => ensure(clusterByID.get(id)))
-                .flatMap((cluster) => cluster.faces);
-            const fileIDs = faceIDs
-                .map((faceID) => fileIDFromFaceID(faceID))
-                .filter((fileID) => fileID !== undefined);
+            const displayFaceID = topFace.faceID;
+            const displayFaceFileID = ensure(fileIDFromFaceID(displayFaceID));
+            const displayFaceFile = ensure(
+                localFileByID.get(displayFaceFileID),
+            );
 
             return {
-                id: cgroup.id,
-                name: cgroup.name,
+                id: cluster.id,
+                name: undefined,
                 faceIDs,
                 fileIDs: [...new Set(fileIDs)],
-                displayFaceID: faceID,
-                displayFaceFile: file,
+                displayFaceID,
+                displayFaceFile,
             };
         })
-        .filter((c) => !!c)
         .sort((a, b) => b.faceIDs.length - a.faceIDs.length);
-
-    return people;
-};

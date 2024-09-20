@@ -3,7 +3,6 @@
  */
 
 import { isDesktop } from "@/base/app";
-import { assertionFailed } from "@/base/assert";
 import { blobCache } from "@/base/blob-cache";
 import { ensureElectron } from "@/base/electron";
 import { isDevBuild } from "@/base/env";
@@ -596,20 +595,6 @@ export const unidentifiedFaceIDs = async (
 ): Promise<string[]> => {
     const index = await getFaceIndex(enteFile.id);
     return index?.faces.map((f) => f.faceID) ?? [];
-};
-
-/**
- * Extract the fileID of the {@link EnteFile} to which the face belongs from its
- * faceID.
- */
-// TODO-Cluster
-export const fileIDFromFaceID = (faceID: string) => {
-    const fileID = parseInt(faceID.split("_")[0] ?? "");
-    if (isNaN(fileID)) {
-        assertionFailed(`Ignoring attempt to parse invalid faceID ${faceID}`);
-        return undefined;
-    }
-    return fileID;
 };
 
 /**
