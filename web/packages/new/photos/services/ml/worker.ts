@@ -25,11 +25,7 @@ import {
     indexCLIP,
     type CLIPIndex,
 } from "./clip";
-import {
-    clusterFaces,
-    type ClusteringOpts,
-    type OnClusteringProgress,
-} from "./cluster";
+import { clusterFaces, type OnClusteringProgress } from "./cluster";
 import { saveFaceCrops } from "./crop";
 import {
     getFaceIndexes,
@@ -281,11 +277,10 @@ export class MLWorker {
     }
 
     // TODO-Cluster
-    async clusterFaces(opts: ClusteringOpts, onProgress: OnClusteringProgress) {
+    async clusterFaces(onProgress: OnClusteringProgress) {
         return clusterFaces(
             await getFaceIndexes(),
             await getAllLocalFiles(),
-            opts,
             onProgress,
         );
     }

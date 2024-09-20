@@ -22,7 +22,6 @@ import type { UploadItem } from "../upload/types";
 import { syncCGroups, updatedPeople, type Person } from "./cgroups";
 import {
     type ClusterFace,
-    type ClusteringOpts,
     type ClusterPreviewFace,
     type FaceCluster,
     type OnClusteringProgress,
@@ -378,12 +377,10 @@ export interface ClusterDebugPageContents {
 }
 
 export const wipClusterDebugPageContents = async (
-    opts: ClusteringOpts,
     onProgress: OnClusteringProgress,
 ): Promise<ClusterDebugPageContents> => {
     if (!(await wipClusterEnable())) throw new Error("Not implemented");
 
-    log.info("clustering", opts);
     _wip_isClustering = true;
     _wip_peopleLocal = undefined;
     triggerStatusUpdate();
@@ -395,7 +392,7 @@ export const wipClusterDebugPageContents = async (
         cgroups,
         unclusteredFaces,
         ...rest
-    } = await worker().then((w) => w.clusterFaces(opts, proxy(onProgress)));
+    } = await worker().then((w) => w.clusterFaces(proxy(onProgress)));
 
     const fileForFace = ({ faceID }: { faceID: string }) =>
         ensure(localFileByID.get(ensure(fileIDFromFaceID(faceID))));

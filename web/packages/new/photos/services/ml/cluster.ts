@@ -26,16 +26,16 @@ export interface FaceCluster {
     faces: string[];
 }
 
-export interface ClusteringOpts {
-    minBlur: number;
-    minScore: number;
-    minClusterSize: number;
-    joinThreshold: number;
-    earlyExitThreshold: number;
-    batchSize: number;
-    offsetIncrement: number;
-    badFaceHeuristics: boolean;
-}
+const clusteringOptions = {
+    minBlur: 10,
+    minScore: 0.8,
+    minClusterSize: 2,
+    joinThreshold: 0.76,
+    earlyExitThreshold: 0.9,
+    batchSize: 10000,
+    offsetIncrement: 7500,
+    badFaceHeuristics: true,
+};
 
 export interface ClusteringProgress {
     completed: number;
@@ -69,7 +69,6 @@ export interface ClusterPreviewFace {
 export const clusterFaces = (
     faceIndexes: FaceIndex[],
     localFiles: EnteFile[],
-    opts: ClusteringOpts,
     onProgress: OnClusteringProgress,
 ) => {
     const {
@@ -81,7 +80,7 @@ export const clusterFaces = (
         batchSize,
         offsetIncrement,
         badFaceHeuristics,
-    } = opts;
+    } = clusteringOptions;
     const t = Date.now();
 
     const localFileByID = new Map(localFiles.map((f) => [f.id, f]));
@@ -223,7 +222,7 @@ export const clusterFaces = (
 
     const timeTakenMs = Date.now() - t;
     log.info(
-        `Clustered ${faces.length} faces into ${sortedClusters.length} clusters, ${faces.length - clusterIDForFaceID.size} faces remain unclustered (${timeTakenMs} ms)`,
+        `Generated ${sortedClusters.length} clusters from ${totalFaceCount} faces (${filteredFaceCount} filtered ${clusteredFaceCount} clustered ${unclusteredFaceCount} unclustered) (${timeTakenMs} ms)`,
     );
 
     return {

@@ -8,9 +8,11 @@ import {
     enableML,
     mlStatusSnapshot,
     mlStatusSubscribe,
+    wipClusterDebugPageContents,
     wipClusterEnable,
     type MLStatus,
 } from "@/new/photos/services/ml";
+import { type ClusteringProgress } from "@/new/photos/services/ml/cluster";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import {
@@ -20,6 +22,7 @@ import {
     Divider,
     FormControlLabel,
     FormGroup,
+    LinearProgress,
     Link,
     Paper,
     Stack,
@@ -27,7 +30,6 @@ import {
     type DialogProps,
 } from "@mui/material";
 import { t } from "i18next";
-import { useRouter } from "next/router";
 import React, { useEffect, useState, useSyncExternalStore } from "react";
 import { Trans } from "react-i18next";
 import type { NewAppContextPhotos } from "../types/context";
@@ -300,6 +302,7 @@ const ManageML: React.FC<ManageMLProps> = ({
 }) => {
     const [showClusterOpt, setShowClusterOpt] = useState(false);
     const { phase, nSyncedFiles, nTotalFiles } = mlStatus;
+    const [progress, setProgress] = useState<ClusteringProgress | undefined>();
 
     useEffect(() => void wipClusterEnable().then(setShowClusterOpt), []);
 
@@ -339,8 +342,10 @@ const ManageML: React.FC<ManageMLProps> = ({
     };
 
     // TODO-Cluster
-    const router = useRouter();
-    const wipClusterDebug = () => router.push("/cluster-debug");
+    const wipClusterDebug = async () => {
+        await wipClusterDebugPageContents(setProgress);
+        setProgress(undefined);
+    };
 
     return (
         <Stack px={"16px"} py={"20px"} gap={4}>
@@ -400,6 +405,22 @@ const ManageML: React.FC<ManageMLProps> = ({
                             "Create and show in-memory clusters (not saved or synced). You can also view them in the search dropdown later.",
                         )}
                     />
+                    {progress && (
+                        <Box sx={{ mr: 1 }}>
+                            <LinearProgress
+                                variant="determinate"
+                                value={
+                                    progress.total > 0
+                                        ? Math.round(
+                                              (progress.completed /
+                                                  progress.total) *
+                                                  100,
+                                          )
+                                        : 0
+                                }
+                            />
+                        </Box>
+                    )}
                 </Box>
             )}
         </Stack>
