@@ -11,6 +11,7 @@ import "package:photos/services/machine_learning/face_ml/face_recognition_servic
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/services/machine_learning/ml_service.dart';
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
+import "package:photos/services/magic_cache_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
@@ -211,32 +212,23 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
             }
           },
         ),
-        // sectionOptionSpacing,
-        // MenuItemWidget(
-        //   captionedTextWidget: const CaptionedTextWidget(
-        //     title: "Check for mixed clusters",
-        //   ),
-        //   pressedColor: getEnteColorScheme(context).fillFaint,
-        //   trailingIcon: Icons.chevron_right_outlined,
-        //   trailingIconIsMuted: true,
-        //   onTap: () async {
-        //     try {
-        //       final susClusters =
-        //           await ClusterFeedbackService.instance.checkForMixedClusters();
-        //       for (final clusterinfo in susClusters) {
-        //         Future.delayed(const Duration(seconds: 4), () {
-        //           showToast(
-        //             context,
-        //             'Cluster with ${clusterinfo.$2} photos is sus',
-        //           );
-        //         });
-        //       }
-        //     } catch (e, s) {
-        //       logger.warning('Checking for mixed clusters failed', e, s);
-        //       await showGenericErrorDialog(context: context, error: e);
-        //     }
-        //   },
-        // ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Update discover",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            try {
+              await MagicCacheService.instance.updateCache(forced: true);
+            } catch (e, s) {
+              logger.warning('Update discover failed', e, s);
+              await showGenericErrorDialog(context: context, error: e);
+            }
+          },
+        ),
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(

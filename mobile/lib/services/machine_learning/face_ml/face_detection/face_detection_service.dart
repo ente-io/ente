@@ -1,5 +1,5 @@
 import "dart:async";
-import 'dart:typed_data' show ByteData, Float32List;
+import 'dart:typed_data' show Uint8List, Float32List;
 import 'dart:ui' as ui show Image;
 
 import 'package:logging/logging.dart';
@@ -44,7 +44,7 @@ class FaceDetectionService extends MlModel {
   /// Detects faces in the given image data.
   static Future<List<FaceDetectionRelative>> predict(
     ui.Image image,
-    ByteData imageByteData,
+    Uint8List rawRgbaBytes,
     int sessionAddress,
   ) async {
     assert(
@@ -59,7 +59,7 @@ class FaceDetectionService extends MlModel {
     final (inputImageList, newSize) =
         await preprocessImageToFloat32ChannelsFirst(
       image,
-      imageByteData,
+      rawRgbaBytes,
       normalization: 1,
       requiredWidth: kInputWidth,
       requiredHeight: kInputHeight,

@@ -8,7 +8,6 @@ import { CustomError } from "@ente/shared/error";
 import useMemoSingleThreaded from "@ente/shared/hooks/useMemoSingleThreaded";
 import { styled } from "@mui/material";
 import PhotoViewer from "components/PhotoViewer";
-import { TRASH_SECTION } from "constants/collection";
 import { useRouter } from "next/router";
 import { GalleryContext } from "pages/gallery";
 import PhotoSwipe from "photoswipe";
@@ -19,6 +18,7 @@ import {
     SelectedState,
     SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
+import { TRASH_SECTION } from "utils/collection";
 import {
     handleSelectCreator,
     updateFileMsrcProps,
@@ -66,6 +66,7 @@ interface Props {
     setIsPhotoSwipeOpen?: (value: boolean) => void;
     isInHiddenSection?: boolean;
     setFilesDownloadProgressAttributesCreator?: SetFilesDownloadProgressAttributesCreator;
+    selectable?: boolean;
 }
 
 const PhotoFrame = ({
@@ -86,6 +87,7 @@ const PhotoFrame = ({
     setIsPhotoSwipeOpen,
     isInHiddenSection,
     setFilesDownloadProgressAttributesCreator,
+    selectable,
 }: Props) => {
     const [open, setOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
@@ -267,6 +269,7 @@ const PhotoFrame = ({
             )(!checked);
         }
     };
+
     const getThumbnail = (
         item: EnteFile,
         index: number,
@@ -277,7 +280,7 @@ const PhotoFrame = ({
             file={item}
             updateURL={updateURL(index)}
             onClick={onThumbnailClick(index)}
-            selectable={enableDownload}
+            selectable={selectable}
             onSelect={handleSelect(
                 item.id,
                 item.ownerID === galleryContext.user?.id,
@@ -489,7 +492,9 @@ const PhotoFrame = ({
             );
             fetching[item.id] = true;
 
-            const srcURL = await DownloadManager.getFileForPreview(item, true);
+            const srcURL = await DownloadManager.getFileForPreview(item, {
+                forceConvertVideos: true,
+            });
 
             try {
                 await updateSrcURL(index, item.id, srcURL, true);

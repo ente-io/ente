@@ -1,7 +1,7 @@
 import { FileType } from "@/media/file-type";
 import { getLocalFiles } from "@/new/photos/services/files";
 import { getLocalCollections } from "services/collectionService";
-import { tryToParseDateTime } from "services/upload/date";
+import { parseDateFromDigitGroups } from "services/upload/date";
 import {
     MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT,
     getClippedMetadataJSONMapKeyForFile,
@@ -140,19 +140,12 @@ async function totalFileCountCheck(expectedState) {
 
 async function totalCollectionCountCheck(expectedState) {
     const collections = await getLocalCollections();
-    const files = await getLocalFiles();
-    const nonEmptyCollectionIds = new Set(
-        files.map((file) => file.collectionID),
-    );
-    const nonEmptyCollections = collections.filter((collection) =>
-        nonEmptyCollectionIds.has(collection.id),
-    );
-    if (expectedState["collection_count"] === nonEmptyCollections.length) {
+    if (expectedState["collection_count"] === collections.length) {
         console.log("collection count check passed ✅");
     } else {
         throw Error(
             `total Collection count check failed ❌
-                expected : ${expectedState["collection_count"]},  got: ${nonEmptyCollections.length}`,
+                expected : ${expectedState["collection_count"]},  got: ${collections.length}`,
         );
     }
 }
@@ -382,7 +375,7 @@ async function googleMetadataReadingCheck(expectedState) {
 function parseDateTimeFromFileNameTest() {
     DATE_TIME_PARSING_TEST_FILE_NAMES.forEach(
         ({ fileName, expectedDateTime }) => {
-            const dateTime = tryToParseDateTime(fileName);
+            const dateTime = parseDateFromDigitGroups(fileName);
             const formattedDateTime = getFormattedDateTime(dateTime);
             if (formattedDateTime !== expectedDateTime) {
                 throw Error(
@@ -394,7 +387,7 @@ function parseDateTimeFromFileNameTest() {
         },
     );
     DATE_TIME_PARSING_TEST_FILE_NAMES_MUST_FAIL.forEach((fileName) => {
-        const dateTime = tryToParseDateTime(fileName);
+        const dateTime = parseDateFromDigitGroups(fileName);
         if (dateTime) {
             throw Error(
                 `parseDateTimeFromFileNameTest failed ❌ ,

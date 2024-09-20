@@ -1,6 +1,6 @@
 import type { ElectronMLWorker } from "@/base/types/ipc";
 import type { ImageBitmapAndData } from "./blob";
-import { clipIndexes } from "./db";
+import { getCLIPIndexes } from "./db";
 import { pixelRGBBilinear } from "./image";
 import { dotProduct, norm } from "./math";
 import type { CLIPMatches } from "./worker-types";
@@ -128,6 +128,9 @@ const convertToCLIPInput = (imageData: ImageData) => {
     // Maintain aspect ratio.
     const scale = Math.max(requiredWidth / width, requiredHeight / height);
 
+    // Perform antialiasing if downscaling.
+    const antialias = scale < 0.8;
+
     const scaledWidth = Math.round(width * scale);
     const scaledHeight = Math.round(height * scale);
     const widthOffset = Math.max(0, scaledWidth - requiredWidth) / 2;
@@ -147,6 +150,7 @@ const convertToCLIPInput = (imageData: ImageData) => {
                 pixelData,
                 width,
                 height,
+                antialias,
             );
             clipInput[pi] = r / 255.0;
             clipInput[pi + cOffsetG] = g / 255.0;
@@ -193,8 +197,8 @@ let _cachedCLIPIndexes:
     | undefined;
 
 /**
- * Cache the CLIP indexes for the duration of a "search session" to avoid
- * converting them from number[] to Float32Array during the match.
+ * Cache the CLIP indexes when possible to avoid converting them from number[]
+ * to Float32Array during the match for-loop itself.
  *
  * Converting them to Float32Array gives a big performance boost (See: [Note:
  * Dot product performance]). But doing that each time loses out on the
@@ -204,7 +208,7 @@ let _cachedCLIPIndexes:
  * produces potentially new CLIP indexes).
  */
 const cachedOrReadCLIPIndexes = async () =>
-    (_cachedCLIPIndexes ??= (await clipIndexes()).map(
+    (_cachedCLIPIndexes ??= (await getCLIPIndexes()).map(
         ({ fileID, embedding }) => ({
             fileID,
             embedding: new Float32Array(embedding),

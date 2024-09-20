@@ -1,4 +1,5 @@
 import { SelectionBar } from "@/base/components/Navbar";
+import type { Collection } from "@/media/collection";
 import { FluidContainer } from "@ente/shared/components/Container";
 import ClockIcon from "@mui/icons-material/AccessTime";
 import AddIcon from "@mui/icons-material/Add";
@@ -13,20 +14,19 @@ import UnArchiveIcon from "@mui/icons-material/Unarchive";
 import VisibilityOffOutlined from "@mui/icons-material/VisibilityOffOutlined";
 import VisibilityOutlined from "@mui/icons-material/VisibilityOutlined";
 import { Box, IconButton, Stack, Tooltip } from "@mui/material";
-import {
-    ALL_SECTION,
-    ARCHIVE_SECTION,
-    TRASH_SECTION,
-} from "constants/collection";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import { useContext } from "react";
-import { Collection } from "types/collection";
 import {
     CollectionSelectorIntent,
     SetCollectionSelectorAttributes,
 } from "types/gallery";
-import { COLLECTION_OPS_TYPE } from "utils/collection";
+import {
+    ALL_SECTION,
+    ARCHIVE_SECTION,
+    COLLECTION_OPS_TYPE,
+    TRASH_SECTION,
+} from "utils/collection";
 import { FILE_OPS_TYPE } from "utils/file";
 import { formatNumber } from "utils/number/format";
 import { getTrashFilesMessage } from "utils/ui";

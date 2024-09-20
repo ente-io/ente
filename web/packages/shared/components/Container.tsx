@@ -10,31 +10,10 @@ export const VerticallyCentered = styled(Box)`
     overflow: auto;
 `;
 
-export const Row = styled("div")`
-    min-height: 32px;
-    display: flex;
-    align-items: center;
-    margin-bottom: ${({ theme }) => theme.spacing(2)};
-    flex: 1;
-`;
-
-export const Value = styled("div")<{ width?: string }>`
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    width: ${(props) => props.width ?? "30%"};
-`;
-
 export const FlexWrapper = styled(Box)`
     display: flex;
     width: 100%;
     align-items: center;
-`;
-
-export const FreeFlowText = styled("div")`
-    word-break: break-word;
-    min-width: 30%;
-    text-align: left;
 `;
 
 export const SpaceBetweenFlex = styled(FlexWrapper)`
@@ -63,10 +42,6 @@ export const IconButtonWithBG = styled(IconButton)(({ theme }) => ({
 
 export const HorizontalFlex = styled(Box)({
     display: "flex",
-});
-
-export const VerticalFlex = styled(HorizontalFlex)({
-    flexDirection: "column",
 });
 
 export const VerticallyCenteredFlex = styled(HorizontalFlex)({

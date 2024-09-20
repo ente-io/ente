@@ -49,8 +49,8 @@ class StartBackupHookWidget extends StatelessWidget {
                     // ignore: unawaited_futures
                     routeToPage(
                       context,
-                      BackupFolderSelectionPage(
-                        buttonText: S.of(context).startBackup,
+                      const BackupFolderSelectionPage(
+                        isFirstBackup: true,
                       ),
                     );
                   }

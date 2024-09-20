@@ -1,8 +1,8 @@
 import { sharedCryptoWorker } from "@/base/crypto";
+import type { Collection } from "@/media/collection";
 import { ItemVisibility } from "@/media/file-metadata";
 import { EnteFile } from "@/new/photos/types/file";
 import { MagicMetadataCore } from "@/new/photos/types/magicMetadata";
-import { Collection } from "types/collection";
 
 export function isArchivedFile(item: EnteFile): boolean {
     if (!item || !item.magicMetadata || !item.magicMetadata.data) {
@@ -53,12 +53,13 @@ export async function updateMagicMetadata<T>(
     }
 
     if (typeof originalMagicMetadata?.data === "string") {
+        // TODO: Is this even used?
         // @ts-expect-error TODO: Need to use zod here.
-        originalMagicMetadata.data = await cryptoWorker.decryptMetadata(
-            originalMagicMetadata.data,
-            originalMagicMetadata.header,
-            decryptionKey,
-        );
+        originalMagicMetadata.data = await cryptoWorker.decryptMetadataJSON({
+            encryptedDataB64: originalMagicMetadata.data,
+            decryptionHeaderB64: originalMagicMetadata.header,
+            keyB64: decryptionKey,
+        });
     }
     // copies the existing magic metadata properties of the files and updates the visibility value
     // The expected behavior while updating magic metadata is to let the existing property as it is and update/add the property you want

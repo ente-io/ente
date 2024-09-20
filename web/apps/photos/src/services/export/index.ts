@@ -1,6 +1,11 @@
 import { ensureElectron } from "@/base/electron";
 import log from "@/base/log";
-import type { Metadata } from "@/media/file-metadata";
+import type { Collection } from "@/media/collection";
+import {
+    fileCreationPhotoDate,
+    fileLocation,
+    type Metadata,
+} from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import downloadManager from "@/new/photos/services/download";
@@ -17,13 +22,12 @@ import { writeStream } from "@/new/photos/utils/native-stream";
 import { wait } from "@/utils/promise";
 import { CustomError } from "@ente/shared/error";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
-import { formatDateTimeShort } from "@ente/shared/time/format";
 import type { User } from "@ente/shared/user/types";
 import QueueProcessor, {
     CancellationStatus,
     RequestCanceller,
 } from "@ente/shared/utils/queueProcessor";
-import { Collection } from "types/collection";
+import i18n from "i18next";
 import {
     CollectionExportNames,
     ExportProgress,
@@ -35,7 +39,6 @@ import {
 import {
     constructCollectionNameMap,
     getCollectionUserFacingName,
-    getNonEmptyPersonalCollections,
 } from "utils/collection";
 import { getPersonalFiles } from "utils/file";
 import { getAllLocalCollections } from "../collectionService";
@@ -100,6 +103,7 @@ class ExportService {
         success: 0,
         failed: 0,
     };
+    private cachedMetadataDateTimeFormatter: Intl.DateTimeFormat;
 
     getExportSettings(): ExportSettings {
         try {
@@ -349,10 +353,8 @@ class ExportService {
                 collectionIdToOwnerIDMap,
             );
 
-            const nonEmptyPersonalCollections = getNonEmptyPersonalCollections(
-                collections,
-                personalFiles,
-                user,
+            const personalCollections = collections.filter(
+                (collection) => collection.owner.id === user?.id,
             );
 
             const exportRecord = await this.getExportRecord(exportFolder);
@@ -360,12 +362,11 @@ class ExportService {
                 convertCollectionIDExportNameObjectToMap(
                     exportRecord.collectionExportNames,
                 );
-            const collectionIDNameMap = constructCollectionNameMap(
-                nonEmptyPersonalCollections,
-            );
+            const collectionIDNameMap =
+                constructCollectionNameMap(personalCollections);
 
             const renamedCollections = getRenamedExportedCollections(
-                nonEmptyPersonalCollections,
+                personalCollections,
                 exportRecord,
             );
 
@@ -391,7 +392,7 @@ class ExportService {
             );
 
             const deletedExportedCollections = getDeletedExportedCollections(
-                nonEmptyPersonalCollections,
+                personalCollections,
                 exportRecord,
             );
 
@@ -1076,10 +1077,36 @@ class ExportService {
         fileExportName: string,
         file: EnteFile,
     ) {
+        const formatter = this.metadataDateTimeFormatter();
         await ensureElectron().fs.writeFile(
             getFileMetadataExportPath(collectionExportPath, fileExportName),
-            getGoogleLikeMetadataFile(fileExportName, file),
+            getGoogleLikeMetadataFile(fileExportName, file, formatter),
         );
+    }
+
+    /**
+     * Lazily created, cached instance of the date time formatter that should be
+     * used for formatting the dates added to the metadata file.
+     */
+    private metadataDateTimeFormatter() {
+        if (this.cachedMetadataDateTimeFormatter)
+            return this.cachedMetadataDateTimeFormatter;
+
+        // AFAIK, Google's format is not documented. It also seems to vary with
+        // locale. This is a best attempt at constructing a formatter that
+        // mirrors the format used by the timestamps in the takeout JSON.
+        const formatter = new Intl.DateTimeFormat(i18n.language, {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+            hour: "numeric",
+            minute: "numeric",
+            second: "numeric",
+            timeZoneName: "short",
+            timeZone: "UTC",
+        });
+        this.cachedMetadataDateTimeFormatter = formatter;
+        return formatter;
     }
 
     isExportInProgress = () => {
@@ -1376,33 +1403,34 @@ const getCollectionExportedFiles = (
     return collectionExportedFiles;
 };
 
-const getGoogleLikeMetadataFile = (fileExportName: string, file: EnteFile) => {
+const getGoogleLikeMetadataFile = (
+    fileExportName: string,
+    file: EnteFile,
+    dateTimeFormatter: Intl.DateTimeFormat,
+) => {
     const metadata: Metadata = file.metadata;
-    const creationTime = Math.floor(metadata.creationTime / 1000000);
+    const creationTime = Math.floor(metadata.creationTime / 1e6);
     const modificationTime = Math.floor(
-        (metadata.modificationTime ?? metadata.creationTime) / 1000000,
+        (metadata.modificationTime ?? metadata.creationTime) / 1e6,
     );
-    const captionValue: string = file?.pubMagicMetadata?.data?.caption;
-    return JSON.stringify(
-        {
-            title: fileExportName,
-            caption: captionValue,
-            creationTime: {
-                timestamp: creationTime,
-                formatted: formatDateTimeShort(creationTime * 1000),
-            },
-            modificationTime: {
-                timestamp: modificationTime,
-                formatted: formatDateTimeShort(modificationTime * 1000),
-            },
-            geoData: {
-                latitude: metadata.latitude,
-                longitude: metadata.longitude,
-            },
+    const result: Record<string, unknown> = {
+        title: fileExportName,
+        creationTime: {
+            timestamp: creationTime,
+            formatted: dateTimeFormatter.format(
+                fileCreationPhotoDate(file, file.pubMagicMetadata?.data),
+            ),
         },
-        null,
-        2,
-    );
+        modificationTime: {
+            timestamp: modificationTime,
+            formatted: dateTimeFormatter.format(modificationTime * 1000),
+        },
+    };
+    const caption = file?.pubMagicMetadata?.data?.caption;
+    if (caption) result.caption = caption;
+    const geoData = fileLocation(file);
+    if (geoData) result.geoData = geoData;
+    return JSON.stringify(result, null, 2);
 };
 
 export const getMetadataFolderExportPath = (collectionExportPath: string) =>

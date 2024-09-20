@@ -2452,10 +2452,10 @@ class S {
     );
   }
 
-  /// `Looks like your subscription has expired. Please subscribe to enable sharing.`
+  /// `You need an active paid subscription to enable sharing.`
   String get subscribeToEnableSharing {
     return Intl.message(
-      'Looks like your subscription has expired. Please subscribe to enable sharing.',
+      'You need an active paid subscription to enable sharing.',
       name: 'subscribeToEnableSharing',
       desc: '',
       args: [],
@@ -2971,6 +2971,167 @@ class S {
     return Intl.message(
       'Magic search',
       name: 'magicSearch',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Discover`
+  String get discover {
+    return Intl.message(
+      'Discover',
+      name: 'discover',
+      desc:
+          'The text to display for the discover section under which we show receipts, screenshots, sunsets, greenery, etc.',
+      args: [],
+    );
+  }
+
+  /// `Identity`
+  String get discover_identity {
+    return Intl.message(
+      'Identity',
+      name: 'discover_identity',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Screenshots`
+  String get discover_screenshots {
+    return Intl.message(
+      'Screenshots',
+      name: 'discover_screenshots',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Receipts`
+  String get discover_receipts {
+    return Intl.message(
+      'Receipts',
+      name: 'discover_receipts',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Notes`
+  String get discover_notes {
+    return Intl.message(
+      'Notes',
+      name: 'discover_notes',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Memes`
+  String get discover_memes {
+    return Intl.message(
+      'Memes',
+      name: 'discover_memes',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Visiting Cards`
+  String get discover_visiting_cards {
+    return Intl.message(
+      'Visiting Cards',
+      name: 'discover_visiting_cards',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Babies`
+  String get discover_babies {
+    return Intl.message(
+      'Babies',
+      name: 'discover_babies',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pets`
+  String get discover_pets {
+    return Intl.message(
+      'Pets',
+      name: 'discover_pets',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Selfies`
+  String get discover_selfies {
+    return Intl.message(
+      'Selfies',
+      name: 'discover_selfies',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Wallpapers`
+  String get discover_wallpapers {
+    return Intl.message(
+      'Wallpapers',
+      name: 'discover_wallpapers',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Food`
+  String get discover_food {
+    return Intl.message(
+      'Food',
+      name: 'discover_food',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Celebrations`
+  String get discover_celebrations {
+    return Intl.message(
+      'Celebrations',
+      name: 'discover_celebrations',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sunset`
+  String get discover_sunset {
+    return Intl.message(
+      'Sunset',
+      name: 'discover_sunset',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hills`
+  String get discover_hills {
+    return Intl.message(
+      'Hills',
+      name: 'discover_hills',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Greenery`
+  String get discover_greenery {
+    return Intl.message(
+      'Greenery',
+      name: 'discover_greenery',
       desc: '',
       args: [],
     );
@@ -9435,6 +9596,36 @@ class S {
     );
   }
 
+  /// `Name the album`
+  String get nameTheAlbum {
+    return Intl.message(
+      'Name the album',
+      name: 'nameTheAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Create a link where your friends can upload photos in original quality.`
+  String get collectPhotosDescription {
+    return Intl.message(
+      'Create a link where your friends can upload photos in original quality.',
+      name: 'collectPhotosDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Collect`
+  String get collect {
+    return Intl.message(
+      'Collect',
+      name: 'collect',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Choose between your device's default lock screen and a custom lock screen with a PIN or password.`
   String get appLockDescriptions {
     return Intl.message(
@@ -9482,6 +9673,76 @@ class S {
       name: 'loopVideoOff',
       desc: '',
       args: [],
+    );
+  }
+
+  /// `Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team`
+  String get localSyncErrorMessage {
+    return Intl.message(
+      'Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team',
+      name: 'localSyncErrorMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Show person`
+  String get showPerson {
+    return Intl.message(
+      'Show person',
+      name: 'showPerson',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sort`
+  String get sort {
+    return Intl.message(
+      'Sort',
+      name: 'sort',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Most recent`
+  String get mostRecent {
+    return Intl.message(
+      'Most recent',
+      name: 'mostRecent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Most relevant`
+  String get mostRelevant {
+    return Intl.message(
+      'Most relevant',
+      name: 'mostRelevant',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Loading your photos...`
+  String get loadingYourPhotos {
+    return Intl.message(
+      'Loading your photos...',
+      name: 'loadingYourPhotos',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Processing {folderName}...`
+  String processingImport(Object folderName) {
+    return Intl.message(
+      'Processing $folderName...',
+      name: 'processingImport',
+      desc: '',
+      args: [folderName],
     );
   }
 }

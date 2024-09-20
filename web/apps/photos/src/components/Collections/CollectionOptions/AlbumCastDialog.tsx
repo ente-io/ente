@@ -1,5 +1,6 @@
 import { boxSeal } from "@/base/crypto/libsodium";
 import log from "@/base/log";
+import type { Collection } from "@/media/collection";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import EnteButton from "@ente/shared/components/EnteButton";
@@ -12,7 +13,6 @@ import { Link, Typography } from "@mui/material";
 import { t } from "i18next";
 import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
-import { Collection } from "types/collection";
 import { v4 as uuidv4 } from "uuid";
 import { loadSender } from "../../../utils/useCastSender";
 

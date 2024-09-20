@@ -3,16 +3,6 @@ import { formattedByteSize } from "@/new/photos/utils/units";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import { formatDate } from "@ente/shared/time/format";
 import { Box, Checkbox, Link, Typography, styled } from "@mui/material";
-import {
-    DATE_CONTAINER_HEIGHT,
-    GAP_BTW_TILES,
-    IMAGE_CONTAINER_MAX_HEIGHT,
-    IMAGE_CONTAINER_MAX_WIDTH,
-    MIN_COLUMNS,
-    SIZE_AND_COUNT_CONTAINER_HEIGHT,
-    SPACE_BTW_DATES,
-    SPACE_BTW_DATES_TO_IMAGE_CONTAINER_WIDTH_RATIO,
-} from "constants/gallery";
 import { t } from "i18next";
 import memoize from "memoize-one";
 import { GalleryContext } from "pages/gallery";
@@ -29,6 +19,17 @@ import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 const FOOTER_HEIGHT = 90;
 const ALBUM_FOOTER_HEIGHT = 75;
 const ALBUM_FOOTER_HEIGHT_WITH_REFERRAL = 113;
+
+import {
+    DATE_CONTAINER_HEIGHT,
+    GAP_BTW_TILES,
+    IMAGE_CONTAINER_MAX_HEIGHT,
+    IMAGE_CONTAINER_MAX_WIDTH,
+    MIN_COLUMNS,
+    SIZE_AND_COUNT_CONTAINER_HEIGHT,
+    SPACE_BTW_DATES,
+    SPACE_BTW_DATES_TO_IMAGE_CONTAINER_WIDTH_RATIO,
+} from "./constants";
 
 export enum ITEM_TYPE {
     TIME = "TIME",
@@ -509,6 +510,7 @@ export function PhotoList({
             height: height - 48,
         };
     };
+
     const getVacuumItem = (timeStampList) => {
         let footerHeight;
         if (publicCollectionGalleryContext.accessedThroughSharedURL) {
@@ -544,7 +546,7 @@ export function PhotoList({
                 <FooterContainer span={columns}>
                     <Typography variant="small">
                         <Trans
-                            i18nKey={"INSTALL_MOBILE_APP"}
+                            i18nKey={"install_mobile_app"}
                             components={{
                                 a: (
                                     <Link
@@ -618,6 +620,7 @@ export function PhotoList({
             ),
         };
     };
+
     /**
      * Checks and merge multiple dates into a single row.
      *

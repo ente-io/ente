@@ -120,6 +120,9 @@
       "title": "Bybit"
     },
     {
+      "title": "Capacities"
+    },
+    {
       "title": "CERN"
     },
     {
@@ -240,6 +243,13 @@
       "slug": "Gosuslugi",
       "altNames": [
         "Госуслуги"
+      ]
+    },
+    {
+      "title": "GOV.UK",
+      "slug": "gov_uk",
+      "altNames": [
+        "Government Gateway"
       ]
     },
     {

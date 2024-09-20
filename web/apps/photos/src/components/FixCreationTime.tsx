@@ -1,7 +1,7 @@
 import log from "@/base/log";
 import {
     decryptPublicMagicMetadata,
-    getUICreationDate,
+    fileCreationPhotoDate,
     updateRemotePublicMagicMetadata,
     type ParsedMetadataDate,
 } from "@/media/file-metadata";
@@ -352,11 +352,11 @@ const updateEnteFileDate = async (
 
     if (!newDate) return;
 
-    const existingUIDate = getUICreationDate(
+    const existingDate = fileCreationPhotoDate(
         enteFile,
         await decryptPublicMagicMetadata(enteFile),
     );
-    if (newDate.timestamp == existingUIDate.getTime()) return;
+    if (newDate.timestamp == existingDate.getTime()) return;
 
     await updateRemotePublicMagicMetadata(enteFile, {
         dateTime: newDate.dateTime,

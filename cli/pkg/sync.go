@@ -38,7 +38,10 @@ func (c *ClICtrl) Export(filter model.Filter) error {
 			continue
 		}
 		if account.App == api.AppAuth {
-			log.Printf("Skip account %s: auth export is not supported", account.Email)
+			err := c.SyncAuthAccount(account, filter)
+			if err != nil {
+				return err
+			}
 			continue
 		}
 		log.Println("start sync")

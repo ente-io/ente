@@ -32,8 +32,8 @@ import {
 } from "./cluster";
 import { saveFaceCrops } from "./crop";
 import {
-    faceIndexes,
-    indexableFileIDs,
+    getFaceIndexes,
+    getIndexableFileIDs,
     markIndexingFailed,
     saveIndexes,
     updateAssumingLocalFiles,
@@ -190,7 +190,7 @@ export class MLWorker {
     }
 
     /**
-     * Find {@link CLIPMatches} for a given {@link searchPhrase}.
+     * Find {@link CLIPMatches} for a given normalized {@link searchPhrase}.
      */
     async clipMatches(searchPhrase: string): Promise<CLIPMatches | undefined> {
         return clipMatches(searchPhrase, ensure(this.electron));
@@ -283,7 +283,7 @@ export class MLWorker {
     // TODO-Cluster
     async clusterFaces(opts: ClusteringOpts, onProgress: OnClusteringProgress) {
         return clusterFaces(
-            await faceIndexes(),
+            await getFaceIndexes(),
             await getAllLocalFiles(),
             opts,
             onProgress,
@@ -395,7 +395,7 @@ const syncWithLocalFilesAndGetFilesToIndex = async (
         localTrashFileIDs,
     );
 
-    const fileIDsToIndex = await indexableFileIDs(count);
+    const fileIDsToIndex = await getIndexableFileIDs(count);
     return new Map(
         fileIDsToIndex.map((id) => [id, ensure(localFileByID.get(id))]),
     );

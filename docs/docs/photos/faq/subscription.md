@@ -176,3 +176,7 @@ you can gain more value out of a single subscription.
 ## Is there a forever-free plan?
 
 Yes, we offer 5 GB of storage for free.
+
+## What are the limitations of the free plan?
+
+You cannot share albums, or setup a family while you are on a free plan.

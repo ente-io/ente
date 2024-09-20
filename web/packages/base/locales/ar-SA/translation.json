@@ -5,8 +5,8 @@
     "HERO_SLIDE_2": "مصممة لتدوم",
     "HERO_SLIDE_3_TITLE": "<div>متاح</div><div> في كل مكان</div>",
     "HERO_SLIDE_3": "أندرويد، آي أو إس، ويب، سطح المكتب",
-    "LOGIN": "تسجيل الدخول",
-    "SIGN_UP": "تسجيل",
+    "login": "تسجيل الدخول",
+    "sign_up": "تسجيل",
     "NEW_USER": "جديد في Ente",
     "EXISTING_USER": "مستخدم موجود",
     "ENTER_NAME": "أدخل الاسم",
@@ -41,7 +41,7 @@
     "REFERRAL_CODE_HINT": "كيف سمعت عن Ente؟ (اختياري)",
     "REFERRAL_INFO": "نحن لا نتتبع عمليات تثبيت التطبيق، سيكون من المفيد لنا أن تخبرنا أين وجدتنا!",
     "PASSPHRASE_MATCH_ERROR": "كلمات المرور غير متطابقة",
-    "create_albums": "",
+    "create_albums": "إنشاء ألبومات",
     "CREATE_COLLECTION": "ألبوم جديد",
     "ENTER_ALBUM_NAME": "اسم الألبوم",
     "CLOSE_OPTION": "إغلاق (Esc)",
@@ -51,8 +51,8 @@
     "NOTHING_HERE": "لا شيء يمكن رؤيته هنا بعد 👀",
     "upload": "تحميل",
     "import": "استيراد",
-    "ADD_PHOTOS": "إضافة صور",
-    "ADD_MORE_PHOTOS": "إضافة المزيد من الصور",
+    "add_photos": "إضافة صور",
+    "add_more_photos": "إضافة المزيد من الصور",
     "add_photos_count_one": "إضافة 1 عنصر",
     "add_photos_count": "إضافة {{count, number}} عناصر",
     "select_photos": "تحديد الصور",
@@ -138,9 +138,10 @@
     "ERROR": "خطأ",
     "MESSAGE": "رسالة",
     "OFFLINE_MSG": "",
-    "INSTALL_MOBILE_APP": "",
-    "DOWNLOAD_APP_MESSAGE": "",
-    "DOWNLOAD_APP": "تنزيل تطبيق سطح المكتب",
+    "install": "تثبيت",
+    "install_mobile_app": "",
+    "download_app": "تنزيل تطبيق سطح المكتب",
+    "download_app_message": "",
     "EXPORT": "تصدير البيانات",
     "SUBSCRIPTION": "اشتراك",
     "SUBSCRIBE": "اشترك",
@@ -162,7 +163,7 @@
     "subscription_info_expired": "",
     "subscription_info_renewal_cancelled": "",
     "subscription_info_storage_quota_exceeded": "",
-    "subscription_status_renewal_active": "",
+    "subscription_status_renewal_active": "تجديد في {{date, date}}",
     "subscription_status_renewal_cancelled": "ينتهي في {{date, date}}",
     "add_on_valid_till": "",
     "subscription_expired": "إنتهت صلاحية الاشتراك",
@@ -209,41 +210,35 @@
     "SHARING_DISABLED_FOR_FREE_ACCOUNTS": "المشاركة معطلة للحسابات المجانية",
     "DOWNLOAD_COLLECTION": "تنزيل الألبوم",
     "CREATE_ALBUM_FAILED": "",
-    "SEARCH": "بحث",
-    "SEARCH_RESULTS": "نتائج البحث",
-    "NO_RESULTS": "لا توجد نتائج",
-    "SEARCH_HINT": "البحث عن الألبومات، التواريخ، والأوصاف...",
-    "SEARCH_TYPE": {
-        "COLLECTION": "ألبوم",
-        "LOCATION": "الموقع",
-        "CITY": "الموقع",
-        "DATE": "تاريخ",
-        "FILE_NAME": "إسم الملف",
-        "THING": "المحتوى",
-        "FILE_CAPTION": "وصف",
-        "FILE_TYPE": "نوع الملف",
-        "CLIP": "سحر"
-    },
+    "search": "بحث",
+    "search_results": "نتائج البحث",
+    "no_results": "لا توجد نتائج",
+    "search_hint": "البحث عن الألبومات، التواريخ، والأوصاف...",
+    "album": "ألبوم",
+    "date": "تاريخ",
+    "description": "وصف",
+    "file_type": "نوع الملف",
+    "magic": "سحر",
     "photos_count_zero": "لا توجد ذكريات",
     "photos_count_one": "ذكرى واحدة",
     "photos_count": "{{count, number}} ذكريات",
     "TERMS_AND_CONDITIONS": "أوافق على <a>شروط الخدمة</a> و<b>سياسة الخصوصية</b>",
     "ADD_TO_COLLECTION": "إضافة إلى الألبوم",
     "SELECTED": "محدد",
-    "PEOPLE": "",
+    "people": "",
     "indexing_scheduled": "الفهرسة مجدولة...",
     "indexing_photos": "",
     "indexing_fetching": "",
     "indexing_people": "",
     "indexing_done": "",
     "UNIDENTIFIED_FACES": "وجوه غير محددة",
-    "OBJECTS": "",
+    "OBJECTS": "عناصر",
     "TEXT": "نص",
     "INFO": "معلومات ",
     "INFO_OPTION": "معلومات (I)",
-    "FILE_NAME": "إسم الملف",
+    "file_name": "إسم الملف",
     "CAPTION_PLACEHOLDER": "إضافة وصف",
-    "LOCATION": "الموقع",
+    "location": "الموقع",
     "SHOW_ON_MAP": "عرض على OpenStreetMap",
     "MAP": "خريطة",
     "MAP_SETTINGS": "إعدادات الخريطة",
@@ -362,7 +357,6 @@
     "CUSTOM_TIME": "",
     "REOPEN_PLAN_SELECTOR_MODAL": "",
     "OPEN_PLAN_SELECTOR_MODAL_FAILED": "",
-    "INSTALL": "",
     "SHARING_DETAILS": "",
     "MODIFY_SHARING": "",
     "ADD_COLLABORATORS": "",
@@ -412,7 +406,6 @@
     "DISABLE_PASSWORD_MESSAGE": "",
     "PASSWORD_LOCK": "",
     "LOCK": "",
-    "DOWNLOAD_UPLOAD_LOGS": "",
     "file": "",
     "folder": "",
     "google_takeout": "",
@@ -458,6 +451,7 @@
     "YES_STOP": "",
     "CHANGE_FOLDER": "",
     "FAMILY_PLAN": "",
+    "debug_logs": "",
     "DOWNLOAD_LOGS": "",
     "DOWNLOAD_LOGS_MESSAGE": "",
     "WEAK_DEVICE": "",

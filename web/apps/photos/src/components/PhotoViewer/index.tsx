@@ -39,10 +39,6 @@ import InfoIcon from "@mui/icons-material/InfoOutlined";
 import ReplayIcon from "@mui/icons-material/Replay";
 import ZoomInOutlinedIcon from "@mui/icons-material/ZoomInOutlined";
 import { Box, Button, styled } from "@mui/material";
-import {
-    defaultLivePhotoDefaultOptions,
-    photoSwipeV4Events,
-} from "constants/photoViewer";
 import { t } from "i18next";
 import isElectron from "is-electron";
 import { AppContext } from "pages/_app";
@@ -63,6 +59,34 @@ interface PhotoswipeFullscreenAPI {
     exit: () => void;
     isFullscreen: () => boolean;
 }
+
+const defaultLivePhotoDefaultOptions = {
+    click: () => {},
+    hide: () => {},
+    show: () => {},
+    loading: false,
+    visible: false,
+};
+
+const photoSwipeV4Events = [
+    "beforeChange",
+    "afterChange",
+    "imageLoadComplete",
+    "resize",
+    "gettingData",
+    "mouseUsed",
+    "initialZoomIn",
+    "initialZoomInEnd",
+    "initialZoomOut",
+    "initialZoomOutEnd",
+    "parseVerticalMargin",
+    "close",
+    "unbindEvents",
+    "destroy",
+    "updateScrollOffset",
+    "preventDragEvent",
+    "shareLinkClick",
+];
 
 const CaptionContainer = styled("div")(({ theme }) => ({
     padding: theme.spacing(2),

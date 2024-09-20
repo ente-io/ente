@@ -5,9 +5,12 @@ import "package:ente_auth/core/configuration.dart";
 import "package:ente_auth/l10n/l10n.dart";
 import "package:ente_auth/services/local_authentication_service.dart";
 import "package:ente_auth/theme/ente_theme.dart";
+import "package:ente_auth/ui/components/buttons/button_widget.dart";
 import "package:ente_auth/ui/components/captioned_text_widget.dart";
+import "package:ente_auth/ui/components/dialog_widget.dart";
 import "package:ente_auth/ui/components/divider_widget.dart";
 import "package:ente_auth/ui/components/menu_item_widget.dart";
+import "package:ente_auth/ui/components/models/button_type.dart";
 import "package:ente_auth/ui/components/title_bar_title_widget.dart";
 import "package:ente_auth/ui/components/title_bar_widget.dart";
 import "package:ente_auth/ui/components/toggle_switch_widget.dart";
@@ -15,7 +18,6 @@ import "package:ente_auth/ui/settings/lock_screen/lock_screen_auto_lock.dart";
 import "package:ente_auth/ui/settings/lock_screen/lock_screen_password.dart";
 import "package:ente_auth/ui/settings/lock_screen/lock_screen_pin.dart";
 import "package:ente_auth/ui/tools/app_lock.dart";
-import "package:ente_auth/utils/dialog_util.dart";
 import "package:ente_auth/utils/lock_screen_settings.dart";
 import "package:ente_auth/utils/navigation_util.dart";
 import "package:ente_auth/utils/platform_util.dart";
@@ -67,10 +69,18 @@ class _LockScreenOptionsState extends State<LockScreenOptions> {
       await _lockscreenSetting.removePinAndPassword();
       await _configuration.setSystemLockScreen(!isSystemLockEnabled);
     } else {
-      await showErrorDialog(
-        context,
-        context.l10n.noSystemLockFound,
-        context.l10n.deviceLockEnablePreSteps,
+      await showDialogWidget(
+        context: context,
+        title: context.l10n.noSystemLockFound,
+        body: context.l10n.deviceLockEnablePreSteps,
+        isDismissible: true,
+        buttons: const [
+          ButtonWidget(
+            buttonType: ButtonType.secondary,
+            labelText: "OK",
+            isInAlert: true,
+          ),
+        ],
       );
     }
     await _initializeSettings();

@@ -21,6 +21,7 @@ import 'package:photos/models/gallery_type.dart';
 import "package:photos/models/metadata/common_keys.dart";
 import "package:photos/models/ml/face/person.dart";
 import 'package:photos/models/selected_files.dart';
+import "package:photos/service_locator.dart";
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
 import 'package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart';
@@ -581,6 +582,7 @@ class _FileSelectionActionsWidgetState
           "guest_view",
         ),
       );
+      await localSettings.setOnGuestView(true);
       routeToPage(context, page, forceCustomPageRoute: true).ignore();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Bus.instance.fire(GuestViewEvent(true, false));
@@ -678,6 +680,10 @@ class _FileSelectionActionsWidgetState
     _cachedCollectionForSharedLink ??= await collectionActions
         .createSharedCollectionLink(context, split.ownedByCurrentUser);
 
+    if (_cachedCollectionForSharedLink == null) {
+      await dialog.hide();
+      return;
+    }
     final List<EnteFile> ownedSelectedFiles = split.ownedByCurrentUser;
     placeholderBytes = await _createPlaceholder(ownedSelectedFiles);
     await dialog.hide();

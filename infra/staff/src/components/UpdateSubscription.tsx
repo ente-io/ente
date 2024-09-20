@@ -330,7 +330,7 @@ const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
                                     <DatePicker
                                         showYearDropdown
                                         scrollableYearDropdown
-                                        yearDropdownItemNumber={15}
+                                        yearDropdownItemNumber={100}
                                         selected={
                                             values.expiryTime instanceof Date
                                                 ? values.expiryTime

@@ -1,8 +1,12 @@
+import type {
+    Collection,
+    PublicURL,
+    UpdatePublicURL,
+} from "@/media/collection";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import { useContext, useState } from "react";
-import { Collection, PublicURL, UpdatePublicURL } from "types/collection";
 import { PublicLinkSetPassword } from "./setPassword";
 
 interface Iprops {

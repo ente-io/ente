@@ -88,24 +88,6 @@ body {
     opacity: 0;
 }
 
-.pswp-item-container > div.download-banner {
-    width: 100%;
-    height: 16vh;
-    padding: 2vh 0;
-    background-color: #151414;
-    color: #ddd;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-around;
-    opacity: 0.8;
-    font-size: 20px;
-}
-
-.download-banner > a {
-    width: 130px;
-}
-
 .pswp__img {
     object-fit: contain;
 }
@@ -185,13 +167,4 @@ div.otp-input input:focus {
     padding: 16px;
     display: flex;
     align-items: center;
-}
-
-@-webkit-keyframes rotation {
-    from {
-        -webkit-transform: rotate(0deg);
-    }
-    to {
-        -webkit-transform: rotate(359deg);
-    }
 }

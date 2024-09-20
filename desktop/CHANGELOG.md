@@ -1,11 +1,16 @@
 # CHANGELOG
 
-## v1.7.4 (Unreleased)
+## v1.7.5 (Unreleased)
+
+-   Directly upload to selected album on drag and drop.
+-   .
+
+## v1.7.4
 
 -   Improved date search, including support for day of week and hour of day.
 -   Fix video thumbnail generation and upload on Intel macOS.
 -   Club a photo and video into a live photo only if both are within 2 minutes.
--   .
+-   Fix an issue causing ZIP uploads to sometimes fail.
 
 ## v1.7.3
 

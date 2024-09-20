@@ -40,11 +40,6 @@ import DeleteAccountModal from "components/DeleteAccountModal";
 import TwoFactorModal from "components/TwoFactor/Modal";
 import { WatchFolder } from "components/WatchFolder";
 import LinkButton from "components/pages/gallery/LinkButton";
-import {
-    ARCHIVE_SECTION,
-    DUMMY_UNCATEGORIZED_COLLECTION,
-    TRASH_SECTION,
-} from "constants/collection";
 import { t } from "i18next";
 import isElectron from "is-electron";
 import { useRouter } from "next/router";
@@ -74,6 +69,11 @@ import {
     isSubscriptionCancelled,
     isSubscriptionPastDue,
 } from "utils/billing";
+import {
+    ARCHIVE_SECTION,
+    DUMMY_UNCATEGORIZED_COLLECTION,
+    TRASH_SECTION,
+} from "utils/collection";
 import { getDownloadAppMessage } from "utils/ui";
 import { isFamilyAdmin, isPartOfFamily } from "utils/user/family";
 import { testUpload } from "../../../tests/upload.test";
@@ -710,7 +710,7 @@ const DebugSection: React.FC = () => {
             <EnteMenuItem
                 onClick={confirmLogDownload}
                 variant="mini"
-                label={t("DOWNLOAD_UPLOAD_LOGS")}
+                label={t("debug_logs")}
             />
             <Stack py={"14px"} px={"16px"} gap={"24px"} color="text.muted">
                 {appVersion && (

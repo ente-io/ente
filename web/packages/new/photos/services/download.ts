@@ -170,12 +170,19 @@ class DownloadManagerImpl {
         }
     }
 
+    /**
+     * The `forceConvertVideos` option is true when the user presses the
+     * "Convert" button. It bypasses the preflight check we use to see if the
+     * browser can already play the video, and instead always does the
+     * transcoding.
+     */
     getFileForPreview = async (
         file: EnteFile,
-        forceConvert = false,
+        opts?: { forceConvertVideos?: boolean },
     ): Promise<SourceURLs | undefined> => {
         this.ensureInitialized();
         try {
+            const forceConvertVideos = opts?.forceConvertVideos ?? false;
             const getFileForPreviewPromise = async () => {
                 const fileBlob = await new Response(
                     await this.getFile(file, true),
@@ -191,11 +198,14 @@ class DownloadManagerImpl {
                     file,
                     fileBlob,
                     originalFileURL as string,
-                    forceConvert,
+                    forceConvertVideos,
                 );
                 return converted;
             };
-            if (forceConvert || !this.fileConversionPromises.has(file.id)) {
+            if (
+                forceConvertVideos ||
+                !this.fileConversionPromises.has(file.id)
+            ) {
                 this.fileConversionPromises.set(
                     file.id,
                     getFileForPreviewPromise(),
@@ -439,7 +449,7 @@ async function getRenderableFileURL(
     file: EnteFile,
     fileBlob: Blob,
     originalFileURL: string,
-    forceConvert: boolean,
+    forceConvertVideos: boolean,
 ): Promise<SourceURLs> {
     const existingOrNewObjectURL = (convertedBlob: Blob | null | undefined) =>
         convertedBlob
@@ -468,7 +478,7 @@ async function getRenderableFileURL(
             break;
         }
         case FileType.livePhoto: {
-            url = await getRenderableLivePhotoURL(file, fileBlob, forceConvert);
+            url = await getRenderableLivePhotoURL(file, fileBlob);
             isOriginal = false;
             isRenderable = false;
             type = "livePhoto";
@@ -478,7 +488,7 @@ async function getRenderableFileURL(
             const convertedBlob = await getPlayableVideo(
                 file.metadata.title,
                 fileBlob,
-                forceConvert,
+                forceConvertVideos,
             );
             const convertedURL = existingOrNewObjectURL(convertedBlob);
             url = convertedURL;
@@ -502,7 +512,6 @@ async function getRenderableFileURL(
 async function getRenderableLivePhotoURL(
     file: EnteFile,
     fileBlob: Blob,
-    forceConvert: boolean,
 ): Promise<LivePhotoSourceURL | undefined> {
     const livePhoto = await decodeLivePhoto(file.metadata.title, fileBlob);
 
@@ -524,8 +533,7 @@ async function getRenderableLivePhotoURL(
             const convertedVideoBlob = await getPlayableVideo(
                 livePhoto.videoFileName,
                 videoBlob,
-                forceConvert,
-                true,
+                false,
             );
             if (!convertedVideoBlob) return undefined;
             return URL.createObjectURL(convertedVideoBlob);
@@ -544,26 +552,35 @@ async function getRenderableLivePhotoURL(
 async function getPlayableVideo(
     videoNameTitle: string,
     videoBlob: Blob,
-    forceConvert = false,
-    runOnWeb = false,
+    forceConvert: boolean,
 ) {
-    try {
-        const isPlayable = await isPlaybackPossible(
-            URL.createObjectURL(videoBlob),
-        );
-        if (isPlayable && !forceConvert) {
-            return videoBlob;
-        } else {
-            if (!forceConvert && !runOnWeb && !isDesktop) {
-                return null;
-            }
+    const converted = async () => {
+        try {
             log.info(`Converting video ${videoNameTitle} to mp4`);
             const convertedVideoData = await ffmpeg.convertToMP4(videoBlob);
             return new Blob([convertedVideoData], { type: "video/mp4" });
+        } catch (e) {
+            log.error("Video conversion failed", e);
+            return null;
         }
-    } catch (e) {
-        log.error("Video conversion failed", e);
-        return null;
+    };
+
+    // If we've been asked to force convert, do it regardless of anything else.
+    if (forceConvert) return converted();
+
+    const isPlayable = await isPlaybackPossible(URL.createObjectURL(videoBlob));
+    if (isPlayable) return videoBlob;
+
+    // The browser doesn't think it can play this video, try transcoding.
+    if (isDesktop) {
+        return converted();
+    } else {
+        // Don't try to transcode on the web if the file is too big.
+        if (videoBlob.size > 100 * 1024 * 1024 /* 100 MB */) {
+            return null;
+        } else {
+            return converted();
+        }
     }
 }
 

@@ -1,6 +1,23 @@
 import { encryptMetadataJSON, sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
+import {
+    AddToCollectionRequest,
+    Collection,
+    CollectionMagicMetadata,
+    CollectionMagicMetadataProps,
+    CollectionPublicMagicMetadata,
+    CollectionShareeMagicMetadata,
+    CollectionToFileMap,
+    CollectionType,
+    CreatePublicAccessTokenRequest,
+    EncryptedCollection,
+    EncryptedFileKey,
+    MoveToCollectionRequest,
+    PublicURL,
+    RemoveFromCollectionRequest,
+    UpdatePublicURL,
+} from "@/media/collection";
 import { ItemVisibility } from "@/media/file-metadata";
 import { getLocalFiles } from "@/new/photos/services/files";
 import { EnteFile } from "@/new/photos/types/file";
@@ -17,40 +34,22 @@ import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { getActualKey } from "@ente/shared/user";
 import type { User } from "@ente/shared/user/types";
-import { REQUEST_BATCH_SIZE } from "constants/api";
+import { t } from "i18next";
+import {
+    CollectionFilesCount,
+    CollectionSummaries,
+    CollectionSummary,
+    CollectionSummaryType,
+} from "types/collection";
+import { FamilyData } from "types/user";
 import {
     ALL_SECTION,
     ARCHIVE_SECTION,
     COLLECTION_LIST_SORT_BY,
     COLLECTION_SORT_ORDER,
-    CollectionSummaryType,
-    CollectionType,
     DUMMY_UNCATEGORIZED_COLLECTION,
     HIDDEN_ITEMS_SECTION,
     TRASH_SECTION,
-} from "constants/collection";
-import { t } from "i18next";
-import {
-    AddToCollectionRequest,
-    Collection,
-    CollectionFilesCount,
-    CollectionMagicMetadata,
-    CollectionMagicMetadataProps,
-    CollectionPublicMagicMetadata,
-    CollectionShareeMagicMetadata,
-    CollectionSummaries,
-    CollectionSummary,
-    CollectionToFileMap,
-    CreatePublicAccessTokenRequest,
-    EncryptedCollection,
-    EncryptedFileKey,
-    MoveToCollectionRequest,
-    PublicURL,
-    RemoveFromCollectionRequest,
-    UpdatePublicURL,
-} from "types/collection";
-import { FamilyData } from "types/user";
-import {
     changeCollectionSubType,
     getHiddenCollections,
     getNonHiddenCollections,
@@ -83,6 +82,8 @@ const HIDDEN_COLLECTION_IDS = "hidden-collection-ids";
 const UNCATEGORIZED_COLLECTION_NAME = "Uncategorized";
 export const HIDDEN_COLLECTION_NAME = ".hidden";
 const FAVORITE_COLLECTION_NAME = "Favorites";
+
+export const REQUEST_BATCH_SIZE = 1000;
 
 export const getCollectionLastSyncTime = async (collection: Collection) =>
     (await localForage.getItem<number>(`${collection.id}-time`)) ?? 0;
@@ -1068,19 +1069,6 @@ export const getFavCollection = async () => {
     }
 };
 
-export const getNonEmptyCollections = (
-    collections: Collection[],
-    files: EnteFile[],
-) => {
-    const nonEmptyCollectionsIds = new Set<number>();
-    for (const file of files) {
-        nonEmptyCollectionsIds.add(file.collectionID);
-    }
-    return collections.filter((collection) =>
-        nonEmptyCollectionsIds.has(collection.id),
-    );
-};
-
 export function sortCollectionSummaries(
     collectionSummaries: CollectionSummary[],
     sortBy: COLLECTION_LIST_SORT_BY,
@@ -1140,51 +1128,46 @@ export function getCollectionSummaries(
         ) {
             hasUncategorizedCollection = true;
         }
-        if (
-            collectionFilesCount.get(collection.id) ||
-            collection.type === CollectionType.uncategorized
-        ) {
-            let type: CollectionSummaryType;
-            if (isIncomingShare(collection, user)) {
-                if (isIncomingCollabShare(collection, user)) {
-                    type = CollectionSummaryType.incomingShareCollaborator;
-                } else {
-                    type = CollectionSummaryType.incomingShareViewer;
-                }
-            } else if (isOutgoingShare(collection, user)) {
-                type = CollectionSummaryType.outgoingShare;
-            } else if (isSharedOnlyViaLink(collection)) {
-                type = CollectionSummaryType.sharedOnlyViaLink;
-            } else if (isArchivedCollection(collection)) {
-                type = CollectionSummaryType.archived;
-            } else if (isDefaultHiddenCollection(collection)) {
-                type = CollectionSummaryType.defaultHidden;
-            } else if (isPinnedCollection(collection)) {
-                type = CollectionSummaryType.pinned;
+        let type: CollectionSummaryType;
+        if (isIncomingShare(collection, user)) {
+            if (isIncomingCollabShare(collection, user)) {
+                type = CollectionSummaryType.incomingShareCollaborator;
             } else {
-                type = CollectionSummaryType[collection.type];
+                type = CollectionSummaryType.incomingShareViewer;
             }
-
-            let CollectionSummaryItemName: string;
-            if (type === CollectionSummaryType.uncategorized) {
-                CollectionSummaryItemName = t("UNCATEGORIZED");
-            } else if (type === CollectionSummaryType.favorites) {
-                CollectionSummaryItemName = t("FAVORITES");
-            } else {
-                CollectionSummaryItemName = collection.name;
-            }
-
-            collectionSummaries.set(collection.id, {
-                id: collection.id,
-                name: CollectionSummaryItemName,
-                latestFile: collectionLatestFiles.get(collection.id),
-                coverFile: collectionCoverFiles.get(collection.id),
-                fileCount: collectionFilesCount.get(collection.id) ?? 0,
-                updationTime: collection.updationTime,
-                type: type,
-                order: collection.magicMetadata?.data?.order ?? 0,
-            });
+        } else if (isOutgoingShare(collection, user)) {
+            type = CollectionSummaryType.outgoingShare;
+        } else if (isSharedOnlyViaLink(collection)) {
+            type = CollectionSummaryType.sharedOnlyViaLink;
+        } else if (isArchivedCollection(collection)) {
+            type = CollectionSummaryType.archived;
+        } else if (isDefaultHiddenCollection(collection)) {
+            type = CollectionSummaryType.defaultHidden;
+        } else if (isPinnedCollection(collection)) {
+            type = CollectionSummaryType.pinned;
+        } else {
+            type = CollectionSummaryType[collection.type];
         }
+
+        let CollectionSummaryItemName: string;
+        if (type === CollectionSummaryType.uncategorized) {
+            CollectionSummaryItemName = t("UNCATEGORIZED");
+        } else if (type === CollectionSummaryType.favorites) {
+            CollectionSummaryItemName = t("FAVORITES");
+        } else {
+            CollectionSummaryItemName = collection.name;
+        }
+
+        collectionSummaries.set(collection.id, {
+            id: collection.id,
+            name: CollectionSummaryItemName,
+            latestFile: collectionLatestFiles.get(collection.id),
+            coverFile: collectionCoverFiles.get(collection.id),
+            fileCount: collectionFilesCount.get(collection.id) ?? 0,
+            updationTime: collection.updationTime,
+            type: type,
+            order: collection.magicMetadata?.data?.order ?? 0,
+        });
     }
     if (!hasUncategorizedCollection) {
         collectionSummaries.set(

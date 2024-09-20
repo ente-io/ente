@@ -148,10 +148,11 @@ class MultiPartUploader {
   Future<String> putMultipartFile(
     MultipartUploadURLs urls,
     File encryptedFile,
+    int fileSize,
   ) async {
     // upload individual parts and get their etags
     final etags = await _uploadParts(
-      MultipartInfo(urls: urls),
+      MultipartInfo(urls: urls, encFileSize: fileSize),
       encryptedFile,
     );
 
@@ -180,6 +181,11 @@ class MultiPartUploader {
     }
 
     final int encFileLength = encryptedFile.lengthSync();
+    if (encFileLength != partInfo.encFileSize) {
+      throw Exception(
+        "File size mismatch. Expected ${partInfo.encFileSize} but got $encFileLength",
+      );
+    }
     // Start parts upload
     int count = 0;
     while (i < partsLength) {

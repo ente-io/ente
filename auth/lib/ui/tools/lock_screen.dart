@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:ente_auth/core/configuration.dart';
@@ -193,6 +194,8 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
       isCritical: true,
       firstButtonOnTap: () async {
         await UserService.instance.logout(context);
+        // To start the app afresh, resetting all state.
+        Process.killPid(pid, ProcessSignal.sigkill);
       },
     );
   }

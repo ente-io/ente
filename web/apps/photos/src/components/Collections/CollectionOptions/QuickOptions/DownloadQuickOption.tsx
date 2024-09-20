@@ -1,7 +1,7 @@
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import { IconButton, Tooltip } from "@mui/material";
-import { CollectionSummaryType } from "constants/collection";
 import { t } from "i18next";
+import { CollectionSummaryType } from "types/collection";
 import { CollectionActions } from "..";
 interface Iprops {
     handleCollectionAction: (

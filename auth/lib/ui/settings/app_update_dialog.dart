@@ -62,8 +62,8 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
           height: 64,
           child: OutlinedButton(
             style: Theme.of(context).outlinedButtonTheme.style!.copyWith(
-              textStyle: MaterialStateProperty.resolveWith<TextStyle?>(
-                (Set<MaterialState> states) {
+              textStyle: WidgetStateProperty.resolveWith<TextStyle?>(
+                (Set<WidgetState> states) {
                   return Theme.of(context).textTheme.titleMedium;
                 },
               ),

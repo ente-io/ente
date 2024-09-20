@@ -1,17 +1,19 @@
+import type { Collection } from "@/media/collection";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import { LS_KEYS } from "@ente/shared/storage/localStorage";
 import AllCollections from "components/Collections/AllCollections";
 import CollectionInfoWithOptions from "components/Collections/CollectionInfoWithOptions";
-import CollectionListBar from "components/Collections/CollectionListBar";
+import { CollectionListBar } from "components/Collections/CollectionListBar";
 import { SetCollectionNamerAttributes } from "components/Collections/CollectionNamer";
 import CollectionShare from "components/Collections/CollectionShare";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
-import { ALL_SECTION, COLLECTION_LIST_SORT_BY } from "constants/collection";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { sortCollectionSummaries } from "services/collectionService";
-import { Collection, CollectionSummaries } from "types/collection";
+import { CollectionSummaries } from "types/collection";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
 import {
+    ALL_SECTION,
+    COLLECTION_LIST_SORT_BY,
     hasNonSystemCollections,
     isSystemCollection,
     shouldBeShownOnCollectionBar,
@@ -148,12 +150,12 @@ export default function Collections(props: Iprops) {
                 isInHiddenSection={isInHiddenSection}
                 activeCollectionID={activeCollectionID}
                 setActiveCollectionID={setActiveCollectionID}
+                onShowAllCollections={openAllCollections}
+                collectionListSortBy={collectionListSortBy}
+                setCollectionListSortBy={setCollectionListSortBy}
                 collectionSummaries={sortedCollectionSummaries.filter((x) =>
                     shouldBeShownOnCollectionBar(x.type),
                 )}
-                showAllCollections={openAllCollections}
-                setCollectionListSortBy={setCollectionListSortBy}
-                collectionListSortBy={collectionListSortBy}
             />
 
             <AllCollections

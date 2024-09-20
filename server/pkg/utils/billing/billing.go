@@ -108,7 +108,7 @@ func GetFreeSubscription(userID int64) ente.Subscription {
 		ProductID:             ente.FreePlanProductID,
 		OriginalTransactionID: ente.FreePlanTransactionID,
 		Storage:               ente.FreePlanStorage,
-		ExpiryTime:            time.NDaysFromNow(ente.TrialPeriodDuration),
+		ExpiryTime:            time.NYearsFromNow(ente.TrialPeriodDuration),
 	}
 }
 

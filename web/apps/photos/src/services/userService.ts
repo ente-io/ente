@@ -63,24 +63,6 @@ export const getFamiliesToken = async () => {
     }
 };
 
-export const getRoadmapRedirectURL = async () => {
-    try {
-        const token = getToken();
-
-        const resp = await HTTPService.get(
-            await apiURL("/users/roadmap/v2"),
-            null,
-            {
-                "X-Auth-Token": token,
-            },
-        );
-        return resp.data["url"];
-    } catch (e) {
-        log.error("failed to get roadmap url", e);
-        throw e;
-    }
-};
-
 export const isTokenValid = async (token: string) => {
     try {
         const resp = await HTTPService.get(

@@ -8,6 +8,7 @@ import 'package:ente_auth/utils/auth_util.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/lock_screen_settings.dart';
 import 'package:ente_auth/utils/toast_util.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_authentication/flutter_local_authentication.dart';
@@ -19,11 +20,19 @@ class LocalAuthenticationService {
   static final LocalAuthenticationService instance =
       LocalAuthenticationService._privateConstructor();
   final logger = Logger((LocalAuthenticationService).toString());
+  int lastAuthTime = 0;
 
   Future<bool> requestLocalAuthentication(
     BuildContext context,
     String infoMessage,
   ) async {
+    if (kDebugMode) {
+      // if last auth time is less than 60 seconds, don't ask for auth again
+      if (lastAuthTime != 0 &&
+          DateTime.now().millisecondsSinceEpoch - lastAuthTime < 60000) {
+        return true;
+      }
+    }
     if (await isLocalAuthSupportedOnDevice() ||
         LockScreenSettings.instance.getIsAppLockSet()) {
       AppLock.of(context)!.setEnabled(false);
@@ -39,6 +48,7 @@ class LocalAuthenticationService {
         showToast(context, infoMessage);
         return false;
       } else {
+        lastAuthTime = DateTime.now().millisecondsSinceEpoch;
         return true;
       }
     }

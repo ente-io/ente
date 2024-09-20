@@ -1,4 +1,5 @@
 import { MenuItemDivider, MenuItemGroup } from "@/base/components/Menu";
+import type { Collection, PublicURL } from "@/media/collection";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ContentCopyIcon from "@mui/icons-material/ContentCopyOutlined";
@@ -8,7 +9,6 @@ import PublicIcon from "@mui/icons-material/Public";
 import { Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import { useState } from "react";
-import { Collection, PublicURL } from "types/collection";
 import { SetPublicShareProp } from "types/publicCollection";
 import ManagePublicShareOptions from "./manage";
 
