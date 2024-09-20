@@ -150,6 +150,10 @@ export default function Collections(props: Iprops) {
                 isInHiddenSection={isInHiddenSection}
                 activeCollectionID={activeCollectionID}
                 setActiveCollectionID={setActiveCollectionID}
+                activePersonID={
+                    process.env.NEXT_PUBLIC_ENTE_WIP_CL ? "test" : undefined
+                }
+                setActivePersonID={(id) => console.log(id)}
                 onShowAllCollections={openAllCollections}
                 collectionListSortBy={collectionListSortBy}
                 setCollectionListSortBy={setCollectionListSortBy}

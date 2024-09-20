@@ -12,7 +12,7 @@ import LinkIcon from "@mui/icons-material/Link";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import PeopleIcon from "@mui/icons-material/People";
 import PushPin from "@mui/icons-material/PushPin";
-import { Box, IconButton, Typography, styled } from "@mui/material";
+import { Box, IconButton, Stack, Typography, styled } from "@mui/material";
 import Tooltip from "@mui/material/Tooltip";
 import { CollectionTile } from "components/Collections/styledComponents";
 import {
@@ -43,6 +43,14 @@ interface CollectionListBarProps {
      */
     setActiveCollectionID: (id?: number) => void;
     /**
+     * The ID of the currently selected person (if any).
+     */
+    activePersonID: string | undefined;
+    /**
+     * Called when the user changes the active person.
+     */
+    setActivePersonID: (id: string | undefined) => void;
+    /**
      * Called when the user selects the option to show a modal with all the
      * collections.
      */
@@ -66,6 +74,8 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
     isInHiddenSection,
     activeCollectionID,
     setActiveCollectionID,
+    activePersonID,
+    // setActivePersonID
     onShowAllCollections,
     collectionListSortBy,
     setCollectionListSortBy,
@@ -145,12 +155,17 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
         onCollectionClick,
     );
 
+    const mode = activePersonID ? "people" : "albums";
+
     return (
         <CollectionListBarWrapper>
             <SpaceBetweenFlex mb={1}>
-                <Typography>
-                    {isInHiddenSection ? t("HIDDEN_ALBUMS") : t("ALBUMS")}
-                </Typography>
+                <Stack direction="row" gap={1}>
+                    <Typography color={mode == "people" ? "text.muted" : "text.base"}>
+                        {isInHiddenSection ? t("HIDDEN_ALBUMS") : t("ALBUMS")}
+                    </Typography>
+                    {mode == "people" && <Typography>{t("people")}</Typography>}
+                </Stack>
                 {isMobile && (
                     <Box display="flex" alignItems={"center"} gap={1}>
                         <CollectionListSortBy
