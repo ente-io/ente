@@ -360,46 +360,13 @@ export const wipClusterLocalOnce = () => {
 export const wipCluster = async () => {
     if (!(await wipClusterEnable())) throw new Error("Not implemented");
 
-    _state.peopleLocal = [];
     triggerStatusUpdate();
 
-    const { localFileByID, clusters, cgroups } = await worker().then((w) =>
-        w.clusterFaces(),
-    );
-
-    const clusterByID = new Map(clusters.map((c) => [c.id, c]));
-
-    const people = cgroups
-        // TODO-Cluster
-        .map((cgroup) => ({ ...cgroup, name: cgroup.id }))
-        .map((cgroup) => {
-            if (!cgroup.name) return undefined;
-            const faceID = ensure(cgroup.displayFaceID);
-            const fileID = ensure(fileIDFromFaceID(faceID));
-            const file = ensure(localFileByID.get(fileID));
-
-            const faceIDs = cgroup.assigned
-                .map(({ id }) => ensure(clusterByID.get(id)))
-                .flatMap((cluster) => cluster.faces);
-            const fileIDs = faceIDs
-                .map((faceID) => fileIDFromFaceID(faceID))
-                .filter((fileID) => fileID !== undefined);
-
-            return {
-                id: cgroup.id,
-                name: cgroup.name,
-                faceIDs,
-                fileIDs: [...new Set(fileIDs)],
-                displayFaceID: faceID,
-                displayFaceFile: file,
-            };
-        })
-        .filter((c) => !!c)
-        .sort((a, b) => b.faceIDs.length - a.faceIDs.length);
+    const { people } = await worker().then((w) => w.clusterFaces());
 
     _state.peopleLocal = people;
-    triggerStatusUpdate();
     updatePeopleSnapshot();
+    triggerStatusUpdate();
 };
 
 export type MLStatus =

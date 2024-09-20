@@ -173,25 +173,10 @@ export const clusterFaces = async (
         (a, b) => b.faces.length - a.faces.length,
     );
 
-    // TODO-Cluster - Currently we're not syncing with remote or saving anything
-    // locally, so cgroups will be empty. Create a temporary (unsaved, unsynced)
-    // cgroup, one per cluster.
-
-    const cgroups: AnnotatedCGroup[] = [];
-    for (const cluster of sortedClusters) {
-        const faces = cluster.faces.map((id) => ensure(faceForFaceID.get(id)));
-        const topFace = faces.reduce((top, face) =>
-            top.score > face.score ? top : face,
-        );
-        cgroups.push({
-            id: cluster.id,
-            name: undefined,
-            assigned: [cluster],
-            isHidden: false,
-            avatarFaceID: undefined,
-            displayFaceID: topFace.faceID,
-        });
-    }
+    // TODO-Cluster
+    // This isn't really part of the clustering, but help the main thread out by
+    // pre-computing temporary in-memory people, one per cluster.
+    const people = toPeople(sortedClusters, localFileByID, faceForFaceID);
 
     const clusteredFaceCount = clusterIDForFaceID.size;
     const timeTakenMs = Date.now() - t;
@@ -199,11 +184,7 @@ export const clusterFaces = async (
         `Generated ${sortedClusters.length} clusters from ${faces.length} faces (${clusteredFaceCount} clustered ${faces.length - clusteredFaceCount} unclustered) (${timeTakenMs} ms)`,
     );
 
-    return {
-        localFileByID,
-        clusters: sortedClusters,
-        cgroups,
-    };
+    return { clusters: sortedClusters, people };
 };
 
 /**
@@ -354,4 +335,65 @@ const clusterBatchLinear = async (
     }
 
     return state;
+};
+
+/**
+ * Construct a {@link Person} object for each cluster.
+ */
+const toPeople = (
+    clusters: FaceCluster[],
+    localFileByID: Map<number, EnteFile>,
+    faceForFaceID: Map<string, ClusterFace>,
+) => {
+    // TODO-Cluster - Currently we're not syncing with remote or saving anything
+    // locally, so cgroups will be empty. Create a temporary (unsaved, unsynced)
+    // cgroup, one per cluster.
+
+    const cgroups: AnnotatedCGroup[] = [];
+    for (const cluster of clusters) {
+        const faces = cluster.faces.map((id) => ensure(faceForFaceID.get(id)));
+        const topFace = faces.reduce((top, face) =>
+            top.score > face.score ? top : face,
+        );
+        cgroups.push({
+            id: cluster.id,
+            name: undefined,
+            assigned: [cluster],
+            isHidden: false,
+            avatarFaceID: undefined,
+            displayFaceID: topFace.faceID,
+        });
+    }
+
+    const clusterByID = new Map(clusters.map((c) => [c.id, c]));
+
+    const people = cgroups
+        // TODO-Cluster
+        .map((cgroup) => ({ ...cgroup, name: cgroup.id }))
+        .map((cgroup) => {
+            if (!cgroup.name) return undefined;
+            const faceID = ensure(cgroup.displayFaceID);
+            const fileID = ensure(fileIDFromFaceID(faceID));
+            const file = ensure(localFileByID.get(fileID));
+
+            const faceIDs = cgroup.assigned
+                .map(({ id }) => ensure(clusterByID.get(id)))
+                .flatMap((cluster) => cluster.faces);
+            const fileIDs = faceIDs
+                .map((faceID) => fileIDFromFaceID(faceID))
+                .filter((fileID) => fileID !== undefined);
+
+            return {
+                id: cgroup.id,
+                name: cgroup.name,
+                faceIDs,
+                fileIDs: [...new Set(fileIDs)],
+                displayFaceID: faceID,
+                displayFaceFile: file,
+            };
+        })
+        .filter((c) => !!c)
+        .sort((a, b) => b.faceIDs.length - a.faceIDs.length);
+
+    return people;
 };
