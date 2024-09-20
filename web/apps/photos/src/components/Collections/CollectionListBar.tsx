@@ -66,13 +66,13 @@ export interface CollectionListBarProps {
      */
     people: Person[];
     /**
-     * The ID of the currently selected person (if any).
+     * The currently selected person (if any).
      */
-    activePersonID: string | undefined;
+    activePerson: Person | undefined;
     /**
      * Called when the user changes the active person.
      */
-    setActivePersonID: (id: string | undefined) => void;
+    setActivePerson: (id: Person | undefined) => void;
 }
 
 export const CollectionListBar: React.FC<CollectionListBarProps> = ({
@@ -84,8 +84,8 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
     collectionListSortBy,
     setCollectionListSortBy,
     // people,
-    // activePersonID,
-    // setActivePersonID
+    // activePerson,
+    // setActivePerson
 }) => {
     const windowSize = useWindowSize();
     const isMobile = useIsMobileWidth();

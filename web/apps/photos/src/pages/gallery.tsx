@@ -14,6 +14,7 @@ import {
     getLocalFiles,
     getLocalTrashedFiles,
 } from "@/new/photos/services/files";
+import { peopleSnapshot, peopleSubscribe } from "@/new/photos/services/ml";
 import type { Person } from "@/new/photos/services/ml/cgroups";
 import {
     filterSearchableFiles,
@@ -53,7 +54,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import type { ButtonProps, IconButtonProps } from "@mui/material";
 import { Box, Button, IconButton, Typography, styled } from "@mui/material";
 import AuthenticateUserModal from "components/AuthenticateUserModal";
-import Collections from "components/Collections";
+import { Collections } from "components/Collections";
 import { CollectionInfo } from "components/Collections/CollectionInfo";
 import CollectionNamer, {
     CollectionNamerAttributes,
@@ -91,6 +92,7 @@ import {
     useMemo,
     useRef,
     useState,
+    useSyncExternalStore,
 } from "react";
 import { useDropzone } from "react-dropzone";
 import {
@@ -325,7 +327,9 @@ export default function Gallery() {
     //
     // - The collections bar is replaced with a people bar.
     // - The gallery itself shows files which contain this person.
-    const [person, setPerson] = useState<Person | undefined>();
+    const [activePerson, setActivePerson] = useState<Person | undefined>();
+
+    const people = useSyncExternalStore(peopleSubscribe, peopleSnapshot);
 
     const [
         filesDownloadProgressAttributesList,
@@ -539,8 +543,8 @@ export default function Gallery() {
             filteredFiles = await filterSearchableFiles(
                 selectedSearchOption.suggestion,
             );
-        } else if (person) {
-            const pfSet = new Set(person.fileIDs);
+        } else if (activePerson) {
+            const pfSet = new Set(activePerson.fileIDs);
             filteredFiles = files.filter((f) => pfSet.has(f.id));
         } else {
             filteredFiles = getUniqueFiles(
@@ -617,7 +621,7 @@ export default function Gallery() {
         selectedSearchOption,
         activeCollectionID,
         archivedCollections,
-        person,
+        activePerson,
     ]);
 
     const selectAll = (e: KeyboardEvent) => {
@@ -1024,9 +1028,17 @@ export default function Gallery() {
         console.log("onSelectPeople");
     };
 
-    if (person) {
-        log.debug(() => ["person", person]);
+    if (activePerson) {
+        log.debug(() => ["person", activePerson]);
     }
+
+    const collectionBarMode = isInSearchMode
+        ? "search"
+        : isInHiddenSection
+          ? "hidden-albums"
+          : activePerson
+            ? "people"
+            : "albums";
 
     return (
         <GalleryContext.Provider
@@ -1111,27 +1123,27 @@ export default function Gallery() {
                             setIsInSearchMode={setIsInSearchMode}
                             onSelectSearchOption={handleSelectSearchOption}
                             onSelectPeople={handleSelectPeople}
-                            onSelectPerson={setPerson}
+                            onSelectPerson={setActivePerson}
                         />
                     )}
                 </NavbarBase>
 
                 <Collections
-                    activeCollection={activeCollection}
-                    isInSearchMode={isInSearchMode}
-                    isInHiddenSection={isInHiddenSection}
-                    activeCollectionID={activeCollectionID}
-                    setActiveCollectionID={setActiveCollectionID}
-                    collectionSummaries={collectionSummaries}
-                    hiddenCollectionSummaries={hiddenCollectionSummaries}
-                    setCollectionNamerAttributes={setCollectionNamerAttributes}
-                    setPhotoListHeader={setPhotoListHeader}
-                    setFilesDownloadProgressAttributesCreator={
-                        setFilesDownloadProgressAttributesCreator
-                    }
-                    filesDownloadProgressAttributesList={
-                        filesDownloadProgressAttributesList
-                    }
+                    mode={collectionBarMode}
+                    {...{
+                        collectionSummaries,
+                        activeCollection,
+                        activeCollectionID,
+                        setActiveCollectionID,
+                        hiddenCollectionSummaries,
+                        people,
+                        activePerson,
+                        setActivePerson,
+                        setCollectionNamerAttributes,
+                        setPhotoListHeader,
+                        setFilesDownloadProgressAttributesCreator,
+                        filesDownloadProgressAttributesList,
+                    }}
                 />
 
                 <Uploader

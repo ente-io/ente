@@ -37,31 +37,29 @@ interface CollectionsProps {
     setActiveCollectionID: (id?: number) => void;
     hiddenCollectionSummaries: CollectionSummaries;
     people: Person[];
-    activePersonID: string | undefined;
-    setActivePersonID: (id: string | undefined) => void;
+    activePerson: Person | undefined;
+    setActivePerson: (id: Person | undefined) => void;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
     setPhotoListHeader: (value: TimeStampListItem) => void;
     filesDownloadProgressAttributesList: FilesDownloadProgressAttributes[];
     setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
 }
 
-export default function Collections(props: CollectionsProps) {
-    const {
-        mode,
-        collectionSummaries,
-        activeCollection,
-        activeCollectionID,
-        setActiveCollectionID,
-        hiddenCollectionSummaries,
-        people,
-        activePersonID,
-        setActivePersonID,
-        setCollectionNamerAttributes,
-        setPhotoListHeader,
-        filesDownloadProgressAttributesList,
-        setFilesDownloadProgressAttributesCreator,
-    } = props;
-
+export const Collections: React.FC<CollectionsProps> = ({
+    mode,
+    collectionSummaries,
+    activeCollection,
+    activeCollectionID,
+    setActiveCollectionID,
+    hiddenCollectionSummaries,
+    people,
+    activePerson,
+    setActivePerson,
+    setCollectionNamerAttributes,
+    setPhotoListHeader,
+    filesDownloadProgressAttributesList,
+    setFilesDownloadProgressAttributesCreator,
+}) => {
     const [allCollectionView, setAllCollectionView] = useState(false);
     const [collectionShareModalView, setCollectionShareModalView] =
         useState(false);
@@ -162,8 +160,8 @@ export default function Collections(props: CollectionsProps) {
                     activeCollectionID,
                     setActiveCollectionID,
                     people,
-                    activePersonID,
-                    setActivePersonID,
+                    activePerson,
+                    setActivePerson,
                     collectionListSortBy,
                     setCollectionListSortBy,
                 }}
@@ -200,4 +198,4 @@ export default function Collections(props: CollectionsProps) {
             />
         </>
     );
-}
+};
