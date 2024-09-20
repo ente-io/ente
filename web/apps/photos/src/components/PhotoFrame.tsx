@@ -492,7 +492,9 @@ const PhotoFrame = ({
             );
             fetching[item.id] = true;
 
-            const srcURL = await DownloadManager.getFileForPreview(item, true);
+            const srcURL = await DownloadManager.getFileForPreview(item, {
+                forceConvertVideos: true,
+            });
 
             try {
                 await updateSrcURL(index, item.id, srcURL, true);
