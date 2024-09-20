@@ -20,7 +20,9 @@ export const SearchPeopleList: React.FC<SearchPeopleListProps> = ({
 }) => {
     const isMobileWidth = useIsMobileWidth();
     return (
-        <SearchPeopleContainer>
+        <SearchPeopleContainer
+            sx={{ justifyContent: people.length > 3 ? "center" : "start" }}
+        >
             {people.slice(0, isMobileWidth ? 6 : 7).map((person) => (
                 <SearchPeopleButton
                     key={person.id}
@@ -40,7 +42,6 @@ export const SearchPeopleList: React.FC<SearchPeopleListProps> = ({
 const SearchPeopleContainer = styled("div")`
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
     align-items: center;
     gap: 5px;
     margin-block: 12px;
@@ -195,6 +196,10 @@ const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
     ) : (
         <Skeleton
             variant="circular"
+            animation="wave"
+            sx={{
+                backgroundColor: (theme) => theme.colors.background.elevated2,
+            }}
             width={placeholderDimension}
             height={placeholderDimension}
         />
