@@ -42,8 +42,6 @@ export interface ClusteringProgress {
     total: number;
 }
 
-export type OnClusteringProgress = (progress: ClusteringProgress) => void;
-
 /** A {@link Face} annotated with data needed during clustering. */
 export type ClusterFace = Omit<Face, "embedding"> & {
     embedding: Float32Array;
@@ -69,7 +67,7 @@ export interface ClusterPreviewFace {
 export const clusterFaces = (
     faceIndexes: FaceIndex[],
     localFiles: EnteFile[],
-    onProgress: OnClusteringProgress,
+    onProgress: (progress: ClusteringProgress) => void,
 ) => {
     const {
         minBlur,

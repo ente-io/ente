@@ -25,7 +25,7 @@ import {
     indexCLIP,
     type CLIPIndex,
 } from "./clip";
-import { clusterFaces, type OnClusteringProgress } from "./cluster";
+import { clusterFaces, type ClusteringProgress } from "./cluster";
 import { saveFaceCrops } from "./crop";
 import {
     getFaceIndexes,
@@ -97,6 +97,8 @@ interface IndexableItem {
 export class MLWorker {
     /** The last known state of the worker. */
     public state: WorkerState = "init";
+    /** If the worker is currently clustering, then its last known progress. */
+    public clusteringProgess: ClusteringProgress | undefined;
 
     private electron: ElectronMLWorker | undefined;
     private delegate: MLWorkerDelegate | undefined;
@@ -276,13 +278,23 @@ export class MLWorker {
         }));
     }
 
-    // TODO-Cluster
-    async clusterFaces(onProgress: OnClusteringProgress) {
-        return clusterFaces(
+    /**
+     * Run face clustering on all faces.
+     *
+     * This should only be invoked when the face indexing (including syncing
+     * with remote) is complete so that we cluster the latest set of faces.
+     */
+    async clusterFaces() {
+        const result = clusterFaces(
             await getFaceIndexes(),
             await getAllLocalFiles(),
-            onProgress,
+            (progress) => {
+                this.clusteringProgess = progress;
+                this.delegate?.workerDidUpdateStatus();
+            },
         );
+        this.clusteringProgess = undefined;
+        return result;
     }
 }
 

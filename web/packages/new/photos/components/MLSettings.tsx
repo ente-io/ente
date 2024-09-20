@@ -8,11 +8,10 @@ import {
     enableML,
     mlStatusSnapshot,
     mlStatusSubscribe,
-    wipClusterDebugPageContents,
+    wipCluster,
     wipClusterEnable,
     type MLStatus,
 } from "@/new/photos/services/ml";
-import { type ClusteringProgress } from "@/new/photos/services/ml/cluster";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import {
@@ -22,7 +21,6 @@ import {
     Divider,
     FormControlLabel,
     FormGroup,
-    LinearProgress,
     Link,
     Paper,
     Stack,
@@ -302,7 +300,6 @@ const ManageML: React.FC<ManageMLProps> = ({
 }) => {
     const [showClusterOpt, setShowClusterOpt] = useState(false);
     const { phase, nSyncedFiles, nTotalFiles } = mlStatus;
-    const [progress, setProgress] = useState<ClusteringProgress | undefined>();
 
     useEffect(() => void wipClusterEnable().then(setShowClusterOpt), []);
 
@@ -339,12 +336,6 @@ const ManageML: React.FC<ManageMLProps> = ({
             },
             buttonDirection: "row",
         });
-    };
-
-    // TODO-Cluster
-    const wipClusterDebug = async () => {
-        await wipClusterDebugPageContents(setProgress);
-        setProgress(undefined);
     };
 
     return (
@@ -397,30 +388,14 @@ const ManageML: React.FC<ManageMLProps> = ({
                             label={ut(
                                 "Create clusters   • internal only option",
                             )}
-                            onClick={wipClusterDebug}
+                            onClick={() => void wipCluster()}
                         />
                     </MenuItemGroup>
                     <MenuSectionTitle
                         title={ut(
-                            "Create and show in-memory clusters (not saved or synced). You can also view them in the search dropdown later.",
+                            "Create in-memory clusters (not saved or synced). You can also view them in the search dropdown later.",
                         )}
                     />
-                    {progress && (
-                        <Box sx={{ mr: 1 }}>
-                            <LinearProgress
-                                variant="determinate"
-                                value={
-                                    progress.total > 0
-                                        ? Math.round(
-                                              (progress.completed /
-                                                  progress.total) *
-                                                  100,
-                                          )
-                                        : 0
-                                }
-                            />
-                        </Box>
-                    )}
                 </Box>
             )}
         </Stack>

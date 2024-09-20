@@ -24,7 +24,6 @@ import {
     type ClusterFace,
     type ClusterPreviewFace,
     type FaceCluster,
-    type OnClusteringProgress,
 } from "./cluster";
 import { regenerateFaceCrops } from "./crop";
 import { clearMLDB, getFaceIndex, getIndexableAndIndexedCounts } from "./db";
@@ -340,7 +339,6 @@ export const wipClusterEnable = async (): Promise<boolean> =>
     (await isInternalUser());
 
 // // TODO-Cluster temporary state here
-let _wip_isClustering = false;
 let _wip_peopleLocal: Person[] | undefined;
 let _wip_peopleRemote: Person[] | undefined;
 let _wip_hasSwitchedOnce = false;
@@ -374,12 +372,9 @@ export interface ClusterDebugPageContents {
     }[];
 }
 
-export const wipClusterDebugPageContents = async (
-    onProgress: OnClusteringProgress,
-): Promise<ClusterDebugPageContents> => {
+export const wipCluster = async () => {
     if (!(await wipClusterEnable())) throw new Error("Not implemented");
 
-    _wip_isClustering = true;
     _wip_peopleLocal = undefined;
     triggerStatusUpdate();
 
@@ -390,7 +385,7 @@ export const wipClusterDebugPageContents = async (
         cgroups,
         unclusteredFaces,
         ...rest
-    } = await worker().then((w) => w.clusterFaces(proxy(onProgress)));
+    } = await worker().then((w) => w.clusterFaces());
 
     const fileForFace = ({ faceID }: { faceID: string }) =>
         ensure(localFileByID.get(ensure(fileIDFromFaceID(faceID))));
@@ -441,7 +436,6 @@ export const wipClusterDebugPageContents = async (
         .filter((c) => !!c)
         .sort((a, b) => b.faceIDs.length - a.faceIDs.length);
 
-    _wip_isClustering = false;
     _wip_peopleLocal = people;
     triggerStatusUpdate();
     setPeopleSnapshot((_wip_peopleRemote ?? []).concat(people));
@@ -540,6 +534,19 @@ const setMLStatusSnapshot = (snapshot: MLStatus) => {
 const getMLStatus = async (): Promise<MLStatus> => {
     if (!_state.isMLEnabled) return { phase: "disabled" };
 
+    const w = await worker();
+
+    // The worker has a clustering progress set iff it is clustering. This
+    // overrides other behaviours.
+    const clusteringProgress = await w.clusteringProgess;
+    if (clusteringProgress) {
+        return {
+            phase: "clustering",
+            nSyncedFiles: clusteringProgress.completed,
+            nTotalFiles: clusteringProgress.total,
+        };
+    }
+
     const { indexedCount, indexableCount } =
         await getIndexableAndIndexedCounts();
 
@@ -551,11 +558,9 @@ const getMLStatus = async (): Promise<MLStatus> => {
     // indexable count.
 
     let phase: MLStatus["phase"];
-    const state = await (await worker()).state;
+    const state = await w.state;
     if (state == "indexing" || state == "fetching") {
         phase = state;
-    } else if (_wip_isClustering) {
-        phase = "clustering";
     } else if (state == "init" || indexableCount > 0) {
         phase = "scheduled";
     } else {
