@@ -1549,6 +1549,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "subAlreadyLinkedErrMessage": m62,
         "subWillBeCancelledOn": m63,
         "subscribe": MessageLookupByLibrary.simpleMessage("Iscriviti"),
+        "subscribeToEnableSharing": MessageLookupByLibrary.simpleMessage(
+            "È necessario un abbonamento a pagamento attivo per abilitare la condivisione."),
         "subscription": MessageLookupByLibrary.simpleMessage("Abbonamento"),
         "success": MessageLookupByLibrary.simpleMessage("Operazione riuscita"),
         "successfullyArchived":
