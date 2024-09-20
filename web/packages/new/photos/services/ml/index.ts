@@ -84,6 +84,20 @@ class MLState {
     peopleSnapshot: Person[] | undefined;
 
     /**
+     * Cached in-memory copy of people generated from local clusters.
+     *
+     * Part of {@link peopleSnapshot}.
+     */
+    peopleLocal: Person[] = [];
+
+    /**
+     * Cached in-memory copy of people generated from remote cgroups.
+     *
+     * Part of {@link peopleSnapshot}.
+     */
+    peopleRemote: Person[] = [];
+
+    /**
      * In flight face crop regeneration promises indexed by the IDs of the files
      * whose faces we are regenerating.
      */
@@ -339,8 +353,6 @@ export const wipClusterEnable = async (): Promise<boolean> =>
     (await isInternalUser());
 
 // // TODO-Cluster temporary state here
-let _wip_peopleLocal: Person[] | undefined;
-let _wip_peopleRemote: Person[] | undefined;
 let _wip_hasSwitchedOnce = false;
 
 export const wipClusterLocalOnce = () => {
@@ -376,7 +388,7 @@ export interface ClusterDebugPageContents {
 export const wipCluster = async () => {
     if (!(await wipClusterEnable())) throw new Error("Not implemented");
 
-    _wip_peopleLocal = undefined;
+    _state.peopleLocal = [];
     triggerStatusUpdate();
 
     const {
@@ -437,9 +449,9 @@ export const wipCluster = async () => {
         .filter((c) => !!c)
         .sort((a, b) => b.faceIDs.length - a.faceIDs.length);
 
-    _wip_peopleLocal = people;
+    _state.peopleLocal = people;
     triggerStatusUpdate();
-    setPeopleSnapshot((_wip_peopleRemote ?? []).concat(people));
+    updatePeopleSnapshot();
 
     return {
         clusters,
@@ -632,6 +644,9 @@ export const peopleSubscribe = (onChange: () => void): (() => void) => {
  */
 export const peopleSnapshot = () => _state.peopleSnapshot;
 
+const updatePeopleSnapshot = () =>
+    setPeopleSnapshot(_state.peopleRemote.concat(_state.peopleLocal));
+
 const setPeopleSnapshot = (snapshot: Person[] | undefined) => {
     _state.peopleSnapshot = snapshot;
     _state.peopleListeners.forEach((l) => l());
@@ -643,8 +658,8 @@ const setPeopleSnapshot = (snapshot: Person[] | undefined) => {
  */
 const updatePeople = async () => {
     const people = await updatedPeople();
-    _wip_peopleRemote = people;
-    setPeopleSnapshot(people.concat(_wip_peopleLocal ?? []));
+    _state.peopleRemote = people;
+    updatePeopleSnapshot();
     setSearchPeople(people);
 };
 
