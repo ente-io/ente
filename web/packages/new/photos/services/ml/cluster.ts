@@ -173,28 +173,6 @@ export const clusterFaces = async (
         (a, b) => b.faces.length - a.faces.length,
     );
 
-    // Convert into the data structure we're using to debug/visualize.
-    const clusterPreviewClusters =
-        sortedClusters.length < 60
-            ? sortedClusters
-            : sortedClusters.slice(0, 30).concat(sortedClusters.slice(-30));
-    const clusterPreviews = clusterPreviewClusters.map((cluster) => {
-        const faces = cluster.faces.map((id) => ensure(faceForFaceID.get(id)));
-        const topFace = faces.reduce((top, face) =>
-            top.score > face.score ? top : face,
-        );
-        const previewFaces: ClusterPreviewFace[] = faces.map((face) => {
-            const csim = dotProduct(topFace.embedding, face.embedding);
-            return { face, cosineSimilarity: csim, wasMerged: false };
-        });
-        return {
-            clusterSize: cluster.faces.length,
-            faces: previewFaces
-                .sort((a, b) => b.cosineSimilarity - a.cosineSimilarity)
-                .slice(0, 50),
-        };
-    });
-
     // TODO-Cluster - Currently we're not syncing with remote or saving anything
     // locally, so cgroups will be empty. Create a temporary (unsaved, unsynced)
     // cgroup, one per cluster.
@@ -222,26 +200,15 @@ export const clusterFaces = async (
     const clusteredFaceCount = clusterIDForFaceID.size;
     const unclusteredFaceCount = filteredFaceCount - clusteredFaceCount;
 
-    const unclusteredFaces = faces.filter(
-        ({ faceID }) => !clusterIDForFaceID.has(faceID),
-    );
-
     const timeTakenMs = Date.now() - t;
     log.info(
         `Generated ${sortedClusters.length} clusters from ${totalFaceCount} faces (${filteredFaceCount} filtered ${clusteredFaceCount} clustered ${unclusteredFaceCount} unclustered) (${timeTakenMs} ms)`,
     );
 
     return {
-        totalFaceCount,
-        filteredFaceCount,
-        clusteredFaceCount,
-        unclusteredFaceCount,
         localFileByID,
-        clusterPreviews,
         clusters: sortedClusters,
         cgroups,
-        unclusteredFaces: unclusteredFaces,
-        timeTakenMs,
     };
 };
 

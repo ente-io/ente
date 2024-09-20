@@ -20,11 +20,6 @@ import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
 import { setSearchPeople } from "../search";
 import type { UploadItem } from "../upload/types";
 import { syncCGroups, updatedPeople, type Person } from "./cgroups";
-import {
-    type ClusterFace,
-    type ClusterPreviewFace,
-    type FaceCluster,
-} from "./cluster";
 import { regenerateFaceCrops } from "./crop";
 import { clearMLDB, getFaceIndex, getIndexableAndIndexedCounts } from "./db";
 import { MLWorker } from "./worker";
@@ -362,62 +357,15 @@ export const wipClusterLocalOnce = () => {
     void wipCluster();
 };
 
-export interface ClusterPreviewWithFile {
-    clusterSize: number;
-    faces: ClusterPreviewFaceWithFile[];
-}
-
-export type ClusterPreviewFaceWithFile = ClusterPreviewFace & {
-    enteFile: EnteFile;
-};
-
-export interface ClusterDebugPageContents {
-    totalFaceCount: number;
-    filteredFaceCount: number;
-    clusteredFaceCount: number;
-    unclusteredFaceCount: number;
-    timeTakenMs: number;
-    clusters: FaceCluster[];
-    clusterPreviewsWithFile: ClusterPreviewWithFile[];
-    unclusteredFacesWithFile: {
-        face: ClusterFace;
-        enteFile: EnteFile;
-    }[];
-}
-
 export const wipCluster = async () => {
     if (!(await wipClusterEnable())) throw new Error("Not implemented");
 
     _state.peopleLocal = [];
     triggerStatusUpdate();
 
-    const {
-        localFileByID,
-        clusterPreviews,
-        clusters,
-        cgroups,
-        unclusteredFaces,
-        ...rest
-    } = await worker().then((w) => w.clusterFaces());
-
-    const fileForFace = ({ faceID }: { faceID: string }) =>
-        ensure(localFileByID.get(ensure(fileIDFromFaceID(faceID))));
-
-    const clusterPreviewsWithFile = clusterPreviews.map(
-        ({ clusterSize, faces }) => ({
-            clusterSize,
-            faces: faces.map(({ face, ...rest }) => ({
-                face,
-                enteFile: fileForFace(face),
-                ...rest,
-            })),
-        }),
+    const { localFileByID, clusters, cgroups } = await worker().then((w) =>
+        w.clusterFaces(),
     );
-
-    const unclusteredFacesWithFile = unclusteredFaces.map((face) => ({
-        face,
-        enteFile: fileForFace(face),
-    }));
 
     const clusterByID = new Map(clusters.map((c) => [c.id, c]));
 
@@ -452,13 +400,6 @@ export const wipCluster = async () => {
     _state.peopleLocal = people;
     triggerStatusUpdate();
     updatePeopleSnapshot();
-
-    return {
-        clusters,
-        clusterPreviewsWithFile,
-        unclusteredFacesWithFile,
-        ...rest,
-    };
 };
 
 export type MLStatus =
