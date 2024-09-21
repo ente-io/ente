@@ -71,7 +71,8 @@ enum CollectionActions {
     CONFIRM_LEAVE_SHARED_ALBUM,
     LEAVE_SHARED_ALBUM,
     SHOW_SORT_ORDER_MENU,
-    UPDATE_COLLECTION_SORT_ORDER,
+    UPDATE_COLLECTION_SORT_ORDER_ASC,
+    UPDATE_COLLECTION_SORT_ORDER_DESC,
     PIN,
     UNPIN,
     HIDE,
@@ -153,9 +154,13 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
             case CollectionActions.SHOW_SORT_ORDER_MENU:
                 callback = openCollectionSortOrderMenu;
                 break;
-            case CollectionActions.UPDATE_COLLECTION_SORT_ORDER:
-                callback = updateCollectionSortOrder;
+            case CollectionActions.UPDATE_COLLECTION_SORT_ORDER_ASC:
+                callback = updateCollectionSortOrderAsc;
                 break;
+            case CollectionActions.UPDATE_COLLECTION_SORT_ORDER_DESC:
+                callback = updateCollectionSortOrderDesc;
+                break;
+
             case CollectionActions.PIN:
                 callback = pinAlbum;
                 break;
@@ -329,8 +334,12 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         });
     };
 
-    const updateCollectionSortOrder = async ({ asc }: { asc: boolean }) => {
-        await changeCollectionSortOrder(activeCollection, asc);
+    const updateCollectionSortOrderAsc = async () => {
+        await changeCollectionSortOrder(activeCollection, true);
+    };
+
+    const updateCollectionSortOrderDesc = async () => {
+        await changeCollectionSortOrder(activeCollection, false);
     };
 
     const pinAlbum = async () => {
@@ -419,7 +428,7 @@ interface QuickOptionsProps {
     handleCollectionAction: (
         action: CollectionActions,
         loader?: boolean,
-    ) => (...args: any[]) => Promise<void>;
+    ) => () => Promise<void>;
     collectionSummaryType: CollectionSummaryType;
     isDownloadInProgress: boolean;
 }
@@ -463,7 +472,7 @@ interface EmptyTrashQuickOptionProps {
     handleCollectionAction: (
         action: CollectionActions,
         loader?: boolean,
-    ) => (...args: any[]) => Promise<void>;
+    ) => () => Promise<void>;
 }
 
 const EmptyTrashQuickOption: React.FC<EmptyTrashQuickOptionProps> = ({
@@ -501,7 +510,7 @@ interface DownloadQuickOptionProps {
     handleCollectionAction: (
         action: CollectionActions,
         loader?: boolean,
-    ) => (...args: any[]) => Promise<void>;
+    ) => () => Promise<void>;
     collectionSummaryType: CollectionSummaryType;
 }
 
@@ -545,7 +554,7 @@ interface ShareQuickOptionProps {
     handleCollectionAction: (
         action: CollectionActions,
         loader?: boolean,
-    ) => (...args: any[]) => Promise<void>;
+    ) => () => Promise<void>;
     collectionSummaryType: CollectionSummaryType;
 }
 
@@ -579,7 +588,7 @@ interface TrashCollectionOptionProps {
     handleCollectionAction: (
         action: CollectionActions,
         loader?: boolean,
-    ) => (...args: any[]) => Promise<void>;
+    ) => () => Promise<void>;
 }
 
 export const TrashCollectionOption: React.FC<TrashCollectionOptionProps> = ({
@@ -601,7 +610,7 @@ interface OnlyDownloadCollectionOptionProps {
     handleCollectionAction: (
         action: CollectionActions,
         loader?: boolean,
-    ) => (...args: any[]) => Promise<void>;
+    ) => () => Promise<void>;
     downloadOptionText?: string;
     isDownloadInProgress?: boolean;
 }
@@ -632,7 +641,7 @@ interface SharedCollectionOptionProps {
     handleCollectionAction: (
         action: CollectionActions,
         loader?: boolean,
-    ) => (...args: any[]) => Promise<void>;
+    ) => () => Promise<void>;
 }
 
 const SharedCollectionOptions: React.FC<SharedCollectionOptionProps> = ({
@@ -683,7 +692,7 @@ interface AlbumCollectionOptionsProps {
     handleCollectionAction: (
         action: CollectionActions,
         loader?: boolean,
-    ) => (...args: any[]) => Promise<void>;
+    ) => () => Promise<void>;
 }
 
 const AlbumCollectionOptions: React.FC<AlbumCollectionOptionsProps> = ({
@@ -801,7 +810,7 @@ interface CollectionSortOrderMenuProps {
     handleCollectionAction: (
         action: CollectionActions,
         loader?: boolean,
-    ) => (...args: any[]) => Promise<void>;
+    ) => () => Promise<void>;
     overFlowMenuIconRef: React.MutableRefObject<SVGSVGElement>;
     collectionSortOrderMenuView: boolean;
     closeCollectionSortOrderMenu: () => void;
@@ -815,16 +824,16 @@ const CollectionSortOrderMenu: React.FC<CollectionSortOrderMenuProps> = ({
 }) => {
     const setCollectionSortOrderToAsc = () => {
         closeCollectionSortOrderMenu();
-        handleCollectionAction(CollectionActions.UPDATE_COLLECTION_SORT_ORDER)({
-            asc: true,
-        });
+        handleCollectionAction(
+            CollectionActions.UPDATE_COLLECTION_SORT_ORDER_ASC,
+        )();
     };
 
     const setCollectionSortOrderToDesc = () => {
         closeCollectionSortOrderMenu();
-        handleCollectionAction(CollectionActions.UPDATE_COLLECTION_SORT_ORDER)({
-            asc: false,
-        });
+        handleCollectionAction(
+            CollectionActions.UPDATE_COLLECTION_SORT_ORDER_DESC,
+        )();
     };
     return (
         <StyledMenu
