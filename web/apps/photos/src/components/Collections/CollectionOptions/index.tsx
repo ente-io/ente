@@ -351,18 +351,20 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
             title: t("EMPTY_TRASH_TITLE"),
             content: t("EMPTY_TRASH_MESSAGE"),
             proceed: {
-                action: handleCollectionAction(CollectionActions.EMPTY_TRASH),
+                action: emptyTrash,
                 text: t("EMPTY_TRASH"),
                 variant: "critical",
             },
             close: { text: t("cancel") },
         });
 
-    const emptyTrash = async () => {
+    const _emptyTrash = async () => {
         await TrashService.emptyTrash();
         await TrashService.clearLocalTrash();
         setActiveCollectionID(ALL_SECTION);
     };
+
+    const emptyTrash = () => void wrapErrorAndSyncLoading(_emptyTrash);
 
     const _downloadCollection = () => {
         if (isActiveCollectionDownloadInProgress()) return;
@@ -406,9 +408,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
             content: t("LEAVE_SHARED_ALBUM_MESSAGE"),
             proceed: {
                 text: t("LEAVE_SHARED_ALBUM"),
-                action: handleCollectionAction(
-                    CollectionActions.LEAVE_SHARED_ALBUM,
-                ),
+                action: leaveSharedAlbum2,
                 variant: "critical",
             },
             close: {
@@ -416,6 +416,14 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
             },
         });
     };
+
+    const _leaveSharedAlbum = async () => {
+        await CollectionAPI.leaveSharedAlbum(activeCollection.id);
+        setActiveCollectionID(ALL_SECTION);
+    };
+
+    const leaveSharedAlbum2 = () =>
+        void wrapErrorAndSyncLoading(_leaveSharedAlbum);
 
     const showCastAlbumDialog = () => {
         setShowAlbumCastDialog(true);
