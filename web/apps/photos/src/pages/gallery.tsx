@@ -4,6 +4,10 @@ import { useIsMobileWidth } from "@/base/hooks";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
 import {
+    GalleryItemsHeaderAdapter,
+    GalleryItemsSummary,
+} from "@/new/photos/components/Gallery/ListHeader";
+import {
     SearchBar,
     type SearchBarProps,
 } from "@/new/photos/components/SearchBar";
@@ -14,12 +18,14 @@ import {
     getLocalFiles,
     getLocalTrashedFiles,
 } from "@/new/photos/services/files";
+import { peopleSnapshot, peopleSubscribe } from "@/new/photos/services/ml";
 import type { Person } from "@/new/photos/services/ml/cgroups";
 import {
     filterSearchableFiles,
     setSearchCollectionsAndFiles,
 } from "@/new/photos/services/search";
 import type { SearchOption } from "@/new/photos/services/search/types";
+import type { CollectionSummaries } from "@/new/photos/types/collection";
 import { EnteFile } from "@/new/photos/types/file";
 import { mergeMetadata } from "@/new/photos/utils/file";
 import {
@@ -53,15 +59,13 @@ import MenuIcon from "@mui/icons-material/Menu";
 import type { ButtonProps, IconButtonProps } from "@mui/material";
 import { Box, Button, IconButton, Typography, styled } from "@mui/material";
 import AuthenticateUserModal from "components/AuthenticateUserModal";
-import Collections from "components/Collections";
-import { CollectionInfo } from "components/Collections/CollectionInfo";
+import { Collections, type GalleryBarMode } from "components/Collections";
 import CollectionNamer, {
     CollectionNamerAttributes,
 } from "components/Collections/CollectionNamer";
 import CollectionSelector, {
     CollectionSelectorAttributes,
 } from "components/Collections/CollectionSelector";
-import { CollectionInfoBarWrapper } from "components/Collections/styledComponents";
 import ExportModal from "components/ExportModal";
 import {
     FilesDownloadProgress,
@@ -91,6 +95,7 @@ import {
     useMemo,
     useRef,
     useState,
+    useSyncExternalStore,
 } from "react";
 import { useDropzone } from "react-dropzone";
 import {
@@ -109,7 +114,6 @@ import { preFileInfoSync, sync } from "services/sync";
 import { syncTrash } from "services/trashService";
 import uploadManager from "services/upload/uploadManager";
 import { isTokenValid } from "services/userService";
-import { CollectionSummaries, CollectionSummaryType } from "types/collection";
 import {
     GalleryContextType,
     SelectedState,
@@ -158,9 +162,9 @@ export const DeadCenter = styled("div")`
 const defaultGalleryContext: GalleryContextType = {
     showPlanSelectorModal: () => null,
     setActiveCollectionID: () => null,
+    onShowCollection: () => null,
     syncWithRemote: () => null,
     setBlockingLoad: () => null,
-    setIsInSearchMode: () => null,
     photoListHeader: null,
     openExportModal: () => null,
     authenticateUser: () => null,
@@ -245,12 +249,6 @@ export default function Gallery() {
         accept: ".zip",
     });
 
-    // If we're in "search mode". See: [Note: "search mode"].
-    const [isInSearchMode, setIsInSearchMode] = useState(false);
-    // The option selected by the user selected from the search bar dropdown.
-    const [selectedSearchOption, setSelectedSearchOption] = useState<
-        SearchOption | undefined
-    >();
     const syncInProgress = useRef(true);
     const syncInterval = useRef<NodeJS.Timeout>();
     const resync = useRef<{ force: boolean; silent: boolean }>();
@@ -314,18 +312,21 @@ export default function Gallery() {
     const closeAuthenticateUserModal = () =>
         setAuthenticateUserModalView(false);
 
-    // `true` if we're displaying the hidden section.
-    //
-    // - The search bar is replaced by a navbar with a back button.
-    // - The collections bar shows only the hidden collections.
-    // - The gallery itself shows hidden items.
-    const [isInHiddenSection, setIsInHiddenSection] = useState(false);
+    // True if we're in "search mode". See: [Note: "search mode"].
+    const [isInSearchMode, setIsInSearchMode] = useState(false);
 
-    // If set, then display files belonging to this person.
-    //
-    // - The collections bar is replaced with a people bar.
-    // - The gallery itself shows files which contain this person.
-    const [person, setPerson] = useState<Person | undefined>();
+    // The option selected by the user selected from the search bar dropdown.
+    const [selectedSearchOption, setSelectedSearchOption] = useState<
+        SearchOption | undefined
+    >();
+
+    // If visible, what should the gallery bar show.
+    const [barMode, setBarMode] = useState<GalleryBarMode>("albums");
+
+    // The currently selected person in the gallery bar (if any).
+    const [activePerson, setActivePerson] = useState<Person | undefined>();
+
+    const people = useSyncExternalStore(peopleSubscribe, peopleSnapshot);
 
     const [
         filesDownloadProgressAttributesList,
@@ -539,17 +540,21 @@ export default function Gallery() {
             filteredFiles = await filterSearchableFiles(
                 selectedSearchOption.suggestion,
             );
-        } else if (person) {
-            const pfSet = new Set(person.fileIDs);
+        } else if (activePerson) {
+            const pfSet = new Set(activePerson.fileIDs);
             filteredFiles = files.filter((f) => pfSet.has(f.id));
         } else {
+            const baseFiles = barMode == "hidden-albums" ? hiddenFiles : files;
             filteredFiles = getUniqueFiles(
-                (isInHiddenSection ? hiddenFiles : files).filter((item) => {
+                baseFiles.filter((item) => {
                     if (tempDeletedFileIds?.has(item.id)) {
                         return false;
                     }
 
-                    if (!isInHiddenSection && tempHiddenFileIds?.has(item.id)) {
+                    if (
+                        barMode != "hidden-albums" &&
+                        tempHiddenFileIds?.has(item.id)
+                    ) {
                         return false;
                     }
 
@@ -608,6 +613,7 @@ export default function Gallery() {
             return filteredFiles;
         }
     }, [
+        barMode,
         files,
         trashedFiles,
         hiddenFiles,
@@ -617,7 +623,7 @@ export default function Gallery() {
         selectedSearchOption,
         activeCollectionID,
         archivedCollections,
-        person,
+        activePerson,
     ]);
 
     const selectAll = (e: KeyboardEvent) => {
@@ -1005,27 +1011,36 @@ export default function Gallery() {
         setExportModalView(false);
     };
 
+    const handleShowCollection = (collectionID: number) => {
+        setBarMode("albums");
+        setActiveCollectionID(collectionID);
+        setIsInSearchMode(false);
+    };
+
+    const handleShowSearchInput = () => setIsInSearchMode(true);
+
     const openHiddenSection: GalleryContextType["openHiddenSection"] = (
         callback,
     ) => {
         authenticateUser(() => {
-            setIsInHiddenSection(true);
+            setBarMode("hidden-albums");
             setActiveCollectionID(HIDDEN_ITEMS_SECTION);
             callback?.();
         });
     };
 
     const exitHiddenSection = () => {
-        setIsInHiddenSection(false);
+        setBarMode("albums");
         setActiveCollectionID(ALL_SECTION);
     };
 
-    const handleSelectPeople = () => {
-        console.log("onSelectPeople");
+    const handleSelectPerson = (person: Person) => {
+        setActivePerson(person);
+        setBarMode("people");
     };
 
-    if (person) {
-        log.debug(() => ["person", person]);
+    if (activePerson) {
+        log.debug(() => ["person", activePerson]);
     }
 
     return (
@@ -1034,9 +1049,9 @@ export default function Gallery() {
                 ...defaultGalleryContext,
                 showPlanSelectorModal,
                 setActiveCollectionID,
+                onShowCollection: handleShowCollection,
                 syncWithRemote,
                 setBlockingLoad,
-                setIsInSearchMode,
                 photoListHeader,
                 openExportModal,
                 authenticateUser,
@@ -1099,7 +1114,7 @@ export default function Gallery() {
                 <NavbarBase
                     sx={{ background: "transparent", position: "absolute" }}
                 >
-                    {isInHiddenSection ? (
+                    {barMode == "hidden-albums" ? (
                         <HiddenSectionNavbarContents
                             onBack={exitHiddenSection}
                         />
@@ -1108,30 +1123,31 @@ export default function Gallery() {
                             openSidebar={openSidebar}
                             openUploader={openUploader}
                             isInSearchMode={isInSearchMode}
-                            setIsInSearchMode={setIsInSearchMode}
+                            onShowSearchInput={handleShowSearchInput}
                             onSelectSearchOption={handleSelectSearchOption}
-                            onSelectPeople={handleSelectPeople}
-                            onSelectPerson={setPerson}
+                            onSelectPerson={handleSelectPerson}
                         />
                     )}
                 </NavbarBase>
 
                 <Collections
-                    activeCollection={activeCollection}
-                    isInSearchMode={isInSearchMode}
-                    isInHiddenSection={isInHiddenSection}
-                    activeCollectionID={activeCollectionID}
-                    setActiveCollectionID={setActiveCollectionID}
-                    collectionSummaries={collectionSummaries}
-                    hiddenCollectionSummaries={hiddenCollectionSummaries}
-                    setCollectionNamerAttributes={setCollectionNamerAttributes}
-                    setPhotoListHeader={setPhotoListHeader}
-                    setFilesDownloadProgressAttributesCreator={
-                        setFilesDownloadProgressAttributesCreator
-                    }
-                    filesDownloadProgressAttributesList={
-                        filesDownloadProgressAttributesList
-                    }
+                    shouldHide={isInSearchMode}
+                    mode={barMode}
+                    setMode={setBarMode}
+                    {...{
+                        collectionSummaries,
+                        activeCollection,
+                        activeCollectionID,
+                        setActiveCollectionID,
+                        hiddenCollectionSummaries,
+                        people,
+                        activePerson,
+                        onSelectPerson: handleSelectPerson,
+                        setCollectionNamerAttributes,
+                        setPhotoListHeader,
+                        setFilesDownloadProgressAttributesCreator,
+                        filesDownloadProgressAttributesList,
+                    }}
                 />
 
                 <Uploader
@@ -1206,7 +1222,7 @@ export default function Gallery() {
                         showAppDownloadBanner={
                             files.length < 30 && !isInSearchMode
                         }
-                        isInHiddenSection={isInHiddenSection}
+                        isInHiddenSection={barMode == "hidden-albums"}
                         setFilesDownloadProgressAttributesCreator={
                             setFilesDownloadProgressAttributesCreator
                         }
@@ -1234,23 +1250,20 @@ export default function Gallery() {
                             )}
                             isFavoriteCollection={
                                 collectionSummaries.get(activeCollectionID)
-                                    ?.type === CollectionSummaryType.favorites
+                                    ?.type == "favorites"
                             }
                             isUncategorizedCollection={
                                 collectionSummaries.get(activeCollectionID)
-                                    ?.type ===
-                                CollectionSummaryType.uncategorized
+                                    ?.type == "uncategorized"
                             }
                             isIncomingSharedCollection={
                                 collectionSummaries.get(activeCollectionID)
-                                    ?.type ===
-                                    CollectionSummaryType.incomingShareCollaborator ||
+                                    ?.type == "incomingShareCollaborator" ||
                                 collectionSummaries.get(activeCollectionID)
-                                    ?.type ===
-                                    CollectionSummaryType.incomingShareViewer
+                                    ?.type == "incomingShareViewer"
                             }
                             isInSearchMode={isInSearchMode}
-                            isInHiddenSection={isInHiddenSection}
+                            isInHiddenSection={barMode == "hidden-albums"}
                         />
                     )}
                 <ExportModal
@@ -1364,13 +1377,13 @@ interface SearchResultsHeaderProps {
 const SearchResultsHeader: React.FC<SearchResultsHeaderProps> = ({
     selectedOption,
 }) => (
-    <CollectionInfoBarWrapper>
+    <GalleryItemsHeaderAdapter>
         <Typography color="text.muted" variant="large">
             {t("search_results")}
         </Typography>
-        <CollectionInfo
+        <GalleryItemsSummary
             name={selectedOption.suggestion.label}
             fileCount={selectedOption.fileCount}
         />
-    </CollectionInfoBarWrapper>
+    </GalleryItemsHeaderAdapter>
 );

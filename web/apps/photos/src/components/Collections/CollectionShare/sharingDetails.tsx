@@ -13,7 +13,6 @@ import Avatar from "components/pages/gallery/Avatar";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
 import { useContext } from "react";
-import { CollectionSummaryType } from "types/collection";
 
 export default function SharingDetails({ collection, type }) {
     const galleryContext = useContext(GalleryContext);
@@ -52,7 +51,7 @@ export default function SharingDetails({ collection, type }) {
                     />
                 </MenuItemGroup>
             </Stack>
-            {type === CollectionSummaryType.incomingShareCollaborator &&
+            {type == "incomingShareCollaborator" &&
                 collaborators?.length > 0 && (
                     <Stack>
                         <MenuSectionTitle

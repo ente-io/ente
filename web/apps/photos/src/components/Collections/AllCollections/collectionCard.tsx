@@ -1,6 +1,6 @@
+import type { CollectionSummary } from "@/new/photos/types/collection";
 import { Typography } from "@mui/material";
 import { t } from "i18next";
-import { CollectionSummary } from "types/collection";
 import CollectionCard from "../CollectionCard";
 import { AllCollectionTile, AllCollectionTileText } from "../styledComponents";
 

@@ -1,4 +1,6 @@
 import { useIsMobileWidth } from "@/base/hooks";
+import type { Person } from "@/new/photos/services/ml/cgroups";
+import type { CollectionSummary } from "@/new/photos/types/collection";
 import {
     IconButtonWithBG,
     Overlay,
@@ -12,7 +14,7 @@ import LinkIcon from "@mui/icons-material/Link";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import PeopleIcon from "@mui/icons-material/People";
 import PushPin from "@mui/icons-material/PushPin";
-import { Box, IconButton, Typography, styled } from "@mui/material";
+import { Box, IconButton, Stack, Typography, styled } from "@mui/material";
 import Tooltip from "@mui/material/Tooltip";
 import { CollectionTile } from "components/Collections/styledComponents";
 import {
@@ -24,16 +26,24 @@ import memoize from "memoize-one";
 import React, { useEffect, useRef, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeList, ListChildComponentProps, areEqual } from "react-window";
-import { CollectionSummary, CollectionSummaryType } from "types/collection";
 import { ALL_SECTION, COLLECTION_LIST_SORT_BY } from "utils/collection";
+import type { GalleryBarMode } from ".";
 import CollectionCard from "./CollectionCard";
 import CollectionListSortBy from "./CollectionListSortBy";
 
-interface CollectionListBarProps {
+export interface CollectionListBarProps {
     /**
-     * `true` if we're currently in the hidden section.
+     * What are we displaying currently.
      */
-    isInHiddenSection: boolean;
+    mode: GalleryBarMode;
+    /**
+     * Called when the user switches to a different view.
+     */
+    setMode: (mode: GalleryBarMode) => void;
+    /**
+     * Massaged data about the collections that should be shown in the bar.
+     */
+    collectionSummaries: CollectionSummary[];
     /**
      * The ID of the currently active collection (if any)
      */
@@ -57,19 +67,30 @@ interface CollectionListBarProps {
      */
     setCollectionListSortBy: (v: COLLECTION_LIST_SORT_BY) => void;
     /**
-     * Massaged data about the collections that should be shown in the bar.
+     * The list of people that should be shown in the bar.
      */
-    collectionSummaries: CollectionSummary[];
+    people: Person[];
+    /**
+     * The currently selected person (if any).
+     */
+    activePerson: Person | undefined;
+    /**
+     * Called when the user selects the given person in the bar.
+     */
+    onSelectPerson: (person: Person) => void;
 }
 
 export const CollectionListBar: React.FC<CollectionListBarProps> = ({
-    isInHiddenSection,
+    mode,
+    collectionSummaries,
     activeCollectionID,
     setActiveCollectionID,
     onShowAllCollections,
     collectionListSortBy,
     setCollectionListSortBy,
-    collectionSummaries,
+    // people,
+    // activePerson,
+    // onSelectPerson
 }) => {
     const windowSize = useWindowSize();
     const isMobile = useIsMobileWidth();
@@ -148,9 +169,24 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
     return (
         <CollectionListBarWrapper>
             <SpaceBetweenFlex mb={1}>
-                <Typography>
-                    {isInHiddenSection ? t("HIDDEN_ALBUMS") : t("ALBUMS")}
-                </Typography>
+                <Stack direction="row" gap={1}>
+                    <Typography
+                        color={mode == "people" ? "text.muted" : "text.base"}
+                    >
+                        {mode == "hidden-albums"
+                            ? t("HIDDEN_ALBUMS")
+                            : t("ALBUMS")}
+                    </Typography>
+                    {process.env.NEXT_PUBLIC_ENTE_WIP_CL && (
+                        <Typography
+                            color={
+                                mode == "people" ? "text.base" : "text.muted"
+                            }
+                        >
+                            {t("people")}
+                        </Typography>
+                    )}
+                </Stack>
                 {isMobile && (
                     <Box display="flex" alignItems={"center"} gap={1}>
                         <CollectionListSortBy
@@ -227,6 +263,25 @@ const CollectionListBarWrapper = styled(Box)`
     margin-bottom: 16px;
     border-bottom: 1px solid ${({ theme }) => theme.palette.divider};
 `;
+
+// // TODO-Cluster
+// const PeopleHeaderButton = styled("button")(
+//     ({ theme }) => `
+//     /* Reset some button defaults that are affecting us */
+//     background: transparent;
+//     border: 0;
+//     padding: 0;
+//     font: inherit;
+//     /* Button should do this for us, but it isn't working inside the select */
+//     cursor: pointer;
+//     /* The color for the chevron */
+//     color: ${theme.colors.stroke.muted};
+//     /* Hover indication */
+//     && :hover {
+//         color: ${theme.colors.stroke.base};
+//     }
+// `,
+// );
 
 interface ItemData {
     collectionSummaries: CollectionSummary[];
@@ -389,26 +444,21 @@ function CollectionCardText({ collectionName }) {
 function CollectionCardIcon({ collectionType }) {
     return (
         <CollectionBarTileIcon>
-            {collectionType === CollectionSummaryType.favorites && <Favorite />}
-            {collectionType === CollectionSummaryType.archived && (
+            {collectionType == "favorites" && <Favorite />}
+            {collectionType == "archived" && (
                 <ArchiveIcon
                     sx={(theme) => ({
                         color: theme.colors.white.muted,
                     })}
                 />
             )}
-            {collectionType === CollectionSummaryType.outgoingShare && (
+            {collectionType == "outgoingShare" && <PeopleIcon />}
+            {(collectionType == "incomingShareViewer" ||
+                collectionType == "incomingShareCollaborator") && (
                 <PeopleIcon />
             )}
-            {(collectionType === CollectionSummaryType.incomingShareViewer ||
-                collectionType ===
-                    CollectionSummaryType.incomingShareCollaborator) && (
-                <PeopleIcon />
-            )}
-            {collectionType === CollectionSummaryType.sharedOnlyViaLink && (
-                <LinkIcon />
-            )}
-            {collectionType === CollectionSummaryType.pinned && <PushPin />}
+            {collectionType == "sharedOnlyViaLink" && <LinkIcon />}
+            {collectionType == "pinned" && <PushPin />}
         </CollectionBarTileIcon>
     );
 }

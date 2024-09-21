@@ -1,4 +1,6 @@
 import type { Collection } from "@/media/collection";
+import type { Person } from "@/new/photos/services/ml/cgroups";
+import type { CollectionSummaries } from "@/new/photos/types/collection";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import { LS_KEYS } from "@ente/shared/storage/localStorage";
 import AllCollections from "components/Collections/AllCollections";
@@ -9,7 +11,6 @@ import CollectionShare from "components/Collections/CollectionShare";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { sortCollectionSummaries } from "services/collectionService";
-import { CollectionSummaries } from "types/collection";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
 import {
     ALL_SECTION,
@@ -23,37 +24,50 @@ import {
     isFilesDownloadCancelled,
     isFilesDownloadCompleted,
 } from "../FilesDownloadProgress";
-import AlbumCastDialog from "./CollectionOptions/AlbumCastDialog";
+import AlbumCastDialog from "./AlbumCastDialog";
 
-interface Iprops {
+/**
+ * Specifies what the bar is displaying currently.
+ */
+export type GalleryBarMode = "albums" | "hidden-albums" | "people";
+
+interface CollectionsProps {
+    /** `true` if the bar should be hidden altogether. */
+    shouldHide: boolean;
+    /** otherwise show stuff that belongs to this mode. */
+    mode: GalleryBarMode;
+    setMode: (mode: GalleryBarMode) => void;
+    collectionSummaries: CollectionSummaries;
     activeCollection: Collection;
     activeCollectionID?: number;
     setActiveCollectionID: (id?: number) => void;
-    isInSearchMode: boolean;
-    isInHiddenSection: boolean;
-    collectionSummaries: CollectionSummaries;
     hiddenCollectionSummaries: CollectionSummaries;
+    people: Person[];
+    activePerson: Person | undefined;
+    onSelectPerson: (person: Person) => void;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
     setPhotoListHeader: (value: TimeStampListItem) => void;
     filesDownloadProgressAttributesList: FilesDownloadProgressAttributes[];
     setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
 }
 
-export default function Collections(props: Iprops) {
-    const {
-        activeCollection,
-        isInSearchMode,
-        isInHiddenSection,
-        activeCollectionID,
-        setActiveCollectionID,
-        collectionSummaries,
-        hiddenCollectionSummaries,
-        setCollectionNamerAttributes,
-        setPhotoListHeader,
-        filesDownloadProgressAttributesList,
-        setFilesDownloadProgressAttributesCreator,
-    } = props;
-
+export const Collections: React.FC<CollectionsProps> = ({
+    shouldHide,
+    mode,
+    setMode,
+    collectionSummaries,
+    activeCollection,
+    activeCollectionID,
+    setActiveCollectionID,
+    hiddenCollectionSummaries,
+    people,
+    activePerson,
+    onSelectPerson,
+    setCollectionNamerAttributes,
+    setPhotoListHeader,
+    filesDownloadProgressAttributesList,
+    setFilesDownloadProgressAttributesCreator,
+}) => {
     const [allCollectionView, setAllCollectionView] = useState(false);
     const [collectionShareModalView, setCollectionShareModalView] =
         useState(false);
@@ -68,16 +82,18 @@ export default function Collections(props: Iprops) {
 
     const toShowCollectionSummaries = useMemo(
         () =>
-            isInHiddenSection ? hiddenCollectionSummaries : collectionSummaries,
-        [isInHiddenSection, hiddenCollectionSummaries, collectionSummaries],
+            mode == "hidden-albums"
+                ? hiddenCollectionSummaries
+                : collectionSummaries,
+        [mode, hiddenCollectionSummaries, collectionSummaries],
     );
 
     const shouldBeHidden = useMemo(
         () =>
-            isInSearchMode ||
+            shouldHide ||
             (!hasNonSystemCollections(toShowCollectionSummaries) &&
                 activeCollectionID === ALL_SECTION),
-        [isInSearchMode, toShowCollectionSummaries, activeCollectionID],
+        [shouldHide, toShowCollectionSummaries, activeCollectionID],
     );
 
     const sortedCollectionSummaries = useMemo(
@@ -101,9 +117,8 @@ export default function Collections(props: Iprops) {
     }, [activeCollectionID, filesDownloadProgressAttributesList]);
 
     useEffect(() => {
-        if (isInSearchMode) {
-            return;
-        }
+        if (shouldHide) return;
+
         setPhotoListHeader({
             item: (
                 <CollectionInfoWithOptions
@@ -129,10 +144,13 @@ export default function Collections(props: Iprops) {
             height: 68,
         });
     }, [
+        shouldHide,
+        mode,
         toShowCollectionSummaries,
         activeCollectionID,
-        isInSearchMode,
         isActiveCollectionDownloadInProgress,
+        people,
+        activePerson,
     ]);
 
     if (shouldBeHidden) {
@@ -147,12 +165,18 @@ export default function Collections(props: Iprops) {
     return (
         <>
             <CollectionListBar
-                isInHiddenSection={isInHiddenSection}
-                activeCollectionID={activeCollectionID}
-                setActiveCollectionID={setActiveCollectionID}
+                {...{
+                    mode,
+                    setMode,
+                    activeCollectionID,
+                    setActiveCollectionID,
+                    people,
+                    activePerson,
+                    onSelectPerson,
+                    collectionListSortBy,
+                    setCollectionListSortBy,
+                }}
                 onShowAllCollections={openAllCollections}
-                collectionListSortBy={collectionListSortBy}
-                setCollectionListSortBy={setCollectionListSortBy}
                 collectionSummaries={sortedCollectionSummaries.filter((x) =>
                     shouldBeShownOnCollectionBar(x.type),
                 )}
@@ -167,7 +191,7 @@ export default function Collections(props: Iprops) {
                 setActiveCollectionID={setActiveCollectionID}
                 setCollectionListSortBy={setCollectionListSortBy}
                 collectionListSortBy={collectionListSortBy}
-                isInHiddenSection={isInHiddenSection}
+                isInHiddenSection={mode == "hidden-albums"}
             />
 
             <CollectionShare
@@ -185,4 +209,4 @@ export default function Collections(props: Iprops) {
             />
         </>
     );
-}
+};

@@ -115,8 +115,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     }
 
     const onCollectionChipClick = (collectionID) => {
-        galleryContext.setActiveCollectionID(collectionID);
-        galleryContext.setIsInSearchMode(false);
+        galleryContext.onShowCollection(collectionID);
         closePhotoViewer();
     };
 
