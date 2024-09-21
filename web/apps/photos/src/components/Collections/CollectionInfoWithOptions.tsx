@@ -210,12 +210,12 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
                 />
             ),
             proceed: {
-                text: t("DELETE_PHOTOS"),
+                text: t("delete_photos"),
                 action: deleteCollectionAlongWithFiles,
                 variant: "critical",
             },
             secondary: {
-                text: t("KEEP_PHOTOS"),
+                text: t("keep_photos"),
                 action: deleteCollectionButKeepFiles,
                 variant: "primary",
             },
