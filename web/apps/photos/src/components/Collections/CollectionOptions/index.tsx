@@ -396,9 +396,9 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     const _unarchiveAlbum = () =>
         changeCollectionVisibility(activeCollection, ItemVisibility.visible);
 
-    const archiveAlbum = () => wrapErrorAndSyncLoading(_archiveAlbum);
+    const archiveAlbum = () => void wrapErrorAndSyncLoading(_archiveAlbum);
 
-    const unarchiveAlbum = () => wrapErrorAndSyncLoading(_unarchiveAlbum);
+    const unarchiveAlbum = () => void wrapErrorAndSyncLoading(_unarchiveAlbum);
 
     const confirmLeaveSharedAlbum = () => {
         setDialogMessage({
@@ -499,6 +499,9 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                         isArchived={isArchivedCollection(activeCollection)}
                         isHidden={isHiddenCollection(activeCollection)}
                         isPinned={isPinnedCollection(activeCollection)}
+                        onArchiveClick={archiveAlbum}
+                        onUnarchiveClick={unarchiveAlbum}
+                        onCastClick={showCastAlbumDialog}
                         handleCollectionAction={handleCollectionAction}
                     />
                 )}
@@ -720,6 +723,9 @@ interface AlbumCollectionOptionsProps {
     isArchived: boolean;
     isPinned: boolean;
     isHidden: boolean;
+    onArchiveClick: () => void;
+    onUnarchiveClick: () => void;
+    onCastClick: () => void;
     handleCollectionAction: (
         action: CollectionActions,
         loader?: boolean,
@@ -730,6 +736,9 @@ const AlbumCollectionOptions: React.FC<AlbumCollectionOptionsProps> = ({
     isArchived,
     isPinned,
     isHidden,
+    onArchiveClick,
+    onUnarchiveClick,
+    onCastClick,
     handleCollectionAction,
 }) => (
     <>
@@ -770,18 +779,14 @@ const AlbumCollectionOptions: React.FC<AlbumCollectionOptionsProps> = ({
             <>
                 {isArchived ? (
                     <OverflowMenuOption
-                        onClick={handleCollectionAction(
-                            CollectionActions.UNARCHIVE,
-                        )}
+                        onClick={onUnarchiveClick}
                         startIcon={<Unarchive />}
                     >
                         {t("UNARCHIVE_COLLECTION")}
                     </OverflowMenuOption>
                 ) : (
                     <OverflowMenuOption
-                        onClick={handleCollectionAction(
-                            CollectionActions.ARCHIVE,
-                        )}
+                        onClick={onArchiveClick}
                         startIcon={<ArchiveOutlined />}
                     >
                         {t("ARCHIVE_COLLECTION")}
@@ -825,13 +830,7 @@ const AlbumCollectionOptions: React.FC<AlbumCollectionOptionsProps> = ({
         >
             {t("SHARE_COLLECTION")}
         </OverflowMenuOption>
-        <OverflowMenuOption
-            startIcon={<TvIcon />}
-            onClick={handleCollectionAction(
-                CollectionActions.SHOW_ALBUM_CAST_DIALOG,
-                false,
-            )}
-        >
+        <OverflowMenuOption startIcon={<TvIcon />} onClick={onCastClick}>
             {t("CAST_ALBUM_TO_TV")}
         </OverflowMenuOption>
     </>
