@@ -652,7 +652,7 @@ const AlbumCollectionOptions: React.FC<AlbumCollectionOptionsProps> = ({
             {t("rename_album")}
         </OverflowMenuOption>
         <OverflowMenuOption onClick={onSortClick} startIcon={<SortIcon />}>
-            {t("SORT_BY")}
+            {t("sort_by")}
         </OverflowMenuOption>
         {isPinned ? (
             <OverflowMenuOption
@@ -763,10 +763,10 @@ const CollectionSortOrderMenu: React.FC<CollectionSortOrderMenuProps> = ({
             }}
         >
             <OverflowMenuOption onClick={handleDescClick}>
-                {t("NEWEST_FIRST")}
+                {t("newest_first")}
             </OverflowMenuOption>
             <OverflowMenuOption onClick={handleAscClick}>
-                {t("OLDEST_FIRST")}
+                {t("oldest_first")}
             </OverflowMenuOption>
         </StyledMenu>
     );
