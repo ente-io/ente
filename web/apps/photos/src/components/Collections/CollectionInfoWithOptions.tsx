@@ -237,11 +237,11 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
 
     const confirmEmptyTrash = () =>
         setDialogMessage({
-            title: t("EMPTY_TRASH_TITLE"),
-            content: t("EMPTY_TRASH_MESSAGE"),
+            title: t("empty_trash_title"),
+            content: t("empty_trash_message"),
             proceed: {
                 action: emptyTrash,
-                text: t("EMPTY_TRASH"),
+                text: t("empty_trash"),
                 variant: "critical",
             },
             close: { text: t("cancel") },
@@ -459,7 +459,7 @@ const showEmptyTrashQuickOption = (type: CollectionSummaryType) =>
     type == "trash";
 
 const EmptyTrashQuickOption: React.FC<OptionProps> = ({ onClick }) => (
-    <Tooltip title={t("EMPTY_TRASH")}>
+    <Tooltip title={t("empty_trash")}>
         <IconButton onClick={onClick}>
             <DeleteOutlinedIcon />
         </IconButton>
@@ -546,7 +546,7 @@ const EmptyTrashOption: React.FC<OptionProps> = ({ onClick }) => (
         startIcon={<DeleteOutlinedIcon />}
         onClick={onClick}
     >
-        {t("EMPTY_TRASH")}
+        {t("empty_trash")}
     </OverflowMenuOption>
 );
 
