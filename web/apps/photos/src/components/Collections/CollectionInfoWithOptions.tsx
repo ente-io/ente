@@ -72,11 +72,5 @@ export default function CollectionInfoWithOptions({
     );
 }
 
-const OPTIONS_NOT_HAVING_COLLECTION_TYPES = new Set([
-    CollectionSummaryType.all,
-    CollectionSummaryType.archive,
-]);
-
-const shouldShowOptions = (type: CollectionSummaryType) => {
-    return !OPTIONS_NOT_HAVING_COLLECTION_TYPES.has(type);
-};
+const shouldShowOptions = (type: CollectionSummaryType) =>
+    type != "all" && type != "archive";
