@@ -133,7 +133,7 @@
     "delete_account_manually_message": "<p>请从您注册的电子邮件地址发送一封电子邮件到 <a>{{emailID}}</a></p><p>。您的请求将在72小时内处理。</p>",
     "LOGOUT_MESSAGE": "你确定要退出登录吗？",
     "CHANGE_EMAIL": "更换邮箱",
-    "OK": "确定",
+    "ok": "确定",
     "SUCCESS": "成功",
     "error": "错误",
     "MESSAGE": "消息",

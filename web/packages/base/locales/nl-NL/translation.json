@@ -133,7 +133,7 @@
     "delete_account_manually_message": "<p>Stuur een e-mail naar <a>{{emailID}}</a> vanaf uw geregistreerde e-mailadres.</p><p>Uw aanvraag wordt binnen 72 uur verwerkt.</p>",
     "LOGOUT_MESSAGE": "Weet u zeker dat u wilt uitloggen?",
     "CHANGE_EMAIL": "E-mail wijzigen",
-    "OK": "Oké",
+    "ok": "Oké",
     "SUCCESS": "Succes",
     "error": "Foutmelding",
     "MESSAGE": "Melding",

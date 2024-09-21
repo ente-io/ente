@@ -133,7 +133,7 @@
     "delete_account_manually_message": "<p>Prosimy wysłać wiadomość e-mail na <a>{{emailID}}</a> z Twojego zarejestrowanego adresu e-mail. </p><p>Twoja prośba zostanie przetworzona w ciągu 72 godzin.</p>",
     "LOGOUT_MESSAGE": "Czy na pewno chcesz się wylogować?",
     "CHANGE_EMAIL": "Zmień adres e-mail",
-    "OK": "OK",
+    "ok": "OK",
     "SUCCESS": "Sukces",
     "error": "Błąd",
     "MESSAGE": "Wiadomość",

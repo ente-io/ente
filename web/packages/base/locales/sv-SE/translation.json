@@ -133,7 +133,7 @@
     "delete_account_manually_message": "",
     "LOGOUT_MESSAGE": "Är du säker på att du vill logga ut?",
     "CHANGE_EMAIL": "",
-    "OK": "OK",
+    "ok": "OK",
     "SUCCESS": "",
     "error": "",
     "MESSAGE": "Meddelande",

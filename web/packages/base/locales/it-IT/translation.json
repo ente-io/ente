@@ -133,7 +133,7 @@
     "delete_account_manually_message": "<p>Per favore invia una email a <a>{{emailID}}</a> dal tuo indirizzo email registrato.</p><p>La tua richiesta verrà elaborata entro 72 ore.</p>",
     "LOGOUT_MESSAGE": "Sei sicuro di volerti disconnettere?",
     "CHANGE_EMAIL": "Cambia email",
-    "OK": "OK",
+    "ok": "OK",
     "SUCCESS": "Operazione riuscita",
     "error": "Errore",
     "MESSAGE": "Messaggio",

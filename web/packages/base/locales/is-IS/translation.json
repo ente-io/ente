@@ -133,7 +133,7 @@
     "delete_account_manually_message": "",
     "LOGOUT_MESSAGE": "Ertu viss um að þú viljir skrá þig út?",
     "CHANGE_EMAIL": "Breyta netfangi",
-    "OK": "Í lagi",
+    "ok": "Í lagi",
     "SUCCESS": "Tókst",
     "error": "Villa",
     "MESSAGE": "Skilaboð",

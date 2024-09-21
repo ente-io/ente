@@ -133,7 +133,7 @@
     "delete_account_manually_message": "<p>Por favor, envíe un email a <a>{{emailID}}</a> desde su dirección de correo electrónico registrada</p><p>Su solicitud será procesada en 72 horas.</p>",
     "LOGOUT_MESSAGE": "Seguro que quiere cerrar la sesión?",
     "CHANGE_EMAIL": "Cambiar email",
-    "OK": "OK",
+    "ok": "OK",
     "SUCCESS": "Completado",
     "error": "Error",
     "MESSAGE": "Mensaje",

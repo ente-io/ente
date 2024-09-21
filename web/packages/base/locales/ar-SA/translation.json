@@ -133,7 +133,7 @@
     "delete_account_manually_message": "",
     "LOGOUT_MESSAGE": "هل أنت متأكد من أنك تريد تسجيل الخروج؟",
     "CHANGE_EMAIL": "تغيير البريد الإلكتروني",
-    "OK": "حسنا",
+    "ok": "حسنا",
     "SUCCESS": "تم بنجاح",
     "error": "خطأ",
     "MESSAGE": "رسالة",

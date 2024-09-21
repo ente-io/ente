@@ -117,7 +117,7 @@ export default function DialogBoxV2({
                                     onClose();
                                 }}
                             >
-                                {attributes.close?.text ?? t("OK")}
+                                {attributes.close?.text ?? t("ok")}
                             </Button>
                         )}
                         {attributes.buttons &&

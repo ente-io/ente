@@ -133,7 +133,7 @@
     "delete_account_manually_message": "",
     "LOGOUT_MESSAGE": "Είστε σίγουροι ότι θέλετε να αποσυνδεθείτε;",
     "CHANGE_EMAIL": "Αλλαγή διεύθυνσης ηλ. ταχυδρομείου",
-    "OK": "ΟΚ",
+    "ok": "ΟΚ",
     "SUCCESS": "Επιτυχία",
     "error": "Σφάλμα",
     "MESSAGE": "Μήνυμα",
