@@ -203,9 +203,9 @@ export const Collections: React.FC<CollectionsProps> = ({
                 collection={activeCollection}
             />
             <AlbumCastDialog
-                currentCollection={activeCollection}
-                show={showAlbumCastDialog}
-                onHide={closeAlbumCastDialog}
+                open={showAlbumCastDialog}
+                onClose={closeAlbumCastDialog}
+                collection={activeCollection}
             />
         </>
     );

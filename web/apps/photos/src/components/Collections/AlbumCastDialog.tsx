@@ -17,19 +17,18 @@ import { Trans } from "react-i18next";
 import { v4 as uuidv4 } from "uuid";
 
 interface AlbumCastDialogProps {
-    show: boolean;
-    onHide: () => void;
-    currentCollection: Collection;
-}
-
-enum AlbumCastError {
-    TV_NOT_FOUND = "tv_not_found",
+    /** If `true`, the dialog is shown. */
+    open: boolean;
+    /** Callback fired when the dialog wants to be closed. */
+    onClose: () => void;
+    /** The collection that we want to cast. */
+    collection: Collection;
 }
 
 export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
-    show,
-    onHide,
-    currentCollection,
+    open,
+    onClose,
+    collection,
 }) => {
     const [view, setView] = useState<
         "choose" | "auto" | "pin" | "auto-cast-error"
@@ -50,46 +49,39 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
     ) => {
         try {
             await doCast(value.trim());
-            onHide();
+            onClose();
         } catch (e) {
-            const error = e as Error;
-            let fieldError: string;
-            switch (error.message) {
-                case AlbumCastError.TV_NOT_FOUND:
-                    fieldError = t("tv_not_found");
-                    break;
-                default:
-                    fieldError = t("UNKNOWN_ERROR");
-                    break;
+            if (e instanceof Error && e.message == "tv-not-found") {
+                setFieldError(t("tv_not_found"));
+            } else {
+                setFieldError(t("UNKNOWN_ERROR"));
             }
-
-            setFieldError(fieldError);
         }
     };
 
     const doCast = async (pin: string) => {
-        // does the TV exist? have they advertised their existence?
+        // Does the TV exist? have they advertised their existence?
         const tvPublicKeyB64 = await castGateway.getPublicKey(pin);
         if (!tvPublicKeyB64) {
-            throw new Error(AlbumCastError.TV_NOT_FOUND);
+            throw new Error("tv-not-found");
         }
 
-        // generate random uuid string
+        // Generate random id.
         const castToken = uuidv4();
 
-        // ok, they exist. let's give them the good stuff.
+        // Ok, they exist. let's give them the good stuff.
         const payload = JSON.stringify({
             castToken: castToken,
-            collectionID: currentCollection.id,
-            collectionKey: currentCollection.key,
+            collectionID: collection.id,
+            collectionKey: collection.key,
         });
         const encryptedPayload = await boxSeal(btoa(payload), tvPublicKeyB64);
 
-        // hey TV, we acknowlege you!
+        // Hey TV, we acknowlege you!
         await castGateway.publishCastPayload(
             pin,
             encryptedPayload,
-            currentCollection.id,
+            collection.id,
             castToken,
         );
     };
@@ -117,7 +109,7 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
                             doCast(code)
                                 .then(() => {
                                     setView("choose");
-                                    onHide();
+                                    onClose();
                                 })
                                 .catch((e) => {
                                     log.error("Error casting to TV", e);
@@ -127,7 +119,7 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
                     },
                 );
 
-                const collectionID = currentCollection.id;
+                const collectionID = collection.id;
                 session
                     .sendMessage("urn:x-cast:pair-request", { collectionID })
                     .then(() => {
@@ -138,14 +130,14 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
     }, [view]);
 
     useEffect(() => {
-        if (show) castGateway.revokeAllTokens();
-    }, [show]);
+        if (open) castGateway.revokeAllTokens();
+    }, [open]);
 
     return (
         <DialogBoxV2
             sx={{ zIndex: 1600 }}
-            open={show}
-            onClose={onHide}
+            open={open}
+            onClose={onClose}
             attributes={{
                 title: t("cast_album_to_tv"),
             }}
