@@ -90,34 +90,40 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
      * Return a new function by wrapping an async function in an error handler,
      * and syncing with remote on completion.
      */
-    const wrap = async (f: () => Promise<void>) => {
-        return async () => {
-            try {
-                await f();
-            } catch (e) {
-                handleError(e);
-            } finally {
-                syncWithRemote(false, true);
-            }
-        };
-    };
+    const wrap = useCallback(
+        async (f: () => Promise<void>) => {
+            return async () => {
+                try {
+                    await f();
+                } catch (e) {
+                    handleError(e);
+                } finally {
+                    syncWithRemote(false, true);
+                }
+            };
+        },
+        [handleError, syncWithRemote],
+    );
 
     /**
      * Variant of {@link wrap} that also shows the global loading bar.
      */
-    const wrapLoading = async (f: () => Promise<void>) => {
-        return async () => {
-            startLoading();
-            try {
-                await f();
-            } catch (e) {
-                handleError(e);
-            } finally {
-                syncWithRemote(false, true);
-                finishLoading();
-            }
-        };
-    };
+    const wrapLoading = useCallback(
+        async (f: () => Promise<void>) => {
+            return async () => {
+                startLoading();
+                try {
+                    await f();
+                } catch (e) {
+                    handleError(e);
+                } finally {
+                    syncWithRemote(false, true);
+                    finishLoading();
+                }
+            };
+        },
+        [handleError, syncWithRemote, startLoading, finishLoading],
+    );
 
     const showRenameCollectionModal = () => {
         setCollectionNamerAttributes({
