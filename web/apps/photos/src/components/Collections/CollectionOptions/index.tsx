@@ -88,28 +88,10 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
 
     /**
      * Return a new function by wrapping an async function in an error handler,
-     * and syncing with remote on completion.
+     * showing the global loading bar when the function runs, and syncing with
+     * remote on completion.
      */
     const wrap = useCallback(
-        (f: () => Promise<void>) => {
-            const wrapped = async () => {
-                try {
-                    await f();
-                } catch (e) {
-                    handleError(e);
-                } finally {
-                    syncWithRemote(false, true);
-                }
-            };
-            return (): void => void wrapped();
-        },
-        [handleError, syncWithRemote],
-    );
-
-    /**
-     * Variant of {@link wrap} that also shows the global loading bar.
-     */
-    const wrapLoading = useCallback(
         (f: () => Promise<void>) => {
             const wrapped = async () => {
                 startLoading();
@@ -143,7 +125,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     };
 
     const renameCollection = (newName: string) =>
-        wrapLoading(() => _renameCollection(newName))();
+        wrap(() => _renameCollection(newName))();
 
     const confirmDeleteCollection = () => {
         setDialogMessage({
@@ -172,12 +154,12 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         });
     };
 
-    const deleteCollectionAlongWithFiles = wrapLoading(async () => {
+    const deleteCollectionAlongWithFiles = wrap(async () => {
         await CollectionAPI.deleteCollection(activeCollection.id, false);
         setActiveCollectionID(ALL_SECTION);
     });
 
-    const deleteCollectionButKeepFiles = wrapLoading(async () => {
+    const deleteCollectionButKeepFiles = wrap(async () => {
         await CollectionAPI.deleteCollection(activeCollection.id, true);
         setActiveCollectionID(ALL_SECTION);
     });
@@ -194,7 +176,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
             close: { text: t("cancel") },
         });
 
-    const emptyTrash = wrapLoading(async () => {
+    const emptyTrash = wrap(async () => {
         await TrashService.emptyTrash();
         await TrashService.clearLocalTrash();
         setActiveCollectionID(ALL_SECTION);
@@ -226,11 +208,11 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     const downloadCollection = () =>
         void _downloadCollection().catch(handleError);
 
-    const archiveAlbum = wrapLoading(() =>
+    const archiveAlbum = wrap(() =>
         changeCollectionVisibility(activeCollection, ItemVisibility.archived),
     );
 
-    const unarchiveAlbum = wrapLoading(() =>
+    const unarchiveAlbum = wrap(() =>
         changeCollectionVisibility(activeCollection, ItemVisibility.visible),
     );
 
@@ -249,7 +231,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         });
     };
 
-    const leaveSharedAlbum = wrapLoading(async () => {
+    const leaveSharedAlbum = wrap(async () => {
         await CollectionAPI.leaveSharedAlbum(activeCollection.id);
         setActiveCollectionID(ALL_SECTION);
     });
