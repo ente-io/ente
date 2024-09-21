@@ -284,7 +284,6 @@ function handleFailureReason(
     switch (reason) {
         case FAILURE_REASON.CANCELED:
             setDialogMessage({
-                title: t("MESSAGE"),
                 content: t("SUBSCRIPTION_PURCHASE_CANCELLED"),
                 close: { variant: "critical" },
             });
