@@ -255,16 +255,6 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         }
     };
 
-    const deleteCollectionAlongWithFiles = async () => {
-        await CollectionAPI.deleteCollection(activeCollection.id, false);
-        setActiveCollectionID(ALL_SECTION);
-    };
-
-    const deleteCollectionButKeepFiles = async () => {
-        await CollectionAPI.deleteCollection(activeCollection.id, true);
-        setActiveCollectionID(ALL_SECTION);
-    };
-
     const leaveSharedAlbum = async () => {
         await CollectionAPI.leaveSharedAlbum(activeCollection.id);
         setActiveCollectionID(ALL_SECTION);
@@ -328,16 +318,12 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
             ),
             proceed: {
                 text: t("DELETE_PHOTOS"),
-                action: handleCollectionAction(
-                    CollectionActions.DELETE_WITH_FILES,
-                ),
+                action: deleteCollectionAlongWithFiles,
                 variant: "critical",
             },
             secondary: {
                 text: t("KEEP_PHOTOS"),
-                action: handleCollectionAction(
-                    CollectionActions.DELETE_BUT_KEEP_FILES,
-                ),
+                action: deleteCollectionButKeepFiles,
                 variant: "primary",
             },
             close: {
@@ -345,6 +331,22 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
             },
         });
     };
+
+    const _deleteCollectionAlongWithFiles = async () => {
+        await CollectionAPI.deleteCollection(activeCollection.id, false);
+        setActiveCollectionID(ALL_SECTION);
+    };
+
+    const _deleteCollectionButKeepFiles = async () => {
+        await CollectionAPI.deleteCollection(activeCollection.id, true);
+        setActiveCollectionID(ALL_SECTION);
+    };
+
+    const deleteCollectionAlongWithFiles = () =>
+        wrapErrorAndSyncLoading(_deleteCollectionAlongWithFiles);
+
+    const deleteCollectionButKeepFiles = () =>
+        wrapErrorAndSyncLoading(_deleteCollectionButKeepFiles);
 
     const confirmEmptyTrash = () =>
         setDialogMessage({
