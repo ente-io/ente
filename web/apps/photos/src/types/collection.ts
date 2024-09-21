@@ -1,31 +1,31 @@
 import type { EnteFile } from "@/new/photos/types/file";
 
-export enum CollectionSummaryType {
-    folder = "folder",
-    favorites = "favorites",
-    album = "album",
-    archive = "archive",
-    trash = "trash",
-    uncategorized = "uncategorized",
-    all = "all",
-    outgoingShare = "outgoingShare",
-    incomingShareViewer = "incomingShareViewer",
-    incomingShareCollaborator = "incomingShareCollaborator",
-    sharedOnlyViaLink = "sharedOnlyViaLink",
-    archived = "archived",
-    defaultHidden = "defaultHidden",
-    hiddenItems = "hiddenItems",
-    pinned = "pinned",
-}
+export type CollectionSummaryType =
+    | "folder"
+    | "favorites"
+    | "album"
+    | "archive"
+    | "trash"
+    | "uncategorized"
+    | "all"
+    | "outgoingShare"
+    | "incomingShareViewer"
+    | "incomingShareCollaborator"
+    | "sharedOnlyViaLink"
+    | "archived"
+    | "defaultHidden"
+    | "hiddenItems"
+    | "pinned";
 
 /**
  * A massaged version of a {@link Collection} suitable for being directly shown
  * in the UI.
  */
 export interface CollectionSummary {
+    /** The "UI" type for the collection. */
+    type: CollectionSummaryType;
     id: number;
     name: string;
-    type: CollectionSummaryType;
     coverFile: EnteFile;
     latestFile: EnteFile;
     fileCount: number;
