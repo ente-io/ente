@@ -163,7 +163,7 @@ class _Price extends StatelessWidget {
       final priceDouble = double.parse(priceWithoutCurrency);
       final pricePerMonth = priceDouble / 12;
       final pricePerMonthString = pricePerMonth.toStringAsFixed(2);
-      final bool isPlayStore = !UpdateService.instance.isPlayStoreFlavor();
+      final bool isPlayStore = UpdateService.instance.isPlayStoreFlavor();
       return Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
