@@ -145,9 +145,12 @@ export const Collections: React.FC<CollectionsProps> = ({
         });
     }, [
         shouldHide,
+        mode,
         toShowCollectionSummaries,
         activeCollectionID,
         isActiveCollectionDownloadInProgress,
+        people,
+        activePerson,
     ]);
 
     if (shouldBeHidden) {

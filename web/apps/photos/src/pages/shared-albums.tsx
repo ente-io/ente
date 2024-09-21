@@ -32,8 +32,10 @@ import type { ButtonProps, IconButtonProps } from "@mui/material";
 import { Box, Button, IconButton, Stack, Tooltip } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import bs58 from "bs58";
-import { CollectionInfo } from "components/Collections/CollectionInfo";
-import { CollectionInfoBarWrapper } from "components/Collections/styledComponents";
+import {
+    CollectionInfo,
+    CollectionInfoBarWrapper,
+} from "components/Collections/CollectionInfo";
 import { EnteLogo } from "components/EnteLogo";
 import {
     FilesDownloadProgress,

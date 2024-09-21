@@ -55,14 +55,16 @@ import type { ButtonProps, IconButtonProps } from "@mui/material";
 import { Box, Button, IconButton, Typography, styled } from "@mui/material";
 import AuthenticateUserModal from "components/AuthenticateUserModal";
 import { Collections, type GalleryBarMode } from "components/Collections";
-import { CollectionInfo } from "components/Collections/CollectionInfo";
+import {
+    CollectionInfo,
+    CollectionInfoBarWrapper,
+} from "components/Collections/CollectionInfo";
 import CollectionNamer, {
     CollectionNamerAttributes,
 } from "components/Collections/CollectionNamer";
 import CollectionSelector, {
     CollectionSelectorAttributes,
 } from "components/Collections/CollectionSelector";
-import { CollectionInfoBarWrapper } from "components/Collections/styledComponents";
 import ExportModal from "components/ExportModal";
 import {
     FilesDownloadProgress,

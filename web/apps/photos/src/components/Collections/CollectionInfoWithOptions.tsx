@@ -10,8 +10,7 @@ import type { Dispatch, SetStateAction } from "react";
 import { CollectionSummary, CollectionSummaryType } from "types/collection";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
 import { shouldShowOptions } from "utils/collection";
-import { CollectionInfo } from "./CollectionInfo";
-import { CollectionInfoBarWrapper } from "./styledComponents";
+import { CollectionInfo, CollectionInfoBarWrapper } from "./CollectionInfo";
 
 interface Iprops {
     activeCollection: Collection;
