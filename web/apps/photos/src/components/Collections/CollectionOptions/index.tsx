@@ -457,9 +457,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                 triggerButtonIcon={<MoreHoriz ref={overFlowMenuIconRef} />}
             >
                 {collectionSummaryType == "trash" ? (
-                    <TrashCollectionOption
-                        handleCollectionAction={handleCollectionAction}
-                    />
+                    <TrashCollectionOption onClick={confirmEmptyTrash} />
                 ) : collectionSummaryType == "favorites" ? (
                     <OnlyDownloadCollectionOption
                         isDownloadInProgress={isActiveCollectionDownloadInProgress()}
@@ -630,23 +628,11 @@ const ShareQuickOption: React.FC<ShareQuickOptionProps> = ({
     </Tooltip>
 );
 
-interface TrashCollectionOptionProps {
-    handleCollectionAction: (
-        action: CollectionActions,
-        loader?: boolean,
-    ) => () => Promise<void>;
-}
-
-export const TrashCollectionOption: React.FC<TrashCollectionOptionProps> = ({
-    handleCollectionAction,
-}) => (
+const TrashCollectionOption: React.FC<OptionProps> = ({ onClick }) => (
     <OverflowMenuOption
         color="critical"
         startIcon={<DeleteOutlinedIcon />}
-        onClick={handleCollectionAction(
-            CollectionActions.CONFIRM_EMPTY_TRASH,
-            false,
-        )}
+        onClick={onClick}
     >
         {t("EMPTY_TRASH")}
     </OverflowMenuOption>
