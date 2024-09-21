@@ -403,7 +403,7 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
                 startIcon={<VisibilityOff />}
                 onClick={openHiddenSection}
                 variant="captioned"
-                label={t("HIDDEN")}
+                label={t("section_hidden")}
                 subIcon={<LockOutlined />}
             />
             <EnteMenuItem

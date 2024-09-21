@@ -1365,7 +1365,7 @@ const HiddenSectionNavbarContents: React.FC<
             <ArrowBack />
         </IconButton>
         <FlexWrapper>
-            <Typography>{t("HIDDEN")}</Typography>
+            <Typography>{t("section_hidden")}</Typography>
         </FlexWrapper>
     </HorizontalFlex>
 );

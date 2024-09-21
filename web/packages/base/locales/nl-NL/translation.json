@@ -551,7 +551,7 @@
     "at": "om",
     "AUTH_NEXT": "volgende",
     "AUTH_DOWNLOAD_MOBILE_APP": "Download onze mobiele app om uw geheimen te beheren",
-    "HIDDEN": "Verborgen",
+    "section_hidden": "Verborgen",
     "HIDE": "Verbergen",
     "UNHIDE": "Zichtbaar maken",
     "UNHIDE_TO_COLLECTION": "Zichtbaar maken in album",

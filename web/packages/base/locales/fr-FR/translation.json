@@ -551,7 +551,7 @@
     "at": "à",
     "AUTH_NEXT": "suivant",
     "AUTH_DOWNLOAD_MOBILE_APP": "Téléchargez notre application mobile pour gérer vos secrets",
-    "HIDDEN": "Masqué",
+    "section_hidden": "Masqué",
     "HIDE": "Masquer",
     "UNHIDE": "Dévoiler",
     "UNHIDE_TO_COLLECTION": "Afficher dans l'album",

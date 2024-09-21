@@ -551,7 +551,7 @@
     "at": "",
     "AUTH_NEXT": "",
     "AUTH_DOWNLOAD_MOBILE_APP": "",
-    "HIDDEN": "Tersembunyi",
+    "section_hidden": "Tersembunyi",
     "HIDE": "Sembunyikan",
     "UNHIDE": "",
     "UNHIDE_TO_COLLECTION": "",

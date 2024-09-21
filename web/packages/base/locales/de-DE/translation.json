@@ -551,7 +551,7 @@
     "at": "um",
     "AUTH_NEXT": "Weiter",
     "AUTH_DOWNLOAD_MOBILE_APP": "Lade unsere smartphone App herunter, um deine Schlüssel zu verwalten",
-    "HIDDEN": "Versteckt",
+    "section_hidden": "Versteckt",
     "HIDE": "Ausblenden",
     "UNHIDE": "Einblenden",
     "UNHIDE_TO_COLLECTION": "In Album wieder sichtbar machen",

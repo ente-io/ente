@@ -551,7 +551,7 @@
     "at": "在",
     "AUTH_NEXT": "下一个",
     "AUTH_DOWNLOAD_MOBILE_APP": "下载我们的移动应用程序来管理您的密钥",
-    "HIDDEN": "已隐藏",
+    "section_hidden": "已隐藏",
     "HIDE": "隐藏",
     "UNHIDE": "取消隐藏",
     "UNHIDE_TO_COLLECTION": "取消隐藏到相册",
