@@ -389,12 +389,12 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                     />
                 ) : collectionSummaryType == "incomingShareViewer" ||
                   collectionSummaryType == "incomingShareCollaborator" ? (
-                    <SharedCollectionOption
+                    <SharedCollectionOptions
                         isArchived={isArchivedCollection(activeCollection)}
                         handleCollectionAction={handleCollectionAction}
                     />
                 ) : (
-                    <AlbumCollectionOption
+                    <AlbumCollectionOptions
                         isArchived={isArchivedCollection(activeCollection)}
                         isHidden={isHiddenCollection(activeCollection)}
                         isPinned={isPinnedCollection(activeCollection)}
@@ -634,7 +634,7 @@ interface SharedCollectionOptionProps {
     ) => (...args: any[]) => Promise<void>;
 }
 
-const SharedCollectionOption: React.FC<SharedCollectionOptionProps> = ({
+const SharedCollectionOptions: React.FC<SharedCollectionOptionProps> = ({
     isArchived,
     handleCollectionAction,
 }) => (
@@ -685,7 +685,7 @@ interface AlbumCollectionOptionsProps {
     ) => (...args: any[]) => Promise<void>;
 }
 
-const AlbumCollectionOption: React.FC<AlbumCollectionOptionsProps> = ({
+const AlbumCollectionOptions: React.FC<AlbumCollectionOptionsProps> = ({
     isArchived,
     isPinned,
     isHidden,
