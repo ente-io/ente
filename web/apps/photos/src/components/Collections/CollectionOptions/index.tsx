@@ -121,25 +121,6 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         };
     };
 
-    /**
-     * Variant of {@link wrapErrorAndSyncLoading} with a string arg.
-     */
-    const wrapErrorAndSyncLoadingString = async (
-        f: (s: string) => Promise<void>,
-    ) => {
-        return async (s: string) => {
-            startLoading();
-            try {
-                await f(s);
-            } catch (e) {
-                handleError(e);
-            } finally {
-                syncWithRemote(false, true);
-                finishLoading();
-            }
-        };
-    };
-
     const showRenameCollectionModal = () => {
         setCollectionNamerAttributes({
             title: t("RENAME_COLLECTION"),
@@ -155,8 +136,8 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         }
     };
 
-    const renameCollection = () =>
-        void wrapErrorAndSyncLoadingString(_renameCollection);
+    const renameCollection = (newName: string) =>
+        void wrapErrorAndSyncLoading(() => _renameCollection(newName));
 
     const confirmDeleteCollection = () => {
         setDialogMessage({
