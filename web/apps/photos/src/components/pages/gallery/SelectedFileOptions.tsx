@@ -292,7 +292,7 @@ const SelectedFileOptions = ({
                             </IconButton>
                         </Tooltip>
                         {activeCollectionID === ARCHIVE_SECTION && (
-                            <Tooltip title={t("UNARCHIVE")}>
+                            <Tooltip title={t("unarchive")}>
                                 <IconButton
                                     onClick={handleFileOps(
                                         FILE_OPS_TYPE.UNARCHIVE,
