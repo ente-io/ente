@@ -9,7 +9,7 @@ import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
 import castGateway from "@ente/shared/network/cast";
-import { Button, Link, Typography } from "@mui/material";
+import { Button, Link, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
@@ -143,28 +143,27 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
             sx={{ zIndex: 1600 }}
         >
             {view == "choose" && (
-                <>
+                <Stack sx={{ py: 1, gap: 4 }}>
                     {browserCanCast && (
-                        <>
+                        <Stack sx={{ gap: 2 }}>
                             <Typography color={"text.muted"}>
                                 {t("cast_auto_pair_description")}
                             </Typography>
 
-                            <Button
-                                style={{ marginBottom: "1rem" }}
-                                onClick={() => setView("auto")}
-                            >
+                            <Button onClick={() => setView("auto")}>
                                 {t("cast_auto_pair")}
                             </Button>
-                        </>
+                        </Stack>
                     )}
-                    <Typography color="text.muted">
-                        {t("pair_with_pin_description")}
-                    </Typography>
-                    <Button onClick={() => setView("pin")}>
-                        {t("pair_with_pin")}
-                    </Button>
-                </>
+                    <Stack sx={{ gap: 2 }}>
+                        <Typography color="text.muted">
+                            {t("pair_with_pin_description")}
+                        </Typography>
+                        <Button onClick={() => setView("pin")}>
+                            {t("pair_with_pin")}
+                        </Button>
+                    </Stack>
+                </Stack>
             )}
             {view == "auto" && (
                 <VerticallyCentered gap="1rem">
