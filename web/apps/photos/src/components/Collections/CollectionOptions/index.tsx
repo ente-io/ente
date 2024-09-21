@@ -5,6 +5,7 @@ import type { CollectionSummaryType } from "@/new/photos/types/collection";
 import { FlexWrapper, HorizontalFlex } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
+import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
@@ -35,7 +36,6 @@ import { AlbumCollectionOption } from "./AlbumCollectionOption";
 import CollectionSortOrderMenu from "./CollectionSortOrderMenu";
 import { OnlyDownloadCollectionOption } from "./OnlyDownloadCollectionOption";
 import { SharedCollectionOption } from "./SharedCollectionOption";
-import { TrashCollectionOption } from "./TrashCollectionOption";
 
 interface CollectionOptionsProps {
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
@@ -565,4 +565,26 @@ const ShareQuickOption: React.FC<ShareQuickOptionProps> = ({
             <PeopleIcon />
         </IconButton>
     </Tooltip>
+);
+
+interface TrashCollectionOptionProps {
+    handleCollectionAction: (
+        action: CollectionActions,
+        loader?: boolean,
+    ) => (...args: any[]) => Promise<void>;
+}
+
+export const TrashCollectionOption: React.FC<TrashCollectionOptionProps> = ({
+    handleCollectionAction,
+}) => (
+    <OverflowMenuOption
+        color="critical"
+        startIcon={<DeleteOutlinedIcon />}
+        onClick={handleCollectionAction(
+            CollectionActions.CONFIRM_EMPTY_TRASH,
+            false,
+        )}
+    >
+        {t("EMPTY_TRASH")}
+    </OverflowMenuOption>
 );
