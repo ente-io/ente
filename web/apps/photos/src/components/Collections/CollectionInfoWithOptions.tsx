@@ -182,8 +182,8 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
 
     const showRenameCollectionModal = () => {
         setCollectionNamerAttributes({
-            title: t("RENAME_COLLECTION"),
-            buttonText: t("RENAME"),
+            title: t("rename_album"),
+            buttonText: t("rename"),
             autoFilledName: activeCollection.name,
             callback: renameCollection,
         });
@@ -649,7 +649,7 @@ const AlbumCollectionOptions: React.FC<AlbumCollectionOptionsProps> = ({
 }) => (
     <>
         <OverflowMenuOption onClick={onRenameClick} startIcon={<EditIcon />}>
-            {t("RENAME_COLLECTION")}
+            {t("rename_album")}
         </OverflowMenuOption>
         <OverflowMenuOption onClick={onSortClick} startIcon={<SortIcon />}>
             {t("SORT_BY")}
