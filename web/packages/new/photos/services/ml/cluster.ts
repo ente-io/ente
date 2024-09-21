@@ -1,10 +1,15 @@
-import { assertionFailed } from "@/base/assert";
 import { newNonSecureID } from "@/base/id-worker";
 import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
+import { wait } from "@/utils/promise";
 import type { EnteFile } from "../../types/file";
-import type { AnnotatedCGroup } from "./cgroups";
-import { faceDirection, type Face, type FaceIndex } from "./face";
+import type { Person } from "./cgroups";
+import {
+    faceDirection,
+    fileIDFromFaceID,
+    type Face,
+    type FaceIndex,
+} from "./face";
 import { dotProduct } from "./math";
 
 /**
@@ -26,23 +31,21 @@ export interface FaceCluster {
     faces: string[];
 }
 
-export interface ClusteringOpts {
-    minBlur: number;
-    minScore: number;
-    minClusterSize: number;
-    joinThreshold: number;
-    earlyExitThreshold: number;
-    batchSize: number;
-    offsetIncrement: number;
-    badFaceHeuristics: boolean;
-}
+const clusteringOptions = {
+    minBlur: 10,
+    minScore: 0.8,
+    minClusterSize: 2,
+    joinThreshold: 0.76,
+    earlyExitThreshold: 0.9,
+    batchSize: 10000,
+    offsetIncrement: 7500,
+    badFaceHeuristics: true,
+};
 
 export interface ClusteringProgress {
     completed: number;
     total: number;
 }
-
-export type OnClusteringProgress = (progress: ClusteringProgress) => void;
 
 /** A {@link Face} annotated with data needed during clustering. */
 export type ClusterFace = Omit<Face, "embedding"> & {
@@ -65,12 +68,18 @@ export interface ClusterPreviewFace {
  * Generates clusters from the given faces using a batched form of linear
  * clustering, with a bit of lookback (and a dollop of heuristics) to get the
  * clusters to merge across batches.
+ *
+ * [Note: Draining the event loop during clustering]
+ *
+ * The clustering is a synchronous operation, but we make it async to
+ * artificially drain the worker's event loop after each mini-batch so that
+ * other interactions with the worker (where this code runs) do not get stalled
+ * while clustering is in progress.
  */
-export const clusterFaces = (
+export const clusterFaces = async (
     faceIndexes: FaceIndex[],
     localFiles: EnteFile[],
-    opts: ClusteringOpts,
-    onProgress: OnClusteringProgress,
+    onProgress: (progress: ClusteringProgress) => void,
 ) => {
     const {
         minBlur,
@@ -81,7 +90,7 @@ export const clusterFaces = (
         batchSize,
         offsetIncrement,
         badFaceHeuristics,
-    } = opts;
+    } = clusteringOptions;
     const t = Date.now();
 
     const localFileByID = new Map(localFiles.map((f) => [f.id, f]));
@@ -137,7 +146,7 @@ export const clusterFaces = (
             clusters,
         };
 
-        const newState = clusterBatchLinear(
+        const newState = await clusterBatchLinear(
             batch,
             oldState,
             joinThreshold,
@@ -168,76 +177,18 @@ export const clusterFaces = (
         (a, b) => b.faces.length - a.faces.length,
     );
 
-    // Convert into the data structure we're using to debug/visualize.
-    const clusterPreviewClusters =
-        sortedClusters.length < 60
-            ? sortedClusters
-            : sortedClusters.slice(0, 30).concat(sortedClusters.slice(-30));
-    const clusterPreviews = clusterPreviewClusters.map((cluster) => {
-        const faces = cluster.faces.map((id) => ensure(faceForFaceID.get(id)));
-        const topFace = faces.reduce((top, face) =>
-            top.score > face.score ? top : face,
-        );
-        const previewFaces: ClusterPreviewFace[] = faces.map((face) => {
-            const csim = dotProduct(topFace.embedding, face.embedding);
-            return { face, cosineSimilarity: csim, wasMerged: false };
-        });
-        return {
-            clusterSize: cluster.faces.length,
-            faces: previewFaces
-                .sort((a, b) => b.cosineSimilarity - a.cosineSimilarity)
-                .slice(0, 50),
-        };
-    });
+    // TODO-Cluster
+    // This isn't really part of the clustering, but help the main thread out by
+    // pre-computing temporary in-memory people, one per cluster.
+    const people = toPeople(sortedClusters, localFileByID, faceForFaceID);
 
-    // TODO-Cluster - Currently we're not syncing with remote or saving anything
-    // locally, so cgroups will be empty. Create a temporary (unsaved, unsynced)
-    // cgroup, one per cluster.
-
-    const cgroups: AnnotatedCGroup[] = [];
-    for (const cluster of sortedClusters) {
-        const faces = cluster.faces.map((id) => ensure(faceForFaceID.get(id)));
-        const topFace = faces.reduce((top, face) =>
-            top.score > face.score ? top : face,
-        );
-        cgroups.push({
-            id: cluster.id,
-            name: undefined,
-            assigned: [cluster],
-            isHidden: false,
-            avatarFaceID: undefined,
-            displayFaceID: topFace.faceID,
-        });
-    }
-
-    // TODO-Cluster the total face count is only needed during debugging
-    let totalFaceCount = 0;
-    for (const fi of faceIndexes) totalFaceCount += fi.faces.length;
-    const filteredFaceCount = faces.length;
     const clusteredFaceCount = clusterIDForFaceID.size;
-    const unclusteredFaceCount = filteredFaceCount - clusteredFaceCount;
-
-    const unclusteredFaces = faces.filter(
-        ({ faceID }) => !clusterIDForFaceID.has(faceID),
-    );
-
     const timeTakenMs = Date.now() - t;
     log.info(
-        `Clustered ${faces.length} faces into ${sortedClusters.length} clusters, ${faces.length - clusterIDForFaceID.size} faces remain unclustered (${timeTakenMs} ms)`,
+        `Generated ${sortedClusters.length} clusters from ${faces.length} faces (${clusteredFaceCount} clustered ${faces.length - clusteredFaceCount} unclustered) (${timeTakenMs} ms)`,
     );
 
-    return {
-        totalFaceCount,
-        filteredFaceCount,
-        clusteredFaceCount,
-        unclusteredFaceCount,
-        localFileByID,
-        clusterPreviews,
-        clusters: sortedClusters,
-        cgroups,
-        unclusteredFaces: unclusteredFaces,
-        timeTakenMs,
-    };
+    return { clusters: sortedClusters, people };
 };
 
 /**
@@ -289,28 +240,13 @@ const isSidewaysFace = (face: Face) =>
 /** Generate a new cluster ID. */
 const newClusterID = () => newNonSecureID("cluster_");
 
-/**
- * Extract the fileID of the {@link EnteFile} to which the face belongs from its
- * faceID.
- *
- * TODO-Cluster - duplicated with ml/index.ts
- */
-const fileIDFromFaceID = (faceID: string) => {
-    const fileID = parseInt(faceID.split("_")[0] ?? "");
-    if (isNaN(fileID)) {
-        assertionFailed(`Ignoring attempt to parse invalid faceID ${faceID}`);
-        return undefined;
-    }
-    return fileID;
-};
-
 interface ClusteringState {
     clusterIDForFaceID: Map<string, string>;
     clusterIndexForFaceID: Map<string, number>;
     clusters: FaceCluster[];
 }
 
-const clusterBatchLinear = (
+const clusterBatchLinear = async (
     faces: ClusterFace[],
     oldState: ClusteringState,
     joinThreshold: number,
@@ -331,7 +267,11 @@ const clusterBatchLinear = (
 
     // For each face in the batch
     for (const [i, fi] of faces.entries()) {
-        if (i % 100 == 0) onProgress({ completed: i, total: faces.length });
+        if (i % 100 == 0) {
+            onProgress({ completed: i, total: faces.length });
+            // See: [Note: Draining the event loop during clustering]
+            await wait(0);
+        }
 
         // If the face is already part of a cluster, then skip it.
         if (state.clusterIDForFaceID.has(fi.faceID)) continue;
@@ -385,3 +325,43 @@ const clusterBatchLinear = (
 
     return state;
 };
+
+/**
+ * Construct a {@link Person} object for each cluster.
+ */
+const toPeople = (
+    clusters: FaceCluster[],
+    localFileByID: Map<number, EnteFile>,
+    faceForFaceID: Map<string, ClusterFace>,
+): Person[] =>
+    clusters
+        .map((cluster) => {
+            const faces = cluster.faces.map((id) =>
+                ensure(faceForFaceID.get(id)),
+            );
+
+            const faceIDs = cluster.faces;
+            const fileIDs = faceIDs.map((faceID) =>
+                ensure(fileIDFromFaceID(faceID)),
+            );
+
+            const topFace = faces.reduce((top, face) =>
+                top.score > face.score ? top : face,
+            );
+
+            const displayFaceID = topFace.faceID;
+            const displayFaceFileID = ensure(fileIDFromFaceID(displayFaceID));
+            const displayFaceFile = ensure(
+                localFileByID.get(displayFaceFileID),
+            );
+
+            return {
+                id: cluster.id,
+                name: undefined,
+                faceIDs,
+                fileIDs: [...new Set(fileIDs)],
+                displayFaceID,
+                displayFaceFile,
+            };
+        })
+        .sort((a, b) => b.faceIDs.length - a.faceIDs.length);

@@ -1,10 +1,11 @@
 import { masterKeyFromSession } from "@/base/session-store";
-import { fileIDFromFaceID, wipClusterEnable } from ".";
+import { wipClusterEnable } from ".";
 import type { EnteFile } from "../../types/file";
 import { getLocalFiles } from "../files";
 import { pullCGroups } from "../user-entity";
 import type { FaceCluster } from "./cluster";
 import { getClusterGroups, getFaceIndexes } from "./db";
+import { fileIDFromFaceID } from "./face";
 
 /**
  * A cgroup ("cluster group") is a group of clusters (possibly containing just a
@@ -78,12 +79,15 @@ export interface CGroup {
 }
 
 /**
- * A massaged version of {@link CGroup} suitable for being shown in the UI.
+ * A massaged version of {@link CGroup} or a {@link FaceCluster} suitable for
+ * being shown in the UI.
+ *
+ * We transform both both remote cluster groups and local-only face clusters
+ * into the same "person" object that can be shown in the UI.
  *
  * The cgroups synced with remote do not directly correspond to "people".
- * CGroups represent both positive and negative feedback, where the negations
- * are specifically feedback meant so that we do not show the corresponding
- * cluster in the UI.
+ * CGroups represent both positive and negative feedback (i.e, the user does not
+ * wish a particular cluster group to be shown in the UI).
  *
  * So while each person has an underlying cgroups, not all cgroups have a
  * corresponding person.
@@ -95,13 +99,15 @@ export interface CGroup {
  */
 export interface Person {
     /**
-     * Nanoid of the underlying {@link CGroup}.
+     * Nanoid of the underlying {@link CGroup} or {@link FaceCluster}.
      */
     id: string;
     /**
      * The name of the person.
+     *
+     * This will only be set for named cgroups.
      */
-    name: string;
+    name: string | undefined;
     /**
      * IDs of the (unique) files in which this face occurs.
      */
@@ -117,22 +123,6 @@ export interface Person {
     displayFaceFile: EnteFile;
 }
 
-// TODO-Cluster remove me
-/**
- * A {@link CGroup} annotated with various in-memory state to make it easier for
- * the upper layers of our code to directly use it.
- */
-export type AnnotatedCGroup = CGroup & {
-    /**
-     * Locally determined ID of the "best" face that should be used as the
-     * display face, to represent this cluster group in the UI.
-     *
-     * This property is not synced with remote. For more details, see
-     * {@link avatarFaceID}.
-     */
-    displayFaceID: string | undefined;
-};
-
 /**
  * Fetch existing cgroups for the user from remote and save them to DB.
  */
@@ -144,8 +134,12 @@ export const syncCGroups = async () => {
     await pullCGroups(masterKey);
 };
 
+export type NamedPerson = Omit<Person, "name"> & {
+    name: string;
+};
+
 /**
- * Construct in-memory "people" from the cgroups present locally.
+ * Construct in-memory {@link NamedPerson}s from the cgroups present locally.
  *
  * This function is meant to run after files, cgroups and faces have been synced
  * with remote. It then uses all the information in the local DBs to construct
@@ -154,7 +148,7 @@ export const syncCGroups = async () => {
  * @return A list of {@link Person}s, sorted by the number of files that they
  * reference.
  */
-export const updatedPeople = async () => {
+export const namedPeopleFromCGroups = async (): Promise<NamedPerson[]> => {
     if (!process.env.NEXT_PUBLIC_ENTE_WIP_CL) return [];
     if (!(await wipClusterEnable())) return [];
 

@@ -30,5 +30,9 @@ export const preFileInfoSync = async () => {
  * libraries after initial login), and the `preFileInfoSync`, which is called
  * before doing the file sync and thus should run immediately after login.
  */
-export const sync = () =>
-    Promise.all([syncMapEnabled(), mlSync(), searchDataSync()]);
+export const sync = async () => {
+    await Promise.all([syncMapEnabled(), searchDataSync()]);
+    // ML sync might take a very long time for initial indexing, so don't wait
+    // for it to finish.
+    void mlSync();
+};

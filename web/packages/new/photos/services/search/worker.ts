@@ -2,7 +2,7 @@ import { HTTPError } from "@/base/http";
 import type { Location } from "@/base/types";
 import type { Collection } from "@/media/collection";
 import { fileCreationPhotoDate, fileLocation } from "@/media/file-metadata";
-import type { Person } from "@/new/photos/services/ml/cgroups";
+import type { NamedPerson } from "@/new/photos/services/ml/cgroups";
 import type { EnteFile } from "@/new/photos/types/file";
 import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";
@@ -37,7 +37,7 @@ export class SearchWorker {
         collections: [],
         files: [],
     };
-    private people: Person[] = [];
+    private people: NamedPerson[] = [];
 
     /**
      * Fetch any state we might need when the actual search happens.
@@ -62,9 +62,9 @@ export class SearchWorker {
     }
 
     /**
-     * Set the people that we should search across.
+     * Set the (named) people that we should search across.
      */
-    setPeople(people: Person[]) {
+    setPeople(people: NamedPerson[]) {
         this.people = people;
     }
 
@@ -122,7 +122,7 @@ const suggestionsForString = (
     re: RegExp,
     searchString: string,
     { collections, files }: SearchCollectionsAndFiles,
-    people: Person[],
+    people: NamedPerson[],
     { locale, holidays, labelledFileTypes }: LocalizedSearchData,
     locationTags: LocationTag[],
     cities: City[],
@@ -196,7 +196,10 @@ const fileCaptionSuggestion = (
         : [];
 };
 
-const peopleSuggestions = (re: RegExp, people: Person[]): SearchSuggestion[] =>
+const peopleSuggestions = (
+    re: RegExp,
+    people: NamedPerson[],
+): SearchSuggestion[] =>
     people
         .filter((p) => re.test(p.name))
         .map((person) => ({ type: "person", person, label: person.name }));
