@@ -1,10 +1,12 @@
 import { FlexWrapper } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
+import PeopleIcon from "@mui/icons-material/People";
+import { IconButton, Tooltip } from "@mui/material";
+import { t } from "i18next";
 import { CollectionSummaryType } from "types/collection";
 import { CollectionActions } from "..";
 import { DownloadQuickOption } from "./DownloadQuickOption";
 import { EmptyTrashQuickOption } from "./EmptyTrashQuickOption";
-import { ShareQuickOption } from "./ShareQuickOption";
 
 interface QuickOptionsProps {
     handleCollectionAction: (
@@ -49,6 +51,7 @@ export const QuickOptions: React.FC<QuickOptionsProps> = ({
 const showEmptyTrashQuickOption = (type: CollectionSummaryType) => {
     return type === CollectionSummaryType.trash;
 };
+
 const showDownloadQuickOption = (type: CollectionSummaryType) => {
     return (
         type === CollectionSummaryType.folder ||
@@ -64,6 +67,7 @@ const showDownloadQuickOption = (type: CollectionSummaryType) => {
         type === CollectionSummaryType.pinned
     );
 };
+
 const showShareQuickOption = (type: CollectionSummaryType) => {
     return (
         type === CollectionSummaryType.folder ||
@@ -76,3 +80,41 @@ const showShareQuickOption = (type: CollectionSummaryType) => {
         type === CollectionSummaryType.pinned
     );
 };
+
+interface ShareQuickOptionProps {
+    handleCollectionAction: (
+        action: CollectionActions,
+        loader?: boolean,
+    ) => (...args: any[]) => Promise<void>;
+    collectionSummaryType: CollectionSummaryType;
+}
+
+const ShareQuickOption: React.FC<ShareQuickOptionProps> = ({
+    handleCollectionAction,
+    collectionSummaryType,
+}) => (
+    <Tooltip
+        title={
+            collectionSummaryType ===
+                CollectionSummaryType.incomingShareViewer ||
+            collectionSummaryType ===
+                CollectionSummaryType.incomingShareCollaborator
+                ? t("SHARING_DETAILS")
+                : collectionSummaryType ===
+                        CollectionSummaryType.outgoingShare ||
+                    collectionSummaryType ===
+                        CollectionSummaryType.sharedOnlyViaLink
+                  ? t("MODIFY_SHARING")
+                  : t("SHARE_COLLECTION")
+        }
+    >
+        <IconButton
+            onClick={handleCollectionAction(
+                CollectionActions.SHOW_SHARE_DIALOG,
+                false,
+            )}
+        >
+            <PeopleIcon />
+        </IconButton>
+    </Tooltip>
+);
