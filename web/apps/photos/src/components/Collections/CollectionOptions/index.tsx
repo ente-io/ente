@@ -390,6 +390,16 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     const handleDownloadCollection = () =>
         void _downloadCollection().catch(handleError);
 
+    const _archiveAlbum = () =>
+        changeCollectionVisibility(activeCollection, ItemVisibility.archived);
+
+    const _unarchiveAlbum = () =>
+        changeCollectionVisibility(activeCollection, ItemVisibility.visible);
+
+    const archiveAlbum = () => wrapErrorAndSyncLoading(_archiveAlbum);
+
+    const unarchiveAlbum = () => wrapErrorAndSyncLoading(_unarchiveAlbum);
+
     const confirmLeaveSharedAlbum = () => {
         setDialogMessage({
             title: t("LEAVE_SHARED_ALBUM_TITLE"),
@@ -479,9 +489,10 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                   collectionSummaryType == "incomingShareCollaborator" ? (
                     <SharedCollectionOptions
                         isArchived={isArchivedCollection(activeCollection)}
+                        onArchiveClick={archiveAlbum}
+                        onUnarchiveClick={unarchiveAlbum}
                         onLeaveSharedAlbumClick={confirmLeaveSharedAlbum}
                         onCastClick={showCastAlbumDialog}
-                        handleCollectionAction={handleCollectionAction}
                     />
                 ) : (
                     <AlbumCollectionOptions
@@ -664,31 +675,30 @@ const DownloadOption: React.FC<
 
 interface SharedCollectionOptionProps {
     isArchived: boolean;
+    onArchiveClick: () => void;
+    onUnarchiveClick: () => void;
     onLeaveSharedAlbumClick: () => void;
     onCastClick: () => void;
-    handleCollectionAction: (
-        action: CollectionActions,
-        loader?: boolean,
-    ) => () => Promise<void>;
 }
 
 const SharedCollectionOptions: React.FC<SharedCollectionOptionProps> = ({
     isArchived,
+    onArchiveClick,
+    onUnarchiveClick,
     onLeaveSharedAlbumClick,
     onCastClick,
-    handleCollectionAction,
 }) => (
     <>
         {isArchived ? (
             <OverflowMenuOption
-                onClick={handleCollectionAction(CollectionActions.UNARCHIVE)}
+                onClick={onUnarchiveClick}
                 startIcon={<Unarchive />}
             >
                 {t("UNARCHIVE_COLLECTION")}
             </OverflowMenuOption>
         ) : (
             <OverflowMenuOption
-                onClick={handleCollectionAction(CollectionActions.ARCHIVE)}
+                onClick={onArchiveClick}
                 startIcon={<ArchiveOutlined />}
             >
                 {t("ARCHIVE_COLLECTION")}
