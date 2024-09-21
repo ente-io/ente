@@ -134,7 +134,7 @@
     "LOGOUT_MESSAGE": "Sei sicuro di volerti disconnettere?",
     "CHANGE_EMAIL": "Cambia email",
     "ok": "OK",
-    "SUCCESS": "Operazione riuscita",
+    "success": "Operazione riuscita",
     "error": "Errore",
     "MESSAGE": "Messaggio",
     "OFFLINE_MSG": "Sei offline, i ricordi memorizzati nella cache vengono mostrati",

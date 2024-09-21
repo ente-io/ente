@@ -134,7 +134,7 @@
     "LOGOUT_MESSAGE": "Ertu viss um að þú viljir skrá þig út?",
     "CHANGE_EMAIL": "Breyta netfangi",
     "ok": "Í lagi",
-    "SUCCESS": "Tókst",
+    "success": "Tókst",
     "error": "Villa",
     "MESSAGE": "Skilaboð",
     "OFFLINE_MSG": "",

@@ -134,7 +134,7 @@
     "LOGOUT_MESSAGE": "정말로 로그아웃 하시겠습니까?",
     "CHANGE_EMAIL": "이메일 주소 변경",
     "ok": "확인",
-    "SUCCESS": "성공",
+    "success": "성공",
     "error": "",
     "MESSAGE": "",
     "OFFLINE_MSG": "",

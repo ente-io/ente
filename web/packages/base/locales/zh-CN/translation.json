@@ -134,7 +134,7 @@
     "LOGOUT_MESSAGE": "你确定要退出登录吗？",
     "CHANGE_EMAIL": "更换邮箱",
     "ok": "确定",
-    "SUCCESS": "成功",
+    "success": "成功",
     "error": "错误",
     "MESSAGE": "消息",
     "OFFLINE_MSG": "您处于离线状态，正在显示已缓存的回忆",

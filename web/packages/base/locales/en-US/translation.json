@@ -134,7 +134,7 @@
     "LOGOUT_MESSAGE": "Are you sure you want to logout?",
     "CHANGE_EMAIL": "Change email",
     "ok": "OK",
-    "SUCCESS": "Success",
+    "success": "Success",
     "error": "Error",
     "MESSAGE": "Message",
     "OFFLINE_MSG": "You are offline, cached memories are being shown",

@@ -134,7 +134,7 @@
     "LOGOUT_MESSAGE": "Czy na pewno chcesz się wylogować?",
     "CHANGE_EMAIL": "Zmień adres e-mail",
     "ok": "OK",
-    "SUCCESS": "Sukces",
+    "success": "Sukces",
     "error": "Błąd",
     "MESSAGE": "Wiadomość",
     "OFFLINE_MSG": "Jesteś offline, wyświetlane są wspomnienia z pamięci podręcznej",

@@ -134,7 +134,7 @@
     "LOGOUT_MESSAGE": "Sind sie sicher, dass sie sich ausloggen möchten?",
     "CHANGE_EMAIL": "E-Mail-Adresse ändern",
     "ok": "OK",
-    "SUCCESS": "Erfolgreich",
+    "success": "Erfolgreich",
     "error": "Fehler",
     "MESSAGE": "Nachricht",
     "OFFLINE_MSG": "Du bist offline, gecachte Erinnerungen werden angezeigt",

@@ -134,7 +134,7 @@
     "LOGOUT_MESSAGE": "Seguro que quiere cerrar la sesión?",
     "CHANGE_EMAIL": "Cambiar email",
     "ok": "OK",
-    "SUCCESS": "Completado",
+    "success": "Completado",
     "error": "Error",
     "MESSAGE": "Mensaje",
     "OFFLINE_MSG": "Estás desconectado, se están mostrando recuerdos en caché",

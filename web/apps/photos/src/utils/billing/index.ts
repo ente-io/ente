@@ -187,7 +187,7 @@ export async function cancelSubscription(
         setLoading(true);
         await billingService.cancelSubscription();
         setDialogMessage({
-            title: t("SUCCESS"),
+            title: t("success"),
             content: t("SUBSCRIPTION_CANCEL_SUCCESS"),
             close: { variant: "accent" },
         });
@@ -212,7 +212,7 @@ export async function activateSubscription(
         setLoading(true);
         await billingService.activateSubscription();
         setDialogMessage({
-            title: t("SUCCESS"),
+            title: t("success"),
             content: t("SUBSCRIPTION_ACTIVATE_SUCCESS"),
             close: { variant: "accent" },
         });

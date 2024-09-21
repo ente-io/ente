@@ -134,7 +134,7 @@
     "LOGOUT_MESSAGE": "Voulez-vous vraiment vous déconnecter?",
     "CHANGE_EMAIL": "Modifier l'e-mail",
     "ok": "Ok",
-    "SUCCESS": "Parfait",
+    "success": "Parfait",
     "error": "Erreur",
     "MESSAGE": "Message",
     "OFFLINE_MSG": "Vous êtes hors-ligne, les mémoires cache sont affichées",

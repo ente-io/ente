@@ -134,7 +134,7 @@
     "LOGOUT_MESSAGE": "Weet u zeker dat u wilt uitloggen?",
     "CHANGE_EMAIL": "E-mail wijzigen",
     "ok": "Oké",
-    "SUCCESS": "Succes",
+    "success": "Succes",
     "error": "Foutmelding",
     "MESSAGE": "Melding",
     "OFFLINE_MSG": "Je bent offline, lokaal opgeslagen herinneringen worden getoond",

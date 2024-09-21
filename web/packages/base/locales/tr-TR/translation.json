@@ -134,7 +134,7 @@
     "LOGOUT_MESSAGE": "Çıkış yapmak istediğine emin misin?",
     "CHANGE_EMAIL": "E-posta adresini değiştir",
     "ok": "Tamam",
-    "SUCCESS": "Başarılı",
+    "success": "Başarılı",
     "error": "Hata",
     "MESSAGE": "Mesaj",
     "OFFLINE_MSG": "Çevrimdışısın, önbelleğe alınmış anılar gösteriliyor",

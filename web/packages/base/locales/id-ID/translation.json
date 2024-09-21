@@ -134,7 +134,7 @@
     "LOGOUT_MESSAGE": "Apakah kamu yakin ingin keluar akun?",
     "CHANGE_EMAIL": "Ubah email",
     "ok": "OK",
-    "SUCCESS": "Berhasil",
+    "success": "Berhasil",
     "error": "Kesalahan",
     "MESSAGE": "",
     "OFFLINE_MSG": "",

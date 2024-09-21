@@ -134,7 +134,7 @@
     "LOGOUT_MESSAGE": "Você tem certeza que deseja encerrar a sessão?",
     "CHANGE_EMAIL": "Mudar e-mail",
     "ok": "Aceitar",
-    "SUCCESS": "Bem-sucedido",
+    "success": "Bem-sucedido",
     "error": "Erro",
     "MESSAGE": "Mensagem",
     "OFFLINE_MSG": "Você está offline, memórias em cache estão sendo mostradas",

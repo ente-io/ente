@@ -134,7 +134,7 @@
     "LOGOUT_MESSAGE": "Är du säker på att du vill logga ut?",
     "CHANGE_EMAIL": "",
     "ok": "OK",
-    "SUCCESS": "",
+    "success": "",
     "error": "",
     "MESSAGE": "Meddelande",
     "OFFLINE_MSG": "",
