@@ -12,6 +12,7 @@ import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/network/network.dart';
 import 'package:photos/models/file/file.dart';
+import "package:photos/services/collections_service.dart";
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_download_util.dart';
 import 'package:photos/utils/file_uploader_util.dart';
@@ -160,15 +161,36 @@ Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
   final file = item.file;
   Uint8List encryptedThumbnail;
   try {
-    encryptedThumbnail = (await NetworkClient.instance.getDio().get(
-              file.thumbnailUrl,
-              options: Options(
-                headers: {"X-Auth-Token": Configuration.instance.getToken()},
-                responseType: ResponseType.bytes,
-              ),
-              cancelToken: item.cancelToken,
-            ))
-        .data;
+    final authToken = await CollectionsService.instance
+        .getPublicAlbumToken(file.collectionID!);
+    if (authToken != null) {
+      final authJWTToken = await CollectionsService.instance
+          .getPublicAlbumTokenJWT(file.collectionID!);
+
+      final headers = {
+        "X-Auth-Access-Token": authToken,
+        if (authJWTToken != null) "X-Auth-Access-Token-JWT": authJWTToken,
+      };
+
+      encryptedThumbnail = (await NetworkClient.instance.getDio().get(
+                "https://public-albums.ente.io/preview/?fileID=${file.uploadedFileID}",
+                options: Options(
+                  headers: headers,
+                  responseType: ResponseType.bytes,
+                ),
+              ))
+          .data;
+    } else {
+      encryptedThumbnail = (await NetworkClient.instance.getDio().get(
+                file.thumbnailUrl,
+                options: Options(
+                  headers: {"X-Auth-Token": Configuration.instance.getToken()},
+                  responseType: ResponseType.bytes,
+                ),
+                cancelToken: item.cancelToken,
+              ))
+          .data;
+    }
   } catch (e) {
     if (e is DioError && CancelToken.isCancel(e)) {
       return;

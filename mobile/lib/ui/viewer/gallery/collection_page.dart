@@ -24,6 +24,8 @@ class CollectionPage extends StatelessWidget {
   final String tagPrefix;
   final bool? hasVerifiedLock;
   final bool isFromCollectPhotos;
+  final bool isFromPublicShareLink;
+  final List<EnteFile> sharedLinkFiles;
 
   CollectionPage(
     this.c, {
@@ -31,6 +33,8 @@ class CollectionPage extends StatelessWidget {
     this.hasVerifiedLock = false,
     this.isFromCollectPhotos = false,
     Key? key,
+    this.isFromPublicShareLink = false,
+    this.sharedLinkFiles = const [],
   }) : super(key: key);
 
   final _selectedFiles = SelectedFiles();
@@ -49,6 +53,9 @@ class CollectionPage extends StatelessWidget {
         c.thumbnail != null ? [c.thumbnail!] : null;
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
+        if (isFromPublicShareLink) {
+          return FileLoadResult(sharedLinkFiles, false);
+        }
         final FileLoadResult result =
             await FilesDB.instance.getFilesInCollection(
           c.collection.id,
@@ -107,6 +114,8 @@ class CollectionPage extends StatelessWidget {
           _selectedFiles,
           collection: c.collection,
           isFromCollectPhotos: isFromCollectPhotos,
+          isFromPublicShareLink: isFromPublicShareLink,
+          files: sharedLinkFiles,
         ),
       ),
       bottomNavigationBar: isFromCollectPhotos

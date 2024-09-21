@@ -24,14 +24,96 @@ import "package:photos/utils/file_util.dart";
 
 final _logger = Logger("file_download_util");
 
+Future<File?> downloadAndDecryptPublicFile(
+  EnteFile file,
+  String authToken, {
+  ProgressCallback? progressCallback,
+}) async {
+  final String logPrefix = 'Public File-${file.uploadedFileID}:';
+  _logger
+      .info('$logPrefix starting download ${formatBytes(file.fileSize ?? 0)}');
+  _logger.severe("File id ${file.uploadedFileID}");
+
+  final String tempDir = Configuration.instance.getTempDirectory();
+  final String encryptedFilePath = "$tempDir${file.uploadedFileID}.encrypted";
+  final String decryptedFilePath = "$tempDir${file.uploadedFileID}.decrypted";
+
+  try {
+    final authJWTToken = await CollectionsService.instance
+        .getPublicAlbumTokenJWT(file.collectionID!);
+
+    final headers = {
+      "X-Auth-Access-Token": authToken,
+      if (authJWTToken != null) "X-Auth-Access-Token-JWT": authJWTToken,
+    };
+    final response = (await NetworkClient.instance.getDio().download(
+      "https://public-albums.ente.io/download/?fileID=${file.uploadedFileID}",
+      encryptedFilePath,
+      options: Options(
+        headers: headers,
+        responseType: ResponseType.bytes,
+      ),
+      onReceiveProgress: (a, b) {
+        progressCallback?.call(a, b);
+      },
+    ));
+
+    if (response.statusCode != 200) {
+      _logger.warning('$logPrefix download failed ${response.toString()}');
+      return null;
+    }
+
+    final int sizeInBytes = file.fileSize!;
+    final FakePeriodicProgress? fakeProgress = file.fileType == FileType.video
+        ? FakePeriodicProgress(
+            callback: (count) {
+              progressCallback?.call(sizeInBytes, sizeInBytes);
+            },
+            duration: const Duration(milliseconds: 5000),
+          )
+        : null;
+    try {
+      fakeProgress?.start();
+      await CryptoUtil.decryptFile(
+        encryptedFilePath,
+        decryptedFilePath,
+        CryptoUtil.base642bin(file.fileDecryptionHeader!),
+        getFileKey(file),
+      );
+      fakeProgress?.stop();
+      _logger.info('$logPrefix file saved at $decryptedFilePath');
+    } catch (e, s) {
+      fakeProgress?.stop();
+      _logger.severe("Critical: $logPrefix failed to decrypt", e, s);
+      return null;
+    }
+    return File(decryptedFilePath);
+  } catch (e, s) {
+    _logger.severe("$logPrefix failed to download", e, s);
+    return null;
+  }
+}
+
 Future<File?> downloadAndDecrypt(
   EnteFile file, {
   ProgressCallback? progressCallback,
 }) async {
+  final authToken =
+      await CollectionsService.instance.getPublicAlbumToken(file.collectionID!);
+  if (authToken != null) {
+    final authToken = await CollectionsService.instance
+        .getPublicAlbumToken(file.collectionID!);
+
+    return await downloadAndDecryptPublicFile(
+      file,
+      authToken!,
+      progressCallback: progressCallback,
+    );
+  }
+
   final String logPrefix = 'File-${file.uploadedFileID}:';
   _logger
       .info('$logPrefix starting download ${formatBytes(file.fileSize ?? 0)}');
-
   final String tempDir = Configuration.instance.getTempDirectory();
   final String encryptedFilePath = "$tempDir${file.generatedID}.encrypted";
   final encryptedFile = File(encryptedFilePath);
@@ -123,6 +205,12 @@ Future<Uint8List> getFileKeyUsingBgWorker(EnteFile file) async {
       "collectionKey": collectionKey,
     },
   );
+}
+
+Future<void> downloadPublicAlbumToGallery(List<EnteFile> files) async {
+  for (final file in files) {
+    await downloadToGallery(file);
+  }
 }
 
 Future<void> downloadToGallery(EnteFile file) async {

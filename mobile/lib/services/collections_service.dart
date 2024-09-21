@@ -4,6 +4,7 @@ import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
+import "package:fast_base58/fast_base58.dart";
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
@@ -64,6 +65,8 @@ class CollectionsService {
   Collection? cachedUncategorizedCollection;
   final Map<String, EnteFile> _coverCache = <String, EnteFile>{};
   final Map<int, int> _countCache = <int, int>{};
+  final _cachedPublicAlbumToken = <int, String>{};
+  final _cachedPublicAlbumJWTToken = <int, String>{};
 
   CollectionsService._privateConstructor() {
     _db = CollectionsDB.instance;
@@ -172,6 +175,8 @@ class CollectionsService {
     _collectionIDToCollections.clear();
     cachedDefaultHiddenCollection = null;
     cachedUncategorizedCollection = null;
+    _cachedPublicAlbumToken.clear();
+    _cachedPublicAlbumJWTToken.clear();
     _cachedKeys.clear();
   }
 
@@ -1028,6 +1033,84 @@ class CollectionsService {
       }
       rethrow;
     }
+  }
+
+  Future<Collection> getPublicCollection(Uri uri) async {
+    final String authToken = uri.queryParameters["t"] ?? "Not found";
+    final String albumKey = uri.fragment;
+    try {
+      final response = await _enteDio.get(
+        "/public-collection/info",
+        options: Options(
+          headers: {"X-Auth-Access-Token": authToken},
+        ),
+      );
+
+      final collectionData = response.data["collection"];
+      final Collection collection = Collection.fromMap(collectionData);
+      final Uint8List collectionKey =
+          Uint8List.fromList(Base58Decode(albumKey));
+
+      _logger.severe("Public collection fetched: $collectionData");
+      _cachedKeys[collection.id] = collectionKey;
+      _cachedPublicAlbumToken[collection.id] = authToken;
+      return collection;
+    } catch (e, s) {
+      _logger.warning(e, s);
+      _logger.severe("Failed to fetch public collection");
+      if (e is DioError && e.response?.statusCode == 401) {
+        throw UnauthorizedError();
+      }
+      rethrow;
+    }
+  }
+
+  Future<bool> verifyPublicCollectionPassword(
+    String passwordHash,
+    int collectioID,
+  ) async {
+    final authToken = await getPublicAlbumToken(collectioID);
+    try {
+      final response = await _enteDio.post(
+        "https://api.ente.io/public-collection/verify-password",
+        data: {"passHash": passwordHash},
+        options: Options(
+          headers: {
+            "X-Auth-Access-Token": authToken,
+            "Cache-Control": "no-cache",
+          },
+        ),
+      );
+      final jwtToken = response.data["jwtToken"];
+      _logger.severe("TOKEN $authToken");
+      _logger.severe("JWT TOKEN $jwtToken");
+      if (response.statusCode == 200) {
+        await setPublicAlbumTokenJWT(collectioID, jwtToken);
+        return true;
+      }
+      return false;
+    } catch (e) {
+      _logger.severe("Failed to verify public collection password $e");
+      return false;
+    }
+  }
+
+  Future<String?> getPublicAlbumToken(int collectionID) async {
+    if (_cachedPublicAlbumToken.containsKey(collectionID)) {
+      return _cachedPublicAlbumToken[collectionID];
+    }
+    return null;
+  }
+
+  Future<String?> getPublicAlbumTokenJWT(int collectionID) async {
+    if (_cachedPublicAlbumJWTToken.containsKey(collectionID)) {
+      return _cachedPublicAlbumJWTToken[collectionID];
+    }
+    return null;
+  }
+
+  Future<void> setPublicAlbumTokenJWT(int collectionID, String token) async {
+    _cachedPublicAlbumJWTToken[collectionID] = token;
   }
 
   Future<Collection> _fromRemoteCollection(

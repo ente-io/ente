@@ -17,6 +17,7 @@ import "package:photos/l10n/l10n.dart";
 import 'package:photos/models/backup_status.dart';
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/device_collection.dart';
+import "package:photos/models/file/file.dart";
 import 'package:photos/models/gallery_type.dart';
 import "package:photos/models/metadata/common_keys.dart";
 import 'package:photos/models/selected_files.dart';
@@ -41,6 +42,7 @@ import "package:photos/ui/viewer/gallery/hooks/add_photos_sheet.dart";
 import 'package:photos/ui/viewer/gallery/hooks/pick_cover_photo.dart';
 import 'package:photos/utils/data_util.dart';
 import 'package:photos/utils/dialog_util.dart';
+import "package:photos/utils/file_download_util.dart";
 import 'package:photos/utils/magic_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/toast_util.dart';
@@ -53,16 +55,20 @@ class GalleryAppBarWidget extends StatefulWidget {
   final DeviceCollection? deviceCollection;
   final Collection? collection;
   final bool isFromCollectPhotos;
+  final bool isFromPublicShareLink;
+  final List<EnteFile> files;
 
   const GalleryAppBarWidget(
     this.type,
     this.title,
     this.selectedFiles, {
-    Key? key,
+    super.key,
     this.deviceCollection,
     this.collection,
     this.isFromCollectPhotos = false,
-  }) : super(key: key);
+    this.isFromPublicShareLink = false,
+    this.files = const [],
+  });
 
   @override
   State<GalleryAppBarWidget> createState() => _GalleryAppBarWidgetState();
@@ -84,6 +90,7 @@ enum AlbumPopupAction {
   pinAlbum,
   removeLink,
   cleanUncategorized,
+  downloadAlbum,
 }
 
 class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
@@ -457,6 +464,17 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           ),
       ],
     );
+    if (widget.isFromPublicShareLink) {
+      actions.clear();
+      items.clear();
+      items.add(
+        EntePopupMenuItem(
+          "Download album",
+          value: AlbumPopupAction.downloadAlbum,
+          icon: Icons.download_outlined,
+        ),
+      );
+    }
     if (items.isNotEmpty) {
       actions.add(
         PopupMenuButton(
@@ -512,6 +530,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
               await showOnMap();
             } else if (value == AlbumPopupAction.cleanUncategorized) {
               await onCleanUncategorizedClick(context);
+            } else if (value == AlbumPopupAction.downloadAlbum) {
+              await _downloadPublicAlbumToGallery(widget.files);
             } else {
               showToast(context, S.of(context).somethingWentWrong);
             }
@@ -521,6 +541,18 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     }
 
     return actions;
+  }
+
+  Future<void> _downloadPublicAlbumToGallery(List<EnteFile> files) async {
+    final dialog = createProgressDialog(context, "Downloading album");
+    await dialog.show();
+    try {
+      await downloadPublicAlbumToGallery(files);
+    } catch (e, s) {
+      _logger.severe("Failed to download album", e, s);
+      await showGenericErrorDialog(context: context, error: e);
+    }
+    await dialog.hide();
   }
 
   Future<void> onCleanUncategorizedClick(BuildContext buildContext) async {

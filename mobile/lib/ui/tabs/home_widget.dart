@@ -1,4 +1,5 @@
 import 'dart:async';
+import "dart:convert";
 import "dart:io";
 
 import 'package:flutter/material.dart';
@@ -24,7 +25,10 @@ import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/collection/collection.dart";
 import 'package:photos/models/collection/collection_items.dart';
+import "package:photos/models/file/file.dart";
+// import "package:photos/models/file/file.dart";
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
@@ -54,7 +58,9 @@ import "package:photos/ui/tabs/user_collections_tab.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/search/search_widget.dart";
 import 'package:photos/ui/viewer/search_tab/search_tab.dart';
+import "package:photos/utils/crypto_util.dart";
 import 'package:photos/utils/dialog_util.dart';
+import "package:photos/utils/diff_fetcher.dart";
 import "package:photos/utils/navigation_util.dart";
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:uni_links/uni_links.dart';
@@ -100,6 +106,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   late StreamSubscription<BackupFoldersUpdatedEvent> _backupFoldersUpdatedEvent;
   late StreamSubscription<AccountConfiguredEvent> _accountConfiguredEvent;
   late StreamSubscription<CollectionUpdatedEvent> _collectionUpdatedEvent;
+  final DiffFetcher _diffFetcher = DiffFetcher();
 
   @override
   void initState() {
@@ -224,6 +231,89 @@ class _HomeWidgetState extends State<HomeWidget> {
     NotificationService.instance
         .initialize(_onDidReceiveNotificationResponse)
         .ignore();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _initDeeplinkPublicAlbum();
+    });
+  }
+
+  Future<void> _initDeeplinkPublicAlbum() async {
+    // Handle the terminated state
+    final Uri? uri = await getInitialUri();
+    if (uri != null) {
+      await _handlePublicAlbumLink(uri);
+    }
+
+    // Handle the background state
+    uriLinkStream.listen((Uri? uri) async {
+      if (uri != null) {
+        await _handlePublicAlbumLink(uri);
+      }
+    });
+  }
+
+  Future<void> _handlePublicAlbumLink(Uri uri) async {
+    bool result = true;
+    final Collection collection =
+        await CollectionsService.instance.getPublicCollection(uri);
+    final publicUrl = collection.publicURLs![0];
+    if (publicUrl!.passwordEnabled) {
+      await showTextInputDialog(
+        context,
+        title: S.of(context).enterPassword,
+        submitButtonLabel: S.of(context).ok,
+        alwaysShowSuccessState: false,
+        onSubmit: (String text) async {
+          if (text.trim() == "") {
+            return;
+          }
+          try {
+            final hashedPassword = await CryptoUtil.deriveKey(
+              utf8.encode(text) as Uint8List,
+              CryptoUtil.base642bin(publicUrl.nonce!),
+              publicUrl.memLimit!,
+              publicUrl.opsLimit!,
+            );
+            _logger.info(
+              "Hashed password: ${CryptoUtil.bin2base64(hashedPassword)}",
+            );
+
+            result = await CollectionsService.instance
+                .verifyPublicCollectionPassword(
+              CryptoUtil.bin2base64(hashedPassword),
+              collection.id,
+            );
+            if (!result) {
+              await showErrorDialog(
+                context,
+                "Incorrect Password",
+                "Plesae try again",
+              );
+            }
+          } catch (e, s) {
+            _logger.severe("Failed to decrypt password for album", e, s);
+            rethrow;
+          }
+        },
+      );
+    }
+
+    if (result) {
+      final List<EnteFile> sharedFiles =
+          await _diffFetcher.getPublicFiles(context, collection.id);
+
+      await routeToPage(
+        context,
+        CollectionPage(
+          isFromPublicShareLink: true,
+          sharedLinkFiles: sharedFiles,
+          CollectionWithThumbnail(
+            collection,
+            null,
+          ),
+        ),
+      );
+    }
   }
 
   Future<void> _autoLogoutAlert() async {

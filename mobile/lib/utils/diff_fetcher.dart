@@ -1,17 +1,93 @@
 import 'dart:convert';
 import 'dart:math';
 
+import "package:dio/dio.dart";
+import "package:flutter/material.dart";
 import 'package:logging/logging.dart';
 import 'package:photos/core/network/network.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/metadata/file_magic.dart";
+import "package:photos/services/collections_service.dart";
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_download_util.dart';
 
 class DiffFetcher {
   final _logger = Logger("DiffFetcher");
   final _enteDio = NetworkClient.instance.enteDio;
+
+  Future<List<EnteFile>> getPublicFiles(
+    BuildContext context,
+    int collectionID,
+  ) async {
+    try {
+      final authToken =
+          await CollectionsService.instance.getPublicAlbumToken(collectionID);
+      final authJWTToken = await CollectionsService.instance
+          .getPublicAlbumTokenJWT(collectionID);
+      final time =
+          CollectionsService.instance.getCollectionSyncTime(collectionID);
+
+      final headers = {
+        "X-Auth-Access-Token": authToken,
+        "Cache-Control": "no-cache",
+        if (authJWTToken != null) "X-Auth-Access-Token-JWT": authJWTToken,
+      };
+
+      final response = await _enteDio.get(
+        "/public-collection/diff",
+        options: Options(headers: headers),
+        queryParameters: {"sinceTime": time},
+      );
+
+      final diff = response.data["diff"] as List;
+      final startTime = DateTime.now();
+      final sharedFiles = <EnteFile>[];
+
+      for (final item in diff) {
+        final file = EnteFile();
+        file.uploadedFileID = item["id"];
+        file.collectionID = item["collectionID"];
+        file.ownerID = item["ownerID"];
+        file.encryptedKey = item["encryptedKey"];
+        file.keyDecryptionNonce = item["keyDecryptionNonce"];
+        file.fileDecryptionHeader = item["file"]["decryptionHeader"];
+        file.thumbnailDecryptionHeader = item["thumbnail"]["decryptionHeader"];
+        file.metadataDecryptionHeader = item["metadata"]["decryptionHeader"];
+        if (item["info"] != null) {
+          file.fileSize = item["info"]["fileSize"];
+        }
+        final fileKey = getFileKey(file);
+        final encodedMetadata = await CryptoUtil.decryptChaCha(
+          CryptoUtil.base642bin(item["metadata"]["encryptedData"]),
+          fileKey,
+          CryptoUtil.base642bin(file.metadataDecryptionHeader!),
+        );
+        final Map<String, dynamic> metadata =
+            jsonDecode(utf8.decode(encodedMetadata));
+        file.applyMetadata(metadata);
+        if (item['pubMagicMetadata'] != null) {
+          final utfEncodedMmd = await CryptoUtil.decryptChaCha(
+            CryptoUtil.base642bin(item['pubMagicMetadata']['data']),
+            fileKey,
+            CryptoUtil.base642bin(item['pubMagicMetadata']['header']),
+          );
+          file.pubMmdEncodedJson = utf8.decode(utfEncodedMmd);
+          file.pubMmdVersion = item['pubMagicMetadata']['version'];
+          file.pubMagicMetadata =
+              PubMagicMetadata.fromEncodedJson(file.pubMmdEncodedJson!);
+        }
+        sharedFiles.add(file);
+      }
+
+      _logger.info('[Collection-$collectionID] parsed ${diff.length} '
+          'diff items ( ${sharedFiles.length} updated) in ${DateTime.now().difference(startTime).inMilliseconds}ms');
+      return sharedFiles;
+    } catch (e, s) {
+      _logger.severe("Failed to decrypt collection $e", s);
+      rethrow;
+    }
+  }
 
   Future<Diff> getEncryptedFilesDiff(int collectionID, int sinceTime) async {
     try {
