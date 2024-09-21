@@ -200,10 +200,10 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
 
     const confirmDeleteCollection = () => {
         setDialogMessage({
-            title: t("DELETE_COLLECTION_TITLE"),
+            title: t("delete_album_title"),
             content: (
                 <Trans
-                    i18nKey={"DELETE_COLLECTION_MESSAGE"}
+                    i18nKey={"delete_album_message"}
                     components={{
                         a: <Box component={"span"} color="text.base" />,
                     }}
@@ -707,7 +707,7 @@ const AlbumCollectionOptions: React.FC<AlbumCollectionOptionsProps> = ({
             startIcon={<DeleteOutlinedIcon />}
             onClick={onDeleteClick}
         >
-            {t("DELETE_COLLECTION")}
+            {t("delete_album")}
         </OverflowMenuOption>
         <OverflowMenuOption onClick={onShareClick} startIcon={<PeopleIcon />}>
             {t("SHARE_COLLECTION")}
