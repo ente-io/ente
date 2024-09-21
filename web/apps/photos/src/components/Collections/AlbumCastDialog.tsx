@@ -16,7 +16,7 @@ import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 import { v4 as uuidv4 } from "uuid";
 
-interface Props {
+interface AlbumCastDialogProps {
     show: boolean;
     onHide: () => void;
     currentCollection: Collection;
@@ -26,11 +26,11 @@ enum AlbumCastError {
     TV_NOT_FOUND = "tv_not_found",
 }
 
-export default function AlbumCastDialog({
+export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
     show,
     onHide,
     currentCollection,
-}: Props) {
+}) => {
     const [view, setView] = useState<
         "choose" | "auto" | "pin" | "auto-cast-error"
     >("choose");
@@ -73,6 +73,7 @@ export default function AlbumCastDialog({
         if (!tvPublicKeyB64) {
             throw new Error(AlbumCastError.TV_NOT_FOUND);
         }
+
         // generate random uuid string
         const castToken = uuidv4();
 
@@ -119,8 +120,8 @@ export default function AlbumCastDialog({
                                     onHide();
                                 })
                                 .catch((e) => {
-                                    setView("auto-cast-error");
                                     log.error("Error casting to TV", e);
+                                    setView("auto-cast-error");
                                 });
                         }
                     },
@@ -130,19 +131,14 @@ export default function AlbumCastDialog({
                 session
                     .sendMessage("urn:x-cast:pair-request", { collectionID })
                     .then(() => {
-                        log.debug(() => "Message sent successfully");
-                    })
-                    .catch((e) => {
-                        log.error("Error sending message", e);
+                        log.debug(() => "urn:x-cast:pair-request sent");
                     });
             });
         }
     }, [view]);
 
     useEffect(() => {
-        if (show) {
-            castGateway.revokeAllTokens();
-        }
+        if (show) castGateway.revokeAllTokens();
     }, [show]);
 
     return (
@@ -163,12 +159,8 @@ export default function AlbumCastDialog({
                             </Typography>
 
                             <EnteButton
-                                style={{
-                                    marginBottom: "1rem",
-                                }}
-                                onClick={() => {
-                                    setView("auto");
-                                }}
+                                style={{ marginBottom: "1rem" }}
+                                onClick={() => setView("auto")}
                             >
                                 {t("cast_auto_pair")}
                             </EnteButton>
@@ -178,11 +170,7 @@ export default function AlbumCastDialog({
                         {t("pair_with_pin_description")}
                     </Typography>
 
-                    <EnteButton
-                        onClick={() => {
-                            setView("pin");
-                        }}
-                    >
+                    <EnteButton onClick={() => setView("pin")}>
                         {t("pair_with_pin")}
                     </EnteButton>
                 </>
@@ -241,9 +229,7 @@ export default function AlbumCastDialog({
                     />
                     <EnteButton
                         variant="text"
-                        onClick={() => {
-                            setView("choose");
-                        }}
+                        onClick={() => setView("choose")}
                     >
                         {t("GO_BACK")}
                     </EnteButton>
@@ -251,4 +237,4 @@ export default function AlbumCastDialog({
             )}
         </DialogBoxV2>
     );
-}
+};
