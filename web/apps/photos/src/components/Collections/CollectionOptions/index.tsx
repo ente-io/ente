@@ -503,6 +503,11 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
 
 export default CollectionOptions;
 
+/** Props for a generic option. */
+interface OptionProps {
+    onClick: () => void;
+}
+
 interface QuickOptionsProps {
     collectionSummaryType: CollectionSummaryType;
     isDownloadInProgress: () => boolean;
@@ -515,35 +520,30 @@ const QuickOptions: React.FC<QuickOptionsProps> = ({
     onEmptyTrashClick,
     onDownloadClick,
     onShareClick,
-    collectionSummaryType,
+    collectionSummaryType: type,
     isDownloadInProgress,
 }) => (
     <Stack direction="row" sx={{ alignItems: "center", gap: "16px" }}>
-        {showEmptyTrashQuickOption(collectionSummaryType) && (
+        {showEmptyTrashQuickOption(type) && (
             <EmptyTrashQuickOption onClick={onEmptyTrashClick} />
         )}
-        {showDownloadQuickOption(collectionSummaryType) &&
+        {showDownloadQuickOption(type) &&
             (isDownloadInProgress() ? (
                 <EnteSpinner size="20px" sx={{ m: "12px" }} />
             ) : (
                 <DownloadQuickOption
                     onClick={onDownloadClick}
-                    collectionSummaryType={collectionSummaryType}
+                    collectionSummaryType={type}
                 />
             ))}
-        {showShareQuickOption(collectionSummaryType) && (
+        {showShareQuickOption(type) && (
             <ShareQuickOption
                 onClick={onShareClick}
-                collectionSummaryType={collectionSummaryType}
+                collectionSummaryType={type}
             />
         )}
     </Stack>
 );
-
-/** Props for a generic option. */
-interface OptionProps {
-    onClick: () => void;
-}
 
 const showEmptyTrashQuickOption = (type: CollectionSummaryType) =>
     type == "trash";
