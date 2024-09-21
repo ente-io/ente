@@ -1,11 +1,13 @@
-import { FlexWrapper } from "@ente/shared/components/Container";
-import { Box, styled, Typography } from "@mui/material";
+import { Box, Stack, styled, Typography } from "@mui/material";
 import { t } from "i18next";
 import React from "react";
 
 interface GalleryItemsSummaryProps {
+    /** The name / title for the items that are being shown. */
     name: string;
+    /** The number of items being shown. */
     fileCount: number;
+    /** An element (usually an icon) placed after the file count. */
     endIcon?: React.ReactNode;
 }
 
@@ -22,19 +24,18 @@ export const GalleryItemsSummary: React.FC<GalleryItemsSummaryProps> = ({
         <div>
             <Typography variant="h3">{name}</Typography>
 
-            <FlexWrapper>
+            <Stack direction="row" gap={1.5}>
                 <Typography variant="small" color="text.muted">
                     {t("photos_count", { count: fileCount })}
                 </Typography>
                 {endIcon && (
                     <Box
                         sx={{ svg: { fontSize: "17px", color: "text.muted" } }}
-                        ml={1.5}
                     >
                         {endIcon}
                     </Box>
                 )}
-            </FlexWrapper>
+            </Stack>
         </div>
     );
 };
