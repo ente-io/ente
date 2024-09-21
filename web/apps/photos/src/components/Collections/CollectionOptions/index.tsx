@@ -27,7 +27,7 @@ import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";
 import type { Dispatch, SetStateAction } from "react";
-import { useContext, useRef, useState } from "react";
+import { useCallback, useContext, useRef, useState } from "react";
 import { Trans } from "react-i18next";
 import * as CollectionAPI from "services/collectionService";
 import * as TrashService from "services/trashService";
@@ -106,21 +106,28 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         setCollectionSortOrderMenuView(false);
     };
 
+    const handleError = useCallback(
+        (e: unknown) => {
+            log.error("Collection action failed", e);
+            setDialogMessage({
+                title: t("ERROR"),
+                content: t("UNKNOWN_ERROR"),
+                close: { variant: "critical" },
+            });
+        },
+        [setDialogMessage],
+    );
+
     /**
      * Return a new function that shows an generic error dialog if the original
      * function throws.
      */
     const wrapError = async (f: () => Promise<void>) => {
-        return () => {
+        return async () => {
             try {
                 await f();
             } catch (e) {
-                log.error("Collection action failed", e);
-                setDialogMessage({
-                    title: t("ERROR"),
-                    content: t("UNKNOWN_ERROR"),
-                    close: { variant: "critical" },
-                });
+                handleError(e);
             }
         };
     };
@@ -132,16 +139,11 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     const wrapErrorAndSyncWithRemote = async (
         f: (...args: any) => Promise<void>,
     ) => {
-        return (...args: any) => {
+        return async (...args: any) => {
             try {
                 await f();
             } catch (e) {
-                log.error("Collection action failed", e);
-                setDialogMessage({
-                    title: t("ERROR"),
-                    content: t("UNKNOWN_ERROR"),
-                    close: { variant: "critical" },
-                });
+                handleError(e);
             } finally {
                 syncWithRemote(false, true);
             }
@@ -155,17 +157,12 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     const wrapErrorAndSyncWithRemoteLoading = async (
         f: () => Promise<void>,
     ) => {
-        return () => {
+        return async () => {
             startLoading();
             try {
                 await f();
             } catch (e) {
-                log.error("Collection action failed", e);
-                setDialogMessage({
-                    title: t("ERROR"),
-                    content: t("UNKNOWN_ERROR"),
-                    close: { variant: "critical" },
-                });
+                handleError(e);
             } finally {
                 syncWithRemote(false, true);
                 finishLoading();
