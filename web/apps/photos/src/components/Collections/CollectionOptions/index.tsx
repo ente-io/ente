@@ -221,7 +221,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         if (isActiveCollectionDownloadInProgress()) {
             return;
         }
-        if (collectionSummaryType === CollectionSummaryType.hiddenItems) {
+        if (collectionSummaryType == "hiddenItems") {
             const setFilesDownloadProgressAttributes =
                 setFilesDownloadProgressAttributesCreator(
                     activeCollection.name,
@@ -360,33 +360,28 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                 ariaControls={"collection-options"}
                 triggerButtonIcon={<MoreHoriz ref={overFlowMenuIconRef} />}
             >
-                {collectionSummaryType === CollectionSummaryType.trash ? (
+                {collectionSummaryType == "trash" ? (
                     <TrashCollectionOption
                         handleCollectionAction={handleCollectionAction}
                     />
-                ) : collectionSummaryType ===
-                  CollectionSummaryType.favorites ? (
+                ) : collectionSummaryType == "favorites" ? (
                     <OnlyDownloadCollectionOption
                         isDownloadInProgress={isActiveCollectionDownloadInProgress()}
                         handleCollectionAction={handleCollectionAction}
                         downloadOptionText={t("DOWNLOAD_FAVORITES")}
                     />
-                ) : collectionSummaryType ===
-                  CollectionSummaryType.uncategorized ? (
+                ) : collectionSummaryType == "uncategorized" ? (
                     <OnlyDownloadCollectionOption
                         handleCollectionAction={handleCollectionAction}
                         downloadOptionText={t("DOWNLOAD_UNCATEGORIZED")}
                     />
-                ) : collectionSummaryType ===
-                  CollectionSummaryType.hiddenItems ? (
+                ) : collectionSummaryType == "hiddenItems" ? (
                     <OnlyDownloadCollectionOption
                         handleCollectionAction={handleCollectionAction}
                         downloadOptionText={t("DOWNLOAD_HIDDEN_ITEMS")}
                     />
-                ) : collectionSummaryType ===
-                      CollectionSummaryType.incomingShareViewer ||
-                  collectionSummaryType ===
-                      CollectionSummaryType.incomingShareCollaborator ? (
+                ) : collectionSummaryType == "incomingShareViewer" ||
+                  collectionSummaryType == "incomingShareCollaborator" ? (
                     <SharedCollectionOption
                         isArchived={isArchivedCollection(activeCollection)}
                         handleCollectionAction={handleCollectionAction}
@@ -453,7 +448,7 @@ export const QuickOptions: React.FC<QuickOptionsProps> = ({
 };
 
 const showEmptyTrashQuickOption = (type: CollectionSummaryType) => {
-    return type === CollectionSummaryType.trash;
+    return type == "trash";
 };
 
 interface EmptyTrashQuickOptionProps {
@@ -480,17 +475,17 @@ export const EmptyTrashQuickOption: React.FC<EmptyTrashQuickOptionProps> = ({
 
 const showDownloadQuickOption = (type: CollectionSummaryType) => {
     return (
-        type === CollectionSummaryType.folder ||
-        type === CollectionSummaryType.favorites ||
-        type === CollectionSummaryType.album ||
-        type === CollectionSummaryType.uncategorized ||
-        type === CollectionSummaryType.hiddenItems ||
-        type === CollectionSummaryType.incomingShareViewer ||
-        type === CollectionSummaryType.incomingShareCollaborator ||
-        type === CollectionSummaryType.outgoingShare ||
-        type === CollectionSummaryType.sharedOnlyViaLink ||
-        type === CollectionSummaryType.archived ||
-        type === CollectionSummaryType.pinned
+        type == "folder" ||
+        type == "favorites" ||
+        type == "album" ||
+        type == "uncategorized" ||
+        type == "hiddenItems" ||
+        type == "incomingShareViewer" ||
+        type == "incomingShareCollaborator" ||
+        type == "outgoingShare" ||
+        type == "sharedOnlyViaLink" ||
+        type == "archived" ||
+        type == "pinned"
     );
 };
 
@@ -508,11 +503,11 @@ const DownloadQuickOption: React.FC<DownloadQuickOptionProps> = ({
 }) => (
     <Tooltip
         title={
-            collectionSummaryType === CollectionSummaryType.favorites
+            collectionSummaryType == "favorites"
                 ? t("DOWNLOAD_FAVORITES")
-                : collectionSummaryType === CollectionSummaryType.uncategorized
+                : collectionSummaryType == "uncategorized"
                   ? t("DOWNLOAD_UNCATEGORIZED")
-                  : collectionSummaryType === CollectionSummaryType.hiddenItems
+                  : collectionSummaryType == "hiddenItems"
                     ? t("DOWNLOAD_HIDDEN_ITEMS")
                     : t("DOWNLOAD_COLLECTION")
         }
@@ -527,14 +522,14 @@ const DownloadQuickOption: React.FC<DownloadQuickOptionProps> = ({
 
 const showShareQuickOption = (type: CollectionSummaryType) => {
     return (
-        type === CollectionSummaryType.folder ||
-        type === CollectionSummaryType.album ||
-        type === CollectionSummaryType.outgoingShare ||
-        type === CollectionSummaryType.sharedOnlyViaLink ||
-        type === CollectionSummaryType.archived ||
-        type === CollectionSummaryType.incomingShareViewer ||
-        type === CollectionSummaryType.incomingShareCollaborator ||
-        type === CollectionSummaryType.pinned
+        type == "folder" ||
+        type == "album" ||
+        type == "outgoingShare" ||
+        type == "sharedOnlyViaLink" ||
+        type == "archived" ||
+        type == "incomingShareViewer" ||
+        type == "incomingShareCollaborator" ||
+        type == "pinned"
     );
 };
 
@@ -552,15 +547,11 @@ const ShareQuickOption: React.FC<ShareQuickOptionProps> = ({
 }) => (
     <Tooltip
         title={
-            collectionSummaryType ===
-                CollectionSummaryType.incomingShareViewer ||
-            collectionSummaryType ===
-                CollectionSummaryType.incomingShareCollaborator
+            collectionSummaryType == "incomingShareViewer" ||
+            collectionSummaryType == "incomingShareCollaborator"
                 ? t("SHARING_DETAILS")
-                : collectionSummaryType ===
-                        CollectionSummaryType.outgoingShare ||
-                    collectionSummaryType ===
-                        CollectionSummaryType.sharedOnlyViaLink
+                : collectionSummaryType == "outgoingShare" ||
+                    collectionSummaryType == "sharedOnlyViaLink"
                   ? t("MODIFY_SHARING")
                   : t("SHARE_COLLECTION")
         }

@@ -37,16 +37,16 @@ export default function CollectionInfoWithOptions({
 
     const EndIcon = ({ type }: { type: CollectionSummaryType }) => {
         switch (type) {
-            case CollectionSummaryType.favorites:
+            case "favorites":
                 return <Favorite />;
-            case CollectionSummaryType.archived:
+            case "archived":
                 return <ArchiveOutlined />;
-            case CollectionSummaryType.incomingShareViewer:
-            case CollectionSummaryType.incomingShareCollaborator:
+            case "incomingShareViewer":
+            case "incomingShareCollaborator":
                 return <PeopleIcon />;
-            case CollectionSummaryType.outgoingShare:
+            case "outgoingShare":
                 return <PeopleIcon />;
-            case CollectionSummaryType.sharedOnlyViaLink:
+            case "sharedOnlyViaLink":
                 return <LinkIcon />;
             default:
                 return <></>;

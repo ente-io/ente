@@ -1130,28 +1130,44 @@ export function getCollectionSummaries(
         let type: CollectionSummaryType;
         if (isIncomingShare(collection, user)) {
             if (isIncomingCollabShare(collection, user)) {
-                type = CollectionSummaryType.incomingShareCollaborator;
+                type = "incomingShareCollaborator";
             } else {
-                type = CollectionSummaryType.incomingShareViewer;
+                type = "incomingShareViewer";
             }
         } else if (isOutgoingShare(collection, user)) {
-            type = CollectionSummaryType.outgoingShare;
+            type = "outgoingShare";
         } else if (isSharedOnlyViaLink(collection)) {
-            type = CollectionSummaryType.sharedOnlyViaLink;
+            type = "sharedOnlyViaLink";
         } else if (isArchivedCollection(collection)) {
-            type = CollectionSummaryType.archived;
+            type = "archived";
         } else if (isDefaultHiddenCollection(collection)) {
-            type = CollectionSummaryType.defaultHidden;
+            type = "defaultHidden";
         } else if (isPinnedCollection(collection)) {
-            type = CollectionSummaryType.pinned;
+            type = "pinned";
         } else {
-            type = CollectionSummaryType[collection.type];
+            // Directly use the collection type
+            // TODO: The constants can be aligned once collection type goes from
+            // an enum to an union.
+            switch (collection.type) {
+                case CollectionType.folder:
+                    type = "folder";
+                    break;
+                case CollectionType.favorites:
+                    type = "favorites";
+                    break;
+                case CollectionType.album:
+                    type = "album";
+                    break;
+                case CollectionType.uncategorized:
+                    type = "uncategorized";
+                    break;
+            }
         }
 
         let CollectionSummaryItemName: string;
-        if (type === CollectionSummaryType.uncategorized) {
+        if (type == "uncategorized") {
             CollectionSummaryItemName = t("UNCATEGORIZED");
-        } else if (type === CollectionSummaryType.favorites) {
+        } else if (type == "favorites") {
             CollectionSummaryItemName = t("FAVORITES");
         } else {
             CollectionSummaryItemName = collection.name;
@@ -1217,7 +1233,7 @@ function getAllSectionSummary(
     return {
         id: ALL_SECTION,
         name: t("ALL_SECTION_NAME"),
-        type: CollectionSummaryType.all,
+        type: "all",
         coverFile: allSectionFiles?.[0],
         latestFile: allSectionFiles?.[0],
         fileCount: allSectionFiles?.length || 0,
@@ -1247,7 +1263,7 @@ export function getDummyUncategorizedCollectionSummary(): CollectionSummary {
     return {
         id: DUMMY_UNCATEGORIZED_COLLECTION,
         name: t("UNCATEGORIZED"),
-        type: CollectionSummaryType.uncategorized,
+        type: "uncategorized",
         latestFile: null,
         coverFile: null,
         fileCount: 0,
@@ -1264,7 +1280,7 @@ export function getArchivedSectionSummary(
     return {
         id: ARCHIVE_SECTION,
         name: t("ARCHIVE_SECTION_NAME"),
-        type: CollectionSummaryType.archive,
+        type: "archive",
         coverFile: null,
         latestFile: archivedFiles?.[0],
         fileCount: archivedFiles?.length,
@@ -1289,7 +1305,7 @@ export function getHiddenItemsSummary(
     return {
         id: HIDDEN_ITEMS_SECTION,
         name: t("HIDDEN_ITEMS"),
-        type: CollectionSummaryType.hiddenItems,
+        type: "hiddenItems",
         coverFile: hiddenItems?.[0],
         latestFile: hiddenItems?.[0],
         fileCount: hiddenItems?.length,
@@ -1303,7 +1319,7 @@ export function getTrashedCollectionSummary(
     return {
         id: TRASH_SECTION,
         name: t("TRASH"),
-        type: CollectionSummaryType.trash,
+        type: "trash",
         coverFile: null,
         latestFile: trashedFiles?.[0],
         fileCount: trashedFiles?.length,

@@ -52,7 +52,7 @@ export default function SharingDetails({ collection, type }) {
                     />
                 </MenuItemGroup>
             </Stack>
-            {type === CollectionSummaryType.incomingShareCollaborator &&
+            {type == "incomingShareCollaborator" &&
                 collaborators?.length > 0 && (
                     <Stack>
                         <MenuSectionTitle

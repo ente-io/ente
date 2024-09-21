@@ -113,7 +113,7 @@ import { preFileInfoSync, sync } from "services/sync";
 import { syncTrash } from "services/trashService";
 import uploadManager from "services/upload/uploadManager";
 import { isTokenValid } from "services/userService";
-import { CollectionSummaries, CollectionSummaryType } from "types/collection";
+import { CollectionSummaries } from "types/collection";
 import {
     GalleryContextType,
     SelectedState,
@@ -1250,20 +1250,17 @@ export default function Gallery() {
                             )}
                             isFavoriteCollection={
                                 collectionSummaries.get(activeCollectionID)
-                                    ?.type === CollectionSummaryType.favorites
+                                    ?.type == "favorites"
                             }
                             isUncategorizedCollection={
                                 collectionSummaries.get(activeCollectionID)
-                                    ?.type ===
-                                CollectionSummaryType.uncategorized
+                                    ?.type == "uncategorized"
                             }
                             isIncomingSharedCollection={
                                 collectionSummaries.get(activeCollectionID)
-                                    ?.type ===
-                                    CollectionSummaryType.incomingShareCollaborator ||
+                                    ?.type == "incomingShareCollaborator" ||
                                 collectionSummaries.get(activeCollectionID)
-                                    ?.type ===
-                                    CollectionSummaryType.incomingShareViewer
+                                    ?.type == "incomingShareViewer"
                             }
                             isInSearchMode={isInSearchMode}
                             isInHiddenSection={barMode == "hidden-albums"}

@@ -6,11 +6,7 @@ import { AllCollectionDialog } from "components/Collections/AllCollections/dialo
 import { t } from "i18next";
 import { useEffect, useState } from "react";
 import { createUnCategorizedCollection } from "services/collectionService";
-import {
-    CollectionSummaries,
-    CollectionSummary,
-    CollectionSummaryType,
-} from "types/collection";
+import { CollectionSummaries, CollectionSummary } from "types/collection";
 import { CollectionSelectorIntent } from "types/gallery";
 import {
     COLLECTION_SORT_ORDER,
@@ -65,14 +61,14 @@ function CollectionSelector({
                     ) {
                         return (
                             isMoveToAllowedCollection(type) ||
-                            type === CollectionSummaryType.uncategorized
+                            type == "uncategorized"
                         );
                     } else if (
                         attributes.intent === CollectionSelectorIntent.restore
                     ) {
                         return (
                             isMoveToAllowedCollection(type) ||
-                            type === CollectionSummaryType.uncategorized
+                            type == "uncategorized"
                         );
                     } else {
                         return isMoveToAllowedCollection(type);

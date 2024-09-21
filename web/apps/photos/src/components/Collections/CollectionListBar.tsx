@@ -25,7 +25,7 @@ import memoize from "memoize-one";
 import React, { useEffect, useRef, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeList, ListChildComponentProps, areEqual } from "react-window";
-import { CollectionSummary, CollectionSummaryType } from "types/collection";
+import { CollectionSummary } from "types/collection";
 import { ALL_SECTION, COLLECTION_LIST_SORT_BY } from "utils/collection";
 import type { GalleryBarMode } from ".";
 import CollectionCard from "./CollectionCard";
@@ -444,26 +444,21 @@ function CollectionCardText({ collectionName }) {
 function CollectionCardIcon({ collectionType }) {
     return (
         <CollectionBarTileIcon>
-            {collectionType === CollectionSummaryType.favorites && <Favorite />}
-            {collectionType === CollectionSummaryType.archived && (
+            {collectionType == "favorites" && <Favorite />}
+            {collectionType == "archived" && (
                 <ArchiveIcon
                     sx={(theme) => ({
                         color: theme.colors.white.muted,
                     })}
                 />
             )}
-            {collectionType === CollectionSummaryType.outgoingShare && (
+            {collectionType == "outgoingShare" && <PeopleIcon />}
+            {(collectionType == "incomingShareViewer" ||
+                collectionType == "incomingShareCollaborator") && (
                 <PeopleIcon />
             )}
-            {(collectionType === CollectionSummaryType.incomingShareViewer ||
-                collectionType ===
-                    CollectionSummaryType.incomingShareCollaborator) && (
-                <PeopleIcon />
-            )}
-            {collectionType === CollectionSummaryType.sharedOnlyViaLink && (
-                <LinkIcon />
-            )}
-            {collectionType === CollectionSummaryType.pinned && <PushPin />}
+            {collectionType == "sharedOnlyViaLink" && <LinkIcon />}
+            {collectionType == "pinned" && <PushPin />}
         </CollectionBarTileIcon>
     );
 }
