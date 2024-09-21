@@ -50,7 +50,7 @@ export default function CollectionNamer({ attributes, ...props }: Props) {
                 callback={onSubmit}
                 fieldType="text"
                 buttonText={attributes.buttonText}
-                placeholder={t("ENTER_ALBUM_NAME")}
+                placeholder={t("enter_album_name")}
                 initialValue={attributes.autoFilledName}
                 submitButtonProps={{ sx: { mt: 1, mb: 2 } }}
                 secondaryButtonAction={props.onHide}

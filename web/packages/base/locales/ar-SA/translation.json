@@ -43,9 +43,9 @@
     "PASSPHRASE_MATCH_ERROR": "كلمات المرور غير متطابقة",
     "create_albums": "إنشاء ألبومات",
     "CREATE_COLLECTION": "ألبوم جديد",
-    "ENTER_ALBUM_NAME": "اسم الألبوم",
+    "enter_album_name": "اسم الألبوم",
     "CLOSE_OPTION": "إغلاق (Esc)",
-    "ENTER_FILE_NAME": "إسم الملف",
+    "enter_file_name": "إسم الملف",
     "CLOSE": "إغلاق",
     "NO": "لا",
     "NOTHING_HERE": "لا شيء يمكن رؤيته هنا بعد 👀",

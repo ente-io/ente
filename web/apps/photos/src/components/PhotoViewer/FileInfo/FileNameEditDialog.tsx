@@ -34,7 +34,7 @@ export const FileNameEditDialog = ({
             <SingleInputForm
                 initialValue={filename}
                 callback={onSubmit}
-                placeholder={t("ENTER_FILE_NAME")}
+                placeholder={t("enter_file_name")}
                 buttonText={t("rename")}
                 fieldType="text"
                 caption={extension}
