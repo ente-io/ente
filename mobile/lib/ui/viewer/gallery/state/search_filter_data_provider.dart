@@ -5,8 +5,10 @@ class SearchFilterDataProvider {
   final _appliedFiltersNotifier = _AppliedFiltersNotifier();
   final _recommendedFiltersNotifier = _RecommendedFiltersNotifier();
 
-  get recommendations => _recommendedFiltersNotifier.recommendedFilters;
-  get appliedFilters => _appliedFiltersNotifier.appliedFilters;
+  List<HierarchicalSearchFilter> get recommendations =>
+      _recommendedFiltersNotifier.recommendedFilters;
+  List<HierarchicalSearchFilter> get appliedFilters =>
+      _appliedFiltersNotifier.appliedFilters;
 
   void addRecommendations(List<HierarchicalSearchFilter> filters) {
     _recommendedFiltersNotifier.addFilters(filters);
@@ -31,11 +33,30 @@ class SearchFilterDataProvider {
     bool toRecommended = false,
     required VoidCallback listener,
   }) {
+    assert(
+      toApplied != false || toRecommended != false,
+      "Listener not added to any notifier",
+    );
     if (toApplied) {
       _appliedFiltersNotifier.addListener(listener);
-    }
-    if (toRecommended) {
+    } else if (toRecommended) {
       _recommendedFiltersNotifier.addListener(listener);
+    }
+  }
+
+  void removeListener({
+    bool fromApplied = false,
+    bool fromRecommended = false,
+    required VoidCallback listener,
+  }) {
+    assert(
+      fromApplied != false || fromRecommended != false,
+      "Listener not removed from any notifier",
+    );
+    if (fromApplied) {
+      _appliedFiltersNotifier.removeListener(listener);
+    } else if (fromRecommended) {
+      _recommendedFiltersNotifier.removeListener(listener);
     }
   }
 }
