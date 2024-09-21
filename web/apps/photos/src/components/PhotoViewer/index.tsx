@@ -821,7 +821,7 @@ function PhotoViewer(props: Iprops) {
                             {props.enableDownload && (
                                 <button
                                     className="pswp__button pswp__button--custom"
-                                    title={t("DOWNLOAD_OPTION")}
+                                    title={t("download_tooltip")}
                                     onClick={() =>
                                         downloadFileHelper(
                                             photoSwipe.currItem as EnteFile,
@@ -834,7 +834,7 @@ function PhotoViewer(props: Iprops) {
                             {props.enableDownload && shouldShowCopyOption && (
                                 <button
                                     className="pswp__button pswp__button--custom"
-                                    title={t("COPY_OPTION")}
+                                    title={t("copy_tooltip")}
                                     onClick={() =>
                                         copyToClipboardHelper(
                                             photoSwipe.currItem as EnteFile,
@@ -861,7 +861,7 @@ function PhotoViewer(props: Iprops) {
                                 <button
                                     className="pswp__button pswp__button--custom"
                                     onClick={toggleZoomInAndOut}
-                                    title={t("ZOOM_IN_OUT")}
+                                    title={t("zoom_in_out_tooltip")}
                                 >
                                     <ZoomInOutlinedIcon />
                                 </button>
@@ -871,7 +871,7 @@ function PhotoViewer(props: Iprops) {
                                 onClick={() => {
                                     toggleFullscreen(photoSwipe);
                                 }}
-                                title={t("TOGGLE_FULLSCREEN")}
+                                title={t("toggle_fullscreen_tooltip")}
                             >
                                 {!isInFullScreenMode ? (
                                     <FullscreenOutlinedIcon
