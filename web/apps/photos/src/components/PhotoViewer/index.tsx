@@ -937,13 +937,13 @@ function PhotoViewer(props: Iprops) {
                         </div>
                         <button
                             className="pswp__button pswp__button--arrow--left"
-                            title={t("PREVIOUS")}
+                            title={t("previous_tooltip")}
                         >
                             <ChevronLeft sx={{ pointerEvents: "none" }} />
                         </button>
                         <button
                             className="pswp__button pswp__button--arrow--right"
-                            title={t("NEXT")}
+                            title={t("next_tooltip")}
                         >
                             <ChevronRight sx={{ pointerEvents: "none" }} />
                         </button>

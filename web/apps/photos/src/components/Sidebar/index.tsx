@@ -683,7 +683,7 @@ const DebugSection: React.FC = () => {
             title: t("DOWNLOAD_LOGS"),
             content: <Trans i18nKey={"DOWNLOAD_LOGS_MESSAGE"} />,
             proceed: {
-                text: t("DOWNLOAD"),
+                text: t("download"),
                 variant: "accent",
                 action: downloadLogs,
             },

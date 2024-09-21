@@ -407,7 +407,7 @@ const Footer: React.FC = () => {
                 href="https://github.com/ente-io/ente/tree/main/auth#-download"
                 download
             >
-                <Button color="accent">{t("DOWNLOAD")}</Button>
+                <Button color="accent">{t("download")}</Button>
             </a>
         </Footer_>
     );

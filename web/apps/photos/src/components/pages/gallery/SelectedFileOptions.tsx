@@ -176,7 +176,7 @@ const SelectedFileOptions = ({
                                 <ClockIcon />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title={t("DOWNLOAD")}>
+                        <Tooltip title={t("download")}>
                             <IconButton
                                 onClick={handleFileOps(FILE_OPS_TYPE.DOWNLOAD)}
                             >
@@ -223,7 +223,7 @@ const SelectedFileOptions = ({
                     </>
                 ) : isUncategorizedCollection ? (
                     <>
-                        <Tooltip title={t("DOWNLOAD")}>
+                        <Tooltip title={t("download")}>
                             <IconButton
                                 onClick={handleFileOps(FILE_OPS_TYPE.DOWNLOAD)}
                             >
@@ -242,7 +242,7 @@ const SelectedFileOptions = ({
                         </Tooltip>
                     </>
                 ) : isIncomingSharedCollection ? (
-                    <Tooltip title={t("DOWNLOAD")}>
+                    <Tooltip title={t("download")}>
                         <IconButton
                             onClick={handleFileOps(FILE_OPS_TYPE.DOWNLOAD)}
                         >
@@ -256,7 +256,7 @@ const SelectedFileOptions = ({
                                 <VisibilityOutlined />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title={t("DOWNLOAD")}>
+                        <Tooltip title={t("download")}>
                             <IconButton
                                 onClick={handleFileOps(FILE_OPS_TYPE.DOWNLOAD)}
                             >
@@ -279,7 +279,7 @@ const SelectedFileOptions = ({
                                 <ClockIcon />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title={t("DOWNLOAD")}>
+                        <Tooltip title={t("download")}>
                             <IconButton
                                 onClick={handleFileOps(FILE_OPS_TYPE.DOWNLOAD)}
                             >
