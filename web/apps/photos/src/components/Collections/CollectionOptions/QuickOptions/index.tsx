@@ -6,7 +6,7 @@ import { DownloadQuickOption } from "./DownloadQuickOption";
 import { EmptyTrashQuickOption } from "./EmptyTrashQuickOption";
 import { ShareQuickOption } from "./ShareQuickOption";
 
-interface Iprops {
+interface QuickOptionsProps {
     handleCollectionAction: (
         action: CollectionActions,
         loader?: boolean,
@@ -15,11 +15,11 @@ interface Iprops {
     isDownloadInProgress: boolean;
 }
 
-export function QuickOptions({
+export const QuickOptions: React.FC<QuickOptionsProps> = ({
     handleCollectionAction,
     collectionSummaryType,
     isDownloadInProgress,
-}: Iprops) {
+}) => {
     return (
         <FlexWrapper sx={{ gap: "16px" }}>
             {showEmptyTrashQuickOption(collectionSummaryType) && (
@@ -44,7 +44,7 @@ export function QuickOptions({
             )}
         </FlexWrapper>
     );
-}
+};
 
 const showEmptyTrashQuickOption = (type: CollectionSummaryType) => {
     return type === CollectionSummaryType.trash;

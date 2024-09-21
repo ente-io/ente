@@ -18,6 +18,10 @@ export enum CollectionSummaryType {
     pinned = "pinned",
 }
 
+/**
+ * A massaged version of a {@link Collection} suitable for being directly shown
+ * in the UI.
+ */
 export interface CollectionSummary {
     id: number;
     name: string;
