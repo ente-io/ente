@@ -532,7 +532,6 @@
     "CONTINUOUS_EXPORT": "Sync continuously",
     "PENDING_ITEMS": "Pending items",
     "EXPORT_STARTING": "Export starting...",
-    "INCLUDE_SHARED": "Include shared files",
     "delete_account_reason_label": "What is the main reason you are deleting your account?",
     "delete_account_reason_placeholder": "Select a reason",
     "delete_reason": {

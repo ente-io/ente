@@ -57,7 +57,6 @@ export interface ExportRecord {
 export interface ExportSettings {
     folder: string;
     continuousExport: boolean;
-    includeShared: boolean;
 }
 
 export interface ExportUIUpdaters {
