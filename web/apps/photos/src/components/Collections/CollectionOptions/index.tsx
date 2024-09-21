@@ -56,30 +56,6 @@ interface CollectionOptionsProps {
     setShowAlbumCastDialog: Dispatch<SetStateAction<boolean>>;
 }
 
-enum CollectionActions {
-    SHOW_RENAME_DIALOG,
-    RENAME,
-    DOWNLOAD,
-    ARCHIVE,
-    UNARCHIVE,
-    CONFIRM_DELETE,
-    DELETE_WITH_FILES,
-    DELETE_BUT_KEEP_FILES,
-    SHOW_SHARE_DIALOG,
-    CONFIRM_EMPTY_TRASH,
-    EMPTY_TRASH,
-    CONFIRM_LEAVE_SHARED_ALBUM,
-    LEAVE_SHARED_ALBUM,
-    SHOW_SORT_ORDER_MENU,
-    UPDATE_COLLECTION_SORT_ORDER_ASC,
-    UPDATE_COLLECTION_SORT_ORDER_DESC,
-    PIN,
-    UNPIN,
-    HIDE,
-    UNHIDE,
-    SHOW_ALBUM_CAST_DIALOG,
-}
-
 const CollectionOptions = (props: CollectionOptionsProps) => {
     const {
         activeCollection,
@@ -99,13 +75,6 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     const [collectionSortOrderMenuView, setCollectionSortOrderMenuView] =
         useState(false);
 
-    const openCollectionSortOrderMenu = () => {
-        setCollectionSortOrderMenuView(true);
-    };
-    const closeCollectionSortOrderMenu = () => {
-        setCollectionSortOrderMenuView(false);
-    };
-
     const handleError = useCallback(
         (e: unknown) => {
             log.error("Collection action failed", e);
@@ -122,10 +91,10 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
      * Return a new function by wrapping an async function in an error handler,
      * and syncing on completion.
      */
-    const wrapErrorAndSync = async (f: (...args: any) => Promise<void>) => {
-        return async (...args: any) => {
+    const wrapErrorAndSync = async (f: () => Promise<void>) => {
+        return async () => {
             try {
-                await f(...args);
+                await f();
             } catch (e) {
                 handleError(e);
             } finally {
@@ -153,11 +122,10 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     };
 
     /**
-     * Variant of {@link wrapErrorAndSync} that also shows the global
-     * loading bar.
+     * Variant of {@link wrapErrorAndSyncLoading} with a string arg.
      */
     const wrapErrorAndSyncLoadingString = async (
-        f: (string) => Promise<void>,
+        f: (s: string) => Promise<void>,
     ) => {
         return async (s: string) => {
             startLoading();
@@ -172,95 +140,13 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         };
     };
 
-    const handleCollectionAction = (
-        action: CollectionActions,
-        loader = true,
-    ) => {
-        let callback: Function;
-        switch (action) {
-            case CollectionActions.SHOW_RENAME_DIALOG:
-                callback = showRenameCollectionModal;
-                break;
-            case CollectionActions.RENAME:
-                callback = renameCollection;
-                break;
-            case CollectionActions.DOWNLOAD:
-                callback = downloadCollection;
-                break;
-            case CollectionActions.ARCHIVE:
-                callback = archiveCollection;
-                break;
-            case CollectionActions.UNARCHIVE:
-                callback = unArchiveCollection;
-                break;
-            case CollectionActions.CONFIRM_DELETE:
-                callback = confirmDeleteCollection;
-                break;
-            case CollectionActions.DELETE_WITH_FILES:
-                callback = deleteCollectionAlongWithFiles;
-                break;
-            case CollectionActions.DELETE_BUT_KEEP_FILES:
-                callback = deleteCollectionButKeepFiles;
-                break;
-            case CollectionActions.SHOW_SHARE_DIALOG:
-                callback = showCollectionShareModal;
-                break;
-            case CollectionActions.CONFIRM_EMPTY_TRASH:
-                callback = confirmEmptyTrash;
-                break;
-            case CollectionActions.EMPTY_TRASH:
-                callback = emptyTrash;
-                break;
-            case CollectionActions.CONFIRM_LEAVE_SHARED_ALBUM:
-                callback = confirmLeaveSharedAlbum;
-                break;
-            case CollectionActions.LEAVE_SHARED_ALBUM:
-                callback = leaveSharedAlbum;
-                break;
-            case CollectionActions.SHOW_SORT_ORDER_MENU:
-                callback = openCollectionSortOrderMenu;
-                break;
-            case CollectionActions.UPDATE_COLLECTION_SORT_ORDER_ASC:
-                callback = updateCollectionSortOrderAsc;
-                break;
-            case CollectionActions.UPDATE_COLLECTION_SORT_ORDER_DESC:
-                callback = updateCollectionSortOrderDesc;
-                break;
-
-            case CollectionActions.PIN:
-                callback = pinAlbum;
-                break;
-            case CollectionActions.UNPIN:
-                callback = unPinAlbum;
-                break;
-            case CollectionActions.HIDE:
-                callback = hideAlbum;
-                break;
-            case CollectionActions.UNHIDE:
-                callback = unHideAlbum;
-                break;
-            case CollectionActions.SHOW_ALBUM_CAST_DIALOG:
-                callback = showCastAlbumDialog;
-                break;
-            default:
-                log.error(`invalid collection action ${action}`);
-        }
-        return async (...args: any) => {
-            try {
-                loader && startLoading();
-                await callback(...args);
-            } catch (e) {
-                log.error(`collection action ${action} failed`, e);
-                setDialogMessage({
-                    title: t("ERROR"),
-                    content: t("UNKNOWN_ERROR"),
-                    close: { variant: "critical" },
-                });
-            } finally {
-                syncWithRemote(false, true);
-                loader && finishLoading();
-            }
-        };
+    const showRenameCollectionModal = () => {
+        setCollectionNamerAttributes({
+            title: t("RENAME_COLLECTION"),
+            buttonText: t("RENAME"),
+            autoFilledName: activeCollection.name,
+            callback: renameCollection,
+        });
     };
 
     const _renameCollection = async (newName: string) => {
@@ -271,56 +157,6 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
 
     const renameCollection = () =>
         void wrapErrorAndSyncLoadingString(_renameCollection);
-
-    const leaveSharedAlbum = async () => {
-        await CollectionAPI.leaveSharedAlbum(activeCollection.id);
-        setActiveCollectionID(ALL_SECTION);
-    };
-
-    const archiveCollection = () => {
-        changeCollectionVisibility(activeCollection, ItemVisibility.archived);
-    };
-
-    const unArchiveCollection = () => {
-        changeCollectionVisibility(activeCollection, ItemVisibility.visible);
-    };
-
-    const downloadCollection = () => {
-        if (isActiveCollectionDownloadInProgress()) {
-            return;
-        }
-        if (collectionSummaryType == "hiddenItems") {
-            const setFilesDownloadProgressAttributes =
-                setFilesDownloadProgressAttributesCreator(
-                    activeCollection.name,
-                    HIDDEN_ITEMS_SECTION,
-                    true,
-                );
-            downloadDefaultHiddenCollectionHelper(
-                setFilesDownloadProgressAttributes,
-            );
-        } else {
-            const setFilesDownloadProgressAttributes =
-                setFilesDownloadProgressAttributesCreator(
-                    activeCollection.name,
-                    activeCollection.id,
-                    isHiddenCollection(activeCollection),
-                );
-            downloadCollectionHelper(
-                activeCollection.id,
-                setFilesDownloadProgressAttributes,
-            );
-        }
-    };
-
-    const showRenameCollectionModal = () => {
-        setCollectionNamerAttributes({
-            title: t("RENAME_COLLECTION"),
-            buttonText: t("RENAME"),
-            autoFilledName: activeCollection.name,
-            callback: handleCollectionAction(CollectionActions.RENAME),
-        });
-    };
 
     const confirmDeleteCollection = () => {
         setDialogMessage({
@@ -408,7 +244,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         }
     };
 
-    const handleDownloadCollection = () =>
+    const downloadCollection = () =>
         void _downloadCollection().catch(handleError);
 
     const _archiveAlbum = () =>
@@ -427,7 +263,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
             content: t("LEAVE_SHARED_ALBUM_MESSAGE"),
             proceed: {
                 text: t("LEAVE_SHARED_ALBUM"),
-                action: leaveSharedAlbum2,
+                action: leaveSharedAlbum,
                 variant: "critical",
             },
             close: {
@@ -441,7 +277,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         setActiveCollectionID(ALL_SECTION);
     };
 
-    const leaveSharedAlbum2 = () =>
+    const leaveSharedAlbum = () =>
         void wrapErrorAndSyncLoading(_leaveSharedAlbum);
 
     const showCastAlbumDialog = () => setShowAlbumCastDialog(true);
@@ -450,9 +286,9 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
 
     const _unpinAlbum = () => changeCollectionOrder(activeCollection, 0);
 
-    const pinAlbum2 = () => void wrapErrorAndSync(_pinAlbum);
+    const pinAlbum = () => void wrapErrorAndSync(_pinAlbum);
 
-    const unpinAlbum2 = () => void wrapErrorAndSync(_unpinAlbum);
+    const unpinAlbum = () => void wrapErrorAndSync(_unpinAlbum);
 
     const _hideAlbum = async () => {
         await changeCollectionVisibility(
@@ -470,9 +306,9 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         setActiveCollectionID(HIDDEN_ITEMS_SECTION);
     };
 
-    const hideAlbum2 = () => void wrapErrorAndSync(_hideAlbum);
+    const hideAlbum = () => void wrapErrorAndSync(_hideAlbum);
 
-    const unhideAlbum2 = () => void wrapErrorAndSync(_unhideAlbum);
+    const unhideAlbum = () => void wrapErrorAndSync(_unhideAlbum);
 
     const showSortOrderMenu = () => setCollectionSortOrderMenuView(true);
 
@@ -489,44 +325,13 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     const changeSortOrderDesc = () =>
         void wrapErrorAndSync(_changeSortOrderDesc);
 
-    const updateCollectionSortOrderAsc = async () => {
-        await changeCollectionSortOrder(activeCollection, true);
-    };
-
-    const updateCollectionSortOrderDesc = async () => {
-        await changeCollectionSortOrder(activeCollection, false);
-    };
-
-    const pinAlbum = async () => {
-        await changeCollectionOrder(activeCollection, 1);
-    };
-
-    const unPinAlbum = async () => {
-        await changeCollectionOrder(activeCollection, 0);
-    };
-
-    const hideAlbum = async () => {
-        await changeCollectionVisibility(
-            activeCollection,
-            ItemVisibility.hidden,
-        );
-        setActiveCollectionID(ALL_SECTION);
-    };
-    const unHideAlbum = async () => {
-        await changeCollectionVisibility(
-            activeCollection,
-            ItemVisibility.visible,
-        );
-        setActiveCollectionID(HIDDEN_ITEMS_SECTION);
-    };
-
     return (
         <HorizontalFlex sx={{ display: "inline-flex", gap: "16px" }}>
             <QuickOptions
                 collectionSummaryType={collectionSummaryType}
                 isDownloadInProgress={isActiveCollectionDownloadInProgress}
                 onEmptyTrashClick={confirmEmptyTrash}
-                onDownloadClick={handleDownloadCollection}
+                onDownloadClick={downloadCollection}
                 onShareClick={showCollectionShareModal}
             />
 
@@ -541,16 +346,16 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                         isDownloadInProgress={
                             isActiveCollectionDownloadInProgress
                         }
-                        onClick={handleDownloadCollection}
+                        onClick={downloadCollection}
                     >
                         {t("DOWNLOAD_FAVORITES")}
                     </DownloadOption>
                 ) : collectionSummaryType == "uncategorized" ? (
-                    <DownloadOption onClick={handleDownloadCollection}>
+                    <DownloadOption onClick={downloadCollection}>
                         {t("DOWNLOAD_UNCATEGORIZED")}
                     </DownloadOption>
                 ) : collectionSummaryType == "hiddenItems" ? (
-                    <DownloadOption onClick={handleDownloadCollection}>
+                    <DownloadOption onClick={downloadCollection}>
                         {t("DOWNLOAD_HIDDEN_ITEMS")}
                     </DownloadOption>
                 ) : collectionSummaryType == "incomingShareViewer" ||
@@ -571,10 +376,10 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                         onSortClick={showSortOrderMenu}
                         onArchiveClick={archiveAlbum}
                         onUnarchiveClick={unarchiveAlbum}
-                        onPinClick={pinAlbum2}
-                        onUnpinClick={unpinAlbum2}
-                        onHideClick={hideAlbum2}
-                        onUnhideClick={unhideAlbum2}
+                        onPinClick={pinAlbum}
+                        onUnpinClick={unpinAlbum}
+                        onHideClick={hideAlbum}
+                        onUnhideClick={unhideAlbum}
                         onDeleteClick={confirmDeleteCollection}
                         onShareClick={showCollectionShareModal}
                         onCastClick={showCastAlbumDialog}
