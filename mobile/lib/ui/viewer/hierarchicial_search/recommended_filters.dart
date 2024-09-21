@@ -4,14 +4,14 @@ import "package:photos/ui/components/buttons/chip_button_widget.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
 
-class RecommendationsRow extends StatefulWidget {
-  const RecommendationsRow({super.key});
+class RecommendedFilters extends StatefulWidget {
+  const RecommendedFilters({super.key});
 
   @override
-  State<RecommendationsRow> createState() => _RecommendationsRowState();
+  State<RecommendedFilters> createState() => _RecommendedFiltersState();
 }
 
-class _RecommendationsRowState extends State<RecommendationsRow> {
+class _RecommendedFiltersState extends State<RecommendedFilters> {
   late SearchFilterDataProvider _searchFilterDataProvider;
   late List<HierarchicalSearchFilter> _recommendations;
 
