@@ -1,6 +1,7 @@
 import { boxSeal } from "@/base/crypto/libsodium";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
+import { loadCast } from "@/new/photos/utils/chromecast-sender";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import EnteButton from "@ente/shared/components/EnteButton";
@@ -14,7 +15,6 @@ import { t } from "i18next";
 import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 import { v4 as uuidv4 } from "uuid";
-import { loadCast } from "@/new/photos/utils/chromecast-sender";
 
 interface Props {
     show: boolean;
@@ -24,12 +24,6 @@ interface Props {
 
 enum AlbumCastError {
     TV_NOT_FOUND = "tv_not_found",
-}
-
-declare global {
-    interface Window {
-        chrome: any;
-    }
 }
 
 export default function AlbumCastDialog({
@@ -42,11 +36,12 @@ export default function AlbumCastDialog({
     >("choose");
 
     const [browserCanCast, setBrowserCanCast] = useState(false);
-    // Make API call on component mount
+
+    // Make API call to clear all previous sessions on component mount.
     useEffect(() => {
         castGateway.revokeAllTokens();
 
-        setBrowserCanCast(!!window.chrome);
+        setBrowserCanCast(typeof window["chrome"] !== "undefined");
     }, []);
 
     const onSubmit: SingleInputFormProps["callback"] = async (
@@ -101,7 +96,7 @@ export default function AlbumCastDialog({
     useEffect(() => {
         if (view === "auto") {
             loadCast().then(async (cast) => {
-                const instance = await cast.framework.CastContext.getInstance();
+                const instance = cast.framework.CastContext.getInstance();
                 try {
                     await instance.requestSession();
                 } catch (e) {
