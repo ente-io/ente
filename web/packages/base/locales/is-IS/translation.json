@@ -135,7 +135,7 @@
     "CHANGE_EMAIL": "Breyta netfangi",
     "OK": "Í lagi",
     "SUCCESS": "Tókst",
-    "ERROR": "Villa",
+    "error": "Villa",
     "MESSAGE": "Skilaboð",
     "OFFLINE_MSG": "",
     "install": "",

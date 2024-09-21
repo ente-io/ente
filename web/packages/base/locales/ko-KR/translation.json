@@ -135,7 +135,7 @@
     "CHANGE_EMAIL": "이메일 주소 변경",
     "OK": "확인",
     "SUCCESS": "성공",
-    "ERROR": "",
+    "error": "",
     "MESSAGE": "",
     "OFFLINE_MSG": "",
     "install": "",

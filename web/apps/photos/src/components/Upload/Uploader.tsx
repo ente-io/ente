@@ -540,7 +540,7 @@ export default function Uploader({
             closeUploadProgress();
             log.error("Failed to create album", e);
             appContext.setDialogMessage({
-                title: t("ERROR"),
+                title: t("error"),
                 close: { variant: "critical" },
                 content: t("CREATE_ALBUM_FAILED"),
             });

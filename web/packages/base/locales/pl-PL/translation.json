@@ -135,7 +135,7 @@
     "CHANGE_EMAIL": "Zmień adres e-mail",
     "OK": "OK",
     "SUCCESS": "Sukces",
-    "ERROR": "Błąd",
+    "error": "Błąd",
     "MESSAGE": "Wiadomość",
     "OFFLINE_MSG": "Jesteś offline, wyświetlane są wspomnienia z pamięci podręcznej",
     "install": "Zainstaluj",

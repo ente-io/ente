@@ -135,7 +135,7 @@
     "CHANGE_EMAIL": "E-Mail-Adresse ändern",
     "OK": "OK",
     "SUCCESS": "Erfolgreich",
-    "ERROR": "Fehler",
+    "error": "Fehler",
     "MESSAGE": "Nachricht",
     "OFFLINE_MSG": "Du bist offline, gecachte Erinnerungen werden angezeigt",
     "install": "Installieren",

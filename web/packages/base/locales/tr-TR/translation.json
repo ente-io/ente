@@ -135,7 +135,7 @@
     "CHANGE_EMAIL": "E-posta adresini değiştir",
     "OK": "Tamam",
     "SUCCESS": "Başarılı",
-    "ERROR": "Hata",
+    "error": "Hata",
     "MESSAGE": "Mesaj",
     "OFFLINE_MSG": "Çevrimdışısın, önbelleğe alınmış anılar gösteriliyor",
     "install": "",

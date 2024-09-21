@@ -135,7 +135,7 @@
     "CHANGE_EMAIL": "",
     "OK": "OK",
     "SUCCESS": "",
-    "ERROR": "",
+    "error": "",
     "MESSAGE": "Meddelande",
     "OFFLINE_MSG": "",
     "install": "Installera",

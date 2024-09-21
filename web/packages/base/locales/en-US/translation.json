@@ -135,7 +135,7 @@
     "CHANGE_EMAIL": "Change email",
     "OK": "OK",
     "SUCCESS": "Success",
-    "ERROR": "Error",
+    "error": "Error",
     "MESSAGE": "Message",
     "OFFLINE_MSG": "You are offline, cached memories are being shown",
     "install": "Install",

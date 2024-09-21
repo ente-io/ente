@@ -149,7 +149,7 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
         (e: unknown) => {
             log.error("Collection action failed", e);
             setDialogMessage({
-                title: t("ERROR"),
+                title: t("error"),
                 content: t("UNKNOWN_ERROR"),
                 close: { variant: "critical" },
             });

@@ -135,7 +135,7 @@
     "CHANGE_EMAIL": "Modifier l'e-mail",
     "OK": "Ok",
     "SUCCESS": "Parfait",
-    "ERROR": "Erreur",
+    "error": "Erreur",
     "MESSAGE": "Message",
     "OFFLINE_MSG": "Vous êtes hors-ligne, les mémoires cache sont affichées",
     "install": "Installer",

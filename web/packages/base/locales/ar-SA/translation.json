@@ -135,7 +135,7 @@
     "CHANGE_EMAIL": "تغيير البريد الإلكتروني",
     "OK": "حسنا",
     "SUCCESS": "تم بنجاح",
-    "ERROR": "خطأ",
+    "error": "خطأ",
     "MESSAGE": "رسالة",
     "OFFLINE_MSG": "",
     "install": "تثبيت",

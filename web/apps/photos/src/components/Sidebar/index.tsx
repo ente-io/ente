@@ -481,7 +481,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
 
     const somethingWentWrong = () =>
         setDialogMessage({
-            title: t("ERROR"),
+            title: t("error"),
             content: t("RECOVER_KEY_GENERATION_FAILED"),
             close: { variant: "critical" },
         });

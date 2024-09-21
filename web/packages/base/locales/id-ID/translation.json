@@ -135,7 +135,7 @@
     "CHANGE_EMAIL": "Ubah email",
     "OK": "OK",
     "SUCCESS": "Berhasil",
-    "ERROR": "Kesalahan",
+    "error": "Kesalahan",
     "MESSAGE": "",
     "OFFLINE_MSG": "",
     "install": "Instal",

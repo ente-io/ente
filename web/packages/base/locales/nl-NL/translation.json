@@ -135,7 +135,7 @@
     "CHANGE_EMAIL": "E-mail wijzigen",
     "OK": "Oké",
     "SUCCESS": "Succes",
-    "ERROR": "Foutmelding",
+    "error": "Foutmelding",
     "MESSAGE": "Melding",
     "OFFLINE_MSG": "Je bent offline, lokaal opgeslagen herinneringen worden getoond",
     "install": "Installeren",

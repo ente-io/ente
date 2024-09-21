@@ -135,7 +135,7 @@
     "CHANGE_EMAIL": "Cambia email",
     "OK": "OK",
     "SUCCESS": "Operazione riuscita",
-    "ERROR": "Errore",
+    "error": "Errore",
     "MESSAGE": "Messaggio",
     "OFFLINE_MSG": "Sei offline, i ricordi memorizzati nella cache vengono mostrati",
     "install": "Installa",

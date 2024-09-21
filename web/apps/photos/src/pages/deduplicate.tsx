@@ -137,14 +137,14 @@ export default function Deduplicate() {
                 e.httpStatusCode === HttpStatusCode.Forbidden
             ) {
                 setDialogMessage({
-                    title: t("ERROR"),
+                    title: t("error"),
 
                     close: { variant: "critical" },
                     content: t("NOT_FILE_OWNER"),
                 });
             } else {
                 setDialogMessage({
-                    title: t("ERROR"),
+                    title: t("error"),
 
                     close: { variant: "critical" },
                     content: t("UNKNOWN_ERROR"),

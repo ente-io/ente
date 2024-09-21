@@ -46,7 +46,7 @@ const Page: React.FC = () => {
 
     const showPasskeyFetchFailedErrorDialog = useCallback(() => {
         setDialogBoxAttributesV2({
-            title: t("ERROR"),
+            title: t("error"),
             content: t("passkey_fetch_failed"),
             close: {},
         });

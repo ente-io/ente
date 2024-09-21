@@ -135,7 +135,7 @@
     "CHANGE_EMAIL": "Cambiar email",
     "OK": "OK",
     "SUCCESS": "Completado",
-    "ERROR": "Error",
+    "error": "Error",
     "MESSAGE": "Mensaje",
     "OFFLINE_MSG": "Estás desconectado, se están mostrando recuerdos en caché",
     "install": "Instalar",
