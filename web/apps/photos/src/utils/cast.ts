@@ -7,16 +7,14 @@ declare global {
     }
 }
 
-type Sender = {
-    chrome: typeof chrome;
-    cast: typeof cast;
-};
-
-export const loadSender = (() => {
-    let promise: Promise<Sender> | null = null;
+/**
+ * Load the Chromecast script, resolving with the global `cast` object.
+ */
+export const loadCast = (() => {
+    let promise: Promise<any> | undefined;
 
     return () => {
-        if (promise === null) {
+        if (promise === undefined) {
             promise = new Promise((resolve) => {
                 const script = document.createElement("script");
                 script.src =
@@ -29,10 +27,7 @@ export const loadSender = (() => {
                                 chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED,
                         });
 
-                        resolve({
-                            chrome,
-                            cast,
-                        });
+                        resolve(cast);
                     }
                 };
                 document.body.appendChild(script);

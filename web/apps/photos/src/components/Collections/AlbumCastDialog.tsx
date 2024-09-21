@@ -14,7 +14,7 @@ import { t } from "i18next";
 import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 import { v4 as uuidv4 } from "uuid";
-import { loadSender } from "../../utils/useCastSender";
+import { loadCast } from "../../utils/cast";
 
 interface Props {
     show: boolean;
@@ -100,9 +100,7 @@ export default function AlbumCastDialog({
 
     useEffect(() => {
         if (view === "auto") {
-            loadSender().then(async (sender) => {
-                const { cast } = sender;
-
+            loadCast().then(async (cast) => {
                 const instance = await cast.framework.CastContext.getInstance();
                 try {
                     await instance.requestSession();
