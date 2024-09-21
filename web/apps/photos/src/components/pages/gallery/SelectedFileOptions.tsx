@@ -188,7 +188,7 @@ const SelectedFileOptions = ({
                                 <AddIcon />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title={t("ARCHIVE")}>
+                        <Tooltip title={t("archive")}>
                             <IconButton
                                 onClick={handleFileOps(FILE_OPS_TYPE.ARCHIVE)}
                             >
@@ -303,7 +303,7 @@ const SelectedFileOptions = ({
                             </Tooltip>
                         )}
                         {activeCollectionID === ALL_SECTION && (
-                            <Tooltip title={t("ARCHIVE")}>
+                            <Tooltip title={t("archive")}>
                                 <IconButton
                                     onClick={handleFileOps(
                                         FILE_OPS_TYPE.ARCHIVE,

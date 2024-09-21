@@ -592,14 +592,14 @@ const SharedCollectionOptions: React.FC<SharedCollectionOptionProps> = ({
                 onClick={onUnarchiveClick}
                 startIcon={<Unarchive />}
             >
-                {t("UNARCHIVE_COLLECTION")}
+                {t("unarchive_album")}
             </OverflowMenuOption>
         ) : (
             <OverflowMenuOption
                 onClick={onArchiveClick}
                 startIcon={<ArchiveOutlined />}
             >
-                {t("ARCHIVE_COLLECTION")}
+                {t("archive_album")}
             </OverflowMenuOption>
         )}
         <OverflowMenuOption
@@ -676,14 +676,14 @@ const AlbumCollectionOptions: React.FC<AlbumCollectionOptionsProps> = ({
                         onClick={onUnarchiveClick}
                         startIcon={<Unarchive />}
                     >
-                        {t("UNARCHIVE_COLLECTION")}
+                        {t("unarchive_album")}
                     </OverflowMenuOption>
                 ) : (
                     <OverflowMenuOption
                         onClick={onArchiveClick}
                         startIcon={<ArchiveOutlined />}
                     >
-                        {t("ARCHIVE_COLLECTION")}
+                        {t("archive_album")}
                     </OverflowMenuOption>
                 )}
             </>
