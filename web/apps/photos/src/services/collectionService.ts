@@ -1304,7 +1304,7 @@ export function getHiddenItemsSummary(
     );
     return {
         id: HIDDEN_ITEMS_SECTION,
-        name: t("HIDDEN_ITEMS"),
+        name: t("hidden_items"),
         type: "hiddenItems",
         coverFile: hiddenItems?.[0],
         latestFile: hiddenItems?.[0],
