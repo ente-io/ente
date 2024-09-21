@@ -4,13 +4,12 @@ import type { Collection } from "@/media/collection";
 import { loadCast } from "@/new/photos/utils/chromecast-sender";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
-import EnteButton from "@ente/shared/components/EnteButton";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
 import castGateway from "@ente/shared/network/cast";
-import { Link, Typography } from "@mui/material";
+import { Button, Link, Typography } from "@mui/material";
 import { t } from "i18next";
 import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
@@ -151,47 +150,37 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
                                 {t("cast_auto_pair_description")}
                             </Typography>
 
-                            <EnteButton
+                            <Button
                                 style={{ marginBottom: "1rem" }}
                                 onClick={() => setView("auto")}
                             >
                                 {t("cast_auto_pair")}
-                            </EnteButton>
+                            </Button>
                         </>
                     )}
                     <Typography color="text.muted">
                         {t("pair_with_pin_description")}
                     </Typography>
-                    <EnteButton onClick={() => setView("pin")}>
+                    <Button onClick={() => setView("pin")}>
                         {t("pair_with_pin")}
-                    </EnteButton>
+                    </Button>
                 </>
             )}
             {view == "auto" && (
                 <VerticallyCentered gap="1rem">
                     <EnteSpinner />
                     <Typography>{t("choose_device_from_browser")}</Typography>
-                    <EnteButton
-                        variant="text"
-                        onClick={() => {
-                            setView("choose");
-                        }}
-                    >
+                    <Button variant="text" onClick={() => setView("choose")}>
                         {t("GO_BACK")}
-                    </EnteButton>
+                    </Button>
                 </VerticallyCentered>
             )}
             {view == "auto-cast-error" && (
                 <VerticallyCentered gap="1rem">
                     <Typography>{t("cast_auto_pair_failed")}</Typography>
-                    <EnteButton
-                        variant="text"
-                        onClick={() => {
-                            setView("choose");
-                        }}
-                    >
+                    <Button variant="text" onClick={() => setView("choose")}>
                         {t("GO_BACK")}
-                    </EnteButton>
+                    </Button>
                 </VerticallyCentered>
             )}
             {view == "pin" && (
@@ -219,12 +208,9 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
                         buttonText={t("pair_device_to_tv")}
                         submitButtonProps={{ sx: { mt: 1, mb: 2 } }}
                     />
-                    <EnteButton
-                        variant="text"
-                        onClick={() => setView("choose")}
-                    >
+                    <Button variant="text" onClick={() => setView("choose")}>
                         {t("GO_BACK")}
-                    </EnteButton>
+                    </Button>
                 </>
             )}
         </DialogBoxV2>
