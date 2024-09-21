@@ -455,6 +455,19 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
 
     const unhideAlbum2 = () => wrapErrorAndSync(_unhideAlbum);
 
+    const showSortOrderMenu = () => setCollectionSortOrderMenuView(true);
+
+    const hideSortOrderMenu = () => setCollectionSortOrderMenuView(false);
+
+    const _changeSortOrderAsc = () =>
+        changeCollectionSortOrder(activeCollection, true);
+
+    const _changeSortOrderDesc = () =>
+        changeCollectionSortOrder(activeCollection, false);
+
+    const changeSortOrderAsc = () => wrapErrorAndSync(_changeSortOrderAsc);
+
+    const changeSortOrderDesc = () => wrapErrorAndSync(_changeSortOrderDesc);
 
     const updateCollectionSortOrderAsc = async () => {
         await changeCollectionSortOrder(activeCollection, true);
@@ -534,6 +547,8 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                         isArchived={isArchivedCollection(activeCollection)}
                         isHidden={isHiddenCollection(activeCollection)}
                         isPinned={isPinnedCollection(activeCollection)}
+                        onRenameClick={showRenameCollectionModal}
+                        onSortClick={showSortOrderMenu}
                         onArchiveClick={archiveAlbum}
                         onUnarchiveClick={unarchiveAlbum}
                         onPinClick={pinAlbum2}
@@ -762,6 +777,8 @@ interface AlbumCollectionOptionsProps {
     isArchived: boolean;
     isPinned: boolean;
     isHidden: boolean;
+    onRenameClick: () => void;
+    onSortClick: () => void;
     onArchiveClick: () => void;
     onUnarchiveClick: () => void;
     onPinClick: () => void;
@@ -779,6 +796,8 @@ const AlbumCollectionOptions: React.FC<AlbumCollectionOptionsProps> = ({
     isArchived,
     isPinned,
     isHidden,
+    onRenameClick,
+    onSortClick,
     onArchiveClick,
     onUnarchiveClick,
     onPinClick,
@@ -789,22 +808,10 @@ const AlbumCollectionOptions: React.FC<AlbumCollectionOptionsProps> = ({
     handleCollectionAction,
 }) => (
     <>
-        <OverflowMenuOption
-            onClick={handleCollectionAction(
-                CollectionActions.SHOW_RENAME_DIALOG,
-                false,
-            )}
-            startIcon={<EditIcon />}
-        >
+        <OverflowMenuOption onClick={onRenameClick} startIcon={<EditIcon />}>
             {t("RENAME_COLLECTION")}
         </OverflowMenuOption>
-        <OverflowMenuOption
-            onClick={handleCollectionAction(
-                CollectionActions.SHOW_SORT_ORDER_MENU,
-                false,
-            )}
-            startIcon={<SortIcon />}
-        >
+        <OverflowMenuOption onClick={onSortClick} startIcon={<SortIcon />}>
             {t("SORT_BY")}
         </OverflowMenuOption>
         {isPinned ? (
