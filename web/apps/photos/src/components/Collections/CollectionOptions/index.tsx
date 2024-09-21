@@ -4,7 +4,9 @@ import { ItemVisibility } from "@/media/file-metadata";
 import type { CollectionSummaryType } from "@/new/photos/types/collection";
 import { FlexWrapper, HorizontalFlex } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
-import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
+import OverflowMenu, {
+    StyledMenu,
+} from "@ente/shared/components/OverflowMenu/menu";
 import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
 import ArchiveOutlined from "@mui/icons-material/ArchiveOutlined";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
@@ -42,7 +44,6 @@ import {
 } from "utils/collection";
 import { isArchivedCollection, isPinnedCollection } from "utils/magicMetadata";
 import { SetCollectionNamerAttributes } from "../CollectionNamer";
-import CollectionSortOrderMenu from "./CollectionSortOrderMenu";
 
 interface CollectionOptionsProps {
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
@@ -795,3 +796,61 @@ const AlbumCollectionOptions: React.FC<AlbumCollectionOptionsProps> = ({
         </OverflowMenuOption>
     </>
 );
+
+interface CollectionSortOrderMenuProps {
+    handleCollectionAction: (
+        action: CollectionActions,
+        loader?: boolean,
+    ) => (...args: any[]) => Promise<void>;
+    overFlowMenuIconRef: React.MutableRefObject<SVGSVGElement>;
+    collectionSortOrderMenuView: boolean;
+    closeCollectionSortOrderMenu: () => void;
+}
+
+const CollectionSortOrderMenu: React.FC<CollectionSortOrderMenuProps> = ({
+    handleCollectionAction,
+    collectionSortOrderMenuView,
+    closeCollectionSortOrderMenu,
+    overFlowMenuIconRef,
+}) => {
+    const setCollectionSortOrderToAsc = () => {
+        closeCollectionSortOrderMenu();
+        handleCollectionAction(CollectionActions.UPDATE_COLLECTION_SORT_ORDER)({
+            asc: true,
+        });
+    };
+
+    const setCollectionSortOrderToDesc = () => {
+        closeCollectionSortOrderMenu();
+        handleCollectionAction(CollectionActions.UPDATE_COLLECTION_SORT_ORDER)({
+            asc: false,
+        });
+    };
+    return (
+        <StyledMenu
+            id={"collection-files-sort"}
+            anchorEl={overFlowMenuIconRef.current}
+            open={collectionSortOrderMenuView}
+            onClose={closeCollectionSortOrderMenu}
+            MenuListProps={{
+                disablePadding: true,
+                "aria-labelledby": "collection-files-sort",
+            }}
+            anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "right",
+            }}
+            transformOrigin={{
+                vertical: "top",
+                horizontal: "right",
+            }}
+        >
+            <OverflowMenuOption onClick={setCollectionSortOrderToDesc}>
+                {t("NEWEST_FIRST")}
+            </OverflowMenuOption>
+            <OverflowMenuOption onClick={setCollectionSortOrderToAsc}>
+                {t("OLDEST_FIRST")}
+            </OverflowMenuOption>
+        </StyledMenu>
+    );
+};
