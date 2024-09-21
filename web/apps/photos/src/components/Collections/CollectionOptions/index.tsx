@@ -390,10 +390,6 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     const handleDownloadCollection = () =>
         void _downloadCollection().catch(handleError);
 
-    const showCastAlbumDialog = () => {
-        setShowAlbumCastDialog(true);
-    };
-
     const confirmLeaveSharedAlbum = () => {
         setDialogMessage({
             title: t("LEAVE_SHARED_ALBUM_TITLE"),
@@ -409,6 +405,10 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                 text: t("cancel"),
             },
         });
+    };
+
+    const showCastAlbumDialog = () => {
+        setShowAlbumCastDialog(true);
     };
 
     const updateCollectionSortOrderAsc = async () => {
@@ -479,6 +479,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                   collectionSummaryType == "incomingShareCollaborator" ? (
                     <SharedCollectionOptions
                         isArchived={isArchivedCollection(activeCollection)}
+                        onLeaveSharedAlbumClick={confirmLeaveSharedAlbum}
                         onCastClick={showCastAlbumDialog}
                         handleCollectionAction={handleCollectionAction}
                     />
@@ -663,6 +664,7 @@ const DownloadOption: React.FC<
 
 interface SharedCollectionOptionProps {
     isArchived: boolean;
+    onLeaveSharedAlbumClick: () => void;
     onCastClick: () => void;
     handleCollectionAction: (
         action: CollectionActions,
@@ -672,6 +674,7 @@ interface SharedCollectionOptionProps {
 
 const SharedCollectionOptions: React.FC<SharedCollectionOptionProps> = ({
     isArchived,
+    onLeaveSharedAlbumClick,
     onCastClick,
     handleCollectionAction,
 }) => (
@@ -693,10 +696,7 @@ const SharedCollectionOptions: React.FC<SharedCollectionOptionProps> = ({
         )}
         <OverflowMenuOption
             startIcon={<LogoutIcon />}
-            onClick={handleCollectionAction(
-                CollectionActions.CONFIRM_LEAVE_SHARED_ALBUM,
-                false,
-            )}
+            onClick={onLeaveSharedAlbumClick}
         >
             {t("LEAVE_ALBUM")}
         </OverflowMenuOption>
