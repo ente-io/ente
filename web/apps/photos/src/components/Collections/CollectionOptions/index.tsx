@@ -106,6 +106,71 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         setCollectionSortOrderMenuView(false);
     };
 
+    /**
+     * Wrap a async function in an error handler, returning a new function that
+     * shows an generic error dialog if the original function throws.
+     */
+    const wrapError = async (f: () => Promise<void>) => {
+        try {
+            await f();
+        } catch (e) {
+            log.error("Collection action failed", e);
+            setDialogMessage({
+                title: t("ERROR"),
+                content: t("UNKNOWN_ERROR"),
+                close: { variant: "critical" },
+            });
+        }
+    };
+
+    /**
+     * Wrap a async function in an error handler, and sync on completion.
+     *
+     * This function returns a new function that shows an generic error dialog
+     * if the original function throws.
+     */
+    const wrapErrorAndSyncWithRemote = async (f: () => Promise<void>) => {
+        try {
+            await f();
+        } catch (e) {
+            log.error("Collection action failed", e);
+            setDialogMessage({
+                title: t("ERROR"),
+                content: t("UNKNOWN_ERROR"),
+                close: { variant: "critical" },
+            });
+        } finally {
+            syncWithRemote(false, true);
+        }
+    };
+
+    /**
+     * Variant of {@link wrapErrorAndSyncWithRemote} that also shows the global
+     * loading bar.
+     *
+     * This function returns a new function that shows an generic error dialog
+     * if the original function throws. In addition, it also shows a global
+     * loading indicator while everything happens.
+     */
+    const wrapErrorAndSyncWithRemoteLoading = async (
+        f: () => Promise<void>,
+    ) => {
+        startLoading();
+        try {
+            await f();
+        } catch (e) {
+            log.error("Collection action failed", e);
+            setDialogMessage({
+                title: t("ERROR"),
+                content: t("UNKNOWN_ERROR"),
+                close: { variant: "critical" },
+            });
+        } finally {
+            syncWithRemote(false, true);
+            finishLoading();
+        }
+    };
+
     const handleCollectionAction = (
         action: CollectionActions,
         loader = true,
