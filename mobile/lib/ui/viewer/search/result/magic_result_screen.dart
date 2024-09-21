@@ -103,8 +103,9 @@ class _MagicResultScreenState extends State<MagicResultScreen> {
       return widget.fileIdToPosMap;
     } else if (widget.enableGrouping == false) {
       _logger.warning(
-          "fileIdToPosMap is empty, assuming existing list of files is sorted by most relevant.");
-      var map = <int, int>{};
+        "fileIdToPosMap is empty, assuming existing list of files is sorted by most relevant.",
+      );
+      final map = <int, int>{};
       for (int i = 0; i < files.length; i++) {
         map[files[i].uploadedFileID!] = i;
       }
