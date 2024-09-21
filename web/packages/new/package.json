@@ -12,7 +12,5 @@
         "idb": "^8.0.0",
         "zod": "^3.23.8"
     },
-    "devDependencies": {
-        "@types/chromecast-caf-sender": "^1.0.10"
-    }
+    "devDependencies": {}
 }
