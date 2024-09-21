@@ -310,12 +310,6 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         }
     };
 
-    const emptyTrash = async () => {
-        await TrashService.emptyTrash();
-        await TrashService.clearLocalTrash();
-        setActiveCollectionID(ALL_SECTION);
-    };
-
     const showRenameCollectionModal = () => {
         setCollectionNamerAttributes({
             title: t("RENAME_COLLECTION"),
@@ -360,7 +354,6 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         setDialogMessage({
             title: t("EMPTY_TRASH_TITLE"),
             content: t("EMPTY_TRASH_MESSAGE"),
-
             proceed: {
                 action: handleCollectionAction(CollectionActions.EMPTY_TRASH),
                 text: t("EMPTY_TRASH"),
@@ -368,6 +361,38 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
             },
             close: { text: t("cancel") },
         });
+
+    const emptyTrash = async () => {
+        await TrashService.emptyTrash();
+        await TrashService.clearLocalTrash();
+        setActiveCollectionID(ALL_SECTION);
+    };
+
+    const downloadCollection2 = () => {
+        if (isActiveCollectionDownloadInProgress()) return;
+
+        if (collectionSummaryType == "hiddenItems") {
+            return downloadDefaultHiddenCollectionHelper(
+                setFilesDownloadProgressAttributesCreator(
+                    activeCollection.name,
+                    HIDDEN_ITEMS_SECTION,
+                    true,
+                ),
+            );
+        } else {
+            return downloadCollectionHelper(
+                activeCollection.id,
+                setFilesDownloadProgressAttributesCreator(
+                    activeCollection.name,
+                    activeCollection.id,
+                    isHiddenCollection(activeCollection),
+                ),
+            );
+        }
+    };
+
+    const handleDownloadCollection = () =>
+        void downloadCollection2().catch(handleError);
 
     const confirmLeaveSharedAlbum = () => {
         setDialogMessage({
@@ -420,11 +445,11 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     return (
         <HorizontalFlex sx={{ display: "inline-flex", gap: "16px" }}>
             <QuickOptions
-                onEmptyTrashClick={confirmEmptyTrash}
-                onShareClick={showCollectionShareModal}
-                handleCollectionAction={handleCollectionAction}
                 collectionSummaryType={collectionSummaryType}
-                isDownloadInProgress={isActiveCollectionDownloadInProgress()}
+                isDownloadInProgress={isActiveCollectionDownloadInProgress}
+                onEmptyTrashClick={confirmEmptyTrash}
+                onDownloadClick={handleDownloadCollection}
+                onShareClick={showCollectionShareModal}
             />
 
             <OverflowMenu
@@ -479,20 +504,17 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
 export default CollectionOptions;
 
 interface QuickOptionsProps {
-    onEmptyTrashClick: () => void;
-    onShareClick: () => void;
-    handleCollectionAction: (
-        action: CollectionActions,
-        loader?: boolean,
-    ) => () => Promise<void>;
     collectionSummaryType: CollectionSummaryType;
-    isDownloadInProgress: boolean;
+    isDownloadInProgress: () => boolean;
+    onEmptyTrashClick: () => void;
+    onDownloadClick: () => void;
+    onShareClick: () => void;
 }
 
 const QuickOptions: React.FC<QuickOptionsProps> = ({
     onEmptyTrashClick,
+    onDownloadClick,
     onShareClick,
-    handleCollectionAction,
     collectionSummaryType,
     isDownloadInProgress,
 }) => {
@@ -502,13 +524,13 @@ const QuickOptions: React.FC<QuickOptionsProps> = ({
                 <EmptyTrashQuickOption onClick={onEmptyTrashClick} />
             )}
             {showDownloadQuickOption(collectionSummaryType) &&
-                (!isDownloadInProgress ? (
+                (isDownloadInProgress() ? (
+                    <EnteSpinner size="20px" sx={{ cursor: "not-allowed" }} />
+                ) : (
                     <DownloadQuickOption
-                        handleCollectionAction={handleCollectionAction}
+                        onClick={onDownloadClick}
                         collectionSummaryType={collectionSummaryType}
                     />
-                ) : (
-                    <EnteSpinner size="20px" sx={{ cursor: "not-allowed" }} />
                 ))}
             {showShareQuickOption(collectionSummaryType) && (
                 <ShareQuickOption
@@ -520,14 +542,13 @@ const QuickOptions: React.FC<QuickOptionsProps> = ({
     );
 };
 
-const showEmptyTrashQuickOption = (type: CollectionSummaryType) => {
-    return type == "trash";
-};
-
 /** Props for a generic option. */
 interface OptionProps {
     onClick: () => void;
 }
+
+const showEmptyTrashQuickOption = (type: CollectionSummaryType) =>
+    type == "trash";
 
 const EmptyTrashQuickOption: React.FC<OptionProps> = ({ onClick }) => (
     <Tooltip title={t("EMPTY_TRASH")}>
@@ -537,32 +558,25 @@ const EmptyTrashQuickOption: React.FC<OptionProps> = ({ onClick }) => (
     </Tooltip>
 );
 
-const showDownloadQuickOption = (type: CollectionSummaryType) => {
-    return (
-        type == "folder" ||
-        type == "favorites" ||
-        type == "album" ||
-        type == "uncategorized" ||
-        type == "hiddenItems" ||
-        type == "incomingShareViewer" ||
-        type == "incomingShareCollaborator" ||
-        type == "outgoingShare" ||
-        type == "sharedOnlyViaLink" ||
-        type == "archived" ||
-        type == "pinned"
-    );
+const showDownloadQuickOption = (type: CollectionSummaryType) =>
+    type == "folder" ||
+    type == "favorites" ||
+    type == "album" ||
+    type == "uncategorized" ||
+    type == "hiddenItems" ||
+    type == "incomingShareViewer" ||
+    type == "incomingShareCollaborator" ||
+    type == "outgoingShare" ||
+    type == "sharedOnlyViaLink" ||
+    type == "archived" ||
+    type == "pinned";
+
+type DownloadQuickOptionProps = OptionProps & {
+    collectionSummaryType: CollectionSummaryType;
 };
 
-interface DownloadQuickOptionProps {
-    handleCollectionAction: (
-        action: CollectionActions,
-        loader?: boolean,
-    ) => () => Promise<void>;
-    collectionSummaryType: CollectionSummaryType;
-}
-
 const DownloadQuickOption: React.FC<DownloadQuickOptionProps> = ({
-    handleCollectionAction,
+    onClick,
     collectionSummaryType,
 }) => (
     <Tooltip
@@ -576,26 +590,21 @@ const DownloadQuickOption: React.FC<DownloadQuickOptionProps> = ({
                     : t("DOWNLOAD_COLLECTION")
         }
     >
-        <IconButton
-            onClick={handleCollectionAction(CollectionActions.DOWNLOAD, false)}
-        >
+        <IconButton onClick={onClick}>
             <FileDownloadOutlinedIcon />
         </IconButton>
     </Tooltip>
 );
 
-const showShareQuickOption = (type: CollectionSummaryType) => {
-    return (
-        type == "folder" ||
-        type == "album" ||
-        type == "outgoingShare" ||
-        type == "sharedOnlyViaLink" ||
-        type == "archived" ||
-        type == "incomingShareViewer" ||
-        type == "incomingShareCollaborator" ||
-        type == "pinned"
-    );
-};
+const showShareQuickOption = (type: CollectionSummaryType) =>
+    type == "folder" ||
+    type == "album" ||
+    type == "outgoingShare" ||
+    type == "sharedOnlyViaLink" ||
+    type == "archived" ||
+    type == "incomingShareViewer" ||
+    type == "incomingShareCollaborator" ||
+    type == "pinned";
 
 interface ShareQuickOptionProps {
     onClick: () => void;
