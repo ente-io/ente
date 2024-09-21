@@ -176,7 +176,7 @@ const SelectedFileOptions = ({
                                 <ClockIcon />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title={t("DOWNLOAD")}>
+                        <Tooltip title={t("download")}>
                             <IconButton
                                 onClick={handleFileOps(FILE_OPS_TYPE.DOWNLOAD)}
                             >
@@ -188,7 +188,7 @@ const SelectedFileOptions = ({
                                 <AddIcon />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title={t("ARCHIVE")}>
+                        <Tooltip title={t("archive")}>
                             <IconButton
                                 onClick={handleFileOps(FILE_OPS_TYPE.ARCHIVE)}
                             >
@@ -223,7 +223,7 @@ const SelectedFileOptions = ({
                     </>
                 ) : isUncategorizedCollection ? (
                     <>
-                        <Tooltip title={t("DOWNLOAD")}>
+                        <Tooltip title={t("download")}>
                             <IconButton
                                 onClick={handleFileOps(FILE_OPS_TYPE.DOWNLOAD)}
                             >
@@ -242,7 +242,7 @@ const SelectedFileOptions = ({
                         </Tooltip>
                     </>
                 ) : isIncomingSharedCollection ? (
-                    <Tooltip title={t("DOWNLOAD")}>
+                    <Tooltip title={t("download")}>
                         <IconButton
                             onClick={handleFileOps(FILE_OPS_TYPE.DOWNLOAD)}
                         >
@@ -256,7 +256,7 @@ const SelectedFileOptions = ({
                                 <VisibilityOutlined />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title={t("DOWNLOAD")}>
+                        <Tooltip title={t("download")}>
                             <IconButton
                                 onClick={handleFileOps(FILE_OPS_TYPE.DOWNLOAD)}
                             >
@@ -279,7 +279,7 @@ const SelectedFileOptions = ({
                                 <ClockIcon />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title={t("DOWNLOAD")}>
+                        <Tooltip title={t("download")}>
                             <IconButton
                                 onClick={handleFileOps(FILE_OPS_TYPE.DOWNLOAD)}
                             >
@@ -292,7 +292,7 @@ const SelectedFileOptions = ({
                             </IconButton>
                         </Tooltip>
                         {activeCollectionID === ARCHIVE_SECTION && (
-                            <Tooltip title={t("UNARCHIVE")}>
+                            <Tooltip title={t("unarchive")}>
                                 <IconButton
                                     onClick={handleFileOps(
                                         FILE_OPS_TYPE.UNARCHIVE,
@@ -303,7 +303,7 @@ const SelectedFileOptions = ({
                             </Tooltip>
                         )}
                         {activeCollectionID === ALL_SECTION && (
-                            <Tooltip title={t("ARCHIVE")}>
+                            <Tooltip title={t("archive")}>
                                 <IconButton
                                     onClick={handleFileOps(
                                         FILE_OPS_TYPE.ARCHIVE,

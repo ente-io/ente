@@ -168,7 +168,7 @@ export async function updateSubscription(
         await billingService.updateSubscription(plan.stripeID);
     } catch (err) {
         setDialogMessage({
-            title: t("ERROR"),
+            title: t("error"),
             content: t("SUBSCRIPTION_UPDATE_FAILED"),
             close: { variant: "critical" },
         });
@@ -187,13 +187,13 @@ export async function cancelSubscription(
         setLoading(true);
         await billingService.cancelSubscription();
         setDialogMessage({
-            title: t("SUCCESS"),
+            title: t("success"),
             content: t("SUBSCRIPTION_CANCEL_SUCCESS"),
             close: { variant: "accent" },
         });
     } catch (e) {
         setDialogMessage({
-            title: t("ERROR"),
+            title: t("error"),
             content: t("SUBSCRIPTION_CANCEL_FAILED"),
             close: { variant: "critical" },
         });
@@ -212,13 +212,13 @@ export async function activateSubscription(
         setLoading(true);
         await billingService.activateSubscription();
         setDialogMessage({
-            title: t("SUCCESS"),
+            title: t("success"),
             content: t("SUBSCRIPTION_ACTIVATE_SUCCESS"),
             close: { variant: "accent" },
         });
     } catch (e) {
         setDialogMessage({
-            title: t("ERROR"),
+            title: t("error"),
             content: t("SUBSCRIPTION_ACTIVATE_FAILED"),
             close: { variant: "critical" },
         });
@@ -238,7 +238,7 @@ export async function updatePaymentMethod(
     } catch (error) {
         setLoading(false);
         setDialogMessage({
-            title: t("ERROR"),
+            title: t("error"),
             content: t("UNKNOWN_ERROR"),
             close: { variant: "critical" },
         });
@@ -264,7 +264,7 @@ export async function checkSubscriptionPurchase(
                 );
             } catch (e) {
                 setDialogMessage({
-                    title: t("ERROR"),
+                    title: t("error"),
                     content: t("SUBSCRIPTION_VERIFICATION_ERROR"),
                     close: {},
                 });
@@ -329,7 +329,7 @@ function handleFailureReason(
 
         default:
             setDialogMessage({
-                title: t("ERROR"),
+                title: t("error"),
                 content: t("SUBSCRIPTION_PURCHASE_FAILED"),
                 close: { variant: "critical" },
             });

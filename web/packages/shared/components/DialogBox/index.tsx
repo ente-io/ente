@@ -104,7 +104,7 @@ export default function DialogBox({
                                     onClose();
                                 }}
                             >
-                                {attributes.close?.text ?? t("OK")}
+                                {attributes.close?.text ?? t("ok")}
                             </FocusVisibleButton>
                         )}
                         {attributes.proceed && (

@@ -46,7 +46,7 @@ const Page: React.FC = () => {
 
     const showPasskeyFetchFailedErrorDialog = useCallback(() => {
         setDialogBoxAttributesV2({
-            title: t("ERROR"),
+            title: t("error"),
             content: t("passkey_fetch_failed"),
             close: {},
         });
@@ -392,7 +392,7 @@ const RenamePasskeyDialog: React.FC<RenamePasskeyDialogProps> = ({
                     initialValue={passkey.friendlyName}
                     callback={handleSubmit}
                     placeholder={t("enter_passkey_name")}
-                    buttonText={t("RENAME")}
+                    buttonText={t("rename")}
                     fieldType="text"
                     secondaryButtonAction={onClose}
                     submitButtonProps={{ sx: { mt: 1, mb: 0 } }}

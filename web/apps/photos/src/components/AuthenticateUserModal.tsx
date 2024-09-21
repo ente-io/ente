@@ -29,7 +29,7 @@ export default function AuthenticateUserModal({
 
     const somethingWentWrong = () =>
         setDialogMessage({
-            title: t("ERROR"),
+            title: t("error"),
             close: { variant: "critical" },
             content: t("UNKNOWN_ERROR"),
         });

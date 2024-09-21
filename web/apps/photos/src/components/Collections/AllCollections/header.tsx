@@ -22,8 +22,8 @@ export default function AllCollectionsHeader({
                     <Box>
                         <Typography variant="h3">
                             {isInHiddenSection
-                                ? t("ALL_HIDDEN_ALBUMS")
-                                : t("ALL_ALBUMS")}
+                                ? t("all_hidden_albums")
+                                : t("all_albums")}
                         </Typography>
                         <Typography variant="small" color={"text.muted"}>
                             {t("albums_count", { count: collectionCount })}

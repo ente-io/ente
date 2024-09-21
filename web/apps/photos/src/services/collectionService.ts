@@ -1166,9 +1166,9 @@ export function getCollectionSummaries(
 
         let CollectionSummaryItemName: string;
         if (type == "uncategorized") {
-            CollectionSummaryItemName = t("UNCATEGORIZED");
+            CollectionSummaryItemName = t("section_uncategorized");
         } else if (type == "favorites") {
-            CollectionSummaryItemName = t("FAVORITES");
+            CollectionSummaryItemName = t("favorites");
         } else {
             CollectionSummaryItemName = collection.name;
         }
@@ -1232,7 +1232,7 @@ function getAllSectionSummary(
     );
     return {
         id: ALL_SECTION,
-        name: t("ALL_SECTION_NAME"),
+        name: t("section_all"),
         type: "all",
         coverFile: allSectionFiles?.[0],
         latestFile: allSectionFiles?.[0],
@@ -1262,7 +1262,7 @@ function getAllSectionVisibleFiles(
 export function getDummyUncategorizedCollectionSummary(): CollectionSummary {
     return {
         id: DUMMY_UNCATEGORIZED_COLLECTION,
-        name: t("UNCATEGORIZED"),
+        name: t("section_uncategorized"),
         type: "uncategorized",
         latestFile: null,
         coverFile: null,
@@ -1279,7 +1279,7 @@ export function getArchivedSectionSummary(
     );
     return {
         id: ARCHIVE_SECTION,
-        name: t("ARCHIVE_SECTION_NAME"),
+        name: t("section_archive"),
         type: "archive",
         coverFile: null,
         latestFile: archivedFiles?.[0],
@@ -1304,7 +1304,7 @@ export function getHiddenItemsSummary(
     );
     return {
         id: HIDDEN_ITEMS_SECTION,
-        name: t("HIDDEN_ITEMS"),
+        name: t("hidden_items"),
         type: "hiddenItems",
         coverFile: hiddenItems?.[0],
         latestFile: hiddenItems?.[0],
@@ -1318,7 +1318,7 @@ export function getTrashedCollectionSummary(
 ): CollectionSummary {
     return {
         id: TRASH_SECTION,
-        name: t("TRASH"),
+        name: t("section_trash"),
         type: "trash",
         coverFile: null,
         latestFile: trashedFiles?.[0],

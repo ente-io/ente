@@ -23,7 +23,7 @@ interface Props {
 }
 
 enum AlbumCastError {
-    TV_NOT_FOUND = "TV_NOT_FOUND",
+    TV_NOT_FOUND = "tv_not_found",
 }
 
 declare global {
@@ -61,7 +61,7 @@ export default function AlbumCastDialog({
             let fieldError: string;
             switch (error.message) {
                 case AlbumCastError.TV_NOT_FOUND:
-                    fieldError = t("TV_NOT_FOUND");
+                    fieldError = t("tv_not_found");
                     break;
                 default:
                     fieldError = t("UNKNOWN_ERROR");
@@ -158,7 +158,7 @@ export default function AlbumCastDialog({
             open={show}
             onClose={onHide}
             attributes={{
-                title: t("CAST_ALBUM_TO_TV"),
+                title: t("cast_album_to_tv"),
             }}
         >
             {view === "choose" && (
@@ -166,7 +166,7 @@ export default function AlbumCastDialog({
                     {browserCanCast && (
                         <>
                             <Typography color={"text.muted"}>
-                                {t("AUTO_CAST_PAIR_DESC")}
+                                {t("cast_auto_pair_description")}
                             </Typography>
 
                             <EnteButton
@@ -177,12 +177,12 @@ export default function AlbumCastDialog({
                                     setView("auto");
                                 }}
                             >
-                                {t("AUTO_CAST_PAIR")}
+                                {t("cast_auto_pair")}
                             </EnteButton>
                         </>
                     )}
                     <Typography color="text.muted">
-                        {t("PAIR_WITH_PIN_DESC")}
+                        {t("pair_with_pin_description")}
                     </Typography>
 
                     <EnteButton
@@ -190,14 +190,14 @@ export default function AlbumCastDialog({
                             setView("pin");
                         }}
                     >
-                        {t("PAIR_WITH_PIN")}
+                        {t("pair_with_pin")}
                     </EnteButton>
                 </>
             )}
             {view === "auto" && (
                 <VerticallyCentered gap="1rem">
                     <EnteSpinner />
-                    <Typography>{t("CHOOSE_DEVICE_FROM_BROWSER")}</Typography>
+                    <Typography>{t("choose_device_from_browser")}</Typography>
                     <EnteButton
                         variant="text"
                         onClick={() => {
@@ -210,7 +210,7 @@ export default function AlbumCastDialog({
             )}
             {view === "auto-cast-error" && (
                 <VerticallyCentered gap="1rem">
-                    <Typography>{t("CAST_AUTO_PAIR_FAILED")}</Typography>
+                    <Typography>{t("cast_auto_pair_failed")}</Typography>
                     <EnteButton
                         variant="text"
                         onClick={() => {
@@ -225,7 +225,7 @@ export default function AlbumCastDialog({
                 <>
                     <Typography>
                         <Trans
-                            i18nKey="VISIT_CAST_ENTE_IO"
+                            i18nKey="visit_cast_url"
                             components={{
                                 a: (
                                     <Link
@@ -237,13 +237,13 @@ export default function AlbumCastDialog({
                             values={{ url: "cast.ente.io" }}
                         />
                     </Typography>
-                    <Typography>{t("ENTER_CAST_PIN_CODE")}</Typography>
+                    <Typography>{t("enter_cast_pin_code")}</Typography>
                     <SingleInputForm
                         callback={onSubmit}
                         fieldType="text"
                         realLabel={"Code"}
                         realPlaceholder={"123456"}
-                        buttonText={t("PAIR_DEVICE_TO_TV")}
+                        buttonText={t("pair_device_to_tv")}
                         submitButtonProps={{ sx: { mt: 1, mb: 2 } }}
                     />
                     <EnteButton

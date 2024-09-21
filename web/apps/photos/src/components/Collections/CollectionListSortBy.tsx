@@ -54,17 +54,17 @@ export default function CollectionListSortBy(props: CollectionSortProps) {
             }}
         >
             <SortByOption sortBy={COLLECTION_LIST_SORT_BY.NAME}>
-                {t("SORT_BY_NAME")}
+                {t("sort_by_name")}
             </SortByOption>
             <SortByOption
                 sortBy={COLLECTION_LIST_SORT_BY.CREATION_TIME_ASCENDING}
             >
-                {t("SORT_BY_CREATION_TIME_ASCENDING")}
+                {t("sort_by_creation_time_ascending")}
             </SortByOption>
             <SortByOption
                 sortBy={COLLECTION_LIST_SORT_BY.UPDATION_TIME_DESCENDING}
             >
-                {t("SORT_BY_UPDATION_TIME_DESCENDING")}
+                {t("sort_by_updation_time_descending")}
             </SortByOption>
         </OverflowMenu>
     );

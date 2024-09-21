@@ -15,7 +15,7 @@ export const getDownloadAppMessage = (): DialogBoxAttributes => {
         content: t("download_app_message"),
 
         proceed: {
-            text: t("DOWNLOAD"),
+            text: t("download"),
             action: downloadApp,
             variant: "accent",
         },

@@ -321,7 +321,7 @@ export default function PublicCollectionGallery() {
                                         startIcon={<FileDownloadOutlinedIcon />}
                                         onClick={downloadAllFiles}
                                     >
-                                        {t("DOWNLOAD_COLLECTION")}
+                                        {t("download_album")}
                                     </OverflowMenuOption>
                                 </OverflowMenu>
                             ) : (
@@ -726,7 +726,7 @@ const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                 </Box>
             </FluidContainer>
             <Stack spacing={2} direction="row" mr={2}>
-                <Tooltip title={t("DOWNLOAD")}>
+                <Tooltip title={t("download")}>
                     <IconButton onClick={downloadFilesHelper}>
                         <DownloadIcon />
                     </IconButton>

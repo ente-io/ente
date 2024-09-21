@@ -149,7 +149,7 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
         (e: unknown) => {
             log.error("Collection action failed", e);
             setDialogMessage({
-                title: t("ERROR"),
+                title: t("error"),
                 content: t("UNKNOWN_ERROR"),
                 close: { variant: "critical" },
             });
@@ -182,8 +182,8 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
 
     const showRenameCollectionModal = () => {
         setCollectionNamerAttributes({
-            title: t("RENAME_COLLECTION"),
-            buttonText: t("RENAME"),
+            title: t("rename_album"),
+            buttonText: t("rename"),
             autoFilledName: activeCollection.name,
             callback: renameCollection,
         });
@@ -200,22 +200,22 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
 
     const confirmDeleteCollection = () => {
         setDialogMessage({
-            title: t("DELETE_COLLECTION_TITLE"),
+            title: t("delete_album_title"),
             content: (
                 <Trans
-                    i18nKey={"DELETE_COLLECTION_MESSAGE"}
+                    i18nKey={"delete_album_message"}
                     components={{
                         a: <Box component={"span"} color="text.base" />,
                     }}
                 />
             ),
             proceed: {
-                text: t("DELETE_PHOTOS"),
+                text: t("delete_photos"),
                 action: deleteCollectionAlongWithFiles,
                 variant: "critical",
             },
             secondary: {
-                text: t("KEEP_PHOTOS"),
+                text: t("keep_photos"),
                 action: deleteCollectionButKeepFiles,
                 variant: "primary",
             },
@@ -237,11 +237,11 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
 
     const confirmEmptyTrash = () =>
         setDialogMessage({
-            title: t("EMPTY_TRASH_TITLE"),
-            content: t("EMPTY_TRASH_MESSAGE"),
+            title: t("empty_trash_title"),
+            content: t("empty_trash_message"),
             proceed: {
                 action: emptyTrash,
-                text: t("EMPTY_TRASH"),
+                text: t("empty_trash"),
                 variant: "critical",
             },
             close: { text: t("cancel") },
@@ -289,10 +289,10 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
 
     const confirmLeaveSharedAlbum = () => {
         setDialogMessage({
-            title: t("LEAVE_SHARED_ALBUM_TITLE"),
-            content: t("LEAVE_SHARED_ALBUM_MESSAGE"),
+            title: t("leave_shared_album_title"),
+            content: t("leave_shared_album_message"),
             proceed: {
-                text: t("LEAVE_SHARED_ALBUM"),
+                text: t("leave_shared_album"),
                 action: leaveSharedAlbum,
                 variant: "critical",
             },
@@ -364,15 +364,15 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
                         }
                         onClick={downloadCollection}
                     >
-                        {t("DOWNLOAD_FAVORITES")}
+                        {t("download_favorites")}
                     </DownloadOption>
                 ) : collectionSummaryType == "uncategorized" ? (
                     <DownloadOption onClick={downloadCollection}>
-                        {t("DOWNLOAD_UNCATEGORIZED")}
+                        {t("download_uncategorized")}
                     </DownloadOption>
                 ) : collectionSummaryType == "hiddenItems" ? (
                     <DownloadOption onClick={downloadCollection}>
-                        {t("DOWNLOAD_HIDDEN_ITEMS")}
+                        {t("download_hidden_items")}
                     </DownloadOption>
                 ) : collectionSummaryType == "incomingShareViewer" ||
                   collectionSummaryType == "incomingShareCollaborator" ? (
@@ -459,7 +459,7 @@ const showEmptyTrashQuickOption = (type: CollectionSummaryType) =>
     type == "trash";
 
 const EmptyTrashQuickOption: React.FC<OptionProps> = ({ onClick }) => (
-    <Tooltip title={t("EMPTY_TRASH")}>
+    <Tooltip title={t("empty_trash")}>
         <IconButton onClick={onClick}>
             <DeleteOutlinedIcon />
         </IconButton>
@@ -490,12 +490,12 @@ const DownloadQuickOption: React.FC<DownloadQuickOptionProps> = ({
     <Tooltip
         title={
             collectionSummaryType == "favorites"
-                ? t("DOWNLOAD_FAVORITES")
+                ? t("download_favorites")
                 : collectionSummaryType == "uncategorized"
-                  ? t("DOWNLOAD_UNCATEGORIZED")
+                  ? t("download_uncategorized")
                   : collectionSummaryType == "hiddenItems"
-                    ? t("DOWNLOAD_HIDDEN_ITEMS")
-                    : t("DOWNLOAD_COLLECTION")
+                    ? t("download_hidden_items")
+                    : t("download_album")
         }
     >
         <IconButton onClick={onClick}>
@@ -527,11 +527,11 @@ const ShareQuickOption: React.FC<ShareQuickOptionProps> = ({
         title={
             collectionSummaryType == "incomingShareViewer" ||
             collectionSummaryType == "incomingShareCollaborator"
-                ? t("SHARING_DETAILS")
+                ? t("sharing_details")
                 : collectionSummaryType == "outgoingShare" ||
                     collectionSummaryType == "sharedOnlyViaLink"
-                  ? t("MODIFY_SHARING")
-                  : t("SHARE_COLLECTION")
+                  ? t("modify_sharing")
+                  : t("share_album")
         }
     >
         <IconButton onClick={onClick}>
@@ -546,7 +546,7 @@ const EmptyTrashOption: React.FC<OptionProps> = ({ onClick }) => (
         startIcon={<DeleteOutlinedIcon />}
         onClick={onClick}
     >
-        {t("EMPTY_TRASH")}
+        {t("empty_trash")}
     </OverflowMenuOption>
 );
 
@@ -592,24 +592,24 @@ const SharedCollectionOptions: React.FC<SharedCollectionOptionProps> = ({
                 onClick={onUnarchiveClick}
                 startIcon={<Unarchive />}
             >
-                {t("UNARCHIVE_COLLECTION")}
+                {t("unarchive_album")}
             </OverflowMenuOption>
         ) : (
             <OverflowMenuOption
                 onClick={onArchiveClick}
                 startIcon={<ArchiveOutlined />}
             >
-                {t("ARCHIVE_COLLECTION")}
+                {t("archive_album")}
             </OverflowMenuOption>
         )}
         <OverflowMenuOption
             startIcon={<LogoutIcon />}
             onClick={onLeaveSharedAlbumClick}
         >
-            {t("LEAVE_ALBUM")}
+            {t("leave_album")}
         </OverflowMenuOption>
         <OverflowMenuOption startIcon={<TvIcon />} onClick={onCastClick}>
-            {t("CAST_ALBUM_TO_TV")}
+            {t("cast_album_to_tv")}
         </OverflowMenuOption>
     </>
 );
@@ -649,24 +649,24 @@ const AlbumCollectionOptions: React.FC<AlbumCollectionOptionsProps> = ({
 }) => (
     <>
         <OverflowMenuOption onClick={onRenameClick} startIcon={<EditIcon />}>
-            {t("RENAME_COLLECTION")}
+            {t("rename_album")}
         </OverflowMenuOption>
         <OverflowMenuOption onClick={onSortClick} startIcon={<SortIcon />}>
-            {t("SORT_BY")}
+            {t("sort_by")}
         </OverflowMenuOption>
         {isPinned ? (
             <OverflowMenuOption
                 onClick={onUnpinClick}
                 startIcon={<UnPinIcon />}
             >
-                {t("UNPIN_ALBUM")}
+                {t("unpin_album")}
             </OverflowMenuOption>
         ) : (
             <OverflowMenuOption
                 onClick={onPinClick}
                 startIcon={<PushPinOutlined />}
             >
-                {t("PIN_ALBUM")}
+                {t("pin_album")}
             </OverflowMenuOption>
         )}
         {!isHidden && (
@@ -676,14 +676,14 @@ const AlbumCollectionOptions: React.FC<AlbumCollectionOptionsProps> = ({
                         onClick={onUnarchiveClick}
                         startIcon={<Unarchive />}
                     >
-                        {t("UNARCHIVE_COLLECTION")}
+                        {t("unarchive_album")}
                     </OverflowMenuOption>
                 ) : (
                     <OverflowMenuOption
                         onClick={onArchiveClick}
                         startIcon={<ArchiveOutlined />}
                     >
-                        {t("ARCHIVE_COLLECTION")}
+                        {t("archive_album")}
                     </OverflowMenuOption>
                 )}
             </>
@@ -693,27 +693,27 @@ const AlbumCollectionOptions: React.FC<AlbumCollectionOptionsProps> = ({
                 onClick={onUnhideClick}
                 startIcon={<VisibilityOutlined />}
             >
-                {t("UNHIDE_COLLECTION")}
+                {t("unhide_collection")}
             </OverflowMenuOption>
         ) : (
             <OverflowMenuOption
                 onClick={onHideClick}
                 startIcon={<VisibilityOffOutlined />}
             >
-                {t("HIDE_COLLECTION")}
+                {t("hide_collection")}
             </OverflowMenuOption>
         )}
         <OverflowMenuOption
             startIcon={<DeleteOutlinedIcon />}
             onClick={onDeleteClick}
         >
-            {t("DELETE_COLLECTION")}
+            {t("delete_album")}
         </OverflowMenuOption>
         <OverflowMenuOption onClick={onShareClick} startIcon={<PeopleIcon />}>
-            {t("SHARE_COLLECTION")}
+            {t("share_album")}
         </OverflowMenuOption>
         <OverflowMenuOption startIcon={<TvIcon />} onClick={onCastClick}>
-            {t("CAST_ALBUM_TO_TV")}
+            {t("cast_album_to_tv")}
         </OverflowMenuOption>
     </>
 );
@@ -763,10 +763,10 @@ const CollectionSortOrderMenu: React.FC<CollectionSortOrderMenuProps> = ({
             }}
         >
             <OverflowMenuOption onClick={handleDescClick}>
-                {t("NEWEST_FIRST")}
+                {t("newest_first")}
             </OverflowMenuOption>
             <OverflowMenuOption onClick={handleAscClick}>
-                {t("OLDEST_FIRST")}
+                {t("oldest_first")}
             </OverflowMenuOption>
         </StyledMenu>
     );

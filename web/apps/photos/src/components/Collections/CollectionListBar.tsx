@@ -174,8 +174,8 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
                         color={mode == "people" ? "text.muted" : "text.base"}
                     >
                         {mode == "hidden-albums"
-                            ? t("HIDDEN_ALBUMS")
-                            : t("ALBUMS")}
+                            ? t("hidden_albums")
+                            : t("albums")}
                     </Typography>
                     {process.env.NEXT_PUBLIC_ENTE_WIP_CL && (
                         <Typography

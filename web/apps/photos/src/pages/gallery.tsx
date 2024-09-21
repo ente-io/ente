@@ -895,7 +895,7 @@ export default function Gallery() {
             } catch (e) {
                 log.error(`collection ops (${ops}) failed`, e);
                 setDialogMessage({
-                    title: t("ERROR"),
+                    title: t("error"),
 
                     close: { variant: "critical" },
                     content: t("UNKNOWN_ERROR"),
@@ -940,7 +940,7 @@ export default function Gallery() {
         } catch (e) {
             log.error(`file ops (${ops}) failed`, e);
             setDialogMessage({
-                title: t("ERROR"),
+                title: t("error"),
 
                 close: { variant: "critical" },
                 content: t("UNKNOWN_ERROR"),
@@ -959,7 +959,7 @@ export default function Gallery() {
             } catch (e) {
                 log.error(`create and collection ops (${ops}) failed`, e);
                 setDialogMessage({
-                    title: t("ERROR"),
+                    title: t("error"),
 
                     close: { variant: "critical" },
                     content: t("UNKNOWN_ERROR"),
@@ -1365,7 +1365,7 @@ const HiddenSectionNavbarContents: React.FC<
             <ArrowBack />
         </IconButton>
         <FlexWrapper>
-            <Typography>{t("HIDDEN")}</Typography>
+            <Typography>{t("section_hidden")}</Typography>
         </FlexWrapper>
     </HorizontalFlex>
 );
