@@ -36,7 +36,6 @@ import { getActualKey } from "@ente/shared/user";
 import type { User } from "@ente/shared/user/types";
 import { t } from "i18next";
 import {
-    CollectionFilesCount,
     CollectionSummaries,
     CollectionSummary,
     CollectionSummaryType,
@@ -1179,7 +1178,7 @@ export function getCollectionSummaries(
     return collectionSummaries;
 }
 
-function getCollectionsFileCount(files: EnteFile[]): CollectionFilesCount {
+function getCollectionsFileCount(files: EnteFile[]): Map<number, number> {
     const collectionIDToFileMap = groupFilesBasedOnCollectionID(files);
     const collectionFilesCount = new Map<number, number>();
     for (const [id, files] of collectionIDToFileMap) {
