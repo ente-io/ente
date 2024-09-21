@@ -425,9 +425,15 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     const leaveSharedAlbum2 = () =>
         void wrapErrorAndSyncLoading(_leaveSharedAlbum);
 
-    const showCastAlbumDialog = () => {
-        setShowAlbumCastDialog(true);
-    };
+    const showCastAlbumDialog = () => setShowAlbumCastDialog(true);
+
+    const _pinAlbum = () => changeCollectionOrder(activeCollection, 1);
+
+    const _unpinAlbum = () => changeCollectionOrder(activeCollection, 0);
+
+    const pinAlbum2 = () => wrapErrorAndSync(_pinAlbum);
+
+    const unpinAlbum2 = () => wrapErrorAndSync(_unpinAlbum);
 
     const updateCollectionSortOrderAsc = async () => {
         await changeCollectionSortOrder(activeCollection, true);
@@ -509,6 +515,8 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                         isPinned={isPinnedCollection(activeCollection)}
                         onArchiveClick={archiveAlbum}
                         onUnarchiveClick={unarchiveAlbum}
+                        onPinClick={pinAlbum2}
+                        onUnpinClick={unpinAlbum2}
                         onCastClick={showCastAlbumDialog}
                         handleCollectionAction={handleCollectionAction}
                     />
@@ -733,6 +741,8 @@ interface AlbumCollectionOptionsProps {
     isHidden: boolean;
     onArchiveClick: () => void;
     onUnarchiveClick: () => void;
+    onPinClick: () => void;
+    onUnpinClick: () => void;
     onCastClick: () => void;
     handleCollectionAction: (
         action: CollectionActions,
@@ -746,6 +756,8 @@ const AlbumCollectionOptions: React.FC<AlbumCollectionOptionsProps> = ({
     isHidden,
     onArchiveClick,
     onUnarchiveClick,
+    onPinClick,
+    onUnpinClick,
     onCastClick,
     handleCollectionAction,
 }) => (
