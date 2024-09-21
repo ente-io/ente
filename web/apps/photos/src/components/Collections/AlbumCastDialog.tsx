@@ -25,6 +25,9 @@ interface AlbumCastDialogProps {
     collection: Collection;
 }
 
+/**
+ * A dialog that shows various options that the user has for casting an album.
+ */
 export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
     open,
     onClose,
@@ -135,14 +138,12 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
 
     return (
         <DialogBoxV2
-            sx={{ zIndex: 1600 }}
             open={open}
             onClose={onClose}
-            attributes={{
-                title: t("cast_album_to_tv"),
-            }}
+            attributes={{ title: t("cast_album_to_tv") }}
+            sx={{ zIndex: 1600 }}
         >
-            {view === "choose" && (
+            {view == "choose" && (
                 <>
                     {browserCanCast && (
                         <>
@@ -161,13 +162,12 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
                     <Typography color="text.muted">
                         {t("pair_with_pin_description")}
                     </Typography>
-
                     <EnteButton onClick={() => setView("pin")}>
                         {t("pair_with_pin")}
                     </EnteButton>
                 </>
             )}
-            {view === "auto" && (
+            {view == "auto" && (
                 <VerticallyCentered gap="1rem">
                     <EnteSpinner />
                     <Typography>{t("choose_device_from_browser")}</Typography>
@@ -181,7 +181,7 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
                     </EnteButton>
                 </VerticallyCentered>
             )}
-            {view === "auto-cast-error" && (
+            {view == "auto-cast-error" && (
                 <VerticallyCentered gap="1rem">
                     <Typography>{t("cast_auto_pair_failed")}</Typography>
                     <EnteButton
@@ -194,7 +194,7 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
                     </EnteButton>
                 </VerticallyCentered>
             )}
-            {view === "pin" && (
+            {view == "pin" && (
                 <>
                     <Typography>
                         <Trans
