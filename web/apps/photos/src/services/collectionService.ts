@@ -1168,7 +1168,7 @@ export function getCollectionSummaries(
         if (type == "uncategorized") {
             CollectionSummaryItemName = t("section_uncategorized");
         } else if (type == "favorites") {
-            CollectionSummaryItemName = t("FAVORITES");
+            CollectionSummaryItemName = t("favorites");
         } else {
             CollectionSummaryItemName = collection.name;
         }

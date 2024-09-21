@@ -693,14 +693,14 @@ const AlbumCollectionOptions: React.FC<AlbumCollectionOptionsProps> = ({
                 onClick={onUnhideClick}
                 startIcon={<VisibilityOutlined />}
             >
-                {t("UNHIDE_COLLECTION")}
+                {t("unhide_collection")}
             </OverflowMenuOption>
         ) : (
             <OverflowMenuOption
                 onClick={onHideClick}
                 startIcon={<VisibilityOffOutlined />}
             >
-                {t("HIDE_COLLECTION")}
+                {t("hide_collection")}
             </OverflowMenuOption>
         )}
         <OverflowMenuOption
