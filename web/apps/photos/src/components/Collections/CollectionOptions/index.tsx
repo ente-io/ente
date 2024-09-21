@@ -34,7 +34,6 @@ import { isArchivedCollection, isPinnedCollection } from "utils/magicMetadata";
 import { SetCollectionNamerAttributes } from "../CollectionNamer";
 import { AlbumCollectionOption } from "./AlbumCollectionOption";
 import CollectionSortOrderMenu from "./CollectionSortOrderMenu";
-import { OnlyDownloadCollectionOption } from "./OnlyDownloadCollectionOption";
 import { SharedCollectionOption } from "./SharedCollectionOption";
 
 interface CollectionOptionsProps {
@@ -416,7 +415,7 @@ interface QuickOptionsProps {
     isDownloadInProgress: boolean;
 }
 
-export const QuickOptions: React.FC<QuickOptionsProps> = ({
+const QuickOptions: React.FC<QuickOptionsProps> = ({
     handleCollectionAction,
     collectionSummaryType,
     isDownloadInProgress,
@@ -458,7 +457,7 @@ interface EmptyTrashQuickOptionProps {
     ) => (...args: any[]) => Promise<void>;
 }
 
-export const EmptyTrashQuickOption: React.FC<EmptyTrashQuickOptionProps> = ({
+const EmptyTrashQuickOption: React.FC<EmptyTrashQuickOptionProps> = ({
     handleCollectionAction,
 }) => (
     <Tooltip title={t("EMPTY_TRASH")}>
@@ -586,5 +585,35 @@ export const TrashCollectionOption: React.FC<TrashCollectionOptionProps> = ({
         )}
     >
         {t("EMPTY_TRASH")}
+    </OverflowMenuOption>
+);
+
+interface OnlyDownloadCollectionOptionProps {
+    handleCollectionAction: (
+        action: CollectionActions,
+        loader?: boolean,
+    ) => (...args: any[]) => Promise<void>;
+    downloadOptionText?: string;
+    isDownloadInProgress?: boolean;
+}
+
+const OnlyDownloadCollectionOption: React.FC<
+    OnlyDownloadCollectionOptionProps
+> = ({
+    handleCollectionAction,
+    downloadOptionText = t("DOWNLOAD"),
+    isDownloadInProgress,
+}) => (
+    <OverflowMenuOption
+        startIcon={
+            !isDownloadInProgress ? (
+                <FileDownloadOutlinedIcon />
+            ) : (
+                <EnteSpinner size="20px" sx={{ cursor: "not-allowed" }} />
+            )
+        }
+        onClick={handleCollectionAction(CollectionActions.DOWNLOAD, false)}
+    >
+        {downloadOptionText}
     </OverflowMenuOption>
 );
