@@ -364,15 +364,15 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
                         }
                         onClick={downloadCollection}
                     >
-                        {t("DOWNLOAD_FAVORITES")}
+                        {t("download_favorites")}
                     </DownloadOption>
                 ) : collectionSummaryType == "uncategorized" ? (
                     <DownloadOption onClick={downloadCollection}>
-                        {t("DOWNLOAD_UNCATEGORIZED")}
+                        {t("download_uncategorized")}
                     </DownloadOption>
                 ) : collectionSummaryType == "hiddenItems" ? (
                     <DownloadOption onClick={downloadCollection}>
-                        {t("DOWNLOAD_HIDDEN_ITEMS")}
+                        {t("download_hidden_items")}
                     </DownloadOption>
                 ) : collectionSummaryType == "incomingShareViewer" ||
                   collectionSummaryType == "incomingShareCollaborator" ? (
@@ -490,12 +490,12 @@ const DownloadQuickOption: React.FC<DownloadQuickOptionProps> = ({
     <Tooltip
         title={
             collectionSummaryType == "favorites"
-                ? t("DOWNLOAD_FAVORITES")
+                ? t("download_favorites")
                 : collectionSummaryType == "uncategorized"
-                  ? t("DOWNLOAD_UNCATEGORIZED")
+                  ? t("download_uncategorized")
                   : collectionSummaryType == "hiddenItems"
-                    ? t("DOWNLOAD_HIDDEN_ITEMS")
-                    : t("DOWNLOAD_COLLECTION")
+                    ? t("download_hidden_items")
+                    : t("download_album")
         }
     >
         <IconButton onClick={onClick}>

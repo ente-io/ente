@@ -321,7 +321,7 @@ export default function PublicCollectionGallery() {
                                         startIcon={<FileDownloadOutlinedIcon />}
                                         onClick={downloadAllFiles}
                                     >
-                                        {t("DOWNLOAD_COLLECTION")}
+                                        {t("download_album")}
                                     </OverflowMenuOption>
                                 </OverflowMenu>
                             ) : (
