@@ -13,7 +13,6 @@ import CollectionOptions from "components/Collections/CollectionOptions";
 import type { Dispatch, SetStateAction } from "react";
 import { CollectionSummary, CollectionSummaryType } from "types/collection";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
-import { shouldShowOptions } from "utils/collection";
 
 interface Iprops {
     activeCollection: Collection;
@@ -72,3 +71,12 @@ export default function CollectionInfoWithOptions({
         </GalleryItemsHeaderAdapter>
     );
 }
+
+const OPTIONS_NOT_HAVING_COLLECTION_TYPES = new Set([
+    CollectionSummaryType.all,
+    CollectionSummaryType.archive,
+]);
+
+const shouldShowOptions = (type: CollectionSummaryType) => {
+    return !OPTIONS_NOT_HAVING_COLLECTION_TYPES.has(type);
+};

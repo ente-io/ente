@@ -96,11 +96,6 @@ const MOVE_TO_NOT_ALLOWED_COLLECTION = new Set([
     CollectionSummaryType.hiddenItems,
 ]);
 
-const OPTIONS_NOT_HAVING_COLLECTION_TYPES = new Set([
-    CollectionSummaryType.all,
-    CollectionSummaryType.archive,
-]);
-
 const HIDE_FROM_COLLECTION_BAR_TYPES = new Set([
     CollectionSummaryType.trash,
     CollectionSummaryType.archive,
@@ -432,39 +427,6 @@ export const isSystemCollection = (type: CollectionSummaryType) => {
     return SYSTEM_COLLECTION_TYPES.has(type);
 };
 
-export const shouldShowOptions = (type: CollectionSummaryType) => {
-    return !OPTIONS_NOT_HAVING_COLLECTION_TYPES.has(type);
-};
-export const showEmptyTrashQuickOption = (type: CollectionSummaryType) => {
-    return type === CollectionSummaryType.trash;
-};
-export const showDownloadQuickOption = (type: CollectionSummaryType) => {
-    return (
-        type === CollectionSummaryType.folder ||
-        type === CollectionSummaryType.favorites ||
-        type === CollectionSummaryType.album ||
-        type === CollectionSummaryType.uncategorized ||
-        type === CollectionSummaryType.hiddenItems ||
-        type === CollectionSummaryType.incomingShareViewer ||
-        type === CollectionSummaryType.incomingShareCollaborator ||
-        type === CollectionSummaryType.outgoingShare ||
-        type === CollectionSummaryType.sharedOnlyViaLink ||
-        type === CollectionSummaryType.archived ||
-        type === CollectionSummaryType.pinned
-    );
-};
-export const showShareQuickOption = (type: CollectionSummaryType) => {
-    return (
-        type === CollectionSummaryType.folder ||
-        type === CollectionSummaryType.album ||
-        type === CollectionSummaryType.outgoingShare ||
-        type === CollectionSummaryType.sharedOnlyViaLink ||
-        type === CollectionSummaryType.archived ||
-        type === CollectionSummaryType.incomingShareViewer ||
-        type === CollectionSummaryType.incomingShareCollaborator ||
-        type === CollectionSummaryType.pinned
-    );
-};
 export const shouldBeShownOnCollectionBar = (type: CollectionSummaryType) => {
     return !HIDE_FROM_COLLECTION_BAR_TYPES.has(type);
 };

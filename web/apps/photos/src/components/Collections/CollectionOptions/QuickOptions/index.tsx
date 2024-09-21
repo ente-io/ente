@@ -1,15 +1,11 @@
 import { FlexWrapper } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { CollectionSummaryType } from "types/collection";
-import {
-    showDownloadQuickOption,
-    showEmptyTrashQuickOption,
-    showShareQuickOption,
-} from "utils/collection";
 import { CollectionActions } from "..";
 import { DownloadQuickOption } from "./DownloadQuickOption";
 import { EmptyTrashQuickOption } from "./EmptyTrashQuickOption";
 import { ShareQuickOption } from "./ShareQuickOption";
+
 interface Iprops {
     handleCollectionAction: (
         action: CollectionActions,
@@ -49,3 +45,34 @@ export function QuickOptions({
         </FlexWrapper>
     );
 }
+
+const showEmptyTrashQuickOption = (type: CollectionSummaryType) => {
+    return type === CollectionSummaryType.trash;
+};
+const showDownloadQuickOption = (type: CollectionSummaryType) => {
+    return (
+        type === CollectionSummaryType.folder ||
+        type === CollectionSummaryType.favorites ||
+        type === CollectionSummaryType.album ||
+        type === CollectionSummaryType.uncategorized ||
+        type === CollectionSummaryType.hiddenItems ||
+        type === CollectionSummaryType.incomingShareViewer ||
+        type === CollectionSummaryType.incomingShareCollaborator ||
+        type === CollectionSummaryType.outgoingShare ||
+        type === CollectionSummaryType.sharedOnlyViaLink ||
+        type === CollectionSummaryType.archived ||
+        type === CollectionSummaryType.pinned
+    );
+};
+const showShareQuickOption = (type: CollectionSummaryType) => {
+    return (
+        type === CollectionSummaryType.folder ||
+        type === CollectionSummaryType.album ||
+        type === CollectionSummaryType.outgoingShare ||
+        type === CollectionSummaryType.sharedOnlyViaLink ||
+        type === CollectionSummaryType.archived ||
+        type === CollectionSummaryType.incomingShareViewer ||
+        type === CollectionSummaryType.incomingShareCollaborator ||
+        type === CollectionSummaryType.pinned
+    );
+};
