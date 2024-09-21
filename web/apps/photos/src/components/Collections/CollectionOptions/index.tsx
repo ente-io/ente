@@ -118,7 +118,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                 } catch (e) {
                     handleError(e);
                 } finally {
-                    syncWithRemote(false, true);
+                    void syncWithRemote(false, true);
                     finishLoading();
                 }
             };
