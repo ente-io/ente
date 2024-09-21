@@ -609,7 +609,7 @@ const SharedCollectionOptions: React.FC<SharedCollectionOptionProps> = ({
             {t("leave_album")}
         </OverflowMenuOption>
         <OverflowMenuOption startIcon={<TvIcon />} onClick={onCastClick}>
-            {t("CAST_ALBUM_TO_TV")}
+            {t("cast_album_to_tv")}
         </OverflowMenuOption>
     </>
 );
@@ -713,7 +713,7 @@ const AlbumCollectionOptions: React.FC<AlbumCollectionOptionsProps> = ({
             {t("SHARE_COLLECTION")}
         </OverflowMenuOption>
         <OverflowMenuOption startIcon={<TvIcon />} onClick={onCastClick}>
-            {t("CAST_ALBUM_TO_TV")}
+            {t("cast_album_to_tv")}
         </OverflowMenuOption>
     </>
 );
