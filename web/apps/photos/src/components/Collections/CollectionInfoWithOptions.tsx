@@ -289,10 +289,10 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
 
     const confirmLeaveSharedAlbum = () => {
         setDialogMessage({
-            title: t("LEAVE_SHARED_ALBUM_TITLE"),
-            content: t("LEAVE_SHARED_ALBUM_MESSAGE"),
+            title: t("leave_shared_album_title"),
+            content: t("leave_shared_album_message"),
             proceed: {
-                text: t("LEAVE_SHARED_ALBUM"),
+                text: t("leave_shared_album"),
                 action: leaveSharedAlbum,
                 variant: "critical",
             },
@@ -606,7 +606,7 @@ const SharedCollectionOptions: React.FC<SharedCollectionOptionProps> = ({
             startIcon={<LogoutIcon />}
             onClick={onLeaveSharedAlbumClick}
         >
-            {t("LEAVE_ALBUM")}
+            {t("leave_album")}
         </OverflowMenuOption>
         <OverflowMenuOption startIcon={<TvIcon />} onClick={onCastClick}>
             {t("CAST_ALBUM_TO_TV")}
