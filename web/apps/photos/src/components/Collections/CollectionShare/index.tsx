@@ -48,8 +48,8 @@ function CollectionShare({ collectionSummary, ...props }: Props) {
                     title={
                         type == "incomingShareCollaborator" ||
                         type == "incomingShareViewer"
-                            ? t("SHARING_DETAILS")
-                            : t("SHARE_COLLECTION")
+                            ? t("sharing_details")
+                            : t("share_album")
                     }
                     onRootClose={handleRootClose}
                     caption={props.collection.name}

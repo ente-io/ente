@@ -91,7 +91,7 @@ export default function ManagePublicShareOptions({
                 <Stack spacing={"4px"} py={"12px"}>
                     <Titlebar
                         onClose={onClose}
-                        title={t("SHARE_COLLECTION")}
+                        title={t("share_album")}
                         onRootClose={onRootClose}
                     />
                     <Stack py={"20px"} px={"8px"} spacing={"32px"}>

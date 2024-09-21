@@ -527,11 +527,11 @@ const ShareQuickOption: React.FC<ShareQuickOptionProps> = ({
         title={
             collectionSummaryType == "incomingShareViewer" ||
             collectionSummaryType == "incomingShareCollaborator"
-                ? t("SHARING_DETAILS")
+                ? t("sharing_details")
                 : collectionSummaryType == "outgoingShare" ||
                     collectionSummaryType == "sharedOnlyViaLink"
-                  ? t("MODIFY_SHARING")
-                  : t("SHARE_COLLECTION")
+                  ? t("modify_sharing")
+                  : t("share_album")
         }
     >
         <IconButton onClick={onClick}>
@@ -710,7 +710,7 @@ const AlbumCollectionOptions: React.FC<AlbumCollectionOptionsProps> = ({
             {t("delete_album")}
         </OverflowMenuOption>
         <OverflowMenuOption onClick={onShareClick} startIcon={<PeopleIcon />}>
-            {t("SHARE_COLLECTION")}
+            {t("share_album")}
         </OverflowMenuOption>
         <OverflowMenuOption startIcon={<TvIcon />} onClick={onCastClick}>
             {t("cast_album_to_tv")}
