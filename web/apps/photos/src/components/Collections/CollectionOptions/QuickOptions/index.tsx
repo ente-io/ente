@@ -1,12 +1,12 @@
 import { FlexWrapper } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
+import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import PeopleIcon from "@mui/icons-material/People";
 import { IconButton, Tooltip } from "@mui/material";
 import { t } from "i18next";
 import { CollectionSummaryType } from "types/collection";
 import { CollectionActions } from "..";
-import { DownloadQuickOption } from "./DownloadQuickOption";
 
 interface QuickOptionsProps {
     handleCollectionAction: (
@@ -89,6 +89,37 @@ const showDownloadQuickOption = (type: CollectionSummaryType) => {
         type === CollectionSummaryType.pinned
     );
 };
+
+interface DownloadQuickOptionProps {
+    handleCollectionAction: (
+        action: CollectionActions,
+        loader?: boolean,
+    ) => (...args: any[]) => Promise<void>;
+    collectionSummaryType: CollectionSummaryType;
+}
+
+const DownloadQuickOption: React.FC<DownloadQuickOptionProps> = ({
+    handleCollectionAction,
+    collectionSummaryType,
+}) => (
+    <Tooltip
+        title={
+            collectionSummaryType === CollectionSummaryType.favorites
+                ? t("DOWNLOAD_FAVORITES")
+                : collectionSummaryType === CollectionSummaryType.uncategorized
+                  ? t("DOWNLOAD_UNCATEGORIZED")
+                  : collectionSummaryType === CollectionSummaryType.hiddenItems
+                    ? t("DOWNLOAD_HIDDEN_ITEMS")
+                    : t("DOWNLOAD_COLLECTION")
+        }
+    >
+        <IconButton
+            onClick={handleCollectionAction(CollectionActions.DOWNLOAD, false)}
+        >
+            <FileDownloadOutlinedIcon />
+        </IconButton>
+    </Tooltip>
+);
 
 const showShareQuickOption = (type: CollectionSummaryType) => {
     return (
