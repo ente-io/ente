@@ -40,6 +40,7 @@ import 'package:photos/ui/sharing/share_collection_page.dart';
 import 'package:photos/ui/tools/free_space_page.dart';
 import "package:photos/ui/viewer/gallery/hooks/add_photos_sheet.dart";
 import 'package:photos/ui/viewer/gallery/hooks/pick_cover_photo.dart';
+import "package:photos/ui/viewer/hierarchicial_search/recommendations_row.dart";
 import 'package:photos/utils/data_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/magic_util.dart';
@@ -140,6 +141,12 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
               overflow: TextOverflow.ellipsis,
             ),
             actions: _getDefaultActions(context),
+            bottom: galleryType == GalleryType.searchResults
+                ? const PreferredSize(
+                    preferredSize: Size.fromHeight(0),
+                    child: RecommendationsRow(),
+                  )
+                : null,
           );
   }
 
