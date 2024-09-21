@@ -56,7 +56,7 @@ interface CollectionOptionsProps {
     setShowAlbumCastDialog: Dispatch<SetStateAction<boolean>>;
 }
 
-export enum CollectionActions {
+enum CollectionActions {
     SHOW_RENAME_DIALOG,
     RENAME,
     DOWNLOAD,
