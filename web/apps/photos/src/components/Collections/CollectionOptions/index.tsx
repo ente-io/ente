@@ -119,12 +119,6 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     );
 
     /**
-     * Return a new function that shows an generic error dialog if the original
-     * function throws.
-     */
-    const wrapError = (f: () => Promise<void>) => () => f().catch(handleError);
-
-    /**
      * Return a new function by wrapping an async function in an error handler,
      * and syncing on completion.
      */
@@ -149,6 +143,26 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
             startLoading();
             try {
                 await f();
+            } catch (e) {
+                handleError(e);
+            } finally {
+                syncWithRemote(false, true);
+                finishLoading();
+            }
+        };
+    };
+
+    /**
+     * Variant of {@link wrapErrorAndSync} that also shows the global
+     * loading bar.
+     */
+    const wrapErrorAndSyncLoadingString = async (
+        f: (string) => Promise<void>,
+    ) => {
+        return async (s: string) => {
+            startLoading();
+            try {
+                await f(s);
             } catch (e) {
                 handleError(e);
             } finally {
@@ -249,11 +263,14 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         };
     };
 
-    const renameCollection = async (newName: string) => {
+    const _renameCollection = async (newName: string) => {
         if (activeCollection.name !== newName) {
             await CollectionAPI.renameCollection(activeCollection, newName);
         }
     };
+
+    const renameCollection = () =>
+        void wrapErrorAndSyncLoadingString(_renameCollection);
 
     const leaveSharedAlbum = async () => {
         await CollectionAPI.leaveSharedAlbum(activeCollection.id);
@@ -343,10 +360,10 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     };
 
     const deleteCollectionAlongWithFiles = () =>
-        wrapErrorAndSyncLoading(_deleteCollectionAlongWithFiles);
+        void wrapErrorAndSyncLoading(_deleteCollectionAlongWithFiles);
 
     const deleteCollectionButKeepFiles = () =>
-        wrapErrorAndSyncLoading(_deleteCollectionButKeepFiles);
+        void wrapErrorAndSyncLoading(_deleteCollectionButKeepFiles);
 
     const confirmEmptyTrash = () =>
         setDialogMessage({
@@ -433,9 +450,9 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
 
     const _unpinAlbum = () => changeCollectionOrder(activeCollection, 0);
 
-    const pinAlbum2 = () => wrapErrorAndSync(_pinAlbum);
+    const pinAlbum2 = () => void wrapErrorAndSync(_pinAlbum);
 
-    const unpinAlbum2 = () => wrapErrorAndSync(_unpinAlbum);
+    const unpinAlbum2 = () => void wrapErrorAndSync(_unpinAlbum);
 
     const _hideAlbum = async () => {
         await changeCollectionVisibility(
@@ -453,9 +470,9 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         setActiveCollectionID(HIDDEN_ITEMS_SECTION);
     };
 
-    const hideAlbum2 = () => wrapErrorAndSync(_hideAlbum);
+    const hideAlbum2 = () => void wrapErrorAndSync(_hideAlbum);
 
-    const unhideAlbum2 = () => wrapErrorAndSync(_unhideAlbum);
+    const unhideAlbum2 = () => void wrapErrorAndSync(_unhideAlbum);
 
     const showSortOrderMenu = () => setCollectionSortOrderMenuView(true);
 
@@ -467,9 +484,10 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     const _changeSortOrderDesc = () =>
         changeCollectionSortOrder(activeCollection, false);
 
-    const changeSortOrderAsc = () => wrapErrorAndSync(_changeSortOrderAsc);
+    const changeSortOrderAsc = () => void wrapErrorAndSync(_changeSortOrderAsc);
 
-    const changeSortOrderDesc = () => wrapErrorAndSync(_changeSortOrderDesc);
+    const changeSortOrderDesc = () =>
+        void wrapErrorAndSync(_changeSortOrderDesc);
 
     const updateCollectionSortOrderAsc = async () => {
         await changeCollectionSortOrder(activeCollection, true);
