@@ -24,7 +24,7 @@ import {
     isFilesDownloadCancelled,
     isFilesDownloadCompleted,
 } from "../FilesDownloadProgress";
-import AlbumCastDialog from "./CollectionOptions/AlbumCastDialog";
+import AlbumCastDialog from "./AlbumCastDialog";
 
 /**
  * Specifies what the bar is displaying currently.

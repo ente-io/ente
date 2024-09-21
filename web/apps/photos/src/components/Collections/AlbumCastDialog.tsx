@@ -14,7 +14,7 @@ import { t } from "i18next";
 import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 import { v4 as uuidv4 } from "uuid";
-import { loadSender } from "../../../utils/useCastSender";
+import { loadSender } from "../../utils/useCastSender";
 
 interface Props {
     show: boolean;
