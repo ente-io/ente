@@ -2,7 +2,7 @@ import log from "@/base/log";
 import type { Collection } from "@/media/collection";
 import { ItemVisibility } from "@/media/file-metadata";
 import type { CollectionSummaryType } from "@/new/photos/types/collection";
-import { FlexWrapper, HorizontalFlex } from "@ente/shared/components/Container";
+import { HorizontalFlex } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import OverflowMenu, {
     StyledMenu,
@@ -21,7 +21,7 @@ import TvIcon from "@mui/icons-material/Tv";
 import Unarchive from "@mui/icons-material/Unarchive";
 import VisibilityOffOutlined from "@mui/icons-material/VisibilityOffOutlined";
 import VisibilityOutlined from "@mui/icons-material/VisibilityOutlined";
-import { Box, IconButton, Tooltip } from "@mui/material";
+import { Box, IconButton, Stack, Tooltip } from "@mui/material";
 import { UnPinIcon } from "components/icons/UnPinIcon";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
@@ -519,13 +519,13 @@ const QuickOptions: React.FC<QuickOptionsProps> = ({
     isDownloadInProgress,
 }) => {
     return (
-        <FlexWrapper sx={{ gap: "16px" }}>
+        <Stack direction="row" sx={{ alignItems: "center", gap: "16px" }}>
             {showEmptyTrashQuickOption(collectionSummaryType) && (
                 <EmptyTrashQuickOption onClick={onEmptyTrashClick} />
             )}
             {showDownloadQuickOption(collectionSummaryType) &&
                 (isDownloadInProgress() ? (
-                    <EnteSpinner size="20px" sx={{ cursor: "not-allowed" }} />
+                    <EnteSpinner size="20px" sx={{ m: "12px" }} />
                 ) : (
                     <DownloadQuickOption
                         onClick={onDownloadClick}
@@ -538,7 +538,7 @@ const QuickOptions: React.FC<QuickOptionsProps> = ({
                     collectionSummaryType={collectionSummaryType}
                 />
             )}
-        </FlexWrapper>
+        </Stack>
     );
 };
 
