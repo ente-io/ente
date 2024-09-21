@@ -555,9 +555,9 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                         onUnpinClick={unpinAlbum2}
                         onHideClick={hideAlbum2}
                         onUnhideClick={unhideAlbum2}
+                        onDeleteClick={confirmDeleteCollection}
                         onShareClick={showCollectionShareModal}
                         onCastClick={showCastAlbumDialog}
-                        handleCollectionAction={handleCollectionAction}
                     />
                 )}
             </OverflowMenu>
@@ -786,12 +786,9 @@ interface AlbumCollectionOptionsProps {
     onUnpinClick: () => void;
     onHideClick: () => void;
     onUnhideClick: () => void;
+    onDeleteClick: () => void;
     onShareClick: () => void;
     onCastClick: () => void;
-    handleCollectionAction: (
-        action: CollectionActions,
-        loader?: boolean,
-    ) => () => Promise<void>;
 }
 
 const AlbumCollectionOptions: React.FC<AlbumCollectionOptionsProps> = ({
@@ -806,9 +803,9 @@ const AlbumCollectionOptions: React.FC<AlbumCollectionOptionsProps> = ({
     onUnpinClick,
     onHideClick,
     onUnhideClick,
+    onDeleteClick,
     onShareClick,
     onCastClick,
-    handleCollectionAction,
 }) => (
     <>
         <OverflowMenuOption onClick={onRenameClick} startIcon={<EditIcon />}>
@@ -868,20 +865,11 @@ const AlbumCollectionOptions: React.FC<AlbumCollectionOptionsProps> = ({
         )}
         <OverflowMenuOption
             startIcon={<DeleteOutlinedIcon />}
-            onClick={handleCollectionAction(
-                CollectionActions.CONFIRM_DELETE,
-                false,
-            )}
+            onClick={onDeleteClick}
         >
             {t("DELETE_COLLECTION")}
         </OverflowMenuOption>
-        <OverflowMenuOption
-            onClick={handleCollectionAction(
-                CollectionActions.SHOW_SHARE_DIALOG,
-                false,
-            )}
-            startIcon={<PeopleIcon />}
-        >
+        <OverflowMenuOption onClick={onShareClick} startIcon={<PeopleIcon />}>
             {t("SHARE_COLLECTION")}
         </OverflowMenuOption>
         <OverflowMenuOption startIcon={<TvIcon />} onClick={onCastClick}>
