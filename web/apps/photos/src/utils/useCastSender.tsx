@@ -7,8 +7,6 @@ declare global {
     }
 }
 
-import { useEffect, useState } from "react";
-
 type Sender = {
     chrome: typeof chrome;
     cast: typeof cast;
@@ -43,20 +41,3 @@ export const loadSender = (() => {
         return promise;
     };
 })();
-
-export const useCastSender = () => {
-    const [sender, setSender] = useState<Sender | { chrome: null; cast: null }>(
-        {
-            chrome: null,
-            cast: null,
-        },
-    );
-
-    useEffect(() => {
-        loadSender().then((sender) => {
-            setSender(sender);
-        });
-    }, []);
-
-    return sender;
-};
