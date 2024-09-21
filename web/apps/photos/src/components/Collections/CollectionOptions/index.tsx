@@ -368,7 +368,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         setActiveCollectionID(ALL_SECTION);
     };
 
-    const downloadCollection2 = () => {
+    const _downloadCollection = () => {
         if (isActiveCollectionDownloadInProgress()) return;
 
         if (collectionSummaryType == "hiddenItems") {
@@ -392,7 +392,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     };
 
     const handleDownloadCollection = () =>
-        void downloadCollection2().catch(handleError);
+        void _downloadCollection().catch(handleError);
 
     const confirmLeaveSharedAlbum = () => {
         setDialogMessage({
@@ -459,21 +459,22 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                 {collectionSummaryType == "trash" ? (
                     <EmptyTrashOption onClick={confirmEmptyTrash} />
                 ) : collectionSummaryType == "favorites" ? (
-                    <OnlyDownloadCollectionOption
-                        isDownloadInProgress={isActiveCollectionDownloadInProgress()}
-                        handleCollectionAction={handleCollectionAction}
-                        downloadOptionText={t("DOWNLOAD_FAVORITES")}
-                    />
+                    <DownloadOption
+                        isDownloadInProgress={
+                            isActiveCollectionDownloadInProgress
+                        }
+                        onClick={handleDownloadCollection}
+                    >
+                        {t("DOWNLOAD_FAVORITES")}
+                    </DownloadOption>
                 ) : collectionSummaryType == "uncategorized" ? (
-                    <OnlyDownloadCollectionOption
-                        handleCollectionAction={handleCollectionAction}
-                        downloadOptionText={t("DOWNLOAD_UNCATEGORIZED")}
-                    />
+                    <DownloadOption onClick={handleDownloadCollection}>
+                        {t("DOWNLOAD_UNCATEGORIZED")}
+                    </DownloadOption>
                 ) : collectionSummaryType == "hiddenItems" ? (
-                    <OnlyDownloadCollectionOption
-                        handleCollectionAction={handleCollectionAction}
-                        downloadOptionText={t("DOWNLOAD_HIDDEN_ITEMS")}
-                    />
+                    <DownloadOption onClick={handleDownloadCollection}>
+                        {t("DOWNLOAD_HIDDEN_ITEMS")}
+                    </DownloadOption>
                 ) : collectionSummaryType == "incomingShareViewer" ||
                   collectionSummaryType == "incomingShareCollaborator" ? (
                     <SharedCollectionOptions
@@ -638,33 +639,24 @@ const EmptyTrashOption: React.FC<OptionProps> = ({ onClick }) => (
     </OverflowMenuOption>
 );
 
-interface OnlyDownloadCollectionOptionProps {
-    handleCollectionAction: (
-        action: CollectionActions,
-        loader?: boolean,
-    ) => () => Promise<void>;
-    downloadOptionText?: string;
-    isDownloadInProgress?: boolean;
-}
+type DownloadOptionProps = OptionProps & {
+    isDownloadInProgress?: () => boolean;
+};
 
-const OnlyDownloadCollectionOption: React.FC<
-    OnlyDownloadCollectionOptionProps
-> = ({
-    handleCollectionAction,
-    downloadOptionText = t("DOWNLOAD"),
-    isDownloadInProgress,
-}) => (
+const DownloadOption: React.FC<
+    React.PropsWithChildren<DownloadOptionProps>
+> = ({ isDownloadInProgress, onClick, children }) => (
     <OverflowMenuOption
         startIcon={
-            !isDownloadInProgress ? (
-                <FileDownloadOutlinedIcon />
-            ) : (
+            isDownloadInProgress && isDownloadInProgress() ? (
                 <EnteSpinner size="20px" sx={{ cursor: "not-allowed" }} />
+            ) : (
+                <FileDownloadOutlinedIcon />
             )
         }
-        onClick={handleCollectionAction(CollectionActions.DOWNLOAD, false)}
+        onClick={onClick}
     >
-        {downloadOptionText}
+        {children}
     </OverflowMenuOption>
 );
 
