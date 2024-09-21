@@ -457,7 +457,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
 
     const showSortOrderMenu = () => setCollectionSortOrderMenuView(true);
 
-    const hideSortOrderMenu = () => setCollectionSortOrderMenuView(false);
+    const closeSortOrderMenu = () => setCollectionSortOrderMenuView(false);
 
     const _changeSortOrderAsc = () =>
         changeCollectionSortOrder(activeCollection, true);
@@ -562,10 +562,11 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                 )}
             </OverflowMenu>
             <CollectionSortOrderMenu
-                handleCollectionAction={handleCollectionAction}
+                open={collectionSortOrderMenuView}
+                onClose={closeSortOrderMenu}
                 overFlowMenuIconRef={overFlowMenuIconRef}
-                collectionSortOrderMenuView={collectionSortOrderMenuView}
-                closeCollectionSortOrderMenu={closeCollectionSortOrderMenu}
+                onAscClick={changeSortOrderAsc}
+                onDescClick={changeSortOrderDesc}
             />
         </HorizontalFlex>
     );
@@ -879,40 +880,36 @@ const AlbumCollectionOptions: React.FC<AlbumCollectionOptionsProps> = ({
 );
 
 interface CollectionSortOrderMenuProps {
-    handleCollectionAction: (
-        action: CollectionActions,
-        loader?: boolean,
-    ) => () => Promise<void>;
+    open: boolean;
+    onClose: () => void;
     overFlowMenuIconRef: React.MutableRefObject<SVGSVGElement>;
-    collectionSortOrderMenuView: boolean;
-    closeCollectionSortOrderMenu: () => void;
+    onAscClick: () => void;
+    onDescClick: () => void;
 }
 
 const CollectionSortOrderMenu: React.FC<CollectionSortOrderMenuProps> = ({
-    handleCollectionAction,
-    collectionSortOrderMenuView,
-    closeCollectionSortOrderMenu,
+    open,
+    onClose,
     overFlowMenuIconRef,
+    onAscClick,
+    onDescClick,
 }) => {
-    const setCollectionSortOrderToAsc = () => {
-        closeCollectionSortOrderMenu();
-        handleCollectionAction(
-            CollectionActions.UPDATE_COLLECTION_SORT_ORDER_ASC,
-        )();
+    const handleAscClick = () => {
+        onClose();
+        onAscClick();
     };
 
-    const setCollectionSortOrderToDesc = () => {
-        closeCollectionSortOrderMenu();
-        handleCollectionAction(
-            CollectionActions.UPDATE_COLLECTION_SORT_ORDER_DESC,
-        )();
+    const handleDescClick = () => {
+        onClose();
+        onDescClick();
     };
+
     return (
         <StyledMenu
             id={"collection-files-sort"}
             anchorEl={overFlowMenuIconRef.current}
-            open={collectionSortOrderMenuView}
-            onClose={closeCollectionSortOrderMenu}
+            open={open}
+            onClose={onClose}
             MenuListProps={{
                 disablePadding: true,
                 "aria-labelledby": "collection-files-sort",
@@ -926,10 +923,10 @@ const CollectionSortOrderMenu: React.FC<CollectionSortOrderMenuProps> = ({
                 horizontal: "right",
             }}
         >
-            <OverflowMenuOption onClick={setCollectionSortOrderToDesc}>
+            <OverflowMenuOption onClick={handleDescClick}>
                 {t("NEWEST_FIRST")}
             </OverflowMenuOption>
-            <OverflowMenuOption onClick={setCollectionSortOrderToAsc}>
+            <OverflowMenuOption onClick={handleAscClick}>
                 {t("OLDEST_FIRST")}
             </OverflowMenuOption>
         </StyledMenu>
