@@ -1,4 +1,8 @@
 import type { Collection } from "@/media/collection";
+import {
+    GalleryItemsHeaderAdapter,
+    GalleryItemsSummary,
+} from "@/new/photos/components/Gallery/ListHeader";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import ArchiveOutlined from "@mui/icons-material/ArchiveOutlined";
 import Favorite from "@mui/icons-material/FavoriteRounded";
@@ -10,7 +14,6 @@ import type { Dispatch, SetStateAction } from "react";
 import { CollectionSummary, CollectionSummaryType } from "types/collection";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
 import { shouldShowOptions } from "utils/collection";
-import { CollectionInfo, CollectionInfoBarWrapper } from "./CollectionInfo";
 
 interface Iprops {
     activeCollection: Collection;
@@ -52,9 +55,9 @@ export default function CollectionInfoWithOptions({
     };
 
     return (
-        <CollectionInfoBarWrapper>
+        <GalleryItemsHeaderAdapter>
             <SpaceBetweenFlex>
-                <CollectionInfo
+                <GalleryItemsSummary
                     name={name}
                     fileCount={fileCount}
                     endIcon={<EndIcon type={type} />}
@@ -66,6 +69,6 @@ export default function CollectionInfoWithOptions({
                     />
                 )}
             </SpaceBetweenFlex>
-        </CollectionInfoBarWrapper>
+        </GalleryItemsHeaderAdapter>
     );
 }

@@ -3,18 +3,17 @@ import { Box, styled, Typography } from "@mui/material";
 import { t } from "i18next";
 import React from "react";
 
-interface CollectionInfoProps {
+interface GalleryItemsSummaryProps {
     name: string;
     fileCount: number;
     endIcon?: React.ReactNode;
 }
 
 /**
- * A component suitable for being used as a (non-sticky) header / summary view
- * displayed on top of the of a list of photos (or other items) being displayed
- * in the gallery view.
+ * A component suitable for being used as a (non-sticky) summary displayed on
+ * top of the of a list of photos (or other items) shown in the gallery.
  */
-export const CollectionInfo: React.FC<CollectionInfoProps> = ({
+export const GalleryItemsSummary: React.FC<GalleryItemsSummaryProps> = ({
     name,
     fileCount,
     endIcon,
@@ -41,15 +40,15 @@ export const CollectionInfo: React.FC<CollectionInfoProps> = ({
 };
 
 /**
- * A component suitable for wrapping a {@link GalleryItemsSummary} so that it
- * fills the entire width (and acts like a "header") when it is displayed in the
- * gallery view.
+ * A component suitable for wrapping a component which is acting like a gallery
+ * items header so that it fills the entire width (and acts like a "header")
+ * when it is displayed in the gallery view.
  *
- * The {@link GalleryItemsSummary} is displayed as part of the actual gallery
- * items list itself so that it scrolls alongwith the items. This wrapper makes
- * it take the full width of the conceptual "row" that it occupies.
+ * The header view (e.g. a {@link GalleryItemsSummary}) is displayed as part of
+ * the gallery items list itself so that it scrolls alongwith the items. This
+ * wrapper makes it take the full width of the "row" that it occupies.
  */
-export const CollectionInfoBarWrapper = styled(Box)`
+export const GalleryItemsHeaderAdapter = styled(Box)`
     width: 100%;
     margin-bottom: 12px;
 `;

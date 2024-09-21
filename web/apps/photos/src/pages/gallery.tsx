@@ -4,6 +4,10 @@ import { useIsMobileWidth } from "@/base/hooks";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
 import {
+    GalleryItemsHeaderAdapter,
+    GalleryItemsSummary,
+} from "@/new/photos/components/Gallery/ListHeader";
+import {
     SearchBar,
     type SearchBarProps,
 } from "@/new/photos/components/SearchBar";
@@ -55,10 +59,6 @@ import type { ButtonProps, IconButtonProps } from "@mui/material";
 import { Box, Button, IconButton, Typography, styled } from "@mui/material";
 import AuthenticateUserModal from "components/AuthenticateUserModal";
 import { Collections, type GalleryBarMode } from "components/Collections";
-import {
-    CollectionInfo,
-    CollectionInfoBarWrapper,
-} from "components/Collections/CollectionInfo";
 import CollectionNamer, {
     CollectionNamerAttributes,
 } from "components/Collections/CollectionNamer";
@@ -1380,13 +1380,13 @@ interface SearchResultsHeaderProps {
 const SearchResultsHeader: React.FC<SearchResultsHeaderProps> = ({
     selectedOption,
 }) => (
-    <CollectionInfoBarWrapper>
+    <GalleryItemsHeaderAdapter>
         <Typography color="text.muted" variant="large">
             {t("search_results")}
         </Typography>
-        <CollectionInfo
+        <GalleryItemsSummary
             name={selectedOption.suggestion.label}
             fileCount={selectedOption.fileCount}
         />
-    </CollectionInfoBarWrapper>
+    </GalleryItemsHeaderAdapter>
 );
