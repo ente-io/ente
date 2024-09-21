@@ -1,5 +1,6 @@
 import type { Collection } from "@/media/collection";
 import type { Person } from "@/new/photos/services/ml/cgroups";
+import type { CollectionSummaries } from "@/new/photos/types/collection";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import { LS_KEYS } from "@ente/shared/storage/localStorage";
 import AllCollections from "components/Collections/AllCollections";
@@ -10,7 +11,6 @@ import CollectionShare from "components/Collections/CollectionShare";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { sortCollectionSummaries } from "services/collectionService";
-import { CollectionSummaries } from "types/collection";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
 import {
     ALL_SECTION,

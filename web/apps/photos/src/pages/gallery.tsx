@@ -25,6 +25,7 @@ import {
     setSearchCollectionsAndFiles,
 } from "@/new/photos/services/search";
 import type { SearchOption } from "@/new/photos/services/search/types";
+import type { CollectionSummaries } from "@/new/photos/types/collection";
 import { EnteFile } from "@/new/photos/types/file";
 import { mergeMetadata } from "@/new/photos/utils/file";
 import {
@@ -113,7 +114,6 @@ import { preFileInfoSync, sync } from "services/sync";
 import { syncTrash } from "services/trashService";
 import uploadManager from "services/upload/uploadManager";
 import { isTokenValid } from "services/userService";
-import { CollectionSummaries } from "types/collection";
 import {
     GalleryContextType,
     SelectedState,

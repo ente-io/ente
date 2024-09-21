@@ -1,9 +1,9 @@
+import type { CollectionSummary } from "@/new/photos/types/collection";
 import { Divider, useMediaQuery } from "@mui/material";
 import {
     AllCollectionDialog,
     Transition,
 } from "components/Collections/AllCollections/dialog";
-import { CollectionSummary } from "types/collection";
 import { COLLECTION_LIST_SORT_BY } from "utils/collection";
 import AllCollectionContent from "./content";
 import AllCollectionsHeader from "./header";

@@ -1,5 +1,6 @@
 import { useIsMobileWidth } from "@/base/hooks";
 import type { Person } from "@/new/photos/services/ml/cgroups";
+import type { CollectionSummary } from "@/new/photos/types/collection";
 import {
     IconButtonWithBG,
     Overlay,
@@ -25,7 +26,6 @@ import memoize from "memoize-one";
 import React, { useEffect, useRef, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeList, ListChildComponentProps, areEqual } from "react-window";
-import { CollectionSummary } from "types/collection";
 import { ALL_SECTION, COLLECTION_LIST_SORT_BY } from "utils/collection";
 import type { GalleryBarMode } from ".";
 import CollectionCard from "./CollectionCard";

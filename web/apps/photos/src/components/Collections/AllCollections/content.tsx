@@ -1,3 +1,4 @@
+import type { CollectionSummary } from "@/new/photos/types/collection";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import useWindowSize from "@ente/shared/hooks/useWindowSize";
 import { DialogContent } from "@mui/material";
@@ -8,7 +9,6 @@ import {
     ListChildComponentProps,
     areEqual,
 } from "react-window";
-import { CollectionSummary } from "types/collection";
 import AllCollectionCard from "./collectionCard";
 import { AllCollectionMobileBreakpoint } from "./dialog";
 

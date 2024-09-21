@@ -9,6 +9,10 @@ import {
 } from "@/media/collection";
 import { ItemVisibility } from "@/media/file-metadata";
 import { getAllLocalFiles, getLocalFiles } from "@/new/photos/services/files";
+import type {
+    CollectionSummaries,
+    CollectionSummaryType,
+} from "@/new/photos/types/collection";
 import { EnteFile } from "@/new/photos/types/file";
 import { SUB_TYPE } from "@/new/photos/types/magicMetadata";
 import { safeDirectoryName } from "@/new/photos/utils/native-fs";
@@ -31,7 +35,6 @@ import {
     updatePublicCollectionMagicMetadata,
     updateSharedCollectionMagicMetadata,
 } from "services/collectionService";
-import { CollectionSummaries, CollectionSummaryType } from "types/collection";
 import { SetFilesDownloadProgressAttributes } from "types/gallery";
 import { downloadFilesWithProgress } from "utils/file";
 import { isArchivedCollection, updateMagicMetadata } from "utils/magicMetadata";

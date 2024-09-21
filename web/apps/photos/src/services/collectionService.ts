@@ -20,6 +20,11 @@ import {
 } from "@/media/collection";
 import { ItemVisibility } from "@/media/file-metadata";
 import { getLocalFiles } from "@/new/photos/services/files";
+import type {
+    CollectionSummaries,
+    CollectionSummary,
+    CollectionSummaryType,
+} from "@/new/photos/types/collection";
 import { EnteFile } from "@/new/photos/types/file";
 import {
     EncryptedMagicMetadata,
@@ -35,11 +40,6 @@ import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { getActualKey } from "@ente/shared/user";
 import type { User } from "@ente/shared/user/types";
 import { t } from "i18next";
-import {
-    CollectionSummaries,
-    CollectionSummary,
-    CollectionSummaryType,
-} from "types/collection";
 import { FamilyData } from "types/user";
 import {
     ALL_SECTION,

@@ -3,6 +3,10 @@ import {
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
 } from "@/new/photos/components/Gallery/ListHeader";
+import type {
+    CollectionSummary,
+    CollectionSummaryType,
+} from "@/new/photos/types/collection";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import ArchiveOutlined from "@mui/icons-material/ArchiveOutlined";
 import Favorite from "@mui/icons-material/FavoriteRounded";
@@ -11,7 +15,6 @@ import PeopleIcon from "@mui/icons-material/People";
 import { SetCollectionNamerAttributes } from "components/Collections/CollectionNamer";
 import CollectionOptions from "components/Collections/CollectionOptions";
 import type { Dispatch, SetStateAction } from "react";
-import { CollectionSummary, CollectionSummaryType } from "types/collection";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
 
 interface Iprops {

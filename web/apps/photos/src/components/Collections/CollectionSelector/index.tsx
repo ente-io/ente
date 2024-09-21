@@ -1,4 +1,8 @@
 import type { Collection } from "@/media/collection";
+import type {
+    CollectionSummaries,
+    CollectionSummary,
+} from "@/new/photos/types/collection";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleWithCloseButton";
 import { DialogContent, useMediaQuery } from "@mui/material";
@@ -6,7 +10,6 @@ import { AllCollectionDialog } from "components/Collections/AllCollections/dialo
 import { t } from "i18next";
 import { useEffect, useState } from "react";
 import { createUnCategorizedCollection } from "services/collectionService";
-import { CollectionSummaries, CollectionSummary } from "types/collection";
 import { CollectionSelectorIntent } from "types/gallery";
 import {
     COLLECTION_SORT_ORDER,

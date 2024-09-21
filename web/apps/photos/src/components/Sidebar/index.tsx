@@ -57,7 +57,6 @@ import billingService from "services/billingService";
 import { getUncategorizedCollection } from "services/collectionService";
 import exportService from "services/export";
 import { getUserDetailsV2 } from "services/userService";
-import { CollectionSummaries } from "types/collection";
 import { UserDetails } from "types/user";
 import {
     hasAddOnBonus,
