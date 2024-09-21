@@ -420,6 +420,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     return (
         <HorizontalFlex sx={{ display: "inline-flex", gap: "16px" }}>
             <QuickOptions
+                onEmptyTrashClick={confirmEmptyTrash}
                 onShareClick={showCollectionShareModal}
                 handleCollectionAction={handleCollectionAction}
                 collectionSummaryType={collectionSummaryType}
@@ -478,6 +479,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
 export default CollectionOptions;
 
 interface QuickOptionsProps {
+    onEmptyTrashClick: () => void;
     onShareClick: () => void;
     handleCollectionAction: (
         action: CollectionActions,
@@ -488,6 +490,7 @@ interface QuickOptionsProps {
 }
 
 const QuickOptions: React.FC<QuickOptionsProps> = ({
+    onEmptyTrashClick,
     onShareClick,
     handleCollectionAction,
     collectionSummaryType,
@@ -496,9 +499,7 @@ const QuickOptions: React.FC<QuickOptionsProps> = ({
     return (
         <FlexWrapper sx={{ gap: "16px" }}>
             {showEmptyTrashQuickOption(collectionSummaryType) && (
-                <EmptyTrashQuickOption
-                    handleCollectionAction={handleCollectionAction}
-                />
+                <EmptyTrashQuickOption onClick={onEmptyTrashClick} />
             )}
             {showDownloadQuickOption(collectionSummaryType) &&
                 (!isDownloadInProgress ? (
@@ -523,23 +524,14 @@ const showEmptyTrashQuickOption = (type: CollectionSummaryType) => {
     return type == "trash";
 };
 
-interface EmptyTrashQuickOptionProps {
-    handleCollectionAction: (
-        action: CollectionActions,
-        loader?: boolean,
-    ) => () => Promise<void>;
+/** Props for a generic option. */
+interface OptionProps {
+    onClick: () => void;
 }
 
-const EmptyTrashQuickOption: React.FC<EmptyTrashQuickOptionProps> = ({
-    handleCollectionAction,
-}) => (
+const EmptyTrashQuickOption: React.FC<OptionProps> = ({ onClick }) => (
     <Tooltip title={t("EMPTY_TRASH")}>
-        <IconButton
-            onClick={handleCollectionAction(
-                CollectionActions.CONFIRM_EMPTY_TRASH,
-                false,
-            )}
-        >
+        <IconButton onClick={onClick}>
             <DeleteOutlinedIcon />
         </IconButton>
     </Tooltip>
