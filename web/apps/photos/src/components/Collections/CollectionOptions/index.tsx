@@ -249,10 +249,6 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         };
     };
 
-    const showCastAlbumDialog = () => {
-        setShowAlbumCastDialog(true);
-    };
-
     const renameCollection = async (newName: string) => {
         if (activeCollection.name !== newName) {
             await CollectionAPI.renameCollection(activeCollection, newName);
@@ -394,6 +390,10 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     const handleDownloadCollection = () =>
         void _downloadCollection().catch(handleError);
 
+    const showCastAlbumDialog = () => {
+        setShowAlbumCastDialog(true);
+    };
+
     const confirmLeaveSharedAlbum = () => {
         setDialogMessage({
             title: t("LEAVE_SHARED_ALBUM_TITLE"),
@@ -479,6 +479,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                   collectionSummaryType == "incomingShareCollaborator" ? (
                     <SharedCollectionOptions
                         isArchived={isArchivedCollection(activeCollection)}
+                        onCastClick={showCastAlbumDialog}
                         handleCollectionAction={handleCollectionAction}
                     />
                 ) : (
@@ -662,6 +663,7 @@ const DownloadOption: React.FC<
 
 interface SharedCollectionOptionProps {
     isArchived: boolean;
+    onCastClick: () => void;
     handleCollectionAction: (
         action: CollectionActions,
         loader?: boolean,
@@ -670,6 +672,7 @@ interface SharedCollectionOptionProps {
 
 const SharedCollectionOptions: React.FC<SharedCollectionOptionProps> = ({
     isArchived,
+    onCastClick,
     handleCollectionAction,
 }) => (
     <>
@@ -697,13 +700,7 @@ const SharedCollectionOptions: React.FC<SharedCollectionOptionProps> = ({
         >
             {t("LEAVE_ALBUM")}
         </OverflowMenuOption>
-        <OverflowMenuOption
-            startIcon={<TvIcon />}
-            onClick={handleCollectionAction(
-                CollectionActions.SHOW_ALBUM_CAST_DIALOG,
-                false,
-            )}
-        >
+        <OverflowMenuOption startIcon={<TvIcon />} onClick={onCastClick}>
             {t("CAST_ALBUM_TO_TV")}
         </OverflowMenuOption>
     </>
