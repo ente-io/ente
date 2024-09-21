@@ -91,8 +91,8 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
      * and syncing with remote on completion.
      */
     const wrap = useCallback(
-        async (f: () => Promise<void>) => {
-            return async () => {
+        (f: () => Promise<void>) => {
+            const wrapped = async () => {
                 try {
                     await f();
                 } catch (e) {
@@ -101,6 +101,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                     syncWithRemote(false, true);
                 }
             };
+            return (): void => void wrapped();
         },
         [handleError, syncWithRemote],
     );
@@ -109,8 +110,8 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
      * Variant of {@link wrap} that also shows the global loading bar.
      */
     const wrapLoading = useCallback(
-        async (f: () => Promise<void>) => {
-            return async () => {
+        (f: () => Promise<void>) => {
+            const wrapped = async () => {
                 startLoading();
                 try {
                     await f();
@@ -121,6 +122,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                     finishLoading();
                 }
             };
+            return (): void => void wrapped();
         },
         [handleError, syncWithRemote, startLoading, finishLoading],
     );
@@ -141,7 +143,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     };
 
     const renameCollection = (newName: string) =>
-        void wrapLoading(() => _renameCollection(newName));
+        wrapLoading(() => _renameCollection(newName))();
 
     const confirmDeleteCollection = () => {
         setDialogMessage({
@@ -170,21 +172,15 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         });
     };
 
-    const _deleteCollectionAlongWithFiles = async () => {
+    const deleteCollectionAlongWithFiles = wrapLoading(async () => {
         await CollectionAPI.deleteCollection(activeCollection.id, false);
         setActiveCollectionID(ALL_SECTION);
-    };
+    });
 
-    const _deleteCollectionButKeepFiles = async () => {
+    const deleteCollectionButKeepFiles = wrapLoading(async () => {
         await CollectionAPI.deleteCollection(activeCollection.id, true);
         setActiveCollectionID(ALL_SECTION);
-    };
-
-    const deleteCollectionAlongWithFiles = () =>
-        void wrapLoading(_deleteCollectionAlongWithFiles);
-
-    const deleteCollectionButKeepFiles = () =>
-        void wrapLoading(_deleteCollectionButKeepFiles);
+    });
 
     const confirmEmptyTrash = () =>
         setDialogMessage({
@@ -198,13 +194,11 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
             close: { text: t("cancel") },
         });
 
-    const _emptyTrash = async () => {
+    const emptyTrash = wrapLoading(async () => {
         await TrashService.emptyTrash();
         await TrashService.clearLocalTrash();
         setActiveCollectionID(ALL_SECTION);
-    };
-
-    const emptyTrash = () => void wrapLoading(_emptyTrash);
+    });
 
     const _downloadCollection = () => {
         if (isActiveCollectionDownloadInProgress()) return;
@@ -232,15 +226,13 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     const downloadCollection = () =>
         void _downloadCollection().catch(handleError);
 
-    const _archiveAlbum = () =>
-        changeCollectionVisibility(activeCollection, ItemVisibility.archived);
+    const archiveAlbum = wrapLoading(() =>
+        changeCollectionVisibility(activeCollection, ItemVisibility.archived),
+    );
 
-    const _unarchiveAlbum = () =>
-        changeCollectionVisibility(activeCollection, ItemVisibility.visible);
-
-    const archiveAlbum = () => void wrapLoading(_archiveAlbum);
-
-    const unarchiveAlbum = () => void wrapLoading(_unarchiveAlbum);
+    const unarchiveAlbum = wrapLoading(() =>
+        changeCollectionVisibility(activeCollection, ItemVisibility.visible),
+    );
 
     const confirmLeaveSharedAlbum = () => {
         setDialogMessage({
@@ -257,56 +249,44 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         });
     };
 
-    const _leaveSharedAlbum = async () => {
+    const leaveSharedAlbum = wrapLoading(async () => {
         await CollectionAPI.leaveSharedAlbum(activeCollection.id);
         setActiveCollectionID(ALL_SECTION);
-    };
-
-    const leaveSharedAlbum = () => void wrapLoading(_leaveSharedAlbum);
+    });
 
     const showCastAlbumDialog = () => setShowAlbumCastDialog(true);
 
-    const _pinAlbum = () => changeCollectionOrder(activeCollection, 1);
+    const pinAlbum = wrap(() => changeCollectionOrder(activeCollection, 1));
 
-    const _unpinAlbum = () => changeCollectionOrder(activeCollection, 0);
+    const unpinAlbum = wrap(() => changeCollectionOrder(activeCollection, 0));
 
-    const pinAlbum = () => void wrap(_pinAlbum);
-
-    const unpinAlbum = () => void wrap(_unpinAlbum);
-
-    const _hideAlbum = async () => {
+    const hideAlbum = wrap(async () => {
         await changeCollectionVisibility(
             activeCollection,
             ItemVisibility.hidden,
         );
         setActiveCollectionID(ALL_SECTION);
-    };
+    });
 
-    const _unhideAlbum = async () => {
+    const unhideAlbum = wrap(async () => {
         await changeCollectionVisibility(
             activeCollection,
             ItemVisibility.visible,
         );
         setActiveCollectionID(HIDDEN_ITEMS_SECTION);
-    };
-
-    const hideAlbum = () => void wrap(_hideAlbum);
-
-    const unhideAlbum = () => void wrap(_unhideAlbum);
+    });
 
     const showSortOrderMenu = () => setOpenSortOrderMenu(true);
 
     const closeSortOrderMenu = () => setOpenSortOrderMenu(false);
 
-    const _changeSortOrderAsc = () =>
-        changeCollectionSortOrder(activeCollection, true);
+    const changeSortOrderAsc = wrap(() =>
+        changeCollectionSortOrder(activeCollection, true),
+    );
 
-    const _changeSortOrderDesc = () =>
-        changeCollectionSortOrder(activeCollection, false);
-
-    const changeSortOrderAsc = () => void wrap(_changeSortOrderAsc);
-
-    const changeSortOrderDesc = () => void wrap(_changeSortOrderDesc);
+    const changeSortOrderDesc = wrap(() =>
+        changeCollectionSortOrder(activeCollection, false),
+    );
 
     return (
         <HorizontalFlex sx={{ display: "inline-flex", gap: "16px" }}>
