@@ -72,8 +72,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         useContext(AppContext);
     const { syncWithRemote } = useContext(GalleryContext);
     const overFlowMenuIconRef = useRef<SVGSVGElement>(null);
-    const [collectionSortOrderMenuView, setCollectionSortOrderMenuView] =
-        useState(false);
+    const [openSortOrderMenu, setOpenSortOrderMenu] = useState(false);
 
     const handleError = useCallback(
         (e: unknown) => {
@@ -89,9 +88,9 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
 
     /**
      * Return a new function by wrapping an async function in an error handler,
-     * and syncing on completion.
+     * and syncing with remote on completion.
      */
-    const wrapErrorAndSync = async (f: () => Promise<void>) => {
+    const wrap = async (f: () => Promise<void>) => {
         return async () => {
             try {
                 await f();
@@ -104,10 +103,9 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     };
 
     /**
-     * Variant of {@link wrapErrorAndSync} that also shows the global
-     * loading bar.
+     * Variant of {@link wrap} that also shows the global loading bar.
      */
-    const wrapErrorAndSyncLoading = async (f: () => Promise<void>) => {
+    const wrapLoading = async (f: () => Promise<void>) => {
         return async () => {
             startLoading();
             try {
@@ -137,7 +135,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     };
 
     const renameCollection = (newName: string) =>
-        void wrapErrorAndSyncLoading(() => _renameCollection(newName));
+        void wrapLoading(() => _renameCollection(newName));
 
     const confirmDeleteCollection = () => {
         setDialogMessage({
@@ -177,10 +175,10 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     };
 
     const deleteCollectionAlongWithFiles = () =>
-        void wrapErrorAndSyncLoading(_deleteCollectionAlongWithFiles);
+        void wrapLoading(_deleteCollectionAlongWithFiles);
 
     const deleteCollectionButKeepFiles = () =>
-        void wrapErrorAndSyncLoading(_deleteCollectionButKeepFiles);
+        void wrapLoading(_deleteCollectionButKeepFiles);
 
     const confirmEmptyTrash = () =>
         setDialogMessage({
@@ -200,7 +198,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         setActiveCollectionID(ALL_SECTION);
     };
 
-    const emptyTrash = () => void wrapErrorAndSyncLoading(_emptyTrash);
+    const emptyTrash = () => void wrapLoading(_emptyTrash);
 
     const _downloadCollection = () => {
         if (isActiveCollectionDownloadInProgress()) return;
@@ -234,9 +232,9 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     const _unarchiveAlbum = () =>
         changeCollectionVisibility(activeCollection, ItemVisibility.visible);
 
-    const archiveAlbum = () => void wrapErrorAndSyncLoading(_archiveAlbum);
+    const archiveAlbum = () => void wrapLoading(_archiveAlbum);
 
-    const unarchiveAlbum = () => void wrapErrorAndSyncLoading(_unarchiveAlbum);
+    const unarchiveAlbum = () => void wrapLoading(_unarchiveAlbum);
 
     const confirmLeaveSharedAlbum = () => {
         setDialogMessage({
@@ -258,8 +256,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         setActiveCollectionID(ALL_SECTION);
     };
 
-    const leaveSharedAlbum = () =>
-        void wrapErrorAndSyncLoading(_leaveSharedAlbum);
+    const leaveSharedAlbum = () => void wrapLoading(_leaveSharedAlbum);
 
     const showCastAlbumDialog = () => setShowAlbumCastDialog(true);
 
@@ -267,9 +264,9 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
 
     const _unpinAlbum = () => changeCollectionOrder(activeCollection, 0);
 
-    const pinAlbum = () => void wrapErrorAndSync(_pinAlbum);
+    const pinAlbum = () => void wrap(_pinAlbum);
 
-    const unpinAlbum = () => void wrapErrorAndSync(_unpinAlbum);
+    const unpinAlbum = () => void wrap(_unpinAlbum);
 
     const _hideAlbum = async () => {
         await changeCollectionVisibility(
@@ -287,13 +284,13 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         setActiveCollectionID(HIDDEN_ITEMS_SECTION);
     };
 
-    const hideAlbum = () => void wrapErrorAndSync(_hideAlbum);
+    const hideAlbum = () => void wrap(_hideAlbum);
 
-    const unhideAlbum = () => void wrapErrorAndSync(_unhideAlbum);
+    const unhideAlbum = () => void wrap(_unhideAlbum);
 
-    const showSortOrderMenu = () => setCollectionSortOrderMenuView(true);
+    const showSortOrderMenu = () => setOpenSortOrderMenu(true);
 
-    const closeSortOrderMenu = () => setCollectionSortOrderMenuView(false);
+    const closeSortOrderMenu = () => setOpenSortOrderMenu(false);
 
     const _changeSortOrderAsc = () =>
         changeCollectionSortOrder(activeCollection, true);
@@ -301,10 +298,9 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     const _changeSortOrderDesc = () =>
         changeCollectionSortOrder(activeCollection, false);
 
-    const changeSortOrderAsc = () => void wrapErrorAndSync(_changeSortOrderAsc);
+    const changeSortOrderAsc = () => void wrap(_changeSortOrderAsc);
 
-    const changeSortOrderDesc = () =>
-        void wrapErrorAndSync(_changeSortOrderDesc);
+    const changeSortOrderDesc = () => void wrap(_changeSortOrderDesc);
 
     return (
         <HorizontalFlex sx={{ display: "inline-flex", gap: "16px" }}>
@@ -368,7 +364,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                 )}
             </OverflowMenu>
             <CollectionSortOrderMenu
-                open={collectionSortOrderMenuView}
+                open={openSortOrderMenu}
                 onClose={closeSortOrderMenu}
                 overFlowMenuIconRef={overFlowMenuIconRef}
                 onAscClick={changeSortOrderAsc}
