@@ -420,6 +420,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     return (
         <HorizontalFlex sx={{ display: "inline-flex", gap: "16px" }}>
             <QuickOptions
+                onShareClick={showCollectionShareModal}
                 handleCollectionAction={handleCollectionAction}
                 collectionSummaryType={collectionSummaryType}
                 isDownloadInProgress={isActiveCollectionDownloadInProgress()}
@@ -477,6 +478,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
 export default CollectionOptions;
 
 interface QuickOptionsProps {
+    onShareClick: () => void;
     handleCollectionAction: (
         action: CollectionActions,
         loader?: boolean,
@@ -486,6 +488,7 @@ interface QuickOptionsProps {
 }
 
 const QuickOptions: React.FC<QuickOptionsProps> = ({
+    onShareClick,
     handleCollectionAction,
     collectionSummaryType,
     isDownloadInProgress,
@@ -508,7 +511,7 @@ const QuickOptions: React.FC<QuickOptionsProps> = ({
                 ))}
             {showShareQuickOption(collectionSummaryType) && (
                 <ShareQuickOption
-                    handleCollectionAction={handleCollectionAction}
+                    onClick={onShareClick}
                     collectionSummaryType={collectionSummaryType}
                 />
             )}
@@ -603,15 +606,12 @@ const showShareQuickOption = (type: CollectionSummaryType) => {
 };
 
 interface ShareQuickOptionProps {
-    handleCollectionAction: (
-        action: CollectionActions,
-        loader?: boolean,
-    ) => () => Promise<void>;
+    onClick: () => void;
     collectionSummaryType: CollectionSummaryType;
 }
 
 const ShareQuickOption: React.FC<ShareQuickOptionProps> = ({
-    handleCollectionAction,
+    onClick,
     collectionSummaryType,
 }) => (
     <Tooltip
@@ -625,12 +625,7 @@ const ShareQuickOption: React.FC<ShareQuickOptionProps> = ({
                   : t("SHARE_COLLECTION")
         }
     >
-        <IconButton
-            onClick={handleCollectionAction(
-                CollectionActions.SHOW_SHARE_DIALOG,
-                false,
-            )}
-        >
+        <IconButton onClick={onClick}>
             <PeopleIcon />
         </IconButton>
     </Tooltip>
