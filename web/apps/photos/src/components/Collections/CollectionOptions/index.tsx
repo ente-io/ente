@@ -555,6 +555,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                         onUnpinClick={unpinAlbum2}
                         onHideClick={hideAlbum2}
                         onUnhideClick={unhideAlbum2}
+                        onShareClick={showCollectionShareModal}
                         onCastClick={showCastAlbumDialog}
                         handleCollectionAction={handleCollectionAction}
                     />
@@ -785,6 +786,7 @@ interface AlbumCollectionOptionsProps {
     onUnpinClick: () => void;
     onHideClick: () => void;
     onUnhideClick: () => void;
+    onShareClick: () => void;
     onCastClick: () => void;
     handleCollectionAction: (
         action: CollectionActions,
@@ -804,6 +806,7 @@ const AlbumCollectionOptions: React.FC<AlbumCollectionOptionsProps> = ({
     onUnpinClick,
     onHideClick,
     onUnhideClick,
+    onShareClick,
     onCastClick,
     handleCollectionAction,
 }) => (
