@@ -1,52 +1,47 @@
 import { boxSeal } from "@/base/crypto/libsodium";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
-import { VerticallyCentered } from "@ente/shared/components/Container";
+import { loadCast } from "@/new/photos/utils/chromecast-sender";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
-import EnteButton from "@ente/shared/components/EnteButton";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
 import castGateway from "@ente/shared/network/cast";
-import { Link, Typography } from "@mui/material";
+import { Button, Link, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 import { v4 as uuidv4 } from "uuid";
-import { loadSender } from "../../utils/useCastSender";
 
-interface Props {
-    show: boolean;
-    onHide: () => void;
-    currentCollection: Collection;
+interface AlbumCastDialogProps {
+    /** If `true`, the dialog is shown. */
+    open: boolean;
+    /** Callback fired when the dialog wants to be closed. */
+    onClose: () => void;
+    /** The collection that we want to cast. */
+    collection: Collection;
 }
 
-enum AlbumCastError {
-    TV_NOT_FOUND = "tv_not_found",
-}
-
-declare global {
-    interface Window {
-        chrome: any;
-    }
-}
-
-export default function AlbumCastDialog({
-    show,
-    onHide,
-    currentCollection,
-}: Props) {
+/**
+ * A dialog that shows various options that the user has for casting an album.
+ */
+export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
+    open,
+    onClose,
+    collection,
+}) => {
     const [view, setView] = useState<
         "choose" | "auto" | "pin" | "auto-cast-error"
     >("choose");
 
     const [browserCanCast, setBrowserCanCast] = useState(false);
-    // Make API call on component mount
+
+    // Make API call to clear all previous sessions on component mount.
     useEffect(() => {
         castGateway.revokeAllTokens();
 
-        setBrowserCanCast(!!window.chrome);
+        setBrowserCanCast(typeof window["chrome"] !== "undefined");
     }, []);
 
     const onSubmit: SingleInputFormProps["callback"] = async (
@@ -55,55 +50,47 @@ export default function AlbumCastDialog({
     ) => {
         try {
             await doCast(value.trim());
-            onHide();
+            onClose();
         } catch (e) {
-            const error = e as Error;
-            let fieldError: string;
-            switch (error.message) {
-                case AlbumCastError.TV_NOT_FOUND:
-                    fieldError = t("tv_not_found");
-                    break;
-                default:
-                    fieldError = t("UNKNOWN_ERROR");
-                    break;
+            if (e instanceof Error && e.message == "tv-not-found") {
+                setFieldError(t("tv_not_found"));
+            } else {
+                setFieldError(t("UNKNOWN_ERROR"));
             }
-
-            setFieldError(fieldError);
         }
     };
 
     const doCast = async (pin: string) => {
-        // does the TV exist? have they advertised their existence?
+        // Does the TV exist? have they advertised their existence?
         const tvPublicKeyB64 = await castGateway.getPublicKey(pin);
         if (!tvPublicKeyB64) {
-            throw new Error(AlbumCastError.TV_NOT_FOUND);
+            throw new Error("tv-not-found");
         }
-        // generate random uuid string
+
+        // Generate random id.
         const castToken = uuidv4();
 
-        // ok, they exist. let's give them the good stuff.
+        // Ok, they exist. let's give them the good stuff.
         const payload = JSON.stringify({
             castToken: castToken,
-            collectionID: currentCollection.id,
-            collectionKey: currentCollection.key,
+            collectionID: collection.id,
+            collectionKey: collection.key,
         });
         const encryptedPayload = await boxSeal(btoa(payload), tvPublicKeyB64);
 
-        // hey TV, we acknowlege you!
+        // Hey TV, we acknowlege you!
         await castGateway.publishCastPayload(
             pin,
             encryptedPayload,
-            currentCollection.id,
+            collection.id,
             castToken,
         );
     };
 
     useEffect(() => {
         if (view === "auto") {
-            loadSender().then(async (sender) => {
-                const { cast } = sender;
-
-                const instance = await cast.framework.CastContext.getInstance();
+            loadCast().then(async (cast) => {
+                const instance = cast.framework.CastContext.getInstance();
                 try {
                     await instance.requestSession();
                 } catch (e) {
@@ -123,105 +110,80 @@ export default function AlbumCastDialog({
                             doCast(code)
                                 .then(() => {
                                     setView("choose");
-                                    onHide();
+                                    onClose();
                                 })
                                 .catch((e) => {
-                                    setView("auto-cast-error");
                                     log.error("Error casting to TV", e);
+                                    setView("auto-cast-error");
                                 });
                         }
                     },
                 );
 
-                const collectionID = currentCollection.id;
+                const collectionID = collection.id;
                 session
                     .sendMessage("urn:x-cast:pair-request", { collectionID })
                     .then(() => {
-                        log.debug(() => "Message sent successfully");
-                    })
-                    .catch((e) => {
-                        log.error("Error sending message", e);
+                        log.debug(() => "urn:x-cast:pair-request sent");
                     });
             });
         }
     }, [view]);
 
     useEffect(() => {
-        if (show) {
-            castGateway.revokeAllTokens();
-        }
-    }, [show]);
+        if (open) castGateway.revokeAllTokens();
+    }, [open]);
 
     return (
         <DialogBoxV2
+            open={open}
+            onClose={onClose}
+            attributes={{ title: t("cast_album_to_tv") }}
             sx={{ zIndex: 1600 }}
-            open={show}
-            onClose={onHide}
-            attributes={{
-                title: t("cast_album_to_tv"),
-            }}
         >
-            {view === "choose" && (
-                <>
+            {view == "choose" && (
+                <Stack sx={{ py: 1, gap: 4 }}>
                     {browserCanCast && (
-                        <>
+                        <Stack sx={{ gap: 2 }}>
                             <Typography color={"text.muted"}>
                                 {t("cast_auto_pair_description")}
                             </Typography>
 
-                            <EnteButton
-                                style={{
-                                    marginBottom: "1rem",
-                                }}
-                                onClick={() => {
-                                    setView("auto");
-                                }}
-                            >
+                            <Button onClick={() => setView("auto")}>
                                 {t("cast_auto_pair")}
-                            </EnteButton>
-                        </>
+                            </Button>
+                        </Stack>
                     )}
-                    <Typography color="text.muted">
-                        {t("pair_with_pin_description")}
-                    </Typography>
-
-                    <EnteButton
-                        onClick={() => {
-                            setView("pin");
-                        }}
-                    >
-                        {t("pair_with_pin")}
-                    </EnteButton>
-                </>
+                    <Stack sx={{ gap: 2 }}>
+                        <Typography color="text.muted">
+                            {t("pair_with_pin_description")}
+                        </Typography>
+                        <Button onClick={() => setView("pin")}>
+                            {t("pair_with_pin")}
+                        </Button>
+                    </Stack>
+                </Stack>
             )}
-            {view === "auto" && (
-                <VerticallyCentered gap="1rem">
-                    <EnteSpinner />
+            {view == "auto" && (
+                <Stack sx={{ pt: 1, gap: 3, textAlign: "center" }}>
+                    <div>
+                        <EnteSpinner />
+                    </div>
                     <Typography>{t("choose_device_from_browser")}</Typography>
-                    <EnteButton
-                        variant="text"
-                        onClick={() => {
-                            setView("choose");
-                        }}
-                    >
+                    <Button color="secondary" onClick={() => setView("choose")}>
                         {t("GO_BACK")}
-                    </EnteButton>
-                </VerticallyCentered>
+                    </Button>
+                </Stack>
             )}
-            {view === "auto-cast-error" && (
-                <VerticallyCentered gap="1rem">
+            {view == "auto-cast-error" && (
+                <Stack sx={{ pt: 1, gap: 3, textAlign: "center" }}>
                     <Typography>{t("cast_auto_pair_failed")}</Typography>
-                    <EnteButton
-                        variant="text"
-                        onClick={() => {
-                            setView("choose");
-                        }}
-                    >
+                    <Button color="secondary" onClick={() => setView("choose")}>
                         {t("GO_BACK")}
-                    </EnteButton>
-                </VerticallyCentered>
+                    </Button>
+                </Stack>
             )}
-            {view === "pin" && (
+            {view == "pin" && (
                 <>
                     <Typography>
                         <Trans
@@ -246,16 +208,11 @@ export default function AlbumCastDialog({
                         buttonText={t("pair_device_to_tv")}
                         submitButtonProps={{ sx: { mt: 1, mb: 2 } }}
                     />
-                    <EnteButton
-                        variant="text"
-                        onClick={() => {
-                            setView("choose");
-                        }}
-                    >
+                    <Button variant="text" onClick={() => setView("choose")}>
                         {t("GO_BACK")}
-                    </EnteButton>
+                    </Button>
                 </>
             )}
         </DialogBoxV2>
     );
-}
+};

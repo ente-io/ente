@@ -24,7 +24,7 @@ import {
     isFilesDownloadCancelled,
     isFilesDownloadCompleted,
 } from "../FilesDownloadProgress";
-import AlbumCastDialog from "./AlbumCastDialog";
+import { AlbumCastDialog } from "./AlbumCastDialog";
 
 /**
  * Specifies what the bar is displaying currently.
@@ -68,11 +68,11 @@ export const Collections: React.FC<CollectionsProps> = ({
     filesDownloadProgressAttributesList,
     setFilesDownloadProgressAttributesCreator,
 }) => {
-    const [allCollectionView, setAllCollectionView] = useState(false);
-    const [collectionShareModalView, setCollectionShareModalView] =
+    const [openAllCollectionDialog, setOpenAllCollectionDialog] =
         useState(false);
-
-    const [showAlbumCastDialog, setShowAlbumCastDialog] = useState(false);
+    const [openCollectionShareView, setOpenCollectionShareView] =
+        useState(false);
+    const [openAlbumCastDialog, setOpenAlbumCastDialog] = useState(false);
 
     const [collectionListSortBy, setCollectionListSortBy] =
         useLocalState<COLLECTION_LIST_SORT_BY>(
@@ -128,7 +128,7 @@ export const Collections: React.FC<CollectionsProps> = ({
                     activeCollection={activeCollection}
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
                     showCollectionShareModal={() =>
-                        setCollectionShareModalView(true)
+                        setOpenCollectionShareView(true)
                     }
                     setFilesDownloadProgressAttributesCreator={
                         setFilesDownloadProgressAttributesCreator
@@ -137,7 +137,7 @@ export const Collections: React.FC<CollectionsProps> = ({
                         isActiveCollectionDownloadInProgress
                     }
                     setActiveCollectionID={setActiveCollectionID}
-                    setShowAlbumCastDialog={setShowAlbumCastDialog}
+                    setShowAlbumCastDialog={setOpenAlbumCastDialog}
                 />
             ),
             itemType: ITEM_TYPE.HEADER,
@@ -157,11 +157,6 @@ export const Collections: React.FC<CollectionsProps> = ({
         return <></>;
     }
 
-    const closeAllCollections = () => setAllCollectionView(false);
-    const openAllCollections = () => setAllCollectionView(true);
-    const closeCollectionShare = () => setCollectionShareModalView(false);
-    const closeAlbumCastDialog = () => setShowAlbumCastDialog(false);
-
     return (
         <>
             <CollectionListBar
@@ -176,15 +171,15 @@ export const Collections: React.FC<CollectionsProps> = ({
                     collectionListSortBy,
                     setCollectionListSortBy,
                 }}
-                onShowAllCollections={openAllCollections}
+                onShowAllCollections={() => setOpenAllCollectionDialog(true)}
                 collectionSummaries={sortedCollectionSummaries.filter((x) =>
                     shouldBeShownOnCollectionBar(x.type),
                 )}
             />
 
             <AllCollections
-                open={allCollectionView}
-                onClose={closeAllCollections}
+                open={openAllCollectionDialog}
+                onClose={() => setOpenAllCollectionDialog(false)}
                 collectionSummaries={sortedCollectionSummaries.filter(
                     (x) => !isSystemCollection(x.type),
                 )}
@@ -193,19 +188,18 @@ export const Collections: React.FC<CollectionsProps> = ({
                 collectionListSortBy={collectionListSortBy}
                 isInHiddenSection={mode == "hidden-albums"}
             />
-
             <CollectionShare
                 collectionSummary={toShowCollectionSummaries.get(
                     activeCollectionID,
                 )}
-                open={collectionShareModalView}
-                onClose={closeCollectionShare}
+                open={openCollectionShareView}
+                onClose={() => setOpenCollectionShareView(false)}
                 collection={activeCollection}
             />
             <AlbumCastDialog
-                currentCollection={activeCollection}
-                show={showAlbumCastDialog}
-                onHide={closeAlbumCastDialog}
+                open={openAlbumCastDialog}
+                onClose={() => setOpenAlbumCastDialog(false)}
+                collection={activeCollection}
             />
         </>
     );
