@@ -659,14 +659,14 @@ const AlbumCollectionOptions: React.FC<AlbumCollectionOptionsProps> = ({
                 onClick={onUnpinClick}
                 startIcon={<UnPinIcon />}
             >
-                {t("UNPIN_ALBUM")}
+                {t("unpin_album")}
             </OverflowMenuOption>
         ) : (
             <OverflowMenuOption
                 onClick={onPinClick}
                 startIcon={<PushPinOutlined />}
             >
-                {t("PIN_ALBUM")}
+                {t("pin_album")}
             </OverflowMenuOption>
         )}
         {!isHidden && (
