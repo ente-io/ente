@@ -3,6 +3,7 @@
 ## v1.7.5 (Unreleased)
 
 -   Directly upload to selected album on drag and drop.
+-   Include shared files in export.
 -   .
 
 ## v1.7.4
