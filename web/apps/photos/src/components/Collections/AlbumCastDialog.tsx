@@ -2,7 +2,6 @@ import { boxSeal } from "@/base/crypto/libsodium";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
 import { loadCast } from "@/new/photos/utils/chromecast-sender";
-import { VerticallyCentered } from "@ente/shared/components/Container";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import SingleInputForm, {
@@ -166,21 +165,23 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
                 </Stack>
             )}
             {view == "auto" && (
-                <VerticallyCentered gap="1rem">
-                    <EnteSpinner />
+                <Stack sx={{ pt: 1, gap: 3, textAlign: "center" }}>
+                    <div>
+                        <EnteSpinner />
+                    </div>
                     <Typography>{t("choose_device_from_browser")}</Typography>
-                    <Button variant="text" onClick={() => setView("choose")}>
+                    <Button color="secondary" onClick={() => setView("choose")}>
                         {t("GO_BACK")}
                     </Button>
-                </VerticallyCentered>
+                </Stack>
             )}
             {view == "auto-cast-error" && (
-                <VerticallyCentered gap="1rem">
+                <Stack sx={{ pt: 1, gap: 3, textAlign: "center" }}>
                     <Typography>{t("cast_auto_pair_failed")}</Typography>
-                    <Button variant="text" onClick={() => setView("choose")}>
+                    <Button color="secondary" onClick={() => setView("choose")}>
                         {t("GO_BACK")}
                     </Button>
-                </VerticallyCentered>
+                </Stack>
             )}
             {view == "pin" && (
                 <>
