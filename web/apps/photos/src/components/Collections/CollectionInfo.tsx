@@ -10,9 +10,9 @@ interface CollectionInfoProps {
 }
 
 /**
- * A component suitable for being used as a sticky header / summary view
- * (displayed below the gallery bar) when showing a list of photos (or other
- * items) in the gallery view.
+ * A component suitable for being used as a (non-sticky) header / summary view
+ * displayed on top of the of a list of photos (or other items) being displayed
+ * in the gallery view.
  */
 export const CollectionInfo: React.FC<CollectionInfoProps> = ({
     name,
@@ -41,8 +41,13 @@ export const CollectionInfo: React.FC<CollectionInfoProps> = ({
 };
 
 /**
- * A component suitable for wrapping a {@link CollectionInfo} in cases where
- * the actual gallery bar is not being displayed.
+ * A component suitable for wrapping a {@link GalleryItemsSummary} so that it
+ * fills the entire width (and acts like a "header") when it is displayed in the
+ * gallery view.
+ *
+ * The {@link GalleryItemsSummary} is displayed as part of the actual gallery
+ * items list itself so that it scrolls alongwith the items. This wrapper makes
+ * it take the full width of the conceptual "row" that it occupies.
  */
 export const CollectionInfoBarWrapper = styled(Box)`
     width: 100%;
