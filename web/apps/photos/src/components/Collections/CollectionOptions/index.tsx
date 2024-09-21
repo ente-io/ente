@@ -107,68 +107,70 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     };
 
     /**
-     * Wrap a async function in an error handler, returning a new function that
-     * shows an generic error dialog if the original function throws.
+     * Return a new function that shows an generic error dialog if the original
+     * function throws.
      */
     const wrapError = async (f: () => Promise<void>) => {
-        try {
-            await f();
-        } catch (e) {
-            log.error("Collection action failed", e);
-            setDialogMessage({
-                title: t("ERROR"),
-                content: t("UNKNOWN_ERROR"),
-                close: { variant: "critical" },
-            });
-        }
+        return () => {
+            try {
+                await f();
+            } catch (e) {
+                log.error("Collection action failed", e);
+                setDialogMessage({
+                    title: t("ERROR"),
+                    content: t("UNKNOWN_ERROR"),
+                    close: { variant: "critical" },
+                });
+            }
+        };
     };
 
     /**
-     * Wrap a async function in an error handler, and sync on completion.
-     *
-     * This function returns a new function that shows an generic error dialog
-     * if the original function throws.
+     * Return a new function by wrapping an async function in an error handler,
+     * and syncing on completion.
      */
-    const wrapErrorAndSyncWithRemote = async (f: () => Promise<void>) => {
-        try {
-            await f();
-        } catch (e) {
-            log.error("Collection action failed", e);
-            setDialogMessage({
-                title: t("ERROR"),
-                content: t("UNKNOWN_ERROR"),
-                close: { variant: "critical" },
-            });
-        } finally {
-            syncWithRemote(false, true);
-        }
+    const wrapErrorAndSyncWithRemote = async (
+        f: (...args: any) => Promise<void>,
+    ) => {
+        return (...args: any) => {
+            try {
+                await f();
+            } catch (e) {
+                log.error("Collection action failed", e);
+                setDialogMessage({
+                    title: t("ERROR"),
+                    content: t("UNKNOWN_ERROR"),
+                    close: { variant: "critical" },
+                });
+            } finally {
+                syncWithRemote(false, true);
+            }
+        };
     };
 
     /**
      * Variant of {@link wrapErrorAndSyncWithRemote} that also shows the global
      * loading bar.
-     *
-     * This function returns a new function that shows an generic error dialog
-     * if the original function throws. In addition, it also shows a global
-     * loading indicator while everything happens.
      */
     const wrapErrorAndSyncWithRemoteLoading = async (
         f: () => Promise<void>,
     ) => {
-        startLoading();
-        try {
-            await f();
-        } catch (e) {
-            log.error("Collection action failed", e);
-            setDialogMessage({
-                title: t("ERROR"),
-                content: t("UNKNOWN_ERROR"),
-                close: { variant: "critical" },
-            });
-        } finally {
-            syncWithRemote(false, true);
-            finishLoading();
-        }
+        return () => {
+            startLoading();
+            try {
+                await f();
+            } catch (e) {
+                log.error("Collection action failed", e);
+                setDialogMessage({
+                    title: t("ERROR"),
+                    content: t("UNKNOWN_ERROR"),
+                    close: { variant: "critical" },
+                });
+            } finally {
+                syncWithRemote(false, true);
+                finishLoading();
+            }
+        };
     };
 
     const handleCollectionAction = (
