@@ -6,10 +6,14 @@ import { FlexWrapper, HorizontalFlex } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
 import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
+import ArchiveOutlined from "@mui/icons-material/ArchiveOutlined";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
+import LogoutIcon from "@mui/icons-material/Logout";
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
 import PeopleIcon from "@mui/icons-material/People";
+import TvIcon from "@mui/icons-material/Tv";
+import Unarchive from "@mui/icons-material/Unarchive";
 import { Box, IconButton, Tooltip } from "@mui/material";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
@@ -34,7 +38,6 @@ import { isArchivedCollection, isPinnedCollection } from "utils/magicMetadata";
 import { SetCollectionNamerAttributes } from "../CollectionNamer";
 import { AlbumCollectionOption } from "./AlbumCollectionOption";
 import CollectionSortOrderMenu from "./CollectionSortOrderMenu";
-import { SharedCollectionOption } from "./SharedCollectionOption";
 
 interface CollectionOptionsProps {
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
@@ -616,4 +619,53 @@ const OnlyDownloadCollectionOption: React.FC<
     >
         {downloadOptionText}
     </OverflowMenuOption>
+);
+
+interface SharedCollectionOptionProps {
+    isArchived: boolean;
+    handleCollectionAction: (
+        action: CollectionActions,
+        loader?: boolean,
+    ) => (...args: any[]) => Promise<void>;
+}
+
+const SharedCollectionOption: React.FC<SharedCollectionOptionProps> = ({
+    isArchived,
+    handleCollectionAction,
+}) => (
+    <>
+        {isArchived ? (
+            <OverflowMenuOption
+                onClick={handleCollectionAction(CollectionActions.UNARCHIVE)}
+                startIcon={<Unarchive />}
+            >
+                {t("UNARCHIVE_COLLECTION")}
+            </OverflowMenuOption>
+        ) : (
+            <OverflowMenuOption
+                onClick={handleCollectionAction(CollectionActions.ARCHIVE)}
+                startIcon={<ArchiveOutlined />}
+            >
+                {t("ARCHIVE_COLLECTION")}
+            </OverflowMenuOption>
+        )}
+        <OverflowMenuOption
+            startIcon={<LogoutIcon />}
+            onClick={handleCollectionAction(
+                CollectionActions.CONFIRM_LEAVE_SHARED_ALBUM,
+                false,
+            )}
+        >
+            {t("LEAVE_ALBUM")}
+        </OverflowMenuOption>
+        <OverflowMenuOption
+            startIcon={<TvIcon />}
+            onClick={handleCollectionAction(
+                CollectionActions.SHOW_ALBUM_CAST_DIALOG,
+                false,
+            )}
+        >
+            {t("CAST_ALBUM_TO_TV")}
+        </OverflowMenuOption>
+    </>
 );
