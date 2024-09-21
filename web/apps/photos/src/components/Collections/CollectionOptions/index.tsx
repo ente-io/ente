@@ -517,30 +517,28 @@ const QuickOptions: React.FC<QuickOptionsProps> = ({
     onShareClick,
     collectionSummaryType,
     isDownloadInProgress,
-}) => {
-    return (
-        <Stack direction="row" sx={{ alignItems: "center", gap: "16px" }}>
-            {showEmptyTrashQuickOption(collectionSummaryType) && (
-                <EmptyTrashQuickOption onClick={onEmptyTrashClick} />
-            )}
-            {showDownloadQuickOption(collectionSummaryType) &&
-                (isDownloadInProgress() ? (
-                    <EnteSpinner size="20px" sx={{ m: "12px" }} />
-                ) : (
-                    <DownloadQuickOption
-                        onClick={onDownloadClick}
-                        collectionSummaryType={collectionSummaryType}
-                    />
-                ))}
-            {showShareQuickOption(collectionSummaryType) && (
-                <ShareQuickOption
-                    onClick={onShareClick}
+}) => (
+    <Stack direction="row" sx={{ alignItems: "center", gap: "16px" }}>
+        {showEmptyTrashQuickOption(collectionSummaryType) && (
+            <EmptyTrashQuickOption onClick={onEmptyTrashClick} />
+        )}
+        {showDownloadQuickOption(collectionSummaryType) &&
+            (isDownloadInProgress() ? (
+                <EnteSpinner size="20px" sx={{ m: "12px" }} />
+            ) : (
+                <DownloadQuickOption
+                    onClick={onDownloadClick}
                     collectionSummaryType={collectionSummaryType}
                 />
-            )}
-        </Stack>
-    );
-};
+            ))}
+        {showShareQuickOption(collectionSummaryType) && (
+            <ShareQuickOption
+                onClick={onShareClick}
+                collectionSummaryType={collectionSummaryType}
+            />
+        )}
+    </Stack>
+);
 
 /** Props for a generic option. */
 interface OptionProps {
