@@ -122,26 +122,16 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
      * Return a new function that shows an generic error dialog if the original
      * function throws.
      */
-    const wrapError = async (f: () => Promise<void>) => {
-        return async () => {
-            try {
-                await f();
-            } catch (e) {
-                handleError(e);
-            }
-        };
-    };
+    const wrapError = (f: () => Promise<void>) => () => f().catch(handleError);
 
     /**
      * Return a new function by wrapping an async function in an error handler,
      * and syncing on completion.
      */
-    const wrapErrorAndSyncWithRemote = async (
-        f: (...args: any) => Promise<void>,
-    ) => {
+    const wrapErrorAndSync = async (f: (...args: any) => Promise<void>) => {
         return async (...args: any) => {
             try {
-                await f();
+                await f(...args);
             } catch (e) {
                 handleError(e);
             } finally {
@@ -151,12 +141,10 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     };
 
     /**
-     * Variant of {@link wrapErrorAndSyncWithRemote} that also shows the global
+     * Variant of {@link wrapErrorAndSync} that also shows the global
      * loading bar.
      */
-    const wrapErrorAndSyncWithRemoteLoading = async (
-        f: () => Promise<void>,
-    ) => {
+    const wrapErrorAndSyncLoading = async (f: () => Promise<void>) => {
         return async () => {
             startLoading();
             try {
