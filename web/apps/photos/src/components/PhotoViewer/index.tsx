@@ -821,7 +821,7 @@ function PhotoViewer(props: Iprops) {
                             {props.enableDownload && (
                                 <button
                                     className="pswp__button pswp__button--custom"
-                                    title={t("download_tooltip")}
+                                    title={t("download_key")}
                                     onClick={() =>
                                         downloadFileHelper(
                                             photoSwipe.currItem as EnteFile,
@@ -834,7 +834,7 @@ function PhotoViewer(props: Iprops) {
                             {props.enableDownload && shouldShowCopyOption && (
                                 <button
                                     className="pswp__button pswp__button--custom"
-                                    title={t("copy_tooltip")}
+                                    title={t("copy_key")}
                                     onClick={() =>
                                         copyToClipboardHelper(
                                             photoSwipe.currItem as EnteFile,
@@ -861,7 +861,7 @@ function PhotoViewer(props: Iprops) {
                                 <button
                                     className="pswp__button pswp__button--custom"
                                     onClick={toggleZoomInAndOut}
-                                    title={t("zoom_in_out_tooltip")}
+                                    title={t("zoom_in_out_key")}
                                 >
                                     <ZoomInOutlinedIcon />
                                 </button>
@@ -871,7 +871,7 @@ function PhotoViewer(props: Iprops) {
                                 onClick={() => {
                                     toggleFullscreen(photoSwipe);
                                 }}
-                                title={t("toggle_fullscreen_tooltip")}
+                                title={t("toggle_fullscreen_key")}
                             >
                                 {!isInFullScreenMode ? (
                                     <FullscreenOutlinedIcon
@@ -937,13 +937,13 @@ function PhotoViewer(props: Iprops) {
                         </div>
                         <button
                             className="pswp__button pswp__button--arrow--left"
-                            title={t("previous_tooltip")}
+                            title={t("previous_key")}
                         >
                             <ChevronLeft sx={{ pointerEvents: "none" }} />
                         </button>
                         <button
                             className="pswp__button pswp__button--arrow--right"
-                            title={t("next_tooltip")}
+                            title={t("next_key")}
                         >
                             <ChevronRight sx={{ pointerEvents: "none" }} />
                         </button>
