@@ -44,21 +44,22 @@ class _RecommendedFiltersState extends State<RecommendedFilters> {
 
   @override
   Widget build(BuildContext context) {
-    return Flexible(
-      child: ListView.builder(
-        itemBuilder: (context, index) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: ChipButtonWidget(
-              _recommendations[index].name(),
-              leadingIcon: _recommendations[index].icon(),
-            ),
-          );
-        },
-        scrollDirection: Axis.horizontal,
-        itemCount: _recommendations.length,
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-      ),
+    return ListView.builder(
+      itemBuilder: (context, index) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: ChipButtonWidget(
+            _recommendations[index].name(),
+            leadingIcon: _recommendations[index].icon(),
+            onTap: () {
+              _searchFilterDataProvider.applyFilters([_recommendations[index]]);
+            },
+          ),
+        );
+      },
+      scrollDirection: Axis.horizontal,
+      itemCount: _recommendations.length,
+      padding: const EdgeInsets.symmetric(horizontal: 4),
     );
   }
 
