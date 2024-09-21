@@ -435,6 +435,27 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
 
     const unpinAlbum2 = () => wrapErrorAndSync(_unpinAlbum);
 
+    const _hideAlbum = async () => {
+        await changeCollectionVisibility(
+            activeCollection,
+            ItemVisibility.hidden,
+        );
+        setActiveCollectionID(ALL_SECTION);
+    };
+
+    const _unhideAlbum = async () => {
+        await changeCollectionVisibility(
+            activeCollection,
+            ItemVisibility.visible,
+        );
+        setActiveCollectionID(HIDDEN_ITEMS_SECTION);
+    };
+
+    const hideAlbum2 = () => wrapErrorAndSync(_hideAlbum);
+
+    const unhideAlbum2 = () => wrapErrorAndSync(_unhideAlbum);
+
+
     const updateCollectionSortOrderAsc = async () => {
         await changeCollectionSortOrder(activeCollection, true);
     };
@@ -517,6 +538,8 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                         onUnarchiveClick={unarchiveAlbum}
                         onPinClick={pinAlbum2}
                         onUnpinClick={unpinAlbum2}
+                        onHideClick={hideAlbum2}
+                        onUnhideClick={unhideAlbum2}
                         onCastClick={showCastAlbumDialog}
                         handleCollectionAction={handleCollectionAction}
                     />
@@ -743,6 +766,8 @@ interface AlbumCollectionOptionsProps {
     onUnarchiveClick: () => void;
     onPinClick: () => void;
     onUnpinClick: () => void;
+    onHideClick: () => void;
+    onUnhideClick: () => void;
     onCastClick: () => void;
     handleCollectionAction: (
         action: CollectionActions,
@@ -758,6 +783,8 @@ const AlbumCollectionOptions: React.FC<AlbumCollectionOptionsProps> = ({
     onUnarchiveClick,
     onPinClick,
     onUnpinClick,
+    onHideClick,
+    onUnhideClick,
     onCastClick,
     handleCollectionAction,
 }) => (
@@ -782,14 +809,14 @@ const AlbumCollectionOptions: React.FC<AlbumCollectionOptionsProps> = ({
         </OverflowMenuOption>
         {isPinned ? (
             <OverflowMenuOption
-                onClick={handleCollectionAction(CollectionActions.UNPIN, false)}
+                onClick={onUnpinClick}
                 startIcon={<UnPinIcon />}
             >
                 {t("UNPIN_ALBUM")}
             </OverflowMenuOption>
         ) : (
             <OverflowMenuOption
-                onClick={handleCollectionAction(CollectionActions.PIN, false)}
+                onClick={onPinClick}
                 startIcon={<PushPinOutlined />}
             >
                 {t("PIN_ALBUM")}
@@ -816,17 +843,14 @@ const AlbumCollectionOptions: React.FC<AlbumCollectionOptionsProps> = ({
         )}
         {isHidden ? (
             <OverflowMenuOption
-                onClick={handleCollectionAction(
-                    CollectionActions.UNHIDE,
-                    false,
-                )}
+                onClick={onUnhideClick}
                 startIcon={<VisibilityOutlined />}
             >
                 {t("UNHIDE_COLLECTION")}
             </OverflowMenuOption>
         ) : (
             <OverflowMenuOption
-                onClick={handleCollectionAction(CollectionActions.HIDE, false)}
+                onClick={onHideClick}
                 startIcon={<VisibilityOffOutlined />}
             >
                 {t("HIDE_COLLECTION")}
