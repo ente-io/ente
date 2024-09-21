@@ -1,12 +1,12 @@
 import { FlexWrapper } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
+import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import PeopleIcon from "@mui/icons-material/People";
 import { IconButton, Tooltip } from "@mui/material";
 import { t } from "i18next";
 import { CollectionSummaryType } from "types/collection";
 import { CollectionActions } from "..";
 import { DownloadQuickOption } from "./DownloadQuickOption";
-import { EmptyTrashQuickOption } from "./EmptyTrashQuickOption";
 
 interface QuickOptionsProps {
     handleCollectionAction: (
@@ -51,6 +51,28 @@ export const QuickOptions: React.FC<QuickOptionsProps> = ({
 const showEmptyTrashQuickOption = (type: CollectionSummaryType) => {
     return type === CollectionSummaryType.trash;
 };
+
+interface EmptyTrashQuickOptionProps {
+    handleCollectionAction: (
+        action: CollectionActions,
+        loader?: boolean,
+    ) => (...args: any[]) => Promise<void>;
+}
+
+export const EmptyTrashQuickOption: React.FC<EmptyTrashQuickOptionProps> = ({
+    handleCollectionAction,
+}) => (
+    <Tooltip title={t("EMPTY_TRASH")}>
+        <IconButton
+            onClick={handleCollectionAction(
+                CollectionActions.CONFIRM_EMPTY_TRASH,
+                false,
+            )}
+        >
+            <DeleteOutlinedIcon />
+        </IconButton>
+    </Tooltip>
+);
 
 const showDownloadQuickOption = (type: CollectionSummaryType) => {
     return (
