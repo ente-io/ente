@@ -611,11 +611,13 @@ class _CodeWidgetState extends State<CodeWidget> {
     }
     FocusScope.of(context).requestFocus();
     final l10n = context.l10n;
+    final String issuerAccount = widget.code.account.isNotEmpty
+        ? '${widget.code.issuer} (${widget.code.account})'
+        : widget.code.issuer;
     await showChoiceActionSheet(
       context,
       title: l10n.trashCode,
-      body: l10n
-          .trashCodeMessage('${widget.code.issuer} (${widget.code.account})'),
+      body: l10n.trashCodeMessage(issuerAccount),
       firstButtonLabel: l10n.trash,
       isCritical: true,
       firstButtonOnTap: () async {
