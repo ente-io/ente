@@ -170,8 +170,10 @@ class Code {
       if (uri.queryParameters.containsKey("issuer") && !path.contains(":")) {
         return path;
       }
-      return path.split(':')[1];
-    } catch (e) {
+      return path
+          .substring(path.indexOf(':') + 1); // return data after first colon
+    } catch (e, s) {
+      Logger('_getAccount').severe('Error while parsing account', e, s);
       return "";
     }
   }
