@@ -106,6 +106,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   late StreamSubscription<BackupFoldersUpdatedEvent> _backupFoldersUpdatedEvent;
   late StreamSubscription<AccountConfiguredEvent> _accountConfiguredEvent;
   late StreamSubscription<CollectionUpdatedEvent> _collectionUpdatedEvent;
+  late StreamSubscription<Uri?> _uriLinkEventSubscription;
   final DiffFetcher _diffFetcher = DiffFetcher();
 
   @override
@@ -245,7 +246,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     }
 
     // Handle the background state
-    uriLinkStream.listen((Uri? uri) async {
+    _uriLinkEventSubscription = uriLinkStream.listen((Uri? uri) async {
       if (uri != null) {
         await _handlePublicAlbumLink(uri);
       }
@@ -269,13 +270,10 @@ class _HomeWidgetState extends State<HomeWidget> {
           }
           try {
             final hashedPassword = await CryptoUtil.deriveKey(
-              utf8.encode(text) as Uint8List,
+              utf8.encode(text),
               CryptoUtil.base642bin(publicUrl.nonce!),
               publicUrl.memLimit!,
               publicUrl.opsLimit!,
-            );
-            _logger.info(
-              "Hashed password: ${CryptoUtil.bin2base64(hashedPassword)}",
             );
 
             result = await CollectionsService.instance
@@ -286,8 +284,8 @@ class _HomeWidgetState extends State<HomeWidget> {
             if (!result) {
               await showErrorDialog(
                 context,
-                "Incorrect Password",
-                "Plesae try again",
+                S.of(context).incorrectPasswordTitle,
+                S.of(context).pleaseTryAgain,
               );
             }
           } catch (e, s) {
@@ -363,6 +361,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     _collectionUpdatedEvent.cancel();
     isOnSearchTabNotifier.dispose();
     _pageController.dispose();
+    _uriLinkEventSubscription.cancel();
     super.dispose();
   }
 

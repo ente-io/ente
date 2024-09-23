@@ -32,7 +32,6 @@ Future<File?> downloadAndDecryptPublicFile(
   final String logPrefix = 'Public File-${file.uploadedFileID}:';
   _logger
       .info('$logPrefix starting download ${formatBytes(file.fileSize ?? 0)}');
-  _logger.severe("File id ${file.uploadedFileID}");
 
   final String tempDir = Configuration.instance.getTempDirectory();
   final String encryptedFilePath = "$tempDir${file.uploadedFileID}.encrypted";

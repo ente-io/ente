@@ -1036,7 +1036,11 @@ class CollectionsService {
   }
 
   Future<Collection> getPublicCollection(Uri uri) async {
-    final String authToken = uri.queryParameters["t"] ?? "Not found";
+    final String? authToken = uri.queryParameters["t"];
+    if (authToken == null) {
+      _logger.severe("Authorization token not found in URI query parameters");
+      throw Exception("Authorization token is required");
+    }
     final String albumKey = uri.fragment;
     try {
       final response = await _enteDio.get(
@@ -1051,7 +1055,6 @@ class CollectionsService {
       final Uint8List collectionKey =
           Uint8List.fromList(Base58Decode(albumKey));
 
-      _logger.severe("Public collection fetched: $collectionData");
       _cachedKeys[collection.id] = collectionKey;
       _cachedPublicAlbumToken[collection.id] = authToken;
       return collection;
@@ -1082,15 +1085,13 @@ class CollectionsService {
         ),
       );
       final jwtToken = response.data["jwtToken"];
-      _logger.severe("TOKEN $authToken");
-      _logger.severe("JWT TOKEN $jwtToken");
       if (response.statusCode == 200) {
         await setPublicAlbumTokenJWT(collectioID, jwtToken);
         return true;
       }
       return false;
     } catch (e) {
-      _logger.severe("Failed to verify public collection password $e");
+      _logger.warning("Failed to verify public collection password $e");
       return false;
     }
   }
