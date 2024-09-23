@@ -8,45 +8,61 @@ import { styled } from "@mui/material";
 import React, { useEffect, useState } from "react";
 
 interface ItemCardProps {
-    /** The file whose thumbnail (if any) should be should be shown. */
-    coverFile: EnteFile;
     /** One of the *Tile components to use as the top level element. */
     TileComponent: React.FC<React.PropsWithChildren>;
+    /**
+     * The file (if any) whose thumbnail (if any) should be should be shown.
+     */
+    coverFile: EnteFile | undefined;
+    /**
+     * Optional boolean indicating if the user is currently scrolling.
+     *
+     * This is used as a hint by the cover file downloader to prioritize
+     * downloads.
+     */
+    isScrolling?: boolean;
+    /** Optional click handler. */
+    onClick?: () => void;
 }
-
 /**
- * A simplified variant of {@link CollectionCard}, meant to be used for
- * representing either collections and files.
+ * A generic card that can be be used to represent collections,  files, people -
+ * anything that has an associated "cover photo".
+ *
+ * This is a simplified variant / almost-duplicate of {@link CollectionCard}.
  */
-export const ItemCard: React.FC<ItemCardProps> = ({
-    coverFile,
+export const ItemCard: React.FC<React.PropsWithChildren<ItemCardProps>> = ({
     TileComponent,
+    coverFile,
+    isScrolling,
+    onClick,
+    children,
 }) => {
     const [coverImageURL, setCoverImageURL] = useState("");
 
     useEffect(() => {
-        const main = async () => {
-            const url = await downloadManager.getThumbnailForPreview(coverFile);
-            if (url) setCoverImageURL(url);
-        };
-        void main();
-    }, [coverFile]);
+        if (!coverFile) return;
+        void downloadManager
+            .getThumbnailForPreview(coverFile, isScrolling)
+            .then((url) => url && setCoverImageURL(url));
+    }, [coverFile, isScrolling]);
 
     return (
-        <TileComponent>
-            {coverFile.metadata.hasStaticThumbnail ? (
+        <TileComponent {...{ onClick }}>
+            {coverFile?.metadata.hasStaticThumbnail ? (
                 <StaticThumbnail fileType={coverFile.metadata.fileType} />
             ) : coverImageURL ? (
                 <img src={coverImageURL} />
             ) : (
                 <LoadingThumbnail />
             )}
+            {children}
         </TileComponent>
     );
 };
 
 /**
- * A verbatim copy of CollectionTile, meant to be used with ItemCards.
+ * A generic "base" tile, meant to be used (after setting dimensions) as the
+ * {@link TileComponent} provided to an {@link ItemCard}.
  */
 export const ItemTile = styled("div")`
     display: flex;
@@ -63,7 +79,28 @@ export const ItemTile = styled("div")`
     user-select: none;
 `;
 
-export const ResultPreviewTile = styled(ItemTile)`
+/**
+ * A 48x48 TileComponent used in search result dropdown's preview files and
+ * other places.
+ */
+export const PreviewItemTile = styled(ItemTile)`
     width: 48px;
     height: 48px;
+`;
+
+/**
+ * A rectangular, TV-ish tile used in the gallery bar.
+ */
+export const BarItemTile = styled(ItemTile)`
+    width: 90px;
+    height: 64px;
+`;
+
+/**
+ * A large 150x150 TileComponent used when showing the list of all collections
+ * in the all collections view.
+ */
+export const AllCollectionTile = styled(ItemTile)`
+    width: 150px;
+    height: 150px;
 `;

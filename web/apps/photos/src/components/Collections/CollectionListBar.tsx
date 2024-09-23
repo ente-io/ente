@@ -1,12 +1,12 @@
 import { useIsMobileWidth } from "@/base/hooks";
+import { BarItemTile, ItemCard } from "@/new/photos/components/ItemCards";
 import type { Person } from "@/new/photos/services/ml/cgroups";
-import type { CollectionSummary } from "@/new/photos/types/collection";
-import {
-    IconButtonWithBG,
-    Overlay,
-    SpaceBetweenFlex,
-} from "@ente/shared/components/Container";
-import useWindowSize from "@ente/shared/hooks/useWindowSize";
+import type {
+    CollectionSummary,
+    CollectionSummaryType,
+} from "@/new/photos/types/collection";
+import { ensure } from "@/utils/ensure";
+import { IconButtonWithBG, Overlay } from "@ente/shared/components/Container";
 import ArchiveIcon from "@mui/icons-material/Archive";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import Favorite from "@mui/icons-material/FavoriteRounded";
@@ -16,18 +16,23 @@ import PeopleIcon from "@mui/icons-material/People";
 import PushPin from "@mui/icons-material/PushPin";
 import { Box, IconButton, Stack, Typography, styled } from "@mui/material";
 import Tooltip from "@mui/material/Tooltip";
-import { CollectionTile } from "components/Collections/styledComponents";
 import {
     IMAGE_CONTAINER_MAX_WIDTH,
     MIN_COLUMNS,
 } from "components/PhotoList/constants";
 import { t } from "i18next";
-import React, { memo, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+    memo,
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeList, ListChildComponentProps, areEqual } from "react-window";
-import { ALL_SECTION, COLLECTION_LIST_SORT_BY } from "utils/collection";
+import { COLLECTION_LIST_SORT_BY } from "utils/collection";
 import type { GalleryBarMode } from ".";
-import CollectionCard from "./CollectionCard";
 import CollectionListSortBy from "./CollectionListSortBy";
 
 export interface CollectionListBarProps {
@@ -79,6 +84,7 @@ export interface CollectionListBarProps {
     onSelectPerson: (person: Person) => void;
 }
 
+// TODO-Cluster Rename me to GalleryBar
 export const CollectionListBar: React.FC<CollectionListBarProps> = ({
     mode,
     setMode,
@@ -90,67 +96,86 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
     setCollectionListSortBy,
     people,
     activePerson,
-    // onSelectPerson
+    onSelectPerson,
 }) => {
-    const windowSize = useWindowSize();
     const isMobile = useIsMobileWidth();
 
-    const listWrapperRef = useRef<HTMLDivElement>(null);
+    const [canScrollLeft, setCanScrollLeft] = useState(false);
+    const [canScrollRight, setCanScrollRight] = useState(false);
+
+    const listContainerRef = useRef<HTMLDivElement>(null);
     const listRef = useRef(null);
 
-    const [scrollObj, setScrollObj] = useState<{
-        scrollLeft?: number;
-        scrollWidth?: number;
-        clientWidth?: number;
-    }>({});
+    const updateScrollState = useCallback(() => {
+        if (!listContainerRef.current) return;
 
-    const updateScrollObj = () => {
-        if (!listWrapperRef.current) {
-            return;
-        }
-        const { scrollLeft, scrollWidth, clientWidth } = listWrapperRef.current;
-        setScrollObj({ scrollLeft, scrollWidth, clientWidth });
-    };
+        const { scrollLeft, scrollWidth, clientWidth } =
+            listContainerRef.current;
+
+        setCanScrollLeft(scrollLeft > 0);
+        setCanScrollRight(scrollLeft + clientWidth < scrollWidth);
+    }, []);
+
+    // Maintain a ref to the list container with a combo of a callback and a
+    // regular ref.
+    //
+    // Using just a regular ref doesn't work - it is initially null, so
+    // updateScrollState is a no-op. Subsequently, react-window sets it to the
+    // correct element, but updateScrollState doesn't run, unless we add
+    // listContainerRef.current as a dependency. But that is just hacky.
+    //
+    // So instead we use a "callback ref", where we both act on the latest
+    // value, and also save it in a regular ref so that we can subsequently use
+    // it if the scroll position changes because of other, non-DOM, reasons
+    // (e.g. if the list of collections changes).
+
+    const listContainerCallbackRef = useCallback(
+        (ref) => {
+            listContainerRef.current = ref;
+            if (!ref) return;
+
+            // Listen for scrolls and resize.
+            ref.addEventListener("scroll", updateScrollState);
+            const observer = new ResizeObserver(updateScrollState);
+            observer.observe(ref);
+
+            // Call handler right away so that state gets updated for the
+            // initial size.
+            updateScrollState();
+
+            // Remove listeners on cleanup.
+            return () => {
+                ref.removeEventListener("scroll", updateScrollState);
+                observer.unobserve(ref);
+            };
+        },
+        [updateScrollState],
+    );
 
     useEffect(() => {
-        if (!listWrapperRef.current) {
-            return;
-        }
-        // Add event listener
-        listWrapperRef.current?.addEventListener("scroll", updateScrollObj);
+        updateScrollState();
+    }, [updateScrollState, mode, collectionSummaries, people]);
 
-        // Call handler right away so state gets updated with initial window size
-        updateScrollObj();
-        // Remove event listener on cleanup
-        return () =>
-            listWrapperRef.current?.removeEventListener(
-                "resize",
-                updateScrollObj,
-            );
-    }, [listWrapperRef.current]);
+    const scroll = (direction: number) => () =>
+        listContainerRef.current.scrollBy(250 * direction, 0);
 
     useEffect(() => {
-        updateScrollObj();
-    }, [windowSize, collectionSummaries]);
-
-    const scrollComponent = (direction: number) => () => {
-        listWrapperRef.current.scrollBy(250 * direction, 0);
-    };
-
-    const onFarLeft = scrollObj.scrollLeft === 0;
-    const onFarRight =
-        scrollObj.scrollLeft + scrollObj.clientWidth === scrollObj.scrollWidth;
-
-    useEffect(() => {
-        if (!listRef.current) {
-            return;
+        if (!listRef.current) return;
+        // Scroll the active item into view.
+        let i = -1;
+        switch (mode) {
+            case "albums":
+            case "hidden-albums":
+                i = collectionSummaries.findIndex(
+                    ({ id }) => id == activeCollectionID,
+                );
+                break;
+            case "people":
+                i = people.findIndex(({ id }) => id == activePerson?.id);
+                break;
         }
-        // scroll the active collection into view
-        const activeCollectionIndex = collectionSummaries.findIndex(
-            (item) => item.id === activeCollectionID,
-        );
-        listRef.current.scrollToItem(activeCollectionIndex, "smart");
-    }, [activeCollectionID]);
+        if (i != -1) listRef.current.scrollToItem(i, "smart");
+    }, [mode, collectionSummaries, activeCollectionID, people, activePerson]);
 
     const itemData = useMemo<ItemData>(
         () =>
@@ -159,10 +184,9 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
                       type: "collections",
                       collectionSummaries,
                       activeCollectionID,
-                      onCollectionClick: (id?: number) =>
-                          setActiveCollectionID(id ?? ALL_SECTION),
+                      onCollectionClick: setActiveCollectionID,
                   }
-                : { type: "people", people, activePerson },
+                : { type: "people", people, activePerson, onSelectPerson },
         [
             mode,
             collectionSummaries,
@@ -170,70 +194,67 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
             setActiveCollectionID,
             people,
             activePerson,
+            onSelectPerson,
         ],
+    );
+
+    const controls1 = isMobile && (
+        <Box display="flex" alignItems={"center"} gap={1}>
+            <CollectionListSortBy
+                setSortBy={setCollectionListSortBy}
+                activeSortBy={collectionListSortBy}
+                disableBG
+            />
+            <IconButton onClick={onShowAllCollections}>
+                <ExpandMore />
+            </IconButton>
+        </Box>
+    );
+
+    const controls2 = !isMobile && (
+        <Box display="flex" alignItems={"center"} gap={1} height={"64px"}>
+            <CollectionListSortBy
+                setSortBy={setCollectionListSortBy}
+                activeSortBy={collectionListSortBy}
+            />
+            <IconButtonWithBG onClick={onShowAllCollections}>
+                <ExpandMore />
+            </IconButtonWithBG>
+        </Box>
     );
 
     return (
         <BarWrapper>
-            <SpaceBetweenFlex mb={1}>
+            <Row1>
                 <ModeIndicator {...{ mode, setMode }} />
-                {isMobile && (
-                    <Box display="flex" alignItems={"center"} gap={1}>
-                        <CollectionListSortBy
-                            setSortBy={setCollectionListSortBy}
-                            activeSortBy={collectionListSortBy}
-                            disableBG
-                        />
-                        <IconButton onClick={onShowAllCollections}>
-                            <ExpandMore />
-                        </IconButton>
-                    </Box>
-                )}
-            </SpaceBetweenFlex>
-            <Box display="flex" alignItems="flex-start" gap={2}>
+                {controls1}
+            </Row1>
+            <Row2>
                 <ListWrapper>
-                    {!onFarLeft && (
-                        <ScrollButtonLeft onClick={scrollComponent(-1)} />
-                    )}
+                    {canScrollLeft && <ScrollButtonLeft onClick={scroll(-1)} />}
                     <AutoSizer disableHeight>
                         {({ width }) => (
                             <FixedSizeList
                                 ref={listRef}
-                                outerRef={listWrapperRef}
-                                itemData={itemData}
+                                outerRef={listContainerCallbackRef}
                                 layout="horizontal"
                                 width={width}
                                 height={110}
+                                itemData={itemData}
                                 itemKey={getItemKey}
                                 itemCount={getItemCount(itemData)}
                                 itemSize={94}
-                                useIsScrolling
                             >
                                 {ListItem}
                             </FixedSizeList>
                         )}
                     </AutoSizer>
-                    {!onFarRight && (
-                        <ScrollButtonRight onClick={scrollComponent(+1)} />
+                    {canScrollRight && (
+                        <ScrollButtonRight onClick={scroll(+1)} />
                     )}
                 </ListWrapper>
-                {!isMobile && (
-                    <Box
-                        display="flex"
-                        alignItems={"center"}
-                        gap={1}
-                        height={"64px"}
-                    >
-                        <CollectionListSortBy
-                            setSortBy={setCollectionListSortBy}
-                            activeSortBy={collectionListSortBy}
-                        />
-                        <IconButtonWithBG onClick={onShowAllCollections}>
-                            <ExpandMore />
-                        </IconButtonWithBG>
-                    </Box>
-                )}
-            </Box>
+                {controls2}
+            </Row2>
         </BarWrapper>
     );
 };
@@ -247,10 +268,24 @@ const BarWrapper = styled(Box)`
     border-block-end: 1px solid ${({ theme }) => theme.palette.divider};
 `;
 
+export const Row1 = styled(Box)`
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-block-end: 8px;
+`;
+
+export const Row2 = styled(Box)`
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+`;
+
 const ModeIndicator: React.FC<
     Pick<CollectionListBarProps, "mode" | "setMode">
 > = ({ mode }) => (
-    <Stack direction="row" sx={{ gap: "12px" }}>
+    <Stack direction="row" sx={{ gap: "10px" }}>
         <Typography color={mode == "people" ? "text.muted" : "text.base"}>
             {mode == "hidden-albums" ? t("hidden_albums") : t("albums")}
         </Typography>
@@ -280,88 +315,6 @@ const ModeIndicator: React.FC<
 //     }
 // `,
 // );
-
-const ListWrapper = styled(Box)`
-    position: relative;
-    overflow: hidden;
-    height: 86px;
-    width: 100%;
-`;
-
-type ItemData =
-    | {
-          type: "collections";
-          collectionSummaries: CollectionSummary[];
-          activeCollectionID?: number;
-          onCollectionClick: (id?: number) => void;
-      }
-    | {
-          type: "people";
-          people: Person[];
-          activePerson: Person;
-      };
-
-const getItemCount = (data: ItemData) => {
-    switch (data.type) {
-        case "collections": {
-            return data.collectionSummaries.length;
-        }
-        case "people": {
-            return data.people.length;
-        }
-    }
-};
-
-const getItemKey = (index: number, data: ItemData) => {
-    switch (data.type) {
-        case "collections": {
-            const collectionSummary = data.collectionSummaries[index];
-            return `${data.type}-${collectionSummary.id}-${collectionSummary.coverFile?.id}`;
-        }
-        case "people": {
-            // TODO-Cluster
-            const person =
-                data.people[index] ?? data.activePerson ?? data.people[0];
-            return `${data.type}-${person.id}-${person.displayFaceID}`;
-        }
-    }
-};
-
-const ListItem = memo((props: ListChildComponentProps<ItemData>) => {
-    const { data, index, style, isScrolling } = props;
-
-    let card: React.ReactNode;
-
-    switch (data.type) {
-        case "collections": {
-            const {
-                collectionSummaries,
-                activeCollectionID,
-                onCollectionClick,
-            } = data;
-            const collectionSummary = collectionSummaries[index];
-            card = (
-                <CollectionListBarCard
-                    key={collectionSummary.id}
-                    activeCollectionID={activeCollectionID}
-                    isScrolling={isScrolling}
-                    collectionSummary={collectionSummary}
-                    onCollectionClick={onCollectionClick}
-                />
-            );
-            break;
-        }
-
-        case "people": {
-            const { people, activePerson } = data;
-            const person = people[index];
-            card = <PersonCard {...{ person, activePerson }} />;
-            break;
-        }
-    }
-
-    return <div style={style}>{card}</div>;
-}, areEqual);
 
 const ScrollButtonBase: React.FC<
     React.ButtonHTMLAttributes<HTMLButtonElement>
@@ -408,46 +361,120 @@ const ScrollButtonRight = styled(ScrollButtonBase)`
     transform: translate(50%, 0%);
 `;
 
-interface CollectionListBarCardProps {
+const ListWrapper = styled(Box)`
+    position: relative;
+    overflow: hidden;
+    height: 86px;
+    width: 100%;
+`;
+
+type ItemData =
+    | {
+          type: "collections";
+          collectionSummaries: CollectionSummary[];
+          activeCollectionID?: number;
+          onCollectionClick: (id: number) => void;
+      }
+    | {
+          type: "people";
+          people: Person[];
+          activePerson: Person;
+      };
+
+const getItemCount = (data: ItemData) => {
+    switch (data.type) {
+        case "collections": {
+            return data.collectionSummaries.length;
+        }
+        case "people": {
+            return data.people.length;
+        }
+    }
+};
+
+const getItemKey = (index: number, data: ItemData) => {
+    switch (data.type) {
+        case "collections": {
+            const collectionSummary = ensure(data.collectionSummaries[index]);
+            return `${data.type}-${collectionSummary.id}-${collectionSummary.coverFile?.id}`;
+        }
+        case "people": {
+            const person = ensure(data.people[index]);
+            return `${data.type}-${person.id}-${person.displayFaceID}`;
+        }
+    }
+};
+
+const ListItem = memo((props: ListChildComponentProps<ItemData>) => {
+    const { data, index, style } = props;
+
+    let card: React.ReactNode;
+
+    switch (data.type) {
+        case "collections": {
+            const {
+                collectionSummaries,
+                activeCollectionID,
+                onCollectionClick,
+            } = data;
+            const collectionSummary = ensure(collectionSummaries[index]);
+            card = (
+                <CollectionBarCard
+                    key={collectionSummary.id}
+                    activeCollectionID={activeCollectionID}
+                    collectionSummary={collectionSummary}
+                    onCollectionClick={onCollectionClick}
+                />
+            );
+            break;
+        }
+
+        case "people": {
+            const { people, activePerson } = data;
+            const person = ensure(people[index]);
+            card = <PersonCard {...{ person, activePerson }} />;
+            break;
+        }
+    }
+
+    return <div style={style}>{card}</div>;
+}, areEqual);
+
+interface CollectionBarCardProps {
     collectionSummary: CollectionSummary;
     activeCollectionID: number;
     onCollectionClick: (collectionID: number) => void;
-    isScrolling?: boolean;
 }
 
-const CollectionListBarCard = (props: CollectionListBarCardProps) => {
-    const { activeCollectionID, collectionSummary, onCollectionClick } = props;
+const CollectionBarCard: React.FC<CollectionBarCardProps> = ({
+    collectionSummary,
+    activeCollectionID,
+    onCollectionClick,
+}: CollectionBarCardProps) => (
+    <div>
+        <ItemCard
+            TileComponent={BarItemTile}
+            coverFile={collectionSummary.coverFile}
+            onClick={() => onCollectionClick(collectionSummary.id)}
+        >
+            <CardText text={collectionSummary.name} />
+            <CollectionBarCardIcon type={collectionSummary.type} />
+        </ItemCard>
+        {activeCollectionID === collectionSummary.id && <ActiveIndicator />}
+    </div>
+);
 
-    return (
-        <Box>
-            <CollectionCard
-                collectionTile={CollectionBarTile}
-                coverFile={collectionSummary.coverFile}
-                onClick={() => {
-                    onCollectionClick(collectionSummary.id);
-                }}
-            >
-                <CollectionCardText collectionName={collectionSummary.name} />
-                <CollectionCardIcon collectionType={collectionSummary.type} />
-            </CollectionCard>
-            {activeCollectionID === collectionSummary.id && <ActiveIndicator />}
-        </Box>
-    );
-};
+interface CardTextProps {
+    text: string;
+}
 
-const ActiveIndicator = styled("div")`
-    height: 3px;
-    background-color: ${({ theme }) => theme.palette.primary.main};
-    margin-top: 18px;
-    border-radius: 2px;
-`;
+const CardText: React.FC<CardTextProps> = ({ text }) => (
+    <CardText_>
+        <TruncatedText {...{ text }} />
+    </CardText_>
+);
 
-const CollectionBarTile = styled(CollectionTile)`
-    width: 90px;
-    height: 64px;
-`;
-
-const CollectionBarTileText = styled(Overlay)`
+const CardText_ = styled(Overlay)`
     padding: 4px;
     background: linear-gradient(
         0deg,
@@ -456,7 +483,50 @@ const CollectionBarTileText = styled(Overlay)`
     );
 `;
 
-const CollectionBarTileIcon = styled(Overlay)`
+const TruncatedText: React.FC<CardTextProps> = ({ text }) => (
+    <Tooltip title={text}>
+        <Box height={"2.1em"} overflow="hidden">
+            <Ellipsized variant="small" sx={{ wordBreak: "break-word" }}>
+                {text}
+            </Ellipsized>
+        </Box>
+    </Tooltip>
+);
+
+const Ellipsized = styled(Typography)`
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; // number of lines to show
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+`;
+
+interface CollectionBarCardIconProps {
+    type: CollectionSummaryType;
+}
+
+const CollectionBarCardIcon: React.FC<CollectionBarCardIconProps> = ({
+    type,
+}) => (
+    <CollectionBarCardIcon_>
+        {type == "favorites" && <Favorite />}
+        {type == "archived" && (
+            <ArchiveIcon
+                sx={(theme) => ({
+                    color: theme.colors.white.muted,
+                })}
+            />
+        )}
+        {type == "outgoingShare" && <PeopleIcon />}
+        {(type == "incomingShareViewer" ||
+            type == "incomingShareCollaborator") && <PeopleIcon />}
+        {type == "sharedOnlyViaLink" && <LinkIcon />}
+        {type == "pinned" && <PushPin />}
+    </CollectionBarCardIcon_>
+);
+
+const CollectionBarCardIcon_ = styled(Overlay)`
     padding: 4px;
     display: flex;
     justify-content: flex-start;
@@ -466,76 +536,30 @@ const CollectionBarTileIcon = styled(Overlay)`
     }
 `;
 
-function CollectionCardText({ collectionName }) {
-    return (
-        <CollectionBarTileText>
-            <TruncateText text={collectionName} />
-        </CollectionBarTileText>
-    );
-}
-
-function CollectionCardIcon({ collectionType }) {
-    return (
-        <CollectionBarTileIcon>
-            {collectionType == "favorites" && <Favorite />}
-            {collectionType == "archived" && (
-                <ArchiveIcon
-                    sx={(theme) => ({
-                        color: theme.colors.white.muted,
-                    })}
-                />
-            )}
-            {collectionType == "outgoingShare" && <PeopleIcon />}
-            {(collectionType == "incomingShareViewer" ||
-                collectionType == "incomingShareCollaborator") && (
-                <PeopleIcon />
-            )}
-            {collectionType == "sharedOnlyViaLink" && <LinkIcon />}
-            {collectionType == "pinned" && <PushPin />}
-        </CollectionBarTileIcon>
-    );
-}
-
-const TruncateText = ({ text }) => {
-    return (
-        <Tooltip title={text}>
-            <Box height={"2.1em"} overflow="hidden">
-                <Ellipse variant="small" sx={{ wordBreak: "break-word" }}>
-                    {text}
-                </Ellipse>
-            </Box>
-        </Tooltip>
-    );
-};
-
-const Ellipse = styled(Typography)`
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 2; //number of lines to show
-    line-clamp: 2;
-    -webkit-box-orient: vertical;
+const ActiveIndicator = styled("div")`
+    height: 3px;
+    background-color: ${({ theme }) => theme.palette.primary.main};
+    margin-top: 18px;
+    border-radius: 2px;
 `;
 
-interface PersondCardProps {
+interface PersonCardProps {
     person: Person;
     activePerson: Person;
     // onCollectionClick: (collectionID: number) => void;
-    // isScrolling?: boolean;
 }
 
-const PersonCard = ({ person, activePerson }: PersondCardProps) => (
+const PersonCard = ({ person, activePerson }: PersonCardProps) => (
     <Box>
-        <CollectionCard
-            collectionTile={CollectionBarTile}
+        <ItemCard
+            TileComponent={BarItemTile}
             coverFile={person.displayFaceFile}
             onClick={() => {
                 //onCollectionClick(collectionSummary.id);
             }}
         >
-            <CollectionCardText collectionName={person.name} />
-            {/* <CollectionCardIcon collectionType={collectionSummary.type} /> */}
-        </CollectionCard>
+            <CardText text={person.name} />
+        </ItemCard>
         {activePerson.id === person.id && <ActiveIndicator />}
     </Box>
 );

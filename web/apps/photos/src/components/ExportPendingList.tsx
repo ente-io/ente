@@ -1,4 +1,4 @@
-import { ResultPreviewTile } from "@/new/photos/components/ItemCards";
+import { PreviewItemTile } from "@/new/photos/components/ItemCards";
 import { EnteFile } from "@/new/photos/types/file";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
@@ -33,7 +33,7 @@ const ExportPendingList = (props: Iprops) => {
                         key={file.id}
                         coverFile={file}
                         onClick={() => null}
-                        collectionTile={ResultPreviewTile}
+                        collectionTile={PreviewItemTile}
                     />
                 </Box>
                 <ItemContainer>
