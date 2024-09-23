@@ -6,7 +6,7 @@ import SvgIcon from "@mui/material/SvgIcon";
 import { t } from "i18next";
 import { COLLECTION_LIST_SORT_BY } from "utils/collection";
 
-interface CollectionSortProps {
+interface CollectionListSortOptionsProps {
     setSortBy: (sortBy: COLLECTION_LIST_SORT_BY) => void;
     activeSortBy: COLLECTION_LIST_SORT_BY;
     nestedInDialog?: boolean;
@@ -14,7 +14,7 @@ interface CollectionSortProps {
 }
 
 const SortByOptionCreator =
-    ({ setSortBy, activeSortBy }: CollectionSortProps) =>
+    ({ setSortBy, activeSortBy }: CollectionListSortOptionsProps) =>
     (props: { sortBy: COLLECTION_LIST_SORT_BY; children: any }) => {
         const handleClick = () => {
             setSortBy(props.sortBy);
@@ -32,7 +32,9 @@ const SortByOptionCreator =
         );
     };
 
-export default function CollectionListSortBy(props: CollectionSortProps) {
+export const CollectionListSortOptions: React.FC<
+    CollectionListSortOptionsProps
+> = (props) => {
     const SortByOption = SortByOptionCreator(props);
 
     return (
@@ -68,4 +70,4 @@ export default function CollectionListSortBy(props: CollectionSortProps) {
             </SortByOption>
         </OverflowMenu>
     );
-}
+};

@@ -33,7 +33,7 @@ import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeList, ListChildComponentProps, areEqual } from "react-window";
 import { COLLECTION_LIST_SORT_BY } from "utils/collection";
 import type { GalleryBarMode } from ".";
-import CollectionListSortBy from "./CollectionListSortBy";
+import { CollectionListSortOptions } from "./CollectionListSortOptions";
 
 export interface CollectionListBarProps {
     /**
@@ -200,7 +200,7 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
 
     const controls1 = isMobile && (
         <Box display="flex" alignItems={"center"} gap={1}>
-            <CollectionListSortBy
+            <CollectionListSortOptions
                 setSortBy={setCollectionListSortBy}
                 activeSortBy={collectionListSortBy}
                 disableBG
@@ -213,7 +213,7 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
 
     const controls2 = !isMobile && (
         <Box display="flex" alignItems={"center"} gap={1} height={"64px"}>
-            <CollectionListSortBy
+            <CollectionListSortOptions
                 setSortBy={setCollectionListSortBy}
                 activeSortBy={collectionListSortBy}
             />
