@@ -1,4 +1,5 @@
 import { useIsMobileWidth } from "@/base/hooks";
+import log from "@/base/log";
 import type { Person } from "@/new/photos/services/ml/cgroups";
 import type { CollectionSummary } from "@/new/photos/types/collection";
 import {
@@ -22,8 +23,7 @@ import {
     MIN_COLUMNS,
 } from "components/PhotoList/constants";
 import { t } from "i18next";
-import memoize from "memoize-one";
-import React, { useEffect, useRef, useState } from "react";
+import React, { memo, useEffect, useMemo, useRef, useState } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeList, ListChildComponentProps, areEqual } from "react-window";
 import { ALL_SECTION, COLLECTION_LIST_SORT_BY } from "utils/collection";
@@ -96,7 +96,7 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
     const isMobile = useIsMobileWidth();
 
     const collectionListWrapperRef = useRef<HTMLDivElement>(null);
-    const collectionListRef = React.useRef(null);
+    const collectionListRef = useRef(null);
 
     const [scrollObj, setScrollObj] = useState<{
         scrollLeft?: number;
@@ -156,15 +156,18 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
         collectionListRef.current.scrollToItem(activeCollectionIndex, "smart");
     }, [activeCollectionID]);
 
-    const onCollectionClick = (collectionID?: number) => {
-        setActiveCollectionID(collectionID ?? ALL_SECTION);
-    };
-
-    const itemData = createItemData(
-        collectionSummaries,
-        activeCollectionID,
-        onCollectionClick,
+    const itemData = useMemo(
+        () => ({
+            collectionSummaries,
+            activeCollectionID,
+            onCollectionClick: (id?: number) =>
+                setActiveCollectionID(id ?? ALL_SECTION),
+        }),
+        [collectionSummaries, activeCollectionID, setActiveCollectionID],
     );
+
+    // TODO-Cluster
+    log.debug(() => ["renderering collection-bar", itemData]);
 
     return (
         <CollectionListBarWrapper>
@@ -284,6 +287,7 @@ const CollectionListWrapper = styled(Box)`
 // );
 
 interface ItemData {
+    mode: GalleryBarMode;
     collectionSummaries: CollectionSummary[];
     activeCollectionID?: number;
     onCollectionClick: (id?: number) => void;
@@ -291,15 +295,7 @@ interface ItemData {
 
 const CollectionListBarCardWidth = 94;
 
-const createItemData = memoize(
-    (collectionSummaries, activeCollectionID, onCollectionClick) => ({
-        collectionSummaries,
-        activeCollectionID,
-        onCollectionClick,
-    }),
-);
-
-const CollectionCardContainer = React.memo(
+const CollectionCardContainer = memo(
     ({
         data,
         index,
