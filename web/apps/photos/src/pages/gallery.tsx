@@ -1034,7 +1034,7 @@ export default function Gallery() {
         setActiveCollectionID(ALL_SECTION);
     };
 
-    const handleSelectPerson = (person: Person) => {
+    const handleSelectPerson = (person: Person | undefined) => {
         setActivePerson(person);
         setBarMode("people");
     };

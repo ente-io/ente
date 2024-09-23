@@ -248,13 +248,6 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
     );
 };
 
-const CollectionListWrapper = styled(Box)`
-    position: relative;
-    overflow: hidden;
-    height: 86px;
-    width: 100%;
-`;
-
 const CollectionListBarWrapper = styled(Box)`
     padding: 0 24px;
     @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * MIN_COLUMNS}px) {
@@ -262,6 +255,13 @@ const CollectionListBarWrapper = styled(Box)`
     }
     margin-bottom: 16px;
     border-bottom: 1px solid ${({ theme }) => theme.palette.divider};
+`;
+
+const CollectionListWrapper = styled(Box)`
+    position: relative;
+    overflow: hidden;
+    height: 86px;
+    width: 100%;
 `;
 
 // // TODO-Cluster
