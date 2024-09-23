@@ -23,16 +23,16 @@
   "all": "All",
   "notes": "Notes",
   "notesLengthLimit": "Notes can be at most {count} characters long",
-    "@notesLengthLimit": {
-        "description": "Text to indicate the maximum number of characters allowed for notes",
-        "placeholders": {
-        "count": {
-            "description": "The maximum number of characters allowed for notes",
-            "type": "int",
-            "example": "100"
-        }
-        }
-    },
+  "@notesLengthLimit": {
+    "description": "Text to indicate the maximum number of characters allowed for notes",
+    "placeholders": {
+      "count": {
+        "description": "The maximum number of characters allowed for notes",
+        "type": "int",
+        "example": "100"
+      }
+    }
+  },
   "codeAccountHint": "Account (you@domain.com)",
   "codeTagHint": "Tag",
   "accountKeyType": "Type of key",
@@ -492,5 +492,6 @@
   "setNewPin": "Set new PIN",
   "importFailureDescNew": "Could not parse the selected file.",
   "appLockNotEnabled": "App lock not enabled",
-  "appLockNotEnabledDescription": "Please enable app lock from Security > App Lock"
+  "appLockNotEnabledDescription": "Please enable app lock from Security > App Lock",
+  "authToViewPasskey": "Please authenticate to view passkey"
 }
