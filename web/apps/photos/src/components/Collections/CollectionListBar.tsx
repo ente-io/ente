@@ -254,7 +254,7 @@ const BarWrapper = styled(Box)`
 const ModeIndicator: React.FC<
     Pick<CollectionListBarProps, "mode" | "setMode">
 > = ({ mode }) => (
-    <Stack direction="row" gap={1}>
+    <Stack direction="row" sx={{ gap: "12px" }}>
         <Typography color={mode == "people" ? "text.muted" : "text.base"}>
             {mode == "hidden-albums" ? t("hidden_albums") : t("albums")}
         </Typography>
