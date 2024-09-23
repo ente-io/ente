@@ -213,7 +213,7 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
                                 itemSize={94}
                                 useIsScrolling
                             >
-                                {CollectionCardContainer}
+                                {ListItem}
                             </FixedSizeList>
                         )}
                     </AutoSizer>
@@ -305,45 +305,6 @@ type ItemData =
           activePerson: Person;
       };
 
-const CollectionCardContainer = memo(
-    ({
-        data,
-        index,
-        style,
-        isScrolling,
-    }: ListChildComponentProps<ItemData>) => {
-        let card: React.ReactNode;
-        switch (data.type) {
-            case "collections": {
-                const {
-                    collectionSummaries,
-                    activeCollectionID,
-                    onCollectionClick,
-                } = data;
-                const collectionSummary = collectionSummaries[index];
-
-                card = (
-                    <CollectionListBarCard
-                        key={collectionSummary.id}
-                        activeCollectionID={activeCollectionID}
-                        isScrolling={isScrolling}
-                        collectionSummary={collectionSummary}
-                        onCollectionClick={onCollectionClick}
-                    />
-                );
-
-                break;
-            }
-            case "people":
-                card = "Person";
-                break;
-        }
-
-        return <div style={style}>{card}</div>;
-    },
-    areEqual,
-);
-
 const getItemCount = (data: ItemData) => {
     switch (data.type) {
         case "collections": {
@@ -369,6 +330,42 @@ const getItemKey = (index: number, data: ItemData) => {
         }
     }
 };
+
+const ListItem = memo((props: ListChildComponentProps<ItemData>) => {
+    const { data, index, style, isScrolling } = props;
+
+    let card: React.ReactNode;
+
+    switch (data.type) {
+        case "collections": {
+            const {
+                collectionSummaries,
+                activeCollectionID,
+                onCollectionClick,
+            } = data;
+            const collectionSummary = collectionSummaries[index];
+            card = (
+                <CollectionListBarCard
+                    key={collectionSummary.id}
+                    activeCollectionID={activeCollectionID}
+                    isScrolling={isScrolling}
+                    collectionSummary={collectionSummary}
+                    onCollectionClick={onCollectionClick}
+                />
+            );
+            break;
+        }
+
+        case "people": {
+            const { people, activePerson } = data;
+            const person = people[index];
+            card = <PersonCard {...{ person, activePerson }} />;
+            break;
+        }
+    }
+
+    return <div style={style}>{card}</div>;
+}, areEqual);
 
 const ScrollButtonBase: React.FC<
     React.ButtonHTMLAttributes<HTMLButtonElement>
@@ -523,3 +520,26 @@ const Ellipse = styled(Typography)`
     line-clamp: 2;
     -webkit-box-orient: vertical;
 `;
+
+interface PersondCardProps {
+    person: Person;
+    activePerson: Person;
+    // onCollectionClick: (collectionID: number) => void;
+    // isScrolling?: boolean;
+}
+
+const PersonCard = ({ person, activePerson }: PersondCardProps) => (
+    <Box>
+        <CollectionCard
+            collectionTile={CollectionBarTile}
+            coverFile={person.displayFaceFile}
+            onClick={() => {
+                //onCollectionClick(collectionSummary.id);
+            }}
+        >
+            <CollectionCardText collectionName={person.name} />
+            {/* <CollectionCardIcon collectionType={collectionSummary.type} /> */}
+        </CollectionCard>
+        {activePerson.id === person.id && <ActiveIndicator />}
+    </Box>
+);
