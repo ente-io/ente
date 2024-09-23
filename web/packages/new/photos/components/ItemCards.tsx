@@ -12,28 +12,31 @@ interface ItemCardProps {
     coverFile: EnteFile;
     /** One of the *Tile components to use as the top level element. */
     TileComponent: React.FC<React.PropsWithChildren>;
+    /** Optional click handler. */
+    onClick?: () => void;
 }
-
 /**
- * A simplified variant of {@link CollectionCard}, meant to be used for
- * representing either collections and files.
+ * A generic card that can be be used to represent collections,  files, people -
+ * anything that has an associated "cover photo".
+ *
+ * This is a simplified variant / almost-duplicate of {@link CollectionCard}.
  */
-export const ItemCard: React.FC<ItemCardProps> = ({
+export const ItemCard: React.FC<React.PropsWithChildren<ItemCardProps>> = ({
     coverFile,
     TileComponent,
+    onClick,
+    children,
 }) => {
     const [coverImageURL, setCoverImageURL] = useState("");
 
     useEffect(() => {
-        const main = async () => {
-            const url = await downloadManager.getThumbnailForPreview(coverFile);
-            if (url) setCoverImageURL(url);
-        };
-        void main();
+        void downloadManager
+            .getThumbnailForPreview(coverFile)
+            .then((url) => url && setCoverImageURL(url));
     }, [coverFile]);
 
     return (
-        <TileComponent>
+        <TileComponent {...{ onClick }}>
             {coverFile.metadata.hasStaticThumbnail ? (
                 <StaticThumbnail fileType={coverFile.metadata.fileType} />
             ) : coverImageURL ? (
@@ -41,12 +44,16 @@ export const ItemCard: React.FC<ItemCardProps> = ({
             ) : (
                 <LoadingThumbnail />
             )}
+            {children}
         </TileComponent>
     );
 };
 
 /**
- * A verbatim copy of CollectionTile, meant to be used with ItemCards.
+ * A generic "base" tile, meant to be used as the {@link TileComponent} provided
+ * to an {@link ItemCard}.
+ *
+ * Currently a verbatim copy of {@link CollectionTile}.
  */
 export const ItemTile = styled("div")`
     display: flex;
@@ -63,6 +70,9 @@ export const ItemTile = styled("div")`
     user-select: none;
 `;
 
+/**
+ * A TileComponent for use in search result dropdown's preview files.
+ */
 export const ResultPreviewTile = styled(ItemTile)`
     width: 48px;
     height: 48px;
