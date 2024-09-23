@@ -157,7 +157,7 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
         collectionListRef.current.scrollToItem(activeCollectionIndex, "smart");
     }, [activeCollectionID]);
 
-    const itemData = useMemo(
+    const itemData = useMemo<ItemData>(
         () =>
             mode == "albums" || mode == "hidden-albums"
                 ? {
