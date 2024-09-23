@@ -249,12 +249,12 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
 };
 
 const CollectionListBarWrapper = styled(Box)`
-    padding: 0 24px;
+    padding-inline: 24px;
     @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * MIN_COLUMNS}px) {
-        padding: 0 4px;
+        padding-inline: 4px;
     }
-    margin-bottom: 16px;
-    border-bottom: 1px solid ${({ theme }) => theme.palette.divider};
+    margin-block-end: 16px;
+    border-block-end: 1px solid ${({ theme }) => theme.palette.divider};
 `;
 
 const CollectionListWrapper = styled(Box)`
