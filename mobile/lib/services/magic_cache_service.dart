@@ -174,7 +174,7 @@ class MagicCacheService {
       _updateCacheIfTheTimeHasCome();
     });
     Bus.instance.on<FileUploadedEvent>().listen((event) {
-      _pendingUpdateReason.add("File uploaded");
+      queueUpdate("File uploaded");
     });
   }
 
@@ -202,12 +202,12 @@ class MagicCacheService {
     final updatedJSONFile = await RemoteAssetsService.instance
         .getAssetIfUpdated(_kMagicPromptsDataUrl);
     if (updatedJSONFile != null) {
-      _pendingUpdateReason.add("Prompts data updated");
+      queueUpdate("Prompts data updated");
     } else if (lastMagicCacheUpdateTime <
         DateTime.now()
             .subtract(const Duration(days: 1))
             .millisecondsSinceEpoch) {
-      _pendingUpdateReason.add("Cache is old");
+      queueUpdate("Cache is old");
     }
   }
 
