@@ -31,7 +31,7 @@ import React, {
 } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeList, ListChildComponentProps, areEqual } from "react-window";
-import { COLLECTION_LIST_SORT_BY } from "utils/collection";
+import { CollectionListSortBy } from "utils/collection";
 import type { GalleryBarMode } from ".";
 import { CollectionListSortOptions } from "./CollectionListSortOptions";
 
@@ -65,11 +65,11 @@ export interface CollectionListBarProps {
      * The sort order that should be used for showing the collections in the
      * bar.
      */
-    collectionListSortBy: COLLECTION_LIST_SORT_BY;
+    collectionListSortBy: CollectionListSortBy;
     /**
      * Called when the user changes the sort order.
      */
-    setCollectionListSortBy: (v: COLLECTION_LIST_SORT_BY) => void;
+    setCollectionListSortBy: (v: CollectionListSortBy) => void;
     /**
      * The list of people that should be shown in the bar.
      */

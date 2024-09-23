@@ -14,7 +14,7 @@ import { sortCollectionSummaries } from "services/collectionService";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
 import {
     ALL_SECTION,
-    COLLECTION_LIST_SORT_BY,
+    CollectionListSortBy,
     hasNonSystemCollections,
     isSystemCollection,
     shouldBeShownOnCollectionBar,
@@ -75,9 +75,9 @@ export const Collections: React.FC<CollectionsProps> = ({
     const [openAlbumCastDialog, setOpenAlbumCastDialog] = useState(false);
 
     const [collectionListSortBy, setCollectionListSortBy] =
-        useLocalState<COLLECTION_LIST_SORT_BY>(
+        useLocalState<CollectionListSortBy>(
             LS_KEYS.COLLECTION_SORT_BY,
-            COLLECTION_LIST_SORT_BY.UPDATION_TIME_DESCENDING,
+            CollectionListSortBy.UpdationTimeDescending,
         );
 
     const toShowCollectionSummaries = useMemo(

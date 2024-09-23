@@ -4,7 +4,7 @@ import {
     AllCollectionDialog,
     Transition,
 } from "components/Collections/AllCollections/dialog";
-import { COLLECTION_LIST_SORT_BY } from "utils/collection";
+import { CollectionListSortBy } from "utils/collection";
 import AllCollectionContent from "./content";
 import AllCollectionsHeader from "./header";
 
@@ -13,8 +13,8 @@ interface Iprops {
     onClose: () => void;
     collectionSummaries: CollectionSummary[];
     setActiveCollectionID: (id?: number) => void;
-    collectionListSortBy: COLLECTION_LIST_SORT_BY;
-    setCollectionListSortBy: (v: COLLECTION_LIST_SORT_BY) => void;
+    collectionListSortBy: CollectionListSortBy;
+    setCollectionListSortBy: (v: CollectionListSortBy) => void;
     isInHiddenSection: boolean;
 }
 

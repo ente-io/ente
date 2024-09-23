@@ -4,18 +4,18 @@ import TickIcon from "@mui/icons-material/Done";
 import SortIcon from "@mui/icons-material/Sort";
 import SvgIcon from "@mui/material/SvgIcon";
 import { t } from "i18next";
-import { COLLECTION_LIST_SORT_BY } from "utils/collection";
+import { CollectionListSortBy } from "utils/collection";
 
 interface CollectionListSortOptionsProps {
-    setSortBy: (sortBy: COLLECTION_LIST_SORT_BY) => void;
-    activeSortBy: COLLECTION_LIST_SORT_BY;
+    setSortBy: (sortBy: CollectionListSortBy) => void;
+    activeSortBy: CollectionListSortBy;
     nestedInDialog?: boolean;
     disableBG?: boolean;
 }
 
 const SortByOptionCreator =
     ({ setSortBy, activeSortBy }: CollectionListSortOptionsProps) =>
-    (props: { sortBy: COLLECTION_LIST_SORT_BY; children: any }) => {
+    (props: { sortBy: CollectionListSortBy; children: any }) => {
         const handleClick = () => {
             setSortBy(props.sortBy);
         };
@@ -55,17 +55,13 @@ export const CollectionListSortOptions: React.FC<
                 },
             }}
         >
-            <SortByOption sortBy={COLLECTION_LIST_SORT_BY.NAME}>
+            <SortByOption sortBy={CollectionListSortBy.Name}>
                 {t("sort_by_name")}
             </SortByOption>
-            <SortByOption
-                sortBy={COLLECTION_LIST_SORT_BY.CREATION_TIME_ASCENDING}
-            >
+            <SortByOption sortBy={CollectionListSortBy.CreationTimeAscending}>
                 {t("sort_by_creation_time_ascending")}
             </SortByOption>
-            <SortByOption
-                sortBy={COLLECTION_LIST_SORT_BY.UPDATION_TIME_DESCENDING}
-            >
+            <SortByOption sortBy={CollectionListSortBy.UpdationTimeDescending}>
                 {t("sort_by_updation_time_descending")}
             </SortByOption>
         </OverflowMenu>

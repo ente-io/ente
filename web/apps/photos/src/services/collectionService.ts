@@ -44,8 +44,8 @@ import { FamilyData } from "types/user";
 import {
     ALL_SECTION,
     ARCHIVE_SECTION,
-    COLLECTION_LIST_SORT_BY,
     COLLECTION_SORT_ORDER,
+    CollectionListSortBy,
     DUMMY_UNCATEGORIZED_COLLECTION,
     HIDDEN_ITEMS_SECTION,
     TRASH_SECTION,
@@ -1070,19 +1070,19 @@ export const getFavCollection = async () => {
 
 export function sortCollectionSummaries(
     collectionSummaries: CollectionSummary[],
-    sortBy: COLLECTION_LIST_SORT_BY,
+    sortBy: CollectionListSortBy,
 ) {
     return collectionSummaries
         .sort((a, b) => {
             switch (sortBy) {
-                case COLLECTION_LIST_SORT_BY.CREATION_TIME_ASCENDING:
+                case CollectionListSortBy.CreationTimeAscending:
                     return (
                         -1 *
                         compareCollectionsLatestFile(b.latestFile, a.latestFile)
                     );
-                case COLLECTION_LIST_SORT_BY.UPDATION_TIME_DESCENDING:
+                case CollectionListSortBy.UpdationTimeDescending:
                     return b.updationTime - a.updationTime;
-                case COLLECTION_LIST_SORT_BY.NAME:
+                case CollectionListSortBy.Name:
                     return a.name.localeCompare(b.name);
             }
         })
