@@ -97,7 +97,7 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
     setCollectionListSortBy,
     people,
     activePerson,
-    onSelectPerson,
+    // onSelectPerson,
 }) => {
     // const windowSize = useWindowSize();
     const isMobile = useIsMobileWidth();
@@ -108,8 +108,8 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
     const [canScrollLeft, setCanScrollLeft] = useState(false);
     const [canScrollRight, setCanScrollRight] = useState(false);
 
-    const updateScrollState = useCallback((e) => {
-        console.log("updateScrollState 1", e);
+    const updateScrollState = useCallback(() => {
+        console.log("updateScrollState 1");
         if (!listContainerRef.current) return;
 
         const { scrollLeft, scrollWidth, clientWidth } =
@@ -146,7 +146,7 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
         return () => {
             listContainer.removeEventListener("scroll", updateScrollState);
             // listContainer.removeEventListener("resize", updateScrollState);
-            observer.unobserve(listContainer)
+            observer.unobserve(listContainer);
         };
     }, [updateScrollState]);
 
