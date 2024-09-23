@@ -73,9 +73,13 @@ export interface SearchBarProps {
      */
     onSelectSearchOption: (o: SearchOption | undefined) => void;
     /**
-     * Select a person.
+     * Called when the user selects a person shown in the empty state view, or
+     * clicks the people list header itself.
+     *
+     * @param person The selected person, or `undefined` if the user clicked the
+     * generic people header.
      */
-    onSelectPerson: (person: Person) => void;
+    onSelectPerson: (person: Person | undefined) => void;
 }
 
 /**
@@ -184,7 +188,7 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
         onSelectSearchOption(undefined);
     };
 
-    const handleSelectPerson = (person: Person) => {
+    const handleSelectPerson = (person: Person | undefined) => {
         resetSearch();
         onSelectPerson(person);
     };
@@ -368,16 +372,13 @@ const shouldShowEmptyState = (inputValue: string) => {
     return true;
 };
 
-interface EmptyStateProps {
-    /** Called when the user selects a person shown in the empty state view. */
-    onSelectPerson: (person: Person) => void;
-}
-
 /**
  * The view shown in the menu area when the user has not typed anything in the
  * search box.
  */
-const EmptyState: React.FC<EmptyStateProps> = ({ onSelectPerson }) => {
+const EmptyState: React.FC<Pick<SearchBarProps, "onSelectPerson">> = ({
+    onSelectPerson,
+}) => {
     const mlStatus = useSyncExternalStore(mlStatusSubscribe, mlStatusSnapshot);
     const people = useSyncExternalStore(peopleSubscribe, peopleSnapshot);
 
@@ -411,7 +412,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({ onSelectPerson }) => {
         <Box sx={{ textAlign: "left" }}>
             {people && people.length > 0 && (
                 <>
-                    <PeopleHeader />
+                    <PeopleHeader onClick={() => onSelectPerson(undefined)} />
                     <SearchPeopleList {...{ people, onSelectPerson }} />
                 </>
             )}
@@ -422,13 +423,37 @@ const EmptyState: React.FC<EmptyStateProps> = ({ onSelectPerson }) => {
     );
 };
 
-const PeopleHeader: React.FC = () => (
-    <Stack direction="row" color="text.muted">
-        <Typography color="text.base" variant="large">
-            {t("people")}
-        </Typography>
-        <ChevronRightIcon />
-    </Stack>
+interface PeopleHeaderProps {
+    onClick: () => void;
+}
+
+const PeopleHeader: React.FC<PeopleHeaderProps> = ({ onClick }) => (
+    <PeopleHeaderButton {...{ onClick }}>
+        <Stack direction="row" color="text.muted">
+            <Typography color="text.base" variant="large">
+                {t("people")}
+            </Typography>
+            <ChevronRightIcon />
+        </Stack>
+    </PeopleHeaderButton>
+);
+
+const PeopleHeaderButton = styled("button")(
+    ({ theme }) => `
+    /* Reset some button defaults that are affecting us */
+    background: transparent;
+    border: 0;
+    padding: 0;
+    font: inherit;
+    /* Button should do this for us, but it isn't working inside the select */
+    cursor: pointer;
+    /* The color for the chevron */
+    color: ${theme.colors.stroke.muted};
+    /* Hover indication */
+    && :hover {
+        color: ${theme.colors.stroke.base};
+    }
+`,
 );
 
 const Option: React.FC<OptionProps<SearchOption, false>> = (props) => (

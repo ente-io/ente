@@ -1034,8 +1034,10 @@ export default function Gallery() {
         setActiveCollectionID(ALL_SECTION);
     };
 
-    const handleSelectPerson = (person: Person) => {
-        setActivePerson(person);
+    const handleSelectPerson = (person: Person | undefined) => {
+        // TODO-Cluster: The person bar does not have an "all" mode, use the
+        // first person.
+        setActivePerson(person || people[0]);
         setBarMode("people");
     };
 
