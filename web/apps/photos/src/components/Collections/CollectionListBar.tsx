@@ -22,7 +22,14 @@ import {
     MIN_COLUMNS,
 } from "components/PhotoList/constants";
 import { t } from "i18next";
-import React, { memo, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+    memo,
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeList, ListChildComponentProps, areEqual } from "react-window";
 import { ALL_SECTION, COLLECTION_LIST_SORT_BY } from "utils/collection";
@@ -91,57 +98,53 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
     setCollectionListSortBy,
     people,
     activePerson,
-    onSelectPerson
+    onSelectPerson,
 }) => {
     const windowSize = useWindowSize();
     const isMobile = useIsMobileWidth();
 
-    const listWrapperRef = useRef<HTMLDivElement>(null);
+    const listContainerRef = useRef<HTMLDivElement>(null);
     const listRef = useRef(null);
 
-    const [scrollObj, setScrollObj] = useState<{
-        scrollLeft?: number;
-        scrollWidth?: number;
-        clientWidth?: number;
-    }>({});
+    const [canScrollLeft, setCanScrollLeft] = useState(false);
+    const [canScrollRight, setCanScrollRight] = useState(false);
 
-    const updateScrollObj = () => {
-        if (!listWrapperRef.current) {
-            return;
-        }
-        const { scrollLeft, scrollWidth, clientWidth } = listWrapperRef.current;
-        setScrollObj({ scrollLeft, scrollWidth, clientWidth });
-    };
+    const updateScrollState = useCallback(() => {
+        if (!listContainerRef.current) return;
+
+        const { scrollLeft, scrollWidth, clientWidth } =
+            listContainerRef.current;
+
+        setCanScrollLeft(scrollLeft == 0);
+        setCanScrollRight(scrollLeft + clientWidth == scrollWidth);
+    }, []);
 
     useEffect(() => {
-        if (!listWrapperRef.current) return;
+        const listContainer = listContainerRef.current;
+        if (!listContainer) return;
 
         // Add event listener.
-        listWrapperRef.current.addEventListener("scroll", updateScrollObj);
+        listContainer.addEventListener("scroll", updateScrollState);
+        listContainer.addEventListener("resize", updateScrollState);
 
         // Call handler right away so that state gets updated with initial
         // window size.
-        updateScrollObj();
+        updateScrollState();
 
         // Remove event listener on cleanup.
-        return () =>
-            listWrapperRef.current?.removeEventListener(
-                "scroll",
-                updateScrollObj,
-            );
-    }, [listWrapperRef.current]);
+        return () => {
+            listContainer.removeEventListener("scroll", updateScrollState);
+            listContainer.removeEventListener("resize", updateScrollState);
+        };
+    }, [updateScrollState]);
 
     useEffect(() => {
-        updateScrollObj();
-    }, [windowSize, collectionSummaries]);
+        updateScrollState();
+    }, [windowSize, updateScrollState, mode, collectionSummaries, people]);
 
     const scrollComponent = (direction: number) => () => {
-        listWrapperRef.current.scrollBy(250 * direction, 0);
+        listContainerRef.current.scrollBy(250 * direction, 0);
     };
-
-    const onFarLeft = scrollObj.scrollLeft === 0;
-    const onFarRight =
-        scrollObj.scrollLeft + scrollObj.clientWidth === scrollObj.scrollWidth;
 
     useEffect(() => {
         if (!listRef.current) {
@@ -194,14 +197,14 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
             </SpaceBetweenFlex>
             <Box display="flex" alignItems="flex-start" gap={2}>
                 <ListWrapper>
-                    {!onFarLeft && (
+                    {canScrollLeft && (
                         <ScrollButtonLeft onClick={scrollComponent(-1)} />
                     )}
                     <AutoSizer disableHeight>
                         {({ width }) => (
                             <FixedSizeList
                                 ref={listRef}
-                                outerRef={listWrapperRef}
+                                outerRef={listContainerRef}
                                 itemData={itemData}
                                 layout="horizontal"
                                 width={width}
@@ -215,7 +218,7 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
                             </FixedSizeList>
                         )}
                     </AutoSizer>
-                    {!onFarRight && (
+                    {canScrollRight && (
                         <ScrollButtonRight onClick={scrollComponent(+1)} />
                     )}
                 </ListWrapper>
