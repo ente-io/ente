@@ -79,6 +79,7 @@ export interface CollectionListBarProps {
     onSelectPerson: (person: Person) => void;
 }
 
+// TODO-Cluster Rename me to GalleryBar
 export const CollectionListBar: React.FC<CollectionListBarProps> = ({
     mode,
     setMode,
@@ -90,7 +91,7 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
     setCollectionListSortBy,
     people,
     activePerson,
-    // onSelectPerson
+    onSelectPerson
 }) => {
     const windowSize = useWindowSize();
     const isMobile = useIsMobileWidth();
@@ -113,18 +114,19 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
     };
 
     useEffect(() => {
-        if (!listWrapperRef.current) {
-            return;
-        }
-        // Add event listener
-        listWrapperRef.current?.addEventListener("scroll", updateScrollObj);
+        if (!listWrapperRef.current) return;
 
-        // Call handler right away so state gets updated with initial window size
+        // Add event listener.
+        listWrapperRef.current.addEventListener("scroll", updateScrollObj);
+
+        // Call handler right away so that state gets updated with initial
+        // window size.
         updateScrollObj();
-        // Remove event listener on cleanup
+
+        // Remove event listener on cleanup.
         return () =>
             listWrapperRef.current?.removeEventListener(
-                "resize",
+                "scroll",
                 updateScrollObj,
             );
     }, [listWrapperRef.current]);
