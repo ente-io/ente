@@ -378,10 +378,33 @@ export const areLivePhotoAssets = async (
         g.fileType,
         gParsedMetadataJSON,
     );
-    if (!fDate || !gDate) return false;
-    const secondDelta = Math.abs(fDate - gDate) / 1e6;
-    if (secondDelta > 2 * 60 /* 2 mins */) return false;
 
+    const thresholdSeconds = 2 * 60; /* 2 mins */
+    const haveSameishDate =
+        fDate && gDate && Math.abs(fDate - gDate) / 1e6 < thresholdSeconds;
+
+    if (!haveSameishDate) {
+        // Special case 1: Google does not include the metadata JSON for the
+        // video part of the live photo in the Takeout, causing this date check
+        // to fail.
+        //
+        // So only incorporate this check if either neither file has a metadata
+        // JSON, or both have it.
+        if (
+            (!fParsedMetadataJSON && !gParsedMetadataJSON) ||
+            (fParsedMetadataJSON && gParsedMetadataJSON)
+        ) {
+            return false;
+        }
+    }
+
+    if (!haveSameishDate) {
+        // None of the special cases apply, and the date diverges. Don't club
+        // this pair.
+        return false;
+    }
+
+    // All checks pass. Club these two as a live photo.
     return true;
 };
 
