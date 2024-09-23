@@ -150,7 +150,7 @@ Future<ButtonResult?> showGenericErrorDialog({
   bool isWindowCertError = false;
   if (Platform.isWindows &&
       error != null &&
-      error!.toString().contains("CERTIFICATE_VERIFY_FAILED")) {
+      error.toString().contains("CERTIFICATE_VERIFY_FAILED")) {
     isWindowCertError = true;
     errorBody =
         "Certificate verification failed. Please update your system certificates, & restart the app. If the issue persists, please contact support.";
