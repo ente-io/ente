@@ -1,6 +1,9 @@
 import { useIsMobileWidth } from "@/base/hooks";
 import type { Person } from "@/new/photos/services/ml/cgroups";
-import type { CollectionSummary } from "@/new/photos/types/collection";
+import type {
+    CollectionSummary,
+    CollectionSummaryType,
+} from "@/new/photos/types/collection";
 import { ensure } from "@/utils/ensure";
 import { IconButtonWithBG, Overlay } from "@ente/shared/components/Container";
 import ArchiveIcon from "@mui/icons-material/Archive";
@@ -455,8 +458,8 @@ const CollectionBarCard: React.FC<CollectionBarCardProps> = ({
             coverFile={collectionSummary.coverFile}
             onClick={() => onCollectionClick(collectionSummary.id)}
         >
-            <CollectionCardText collectionName={collectionSummary.name} />
-            <CollectionCardIcon collectionType={collectionSummary.type} />
+            <CardText text={collectionSummary.name} />
+            <CollectionBarCardIcon type={collectionSummary.type} />
         </CollectionCard>
         {activeCollectionID === collectionSummary.id && <ActiveIndicator />}
     </div>
@@ -467,7 +470,17 @@ const CollectionBarTile = styled(CollectionTile)`
     height: 64px;
 `;
 
-const CollectionBarTileText = styled(Overlay)`
+interface CardTextProps {
+    text: string;
+}
+
+const CardText: React.FC<CardTextProps> = ({ text }) => (
+    <CardText_>
+        <TruncatedText {...{ text }} />
+    </CardText_>
+);
+
+const CardText_ = styled(Overlay)`
     padding: 4px;
     background: linear-gradient(
         0deg,
@@ -476,7 +489,50 @@ const CollectionBarTileText = styled(Overlay)`
     );
 `;
 
-const CollectionBarTileIcon = styled(Overlay)`
+const TruncatedText: React.FC<CardTextProps> = ({ text }) => (
+    <Tooltip title={text}>
+        <Box height={"2.1em"} overflow="hidden">
+            <Ellipsized variant="small" sx={{ wordBreak: "break-word" }}>
+                {text}
+            </Ellipsized>
+        </Box>
+    </Tooltip>
+);
+
+const Ellipsized = styled(Typography)`
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; // number of lines to show
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+`;
+
+interface CollectionBarCardIconProps {
+    type: CollectionSummaryType;
+}
+
+const CollectionBarCardIcon: React.FC<CollectionBarCardIconProps> = ({
+    type,
+}) => (
+    <CollectionBarCardIcon_>
+        {type == "favorites" && <Favorite />}
+        {type == "archived" && (
+            <ArchiveIcon
+                sx={(theme) => ({
+                    color: theme.colors.white.muted,
+                })}
+            />
+        )}
+        {type == "outgoingShare" && <PeopleIcon />}
+        {(type == "incomingShareViewer" ||
+            type == "incomingShareCollaborator") && <PeopleIcon />}
+        {type == "sharedOnlyViaLink" && <LinkIcon />}
+        {type == "pinned" && <PushPin />}
+    </CollectionBarCardIcon_>
+);
+
+const CollectionBarCardIcon_ = styled(Overlay)`
     padding: 4px;
     display: flex;
     justify-content: flex-start;
@@ -484,57 +540,6 @@ const CollectionBarTileIcon = styled(Overlay)`
     & > .MuiSvgIcon-root {
         font-size: 20px;
     }
-`;
-
-function CollectionCardText({ collectionName }) {
-    return (
-        <CollectionBarTileText>
-            <TruncateText text={collectionName} />
-        </CollectionBarTileText>
-    );
-}
-
-function CollectionCardIcon({ collectionType }) {
-    return (
-        <CollectionBarTileIcon>
-            {collectionType == "favorites" && <Favorite />}
-            {collectionType == "archived" && (
-                <ArchiveIcon
-                    sx={(theme) => ({
-                        color: theme.colors.white.muted,
-                    })}
-                />
-            )}
-            {collectionType == "outgoingShare" && <PeopleIcon />}
-            {(collectionType == "incomingShareViewer" ||
-                collectionType == "incomingShareCollaborator") && (
-                <PeopleIcon />
-            )}
-            {collectionType == "sharedOnlyViaLink" && <LinkIcon />}
-            {collectionType == "pinned" && <PushPin />}
-        </CollectionBarTileIcon>
-    );
-}
-
-const TruncateText = ({ text }) => {
-    return (
-        <Tooltip title={text}>
-            <Box height={"2.1em"} overflow="hidden">
-                <Ellipse variant="small" sx={{ wordBreak: "break-word" }}>
-                    {text}
-                </Ellipse>
-            </Box>
-        </Tooltip>
-    );
-};
-
-const Ellipse = styled(Typography)`
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 2; //number of lines to show
-    line-clamp: 2;
-    -webkit-box-orient: vertical;
 `;
 
 const ActiveIndicator = styled("div")`
@@ -559,8 +564,7 @@ const PersonCard = ({ person, activePerson }: PersonCardProps) => (
                 //onCollectionClick(collectionSummary.id);
             }}
         >
-            <CollectionCardText collectionName={person.name} />
-            {/* <CollectionCardIcon collectionType={collectionSummary.type} /> */}
+            <CardText text={person.name} />
         </CollectionCard>
         {activePerson.id === person.id && <ActiveIndicator />}
     </Box>
