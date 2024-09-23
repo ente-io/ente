@@ -661,6 +661,26 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Zwei-Faktor-Authentifizierung (2FA) wird deaktiviert..."),
         "discord": MessageLookupByLibrary.simpleMessage("Discord"),
+        "discover": MessageLookupByLibrary.simpleMessage("Entdecken"),
+        "discover_babies": MessageLookupByLibrary.simpleMessage("Babys"),
+        "discover_celebrations": MessageLookupByLibrary.simpleMessage("Feiern"),
+        "discover_food": MessageLookupByLibrary.simpleMessage("Essen"),
+        "discover_greenery": MessageLookupByLibrary.simpleMessage("Grün"),
+        "discover_hills": MessageLookupByLibrary.simpleMessage("Berge"),
+        "discover_identity": MessageLookupByLibrary.simpleMessage("Identität"),
+        "discover_memes": MessageLookupByLibrary.simpleMessage("Memes"),
+        "discover_notes": MessageLookupByLibrary.simpleMessage("Notizen"),
+        "discover_pets": MessageLookupByLibrary.simpleMessage("Haustiere"),
+        "discover_receipts": MessageLookupByLibrary.simpleMessage("Belege"),
+        "discover_screenshots":
+            MessageLookupByLibrary.simpleMessage("Bildschirmfotos"),
+        "discover_selfies": MessageLookupByLibrary.simpleMessage("Selfies"),
+        "discover_sunset":
+            MessageLookupByLibrary.simpleMessage("Sonnenuntergang"),
+        "discover_visiting_cards":
+            MessageLookupByLibrary.simpleMessage("Visitenkarten"),
+        "discover_wallpapers":
+            MessageLookupByLibrary.simpleMessage("Hintergründe"),
         "dismiss": MessageLookupByLibrary.simpleMessage("Verwerfen"),
         "distanceInKMUnit": MessageLookupByLibrary.simpleMessage("km"),
         "doNotSignOut":

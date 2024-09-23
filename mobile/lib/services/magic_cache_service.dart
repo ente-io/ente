@@ -191,6 +191,10 @@ class MagicCacheService {
 
   bool get enableDiscover => localSettings.isMLIndexingEnabled;
 
+  void queueUpdate(String reason) {
+    _pendingUpdateReason.add(reason);
+  }
+
   Future<void> _updateCacheIfTheTimeHasCome() async {
     if (!enableDiscover) {
       return;
