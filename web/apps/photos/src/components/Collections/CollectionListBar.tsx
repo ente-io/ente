@@ -102,56 +102,65 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
     // const windowSize = useWindowSize();
     const isMobile = useIsMobileWidth();
 
-    const listContainerCallbackRef = useCallback((node) => {
-        listContainerRef.current = node;
-    }, []);
-    const listContainerRef = useRef<HTMLDivElement>(null);
-    const listRef = useRef(null);
-
     const [canScrollLeft, setCanScrollLeft] = useState(false);
     const [canScrollRight, setCanScrollRight] = useState(false);
 
     const updateScrollState = useCallback(() => {
-        console.log("updateScrollState 1");
-        if (!listContainerRef.current) return;
+        console.log(
+            "updateScrollState called, ref is",
+            listContainerRef.current,
+        );
+        // if (!listContainerRef.current) return;
 
         const { scrollLeft, scrollWidth, clientWidth } =
             listContainerRef.current;
 
-        console.log("updateScrollState 2", {
-            scrollLeft,
-            scrollWidth,
-            clientWidth,
-        });
+        // console.log("updateScrollState 2", {
+        //     scrollLeft,
+        //     scrollWidth,
+        //     clientWidth,
+        // });
 
         setCanScrollLeft(scrollLeft > 0);
         setCanScrollRight(scrollLeft + clientWidth < scrollWidth);
     }, []);
 
-    useEffect(() => {
-        const listContainer = listContainerRef.current;
-        if (!listContainer) return;
+    const listContainerCallbackRef = useCallback(
+        (ref) => {
+            console.log("callback ref was called with node", ref);
+            listContainerRef.current = ref;
+            if (!ref) return;
 
-        // Add event listener.
-        listContainer.addEventListener("scroll", updateScrollState);
-        const observer = new ResizeObserver((es) => {
-            console.log(es);
+            // Add event listener.
+            ref.addEventListener("scroll", updateScrollState);
+            const observer = new ResizeObserver((es) => {
+                console.log(es);
+                updateScrollState();
+            });
+            observer.observe(ref);
+            // listContainer.addEventListener("resize", updateScrollState);
+
+            // Call handler right away so that state gets updated with initial
+            // window size.
             updateScrollState();
-        });
-        observer.observe(listContainer);
-        // listContainer.addEventListener("resize", updateScrollState);
 
-        // Call handler right away so that state gets updated with initial
-        // window size.
-        updateScrollState();
+            // Remove event listener on cleanup.
+            return () => {
+                ref.removeEventListener("scroll", updateScrollState);
+                // listContainer.removeEventListener("resize", updateScrollState);
+                observer.unobserve(ref);
+            };
+        },
+        [updateScrollState],
+    );
 
-        // Remove event listener on cleanup.
-        return () => {
-            listContainer.removeEventListener("scroll", updateScrollState);
-            // listContainer.removeEventListener("resize", updateScrollState);
-            observer.unobserve(listContainer);
-        };
-    }, [updateScrollState]);
+    const listContainerRef = useRef<HTMLDivElement>(null);
+    const listRef = useRef(null);
+
+    // useEffect(() => {
+    //     const listContainer = listContainerRef.current;
+    //     if (!listContainer) return;
+    // }, [updateScrollState]);
 
     useEffect(() => {
         updateScrollState();
