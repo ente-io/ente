@@ -398,12 +398,6 @@ export const areLivePhotoAssets = async (
         }
     }
 
-    if (!haveSameishDate) {
-        // None of the special cases apply, and the date diverges. Don't club
-        // this pair.
-        return false;
-    }
-
     // All checks pass. Club these two as a live photo.
     return true;
 };
