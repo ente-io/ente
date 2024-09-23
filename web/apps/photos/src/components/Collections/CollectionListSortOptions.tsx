@@ -4,7 +4,7 @@ import TickIcon from "@mui/icons-material/Done";
 import SortIcon from "@mui/icons-material/Sort";
 import SvgIcon from "@mui/material/SvgIcon";
 import { t } from "i18next";
-import { CollectionListSortBy } from "utils/collection";
+import { CollectionListSortBy } from "@/new/photos/types/collection";
 
 interface CollectionListSortOptionsProps {
     setSortBy: (sortBy: CollectionListSortBy) => void;

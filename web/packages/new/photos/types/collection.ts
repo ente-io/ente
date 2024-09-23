@@ -34,3 +34,13 @@ export interface CollectionSummary {
 }
 
 export type CollectionSummaries = Map<number, CollectionSummary>;
+
+/**
+ * Sort orders for use when we're showing lists of collections (e.g. in the
+ * collection bar).
+ */
+export enum CollectionListSortBy {
+    Name,
+    CreationTimeAscending,
+    UpdationTimeDescending,
+}

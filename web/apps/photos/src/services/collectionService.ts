@@ -45,7 +45,6 @@ import {
     ALL_SECTION,
     ARCHIVE_SECTION,
     COLLECTION_SORT_ORDER,
-    CollectionListSortBy,
     DUMMY_UNCATEGORIZED_COLLECTION,
     HIDDEN_ITEMS_SECTION,
     TRASH_SECTION,
@@ -61,6 +60,7 @@ import {
     isSharedOnlyViaLink,
     isValidMoveTarget,
 } from "utils/collection";
+import { CollectionListSortBy } from "@/new/photos/types/collection";
 import {
     getUniqueFiles,
     groupFilesBasedOnCollectionID,

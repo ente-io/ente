@@ -45,16 +45,6 @@ export const DUMMY_UNCATEGORIZED_COLLECTION = -3;
 export const HIDDEN_ITEMS_SECTION = -4;
 export const ALL_SECTION = 0;
 
-/**
- * Sort orders for use when we're showing lists of collections (e.g. in the
- * collection bar).
- */
-export enum CollectionListSortBy {
-    Name,
-    CreationTimeAscending,
-    UpdationTimeDescending,
-}
-
 export const COLLECTION_SORT_ORDER = new Map<CollectionSummaryType, number>([
     ["all", 0],
     ["hiddenItems", 0],

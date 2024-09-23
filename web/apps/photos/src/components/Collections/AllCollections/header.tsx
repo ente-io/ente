@@ -5,7 +5,7 @@ import {
 } from "@ente/shared/components/Container";
 import Close from "@mui/icons-material/Close";
 import { Box, DialogTitle, Stack, Typography } from "@mui/material";
-import CollectionListSortOptions from "components/Collections/CollectionListSortBy";
+import { CollectionListSortOptions } from "components/Collections/CollectionListSortOptions";
 import { t } from "i18next";
 
 export default function AllCollectionsHeader({

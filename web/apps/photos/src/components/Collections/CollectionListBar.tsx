@@ -5,6 +5,7 @@ import type {
     CollectionSummary,
     CollectionSummaryType,
 } from "@/new/photos/types/collection";
+import { CollectionListSortBy } from "@/new/photos/types/collection";
 import { ensure } from "@/utils/ensure";
 import { IconButtonWithBG, Overlay } from "@ente/shared/components/Container";
 import ArchiveIcon from "@mui/icons-material/Archive";
@@ -31,7 +32,6 @@ import React, {
 } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeList, ListChildComponentProps, areEqual } from "react-window";
-import { CollectionListSortBy } from "utils/collection";
 import type { GalleryBarMode } from ".";
 import { CollectionListSortOptions } from "./CollectionListSortOptions";
 

@@ -1,10 +1,10 @@
 import type { CollectionSummary } from "@/new/photos/types/collection";
+import { CollectionListSortBy } from "@/new/photos/types/collection";
 import { Divider, useMediaQuery } from "@mui/material";
 import {
     AllCollectionDialog,
     Transition,
 } from "components/Collections/AllCollections/dialog";
-import { CollectionListSortBy } from "utils/collection";
 import AllCollectionContent from "./content";
 import AllCollectionsHeader from "./header";
 

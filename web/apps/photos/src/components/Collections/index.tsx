@@ -1,6 +1,7 @@
 import type { Collection } from "@/media/collection";
 import type { Person } from "@/new/photos/services/ml/cgroups";
 import type { CollectionSummaries } from "@/new/photos/types/collection";
+import { CollectionListSortBy } from "@/new/photos/types/collection";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import { LS_KEYS } from "@ente/shared/storage/localStorage";
 import AllCollections from "components/Collections/AllCollections";
@@ -14,7 +15,6 @@ import { sortCollectionSummaries } from "services/collectionService";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
 import {
     ALL_SECTION,
-    CollectionListSortBy,
     hasNonSystemCollections,
     isSystemCollection,
     shouldBeShownOnCollectionBar,
