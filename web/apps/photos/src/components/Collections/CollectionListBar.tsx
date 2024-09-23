@@ -99,81 +99,70 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
     activePerson,
     // onSelectPerson,
 }) => {
-    // const windowSize = useWindowSize();
     const isMobile = useIsMobileWidth();
 
     const [canScrollLeft, setCanScrollLeft] = useState(false);
     const [canScrollRight, setCanScrollRight] = useState(false);
 
+    const listContainerRef = useRef<HTMLDivElement>(null);
+    const listRef = useRef(null);
+
     const updateScrollState = useCallback(() => {
-        console.log(
-            "updateScrollState called, ref is",
-            listContainerRef.current,
-        );
-        // if (!listContainerRef.current) return;
+        if (!listContainerRef.current) return;
 
         const { scrollLeft, scrollWidth, clientWidth } =
             listContainerRef.current;
-
-        // console.log("updateScrollState 2", {
-        //     scrollLeft,
-        //     scrollWidth,
-        //     clientWidth,
-        // });
 
         setCanScrollLeft(scrollLeft > 0);
         setCanScrollRight(scrollLeft + clientWidth < scrollWidth);
     }, []);
 
+    // Maintain a ref to the list container with a combo of a callback and a
+    // regular ref.
+    //
+    // Using just a regular ref doesn't work - it is initially null, so
+    // updateScrollState is a no-op. Subsequently, react-window sets it to the
+    // correct element, but updateScrollState doesn't run, unless we add
+    // listContainerRef.current as a dependency. But that is just hacky.
+    //
+    // So instead we use a "callback ref", where we both act on the latest
+    // value, and also save it in a regular ref so that we can subsequently use
+    // it if the scroll position changes because of other, non-DOM, reasons
+    // (e.g. if the list of collections changes).
+
     const listContainerCallbackRef = useCallback(
         (ref) => {
-            console.log("callback ref was called with node", ref);
             listContainerRef.current = ref;
             if (!ref) return;
 
-            // Add event listener.
+            // Listen for scrolls and resize.
             ref.addEventListener("scroll", updateScrollState);
-            const observer = new ResizeObserver((es) => {
-                console.log(es);
-                updateScrollState();
-            });
+            const observer = new ResizeObserver(updateScrollState);
             observer.observe(ref);
-            // listContainer.addEventListener("resize", updateScrollState);
 
-            // Call handler right away so that state gets updated with initial
-            // window size.
+            // Call handler right away so that state gets updated for the
+            // initial size.
             updateScrollState();
 
-            // Remove event listener on cleanup.
+            // Remove listeners on cleanup.
             return () => {
                 ref.removeEventListener("scroll", updateScrollState);
-                // listContainer.removeEventListener("resize", updateScrollState);
                 observer.unobserve(ref);
             };
         },
         [updateScrollState],
     );
 
-    const listContainerRef = useRef<HTMLDivElement>(null);
-    const listRef = useRef(null);
-
-    // useEffect(() => {
-    //     const listContainer = listContainerRef.current;
-    //     if (!listContainer) return;
-    // }, [updateScrollState]);
-
     useEffect(() => {
         updateScrollState();
     }, [updateScrollState, mode, collectionSummaries, people]);
 
-    const scrollComponent = (direction: number) => () => {
+    const scroll = (direction: number) => () =>
         listContainerRef.current.scrollBy(250 * direction, 0);
-    };
 
     useEffect(() => {
-        if (!listRef.current) {
-            return;
-        }
+        if (!listRef.current) return;
+
         // scroll the active collection into view
         const activeCollectionIndex = collectionSummaries.findIndex(
             (item) => item.id === activeCollectionID,
@@ -221,9 +210,7 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
             </SpaceBetweenFlex>
             <Box display="flex" alignItems="flex-start" gap={2}>
                 <ListWrapper>
-                    {canScrollLeft && (
-                        <ScrollButtonLeft onClick={scrollComponent(-1)} />
-                    )}
+                    {canScrollLeft && <ScrollButtonLeft onClick={scroll(-1)} />}
                     <AutoSizer disableHeight>
                         {({ width }) => (
                             <FixedSizeList
@@ -243,7 +230,7 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
                         )}
                     </AutoSizer>
                     {canScrollRight && (
-                        <ScrollButtonRight onClick={scrollComponent(+1)} />
+                        <ScrollButtonRight onClick={scroll(+1)} />
                     )}
                 </ListWrapper>
                 {!isMobile && (
