@@ -356,17 +356,27 @@ export const areLivePhotoAssets = async (
     // items that coincidentally have the same name (this is not uncommon since,
     // e.g. many cameras use a deterministic numbering scheme).
 
+    const fParsedMetadataJSON = matchTakeoutMetadata(
+        f.fileName,
+        f.collectionID,
+        parsedMetadataJSONMap,
+    );
+
+    const gParsedMetadataJSON = matchTakeoutMetadata(
+        g.fileName,
+        g.collectionID,
+        parsedMetadataJSONMap,
+    );
+
     const fDate = await uploadItemCreationDate(
         f.uploadItem,
         f.fileType,
-        f.collectionID,
-        parsedMetadataJSONMap,
+        fParsedMetadataJSON,
     );
     const gDate = await uploadItemCreationDate(
         g.uploadItem,
         g.fileType,
-        g.collectionID,
-        parsedMetadataJSONMap,
+        gParsedMetadataJSON,
     );
     if (!fDate || !gDate) return false;
     const secondDelta = Math.abs(fDate - gDate) / 1e6;
@@ -433,17 +443,8 @@ const uploadItemSize = async (uploadItem: UploadItem): Promise<number> => {
 const uploadItemCreationDate = async (
     uploadItem: UploadItem,
     fileType: FileType,
-    collectionID: number,
-    parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
+    parsedMetadataJSON: ParsedMetadataJSON | undefined,
 ) => {
-    const fileName = uploadItemFileName(uploadItem);
-
-    const parsedMetadataJSON = matchTakeoutMetadata(
-        fileName,
-        collectionID,
-        parsedMetadataJSONMap,
-    );
-
     if (parsedMetadataJSON?.creationTime)
         return parsedMetadataJSON?.creationTime;
 
