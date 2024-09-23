@@ -379,14 +379,21 @@ export const areLivePhotoAssets = async (
         gParsedMetadataJSON,
     );
 
-    const thresholdSeconds = 2 * 60; /* 2 mins */
+    // The exact threshold to use is hard to decide. The times should be usually
+    // exact to minute, but it is possible that one of the items is missing the
+    // timezone while the other has it. Their dates (as shown by the app) would
+    // both be correct, just the UTC epochs will vary.
+    //
+    // Using a threshold of 1 day makes the app more robust to such timezone
+    // discrepancies while only marginally increasing the risk of false
+    // positives. But this is a heuristic that might not always be correct.
+    const thresholdSeconds = 24 * 60 * 60; /* 1 day */
     const haveSameishDate =
         fDate && gDate && Math.abs(fDate - gDate) / 1e6 < thresholdSeconds;
 
     if (!haveSameishDate) {
-        // Special case 1: Google does not include the metadata JSON for the
-        // video part of the live photo in the Takeout, causing this date check
-        // to fail.
+        // Google does not include the metadata JSON for the video part of the
+        // live photo in the Takeout, causing this date check to fail.
         //
         // So only incorporate this check if either neither file has a metadata
         // JSON, or both have it.
