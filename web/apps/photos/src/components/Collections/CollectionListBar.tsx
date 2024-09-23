@@ -1,4 +1,5 @@
 import { useIsMobileWidth } from "@/base/hooks";
+import { BarItemTile, ItemCard } from "@/new/photos/components/ItemCards";
 import type { Person } from "@/new/photos/services/ml/cgroups";
 import type {
     CollectionSummary,
@@ -15,7 +16,6 @@ import PeopleIcon from "@mui/icons-material/People";
 import PushPin from "@mui/icons-material/PushPin";
 import { Box, IconButton, Stack, Typography, styled } from "@mui/material";
 import Tooltip from "@mui/material/Tooltip";
-import { CollectionTile } from "components/Collections/styledComponents";
 import {
     IMAGE_CONTAINER_MAX_WIDTH,
     MIN_COLUMNS,
@@ -33,7 +33,6 @@ import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeList, ListChildComponentProps, areEqual } from "react-window";
 import { COLLECTION_LIST_SORT_BY } from "utils/collection";
 import type { GalleryBarMode } from ".";
-import CollectionCard from "./CollectionCard";
 import CollectionListSortBy from "./CollectionListSortBy";
 
 export interface CollectionListBarProps {
@@ -453,22 +452,17 @@ const CollectionBarCard: React.FC<CollectionBarCardProps> = ({
     onCollectionClick,
 }: CollectionBarCardProps) => (
     <div>
-        <CollectionCard
-            collectionTile={CollectionBarTile}
+        <ItemCard
+            TileComponent={BarItemTile}
             coverFile={collectionSummary.coverFile}
             onClick={() => onCollectionClick(collectionSummary.id)}
         >
             <CardText text={collectionSummary.name} />
             <CollectionBarCardIcon type={collectionSummary.type} />
-        </CollectionCard>
+        </ItemCard>
         {activeCollectionID === collectionSummary.id && <ActiveIndicator />}
     </div>
 );
-
-const CollectionBarTile = styled(CollectionTile)`
-    width: 90px;
-    height: 64px;
-`;
 
 interface CardTextProps {
     text: string;
@@ -557,15 +551,15 @@ interface PersonCardProps {
 
 const PersonCard = ({ person, activePerson }: PersonCardProps) => (
     <Box>
-        <CollectionCard
-            collectionTile={CollectionBarTile}
+        <ItemCard
+            TileComponent={BarItemTile}
             coverFile={person.displayFaceFile}
             onClick={() => {
                 //onCollectionClick(collectionSummary.id);
             }}
         >
             <CardText text={person.name} />
-        </CollectionCard>
+        </ItemCard>
         {activePerson.id === person.id && <ActiveIndicator />}
     </Box>
 );

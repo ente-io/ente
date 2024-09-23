@@ -1,6 +1,6 @@
 import { assertionFailed } from "@/base/assert";
 import { useIsMobileWidth } from "@/base/hooks";
-import { ItemCard, ResultPreviewTile } from "@/new/photos/components/ItemCards";
+import { ItemCard, PreviewItemTile } from "@/new/photos/components/ItemCards";
 import {
     isMLSupported,
     mlStatusSnapshot,
@@ -489,7 +489,7 @@ const OptionContents = ({ data: option }: { data: SearchOption }) => (
                     <ItemCard
                         key={file.id}
                         coverFile={file}
-                        TileComponent={ResultPreviewTile}
+                        TileComponent={PreviewItemTile}
                     />
                 ))}
             </Stack>

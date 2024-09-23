@@ -8,10 +8,19 @@ import { styled } from "@mui/material";
 import React, { useEffect, useState } from "react";
 
 interface ItemCardProps {
-    /** The file whose thumbnail (if any) should be should be shown. */
-    coverFile: EnteFile;
     /** One of the *Tile components to use as the top level element. */
     TileComponent: React.FC<React.PropsWithChildren>;
+    /**
+     * The file (if any) whose thumbnail (if any) should be should be shown.
+     */
+    coverFile: EnteFile | undefined;
+    /**
+     * Optional boolean indicating if the user is currently scrolling.
+     *
+     * This is used as a hint by the cover file downloader to prioritize
+     * downloads.
+     */
+    isScrolling?: boolean;
     /** Optional click handler. */
     onClick?: () => void;
 }
@@ -22,22 +31,24 @@ interface ItemCardProps {
  * This is a simplified variant / almost-duplicate of {@link CollectionCard}.
  */
 export const ItemCard: React.FC<React.PropsWithChildren<ItemCardProps>> = ({
-    coverFile,
     TileComponent,
+    coverFile,
+    isScrolling,
     onClick,
     children,
 }) => {
     const [coverImageURL, setCoverImageURL] = useState("");
 
     useEffect(() => {
+        if (!coverFile) return;
         void downloadManager
-            .getThumbnailForPreview(coverFile)
+            .getThumbnailForPreview(coverFile, isScrolling)
             .then((url) => url && setCoverImageURL(url));
-    }, [coverFile]);
+    }, [coverFile, isScrolling]);
 
     return (
         <TileComponent {...{ onClick }}>
-            {coverFile.metadata.hasStaticThumbnail ? (
+            {coverFile?.metadata.hasStaticThumbnail ? (
                 <StaticThumbnail fileType={coverFile.metadata.fileType} />
             ) : coverImageURL ? (
                 <img src={coverImageURL} />
@@ -53,7 +64,7 @@ export const ItemCard: React.FC<React.PropsWithChildren<ItemCardProps>> = ({
  * A generic "base" tile, meant to be used as the {@link TileComponent} provided
  * to an {@link ItemCard}.
  *
- * Currently a verbatim copy of {@link CollectionTile}.
+ * Currently a verbatim copy of the deprecated {@link CollectionTile}.
  */
 export const ItemTile = styled("div")`
     display: flex;
@@ -71,9 +82,18 @@ export const ItemTile = styled("div")`
 `;
 
 /**
- * A TileComponent for use in search result dropdown's preview files.
+ * A 48x48 TileComponent used in search result dropdown's preview files and
+ * other places.
  */
-export const ResultPreviewTile = styled(ItemTile)`
+export const PreviewItemTile = styled(ItemTile)`
     width: 48px;
     height: 48px;
+`;
+
+/**
+ * A rectangular, TV-ish tile used in the gallery bar.
+ */
+export const BarItemTile = styled(ItemTile)`
+    width: 90px;
+    height: 64px;
 `;
