@@ -33,7 +33,7 @@ import {
 import { EncryptedMagicMetadata } from "@/new/photos/types/magicMetadata";
 import { detectFileTypeInfoFromChunk } from "@/new/photos/utils/detect-type";
 import { readStream } from "@/new/photos/utils/native-stream";
-import { ensure } from "@/utils/ensure";
+import { ensure, ensureInteger, ensureNumber } from "@/utils/ensure";
 import { CustomError, handleUploadError } from "@ente/shared/error";
 import { addToCollection } from "services/collectionService";
 import {
@@ -985,24 +985,33 @@ const extractImageOrVideoMetadata = async (
             tryParseEpochMicrosecondsFromFileName(fileName) ?? modificationTime;
     }
 
+    // To avoid introducing malformed data into the metadata fields (which the
+    // other clients might not expect and handle), we have extra "ensure" checks
+    // here that act as a safety valve if somehow the TypeScript type is lying.
+    //
+    // There is no deterministic sample we found that necessitated adding these
+    // extra checks, but we did get one user with a list in the width field of
+    // the metadata (it should've been an integer). The most probable theory is
+    // that somehow it made its way in through malformed Exif.
+
     const metadata: Metadata = {
         fileType,
         title: fileName,
-        creationTime,
-        modificationTime,
+        creationTime: ensureInteger(creationTime),
+        modificationTime: ensureInteger(modificationTime),
         hash,
     };
 
     const location = parsedMetadataJSON?.location ?? parsedMetadata?.location;
     if (location) {
-        metadata.latitude = location.latitude;
-        metadata.longitude = location.longitude;
+        metadata.latitude = ensureNumber(location.latitude);
+        metadata.longitude = ensureNumber(location.longitude);
     }
 
     if (parsedMetadata) {
         const { width: w, height: h } = parsedMetadata;
-        if (w) publicMagicMetadata.w = w;
-        if (h) publicMagicMetadata.h = h;
+        if (w) publicMagicMetadata.w = ensureInteger(w);
+        if (h) publicMagicMetadata.h = ensureInteger(h);
     }
 
     return { metadata, publicMagicMetadata };
