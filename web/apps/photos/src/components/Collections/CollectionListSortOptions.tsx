@@ -1,36 +1,17 @@
+import type { CollectionListSortOrder } from "@/new/photos/types/collection";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
 import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
 import TickIcon from "@mui/icons-material/Done";
 import SortIcon from "@mui/icons-material/Sort";
 import SvgIcon from "@mui/material/SvgIcon";
 import { t } from "i18next";
-import { CollectionListSortBy } from "@/new/photos/types/collection";
 
 interface CollectionListSortOptionsProps {
-    setSortBy: (sortBy: CollectionListSortBy) => void;
-    activeSortBy: CollectionListSortBy;
+    setSortBy: (order: CollectionListSortOrder) => void;
+    activeSortBy: CollectionListSortOrder;
     nestedInDialog?: boolean;
     disableBG?: boolean;
 }
-
-const SortByOptionCreator =
-    ({ setSortBy, activeSortBy }: CollectionListSortOptionsProps) =>
-    (props: { sortBy: CollectionListSortBy; children: any }) => {
-        const handleClick = () => {
-            setSortBy(props.sortBy);
-        };
-
-        return (
-            <OverflowMenuOption
-                onClick={handleClick}
-                endIcon={
-                    activeSortBy === props.sortBy ? <TickIcon /> : <SvgIcon />
-                }
-            >
-                {props.children}
-            </OverflowMenuOption>
-        );
-    };
 
 export const CollectionListSortOptions: React.FC<
     CollectionListSortOptionsProps
@@ -55,15 +36,32 @@ export const CollectionListSortOptions: React.FC<
                 },
             }}
         >
-            <SortByOption sortBy={CollectionListSortBy.Name}>
-                {t("sort_by_name")}
-            </SortByOption>
-            <SortByOption sortBy={CollectionListSortBy.CreationTimeAscending}>
+            <SortByOption sortBy="name">{t("sort_by_name")}</SortByOption>
+            <SortByOption sortBy="creation-time-asc">
                 {t("sort_by_creation_time_ascending")}
             </SortByOption>
-            <SortByOption sortBy={CollectionListSortBy.UpdationTimeDescending}>
+            <SortByOption sortBy="updation-time-desc">
                 {t("sort_by_updation_time_descending")}
             </SortByOption>
         </OverflowMenu>
     );
 };
+
+const SortByOptionCreator =
+    ({ setSortBy, activeSortBy }: CollectionListSortOptionsProps) =>
+    (props: { sortBy: CollectionListSortOrder; children: any }) => {
+        const handleClick = () => {
+            setSortBy(props.sortBy);
+        };
+
+        return (
+            <OverflowMenuOption
+                onClick={handleClick}
+                endIcon={
+                    activeSortBy === props.sortBy ? <TickIcon /> : <SvgIcon />
+                }
+            >
+                {props.children}
+            </OverflowMenuOption>
+        );
+    };

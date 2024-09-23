@@ -2,10 +2,10 @@ import { useIsMobileWidth } from "@/base/hooks";
 import { BarItemTile, ItemCard } from "@/new/photos/components/ItemCards";
 import type { Person } from "@/new/photos/services/ml/cgroups";
 import type {
+    CollectionListSortOrder,
     CollectionSummary,
     CollectionSummaryType,
 } from "@/new/photos/types/collection";
-import { CollectionListSortBy } from "@/new/photos/types/collection";
 import { ensure } from "@/utils/ensure";
 import { IconButtonWithBG, Overlay } from "@ente/shared/components/Container";
 import ArchiveIcon from "@mui/icons-material/Archive";
@@ -65,11 +65,11 @@ export interface CollectionListBarProps {
      * The sort order that should be used for showing the collections in the
      * bar.
      */
-    collectionListSortBy: CollectionListSortBy;
+    collectionListSortBy: CollectionListSortOrder;
     /**
      * Called when the user changes the sort order.
      */
-    setCollectionListSortBy: (v: CollectionListSortBy) => void;
+    setCollectionListSortBy: (order: CollectionListSortOrder) => void;
     /**
      * The list of people that should be shown in the bar.
      */

@@ -25,6 +25,7 @@ import type {
     CollectionSummary,
     CollectionSummaryType,
 } from "@/new/photos/types/collection";
+import { CollectionListSortOrder } from "@/new/photos/types/collection";
 import { EnteFile } from "@/new/photos/types/file";
 import {
     EncryptedMagicMetadata,
@@ -60,7 +61,6 @@ import {
     isSharedOnlyViaLink,
     isValidMoveTarget,
 } from "utils/collection";
-import { CollectionListSortBy } from "@/new/photos/types/collection";
 import {
     getUniqueFiles,
     groupFilesBasedOnCollectionID,
@@ -1070,20 +1070,20 @@ export const getFavCollection = async () => {
 
 export function sortCollectionSummaries(
     collectionSummaries: CollectionSummary[],
-    sortBy: CollectionListSortBy,
+    sortBy: CollectionListSortOrder,
 ) {
     return collectionSummaries
         .sort((a, b) => {
             switch (sortBy) {
-                case CollectionListSortBy.CreationTimeAscending:
+                case "name":
+                    return a.name.localeCompare(b.name);
+                case "creation-time-asc":
                     return (
                         -1 *
                         compareCollectionsLatestFile(b.latestFile, a.latestFile)
                     );
-                case CollectionListSortBy.UpdationTimeDescending:
+                case "updation-time-desc":
                     return b.updationTime - a.updationTime;
-                case CollectionListSortBy.Name:
-                    return a.name.localeCompare(b.name);
             }
         })
         .sort((a, b) => b.order ?? 0 - a.order ?? 0)

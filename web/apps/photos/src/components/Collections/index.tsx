@@ -1,7 +1,9 @@
 import type { Collection } from "@/media/collection";
 import type { Person } from "@/new/photos/services/ml/cgroups";
-import type { CollectionSummaries } from "@/new/photos/types/collection";
-import { CollectionListSortBy } from "@/new/photos/types/collection";
+import type {
+    CollectionListSortOrder,
+    CollectionSummaries,
+} from "@/new/photos/types/collection";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import { LS_KEYS } from "@ente/shared/storage/localStorage";
 import AllCollections from "components/Collections/AllCollections";
@@ -75,9 +77,9 @@ export const Collections: React.FC<CollectionsProps> = ({
     const [openAlbumCastDialog, setOpenAlbumCastDialog] = useState(false);
 
     const [collectionListSortBy, setCollectionListSortBy] =
-        useLocalState<CollectionListSortBy>(
+        useLocalState<CollectionListSortOrder>(
             LS_KEYS.COLLECTION_SORT_BY,
-            CollectionListSortBy.UpdationTimeDescending,
+            "updation-time-desc",
         );
 
     const toShowCollectionSummaries = useMemo(
