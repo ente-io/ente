@@ -230,7 +230,6 @@ class MagicCacheService {
         return;
       }
       _logger.info("updating magic cache ${_pendingUpdateReason.toList()}");
-      _pendingUpdateReason.clear();
       _isUpdateInProgress = true;
       final EnteWatch? w = kDebugMode ? EnteWatch("magicCacheWatch") : null;
       w?.start();
@@ -249,6 +248,7 @@ class MagicCacheService {
       w?.log("cacheWritten");
       await _resetLastMagicCacheUpdateTime();
       w?.logAndReset('done');
+      _pendingUpdateReason.clear();
       Bus.instance.fire(MagicCacheUpdatedEvent());
     } catch (e, s) {
       _logger.info("Error updating magic cache", e, s);
@@ -380,6 +380,7 @@ class MagicCacheService {
     List<Prompt> magicPromptsData,
   ) async {
     final results = <MagicCache>[];
+    final List<int> matchCount = [];
     for (Prompt prompt in magicPromptsData) {
       final fileUploadedIDs =
           await SemanticSearchService.instance.getMatchingFileIDs(
@@ -391,7 +392,9 @@ class MagicCacheService {
           MagicCache(prompt.title, fileUploadedIDs),
         );
       }
+      matchCount.add(fileUploadedIDs.length);
     }
+    _logger.info('magic result count $matchCount');
     return results;
   }
 }
