@@ -1,5 +1,4 @@
 import { useIsMobileWidth } from "@/base/hooks";
-import log from "@/base/log";
 import type { Person } from "@/new/photos/services/ml/cgroups";
 import type { CollectionSummary } from "@/new/photos/types/collection";
 import {
@@ -173,9 +172,6 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
             activePerson,
         ],
     );
-
-    // TODO-Cluster
-    log.debug(() => ["renderering collection-bar", itemData]);
 
     return (
         <BarWrapper>

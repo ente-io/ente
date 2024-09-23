@@ -4,7 +4,7 @@ import {
 } from "@/base/crypto/libsodium";
 import { type CryptoWorker } from "@/base/crypto/worker";
 import { ensureElectron } from "@/base/electron";
-import { basename } from "@/base/file";
+import { basename, nameAndExtension } from "@/base/file";
 import log from "@/base/log";
 import { CustomErrorMessage } from "@/base/types/ipc";
 import { hasFileHash } from "@/media/file";
@@ -290,6 +290,199 @@ export interface UploadURL {
     url: string;
     objectKey: string;
 }
+
+export interface PotentialLivePhotoAsset {
+    fileName: string;
+    fileType: FileType;
+    collectionID: number;
+    uploadItem: UploadItem;
+}
+
+/**
+ * Check if the two given assets should be clubbed together as a live photo.
+ */
+export const areLivePhotoAssets = async (
+    f: PotentialLivePhotoAsset,
+    g: PotentialLivePhotoAsset,
+    parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
+) => {
+    if (f.collectionID != g.collectionID) return false;
+
+    const [fName, fExt] = nameAndExtension(f.fileName);
+    const [gName, gExt] = nameAndExtension(g.fileName);
+
+    let fPrunedName: string;
+    let gPrunedName: string;
+    if (f.fileType == FileType.image && g.fileType == FileType.video) {
+        fPrunedName = removePotentialLivePhotoSuffix(
+            fName,
+            // A Google Live Photo image file can have video extension appended
+            // as suffix, so we pass that to removePotentialLivePhotoSuffix to
+            // remove it.
+            //
+            // Example: IMG_20210630_0001.mp4.jpg (Google Live Photo image file)
+            gExt ? `.${gExt}` : undefined,
+        );
+        gPrunedName = removePotentialLivePhotoSuffix(gName);
+    } else if (f.fileType == FileType.video && g.fileType == FileType.image) {
+        fPrunedName = removePotentialLivePhotoSuffix(fName);
+        gPrunedName = removePotentialLivePhotoSuffix(
+            gName,
+            fExt ? `.${fExt}` : undefined,
+        );
+    } else {
+        return false;
+    }
+
+    if (fPrunedName != gPrunedName) return false;
+
+    // Also check that the size of an individual Live Photo asset is less than
+    // an (arbitrary) limit. This should be true in practice as the videos for a
+    // live photo are a few seconds long. Further on, the zipping library that
+    // we use doesn't support stream as a input.
+
+    const maxAssetSize = 20 * 1024 * 1024; /* 20MB */
+    const fSize = await uploadItemSize(f.uploadItem);
+    const gSize = await uploadItemSize(g.uploadItem);
+    if (fSize > maxAssetSize || gSize > maxAssetSize) {
+        log.info(
+            `Not classifying files with too large sizes (${fSize} and ${gSize} bytes) as a live photo`,
+        );
+        return false;
+    }
+
+    // Finally, ensure that the creation times of the image and video are within
+    // some epsilon of each other. This is to avoid clubbing together unrelated
+    // items that coincidentally have the same name (this is not uncommon since,
+    // e.g. many cameras use a deterministic numbering scheme).
+
+    const fParsedMetadataJSON = matchTakeoutMetadata(
+        f.fileName,
+        f.collectionID,
+        parsedMetadataJSONMap,
+    );
+
+    const gParsedMetadataJSON = matchTakeoutMetadata(
+        g.fileName,
+        g.collectionID,
+        parsedMetadataJSONMap,
+    );
+
+    const fDate = await uploadItemCreationDate(
+        f.uploadItem,
+        f.fileType,
+        fParsedMetadataJSON,
+    );
+    const gDate = await uploadItemCreationDate(
+        g.uploadItem,
+        g.fileType,
+        gParsedMetadataJSON,
+    );
+
+    // The exact threshold to use is hard to decide. The times should be usually
+    // exact to minute, but it is possible that one of the items is missing the
+    // timezone while the other has it. Their dates (as shown by the app) would
+    // both be correct, just the UTC epochs will vary.
+    //
+    // Using a threshold of 1 day makes the app more robust to such timezone
+    // discrepancies while only marginally increasing the risk of false
+    // positives. But this is a heuristic that might not always be correct.
+    const thresholdSeconds = 24 * 60 * 60; /* 1 day */
+    const haveSameishDate =
+        fDate && gDate && Math.abs(fDate - gDate) / 1e6 < thresholdSeconds;
+
+    if (!haveSameishDate) {
+        // Google does not include the metadata JSON for the video part of the
+        // live photo in the Takeout, causing this date check to fail.
+        //
+        // So only incorporate this check if either neither file has a metadata
+        // JSON, or both have it.
+        if (
+            (!fParsedMetadataJSON && !gParsedMetadataJSON) ||
+            (fParsedMetadataJSON && gParsedMetadataJSON)
+        ) {
+            return false;
+        }
+    }
+
+    // All checks pass. Club these two as a live photo.
+    return true;
+};
+
+const removePotentialLivePhotoSuffix = (name: string, suffix?: string) => {
+    const suffix_3 = "_3";
+
+    // The icloud-photos-downloader library appends _HVEC to the end of the
+    // filename in case of live photos.
+    //
+    // https://github.com/icloud-photos-downloader/icloud_photos_downloader
+    const suffix_hvec = "_HVEC";
+
+    let foundSuffix: string | undefined;
+    if (name.endsWith(suffix_3)) {
+        foundSuffix = suffix_3;
+    } else if (
+        name.endsWith(suffix_hvec) ||
+        name.endsWith(suffix_hvec.toLowerCase())
+    ) {
+        foundSuffix = suffix_hvec;
+    } else if (suffix) {
+        if (name.endsWith(suffix) || name.endsWith(suffix.toLowerCase())) {
+            foundSuffix = suffix;
+        }
+    }
+
+    return foundSuffix ? name.slice(0, foundSuffix.length * -1) : name;
+};
+
+/**
+ * Return the size of the given {@link uploadItem}.
+ */
+const uploadItemSize = async (uploadItem: UploadItem): Promise<number> => {
+    if (uploadItem instanceof File) return uploadItem.size;
+    if (typeof uploadItem == "string")
+        return ensureElectron().pathOrZipItemSize(uploadItem);
+    if (Array.isArray(uploadItem))
+        return ensureElectron().pathOrZipItemSize(uploadItem);
+    return uploadItem.file.size;
+};
+
+/**
+ * Return the creation date for the given {@link uploadItem}.
+ *
+ * [Note: Duplicate retrieval of creation date for live photo clubbing]
+ *
+ * This function duplicates some logic of {@link extractImageOrVideoMetadata}.
+ * This duplication, while not good, is currently unavoidable with the way the
+ * code is structured since the live photo clubbing happens at an earlier time
+ * in the pipeline when we don't have the Exif data, but the Exif data is needed
+ * to determine the file's creation time (to ensure that we only club photos and
+ * videos with close by creation times, instead of just relying on file names).
+ *
+ * Note that unlike {@link extractImageOrVideoMetadata}, we don't try to
+ * fallback to the file's modification time. This is because for the purpose of
+ * live photo clubbing, we wish to use the creation date only in cases where we
+ * have it.
+ */
+const uploadItemCreationDate = async (
+    uploadItem: UploadItem,
+    fileType: FileType,
+    parsedMetadataJSON: ParsedMetadataJSON | undefined,
+) => {
+    if (parsedMetadataJSON?.creationTime)
+        return parsedMetadataJSON?.creationTime;
+
+    let parsedMetadata: ParsedMetadata | undefined;
+    if (fileType == FileType.image) {
+        parsedMetadata = await tryExtractImageMetadata(uploadItem, undefined);
+    } else if (fileType == FileType.video) {
+        parsedMetadata = await tryExtractVideoMetadata(uploadItem);
+    } else {
+        throw new Error(`Unexpected file type ${fileType} for ${uploadItem}`);
+    }
+
+    return parsedMetadata?.creationDate?.timestamp;
+};
 
 /**
  * A function that can be called to obtain a "progressTracker" that then is
@@ -764,7 +957,7 @@ const extractImageOrVideoMetadata = async (
 
     const hash = await computeHash(uploadItem, worker);
 
-    // Some of this logic is duplicated below in `uploadItemCreationDate`.
+    // Some of this logic is duplicated in `uploadItemCreationDate`.
     //
     // See: [Note: Duplicate retrieval of creation date for live photo clubbing]
 
@@ -849,66 +1042,6 @@ const tryExtractVideoMetadata = async (uploadItem: UploadItem) => {
         log.error(`Failed to extract video metadata for ${uploadItem}`, e);
         return undefined;
     }
-};
-
-/**
- * Return the creation date for the given {@link uploadItem}.
- *
- * [Note: Duplicate retrieval of creation date for live photo clubbing]
- *
- * This function duplicates some logic of {@link extractImageOrVideoMetadata}.
- * This duplication, while not good, is currently unavoidable with the way the
- * code is structured since the live photo clubbing happens at an earlier time
- * in the pipeline when we don't have the Exif data, but the Exif data is needed
- * to determine the file's creation time (to ensure that we only club photos and
- * videos with close by creation times, instead of just relying on file names).
- *
- * Note that unlike {@link extractImageOrVideoMetadata}, we don't try to
- * fallback to the file's modification time. This is because for the purpose of
- * live photo clubbing, we wish to use the creation date only in cases where we
- * have it.
- */
-export const uploadItemCreationDate = async (
-    uploadItem: UploadItem,
-    fileType: FileType,
-    collectionID: number,
-    parsedMetadataJSONMap: Map<string, ParsedMetadataJSON>,
-) => {
-    const fileName = uploadItemFileName(uploadItem);
-
-    const parsedMetadataJSON = matchTakeoutMetadata(
-        fileName,
-        collectionID,
-        parsedMetadataJSONMap,
-    );
-
-    if (parsedMetadataJSON?.creationTime)
-        return parsedMetadataJSON?.creationTime;
-
-    let parsedMetadata: ParsedMetadata | undefined;
-    if (fileType == FileType.image) {
-        parsedMetadata = await tryExtractImageMetadata(uploadItem, undefined);
-    } else if (fileType == FileType.video) {
-        parsedMetadata = await tryExtractVideoMetadata(uploadItem);
-    } else {
-        throw new Error(`Unexpected file type ${fileType} for ${uploadItem}`);
-    }
-
-    return parsedMetadata?.creationDate?.timestamp;
-};
-
-/**
- * Return the size of the given {@link uploadItem}.
- */
-export const uploadItemSize = async (
-    uploadItem: UploadItem,
-): Promise<number> => {
-    if (uploadItem instanceof File) return uploadItem.size;
-    if (typeof uploadItem == "string")
-        return ensureElectron().pathOrZipItemSize(uploadItem);
-    if (Array.isArray(uploadItem))
-        return ensureElectron().pathOrZipItemSize(uploadItem);
-    return uploadItem.file.size;
 };
 
 const computeHash = async (uploadItem: UploadItem, worker: CryptoWorker) => {
