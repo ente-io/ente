@@ -97,7 +97,7 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
     setCollectionListSortBy,
     people,
     activePerson,
-    // onSelectPerson,
+    onSelectPerson,
 }) => {
     const isMobile = useIsMobileWidth();
 
@@ -162,13 +162,21 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
 
     useEffect(() => {
         if (!listRef.current) return;
-
-        // scroll the active collection into view
-        const activeCollectionIndex = collectionSummaries.findIndex(
-            (item) => item.id === activeCollectionID,
-        );
-        listRef.current.scrollToItem(activeCollectionIndex, "smart");
-    }, [activeCollectionID]);
+        // Scroll the active item into view.
+        let i = -1;
+        switch (mode) {
+            case "albums":
+            case "hidden-albums":
+                i = collectionSummaries.findIndex(
+                    ({ id }) => id == activeCollectionID,
+                );
+                break;
+            case "people":
+                i = people.findIndex(({ id }) => id == activePerson?.id);
+                break;
+        }
+        if (i != -1) listRef.current.scrollToItem(i, "smart");
+    }, [mode, collectionSummaries, activeCollectionID, people, activePerson]);
 
     const itemData = useMemo<ItemData>(
         () =>
@@ -180,7 +188,7 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
                       onCollectionClick: (id?: number) =>
                           setActiveCollectionID(id ?? ALL_SECTION),
                   }
-                : { type: "people", people, activePerson },
+                : { type: "people", people, activePerson, onSelectPerson },
         [
             mode,
             collectionSummaries,
@@ -188,6 +196,7 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
             setActiveCollectionID,
             people,
             activePerson,
+            onSelectPerson,
         ],
     );
 
