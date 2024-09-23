@@ -6,7 +6,6 @@ import {
     Overlay,
     SpaceBetweenFlex,
 } from "@ente/shared/components/Container";
-import useWindowSize from "@ente/shared/hooks/useWindowSize";
 import ArchiveIcon from "@mui/icons-material/Archive";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import Favorite from "@mui/icons-material/FavoriteRounded";
@@ -100,7 +99,7 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
     activePerson,
     onSelectPerson,
 }) => {
-    const windowSize = useWindowSize();
+    // const windowSize = useWindowSize();
     const isMobile = useIsMobileWidth();
 
     const listContainerRef = useRef<HTMLDivElement>(null);
@@ -109,14 +108,21 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
     const [canScrollLeft, setCanScrollLeft] = useState(false);
     const [canScrollRight, setCanScrollRight] = useState(false);
 
-    const updateScrollState = useCallback(() => {
+    const updateScrollState = useCallback((e) => {
+        console.log("updateScrollState 1", e);
         if (!listContainerRef.current) return;
 
         const { scrollLeft, scrollWidth, clientWidth } =
             listContainerRef.current;
 
-        setCanScrollLeft(scrollLeft == 0);
-        setCanScrollRight(scrollLeft + clientWidth == scrollWidth);
+        console.log("updateScrollState 2", {
+            scrollLeft,
+            scrollWidth,
+            clientWidth,
+        });
+
+        setCanScrollLeft(scrollLeft > 0);
+        setCanScrollRight(scrollLeft + clientWidth < scrollWidth);
     }, []);
 
     useEffect(() => {
@@ -125,7 +131,12 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
 
         // Add event listener.
         listContainer.addEventListener("scroll", updateScrollState);
-        listContainer.addEventListener("resize", updateScrollState);
+        const observer = new ResizeObserver((es) => {
+            console.log(es);
+            updateScrollState();
+        });
+        observer.observe(listContainer);
+        // listContainer.addEventListener("resize", updateScrollState);
 
         // Call handler right away so that state gets updated with initial
         // window size.
@@ -134,13 +145,14 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
         // Remove event listener on cleanup.
         return () => {
             listContainer.removeEventListener("scroll", updateScrollState);
-            listContainer.removeEventListener("resize", updateScrollState);
+            // listContainer.removeEventListener("resize", updateScrollState);
+            observer.unobserve(listContainer)
         };
     }, [updateScrollState]);
 
     useEffect(() => {
         updateScrollState();
-    }, [windowSize, updateScrollState, mode, collectionSummaries, people]);
+    }, [updateScrollState, mode, collectionSummaries, people]);
 
     const scrollComponent = (direction: number) => () => {
         listContainerRef.current.scrollBy(250 * direction, 0);
