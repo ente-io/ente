@@ -61,10 +61,8 @@ export const ItemCard: React.FC<React.PropsWithChildren<ItemCardProps>> = ({
 };
 
 /**
- * A generic "base" tile, meant to be used as the {@link TileComponent} provided
- * to an {@link ItemCard}.
- *
- * Currently a verbatim copy of the deprecated {@link CollectionTile}.
+ * A generic "base" tile, meant to be used (after setting dimensions) as the
+ * {@link TileComponent} provided to an {@link ItemCard}.
  */
 export const ItemTile = styled("div")`
     display: flex;
@@ -96,4 +94,13 @@ export const PreviewItemTile = styled(ItemTile)`
 export const BarItemTile = styled(ItemTile)`
     width: 90px;
     height: 64px;
+`;
+
+/**
+ * A large 150x150 TileComponent used when showing the list of all collections
+ * in the all collections view.
+ */
+export const AllCollectionTile = styled(ItemTile)`
+    width: 150px;
+    height: 150px;
 `;

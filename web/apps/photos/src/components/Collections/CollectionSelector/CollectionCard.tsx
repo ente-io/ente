@@ -1,7 +1,8 @@
+import { AllCollectionTile } from "@/new/photos/components/ItemCards";
 import type { CollectionSummary } from "@/new/photos/types/collection";
 import { Typography } from "@mui/material";
 import CollectionCard from "../CollectionCard";
-import { AllCollectionTile, AllCollectionTileText } from "../styledComponents";
+import { AllCollectionTileText } from "../styledComponents";
 
 interface Iprops {
     collectionSummary: CollectionSummary;
