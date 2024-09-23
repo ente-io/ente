@@ -50,7 +50,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
       await autoLogoutAlert(context);
     });
     super.initState();
-    PreferenceService.instance.configureDefaults().ignore()
+    PreferenceService.instance.configureDefaults().ignore();
   }
 
   @override
