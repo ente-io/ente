@@ -102,6 +102,9 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
     // const windowSize = useWindowSize();
     const isMobile = useIsMobileWidth();
 
+    const listContainerCallbackRef = useCallback((node) => {
+        listContainerRef.current = node;
+    }, []);
     const listContainerRef = useRef<HTMLDivElement>(null);
     const listRef = useRef(null);
 
@@ -216,7 +219,7 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
                         {({ width }) => (
                             <FixedSizeList
                                 ref={listRef}
-                                outerRef={listContainerRef}
+                                outerRef={listContainerCallbackRef}
                                 itemData={itemData}
                                 layout="horizontal"
                                 width={width}
