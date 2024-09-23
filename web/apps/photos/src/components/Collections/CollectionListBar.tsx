@@ -96,8 +96,8 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
     const windowSize = useWindowSize();
     const isMobile = useIsMobileWidth();
 
-    const collectionListWrapperRef = useRef<HTMLDivElement>(null);
-    const collectionListRef = useRef(null);
+    const listWrapperRef = useRef<HTMLDivElement>(null);
+    const listRef = useRef(null);
 
     const [scrollObj, setScrollObj] = useState<{
         scrollLeft?: number;
@@ -106,40 +106,36 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
     }>({});
 
     const updateScrollObj = () => {
-        if (!collectionListWrapperRef.current) {
+        if (!listWrapperRef.current) {
             return;
         }
-        const { scrollLeft, scrollWidth, clientWidth } =
-            collectionListWrapperRef.current;
+        const { scrollLeft, scrollWidth, clientWidth } = listWrapperRef.current;
         setScrollObj({ scrollLeft, scrollWidth, clientWidth });
     };
 
     useEffect(() => {
-        if (!collectionListWrapperRef.current) {
+        if (!listWrapperRef.current) {
             return;
         }
         // Add event listener
-        collectionListWrapperRef.current?.addEventListener(
-            "scroll",
-            updateScrollObj,
-        );
+        listWrapperRef.current?.addEventListener("scroll", updateScrollObj);
 
         // Call handler right away so state gets updated with initial window size
         updateScrollObj();
         // Remove event listener on cleanup
         return () =>
-            collectionListWrapperRef.current?.removeEventListener(
+            listWrapperRef.current?.removeEventListener(
                 "resize",
                 updateScrollObj,
             );
-    }, [collectionListWrapperRef.current]);
+    }, [listWrapperRef.current]);
 
     useEffect(() => {
         updateScrollObj();
     }, [windowSize, collectionSummaries]);
 
     const scrollComponent = (direction: number) => () => {
-        collectionListWrapperRef.current.scrollBy(250 * direction, 0);
+        listWrapperRef.current.scrollBy(250 * direction, 0);
     };
 
     const onFarLeft = scrollObj.scrollLeft === 0;
@@ -147,14 +143,14 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
         scrollObj.scrollLeft + scrollObj.clientWidth === scrollObj.scrollWidth;
 
     useEffect(() => {
-        if (!collectionListRef.current) {
+        if (!listRef.current) {
             return;
         }
         // scroll the active collection into view
         const activeCollectionIndex = collectionSummaries.findIndex(
             (item) => item.id === activeCollectionID,
         );
-        collectionListRef.current.scrollToItem(activeCollectionIndex, "smart");
+        listRef.current.scrollToItem(activeCollectionIndex, "smart");
     }, [activeCollectionID]);
 
     const itemData = useMemo<ItemData>(
@@ -182,7 +178,7 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
     log.debug(() => ["renderering collection-bar", itemData]);
 
     return (
-        <CollectionListBarWrapper>
+        <BarWrapper>
             <SpaceBetweenFlex mb={1}>
                 <ModeIndicator {...{ mode, setMode }} />
                 {isMobile && (
@@ -199,22 +195,22 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
                 )}
             </SpaceBetweenFlex>
             <Box display="flex" alignItems="flex-start" gap={2}>
-                <CollectionListWrapper>
+                <ListWrapper>
                     {!onFarLeft && (
                         <ScrollButtonLeft onClick={scrollComponent(-1)} />
                     )}
                     <AutoSizer disableHeight>
                         {({ width }) => (
                             <FixedSizeList
-                                ref={collectionListRef}
-                                outerRef={collectionListWrapperRef}
+                                ref={listRef}
+                                outerRef={listWrapperRef}
                                 itemData={itemData}
                                 layout="horizontal"
                                 width={width}
                                 height={110}
                                 itemKey={getItemKey}
-                                itemCount={collectionSummaries.length}
-                                itemSize={CollectionListBarCardWidth}
+                                itemCount={getItemCount(itemData)}
+                                itemSize={94}
                                 useIsScrolling
                             >
                                 {CollectionCardContainer}
@@ -224,7 +220,7 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
                     {!onFarRight && (
                         <ScrollButtonRight onClick={scrollComponent(+1)} />
                     )}
-                </CollectionListWrapper>
+                </ListWrapper>
                 {!isMobile && (
                     <Box
                         display="flex"
@@ -242,11 +238,11 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
                     </Box>
                 )}
             </Box>
-        </CollectionListBarWrapper>
+        </BarWrapper>
     );
 };
 
-const CollectionListBarWrapper = styled(Box)`
+const BarWrapper = styled(Box)`
     padding-inline: 24px;
     @media (max-width: ${IMAGE_CONTAINER_MAX_WIDTH * MIN_COLUMNS}px) {
         padding-inline: 4px;
@@ -270,13 +266,6 @@ const ModeIndicator: React.FC<
     </Stack>
 );
 
-const CollectionListWrapper = styled(Box)`
-    position: relative;
-    overflow: hidden;
-    height: 86px;
-    width: 100%;
-`;
-
 // // TODO-Cluster
 // const PeopleHeaderButton = styled("button")(
 //     ({ theme }) => `
@@ -296,6 +285,13 @@ const CollectionListWrapper = styled(Box)`
 // `,
 // );
 
+const ListWrapper = styled(Box)`
+    position: relative;
+    overflow: hidden;
+    height: 86px;
+    width: 100%;
+`;
+
 type ItemData =
     | {
           type: "collections";
@@ -308,8 +304,6 @@ type ItemData =
           people: Person[];
           activePerson: Person;
       };
-
-const CollectionListBarCardWidth = 94;
 
 const CollectionCardContainer = memo(
     ({
@@ -350,6 +344,17 @@ const CollectionCardContainer = memo(
     areEqual,
 );
 
+const getItemCount = (data: ItemData) => {
+    switch (data.type) {
+        case "collections": {
+            return data.collectionSummaries.length;
+        }
+        case "people": {
+            return data.people.length;
+        }
+    }
+};
+
 const getItemKey = (index: number, data: ItemData) => {
     switch (data.type) {
         case "collections": {
@@ -357,7 +362,9 @@ const getItemKey = (index: number, data: ItemData) => {
             return `${data.type}-${collectionSummary.id}-${collectionSummary.coverFile?.id}`;
         }
         case "people": {
-            const person = data.people[index];
+            // TODO-Cluster
+            const person =
+                data.people[index] ?? data.activePerson ?? data.people[0];
             return `${data.type}-${person.id}-${person.displayFaceID}`;
         }
     }

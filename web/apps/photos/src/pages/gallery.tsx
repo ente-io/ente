@@ -1035,7 +1035,9 @@ export default function Gallery() {
     };
 
     const handleSelectPerson = (person: Person | undefined) => {
-        setActivePerson(person);
+        // TODO-Cluster: The person bar does not have an "all" mode, use the
+        // first person.
+        setActivePerson(person || people[0]);
         setBarMode("people");
     };
 
