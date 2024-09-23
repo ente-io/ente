@@ -39,7 +39,7 @@ import UploadService, {
     uploadItemFileName,
     uploadItemSize,
     uploader,
-} from "./uploadService";
+} from "./upload-service";
 
 export type FileID = number;
 
