@@ -89,8 +89,8 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
     onShowAllCollections,
     collectionListSortBy,
     setCollectionListSortBy,
-    // people,
-    // activePerson,
+    people,
+    activePerson,
     // onSelectPerson
 }) => {
     const windowSize = useWindowSize();
@@ -158,14 +158,24 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
     }, [activeCollectionID]);
 
     const itemData = useMemo(
-        () => ({
-            type: "collections",
+        () =>
+            mode == "albums" || mode == "hidden-albums"
+                ? {
+                      type: "collections",
+                      collectionSummaries,
+                      activeCollectionID,
+                      onCollectionClick: (id?: number) =>
+                          setActiveCollectionID(id ?? ALL_SECTION),
+                  }
+                : { type: "people", people, activePerson },
+        [
+            mode,
             collectionSummaries,
             activeCollectionID,
-            onCollectionClick: (id?: number) =>
-                setActiveCollectionID(id ?? ALL_SECTION),
-        }),
-        [mode, collectionSummaries, activeCollectionID, setActiveCollectionID],
+            setActiveCollectionID,
+            people,
+            activePerson,
+        ],
     );
 
     // TODO-Cluster
@@ -247,7 +257,7 @@ const CollectionListBarWrapper = styled(Box)`
 
 const ModeIndicator: React.FC<
     Pick<CollectionListBarProps, "mode" | "setMode">
-> = ({ mode, setMode }) => (
+> = ({ mode }) => (
     <Stack direction="row" gap={1}>
         <Typography color={mode == "people" ? "text.muted" : "text.base"}>
             {mode == "hidden-albums" ? t("hidden_albums") : t("albums")}
@@ -286,12 +296,18 @@ const CollectionListWrapper = styled(Box)`
 // `,
 // );
 
-interface ItemData {
-    type: "collections" | "people";
-    collectionSummaries: CollectionSummary[];
-    activeCollectionID?: number;
-    onCollectionClick: (id?: number) => void;
-}
+type ItemData =
+    | {
+          type: "collections";
+          collectionSummaries: CollectionSummary[];
+          activeCollectionID?: number;
+          onCollectionClick: (id?: number) => void;
+      }
+    | {
+          type: "people";
+          people: Person[];
+          activePerson: Person;
+      };
 
 const CollectionListBarCardWidth = 94;
 
@@ -302,28 +318,49 @@ const CollectionCardContainer = memo(
         style,
         isScrolling,
     }: ListChildComponentProps<ItemData>) => {
-        const { collectionSummaries, activeCollectionID, onCollectionClick } =
-            data;
+        let card: React.ReactNode;
+        switch (data.type) {
+            case "collections": {
+                const {
+                    collectionSummaries,
+                    activeCollectionID,
+                    onCollectionClick,
+                } = data;
+                const collectionSummary = collectionSummaries[index];
 
-        const collectionSummary = collectionSummaries[index];
+                card = (
+                    <CollectionListBarCard
+                        key={collectionSummary.id}
+                        activeCollectionID={activeCollectionID}
+                        isScrolling={isScrolling}
+                        collectionSummary={collectionSummary}
+                        onCollectionClick={onCollectionClick}
+                    />
+                );
 
-        return (
-            <div style={style}>
-                <CollectionListBarCard
-                    key={collectionSummary.id}
-                    activeCollectionID={activeCollectionID}
-                    isScrolling={isScrolling}
-                    collectionSummary={collectionSummary}
-                    onCollectionClick={onCollectionClick}
-                />
-            </div>
-        );
+                break;
+            }
+            case "people":
+                card = "Person";
+                break;
+        }
+
+        return <div style={style}>{card}</div>;
     },
     areEqual,
 );
 
 const getItemKey = (index: number, data: ItemData) => {
-    return `${data.collectionSummaries[index].id}-${data.collectionSummaries[index].coverFile?.id}`;
+    switch (data.type) {
+        case "collections": {
+            const collectionSummary = data.collectionSummaries[index];
+            return `${data.type}-${collectionSummary.id}-${collectionSummary.coverFile?.id}`;
+        }
+        case "people": {
+            const person = data.people[index];
+            return `${data.type}-${person.id}-${person.displayFaceID}`;
+        }
+    }
 };
 
 const ScrollButtonBase: React.FC<
