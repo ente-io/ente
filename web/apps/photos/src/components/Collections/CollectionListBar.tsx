@@ -82,6 +82,7 @@ export interface CollectionListBarProps {
 
 export const CollectionListBar: React.FC<CollectionListBarProps> = ({
     mode,
+    setMode,
     collectionSummaries,
     activeCollectionID,
     setActiveCollectionID,
@@ -158,12 +159,13 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
 
     const itemData = useMemo(
         () => ({
+            type: "collections",
             collectionSummaries,
             activeCollectionID,
             onCollectionClick: (id?: number) =>
                 setActiveCollectionID(id ?? ALL_SECTION),
         }),
-        [collectionSummaries, activeCollectionID, setActiveCollectionID],
+        [mode, collectionSummaries, activeCollectionID, setActiveCollectionID],
     );
 
     // TODO-Cluster
@@ -172,24 +174,7 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
     return (
         <CollectionListBarWrapper>
             <SpaceBetweenFlex mb={1}>
-                <Stack direction="row" gap={1}>
-                    <Typography
-                        color={mode == "people" ? "text.muted" : "text.base"}
-                    >
-                        {mode == "hidden-albums"
-                            ? t("hidden_albums")
-                            : t("albums")}
-                    </Typography>
-                    {process.env.NEXT_PUBLIC_ENTE_WIP_CL && (
-                        <Typography
-                            color={
-                                mode == "people" ? "text.base" : "text.muted"
-                            }
-                        >
-                            {t("people")}
-                        </Typography>
-                    )}
-                </Stack>
+                <ModeIndicator {...{ mode, setMode }} />
                 {isMobile && (
                     <Box display="flex" alignItems={"center"} gap={1}>
                         <CollectionListSortBy
@@ -260,6 +245,21 @@ const CollectionListBarWrapper = styled(Box)`
     border-block-end: 1px solid ${({ theme }) => theme.palette.divider};
 `;
 
+const ModeIndicator: React.FC<
+    Pick<CollectionListBarProps, "mode" | "setMode">
+> = ({ mode, setMode }) => (
+    <Stack direction="row" gap={1}>
+        <Typography color={mode == "people" ? "text.muted" : "text.base"}>
+            {mode == "hidden-albums" ? t("hidden_albums") : t("albums")}
+        </Typography>
+        {process.env.NEXT_PUBLIC_ENTE_WIP_CL && (
+            <Typography color={mode == "people" ? "text.base" : "text.muted"}>
+                {t("people")}
+            </Typography>
+        )}
+    </Stack>
+);
+
 const CollectionListWrapper = styled(Box)`
     position: relative;
     overflow: hidden;
@@ -287,7 +287,7 @@ const CollectionListWrapper = styled(Box)`
 // );
 
 interface ItemData {
-    mode: GalleryBarMode;
+    type: "collections" | "people";
     collectionSummaries: CollectionSummary[];
     activeCollectionID?: number;
     onCollectionClick: (id?: number) => void;
