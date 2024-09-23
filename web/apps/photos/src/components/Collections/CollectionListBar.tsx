@@ -1,11 +1,7 @@
 import { useIsMobileWidth } from "@/base/hooks";
 import type { Person } from "@/new/photos/services/ml/cgroups";
 import type { CollectionSummary } from "@/new/photos/types/collection";
-import {
-    IconButtonWithBG,
-    Overlay,
-    SpaceBetweenFlex,
-} from "@ente/shared/components/Container";
+import { IconButtonWithBG, Overlay } from "@ente/shared/components/Container";
 import ArchiveIcon from "@mui/icons-material/Archive";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import Favorite from "@mui/icons-material/FavoriteRounded";
@@ -200,24 +196,38 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
         ],
     );
 
+    const controls1 = isMobile && (
+        <Box display="flex" alignItems={"center"} gap={1}>
+            <CollectionListSortBy
+                setSortBy={setCollectionListSortBy}
+                activeSortBy={collectionListSortBy}
+                disableBG
+            />
+            <IconButton onClick={onShowAllCollections}>
+                <ExpandMore />
+            </IconButton>
+        </Box>
+    );
+
+    const controls2 = !isMobile && (
+        <Box display="flex" alignItems={"center"} gap={1} height={"64px"}>
+            <CollectionListSortBy
+                setSortBy={setCollectionListSortBy}
+                activeSortBy={collectionListSortBy}
+            />
+            <IconButtonWithBG onClick={onShowAllCollections}>
+                <ExpandMore />
+            </IconButtonWithBG>
+        </Box>
+    );
+
     return (
         <BarWrapper>
-            <SpaceBetweenFlex mb={1}>
+            <Row1>
                 <ModeIndicator {...{ mode, setMode }} />
-                {isMobile && (
-                    <Box display="flex" alignItems={"center"} gap={1}>
-                        <CollectionListSortBy
-                            setSortBy={setCollectionListSortBy}
-                            activeSortBy={collectionListSortBy}
-                            disableBG
-                        />
-                        <IconButton onClick={onShowAllCollections}>
-                            <ExpandMore />
-                        </IconButton>
-                    </Box>
-                )}
-            </SpaceBetweenFlex>
-            <Box display="flex" alignItems="flex-start" gap={2}>
+                {controls1}
+            </Row1>
+            <Row2>
                 <ListWrapper>
                     {canScrollLeft && <ScrollButtonLeft onClick={scroll(-1)} />}
                     <AutoSizer disableHeight>
@@ -225,10 +235,10 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
                             <FixedSizeList
                                 ref={listRef}
                                 outerRef={listContainerCallbackRef}
-                                itemData={itemData}
                                 layout="horizontal"
                                 width={width}
                                 height={110}
+                                itemData={itemData}
                                 itemKey={getItemKey}
                                 itemCount={getItemCount(itemData)}
                                 itemSize={94}
@@ -242,23 +252,8 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
                         <ScrollButtonRight onClick={scroll(+1)} />
                     )}
                 </ListWrapper>
-                {!isMobile && (
-                    <Box
-                        display="flex"
-                        alignItems={"center"}
-                        gap={1}
-                        height={"64px"}
-                    >
-                        <CollectionListSortBy
-                            setSortBy={setCollectionListSortBy}
-                            activeSortBy={collectionListSortBy}
-                        />
-                        <IconButtonWithBG onClick={onShowAllCollections}>
-                            <ExpandMore />
-                        </IconButtonWithBG>
-                    </Box>
-                )}
-            </Box>
+                {controls2}
+            </Row2>
         </BarWrapper>
     );
 };
@@ -272,10 +267,24 @@ const BarWrapper = styled(Box)`
     border-block-end: 1px solid ${({ theme }) => theme.palette.divider};
 `;
 
+export const Row1 = styled(Box)`
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-block-end: 8px;
+`;
+
+export const Row2 = styled(Box)`
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+`;
+
 const ModeIndicator: React.FC<
     Pick<CollectionListBarProps, "mode" | "setMode">
 > = ({ mode }) => (
-    <Stack direction="row" sx={{ gap: "12px" }}>
+    <Stack direction="row" sx={{ gap: "10px" }}>
         <Typography color={mode == "people" ? "text.muted" : "text.base"}>
             {mode == "hidden-albums" ? t("hidden_albums") : t("albums")}
         </Typography>
@@ -305,6 +314,51 @@ const ModeIndicator: React.FC<
 //     }
 // `,
 // );
+
+const ScrollButtonBase: React.FC<
+    React.ButtonHTMLAttributes<HTMLButtonElement>
+> = (props) => (
+    <ScrollButtonBase_ {...props}>
+        <NavigateNextIcon />
+    </ScrollButtonBase_>
+);
+
+const ScrollButtonBase_ = styled("button")`
+    position: absolute;
+    z-index: 2;
+    top: 7px;
+    height: 50px;
+    width: 50px;
+    border: none;
+    padding: 0;
+    margin: 0;
+
+    border-radius: 50%;
+    background-color: ${({ theme }) => theme.colors.backdrop.muted};
+    color: ${({ theme }) => theme.colors.stroke.base};
+
+    & > svg {
+        border-radius: 50%;
+        height: 30px;
+        width: 30px;
+    }
+`;
+
+const ScrollButtonLeft = styled(ScrollButtonBase)`
+    left: 0;
+    text-align: right;
+    transform: translate(-50%, 0%);
+
+    & > svg {
+        transform: rotate(180deg);
+    }
+`;
+
+const ScrollButtonRight = styled(ScrollButtonBase)`
+    right: 0;
+    text-align: left;
+    transform: translate(50%, 0%);
+`;
 
 const ListWrapper = styled(Box)`
     position: relative;
@@ -387,51 +441,6 @@ const ListItem = memo((props: ListChildComponentProps<ItemData>) => {
 
     return <div style={style}>{card}</div>;
 }, areEqual);
-
-const ScrollButtonBase: React.FC<
-    React.ButtonHTMLAttributes<HTMLButtonElement>
-> = (props) => (
-    <ScrollButtonBase_ {...props}>
-        <NavigateNextIcon />
-    </ScrollButtonBase_>
-);
-
-const ScrollButtonBase_ = styled("button")`
-    position: absolute;
-    z-index: 2;
-    top: 7px;
-    height: 50px;
-    width: 50px;
-    border: none;
-    padding: 0;
-    margin: 0;
-
-    border-radius: 50%;
-    background-color: ${({ theme }) => theme.colors.backdrop.muted};
-    color: ${({ theme }) => theme.colors.stroke.base};
-
-    & > svg {
-        border-radius: 50%;
-        height: 30px;
-        width: 30px;
-    }
-`;
-
-const ScrollButtonLeft = styled(ScrollButtonBase)`
-    left: 0;
-    text-align: right;
-    transform: translate(-50%, 0%);
-
-    & > svg {
-        transform: rotate(180deg);
-    }
-`;
-
-const ScrollButtonRight = styled(ScrollButtonBase)`
-    right: 0;
-    text-align: left;
-    transform: translate(50%, 0%);
-`;
 
 interface CollectionListBarCardProps {
     collectionSummary: CollectionSummary;
