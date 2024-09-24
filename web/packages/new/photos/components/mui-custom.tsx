@@ -13,6 +13,9 @@ export const FilledIconButton = styled(IconButton)(({ theme }) => ({
  * There are cases where we semantically (and functionally) want a button, but
  * don't want the browser's default styling. This component is meant to act as a
  * base for such cases.
+ *
+ * Contrary to its name, it does add a bit of styling, to make these buttons fit
+ * in with the rest of our theme.
  */
 export const UnstyledButton = styled("button")`
     /* Reset some button defaults that are affecting us */
@@ -25,7 +28,6 @@ export const UnstyledButton = styled("button")`
        inherit that customization also. */
     letter-spacing: inherit;
 
-    /* Button should do this for us (I think), but it isn't working for some
-       reason I don't yet know (maybe something we customized in the theme?) */
+    /* The button default is to show an flipped arrow. Show a hand instead. */
     cursor: pointer;
 `;
