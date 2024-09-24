@@ -1,12 +1,19 @@
 import { useIsMobileWidth } from "@/base/hooks";
+import { CollectionsSortOptions } from "@/new/photos/components/CollectionsSortOptions";
 import { BarItemTile, ItemCard } from "@/new/photos/components/ItemCards";
+import { FilledIconButton } from "@/new/photos/components/mui-custom";
+import {
+    IMAGE_CONTAINER_MAX_WIDTH,
+    MIN_COLUMNS,
+} from "@/new/photos/components/PhotoList";
 import type { Person } from "@/new/photos/services/ml/cgroups";
 import type {
     CollectionSummary,
     CollectionSummaryType,
+    CollectionsSortBy,
 } from "@/new/photos/types/collection";
 import { ensure } from "@/utils/ensure";
-import { IconButtonWithBG, Overlay } from "@ente/shared/components/Container";
+import { Overlay } from "@ente/shared/components/Container";
 import ArchiveIcon from "@mui/icons-material/Archive";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import Favorite from "@mui/icons-material/FavoriteRounded";
@@ -16,10 +23,6 @@ import PeopleIcon from "@mui/icons-material/People";
 import PushPin from "@mui/icons-material/PushPin";
 import { Box, IconButton, Stack, Typography, styled } from "@mui/material";
 import Tooltip from "@mui/material/Tooltip";
-import {
-    IMAGE_CONTAINER_MAX_WIDTH,
-    MIN_COLUMNS,
-} from "components/PhotoList/constants";
 import { t } from "i18next";
 import React, {
     memo,
@@ -30,12 +33,18 @@ import React, {
     useState,
 } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
-import { FixedSizeList, ListChildComponentProps, areEqual } from "react-window";
-import { COLLECTION_LIST_SORT_BY } from "utils/collection";
-import type { GalleryBarMode } from ".";
-import CollectionListSortBy from "./CollectionListSortBy";
+import {
+    FixedSizeList,
+    type ListChildComponentProps,
+    areEqual,
+} from "react-window";
 
-export interface CollectionListBarProps {
+/**
+ * Specifies what the bar is displaying currently.
+ */
+export type GalleryBarMode = "albums" | "hidden-albums" | "people";
+
+export interface GalleryBarImplProps {
     /**
      * What are we displaying currently.
      */
@@ -51,7 +60,7 @@ export interface CollectionListBarProps {
     /**
      * The ID of the currently active collection (if any)
      */
-    activeCollectionID?: number;
+    activeCollectionID: number;
     /**
      * Called when the user changes the active collection.
      */
@@ -62,20 +71,21 @@ export interface CollectionListBarProps {
      */
     onShowAllCollections: () => void;
     /**
-     * The sort order that should be used for showing the collections in the
-     * bar.
+     * The scheme that should be used for sorting the collections in the bar.
      */
-    collectionListSortBy: COLLECTION_LIST_SORT_BY;
+    collectionsSortBy: CollectionsSortBy;
     /**
-     * Called when the user changes the sort order.
+     * Called when the user changes the sorting scheme.
      */
-    setCollectionListSortBy: (v: COLLECTION_LIST_SORT_BY) => void;
+    onChangeCollectionsSortBy: (by: CollectionsSortBy) => void;
     /**
      * The list of people that should be shown in the bar.
      */
     people: Person[];
     /**
      * The currently selected person (if any).
+     *
+     * Required if mode is "people".
      */
     activePerson: Person | undefined;
     /**
@@ -84,16 +94,15 @@ export interface CollectionListBarProps {
     onSelectPerson: (person: Person) => void;
 }
 
-// TODO-Cluster Rename me to GalleryBar
-export const CollectionListBar: React.FC<CollectionListBarProps> = ({
+export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     mode,
     setMode,
     collectionSummaries,
     activeCollectionID,
     setActiveCollectionID,
     onShowAllCollections,
-    collectionListSortBy,
-    setCollectionListSortBy,
+    collectionsSortBy,
+    onChangeCollectionsSortBy,
     people,
     activePerson,
     onSelectPerson,
@@ -103,8 +112,8 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
     const [canScrollLeft, setCanScrollLeft] = useState(false);
     const [canScrollRight, setCanScrollRight] = useState(false);
 
-    const listContainerRef = useRef<HTMLDivElement>(null);
-    const listRef = useRef(null);
+    const listContainerRef = useRef<HTMLDivElement | null>(null);
+    const listRef = useRef<FixedSizeList | null>(null);
 
     const updateScrollState = useCallback(() => {
         if (!listContainerRef.current) return;
@@ -129,7 +138,9 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
     // it if the scroll position changes because of other, non-DOM, reasons
     // (e.g. if the list of collections changes).
 
-    const listContainerCallbackRef = useCallback(
+    const listContainerCallbackRef = useCallback<
+        (ref: HTMLDivElement | null) => void
+    >(
         (ref) => {
             listContainerRef.current = ref;
             if (!ref) return;
@@ -157,7 +168,7 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
     }, [updateScrollState, mode, collectionSummaries, people]);
 
     const scroll = (direction: number) => () =>
-        listContainerRef.current.scrollBy(250 * direction, 0);
+        listContainerRef.current?.scrollBy(250 * direction, 0);
 
     useEffect(() => {
         if (!listRef.current) return;
@@ -186,7 +197,12 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
                       activeCollectionID,
                       onCollectionClick: setActiveCollectionID,
                   }
-                : { type: "people", people, activePerson, onSelectPerson },
+                : {
+                      type: "people",
+                      people,
+                      activePerson: ensure(activePerson),
+                      onSelectPerson,
+                  },
         [
             mode,
             collectionSummaries,
@@ -200,10 +216,10 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
 
     const controls1 = isMobile && (
         <Box display="flex" alignItems={"center"} gap={1}>
-            <CollectionListSortBy
-                setSortBy={setCollectionListSortBy}
-                activeSortBy={collectionListSortBy}
-                disableBG
+            <CollectionsSortOptions
+                activeSortBy={collectionsSortBy}
+                onChangeSortBy={onChangeCollectionsSortBy}
+                disableTriggerButtonBackground
             />
             <IconButton onClick={onShowAllCollections}>
                 <ExpandMore />
@@ -213,13 +229,13 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
 
     const controls2 = !isMobile && (
         <Box display="flex" alignItems={"center"} gap={1} height={"64px"}>
-            <CollectionListSortBy
-                setSortBy={setCollectionListSortBy}
-                activeSortBy={collectionListSortBy}
+            <CollectionsSortOptions
+                activeSortBy={collectionsSortBy}
+                onChangeSortBy={onChangeCollectionsSortBy}
             />
-            <IconButtonWithBG onClick={onShowAllCollections}>
+            <FilledIconButton onClick={onShowAllCollections}>
                 <ExpandMore />
-            </IconButtonWithBG>
+            </FilledIconButton>
         </Box>
     );
 
@@ -283,7 +299,7 @@ export const Row2 = styled(Box)`
 `;
 
 const ModeIndicator: React.FC<
-    Pick<CollectionListBarProps, "mode" | "setMode">
+    Pick<GalleryBarImplProps, "mode" | "setMode">
 > = ({ mode }) => (
     <Stack direction="row" sx={{ gap: "10px" }}>
         <Typography color={mode == "people" ? "text.muted" : "text.base"}>
@@ -372,7 +388,7 @@ type ItemData =
     | {
           type: "collections";
           collectionSummaries: CollectionSummary[];
-          activeCollectionID?: number;
+          activeCollectionID: number;
           onCollectionClick: (id: number) => void;
       }
     | {
@@ -558,7 +574,7 @@ const PersonCard = ({ person, activePerson }: PersonCardProps) => (
                 //onCollectionClick(collectionSummary.id);
             }}
         >
-            <CardText text={person.name} />
+            {person.name && <CardText text={person.name} />}
         </ItemCard>
         {activePerson.id === person.id && <ActiveIndicator />}
     </Box>

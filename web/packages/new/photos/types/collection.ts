@@ -26,7 +26,7 @@ export interface CollectionSummary {
     type: CollectionSummaryType;
     id: number;
     name: string;
-    coverFile: EnteFile;
+    coverFile: EnteFile | undefined;
     latestFile: EnteFile;
     fileCount: number;
     updationTime: number;
@@ -34,3 +34,21 @@ export interface CollectionSummary {
 }
 
 export type CollectionSummaries = Map<number, CollectionSummary>;
+
+/**
+ * The sort schemes that can be used when we're showing list of collections
+ * (e.g. in the collection bar).
+ *
+ * This is the list of all possible values, see {@link CollectionsSortBy} for
+ * the type.
+ */
+export const collectionsSortBy = [
+    "name",
+    "creation-time-asc",
+    "updation-time-desc",
+] as const;
+
+/**
+ * Type of individual {@link collectionsSortBy} values.
+ */
+export type CollectionsSortBy = (typeof collectionsSortBy)[number];
