@@ -18,7 +18,6 @@ import {
     useMediaQuery,
 } from "@mui/material";
 import { AllCollectionDialog } from "components/Collections/AllCollections/dialog";
-import CollectionCard from "components/Collections/CollectionCard";
 import { t } from "i18next";
 import { useEffect, useState } from "react";
 import { createUnCategorizedCollection } from "services/collectionService";
@@ -195,14 +194,10 @@ interface AddCollectionButtonProps {
 const AddCollectionButton: React.FC<AddCollectionButtonProps> = ({
     showNextModal,
 }) => (
-    <CollectionCard
-        collectionTile={AllCollectionTile}
-        onClick={() => showNextModal()}
-        coverFile={null}
-    >
+    <ItemCard TileComponent={AllCollectionTile} onClick={showNextModal}>
         <LargeTileTextOverlay>{t("create_albums")}</LargeTileTextOverlay>
         <ImageContainer>+</ImageContainer>
-    </CollectionCard>
+    </ItemCard>
 );
 
 const ImageContainer = styled(ItemTileOverlay)`

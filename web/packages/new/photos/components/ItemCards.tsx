@@ -13,7 +13,7 @@ interface ItemCardProps {
     /**
      * The file (if any) whose thumbnail (if any) should be should be shown.
      */
-    coverFile: EnteFile | undefined;
+    coverFile?: EnteFile | undefined;
     /**
      * Optional boolean indicating if the user is currently scrolling.
      *
