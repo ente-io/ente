@@ -7,7 +7,7 @@ import {
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
 } from "@/new/photos/components/Gallery/ListHeader";
-import { SpaceBetweenBox } from "@/new/photos/components/mui-custom";
+import { SpaceBetweenFlex } from "@/new/photos/components/mui-custom";
 import downloadManager from "@/new/photos/services/download";
 import { EnteFile } from "@/new/photos/types/file";
 import { mergeMetadata } from "@/new/photos/utils/file";
@@ -307,7 +307,7 @@ export default function PublicCollectionGallery() {
             setPhotoListHeader({
                 item: (
                     <GalleryItemsHeaderAdapter>
-                        <SpaceBetweenBox>
+                        <SpaceBetweenFlex>
                             <GalleryItemsSummary
                                 name={publicCollection.name}
                                 fileCount={publicFiles.length}
@@ -325,7 +325,7 @@ export default function PublicCollectionGallery() {
                                     </OverflowMenuOption>
                                 </OverflowMenu>
                             )}
-                        </SpaceBetweenBox>
+                        </SpaceBetweenFlex>
                     </GalleryItemsHeaderAdapter>
                 ),
                 itemType: ITEM_TYPE.HEADER,

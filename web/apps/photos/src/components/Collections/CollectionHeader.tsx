@@ -6,7 +6,7 @@ import {
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
 } from "@/new/photos/components/Gallery/ListHeader";
-import { SpaceBetweenBox } from "@/new/photos/components/mui-custom";
+import { SpaceBetweenFlex } from "@/new/photos/components/mui-custom";
 import type {
     CollectionSummary,
     CollectionSummaryType,
@@ -101,7 +101,7 @@ export const CollectionHeader: React.FC<CollectionHeaderProps> = ({
 
     return (
         <GalleryItemsHeaderAdapter>
-            <SpaceBetweenBox>
+            <SpaceBetweenFlex>
                 <GalleryItemsSummary
                     name={name}
                     fileCount={fileCount}
@@ -110,7 +110,7 @@ export const CollectionHeader: React.FC<CollectionHeaderProps> = ({
                 {shouldShowOptions(type) && (
                     <CollectionOptions collectionSummaryType={type} {...rest} />
                 )}
-            </SpaceBetweenBox>
+            </SpaceBetweenFlex>
         </GalleryItemsHeaderAdapter>
     );
 };

@@ -40,7 +40,7 @@ export const UnstyledButton = styled("button")`
  * and its uses moved to this one when possible (so that we can then see where
  * the width: 100% is essential).
  */
-export const SpaceBetweenBox = styled(Box)`
+export const SpaceBetweenFlex = styled(Box)`
     display: flex;
     justify-content: space-between;
     align-items: center;
