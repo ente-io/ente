@@ -15,7 +15,6 @@ import {
     removeData,
 } from "@ente/shared/storage/localStorage";
 import AllCollections from "components/Collections/AllCollections";
-import { CollectionListHeader } from "components/Collections/CollectionListHeader";
 import { SetCollectionNamerAttributes } from "components/Collections/CollectionNamer";
 import CollectionShare from "components/Collections/CollectionShare";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
@@ -34,6 +33,7 @@ import {
     isFilesDownloadCompleted,
 } from "../FilesDownloadProgress";
 import { AlbumCastDialog } from "./AlbumCastDialog";
+import { CollectionHeader } from "./CollectionHeader";
 
 type CollectionsProps = Omit<
     GalleryBarImplProps,
@@ -126,7 +126,7 @@ export const Collections: React.FC<CollectionsProps> = ({
 
         setPhotoListHeader({
             item: (
-                <CollectionListHeader
+                <CollectionHeader
                     {...{
                         activeCollection,
                         setActiveCollectionID,

@@ -57,7 +57,7 @@ import {
 } from "utils/collection";
 import { isArchivedCollection, isPinnedCollection } from "utils/magicMetadata";
 
-interface CollectionListHeaderProps {
+interface CollectionHeaderProps {
     collectionSummary: CollectionSummary;
     activeCollection: Collection;
     setActiveCollectionID: (collectionID: number) => void;
@@ -68,7 +68,11 @@ interface CollectionListHeaderProps {
     setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
 }
 
-export const CollectionListHeader: React.FC<CollectionListHeaderProps> = ({
+/**
+ * A header shown at the top of the list of photos in the gallery, when the
+ * gallery is showing a collection.
+ */
+export const CollectionHeader: React.FC<CollectionHeaderProps> = ({
     collectionSummary,
     ...rest
 }) => {
@@ -117,7 +121,7 @@ const shouldShowOptions = (type: CollectionSummaryType) =>
     type != "all" && type != "archive";
 
 type CollectionOptionsProps = Omit<
-    CollectionListHeaderProps,
+    CollectionHeaderProps,
     "collectionSummary"
 > & {
     collectionSummaryType: CollectionSummaryType;
