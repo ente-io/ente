@@ -151,9 +151,10 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
     const components = useMemo(() => ({ Control, Input, Option }), []);
 
     const handleChange = (value: SearchOption | null) => {
-        // Collection suggestions are handled differently - our caller will
-        // switch to the collection view, dismissing search.
-        if (value?.suggestion.type == "collection") {
+        const type = value?.suggestion.type;
+        // Collection and people suggestions are handled differently - our
+        // caller will switch to the corresponding view, dismissing search.
+        if (type == "collection" || type == "person") {
             setValue(null);
             setInputValue("");
         } else {

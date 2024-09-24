@@ -962,15 +962,22 @@ export default function Gallery() {
     const handleSelectSearchOption = (
         searchOption: SearchOption | undefined,
     ) => {
-        if (searchOption?.suggestion.type == "collection") {
+        const type = searchOption?.suggestion.type;
+        if (type == "collection" || type == "person") {
             setIsInSearchMode(false);
             setSelectedSearchOption(undefined);
-            setActiveCollectionID(searchOption.suggestion.collectionID);
+            if (type == "collection") {
+                setBarMode("albums");
+                setActiveCollectionID(searchOption.suggestion.collectionID);
+            } else {
+                setBarMode("people");
+                setActivePerson(searchOption.suggestion.person);
+            }
         } else {
             setIsInSearchMode(!!searchOption);
             setSelectedSearchOption(searchOption);
         }
-        setIsClipSearchResult(searchOption?.suggestion.type == "clip");
+        setIsClipSearchResult(type == "clip");
     };
 
     const openUploader = (intent?: UploadTypeSelectorIntent) => {
