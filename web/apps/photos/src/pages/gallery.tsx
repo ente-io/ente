@@ -827,10 +827,6 @@ export default function Gallery() {
         setHiddenCollectionSummaries(hiddenCollectionSummaries);
     };
 
-    if (!collectionSummaries || !filteredData) {
-        return <div />;
-    }
-
     const setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator =
         (folderName, collectionID, isHidden) => {
             const id = filesDownloadProgressAttributesList?.length ?? 0;
@@ -1039,6 +1035,10 @@ export default function Gallery() {
 
     if (activePerson) {
         log.debug(() => ["person", activePerson]);
+    }
+
+    if (!collectionSummaries || !filteredData) {
+        return <div></div>;
     }
 
     return (
