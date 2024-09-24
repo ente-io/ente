@@ -9,13 +9,22 @@ import { t } from "i18next";
 import React from "react";
 
 interface GalleryItemsSummaryProps {
-    /** The name / title for the items that are being shown. */
+    /**
+     * The name / title for the items that are being shown.
+     */
     name: string;
-    /** Extra props to pass to the Typography component that shows the name. */
+    /**
+     * Optional extra props to pass to the {@link Typography} component that
+     * shows {@link name}
+     */
     nameProps?: TypographyProps;
-    /** The number of items being shown. */
+    /**
+     * The number of items being shown.
+     */
     fileCount: number;
-    /** An element (usually an icon) placed after the file count. */
+    /**
+     * An optional element, usually an icon, placed after the file count.
+     */
     endIcon?: React.ReactNode;
 }
 
@@ -28,35 +37,31 @@ export const GalleryItemsSummary: React.FC<GalleryItemsSummaryProps> = ({
     nameProps,
     fileCount,
     endIcon,
-}) => {
-    return (
-        <div>
-            <Typography variant="h3" {...(nameProps ?? {})}>
-                {name}
-            </Typography>
+}) => (
+    <div>
+        <Typography variant="h3" {...(nameProps ?? {})}>
+            {name}
+        </Typography>
 
-            <Stack
-                direction="row"
-                gap={1.5}
-                sx={{
-                    // Keep height the same even when there is no endIcon
-                    minHeight: "24px",
-                }}
-            >
-                <Typography variant="small" color="text.muted">
-                    {t("photos_count", { count: fileCount })}
-                </Typography>
-                {endIcon && (
-                    <Box
-                        sx={{ svg: { fontSize: "17px", color: "text.muted" } }}
-                    >
-                        {endIcon}
-                    </Box>
-                )}
-            </Stack>
-        </div>
-    );
-};
+        <Stack
+            direction="row"
+            gap={1.5}
+            sx={{
+                // Keep height the same even when there is no endIcon
+                minHeight: "24px",
+            }}
+        >
+            <Typography variant="small" color="text.muted">
+                {t("photos_count", { count: fileCount })}
+            </Typography>
+            {endIcon && (
+                <Box sx={{ svg: { fontSize: "17px", color: "text.muted" } }}>
+                    {endIcon}
+                </Box>
+            )}
+        </Stack>
+    </div>
+);
 
 /**
  * A component suitable for wrapping a component which is acting like a gallery
