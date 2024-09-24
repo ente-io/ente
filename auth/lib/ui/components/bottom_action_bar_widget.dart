@@ -1,10 +1,7 @@
-import 'dart:math';
-
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/components/actions_bar_widget.dart';
 import 'package:ente_auth/ui/components/code_selection_actions_widget.dart';
-import 'package:ente_auth/ui/components/components_constants.dart';
 import "package:ente_auth/ui/components/divider_widget.dart";
 import 'package:flutter/material.dart';
 
@@ -37,14 +34,7 @@ class BottomActionBarWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
-    final widthOfScreen = MediaQuery.of(context).size.width;
     final colorScheme = getEnteColorScheme(context);
-    final double leftRightPadding = min(
-      widthOfScreen > restrictedMaxWidth
-          ? (widthOfScreen - restrictedMaxWidth) / 2
-          : 0,
-      20,
-    );
     return Container(
       decoration: BoxDecoration(
         color: backgroundColor ?? colorScheme.backgroundElevated2,
@@ -56,8 +46,6 @@ class BottomActionBarWidget extends StatelessWidget {
       padding: EdgeInsets.only(
         top: 4,
         bottom: bottomPadding,
-        right: leftRightPadding,
-        left: leftRightPadding,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
