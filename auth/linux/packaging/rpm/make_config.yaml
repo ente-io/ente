@@ -6,6 +6,7 @@ packager: Ente.io Developers
 packagerEmail: auth@ente.io
 license: GPLv3
 url: https://github.com/ente-io/ente
+package_name: enteauth
 
 display_name: Auth
 
