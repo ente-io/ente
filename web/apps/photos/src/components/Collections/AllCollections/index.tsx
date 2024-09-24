@@ -1,3 +1,4 @@
+import { CollectionsSortOptions } from "@/new/photos/components/CollectionsSortOptions";
 import type { CollectionSummary } from "@/new/photos/types/collection";
 import { CollectionsSortBy } from "@/new/photos/types/collection";
 import {
@@ -19,7 +20,6 @@ import {
     Transition,
 } from "components/Collections/AllCollections/dialog";
 import { t } from "i18next";
-import { CollectionsSortOptions } from "../CollectionsSortOptions";
 import AllCollectionContent from "./content";
 
 interface AllCollectionsProps {

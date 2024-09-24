@@ -5,6 +5,7 @@ import TickIcon from "@mui/icons-material/Done";
 import SortIcon from "@mui/icons-material/Sort";
 import SvgIcon from "@mui/material/SvgIcon";
 import { t } from "i18next";
+import React from "react";
 
 interface CollectionsSortOptionsProps {
     /**
@@ -43,13 +44,17 @@ export const CollectionsSortOptions: React.FC<CollectionsSortOptionsProps> = ({
         menuPaperProps={{
             sx: {
                 backgroundColor: (theme) =>
-                    nestedInDialog && theme.colors.background.elevated2,
+                    nestedInDialog
+                        ? theme.colors.background.elevated2
+                        : undefined,
             },
         }}
         triggerButtonProps={{
             sx: {
-                background: (theme) =>
-                    !disableTriggerButtonBackground && theme.colors.fill.faint,
+                backgroundColor: (theme) =>
+                    disableTriggerButtonBackground
+                        ? undefined
+                        : theme.colors.fill.faint,
             },
         }}
     >

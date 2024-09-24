@@ -1,4 +1,5 @@
 import { useIsMobileWidth } from "@/base/hooks";
+import { CollectionsSortOptions } from "@/new/photos/components/CollectionsSortOptions";
 import { BarItemTile, ItemCard } from "@/new/photos/components/ItemCards";
 import type { Person } from "@/new/photos/services/ml/cgroups";
 import type {
@@ -33,7 +34,6 @@ import React, {
 import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeList, ListChildComponentProps, areEqual } from "react-window";
 import type { GalleryBarMode } from ".";
-import { CollectionsSortOptions } from "./CollectionsSortOptions";
 
 export interface CollectionListBarProps {
     /**
