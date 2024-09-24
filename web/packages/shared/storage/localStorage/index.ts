@@ -13,6 +13,7 @@ export enum LS_KEYS {
     EXPORT = "export",
     // LOGS = "logs",
     USER_DETAILS = "userDetails",
+    // Migrated to (and only used by) useCollectionsSortByLocalState.
     COLLECTION_SORT_BY = "collectionSortBy",
     THEME = "theme",
     // Moved to the new wrapper @/base/local-storage

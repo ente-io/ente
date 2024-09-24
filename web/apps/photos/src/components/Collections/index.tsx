@@ -1,12 +1,11 @@
 import type { Collection } from "@/media/collection";
 import type { Person } from "@/new/photos/services/ml/cgroups";
 import {
-    collectionsSortOrders,
-    type CollectionListSortOrder,
+    collectionsSortBy,
+    type CollectionsSortBy,
     type CollectionSummaries,
 } from "@/new/photos/types/collection";
 import { includes } from "@/utils/type-guards";
-import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import {
     getData,
     LS_KEYS,
@@ -82,11 +81,8 @@ export const Collections: React.FC<CollectionsProps> = ({
         useState(false);
     const [openAlbumCastDialog, setOpenAlbumCastDialog] = useState(false);
 
-    const [collectionListSortBy, setCollectionListSortBy] =
-        useLocalState<CollectionListSortOrder>(
-            LS_KEYS.COLLECTION_SORT_BY,
-            "updation-time-desc",
-        );
+    const [collectionsSortBy, setCollectionsSortBy] =
+        useCollectionsSortByLocalState("updation-time-desc");
 
     const toShowCollectionSummaries = useMemo(
         () =>
@@ -108,9 +104,9 @@ export const Collections: React.FC<CollectionsProps> = ({
         () =>
             sortCollectionSummaries(
                 [...toShowCollectionSummaries.values()],
-                collectionListSortBy,
+                collectionsSortBy,
             ),
-        [collectionListSortBy, toShowCollectionSummaries],
+        [collectionsSortBy, toShowCollectionSummaries],
     );
 
     const isActiveCollectionDownloadInProgress = useCallback(() => {
@@ -176,8 +172,8 @@ export const Collections: React.FC<CollectionsProps> = ({
                     people,
                     activePerson,
                     onSelectPerson,
-                    collectionListSortBy,
-                    setCollectionListSortBy,
+                    collectionListSortBy: collectionsSortBy,
+                    setCollectionListSortBy: setCollectionsSortBy,
                 }}
                 onShowAllCollections={() => setOpenAllCollectionDialog(true)}
                 collectionSummaries={sortedCollectionSummaries.filter((x) =>
@@ -192,8 +188,8 @@ export const Collections: React.FC<CollectionsProps> = ({
                     (x) => !isSystemCollection(x.type),
                 )}
                 setActiveCollectionID={setActiveCollectionID}
-                setCollectionListSortBy={setCollectionListSortBy}
-                collectionListSortBy={collectionListSortBy}
+                setCollectionListSortBy={setCollectionsSortBy}
+                collectionListSortBy={collectionsSortBy}
                 isInHiddenSection={mode == "hidden-albums"}
             />
             <CollectionShare
@@ -217,28 +213,24 @@ export const Collections: React.FC<CollectionsProps> = ({
  * A hook that maintains the collections sort order both as in-memory and local
  * storage state.
  */
-const useCollectionsSortOrderLocalState = (
-    initialValue: CollectionListSortOrder,
-) => {
-    const key = "collectionsSortOrder";
+const useCollectionsSortByLocalState = (initialValue: CollectionsSortBy) => {
+    const key = "collectionsSortBy";
 
     const [value, setValue] = useState(initialValue);
 
     useEffect(() => {
-        const sortOrder = localStorage.getItem(key);
-        if (sortOrder) {
-            if (includes(collectionsSortOrders, sortOrder)) {
-                setValue(sortOrder);
-            }
+        const value = localStorage.getItem(key);
+        if (value) {
+            if (includes(collectionsSortBy, value)) setValue(value);
         } else {
-            // Older versions of this code used to store in a different place.
-            // Migrate it from there if it is found there.
+            // Older versions of this code used to store the value in a
+            // different place and format. Migrate if needed.
             //
             // This migration added Sep 2024, can be removed after a bit (esp
             // since it effectively runs on each app start). (tag: Migration).
             const oldData = getData(LS_KEYS.COLLECTION_SORT_BY);
             if (oldData) {
-                let newValue: CollectionListSortOrder | undefined;
+                let newValue: CollectionsSortBy | undefined;
                 switch (oldData.value) {
                     case 0:
                         newValue = "name";
@@ -259,7 +251,7 @@ const useCollectionsSortOrderLocalState = (
         }
     }, []);
 
-    const setter = (value: CollectionListSortOrder) => {
+    const setter = (value: CollectionsSortBy) => {
         localStorage.setItem(key, value);
         setValue(value);
     };

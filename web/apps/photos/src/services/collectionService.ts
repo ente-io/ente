@@ -25,7 +25,7 @@ import type {
     CollectionSummary,
     CollectionSummaryType,
 } from "@/new/photos/types/collection";
-import { CollectionListSortOrder } from "@/new/photos/types/collection";
+import { CollectionsSortBy } from "@/new/photos/types/collection";
 import { EnteFile } from "@/new/photos/types/file";
 import {
     EncryptedMagicMetadata,
@@ -1070,7 +1070,7 @@ export const getFavCollection = async () => {
 
 export function sortCollectionSummaries(
     collectionSummaries: CollectionSummary[],
-    sortBy: CollectionListSortOrder,
+    sortBy: CollectionsSortBy,
 ) {
     return collectionSummaries
         .sort((a, b) => {

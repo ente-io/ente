@@ -1,5 +1,5 @@
 import type { CollectionSummary } from "@/new/photos/types/collection";
-import { CollectionListSortOrder } from "@/new/photos/types/collection";
+import { CollectionsSortBy } from "@/new/photos/types/collection";
 import { Divider, useMediaQuery } from "@mui/material";
 import {
     AllCollectionDialog,
@@ -13,8 +13,8 @@ interface Iprops {
     onClose: () => void;
     collectionSummaries: CollectionSummary[];
     setActiveCollectionID: (id?: number) => void;
-    collectionListSortBy: CollectionListSortOrder;
-    setCollectionListSortBy: (v: CollectionListSortOrder) => void;
+    collectionListSortBy: CollectionsSortBy;
+    setCollectionListSortBy: (v: CollectionsSortBy) => void;
     isInHiddenSection: boolean;
 }
 

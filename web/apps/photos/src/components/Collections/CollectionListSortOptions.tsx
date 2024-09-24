@@ -1,4 +1,4 @@
-import type { CollectionListSortOrder } from "@/new/photos/types/collection";
+import type { CollectionsSortBy } from "@/new/photos/types/collection";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
 import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
 import TickIcon from "@mui/icons-material/Done";
@@ -7,8 +7,8 @@ import SvgIcon from "@mui/material/SvgIcon";
 import { t } from "i18next";
 
 interface CollectionListSortOptionsProps {
-    setSortBy: (order: CollectionListSortOrder) => void;
-    activeSortBy: CollectionListSortOrder;
+    setSortBy: (order: CollectionsSortBy) => void;
+    activeSortBy: CollectionsSortBy;
     nestedInDialog?: boolean;
     disableBG?: boolean;
 }
@@ -49,7 +49,7 @@ export const CollectionListSortOptions: React.FC<
 
 const SortByOptionCreator =
     ({ setSortBy, activeSortBy }: CollectionListSortOptionsProps) =>
-    (props: { sortBy: CollectionListSortOrder; children: any }) => {
+    (props: { sortBy: CollectionsSortBy; children: any }) => {
         const handleClick = () => {
             setSortBy(props.sortBy);
         };
