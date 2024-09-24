@@ -3,11 +3,8 @@ import { NavbarBase } from "@/base/components/Navbar";
 import { useIsMobileWidth } from "@/base/hooks";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
+import { SearchResultsHeader } from "@/new/photos/components/Gallery";
 import type { GalleryBarMode } from "@/new/photos/components/Gallery/BarImpl";
-import {
-    GalleryItemsHeaderAdapter,
-    GalleryItemsSummary,
-} from "@/new/photos/components/Gallery/ListHeader";
 import {
     SearchBar,
     type SearchBarProps,
@@ -1379,22 +1376,4 @@ const HiddenSectionNavbarContents: React.FC<
             <Typography>{t("section_hidden")}</Typography>
         </FlexWrapper>
     </HorizontalFlex>
-);
-
-interface SearchResultsHeaderProps {
-    selectedOption: SearchOption;
-}
-
-const SearchResultsHeader: React.FC<SearchResultsHeaderProps> = ({
-    selectedOption,
-}) => (
-    <GalleryItemsHeaderAdapter>
-        <Typography color="text.muted" variant="large">
-            {t("search_results")}
-        </Typography>
-        <GalleryItemsSummary
-            name={selectedOption.suggestion.label}
-            fileCount={selectedOption.fileCount}
-        />
-    </GalleryItemsHeaderAdapter>
 );
