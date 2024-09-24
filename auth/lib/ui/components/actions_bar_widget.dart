@@ -29,7 +29,7 @@ class _ActionBarWidgetState extends State<ActionBarWidget> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (widget.code.note.isNotEmpty)
-              Text(
+              SelectableText(
                 widget.code.note,
                 style: textTheme.miniMuted,
               ),
@@ -40,7 +40,7 @@ class _ActionBarWidgetState extends State<ActionBarWidget> {
                   flex: 1,
                   child: Column(
                     children: [
-                      Text(
+                      SelectableText(
                         widget.code.issuerAccount,
                         style: textTheme.miniMuted,
                       ),
