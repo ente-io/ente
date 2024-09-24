@@ -15,7 +15,7 @@ import {
     removeData,
 } from "@ente/shared/storage/localStorage";
 import AllCollections from "components/Collections/AllCollections";
-import CollectionInfoWithOptions from "components/Collections/CollectionInfoWithOptions";
+import { CollectionListHeader } from "components/Collections/CollectionListHeader";
 import { SetCollectionNamerAttributes } from "components/Collections/CollectionNamer";
 import CollectionShare from "components/Collections/CollectionShare";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
@@ -126,22 +126,20 @@ export const Collections: React.FC<CollectionsProps> = ({
 
         setPhotoListHeader({
             item: (
-                <CollectionInfoWithOptions
+                <CollectionListHeader
                     collectionSummary={toShowCollectionSummaries.get(
                         activeCollectionID,
                     )}
-                    activeCollection={activeCollection}
-                    setCollectionNamerAttributes={setCollectionNamerAttributes}
+                    {...{
+                        activeCollection,
+                        setActiveCollectionID,
+                        setCollectionNamerAttributes,
+                        setFilesDownloadProgressAttributesCreator,
+                        isActiveCollectionDownloadInProgress,
+                    }}
                     showCollectionShareModal={() =>
                         setOpenCollectionShareView(true)
                     }
-                    setFilesDownloadProgressAttributesCreator={
-                        setFilesDownloadProgressAttributesCreator
-                    }
-                    isActiveCollectionDownloadInProgress={
-                        isActiveCollectionDownloadInProgress
-                    }
-                    setActiveCollectionID={setActiveCollectionID}
                     setShowAlbumCastDialog={setOpenAlbumCastDialog}
                 />
             ),

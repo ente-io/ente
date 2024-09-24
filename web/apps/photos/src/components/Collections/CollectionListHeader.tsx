@@ -1,3 +1,4 @@
+import { assertionFailed } from "@/base/assert";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
 import { ItemVisibility } from "@/media/file-metadata";
@@ -57,22 +58,23 @@ import {
 } from "utils/collection";
 import { isArchivedCollection, isPinnedCollection } from "utils/magicMetadata";
 
-interface Iprops {
-    activeCollection: Collection;
+interface CollectionListHeaderProps {
     collectionSummary: CollectionSummary;
+    activeCollection: Collection;
+    setActiveCollectionID: (collectionID: number) => void;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
     showCollectionShareModal: () => void;
     setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
     isActiveCollectionDownloadInProgress: () => boolean;
-    setActiveCollectionID: (collectionID: number) => void;
     setShowAlbumCastDialog: Dispatch<SetStateAction<boolean>>;
 }
 
-export default function CollectionInfoWithOptions({
+export const CollectionListHeader: React.FC<CollectionListHeaderProps> = ({
     collectionSummary,
-    ...props
-}: Iprops) {
+    ...rest
+}) => {
     if (!collectionSummary) {
+        assertionFailed("CollectionListHeader without a collection");
         return <></>;
     }
 
@@ -105,29 +107,22 @@ export default function CollectionInfoWithOptions({
                     endIcon={<EndIcon type={type} />}
                 />
                 {shouldShowOptions(type) && (
-                    <CollectionOptions
-                        {...props}
-                        collectionSummaryType={type}
-                    />
+                    <CollectionOptions collectionSummaryType={type} {...rest} />
                 )}
             </SpaceBetweenFlex>
         </GalleryItemsHeaderAdapter>
     );
-}
+};
 
 const shouldShowOptions = (type: CollectionSummaryType) =>
     type != "all" && type != "archive";
 
-interface CollectionOptionsProps {
-    setCollectionNamerAttributes: SetCollectionNamerAttributes;
-    setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
-    isActiveCollectionDownloadInProgress: () => boolean;
-    activeCollection: Collection;
+type CollectionOptionsProps = Omit<
+    CollectionListHeaderProps,
+    "collectionSummary"
+> & {
     collectionSummaryType: CollectionSummaryType;
-    showCollectionShareModal: () => void;
-    setActiveCollectionID: (collectionID: number) => void;
-    setShowAlbumCastDialog: Dispatch<SetStateAction<boolean>>;
-}
+};
 
 const CollectionOptions: React.FC<CollectionOptionsProps> = ({
     activeCollection,
