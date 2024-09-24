@@ -202,7 +202,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                       type: "collections",
                       collectionSummaries,
                       activeCollectionID: ensure(activeCollectionID),
-                      onCollectionClick: onSelectCollectionID,
+                      onSelectCollectionID,
                   }
                 : {
                       type: "people",
@@ -394,12 +394,13 @@ type ItemData =
           type: "collections";
           collectionSummaries: CollectionSummary[];
           activeCollectionID: number;
-          onCollectionClick: (id: number) => void;
+          onSelectCollectionID: (id: number) => void;
       }
     | {
           type: "people";
           people: Person[];
           activePerson: Person;
+          onSelectPerson: (person: Person) => void;
       };
 
 const getItemCount = (data: ItemData) => {
@@ -436,24 +437,31 @@ const ListItem = memo((props: ListChildComponentProps<ItemData>) => {
             const {
                 collectionSummaries,
                 activeCollectionID,
-                onCollectionClick,
+                onSelectCollectionID,
             } = data;
             const collectionSummary = ensure(collectionSummaries[index]);
             card = (
                 <CollectionBarCard
                     key={collectionSummary.id}
-                    activeCollectionID={activeCollectionID}
-                    collectionSummary={collectionSummary}
-                    onCollectionClick={onCollectionClick}
+                    {...{
+                        collectionSummary,
+                        activeCollectionID,
+                        onSelectCollectionID,
+                    }}
                 />
             );
             break;
         }
 
         case "people": {
-            const { people, activePerson } = data;
+            const { people, activePerson, onSelectPerson } = data;
             const person = ensure(people[index]);
-            card = <PersonCard {...{ person, activePerson }} />;
+            card = (
+                <PersonCard
+                    key={person.id}
+                    {...{ person, activePerson, onSelectPerson }}
+                />
+            );
             break;
         }
     }
@@ -464,19 +472,19 @@ const ListItem = memo((props: ListChildComponentProps<ItemData>) => {
 interface CollectionBarCardProps {
     collectionSummary: CollectionSummary;
     activeCollectionID: number;
-    onCollectionClick: (collectionID: number) => void;
+    onSelectCollectionID: (collectionID: number) => void;
 }
 
 const CollectionBarCard: React.FC<CollectionBarCardProps> = ({
     collectionSummary,
     activeCollectionID,
-    onCollectionClick,
+    onSelectCollectionID,
 }: CollectionBarCardProps) => (
     <div>
         <ItemCard
             TileComponent={BarItemTile}
             coverFile={collectionSummary.coverFile}
-            onClick={() => onCollectionClick(collectionSummary.id)}
+            onClick={() => onSelectCollectionID(collectionSummary.id)}
         >
             <CardText text={collectionSummary.name} />
             <CollectionBarCardIcon type={collectionSummary.type} />
@@ -567,17 +575,19 @@ const ActiveIndicator = styled("div")`
 interface PersonCardProps {
     person: Person;
     activePerson: Person;
-    // onCollectionClick: (collectionID: number) => void;
+    onSelectPerson: (person: Person) => void;
 }
 
-const PersonCard = ({ person, activePerson }: PersonCardProps) => (
+const PersonCard: React.FC<PersonCardProps> = ({
+    person,
+    activePerson,
+    onSelectPerson,
+}) => (
     <Box>
         <ItemCard
             TileComponent={BarItemTile}
             coverFile={person.displayFaceFile}
-            onClick={() => {
-                //onCollectionClick(collectionSummary.id);
-            }}
+            onClick={() => onSelectPerson(person)}
         >
             {person.name && <CardText text={person.name} />}
         </ItemCard>
