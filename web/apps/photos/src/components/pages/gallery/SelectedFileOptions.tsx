@@ -1,5 +1,6 @@
 import { SelectionBar } from "@/base/components/Navbar";
 import type { Collection } from "@/media/collection";
+import type { GalleryBarMode } from "@/new/photos/components/Gallery/BarImpl";
 import { FluidContainer } from "@ente/shared/components/Container";
 import ClockIcon from "@mui/icons-material/AccessTime";
 import AddIcon from "@mui/icons-material/Add";
@@ -41,6 +42,7 @@ interface Props {
     count: number;
     ownCount: number;
     clearSelection: () => void;
+    barMode?: GalleryBarMode;
     activeCollectionID: number;
     isFavoriteCollection: boolean;
     isUncategorizedCollection: boolean;
@@ -59,6 +61,7 @@ const SelectedFileOptions = ({
     count,
     ownCount,
     clearSelection,
+    barMode,
     activeCollectionID,
     isFavoriteCollection,
     isUncategorizedCollection,
@@ -153,6 +156,8 @@ const SelectedFileOptions = ({
             intent: CollectionSelectorIntent.unhide,
         });
     };
+
+    const peopleMode = barMode == "people";
 
     return (
         <SelectionBar>
@@ -272,13 +277,17 @@ const SelectedFileOptions = ({
                     </>
                 ) : (
                     <>
-                        <Tooltip title={t("FIX_CREATION_TIME")}>
-                            <IconButton
-                                onClick={handleFileOps(FILE_OPS_TYPE.FIX_TIME)}
-                            >
-                                <ClockIcon />
-                            </IconButton>
-                        </Tooltip>
+                        {!peopleMode && (
+                            <Tooltip title={t("FIX_CREATION_TIME")}>
+                                <IconButton
+                                    onClick={handleFileOps(
+                                        FILE_OPS_TYPE.FIX_TIME,
+                                    )}
+                                >
+                                    <ClockIcon />
+                                </IconButton>
+                            </Tooltip>
+                        )}
                         <Tooltip title={t("download")}>
                             <IconButton
                                 onClick={handleFileOps(FILE_OPS_TYPE.DOWNLOAD)}
@@ -291,18 +300,19 @@ const SelectedFileOptions = ({
                                 <AddIcon />
                             </IconButton>
                         </Tooltip>
-                        {activeCollectionID === ARCHIVE_SECTION && (
-                            <Tooltip title={t("unarchive")}>
-                                <IconButton
-                                    onClick={handleFileOps(
-                                        FILE_OPS_TYPE.UNARCHIVE,
-                                    )}
-                                >
-                                    <UnArchiveIcon />
-                                </IconButton>
-                            </Tooltip>
-                        )}
-                        {activeCollectionID === ALL_SECTION && (
+                        {activeCollectionID === ARCHIVE_SECTION &&
+                            !peopleMode && (
+                                <Tooltip title={t("unarchive")}>
+                                    <IconButton
+                                        onClick={handleFileOps(
+                                            FILE_OPS_TYPE.UNARCHIVE,
+                                        )}
+                                    >
+                                        <UnArchiveIcon />
+                                    </IconButton>
+                                </Tooltip>
+                            )}
+                        {activeCollectionID === ALL_SECTION && !peopleMode && (
                             <Tooltip title={t("archive")}>
                                 <IconButton
                                     onClick={handleFileOps(
@@ -315,6 +325,7 @@ const SelectedFileOptions = ({
                         )}
                         {activeCollectionID !== ALL_SECTION &&
                             activeCollectionID !== ARCHIVE_SECTION &&
+                            !peopleMode &&
                             !isFavoriteCollection && (
                                 <>
                                     <Tooltip title={t("MOVE")}>

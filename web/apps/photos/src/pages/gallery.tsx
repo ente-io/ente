@@ -1258,6 +1258,7 @@ export default function Gallery() {
                             count={selected.count}
                             ownCount={selected.ownCount}
                             clearSelection={clearSelection}
+                            barMode={barMode}
                             activeCollectionID={activeCollectionID}
                             selectedCollection={getSelectedCollection(
                                 selected.collectionID,
