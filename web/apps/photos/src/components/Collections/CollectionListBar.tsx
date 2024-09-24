@@ -1,6 +1,7 @@
 import { useIsMobileWidth } from "@/base/hooks";
 import { CollectionsSortOptions } from "@/new/photos/components/CollectionsSortOptions";
 import { BarItemTile, ItemCard } from "@/new/photos/components/ItemCards";
+import { FilledIconButton } from "@/new/photos/components/mui-custom";
 import type { Person } from "@/new/photos/services/ml/cgroups";
 import type {
     CollectionSummary,
@@ -8,7 +9,7 @@ import type {
     CollectionsSortBy,
 } from "@/new/photos/types/collection";
 import { ensure } from "@/utils/ensure";
-import { IconButtonWithBG, Overlay } from "@ente/shared/components/Container";
+import { Overlay } from "@ente/shared/components/Container";
 import ArchiveIcon from "@mui/icons-material/Archive";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import Favorite from "@mui/icons-material/FavoriteRounded";
@@ -216,9 +217,9 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
                 activeSortBy={collectionsSortBy}
                 onChangeSortBy={onChangeCollectionsSortBy}
             />
-            <IconButtonWithBG onClick={onShowAllCollections}>
+            <FilledIconButton onClick={onShowAllCollections}>
                 <ExpandMore />
-            </IconButtonWithBG>
+            </FilledIconButton>
         </Box>
     );
 

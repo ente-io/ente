@@ -1,11 +1,8 @@
 import { CollectionsSortOptions } from "@/new/photos/components/CollectionsSortOptions";
+import { FilledIconButton } from "@/new/photos/components/mui-custom";
 import type { CollectionSummary } from "@/new/photos/types/collection";
 import { CollectionsSortBy } from "@/new/photos/types/collection";
-import {
-    FlexWrapper,
-    FluidContainer,
-    IconButtonWithBG,
-} from "@ente/shared/components/Container";
+import { FlexWrapper, FluidContainer } from "@ente/shared/components/Container";
 import Close from "@mui/icons-material/Close";
 import {
     Box,
@@ -105,9 +102,9 @@ const AllCollectionsHeader = ({
                     onChangeSortBy={onChangeCollectionsSortBy}
                     nestedInDialog
                 />
-                <IconButtonWithBG onClick={onClose}>
+                <FilledIconButton onClick={onClose}>
                     <Close />
-                </IconButtonWithBG>
+                </FilledIconButton>
             </Stack>
         </FlexWrapper>
     </DialogTitle>
