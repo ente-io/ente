@@ -216,6 +216,40 @@ const SelectedFileOptions = ({
                             </IconButton>
                         </Tooltip>
                     </>
+                ) : peopleMode ? (
+                    <>
+                        <Tooltip title={t("download")}>
+                            <IconButton
+                                onClick={handleFileOps(FILE_OPS_TYPE.DOWNLOAD)}
+                            >
+                                <DownloadIcon />
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title={t("ADD")}>
+                            <IconButton onClick={addToCollection}>
+                                <AddIcon />
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title={t("archive")}>
+                            <IconButton
+                                onClick={handleFileOps(FILE_OPS_TYPE.ARCHIVE)}
+                            >
+                                <ArchiveIcon />
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title={t("HIDE")}>
+                            <IconButton
+                                onClick={handleFileOps(FILE_OPS_TYPE.HIDE)}
+                            >
+                                <VisibilityOffOutlined />
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title={t("DELETE")}>
+                            <IconButton onClick={trashHandler}>
+                                <DeleteIcon />
+                            </IconButton>
+                        </Tooltip>
+                    </>
                 ) : activeCollectionID === TRASH_SECTION ? (
                     <>
                         <Tooltip title={t("RESTORE")}>
@@ -280,17 +314,13 @@ const SelectedFileOptions = ({
                     </>
                 ) : (
                     <>
-                        {!peopleMode && (
-                            <Tooltip title={t("FIX_CREATION_TIME")}>
-                                <IconButton
-                                    onClick={handleFileOps(
-                                        FILE_OPS_TYPE.FIX_TIME,
-                                    )}
-                                >
-                                    <ClockIcon />
-                                </IconButton>
-                            </Tooltip>
-                        )}
+                        <Tooltip title={t("FIX_CREATION_TIME")}>
+                            <IconButton
+                                onClick={handleFileOps(FILE_OPS_TYPE.FIX_TIME)}
+                            >
+                                <ClockIcon />
+                            </IconButton>
+                        </Tooltip>
                         <Tooltip title={t("download")}>
                             <IconButton
                                 onClick={handleFileOps(FILE_OPS_TYPE.DOWNLOAD)}
@@ -303,19 +333,18 @@ const SelectedFileOptions = ({
                                 <AddIcon />
                             </IconButton>
                         </Tooltip>
-                        {activeCollectionID === ARCHIVE_SECTION &&
-                            !peopleMode && (
-                                <Tooltip title={t("unarchive")}>
-                                    <IconButton
-                                        onClick={handleFileOps(
-                                            FILE_OPS_TYPE.UNARCHIVE,
-                                        )}
-                                    >
-                                        <UnArchiveIcon />
-                                    </IconButton>
-                                </Tooltip>
-                            )}
-                        {activeCollectionID === ALL_SECTION && !peopleMode && (
+                        {activeCollectionID === ARCHIVE_SECTION && (
+                            <Tooltip title={t("unarchive")}>
+                                <IconButton
+                                    onClick={handleFileOps(
+                                        FILE_OPS_TYPE.UNARCHIVE,
+                                    )}
+                                >
+                                    <UnArchiveIcon />
+                                </IconButton>
+                            </Tooltip>
+                        )}
+                        {activeCollectionID === ALL_SECTION && (
                             <Tooltip title={t("archive")}>
                                 <IconButton
                                     onClick={handleFileOps(
@@ -328,7 +357,6 @@ const SelectedFileOptions = ({
                         )}
                         {activeCollectionID !== ALL_SECTION &&
                             activeCollectionID !== ARCHIVE_SECTION &&
-                            !peopleMode &&
                             !isFavoriteCollection && (
                                 <>
                                     <Tooltip title={t("MOVE")}>
