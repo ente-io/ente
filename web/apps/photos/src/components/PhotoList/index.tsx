@@ -16,20 +16,22 @@ import {
 import { handleSelectCreator } from "utils/photoFrame";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 
-const FOOTER_HEIGHT = 90;
-const ALBUM_FOOTER_HEIGHT = 75;
-const ALBUM_FOOTER_HEIGHT_WITH_REFERRAL = 113;
-
 import {
-    DATE_CONTAINER_HEIGHT,
     GAP_BTW_TILES,
     IMAGE_CONTAINER_MAX_HEIGHT,
     IMAGE_CONTAINER_MAX_WIDTH,
     MIN_COLUMNS,
-    SIZE_AND_COUNT_CONTAINER_HEIGHT,
-    SPACE_BTW_DATES,
-    SPACE_BTW_DATES_TO_IMAGE_CONTAINER_WIDTH_RATIO,
-} from "./constants";
+} from "@/new/photos/components/PhotoList";
+
+export const DATE_CONTAINER_HEIGHT = 48;
+export const SIZE_AND_COUNT_CONTAINER_HEIGHT = 72;
+export const SPACE_BTW_DATES = 44;
+
+const SPACE_BTW_DATES_TO_IMAGE_CONTAINER_WIDTH_RATIO = 0.244;
+
+const FOOTER_HEIGHT = 90;
+const ALBUM_FOOTER_HEIGHT = 75;
+const ALBUM_FOOTER_HEIGHT_WITH_REFERRAL = 113;
 
 export enum ITEM_TYPE {
     TIME = "TIME",

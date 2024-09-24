@@ -2,6 +2,10 @@ import { useIsMobileWidth } from "@/base/hooks";
 import { CollectionsSortOptions } from "@/new/photos/components/CollectionsSortOptions";
 import { BarItemTile, ItemCard } from "@/new/photos/components/ItemCards";
 import { FilledIconButton } from "@/new/photos/components/mui-custom";
+import {
+    IMAGE_CONTAINER_MAX_WIDTH,
+    MIN_COLUMNS,
+} from "@/new/photos/components/PhotoList";
 import type { Person } from "@/new/photos/services/ml/cgroups";
 import type {
     CollectionSummary,
@@ -19,10 +23,6 @@ import PeopleIcon from "@mui/icons-material/People";
 import PushPin from "@mui/icons-material/PushPin";
 import { Box, IconButton, Stack, Typography, styled } from "@mui/material";
 import Tooltip from "@mui/material/Tooltip";
-import {
-    IMAGE_CONTAINER_MAX_WIDTH,
-    MIN_COLUMNS,
-} from "components/PhotoList/constants";
 import { t } from "i18next";
 import React, {
     memo,
