@@ -70,12 +70,16 @@ const SelectedFileOptions = ({
     isInHiddenSection,
 }: Props) => {
     const { setDialogMessage } = useContext(AppContext);
+
+    const peopleMode = barMode == "people";
+
     const addToCollection = () =>
         setCollectionSelectorAttributes({
             callback: handleCollectionOps(COLLECTION_OPS_TYPE.ADD),
             showNextModal: showCreateCollectionModal(COLLECTION_OPS_TYPE.ADD),
             intent: CollectionSelectorIntent.add,
-            fromCollection: !isInSearchMode ? activeCollectionID : undefined,
+            fromCollection:
+                !isInSearchMode && !peopleMode ? activeCollectionID : undefined,
         });
 
     const trashHandler = () =>
@@ -143,7 +147,8 @@ const SelectedFileOptions = ({
             callback: handleCollectionOps(COLLECTION_OPS_TYPE.MOVE),
             showNextModal: showCreateCollectionModal(COLLECTION_OPS_TYPE.MOVE),
             intent: CollectionSelectorIntent.move,
-            fromCollection: !isInSearchMode ? activeCollectionID : undefined,
+            fromCollection:
+                !isInSearchMode && !peopleMode ? activeCollectionID : undefined,
         });
     };
 
@@ -156,8 +161,6 @@ const SelectedFileOptions = ({
             intent: CollectionSelectorIntent.unhide,
         });
     };
-
-    const peopleMode = barMode == "people";
 
     return (
         <SelectionBar>
