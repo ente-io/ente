@@ -461,7 +461,7 @@ class _HomePageState extends State<HomePage> {
 
                   return ClipRect(
                     child: CodeWidget(
-                      key: ValueKey(code.hashCode),
+                      key: ValueKey('${code.hashCode}_$newIndex'),
                       code,
                       isCompactMode: isCompactMode,
                     ),
@@ -493,6 +493,7 @@ class _HomePageState extends State<HomePage> {
                         itemBuilder: ((context, index) {
                           final codeState = _filteredCodes[index];
                           return CodeWidget(
+                            key: ValueKey('${codeState.hashCode}_$index'),
                             codeState,
                             isCompactMode: isCompactMode,
                           );
