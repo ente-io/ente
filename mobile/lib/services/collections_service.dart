@@ -1054,6 +1054,7 @@ class CollectionsService {
       final Collection collection = Collection.fromMap(collectionData);
       final Uint8List collectionKey =
           Uint8List.fromList(Base58Decode(albumKey));
+      collection.setName(_getDecryptedCollectionName(collection));
 
       _cachedKeys[collection.id] = collectionKey;
       _cachedPublicAlbumToken[collection.id] = authToken;

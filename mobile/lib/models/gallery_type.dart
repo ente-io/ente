@@ -20,6 +20,7 @@ enum GalleryType {
   quickLink,
   peopleTag,
   cluster,
+  sharedPublicLink,
 }
 
 extension GalleyTypeExtension on GalleryType {
@@ -42,6 +43,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.hiddenOwnedCollection:
       case GalleryType.trash:
       case GalleryType.cluster:
+      case GalleryType.sharedPublicLink:
         return false;
     }
   }
@@ -65,6 +67,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.sharedCollection:
       case GalleryType.locationTag:
       case GalleryType.cluster:
+      case GalleryType.sharedPublicLink:
         return false;
     }
   }
@@ -89,6 +92,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.hiddenSection:
       case GalleryType.hiddenOwnedCollection:
       case GalleryType.sharedCollection:
+      case GalleryType.sharedPublicLink:
         return false;
     }
   }
@@ -111,6 +115,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.trash:
       case GalleryType.cluster:
       case GalleryType.sharedCollection:
+      case GalleryType.sharedPublicLink:
         return false;
     }
   }
@@ -133,6 +138,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.trash:
       case GalleryType.sharedCollection:
       case GalleryType.quickLink:
+      case GalleryType.sharedPublicLink:
         return false;
     }
   }
@@ -155,6 +161,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.cluster:
       case GalleryType.trash:
       case GalleryType.locationTag:
+      case GalleryType.sharedPublicLink:
         return false;
     }
   }
@@ -178,6 +185,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.sharedCollection:
       case GalleryType.locationTag:
       case GalleryType.cluster:
+      case GalleryType.sharedPublicLink:
         return false;
     }
   }
@@ -205,6 +213,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.favorite:
       case GalleryType.cluster:
       case GalleryType.sharedCollection:
+      case GalleryType.sharedPublicLink:
         return false;
     }
   }
@@ -233,6 +242,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.localFolder:
       case GalleryType.trash:
       case GalleryType.sharedCollection:
+      case GalleryType.sharedPublicLink:
         return false;
     }
   }
@@ -273,6 +283,9 @@ extension GalleryAppBarExtn on GalleryType {
     if (this == GalleryType.ownedCollection ||
         this == GalleryType.quickLink ||
         this == GalleryType.hiddenOwnedCollection) {
+      return true;
+    }
+    if (this == GalleryType.sharedPublicLink && c!.isEnableCollect()) {
       return true;
     }
     if (this == GalleryType.sharedCollection) {
@@ -353,6 +366,7 @@ extension GalleryAppBarExtn on GalleryType {
       case GalleryType.localFolder:
       case GalleryType.locationTag:
       case GalleryType.searchResults:
+      case GalleryType.sharedPublicLink:
         return false;
       case GalleryType.cluster:
       case GalleryType.uncategorized:
@@ -368,6 +382,9 @@ extension GalleryAppBarExtn on GalleryType {
 }
 
 GalleryType getGalleryType(Collection c, int userID) {
+  if (c.type == CollectionType.album) {
+    return GalleryType.sharedPublicLink;
+  }
   if (!c.isOwner(userID)) {
     return GalleryType.sharedCollection;
   }

@@ -117,8 +117,7 @@ class CollectionPage extends StatelessWidget {
           _selectedFiles,
           collection: c.collection,
           isFromCollectPhotos: isFromCollectPhotos,
-          isFromPublicShareLink: isFromPublicShareLink,
-          files: sharedLinkFiles!,
+          sharedLinkFiles: sharedLinkFiles,
         ),
       ),
       bottomNavigationBar: isFromCollectPhotos
