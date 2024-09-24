@@ -1,4 +1,5 @@
 import type { Collection } from "@/media/collection";
+import { PersonListHeader } from "@/new/photos/components/Gallery";
 import {
     GalleryBarImpl,
     type GalleryBarImplProps,
@@ -8,6 +9,7 @@ import {
     type CollectionsSortBy,
     type CollectionSummaries,
 } from "@/new/photos/types/collection";
+import { ensure } from "@/utils/ensure";
 import { includes } from "@/utils/type-guards";
 import {
     getData,
@@ -59,14 +61,24 @@ type CollectionsProps = Omit<
 };
 
 /**
- * The horizontally scrollable bar shown at the top of the gallery.
+ * The gallery bar, the header for the list items, and state for any associated
+ * dialogs that might be triggered by actions on either the bar or the header..
  *
- * This component includes both the actual bar, and also the surrounding chrome
- * and state for any associated dialogs that might be triggered by actions on
- * the bar.
+ * This component manages the sticky horizontally scrollable bar shown at the
+ * top of the gallery, AND the non-sticky header shown below the bar, at the top
+ * of the actual list of items.
+ *
+ * These are disparate views - indeed, the list header is not even a child of
+ * this component but is instead proxied via {@link setPhotoListHeader}. Still,
+ * having this intermediate wrapper component allows us to move some of the
+ * common concerns shared by both the gallery bar and list header (e.g. some
+ * dialogs that can be invoked from both places) into this file instead of
+ * cluttering the already big gallery component.
+ *
+ * TODO: Once the gallery code is better responsibilitied out, consider moving
+ * this code back inline into the gallery.
  */
-// TODO-Cluster Rename me to GalleryBar and subsume GalleryBarImpl
-export const Collections: React.FC<CollectionsProps> = ({
+export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
     shouldHide,
     mode,
     onChangeMode,
@@ -132,22 +144,27 @@ export const Collections: React.FC<CollectionsProps> = ({
         if (shouldHide) return;
 
         setPhotoListHeader({
-            item: (
-                <CollectionHeader
-                    {...{
-                        activeCollection,
-                        setActiveCollectionID,
-                        setCollectionNamerAttributes,
-                        setFilesDownloadProgressAttributesCreator,
-                        isActiveCollectionDownloadInProgress,
-                    }}
-                    collectionSummary={toShowCollectionSummaries.get(
-                        activeCollectionID,
-                    )}
-                    onCollectionShare={() => setOpenCollectionShareView(true)}
-                    onCollectionCast={() => setOpenAlbumCastDialog(true)}
-                />
-            ),
+            item:
+                mode != "people" ? (
+                    <CollectionHeader
+                        {...{
+                            activeCollection,
+                            setActiveCollectionID,
+                            setCollectionNamerAttributes,
+                            setFilesDownloadProgressAttributesCreator,
+                            isActiveCollectionDownloadInProgress,
+                        }}
+                        collectionSummary={toShowCollectionSummaries.get(
+                            activeCollectionID,
+                        )}
+                        onCollectionShare={() =>
+                            setOpenCollectionShareView(true)
+                        }
+                        onCollectionCast={() => setOpenAlbumCastDialog(true)}
+                    />
+                ) : (
+                    <PersonListHeader person={ensure(activePerson)} />
+                ),
             itemType: ITEM_TYPE.HEADER,
             height: 68,
         });

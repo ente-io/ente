@@ -3,11 +3,8 @@ import { NavbarBase } from "@/base/components/Navbar";
 import { useIsMobileWidth } from "@/base/hooks";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
+import { SearchResultsHeader } from "@/new/photos/components/Gallery";
 import type { GalleryBarMode } from "@/new/photos/components/Gallery/BarImpl";
-import {
-    GalleryItemsHeaderAdapter,
-    GalleryItemsSummary,
-} from "@/new/photos/components/Gallery/ListHeader";
 import {
     SearchBar,
     type SearchBarProps,
@@ -59,15 +56,16 @@ import ArrowBack from "@mui/icons-material/ArrowBack";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
 import type { ButtonProps, IconButtonProps } from "@mui/material";
-import { Box, Button, IconButton, Typography, styled } from "@mui/material";
+import { Box, Button, IconButton, Typography } from "@mui/material";
 import AuthenticateUserModal from "components/AuthenticateUserModal";
-import { Collections } from "components/Collections";
 import CollectionNamer, {
     CollectionNamerAttributes,
 } from "components/Collections/CollectionNamer";
-import CollectionSelector, {
+import {
+    CollectionSelector,
     CollectionSelectorAttributes,
 } from "components/Collections/CollectionSelector";
+import { GalleryBarAndListHeader } from "components/Collections/GalleryBarAndListHeader";
 import ExportModal from "components/ExportModal";
 import {
     FilesDownloadProgress,
@@ -150,17 +148,6 @@ import { isArchivedFile } from "utils/magicMetadata";
 import { getSessionExpiredMessage } from "utils/ui";
 import { getLocalFamilyData } from "utils/user/family";
 
-const SYNC_INTERVAL_IN_MICROSECONDS = 1000 * 60 * 5; // 5 minutes
-
-export const DeadCenter = styled("div")`
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    flex-direction: column;
-`;
-
 const defaultGalleryContext: GalleryContextType = {
     showPlanSelectorModal: () => null,
     setActiveCollectionID: () => null,
@@ -183,8 +170,20 @@ export const GalleryContext = createContext<GalleryContextType>(
     defaultGalleryContext,
 );
 
+/**
+ * The default view for logged in users.
+ *
+ * I heard you like ascii art.
+ *
+ *        Navbar / Search         ^
+ *     ---------------------      |
+ *          Gallery Bar         sticky
+ *     ---------------------   ---/---
+ *       Photo List Header    scrollable
+ *     ---------------------      |
+ *           Photo List           v
+ */
 export default function Gallery() {
-    const router = useRouter();
     const [user, setUser] = useState(null);
     const [familyData, setFamilyData] = useState<FamilyData>(null);
     const [collections, setCollections] = useState<Collection[]>(null);
@@ -297,8 +296,6 @@ export default function Gallery() {
 
     const closeSidebar = () => setSidebarView(false);
     const openSidebar = () => setSidebarView(true);
-    const [photoListHeader, setPhotoListHeader] =
-        useState<TimeStampListItem>(null);
 
     const [exportModalView, setExportModalView] = useState(false);
 
@@ -322,7 +319,7 @@ export default function Gallery() {
         SearchOption | undefined
     >();
 
-    // If visible, what should the gallery bar show.
+    // If visible, what should the (sticky) gallery bar show.
     const [barMode, setBarMode] = useState<GalleryBarMode>("albums");
 
     // The currently selected person in the gallery bar (if any).
@@ -330,13 +327,19 @@ export default function Gallery() {
 
     const people = useSyncExternalStore(peopleSubscribe, peopleSnapshot);
 
+    const [isClipSearchResult, setIsClipSearchResult] =
+        useState<boolean>(false);
+
+    // The (non-sticky) header shown at the top of the gallery items.
+    const [photoListHeader, setPhotoListHeader] =
+        useState<TimeStampListItem>(null);
+
     const [
         filesDownloadProgressAttributesList,
         setFilesDownloadProgressAttributesList,
     ] = useState<FilesDownloadProgressAttributes[]>([]);
 
-    const [isClipSearchResult, setIsClipSearchResult] =
-        useState<boolean>(false);
+    const router = useRouter();
 
     // Ensure that the keys in local storage are not malformed by verifying that
     // the recoveryKey can be decrypted with the masterKey.
@@ -398,9 +401,10 @@ export default function Gallery() {
             await syncWithRemote(true);
             setIsFirstLoad(false);
             setJustSignedUp(false);
-            syncInterval.current = setInterval(() => {
-                syncWithRemote(false, true);
-            }, SYNC_INTERVAL_IN_MICROSECONDS);
+            syncInterval.current = setInterval(
+                () => syncWithRemote(false, true),
+                5 * 60 * 1000 /* 5 minutes */,
+            );
             if (electron) {
                 electron.onMainWindowFocus(() => syncWithRemote(false, true));
                 if (await shouldShowWhatsNew(electron)) setOpenWhatsNew(true);
@@ -823,10 +827,6 @@ export default function Gallery() {
         setHiddenCollectionSummaries(hiddenCollectionSummaries);
     };
 
-    if (!collectionSummaries || !filteredData) {
-        return <div />;
-    }
-
     const setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator =
         (folderName, collectionID, isHidden) => {
             const id = filesDownloadProgressAttributesList?.length ?? 0;
@@ -1037,6 +1037,10 @@ export default function Gallery() {
         log.debug(() => ["person", activePerson]);
     }
 
+    if (!collectionSummaries || !filteredData) {
+        return <div></div>;
+    }
+
     return (
         <GalleryContext.Provider
             value={{
@@ -1126,7 +1130,7 @@ export default function Gallery() {
                     )}
                 </NavbarBase>
 
-                <Collections
+                <GalleryBarAndListHeader
                     {...{
                         shouldHide: isInSearchMode,
                         mode: barMode,
@@ -1364,22 +1368,4 @@ const HiddenSectionNavbarContents: React.FC<
             <Typography>{t("section_hidden")}</Typography>
         </FlexWrapper>
     </HorizontalFlex>
-);
-
-interface SearchResultsHeaderProps {
-    selectedOption: SearchOption;
-}
-
-const SearchResultsHeader: React.FC<SearchResultsHeaderProps> = ({
-    selectedOption,
-}) => (
-    <GalleryItemsHeaderAdapter>
-        <Typography color="text.muted" variant="large">
-            {t("search_results")}
-        </Typography>
-        <GalleryItemsSummary
-            name={selectedOption.suggestion.label}
-            fileCount={selectedOption.fileCount}
-        />
-    </GalleryItemsHeaderAdapter>
 );
