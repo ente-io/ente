@@ -1,11 +1,17 @@
 import type { Collection } from "@/media/collection";
 import type { Person } from "@/new/photos/services/ml/cgroups";
-import type {
-    CollectionListSortOrder,
-    CollectionSummaries,
+import {
+    collectionsSortOrders,
+    type CollectionListSortOrder,
+    type CollectionSummaries,
 } from "@/new/photos/types/collection";
+import { includes } from "@/utils/type-guards";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
-import { LS_KEYS } from "@ente/shared/storage/localStorage";
+import {
+    getData,
+    LS_KEYS,
+    removeData,
+} from "@ente/shared/storage/localStorage";
 import AllCollections from "components/Collections/AllCollections";
 import CollectionInfoWithOptions from "components/Collections/CollectionInfoWithOptions";
 import { CollectionListBar } from "components/Collections/CollectionListBar";
@@ -205,4 +211,58 @@ export const Collections: React.FC<CollectionsProps> = ({
             />
         </>
     );
+};
+
+/**
+ * A hook that maintains the collections sort order both as in-memory and local
+ * storage state.
+ */
+const useCollectionsSortOrderLocalState = (
+    initialValue: CollectionListSortOrder,
+) => {
+    const key = "collectionsSortOrder";
+
+    const [value, setValue] = useState(initialValue);
+
+    useEffect(() => {
+        const sortOrder = localStorage.getItem(key);
+        if (sortOrder) {
+            if (includes(collectionsSortOrders, sortOrder)) {
+                setValue(sortOrder);
+            }
+        } else {
+            // Older versions of this code used to store in a different place.
+            // Migrate it from there if it is found there.
+            //
+            // This migration added Sep 2024, can be removed after a bit (esp
+            // since it effectively runs on each app start). (tag: Migration).
+            const oldData = getData(LS_KEYS.COLLECTION_SORT_BY);
+            if (oldData) {
+                let newValue: CollectionListSortOrder | undefined;
+                switch (oldData.value) {
+                    case 0:
+                        newValue = "name";
+                        break;
+                    case 1:
+                        newValue = "creation-time-asc";
+                        break;
+                    case 2:
+                        newValue = "updation-time-desc";
+                        break;
+                }
+                if (newValue) {
+                    localStorage.setItem(key, newValue);
+                    setValue(newValue);
+                }
+                removeData(LS_KEYS.COLLECTION_SORT_BY);
+            }
+        }
+    }, []);
+
+    const setter = (value: CollectionListSortOrder) => {
+        localStorage.setItem(key, value);
+        setValue(value);
+    };
+
+    return [value, setter];
 };

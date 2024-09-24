@@ -36,10 +36,19 @@ export interface CollectionSummary {
 export type CollectionSummaries = Map<number, CollectionSummary>;
 
 /**
- * Sort order for use when we're showing lists of collections (e.g. in the
- * collection bar).
+ * The sort orders that can be used when we're showing list of collections (e.g.
+ * in the collection bar).
+ *
+ * This is the list of all possible values, see {@link CollectionListSortOrder}
+ * for the type.
  */
-export type CollectionListSortOrder =
-    | "name"
-    | "creation-time-asc"
-    | "updation-time-desc";
+export const collectionsSortOrders = [
+    "name",
+    "creation-time-asc",
+    "updation-time-desc",
+] as const;
+
+/**
+ * Type of individual {@link collectionsSortOrders} values.
+ */
+export type CollectionListSortOrder = (typeof collectionsSortOrders)[number];
