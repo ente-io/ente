@@ -1,7 +1,10 @@
 import { useIsMobileWidth } from "@/base/hooks";
 import { CollectionsSortOptions } from "@/new/photos/components/CollectionsSortOptions";
 import { BarItemTile, ItemCard } from "@/new/photos/components/ItemCards";
-import { FilledIconButton } from "@/new/photos/components/mui-custom";
+import {
+    FilledIconButton,
+    UnstyledButton,
+} from "@/new/photos/components/mui-custom";
 import {
     IMAGE_CONTAINER_MAX_WIDTH,
     MIN_COLUMNS,
@@ -327,22 +330,10 @@ const ModeIndicator: React.FC<
     );
 };
 
-const AlbumModeButton = styled("button")(
+const AlbumModeButton = styled(UnstyledButton)(
     ({ theme }) => `
-    /* Reset some button defaults that are unwanted here. */
-    background: transparent;
-    border: 0;
-    padding: 0;
-    /* Not sure why the button's default pointer is not coming into effect
-       automatically. */
-    cursor: pointer;
-    font: inherit;
-    p {
-        color: ${theme.colors.text.muted}
-    }
-    p:hover {
-        color: ${theme.colors.text.base};
-    }
+    p { color: ${theme.colors.text.muted} }
+    p:hover { color: ${theme.colors.text.base} }
 `,
 );
 

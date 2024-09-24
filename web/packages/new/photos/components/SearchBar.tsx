@@ -42,6 +42,7 @@ import {
 } from "react-select";
 import AsyncSelect from "react-select/async";
 import { SearchPeopleList } from "./PeopleList";
+import { UnstyledButton } from "./mui-custom";
 
 export interface SearchBarProps {
     /**
@@ -438,15 +439,8 @@ const PeopleHeader: React.FC<PeopleHeaderProps> = ({ onClick }) => (
     </PeopleHeaderButton>
 );
 
-const PeopleHeaderButton = styled("button")(
+const PeopleHeaderButton = styled(UnstyledButton)(
     ({ theme }) => `
-    /* Reset some button defaults that are affecting us */
-    background: transparent;
-    border: 0;
-    padding: 0;
-    font: inherit;
-    /* Button should do this for us, but it isn't working inside the select */
-    cursor: pointer;
     /* The color for the chevron */
     color: ${theme.colors.stroke.muted};
     /* Hover indication */
