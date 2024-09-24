@@ -254,13 +254,7 @@ export default function Gallery() {
     const syncInProgress = useRef(true);
     const syncInterval = useRef<NodeJS.Timeout>();
     const resync = useRef<{ force: boolean; silent: boolean }>();
-    // tempDeletedFileIds and tempHiddenFileIds are used to keep track of files that are deleted/hidden in the current session but not yet synced with the server.
-    const [tempDeletedFileIds, setTempDeletedFileIds] = useState<Set<number>>(
-        new Set<number>(),
-    );
-    const [tempHiddenFileIds, setTempHiddenFileIds] = useState<Set<number>>(
-        new Set<number>(),
-    );
+
     const {
         startLoading,
         finishLoading,
@@ -339,6 +333,16 @@ export default function Gallery() {
         filesDownloadProgressAttributesList,
         setFilesDownloadProgressAttributesList,
     ] = useState<FilesDownloadProgressAttributes[]>([]);
+
+    // tempDeletedFileIds and tempHiddenFileIds are used to keep track of files
+    // that are deleted/hidden in the current session but not yet synced with
+    // the server.
+    const [tempDeletedFileIds, setTempDeletedFileIds] = useState(
+        new Set<number>(),
+    );
+    const [tempHiddenFileIds, setTempHiddenFileIds] = useState(
+        new Set<number>(),
+    );
 
     const router = useRouter();
 
@@ -550,7 +554,13 @@ export default function Gallery() {
         } else if (barMode == "people") {
             const pfSet = new Set(ensure(activePerson).fileIDs);
             filteredFiles = getUniqueFiles(
-                files.filter((f) => pfSet.has(f.id)),
+                files.filter(({ id }) => {
+                    if (!pfSet.has(id)) return false;
+                    // TODO-Cluster
+                    // if (tempDeletedFileIds?.has(id)) return false;
+                    // if (tempHiddenFileIds?.has(id)) return false;
+                    return true;
+                }),
             );
         } else {
             const baseFiles = barMode == "hidden-albums" ? hiddenFiles : files;
