@@ -1116,7 +1116,7 @@ export default function Gallery() {
                 <Collections
                     shouldHide={isInSearchMode}
                     mode={barMode}
-                    setMode={setBarMode}
+                    onChangeMode={setBarMode}
                     {...{
                         collectionSummaries,
                         activeCollection,

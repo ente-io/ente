@@ -50,21 +50,25 @@ export interface GalleryBarImplProps {
      */
     mode: GalleryBarMode;
     /**
-     * Called when the user switches to a different view.
+     * Called when the user selects to a different mode than the current one.
      */
-    setMode: (mode: GalleryBarMode) => void;
+    onChangeMode: (mode: GalleryBarMode) => void;
     /**
      * Massaged data about the collections that should be shown in the bar.
      */
     collectionSummaries: CollectionSummary[];
     /**
-     * The ID of the currently active collection (if any)
+     * The ID of the currently active collection (if any).
+     *
+     * Required if mode is not "albums" or "hidden-albums".
      */
-    activeCollectionID: number;
+    activeCollectionID: number | undefined;
     /**
-     * Called when the user changes the active collection.
+     * Called when the user selects a new collection in the bar.
+     *
+     * This callback is passed the id of the selected collection.
      */
-    setActiveCollectionID: (id?: number) => void;
+    onSelectCollectionID: (collectionID: number) => void;
     /**
      * Called when the user selects the option to show a modal with all the
      * collections.
@@ -83,23 +87,23 @@ export interface GalleryBarImplProps {
      */
     people: Person[];
     /**
-     * The currently selected person (if any).
+     * The currently selected person.
      *
      * Required if mode is "people".
      */
     activePerson: Person | undefined;
     /**
-     * Called when the user selects the given person in the bar.
+     * Called when the user selects a new person in the bar.
      */
     onSelectPerson: (person: Person) => void;
 }
 
 export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     mode,
-    setMode,
+    onChangeMode,
     collectionSummaries,
     activeCollectionID,
-    setActiveCollectionID,
+    onSelectCollectionID,
     onShowAllCollections,
     collectionsSortBy,
     onChangeCollectionsSortBy,
@@ -194,8 +198,8 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                 ? {
                       type: "collections",
                       collectionSummaries,
-                      activeCollectionID,
-                      onCollectionClick: setActiveCollectionID,
+                      activeCollectionID: ensure(activeCollectionID),
+                      onCollectionClick: onSelectCollectionID,
                   }
                 : {
                       type: "people",
@@ -207,7 +211,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
             mode,
             collectionSummaries,
             activeCollectionID,
-            setActiveCollectionID,
+            onSelectCollectionID,
             people,
             activePerson,
             onSelectPerson,
@@ -242,7 +246,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     return (
         <BarWrapper>
             <Row1>
-                <ModeIndicator {...{ mode, setMode }} />
+                <ModeIndicator {...{ mode, onChangeMode }} />
                 {controls1}
             </Row1>
             <Row2>
@@ -299,7 +303,7 @@ export const Row2 = styled(Box)`
 `;
 
 const ModeIndicator: React.FC<
-    Pick<GalleryBarImplProps, "mode" | "setMode">
+    Pick<GalleryBarImplProps, "mode" | "onChangeMode">
 > = ({ mode }) => (
     <Stack direction="row" sx={{ gap: "10px" }}>
         <Typography color={mode == "people" ? "text.muted" : "text.base"}>

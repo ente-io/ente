@@ -1,9 +1,8 @@
 import type { Collection } from "@/media/collection";
 import {
     GalleryBarImpl,
-    type GalleryBarMode,
+    type GalleryBarImplProps,
 } from "@/new/photos/components/Gallery/BarImpl";
-import type { Person } from "@/new/photos/services/ml/cgroups";
 import {
     collectionsSortBy,
     type CollectionsSortBy,
@@ -36,31 +35,34 @@ import {
 } from "../FilesDownloadProgress";
 import { AlbumCastDialog } from "./AlbumCastDialog";
 
-interface CollectionsProps {
-    /** `true` if the bar should be hidden altogether. */
+type CollectionsProps = Omit<
+    GalleryBarImplProps,
+    | "collectionSummaries"
+    | "hiddenCollectionSummaries"
+    | "onSelectCollectionID"
+    | "collectionsSortBy"
+    | "onChangeCollectionsSortBy"
+    | "onShowAllCollections"
+> & {
+    /**
+     * When `true`, the bar is be hidden altogether.
+     */
     shouldHide: boolean;
-    /** otherwise show stuff that belongs to this mode. */
-    mode: GalleryBarMode;
-    setMode: (mode: GalleryBarMode) => void;
     collectionSummaries: CollectionSummaries;
     activeCollection: Collection;
-    activeCollectionID?: number;
-    setActiveCollectionID: (id?: number) => void;
+    setActiveCollectionID: (collectionID: number) => void;
     hiddenCollectionSummaries: CollectionSummaries;
-    people: Person[];
-    activePerson: Person | undefined;
-    onSelectPerson: (person: Person) => void;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
     setPhotoListHeader: (value: TimeStampListItem) => void;
     filesDownloadProgressAttributesList: FilesDownloadProgressAttributes[];
     setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
-}
+};
 
 // TODO-Cluster Rename me to GalleryBar and subsume GalleryBarImpl
 export const Collections: React.FC<CollectionsProps> = ({
     shouldHide,
     mode,
-    setMode,
+    onChangeMode,
     collectionSummaries,
     activeCollection,
     activeCollectionID,
@@ -165,14 +167,14 @@ export const Collections: React.FC<CollectionsProps> = ({
             <GalleryBarImpl
                 {...{
                     mode,
-                    setMode,
+                    onChangeMode,
                     activeCollectionID,
-                    setActiveCollectionID,
                     people,
                     activePerson,
                     onSelectPerson,
                     collectionsSortBy,
                 }}
+                onSelectCollectionID={setActiveCollectionID}
                 onChangeCollectionsSortBy={setCollectionsSortBy}
                 onShowAllCollections={() => setOpenAllCollectionDialog(true)}
                 collectionSummaries={sortedCollectionSummaries.filter((x) =>
@@ -186,7 +188,7 @@ export const Collections: React.FC<CollectionsProps> = ({
                 collectionSummaries={sortedCollectionSummaries.filter(
                     (x) => !isSystemCollection(x.type),
                 )}
-                setActiveCollectionID={setActiveCollectionID}
+                onSelectCollectionID={setActiveCollectionID}
                 onChangeCollectionsSortBy={setCollectionsSortBy}
                 collectionsSortBy={collectionsSortBy}
                 isInHiddenSection={mode == "hidden-albums"}
