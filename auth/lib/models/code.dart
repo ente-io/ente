@@ -28,9 +28,13 @@ class Code {
   bool get isPinned => display.pinned;
 
   bool get isTrashed => display.trashed;
+  String get note => display.note;
 
   final Object? err;
   bool get hasError => err != null;
+
+  String get issuerAccount =>
+      account.isNotEmpty ? '$issuer ($account)' : issuer;
 
   Code(
     this.account,

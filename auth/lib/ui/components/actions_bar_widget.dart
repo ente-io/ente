@@ -24,34 +24,49 @@ class _ActionBarWidgetState extends State<ActionBarWidget> {
     return SizedBox(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: Column(
+          // left align the text
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Flexible(
-              flex: 1,
-              child: Text(
-                widget.code.issuer,
+            if (widget.code.note.isNotEmpty)
+              Text(
+                widget.code.note,
                 style: textTheme.miniMuted,
               ),
-            ),
-            Flexible(
-              flex: 1,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () {
-                    widget.onCancel?.call();
-                  },
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      context.l10n.cancel,
-                      style: textTheme.mini,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Flexible(
+                  flex: 1,
+                  child: Column(
+                    children: [
+                      Text(
+                        widget.code.issuerAccount,
+                        style: textTheme.miniMuted,
+                      ),
+                    ],
+                  ),
+                ),
+                Flexible(
+                  flex: 1,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () {
+                        widget.onCancel?.call();
+                      },
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          context.l10n.cancel,
+                          style: textTheme.mini,
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
+              ],
             ),
           ],
         ),
