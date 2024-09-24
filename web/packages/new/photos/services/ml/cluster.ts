@@ -3,7 +3,6 @@ import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import type { EnteFile } from "../../types/file";
-import type { Person } from "./cgroups";
 import {
     faceDirection,
     fileIDFromFaceID,
@@ -11,6 +10,7 @@ import {
     type FaceIndex,
 } from "./face";
 import { dotProduct } from "./math";
+import type { Person } from "./people";
 
 /**
  * A face cluster is an set of faces, and a nanoid to uniquely identify it.

@@ -7,7 +7,7 @@
  * there.
  */
 
-import type { Person } from "@/new/photos/services/ml/cgroups";
+import type { Person } from "@/new/photos/services/ml/people";
 import type { SearchOption } from "@/new/photos/services/search/types";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
 import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";

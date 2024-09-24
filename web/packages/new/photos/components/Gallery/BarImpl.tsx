@@ -13,7 +13,7 @@ import {
     IMAGE_CONTAINER_MAX_WIDTH,
     MIN_COLUMNS,
 } from "@/new/photos/components/PhotoList";
-import type { Person } from "@/new/photos/services/ml/cgroups";
+import type { Person } from "@/new/photos/services/ml/people";
 import type {
     CollectionSummary,
     CollectionSummaryType,

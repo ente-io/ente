@@ -6,7 +6,7 @@
 import type { Location } from "@/base/types";
 import type { Collection } from "@/media/collection";
 import { FileType } from "@/media/file-type";
-import type { Person } from "@/new/photos/services/ml/cgroups";
+import type { Person } from "@/new/photos/services/ml/people";
 import type { EnteFile } from "@/new/photos/types/file";
 import type { LocationTag } from "../user-entity";
 

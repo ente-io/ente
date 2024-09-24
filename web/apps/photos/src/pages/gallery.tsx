@@ -17,7 +17,7 @@ import {
     getLocalTrashedFiles,
 } from "@/new/photos/services/files";
 import { peopleSnapshot, peopleSubscribe } from "@/new/photos/services/ml";
-import type { Person } from "@/new/photos/services/ml/cgroups";
+import type { Person } from "@/new/photos/services/ml/people";
 import {
     filterSearchableFiles,
     setSearchCollectionsAndFiles,
