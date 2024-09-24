@@ -1,6 +1,6 @@
 import { useIsMobileWidth } from "@/base/hooks";
 import { CollectionsSortOptions } from "@/new/photos/components/CollectionsSortOptions";
-import { BarItemTile, ItemCard } from "@/new/photos/components/ItemCards";
+import { BarItemTile, ItemCard, TileTextOverlay } from "@/new/photos/components/ItemCards";
 import {
     FilledIconButton,
     UnstyledButton,
@@ -498,19 +498,10 @@ interface CardTextProps {
 }
 
 const CardText: React.FC<CardTextProps> = ({ text }) => (
-    <CardText_>
+    <TileTextOverlay>
         <TruncatedText {...{ text }} />
-    </CardText_>
+    </TileTextOverlay>
 );
-
-const CardText_ = styled(Overlay)`
-    padding: 4px;
-    background: linear-gradient(
-        0deg,
-        rgba(0, 0, 0, 0.1) 0%,
-        rgba(0, 0, 0, 0.5) 86.46%
-    );
-`;
 
 const TruncatedText: React.FC<CardTextProps> = ({ text }) => (
     <Tooltip title={text}>

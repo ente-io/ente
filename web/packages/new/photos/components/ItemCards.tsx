@@ -63,9 +63,13 @@ export const ItemCard: React.FC<React.PropsWithChildren<ItemCardProps>> = ({
 /**
  * A generic "base" tile, meant to be used (after setting dimensions) as the
  * {@link TileComponent} provided to an {@link ItemCard}.
+ *
+ * Use {@link ItemTileOverlay} (usually via one of its presets) to overlay
+ * content on top of the tile.
  */
 export const ItemTile = styled("div")`
     display: flex;
+    /* Act as container for the absolutely positioned ItemTileOverlays. */
     position: relative;
     border-radius: 4px;
     overflow: hidden;
@@ -103,4 +107,30 @@ export const BarItemTile = styled(ItemTile)`
 export const AllCollectionTile = styled(ItemTile)`
     width: 150px;
     height: 150px;
+`;
+
+/**
+ * An empty overlay on top of the nearest relative positioned ancestor.
+ *
+ * This is meant to be used in tandem with {@link ItemTile}.
+ */
+export const ItemTileOverlay = styled("div")`
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+`;
+
+/**
+ * An {@link ItemTileOverlay} suitable for hosting textual content for small and
+ * medium sized tiles.
+ */
+export const TileTextOverlay = styled(ItemTileOverlay)`
+    padding: 4px;
+    background: linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.1) 0%,
+        rgba(0, 0, 0, 0.5) 86.46%
+    );
 `;
