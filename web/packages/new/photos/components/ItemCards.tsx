@@ -8,10 +8,12 @@ import { styled } from "@mui/material";
 import React, { useEffect, useState } from "react";
 
 interface ItemCardProps {
-    /** One of the *Tile components to use as the top level element. */
+    /**
+     * One of the *Tile components to use as the top level element.
+     */
     TileComponent: React.FC<React.PropsWithChildren>;
     /**
-     * The file (if any) whose thumbnail (if any) should be should be shown.
+     * Optional file whose thumbnail (if any) should be should be shown.
      */
     coverFile?: EnteFile | undefined;
     /**
@@ -21,14 +23,14 @@ interface ItemCardProps {
      * downloads.
      */
     isScrolling?: boolean;
-    /** Optional click handler. */
+    /**
+     * Optional click handler.
+     */
     onClick?: () => void;
 }
 /**
- * A generic card that can be be used to represent collections,  files, people -
- * anything that has an associated "cover photo".
- *
- * This is a simplified variant / almost-duplicate of {@link CollectionCard}.
+ * A generic card that can be be used to represent collections, files, people -
+ * anything that (usually) has an associated "cover photo".
  */
 export const ItemCard: React.FC<React.PropsWithChildren<ItemCardProps>> = ({
     TileComponent,
