@@ -109,6 +109,7 @@ export default function PublicCollectionGallery() {
         ownCount: 0,
         count: 0,
         collectionID: 0,
+        context: undefined,
     });
 
     const {
@@ -472,7 +473,12 @@ export default function PublicCollectionGallery() {
         if (!selected?.count) {
             return;
         }
-        setSelected({ ownCount: 0, count: 0, collectionID: 0 });
+        setSelected({
+            ownCount: 0,
+            count: 0,
+            collectionID: 0,
+            context: undefined,
+        });
     };
 
     const downloadFilesHelper = async () => {

@@ -19,6 +19,16 @@ import React from "react";
 import { SpaceBetweenFlex } from "../mui-custom";
 import { GalleryItemsHeaderAdapter, GalleryItemsSummary } from "./ListHeader";
 
+/**
+ * The context in which a selection was made.
+ *
+ * This allows us to reset the selection if user moves to a different context
+ * and starts a new selection.
+ * */
+export type SelectionContext =
+    | { mode: "albums" | "hidden-albums"; collectionID: number }
+    | { mode: "people"; personID: string };
+
 interface SearchResultsHeaderProps {
     selectedOption: SearchOption;
 }

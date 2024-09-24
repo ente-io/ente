@@ -202,6 +202,7 @@ export default function Gallery() {
         ownCount: 0,
         count: 0,
         collectionID: 0,
+        context: { mode: "albums", collectionID: ALL_SECTION },
     });
     const [planModalView, setPlanModalView] = useState(false);
     const [blockingLoad, setBlockingLoad] = useState(false);
@@ -661,6 +662,13 @@ export default function Gallery() {
             ownCount: 0,
             count: 0,
             collectionID: activeCollectionID,
+            context:
+                barMode == "people" && activePerson
+                    ? { mode: "people" as const, personID: activePerson.id }
+                    : {
+                          mode: "albums" as const,
+                          collectionID: ensure(activeCollectionID),
+                      },
         };
 
         filteredData.forEach((item) => {
@@ -677,7 +685,12 @@ export default function Gallery() {
         if (!selected?.count) {
             return;
         }
-        setSelected({ ownCount: 0, count: 0, collectionID: 0 });
+        setSelected({
+            ownCount: 0,
+            count: 0,
+            collectionID: 0,
+            context: undefined,
+        });
     };
 
     const keyboardShortcutHandlerRef = useRef({
@@ -1207,6 +1220,7 @@ export default function Gallery() {
                 ) : (
                     <PhotoFrame
                         page={PAGES.GALLERY}
+                        mode={barMode}
                         files={filteredData}
                         syncWithRemote={syncWithRemote}
                         favItemIds={favItemIds}
@@ -1216,6 +1230,7 @@ export default function Gallery() {
                         setTempDeletedFileIds={setTempDeletedFileIds}
                         setIsPhotoSwipeOpen={setIsPhotoSwipeOpen}
                         activeCollectionID={activeCollectionID}
+                        activePersonID={activePerson?.id}
                         enableDownload={true}
                         fileToCollectionsMap={fileToCollectionsMap}
                         collectionNameMap={collectionNameMap}
