@@ -113,8 +113,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     const [canScrollRight, setCanScrollRight] = useState(false);
 
     const listContainerRef = useRef<HTMLDivElement | null>(null);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const listRef = useRef<any>(null);
+    const listRef = useRef<FixedSizeList | null>(null);
 
     const updateScrollState = useCallback(() => {
         if (!listContainerRef.current) return;
@@ -186,7 +185,6 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                 i = people.findIndex(({ id }) => id == activePerson?.id);
                 break;
         }
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
         if (i != -1) listRef.current.scrollToItem(i, "smart");
     }, [mode, collectionSummaries, activeCollectionID, people, activePerson]);
 
