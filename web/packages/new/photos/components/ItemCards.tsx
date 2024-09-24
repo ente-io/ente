@@ -134,3 +134,16 @@ export const TileTextOverlay = styled(ItemTileOverlay)`
         rgba(0, 0, 0, 0.5) 86.46%
     );
 `;
+
+/**
+ * A variation of {@link TileTextOverlay} for use with larger tiles like the
+ * {@link AllCollectionTile}.
+ */
+export const LargeTileTextOverlay = styled(ItemTileOverlay)`
+    padding: 8px;
+    background: linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.1) 0%,
+        rgba(0, 0, 0, 0.5) 86.46%
+    );
+`;

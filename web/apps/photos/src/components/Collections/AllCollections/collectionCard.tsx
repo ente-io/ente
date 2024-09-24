@@ -1,9 +1,11 @@
-import { AllCollectionTile } from "@/new/photos/components/ItemCards";
+import {
+    AllCollectionTile,
+    LargeTileTextOverlay,
+} from "@/new/photos/components/ItemCards";
 import type { CollectionSummary } from "@/new/photos/types/collection";
 import { Typography } from "@mui/material";
 import { t } from "i18next";
 import CollectionCard from "../CollectionCard";
-import { AllCollectionTileText } from "../styledComponents";
 
 interface Iprops {
     collectionSummary: CollectionSummary;
@@ -23,12 +25,12 @@ export default function AllCollectionCard({
             onClick={() => onCollectionClick(collectionSummary.id)}
             isScrolling={isScrolling}
         >
-            <AllCollectionTileText>
+            <LargeTileTextOverlay>
                 <Typography>{collectionSummary.name}</Typography>
                 <Typography variant="small" color="text.muted">
                     {t("photos_count", { count: collectionSummary.fileCount })}
                 </Typography>
-            </AllCollectionTileText>
+            </LargeTileTextOverlay>
         </CollectionCard>
     );
 }
