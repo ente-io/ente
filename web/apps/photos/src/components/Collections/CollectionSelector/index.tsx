@@ -8,10 +8,20 @@ import type {
     CollectionSummaries,
     CollectionSummary,
 } from "@/new/photos/types/collection";
-import { FlexWrapper } from "@ente/shared/components/Container";
+import {
+    CenteredFlex,
+    FlexWrapper,
+    Overlay,
+} from "@ente/shared/components/Container";
 import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleWithCloseButton";
-import { DialogContent, Typography, useMediaQuery } from "@mui/material";
+import {
+    DialogContent,
+    styled,
+    Typography,
+    useMediaQuery,
+} from "@mui/material";
 import { AllCollectionDialog } from "components/Collections/AllCollections/dialog";
+import CollectionCard from "components/Collections/CollectionCard";
 import { t } from "i18next";
 import { useEffect, useState } from "react";
 import { createUnCategorizedCollection } from "services/collectionService";
@@ -22,7 +32,6 @@ import {
     isAddToAllowedCollection,
     isMoveToAllowedCollection,
 } from "utils/collection";
-import AddCollectionButton from "./AddCollectionButton";
 
 export interface CollectionSelectorAttributes {
     callback: (collection: Collection) => void;
@@ -182,3 +191,27 @@ const CollectionSelectorCard: React.FC<CollectionSelectorCardProps> = ({
         </LargeTileTextOverlay>
     </ItemCard>
 );
+
+interface AddCollectionButtonProps {
+    showNextModal: () => void;
+}
+
+export const AddCollectionButton: React.FC<AddCollectionButtonProps> = ({
+    showNextModal,
+}) => (
+    <CollectionCard
+        collectionTile={AllCollectionTile}
+        onClick={() => showNextModal()}
+        coverFile={null}
+    >
+        <LargeTileTextOverlay>{t("create_albums")}</LargeTileTextOverlay>
+        <ImageContainer>
+            <CenteredFlex>+</CenteredFlex>
+        </ImageContainer>
+    </CollectionCard>
+);
+
+const ImageContainer = styled(Overlay)`
+    display: flex;
+    font-size: 42px;
+`;
