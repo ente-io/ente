@@ -1578,6 +1578,26 @@ class FilesDB {
     return collectionIDsOfFile;
   }
 
+  ///Each collectionIDs in list aren't necessarily unique
+  Future<List<int>> getAllCollectionIDsOfFiles(
+    List<int> uploadedFileIDs,
+  ) async {
+    final db = await instance.sqliteAsyncDB;
+    final inParam = uploadedFileIDs.join(',');
+
+    final results = await db.getAll(
+      '''
+      SELECT $columnCollectionID FROM $filesTable
+      WHERE $columnUploadedFileID IN ($inParam) AND $columnCollectionID != -1
+    ''',
+    );
+    final collectionIDsOfFiles = <int>[];
+    for (var result in results) {
+      collectionIDsOfFiles.add(result['collection_id'] as int);
+    }
+    return collectionIDsOfFiles;
+  }
+
   List<EnteFile> convertToFilesForIsolate(Map args) {
     final List<EnteFile> files = [];
     for (final result in args["result"]) {
