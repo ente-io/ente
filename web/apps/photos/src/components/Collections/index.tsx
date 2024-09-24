@@ -127,9 +127,6 @@ export const Collections: React.FC<CollectionsProps> = ({
         setPhotoListHeader({
             item: (
                 <CollectionListHeader
-                    collectionSummary={toShowCollectionSummaries.get(
-                        activeCollectionID,
-                    )}
                     {...{
                         activeCollection,
                         setActiveCollectionID,
@@ -137,10 +134,11 @@ export const Collections: React.FC<CollectionsProps> = ({
                         setFilesDownloadProgressAttributesCreator,
                         isActiveCollectionDownloadInProgress,
                     }}
-                    showCollectionShareModal={() =>
-                        setOpenCollectionShareView(true)
-                    }
-                    setShowAlbumCastDialog={setOpenAlbumCastDialog}
+                    collectionSummary={toShowCollectionSummaries.get(
+                        activeCollectionID,
+                    )}
+                    onCollectionShare={() => setOpenCollectionShareView(true)}
+                    onCollectionCast={() => setOpenAlbumCastDialog(true)}
                 />
             ),
             itemType: ITEM_TYPE.HEADER,

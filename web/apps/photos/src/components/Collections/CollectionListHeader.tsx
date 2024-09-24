@@ -40,8 +40,7 @@ import { UnPinIcon } from "components/icons/UnPinIcon";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";
-import type { Dispatch, SetStateAction } from "react";
-import { useCallback, useContext, useRef, useState } from "react";
+import React, { useCallback, useContext, useRef, useState } from "react";
 import { Trans } from "react-i18next";
 import * as CollectionAPI from "services/collectionService";
 import * as TrashService from "services/trashService";
@@ -62,11 +61,11 @@ interface CollectionListHeaderProps {
     collectionSummary: CollectionSummary;
     activeCollection: Collection;
     setActiveCollectionID: (collectionID: number) => void;
-    setCollectionNamerAttributes: SetCollectionNamerAttributes;
-    showCollectionShareModal: () => void;
-    setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
     isActiveCollectionDownloadInProgress: () => boolean;
-    setShowAlbumCastDialog: Dispatch<SetStateAction<boolean>>;
+    onCollectionShare: () => void;
+    onCollectionCast: () => void;
+    setCollectionNamerAttributes: SetCollectionNamerAttributes;
+    setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
 }
 
 export const CollectionListHeader: React.FC<CollectionListHeaderProps> = ({
@@ -128,11 +127,11 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
     activeCollection,
     collectionSummaryType,
     setActiveCollectionID,
+    onCollectionShare,
+    onCollectionCast,
     setCollectionNamerAttributes,
-    showCollectionShareModal,
     setFilesDownloadProgressAttributesCreator,
     isActiveCollectionDownloadInProgress,
-    setShowAlbumCastDialog,
 }) => {
     const { startLoading, finishLoading, setDialogMessage } =
         useContext(AppContext);
@@ -302,8 +301,6 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
         setActiveCollectionID(ALL_SECTION);
     });
 
-    const showCastAlbumDialog = () => setShowAlbumCastDialog(true);
-
     const pinAlbum = wrap(() => changeCollectionOrder(activeCollection, 1));
 
     const unpinAlbum = wrap(() => changeCollectionOrder(activeCollection, 0));
@@ -343,7 +340,7 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
                 isDownloadInProgress={isActiveCollectionDownloadInProgress}
                 onEmptyTrashClick={confirmEmptyTrash}
                 onDownloadClick={downloadCollection}
-                onShareClick={showCollectionShareModal}
+                onShareClick={onCollectionShare}
             />
 
             <OverflowMenu
@@ -376,7 +373,7 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
                         onArchiveClick={archiveAlbum}
                         onUnarchiveClick={unarchiveAlbum}
                         onLeaveSharedAlbumClick={confirmLeaveSharedAlbum}
-                        onCastClick={showCastAlbumDialog}
+                        onCastClick={onCollectionCast}
                     />
                 ) : (
                     <AlbumCollectionOptions
@@ -392,8 +389,8 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
                         onHideClick={hideAlbum}
                         onUnhideClick={unhideAlbum}
                         onDeleteClick={confirmDeleteCollection}
-                        onShareClick={showCollectionShareModal}
-                        onCastClick={showCastAlbumDialog}
+                        onShareClick={onCollectionShare}
+                        onCastClick={onCollectionCast}
                     />
                 )}
             </OverflowMenu>
