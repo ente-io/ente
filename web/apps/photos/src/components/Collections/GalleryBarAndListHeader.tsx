@@ -9,6 +9,7 @@ import {
     type CollectionsSortBy,
     type CollectionSummaries,
 } from "@/new/photos/types/collection";
+import { ensure } from "@/utils/ensure";
 import { includes } from "@/utils/type-guards";
 import {
     getData,
@@ -35,7 +36,6 @@ import {
 } from "../FilesDownloadProgress";
 import { AlbumCastDialog } from "./AlbumCastDialog";
 import { CollectionHeader } from "./CollectionHeader";
-import { ensure } from "@/utils/ensure";
 
 type CollectionsProps = Omit<
     GalleryBarImplProps,

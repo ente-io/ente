@@ -1,6 +1,10 @@
 import { useIsMobileWidth } from "@/base/hooks";
 import { CollectionsSortOptions } from "@/new/photos/components/CollectionsSortOptions";
-import { BarItemTile, ItemCard, TileTextOverlay } from "@/new/photos/components/ItemCards";
+import {
+    BarItemTile,
+    ItemCard,
+    TileTextOverlay,
+} from "@/new/photos/components/ItemCards";
 import {
     FilledIconButton,
     UnstyledButton,
