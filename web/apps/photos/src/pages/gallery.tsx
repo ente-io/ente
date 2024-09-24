@@ -62,7 +62,8 @@ import { Collections } from "components/Collections";
 import CollectionNamer, {
     CollectionNamerAttributes,
 } from "components/Collections/CollectionNamer";
-import CollectionSelector, {
+import {
+    CollectionSelector,
     CollectionSelectorAttributes,
 } from "components/Collections/CollectionSelector";
 import ExportModal from "components/ExportModal";

@@ -41,19 +41,20 @@ export interface CollectionSelectorAttributes {
     onCancel?: () => void;
 }
 
-interface Props {
+interface CollectionSelectorProps {
     open: boolean;
     onClose: () => void;
     attributes: CollectionSelectorAttributes;
     collections: Collection[];
     collectionSummaries: CollectionSummaries;
 }
-function CollectionSelector({
+
+export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
     attributes,
     collectionSummaries,
     collections,
     ...props
-}: Props) {
+}) => {
     const isMobile = useMediaQuery("(max-width: 428px)");
 
     const [collectionsToShow, setCollectionsToShow] = useState<
@@ -168,9 +169,7 @@ function CollectionSelector({
             </DialogContent>
         </AllCollectionDialog>
     );
-}
-
-export default CollectionSelector;
+};
 
 interface CollectionSelectorCardProps {
     collectionSummary: CollectionSummary;
@@ -196,7 +195,7 @@ interface AddCollectionButtonProps {
     showNextModal: () => void;
 }
 
-export const AddCollectionButton: React.FC<AddCollectionButtonProps> = ({
+const AddCollectionButton: React.FC<AddCollectionButtonProps> = ({
     showNextModal,
 }) => (
     <CollectionCard
