@@ -275,58 +275,21 @@ export default function PublicCollectionGallery() {
         main();
     }, []);
 
-    const downloadEnabled = useMemo(
-        () => publicCollection?.publicURLs?.[0]?.enableDownload ?? true,
-        [publicCollection],
-    );
-
-    const downloadAllFiles = async () => {
-        try {
-            if (!downloadEnabled) {
-                return;
-            }
-            const setFilesDownloadProgressAttributes =
-                setFilesDownloadProgressAttributesCreator(
-                    publicCollection.name,
-                    publicCollection.id,
-                    isHiddenCollection(publicCollection),
-                );
-            await downloadCollectionFiles(
-                publicCollection.name,
-                publicFiles,
-                setFilesDownloadProgressAttributes,
-            );
-        } catch (e) {
-            log.error("failed to downloads shared album all files", e);
-        }
-    };
+    const downloadEnabled =
+        publicCollection?.publicURLs?.[0]?.enableDownload ?? true;
 
     useEffect(() => {
         publicCollection &&
             publicFiles &&
             setPhotoListHeader({
                 item: (
-                    <GalleryItemsHeaderAdapter>
-                        <SpaceBetweenFlex>
-                            <GalleryItemsSummary
-                                name={publicCollection.name}
-                                fileCount={publicFiles.length}
-                            />
-                            {downloadEnabled && (
-                                <OverflowMenu
-                                    ariaControls={"collection-options"}
-                                    triggerButtonIcon={<MoreHoriz />}
-                                >
-                                    <OverflowMenuOption
-                                        startIcon={<FileDownloadOutlinedIcon />}
-                                        onClick={downloadAllFiles}
-                                    >
-                                        {t("download_album")}
-                                    </OverflowMenuOption>
-                                </OverflowMenu>
-                            )}
-                        </SpaceBetweenFlex>
-                    </GalleryItemsHeaderAdapter>
+                    <ListHeader
+                        {...{
+                            publicCollection,
+                            publicFiles,
+                            setFilesDownloadProgressAttributesCreator,
+                        }}
+                    />
                 ),
                 itemType: ITEM_TYPE.HEADER,
                 height: 68,
@@ -731,5 +694,58 @@ const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                 </Tooltip>
             </Stack>
         </SelectionBar>
+    );
+};
+
+interface ListHeaderProps {
+    publicCollection: Collection;
+    publicFiles: EnteFile[];
+    setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
+}
+
+const ListHeader: React.FC<ListHeaderProps> = ({
+    publicCollection,
+    publicFiles,
+    setFilesDownloadProgressAttributesCreator,
+}) => {
+    const downloadEnabled =
+        publicCollection.publicURLs?.[0]?.enableDownload ?? true;
+
+    const downloadAllFiles = async () => {
+        const setFilesDownloadProgressAttributes =
+            setFilesDownloadProgressAttributesCreator(
+                publicCollection.name,
+                publicCollection.id,
+                isHiddenCollection(publicCollection),
+            );
+        await downloadCollectionFiles(
+            publicCollection.name,
+            publicFiles,
+            setFilesDownloadProgressAttributes,
+        );
+    };
+
+    return (
+        <GalleryItemsHeaderAdapter>
+            <SpaceBetweenFlex>
+                <GalleryItemsSummary
+                    name={publicCollection.name}
+                    fileCount={publicFiles.length}
+                />
+                {downloadEnabled && (
+                    <OverflowMenu
+                        ariaControls={"collection-options"}
+                        triggerButtonIcon={<MoreHoriz />}
+                    >
+                        <OverflowMenuOption
+                            startIcon={<FileDownloadOutlinedIcon />}
+                            onClick={downloadAllFiles}
+                        >
+                            {t("download_album")}
+                        </OverflowMenuOption>
+                    </OverflowMenu>
+                )}
+            </SpaceBetweenFlex>
+        </GalleryItemsHeaderAdapter>
     );
 };
