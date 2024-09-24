@@ -5,18 +5,23 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
+import "package:photos/db/files_db.dart";
 import 'package:photos/events/event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file_load_result.dart';
+import "package:photos/models/search/hierarchical/album_filter.dart";
+import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
 import 'package:photos/models/selected_files.dart';
+import "package:photos/services/search_service.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import "package:photos/ui/viewer/gallery/component/group/type.dart";
 import "package:photos/ui/viewer/gallery/component/multiple_groups_gallery_view.dart";
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import "package:photos/ui/viewer/gallery/state/gallery_context_state.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
+import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 import "package:photos/utils/debouncer.dart";
 import "package:photos/utils/hierarchical_search_util.dart";
@@ -111,6 +116,8 @@ class GalleryState extends State<Gallery> {
   late String _logTag;
   bool _sortOrderAsc = false;
   List<EnteFile> _allFiles = [];
+  List<EnteFile> _filteredFiles = [];
+  late SearchFilterDataProvider? _searchFilterDataProvider;
 
   @override
   void initState() {
@@ -181,6 +188,62 @@ class GalleryState extends State<Gallery> {
     });
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _searchFilterDataProvider =
+        InheritedSearchFilterData.maybeOf(context)?.searchFilterDataProvider;
+
+    if (_searchFilterDataProvider != null) {
+      _searchFilterDataProvider!
+          .removeListener(fromApplied: true, listener: _onFiltersUpdated);
+      _searchFilterDataProvider!
+          .addListener(toApplied: true, listener: _onFiltersUpdated);
+    }
+  }
+
+  void _onFiltersUpdated() async {
+    final filters = _searchFilterDataProvider!.appliedFilters;
+    final filterdFiles = <EnteFile>[];
+    final _allFilesInDb = await SearchService.instance.getAllFiles();
+
+//todo: add the top level filter if we're using _allFilesInDb here
+    for (EnteFile file in _allFilesInDb) {
+      for (HierarchicalSearchFilter filter in filters) {
+        if (filter is AlbumFilter) {
+          if (filter.isMatch(file) &&
+              file.uploadedFileID != null &&
+              file.uploadedFileID != -1) {
+            filter.matchedUploadedIDs.add(file.uploadedFileID!);
+          }
+        } else {
+          if (filter.isMatch(file)) {
+            filterdFiles.add(file);
+          }
+        }
+      }
+    }
+
+    Set<int> filteredUploadedIDs = {};
+    for (int i = 0; i < filters.length; i++) {
+      if (i == 0) {
+        filteredUploadedIDs =
+            filteredUploadedIDs.union(filters[i].getMatchedUploadedIDs());
+      } else {
+        filteredUploadedIDs = filteredUploadedIDs
+            .intersection(filters[i].getMatchedUploadedIDs());
+      }
+    }
+
+    final filteredIDtoFile =
+        await FilesDB.instance.getFilesFromIDs(filteredUploadedIDs.toList());
+    for (int id in filteredIDtoFile.keys) {
+      filterdFiles.add(filteredIDtoFile[id]!);
+    }
+
+    _setFilteredFilesAndReload(filterdFiles);
+  }
+
   void _setFilesAndReload(List<EnteFile> files) {
     final hasReloaded = _onFilesLoaded(files);
     if (!hasReloaded && mounted) {
@@ -225,6 +288,20 @@ class GalleryState extends State<Gallery> {
     }
   }
 
+  void _setFilteredFilesAndReload(List<EnteFile> files) {
+    _filteredFiles = files;
+
+    final updatedGroupedFiles =
+        widget.enableFileGrouping && widget.groupType.timeGrouping()
+            ? _groupBasedOnTime(files)
+            : _genericGroupForPerf(files);
+    if (mounted) {
+      setState(() {
+        currentGroupedFiles = updatedGroupedFiles;
+      });
+    }
+  }
+
   // group files into multiple groups and returns `true` if it resulted in a
   // gallery reload
   bool _onFilesLoaded(List<EnteFile> files) {
@@ -257,6 +334,10 @@ class GalleryState extends State<Gallery> {
       subscription.cancel();
     }
     _debouncer.cancelDebounceTimer();
+    if (_searchFilterDataProvider != null) {
+      _searchFilterDataProvider!
+          .removeListener(fromApplied: true, listener: _onFiltersUpdated);
+    }
     super.dispose();
   }
 
