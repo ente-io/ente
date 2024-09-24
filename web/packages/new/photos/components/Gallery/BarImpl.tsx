@@ -423,7 +423,6 @@ const getItemKey = (index: number, data: ItemData) => {
     }
 };
 
-// eslint-disable-next-line react/display-name
 const ListItem = memo((props: ListChildComponentProps<ItemData>) => {
     const { data, index, style } = props;
 
