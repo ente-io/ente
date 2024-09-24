@@ -50,6 +50,7 @@ export const PersonListHeader: React.FC<PeopleListHeaderProps> = ({
             <SpaceBetweenFlex>
                 <GalleryItemsSummary
                     name={person.name ?? "Unnamed person"}
+                    nameProps={person.name ? {} : { color: "text.muted" }}
                     fileCount={person.fileIDs.length}
                 />
                 {hasOptions && (

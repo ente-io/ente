@@ -1,10 +1,18 @@
-import { Box, Stack, styled, Typography } from "@mui/material";
+import {
+    Box,
+    Stack,
+    styled,
+    Typography,
+    type TypographyProps,
+} from "@mui/material";
 import { t } from "i18next";
 import React from "react";
 
 interface GalleryItemsSummaryProps {
     /** The name / title for the items that are being shown. */
     name: string;
+    /** Extra props to pass to the Typography component that shows the name. */
+    nameProps?: TypographyProps;
     /** The number of items being shown. */
     fileCount: number;
     /** An element (usually an icon) placed after the file count. */
@@ -17,12 +25,15 @@ interface GalleryItemsSummaryProps {
  */
 export const GalleryItemsSummary: React.FC<GalleryItemsSummaryProps> = ({
     name,
+    nameProps,
     fileCount,
     endIcon,
 }) => {
     return (
         <div>
-            <Typography variant="h3">{name}</Typography>
+            <Typography variant="h3" {...(nameProps ?? {})}>
+                {name}
+            </Typography>
 
             <Stack
                 direction="row"
