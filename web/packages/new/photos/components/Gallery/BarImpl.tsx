@@ -60,7 +60,7 @@ export interface GalleryBarImplProps {
     /**
      * The ID of the currently active collection (if any)
      */
-    activeCollectionID?: number;
+    activeCollectionID: number;
     /**
      * Called when the user changes the active collection.
      */
@@ -84,6 +84,8 @@ export interface GalleryBarImplProps {
     people: Person[];
     /**
      * The currently selected person (if any).
+     *
+     * Required if mode is "people".
      */
     activePerson: Person | undefined;
     /**
@@ -110,8 +112,9 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     const [canScrollLeft, setCanScrollLeft] = useState(false);
     const [canScrollRight, setCanScrollRight] = useState(false);
 
-    const listContainerRef = useRef<HTMLDivElement>(null);
-    const listRef = useRef(null);
+    const listContainerRef = useRef<HTMLDivElement | null>(null);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const listRef = useRef<any>(null);
 
     const updateScrollState = useCallback(() => {
         if (!listContainerRef.current) return;
@@ -136,7 +139,9 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     // it if the scroll position changes because of other, non-DOM, reasons
     // (e.g. if the list of collections changes).
 
-    const listContainerCallbackRef = useCallback(
+    const listContainerCallbackRef = useCallback<
+        (ref: HTMLDivElement | null) => void
+    >(
         (ref) => {
             listContainerRef.current = ref;
             if (!ref) return;
@@ -164,7 +169,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     }, [updateScrollState, mode, collectionSummaries, people]);
 
     const scroll = (direction: number) => () =>
-        listContainerRef.current.scrollBy(250 * direction, 0);
+        listContainerRef.current?.scrollBy(250 * direction, 0);
 
     useEffect(() => {
         if (!listRef.current) return;
@@ -181,6 +186,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                 i = people.findIndex(({ id }) => id == activePerson?.id);
                 break;
         }
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
         if (i != -1) listRef.current.scrollToItem(i, "smart");
     }, [mode, collectionSummaries, activeCollectionID, people, activePerson]);
 
@@ -193,7 +199,12 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                       activeCollectionID,
                       onCollectionClick: setActiveCollectionID,
                   }
-                : { type: "people", people, activePerson, onSelectPerson },
+                : {
+                      type: "people",
+                      people,
+                      activePerson: ensure(activePerson),
+                      onSelectPerson,
+                  },
         [
             mode,
             collectionSummaries,
@@ -379,7 +390,7 @@ type ItemData =
     | {
           type: "collections";
           collectionSummaries: CollectionSummary[];
-          activeCollectionID?: number;
+          activeCollectionID: number;
           onCollectionClick: (id: number) => void;
       }
     | {
@@ -412,6 +423,7 @@ const getItemKey = (index: number, data: ItemData) => {
     }
 };
 
+// eslint-disable-next-line react/display-name
 const ListItem = memo((props: ListChildComponentProps<ItemData>) => {
     const { data, index, style } = props;
 
@@ -565,7 +577,7 @@ const PersonCard = ({ person, activePerson }: PersonCardProps) => (
                 //onCollectionClick(collectionSummary.id);
             }}
         >
-            <CardText text={person.name} />
+            {person.name && <CardText text={person.name} />}
         </ItemCard>
         {activePerson.id === person.id && <ActiveIndicator />}
     </Box>

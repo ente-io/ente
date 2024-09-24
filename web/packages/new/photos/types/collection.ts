@@ -26,7 +26,7 @@ export interface CollectionSummary {
     type: CollectionSummaryType;
     id: number;
     name: string;
-    coverFile: EnteFile;
+    coverFile: EnteFile | undefined;
     latestFile: EnteFile;
     fileCount: number;
     updationTime: number;
