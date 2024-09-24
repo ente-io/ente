@@ -304,37 +304,42 @@ export const Row2 = styled(Box)`
 
 const ModeIndicator: React.FC<
     Pick<GalleryBarImplProps, "mode" | "onChangeMode">
-> = ({ mode }) => (
-    <Stack direction="row" sx={{ gap: "10px" }}>
-        <Typography color={mode == "people" ? "text.muted" : "text.base"}>
-            {mode == "hidden-albums" ? t("hidden_albums") : t("albums")}
-        </Typography>
-        {process.env.NEXT_PUBLIC_ENTE_WIP_CL && (
-            <Typography color={mode == "people" ? "text.base" : "text.muted"}>
-                {t("people")}
-            </Typography>
-        )}
-    </Stack>
-);
+> = ({ mode, onChangeMode }) => {
+    // Mode switcher is not shown in the hidden albums section.
+    if (mode == "hidden-albums") {
+        return <Typography>{t("hidden_albums")}</Typography>;
+    }
 
-// // TODO-Cluster
-// const PeopleHeaderButton = styled("button")(
-//     ({ theme }) => `
-//     /* Reset some button defaults that are affecting us */
-//     background: transparent;
-//     border: 0;
-//     padding: 0;
-//     font: inherit;
-//     /* Button should do this for us, but it isn't working inside the select */
-//     cursor: pointer;
-//     /* The color for the chevron */
-//     color: ${theme.colors.stroke.muted};
-//     /* Hover indication */
-//     && :hover {
-//         color: ${theme.colors.stroke.base};
-//     }
-// `,
-// );
+    // Show the static mode indicator with only the "Albums" title unless we
+    // come here with the people mode already set. This is because we don't
+    // currently have an empty state for the People mode when ML is not enabled.
+    if (mode == "albums") {
+        return <Typography>{t("albums")}</Typography>;
+    }
+
+    return (
+        <Stack direction="row" sx={{ gap: "10px" }}>
+            <AlbumModeButton onClick={() => onChangeMode("albums")}>
+                {t("albums")}
+            </AlbumModeButton>
+            <Typography>{t("people")}</Typography>
+        </Stack>
+    );
+};
+
+const AlbumModeButton = styled("button")(
+    ({ theme }) => `
+    background: transparent;
+    border: 0;
+    padding: 0;
+    font: inherit;
+    /* Hover indication */
+    color: ${theme.colors.text.muted}
+    && :hover {
+        color: ${theme.colors.text.base};
+    }
+`,
+);
 
 const ScrollButtonBase: React.FC<
     React.ButtonHTMLAttributes<HTMLButtonElement>
