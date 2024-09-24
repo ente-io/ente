@@ -178,13 +178,10 @@ func (c *Controller) RevokeInvite(ctx context.Context, adminID int64, id uuid.UU
 }
 
 func (c *Controller) CloseFamily(ctx context.Context, adminID int64) error {
-	familyMembers, err := c.FamilyRepo.GetMembersWithStatus(adminID, repo.ActiveFamilyMemberStatus)
+	logger := logrus.WithField("adminID", adminID).WithField("operation", "CloseFamily")
+	err := c.removeMembers(ctx, adminID, logger)
 	if err != nil {
-		return stacktrace.Propagate(err, "")
-	}
-	if len(familyMembers) != 1 {
-		msg := fmt.Sprintf("can not close family with %d members", len(familyMembers))
-		return stacktrace.Propagate(ente.NewBadRequestWithMessage(msg), "")
+		return stacktrace.Propagate(err, "failed to remove members")
 	}
 	err = c.FamilyRepo.CloseFamily(ctx, adminID)
 	if err != nil {
