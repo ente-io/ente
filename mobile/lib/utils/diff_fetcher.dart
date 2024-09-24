@@ -25,8 +25,6 @@ class DiffFetcher {
           await CollectionsService.instance.getPublicAlbumToken(collectionID);
       final authJWTToken = await CollectionsService.instance
           .getPublicAlbumTokenJWT(collectionID);
-      final time =
-          CollectionsService.instance.getCollectionSyncTime(collectionID);
 
       final headers = {
         "X-Auth-Access-Token": authToken,
@@ -37,7 +35,7 @@ class DiffFetcher {
       final response = await _enteDio.get(
         "/public-collection/diff",
         options: Options(headers: headers),
-        queryParameters: {"sinceTime": time},
+        queryParameters: {"sinceTime": 0},
       );
 
       final diff = response.data["diff"] as List;

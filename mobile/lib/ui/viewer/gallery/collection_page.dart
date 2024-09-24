@@ -25,17 +25,20 @@ class CollectionPage extends StatelessWidget {
   final bool? hasVerifiedLock;
   final bool isFromCollectPhotos;
   final bool isFromPublicShareLink;
-  final List<EnteFile> sharedLinkFiles;
+  final List<EnteFile>? sharedLinkFiles;
 
   CollectionPage(
     this.c, {
     this.tagPrefix = "collection",
     this.hasVerifiedLock = false,
     this.isFromCollectPhotos = false,
-    Key? key,
+    super.key,
     this.isFromPublicShareLink = false,
-    this.sharedLinkFiles = const [],
-  }) : super(key: key);
+    this.sharedLinkFiles,
+  }) : assert(
+          !(isFromPublicShareLink && sharedLinkFiles == null),
+          'sharedLinkFiles cannot be empty if isFromPublicShareLink is true',
+        );
 
   final _selectedFiles = SelectedFiles();
 
@@ -54,7 +57,7 @@ class CollectionPage extends StatelessWidget {
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
         if (isFromPublicShareLink) {
-          return FileLoadResult(sharedLinkFiles, false);
+          return FileLoadResult(sharedLinkFiles!, false);
         }
         final FileLoadResult result =
             await FilesDB.instance.getFilesInCollection(
@@ -115,7 +118,7 @@ class CollectionPage extends StatelessWidget {
           collection: c.collection,
           isFromCollectPhotos: isFromCollectPhotos,
           isFromPublicShareLink: isFromPublicShareLink,
-          files: sharedLinkFiles,
+          files: sharedLinkFiles!,
         ),
       ),
       bottomNavigationBar: isFromCollectPhotos

@@ -28,7 +28,6 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection/collection.dart";
 import 'package:photos/models/collection/collection_items.dart';
 import "package:photos/models/file/file.dart";
-// import "package:photos/models/file/file.dart";
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
