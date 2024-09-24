@@ -1068,13 +1068,13 @@ export const getFavCollection = async () => {
     }
 };
 
-export function sortCollectionSummaries(
+export const sortCollectionSummaries = (
     collectionSummaries: CollectionSummary[],
-    sortBy: CollectionsSortBy,
-) {
-    return collectionSummaries
+    by: CollectionsSortBy,
+) =>
+    collectionSummaries
         .sort((a, b) => {
-            switch (sortBy) {
+            switch (by) {
                 case "name":
                     return a.name.localeCompare(b.name);
                 case "creation-time-asc":
@@ -1092,7 +1092,6 @@ export function sortCollectionSummaries(
                 COLLECTION_SORT_ORDER.get(a.type) -
                 COLLECTION_SORT_ORDER.get(b.type),
         );
-}
 
 function compareCollectionsLatestFile(first: EnteFile, second: EnteFile) {
     if (!first) {

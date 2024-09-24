@@ -5,7 +5,7 @@ import {
 } from "@ente/shared/components/Container";
 import Close from "@mui/icons-material/Close";
 import { Box, DialogTitle, Stack, Typography } from "@mui/material";
-import { CollectionListSortOptions } from "components/Collections/CollectionListSortOptions";
+import { CollectionsSortOptions } from "components/Collections/CollectionListSortOptions";
 import { t } from "i18next";
 
 export default function AllCollectionsHeader({
@@ -31,7 +31,7 @@ export default function AllCollectionsHeader({
                     </Box>
                 </FluidContainer>
                 <Stack direction="row" spacing={1.5}>
-                    <CollectionListSortOptions
+                    <CollectionsSortOptions
                         activeSortBy={collectionSortBy}
                         setSortBy={setCollectionSortBy}
                         nestedInDialog

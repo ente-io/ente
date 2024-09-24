@@ -6,16 +6,35 @@ import SortIcon from "@mui/icons-material/Sort";
 import SvgIcon from "@mui/material/SvgIcon";
 import { t } from "i18next";
 
-interface CollectionListSortOptionsProps {
-    setSortBy: (order: CollectionsSortBy) => void;
+interface CollectionsSortOptionsProps {
+    /**
+     * The sorting scheme currently active.
+     */
     activeSortBy: CollectionsSortBy;
+    /**
+     * Change the scheme that should be used.
+     */
+    onChangeSortBy: (by: CollectionsSortBy) => void;
+    /**
+     * Set this to true if we're being shown inside a dialog, to further
+     * increase the elevation of the menu.
+     */
     nestedInDialog?: boolean;
-    disableBG?: boolean;
+    /**
+     * Set this to true to disable the background in the button that triggers
+     * the menu.
+     */
+    disableTriggerButtonBackground?: boolean;
 }
 
-export const CollectionListSortOptions: React.FC<
-    CollectionListSortOptionsProps
-> = (props) => {
+/**
+ * A button that shows an overflow menu allowing the user to choose from amongst
+ * the {@link CollectionsSortBy} values that should be used for sorting the
+ * lists of collections.
+ */
+export const CollectionsSortOptions: React.FC<CollectionsSortOptionsProps> = (
+    props,
+) => {
     const SortByOption = SortByOptionCreator(props);
 
     return (
@@ -32,7 +51,8 @@ export const CollectionListSortOptions: React.FC<
             triggerButtonProps={{
                 sx: {
                     background: (theme) =>
-                        !props.disableBG && theme.colors.fill.faint,
+                        !props.disableTriggerButtonBackground &&
+                        theme.colors.fill.faint,
                 },
             }}
         >
@@ -48,10 +68,10 @@ export const CollectionListSortOptions: React.FC<
 };
 
 const SortByOptionCreator =
-    ({ setSortBy, activeSortBy }: CollectionListSortOptionsProps) =>
+    ({ onChangeSortBy, activeSortBy }: CollectionsSortOptionsProps) =>
     (props: { sortBy: CollectionsSortBy; children: any }) => {
         const handleClick = () => {
-            setSortBy(props.sortBy);
+            onChangeSortBy(props.sortBy);
         };
 
         return (

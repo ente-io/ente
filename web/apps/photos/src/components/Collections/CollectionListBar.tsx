@@ -33,7 +33,7 @@ import React, {
 import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeList, ListChildComponentProps, areEqual } from "react-window";
 import type { GalleryBarMode } from ".";
-import { CollectionListSortOptions } from "./CollectionListSortOptions";
+import { CollectionsSortOptions } from "./CollectionListSortOptions";
 
 export interface CollectionListBarProps {
     /**
@@ -62,14 +62,13 @@ export interface CollectionListBarProps {
      */
     onShowAllCollections: () => void;
     /**
-     * The sort order that should be used for showing the collections in the
-     * bar.
+     * The scheme that should be used for sorting the collections in the bar.
      */
-    collectionListSortBy: CollectionsSortBy;
+    collectionsSortBy: CollectionsSortBy;
     /**
-     * Called when the user changes the sort order.
+     * Called when the user changes the sorting scheme.
      */
-    setCollectionListSortBy: (order: CollectionsSortBy) => void;
+    onChangeCollectionsSortBy: (by: CollectionsSortBy) => void;
     /**
      * The list of people that should be shown in the bar.
      */
@@ -92,8 +91,8 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
     activeCollectionID,
     setActiveCollectionID,
     onShowAllCollections,
-    collectionListSortBy,
-    setCollectionListSortBy,
+    collectionsSortBy,
+    onChangeCollectionsSortBy,
     people,
     activePerson,
     onSelectPerson,
@@ -200,10 +199,10 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
 
     const controls1 = isMobile && (
         <Box display="flex" alignItems={"center"} gap={1}>
-            <CollectionListSortOptions
-                setSortBy={setCollectionListSortBy}
-                activeSortBy={collectionListSortBy}
-                disableBG
+            <CollectionsSortOptions
+                activeSortBy={collectionsSortBy}
+                onChangeSortBy={onChangeCollectionsSortBy}
+                disableTriggerButtonBackground
             />
             <IconButton onClick={onShowAllCollections}>
                 <ExpandMore />
@@ -213,9 +212,9 @@ export const CollectionListBar: React.FC<CollectionListBarProps> = ({
 
     const controls2 = !isMobile && (
         <Box display="flex" alignItems={"center"} gap={1} height={"64px"}>
-            <CollectionListSortOptions
-                setSortBy={setCollectionListSortBy}
-                activeSortBy={collectionListSortBy}
+            <CollectionsSortOptions
+                activeSortBy={collectionsSortBy}
+                onChangeSortBy={onChangeCollectionsSortBy}
             />
             <IconButtonWithBG onClick={onShowAllCollections}>
                 <ExpandMore />

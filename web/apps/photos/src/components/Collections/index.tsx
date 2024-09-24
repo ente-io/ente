@@ -172,9 +172,9 @@ export const Collections: React.FC<CollectionsProps> = ({
                     people,
                     activePerson,
                     onSelectPerson,
-                    collectionListSortBy: collectionsSortBy,
-                    setCollectionListSortBy: setCollectionsSortBy,
+                    collectionsSortBy,
                 }}
+                onChangeCollectionsSortBy={setCollectionsSortBy}
                 onShowAllCollections={() => setOpenAllCollectionDialog(true)}
                 collectionSummaries={sortedCollectionSummaries.filter((x) =>
                     shouldBeShownOnCollectionBar(x.type),
@@ -256,5 +256,5 @@ const useCollectionsSortByLocalState = (initialValue: CollectionsSortBy) => {
         setValue(value);
     };
 
-    return [value, setter];
+    return [value, setter] as const;
 };
