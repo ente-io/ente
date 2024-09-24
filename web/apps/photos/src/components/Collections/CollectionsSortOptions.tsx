@@ -32,56 +32,60 @@ interface CollectionsSortOptionsProps {
  * the {@link CollectionsSortBy} values that should be used for sorting the
  * lists of collections.
  */
-export const CollectionsSortOptions: React.FC<CollectionsSortOptionsProps> = (
-    props,
-) => {
-    const SortByOption = SortByOptionCreator(props);
+export const CollectionsSortOptions: React.FC<CollectionsSortOptionsProps> = ({
+    nestedInDialog,
+    disableTriggerButtonBackground,
+    ...optProps
+}) => (
+    <OverflowMenu
+        ariaControls="collection-sort"
+        triggerButtonIcon={<SortIcon />}
+        menuPaperProps={{
+            sx: {
+                backgroundColor: (theme) =>
+                    nestedInDialog && theme.colors.background.elevated2,
+            },
+        }}
+        triggerButtonProps={{
+            sx: {
+                background: (theme) =>
+                    !disableTriggerButtonBackground && theme.colors.fill.faint,
+            },
+        }}
+    >
+        <SortByOption {...optProps} sortBy="name">
+            {t("sort_by_name")}
+        </SortByOption>
+        <SortByOption {...optProps} sortBy="creation-time-asc">
+            {t("sort_by_creation_time_ascending")}
+        </SortByOption>
+        <SortByOption {...optProps} sortBy="updation-time-desc">
+            {t("sort_by_updation_time_descending")}
+        </SortByOption>
+    </OverflowMenu>
+);
 
-    return (
-        <OverflowMenu
-            ariaControls="collection-sort"
-            triggerButtonIcon={<SortIcon />}
-            menuPaperProps={{
-                sx: {
-                    backgroundColor: (theme) =>
-                        props.nestedInDialog &&
-                        theme.colors.background.elevated2,
-                },
-            }}
-            triggerButtonProps={{
-                sx: {
-                    background: (theme) =>
-                        !props.disableTriggerButtonBackground &&
-                        theme.colors.fill.faint,
-                },
-            }}
-        >
-            <SortByOption sortBy="name">{t("sort_by_name")}</SortByOption>
-            <SortByOption sortBy="creation-time-asc">
-                {t("sort_by_creation_time_ascending")}
-            </SortByOption>
-            <SortByOption sortBy="updation-time-desc">
-                {t("sort_by_updation_time_descending")}
-            </SortByOption>
-        </OverflowMenu>
-    );
+type SortByOptionProps = Pick<
+    CollectionsSortOptionsProps,
+    "activeSortBy" | "onChangeSortBy"
+> & {
+    sortBy: CollectionsSortBy;
 };
 
-const SortByOptionCreator =
-    ({ onChangeSortBy, activeSortBy }: CollectionsSortOptionsProps) =>
-    (props: { sortBy: CollectionsSortBy; children: any }) => {
-        const handleClick = () => {
-            onChangeSortBy(props.sortBy);
-        };
+const SortByOption: React.FC<React.PropsWithChildren<SortByOptionProps>> = ({
+    sortBy,
+    activeSortBy,
+    onChangeSortBy,
+    children,
+}) => {
+    const handleClick = () => onChangeSortBy(sortBy);
 
-        return (
-            <OverflowMenuOption
-                onClick={handleClick}
-                endIcon={
-                    activeSortBy === props.sortBy ? <TickIcon /> : <SvgIcon />
-                }
-            >
-                {props.children}
-            </OverflowMenuOption>
-        );
-    };
+    return (
+        <OverflowMenuOption
+            onClick={handleClick}
+            endIcon={activeSortBy == sortBy ? <TickIcon /> : <SvgIcon />}
+        >
+            {children}
+        </OverflowMenuOption>
+    );
+};

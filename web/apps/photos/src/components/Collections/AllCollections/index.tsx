@@ -1,33 +1,47 @@
 import type { CollectionSummary } from "@/new/photos/types/collection";
 import { CollectionsSortBy } from "@/new/photos/types/collection";
-import { Divider, useMediaQuery } from "@mui/material";
+import {
+    FlexWrapper,
+    FluidContainer,
+    IconButtonWithBG,
+} from "@ente/shared/components/Container";
+import Close from "@mui/icons-material/Close";
+import {
+    Box,
+    DialogTitle,
+    Divider,
+    Stack,
+    Typography,
+    useMediaQuery,
+} from "@mui/material";
 import {
     AllCollectionDialog,
     Transition,
 } from "components/Collections/AllCollections/dialog";
+import { t } from "i18next";
+import { CollectionsSortOptions } from "../CollectionsSortOptions";
 import AllCollectionContent from "./content";
-import AllCollectionsHeader from "./header";
 
-interface Iprops {
+interface AllCollectionsProps {
     open: boolean;
     onClose: () => void;
     collectionSummaries: CollectionSummary[];
     setActiveCollectionID: (id?: number) => void;
-    collectionListSortBy: CollectionsSortBy;
-    setCollectionListSortBy: (v: CollectionsSortBy) => void;
+    collectionsSortBy: CollectionsSortBy;
+    onChangeCollectionsSortBy: (by: CollectionsSortBy) => void;
     isInHiddenSection: boolean;
 }
 
 const LeftSlideTransition = Transition("up");
 
-export default function AllCollections(props: Iprops) {
+export default function AllCollections(props: AllCollectionsProps) {
     const {
         collectionSummaries,
         open,
         onClose,
         setActiveCollectionID,
-        collectionListSortBy,
-        setCollectionListSortBy,
+        collectionsSortBy,
+        onChangeCollectionsSortBy,
         isInHiddenSection,
     } = props;
     const isMobile = useMediaQuery("(max-width: 428px)");
@@ -47,11 +61,13 @@ export default function AllCollections(props: Iprops) {
             fullWidth={true}
         >
             <AllCollectionsHeader
-                isInHiddenSection={isInHiddenSection}
-                onClose={onClose}
+                {...{
+                    isInHiddenSection,
+                    onClose,
+                    collectionsSortBy,
+                    onChangeCollectionsSortBy,
+                }}
                 collectionCount={props.collectionSummaries.length}
-                collectionSortBy={collectionListSortBy}
-                setCollectionSortBy={setCollectionListSortBy}
             />
             <Divider />
             <AllCollectionContent
@@ -61,3 +77,38 @@ export default function AllCollections(props: Iprops) {
         </AllCollectionDialog>
     );
 }
+
+const AllCollectionsHeader = ({
+    onClose,
+    collectionCount,
+    collectionsSortBy,
+    onChangeCollectionsSortBy,
+    isInHiddenSection,
+}) => (
+    <DialogTitle>
+        <FlexWrapper>
+            <FluidContainer mr={1.5}>
+                <Box>
+                    <Typography variant="h3">
+                        {isInHiddenSection
+                            ? t("all_hidden_albums")
+                            : t("all_albums")}
+                    </Typography>
+                    <Typography variant="small" color={"text.muted"}>
+                        {t("albums_count", { count: collectionCount })}
+                    </Typography>
+                </Box>
+            </FluidContainer>
+            <Stack direction="row" spacing={1.5}>
+                <CollectionsSortOptions
+                    activeSortBy={collectionsSortBy}
+                    onChangeSortBy={onChangeCollectionsSortBy}
+                    nestedInDialog
+                />
+                <IconButtonWithBG onClick={onClose}>
+                    <Close />
+                </IconButtonWithBG>
+            </Stack>
+        </FlexWrapper>
+    </DialogTitle>
+);

@@ -33,7 +33,7 @@ import React, {
 import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeList, ListChildComponentProps, areEqual } from "react-window";
 import type { GalleryBarMode } from ".";
-import { CollectionsSortOptions } from "./CollectionListSortOptions";
+import { CollectionsSortOptions } from "./CollectionsSortOptions";
 
 export interface CollectionListBarProps {
     /**

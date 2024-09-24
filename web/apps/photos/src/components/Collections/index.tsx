@@ -188,8 +188,8 @@ export const Collections: React.FC<CollectionsProps> = ({
                     (x) => !isSystemCollection(x.type),
                 )}
                 setActiveCollectionID={setActiveCollectionID}
-                setCollectionListSortBy={setCollectionsSortBy}
-                collectionListSortBy={collectionsSortBy}
+                onChangeCollectionsSortBy={setCollectionsSortBy}
+                collectionsSortBy={collectionsSortBy}
                 isInHiddenSection={mode == "hidden-albums"}
             />
             <CollectionShare
