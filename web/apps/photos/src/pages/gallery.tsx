@@ -59,7 +59,8 @@ import MenuIcon from "@mui/icons-material/Menu";
 import type { ButtonProps, IconButtonProps } from "@mui/material";
 import { Box, Button, IconButton, Typography, styled } from "@mui/material";
 import AuthenticateUserModal from "components/AuthenticateUserModal";
-import { Collections, type GalleryBarMode } from "components/Collections";
+import { Collections } from "components/Collections";
+import type { GalleryBarMode } from "components/Collections/CollectionListBar";
 import CollectionNamer, {
     CollectionNamerAttributes,
 } from "components/Collections/CollectionNamer";

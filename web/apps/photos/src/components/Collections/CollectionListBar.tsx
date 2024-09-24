@@ -34,7 +34,11 @@ import React, {
 } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeList, ListChildComponentProps, areEqual } from "react-window";
-import type { GalleryBarMode } from ".";
+
+/**
+ * Specifies what the bar is displaying currently.
+ */
+export type GalleryBarMode = "albums" | "hidden-albums" | "people";
 
 export interface CollectionListBarProps {
     /**
@@ -84,7 +88,7 @@ export interface CollectionListBarProps {
     onSelectPerson: (person: Person) => void;
 }
 
-// TODO-Cluster Rename me to GalleryBar
+// TODO-Cluster Rename me to GalleryBarImpl
 export const CollectionListBar: React.FC<CollectionListBarProps> = ({
     mode,
     setMode,

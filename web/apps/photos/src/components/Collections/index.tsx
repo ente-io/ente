@@ -13,7 +13,10 @@ import {
 } from "@ente/shared/storage/localStorage";
 import AllCollections from "components/Collections/AllCollections";
 import CollectionInfoWithOptions from "components/Collections/CollectionInfoWithOptions";
-import { CollectionListBar } from "components/Collections/CollectionListBar";
+import {
+    CollectionListBar,
+    type GalleryBarMode,
+} from "components/Collections/CollectionListBar";
 import { SetCollectionNamerAttributes } from "components/Collections/CollectionNamer";
 import CollectionShare from "components/Collections/CollectionShare";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
@@ -32,11 +35,6 @@ import {
     isFilesDownloadCompleted,
 } from "../FilesDownloadProgress";
 import { AlbumCastDialog } from "./AlbumCastDialog";
-
-/**
- * Specifies what the bar is displaying currently.
- */
-export type GalleryBarMode = "albums" | "hidden-albums" | "people";
 
 interface CollectionsProps {
     /** `true` if the bar should be hidden altogether. */
@@ -58,6 +56,7 @@ interface CollectionsProps {
     setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
 }
 
+// TODO-Cluster Rename me to GalleryBar and subsume GalleryBarImpl
 export const Collections: React.FC<CollectionsProps> = ({
     shouldHide,
     mode,
