@@ -1,4 +1,5 @@
 import {
+    AllCollectionTile,
     ItemCard,
     LargeTileTextOverlay,
 } from "@/new/photos/components/ItemCards";

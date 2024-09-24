@@ -1,11 +1,16 @@
 import type { Collection } from "@/media/collection";
+import {
+    AllCollectionTile,
+    ItemCard,
+    LargeTileTextOverlay,
+} from "@/new/photos/components/ItemCards";
 import type {
     CollectionSummaries,
     CollectionSummary,
 } from "@/new/photos/types/collection";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleWithCloseButton";
-import { DialogContent, useMediaQuery } from "@mui/material";
+import { DialogContent, Typography, useMediaQuery } from "@mui/material";
 import { AllCollectionDialog } from "components/Collections/AllCollections/dialog";
 import { t } from "i18next";
 import { useEffect, useState } from "react";
@@ -18,7 +23,6 @@ import {
     isMoveToAllowedCollection,
 } from "utils/collection";
 import AddCollectionButton from "./AddCollectionButton";
-import CollectionSelectorCard from "./CollectionCard";
 
 export interface CollectionSelectorAttributes {
     callback: (collection: Collection) => void;
@@ -146,9 +150,9 @@ function CollectionSelector({
                     />
                     {collectionsToShow.map((collectionSummary) => (
                         <CollectionSelectorCard
-                            onCollectionClick={handleCollectionClick}
-                            collectionSummary={collectionSummary}
                             key={collectionSummary.id}
+                            collectionSummary={collectionSummary}
+                            onCollectionClick={handleCollectionClick}
                         />
                     ))}
                 </FlexWrapper>
@@ -158,3 +162,23 @@ function CollectionSelector({
 }
 
 export default CollectionSelector;
+
+interface CollectionSelectorCardProps {
+    collectionSummary: CollectionSummary;
+    onCollectionClick: (collectionID: number) => void;
+}
+
+const CollectionSelectorCard: React.FC<CollectionSelectorCardProps> = ({
+    collectionSummary,
+    onCollectionClick,
+}) => (
+    <ItemCard
+        TileComponent={AllCollectionTile}
+        coverFile={collectionSummary.coverFile}
+        onClick={() => onCollectionClick(collectionSummary.id)}
+    >
+        <LargeTileTextOverlay>
+            <Typography>{collectionSummary.name}</Typography>
+        </LargeTileTextOverlay>
+    </ItemCard>
+);
