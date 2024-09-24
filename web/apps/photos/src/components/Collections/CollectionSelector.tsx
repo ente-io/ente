@@ -2,17 +2,14 @@ import type { Collection } from "@/media/collection";
 import {
     AllCollectionTile,
     ItemCard,
+    ItemTileOverlay,
     LargeTileTextOverlay,
 } from "@/new/photos/components/ItemCards";
 import type {
     CollectionSummaries,
     CollectionSummary,
 } from "@/new/photos/types/collection";
-import {
-    CenteredFlex,
-    FlexWrapper,
-    Overlay,
-} from "@ente/shared/components/Container";
+import { FlexWrapper } from "@ente/shared/components/Container";
 import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleWithCloseButton";
 import {
     DialogContent,
@@ -204,13 +201,13 @@ const AddCollectionButton: React.FC<AddCollectionButtonProps> = ({
         coverFile={null}
     >
         <LargeTileTextOverlay>{t("create_albums")}</LargeTileTextOverlay>
-        <ImageContainer>
-            <CenteredFlex>+</CenteredFlex>
-        </ImageContainer>
+        <ImageContainer>+</ImageContainer>
     </CollectionCard>
 );
 
-const ImageContainer = styled(Overlay)`
+const ImageContainer = styled(ItemTileOverlay)`
     display: flex;
+    justify-content: center;
+    align-items: center;
     font-size: 42px;
 `;
