@@ -1,4 +1,5 @@
 import type { Collection } from "@/media/collection";
+import { PersonListHeader } from "@/new/photos/components/Gallery";
 import {
     GalleryBarImpl,
     type GalleryBarImplProps,
@@ -34,6 +35,7 @@ import {
 } from "../FilesDownloadProgress";
 import { AlbumCastDialog } from "./AlbumCastDialog";
 import { CollectionHeader } from "./CollectionHeader";
+import { ensure } from "@/utils/ensure";
 
 type CollectionsProps = Omit<
     GalleryBarImplProps,
@@ -142,22 +144,27 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
         if (shouldHide) return;
 
         setPhotoListHeader({
-            item: (
-                <CollectionHeader
-                    {...{
-                        activeCollection,
-                        setActiveCollectionID,
-                        setCollectionNamerAttributes,
-                        setFilesDownloadProgressAttributesCreator,
-                        isActiveCollectionDownloadInProgress,
-                    }}
-                    collectionSummary={toShowCollectionSummaries.get(
-                        activeCollectionID,
-                    )}
-                    onCollectionShare={() => setOpenCollectionShareView(true)}
-                    onCollectionCast={() => setOpenAlbumCastDialog(true)}
-                />
-            ),
+            item:
+                mode != "people" ? (
+                    <CollectionHeader
+                        {...{
+                            activeCollection,
+                            setActiveCollectionID,
+                            setCollectionNamerAttributes,
+                            setFilesDownloadProgressAttributesCreator,
+                            isActiveCollectionDownloadInProgress,
+                        }}
+                        collectionSummary={toShowCollectionSummaries.get(
+                            activeCollectionID,
+                        )}
+                        onCollectionShare={() =>
+                            setOpenCollectionShareView(true)
+                        }
+                        onCollectionCast={() => setOpenAlbumCastDialog(true)}
+                    />
+                ) : (
+                    <PersonListHeader person={ensure(activePerson)} />
+                ),
             itemType: ITEM_TYPE.HEADER,
             height: 68,
         });
