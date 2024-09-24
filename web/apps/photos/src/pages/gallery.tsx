@@ -29,6 +29,7 @@ import type { SearchOption } from "@/new/photos/services/search/types";
 import type { CollectionSummaries } from "@/new/photos/types/collection";
 import { EnteFile } from "@/new/photos/types/file";
 import { mergeMetadata } from "@/new/photos/utils/file";
+import { ensure } from "@/utils/ensure";
 import {
     CenteredFlex,
     FlexWrapper,
@@ -541,8 +542,8 @@ export default function Gallery() {
             filteredFiles = await filterSearchableFiles(
                 selectedSearchOption.suggestion,
             );
-        } else if (activePerson) {
-            const pfSet = new Set(activePerson.fileIDs);
+        } else if (barMode == "people") {
+            const pfSet = new Set(ensure(activePerson).fileIDs);
             filteredFiles = files.filter((f) => pfSet.has(f.id));
         } else {
             const baseFiles = barMode == "hidden-albums" ? hiddenFiles : files;
@@ -961,15 +962,22 @@ export default function Gallery() {
     const handleSelectSearchOption = (
         searchOption: SearchOption | undefined,
     ) => {
-        if (searchOption?.suggestion.type == "collection") {
+        const type = searchOption?.suggestion.type;
+        if (type == "collection" || type == "person") {
             setIsInSearchMode(false);
             setSelectedSearchOption(undefined);
-            setActiveCollectionID(searchOption.suggestion.collectionID);
+            if (type == "collection") {
+                setBarMode("albums");
+                setActiveCollectionID(searchOption.suggestion.collectionID);
+            } else {
+                setBarMode("people");
+                setActivePerson(searchOption.suggestion.person);
+            }
         } else {
             setIsInSearchMode(!!searchOption);
             setSelectedSearchOption(searchOption);
         }
-        setIsClipSearchResult(searchOption?.suggestion.type == "clip");
+        setIsClipSearchResult(type == "clip");
     };
 
     const openUploader = (intent?: UploadTypeSelectorIntent) => {
@@ -1016,9 +1024,12 @@ export default function Gallery() {
     };
 
     const handleSelectPerson = (person: Person | undefined) => {
-        // TODO-Cluster: The person bar does not have an "all" mode, use the
-        // first person.
-        setActivePerson(person || people[0]);
+        // The person bar currently does not have an "all" mode, so default to
+        // the first person when no specific person is provided. This can happen
+        // when the user clicks the "People" header in the search empty state (it
+        // is guaranteed that this header will only be shown if there is at
+        // least one person).
+        setActivePerson(person ?? ensure(people[0]));
         setBarMode("people");
     };
 
@@ -1103,21 +1114,23 @@ export default function Gallery() {
                         />
                     ) : (
                         <NormalNavbarContents
-                            openSidebar={openSidebar}
-                            openUploader={openUploader}
-                            isInSearchMode={isInSearchMode}
-                            onShowSearchInput={handleShowSearchInput}
-                            onSelectSearchOption={handleSelectSearchOption}
-                            onSelectPerson={handleSelectPerson}
+                            {...{
+                                openSidebar,
+                                openUploader,
+                                isInSearchMode,
+                                onShowSearchInput: handleShowSearchInput,
+                                onSelectSearchOption: handleSelectSearchOption,
+                                onSelectPerson: handleSelectPerson,
+                            }}
                         />
                     )}
                 </NavbarBase>
 
                 <Collections
-                    shouldHide={isInSearchMode}
-                    mode={barMode}
-                    setMode={setBarMode}
                     {...{
+                        shouldHide: isInSearchMode,
+                        mode: barMode,
+                        onChangeMode: setBarMode,
                         collectionSummaries,
                         activeCollection,
                         activeCollectionID,

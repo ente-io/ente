@@ -1,3 +1,4 @@
+import { assertionFailed } from "@/base/assert";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
 import { ItemVisibility } from "@/media/file-metadata";
@@ -5,14 +6,12 @@ import {
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
 } from "@/new/photos/components/Gallery/ListHeader";
+import { SpaceBetweenBox } from "@/new/photos/components/mui-custom";
 import type {
     CollectionSummary,
     CollectionSummaryType,
 } from "@/new/photos/types/collection";
-import {
-    HorizontalFlex,
-    SpaceBetweenFlex,
-} from "@ente/shared/components/Container";
+import { HorizontalFlex } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import OverflowMenu, {
     StyledMenu,
@@ -39,8 +38,7 @@ import { UnPinIcon } from "components/icons/UnPinIcon";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";
-import type { Dispatch, SetStateAction } from "react";
-import { useCallback, useContext, useRef, useState } from "react";
+import React, { useCallback, useContext, useRef, useState } from "react";
 import { Trans } from "react-i18next";
 import * as CollectionAPI from "services/collectionService";
 import * as TrashService from "services/trashService";
@@ -57,22 +55,27 @@ import {
 } from "utils/collection";
 import { isArchivedCollection, isPinnedCollection } from "utils/magicMetadata";
 
-interface Iprops {
-    activeCollection: Collection;
+interface CollectionHeaderProps {
     collectionSummary: CollectionSummary;
-    setCollectionNamerAttributes: SetCollectionNamerAttributes;
-    showCollectionShareModal: () => void;
-    setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
-    isActiveCollectionDownloadInProgress: () => boolean;
+    activeCollection: Collection;
     setActiveCollectionID: (collectionID: number) => void;
-    setShowAlbumCastDialog: Dispatch<SetStateAction<boolean>>;
+    isActiveCollectionDownloadInProgress: () => boolean;
+    onCollectionShare: () => void;
+    onCollectionCast: () => void;
+    setCollectionNamerAttributes: SetCollectionNamerAttributes;
+    setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
 }
 
-export default function CollectionInfoWithOptions({
+/**
+ * A header shown at the top of the list of photos in the gallery, when the
+ * gallery is showing a collection.
+ */
+export const CollectionHeader: React.FC<CollectionHeaderProps> = ({
     collectionSummary,
-    ...props
-}: Iprops) {
+    ...rest
+}) => {
     if (!collectionSummary) {
+        assertionFailed("Gallery/CollectionHeader without a collection");
         return <></>;
     }
 
@@ -98,46 +101,39 @@ export default function CollectionInfoWithOptions({
 
     return (
         <GalleryItemsHeaderAdapter>
-            <SpaceBetweenFlex>
+            <SpaceBetweenBox>
                 <GalleryItemsSummary
                     name={name}
                     fileCount={fileCount}
                     endIcon={<EndIcon type={type} />}
                 />
                 {shouldShowOptions(type) && (
-                    <CollectionOptions
-                        {...props}
-                        collectionSummaryType={type}
-                    />
+                    <CollectionOptions collectionSummaryType={type} {...rest} />
                 )}
-            </SpaceBetweenFlex>
+            </SpaceBetweenBox>
         </GalleryItemsHeaderAdapter>
     );
-}
+};
 
 const shouldShowOptions = (type: CollectionSummaryType) =>
     type != "all" && type != "archive";
 
-interface CollectionOptionsProps {
-    setCollectionNamerAttributes: SetCollectionNamerAttributes;
-    setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
-    isActiveCollectionDownloadInProgress: () => boolean;
-    activeCollection: Collection;
+type CollectionOptionsProps = Omit<
+    CollectionHeaderProps,
+    "collectionSummary"
+> & {
     collectionSummaryType: CollectionSummaryType;
-    showCollectionShareModal: () => void;
-    setActiveCollectionID: (collectionID: number) => void;
-    setShowAlbumCastDialog: Dispatch<SetStateAction<boolean>>;
-}
+};
 
 const CollectionOptions: React.FC<CollectionOptionsProps> = ({
     activeCollection,
     collectionSummaryType,
     setActiveCollectionID,
+    onCollectionShare,
+    onCollectionCast,
     setCollectionNamerAttributes,
-    showCollectionShareModal,
     setFilesDownloadProgressAttributesCreator,
     isActiveCollectionDownloadInProgress,
-    setShowAlbumCastDialog,
 }) => {
     const { startLoading, finishLoading, setDialogMessage } =
         useContext(AppContext);
@@ -307,8 +303,6 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
         setActiveCollectionID(ALL_SECTION);
     });
 
-    const showCastAlbumDialog = () => setShowAlbumCastDialog(true);
-
     const pinAlbum = wrap(() => changeCollectionOrder(activeCollection, 1));
 
     const unpinAlbum = wrap(() => changeCollectionOrder(activeCollection, 0));
@@ -348,7 +342,7 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
                 isDownloadInProgress={isActiveCollectionDownloadInProgress}
                 onEmptyTrashClick={confirmEmptyTrash}
                 onDownloadClick={downloadCollection}
-                onShareClick={showCollectionShareModal}
+                onShareClick={onCollectionShare}
             />
 
             <OverflowMenu
@@ -381,7 +375,7 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
                         onArchiveClick={archiveAlbum}
                         onUnarchiveClick={unarchiveAlbum}
                         onLeaveSharedAlbumClick={confirmLeaveSharedAlbum}
-                        onCastClick={showCastAlbumDialog}
+                        onCastClick={onCollectionCast}
                     />
                 ) : (
                     <AlbumCollectionOptions
@@ -397,8 +391,8 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
                         onHideClick={hideAlbum}
                         onUnhideClick={unhideAlbum}
                         onDeleteClick={confirmDeleteCollection}
-                        onShareClick={showCollectionShareModal}
-                        onCastClick={showCastAlbumDialog}
+                        onShareClick={onCollectionShare}
+                        onCastClick={onCollectionCast}
                     />
                 )}
             </OverflowMenu>

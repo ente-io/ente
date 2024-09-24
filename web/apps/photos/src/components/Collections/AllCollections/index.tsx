@@ -23,7 +23,7 @@ interface AllCollectionsProps {
     open: boolean;
     onClose: () => void;
     collectionSummaries: CollectionSummary[];
-    setActiveCollectionID: (id?: number) => void;
+    onSelectCollectionID: (id: number) => void;
     collectionsSortBy: CollectionsSortBy;
     onChangeCollectionsSortBy: (by: CollectionsSortBy) => void;
     isInHiddenSection: boolean;
@@ -36,7 +36,7 @@ export default function AllCollections(props: AllCollectionsProps) {
         collectionSummaries,
         open,
         onClose,
-        setActiveCollectionID,
+        onSelectCollectionID,
         collectionsSortBy,
         onChangeCollectionsSortBy,
         isInHiddenSection,
@@ -44,7 +44,7 @@ export default function AllCollections(props: AllCollectionsProps) {
     const isMobile = useMediaQuery("(max-width: 428px)");
 
     const onCollectionClick = (collectionID: number) => {
-        setActiveCollectionID(collectionID);
+        onSelectCollectionID(collectionID);
         onClose();
     };
 
