@@ -58,7 +58,6 @@ import MenuIcon from "@mui/icons-material/Menu";
 import type { ButtonProps, IconButtonProps } from "@mui/material";
 import { Box, Button, IconButton, Typography } from "@mui/material";
 import AuthenticateUserModal from "components/AuthenticateUserModal";
-import { Collections } from "components/Collections";
 import CollectionNamer, {
     CollectionNamerAttributes,
 } from "components/Collections/CollectionNamer";
@@ -66,6 +65,7 @@ import {
     CollectionSelector,
     CollectionSelectorAttributes,
 } from "components/Collections/CollectionSelector";
+import { GalleryBarAndListHeader } from "components/Collections/GalleryBarAndListHeader";
 import ExportModal from "components/ExportModal";
 import {
     FilesDownloadProgress,
@@ -1130,7 +1130,7 @@ export default function Gallery() {
                     )}
                 </NavbarBase>
 
-                <Collections
+                <GalleryBarAndListHeader
                     {...{
                         shouldHide: isInSearchMode,
                         mode: barMode,
