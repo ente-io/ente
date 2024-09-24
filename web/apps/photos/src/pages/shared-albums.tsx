@@ -7,13 +7,13 @@ import {
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
 } from "@/new/photos/components/Gallery/ListHeader";
+import { SpaceBetweenBox } from "@/new/photos/components/mui-custom";
 import downloadManager from "@/new/photos/services/download";
 import { EnteFile } from "@/new/photos/types/file";
 import { mergeMetadata } from "@/new/photos/utils/file";
 import {
     CenteredFlex,
     FluidContainer,
-    SpaceBetweenFlex,
     VerticallyCentered,
 } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
@@ -307,12 +307,12 @@ export default function PublicCollectionGallery() {
             setPhotoListHeader({
                 item: (
                     <GalleryItemsHeaderAdapter>
-                        <SpaceBetweenFlex>
+                        <SpaceBetweenBox>
                             <GalleryItemsSummary
                                 name={publicCollection.name}
                                 fileCount={publicFiles.length}
                             />
-                            {downloadEnabled ? (
+                            {downloadEnabled && (
                                 <OverflowMenu
                                     ariaControls={"collection-options"}
                                     triggerButtonIcon={<MoreHoriz />}
@@ -324,10 +324,8 @@ export default function PublicCollectionGallery() {
                                         {t("download_album")}
                                     </OverflowMenuOption>
                                 </OverflowMenu>
-                            ) : (
-                                <div />
                             )}
-                        </SpaceBetweenFlex>
+                        </SpaceBetweenBox>
                     </GalleryItemsHeaderAdapter>
                 ),
                 itemType: ITEM_TYPE.HEADER,

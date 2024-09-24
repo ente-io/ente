@@ -101,7 +101,18 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
-          onTap: () async => await onPasskeyClick(context),
+          onTap: () async {
+            final bool hasAuthenticated = await LocalAuthenticationService
+                .instance
+                .requestLocalAuthentication(
+              context,
+              context.l10n.authToViewPasskey,
+            );
+            await PlatformUtil.refocusWindows();
+            if (hasAuthenticated) {
+              await onPasskeyClick(context);
+            }
+          },
         ),
         sectionOptionSpacing,
         MenuItemWidget(

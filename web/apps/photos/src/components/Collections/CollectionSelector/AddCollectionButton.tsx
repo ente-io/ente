@@ -1,10 +1,8 @@
+import { AllCollectionTile } from "@/new/photos/components/ItemCards";
 import { CenteredFlex, Overlay } from "@ente/shared/components/Container";
 import { styled } from "@mui/material";
 import CollectionCard from "components/Collections/CollectionCard";
-import {
-    AllCollectionTile,
-    AllCollectionTileText,
-} from "components/Collections/styledComponents";
+import { AllCollectionTileText } from "components/Collections/styledComponents";
 import { t } from "i18next";
 
 const ImageContainer = styled(Overlay)`

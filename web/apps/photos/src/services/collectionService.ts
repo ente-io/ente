@@ -25,6 +25,7 @@ import type {
     CollectionSummary,
     CollectionSummaryType,
 } from "@/new/photos/types/collection";
+import { CollectionsSortBy } from "@/new/photos/types/collection";
 import { EnteFile } from "@/new/photos/types/file";
 import {
     EncryptedMagicMetadata,
@@ -44,7 +45,6 @@ import { FamilyData } from "types/user";
 import {
     ALL_SECTION,
     ARCHIVE_SECTION,
-    COLLECTION_LIST_SORT_BY,
     COLLECTION_SORT_ORDER,
     DUMMY_UNCATEGORIZED_COLLECTION,
     HIDDEN_ITEMS_SECTION,
@@ -1068,22 +1068,22 @@ export const getFavCollection = async () => {
     }
 };
 
-export function sortCollectionSummaries(
+export const sortCollectionSummaries = (
     collectionSummaries: CollectionSummary[],
-    sortBy: COLLECTION_LIST_SORT_BY,
-) {
-    return collectionSummaries
+    by: CollectionsSortBy,
+) =>
+    collectionSummaries
         .sort((a, b) => {
-            switch (sortBy) {
-                case COLLECTION_LIST_SORT_BY.CREATION_TIME_ASCENDING:
+            switch (by) {
+                case "name":
+                    return a.name.localeCompare(b.name);
+                case "creation-time-asc":
                     return (
                         -1 *
                         compareCollectionsLatestFile(b.latestFile, a.latestFile)
                     );
-                case COLLECTION_LIST_SORT_BY.UPDATION_TIME_DESCENDING:
+                case "updation-time-desc":
                     return b.updationTime - a.updationTime;
-                case COLLECTION_LIST_SORT_BY.NAME:
-                    return a.name.localeCompare(b.name);
             }
         })
         .sort((a, b) => b.order ?? 0 - a.order ?? 0)
@@ -1092,7 +1092,6 @@ export function sortCollectionSummaries(
                 COLLECTION_SORT_ORDER.get(a.type) -
                 COLLECTION_SORT_ORDER.get(b.type),
         );
-}
 
 function compareCollectionsLatestFile(first: EnteFile, second: EnteFile) {
     if (!first) {

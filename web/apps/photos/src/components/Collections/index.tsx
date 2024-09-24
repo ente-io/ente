@@ -1,11 +1,20 @@
 import type { Collection } from "@/media/collection";
-import type { Person } from "@/new/photos/services/ml/cgroups";
-import type { CollectionSummaries } from "@/new/photos/types/collection";
-import { useLocalState } from "@ente/shared/hooks/useLocalState";
-import { LS_KEYS } from "@ente/shared/storage/localStorage";
+import {
+    GalleryBarImpl,
+    type GalleryBarImplProps,
+} from "@/new/photos/components/Gallery/BarImpl";
+import {
+    collectionsSortBy,
+    type CollectionsSortBy,
+    type CollectionSummaries,
+} from "@/new/photos/types/collection";
+import { includes } from "@/utils/type-guards";
+import {
+    getData,
+    LS_KEYS,
+    removeData,
+} from "@ente/shared/storage/localStorage";
 import AllCollections from "components/Collections/AllCollections";
-import CollectionInfoWithOptions from "components/Collections/CollectionInfoWithOptions";
-import { CollectionListBar } from "components/Collections/CollectionListBar";
 import { SetCollectionNamerAttributes } from "components/Collections/CollectionNamer";
 import CollectionShare from "components/Collections/CollectionShare";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
@@ -14,7 +23,6 @@ import { sortCollectionSummaries } from "services/collectionService";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
 import {
     ALL_SECTION,
-    COLLECTION_LIST_SORT_BY,
     hasNonSystemCollections,
     isSystemCollection,
     shouldBeShownOnCollectionBar,
@@ -25,36 +33,43 @@ import {
     isFilesDownloadCompleted,
 } from "../FilesDownloadProgress";
 import { AlbumCastDialog } from "./AlbumCastDialog";
+import { CollectionHeader } from "./CollectionHeader";
 
-/**
- * Specifies what the bar is displaying currently.
- */
-export type GalleryBarMode = "albums" | "hidden-albums" | "people";
-
-interface CollectionsProps {
-    /** `true` if the bar should be hidden altogether. */
+type CollectionsProps = Omit<
+    GalleryBarImplProps,
+    | "collectionSummaries"
+    | "hiddenCollectionSummaries"
+    | "onSelectCollectionID"
+    | "collectionsSortBy"
+    | "onChangeCollectionsSortBy"
+    | "onShowAllCollections"
+> & {
+    /**
+     * When `true`, the bar is be hidden altogether.
+     */
     shouldHide: boolean;
-    /** otherwise show stuff that belongs to this mode. */
-    mode: GalleryBarMode;
-    setMode: (mode: GalleryBarMode) => void;
     collectionSummaries: CollectionSummaries;
     activeCollection: Collection;
-    activeCollectionID?: number;
-    setActiveCollectionID: (id?: number) => void;
+    setActiveCollectionID: (collectionID: number) => void;
     hiddenCollectionSummaries: CollectionSummaries;
-    people: Person[];
-    activePerson: Person | undefined;
-    onSelectPerson: (person: Person) => void;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
     setPhotoListHeader: (value: TimeStampListItem) => void;
     filesDownloadProgressAttributesList: FilesDownloadProgressAttributes[];
     setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
-}
+};
 
+/**
+ * The horizontally scrollable bar shown at the top of the gallery.
+ *
+ * This component includes both the actual bar, and also the surrounding chrome
+ * and state for any associated dialogs that might be triggered by actions on
+ * the bar.
+ */
+// TODO-Cluster Rename me to GalleryBar and subsume GalleryBarImpl
 export const Collections: React.FC<CollectionsProps> = ({
     shouldHide,
     mode,
-    setMode,
+    onChangeMode,
     collectionSummaries,
     activeCollection,
     activeCollectionID,
@@ -74,11 +89,8 @@ export const Collections: React.FC<CollectionsProps> = ({
         useState(false);
     const [openAlbumCastDialog, setOpenAlbumCastDialog] = useState(false);
 
-    const [collectionListSortBy, setCollectionListSortBy] =
-        useLocalState<COLLECTION_LIST_SORT_BY>(
-            LS_KEYS.COLLECTION_SORT_BY,
-            COLLECTION_LIST_SORT_BY.UPDATION_TIME_DESCENDING,
-        );
+    const [collectionsSortBy, setCollectionsSortBy] =
+        useCollectionsSortByLocalState("updation-time-desc");
 
     const toShowCollectionSummaries = useMemo(
         () =>
@@ -100,9 +112,9 @@ export const Collections: React.FC<CollectionsProps> = ({
         () =>
             sortCollectionSummaries(
                 [...toShowCollectionSummaries.values()],
-                collectionListSortBy,
+                collectionsSortBy,
             ),
-        [collectionListSortBy, toShowCollectionSummaries],
+        [collectionsSortBy, toShowCollectionSummaries],
     );
 
     const isActiveCollectionDownloadInProgress = useCallback(() => {
@@ -121,23 +133,19 @@ export const Collections: React.FC<CollectionsProps> = ({
 
         setPhotoListHeader({
             item: (
-                <CollectionInfoWithOptions
+                <CollectionHeader
+                    {...{
+                        activeCollection,
+                        setActiveCollectionID,
+                        setCollectionNamerAttributes,
+                        setFilesDownloadProgressAttributesCreator,
+                        isActiveCollectionDownloadInProgress,
+                    }}
                     collectionSummary={toShowCollectionSummaries.get(
                         activeCollectionID,
                     )}
-                    activeCollection={activeCollection}
-                    setCollectionNamerAttributes={setCollectionNamerAttributes}
-                    showCollectionShareModal={() =>
-                        setOpenCollectionShareView(true)
-                    }
-                    setFilesDownloadProgressAttributesCreator={
-                        setFilesDownloadProgressAttributesCreator
-                    }
-                    isActiveCollectionDownloadInProgress={
-                        isActiveCollectionDownloadInProgress
-                    }
-                    setActiveCollectionID={setActiveCollectionID}
-                    setShowAlbumCastDialog={setOpenAlbumCastDialog}
+                    onCollectionShare={() => setOpenCollectionShareView(true)}
+                    onCollectionCast={() => setOpenAlbumCastDialog(true)}
                 />
             ),
             itemType: ITEM_TYPE.HEADER,
@@ -159,18 +167,18 @@ export const Collections: React.FC<CollectionsProps> = ({
 
     return (
         <>
-            <CollectionListBar
+            <GalleryBarImpl
                 {...{
                     mode,
-                    setMode,
+                    onChangeMode,
                     activeCollectionID,
-                    setActiveCollectionID,
                     people,
                     activePerson,
                     onSelectPerson,
-                    collectionListSortBy,
-                    setCollectionListSortBy,
+                    collectionsSortBy,
                 }}
+                onSelectCollectionID={setActiveCollectionID}
+                onChangeCollectionsSortBy={setCollectionsSortBy}
                 onShowAllCollections={() => setOpenAllCollectionDialog(true)}
                 collectionSummaries={sortedCollectionSummaries.filter((x) =>
                     shouldBeShownOnCollectionBar(x.type),
@@ -183,9 +191,9 @@ export const Collections: React.FC<CollectionsProps> = ({
                 collectionSummaries={sortedCollectionSummaries.filter(
                     (x) => !isSystemCollection(x.type),
                 )}
-                setActiveCollectionID={setActiveCollectionID}
-                setCollectionListSortBy={setCollectionListSortBy}
-                collectionListSortBy={collectionListSortBy}
+                onSelectCollectionID={setActiveCollectionID}
+                onChangeCollectionsSortBy={setCollectionsSortBy}
+                collectionsSortBy={collectionsSortBy}
                 isInHiddenSection={mode == "hidden-albums"}
             />
             <CollectionShare
@@ -203,4 +211,54 @@ export const Collections: React.FC<CollectionsProps> = ({
             />
         </>
     );
+};
+
+/**
+ * A hook that maintains the collections sort order both as in-memory and local
+ * storage state.
+ */
+const useCollectionsSortByLocalState = (initialValue: CollectionsSortBy) => {
+    const key = "collectionsSortBy";
+
+    const [value, setValue] = useState(initialValue);
+
+    useEffect(() => {
+        const value = localStorage.getItem(key);
+        if (value) {
+            if (includes(collectionsSortBy, value)) setValue(value);
+        } else {
+            // Older versions of this code used to store the value in a
+            // different place and format. Migrate if needed.
+            //
+            // This migration added Sep 2024, can be removed after a bit (esp
+            // since it effectively runs on each app start). (tag: Migration).
+            const oldData = getData(LS_KEYS.COLLECTION_SORT_BY);
+            if (oldData) {
+                let newValue: CollectionsSortBy | undefined;
+                switch (oldData.value) {
+                    case 0:
+                        newValue = "name";
+                        break;
+                    case 1:
+                        newValue = "creation-time-asc";
+                        break;
+                    case 2:
+                        newValue = "updation-time-desc";
+                        break;
+                }
+                if (newValue) {
+                    localStorage.setItem(key, newValue);
+                    setValue(newValue);
+                }
+                removeData(LS_KEYS.COLLECTION_SORT_BY);
+            }
+        }
+    }, []);
+
+    const setter = (value: CollectionsSortBy) => {
+        localStorage.setItem(key, value);
+        setValue(value);
+    };
+
+    return [value, setter] as const;
 };

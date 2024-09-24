@@ -1,6 +1,6 @@
 import { assertionFailed } from "@/base/assert";
 import { useIsMobileWidth } from "@/base/hooks";
-import { ItemCard, ResultPreviewTile } from "@/new/photos/components/ItemCards";
+import { ItemCard, PreviewItemTile } from "@/new/photos/components/ItemCards";
 import {
     isMLSupported,
     mlStatusSnapshot,
@@ -42,6 +42,7 @@ import {
 } from "react-select";
 import AsyncSelect from "react-select/async";
 import { SearchPeopleList } from "./PeopleList";
+import { UnstyledButton } from "./mui-custom";
 
 export interface SearchBarProps {
     /**
@@ -150,9 +151,10 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
     const components = useMemo(() => ({ Control, Input, Option }), []);
 
     const handleChange = (value: SearchOption | null) => {
-        // Collection suggestions are handled differently - our caller will
-        // switch to the collection view, dismissing search.
-        if (value?.suggestion.type == "collection") {
+        const type = value?.suggestion.type;
+        // Collection and people suggestions are handled differently - our
+        // caller will switch to the corresponding view, dismissing search.
+        if (type == "collection" || type == "person") {
             setValue(null);
             setInputValue("");
         } else {
@@ -438,15 +440,8 @@ const PeopleHeader: React.FC<PeopleHeaderProps> = ({ onClick }) => (
     </PeopleHeaderButton>
 );
 
-const PeopleHeaderButton = styled("button")(
+const PeopleHeaderButton = styled(UnstyledButton)(
     ({ theme }) => `
-    /* Reset some button defaults that are affecting us */
-    background: transparent;
-    border: 0;
-    padding: 0;
-    font: inherit;
-    /* Button should do this for us, but it isn't working inside the select */
-    cursor: pointer;
     /* The color for the chevron */
     color: ${theme.colors.stroke.muted};
     /* Hover indication */
@@ -489,7 +484,7 @@ const OptionContents = ({ data: option }: { data: SearchOption }) => (
                     <ItemCard
                         key={file.id}
                         coverFile={file}
-                        TileComponent={ResultPreviewTile}
+                        TileComponent={PreviewItemTile}
                     />
                 ))}
             </Stack>

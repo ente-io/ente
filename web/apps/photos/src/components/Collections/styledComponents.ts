@@ -10,27 +10,6 @@ export const ScrollContainer = styled("div")`
     gap: 4px;
 `;
 
-/** See also: {@link ItemTile}. */
-export const CollectionTile = styled("div")`
-    display: flex;
-    position: relative;
-    border-radius: 4px;
-    overflow: hidden;
-    cursor: pointer;
-    & > img {
-        object-fit: cover;
-        width: 100%;
-        height: 100%;
-        pointer-events: none;
-    }
-    user-select: none;
-`;
-
-export const AllCollectionTile = styled(CollectionTile)`
-    width: 150px;
-    height: 150px;
-`;
-
 export const AllCollectionTileText = styled(Overlay)`
     padding: 8px;
     background: linear-gradient(
