@@ -6,14 +6,12 @@ import {
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
 } from "@/new/photos/components/Gallery/ListHeader";
+import { SpaceBetweenBox } from "@/new/photos/components/mui-custom";
 import type {
     CollectionSummary,
     CollectionSummaryType,
 } from "@/new/photos/types/collection";
-import {
-    HorizontalFlex,
-    SpaceBetweenFlex,
-} from "@ente/shared/components/Container";
+import { HorizontalFlex } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import OverflowMenu, {
     StyledMenu,
@@ -77,7 +75,7 @@ export const CollectionHeader: React.FC<CollectionHeaderProps> = ({
     ...rest
 }) => {
     if (!collectionSummary) {
-        assertionFailed("CollectionListHeader without a collection");
+        assertionFailed("Gallery/CollectionHeader without a collection");
         return <></>;
     }
 
@@ -103,7 +101,7 @@ export const CollectionHeader: React.FC<CollectionHeaderProps> = ({
 
     return (
         <GalleryItemsHeaderAdapter>
-            <SpaceBetweenFlex>
+            <SpaceBetweenBox>
                 <GalleryItemsSummary
                     name={name}
                     fileCount={fileCount}
@@ -112,7 +110,7 @@ export const CollectionHeader: React.FC<CollectionHeaderProps> = ({
                 {shouldShowOptions(type) && (
                     <CollectionOptions collectionSummaryType={type} {...rest} />
                 )}
-            </SpaceBetweenFlex>
+            </SpaceBetweenBox>
         </GalleryItemsHeaderAdapter>
     );
 };

@@ -58,6 +58,13 @@ type CollectionsProps = Omit<
     setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
 };
 
+/**
+ * The horizontally scrollable bar shown at the top of the gallery.
+ *
+ * This component includes both the actual bar, and also the surrounding chrome
+ * and state for any associated dialogs that might be triggered by actions on
+ * the bar.
+ */
 // TODO-Cluster Rename me to GalleryBar and subsume GalleryBarImpl
 export const Collections: React.FC<CollectionsProps> = ({
     shouldHide,
