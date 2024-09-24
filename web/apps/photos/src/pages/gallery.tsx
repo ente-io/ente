@@ -549,7 +549,9 @@ export default function Gallery() {
             );
         } else if (barMode == "people") {
             const pfSet = new Set(ensure(activePerson).fileIDs);
-            filteredFiles = files.filter((f) => pfSet.has(f.id));
+            filteredFiles = getUniqueFiles(
+                files.filter((f) => pfSet.has(f.id)),
+            );
         } else {
             const baseFiles = barMode == "hidden-albums" ? hiddenFiles : files;
             filteredFiles = getUniqueFiles(
