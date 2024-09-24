@@ -183,6 +183,19 @@ export const GalleryContext = createContext<GalleryContextType>(
     defaultGalleryContext,
 );
 
+/**
+ * The default view for logged in users.
+ *
+ * I heard you like ascii art.
+ *
+ *        Navbar / Search         ^
+ *     ---------------------      |
+ *          Gallery Bar         sticky
+ *     ---------------------   ---/---
+ *       Photo List Header    scrollable
+ *     ---------------------      |
+ *           Photo List           v
+ */
 export default function Gallery() {
     const router = useRouter();
     const [user, setUser] = useState(null);
@@ -297,8 +310,6 @@ export default function Gallery() {
 
     const closeSidebar = () => setSidebarView(false);
     const openSidebar = () => setSidebarView(true);
-    const [photoListHeader, setPhotoListHeader] =
-        useState<TimeStampListItem>(null);
 
     const [exportModalView, setExportModalView] = useState(false);
 
@@ -322,7 +333,7 @@ export default function Gallery() {
         SearchOption | undefined
     >();
 
-    // If visible, what should the gallery bar show.
+    // If visible, what should the (sticky) gallery bar show.
     const [barMode, setBarMode] = useState<GalleryBarMode>("albums");
 
     // The currently selected person in the gallery bar (if any).
@@ -330,13 +341,17 @@ export default function Gallery() {
 
     const people = useSyncExternalStore(peopleSubscribe, peopleSnapshot);
 
+    const [isClipSearchResult, setIsClipSearchResult] =
+        useState<boolean>(false);
+
+    // The (non-sticky) header shown at the top of the gallery items.
+    const [photoListHeader, setPhotoListHeader] =
+        useState<TimeStampListItem>(null);
+
     const [
         filesDownloadProgressAttributesList,
         setFilesDownloadProgressAttributesList,
     ] = useState<FilesDownloadProgressAttributes[]>([]);
-
-    const [isClipSearchResult, setIsClipSearchResult] =
-        useState<boolean>(false);
 
     // Ensure that the keys in local storage are not malformed by verifying that
     // the recoveryKey can be decrypted with the masterKey.
