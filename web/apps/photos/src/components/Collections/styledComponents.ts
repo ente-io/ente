@@ -1,15 +1,6 @@
 import { Overlay } from "@ente/shared/components/Container";
 import { styled } from "@mui/material";
 
-export const ScrollContainer = styled("div")`
-    width: 100%;
-    height: 120px;
-    overflow: auto;
-    scroll-behavior: smooth;
-    display: flex;
-    gap: 4px;
-`;
-
 export const AllCollectionTileText = styled(Overlay)`
     padding: 8px;
     background: linear-gradient(

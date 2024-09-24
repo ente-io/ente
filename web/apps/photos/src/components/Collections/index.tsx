@@ -65,7 +65,8 @@ type CollectionsProps = Omit<
  * and state for any associated dialogs that might be triggered by actions on
  * the bar.
  */
-// TODO-Cluster Rename me to GalleryBar and subsume GalleryBarImpl
+// TODO-Cluster - Rename me to GalleryBar and subsume GalleryBarImpl - Or rename
+// to GalleryBarAndHeader.
 export const Collections: React.FC<CollectionsProps> = ({
     shouldHide,
     mode,
