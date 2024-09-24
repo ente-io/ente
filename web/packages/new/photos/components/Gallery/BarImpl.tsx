@@ -33,14 +33,18 @@ import React, {
     useState,
 } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
-import { FixedSizeList, ListChildComponentProps, areEqual } from "react-window";
+import {
+    FixedSizeList,
+    type ListChildComponentProps,
+    areEqual,
+} from "react-window";
 
 /**
  * Specifies what the bar is displaying currently.
  */
 export type GalleryBarMode = "albums" | "hidden-albums" | "people";
 
-export interface CollectionListBarProps {
+export interface GalleryBarImplProps {
     /**
      * What are we displaying currently.
      */
@@ -88,8 +92,7 @@ export interface CollectionListBarProps {
     onSelectPerson: (person: Person) => void;
 }
 
-// TODO-Cluster Rename me to GalleryBarImpl
-export const CollectionListBar: React.FC<CollectionListBarProps> = ({
+export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     mode,
     setMode,
     collectionSummaries,
@@ -287,7 +290,7 @@ export const Row2 = styled(Box)`
 `;
 
 const ModeIndicator: React.FC<
-    Pick<CollectionListBarProps, "mode" | "setMode">
+    Pick<GalleryBarImplProps, "mode" | "setMode">
 > = ({ mode }) => (
     <Stack direction="row" sx={{ gap: "10px" }}>
         <Typography color={mode == "people" ? "text.muted" : "text.base"}>

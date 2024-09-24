@@ -1,4 +1,8 @@
 import type { Collection } from "@/media/collection";
+import {
+    GalleryBarImpl,
+    type GalleryBarMode,
+} from "@/new/photos/components/Gallery/BarImpl";
 import type { Person } from "@/new/photos/services/ml/cgroups";
 import {
     collectionsSortBy,
@@ -13,10 +17,6 @@ import {
 } from "@ente/shared/storage/localStorage";
 import AllCollections from "components/Collections/AllCollections";
 import CollectionInfoWithOptions from "components/Collections/CollectionInfoWithOptions";
-import {
-    CollectionListBar,
-    type GalleryBarMode,
-} from "components/Collections/CollectionListBar";
 import { SetCollectionNamerAttributes } from "components/Collections/CollectionNamer";
 import CollectionShare from "components/Collections/CollectionShare";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
@@ -162,7 +162,7 @@ export const Collections: React.FC<CollectionsProps> = ({
 
     return (
         <>
-            <CollectionListBar
+            <GalleryBarImpl
                 {...{
                     mode,
                     setMode,

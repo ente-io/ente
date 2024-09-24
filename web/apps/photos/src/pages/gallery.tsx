@@ -3,6 +3,7 @@ import { NavbarBase } from "@/base/components/Navbar";
 import { useIsMobileWidth } from "@/base/hooks";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
+import type { GalleryBarMode } from "@/new/photos/components/Gallery/BarImpl";
 import {
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
@@ -60,7 +61,6 @@ import type { ButtonProps, IconButtonProps } from "@mui/material";
 import { Box, Button, IconButton, Typography, styled } from "@mui/material";
 import AuthenticateUserModal from "components/AuthenticateUserModal";
 import { Collections } from "components/Collections";
-import type { GalleryBarMode } from "components/Collections/CollectionListBar";
 import CollectionNamer, {
     CollectionNamerAttributes,
 } from "components/Collections/CollectionNamer";
