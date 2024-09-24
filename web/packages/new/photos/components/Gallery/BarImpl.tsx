@@ -320,7 +320,7 @@ const ModeIndicator: React.FC<
     return (
         <Stack direction="row" sx={{ gap: "10px" }}>
             <AlbumModeButton onClick={() => onChangeMode("albums")}>
-                {t("albums")}
+                <Typography>{t("albums")}</Typography>
             </AlbumModeButton>
             <Typography>{t("people")}</Typography>
         </Stack>
@@ -329,13 +329,18 @@ const ModeIndicator: React.FC<
 
 const AlbumModeButton = styled("button")(
     ({ theme }) => `
+    /* Reset some button defaults that are unwanted here. */
     background: transparent;
     border: 0;
     padding: 0;
+    /* Not sure why the button's default pointer is not coming into effect
+       automatically. */
+    cursor: pointer;
     font: inherit;
-    /* Hover indication */
-    color: ${theme.colors.text.muted}
-    && :hover {
+    p {
+        color: ${theme.colors.text.muted}
+    }
+    p:hover {
         color: ${theme.colors.text.base};
     }
 `,
