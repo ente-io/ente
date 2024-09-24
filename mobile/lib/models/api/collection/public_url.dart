@@ -1,3 +1,33 @@
+class SharedPublicURL {
+  String? nonce;
+  int? opsLimit;
+  int? memLimit;
+
+  SharedPublicURL({
+    this.nonce,
+    this.opsLimit,
+    this.memLimit,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'nonce': nonce,
+      'opsLimit': opsLimit,
+      'memLimit': memLimit,
+    };
+  }
+
+  static SharedPublicURL? fromMap(Map<String, dynamic>? map) {
+    if (map == null) return null;
+
+    return SharedPublicURL(
+      nonce: map['nonce'],
+      opsLimit: map['opsLimit'],
+      memLimit: map['memLimit'],
+    );
+  }
+}
+
 class PublicURL {
   String url;
   int deviceLimit;
@@ -8,6 +38,7 @@ class PublicURL {
   String? nonce;
   int? opsLimit;
   int? memLimit;
+  SharedPublicURL? sharedPublicURL;
 
   PublicURL({
     required this.url,
@@ -19,6 +50,7 @@ class PublicURL {
     this.nonce,
     this.opsLimit,
     this.memLimit,
+    this.sharedPublicURL,
   });
 
   Map<String, dynamic> toMap() {
@@ -32,6 +64,7 @@ class PublicURL {
       'nonce': nonce,
       'memLimit': memLimit,
       'opsLimit': opsLimit,
+      'sharedPublicURL': sharedPublicURL?.toMap(),
     };
   }
 
@@ -54,6 +87,7 @@ class PublicURL {
       nonce: map['nonce'],
       opsLimit: map['opsLimit'],
       memLimit: map['memLimit'],
+      sharedPublicURL: SharedPublicURL.fromMap(map),
     );
   }
 }
