@@ -56,7 +56,7 @@ import ArrowBack from "@mui/icons-material/ArrowBack";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
 import type { ButtonProps, IconButtonProps } from "@mui/material";
-import { Box, Button, IconButton, Typography, styled } from "@mui/material";
+import { Box, Button, IconButton, Typography } from "@mui/material";
 import AuthenticateUserModal from "components/AuthenticateUserModal";
 import { Collections } from "components/Collections";
 import CollectionNamer, {
@@ -148,17 +148,6 @@ import { isArchivedFile } from "utils/magicMetadata";
 import { getSessionExpiredMessage } from "utils/ui";
 import { getLocalFamilyData } from "utils/user/family";
 
-const SYNC_INTERVAL_IN_MICROSECONDS = 1000 * 60 * 5; // 5 minutes
-
-export const DeadCenter = styled("div")`
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    flex-direction: column;
-`;
-
 const defaultGalleryContext: GalleryContextType = {
     showPlanSelectorModal: () => null,
     setActiveCollectionID: () => null,
@@ -195,7 +184,6 @@ export const GalleryContext = createContext<GalleryContextType>(
  *           Photo List           v
  */
 export default function Gallery() {
-    const router = useRouter();
     const [user, setUser] = useState(null);
     const [familyData, setFamilyData] = useState<FamilyData>(null);
     const [collections, setCollections] = useState<Collection[]>(null);
@@ -351,6 +339,8 @@ export default function Gallery() {
         setFilesDownloadProgressAttributesList,
     ] = useState<FilesDownloadProgressAttributes[]>([]);
 
+    const router = useRouter();
+
     // Ensure that the keys in local storage are not malformed by verifying that
     // the recoveryKey can be decrypted with the masterKey.
     // Note: This is not bullet-proof.
@@ -411,9 +401,10 @@ export default function Gallery() {
             await syncWithRemote(true);
             setIsFirstLoad(false);
             setJustSignedUp(false);
-            syncInterval.current = setInterval(() => {
-                syncWithRemote(false, true);
-            }, SYNC_INTERVAL_IN_MICROSECONDS);
+            syncInterval.current = setInterval(
+                () => syncWithRemote(false, true),
+                5 * 60 * 1000 /* 5 minutes */,
+            );
             if (electron) {
                 electron.onMainWindowFocus(() => syncWithRemote(false, true));
                 if (await shouldShowWhatsNew(electron)) setOpenWhatsNew(true);
