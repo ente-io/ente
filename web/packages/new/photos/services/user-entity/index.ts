@@ -5,7 +5,7 @@ import {
 } from "@/base/crypto";
 import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
-import { gunzip } from "../gzip";
+import { gunzip } from "../../utils/gzip";
 import { applyCGroupDiff } from "../ml/db";
 import type { CGroup } from "../ml/people";
 import {
