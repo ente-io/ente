@@ -1,9 +1,11 @@
-import { getKV, getKVN, getKVS, setKV } from "@/base/kv";
+import { getKV, getKVN, setKV } from "@/base/kv";
 import { z } from "zod";
-import { LocalLocationTag, type EntityType } from ".";
+import { type EntityType } from ".";
 import { RemoteUserEntityKey } from "./remote";
 
-// Our DB footprint ---v
+// Our DB footprint---
+//
+// All these are stored in the kv db.
 
 const entitiesKey = (type: EntityType) => `entity/${type}`;
 const entityKeyKey = (type: EntityType) => `entity/${type}/key`;
@@ -52,16 +54,6 @@ export const savedEntities = async (
     type: EntityType,
 ): Promise<LocalUserEntity[]> =>
     LocalUserEntity.array().parse((await getKV(entitiesKey(type))) ?? []);
-
-/**
- * Return all the location tags that are present locally.
- *
- * Use {@link pullLocationTags} to synchronize this list with remote.
- */
-export const savedLocationTags = async () =>
-    LocalLocationTag.array().parse(
-        JSON.parse((await getKVS("locationTags")) ?? "[]"),
-    );
 
 /**
  * Save the {@link entityKey} for the given user entity {@link type} to our

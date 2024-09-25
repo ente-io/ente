@@ -9,19 +9,19 @@ import { gunzip } from "../../utils/gzip";
 import { applyCGroupDiff } from "../ml/db";
 import type { CGroup } from "../ml/people";
 import {
+    savedEntities,
     savedLatestUpdatedAt,
-    savedLocationTags,
     savedRemoteUserEntityKey,
+    saveEntities,
     saveLatestUpdatedAt,
-    saveLocationTags,
     saveRemoteUserEntityKey,
 } from "./db";
 import {
     getUserEntityKey,
     postUserEntityKey,
     RemoteUserEntityKey,
-    type UserEntityChange,
     userEntityDiff,
+    type UserEntityChange,
 } from "./remote";
 
 /**
@@ -44,39 +44,7 @@ export type EntityType =
      */
     | "cgroup";
 
-/**
- * Update our local location tags with changes from remote.
- *
- * This function fetches all the location tag user entities from remote and
- * updates our local database. It uses local state to remember the latest entry
- * the last time it did a pull, so each subsequent pull is a lightweight diff.
- *
- * @param masterKey The user's master key. This is used to encrypt and decrypt
- * the location tags specific entity key.
- */
-export const pullLocationTags = async (masterKey: Uint8Array) => {
-    const decoder = new TextDecoder();
-    const parse = (id: string, data: Uint8Array): LocationTag => ({
-        id,
-        ...RemoteLocationTag.parse(JSON.parse(decoder.decode(data))),
-    });
-
-    const processBatch = async (entities: UserEntityChange[]) => {
-        const existingTagsByID = new Map(
-            (await savedLocationTags()).map((t) => [t.id, t]),
-        );
-        entities.forEach(({ id, data }) =>
-            data
-                ? existingTagsByID.set(id, parse(id, data))
-                : existingTagsByID.delete(id),
-        );
-        return saveLocationTags([...existingTagsByID.values()]);
-    };
-
-    return pullUserEntities("location", masterKey, processBatch);
-};
-
-/** Zod schema for the tag that we get from or put to remote. */
+/** Zod schema for the fields of interest in the location tag that we get from remote. */
 const RemoteLocationTag = z.object({
     name: z.string(),
     radius: z.number(),
@@ -86,14 +54,15 @@ const RemoteLocationTag = z.object({
     }),
 });
 
-export type RemoteLocationTag = z.infer<typeof RemoteLocationTag>;
+export type LocationTag = z.infer<typeof RemoteLocationTag>;
 
-/** Zod schema for the tag that we persist locally. */
-export const LocalLocationTag = RemoteLocationTag.extend({
-    id: z.string(),
-});
-
-export type LocationTag = z.infer<typeof LocalLocationTag>;
+/**
+ * Return the list of locally available location tags.
+ */
+export const savedLocationTags = (): Promise<LocationTag[]> =>
+    savedEntities("location").then((es) =>
+        es.map((e) => RemoteLocationTag.parse(e)),
+    );
 
 /**
  * Update our local cgroups with changes from remote.
@@ -103,6 +72,10 @@ export type LocationTag = z.infer<typeof LocalLocationTag>;
  * checked.
  *
  * This diff is then applied to the data we have persisted locally.
+ *
+ *  * This function fetches all the location tag user entities from remote and
+ * updates our local database. It uses local state to remember the latest entry
+ * the last time it did a pull, so each subsequent pull is a lightweight diff.
  *
  * @param masterKey The user's master key. This is used to encrypt and decrypt
  * the cgroup specific entity key.
@@ -128,7 +101,7 @@ export const pullCGroups = (masterKey: Uint8Array) => {
             ),
         );
 
-    return pullUserEntities("cgroup", masterKey, processBatch);
+    return pullUserEntities("cgroup", masterKey);
 };
 
 const RemoteFaceCluster = z.object({
@@ -148,36 +121,52 @@ const RemoteCGroup = z.object({
 export type RemoteCGroup = z.infer<typeof RemoteCGroup>;
 
 /**
- * Sync of the given {@link type} entities that we have locally with remote.
+ * Update our local entities of the given {@link type} by pulling the latest
+ * changes from remote.
  *
- * This fetches all the user entities of {@link type} from remote that have been
- * created, updated or deleted since the last time we checked.
+ * This fetches all the user entities corresponding to the given user entity
+ * type from remote that have been created, updated or deleted since the last
+ * time we checked.
  *
- * For each diff response, the {@link processBatch} is invoked to give a chance
- * to caller to apply the updates to the data we have persisted locally.
+ * This diff is then applied to the data we have persisted locally.
  *
- * The user's {@link masterKey} is used to decrypt (or encrypt, when generating
- * a new one) the entity key.
+ * It uses local state to remember the latest entry the last time it did a pull,
+ * so each subsequent pull is a lightweight diff.
+ *
+ * @param masterKey The user's masterKey, which is is used to decrypt the entity
+ * key (or encrypt it, when generating a new one).
  */
-const pullUserEntities = async (
+export const pullUserEntities = async (
     type: EntityType,
     masterKey: Uint8Array,
-    processBatch: (entities: UserEntityChange[]) => Promise<void>,
 ) => {
     const entityKeyB64 = await getOrCreateEntityKeyB64(type, masterKey);
+
+    const isGzipped = type == "cgroup";
 
     let sinceTime = (await savedLatestUpdatedAt(type)) ?? 0;
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, no-constant-condition
     while (true) {
-        const entities = await userEntityDiff(type, sinceTime, entityKeyB64);
-        if (entities.length == 0) break;
+        const diff = await userEntityDiff(type, sinceTime, entityKeyB64);
+        if (diff.length == 0) break;
 
-        await processBatch(entities);
-
-        sinceTime = entities.reduce(
-            (max, entity) => Math.max(max, entity.updatedAt),
-            sinceTime,
+        const entityByID = new Map(
+            (await savedEntities(type)).map((e) => [e.id, e]),
         );
+
+        for (const { id, data, updatedAt } of diff) {
+            if (data) {
+                const s = isGzipped
+                    ? await gunzip(data)
+                    : new TextDecoder().decode(data);
+                entityByID.set(id, { id, data: JSON.parse(s), updatedAt });
+            } else {
+                entityByID.delete(id);
+            }
+            sinceTime = Math.max(sinceTime, updatedAt);
+        }
+
+        await saveEntities(type, [...entityByID.values()]);
         await saveLatestUpdatedAt(type, sinceTime);
     }
 };
