@@ -1,4 +1,4 @@
-import { getKV, removeKV, setKV } from "@/base/kv";
+import { getKVS, removeKV, setKV } from "@/base/kv";
 import log from "@/base/log";
 
 export enum LS_KEYS {
@@ -78,7 +78,7 @@ export const migrateKVToken = async (user: unknown) => {
         typeof oldLSUser == "object" &&
         "token" in oldLSUser &&
         typeof oldLSUser.token == "string" &&
-        !(await getKV("token"));
+        !(await getKVS("token"));
 
     user &&
     typeof user == "object" &&

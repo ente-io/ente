@@ -9,12 +9,16 @@ import log from "./log";
  * storage is limited to the main thread).
  *
  * The "kv" database consists of one object store, "kv". Keys are strings.
- * Values can be strings or number or booleans.
+ * Values can be arbitrary JSON objects.
  */
 interface KVDBSchema extends DBSchema {
     kv: {
         key: string;
-        value: string | number | boolean;
+        /**
+         * Typescript doesn't have a native JSON type, so this needs to be
+         * unknown
+         */
+        value: unknown;
     };
 }
 
@@ -101,8 +105,16 @@ export const clearKVDB = async () => {
 /**
  * Return the string value stored corresponding to {@link key}, or `undefined`
  * if there is no such entry.
+ *
+ * Typescript doesn't have a native JSON type, so the return value is type as an
+ * `unknown`. For primitive types, you can avoid casting by using the
+ * {@link getKVS} (string), {@link getKVN} (number) or {@link getKVB} (boolean)
+ * methods that do an additional runtime check of the type.
  */
-export const getKV = async (key: string) => _getKV<string>(key, "string");
+export const getKV = async (key: string) => {
+    const db = await kvDB();
+    return db.get("kv", key);
+};
 
 export const _getKV = async <T extends string | number | boolean>(
     key: string,
@@ -113,10 +125,13 @@ export const _getKV = async <T extends string | number | boolean>(
     if (v === undefined) return undefined;
     if (typeof v != type)
         throw new Error(
-            `Expected the value corresponding to key ${key} to be a ${type}, but instead got ${v}`,
+            `Expected the value corresponding to key ${key} to be a ${type}, but instead got ${String(v)}`,
         );
     return v as T;
 };
+
+/** String variant of {@link getKV}. */
+export const getKVS = async (key: string) => _getKV<string>(key, "string");
 
 /** Numeric variant of {@link getKV}. */
 export const getKVN = async (key: string) => _getKV<number>(key, "number");
@@ -127,8 +142,11 @@ export const getKVB = async (key: string) => _getKV<boolean>(key, "boolean");
 /**
  * Save the given {@link value} corresponding to {@link key}, overwriting any
  * existing value.
+ *
+ * @param value Any arbitrary JSON object. Typescript doesn't have a native JSON
+ * type, so this is typed as a unknown
  */
-export const setKV = async (key: string, value: string | number | boolean) => {
+export const setKV = async (key: string, value: unknown) => {
     const db = await kvDB();
     await db.put("kv", value, key);
 };

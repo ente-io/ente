@@ -44,7 +44,7 @@ const defaultDiffLimit = 500;
  */
 export interface UserEntityChange {
     /**
-     * A UUID or nanoid of the entity.
+     * The UUID or nanoid of the entity.
      */
     id: string;
     /**
