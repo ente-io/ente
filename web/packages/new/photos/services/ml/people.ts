@@ -126,7 +126,7 @@ export interface Person {
 /**
  * Fetch existing cgroups for the user from remote and save them to DB.
  */
-export const syncCGroups = async () => {
+export const pullCGroups = async () => {
     if (!process.env.NEXT_PUBLIC_ENTE_WIP_CL) return;
     if (!(await wipClusterEnable())) return;
 

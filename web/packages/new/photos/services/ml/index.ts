@@ -20,7 +20,7 @@ import { setSearchPeople } from "../search";
 import type { UploadItem } from "../upload/types";
 import { regenerateFaceCrops } from "./crop";
 import { clearMLDB, getFaceIndex, getIndexableAndIndexedCounts } from "./db";
-import { namedPeopleFromCGroups, syncCGroups, type Person } from "./people";
+import { namedPeopleFromCGroups, pullCGroups, type Person } from "./people";
 import { MLWorker } from "./worker";
 import type { CLIPMatches } from "./worker-types";
 
@@ -326,13 +326,15 @@ export const mlSync = async () => {
     // Fetch indexes, or index locally if needed.
     await worker().then((w) => w.sync());
 
-    // Fetch existing cgroups.
-    await syncCGroups();
+    // Fetch existing cgroups from remote.
+    await pullCGroups();
 
-    // Generate local clusters
+    // Generate or update local clusters.
     // TODO-Cluster
     // Warning - this is heavily WIP
-    wipClusterLocalOnce();
+    if (process.env.NEXT_PUBLIC_ENTE_WIP_CL_AUTO) {
+        await wipCluster();
+    }
 
     // Update our in-memory snapshot of people.
     const namedPeople = await namedPeopleFromCGroups();
@@ -372,20 +374,11 @@ export const indexNewUpload = (enteFile: EnteFile, uploadItem: UploadItem) => {
 
 /**
  * WIP! Don't enable, dragon eggs are hatching here.
+ * TODO-Cluster
  */
 export const wipClusterEnable = async (): Promise<boolean> =>
     (!!process.env.NEXT_PUBLIC_ENTE_WIP_CL && isDevBuild) ||
     (await isInternalUser());
-
-// // TODO-Cluster temporary state here
-let _wip_hasSwitchedOnce = false;
-
-export const wipClusterLocalOnce = () => {
-    if (!process.env.NEXT_PUBLIC_ENTE_WIP_CL_AUTO) return;
-    if (_wip_hasSwitchedOnce) return;
-    _wip_hasSwitchedOnce = true;
-    void wipCluster();
-};
 
 export const wipCluster = async () => {
     if (!(await wipClusterEnable())) throw new Error("Not implemented");
