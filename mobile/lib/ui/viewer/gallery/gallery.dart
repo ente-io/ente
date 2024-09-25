@@ -204,6 +204,11 @@ class GalleryState extends State<Gallery> {
 
   void _onFiltersUpdated() async {
     final filters = _searchFilterDataProvider!.appliedFilters;
+    if (filters.isEmpty) {
+      Navigator.of(context).pop();
+      return;
+    }
+
     final filterdFiles = <EnteFile>[];
     final _allFilesInDb = await SearchService.instance.getAllFiles();
 
