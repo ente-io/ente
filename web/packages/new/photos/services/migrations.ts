@@ -94,9 +94,9 @@ const m3 = () =>
         // DB (although empty).
         deleteDB("mldata"),
 
-        // Remove data from an intermediate format that stored user-entities
-        // piecewise instead of as generic, verbatim, entities.
+        // Remove data from an intermediate format that stored user-entities in
+        // their parsed form instead of as generic, verbatim, entities.
         removeKV("locationTags"),
-        removeKV("entityKey/locationTags"),
-        removeKV("latestUpdatedAt/locationTags"),
+        removeKV("entityKey/location"),
+        removeKV("latestUpdatedAt/location"),
     ]);
