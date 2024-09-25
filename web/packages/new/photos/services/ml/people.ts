@@ -2,9 +2,9 @@ import { masterKeyFromSession } from "@/base/session-store";
 import { wipClusterEnable } from ".";
 import type { EnteFile } from "../../types/file";
 import { getLocalFiles } from "../files";
-import { pullCGroups } from "../user-entity";
+import { pullUserEntities, savedCGroups } from "../user-entity";
 import type { FaceCluster } from "./cluster";
-import { getClusterGroups, getFaceIndexes } from "./db";
+import { getFaceIndexes } from "./db";
 import { fileIDFromFaceID } from "./face";
 
 /**
@@ -131,7 +131,7 @@ export const syncCGroups = async () => {
     if (!(await wipClusterEnable())) return;
 
     const masterKey = await masterKeyFromSession();
-    await pullCGroups(masterKey);
+    await pullUserEntities("cgroup", masterKey);
 };
 
 export type NamedPerson = Omit<Person, "name"> & {
@@ -180,9 +180,9 @@ export const namedPeopleFromCGroups = async (): Promise<NamedPerson[]> => {
     }
 
     // Convert cgroups to people.
-    const cgroups = await getClusterGroups();
+    const cgroups = await savedCGroups();
     return cgroups
-        .map((cgroup) => {
+        .map(({ id, data: cgroup }) => {
             // Hidden cgroups are clusters specifically marked so as to not be shown
             // in the UI.
             if (cgroup.isHidden) return undefined;
@@ -228,8 +228,6 @@ export const namedPeopleFromCGroups = async (): Promise<NamedPerson[]> => {
                 displayFaceID = highestScoringFace.faceID;
                 displayFaceFile = highestScoringFace.file;
             }
-
-            const id = cgroup.id;
 
             return { id, name, fileIDs, displayFaceID, displayFaceFile };
         })

@@ -6,8 +6,6 @@ import {
 import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
 import { gunzip } from "../../utils/gzip";
-import { applyCGroupDiff } from "../ml/db";
-import type { CGroup } from "../ml/people";
 import {
     savedEntities,
     savedLatestUpdatedAt,
@@ -15,13 +13,13 @@ import {
     saveEntities,
     saveLatestUpdatedAt,
     saveRemoteUserEntityKey,
+    type LocalUserEntity,
 } from "./db";
 import {
     getUserEntityKey,
     postUserEntityKey,
     RemoteUserEntityKey,
     userEntityDiff,
-    type UserEntityChange,
 } from "./remote";
 
 /**
@@ -44,7 +42,10 @@ export type EntityType =
      */
     | "cgroup";
 
-/** Zod schema for the fields of interest in the location tag that we get from remote. */
+/**
+ * Zod schema for the fields of interest in the location tag that we get from
+ * remote.
+ */
 const RemoteLocationTag = z.object({
     name: z.string(),
     radius: z.number(),
@@ -54,6 +55,9 @@ const RemoteLocationTag = z.object({
     }),
 });
 
+/**
+ * A view of the location tag data suitable for use by the rest of the app.
+ */
 export type LocationTag = z.infer<typeof RemoteLocationTag>;
 
 /**
@@ -61,54 +65,17 @@ export type LocationTag = z.infer<typeof RemoteLocationTag>;
  */
 export const savedLocationTags = (): Promise<LocationTag[]> =>
     savedEntities("location").then((es) =>
-        es.map((e) => RemoteLocationTag.parse(e)),
+        es.map((e) => RemoteLocationTag.parse(e.data)),
     );
-
-/**
- * Update our local cgroups with changes from remote.
- *
- * This fetches all the user entities corresponding to the "cgroup" entity type
- * from remote that have been created, updated or deleted since the last time we
- * checked.
- *
- * This diff is then applied to the data we have persisted locally.
- *
- *  * This function fetches all the location tag user entities from remote and
- * updates our local database. It uses local state to remember the latest entry
- * the last time it did a pull, so each subsequent pull is a lightweight diff.
- *
- * @param masterKey The user's master key. This is used to encrypt and decrypt
- * the cgroup specific entity key.
- */
-export const pullCGroups = (masterKey: Uint8Array) => {
-    // See: [Note: strict mode migration]
-    //
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    const parse = async (id: string, data: Uint8Array): Promise<CGroup> => ({
-        id,
-        name: undefined,
-        avatarFaceID: undefined,
-        ...RemoteCGroup.parse(JSON.parse(await gunzip(data))),
-    });
-
-    const processBatch = async (entities: UserEntityChange[]) =>
-        await applyCGroupDiff(
-            await Promise.all(
-                entities.map(async ({ id, data }) =>
-                    data ? await parse(id, data) : id,
-                ),
-            ),
-        );
-
-    return pullUserEntities("cgroup", masterKey);
-};
 
 const RemoteFaceCluster = z.object({
     id: z.string(),
     faces: z.string().array(),
 });
 
+/**
+ * Zod schema for the fields of interest in the cgroup that we get from remote.
+ */
 const RemoteCGroup = z.object({
     name: z.string().nullish().transform(nullToUndefined),
     assigned: z.array(RemoteFaceCluster),
@@ -119,6 +86,18 @@ const RemoteCGroup = z.object({
 });
 
 export type RemoteCGroup = z.infer<typeof RemoteCGroup>;
+
+export type CGroupUserEntity = Omit<LocalUserEntity, "data"> & {
+    data: RemoteCGroup;
+};
+
+/**
+ * Return the list of locally available cgroup user entities.
+ */
+export const savedCGroups = (): Promise<CGroupUserEntity[]> =>
+    savedEntities("cgroup").then((es) =>
+        es.map((e) => ({ ...e, data: RemoteCGroup.parse(e.data) })),
+    );
 
 /**
  * Update our local entities of the given {@link type} by pulling the latest
