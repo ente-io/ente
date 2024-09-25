@@ -3,7 +3,7 @@ import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import type { EnteFile } from "../../types/file";
-import { savedCGroups } from "../user-entity";
+import { savedCGroupUserEntities, type CGroupUserEntity } from "../user-entity";
 import { savedFaceClusters } from "./db";
 import {
     faceDirection,
@@ -12,6 +12,7 @@ import {
     type FaceIndex,
 } from "./face";
 import { dotProduct } from "./math";
+import type { CGroup } from "./people";
 
 /**
  * A face cluster is an set of faces, and a nanoid to uniquely identify it.
@@ -111,12 +112,16 @@ export const clusterFaces = async (
     let clusters: FaceCluster[] = [];
 
     // Get the locally available remote cluster groups.
-    const cgroups = await savedCGroups();
-    // Sort them so that the latest ones are first.
-    const sortedCGroups = cgroups.sort((a, b) => b.updatedAt - a.updatedAt);
+    const cgroupUserEntities = await savedCGroupUserEntities();
+    // Sort them so that the latest ones are first. This is not expected to be
+    // needed, it is just a safety check in case a client puts a face into two
+    // clusters, in which case we want to use the more recent cgroup.
+    const sortedCGroupUserEntities = cgroupUserEntities.sort(
+        (a, b) => b.updatedAt - a.updatedAt,
+    );
     // Extract the remote clusters.
     clusters = clusters.concat(
-        sortedCGroups.map((cg) => cg.data.assigned).flat(),
+        sortedCGroupUserEntities.map((cg) => cg.data.assigned).flat(),
     );
 
     // Add on the clusters we have available locally.
@@ -189,18 +194,58 @@ export const clusterFaces = async (
         `Generated ${sortedClusters.length} clusters from ${faces.length} faces (${clusteredFaceCount} clustered ${faces.length - clusteredFaceCount} unclustered) (${timeTakenMs} ms)`,
     );
 
-    // // TODO-Cluster
-    // // This isn't really part of the clustering, but help the main thread out by
-    // // pre-computing temporary in-memory people, one per cluster.
+    // Clustering is complete at this point. Now we want to
+    // 1. Update remote cgroups that have changed.
+    // 1. Update our local state.
+
+    // Index clusters by their ID for fast lookup.
+    const clusterByID = new Map(clusters.map((c) => [c.id, c]));
+
+    // Map from clusters to their (remote) cgroup.
+    const clusterIDToCGroupID = new Map<string, string>();
+    for (const cgroup of cgroupUserEntities) {
+        for (const cluster of cgroup.data.assigned)
+            clusterIDToCGroupID.set(cluster.id, cgroup.id);
+    }
+
+    // Find the cgroups that have changed since we started.
+    const changedCGroupUserEntities: CGroupUserEntity[] = [];
+    for (const cgroupEntity of cgroupUserEntities) {
+        for (const oldCluster of cgroupEntity.data.assigned) {
+            // The clustering algorithm does not remove any existing faces, it
+            // can only add new ones to the cluster. So we can use the count as
+            // an indication if something changed.
+            if (
+                oldCluster.faces.length !=
+                ensure(clusterByID.get(oldCluster.id)).faces.length
+            ) {
+                changedCGroupUserEntities.push({
+                    ...cgroupEntity,
+                    data: {
+                        ...cgroupEntity.data,
+                        assigned: cgroupEntity.data.assigned.map(({ id }) =>
+                            ensure(clusterByID.get(id)),
+                        ),
+                    },
+                });
+                break;
+            }
+        }
+    }
+
+    console.log("Should PUT remote clusters", changedCGroupUserEntities);
+
+    // Find clusters that are not part of a remote cgroup.
+    const localClusters = clusters.filter(
+        ({ id }) => !clusterIDToCGroupID.has(id),
+    );
+
+    console.log("Should save local clusters", localClusters);
 
     // // For fast reverse lookup - map from face ids to the face.
     // const faceForFaceID = new Map(faces.map((f) => [f.faceID, f]));
 
     // const people = toPeople(sortedClusters, localFileByID, faceForFaceID);
-
-    // // reconcileClusters
-    // // Save local
-    // // updated map -> remote - Put
 
     return { clusters: sortedClusters, people: [] };
 };

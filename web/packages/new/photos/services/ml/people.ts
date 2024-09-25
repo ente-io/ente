@@ -1,12 +1,12 @@
 import { masterKeyFromSession } from "@/base/session-store";
+import { ensure } from "@/utils/ensure";
 import { wipClusterEnable } from ".";
 import type { EnteFile } from "../../types/file";
 import { getLocalFiles } from "../files";
-import { pullUserEntities, savedCGroups } from "../user-entity";
+import { pullUserEntities, savedCGroupUserEntities } from "../user-entity";
 import type { FaceCluster } from "./cluster";
 import { getFaceIndexes } from "./db";
 import { fileIDFromFaceID, type Face } from "./face";
-import { ensure } from "@/utils/ensure";
 
 /**
  * A cgroup ("cluster group") is a group of clusters (possibly containing just a
@@ -181,7 +181,7 @@ export const namedPeopleFromCGroups = async (): Promise<NamedPerson[]> => {
     }
 
     // Convert cgroups to people.
-    const cgroups = await savedCGroups();
+    const cgroups = await savedCGroupUserEntities();
     return cgroups
         .map(({ id, data: cgroup }) => {
             // Hidden cgroups are clusters specifically marked so as to not be shown
@@ -235,7 +235,6 @@ export const namedPeopleFromCGroups = async (): Promise<NamedPerson[]> => {
         .filter((c) => !!c)
         .sort((a, b) => b.fileIDs.length - a.fileIDs.length);
 };
-
 
 /**
  * Construct a {@link Person} object for each cluster.
