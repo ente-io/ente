@@ -2,7 +2,7 @@ import { HTTPError } from "@/base/http";
 import type { Location } from "@/base/types";
 import type { Collection } from "@/media/collection";
 import { fileCreationPhotoDate, fileLocation } from "@/media/file-metadata";
-import type { NamedPerson } from "@/new/photos/services/ml/cgroups";
+import type { NamedPerson } from "@/new/photos/services/ml/people";
 import type { EnteFile } from "@/new/photos/types/file";
 import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";

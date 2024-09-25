@@ -1,5 +1,6 @@
 import { SelectionBar } from "@/base/components/Navbar";
 import type { Collection } from "@/media/collection";
+import type { GalleryBarMode } from "@/new/photos/components/Gallery/BarImpl";
 import { FluidContainer } from "@ente/shared/components/Container";
 import ClockIcon from "@mui/icons-material/AccessTime";
 import AddIcon from "@mui/icons-material/Add";
@@ -41,6 +42,7 @@ interface Props {
     count: number;
     ownCount: number;
     clearSelection: () => void;
+    barMode?: GalleryBarMode;
     activeCollectionID: number;
     isFavoriteCollection: boolean;
     isUncategorizedCollection: boolean;
@@ -59,6 +61,7 @@ const SelectedFileOptions = ({
     count,
     ownCount,
     clearSelection,
+    barMode,
     activeCollectionID,
     isFavoriteCollection,
     isUncategorizedCollection,
@@ -67,12 +70,16 @@ const SelectedFileOptions = ({
     isInHiddenSection,
 }: Props) => {
     const { setDialogMessage } = useContext(AppContext);
+
+    const peopleMode = barMode == "people";
+
     const addToCollection = () =>
         setCollectionSelectorAttributes({
             callback: handleCollectionOps(COLLECTION_OPS_TYPE.ADD),
             showNextModal: showCreateCollectionModal(COLLECTION_OPS_TYPE.ADD),
             intent: CollectionSelectorIntent.add,
-            fromCollection: !isInSearchMode ? activeCollectionID : undefined,
+            fromCollection:
+                !isInSearchMode && !peopleMode ? activeCollectionID : undefined,
         });
 
     const trashHandler = () =>
@@ -140,7 +147,8 @@ const SelectedFileOptions = ({
             callback: handleCollectionOps(COLLECTION_OPS_TYPE.MOVE),
             showNextModal: showCreateCollectionModal(COLLECTION_OPS_TYPE.MOVE),
             intent: CollectionSelectorIntent.move,
-            fromCollection: !isInSearchMode ? activeCollectionID : undefined,
+            fromCollection:
+                !isInSearchMode && !peopleMode ? activeCollectionID : undefined,
         });
     };
 
@@ -176,6 +184,40 @@ const SelectedFileOptions = ({
                                 <ClockIcon />
                             </IconButton>
                         </Tooltip>
+                        <Tooltip title={t("download")}>
+                            <IconButton
+                                onClick={handleFileOps(FILE_OPS_TYPE.DOWNLOAD)}
+                            >
+                                <DownloadIcon />
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title={t("ADD")}>
+                            <IconButton onClick={addToCollection}>
+                                <AddIcon />
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title={t("archive")}>
+                            <IconButton
+                                onClick={handleFileOps(FILE_OPS_TYPE.ARCHIVE)}
+                            >
+                                <ArchiveIcon />
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title={t("HIDE")}>
+                            <IconButton
+                                onClick={handleFileOps(FILE_OPS_TYPE.HIDE)}
+                            >
+                                <VisibilityOffOutlined />
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title={t("DELETE")}>
+                            <IconButton onClick={trashHandler}>
+                                <DeleteIcon />
+                            </IconButton>
+                        </Tooltip>
+                    </>
+                ) : peopleMode ? (
+                    <>
                         <Tooltip title={t("download")}>
                             <IconButton
                                 onClick={handleFileOps(FILE_OPS_TYPE.DOWNLOAD)}

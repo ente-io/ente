@@ -7,7 +7,7 @@
  * there.
  */
 
-import type { Person } from "@/new/photos/services/ml/cgroups";
+import type { Person } from "@/new/photos/services/ml/people";
 import type { SearchOption } from "@/new/photos/services/search/types";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
 import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
@@ -18,6 +18,16 @@ import { t } from "i18next";
 import React from "react";
 import { SpaceBetweenFlex } from "../mui-custom";
 import { GalleryItemsHeaderAdapter, GalleryItemsSummary } from "./ListHeader";
+
+/**
+ * The context in which a selection was made.
+ *
+ * This allows us to reset the selection if user moves to a different context
+ * and starts a new selection.
+ * */
+export type SelectionContext =
+    | { mode: "albums" | "hidden-albums"; collectionID: number }
+    | { mode: "people"; personID: string };
 
 interface SearchResultsHeaderProps {
     selectedOption: SearchOption;

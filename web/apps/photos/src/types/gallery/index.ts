@@ -1,4 +1,5 @@
 import type { Collection } from "@/media/collection";
+import { type SelectionContext } from "@/new/photos/components/Gallery";
 import { EnteFile } from "@/new/photos/types/file";
 import type { User } from "@ente/shared/user/types";
 import { CollectionSelectorAttributes } from "components/Collections/CollectionSelector";
@@ -10,6 +11,12 @@ export type SelectedState = {
     ownCount: number;
     count: number;
     collectionID: number;
+    /**
+     * The context in which the selection was made. Only set by newer code if
+     * there is an active selection (older code continues to rely on the
+     * {@link collectionID} logic).
+     */
+    context: SelectionContext | undefined;
 };
 export type SetSelectedState = React.Dispatch<
     React.SetStateAction<SelectedState>

@@ -1,9 +1,9 @@
 import log from "@/base/log";
 import { deleteDB, openDB, type DBSchema } from "idb";
-import type { CGroup } from "./cgroups";
 import type { LocalCLIPIndex } from "./clip";
 import type { FaceCluster } from "./cluster";
 import type { LocalFaceIndex } from "./face";
+import type { CGroup } from "./people";
 
 /**
  * ML DB schema.

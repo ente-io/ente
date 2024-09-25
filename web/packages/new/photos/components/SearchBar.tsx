@@ -8,7 +8,7 @@ import {
     peopleSnapshot,
     peopleSubscribe,
 } from "@/new/photos/services/ml";
-import type { Person } from "@/new/photos/services/ml/cgroups";
+import type { Person } from "@/new/photos/services/ml/people";
 import { searchOptionsForString } from "@/new/photos/services/search";
 import type { SearchOption } from "@/new/photos/services/search/types";
 import { nullToUndefined } from "@/utils/transform";

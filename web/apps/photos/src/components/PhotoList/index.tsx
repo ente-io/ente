@@ -1,3 +1,4 @@
+import type { GalleryBarMode } from "@/new/photos/components/Gallery/BarImpl";
 import { EnteFile } from "@/new/photos/types/file";
 import { formattedByteSize } from "@/new/photos/utils/units";
 import { FlexWrapper } from "@ente/shared/components/Container";
@@ -189,6 +190,7 @@ const NothingContainer = styled(ListItemContainer)`
 interface Props {
     height: number;
     width: number;
+    mode?: GalleryBarMode;
     displayFiles: EnteFile[];
     showAppDownloadBanner: boolean;
     getThumbnail: (
@@ -197,6 +199,7 @@ interface Props {
         isScrolling?: boolean,
     ) => JSX.Element;
     activeCollectionID: number;
+    activePersonID?: string;
 }
 
 interface ItemData {
@@ -253,10 +256,12 @@ const PhotoListRow = React.memo(
 export function PhotoList({
     height,
     width,
+    mode,
     displayFiles,
     showAppDownloadBanner,
     getThumbnail,
     activeCollectionID,
+    activePersonID,
 }: Props) {
     const galleryContext = useContext(GalleryContext);
     const publicCollectionGalleryContext = useContext(
@@ -768,7 +773,9 @@ export function PhotoList({
 
     const handleSelect = handleSelectCreator(
         galleryContext.setSelectedFiles,
+        mode,
         activeCollectionID,
+        activePersonID,
     );
 
     const onChangeSelectAllCheckBox = (date: string) => {

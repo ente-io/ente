@@ -17,7 +17,7 @@ import {
     getLocalTrashedFiles,
 } from "@/new/photos/services/files";
 import { peopleSnapshot, peopleSubscribe } from "@/new/photos/services/ml";
-import type { Person } from "@/new/photos/services/ml/cgroups";
+import type { Person } from "@/new/photos/services/ml/people";
 import {
     filterSearchableFiles,
     setSearchCollectionsAndFiles,
@@ -202,6 +202,7 @@ export default function Gallery() {
         ownCount: 0,
         count: 0,
         collectionID: 0,
+        context: { mode: "albums", collectionID: ALL_SECTION },
     });
     const [planModalView, setPlanModalView] = useState(false);
     const [blockingLoad, setBlockingLoad] = useState(false);
@@ -253,13 +254,7 @@ export default function Gallery() {
     const syncInProgress = useRef(true);
     const syncInterval = useRef<NodeJS.Timeout>();
     const resync = useRef<{ force: boolean; silent: boolean }>();
-    // tempDeletedFileIds and tempHiddenFileIds are used to keep track of files that are deleted/hidden in the current session but not yet synced with the server.
-    const [tempDeletedFileIds, setTempDeletedFileIds] = useState<Set<number>>(
-        new Set<number>(),
-    );
-    const [tempHiddenFileIds, setTempHiddenFileIds] = useState<Set<number>>(
-        new Set<number>(),
-    );
+
     const {
         startLoading,
         finishLoading,
@@ -338,6 +333,16 @@ export default function Gallery() {
         filesDownloadProgressAttributesList,
         setFilesDownloadProgressAttributesList,
     ] = useState<FilesDownloadProgressAttributes[]>([]);
+
+    // tempDeletedFileIds and tempHiddenFileIds are used to keep track of files
+    // that are deleted/hidden in the current session but not yet synced with
+    // the server.
+    const [tempDeletedFileIds, setTempDeletedFileIds] = useState(
+        new Set<number>(),
+    );
+    const [tempHiddenFileIds, setTempHiddenFileIds] = useState(
+        new Set<number>(),
+    );
 
     const router = useRouter();
 
@@ -548,7 +553,15 @@ export default function Gallery() {
             );
         } else if (barMode == "people") {
             const pfSet = new Set(ensure(activePerson).fileIDs);
-            filteredFiles = files.filter((f) => pfSet.has(f.id));
+            filteredFiles = getUniqueFiles(
+                files.filter(({ id }) => {
+                    if (!pfSet.has(id)) return false;
+                    // TODO-Cluster
+                    // if (tempDeletedFileIds?.has(id)) return false;
+                    // if (tempHiddenFileIds?.has(id)) return false;
+                    return true;
+                }),
+            );
         } else {
             const baseFiles = barMode == "hidden-albums" ? hiddenFiles : files;
             filteredFiles = getUniqueFiles(
@@ -661,6 +674,13 @@ export default function Gallery() {
             ownCount: 0,
             count: 0,
             collectionID: activeCollectionID,
+            context:
+                barMode == "people" && activePerson
+                    ? { mode: "people" as const, personID: activePerson.id }
+                    : {
+                          mode: "albums" as const,
+                          collectionID: ensure(activeCollectionID),
+                      },
         };
 
         filteredData.forEach((item) => {
@@ -677,7 +697,12 @@ export default function Gallery() {
         if (!selected?.count) {
             return;
         }
-        setSelected({ ownCount: 0, count: 0, collectionID: 0 });
+        setSelected({
+            ownCount: 0,
+            count: 0,
+            collectionID: 0,
+            context: undefined,
+        });
     };
 
     const keyboardShortcutHandlerRef = useRef({
@@ -1207,6 +1232,7 @@ export default function Gallery() {
                 ) : (
                     <PhotoFrame
                         page={PAGES.GALLERY}
+                        mode={barMode}
                         files={filteredData}
                         syncWithRemote={syncWithRemote}
                         favItemIds={favItemIds}
@@ -1216,6 +1242,7 @@ export default function Gallery() {
                         setTempDeletedFileIds={setTempDeletedFileIds}
                         setIsPhotoSwipeOpen={setIsPhotoSwipeOpen}
                         activeCollectionID={activeCollectionID}
+                        activePersonID={activePerson?.id}
                         enableDownload={true}
                         fileToCollectionsMap={fileToCollectionsMap}
                         collectionNameMap={collectionNameMap}
@@ -1243,6 +1270,7 @@ export default function Gallery() {
                             count={selected.count}
                             ownCount={selected.ownCount}
                             clearSelection={clearSelection}
+                            barMode={barMode}
                             activeCollectionID={activeCollectionID}
                             selectedCollection={getSelectedCollection(
                                 selected.collectionID,

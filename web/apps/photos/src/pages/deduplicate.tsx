@@ -49,6 +49,7 @@ export default function Deduplicate() {
         count: 0,
         collectionID: 0,
         ownCount: 0,
+        context: undefined,
     });
     const closeDeduplication = function () {
         Router.push(PAGES.GALLERY);
@@ -97,6 +98,7 @@ export default function Deduplicate() {
             count: count,
             ownCount: count,
             collectionID: ALL_SECTION,
+            context: undefined,
         };
         for (const fileID of toSelectFileIDs) {
             selectedFiles[fileID] = true;
@@ -157,7 +159,12 @@ export default function Deduplicate() {
     };
 
     const clearSelection = function () {
-        setSelected({ count: 0, collectionID: 0, ownCount: 0 });
+        setSelected({
+            count: 0,
+            collectionID: 0,
+            ownCount: 0,
+            context: undefined,
+        });
     };
 
     if (!duplicates) {

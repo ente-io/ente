@@ -1,5 +1,6 @@
 import log from "@/base/log";
 import { FileType } from "@/media/file-type";
+import type { GalleryBarMode } from "@/new/photos/components/Gallery/BarImpl";
 import DownloadManager from "@/new/photos/services/download";
 import type { LivePhotoSourceURL, SourceURLs } from "@/new/photos/types/file";
 import { EnteFile } from "@/new/photos/types/file";
@@ -48,6 +49,7 @@ interface Props {
         | PHOTOS_PAGES.GALLERY
         | PHOTOS_PAGES.DEDUPLICATE
         | PHOTOS_PAGES.SHARED_ALBUMS;
+    mode?: GalleryBarMode;
     files: EnteFile[];
     duplicates?: Duplicate[];
     syncWithRemote: () => Promise<void>;
@@ -58,7 +60,10 @@ interface Props {
     selected: SelectedState;
     tempDeletedFileIds?: Set<number>;
     setTempDeletedFileIds?: (value: Set<number>) => void;
+    /** This will be set if mode is not "people". */
     activeCollectionID: number;
+    /** This will be set if mode is "people". */
+    activePersonID?: string | undefined;
     enableDownload?: boolean;
     fileToCollectionsMap: Map<number, number[]>;
     collectionNameMap: Map<number, string>;
@@ -72,6 +77,7 @@ interface Props {
 const PhotoFrame = ({
     page,
     duplicates,
+    mode,
     files,
     syncWithRemote,
     favItemIds,
@@ -80,6 +86,7 @@ const PhotoFrame = ({
     tempDeletedFileIds,
     setTempDeletedFileIds,
     activeCollectionID,
+    activePersonID,
     enableDownload,
     fileToCollectionsMap,
     collectionNameMap,
@@ -232,7 +239,9 @@ const PhotoFrame = ({
 
     const handleSelect = handleSelectCreator(
         setSelected,
+        mode,
         activeCollectionID,
+        activePersonID,
         setRangeStart,
     );
 
@@ -287,8 +296,13 @@ const PhotoFrame = ({
                 index,
             )}
             selected={
-                selected.collectionID === activeCollectionID &&
-                selected[item.id]
+                (!mode
+                    ? selected.collectionID === activeCollectionID
+                    : mode == selected.context?.mode &&
+                      (selected.context.mode == "people"
+                          ? selected.context.personID == activePersonID
+                          : selected.context.collectionID ==
+                            activeCollectionID)) && selected[item.id]
             }
             selectOnClick={selected.count > 0}
             onHover={onHoverOver(index)}
@@ -539,8 +553,10 @@ const PhotoFrame = ({
                             width={width}
                             height={height}
                             getThumbnail={getThumbnail}
+                            mode={mode}
                             displayFiles={displayFiles}
                             activeCollectionID={activeCollectionID}
+                            activePersonID={activePersonID}
                             showAppDownloadBanner={showAppDownloadBanner}
                         />
                     )
