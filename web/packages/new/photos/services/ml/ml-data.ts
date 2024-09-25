@@ -3,8 +3,8 @@ import log from "@/base/log";
 import type { EnteFile } from "@/new/photos/types/file";
 import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
+import { gunzip, gzip } from "../../utils/gzip";
 import { fetchFileData, putFileData } from "../file-data";
-import { gunzip, gzip } from "../gzip";
 import { type RemoteCLIPIndex } from "./clip";
 import { type RemoteFaceIndex } from "./face";
 

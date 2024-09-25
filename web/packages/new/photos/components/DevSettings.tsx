@@ -1,6 +1,6 @@
 import { useIsMobileWidth } from "@/base/hooks";
 import { ensureOk } from "@/base/http";
-import { getKV, removeKV, setKV } from "@/base/kv";
+import { getKVS, removeKV, setKV } from "@/base/kv";
 import log from "@/base/log";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import {
@@ -69,7 +69,8 @@ const Contents: React.FC<ContentsProps> = (props) => {
     >();
 
     useEffect(
-        () => void getKV("apiOrigin").then((o) => setInitialAPIOrigin(o ?? "")),
+        () =>
+            void getKVS("apiOrigin").then((o) => setInitialAPIOrigin(o ?? "")),
         [],
     );
 

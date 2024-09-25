@@ -431,6 +431,7 @@ export const setFaceClusters = async (clusters: FaceCluster[]) => {
  * -   A cgroup, in which case it should add or overwrite the entry for the
  *     corresponding cluster group (as identified by its {@link id}).
  */
+// TODO-Cluster delete me
 export const applyCGroupDiff = async (diff: (string | CGroup)[]) => {
     const db = await mlDB();
     const tx = db.transaction("cluster-group", "readwrite");

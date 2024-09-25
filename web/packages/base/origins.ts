@@ -1,4 +1,4 @@
-import { getKV } from "@/base/kv";
+import { getKVS } from "@/base/kv";
 
 /**
  * Return the origin (scheme, host, port triple) that should be used for making
@@ -35,7 +35,7 @@ export const apiURL = async (path: string) => (await apiOrigin()) + path;
  * Otherwise return undefined.
  */
 export const customAPIOrigin = async () =>
-    (await getKV("apiOrigin")) ??
+    (await getKVS("apiOrigin")) ??
     process.env.NEXT_PUBLIC_ENTE_ENDPOINT ??
     undefined;
 

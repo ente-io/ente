@@ -130,6 +130,8 @@ export const clusterFaces = async (
     // The resultant clusters.
     // TODO-Cluster Later on, instead of starting from a blank slate, this will
     // be list of existing clusters we fetch from remote.
+    // - fetchRemoteClusterFeedback
+    // [..local, ..remote]
     let clusters: FaceCluster[] = [];
 
     // Process the faces in batches, but keep an overlap between batches to
@@ -187,6 +189,10 @@ export const clusterFaces = async (
     log.info(
         `Generated ${sortedClusters.length} clusters from ${faces.length} faces (${clusteredFaceCount} clustered ${faces.length - clusteredFaceCount} unclustered) (${timeTakenMs} ms)`,
     );
+
+    // reconcileClusters
+    // Save local
+    // updated map -> remote - Put
 
     return { clusters: sortedClusters, people };
 };

@@ -12,7 +12,7 @@ import * as chrono from "chrono-node";
 import { expose } from "comlink";
 import { z } from "zod";
 import {
-    pullLocationTags,
+    pullUserEntities,
     savedLocationTags,
     type LocationTag,
 } from "../user-entity";
@@ -47,7 +47,7 @@ export class SearchWorker {
      */
     async sync(masterKey: Uint8Array) {
         return Promise.all([
-            pullLocationTags(masterKey)
+            pullUserEntities("location", masterKey)
                 .then(() => savedLocationTags())
                 .then((ts) => (this.locationTags = ts)),
             fetchCities().then((cs) => (this.cities = cs)),
