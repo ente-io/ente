@@ -40,4 +40,12 @@ class AlbumFilter extends HierarchicalSearchFilter {
   Set<int> getMatchedUploadedIDs() {
     return matchedUploadedIDs;
   }
+
+  @override
+  bool isSameFilter(HierarchicalSearchFilter other) {
+    if (other is AlbumFilter) {
+      return other.collectionID == collectionID;
+    }
+    return false;
+  }
 }

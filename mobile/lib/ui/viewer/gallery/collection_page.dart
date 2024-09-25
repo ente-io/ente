@@ -9,6 +9,8 @@ import 'package:photos/models/collection/collection_items.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/gallery_type.dart';
+import "package:photos/models/search/hierarchical/album_filter.dart";
+import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
@@ -101,7 +103,12 @@ class CollectionPage extends StatelessWidget {
           : const SizedBox(height: 212),
     );
     return InheritedSearchFilterData(
-      searchFilterDataProvider: SearchFilterDataProvider(),
+      searchFilterDataProvider: SearchFilterDataProvider()
+        ..initialGalleryFilter = AlbumFilter(
+          collectionID: c.collection.id,
+          albumName: c.collection.displayName,
+          occurrence: kMostRelevantFilter,
+        ),
       child: Scaffold(
         appBar: PreferredSize(
           preferredSize: const Size.fromHeight(50.0),

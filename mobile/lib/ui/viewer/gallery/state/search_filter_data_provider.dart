@@ -5,13 +5,20 @@ class SearchFilterDataProvider {
   final _appliedFiltersNotifier = _AppliedFiltersNotifier();
   final _recommendedFiltersNotifier = _RecommendedFiltersNotifier();
 
+  //TODO: Make this non-nullable and required so every time this is wrapped
+  //over a gallery's scaffold, it's forced to provide an initial gallery filter
+  HierarchicalSearchFilter? initialGalleryFilter;
+
   List<HierarchicalSearchFilter> get recommendations =>
       _recommendedFiltersNotifier.recommendedFilters;
   List<HierarchicalSearchFilter> get appliedFilters =>
       _appliedFiltersNotifier.appliedFilters;
 
   void addRecommendations(List<HierarchicalSearchFilter> filters) {
-    _recommendedFiltersNotifier.addFilters(filters);
+    _recommendedFiltersNotifier.addFilters(
+      filters,
+      initialGalleryFilter: initialGalleryFilter,
+    );
   }
 
   void applyFilters(List<HierarchicalSearchFilter> filters) {
@@ -21,7 +28,10 @@ class SearchFilterDataProvider {
 
   void removeAppliedFilters(List<HierarchicalSearchFilter> filters) {
     _appliedFiltersNotifier.removeFilters(filters);
-    _recommendedFiltersNotifier.addFilters(filters);
+    _recommendedFiltersNotifier.addFilters(
+      filters,
+      initialGalleryFilter: initialGalleryFilter,
+    );
   }
 
   void clearRecommendations() {
@@ -82,8 +92,25 @@ class _RecommendedFiltersNotifier extends ChangeNotifier {
 
   List<HierarchicalSearchFilter> get recommendedFilters => _recommendedFilters;
 
-  void addFilters(List<HierarchicalSearchFilter> filters) {
-    _recommendedFilters.addAll(filters);
+  void addFilters(
+    List<HierarchicalSearchFilter> filters, {
+    required HierarchicalSearchFilter? initialGalleryFilter,
+  }) {
+    if (initialGalleryFilter != null) {
+      for (HierarchicalSearchFilter filter in filters) {
+        if (filter.isSameFilter(initialGalleryFilter)) {
+          continue;
+        }
+        _recommendedFilters.add(filter);
+      }
+    } else {
+      //To check if such cases come up during development of hierarchical search
+      assert(
+        false,
+        "Initial gallery filter not provided",
+      );
+      _recommendedFilters.addAll(filters);
+    }
     notifyListeners();
   }
 
