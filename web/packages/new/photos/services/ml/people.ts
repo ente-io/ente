@@ -5,7 +5,8 @@ import { getLocalFiles } from "../files";
 import { pullUserEntities, savedCGroups } from "../user-entity";
 import type { FaceCluster } from "./cluster";
 import { getFaceIndexes } from "./db";
-import { fileIDFromFaceID } from "./face";
+import { fileIDFromFaceID, type Face } from "./face";
+import { ensure } from "@/utils/ensure";
 
 /**
  * A cgroup ("cluster group") is a group of clusters (possibly containing just a
@@ -234,3 +235,44 @@ export const namedPeopleFromCGroups = async (): Promise<NamedPerson[]> => {
         .filter((c) => !!c)
         .sort((a, b) => b.fileIDs.length - a.fileIDs.length);
 };
+
+
+/**
+ * Construct a {@link Person} object for each cluster.
+ */
+export const toPeople = (
+    clusters: FaceCluster[],
+    localFileByID: Map<number, EnteFile>,
+    faceForFaceID: Map<string, Face>,
+): Person[] =>
+    clusters
+        .map((cluster) => {
+            const faces = cluster.faces.map((id) =>
+                ensure(faceForFaceID.get(id)),
+            );
+
+            const faceIDs = cluster.faces;
+            const fileIDs = faceIDs.map((faceID) =>
+                ensure(fileIDFromFaceID(faceID)),
+            );
+
+            const topFace = faces.reduce((top, face) =>
+                top.score > face.score ? top : face,
+            );
+
+            const displayFaceID = topFace.faceID;
+            const displayFaceFileID = ensure(fileIDFromFaceID(displayFaceID));
+            const displayFaceFile = ensure(
+                localFileByID.get(displayFaceFileID),
+            );
+
+            return {
+                id: cluster.id,
+                name: undefined,
+                faceIDs,
+                fileIDs: [...new Set(fileIDs)],
+                displayFaceID,
+                displayFaceFile,
+            };
+        })
+        .sort((a, b) => b.faceIDs.length - a.faceIDs.length);

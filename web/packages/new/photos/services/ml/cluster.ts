@@ -12,7 +12,6 @@ import {
     type FaceIndex,
 } from "./face";
 import { dotProduct } from "./math";
-import type { Person } from "./people";
 
 /**
  * A face cluster is an set of faces, and a nanoid to uniquely identify it.
@@ -184,26 +183,26 @@ export const clusterFaces = async (
         (a, b) => b.faces.length - a.faces.length,
     );
 
-    // TODO-Cluster
-    // This isn't really part of the clustering, but help the main thread out by
-    // pre-computing temporary in-memory people, one per cluster.
-
-    // For fast reverse lookup - map from face ids to the face.
-    const faceForFaceID = new Map(faces.map((f) => [f.faceID, f]));
-
-    const people = toPeople(sortedClusters, localFileByID, faceForFaceID);
-
     const clusteredFaceCount = faceIDToClusterID.size;
     const timeTakenMs = Date.now() - t;
     log.info(
         `Generated ${sortedClusters.length} clusters from ${faces.length} faces (${clusteredFaceCount} clustered ${faces.length - clusteredFaceCount} unclustered) (${timeTakenMs} ms)`,
     );
 
-    // reconcileClusters
-    // Save local
-    // updated map -> remote - Put
+    // // TODO-Cluster
+    // // This isn't really part of the clustering, but help the main thread out by
+    // // pre-computing temporary in-memory people, one per cluster.
 
-    return { clusters: sortedClusters, people };
+    // // For fast reverse lookup - map from face ids to the face.
+    // const faceForFaceID = new Map(faces.map((f) => [f.faceID, f]));
+
+    // const people = toPeople(sortedClusters, localFileByID, faceForFaceID);
+
+    // // reconcileClusters
+    // // Save local
+    // // updated map -> remote - Put
+
+    return { clusters: sortedClusters, people: [] };
 };
 
 /**
@@ -318,43 +317,3 @@ const clusterBatchLinear = async (
         }
     }
 };
-
-/**
- * Construct a {@link Person} object for each cluster.
- */
-const toPeople = (
-    clusters: FaceCluster[],
-    localFileByID: Map<number, EnteFile>,
-    faceForFaceID: Map<string, ClusterFace>,
-): Person[] =>
-    clusters
-        .map((cluster) => {
-            const faces = cluster.faces.map((id) =>
-                ensure(faceForFaceID.get(id)),
-            );
-
-            const faceIDs = cluster.faces;
-            const fileIDs = faceIDs.map((faceID) =>
-                ensure(fileIDFromFaceID(faceID)),
-            );
-
-            const topFace = faces.reduce((top, face) =>
-                top.score > face.score ? top : face,
-            );
-
-            const displayFaceID = topFace.faceID;
-            const displayFaceFileID = ensure(fileIDFromFaceID(displayFaceID));
-            const displayFaceFile = ensure(
-                localFileByID.get(displayFaceFileID),
-            );
-
-            return {
-                id: cluster.id,
-                name: undefined,
-                faceIDs,
-                fileIDs: [...new Set(fileIDs)],
-                displayFaceID,
-                displayFaceFile,
-            };
-        })
-        .sort((a, b) => b.faceIDs.length - a.faceIDs.length);
