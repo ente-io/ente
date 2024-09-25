@@ -29,11 +29,12 @@ import { deleteDB } from "idb";
  */
 export const runMigrations = async () => {
     const m = (await getKVN("migrationLevel")) ?? 0;
-    const latest = 2;
+    const latest = 3;
     if (m < latest) {
         log.info(`Running migrations ${m} => ${latest}`);
-        if (m < 1 && isDesktop) await m0();
-        if (m < 2) await m1();
+        if (m < 1 && isDesktop) await m1();
+        if (m < 2) await m2();
+        if (m < 3) await m3();
         await setKV("migrationLevel", latest);
     }
 };
@@ -42,7 +43,7 @@ export const runMigrations = async () => {
 // almost all clients would've migrated over.
 
 // Added: Aug 2024 (v1.7.3). Prunable.
-const m0 = () =>
+const m1 = () =>
     Promise.all([
         // Delete the legacy face DB v1.
         deleteDB("mldata"),
@@ -67,7 +68,7 @@ const m0 = () =>
     });
 
 // Added: Sep 2024 (v1.7.5-beta). Prunable.
-const m1 = () =>
+const m2 = () =>
     // Older versions of the user-entities code kept the diff related state
     // in a different place. These entries are not needed anymore (the tags
     // themselves will get resynced).
@@ -75,6 +76,23 @@ const m1 = () =>
         localForage.removeItem("location_tags"),
         localForage.removeItem("location_tags_key"),
         localForage.removeItem("location_tags_time"),
+
+        // Remove data from an intermediate format that stored user-entities
+        // piecewise instead of as generic, verbatim, entities.
+        removeKV("locationTags"),
+        removeKV("entityKey/locationTags"),
+        removeKV("latestUpdatedAt/locationTags"),
+    ]);
+
+// Added: Sep 2024 (v1.7.5-beta). Prunable.
+const m3 = () =>
+    Promise.all([
+        // Delete the legacy face DB v1.
+        //
+        // This was already removed in m1, but that was behind an isDesktop
+        // check, but later I found out that old web versions also created this
+        // DB (although empty).
+        deleteDB("mldata"),
 
         // Remove data from an intermediate format that stored user-entities
         // piecewise instead of as generic, verbatim, entities.
