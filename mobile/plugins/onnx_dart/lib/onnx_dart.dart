@@ -25,8 +25,13 @@ class OnnxDart {
     String modelType, {
     int sessionAddress = 0,
   }) async {
-    final result = await OnnxDartPlatform.instance
-        .predict(inputData, null, modelType, sessionAddress: sessionAddress);
+    final result = await OnnxDartPlatform.instance.predict(
+      inputData,
+      null,
+      null,
+      modelType,
+      sessionAddress: sessionAddress,
+    );
     return result;
   }
 
@@ -35,8 +40,30 @@ class OnnxDart {
     String modelType, {
     int sessionAddress = 0,
   }) async {
-    final result = await OnnxDartPlatform.instance
-        .predict(null, inputDataInt, modelType, sessionAddress: sessionAddress);
+    final result = await OnnxDartPlatform.instance.predict(
+      null,
+      inputDataInt,
+      null,
+      modelType,
+      sessionAddress: sessionAddress,
+    );
+    return result;
+  }
+
+  Future<Float32List?> predictRgba(
+    Uint8List inputBytes,
+    Int32List inputShape,
+    String modelType, {
+    int sessionAddress = 0,
+  }) async {
+    final result = await OnnxDartPlatform.instance.predict(
+      null,
+      null,
+      inputBytes,
+      modelType,
+      sessionAddress: sessionAddress,
+      inputShapeList: inputShape,
+    );
     return result;
   }
 }

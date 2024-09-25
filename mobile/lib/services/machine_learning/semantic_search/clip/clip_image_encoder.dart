@@ -1,12 +1,10 @@
-import "dart:typed_data" show Uint8List;
+import "dart:typed_data" show Int32List, Uint8List;
 import "dart:ui" show Image;
 
 import "package:logging/logging.dart";
-// import "package:onnx_dart/onnx_dart.dart";
+import "package:onnx_dart/onnx_dart.dart";
 import "package:onnxruntime/onnxruntime.dart";
 import "package:photos/services/machine_learning/ml_model.dart";
-import "package:photos/utils/debug_ml_export_data.dart";
-// import "package:photos/utils/image_ml_util.dart";
 import "package:photos/utils/ml_util.dart";
 
 class ClipImageEncoder extends MlModel {
@@ -36,27 +34,13 @@ class ClipImageEncoder extends MlModel {
     int? enteFileID,
   ]) async {
     final startTime = DateTime.now();
-    // final inputListAa = await preprocessImageClip(image, rawRgbaBytes, true);
-    // final inputListNoaa = await preprocessImageClip(image, rawRgbaBytes, false);
-    // await encodeAndSaveData(inputListAa, "star-aa-mobile-input", "clip");
-    // await encodeAndSaveData(inputListNoaa, "star-noaa-mobile-input", "clip");
-    final preprocessingTime = DateTime.now();
-    final preprocessingMs =
-        preprocessingTime.difference(startTime).inMilliseconds;
-    late List<double> resultAa; //, resultNoaa;
+    final inputShape = <int>[image.height, image.width, 4]; // [H, W, C]
+    late List<double> result;
     try {
-      if (false) {
-        // resultAa = await _runPlatformPluginPredict(rawRgbaBytes);
-        // resultNoaa = await _runPlatformPluginPredict(inputListNoaa);
-        // await encodeAndSaveData(resultAa, "star-aa-mobile-embedding", "clip");
-        // await encodeAndSaveData(
-        //   resultNoaa,
-        //   "star-noaa-mobile-embedding",
-        //   "clip",
-        // );
+      if (MlModel.usePlatformPlugin) {
+        result = await _runPlatformPluginPredict(rawRgbaBytes, inputShape);
       } else {
-        resultAa = _runFFIBasedPredict(rawRgbaBytes, sessionAddress);
-        print('clip inference done with FFI package');
+        result = _runFFIBasedPredict(rawRgbaBytes, inputShape, sessionAddress);
       }
     } catch (e, stackTrace) {
       _logger.severe(
@@ -66,27 +50,21 @@ class ClipImageEncoder extends MlModel {
       );
       rethrow;
     }
-    final inferTime = DateTime.now();
-    final inferenceMs = inferTime.difference(preprocessingTime).inMilliseconds;
-    final totalMs = inferTime.difference(startTime).inMilliseconds;
+    final totalMs = DateTime.now().difference(startTime).inMilliseconds;
     _logger.info(
-      "Clip image predict took $totalMs ms${enteFileID != null ? " with fileID $enteFileID" : ""} (inference: $inferenceMs ms, preprocessing: $preprocessingMs ms)",
+      "Clip image predict took $totalMs ms${enteFileID != null ? " with fileID $enteFileID" : ""}",
     );
-    await encodeAndSaveData(
-      resultAa,
-      'singapore-rgba-mobile-embedding-ffi',
-      'clip',
-    );
-    return resultAa;
+    return result;
   }
 
   static List<double> _runFFIBasedPredict(
     Uint8List inputImageList,
+    List<int> inputImageShape,
     int sessionAddress,
   ) {
     final inputOrt = OrtValueTensor.createTensorWithDataList(
       inputImageList,
-      [1200, 1920, 4],
+      inputImageShape,
     );
     final inputs = {'input': inputOrt};
     final session = OrtSession.fromAddress(sessionAddress);
@@ -102,16 +80,18 @@ class ClipImageEncoder extends MlModel {
     return embedding;
   }
 
-  // static Future<List<double>> _runPlatformPluginPredict(
-  //   Uint8List inputImageList,
-  // ) async {
-  //   final OnnxDart plugin = OnnxDart();
-  //   final result = await plugin.predictRgba(
-  //     inputImageList,
-  //     _modelName,
-  //   );
-  //   final List<double> embedding = result!.sublist(0, 512);
-  //   normalizeEmbedding(embedding);
-  //   return embedding;
-  // }
+  static Future<List<double>> _runPlatformPluginPredict(
+    Uint8List inputImageList,
+    List<int> inputImageShape,
+  ) async {
+    final OnnxDart plugin = OnnxDart();
+    final result = await plugin.predictRgba(
+      inputImageList,
+      Int32List.fromList(inputImageShape),
+      _modelName,
+    );
+    final List<double> embedding = result!.sublist(0, 512);
+    normalizeEmbedding(embedding);
+    return embedding;
+  }
 }
