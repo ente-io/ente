@@ -53,6 +53,7 @@ class _CodeWidgetState extends State<CodeWidget> {
   late bool _hideCode;
   bool isMaskingEnabled = false;
   int _codeTimeStep = -1;
+  int lastRefreshTime = 0;
 
   @override
   void initState() {
@@ -63,21 +64,22 @@ class _CodeWidgetState extends State<CodeWidget> {
     _everySecondTimer =
         Timer.periodic(const Duration(milliseconds: 500), (Timer t) {
       int newStep = 0;
+      int epochSeconds = DateTime.now().millisecondsSinceEpoch ~/ 1000;
       if (widget.code.type != Type.hotp) {
-        newStep = (((DateTime.now().millisecondsSinceEpoch ~/ 1000).round()) ~/
-                widget.code.period)
-            .floor();
+        newStep = ((epochSeconds.round()) ~/ widget.code.period).floor();
       } else {
         newStep = widget.code.counter;
       }
-      if (_codeTimeStep != newStep) {
-        _codeTimeStep = newStep;
+      if (_codeTimeStep != newStep ||
+          epochSeconds - lastRefreshTime > widget.code.period) {
         String newCode = _getCurrentOTP();
-        if (newCode != _currentCode.value) {
+        if (newCode != _currentCode.value && mounted) {
           _currentCode.value = newCode;
           if (widget.code.type.isTOTPCompatible) {
             _nextCode.value = _getNextTotp();
           }
+          _codeTimeStep = newStep;
+          lastRefreshTime = epochSeconds;
         }
       }
     });
@@ -681,10 +683,18 @@ class _CodeWidgetState extends State<CodeWidget> {
       // replace all digits with •
       code = code.replaceAll(RegExp(r'\S'), '•');
     }
-    if (code.length == 6) {
-      return "${code.substring(0, 3)} ${code.substring(3, 6)}";
+    switch (code.length) {
+      case 6:
+        return "${code.substring(0, 3)} ${code.substring(3, 6)}";
+      case 7:
+        return "${code.substring(0, 3)} ${code.substring(3, 4)} ${code.substring(4, 7)}";
+      case 8:
+        return "${code.substring(0, 3)} ${code.substring(3, 5)} ${code.substring(5, 8)}";
+      case 9:
+        return "${code.substring(0, 3)} ${code.substring(3, 6)} ${code.substring(6, 9)}";
+      default:
+        return code;
     }
-    return code;
   }
 }
 
