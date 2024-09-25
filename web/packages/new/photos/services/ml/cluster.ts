@@ -69,6 +69,11 @@ export interface ClusterPreviewFace {
  * clustering, with a bit of lookback (and a dollop of heuristics) to get the
  * clusters to merge across batches.
  *
+ * The same logic is used for both the inital clustering and subsequent
+ * incremental updates, just that the incremental updates will be much faster
+ * since most of the files will be skipped (as they already have a cluster
+ * assigned to them).
+ *
  * [Note: Draining the event loop during clustering]
  *
  * The clustering is a synchronous operation, but we make it async to
@@ -119,6 +124,33 @@ export const clusterFaces = async (
     // For fast reverse lookup - map from face ids to the face.
     const faceForFaceID = new Map(faces.map((f) => [f.faceID, f]));
 
+    // The existing, and resultant, clusters.
+    //
+    // We start with clusters we have currently (whether from remote or from a
+    // previous local run). This function is called after we have already synced
+    // cgroups with remote, so we know that it is up to date.
+    //
+    // We generate two sets of maps.
+    //
+    // Remote:
+    // - faceID -> clusterID
+    // - clusterID -> cgroupID
+    //
+    // Local:
+    // - faceID -> clusterID
+    //
+    // Then merge them into a single set of maps, giving preference to the
+    // information that we get from remote.
+    //
+    // We then run clustering using these maps (skipping over faces that have
+    // already been clustered).
+
+    // TODO-Cluster Later on, instead of starting from a blank slate, this will
+    // be list of existing clusters we fetch from remote.
+    // - fetchRemoteClusterFeedback
+    // [..local, ..remote]
+    let clusters: FaceCluster[] = [];
+
     // For fast reverse lookup - map from the id of a face to the id of the
     // cluster to which it belongs.
     let clusterIDForFaceID = new Map<string, string>();
@@ -126,13 +158,6 @@ export const clusterFaces = async (
     // For fast reverse lookup - map from the id of a cluster to its position in
     // the clusters array.
     let clusterIndexForFaceID = new Map<string, number>();
-
-    // The resultant clusters.
-    // TODO-Cluster Later on, instead of starting from a blank slate, this will
-    // be list of existing clusters we fetch from remote.
-    // - fetchRemoteClusterFeedback
-    // [..local, ..remote]
-    let clusters: FaceCluster[] = [];
 
     // Process the faces in batches, but keep an overlap between batches to
     // allow "links" to form with existing clusters.
