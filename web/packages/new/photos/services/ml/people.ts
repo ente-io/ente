@@ -2,9 +2,9 @@ import { masterKeyFromSession } from "@/base/session-store";
 import { wipClusterEnable } from ".";
 import type { EnteFile } from "../../types/file";
 import { getLocalFiles } from "../files";
-import { pullUserEntities, savedCGroups } from "../user-entity";
+import { pullUserEntities, savedCGroupUserEntities } from "../user-entity";
 import type { FaceCluster } from "./cluster";
-import { getFaceIndexes } from "./db";
+import { getFaceIndexes, savedFaceClusters } from "./db";
 import { fileIDFromFaceID } from "./face";
 
 /**
@@ -126,7 +126,7 @@ export interface Person {
 /**
  * Fetch existing cgroups for the user from remote and save them to DB.
  */
-export const syncCGroups = async () => {
+export const pullCGroups = async () => {
     if (!process.env.NEXT_PUBLIC_ENTE_WIP_CL) return;
     if (!(await wipClusterEnable())) return;
 
@@ -139,36 +139,34 @@ export type NamedPerson = Omit<Person, "name"> & {
 };
 
 /**
- * Construct in-memory {@link NamedPerson}s from the cgroups present locally.
+ * Construct in-memory people using the data present locally, ignoring faces
+ * belonging to deleted and hidden files.
  *
  * This function is meant to run after files, cgroups and faces have been synced
- * with remote. It then uses all the information in the local DBs to construct
- * an in-memory list of {@link Person}s on which the UI will operate.
+ * with remote, and clustering has completed. It uses the current local state to
+ * construct an in-memory list of {@link Person}s on which the UI will operate.
  *
  * @return A list of {@link Person}s, sorted by the number of files that they
  * reference.
  */
-export const namedPeopleFromCGroups = async (): Promise<NamedPerson[]> => {
+export const reconstructPeople = async (): Promise<Person[]> => {
     if (!process.env.NEXT_PUBLIC_ENTE_WIP_CL) return [];
     if (!(await wipClusterEnable())) return [];
-
-    // Ignore faces belonging to deleted (incl Trash) and hidden files.
-    //
-    // More generally, we should not make strict assumptions about the clusters
-    // we get from remote. In particular, the same face ID can be in different
-    // clusters. In such cases we should assign it arbitrarily assign it to the
-    // last cluster we find it in. Such leeway is intentionally provided to
-    // allow clients some slack in how they implement the sync without needing
-    // to make an blocking API request for every user interaction.
 
     const files = await getLocalFiles("normal");
     const fileByID = new Map(files.map((f) => [f.id, f]));
 
-    const faceIndexes = await getFaceIndexes();
+    // "Person face"s are faces annotated with their corresponding local files.
+    //
+    // Note that since we ignore deleted and hidden files, it is possible that
+    // there might not be an entry for a particular face in this map even if its
+    // file is otherwise existent.
     const personFaceByID = new Map<
         string,
         { faceID: string; file: EnteFile; score: number }
     >();
+
+    const faceIndexes = await getFaceIndexes();
     for (const { faces } of faceIndexes) {
         for (const { faceID, score } of faces) {
             const fileID = fileIDFromFaceID(faceID);
@@ -180,57 +178,77 @@ export const namedPeopleFromCGroups = async (): Promise<NamedPerson[]> => {
     }
 
     // Convert cgroups to people.
-    const cgroups = await savedCGroups();
-    return cgroups
-        .map(({ id, data: cgroup }) => {
-            // Hidden cgroups are clusters specifically marked so as to not be shown
-            // in the UI.
-            if (cgroup.isHidden) return undefined;
+    const cgroups = await savedCGroupUserEntities();
+    const cgroupPeople = cgroups.map(({ id, data: cgroup }) => {
+        // Hidden cgroups are clusters specifically marked so as to not be shown
+        // in the UI.
+        if (cgroup.isHidden) return undefined;
 
-            // Unnamed groups are also not shown.
-            const name = cgroup.name;
-            if (!name) return undefined;
+        // Unnamed groups are also not shown.
+        const name = cgroup.name;
 
-            // Person faces from all the clusters assigned to this cgroup, sorted by
-            // their score.
-            const faces = cgroup.assigned
-                .map(({ faces }) =>
-                    faces
-                        .map((id) => personFaceByID.get(id))
-                        .filter((f) => !!f),
-                )
-                .flat()
-                .sort((a, b) => b.score - a.score);
+        // Person faces from all the clusters assigned to this cgroup, sorted by
+        // their score.
+        const faces = cgroup.assigned
+            .map(({ faces }) =>
+                faces.map((id) => personFaceByID.get(id)).filter((f) => !!f),
+            )
+            .flat()
+            .sort((a, b) => b.score - a.score);
 
-            // Ignore this cgroup if we don't have eligible faces left in it.
-            const highestScoringFace = faces[0];
-            if (!highestScoringFace) return undefined;
+        // Ignore this cgroup if we don't have visible faces left in it.
+        const highestScoringFace = faces[0];
+        if (!highestScoringFace) return undefined;
 
-            // IDs of the files containing this face.
-            const fileIDs = [...new Set(faces.map((f) => f.file.id))];
+        // IDs of the files containing this face.
+        const fileIDs = [...new Set(faces.map((f) => f.file.id))];
 
-            // Avatar face ID, or the highest scoring face.
-            const avatarFaceID = cgroup.avatarFaceID;
-            let avatarFile: EnteFile | undefined;
-            if (avatarFaceID) {
-                const avatarFileID = fileIDFromFaceID(avatarFaceID);
-                if (avatarFileID) {
-                    avatarFile = fileByID.get(avatarFileID);
-                }
-            }
+        // Avatar face ID, or the highest scoring face.
+        const avatarFaceID = cgroup.avatarFaceID;
+        let avatarFile: EnteFile | undefined;
+        if (avatarFaceID) {
+            const avatarFileID = fileIDFromFaceID(avatarFaceID);
+            if (avatarFileID) avatarFile = fileByID.get(avatarFileID);
+        }
 
-            let displayFaceID: string;
-            let displayFaceFile: EnteFile;
-            if (avatarFaceID && avatarFile) {
-                displayFaceID = avatarFaceID;
-                displayFaceFile = avatarFile;
-            } else {
-                displayFaceID = highestScoringFace.faceID;
-                displayFaceFile = highestScoringFace.file;
-            }
+        let displayFaceID: string;
+        let displayFaceFile: EnteFile;
+        if (avatarFaceID && avatarFile) {
+            displayFaceID = avatarFaceID;
+            displayFaceFile = avatarFile;
+        } else {
+            displayFaceID = highestScoringFace.faceID;
+            displayFaceFile = highestScoringFace.file;
+        }
 
-            return { id, name, fileIDs, displayFaceID, displayFaceFile };
-        })
+        return { id, name, fileIDs, displayFaceID, displayFaceFile };
+    });
+
+    // Convert local-only clusters to people.
+    const localClusters = await savedFaceClusters();
+    const clusterPeople = localClusters.map((cluster) => {
+        const faces = cluster.faces
+            .map((id) => personFaceByID.get(id))
+            .filter((f) => !!f);
+
+        // Ignore this cluster if there are no visible faces left it in.
+        if (!faces.length) return undefined;
+
+        const topFace = faces.reduce((top, face) =>
+            top.score > face.score ? top : face,
+        );
+
+        return {
+            id: cluster.id,
+            name: undefined,
+            fileIDs: [...new Set(faces.map((f) => f.file.id))],
+            displayFaceID: topFace.faceID,
+            displayFaceFile: topFace.file,
+        };
+    });
+
+    return cgroupPeople
+        .concat(clusterPeople)
         .filter((c) => !!c)
         .sort((a, b) => b.fileIDs.length - a.fileIDs.length);
 };

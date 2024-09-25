@@ -94,7 +94,7 @@ export type CGroupUserEntity = Omit<LocalUserEntity, "data"> & {
 /**
  * Return the list of locally available cgroup user entities.
  */
-export const savedCGroups = (): Promise<CGroupUserEntity[]> =>
+export const savedCGroupUserEntities = (): Promise<CGroupUserEntity[]> =>
     savedEntities("cgroup").then((es) =>
         es.map((e) => ({ ...e, data: RemoteCGroup.parse(e.data) })),
     );

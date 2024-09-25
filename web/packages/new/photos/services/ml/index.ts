@@ -20,7 +20,12 @@ import { setSearchPeople } from "../search";
 import type { UploadItem } from "../upload/types";
 import { regenerateFaceCrops } from "./crop";
 import { clearMLDB, getFaceIndex, getIndexableAndIndexedCounts } from "./db";
-import { namedPeopleFromCGroups, syncCGroups, type Person } from "./people";
+import {
+    pullCGroups,
+    reconstructPeople,
+    type NamedPerson,
+    type Person,
+} from "./people";
 import { MLWorker } from "./worker";
 import type { CLIPMatches } from "./worker-types";
 
@@ -81,20 +86,6 @@ class MLState {
      * function.
      */
     peopleSnapshot: Person[] | undefined;
-
-    /**
-     * Cached in-memory copy of people generated from local clusters.
-     *
-     * Part of {@link peopleSnapshot}.
-     */
-    peopleLocal: Person[] = [];
-
-    /**
-     * Cached in-memory copy of people generated from remote cgroups.
-     *
-     * Part of {@link peopleSnapshot}.
-     */
-    peopleRemote: Person[] = [];
 
     /**
      * In flight face crop regeneration promises indexed by the IDs of the files
@@ -326,22 +317,17 @@ export const mlSync = async () => {
     // Fetch indexes, or index locally if needed.
     await worker().then((w) => w.sync());
 
-    // Fetch existing cgroups.
-    await syncCGroups();
+    // Fetch existing cgroups from remote.
+    await pullCGroups();
 
-    // Generate local clusters
+    // Generate or update local clusters.
     // TODO-Cluster
     // Warning - this is heavily WIP
-    wipClusterLocalOnce();
+    if (process.env.NEXT_PUBLIC_ENTE_WIP_CL_AUTO) {
+        await wipCluster();
+    }
 
-    // Update our in-memory snapshot of people.
-    const namedPeople = await namedPeopleFromCGroups();
-    _state.peopleRemote = namedPeople;
-    updatePeopleSnapshot();
-
-    // Notify the search subsystem of the update. Since the search only used
-    // named cgroups, we only give it the people we got from cgroups.
-    setSearchPeople(namedPeople);
+    await updatePeople();
 
     _state.isSyncing = false;
 };
@@ -372,30 +358,19 @@ export const indexNewUpload = (enteFile: EnteFile, uploadItem: UploadItem) => {
 
 /**
  * WIP! Don't enable, dragon eggs are hatching here.
+ * TODO-Cluster
  */
 export const wipClusterEnable = async (): Promise<boolean> =>
     (!!process.env.NEXT_PUBLIC_ENTE_WIP_CL && isDevBuild) ||
     (await isInternalUser());
-
-// // TODO-Cluster temporary state here
-let _wip_hasSwitchedOnce = false;
-
-export const wipClusterLocalOnce = () => {
-    if (!process.env.NEXT_PUBLIC_ENTE_WIP_CL_AUTO) return;
-    if (_wip_hasSwitchedOnce) return;
-    _wip_hasSwitchedOnce = true;
-    void wipCluster();
-};
 
 export const wipCluster = async () => {
     if (!(await wipClusterEnable())) throw new Error("Not implemented");
 
     triggerStatusUpdate();
 
-    const { people } = await worker().then((w) => w.clusterFaces());
+    await worker().then((w) => w.clusterFaces());
 
-    _state.peopleLocal = people;
-    updatePeopleSnapshot();
     triggerStatusUpdate();
 };
 
@@ -403,8 +378,8 @@ export type MLStatus =
     | { phase: "disabled" /* The ML remote flag is off */ }
     | {
           /**
-           * Which phase we are in within the indexing pipeline when viewed across the
-           * user's entire library:
+           * Which phase we are in within the indexing pipeline when viewed
+           * across the user's entire library:
            *
            * - "scheduled": A ML job is scheduled. Likely there are files we
            *   know of that have not been indexed, but is also the state before
@@ -415,11 +390,11 @@ export type MLStatus =
            * - "fetching": The indexer is currently running, but we're primarily
            *   fetching indexes for existing files.
            *
-           * - "clustering": All file we know of have been indexed, and we are now
-           *   clustering the faces that were found.
+           * - "clustering": All files we know of have been indexed, and we are
+           *   now clustering the faces that were found.
            *
-           * - "done": ML indexing and face clustering is complete for the user's
-           *   library.
+           * - "done": ML indexing and face clustering is complete for the
+           *   user's library.
            */
           phase: "scheduled" | "indexing" | "fetching" | "clustering" | "done";
           /** The number of files that have already been indexed. */
@@ -582,8 +557,17 @@ export const peopleSubscribe = (onChange: () => void): (() => void) => {
  */
 export const peopleSnapshot = () => _state.peopleSnapshot;
 
-const updatePeopleSnapshot = () =>
-    setPeopleSnapshot(_state.peopleRemote.concat(_state.peopleLocal));
+// Update our, and the search subsystem's, snapshot of people by reconstructing
+// it from the latest local state.
+const updatePeople = async () => {
+    const people = await reconstructPeople();
+
+    // Notify the search subsystem of the update (search only uses named ones).
+    setSearchPeople(people.filter((p): p is NamedPerson => !!p.name));
+
+    // Update our in-memory list of people.
+    setPeopleSnapshot(people);
+};
 
 const setPeopleSnapshot = (snapshot: Person[] | undefined) => {
     _state.peopleSnapshot = snapshot;
