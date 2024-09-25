@@ -1,8 +1,8 @@
-import "dart:typed_data" show Float32List, Int8List, Uint8List;
+import "dart:typed_data" show Uint8List;
 import "dart:ui" show Image;
 
 import "package:logging/logging.dart";
-import "package:onnx_dart/onnx_dart.dart";
+// import "package:onnx_dart/onnx_dart.dart";
 import "package:onnxruntime/onnxruntime.dart";
 import "package:photos/services/machine_learning/ml_model.dart";
 import "package:photos/utils/debug_ml_export_data.dart";
@@ -46,7 +46,7 @@ class ClipImageEncoder extends MlModel {
     late List<double> resultAa; //, resultNoaa;
     try {
       if (false) {
-        resultAa = await _runPlatformPluginPredict(rawRgbaBytes);
+        // resultAa = await _runPlatformPluginPredict(rawRgbaBytes);
         // resultNoaa = await _runPlatformPluginPredict(inputListNoaa);
         // await encodeAndSaveData(resultAa, "star-aa-mobile-embedding", "clip");
         // await encodeAndSaveData(
@@ -102,16 +102,16 @@ class ClipImageEncoder extends MlModel {
     return embedding;
   }
 
-  static Future<List<double>> _runPlatformPluginPredict(
-    Uint8List inputImageList,
-  ) async {
-    final OnnxDart plugin = OnnxDart();
-    final result = await plugin.predictRgba(
-      inputImageList,
-      _modelName,
-    );
-    final List<double> embedding = result!.sublist(0, 512);
-    normalizeEmbedding(embedding);
-    return embedding;
-  }
+  // static Future<List<double>> _runPlatformPluginPredict(
+  //   Uint8List inputImageList,
+  // ) async {
+  //   final OnnxDart plugin = OnnxDart();
+  //   final result = await plugin.predictRgba(
+  //     inputImageList,
+  //     _modelName,
+  //   );
+  //   final List<double> embedding = result!.sublist(0, 512);
+  //   normalizeEmbedding(embedding);
+  //   return embedding;
+  // }
 }
