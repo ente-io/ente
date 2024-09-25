@@ -683,10 +683,18 @@ class _CodeWidgetState extends State<CodeWidget> {
       // replace all digits with •
       code = code.replaceAll(RegExp(r'\S'), '•');
     }
-    if (code.length == 6) {
-      return "${code.substring(0, 3)} ${code.substring(3, 6)}";
+    switch (code.length) {
+      case 6:
+        return "${code.substring(0, 3)} ${code.substring(3, 6)}";
+      case 7:
+        return "${code.substring(0, 3)} ${code.substring(3, 4)} ${code.substring(4, 7)}";
+      case 8:
+        return "${code.substring(0, 3)} ${code.substring(3, 5)} ${code.substring(5, 8)}";
+      case 9:
+        return "${code.substring(0, 3)} ${code.substring(3, 6)} ${code.substring(6, 9)}";
+      default:
+        return code;
     }
-    return code;
   }
 }
 
