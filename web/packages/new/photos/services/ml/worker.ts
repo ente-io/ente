@@ -25,7 +25,11 @@ import {
     indexCLIP,
     type CLIPIndex,
 } from "./clip";
-import { clusterFaces, reconcileClusters, type ClusteringProgress } from "./cluster";
+import {
+    clusterFaces,
+    reconcileClusters,
+    type ClusteringProgress,
+} from "./cluster";
 import { saveFaceCrops } from "./crop";
 import {
     getFaceIndexes,
@@ -294,7 +298,7 @@ export class MLWorker {
             (progress) => this.updateClusteringProgress(progress),
         );
         this.updateClusteringProgress(undefined);
-        await reconcileClusters(clusters)
+        await reconcileClusters(clusters);
     }
 
     private updateClusteringProgress(progress: ClusteringProgress | undefined) {

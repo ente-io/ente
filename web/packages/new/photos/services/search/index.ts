@@ -4,6 +4,7 @@ import { ComlinkWorker } from "@/base/worker/comlink-worker";
 import { FileType } from "@/media/file-type";
 import i18n, { t } from "i18next";
 import { clipMatches, isMLEnabled, isMLSupported } from "../ml";
+import type { NamedPerson } from "../ml/people";
 import type {
     LabelledFileType,
     LabelledSearchDateComponents,
@@ -12,7 +13,6 @@ import type {
     SearchSuggestion,
 } from "./types";
 import type { SearchWorker } from "./worker";
-import type { NamedPerson } from "../ml/people";
 
 /**
  * Cached instance of the {@link ComlinkWorker} that wraps our web worker.

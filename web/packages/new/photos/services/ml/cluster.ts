@@ -132,6 +132,10 @@ export const clusterFaces = async (
 
     // Extract the remote clusters.
     clusters = clusters.concat(
+        // See: [Note: strict mode migration]
+        //
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         sortedCGroupUserEntities.map((cg) => cg.data.assigned).flat(),
     );
 

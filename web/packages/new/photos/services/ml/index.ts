@@ -563,9 +563,7 @@ const updatePeople = async () => {
     const people = await reconstructPeople();
 
     // Notify the search subsystem of the update (search only uses named ones).
-    setSearchPeople(
-        people.filter((p): p is NamedPerson => !!p.name),
-    );
+    setSearchPeople(people.filter((p): p is NamedPerson => !!p.name));
 
     // Update our in-memory list of people.
     setPeopleSnapshot(people);
