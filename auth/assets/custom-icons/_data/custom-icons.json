@@ -30,6 +30,9 @@
     {
       "title": "AscendEX"
     },
+   {
+      "title": "Band"
+    },
     {
       "title": "Battle.net",
       "slug": "battlenet",
@@ -728,9 +731,6 @@
         "Ya",
         "Яндекс"
       ]
-    },
-    {
-      "title": "Band"
     },
     {
       "title": "YNAB",
