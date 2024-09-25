@@ -247,6 +247,7 @@ class GalleryState extends State<Gallery> {
     }
 
     _setFilteredFilesAndReload(filterdFiles);
+    curateAlbumFilters(_searchFilterDataProvider!, filterdFiles);
   }
 
   void _setFilesAndReload(List<EnteFile> files) {
