@@ -10,6 +10,26 @@ import log from "./log";
  *
  * The "kv" database consists of one object store, "kv". Keys are strings.
  * Values can be arbitrary JSON objects.
+ *
+ * [Note: Avoiding IndexedDB flakiness by avoiding indexes]
+ *
+ * Sporadically, rarely, but definitely, we ran into issues with IndexedDB
+ * losing data. e.g. saves from the ML web worker would complete successfully,
+ * but the saves would not reflect on the main thread, and that data would just
+ * get lost when the app would refresh.
+ *
+ * I'm not sure where the problem lay - in our own code, in the library that we
+ * are using (idb), within IndexedDB itself, or in Electron/Chrome's
+ * implementation of it (these cases all came up in the context of the ML code
+ * that only ran in our desktop app).
+ *
+ * A piece of advice I randomly ran across on the internet was to keep it very
+ * simple, and avoid all indexes. I also recalled that we did not see such
+ * issues with our older (but now unmaintained) library, localforage, which also
+ * doesn't use any indexes, and just has a flat single-store schema.
+ *
+ * So this may be superstition, but for now the approach I'm taking is to use
+ * IndexedDB as a key value store only.
  */
 interface KVDBSchema extends DBSchema {
     kv: {
