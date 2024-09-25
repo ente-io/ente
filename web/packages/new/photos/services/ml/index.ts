@@ -18,6 +18,7 @@ import { isInternalUser } from "../feature-flags";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
 import { setSearchPeople } from "../search";
 import type { UploadItem } from "../upload/types";
+import { reconcileClusters } from "./cluster";
 import { regenerateFaceCrops } from "./crop";
 import { clearMLDB, getFaceIndex, getIndexableAndIndexedCounts } from "./db";
 import { namedPeopleFromCGroups, pullCGroups, type Person } from "./people";
@@ -385,9 +386,11 @@ export const wipCluster = async () => {
 
     triggerStatusUpdate();
 
-    const { people } = await worker().then((w) => w.clusterFaces());
+    const clusters = await worker().then((w) => w.clusterFaces());
+    // TODO-Cluster this needs to happen in the worker itself
+    await reconcileClusters(clusters);
 
-    _state.peopleLocal = people;
+    _state.peopleLocal = [];
     updatePeopleSnapshot();
     triggerStatusUpdate();
 };

@@ -4,7 +4,7 @@ import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import type { EnteFile } from "../../types/file";
 import { savedCGroupUserEntities, type CGroupUserEntity } from "../user-entity";
-import { savedFaceClusters } from "./db";
+import { savedFaceClusters, saveFaceClusters } from "./db";
 import {
     faceDirection,
     fileIDFromFaceID,
@@ -12,11 +12,11 @@ import {
     type FaceIndex,
 } from "./face";
 import { dotProduct } from "./math";
-import type { CGroup } from "./people";
 
 /**
  * A face cluster is an set of faces, and a nanoid to uniquely identify it.
  *
+ * // TODO-Cluster
  * A cluster may be local only, or synced to remote as part of a {@link CGroup}.
  */
 export interface FaceCluster {
@@ -194,12 +194,19 @@ export const clusterFaces = async (
         `Generated ${sortedClusters.length} clusters from ${faces.length} faces (${clusteredFaceCount} clustered ${faces.length - clusteredFaceCount} unclustered) (${timeTakenMs} ms)`,
     );
 
-    // Clustering is complete at this point. Now we want to
-    // 1. Update remote cgroups that have changed.
-    // 1. Update our local state.
+    return sortedClusters;
+};
 
+/**
+ * Use the output of the clustering phase to (a) update any remote cgroups that
+ * have changed, and (b) update our locally persisted clusters.
+ */
+export const reconcileClusters = async (clusters: FaceCluster[]) => {
     // Index clusters by their ID for fast lookup.
     const clusterByID = new Map(clusters.map((c) => [c.id, c]));
+
+    // Get the existing remote cluster groups.
+    const cgroupUserEntities = await savedCGroupUserEntities();
 
     // Map from clusters to their (remote) cgroup.
     const clusterIDToCGroupID = new Map<string, string>();
@@ -233,21 +240,15 @@ export const clusterFaces = async (
         }
     }
 
-    console.log("Should PUT remote clusters", changedCGroupUserEntities);
+    if (changedCGroupUserEntities.length) {
+        log.info(`Updating ${changedCGroupUserEntities.length} remote cgroups`);
+        // TODO-Cluster do it
+    }
 
-    // Find clusters that are not part of a remote cgroup.
-    const localClusters = clusters.filter(
-        ({ id }) => !clusterIDToCGroupID.has(id),
+    // Locally save clusters that are not part of a remote cgroup.
+    await saveFaceClusters(
+        clusters.filter(({ id }) => !clusterIDToCGroupID.has(id)),
     );
-
-    console.log("Should save local clusters", localClusters);
-
-    // // For fast reverse lookup - map from face ids to the face.
-    // const faceForFaceID = new Map(faces.map((f) => [f.faceID, f]));
-
-    // const people = toPeople(sortedClusters, localFileByID, faceForFaceID);
-
-    return { clusters: sortedClusters, people: [] };
 };
 
 /**
