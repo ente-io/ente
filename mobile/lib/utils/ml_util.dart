@@ -396,7 +396,7 @@ Future<MLResult> analyzeImageStatic(Map args) async {
     final startTime = DateTime.now();
 
     // Decode the image once to use for both face detection and alignment
-    final (image, imageByteData) = await decodeImageFromPath(imagePath);
+    final (image, rawRgbaBytes) = await decodeImageFromPath(imagePath);
     final decodedImageSize =
         Dimensions(height: image.height, width: image.width);
     final result = MLResult.fromEnteFileID(enteFileID);
@@ -404,39 +404,40 @@ Future<MLResult> analyzeImageStatic(Map args) async {
     final decodeTime = DateTime.now();
     final decodeMs = decodeTime.difference(startTime).inMilliseconds;
 
-    if (runFaces) {
-      final resultFaces = await FaceRecognitionService.runFacesPipeline(
-        enteFileID,
-        image,
-        imageByteData,
-        faceDetectionAddress,
-        faceEmbeddingAddress,
-      );
-      if (resultFaces.isEmpty) {
-        result.faces = <FaceResult>[];
-      } else {
-        result.faces = resultFaces;
-      }
-    }
-    final facesTime = DateTime.now();
-    final facesMs = facesTime.difference(decodeTime).inMilliseconds;
-    final faceMsString = runFaces ? ", faces: $facesMs ms" : "";
+    String faceMsString = "", clipMsString = "";
+    final pipelines = await Future.wait([
+      runFaces
+          ? FaceRecognitionService.runFacesPipeline(
+              enteFileID,
+              image,
+              rawRgbaBytes,
+              faceDetectionAddress,
+              faceEmbeddingAddress,
+            ).then((result) {
+              faceMsString =
+                  ", faces: ${DateTime.now().difference(decodeTime).inMilliseconds} ms";
+              return result;
+            })
+          : Future.value(null),
+      runClip
+          ? SemanticSearchService.runClipImage(
+              enteFileID,
+              image,
+              rawRgbaBytes,
+              clipImageAddress,
+            ).then((result) {
+              clipMsString =
+                  ", clip: ${DateTime.now().difference(decodeTime).inMilliseconds} ms";
+              return result;
+            })
+          : Future.value(null),
+    ]);
 
-    if (runClip) {
-      final clipResult = await SemanticSearchService.runClipImage(
-        enteFileID,
-        image,
-        imageByteData,
-        clipImageAddress,
-      );
-      result.clip = clipResult;
-    }
-    final clipTime = DateTime.now();
-    final clipMs = clipTime.difference(facesTime).inMilliseconds;
-    final clipMsString = runClip ? ", clip: $clipMs ms" : "";
+    if (pipelines[0] != null) result.faces = pipelines[0] as List<FaceResult>;
+    if (pipelines[1] != null) result.clip = pipelines[1] as ClipResult;
 
-    final endTime = DateTime.now();
-    final totalMs = endTime.difference(startTime).inMilliseconds;
+    final totalMs = DateTime.now().difference(startTime).inMilliseconds;
+
     _logger.info(
       'Finished analyzeImageStatic for fileID $enteFileID, in $totalMs ms (decode: $decodeMs ms$faceMsString$clipMsString)',
     );

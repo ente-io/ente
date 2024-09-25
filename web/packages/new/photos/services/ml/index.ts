@@ -3,7 +3,6 @@
  */
 
 import { isDesktop } from "@/base/app";
-import { assertionFailed } from "@/base/assert";
 import { blobCache } from "@/base/blob-cache";
 import { ensureElectron } from "@/base/electron";
 import { isDevBuild } from "@/base/env";
@@ -17,17 +16,11 @@ import { throttled } from "@/utils/promise";
 import { proxy, transfer } from "comlink";
 import { isInternalUser } from "../feature-flags";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
-import type { SearchPerson } from "../search/types";
+import { setSearchPeople } from "../search";
 import type { UploadItem } from "../upload/types";
-import {
-    type ClusterFace,
-    type ClusteringOpts,
-    type ClusterPreviewFace,
-    type FaceCluster,
-    type OnClusteringProgress,
-} from "./cluster";
 import { regenerateFaceCrops } from "./crop";
-import { clearMLDB, faceIndex, indexableAndIndexedCounts } from "./db";
+import { clearMLDB, getFaceIndex, getIndexableAndIndexedCounts } from "./db";
+import { namedPeopleFromCGroups, syncCGroups, type Person } from "./people";
 import { MLWorker } from "./worker";
 import type { CLIPMatches } from "./worker-types";
 
@@ -59,18 +52,49 @@ class MLState {
     comlinkWorker: Promise<ComlinkWorker<typeof MLWorker>> | undefined;
 
     /**
-     * Subscriptions to {@link MLStatus}.
+     * `true` if a sync is currently in progress.
+     */
+    isSyncing = false;
+
+    /**
+     * Subscriptions to {@link MLStatus} updates.
      *
      * See {@link mlStatusSubscribe}.
      */
     mlStatusListeners: (() => void)[] = [];
 
     /**
-     * Snapshot of {@link MLStatus}.
-     *
-     * See {@link mlStatusSnapshot}.
+     * Snapshot of the {@link MLStatus} returned by the {@link mlStatusSnapshot}
+     * function.
      */
     mlStatusSnapshot: MLStatus | undefined;
+
+    /**
+     * Subscriptions to updates to the list of {@link Person}s we know about.
+     *
+     * See {@link peopleSubscribe}.
+     */
+    peopleListeners: (() => void)[] = [];
+
+    /**
+     * Snapshot of the {@link Person}s returned by the {@link peopleSnapshot}
+     * function.
+     */
+    peopleSnapshot: Person[] | undefined;
+
+    /**
+     * Cached in-memory copy of people generated from local clusters.
+     *
+     * Part of {@link peopleSnapshot}.
+     */
+    peopleLocal: Person[] = [];
+
+    /**
+     * Cached in-memory copy of people generated from remote cgroups.
+     *
+     * Part of {@link peopleSnapshot}.
+     */
+    peopleRemote: Person[] = [];
 
     /**
      * In flight face crop regeneration promises indexed by the IDs of the files
@@ -88,9 +112,7 @@ const worker = () =>
 
 const createComlinkWorker = async () => {
     const electron = ensureElectron();
-    const delegate = {
-        workerDidProcessFileOrIdle,
-    };
+    const delegate = { workerDidUpdateStatus };
 
     // Obtain a message port from the Electron layer.
     const messagePort = await createMLWorker(electron);
@@ -196,8 +218,8 @@ export const enableML = async () => {
     setIsMLEnabledLocal(true);
     _state.isMLEnabled = true;
     setInterimScheduledStatus();
-    triggerStatusUpdate();
-    triggerMLSync();
+    // Trigger updates, but don't wait for them to finish.
+    void updateMLStatusSnapshot().then(mlSync);
 };
 
 /**
@@ -210,6 +232,7 @@ export const disableML = async () => {
     await updateIsMLEnabledRemote(false);
     setIsMLEnabledLocal(false);
     _state.isMLEnabled = false;
+    _state.isSyncing = false;
     await terminateMLWorker();
     triggerStatusUpdate();
 };
@@ -229,11 +252,6 @@ const mlLocalKey = "mlEnabled";
  * that is synced with remote.
  */
 const isMLEnabledLocal = () => {
-    // Delete legacy ML keys.
-    //
-    // This code was added August 2024 (v1.7.3-beta) and can be removed at some
-    // point when most clients have migrated (tag: Migration).
-    localStorage.removeItem("faceIndexingEnabled");
     return localStorage.getItem(mlLocalKey) == "1";
 };
 
@@ -273,32 +291,59 @@ const updateIsMLEnabledRemote = (enabled: boolean) =>
  * It checks with remote if the ML flag is set, and updates our local flag to
  * reflect that value.
  *
- * To trigger the actual ML sync, use {@link triggerMLSync}.
+ * To perform the actual ML sync, use {@link mlSync}.
  */
-export const triggerMLStatusSync = () => void mlStatusSync();
-
-const mlStatusSync = async () => {
+export const mlStatusSync = async () => {
     _state.isMLEnabled = await getIsMLEnabledRemote();
     setIsMLEnabledLocal(_state.isMLEnabled);
-    triggerStatusUpdate();
+    return updateMLStatusSnapshot();
 };
 
 /**
- * Trigger a ML sync.
+ * Perform a ML sync, whatever is applicable.
  *
  * This is called during the global sync sequence, after files information have
  * been synced with remote.
  *
  * If ML is enabled, it pulls any missing embeddings from remote and starts
- * indexing to backfill any missing values.
+ * indexing to backfill any missing values. It also syncs cgroups and updates
+ * the search service to use the latest values. Finally, it uses the latest
+ * files, faces and cgroups to update the people shown in the UI.
  *
- * This will only have an effect if {@link triggerMLSync} has been called at
+ * This will only have an effect if {@link mlStatusSync} has been called at
  * least once prior to calling this in the sync sequence.
  */
-export const triggerMLSync = () => void mlSync();
+export const mlSync = async () => {
+    if (!_state.isMLEnabled) return;
+    if (_state.isSyncing) return;
+    _state.isSyncing = true;
 
-const mlSync = async () => {
-    if (_state.isMLEnabled) await worker().then((w) => w.sync());
+    // Dependency order for the sync
+    //
+    //     files -> faces -> cgroups -> clusters
+    //
+
+    // Fetch indexes, or index locally if needed.
+    await worker().then((w) => w.sync());
+
+    // Fetch existing cgroups.
+    await syncCGroups();
+
+    // Generate local clusters
+    // TODO-Cluster
+    // Warning - this is heavily WIP
+    wipClusterLocalOnce();
+
+    // Update our in-memory snapshot of people.
+    const namedPeople = await namedPeopleFromCGroups();
+    _state.peopleRemote = namedPeople;
+    updatePeopleSnapshot();
+
+    // Notify the search subsystem of the update. Since the search only used
+    // named cgroups, we only give it the people we got from cgroups.
+    setSearchPeople(namedPeople);
+
+    _state.isSyncing = false;
 };
 
 /**
@@ -333,119 +378,25 @@ export const wipClusterEnable = async (): Promise<boolean> =>
     (await isInternalUser());
 
 // // TODO-Cluster temporary state here
-let _wip_isClustering = false;
-let _wip_searchPersons: SearchPerson[] | undefined;
 let _wip_hasSwitchedOnce = false;
 
-export const wipHasSwitchedOnceCmpAndSet = () => {
-    if (_wip_hasSwitchedOnce) return true;
+export const wipClusterLocalOnce = () => {
+    if (!process.env.NEXT_PUBLIC_ENTE_WIP_CL_AUTO) return;
+    if (_wip_hasSwitchedOnce) return;
     _wip_hasSwitchedOnce = true;
-    return false;
+    void wipCluster();
 };
 
-export const wipSearchPersons = async () => {
-    if (!(await wipClusterEnable())) return [];
-    return _wip_searchPersons ?? [];
-};
-
-export interface ClusterPreviewWithFile {
-    clusterSize: number;
-    faces: ClusterPreviewFaceWithFile[];
-}
-
-export type ClusterPreviewFaceWithFile = ClusterPreviewFace & {
-    enteFile: EnteFile;
-};
-
-export interface ClusterDebugPageContents {
-    totalFaceCount: number;
-    filteredFaceCount: number;
-    clusteredFaceCount: number;
-    unclusteredFaceCount: number;
-    timeTakenMs: number;
-    clusters: FaceCluster[];
-    clusterPreviewsWithFile: ClusterPreviewWithFile[];
-    unclusteredFacesWithFile: {
-        face: ClusterFace;
-        enteFile: EnteFile;
-    }[];
-}
-
-export const wipClusterDebugPageContents = async (
-    opts: ClusteringOpts,
-    onProgress: OnClusteringProgress,
-): Promise<ClusterDebugPageContents> => {
+export const wipCluster = async () => {
     if (!(await wipClusterEnable())) throw new Error("Not implemented");
 
-    log.info("clustering", opts);
-    _wip_isClustering = true;
-    _wip_searchPersons = undefined;
     triggerStatusUpdate();
 
-    const {
-        localFileByID,
-        clusterPreviews,
-        clusters,
-        cgroups,
-        unclusteredFaces,
-        ...rest
-    } = await worker().then((w) => w.clusterFaces(opts, proxy(onProgress)));
+    const { people } = await worker().then((w) => w.clusterFaces());
 
-    const fileForFace = ({ faceID }: { faceID: string }) =>
-        ensure(localFileByID.get(ensure(fileIDFromFaceID(faceID))));
-
-    const clusterPreviewsWithFile = clusterPreviews.map(
-        ({ clusterSize, faces }) => ({
-            clusterSize,
-            faces: faces.map(({ face, ...rest }) => ({
-                face,
-                enteFile: fileForFace(face),
-                ...rest,
-            })),
-        }),
-    );
-
-    const unclusteredFacesWithFile = unclusteredFaces.map((face) => ({
-        face,
-        enteFile: fileForFace(face),
-    }));
-
-    const clusterByID = new Map(clusters.map((c) => [c.id, c]));
-
-    const searchPersons = cgroups
-        .map((cgroup) => {
-            const faceID = ensure(cgroup.displayFaceID);
-            const fileID = ensure(fileIDFromFaceID(faceID));
-            const file = ensure(localFileByID.get(fileID));
-
-            const faceIDs = cgroup.clusterIDs
-                .map((id) => ensure(clusterByID.get(id)))
-                .flatMap((cluster) => cluster.faceIDs);
-            const fileIDs = faceIDs
-                .map((faceID) => fileIDFromFaceID(faceID))
-                .filter((fileID) => fileID !== undefined);
-
-            return {
-                id: cgroup.id,
-                name: cgroup.name,
-                faceIDs,
-                files: [...new Set(fileIDs)],
-                displayFaceID: faceID,
-                displayFaceFile: file,
-            };
-        })
-        .sort((a, b) => b.faceIDs.length - a.faceIDs.length);
-
-    _wip_isClustering = false;
-    _wip_searchPersons = searchPersons;
+    _state.peopleLocal = people;
+    updatePeopleSnapshot();
     triggerStatusUpdate();
-
-    return {
-        clusters,
-        clusterPreviewsWithFile,
-        unclusteredFacesWithFile,
-        ...rest,
-    };
 };
 
 export type MLStatus =
@@ -514,8 +465,8 @@ export const mlStatusSnapshot = (): MLStatus | undefined => {
 };
 
 /**
- * Trigger an asynchronous and unconditional update of the {@link MLStatus}
- * snapshot.
+ * Trigger an asynchronous update of the {@link MLStatus} snapshot, and return
+ * without waiting for it to finish.
  */
 const triggerStatusUpdate = () => void updateMLStatusSnapshot();
 
@@ -534,7 +485,21 @@ const setMLStatusSnapshot = (snapshot: MLStatus) => {
 const getMLStatus = async (): Promise<MLStatus> => {
     if (!_state.isMLEnabled) return { phase: "disabled" };
 
-    const { indexedCount, indexableCount } = await indexableAndIndexedCounts();
+    const w = await worker();
+
+    // The worker has a clustering progress set iff it is clustering. This
+    // overrides other behaviours.
+    const clusteringProgress = await w.clusteringProgess;
+    if (clusteringProgress) {
+        return {
+            phase: "clustering",
+            nSyncedFiles: clusteringProgress.completed,
+            nTotalFiles: clusteringProgress.total,
+        };
+    }
+
+    const { indexedCount, indexableCount } =
+        await getIndexableAndIndexedCounts();
 
     // During live uploads, the indexable count remains zero even as the indexer
     // is processing the newly uploaded items. This is because these "live
@@ -544,11 +509,9 @@ const getMLStatus = async (): Promise<MLStatus> => {
     // indexable count.
 
     let phase: MLStatus["phase"];
-    const state = await (await worker()).state;
+    const state = await w.state;
     if (state == "indexing" || state == "fetching") {
         phase = state;
-    } else if (_wip_isClustering) {
-        phase = "clustering";
     } else if (state == "init" || indexableCount > 0) {
         phase = "scheduled";
     } else {
@@ -584,15 +547,56 @@ const setInterimScheduledStatus = () => {
     setMLStatusSnapshot({ phase: "scheduled", nSyncedFiles, nTotalFiles });
 };
 
-const workerDidProcessFileOrIdle = throttled(updateMLStatusSnapshot, 2000);
+const workerDidUpdateStatus = throttled(updateMLStatusSnapshot, 2000);
+
+/**
+ * A function that can be used to subscribe to updates to {@link Person}s.
+ *
+ * This, along with {@link peopleSnapshot}, is meant to be used as arguments to
+ * React's {@link useSyncExternalStore}.
+ *
+ * @param callback A function that will be invoked whenever the result of
+ * {@link peopleSnapshot} changes.
+ *
+ * @returns A function that can be used to clear the subscription.
+ */
+export const peopleSubscribe = (onChange: () => void): (() => void) => {
+    _state.peopleListeners.push(onChange);
+    return () => {
+        _state.peopleListeners = _state.peopleListeners.filter(
+            (l) => l != onChange,
+        );
+    };
+};
+
+/**
+ * Return the last known, cached {@link people}.
+ *
+ * This, along with {@link peopleSnapshot}, is meant to be used as arguments to
+ * React's {@link useSyncExternalStore}.
+ *
+ * A return value of `undefined` indicates that we're either still loading the
+ * initial list of people, or that the user has ML disabled and thus doesn't
+ * have any people (this is distinct from the case where the user has ML enabled
+ * but doesn't have any named "person" clusters so far).
+ */
+export const peopleSnapshot = () => _state.peopleSnapshot;
+
+const updatePeopleSnapshot = () =>
+    setPeopleSnapshot(_state.peopleRemote.concat(_state.peopleLocal));
+
+const setPeopleSnapshot = (snapshot: Person[] | undefined) => {
+    _state.peopleSnapshot = snapshot;
+    _state.peopleListeners.forEach((l) => l());
+};
 
 /**
  * Use CLIP to perform a natural language search over image embeddings.
  *
- * @param searchPhrase The text entered by the user in the search box.
+ * @param searchPhrase Normalized (trimmed and lowercased) search phrase.
  *
- * It returns file (IDs) that should be shown in the search results, along with
- * their scores.
+ * It returns file (IDs) that should be shown in the search results, each
+ * annotated with its score.
  *
  * The result can also be `undefined`, which indicates that the download for the
  * ML model is still in progress (trying again later should succeed).
@@ -609,21 +613,8 @@ export const clipMatches = (
 export const unidentifiedFaceIDs = async (
     enteFile: EnteFile,
 ): Promise<string[]> => {
-    const index = await faceIndex(enteFile.id);
+    const index = await getFaceIndex(enteFile.id);
     return index?.faces.map((f) => f.faceID) ?? [];
-};
-
-/**
- * Extract the fileID of the {@link EnteFile} to which the face belongs from its
- * faceID.
- */
-const fileIDFromFaceID = (faceID: string) => {
-    const fileID = parseInt(faceID.split("_")[0] ?? "");
-    if (isNaN(fileID)) {
-        assertionFailed(`Ignoring attempt to parse invalid faceID ${faceID}`);
-        return undefined;
-    }
-    return fileID;
 };
 
 /**
@@ -653,7 +644,7 @@ export const faceCrop = async (faceID: string, enteFile: EnteFile) => {
  * the file (updating the "face-crops" {@link BlobCache}).
  */
 const regenerateFaceCropsIfNeeded = async (enteFile: EnteFile) => {
-    const index = await faceIndex(enteFile.id);
+    const index = await getFaceIndex(enteFile.id);
     if (!index) return;
 
     const cache = await blobCache("face-crops");

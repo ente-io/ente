@@ -123,8 +123,8 @@ documentation PRs around this too.
 
 > [!TIP]
 >
-> You can find more guides and documentation around self-hosting at
-> [help.ente.io/self-hosting](https://help.ente.io/self-hosting).
+> For more documentation around self-hosting, see
+> **[help.ente.io/self-hosting](https://help.ente.io/self-hosting)**.
 
 ## Thanks ❤️
 

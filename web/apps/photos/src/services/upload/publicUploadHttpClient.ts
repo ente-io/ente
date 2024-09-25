@@ -3,8 +3,8 @@ import { apiURL } from "@/base/origins";
 import { EnteFile } from "@/new/photos/types/file";
 import { CustomError, handleUploadError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
+import { MultipartUploadURLs, UploadFile, UploadURL } from "./upload-service";
 import { retryHTTPCall } from "./uploadHttpClient";
-import { MultipartUploadURLs, UploadFile, UploadURL } from "./uploadService";
 
 const MAX_URL_REQUESTS = 50;
 

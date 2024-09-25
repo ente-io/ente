@@ -213,7 +213,7 @@ export const sessionExpiredDialogAttributes = (
     content: t("SESSION_EXPIRED_MESSAGE"),
     nonClosable: true,
     proceed: {
-        text: t("LOGIN"),
+        text: t("login"),
         action: onLogin,
         variant: "accent",
     },

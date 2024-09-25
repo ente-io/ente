@@ -1,39 +1,50 @@
-import { Divider, useMediaQuery } from "@mui/material";
+import { CollectionsSortOptions } from "@/new/photos/components/CollectionsSortOptions";
+import { FilledIconButton } from "@/new/photos/components/mui-custom";
+import type { CollectionSummary } from "@/new/photos/types/collection";
+import { CollectionsSortBy } from "@/new/photos/types/collection";
+import { FlexWrapper, FluidContainer } from "@ente/shared/components/Container";
+import Close from "@mui/icons-material/Close";
+import {
+    Box,
+    DialogTitle,
+    Divider,
+    Stack,
+    Typography,
+    useMediaQuery,
+} from "@mui/material";
 import {
     AllCollectionDialog,
     Transition,
 } from "components/Collections/AllCollections/dialog";
-import { COLLECTION_LIST_SORT_BY } from "constants/collection";
-import { CollectionSummary } from "types/collection";
+import { t } from "i18next";
 import AllCollectionContent from "./content";
-import AllCollectionsHeader from "./header";
 
-interface Iprops {
+interface AllCollectionsProps {
     open: boolean;
     onClose: () => void;
     collectionSummaries: CollectionSummary[];
-    setActiveCollectionID: (id?: number) => void;
-    collectionListSortBy: COLLECTION_LIST_SORT_BY;
-    setCollectionListSortBy: (v: COLLECTION_LIST_SORT_BY) => void;
+    onSelectCollectionID: (id: number) => void;
+    collectionsSortBy: CollectionsSortBy;
+    onChangeCollectionsSortBy: (by: CollectionsSortBy) => void;
     isInHiddenSection: boolean;
 }
 
 const LeftSlideTransition = Transition("up");
 
-export default function AllCollections(props: Iprops) {
+export default function AllCollections(props: AllCollectionsProps) {
     const {
         collectionSummaries,
         open,
         onClose,
-        setActiveCollectionID,
-        collectionListSortBy,
-        setCollectionListSortBy,
+        onSelectCollectionID,
+        collectionsSortBy,
+        onChangeCollectionsSortBy,
         isInHiddenSection,
     } = props;
     const isMobile = useMediaQuery("(max-width: 428px)");
 
     const onCollectionClick = (collectionID: number) => {
-        setActiveCollectionID(collectionID);
+        onSelectCollectionID(collectionID);
         onClose();
     };
 
@@ -47,11 +58,13 @@ export default function AllCollections(props: Iprops) {
             fullWidth={true}
         >
             <AllCollectionsHeader
-                isInHiddenSection={isInHiddenSection}
-                onClose={onClose}
+                {...{
+                    isInHiddenSection,
+                    onClose,
+                    collectionsSortBy,
+                    onChangeCollectionsSortBy,
+                }}
                 collectionCount={props.collectionSummaries.length}
-                collectionSortBy={collectionListSortBy}
-                setCollectionSortBy={setCollectionListSortBy}
             />
             <Divider />
             <AllCollectionContent
@@ -61,3 +74,38 @@ export default function AllCollections(props: Iprops) {
         </AllCollectionDialog>
     );
 }
+
+const AllCollectionsHeader = ({
+    onClose,
+    collectionCount,
+    collectionsSortBy,
+    onChangeCollectionsSortBy,
+    isInHiddenSection,
+}) => (
+    <DialogTitle>
+        <FlexWrapper>
+            <FluidContainer mr={1.5}>
+                <Box>
+                    <Typography variant="h3">
+                        {isInHiddenSection
+                            ? t("all_hidden_albums")
+                            : t("all_albums")}
+                    </Typography>
+                    <Typography variant="small" color={"text.muted"}>
+                        {t("albums_count", { count: collectionCount })}
+                    </Typography>
+                </Box>
+            </FluidContainer>
+            <Stack direction="row" spacing={1.5}>
+                <CollectionsSortOptions
+                    activeSortBy={collectionsSortBy}
+                    onChangeSortBy={onChangeCollectionsSortBy}
+                    nestedInDialog
+                />
+                <FilledIconButton onClick={onClose}>
+                    <Close />
+                </FilledIconButton>
+            </Stack>
+        </FlexWrapper>
+    </DialogTitle>
+);

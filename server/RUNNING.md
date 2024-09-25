@@ -10,10 +10,14 @@ static go binary.
 
 This document describes these approaches, and also outlines configuration.
 
-- [Run using Docker using a pre-built Docker image](docs/docker.md)
-- [Run using Docker but build an image from source](#build-and-run-using-docker)
-- [Running without Docker](#run-without-docker)
-- [Configuration](#configuration)
+-   [Run using Docker using a pre-built Docker image](docs/docker.md)
+-   [Run using Docker but build an image from source](#build-and-run-using-docker)
+-   [Running without Docker](#run-without-docker)
+-   [Configuration](#configuration)
+
+If your mobile app is able to connect to your self hosted instance but is not
+able to view or upload images, see
+[help.ente.io/self-hosting/guides/configuring-s3](https://help.ente.io/self-hosting/guides/configuring-s3).
 
 ## Build and run using Docker
 
@@ -104,7 +108,6 @@ brew install pkg-config
 > Here we install same major version of Postgres as our production database to
 > avoid surprises, but if you're using a newer Postgres that should work fine
 > too.
-
 
 On M1 macs, we additionally need to link the postgres keg.
 

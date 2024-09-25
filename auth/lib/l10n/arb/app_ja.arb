@@ -137,7 +137,6 @@
   "leaveFamily": "ファミリープランから退会",
   "leaveFamilyMessage": "本当にファミリープランを退会しますか？",
   "inFamilyPlanMessage": "ファミリープランに入会しています！",
-  "swipeHint": "左にスワイプしてコードを編集、削除します",
   "scan": "読み取り",
   "scanACode": "コードを読み取り",
   "verify": "認証",

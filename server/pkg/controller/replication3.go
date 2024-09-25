@@ -445,7 +445,7 @@ func (c *ReplicationController3) replicateFile(in *UploadInput, dest *UploadDest
 		return failure(stacktrace.Propagate(err, "Failed to upload object"))
 	}
 	// log if time taken is more than 2 seconds and speed is less than .5MB/s
-	if dest.Label == "wasabi" && time.Since(start) > slowUploadThreshold {
+	if time.Since(start) > slowUploadThreshold {
 		elapsed := time.Since(start)
 		uploadSpeedMBps := float64(in.ExpectedSize) / (elapsed.Seconds() * 1024 * 1024)
 
@@ -454,6 +454,7 @@ func (c *ReplicationController3) replicateFile(in *UploadInput, dest *UploadDest
 				"sizeBytes":   in.ExpectedSize,
 				"speedMBps":   uploadSpeedMBps,
 				"elapsedSecs": elapsed.Seconds(),
+				"label":       dest.Label,
 			}).Infof("Slow replication upload to %s: %.2f seconds, speed: %.2f MB/s", dest.Label, elapsed.Seconds(), uploadSpeedMBps)
 		}
 	}

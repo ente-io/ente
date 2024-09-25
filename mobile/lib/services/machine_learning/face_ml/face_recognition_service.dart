@@ -1,5 +1,5 @@
 import "dart:async" show unawaited;
-import "dart:typed_data" show ByteData, Float32List;
+import "dart:typed_data" show Uint8List, Float32List;
 import "dart:ui" show Image;
 
 import "package:logging/logging.dart";
@@ -70,7 +70,7 @@ class FaceRecognitionService {
   static Future<List<FaceResult>> runFacesPipeline(
     int enteFileID,
     Image image,
-    ByteData imageByteData,
+    Uint8List rawRgbaBytes,
     int faceDetectionAddress,
     int faceEmbeddingAddress,
   ) async {
@@ -82,7 +82,7 @@ class FaceRecognitionService {
         await _detectFacesSync(
       enteFileID,
       image,
-      imageByteData,
+      rawRgbaBytes,
       faceDetectionAddress,
       faceResults,
     );
@@ -100,7 +100,7 @@ class FaceRecognitionService {
     // Align the faces
     final Float32List faceAlignmentResult = await _alignFacesSync(
       image,
-      imageByteData,
+      rawRgbaBytes,
       faceDetectionResult,
       faceResults,
     );
@@ -130,7 +130,7 @@ class FaceRecognitionService {
   static Future<List<FaceDetectionRelative>> _detectFacesSync(
     int fileID,
     Image image,
-    ByteData imageByteData,
+    Uint8List rawRgbaBytes,
     int interpreterAddress,
     List<FaceResult> faceResults,
   ) async {
@@ -139,7 +139,7 @@ class FaceRecognitionService {
       final List<FaceDetectionRelative> faces =
           await FaceDetectionService.predict(
         image,
-        imageByteData,
+        rawRgbaBytes,
         interpreterAddress,
       );
 
@@ -166,7 +166,7 @@ class FaceRecognitionService {
   /// Returns a list of the aligned faces as image data.
   static Future<Float32List> _alignFacesSync(
     Image image,
-    ByteData imageByteData,
+    Uint8List rawRgbaBytes,
     List<FaceDetectionRelative> faces,
     List<FaceResult> faceResults,
   ) async {
@@ -174,7 +174,7 @@ class FaceRecognitionService {
       final (alignedFaces, alignmentResults, _, blurValues, _) =
           await preprocessToMobileFaceNetFloat32List(
         image,
-        imageByteData,
+        rawRgbaBytes,
         faces,
       );
 

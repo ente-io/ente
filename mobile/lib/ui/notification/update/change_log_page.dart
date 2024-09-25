@@ -1,5 +1,3 @@
-import "dart:async";
-
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/services/update_service.dart';
@@ -8,14 +6,12 @@ import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
-import "package:photos/ui/growth/referral_screen.dart";
 import 'package:photos/ui/notification/update/change_log_entry.dart';
-import "package:photos/utils/navigation_util.dart";
 
 class ChangeLogPage extends StatefulWidget {
   const ChangeLogPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<ChangeLogPage> createState() => _ChangeLogPageState();
@@ -77,36 +73,17 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
                     const SizedBox(
                       height: 8,
                     ),
-                    // ButtonWidget(
-                    //   buttonType: ButtonType.trailingIconSecondary,
-                    //   buttonSize: ButtonSize.large,
-                    //   labelText: S.of(context).joinDiscord,
-                    //   icon: Icons.discord_outlined,
-                    //   iconColor: enteColorScheme.primary500,
-                    //   onTap: () async {
-                    //     unawaited(
-                    //       launchUrlString(
-                    //         "https://discord.com/invite/z2YVKkycX3",
-                    //         mode: LaunchMode.externalApplication,
-                    //       ),
-                    //     );
-                    //   },
-                    // ),
                     ButtonWidget(
                       buttonType: ButtonType.trailingIconSecondary,
                       buttonSize: ButtonSize.large,
-                      labelText: 'Claim referral code',
-                      icon: Icons.arrow_forward_outlined,
+                      labelText: S.of(context).rateTheApp,
+                      icon: Icons.favorite_rounded,
                       iconColor: enteColorScheme.primary500,
                       onTap: () async {
-                        unawaited(
-                          routeToPage(
-                            context,
-                            const ReferralScreen(),
-                          ),
-                        );
+                        await UpdateService.instance.launchReviewUrl();
                       },
                     ),
+                    const SizedBox(height: 8),
                     const SizedBox(height: 8),
                   ],
                 ),
@@ -123,20 +100,17 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
     final List<ChangeLogEntry> items = [];
     items.addAll([
       ChangeLogEntry(
-        'Personal referral codes',
-        'Claim your personal code to invite friends now. Earn 10GB free for every successful referral.',
+        'Discover',
+        'Looking for photos of your id cards, notes, or even memes? Go to the search tab and check out Discover. Based on our semantic search, it\'s a place to find photos that might be important for you.\n\nOnly available if you have enabled Machine Learning.',
       ),
       ChangeLogEntry(
-        'Resumable uploads',
-        'We\'ve added support for resuming uploads across app sessions. Please enable this from Backup settings.',
+        'Backup Status',
+        'We\'ve added a log of all the files that have been uploaded to Ente, including failures and queued.',
       ),
       ChangeLogEntry(
-        'Quick links',
-        'Created too many links to share? You can select and clear multiple in one go now.',
-      ),
-      ChangeLogEntry(
-        'App lock',
-        'We\'ve introduced an option to hide Ente from your app switcher. Check out Security > App lock.',
+        'Magic Search Improvement',
+        'We have improved magic search to become much faster, so you don\'t have to wait to find what you\'re looking for.',
+        isFeature: false,
       ),
     ]);
 

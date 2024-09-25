@@ -1,5 +1,5 @@
 {
-  "account": "حسابي",
+  "account": "الحساب",
   "unlock": "فتح القفل",
   "recoveryKey": "مفتاح الاسترداد",
   "counterAppBarTitle": "العداد",
@@ -19,6 +19,20 @@
   "pleaseVerifyDetails": "من فضلك تأكد من بياناتك وحاول مرة أخرى",
   "codeIssuerHint": "المصدِّر",
   "codeSecretKeyHint": "الرمز السري",
+  "secret": "سري",
+  "all": "الكل",
+  "notes": "ملاحظات",
+  "notesLengthLimit": "يمكن أن تصل الملاحظات إلى {count} حرفا كحد أقصى",
+  "@notesLengthLimit": {
+    "description": "Text to indicate the maximum number of characters allowed for notes",
+    "placeholders": {
+      "count": {
+        "description": "The maximum number of characters allowed for notes",
+        "type": "int",
+        "example": "100"
+      }
+    }
+  },
   "codeAccountHint": "الحساب (you@domain.com)",
   "codeTagHint": "وسم",
   "accountKeyType": "نوع المفتاح",
@@ -79,7 +93,7 @@
   "data": "البيانات",
   "importCodes": "استورد شيفرات",
   "importTypePlainText": "نص بسيط",
-  "importTypeEnteEncrypted": "تصدير Ente Ecrypted",
+  "importTypeEnteEncrypted": "تصدير مشفر ente",
   "passwordForDecryptingExport": "كلمة المرور لفك تشفير التصدير",
   "passwordEmptyError": "لا يمكن أن تكون كلمة المرور فارغة",
   "importFromApp": "استورد الشيفرات من {appName}",
@@ -137,7 +151,6 @@
   "leaveFamily": "مغادرة خطة العائلة",
   "leaveFamilyMessage": "هل أنت متأكد من الخروج من خطة العائلة؟",
   "inFamilyPlanMessage": "أنت مندرج ضمن خطة عائلية!",
-  "swipeHint": "اسحب لليسار لتحرير أو إزالة الرموز",
   "scan": "مسح",
   "scanACode": "فحص رمز Qr",
   "verify": "التحقق",
@@ -182,6 +195,7 @@
   "security": "الأمان",
   "lockscreen": "شاشة القفل",
   "authToChangeLockscreenSetting": "الرجاء المصادقة لتغيير إعدادات شاشة القفل",
+  "deviceLockEnablePreSteps": "لتمكين قفل التطبيق، فضلا أعد شيفرة مرور للجهاز أو قفل الشاشة في إعدادات نظامك.",
   "viewActiveSessions": "عرض الجلسات النشطة",
   "authToViewYourActiveSessions": "الرجاء المصادقة لعرض جلساتك النشطة",
   "searchHint": "بحث...",

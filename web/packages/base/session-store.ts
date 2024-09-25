@@ -3,7 +3,7 @@ import { decryptBox } from "./crypto";
 import { toB64 } from "./crypto/libsodium";
 
 /**
- * Return the user's master key (as a base64 string) from session storage.
+ * Return the user's master key from session storage.
  *
  * Precondition: The user should be logged in.
  */

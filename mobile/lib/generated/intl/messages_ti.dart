@@ -21,8 +21,5 @@ class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'ti';
 
   final messages = _notInlinedMessages(_notInlinedMessages);
-  static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
-        "loopVideoOff": MessageLookupByLibrary.simpleMessage("Loop video off"),
-        "loopVideoOn": MessageLookupByLibrary.simpleMessage("Loop video on")
-      };
+  static Map<String, Function> _notInlinedMessages(_) => <String, Function>{};
 }

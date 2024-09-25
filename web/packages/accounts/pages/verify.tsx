@@ -1,4 +1,5 @@
 import type { UserVerificationResponse } from "@/accounts/types/user";
+import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
@@ -13,7 +14,6 @@ import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
 import { ApiError } from "@ente/shared/error";
-import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import localForage from "@ente/shared/storage/localForage";
 import {
     LS_KEYS,
@@ -39,6 +39,7 @@ import {
     openPasskeyVerificationURL,
     passkeyVerificationRedirectURL,
 } from "../services/passkey";
+import { unstashRedirect } from "../services/redirect";
 import { configureSRP } from "../services/srp";
 import type { PageProps } from "../types/page";
 import type { SRPSetupAttributes } from "../types/srp";
@@ -142,8 +143,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 }
                 localForage.clear();
                 setIsFirstLogin(true);
-                const redirectURL = InMemoryStore.get(MS_KEYS.REDIRECT_URL);
-                InMemoryStore.delete(MS_KEYS.REDIRECT_URL);
+                const redirectURL = unstashRedirect();
                 if (keyAttributes?.encryptedKey) {
                     clearKeys();
                     router.push(redirectURL ?? PAGES.CREDENTIALS);
@@ -159,6 +159,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     setFieldError(t("EXPIRED_CODE"));
                 }
             } else {
+                log.error("OTT verification failed", e);
                 setFieldError(`${t("UNKNOWN_ERROR")} ${JSON.stringify(e)}`);
             }
         }

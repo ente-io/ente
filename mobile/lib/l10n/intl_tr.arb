@@ -12,6 +12,7 @@
   "deleteAccountFeedbackPrompt": "Aramızdan ayrıldığınız için üzgünüz. Lütfen kendimizi geliştirmemize yardımcı olun. Neden ayrıldığınızı Açıklar mısınız.",
   "feedback": "Geri Bildirim",
   "kindlyHelpUsWithThisInformation": "Lütfen bu bilgilerle bize yardımcı olun",
+  "confirmDeletePrompt": "Evet, bu hesabı ve verilerini tüm uygulamalardan kalıcı olarak silmek istiyorum.",
   "confirmAccountDeletion": "Hesap silme işlemini onayla",
   "deleteAccountPermanentlyButton": "Hesabımı kalıcı olarak sil",
   "yourAccountHasBeenDeleted": "Hesabınız silindi",
@@ -23,6 +24,7 @@
   "sendEmail": "E-posta gönder",
   "deleteRequestSLAText": "İsteğiniz 72 saat içinde gerçekleştirilecek.",
   "deleteEmailRequest": "Lütfen kayıtlı e-posta adresinizden <warning>account-deletion@ente.io</warning>'a e-posta gönderiniz.",
+  "entePhotosPerm": "Ente fotoğrafları saklamak için <i>iznine ihtiyaç duyuyor</i>",
   "ok": "Tamam",
   "createAccount": "Hesap oluşturun",
   "createNewAccount": "Yeni bir hesap oluşturun",
@@ -226,6 +228,7 @@
   },
   "collectPhotos": "Fotoğrafları topla",
   "collaborativeLink": "Organizasyon bağlantısı",
+  "shareWithNonenteUsers": "Ente kullanıcısı olmayanlar için paylaş",
   "createPublicLink": "Herkese açık link oluştur",
   "sendLink": "Link gönder",
   "copyLink": "Linki kopyala",
@@ -255,6 +258,7 @@
   },
   "verificationId": "Doğrulama kimliği",
   "verifyEmailID": "{email} doğrula",
+  "emailNoEnteAccount": "{email}, Ente hesabı bulunmamaktadır.\n\nOnlarla fotoğraf paylaşımı için bir davet gönder.",
   "shareMyVerificationID": "İşte ente.io için doğrulama kimliğim: {verificationID}.",
   "shareTextConfirmOthersVerificationID": "Merhaba, bu ente.io doğrulama kimliğinizin doğruluğunu onaylayabilir misiniz: {verificationID}",
   "somethingWentWrong": "Bazı şeyler yanlış gitti",
@@ -314,7 +318,6 @@
   "removingFromFavorites": "Favorilerimden kaldır...",
   "sorryCouldNotAddToFavorites": "Üzgünüm, favorilere ekleyemedim!",
   "sorryCouldNotRemoveFromFavorites": "Üzgünüm, favorilere ekleyemedim!",
-  "subscribeToEnableSharing": "Aboneliğinizin süresi dolmuş gibi görünüyor. Paylaşımı etkinleştirmek için lütfen abone olun.",
   "subscribe": "Abone ol",
   "canOnlyRemoveFilesOwnedByYou": "Yalnızca size ait dosyaları kaldırabilir",
   "deleteSharedAlbum": "Paylaşılan albüm silinsin mi?",
@@ -1167,7 +1170,5 @@
   "invalidEndpoint": "Geçersiz uç nokta",
   "invalidEndpointMessage": "Üzgünüz, girdiğiniz uç nokta geçersiz. Lütfen geçerli bir uç nokta girin ve tekrar deneyin.",
   "endpointUpdatedMessage": "Fatura başarıyla güncellendi",
-  "customEndpoint": "{endpoint}'e bağlanıldı",
-  "loopVideoOn": "Loop video on",
-  "loopVideoOff": "Loop video off"
+  "customEndpoint": "{endpoint}'e bağlanıldı"
 }

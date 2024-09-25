@@ -1,5 +1,5 @@
+import type { Collection, PublicURL } from "@/media/collection";
 import { useEffect, useState } from "react";
-import { Collection, PublicURL } from "types/collection";
 import { appendCollectionKeyToShareURL } from "utils/collection";
 import EnablePublicShareOptions from "./EnablePublicShareOptions";
 import CopyLinkModal from "./copyLinkModal";

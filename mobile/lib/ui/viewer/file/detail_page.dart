@@ -15,6 +15,7 @@ import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/file/file_type.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/local_authentication_service.dart";
 import "package:photos/ui/common/fast_scroll_physics.dart";
 import 'package:photos/ui/tools/editor/image_editor_page.dart';
@@ -156,6 +157,7 @@ class _DetailPageState extends State<DetailPage> {
           final authenticated = await _requestAuthentication();
           if (authenticated) {
             Bus.instance.fire(GuestViewEvent(false, false));
+            await localSettings.setOnGuestView(false);
           }
         }
       },

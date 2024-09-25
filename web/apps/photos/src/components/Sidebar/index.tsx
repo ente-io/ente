@@ -4,6 +4,7 @@ import { EnteDrawer } from "@/base/components/EnteDrawer";
 import log from "@/base/log";
 import { savedLogs } from "@/base/log-web";
 import { customAPIHost } from "@/base/origins";
+import type { CollectionSummaries } from "@/new/photos/types/collection";
 import { initiateEmail, openURL } from "@/new/photos/utils/web";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import { EnteLogo } from "@ente/shared/components/EnteLogo";
@@ -40,11 +41,6 @@ import DeleteAccountModal from "components/DeleteAccountModal";
 import TwoFactorModal from "components/TwoFactor/Modal";
 import { WatchFolder } from "components/WatchFolder";
 import LinkButton from "components/pages/gallery/LinkButton";
-import {
-    ARCHIVE_SECTION,
-    DUMMY_UNCATEGORIZED_COLLECTION,
-    TRASH_SECTION,
-} from "constants/collection";
 import { t } from "i18next";
 import isElectron from "is-electron";
 import { useRouter } from "next/router";
@@ -62,7 +58,6 @@ import billingService from "services/billingService";
 import { getUncategorizedCollection } from "services/collectionService";
 import exportService from "services/export";
 import { getUserDetailsV2 } from "services/userService";
-import { CollectionSummaries } from "types/collection";
 import { UserDetails } from "types/user";
 import {
     hasAddOnBonus,
@@ -74,6 +69,11 @@ import {
     isSubscriptionCancelled,
     isSubscriptionPastDue,
 } from "utils/billing";
+import {
+    ARCHIVE_SECTION,
+    DUMMY_UNCATEGORIZED_COLLECTION,
+    TRASH_SECTION,
+} from "utils/collection";
 import { getDownloadAppMessage } from "utils/ui";
 import { isFamilyAdmin, isPartOfFamily } from "utils/user/family";
 import { testUpload } from "../../../tests/upload.test";
@@ -385,7 +385,7 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
                 startIcon={<CategoryIcon />}
                 onClick={openUncategorizedSection}
                 variant="captioned"
-                label={t("UNCATEGORIZED")}
+                label={t("section_uncategorized")}
                 subText={collectionSummaries
                     .get(uncategorizedCollectionId)
                     ?.fileCount.toString()}
@@ -394,7 +394,7 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
                 startIcon={<ArchiveOutlined />}
                 onClick={openArchiveSection}
                 variant="captioned"
-                label={t("ARCHIVE_SECTION_NAME")}
+                label={t("section_archive")}
                 subText={collectionSummaries
                     .get(ARCHIVE_SECTION)
                     ?.fileCount.toString()}
@@ -403,14 +403,14 @@ const ShortcutSection: React.FC<ShortcutSectionProps> = ({
                 startIcon={<VisibilityOff />}
                 onClick={openHiddenSection}
                 variant="captioned"
-                label={t("HIDDEN")}
+                label={t("section_hidden")}
                 subIcon={<LockOutlined />}
             />
             <EnteMenuItem
                 startIcon={<DeleteOutline />}
                 onClick={openTrashSection}
                 variant="captioned"
-                label={t("TRASH")}
+                label={t("section_trash")}
                 subText={collectionSummaries
                     .get(TRASH_SECTION)
                     ?.fileCount.toString()}
@@ -481,7 +481,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
 
     const somethingWentWrong = () =>
         setDialogMessage({
-            title: t("ERROR"),
+            title: t("error"),
             content: t("RECOVER_KEY_GENERATION_FAILED"),
             close: { variant: "critical" },
         });
@@ -683,7 +683,7 @@ const DebugSection: React.FC = () => {
             title: t("DOWNLOAD_LOGS"),
             content: <Trans i18nKey={"DOWNLOAD_LOGS_MESSAGE"} />,
             proceed: {
-                text: t("DOWNLOAD"),
+                text: t("download"),
                 variant: "accent",
                 action: downloadLogs,
             },
@@ -710,7 +710,7 @@ const DebugSection: React.FC = () => {
             <EnteMenuItem
                 onClick={confirmLogDownload}
                 variant="mini"
-                label={t("DOWNLOAD_UPLOAD_LOGS")}
+                label={t("debug_logs")}
             />
             <Stack py={"14px"} px={"16px"} gap={"24px"} color="text.muted">
                 {appVersion && (

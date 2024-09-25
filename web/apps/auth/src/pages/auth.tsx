@@ -1,3 +1,4 @@
+import { stashRedirect } from "@/accounts/services/redirect";
 import { NavbarBase } from "@/base/components/Navbar";
 import { ensure } from "@/utils/ensure";
 import {
@@ -11,7 +12,6 @@ import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
 import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
 import { AUTH_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { ApiError, CustomError } from "@ente/shared/error";
-import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import LogoutOutlined from "@mui/icons-material/LogoutOutlined";
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
 import { Button, ButtonBase, Snackbar, TextField, styled } from "@mui/material";
@@ -43,7 +43,7 @@ const Page: React.FC = () => {
                     e instanceof Error &&
                     e.message == CustomError.KEY_MISSING
                 ) {
-                    InMemoryStore.set(MS_KEYS.REDIRECT_URL, PAGES.AUTH);
+                    stashRedirect(PAGES.AUTH);
                     router.push("/");
                 } else if (e instanceof ApiError && e.httpStatusCode == 401) {
                     // We get back a 401 Unauthorized if the token is not valid.
@@ -93,7 +93,7 @@ const Page: React.FC = () => {
                     <TextField
                         id="search"
                         name="search"
-                        label={t("SEARCH")}
+                        label={t("search")}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         variant="filled"
                         style={{ width: "350px" }}
@@ -121,7 +121,7 @@ const Page: React.FC = () => {
                             }}
                         >
                             {searchTerm.length > 0 ? (
-                                <p>{t("NO_RESULTS")}</p>
+                                <p>{t("no_results")}</p>
                             ) : (
                                 <></>
                             )}
@@ -407,7 +407,7 @@ const Footer: React.FC = () => {
                 href="https://github.com/ente-io/ente/tree/main/auth#-download"
                 download
             >
-                <Button color="accent">{t("DOWNLOAD")}</Button>
+                <Button color="accent">{t("download")}</Button>
             </a>
         </Footer_>
     );

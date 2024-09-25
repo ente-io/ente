@@ -319,7 +319,6 @@
   "removingFromFavorites": "מסיר מהמועדפים...",
   "sorryCouldNotAddToFavorites": "סליחה, לא ניתן להוסיף למועדפים!",
   "sorryCouldNotRemoveFromFavorites": "סליחה, לא ניתן להסיר מהמועדפים!",
-  "subscribeToEnableSharing": "נראה שהמנוי שלך עומד לפוג. אנא הירשם כדי לאפשר שיתוף.",
   "subscribe": "הרשם",
   "canOnlyRemoveFilesOwnedByYou": "יכול להסיר רק קבצים שבבעלותך",
   "deleteSharedAlbum": "מחק את האלבום המשותף?",
@@ -818,7 +817,5 @@
   "addPhotos": "הוסף תמונות",
   "create": "צור",
   "viewAll": "הצג הכל",
-  "hiding": "מחביא...",
-  "loopVideoOn": "Loop video on",
-  "loopVideoOff": "Loop video off"
+  "hiding": "מחביא..."
 }

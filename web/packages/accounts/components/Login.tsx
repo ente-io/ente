@@ -50,12 +50,12 @@ export const Login: React.FC<LoginProps> = ({ signUp, host }) => {
 
     return (
         <>
-            <FormPaperTitle>{t("LOGIN")}</FormPaperTitle>
+            <FormPaperTitle>{t("login")}</FormPaperTitle>
             <SingleInputForm
                 callback={loginUser}
                 fieldType="email"
                 placeholder={t("ENTER_EMAIL")}
-                buttonText={t("LOGIN")}
+                buttonText={t("login")}
                 autoComplete="username"
                 hiddenPostInput={
                     <Input sx={{ display: "none" }} type="password" value="" />

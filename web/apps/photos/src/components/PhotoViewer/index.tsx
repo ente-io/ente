@@ -39,10 +39,6 @@ import InfoIcon from "@mui/icons-material/InfoOutlined";
 import ReplayIcon from "@mui/icons-material/Replay";
 import ZoomInOutlinedIcon from "@mui/icons-material/ZoomInOutlined";
 import { Box, Button, styled } from "@mui/material";
-import {
-    defaultLivePhotoDefaultOptions,
-    photoSwipeV4Events,
-} from "constants/photoViewer";
 import { t } from "i18next";
 import isElectron from "is-electron";
 import { AppContext } from "pages/_app";
@@ -63,6 +59,34 @@ interface PhotoswipeFullscreenAPI {
     exit: () => void;
     isFullscreen: () => boolean;
 }
+
+const defaultLivePhotoDefaultOptions = {
+    click: () => {},
+    hide: () => {},
+    show: () => {},
+    loading: false,
+    visible: false,
+};
+
+const photoSwipeV4Events = [
+    "beforeChange",
+    "afterChange",
+    "imageLoadComplete",
+    "resize",
+    "gettingData",
+    "mouseUsed",
+    "initialZoomIn",
+    "initialZoomInEnd",
+    "initialZoomOut",
+    "initialZoomOutEnd",
+    "parseVerticalMargin",
+    "close",
+    "unbindEvents",
+    "destroy",
+    "updateScrollOffset",
+    "preventDragEvent",
+    "shareLinkClick",
+];
 
 const CaptionContainer = styled("div")(({ theme }) => ({
     padding: theme.spacing(2),
@@ -797,7 +821,7 @@ function PhotoViewer(props: Iprops) {
                             {props.enableDownload && (
                                 <button
                                     className="pswp__button pswp__button--custom"
-                                    title={t("DOWNLOAD_OPTION")}
+                                    title={t("download_key")}
                                     onClick={() =>
                                         downloadFileHelper(
                                             photoSwipe.currItem as EnteFile,
@@ -810,7 +834,7 @@ function PhotoViewer(props: Iprops) {
                             {props.enableDownload && shouldShowCopyOption && (
                                 <button
                                     className="pswp__button pswp__button--custom"
-                                    title={t("COPY_OPTION")}
+                                    title={t("copy_key")}
                                     onClick={() =>
                                         copyToClipboardHelper(
                                             photoSwipe.currItem as EnteFile,
@@ -837,7 +861,7 @@ function PhotoViewer(props: Iprops) {
                                 <button
                                     className="pswp__button pswp__button--custom"
                                     onClick={toggleZoomInAndOut}
-                                    title={t("ZOOM_IN_OUT")}
+                                    title={t("zoom_in_out_key")}
                                 >
                                     <ZoomInOutlinedIcon />
                                 </button>
@@ -847,7 +871,7 @@ function PhotoViewer(props: Iprops) {
                                 onClick={() => {
                                     toggleFullscreen(photoSwipe);
                                 }}
-                                title={t("TOGGLE_FULLSCREEN")}
+                                title={t("toggle_fullscreen_key")}
                             >
                                 {!isInFullScreenMode ? (
                                     <FullscreenOutlinedIcon
@@ -913,13 +937,13 @@ function PhotoViewer(props: Iprops) {
                         </div>
                         <button
                             className="pswp__button pswp__button--arrow--left"
-                            title={t("PREVIOUS")}
+                            title={t("previous_key")}
                         >
                             <ChevronLeft sx={{ pointerEvents: "none" }} />
                         </button>
                         <button
                             className="pswp__button pswp__button--arrow--right"
-                            title={t("NEXT")}
+                            title={t("next_key")}
                         >
                             <ChevronRight sx={{ pointerEvents: "none" }} />
                         </button>

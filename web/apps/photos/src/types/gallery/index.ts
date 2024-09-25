@@ -1,15 +1,22 @@
+import type { Collection } from "@/media/collection";
+import { type SelectionContext } from "@/new/photos/components/Gallery";
 import { EnteFile } from "@/new/photos/types/file";
 import type { User } from "@ente/shared/user/types";
 import { CollectionSelectorAttributes } from "components/Collections/CollectionSelector";
 import { FilesDownloadProgressAttributes } from "components/FilesDownloadProgress";
 import { TimeStampListItem } from "components/PhotoList";
-import { Collection } from "types/collection";
 
 export type SelectedState = {
     [k: number]: boolean;
     ownCount: number;
     count: number;
     collectionID: number;
+    /**
+     * The context in which the selection was made. Only set by newer code if
+     * there is an active selection (older code continues to rely on the
+     * {@link collectionID} logic).
+     */
+    context: SelectionContext | undefined;
 };
 export type SetSelectedState = React.Dispatch<
     React.SetStateAction<SelectedState>
@@ -42,9 +49,10 @@ export type MergedSourceURL = {
 export type GalleryContextType = {
     showPlanSelectorModal: () => void;
     setActiveCollectionID: (collectionID: number) => void;
+    /** Newer and almost equivalent alternative to setActiveCollectionID. */
+    onShowCollection: (collectionID: number) => void;
     syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;
     setBlockingLoad: (value: boolean) => void;
-    setIsInSearchMode: (value: boolean) => void;
     photoListHeader: TimeStampListItem;
     openExportModal: () => void;
     authenticateUser: (callback: () => void) => void;

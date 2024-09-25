@@ -25,15 +25,11 @@ import {
     indexCLIP,
     type CLIPIndex,
 } from "./clip";
-import {
-    clusterFaces,
-    type ClusteringOpts,
-    type OnClusteringProgress,
-} from "./cluster";
+import { clusterFaces, type ClusteringProgress } from "./cluster";
 import { saveFaceCrops } from "./crop";
 import {
-    faceIndexes,
-    indexableFileIDs,
+    getFaceIndexes,
+    getIndexableFileIDs,
     markIndexingFailed,
     saveIndexes,
     updateAssumingLocalFiles,
@@ -101,6 +97,8 @@ interface IndexableItem {
 export class MLWorker {
     /** The last known state of the worker. */
     public state: WorkerState = "init";
+    /** If the worker is currently clustering, then its last known progress. */
+    public clusteringProgess: ClusteringProgress | undefined;
 
     private electron: ElectronMLWorker | undefined;
     private delegate: MLWorkerDelegate | undefined;
@@ -190,7 +188,7 @@ export class MLWorker {
     }
 
     /**
-     * Find {@link CLIPMatches} for a given {@link searchPhrase}.
+     * Find {@link CLIPMatches} for a given normalized {@link searchPhrase}.
      */
     async clipMatches(searchPhrase: string): Promise<CLIPMatches | undefined> {
         return clipMatches(searchPhrase, ensure(this.electron));
@@ -246,7 +244,7 @@ export class MLWorker {
         this.state = "idle";
         this.idleDuration = Math.min(this.idleDuration * 2, idleDurationMax);
         this.idleTimeout = setTimeout(scheduleTick, this.idleDuration * 1000);
-        this.delegate?.workerDidProcessFileOrIdle();
+        this.delegate?.workerDidUpdateStatus();
     }
 
     /** Return the next batch of items to backfill (if any). */
@@ -280,14 +278,25 @@ export class MLWorker {
         }));
     }
 
-    // TODO-Cluster
-    async clusterFaces(opts: ClusteringOpts, onProgress: OnClusteringProgress) {
-        return clusterFaces(
-            await faceIndexes(),
+    /**
+     * Run face clustering on all faces.
+     *
+     * This should only be invoked when the face indexing (including syncing
+     * with remote) is complete so that we cluster the latest set of faces.
+     */
+    async clusterFaces() {
+        const result = await clusterFaces(
+            await getFaceIndexes(),
             await getAllLocalFiles(),
-            opts,
-            onProgress,
+            (progress) => this.updateClusteringProgress(progress),
         );
+        this.updateClusteringProgress(undefined);
+        return result;
+    }
+
+    private updateClusteringProgress(progress: ClusteringProgress | undefined) {
+        this.clusteringProgess = progress;
+        this.delegate?.workerDidUpdateStatus();
     }
 }
 
@@ -347,7 +356,7 @@ const indexNextBatch = async (
         await Promise.race(tasks);
 
         // Let the main thread now we're doing something.
-        delegate?.workerDidProcessFileOrIdle();
+        delegate?.workerDidUpdateStatus();
 
         // Let us drain the microtask queue. This also gives a chance for other
         // interactive tasks like `clipMatches` to run.
@@ -395,7 +404,7 @@ const syncWithLocalFilesAndGetFilesToIndex = async (
         localTrashFileIDs,
     );
 
-    const fileIDsToIndex = await indexableFileIDs(count);
+    const fileIDsToIndex = await getIndexableFileIDs(count);
     return new Map(
         fileIDsToIndex.map((id) => [id, ensure(localFileByID.get(id))]),
     );

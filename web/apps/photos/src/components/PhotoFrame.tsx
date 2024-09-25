@@ -1,5 +1,6 @@
 import log from "@/base/log";
 import { FileType } from "@/media/file-type";
+import type { GalleryBarMode } from "@/new/photos/components/Gallery/BarImpl";
 import DownloadManager from "@/new/photos/services/download";
 import type { LivePhotoSourceURL, SourceURLs } from "@/new/photos/types/file";
 import { EnteFile } from "@/new/photos/types/file";
@@ -8,7 +9,6 @@ import { CustomError } from "@ente/shared/error";
 import useMemoSingleThreaded from "@ente/shared/hooks/useMemoSingleThreaded";
 import { styled } from "@mui/material";
 import PhotoViewer from "components/PhotoViewer";
-import { TRASH_SECTION } from "constants/collection";
 import { useRouter } from "next/router";
 import { GalleryContext } from "pages/gallery";
 import PhotoSwipe from "photoswipe";
@@ -19,6 +19,7 @@ import {
     SelectedState,
     SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
+import { TRASH_SECTION } from "utils/collection";
 import {
     handleSelectCreator,
     updateFileMsrcProps,
@@ -48,6 +49,7 @@ interface Props {
         | PHOTOS_PAGES.GALLERY
         | PHOTOS_PAGES.DEDUPLICATE
         | PHOTOS_PAGES.SHARED_ALBUMS;
+    mode?: GalleryBarMode;
     files: EnteFile[];
     duplicates?: Duplicate[];
     syncWithRemote: () => Promise<void>;
@@ -58,7 +60,10 @@ interface Props {
     selected: SelectedState;
     tempDeletedFileIds?: Set<number>;
     setTempDeletedFileIds?: (value: Set<number>) => void;
+    /** This will be set if mode is not "people". */
     activeCollectionID: number;
+    /** This will be set if mode is "people". */
+    activePersonID?: string | undefined;
     enableDownload?: boolean;
     fileToCollectionsMap: Map<number, number[]>;
     collectionNameMap: Map<number, string>;
@@ -66,11 +71,13 @@ interface Props {
     setIsPhotoSwipeOpen?: (value: boolean) => void;
     isInHiddenSection?: boolean;
     setFilesDownloadProgressAttributesCreator?: SetFilesDownloadProgressAttributesCreator;
+    selectable?: boolean;
 }
 
 const PhotoFrame = ({
     page,
     duplicates,
+    mode,
     files,
     syncWithRemote,
     favItemIds,
@@ -79,6 +86,7 @@ const PhotoFrame = ({
     tempDeletedFileIds,
     setTempDeletedFileIds,
     activeCollectionID,
+    activePersonID,
     enableDownload,
     fileToCollectionsMap,
     collectionNameMap,
@@ -86,6 +94,7 @@ const PhotoFrame = ({
     setIsPhotoSwipeOpen,
     isInHiddenSection,
     setFilesDownloadProgressAttributesCreator,
+    selectable,
 }: Props) => {
     const [open, setOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
@@ -230,7 +239,9 @@ const PhotoFrame = ({
 
     const handleSelect = handleSelectCreator(
         setSelected,
+        mode,
         activeCollectionID,
+        activePersonID,
         setRangeStart,
     );
 
@@ -267,6 +278,7 @@ const PhotoFrame = ({
             )(!checked);
         }
     };
+
     const getThumbnail = (
         item: EnteFile,
         index: number,
@@ -277,15 +289,20 @@ const PhotoFrame = ({
             file={item}
             updateURL={updateURL(index)}
             onClick={onThumbnailClick(index)}
-            selectable={enableDownload}
+            selectable={selectable}
             onSelect={handleSelect(
                 item.id,
                 item.ownerID === galleryContext.user?.id,
                 index,
             )}
             selected={
-                selected.collectionID === activeCollectionID &&
-                selected[item.id]
+                (!mode
+                    ? selected.collectionID === activeCollectionID
+                    : mode == selected.context?.mode &&
+                      (selected.context.mode == "people"
+                          ? selected.context.personID == activePersonID
+                          : selected.context.collectionID ==
+                            activeCollectionID)) && selected[item.id]
             }
             selectOnClick={selected.count > 0}
             onHover={onHoverOver(index)}
@@ -489,7 +506,9 @@ const PhotoFrame = ({
             );
             fetching[item.id] = true;
 
-            const srcURL = await DownloadManager.getFileForPreview(item, true);
+            const srcURL = await DownloadManager.getFileForPreview(item, {
+                forceConvertVideos: true,
+            });
 
             try {
                 await updateSrcURL(index, item.id, srcURL, true);
@@ -534,8 +553,10 @@ const PhotoFrame = ({
                             width={width}
                             height={height}
                             getThumbnail={getThumbnail}
+                            mode={mode}
                             displayFiles={displayFiles}
                             activeCollectionID={activeCollectionID}
+                            activePersonID={activePersonID}
                             showAppDownloadBanner={showAppDownloadBanner}
                         />
                     )

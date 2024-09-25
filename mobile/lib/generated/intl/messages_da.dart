@@ -98,8 +98,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "longPressAnEmailToVerifyEndToEndEncryption":
             MessageLookupByLibrary.simpleMessage(
                 "Langt tryk på en e-mail for at bekræfte slutningen af krypteringen."),
-        "loopVideoOff": MessageLookupByLibrary.simpleMessage("Loop video off"),
-        "loopVideoOn": MessageLookupByLibrary.simpleMessage("Loop video on"),
         "manage": MessageLookupByLibrary.simpleMessage("Administrér"),
         "memoryCount": m0,
         "mlIndexingDescription": MessageLookupByLibrary.simpleMessage(

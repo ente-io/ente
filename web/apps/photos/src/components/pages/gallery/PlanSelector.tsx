@@ -1,5 +1,6 @@
 import log from "@/base/log";
 import { bytesInGB, formattedStorageByteSize } from "@/new/photos/utils/units";
+import { openURL } from "@/new/photos/utils/web";
 import {
     FlexWrapper,
     FluidContainer,
@@ -24,14 +25,14 @@ import {
 } from "@mui/material";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import { PLAN_PERIOD } from "constants/gallery";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { Trans } from "react-i18next";
 import billingService, { type PlansResponse } from "services/billingService";
-import { Plan, Subscription } from "types/billing";
+import { getFamilyPortalRedirectURL } from "services/userService";
+import { Plan, PLAN_PERIOD, Subscription } from "types/billing";
 import { SetLoading } from "types/gallery";
 import { BonusData } from "types/user";
 import {
@@ -46,7 +47,6 @@ import {
     isSubscriptionActive,
     isSubscriptionCancelled,
     isUserSubscribedPlan,
-    manageFamilyMethod,
     planForSubscription,
     planSelectionOutcome,
     updatePaymentMethod,
@@ -185,7 +185,7 @@ function PlanSelectorCard(props: PlanSelectorCardProps) {
                 } catch (e) {
                     props.setLoading(false);
                     appContext.setDialogMessage({
-                        title: t("ERROR"),
+                        title: t("error"),
                         content: t("SUBSCRIPTION_PURCHASE_FAILED"),
                         close: { variant: "critical" },
                     });
@@ -686,9 +686,22 @@ function ManageSubscription({
     closeModal,
     setLoading,
 }: ManageSubscriptionProps) {
-    const appContext = useContext(AppContext);
-    const openFamilyPortal = () =>
-        manageFamilyMethod(appContext.setDialogMessage, setLoading);
+    const { setDialogMessage } = useContext(AppContext);
+
+    const openFamilyPortal = async () => {
+        setLoading(true);
+        try {
+            openURL(await getFamilyPortalRedirectURL());
+        } catch (e) {
+            log.error("Could not redirect to family portal", e);
+            setDialogMessage({
+                title: t("error"),
+                content: t("UNKNOWN_ERROR"),
+                close: { variant: "critical" },
+            });
+        }
+        setLoading(false);
+    };
 
     return (
         <Stack spacing={1}>

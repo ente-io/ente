@@ -1,18 +1,9 @@
+import type { GalleryBarMode } from "@/new/photos/components/Gallery/BarImpl";
 import { EnteFile } from "@/new/photos/types/file";
 import { formattedByteSize } from "@/new/photos/utils/units";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import { formatDate } from "@ente/shared/time/format";
 import { Box, Checkbox, Link, Typography, styled } from "@mui/material";
-import {
-    DATE_CONTAINER_HEIGHT,
-    GAP_BTW_TILES,
-    IMAGE_CONTAINER_MAX_HEIGHT,
-    IMAGE_CONTAINER_MAX_WIDTH,
-    MIN_COLUMNS,
-    SIZE_AND_COUNT_CONTAINER_HEIGHT,
-    SPACE_BTW_DATES,
-    SPACE_BTW_DATES_TO_IMAGE_CONTAINER_WIDTH_RATIO,
-} from "constants/gallery";
 import { t } from "i18next";
 import memoize from "memoize-one";
 import { GalleryContext } from "pages/gallery";
@@ -25,6 +16,19 @@ import {
 } from "react-window";
 import { handleSelectCreator } from "utils/photoFrame";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
+
+import {
+    GAP_BTW_TILES,
+    IMAGE_CONTAINER_MAX_HEIGHT,
+    IMAGE_CONTAINER_MAX_WIDTH,
+    MIN_COLUMNS,
+} from "@/new/photos/components/PhotoList";
+
+export const DATE_CONTAINER_HEIGHT = 48;
+export const SIZE_AND_COUNT_CONTAINER_HEIGHT = 72;
+export const SPACE_BTW_DATES = 44;
+
+const SPACE_BTW_DATES_TO_IMAGE_CONTAINER_WIDTH_RATIO = 0.244;
 
 const FOOTER_HEIGHT = 90;
 const ALBUM_FOOTER_HEIGHT = 75;
@@ -186,6 +190,7 @@ const NothingContainer = styled(ListItemContainer)`
 interface Props {
     height: number;
     width: number;
+    mode?: GalleryBarMode;
     displayFiles: EnteFile[];
     showAppDownloadBanner: boolean;
     getThumbnail: (
@@ -194,6 +199,7 @@ interface Props {
         isScrolling?: boolean,
     ) => JSX.Element;
     activeCollectionID: number;
+    activePersonID?: string;
 }
 
 interface ItemData {
@@ -250,10 +256,12 @@ const PhotoListRow = React.memo(
 export function PhotoList({
     height,
     width,
+    mode,
     displayFiles,
     showAppDownloadBanner,
     getThumbnail,
     activeCollectionID,
+    activePersonID,
 }: Props) {
     const galleryContext = useContext(GalleryContext);
     const publicCollectionGalleryContext = useContext(
@@ -509,6 +517,7 @@ export function PhotoList({
             height: height - 48,
         };
     };
+
     const getVacuumItem = (timeStampList) => {
         let footerHeight;
         if (publicCollectionGalleryContext.accessedThroughSharedURL) {
@@ -544,7 +553,7 @@ export function PhotoList({
                 <FooterContainer span={columns}>
                     <Typography variant="small">
                         <Trans
-                            i18nKey={"INSTALL_MOBILE_APP"}
+                            i18nKey={"install_mobile_app"}
                             components={{
                                 a: (
                                     <Link
@@ -618,6 +627,7 @@ export function PhotoList({
             ),
         };
     };
+
     /**
      * Checks and merge multiple dates into a single row.
      *
@@ -763,7 +773,9 @@ export function PhotoList({
 
     const handleSelect = handleSelectCreator(
         galleryContext.setSelectedFiles,
+        mode,
         activeCollectionID,
+        activePersonID,
     );
 
     const onChangeSelectAllCheckBox = (date: string) => {

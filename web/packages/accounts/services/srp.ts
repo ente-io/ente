@@ -2,7 +2,6 @@ import type { UserVerificationResponse } from "@/accounts/types/user";
 import { sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
 import { generateLoginSubKey } from "@ente/shared/crypto/helpers";
-import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { SRP, SrpClient } from "fast-srp-hap";
 import { v4 as uuidv4 } from "uuid";
@@ -24,13 +23,6 @@ export const configureSRP = async ({
     loginSubKey,
 }: SRPSetupAttributes) => {
     try {
-        const srpConfigureInProgress = InMemoryStore.get(
-            MS_KEYS.SRP_CONFIGURE_IN_PROGRESS,
-        );
-        if (srpConfigureInProgress) {
-            throw Error("SRP configure already in progress");
-        }
-        InMemoryStore.set(MS_KEYS.SRP_CONFIGURE_IN_PROGRESS, true);
         const srpClient = await generateSRPClient(
             srpSalt,
             srpUserID,
@@ -61,8 +53,6 @@ export const configureSRP = async ({
     } catch (e) {
         log.error("Failed to configure SRP", e);
         throw e;
-    } finally {
-        InMemoryStore.set(MS_KEYS.SRP_CONFIGURE_IN_PROGRESS, false);
     }
 };
 

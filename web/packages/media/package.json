@@ -5,10 +5,10 @@
     "dependencies": {
         "@/base": "*",
         "file-type": "16.5.4",
-        "heic-convert": "^2.1",
-        "jszip": "^3.10"
+        "heic-convert": "^2.1.0",
+        "jszip": "^3.10.1"
     },
     "devDependencies": {
-        "@types/heic-convert": "^1.2.3"
+        "@types/heic-convert": "^2.1.0"
     }
 }

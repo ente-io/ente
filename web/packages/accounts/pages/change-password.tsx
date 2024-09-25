@@ -25,7 +25,6 @@ import {
     generateLoginSubKey,
     saveKeyInSessionStore,
 } from "@ente/shared/crypto/helpers";
-import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
 import { SESSION_KEYS } from "@ente/shared/storage/sessionStorage";
 import { getActualKey } from "@ente/shared/user";
@@ -33,7 +32,7 @@ import type { KEK, KeyAttributes, User } from "@ente/shared/user/types";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { appHomeRoute } from "../services/redirect";
+import { appHomeRoute, stashRedirect } from "../services/redirect";
 import type { PageProps } from "../types/page";
 
 const Page: React.FC<PageProps> = () => {
@@ -46,7 +45,7 @@ const Page: React.FC<PageProps> = () => {
         const user = getData(LS_KEYS.USER);
         setUser(user);
         if (!user?.token) {
-            InMemoryStore.set(MS_KEYS.REDIRECT_URL, PAGES.CHANGE_PASSWORD);
+            stashRedirect(PAGES.CHANGE_PASSWORD);
             router.push("/");
         } else {
             setToken(user.token);

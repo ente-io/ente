@@ -115,10 +115,10 @@ func (u *PasskeyUser) WebAuthnCredentials() []webauthn.Credential {
 
 ##### Response body (JSON)
 
-| Key       | Type            | Value                                                                                                                                         |
-| --------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| options   | object          | The credential creation options that will be provided to the browser.                                                                         |
-| sessionID | string (uuidv4) | The identifier the server uses to persist metadata about the registration ceremony, like the user ID and challenge to prevent replay attacks. |
+| Key       | Type          | Value                                                                                                                                         |
+| --------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| options   | object        | The credential creation options that will be provided to the browser.                                                                         |
+| sessionID | string (uuid) | The identifier the server uses to persist metadata about the registration ceremony, like the user ID and challenge to prevent replay attacks. |
 
 ```json
 {

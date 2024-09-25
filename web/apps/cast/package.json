@@ -10,6 +10,6 @@
         "@ente/shared": "*"
     },
     "devDependencies": {
-        "@types/chromecast-caf-receiver": "^6.0"
+        "@types/chromecast-caf-receiver": "^6.0.17"
     }
 }

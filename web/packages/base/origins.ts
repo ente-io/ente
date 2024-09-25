@@ -1,5 +1,4 @@
-import { getKV, setKV } from "@/base/kv";
-import { inWorker } from "./env";
+import { getKVS } from "@/base/kv";
 
 /**
  * Return the origin (scheme, host, port triple) that should be used for making
@@ -35,21 +34,10 @@ export const apiURL = async (path: string) => (await apiOrigin()) + path;
  *
  * Otherwise return undefined.
  */
-export const customAPIOrigin = async () => {
-    let origin = await getKV("apiOrigin");
-    if (!origin && !inWorker()) {
-        // TODO: Migration of apiOrigin from local storage to indexed DB. Added
-        // 27 June 2024, 1.7.2-rc. Remove me after a bit (tag: Migration).
-        const legacyOrigin = localStorage.getItem("apiOrigin");
-        if (legacyOrigin !== null) {
-            origin = legacyOrigin;
-            if (origin) await setKV("apiOrigin", origin);
-            localStorage.removeItem("apiOrigin");
-        }
-    }
-
-    return origin ?? process.env.NEXT_PUBLIC_ENTE_ENDPOINT ?? undefined;
-};
+export const customAPIOrigin = async () =>
+    (await getKVS("apiOrigin")) ??
+    process.env.NEXT_PUBLIC_ENTE_ENDPOINT ??
+    undefined;
 
 /**
  * A convenience wrapper over {@link customAPIOrigin} that returns the only the

@@ -7,6 +7,11 @@ on:
             - "web/**"
             - ".github/workflows/web-lint.yml"
 
+# Cancel in-progress lint runs when a new commit is pushed.
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
 jobs:
     lint:
         runs-on: ubuntu-latest
