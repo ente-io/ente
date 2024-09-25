@@ -305,8 +305,8 @@ export class MLWorker {
             await getAllLocalFiles(),
             (progress) => this.updateClusteringProgress(progress),
         );
-        this.updateClusteringProgress(undefined);
         await reconcileClusters(clusters);
+        this.updateClusteringProgress(undefined);
     }
 
     private updateClusteringProgress(progress: ClusteringProgress | undefined) {
