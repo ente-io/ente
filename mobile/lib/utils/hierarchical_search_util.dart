@@ -37,5 +37,5 @@ void curateAlbumFilters(
     );
   }
 
-  searchFilterDataProvider.addRecommendations(albumFilters);
+  searchFilterDataProvider.clearAndAddRecommendations(albumFilters);
 }

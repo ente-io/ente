@@ -15,29 +15,24 @@ class SearchFilterDataProvider {
   List<HierarchicalSearchFilter> get appliedFilters =>
       _appliedFiltersNotifier.appliedFilters;
 
-  void addRecommendations(List<HierarchicalSearchFilter> filters) {
-    _recommendedFiltersNotifier.addFilters(
-      filters,
-      initialGalleryFilter: initialGalleryFilter,
-    );
+  void clearAndAddRecommendations(List<HierarchicalSearchFilter> filters) {
+    _recommendedFiltersNotifier.clearFilters();
+    _safelyAddToRecommended(filters);
   }
 
   void applyFilters(List<HierarchicalSearchFilter> filters) {
+    _recommendedFiltersNotifier.removeFilters(filters);
     if (!_isSearching) {
       _isSearching = true;
       _appliedFiltersNotifier.addFilters([initialGalleryFilter!, ...filters]);
     } else {
       _appliedFiltersNotifier.addFilters(filters);
     }
-    _recommendedFiltersNotifier.removeFilters(filters);
   }
 
   void removeAppliedFilters(List<HierarchicalSearchFilter> filters) {
     _appliedFiltersNotifier.removeFilters(filters);
-    _recommendedFiltersNotifier.addFilters(
-      filters,
-      initialGalleryFilter: initialGalleryFilter,
-    );
+    _safelyAddToRecommended(filters);
   }
 
   void clearRecommendations() {
@@ -75,6 +70,17 @@ class SearchFilterDataProvider {
       _recommendedFiltersNotifier.removeListener(listener);
     }
   }
+
+  void _safelyAddToRecommended(List<HierarchicalSearchFilter> filters) {
+    _recommendedFiltersNotifier.addFilters(
+      filters,
+      filtersToAvoid: [
+        initialGalleryFilter!,
+        ...appliedFilters,
+        ...recommendations,
+      ],
+    );
+  }
 }
 
 class _AppliedFiltersNotifier extends ChangeNotifier {
@@ -100,23 +106,24 @@ class _RecommendedFiltersNotifier extends ChangeNotifier {
 
   void addFilters(
     List<HierarchicalSearchFilter> filters, {
-    required HierarchicalSearchFilter? initialGalleryFilter,
+    ///This is to ensure that the filters that are being added are not already
+    ///already in recommendations or applied filters
+    required List<HierarchicalSearchFilter> filtersToAvoid,
   }) {
-    if (initialGalleryFilter != null) {
-      for (HierarchicalSearchFilter filter in filters) {
-        if (filter.isSameFilter(initialGalleryFilter)) {
-          continue;
+    for (HierarchicalSearchFilter filter in filters) {
+      bool avoidFilter = false;
+      for (HierarchicalSearchFilter filterToAvoid in filtersToAvoid) {
+        if (filter.isSameFilter(filterToAvoid)) {
+          avoidFilter = true;
+          break;
         }
-        _recommendedFilters.add(filter);
       }
-    } else {
-      //To check if such cases come up during development of hierarchical search
-      assert(
-        false,
-        "Initial gallery filter not provided",
-      );
-      _recommendedFilters.addAll(filters);
+      if (avoidFilter) {
+        continue;
+      }
+      _recommendedFilters.add(filter);
     }
+
     notifyListeners();
   }
 
