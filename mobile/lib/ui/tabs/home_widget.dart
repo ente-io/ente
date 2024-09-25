@@ -55,6 +55,7 @@ import "package:photos/ui/settings_page.dart";
 import "package:photos/ui/tabs/shared_collections_tab.dart";
 import "package:photos/ui/tabs/user_collections_tab.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
+import "package:photos/ui/viewer/gallery/shared_public_collection_page.dart";
 import "package:photos/ui/viewer/search/search_widget.dart";
 import 'package:photos/ui/viewer/search_tab/search_tab.dart';
 import "package:photos/utils/crypto_util.dart";
@@ -301,9 +302,8 @@ class _HomeWidgetState extends State<HomeWidget> {
 
       await routeToPage(
         context,
-        CollectionPage(
-          isFromPublicShareLink: true,
-          sharedLinkFiles: sharedFiles,
+        SharedPublicCollectionPage(
+          files: sharedFiles,
           CollectionWithThumbnail(
             collection,
             null,

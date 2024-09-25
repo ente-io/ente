@@ -20,7 +20,7 @@ enum GalleryType {
   quickLink,
   peopleTag,
   cluster,
-  sharedPublicLink,
+  sharedPublicCollection,
   magic,
 }
 
@@ -45,7 +45,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.hiddenOwnedCollection:
       case GalleryType.trash:
       case GalleryType.cluster:
-      case GalleryType.sharedPublicLink:
+      case GalleryType.sharedPublicCollection:
         return false;
     }
   }
@@ -69,7 +69,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.sharedCollection:
       case GalleryType.locationTag:
       case GalleryType.cluster:
-      case GalleryType.sharedPublicLink:
+      case GalleryType.sharedPublicCollection:
       case GalleryType.magic:
         return false;
     }
@@ -96,7 +96,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.hiddenSection:
       case GalleryType.hiddenOwnedCollection:
       case GalleryType.sharedCollection:
-      case GalleryType.sharedPublicLink:
+      case GalleryType.sharedPublicCollection:
         return false;
     }
   }
@@ -120,7 +120,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.trash:
       case GalleryType.cluster:
       case GalleryType.sharedCollection:
-      case GalleryType.sharedPublicLink:
+      case GalleryType.sharedPublicCollection:
         return false;
     }
   }
@@ -144,7 +144,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.trash:
       case GalleryType.sharedCollection:
       case GalleryType.quickLink:
-      case GalleryType.sharedPublicLink:
+      case GalleryType.sharedPublicCollection:
         return false;
     }
   }
@@ -167,7 +167,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.cluster:
       case GalleryType.trash:
       case GalleryType.locationTag:
-      case GalleryType.sharedPublicLink:
+      case GalleryType.sharedPublicCollection:
       case GalleryType.magic:
         return false;
     }
@@ -193,7 +193,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.trash:
       case GalleryType.sharedCollection:
       case GalleryType.cluster:
-      case GalleryType.sharedPublicLink:
+      case GalleryType.sharedPublicCollection:
         return false;
     }
   }
@@ -222,7 +222,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.favorite:
       case GalleryType.cluster:
       case GalleryType.sharedCollection:
-      case GalleryType.sharedPublicLink:
+      case GalleryType.sharedPublicCollection:
         return false;
     }
   }
@@ -252,7 +252,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.localFolder:
       case GalleryType.trash:
       case GalleryType.sharedCollection:
-      case GalleryType.sharedPublicLink:
+      case GalleryType.sharedPublicCollection:
         return false;
     }
   }
@@ -295,7 +295,7 @@ extension GalleryAppBarExtn on GalleryType {
         this == GalleryType.hiddenOwnedCollection) {
       return true;
     }
-    if (this == GalleryType.sharedPublicLink && c!.isEnableCollect()) {
+    if (this == GalleryType.sharedPublicCollection && c!.isEnableCollect()) {
       return true;
     }
     if (this == GalleryType.sharedCollection) {
@@ -377,7 +377,8 @@ extension GalleryAppBarExtn on GalleryType {
       case GalleryType.locationTag:
       case GalleryType.searchResults:
       case GalleryType.magic:
-        return true;
+      case GalleryType.sharedPublicCollection:
+        return false;
       case GalleryType.uncategorized:
       case GalleryType.cluster:
       case GalleryType.peopleTag:
@@ -386,7 +387,6 @@ extension GalleryAppBarExtn on GalleryType {
       case GalleryType.quickLink:
       case GalleryType.favorite:
       case GalleryType.hiddenOwnedCollection:
-      case GalleryType.sharedPublicLink:
         return true;
     }
   }
@@ -394,7 +394,7 @@ extension GalleryAppBarExtn on GalleryType {
 
 GalleryType getGalleryType(Collection c, int userID) {
   if (c.type == CollectionType.album) {
-    return GalleryType.sharedPublicLink;
+    return GalleryType.sharedPublicCollection;
   }
   if (!c.isOwner(userID)) {
     return GalleryType.sharedCollection;

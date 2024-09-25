@@ -206,12 +206,6 @@ Future<Uint8List> getFileKeyUsingBgWorker(EnteFile file) async {
   );
 }
 
-Future<void> downloadPublicAlbumToGallery(List<EnteFile> files) async {
-  for (final file in files) {
-    await downloadToGallery(file);
-  }
-}
-
 Future<void> downloadToGallery(EnteFile file) async {
   try {
     final FileType type = file.fileType;
