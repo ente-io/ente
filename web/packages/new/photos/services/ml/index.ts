@@ -18,10 +18,14 @@ import { isInternalUser } from "../feature-flags";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
 import { setSearchPeople } from "../search";
 import type { UploadItem } from "../upload/types";
-import { reconcileClusters } from "./cluster";
 import { regenerateFaceCrops } from "./crop";
 import { clearMLDB, getFaceIndex, getIndexableAndIndexedCounts } from "./db";
-import { namedPeopleFromCGroups, pullCGroups, type Person } from "./people";
+import {
+    pullCGroups,
+    reconstructPeople,
+    type NamedPerson,
+    type Person,
+} from "./people";
 import { MLWorker } from "./worker";
 import type { CLIPMatches } from "./worker-types";
 
@@ -82,20 +86,6 @@ class MLState {
      * function.
      */
     peopleSnapshot: Person[] | undefined;
-
-    /**
-     * Cached in-memory copy of people generated from local clusters.
-     *
-     * Part of {@link peopleSnapshot}.
-     */
-    peopleLocal: Person[] = [];
-
-    /**
-     * Cached in-memory copy of people generated from remote cgroups.
-     *
-     * Part of {@link peopleSnapshot}.
-     */
-    peopleRemote: Person[] = [];
 
     /**
      * In flight face crop regeneration promises indexed by the IDs of the files
@@ -337,14 +327,7 @@ export const mlSync = async () => {
         await wipCluster();
     }
 
-    // Update our in-memory snapshot of people.
-    const namedPeople = await namedPeopleFromCGroups();
-    _state.peopleRemote = namedPeople;
-    updatePeopleSnapshot();
-
-    // Notify the search subsystem of the update. Since the search only used
-    // named cgroups, we only give it the people we got from cgroups.
-    setSearchPeople(namedPeople);
+    await updatePeople();
 
     _state.isSyncing = false;
 };
@@ -386,12 +369,8 @@ export const wipCluster = async () => {
 
     triggerStatusUpdate();
 
-    const clusters = await worker().then((w) => w.clusterFaces());
-    // TODO-Cluster this needs to happen in the worker itself
-    await reconcileClusters(clusters);
+    await worker().then((w) => w.clusterFaces());
 
-    _state.peopleLocal = [];
-    updatePeopleSnapshot();
     triggerStatusUpdate();
 };
 
@@ -578,8 +557,19 @@ export const peopleSubscribe = (onChange: () => void): (() => void) => {
  */
 export const peopleSnapshot = () => _state.peopleSnapshot;
 
-const updatePeopleSnapshot = () =>
-    setPeopleSnapshot(_state.peopleRemote.concat(_state.peopleLocal));
+// Update our, and the search subsystem's, snapshot of people by reconstructing
+// it from the latest local state.
+const updatePeople = async () => {
+    const people = await reconstructPeople();
+
+    // Notify the search subsystem of the update (search only uses named ones).
+    setSearchPeople(
+        people.filter((p): p is NamedPerson => !!p.name),
+    );
+
+    // Update our in-memory list of people.
+    setPeopleSnapshot(people);
+};
 
 const setPeopleSnapshot = (snapshot: Person[] | undefined) => {
     _state.peopleSnapshot = snapshot;

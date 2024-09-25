@@ -113,12 +113,23 @@ export const clusterFaces = async (
 
     // Get the locally available remote cluster groups.
     const cgroupUserEntities = await savedCGroupUserEntities();
-    // Sort them so that the latest ones are first. This is not expected to be
-    // needed, it is just a safety check in case a client puts a face into two
-    // clusters, in which case we want to use the more recent cgroup.
+
+    // Sort them so that the latest ones are first.
+    //
+    // This is not expected to be something that makes a functional difference
+    // but is done as part of a general theme of not making strict assumptions
+    // about the clusters we get from remote.
+    //
+    // In particular, the same face ID can be in different clusters. In such
+    // cases we should assign it arbitrarily assign it to the last cluster we
+    // find it in. Such leeway is intentionally provided to allow clients some
+    // slack in how they implement the sync without needing to make an blocking
+    // API request for every user interaction.
+
     const sortedCGroupUserEntities = cgroupUserEntities.sort(
         (a, b) => b.updatedAt - a.updatedAt,
     );
+
     // Extract the remote clusters.
     clusters = clusters.concat(
         sortedCGroupUserEntities.map((cg) => cg.data.assigned).flat(),

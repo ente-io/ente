@@ -25,7 +25,7 @@ import {
     indexCLIP,
     type CLIPIndex,
 } from "./clip";
-import { clusterFaces, type ClusteringProgress } from "./cluster";
+import { clusterFaces, reconcileClusters, type ClusteringProgress } from "./cluster";
 import { saveFaceCrops } from "./crop";
 import {
     getFaceIndexes,
@@ -279,19 +279,22 @@ export class MLWorker {
     }
 
     /**
-     * Run face clustering on all faces.
+     * Run face clustering on all faces, and update both local and remote state
+     * as appropriate.
      *
      * This should only be invoked when the face indexing (including syncing
-     * with remote) is complete so that we cluster the latest set of faces.
+     * with remote) is complete so that we cluster the latest set of faces, and
+     * after we have fetched the latest cgroups from remote (so that we do no
+     * overwrite any remote updates).
      */
     async clusterFaces() {
-        const result = await clusterFaces(
+        const clusters = await clusterFaces(
             await getFaceIndexes(),
             await getAllLocalFiles(),
             (progress) => this.updateClusteringProgress(progress),
         );
         this.updateClusteringProgress(undefined);
-        return result;
+        await reconcileClusters(clusters)
     }
 
     private updateClusteringProgress(progress: ClusteringProgress | undefined) {
