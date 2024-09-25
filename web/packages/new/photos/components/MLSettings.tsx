@@ -315,14 +315,19 @@ const ManageML: React.FC<ManageMLProps> = ({
             status = t("indexing_status_running");
             break;
         case "clustering":
-            // TODO-Cluster
             status = t("people");
             break;
         default:
             status = t("indexing_status_done");
             break;
     }
-    const processed = `${nSyncedFiles} / ${nTotalFiles}`;
+
+    // When clustering, show the progress as a percentage instead of the
+    // potentially confusing total counts during incremental updates.
+    const processed =
+        phase == "clustering"
+            ? `${Math.round((100 * nSyncedFiles) / nTotalFiles)}`
+            : `${nSyncedFiles} / ${nTotalFiles}`;
 
     const confirmDisableML = () => {
         setDialogBoxAttributesV2({

@@ -403,8 +403,8 @@ export type MLStatus =
     | { phase: "disabled" /* The ML remote flag is off */ }
     | {
           /**
-           * Which phase we are in within the indexing pipeline when viewed across the
-           * user's entire library:
+           * Which phase we are in within the indexing pipeline when viewed
+           * across the user's entire library:
            *
            * - "scheduled": A ML job is scheduled. Likely there are files we
            *   know of that have not been indexed, but is also the state before
@@ -415,11 +415,11 @@ export type MLStatus =
            * - "fetching": The indexer is currently running, but we're primarily
            *   fetching indexes for existing files.
            *
-           * - "clustering": All file we know of have been indexed, and we are now
-           *   clustering the faces that were found.
+           * - "clustering": All files we know of have been indexed, and we are
+           *   now clustering the faces that were found.
            *
-           * - "done": ML indexing and face clustering is complete for the user's
-           *   library.
+           * - "done": ML indexing and face clustering is complete for the
+           *   user's library.
            */
           phase: "scheduled" | "indexing" | "fetching" | "clustering" | "done";
           /** The number of files that have already been indexed. */
