@@ -75,4 +75,10 @@ const m1 = () =>
         localForage.removeItem("location_tags"),
         localForage.removeItem("location_tags_key"),
         localForage.removeItem("location_tags_time"),
+
+        // Remove data from an intermediate format that stored user-entities
+        // piecewise instead of as generic, verbatim, entities.
+        removeKV("locationTags"),
+        removeKV("entityKey/locationTags"),
+        removeKV("latestUpdatedAt/locationTags"),
     ]);

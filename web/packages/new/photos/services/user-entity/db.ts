@@ -2,6 +2,14 @@ import { getKV, getKVN, setKV } from "@/base/kv";
 import { LocalLocationTag, type EntityType, type LocationTag } from ".";
 import { RemoteUserEntityKey } from "./remote";
 
+// Our DB footprint ---v
+
+const entityKey = (type: EntityType) => `entity/${type}`;
+const entityKeyKey = (type: EntityType) => `entity/${type}/key`;
+const latestUpdatedAtKey = (type: EntityType) => `entity/${type}/time`;
+
+// ^---
+
 export const saveLocationTags = (tags: LocationTag[]) =>
     setKV("locationTags", JSON.stringify(tags));
 
@@ -15,8 +23,6 @@ export const savedLocationTags = async () =>
         JSON.parse((await getKV("locationTags")) ?? "[]"),
     );
 
-const entityKeyKey = (type: EntityType) => `entityKey/${type}`;
-
 /**
  * Return the locally persisted {@link RemoteUserEntityKey}, if any,
  * corresponding the given {@link type}.
@@ -29,14 +35,12 @@ export const savedRemoteUserEntityKey = (
     );
 
 /**
- * Setter for {@link entityKey}.
+ * Setter for {@link savedRemoteUserEntityKey}.
  */
 export const saveRemoteUserEntityKey = (
     type: EntityType,
     entityKey: RemoteUserEntityKey,
 ) => setKV(entityKeyKey(type), JSON.stringify(entityKey));
-
-const latestUpdatedAtKey = (type: EntityType) => `latestUpdatedAt/${type}`;
 
 /**
  * Return the locally persisted value for the latest `updatedAt` time for the
