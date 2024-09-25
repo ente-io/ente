@@ -158,9 +158,7 @@ class OnnxDartPlugin: FlutterPlugin, MethodCallHandler {
   }
 
   private fun predict(modelType: ModelType, sessionAddress: Int, inputDataFloat: FloatArray? = null, inputDataInt: IntArray? = null, inputUint8DataArray: ByteArray? = null, inputShapeArray: IntArray? = null, result: Result) {
-    // Assert that exactly one of inputDataFloat or inputDataInt is provided
-    // assert((inputDataFloat != null).xor(inputDataInt != null)) { "Exactly one of inputDataFloat or inputDataInt must be provided" }
-    // TODO: lau re-add above assert later
+    assert((inputDataFloat != null).xor((inputDataInt != null).xor(inputUint8DataArray != null))) { "Exactly one of inputDataFloat, inputDataInt or inputUint8DataArray must be provided" }
 
     scope.launch {
       val modelState = sessionMap[modelType]
