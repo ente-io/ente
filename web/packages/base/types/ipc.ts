@@ -558,7 +558,10 @@ export interface ElectronMLWorker {
      *
      * @returns A CLIP embedding (an array of 512 floating point values).
      */
-    computeCLIPImageEmbedding: (input: Float32Array) => Promise<Float32Array>;
+    computeCLIPImageEmbedding: (
+        input: Uint8ClampedArray,
+        inputShape: number[],
+    ) => Promise<Float32Array>;
 
     /**
      * Return a CLIP embedding of the given image if we already have the model

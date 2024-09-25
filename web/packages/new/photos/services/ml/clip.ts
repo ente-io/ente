@@ -113,8 +113,9 @@ const computeEmbedding = async (
     imageData: ImageData,
     electron: ElectronMLWorker,
 ): Promise<Float32Array> => {
-    const clipInput = convertToCLIPInput(imageData);
-    return normalized(await electron.computeCLIPImageEmbedding(clipInput));
+    const { height, width, data: pixelData } = imageData;
+    const inputShape = [height, width, 4]; // [H, W, C]
+    return normalized(await electron.computeCLIPImageEmbedding(pixelData, inputShape));
 };
 
 /**
