@@ -8,6 +8,7 @@ class SearchFilterDataProvider {
   //TODO: Make this non-nullable and required so every time this is wrapped
   //over a gallery's scaffold, it's forced to provide an initial gallery filter
   HierarchicalSearchFilter? initialGalleryFilter;
+  bool _isSearching = false;
 
   List<HierarchicalSearchFilter> get recommendations =>
       _recommendedFiltersNotifier.recommendedFilters;
@@ -22,7 +23,12 @@ class SearchFilterDataProvider {
   }
 
   void applyFilters(List<HierarchicalSearchFilter> filters) {
-    _appliedFiltersNotifier.addFilters(filters);
+    if (!_isSearching) {
+      _isSearching = true;
+      _appliedFiltersNotifier.addFilters([initialGalleryFilter!, ...filters]);
+    } else {
+      _appliedFiltersNotifier.addFilters(filters);
+    }
     _recommendedFiltersNotifier.removeFilters(filters);
   }
 
