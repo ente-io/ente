@@ -10,9 +10,9 @@ import { apiURL } from "@/base/origins";
 import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
-import { gunzip } from "./gzip";
-import { applyCGroupDiff } from "./ml/db";
-import type { CGroup } from "./ml/people";
+import { gunzip } from "../gzip";
+import { applyCGroupDiff } from "../ml/db";
+import type { CGroup } from "../ml/people";
 
 /**
  * User entities are predefined lists of otherwise arbitrary data that the user
