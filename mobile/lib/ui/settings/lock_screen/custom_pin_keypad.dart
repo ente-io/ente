@@ -133,12 +133,13 @@ class CustomPinKeypad extends StatelessWidget {
   }
 }
 
-class _Button extends StatelessWidget {
+class _Button extends StatefulWidget {
   final String number;
   final String text;
   final VoidCallback? onTap;
   final bool muteButton;
   final Widget? icon;
+
   const _Button({
     required this.number,
     required this.text,
@@ -148,29 +149,58 @@ class _Button extends StatelessWidget {
   });
 
   @override
+  State<_Button> createState() => _ButtonState();
+}
+
+class _ButtonState extends State<_Button> {
+  bool isPressed = false;
+
+  void _onTapDown(TapDownDetails details) {
+    setState(() {
+      isPressed = true;
+    });
+  }
+
+  void _onTapUp(TapUpDetails details) async {
+    setState(() {
+      isPressed = false;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     return Expanded(
       child: GestureDetector(
-        onTap: onTap,
-        child: Container(
+        onTapDown: _onTapDown,
+        onTapUp: _onTapUp,
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 100),
+          curve: Curves.easeOut,
           margin: const EdgeInsets.all(4),
           decoration: BoxDecoration(
             shape: BoxShape.rectangle,
             borderRadius: BorderRadius.circular(6),
-            color: muteButton
-                ? colorScheme.fillFaintPressed
-                : icon == null
-                    ? colorScheme.backgroundElevated2
-                    : null,
+            color: isPressed
+                ? colorScheme.backgroundElevated
+                : widget.muteButton
+                    ? colorScheme.fillFaintPressed
+                    : widget.icon == null
+                        ? colorScheme.backgroundElevated2
+                        : null,
           ),
           child: Center(
-            child: muteButton
+            child: widget.muteButton
                 ? const SizedBox.shrink()
-                : icon != null
+                : widget.icon != null
                     ? Container(
-                        child: icon,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 4,
+                          vertical: 10,
+                        ),
+                        child: widget.icon,
                       )
                     : Container(
                         padding: const EdgeInsets.all(4),
@@ -178,11 +208,11 @@ class _Button extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              number,
+                              widget.number,
                               style: textTheme.h3,
                             ),
                             Text(
-                              text,
+                              widget.text,
                               style: textTheme.tinyBold,
                             ),
                           ],

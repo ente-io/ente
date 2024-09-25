@@ -2,6 +2,13 @@ import { stashRedirect } from "@/accounts/services/redirect";
 import { NavbarBase } from "@/base/components/Navbar";
 import { useIsMobileWidth } from "@/base/hooks";
 import log from "@/base/log";
+import type { Collection } from "@/media/collection";
+import { SearchResultsHeader } from "@/new/photos/components/Gallery";
+import type { GalleryBarMode } from "@/new/photos/components/Gallery/BarImpl";
+import {
+    SearchBar,
+    type SearchBarProps,
+} from "@/new/photos/components/SearchBar";
 import { WhatsNew } from "@/new/photos/components/WhatsNew";
 import { shouldShowWhatsNew } from "@/new/photos/services/changelog";
 import downloadManager from "@/new/photos/services/download";
@@ -9,14 +16,17 @@ import {
     getLocalFiles,
     getLocalTrashedFiles,
 } from "@/new/photos/services/files";
-import { wipHasSwitchedOnceCmpAndSet } from "@/new/photos/services/ml";
-import { search, setSearchableFiles } from "@/new/photos/services/search";
+import { peopleSnapshot, peopleSubscribe } from "@/new/photos/services/ml";
+import type { Person } from "@/new/photos/services/ml/people";
 import {
-    SearchQuery,
-    SearchResultSummary,
-} from "@/new/photos/services/search/types";
+    filterSearchableFiles,
+    setSearchCollectionsAndFiles,
+} from "@/new/photos/services/search";
+import type { SearchOption } from "@/new/photos/services/search/types";
+import type { CollectionSummaries } from "@/new/photos/types/collection";
 import { EnteFile } from "@/new/photos/types/file";
 import { mergeMetadata } from "@/new/photos/utils/file";
+import { ensure } from "@/utils/ensure";
 import {
     CenteredFlex,
     FlexWrapper,
@@ -46,17 +56,16 @@ import ArrowBack from "@mui/icons-material/ArrowBack";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
 import type { ButtonProps, IconButtonProps } from "@mui/material";
-import { Box, Button, IconButton, Typography, styled } from "@mui/material";
+import { Box, Button, IconButton, Typography } from "@mui/material";
 import AuthenticateUserModal from "components/AuthenticateUserModal";
-import Collections from "components/Collections";
-import { CollectionInfo } from "components/Collections/CollectionInfo";
 import CollectionNamer, {
     CollectionNamerAttributes,
 } from "components/Collections/CollectionNamer";
-import CollectionSelector, {
+import {
+    CollectionSelector,
     CollectionSelectorAttributes,
 } from "components/Collections/CollectionSelector";
-import { CollectionInfoBarWrapper } from "components/Collections/styledComponents";
+import { GalleryBarAndListHeader } from "components/Collections/GalleryBarAndListHeader";
 import ExportModal from "components/ExportModal";
 import {
     FilesDownloadProgress,
@@ -70,7 +79,6 @@ import GalleryEmptyState from "components/GalleryEmptyState";
 import { LoadingOverlay } from "components/LoadingOverlay";
 import PhotoFrame from "components/PhotoFrame";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
-import { SearchBar, type UpdateSearch } from "components/SearchBar";
 import Sidebar from "components/Sidebar";
 import { type UploadTypeSelectorIntent } from "components/Upload/UploadTypeSelector";
 import Uploader from "components/Upload/Uploader";
@@ -87,6 +95,7 @@ import {
     useMemo,
     useRef,
     useState,
+    useSyncExternalStore,
 } from "react";
 import { useDropzone } from "react-dropzone";
 import {
@@ -101,11 +110,10 @@ import {
     getSectionSummaries,
 } from "services/collectionService";
 import { syncFiles } from "services/fileService";
-import { sync, triggerPreFileInfoSync } from "services/sync";
+import { preFileInfoSync, sync } from "services/sync";
 import { syncTrash } from "services/trashService";
 import uploadManager from "services/upload/uploadManager";
 import { isTokenValid } from "services/userService";
-import { Collection, CollectionSummaries } from "types/collection";
 import {
     GalleryContextType,
     SelectedState,
@@ -118,7 +126,6 @@ import {
     ALL_SECTION,
     ARCHIVE_SECTION,
     COLLECTION_OPS_TYPE,
-    CollectionSummaryType,
     HIDDEN_ITEMS_SECTION,
     TRASH_SECTION,
     constructCollectionNameMap,
@@ -141,23 +148,12 @@ import { isArchivedFile } from "utils/magicMetadata";
 import { getSessionExpiredMessage } from "utils/ui";
 import { getLocalFamilyData } from "utils/user/family";
 
-const SYNC_INTERVAL_IN_MICROSECONDS = 1000 * 60 * 5; // 5 minutes
-
-export const DeadCenter = styled("div")`
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    flex-direction: column;
-`;
-
 const defaultGalleryContext: GalleryContextType = {
     showPlanSelectorModal: () => null,
     setActiveCollectionID: () => null,
+    onShowCollection: () => null,
     syncWithRemote: () => null,
     setBlockingLoad: () => null,
-    setIsInSearchMode: () => null,
     photoListHeader: null,
     openExportModal: () => null,
     authenticateUser: () => null,
@@ -174,8 +170,20 @@ export const GalleryContext = createContext<GalleryContextType>(
     defaultGalleryContext,
 );
 
+/**
+ * The default view for logged in users.
+ *
+ * I heard you like ascii art.
+ *
+ *        Navbar / Search         ^
+ *     ---------------------      |
+ *          Gallery Bar         sticky
+ *     ---------------------   ---/---
+ *       Photo List Header    scrollable
+ *     ---------------------      |
+ *           Photo List           v
+ */
 export default function Gallery() {
-    const router = useRouter();
     const [user, setUser] = useState(null);
     const [familyData, setFamilyData] = useState<FamilyData>(null);
     const [collections, setCollections] = useState<Collection[]>(null);
@@ -194,6 +202,7 @@ export default function Gallery() {
         ownCount: 0,
         count: 0,
         collectionID: 0,
+        context: { mode: "albums", collectionID: ALL_SECTION },
     });
     const [planModalView, setPlanModalView] = useState(false);
     const [blockingLoad, setBlockingLoad] = useState(false);
@@ -203,12 +212,8 @@ export default function Gallery() {
     const [collectionNamerAttributes, setCollectionNamerAttributes] =
         useState<CollectionNamerAttributes>(null);
     const [collectionNamerView, setCollectionNamerView] = useState(false);
-    const [searchQuery, setSearchQuery] = useState<SearchQuery>(null);
     const [shouldDisableDropzone, setShouldDisableDropzone] = useState(false);
     const [isPhotoSwipeOpen, setIsPhotoSwipeOpen] = useState(false);
-    // TODO(MR): This is never true currently, this is the WIP ability to show
-    // what's new dialog on desktop app updates. The UI is done, need to hook
-    // this up to logic to trigger it.
     const [openWhatsNew, setOpenWhatsNew] = useState(false);
 
     const {
@@ -246,19 +251,10 @@ export default function Gallery() {
         accept: ".zip",
     });
 
-    const [isInSearchMode, setIsInSearchMode] = useState(false);
-    const [searchResultSummary, setSetSearchResultSummary] =
-        useState<SearchResultSummary>(null);
     const syncInProgress = useRef(true);
     const syncInterval = useRef<NodeJS.Timeout>();
     const resync = useRef<{ force: boolean; silent: boolean }>();
-    // tempDeletedFileIds and tempHiddenFileIds are used to keep track of files that are deleted/hidden in the current session but not yet synced with the server.
-    const [tempDeletedFileIds, setTempDeletedFileIds] = useState<Set<number>>(
-        new Set<number>(),
-    );
-    const [tempHiddenFileIds, setTempHiddenFileIds] = useState<Set<number>>(
-        new Set<number>(),
-    );
+
     const {
         startLoading,
         finishLoading,
@@ -295,8 +291,6 @@ export default function Gallery() {
 
     const closeSidebar = () => setSidebarView(false);
     const openSidebar = () => setSidebarView(true);
-    const [photoListHeader, setPhotoListHeader] =
-        useState<TimeStampListItem>(null);
 
     const [exportModalView, setExportModalView] = useState(false);
 
@@ -312,25 +306,45 @@ export default function Gallery() {
     const closeAuthenticateUserModal = () =>
         setAuthenticateUserModalView(false);
 
-    const [isInHiddenSection, setIsInHiddenSection] = useState(false);
+    // True if we're in "search mode". See: [Note: "search mode"].
+    const [isInSearchMode, setIsInSearchMode] = useState(false);
+
+    // The option selected by the user selected from the search bar dropdown.
+    const [selectedSearchOption, setSelectedSearchOption] = useState<
+        SearchOption | undefined
+    >();
+
+    // If visible, what should the (sticky) gallery bar show.
+    const [barMode, setBarMode] = useState<GalleryBarMode>("albums");
+
+    // The currently selected person in the gallery bar (if any).
+    const [activePerson, setActivePerson] = useState<Person | undefined>();
+
+    const people = useSyncExternalStore(peopleSubscribe, peopleSnapshot);
+
+    const [isClipSearchResult, setIsClipSearchResult] =
+        useState<boolean>(false);
+
+    // The (non-sticky) header shown at the top of the gallery items.
+    const [photoListHeader, setPhotoListHeader] =
+        useState<TimeStampListItem>(null);
 
     const [
         filesDownloadProgressAttributesList,
         setFilesDownloadProgressAttributesList,
     ] = useState<FilesDownloadProgressAttributes[]>([]);
 
-    const openHiddenSection: GalleryContextType["openHiddenSection"] = (
-        callback,
-    ) => {
-        authenticateUser(() => {
-            setIsInHiddenSection(true);
-            setActiveCollectionID(HIDDEN_ITEMS_SECTION);
-            callback?.();
-        });
-    };
+    // tempDeletedFileIds and tempHiddenFileIds are used to keep track of files
+    // that are deleted/hidden in the current session but not yet synced with
+    // the server.
+    const [tempDeletedFileIds, setTempDeletedFileIds] = useState(
+        new Set<number>(),
+    );
+    const [tempHiddenFileIds, setTempHiddenFileIds] = useState(
+        new Set<number>(),
+    );
 
-    const [isClipSearchResult, setIsClipSearchResult] =
-        useState<boolean>(false);
+    const router = useRouter();
 
     // Ensure that the keys in local storage are not malformed by verifying that
     // the recoveryKey can be decrypted with the masterKey.
@@ -392,9 +406,10 @@ export default function Gallery() {
             await syncWithRemote(true);
             setIsFirstLoad(false);
             setJustSignedUp(false);
-            syncInterval.current = setInterval(() => {
-                syncWithRemote(false, true);
-            }, SYNC_INTERVAL_IN_MICROSECONDS);
+            syncInterval.current = setInterval(
+                () => syncWithRemote(false, true),
+                5 * 60 * 1000 /* 5 minutes */,
+            );
             if (electron) {
                 electron.onMainWindowFocus(() => syncWithRemote(false, true));
                 if (await shouldShowWhatsNew(electron)) setOpenWhatsNew(true);
@@ -407,7 +422,14 @@ export default function Gallery() {
         };
     }, []);
 
-    useEffect(() => setSearchableFiles(files), [files]);
+    useEffect(
+        () =>
+            setSearchCollectionsAndFiles({
+                collections: collections ?? [],
+                files: getUniqueFiles(files ?? []),
+            }),
+        [collections, files],
+    );
 
     useEffect(() => {
         if (!user || !files || !collections || !hiddenFiles || !trashedFiles) {
@@ -482,18 +504,18 @@ export default function Gallery() {
     }, [router.isReady]);
 
     useEffect(() => {
-        if (isInSearchMode && searchResultSummary) {
+        if (isInSearchMode && selectedSearchOption) {
             setPhotoListHeader({
                 height: 104,
                 item: (
-                    <SearchResultSummaryHeader
-                        searchResultSummary={searchResultSummary}
+                    <SearchResultsHeader
+                        selectedOption={selectedSearchOption}
                     />
                 ),
                 itemType: ITEM_TYPE.HEADER,
             });
         }
-    }, [isInSearchMode, searchResultSummary]);
+    }, [isInSearchMode, selectedSearchOption]);
 
     const activeCollection = useMemo(() => {
         if (!collections || !hiddenCollections) {
@@ -517,7 +539,7 @@ export default function Gallery() {
             return;
         }
 
-        if (activeCollectionID === TRASH_SECTION && !isInSearchMode) {
+        if (activeCollectionID === TRASH_SECTION && !selectedSearchOption) {
             return getUniqueFiles([
                 ...trashedFiles,
                 ...files.filter((file) => tempDeletedFileIds?.has(file.id)),
@@ -525,16 +547,33 @@ export default function Gallery() {
         }
 
         let filteredFiles: EnteFile[] = [];
-        if (isInSearchMode) {
-            filteredFiles = getUniqueFiles(await search(searchQuery));
-        } else {
+        if (selectedSearchOption) {
+            filteredFiles = await filterSearchableFiles(
+                selectedSearchOption.suggestion,
+            );
+        } else if (barMode == "people") {
+            const pfSet = new Set(ensure(activePerson).fileIDs);
             filteredFiles = getUniqueFiles(
-                (isInHiddenSection ? hiddenFiles : files).filter((item) => {
+                files.filter(({ id }) => {
+                    if (!pfSet.has(id)) return false;
+                    // TODO-Cluster
+                    // if (tempDeletedFileIds?.has(id)) return false;
+                    // if (tempHiddenFileIds?.has(id)) return false;
+                    return true;
+                }),
+            );
+        } else {
+            const baseFiles = barMode == "hidden-albums" ? hiddenFiles : files;
+            filteredFiles = getUniqueFiles(
+                baseFiles.filter((item) => {
                     if (tempDeletedFileIds?.has(item.id)) {
                         return false;
                     }
 
-                    if (!isInHiddenSection && tempHiddenFileIds?.has(item.id)) {
+                    if (
+                        barMode != "hidden-albums" &&
+                        tempHiddenFileIds?.has(item.id)
+                    ) {
                         return false;
                     }
 
@@ -586,11 +625,6 @@ export default function Gallery() {
                 }),
             );
         }
-        if (searchQuery?.clip) {
-            return filteredFiles.sort((a, b) => {
-                return searchQuery.clip.get(b.id) - searchQuery.clip.get(a.id);
-            });
-        }
         const sortAsc = activeCollection?.pubMagicMetadata?.data?.asc ?? false;
         if (sortAsc) {
             return sortFiles(filteredFiles, true);
@@ -598,15 +632,17 @@ export default function Gallery() {
             return filteredFiles;
         }
     }, [
+        barMode,
         files,
         trashedFiles,
         hiddenFiles,
         tempDeletedFileIds,
         tempHiddenFileIds,
         hiddenFileIds,
-        searchQuery,
+        selectedSearchOption,
         activeCollectionID,
         archivedCollections,
+        activePerson,
     ]);
 
     const selectAll = (e: KeyboardEvent) => {
@@ -638,6 +674,13 @@ export default function Gallery() {
             ownCount: 0,
             count: 0,
             collectionID: activeCollectionID,
+            context:
+                barMode == "people" && activePerson
+                    ? { mode: "people" as const, personID: activePerson.id }
+                    : {
+                          mode: "albums" as const,
+                          collectionID: ensure(activeCollectionID),
+                      },
         };
 
         filteredData.forEach((item) => {
@@ -654,7 +697,12 @@ export default function Gallery() {
         if (!selected?.count) {
             return;
         }
-        setSelected({ ownCount: 0, count: 0, collectionID: 0 });
+        setSelected({
+            ownCount: 0,
+            count: 0,
+            collectionID: 0,
+            context: undefined,
+        });
     };
 
     const keyboardShortcutHandlerRef = useRef({
@@ -668,16 +716,6 @@ export default function Gallery() {
             clearSelection,
         };
     }, [selectAll, clearSelection]);
-
-    useEffect(() => {
-        // TODO-Cluster
-        if (process.env.NEXT_PUBLIC_ENTE_WIP_CL_AUTO) {
-            setTimeout(() => {
-                if (!wipHasSwitchedOnceCmpAndSet())
-                    router.push("cluster-debug");
-            }, 2000);
-        }
-    }, []);
 
     const fileToCollectionsMap = useMemoSingleThreaded(() => {
         return constructFileToCollectionMap(files);
@@ -714,7 +752,7 @@ export default function Gallery() {
                 throw new Error(CustomError.SESSION_EXPIRED);
             }
             !silent && startLoading();
-            triggerPreFileInfoSync();
+            await preFileInfoSync();
             const collections = await getAllLatestCollections();
             const { normalCollections, hiddenCollections } =
                 await splitNormalAndHiddenCollections(collections);
@@ -814,10 +852,6 @@ export default function Gallery() {
         setHiddenCollectionSummaries(hiddenCollectionSummaries);
     };
 
-    if (!collectionSummaries || !filteredData) {
-        return <div />;
-    }
-
     const setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator =
         (folderName, collectionID, isHidden) => {
             const id = filesDownloadProgressAttributesList?.length ?? 0;
@@ -871,24 +905,12 @@ export default function Gallery() {
                         selected.collectionID,
                     );
                 }
-                if (selected?.ownCount === filteredData?.length) {
-                    if (
-                        ops === COLLECTION_OPS_TYPE.REMOVE ||
-                        ops === COLLECTION_OPS_TYPE.RESTORE ||
-                        ops === COLLECTION_OPS_TYPE.MOVE
-                    ) {
-                        // redirect to all section when no items are left in the current collection.
-                        setActiveCollectionID(ALL_SECTION);
-                    } else if (ops === COLLECTION_OPS_TYPE.UNHIDE) {
-                        exitHiddenSection();
-                    }
-                }
                 clearSelection();
                 await syncWithRemote(false, true);
             } catch (e) {
                 log.error(`collection ops (${ops}) failed`, e);
                 setDialogMessage({
-                    title: t("ERROR"),
+                    title: t("error"),
 
                     close: { variant: "critical" },
                     content: t("UNKNOWN_ERROR"),
@@ -920,20 +942,12 @@ export default function Gallery() {
                     setFilesDownloadProgressAttributesCreator,
                 );
             }
-            if (
-                selected?.ownCount === filteredData?.length &&
-                ops !== FILE_OPS_TYPE.ARCHIVE &&
-                ops !== FILE_OPS_TYPE.DOWNLOAD &&
-                ops !== FILE_OPS_TYPE.FIX_TIME
-            ) {
-                setActiveCollectionID(ALL_SECTION);
-            }
             clearSelection();
             await syncWithRemote(false, true);
         } catch (e) {
             log.error(`file ops (${ops}) failed`, e);
             setDialogMessage({
-                title: t("ERROR"),
+                title: t("error"),
 
                 close: { variant: "critical" },
                 content: t("UNKNOWN_ERROR"),
@@ -952,7 +966,7 @@ export default function Gallery() {
             } catch (e) {
                 log.error(`create and collection ops (${ops}) failed`, e);
                 setDialogMessage({
-                    title: t("ERROR"),
+                    title: t("error"),
 
                     close: { variant: "critical" },
                     content: t("UNKNOWN_ERROR"),
@@ -970,16 +984,25 @@ export default function Gallery() {
             });
     };
 
-    const updateSearch: UpdateSearch = (newSearch, summary) => {
-        if (newSearch?.collection) {
-            setActiveCollectionID(newSearch?.collection);
+    const handleSelectSearchOption = (
+        searchOption: SearchOption | undefined,
+    ) => {
+        const type = searchOption?.suggestion.type;
+        if (type == "collection" || type == "person") {
             setIsInSearchMode(false);
+            setSelectedSearchOption(undefined);
+            if (type == "collection") {
+                setBarMode("albums");
+                setActiveCollectionID(searchOption.suggestion.collectionID);
+            } else {
+                setBarMode("people");
+                setActivePerson(searchOption.suggestion.person);
+            }
         } else {
-            setSearchQuery(newSearch);
-            setIsInSearchMode(!!newSearch);
-            setSetSearchResultSummary(summary);
+            setIsInSearchMode(!!searchOption);
+            setSelectedSearchOption(searchOption);
         }
-        setIsClipSearchResult(!!newSearch?.clip);
+        setIsClipSearchResult(type == "clip");
     };
 
     const openUploader = (intent?: UploadTypeSelectorIntent) => {
@@ -1002,10 +1025,46 @@ export default function Gallery() {
         setExportModalView(false);
     };
 
+    const handleShowCollection = (collectionID: number) => {
+        setBarMode("albums");
+        setActiveCollectionID(collectionID);
+        setIsInSearchMode(false);
+    };
+
+    const handleShowSearchInput = () => setIsInSearchMode(true);
+
+    const openHiddenSection: GalleryContextType["openHiddenSection"] = (
+        callback,
+    ) => {
+        authenticateUser(() => {
+            setBarMode("hidden-albums");
+            setActiveCollectionID(HIDDEN_ITEMS_SECTION);
+            callback?.();
+        });
+    };
+
     const exitHiddenSection = () => {
-        setIsInHiddenSection(false);
+        setBarMode("albums");
         setActiveCollectionID(ALL_SECTION);
     };
+
+    const handleSelectPerson = (person: Person | undefined) => {
+        // The person bar currently does not have an "all" mode, so default to
+        // the first person when no specific person is provided. This can happen
+        // when the user clicks the "People" header in the search empty state (it
+        // is guaranteed that this header will only be shown if there is at
+        // least one person).
+        setActivePerson(person ?? ensure(people[0]));
+        setBarMode("people");
+    };
+
+    if (activePerson) {
+        log.debug(() => ["person", activePerson]);
+    }
+
+    if (!collectionSummaries || !filteredData) {
+        return <div></div>;
+    }
 
     return (
         <GalleryContext.Provider
@@ -1013,9 +1072,9 @@ export default function Gallery() {
                 ...defaultGalleryContext,
                 showPlanSelectorModal,
                 setActiveCollectionID,
+                onShowCollection: handleShowCollection,
                 syncWithRemote,
                 setBlockingLoad,
-                setIsInSearchMode,
                 photoListHeader,
                 openExportModal,
                 authenticateUser,
@@ -1078,39 +1137,42 @@ export default function Gallery() {
                 <NavbarBase
                     sx={{ background: "transparent", position: "absolute" }}
                 >
-                    {isInHiddenSection ? (
+                    {barMode == "hidden-albums" ? (
                         <HiddenSectionNavbarContents
                             onBack={exitHiddenSection}
                         />
                     ) : (
                         <NormalNavbarContents
-                            openSidebar={openSidebar}
-                            openUploader={openUploader}
-                            isInSearchMode={isInSearchMode}
-                            setIsInSearchMode={setIsInSearchMode}
-                            updateSearch={updateSearch}
-                            collections={collections}
-                            files={files}
+                            {...{
+                                openSidebar,
+                                openUploader,
+                                isInSearchMode,
+                                onShowSearchInput: handleShowSearchInput,
+                                onSelectSearchOption: handleSelectSearchOption,
+                                onSelectPerson: handleSelectPerson,
+                            }}
                         />
                     )}
                 </NavbarBase>
 
-                <Collections
-                    activeCollection={activeCollection}
-                    isInSearchMode={isInSearchMode}
-                    isInHiddenSection={isInHiddenSection}
-                    activeCollectionID={activeCollectionID}
-                    setActiveCollectionID={setActiveCollectionID}
-                    collectionSummaries={collectionSummaries}
-                    hiddenCollectionSummaries={hiddenCollectionSummaries}
-                    setCollectionNamerAttributes={setCollectionNamerAttributes}
-                    setPhotoListHeader={setPhotoListHeader}
-                    setFilesDownloadProgressAttributesCreator={
-                        setFilesDownloadProgressAttributesCreator
-                    }
-                    filesDownloadProgressAttributesList={
-                        filesDownloadProgressAttributesList
-                    }
+                <GalleryBarAndListHeader
+                    {...{
+                        shouldHide: isInSearchMode,
+                        mode: barMode,
+                        onChangeMode: setBarMode,
+                        collectionSummaries,
+                        activeCollection,
+                        activeCollectionID,
+                        setActiveCollectionID,
+                        hiddenCollectionSummaries,
+                        people,
+                        activePerson,
+                        onSelectPerson: handleSelectPerson,
+                        setCollectionNamerAttributes,
+                        setPhotoListHeader,
+                        setFilesDownloadProgressAttributesCreator,
+                        filesDownloadProgressAttributesList,
+                    }}
                 />
 
                 <Uploader
@@ -1170,6 +1232,7 @@ export default function Gallery() {
                 ) : (
                     <PhotoFrame
                         page={PAGES.GALLERY}
+                        mode={barMode}
                         files={filteredData}
                         syncWithRemote={syncWithRemote}
                         favItemIds={favItemIds}
@@ -1179,16 +1242,18 @@ export default function Gallery() {
                         setTempDeletedFileIds={setTempDeletedFileIds}
                         setIsPhotoSwipeOpen={setIsPhotoSwipeOpen}
                         activeCollectionID={activeCollectionID}
+                        activePersonID={activePerson?.id}
                         enableDownload={true}
                         fileToCollectionsMap={fileToCollectionsMap}
                         collectionNameMap={collectionNameMap}
                         showAppDownloadBanner={
                             files.length < 30 && !isInSearchMode
                         }
-                        isInHiddenSection={isInHiddenSection}
+                        isInHiddenSection={barMode == "hidden-albums"}
                         setFilesDownloadProgressAttributesCreator={
                             setFilesDownloadProgressAttributesCreator
                         }
+                        selectable={true}
                     />
                 )}
                 {selected.count > 0 &&
@@ -1205,6 +1270,7 @@ export default function Gallery() {
                             count={selected.count}
                             ownCount={selected.ownCount}
                             clearSelection={clearSelection}
+                            barMode={barMode}
                             activeCollectionID={activeCollectionID}
                             selectedCollection={getSelectedCollection(
                                 selected.collectionID,
@@ -1212,23 +1278,20 @@ export default function Gallery() {
                             )}
                             isFavoriteCollection={
                                 collectionSummaries.get(activeCollectionID)
-                                    ?.type === CollectionSummaryType.favorites
+                                    ?.type == "favorites"
                             }
                             isUncategorizedCollection={
                                 collectionSummaries.get(activeCollectionID)
-                                    ?.type ===
-                                CollectionSummaryType.uncategorized
+                                    ?.type == "uncategorized"
                             }
                             isIncomingSharedCollection={
                                 collectionSummaries.get(activeCollectionID)
-                                    ?.type ===
-                                    CollectionSummaryType.incomingShareCollaborator ||
+                                    ?.type == "incomingShareCollaborator" ||
                                 collectionSummaries.get(activeCollectionID)
-                                    ?.type ===
-                                    CollectionSummaryType.incomingShareViewer
+                                    ?.type == "incomingShareViewer"
                             }
                             isInSearchMode={isInSearchMode}
-                            isInHiddenSection={isInHiddenSection}
+                            isInHiddenSection={barMode == "hidden-albums"}
                         />
                     )}
                 <ExportModal
@@ -1263,35 +1326,20 @@ const mergeMaps = <K, V>(map1: Map<K, V>, map2: Map<K, V>) => {
     return mergedMap;
 };
 
-interface NormalNavbarContentsProps {
+type NormalNavbarContentsProps = SearchBarProps & {
     openSidebar: () => void;
     openUploader: () => void;
-    isInSearchMode: boolean;
-    setIsInSearchMode: (v: boolean) => void;
-    updateSearch: UpdateSearch;
-    collections: Collection[];
-    files: EnteFile[];
-}
+};
 
 const NormalNavbarContents: React.FC<NormalNavbarContentsProps> = ({
     openSidebar,
     openUploader,
-    isInSearchMode,
-    setIsInSearchMode,
-    updateSearch,
-    collections,
-    files,
+    ...props
 }) => (
     <>
-        {!isInSearchMode && <SidebarButton onClick={openSidebar} />}
-        <SearchBar
-            isInSearchMode={isInSearchMode}
-            setIsInSearchMode={setIsInSearchMode}
-            updateSearch={updateSearch}
-            collections={collections}
-            files={files}
-        />
-        {!isInSearchMode && <UploadButton onClick={openUploader} />}
+        {!props.isInSearchMode && <SidebarButton onClick={openSidebar} />}
+        <SearchBar {...props} />
+        {!props.isInSearchMode && <UploadButton onClick={openUploader} />}
     </>
 );
 
@@ -1345,30 +1393,7 @@ const HiddenSectionNavbarContents: React.FC<
             <ArrowBack />
         </IconButton>
         <FlexWrapper>
-            <Typography>{t("HIDDEN")}</Typography>
+            <Typography>{t("section_hidden")}</Typography>
         </FlexWrapper>
     </HorizontalFlex>
 );
-
-interface SearchResultSummaryHeaderProps {
-    searchResultSummary: SearchResultSummary;
-}
-
-const SearchResultSummaryHeader: React.FC<SearchResultSummaryHeaderProps> = ({
-    searchResultSummary,
-}) => {
-    if (!searchResultSummary) {
-        return <></>;
-    }
-
-    const { optionName, fileCount } = searchResultSummary;
-
-    return (
-        <CollectionInfoBarWrapper>
-            <Typography color="text.muted" variant="large">
-                {t("search_results")}
-            </Typography>
-            <CollectionInfo name={optionName} fileCount={fileCount} />
-        </CollectionInfoBarWrapper>
-    );
-};

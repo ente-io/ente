@@ -11,8 +11,8 @@ import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
 import { gunzip } from "./gzip";
-import type { CGroup } from "./ml/cgroups";
 import { applyCGroupDiff } from "./ml/db";
+import type { CGroup } from "./ml/people";
 
 /**
  * User entities are predefined lists of otherwise arbitrary data that the user
@@ -109,16 +109,16 @@ export const savedLocationTags = async () =>
  * the cgroup specific entity key.
  */
 export const pullCGroups = (masterKey: Uint8Array) => {
-    const parse = async (id: string, data: Uint8Array): Promise<CGroup> => {
-        const r = RemoteCGroup.parse(JSON.parse(await gunzip(data)));
-        return {
-            id,
-            name: r.name,
-            clusterIDs: r.assigned.map(({ id }) => id),
-            isHidden: r.isHidden,
-            avatarFaceID: r.avatarFaceID,
-        };
-    };
+    // See: [Note: strict mode migration]
+    //
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const parse = async (id: string, data: Uint8Array): Promise<CGroup> => ({
+        id,
+        name: undefined,
+        avatarFaceID: undefined,
+        ...RemoteCGroup.parse(JSON.parse(await gunzip(data))),
+    });
 
     const processBatch = async (entities: UserEntityChange[]) =>
         await applyCGroupDiff(
@@ -132,14 +132,14 @@ export const pullCGroups = (masterKey: Uint8Array) => {
     return pullUserEntities("cgroup", masterKey, processBatch);
 };
 
+const RemoteFaceCluster = z.object({
+    id: z.string(),
+    faces: z.string().array(),
+});
+
 const RemoteCGroup = z.object({
     name: z.string().nullish().transform(nullToUndefined),
-    assigned: z.array(
-        z.object({
-            id: z.string(),
-            faces: z.string().array(),
-        }),
-    ),
+    assigned: z.array(RemoteFaceCluster),
     // The remote cgroup also has a "rejected" property, but that is not
     // currently used by any of the clients.
     isHidden: z.boolean(),

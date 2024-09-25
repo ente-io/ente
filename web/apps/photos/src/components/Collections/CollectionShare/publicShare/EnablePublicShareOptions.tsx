@@ -3,6 +3,7 @@ import {
     MenuItemGroup,
     MenuSectionTitle,
 } from "@/base/components/Menu";
+import type { Collection, PublicURL } from "@/media/collection";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import DownloadSharp from "@mui/icons-material/DownloadSharp";
 import LinkIcon from "@mui/icons-material/Link";
@@ -15,7 +16,6 @@ import {
     createShareableURL,
     updateShareableURL,
 } from "services/collectionService";
-import { Collection, PublicURL } from "types/collection";
 import { handleSharingErrors } from "utils/error/ui";
 interface Iprops {
     collection: Collection;

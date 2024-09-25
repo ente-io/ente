@@ -19,6 +19,20 @@
   "pleaseVerifyDetails": "请验证详细信息并重试",
   "codeIssuerHint": "发行人",
   "codeSecretKeyHint": "私钥",
+  "secret": "秘密",
+  "all": "全部",
+  "notes": "备注",
+  "notesLengthLimit": "备注最多可以包含 {count} 个字符",
+  "@notesLengthLimit": {
+    "description": "Text to indicate the maximum number of characters allowed for notes",
+    "placeholders": {
+      "count": {
+        "description": "The maximum number of characters allowed for notes",
+        "type": "int",
+        "example": "100"
+      }
+    }
+  },
   "codeAccountHint": "账户 (you@domain.com)",
   "codeTagHint": "标签",
   "accountKeyType": "密钥类型",
@@ -34,6 +48,9 @@
   "nextTotpTitle": "下一个",
   "deleteCodeTitle": "要删除代码吗？",
   "deleteCodeMessage": "您确定要删除此代码吗？此操作不可逆。",
+  "trashCode": "要删除代码吗？",
+  "trashCodeMessage": "您确定要删除 {account} 的代码吗？",
+  "trash": "删除",
   "viewLogsAction": "查看日志",
   "sendLogsDescription": "这将发送日志以帮助我们调试您的问题。虽然我们采取预防措施确保不记录敏感信息，但我们建议您在共享这些日志之前先查看它们。",
   "preparingLogsTitle": "正在准备日志...",
@@ -100,6 +117,7 @@
   "emailVerificationToggle": "电子邮件验证",
   "emailVerificationEnableWarning": "为避免被锁在您的账户之外，请在启用电子邮件验证之前确保在 Ente Auth 之外存储电子邮件双重验证的副本。",
   "authToChangeEmailVerificationSetting": "请进行身份验证以更改电子邮件验证",
+  "authenticateGeneric": "请验证",
   "authToViewYourRecoveryKey": "请验证以查看您的恢复密钥",
   "authToChangeYourEmail": "请验证以更改您的电子邮件",
   "authToChangeYourPassword": "请验证以更改密码",
@@ -137,7 +155,8 @@
   "leaveFamily": "离开家庭",
   "leaveFamilyMessage": "您确定要离开家庭计划吗？",
   "inFamilyPlanMessage": "你在一个家庭计划中！",
-  "swipeHint": "向左滑动以编辑或删除代码",
+  "hintForMobile": "长按代码即可编辑或删除。",
+  "hintForDesktop": "右键单击代码即可编辑或删除。",
   "scan": "扫描",
   "scanACode": "扫描代码",
   "verify": "验证",
@@ -193,6 +212,10 @@
   "scanAQrCode": "扫描二维码",
   "enterDetailsManually": "手动输入详细信息",
   "edit": "编辑",
+  "share": "分享",
+  "shareCodes": "分享代码",
+  "shareCodesDuration": "选择您要分享代码的期限。",
+  "restore": "恢复",
   "copiedToClipboard": "已复制到剪贴板",
   "copiedNextToClipboard": "已将下一个代码复制到剪贴板",
   "error": "错误",
@@ -346,6 +369,7 @@
   "sigInBackupReminder": "请导出您的代码以确保您有可以恢复的备份。",
   "offlineModeWarning": "您已选择在不进行备份的情况下继续操作。请手动备份以确保您的代码安全。",
   "showLargeIcons": "显示大图标",
+  "compactMode": "紧凑模式",
   "shouldHideCode": "隐藏代码",
   "doubleTapToViewHiddenCode": "您可以双击条目来查看代码",
   "focusOnSearchBar": "应用启动后聚焦搜索",
@@ -466,5 +490,7 @@
   "pinLock": "Pin 锁定",
   "enterPin": "输入 PIN 码",
   "setNewPin": "设置新 PIN 码",
-  "importFailureDescNew": "无法解析选定的文件。"
+  "importFailureDescNew": "无法解析选定的文件。",
+  "appLockNotEnabled": "应用锁未启用",
+  "appLockNotEnabledDescription": "请从“安全”>“应用锁”启用应用锁"
 }

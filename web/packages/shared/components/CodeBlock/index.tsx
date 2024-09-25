@@ -1,20 +1,14 @@
-import { FreeFlowText } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
-import type { BoxProps } from "@mui/material";
+import { type BoxProps, styled } from "@mui/material";
 import React from "react";
 import CopyButton from "./CopyButton";
 import { CodeWrapper, CopyButtonWrapper, Wrapper } from "./styledComponents";
 
 type Iprops = React.PropsWithChildren<{
     code: string | null;
-    wordBreak?: "normal" | "break-all" | "keep-all" | "break-word";
 }>;
 
-export default function CodeBlock({
-    code,
-    wordBreak,
-    ...props
-}: BoxProps<"div", Iprops>) {
+export default function CodeBlock({ code, ...props }: BoxProps<"div", Iprops>) {
     if (!code) {
         return (
             <Wrapper>
@@ -25,9 +19,7 @@ export default function CodeBlock({
     return (
         <Wrapper {...props}>
             <CodeWrapper>
-                <FreeFlowText style={{ wordBreak: wordBreak }}>
-                    {code}
-                </FreeFlowText>
+                <FreeFlowText>{code}</FreeFlowText>
             </CodeWrapper>
             <CopyButtonWrapper>
                 <CopyButton code={code} />
@@ -35,3 +27,9 @@ export default function CodeBlock({
         </Wrapper>
     );
 }
+
+const FreeFlowText = styled("div")`
+    word-break: break-word;
+    min-width: 30%;
+    text-align: left;
+`;

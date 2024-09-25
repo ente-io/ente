@@ -1,6 +1,6 @@
+import type { PublicURL } from "@/media/collection";
 import { EnteFile } from "@/new/photos/types/file";
 import { TimeStampListItem } from "components/PhotoList";
-import { PublicURL } from "types/collection";
 
 export interface PublicCollectionGalleryContextType {
     token: string;

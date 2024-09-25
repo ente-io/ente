@@ -1,6 +1,6 @@
+import type { Collection } from "@/media/collection";
 import { styled } from "@mui/material";
 import NumberAvatar from "@mui/material/Avatar";
-import { Collection } from "types/collection";
 import Avatar from "./Avatar";
 
 const AvatarContainer = styled("div")({

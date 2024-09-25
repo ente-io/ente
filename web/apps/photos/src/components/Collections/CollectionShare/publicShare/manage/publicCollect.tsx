@@ -1,8 +1,12 @@
 import { MenuItemGroup, MenuSectionTitle } from "@/base/components/Menu";
+import type {
+    Collection,
+    PublicURL,
+    UpdatePublicURL,
+} from "@/media/collection";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import { Stack } from "@mui/material";
 import { t } from "i18next";
-import { Collection, PublicURL, UpdatePublicURL } from "types/collection";
 
 interface Iprops {
     publicShareProp: PublicURL;

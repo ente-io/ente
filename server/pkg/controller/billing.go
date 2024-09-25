@@ -178,7 +178,7 @@ func (c *BillingController) IsActivePayingSubscriber(userID int64) error {
 }
 
 // HasActiveSelfOrFamilySubscription validates if the user or user's family admin has active subscription
-func (c *BillingController) HasActiveSelfOrFamilySubscription(userID int64) error {
+func (c *BillingController) HasActiveSelfOrFamilySubscription(userID int64, mustBeOnPaidPlan bool) error {
 	var subscriptionUserID int64
 	familyAdminID, err := c.UserRepo.GetFamilyAdminID(userID)
 	if err != nil {
@@ -201,6 +201,15 @@ func (c *BillingController) HasActiveSelfOrFamilySubscription(userID int64) erro
 			}
 		}
 		return stacktrace.Propagate(err, "")
+	}
+	if mustBeOnPaidPlan {
+		isPayingUser, err := c.BillingRepo.IsUserOnPaidPlan(subscriptionUserID)
+		if err != nil {
+			return stacktrace.Propagate(err, "failed to check if user is on paid plan")
+		}
+		if !isPayingUser {
+			return ente.ErrSharingDisabledForFreeAccounts
+		}
 	}
 	return nil
 }

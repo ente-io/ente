@@ -221,7 +221,6 @@ const TakeoutOptions: React.FC<Omit<OptionsProps, "intent">> = ({
                         <FocusVisibleButton
                             color="accent"
                             fullWidth
-                            disableRipple
                             onClick={() => onSelect("folders")}
                         >
                             {t("select_folder")}
@@ -229,7 +228,6 @@ const TakeoutOptions: React.FC<Omit<OptionsProps, "intent">> = ({
                         <FocusVisibleButton
                             color="secondary"
                             fullWidth
-                            disableRipple
                             onClick={() => onSelect("zips")}
                         >
                             {t("Select zips")}
@@ -239,11 +237,7 @@ const TakeoutOptions: React.FC<Omit<OptionsProps, "intent">> = ({
                             target="_blank"
                             rel="noopener"
                         >
-                            <FocusVisibleButton
-                                color="secondary"
-                                fullWidth
-                                disableRipple
-                            >
+                            <FocusVisibleButton color="secondary" fullWidth>
                                 {t("faq")}
                             </FocusVisibleButton>
                         </Link>

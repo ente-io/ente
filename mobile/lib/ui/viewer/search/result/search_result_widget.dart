@@ -110,7 +110,6 @@ class SearchResultWidget extends StatelessWidget {
             context,
             SearchResultPage(
               searchResult,
-              enableGrouping: searchResult.type() != ResultType.magic,
             ),
           );
         }

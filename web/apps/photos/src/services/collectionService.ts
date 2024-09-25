@@ -1,8 +1,31 @@
 import { encryptMetadataJSON, sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
+import {
+    AddToCollectionRequest,
+    Collection,
+    CollectionMagicMetadata,
+    CollectionMagicMetadataProps,
+    CollectionPublicMagicMetadata,
+    CollectionShareeMagicMetadata,
+    CollectionToFileMap,
+    CollectionType,
+    CreatePublicAccessTokenRequest,
+    EncryptedCollection,
+    EncryptedFileKey,
+    MoveToCollectionRequest,
+    PublicURL,
+    RemoveFromCollectionRequest,
+    UpdatePublicURL,
+} from "@/media/collection";
 import { ItemVisibility } from "@/media/file-metadata";
 import { getLocalFiles } from "@/new/photos/services/files";
+import type {
+    CollectionSummaries,
+    CollectionSummary,
+    CollectionSummaryType,
+} from "@/new/photos/types/collection";
+import { CollectionsSortBy } from "@/new/photos/types/collection";
 import { EnteFile } from "@/new/photos/types/file";
 import {
     EncryptedMagicMetadata,
@@ -18,33 +41,11 @@ import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { getActualKey } from "@ente/shared/user";
 import type { User } from "@ente/shared/user/types";
 import { t } from "i18next";
-import {
-    AddToCollectionRequest,
-    Collection,
-    CollectionFilesCount,
-    CollectionMagicMetadata,
-    CollectionMagicMetadataProps,
-    CollectionPublicMagicMetadata,
-    CollectionShareeMagicMetadata,
-    CollectionSummaries,
-    CollectionSummary,
-    CollectionToFileMap,
-    CreatePublicAccessTokenRequest,
-    EncryptedCollection,
-    EncryptedFileKey,
-    MoveToCollectionRequest,
-    PublicURL,
-    RemoveFromCollectionRequest,
-    UpdatePublicURL,
-} from "types/collection";
 import { FamilyData } from "types/user";
 import {
     ALL_SECTION,
     ARCHIVE_SECTION,
-    COLLECTION_LIST_SORT_BY,
     COLLECTION_SORT_ORDER,
-    CollectionSummaryType,
-    CollectionType,
     DUMMY_UNCATEGORIZED_COLLECTION,
     HIDDEN_ITEMS_SECTION,
     TRASH_SECTION,
@@ -1067,35 +1068,22 @@ export const getFavCollection = async () => {
     }
 };
 
-export const getNonEmptyCollections = (
-    collections: Collection[],
-    files: EnteFile[],
-) => {
-    const nonEmptyCollectionsIds = new Set<number>();
-    for (const file of files) {
-        nonEmptyCollectionsIds.add(file.collectionID);
-    }
-    return collections.filter((collection) =>
-        nonEmptyCollectionsIds.has(collection.id),
-    );
-};
-
-export function sortCollectionSummaries(
+export const sortCollectionSummaries = (
     collectionSummaries: CollectionSummary[],
-    sortBy: COLLECTION_LIST_SORT_BY,
-) {
-    return collectionSummaries
+    by: CollectionsSortBy,
+) =>
+    collectionSummaries
         .sort((a, b) => {
-            switch (sortBy) {
-                case COLLECTION_LIST_SORT_BY.CREATION_TIME_ASCENDING:
+            switch (by) {
+                case "name":
+                    return a.name.localeCompare(b.name);
+                case "creation-time-asc":
                     return (
                         -1 *
                         compareCollectionsLatestFile(b.latestFile, a.latestFile)
                     );
-                case COLLECTION_LIST_SORT_BY.UPDATION_TIME_DESCENDING:
+                case "updation-time-desc":
                     return b.updationTime - a.updationTime;
-                case COLLECTION_LIST_SORT_BY.NAME:
-                    return a.name.localeCompare(b.name);
             }
         })
         .sort((a, b) => b.order ?? 0 - a.order ?? 0)
@@ -1104,7 +1092,6 @@ export function sortCollectionSummaries(
                 COLLECTION_SORT_ORDER.get(a.type) -
                 COLLECTION_SORT_ORDER.get(b.type),
         );
-}
 
 function compareCollectionsLatestFile(first: EnteFile, second: EnteFile) {
     if (!first) {
@@ -1139,51 +1126,62 @@ export function getCollectionSummaries(
         ) {
             hasUncategorizedCollection = true;
         }
-        if (
-            collectionFilesCount.get(collection.id) ||
-            collection.type === CollectionType.uncategorized
-        ) {
-            let type: CollectionSummaryType;
-            if (isIncomingShare(collection, user)) {
-                if (isIncomingCollabShare(collection, user)) {
-                    type = CollectionSummaryType.incomingShareCollaborator;
-                } else {
-                    type = CollectionSummaryType.incomingShareViewer;
-                }
-            } else if (isOutgoingShare(collection, user)) {
-                type = CollectionSummaryType.outgoingShare;
-            } else if (isSharedOnlyViaLink(collection)) {
-                type = CollectionSummaryType.sharedOnlyViaLink;
-            } else if (isArchivedCollection(collection)) {
-                type = CollectionSummaryType.archived;
-            } else if (isDefaultHiddenCollection(collection)) {
-                type = CollectionSummaryType.defaultHidden;
-            } else if (isPinnedCollection(collection)) {
-                type = CollectionSummaryType.pinned;
+        let type: CollectionSummaryType;
+        if (isIncomingShare(collection, user)) {
+            if (isIncomingCollabShare(collection, user)) {
+                type = "incomingShareCollaborator";
             } else {
-                type = CollectionSummaryType[collection.type];
+                type = "incomingShareViewer";
             }
-
-            let CollectionSummaryItemName: string;
-            if (type === CollectionSummaryType.uncategorized) {
-                CollectionSummaryItemName = t("UNCATEGORIZED");
-            } else if (type === CollectionSummaryType.favorites) {
-                CollectionSummaryItemName = t("FAVORITES");
-            } else {
-                CollectionSummaryItemName = collection.name;
+        } else if (isOutgoingShare(collection, user)) {
+            type = "outgoingShare";
+        } else if (isSharedOnlyViaLink(collection)) {
+            type = "sharedOnlyViaLink";
+        } else if (isArchivedCollection(collection)) {
+            type = "archived";
+        } else if (isDefaultHiddenCollection(collection)) {
+            type = "defaultHidden";
+        } else if (isPinnedCollection(collection)) {
+            type = "pinned";
+        } else {
+            // Directly use the collection type
+            // TODO: The constants can be aligned once collection type goes from
+            // an enum to an union.
+            switch (collection.type) {
+                case CollectionType.folder:
+                    type = "folder";
+                    break;
+                case CollectionType.favorites:
+                    type = "favorites";
+                    break;
+                case CollectionType.album:
+                    type = "album";
+                    break;
+                case CollectionType.uncategorized:
+                    type = "uncategorized";
+                    break;
             }
-
-            collectionSummaries.set(collection.id, {
-                id: collection.id,
-                name: CollectionSummaryItemName,
-                latestFile: collectionLatestFiles.get(collection.id),
-                coverFile: collectionCoverFiles.get(collection.id),
-                fileCount: collectionFilesCount.get(collection.id) ?? 0,
-                updationTime: collection.updationTime,
-                type: type,
-                order: collection.magicMetadata?.data?.order ?? 0,
-            });
         }
+
+        let CollectionSummaryItemName: string;
+        if (type == "uncategorized") {
+            CollectionSummaryItemName = t("section_uncategorized");
+        } else if (type == "favorites") {
+            CollectionSummaryItemName = t("favorites");
+        } else {
+            CollectionSummaryItemName = collection.name;
+        }
+
+        collectionSummaries.set(collection.id, {
+            id: collection.id,
+            name: CollectionSummaryItemName,
+            latestFile: collectionLatestFiles.get(collection.id),
+            coverFile: collectionCoverFiles.get(collection.id),
+            fileCount: collectionFilesCount.get(collection.id) ?? 0,
+            updationTime: collection.updationTime,
+            type: type,
+            order: collection.magicMetadata?.data?.order ?? 0,
+        });
     }
     if (!hasUncategorizedCollection) {
         collectionSummaries.set(
@@ -1195,7 +1193,7 @@ export function getCollectionSummaries(
     return collectionSummaries;
 }
 
-function getCollectionsFileCount(files: EnteFile[]): CollectionFilesCount {
+function getCollectionsFileCount(files: EnteFile[]): Map<number, number> {
     const collectionIDToFileMap = groupFilesBasedOnCollectionID(files);
     const collectionFilesCount = new Map<number, number>();
     for (const [id, files] of collectionIDToFileMap) {
@@ -1233,8 +1231,8 @@ function getAllSectionSummary(
     );
     return {
         id: ALL_SECTION,
-        name: t("ALL_SECTION_NAME"),
-        type: CollectionSummaryType.all,
+        name: t("section_all"),
+        type: "all",
         coverFile: allSectionFiles?.[0],
         latestFile: allSectionFiles?.[0],
         fileCount: allSectionFiles?.length || 0,
@@ -1263,8 +1261,8 @@ function getAllSectionVisibleFiles(
 export function getDummyUncategorizedCollectionSummary(): CollectionSummary {
     return {
         id: DUMMY_UNCATEGORIZED_COLLECTION,
-        name: t("UNCATEGORIZED"),
-        type: CollectionSummaryType.uncategorized,
+        name: t("section_uncategorized"),
+        type: "uncategorized",
         latestFile: null,
         coverFile: null,
         fileCount: 0,
@@ -1280,8 +1278,8 @@ export function getArchivedSectionSummary(
     );
     return {
         id: ARCHIVE_SECTION,
-        name: t("ARCHIVE_SECTION_NAME"),
-        type: CollectionSummaryType.archive,
+        name: t("section_archive"),
+        type: "archive",
         coverFile: null,
         latestFile: archivedFiles?.[0],
         fileCount: archivedFiles?.length,
@@ -1305,8 +1303,8 @@ export function getHiddenItemsSummary(
     );
     return {
         id: HIDDEN_ITEMS_SECTION,
-        name: t("HIDDEN_ITEMS"),
-        type: CollectionSummaryType.hiddenItems,
+        name: t("hidden_items"),
+        type: "hiddenItems",
         coverFile: hiddenItems?.[0],
         latestFile: hiddenItems?.[0],
         fileCount: hiddenItems?.length,
@@ -1319,8 +1317,8 @@ export function getTrashedCollectionSummary(
 ): CollectionSummary {
     return {
         id: TRASH_SECTION,
-        name: t("TRASH"),
-        type: CollectionSummaryType.trash,
+        name: t("section_trash"),
+        type: "trash",
         coverFile: null,
         latestFile: trashedFiles?.[0],
         fileCount: trashedFiles?.length,

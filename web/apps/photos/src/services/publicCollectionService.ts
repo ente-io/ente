@@ -1,12 +1,15 @@
 import { sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
+import type {
+    Collection,
+    CollectionPublicMagicMetadata,
+} from "@/media/collection";
 import { EncryptedEnteFile, EnteFile } from "@/new/photos/types/file";
 import { mergeMetadata } from "@/new/photos/utils/file";
 import { CustomError, parseSharingErrorCodes } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import localForage from "@ente/shared/storage/localForage";
-import { Collection, CollectionPublicMagicMetadata } from "types/collection";
 import { LocalSavedPublicCollectionFiles } from "types/publicCollection";
 import { decryptFile, sortFiles } from "utils/file";
 

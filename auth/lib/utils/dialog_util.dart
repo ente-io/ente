@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:confetti/confetti.dart';
@@ -14,6 +15,7 @@ import 'package:ente_auth/ui/components/dialog_widget.dart';
 import 'package:ente_auth/ui/components/models/button_result.dart';
 import 'package:ente_auth/ui/components/models/button_type.dart';
 import 'package:ente_auth/utils/email_util.dart';
+import 'package:ente_auth/utils/platform_util.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -109,14 +111,14 @@ String parseErrorForUI(
       final DioException dioError = error;
       if (dioError.type == DioExceptionType.badResponse) {
         if (dioError.response?.data["code"] != null) {
-          errorInfo = "Reason: " + dioError.response!.data["code"];
+          errorInfo = "Reason: ${dioError.response!.data["code"]}";
         } else {
-          errorInfo = "Reason: " + dioError.response!.data.toString();
+          errorInfo = "Reason: ${dioError.response!.data}";
         }
       } else if (dioError.type == DioExceptionType.unknown) {
-        errorInfo = "Reason: " + dioError.error.toString();
+        errorInfo = "Reason: $dioError.error";
       } else {
-        errorInfo = "Reason: " + dioError.type.toString();
+        errorInfo = "Reason: $dioError.type";
       }
     } else {
       if (kDebugMode) {
@@ -140,11 +142,19 @@ Future<ButtonResult?> showGenericErrorDialog({
   bool isDismissible = true,
   required Object? error,
 }) async {
-  final errorBody = parseErrorForUI(
+  String errorBody = parseErrorForUI(
     context,
     context.l10n.itLooksLikeSomethingWentWrongPleaseRetryAfterSome,
     error: error,
   );
+  bool isWindowCertError = false;
+  if (Platform.isWindows &&
+      error != null &&
+      error.toString().contains("CERTIFICATE_VERIFY_FAILED")) {
+    isWindowCertError = true;
+    errorBody =
+        "Certificate verification failed. Please update your system certificates, & restart the app. If the issue persists, please contact support.";
+  }
 
   return showDialogWidget(
     context: context,
@@ -159,6 +169,20 @@ Future<ButtonResult?> showGenericErrorDialog({
         buttonAction: ButtonAction.first,
         isInAlert: true,
       ),
+      if (isWindowCertError)
+        ButtonWidget(
+          buttonType: ButtonType.neutral,
+          labelText: 'Update Certificates',
+          buttonAction: ButtonAction.third,
+          isInAlert: true,
+          onTap: () async {
+            PlatformUtil.openWebView(
+              context,
+              context.l10n.faq,
+              "https://help.ente.io/auth/troubleshooting/windows-login",
+            );
+          },
+        ),
       ButtonWidget(
         buttonType: ButtonType.secondary,
         labelText: context.l10n.contactSupport,

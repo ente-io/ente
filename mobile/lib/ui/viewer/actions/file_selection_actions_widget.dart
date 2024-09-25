@@ -680,6 +680,10 @@ class _FileSelectionActionsWidgetState
     _cachedCollectionForSharedLink ??= await collectionActions
         .createSharedCollectionLink(context, split.ownedByCurrentUser);
 
+    if (_cachedCollectionForSharedLink == null) {
+      await dialog.hide();
+      return;
+    }
     final List<EnteFile> ownedSelectedFiles = split.ownedByCurrentUser;
     placeholderBytes = await _createPlaceholder(ownedSelectedFiles);
     await dialog.hide();

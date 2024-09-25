@@ -1,9 +1,9 @@
 import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
+import type { Collection } from "@/media/collection";
+import type { CollectionSummary } from "@/new/photos/types/collection";
 import { DialogProps, Stack } from "@mui/material";
 import { t } from "i18next";
-import { Collection, CollectionSummary } from "types/collection";
-import { CollectionSummaryType } from "utils/collection";
 import EmailShare from "./emailShare";
 import PublicShare from "./publicShare";
 import SharingDetails from "./sharingDetails";
@@ -46,18 +46,17 @@ function CollectionShare({ collectionSummary, ...props }: Props) {
                 <Titlebar
                     onClose={props.onClose}
                     title={
-                        type ===
-                            CollectionSummaryType.incomingShareCollaborator ||
-                        type === CollectionSummaryType.incomingShareViewer
-                            ? t("SHARING_DETAILS")
-                            : t("SHARE_COLLECTION")
+                        type == "incomingShareCollaborator" ||
+                        type == "incomingShareViewer"
+                            ? t("sharing_details")
+                            : t("share_album")
                     }
                     onRootClose={handleRootClose}
                     caption={props.collection.name}
                 />
                 <Stack py={"20px"} px={"8px"} gap={"24px"}>
-                    {type === CollectionSummaryType.incomingShareCollaborator ||
-                    type === CollectionSummaryType.incomingShareViewer ? (
+                    {type == "incomingShareCollaborator" ||
+                    type == "incomingShareViewer" ? (
                         <SharingDetails
                             collection={props.collection}
                             type={type}

@@ -1,11 +1,11 @@
-import "dart:typed_data";
+import "dart:async";
 
 import 'package:flutter/material.dart';
 import "package:photos/models/backup/backup_item.dart";
 import "package:photos/models/backup/backup_item_status.dart";
 import 'package:photos/theme/ente_theme.dart';
+import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/utils/file_uploader.dart";
-import "package:photos/utils/thumbnail_util.dart";
 
 class BackupItemCard extends StatefulWidget {
   const BackupItemCard({
@@ -20,29 +20,27 @@ class BackupItemCard extends StatefulWidget {
 }
 
 class _BackupItemCardState extends State<BackupItemCard> {
-  Uint8List? thumbnail;
   String? folderName;
+  bool showThumbnail = false;
 
   @override
   void initState() {
     super.initState();
-    _getThumbnail();
-    _getFolderName();
+    folderName = widget.item.file.deviceFolder ?? '';
+
+    // Delay rendering of the thumbnail for 0.5 seconds
+    Timer(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        setState(() {
+          showThumbnail = true;
+        });
+      }
+    });
   }
 
   @override
   void dispose() {
     super.dispose();
-  }
-
-  _getThumbnail() async {
-    thumbnail = await getThumbnail(widget.item.file);
-    setState(() {});
-  }
-
-  _getFolderName() async {
-    folderName = widget.item.file.deviceFolder ?? '';
-    setState(() {});
   }
 
   @override
@@ -54,9 +52,7 @@ class _BackupItemCardState extends State<BackupItemCard> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(4),
         border: Border.all(
-          color: Theme.of(context).brightness == Brightness.light
-              ? const Color(0xFF000000).withOpacity(0.08)
-              : const Color(0xFFFFFFFF).withOpacity(0.08),
+          color: colorScheme.fillFaint.withOpacity(0.08),
           width: 1,
         ),
       ),
@@ -67,12 +63,14 @@ class _BackupItemCardState extends State<BackupItemCard> {
             height: 60,
             child: ClipRRect(
               borderRadius: BorderRadius.circular(4),
-              child: thumbnail != null
-                  ? Image.memory(
-                      thumbnail!,
-                      fit: BoxFit.cover,
+              child: showThumbnail
+                  ? ThumbnailWidget(
+                      widget.item.file,
+                      shouldShowSyncStatus: false,
                     )
-                  : const SizedBox(),
+                  : Container(
+                      color: colorScheme.fillFaint, // Placeholder color
+                    ),
             ),
           ),
           const SizedBox(width: 12),

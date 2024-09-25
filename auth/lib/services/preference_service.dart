@@ -9,11 +9,12 @@ class PreferenceService {
 
   late final SharedPreferences _prefs;
 
-  static const kHasShownCoachMarkKey = "has_shown_coach_mark";
+  static const kHasShownCoachMarkKey = "has_shown_coach_mark_v2";
   static const kShouldShowLargeIconsKey = "should_show_large_icons";
   static const kShouldHideCodesKey = "should_hide_codes";
   static const kShouldAutoFocusOnSearchBar = "should_auto_focus_on_search_bar";
   static const kShouldMinimizeOnCopy = "should_minimize_on_copy";
+  static const kCompactMode = "vi.compactMode";
 
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
@@ -46,6 +47,20 @@ class PreferenceService {
 
   bool shouldHideCodes() {
     return _prefs.getBool(kShouldHideCodesKey) ?? false;
+  }
+
+  bool isCompactMode() {
+    return _prefs.getBool(kCompactMode) ?? false;
+  }
+
+  Future<void> setCompactMode(bool value) async {
+    await _prefs.setBool(kCompactMode, value);
+  }
+
+  Future<void> configureDefaults() async {
+    if (!_prefs.containsKey(kCompactMode)) {
+      await _prefs.setBool(kCompactMode, true);
+    }
   }
 
   Future<void> setHideCodes(bool value) async {

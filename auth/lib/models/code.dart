@@ -27,8 +27,14 @@ class Code {
 
   bool get isPinned => display.pinned;
 
+  bool get isTrashed => display.trashed;
+  String get note => display.note;
+
   final Object? err;
   bool get hasError => err != null;
+
+  String get issuerAccount =>
+      account.isNotEmpty ? '$issuer ($account)' : issuer;
 
   Code(
     this.account,
@@ -81,6 +87,7 @@ class Code {
     final Type updatedType = type ?? this.type;
     final int updatedCounter = counter ?? this.counter;
     final CodeDisplay updatedDisplay = display ?? this.display;
+    final String encodedIssuer = Uri.encodeQueryComponent(updateIssuer);
 
     return Code(
       updateAccount,
@@ -92,7 +99,7 @@ class Code {
       updatedType,
       updatedCounter,
       "otpauth://${updatedType.name}/$updateIssuer:$updateAccount?algorithm=${updatedAlgo.name}"
-      "&digits=$updatedDigits&issuer=$updateIssuer"
+      "&digits=$updatedDigits&issuer=$encodedIssuer"
       "&period=$updatePeriod&secret=$updatedSecret${updatedType == Type.hotp ? "&counter=$updatedCounter" : ""}",
       generatedID: generatedID,
       display: updatedDisplay,
@@ -107,6 +114,7 @@ class Code {
     CodeDisplay? display,
     int digits,
   ) {
+    final String encodedIssuer = Uri.encodeQueryComponent(issuer);
     return Code(
       account,
       issuer,
@@ -116,7 +124,7 @@ class Code {
       Algorithm.sha1,
       type,
       0,
-      "otpauth://${type.name}/$issuer:$account?algorithm=SHA1&digits=$digits&issuer=$issuer&period=30&secret=$secret",
+      "otpauth://${type.name}/$issuer:$account?algorithm=SHA1&digits=$digits&issuer=$encodedIssuer&period=30&secret=$secret",
       display: display ?? CodeDisplay(),
     );
   }
@@ -124,7 +132,7 @@ class Code {
   static Code fromOTPAuthUrl(String rawData, {CodeDisplay? display}) {
     Uri uri = Uri.parse(rawData);
     final issuer = _getIssuer(uri);
-    final account = _getAccount(uri);
+    final account = _getAccount(uri, issuer);
 
     try {
       final code = Code(
@@ -155,7 +163,7 @@ class Code {
     }
   }
 
-  static String _getAccount(Uri uri) {
+  static String _getAccount(Uri uri, String issuer) {
     try {
       String path = Uri.decodeComponent(uri.path);
       if (path.startsWith("/")) {
@@ -166,8 +174,14 @@ class Code {
       if (uri.queryParameters.containsKey("issuer") && !path.contains(":")) {
         return path;
       }
-      return path.split(':')[1];
-    } catch (e) {
+      // handle case where issuer name contains colon
+      if (path.startsWith('$issuer:')) {
+        return path.substring(issuer.length + 1);
+      }
+      return path
+          .substring(path.indexOf(':') + 1); // return data after first colon
+    } catch (e, s) {
+      Logger('_getAccount').severe('Error while parsing account', e, s);
       return "";
     }
   }

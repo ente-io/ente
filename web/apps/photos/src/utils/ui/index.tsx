@@ -15,7 +15,7 @@ export const getDownloadAppMessage = (): DialogBoxAttributes => {
         content: t("download_app_message"),
 
         proceed: {
-            text: t("DOWNLOAD"),
+            text: t("download"),
             action: downloadApp,
             variant: "accent",
         },
@@ -36,6 +36,7 @@ export const getTrashFilesMessage = (
         action: deleteFileHelper,
         text: t("MOVE_TO_TRASH"),
         variant: "critical",
+        autoFocus: true,
     },
     close: { text: t("cancel") },
 });
@@ -47,6 +48,7 @@ export const getTrashFileMessage = (deleteFileHelper): DialogBoxAttributes => ({
         action: deleteFileHelper,
         text: t("MOVE_TO_TRASH"),
         variant: "critical",
+        autoFocus: true,
     },
     close: { text: t("cancel") },
 });

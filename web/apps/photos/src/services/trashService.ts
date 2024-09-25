@@ -1,5 +1,6 @@
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
+import type { Collection } from "@/media/collection";
 import {
     getLocalTrash,
     getTrashedFiles,
@@ -9,7 +10,6 @@ import { EncryptedTrashItem, Trash } from "@/new/photos/types/file";
 import HTTPService from "@ente/shared/network/HTTPService";
 import localForage from "@ente/shared/storage/localForage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
-import { Collection } from "types/collection";
 import { SetFiles } from "types/gallery";
 import { decryptFile } from "utils/file";
 import { getCollection } from "./collectionService";

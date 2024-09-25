@@ -1,8 +1,8 @@
 import { sharedCryptoWorker } from "@/base/crypto";
+import type { Collection } from "@/media/collection";
 import { ItemVisibility } from "@/media/file-metadata";
 import { EnteFile } from "@/new/photos/types/file";
 import { MagicMetadataCore } from "@/new/photos/types/magicMetadata";
-import { Collection } from "types/collection";
 
 export function isArchivedFile(item: EnteFile): boolean {
     if (!item || !item.magicMetadata || !item.magicMetadata.data) {

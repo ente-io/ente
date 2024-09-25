@@ -50,30 +50,35 @@ class _BackupStatusScreenState extends State<BackupStatusScreen> {
           },
         )
         .sorted(
-          (a, b) => (a.file.uploadedFileID!).compareTo(b.file.uploadedFileID!),
+          (a, b) => (b.file.uploadedFileID!).compareTo(a.file.uploadedFileID!),
         )
         .toList();
     Bus.instance.on<FileUploadedEvent>().listen((event) {
-      setState(() {
-        result!.insert(
-          0,
-          BackupItem(
-            status: BackupItemStatus.uploaded,
-            file: event.file,
-            collectionID: event.file.collectionID ?? 0,
-            completer: null,
-          ),
-        );
-      });
+      result!.insert(
+        0,
+        BackupItem(
+          status: BackupItemStatus.uploaded,
+          file: event.file,
+          collectionID: event.file.collectionID ?? 0,
+          completer: null,
+        ),
+      );
+      safeSetState();
     });
-    setState(() {});
+    safeSetState();
   }
 
   void checkBackupUpdatedEvent() {
     Bus.instance.on<BackupUpdatedEvent>().listen((event) {
       items = event.items;
-      setState(() {});
+      safeSetState();
     });
+  }
+
+  void safeSetState() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
@@ -127,17 +132,23 @@ class _BackupStatusScreenState extends State<BackupStatusScreen> {
                 ],
               ),
             )
-          : ListView.builder(
-              padding: const EdgeInsets.symmetric(
-                vertical: 20,
-                horizontal: 16,
+          : Scrollbar(
+              child: ListView.builder(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 20,
+                  horizontal: 16,
+                ),
+                shrinkWrap: false,
+                primary: true,
+                prototypeItem: Container(height: 70),
+                itemBuilder: (context, index) {
+                  return BackupItemCard(
+                    item: allItems[index],
+                    key: ValueKey(allItems[index].file.uploadedFileID),
+                  );
+                },
+                itemCount: allItems.length,
               ),
-              shrinkWrap: true,
-              primary: false,
-              itemBuilder: (context, index) {
-                return BackupItemCard(item: allItems[index]);
-              },
-              itemCount: allItems.length,
             ),
     );
   }

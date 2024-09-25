@@ -1,9 +1,9 @@
 import log from "@/base/log";
 import { deleteDB, openDB, type DBSchema } from "idb";
-import type { CGroup } from "./cgroups";
 import type { LocalCLIPIndex } from "./clip";
 import type { FaceCluster } from "./cluster";
 import type { LocalFaceIndex } from "./face";
+import type { CGroup } from "./people";
 
 /**
  * ML DB schema.
@@ -212,7 +212,7 @@ const newFileStatus = (fileID: number): FileStatus => ({
 /**
  * Return the {@link FaceIndex}, if any, for {@link fileID}.
  */
-export const faceIndex = async (fileID: number) => {
+export const getFaceIndex = async (fileID: number) => {
     const db = await mlDB();
     return db.get("face-index", fileID);
 };
@@ -220,7 +220,7 @@ export const faceIndex = async (fileID: number) => {
 /**
  * Return all face indexes present locally.
  */
-export const faceIndexes = async () => {
+export const getFaceIndexes = async () => {
     const db = await mlDB();
     return await db.getAll("face-index");
 };
@@ -228,7 +228,7 @@ export const faceIndexes = async () => {
 /**
  * Return all CLIP indexes present locally.
  */
-export const clipIndexes = async () => {
+export const getCLIPIndexes = async () => {
     const db = await mlDB();
     return await db.getAll("clip-index");
 };
@@ -329,7 +329,7 @@ export const updateAssumingLocalFiles = async (
  * fall within the purview of the indexer will be indexable + indexed (if we are
  * ignoring the "failed" ones).
  */
-export const indexableAndIndexedCounts = async () => {
+export const getIndexableAndIndexedCounts = async () => {
     const db = await mlDB();
     const tx = db.transaction("file-status", "readonly");
     const indexableCount = await tx.store
@@ -353,7 +353,7 @@ export const indexableAndIndexedCounts = async () => {
  * than {@link count} items present, the files with the higher file IDs (which
  * can be taken as a approximate for their creation order) are preferred.
  */
-export const indexableFileIDs = async (count: number) => {
+export const getIndexableFileIDs = async (count: number) => {
     const db = await mlDB();
     const tx = db.transaction("file-status", "readonly");
     let cursor = await tx.store
@@ -392,7 +392,7 @@ export const markIndexingFailed = async (fileID: number) => {
 /**
  * Return all face clusters present locally.
  */
-export const faceClusters = async () => {
+export const getFaceClusters = async () => {
     const db = await mlDB();
     return db.getAll("face-cluster");
 };
@@ -400,7 +400,7 @@ export const faceClusters = async () => {
 /**
  * Return all cluster group entries (aka "cgroups") present locally.
  */
-export const clusterGroups = async () => {
+export const getClusterGroups = async () => {
     const db = await mlDB();
     return db.getAll("cluster-group");
 };
@@ -411,6 +411,7 @@ export const clusterGroups = async () => {
  * This function deletes all entries from the face cluster object store, and
  * then inserts the given {@link clusters} into it.
  */
+// TODO-Cluster
 export const setFaceClusters = async (clusters: FaceCluster[]) => {
     const db = await mlDB();
     const tx = db.transaction("face-cluster", "readwrite");

@@ -1,18 +1,14 @@
-import { fetchAndSaveFeatureFlagsIfNeeded } from "@/new/photos/services/feature-flags";
-import {
-    isMLSupported,
-    triggerMLStatusSync,
-    triggerMLSync,
-} from "@/new/photos/services/ml";
-import { triggerSearchDataSync } from "@/new/photos/services/search";
+import { triggerFeatureFlagsFetchIfNeeded } from "@/new/photos/services/feature-flags";
+import { isMLSupported, mlStatusSync, mlSync } from "@/new/photos/services/ml";
+import { searchDataSync } from "@/new/photos/services/search";
 import { syncMapEnabled } from "services/userService";
 
 /**
  * Part 1 of {@link sync}. See TODO below for why this is split.
  */
-export const triggerPreFileInfoSync = () => {
-    fetchAndSaveFeatureFlagsIfNeeded();
-    if (isMLSupported) triggerMLStatusSync();
+export const preFileInfoSync = async () => {
+    triggerFeatureFlagsFetchIfNeeded();
+    await Promise.all([isMLSupported && mlStatusSync()]);
 };
 
 /**
@@ -35,7 +31,8 @@ export const triggerPreFileInfoSync = () => {
  * before doing the file sync and thus should run immediately after login.
  */
 export const sync = async () => {
-    await Promise.all([syncMapEnabled()]);
-    triggerSearchDataSync();
-    if (isMLSupported) triggerMLSync();
+    await Promise.all([syncMapEnabled(), searchDataSync()]);
+    // ML sync might take a very long time for initial indexing, so don't wait
+    // for it to finish.
+    void mlSync();
 };

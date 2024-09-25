@@ -7,9 +7,7 @@ import 'package:photo_manager/photo_manager.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/services/sync_service.dart';
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/utils/debouncer.dart";
 import "package:photos/utils/dialog_util.dart";
-import "package:photos/utils/email_util.dart";
 import "package:photos/utils/photo_manager_util.dart";
 import "package:styled_text/styled_text.dart";
 
@@ -21,88 +19,67 @@ class GrantPermissionsWidget extends StatefulWidget {
 }
 
 class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
-  final _debouncer = Debouncer(const Duration(milliseconds: 500));
   final Logger _logger = Logger("_GrantPermissionsWidgetState");
-
-  @override
-  void dispose() {
-    _debouncer.cancelDebounceTimer();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     final isLightMode = Theme.of(context).brightness == Brightness.light;
     return Scaffold(
       body: SingleChildScrollView(
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onScaleEnd: (details) {
-            _debouncer.run(() async {
-              unawaited(
-                triggerSendLogs(
-                  "support@ente.io",
-                  "Stuck on grant permission screen on ${Platform.operatingSystem}",
-                  null,
-                ),
-              );
-            });
-          },
-          child: Padding(
-            padding: const EdgeInsets.only(top: 20, bottom: 120),
-            child: Column(
-              children: [
-                const SizedBox(
-                  height: 24,
-                ),
-                Center(
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      isLightMode
-                          ? Image.asset(
-                              'assets/loading_photos_background.png',
-                              color: Colors.white.withOpacity(0.4),
-                              colorBlendMode: BlendMode.modulate,
-                            )
-                          : Image.asset(
-                              'assets/loading_photos_background_dark.png',
-                            ),
-                      Center(
-                        child: Column(
-                          children: [
-                            const SizedBox(height: 42),
-                            Image.asset(
-                              "assets/gallery_locked.png",
-                              height: 160,
-                            ),
-                          ],
-                        ),
+        child: Padding(
+          padding: const EdgeInsets.only(top: 20, bottom: 120),
+          child: Column(
+            children: [
+              const SizedBox(
+                height: 24,
+              ),
+              Center(
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    isLightMode
+                        ? Image.asset(
+                            'assets/loading_photos_background.png',
+                            color: Colors.white.withOpacity(0.4),
+                            colorBlendMode: BlendMode.modulate,
+                          )
+                        : Image.asset(
+                            'assets/loading_photos_background_dark.png',
+                          ),
+                    Center(
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 42),
+                          Image.asset(
+                            "assets/gallery_locked.png",
+                            height: 160,
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 36),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(40, 0, 40, 0),
-                  child: StyledText(
-                    text: S.of(context).entePhotosPerm,
-                    style: Theme.of(context)
-                        .textTheme
-                        .headlineSmall!
-                        .copyWith(fontWeight: FontWeight.w700),
-                    tags: {
-                      'i': StyledTextTag(
-                        style: Theme.of(context)
-                            .textTheme
-                            .headlineSmall!
-                            .copyWith(fontWeight: FontWeight.w400),
-                      ),
-                    },
-                  ),
+              ),
+              const SizedBox(height: 36),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(40, 0, 40, 0),
+                child: StyledText(
+                  text: S.of(context).entePhotosPerm,
+                  style: Theme.of(context)
+                      .textTheme
+                      .headlineSmall!
+                      .copyWith(fontWeight: FontWeight.w700),
+                  tags: {
+                    'i': StyledTextTag(
+                      style: Theme.of(context)
+                          .textTheme
+                          .headlineSmall!
+                          .copyWith(fontWeight: FontWeight.w400),
+                    ),
+                  },
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

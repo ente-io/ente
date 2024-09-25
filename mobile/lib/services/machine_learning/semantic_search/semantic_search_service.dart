@@ -182,15 +182,16 @@ class SemanticSearchService {
     String query,
     double minimumSimilarity,
   ) async {
-    final results =
-        await getMatchingFiles(query, similarityThreshold: minimumSimilarity);
-
-    final matchingFileIDs = <int>[];
-    for (EnteFile file in results) {
-      matchingFileIDs.add(file.uploadedFileID!);
+    final textEmbedding = await _getTextEmbedding(query);
+    final queryResults = await _getSimilarities(
+      textEmbedding,
+      minimumSimilarity: minimumSimilarity,
+    );
+    final result = <int>[];
+    for (final r in queryResults) {
+      result.add(r.id);
     }
-
-    return matchingFileIDs;
+    return result;
   }
 
   Future<void> _loadTextModel({bool delay = false}) async {
@@ -220,7 +221,7 @@ class SemanticSearchService {
   }
 
   Future<List<double>> _getTextEmbedding(String query) async {
-    _logger.info("Searching for " + query);
+    _logger.info("Searching for ${kDebugMode ? query : ''}");
     final cachedResult = _queryEmbeddingCache.get(query);
     if (cachedResult != null) {
       return cachedResult;

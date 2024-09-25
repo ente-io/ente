@@ -1,38 +1,73 @@
+import { useIsMobileWidth } from "@/base/hooks";
 import { faceCrop, unidentifiedFaceIDs } from "@/new/photos/services/ml";
+import type { Person } from "@/new/photos/services/ml/people";
 import type { EnteFile } from "@/new/photos/types/file";
 import { Skeleton, Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
-import type { SearchPerson } from "../services/search/types";
 
-export interface PeopleListProps {
-    people: SearchPerson[];
-    maxRows: number;
-    onSelect?: (person: SearchPerson, index: number) => void;
+export interface SearchPeopleListProps {
+    people: Person[];
+    onSelectPerson: (person: Person) => void;
 }
 
-export const PeopleList: React.FC<PeopleListProps> = ({
+/**
+ * Shows a list of {@link Person}s in the empty state of the search bar.
+ */
+export const SearchPeopleList: React.FC<SearchPeopleListProps> = ({
     people,
-    maxRows,
-    onSelect,
+    onSelectPerson,
 }) => {
+    const isMobileWidth = useIsMobileWidth();
     return (
-        <FaceChipContainer style={{ maxHeight: maxRows * 122 + 28 }}>
-            {people.map((person, index) => (
-                <FaceChip
+        <SearchPeopleContainer
+            sx={{ justifyContent: people.length > 3 ? "center" : "start" }}
+        >
+            {people.slice(0, isMobileWidth ? 6 : 7).map((person) => (
+                <SearchPeopleButton
                     key={person.id}
-                    clickable={!!onSelect}
-                    onClick={() => onSelect && onSelect(person, index)}
+                    onClick={() => onSelectPerson(person)}
                 >
                     <FaceCropImageView
                         faceID={person.displayFaceID}
                         enteFile={person.displayFaceFile}
+                        placeholderDimension={87}
                     />
-                </FaceChip>
+                </SearchPeopleButton>
             ))}
-        </FaceChipContainer>
+        </SearchPeopleContainer>
     );
 };
+
+const SearchPeopleContainer = styled("div")`
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 5px;
+    margin-block: 12px;
+`;
+
+const SearchPeopleButton = styled("button")(
+    ({ theme }) => `
+    /* Reset some button defaults */
+    border: 0;
+    padding: 0;
+    /* Button should do this for us, but it isn't working inside the select */
+    cursor: pointer;
+    width: 87px;
+    height: 87px;
+    border-radius: 50%;
+    overflow: hidden;
+    & > img {
+        width: 100%;
+        height: 100%;
+    }
+    :hover {
+        outline: 1px solid ${theme.colors.stroke.faint};
+        outline-offset: 2px;
+    }
+`,
+);
 
 const FaceChipContainer = styled("div")`
     display: flex;
@@ -60,7 +95,7 @@ const FaceChip = styled("div")<{ clickable?: boolean }>`
 
 export interface PhotoPeopleListProps {
     file: EnteFile;
-    onSelect?: (person: SearchPerson, index: number) => void;
+    onSelect?: (person: Person, index: number) => void;
 }
 
 export function PhotoPeopleList() {
@@ -105,7 +140,10 @@ export const UnidentifiedFaces: React.FC<UnidentifiedFacesProps> = ({
             <FaceChipContainer>
                 {faceIDs.map((faceID) => (
                     <FaceChip key={faceID}>
-                        <FaceCropImageView {...{ enteFile, faceID }} />
+                        <FaceCropImageView
+                            placeholderDimension={112}
+                            {...{ enteFile, faceID }}
+                        />
                     </FaceChip>
                 ))}
             </FaceChipContainer>
@@ -118,6 +156,8 @@ interface FaceCropImageViewProps {
     faceID: string;
     /** The {@link EnteFile} which contains this face. */
     enteFile: EnteFile;
+    /** Width and height for the placeholder. */
+    placeholderDimension: number;
 }
 
 /**
@@ -132,6 +172,7 @@ interface FaceCropImageViewProps {
 const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
     faceID,
     enteFile,
+    placeholderDimension,
 }) => {
     const [objectURL, setObjectURL] = useState<string | undefined>();
 
@@ -153,6 +194,14 @@ const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
     return objectURL ? (
         <img style={{ objectFit: "cover" }} src={objectURL} />
     ) : (
-        <Skeleton variant="circular" height={120} width={120} />
+        <Skeleton
+            variant="circular"
+            animation="wave"
+            sx={{
+                backgroundColor: (theme) => theme.colors.background.elevated2,
+            }}
+            width={placeholderDimension}
+            height={placeholderDimension}
+        />
     );
 };

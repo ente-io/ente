@@ -1,5 +1,6 @@
 import { ensureElectron } from "@/base/electron";
 import log from "@/base/log";
+import type { Collection } from "@/media/collection";
 import {
     fileCreationPhotoDate,
     fileLocation,
@@ -21,13 +22,11 @@ import { writeStream } from "@/new/photos/utils/native-stream";
 import { wait } from "@/utils/promise";
 import { CustomError } from "@ente/shared/error";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
-import type { User } from "@ente/shared/user/types";
 import QueueProcessor, {
     CancellationStatus,
     RequestCanceller,
 } from "@ente/shared/utils/queueProcessor";
 import i18n from "i18next";
-import { Collection } from "types/collection";
 import {
     CollectionExportNames,
     ExportProgress,
@@ -39,9 +38,7 @@ import {
 import {
     constructCollectionNameMap,
     getCollectionUserFacingName,
-    getNonEmptyPersonalCollections,
 } from "utils/collection";
-import { getPersonalFiles } from "utils/file";
 import { getAllLocalCollections } from "../collectionService";
 import { migrateExport } from "./migration";
 
@@ -213,23 +210,10 @@ class ExportService {
         exportRecord: ExportRecord,
     ): Promise<EnteFile[]> => {
         try {
-            const user: User = getData(LS_KEYS.USER);
             const files = await getAllLocalFiles();
-            const collections = await getAllLocalCollections();
-            const collectionIdToOwnerIDMap = new Map<number, number>(
-                collections.map((collection) => [
-                    collection.id,
-                    collection.owner.id,
-                ]),
-            );
-            const userPersonalFiles = getPersonalFiles(
-                files,
-                user,
-                collectionIdToOwnerIDMap,
-            );
 
             const unExportedFiles = getUnExportedFiles(
-                userPersonalFiles,
+                files,
                 exportRecord,
                 undefined,
             );
@@ -339,49 +323,29 @@ class ExportService {
         { resync }: ExportOpts,
     ) {
         try {
-            const user: User = getData(LS_KEYS.USER);
             const files = mergeMetadata(await getAllLocalFiles());
             const collections = await getAllLocalCollections();
-            const collectionIdToOwnerIDMap = new Map<number, number>(
-                collections.map((collection) => [
-                    collection.id,
-                    collection.owner.id,
-                ]),
-            );
-            const personalFiles = getPersonalFiles(
-                files,
-                user,
-                collectionIdToOwnerIDMap,
-            );
-
-            const nonEmptyPersonalCollections = getNonEmptyPersonalCollections(
-                collections,
-                personalFiles,
-                user,
-            );
 
             const exportRecord = await this.getExportRecord(exportFolder);
             const collectionIDExportNameMap =
                 convertCollectionIDExportNameObjectToMap(
                     exportRecord.collectionExportNames,
                 );
-            const collectionIDNameMap = constructCollectionNameMap(
-                nonEmptyPersonalCollections,
-            );
+            const collectionIDNameMap = constructCollectionNameMap(collections);
 
             const renamedCollections = getRenamedExportedCollections(
-                nonEmptyPersonalCollections,
+                collections,
                 exportRecord,
             );
 
             const removedFileUIDs = getDeletedExportedFiles(
-                personalFiles,
+                files,
                 exportRecord,
             );
 
             const diskFileRecordIDs = resync
                 ? await readOnDiskFileExportRecordIDs(
-                      personalFiles,
+                      files,
                       collectionIDExportNameMap,
                       exportFolder,
                       exportRecord,
@@ -390,18 +354,18 @@ class ExportService {
                 : undefined;
 
             const filesToExport = getUnExportedFiles(
-                personalFiles,
+                files,
                 exportRecord,
                 diskFileRecordIDs,
             );
 
             const deletedExportedCollections = getDeletedExportedCollections(
-                nonEmptyPersonalCollections,
+                collections,
                 exportRecord,
             );
 
             log.info(
-                `personal files:${personalFiles.length} unexported files: ${filesToExport.length}, deleted exported files: ${removedFileUIDs.length}, renamed collections: ${renamedCollections.length}, deleted collections: ${deletedExportedCollections.length}`,
+                `files:${files.length} unexported files: ${filesToExport.length}, deleted exported files: ${removedFileUIDs.length}, renamed collections: ${renamedCollections.length}, deleted collections: ${deletedExportedCollections.length}`,
             );
             let success = 0;
             let failed = 0;

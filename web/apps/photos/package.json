@@ -17,7 +17,6 @@
         "exifreader": "^4",
         "fast-srp-hap": "^2.0.4",
         "ffmpeg-wasm": "file:./thirdparty/ffmpeg-wasm",
-        "hdbscan": "0.0.1-alpha.5",
         "leaflet": "^1.9.4",
         "leaflet-defaulticon-compatibility": "^0.1.1",
         "localforage": "^1.9.0",
@@ -32,7 +31,7 @@
         "react-select": "^5.8.0",
         "react-top-loading-bar": "^2.0.1",
         "react-virtualized-auto-sizer": "^1.0",
-        "react-window": "^1.8.6",
+        "react-window": "^1.8.10",
         "sanitize-filename": "^1.6.3",
         "similarity-transformation": "^0.0.1",
         "transformation-matrix": "^2.16",
@@ -47,8 +46,7 @@
         "@types/leaflet": "^1.9",
         "@types/photoswipe": "^4.1.1",
         "@types/react-virtualized-auto-sizer": "^1.0",
-        "@types/react-window": "^1.8.2",
-        "@types/react-window-infinite-loader": "^1.0.3",
+        "@types/react-window": "^1.8.8",
         "@types/uuid": "^9.0.2",
         "@types/zxcvbn": "^4.4.1"
     }

@@ -166,7 +166,7 @@ func (c *CollectionController) Share(ctx *gin.Context, req ente.AlterShareReques
 	if fromUserID != collection.Owner.ID {
 		return nil, stacktrace.Propagate(ente.ErrPermissionDenied, "")
 	}
-	err = c.BillingCtrl.HasActiveSelfOrFamilySubscription(fromUserID)
+	err = c.BillingCtrl.HasActiveSelfOrFamilySubscription(fromUserID, true)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}
@@ -270,7 +270,7 @@ func (c *CollectionController) ShareURL(ctx context.Context, userID int64, req e
 	if userID != collection.Owner.ID {
 		return ente.PublicURL{}, stacktrace.Propagate(ente.ErrPermissionDenied, "")
 	}
-	err = c.BillingCtrl.HasActiveSelfOrFamilySubscription(userID)
+	err = c.BillingCtrl.HasActiveSelfOrFamilySubscription(userID, true)
 	if err != nil {
 		return ente.PublicURL{}, stacktrace.Propagate(err, "")
 	}
@@ -287,7 +287,7 @@ func (c *CollectionController) UpdateShareURL(ctx context.Context, userID int64,
 	if err := c.verifyOwnership(req.CollectionID, userID); err != nil {
 		return ente.PublicURL{}, stacktrace.Propagate(err, "")
 	}
-	err := c.BillingCtrl.HasActiveSelfOrFamilySubscription(userID)
+	err := c.BillingCtrl.HasActiveSelfOrFamilySubscription(userID, true)
 	if err != nil {
 		return ente.PublicURL{}, stacktrace.Propagate(err, "")
 	}

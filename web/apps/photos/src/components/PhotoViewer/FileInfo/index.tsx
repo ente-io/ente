@@ -115,8 +115,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     }
 
     const onCollectionChipClick = (collectionID) => {
-        galleryContext.setActiveCollectionID(collectionID);
-        galleryContext.setIsInSearchMode(false);
+        galleryContext.onShowCollection(collectionID);
         closePhotoViewer();
     };
 
@@ -270,7 +269,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
 
                 {isMLEnabled() && (
                     <>
-                        {/* <PhotoPeopleList file={file} /> */}
+                        {/* TODO-Cluster <PhotoPeopleList file={file} /> */}
                         <UnidentifiedFaces enteFile={file} />
                     </>
                 )}
@@ -567,7 +566,8 @@ const RawExif: React.FC<RawExifProps> = ({
                 } else if (
                     tag &&
                     typeof tag == "object" &&
-                    "description" in tag
+                    "description" in tag &&
+                    typeof tag.description == "string"
                 ) {
                     description = tag.description;
                 }

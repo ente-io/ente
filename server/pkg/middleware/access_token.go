@@ -117,7 +117,7 @@ func (m *AccessTokenMiddleware) validateOwnersSubscription(cID int64) error {
 	if err != nil {
 		return stacktrace.Propagate(err, "")
 	}
-	return m.BillingCtrl.HasActiveSelfOrFamilySubscription(userID)
+	return m.BillingCtrl.HasActiveSelfOrFamilySubscription(userID, false)
 }
 
 func (m *AccessTokenMiddleware) isDeviceLimitReached(ctx context.Context,

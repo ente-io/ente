@@ -1,6 +1,7 @@
 import { basename } from "@/base/file";
 import log from "@/base/log";
 import type { CollectionMapping, Electron, ZipItem } from "@/base/types/ipc";
+import type { Collection } from "@/media/collection";
 import { exportMetadataDirectoryName } from "@/new/photos/services/export";
 import type {
     FileAndPath,
@@ -33,8 +34,6 @@ import type {
 } from "services/upload/uploadManager";
 import uploadManager from "services/upload/uploadManager";
 import watcher from "services/watch";
-import { NotificationAttributes } from "types/Notification";
-import { Collection } from "types/collection";
 import {
     CollectionSelectorIntent,
     SetCollectionSelectorAttributes,
@@ -42,6 +41,7 @@ import {
     SetFiles,
     SetLoading,
 } from "types/gallery";
+import { NotificationAttributes } from "types/Notification";
 import { getOrCreateAlbum } from "utils/collection";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import {
@@ -540,7 +540,7 @@ export default function Uploader({
             closeUploadProgress();
             log.error("Failed to create album", e);
             appContext.setDialogMessage({
-                title: t("ERROR"),
+                title: t("error"),
                 close: { variant: "critical" },
                 content: t("CREATE_ALBUM_FAILED"),
             });

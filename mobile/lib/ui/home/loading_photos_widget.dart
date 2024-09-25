@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
@@ -26,21 +25,21 @@ class LoadingPhotosWidget extends StatefulWidget {
 
 class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
   late StreamSubscription<SyncStatusUpdate> _firstImportEvent;
-  late StreamSubscription<LocalImportProgressEvent> _importProgressEvent;
+  StreamSubscription<LocalImportProgressEvent>? _importProgressEvent;
   int _currentPage = 0;
-  String _loadingMessage = "Loading your photos...";
+  String? _loadingMessage;
   final PageController _pageController = PageController(
     initialPage: 0,
   );
   final List<String> _messages = [];
   late final Timer _didYouKnowTimer;
-  final fortySecondsOnScreen = ValueNotifier(false);
+  final oneMinuteOnScreen = ValueNotifier(false);
 
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 40), () {
-      fortySecondsOnScreen.value = true;
+    Future.delayed(const Duration(seconds: 60), () {
+      oneMinuteOnScreen.value = true;
     });
     _firstImportEvent =
         Bus.instance.on<SyncStatusUpdate>().listen((event) async {
@@ -51,23 +50,15 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
           // ignore: unawaited_futures
           routeToPage(
             context,
-            BackupFolderSelectionPage(
+            const BackupFolderSelectionPage(
               isOnboarding: true,
-              buttonText: S.of(context).startBackup,
+              isFirstBackup: true,
             ),
           );
         }
       }
     });
-    _importProgressEvent =
-        Bus.instance.on<LocalImportProgressEvent>().listen((event) {
-      if (Platform.isAndroid) {
-        _loadingMessage = 'Processing ${event.folderName}...';
-        if (mounted) {
-          setState(() {});
-        }
-      }
-    });
+
     _didYouKnowTimer =
         Timer.periodic(const Duration(seconds: 5), (Timer timer) {
       if (!mounted) {
@@ -88,16 +79,33 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_importProgressEvent != null) {
+      _importProgressEvent!.cancel();
+    } else {
+      _importProgressEvent =
+          Bus.instance.on<LocalImportProgressEvent>().listen((event) {
+        _loadingMessage = S.of(context).processingImport(event.folderName);
+        if (mounted) {
+          setState(() {});
+        }
+      });
+    }
+  }
+
+  @override
   void dispose() {
     _firstImportEvent.cancel();
-    _importProgressEvent.cancel();
+    _importProgressEvent?.cancel();
     _didYouKnowTimer.cancel();
-    fortySecondsOnScreen.dispose();
+    oneMinuteOnScreen.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    _loadingMessage ??= S.of(context).loadingYourPhotos;
     _setupLoadingMessages(context);
     final isLightMode = Theme.of(context).brightness == Brightness.light;
     return Scaffold(
@@ -134,7 +142,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
                   ],
                 ),
                 Text(
-                  _loadingMessage,
+                  _loadingMessage!,
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.subTextColor,
                   ),
@@ -191,7 +199,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
       appBar: AppBar(
         actions: [
           ValueListenableBuilder(
-            valueListenable: fortySecondsOnScreen,
+            valueListenable: oneMinuteOnScreen,
             builder: (context, value, _) {
               return value
                   ? IconButton(

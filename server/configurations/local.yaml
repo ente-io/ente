@@ -209,6 +209,9 @@ jwt:
 # The smtp credentials will be used if the host is specified. Otherwise it will
 # try to use the transmail credentials. Ideally, one of smtp or transmail should
 # be configured for a production instance.
+#
+# username and password are optional (e.g. if you're using a local relay server
+# and don't need authentication).
 smtp:
     host:
     port:

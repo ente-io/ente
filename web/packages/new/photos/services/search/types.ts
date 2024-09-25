@@ -4,11 +4,55 @@
  */
 
 import type { Location } from "@/base/types";
+import type { Collection } from "@/media/collection";
 import { FileType } from "@/media/file-type";
+import type { Person } from "@/new/photos/services/ml/people";
 import type { EnteFile } from "@/new/photos/types/file";
 import type { LocationTag } from "../user-entity";
 
-export interface DateSearchResult {
+/**
+ * A search suggestion.
+ *
+ * These (wrapped up in {@link SearchOption}s) are shown in the search results
+ * dropdown, and can also be used to filter the list of files that are shown.
+ */
+export type SearchSuggestion = { label: string } & (
+    | { type: "collection"; collectionID: number }
+    | { type: "fileType"; fileType: FileType }
+    | { type: "fileName"; fileIDs: number[] }
+    | { type: "fileCaption"; fileIDs: number[] }
+    | { type: "date"; dateComponents: SearchDateComponents }
+    | { type: "location"; locationTag: LocationTag }
+    | { type: "city"; city: City }
+    | { type: "clip"; clipScoreForFileID: Map<number, number> }
+    | { type: "person"; person: Person }
+);
+
+/**
+ * An option shown in the the search bar's select dropdown.
+ *
+ * The {@link SearchOption} wraps a {@link SearchSuggestion} with some metadata
+ * used when showing a corresponding entry in the dropdown, and in the results
+ * header.
+ *
+ * If the user selects the option, then we will re-run the search using the
+ * {@link suggestion} to filter the list of files shown to the user.
+ */
+export interface SearchOption {
+    suggestion: SearchSuggestion;
+    fileCount: number;
+    previewFiles: EnteFile[];
+}
+
+/**
+ * The collections and files over which we should search.
+ */
+export interface SearchCollectionsAndFiles {
+    collections: Collection[];
+    files: EnteFile[];
+}
+
+export interface LabelledSearchDateComponents {
     components: SearchDateComponents;
     label: string;
 }
@@ -19,27 +63,13 @@ export interface LabelledFileType {
 }
 
 /**
- * An annotated version of {@link T} that includes its searchable "lowercased"
- * label or name.
- *
- * Precomputing these lowercased values saves us from doing the lowercasing
- * during the search itself.
- */
-export type Searchable<T> = T & {
-    /**
-     * The name or label of T, lowercased.
-     */
-    lowercasedName: string;
-};
-
-/**
  * Various bits of static but locale specific data that the search worker needs
  * during searching.
  */
 export interface LocalizedSearchData {
     locale: string;
-    holidays: Searchable<DateSearchResult>[];
-    labelledFileTypes: Searchable<LabelledFileType>[];
+    holidays: LabelledSearchDateComponents[];
+    labelledFileTypes: LabelledFileType[];
 }
 
 /**
@@ -75,18 +105,6 @@ export interface SearchDateComponents {
 }
 
 /**
- * A massaged version of {@link CGroup} suitable for being shown in search
- * results.
- */
-export interface SearchPerson {
-    id: string;
-    name?: string;
-    files: number[];
-    displayFaceID: string;
-    displayFaceFile: EnteFile;
-}
-
-/**
  * A city as identified by a static dataset.
  *
  * Each city is represented by its latitude and longitude. The dataset does not
@@ -96,56 +114,3 @@ export type City = Location & {
     /** Name of the city. */
     name: string;
 };
-
-// TODO-cgroup: Audit below
-
-export enum SuggestionType {
-    DATE = "DATE",
-    LOCATION = "LOCATION",
-    COLLECTION = "COLLECTION",
-    FILE_NAME = "FILE_NAME",
-    PERSON = "PERSON",
-    FILE_CAPTION = "FILE_CAPTION",
-    FILE_TYPE = "FILE_TYPE",
-    CLIP = "CLIP",
-    CITY = "CITY",
-}
-
-export interface Suggestion {
-    type: SuggestionType;
-    label: string;
-    value:
-        | SearchDateComponents
-        | number[]
-        | SearchPerson
-        | LocationTag
-        | City
-        | FileType
-        | ClipSearchScores;
-}
-
-export interface SearchQuery {
-    date?: SearchDateComponents;
-    location?: LocationTag;
-    city?: City;
-    collection?: number;
-    files?: number[];
-    person?: SearchPerson;
-    fileType?: FileType;
-    clip?: ClipSearchScores;
-}
-
-export interface SearchResultSummary {
-    optionName: string;
-    fileCount: number;
-}
-
-/**
- * An option shown in the the search bar's select dropdown.
- */
-export interface SearchOption extends Suggestion {
-    fileCount: number;
-    previewFiles: EnteFile[];
-}
-
-export type ClipSearchScores = Map<number, number>;

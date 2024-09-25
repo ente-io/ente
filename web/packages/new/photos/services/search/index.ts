@@ -1,16 +1,16 @@
-import { isDesktop } from "@/base/app";
+import log from "@/base/log";
 import { masterKeyFromSession } from "@/base/session-store";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
 import { FileType } from "@/media/file-type";
 import i18n, { t } from "i18next";
-import type { EnteFile } from "../../types/file";
-import { clipMatches, isMLEnabled } from "../ml";
-import {
-    SuggestionType,
-    type DateSearchResult,
-    type LabelledFileType,
-    type LocalizedSearchData,
-    type SearchQuery,
+import { clipMatches, isMLEnabled, isMLSupported } from "../ml";
+import type { NamedPerson } from "../ml/people";
+import type {
+    LabelledFileType,
+    LabelledSearchDateComponents,
+    LocalizedSearchData,
+    SearchCollectionsAndFiles,
+    SearchSuggestion,
 } from "./types";
 import type { SearchWorker } from "./worker";
 
@@ -48,22 +48,39 @@ export const logoutSearch = () => {
 /**
  * Fetch any data that would be needed if the user were to search.
  */
-export const triggerSearchDataSync = () =>
-    void worker().then((w) => masterKeyFromSession().then((k) => w.sync(k)));
+export const searchDataSync = () =>
+    worker().then((w) => masterKeyFromSession().then((k) => w.sync(k)));
 
 /**
- * Set the files over which we will search.
+ * Set the collections and files over which we should search.
  */
-export const setSearchableFiles = (enteFiles: EnteFile[]) =>
-    void worker().then((w) => w.setEnteFiles(enteFiles));
+export const setSearchCollectionsAndFiles = (cf: SearchCollectionsAndFiles) =>
+    void worker().then((w) => w.setCollectionsAndFiles(cf));
 
 /**
- * Convert a search string into a reusable "search query" that can be passed on
- * to the {@link search} function.
+ * Set the (named) people that we should search across.
+ */
+export const setSearchPeople = (people: NamedPerson[]) =>
+    void worker().then((w) => w.setPeople(people));
+
+/**
+ * Convert a search string into (annotated) suggestions that can be shown in the
+ * search results dropdown.
  *
  * @param searchString The string we want to search for.
  */
-export const createSearchQuery = async (searchString: string) => {
+export const searchOptionsForString = async (searchString: string) => {
+    const t = Date.now();
+    const suggestions = await suggestionsForString(searchString);
+    const options = await suggestionsToOptions(suggestions);
+    log.debug(() => [
+        "search",
+        { searchString, options, duration: `${Date.now() - t} ms` },
+    ]);
+    return options;
+};
+
+const suggestionsForString = async (searchString: string) => {
     // Normalize it by trimming whitespace and converting to lowercase.
     const s = searchString.trim().toLowerCase();
     if (s.length == 0) return [];
@@ -71,32 +88,52 @@ export const createSearchQuery = async (searchString: string) => {
     // The CLIP matching code already runs in the ML worker, so let that run
     // separately, in parallel with the rest of the search query construction in
     // the search worker, then combine the two.
-    const results = await Promise.all([
-        clipSuggestions(s, searchString).then((s) => s ?? []),
-        worker().then((w) => w.createSearchQuery(s, localizedSearchData())),
+    const [clip, [restPre, restPost]] = await Promise.all([
+        clipSuggestion(s, searchString).then((s) => s ?? []),
+        worker().then((w) =>
+            w.suggestionsForString(s, searchString, localizedSearchData()),
+        ),
     ]);
-    return results.flat();
+    return [restPre, clip, restPost].flat();
 };
 
-const clipSuggestions = async (s: string, searchString: string) => {
-    if (!isDesktop) return undefined;
+const clipSuggestion = async (
+    s: string,
+    searchString: string,
+): Promise<SearchSuggestion | undefined> => {
+    if (!isMLSupported) return undefined;
     if (!isMLEnabled()) return undefined;
 
     const matches = await clipMatches(s);
     if (!matches) return undefined;
-    return {
-        type: SuggestionType.CLIP,
-        value: matches,
-        label: searchString,
-    };
+    return { type: "clip", clipScoreForFileID: matches, label: searchString };
 };
 
+const suggestionsToOptions = (suggestions: SearchSuggestion[]) =>
+    filterSearchableFilesMulti(suggestions).then((res) =>
+        res.map(([files, suggestion]) => ({
+            suggestion,
+            fileCount: files.length,
+            previewFiles: files.slice(0, 3),
+        })),
+    );
+
 /**
- * Search for and return the list of {@link EnteFile}s that match the given
- * {@link search} query.
+ * Return the list of {@link EnteFile}s (from amongst the previously set
+ * {@link SearchCollectionsAndFiles}) that match the given search {@link suggestion}.
  */
-export const search = async (search: SearchQuery) =>
-    worker().then((w) => w.search(search));
+export const filterSearchableFiles = async (suggestion: SearchSuggestion) =>
+    worker().then((w) => w.filterSearchableFiles(suggestion));
+
+/**
+ * A batched variant of {@link filterSearchableFiles}.
+ *
+ * This has drastically (10x) better performance when filtering files for a
+ * large number of suggestions (e.g. single letter searches that lead to a large
+ * number of city prefix matches), likely because of reduced worker IPC.
+ */
+const filterSearchableFilesMulti = async (suggestions: SearchSuggestion[]) =>
+    worker().then((w) => w.filterSearchableFilesMulti(suggestions));
 
 /**
  * Cached value of {@link localizedSearchData}.
@@ -121,20 +158,14 @@ let _localizedSearchData: LocalizedSearchData | undefined;
 const localizedSearchData = () =>
     (_localizedSearchData ??= {
         locale: i18n.language,
-        holidays: holidays().map((h) => ({
-            ...h,
-            lowercasedName: h.label.toLowerCase(),
-        })),
-        labelledFileTypes: labelledFileTypes().map((t) => ({
-            ...t,
-            lowercasedName: t.label.toLowerCase(),
-        })),
+        holidays: holidays(),
+        labelledFileTypes: labelledFileTypes(),
     });
 
 /**
  * A list of holidays - their yearly dates and localized names.
  */
-const holidays = (): DateSearchResult[] => [
+const holidays = (): LabelledSearchDateComponents[] => [
     { components: { month: 12, day: 25 }, label: t("CHRISTMAS") },
     { components: { month: 12, day: 24 }, label: t("CHRISTMAS_EVE") },
     { components: { month: 1, day: 1 }, label: t("NEW_YEAR") },

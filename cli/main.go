@@ -15,7 +15,7 @@ import (
 	"strings"
 )
 
-var AppVersion = "0.1.18"
+var AppVersion = "0.2.1"
 
 func main() {
 	cliDBPath, err := GetCLIConfigPath()
@@ -78,6 +78,9 @@ func main() {
 	if len(os.Args) == 1 {
 		// If no arguments are passed, show help
 		os.Args = append(os.Args, "help")
+	}
+	if os.Args[1] == "version" && viper.GetString("endpoint.api") != constants.EnteApiUrl {
+		log.Printf("Custom endpoint: %s\n", viper.GetString("endpoint.api"))
 	}
 	cmd.Execute(&ctrl, AppVersion)
 }
