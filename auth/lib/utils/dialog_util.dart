@@ -239,7 +239,7 @@ Future<ButtonResult?> showChoiceDialog(
   required String title,
   String? body,
   required String firstButtonLabel,
-  String secondButtonLabel = "Cancel",
+  String? secondButtonLabel = "Cancel",
   ButtonType firstButtonType = ButtonType.neutral,
   ButtonType secondButtonType = ButtonType.secondary,
   ButtonAction firstButtonAction = ButtonAction.first,
@@ -258,13 +258,14 @@ Future<ButtonResult?> showChoiceDialog(
       onTap: firstButtonOnTap,
       buttonAction: firstButtonAction,
     ),
-    ButtonWidget(
-      buttonType: secondButtonType,
-      labelText: secondButtonLabel,
-      isInAlert: true,
-      onTap: secondButtonOnTap,
-      buttonAction: secondButtonAction,
-    ),
+    if (secondButtonLabel != null)
+      ButtonWidget(
+        buttonType: secondButtonType,
+        labelText: secondButtonLabel,
+        isInAlert: true,
+        onTap: secondButtonOnTap,
+        buttonAction: secondButtonAction,
+      ),
   ];
   return showDialogWidget(
     context: context,

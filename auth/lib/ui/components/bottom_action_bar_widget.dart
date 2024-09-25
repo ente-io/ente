@@ -12,6 +12,7 @@ class BottomActionBarWidget extends StatelessWidget {
   final Code code;
   final VoidCallback? onCancel;
   final Color? backgroundColor;
+  final VoidCallback? onNotes;
   final VoidCallback? onShare;
   final VoidCallback? onPin;
   final VoidCallback? onShowQR;
@@ -25,6 +26,7 @@ class BottomActionBarWidget extends StatelessWidget {
     this.onCancel,
     this.backgroundColor,
     super.key,
+    this.onNotes,
     this.onShare,
     this.onPin,
     this.onShowQR,
@@ -65,6 +67,7 @@ class BottomActionBarWidget extends StatelessWidget {
           const SizedBox(height: 8),
           CodeSelectionActionsWidget(
             code: code,
+            onNotes: onNotes,
             onShare: onShare,
             onPin: onPin,
             onShowQR: onShowQR,

@@ -15,6 +15,7 @@ import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/code_timer_progress.dart';
 import 'package:ente_auth/ui/components/bottom_action_bar_widget.dart';
+import 'package:ente_auth/ui/components/models/button_type.dart';
 import 'package:ente_auth/ui/share/code_share.dart';
 import 'package:ente_auth/ui/utils/icon_utils.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
@@ -219,6 +220,7 @@ class _CodeWidgetState extends State<CodeWidget> {
                   builder: (_) {
                     return BottomActionBarWidget(
                       code: widget.code,
+                      onNotes: () => _onShowNotesPressed(true),
                       onEdit: () => _onEditPressed(true),
                       onShare: () => _onSharePressed(true),
                       onPin: () => _onPinPressed(true),
@@ -260,6 +262,12 @@ class _CodeWidgetState extends State<CodeWidget> {
                       label: 'QR',
                       icon: Icons.qr_code_2_outlined,
                       onSelected: () => _onShowQrPressed(null),
+                    ),
+                  if (widget.code.note.isNotEmpty)
+                    MenuItem(
+                      label: context.l10n.notes,
+                      icon: Icons.notes_outlined,
+                      onSelected: () => _onShowNotesPressed(null),
                     ),
                   if (!widget.code.isTrashed)
                     MenuItem(
@@ -483,6 +491,20 @@ class _CodeWidgetState extends State<CodeWidget> {
           )
           .ignore();
     }
+  }
+
+  Future<void> _onShowNotesPressed([bool? pop]) async {
+    if (mounted && pop == true) {
+      Navigator.of(context).pop();
+    }
+    await showChoiceDialog(
+      context,
+      title: context.l10n.notes,
+      body: widget.code.note,
+      firstButtonLabel: context.l10n.close,
+      firstButtonType: ButtonType.secondary,
+      secondButtonLabel: null,
+    );
   }
 
   Future<void> _onEditPressed([bool? pop]) async {
