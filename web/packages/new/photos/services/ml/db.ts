@@ -151,7 +151,7 @@ export const clearMLDB = async () => {
     }
     _mlDB = undefined;
 
-    return deleteDB("face", {
+    return deleteDB("ml", {
         blocked() {
             log.warn(
                 "Waiting for an existing client to close their connection so that we can delete the ML DB",

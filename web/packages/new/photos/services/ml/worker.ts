@@ -109,6 +109,7 @@ export class MLWorker {
     private liveQ: IndexableItem[] = [];
     private idleTimeout: ReturnType<typeof setTimeout> | undefined;
     private idleDuration = idleDurationStart; /* unit: seconds */
+    private onNextIdles: (() => void)[] = [];
 
     /**
      * Initialize a new {@link MLWorker}.
@@ -133,17 +134,19 @@ export class MLWorker {
     }
 
     /**
-     * Start backfilling if needed.
-     *
-     * This function enqueues a backfill attempt and returns immediately without
-     * waiting for it complete.
+     * Start backfilling if needed, and return after there are no more items
+     * remaining to backfill.
      *
      * During a backfill, we first attempt to fetch ML data for files which
      * don't have that data locally. If on fetching we find what we need, we
      * save it locally. Otherwise we index them.
      */
-    sync() {
+    index() {
+        const nextIdle = new Promise<void>((resolve) =>
+            this.onNextIdles.push(resolve),
+        );
         this.wakeUp();
+        return nextIdle;
     }
 
     /** Invoked in response to external events. */
@@ -249,6 +252,11 @@ export class MLWorker {
         this.idleDuration = Math.min(this.idleDuration * 2, idleDurationMax);
         this.idleTimeout = setTimeout(scheduleTick, this.idleDuration * 1000);
         this.delegate?.workerDidUpdateStatus();
+
+        // Resolve any awaiting promises returned from `index`.
+        const onNextIdles = this.onNextIdles;
+        this.onNextIdles = [];
+        onNextIdles.forEach((f) => f());
     }
 
     /** Return the next batch of items to backfill (if any). */
@@ -297,8 +305,8 @@ export class MLWorker {
             await getAllLocalFiles(),
             (progress) => this.updateClusteringProgress(progress),
         );
-        this.updateClusteringProgress(undefined);
         await reconcileClusters(clusters);
+        this.updateClusteringProgress(undefined);
     }
 
     private updateClusteringProgress(progress: ClusteringProgress | undefined) {

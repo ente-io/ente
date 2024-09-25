@@ -314,8 +314,10 @@ export const mlSync = async () => {
     //     files -> faces -> cgroups -> clusters
     //
 
+    const w = await worker();
+
     // Fetch indexes, or index locally if needed.
-    await worker().then((w) => w.sync());
+    await w.index();
 
     // Fetch existing cgroups from remote.
     await pullCGroups();
@@ -324,7 +326,7 @@ export const mlSync = async () => {
     // TODO-Cluster
     // Warning - this is heavily WIP
     if (process.env.NEXT_PUBLIC_ENTE_WIP_CL_AUTO) {
-        await wipCluster();
+        await w.clusterFaces();
     }
 
     await updatePeople();

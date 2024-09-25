@@ -326,7 +326,7 @@ const ManageML: React.FC<ManageMLProps> = ({
     // potentially confusing total counts during incremental updates.
     const processed =
         phase == "clustering"
-            ? `${Math.round((100 * nSyncedFiles) / nTotalFiles)}`
+            ? `${Math.round((100 * nSyncedFiles) / nTotalFiles)}%`
             : `${nSyncedFiles} / ${nTotalFiles}`;
 
     const confirmDisableML = () => {
