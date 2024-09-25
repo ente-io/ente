@@ -132,7 +132,7 @@ class Code {
   static Code fromOTPAuthUrl(String rawData, {CodeDisplay? display}) {
     Uri uri = Uri.parse(rawData);
     final issuer = _getIssuer(uri);
-    final account = _getAccount(uri);
+    final account = _getAccount(uri, issuer);
 
     try {
       final code = Code(
@@ -163,7 +163,7 @@ class Code {
     }
   }
 
-  static String _getAccount(Uri uri) {
+  static String _getAccount(Uri uri, String issuer) {
     try {
       String path = Uri.decodeComponent(uri.path);
       if (path.startsWith("/")) {
@@ -173,6 +173,10 @@ class Code {
       // otpauth://totp/ACCOUNT?secret=SUPERSECRET&issuer=SERVICE
       if (uri.queryParameters.containsKey("issuer") && !path.contains(":")) {
         return path;
+      }
+      // handle case where issuer name contains colon
+      if (path.startsWith('$issuer:')) {
+        return path.substring(issuer.length + 1);
       }
       return path
           .substring(path.indexOf(':') + 1); // return data after first colon
