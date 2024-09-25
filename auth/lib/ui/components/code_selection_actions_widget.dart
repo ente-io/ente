@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 
 class CodeSelectionActionsWidget extends StatefulWidget {
   final Code code;
-  final VoidCallback? onNotes;
   final VoidCallback? onShare;
   final VoidCallback? onPin;
   final VoidCallback? onShowQR;
@@ -17,7 +16,6 @@ class CodeSelectionActionsWidget extends StatefulWidget {
   const CodeSelectionActionsWidget({
     super.key,
     required this.code,
-    this.onNotes,
     this.onShare,
     this.onPin,
     this.onShowQR,
@@ -72,16 +70,6 @@ class _CodeSelectionActionsWidgetState
           labelText: 'QR',
           icon: Icons.qr_code_2_outlined,
           onTap: widget.onShowQR,
-        ),
-      );
-    }
-
-    if (widget.code.note.isNotEmpty) {
-      items.add(
-        SelectionActionButton(
-          labelText: context.l10n.notes,
-          icon: Icons.notes_outlined,
-          onTap: widget.onNotes,
         ),
       );
     }

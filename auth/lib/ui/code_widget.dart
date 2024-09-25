@@ -220,7 +220,6 @@ class _CodeWidgetState extends State<CodeWidget> {
                   builder: (_) {
                     return BottomActionBarWidget(
                       code: widget.code,
-                      onNotes: () => _onShowNotesPressed(true),
                       onEdit: () => _onEditPressed(true),
                       onShare: () => _onSharePressed(true),
                       onPin: () => _onPinPressed(true),
