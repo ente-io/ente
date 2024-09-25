@@ -66,7 +66,7 @@ func (h *FileHandler) GetFileData(ctx *gin.Context) {
 
 func (h *FileHandler) GetPreviewUploadURL(c *gin.Context) {
 	var request fileData.PreviewUploadUrlRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
+	if err := c.ShouldBindQuery(&request); err != nil {
 		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("Request binding failed %s", err)))
 		return
 	}

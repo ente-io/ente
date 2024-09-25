@@ -27,6 +27,7 @@ func AllObjects(fileID int64, ownerID int64, oType ente.ObjectType) []string {
 func CompleteObjectKey(fileID int64, ownerID int64, oType ente.ObjectType, id string) string {
 	switch oType {
 	case ente.PreviewVideo:
+		return fmt.Sprintf("%s%s/%s", BasePrefix(fileID, ownerID), string(oType), id)
 	case ente.PreviewImage:
 		return fmt.Sprintf("%s%s/%s", BasePrefix(fileID, ownerID), string(oType), id)
 	default:
