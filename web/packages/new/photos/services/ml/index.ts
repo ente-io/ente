@@ -315,7 +315,7 @@ export const mlSync = async () => {
     //
 
     // Fetch indexes, or index locally if needed.
-    await worker().then((w) => w.sync());
+    await worker().then((w) => w.index());
 
     // Fetch existing cgroups from remote.
     await pullCGroups();
