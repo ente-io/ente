@@ -1,11 +1,22 @@
 import type { Collection } from "@/media/collection";
+import {
+    AllCollectionTile,
+    ItemCard,
+    ItemTileOverlay,
+    LargeTileTextOverlay,
+} from "@/new/photos/components/ItemCards";
 import type {
     CollectionSummaries,
     CollectionSummary,
 } from "@/new/photos/types/collection";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleWithCloseButton";
-import { DialogContent, useMediaQuery } from "@mui/material";
+import {
+    DialogContent,
+    styled,
+    Typography,
+    useMediaQuery,
+} from "@mui/material";
 import { AllCollectionDialog } from "components/Collections/AllCollections/dialog";
 import { t } from "i18next";
 import { useEffect, useState } from "react";
@@ -17,8 +28,6 @@ import {
     isAddToAllowedCollection,
     isMoveToAllowedCollection,
 } from "utils/collection";
-import AddCollectionButton from "./AddCollectionButton";
-import CollectionSelectorCard from "./CollectionCard";
 
 export interface CollectionSelectorAttributes {
     callback: (collection: Collection) => void;
@@ -28,19 +37,20 @@ export interface CollectionSelectorAttributes {
     onCancel?: () => void;
 }
 
-interface Props {
+interface CollectionSelectorProps {
     open: boolean;
     onClose: () => void;
     attributes: CollectionSelectorAttributes;
     collections: Collection[];
     collectionSummaries: CollectionSummaries;
 }
-function CollectionSelector({
+
+export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
     attributes,
     collectionSummaries,
     collections,
     ...props
-}: Props) {
+}) => {
     const isMobile = useMediaQuery("(max-width: 428px)");
 
     const [collectionsToShow, setCollectionsToShow] = useState<
@@ -146,15 +156,53 @@ function CollectionSelector({
                     />
                     {collectionsToShow.map((collectionSummary) => (
                         <CollectionSelectorCard
-                            onCollectionClick={handleCollectionClick}
-                            collectionSummary={collectionSummary}
                             key={collectionSummary.id}
+                            collectionSummary={collectionSummary}
+                            onCollectionClick={handleCollectionClick}
                         />
                     ))}
                 </FlexWrapper>
             </DialogContent>
         </AllCollectionDialog>
     );
+};
+
+interface CollectionSelectorCardProps {
+    collectionSummary: CollectionSummary;
+    onCollectionClick: (collectionID: number) => void;
 }
 
-export default CollectionSelector;
+const CollectionSelectorCard: React.FC<CollectionSelectorCardProps> = ({
+    collectionSummary,
+    onCollectionClick,
+}) => (
+    <ItemCard
+        TileComponent={AllCollectionTile}
+        coverFile={collectionSummary.coverFile}
+        onClick={() => onCollectionClick(collectionSummary.id)}
+    >
+        <LargeTileTextOverlay>
+            <Typography>{collectionSummary.name}</Typography>
+        </LargeTileTextOverlay>
+    </ItemCard>
+);
+
+interface AddCollectionButtonProps {
+    showNextModal: () => void;
+}
+
+const AddCollectionButton: React.FC<AddCollectionButtonProps> = ({
+    showNextModal,
+}) => (
+    <ItemCard TileComponent={AllCollectionTile} onClick={showNextModal}>
+        <LargeTileTextOverlay>{t("create_albums")}</LargeTileTextOverlay>
+        <ImageContainer>+</ImageContainer>
+    </ItemCard>
+);
+
+const ImageContainer = styled(ItemTileOverlay)`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 42px;
+`;
