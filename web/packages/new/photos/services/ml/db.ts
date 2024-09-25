@@ -3,7 +3,6 @@ import { deleteDB, openDB, type DBSchema } from "idb";
 import type { LocalCLIPIndex } from "./clip";
 import type { FaceCluster } from "./cluster";
 import type { LocalFaceIndex } from "./face";
-import type { CGroup } from "./people";
 
 /**
  * ML DB schema.
@@ -56,9 +55,10 @@ interface MLDBSchema extends DBSchema {
         key: string;
         value: FaceCluster;
     };
+    /* Unused */
     "cluster-group": {
         key: string;
-        value: CGroup;
+        value: unknown;
     };
 }
 
@@ -386,7 +386,7 @@ export const markIndexingFailed = async (fileID: number) => {
 /**
  * Return all face clusters present locally.
  */
-export const getFaceClusters = async () => {
+export const savedFaceClusters = async () => {
     const db = await mlDB();
     return db.getAll("face-cluster");
 };
@@ -397,8 +397,7 @@ export const getFaceClusters = async () => {
  * This function deletes all entries from the face cluster object store, and
  * then inserts the given {@link clusters} into it.
  */
-// TODO-Cluster
-export const setFaceClusters = async (clusters: FaceCluster[]) => {
+export const saveFaceClusters = async (clusters: FaceCluster[]) => {
     const db = await mlDB();
     const tx = db.transaction("face-cluster", "readwrite");
     await tx.store.clear();
