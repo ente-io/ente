@@ -22,6 +22,7 @@ dependencies:
   adaptive_theme: ^3.1.0
   animate_do: ^2.0.0
   animated_list_plus: ^0.5.2
+  app_links: ^6.3.2
   archive: ^3.6.1
   background_fetch: ^1.2.1
   battery_info: ^1.1.1
@@ -74,6 +75,8 @@ dependencies:
   flutter_cache_manager: ^3.3.0
   flutter_datetime_picker_bdaya: ^3.0.2
   flutter_displaymode: ^0.6.0
+  flutter_driver:
+    sdk: flutter
   flutter_easyloading: ^3.0.0
   flutter_email_sender: ^5.2.0
   flutter_image_compress: ^1.1.0
