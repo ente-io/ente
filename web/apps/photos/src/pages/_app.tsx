@@ -90,6 +90,7 @@ type AppContextT = AccountsContextT & {
     themeColor: THEME_COLOR;
     setThemeColor: (themeColor: THEME_COLOR) => void;
     somethingWentWrong: () => void;
+    onGenericError: (error: unknown) => void;
     isCFProxyDisabled: boolean;
     setIsCFProxyDisabled: (disabled: boolean) => void;
 };
@@ -276,6 +277,7 @@ export default function App({ Component, pageProps }: AppProps) {
     const closeMessageDialog = () => setMessageDialogView(false);
     const closeDialogBoxV2 = () => setDialogBoxV2View(false);
 
+    // Use `onGenericError` instead.
     const somethingWentWrong = useCallback(
         () =>
             setDialogMessage({
@@ -284,6 +286,18 @@ export default function App({ Component, pageProps }: AppProps) {
                 content: t("UNKNOWN_ERROR"),
             }),
         [setDialogMessage],
+    );
+
+    const onGenericError = useCallback(
+        (e: unknown) => (
+            log.error("Error", e),
+            setDialogBoxAttributesV2({
+                title: t("error"),
+                content: t("UNKNOWN_ERROR"),
+                close: { variant: "critical" },
+            })
+        ),
+        [setDialogBoxAttributesV2],
     );
 
     const logout = () => {
@@ -304,6 +318,7 @@ export default function App({ Component, pageProps }: AppProps) {
         themeColor,
         setThemeColor,
         somethingWentWrong,
+        onGenericError,
         setDialogBoxAttributesV2,
         mapEnabled,
         updateMapEnabled,

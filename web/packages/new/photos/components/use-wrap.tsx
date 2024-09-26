@@ -1,4 +1,3 @@
-import log from "@/base/log";
 import React from "react";
 import type { NewAppContextPhotos } from "../types/context";
 
@@ -13,7 +12,7 @@ export const useWrapAsyncOperation = (
     /** See: [Note: Migrating components that need the app context]. */
     appContext: NewAppContextPhotos,
 ) => {
-    const { startLoading, finishLoading, somethingWentWrong } = appContext;
+    const { startLoading, finishLoading, onGenericError } = appContext;
 
     const wrap = React.useCallback(
         (f: () => Promise<void>) => {
@@ -22,15 +21,14 @@ export const useWrapAsyncOperation = (
                 try {
                     await f();
                 } catch (e) {
-                    log.error("Error", e);
-                    somethingWentWrong();
+                    onGenericError(e);
                 } finally {
                     finishLoading();
                 }
             };
             return (): void => void wrapped();
         },
-        [somethingWentWrong, startLoading, finishLoading],
+        [onGenericError, startLoading, finishLoading],
     );
 
     return wrap;
