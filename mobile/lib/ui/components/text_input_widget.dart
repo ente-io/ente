@@ -137,9 +137,11 @@ class _TextInputWidgetState extends State<TextInputWidget> {
     if (executionState == ExecutionState.successful) {
       Future.delayed(Duration(seconds: widget.popNavAfterSubmission ? 1 : 2),
           () {
-        setState(() {
-          executionState = ExecutionState.idle;
-        });
+        if (mounted) {
+          setState(() {
+            executionState = ExecutionState.idle;
+          });
+        }
       });
     }
     final colorScheme = getEnteColorScheme(context);

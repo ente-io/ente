@@ -28,14 +28,14 @@ export const FileNameEditDialog = ({
             open={isInEditMode}
             onClose={closeEditMode}
             attributes={{
-                title: t("RENAME_FILE"),
+                title: t("rename_file"),
             }}
         >
             <SingleInputForm
                 initialValue={filename}
                 callback={onSubmit}
-                placeholder={t("ENTER_FILE_NAME")}
-                buttonText={t("RENAME")}
+                placeholder={t("enter_file_name")}
+                buttonText={t("rename")}
                 fieldType="text"
                 caption={extension}
                 secondaryButtonAction={closeEditMode}

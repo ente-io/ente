@@ -2,7 +2,7 @@
 
 import { ensure } from "@/utils/ensure";
 import { z } from "zod";
-import { getKV } from "./kv";
+import { getKVS } from "./kv";
 
 // TODO: During login the only field present is email. Which makes this
 // optionality indicated by these types incorrect.
@@ -57,4 +57,4 @@ export const ensureLocalUser = (): LocalUser => {
  * The underlying data is stored in IndexedDB, and can be accessed from web
  * workers.
  */
-export const ensureAuthToken = async () => ensure(await getKV("token"));
+export const ensureAuthToken = async () => ensure(await getKVS("token"));

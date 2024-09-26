@@ -101,7 +101,9 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
-          onTap: () async => await onPasskeyClick(context),
+          onTap: () async {
+            await onPasskeyClick(context);
+          },
         ),
         sectionOptionSpacing,
         MenuItemWidget(
@@ -178,6 +180,15 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
 
   Future<void> onPasskeyClick(BuildContext buildContext) async {
     try {
+      final hasAuthenticated =
+          await LocalAuthenticationService.instance.requestLocalAuthentication(
+        context,
+        context.l10n.authenticateGeneric,
+      );
+      await PlatformUtil.refocusWindows();
+      if (!hasAuthenticated) {
+        return;
+      }
       final isPassKeyResetEnabled =
           await PasskeyService.instance.isPasskeyRecoveryEnabled();
       if (!isPassKeyResetEnabled) {

@@ -1,10 +1,11 @@
 import { useIsMobileWidth } from "@/base/hooks";
 import { faceCrop, unidentifiedFaceIDs } from "@/new/photos/services/ml";
-import type { Person } from "@/new/photos/services/ml/cgroups";
+import type { Person } from "@/new/photos/services/ml/people";
 import type { EnteFile } from "@/new/photos/types/file";
 import { Skeleton, Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
+import { UnstyledButton } from "./mui-custom";
 
 export interface SearchPeopleListProps {
     people: Person[];
@@ -20,9 +21,11 @@ export const SearchPeopleList: React.FC<SearchPeopleListProps> = ({
 }) => {
     const isMobileWidth = useIsMobileWidth();
     return (
-        <SearchFaceChipContainer>
+        <SearchPeopleContainer
+            sx={{ justifyContent: people.length > 3 ? "center" : "start" }}
+        >
             {people.slice(0, isMobileWidth ? 6 : 7).map((person) => (
-                <SearchFaceChip
+                <SearchPeopleButton
                     key={person.id}
                     onClick={() => onSelectPerson(person)}
                 >
@@ -31,35 +34,37 @@ export const SearchPeopleList: React.FC<SearchPeopleListProps> = ({
                         enteFile={person.displayFaceFile}
                         placeholderDimension={87}
                     />
-                </SearchFaceChip>
+                </SearchPeopleButton>
             ))}
-        </SearchFaceChipContainer>
+        </SearchPeopleContainer>
     );
 };
 
-const SearchFaceChipContainer = styled("div")`
+const SearchPeopleContainer = styled("div")`
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
     align-items: center;
     gap: 5px;
-    margin-block: 16px;
-    /* On very small (~ < 375px) mobile screens 6 faces won't fit in 2 rows.
-       Clip the third one. */
-    overflow: hidden;
+    margin-block-start: 12px;
+    margin-block-end: 15px;
 `;
 
-const SearchFaceChip = styled("div")`
+const SearchPeopleButton = styled(UnstyledButton)(
+    ({ theme }) => `
     width: 87px;
     height: 87px;
     border-radius: 50%;
     overflow: hidden;
-    cursor: pointer;
     & > img {
         width: 100%;
         height: 100%;
     }
-`;
+    :hover {
+        outline: 1px solid ${theme.colors.stroke.faint};
+        outline-offset: 2px;
+    }
+`,
+);
 
 const FaceChipContainer = styled("div")`
     display: flex;
@@ -188,6 +193,10 @@ const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
     ) : (
         <Skeleton
             variant="circular"
+            animation="wave"
+            sx={{
+                backgroundColor: (theme) => theme.colors.background.elevated2,
+            }}
             width={placeholderDimension}
             height={placeholderDimension}
         />

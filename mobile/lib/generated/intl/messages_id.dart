@@ -565,6 +565,19 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Menonaktifkan autentikasi dua langkah..."),
         "discord": MessageLookupByLibrary.simpleMessage("Discord"),
+        "discover_babies": MessageLookupByLibrary.simpleMessage("Bayi"),
+        "discover_food": MessageLookupByLibrary.simpleMessage("Makanan"),
+        "discover_hills": MessageLookupByLibrary.simpleMessage("Bukit"),
+        "discover_identity": MessageLookupByLibrary.simpleMessage("Identitas"),
+        "discover_memes": MessageLookupByLibrary.simpleMessage("Meme"),
+        "discover_notes": MessageLookupByLibrary.simpleMessage("Catatan"),
+        "discover_pets": MessageLookupByLibrary.simpleMessage("Peliharaan"),
+        "discover_screenshots":
+            MessageLookupByLibrary.simpleMessage("Tangkapan layar"),
+        "discover_selfies": MessageLookupByLibrary.simpleMessage("Swafoto"),
+        "discover_sunset": MessageLookupByLibrary.simpleMessage("Senja"),
+        "discover_wallpapers":
+            MessageLookupByLibrary.simpleMessage("Gambar latar"),
         "distanceInKMUnit": MessageLookupByLibrary.simpleMessage("km"),
         "doNotSignOut":
             MessageLookupByLibrary.simpleMessage("Jangan keluarkan akun"),
@@ -792,6 +805,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
             "Harap bantu kami dengan informasi ini"),
         "language": MessageLookupByLibrary.simpleMessage("Bahasa"),
+        "lastUpdated":
+            MessageLookupByLibrary.simpleMessage("Terakhir diperbaharui"),
         "leave": MessageLookupByLibrary.simpleMessage("Tinggalkan"),
         "leaveAlbum": MessageLookupByLibrary.simpleMessage("Tinggalkan album"),
         "leaveFamily":
@@ -897,6 +912,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Pindah ke sampah"),
         "movingFilesToAlbum": MessageLookupByLibrary.simpleMessage(
             "Memindahkan file ke album..."),
+        "name": MessageLookupByLibrary.simpleMessage("Nama"),
         "networkConnectionRefusedErr": MessageLookupByLibrary.simpleMessage(
             "Tidak dapat terhubung dengan Ente, silakan coba lagi setelah beberapa saat. Jika masalah berlanjut, harap hubungi dukungan."),
         "networkHostLookUpErr": MessageLookupByLibrary.simpleMessage(
@@ -904,6 +920,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "never": MessageLookupByLibrary.simpleMessage("Tidak pernah"),
         "newAlbum": MessageLookupByLibrary.simpleMessage("Album baru"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("Baru di Ente"),
+        "newest": MessageLookupByLibrary.simpleMessage("Terbaru"),
         "no": MessageLookupByLibrary.simpleMessage("Tidak"),
         "noAlbumsSharedByYouYet": MessageLookupByLibrary.simpleMessage(
             "Belum ada album yang kamu bagikan"),
@@ -1040,11 +1057,15 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Kebijakan Privasi"),
         "privateBackups":
             MessageLookupByLibrary.simpleMessage("Cadangan pribadi"),
+        "privateSharing":
+            MessageLookupByLibrary.simpleMessage("Berbagi secara privat"),
         "publicLinkCreated":
             MessageLookupByLibrary.simpleMessage("Link publik dibuat"),
         "publicLinkEnabled":
             MessageLookupByLibrary.simpleMessage("Link publik aktif"),
         "radius": MessageLookupByLibrary.simpleMessage("Radius"),
+        "raiseTicket":
+            MessageLookupByLibrary.simpleMessage("Buat tiket dukungan"),
         "rateTheApp": MessageLookupByLibrary.simpleMessage("Nilai app ini"),
         "rateUs": MessageLookupByLibrary.simpleMessage("Beri kami nilai"),
         "rateUsOnStore": m47,
@@ -1197,6 +1218,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "sendLink": MessageLookupByLibrary.simpleMessage("Kirim link"),
         "serverEndpoint":
             MessageLookupByLibrary.simpleMessage("Endpoint server"),
+        "sessionExpired":
+            MessageLookupByLibrary.simpleMessage("Sesi telah berakhir"),
         "setAPassword": MessageLookupByLibrary.simpleMessage("Atur sandi"),
         "setAs": MessageLookupByLibrary.simpleMessage("Pasang sebagai"),
         "setCover": MessageLookupByLibrary.simpleMessage("Ubah sampul"),
@@ -1295,6 +1318,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Keluarga"),
         "storageBreakupYou": MessageLookupByLibrary.simpleMessage("Kamu"),
         "storageInGB": m60,
+        "storageLimitExceeded": MessageLookupByLibrary.simpleMessage(
+            "Batas penyimpanan terlampaui"),
         "storageUsageInfo": m61,
         "strongStrength": MessageLookupByLibrary.simpleMessage("Kuat"),
         "subAlreadyLinkedErrMessage": m62,
@@ -1405,6 +1430,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Pembaruan tersedia"),
         "updatingFolderSelection": MessageLookupByLibrary.simpleMessage(
             "Memperbaharui pilihan folder..."),
+        "upgrade": MessageLookupByLibrary.simpleMessage("Tingkatkan"),
         "uploadingFilesToAlbum":
             MessageLookupByLibrary.simpleMessage("Mengunggah file ke album..."),
         "upto50OffUntil4thDec": MessageLookupByLibrary.simpleMessage(

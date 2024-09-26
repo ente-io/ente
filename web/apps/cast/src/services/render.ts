@@ -28,7 +28,7 @@ import HTTPService from "@ente/shared/network/HTTPService";
 import type { AxiosResponse } from "axios";
 import type { CastData } from "services/cast-data";
 import { detectMediaMIMEType } from "services/detect-type";
-import { isChromecast } from "./chromecast";
+import { isChromecast } from "./chromecast-receiver";
 
 /**
  * An async generator function that loops through all the files in the

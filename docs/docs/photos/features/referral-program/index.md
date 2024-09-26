@@ -56,9 +56,6 @@ Code_.
 
 </div>
 
-Please note that referral codes should be applied within one month of account
-creation to claim free storage.
-
 ---
 
 More questions? Drop a mail to [referrals@ente.io](mailto:referrals@ente.io),

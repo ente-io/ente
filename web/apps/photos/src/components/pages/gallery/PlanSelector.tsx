@@ -185,7 +185,7 @@ function PlanSelectorCard(props: PlanSelectorCardProps) {
                 } catch (e) {
                     props.setLoading(false);
                     appContext.setDialogMessage({
-                        title: t("ERROR"),
+                        title: t("error"),
                         content: t("SUBSCRIPTION_PURCHASE_FAILED"),
                         close: { variant: "critical" },
                     });
@@ -695,7 +695,7 @@ function ManageSubscription({
         } catch (e) {
             log.error("Could not redirect to family portal", e);
             setDialogMessage({
-                title: t("ERROR"),
+                title: t("error"),
                 content: t("UNKNOWN_ERROR"),
                 close: { variant: "critical" },
             });

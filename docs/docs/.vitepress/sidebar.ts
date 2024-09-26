@@ -254,6 +254,10 @@ export const sidebar = [
                         text: "Using external S3",
                         link: "/self-hosting/guides/external-s3",
                     },
+                    {
+                        text: "DB migration",
+                        link: "/self-hosting/guides/db-migration",
+                    },
                 ],
             },
             {

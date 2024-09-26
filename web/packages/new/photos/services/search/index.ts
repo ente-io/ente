@@ -4,12 +4,12 @@ import { ComlinkWorker } from "@/base/worker/comlink-worker";
 import { FileType } from "@/media/file-type";
 import i18n, { t } from "i18next";
 import { clipMatches, isMLEnabled, isMLSupported } from "../ml";
-import type { Person } from "../ml/cgroups";
 import type {
     LabelledFileType,
     LabelledSearchDateComponents,
     LocalizedSearchData,
     SearchCollectionsAndFiles,
+    SearchPerson,
     SearchSuggestion,
 } from "./types";
 import type { SearchWorker } from "./worker";
@@ -58,9 +58,9 @@ export const setSearchCollectionsAndFiles = (cf: SearchCollectionsAndFiles) =>
     void worker().then((w) => w.setCollectionsAndFiles(cf));
 
 /**
- * Set the people that we should search across.
+ * Set the (named) people that we should search across.
  */
-export const setSearchPeople = (people: Person[]) =>
+export const setSearchPeople = (people: SearchPerson[]) =>
     void worker().then((w) => w.setPeople(people));
 
 /**

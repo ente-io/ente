@@ -180,7 +180,7 @@ class SearchService {
   Future<List<GenericSearchResult>> getMagicSectionResults(
     BuildContext context,
   ) async {
-    if (localSettings.isMLIndexingEnabled && flagService.internalUser) {
+    if (localSettings.isMLIndexingEnabled) {
       return MagicCacheService.instance.getMagicGenericSearchResult(context);
     } else {
       return <GenericSearchResult>[];

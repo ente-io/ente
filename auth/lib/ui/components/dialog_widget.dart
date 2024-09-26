@@ -77,17 +77,19 @@ class DialogWidget extends StatelessWidget {
         color: Colors.transparent,
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ContentContainer(
-                title: title,
-                body: body,
-                icon: icon,
-              ),
-              const SizedBox(height: 36),
-              Actions(buttons),
-            ],
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ContentContainer(
+                  title: title,
+                  body: body,
+                  icon: icon,
+                ),
+                const SizedBox(height: 36),
+                Actions(buttons),
+              ],
+            ),
           ),
         ),
       ),

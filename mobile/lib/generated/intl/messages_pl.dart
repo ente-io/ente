@@ -657,6 +657,27 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Uwierzytelnianie dwustopniowe jest wyłączane..."),
         "discord": MessageLookupByLibrary.simpleMessage("Discord"),
+        "discover": MessageLookupByLibrary.simpleMessage("Odkryj"),
+        "discover_babies": MessageLookupByLibrary.simpleMessage("Niemowlęta"),
+        "discover_celebrations":
+            MessageLookupByLibrary.simpleMessage("Uroczystości"),
+        "discover_food": MessageLookupByLibrary.simpleMessage("Jedzenie"),
+        "discover_greenery": MessageLookupByLibrary.simpleMessage("Zieleń"),
+        "discover_hills": MessageLookupByLibrary.simpleMessage("Wzgórza"),
+        "discover_identity": MessageLookupByLibrary.simpleMessage("Tożsamość"),
+        "discover_memes": MessageLookupByLibrary.simpleMessage("Memy"),
+        "discover_notes": MessageLookupByLibrary.simpleMessage("Notatki"),
+        "discover_pets":
+            MessageLookupByLibrary.simpleMessage("Zwierzęta domowe"),
+        "discover_receipts": MessageLookupByLibrary.simpleMessage("Paragony"),
+        "discover_screenshots":
+            MessageLookupByLibrary.simpleMessage("Zrzuty ekranu"),
+        "discover_selfies": MessageLookupByLibrary.simpleMessage("Selfie"),
+        "discover_sunset":
+            MessageLookupByLibrary.simpleMessage("Zachód słońca"),
+        "discover_visiting_cards":
+            MessageLookupByLibrary.simpleMessage("Wizytówki"),
+        "discover_wallpapers": MessageLookupByLibrary.simpleMessage("Tapety"),
         "dismiss": MessageLookupByLibrary.simpleMessage("Odrzuć"),
         "distanceInKMUnit": MessageLookupByLibrary.simpleMessage("km"),
         "doNotSignOut":

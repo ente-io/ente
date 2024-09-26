@@ -131,6 +131,10 @@ class MLService {
         );
         await clusterAllImages();
       }
+      if (_mlControllerStatus == true) {
+        // refresh discover section
+        MagicCacheService.instance.updateCache().ignore();
+      }
       await indexAllImages();
       if ((await MLDataDB.instance.getUnclusteredFaceCount()) > 0) {
         await clusterAllImages();
@@ -207,6 +211,9 @@ class MLService {
           (previousValue, element) => previousValue + (element ? 1 : 0),
         );
         fileAnalyzedCount += sumFutures;
+      }
+      if (fileAnalyzedCount > 0) {
+        MagicCacheService.instance.queueUpdate('fileIndexed');
       }
       _logger.info(
         "`indexAllImages()` finished. Analyzed $fileAnalyzedCount images, in ${stopwatch.elapsed.inSeconds} seconds (avg of ${stopwatch.elapsed.inSeconds / fileAnalyzedCount} seconds per image)",

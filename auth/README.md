@@ -12,7 +12,7 @@ multi-device sync.
 ### Android
 
 This repository's [GitHub
-releases](https://github.com/ente-io/ente/releases?q=tag%3Aauth-v3)
+releases](https://github.com/ente-io/ente/releases?q=tag%3Aauth-v4)
 contains APKs, built straight from source. These builds keep themselves updated,
 without relying on third party stores.
 
@@ -33,7 +33,7 @@ You can alternatively install the build from PlayStore or F-Droid.
 
 ### Desktop
 
-You can [**download**](https://github.com/ente-io/ente/releases?q=tag%3Aauth-v3)
+You can [**download**](https://github.com/ente-io/ente/releases?q=tag%3Aauth-v4)
 a native desktop app from this repository's GitHub releases. The desktop app
 works on Windows, Linux and macOS.
 

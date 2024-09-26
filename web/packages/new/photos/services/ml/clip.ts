@@ -1,7 +1,6 @@
 import type { ElectronMLWorker } from "@/base/types/ipc";
 import type { ImageBitmapAndData } from "./blob";
 import { getCLIPIndexes } from "./db";
-import { pixelRGBBilinear } from "./image";
 import { dotProduct, norm } from "./math";
 import type { CLIPMatches } from "./worker-types";
 
@@ -113,52 +112,15 @@ const computeEmbedding = async (
     imageData: ImageData,
     electron: ElectronMLWorker,
 ): Promise<Float32Array> => {
-    const clipInput = convertToCLIPInput(imageData);
-    return normalized(await electron.computeCLIPImageEmbedding(clipInput));
-};
-
-/**
- * Convert {@link imageData} into the format that the MobileCLIP model expects.
- */
-const convertToCLIPInput = (imageData: ImageData) => {
-    const [requiredWidth, requiredHeight] = [256, 256];
-
-    const { width, height, data: pixelData } = imageData;
-
-    // Maintain aspect ratio.
-    const scale = Math.max(requiredWidth / width, requiredHeight / height);
-
-    // Perform antialiasing if downscaling.
-    const antialias = scale < 0.8;
-
-    const scaledWidth = Math.round(width * scale);
-    const scaledHeight = Math.round(height * scale);
-    const widthOffset = Math.max(0, scaledWidth - requiredWidth) / 2;
-    const heightOffset = Math.max(0, scaledHeight - requiredHeight) / 2;
-
-    const clipInput = new Float32Array(3 * requiredWidth * requiredHeight);
-
-    // Populate the Float32Array with normalized pixel values.
-    let pi = 0;
-    const cOffsetG = requiredHeight * requiredWidth; // ChannelOffsetGreen
-    const cOffsetB = 2 * requiredHeight * requiredWidth; // ChannelOffsetBlue
-    for (let h = 0 + heightOffset; h < scaledHeight - heightOffset; h++) {
-        for (let w = 0 + widthOffset; w < scaledWidth - widthOffset; w++) {
-            const { r, g, b } = pixelRGBBilinear(
-                w / scale,
-                h / scale,
-                pixelData,
-                width,
-                height,
-                antialias,
-            );
-            clipInput[pi] = r / 255.0;
-            clipInput[pi + cOffsetG] = g / 255.0;
-            clipInput[pi + cOffsetB] = b / 255.0;
-            pi++;
-        }
-    }
-    return clipInput;
+    // In contrast to the face detection model, the image pre-preprocessing
+    // happens within the model itself, using ONNX primitives. This is more
+    // performant and also saves us from having to reinvent (say) the
+    // antialising wheels.
+    const { height, width, data: pixelData } = imageData;
+    const inputShape = [height, width, 4]; // [H, W, C]
+    return normalized(
+        await electron.computeCLIPImageEmbedding(pixelData, inputShape),
+    );
 };
 
 const normalized = (embedding: Float32Array) => {

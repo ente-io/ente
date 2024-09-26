@@ -12,6 +12,7 @@ const (
 const (
 	CollectionsSyncKey        = "lastCollectionSync"
 	CollectionsFileSyncKeyFmt = "collectionFilesSync-%d"
+	AuthenticatorSyncKey      = "lastAuthenticatorSync"
 )
 
 type ContextKey string

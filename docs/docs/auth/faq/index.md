@@ -11,13 +11,9 @@ All codes you backup via Ente is stored end-to-end encrypted. This means only
 you can access your codes. Our apps are open source and our cryptography has
 been externally audited.
 
-### Can I access my codes on desktop?
-
-You can access your codes on the web at [auth.ente.io](https://auth.ente.io).
-
 ### How can I delete or edit codes?
 
-You can delete or edit a code by swiping left on that item.
+You can delete or edit a code long press (or right click on desktop) on that item.
 
 ### How can I support this project?
 
@@ -39,6 +35,10 @@ Usually this discrepancy occurs because the time in your browser might be
 incorrect. In particular, multiple users who have reported that Firefox provides
 incorrect time when various privacy settings are enabled.
 
+### Can I access my codes on web?
+
+You can access your codes on the web at [auth.ente.io](https://auth.ente.io).
+
 ### Does Ente Authenticator require an account?
 
 Answer: No, Ente Authenticator does not require an account. You can choose to
@@ -48,6 +48,10 @@ use the app without backups if you prefer.
 
 Yes, you can download the Ente app on multiple devices and sync the codes,
 end-to-end encrypted.
+
+### What information about my codes is stored on Ente server?
+
+Due to E2EE, the server doesn't know anything about the code. Everything is encrypted, including the tags, type, account, issuer, notes, and pinned or trash status, etc."
 
 ### What does it mean when I receive a message saying my current device is not powerful enough to verify my password?
 
