@@ -10,7 +10,6 @@
 import { pt } from "@/base/i18n";
 import { addPerson, type Person } from "@/new/photos/services/ml/people";
 import type { SearchOption } from "@/new/photos/services/search/types";
-import { wait } from "@/utils/promise";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
 import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
 import AddIcon from "@mui/icons-material/Add";
@@ -18,7 +17,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
 import { IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { t } from "i18next";
-import React, { useCallback, useState } from "react";
+import React, { useState } from "react";
 import type { FaceCluster } from "../../services/ml/cluster";
 import type { CGroupUserEntity } from "../../services/user-entity";
 import type { NewAppContextPhotos } from "../../types/context";
@@ -121,13 +120,11 @@ const CGroupPersonOptions: React.FC<CGroupPersonOptionsProps> = ({
 };
 
 interface ClusterPersonOptionsProps {
-    person: Person;
     cluster: FaceCluster;
     appContext: NewAppContextPhotos;
 }
 
 const ClusterPersonOptions: React.FC<ClusterPersonOptionsProps> = ({
-    person,
     cluster,
     appContext,
 }) => {
@@ -135,22 +132,16 @@ const ClusterPersonOptions: React.FC<ClusterPersonOptionsProps> = ({
 
     const [openAddNameInput, setOpenAddNameInput] = useState(false);
 
-    const addPersonWithName = useCallback(
-        async (name: string) => {
-            startLoading();
-            try {
-                console.log("adding", name, person);
-                await wait(2000);
-                throw new Error("test");
-                await addPerson(name, { id: "", faces: [] } /* TODO-Cluster*/);
-            } finally {
-                finishLoading();
-            }
-        },
-        [person, startLoading, finishLoading],
-    );
-
     const handleAddPerson = () => setOpenAddNameInput(true);
+
+    const addPersonWithName = async (name: string) => {
+        startLoading();
+        try {
+            await addPerson(name, cluster);
+        } finally {
+            finishLoading();
+        }
+    };
 
     return (
         <>
