@@ -19,7 +19,8 @@ import { isInternalUser } from "../feature-flags";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
 import { setSearchPeople } from "../search";
 import type { UploadItem } from "../upload/types";
-import { pullUserEntities } from "../user-entity";
+import { addUserEntity, pullUserEntities } from "../user-entity";
+import type { FaceCluster } from "./cluster";
 import { regenerateFaceCrops } from "./crop";
 import { clearMLDB, getFaceIndex, getIndexableAndIndexedCounts } from "./db";
 import { reconstructPeople, type Person } from "./people";
@@ -551,10 +552,11 @@ const updatePeople = async () => {
     const people = await reconstructPeople();
 
     // Notify the search subsystem of the update (search only uses named ones).
-    const namedPeople = people
-        .map((p) => (p.name ? { name: p.name, person: p } : undefined))
-        .filter((p) => !!p);
-    setSearchPeople(namedPeople);
+    setSearchPeople(
+        people
+            .map((p) => (p.name ? { name: p.name, person: p } : undefined))
+            .filter((p) => !!p),
+    );
 
     // Update our in-memory list of people.
     setPeopleSnapshot(people);
@@ -628,4 +630,25 @@ const regenerateFaceCropsIfNeeded = async (enteFile: EnteFile) => {
     for (const id of faceIDs) if (!(await cache.has(id))) needsRegen = true;
 
     if (needsRegen) await regenerateFaceCrops(enteFile, index);
+};
+
+/**
+ * Convert a cluster into a named cgroup, updating both remote and local state.
+ *
+ * @param name Name of the new cgroup user entity.
+ *
+ * @param cluster The underlying cluster to use to populate the cgroup.
+ */
+export const addPerson = async (name: string, cluster: FaceCluster) => {
+    const masterKey = await masterKeyFromSession();
+    await addUserEntity(
+        "cgroup",
+        {
+            name,
+            assigned: [cluster],
+            isHidden: false,
+        },
+        masterKey,
+    );
+    return updatePeople();
 };

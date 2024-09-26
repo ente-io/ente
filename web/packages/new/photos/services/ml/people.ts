@@ -1,8 +1,7 @@
-import { masterKeyFromSession } from "@/base/session-store";
 import { wipClusterEnable } from ".";
 import type { EnteFile } from "../../types/file";
 import { getLocalFiles } from "../files";
-import { addUserEntity, savedCGroups, type CGroup } from "../user-entity";
+import { savedCGroups, type CGroup } from "../user-entity";
 import type { FaceCluster } from "./cluster";
 import { getFaceIndexes, savedFaceClusters } from "./db";
 import { fileIDFromFaceID } from "./face";
@@ -261,21 +260,3 @@ export const reconstructPeople = async (): Promise<Person[]> => {
  */
 const resolvedAvatarFaceID = (avatarFaceID: string | undefined) =>
     avatarFaceID?.split("_").length == 1 ? undefined : avatarFaceID;
-
-/**
- * Convert a cluster into a named cgroup, updating both remote and local state.
- *
- * @param name Name of the new cgroup user entity.
- *
- * @param cluster The underlying cluster to use to populate the cgroup.
- */
-export const addPerson = async (name: string, cluster: FaceCluster) =>
-    addUserEntity(
-        "cgroup",
-        {
-            name,
-            assigned: [cluster],
-            isHidden: false,
-        },
-        await masterKeyFromSession(),
-    );
