@@ -53,12 +53,12 @@ export const SearchResultsHeader: React.FC<SearchResultsHeaderProps> = ({
     </GalleryItemsHeaderAdapter>
 );
 
-interface PeopleListHeaderProps {
+interface PeopleHeaderProps {
     person: Person;
     appContext: NewAppContextPhotos;
 }
 
-export const PersonListHeader: React.FC<PeopleListHeaderProps> = ({
+export const PeopleHeader: React.FC<PeopleHeaderProps> = ({
     person,
     appContext,
 }) => {

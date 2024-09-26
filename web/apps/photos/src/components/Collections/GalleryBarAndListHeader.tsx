@@ -1,5 +1,5 @@
 import type { Collection } from "@/media/collection";
-import { PersonListHeader } from "@/new/photos/components/Gallery";
+import { PeopleHeader } from "@/new/photos/components/Gallery";
 import {
     GalleryBarImpl,
     type GalleryBarImplProps,
@@ -172,7 +172,7 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
                         onCollectionCast={() => setOpenAlbumCastDialog(true)}
                     />
                 ) : (
-                    <PersonListHeader
+                    <PeopleHeader
                         person={ensure(activePerson)}
                         appContext={appContext}
                     />
