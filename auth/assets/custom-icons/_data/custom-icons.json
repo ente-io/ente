@@ -491,6 +491,9 @@
     {
       "title": "okx",
       "hex": "000000"
+      "altNames": [
+        "欧易"
+      ]
     },
     {
       "title": "Parsec"
