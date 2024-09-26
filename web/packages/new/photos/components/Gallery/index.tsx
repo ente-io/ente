@@ -80,7 +80,6 @@ export const PeopleHeader: React.FC<PeopleHeaderProps> = ({
                     />
                 ) : (
                     <ClusterPersonOptions
-                        person={person}
                         cluster={person.cluster}
                         appContext={appContext}
                     />
