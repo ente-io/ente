@@ -553,7 +553,7 @@ export default function Gallery() {
             );
         } else if (barMode == "people") {
             const activePerson = ensure(
-                people.find((p) => p.id == activePersonID),
+                people.find((p) => p.id == activePersonID) ?? people[0],
             );
             const pfSet = new Set(activePerson.fileIDs);
             filteredFiles = getUniqueFiles(
@@ -1058,7 +1058,7 @@ export default function Gallery() {
         // when the user clicks the "People" header in the search empty state (it
         // is guaranteed that this header will only be shown if there is at
         // least one person).
-        setActivePersonID(person.id ?? ensure(people[0]).id);
+        setActivePersonID(person?.id ?? ensure(people[0]).id);
         setBarMode("people");
     };
 

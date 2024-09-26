@@ -100,9 +100,10 @@ export interface GalleryBarImplProps {
      */
     activePersonID: string | undefined;
     /**
-     * Called when the user selects a new person in the bar.
+     * Called when the selection should be moved to a new person in the bar, or
+     * reset to the default state (when {@link person} is `undefined`).
      */
-    onSelectPerson: (person: Person) => void;
+    onSelectPerson: (person: Person | undefined) => void;
 }
 
 export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
@@ -212,7 +213,8 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                       type: "people",
                       people,
                       activePerson: ensure(
-                          people.find((p) => p.id == activePersonID),
+                          people.find((p) => p.id == activePersonID) ??
+                              people[0],
                       ),
                       onSelectPerson,
                   },

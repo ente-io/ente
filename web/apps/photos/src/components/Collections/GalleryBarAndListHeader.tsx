@@ -174,9 +174,10 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
                 ) : (
                     <PeopleHeader
                         person={ensure(
-                            people.find((p) => p.id == activePersonID),
+                            people.find((p) => p.id == activePersonID) ??
+                                people[0],
                         )}
-                        appContext={appContext}
+                        {...{ onSelectPerson, appContext }}
                     />
                 ),
             itemType: ITEM_TYPE.HEADER,

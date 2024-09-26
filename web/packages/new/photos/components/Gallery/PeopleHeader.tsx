@@ -28,17 +28,18 @@ import type { CGroup } from "../../services/user-entity";
 import type { NewAppContextPhotos } from "../../types/context";
 import { SpaceBetweenFlex } from "../mui-custom";
 import { NameInputDialog } from "../NameInputDialog";
-import { useWrapLoadError } from "../use-wrap";
+import type { GalleryBarImplProps } from "./BarImpl";
 import { GalleryItemsHeaderAdapter, GalleryItemsSummary } from "./ListHeader";
 
-interface PeopleHeaderProps {
+type PeopleHeaderProps = Pick<GalleryBarImplProps, "onSelectPerson"> & {
     person: Person;
     appContext: NewAppContextPhotos;
-}
+};
 
 export const PeopleHeader: React.FC<PeopleHeaderProps> = ({
     person,
     appContext,
+    onSelectPerson,
 }) => {
     return (
         <GalleryItemsHeaderAdapter>
@@ -53,7 +54,7 @@ export const PeopleHeader: React.FC<PeopleHeaderProps> = ({
                 {person.type == "cgroup" ? (
                     <CGroupPersonOptions
                         cgroup={person.cgroup}
-                        appContext={appContext}
+                        {...{ onSelectPerson, appContext }}
                     />
                 ) : (
                     <ClusterPersonOptions
@@ -66,19 +67,24 @@ export const PeopleHeader: React.FC<PeopleHeaderProps> = ({
     );
 };
 
-interface CGroupPersonOptionsProps {
+type CGroupPersonOptionsProps = Pick<
+    PeopleHeaderProps,
+    "appContext" | "onSelectPerson"
+> & {
     cgroup: CGroup;
-    appContext: NewAppContextPhotos;
-}
+};
 
 const CGroupPersonOptions: React.FC<CGroupPersonOptionsProps> = ({
     cgroup,
     appContext,
+    onSelectPerson,
 }) => {
-    const { startLoading, finishLoading, setDialogBoxAttributesV2 } =
-        appContext;
-
-    const wrap = useWrapLoadError(appContext);
+    const {
+        startLoading,
+        finishLoading,
+        onGenericError,
+        setDialogBoxAttributesV2,
+    } = appContext;
 
     const [openAddNameInput, setOpenAddNameInput] = useState(false);
 
@@ -102,10 +108,23 @@ const CGroupPersonOptions: React.FC<CGroupPersonOptionsProps> = ({
             close: { text: t("cancel") },
             proceed: {
                 text: t("RESET"),
-                action: wrap(() => deletePerson(cgroup)),
+                action: doDeletePerson,
             },
             buttonDirection: "row",
         });
+
+    const doDeletePerson = async () => {
+        startLoading();
+        try {
+            await deletePerson(cgroup);
+            // Reset the selection to the default state.
+            onSelectPerson(undefined);
+        } catch (e) {
+            onGenericError(e);
+        } finally {
+            finishLoading();
+        }
+    };
 
     return (
         <>
@@ -142,10 +161,9 @@ const CGroupPersonOptions: React.FC<CGroupPersonOptionsProps> = ({
     );
 };
 
-interface ClusterPersonOptionsProps {
+type ClusterPersonOptionsProps = Pick<PeopleHeaderProps, "appContext"> & {
     cluster: FaceCluster;
-    appContext: NewAppContextPhotos;
-}
+};
 
 const ClusterPersonOptions: React.FC<ClusterPersonOptionsProps> = ({
     cluster,
