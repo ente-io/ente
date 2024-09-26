@@ -16,7 +16,7 @@ import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option"
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
-import { Typography } from "@mui/material";
+import { IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { t } from "i18next";
 import React, { useCallback, useState } from "react";
 import type { FaceCluster } from "../../services/ml/cluster";
@@ -154,18 +154,26 @@ const ClusterPersonOptions: React.FC<ClusterPersonOptionsProps> = ({
 
     return (
         <>
-            <OverflowMenu
-                ariaControls={"person-options"}
-                triggerButtonIcon={<MoreHoriz />}
-            >
-                <OverflowMenuOption
-                    startIcon={<AddIcon />}
-                    centerAlign
-                    onClick={handleAddPerson}
+            <Stack direction="row" sx={{ alignItems: "center", gap: 2 }}>
+                <Tooltip title={pt("Add a name")}>
+                    <IconButton onClick={handleAddPerson}>
+                        <AddIcon />
+                    </IconButton>
+                </Tooltip>
+
+                <OverflowMenu
+                    ariaControls={"person-options"}
+                    triggerButtonIcon={<MoreHoriz />}
                 >
-                    {pt("Add a name")}
-                </OverflowMenuOption>
-            </OverflowMenu>
+                    <OverflowMenuOption
+                        startIcon={<AddIcon />}
+                        centerAlign
+                        onClick={handleAddPerson}
+                    >
+                        {pt("Add a name")}
+                    </OverflowMenuOption>
+                </OverflowMenu>
+            </Stack>
 
             <NameInputDialog
                 open={openAddNameInput}
