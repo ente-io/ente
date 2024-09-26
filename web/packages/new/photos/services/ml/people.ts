@@ -231,8 +231,8 @@ export const reconstructPeople = async (): Promise<Person[]> => {
             .map((id) => personFaceByID.get(id))
             .filter((f) => !!f);
 
-        // Ignore this cluster if there are no visible faces left it in.
-        if (!faces.length) return undefined;
+        // Ignore clusters with too few visible faces.
+        if (faces.length < 10) return undefined;
 
         const topFace = faces.reduce((top, face) =>
             top.score > face.score ? top : face,
