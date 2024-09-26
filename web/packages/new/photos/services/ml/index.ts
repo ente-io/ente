@@ -551,11 +551,10 @@ const updatePeople = async () => {
     const people = await reconstructPeople();
 
     // Notify the search subsystem of the update (search only uses named ones).
-    // See: [Note: strict mode migration]
-    //
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    setSearchPeople(people.filter((p) => typeof p.name !== "undefined"));
+    const namedPeople = people
+        .map((p) => (p.name ? { name: p.name, person: p } : undefined))
+        .filter((p) => !!p);
+    setSearchPeople(namedPeople);
 
     // Update our in-memory list of people.
     setPeopleSnapshot(people);

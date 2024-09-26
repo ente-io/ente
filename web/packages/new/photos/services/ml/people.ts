@@ -131,10 +131,6 @@ export type Person = (
     displayFaceFile: EnteFile;
 };
 
-export type NamedPerson = Omit<Person, "name"> & {
-    name: string;
-};
-
 /**
  * Construct in-memory people using the data present locally, ignoring faces
  * belonging to deleted and hidden files.
