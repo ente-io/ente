@@ -187,59 +187,6 @@ export const clusterFaces = async (
 };
 
 /**
- * Use the output of the clustering phase to (a) update any remote cgroups that
- * have changed, and (b) update our locally persisted clusters.
- */
-export const reconcileClusters = async (clusters: FaceCluster[]) => {
-    // Index clusters by their ID for fast lookup.
-    const clusterByID = new Map(clusters.map((c) => [c.id, c]));
-
-    // Get the existing remote cluster groups.
-    const cgroupEntities = await savedCGroupUserEntities();
-
-    // Find the cgroups that have changed since we started.
-    const changedCGroupEntities = cgroupEntities
-        .map((cgroupEntity) => {
-            for (const oldCluster of cgroupEntity.data.assigned) {
-                // The clustering algorithm does not remove any existing faces, it
-                // can only add new ones to the cluster. So we can use the count as
-                // an indication if something changed.
-                const newCluster = ensure(clusterByID.get(oldCluster.id));
-                if (oldCluster.faces.length != newCluster.faces.length) {
-                    return {
-                        ...cgroupEntity,
-                        data: {
-                            ...cgroupEntity.data,
-                            assigned: cgroupEntity.data.assigned.map(({ id }) =>
-                                ensure(clusterByID.get(id)),
-                            ),
-                        },
-                    };
-                }
-            }
-            return undefined;
-        })
-        .filter((g) => !!g);
-
-    if (changedCGroupEntities.length) {
-        log.info(`Updating ${changedCGroupEntities.length} remote cgroups`);
-        // TODO-Cluster do it
-    }
-
-    // Find which clusters are part of remote cgroups.
-    const isRemoteClusterID = new Set<string>();
-    for (const cgroupEntity of cgroupEntities) {
-        for (const cluster of cgroupEntity.data.assigned)
-            isRemoteClusterID.add(cluster.id);
-    }
-
-    // Locally save clusters that are not part of any remote cgroup.
-    await saveFaceClusters(
-        clusters.filter(({ id }) => !isRemoteClusterID.has(id)),
-    );
-};
-
-/**
  * A generator function that returns a stream of eligible {@link ClusterFace}s
  * by flattening all the the faces present in the given {@link faceIndices}.
  *
@@ -394,4 +341,57 @@ const clusterBatchLinear = async (
             state.clusters.push(cluster);
         }
     }
+};
+
+/**
+ * Use the output of the clustering phase to (a) update any remote cgroups that
+ * have changed, and (b) update our locally persisted clusters.
+ */
+export const reconcileClusters = async (clusters: FaceCluster[]) => {
+    // Index clusters by their ID for fast lookup.
+    const clusterByID = new Map(clusters.map((c) => [c.id, c]));
+
+    // Get the existing remote cluster groups.
+    const cgroupEntities = await savedCGroupUserEntities();
+
+    // Find the cgroups that have changed since we started.
+    const changedCGroupEntities = cgroupEntities
+        .map((cgroupEntity) => {
+            for (const oldCluster of cgroupEntity.data.assigned) {
+                // The clustering algorithm does not remove any existing faces, it
+                // can only add new ones to the cluster. So we can use the count as
+                // an indication if something changed.
+                const newCluster = ensure(clusterByID.get(oldCluster.id));
+                if (oldCluster.faces.length != newCluster.faces.length) {
+                    return {
+                        ...cgroupEntity,
+                        data: {
+                            ...cgroupEntity.data,
+                            assigned: cgroupEntity.data.assigned.map(({ id }) =>
+                                ensure(clusterByID.get(id)),
+                            ),
+                        },
+                    };
+                }
+            }
+            return undefined;
+        })
+        .filter((g) => !!g);
+
+    if (changedCGroupEntities.length) {
+        log.info(`Updating ${changedCGroupEntities.length} remote cgroups`);
+        // TODO-Cluster do it
+    }
+
+    // Find which clusters are part of remote cgroups.
+    const isRemoteClusterID = new Set<string>();
+    for (const cgroupEntity of cgroupEntities) {
+        for (const cluster of cgroupEntity.data.assigned)
+            isRemoteClusterID.add(cluster.id);
+    }
+
+    // Locally save clusters that are not part of any remote cgroup.
+    await saveFaceClusters(
+        clusters.filter(({ id }) => !isRemoteClusterID.has(id)),
+    );
 };
