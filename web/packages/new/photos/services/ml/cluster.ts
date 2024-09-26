@@ -172,11 +172,8 @@ export const clusterFaces = async (
         );
     }
 
-    // Prune clusters that are smaller than the threshold.
-    const validClusters = clusters.filter((cs) => cs.faces.length > 2);
-
     // Sort clusters by the number of faces in them.
-    const sortedClusters = validClusters.sort(
+    const sortedClusters = clusters.sort(
         (a, b) => b.faces.length - a.faces.length,
     );
 
