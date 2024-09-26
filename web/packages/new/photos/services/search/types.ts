@@ -6,7 +6,7 @@
 import type { Location } from "@/base/types";
 import type { Collection } from "@/media/collection";
 import { FileType } from "@/media/file-type";
-import type { Person } from "@/new/photos/services/ml/cgroups";
+import type { Person } from "@/new/photos/services/ml/people";
 import type { EnteFile } from "@/new/photos/types/file";
 import type { LocationTag } from "../user-entity";
 
@@ -114,3 +114,16 @@ export type City = Location & {
     /** Name of the city. */
     name: string;
 };
+
+export type NamedPerson = Person & {
+    name: string;
+};
+
+/**
+ * What we want is NamedPerson, but I can't get it to TypeScript to accept it in
+ * our usage contexts. This is a workaround.
+ */
+export interface SearchPerson {
+    person: Person;
+    name: string;
+}

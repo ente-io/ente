@@ -12,5 +12,6 @@ export const RippleDisabledButton: React.FC<ButtonProps> = (props) => (
 export const FocusVisibleButton = styled(RippleDisabledButton)`
     &.Mui-focusVisible {
         outline: 1px solid ${(props) => props.theme.colors.stroke.base};
+        outline-offset: 2px;
     }
 `;

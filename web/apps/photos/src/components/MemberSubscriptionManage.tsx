@@ -20,7 +20,7 @@ export function MemberSubscriptionManage({ open, userDetails, onClose }) {
             await billingService.leaveFamily();
         } catch (e) {
             setDialogMessage({
-                title: t("ERROR"),
+                title: t("error"),
                 close: { variant: "critical" },
                 content: t("UNKNOWN_ERROR"),
             });

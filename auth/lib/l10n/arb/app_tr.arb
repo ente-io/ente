@@ -19,6 +19,20 @@
   "pleaseVerifyDetails": "Lütfen bilgileri doğrulayın ve tekrar deneyin",
   "codeIssuerHint": "Yayınlayan",
   "codeSecretKeyHint": "Gizli Anahtar",
+  "secret": "Gizli",
+  "all": "Tümü",
+  "notes": "Notlar",
+  "notesLengthLimit": "Notlar en fazla {count} karakter uzunluğunda olabilir",
+  "@notesLengthLimit": {
+    "description": "Text to indicate the maximum number of characters allowed for notes",
+    "placeholders": {
+      "count": {
+        "description": "The maximum number of characters allowed for notes",
+        "type": "int",
+        "example": "100"
+      }
+    }
+  },
   "codeAccountHint": "Hesap (ornek@domain.com)",
   "codeTagHint": "Etiket",
   "accountKeyType": "Anahtar türü",
@@ -34,6 +48,9 @@
   "nextTotpTitle": "sonraki",
   "deleteCodeTitle": "Kodu silmek istiyor musunuz?",
   "deleteCodeMessage": "Bu kodu silmek istediğinize emin misiniz? Bu geri alınamaz bir işlemdir.",
+  "trashCode": "Kod çöpe atılsın mı?",
+  "trashCodeMessage": "{account} için kodu çöpe atmak istediğinize emin misiniz?",
+  "trash": "Çöp",
   "viewLogsAction": "Günlüğü görüntüle",
   "sendLogsDescription": "Günlüğünüz hatanızı çözmemize yardımcı olacaktır. Hassas bilginin kaydedilmediğine dikkat etsek de bu günlükleri paylaşmadan önce kontrol etmenizi isteriz.",
   "preparingLogsTitle": "Günlük hazırlanıyor...",
@@ -100,6 +117,7 @@
   "emailVerificationToggle": "E-posta doğrulama",
   "emailVerificationEnableWarning": "E-postanız için 2FA'yı bizde saklıyorsanız, e-posta doğrulamasını açmak bir kilitlenmeye neden olabilir. Bir hizmetin dışında kalırsanız, diğerine giriş yapamayabilirsiniz.",
   "authToChangeEmailVerificationSetting": "E-posta doğrulamasını değiştirmek için lütfen kimlik doğrulaması yapın",
+  "authenticateGeneric": "Lütfen doğrulama yapın",
   "authToViewYourRecoveryKey": "Kurtarma anahtarınızı görmek için lütfen kimliğinizi doğrulayın",
   "authToChangeYourEmail": "Epostanızı değiştirmek için lütfen kimliğinizi doğrulayın",
   "authToChangeYourPassword": "Şifrenizi değiştirmek için lütfen kimliğinizi doğrulayın",
@@ -137,7 +155,8 @@
   "leaveFamily": "Aile planından ayrıl",
   "leaveFamilyMessage": "Aile planından ayrılmak istediğinize emin misiniz?",
   "inFamilyPlanMessage": "Aile planı kullanıyorsunuz!",
-  "swipeHint": "Kodları düzenlemek ya da kaldırmak için sola kaydırın",
+  "hintForMobile": "Bir koda uzun basarak düzenleyin veya silin.",
+  "hintForDesktop": "Bir koda sağ tıklayıp düzenleyin veya silin.",
   "scan": "Tara",
   "scanACode": "Bir kodu tarayın",
   "verify": "Doğrula",
@@ -193,6 +212,10 @@
   "scanAQrCode": "Bir QR kod tarayın",
   "enterDetailsManually": "Bilgileri elle girin",
   "edit": "Düzenle",
+  "share": "Paylaş",
+  "shareCodes": "Kodları paylaş",
+  "shareCodesDuration": "Kodları paylaşma süresini seçin.",
+  "restore": "Geri yükle",
   "copiedToClipboard": "Panoya kopyalandı",
   "copiedNextToClipboard": "Sonraki kod panoya kopyalandı",
   "error": "Hata",
@@ -346,6 +369,7 @@
   "sigInBackupReminder": "Geri yükleyebileceğiniz bir yedeğiniz olduğundan emin olmak için lütfen kodlarınızı dışa aktarın.",
   "offlineModeWarning": "Yedekleme yapmadan devam etmeyi seçtiniz. Kodlarınızın güvende olduğundan emin olmak için lütfen manuel yedekleme yapın.",
   "showLargeIcons": "Büyük simgeler göster",
+  "compactMode": "Sıkıştırılmış mod",
   "shouldHideCode": "Kodları gizle",
   "doubleTapToViewHiddenCode": "Kodu görüntülemek için bir girdiye çift dokunabilirsiniz",
   "focusOnSearchBar": "Uygulama başladığında arama bölümüne odaklan",
@@ -466,5 +490,7 @@
   "pinLock": "Pin kilidi",
   "enterPin": "PIN Girin",
   "setNewPin": "Yeni PIN belirleyin",
-  "importFailureDescNew": "Seçilen dosya ayrıştırılamadı."
+  "importFailureDescNew": "Seçilen dosya ayrıştırılamadı.",
+  "appLockNotEnabled": "Uygulama kilidi etkin değil",
+  "appLockNotEnabledDescription": "Uygulama kilidini Güvenlik -> Uygulama Kilidi üzerinden etkinleştirin"
 }

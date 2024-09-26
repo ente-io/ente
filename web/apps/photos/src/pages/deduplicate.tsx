@@ -49,6 +49,7 @@ export default function Deduplicate() {
         count: 0,
         collectionID: 0,
         ownCount: 0,
+        context: undefined,
     });
     const closeDeduplication = function () {
         Router.push(PAGES.GALLERY);
@@ -97,6 +98,7 @@ export default function Deduplicate() {
             count: count,
             ownCount: count,
             collectionID: ALL_SECTION,
+            context: undefined,
         };
         for (const fileID of toSelectFileIDs) {
             selectedFiles[fileID] = true;
@@ -137,14 +139,14 @@ export default function Deduplicate() {
                 e.httpStatusCode === HttpStatusCode.Forbidden
             ) {
                 setDialogMessage({
-                    title: t("ERROR"),
+                    title: t("error"),
 
                     close: { variant: "critical" },
                     content: t("NOT_FILE_OWNER"),
                 });
             } else {
                 setDialogMessage({
-                    title: t("ERROR"),
+                    title: t("error"),
 
                     close: { variant: "critical" },
                     content: t("UNKNOWN_ERROR"),
@@ -157,7 +159,12 @@ export default function Deduplicate() {
     };
 
     const clearSelection = function () {
-        setSelected({ count: 0, collectionID: 0, ownCount: 0 });
+        setSelected({
+            count: 0,
+            collectionID: 0,
+            ownCount: 0,
+            context: undefined,
+        });
     };
 
     if (!duplicates) {
@@ -196,6 +203,7 @@ export default function Deduplicate() {
                     activeCollectionID={ALL_SECTION}
                     fileToCollectionsMap={fileToCollectionsMap}
                     collectionNameMap={collectionNameMap}
+                    selectable={true}
                 />
             )}
             <DeduplicateOptions

@@ -93,3 +93,8 @@ implemented, are in various blog posts announcing these features.
 
 We are now working on the other requested features around sharing, including
 comments and reactions.
+
+## Limitations
+
+Sharing is only available to paid customers. This limitation safeguards against
+potential platform abuse.

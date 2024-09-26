@@ -1,6 +1,6 @@
 import "dart:async";
 import "dart:io" show File, Platform;
-import "dart:math" show exp, max, min, pi;
+import "dart:math" show exp, min, pi;
 import "dart:typed_data" show Float32List, Uint8List;
 import "dart:ui";
 
@@ -229,44 +229,6 @@ Future<(Float32List, Dimensions)> preprocessImageToFloat32ChannelsFirst(
   }
 
   return (processedBytes, Dimensions(width: scaledWidth, height: scaledHeight));
-}
-
-Future<Float32List> preprocessImageClip(
-  Image image,
-  Uint8List rawRgbaBytes,
-) async {
-  const int requiredWidth = 256;
-  const int requiredHeight = 256;
-  const int requiredSize = 3 * requiredWidth * requiredHeight;
-  final scale = max(requiredWidth / image.width, requiredHeight / image.height);
-  final bool useAntiAlias = scale < 0.8;
-  final scaledWidth = (image.width * scale).round();
-  final scaledHeight = (image.height * scale).round();
-  final widthOffset = max(0, scaledWidth - requiredWidth) / 2;
-  final heightOffset = max(0, scaledHeight - requiredHeight) / 2;
-
-  final processedBytes = Float32List(requiredSize);
-  final buffer = Float32List.view(processedBytes.buffer);
-  int pixelIndex = 0;
-  const int greenOff = requiredHeight * requiredWidth;
-  const int blueOff = 2 * requiredHeight * requiredWidth;
-  for (var h = 0 + heightOffset; h < scaledHeight - heightOffset; h++) {
-    for (var w = 0 + widthOffset; w < scaledWidth - widthOffset; w++) {
-      final RGB pixel = _getPixelBilinear(
-        w / scale,
-        h / scale,
-        image,
-        rawRgbaBytes,
-        antiAlias: useAntiAlias,
-      );
-      buffer[pixelIndex] = pixel.$1 / 255;
-      buffer[pixelIndex + greenOff] = pixel.$2 / 255;
-      buffer[pixelIndex + blueOff] = pixel.$3 / 255;
-      pixelIndex++;
-    }
-  }
-
-  return processedBytes;
 }
 
 Future<(Float32List, List<AlignmentResult>, List<bool>, List<double>, Size)>

@@ -1,7 +1,10 @@
 import log from "@/base/log";
 import { FileType } from "@/media/file-type";
+import type { SelectionContext } from "@/new/photos/components/Gallery";
+import type { GalleryBarMode } from "@/new/photos/components/Gallery/BarImpl";
 import type { LivePhotoSourceURL, SourceURLs } from "@/new/photos/types/file";
 import { EnteFile } from "@/new/photos/types/file";
+import { ensure } from "@/utils/ensure";
 import { SetSelectedState } from "types/gallery";
 
 export async function playVideo(livePhotoVideo, livePhotoImage) {
@@ -102,7 +105,9 @@ export async function updateFileSrcProps(
 export const handleSelectCreator =
     (
         setSelected: SetSelectedState,
+        mode: GalleryBarMode | undefined,
         activeCollectionID: number,
+        activePersonID: string | undefined,
         setRangeStart?,
     ) =>
     (id: number, isOwnFile: boolean, index?: number) =>
@@ -115,9 +120,83 @@ export const handleSelectCreator =
             }
         }
         setSelected((selected) => {
-            if (selected.collectionID !== activeCollectionID) {
-                selected = { ownCount: 0, count: 0, collectionID: 0 };
+            if (!mode) {
+                // Retain older behavior for non-gallery call sites.
+                if (selected.collectionID !== activeCollectionID) {
+                    selected = {
+                        ownCount: 0,
+                        count: 0,
+                        collectionID: 0,
+                        context: undefined,
+                    };
+                }
+            } else if (!selected.context) {
+                // Gallery will specify a mode, but a fresh selection starts off
+                // without a context, so fill it in with the current context.
+                selected = {
+                    ...selected,
+                    context:
+                        mode == "people"
+                            ? { mode, personID: ensure(activePersonID) }
+                            : {
+                                  mode,
+                                  collectionID: ensure(activeCollectionID),
+                              },
+                };
+            } else {
+                // Both mode and context are defined.
+                if (selected.context.mode != mode) {
+                    // Clear selection if mode has changed.
+                    selected = {
+                        ownCount: 0,
+                        count: 0,
+                        collectionID: 0,
+                        context:
+                            mode == "people"
+                                ? { mode, personID: ensure(activePersonID) }
+                                : {
+                                      mode,
+                                      collectionID: ensure(activeCollectionID),
+                                  },
+                    };
+                } else {
+                    if (selected.context?.mode == "people") {
+                        if (selected.context.personID != activePersonID) {
+                            // Clear selection if person has changed.
+                            selected = {
+                                ownCount: 0,
+                                count: 0,
+                                collectionID: 0,
+                                context: {
+                                    mode: selected.context?.mode,
+                                    personID: ensure(activePersonID),
+                                },
+                            };
+                        }
+                    } else {
+                        if (
+                            selected.context.collectionID != activeCollectionID
+                        ) {
+                            // Clear selection if collection has changed.
+                            selected = {
+                                ownCount: 0,
+                                count: 0,
+                                collectionID: 0,
+                                context: {
+                                    mode: selected.context?.mode,
+                                    collectionID: ensure(activeCollectionID),
+                                },
+                            };
+                        }
+                    }
+                }
             }
+
+            const newContext: SelectionContext | undefined = !mode
+                ? undefined
+                : mode == "people"
+                  ? { mode, personID: ensure(activePersonID) }
+                  : { mode, collectionID: ensure(activeCollectionID) };
 
             const handleCounterChange = (count: number) => {
                 if (selected[id] === checked) {
@@ -146,6 +225,7 @@ export const handleSelectCreator =
                 ...selected,
                 [id]: checked,
                 collectionID: activeCollectionID,
+                context: newContext,
                 ...handleAllCounterChange(),
             };
         });

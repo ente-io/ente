@@ -5,7 +5,7 @@ import { FilledCircleCheck } from "components/FilledCircleCheck";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { readCastData } from "services/cast-data";
-import { isChromecast } from "services/chromecast";
+import { isChromecast } from "services/chromecast-receiver";
 import { imageURLGenerator } from "services/render";
 
 export default function Slideshow() {

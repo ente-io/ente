@@ -151,7 +151,6 @@
   "leaveFamily": "مغادرة خطة العائلة",
   "leaveFamilyMessage": "هل أنت متأكد من الخروج من خطة العائلة؟",
   "inFamilyPlanMessage": "أنت مندرج ضمن خطة عائلية!",
-  "swipeHint": "اسحب لليسار لتحرير أو إزالة الرموز",
   "scan": "مسح",
   "scanACode": "فحص رمز Qr",
   "verify": "التحقق",

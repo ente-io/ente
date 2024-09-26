@@ -106,7 +106,6 @@
   "leaveFamily": "Poistu perheestä",
   "leaveFamilyMessage": "Oletko varma että haluat jättää tämän perhemallin?",
   "inFamilyPlanMessage": "Olet perhemallissa!",
-  "swipeHint": "Pyyhkäise vasemmalle muokataksesi tai poistaaksesi koodeja",
   "scan": "Lue",
   "scanACode": "Lue koodi",
   "verify": "Vahvista",
