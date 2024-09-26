@@ -650,5 +650,5 @@ export const addPerson = async (name: string, cluster: FaceCluster) => {
         },
         masterKey,
     );
-    return updatePeople();
+    return mlSync();
 };
