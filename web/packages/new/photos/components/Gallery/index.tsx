@@ -87,26 +87,16 @@ export const PersonListHeader: React.FC<PeopleListHeaderProps> = ({
                         ariaControls={"person-options"}
                         triggerButtonIcon={<MoreHoriz />}
                     >
-                        {person.type == "cgroup" ? (
-                            <>
-                                <OverflowMenuOption
-                                    startIcon={<EditIcon />}
-                                    centerAlign
-                                    onClick={() => console.log("test")}
-                                >
-                                    {t("rename")}
-                                </OverflowMenuOption>
-                            </>
+                        {person.type != "cgroup" ? (
+                            <CGroupPersonOptions onAddPerson={addPerson} />
                         ) : (
-                            <>
-                                <OverflowMenuOption
-                                    startIcon={<AddIcon />}
-                                    centerAlign
-                                    onClick={addPerson}
-                                >
-                                    {pt("Add a name")}
-                                </OverflowMenuOption>
-                            </>
+                            <OverflowMenuOption
+                                startIcon={<AddIcon />}
+                                centerAlign
+                                onClick={addPerson}
+                            >
+                                {pt("Add a name")}
+                            </OverflowMenuOption>
                         )}
                     </OverflowMenu>
                 )}
@@ -114,3 +104,25 @@ export const PersonListHeader: React.FC<PeopleListHeaderProps> = ({
         </GalleryItemsHeaderAdapter>
     );
 };
+
+interface CGroupOptionsProps {
+    onAddPerson: () => void;
+}
+const CGroupPersonOptions: React.FC<CGroupOptionsProps> = ({ onAddPerson }) => (
+    <>
+        <OverflowMenuOption
+            startIcon={<EditIcon />}
+            centerAlign
+            onClick={() => console.log("test")}
+        >
+            {t("rename")}
+        </OverflowMenuOption>
+        <OverflowMenuOption
+            startIcon={<AddIcon />}
+            centerAlign
+            onClick={onAddPerson}
+        >
+            {pt("Add a name")}
+        </OverflowMenuOption>
+    </>
+);
