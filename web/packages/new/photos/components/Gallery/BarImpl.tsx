@@ -94,11 +94,11 @@ export interface GalleryBarImplProps {
      */
     people: Person[];
     /**
-     * The currently selected person.
+     * The ID of the currently selected person.
      *
      * Required if mode is "people".
      */
-    activePerson: Person | undefined;
+    activePersonID: string | undefined;
     /**
      * Called when the user selects a new person in the bar.
      */
@@ -115,7 +115,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     collectionsSortBy,
     onChangeCollectionsSortBy,
     people,
-    activePerson,
+    activePersonID,
     onSelectPerson,
 }) => {
     const isMobile = useIsMobileWidth();
@@ -193,11 +193,11 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                 );
                 break;
             case "people":
-                i = people.findIndex(({ id }) => id == activePerson?.id);
+                i = people.findIndex(({ id }) => id == activePersonID);
                 break;
         }
         if (i != -1) listRef.current.scrollToItem(i, "smart");
-    }, [mode, collectionSummaries, activeCollectionID, people, activePerson]);
+    }, [mode, collectionSummaries, activeCollectionID, people, activePersonID]);
 
     const itemData = useMemo<ItemData>(
         () =>
@@ -211,7 +211,9 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                 : {
                       type: "people",
                       people,
-                      activePerson: ensure(activePerson),
+                      activePerson: ensure(
+                          people.find((p) => p.id == activePersonID),
+                      ),
                       onSelectPerson,
                   },
         [
@@ -220,7 +222,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
             activeCollectionID,
             onSelectCollectionID,
             people,
-            activePerson,
+            activePersonID,
             onSelectPerson,
         ],
     );

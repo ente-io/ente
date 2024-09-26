@@ -95,7 +95,7 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
     setActiveCollectionID,
     hiddenCollectionSummaries,
     people,
-    activePerson,
+    activePersonID,
     onSelectPerson,
     setCollectionNamerAttributes,
     setPhotoListHeader,
@@ -173,7 +173,9 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
                     />
                 ) : (
                     <PeopleHeader
-                        person={ensure(activePerson)}
+                        person={ensure(
+                            people.find((p) => p.id == activePersonID),
+                        )}
                         appContext={appContext}
                     />
                 ),
@@ -187,7 +189,7 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
         activeCollectionID,
         isActiveCollectionDownloadInProgress,
         people,
-        activePerson,
+        activePersonID,
     ]);
 
     if (shouldBeHidden) {
@@ -202,7 +204,7 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
                     onChangeMode,
                     activeCollectionID,
                     people,
-                    activePerson,
+                    activePersonID,
                     onSelectPerson,
                     collectionsSortBy,
                 }}
