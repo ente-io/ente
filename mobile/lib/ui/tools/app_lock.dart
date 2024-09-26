@@ -1,9 +1,12 @@
 import 'dart:async';
 
+import "package:app_links/app_links.dart";
 import 'package:flutter/material.dart';
+import "package:flutter/services.dart";
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
+import "package:photos/main.dart";
 import "package:photos/utils/lock_screen_settings.dart";
 
 /// A widget which handles app lifecycle events for showing and hiding a lock screen.
@@ -63,6 +66,7 @@ class _AppLockState extends State<AppLock> with WidgetsBindingObserver {
   late bool _enabled;
 
   Timer? _backgroundLockLatencyTimer;
+  late StreamSubscription<Uri?> _uriLinkEventSubscription;
 
   @override
   void initState() {
@@ -71,7 +75,7 @@ class _AppLockState extends State<AppLock> with WidgetsBindingObserver {
     this._didUnlockForAppLaunch = !this.widget.enabled;
     this._isLocked = false;
     this._enabled = this.widget.enabled;
-
+    _initDeeplinkPublicAlbum();
     super.initState();
   }
 
@@ -101,8 +105,21 @@ class _AppLockState extends State<AppLock> with WidgetsBindingObserver {
     WidgetsBinding.instance.removeObserver(this);
 
     this._backgroundLockLatencyTimer?.cancel();
-
+    _uriLinkEventSubscription.cancel();
     super.dispose();
+  }
+
+  Future<void> _initDeeplinkPublicAlbum() async {
+    // Handle the terminated state
+    final AppLinks appLink = AppLinks();
+    try {
+      final Uri? uri = await appLink.getLatestLink();
+      if (uri != null) {
+        publicURL = uri;
+      }
+    } on PlatformException {
+      print("PlatformException thrown while getting initial link");
+    }
   }
 
   @override

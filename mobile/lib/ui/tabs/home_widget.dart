@@ -2,6 +2,7 @@ import 'dart:async';
 import "dart:convert";
 import "dart:io";
 
+import "package:app_links/app_links.dart";
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -25,6 +26,7 @@ import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/main.dart";
 import "package:photos/models/collection/collection.dart";
 import 'package:photos/models/collection/collection_items.dart';
 import "package:photos/models/file/file.dart";
@@ -239,18 +241,22 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   Future<void> _initDeeplinkPublicAlbum() async {
+    final AppLinks appLink = AppLinks();
     // Handle the terminated state
-    final Uri? uri = await getInitialUri();
-    if (uri != null) {
-      await _handlePublicAlbumLink(uri);
+    if (publicURL != null) {
+      await _handlePublicAlbumLink(publicURL!);
+      return;
     }
-
-    // Handle the background state
-    _uriLinkEventSubscription = uriLinkStream.listen((Uri? uri) async {
-      if (uri != null) {
-        await _handlePublicAlbumLink(uri);
-      }
-    });
+    _uriLinkEventSubscription = appLink.uriLinkStream.listen(
+      (Uri? uri) async {
+        if (uri != null) {
+          publicURL = uri;
+        }
+      },
+      onError: (err) {
+        _logger.severe(err);
+      },
+    );
   }
 
   Future<void> _handlePublicAlbumLink(Uri uri) async {

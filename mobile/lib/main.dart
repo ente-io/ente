@@ -70,6 +70,7 @@ const kFGHomeWidgetSyncFrequency = Duration(minutes: 15);
 const kBGTaskTimeout = Duration(seconds: 25);
 const kBGPushTimeout = Duration(seconds: 28);
 const kFGTaskDeathTimeoutInMicroseconds = 5000000;
+Uri? publicURL;
 
 void main() async {
   debugRepaintRainbowEnabled = false;
