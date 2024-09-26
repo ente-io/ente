@@ -1,8 +1,8 @@
 import log from "@/base/log";
-import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
+import { Dialog, DialogContent, DialogTitle } from "@mui/material";
 import { t } from "i18next";
 import React from "react";
 import type { DialogVisiblityProps } from "./mui-custom";
@@ -53,16 +53,19 @@ export const NameInputDialog: React.FC<NameInputDialogProps> = ({
     };
 
     return (
-        <DialogBoxV2 open={open} onClose={onClose} attributes={{ title }}>
-            <SingleInputForm
-                fieldType="text"
-                placeholder={placeholder}
-                initialValue={initialValue}
-                callback={handleSubmit}
-                buttonText={submitButtonTitle}
-                submitButtonProps={{ sx: { mt: 1, mb: 2 } }}
-                secondaryButtonAction={onClose}
-            />
-        </DialogBoxV2>
+        <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
+            <DialogTitle>{title}</DialogTitle>
+            <DialogContent>
+                <SingleInputForm
+                    fieldType="text"
+                    placeholder={placeholder}
+                    initialValue={initialValue}
+                    callback={handleSubmit}
+                    buttonText={submitButtonTitle}
+                    submitButtonProps={{ sx: { mt: 1, mb: 2 } }}
+                    secondaryButtonAction={onClose}
+                />
+            </DialogContent>
+        </Dialog>
     );
 };

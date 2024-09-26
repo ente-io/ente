@@ -123,9 +123,9 @@ export const PersonListHeader: React.FC<PeopleListHeaderProps> = ({
                 open={openAddNameInput}
                 onClose={() => setOpenAddNameInput(false)}
                 title={pt("Add person")}
-                placeholder={"ENTER_NAME"}
+                placeholder={t("ENTER_NAME") /* TODO-Cluster */}
                 initialValue={""}
-                submitButtonTitle={"Add"}
+                submitButtonTitle={t("ADD")}
                 onSubmit={addPersonWithName}
             />
         </GalleryItemsHeaderAdapter>
