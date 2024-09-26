@@ -58,6 +58,11 @@ export const PersonListHeader: React.FC<PeopleListHeaderProps> = ({
 }) => {
     // TODO-Cluster
     const hasOptions = process.env.NEXT_PUBLIC_ENTE_WIP_CL;
+
+    const addPerson = () => {
+        console.log("add person");
+    };
+
     return (
         <GalleryItemsHeaderAdapter>
             <SpaceBetweenFlex>
@@ -73,21 +78,27 @@ export const PersonListHeader: React.FC<PeopleListHeaderProps> = ({
                         ariaControls={"person-options"}
                         triggerButtonIcon={<MoreHoriz />}
                     >
-                        <OverflowMenuOption
-                            startIcon={<AddIcon />}
-                            centerAlign
-                            onClick={() => console.log("test")}
-                        >
-                            {pt("Add a name")}
-                        </OverflowMenuOption>
-
-                        <OverflowMenuOption
-                            startIcon={<EditIcon />}
-                            centerAlign
-                            onClick={() => console.log("test")}
-                        >
-                            {pt("rename")}
-                        </OverflowMenuOption>
+                        {person.type == "cgroup" ? (
+                            <>
+                                <OverflowMenuOption
+                                    startIcon={<EditIcon />}
+                                    centerAlign
+                                    onClick={() => console.log("test")}
+                                >
+                                    {t("rename")}
+                                </OverflowMenuOption>
+                            </>
+                        ) : (
+                            <>
+                                <OverflowMenuOption
+                                    startIcon={<AddIcon />}
+                                    centerAlign
+                                    onClick={addPerson}
+                                >
+                                    {pt("Add a name")}
+                                </OverflowMenuOption>
+                            </>
+                        )}
                     </OverflowMenu>
                 )}
             </SpaceBetweenFlex>
