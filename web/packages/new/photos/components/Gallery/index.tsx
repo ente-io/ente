@@ -12,6 +12,7 @@ import type { Person } from "@/new/photos/services/ml/people";
 import type { SearchOption } from "@/new/photos/services/search/types";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
 import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
+import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
 import { Typography } from "@mui/material";
@@ -73,10 +74,19 @@ export const PersonListHeader: React.FC<PeopleListHeaderProps> = ({
                         triggerButtonIcon={<MoreHoriz />}
                     >
                         <OverflowMenuOption
-                            startIcon={<EditIcon />}
+                            startIcon={<AddIcon />}
+                            centerAlign
                             onClick={() => console.log("test")}
                         >
-                            {t("download_album")}
+                            {pt("Add a name")}
+                        </OverflowMenuOption>
+
+                        <OverflowMenuOption
+                            startIcon={<EditIcon />}
+                            centerAlign
+                            onClick={() => console.log("test")}
+                        >
+                            {pt("rename")}
                         </OverflowMenuOption>
                     </OverflowMenu>
                 )}
