@@ -5,7 +5,7 @@
     },
     {
       "title": "23andme"
-    },    
+    },
     {
       "title": "3Commas"
     },
@@ -199,7 +199,7 @@
     },
     {
       "title": "eBay"
-    },    
+    },
     {
       "title": "ecitizen kenya",
       "slug": "ecitizen_kenya"
@@ -269,10 +269,10 @@
     },
     {
       "title": "Guideline"
-    },    
+    },
     {
       "title": "Gusto"
-    },    
+    },
     {
       "title": "Habbo"
     },
@@ -298,7 +298,7 @@
     {
       "title": "ID.me",
       "slug": "IDme"
-    },    
+    },
     {
       "title": "Infomaniak"
     },
@@ -371,7 +371,7 @@
     {
       "title": "Login.gov",
       "slug": "login_gov"
-    },    
+    },
     {
       "title": "Marketplace.tf",
       "slug": "marketplacedottf"
@@ -621,7 +621,7 @@
         "T Mobile",
         "T-Mobile ID"
       ]
-    },    
+    },
     {
       "title": "TCPShield"
     },
@@ -645,7 +645,7 @@
     },
     {
       "title": "Titan"
-    },    
+    },
     {
       "title": "TorGuard"
     },
@@ -734,6 +734,12 @@
       "title": "YNAB",
       "altNames": [
         "You Need A Budget"
+      ]
+    },
+    {
+      "title": "Pritunl",
+      "altNames": [
+        "pritunl"
       ]
     }
   ]
