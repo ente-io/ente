@@ -2,11 +2,7 @@ import { masterKeyFromSession } from "@/base/session-store";
 import { wipClusterEnable } from ".";
 import type { EnteFile } from "../../types/file";
 import { getLocalFiles } from "../files";
-import {
-    addUserEntity,
-    savedCGroupUserEntities,
-    type CGroupUserEntity,
-} from "../user-entity";
+import { addUserEntity, savedCGroups, type CGroup } from "../user-entity";
 import type { FaceCluster } from "./cluster";
 import { getFaceIndexes, savedFaceClusters } from "./db";
 import { fileIDFromFaceID } from "./face";
@@ -18,7 +14,7 @@ import { fileIDFromFaceID } from "./face";
  * Interactions include hiding, merging and giving a name and/or a cover photo.
  *
  * The most frequent interaction is naming a {@link FaceCluster}, which promotes
- * it to a become a {@link CGroupUserEntity}. The promotion comes with the
+ * it to a become a {@link CGroup}. The promotion comes with the
  * ability to be synced with remote (as a "cgroup" user entity).
  *
  * There after, the user may attach more clusters to the same cgroup.
@@ -84,8 +80,8 @@ export interface CGroupUserEntityData {
 }
 
 /**
- * A massaged version of {@link CGroupUserEntityData} or a {@link FaceCluster}
- * suitable for being shown in the UI.
+ * A massaged version of {@link CGroup} or a {@link FaceCluster} suitable for
+ * being shown in the UI.
  *
  * We transform both both remote cluster groups and local-only face clusters
  * into the same "person" object that can be shown in the UI.
@@ -99,11 +95,11 @@ export interface CGroupUserEntityData {
  *
  * Beyond this semantic difference, there is also data massaging: a
  * {@link Person} has data converted into a format that the UI can directly and
- * efficiently use, as compared to a {@link CGroupUserEntityData}, which is
- * tailored for transmission and storage.
+ * efficiently use, as compared to a {@link CGroup}, which is tailored for
+ * transmission and storage.
  */
 export type Person = (
-    | { type: "cgroup"; cgroupUserEntity: CGroupUserEntity }
+    | { type: "cgroup"; cgroup: CGroup }
     | { type: "cluster"; cluster: FaceCluster }
 ) & {
     /**
@@ -173,17 +169,18 @@ export const reconstructPeople = async (): Promise<Person[]> => {
     type Interim = (Person | undefined)[];
 
     // Convert cgroups to people.
-    const cgroups = await savedCGroupUserEntities();
-    const cgroupPeople: Interim = cgroups.map((cgroupUserEntity) => {
-        const { id, data: cgroup } = cgroupUserEntity;
+    const cgroups = await savedCGroups();
+    const cgroupPeople: Interim = cgroups.map((cgroup) => {
+        const { id, data } = cgroup;
+        const { name, isHidden, assigned, avatarFaceID } = data;
 
         // Hidden cgroups are clusters specifically marked so as to not be shown
         // in the UI.
-        if (cgroup.isHidden) return undefined;
+        if (isHidden) return undefined;
 
         // Person faces from all the clusters assigned to this cgroup, sorted by
         // their score.
-        const faces = cgroup.assigned
+        const faces = assigned
             .map(({ faces }) =>
                 faces.map((id) => personFaceByID.get(id)).filter((f) => !!f),
             )
@@ -198,7 +195,6 @@ export const reconstructPeople = async (): Promise<Person[]> => {
         const fileIDs = [...new Set(faces.map((f) => f.file.id))];
 
         // Avatar face ID, or the highest scoring face.
-        const avatarFaceID = cgroup.avatarFaceID;
         let avatarFile: EnteFile | undefined;
         if (avatarFaceID) {
             const avatarFileID = fileIDFromFaceID(avatarFaceID);
@@ -217,9 +213,9 @@ export const reconstructPeople = async (): Promise<Person[]> => {
 
         return {
             type: "cgroup",
-            cgroupUserEntity,
+            cgroup,
             id,
-            name: cgroup.name,
+            name,
             fileIDs,
             displayFaceID,
             displayFaceFile,

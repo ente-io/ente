@@ -19,7 +19,7 @@ import { IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { t } from "i18next";
 import React, { useState } from "react";
 import type { FaceCluster } from "../../services/ml/cluster";
-import type { CGroupUserEntity } from "../../services/user-entity";
+import type { CGroup } from "../../services/user-entity";
 import type { NewAppContextPhotos } from "../../types/context";
 import { SpaceBetweenFlex } from "../mui-custom";
 import { NameInputDialog } from "../NameInputDialog";
@@ -75,7 +75,7 @@ export const PeopleHeader: React.FC<PeopleHeaderProps> = ({
                 {person.type == "cgroup" ? (
                     <CGroupPersonOptions
                         person={person}
-                        cgroup={person.cgroupUserEntity}
+                        cgroup={person.cgroup}
                         appContext={appContext}
                     />
                 ) : (
@@ -91,7 +91,7 @@ export const PeopleHeader: React.FC<PeopleHeaderProps> = ({
 
 interface CGroupPersonOptionsProps {
     person: Person;
-    cgroup: CGroupUserEntity;
+    cgroup: CGroup;
     appContext: NewAppContextPhotos;
 }
 

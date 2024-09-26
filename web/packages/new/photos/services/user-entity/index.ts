@@ -50,7 +50,7 @@ export type EntityType =
  * Zod schema for the fields of interest in the location tag that we get from
  * remote.
  */
-const RemoteLocationTag = z.object({
+const RemoteLocationTagData = z.object({
     name: z.string(),
     radius: z.number(),
     centerPoint: z.object({
@@ -62,14 +62,14 @@ const RemoteLocationTag = z.object({
 /**
  * A view of the location tag data suitable for use by the rest of the app.
  */
-export type LocationTag = z.infer<typeof RemoteLocationTag>;
+export type LocationTag = z.infer<typeof RemoteLocationTagData>;
 
 /**
  * Return the list of locally available location tags.
  */
 export const savedLocationTags = (): Promise<LocationTag[]> =>
     savedEntities("location").then((es) =>
-        es.map((e) => RemoteLocationTag.parse(e.data)),
+        es.map((e) => RemoteLocationTagData.parse(e.data)),
     );
 
 const RemoteFaceCluster = z.object({
@@ -82,7 +82,7 @@ const RemoteFaceCluster = z.object({
  *
  * See also: {@link CGroupUserEntityData}.
  */
-const RemoteCGroup = z.object({
+const RemoteCGroupData = z.object({
     name: z.string().nullish().transform(nullToUndefined),
     assigned: z.array(RemoteFaceCluster),
     // The remote cgroup also has a "rejected" property, but that is not
@@ -91,7 +91,10 @@ const RemoteCGroup = z.object({
     avatarFaceID: z.string().nullish().transform(nullToUndefined),
 });
 
-export type CGroupUserEntity = Omit<LocalUserEntity, "data"> & {
+/**
+ * A "cgroup" user entity.
+ */
+export type CGroup = Omit<LocalUserEntity, "data"> & {
     // CGroupUserEntityData is meant to be a (documented) equivalent of
     // `z.infer<typeof RemoteCGroup>`.
     data: CGroupUserEntityData;
@@ -100,13 +103,13 @@ export type CGroupUserEntity = Omit<LocalUserEntity, "data"> & {
 /**
  * Return the list of locally available cgroup user entities.
  */
-export const savedCGroupUserEntities = (): Promise<CGroupUserEntity[]> =>
+export const savedCGroups = (): Promise<CGroup[]> =>
     // See: [Note: strict mode migration]
     //
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     savedEntities("cgroup").then((es) =>
-        es.map((e) => ({ ...e, data: RemoteCGroup.parse(e.data) })),
+        es.map((e) => ({ ...e, data: RemoteCGroupData.parse(e.data) })),
     );
 
 /**
