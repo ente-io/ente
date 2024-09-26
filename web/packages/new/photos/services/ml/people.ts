@@ -170,12 +170,11 @@ export const reconstructPeople = async (): Promise<Person[]> => {
     }
 
     // Help out tsc.
-    const typeCGroup: Person["type"] = "cgroup";
-    const typeCluster: Person["type"] = "cluster";
+    type Interim = (Person | undefined)[];
 
     // Convert cgroups to people.
     const cgroups = await savedCGroupUserEntities();
-    const cgroupPeople = cgroups.map(({ id, data: cgroup }) => {
+    const cgroupPeople: Interim = cgroups.map(({ id, data: cgroup }) => {
         // Hidden cgroups are clusters specifically marked so as to not be shown
         // in the UI.
         if (cgroup.isHidden) return undefined;
@@ -215,7 +214,7 @@ export const reconstructPeople = async (): Promise<Person[]> => {
         }
 
         return {
-            type: typeCGroup,
+            type: "cgroup",
             id,
             name: cgroup.name,
             fileIDs,
@@ -226,7 +225,7 @@ export const reconstructPeople = async (): Promise<Person[]> => {
 
     // Convert local-only clusters to people.
     const localClusters = await savedFaceClusters();
-    const clusterPeople = localClusters.map((cluster) => {
+    const clusterPeople: Interim = localClusters.map((cluster) => {
         const faces = cluster.faces
             .map((id) => personFaceByID.get(id))
             .filter((f) => !!f);
@@ -239,7 +238,7 @@ export const reconstructPeople = async (): Promise<Person[]> => {
         );
 
         return {
-            type: typeCluster,
+            type: "cluster",
             id: cluster.id,
             name: undefined,
             fileIDs: [...new Set(faces.map((f) => f.file.id))],
