@@ -172,7 +172,7 @@ export const reconstructPeople = async (): Promise<Person[]> => {
     const cgroups = await savedCGroups();
     const cgroupPeople: Interim = cgroups.map((cgroup) => {
         const { id, data } = cgroup;
-        const { name, isHidden, assigned, avatarFaceID } = data;
+        const { name, isHidden, assigned } = data;
 
         // Hidden cgroups are clusters specifically marked so as to not be shown
         // in the UI.
@@ -196,6 +196,7 @@ export const reconstructPeople = async (): Promise<Person[]> => {
 
         // Avatar face ID, or the highest scoring face.
         let avatarFile: EnteFile | undefined;
+        const avatarFaceID = resolvedAvatarFaceID(data.avatarFaceID);
         if (avatarFaceID) {
             const avatarFileID = fileIDFromFaceID(avatarFaceID);
             if (avatarFileID) avatarFile = fileByID.get(avatarFileID);
@@ -252,6 +253,14 @@ export const reconstructPeople = async (): Promise<Person[]> => {
         .filter((c) => !!c)
         .sort((a, b) => b.fileIDs.length - a.fileIDs.length);
 };
+
+/**
+ * Older versions of the mobile app set the avatarFileID as the avatarFaceID.
+ * Use the format of the string to detect such cases, and as a workaround,
+ * ignore the avatarID in such cases.
+ */
+const resolvedAvatarFaceID = (avatarFaceID: string | undefined) =>
+    avatarFaceID?.split("_").length == 1 ? undefined : avatarFaceID;
 
 /**
  * Convert a cluster into a named cgroup, updating both remote and local state.
