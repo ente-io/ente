@@ -1,5 +1,7 @@
 display_name: Ente Auth
 package_name: enteauth
+include_build_number: false
+
 maintainer:
   name: Ente.io Developers
   email: auth@ente.io

@@ -1,4 +1,5 @@
 display_name: Ente Auth
+package_name: enteauth
 license: GPLv3
 
 metainfo: linux/packaging/ente_auth.appdata.xml
@@ -26,9 +27,9 @@ startup_notify: false
 # include:
 #   - libcurl.so.4
 include:
-    - libffi.so.8
-    - libtiff.so.5
-    - libjpeg.so.8
+  - libffi.so.8
+  - libtiff.so.5
+  - libjpeg.so.8
 
 supported_mime_type:
   - x-scheme-handler/enteauth

@@ -96,7 +96,8 @@ jobs:
             - name: Build desktop app
               run: |
                   flutter config --enable-linux-desktop
-                  dart pub global activate flutter_distributor
+                  # dart pub global activate flutter_distributor
+                  dart pub global activate --source git https://github.com/prateekmedia/flutter_distributor --git-ref develop --git-path packages/flutter_distributor
                   flutter_distributor package --platform=linux --targets=deb --skip-clean
                   mv dist/**/*-*-linux.deb artifacts/ente-${{ github.ref_name }}-x86_64.deb
               env:
@@ -163,7 +164,7 @@ jobs:
           run: |
             flutter config --enable-linux-desktop
             # dart pub global activate flutter_distributor
-            dart pub global activate --source git https://github.com/prateekmedia/flutter_distributor --git-ref pacman --git-path packages/flutter_distributor
+            dart pub global activate --source git https://github.com/prateekmedia/flutter_distributor --git-ref develop --git-path packages/flutter_distributor
             # Run below command if it is a beta or nightly
             if [[ ${{ github.ref }} =~ beta|nightly ]]; then
               flutter_distributor package --platform=linux --targets=pacman --skip-clean
@@ -211,7 +212,8 @@ jobs:
             - name: Build Windows installer
               run: |
                   flutter config --enable-windows-desktop
-                  dart pub global activate flutter_distributor
+                  # dart pub global activate flutter_distributor
+                  dart pub global activate --source git https://github.com/prateekmedia/flutter_distributor --git-ref develop --git-path packages/flutter_distributor
                   make innoinstall
                   flutter_distributor package --platform=windows --targets=exe --skip-clean
                   mv dist/**/ente_auth-*-windows-setup.exe artifacts/ente-${{ github.ref_name }}-installer.exe
