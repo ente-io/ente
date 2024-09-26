@@ -94,15 +94,16 @@ export interface GalleryBarImplProps {
      */
     people: Person[];
     /**
-     * The currently selected person.
+     * The ID of the currently selected person.
      *
      * Required if mode is "people".
      */
-    activePerson: Person | undefined;
+    activePersonID: string | undefined;
     /**
-     * Called when the user selects a new person in the bar.
+     * Called when the selection should be moved to a new person in the bar, or
+     * reset to the default state (when {@link person} is `undefined`).
      */
-    onSelectPerson: (person: Person) => void;
+    onSelectPerson: (person: Person | undefined) => void;
 }
 
 export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
@@ -115,7 +116,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     collectionsSortBy,
     onChangeCollectionsSortBy,
     people,
-    activePerson,
+    activePersonID,
     onSelectPerson,
 }) => {
     const isMobile = useIsMobileWidth();
@@ -193,11 +194,11 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                 );
                 break;
             case "people":
-                i = people.findIndex(({ id }) => id == activePerson?.id);
+                i = people.findIndex(({ id }) => id == activePersonID);
                 break;
         }
         if (i != -1) listRef.current.scrollToItem(i, "smart");
-    }, [mode, collectionSummaries, activeCollectionID, people, activePerson]);
+    }, [mode, collectionSummaries, activeCollectionID, people, activePersonID]);
 
     const itemData = useMemo<ItemData>(
         () =>
@@ -211,7 +212,10 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                 : {
                       type: "people",
                       people,
-                      activePerson: ensure(activePerson),
+                      activePerson: ensure(
+                          people.find((p) => p.id == activePersonID) ??
+                              people[0],
+                      ),
                       onSelectPerson,
                   },
         [
@@ -220,7 +224,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
             activeCollectionID,
             onSelectCollectionID,
             people,
-            activePerson,
+            activePersonID,
             onSelectPerson,
         ],
     );

@@ -317,8 +317,8 @@ export default function Gallery() {
     // If visible, what should the (sticky) gallery bar show.
     const [barMode, setBarMode] = useState<GalleryBarMode>("albums");
 
-    // The currently selected person in the gallery bar (if any).
-    const [activePerson, setActivePerson] = useState<Person | undefined>();
+    // The ID of the currently selected person in the gallery bar (if any).
+    const [activePersonID, setActivePersonID] = useState<string | undefined>();
 
     const people = useSyncExternalStore(peopleSubscribe, peopleSnapshot);
 
@@ -552,7 +552,10 @@ export default function Gallery() {
                 selectedSearchOption.suggestion,
             );
         } else if (barMode == "people") {
-            const pfSet = new Set(ensure(activePerson).fileIDs);
+            const activePerson = ensure(
+                people.find((p) => p.id == activePersonID) ?? people[0],
+            );
+            const pfSet = new Set(activePerson.fileIDs);
             filteredFiles = getUniqueFiles(
                 files.filter(({ id }) => {
                     if (!pfSet.has(id)) return false;
@@ -642,7 +645,8 @@ export default function Gallery() {
         selectedSearchOption,
         activeCollectionID,
         archivedCollections,
-        activePerson,
+        people,
+        activePersonID,
     ]);
 
     const selectAll = (e: KeyboardEvent) => {
@@ -675,8 +679,8 @@ export default function Gallery() {
             count: 0,
             collectionID: activeCollectionID,
             context:
-                barMode == "people" && activePerson
-                    ? { mode: "people" as const, personID: activePerson.id }
+                barMode == "people" && activePersonID
+                    ? { mode: "people" as const, personID: activePersonID }
                     : {
                           mode: "albums" as const,
                           collectionID: ensure(activeCollectionID),
@@ -996,7 +1000,7 @@ export default function Gallery() {
                 setActiveCollectionID(searchOption.suggestion.collectionID);
             } else {
                 setBarMode("people");
-                setActivePerson(searchOption.suggestion.person);
+                setActivePersonID(searchOption.suggestion.person.id);
             }
         } else {
             setIsInSearchMode(!!searchOption);
@@ -1054,7 +1058,7 @@ export default function Gallery() {
         // when the user clicks the "People" header in the search empty state (it
         // is guaranteed that this header will only be shown if there is at
         // least one person).
-        setActivePerson(person ?? ensure(people[0]));
+        setActivePersonID(person?.id ?? ensure(people[0]).id);
         setBarMode("people");
     };
 
@@ -1167,7 +1171,7 @@ export default function Gallery() {
                         setActiveCollectionID,
                         hiddenCollectionSummaries,
                         people,
-                        activePerson,
+                        activePersonID,
                         onSelectPerson: handleSelectPerson,
                         setCollectionNamerAttributes,
                         setPhotoListHeader,
@@ -1243,7 +1247,7 @@ export default function Gallery() {
                         setTempDeletedFileIds={setTempDeletedFileIds}
                         setIsPhotoSwipeOpen={setIsPhotoSwipeOpen}
                         activeCollectionID={activeCollectionID}
-                        activePersonID={activePerson?.id}
+                        activePersonID={activePersonID}
                         enableDownload={true}
                         fileToCollectionsMap={fileToCollectionsMap}
                         collectionNameMap={collectionNameMap}

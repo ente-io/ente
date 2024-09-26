@@ -194,10 +194,9 @@ export const putUserEntity = async (
  */
 export const deleteUserEntity = async (id: string) =>
     ensureOk(
-        await fetch(await apiURL("/user-entity/entity"), {
+        await fetch(await apiURL("/user-entity/entity", { id }), {
             method: "DELETE",
             headers: await authenticatedRequestHeaders(),
-            body: JSON.stringify({ id }),
         }),
     );
 

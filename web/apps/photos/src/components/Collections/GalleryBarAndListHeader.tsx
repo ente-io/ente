@@ -1,9 +1,9 @@
 import type { Collection } from "@/media/collection";
-import { PeopleHeader } from "@/new/photos/components/Gallery";
 import {
     GalleryBarImpl,
     type GalleryBarImplProps,
 } from "@/new/photos/components/Gallery/BarImpl";
+import { PeopleHeader } from "@/new/photos/components/Gallery/PeopleHeader";
 import {
     collectionsSortBy,
     type CollectionsSortBy,
@@ -95,7 +95,7 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
     setActiveCollectionID,
     hiddenCollectionSummaries,
     people,
-    activePerson,
+    activePersonID,
     onSelectPerson,
     setCollectionNamerAttributes,
     setPhotoListHeader,
@@ -173,8 +173,11 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
                     />
                 ) : (
                     <PeopleHeader
-                        person={ensure(activePerson)}
-                        appContext={appContext}
+                        person={ensure(
+                            people.find((p) => p.id == activePersonID) ??
+                                people[0],
+                        )}
+                        {...{ onSelectPerson, appContext }}
                     />
                 ),
             itemType: ITEM_TYPE.HEADER,
@@ -187,7 +190,7 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
         activeCollectionID,
         isActiveCollectionDownloadInProgress,
         people,
-        activePerson,
+        activePersonID,
     ]);
 
     if (shouldBeHidden) {
@@ -202,7 +205,7 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
                     onChangeMode,
                     activeCollectionID,
                     people,
-                    activePerson,
+                    activePersonID,
                     onSelectPerson,
                     collectionsSortBy,
                 }}

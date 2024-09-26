@@ -3,10 +3,7 @@ import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import type { EnteFile } from "../../types/file";
-import {
-    savedCGroupUserEntities,
-    updateOrCreateUserEntities,
-} from "../user-entity";
+import { savedCGroups, updateOrCreateUserEntities } from "../user-entity";
 import { savedFaceClusters, saveFaceClusters } from "./db";
 import {
     faceDirection,
@@ -94,7 +91,7 @@ export const clusterFaces = async (
     let clusters: FaceCluster[] = [];
 
     // Get the locally available remote cluster groups.
-    const cgroupUserEntities = await savedCGroupUserEntities();
+    const cgroups = await savedCGroups();
 
     // Sort them so that the latest ones are first.
     //
@@ -108,9 +105,7 @@ export const clusterFaces = async (
     // slack in how they implement the sync without needing to make an blocking
     // API request for every user interaction.
 
-    const sortedCGroupUserEntities = cgroupUserEntities.sort(
-        (a, b) => b.updatedAt - a.updatedAt,
-    );
+    const sortedCGroups = cgroups.sort((a, b) => b.updatedAt - a.updatedAt);
 
     // Extract the remote clusters.
     clusters = clusters.concat(
@@ -118,7 +113,7 @@ export const clusterFaces = async (
         //
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        sortedCGroupUserEntities.map((cg) => cg.data.assigned).flat(),
+        sortedCGroups.map((cg) => cg.data.assigned).flat(),
     );
 
     // Add on the clusters we have available locally.
@@ -345,7 +340,7 @@ export const reconcileClusters = async (
     const clusterByID = new Map(clusters.map((c) => [c.id, c]));
 
     // Get the existing remote cluster groups.
-    const cgroupEntities = await savedCGroupUserEntities();
+    const cgroupEntities = await savedCGroups();
 
     // Find the cgroups that have changed since we started.
     const changedCGroupEntities = cgroupEntities
