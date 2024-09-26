@@ -7,6 +7,7 @@ import { blobCache } from "@/base/blob-cache";
 import { ensureElectron } from "@/base/electron";
 import { isDevBuild } from "@/base/env";
 import log from "@/base/log";
+import { masterKeyFromSession } from "@/base/session-store";
 import type { Electron } from "@/base/types/ipc";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
 import { FileType } from "@/media/file-type";
@@ -18,14 +19,10 @@ import { isInternalUser } from "../feature-flags";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
 import { setSearchPeople } from "../search";
 import type { UploadItem } from "../upload/types";
+import { pullUserEntities } from "../user-entity";
 import { regenerateFaceCrops } from "./crop";
 import { clearMLDB, getFaceIndex, getIndexableAndIndexedCounts } from "./db";
-import {
-    pullCGroups,
-    reconstructPeople,
-    type NamedPerson,
-    type Person,
-} from "./people";
+import { reconstructPeople, type NamedPerson, type Person } from "./people";
 import { MLWorker } from "./worker";
 import type { CLIPMatches } from "./worker-types";
 
@@ -317,13 +314,15 @@ export const mlSync = async () => {
     // Fetch indexes, or index locally if needed.
     await w.index();
 
-    // Fetch existing cgroups from remote.
-    await pullCGroups();
-
-    // Generate or update local clusters.
     // TODO-Cluster
     if (await wipClusterEnable()) {
-        await w.clusterFaces();
+        const masterKey = await masterKeyFromSession();
+
+        // Fetch existing cgroups from remote.
+        await pullUserEntities("cgroup", masterKey);
+
+        // Generate or update local clusters.
+        await w.clusterFaces(masterKey);
     }
 
     await updatePeople();

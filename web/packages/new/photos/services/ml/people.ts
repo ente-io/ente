@@ -1,8 +1,7 @@
-import { masterKeyFromSession } from "@/base/session-store";
 import { wipClusterEnable } from ".";
 import type { EnteFile } from "../../types/file";
 import { getLocalFiles } from "../files";
-import { pullUserEntities, savedCGroupUserEntities } from "../user-entity";
+import { savedCGroupUserEntities } from "../user-entity";
 import type { FaceCluster } from "./cluster";
 import { getFaceIndexes, savedFaceClusters } from "./db";
 import { fileIDFromFaceID } from "./face";
@@ -122,16 +121,6 @@ export interface Person {
      */
     displayFaceFile: EnteFile;
 }
-
-/**
- * Fetch existing cgroups for the user from remote and save them to DB.
- */
-export const pullCGroups = async () => {
-    if (!(await wipClusterEnable())) return;
-
-    const masterKey = await masterKeyFromSession();
-    await pullUserEntities("cgroup", masterKey);
-};
 
 export type NamedPerson = Omit<Person, "name"> & {
     name: string;

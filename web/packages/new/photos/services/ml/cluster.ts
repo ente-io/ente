@@ -3,7 +3,10 @@ import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import type { EnteFile } from "../../types/file";
-import { savedCGroupUserEntities } from "../user-entity";
+import {
+    savedCGroupUserEntities,
+    updateOrCreateUserEntities,
+} from "../user-entity";
 import { savedFaceClusters, saveFaceClusters } from "./db";
 import {
     faceDirection,
@@ -346,8 +349,14 @@ const clusterBatchLinear = async (
 /**
  * Use the output of the clustering phase to (a) update any remote cgroups that
  * have changed, and (b) update our locally persisted clusters.
+ *
+ * @param masterKey The user's master key, required for updating the cgroups on
+ * remote if needed.
  */
-export const reconcileClusters = async (clusters: FaceCluster[]) => {
+export const reconcileClusters = async (
+    clusters: FaceCluster[],
+    masterKey: Uint8Array,
+) => {
     // Index clusters by their ID for fast lookup.
     const clusterByID = new Map(clusters.map((c) => [c.id, c]));
 
@@ -378,9 +387,14 @@ export const reconcileClusters = async (clusters: FaceCluster[]) => {
         })
         .filter((g) => !!g);
 
+    // Update remote if needed.
     if (changedCGroupEntities.length) {
         log.info(`Updating ${changedCGroupEntities.length} remote cgroups`);
-        // TODO-Cluster do it
+        await updateOrCreateUserEntities(
+            "cgroup",
+            changedCGroupEntities,
+            masterKey,
+        );
     }
 
     // Find which clusters are part of remote cgroups.

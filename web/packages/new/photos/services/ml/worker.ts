@@ -298,14 +298,17 @@ export class MLWorker {
      * with remote) is complete so that we cluster the latest set of faces, and
      * after we have fetched the latest cgroups from remote (so that we do no
      * overwrite any remote updates).
+     *
+     * @param masterKey The user's master key, required for updating remote
+     * cgroups if needed.
      */
-    async clusterFaces() {
+    async clusterFaces(masterKey: Uint8Array) {
         const clusters = await clusterFaces(
             await getFaceIndexes(),
             await getAllLocalFiles(),
             (progress) => this.updateClusteringProgress(progress),
         );
-        await reconcileClusters(clusters);
+        await reconcileClusters(clusters, masterKey);
         this.updateClusteringProgress(undefined);
     }
 
