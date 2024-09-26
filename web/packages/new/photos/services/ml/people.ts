@@ -169,6 +169,10 @@ export const reconstructPeople = async (): Promise<Person[]> => {
         }
     }
 
+    // Help out tsc.
+    const typeCGroup: Person["type"] = "cgroup";
+    const typeCluster: Person["type"] = "cluster";
+
     // Convert cgroups to people.
     const cgroups = await savedCGroupUserEntities();
     const cgroupPeople = cgroups.map(({ id, data: cgroup }) => {
@@ -211,7 +215,7 @@ export const reconstructPeople = async (): Promise<Person[]> => {
         }
 
         return {
-            type: "cgroup" as const,
+            type: typeCGroup,
             id,
             name: cgroup.name,
             fileIDs,
@@ -235,7 +239,7 @@ export const reconstructPeople = async (): Promise<Person[]> => {
         );
 
         return {
-            type: "cluster" as const,
+            type: typeCluster,
             id: cluster.id,
             name: undefined,
             fileIDs: [...new Set(faces.map((f) => f.file.id))],
