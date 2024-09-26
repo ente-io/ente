@@ -5,6 +5,7 @@ import type { EnteFile } from "@/new/photos/types/file";
 import { Skeleton, Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
+import { UnstyledButton } from "./mui-custom";
 
 export interface SearchPeopleListProps {
     people: Person[];
@@ -48,13 +49,8 @@ const SearchPeopleContainer = styled("div")`
     margin-block-end: 15px;
 `;
 
-const SearchPeopleButton = styled("button")(
+const SearchPeopleButton = styled(UnstyledButton)(
     ({ theme }) => `
-    /* Reset some button defaults */
-    border: 0;
-    padding: 0;
-    /* Button should do this for us, but it isn't working inside the select */
-    cursor: pointer;
     width: 87px;
     height: 87px;
     border-radius: 50%;
