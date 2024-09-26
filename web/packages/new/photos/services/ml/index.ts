@@ -322,8 +322,7 @@ export const mlSync = async () => {
 
     // Generate or update local clusters.
     // TODO-Cluster
-    // Warning - this is heavily WIP
-    if (process.env.NEXT_PUBLIC_ENTE_WIP_CL_AUTO) {
+    if (await wipClusterEnable()) {
         await w.clusterFaces();
     }
 
@@ -363,16 +362,6 @@ export const indexNewUpload = (enteFile: EnteFile, uploadItem: UploadItem) => {
 export const wipClusterEnable = async (): Promise<boolean> =>
     (!!process.env.NEXT_PUBLIC_ENTE_WIP_CL && isDevBuild) ||
     (await isInternalUser());
-
-export const wipCluster = async () => {
-    if (!(await wipClusterEnable())) throw new Error("Not implemented");
-
-    triggerStatusUpdate();
-
-    await worker().then((w) => w.clusterFaces());
-
-    triggerStatusUpdate();
-};
 
 export type MLStatus =
     | { phase: "disabled" /* The ML remote flag is off */ }

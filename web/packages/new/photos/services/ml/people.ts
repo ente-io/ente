@@ -127,7 +127,6 @@ export interface Person {
  * Fetch existing cgroups for the user from remote and save them to DB.
  */
 export const pullCGroups = async () => {
-    if (!process.env.NEXT_PUBLIC_ENTE_WIP_CL) return;
     if (!(await wipClusterEnable())) return;
 
     const masterKey = await masterKeyFromSession();
@@ -150,7 +149,6 @@ export type NamedPerson = Omit<Person, "name"> & {
  * reference.
  */
 export const reconstructPeople = async (): Promise<Person[]> => {
-    if (!process.env.NEXT_PUBLIC_ENTE_WIP_CL) return [];
     if (!(await wipClusterEnable())) return [];
 
     const files = await getLocalFiles("normal");
