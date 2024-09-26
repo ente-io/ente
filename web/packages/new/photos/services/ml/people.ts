@@ -2,7 +2,11 @@ import { masterKeyFromSession } from "@/base/session-store";
 import { wipClusterEnable } from ".";
 import type { EnteFile } from "../../types/file";
 import { getLocalFiles } from "../files";
-import { addUserEntity, savedCGroupUserEntities } from "../user-entity";
+import {
+    addUserEntity,
+    savedCGroupUserEntities,
+    type CGroupUserEntity,
+} from "../user-entity";
 import type { FaceCluster } from "./cluster";
 import { getFaceIndexes, savedFaceClusters } from "./db";
 import { fileIDFromFaceID } from "./face";
@@ -100,9 +104,11 @@ export interface CGroupUserEntityData {
  */
 export interface Person {
     /**
-     * The source of the underlying data.
+     * The underlying data.
      */
-    type: "cgroup" | "cluster";
+    underlying:
+        | { type: "cgroup"; cgroupUserEntity: CGroupUserEntity }
+        | { type: "cluster"; cluster: FaceCluster };
     /**
      * Nanoid of the underlying cgroup or {@link FaceCluster}.
      */
@@ -175,7 +181,9 @@ export const reconstructPeople = async (): Promise<Person[]> => {
 
     // Convert cgroups to people.
     const cgroups = await savedCGroupUserEntities();
-    const cgroupPeople: Interim = cgroups.map(({ id, data: cgroup }) => {
+    const cgroupPeople: Interim = cgroups.map((cgroupUserEntity) => {
+        const { id, data: cgroup } = cgroupUserEntity;
+
         // Hidden cgroups are clusters specifically marked so as to not be shown
         // in the UI.
         if (cgroup.isHidden) return undefined;
@@ -215,7 +223,7 @@ export const reconstructPeople = async (): Promise<Person[]> => {
         }
 
         return {
-            type: "cgroup",
+            underlying: { type: "cgroup", cgroupUserEntity },
             id,
             name: cgroup.name,
             fileIDs,
@@ -239,7 +247,7 @@ export const reconstructPeople = async (): Promise<Person[]> => {
         );
 
         return {
-            type: "cluster",
+            underlying: { type: "cluster", cluster },
             id: cluster.id,
             name: undefined,
             fileIDs: [...new Set(faces.map((f) => f.file.id))],

@@ -22,7 +22,6 @@ import React, { useCallback, useState } from "react";
 import type { NewAppContextPhotos } from "../../types/context";
 import { SpaceBetweenFlex } from "../mui-custom";
 import { NameInputDialog } from "../NameInputDialog";
-import { useWrapLoadError } from "../use-wrap";
 import { GalleryItemsHeaderAdapter, GalleryItemsSummary } from "./ListHeader";
 
 /**
@@ -62,38 +61,6 @@ export const PeopleHeader: React.FC<PeopleHeaderProps> = ({
     person,
     appContext,
 }) => {
-    // TODO-Cluster
-    const hasOptions = process.env.NEXT_PUBLIC_ENTE_WIP_CL;
-
-    const { startLoading, finishLoading } = appContext;
-
-    const [openAddNameInput, setOpenAddNameInput] = useState(false);
-
-    const wrapLoadError = useWrapLoadError(appContext);
-
-    const addPersonWithName = useCallback(
-        async (name: string) => {
-            startLoading();
-            try {
-                console.log("adding", name);
-                await wait(2000);
-                throw new Error("test");
-                await addPerson(name, { id: "", faces: [] } /* TODO-Cluster*/);
-            } finally {
-                finishLoading();
-            }
-        },
-        [startLoading, finishLoading],
-    );
-
-    const handleAddPerson = () => setOpenAddNameInput(true);
-
-    const rename = wrapLoadError(async () => {
-        console.log("add person");
-        await wait(2000);
-        throw new Error("test");
-    });
-
     return (
         <GalleryItemsHeaderAdapter>
             <SpaceBetweenFlex>
@@ -104,21 +71,99 @@ export const PeopleHeader: React.FC<PeopleHeaderProps> = ({
                     nameProps={person.name ? {} : { color: "text.muted" }}
                     fileCount={person.fileIDs.length}
                 />
-                {hasOptions && (
-                    <OverflowMenu
-                        ariaControls={"person-options"}
-                        triggerButtonIcon={<MoreHoriz />}
-                    >
-                        {person.type == "cgroup" ? (
-                            <CGroupPersonOptions onRename={rename} />
-                        ) : (
-                            <ClusterPersonOptions
-                                onAddPerson={handleAddPerson}
-                            />
-                        )}
-                    </OverflowMenu>
+                {person.underlying.type == "cgroup" ? (
+                    <CGroupPersonOptions
+                        person={person}
+                        appContext={appContext}
+                    />
+                ) : (
+                    <ClusterPersonOptions
+                        person={person}
+                        appContext={appContext}
+                    />
                 )}
             </SpaceBetweenFlex>
+        </GalleryItemsHeaderAdapter>
+    );
+};
+
+interface CGroupPersonOptionsProps {
+    person: Omit<Person, "underlying"> & {
+        underlying: Extract<Person["underlying"], { type: "cgroup" }>;
+    };
+    appContext: NewAppContextPhotos;
+}
+
+const CGroupPersonOptions: React.FC<CGroupPersonOptionsProps> = ({
+    person,
+}) => {
+    const rename = () => {
+        console.log("todo rename", person);
+    };
+
+    return (
+        <OverflowMenu
+            ariaControls={"person-options"}
+            triggerButtonIcon={<MoreHoriz />}
+        >
+            <OverflowMenuOption
+                startIcon={<EditIcon />}
+                centerAlign
+                onClick={rename}
+            >
+                {t("rename")}
+            </OverflowMenuOption>
+        </OverflowMenu>
+    );
+};
+
+interface ClusterPersonOptionsProps {
+    person: Omit<Person, "underlying"> & {
+        underlying: Extract<Person["underlying"], { type: "cluster" }>;
+    };
+    appContext: NewAppContextPhotos;
+}
+
+const ClusterPersonOptions: React.FC<ClusterPersonOptionsProps> = ({
+    person,
+    appContext,
+}) => {
+    const { startLoading, finishLoading } = appContext;
+
+    const [openAddNameInput, setOpenAddNameInput] = useState(false);
+
+    const addPersonWithName = useCallback(
+        async (name: string) => {
+            startLoading();
+            try {
+                console.log("adding", name, person);
+                await wait(2000);
+                throw new Error("test");
+                await addPerson(name, { id: "", faces: [] } /* TODO-Cluster*/);
+            } finally {
+                finishLoading();
+            }
+        },
+        [person, startLoading, finishLoading],
+    );
+
+    const handleAddPerson = () => setOpenAddNameInput(true);
+
+    return (
+        <>
+            <OverflowMenu
+                ariaControls={"person-options"}
+                triggerButtonIcon={<MoreHoriz />}
+            >
+                <OverflowMenuOption
+                    startIcon={<AddIcon />}
+                    centerAlign
+                    onClick={handleAddPerson}
+                >
+                    {pt("Add a name")}
+                </OverflowMenuOption>
+            </OverflowMenu>
+
             <NameInputDialog
                 open={openAddNameInput}
                 onClose={() => setOpenAddNameInput(false)}
@@ -128,49 +173,6 @@ export const PeopleHeader: React.FC<PeopleHeaderProps> = ({
                 submitButtonTitle={t("ADD")}
                 onSubmit={addPersonWithName}
             />
-        </GalleryItemsHeaderAdapter>
+        </>
     );
 };
-
-interface CGroupPersonOptionsProps {
-    onRename: () => void;
-}
-
-const CGroupPersonOptions: React.FC<CGroupPersonOptionsProps> = ({
-    onRename,
-}) => (
-    <>
-        <OverflowMenuOption
-            startIcon={<EditIcon />}
-            centerAlign
-            onClick={onRename}
-        >
-            {t("rename")}
-        </OverflowMenuOption>
-        {/* <OverflowMenuOption
-            startIcon={<RemoveIcon />}
-            centerAlign
-            onClick={onDelete}
-        >
-            {pt("Remove")}
-        </OverflowMenuOption> */}
-    </>
-);
-
-interface ClusterPersonOptionsProps {
-    onAddPerson: () => void;
-}
-
-const ClusterPersonOptions: React.FC<ClusterPersonOptionsProps> = ({
-    onAddPerson,
-}) => (
-    <>
-        <OverflowMenuOption
-            startIcon={<AddIcon />}
-            centerAlign
-            onClick={onAddPerson}
-        >
-            {pt("Add a name")}
-        </OverflowMenuOption>
-    </>
-);
