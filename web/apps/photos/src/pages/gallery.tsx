@@ -1058,10 +1058,6 @@ export default function Gallery() {
         setBarMode("people");
     };
 
-    if (activePerson) {
-        log.debug(() => ["person", activePerson]);
-    }
-
     if (!collectionSummaries || !filteredData) {
         return <div></div>;
     }

@@ -72,6 +72,12 @@ export const PersonListHeader: React.FC<PeopleListHeaderProps> = ({
         throw new Error("test");
     });
 
+    const rename = wrap(async () => {
+        console.log("add person");
+        await wait(2000);
+        throw new Error("test");
+    });
+
     return (
         <GalleryItemsHeaderAdapter>
             <SpaceBetweenFlex>
@@ -87,16 +93,10 @@ export const PersonListHeader: React.FC<PeopleListHeaderProps> = ({
                         ariaControls={"person-options"}
                         triggerButtonIcon={<MoreHoriz />}
                     >
-                        {person.type != "cgroup" ? (
-                            <CGroupPersonOptions onAddPerson={addPerson} />
+                        {person.type == "cgroup" ? (
+                            <CGroupPersonOptions onRename={rename} />
                         ) : (
-                            <OverflowMenuOption
-                                startIcon={<AddIcon />}
-                                centerAlign
-                                onClick={addPerson}
-                            >
-                                {pt("Add a name")}
-                            </OverflowMenuOption>
+                            <ClusterPersonOptions onAddPerson={addPerson} />
                         )}
                     </OverflowMenu>
                 )}
@@ -105,18 +105,39 @@ export const PersonListHeader: React.FC<PeopleListHeaderProps> = ({
     );
 };
 
-interface CGroupOptionsProps {
-    onAddPerson: () => void;
+interface CGroupPersonOptionsProps {
+    onRename: () => void;
 }
-const CGroupPersonOptions: React.FC<CGroupOptionsProps> = ({ onAddPerson }) => (
+
+const CGroupPersonOptions: React.FC<CGroupPersonOptionsProps> = ({
+    onRename,
+}) => (
     <>
         <OverflowMenuOption
             startIcon={<EditIcon />}
             centerAlign
-            onClick={() => console.log("test")}
+            onClick={onRename}
         >
             {t("rename")}
         </OverflowMenuOption>
+        {/* <OverflowMenuOption
+            startIcon={<RemoveIcon />}
+            centerAlign
+            onClick={onDelete}
+        >
+            {pt("Remove")}
+        </OverflowMenuOption> */}
+    </>
+);
+
+interface ClusterPersonOptionsProps {
+    onAddPerson: () => void;
+}
+
+const ClusterPersonOptions: React.FC<ClusterPersonOptionsProps> = ({
+    onAddPerson,
+}) => (
+    <>
         <OverflowMenuOption
             startIcon={<AddIcon />}
             centerAlign
