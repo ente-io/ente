@@ -1,9 +1,9 @@
 import type { Collection } from "@/media/collection";
-import { PeopleHeader } from "@/new/photos/components/Gallery";
 import {
     GalleryBarImpl,
     type GalleryBarImplProps,
 } from "@/new/photos/components/Gallery/BarImpl";
+import { PeopleHeader } from "@/new/photos/components/Gallery/PeopleHeader";
 import {
     collectionsSortBy,
     type CollectionsSortBy,
