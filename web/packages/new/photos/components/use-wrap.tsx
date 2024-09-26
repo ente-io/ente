@@ -4,17 +4,21 @@ import type { NewAppContextPhotos } from "../types/context";
 /**
  * Return a wrap function.
  *
- * This wrap function itself takes an async function, and returns new
- * function by wrapping an async function in an error handler, showing the
- * global loading bar when the function runs.
+ * This returned wrap function itself takes an async function, and will return a
+ * new function that wraps the provided async function (a) in an error handler,
+ * and (b) shows the global loading bar when the function runs.
+ *
+ * This legend of the three functions that are involved might help:
+ *
+ * - useWrap: () => wrap
+ * - wrap: (f) => void
+ * - f: async () => Promise<void>
  */
-export const useWrapAsyncOperation = (
+export const useWrapLoadError = (
     /** See: [Note: Migrating components that need the app context]. */
-    appContext: NewAppContextPhotos,
-) => {
-    const { startLoading, finishLoading, onGenericError } = appContext;
-
-    const wrap = React.useCallback(
+    { startLoading, finishLoading, onGenericError }: NewAppContextPhotos,
+) =>
+    React.useCallback(
         (f: () => Promise<void>) => {
             const wrapped = async () => {
                 startLoading();
@@ -31,5 +35,25 @@ export const useWrapAsyncOperation = (
         [onGenericError, startLoading, finishLoading],
     );
 
-    return wrap;
-};
+/**
+ * A variant of {@link useWrapLoadError} that does not handle the error, only
+ * does the loading indicator.
+ */
+export const useWrapLoad = (
+    /** See: [Note: Migrating components that need the app context]. */
+    { startLoading, finishLoading }: NewAppContextPhotos,
+) =>
+    React.useCallback(
+        (f: () => Promise<void>) => {
+            const wrapped = async () => {
+                startLoading();
+                try {
+                    await f();
+                } finally {
+                    finishLoading();
+                }
+            };
+            return (): void => void wrapped();
+        },
+        [startLoading, finishLoading],
+    );

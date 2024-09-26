@@ -21,7 +21,7 @@ import { t } from "i18next";
 import React from "react";
 import type { NewAppContextPhotos } from "../../types/context";
 import { SpaceBetweenFlex } from "../mui-custom";
-import { useWrapAsyncOperation } from "../use-wrap";
+import { useWrapLoad, useWrapLoadError } from "../use-wrap";
 import { GalleryItemsHeaderAdapter, GalleryItemsSummary } from "./ListHeader";
 
 /**
@@ -64,15 +64,18 @@ export const PersonListHeader: React.FC<PeopleListHeaderProps> = ({
     // TODO-Cluster
     const hasOptions = process.env.NEXT_PUBLIC_ENTE_WIP_CL;
 
-    const wrap = useWrapAsyncOperation(appContext);
+    const wrapLoadError = useWrapLoadError(appContext);
 
-    const addPerson = wrap(async () => {
+    const wrapLoad = useWrapLoad(appContext);
+
+    const addPerson = wrapLoadError(async () => {
         console.log("add person");
+
         await wait(2000);
         throw new Error("test");
     });
 
-    const rename = wrap(async () => {
+    const rename = wrapLoad(async () => {
         console.log("add person");
         await wait(2000);
         throw new Error("test");
