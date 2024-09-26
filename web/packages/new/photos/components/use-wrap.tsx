@@ -37,9 +37,10 @@ export const useWrapLoadError = (
 
 /**
  * A variant of {@link useWrapLoadError} that does not handle the error, only
- * does the loading indicator.
+ * does the loading indicator. It also returns the async function directly
+ * instead of voiding the await.
  */
-export const useWrapLoad = (
+export const useWrapLoadAsync = (
     /** See: [Note: Migrating components that need the app context]. */
     { startLoading, finishLoading }: NewAppContextPhotos,
 ) =>
@@ -53,7 +54,7 @@ export const useWrapLoad = (
                     finishLoading();
                 }
             };
-            return (): void => void wrapped();
+            return wrapped;
         },
         [startLoading, finishLoading],
     );

@@ -8,7 +8,7 @@
  */
 
 import { pt } from "@/base/i18n";
-import type { Person } from "@/new/photos/services/ml/people";
+import { addPerson, type Person } from "@/new/photos/services/ml/people";
 import type { SearchOption } from "@/new/photos/services/search/types";
 import { wait } from "@/utils/promise";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
@@ -18,10 +18,11 @@ import EditIcon from "@mui/icons-material/Edit";
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
 import { Typography } from "@mui/material";
 import { t } from "i18next";
-import React from "react";
+import React, { useCallback, useState } from "react";
 import type { NewAppContextPhotos } from "../../types/context";
 import { SpaceBetweenFlex } from "../mui-custom";
-import { useWrapLoad, useWrapLoadError } from "../use-wrap";
+import { NameInputDialog } from "../NameInputDialog";
+import { useWrapLoadError } from "../use-wrap";
 import { GalleryItemsHeaderAdapter, GalleryItemsSummary } from "./ListHeader";
 
 /**
@@ -64,18 +65,30 @@ export const PersonListHeader: React.FC<PeopleListHeaderProps> = ({
     // TODO-Cluster
     const hasOptions = process.env.NEXT_PUBLIC_ENTE_WIP_CL;
 
+    const { startLoading, finishLoading } = appContext;
+
+    const [openAddNameInput, setOpenAddNameInput] = useState(false);
+
     const wrapLoadError = useWrapLoadError(appContext);
 
-    const wrapLoad = useWrapLoad(appContext);
+    const addPersonWithName = useCallback(
+        async (name: string) => {
+            startLoading();
+            try {
+                console.log("adding", name);
+                await wait(2000);
+                throw new Error("test");
+                await addPerson(name, { id: "", faces: [] } /* TODO-Cluster*/);
+            } finally {
+                finishLoading();
+            }
+        },
+        [startLoading, finishLoading],
+    );
 
-    const addPerson = wrapLoadError(async () => {
-        console.log("add person");
+    const handleAddPerson = () => setOpenAddNameInput(true);
 
-        await wait(2000);
-        throw new Error("test");
-    });
-
-    const rename = wrapLoad(async () => {
+    const rename = wrapLoadError(async () => {
         console.log("add person");
         await wait(2000);
         throw new Error("test");
@@ -99,11 +112,22 @@ export const PersonListHeader: React.FC<PeopleListHeaderProps> = ({
                         {person.type == "cgroup" ? (
                             <CGroupPersonOptions onRename={rename} />
                         ) : (
-                            <ClusterPersonOptions onAddPerson={addPerson} />
+                            <ClusterPersonOptions
+                                onAddPerson={handleAddPerson}
+                            />
                         )}
                     </OverflowMenu>
                 )}
             </SpaceBetweenFlex>
+            <NameInputDialog
+                open={openAddNameInput}
+                onClose={() => setOpenAddNameInput(false)}
+                title={pt("Add person")}
+                placeholder={"ENTER_NAME"}
+                initialValue={""}
+                submitButtonTitle={"Add"}
+                onSubmit={addPersonWithName}
+            />
         </GalleryItemsHeaderAdapter>
     );
 };
