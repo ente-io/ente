@@ -19,6 +19,8 @@ import MoreHoriz from "@mui/icons-material/MoreHoriz";
 import { Typography } from "@mui/material";
 import { t } from "i18next";
 import React, { useCallback, useState } from "react";
+import type { FaceCluster } from "../../services/ml/cluster";
+import type { CGroupUserEntity } from "../../services/user-entity";
 import type { NewAppContextPhotos } from "../../types/context";
 import { SpaceBetweenFlex } from "../mui-custom";
 import { NameInputDialog } from "../NameInputDialog";
@@ -71,14 +73,16 @@ export const PeopleHeader: React.FC<PeopleHeaderProps> = ({
                     nameProps={person.name ? {} : { color: "text.muted" }}
                     fileCount={person.fileIDs.length}
                 />
-                {person.underlying.type == "cgroup" ? (
+                {person.type == "cgroup" ? (
                     <CGroupPersonOptions
                         person={person}
+                        cgroup={person.cgroupUserEntity}
                         appContext={appContext}
                     />
                 ) : (
                     <ClusterPersonOptions
                         person={person}
+                        cluster={person.cluster}
                         appContext={appContext}
                     />
                 )}
@@ -88,9 +92,8 @@ export const PeopleHeader: React.FC<PeopleHeaderProps> = ({
 };
 
 interface CGroupPersonOptionsProps {
-    person: Omit<Person, "underlying"> & {
-        underlying: Extract<Person["underlying"], { type: "cgroup" }>;
-    };
+    person: Person;
+    cgroup: CGroupUserEntity;
     appContext: NewAppContextPhotos;
 }
 
@@ -118,14 +121,14 @@ const CGroupPersonOptions: React.FC<CGroupPersonOptionsProps> = ({
 };
 
 interface ClusterPersonOptionsProps {
-    person: Omit<Person, "underlying"> & {
-        underlying: Extract<Person["underlying"], { type: "cluster" }>;
-    };
+    person: Person;
+    cluster: FaceCluster;
     appContext: NewAppContextPhotos;
 }
 
 const ClusterPersonOptions: React.FC<ClusterPersonOptionsProps> = ({
     person,
+    cluster,
     appContext,
 }) => {
     const { startLoading, finishLoading } = appContext;

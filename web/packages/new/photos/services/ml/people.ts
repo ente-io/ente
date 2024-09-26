@@ -102,13 +102,10 @@ export interface CGroupUserEntityData {
  * efficiently use, as compared to a {@link CGroupUserEntityData}, which is
  * tailored for transmission and storage.
  */
-export interface Person {
-    /**
-     * The underlying data.
-     */
-    underlying:
-        | { type: "cgroup"; cgroupUserEntity: CGroupUserEntity }
-        | { type: "cluster"; cluster: FaceCluster };
+export type Person = (
+    | { type: "cgroup"; cgroupUserEntity: CGroupUserEntity }
+    | { type: "cluster"; cluster: FaceCluster }
+) & {
     /**
      * Nanoid of the underlying cgroup or {@link FaceCluster}.
      */
@@ -132,7 +129,7 @@ export interface Person {
      * The {@link EnteFile} which contains the display face.
      */
     displayFaceFile: EnteFile;
-}
+};
 
 export type NamedPerson = Omit<Person, "name"> & {
     name: string;
@@ -223,7 +220,8 @@ export const reconstructPeople = async (): Promise<Person[]> => {
         }
 
         return {
-            underlying: { type: "cgroup", cgroupUserEntity },
+            type: "cgroup",
+            cgroupUserEntity,
             id,
             name: cgroup.name,
             fileIDs,
@@ -247,7 +245,8 @@ export const reconstructPeople = async (): Promise<Person[]> => {
         );
 
         return {
-            underlying: { type: "cluster", cluster },
+            type: "cluster",
+            cluster,
             id: cluster.id,
             name: undefined,
             fileIDs: [...new Set(faces.map((f) => f.file.id))],
