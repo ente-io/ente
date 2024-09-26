@@ -117,6 +117,7 @@ class MLService {
     try {
       if (force) {
         _mlControllerStatus = true;
+        MagicCacheService.instance.queueUpdate('forced run');
       }
       if (_cannotRunMLFunction() && !force) return;
       _isRunningML = true;
