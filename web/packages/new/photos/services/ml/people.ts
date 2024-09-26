@@ -99,6 +99,10 @@ export interface CGroupUserEntityData {
  */
 export interface Person {
     /**
+     * The source of the underlying data.
+     */
+    type: "cgroup" | "cluster";
+    /**
      * Nanoid of the underlying cgroup or {@link FaceCluster}.
      */
     id: string;
@@ -172,9 +176,6 @@ export const reconstructPeople = async (): Promise<Person[]> => {
         // in the UI.
         if (cgroup.isHidden) return undefined;
 
-        // Unnamed groups are also not shown.
-        const name = cgroup.name;
-
         // Person faces from all the clusters assigned to this cgroup, sorted by
         // their score.
         const faces = cgroup.assigned
@@ -209,7 +210,14 @@ export const reconstructPeople = async (): Promise<Person[]> => {
             displayFaceFile = highestScoringFace.file;
         }
 
-        return { id, name, fileIDs, displayFaceID, displayFaceFile };
+        return {
+            type: "cgroup" as const,
+            id,
+            name: cgroup.name,
+            fileIDs,
+            displayFaceID,
+            displayFaceFile,
+        };
     });
 
     // Convert local-only clusters to people.
@@ -227,6 +235,7 @@ export const reconstructPeople = async (): Promise<Person[]> => {
         );
 
         return {
+            type: "cluster" as const,
             id: cluster.id,
             name: undefined,
             fileIDs: [...new Set(faces.map((f) => f.file.id))],
