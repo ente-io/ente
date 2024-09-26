@@ -7,6 +7,7 @@ import { blobCache } from "@/base/blob-cache";
 import { ensureElectron } from "@/base/electron";
 import { isDevBuild } from "@/base/env";
 import log from "@/base/log";
+import { masterKeyFromSession } from "@/base/session-store";
 import type { Electron } from "@/base/types/ipc";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
 import { FileType } from "@/media/file-type";
@@ -18,14 +19,10 @@ import { isInternalUser } from "../feature-flags";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
 import { setSearchPeople } from "../search";
 import type { UploadItem } from "../upload/types";
+import { pullUserEntities } from "../user-entity";
 import { regenerateFaceCrops } from "./crop";
 import { clearMLDB, getFaceIndex, getIndexableAndIndexedCounts } from "./db";
-import {
-    pullCGroups,
-    reconstructPeople,
-    type NamedPerson,
-    type Person,
-} from "./people";
+import { reconstructPeople, type NamedPerson, type Person } from "./people";
 import { MLWorker } from "./worker";
 import type { CLIPMatches } from "./worker-types";
 
@@ -242,9 +239,7 @@ const mlLocalKey = "mlEnabled";
  * The remote status is tracked with a separate {@link isMLEnabledRemote} flag
  * that is synced with remote.
  */
-const isMLEnabledLocal = () => {
-    return localStorage.getItem(mlLocalKey) == "1";
-};
+const isMLEnabledLocal = () => localStorage.getItem(mlLocalKey) == "1";
 
 /**
  * Update the (locally stored) value of {@link isMLEnabledLocal}.
@@ -319,14 +314,15 @@ export const mlSync = async () => {
     // Fetch indexes, or index locally if needed.
     await w.index();
 
-    // Fetch existing cgroups from remote.
-    await pullCGroups();
-
-    // Generate or update local clusters.
     // TODO-Cluster
-    // Warning - this is heavily WIP
-    if (process.env.NEXT_PUBLIC_ENTE_WIP_CL_AUTO) {
-        await w.clusterFaces();
+    if (await wipClusterEnable()) {
+        const masterKey = await masterKeyFromSession();
+
+        // Fetch existing cgroups from remote.
+        await pullUserEntities("cgroup", masterKey);
+
+        // Generate or update local clusters.
+        await w.clusterFaces(masterKey);
     }
 
     await updatePeople();
@@ -365,16 +361,6 @@ export const indexNewUpload = (enteFile: EnteFile, uploadItem: UploadItem) => {
 export const wipClusterEnable = async (): Promise<boolean> =>
     (!!process.env.NEXT_PUBLIC_ENTE_WIP_CL && isDevBuild) ||
     (await isInternalUser());
-
-export const wipCluster = async () => {
-    if (!(await wipClusterEnable())) throw new Error("Not implemented");
-
-    triggerStatusUpdate();
-
-    await worker().then((w) => w.clusterFaces());
-
-    triggerStatusUpdate();
-};
 
 export type MLStatus =
     | { phase: "disabled" /* The ML remote flag is off */ }
