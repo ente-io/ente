@@ -322,7 +322,7 @@ const clusterBatchLinear = async (
             }
         }
 
-        if (nnIndex) {
+        if (nnIndex !== undefined) {
             // Found a neighbour close enough, add ourselves to its cluster.
             const nnFace = ensure(faces[nnIndex]);
             const nnClusterIndex = ensure(
