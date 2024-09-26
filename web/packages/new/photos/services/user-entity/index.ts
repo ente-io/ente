@@ -154,31 +154,26 @@ export const pullUserEntities = async (
 const isGzipped = (type: EntityType) => type == "cgroup";
 
 /**
- * Add or update a user entity of the given {@link type}.
+ * Create a new user entity of the given {@link type}.
  *
  * @param data Arbitrary data associated with the entity. The format of the data
  * is specific to each entity type, but the provided data should be JSON
  * serializable (Typescript does not have a native JSON type, so we need to
  * specify this as an `unknown`).
  *
- * @param id If updating an existing entity, set this to the id of the existing
- * entity.
- *
  * @param masterKey The user's masterKey, which is is used to encrypt and
  * decrypt the entity key.
  */
-export const addOrUpdateUserEntity = async (
+export const addUserEntity = async (
     type: EntityType,
     data: unknown,
-    id: string | undefined,
     masterKey: Uint8Array,
 ) => {
-    const encryptedBlob = await encryptedUserEntityData(type, data, masterKey);
-
-    await (id
-        ? putUserEntity(id, type, encryptedBlob)
-        : postUserEntity(type, encryptedBlob));
-
+    // Create it on remote.
+    await postUserEntity(
+        type,
+        await encryptedUserEntityData(type, data, masterKey),
+    );
     // Perform a diff sync to update our local state.
     return pullUserEntities(type, masterKey);
 };
@@ -195,6 +190,30 @@ export const encryptedUserEntityData = async (
         ? await gzip(json)
         : new TextEncoder().encode(json);
     return encryptBlobB64(bytes, entityKeyB64);
+};
+
+/**
+ * Update the given user entities (both on remote and locally), creating them if
+ * they don't exist.
+ *
+ * @param masterKey The user's masterKey, which is is used to encrypt and
+ * decrypt the entity key.
+ */
+export const updateOrCreateUserEntities = async (
+    type: EntityType,
+    entities: LocalUserEntity[],
+    masterKey: Uint8Array,
+) => {
+    // PUT all of them.
+    await Promise.all(
+        entities.map(({ id, data }) =>
+            encryptedUserEntityData(type, data, masterKey).then(
+                (encryptedBlob) => putUserEntity(id, type, encryptedBlob),
+            ),
+        ),
+    );
+    // Perform a diff sync to update our local state.
+    return pullUserEntities(type, masterKey);
 };
 
 /**
