@@ -95,7 +95,7 @@ const CGroupPersonOptions: React.FC<CGroupPersonOptionsProps> = ({
                     centerAlign
                     onClick={handleRenamePerson}
                 >
-                    {pt("rename")}
+                    {t("rename")}
                 </OverflowMenuOption>
             </OverflowMenu>
 
