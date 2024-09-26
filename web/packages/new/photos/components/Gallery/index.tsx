@@ -10,6 +10,7 @@
 import { pt } from "@/base/i18n";
 import type { Person } from "@/new/photos/services/ml/people";
 import type { SearchOption } from "@/new/photos/services/search/types";
+import { wait } from "@/utils/promise";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
 import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
 import AddIcon from "@mui/icons-material/Add";
@@ -18,7 +19,9 @@ import MoreHoriz from "@mui/icons-material/MoreHoriz";
 import { Typography } from "@mui/material";
 import { t } from "i18next";
 import React from "react";
+import type { NewAppContextPhotos } from "../../types/context";
 import { SpaceBetweenFlex } from "../mui-custom";
+import { useWrapAsyncOperation } from "../use-wrap";
 import { GalleryItemsHeaderAdapter, GalleryItemsSummary } from "./ListHeader";
 
 /**
@@ -51,17 +54,23 @@ export const SearchResultsHeader: React.FC<SearchResultsHeaderProps> = ({
 
 interface PeopleListHeaderProps {
     person: Person;
+    appContext: NewAppContextPhotos;
 }
 
 export const PersonListHeader: React.FC<PeopleListHeaderProps> = ({
     person,
+    appContext,
 }) => {
     // TODO-Cluster
     const hasOptions = process.env.NEXT_PUBLIC_ENTE_WIP_CL;
 
-    const addPerson = () => {
+    const wrap = useWrapAsyncOperation(appContext);
+
+    const addPerson = wrap(async () => {
         console.log("add person");
-    };
+        await wait(2000);
+        throw new Error("test");
+    });
 
     return (
         <GalleryItemsHeaderAdapter>

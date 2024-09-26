@@ -20,7 +20,14 @@ import AllCollections from "components/Collections/AllCollections";
 import { SetCollectionNamerAttributes } from "components/Collections/CollectionNamer";
 import CollectionShare from "components/Collections/CollectionShare";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { AppContext } from "pages/_app";
+import React, {
+    useCallback,
+    useContext,
+    useEffect,
+    useMemo,
+    useState,
+} from "react";
 import { sortCollectionSummaries } from "services/collectionService";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
 import {
@@ -95,6 +102,8 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
     filesDownloadProgressAttributesList,
     setFilesDownloadProgressAttributesCreator,
 }) => {
+    const appContext = useContext(AppContext);
+
     const [openAllCollectionDialog, setOpenAllCollectionDialog] =
         useState(false);
     const [openCollectionShareView, setOpenCollectionShareView] =
@@ -163,7 +172,10 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
                         onCollectionCast={() => setOpenAlbumCastDialog(true)}
                     />
                 ) : (
-                    <PersonListHeader person={ensure(activePerson)} />
+                    <PersonListHeader
+                        person={ensure(activePerson)}
+                        appContext={appContext}
+                    />
                 ),
             itemType: ITEM_TYPE.HEADER,
             height: 68,
