@@ -16,8 +16,8 @@ import { dotProduct } from "./math";
 /**
  * A face cluster is an set of faces, and a nanoid to uniquely identify it.
  *
- * // TODO-Cluster
- * A cluster may be local only, or synced to remote as part of a {@link CGroup}.
+ * These are local only clusters. The clusters that are synced with remote are
+ * part of {@link CGroup}s.
  */
 export interface FaceCluster {
     /**
