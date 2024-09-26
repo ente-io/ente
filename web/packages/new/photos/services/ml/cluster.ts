@@ -167,15 +167,10 @@ export const clusterFaces = async (
         );
     }
 
-    // Sort clusters by the number of faces in them.
-    const sortedClusters = clusters.sort(
-        (a, b) => b.faces.length - a.faces.length,
-    );
-
     const t = `(${Date.now() - startTime} ms)`;
     log.info(`Generated ${clusters.length} clusters from ${total} faces ${t}`);
 
-    return sortedClusters;
+    return clusters;
 };
 
 /**
