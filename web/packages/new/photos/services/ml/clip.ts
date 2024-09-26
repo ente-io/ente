@@ -112,9 +112,15 @@ const computeEmbedding = async (
     imageData: ImageData,
     electron: ElectronMLWorker,
 ): Promise<Float32Array> => {
+    // In contrast to the face detection model, the image pre-preprocessing
+    // happens within the model itself, using ONNX primitives. This is more
+    // performant and also saves us from having to reinvent (say) the
+    // antialising wheels.
     const { height, width, data: pixelData } = imageData;
     const inputShape = [height, width, 4]; // [H, W, C]
-    return normalized(await electron.computeCLIPImageEmbedding(pixelData, inputShape));
+    return normalized(
+        await electron.computeCLIPImageEmbedding(pixelData, inputShape),
+    );
 };
 
 const normalized = (embedding: Float32Array) => {

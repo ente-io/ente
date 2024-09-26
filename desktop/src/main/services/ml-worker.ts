@@ -203,8 +203,7 @@ const createInferenceSession = async (modelPath: string) => {
 
 const cachedCLIPImageSession = makeCachedInferenceSession(
     "mobileclip_s2_image_opset18_rgba_sim.onnx",
-    143061211 /* 143 MB */,
-    // TODO: manav: check above number, because I got 143093992 but might be calculating wrong
+    143093992 /* 143 MB */,
 );
 
 /**
