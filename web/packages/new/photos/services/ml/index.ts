@@ -25,6 +25,7 @@ import {
     updateOrCreateUserEntities,
     type CGroup,
 } from "../user-entity";
+import { deleteUserEntity } from "../user-entity/remote";
 import type { FaceCluster } from "./cluster";
 import { regenerateFaceCrops } from "./crop";
 import { clearMLDB, getFaceIndex, getIndexableAndIndexedCounts } from "./db";
@@ -673,5 +674,15 @@ export const renamePerson = async (name: string, cgroup: CGroup) => {
         [{ ...cgroup, data: { ...cgroup.data, name } }],
         masterKey,
     );
+    return mlSync();
+};
+
+/**
+ * Delete an existing person.
+ *
+ * @param cgroup The existing cgroup underlying the person.
+ */
+export const deletePerson = async ({ id }: CGroup) => {
+    await deleteUserEntity(id);
     return mlSync();
 };

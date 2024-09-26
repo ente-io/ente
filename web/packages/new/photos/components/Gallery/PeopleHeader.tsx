@@ -8,7 +8,11 @@
  */
 
 import { pt } from "@/base/i18n";
-import { addPerson, renamePerson } from "@/new/photos/services/ml/";
+import {
+    addPerson,
+    deletePerson,
+    renamePerson,
+} from "@/new/photos/services/ml/";
 import { type Person } from "@/new/photos/services/ml/people";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
 import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
@@ -16,6 +20,7 @@ import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
 import { IconButton, Stack, Tooltip } from "@mui/material";
+import { ClearIcon } from "@mui/x-date-pickers";
 import { t } from "i18next";
 import React, { useState } from "react";
 import type { FaceCluster } from "../../services/ml/cluster";
@@ -23,6 +28,7 @@ import type { CGroup } from "../../services/user-entity";
 import type { NewAppContextPhotos } from "../../types/context";
 import { SpaceBetweenFlex } from "../mui-custom";
 import { NameInputDialog } from "../NameInputDialog";
+import { useWrapLoadError } from "../use-wrap";
 import { GalleryItemsHeaderAdapter, GalleryItemsSummary } from "./ListHeader";
 
 interface PeopleHeaderProps {
@@ -69,7 +75,10 @@ const CGroupPersonOptions: React.FC<CGroupPersonOptionsProps> = ({
     cgroup,
     appContext,
 }) => {
-    const { startLoading, finishLoading } = appContext;
+    const { startLoading, finishLoading, setDialogBoxAttributesV2 } =
+        appContext;
+
+    const wrap = useWrapLoadError(appContext);
 
     const [openAddNameInput, setOpenAddNameInput] = useState(false);
 
@@ -84,6 +93,20 @@ const CGroupPersonOptions: React.FC<CGroupPersonOptionsProps> = ({
         }
     };
 
+    const handleDeletePerson = () =>
+        setDialogBoxAttributesV2({
+            title: pt("Reset person?"),
+            content: pt(
+                "The name, face groupings and suggestions for this person will be reset",
+            ),
+            close: { text: t("cancel") },
+            proceed: {
+                text: t("RESET"),
+                action: wrap(() => deletePerson(cgroup)),
+            },
+            buttonDirection: "row",
+        });
+
     return (
         <>
             <OverflowMenu
@@ -96,6 +119,13 @@ const CGroupPersonOptions: React.FC<CGroupPersonOptionsProps> = ({
                     onClick={handleRenamePerson}
                 >
                     {t("rename")}
+                </OverflowMenuOption>
+                <OverflowMenuOption
+                    startIcon={<ClearIcon />}
+                    centerAlign
+                    onClick={handleDeletePerson}
+                >
+                    {pt("Reset")}
                 </OverflowMenuOption>
             </OverflowMenu>
 
