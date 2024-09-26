@@ -1,11 +1,12 @@
 import {
     decryptBoxB64,
+    encryptBlobB64,
     encryptBoxB64,
     generateNewBlobOrStreamKey,
 } from "@/base/crypto";
 import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
-import { gunzip } from "../../utils/gzip";
+import { gunzip, gzip } from "../../utils/gzip";
 import {
     savedEntities,
     savedLatestUpdatedAt,
@@ -17,7 +18,9 @@ import {
 } from "./db";
 import {
     getUserEntityKey,
+    postUserEntity,
     postUserEntityKey,
+    putUserEntity,
     RemoteUserEntityKey,
     userEntityDiff,
 } from "./remote";
@@ -112,16 +115,14 @@ export const savedCGroupUserEntities = (): Promise<CGroupUserEntity[]> =>
  * It uses local state to remember the latest entry the last time it did a pull,
  * so each subsequent pull is a lightweight diff.
  *
- * @param masterKey The user's masterKey, which is is used to decrypt the entity
- * key (or encrypt it, when generating a new one).
+ * @param masterKey The user's masterKey, which is is used to encrypt and
+ * decrypt the entity key.
  */
 export const pullUserEntities = async (
     type: EntityType,
     masterKey: Uint8Array,
 ) => {
     const entityKeyB64 = await getOrCreateEntityKeyB64(type, masterKey);
-
-    const isGzipped = type == "cgroup";
 
     let sinceTime = (await savedLatestUpdatedAt(type)) ?? 0;
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, no-constant-condition
@@ -135,7 +136,7 @@ export const pullUserEntities = async (
 
         for (const { id, data, updatedAt } of diff) {
             if (data) {
-                const s = isGzipped
+                const s = isGzipped(type)
                     ? await gunzip(data)
                     : new TextDecoder().decode(data);
                 entityByID.set(id, { id, data: JSON.parse(s), updatedAt });
@@ -148,6 +149,44 @@ export const pullUserEntities = async (
         await saveEntities(type, [...entityByID.values()]);
         await saveLatestUpdatedAt(type, sinceTime);
     }
+};
+
+const isGzipped = (type: EntityType) => type == "cgroup";
+
+/**
+ * Add or update a user entity of the given {@link type}.
+ *
+ * @param data Arbitrary data associated with the entity. The format of the data
+ * is specific to each entity type, but the provided data should be JSON
+ * serializable (Typescript does not have a native JSON type, so we need to
+ * specify this as an `unknown`).
+ *
+ * @param id If updating an existing entity, set this to the id of the existing
+ * entity.
+ *
+ * @param masterKey The user's masterKey, which is is used to encrypt and
+ * decrypt the entity key.
+ */
+export const addOrUpdateUserEntity = async (
+    type: EntityType,
+    data: unknown,
+    id: string | undefined,
+    masterKey: Uint8Array,
+) => {
+    const entityKeyB64 = await getOrCreateEntityKeyB64(type, masterKey);
+
+    const json = JSON.stringify(data);
+    const bytes = isGzipped(type)
+        ? await gzip(json)
+        : new TextEncoder().encode(json);
+    const encryptedBlob = await encryptBlobB64(bytes, entityKeyB64);
+
+    await (id
+        ? putUserEntity(id, type, encryptedBlob)
+        : postUserEntity(type, encryptedBlob));
+
+    // Perform a diff sync to update our local state.
+    return pullUserEntities(type, masterKey);
 };
 
 /**
