@@ -47,7 +47,14 @@ import isElectron from "is-electron";
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
 import "photoswipe/dist/photoswipe.css";
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import {
+    createContext,
+    useCallback,
+    useContext,
+    useEffect,
+    useRef,
+    useState,
+} from "react";
 import LoadingBar from "react-top-loading-bar";
 import { resumeExportsIfNeeded } from "services/export";
 import { photosLogout } from "services/logout";
@@ -269,12 +276,15 @@ export default function App({ Component, pageProps }: AppProps) {
     const closeMessageDialog = () => setMessageDialogView(false);
     const closeDialogBoxV2 = () => setDialogBoxV2View(false);
 
-    const somethingWentWrong = () =>
-        setDialogMessage({
-            title: t("error"),
-            close: { variant: "critical" },
-            content: t("UNKNOWN_ERROR"),
-        });
+    const somethingWentWrong = useCallback(
+        () =>
+            setDialogMessage({
+                title: t("error"),
+                close: { variant: "critical" },
+                content: t("UNKNOWN_ERROR"),
+            }),
+        [setDialogMessage],
+    );
 
     const logout = () => {
         void photosLogout().then(() => router.push("/"));
