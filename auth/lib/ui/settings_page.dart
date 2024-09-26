@@ -142,7 +142,10 @@ class SettingsPage extends StatelessWidget {
       sectionSpacing,
     ]);
 
-    if (Platform.isAndroid || kDebugMode) {
+    if (Platform.isAndroid ||
+        Platform.isWindows ||
+        Platform.isLinux ||
+        kDebugMode) {
       contents.addAll([
         const ThemeSwitchWidget(),
         sectionSpacing,
