@@ -19,7 +19,12 @@ import { isInternalUser } from "../feature-flags";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
 import { setSearchPeople } from "../search";
 import type { UploadItem } from "../upload/types";
-import { addUserEntity, pullUserEntities } from "../user-entity";
+import {
+    addUserEntity,
+    pullUserEntities,
+    updateOrCreateUserEntities,
+    type CGroup,
+} from "../user-entity";
 import type { FaceCluster } from "./cluster";
 import { regenerateFaceCrops } from "./crop";
 import { clearMLDB, getFaceIndex, getIndexableAndIndexedCounts } from "./db";
@@ -633,7 +638,7 @@ const regenerateFaceCropsIfNeeded = async (enteFile: EnteFile) => {
 };
 
 /**
- * Convert a cluster into a named cgroup, updating both remote and local state.
+ * Convert a cluster into a named person, updating both remote and local state.
  *
  * @param name Name of the new cgroup user entity.
  *
@@ -648,6 +653,24 @@ export const addPerson = async (name: string, cluster: FaceCluster) => {
             assigned: [cluster],
             isHidden: false,
         },
+        masterKey,
+    );
+    return mlSync();
+};
+
+/**
+ * Rename an existing named person.
+ *
+ * @param name The new name to use.
+ *
+ * @param cgroup The existing cgroup underlying the person. This is the (remote)
+ * user entity that will get updated.
+ */
+export const renamePerson = async (name: string, cgroup: CGroup) => {
+    const masterKey = await masterKeyFromSession();
+    await updateOrCreateUserEntities(
+        "cgroup",
+        [{ ...cgroup, data: { ...cgroup.data, name } }],
         masterKey,
     );
     return mlSync();

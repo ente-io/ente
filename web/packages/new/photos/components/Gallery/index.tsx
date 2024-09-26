@@ -8,7 +8,7 @@
  */
 
 import { pt } from "@/base/i18n";
-import { addPerson } from "@/new/photos/services/ml/";
+import { addPerson, renamePerson } from "@/new/photos/services/ml/";
 import { type Person } from "@/new/photos/services/ml/people";
 import type { SearchOption } from "@/new/photos/services/search/types";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
@@ -91,31 +91,54 @@ export const PeopleHeader: React.FC<PeopleHeaderProps> = ({
 };
 
 interface CGroupPersonOptionsProps {
-    person: Person;
     cgroup: CGroup;
     appContext: NewAppContextPhotos;
 }
 
 const CGroupPersonOptions: React.FC<CGroupPersonOptionsProps> = ({
-    person,
+    cgroup,
+    appContext,
 }) => {
-    const rename = () => {
-        console.log("todo rename", person);
+    const { startLoading, finishLoading } = appContext;
+
+    const [openAddNameInput, setOpenAddNameInput] = useState(false);
+
+    const handleRenamePerson = () => setOpenAddNameInput(true);
+
+    const renamePersonUsingName = async (name: string) => {
+        startLoading();
+        try {
+            await renamePerson(name, cgroup);
+        } finally {
+            finishLoading();
+        }
     };
 
     return (
-        <OverflowMenu
-            ariaControls={"person-options"}
-            triggerButtonIcon={<MoreHoriz />}
-        >
-            <OverflowMenuOption
-                startIcon={<EditIcon />}
-                centerAlign
-                onClick={rename}
+        <>
+            <OverflowMenu
+                ariaControls={"person-options"}
+                triggerButtonIcon={<MoreHoriz />}
             >
-                {t("rename")}
-            </OverflowMenuOption>
-        </OverflowMenu>
+                <OverflowMenuOption
+                    startIcon={<EditIcon />}
+                    centerAlign
+                    onClick={handleRenamePerson}
+                >
+                    {pt("rename")}
+                </OverflowMenuOption>
+            </OverflowMenu>
+
+            <NameInputDialog
+                open={openAddNameInput}
+                onClose={() => setOpenAddNameInput(false)}
+                title={pt("Rename person")}
+                placeholder={t("ENTER_NAME") /* TODO-Cluster */}
+                initialValue={cgroup.data.name ?? ""}
+                submitButtonTitle={t("rename")}
+                onSubmit={renamePersonUsingName}
+            />
+        </>
     );
 };
 
@@ -130,9 +153,9 @@ const ClusterPersonOptions: React.FC<ClusterPersonOptionsProps> = ({
 }) => {
     const { startLoading, finishLoading } = appContext;
 
-    const [openAddNameInput, setOpenAddNameInput] = useState(false);
+    const [openNameInput, setOpenNameInput] = useState(false);
 
-    const handleAddPerson = () => setOpenAddNameInput(true);
+    const handleAddPerson = () => setOpenNameInput(true);
 
     const addPersonWithName = async (name: string) => {
         startLoading();
@@ -167,8 +190,8 @@ const ClusterPersonOptions: React.FC<ClusterPersonOptionsProps> = ({
             </Stack>
 
             <NameInputDialog
-                open={openAddNameInput}
-                onClose={() => setOpenAddNameInput(false)}
+                open={openNameInput}
+                onClose={() => setOpenNameInput(false)}
                 title={pt("Add person")}
                 placeholder={t("ENTER_NAME") /* TODO-Cluster */}
                 initialValue={""}

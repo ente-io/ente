@@ -178,15 +178,11 @@ export const addUserEntity = async (
     type: EntityType,
     data: unknown,
     masterKey: Uint8Array,
-) => {
-    // Create it on remote.
+) =>
     await postUserEntity(
         type,
         await encryptedUserEntityData(type, data, masterKey),
     );
-    // Perform a diff sync to update our local state.
-    return pullUserEntities(type, masterKey);
-};
 
 export const encryptedUserEntityData = async (
     type: EntityType,
@@ -213,8 +209,7 @@ export const updateOrCreateUserEntities = async (
     type: EntityType,
     entities: LocalUserEntity[],
     masterKey: Uint8Array,
-) => {
-    // PUT all of them.
+) =>
     await Promise.all(
         entities.map(({ id, data }) =>
             encryptedUserEntityData(type, data, masterKey).then(
@@ -222,9 +217,6 @@ export const updateOrCreateUserEntities = async (
             ),
         ),
     );
-    // Perform a diff sync to update our local state.
-    return pullUserEntities(type, masterKey);
-};
 
 /**
  * Return the entity key that can be used to decrypt the encrypted contents of
