@@ -263,11 +263,11 @@ interface ClusteringState {
 }
 
 const clusterBatchLinear = async (
-    faces: ClusterFace[],
+    batch: ClusterFace[],
     state: ClusteringState,
     onProgress: (progress: ClusteringProgress) => void,
 ) => {
-    const [clustered, unclustered] = faces.reduce<
+    const [clusteredFaces, unclusteredFaces] = batch.reduce<
         [ClusterFace[], ClusterFace[]]
     >(
         (split, face) => (
@@ -277,21 +277,21 @@ const clusterBatchLinear = async (
         [[], []],
     );
 
-    if (!unclustered.length) {
+    if (!unclusteredFaces.length) {
         // Optimization: early exit if nothing in batch is unclustered. In a
         // single test (so it might be not be a universal benefit) of ~8k faces,
         // it helped reduce the no-op time by 10x.
-        onProgress({ completed: faces.length, total: faces.length });
+        onProgress({ completed: batch.length, total: batch.length });
         return;
     }
 
     // Sort the faces so that the already clustered ones are at the front.
-    const sortedFaces = clustered.concat(unclustered);
+    const faces = clusteredFaces.concat(unclusteredFaces);
 
     // For each face in the batch
-    for (const [i, fi] of sortedFaces.entries()) {
+    for (const [i, fi] of faces.entries()) {
         if (i % 100 == 0) {
-            onProgress({ completed: i, total: faces.length });
+            onProgress({ completed: i, total: batch.length });
             // See: [Note: Draining the event loop during clustering]
             await wait(0);
         }
