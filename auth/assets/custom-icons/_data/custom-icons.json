@@ -21,9 +21,9 @@
       "hex": "000000"
     },
     {
-      "title": "aliyun", 
-      "altNames": [ 
-        "阿里云"  
+      "title": "aliyun",
+      "altNames": [
+        "阿里云"
       ]
     },
     {
@@ -37,9 +37,9 @@
       "title": "AscendEX"
     },
     {
-      "title": "BaiduCloud", 
-      "altNames": [ 
-        "百度云",   
+      "title": "BaiduCloud",
+      "altNames": [
+        "百度云",
         "baiduyun"
       ]
     },
@@ -55,9 +55,9 @@
       ]
     },
     {
-      "title": "BBS.NGA", 
+      "title": "BBS.NGA",
       "altNames": [
-        "NGA玩家社区",   
+        "NGA玩家社区",
         “NGA社区”
       ]
     },
@@ -357,9 +357,9 @@
       "hex": "D3D800"
     },
     {
-      "title": "jianguoyun", 
+      "title": "jianguoyun",
       "altNames": [
-        "坚果云" 
+        "坚果云"
       ]
     },
     {
@@ -392,9 +392,9 @@
       "slug": "laposte"
     },
     {
-      "title": "Lark", 
-      "altNames": [ 
-        "飞书" 
+      "title": "Lark",
+      "altNames": [
+        "飞书"
       ]
     },
     {
@@ -496,9 +496,9 @@
       "slug": "name_com"
     },
     {
-      "title": "NeteaseMail", 
+      "title": "NeteaseMail",
       "altNames": [
-        "网易邮箱",   
+        "网易邮箱",
         "Mail.163"
       ]
     },
@@ -597,7 +597,7 @@
       "title": "Proxmox"
     },
     {
-      "title": "qiniuyun",  
+      "title": "qiniuyun",
       "altNames": [
         "七牛云",
         "qiniu"
@@ -700,7 +700,7 @@
     {
       "title": "tencent cloud",
       "slug": "tencent_cloud"
-      "altNames": [  
+      "altNames": [
         "腾讯云",
         "tencentcloud"
       ]
@@ -727,9 +727,9 @@
       "title": "Titan"
     },    
     {
-      "title": "tianyiyun", 
-      "altNames": [ 
-        "天翼云" 
+      "title": "tianyiyun",
+      "altNames": [
+        "天翼云"
       ]
     },
     {
@@ -782,7 +782,7 @@
       "title": "Vikunja"
     },
     {
-      "title": "volcengine", 
+      "title": "volcengine",
       "altNames": [
         "火山引擎"
       ]
