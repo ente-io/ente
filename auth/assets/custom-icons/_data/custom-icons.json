@@ -362,6 +362,14 @@
     {
       "title": "Letterboxd"
     },
+   {
+      "title": "Linux.Do",
+      "slug": "LINUX_DO", 
+      "altNames": [
+        "LINUX DO",
+        "LinxDo"
+      ]
+    },
     {
       "title": "Local",
       "slug": "local_wp",
