@@ -13,39 +13,38 @@ import { fileIDFromFaceID } from "./face";
  * Interactions include hiding, merging and giving a name and/or a cover photo.
  *
  * The most frequent interaction is naming a {@link FaceCluster}, which promotes
- * it to a become a {@link CGroup}. The promotion comes with the ability to be
- * synced with remote (as a "cgroup" user entity).
+ * it to a become a {@link CGroupUserEntity}. The promotion comes with the
+ * ability to be synced with remote (as a "cgroup" user entity).
  *
- * There after, the user may attach more clusters to the same {@link CGroup}.
+ * There after, the user may attach more clusters to the same cgroup.
  *
  * > A named cluster group can be thought of as a "person", though this is not
  * > necessarily an accurate characterization. e.g. there can be a named cluster
  * > group that contains face clusters of pets.
  *
  * The other form of interaction is hiding. The user may hide a single (unnamed)
- * cluster, or they may hide an named {@link CGroup}. In both cases, we promote
- * the cluster to a CGroup if needed so that their request to hide gets synced.
+ * cluster, or they may hide an named cgroup. In both cases, we promote the
+ * cluster to a cgroup if needed so that their request to hide gets synced.
  *
  * The user can see both the cgroups and clusters in the UI, but only the
  * cgroups are synced with remote.
  */
-export interface CGroup {
-    /**
-     * A nanoid for this cluster group.
-     *
-     * This is the ID of the "cgroup" user entity (the envelope), and it is not
-     * contained as part of the group entity payload itself.
-     */
-    id: string;
+export interface CGroupUserEntityData {
     /**
      * A name assigned by the user to this cluster group.
      *
      * The client should handle both empty strings and undefined as indicating a
-     * cgroup without a name. When the client needs to set this to an "empty"
+     * cgroup without a name. When the client needs to set this to an <empty>
      * value, which happens when hiding an unnamed cluster, it should it to an
      * empty string. That is, expect `"" | undefined`, but set `""`.
+     *
+     * [Note: Mark optional for Zod/exactOptionalPropertyTypes]
+     *
+     * The type is marked as an optional (?) because currently Zod does not
+     * differentiate between optionals and undefined-valued properties as
+     * required by exactOptionalPropertyTypes.
      */
-    name: string | undefined;
+    name?: string | undefined;
     /**
      * An unordered set ofe clusters that have been assigned to this group.
      *
@@ -73,13 +72,15 @@ export interface CGroup {
      *
      * -   {@link displayFaceID} is the automatic placeholder, and only comes
      *     into effect if the user has not explicitly selected a face.
+     *
+     * Also, see: [Note: Mark optional for Zod/exactOptionalPropertyTypes]
      */
-    avatarFaceID: string | undefined;
+    avatarFaceID?: string | undefined;
 }
 
 /**
- * A massaged version of {@link CGroup} or a {@link FaceCluster} suitable for
- * being shown in the UI.
+ * A massaged version of {@link CGroupUserEntityData} or a {@link FaceCluster}
+ * suitable for being shown in the UI.
  *
  * We transform both both remote cluster groups and local-only face clusters
  * into the same "person" object that can be shown in the UI.
@@ -93,12 +94,12 @@ export interface CGroup {
  *
  * Beyond this semantic difference, there is also data massaging: a
  * {@link Person} has data converted into a format that the UI can directly and
- * efficiently use, as compared to a {@link CGroup}, which is tailored for
- * transmission and storage.
+ * efficiently use, as compared to a {@link CGroupUserEntityData}, which is
+ * tailored for transmission and storage.
  */
 export interface Person {
     /**
-     * Nanoid of the underlying {@link CGroup} or {@link FaceCluster}.
+     * Nanoid of the underlying cgroup or {@link FaceCluster}.
      */
     id: string;
     /**

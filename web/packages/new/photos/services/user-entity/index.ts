@@ -7,6 +7,7 @@ import {
 import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
 import { gunzip, gzip } from "../../utils/gzip";
+import type { CGroupUserEntityData } from "../ml/people";
 import {
     savedEntities,
     savedLatestUpdatedAt,
@@ -78,6 +79,8 @@ const RemoteFaceCluster = z.object({
 
 /**
  * Zod schema for the fields of interest in the cgroup that we get from remote.
+ *
+ * See also: {@link CGroupUserEntityData}.
  */
 const RemoteCGroup = z.object({
     name: z.string().nullish().transform(nullToUndefined),
@@ -88,10 +91,10 @@ const RemoteCGroup = z.object({
     avatarFaceID: z.string().nullish().transform(nullToUndefined),
 });
 
-export type RemoteCGroup = z.infer<typeof RemoteCGroup>;
-
 export type CGroupUserEntity = Omit<LocalUserEntity, "data"> & {
-    data: RemoteCGroup;
+    // CGroupUserEntityData is meant to be a (documented) equivalent of
+    // `z.infer<typeof RemoteCGroup>`.
+    data: CGroupUserEntityData;
 };
 
 /**
