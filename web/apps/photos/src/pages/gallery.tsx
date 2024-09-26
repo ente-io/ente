@@ -1135,7 +1135,12 @@ export default function Gallery() {
                     attributes={fixCreationTimeAttributes}
                 />
                 <NavbarBase
-                    sx={{ background: "transparent", position: "absolute" }}
+                    sx={{
+                        background: "transparent",
+                        position: "absolute",
+                        // Override the default 16px we get from NavbarBase
+                        marginBottom: "12px",
+                    }}
                 >
                     {barMode == "hidden-albums" ? (
                         <HiddenSectionNavbarContents
