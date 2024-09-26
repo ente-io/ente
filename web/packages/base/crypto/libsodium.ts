@@ -682,6 +682,12 @@ export async function boxSealOpen(
     );
 }
 
+/**
+ * Encrypt the given {@link input} using the given {@link publicKey}.
+ *
+ * This function performs asymmetric (public-key) encryption. To decrypt the
+ * result, use {@link boxSealOpen}.
+ */
 export async function boxSeal(input: string, publicKey: string) {
     await sodium.ready;
     return await toB64(

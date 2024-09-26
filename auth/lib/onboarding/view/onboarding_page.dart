@@ -8,6 +8,7 @@ import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/events/trigger_logout_event.dart';
 import "package:ente_auth/l10n/l10n.dart";
 import 'package:ente_auth/locale.dart';
+import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/theme/text_style.dart';
 import 'package:ente_auth/ui/account/email_entry_page.dart';
 import 'package:ente_auth/ui/account/login_page.dart';
@@ -49,6 +50,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
       await autoLogoutAlert(context);
     });
     super.initState();
+    PreferenceService.instance.configureDefaults().ignore();
   }
 
   @override

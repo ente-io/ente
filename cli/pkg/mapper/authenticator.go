@@ -9,7 +9,7 @@ import (
 )
 
 func MapRemoteAuthEntityToString(ctx context.Context, authEntity models.AuthEntity, authKey []byte) (*string, error) {
-	_, decrypted, err := eCrypto.DecryptChaChaBase64(*authEntity.EncryptedData, authKey, *authEntity.Header)
+	_, decrypted, err := eCrypto.DecryptChaChaBase64Auth(*authEntity.EncryptedData, authKey, *authEntity.Header)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decrypt auth enityt %s: %v", authEntity.ID, err)
 	}

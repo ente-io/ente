@@ -675,6 +675,27 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Désactiver la double-authentification..."),
         "discord": MessageLookupByLibrary.simpleMessage("Discord"),
+        "discover": MessageLookupByLibrary.simpleMessage("Découverte"),
+        "discover_babies": MessageLookupByLibrary.simpleMessage("Bébés"),
+        "discover_celebrations": MessageLookupByLibrary.simpleMessage("Fêtes"),
+        "discover_food": MessageLookupByLibrary.simpleMessage("Alimentation"),
+        "discover_greenery": MessageLookupByLibrary.simpleMessage("Plantes"),
+        "discover_hills": MessageLookupByLibrary.simpleMessage("Montagnes"),
+        "discover_identity": MessageLookupByLibrary.simpleMessage("Identité"),
+        "discover_memes": MessageLookupByLibrary.simpleMessage("Mèmes"),
+        "discover_notes": MessageLookupByLibrary.simpleMessage("Notes"),
+        "discover_pets":
+            MessageLookupByLibrary.simpleMessage("Animaux de compagnie"),
+        "discover_receipts": MessageLookupByLibrary.simpleMessage("Recettes"),
+        "discover_screenshots":
+            MessageLookupByLibrary.simpleMessage("Captures d\'écran "),
+        "discover_selfies": MessageLookupByLibrary.simpleMessage("Selfies"),
+        "discover_sunset":
+            MessageLookupByLibrary.simpleMessage("Coucher du soleil"),
+        "discover_visiting_cards":
+            MessageLookupByLibrary.simpleMessage("Carte de Visite"),
+        "discover_wallpapers":
+            MessageLookupByLibrary.simpleMessage("Fonds d\'écran"),
         "dismiss": MessageLookupByLibrary.simpleMessage("Rejeter"),
         "distanceInKMUnit": MessageLookupByLibrary.simpleMessage("km"),
         "doNotSignOut":

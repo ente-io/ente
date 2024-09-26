@@ -57,6 +57,12 @@ class PreferenceService {
     await _prefs.setBool(kCompactMode, value);
   }
 
+  Future<void> configureDefaults() async {
+    if (!_prefs.containsKey(kCompactMode)) {
+      await _prefs.setBool(kCompactMode, true);
+    }
+  }
+
   Future<void> setHideCodes(bool value) async {
     await _prefs.setBool(kShouldHideCodesKey, value);
     Bus.instance.fire(IconsChangedEvent());

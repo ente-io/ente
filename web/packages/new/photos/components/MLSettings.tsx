@@ -1,13 +1,14 @@
 import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { MenuItemGroup, MenuSectionTitle } from "@/base/components/Menu";
 import { Titlebar } from "@/base/components/Titlebar";
-import { pt, ut } from "@/base/i18n";
+import { ut } from "@/base/i18n";
 import log from "@/base/log";
 import {
     disableML,
     enableML,
     mlStatusSnapshot,
     mlStatusSubscribe,
+    wipCluster,
     wipClusterEnable,
     type MLStatus,
 } from "@/new/photos/services/ml";
@@ -27,7 +28,6 @@ import {
     type DialogProps,
 } from "@mui/material";
 import { t } from "i18next";
-import { useRouter } from "next/router";
 import React, { useEffect, useState, useSyncExternalStore } from "react";
 import { Trans } from "react-i18next";
 import type { NewAppContextPhotos } from "../types/context";
@@ -315,14 +315,19 @@ const ManageML: React.FC<ManageMLProps> = ({
             status = t("indexing_status_running");
             break;
         case "clustering":
-            // TODO-Cluster
-            status = pt("Grouping faces");
+            status = t("people");
             break;
         default:
             status = t("indexing_status_done");
             break;
     }
-    const processed = `${nSyncedFiles} / ${nTotalFiles}`;
+
+    // When clustering, show the progress as a percentage instead of the
+    // potentially confusing total counts during incremental updates.
+    const processed =
+        phase == "clustering"
+            ? `${Math.round((100 * nSyncedFiles) / nTotalFiles)}%`
+            : `${nSyncedFiles} / ${nTotalFiles}`;
 
     const confirmDisableML = () => {
         setDialogBoxAttributesV2({
@@ -337,10 +342,6 @@ const ManageML: React.FC<ManageMLProps> = ({
             buttonDirection: "row",
         });
     };
-
-    // TODO-Cluster
-    const router = useRouter();
-    const wipClusterDebug = () => router.push("/cluster-debug");
 
     return (
         <Stack px={"16px"} py={"20px"} gap={4}>
@@ -392,12 +393,12 @@ const ManageML: React.FC<ManageMLProps> = ({
                             label={ut(
                                 "Create clusters   • internal only option",
                             )}
-                            onClick={wipClusterDebug}
+                            onClick={() => void wipCluster()}
                         />
                     </MenuItemGroup>
                     <MenuSectionTitle
                         title={ut(
-                            "Create and show in-memory clusters (not saved or synced). You can also view them in the search dropdown later.",
+                            "Create in-memory clusters (not saved or synced). You can also view them in the search dropdown later.",
                         )}
                     />
                 </Box>

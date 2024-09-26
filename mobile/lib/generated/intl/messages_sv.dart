@@ -232,6 +232,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "disableDownloadWarningTitle":
             MessageLookupByLibrary.simpleMessage("Vänligen notera:"),
         "discord": MessageLookupByLibrary.simpleMessage("Discord"),
+        "discover_notes": MessageLookupByLibrary.simpleMessage("Anteckningar"),
+        "discover_receipts": MessageLookupByLibrary.simpleMessage("Kvitton"),
         "doThisLater": MessageLookupByLibrary.simpleMessage("Gör detta senare"),
         "done": MessageLookupByLibrary.simpleMessage("Klar"),
         "dropSupportEmail": m22,
@@ -376,6 +378,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "oops": MessageLookupByLibrary.simpleMessage("Hoppsan"),
         "orPickAnExistingOne":
             MessageLookupByLibrary.simpleMessage("Eller välj en befintlig"),
+        "passkey": MessageLookupByLibrary.simpleMessage("Nyckel"),
         "password": MessageLookupByLibrary.simpleMessage("Lösenord"),
         "passwordChangedSuccessfully":
             MessageLookupByLibrary.simpleMessage("Lösenordet har ändrats"),
@@ -556,6 +559,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "verifyEmail":
             MessageLookupByLibrary.simpleMessage("Bekräfta e-postadress"),
         "verifyEmailID": m70,
+        "verifyPasskey":
+            MessageLookupByLibrary.simpleMessage("Verifiera nyckel"),
         "verifyPassword":
             MessageLookupByLibrary.simpleMessage("Bekräfta lösenord"),
         "verifyingRecoveryKey": MessageLookupByLibrary.simpleMessage(

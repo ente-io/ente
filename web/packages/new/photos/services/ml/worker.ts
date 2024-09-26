@@ -27,8 +27,8 @@ import {
 } from "./clip";
 import {
     clusterFaces,
-    type ClusteringOpts,
-    type OnClusteringProgress,
+    reconcileClusters,
+    type ClusteringProgress,
 } from "./cluster";
 import { saveFaceCrops } from "./crop";
 import {
@@ -101,12 +101,15 @@ interface IndexableItem {
 export class MLWorker {
     /** The last known state of the worker. */
     public state: WorkerState = "init";
+    /** If the worker is currently clustering, then its last known progress. */
+    public clusteringProgess: ClusteringProgress | undefined;
 
     private electron: ElectronMLWorker | undefined;
     private delegate: MLWorkerDelegate | undefined;
     private liveQ: IndexableItem[] = [];
     private idleTimeout: ReturnType<typeof setTimeout> | undefined;
     private idleDuration = idleDurationStart; /* unit: seconds */
+    private onNextIdles: (() => void)[] = [];
 
     /**
      * Initialize a new {@link MLWorker}.
@@ -131,17 +134,19 @@ export class MLWorker {
     }
 
     /**
-     * Start backfilling if needed.
-     *
-     * This function enqueues a backfill attempt and returns immediately without
-     * waiting for it complete.
+     * Start backfilling if needed, and return after there are no more items
+     * remaining to backfill.
      *
      * During a backfill, we first attempt to fetch ML data for files which
      * don't have that data locally. If on fetching we find what we need, we
      * save it locally. Otherwise we index them.
      */
-    sync() {
+    index() {
+        const nextIdle = new Promise<void>((resolve) =>
+            this.onNextIdles.push(resolve),
+        );
         this.wakeUp();
+        return nextIdle;
     }
 
     /** Invoked in response to external events. */
@@ -246,7 +251,12 @@ export class MLWorker {
         this.state = "idle";
         this.idleDuration = Math.min(this.idleDuration * 2, idleDurationMax);
         this.idleTimeout = setTimeout(scheduleTick, this.idleDuration * 1000);
-        this.delegate?.workerDidProcessFileOrIdle();
+        this.delegate?.workerDidUpdateStatus();
+
+        // Resolve any awaiting promises returned from `index`.
+        const onNextIdles = this.onNextIdles;
+        this.onNextIdles = [];
+        onNextIdles.forEach((f) => f());
     }
 
     /** Return the next batch of items to backfill (if any). */
@@ -280,14 +290,28 @@ export class MLWorker {
         }));
     }
 
-    // TODO-Cluster
-    async clusterFaces(opts: ClusteringOpts, onProgress: OnClusteringProgress) {
-        return clusterFaces(
+    /**
+     * Run face clustering on all faces, and update both local and remote state
+     * as appropriate.
+     *
+     * This should only be invoked when the face indexing (including syncing
+     * with remote) is complete so that we cluster the latest set of faces, and
+     * after we have fetched the latest cgroups from remote (so that we do no
+     * overwrite any remote updates).
+     */
+    async clusterFaces() {
+        const clusters = await clusterFaces(
             await getFaceIndexes(),
             await getAllLocalFiles(),
-            opts,
-            onProgress,
+            (progress) => this.updateClusteringProgress(progress),
         );
+        await reconcileClusters(clusters);
+        this.updateClusteringProgress(undefined);
+    }
+
+    private updateClusteringProgress(progress: ClusteringProgress | undefined) {
+        this.clusteringProgess = progress;
+        this.delegate?.workerDidUpdateStatus();
     }
 }
 
@@ -347,7 +371,7 @@ const indexNextBatch = async (
         await Promise.race(tasks);
 
         // Let the main thread now we're doing something.
-        delegate?.workerDidProcessFileOrIdle();
+        delegate?.workerDidUpdateStatus();
 
         // Let us drain the microtask queue. This also gives a chance for other
         // interactive tasks like `clipMatches` to run.

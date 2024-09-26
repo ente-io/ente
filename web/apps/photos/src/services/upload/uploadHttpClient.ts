@@ -5,7 +5,7 @@ import { wait } from "@/utils/promise";
 import { CustomError, handleUploadError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
-import { MultipartUploadURLs, UploadFile, UploadURL } from "./uploadService";
+import { MultipartUploadURLs, UploadFile, UploadURL } from "./upload-service";
 
 const MAX_URL_REQUESTS = 50;
 

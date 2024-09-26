@@ -126,7 +126,7 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m38(albumName) => "Spostato con successo su ${albumName}";
 
-  static String m39(name) => "Non sei ${name}?";
+  static String m39(name) => "Non è ${name}?";
 
   static String m40(familyAdminEmail) =>
       "Per favore contatta ${familyAdminEmail} per cambiare il tuo codice.";
@@ -659,6 +659,27 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Disattivazione autenticazione a due fattori..."),
         "discord": MessageLookupByLibrary.simpleMessage("Discord"),
+        "discover": MessageLookupByLibrary.simpleMessage("Scopri"),
+        "discover_babies": MessageLookupByLibrary.simpleMessage("Neonati"),
+        "discover_celebrations":
+            MessageLookupByLibrary.simpleMessage("Festeggiamenti"),
+        "discover_food": MessageLookupByLibrary.simpleMessage("Cibo"),
+        "discover_greenery":
+            MessageLookupByLibrary.simpleMessage("Vegetazione"),
+        "discover_hills": MessageLookupByLibrary.simpleMessage("Colline"),
+        "discover_identity": MessageLookupByLibrary.simpleMessage("Identità"),
+        "discover_memes": MessageLookupByLibrary.simpleMessage("Meme"),
+        "discover_notes": MessageLookupByLibrary.simpleMessage("Note"),
+        "discover_pets":
+            MessageLookupByLibrary.simpleMessage("Animali domestici"),
+        "discover_receipts": MessageLookupByLibrary.simpleMessage("Ricette"),
+        "discover_screenshots":
+            MessageLookupByLibrary.simpleMessage("Schermate"),
+        "discover_selfies": MessageLookupByLibrary.simpleMessage("Selfie"),
+        "discover_sunset": MessageLookupByLibrary.simpleMessage("Tramonto"),
+        "discover_visiting_cards":
+            MessageLookupByLibrary.simpleMessage("Biglietti da Visita"),
+        "discover_wallpapers": MessageLookupByLibrary.simpleMessage("Sfondi"),
         "dismiss": MessageLookupByLibrary.simpleMessage("Ignora"),
         "distanceInKMUnit": MessageLookupByLibrary.simpleMessage("km"),
         "doNotSignOut": MessageLookupByLibrary.simpleMessage("Non uscire"),
@@ -1549,6 +1570,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "subAlreadyLinkedErrMessage": m62,
         "subWillBeCancelledOn": m63,
         "subscribe": MessageLookupByLibrary.simpleMessage("Iscriviti"),
+        "subscribeToEnableSharing": MessageLookupByLibrary.simpleMessage(
+            "È necessario un abbonamento a pagamento attivo per abilitare la condivisione."),
         "subscription": MessageLookupByLibrary.simpleMessage("Abbonamento"),
         "success": MessageLookupByLibrary.simpleMessage("Operazione riuscita"),
         "successfullyArchived":

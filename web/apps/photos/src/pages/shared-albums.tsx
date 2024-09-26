@@ -3,13 +3,17 @@ import { sharedCryptoWorker } from "@/base/crypto";
 import { useIsMobileWidth, useIsTouchscreen } from "@/base/hooks";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
+import {
+    GalleryItemsHeaderAdapter,
+    GalleryItemsSummary,
+} from "@/new/photos/components/Gallery/ListHeader";
+import { SpaceBetweenFlex } from "@/new/photos/components/mui-custom";
 import downloadManager from "@/new/photos/services/download";
 import { EnteFile } from "@/new/photos/types/file";
 import { mergeMetadata } from "@/new/photos/utils/file";
 import {
     CenteredFlex,
     FluidContainer,
-    SpaceBetweenFlex,
     VerticallyCentered,
 } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
@@ -32,8 +36,6 @@ import type { ButtonProps, IconButtonProps } from "@mui/material";
 import { Box, Button, IconButton, Stack, Tooltip } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import bs58 from "bs58";
-import { CollectionInfo } from "components/Collections/CollectionInfo";
-import { CollectionInfoBarWrapper } from "components/Collections/styledComponents";
 import { EnteLogo } from "components/EnteLogo";
 import {
     FilesDownloadProgress,
@@ -107,6 +109,7 @@ export default function PublicCollectionGallery() {
         ownCount: 0,
         count: 0,
         collectionID: 0,
+        context: undefined,
     });
 
     const {
@@ -273,60 +276,21 @@ export default function PublicCollectionGallery() {
         main();
     }, []);
 
-    const downloadEnabled = useMemo(
-        () => publicCollection?.publicURLs?.[0]?.enableDownload ?? true,
-        [publicCollection],
-    );
-
-    const downloadAllFiles = async () => {
-        try {
-            if (!downloadEnabled) {
-                return;
-            }
-            const setFilesDownloadProgressAttributes =
-                setFilesDownloadProgressAttributesCreator(
-                    publicCollection.name,
-                    publicCollection.id,
-                    isHiddenCollection(publicCollection),
-                );
-            await downloadCollectionFiles(
-                publicCollection.name,
-                publicFiles,
-                setFilesDownloadProgressAttributes,
-            );
-        } catch (e) {
-            log.error("failed to downloads shared album all files", e);
-        }
-    };
+    const downloadEnabled =
+        publicCollection?.publicURLs?.[0]?.enableDownload ?? true;
 
     useEffect(() => {
         publicCollection &&
             publicFiles &&
             setPhotoListHeader({
                 item: (
-                    <CollectionInfoBarWrapper>
-                        <SpaceBetweenFlex>
-                            <CollectionInfo
-                                name={publicCollection.name}
-                                fileCount={publicFiles.length}
-                            />
-                            {downloadEnabled ? (
-                                <OverflowMenu
-                                    ariaControls={"collection-options"}
-                                    triggerButtonIcon={<MoreHoriz />}
-                                >
-                                    <OverflowMenuOption
-                                        startIcon={<FileDownloadOutlinedIcon />}
-                                        onClick={downloadAllFiles}
-                                    >
-                                        {t("DOWNLOAD_COLLECTION")}
-                                    </OverflowMenuOption>
-                                </OverflowMenu>
-                            ) : (
-                                <div />
-                            )}
-                        </SpaceBetweenFlex>
-                    </CollectionInfoBarWrapper>
+                    <ListHeader
+                        {...{
+                            publicCollection,
+                            publicFiles,
+                            setFilesDownloadProgressAttributesCreator,
+                        }}
+                    />
                 ),
                 itemType: ITEM_TYPE.HEADER,
                 height: 68,
@@ -509,7 +473,12 @@ export default function PublicCollectionGallery() {
         if (!selected?.count) {
             return;
         }
-        setSelected({ ownCount: 0, count: 0, collectionID: 0 });
+        setSelected({
+            ownCount: 0,
+            count: 0,
+            collectionID: 0,
+            context: undefined,
+        });
     };
 
     const downloadFilesHelper = async () => {
@@ -724,12 +693,65 @@ const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                 </Box>
             </FluidContainer>
             <Stack spacing={2} direction="row" mr={2}>
-                <Tooltip title={t("DOWNLOAD")}>
+                <Tooltip title={t("download")}>
                     <IconButton onClick={downloadFilesHelper}>
                         <DownloadIcon />
                     </IconButton>
                 </Tooltip>
             </Stack>
         </SelectionBar>
+    );
+};
+
+interface ListHeaderProps {
+    publicCollection: Collection;
+    publicFiles: EnteFile[];
+    setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
+}
+
+const ListHeader: React.FC<ListHeaderProps> = ({
+    publicCollection,
+    publicFiles,
+    setFilesDownloadProgressAttributesCreator,
+}) => {
+    const downloadEnabled =
+        publicCollection.publicURLs?.[0]?.enableDownload ?? true;
+
+    const downloadAllFiles = async () => {
+        const setFilesDownloadProgressAttributes =
+            setFilesDownloadProgressAttributesCreator(
+                publicCollection.name,
+                publicCollection.id,
+                isHiddenCollection(publicCollection),
+            );
+        await downloadCollectionFiles(
+            publicCollection.name,
+            publicFiles,
+            setFilesDownloadProgressAttributes,
+        );
+    };
+
+    return (
+        <GalleryItemsHeaderAdapter>
+            <SpaceBetweenFlex>
+                <GalleryItemsSummary
+                    name={publicCollection.name}
+                    fileCount={publicFiles.length}
+                />
+                {downloadEnabled && (
+                    <OverflowMenu
+                        ariaControls={"collection-options"}
+                        triggerButtonIcon={<MoreHoriz />}
+                    >
+                        <OverflowMenuOption
+                            startIcon={<FileDownloadOutlinedIcon />}
+                            onClick={downloadAllFiles}
+                        >
+                            {t("download_album")}
+                        </OverflowMenuOption>
+                    </OverflowMenu>
+                )}
+            </SpaceBetweenFlex>
+        </GalleryItemsHeaderAdapter>
     );
 };

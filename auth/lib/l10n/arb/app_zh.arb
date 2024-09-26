@@ -155,6 +155,8 @@
   "leaveFamily": "离开家庭",
   "leaveFamilyMessage": "您确定要离开家庭计划吗？",
   "inFamilyPlanMessage": "你在一个家庭计划中！",
+  "hintForMobile": "长按代码即可编辑或删除。",
+  "hintForDesktop": "右键单击代码即可编辑或删除。",
   "scan": "扫描",
   "scanACode": "扫描代码",
   "verify": "验证",

@@ -1,6 +1,6 @@
 import { assertionFailed } from "@/base/assert";
 import { useIsMobileWidth } from "@/base/hooks";
-import { ItemCard, ResultPreviewTile } from "@/new/photos/components/ItemCards";
+import { ItemCard, PreviewItemTile } from "@/new/photos/components/ItemCards";
 import {
     isMLSupported,
     mlStatusSnapshot,
@@ -8,7 +8,7 @@ import {
     peopleSnapshot,
     peopleSubscribe,
 } from "@/new/photos/services/ml";
-import type { Person } from "@/new/photos/services/ml/cgroups";
+import type { Person } from "@/new/photos/services/ml/people";
 import { searchOptionsForString } from "@/new/photos/services/search";
 import type { SearchOption } from "@/new/photos/services/search/types";
 import { nullToUndefined } from "@/utils/transform";
@@ -42,6 +42,7 @@ import {
 } from "react-select";
 import AsyncSelect from "react-select/async";
 import { SearchPeopleList } from "./PeopleList";
+import { UnstyledButton } from "./mui-custom";
 
 export interface SearchBarProps {
     /**
@@ -61,13 +62,25 @@ export interface SearchBarProps {
      */
     isInSearchMode: boolean;
     /**
-     * Enter or exit "search mode".
+     * Invoked when the user wants to enter "search mode".
+     *
+     * This scenario only arises when the search bar is in the mobile device
+     * sized configuration, where the user needs to tap the search icon to enter
+     * the search mode.
      */
-    setIsInSearchMode: (b: boolean) => void;
+    onShowSearchInput: () => void;
     /**
      * Set or clear the selected {@link SearchOption}.
      */
     onSelectSearchOption: (o: SearchOption | undefined) => void;
+    /**
+     * Called when the user selects a person shown in the empty state view, or
+     * clicks the people list header itself.
+     *
+     * @param person The selected person, or `undefined` if the user clicked the
+     * generic people header.
+     */
+    onSelectPerson: (person: Person | undefined) => void;
 }
 
 /**
@@ -86,20 +99,18 @@ export interface SearchBarProps {
  * list of files that match that suggestion.
  */
 export const SearchBar: React.FC<SearchBarProps> = ({
-    setIsInSearchMode,
     isInSearchMode,
-    onSelectSearchOption,
+    onShowSearchInput,
+    ...rest
 }) => {
     const isMobileWidth = useIsMobileWidth();
-
-    const showSearchInput = () => setIsInSearchMode(true);
 
     return (
         <Box sx={{ flex: 1, px: ["4px", "24px"] }}>
             {isMobileWidth && !isInSearchMode ? (
-                <MobileSearchArea onSearch={showSearchInput} />
+                <MobileSearchArea onSearch={onShowSearchInput} />
             ) : (
-                <SearchInput {...{ isInSearchMode, onSelectSearchOption }} />
+                <SearchInput {...{ isInSearchMode }} {...rest} />
             )}
         </Box>
     );
@@ -118,9 +129,10 @@ const MobileSearchArea: React.FC<MobileSearchAreaProps> = ({ onSearch }) => (
     </Box>
 );
 
-const SearchInput: React.FC<Omit<SearchBarProps, "setIsInSearchMode">> = ({
+const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
     isInSearchMode,
     onSelectSearchOption,
+    onSelectPerson,
 }) => {
     // A ref to the top level Select.
     const selectRef = useRef<SelectInstance<SearchOption> | null>(null);
@@ -139,9 +151,10 @@ const SearchInput: React.FC<Omit<SearchBarProps, "setIsInSearchMode">> = ({
     const components = useMemo(() => ({ Control, Input, Option }), []);
 
     const handleChange = (value: SearchOption | null) => {
-        // Collection suggestions are handled differently - our caller will
-        // switch to the collection view, dismissing search.
-        if (value?.suggestion.type == "collection") {
+        const type = value?.suggestion.type;
+        // Collection and people suggestions are handled differently - our
+        // caller will switch to the corresponding view, dismissing search.
+        if (type == "collection" || type == "person") {
             setValue(null);
             setInputValue("");
         } else {
@@ -166,16 +179,20 @@ const SearchInput: React.FC<Omit<SearchBarProps, "setIsInSearchMode">> = ({
     };
 
     const resetSearch = () => {
+        // Dismiss the search menu if it is open.
+        selectRef.current?.blur();
+
+        // Clear all our state.
         setValue(null);
         setInputValue("");
+
+        // Let our parent know.
         onSelectSearchOption(undefined);
     };
 
-    const handleSelectCGroup = (value: SearchOption) => {
-        // Dismiss the search menu.
-        selectRef.current?.blur();
-        setValue(value);
-        onSelectSearchOption(undefined);
+    const handleSelectPerson = (person: Person | undefined) => {
+        resetSearch();
+        onSelectPerson(person);
     };
 
     const handleFocus = () => {
@@ -207,7 +224,7 @@ const SearchInput: React.FC<Omit<SearchBarProps, "setIsInSearchMode">> = ({
                 placeholder={t("search_hint")}
                 noOptionsMessage={({ inputValue }) =>
                     shouldShowEmptyState(inputValue) ? (
-                        <EmptyState onSelectCGroup={handleSelectCGroup} />
+                        <EmptyState onSelectPerson={handleSelectPerson} />
                     ) : null
                 }
             />
@@ -357,16 +374,13 @@ const shouldShowEmptyState = (inputValue: string) => {
     return true;
 };
 
-interface EmptyStateProps {
-    /** Called when the user selects a cgroup shown in the empty state view. */
-    onSelectCGroup: (value: SearchOption) => void;
-}
-
 /**
  * The view shown in the menu area when the user has not typed anything in the
  * search box.
  */
-const EmptyState: React.FC<EmptyStateProps> = () => {
+const EmptyState: React.FC<Pick<SearchBarProps, "onSelectPerson">> = ({
+    onSelectPerson,
+}) => {
     const mlStatus = useSyncExternalStore(mlStatusSubscribe, mlStatusSnapshot);
     const people = useSyncExternalStore(peopleSubscribe, peopleSnapshot);
 
@@ -388,6 +402,7 @@ const EmptyState: React.FC<EmptyStateProps> = () => {
             label = t("indexing_fetching", mlStatus);
             break;
         case "clustering":
+            // TODO-Cluster
             label = t("indexing_people", mlStatus);
             break;
         case "done":
@@ -395,38 +410,46 @@ const EmptyState: React.FC<EmptyStateProps> = () => {
             break;
     }
 
-    const handleSelectPerson = (person: Person) => console.log(person);
-
     return (
         <Box sx={{ textAlign: "left" }}>
             {people && people.length > 0 && (
                 <>
-                    <PeopleHeader />
-                    <SearchPeopleList
-                        people={people}
-                        onSelectPerson={handleSelectPerson}
-                    />
+                    <PeopleHeader onClick={() => onSelectPerson(undefined)} />
+                    <SearchPeopleList {...{ people, onSelectPerson }} />
                 </>
             )}
-            <Typography variant="mini" sx={{ my: "2px" }}>
+            <Typography variant="mini" sx={{ my: "4px" }}>
                 {label}
             </Typography>
         </Box>
     );
 };
 
-const PeopleHeader: React.FC = () => {
-    // TODO-Cluster
-    const handleClick = () => console.log("click");
-    return (
-        <Stack direction="row" sx={{ cursor: "pointer" }} onClick={handleClick}>
+interface PeopleHeaderProps {
+    onClick: () => void;
+}
+
+const PeopleHeader: React.FC<PeopleHeaderProps> = ({ onClick }) => (
+    <PeopleHeaderButton {...{ onClick }}>
+        <Stack direction="row" color="text.muted">
             <Typography color="text.base" variant="large">
                 {t("people")}
             </Typography>
             <ChevronRightIcon />
         </Stack>
-    );
-};
+    </PeopleHeaderButton>
+);
+
+const PeopleHeaderButton = styled(UnstyledButton)(
+    ({ theme }) => `
+    /* The color for the chevron */
+    color: ${theme.colors.stroke.muted};
+    /* Hover indication */
+    && :hover {
+        color: ${theme.colors.stroke.base};
+    }
+`,
+);
 
 const Option: React.FC<OptionProps<SearchOption, false>> = (props) => (
     <SelectComponents.Option {...props}>
@@ -461,7 +484,7 @@ const OptionContents = ({ data: option }: { data: SearchOption }) => (
                     <ItemCard
                         key={file.id}
                         coverFile={file}
-                        TileComponent={ResultPreviewTile}
+                        TileComponent={PreviewItemTile}
                     />
                 ))}
             </Stack>

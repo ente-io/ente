@@ -1,4 +1,4 @@
-import { Box, IconButton, styled } from "@mui/material";
+import { Box, styled } from "@mui/material";
 
 export const VerticallyCentered = styled(Box)`
     flex: 1;
@@ -35,10 +35,6 @@ export const Overlay = styled(Box)`
     top: 0;
     left: 0;
 `;
-
-export const IconButtonWithBG = styled(IconButton)(({ theme }) => ({
-    backgroundColor: theme.colors.fill.faint,
-}));
 
 export const HorizontalFlex = styled(Box)({
     display: "flex",

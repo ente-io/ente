@@ -7,6 +7,7 @@
 //
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
+import { assertionFailed } from "@/base/assert";
 import type { ElectronMLWorker } from "@/base/types/ipc";
 import type { EnteFile } from "@/new/photos/types/file";
 import { Matrix } from "ml-matrix";
@@ -149,7 +150,7 @@ export interface Face {
      * Finally, this face ID is not completely opaque. It consists of underscore
      * separated components, the first of which is the ID of the
      * {@link EnteFile} to which this face belongs. Client code can rely on this
-     * structure and can parse it if needed.
+     * structure and can parse it if needed using {@link fileIDFromFaceID}.
      */
     faceID: string;
     /**
@@ -227,6 +228,19 @@ export interface Box {
     /** The height of the box. */
     height: number;
 }
+
+/**
+ * Extract the fileID of the {@link EnteFile} to which the face belongs from its
+ * faceID.
+ */
+export const fileIDFromFaceID = (faceID: string) => {
+    const fileID = parseInt(faceID.split("_")[0] ?? "");
+    if (isNaN(fileID)) {
+        assertionFailed(`Ignoring attempt to parse invalid faceID ${faceID}`);
+        return undefined;
+    }
+    return fileID;
+};
 
 /**
  * Index faces in the given file.
@@ -383,7 +397,6 @@ const convertToYOLOInputFloat32ChannelsFirst = (imageData: ImageData) => {
                           pixelData,
                           width,
                           height,
-                          false,
                       );
             yoloInput[pi] = r / 255.0;
             yoloInput[pi + channelOffsetGreen] = g / 255.0;

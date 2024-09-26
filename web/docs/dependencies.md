@@ -209,9 +209,6 @@ For more details, see [translations.md](translations.md).
     > provides affine transforms, while `matrix` is for performing computations
     > on matrices, say inverting them or performing their decomposition.
 
--   [hdbscan](https://github.com/shaileshpandit/hdbscan-js) is used for face
-    clustering.
-
 ## Auth app specific
 
 -   [otpauth](https://github.com/hectorm/otpauth) is used for the generation of

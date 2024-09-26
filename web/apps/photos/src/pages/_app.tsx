@@ -271,7 +271,7 @@ export default function App({ Component, pageProps }: AppProps) {
 
     const somethingWentWrong = () =>
         setDialogMessage({
-            title: t("ERROR"),
+            title: t("error"),
             close: { variant: "critical" },
             content: t("UNKNOWN_ERROR"),
         });
