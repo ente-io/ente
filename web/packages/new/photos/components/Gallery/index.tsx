@@ -7,6 +7,7 @@
  * there.
  */
 
+import { pt } from "@/base/i18n";
 import type { Person } from "@/new/photos/services/ml/people";
 import type { SearchOption } from "@/new/photos/services/search/types";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
@@ -54,12 +55,15 @@ interface PeopleListHeaderProps {
 export const PersonListHeader: React.FC<PeopleListHeaderProps> = ({
     person,
 }) => {
+    // TODO-Cluster
     const hasOptions = process.env.NEXT_PUBLIC_ENTE_WIP_CL;
     return (
         <GalleryItemsHeaderAdapter>
             <SpaceBetweenFlex>
                 <GalleryItemsSummary
-                    name={person.name ?? "Unnamed person"}
+                    name={
+                        person.name ?? pt("Unnamed person") /* TODO-Cluster */
+                    }
                     nameProps={person.name ? {} : { color: "text.muted" }}
                     fileCount={person.fileIDs.length}
                 />

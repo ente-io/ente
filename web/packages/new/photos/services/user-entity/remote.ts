@@ -1,4 +1,5 @@
 import { decryptBlob } from "@/base/crypto";
+import type { EncryptedBlobB64 } from "@/base/crypto/types";
 import { authenticatedRequestHeaders, ensureOk, HTTPError } from "@/base/http";
 import { apiURL } from "@/base/origins";
 import { ensure } from "@/utils/ensure";
@@ -146,6 +147,59 @@ export const userEntityDiff = async (
         ),
     );
 };
+
+/**
+ * Create a new user entity with the given {@link type} on remote.
+ */
+export const postUserEntity = async (
+    type: EntityType,
+    { encryptedData, decryptionHeader }: EncryptedBlobB64,
+) =>
+    ensureOk(
+        await fetch(await apiURL("/user-entity/entity"), {
+            method: "POST",
+            headers: await authenticatedRequestHeaders(),
+            body: JSON.stringify({
+                type,
+                encryptedData: encryptedData,
+                header: decryptionHeader,
+            }),
+        }),
+    );
+
+/**
+ * Update an existing remote user entity with the given {@link id} and
+ * {@link type}.
+ */
+export const putUserEntity = async (
+    id: string,
+    type: EntityType,
+    { encryptedData, decryptionHeader }: EncryptedBlobB64,
+) =>
+    ensureOk(
+        await fetch(await apiURL("/user-entity/entity"), {
+            method: "PUT",
+            headers: await authenticatedRequestHeaders(),
+            body: JSON.stringify({
+                id,
+                type,
+                encryptedData: encryptedData,
+                header: decryptionHeader,
+            }),
+        }),
+    );
+
+/**
+ * Delete an existing remote user entity with the given {@link id}.
+ */
+export const deleteUserEntity = async (id: string) =>
+    ensureOk(
+        await fetch(await apiURL("/user-entity/entity"), {
+            method: "DELETE",
+            headers: await authenticatedRequestHeaders(),
+            body: JSON.stringify({ id }),
+        }),
+    );
 
 /**
  * Fetch the encryption key for the given user entity {@link type} from remote.

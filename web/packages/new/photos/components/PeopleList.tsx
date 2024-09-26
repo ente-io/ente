@@ -44,7 +44,8 @@ const SearchPeopleContainer = styled("div")`
     flex-wrap: wrap;
     align-items: center;
     gap: 5px;
-    margin-block: 12px;
+    margin-block-start: 12px;
+    margin-block-end: 15px;
 `;
 
 const SearchPeopleButton = styled("button")(

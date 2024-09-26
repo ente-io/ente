@@ -1,15 +1,12 @@
 import { EnteDrawer } from "@/base/components/EnteDrawer";
-import { MenuItemGroup, MenuSectionTitle } from "@/base/components/Menu";
+import { MenuItemGroup } from "@/base/components/Menu";
 import { Titlebar } from "@/base/components/Titlebar";
-import { ut } from "@/base/i18n";
 import log from "@/base/log";
 import {
     disableML,
     enableML,
     mlStatusSnapshot,
     mlStatusSubscribe,
-    wipCluster,
-    wipClusterEnable,
     type MLStatus,
 } from "@/new/photos/services/ml";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
@@ -298,10 +295,7 @@ const ManageML: React.FC<ManageMLProps> = ({
     onDisableML,
     setDialogBoxAttributesV2,
 }) => {
-    const [showClusterOpt, setShowClusterOpt] = useState(false);
     const { phase, nSyncedFiles, nTotalFiles } = mlStatus;
-
-    useEffect(() => void wipClusterEnable().then(setShowClusterOpt), []);
 
     let status: string;
     switch (phase) {
@@ -386,23 +380,6 @@ const ManageML: React.FC<ManageMLProps> = ({
                     </Stack>
                 </Stack>
             </Paper>
-            {showClusterOpt && (
-                <Box>
-                    <MenuItemGroup>
-                        <EnteMenuItem
-                            label={ut(
-                                "Create clusters   • internal only option",
-                            )}
-                            onClick={() => void wipCluster()}
-                        />
-                    </MenuItemGroup>
-                    <MenuSectionTitle
-                        title={ut(
-                            "Create in-memory clusters (not saved or synced). You can also view them in the search dropdown later.",
-                        )}
-                    />
-                </Box>
-            )}
         </Stack>
     );
 };

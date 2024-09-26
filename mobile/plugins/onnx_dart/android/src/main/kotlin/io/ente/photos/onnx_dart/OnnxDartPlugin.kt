@@ -93,13 +93,15 @@ class OnnxDartPlugin: FlutterPlugin, MethodCallHandler {
         val modelType = call.argument<String>("modelType")
         val inputDataArray = call.argument<FloatArray>("inputData")
         val inputIntDataArray = call.argument<IntArray>("inputDataInt")
+        val inputUint8DataArray = call.argument<ByteArray>("inputDataUint8")
+        val inputShapeArray = call.argument<IntArray>("inputShapeList")
 
-        if (sessionAddress == null || modelType == null || (inputDataArray == null && inputIntDataArray == null)) {
+        if (sessionAddress == null || modelType == null || (inputDataArray == null && inputIntDataArray == null && inputUint8DataArray == null)) {
           result.error("INVALID_ARGUMENT", "Session address, model type, or input data is missing", null)
           return
         }
 
-        predict(ModelType.valueOf(modelType), sessionAddress, inputDataArray, inputIntDataArray, result)
+        predict(ModelType.valueOf(modelType), sessionAddress, inputDataArray, inputIntDataArray, inputUint8DataArray, inputShapeArray, result)
       }
       else -> {
         result.notImplemented()
@@ -155,9 +157,8 @@ class OnnxDartPlugin: FlutterPlugin, MethodCallHandler {
     }
   }
 
-  private fun predict(modelType: ModelType, sessionAddress: Int, inputDataFloat: FloatArray? = null, inputDataInt: IntArray? = null, result: Result) {
-    // Assert that exactly one of inputDataFloat or inputDataInt is provided
-    assert((inputDataFloat != null).xor(inputDataInt != null)) { "Exactly one of inputDataFloat or inputDataInt must be provided" }
+  private fun predict(modelType: ModelType, sessionAddress: Int, inputDataFloat: FloatArray? = null, inputDataInt: IntArray? = null, inputUint8DataArray: ByteArray? = null, inputShapeArray: IntArray? = null, result: Result) {
+    assert((inputDataFloat != null).xor((inputDataInt != null).xor(inputUint8DataArray != null))) { "Exactly one of inputDataFloat, inputDataInt or inputUint8DataArray must be provided" }
 
     scope.launch {
       val modelState = sessionMap[modelType]
@@ -178,8 +179,11 @@ class OnnxDartPlugin: FlutterPlugin, MethodCallHandler {
             inputTensorShape = longArrayOf(totalSize, 112, 112, 3)
           }
           ModelType.ClipImageEncoder -> {
-            inputTensorShape = longArrayOf(1, 3, 256, 256)
-//            inputTensorShape = longArrayOf(1, 3, 256, 256)
+            if (inputShapeArray != null) {
+              inputTensorShape = inputShapeArray.map { it.toLong() }.toLongArray()
+            } else {
+              result.error("INVALID_ARGUMENT", "Input shape is missing for clip image input", null)
+            }
           }
           ModelType.ClipTextEncoder -> {
             inputTensorShape = longArrayOf(1, 77)
@@ -192,6 +196,7 @@ class OnnxDartPlugin: FlutterPlugin, MethodCallHandler {
         val inputTensor = when {
           inputDataFloat != null -> OnnxTensor.createTensor(env, FloatBuffer.wrap(inputDataFloat), inputTensorShape)
           inputDataInt != null -> OnnxTensor.createTensor(env, IntBuffer.wrap(inputDataInt), inputTensorShape)
+          inputUint8DataArray != null -> OnnxTensor.createTensor(env, ByteBuffer.wrap(inputUint8DataArray), inputTensorShape, OnnxJavaType.UINT8)
           else -> throw IllegalArgumentException("No input data provided")
         }
         val inputs = mutableMapOf<String, OnnxTensor>()
@@ -219,7 +224,7 @@ class OnnxDartPlugin: FlutterPlugin, MethodCallHandler {
         inputTensor.close()
       } catch (e: OrtException) {
         withContext(Dispatchers.Main) {
-          result.error("PREDICTION_ERROR", "Error during prediction: ${e.message}", null)
+          result.error("PREDICTION_ERROR", "Error during prediction: ${e.message} ${e.stackTraceToString()}", null)
         }
       } catch (e: Exception) {
         Log.e(TAG, "Error during prediction: ${e.message}", e)
