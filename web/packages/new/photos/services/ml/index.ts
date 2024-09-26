@@ -242,9 +242,7 @@ const mlLocalKey = "mlEnabled";
  * The remote status is tracked with a separate {@link isMLEnabledRemote} flag
  * that is synced with remote.
  */
-const isMLEnabledLocal = () => {
-    return localStorage.getItem(mlLocalKey) == "1";
-};
+const isMLEnabledLocal = () => localStorage.getItem(mlLocalKey) == "1";
 
 /**
  * Update the (locally stored) value of {@link isMLEnabledLocal}.
