@@ -173,13 +173,7 @@ export const addOrUpdateUserEntity = async (
     id: string | undefined,
     masterKey: Uint8Array,
 ) => {
-    const entityKeyB64 = await getOrCreateEntityKeyB64(type, masterKey);
-
-    const json = JSON.stringify(data);
-    const bytes = isGzipped(type)
-        ? await gzip(json)
-        : new TextEncoder().encode(json);
-    const encryptedBlob = await encryptBlobB64(bytes, entityKeyB64);
+    const encryptedBlob = await encryptedUserEntityData(type, data, masterKey);
 
     await (id
         ? putUserEntity(id, type, encryptedBlob)
@@ -187,6 +181,20 @@ export const addOrUpdateUserEntity = async (
 
     // Perform a diff sync to update our local state.
     return pullUserEntities(type, masterKey);
+};
+
+export const encryptedUserEntityData = async (
+    type: EntityType,
+    data: unknown,
+    masterKey: Uint8Array,
+) => {
+    const entityKeyB64 = await getOrCreateEntityKeyB64(type, masterKey);
+
+    const json = JSON.stringify(data);
+    const bytes = isGzipped(type)
+        ? await gzip(json)
+        : new TextEncoder().encode(json);
+    return encryptBlobB64(bytes, entityKeyB64);
 };
 
 /**
