@@ -80,7 +80,7 @@ export const clusterFaces = async (
     localFiles: EnteFile[],
     onProgress: (progress: ClusteringProgress) => void,
 ) => {
-    const t = Date.now();
+    const startTime = Date.now();
 
     // A flattened array of filtered and annotated faces.
     const filteredFaces = [...enumerateFaces(faceIndexes)];
@@ -154,24 +154,16 @@ export const clusterFaces = async (
     // Process the faces in batches, but keep an overlap between batches to
     // allow "links" to form with existing clusters.
 
+    const total = faces.length;
     const batchSize = 10000;
     const offsetIncrement = 7500;
 
-    for (let offset = 0; offset < faces.length; offset += offsetIncrement) {
-        const it = Date.now();
-        const batch = faces.slice(offset, offset + batchSize);
+    for (let offset = 0; offset < total; offset += offsetIncrement) {
         await clusterBatchLinear(
-            batch,
+            faces.slice(offset, offset + batchSize),
             state,
-            ({ completed }: ClusteringProgress) =>
-                onProgress({
-                    completed: offset + completed,
-                    total: faces.length,
-                }),
-        );
-        log.debug(
-            () =>
-                `Clustered faces ${offset} to ${offset + batch.length} (${Date.now() - it} ms, ${state.clusters.length} clusters)`,
+            ({ completed }) =>
+                onProgress({ completed: offset + completed, total }),
         );
     }
 
@@ -180,11 +172,8 @@ export const clusterFaces = async (
         (a, b) => b.faces.length - a.faces.length,
     );
 
-    const clusteredFaceCount = faceIDToClusterID.size;
-    const timeTakenMs = Date.now() - t;
-    log.info(
-        `Generated ${sortedClusters.length} clusters from ${faces.length} faces (${clusteredFaceCount} clustered ${faces.length - clusteredFaceCount} unclustered) (${timeTakenMs} ms)`,
-    );
+    const t = `(${Date.now() - startTime} ms)`;
+    log.info(`Generated ${clusters.length} clusters from ${total} faces ${t}`);
 
     return sortedClusters;
 };
@@ -389,12 +378,12 @@ export const reconcileClusters = async (
 
     // Update remote if needed.
     if (changedCGroupEntities.length) {
-        log.info(`Updating ${changedCGroupEntities.length} remote cgroups`);
         await updateOrCreateUserEntities(
             "cgroup",
             changedCGroupEntities,
             masterKey,
         );
+        log.info(`Updated ${changedCGroupEntities.length} remote cgroups`);
     }
 
     // Find which clusters are part of remote cgroups.
