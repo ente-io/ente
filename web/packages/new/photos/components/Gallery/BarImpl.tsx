@@ -300,7 +300,7 @@ export const Row1 = styled(Box)`
     align-items: center;
     justify-content: space-between;
     gap: 10px;
-    margin-block-end: 8px;
+    margin-block-end: 12px;
 `;
 
 export const Row2 = styled(Box)`

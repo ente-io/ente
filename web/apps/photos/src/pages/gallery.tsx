@@ -1058,10 +1058,6 @@ export default function Gallery() {
         setBarMode("people");
     };
 
-    if (activePerson) {
-        log.debug(() => ["person", activePerson]);
-    }
-
     if (!collectionSummaries || !filteredData) {
         return <div></div>;
     }
@@ -1135,7 +1131,12 @@ export default function Gallery() {
                     attributes={fixCreationTimeAttributes}
                 />
                 <NavbarBase
-                    sx={{ background: "transparent", position: "absolute" }}
+                    sx={{
+                        background: "transparent",
+                        position: "absolute",
+                        // Override the default 16px we get from NavbarBase
+                        marginBottom: "12px",
+                    }}
                 >
                     {barMode == "hidden-albums" ? (
                         <HiddenSectionNavbarContents

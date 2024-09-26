@@ -8,16 +8,21 @@
  */
 
 import { pt } from "@/base/i18n";
-import type { Person } from "@/new/photos/services/ml/people";
+import { addPerson, type Person } from "@/new/photos/services/ml/people";
 import type { SearchOption } from "@/new/photos/services/search/types";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
 import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
+import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
-import { Typography } from "@mui/material";
+import { IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import { t } from "i18next";
-import React from "react";
+import React, { useState } from "react";
+import type { FaceCluster } from "../../services/ml/cluster";
+import type { CGroupUserEntity } from "../../services/user-entity";
+import type { NewAppContextPhotos } from "../../types/context";
 import { SpaceBetweenFlex } from "../mui-custom";
+import { NameInputDialog } from "../NameInputDialog";
 import { GalleryItemsHeaderAdapter, GalleryItemsSummary } from "./ListHeader";
 
 /**
@@ -48,15 +53,15 @@ export const SearchResultsHeader: React.FC<SearchResultsHeaderProps> = ({
     </GalleryItemsHeaderAdapter>
 );
 
-interface PeopleListHeaderProps {
+interface PeopleHeaderProps {
     person: Person;
+    appContext: NewAppContextPhotos;
 }
 
-export const PersonListHeader: React.FC<PeopleListHeaderProps> = ({
+export const PeopleHeader: React.FC<PeopleHeaderProps> = ({
     person,
+    appContext,
 }) => {
-    // TODO-Cluster
-    const hasOptions = process.env.NEXT_PUBLIC_ENTE_WIP_CL;
     return (
         <GalleryItemsHeaderAdapter>
             <SpaceBetweenFlex>
@@ -67,20 +72,108 @@ export const PersonListHeader: React.FC<PeopleListHeaderProps> = ({
                     nameProps={person.name ? {} : { color: "text.muted" }}
                     fileCount={person.fileIDs.length}
                 />
-                {hasOptions && (
-                    <OverflowMenu
-                        ariaControls={"person-options"}
-                        triggerButtonIcon={<MoreHoriz />}
-                    >
-                        <OverflowMenuOption
-                            startIcon={<EditIcon />}
-                            onClick={() => console.log("test")}
-                        >
-                            {t("download_album")}
-                        </OverflowMenuOption>
-                    </OverflowMenu>
+                {person.type == "cgroup" ? (
+                    <CGroupPersonOptions
+                        person={person}
+                        cgroup={person.cgroupUserEntity}
+                        appContext={appContext}
+                    />
+                ) : (
+                    <ClusterPersonOptions
+                        cluster={person.cluster}
+                        appContext={appContext}
+                    />
                 )}
             </SpaceBetweenFlex>
         </GalleryItemsHeaderAdapter>
+    );
+};
+
+interface CGroupPersonOptionsProps {
+    person: Person;
+    cgroup: CGroupUserEntity;
+    appContext: NewAppContextPhotos;
+}
+
+const CGroupPersonOptions: React.FC<CGroupPersonOptionsProps> = ({
+    person,
+}) => {
+    const rename = () => {
+        console.log("todo rename", person);
+    };
+
+    return (
+        <OverflowMenu
+            ariaControls={"person-options"}
+            triggerButtonIcon={<MoreHoriz />}
+        >
+            <OverflowMenuOption
+                startIcon={<EditIcon />}
+                centerAlign
+                onClick={rename}
+            >
+                {t("rename")}
+            </OverflowMenuOption>
+        </OverflowMenu>
+    );
+};
+
+interface ClusterPersonOptionsProps {
+    cluster: FaceCluster;
+    appContext: NewAppContextPhotos;
+}
+
+const ClusterPersonOptions: React.FC<ClusterPersonOptionsProps> = ({
+    cluster,
+    appContext,
+}) => {
+    const { startLoading, finishLoading } = appContext;
+
+    const [openAddNameInput, setOpenAddNameInput] = useState(false);
+
+    const handleAddPerson = () => setOpenAddNameInput(true);
+
+    const addPersonWithName = async (name: string) => {
+        startLoading();
+        try {
+            await addPerson(name, cluster);
+        } finally {
+            finishLoading();
+        }
+    };
+
+    return (
+        <>
+            <Stack direction="row" sx={{ alignItems: "center", gap: 2 }}>
+                <Tooltip title={pt("Add a name")}>
+                    <IconButton onClick={handleAddPerson}>
+                        <AddIcon />
+                    </IconButton>
+                </Tooltip>
+
+                <OverflowMenu
+                    ariaControls={"person-options"}
+                    triggerButtonIcon={<MoreHoriz />}
+                >
+                    <OverflowMenuOption
+                        startIcon={<AddIcon />}
+                        centerAlign
+                        onClick={handleAddPerson}
+                    >
+                        {pt("Add a name")}
+                    </OverflowMenuOption>
+                </OverflowMenu>
+            </Stack>
+
+            <NameInputDialog
+                open={openAddNameInput}
+                onClose={() => setOpenAddNameInput(false)}
+                title={pt("Add person")}
+                placeholder={t("ENTER_NAME") /* TODO-Cluster */}
+                initialValue={""}
+                submitButtonTitle={t("ADD")}
+                onSubmit={addPersonWithName}
+            />
+        </>
     );
 };

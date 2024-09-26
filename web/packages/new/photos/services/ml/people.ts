@@ -1,7 +1,12 @@
+import { masterKeyFromSession } from "@/base/session-store";
 import { wipClusterEnable } from ".";
 import type { EnteFile } from "../../types/file";
 import { getLocalFiles } from "../files";
-import { savedCGroupUserEntities } from "../user-entity";
+import {
+    addUserEntity,
+    savedCGroupUserEntities,
+    type CGroupUserEntity,
+} from "../user-entity";
 import type { FaceCluster } from "./cluster";
 import { getFaceIndexes, savedFaceClusters } from "./db";
 import { fileIDFromFaceID } from "./face";
@@ -97,7 +102,10 @@ export interface CGroupUserEntityData {
  * efficiently use, as compared to a {@link CGroupUserEntityData}, which is
  * tailored for transmission and storage.
  */
-export interface Person {
+export type Person = (
+    | { type: "cgroup"; cgroupUserEntity: CGroupUserEntity }
+    | { type: "cluster"; cluster: FaceCluster }
+) & {
     /**
      * Nanoid of the underlying cgroup or {@link FaceCluster}.
      */
@@ -121,10 +129,6 @@ export interface Person {
      * The {@link EnteFile} which contains the display face.
      */
     displayFaceFile: EnteFile;
-}
-
-export type NamedPerson = Omit<Person, "name"> & {
-    name: string;
 };
 
 /**
@@ -165,15 +169,17 @@ export const reconstructPeople = async (): Promise<Person[]> => {
         }
     }
 
+    // Help out tsc.
+    type Interim = (Person | undefined)[];
+
     // Convert cgroups to people.
     const cgroups = await savedCGroupUserEntities();
-    const cgroupPeople = cgroups.map(({ id, data: cgroup }) => {
+    const cgroupPeople: Interim = cgroups.map((cgroupUserEntity) => {
+        const { id, data: cgroup } = cgroupUserEntity;
+
         // Hidden cgroups are clusters specifically marked so as to not be shown
         // in the UI.
         if (cgroup.isHidden) return undefined;
-
-        // Unnamed groups are also not shown.
-        const name = cgroup.name;
 
         // Person faces from all the clusters assigned to this cgroup, sorted by
         // their score.
@@ -209,12 +215,20 @@ export const reconstructPeople = async (): Promise<Person[]> => {
             displayFaceFile = highestScoringFace.file;
         }
 
-        return { id, name, fileIDs, displayFaceID, displayFaceFile };
+        return {
+            type: "cgroup",
+            cgroupUserEntity,
+            id,
+            name: cgroup.name,
+            fileIDs,
+            displayFaceID,
+            displayFaceFile,
+        };
     });
 
     // Convert local-only clusters to people.
     const localClusters = await savedFaceClusters();
-    const clusterPeople = localClusters.map((cluster) => {
+    const clusterPeople: Interim = localClusters.map((cluster) => {
         const faces = cluster.faces
             .map((id) => personFaceByID.get(id))
             .filter((f) => !!f);
@@ -227,6 +241,8 @@ export const reconstructPeople = async (): Promise<Person[]> => {
         );
 
         return {
+            type: "cluster",
+            cluster,
             id: cluster.id,
             name: undefined,
             fileIDs: [...new Set(faces.map((f) => f.file.id))],
@@ -240,3 +256,21 @@ export const reconstructPeople = async (): Promise<Person[]> => {
         .filter((c) => !!c)
         .sort((a, b) => b.fileIDs.length - a.fileIDs.length);
 };
+
+/**
+ * Convert a cluster into a named cgroup, updating both remote and local state.
+ *
+ * @param name Name of the new cgroup user entity.
+ *
+ * @param cluster The underlying cluster to use to populate the cgroup.
+ */
+export const addPerson = async (name: string, cluster: FaceCluster) =>
+    addUserEntity(
+        "cgroup",
+        {
+            name,
+            assigned: [cluster],
+            isHidden: false,
+        },
+        await masterKeyFromSession(),
+    );

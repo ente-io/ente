@@ -22,7 +22,7 @@ import type { UploadItem } from "../upload/types";
 import { pullUserEntities } from "../user-entity";
 import { regenerateFaceCrops } from "./crop";
 import { clearMLDB, getFaceIndex, getIndexableAndIndexedCounts } from "./db";
-import { reconstructPeople, type NamedPerson, type Person } from "./people";
+import { reconstructPeople, type Person } from "./people";
 import { MLWorker } from "./worker";
 import type { CLIPMatches } from "./worker-types";
 
@@ -551,7 +551,10 @@ const updatePeople = async () => {
     const people = await reconstructPeople();
 
     // Notify the search subsystem of the update (search only uses named ones).
-    setSearchPeople(people.filter((p): p is NamedPerson => !!p.name));
+    const namedPeople = people
+        .map((p) => (p.name ? { name: p.name, person: p } : undefined))
+        .filter((p) => !!p);
+    setSearchPeople(namedPeople);
 
     // Update our in-memory list of people.
     setPeopleSnapshot(people);
