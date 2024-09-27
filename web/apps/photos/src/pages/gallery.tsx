@@ -1132,6 +1132,12 @@ export default function Gallery() {
         return <div></div>;
     }
 
+    const showEmptySectionState =
+        !isInSearchMode &&
+        !isFirstLoad &&
+        !files?.length &&
+        !hiddenFiles?.length;
+
     return (
         <GalleryContext.Provider
             value={{
@@ -1295,12 +1301,10 @@ export default function Gallery() {
                     open={openWhatsNew}
                     onClose={() => setOpenWhatsNew(false)}
                 />
-                {!isInSearchMode &&
-                !isFirstLoad &&
-                !files?.length &&
-                !hiddenFiles?.length &&
-                activeCollectionID === ALL_SECTION ? (
+                {showEmptySectionState && activeCollectionID === ALL_SECTION ? (
                     <GalleryEmptyState openUploader={openUploader} />
+                ) : showEmptySectionState && resolvedBarMode == "people" ? (
+                    <div>Empty</div>
                 ) : (
                     <PhotoFrame
                         page={PAGES.GALLERY}
