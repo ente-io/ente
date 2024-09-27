@@ -599,7 +599,7 @@ export const clipMatches = (
  * ID of the face, and the personID is the id of the corresponding person that
  * this face is associated to (if any).
  */
-export const peopleIDsAndOtherFaceIDsInFile = async (
+export const annotatedFaceIDsForFile = async (
     enteFile: EnteFile,
 ): Promise<[string, string | undefined][]> => {
     const index = await getFaceIndex(enteFile.id);

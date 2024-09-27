@@ -16,13 +16,14 @@ import { UnidentifiedFaces } from "@/new/photos/components/PeopleList";
 import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker";
 import { photoSwipeZIndex } from "@/new/photos/components/PhotoViewer";
 import { tagNumericValue, type RawExifTags } from "@/new/photos/services/exif";
-import { isMLEnabled } from "@/new/photos/services/ml";
+import { annotatedFaceIDsForFile, isMLEnabled } from "@/new/photos/services/ml";
 import { EnteFile } from "@/new/photos/types/file";
 import { formattedByteSize } from "@/new/photos/utils/units";
 import CopyButton from "@ente/shared/components/CodeBlock/CopyButton";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { getPublicMagicMetadataSync } from "@ente/shared/file-metadata";
+import useMemoSingleThreaded from "@ente/shared/hooks/useMemoSingleThreaded";
 import { formatDate, formatTime } from "@ente/shared/time/format";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import CameraOutlined from "@mui/icons-material/CameraOutlined";
@@ -105,6 +106,23 @@ export const FileInfo: React.FC<FileInfoProps> = ({
         }
         return exif?.parsed?.location;
     }, [file, exif]);
+
+    const [annotatedPeopleFaceIDs, otherFaceIDs] =
+        useMemoSingleThreaded(async () => {
+            if (!file) return [[], []];
+            const annotatedFaceIDs = await annotatedFaceIDsForFile(file);
+            return annotatedFaceIDs.reduce(
+                ([people, other], item) => {
+                    if (item[1]) {
+                        people.push(item);
+                    } else {
+                        other.push(item[0]);
+                    }
+                    return [people, other];
+                },
+                [[], []],
+            );
+        }, [file]);
 
     useEffect(() => {
         setExifInfo(parseExifInfo(exif));
