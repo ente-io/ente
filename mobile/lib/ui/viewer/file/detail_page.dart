@@ -355,7 +355,7 @@ class _DetailPageState extends State<DetailPage> {
       return;
     }
     setState(() {
-      _files!.remove(file);
+      _files!.removeAt(_selectedIndexNotifier.value);
       _selectedIndexNotifier.value = min(
         _selectedIndexNotifier.value,
         totalFiles - 2,
