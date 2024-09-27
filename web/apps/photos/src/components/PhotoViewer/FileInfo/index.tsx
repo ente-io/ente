@@ -12,11 +12,19 @@ import {
     type ParsedMetadataDate,
 } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
-import { UnidentifiedFaces } from "@/new/photos/components/PeopleList";
+import {
+    AnnotatedFacePeopleList,
+    UnclusteredFaceList,
+} from "@/new/photos/components/PeopleList";
 import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker";
 import { photoSwipeZIndex } from "@/new/photos/components/PhotoViewer";
 import { tagNumericValue, type RawExifTags } from "@/new/photos/services/exif";
-import { isMLEnabled } from "@/new/photos/services/ml";
+import {
+    AnnotatedFacesForFile,
+    getAnnotatedFacesForFile,
+    isMLEnabled,
+    type AnnotatedFaceID,
+} from "@/new/photos/services/ml";
 import { EnteFile } from "@/new/photos/types/file";
 import { formattedByteSize } from "@/new/photos/utils/units";
 import CopyButton from "@ente/shared/components/CodeBlock/CopyButton";
@@ -61,7 +69,7 @@ export interface FileInfoExif {
     parsed: ParsedMetadata | undefined;
 }
 
-interface FileInfoProps {
+export interface FileInfoProps {
     showInfo: boolean;
     handleCloseInfo: () => void;
     closePhotoViewer: () => void;
@@ -73,6 +81,10 @@ interface FileInfoProps {
     fileToCollectionsMap?: Map<number, number[]>;
     collectionNameMap?: Map<number, string>;
     showCollectionChips: boolean;
+    /**
+     * Called when the user selects a person in the file info panel.
+     */
+    onSelectPerson?: ((personID: string) => void) | undefined;
 }
 
 export const FileInfo: React.FC<FileInfoProps> = ({
@@ -87,6 +99,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     collectionNameMap,
     showCollectionChips,
     closePhotoViewer,
+    onSelectPerson,
 }) => {
     const { mapEnabled, updateMapEnabled, setDialogBoxAttributesV2 } =
         useContext(AppContext);
@@ -97,6 +110,9 @@ export const FileInfo: React.FC<FileInfoProps> = ({
 
     const [exifInfo, setExifInfo] = useState<ExifInfo | undefined>();
     const [openRawExif, setOpenRawExif] = useState(false);
+    const [annotatedFaces, setAnnotatedFaces] = useState<
+        AnnotatedFacesForFile | undefined
+    >();
 
     const location = useMemo(() => {
         if (file) {
@@ -105,6 +121,21 @@ export const FileInfo: React.FC<FileInfoProps> = ({
         }
         return exif?.parsed?.location;
     }, [file, exif]);
+
+    useEffect(() => {
+        if (!file) return;
+
+        let didCancel = false;
+
+        void (async () => {
+            const result = await getAnnotatedFacesForFile(file);
+            !didCancel && setAnnotatedFaces(result);
+        })();
+
+        return () => {
+            didCancel = true;
+        };
+    }, [file]);
 
     useEffect(() => {
         setExifInfo(parseExifInfo(exif));
@@ -128,6 +159,13 @@ export const FileInfo: React.FC<FileInfoProps> = ({
         setDialogBoxAttributesV2(
             getMapDisableConfirmationDialog(() => updateMapEnabled(false)),
         );
+
+    const handleSelectFace = (annotatedFaceID: AnnotatedFaceID) => {
+        if (onSelectPerson) {
+            onSelectPerson(annotatedFaceID.personID);
+            closePhotoViewer();
+        }
+    };
 
     return (
         <FileInfoSidebar open={showInfo} onClose={handleCloseInfo}>
@@ -267,10 +305,17 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                     </InfoItem>
                 )}
 
-                {isMLEnabled() && (
+                {isMLEnabled() && annotatedFaces && (
                     <>
-                        {/* TODO-Cluster <PhotoPeopleList file={file} /> */}
-                        <UnidentifiedFaces enteFile={file} />
+                        <AnnotatedFacePeopleList
+                            enteFile={file}
+                            annotatedFaceIDs={annotatedFaces.annotatedFaceIDs}
+                            onSelectFace={handleSelectFace}
+                        />
+                        <UnclusteredFaceList
+                            enteFile={file}
+                            faceIDs={annotatedFaces.otherFaceIDs}
+                        />
                     </>
                 )}
             </Stack>

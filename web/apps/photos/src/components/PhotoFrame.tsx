@@ -8,7 +8,7 @@ import { PHOTOS_PAGES } from "@ente/shared/constants/pages";
 import { CustomError } from "@ente/shared/error";
 import useMemoSingleThreaded from "@ente/shared/hooks/useMemoSingleThreaded";
 import { styled } from "@mui/material";
-import PhotoViewer from "components/PhotoViewer";
+import PhotoViewer, { type PhotoViewerProps } from "components/PhotoViewer";
 import { useRouter } from "next/router";
 import { GalleryContext } from "pages/gallery";
 import PhotoSwipe from "photoswipe";
@@ -72,6 +72,7 @@ interface Props {
     isInHiddenSection?: boolean;
     setFilesDownloadProgressAttributesCreator?: SetFilesDownloadProgressAttributesCreator;
     selectable?: boolean;
+    onSelectPerson?: PhotoViewerProps["onSelectPerson"];
 }
 
 const PhotoFrame = ({
@@ -95,6 +96,7 @@ const PhotoFrame = ({
     isInHiddenSection,
     setFilesDownloadProgressAttributesCreator,
     selectable,
+    onSelectPerson,
 }: Props) => {
     const [open, setOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
@@ -580,6 +582,7 @@ const PhotoFrame = ({
                 setFilesDownloadProgressAttributesCreator={
                     setFilesDownloadProgressAttributesCreator
                 }
+                onSelectPerson={onSelectPerson}
             />
         </Container>
     );

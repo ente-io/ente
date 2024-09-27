@@ -5,6 +5,7 @@ import log from "@/base/log";
 import type { Collection } from "@/media/collection";
 import { SearchResultsHeader } from "@/new/photos/components/Gallery";
 import type { GalleryBarMode } from "@/new/photos/components/Gallery/BarImpl";
+import { GalleryPeopleState } from "@/new/photos/components/Gallery/PeopleHeader";
 import {
     SearchBar,
     type SearchBarProps,
@@ -526,9 +527,16 @@ export default function Gallery() {
         );
     }, [collections, activeCollectionID]);
 
-    const filteredData = useMemoSingleThreaded(async (): Promise<
-        EnteFile[]
-    > => {
+    // The derived UI state when we are in "people" mode.
+    //
+    // TODO: This spawns even more workarounds below. Move this to a
+    // reducer/store.
+    type DerivedState1 = {
+        filteredData: EnteFile[];
+        galleryPeopleState: GalleryPeopleState | undefined;
+    };
+
+    const derived1: DerivedState1 = useMemoSingleThreaded(async () => {
         if (
             !files ||
             !user ||
@@ -536,35 +544,54 @@ export default function Gallery() {
             !hiddenFiles ||
             !archivedCollections
         ) {
-            return;
+            return { filteredData: [], galleryPeopleState: undefined };
         }
 
         if (activeCollectionID === TRASH_SECTION && !selectedSearchOption) {
-            return getUniqueFiles([
+            const filteredData = getUniqueFiles([
                 ...trashedFiles,
                 ...files.filter((file) => tempDeletedFileIds?.has(file.id)),
             ]);
+            return { filteredData, galleryPeopleState: undefined };
         }
 
         let filteredFiles: EnteFile[] = [];
+        let galleryPeopleState: GalleryPeopleState;
         if (selectedSearchOption) {
             filteredFiles = await filterSearchableFiles(
                 selectedSearchOption.suggestion,
             );
         } else if (barMode == "people") {
-            const activePerson = ensure(
-                people.find((p) => p.id == activePersonID) ?? people[0],
-            );
-            const pfSet = new Set(activePerson.fileIDs);
+            let filteredPeople = people;
+            if (tempDeletedFileIds?.size ?? tempHiddenFileIds?.size) {
+                // Prune the in-memory temp updates from the actual state to
+                // obtain the UI state.
+                filteredPeople = people
+                    .map((p) => ({
+                        ...p,
+                        fileIDs: p.fileIDs.filter(
+                            (id) =>
+                                !tempDeletedFileIds?.has(id) &&
+                                !tempHiddenFileIds?.has(id),
+                        ),
+                    }))
+                    .filter((p) => p.fileIDs.length > 0);
+            }
+            const activePerson =
+                filteredPeople.find((p) => p.id == activePersonID) ??
+                filteredPeople[0];
+            const pfSet = new Set(activePerson?.fileIDs ?? []);
             filteredFiles = getUniqueFiles(
                 files.filter(({ id }) => {
                     if (!pfSet.has(id)) return false;
-                    // TODO-Cluster
-                    // if (tempDeletedFileIds?.has(id)) return false;
-                    // if (tempHiddenFileIds?.has(id)) return false;
                     return true;
                 }),
             );
+            galleryPeopleState = {
+                activePerson,
+                activePersonID,
+                people: filteredPeople,
+            };
         } else {
             const baseFiles = barMode == "hidden-albums" ? hiddenFiles : files;
             filteredFiles = getUniqueFiles(
@@ -630,10 +657,10 @@ export default function Gallery() {
         }
         const sortAsc = activeCollection?.pubMagicMetadata?.data?.asc ?? false;
         if (sortAsc) {
-            return sortFiles(filteredFiles, true);
-        } else {
-            return filteredFiles;
+            filteredFiles = sortFiles(filteredFiles, true);
         }
+
+        return { filteredData: filteredFiles, galleryPeopleState };
     }, [
         barMode,
         files,
@@ -648,6 +675,36 @@ export default function Gallery() {
         people,
         activePersonID,
     ]);
+
+    const { filteredData, galleryPeopleState } = derived1 ?? {
+        filteredData: [],
+        galleryPeopleState: undefined,
+    };
+
+    // Calling setState during rendering is frowned upon for good reasons, but
+    // it is not verboten, and it has documented semantics:
+    //
+    // > React will discard the currently rendering component's output and
+    // > immediately attempt to render it again with the new state.
+    // >
+    // > https://react.dev/reference/react/useState
+    //
+    // That said, we should try to refactor this code to use a reducer or some
+    // other store so that this is not needed.
+    if (barMode == "people" && galleryPeopleState?.people.length === 0) {
+        log.info(
+            "Resetting gallery to all section since people mode is no longer valid",
+        );
+        setBarMode("albums");
+        setActiveCollectionID(ALL_SECTION);
+    }
+
+    // Derived1 is async, leading to even more workarounds.
+    const resolvedBarMode = galleryPeopleState
+        ? barMode
+        : barMode == "people"
+          ? "albums"
+          : barMode;
 
     const selectAll = (e: KeyboardEvent) => {
         // ignore ctrl/cmd + a if the user is typing in a text field
@@ -679,10 +736,14 @@ export default function Gallery() {
             count: 0,
             collectionID: activeCollectionID,
             context:
-                barMode == "people" && activePersonID
-                    ? { mode: "people" as const, personID: activePersonID }
+                resolvedBarMode == "people" &&
+                galleryPeopleState?.activePersonID
+                    ? {
+                          mode: "people" as const,
+                          personID: galleryPeopleState.activePersonID,
+                      }
                     : {
-                          mode: "albums" as const,
+                          mode: resolvedBarMode as "albums" | "hidden-albums",
                           collectionID: ensure(activeCollectionID),
                       },
         };
@@ -1058,7 +1119,12 @@ export default function Gallery() {
         // when the user clicks the "People" header in the search empty state (it
         // is guaranteed that this header will only be shown if there is at
         // least one person).
-        setActivePersonID(person?.id ?? ensure(people[0]).id);
+        setActivePersonID(person?.id ?? galleryPeopleState?.people[0]?.id);
+        setBarMode("people");
+    };
+
+    const handleSelectFileInfoPerson = (personID: string) => {
+        setActivePersonID(personID);
         setBarMode("people");
     };
 
@@ -1142,7 +1208,7 @@ export default function Gallery() {
                         marginBottom: "12px",
                     }}
                 >
-                    {barMode == "hidden-albums" ? (
+                    {resolvedBarMode == "hidden-albums" ? (
                         <HiddenSectionNavbarContents
                             onBack={exitHiddenSection}
                         />
@@ -1163,15 +1229,16 @@ export default function Gallery() {
                 <GalleryBarAndListHeader
                     {...{
                         shouldHide: isInSearchMode,
-                        mode: barMode,
+                        mode: resolvedBarMode,
                         onChangeMode: setBarMode,
                         collectionSummaries,
                         activeCollection,
                         activeCollectionID,
                         setActiveCollectionID,
                         hiddenCollectionSummaries,
-                        people,
-                        activePersonID,
+                        people: galleryPeopleState?.people,
+                        activePersonID: galleryPeopleState?.activePersonID,
+                        activePerson: galleryPeopleState?.activePerson,
                         onSelectPerson: handleSelectPerson,
                         setCollectionNamerAttributes,
                         setPhotoListHeader,
@@ -1237,7 +1304,7 @@ export default function Gallery() {
                 ) : (
                     <PhotoFrame
                         page={PAGES.GALLERY}
-                        mode={barMode}
+                        mode={resolvedBarMode}
                         files={filteredData}
                         syncWithRemote={syncWithRemote}
                         favItemIds={favItemIds}
@@ -1247,18 +1314,19 @@ export default function Gallery() {
                         setTempDeletedFileIds={setTempDeletedFileIds}
                         setIsPhotoSwipeOpen={setIsPhotoSwipeOpen}
                         activeCollectionID={activeCollectionID}
-                        activePersonID={activePersonID}
+                        activePersonID={galleryPeopleState?.activePersonID}
                         enableDownload={true}
                         fileToCollectionsMap={fileToCollectionsMap}
                         collectionNameMap={collectionNameMap}
                         showAppDownloadBanner={
                             files.length < 30 && !isInSearchMode
                         }
-                        isInHiddenSection={barMode == "hidden-albums"}
+                        isInHiddenSection={resolvedBarMode == "hidden-albums"}
                         setFilesDownloadProgressAttributesCreator={
                             setFilesDownloadProgressAttributesCreator
                         }
                         selectable={true}
+                        onSelectPerson={handleSelectFileInfoPerson}
                     />
                 )}
                 {selected.count > 0 &&
@@ -1275,7 +1343,7 @@ export default function Gallery() {
                             count={selected.count}
                             ownCount={selected.ownCount}
                             clearSelection={clearSelection}
-                            barMode={barMode}
+                            barMode={resolvedBarMode}
                             activeCollectionID={activeCollectionID}
                             selectedCollection={getSelectedCollection(
                                 selected.collectionID,
@@ -1296,7 +1364,9 @@ export default function Gallery() {
                                     ?.type == "incomingShareViewer"
                             }
                             isInSearchMode={isInSearchMode}
-                            isInHiddenSection={barMode == "hidden-albums"}
+                            isInHiddenSection={
+                                resolvedBarMode == "hidden-albums"
+                            }
                         />
                     )}
                 <ExportModal

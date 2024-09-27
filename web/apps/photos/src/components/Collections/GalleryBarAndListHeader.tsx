@@ -9,7 +9,6 @@ import {
     type CollectionsSortBy,
     type CollectionSummaries,
 } from "@/new/photos/types/collection";
-import { ensure } from "@/utils/ensure";
 import { includes } from "@/utils/type-guards";
 import {
     getData,
@@ -95,7 +94,7 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
     setActiveCollectionID,
     hiddenCollectionSummaries,
     people,
-    activePersonID,
+    activePerson,
     onSelectPerson,
     setCollectionNamerAttributes,
     setPhotoListHeader,
@@ -173,10 +172,7 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
                     />
                 ) : (
                     <PeopleHeader
-                        person={ensure(
-                            people.find((p) => p.id == activePersonID) ??
-                                people[0],
-                        )}
+                        person={activePerson}
                         {...{ onSelectPerson, appContext }}
                     />
                 ),
@@ -190,7 +186,7 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
         activeCollectionID,
         isActiveCollectionDownloadInProgress,
         people,
-        activePersonID,
+        activePerson,
     ]);
 
     if (shouldBeHidden) {
@@ -205,7 +201,7 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
                     onChangeMode,
                     activeCollectionID,
                     people,
-                    activePersonID,
+                    activePerson,
                     onSelectPerson,
                     collectionsSortBy,
                 }}

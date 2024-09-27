@@ -1,4 +1,3 @@
-import { wipClusterEnable } from ".";
 import type { EnteFile } from "../../types/file";
 import { getLocalFiles } from "../files";
 import { savedCGroups, type CGroup } from "../user-entity";
@@ -138,8 +137,6 @@ export type Person = (
  * reference.
  */
 export const reconstructPeople = async (): Promise<Person[]> => {
-    if (!(await wipClusterEnable())) return [];
-
     const files = await getLocalFiles("normal");
     const fileByID = new Map(files.map((f) => [f.id, f]));
 
@@ -247,10 +244,12 @@ export const reconstructPeople = async (): Promise<Person[]> => {
         };
     });
 
-    return cgroupPeople
-        .concat(clusterPeople)
-        .filter((c) => !!c)
-        .sort((a, b) => b.fileIDs.length - a.fileIDs.length);
+    const sorted = (ps: Interim) =>
+        ps
+            .filter((c) => !!c)
+            .sort((a, b) => b.fileIDs.length - a.fileIDs.length);
+
+    return sorted(cgroupPeople).concat(sorted(clusterPeople));
 };
 
 /**

@@ -31,6 +31,34 @@ import { NameInputDialog } from "../NameInputDialog";
 import type { GalleryBarImplProps } from "./BarImpl";
 import { GalleryItemsHeaderAdapter, GalleryItemsSummary } from "./ListHeader";
 
+/**
+ * Derived UI state backing the gallery when it is in "people" mode.
+ *
+ * This may be different from the actual underlying state since there might be
+ * unsynced data (hidden or deleted that have not yet been synced with remote)
+ * that should be taken into account for the UI state.
+ */
+export interface GalleryPeopleState {
+    /**
+     * The ID of the currently selected person.
+     *
+     * We do not have an empty state currently, so this is guaranteed to be
+     * present whenever the gallery is in the "people" mode.
+     */
+    activePersonID: string;
+    /**
+     * The currently selected person.
+     *
+     * This is a convenience property that contains a direct reference to the
+     * active {@link Person} from amongst {@link people}.
+     */
+    activePerson: Person;
+    /**
+     * The list of people to show.
+     */
+    people: Person[];
+}
+
 type PeopleHeaderProps = Pick<GalleryBarImplProps, "onSelectPerson"> & {
     person: Person;
     appContext: NewAppContextPhotos;

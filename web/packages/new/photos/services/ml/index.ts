@@ -5,7 +5,6 @@
 import { isDesktop } from "@/base/app";
 import { blobCache } from "@/base/blob-cache";
 import { ensureElectron } from "@/base/electron";
-import { isDevBuild } from "@/base/env";
 import log from "@/base/log";
 import { masterKeyFromSession } from "@/base/session-store";
 import type { Electron } from "@/base/types/ipc";
@@ -107,7 +106,7 @@ const worker = () =>
 
 const createComlinkWorker = async () => {
     const electron = ensureElectron();
-    const delegate = { workerDidUpdateStatus };
+    const delegate = { workerDidUpdateStatus, workerDidUnawaitedIndex };
 
     // Obtain a message port from the Electron layer.
     const messagePort = await createMLWorker(electron);
@@ -313,28 +312,32 @@ export const mlSync = async () => {
 
     // Dependency order for the sync
     //
-    //     files -> faces -> cgroups -> clusters
+    //     files -> faces -> cgroups -> clusters -> people
     //
 
-    const w = await worker();
-
     // Fetch indexes, or index locally if needed.
-    await w.index();
+    await (await worker()).index();
 
-    // TODO-Cluster
-    if (await wipClusterEnable()) {
-        const masterKey = await masterKeyFromSession();
-
-        // Fetch existing cgroups from remote.
-        await pullUserEntities("cgroup", masterKey);
-
-        // Generate or update local clusters.
-        await w.clusterFaces(masterKey);
-    }
-
-    await updatePeople();
+    await updateClustersAndPeople();
 
     _state.isSyncing = false;
+};
+
+const workerDidUnawaitedIndex = () => void updateClustersAndPeople();
+
+const updateClustersAndPeople = async () => {
+    if (!(await isInternalUser())) return;
+
+    const masterKey = await masterKeyFromSession();
+
+    // Fetch existing cgroups from remote.
+    await pullUserEntities("cgroup", masterKey);
+
+    // Generate or update local clusters.
+    await (await worker()).clusterFaces(masterKey);
+
+    // Update the people shown in the UI.
+    await updatePeople();
 };
 
 /**
@@ -360,14 +363,6 @@ export const indexNewUpload = (enteFile: EnteFile, uploadItem: UploadItem) => {
     log.debug(() => ["ml/liveq", { enteFile, uploadItem }]);
     void worker().then((w) => w.onUpload(enteFile, uploadItem));
 };
-
-/**
- * WIP! Don't enable, dragon eggs are hatching here.
- * TODO-Cluster
- */
-export const wipClusterEnable = async (): Promise<boolean> =>
-    (!!process.env.NEXT_PUBLIC_ENTE_WIP_CL && isDevBuild) ||
-    (await isInternalUser());
 
 export type MLStatus =
     | { phase: "disabled" /* The ML remote flag is off */ }
@@ -589,15 +584,65 @@ export const clipMatches = (
 ): Promise<CLIPMatches | undefined> =>
     worker().then((w) => w.clipMatches(searchPhrase));
 
+/** A face ID annotated with the ID of the person to which it is associated. */
+export interface AnnotatedFaceID {
+    faceID: string;
+    personID: string;
+}
+
 /**
- * Return the IDs of all the faces in the given {@link enteFile} that are not
- * associated with a person cluster.
+ * List of faces found in a file
+ *
+ * It is actually a pair of lists, one annotated by the person ids, and one with
+ * just the face ids.
  */
-export const unidentifiedFaceIDs = async (
+export interface AnnotatedFacesForFile {
+    /**
+     * A list of {@link AnnotatedFaceID}s for all faces in the file that are
+     * also associated with a {@link Person}.
+     */
+    annotatedFaceIDs: AnnotatedFaceID[];
+    /* A list of the remaining face (ids). */
+    otherFaceIDs: string[];
+}
+
+/**
+ * Return the list of faces found in the given {@link enteFile}.
+ */
+export const getAnnotatedFacesForFile = async (
     enteFile: EnteFile,
-): Promise<string[]> => {
+): Promise<AnnotatedFacesForFile> => {
+    const annotatedFaceIDs: AnnotatedFaceID[] = [];
+    const otherFaceIDs: string[] = [];
+
     const index = await getFaceIndex(enteFile.id);
-    return index?.faces.map((f) => f.faceID) ?? [];
+    if (!index) return { annotatedFaceIDs, otherFaceIDs };
+
+    const people = _state.peopleSnapshot ?? [];
+
+    const faceIDToPersonID = new Map<string, string>();
+    for (const person of people) {
+        let faceIDs: string[];
+        if (person.type == "cgroup") {
+            faceIDs = person.cgroup.data.assigned.map((c) => c.faces).flat();
+        } else {
+            faceIDs = person.cluster.faces;
+        }
+        for (const faceID of faceIDs) {
+            faceIDToPersonID.set(faceID, person.id);
+        }
+    }
+
+    for (const { faceID } of index.faces) {
+        const personID = faceIDToPersonID.get(faceID);
+        if (personID) {
+            annotatedFaceIDs.push({ faceID, personID });
+        } else {
+            otherFaceIDs.push(faceID);
+        }
+    }
+
+    return { annotatedFaceIDs, otherFaceIDs };
 };
 
 /**
