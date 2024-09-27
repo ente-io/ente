@@ -339,13 +339,13 @@ const ModeIndicator: React.FC<
     return (
         <Stack direction="row" sx={{ gap: "10px" }}>
             <ModeButton
-                $active={mode == "albums"}
+                active={mode == "albums"}
                 onClick={() => onChangeMode("albums")}
             >
                 <Typography>{t("albums")}</Typography>
             </ModeButton>
             <ModeButton
-                $active={mode == "people"}
+                active={mode == "people"}
                 onClick={() => onChangeMode("people")}
             >
                 <Typography>{t("people")}</Typography>
@@ -354,9 +354,11 @@ const ModeIndicator: React.FC<
     );
 };
 
-const ModeButton = styled(UnstyledButton)<{ $active: boolean }>(
-    ({ $active, theme }) => `
-    p { color: ${$active ? theme.colors.text.base : theme.colors.text.muted} }
+const ModeButton = styled(UnstyledButton, {
+    shouldForwardProp: (propName) => propName != "active",
+})<{ active: boolean }>(
+    ({ active, theme }) => `
+    p { color: ${active ? theme.colors.text.base : theme.colors.text.muted} }
     p:hover { color: ${theme.colors.text.base} }
 `,
 );
