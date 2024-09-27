@@ -40,19 +40,12 @@ import { GalleryItemsHeaderAdapter, GalleryItemsSummary } from "./ListHeader";
  */
 export interface GalleryPeopleState {
     /**
-     * The ID of the currently selected person.
+     * The currently selected person, if any.
      *
-     * We do not have an empty state currently, so this is guaranteed to be
-     * present whenever the gallery is in the "people" mode.
+     * Whenever this is present, it is guaranteed to be one of the items from
+     * within {@link people}.
      */
-    activePersonID: string;
-    /**
-     * The currently selected person.
-     *
-     * This is a convenience property that contains a direct reference to the
-     * active {@link Person} from amongst {@link people}.
-     */
-    activePerson: Person;
+    activePerson: Person | undefined;
     /**
      * The list of people to show.
      */

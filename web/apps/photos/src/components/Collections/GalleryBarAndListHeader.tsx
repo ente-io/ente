@@ -170,11 +170,13 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
                         }
                         onCollectionCast={() => setOpenAlbumCastDialog(true)}
                     />
-                ) : (
+                ) : activePerson ? (
                     <PeopleHeader
                         person={activePerson}
                         {...{ onSelectPerson, appContext }}
                     />
+                ) : (
+                    <></>
                 ),
             itemType: ITEM_TYPE.HEADER,
             height: 68,

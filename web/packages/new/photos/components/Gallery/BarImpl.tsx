@@ -94,9 +94,7 @@ export interface GalleryBarImplProps {
      */
     people: Person[];
     /**
-     * The currently selected person.
-     *
-     * Required if mode is "people".
+     * The currently selected person, if any.
      */
     activePerson: Person | undefined;
     /**
@@ -212,7 +210,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                 : {
                       type: "people" as const,
                       people,
-                      activePerson: ensure(activePerson),
+                      activePerson,
                       onSelectPerson,
                   },
         [
@@ -404,7 +402,7 @@ type ItemData =
     | {
           type: "people";
           people: Person[];
-          activePerson: Person;
+          activePerson: Person | undefined;
           onSelectPerson: (person: Person) => void;
       };
 
@@ -570,7 +568,7 @@ const ActiveIndicator = styled("div")`
 
 interface PersonCardProps {
     person: Person;
-    activePerson: Person;
+    activePerson: Person | undefined;
     onSelectPerson: (person: Person) => void;
 }
 
@@ -588,6 +586,6 @@ const PersonCard: React.FC<PersonCardProps> = ({
         >
             {person.name && <CardText text={person.name} />}
         </ItemCard>
-        {activePerson.id === person.id && <ActiveIndicator />}
+        {activePerson?.id === person.id && <ActiveIndicator />}
     </Box>
 );
