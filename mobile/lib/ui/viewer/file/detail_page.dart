@@ -40,14 +40,12 @@ class DetailPageConfiguration {
   final int selectedIndex;
   final String tagPrefix;
   final DetailPageMode mode;
-  final bool sortOrderAsc;
 
   DetailPageConfiguration(
     this.files,
     this.selectedIndex,
     this.tagPrefix, {
     this.mode = DetailPageMode.full,
-    this.sortOrderAsc = false,
   });
 
   DetailPageConfiguration copyWith({
@@ -55,13 +53,11 @@ class DetailPageConfiguration {
     GalleryLoader? asyncLoader,
     int? selectedIndex,
     String? tagPrefix,
-    bool? sortOrderAsc,
   }) {
     return DetailPageConfiguration(
       files ?? this.files,
       selectedIndex ?? this.selectedIndex,
       tagPrefix ?? this.tagPrefix,
-      sortOrderAsc: sortOrderAsc ?? this.sortOrderAsc,
     );
   }
 }
@@ -91,6 +87,7 @@ class _DetailPageState extends State<DetailPage> {
   void initState() {
     super.initState();
     _files = widget.config.files;
+
     _selectedIndexNotifier.value = widget.config.selectedIndex;
     _pageController = PageController(initialPage: _selectedIndexNotifier.value);
     _guestViewEventSubscription =

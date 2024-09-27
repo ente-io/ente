@@ -172,7 +172,6 @@ class GalleryFileWidget extends StatelessWidget {
         galleryFiles,
         galleryFiles.indexOf(file),
         tag,
-        sortOrderAsc: GalleryContextState.of(context)!.sortOrderAsc,
       ),
     );
     routeToPage(context, page, forceCustomPageRoute: true);
