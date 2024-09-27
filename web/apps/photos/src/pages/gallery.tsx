@@ -560,23 +560,36 @@ export default function Gallery() {
                 selectedSearchOption.suggestion,
             );
         } else if (barMode == "people") {
+            let filteredPeople = people;
+            if (tempDeletedFileIds?.size ?? tempHiddenFileIds?.size) {
+                // Prune the in-memory temp updates from the actual state to
+                // obtain the UI state.
+                filteredPeople = people
+                    .map((p) => ({
+                        ...p,
+                        fileIDs: p.fileIDs.filter(
+                            (id) =>
+                                !tempDeletedFileIds?.has(id) &&
+                                !tempHiddenFileIds?.has(id),
+                        ),
+                    }))
+                    .filter((p) => p.fileIDs.length > 0);
+            }
             const activePerson = ensure(
-                people.find((p) => p.id == activePersonID) ?? people[0],
+                filteredPeople.find((p) => p.id == activePersonID) ??
+                    filteredPeople[0],
             );
             const pfSet = new Set(activePerson.fileIDs);
             filteredFiles = getUniqueFiles(
                 files.filter(({ id }) => {
                     if (!pfSet.has(id)) return false;
-                    // TODO-Cluster
-                    // if (tempDeletedFileIds?.has(id)) return false;
-                    // if (tempHiddenFileIds?.has(id)) return false;
                     return true;
                 }),
             );
             galleryPeopleState = {
                 activePerson,
                 activePersonID,
-                people,
+                people: filteredPeople,
             };
         } else {
             const baseFiles = barMode == "hidden-albums" ? hiddenFiles : files;
