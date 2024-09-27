@@ -13,6 +13,7 @@ import 'package:photos/services/collections_service.dart';
 import "package:photos/services/filter/db_filters.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
+import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 
 class HomeGalleryWidget extends StatelessWidget {
@@ -21,11 +22,11 @@ class HomeGalleryWidget extends StatelessWidget {
   final SelectedFiles selectedFiles;
 
   const HomeGalleryWidget({
-    Key? key,
+    super.key,
     this.header,
     this.footer,
     required this.selectedFiles,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -85,14 +86,16 @@ class HomeGalleryWidget extends StatelessWidget {
       reloadDebounceTime: const Duration(seconds: 2),
       reloadDebounceExecutionInterval: const Duration(seconds: 5),
     );
-    return SelectionState(
-      selectedFiles: selectedFiles,
-      child: Stack(
-        alignment: Alignment.bottomCenter,
-        children: [
-          gallery,
-          FileSelectionOverlayBar(GalleryType.homepage, selectedFiles),
-        ],
+    return GalleryFilesState(
+      child: SelectionState(
+        selectedFiles: selectedFiles,
+        child: Stack(
+          alignment: Alignment.bottomCenter,
+          children: [
+            gallery,
+            FileSelectionOverlayBar(GalleryType.homepage, selectedFiles),
+          ],
+        ),
       ),
     );
   }

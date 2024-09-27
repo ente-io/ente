@@ -1,6 +1,5 @@
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
-import "package:photos/models/file/file.dart";
 import "package:photos/models/selected_files.dart";
 
 ///This is an inherited widget that needs to be wrapped around Gallery and
@@ -9,17 +8,11 @@ import "package:photos/models/selected_files.dart";
 class SelectionState extends InheritedWidget {
   final SelectedFiles selectedFiles;
 
-  ///Should be assigned later in gallery when files are loaded.
-  ///Note: EnteFiles in this list should be references of the same EnteFiles
-  ///that are grouped in gallery, so that when files are added/deleted,
-  ///both lists are in sync.
-  List<EnteFile>? allGalleryFiles;
-
-  SelectionState({
-    Key? key,
+  const SelectionState({
+    super.key,
     required this.selectedFiles,
-    required Widget child,
-  }) : super(key: key, child: child);
+    required super.child,
+  });
 
   static SelectionState? maybeOf(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<SelectionState>();

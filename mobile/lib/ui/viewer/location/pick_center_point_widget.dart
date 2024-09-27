@@ -20,6 +20,7 @@ import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/notification_widget.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
+import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 
 Future<Location?> showPickCenterPointSheet(
   BuildContext context, {
@@ -83,40 +84,42 @@ class PickCenterPointWidget extends StatelessWidget {
                           caption: locationTagName ?? "New location",
                         ),
                         Expanded(
-                          child: Gallery(
-                            asyncLoader: (
-                              creationStartTime,
-                              creationEndTime, {
-                              limit,
-                              asc,
-                            }) async {
-                              final collectionsToHide = CollectionsService
-                                  .instance
-                                  .archivedOrHiddenCollectionIds();
-                              FileLoadResult result;
-                              result = await FilesDB.instance
-                                  .fetchAllUploadedAndSharedFilesWithLocation(
-                                galleryLoadStartTime,
-                                galleryLoadEndTime,
-                                limit: null,
-                                asc: false,
-                                filterOptions: DBFilterOptions(
-                                  ignoredCollectionIDs: collectionsToHide,
-                                  hideIgnoredForUpload: true,
+                          child: GalleryFilesState(
+                            child: Gallery(
+                              asyncLoader: (
+                                creationStartTime,
+                                creationEndTime, {
+                                limit,
+                                asc,
+                              }) async {
+                                final collectionsToHide = CollectionsService
+                                    .instance
+                                    .archivedOrHiddenCollectionIds();
+                                FileLoadResult result;
+                                result = await FilesDB.instance
+                                    .fetchAllUploadedAndSharedFilesWithLocation(
+                                  galleryLoadStartTime,
+                                  galleryLoadEndTime,
+                                  limit: null,
+                                  asc: false,
+                                  filterOptions: DBFilterOptions(
+                                    ignoredCollectionIDs: collectionsToHide,
+                                    hideIgnoredForUpload: true,
+                                  ),
+                                );
+                                return result;
+                              },
+                              reloadEvent:
+                                  Bus.instance.on<LocalPhotosUpdatedEvent>(),
+                              tagPrefix: "pick_center_point_gallery",
+                              selectedFiles: selectedFiles,
+                              limitSelectionToOne: true,
+                              showSelectAllByDefault: false,
+                              header: const Padding(
+                                padding: EdgeInsets.all(10),
+                                child: NotificationTipWidget(
+                                  "You can also add a location centered on a photo from the photo's info screen",
                                 ),
-                              );
-                              return result;
-                            },
-                            reloadEvent:
-                                Bus.instance.on<LocalPhotosUpdatedEvent>(),
-                            tagPrefix: "pick_center_point_gallery",
-                            selectedFiles: selectedFiles,
-                            limitSelectionToOne: true,
-                            showSelectAllByDefault: false,
-                            header: const Padding(
-                              padding: EdgeInsets.all(10),
-                              child: NotificationTipWidget(
-                                "You can also add a location centered on a photo from the photo's info screen",
                               ),
                             ),
                           ),
