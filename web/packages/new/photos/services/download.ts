@@ -144,6 +144,18 @@ class DownloadManagerImpl {
         return thumb;
     }
 
+    /**
+     * Resolves with an object URL that points to the file's thumbnail.
+     *
+     * The thumbnail will be downloaded (unless {@link localOnly} is true) and
+     * cached.
+     *
+     * The optional {@link localOnly} parameter can be set to indicate that this
+     * is being called as part of a scroll, so the downloader should not attempt
+     * to download the file but should instead fulfill the request from the
+     * cache. This avoids an unbounded flurry of requests on scroll, only
+     * downloading when the position has quiescized.
+     */
     async getThumbnailForPreview(
         file: EnteFile,
         localOnly = false,
