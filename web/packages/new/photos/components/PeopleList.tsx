@@ -6,6 +6,7 @@ import { Skeleton, Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
 import { UnstyledButton } from "./mui-custom";
+import type { CGroup } from "../services/user-entity";
 
 export interface SearchPeopleListProps {
     people: Person[];
@@ -16,6 +17,75 @@ export interface SearchPeopleListProps {
  * Shows a list of {@link Person}s in the empty state of the search bar.
  */
 export const SearchPeopleList: React.FC<SearchPeopleListProps> = ({
+    people,
+    onSelectPerson,
+}) => {
+    const isMobileWidth = useIsMobileWidth();
+    return (
+        <SearchPeopleContainer
+            sx={{ justifyContent: people.length > 3 ? "center" : "start" }}
+        >
+            {people.slice(0, isMobileWidth ? 6 : 7).map((person) => (
+                <SearchPeopleButton
+                    key={person.id}
+                    onClick={() => onSelectPerson(person)}
+                >
+                    <FaceCropImageView
+                        faceID={person.displayFaceID}
+                        enteFile={person.displayFaceFile}
+                        placeholderDimension={87}
+                    />
+                </SearchPeopleButton>
+            ))}
+        </SearchPeopleContainer>
+    );
+};
+
+const SearchPeopleContainer = styled("div")`
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 5px;
+    margin-block-start: 12px;
+    margin-block-end: 15px;
+`;
+
+const SearchPeopleButton = styled(UnstyledButton)(
+    ({ theme }) => `
+    width: 87px;
+    height: 87px;
+    border-radius: 50%;
+    overflow: hidden;
+    & > img {
+        width: 100%;
+        height: 100%;
+    }
+    :hover {
+        outline: 1px solid ${theme.colors.stroke.faint};
+        outline-offset: 2px;
+    }
+`,
+);
+
+export interface CGroupPeopleListProps {
+    /**
+     * List of cgroup people to show.
+     *
+     * The current types don't reflect this, but these are all guaranteed to be
+     * {@link Person}s with type "cgroup"
+     */
+    people: Person[];
+    /**
+     * Called when the user selects a person in the list.
+     */
+    onSelectPerson: (person: Person) => void;
+}
+
+/**
+ * Show the list of faces in the given file that are not linked to a a specific
+ * cgroup ("people").
+ */
+export const CGroupPeopleList: React.FC<SearchPeopleListProps> = ({
     people,
     onSelectPerson,
 }) => {

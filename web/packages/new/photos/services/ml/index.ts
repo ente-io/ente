@@ -593,14 +593,37 @@ export const clipMatches = (
     worker().then((w) => w.clipMatches(searchPhrase));
 
 /**
- * Return the IDs of all the faces in the given {@link enteFile} that are not
- * associated with a person cluster.
+ * Return the list of faces found in the given {@link enteFile}.
+ *
+ * Each item is returned as a (faceID, personID) tuple, where the faceID is the
+ * ID of the face, and the personID is the id of the corresponding person that
+ * this face is associated to (if any).
  */
-export const unidentifiedFaceIDs = async (
+export const peopleIDsAndOtherFaceIDsInFile = async (
     enteFile: EnteFile,
-): Promise<string[]> => {
+): Promise<[string, string | undefined][]> => {
     const index = await getFaceIndex(enteFile.id);
-    return index?.faces.map((f) => f.faceID) ?? [];
+    if (!index) return [];
+
+    const people = _state.peopleSnapshot ?? [];
+
+    const faceIDToPersonID = new Map<string, string>();
+    for (const person of people) {
+        let faceIDs: string[];
+        if (person.type == "cgroup") {
+            faceIDs = person.cgroup.data.assigned.map((c) => c.faces).flat();
+        } else {
+            faceIDs = person.cluster.faces;
+        }
+        for (const faceID of faceIDs) {
+            faceIDToPersonID.set(faceID, person.id);
+        }
+    }
+
+    return index.faces.map(({ faceID }) => [
+        faceID,
+        faceIDToPersonID.get(faceID),
+    ]);
 };
 
 /**
