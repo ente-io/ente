@@ -562,11 +562,11 @@ export default function Gallery() {
                 selectedSearchOption.suggestion,
             );
         } else if (barMode == "people") {
-            let filteredPeople = people;
+            let filteredPeople = people ?? [];
             if (tempDeletedFileIds?.size ?? tempHiddenFileIds?.size) {
                 // Prune the in-memory temp updates from the actual state to
                 // obtain the UI state.
-                filteredPeople = people
+                filteredPeople = (people ?? [])
                     .map((p) => ({
                         ...p,
                         fileIDs: p.fileIDs.filter(
