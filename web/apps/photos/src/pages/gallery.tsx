@@ -3,7 +3,7 @@ import { NavbarBase } from "@/base/components/Navbar";
 import { useIsMobileWidth } from "@/base/hooks";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
-import { SearchResultsHeader } from "@/new/photos/components/Gallery";
+import { PeopleEmptyState, SearchResultsHeader } from "@/new/photos/components/Gallery";
 import type { GalleryBarMode } from "@/new/photos/components/Gallery/BarImpl";
 import { GalleryPeopleState } from "@/new/photos/components/Gallery/PeopleHeader";
 import {
@@ -1103,12 +1103,6 @@ export default function Gallery() {
         return <div></div>;
     }
 
-    const showEmptySectionState =
-        !isInSearchMode &&
-        !isFirstLoad &&
-        !files?.length &&
-        !hiddenFiles?.length;
-
     return (
         <GalleryContext.Provider
             value={{
@@ -1271,12 +1265,17 @@ export default function Gallery() {
                     open={openWhatsNew}
                     onClose={() => setOpenWhatsNew(false)}
                 />
-                {showEmptySectionState && activeCollectionID === ALL_SECTION ? (
+                {!isInSearchMode &&
+                !isFirstLoad &&
+                !files?.length &&
+                !hiddenFiles?.length &&
+                activeCollectionID === ALL_SECTION ? (
                     <GalleryEmptyState openUploader={openUploader} />
-                ) : showEmptySectionState &&
+                ) : !isInSearchMode &&
+                  !isFirstLoad &&
                   barMode == "people" &&
                   !galleryPeopleState?.activePerson ? (
-                    <div>Empty</div>
+                    <PeopleEmptyState />
                 ) : (
                     <PhotoFrame
                         page={PAGES.GALLERY}
