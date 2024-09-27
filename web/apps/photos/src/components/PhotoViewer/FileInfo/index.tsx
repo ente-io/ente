@@ -12,18 +12,25 @@ import {
     type ParsedMetadataDate,
 } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
-import { UnidentifiedFaces } from "@/new/photos/components/PeopleList";
+import {
+    AnnotatedFacePeopleList,
+    UnclusteredFaceList,
+} from "@/new/photos/components/PeopleList";
 import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker";
 import { photoSwipeZIndex } from "@/new/photos/components/PhotoViewer";
 import { tagNumericValue, type RawExifTags } from "@/new/photos/services/exif";
-import { annotatedFaceIDsForFile, AnnotatedFacesForFile, getAnnotatedFacesForFile, getFacesForFile, isMLEnabled } from "@/new/photos/services/ml";
+import {
+    AnnotatedFacesForFile,
+    getAnnotatedFacesForFile,
+    isMLEnabled,
+    type AnnotatedFaceID,
+} from "@/new/photos/services/ml";
 import { EnteFile } from "@/new/photos/types/file";
 import { formattedByteSize } from "@/new/photos/utils/units";
 import CopyButton from "@ente/shared/components/CodeBlock/CopyButton";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { getPublicMagicMetadataSync } from "@ente/shared/file-metadata";
-import useMemoSingleThreaded from "@ente/shared/hooks/useMemoSingleThreaded";
 import { formatDate, formatTime } from "@ente/shared/time/format";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import CameraOutlined from "@mui/icons-material/CameraOutlined";
@@ -98,7 +105,9 @@ export const FileInfo: React.FC<FileInfoProps> = ({
 
     const [exifInfo, setExifInfo] = useState<ExifInfo | undefined>();
     const [openRawExif, setOpenRawExif] = useState(false);
-    const [annotatedFaces, setAnnotatedFaces] = useState<AnnotatedFacesForFile | undefined>();
+    const [annotatedFaces, setAnnotatedFaces] = useState<
+        AnnotatedFacesForFile | undefined
+    >();
 
     const location = useMemo(() => {
         if (file) {
@@ -108,18 +117,20 @@ export const FileInfo: React.FC<FileInfoProps> = ({
         return exif?.parsed?.location;
     }, [file, exif]);
 
+    useEffect(() => {
+        if (!file) return;
 
-        useEffect(() => {
-            let didCancel = false;
+        let didCancel = false;
 
-            void (async () => {
-                const result = await getAnnotatedFacesForFile(file);
-                !didCancel && setAnnotatedFaces(result);
-            })();
+        void (async () => {
+            const result = await getAnnotatedFacesForFile(file);
+            !didCancel && setAnnotatedFaces(result);
+        })();
 
-            return () =>  {               didCancel = true;}
-        }, [file]);
-
+        return () => {
+            didCancel = true;
+        };
+    }, [file]);
 
     useEffect(() => {
         setExifInfo(parseExifInfo(exif));
@@ -143,6 +154,10 @@ export const FileInfo: React.FC<FileInfoProps> = ({
         setDialogBoxAttributesV2(
             getMapDisableConfirmationDialog(() => updateMapEnabled(false)),
         );
+
+    const handleSelectFace = (annotatedFaceID: AnnotatedFaceID) => {
+        console.log(annotatedFaceID);
+    };
 
     return (
         <FileInfoSidebar open={showInfo} onClose={handleCloseInfo}>
@@ -282,11 +297,17 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                     </InfoItem>
                 )}
 
-                {isMLEnabled() && (
+                {isMLEnabled() && annotatedFaces && (
                     <>
-                    {annotatedFaces?.annotatedFaceIDs.length &&
-                        // {/* TODO-Cluster <PhotoPeopleList file={file} /> */}
-                        <UnidentifiedFaces enteFile={file} />
+                        <AnnotatedFacePeopleList
+                            enteFile={file}
+                            annotatedFaceIDs={annotatedFaces.annotatedFaceIDs}
+                            onSelectFace={handleSelectFace}
+                        />
+                        <UnclusteredFaceList
+                            enteFile={file}
+                            faceIDs={annotatedFaces.otherFaceIDs}
+                        />
                     </>
                 )}
             </Stack>
