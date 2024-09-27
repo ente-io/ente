@@ -197,7 +197,10 @@ function* enumerateFaces(faceIndices: FaceIndex[]) {
  *
  * Sorting faces temporally is meant as a heuristic for better clusters.
  */
-const sortFacesNewestOnesFirst = (faces: ClusterFace[], localFiles: EnteFile[]) => {
+const sortFacesNewestOnesFirst = (
+    faces: ClusterFace[],
+    localFiles: EnteFile[],
+) => {
     const localFileByID = new Map(localFiles.map((f) => [f.id, f]));
     const fileForFaceID = new Map(
         faces.map(({ faceID }) => [
@@ -344,22 +347,22 @@ export const reconcileClusters = async (
     const clusterByID = new Map(clusters.map((c) => [c.id, c]));
 
     // Get the existing remote cluster groups.
-    const cgroupEntities = await savedCGroups();
+    const cgroups = await savedCGroups();
 
     // Find the cgroups that have changed since we started.
-    const changedCGroupEntities = cgroupEntities
-        .map((cgroupEntity) => {
-            for (const oldCluster of cgroupEntity.data.assigned) {
+    const changedCGroups = cgroups
+        .map((cgroup) => {
+            for (const oldCluster of cgroup.data.assigned) {
                 // The clustering algorithm does not remove any existing faces, it
                 // can only add new ones to the cluster. So we can use the count as
                 // an indication if something changed.
                 const newCluster = ensure(clusterByID.get(oldCluster.id));
                 if (oldCluster.faces.length != newCluster.faces.length) {
                     return {
-                        ...cgroupEntity,
+                        ...cgroup,
                         data: {
-                            ...cgroupEntity.data,
-                            assigned: cgroupEntity.data.assigned.map(({ id }) =>
+                            ...cgroup.data,
+                            assigned: cgroup.data.assigned.map(({ id }) =>
                                 ensure(clusterByID.get(id)),
                             ),
                         },
@@ -371,19 +374,15 @@ export const reconcileClusters = async (
         .filter((g) => !!g);
 
     // Update remote if needed.
-    if (changedCGroupEntities.length) {
-        await updateOrCreateUserEntities(
-            "cgroup",
-            changedCGroupEntities,
-            masterKey,
-        );
-        log.info(`Updated ${changedCGroupEntities.length} remote cgroups`);
+    if (changedCGroups.length) {
+        await updateOrCreateUserEntities("cgroup", changedCGroups, masterKey);
+        log.info(`Updated ${changedCGroups.length} remote cgroups`);
     }
 
     // Find which clusters are part of remote cgroups.
     const isRemoteClusterID = new Set<string>();
-    for (const cgroupEntity of cgroupEntities) {
-        for (const cluster of cgroupEntity.data.assigned)
+    for (const cgroup of cgroups) {
+        for (const cluster of cgroup.data.assigned)
             isRemoteClusterID.add(cluster.id);
     }
 
