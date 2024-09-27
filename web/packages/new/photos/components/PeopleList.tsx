@@ -96,7 +96,7 @@ export const AnnotatedFacePeopleList: React.FC<
             <Typography variant="large" p={1}>
                 {t("people")}
             </Typography>
-            <AnnotatedFacePeopleContainer>
+            <FileFaceList>
                 {annotatedFaceIDs.map((annotatedFaceID) => (
                     <AnnotatedFaceButton
                         key={annotatedFaceID.faceID}
@@ -109,16 +109,18 @@ export const AnnotatedFacePeopleList: React.FC<
                         />
                     </AnnotatedFaceButton>
                 ))}
-            </AnnotatedFacePeopleContainer>
+            </FileFaceList>
         </>
     );
 };
 
-const AnnotatedFacePeopleContainer = styled("div")`
+const FileFaceList = styled("div")`
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
     align-items: center;
     gap: 5px;
+    margin: 5px;
 `;
 
 const AnnotatedFaceButton = styled(UnstyledButton)(
@@ -165,7 +167,7 @@ export const UnclusteredFaceList: React.FC<UnclusteredFaceListProps> = ({
                 {pt("Other faces")}
                 {/*t("UNIDENTIFIED_FACES")  TODO-Cluster */}
             </Typography>
-            <UnclusteredFacesContainer>
+            <FileFaceList>
                 {faceIDs.map((faceID) => (
                     <UnclusteredFace key={faceID}>
                         <FaceCropImageView
@@ -174,20 +176,10 @@ export const UnclusteredFaceList: React.FC<UnclusteredFaceListProps> = ({
                         />
                     </UnclusteredFace>
                 ))}
-            </UnclusteredFacesContainer>
+            </FileFaceList>
         </>
     );
 };
-
-const UnclusteredFacesContainer = styled("div")`
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    margin-top: 5px;
-    margin-bottom: 5px;
-    overflow: auto;
-`;
 
 const UnclusteredFace = styled("div")`
     width: 112px;
@@ -195,7 +187,6 @@ const UnclusteredFace = styled("div")`
     margin: 5px;
     border-radius: 50%;
     overflow: hidden;
-    position: relative;
     & > img {
         width: 100%;
         height: 100%;
