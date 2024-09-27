@@ -575,11 +575,10 @@ export default function Gallery() {
                     }))
                     .filter((p) => p.fileIDs.length > 0);
             }
-            const activePerson = ensure(
+            const activePerson =
                 filteredPeople.find((p) => p.id == activePersonID) ??
-                    filteredPeople[0],
-            );
-            const pfSet = new Set(activePerson.fileIDs);
+                filteredPeople[0];
+            const pfSet = new Set(activePerson?.fileIDs ?? []);
             filteredFiles = getUniqueFiles(
                 files.filter(({ id }) => {
                     if (!pfSet.has(id)) return false;
@@ -728,8 +727,11 @@ export default function Gallery() {
             count: 0,
             collectionID: activeCollectionID,
             context:
-                barMode == "people" && activePersonID
-                    ? { mode: "people" as const, personID: activePersonID }
+                barMode == "people" && galleryPeopleState?.activePersonID
+                    ? {
+                          mode: "people" as const,
+                          personID: galleryPeopleState.activePersonID,
+                      }
                     : {
                           mode: "albums" as const,
                           collectionID: ensure(activeCollectionID),
@@ -1107,7 +1109,7 @@ export default function Gallery() {
         // when the user clicks the "People" header in the search empty state (it
         // is guaranteed that this header will only be shown if there is at
         // least one person).
-        setActivePersonID(person?.id ?? ensure(people[0]).id);
+        setActivePersonID(person?.id ?? galleryPeopleState?.people[0]?.id);
         setBarMode("people");
     };
 
@@ -1219,8 +1221,9 @@ export default function Gallery() {
                         activeCollectionID,
                         setActiveCollectionID,
                         hiddenCollectionSummaries,
-                        people,
-                        activePersonID,
+                        people: galleryPeopleState?.people,
+                        activePersonID: galleryPeopleState?.activePersonID,
+                        activePerson: galleryPeopleState?.activePerson,
                         onSelectPerson: handleSelectPerson,
                         setCollectionNamerAttributes,
                         setPhotoListHeader,
@@ -1296,7 +1299,7 @@ export default function Gallery() {
                         setTempDeletedFileIds={setTempDeletedFileIds}
                         setIsPhotoSwipeOpen={setIsPhotoSwipeOpen}
                         activeCollectionID={activeCollectionID}
-                        activePersonID={activePersonID}
+                        activePersonID={galleryPeopleState?.activePersonID}
                         enableDownload={true}
                         fileToCollectionsMap={fileToCollectionsMap}
                         collectionNameMap={collectionNameMap}

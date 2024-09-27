@@ -94,11 +94,11 @@ export interface GalleryBarImplProps {
      */
     people: Person[];
     /**
-     * The ID of the currently selected person.
+     * The currently selected person.
      *
      * Required if mode is "people".
      */
-    activePersonID: string | undefined;
+    activePerson: Person | undefined;
     /**
      * Called when the selection should be moved to a new person in the bar, or
      * reset to the default state (when {@link person} is `undefined`).
@@ -116,7 +116,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     collectionsSortBy,
     onChangeCollectionsSortBy,
     people,
-    activePersonID,
+    activePerson,
     onSelectPerson,
 }) => {
     const isMobile = useIsMobileWidth();
@@ -194,11 +194,11 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                 );
                 break;
             case "people":
-                i = people.findIndex(({ id }) => id == activePersonID);
+                i = people.findIndex(({ id }) => id == activePerson?.id);
                 break;
         }
         if (i != -1) listRef.current.scrollToItem(i, "smart");
-    }, [mode, collectionSummaries, activeCollectionID, people, activePersonID]);
+    }, [mode, collectionSummaries, activeCollectionID, people, activePerson]);
 
     const itemData = useMemo<ItemData>(
         () =>
@@ -210,12 +210,9 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                       onSelectCollectionID,
                   }
                 : {
-                      type: "people",
+                      type: "people" as const,
                       people,
-                      activePerson: ensure(
-                          people.find((p) => p.id == activePersonID) ??
-                              people[0],
-                      ),
+                      activePerson: ensure(activePerson),
                       onSelectPerson,
                   },
         [
@@ -224,7 +221,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
             activeCollectionID,
             onSelectCollectionID,
             people,
-            activePersonID,
+            activePerson,
             onSelectPerson,
         ],
     );
