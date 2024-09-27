@@ -5,6 +5,7 @@ import log from "@/base/log";
 import type { Collection } from "@/media/collection";
 import { SearchResultsHeader } from "@/new/photos/components/Gallery";
 import type { GalleryBarMode } from "@/new/photos/components/Gallery/BarImpl";
+import { GalleryPeopleState } from "@/new/photos/components/Gallery/PeopleHeader";
 import {
     SearchBar,
     type SearchBarProps,
@@ -526,9 +527,14 @@ export default function Gallery() {
         );
     }, [collections, activeCollectionID]);
 
-    const filteredData = useMemoSingleThreaded(async (): Promise<
-        EnteFile[]
-    > => {
+    // The derived UI state when we are in "people" mode.
+    // TODO: Move this to a reducer/store.
+    type DerivedState1 = {
+        filteredData: EnteFile[];
+        galleryPeopleState: GalleryPeopleState | undefined;
+    };
+
+    const derived1: DerivedState1 = useMemoSingleThreaded(async () => {
         if (
             !files ||
             !user ||
@@ -536,17 +542,19 @@ export default function Gallery() {
             !hiddenFiles ||
             !archivedCollections
         ) {
-            return;
+            return { filteredData: [], galleryPeopleState: undefined };
         }
 
         if (activeCollectionID === TRASH_SECTION && !selectedSearchOption) {
-            return getUniqueFiles([
+            const filteredData = getUniqueFiles([
                 ...trashedFiles,
                 ...files.filter((file) => tempDeletedFileIds?.has(file.id)),
             ]);
+            return { filteredData, galleryPeopleState: undefined };
         }
 
         let filteredFiles: EnteFile[] = [];
+        let galleryPeopleState: GalleryPeopleState;
         if (selectedSearchOption) {
             filteredFiles = await filterSearchableFiles(
                 selectedSearchOption.suggestion,
@@ -565,6 +573,11 @@ export default function Gallery() {
                     return true;
                 }),
             );
+            galleryPeopleState = {
+                activePerson,
+                activePersonID,
+                people,
+            };
         } else {
             const baseFiles = barMode == "hidden-albums" ? hiddenFiles : files;
             filteredFiles = getUniqueFiles(
@@ -630,10 +643,10 @@ export default function Gallery() {
         }
         const sortAsc = activeCollection?.pubMagicMetadata?.data?.asc ?? false;
         if (sortAsc) {
-            return sortFiles(filteredFiles, true);
-        } else {
-            return filteredFiles;
+            filteredFiles = sortFiles(filteredFiles, true);
         }
+
+        return { filteredData: filteredFiles, galleryPeopleState };
     }, [
         barMode,
         files,
@@ -648,6 +661,26 @@ export default function Gallery() {
         people,
         activePersonID,
     ]);
+
+    const { filteredData, galleryPeopleState } = derived1;
+
+    // Calling setState during rendering is frowned upon for good reasons, but
+    // it is not verboten, and it has documented semantics:
+    //
+    // > React will discard the currently rendering component's output and
+    // > immediately attempt to render it again with the new state.
+    // >
+    // > https://react.dev/reference/react/useState
+    //
+    // That said, we should try to refactor this code to use a reducer or some
+    // other store so that this is not needed.
+    if (barMode == "people" && !galleryPeopleState) {
+        log.info(
+            "Resetting gallery to all section since people mode is no longer valid",
+        );
+        setBarMode("albums");
+        setActiveCollectionID(ALL_SECTION);
+    }
 
     const selectAll = (e: KeyboardEvent) => {
         // ignore ctrl/cmd + a if the user is typing in a text field

@@ -32,7 +32,7 @@ import type { GalleryBarImplProps } from "./BarImpl";
 import { GalleryItemsHeaderAdapter, GalleryItemsSummary } from "./ListHeader";
 
 /**
- * UI state backing the gallery when it is in "people" mode.
+ * Derived UI state backing the gallery when it is in "people" mode.
  *
  * This may be different from the actual underlying state since there might be
  * unsynced data (hidden or deleted that have not yet been synced with remote)
