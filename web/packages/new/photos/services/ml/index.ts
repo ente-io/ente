@@ -87,6 +87,9 @@ class MLState {
     /**
      * Snapshot of the {@link Person}s returned by the {@link peopleSnapshot}
      * function.
+     *
+     * It will be `undefined` only if ML is disabled. Otherwise, it will be an
+     * empty array even if the snapshot is pending its first sync.
      */
     peopleSnapshot: Person[] | undefined;
 
@@ -186,6 +189,7 @@ export const isMLSupported = isDesktop;
  */
 export const initML = () => {
     _state.isMLEnabled = isMLEnabledLocal();
+    resetPeopleSnapshot();
 };
 
 export const logoutML = async () => {
@@ -222,6 +226,7 @@ export const enableML = async () => {
     setIsMLEnabledLocal(true);
     _state.isMLEnabled = true;
     setInterimScheduledStatus();
+    resetPeopleSnapshot();
     // Trigger updates, but don't wait for them to finish.
     void updateMLStatusSnapshot().then(mlSync);
 };
@@ -239,6 +244,7 @@ export const disableML = async () => {
     _state.isSyncing = false;
     await terminateMLWorker();
     triggerStatusUpdate();
+    resetPeopleSnapshot();
 };
 
 /**
@@ -545,15 +551,24 @@ export const peopleSubscribe = (onChange: () => void): (() => void) => {
 };
 
 /**
+ * If ML is enabled, set the people snapshot to an empty array to indicate that
+ * ML is enabled, but we're still reading in the set of people.
+ *
+ * Otherwise, if ML is disabled, set the people snapshot to `undefined`.
+ */
+const resetPeopleSnapshot = () =>
+    setPeopleSnapshot(_state.isMLEnabled ? [] : undefined);
+
+/**
  * Return the last known, cached {@link people}.
  *
  * This, along with {@link peopleSnapshot}, is meant to be used as arguments to
  * React's {@link useSyncExternalStore}.
  *
- * A return value of `undefined` indicates that we're either still loading the
- * initial list of people, or that the user has ML disabled and thus doesn't
- * have any people (this is distinct from the case where the user has ML enabled
- * but doesn't have any named "person" clusters so far).
+ * A return value of `undefined` indicates that ML is disabled. In all other
+ * cases, the list will be either empty (if we're either still loading the
+ * initial list of people, or if the user doesn't have any people), or, well,
+ * non-empty.
  */
 export const peopleSnapshot = () => _state.peopleSnapshot;
 
