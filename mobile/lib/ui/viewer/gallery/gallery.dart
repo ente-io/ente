@@ -53,7 +53,9 @@ class Gallery extends StatefulWidget {
   final bool limitSelectionToOne;
 
   /// When true, the gallery will be in selection mode. Tapping on any item
-  /// will select even when no other item is selected.
+  /// will select it even when no other item is selected. This is only used to
+  /// make selection possible without long pressing. If a gallery has selected
+  /// files, it's not necessary that this will be true.
   final bool inSelectionMode;
   final bool showSelectAllByDefault;
   final bool isScrollablePositionedList;
