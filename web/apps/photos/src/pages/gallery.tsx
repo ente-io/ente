@@ -662,7 +662,10 @@ export default function Gallery() {
         activePersonID,
     ]);
 
-    const { filteredData, galleryPeopleState } = derived1;
+    const { filteredData, galleryPeopleState } = derived1 ?? {
+        filteredData: [],
+        galleryPeopleState: undefined,
+    };
 
     // Calling setState during rendering is frowned upon for good reasons, but
     // it is not verboten, and it has documented semantics:
@@ -674,7 +677,7 @@ export default function Gallery() {
     //
     // That said, we should try to refactor this code to use a reducer or some
     // other store so that this is not needed.
-    if (barMode == "people" && !galleryPeopleState) {
+    if (barMode == "people" && galleryPeopleState?.people.length === 0) {
         log.info(
             "Resetting gallery to all section since people mode is no longer valid",
         );
