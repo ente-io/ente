@@ -256,7 +256,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   Future<void> _handlePublicAlbumLink(Uri uri) async {
     bool result = true;
     final Collection collection =
-        await CollectionsService.instance.getPublicCollection(uri);
+        await CollectionsService.instance.getPublicCollection(context, uri);
     final publicUrl = collection.publicURLs![0];
     if (publicUrl!.passwordEnabled) {
       await showTextInputDialog(
@@ -278,18 +278,13 @@ class _HomeWidgetState extends State<HomeWidget> {
 
             result = await CollectionsService.instance
                 .verifyPublicCollectionPassword(
+              context,
               CryptoUtil.bin2base64(hashedPassword),
               collection.id,
             );
-            if (!result) {
-              await showErrorDialog(
-                context,
-                S.of(context).incorrectPasswordTitle,
-                S.of(context).pleaseTryAgain,
-              );
-            }
           } catch (e, s) {
             _logger.severe("Failed to decrypt password for album", e, s);
+            await showGenericErrorDialog(context: context, error: e);
             rethrow;
           }
         },

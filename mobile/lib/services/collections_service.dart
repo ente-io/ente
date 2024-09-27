@@ -6,6 +6,7 @@ import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import "package:fast_base58/fast_base58.dart";
 import 'package:flutter/foundation.dart';
+import "package:flutter/material.dart";
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
@@ -22,6 +23,7 @@ import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/extensions/list.dart';
 import 'package:photos/extensions/stop_watch.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/api/collection/create_request.dart';
 import "package:photos/models/api/collection/public_url.dart";
 import "package:photos/models/api/collection/user.dart";
@@ -38,6 +40,7 @@ import 'package:photos/services/file_magic_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/utils/crypto_util.dart';
+import "package:photos/utils/dialog_util.dart";
 import 'package:photos/utils/file_download_util.dart';
 import "package:photos/utils/local_settings.dart";
 import 'package:shared_preferences/shared_preferences.dart';
@@ -1037,12 +1040,8 @@ class CollectionsService {
     }
   }
 
-  Future<Collection> getPublicCollection(Uri uri) async {
+  Future<Collection> getPublicCollection(BuildContext context, Uri uri) async {
     final String? authToken = uri.queryParameters["t"];
-    if (authToken == null) {
-      _logger.severe("Authorization token not found in URI query parameters");
-      throw Exception("Authorization token is required");
-    }
     final String albumKey = uri.fragment;
     try {
       final response = await _enteDio.get(
@@ -1058,13 +1057,22 @@ class CollectionsService {
           Uint8List.fromList(Base58Decode(albumKey));
 
       _cachedKeys[collection.id] = collectionKey;
-      _cachedPublicAlbumToken[collection.id] = authToken;
+      _cachedPublicAlbumToken[collection.id] = authToken!;
       _cachedPublicCollectionID.add(collection.id);
       collection.setName(_getDecryptedCollectionName(collection));
       return collection;
     } catch (e, s) {
       _logger.warning(e, s);
       _logger.severe("Failed to fetch public collection");
+      if (e is DioError && e.response?.statusCode == 410) {
+        await showInfoDialog(
+          context,
+          title: "Link Expired",
+          body: "The link you are trying to access has expired.",
+        );
+        throw UnauthorizedError();
+      }
+      await showGenericErrorDialog(context: context, error: e);
       if (e is DioError && e.response?.statusCode == 401) {
         throw UnauthorizedError();
       }
@@ -1073,6 +1081,7 @@ class CollectionsService {
   }
 
   Future<bool> verifyPublicCollectionPassword(
+    BuildContext context,
     String passwordHash,
     int collectioID,
   ) async {
@@ -1096,6 +1105,11 @@ class CollectionsService {
       return false;
     } catch (e) {
       _logger.warning("Failed to verify public collection password $e");
+      await showErrorDialog(
+        context,
+        S.of(context).incorrectPasswordTitle,
+        S.of(context).pleaseTryAgain,
+      );
       return false;
     }
   }

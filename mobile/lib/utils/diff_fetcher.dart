@@ -6,10 +6,12 @@ import "package:flutter/material.dart";
 import 'package:logging/logging.dart';
 import 'package:photos/core/network/network.dart';
 import 'package:photos/db/files_db.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/services/collections_service.dart";
 import 'package:photos/utils/crypto_util.dart';
+import "package:photos/utils/dialog_util.dart";
 import 'package:photos/utils/file_download_util.dart';
 
 class DiffFetcher {
@@ -83,6 +85,11 @@ class DiffFetcher {
       return sharedFiles;
     } catch (e, s) {
       _logger.severe("Failed to decrypt collection ", e, s);
+      await showErrorDialog(
+        context,
+        S.of(context).somethingWentWrong,
+        e.toString(),
+      );
       rethrow;
     }
   }
