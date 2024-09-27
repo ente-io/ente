@@ -226,7 +226,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
         ],
     );
 
-    const controls1 = isMobile && (
+    const controls1 = isMobile && mode != "people" && (
         <Box display="flex" alignItems={"center"} gap={1}>
             <CollectionsSortOptions
                 activeSortBy={collectionsSortBy}
@@ -239,7 +239,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
         </Box>
     );
 
-    const controls2 = !isMobile && (
+    const controls2 = !isMobile && mode != "people" && (
         <Box display="flex" alignItems={"center"} gap={1} height={"64px"}>
             <CollectionsSortOptions
                 activeSortBy={collectionsSortBy}
