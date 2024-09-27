@@ -97,9 +97,8 @@ Future<File?> downloadAndDecrypt(
   EnteFile file, {
   ProgressCallback? progressCallback,
 }) async {
-  final authToken =
-      await CollectionsService.instance.getPublicAlbumToken(file.collectionID!);
-  if (authToken != null) {
+  if (await CollectionsService.instance
+      .isPublicCollection(file.collectionID!)) {
     final authToken = await CollectionsService.instance
         .getPublicAlbumToken(file.collectionID!);
 

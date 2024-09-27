@@ -82,7 +82,7 @@ class DiffFetcher {
           'diff items ( ${sharedFiles.length} updated) in ${DateTime.now().difference(startTime).inMilliseconds}ms');
       return sharedFiles;
     } catch (e, s) {
-      _logger.severe("Failed to decrypt collection $e", s);
+      _logger.severe("Failed to decrypt collection ", e, s);
       rethrow;
     }
   }
