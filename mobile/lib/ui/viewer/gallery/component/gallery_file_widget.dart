@@ -11,6 +11,7 @@ import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_context_state.dart";
+import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/navigation_util.dart";
 
@@ -165,11 +166,11 @@ class GalleryFileWidget extends StatelessWidget {
   }
 
   void _routeToDetailPage(EnteFile file, BuildContext context) {
+    final galleryFiles = GalleryFilesState.of(context).galleryFiles;
     final page = DetailPage(
       DetailPageConfiguration(
-        List.unmodifiable(filesInGroup),
-        asyncLoader,
-        filesInGroup.indexOf(file),
+        galleryFiles,
+        galleryFiles.indexOf(file),
         tag,
         sortOrderAsc: GalleryContextState.of(context)!.sortOrderAsc,
       ),

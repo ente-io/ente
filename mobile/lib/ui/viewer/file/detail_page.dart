@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
-import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/guest_view_event.dart";
@@ -38,7 +37,6 @@ enum DetailPageMode {
 
 class DetailPageConfiguration {
   final List<EnteFile> files;
-  final GalleryLoader? asyncLoader;
   final int selectedIndex;
   final String tagPrefix;
   final DetailPageMode mode;
@@ -46,7 +44,6 @@ class DetailPageConfiguration {
 
   DetailPageConfiguration(
     this.files,
-    this.asyncLoader,
     this.selectedIndex,
     this.tagPrefix, {
     this.mode = DetailPageMode.full,
@@ -62,7 +59,6 @@ class DetailPageConfiguration {
   }) {
     return DetailPageConfiguration(
       files ?? this.files,
-      asyncLoader ?? this.asyncLoader,
       selectedIndex ?? this.selectedIndex,
       tagPrefix ?? this.tagPrefix,
       sortOrderAsc: sortOrderAsc ?? this.sortOrderAsc,
@@ -80,14 +76,11 @@ class DetailPage extends StatefulWidget {
 }
 
 class _DetailPageState extends State<DetailPage> {
-  static const kLoadLimit = 100;
   final _logger = Logger("DetailPageState");
   bool _shouldDisableScroll = false;
   List<EnteFile>? _files;
   late PageController _pageController;
   final _selectedIndexNotifier = ValueNotifier(0);
-  bool _hasLoadedTillStart = false;
-  bool _hasLoadedTillEnd = false;
   final _enableFullScreenNotifier = ValueNotifier(false);
   bool _isFirstOpened = true;
   bool isGuestView = false;
@@ -97,11 +90,8 @@ class _DetailPageState extends State<DetailPage> {
   @override
   void initState() {
     super.initState();
-    _files = [
-      ...widget.config.files,
-    ]; // Make a copy since we append preceding and succeeding entries to this
+    _files = widget.config.files;
     _selectedIndexNotifier.value = widget.config.selectedIndex;
-    _preloadEntries();
     _pageController = PageController(initialPage: _selectedIndexNotifier.value);
     _guestViewEventSubscription =
         Bus.instance.on<GuestViewEvent>().listen((event) {
@@ -311,7 +301,6 @@ class _DetailPageState extends State<DetailPage> {
           _selectedIndexNotifier.value = index;
         }
         Bus.instance.fire(GuestViewEvent(isGuestView, swipeLocked));
-        _preloadEntries();
       },
       physics: _shouldDisableScroll || swipeLocked
           ? const NeverScrollableScrollPhysics()
@@ -347,74 +336,6 @@ class _DetailPageState extends State<DetailPage> {
         overlays: SystemUiOverlay.values,
       );
     }
-  }
-
-  Future<void> _preloadEntries() async {
-    final isSortOrderAsc = widget.config.sortOrderAsc;
-
-    if (widget.config.asyncLoader == null) return;
-
-    if (_selectedIndexNotifier.value == 0 && !_hasLoadedTillStart) {
-      await _loadStartEntries(isSortOrderAsc);
-    }
-
-    if (_selectedIndexNotifier.value == _files!.length - 1 &&
-        !_hasLoadedTillEnd) {
-      await _loadEndEntries(isSortOrderAsc);
-    }
-  }
-
-  Future<void> _loadStartEntries(bool isSortOrderAsc) async {
-    final result = isSortOrderAsc
-        ? await widget.config.asyncLoader!(
-            galleryLoadStartTime,
-            _files![_selectedIndexNotifier.value].creationTime! - 1,
-            limit: kLoadLimit,
-          )
-        : await widget.config.asyncLoader!(
-            _files![_selectedIndexNotifier.value].creationTime! + 1,
-            DateTime.now().microsecondsSinceEpoch,
-            limit: kLoadLimit,
-            asc: true,
-          );
-
-    setState(() {
-      _logger.fine('setState loadStartEntries');
-      // Returned result could be a subtype of File
-      // ignore: unnecessary_cast
-      final files = result.files.reversed.map((e) => e as EnteFile).toList();
-      if (!result.hasMore) {
-        _hasLoadedTillStart = true;
-      }
-      final length = files.length;
-      files.addAll(_files!);
-      _files = files;
-      _pageController.jumpToPage(length);
-      _selectedIndexNotifier.value = length;
-    });
-  }
-
-  Future<void> _loadEndEntries(bool isSortOrderAsc) async {
-    final result = isSortOrderAsc
-        ? await widget.config.asyncLoader!(
-            _files![_selectedIndexNotifier.value].creationTime! + 1,
-            DateTime.now().microsecondsSinceEpoch,
-            limit: kLoadLimit,
-            asc: true,
-          )
-        : await widget.config.asyncLoader!(
-            galleryLoadStartTime,
-            _files![_selectedIndexNotifier.value].creationTime! - 1,
-            limit: kLoadLimit,
-          );
-
-    setState(() {
-      if (!result.hasMore) {
-        _hasLoadedTillEnd = true;
-      }
-      _logger.fine('setState loadEndEntries hasMore ${result.hasMore}');
-      _files!.addAll(result.files);
-    });
   }
 
   void _preloadFiles(int index) {

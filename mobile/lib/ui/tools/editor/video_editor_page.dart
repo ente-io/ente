@@ -263,11 +263,13 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
             _logger.info("Original file " + widget.file.toString());
             _logger.info("Saved edits to file " + newFile.toString());
             final existingFiles = widget.detailPageConfig.files;
-            final files = (await widget.detailPageConfig.asyncLoader!(
-              existingFiles[existingFiles.length - 1].creationTime!,
-              existingFiles[0].creationTime!,
-            ))
-                .files;
+            final files = existingFiles;
+            // final files = (await widget.detailPageConfig.asyncLoader!(
+            //   existingFiles[existingFiles.length - 1].creationTime!,
+            //   existingFiles[0].creationTime!,
+            // ))
+            //     .files;
+
             // the index could be -1 if the files fetched doesn't contain the newly
             // edited files
             int selectionIndex = files
