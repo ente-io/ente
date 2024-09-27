@@ -64,34 +64,19 @@ export const ItemCard: React.FC<React.PropsWithChildren<ItemCardProps>> = ({
         if (!coverFile) return;
 
         let didCancel = false;
-        let thisObjectURL: string | undefined;
 
-        const go = async () => {
-            if (coverFaceID) {
-                const blob = await faceCrop(coverFaceID, coverFile);
-                if (!didCancel) {
-                    thisObjectURL = blob
-                        ? URL.createObjectURL(blob)
-                        : undefined;
-                    setCoverImageURL(thisObjectURL);
-                }
-            } else {
-                const url = await downloadManager.getThumbnailForPreview(
-                    coverFile,
-                    isScrolling,
-                );
-                if (!didCancel) {
-                    thisObjectURL = url;
-                    setCoverImageURL(thisObjectURL);
-                }
-            }
-        };
-
-        void go();
+        if (coverFaceID) {
+            void faceCrop(coverFaceID, coverFile).then(
+                (url) => !didCancel && setCoverImageURL(url),
+            );
+        } else {
+            void downloadManager
+                .getThumbnailForPreview(coverFile, isScrolling)
+                .then((url) => !didCancel && setCoverImageURL(url));
+        }
 
         return () => {
             didCancel = true;
-            if (thisObjectURL) URL.revokeObjectURL(thisObjectURL);
         };
     }, [coverFile, coverFaceID, isScrolling]);
 

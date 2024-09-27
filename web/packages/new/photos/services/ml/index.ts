@@ -95,6 +95,13 @@ class MLState {
      * whose faces we are regenerating.
      */
     inFlightFaceCropRegens = new Map<number, Promise<void>>();
+
+    /**
+     * Cached object URLs to face crops that we have previously vended out.
+     *
+     * The cache is only cleared on logout.
+     */
+    faceCropObjectURLCache = new Map<string, string>();
 }
 
 /** State shared by the functions in this module. See {@link MLState}. */
@@ -187,6 +194,9 @@ export const logoutML = async () => {
     // execution contexts], it gets called first in the logout sequence, and
     // then this function (`logoutML`) gets called at a later point in time.
 
+    [..._state.faceCropObjectURLCache.values()].forEach((url) =>
+        URL.revokeObjectURL(url),
+    );
     _state = new MLState();
     await clearMLDB();
 };
@@ -646,7 +656,10 @@ export const getAnnotatedFacesForFile = async (
 };
 
 /**
- * Return the cached face crop for the given face, regenerating it if needed.
+ * Return a URL to the face crop for the given face, regenerating it if needed.
+ *
+ * The resultant URL is cached (both the object URL itself, and the underlying
+ * file crop blob used to generete it).
  *
  * @param faceID The id of the face whose face crop we want.
  *
@@ -662,8 +675,17 @@ export const faceCrop = async (faceID: string, enteFile: EnteFile) => {
 
     await inFlight;
 
-    const cache = await blobCache("face-crops");
-    return cache.get(faceID);
+    let url = _state.faceCropObjectURLCache.get(faceID);
+    if (!url) {
+        const cache = await blobCache("face-crops");
+        const blob = await cache.get(faceID);
+        if (blob) {
+            url = URL.createObjectURL(blob);
+            if (url) _state.faceCropObjectURLCache.set(faceID, url);
+        }
+    }
+
+    return url;
 };
 
 /**
