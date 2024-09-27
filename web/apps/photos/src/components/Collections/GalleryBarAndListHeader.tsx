@@ -86,6 +86,7 @@ type CollectionsProps = Omit<
  */
 export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
     shouldHide,
+    showPeopleSectionButton,
     mode,
     onChangeMode,
     collectionSummaries,
@@ -199,6 +200,7 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
         <>
             <GalleryBarImpl
                 {...{
+                    showPeopleSectionButton,
                     mode,
                     onChangeMode,
                     activeCollectionID,

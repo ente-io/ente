@@ -53,6 +53,10 @@ export type GalleryBarMode = "albums" | "hidden-albums" | "people";
 
 export interface GalleryBarImplProps {
     /**
+     * When `true`, the bar shows a button to switch to the people section.
+     */
+    showPeopleSectionButton: boolean;
+    /**
      * What are we displaying currently.
      */
     mode: GalleryBarMode;
@@ -105,6 +109,7 @@ export interface GalleryBarImplProps {
 }
 
 export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
+    showPeopleSectionButton,
     mode,
     onChangeMode,
     collectionSummaries,
@@ -255,7 +260,9 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
             sx={people.length ? {} : { borderBlockEndColor: "transparent" }}
         >
             <Row1>
-                <ModeIndicator {...{ mode, onChangeMode }} />
+                <ModeIndicator
+                    {...{ showPeopleSectionButton, mode, onChangeMode }}
+                />
                 {controls1}
             </Row1>
             <Row2>
@@ -312,33 +319,44 @@ export const Row2 = styled(Box)`
 `;
 
 const ModeIndicator: React.FC<
-    Pick<GalleryBarImplProps, "mode" | "onChangeMode">
-> = ({ mode, onChangeMode }) => {
+    Pick<
+        GalleryBarImplProps,
+        "showPeopleSectionButton" | "mode" | "onChangeMode"
+    >
+> = ({ showPeopleSectionButton, mode, onChangeMode }) => {
     // Mode switcher is not shown in the hidden albums section.
     if (mode == "hidden-albums") {
         return <Typography>{t("hidden_albums")}</Typography>;
     }
 
-    // Show the static mode indicator with only the "Albums" title unless we
-    // come here with the people mode already set. This is because we don't
-    // currently have an empty state for the People mode when ML is not enabled.
-    if (mode == "albums") {
+    // Show the static mode indicator with only the "Albums" title if we have
+    // not been asked to show the people button (there are no other sections to
+    // switch to in such a case).
+    if (!showPeopleSectionButton) {
         return <Typography>{t("albums")}</Typography>;
     }
 
     return (
         <Stack direction="row" sx={{ gap: "10px" }}>
-            <AlbumModeButton onClick={() => onChangeMode("albums")}>
+            <ModeButton
+                $active={mode == "albums"}
+                onClick={() => onChangeMode("albums")}
+            >
                 <Typography>{t("albums")}</Typography>
-            </AlbumModeButton>
-            <Typography>{t("people")}</Typography>
+            </ModeButton>
+            <ModeButton
+                $active={mode == "people"}
+                onClick={() => onChangeMode("people")}
+            >
+                <Typography>{t("people")}</Typography>
+            </ModeButton>
         </Stack>
     );
 };
 
-const AlbumModeButton = styled(UnstyledButton)(
-    ({ theme }) => `
-    p { color: ${theme.colors.text.muted} }
+const ModeButton = styled(UnstyledButton)<{ $active: boolean }>(
+    ({ $active, theme }) => `
+    p { color: ${$active ? theme.colors.text.base : theme.colors.text.muted} }
     p:hover { color: ${theme.colors.text.base} }
 `,
 );

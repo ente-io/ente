@@ -3,7 +3,10 @@ import { NavbarBase } from "@/base/components/Navbar";
 import { useIsMobileWidth } from "@/base/hooks";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
-import { PeopleEmptyState, SearchResultsHeader } from "@/new/photos/components/Gallery";
+import {
+    PeopleEmptyState,
+    SearchResultsHeader,
+} from "@/new/photos/components/Gallery";
 import type { GalleryBarMode } from "@/new/photos/components/Gallery/BarImpl";
 import { GalleryPeopleState } from "@/new/photos/components/Gallery/PeopleHeader";
 import {
@@ -1103,6 +1106,10 @@ export default function Gallery() {
         return <div></div>;
     }
 
+    // `people` will be undefined only when ML is disabled, otherwise it'll be
+    // an empty array (even if people are loading).
+    const showPeopleSectionButton = people !== undefined;
+
     return (
         <GalleryContext.Provider
             value={{
@@ -1207,6 +1214,7 @@ export default function Gallery() {
                         activeCollectionID,
                         setActiveCollectionID,
                         hiddenCollectionSummaries,
+                        showPeopleSectionButton,
                         people: galleryPeopleState?.people ?? [],
                         activePerson: galleryPeopleState?.activePerson,
                         onSelectPerson: handleSelectPerson,
