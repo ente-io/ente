@@ -107,7 +107,7 @@ const worker = () =>
 
 const createComlinkWorker = async () => {
     const electron = ensureElectron();
-    const delegate = { workerDidUpdateStatus };
+    const delegate = { workerDidUpdateStatus, workerDidUnawaitedIndex };
 
     // Obtain a message port from the Electron layer.
     const messagePort = await createMLWorker(electron);
@@ -313,14 +313,20 @@ export const mlSync = async () => {
 
     // Dependency order for the sync
     //
-    //     files -> faces -> cgroups -> clusters
+    //     files -> faces -> cgroups -> clusters -> people
     //
 
-    const w = await worker();
-
     // Fetch indexes, or index locally if needed.
-    await w.index();
+    await (await worker()).index();
 
+    await updateClustersAndPeople();
+
+    _state.isSyncing = false;
+};
+
+const workerDidUnawaitedIndex = () => void updateClustersAndPeople();
+
+const updateClustersAndPeople = async () => {
     // TODO-Cluster
     if (await wipClusterEnable()) {
         const masterKey = await masterKeyFromSession();
@@ -329,12 +335,9 @@ export const mlSync = async () => {
         await pullUserEntities("cgroup", masterKey);
 
         // Generate or update local clusters.
-        await w.clusterFaces(masterKey);
+        await (await worker()).clusterFaces(masterKey);
     }
-
     await updatePeople();
-
-    _state.isSyncing = false;
 };
 
 /**

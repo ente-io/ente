@@ -274,6 +274,12 @@ export class MLWorker {
         this.onNextIdles = [];
         this.countSinceLastIdle = 0;
         onNextIdles.forEach((f) => f(countSinceLastIdle));
+
+        // If no one was waiting, then let the main thread know via a different
+        // channel so that it can update the clusters and people.
+        if (onNextIdles.length == 0 && countSinceLastIdle > 0) {
+            this.delegate?.workerDidUnawaitedIndex();
+        }
     }
 
     /** Return the next batch of items to backfill (if any). */
