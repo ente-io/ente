@@ -583,6 +583,7 @@ const PersonCard: React.FC<PersonCardProps> = ({
         <ItemCard
             TileComponent={BarItemTile}
             coverFile={person.displayFaceFile}
+            coverFaceID={person.displayFaceID}
             onClick={() => onSelectPerson(person)}
         >
             {person.name && <CardText text={person.name} />}
