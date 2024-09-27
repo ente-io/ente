@@ -45,7 +45,13 @@ export const SearchResultsHeader: React.FC<SearchResultsHeaderProps> = ({
 
 export const PeopleEmptyState: React.FC = () => (
     <VerticallyCentered>
-        <Typography color="text.muted">
+        <Typography
+            color="text.muted"
+            sx={{
+                // Approximately compensate for the hidden section bar
+                paddingBlockEnd: "86px",
+            }}
+        >
             {pt("People will appear here once indexing completes")}
         </Typography>
     </VerticallyCentered>

@@ -250,7 +250,10 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     );
 
     return (
-        <BarWrapper>
+        // Hide the bottom border if we're showing the empty state for people.
+        <BarWrapper
+            sx={people.length ? {} : { borderBlockEndColor: "transparent" }}
+        >
             <Row1>
                 <ModeIndicator {...{ mode, onChangeMode }} />
                 {controls1}
