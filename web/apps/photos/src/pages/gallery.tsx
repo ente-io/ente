@@ -3,7 +3,10 @@ import { NavbarBase } from "@/base/components/Navbar";
 import { useIsMobileWidth } from "@/base/hooks";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
-import { SearchResultsHeader } from "@/new/photos/components/Gallery";
+import {
+    PeopleEmptyState,
+    SearchResultsHeader,
+} from "@/new/photos/components/Gallery";
 import type { GalleryBarMode } from "@/new/photos/components/Gallery/BarImpl";
 import { GalleryPeopleState } from "@/new/photos/components/Gallery/PeopleHeader";
 import {
@@ -562,11 +565,12 @@ export default function Gallery() {
                 selectedSearchOption.suggestion,
             );
         } else if (barMode == "people") {
-            let filteredPeople = people;
+            let filteredPeople = people ?? [];
             if (tempDeletedFileIds?.size ?? tempHiddenFileIds?.size) {
                 // Prune the in-memory temp updates from the actual state to
-                // obtain the UI state.
-                filteredPeople = people
+                // obtain the UI state. Kept inside an preflight check to so
+                // that the common path remains fast.
+                filteredPeople = filteredPeople
                     .map((p) => ({
                         ...p,
                         fileIDs: p.fileIDs.filter(
@@ -579,6 +583,8 @@ export default function Gallery() {
             }
             const activePerson =
                 filteredPeople.find((p) => p.id == activePersonID) ??
+                // We don't have an "All" pseudo-album in people mode currently,
+                // so default to the first person in the list.
                 filteredPeople[0];
             const pfSet = new Set(activePerson?.fileIDs ?? []);
             filteredFiles = getUniqueFiles(
@@ -589,7 +595,6 @@ export default function Gallery() {
             );
             galleryPeopleState = {
                 activePerson,
-                activePersonID,
                 people: filteredPeople,
             };
         } else {
@@ -681,31 +686,6 @@ export default function Gallery() {
         galleryPeopleState: undefined,
     };
 
-    // Calling setState during rendering is frowned upon for good reasons, but
-    // it is not verboten, and it has documented semantics:
-    //
-    // > React will discard the currently rendering component's output and
-    // > immediately attempt to render it again with the new state.
-    // >
-    // > https://react.dev/reference/react/useState
-    //
-    // That said, we should try to refactor this code to use a reducer or some
-    // other store so that this is not needed.
-    if (barMode == "people" && galleryPeopleState?.people.length === 0) {
-        log.info(
-            "Resetting gallery to all section since people mode is no longer valid",
-        );
-        setBarMode("albums");
-        setActiveCollectionID(ALL_SECTION);
-    }
-
-    // Derived1 is async, leading to even more workarounds.
-    const resolvedBarMode = galleryPeopleState
-        ? barMode
-        : barMode == "people"
-          ? "albums"
-          : barMode;
-
     const selectAll = (e: KeyboardEvent) => {
         // ignore ctrl/cmd + a if the user is typing in a text field
         if (
@@ -736,14 +716,13 @@ export default function Gallery() {
             count: 0,
             collectionID: activeCollectionID,
             context:
-                resolvedBarMode == "people" &&
-                galleryPeopleState?.activePersonID
+                barMode == "people" && galleryPeopleState?.activePerson?.id
                     ? {
                           mode: "people" as const,
-                          personID: galleryPeopleState.activePersonID,
+                          personID: galleryPeopleState.activePerson.id,
                       }
                     : {
-                          mode: resolvedBarMode as "albums" | "hidden-albums",
+                          mode: barMode as "albums" | "hidden-albums",
                           collectionID: ensure(activeCollectionID),
                       },
         };
@@ -1114,12 +1093,7 @@ export default function Gallery() {
     };
 
     const handleSelectPerson = (person: Person | undefined) => {
-        // The person bar currently does not have an "all" mode, so default to
-        // the first person when no specific person is provided. This can happen
-        // when the user clicks the "People" header in the search empty state (it
-        // is guaranteed that this header will only be shown if there is at
-        // least one person).
-        setActivePersonID(person?.id ?? galleryPeopleState?.people[0]?.id);
+        setActivePersonID(person?.id);
         setBarMode("people");
     };
 
@@ -1131,6 +1105,10 @@ export default function Gallery() {
     if (!collectionSummaries || !filteredData) {
         return <div></div>;
     }
+
+    // `people` will be undefined only when ML is disabled, otherwise it'll be
+    // an empty array (even if people are loading).
+    const showPeopleSectionButton = people !== undefined;
 
     return (
         <GalleryContext.Provider
@@ -1208,7 +1186,7 @@ export default function Gallery() {
                         marginBottom: "12px",
                     }}
                 >
-                    {resolvedBarMode == "hidden-albums" ? (
+                    {barMode == "hidden-albums" ? (
                         <HiddenSectionNavbarContents
                             onBack={exitHiddenSection}
                         />
@@ -1229,15 +1207,15 @@ export default function Gallery() {
                 <GalleryBarAndListHeader
                     {...{
                         shouldHide: isInSearchMode,
-                        mode: resolvedBarMode,
+                        mode: barMode,
                         onChangeMode: setBarMode,
                         collectionSummaries,
                         activeCollection,
                         activeCollectionID,
                         setActiveCollectionID,
                         hiddenCollectionSummaries,
-                        people: galleryPeopleState?.people,
-                        activePersonID: galleryPeopleState?.activePersonID,
+                        showPeopleSectionButton,
+                        people: galleryPeopleState?.people ?? [],
                         activePerson: galleryPeopleState?.activePerson,
                         onSelectPerson: handleSelectPerson,
                         setCollectionNamerAttributes,
@@ -1301,10 +1279,15 @@ export default function Gallery() {
                 !hiddenFiles?.length &&
                 activeCollectionID === ALL_SECTION ? (
                     <GalleryEmptyState openUploader={openUploader} />
+                ) : !isInSearchMode &&
+                  !isFirstLoad &&
+                  barMode == "people" &&
+                  !galleryPeopleState?.activePerson ? (
+                    <PeopleEmptyState />
                 ) : (
                     <PhotoFrame
                         page={PAGES.GALLERY}
-                        mode={resolvedBarMode}
+                        mode={barMode}
                         files={filteredData}
                         syncWithRemote={syncWithRemote}
                         favItemIds={favItemIds}
@@ -1314,14 +1297,14 @@ export default function Gallery() {
                         setTempDeletedFileIds={setTempDeletedFileIds}
                         setIsPhotoSwipeOpen={setIsPhotoSwipeOpen}
                         activeCollectionID={activeCollectionID}
-                        activePersonID={galleryPeopleState?.activePersonID}
+                        activePersonID={galleryPeopleState?.activePerson?.id}
                         enableDownload={true}
                         fileToCollectionsMap={fileToCollectionsMap}
                         collectionNameMap={collectionNameMap}
                         showAppDownloadBanner={
                             files.length < 30 && !isInSearchMode
                         }
-                        isInHiddenSection={resolvedBarMode == "hidden-albums"}
+                        isInHiddenSection={barMode == "hidden-albums"}
                         setFilesDownloadProgressAttributesCreator={
                             setFilesDownloadProgressAttributesCreator
                         }
@@ -1343,7 +1326,7 @@ export default function Gallery() {
                             count={selected.count}
                             ownCount={selected.ownCount}
                             clearSelection={clearSelection}
-                            barMode={resolvedBarMode}
+                            barMode={barMode}
                             activeCollectionID={activeCollectionID}
                             selectedCollection={getSelectedCollection(
                                 selected.collectionID,
@@ -1364,9 +1347,7 @@ export default function Gallery() {
                                     ?.type == "incomingShareViewer"
                             }
                             isInSearchMode={isInSearchMode}
-                            isInHiddenSection={
-                                resolvedBarMode == "hidden-albums"
-                            }
+                            isInHiddenSection={barMode == "hidden-albums"}
                         />
                     )}
                 <ExportModal

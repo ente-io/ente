@@ -216,25 +216,22 @@ const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
     enteFile,
     placeholderDimension,
 }) => {
-    const [objectURL, setObjectURL] = useState<string | undefined>();
+    const [url, setURL] = useState<string | undefined>();
 
     useEffect(() => {
         let didCancel = false;
-        let thisObjectURL: string | undefined;
 
-        void faceCrop(faceID, enteFile).then((blob) => {
-            if (blob && !didCancel)
-                setObjectURL((thisObjectURL = URL.createObjectURL(blob)));
-        });
+        void faceCrop(faceID, enteFile).then(
+            (url) => !didCancel && setURL(url),
+        );
 
         return () => {
             didCancel = true;
-            if (thisObjectURL) URL.revokeObjectURL(thisObjectURL);
         };
     }, [faceID, enteFile]);
 
-    return objectURL ? (
-        <img style={{ objectFit: "cover" }} src={objectURL} />
+    return url ? (
+        <img style={{ objectFit: "cover" }} src={url} />
     ) : (
         <Skeleton
             variant="circular"

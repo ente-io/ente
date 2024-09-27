@@ -7,7 +7,9 @@
  * there.
  */
 
+import { pt } from "@/base/i18n";
 import type { SearchOption } from "@/new/photos/services/search/types";
+import { VerticallyCentered } from "@ente/shared/components/Container";
 import { Typography } from "@mui/material";
 import { t } from "i18next";
 import React from "react";
@@ -39,4 +41,18 @@ export const SearchResultsHeader: React.FC<SearchResultsHeaderProps> = ({
             fileCount={selectedOption.fileCount}
         />
     </GalleryItemsHeaderAdapter>
+);
+
+export const PeopleEmptyState: React.FC = () => (
+    <VerticallyCentered>
+        <Typography
+            color="text.muted"
+            sx={{
+                // Approximately compensate for the hidden section bar
+                paddingBlockEnd: "86px",
+            }}
+        >
+            {pt("People will appear here once indexing completes")}
+        </Typography>
+    </VerticallyCentered>
 );

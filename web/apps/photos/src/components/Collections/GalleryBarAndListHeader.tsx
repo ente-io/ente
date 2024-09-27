@@ -86,6 +86,7 @@ type CollectionsProps = Omit<
  */
 export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
     shouldHide,
+    showPeopleSectionButton,
     mode,
     onChangeMode,
     collectionSummaries,
@@ -170,11 +171,13 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
                         }
                         onCollectionCast={() => setOpenAlbumCastDialog(true)}
                     />
-                ) : (
+                ) : activePerson ? (
                     <PeopleHeader
                         person={activePerson}
                         {...{ onSelectPerson, appContext }}
                     />
+                ) : (
+                    <></>
                 ),
             itemType: ITEM_TYPE.HEADER,
             height: 68,
@@ -185,7 +188,6 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
         toShowCollectionSummaries,
         activeCollectionID,
         isActiveCollectionDownloadInProgress,
-        people,
         activePerson,
     ]);
 
@@ -197,6 +199,7 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
         <>
             <GalleryBarImpl
                 {...{
+                    showPeopleSectionButton,
                     mode,
                     onChangeMode,
                     activeCollectionID,
