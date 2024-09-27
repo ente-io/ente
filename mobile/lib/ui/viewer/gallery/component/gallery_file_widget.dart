@@ -22,7 +22,6 @@ class GalleryFileWidget extends StatelessWidget {
   final String tag;
   final int photoGridSize;
   final int? currentUserID;
-  final List<EnteFile> filesInGroup;
   final GalleryLoader asyncLoader;
   const GalleryFileWidget({
     required this.file,
@@ -31,7 +30,6 @@ class GalleryFileWidget extends StatelessWidget {
     required this.tag,
     required this.photoGridSize,
     required this.currentUserID,
-    required this.filesInGroup,
     required this.asyncLoader,
     super.key,
   });
