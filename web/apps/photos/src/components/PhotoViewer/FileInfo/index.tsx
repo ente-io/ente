@@ -16,7 +16,7 @@ import { UnidentifiedFaces } from "@/new/photos/components/PeopleList";
 import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker";
 import { photoSwipeZIndex } from "@/new/photos/components/PhotoViewer";
 import { tagNumericValue, type RawExifTags } from "@/new/photos/services/exif";
-import { annotatedFaceIDsForFile, isMLEnabled } from "@/new/photos/services/ml";
+import { annotatedFaceIDsForFile, AnnotatedFacesForFile, getAnnotatedFacesForFile, getFacesForFile, isMLEnabled } from "@/new/photos/services/ml";
 import { EnteFile } from "@/new/photos/types/file";
 import { formattedByteSize } from "@/new/photos/utils/units";
 import CopyButton from "@ente/shared/components/CodeBlock/CopyButton";
@@ -98,6 +98,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
 
     const [exifInfo, setExifInfo] = useState<ExifInfo | undefined>();
     const [openRawExif, setOpenRawExif] = useState(false);
+    const [annotatedFaces, setAnnotatedFaces] = useState<AnnotatedFacesForFile | undefined>();
 
     const location = useMemo(() => {
         if (file) {
@@ -107,22 +108,18 @@ export const FileInfo: React.FC<FileInfoProps> = ({
         return exif?.parsed?.location;
     }, [file, exif]);
 
-    const [annotatedPeopleFaceIDs, otherFaceIDs] =
-        useMemoSingleThreaded(async () => {
-            if (!file) return [[], []];
-            const annotatedFaceIDs = await annotatedFaceIDsForFile(file);
-            return annotatedFaceIDs.reduce(
-                ([people, other], item) => {
-                    if (item[1]) {
-                        people.push(item);
-                    } else {
-                        other.push(item[0]);
-                    }
-                    return [people, other];
-                },
-                [[], []],
-            );
+
+        useEffect(() => {
+            let didCancel = false;
+
+            void (async () => {
+                const result = await getAnnotatedFacesForFile(file);
+                !didCancel && setAnnotatedFaces(result);
+            })();
+
+            return () =>  {               didCancel = true;}
         }, [file]);
+
 
     useEffect(() => {
         setExifInfo(parseExifInfo(exif));
@@ -287,7 +284,8 @@ export const FileInfo: React.FC<FileInfoProps> = ({
 
                 {isMLEnabled() && (
                     <>
-                        {/* TODO-Cluster <PhotoPeopleList file={file} /> */}
+                    {annotatedFaces?.annotatedFaceIDs.length &&
+                        // {/* TODO-Cluster <PhotoPeopleList file={file} /> */}
                         <UnidentifiedFaces enteFile={file} />
                     </>
                 )}

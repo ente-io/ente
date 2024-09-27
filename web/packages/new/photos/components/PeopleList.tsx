@@ -1,12 +1,11 @@
 import { useIsMobileWidth } from "@/base/hooks";
-import { faceCrop, unidentifiedFaceIDs } from "@/new/photos/services/ml";
+import { faceCrop, type AnnotatedFaceID } from "@/new/photos/services/ml";
 import type { Person } from "@/new/photos/services/ml/people";
 import type { EnteFile } from "@/new/photos/types/file";
 import { Skeleton, Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
 import { UnstyledButton } from "./mui-custom";
-import type { CGroup } from "../services/user-entity";
 
 export interface SearchPeopleListProps {
     people: Person[];
@@ -67,28 +66,21 @@ const SearchPeopleButton = styled(UnstyledButton)(
 `,
 );
 
-export interface CGroupPeopleListProps {
+export interface AnnotatedFacePeopleListProps {
+    annotatedFaceIDs: AnnotatedFaceID[];
     /**
-     * List of cgroup people to show.
-     *
-     * The current types don't reflect this, but these are all guaranteed to be
-     * {@link Person}s with type "cgroup"
+     * Called when the user selects a face in the list.
      */
-    people: Person[];
-    /**
-     * Called when the user selects a person in the list.
-     */
-    onSelectPerson: (person: Person) => void;
+    onSelectFace: (annotatedFaceID: AnnotatedFaceID) => void;
 }
 
 /**
- * Show the list of faces in the given file that are not linked to a a specific
- * cgroup ("people").
+ * Show the list of faces in the given file that are associated with a specific
+ * person.
  */
-export const CGroupPeopleList: React.FC<SearchPeopleListProps> = ({
-    people,
-    onSelectPerson,
-}) => {
+export const AnnotatedFacePeopleList: React.FC<
+    AnnotatedFacePeopleListProps
+> = ({ annotatedFaceIDs, onSelectFace }) => {
     const isMobileWidth = useIsMobileWidth();
     return (
         <SearchPeopleContainer
@@ -181,21 +173,6 @@ export const UnidentifiedFaces: React.FC<UnidentifiedFacesProps> = ({
     enteFile,
 }) => {
     const [faceIDs, setFaceIDs] = useState<string[]>([]);
-
-    useEffect(() => {
-        let didCancel = false;
-
-        const go = async () => {
-            const faceIDs = await unidentifiedFaceIDs(enteFile);
-            !didCancel && setFaceIDs(faceIDs);
-        };
-
-        void go();
-
-        return () => {
-            didCancel = true;
-        };
-    }, [enteFile]);
 
     if (faceIDs.length == 0) return <></>;
 

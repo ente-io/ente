@@ -592,18 +592,39 @@ export const clipMatches = (
 ): Promise<CLIPMatches | undefined> =>
     worker().then((w) => w.clipMatches(searchPhrase));
 
+/** A face ID annotated with the ID of the person to which it is associated. */
+export interface AnnotatedFaceID {
+    faceID: string;
+    personID: string;
+}
+
+/**
+ * List of faces found in a file
+ *
+ * It is actually a pair of lists, one annotated by the person ids, and one with
+ * just the face ids.
+ */
+export interface AnnotatedFacesForFile {
+    /**
+     * A list of {@link AnnotatedFaceID}s for all faces in the file that are
+     * also associated with a {@link Person}.
+     */
+    annotatedFaceIDs: AnnotatedFaceID[];
+    /* A list of the remaining face (ids). */
+    otherFaceIDs: string[];
+}
+
 /**
  * Return the list of faces found in the given {@link enteFile}.
- *
- * Each item is returned as a (faceID, personID) tuple, where the faceID is the
- * ID of the face, and the personID is the id of the corresponding person that
- * this face is associated to (if any).
  */
-export const annotatedFaceIDsForFile = async (
+export const getAnnotatedFacesForFile = async (
     enteFile: EnteFile,
-): Promise<[string, string | undefined][]> => {
+): Promise<AnnotatedFacesForFile> => {
+    const annotatedFaceIDs: AnnotatedFaceID[] = [];
+    const otherFaceIDs: string[] = [];
+
     const index = await getFaceIndex(enteFile.id);
-    if (!index) return [];
+    if (!index) return { annotatedFaceIDs, otherFaceIDs };
 
     const people = _state.peopleSnapshot ?? [];
 
@@ -620,10 +641,16 @@ export const annotatedFaceIDsForFile = async (
         }
     }
 
-    return index.faces.map(({ faceID }) => [
-        faceID,
-        faceIDToPersonID.get(faceID),
-    ]);
+    for (const { faceID } of index.faces) {
+        const personID = faceIDToPersonID.get(faceID);
+        if (personID) {
+            annotatedFaceIDs.push({ faceID, personID });
+        } else {
+            otherFaceIDs.push(faceID);
+        }
+    }
+
+    return { annotatedFaceIDs, otherFaceIDs };
 };
 
 /**
