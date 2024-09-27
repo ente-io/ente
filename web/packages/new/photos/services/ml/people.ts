@@ -247,10 +247,12 @@ export const reconstructPeople = async (): Promise<Person[]> => {
         };
     });
 
-    return cgroupPeople
-        .concat(clusterPeople)
-        .filter((c) => !!c)
-        .sort((a, b) => b.fileIDs.length - a.fileIDs.length);
+    const sorted = (ps: Interim) =>
+        ps
+            .filter((c) => !!c)
+            .sort((a, b) => b.fileIDs.length - a.fileIDs.length);
+
+    return sorted(cgroupPeople).concat(sorted(clusterPeople));
 };
 
 /**
