@@ -1,3 +1,4 @@
+import { assertionFailed } from "@/base/assert";
 import { newNonSecureID } from "@/base/id-worker";
 import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
@@ -196,26 +197,29 @@ function* enumerateFaces(faceIndices: FaceIndex[]) {
  *
  * Sorting faces temporally is meant as a heuristic for better clusters.
  */
-const sortFacesNewestOnesFirst = (
-    faces: ClusterFace[],
-    localFiles: EnteFile[],
-) => {
+const sortFacesNewestOnesFirst = (faces: ClusterFace[], localFiles: EnteFile[]) => {
     const localFileByID = new Map(localFiles.map((f) => [f.id, f]));
     const fileForFaceID = new Map(
         faces.map(({ faceID }) => [
             faceID,
-            ensure(localFileByID.get(ensure(fileIDFromFaceID(faceID)))),
+            localFileByID.get(ensure(fileIDFromFaceID(faceID))),
         ]),
     );
 
-    const fileForFace = ({ faceID }: { faceID: string }) =>
-        ensure(fileForFaceID.get(faceID));
+    // In unexpected scenarios, we might run clustering without having the
+    // corresponding EnteFile available locally. This shouldn't happen, so log
+    // an warning, but meanwhile let the clustering proceed by assigning such
+    // files an arbitrary creationTime.
+    const sortTimeForFace = ({ faceID }: { faceID: string }) => {
+        const file = fileForFaceID.get(faceID);
+        if (!file) {
+            assertionFailed(`Did not find a local file for faceID ${faceID}`);
+            return 0;
+        }
+        return file.metadata.creationTime;
+    };
 
-    return faces.sort(
-        (a, b) =>
-            fileForFace(b).metadata.creationTime -
-            fileForFace(a).metadata.creationTime,
-    );
+    return faces.sort((a, b) => sortTimeForFace(b) - sortTimeForFace(a));
 };
 
 /**
