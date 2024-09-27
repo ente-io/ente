@@ -5,7 +5,6 @@
 import { isDesktop } from "@/base/app";
 import { blobCache } from "@/base/blob-cache";
 import { ensureElectron } from "@/base/electron";
-import { isDevBuild } from "@/base/env";
 import log from "@/base/log";
 import { masterKeyFromSession } from "@/base/session-store";
 import type { Electron } from "@/base/types/ipc";
@@ -327,16 +326,17 @@ export const mlSync = async () => {
 const workerDidUnawaitedIndex = () => void updateClustersAndPeople();
 
 const updateClustersAndPeople = async () => {
-    // TODO-Cluster
-    if (await wipClusterEnable()) {
-        const masterKey = await masterKeyFromSession();
+    if (!(await isInternalUser())) return;
 
-        // Fetch existing cgroups from remote.
-        await pullUserEntities("cgroup", masterKey);
+    const masterKey = await masterKeyFromSession();
 
-        // Generate or update local clusters.
-        await (await worker()).clusterFaces(masterKey);
-    }
+    // Fetch existing cgroups from remote.
+    await pullUserEntities("cgroup", masterKey);
+
+    // Generate or update local clusters.
+    await (await worker()).clusterFaces(masterKey);
+
+    // Update the people shown in the UI.
     await updatePeople();
 };
 
@@ -363,14 +363,6 @@ export const indexNewUpload = (enteFile: EnteFile, uploadItem: UploadItem) => {
     log.debug(() => ["ml/liveq", { enteFile, uploadItem }]);
     void worker().then((w) => w.onUpload(enteFile, uploadItem));
 };
-
-/**
- * WIP! Don't enable, dragon eggs are hatching here.
- * TODO-Cluster
- */
-export const wipClusterEnable = async (): Promise<boolean> =>
-    (!!process.env.NEXT_PUBLIC_ENTE_WIP_CL && isDevBuild) ||
-    (await isInternalUser());
 
 export type MLStatus =
     | { phase: "disabled" /* The ML remote flag is off */ }
