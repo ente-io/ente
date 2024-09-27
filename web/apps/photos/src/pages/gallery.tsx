@@ -736,13 +736,14 @@ export default function Gallery() {
             count: 0,
             collectionID: activeCollectionID,
             context:
-                barMode == "people" && galleryPeopleState?.activePersonID
+                resolvedBarMode == "people" &&
+                galleryPeopleState?.activePersonID
                     ? {
                           mode: "people" as const,
                           personID: galleryPeopleState.activePersonID,
                       }
                     : {
-                          mode: "albums" as const,
+                          mode: resolvedBarMode as "albums" | "hidden-albums",
                           collectionID: ensure(activeCollectionID),
                       },
         };
