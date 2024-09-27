@@ -69,7 +69,7 @@ export interface FileInfoExif {
     parsed: ParsedMetadata | undefined;
 }
 
-interface FileInfoProps {
+export interface FileInfoProps {
     showInfo: boolean;
     handleCloseInfo: () => void;
     closePhotoViewer: () => void;
@@ -81,6 +81,10 @@ interface FileInfoProps {
     fileToCollectionsMap?: Map<number, number[]>;
     collectionNameMap?: Map<number, string>;
     showCollectionChips: boolean;
+    /**
+     * Called when the user selects a person in the file info panel.
+     */
+    onSelectPerson?: ((personID: string) => void) | undefined;
 }
 
 export const FileInfo: React.FC<FileInfoProps> = ({
@@ -95,6 +99,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     collectionNameMap,
     showCollectionChips,
     closePhotoViewer,
+    onSelectPerson,
 }) => {
     const { mapEnabled, updateMapEnabled, setDialogBoxAttributesV2 } =
         useContext(AppContext);
@@ -156,7 +161,10 @@ export const FileInfo: React.FC<FileInfoProps> = ({
         );
 
     const handleSelectFace = (annotatedFaceID: AnnotatedFaceID) => {
-        console.log(annotatedFaceID);
+        if (onSelectPerson) {
+            onSelectPerson(annotatedFaceID.personID);
+            closePhotoViewer();
+        }
     };
 
     return (

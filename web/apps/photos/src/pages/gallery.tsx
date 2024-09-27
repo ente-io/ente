@@ -1123,6 +1123,11 @@ export default function Gallery() {
         setBarMode("people");
     };
 
+    const handleSelectFileInfoPerson = (personID: string) => {
+        setActivePersonID(personID);
+        setBarMode("people");
+    };
+
     if (!collectionSummaries || !filteredData) {
         return <div></div>;
     }
@@ -1321,6 +1326,7 @@ export default function Gallery() {
                             setFilesDownloadProgressAttributesCreator
                         }
                         selectable={true}
+                        onSelectPerson={handleSelectFileInfoPerson}
                     />
                 )}
                 {selected.count > 0 &&
