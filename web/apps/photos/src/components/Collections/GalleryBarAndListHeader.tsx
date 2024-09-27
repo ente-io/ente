@@ -188,7 +188,6 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
         toShowCollectionSummaries,
         activeCollectionID,
         isActiveCollectionDownloadInProgress,
-        people,
         activePerson,
     ]);
 
