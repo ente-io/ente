@@ -528,7 +528,9 @@ export default function Gallery() {
     }, [collections, activeCollectionID]);
 
     // The derived UI state when we are in "people" mode.
-    // TODO: Move this to a reducer/store.
+    //
+    // TODO: This spawns even more workarounds below. Move this to a
+    // reducer/store.
     type DerivedState1 = {
         filteredData: EnteFile[];
         galleryPeopleState: GalleryPeopleState | undefined;
@@ -696,6 +698,13 @@ export default function Gallery() {
         setBarMode("albums");
         setActiveCollectionID(ALL_SECTION);
     }
+
+    // Derived1 is async, leading to even more workarounds.
+    const resolvedBarMode = galleryPeopleState
+        ? barMode
+        : barMode == "people"
+          ? "albums"
+          : barMode;
 
     const selectAll = (e: KeyboardEvent) => {
         // ignore ctrl/cmd + a if the user is typing in a text field
@@ -1193,7 +1202,7 @@ export default function Gallery() {
                         marginBottom: "12px",
                     }}
                 >
-                    {barMode == "hidden-albums" ? (
+                    {resolvedBarMode == "hidden-albums" ? (
                         <HiddenSectionNavbarContents
                             onBack={exitHiddenSection}
                         />
@@ -1214,7 +1223,7 @@ export default function Gallery() {
                 <GalleryBarAndListHeader
                     {...{
                         shouldHide: isInSearchMode,
-                        mode: barMode,
+                        mode: resolvedBarMode,
                         onChangeMode: setBarMode,
                         collectionSummaries,
                         activeCollection,
@@ -1289,7 +1298,7 @@ export default function Gallery() {
                 ) : (
                     <PhotoFrame
                         page={PAGES.GALLERY}
-                        mode={barMode}
+                        mode={resolvedBarMode}
                         files={filteredData}
                         syncWithRemote={syncWithRemote}
                         favItemIds={favItemIds}
@@ -1306,7 +1315,7 @@ export default function Gallery() {
                         showAppDownloadBanner={
                             files.length < 30 && !isInSearchMode
                         }
-                        isInHiddenSection={barMode == "hidden-albums"}
+                        isInHiddenSection={resolvedBarMode == "hidden-albums"}
                         setFilesDownloadProgressAttributesCreator={
                             setFilesDownloadProgressAttributesCreator
                         }
@@ -1327,7 +1336,7 @@ export default function Gallery() {
                             count={selected.count}
                             ownCount={selected.ownCount}
                             clearSelection={clearSelection}
-                            barMode={barMode}
+                            barMode={resolvedBarMode}
                             activeCollectionID={activeCollectionID}
                             selectedCollection={getSelectedCollection(
                                 selected.collectionID,
@@ -1348,7 +1357,9 @@ export default function Gallery() {
                                     ?.type == "incomingShareViewer"
                             }
                             isInSearchMode={isInSearchMode}
-                            isInHiddenSection={barMode == "hidden-albums"}
+                            isInHiddenSection={
+                                resolvedBarMode == "hidden-albums"
+                            }
                         />
                     )}
                 <ExportModal
