@@ -393,9 +393,6 @@ extension GalleryAppBarExtn on GalleryType {
 }
 
 GalleryType getGalleryType(Collection c, int userID) {
-  if (c.type == CollectionType.album) {
-    return GalleryType.sharedPublicCollection;
-  }
   if (!c.isOwner(userID)) {
     return GalleryType.sharedCollection;
   }

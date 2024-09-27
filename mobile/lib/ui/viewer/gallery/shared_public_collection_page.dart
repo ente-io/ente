@@ -1,5 +1,4 @@
 import "package:flutter/material.dart";
-import "package:photos/core/configuration.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/collection_meta_event.dart";
 import "package:photos/events/collection_updated_event.dart";
@@ -30,15 +29,12 @@ class SharedPublicCollectionPage extends StatelessWidget {
         );
 
   final _selectedFiles = SelectedFiles();
+  final galleryType = GalleryType.sharedPublicCollection;
 
   @override
   Widget build(BuildContext context) {
     final bool isPublicDownload = c.collection.isPublicDownload();
     final bool isisEnableCollect = c.collection.isEnableCollect();
-    final galleryType = getGalleryType(
-      c.collection,
-      Configuration.instance.getUserID()!,
-    );
     final List<EnteFile>? initialFiles =
         c.thumbnail != null ? [c.thumbnail!] : null;
     final gallery = Gallery(

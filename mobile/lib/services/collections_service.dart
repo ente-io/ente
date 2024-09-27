@@ -67,6 +67,7 @@ class CollectionsService {
   final Map<int, int> _countCache = <int, int>{};
   final _cachedPublicAlbumToken = <int, String>{};
   final _cachedPublicAlbumJWTToken = <int, String>{};
+  final _cachedPublicCollectionID = <int>[];
 
   CollectionsService._privateConstructor() {
     _db = CollectionsDB.instance;
@@ -177,6 +178,7 @@ class CollectionsService {
     cachedUncategorizedCollection = null;
     _cachedPublicAlbumToken.clear();
     _cachedPublicAlbumJWTToken.clear();
+    _cachedPublicCollectionID.clear();
     _cachedKeys.clear();
   }
 
@@ -1054,10 +1056,11 @@ class CollectionsService {
       final Collection collection = Collection.fromMap(collectionData);
       final Uint8List collectionKey =
           Uint8List.fromList(Base58Decode(albumKey));
-      collection.setName(_getDecryptedCollectionName(collection));
 
       _cachedKeys[collection.id] = collectionKey;
       _cachedPublicAlbumToken[collection.id] = authToken;
+      _cachedPublicCollectionID.add(collection.id);
+      collection.setName(_getDecryptedCollectionName(collection));
       return collection;
     } catch (e, s) {
       _logger.warning(e, s);
@@ -1109,6 +1112,10 @@ class CollectionsService {
       return _cachedPublicAlbumJWTToken[collectionID];
     }
     return null;
+  }
+
+  Future<bool> isPublicCollection(int collectionID) async {
+    return _cachedPublicCollectionID.contains(collectionID);
   }
 
   Future<void> setPublicAlbumTokenJWT(int collectionID, String token) async {
