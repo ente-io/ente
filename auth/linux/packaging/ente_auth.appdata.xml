@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-    <id>ente_auth</id>
+    <id>enteauth</id>
     <metadata_license>CC0-1.0</metadata_license>
     <project_license>AGPL-3.0</project_license>
     <name>Ente Auth</name>
@@ -10,7 +10,7 @@
         <p>Auth has an app for every platform. Mobile, desktop and web. Your codes sync across all your devices, end-to-end encrypted.</p>
         <p>Auth also comes with Offline mode, tags, icons, pins, import/export and more</p>
     </description>
-    <launchable type="desktop-id">ente_auth.desktop</launchable>
+    <launchable type="desktop-id">enteauth.desktop</launchable>
     <url type="homepage">https://ente.io/auth</url>
     <screenshots>
         <screenshot type="default">
@@ -21,7 +21,7 @@
         <release version="3.0.12" date="2024-06-17"/>
     </releases>
     <provides>
-        <id>ente_auth.desktop</id>
+        <id>enteauth.desktop</id>
     </provides>
     <content_rating type="oars-1.0" />
     <developer id="io.github.ente-io.ente">
