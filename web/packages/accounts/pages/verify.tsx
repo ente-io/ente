@@ -33,6 +33,7 @@ import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
+import { getSRPAttributes } from "../api/srp";
 import { putAttributes, sendOtt, verifyOtt } from "../api/user";
 import { PAGES } from "../constants/pages";
 import {
@@ -85,7 +86,18 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     LS_KEYS.SRP_ATTRIBUTES,
                 );
                 if (srpAttributes && !srpAttributes.isEmailMFAEnabled) {
-                    router.push(PAGES.CREDENTIALS);
+                    // Fetch the latest SRP attributes instead of relying on the
+                    // potentially stale stored values. This is an infrequent scenario
+                    // path, so extra API calls are fine.
+                    const latestSRPAttributes = await getSRPAttributes(email);
+                    if (
+                        latestSRPAttributes &&
+                        !latestSRPAttributes.isEmailMFAEnabled
+                    ) {
+                        router.push(PAGES.CREDENTIALS);
+                    } else {
+                        setEmail(user.email);
+                    }
                 } else {
                     setEmail(user.email);
                 }
