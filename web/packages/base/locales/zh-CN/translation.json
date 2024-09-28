@@ -48,7 +48,7 @@
     "enter_file_name": "文件名",
     "CLOSE": "关闭",
     "NO": "否",
-    "NOTHING_HERE": "这里什么也没有",
+    "nothing_here": "这里什么也没有",
     "upload": "上传",
     "import": "导入",
     "add_photos": "添加照片",
