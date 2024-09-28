@@ -1,11 +1,11 @@
 # CHANGELOG
 
-## v1.7.5 (Unreleased)
+## v1.7.5
 
 -   Face grouping (beta).
--   Directly upload to selected album on drag and drop.
 -   Include shared files in export.
--   .
+-   Directly upload to selected album on drag and drop.
+-   Improve heuristics for clubbing a photo and video into a live photo.
 
 ## v1.7.4
 
