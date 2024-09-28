@@ -324,7 +324,7 @@
     "hide_collection": "Verberg album",
     "unhide_collection": "Album zichtbaar maken",
     "MOVE": "Verplaatsen",
-    "ADD": "Toevoegen",
+    "add": "Toevoegen",
     "REMOVE": "Verwijderen",
     "YES_REMOVE": "Ja, verwijderen",
     "REMOVE_FROM_COLLECTION": "Verwijderen uit album",

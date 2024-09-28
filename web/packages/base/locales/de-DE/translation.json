@@ -324,7 +324,7 @@
     "hide_collection": "Album ausblenden",
     "unhide_collection": "Album wieder einblenden",
     "MOVE": "Verschieben",
-    "ADD": "Hinzufügen",
+    "add": "Hinzufügen",
     "REMOVE": "Entfernen",
     "YES_REMOVE": "Ja, entfernen",
     "REMOVE_FROM_COLLECTION": "Aus Album entfernen",

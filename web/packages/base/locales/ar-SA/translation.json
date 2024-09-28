@@ -324,7 +324,7 @@
     "hide_collection": "إخفاء الألبوم",
     "unhide_collection": "إلغاء إخفاء الألبوم",
     "MOVE": "نقل",
-    "ADD": "إضافة",
+    "add": "إضافة",
     "REMOVE": "ازالة",
     "YES_REMOVE": "نعم، إزالة",
     "REMOVE_FROM_COLLECTION": "",

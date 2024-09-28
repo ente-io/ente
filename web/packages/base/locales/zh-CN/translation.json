@@ -324,7 +324,7 @@
     "hide_collection": "隐藏相册",
     "unhide_collection": "取消隐藏相册",
     "MOVE": "移动",
-    "ADD": "添加",
+    "add": "添加",
     "REMOVE": "移除",
     "YES_REMOVE": "是，移除",
     "REMOVE_FROM_COLLECTION": "从相册中移除",

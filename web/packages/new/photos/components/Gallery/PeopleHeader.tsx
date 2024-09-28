@@ -234,7 +234,7 @@ const ClusterPersonOptions: React.FC<ClusterPersonOptionsProps> = ({
                 title={pt("Add person") /* TODO-Cluster */}
                 placeholder={t("enter_name")}
                 initialValue={""}
-                submitButtonTitle={t("ADD")}
+                submitButtonTitle={t("add")}
                 onSubmit={addPersonWithName}
             />
         </>
