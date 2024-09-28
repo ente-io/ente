@@ -162,7 +162,7 @@ function PlanSelectorCard(props: PlanSelectorCardProps) {
                 appContext.setDialogMessage({
                     title: t("OPEN_PLAN_SELECTOR_MODAL_FAILED"),
                     content: t("UNKNOWN_ERROR"),
-                    close: { text: t("CLOSE"), variant: "secondary" },
+                    close: { text: t("close"), variant: "secondary" },
                     proceed: {
                         text: t("REOPEN_PLAN_SELECTOR_MODAL"),
                         variant: "accent",

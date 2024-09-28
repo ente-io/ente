@@ -814,7 +814,7 @@ function PhotoViewer(props: PhotoViewerProps) {
 
                             <button
                                 className="pswp__button pswp__button--custom"
-                                title={t("CLOSE_OPTION")}
+                                title={t("close_key")}
                                 onClick={handleClose}
                             >
                                 <CloseIcon />

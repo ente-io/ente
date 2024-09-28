@@ -68,7 +68,7 @@ function RecoveryKey({ somethingWentWrong, ...props }: Props) {
             fullWidth
         >
             <DialogTitleWithCloseButton onClose={props.onHide}>
-                {t("RECOVERY_KEY")}
+                {t("recovery_key")}
             </DialogTitleWithCloseButton>
             <DialogContent>
                 <Typography mb={3}>{t("RECOVERY_KEY_DESCRIPTION")}</Typography>
@@ -81,10 +81,10 @@ function RecoveryKey({ somethingWentWrong, ...props }: Props) {
             </DialogContent>
             <DialogActions>
                 <Button color="secondary" size="large" onClick={props.onHide}>
-                    {t("SAVE_LATER")}
+                    {t("do_this_later")}
                 </Button>
                 <Button color="accent" size="large" onClick={onSaveClick}>
-                    {t("SAVE")}
+                    {t("save_key")}
                 </Button>
             </DialogActions>
         </Dialog>

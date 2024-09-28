@@ -57,7 +57,7 @@ export default function UploadProgress({
                 action: props.cancelUploads,
             },
             close: {
-                text: t("NO"),
+                text: t("no"),
                 variant: "secondary",
                 action: () => {},
             },
