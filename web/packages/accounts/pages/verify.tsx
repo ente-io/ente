@@ -42,7 +42,7 @@ import {
 import { unstashRedirect } from "../services/redirect";
 import { configureSRP } from "../services/srp";
 import type { PageProps } from "../types/page";
-import type { SRPSetupAttributes } from "../types/srp";
+import type { SRPAttributes, SRPSetupAttributes } from "../types/srp";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
     const { logout, showNavBar, setDialogBoxAttributesV2 } = appContext;
@@ -69,7 +69,26 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             ) {
                 router.push(PAGES.CREDENTIALS);
             } else {
-                setEmail(user.email);
+                // The user might have email verification disabled, but after
+                // previously entering their email on the login screen, they
+                // might've closed the tab before proceeding (or opened a us in
+                // a new tab at this point).
+                //
+                // In such cases, we'll end up here with an email present.
+                //
+                // To distinguish this scenario from the normal email
+                // verification flow, we can check to see the SRP attributes
+                // (the login page would've fetched and saved them). If they are
+                // present and indicate that email verification is not required,
+                // redirect to the password verification page.
+                const srpAttributes: SRPAttributes = getData(
+                    LS_KEYS.SRP_ATTRIBUTES,
+                );
+                if (srpAttributes && !srpAttributes.isEmailMFAEnabled) {
+                    router.push(PAGES.CREDENTIALS);
+                } else {
+                    setEmail(user.email);
+                }
             }
         };
         main();
