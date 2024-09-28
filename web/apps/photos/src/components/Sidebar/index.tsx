@@ -606,7 +606,7 @@ const HelpSection: React.FC = () => {
             <EnteMenuItem
                 onClick={contactSupport}
                 labelComponent={
-                    <span title="support@ente.io">{t("SUPPORT")}</span>
+                    <span title="support@ente.io">{t("support")}</span>
                 }
                 variant="secondary"
             />
