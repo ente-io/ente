@@ -149,7 +149,7 @@ const Page: React.FC<RecoverPageProps> = ({ appContext, twoFactorType }) => {
         dialogClose?: DialogBoxAttributesV2["close"],
     ) => {
         appContext.setDialogBoxAttributesV2({
-            title: t("CONTACT_SUPPORT"),
+            title: t("contact_support"),
             close: dialogClose ?? {},
             content: (
                 <Trans

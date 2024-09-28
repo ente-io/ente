@@ -506,7 +506,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
             <EnteMenuItem
                 variant="secondary"
                 onClick={openRecoveryKeyModal}
-                label={t("RECOVERY_KEY")}
+                label={t("recovery_key")}
             />
             {isInternalUserViaEmailCheck() && (
                 <EnteMenuItem
@@ -600,7 +600,7 @@ const HelpSection: React.FC = () => {
         <>
             <EnteMenuItem
                 onClick={requestFeature}
-                label={t("REQUEST_FEATURE")}
+                label={t("request_feature")}
                 variant="secondary"
             />
             <EnteMenuItem
