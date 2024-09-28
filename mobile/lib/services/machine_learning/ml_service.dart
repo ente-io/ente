@@ -117,7 +117,6 @@ class MLService {
     try {
       if (force) {
         _mlControllerStatus = true;
-        MagicCacheService.instance.queueUpdate('forced run');
       }
       if (_cannotRunMLFunction() && !force) return;
       _isRunningML = true;
@@ -134,7 +133,7 @@ class MLService {
       }
       if (_mlControllerStatus == true) {
         // refresh discover section
-        MagicCacheService.instance.updateCache().ignore();
+        MagicCacheService.instance.updateCache(forced: force).ignore();
       }
       await indexAllImages();
       if ((await MLDataDB.instance.getUnclusteredFaceCount()) > 0) {
