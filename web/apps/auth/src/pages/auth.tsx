@@ -158,7 +158,7 @@ const AuthNavbar: React.FC = () => {
                         startIcon={<LogoutOutlined />}
                         onClick={logout}
                     >
-                        {t("LOGOUT")}
+                        {t("logout")}
                     </OverflowMenuOption>
                 </OverflowMenu>
             </HorizontalFlex>

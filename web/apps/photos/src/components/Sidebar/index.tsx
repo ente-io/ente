@@ -634,9 +634,9 @@ const ExitSection: React.FC = () => {
 
     const confirmLogout = () => {
         setDialogMessage({
-            title: t("LOGOUT_MESSAGE"),
+            title: t("logout_message"),
             proceed: {
-                text: t("LOGOUT"),
+                text: t("logout"),
                 action: logout,
                 variant: "critical",
             },
@@ -649,7 +649,7 @@ const ExitSection: React.FC = () => {
             <EnteMenuItem
                 onClick={confirmLogout}
                 color="critical"
-                label={t("LOGOUT")}
+                label={t("logout")}
                 variant="secondary"
             />
             <EnteMenuItem
