@@ -2,6 +2,7 @@
 
 ## v1.7.5 (Unreleased)
 
+-   Face grouping (beta).
 -   Directly upload to selected album on drag and drop.
 -   Include shared files in export.
 -   .
