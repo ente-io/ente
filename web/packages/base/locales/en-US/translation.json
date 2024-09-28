@@ -596,7 +596,7 @@
     "COLORS": "Colors",
     "FLIP": "Flip",
     "ROTATION": "Rotation",
-    "RESET": "Reset",
+    "reset": "Reset",
     "PHOTO_EDITOR": "Photo Editor",
     "FASTER_UPLOAD": "Faster uploads",
     "FASTER_UPLOAD_DESCRIPTION": "Route uploads through nearby servers",

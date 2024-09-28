@@ -596,7 +596,7 @@
     "COLORS": "Colores",
     "FLIP": "",
     "ROTATION": "",
-    "RESET": "",
+    "reset": "",
     "PHOTO_EDITOR": "",
     "FASTER_UPLOAD": "",
     "FASTER_UPLOAD_DESCRIPTION": "",

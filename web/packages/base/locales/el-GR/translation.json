@@ -596,7 +596,7 @@
     "COLORS": "Χρώματα",
     "FLIP": "",
     "ROTATION": "Περιστροφή",
-    "RESET": "Επαναφορά",
+    "reset": "Επαναφορά",
     "PHOTO_EDITOR": "Επεξεργαστής φωτογραφιών",
     "FASTER_UPLOAD": "",
     "FASTER_UPLOAD_DESCRIPTION": "",

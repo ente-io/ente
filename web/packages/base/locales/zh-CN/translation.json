@@ -596,7 +596,7 @@
     "COLORS": "颜色",
     "FLIP": "上下翻转",
     "ROTATION": "回转",
-    "RESET": "重设",
+    "reset": "重设",
     "PHOTO_EDITOR": "照片编辑器",
     "FASTER_UPLOAD": "更快上传",
     "FASTER_UPLOAD_DESCRIPTION": "通过附近的服务器路由上传",

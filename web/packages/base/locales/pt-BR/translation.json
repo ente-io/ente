@@ -596,7 +596,7 @@
     "COLORS": "Cores",
     "FLIP": "Inverter",
     "ROTATION": "Rotação",
-    "RESET": "Redefinir",
+    "reset": "Redefinir",
     "PHOTO_EDITOR": "Editor de Fotos",
     "FASTER_UPLOAD": "Envios mais rápidos",
     "FASTER_UPLOAD_DESCRIPTION": "Rotas enviam em servidores próximos",

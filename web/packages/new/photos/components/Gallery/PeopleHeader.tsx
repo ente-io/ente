@@ -128,7 +128,7 @@ const CGroupPersonOptions: React.FC<CGroupPersonOptionsProps> = ({
             ),
             close: { text: t("cancel") },
             proceed: {
-                text: t("RESET"),
+                text: t("reset"),
                 action: doDeletePerson,
             },
             buttonDirection: "row",

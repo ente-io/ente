@@ -596,7 +596,7 @@
     "COLORS": "Colori",
     "FLIP": "Capovolgi",
     "ROTATION": "Rotazione",
-    "RESET": "Reimposta",
+    "reset": "Reimposta",
     "PHOTO_EDITOR": "Editor Foto",
     "FASTER_UPLOAD": "Upload più veloci",
     "FASTER_UPLOAD_DESCRIPTION": "Effettua l'upload attraverso i server vicini",

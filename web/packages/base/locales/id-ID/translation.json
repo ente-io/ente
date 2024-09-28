@@ -596,7 +596,7 @@
     "COLORS": "Warna",
     "FLIP": "",
     "ROTATION": "",
-    "RESET": "",
+    "reset": "",
     "PHOTO_EDITOR": "Editor Foto",
     "FASTER_UPLOAD": "Pengunggahan lebih cepat",
     "FASTER_UPLOAD_DESCRIPTION": "",

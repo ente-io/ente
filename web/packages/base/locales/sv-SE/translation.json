@@ -596,7 +596,7 @@
     "COLORS": "Färger",
     "FLIP": "",
     "ROTATION": "",
-    "RESET": "Återställ",
+    "reset": "Återställ",
     "PHOTO_EDITOR": "",
     "FASTER_UPLOAD": "",
     "FASTER_UPLOAD_DESCRIPTION": "",
