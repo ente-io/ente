@@ -216,7 +216,7 @@ jobs:
                   dart pub global activate --source git https://github.com/prateekmedia/flutter_distributor --git-ref develop --git-path packages/flutter_distributor
                   make innoinstall
                   flutter_distributor package --platform=windows --targets=exe --skip-clean
-                  mv dist/**/enteauth-*-windows-setup.exe artifacts/ente-${{ github.ref_name }}-installer.exe
+                  mv dist/**/*-windows-setup.exe artifacts/ente-${{ github.ref_name }}-installer.exe
 
             - name: Retain Windows EXE and DLLs
               run: cp -r build/windows/x64/runner/Release ente-${{ github.ref_name }}-windows
@@ -309,7 +309,7 @@ jobs:
                   flutter config --enable-macos-desktop
                   dart pub global activate flutter_distributor
                   flutter_distributor package --platform=macos --targets=dmg --skip-clean
-                  mv dist/**/enteauth-*-macos.dmg artifacts/ente-${{ github.ref_name }}.dmg
+                  mv dist/**/*-macos.dmg artifacts/ente-${{ github.ref_name }}.dmg
 
             - name: Code sign DMG
               run: |
