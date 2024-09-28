@@ -9,7 +9,7 @@
     "sign_up": "회원가입",
     "NEW_USER": "Ente 의 새소식",
     "EXISTING_USER": "기존 회원 로그인",
-    "ENTER_NAME": "이름 입력",
+    "enter_name": "이름 입력",
     "PUBLIC_UPLOADER_NAME_MESSAGE": "친구들이 이 멋진 사진에 대해 고마워할 수 있도록 이름을 추가하세요!",
     "ENTER_EMAIL": "이메일 주소를 입력하세요",
     "EMAIL_ERROR": "올바른 이메일을 입력하세요",

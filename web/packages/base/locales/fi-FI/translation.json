@@ -9,7 +9,7 @@
     "sign_up": "Rekisteröidy",
     "NEW_USER": "Uusi Ente-käyttäjä",
     "EXISTING_USER": "Jo valmiiksi olemassaoleva käyttäjä",
-    "ENTER_NAME": "Lisää nimi",
+    "enter_name": "Lisää nimi",
     "PUBLIC_UPLOADER_NAME_MESSAGE": "Lisää nimi, jotta ystäväsi tietävät, ketä kiittää näistä hienoista kuvista!",
     "ENTER_EMAIL": "Syötä sähköpostiosoite",
     "EMAIL_ERROR": "Syötä voimassa oleva sähköpostiosoite",

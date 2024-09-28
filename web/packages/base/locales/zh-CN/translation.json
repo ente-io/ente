@@ -9,7 +9,7 @@
     "sign_up": "注册",
     "NEW_USER": "初来 Ente",
     "EXISTING_USER": "现有用户",
-    "ENTER_NAME": "输入名字",
+    "enter_name": "输入名字",
     "PUBLIC_UPLOADER_NAME_MESSAGE": "请添加一个名字，以便您的朋友知晓该感谢谁拍摄了这些精美的照片！",
     "ENTER_EMAIL": "请输入电子邮件地址",
     "EMAIL_ERROR": "请输入有效的电子邮件",

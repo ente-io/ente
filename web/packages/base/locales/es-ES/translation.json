@@ -9,7 +9,7 @@
     "sign_up": "Registro",
     "NEW_USER": "Nuevo en Ente",
     "EXISTING_USER": "Usuario existente",
-    "ENTER_NAME": "Introducir nombre",
+    "enter_name": "Introducir nombre",
     "PUBLIC_UPLOADER_NAME_MESSAGE": "¡Añade un nombre para que tus amigos sepan a quién dar las gracias por estas fotos geniales!",
     "ENTER_EMAIL": "Introducir email",
     "EMAIL_ERROR": "Introduce un email válido",

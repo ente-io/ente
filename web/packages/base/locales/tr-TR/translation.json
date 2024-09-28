@@ -9,7 +9,7 @@
     "sign_up": "Hesap aç",
     "NEW_USER": "Yeni ente kullanıcısı",
     "EXISTING_USER": "Mevcut kullanıcı",
-    "ENTER_NAME": "İsim gir",
+    "enter_name": "İsim gir",
     "PUBLIC_UPLOADER_NAME_MESSAGE": "Arkadaşlarının bu harika fotoğraflar için kime teşekkür etmeleri gerektiğini bilmeleri için bir isim ekle!",
     "ENTER_EMAIL": "E-posta adresini girin",
     "EMAIL_ERROR": "Geçerli bir e-posta gir",

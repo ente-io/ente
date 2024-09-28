@@ -173,7 +173,7 @@ const CGroupPersonOptions: React.FC<CGroupPersonOptionsProps> = ({
                 open={openAddNameInput}
                 onClose={() => setOpenAddNameInput(false)}
                 title={pt("Rename person")}
-                placeholder={t("ENTER_NAME") /* TODO-Cluster */}
+                placeholder={t("enter_name") /* TODO-Cluster */}
                 initialValue={cgroup.data.name ?? ""}
                 submitButtonTitle={t("rename")}
                 onSubmit={renamePersonUsingName}
@@ -232,7 +232,7 @@ const ClusterPersonOptions: React.FC<ClusterPersonOptionsProps> = ({
                 open={openNameInput}
                 onClose={() => setOpenNameInput(false)}
                 title={pt("Add person")}
-                placeholder={t("ENTER_NAME") /* TODO-Cluster */}
+                placeholder={t("enter_name") /* TODO-Cluster */}
                 initialValue={""}
                 submitButtonTitle={t("ADD")}
                 onSubmit={addPersonWithName}

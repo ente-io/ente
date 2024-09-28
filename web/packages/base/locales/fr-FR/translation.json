@@ -9,7 +9,7 @@
     "sign_up": "Inscription",
     "NEW_USER": "Nouveau sur Ente",
     "EXISTING_USER": "Utilisateur existant",
-    "ENTER_NAME": "Saisir un nom",
+    "enter_name": "Saisir un nom",
     "PUBLIC_UPLOADER_NAME_MESSAGE": "Ajouter un nom afin que vos amis sachent qui remercier pour ces magnifiques photos!",
     "ENTER_EMAIL": "Saisir l'adresse e-mail",
     "EMAIL_ERROR": "Saisir un e-mail valide",

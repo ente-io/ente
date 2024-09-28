@@ -21,7 +21,7 @@ export default function UserNameInputDialog({
         <DialogBox maxWidth="xs" open={open} onClose={onClose}>
             <DialogIcon icon={<AutoAwesomeOutlinedIcon />} />
 
-            <DialogTitle>{t("ENTER_NAME")}</DialogTitle>
+            <DialogTitle>{t("enter_name")}</DialogTitle>
 
             <DialogContent>
                 <Typography color={"text.muted"} pb={1}>
