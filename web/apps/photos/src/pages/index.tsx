@@ -1,5 +1,6 @@
 import { Login } from "@/accounts/components/Login";
 import { SignUp } from "@/accounts/components/SignUp";
+import type { SRPAttributes } from "@/accounts/types/srp";
 import log from "@/base/log";
 import { albumsAppOrigin, customAPIHost } from "@/base/origins";
 import { DevSettings } from "@/new/photos/components/DevSettings";
@@ -89,7 +90,26 @@ export default function LandingPage() {
         if (key && token) {
             await router.push(PAGES.GALLERY);
         } else if (user?.email) {
-            await router.push(PAGES.VERIFY);
+            // The user had previously entered their email on the login screen
+            // but closed the tab before proceeding (or opened a us in a new tab
+            // at this point).
+            //
+            // In such cases, we'll have an email present.
+            //
+            // Where to go next depends on whether they have enabled email
+            // verification or not.
+            //
+            // The login page would have fetched and saved SRP attributes, so we
+            // can see if they are present and indicate the email verification
+            // is not required. Otherwise, move to the verification page.
+            const srpAttributes: SRPAttributes = getData(
+                LS_KEYS.SRP_ATTRIBUTES,
+            );
+            if (srpAttributes && !srpAttributes.isEmailMFAEnabled) {
+                await router.push(PAGES.CREDENTIALS);
+            } else {
+                await router.push(PAGES.VERIFY);
+            }
         }
         await initLocalForage();
         setLoading(false);
