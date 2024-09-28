@@ -174,6 +174,10 @@ export const reconstructPeople = async (): Promise<Person[]> => {
         // in the UI.
         if (isHidden) return undefined;
 
+        // Older versions of the mobile app marked hidden cgroups by setting
+        // their name to an empty string.
+        if (!name) return undefined;
+
         // Person faces from all the clusters assigned to this cgroup, sorted by
         // their score.
         const faces = assigned
