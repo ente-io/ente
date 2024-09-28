@@ -205,7 +205,7 @@ class MagicCacheService {
       queueUpdate("Prompts data updated");
     } else if (lastMagicCacheUpdateTime <
         DateTime.now()
-            .subtract(const Duration(days: 1))
+            .subtract(const Duration(hours: 12))
             .millisecondsSinceEpoch) {
       queueUpdate("Cache is old");
     }
