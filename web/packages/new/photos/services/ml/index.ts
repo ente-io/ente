@@ -14,7 +14,6 @@ import type { EnteFile } from "@/new/photos/types/file";
 import { ensure } from "@/utils/ensure";
 import { throttled } from "@/utils/promise";
 import { proxy, transfer } from "comlink";
-import { isInternalUser } from "../feature-flags";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
 import { setSearchPeople } from "../search";
 import type { UploadItem } from "../upload/types";
@@ -342,8 +341,6 @@ export const mlSync = async () => {
 const workerDidUnawaitedIndex = () => void updateClustersAndPeople();
 
 const updateClustersAndPeople = async () => {
-    if (!(await isInternalUser())) return;
-
     const masterKey = await masterKeyFromSession();
 
     // Fetch existing cgroups from remote.

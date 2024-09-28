@@ -301,10 +301,6 @@ const clusterBatchLinear = async (
             if (csim > nnCosineSimilarity && csim >= threshold) {
                 nnIndex = j;
                 nnCosineSimilarity = csim;
-
-                // If we've find something above our early exit threshold, stop
-                // looking for a better match (A way to speed up clustering).
-                if (csim >= 0.9) break;
             }
         }
 
