@@ -59,48 +59,11 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
     useEffect(() => {
         const main = async () => {
             const user: User = getData(LS_KEYS.USER);
-            const keyAttributes: KeyAttributes = getData(
-                LS_KEYS.KEY_ATTRIBUTES,
-            );
-            if (!user?.email) {
-                router.push("/");
-            } else if (
-                keyAttributes?.encryptedKey &&
-                (user.token || user.encryptedToken)
-            ) {
-                router.push(PAGES.CREDENTIALS);
+            const redirect = await redirectionIfNeeded(user);
+            if (redirect) {
+                router.push(redirect);
             } else {
-                // The user might have email verification disabled, but after
-                // previously entering their email on the login screen, they
-                // might've closed the tab before proceeding (or opened a us in
-                // a new tab at this point).
-                //
-                // In such cases, we'll end up here with an email present.
-                //
-                // To distinguish this scenario from the normal email
-                // verification flow, we can check to see the SRP attributes
-                // (the login page would've fetched and saved them). If they are
-                // present and indicate that email verification is not required,
-                // redirect to the password verification page.
-                const srpAttributes: SRPAttributes = getData(
-                    LS_KEYS.SRP_ATTRIBUTES,
-                );
-                if (srpAttributes && !srpAttributes.isEmailMFAEnabled) {
-                    // Fetch the latest SRP attributes instead of relying on the
-                    // potentially stale stored values. This is an infrequent scenario
-                    // path, so extra API calls are fine.
-                    const latestSRPAttributes = await getSRPAttributes(email);
-                    if (
-                        latestSRPAttributes &&
-                        !latestSRPAttributes.isEmailMFAEnabled
-                    ) {
-                        router.push(PAGES.CREDENTIALS);
-                    } else {
-                        setEmail(user.email);
-                    }
-                } else {
-                    setEmail(user.email);
-                }
+                setEmail(user.email);
             }
         };
         main();
@@ -284,3 +247,45 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
 };
 
 export default Page;
+
+/**
+ * A function called during page load to see if a redirection is required
+ *
+ * @returns The slug to redirect to, if needed.
+ */
+const redirectionIfNeeded = async (user: User | undefined) => {
+    const email = user?.email;
+    if (!email) {
+        return "/";
+    }
+
+    const keyAttributes: KeyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
+
+    if (keyAttributes?.encryptedKey && (user.token || user.encryptedToken)) {
+        return PAGES.CREDENTIALS;
+    }
+
+    // The user might have email verification disabled, but after previously
+    // entering their email on the login screen, they might've closed the tab
+    // before proceeding (or opened a us in a new tab at this point).
+    //
+    // In such cases, we'll end up here with an email present.
+    //
+    // To distinguish this scenario from the normal email verification flow, we
+    // can check to see the SRP attributes (the login page would've fetched and
+    // saved them). If they are present and indicate that email verification is
+    // not required, redirect to the password verification page.
+
+    const srpAttributes: SRPAttributes = getData(LS_KEYS.SRP_ATTRIBUTES);
+    if (srpAttributes && !srpAttributes.isEmailMFAEnabled) {
+        // Fetch the latest SRP attributes instead of relying on the potentially
+        // stale stored values. This is an infrequent scenario path, so extra
+        // API calls are fine.
+        const latestSRPAttributes = await getSRPAttributes(email);
+        if (latestSRPAttributes && !latestSRPAttributes.isEmailMFAEnabled) {
+            return PAGES.CREDENTIALS;
+        }
+    }
+
+    return undefined;
+};
