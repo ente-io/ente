@@ -31,6 +31,27 @@ import { NameInputDialog } from "../NameInputDialog";
 import type { GalleryBarImplProps } from "./BarImpl";
 import { GalleryItemsHeaderAdapter, GalleryItemsSummary } from "./ListHeader";
 
+/**
+ * Derived UI state backing the gallery when it is in "people" mode.
+ *
+ * This may be different from the actual underlying state since there might be
+ * unsynced data (hidden or deleted that have not yet been synced with remote)
+ * that should be taken into account for the UI state.
+ */
+export interface GalleryPeopleState {
+    /**
+     * The currently selected person, if any.
+     *
+     * Whenever this is present, it is guaranteed to be one of the items from
+     * within {@link people}.
+     */
+    activePerson: Person | undefined;
+    /**
+     * The list of people to show.
+     */
+    people: Person[];
+}
+
 type PeopleHeaderProps = Pick<GalleryBarImplProps, "onSelectPerson"> & {
     person: Person;
     appContext: NewAppContextPhotos;
@@ -107,7 +128,7 @@ const CGroupPersonOptions: React.FC<CGroupPersonOptionsProps> = ({
             ),
             close: { text: t("cancel") },
             proceed: {
-                text: t("RESET"),
+                text: t("reset"),
                 action: doDeletePerson,
             },
             buttonDirection: "row",
@@ -151,8 +172,8 @@ const CGroupPersonOptions: React.FC<CGroupPersonOptionsProps> = ({
             <NameInputDialog
                 open={openAddNameInput}
                 onClose={() => setOpenAddNameInput(false)}
-                title={pt("Rename person")}
-                placeholder={t("ENTER_NAME") /* TODO-Cluster */}
+                title={pt("Rename person") /* TODO-Cluster pt()'s */}
+                placeholder={t("enter_name")}
                 initialValue={cgroup.data.name ?? ""}
                 submitButtonTitle={t("rename")}
                 onSubmit={renamePersonUsingName}
@@ -210,10 +231,10 @@ const ClusterPersonOptions: React.FC<ClusterPersonOptionsProps> = ({
             <NameInputDialog
                 open={openNameInput}
                 onClose={() => setOpenNameInput(false)}
-                title={pt("Add person")}
-                placeholder={t("ENTER_NAME") /* TODO-Cluster */}
+                title={pt("Add person") /* TODO-Cluster */}
+                placeholder={t("enter_name")}
                 initialValue={""}
-                submitButtonTitle={t("ADD")}
+                submitButtonTitle={t("add")}
                 onSubmit={addPersonWithName}
             />
         </>

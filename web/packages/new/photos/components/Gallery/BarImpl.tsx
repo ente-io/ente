@@ -53,6 +53,10 @@ export type GalleryBarMode = "albums" | "hidden-albums" | "people";
 
 export interface GalleryBarImplProps {
     /**
+     * When `true`, the bar shows a button to switch to the people section.
+     */
+    showPeopleSectionButton: boolean;
+    /**
      * What are we displaying currently.
      */
     mode: GalleryBarMode;
@@ -94,11 +98,9 @@ export interface GalleryBarImplProps {
      */
     people: Person[];
     /**
-     * The ID of the currently selected person.
-     *
-     * Required if mode is "people".
+     * The currently selected person, if any.
      */
-    activePersonID: string | undefined;
+    activePerson: Person | undefined;
     /**
      * Called when the selection should be moved to a new person in the bar, or
      * reset to the default state (when {@link person} is `undefined`).
@@ -107,6 +109,7 @@ export interface GalleryBarImplProps {
 }
 
 export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
+    showPeopleSectionButton,
     mode,
     onChangeMode,
     collectionSummaries,
@@ -116,7 +119,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     collectionsSortBy,
     onChangeCollectionsSortBy,
     people,
-    activePersonID,
+    activePerson,
     onSelectPerson,
 }) => {
     const isMobile = useIsMobileWidth();
@@ -194,11 +197,11 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                 );
                 break;
             case "people":
-                i = people.findIndex(({ id }) => id == activePersonID);
+                i = people.findIndex(({ id }) => id == activePerson?.id);
                 break;
         }
         if (i != -1) listRef.current.scrollToItem(i, "smart");
-    }, [mode, collectionSummaries, activeCollectionID, people, activePersonID]);
+    }, [mode, collectionSummaries, activeCollectionID, people, activePerson]);
 
     const itemData = useMemo<ItemData>(
         () =>
@@ -210,12 +213,9 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                       onSelectCollectionID,
                   }
                 : {
-                      type: "people",
+                      type: "people" as const,
                       people,
-                      activePerson: ensure(
-                          people.find((p) => p.id == activePersonID) ??
-                              people[0],
-                      ),
+                      activePerson,
                       onSelectPerson,
                   },
         [
@@ -224,12 +224,12 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
             activeCollectionID,
             onSelectCollectionID,
             people,
-            activePersonID,
+            activePerson,
             onSelectPerson,
         ],
     );
 
-    const controls1 = isMobile && (
+    const controls1 = isMobile && mode != "people" && (
         <Box display="flex" alignItems={"center"} gap={1}>
             <CollectionsSortOptions
                 activeSortBy={collectionsSortBy}
@@ -242,7 +242,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
         </Box>
     );
 
-    const controls2 = !isMobile && (
+    const controls2 = !isMobile && mode != "people" && (
         <Box display="flex" alignItems={"center"} gap={1} height={"64px"}>
             <CollectionsSortOptions
                 activeSortBy={collectionsSortBy}
@@ -255,9 +255,14 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     );
 
     return (
-        <BarWrapper>
+        // Hide the bottom border if we're showing the empty state for people.
+        <BarWrapper
+            sx={people.length ? {} : { borderBlockEndColor: "transparent" }}
+        >
             <Row1>
-                <ModeIndicator {...{ mode, onChangeMode }} />
+                <ModeIndicator
+                    {...{ showPeopleSectionButton, mode, onChangeMode }}
+                />
                 {controls1}
             </Row1>
             <Row2>
@@ -314,33 +319,46 @@ export const Row2 = styled(Box)`
 `;
 
 const ModeIndicator: React.FC<
-    Pick<GalleryBarImplProps, "mode" | "onChangeMode">
-> = ({ mode, onChangeMode }) => {
+    Pick<
+        GalleryBarImplProps,
+        "showPeopleSectionButton" | "mode" | "onChangeMode"
+    >
+> = ({ showPeopleSectionButton, mode, onChangeMode }) => {
     // Mode switcher is not shown in the hidden albums section.
     if (mode == "hidden-albums") {
         return <Typography>{t("hidden_albums")}</Typography>;
     }
 
-    // Show the static mode indicator with only the "Albums" title unless we
-    // come here with the people mode already set. This is because we don't
-    // currently have an empty state for the People mode when ML is not enabled.
-    if (mode == "albums") {
+    // Show the static mode indicator with only the "Albums" title if we have
+    // not been asked to show the people button (there are no other sections to
+    // switch to in such a case).
+    if (!showPeopleSectionButton) {
         return <Typography>{t("albums")}</Typography>;
     }
 
     return (
         <Stack direction="row" sx={{ gap: "10px" }}>
-            <AlbumModeButton onClick={() => onChangeMode("albums")}>
+            <ModeButton
+                active={mode == "albums"}
+                onClick={() => onChangeMode("albums")}
+            >
                 <Typography>{t("albums")}</Typography>
-            </AlbumModeButton>
-            <Typography>{t("people")}</Typography>
+            </ModeButton>
+            <ModeButton
+                active={mode == "people"}
+                onClick={() => onChangeMode("people")}
+            >
+                <Typography>{t("people")}</Typography>
+            </ModeButton>
         </Stack>
     );
 };
 
-const AlbumModeButton = styled(UnstyledButton)(
-    ({ theme }) => `
-    p { color: ${theme.colors.text.muted} }
+const ModeButton = styled(UnstyledButton, {
+    shouldForwardProp: (propName) => propName != "active",
+})<{ active: boolean }>(
+    ({ active, theme }) => `
+    p { color: ${active ? theme.colors.text.base : theme.colors.text.muted} }
     p:hover { color: ${theme.colors.text.base} }
 `,
 );
@@ -407,7 +425,7 @@ type ItemData =
     | {
           type: "people";
           people: Person[];
-          activePerson: Person;
+          activePerson: Person | undefined;
           onSelectPerson: (person: Person) => void;
       };
 
@@ -573,7 +591,7 @@ const ActiveIndicator = styled("div")`
 
 interface PersonCardProps {
     person: Person;
-    activePerson: Person;
+    activePerson: Person | undefined;
     onSelectPerson: (person: Person) => void;
 }
 
@@ -586,10 +604,11 @@ const PersonCard: React.FC<PersonCardProps> = ({
         <ItemCard
             TileComponent={BarItemTile}
             coverFile={person.displayFaceFile}
+            coverFaceID={person.displayFaceID}
             onClick={() => onSelectPerson(person)}
         >
             {person.name && <CardText text={person.name} />}
         </ItemCard>
-        {activePerson.id === person.id && <ActiveIndicator />}
+        {activePerson?.id === person.id && <ActiveIndicator />}
     </Box>
 );

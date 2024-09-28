@@ -5,7 +5,6 @@
 import { isDesktop } from "@/base/app";
 import { blobCache } from "@/base/blob-cache";
 import { ensureElectron } from "@/base/electron";
-import { isDevBuild } from "@/base/env";
 import log from "@/base/log";
 import { masterKeyFromSession } from "@/base/session-store";
 import type { Electron } from "@/base/types/ipc";
@@ -15,7 +14,6 @@ import type { EnteFile } from "@/new/photos/types/file";
 import { ensure } from "@/utils/ensure";
 import { throttled } from "@/utils/promise";
 import { proxy, transfer } from "comlink";
-import { isInternalUser } from "../feature-flags";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
 import { setSearchPeople } from "../search";
 import type { UploadItem } from "../upload/types";
@@ -88,6 +86,9 @@ class MLState {
     /**
      * Snapshot of the {@link Person}s returned by the {@link peopleSnapshot}
      * function.
+     *
+     * It will be `undefined` only if ML is disabled. Otherwise, it will be an
+     * empty array even if the snapshot is pending its first sync.
      */
     peopleSnapshot: Person[] | undefined;
 
@@ -96,6 +97,13 @@ class MLState {
      * whose faces we are regenerating.
      */
     inFlightFaceCropRegens = new Map<number, Promise<void>>();
+
+    /**
+     * Cached object URLs to face crops that we have previously vended out.
+     *
+     * The cache is only cleared on logout.
+     */
+    faceCropObjectURLCache = new Map<string, string>();
 }
 
 /** State shared by the functions in this module. See {@link MLState}. */
@@ -107,7 +115,7 @@ const worker = () =>
 
 const createComlinkWorker = async () => {
     const electron = ensureElectron();
-    const delegate = { workerDidUpdateStatus };
+    const delegate = { workerDidUpdateStatus, workerDidUnawaitedIndex };
 
     // Obtain a message port from the Electron layer.
     const messagePort = await createMLWorker(electron);
@@ -180,6 +188,7 @@ export const isMLSupported = isDesktop;
  */
 export const initML = () => {
     _state.isMLEnabled = isMLEnabledLocal();
+    resetPeopleSnapshot();
 };
 
 export const logoutML = async () => {
@@ -188,6 +197,9 @@ export const logoutML = async () => {
     // execution contexts], it gets called first in the logout sequence, and
     // then this function (`logoutML`) gets called at a later point in time.
 
+    [..._state.faceCropObjectURLCache.values()].forEach((url) =>
+        URL.revokeObjectURL(url),
+    );
     _state = new MLState();
     await clearMLDB();
 };
@@ -213,6 +225,7 @@ export const enableML = async () => {
     setIsMLEnabledLocal(true);
     _state.isMLEnabled = true;
     setInterimScheduledStatus();
+    resetPeopleSnapshot();
     // Trigger updates, but don't wait for them to finish.
     void updateMLStatusSnapshot().then(mlSync);
 };
@@ -230,6 +243,7 @@ export const disableML = async () => {
     _state.isSyncing = false;
     await terminateMLWorker();
     triggerStatusUpdate();
+    resetPeopleSnapshot();
 };
 
 /**
@@ -313,28 +327,30 @@ export const mlSync = async () => {
 
     // Dependency order for the sync
     //
-    //     files -> faces -> cgroups -> clusters
+    //     files -> faces -> cgroups -> clusters -> people
     //
 
-    const w = await worker();
-
     // Fetch indexes, or index locally if needed.
-    await w.index();
+    await (await worker()).index();
 
-    // TODO-Cluster
-    if (await wipClusterEnable()) {
-        const masterKey = await masterKeyFromSession();
-
-        // Fetch existing cgroups from remote.
-        await pullUserEntities("cgroup", masterKey);
-
-        // Generate or update local clusters.
-        await w.clusterFaces(masterKey);
-    }
-
-    await updatePeople();
+    await updateClustersAndPeople();
 
     _state.isSyncing = false;
+};
+
+const workerDidUnawaitedIndex = () => void updateClustersAndPeople();
+
+const updateClustersAndPeople = async () => {
+    const masterKey = await masterKeyFromSession();
+
+    // Fetch existing cgroups from remote.
+    await pullUserEntities("cgroup", masterKey);
+
+    // Generate or update local clusters.
+    await (await worker()).clusterFaces(masterKey);
+
+    // Update the people shown in the UI.
+    await updatePeople();
 };
 
 /**
@@ -360,14 +376,6 @@ export const indexNewUpload = (enteFile: EnteFile, uploadItem: UploadItem) => {
     log.debug(() => ["ml/liveq", { enteFile, uploadItem }]);
     void worker().then((w) => w.onUpload(enteFile, uploadItem));
 };
-
-/**
- * WIP! Don't enable, dragon eggs are hatching here.
- * TODO-Cluster
- */
-export const wipClusterEnable = async (): Promise<boolean> =>
-    (!!process.env.NEXT_PUBLIC_ENTE_WIP_CL && isDevBuild) ||
-    (await isInternalUser());
 
 export type MLStatus =
     | { phase: "disabled" /* The ML remote flag is off */ }
@@ -540,15 +548,24 @@ export const peopleSubscribe = (onChange: () => void): (() => void) => {
 };
 
 /**
+ * If ML is enabled, set the people snapshot to an empty array to indicate that
+ * ML is enabled, but we're still reading in the set of people.
+ *
+ * Otherwise, if ML is disabled, set the people snapshot to `undefined`.
+ */
+const resetPeopleSnapshot = () =>
+    setPeopleSnapshot(_state.isMLEnabled ? [] : undefined);
+
+/**
  * Return the last known, cached {@link people}.
  *
  * This, along with {@link peopleSnapshot}, is meant to be used as arguments to
  * React's {@link useSyncExternalStore}.
  *
- * A return value of `undefined` indicates that we're either still loading the
- * initial list of people, or that the user has ML disabled and thus doesn't
- * have any people (this is distinct from the case where the user has ML enabled
- * but doesn't have any named "person" clusters so far).
+ * A return value of `undefined` indicates that ML is disabled. In all other
+ * cases, the list will be either empty (if we're either still loading the
+ * initial list of people, or if the user doesn't have any people), or, well,
+ * non-empty.
  */
 export const peopleSnapshot = () => _state.peopleSnapshot;
 
@@ -589,19 +606,72 @@ export const clipMatches = (
 ): Promise<CLIPMatches | undefined> =>
     worker().then((w) => w.clipMatches(searchPhrase));
 
+/** A face ID annotated with the ID of the person to which it is associated. */
+export interface AnnotatedFaceID {
+    faceID: string;
+    personID: string;
+}
+
 /**
- * Return the IDs of all the faces in the given {@link enteFile} that are not
- * associated with a person cluster.
+ * List of faces found in a file
+ *
+ * It is actually a pair of lists, one annotated by the person ids, and one with
+ * just the face ids.
  */
-export const unidentifiedFaceIDs = async (
+export interface AnnotatedFacesForFile {
+    /**
+     * A list of {@link AnnotatedFaceID}s for all faces in the file that are
+     * also associated with a {@link Person}.
+     */
+    annotatedFaceIDs: AnnotatedFaceID[];
+    /* A list of the remaining face (ids). */
+    otherFaceIDs: string[];
+}
+
+/**
+ * Return the list of faces found in the given {@link enteFile}.
+ */
+export const getAnnotatedFacesForFile = async (
     enteFile: EnteFile,
-): Promise<string[]> => {
+): Promise<AnnotatedFacesForFile> => {
+    const annotatedFaceIDs: AnnotatedFaceID[] = [];
+    const otherFaceIDs: string[] = [];
+
     const index = await getFaceIndex(enteFile.id);
-    return index?.faces.map((f) => f.faceID) ?? [];
+    if (!index) return { annotatedFaceIDs, otherFaceIDs };
+
+    const people = _state.peopleSnapshot ?? [];
+
+    const faceIDToPersonID = new Map<string, string>();
+    for (const person of people) {
+        let faceIDs: string[];
+        if (person.type == "cgroup") {
+            faceIDs = person.cgroup.data.assigned.map((c) => c.faces).flat();
+        } else {
+            faceIDs = person.cluster.faces;
+        }
+        for (const faceID of faceIDs) {
+            faceIDToPersonID.set(faceID, person.id);
+        }
+    }
+
+    for (const { faceID } of index.faces) {
+        const personID = faceIDToPersonID.get(faceID);
+        if (personID) {
+            annotatedFaceIDs.push({ faceID, personID });
+        } else {
+            otherFaceIDs.push(faceID);
+        }
+    }
+
+    return { annotatedFaceIDs, otherFaceIDs };
 };
 
 /**
- * Return the cached face crop for the given face, regenerating it if needed.
+ * Return a URL to the face crop for the given face, regenerating it if needed.
+ *
+ * The resultant URL is cached (both the object URL itself, and the underlying
+ * file crop blob used to generete it).
  *
  * @param faceID The id of the face whose face crop we want.
  *
@@ -617,8 +687,17 @@ export const faceCrop = async (faceID: string, enteFile: EnteFile) => {
 
     await inFlight;
 
-    const cache = await blobCache("face-crops");
-    return cache.get(faceID);
+    let url = _state.faceCropObjectURLCache.get(faceID);
+    if (!url) {
+        const cache = await blobCache("face-crops");
+        const blob = await cache.get(faceID);
+        if (blob) {
+            url = URL.createObjectURL(blob);
+            if (url) _state.faceCropObjectURLCache.set(faceID, url);
+        }
+    }
+
+    return url;
 };
 
 /**

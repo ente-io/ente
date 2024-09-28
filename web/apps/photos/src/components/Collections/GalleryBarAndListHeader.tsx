@@ -9,7 +9,6 @@ import {
     type CollectionsSortBy,
     type CollectionSummaries,
 } from "@/new/photos/types/collection";
-import { ensure } from "@/utils/ensure";
 import { includes } from "@/utils/type-guards";
 import {
     getData,
@@ -87,6 +86,7 @@ type CollectionsProps = Omit<
  */
 export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
     shouldHide,
+    showPeopleSectionButton,
     mode,
     onChangeMode,
     collectionSummaries,
@@ -95,7 +95,7 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
     setActiveCollectionID,
     hiddenCollectionSummaries,
     people,
-    activePersonID,
+    activePerson,
     onSelectPerson,
     setCollectionNamerAttributes,
     setPhotoListHeader,
@@ -171,14 +171,13 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
                         }
                         onCollectionCast={() => setOpenAlbumCastDialog(true)}
                     />
-                ) : (
+                ) : activePerson ? (
                     <PeopleHeader
-                        person={ensure(
-                            people.find((p) => p.id == activePersonID) ??
-                                people[0],
-                        )}
+                        person={activePerson}
                         {...{ onSelectPerson, appContext }}
                     />
+                ) : (
+                    <></>
                 ),
             itemType: ITEM_TYPE.HEADER,
             height: 68,
@@ -189,8 +188,7 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
         toShowCollectionSummaries,
         activeCollectionID,
         isActiveCollectionDownloadInProgress,
-        people,
-        activePersonID,
+        activePerson,
     ]);
 
     if (shouldBeHidden) {
@@ -201,11 +199,12 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
         <>
             <GalleryBarImpl
                 {...{
+                    showPeopleSectionButton,
                     mode,
                     onChangeMode,
                     activeCollectionID,
                     people,
-                    activePersonID,
+                    activePerson,
                     onSelectPerson,
                     collectionsSortBy,
                 }}

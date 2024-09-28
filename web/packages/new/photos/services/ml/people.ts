@@ -1,4 +1,3 @@
-import { wipClusterEnable } from ".";
 import type { EnteFile } from "../../types/file";
 import { getLocalFiles } from "../files";
 import { savedCGroups, type CGroup } from "../user-entity";
@@ -138,8 +137,6 @@ export type Person = (
  * reference.
  */
 export const reconstructPeople = async (): Promise<Person[]> => {
-    if (!(await wipClusterEnable())) return [];
-
     const files = await getLocalFiles("normal");
     const fileByID = new Map(files.map((f) => [f.id, f]));
 
@@ -164,6 +161,20 @@ export const reconstructPeople = async (): Promise<Person[]> => {
         }
     }
 
+    // Return annotated "person faces" corresponding to the given face ids,
+    // sorting them by the creation time of the file they belong to.
+    //
+    // Within the same file, sort by the face score.
+    const personFacesSortedNewestFirst = (faceIDs: string[]) =>
+        faceIDs
+            .map((faceID) => personFaceByID.get(faceID))
+            .filter((pf) => !!pf)
+            .sort((a, b) => {
+                const at = a.file.metadata.creationTime;
+                const bt = b.file.metadata.creationTime;
+                return bt == at ? b.score - a.score : bt - at;
+            });
+
     // Help out tsc.
     type Interim = (Person | undefined)[];
 
@@ -177,18 +188,19 @@ export const reconstructPeople = async (): Promise<Person[]> => {
         // in the UI.
         if (isHidden) return undefined;
 
+        // Older versions of the mobile app marked hidden cgroups by setting
+        // their name to an empty string.
+        if (!name) return undefined;
+
         // Person faces from all the clusters assigned to this cgroup, sorted by
-        // their score.
-        const faces = assigned
-            .map(({ faces }) =>
-                faces.map((id) => personFaceByID.get(id)).filter((f) => !!f),
-            )
-            .flat()
-            .sort((a, b) => b.score - a.score);
+        // recency (then score).
+        const faces = personFacesSortedNewestFirst(
+            assigned.map(({ faces }) => faces).flat(),
+        );
 
         // Ignore this cgroup if we don't have visible faces left in it.
-        const highestScoringFace = faces[0];
-        if (!highestScoringFace) return undefined;
+        const mostRecentFace = faces[0];
+        if (!mostRecentFace) return undefined;
 
         // IDs of the files containing this face.
         const fileIDs = [...new Set(faces.map((f) => f.file.id))];
@@ -207,8 +219,8 @@ export const reconstructPeople = async (): Promise<Person[]> => {
             displayFaceID = avatarFaceID;
             displayFaceFile = avatarFile;
         } else {
-            displayFaceID = highestScoringFace.faceID;
-            displayFaceFile = highestScoringFace.file;
+            displayFaceID = mostRecentFace.faceID;
+            displayFaceFile = mostRecentFace.file;
         }
 
         return {
@@ -225,16 +237,14 @@ export const reconstructPeople = async (): Promise<Person[]> => {
     // Convert local-only clusters to people.
     const localClusters = await savedFaceClusters();
     const clusterPeople: Interim = localClusters.map((cluster) => {
-        const faces = cluster.faces
-            .map((id) => personFaceByID.get(id))
-            .filter((f) => !!f);
+        const faces = personFacesSortedNewestFirst(cluster.faces);
+
+        // Ignore this cluster if we don't have visible faces left in it.
+        const mostRecentFace = faces[0];
+        if (!mostRecentFace) return undefined;
 
         // Ignore clusters with too few visible faces.
         if (faces.length < 10) return undefined;
-
-        const topFace = faces.reduce((top, face) =>
-            top.score > face.score ? top : face,
-        );
 
         return {
             type: "cluster",
@@ -242,15 +252,17 @@ export const reconstructPeople = async (): Promise<Person[]> => {
             id: cluster.id,
             name: undefined,
             fileIDs: [...new Set(faces.map((f) => f.file.id))],
-            displayFaceID: topFace.faceID,
-            displayFaceFile: topFace.file,
+            displayFaceID: mostRecentFace.faceID,
+            displayFaceFile: mostRecentFace.file,
         };
     });
 
-    return cgroupPeople
-        .concat(clusterPeople)
-        .filter((c) => !!c)
-        .sort((a, b) => b.fileIDs.length - a.fileIDs.length);
+    const sorted = (ps: Interim) =>
+        ps
+            .filter((c) => !!c)
+            .sort((a, b) => b.fileIDs.length - a.fileIDs.length);
+
+    return sorted(cgroupPeople).concat(sorted(clusterPeople));
 };
 
 /**

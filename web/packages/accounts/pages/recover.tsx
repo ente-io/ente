@@ -99,7 +99,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
 
     const showNoRecoveryKeyMessage = () =>
         setDialogBoxAttributesV2({
-            title: t("SORRY"),
+            title: t("sorry"),
             close: {},
             content: t("NO_RECOVERY_KEY_MESSAGE"),
         });

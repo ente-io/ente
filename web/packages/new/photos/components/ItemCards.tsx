@@ -6,6 +6,7 @@ import downloadManager from "@/new/photos/services/download";
 import { type EnteFile } from "@/new/photos/types/file";
 import { styled } from "@mui/material";
 import React, { useEffect, useState } from "react";
+import { faceCrop } from "../services/ml";
 
 interface ItemCardProps {
     /**
@@ -17,10 +18,16 @@ interface ItemCardProps {
      */
     coverFile?: EnteFile | undefined;
     /**
+     * Optional ID of a specific face within {@link coverFile} to show.
+     *
+     * Precondition: {@link faceID} must be an ID of a face that belongs to the
+     * given {@link coverFile}.
+     */
+    coverFaceID?: string | undefined;
+    /**
      * Optional boolean indicating if the user is currently scrolling.
      *
-     * This is used as a hint by the cover file downloader to prioritize
-     * downloads.
+     * This is used as a hint by the file downloader to prioritize downloads.
      */
     isScrolling?: boolean;
     /**
@@ -28,25 +35,50 @@ interface ItemCardProps {
      */
     onClick?: () => void;
 }
+
 /**
  * A generic card that can be be used to represent collections, files, people -
  * anything that (usually) has an associated "cover photo".
+ *
+ * Usually, we provide it a {@link coverFile} prop to set the file whose
+ * thumbnail should be shown in the card. However, an additional
+ * {@link coverFaceID} prop can be used to show the face crop for that specific
+ * face within the cover file.
+ *
+ * Note that while the common use case is to use this with a cover photo (and an
+ * additional cover faceID), both of these are optional and the item card can
+ * also be used as a static component without an associated cover image by
+ * covering it with an opaque overlay.
  */
 export const ItemCard: React.FC<React.PropsWithChildren<ItemCardProps>> = ({
     TileComponent,
     coverFile,
+    coverFaceID,
     isScrolling,
     onClick,
     children,
 }) => {
-    const [coverImageURL, setCoverImageURL] = useState("");
+    const [coverImageURL, setCoverImageURL] = useState<string | undefined>();
 
     useEffect(() => {
         if (!coverFile) return;
-        void downloadManager
-            .getThumbnailForPreview(coverFile, isScrolling)
-            .then((url) => url && setCoverImageURL(url));
-    }, [coverFile, isScrolling]);
+
+        let didCancel = false;
+
+        if (coverFaceID) {
+            void faceCrop(coverFaceID, coverFile).then(
+                (url) => !didCancel && setCoverImageURL(url),
+            );
+        } else {
+            void downloadManager
+                .getThumbnailForPreview(coverFile, isScrolling)
+                .then((url) => !didCancel && setCoverImageURL(url));
+        }
+
+        return () => {
+            didCancel = true;
+        };
+    }, [coverFile, coverFaceID, isScrolling]);
 
     return (
         <TileComponent {...{ onClick }}>
