@@ -128,7 +128,7 @@ const CGroupPersonOptions: React.FC<CGroupPersonOptionsProps> = ({
             ),
             close: { text: t("cancel") },
             proceed: {
-                text: t("RESET"),
+                text: t("reset"),
                 action: doDeletePerson,
             },
             buttonDirection: "row",
@@ -172,8 +172,8 @@ const CGroupPersonOptions: React.FC<CGroupPersonOptionsProps> = ({
             <NameInputDialog
                 open={openAddNameInput}
                 onClose={() => setOpenAddNameInput(false)}
-                title={pt("Rename person")}
-                placeholder={t("ENTER_NAME") /* TODO-Cluster */}
+                title={pt("Rename person") /* TODO-Cluster pt()'s */}
+                placeholder={t("enter_name")}
                 initialValue={cgroup.data.name ?? ""}
                 submitButtonTitle={t("rename")}
                 onSubmit={renamePersonUsingName}
@@ -231,10 +231,10 @@ const ClusterPersonOptions: React.FC<ClusterPersonOptionsProps> = ({
             <NameInputDialog
                 open={openNameInput}
                 onClose={() => setOpenNameInput(false)}
-                title={pt("Add person")}
-                placeholder={t("ENTER_NAME") /* TODO-Cluster */}
+                title={pt("Add person") /* TODO-Cluster */}
+                placeholder={t("enter_name")}
                 initialValue={""}
-                submitButtonTitle={t("ADD")}
+                submitButtonTitle={t("add")}
                 onSubmit={addPersonWithName}
             />
         </>

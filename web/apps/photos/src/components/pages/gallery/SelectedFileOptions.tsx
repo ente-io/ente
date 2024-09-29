@@ -191,7 +191,7 @@ const SelectedFileOptions = ({
                                 <DownloadIcon />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title={t("ADD")}>
+                        <Tooltip title={t("add")}>
                             <IconButton onClick={addToCollection}>
                                 <AddIcon />
                             </IconButton>
@@ -225,7 +225,7 @@ const SelectedFileOptions = ({
                                 <DownloadIcon />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title={t("ADD")}>
+                        <Tooltip title={t("add")}>
                             <IconButton onClick={addToCollection}>
                                 <AddIcon />
                             </IconButton>
@@ -328,7 +328,7 @@ const SelectedFileOptions = ({
                                 <DownloadIcon />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title={t("ADD")}>
+                        <Tooltip title={t("add")}>
                             <IconButton onClick={addToCollection}>
                                 <AddIcon />
                             </IconButton>

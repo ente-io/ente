@@ -255,7 +255,7 @@ export default function Gallery() {
         accept: ".zip",
     });
 
-    const syncInProgress = useRef(true);
+    const syncInProgress = useRef(false);
     const syncInterval = useRef<NodeJS.Timeout>();
     const resync = useRef<{ force: boolean; silent: boolean }>();
 
@@ -785,6 +785,7 @@ export default function Gallery() {
             resync.current = { force, silent };
             return;
         }
+        const isForced = syncInProgress.current && force;
         syncInProgress.current = true;
         try {
             const token = getToken();
@@ -805,7 +806,14 @@ export default function Gallery() {
             await syncFiles("normal", normalCollections, setFiles);
             await syncFiles("hidden", hiddenCollections, setHiddenFiles);
             await syncTrash(collections, setTrashedFiles);
-            await sync();
+            // syncWithRemote is called with the force flag set to true before
+            // doing an upload. So it is possible, say when resuming a pending
+            // upload, that we get two syncWithRemotes happening in parallel.
+            //
+            // Do the non-file-related sync only for one of these parallel ones.
+            if (!isForced) {
+                await sync();
+            }
         } catch (e) {
             switch (e.message) {
                 case CustomError.SESSION_EXPIRED:

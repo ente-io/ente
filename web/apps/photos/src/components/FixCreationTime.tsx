@@ -252,7 +252,7 @@ const Footer = ({ step, startFix, ...props }) => {
                 )}
                 {step == "completed" && (
                     <Button color="primary" size="large" onClick={props.hide}>
-                        {t("CLOSE")}
+                        {t("close")}
                     </Button>
                 )}
                 {(!step || step == "completed-with-errors") && (
