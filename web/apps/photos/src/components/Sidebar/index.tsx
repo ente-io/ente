@@ -506,7 +506,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
             <EnteMenuItem
                 variant="secondary"
                 onClick={openRecoveryKeyModal}
-                label={t("RECOVERY_KEY")}
+                label={t("recovery_key")}
             />
             {isInternalUserViaEmailCheck() && (
                 <EnteMenuItem
@@ -600,13 +600,13 @@ const HelpSection: React.FC = () => {
         <>
             <EnteMenuItem
                 onClick={requestFeature}
-                label={t("REQUEST_FEATURE")}
+                label={t("request_feature")}
                 variant="secondary"
             />
             <EnteMenuItem
                 onClick={contactSupport}
                 labelComponent={
-                    <span title="support@ente.io">{t("SUPPORT")}</span>
+                    <span title="support@ente.io">{t("support")}</span>
                 }
                 variant="secondary"
             />
@@ -634,9 +634,9 @@ const ExitSection: React.FC = () => {
 
     const confirmLogout = () => {
         setDialogMessage({
-            title: t("LOGOUT_MESSAGE"),
+            title: t("logout_message"),
             proceed: {
-                text: t("LOGOUT"),
+                text: t("logout"),
                 action: logout,
                 variant: "critical",
             },
@@ -649,7 +649,7 @@ const ExitSection: React.FC = () => {
             <EnteMenuItem
                 onClick={confirmLogout}
                 color="critical"
-                label={t("LOGOUT")}
+                label={t("logout")}
                 variant="secondary"
             />
             <EnteMenuItem

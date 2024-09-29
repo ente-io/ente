@@ -140,7 +140,9 @@ export const encryptBlob = (data: BytesOrB64, key: BytesOrB64) =>
  * strings.
  */
 export const encryptBlobB64 = (data: BytesOrB64, key: BytesOrB64) =>
-    assertInWorker(ei._encryptBlobB64(data, key));
+    inWorker()
+        ? ei._encryptBlobB64(data, key)
+        : sharedCryptoWorker().then((w) => w._encryptBlobB64(data, key));
 
 /**
  * Encrypt the thumbnail for a file.

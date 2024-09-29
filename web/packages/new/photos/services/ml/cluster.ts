@@ -1,12 +1,10 @@
+import { assertionFailed } from "@/base/assert";
 import { newNonSecureID } from "@/base/id-worker";
 import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import type { EnteFile } from "../../types/file";
-import {
-    savedCGroupUserEntities,
-    updateOrCreateUserEntities,
-} from "../user-entity";
+import { savedCGroups, updateOrCreateUserEntities } from "../user-entity";
 import { savedFaceClusters, saveFaceClusters } from "./db";
 import {
     faceDirection,
@@ -94,7 +92,7 @@ export const clusterFaces = async (
     let clusters: FaceCluster[] = [];
 
     // Get the locally available remote cluster groups.
-    const cgroupUserEntities = await savedCGroupUserEntities();
+    const cgroups = await savedCGroups();
 
     // Sort them so that the latest ones are first.
     //
@@ -108,9 +106,7 @@ export const clusterFaces = async (
     // slack in how they implement the sync without needing to make an blocking
     // API request for every user interaction.
 
-    const sortedCGroupUserEntities = cgroupUserEntities.sort(
-        (a, b) => b.updatedAt - a.updatedAt,
-    );
+    const sortedCGroups = cgroups.sort((a, b) => b.updatedAt - a.updatedAt);
 
     // Extract the remote clusters.
     clusters = clusters.concat(
@@ -118,7 +114,7 @@ export const clusterFaces = async (
         //
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        sortedCGroupUserEntities.map((cg) => cg.data.assigned).flat(),
+        sortedCGroups.map((cg) => cg.data.assigned).flat(),
     );
 
     // Add on the clusters we have available locally.
@@ -209,18 +205,24 @@ const sortFacesNewestOnesFirst = (
     const fileForFaceID = new Map(
         faces.map(({ faceID }) => [
             faceID,
-            ensure(localFileByID.get(ensure(fileIDFromFaceID(faceID)))),
+            localFileByID.get(ensure(fileIDFromFaceID(faceID))),
         ]),
     );
 
-    const fileForFace = ({ faceID }: { faceID: string }) =>
-        ensure(fileForFaceID.get(faceID));
+    // In unexpected scenarios, we might run clustering without having the
+    // corresponding EnteFile available locally. This shouldn't happen, so log
+    // an warning, but meanwhile let the clustering proceed by assigning such
+    // files an arbitrary creationTime.
+    const sortTimeForFace = ({ faceID }: { faceID: string }) => {
+        const file = fileForFaceID.get(faceID);
+        if (!file) {
+            assertionFailed(`Did not find a local file for faceID ${faceID}`);
+            return 0;
+        }
+        return file.metadata.creationTime;
+    };
 
-    return faces.sort(
-        (a, b) =>
-            fileForFace(b).metadata.creationTime -
-            fileForFace(a).metadata.creationTime,
-    );
+    return faces.sort((a, b) => sortTimeForFace(b) - sortTimeForFace(a));
 };
 
 /**
@@ -299,10 +301,6 @@ const clusterBatchLinear = async (
             if (csim > nnCosineSimilarity && csim >= threshold) {
                 nnIndex = j;
                 nnCosineSimilarity = csim;
-
-                // If we've find something above our early exit threshold, stop
-                // looking for a better match (A way to speed up clustering).
-                if (csim >= 0.9) break;
             }
         }
 
@@ -345,22 +343,22 @@ export const reconcileClusters = async (
     const clusterByID = new Map(clusters.map((c) => [c.id, c]));
 
     // Get the existing remote cluster groups.
-    const cgroupEntities = await savedCGroupUserEntities();
+    const cgroups = await savedCGroups();
 
     // Find the cgroups that have changed since we started.
-    const changedCGroupEntities = cgroupEntities
-        .map((cgroupEntity) => {
-            for (const oldCluster of cgroupEntity.data.assigned) {
+    const changedCGroups = cgroups
+        .map((cgroup) => {
+            for (const oldCluster of cgroup.data.assigned) {
                 // The clustering algorithm does not remove any existing faces, it
                 // can only add new ones to the cluster. So we can use the count as
                 // an indication if something changed.
                 const newCluster = ensure(clusterByID.get(oldCluster.id));
                 if (oldCluster.faces.length != newCluster.faces.length) {
                     return {
-                        ...cgroupEntity,
+                        ...cgroup,
                         data: {
-                            ...cgroupEntity.data,
-                            assigned: cgroupEntity.data.assigned.map(({ id }) =>
+                            ...cgroup.data,
+                            assigned: cgroup.data.assigned.map(({ id }) =>
                                 ensure(clusterByID.get(id)),
                             ),
                         },
@@ -372,19 +370,15 @@ export const reconcileClusters = async (
         .filter((g) => !!g);
 
     // Update remote if needed.
-    if (changedCGroupEntities.length) {
-        await updateOrCreateUserEntities(
-            "cgroup",
-            changedCGroupEntities,
-            masterKey,
-        );
-        log.info(`Updated ${changedCGroupEntities.length} remote cgroups`);
+    if (changedCGroups.length) {
+        await updateOrCreateUserEntities("cgroup", changedCGroups, masterKey);
+        log.info(`Updated ${changedCGroups.length} remote cgroups`);
     }
 
     // Find which clusters are part of remote cgroups.
     const isRemoteClusterID = new Set<string>();
-    for (const cgroupEntity of cgroupEntities) {
-        for (const cluster of cgroupEntity.data.assigned)
+    for (const cgroup of cgroups) {
+        for (const cluster of cgroup.data.assigned)
             isRemoteClusterID.add(cluster.id);
     }
 

@@ -15,6 +15,7 @@ import * as libsodium from "./libsodium";
 export class CryptoWorker {
     encryptBoxB64 = ei._encryptBoxB64;
     encryptThumbnail = ei._encryptThumbnail;
+    _encryptBlobB64 = ei._encryptBlobB64;
     encryptMetadataJSON_New = ei._encryptMetadataJSON_New;
     encryptMetadataJSON = ei._encryptMetadataJSON;
     decryptBox = ei._decryptBox;

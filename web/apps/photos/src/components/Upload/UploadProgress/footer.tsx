@@ -22,7 +22,7 @@ export function UploadProgressFooter() {
                     </Button>
                 ) : (
                     <Button variant="contained" fullWidth onClick={onClose}>
-                        {t("CLOSE")}
+                        {t("close")}
                     </Button>
                 ))}
         </DialogActions>
