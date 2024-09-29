@@ -255,7 +255,7 @@ export default function Gallery() {
         accept: ".zip",
     });
 
-    const syncInProgress = useRef(true);
+    const syncInProgress = useRef(false);
     const syncInterval = useRef<NodeJS.Timeout>();
     const resync = useRef<{ force: boolean; silent: boolean }>();
 
