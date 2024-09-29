@@ -107,6 +107,14 @@ class EntityService {
     }
   }
 
+  Future<void> syncEntity(EntityType type) async {
+    try {
+      await _remoteToLocalSync(type);
+    } catch (e) {
+      _logger.severe("Failed to sync entities", e);
+    }
+  }
+
   Future<void> _remoteToLocalSync(EntityType type) async {
     final int lastSyncTime =
         _prefs.getInt(_getEntityLastSyncTimePrefix(type)) ?? 0;
@@ -116,7 +124,6 @@ class EntityService {
       limit: fetchLimit,
     );
     if (result.isEmpty) {
-      debugPrint("No $type entries to sync");
       return;
     }
     final bool hasMoreItems = result.length == fetchLimit;
