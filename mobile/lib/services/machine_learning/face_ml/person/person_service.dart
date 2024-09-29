@@ -9,12 +9,11 @@ import "package:photos/events/people_changed_event.dart";
 import "package:photos/extensions/stop_watch.dart";
 import "package:photos/models/api/entity/type.dart";
 import "package:photos/models/file/file.dart";
+import 'package:photos/models/ml/face/face.dart';
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/entity_service.dart";
 import "package:shared_preferences/shared_preferences.dart";
-
-import "../../../../models/ml/face/face.dart";
 
 class PersonService {
   final EntityService entityService;
