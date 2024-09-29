@@ -8,10 +8,13 @@ import "package:photos/db/ml/db.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/extensions/stop_watch.dart";
 import "package:photos/models/api/entity/type.dart";
+import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/entity_service.dart";
 import "package:shared_preferences/shared_preferences.dart";
+
+import "../../../../models/ml/face/face.dart";
 
 class PersonService {
   final EntityService entityService;
@@ -290,6 +293,24 @@ class PersonService {
     logger.info("Storing feedback for ${faceIdToClusterID.length} faces");
     await faceMLDataDB.updateFaceIdToClusterId(faceIdToClusterID);
     await faceMLDataDB.bulkAssignClusterToPersonID(clusterToPersonID);
+  }
+
+  Future<void> updateAvatar(PersonEntity p, EnteFile file) async {
+    final Face? face = await MLDataDB.instance.getCoverFaceForPerson(
+      recentFileID: file.uploadedFileID!,
+      personID: p.remoteID,
+    );
+    if (face == null) {
+      throw Exception(
+        "No face found for person ${p.remoteID} in file ${file.uploadedFileID}",
+      );
+    }
+
+    final person = (await getPerson(p.remoteID))!;
+    final updatedPerson = person.copyWith(
+      data: person.data.copyWith(avatarFaceId: face.faceID),
+    );
+    await _updatePerson(updatedPerson);
   }
 
   Future<void> updateAttributes(
