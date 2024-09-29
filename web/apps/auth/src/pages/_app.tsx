@@ -130,7 +130,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
     const somethingWentWrong = () =>
         setDialogBoxAttributesV2({
-            title: t("ERROR"),
+            title: t("error"),
             close: { variant: "critical" },
             content: t("UNKNOWN_ERROR"),
         });

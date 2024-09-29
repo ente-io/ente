@@ -40,8 +40,10 @@ class MethodChannelOnnxDart extends OnnxDartPlatform {
   Future<Float32List?> predict(
     Float32List? inputData,
     Int32List? inputDataInt,
+    Uint8List? inputDataUint8,
     String modelType, {
     int sessionAddress = 0,
+    Int32List? inputShapeList,
   }) {
     return methodChannel.invokeMethod<Float32List?>(
       'predict',
@@ -49,7 +51,9 @@ class MethodChannelOnnxDart extends OnnxDartPlatform {
         'sessionAddress': sessionAddress,
         'inputData': inputData,
         'inputDataInt': inputDataInt,
+        'inputDataUint8': inputDataUint8,
         'modelType': modelType,
+        "inputShapeList": inputShapeList,
       },
     );
   }

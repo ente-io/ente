@@ -5,7 +5,6 @@ import 'package:ente_auth/events/codes_updated_event.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/utils/platform_util.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class CoachMarkWidget extends StatelessWidget {

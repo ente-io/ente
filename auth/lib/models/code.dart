@@ -28,9 +28,13 @@ class Code {
   bool get isPinned => display.pinned;
 
   bool get isTrashed => display.trashed;
+  String get note => display.note;
 
   final Object? err;
   bool get hasError => err != null;
+
+  String get issuerAccount =>
+      account.isNotEmpty ? '$issuer ($account)' : issuer;
 
   Code(
     this.account,
@@ -128,7 +132,7 @@ class Code {
   static Code fromOTPAuthUrl(String rawData, {CodeDisplay? display}) {
     Uri uri = Uri.parse(rawData);
     final issuer = _getIssuer(uri);
-    final account = _getAccount(uri);
+    final account = _getAccount(uri, issuer);
 
     try {
       final code = Code(
@@ -159,7 +163,7 @@ class Code {
     }
   }
 
-  static String _getAccount(Uri uri) {
+  static String _getAccount(Uri uri, String issuer) {
     try {
       String path = Uri.decodeComponent(uri.path);
       if (path.startsWith("/")) {
@@ -170,8 +174,14 @@ class Code {
       if (uri.queryParameters.containsKey("issuer") && !path.contains(":")) {
         return path;
       }
-      return path.split(':')[1];
-    } catch (e) {
+      // handle case where issuer name contains colon
+      if (path.startsWith('$issuer:')) {
+        return path.substring(issuer.length + 1);
+      }
+      return path
+          .substring(path.indexOf(':') + 1); // return data after first colon
+    } catch (e, s) {
+      Logger('_getAccount').severe('Error while parsing account', e, s);
       return "";
     }
   }

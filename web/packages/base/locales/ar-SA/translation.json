@@ -1,15 +1,15 @@
 {
-    "HERO_SLIDE_1_TITLE": "<div>نسخ احتياطية خاصة</div><div>لذكرياتك</div>",
-    "HERO_SLIDE_1": "تشفير من طرف إلى طرف بشكل افتراضي",
-    "HERO_SLIDE_2_TITLE": "<div>يتم تخزينها بأمان</div><div>في ملجأ للطوارئ</div>",
-    "HERO_SLIDE_2": "مصممة لتدوم",
-    "HERO_SLIDE_3_TITLE": "<div>متاح</div><div> في كل مكان</div>",
-    "HERO_SLIDE_3": "أندرويد، آي أو إس، ويب، سطح المكتب",
+    "intro_slide_1_title": "<div>نسخ احتياطية خاصة</div><div>لذكرياتك</div>",
+    "intro_slide_1": "تشفير من طرف إلى طرف بشكل افتراضي",
+    "intro_slide_2_title": "<div>يتم تخزينها بأمان</div><div>في ملجأ للطوارئ</div>",
+    "intro_slide_2": "مصممة لتدوم",
+    "intro_slide_3_title": "<div>متاح</div><div> في كل مكان</div>",
+    "intro_slide_3": "أندرويد، آي أو إس، ويب، سطح المكتب",
     "login": "تسجيل الدخول",
     "sign_up": "تسجيل",
     "NEW_USER": "جديد في Ente",
     "EXISTING_USER": "مستخدم موجود",
-    "ENTER_NAME": "أدخل الاسم",
+    "enter_name": "أدخل الاسم",
     "PUBLIC_UPLOADER_NAME_MESSAGE": "أضف اسما حتى يتمكن أصدقاؤك من معرفة من يشكرون على هذه الصور الرائعة!",
     "ENTER_EMAIL": "أدخل عنوان البريد الإلكتروني",
     "EMAIL_ERROR": "أدخل بريد إلكتروني صالح",
@@ -43,12 +43,12 @@
     "PASSPHRASE_MATCH_ERROR": "كلمات المرور غير متطابقة",
     "create_albums": "إنشاء ألبومات",
     "CREATE_COLLECTION": "ألبوم جديد",
-    "ENTER_ALBUM_NAME": "اسم الألبوم",
-    "CLOSE_OPTION": "إغلاق (Esc)",
-    "ENTER_FILE_NAME": "إسم الملف",
-    "CLOSE": "إغلاق",
-    "NO": "لا",
-    "NOTHING_HERE": "لا شيء يمكن رؤيته هنا بعد 👀",
+    "enter_album_name": "اسم الألبوم",
+    "close_key": "إغلاق (Esc)",
+    "enter_file_name": "إسم الملف",
+    "close": "إغلاق",
+    "no": "لا",
+    "nothing_here": "",
     "upload": "تحميل",
     "import": "استيراد",
     "add_photos": "إضافة صور",
@@ -71,16 +71,17 @@
     "NO_ACCOUNT": "ليس لديك حساب",
     "ACCOUNT_EXISTS": "لديك حساب بالفعل",
     "CREATE": "إنشاء",
-    "DOWNLOAD": "تنزيل",
-    "DOWNLOAD_OPTION": "تنزيل (D)",
-    "DOWNLOAD_FAVORITES": "تنزيل المفضلات",
-    "DOWNLOAD_UNCATEGORIZED": "التنزيل غير المصنف",
-    "DOWNLOAD_HIDDEN_ITEMS": "تنزيل العناصر المخفية",
-    "COPY_OPTION": "نسخ كـ PNG (Ctrl/Cmd - C)",
-    "TOGGLE_FULLSCREEN": "تبديل ملء الشاشة (F)",
-    "ZOOM_IN_OUT": "تكبير/تصغير",
-    "PREVIOUS": "السابق (←)",
-    "NEXT": "التالي (→)",
+    "download": "تنزيل",
+    "download_album": "تنزيل الألبوم",
+    "download_favorites": "تنزيل المفضلات",
+    "download_uncategorized": "التنزيل غير المصنف",
+    "download_hidden_items": "تنزيل العناصر المخفية",
+    "download_key": "تنزيل (D)",
+    "copy_key": "نسخ كـ PNG (Ctrl/Cmd - C)",
+    "toggle_fullscreen_key": "تبديل ملء الشاشة (F)",
+    "zoom_in_out_key": "تكبير/تصغير",
+    "previous_key": "السابق (←)",
+    "next_key": "التالي (→)",
     "title_photos": "صور Ente",
     "title_auth": "مصادقة Ente",
     "title_accounts": "حسابات Ente",
@@ -108,35 +109,33 @@
     "password_changed_elsewhere": "تم تغيير كلمة المرور في مكان آخر",
     "password_changed_elsewhere_message": "يرجى تسجيل الدخول مرة أخرى على هذا الجهاز لاستخدام كلمة المرور الجديدة للمصادقة.",
     "GO_BACK": "رجوع",
-    "RECOVERY_KEY": "مفتاح الاستعادة",
-    "SAVE_LATER": "قم بهذا لاحقا",
-    "SAVE": "حفظ المفتاح",
-    "RECOVERY_KEY_DESCRIPTION": "",
-    "RECOVER_KEY_GENERATION_FAILED": "",
-    "KEY_NOT_STORED_DISCLAIMER": "",
+    "recovery_key": "مفتاح الاستعادة",
+    "do_this_later": "قم بهذا لاحقا",
+    "save_key": "حفظ المفتاح",
+    "RECOVERY_KEY_DESCRIPTION": "إذا نسيت كلمة المرور الخاصة بك، فالطريقة الوحيدة التي يمكنك بها استرداد البيانات الخاصة بك هي بهذا المفتاح.",
+    "RECOVER_KEY_GENERATION_FAILED": "لا يمكن إنشاء رمز الاسترداد، الرجاء المحاولة مرة أخرى",
+    "KEY_NOT_STORED_DISCLAIMER": "لا يتم تخزين هذا المفتاح أليا، لذا يرجى حفظ هذا في مكان آمن",
     "FORGOT_PASSWORD": "نسيت كلمة المرور",
     "RECOVER_ACCOUNT": "إستعادة الحساب",
     "RECOVERY_KEY_HINT": "مفتاح الاستعادة",
     "RECOVER": "استعادة",
     "NO_RECOVERY_KEY": "ما من مفتاح استعادة؟",
     "INCORRECT_RECOVERY_KEY": "مفتاح استعادة غير صحيح",
-    "SORRY": "عذرا",
-    "NO_RECOVERY_KEY_MESSAGE": "",
+    "sorry": "عذرا",
+    "NO_RECOVERY_KEY_MESSAGE": "بسبب طبيعة نظام التشفير التام بين الطرفين، لا يمكن فك تشفير بياناتك دون كلمة المرور أو مفتاح الاسترداد الخاص بك",
     "NO_TWO_FACTOR_RECOVERY_KEY_MESSAGE": "",
-    "CONTACT_SUPPORT": "الاتصال بالدعم",
-    "REQUEST_FEATURE": "طلب ميزة",
-    "SUPPORT": "الدعم",
-    "CONFIRM": "تأكيد",
+    "contact_support": "الاتصال بالدعم",
+    "request_feature": "طلب ميزة",
+    "support": "الدعم",
     "cancel": "إلغاء",
-    "LOGOUT": "تسجيل الخروج",
+    "logout": "تسجيل الخروج",
+    "logout_message": "هل أنت متأكد من أنك تريد تسجيل الخروج؟",
     "delete_account": "حذف الحساب",
     "delete_account_manually_message": "",
-    "LOGOUT_MESSAGE": "هل أنت متأكد من أنك تريد تسجيل الخروج؟",
     "CHANGE_EMAIL": "تغيير البريد الإلكتروني",
-    "OK": "حسنا",
-    "SUCCESS": "تم بنجاح",
-    "ERROR": "خطأ",
-    "MESSAGE": "رسالة",
+    "ok": "حسنا",
+    "success": "تم بنجاح",
+    "error": "خطأ",
     "OFFLINE_MSG": "",
     "install": "تثبيت",
     "install_mobile_app": "",
@@ -195,20 +194,19 @@
     "CANCEL_SUBSCRIPTION_ON_MOBILE": "",
     "CANCEL_SUBSCRIPTION_ON_MOBILE_MESSAGE": "",
     "MAIL_TO_MANAGE_SUBSCRIPTION": "",
-    "RENAME": "اعادة تسمية",
-    "RENAME_FILE": "إعادة تسمية ملف",
-    "RENAME_COLLECTION": "إعادة تسمية ألبوم",
-    "DELETE_COLLECTION_TITLE": "حذف ألبوم؟",
-    "DELETE_COLLECTION": "حذف ألبوم",
-    "DELETE_COLLECTION_MESSAGE": "",
-    "DELETE_PHOTOS": "حذف الصور",
-    "KEEP_PHOTOS": "الاحتفاظ بالصور",
-    "SHARE_COLLECTION": "مشاركة الألبوم",
+    "rename": "اعادة تسمية",
+    "rename_file": "إعادة تسمية ملف",
+    "rename_album": "إعادة تسمية ألبوم",
+    "delete_album": "حذف ألبوم",
+    "delete_album_title": "حذف ألبوم؟",
+    "delete_album_message": "",
+    "delete_photos": "حذف الصور",
+    "keep_photos": "الاحتفاظ بالصور",
+    "share_album": "مشاركة الألبوم",
     "SHARE_WITH_SELF": "عفوا، لا يمكنك المشاركة مع نفسك",
     "ALREADY_SHARED": "",
     "SHARING_BAD_REQUEST_ERROR": "لا يسمح بمشاركة الألبوم",
     "SHARING_DISABLED_FOR_FREE_ACCOUNTS": "المشاركة معطلة للحسابات المجانية",
-    "DOWNLOAD_COLLECTION": "تنزيل الألبوم",
     "CREATE_ALBUM_FAILED": "",
     "search": "بحث",
     "search_results": "نتائج البحث",
@@ -223,7 +221,6 @@
     "photos_count_one": "ذكرى واحدة",
     "photos_count": "{{count, number}} ذكريات",
     "TERMS_AND_CONDITIONS": "أوافق على <a>شروط الخدمة</a> و<b>سياسة الخصوصية</b>",
-    "ADD_TO_COLLECTION": "إضافة إلى الألبوم",
     "SELECTED": "محدد",
     "people": "",
     "indexing_scheduled": "الفهرسة مجدولة...",
@@ -307,43 +304,47 @@
     "LARGER_THAN_AVAILABLE_STORAGE_INFO": "",
     "TOO_LARGE_INFO": "",
     "THUMBNAIL_GENERATION_FAILED_INFO": "",
-    "UPLOAD_TO_COLLECTION": "",
-    "UNCATEGORIZED": "",
-    "ARCHIVE": "",
-    "FAVORITES": "",
-    "ARCHIVE_COLLECTION": "",
-    "ARCHIVE_SECTION_NAME": "",
-    "ALL_SECTION_NAME": "",
-    "MOVE_TO_COLLECTION": "",
-    "UNARCHIVE": "",
-    "UNARCHIVE_COLLECTION": "",
-    "HIDE_COLLECTION": "إخفاء الألبوم",
-    "UNHIDE_COLLECTION": "إلغاء إخفاء الألبوم",
+    "select_album": "",
+    "upload_to_album": "",
+    "add_to_album": "إضافة إلى الألبوم",
+    "move_to_album": "",
+    "unhide_to_album": "",
+    "restore_to_album": "",
+    "section_all": "",
+    "section_uncategorized": "",
+    "section_archive": "",
+    "section_hidden": "",
+    "section_trash": "سلة المهملات",
+    "favorites": "",
+    "archive": "",
+    "archive_album": "",
+    "unarchive": "",
+    "unarchive_album": "",
+    "hide_collection": "إخفاء الألبوم",
+    "unhide_collection": "إلغاء إخفاء الألبوم",
     "MOVE": "نقل",
-    "ADD": "إضافة",
+    "add": "إضافة",
     "REMOVE": "ازالة",
     "YES_REMOVE": "نعم، إزالة",
     "REMOVE_FROM_COLLECTION": "",
-    "TRASH": "سلة المهملات",
     "MOVE_TO_TRASH": "نقل إلى سلة المهملات",
     "TRASH_FILES_MESSAGE": "",
     "TRASH_FILE_MESSAGE": "",
     "DELETE_PERMANENTLY": "حذف بشكل دائم",
     "RESTORE": "استعادة",
-    "RESTORE_TO_COLLECTION": "",
-    "EMPTY_TRASH": "إفراغ سلة المهملات",
-    "EMPTY_TRASH_TITLE": "إفراغ سلة المهملات؟",
-    "EMPTY_TRASH_MESSAGE": "",
-    "LEAVE_SHARED_ALBUM": "",
-    "LEAVE_ALBUM": "",
-    "LEAVE_SHARED_ALBUM_TITLE": "",
-    "LEAVE_SHARED_ALBUM_MESSAGE": "",
+    "empty_trash": "إفراغ سلة المهملات",
+    "empty_trash_title": "إفراغ سلة المهملات؟",
+    "empty_trash_message": "",
+    "leave_album": "",
+    "leave_shared_album_title": "",
+    "leave_shared_album_message": "",
+    "leave_shared_album": "",
     "NOT_FILE_OWNER": "",
     "CONFIRM_SELF_REMOVE_MESSAGE": "",
     "CONFIRM_SELF_AND_OTHER_REMOVE_MESSAGE": "",
-    "SORT_BY_CREATION_TIME_ASCENDING": "",
-    "SORT_BY_UPDATION_TIME_DESCENDING": "",
-    "SORT_BY_NAME": "",
+    "sort_by_creation_time_ascending": "",
+    "sort_by_updation_time_descending": "",
+    "sort_by_name": "",
     "FIX_CREATION_TIME": "",
     "FIX_CREATION_TIME_IN_PROGRESS": "",
     "CREATION_TIME_UPDATED": "",
@@ -357,8 +358,8 @@
     "CUSTOM_TIME": "",
     "REOPEN_PLAN_SELECTOR_MODAL": "",
     "OPEN_PLAN_SELECTOR_MODAL_FAILED": "",
-    "SHARING_DETAILS": "",
-    "MODIFY_SHARING": "",
+    "sharing_details": "",
+    "modify_sharing": "",
     "ADD_COLLABORATORS": "",
     "ADD_NEW_EMAIL": "",
     "shared_with_people_count_zero": "",
@@ -420,13 +421,13 @@
     "STOP_DOWNLOADS_HEADER": "",
     "YES_STOP_DOWNLOADS": "",
     "STOP_ALL_DOWNLOADS_MESSAGE": "",
+    "albums": "",
     "albums_count_one": "",
     "albums_count": "",
-    "ALL_ALBUMS": "",
-    "ALBUMS": "",
-    "ALL_HIDDEN_ALBUMS": "",
-    "HIDDEN_ALBUMS": "",
-    "HIDDEN_ITEMS": "",
+    "all_albums": "",
+    "all_hidden_albums": "",
+    "hidden_albums": "",
+    "hidden_items": "",
     "ENTER_TWO_FACTOR_OTP": "",
     "CREATE_ACCOUNT": "",
     "COPIED": "",
@@ -551,17 +552,14 @@
     "at": "",
     "AUTH_NEXT": "",
     "AUTH_DOWNLOAD_MOBILE_APP": "",
-    "HIDDEN": "",
     "HIDE": "",
     "UNHIDE": "",
-    "UNHIDE_TO_COLLECTION": "",
-    "SORT_BY": "",
-    "NEWEST_FIRST": "",
-    "OLDEST_FIRST": "",
+    "sort_by": "",
+    "newest_first": "",
+    "oldest_first": "",
     "CONVERSION_FAILED_NOTIFICATION_MESSAGE": "",
-    "SELECT_COLLECTION": "",
-    "PIN_ALBUM": "",
-    "UNPIN_ALBUM": "",
+    "pin_album": "",
+    "unpin_album": "",
     "DOWNLOAD_COMPLETE": "",
     "DOWNLOADING_COLLECTION": "",
     "DOWNLOAD_FAILED": "",
@@ -597,21 +595,21 @@
     "COLORS": "",
     "FLIP": "",
     "ROTATION": "",
-    "RESET": "",
+    "reset": "",
     "PHOTO_EDITOR": "",
     "FASTER_UPLOAD": "",
     "FASTER_UPLOAD_DESCRIPTION": "",
-    "CAST_ALBUM_TO_TV": "",
-    "ENTER_CAST_PIN_CODE": "",
-    "PAIR_DEVICE_TO_TV": "",
-    "TV_NOT_FOUND": "",
-    "AUTO_CAST_PAIR": "",
-    "AUTO_CAST_PAIR_DESC": "",
-    "PAIR_WITH_PIN": "",
-    "CHOOSE_DEVICE_FROM_BROWSER": "",
-    "PAIR_WITH_PIN_DESC": "",
-    "VISIT_CAST_ENTE_IO": "",
-    "CAST_AUTO_PAIR_FAILED": "",
+    "cast_album_to_tv": "",
+    "enter_cast_pin_code": "",
+    "pair_device_to_tv": "",
+    "tv_not_found": "",
+    "cast_auto_pair": "",
+    "cast_auto_pair_description": "",
+    "choose_device_from_browser": "",
+    "cast_auto_pair_failed": "",
+    "pair_with_pin": "",
+    "pair_with_pin_description": "",
+    "visit_cast_url": "",
     "FREEHAND": "",
     "APPLY_CROP": "",
     "PHOTO_EDIT_REQUIRED_TO_SAVE": "",

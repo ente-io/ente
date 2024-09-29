@@ -112,29 +112,37 @@ func (c *Controller) HandleAccountDeletion(ctx context.Context, userID int64, lo
 		}
 	} else {
 		logger.Info("user is a family admin, revoking invites & removing members")
-		members, err := c.FetchMembersForAdminID(ctx, userID)
-		if err != nil {
-			return stacktrace.Propagate(err, "")
+		removeErr := c.removeMembers(ctx, userID, logger)
+		if removeErr != nil {
+			return removeErr
 		}
+	}
+	return nil
+}
 
-		for _, member := range members.Members {
-			if member.IsAdmin {
-				continue
-			} else if member.Status == ente.ACCEPTED {
-				logger.Info(fmt.Sprintf("removing memeber_id %d", member.MemberUserID))
-				err = c.RemoveMember(ctx, userID, member.ID)
-				if err != nil {
-					return stacktrace.Propagate(err, "")
-				}
-			} else if member.Status == ente.INVITED {
-				logger.Info(fmt.Sprintf("revoking invite member_id %d", member.MemberUserID))
-				err = c.RevokeInvite(ctx, userID, member.ID)
-				if err != nil {
-					return stacktrace.Propagate(err, "")
-				}
-			} else {
-				logger.WithField("member", member).Error("unxpected state during account deletion")
+func (c *Controller) removeMembers(ctx context.Context, adminID int64, logger *logrus.Entry) error {
+	members, err := c.FetchMembersForAdminID(ctx, adminID)
+	if err != nil {
+		return stacktrace.Propagate(err, "")
+	}
+
+	for _, member := range members.Members {
+		if member.IsAdmin {
+			continue
+		} else if member.Status == ente.ACCEPTED {
+			logger.Info(fmt.Sprintf("removing memeber_id %d", member.MemberUserID))
+			err = c.RemoveMember(ctx, adminID, member.ID)
+			if err != nil {
+				return stacktrace.Propagate(err, "")
 			}
+		} else if member.Status == ente.INVITED {
+			logger.Info(fmt.Sprintf("revoking invite member_id %d", member.MemberUserID))
+			err = c.RevokeInvite(ctx, adminID, member.ID)
+			if err != nil {
+				return stacktrace.Propagate(err, "")
+			}
+		} else {
+			logger.WithField("member", member).Error("unxpected state during account deletion")
 		}
 	}
 	return nil

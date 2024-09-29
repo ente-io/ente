@@ -2,7 +2,6 @@ import { HTTPError } from "@/base/http";
 import type { Location } from "@/base/types";
 import type { Collection } from "@/media/collection";
 import { fileCreationPhotoDate, fileLocation } from "@/media/file-metadata";
-import type { Person } from "@/new/photos/services/ml/cgroups";
 import type { EnteFile } from "@/new/photos/types/file";
 import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";
@@ -12,7 +11,7 @@ import * as chrono from "chrono-node";
 import { expose } from "comlink";
 import { z } from "zod";
 import {
-    pullLocationTags,
+    pullUserEntities,
     savedLocationTags,
     type LocationTag,
 } from "../user-entity";
@@ -23,6 +22,7 @@ import type {
     LocalizedSearchData,
     SearchCollectionsAndFiles,
     SearchDateComponents,
+    SearchPerson,
     SearchSuggestion,
 } from "./types";
 
@@ -37,7 +37,7 @@ export class SearchWorker {
         collections: [],
         files: [],
     };
-    private people: Person[] = [];
+    private people: SearchPerson[] = [];
 
     /**
      * Fetch any state we might need when the actual search happens.
@@ -47,7 +47,7 @@ export class SearchWorker {
      */
     async sync(masterKey: Uint8Array) {
         return Promise.all([
-            pullLocationTags(masterKey)
+            pullUserEntities("location", masterKey)
                 .then(() => savedLocationTags())
                 .then((ts) => (this.locationTags = ts)),
             fetchCities().then((cs) => (this.cities = cs)),
@@ -62,9 +62,9 @@ export class SearchWorker {
     }
 
     /**
-     * Set the people that we should search across.
+     * Set the (named) people that we should search across.
      */
-    setPeople(people: Person[]) {
+    setPeople(people: SearchPerson[]) {
         this.people = people;
     }
 
@@ -122,7 +122,7 @@ const suggestionsForString = (
     re: RegExp,
     searchString: string,
     { collections, files }: SearchCollectionsAndFiles,
-    people: Person[],
+    people: SearchPerson[],
     { locale, holidays, labelledFileTypes }: LocalizedSearchData,
     locationTags: LocationTag[],
     cities: City[],
@@ -196,10 +196,13 @@ const fileCaptionSuggestion = (
         : [];
 };
 
-const peopleSuggestions = (re: RegExp, people: Person[]): SearchSuggestion[] =>
+const peopleSuggestions = (
+    re: RegExp,
+    people: SearchPerson[],
+): SearchSuggestion[] =>
     people
-        .filter((p) => re.test(p.name))
-        .map((person) => ({ type: "person", person, label: person.name }));
+        .filter((sp) => re.test(sp.name))
+        .map((sp) => ({ type: "person", person: sp.person, label: sp.name }));
 
 const dateSuggestions = (
     s: string,

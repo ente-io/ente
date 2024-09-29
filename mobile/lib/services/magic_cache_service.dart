@@ -174,7 +174,7 @@ class MagicCacheService {
       _updateCacheIfTheTimeHasCome();
     });
     Bus.instance.on<FileUploadedEvent>().listen((event) {
-      _pendingUpdateReason.add("File uploaded");
+      queueUpdate("File uploaded");
     });
   }
 
@@ -191,6 +191,10 @@ class MagicCacheService {
 
   bool get enableDiscover => localSettings.isMLIndexingEnabled;
 
+  void queueUpdate(String reason) {
+    _pendingUpdateReason.add(reason);
+  }
+
   Future<void> _updateCacheIfTheTimeHasCome() async {
     if (!enableDiscover) {
       return;
@@ -198,12 +202,12 @@ class MagicCacheService {
     final updatedJSONFile = await RemoteAssetsService.instance
         .getAssetIfUpdated(_kMagicPromptsDataUrl);
     if (updatedJSONFile != null) {
-      _pendingUpdateReason.add("Prompts data updated");
+      queueUpdate("Prompts data updated");
     } else if (lastMagicCacheUpdateTime <
         DateTime.now()
-            .subtract(const Duration(days: 1))
+            .subtract(const Duration(hours: 12))
             .millisecondsSinceEpoch) {
-      _pendingUpdateReason.add("Cache is old");
+      queueUpdate("Cache is old");
     }
   }
 
@@ -226,7 +230,6 @@ class MagicCacheService {
         return;
       }
       _logger.info("updating magic cache ${_pendingUpdateReason.toList()}");
-      _pendingUpdateReason.clear();
       _isUpdateInProgress = true;
       final EnteWatch? w = kDebugMode ? EnteWatch("magicCacheWatch") : null;
       w?.start();
@@ -245,6 +248,7 @@ class MagicCacheService {
       w?.log("cacheWritten");
       await _resetLastMagicCacheUpdateTime();
       w?.logAndReset('done');
+      _pendingUpdateReason.clear();
       Bus.instance.fire(MagicCacheUpdatedEvent());
     } catch (e, s) {
       _logger.info("Error updating magic cache", e, s);
@@ -376,6 +380,7 @@ class MagicCacheService {
     List<Prompt> magicPromptsData,
   ) async {
     final results = <MagicCache>[];
+    final List<int> matchCount = [];
     for (Prompt prompt in magicPromptsData) {
       final fileUploadedIDs =
           await SemanticSearchService.instance.getMatchingFileIDs(
@@ -387,7 +392,9 @@ class MagicCacheService {
           MagicCache(prompt.title, fileUploadedIDs),
         );
       }
+      matchCount.add(fileUploadedIDs.length);
     }
+    _logger.info('magic result count $matchCount');
     return results;
   }
 }

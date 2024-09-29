@@ -2,6 +2,7 @@ import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import "package:flutter/scheduler.dart";
 import "package:flutter_animate/flutter_animate.dart";
+import "package:photos/services/update_service.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/utils/data_util.dart';
@@ -162,17 +163,30 @@ class _Price extends StatelessWidget {
       final priceDouble = double.parse(priceWithoutCurrency);
       final pricePerMonth = priceDouble / 12;
       final pricePerMonthString = pricePerMonth.toStringAsFixed(2);
+      final bool isPlayStore = UpdateService.instance.isPlayStoreFlavor();
       return Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          Text(
-            currencySymbol + pricePerMonthString + ' / ' + 'month',
-            style: textTheme.largeBold.copyWith(color: textBaseLight),
-          ),
-          Text(
-            price + " / " + "yr",
-            style: textTheme.small.copyWith(color: textFaintLight),
-          ),
+          if (isPlayStore)
+            Text(
+              price + " / " + "yr",
+              style: textTheme.largeBold.copyWith(color: textBaseLight),
+            ),
+          if (isPlayStore)
+            Text(
+              currencySymbol + pricePerMonthString + ' / ' + 'month',
+              style: textTheme.small.copyWith(color: textFaintLight),
+            ),
+          if (!isPlayStore)
+            Text(
+              currencySymbol + pricePerMonthString + ' / ' + 'month',
+              style: textTheme.largeBold.copyWith(color: textBaseLight),
+            ),
+          if (!isPlayStore)
+            Text(
+              price + " / " + "yr",
+              style: textTheme.small.copyWith(color: textFaintLight),
+            ),
         ],
       )
           .animate(delay: const Duration(milliseconds: 100))

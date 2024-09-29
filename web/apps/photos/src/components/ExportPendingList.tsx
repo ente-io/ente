@@ -1,11 +1,10 @@
-import { ResultPreviewTile } from "@/new/photos/components/ItemCards";
+import { ItemCard, PreviewItemTile } from "@/new/photos/components/ItemCards";
 import { EnteFile } from "@/new/photos/types/file";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import { Box, styled } from "@mui/material";
 import ItemList from "components/ItemList";
 import { t } from "i18next";
-import CollectionCard from "./Collections/CollectionCard";
 
 interface Iprops {
     isOpen: boolean;
@@ -29,11 +28,10 @@ const ExportPendingList = (props: Iprops) => {
         return (
             <FlexWrapper>
                 <Box sx={{ marginRight: "8px" }}>
-                    <CollectionCard
+                    <ItemCard
                         key={file.id}
+                        TileComponent={PreviewItemTile}
                         coverFile={file}
-                        onClick={() => null}
-                        collectionTile={ResultPreviewTile}
                     />
                 </Box>
                 <ItemContainer>
@@ -59,6 +57,7 @@ const ExportPendingList = (props: Iprops) => {
         <DialogBoxV2
             open={props.isOpen}
             onClose={props.onClose}
+            fullWidth
             PaperProps={{
                 sx: { maxWidth: "444px" },
             }}
@@ -66,7 +65,7 @@ const ExportPendingList = (props: Iprops) => {
                 title: t("PENDING_ITEMS"),
                 close: {
                     action: props.onClose,
-                    text: t("CLOSE"),
+                    text: t("close"),
                 },
             }}
         >

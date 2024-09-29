@@ -10,6 +10,10 @@ interface Iprops {
     endIcon?: React.ReactNode;
     keepOpenAfterClick?: boolean;
     children?: any;
+    // To avoid changing old places without an audit, new code should use this
+    // option explicitly to fix/tweak the alignment of the button label and
+    // icon. Once all existing uses have migrated, can change the default.
+    centerAlign?: boolean;
 }
 export function OverflowMenuOption({
     onClick,
@@ -17,6 +21,7 @@ export function OverflowMenuOption({
     startIcon,
     endIcon,
     keepOpenAfterClick,
+    centerAlign,
     children,
 }: Iprops) {
     const menuContext = useContext(OverflowMenuContext);
@@ -44,6 +49,7 @@ export function OverflowMenuOption({
                     <Box
                         sx={{
                             padding: 0,
+                            marginBlockStart: centerAlign ? "6px" : 0,
                             marginRight: 1.5,
                         }}
                     >

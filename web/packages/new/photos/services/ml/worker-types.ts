@@ -3,15 +3,29 @@
  */
 
 /**
- * Callbacks invoked by the worker at various points in the indexing pipeline to
- * notify the main thread of events it might be interested in.
+ * Callbacks invoked by the worker at various points in the indexing and
+ * clustering pipeline to notify the main thread of events it might be
+ * interested in.
  */
 export interface MLWorkerDelegate {
     /**
-     * Called whenever the worker processes a file during indexing (either
-     * successfully or with errors), or when in goes into the "idle" state.
+     * Called whenever the worker does some action that might need the UI state
+     * indicating the indexing or clustering status to be updated.
      */
-    workerDidProcessFileOrIdle: () => void;
+    workerDidUpdateStatus: () => void;
+    /**
+     * Called when the worker indexes some files, but then notices that the main
+     * thread was not awaiting the indexing (e.g. it was not initiated by the
+     * main thread during a sync, but happened because of a live upload).
+     *
+     * In such cases, it uses this method to inform the main thread that some
+     * files were indexed, so that it can update any dependent state (e.g.
+     * clusters).
+     *
+     * It doesn't always call this because otherwise the main thread would need
+     * some extra code to avoid updating the dependent state twice.
+     */
+    workerDidUnawaitedIndex: () => void;
 }
 
 /**

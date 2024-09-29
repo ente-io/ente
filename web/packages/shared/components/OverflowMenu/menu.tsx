@@ -1,11 +1,16 @@
-import { IconButton, styled, type PaperProps } from "@mui/material";
+import {
+    IconButton,
+    styled,
+    type IconButtonProps,
+    type PaperProps,
+} from "@mui/material";
 import Menu, { type MenuProps } from "@mui/material/Menu";
 import React, { useState } from "react";
 import { OverflowMenuContext } from "./context";
 
 export interface Iprops {
     triggerButtonIcon: React.ReactNode;
-    triggerButtonProps?: any;
+    triggerButtonProps?: Partial<IconButtonProps>;
     children?: React.ReactNode;
     ariaControls: string;
     menuPaperProps?: Partial<PaperProps>;
