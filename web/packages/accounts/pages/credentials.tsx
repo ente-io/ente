@@ -23,7 +23,6 @@ import {
     saveKeyInSessionStore,
 } from "@ente/shared/crypto/helpers";
 import { CustomError } from "@ente/shared/error";
-import InMemoryStore, { MS_KEYS } from "@ente/shared/storage/InMemoryStore";
 import {
     LS_KEYS,
     getData,
@@ -52,7 +51,11 @@ import {
     openPasskeyVerificationURL,
     passkeyVerificationRedirectURL,
 } from "../services/passkey";
-import { appHomeRoute } from "../services/redirect";
+import {
+    appHomeRoute,
+    stashRedirect,
+    unstashRedirect,
+} from "../services/redirect";
 import { checkSessionValidity } from "../services/session";
 import {
     configureSRP,
@@ -231,7 +234,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                         isTwoFactorEnabled: true,
                         isTwoFactorPasskeysEnabled: true,
                     });
-                    InMemoryStore.set(MS_KEYS.REDIRECT_URL, "/");
+                    stashRedirect("/");
                     const url =
                         passkeyVerificationRedirectURL(passkeySessionID);
                     setPasskeyVerificationData({ passkeySessionID, url });
@@ -312,9 +315,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             } catch (e) {
                 log.error("migrate to srp failed", e);
             }
-            const redirectURL = InMemoryStore.get(MS_KEYS.REDIRECT_URL);
-            InMemoryStore.delete(MS_KEYS.REDIRECT_URL);
-            router.push(redirectURL ?? appHomeRoute);
+            router.push(unstashRedirect() ?? appHomeRoute);
         } catch (e) {
             log.error("useMasterPassword failed", e);
         }

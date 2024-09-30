@@ -1,5 +1,4 @@
 import { UPLOAD_STAGES } from "@/new/photos/services/upload/types";
-import UploadProgressContext from "contexts/uploadProgress";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import { useContext, useEffect, useState } from "react";
@@ -9,6 +8,7 @@ import type {
     UploadCounter,
     UploadFileNames,
 } from "services/upload/uploadManager";
+import UploadProgressContext from "./context";
 import { UploadProgressDialog } from "./dialog";
 import { MinimizedUploadProgress } from "./minimized";
 
@@ -57,7 +57,7 @@ export default function UploadProgress({
                 action: props.cancelUploads,
             },
             close: {
-                text: t("NO"),
+                text: t("no"),
                 variant: "secondary",
                 action: () => {},
             },

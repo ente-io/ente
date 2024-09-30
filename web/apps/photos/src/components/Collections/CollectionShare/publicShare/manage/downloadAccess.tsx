@@ -1,9 +1,13 @@
+import type {
+    Collection,
+    PublicURL,
+    UpdatePublicURL,
+} from "@/media/collection";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import { useContext } from "react";
 import { Trans } from "react-i18next";
-import { Collection, PublicURL, UpdatePublicURL } from "types/collection";
 interface Iprops {
     publicShareProp: PublicURL;
     collection: Collection;

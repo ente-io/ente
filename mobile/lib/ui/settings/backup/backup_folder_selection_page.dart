@@ -19,14 +19,14 @@ import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 
 class BackupFolderSelectionPage extends StatefulWidget {
+  final bool isFirstBackup;
   final bool isOnboarding;
-  final String buttonText;
 
   const BackupFolderSelectionPage({
-    required this.buttonText,
+    required this.isFirstBackup,
     this.isOnboarding = false,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<BackupFolderSelectionPage> createState() =>
@@ -173,7 +173,11 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                               : () async {
                                   await updateFolderSettings();
                                 },
-                      child: Text(widget.buttonText),
+                      child: Text(
+                        widget.isFirstBackup
+                            ? S.of(context).startBackup
+                            : S.of(context).backup,
+                      ),
                     ),
                   ),
                   widget.isOnboarding

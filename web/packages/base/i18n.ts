@@ -5,7 +5,6 @@ import { getUserLocales } from "get-user-locale";
 import i18n from "i18next";
 import resourcesToBackend from "i18next-resources-to-backend";
 import { initReactI18next } from "react-i18next";
-import { object, string } from "yup";
 
 /**
  * List of all {@link SupportedLocale}s.
@@ -60,7 +59,7 @@ const defaultLocale: SupportedLocale = "en-US";
  *     produce a string like "July 19, 2024".
  */
 export const setupI18n = async () => {
-    const localeString = savedLocaleStringMigratingIfNeeded();
+    const localeString = localStorage.getItem("locale") ?? undefined;
     const locale = closestSupportedLocale(localeString);
 
     // https://www.i18next.com/overview/api
@@ -134,71 +133,6 @@ export const setupI18n = async () => {
         // milliseconds, so divide by 1000.
         return (val) => formatter.format(val / 1000);
     });
-};
-
-/**
- * Read and return the locale (if any) that we'd previously saved in local
- * storage.
- *
- * If it finds a locale stored in the old format, it also updates the saved
- * value and returns it in the new format.
- */
-const savedLocaleStringMigratingIfNeeded = (): SupportedLocale | undefined => {
-    const ls = localStorage.getItem("locale");
-
-    // An older version of our code had stored only the language code, not the
-    // full locale. Migrate these to the new locale format. Luckily, all such
-    // languages can be unambiguously mapped to locales in our current set.
-    //
-    // This migration is dated Feb 2024. And it can be removed after a few
-    // months, because by then either customers would've opened the app and
-    // their setting migrated to the new format, or the browser would've cleared
-    // the older local storage entry anyway (tag: Migration).
-
-    if (!ls) {
-        // Nothing found
-        return undefined;
-    }
-
-    if (includes(supportedLocales, ls)) {
-        // Already in the new format
-        return ls;
-    }
-
-    let value: string | undefined;
-    try {
-        const oldFormatData = object({ value: string() }).json().cast(ls);
-        value = oldFormatData.value;
-    } catch (e) {
-        // Not a valid JSON, or not in the format we expected it. This shouldn't
-        // have happened, we're the only one setting it.
-        log.error("Failed to parse locale obtained from local storage", e);
-        // Also remove the old key, it is not parseable by us anymore.
-        localStorage.removeItem("locale");
-        return undefined;
-    }
-
-    const newValue = mapOldValue(value);
-    if (newValue) localStorage.setItem("locale", newValue);
-
-    return newValue;
-};
-
-const mapOldValue = (value: string | undefined) => {
-    switch (value) {
-        case "en":
-            return "en-US";
-        case "fr":
-            return "fr-FR";
-        case "zh":
-            return "zh-CN";
-        case "nl":
-            return "nl-NL";
-        case "es":
-            return "es-ES";
-        default:
-            return undefined;
-    }
 };
 
 /**

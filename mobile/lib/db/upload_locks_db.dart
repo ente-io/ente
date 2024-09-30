@@ -250,6 +250,7 @@ class UploadLocksDB {
     }
     final row = rows.first;
     final objectKey = row[_trackUploadTable.columnObjectKey] as String;
+    final encFileSize = row[_trackUploadTable.columnEncryptedFileSize] as int;
     final partsStatus = await db.query(
       _partsTable.table,
       where: '${_partsTable.columnObjectKey} = ?',
@@ -285,6 +286,7 @@ class UploadLocksDB {
           .byName(row[_trackUploadTable.columnStatus] as String),
       partUploadStatus: partUploadStatus,
       partETags: partETags,
+      encFileSize: encFileSize,
       partSize: row[_trackUploadTable.columnPartSize] as int,
     );
   }

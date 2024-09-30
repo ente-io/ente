@@ -7,6 +7,7 @@ import 'package:photos/ui/collections/collection_action_sheet.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import "package:photos/ui/components/empty_state_item_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
+import "package:photos/utils/collection_util.dart";
 import "package:photos/utils/share_util.dart";
 import "package:photos/utils/toast_util.dart";
 
@@ -80,10 +81,7 @@ class SharedEmptyStateWidget extends StatelessWidget {
                       labelText: S.of(context).collectEventPhotos,
                       icon: Icons.add_photo_alternate_outlined,
                       onTap: () async {
-                        showCollectionActionSheet(
-                          context,
-                          actionType: CollectionActionType.collectPhotos,
-                        );
+                        await onTapCollectEventPhotos(context);
                       },
                     ),
                     const SizedBox(height: 6),

@@ -318,9 +318,9 @@ const Slideshow: React.FC = () => {
 /images/onboarding-lock/3x.png 3x"
                     />
                     <FeatureText>
-                        <Trans i18nKey={"HERO_SLIDE_1_TITLE"} />
+                        <Trans i18nKey={"intro_slide_1_title"} />
                     </FeatureText>
-                    <TextContainer>{t("HERO_SLIDE_1")}</TextContainer>
+                    <TextContainer>{t("intro_slide_1")}</TextContainer>
                 </Slide>
                 <Slide index={1}>
                     <SlideContents>
@@ -330,9 +330,9 @@ const Slideshow: React.FC = () => {
                 /images/onboarding-safe/3x.png 3x"
                         />
                         <FeatureText>
-                            <Trans i18nKey={"HERO_SLIDE_2_TITLE"} />
+                            <Trans i18nKey={"intro_slide_2_title"} />
                         </FeatureText>
-                        <TextContainer>{t("HERO_SLIDE_2")}</TextContainer>
+                        <TextContainer>{t("intro_slide_2")}</TextContainer>
                     </SlideContents>
                 </Slide>
                 <Slide index={2}>
@@ -343,9 +343,9 @@ const Slideshow: React.FC = () => {
                 /images/onboarding-sync/3x.png 3x"
                         />
                         <FeatureText>
-                            <Trans i18nKey={"HERO_SLIDE_3_TITLE"} />
+                            <Trans i18nKey={"intro_slide_3_title"} />
                         </FeatureText>
-                        <TextContainer>{t("HERO_SLIDE_3")}</TextContainer>
+                        <TextContainer>{t("intro_slide_3")}</TextContainer>
                     </SlideContents>
                 </Slide>
             </Slider>

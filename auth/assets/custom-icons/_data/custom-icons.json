@@ -4,6 +4,9 @@
       "title": "1xBet"
     },
     {
+      "title": "23andme"
+    },    
+    {
       "title": "3Commas"
     },
     {
@@ -120,6 +123,12 @@
       "title": "Bybit"
     },
     {
+      "title": "Canva"
+    },
+    {
+      "title": "Capacities"
+    },
+    {
       "title": "CERN"
     },
     {
@@ -135,6 +144,9 @@
     },
     {
       "title": "Cloudflare"
+    },
+    {
+      "title": "Coinbase"
     },
     {
       "title": "CoinDCX"
@@ -186,6 +198,9 @@
       "slug": "dusnet"
     },
     {
+      "title": "eBay"
+    },    
+    {
       "title": "ecitizen kenya",
       "slug": "ecitizen_kenya"
     },
@@ -221,6 +236,9 @@
       "slug": "mozilla"
     },
     {
+      "title": "ForUsAll"
+    },
+    {
       "title": "G2A"
     },
     {
@@ -243,6 +261,19 @@
       ]
     },
     {
+      "title": "GOV.UK",
+      "slug": "gov_uk",
+      "altNames": [
+        "Government Gateway"
+      ]
+    },
+    {
+      "title": "Guideline"
+    },    
+    {
+      "title": "Gusto"
+    },    
+    {
       "title": "Habbo"
     },
     {
@@ -264,6 +295,10 @@
     {
       "title": "IceDrive"
     },
+    {
+      "title": "ID.me",
+      "slug": "IDme"
+    },    
     {
       "title": "Infomaniak"
     },
@@ -333,6 +368,10 @@
         "Local Wordpress"
       ]
     },
+    {
+      "title": "Login.gov",
+      "slug": "login_gov"
+    },    
     {
       "title": "Marketplace.tf",
       "slug": "marketplacedottf"
@@ -577,6 +616,13 @@
       "slug": "synology_dsm"
     },
     {
+      "title": "T-Mobile",
+      "altNames": [
+        "T Mobile",
+        "T-Mobile ID"
+      ]
+    },    
+    {
       "title": "TCPShield"
     },
     {
@@ -597,6 +643,9 @@
       "title": "Termius",
       "hex": "858585"
     },
+    {
+      "title": "Titan"
+    },    
     {
       "title": "TorGuard"
     },
@@ -645,6 +694,9 @@
     },
     {
       "title": "Vikunja"
+    },
+    {
+      "title": "WARGAMING.NET"
     },
     {
       "title": "Wealthfront"

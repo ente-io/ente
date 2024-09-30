@@ -5,8 +5,8 @@ import 'package:ente_auth/ui/components/captioned_text_widget.dart';
 import 'package:ente_auth/ui/components/expandable_menu_item_widget.dart';
 import 'package:ente_auth/ui/components/menu_item_widget.dart';
 import 'package:ente_auth/ui/settings/common_settings.dart';
-import 'package:ente_auth/ui/settings/faq.dart';
 import 'package:ente_auth/utils/email_util.dart';
+import 'package:ente_auth/utils/platform_util.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -42,15 +42,15 @@ class _SupportSectionWidgetState extends State<SupportSectionWidget> {
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
-            // ignore: unawaited_futures
-            showModalBottomSheet<void>(
-              backgroundColor: Theme.of(context).colorScheme.background,
-              barrierColor: Colors.black87,
-              context: context,
-              builder: (context) {
-                return const FAQQuestionsWidget();
-              },
-            );
+            try {
+              PlatformUtil.openWebView(
+                context,
+                context.l10n.faq,
+                "https://help.ente.io/auth/faq",
+              );
+            } catch (e) {
+              Logger("SupportSection").severe("Failed to open FAQ", e);
+            }
           },
         ),
         sectionOptionSpacing,

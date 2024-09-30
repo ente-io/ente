@@ -91,7 +91,7 @@ export default function ExportInProgress(props: Props) {
                     size="large"
                     onClick={props.closeExportDialog}
                 >
-                    {t("CLOSE")}
+                    {t("close")}
                 </Button>
                 <Button
                     size="large"

@@ -1,11 +1,13 @@
 import "dart:async" show unawaited;
-import "dart:typed_data" show ByteData, Float32List;
+import "dart:typed_data" show Uint8List, Float32List;
 import "dart:ui" show Image;
 
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/diff_sync_complete_event.dart";
 import "package:photos/events/people_changed_event.dart";
+import "package:photos/models/api/entity/type.dart";
+import "package:photos/services/entity_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_detection/detection.dart";
 import "package:photos/services/machine_learning/face_ml/face_detection/face_detection_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_embedding/face_embedding_service.dart";
@@ -59,6 +61,7 @@ class FaceRecognitionService {
       return;
     }
     _isSyncing = true;
+    await EntityService.instance.syncEntity(EntityType.cgroup);
     if (_shouldSyncPeople) {
       await PersonService.instance.reconcileClusters();
       Bus.instance.fire(PeopleChangedEvent(type: PeopleEventType.syncDone));
@@ -70,7 +73,7 @@ class FaceRecognitionService {
   static Future<List<FaceResult>> runFacesPipeline(
     int enteFileID,
     Image image,
-    ByteData imageByteData,
+    Uint8List rawRgbaBytes,
     int faceDetectionAddress,
     int faceEmbeddingAddress,
   ) async {
@@ -82,7 +85,7 @@ class FaceRecognitionService {
         await _detectFacesSync(
       enteFileID,
       image,
-      imageByteData,
+      rawRgbaBytes,
       faceDetectionAddress,
       faceResults,
     );
@@ -100,7 +103,7 @@ class FaceRecognitionService {
     // Align the faces
     final Float32List faceAlignmentResult = await _alignFacesSync(
       image,
-      imageByteData,
+      rawRgbaBytes,
       faceDetectionResult,
       faceResults,
     );
@@ -130,7 +133,7 @@ class FaceRecognitionService {
   static Future<List<FaceDetectionRelative>> _detectFacesSync(
     int fileID,
     Image image,
-    ByteData imageByteData,
+    Uint8List rawRgbaBytes,
     int interpreterAddress,
     List<FaceResult> faceResults,
   ) async {
@@ -139,7 +142,7 @@ class FaceRecognitionService {
       final List<FaceDetectionRelative> faces =
           await FaceDetectionService.predict(
         image,
-        imageByteData,
+        rawRgbaBytes,
         interpreterAddress,
       );
 
@@ -166,7 +169,7 @@ class FaceRecognitionService {
   /// Returns a list of the aligned faces as image data.
   static Future<Float32List> _alignFacesSync(
     Image image,
-    ByteData imageByteData,
+    Uint8List rawRgbaBytes,
     List<FaceDetectionRelative> faces,
     List<FaceResult> faceResults,
   ) async {
@@ -174,7 +177,7 @@ class FaceRecognitionService {
       final (alignedFaces, alignmentResults, _, blurValues, _) =
           await preprocessToMobileFaceNetFloat32List(
         image,
-        imageByteData,
+        rawRgbaBytes,
         faces,
       );
 

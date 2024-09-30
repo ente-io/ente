@@ -27,6 +27,7 @@ import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
 import 'package:photos/services/machine_learning/ml_result.dart';
 import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
+import "package:photos/services/magic_cache_service.dart";
 import "package:photos/utils/ml_util.dart";
 import "package:photos/utils/network_util.dart";
 import "package:synchronized/synchronized.dart";
@@ -130,8 +131,18 @@ class MLService {
         );
         await clusterAllImages();
       }
+      if (_mlControllerStatus == true) {
+        // refresh discover section
+        MagicCacheService.instance.updateCache(forced: force).ignore();
+      }
       await indexAllImages();
-      await clusterAllImages();
+      if ((await MLDataDB.instance.getUnclusteredFaceCount()) > 0) {
+        await clusterAllImages();
+      }
+      if (_mlControllerStatus == true) {
+        // refresh discover section
+        MagicCacheService.instance.updateCache().ignore();
+      }
     } catch (e, s) {
       _logger.severe("runAllML failed", e, s);
       rethrow;
@@ -200,6 +211,9 @@ class MLService {
           (previousValue, element) => previousValue + (element ? 1 : 0),
         );
         fileAnalyzedCount += sumFutures;
+      }
+      if (fileAnalyzedCount > 0) {
+        MagicCacheService.instance.queueUpdate('fileIndexed');
       }
       _logger.info(
         "`indexAllImages()` finished. Analyzed $fileAnalyzedCount images, in ${stopwatch.elapsed.inSeconds} seconds (avg of ${stopwatch.elapsed.inSeconds / fileAnalyzedCount} seconds per image)",

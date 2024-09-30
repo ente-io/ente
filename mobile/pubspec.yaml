@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 0.9.35+935
+version: 0.9.46+946
 publish_to: none
 
 environment:
@@ -174,7 +174,6 @@ dependencies:
   tuple: ^2.0.0
   uni_links: ^0.5.1
   url_launcher: ^6.0.3
-  uuid: ^3.0.7
   video_compress:
     git:
       url: https://github.com/RmanAkbarzadeh/VideoCompress.git

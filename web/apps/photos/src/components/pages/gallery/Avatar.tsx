@@ -1,7 +1,6 @@
 import log from "@/base/log";
 import { EnteFile } from "@/new/photos/types/file";
-import { styled } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
+import { styled, useTheme } from "@mui/material";
 import { GalleryContext } from "pages/gallery";
 import React, { useContext, useLayoutEffect, useState } from "react";
 
@@ -21,7 +20,7 @@ const AvatarBase = styled("div")<{
     width: ${({ size }) => `${size}px`};
     height: ${({ size }) => `${size}px`};
     background-color: ${({ colorCode, opacity }) =>
-        `${colorCode}${opacity === 100 ? "" : opacity ?? 95}`};
+        `${colorCode}${opacity === 100 ? "" : (opacity ?? 95)}`};
     border-radius: 50%;
     display: flex;
     justify-content: center;

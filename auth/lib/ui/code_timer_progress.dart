@@ -1,3 +1,4 @@
+import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -30,6 +31,7 @@ class _CodeTimerProgressState extends State<CodeTimerProgress>
   late final Ticker _ticker;
   late final ValueNotifier<double> _progress;
   late final int _microSecondsInPeriod;
+  late bool _isCompactMode=false;
 
   @override
   void initState() {
@@ -38,6 +40,7 @@ class _CodeTimerProgressState extends State<CodeTimerProgress>
     _progress = ValueNotifier<double>(0.0);
     _ticker = createTicker(_updateTimeRemaining);
     _ticker.start();
+    _isCompactMode = PreferenceService.instance.isCompactMode();
     _updateTimeRemaining(Duration.zero);
   }
 
@@ -57,7 +60,7 @@ class _CodeTimerProgressState extends State<CodeTimerProgress>
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 3,
+      height: _isCompactMode ?1:3,
       child: ValueListenableBuilder<double>(
         valueListenable: _progress,
         builder: (context, progress, _) {

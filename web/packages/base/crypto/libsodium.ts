@@ -134,9 +134,20 @@ const bytes = async (bob: BytesOrB64) =>
  * This returns a new randomly generated 256-bit key suitable for being used
  * with libsodium's secretbox APIs.
  */
-export const generateBoxKey = async () => {
+export const generateNewBoxKey = async () => {
     await sodium.ready;
     return toB64(sodium.crypto_secretbox_keygen());
+};
+
+/**
+ * Generate a key for use with the *Blob or *Stream encryption functions.
+ *
+ * This returns a new randomly generated 256-bit key suitable for being used
+ * with libsodium's secretstream APIs.
+ */
+export const generateNewBlobOrStreamKey = async () => {
+    await sodium.ready;
+    return toB64(sodium.crypto_secretstream_xchacha20poly1305_keygen());
 };
 
 /**
@@ -379,7 +390,7 @@ export async function encryptFileChunk(
 }
 
 /**
- * Decrypt the result of {@link encryptBoxB64}.
+ * Decrypt the result of {@link encryptBoxB64} and return the decrypted bytes.
  */
 export const decryptBox = async (
     { encryptedData, nonce }: EncryptedBox,
@@ -671,6 +682,12 @@ export async function boxSealOpen(
     );
 }
 
+/**
+ * Encrypt the given {@link input} using the given {@link publicKey}.
+ *
+ * This function performs asymmetric (public-key) encryption. To decrypt the
+ * result, use {@link boxSealOpen}.
+ */
 export async function boxSeal(input: string, publicKey: string) {
     await sodium.ready;
     return await toB64(

@@ -22,10 +22,8 @@ import (
 	"github.com/ente-io/museum/pkg/utils/email"
 	"github.com/ente-io/stacktrace"
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt"
 	"github.com/patrickmn/go-cache"
 	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
 )
 
 // UserController exposes request handlers for all user related requests
@@ -52,8 +50,6 @@ type UserController struct {
 	JwtSecret              []byte
 	Cache                  *cache.Cache // refers to the auth token cache
 	HardCodedOTT           HardCodedOTT
-	roadmapURLPrefix       string
-	roadmapSSOSecret       string
 	UserCache              *cache2.UserCache
 	UserCacheController    *usercache.Controller
 }
@@ -144,8 +140,6 @@ func NewUserController(
 		MailingListsController: mailingListsController,
 		PushController:         pushController,
 		HardCodedOTT:           ReadHardCodedOTTFromConfig(),
-		roadmapURLPrefix:       viper.GetString("roadmap.url-prefix"),
-		roadmapSSOSecret:       viper.GetString("roadmap.sso-secret"),
 		UserCache:              userCache,
 		UserCacheController:    userCacheController,
 	}
@@ -242,28 +236,6 @@ func (c *UserController) GetPublicKey(email string) (string, error) {
 		return "", stacktrace.Propagate(err, "")
 	}
 	return key, nil
-}
-
-// GetRoadmapURL redirects the user to the feedback page
-func (c *UserController) GetRoadmapURL(userID int64) (string, error) {
-	// If SSO is not configured, redirect the user to the plain roadmap
-	if c.roadmapURLPrefix == "" || c.roadmapSSOSecret == "" {
-		return "https://roadmap.ente.io", nil
-	}
-	user, err := c.UserRepo.Get(userID)
-	if err != nil {
-		return "", stacktrace.Propagate(err, "")
-	}
-	userData := jwt.MapClaims{
-		"full_name": "",
-		"email":     user.Hash + "@ente.io",
-	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, userData)
-	signature, err := token.SignedString([]byte(c.roadmapSSOSecret))
-	if err != nil {
-		return "", stacktrace.Propagate(err, "")
-	}
-	return c.roadmapURLPrefix + signature, nil
 }
 
 // GetTwoFactorStatus returns a user's two factor status

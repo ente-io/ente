@@ -169,7 +169,7 @@ func (c *ClICtrl) downloadEntry(ctx context.Context,
 				}
 				fileDiskMetadata.AddFileName(imageFileName)
 			}
-			if videoPath == "" {
+			if videoPath != "" {
 				videoExtn := filepath.Ext(videoPath)
 				videoFileName := diskInfo.GenerateUniqueFileName(baseFileName, videoExtn)
 				videoFilePath := filepath.Join(diskInfo.ExportRoot, diskInfo.AlbumMeta.FolderName, videoFileName)

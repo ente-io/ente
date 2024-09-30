@@ -28,7 +28,7 @@ import HTTPService from "@ente/shared/network/HTTPService";
 import type { AxiosResponse } from "axios";
 import type { CastData } from "services/cast-data";
 import { detectMediaMIMEType } from "services/detect-type";
-import { isChromecast } from "./chromecast";
+import { isChromecast } from "./chromecast-receiver";
 
 /**
  * An async generator function that loops through all the files in the
@@ -214,22 +214,22 @@ const decryptEnteFile = async (
         fileMagicMetadata = {
             ...encryptedFile.magicMetadata,
             // @ts-expect-error TODO: Need to use zod here.
-            data: await worker.decryptMetadata(
-                magicMetadata.data,
-                magicMetadata.header,
-                fileKey,
-            ),
+            data: await worker.decryptMetadataJSON({
+                encryptedDataB64: magicMetadata.data,
+                decryptionHeaderB64: magicMetadata.header,
+                keyB64: fileKey,
+            }),
         };
     }
     if (pubMagicMetadata?.data) {
         filePubMagicMetadata = {
             ...pubMagicMetadata,
             // @ts-expect-error TODO: Need to use zod here.
-            data: await worker.decryptMetadata(
-                pubMagicMetadata.data,
-                pubMagicMetadata.header,
-                fileKey,
-            ),
+            data: await worker.decryptMetadataJSON({
+                encryptedDataB64: pubMagicMetadata.data,
+                decryptionHeaderB64: pubMagicMetadata.header,
+                keyB64: fileKey,
+            }),
         };
     }
     return mergeMetadata1({

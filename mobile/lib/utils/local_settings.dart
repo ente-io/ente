@@ -15,6 +15,7 @@ class LocalSettings {
   static const kEnableMultiplePart = "ls.enable_multiple_part";
   static const kRateUsPromptThreshold = 2;
   static const shouldLoopVideoKey = "video.should_loop";
+  static const onGuestViewKey = "on_guest_view";
 
   final SharedPreferences _prefs;
 
@@ -90,5 +91,13 @@ class LocalSettings {
 
   bool shouldLoopVideo() {
     return _prefs.getBool(shouldLoopVideoKey) ?? true;
+  }
+
+  Future<void> setOnGuestView(bool value) {
+    return _prefs.setBool(onGuestViewKey, value);
+  }
+
+  bool isOnGuestView() {
+    return _prefs.getBool(onGuestViewKey) ?? false;
   }
 }

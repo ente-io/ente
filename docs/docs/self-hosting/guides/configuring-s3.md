@@ -33,7 +33,7 @@ and put your custom configuration there (in your case, you can put an entire
 
 > [!TIP]
 >
-> For more details about these configuration objects, see the documentaion for
+> For more details about these configuration objects, see the documentation for
 > the `s3` object in
 > [configurations/local.yaml](https://github.com/ente-io/ente/blob/main/server/configurations/local.yaml).
 
@@ -80,6 +80,22 @@ To summarize:
 Set the S3 bucket `endpoint` in `credentials.yaml` to a `yourserverip:3200` or
 some such IP/hostname that accessible from both where you are running the Ente
 clients (e.g. the mobile app) and also from within the Docker compose cluster.
+
+### Example
+
+An example `museum.yaml` when you're trying to connect to museum running on your
+computer from your phone on the same WiFi network:
+
+```
+s3:
+    are_local_buckets: true
+    b2-eu-cen:
+        key: test
+        secret: testtest
+        endpoint: http://<YOUR-WIFI-IP>:3200
+        region: eu-central-2
+        bucket: b2-eu-cen
+```
 
 ### 403 Forbidden
 

@@ -12,6 +12,7 @@ import "package:photos/services/filter/db_filters.dart";
 import "package:photos/services/location_service.dart";
 import 'package:photos/states/location_state.dart';
 import "package:photos/ui/viewer/gallery/gallery.dart";
+import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 
 ///This gallery will get rebuilt with the updated radius when
 ///InheritedLocationTagData notifies a change in radius.
@@ -100,20 +101,22 @@ class _DynamicLocationGalleryWidgetState
                   ),
                   constrains.maxWidth,
                 ),
-                child: Gallery(
-                  loadingWidget: const SizedBox.shrink(),
-                  disableScroll: true,
-                  asyncLoader: (
-                    creationStartTime,
-                    creationEndTime, {
-                    limit,
-                    asc,
-                  }) async {
-                    return snapshot.data as FileLoadResult;
-                  },
-                  tagPrefix: widget.tagPrefix,
-                  enableFileGrouping: false,
-                  showSelectAllByDefault: false,
+                child: GalleryFilesState(
+                  child: Gallery(
+                    loadingWidget: const SizedBox.shrink(),
+                    disableScroll: true,
+                    asyncLoader: (
+                      creationStartTime,
+                      creationEndTime, {
+                      limit,
+                      asc,
+                    }) async {
+                      return snapshot.data as FileLoadResult;
+                    },
+                    tagPrefix: widget.tagPrefix,
+                    enableFileGrouping: false,
+                    showSelectAllByDefault: false,
+                  ),
                 ),
               );
             },

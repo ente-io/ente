@@ -14,6 +14,7 @@ import "package:photos/services/collections_service.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
+import "package:photos/ui/viewer/search/result/magic_result_screen.dart";
 import "package:photos/ui/viewer/search/result/searchable_item.dart";
 import "package:photos/utils/navigation_util.dart";
 
@@ -150,6 +151,32 @@ class _SearchSectionAllPageState extends State<SearchSectionAllPage> {
                                   albumSectionResult.collectionWithThumbnail,
                                   tagPrefix: "searchable_item" +
                                       albumSectionResult.heroTag(),
+                                ),
+                              );
+                            },
+                          );
+                        }
+
+                        if (widget.sectionType == SectionType.magic) {
+                          final magicSectionResult =
+                              sectionResults[index] as GenericSearchResult;
+                          return SearchableItemWidget(
+                            magicSectionResult,
+                            onResultTap: () {
+                              RecentSearches()
+                                  .add(sectionResults[index].name());
+                              routeToPage(
+                                context,
+                                MagicResultScreen(
+                                  magicSectionResult.resultFiles(),
+                                  name: magicSectionResult.name(),
+                                  enableGrouping: magicSectionResult
+                                      .params["enableGrouping"]! as bool,
+                                  fileIdToPosMap: magicSectionResult
+                                          .params["fileIdToPosMap"]
+                                      as Map<int, int>,
+                                  heroTag: "searchable_item" +
+                                      magicSectionResult.heroTag(),
                                 ),
                               );
                             },

@@ -60,7 +60,7 @@ const pixelRGBA = (
     y: number,
 ) => {
     if (x < 0 || x >= width || y < 0 || y >= height) {
-        return { r: 0, g: 0, b: 0, a: 0 };
+        return { r: 114, g: 114, b: 114, a: 0 };
     }
     const index = (y * width + x) * 4;
     return {

@@ -6,6 +6,7 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/collection_updated_event.dart";
 import "package:photos/events/event.dart";
 import "package:photos/events/location_tag_updated_event.dart";
+import "package:photos/events/magic_cache_updated_event.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection/collection.dart";
@@ -39,8 +40,8 @@ enum ResultType {
 
 enum SectionType {
   face,
-  location,
   magic,
+  location,
   // includes year, month , day, event ResultType
   moment,
   album,
@@ -57,7 +58,7 @@ extension SectionTypeExtensions on SectionType {
       case SectionType.face:
         return S.of(context).people;
       case SectionType.magic:
-        return "Magic";
+        return S.of(context).discover;
       case SectionType.moment:
         return S.of(context).moments;
       case SectionType.location:
@@ -78,7 +79,7 @@ extension SectionTypeExtensions on SectionType {
       case SectionType.face:
         return S.of(context).searchFaceEmptySection;
       case SectionType.magic:
-        return "Magic";
+        return "Discover";
       case SectionType.moment:
         return S.of(context).searchDatesEmptySection;
       case SectionType.location:
@@ -117,7 +118,7 @@ extension SectionTypeExtensions on SectionType {
     }
   }
 
-  bool get sortByName => this != SectionType.face;
+  bool get sortByName => this != SectionType.face && this != SectionType.magic;
 
   bool get isEmptyCTAVisible {
     switch (this) {
@@ -249,7 +250,7 @@ extension SectionTypeExtensions on SectionType {
       case SectionType.face:
         return SearchService.instance.getAllFace(limit);
       case SectionType.magic:
-        return SearchService.instance.getMagicSectionResutls();
+        return SearchService.instance.getMagicSectionResults(context);
 
       case SectionType.moment:
         return SearchService.instance.getRandomMomentsSearchResults(context);
@@ -291,6 +292,8 @@ extension SectionTypeExtensions on SectionType {
     switch (this) {
       case SectionType.location:
         return [Bus.instance.on<LocationTagUpdatedEvent>()];
+      case SectionType.magic:
+        return [Bus.instance.on<MagicCacheUpdatedEvent>()];
       default:
         return [];
     }

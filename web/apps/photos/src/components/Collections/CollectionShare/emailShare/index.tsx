@@ -1,5 +1,5 @@
+import { COLLECTION_ROLE, type Collection } from "@/media/collection";
 import { useRef, useState } from "react";
-import { COLLECTION_ROLE, Collection } from "types/collection";
 
 import {
     MenuItemDivider,

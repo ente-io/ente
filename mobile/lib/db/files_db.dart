@@ -1229,14 +1229,14 @@ class FilesDB {
       // delete all files with same local ID
       unawaited(
         db.execute(
-          'DELETE FROM $filesTable WHERE $columnLocalID = ?',
+          'DELETE FROM $filesTable WHERE $columnLocalID = ? AND ($columnUploadedFileID IS NULL OR $columnUploadedFileID = -1)',
           [file.localID],
         ),
       );
     } else {
       unawaited(
         db.execute(
-          'DELETE FROM $filesTable WHERE $columnGeneratedID = ?',
+          'DELETE FROM $filesTable WHERE $columnGeneratedID = ? AND ($columnUploadedFileID IS NULL OR $columnUploadedFileID = -1)',
           [file.generatedID],
         ),
       );

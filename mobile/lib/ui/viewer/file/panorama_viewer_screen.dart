@@ -127,6 +127,7 @@ class _PanoramaViewerScreenState extends State<PanoramaViewerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: isVisible ? AppBar() : null,
       body: Stack(
         children: [
           Panorama(

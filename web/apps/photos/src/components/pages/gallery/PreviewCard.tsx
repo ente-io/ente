@@ -1,5 +1,13 @@
 import log from "@/base/log";
 import { FileType } from "@/media/file-type";
+import {
+    GAP_BTW_TILES,
+    IMAGE_CONTAINER_MAX_WIDTH,
+} from "@/new/photos/components/PhotoList";
+import {
+    LoadingThumbnail,
+    StaticThumbnail,
+} from "@/new/photos/components/PlaceholderThumbnails";
 import DownloadManager from "@/new/photos/services/download";
 import { EnteFile } from "@/new/photos/types/file";
 import { Overlay } from "@ente/shared/components/Container";
@@ -8,16 +16,11 @@ import useLongPress from "@ente/shared/hooks/useLongPress";
 import AlbumOutlined from "@mui/icons-material/AlbumOutlined";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
 import { Tooltip, styled } from "@mui/material";
-import {
-    LoadingThumbnail,
-    StaticThumbnail,
-} from "components/PlaceholderThumbnails";
-import { TRASH_SECTION } from "constants/collection";
-import { GAP_BTW_TILES, IMAGE_CONTAINER_MAX_WIDTH } from "constants/gallery";
 import i18n from "i18next";
 import { DeduplicateContext } from "pages/deduplicate";
 import { GalleryContext } from "pages/gallery";
 import React, { useContext, useEffect, useRef, useState } from "react";
+import { TRASH_SECTION } from "utils/collection";
 import { shouldShowAvatar } from "utils/file";
 import Avatar from "./Avatar";
 
@@ -42,7 +45,6 @@ const Check = styled("input")<{ $active: boolean }>`
     position: absolute;
     z-index: 10;
     left: 0;
-    opacity: 0;
     outline: none;
     cursor: pointer;
     @media (pointer: coarse) {
@@ -90,8 +92,10 @@ const Check = styled("input")<{ $active: boolean }>`
         border-right: 2px solid #ddd;
         border-bottom: 2px solid #ddd;
     }
-    ${(props) => props.$active && "opacity: 0.5 "};
+    visibility: hidden;
+    ${(props) => props.$active && "visibility: visible; opacity: 0.5;"};
     &:checked {
+        visibility: visible;
         opacity: 1 !important;
     }
 `;
@@ -207,6 +211,7 @@ const Cont = styled("div")<{ disabled: boolean }>`
 
     &:hover {
         input[type="checkbox"] {
+            visibility: visible;
             opacity: 0.5;
         }
 

@@ -16,8 +16,8 @@ SetupIconFile={{SETUP_ICON_FILE}}
 WizardStyle=modern
 ;PrivilegesRequired={{PRIVILEGES_REQUIRED}}
 PrivilegesRequiredOverridesAllowed=dialog
-ArchitecturesAllowed=x64
-ArchitecturesInstallIn64BitMode=x64
+ArchitecturesAllowed=x64compatible
+ArchitecturesInstallIn64BitMode=x64compatible
 UninstallDisplayIcon={app}\auth.exe
 
 [Languages]

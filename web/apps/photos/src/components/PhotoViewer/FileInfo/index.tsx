@@ -3,18 +3,28 @@ import { Titlebar } from "@/base/components/Titlebar";
 import { EllipsizedTypography } from "@/base/components/Typography";
 import { nameAndExtension } from "@/base/file";
 import log from "@/base/log";
+import type { Location } from "@/base/types";
 import type { ParsedMetadata } from "@/media/file-metadata";
 import {
-    getUICreationDate,
+    fileCreationPhotoDate,
+    fileLocation,
     updateRemotePublicMagicMetadata,
     type ParsedMetadataDate,
 } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
-import { UnidentifiedFaces } from "@/new/photos/components/PeopleList";
+import {
+    AnnotatedFacePeopleList,
+    UnclusteredFaceList,
+} from "@/new/photos/components/PeopleList";
 import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker";
 import { photoSwipeZIndex } from "@/new/photos/components/PhotoViewer";
 import { tagNumericValue, type RawExifTags } from "@/new/photos/services/exif";
-import { isMLEnabled } from "@/new/photos/services/ml";
+import {
+    AnnotatedFacesForFile,
+    getAnnotatedFacesForFile,
+    isMLEnabled,
+    type AnnotatedFaceID,
+} from "@/new/photos/services/ml";
 import { EnteFile } from "@/new/photos/types/file";
 import { formattedByteSize } from "@/new/photos/utils/units";
 import CopyButton from "@ente/shared/components/CodeBlock/CopyButton";
@@ -59,7 +69,7 @@ export interface FileInfoExif {
     parsed: ParsedMetadata | undefined;
 }
 
-interface FileInfoProps {
+export interface FileInfoProps {
     showInfo: boolean;
     handleCloseInfo: () => void;
     closePhotoViewer: () => void;
@@ -71,6 +81,10 @@ interface FileInfoProps {
     fileToCollectionsMap?: Map<number, number[]>;
     collectionNameMap?: Map<number, string>;
     showCollectionChips: boolean;
+    /**
+     * Called when the user selects a person in the file info panel.
+     */
+    onSelectPerson?: ((personID: string) => void) | undefined;
 }
 
 export const FileInfo: React.FC<FileInfoProps> = ({
@@ -85,6 +99,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     collectionNameMap,
     showCollectionChips,
     closePhotoViewer,
+    onSelectPerson,
 }) => {
     const { mapEnabled, updateMapEnabled, setDialogBoxAttributesV2 } =
         useContext(AppContext);
@@ -95,21 +110,32 @@ export const FileInfo: React.FC<FileInfoProps> = ({
 
     const [exifInfo, setExifInfo] = useState<ExifInfo | undefined>();
     const [openRawExif, setOpenRawExif] = useState(false);
+    const [annotatedFaces, setAnnotatedFaces] = useState<
+        AnnotatedFacesForFile | undefined
+    >();
 
     const location = useMemo(() => {
-        if (file && file.metadata) {
-            if (
-                (file.metadata.latitude || file.metadata.latitude === 0) &&
-                !(file.metadata.longitude === 0 && file.metadata.latitude === 0)
-            ) {
-                return {
-                    latitude: file.metadata.latitude,
-                    longitude: file.metadata.longitude,
-                };
-            }
+        if (file) {
+            const location = fileLocation(file);
+            if (location) return location;
         }
         return exif?.parsed?.location;
     }, [file, exif]);
+
+    useEffect(() => {
+        if (!file) return;
+
+        let didCancel = false;
+
+        void (async () => {
+            const result = await getAnnotatedFacesForFile(file);
+            !didCancel && setAnnotatedFaces(result);
+        })();
+
+        return () => {
+            didCancel = true;
+        };
+    }, [file]);
 
     useEffect(() => {
         setExifInfo(parseExifInfo(exif));
@@ -120,8 +146,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     }
 
     const onCollectionChipClick = (collectionID) => {
-        galleryContext.setActiveCollectionID(collectionID);
-        galleryContext.setIsInSearchMode(false);
+        galleryContext.onShowCollection(collectionID);
         closePhotoViewer();
     };
 
@@ -134,6 +159,13 @@ export const FileInfo: React.FC<FileInfoProps> = ({
         setDialogBoxAttributesV2(
             getMapDisableConfirmationDialog(() => updateMapEnabled(false)),
         );
+
+    const handleSelectFace = (annotatedFaceID: AnnotatedFaceID) => {
+        if (onSelectPerson) {
+            onSelectPerson(annotatedFaceID.personID);
+            closePhotoViewer();
+        }
+    };
 
     return (
         <FileInfoSidebar open={showInfo} onClose={handleCloseInfo}>
@@ -176,12 +208,12 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                     <>
                         <InfoItem
                             icon={<LocationOnOutlined />}
-                            title={t("LOCATION")}
+                            title={t("location")}
                             caption={
                                 !mapEnabled ||
                                 publicCollectionGalleryContext.accessedThroughSharedURL ? (
                                     <Link
-                                        href={getOpenStreetMapLink(location)}
+                                        href={openStreetMapLink(location)}
                                         target="_blank"
                                         rel="noopener"
                                         sx={{ fontWeight: "bold" }}
@@ -205,7 +237,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                             }
                             customEndButton={
                                 <CopyButton
-                                    code={getOpenStreetMapLink(location)}
+                                    code={openStreetMapLink(location)}
                                     color="secondary"
                                     size="medium"
                                 />
@@ -273,10 +305,17 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                     </InfoItem>
                 )}
 
-                {isMLEnabled() && (
+                {isMLEnabled() && annotatedFaces && (
                     <>
-                        {/* <PhotoPeopleList file={file} /> */}
-                        <UnidentifiedFaces enteFile={file} />
+                        <AnnotatedFacePeopleList
+                            enteFile={file}
+                            annotatedFaceIDs={annotatedFaces.annotatedFaceIDs}
+                            onSelectFace={handleSelectFace}
+                        />
+                        <UnclusteredFaceList
+                            enteFile={file}
+                            faceIDs={annotatedFaces.otherFaceIDs}
+                        />
                     </>
                 )}
             </Stack>
@@ -367,7 +406,7 @@ export const CreationTime: React.FC<CreationTimeProps> = ({
     const closeEditMode = () => setIsInEditMode(false);
 
     const publicMagicMetadata = getPublicMagicMetadataSync(enteFile);
-    const originalDate = getUICreationDate(enteFile, publicMagicMetadata);
+    const originalDate = fileCreationPhotoDate(enteFile, publicMagicMetadata);
 
     const saveEdits = async (pickedTime: ParsedMetadataDate) => {
         try {
@@ -531,11 +570,8 @@ const BasicDeviceCamera: React.FC<{ parsedExif: ExifInfo }> = ({
     );
 };
 
-const getOpenStreetMapLink = (location: {
-    latitude: number;
-    longitude: number;
-}) =>
-    `https://www.openstreetmap.org/?mlat=${location.latitude}&mlon=${location.longitude}#map=15/${location.latitude}/${location.longitude}`;
+const openStreetMapLink = ({ latitude, longitude }: Location) =>
+    `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=15/${latitude}/${longitude}`;
 
 interface RawExifProps {
     open: boolean;
@@ -575,7 +611,8 @@ const RawExif: React.FC<RawExifProps> = ({
                 } else if (
                     tag &&
                     typeof tag == "object" &&
-                    "description" in tag
+                    "description" in tag &&
+                    typeof tag.description == "string"
                 ) {
                     description = tag.description;
                 }

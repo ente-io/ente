@@ -1,4 +1,4 @@
-import { removeKV, setKV } from "@/base/kv";
+import { getKVS, removeKV, setKV } from "@/base/kv";
 import log from "@/base/log";
 
 export enum LS_KEYS {
@@ -13,6 +13,7 @@ export enum LS_KEYS {
     EXPORT = "export",
     // LOGS = "logs",
     USER_DETAILS = "userDetails",
+    // Migrated to (and only used by) useCollectionsSortByLocalState.
     COLLECTION_SORT_BY = "collectionSortBy",
     THEME = "theme",
     // Moved to the new wrapper @/base/local-storage
@@ -68,6 +69,17 @@ export const setLSUser = async (user: object) => {
  * inlined into `setLSUser` (tag: Migration).
  */
 export const migrateKVToken = async (user: unknown) => {
+    // Throw an error if the data is in local storage but not in IndexedDB. This
+    // is a pre-cursor to inlining this code.
+    // TODO(REL): Remove this sanity check after a few days.
+    const oldLSUser = getData(LS_KEYS.USER);
+    const wasMissing =
+        oldLSUser &&
+        typeof oldLSUser == "object" &&
+        "token" in oldLSUser &&
+        typeof oldLSUser.token == "string" &&
+        !(await getKVS("token"));
+
     user &&
     typeof user == "object" &&
     "id" in user &&
@@ -81,4 +93,9 @@ export const migrateKVToken = async (user: unknown) => {
     typeof user.token == "string"
         ? await setKV("token", user.token)
         : await removeKV("token");
+
+    if (wasMissing)
+        throw new Error(
+            "The user's token was present in local storage but not in IndexedDB",
+        );
 };
