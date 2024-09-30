@@ -38,7 +38,7 @@ export const UnstyledButton = styled("button")`
        inherit that customization also. */
     letter-spacing: inherit;
 
-    /* The button default is to show an flipped arrow. Show a hand instead. */
+    /* Default cursor on mouse over of a button is not a hand pointer */
     cursor: pointer;
 `;
 
