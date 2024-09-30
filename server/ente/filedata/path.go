@@ -46,6 +46,10 @@ func ObjectMedata(fileID int64, ownerID int64, oType ente.ObjectType, id *string
 	}
 }
 
+func DeletePrefix(fileID int64, ownerID int64, oType ente.ObjectType) string {
+	return fmt.Sprintf("%s%s/", BasePrefix(fileID, ownerID), string(oType))
+}
+
 func NewUploadID(oType ente.ObjectType) string {
 	if oType == ente.PreviewVideo {
 		return base.MustNewID("pv")
