@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/ente/filedata"
 	fileDataRepo "github.com/ente-io/museum/pkg/repo/filedata"
 	enteTime "github.com/ente-io/museum/pkg/utils/time"
@@ -66,6 +67,10 @@ func (c *Controller) tryReplicate() error {
 			log.Errorf("Could not fetch row for replication: %s", err)
 		}
 		return err
+	}
+	if row.Type == ente.PreviewVideo {
+		log.Infof("Skipping replication for preview video %d", row.FileID)
+		return nil
 	}
 	err = c.replicateRowData(ctx, *row)
 	if err != nil {

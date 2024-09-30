@@ -97,6 +97,8 @@ type Row struct {
 	// If a file type has multiple objects, then the size is the sum of all the objects.
 	Size              int64
 	LatestBucket      string
+	ObjectID          *string
+	ObjectNonce       *string
 	ReplicatedBuckets []string
 	DeleteFromBuckets []string
 	InflightReplicas  []string
@@ -109,19 +111,16 @@ type Row struct {
 
 // S3FileMetadataObjectKey returns the object key for the metadata stored in the S3 bucket.
 func (r *Row) S3FileMetadataObjectKey() string {
-	if r.Type == ente.MlData {
-		return derivedMetaPath(r.FileID, r.UserID)
+	if r.Type == ente.MlData || r.Type == ente.PreviewVideo {
+		return ObjectMedata(r.FileID, r.UserID, r.Type, r.ObjectID)
 	}
-
 	panic(fmt.Sprintf("S3FileMetadata should not be written for %s type", r.Type))
 }
 
 // GetS3FileObjectKey returns the object key for the file data stored in the S3 bucket.
 func (r *Row) GetS3FileObjectKey() string {
-	//if r.Type == ente.PreviewVideo {
-	//	return previewVideoPath(r.FileID, r.UserID)
-	//} else if r.Type == ente.PreviewImage {
-	//	return previewImagePath(r.FileID, r.UserID)
-	//}
+	if r.Type == ente.PreviewVideo || r.Type == ente.PreviewImage {
+		return ObjectKey(r.FileID, r.UserID, r.Type, r.ObjectID)
+	}
 	panic(fmt.Sprintf("unsupported object type %s", r.Type))
 }

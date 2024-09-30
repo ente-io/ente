@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/ente/filedata"
+	"github.com/ente-io/museum/pkg/repo"
 	"github.com/ente-io/museum/pkg/utils/array"
 	"github.com/ente-io/stacktrace"
 	"github.com/lib/pq"
@@ -14,7 +15,8 @@ import (
 
 // Repository defines the methods for inserting, updating, and retrieving file data.
 type Repository struct {
-	DB *sql.DB
+	DB                *sql.DB
+	ObjectCleanupRepo *repo.ObjectCleanupRepository
 }
 
 const (
@@ -54,8 +56,48 @@ func (r *Repository) InsertOrUpdate(ctx context.Context, data filedata.Row) erro
 	return nil
 }
 
+func (r *Repository) InsertOrUpdatePreviewData(ctx context.Context, data filedata.Row) error {
+	tx, err := r.DB.BeginTx(ctx, nil)
+	query := `
+        INSERT INTO file_data 
+            (file_id, user_id, data_type, size, latest_bucket, obj_id, obj_nonce ) 
+        VALUES 
+            ($1, $2, $3, $4, $5, $6, $7)
+        ON CONFLICT (file_id, data_type)
+        DO UPDATE SET 
+            size = EXCLUDED.size,
+            delete_from_buckets = array(
+                SELECT DISTINCT elem FROM unnest(
+                    array_append(
+                        array_cat(array_cat(file_data.replicated_buckets, file_data.delete_from_buckets), file_data.inflight_rep_buckets),
+                        CASE WHEN file_data.latest_bucket != EXCLUDED.latest_bucket THEN file_data.latest_bucket  END
+                    )
+                ) AS elem
+                WHERE elem IS NOT NULL AND elem != EXCLUDED.latest_bucket
+            ),
+            replicated_buckets = ARRAY[]::s3region[],
+            pending_sync = true,
+            latest_bucket = EXCLUDED.latest_bucket,
+            obj_id = EXCLUDED.obj_id,
+            obj_nonce = excluded.obj_nonce,
+            updated_at = now_utc_micro_seconds()
+        WHERE file_data.is_deleted = false`
+	_, err = tx.ExecContext(ctx, query,
+		data.FileID, data.UserID, string(data.Type), data.Size, data.LatestBucket, *data.ObjectID, *data.ObjectNonce)
+	if err != nil {
+		tx.Rollback()
+		return stacktrace.Propagate(err, "failed to insert file data")
+	}
+	err = r.ObjectCleanupRepo.RemoveTempObjectFromDC(ctx, tx, "", data.LatestBucket)
+	if err != nil {
+		tx.Rollback()
+		return stacktrace.Propagate(err, "failed to remove object from tempObjects")
+	}
+	return tx.Commit()
+}
+
 func (r *Repository) GetFilesData(ctx context.Context, oType ente.ObjectType, fileIDs []int64) ([]filedata.Row, error) {
-	rows, err := r.DB.QueryContext(ctx, `SELECT file_id, user_id, data_type, size, latest_bucket, replicated_buckets, delete_from_buckets, inflight_rep_buckets, pending_sync, is_deleted, sync_locked_till, created_at, updated_at
+	rows, err := r.DB.QueryContext(ctx, `SELECT file_id, user_id, data_type, size, latest_bucket, replicated_buckets, delete_from_buckets, inflight_rep_buckets, pending_sync, is_deleted, sync_locked_till, created_at, updated_at, obj_id, obj_nonce
 										FROM file_data
 										WHERE data_type = $1 AND file_id = ANY($2)`, string(oType), pq.Array(fileIDs))
 	if err != nil {
@@ -65,7 +107,7 @@ func (r *Repository) GetFilesData(ctx context.Context, oType ente.ObjectType, fi
 }
 
 func (r *Repository) GetFileData(ctx context.Context, fileIDs int64) ([]filedata.Row, error) {
-	rows, err := r.DB.QueryContext(ctx, `SELECT file_id, user_id, data_type, size, latest_bucket, replicated_buckets, delete_from_buckets,inflight_rep_buckets, pending_sync, is_deleted, sync_locked_till, created_at, updated_at
+	rows, err := r.DB.QueryContext(ctx, `SELECT file_id, user_id, data_type, size, latest_bucket, replicated_buckets, delete_from_buckets,inflight_rep_buckets, pending_sync, is_deleted, sync_locked_till, created_at, updated_at, obj_id, obj_nonce
 										FROM file_data
 										WHERE file_id = $1`, fileIDs)
 	if err != nil {
@@ -251,7 +293,7 @@ func convertRowsToFilesData(rows *sql.Rows) ([]filedata.Row, error) {
 	var filesData []filedata.Row
 	for rows.Next() {
 		var fileData filedata.Row
-		err := rows.Scan(&fileData.FileID, &fileData.UserID, &fileData.Type, &fileData.Size, &fileData.LatestBucket, pq.Array(&fileData.ReplicatedBuckets), pq.Array(&fileData.DeleteFromBuckets), pq.Array(&fileData.InflightReplicas), &fileData.PendingSync, &fileData.IsDeleted, &fileData.SyncLockedTill, &fileData.CreatedAt, &fileData.UpdatedAt)
+		err := rows.Scan(&fileData.FileID, &fileData.UserID, &fileData.Type, &fileData.Size, &fileData.LatestBucket, pq.Array(&fileData.ReplicatedBuckets), pq.Array(&fileData.DeleteFromBuckets), pq.Array(&fileData.InflightReplicas), &fileData.PendingSync, &fileData.IsDeleted, &fileData.SyncLockedTill, &fileData.CreatedAt, &fileData.UpdatedAt, &fileData.ObjectID, &fileData.ObjectNonce)
 		if err != nil {
 			return nil, stacktrace.Propagate(err, "")
 		}

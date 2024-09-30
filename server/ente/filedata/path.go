@@ -24,16 +24,26 @@ func AllObjects(fileID int64, ownerID int64, oType ente.ObjectType) []string {
 	}
 }
 
-func CompleteObjectKey(fileID int64, ownerID int64, oType ente.ObjectType, id string) string {
+func ObjectKey(fileID int64, ownerID int64, oType ente.ObjectType, id *string) string {
 	switch oType {
 	case ente.PreviewVideo:
-		return fmt.Sprintf("%s%s/%s", BasePrefix(fileID, ownerID), string(oType), id)
+		return fmt.Sprintf("%s%s/%s", BasePrefix(fileID, ownerID), string(oType), *id)
 	case ente.PreviewImage:
-		return fmt.Sprintf("%s%s/%s", BasePrefix(fileID, ownerID), string(oType), id)
+		return fmt.Sprintf("%s%s/%s", BasePrefix(fileID, ownerID), string(oType), *id)
 	default:
 		panic(fmt.Sprintf("object type %s is not supported", oType))
 	}
-	panic(fmt.Sprintf("object type %s is not supported", oType))
+}
+
+func ObjectMedata(fileID int64, ownerID int64, oType ente.ObjectType, id *string) string {
+	switch oType {
+	case ente.PreviewVideo:
+		return fmt.Sprintf("%s_playlist", ObjectKey(fileID, ownerID, oType, id))
+	case ente.MlData:
+		return fmt.Sprintf("%s%s", BasePrefix(fileID, ownerID), string(oType))
+	default:
+		panic(fmt.Sprintf("ObjectMetadata not supported for type %s", string(oType)))
+	}
 }
 
 func NewUploadID(oType ente.ObjectType) string {

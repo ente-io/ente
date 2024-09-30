@@ -88,7 +88,7 @@ func (c *Controller) InsertOrUpdateMetadata(ctx *gin.Context, req *fileData.PutF
 	}
 	fileOwnerID := userID
 	bucketID := c.S3Config.GetBucketID(req.Type)
-	objectKey := req.S3FileMetadataObjectKey(fileOwnerID)
+	objectKey := fileData.ObjectMedata(req.FileID, fileOwnerID, req.Type, nil)
 	obj := fileData.S3FileMetadata{
 		Version:          *req.Version,
 		EncryptedData:    *req.EncryptedData,

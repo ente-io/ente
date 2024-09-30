@@ -92,6 +92,26 @@ func (c *Controller) uploadObject(obj fileData.S3FileMetadata, objectKey string,
 	return int64(len(embeddingObj)), nil
 }
 
+func (c *Controller) verifySize(bucketID string, objectKey string, expectedSize int64) error {
+	s3Client := c.S3Config.GetS3Client(bucketID)
+	bucket := c.S3Config.GetBucket(bucketID)
+	res, err := s3Client.HeadObject(&s3.HeadObjectInput{
+		Bucket: bucket,
+		Key:    &objectKey,
+	})
+	if err != nil {
+		return stacktrace.Propagate(err, "Fetching object info from bucket %s failed", *bucket)
+	}
+
+	if *res.ContentLength != expectedSize {
+		err = fmt.Errorf("size of the uploaded file (%d) does not match the expected size (%d) in bucket %s",
+			*res.ContentLength, expectedSize, *bucket)
+		//c.notifyDiscord(fmt.Sprint(err))
+		return stacktrace.Propagate(err, "")
+	}
+	return nil
+}
+
 // copyObject copies the object from srcObjectKey to destObjectKey in the same bucket and returns the object size
 func (c *Controller) copyObject(srcObjectKey string, destObjectKey string, bucketID string) error {
 	bucket := c.S3Config.GetBucket(bucketID)

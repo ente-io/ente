@@ -28,15 +28,3 @@ func (r PutFileDataRequest) Validate() error {
 	}
 	return nil
 }
-
-func (r PutFileDataRequest) S3FileMetadataObjectKey(ownerID int64) string {
-	if r.Type == ente.MlData {
-		return derivedMetaPath(r.FileID, ownerID)
-	}
-
-	panic(fmt.Sprintf("S3FileMetadata should not be written for %s type", r.Type))
-}
-
-func (r PutFileDataRequest) S3FileObjectKey(ownerID int64) string {
-	panic(fmt.Sprintf("S3FileObjectKey should not be written for %s type", r.Type))
-}
