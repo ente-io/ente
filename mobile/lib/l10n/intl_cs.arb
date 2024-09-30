@@ -1,4 +1,6 @@
 {
   "@@locale ": "en",
-  "incorrectRecoveryKeyBody": ""
+  "askDeleteReason": "Jaký je váš hlavní důvod, proč mažete svůj účet?",
+  "incorrectRecoveryKeyBody": "",
+  "checkInboxAndSpamFolder": "Zkontrolujte prosím svou doručenou poštu (a spam) pro dokončení ověření"
 }

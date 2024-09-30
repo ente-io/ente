@@ -22,7 +22,7 @@ import 'package:photos/utils/navigation_util.dart';
 class DeduplicatePage extends StatefulWidget {
   final List<DuplicateFiles> duplicates;
 
-  const DeduplicatePage(this.duplicates, {Key? key}) : super(key: key);
+  const DeduplicatePage(this.duplicates, {super.key});
 
   @override
   State<DeduplicatePage> createState() => _DeduplicatePageState();
@@ -442,7 +442,6 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
           DetailPage(
             DetailPageConfiguration(
               files,
-              null,
               files.indexOf(file),
               "deduplicate_",
               mode: DetailPageMode.minimalistic,
@@ -459,7 +458,6 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
           DetailPage(
             DetailPageConfiguration(
               files,
-              null,
               files.indexOf(file),
               "deduplicate_",
               mode: DetailPageMode.minimalistic,

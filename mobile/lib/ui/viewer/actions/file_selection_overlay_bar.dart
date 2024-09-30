@@ -6,6 +6,7 @@ import 'package:photos/models/selected_files.dart';
 import "package:photos/theme/effects.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/components/bottom_action_bar/bottom_action_bar_widget.dart';
+import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 
 class FileSelectionOverlayBar extends StatefulWidget {
@@ -23,8 +24,8 @@ class FileSelectionOverlayBar extends StatefulWidget {
     this.backgroundColor,
     this.person,
     this.clusterID,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<FileSelectionOverlayBar> createState() =>
@@ -136,6 +137,7 @@ class _SelectAllButtonState extends State<SelectAllButton> {
   @override
   Widget build(BuildContext context) {
     final selectionState = SelectionState.of(context);
+    final allGalleryFiles = GalleryFilesState.of(context).galleryFiles;
     assert(
       selectionState != null,
       "SelectionState not found in context, SelectionState should be an ancestor of FileSelectionOverlayBar",
@@ -147,8 +149,9 @@ class _SelectAllButtonState extends State<SelectAllButton> {
           if (_allSelected) {
             selectionState.selectedFiles.clearAll();
           } else {
-            selectionState.selectedFiles
-                .selectAll(selectionState.allGalleryFiles!.toSet());
+            selectionState.selectedFiles.selectAll(
+              allGalleryFiles.toSet(),
+            );
           }
           _allSelected = !_allSelected;
         });
@@ -181,7 +184,7 @@ class _SelectAllButtonState extends State<SelectAllButton> {
                 listenable: selectionState!.selectedFiles,
                 builder: (context, _) {
                   if (selectionState.selectedFiles.files.length ==
-                      selectionState.allGalleryFiles?.length) {
+                      allGalleryFiles.length) {
                     _allSelected = true;
                   } else {
                     _allSelected = false;

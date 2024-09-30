@@ -17,6 +17,7 @@ import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
+import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 
 Future<int?> showPickCoverPhotoSheet(
   BuildContext context,
@@ -81,43 +82,46 @@ class PickCoverPhotoWidget extends StatelessWidget {
                           showCloseButton: true,
                         ),
                         Expanded(
-                          child: Gallery(
-                            asyncLoader: (
-                              creationStartTime,
-                              creationEndTime, {
-                              limit,
-                              asc,
-                            }) async {
-                              final FileLoadResult result =
-                                  await FilesDB.instance.getFilesInCollection(
-                                collection.id,
+                          child: GalleryFilesState(
+                            child: Gallery(
+                              asyncLoader: (
                                 creationStartTime,
-                                creationEndTime,
-                                limit: limit,
-                                asc: asc,
-                              );
-                              // hide ignored files from home page UI
-                              final ignoredIDs = await IgnoredFilesService
-                                  .instance.idToIgnoreReasonMap;
-                              result.files.removeWhere(
-                                (f) =>
-                                    f.uploadedFileID == null &&
-                                    IgnoredFilesService.instance
-                                        .shouldSkipUpload(ignoredIDs, f),
-                              );
-                              return result;
-                            },
-                            reloadEvent:
-                                Bus.instance.on<CollectionUpdatedEvent>().where(
-                                      (event) =>
-                                          event.collectionID == collection.id,
-                                    ),
-                            tagPrefix: "pick_center_point_gallery",
-                            selectedFiles: selectedFiles,
-                            limitSelectionToOne: true,
-                            showSelectAllByDefault: false,
-                            sortAsyncFn: () =>
-                                collection.pubMagicMetadata.asc ?? false,
+                                creationEndTime, {
+                                limit,
+                                asc,
+                              }) async {
+                                final FileLoadResult result =
+                                    await FilesDB.instance.getFilesInCollection(
+                                  collection.id,
+                                  creationStartTime,
+                                  creationEndTime,
+                                  limit: limit,
+                                  asc: asc,
+                                );
+                                // hide ignored files from home page UI
+                                final ignoredIDs = await IgnoredFilesService
+                                    .instance.idToIgnoreReasonMap;
+                                result.files.removeWhere(
+                                  (f) =>
+                                      f.uploadedFileID == null &&
+                                      IgnoredFilesService.instance
+                                          .shouldSkipUpload(ignoredIDs, f),
+                                );
+                                return result;
+                              },
+                              reloadEvent: Bus.instance
+                                  .on<CollectionUpdatedEvent>()
+                                  .where(
+                                    (event) =>
+                                        event.collectionID == collection.id,
+                                  ),
+                              tagPrefix: "pick_center_point_gallery",
+                              selectedFiles: selectedFiles,
+                              limitSelectionToOne: true,
+                              showSelectAllByDefault: false,
+                              sortAsyncFn: () =>
+                                  collection.pubMagicMetadata.asc ?? false,
+                            ),
                           ),
                         ),
                       ],

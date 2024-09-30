@@ -17,6 +17,7 @@ import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedba
 import "package:photos/services/search_service.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
+import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 import "package:photos/ui/viewer/people/people_app_bar.dart";
 import "package:photos/ui/viewer/people/people_banner.dart";
@@ -110,110 +111,113 @@ class _PeoplePageState extends State<PeoplePage> {
   @override
   Widget build(BuildContext context) {
     _logger.info("Building for ${widget.person.data.name}");
-    return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(50.0),
-        child: PeopleAppBar(
-          GalleryType.peopleTag,
-          widget.person.data.name,
-          _selectedFiles,
-          widget.person,
+    return GalleryFilesState(
+      child: Scaffold(
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(50.0),
+          child: PeopleAppBar(
+            GalleryType.peopleTag,
+            widget.person.data.name,
+            _selectedFiles,
+            widget.person,
+          ),
         ),
-      ),
-      body: FutureBuilder<List<EnteFile>>(
-        future: filesFuture,
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            final personFiles = snapshot.data as List<EnteFile>;
-            return Column(
-              children: [
-                Expanded(
-                  child: SelectionState(
-                    selectedFiles: _selectedFiles,
-                    child: Stack(
-                      alignment: Alignment.bottomCenter,
-                      children: [
-                        Gallery(
-                          asyncLoader: (
-                            creationStartTime,
-                            creationEndTime, {
-                            limit,
-                            asc,
-                          }) async {
-                            final result = await loadPersonFiles();
-                            return Future.value(
-                              FileLoadResult(
-                                result,
-                                false,
-                              ),
-                            );
-                          },
-                          reloadEvent:
-                              Bus.instance.on<LocalPhotosUpdatedEvent>(),
-                          forceReloadEvents: [
-                            Bus.instance.on<PeopleChangedEvent>(),
-                          ],
-                          removalEventTypes: const {
-                            EventType.deletedFromRemote,
-                            EventType.deletedFromEverywhere,
-                            EventType.hide,
-                          },
-                          tagPrefix: widget.tagPrefix + widget.tagPrefix,
-                          selectedFiles: _selectedFiles,
-                          initialFiles:
-                              personFiles.isNotEmpty ? [personFiles.first] : [],
-                        ),
-                        FileSelectionOverlayBar(
-                          PeoplePage.overlayType,
-                          _selectedFiles,
-                          person: widget.person,
-                        ),
-                      ],
+        body: FutureBuilder<List<EnteFile>>(
+          future: filesFuture,
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              final personFiles = snapshot.data as List<EnteFile>;
+              return Column(
+                children: [
+                  Expanded(
+                    child: SelectionState(
+                      selectedFiles: _selectedFiles,
+                      child: Stack(
+                        alignment: Alignment.bottomCenter,
+                        children: [
+                          Gallery(
+                            asyncLoader: (
+                              creationStartTime,
+                              creationEndTime, {
+                              limit,
+                              asc,
+                            }) async {
+                              final result = await loadPersonFiles();
+                              return Future.value(
+                                FileLoadResult(
+                                  result,
+                                  false,
+                                ),
+                              );
+                            },
+                            reloadEvent:
+                                Bus.instance.on<LocalPhotosUpdatedEvent>(),
+                            forceReloadEvents: [
+                              Bus.instance.on<PeopleChangedEvent>(),
+                            ],
+                            removalEventTypes: const {
+                              EventType.deletedFromRemote,
+                              EventType.deletedFromEverywhere,
+                              EventType.hide,
+                            },
+                            tagPrefix: widget.tagPrefix + widget.tagPrefix,
+                            selectedFiles: _selectedFiles,
+                            initialFiles: personFiles.isNotEmpty
+                                ? [personFiles.first]
+                                : [],
+                          ),
+                          FileSelectionOverlayBar(
+                            PeoplePage.overlayType,
+                            _selectedFiles,
+                            person: widget.person,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                showSuggestionBanner
-                    ? Dismissible(
-                        key: const Key("suggestionBanner"),
-                        direction: DismissDirection.horizontal,
-                        onDismissed: (direction) {
-                          setState(() {
-                            userDismissedSuggestionBanner = true;
-                          });
-                        },
-                        child: PeopleBanner(
-                          type: PeopleBannerType.suggestion,
-                          startIcon: Icons.face_retouching_natural,
-                          actionIcon: Icons.search_outlined,
-                          text: "Review suggestions",
-                          subText: "Improve the results",
-                          onTap: () async {
-                            unawaited(
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      PersonReviewClusterSuggestion(
-                                    widget.person,
+                  showSuggestionBanner
+                      ? Dismissible(
+                          key: const Key("suggestionBanner"),
+                          direction: DismissDirection.horizontal,
+                          onDismissed: (direction) {
+                            setState(() {
+                              userDismissedSuggestionBanner = true;
+                            });
+                          },
+                          child: PeopleBanner(
+                            type: PeopleBannerType.suggestion,
+                            startIcon: Icons.face_retouching_natural,
+                            actionIcon: Icons.search_outlined,
+                            text: "Review suggestions",
+                            subText: "Improve the results",
+                            onTap: () async {
+                              unawaited(
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        PersonReviewClusterSuggestion(
+                                      widget.person,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            );
-                          },
-                        ),
-                      )
-                    : const SizedBox.shrink(),
-              ],
-            );
-          } else if (snapshot.hasError) {
-            log("Error: ${snapshot.error} ${snapshot.stackTrace}}");
-            //Need to show an error on the UI here
-            return const SizedBox.shrink();
-          } else {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-        },
+                              );
+                            },
+                          ),
+                        )
+                      : const SizedBox.shrink(),
+                ],
+              );
+            } else if (snapshot.hasError) {
+              log("Error: ${snapshot.error} ${snapshot.stackTrace}}");
+              //Need to show an error on the UI here
+              return const SizedBox.shrink();
+            } else {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+          },
+        ),
       ),
     );
   }

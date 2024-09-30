@@ -342,7 +342,8 @@ Future<MediaUploadData> _getMediaUploadDataFromAppCache(EnteFile file) async {
     Map<String, int>? dimensions;
     if (file.fileType == FileType.image) {
       dimensions = await getImageHeightAndWith(imagePath: localPath);
-    } else {
+    } else if (thumbnailData != null) {
+      // the thumbnail null check is to ensure that we are able to generate thum
       // for video, we need to use the thumbnail data with any max width/height
       final thumbnailFilePath = await VideoThumbnail.thumbnailFile(
         video: localPath,
@@ -406,14 +407,19 @@ Future<Uint8List?> getThumbnailFromInAppCacheFile(EnteFile file) async {
     return null;
   }
   if (file.fileType == FileType.video) {
-    final thumbnailFilePath = await VideoThumbnail.thumbnailFile(
-      video: localFile.path,
-      imageFormat: ImageFormat.JPEG,
-      thumbnailPath: (await getTemporaryDirectory()).path,
-      maxWidth: thumbnailLargeSize,
-      quality: 80,
-    );
-    localFile = File(thumbnailFilePath!);
+    try {
+      final thumbnailFilePath = await VideoThumbnail.thumbnailFile(
+        video: localFile.path,
+        imageFormat: ImageFormat.JPEG,
+        thumbnailPath: (await getTemporaryDirectory()).path,
+        maxWidth: thumbnailLargeSize,
+        quality: 80,
+      );
+      localFile = File(thumbnailFilePath!);
+    } catch (e) {
+      _logger.warning('Failed to generate video thumbnail', e);
+      return null;
+    }
   }
   var thumbnailData = await localFile.readAsBytes();
   int compressionAttempts = 0;

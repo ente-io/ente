@@ -15,4 +15,5 @@ export interface NewAppContextPhotos {
     finishLoading: () => void;
     setDialogBoxAttributesV2: (attrs: DialogBoxAttributesV2) => void;
     somethingWentWrong: () => void;
+    onGenericError: (error: unknown) => void;
 }

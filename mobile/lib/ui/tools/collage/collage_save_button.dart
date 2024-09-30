@@ -59,7 +59,7 @@ class SaveCollageButton extends StatelessWidget {
             replacePage(
               context,
               DetailPage(
-                DetailPageConfiguration([newFile], null, 0, "collage"),
+                DetailPageConfiguration([newFile], 0, "collage"),
               ),
               result: true,
             );

@@ -65,7 +65,7 @@ const ExportPendingList = (props: Iprops) => {
                 title: t("PENDING_ITEMS"),
                 close: {
                     action: props.onClose,
-                    text: t("CLOSE"),
+                    text: t("close"),
                 },
             }}
         >
