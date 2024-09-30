@@ -16,7 +16,7 @@ import "package:photos/ui/viewer/gallery/component/group/type.dart";
 import "package:photos/ui/viewer/gallery/component/multiple_groups_gallery_view.dart";
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import "package:photos/ui/viewer/gallery/state/gallery_context_state.dart";
-import "package:photos/ui/viewer/gallery/state/selection_state.dart";
+import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/utils/debouncer.dart";
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
@@ -53,7 +53,9 @@ class Gallery extends StatefulWidget {
   final bool limitSelectionToOne;
 
   /// When true, the gallery will be in selection mode. Tapping on any item
-  /// will select even when no other item is selected.
+  /// will select it even when no other item is selected. This is only used to
+  /// make selection possible without long pressing. If a gallery has selected
+  /// files, it's not necessary that this will be true.
   final bool inSelectionMode;
   final bool showSelectAllByDefault;
   final bool isScrollablePositionedList;
@@ -86,8 +88,8 @@ class Gallery extends StatefulWidget {
     this.isScrollablePositionedList = true,
     this.reloadDebounceTime = const Duration(milliseconds: 500),
     this.reloadDebounceExecutionInterval = const Duration(seconds: 2),
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<Gallery> createState() {
@@ -250,7 +252,7 @@ class GalleryState extends State<Gallery> {
   @override
   Widget build(BuildContext context) {
     _logger.finest("Building Gallery  ${widget.tagPrefix}");
-    SelectionState.of(context)?.allGalleryFiles = _allFiles;
+    GalleryFilesState.of(context).setGalleryFiles = _allFiles;
     if (!_hasLoadedFiles) {
       return widget.loadingWidget;
     }

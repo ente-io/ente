@@ -139,10 +139,10 @@ class HomeWidgetService {
         iOSName: 'SlideshowWidget',
       );
       _logger.info(
-        ">>> OG size of SlideshowWidget image: ${width} x $height",
+        ">>> OG size of SlideshowWidget image: $width x $height",
       );
       _logger.info(
-        ">>> SlideshowWidget image rendered with size ${cacheWidth} x $cacheHeight",
+        ">>> SlideshowWidget image rendered with size $cacheWidth x $cacheHeight",
       );
     } catch (e) {
       _logger.severe("Error rendering widget", e);
@@ -217,7 +217,7 @@ class HomeWidgetService {
     if (res == null) return;
 
     final page = DetailPage(
-      DetailPageConfiguration(List.unmodifiable([res]), null, 0, "collection"),
+      DetailPageConfiguration(List.unmodifiable([res]), 0, "collection"),
     );
     routeToPage(context, page, forceCustomPageRoute: true).ignore();
   }

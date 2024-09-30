@@ -15,6 +15,7 @@ import 'package:photos/models/selected_files.dart';
 import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedback.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
+import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 import "package:photos/ui/viewer/people/add_person_action_sheet.dart";
 import "package:photos/ui/viewer/people/cluster_app_bar.dart";
@@ -45,8 +46,8 @@ class ClusterPage extends StatefulWidget {
     this.personID,
     this.appendTitle = "",
     this.showNamingBanner = true,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<ClusterPage> createState() => _ClusterPageState();
@@ -138,79 +139,85 @@ class _ClusterPageState extends State<ClusterPage> {
       enableFileGrouping: widget.enableGrouping,
       initialFiles: [widget.searchResult.first],
     );
-    return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(50.0),
-        child: ClusterAppBar(
-          SearchResultPage.appBarType,
-          "${files.length} memories${widget.appendTitle}",
-          _selectedFiles,
-          widget.clusterID,
-          key: ValueKey(files.length),
+    return GalleryFilesState(
+      child: Scaffold(
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(50.0),
+          child: ClusterAppBar(
+            SearchResultPage.appBarType,
+            "${files.length} memories${widget.appendTitle}",
+            _selectedFiles,
+            widget.clusterID,
+            key: ValueKey(files.length),
+          ),
         ),
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: SelectionState(
-              selectedFiles: _selectedFiles,
-              child: Stack(
-                alignment: Alignment.bottomCenter,
-                children: [
-                  gallery,
-                  FileSelectionOverlayBar(
-                    ClusterPage.overlayType,
-                    _selectedFiles,
-                    clusterID: widget.clusterID,
-                  ),
-                ],
+        body: Column(
+          children: [
+            Expanded(
+              child: SelectionState(
+                selectedFiles: _selectedFiles,
+                child: Stack(
+                  alignment: Alignment.bottomCenter,
+                  children: [
+                    gallery,
+                    FileSelectionOverlayBar(
+                      ClusterPage.overlayType,
+                      _selectedFiles,
+                      clusterID: widget.clusterID,
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          showNamingBanner
-              ? SafeArea(
-                  child: Dismissible(
-                    key: const Key("namingBanner"),
-                    direction: DismissDirection.horizontal,
-                    onDismissed: (direction) {
-                      setState(() {
-                        userDismissedNamingBanner = true;
-                      });
-                    },
-                    child: PeopleBanner(
-                      type: PeopleBannerType.addName,
-                      faceWidget: PersonFaceWidget(
-                        files.first,
-                        clusterID: widget.clusterID,
-                      ),
-                      actionIcon: Icons.add_outlined,
-                      text: S.of(context).addAName,
-                      subText: S.of(context).findPeopleByName,
-                      onTap: () async {
-                        if (widget.personID == null) {
-                          final result = await showAssignPersonAction(
-                            context,
-                            clusterID: widget.clusterID,
-                          );
-                          if (result != null &&
-                              result is (PersonEntity, EnteFile)) {
-                            Navigator.pop(context);
-                            // ignore: unawaited_futures
-                            routeToPage(context, PeoplePage(person: result.$1));
-                          } else if (result != null && result is PersonEntity) {
-                            Navigator.pop(context);
-                            // ignore: unawaited_futures
-                            routeToPage(context, PeoplePage(person: result));
-                          }
-                        } else {
-                          showShortToast(context, "No personID or clusterID");
-                        }
+            showNamingBanner
+                ? SafeArea(
+                    child: Dismissible(
+                      key: const Key("namingBanner"),
+                      direction: DismissDirection.horizontal,
+                      onDismissed: (direction) {
+                        setState(() {
+                          userDismissedNamingBanner = true;
+                        });
                       },
+                      child: PeopleBanner(
+                        type: PeopleBannerType.addName,
+                        faceWidget: PersonFaceWidget(
+                          files.first,
+                          clusterID: widget.clusterID,
+                        ),
+                        actionIcon: Icons.add_outlined,
+                        text: S.of(context).addAName,
+                        subText: S.of(context).findPeopleByName,
+                        onTap: () async {
+                          if (widget.personID == null) {
+                            final result = await showAssignPersonAction(
+                              context,
+                              clusterID: widget.clusterID,
+                            );
+                            if (result != null &&
+                                result is (PersonEntity, EnteFile)) {
+                              Navigator.pop(context);
+                              // ignore: unawaited_futures
+                              routeToPage(
+                                context,
+                                PeoplePage(person: result.$1),
+                              );
+                            } else if (result != null &&
+                                result is PersonEntity) {
+                              Navigator.pop(context);
+                              // ignore: unawaited_futures
+                              routeToPage(context, PeoplePage(person: result));
+                            }
+                          } else {
+                            showShortToast(context, "No personID or clusterID");
+                          }
+                        },
+                      ),
                     ),
-                  ),
-                )
-              : const SizedBox.shrink(),
-        ],
+                  )
+                : const SizedBox.shrink(),
+          ],
+        ),
       ),
     );
   }
