@@ -144,10 +144,22 @@ export interface FilePublicMagicMetadataProps {
      * Epoch microseconds.
      */
     editedTime?: number;
+    /**
+     * Edited name of the {@link EnteFile}.
+     *
+     * If the user edits the name of the file within Ente, then the edits are
+     * saved in this field.
+     */
     editedName?: string;
+    /**
+     * A arbitrary textual caption / description that the user has attached to
+     * the {@link EnteFile}.
+     */
     caption?: string;
     uploaderName?: string;
+    /** Width of the image / video, in pixels. */
     w?: number;
+    /** Height of the image / video, in pixels. */
     h?: number;
 }
 
