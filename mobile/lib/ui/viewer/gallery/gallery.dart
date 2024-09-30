@@ -117,8 +117,7 @@ class GalleryState extends State<Gallery> {
   final _forceReloadEventSubscriptions = <StreamSubscription<Event>>[];
   late String _logTag;
   bool _sortOrderAsc = false;
-  List<EnteFile> _allFiles = [];
-  List<EnteFile> _filteredFiles = [];
+  List<EnteFile> _allGalleryFiles = [];
   late SearchFilterDataProvider? _searchFilterDataProvider;
 
   @override
@@ -252,10 +251,48 @@ class GalleryState extends State<Gallery> {
     curateAlbumFilters(_searchFilterDataProvider!, filterdFiles);
   }
 
+  void _setFilteredFilesAndReload(List<EnteFile> files) {
+    _allGalleryFiles = files;
+    final updatedGroupedFiles =
+        widget.enableFileGrouping && widget.groupType.timeGrouping()
+            ? _groupBasedOnTime(files)
+            : _genericGroupForPerf(files);
+
+    if (mounted) {
+      setState(() {
+        currentGroupedFiles = updatedGroupedFiles;
+      });
+    }
+  }
+
   void _setFilesAndReload(List<EnteFile> files) {
     final hasReloaded = _onFilesLoaded(files);
     if (!hasReloaded && mounted) {
       setState(() {});
+    }
+  }
+
+  // group files into multiple groups and returns `true` if it resulted in a
+  // gallery reload
+  bool _onFilesLoaded(List<EnteFile> files) {
+    _allGalleryFiles = files;
+
+    final updatedGroupedFiles =
+        widget.enableFileGrouping && widget.groupType.timeGrouping()
+            ? _groupBasedOnTime(files)
+            : _genericGroupForPerf(files);
+    if (currentGroupedFiles.length != updatedGroupedFiles.length ||
+        currentGroupedFiles.isEmpty) {
+      if (mounted) {
+        setState(() {
+          _hasLoadedFiles = true;
+          currentGroupedFiles = updatedGroupedFiles;
+        });
+      }
+      return true;
+    } else {
+      currentGroupedFiles = updatedGroupedFiles;
+      return false;
     }
   }
 
@@ -296,44 +333,6 @@ class GalleryState extends State<Gallery> {
     }
   }
 
-  void _setFilteredFilesAndReload(List<EnteFile> files) {
-    _filteredFiles = files;
-
-    final updatedGroupedFiles =
-        widget.enableFileGrouping && widget.groupType.timeGrouping()
-            ? _groupBasedOnTime(files)
-            : _genericGroupForPerf(files);
-    if (mounted) {
-      setState(() {
-        currentGroupedFiles = updatedGroupedFiles;
-      });
-    }
-  }
-
-  // group files into multiple groups and returns `true` if it resulted in a
-  // gallery reload
-  bool _onFilesLoaded(List<EnteFile> files) {
-    _allFiles = files;
-
-    final updatedGroupedFiles =
-        widget.enableFileGrouping && widget.groupType.timeGrouping()
-            ? _groupBasedOnTime(files)
-            : _genericGroupForPerf(files);
-    if (currentGroupedFiles.length != updatedGroupedFiles.length ||
-        currentGroupedFiles.isEmpty) {
-      if (mounted) {
-        setState(() {
-          _hasLoadedFiles = true;
-          currentGroupedFiles = updatedGroupedFiles;
-        });
-      }
-      return true;
-    } else {
-      currentGroupedFiles = updatedGroupedFiles;
-      return false;
-    }
-  }
-
   @override
   void dispose() {
     _reloadEventSubscription?.cancel();
@@ -352,7 +351,7 @@ class GalleryState extends State<Gallery> {
   @override
   Widget build(BuildContext context) {
     _logger.finest("Building Gallery  ${widget.tagPrefix}");
-    GalleryFilesState.of(context).setGalleryFiles = _allFiles;
+    GalleryFilesState.of(context).setGalleryFiles = _allGalleryFiles;
     if (!_hasLoadedFiles) {
       return widget.loadingWidget;
     }
