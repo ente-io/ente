@@ -140,16 +140,6 @@
   "oops": "Oups",
   "suggestFeatures": "Suggérer des fonctionnalités",
   "faq": "FAQ",
-  "faq_q_1": "Quelle est la sécurité de Auth?",
-  "faq_a_1": "Tous les codes que vous sauvegardez via ente sont chiffrés de bout en bout. Cela signifie que vous seul pouvez accéder à vos codes. Nos applications sont open source et notre cryptographie ont fait l'objet d'un audit externe.",
-  "faq_q_2": "Puis-je accéder à mes codes sur mon ordinateur ?",
-  "faq_a_2": "Vous pouvez accéder à vos codes sur le web via auth.ente.io.",
-  "faq_q_3": "Comment puis-je supprimer des codes ?",
-  "faq_a_3": "Vous pouvez supprimer un code en glissant vers la gauche.",
-  "faq_q_4": "Comment puis-je soutenir le projet ?",
-  "faq_a_4": "Vous pouvez soutenir le développement de ce projet en vous abonnant à notre application Photos, ente.io.",
-  "faq_q_5": "Comment puis-je activer le verrouillage FaceID dans Auth",
-  "faq_a_5": "Vous pouvez activer le verrouillage FaceID dans Paramètres → Sécurité → Écran de verrouillage.",
   "somethingWentWrongMessage": "Quelque chose s'est mal passé, veuillez recommencer",
   "leaveFamily": "Quitter le plan familial",
   "leaveFamilyMessage": "Êtes-vous sûr de vouloir quitter le plan familial ?",
@@ -487,5 +477,6 @@
   "pinLock": "Verrouillage par code PIN",
   "enterPin": "Saisir le code PIN",
   "setNewPin": "Définir un nouveau code PIN",
-  "importFailureDescNew": "Impossible de lire le fichier sélectionné."
+  "importFailureDescNew": "Impossible de lire le fichier sélectionné.",
+  "authToViewPasskey": "Veuillez vous authentifier pour afficher la clé d'accès"
 }
