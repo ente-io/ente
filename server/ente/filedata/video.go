@@ -9,6 +9,7 @@ type VidPreviewRequest struct {
 	ObjectSize    int64  `json:"objectSize" binding:"required"`
 	Playlist      string `json:"playlist" binding:"required"`
 	PlayListNonce string `json:"playListNonce" binding:"required"`
+	Version       *int   `json:"version"`
 }
 
 func (r VidPreviewRequest) Validate() error {

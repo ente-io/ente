@@ -78,8 +78,8 @@ type PreviewUploadUrlRequest struct {
 }
 
 type PreviewUploadUrl struct {
-	Id  string `json:"id" binding:"required"`
-	Url string `json:"url" binding:"required"`
+	ObjectID string `json:"objectID" binding:"required"`
+	Url      string `json:"url" binding:"required"`
 }
 
 func (g *PreviewUploadUrlRequest) Validate() error {

@@ -44,14 +44,14 @@ func (c *Controller) PreviewUploadURL(ctx *gin.Context, request filedata.Preview
 	}
 	id := filedata.NewUploadID(request.Type)
 	// note: instead of the final url, give a temp url for upload purpose.
-	uploadUrl := filedata.ObjectKey(request.FileID, fileOwnerID, request.Type, &id)
+	objectKey := filedata.ObjectKey(request.FileID, fileOwnerID, request.Type, &id)
 	bucketID := c.S3Config.GetBucketID(request.Type)
-	enteUrl, err := c.getUploadURL(bucketID, uploadUrl)
+	enteUrl, err := c.getUploadURL(bucketID, objectKey)
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}
 	return &filedata.PreviewUploadUrl{
-		Id:  id,
-		Url: enteUrl.URL,
+		ObjectID: id,
+		Url:      enteUrl.URL,
 	}, nil
 }

@@ -11,7 +11,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (c *Controller) InsertVideoPreview(ctx *gin.Context, req filedata.VidPreviewRequest) error {
+func (c *Controller) InsertVideoPreview(ctx *gin.Context, req *filedata.VidPreviewRequest) error {
 	if err := req.Validate(); err != nil {
 		return stacktrace.Propagate(err, "validation failed")
 	}
@@ -32,7 +32,7 @@ func (c *Controller) InsertVideoPreview(ctx *gin.Context, req filedata.VidPrevie
 	// Start a goroutine to handle the upload and insert operations
 	go func() {
 		obj := filedata.S3FileMetadata{
-			Version:          1,
+			Version:          *req.Version,
 			EncryptedData:    req.Playlist,
 			DecryptionHeader: req.PlayListNonce,
 			Client:           network.GetClientInfo(ctx),

@@ -33,6 +33,28 @@ func (h *FileHandler) PutFileData(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, gin.H{})
 }
+func (h *FileHandler) PutVideoData(ctx *gin.Context) {
+	var req fileData.VidPreviewRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, ente.NewBadRequestWithMessage(err.Error()))
+		return
+	}
+	if err := req.Validate(); err != nil {
+		ctx.JSON(http.StatusBadRequest, err)
+		return
+	}
+	reqInt := &req
+	if reqInt.Version == nil {
+		version := 1
+		reqInt.Version = &version
+	}
+	err := h.FileDataCtrl.InsertVideoPreview(ctx, &req)
+	if err != nil {
+		handler.Error(ctx, err)
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{})
+}
 
 func (h *FileHandler) GetFilesData(ctx *gin.Context) {
 	var req fileData.GetFilesData
