@@ -252,11 +252,14 @@ class GalleryState extends State<Gallery> {
   }
 
   void _setFilteredFilesAndReload(List<EnteFile> files) {
-    _allGalleryFiles = files;
     final updatedGroupedFiles =
         widget.enableFileGrouping && widget.groupType.timeGrouping()
             ? _groupBasedOnTime(files)
             : _genericGroupForPerf(files);
+
+    _allGalleryFiles = [
+      for (List<EnteFile> group in updatedGroupedFiles) ...group,
+    ];
 
     if (mounted) {
       setState(() {
