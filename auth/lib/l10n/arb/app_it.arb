@@ -141,16 +141,6 @@
   "oops": "Oops",
   "suggestFeatures": "Suggerisci funzionalità",
   "faq": "FAQ",
-  "faq_q_1": "Quanto è sicuro Auth?",
-  "faq_a_1": "Tutti i codici di cui fai il backup tramite Auth sono memorizzati con crittografia end-to-end. Ciò significa che solo tu puoi accedere ai tuoi codici. Le nostre app sono open source e la nostra crittografia è stata verificata esternamente.",
-  "faq_q_2": "Posso accedere ai miei codici sul desktop?",
-  "faq_a_2": "Puoi accedere ai tuoi codici sul web @ auth.ente.io.",
-  "faq_q_3": "Come posso cancellare i codici?",
-  "faq_a_3": "Puoi eliminare un codice scorrendo il dito a sinistra sul codice in questione.",
-  "faq_q_4": "Come posso supportare questo progetto?",
-  "faq_a_4": "Puoi supportare lo sviluppo di questo progetto abbonandoti alla nostra app Photos @ ente.io.",
-  "faq_q_5": "Come posso abilitare il blocco FaceID in Auth",
-  "faq_a_5": "Puoi abilitare il blocco FaceID in Impostazioni → Sicurezza → Schermata di blocco.",
   "somethingWentWrongMessage": "Qualcosa è andato storto, per favore riprova",
   "leaveFamily": "Abbandona il piano famiglia",
   "leaveFamilyMessage": "Sei sicuro di voler uscire dal piano famiglia?",
@@ -492,5 +482,6 @@
   "setNewPin": "Imposta un nuovo PIN",
   "importFailureDescNew": "Impossibile elaborare il file selezionato.",
   "appLockNotEnabled": "Blocco app non abilitato",
-  "appLockNotEnabledDescription": "Si prega di abilitare il blocco dell'app da Sicurezza > Blocco App"
+  "appLockNotEnabledDescription": "Si prega di abilitare il blocco dell'app da Sicurezza > Blocco App",
+  "authToViewPasskey": "Autenticati per visualizzare le tue passkey"
 }
