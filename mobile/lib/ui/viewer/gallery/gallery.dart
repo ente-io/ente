@@ -5,14 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
-import "package:photos/db/files_db.dart";
 import 'package:photos/events/event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file_load_result.dart';
-import "package:photos/models/search/hierarchical/album_filter.dart";
-import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
 import 'package:photos/models/selected_files.dart';
 import "package:photos/services/search_service.dart";
 import 'package:photos/ui/common/loading_widget.dart';
@@ -210,43 +207,8 @@ class GalleryState extends State<Gallery> {
       return;
     }
 
-    final filterdFiles = <EnteFile>[];
-    final _allFilesInDb = await SearchService.instance.getAllFiles();
-
-//todo: add the top level filter if we're using _allFilesInDb here
-    for (EnteFile file in _allFilesInDb) {
-      for (HierarchicalSearchFilter filter in filters) {
-        if (filter is AlbumFilter) {
-          if (filter.isMatch(file) &&
-              file.uploadedFileID != null &&
-              file.uploadedFileID != -1) {
-            filter.matchedUploadedIDs.add(file.uploadedFileID!);
-          }
-        } else {
-          if (filter.isMatch(file)) {
-            filterdFiles.add(file);
-          }
-        }
-      }
-    }
-
-    Set<int> filteredUploadedIDs = {};
-    for (int i = 0; i < filters.length; i++) {
-      if (i == 0) {
-        filteredUploadedIDs =
-            filteredUploadedIDs.union(filters[i].getMatchedUploadedIDs());
-      } else {
-        filteredUploadedIDs = filteredUploadedIDs
-            .intersection(filters[i].getMatchedUploadedIDs());
-      }
-    }
-
-    final filteredIDtoFile =
-        await FilesDB.instance.getFilesFromIDs(filteredUploadedIDs.toList());
-    for (int id in filteredIDtoFile.keys) {
-      filterdFiles.add(filteredIDtoFile[id]!);
-    }
-
+    final allFilesInDb = await SearchService.instance.getAllFiles();
+    final filterdFiles = await getFilteredFiles(allFilesInDb, filters);
     _setFilteredFilesAndReload(filterdFiles);
     curateAlbumFilters(_searchFilterDataProvider!, filterdFiles);
   }
@@ -320,7 +282,6 @@ class GalleryState extends State<Gallery> {
       );
 
       if (!result.hasMore) {
-        //There is a possility that this won't work if hasMore is never true.
         final searchFilterDataProvider =
             InheritedSearchFilterData.maybeOf(context)
                 ?.searchFilterDataProvider;
