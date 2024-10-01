@@ -72,7 +72,7 @@ func (h *FileHandler) GetFilesData(ctx *gin.Context) {
 
 func (h *FileHandler) GetFileData(ctx *gin.Context) {
 	var req fileData.GetFileData
-	if err := ctx.ShouldBindJSON(&req); err != nil {
+	if err := ctx.ShouldBindQuery(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, ente.NewBadRequestWithMessage(err.Error()))
 		return
 	}
@@ -102,7 +102,7 @@ func (h *FileHandler) GetPreviewUploadURL(c *gin.Context) {
 
 func (h *FileHandler) GetPreviewURL(c *gin.Context) {
 	var request fileData.GetPreviewURLRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
+	if err := c.ShouldBindQuery(&request); err != nil {
 		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, fmt.Sprintf("Request binding failed %s", err)))
 		return
 	}
