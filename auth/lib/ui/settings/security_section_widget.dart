@@ -155,8 +155,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
             result = await showChoiceActionSheet(
               context,
               title: context.l10n.warning,
-              body:
-                  "You have chosen to proceed without backups. If you forget the applock, all data will be lost, and you'll need to reinstall the app.",
+              body: context.l10n.appLockOfflineModeWarning,
               secondButtonLabel: context.l10n.cancel,
               firstButtonLabel: context.l10n.ok,
             );
@@ -170,7 +169,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           if (await Configuration.instance.shouldShowLockScreen()) {
             final bool result = await requestAuthentication(
               context,
-              context.l10n.about,
+              context.l10n.authToChangeLockscreenSetting,
             );
             if (result) {
               await Navigator.of(context).push(
