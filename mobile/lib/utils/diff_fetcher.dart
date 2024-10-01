@@ -46,6 +46,9 @@ class DiffFetcher {
 
       for (final item in diff) {
         final file = EnteFile();
+        if (item["isDeleted"]) {
+          continue;
+        }
         file.uploadedFileID = item["id"];
         file.collectionID = item["collectionID"];
         file.ownerID = item["ownerID"];

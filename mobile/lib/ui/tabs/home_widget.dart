@@ -285,7 +285,6 @@ class _HomeWidgetState extends State<HomeWidget> {
           } catch (e, s) {
             _logger.severe("Failed to decrypt password for album", e, s);
             await showGenericErrorDialog(context: context, error: e);
-            rethrow;
           }
         },
       );
