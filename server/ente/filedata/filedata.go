@@ -95,9 +95,11 @@ type Row struct {
 	UserID int64
 	Type   ente.ObjectType
 	// If a file type has multiple objects, then the size is the sum of all the objects.
-	Size              int64
-	LatestBucket      string
-	ObjectID          *string
+	Size         int64
+	LatestBucket string
+	ObjectID     *string
+	// For HLS video object, there's no object nonce, all relevant data
+	// is stored in the metadata object that primarily contains the playlist.
 	ObjectNonce       *string
 	ReplicatedBuckets []string
 	DeleteFromBuckets []string

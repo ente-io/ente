@@ -53,7 +53,6 @@ func (c *Controller) InsertVideoPreview(ctx *gin.Context, req *filedata.VidPrevi
 			Size:         size + req.ObjectSize,
 			LatestBucket: bucketID,
 			ObjectID:     &req.ObjectID,
-			ObjectNonce:  &req.ObjectNonce,
 		}
 
 		dbInsertErr := c.Repo.InsertOrUpdatePreviewData(context.Background(), row)

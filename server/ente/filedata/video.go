@@ -16,8 +16,5 @@ func (r VidPreviewRequest) Validate() error {
 	if r.Playlist == "" || r.PlayListNonce == "" {
 		return ente.NewBadRequestWithMessage("playlist and playListNonce are required for preview video")
 	}
-	if r.ObjectNonce == "" {
-		return ente.NewBadRequestWithMessage("objectNonce is required for preview video")
-	}
 	return nil
 }
