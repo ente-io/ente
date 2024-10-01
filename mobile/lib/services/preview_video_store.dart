@@ -28,7 +28,7 @@ class PreviewVideoStore {
   Future<void> chunkAndUploadVideo(EnteFile enteFile) async {
     if (!enteFile.isUploaded) return;
 
-    final file = await getFileFromServer(enteFile);
+    final file = await getFile(enteFile, isOrigin: true);
     if (file == null) return;
     final tmpDirectory = await getApplicationDocumentsDirectory();
     final prefix = "${tmpDirectory.path}/${enteFile.generatedID}";
