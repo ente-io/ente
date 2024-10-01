@@ -34,7 +34,7 @@ func (c *Controller) InsertVideoPreview(ctx *gin.Context, req *filedata.VidPrevi
 		obj := filedata.S3FileMetadata{
 			Version:          *req.Version,
 			EncryptedData:    req.Playlist,
-			DecryptionHeader: req.PlayListNonce,
+			DecryptionHeader: req.PlayListHeader,
 			Client:           network.GetClientInfo(ctx),
 		}
 		logger := log.
@@ -46,6 +46,7 @@ func (c *Controller) InsertVideoPreview(ctx *gin.Context, req *filedata.VidPrevi
 			logger.WithError(uploadErr).Error("upload failed")
 			return
 		}
+		nonce := "na"
 		row := filedata.Row{
 			FileID:       req.FileID,
 			Type:         ente.PreviewVideo,
@@ -53,9 +54,10 @@ func (c *Controller) InsertVideoPreview(ctx *gin.Context, req *filedata.VidPrevi
 			Size:         size + req.ObjectSize,
 			LatestBucket: bucketID,
 			ObjectID:     &req.ObjectID,
+			ObjectNonce:  &nonce,
 		}
 
-		dbInsertErr := c.Repo.InsertOrUpdatePreviewData(context.Background(), row)
+		dbInsertErr := c.Repo.InsertOrUpdatePreviewData(context.Background(), row, fileObjectKey)
 		if dbInsertErr != nil {
 			logger.WithError(dbInsertErr).Error("insert or update failed")
 			return

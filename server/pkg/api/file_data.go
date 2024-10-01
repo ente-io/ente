@@ -36,7 +36,7 @@ func (h *FileHandler) PutFileData(ctx *gin.Context) {
 func (h *FileHandler) PutVideoData(ctx *gin.Context) {
 	var req fileData.VidPreviewRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, ente.NewBadRequestWithMessage(err.Error()))
+		handler.Error(ctx, ente.NewBadRequestWithMessage(err.Error()))
 		return
 	}
 	if err := req.Validate(); err != nil {

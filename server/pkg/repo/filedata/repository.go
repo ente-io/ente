@@ -56,7 +56,7 @@ func (r *Repository) InsertOrUpdate(ctx context.Context, data filedata.Row) erro
 	return nil
 }
 
-func (r *Repository) InsertOrUpdatePreviewData(ctx context.Context, data filedata.Row) error {
+func (r *Repository) InsertOrUpdatePreviewData(ctx context.Context, data filedata.Row, previewObject string) error {
 	tx, err := r.DB.BeginTx(ctx, nil)
 	query := `
         INSERT INTO file_data 
@@ -88,7 +88,7 @@ func (r *Repository) InsertOrUpdatePreviewData(ctx context.Context, data filedat
 		tx.Rollback()
 		return stacktrace.Propagate(err, "failed to insert file data")
 	}
-	err = r.ObjectCleanupRepo.RemoveTempObjectFromDC(ctx, tx, "", data.LatestBucket)
+	err = r.ObjectCleanupRepo.RemoveTempObjectFromDC(ctx, tx, previewObject, data.LatestBucket)
 	if err != nil {
 		tx.Rollback()
 		return stacktrace.Propagate(err, "failed to remove object from tempObjects")
