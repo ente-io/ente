@@ -19,9 +19,23 @@ export const apiOrigin = async () =>
  * @param path The URL path usually, but can be anything that needs to be
  * suffixed to the origin. It must begin with a "/".
  *
+ * @param queryParams An optional object containing query params. This is
+ * appended to the generated URL after funneling it through
+ * {@link URLSearchParams}.
+ *
  * @returns path prefixed by {@link apiOrigin}.
  */
-export const apiURL = async (path: string) => (await apiOrigin()) + path;
+export const apiURL = async (
+    path: string,
+    queryParams?: Record<string, string>,
+) => {
+    let url = (await apiOrigin()) + path;
+    if (queryParams) {
+        const params = new URLSearchParams(queryParams);
+        url = `${url}?${params.toString()}`;
+    }
+    return url;
+};
 
 /**
  * Return the overridden API origin, if one is defined by either (in priority

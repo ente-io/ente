@@ -1,15 +1,14 @@
 import type { Collection } from "@/media/collection";
-import { PersonListHeader } from "@/new/photos/components/Gallery";
 import {
     GalleryBarImpl,
     type GalleryBarImplProps,
 } from "@/new/photos/components/Gallery/BarImpl";
+import { PeopleHeader } from "@/new/photos/components/Gallery/PeopleHeader";
 import {
     collectionsSortBy,
     type CollectionsSortBy,
     type CollectionSummaries,
 } from "@/new/photos/types/collection";
-import { ensure } from "@/utils/ensure";
 import { includes } from "@/utils/type-guards";
 import {
     getData,
@@ -20,7 +19,14 @@ import AllCollections from "components/Collections/AllCollections";
 import { SetCollectionNamerAttributes } from "components/Collections/CollectionNamer";
 import CollectionShare from "components/Collections/CollectionShare";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { AppContext } from "pages/_app";
+import React, {
+    useCallback,
+    useContext,
+    useEffect,
+    useMemo,
+    useState,
+} from "react";
 import { sortCollectionSummaries } from "services/collectionService";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
 import {
@@ -80,6 +86,7 @@ type CollectionsProps = Omit<
  */
 export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
     shouldHide,
+    showPeopleSectionButton,
     mode,
     onChangeMode,
     collectionSummaries,
@@ -95,6 +102,8 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
     filesDownloadProgressAttributesList,
     setFilesDownloadProgressAttributesCreator,
 }) => {
+    const appContext = useContext(AppContext);
+
     const [openAllCollectionDialog, setOpenAllCollectionDialog] =
         useState(false);
     const [openCollectionShareView, setOpenCollectionShareView] =
@@ -162,8 +171,13 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
                         }
                         onCollectionCast={() => setOpenAlbumCastDialog(true)}
                     />
+                ) : activePerson ? (
+                    <PeopleHeader
+                        person={activePerson}
+                        {...{ onSelectPerson, appContext }}
+                    />
                 ) : (
-                    <PersonListHeader person={ensure(activePerson)} />
+                    <></>
                 ),
             itemType: ITEM_TYPE.HEADER,
             height: 68,
@@ -174,7 +188,6 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
         toShowCollectionSummaries,
         activeCollectionID,
         isActiveCollectionDownloadInProgress,
-        people,
         activePerson,
     ]);
 
@@ -186,6 +199,7 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
         <>
             <GalleryBarImpl
                 {...{
+                    showPeopleSectionButton,
                     mode,
                     onChangeMode,
                     activeCollectionID,

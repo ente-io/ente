@@ -66,7 +66,7 @@ export default function ExportFinished(props: Props) {
             </DialogContent>
             <DialogActions>
                 <Button color="secondary" size="large" onClick={props.onHide}>
-                    {t("CLOSE")}
+                    {t("close")}
                 </Button>
                 <Button size="large" color="primary" onClick={props.onResync}>
                     {t("EXPORT_AGAIN")}

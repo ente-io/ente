@@ -1,11 +1,13 @@
 import {
     decryptBoxB64,
+    encryptBlobB64,
     encryptBoxB64,
     generateNewBlobOrStreamKey,
 } from "@/base/crypto";
 import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
-import { gunzip } from "../../utils/gzip";
+import { gunzip, gzip } from "../../utils/gzip";
+import type { CGroupUserEntityData } from "../ml/people";
 import {
     savedEntities,
     savedLatestUpdatedAt,
@@ -17,7 +19,9 @@ import {
 } from "./db";
 import {
     getUserEntityKey,
+    postUserEntity,
     postUserEntityKey,
+    putUserEntity,
     RemoteUserEntityKey,
     userEntityDiff,
 } from "./remote";
@@ -46,7 +50,7 @@ export type EntityType =
  * Zod schema for the fields of interest in the location tag that we get from
  * remote.
  */
-const RemoteLocationTag = z.object({
+const RemoteLocationTagData = z.object({
     name: z.string(),
     radius: z.number(),
     centerPoint: z.object({
@@ -58,14 +62,14 @@ const RemoteLocationTag = z.object({
 /**
  * A view of the location tag data suitable for use by the rest of the app.
  */
-export type LocationTag = z.infer<typeof RemoteLocationTag>;
+export type LocationTag = z.infer<typeof RemoteLocationTagData>;
 
 /**
  * Return the list of locally available location tags.
  */
 export const savedLocationTags = (): Promise<LocationTag[]> =>
     savedEntities("location").then((es) =>
-        es.map((e) => RemoteLocationTag.parse(e.data)),
+        es.map((e) => RemoteLocationTagData.parse(e.data)),
     );
 
 const RemoteFaceCluster = z.object({
@@ -75,8 +79,10 @@ const RemoteFaceCluster = z.object({
 
 /**
  * Zod schema for the fields of interest in the cgroup that we get from remote.
+ *
+ * See also: {@link CGroupUserEntityData}.
  */
-const RemoteCGroup = z.object({
+const RemoteCGroupData = z.object({
     name: z.string().nullish().transform(nullToUndefined),
     assigned: z.array(RemoteFaceCluster),
     // The remote cgroup also has a "rejected" property, but that is not
@@ -85,18 +91,25 @@ const RemoteCGroup = z.object({
     avatarFaceID: z.string().nullish().transform(nullToUndefined),
 });
 
-export type RemoteCGroup = z.infer<typeof RemoteCGroup>;
-
-export type CGroupUserEntity = Omit<LocalUserEntity, "data"> & {
-    data: RemoteCGroup;
+/**
+ * A "cgroup" user entity.
+ */
+export type CGroup = Omit<LocalUserEntity, "data"> & {
+    // CGroupUserEntityData is meant to be a (documented) equivalent of
+    // `z.infer<typeof RemoteCGroup>`.
+    data: CGroupUserEntityData;
 };
 
 /**
  * Return the list of locally available cgroup user entities.
  */
-export const savedCGroups = (): Promise<CGroupUserEntity[]> =>
+export const savedCGroups = (): Promise<CGroup[]> =>
+    // See: [Note: strict mode migration]
+    //
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     savedEntities("cgroup").then((es) =>
-        es.map((e) => ({ ...e, data: RemoteCGroup.parse(e.data) })),
+        es.map((e) => ({ ...e, data: RemoteCGroupData.parse(e.data) })),
     );
 
 /**
@@ -112,16 +125,14 @@ export const savedCGroups = (): Promise<CGroupUserEntity[]> =>
  * It uses local state to remember the latest entry the last time it did a pull,
  * so each subsequent pull is a lightweight diff.
  *
- * @param masterKey The user's masterKey, which is is used to decrypt the entity
- * key (or encrypt it, when generating a new one).
+ * @param masterKey The user's masterKey, which is is used to encrypt and
+ * decrypt the entity key.
  */
 export const pullUserEntities = async (
     type: EntityType,
     masterKey: Uint8Array,
 ) => {
     const entityKeyB64 = await getOrCreateEntityKeyB64(type, masterKey);
-
-    const isGzipped = type == "cgroup";
 
     let sinceTime = (await savedLatestUpdatedAt(type)) ?? 0;
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, no-constant-condition
@@ -135,7 +146,7 @@ export const pullUserEntities = async (
 
         for (const { id, data, updatedAt } of diff) {
             if (data) {
-                const s = isGzipped
+                const s = isGzipped(type)
                     ? await gunzip(data)
                     : new TextDecoder().decode(data);
                 entityByID.set(id, { id, data: JSON.parse(s), updatedAt });
@@ -149,6 +160,63 @@ export const pullUserEntities = async (
         await saveLatestUpdatedAt(type, sinceTime);
     }
 };
+
+const isGzipped = (type: EntityType) => type == "cgroup";
+
+/**
+ * Create a new user entity of the given {@link type}.
+ *
+ * @param data Arbitrary data associated with the entity. The format of the data
+ * is specific to each entity type, but the provided data should be JSON
+ * serializable (Typescript does not have a native JSON type, so we need to
+ * specify this as an `unknown`).
+ *
+ * @param masterKey The user's masterKey, which is is used to encrypt and
+ * decrypt the entity key.
+ */
+export const addUserEntity = async (
+    type: EntityType,
+    data: unknown,
+    masterKey: Uint8Array,
+) =>
+    await postUserEntity(
+        type,
+        await encryptedUserEntityData(type, data, masterKey),
+    );
+
+export const encryptedUserEntityData = async (
+    type: EntityType,
+    data: unknown,
+    masterKey: Uint8Array,
+) => {
+    const entityKeyB64 = await getOrCreateEntityKeyB64(type, masterKey);
+
+    const json = JSON.stringify(data);
+    const bytes = isGzipped(type)
+        ? await gzip(json)
+        : new TextEncoder().encode(json);
+    return encryptBlobB64(bytes, entityKeyB64);
+};
+
+/**
+ * Update the given user entities (both on remote and locally), creating them if
+ * they don't exist.
+ *
+ * @param masterKey The user's masterKey, which is is used to encrypt and
+ * decrypt the entity key.
+ */
+export const updateOrCreateUserEntities = async (
+    type: EntityType,
+    entities: LocalUserEntity[],
+    masterKey: Uint8Array,
+) =>
+    await Promise.all(
+        entities.map(({ id, data }) =>
+            encryptedUserEntityData(type, data, masterKey).then(
+                (encryptedBlob) => putUserEntity(id, type, encryptedBlob),
+            ),
+        ),
+    );
 
 /**
  * Return the entity key that can be used to decrypt the encrypted contents of

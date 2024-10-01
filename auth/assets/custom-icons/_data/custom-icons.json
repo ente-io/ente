@@ -618,7 +618,8 @@
     {
       "title": "T-Mobile",
       "altNames": [
-        "T Mobile"
+        "T Mobile",
+        "T-Mobile ID"
       ]
     },    
     {
@@ -693,6 +694,9 @@
     },
     {
       "title": "Vikunja"
+    },
+    {
+      "title": "WARGAMING.NET"
     },
     {
       "title": "Wealthfront"

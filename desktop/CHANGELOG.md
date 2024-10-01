@@ -1,10 +1,16 @@
 # CHANGELOG
 
-## v1.7.5 (Unreleased)
+## v1.7.6 (Unreleased)
 
--   Directly upload to selected album on drag and drop.
--   Include shared files in export.
+-   Parse description from Google Takeout metadata JSON.
 -   .
+
+## v1.7.5
+
+-   Face grouping (beta).
+-   Include shared files in export.
+-   Directly upload to selected album on drag and drop.
+-   Improve heuristics for clubbing a photo and video into a live photo.
 
 ## v1.7.4
 

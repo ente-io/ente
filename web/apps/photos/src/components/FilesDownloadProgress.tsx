@@ -82,7 +82,7 @@ export const FilesDownloadProgress: React.FC<FilesDownloadProgressProps> = ({
                 },
             },
             close: {
-                text: t("NO"),
+                text: t("no"),
                 variant: "secondary",
                 action: () => {},
             },

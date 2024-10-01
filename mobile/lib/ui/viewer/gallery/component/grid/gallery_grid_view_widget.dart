@@ -38,7 +38,6 @@ class GalleryGridViewWidget extends StatelessWidget {
           tag: tag,
           photoGridSize: photoGridSize,
           currentUserID: currentUserID,
-          filesInGroup: filesInGroup,
           asyncLoader: asyncLoader,
         );
       },

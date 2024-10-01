@@ -13,6 +13,7 @@ import "package:photos/services/search_service.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import "package:photos/ui/viewer/gallery/component/group/type.dart";
 import 'package:photos/ui/viewer/gallery/gallery.dart';
+import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 
 class LargeFilesPagePage extends StatelessWidget {
@@ -26,8 +27,8 @@ class LargeFilesPagePage extends StatelessWidget {
     this.tagPrefix = "Uncategorized_page",
     this.appBarType = GalleryType.homepage,
     this.overlayType = GalleryType.homepage,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -68,34 +69,36 @@ class LargeFilesPagePage extends StatelessWidget {
       initialFiles: null,
       albumName: S.of(context).viewLargeFiles,
     );
-    return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(50.0),
-        child: AppBar(
-          elevation: 0,
-          centerTitle: false,
-          title: Text(
-            S.of(context).viewLargeFiles,
-            style: Theme.of(context)
-                .textTheme
-                .headlineSmall!
-                .copyWith(fontSize: 16),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
+    return GalleryFilesState(
+      child: Scaffold(
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(50.0),
+          child: AppBar(
+            elevation: 0,
+            centerTitle: false,
+            title: Text(
+              S.of(context).viewLargeFiles,
+              style: Theme.of(context)
+                  .textTheme
+                  .headlineSmall!
+                  .copyWith(fontSize: 16),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
         ),
-      ),
-      body: SelectionState(
-        selectedFiles: _selectedFiles,
-        child: Stack(
-          alignment: Alignment.bottomCenter,
-          children: [
-            gallery,
-            FileSelectionOverlayBar(
-              overlayType,
-              _selectedFiles,
-            ),
-          ],
+        body: SelectionState(
+          selectedFiles: _selectedFiles,
+          child: Stack(
+            alignment: Alignment.bottomCenter,
+            children: [
+              gallery,
+              FileSelectionOverlayBar(
+                overlayType,
+                _selectedFiles,
+              ),
+            ],
+          ),
         ),
       ),
     );

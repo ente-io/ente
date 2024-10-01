@@ -47,7 +47,14 @@ import isElectron from "is-electron";
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
 import "photoswipe/dist/photoswipe.css";
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import {
+    createContext,
+    useCallback,
+    useContext,
+    useEffect,
+    useRef,
+    useState,
+} from "react";
 import LoadingBar from "react-top-loading-bar";
 import { resumeExportsIfNeeded } from "services/export";
 import { photosLogout } from "services/logout";
@@ -83,6 +90,7 @@ type AppContextT = AccountsContextT & {
     themeColor: THEME_COLOR;
     setThemeColor: (themeColor: THEME_COLOR) => void;
     somethingWentWrong: () => void;
+    onGenericError: (error: unknown) => void;
     isCFProxyDisabled: boolean;
     setIsCFProxyDisabled: (disabled: boolean) => void;
 };
@@ -269,12 +277,28 @@ export default function App({ Component, pageProps }: AppProps) {
     const closeMessageDialog = () => setMessageDialogView(false);
     const closeDialogBoxV2 = () => setDialogBoxV2View(false);
 
-    const somethingWentWrong = () =>
-        setDialogMessage({
-            title: t("error"),
-            close: { variant: "critical" },
-            content: t("UNKNOWN_ERROR"),
-        });
+    // Use `onGenericError` instead.
+    const somethingWentWrong = useCallback(
+        () =>
+            setDialogMessage({
+                title: t("error"),
+                close: { variant: "critical" },
+                content: t("UNKNOWN_ERROR"),
+            }),
+        [setDialogMessage],
+    );
+
+    const onGenericError = useCallback(
+        (e: unknown) => (
+            log.error("Error", e),
+            setDialogBoxAttributesV2({
+                title: t("error"),
+                content: t("UNKNOWN_ERROR"),
+                close: { variant: "critical" },
+            })
+        ),
+        [setDialogBoxAttributesV2],
+    );
 
     const logout = () => {
         void photosLogout().then(() => router.push("/"));
@@ -294,6 +318,7 @@ export default function App({ Component, pageProps }: AppProps) {
         themeColor,
         setThemeColor,
         somethingWentWrong,
+        onGenericError,
         setDialogBoxAttributesV2,
         mapEnabled,
         updateMapEnabled,

@@ -1,4 +1,3 @@
-
 ---
 title: Migrating from Authy
 description: Guide for importing your existing Authy 2FA tokens into Ente Auth

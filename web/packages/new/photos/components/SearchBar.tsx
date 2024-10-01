@@ -418,7 +418,7 @@ const EmptyState: React.FC<Pick<SearchBarProps, "onSelectPerson">> = ({
                     <SearchPeopleList {...{ people, onSelectPerson }} />
                 </>
             )}
-            <Typography variant="mini" sx={{ my: "4px" }}>
+            <Typography variant="mini" sx={{ mt: "5px", mb: "4px" }}>
                 {label}
             </Typography>
         </Box>

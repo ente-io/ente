@@ -1,6 +1,16 @@
 import { Box, IconButton, styled } from "@mui/material";
 
 /**
+ * Common props to control the display of a dialog-like component.
+ */
+export interface DialogVisiblityProps {
+    /** If `true`, the dialog is shown. */
+    open: boolean;
+    /** Callback fired when the dialog wants to be closed. */
+    onClose: () => void;
+}
+
+/**
  * A MUI {@link IconButton} filled in with at faint background.
  */
 export const FilledIconButton = styled(IconButton)(({ theme }) => ({
@@ -28,7 +38,7 @@ export const UnstyledButton = styled("button")`
        inherit that customization also. */
     letter-spacing: inherit;
 
-    /* The button default is to show an flipped arrow. Show a hand instead. */
+    /* Default cursor on mouse over of a button is not a hand pointer */
     cursor: pointer;
 `;
 
