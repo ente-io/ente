@@ -11,7 +11,6 @@ import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/selected_files.dart';
-import "package:photos/services/search_service.dart";
 import 'package:photos/ui/common/loading_widget.dart';
 import "package:photos/ui/viewer/gallery/component/group/type.dart";
 import "package:photos/ui/viewer/gallery/component/multiple_groups_gallery_view.dart";
@@ -207,8 +206,7 @@ class GalleryState extends State<Gallery> {
       return;
     }
 
-    final allFilesInDb = await SearchService.instance.getAllFiles();
-    final filterdFiles = await getFilteredFiles(allFilesInDb, filters);
+    final filterdFiles = await getFilteredFiles(filters);
     _setFilteredFilesAndReload(filterdFiles);
     curateAlbumFilters(_searchFilterDataProvider!, filterdFiles);
   }
