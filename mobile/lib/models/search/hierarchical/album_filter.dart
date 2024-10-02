@@ -8,7 +8,6 @@ class AlbumFilter extends HierarchicalSearchFilter {
 
   ///Number of files in the gallery that are from [collectionID]
   final int occurrence;
-  final Set<int> matchedUploadedIDs = {};
 
   AlbumFilter({
     required this.collectionID,

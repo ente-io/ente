@@ -21,7 +21,7 @@ Future<List<EnteFile>> getFilteredFiles(
         }
       } else {
         if (filter.isMatch(file)) {
-          filteredFiles.add(file);
+          filter.matchedUploadedIDs.add(file.uploadedFileID!);
         }
       }
     }
