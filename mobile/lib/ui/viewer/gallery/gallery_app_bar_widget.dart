@@ -148,14 +148,14 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                     ),
                   ),
                   const SizedBox(
-                    width: 300,
+                    width: 200,
                     height: 50,
                     child: AppliedFilters(),
                   ),
                 ],
               ),
             ),
-            actions: _getDefaultActions(context),
+            // actions: _getDefaultActions(context),
             bottom: galleryType == GalleryType.searchResults ||
                     galleryType == GalleryType.ownedCollection
                 ? const PreferredSize(

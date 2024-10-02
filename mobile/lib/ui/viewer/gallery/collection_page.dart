@@ -19,6 +19,7 @@ import "package:photos/ui/viewer/gallery/empty_album_state.dart";
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
+import "package:photos/ui/viewer/gallery/hierarchical_search_gallery.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
@@ -114,7 +115,7 @@ class CollectionPage extends StatelessWidget {
           ),
         child: Scaffold(
           appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(50.0),
+            preferredSize: const Size.fromHeight(90.0),
             child: GalleryAppBarWidget(
               galleryType,
               c.collection.displayName,
@@ -134,7 +135,23 @@ class CollectionPage extends StatelessWidget {
             child: Stack(
               alignment: Alignment.bottomCenter,
               children: [
-                gallery,
+                Builder(
+                  builder: (context) {
+                    return ValueListenableBuilder(
+                      valueListenable: InheritedSearchFilterData.of(context)
+                          .searchFilterDataProvider!
+                          .isSearchingNotifier,
+                      builder: (context, value, _) {
+                        return value
+                            ? HierarchicalSearchGallery(
+                                tagPrefix: tagPrefix,
+                                selectedFiles: _selectedFiles,
+                              )
+                            : gallery;
+                      },
+                    );
+                  },
+                ),
                 FileSelectionOverlayBar(
                   galleryType,
                   _selectedFiles,

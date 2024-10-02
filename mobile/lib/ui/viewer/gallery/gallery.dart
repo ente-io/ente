@@ -18,7 +18,6 @@ import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import "package:photos/ui/viewer/gallery/state/gallery_context_state.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
-import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
 import "package:photos/utils/debouncer.dart";
 import "package:photos/utils/hierarchical_search_util.dart";
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
@@ -114,7 +113,6 @@ class GalleryState extends State<Gallery> {
   late String _logTag;
   bool _sortOrderAsc = false;
   List<EnteFile> _allGalleryFiles = [];
-  late SearchFilterDataProvider? _searchFilterDataProvider;
 
   @override
   void initState() {
@@ -185,49 +183,6 @@ class GalleryState extends State<Gallery> {
     });
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _searchFilterDataProvider =
-        InheritedSearchFilterData.maybeOf(context)?.searchFilterDataProvider;
-
-    if (_searchFilterDataProvider != null) {
-      _searchFilterDataProvider!
-          .removeListener(fromApplied: true, listener: _onFiltersUpdated);
-      _searchFilterDataProvider!
-          .addListener(toApplied: true, listener: _onFiltersUpdated);
-    }
-  }
-
-  void _onFiltersUpdated() async {
-    final filters = _searchFilterDataProvider!.appliedFilters;
-    if (filters.isEmpty) {
-      Navigator.of(context).pop();
-      return;
-    }
-
-    final filterdFiles = await getFilteredFiles(filters);
-    _setFilteredFilesAndReload(filterdFiles);
-    curateAlbumFilters(_searchFilterDataProvider!, filterdFiles);
-  }
-
-  void _setFilteredFilesAndReload(List<EnteFile> files) {
-    final updatedGroupedFiles =
-        widget.enableFileGrouping && widget.groupType.timeGrouping()
-            ? _groupBasedOnTime(files)
-            : _genericGroupForPerf(files);
-
-    _allGalleryFiles = [
-      for (List<EnteFile> group in updatedGroupedFiles) ...group,
-    ];
-
-    if (mounted) {
-      setState(() {
-        currentGroupedFiles = updatedGroupedFiles;
-      });
-    }
-  }
-
   void _setFilesAndReload(List<EnteFile> files) {
     final hasReloaded = _onFilesLoaded(files);
     if (!hasReloaded && mounted) {
@@ -279,11 +234,13 @@ class GalleryState extends State<Gallery> {
             "ms",
       );
 
+      /// To curate filters when a gallery is first opened.
       if (!result.hasMore) {
         final searchFilterDataProvider =
             InheritedSearchFilterData.maybeOf(context)
                 ?.searchFilterDataProvider;
-        if (searchFilterDataProvider != null) {
+        if (searchFilterDataProvider != null &&
+            !searchFilterDataProvider.isSearchingNotifier.value) {
           curateAlbumFilters(searchFilterDataProvider, result.files);
         }
       }
@@ -303,10 +260,6 @@ class GalleryState extends State<Gallery> {
       subscription.cancel();
     }
     _debouncer.cancelDebounceTimer();
-    if (_searchFilterDataProvider != null) {
-      _searchFilterDataProvider!
-          .removeListener(fromApplied: true, listener: _onFiltersUpdated);
-    }
     super.dispose();
   }
 
