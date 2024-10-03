@@ -1,15 +1,14 @@
 import Slide from "@mui/material/Slide";
 import type { TransitionProps } from "@mui/material/transitions";
-import React from "react";
+import React, { forwardRef } from "react";
 
 /**
- * A React component that can be passed as the `TransitionComponent` props to a
- * MUI {@link Dialog} to get it to use a slide transition (default is fade).
+ * A React component that can be passed as the {@link TransitionComponent} prop
+ * to a MUI {@link Dialog} to get it to use a slide transition (by default, the
+ * dialog does a fade transition).
  */
-export const SlideTransition = React.forwardRef(function Transition(
-    props: TransitionProps & {
-        children: React.ReactElement;
-    },
+export const SlideTransition = forwardRef(function Transition(
+    props: TransitionProps & { children: React.ReactElement },
     ref: React.Ref<unknown>,
 ) {
     return <Slide direction="up" ref={ref} {...props} />;
