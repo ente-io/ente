@@ -27,6 +27,21 @@ export const fileLogID = (enteFile: EnteFile) =>
     `file ${enteFile.metadata.title ?? "-"} (${enteFile.id})`;
 
 /**
+ * Update the in-memory representation of an array of {@link EnteFile} to
+ * reflect user edits since the file was uploaded.
+ *
+ * This is a list variant of {@link mergeMetadata1}.
+ */
+export const mergeMetadata = (files: EnteFile[]) =>
+    files.map((file) => mergeMetadata1(file));
+
+/**
+ * Update the immutable fields of an (in-memory) {@link EnteFile} with any edits
+ * that the user has made to their corresponding mutable metadata fields.
+ *
+ * This function updates a single file, see {@link mergeMetadata} for a
+ * convenience function to run it on an array of files.
+ *
  * [Note: File name for local EnteFile objects]
  *
  * The title property in a file's metadata is the original file's name. The
@@ -38,25 +53,27 @@ export const fileLogID = (enteFile: EnteFile) =>
  * Effectively, post this step, the file's metadata.title can be used in lieu of
  * its filename.
  */
-export function mergeMetadata(files: EnteFile[]): EnteFile[] {
-    return files.map((file) => mergeMetadata1(file));
-}
+export const mergeMetadata1 = (file: EnteFile): EnteFile => {
+    const mutableMetadata = file.pubMagicMetadata?.data;
+    if (mutableMetadata) {
+        const { editedTime, editedName, lat, long } = mutableMetadata;
+        if (editedTime) file.metadata.creationTime = editedTime;
+        if (editedName) file.metadata.title = editedName;
+        // Use (lat, long) only if both are present and nonzero.
+        if (lat && long) {
+            file.metadata.latitude = lat;
+            file.metadata.longitude = long;
+        }
+    }
 
-export function mergeMetadata1(file: EnteFile): EnteFile {
-    if (file.pubMagicMetadata?.data.editedTime) {
-        file.metadata.creationTime = file.pubMagicMetadata.data.editedTime;
-    }
-    if (file.pubMagicMetadata?.data.editedName) {
-        file.metadata.title = file.pubMagicMetadata.data.editedName;
-    }
-    // In a very rare cases (have found only one so far, a very old file
-    // uploaded by an initial dev version of Ente) the photo has no modification
-    // time. Gracefully handle such cases.
+    // In a very rare cases (have found only one so far, a very old file in
+    // Vishnu's account, uploaded by an initial dev version of Ente) the photo
+    // has no modification time. Gracefully handle such cases.
     if (!file.metadata.modificationTime)
         file.metadata.modificationTime = file.metadata.creationTime;
 
     return file;
-}
+};
 
 /**
  * Return a new {@link Blob} containing data in a format that the browser
