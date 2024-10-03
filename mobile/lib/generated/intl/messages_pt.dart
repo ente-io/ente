@@ -230,7 +230,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "about": MessageLookupByLibrary.simpleMessage("Sobre"),
         "account": MessageLookupByLibrary.simpleMessage("Conta"),
         "accountWelcomeBack":
-            MessageLookupByLibrary.simpleMessage("Bem-vindo de volta!"),
+            MessageLookupByLibrary.simpleMessage("Seja bem-vindo de volta!"),
         "ackPasswordLostWarning": MessageLookupByLibrary.simpleMessage(
             "Eu entendo que se eu perder minha senha, posso perder meus dados, já que meus dados são <underline>criptografados de ponta a ponta</underline>."),
         "activeSessions":
@@ -764,7 +764,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "enterValidEmail": MessageLookupByLibrary.simpleMessage(
             "Por, favor insira um endereço de e-mail válido."),
         "enterYourEmailAddress": MessageLookupByLibrary.simpleMessage(
-            "Insira o seu endereço de e-mail"),
+            "Insira seu endereço de e-mail"),
         "enterYourPassword":
             MessageLookupByLibrary.simpleMessage("Insira sua senha"),
         "enterYourRecoveryKey": MessageLookupByLibrary.simpleMessage(

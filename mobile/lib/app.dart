@@ -2,7 +2,6 @@ import "dart:async";
 import 'dart:io';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:background_fetch/background_fetch.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -20,6 +19,7 @@ import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/tabs/home_widget.dart';
 import "package:photos/ui/viewer/actions/file_viewer.dart";
 import "package:photos/utils/intent_util.dart";
+import "package:workmanager/workmanager.dart" as workmanager;
 
 class EnteApp extends StatefulWidget {
   final Future<void> Function(String) runBackgroundTask;
@@ -87,7 +87,8 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
         : MediaExtentionAction(action: IntentAction.main);
     AppLifecycleService.instance.setMediaExtensionAction(mediaExtentionAction);
     if (mediaExtentionAction.action == IntentAction.main) {
-      _configureBackgroundFetch();
+      // _configureBackgroundFetch();
+      _configureWorkManager();
     }
   }
 
@@ -159,6 +160,26 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     } else {
       AppLifecycleService.instance.onAppInBackground(stateChangeReason);
     }
+  }
+
+  void _configureWorkManager() {
+    workmanager.Workmanager().initialize(
+      () async => await widget.runBackgroundTask("taskId"),
+      isInDebugMode: kDebugMode,
+    );
+    workmanager.Workmanager().registerPeriodicTask(
+      "1",
+      "sync",
+      frequency: const Duration(minutes: 15),
+      initialDelay: const Duration(minutes: 1),
+      constraints: workmanager.Constraints(
+        networkType: workmanager.NetworkType.connected,
+        requiresBatteryNotLow: true,
+        requiresCharging: false,
+        requiresStorageNotLow: false,
+        requiresDeviceIdle: false,
+      ),
+    );
   }
 
   void _configureBackgroundFetch() {

@@ -188,6 +188,7 @@ dependencies:
   wallpaper_manager_flutter: ^0.0.2
   wechat_assets_picker: ^8.6.3
   widgets_to_image: ^0.0.2
+  workmanager: ^0.5.2
   xml: ^6.3.0
   xmp: ^1.0.3
 
