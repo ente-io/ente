@@ -6,7 +6,7 @@ import {
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
 } from "@/new/photos/components/Gallery/ListHeader";
-import { SpaceBetweenFlex } from "@/new/photos/components/mui-custom";
+import { SpaceBetweenFlex } from "@/new/photos/components/mui";
 import type {
     CollectionSummary,
     CollectionSummaryType,

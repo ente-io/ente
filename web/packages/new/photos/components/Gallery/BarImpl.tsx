@@ -5,10 +5,7 @@ import {
     ItemCard,
     TileTextOverlay,
 } from "@/new/photos/components/ItemCards";
-import {
-    FilledIconButton,
-    UnstyledButton,
-} from "@/new/photos/components/mui-custom";
+import { FilledIconButton, UnstyledButton } from "@/new/photos/components/mui";
 import {
     IMAGE_CONTAINER_MAX_WIDTH,
     MIN_COLUMNS,

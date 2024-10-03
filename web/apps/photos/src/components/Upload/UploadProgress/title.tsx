@@ -1,4 +1,4 @@
-import { FilledIconButton } from "@/new/photos/components/mui-custom";
+import { FilledIconButton } from "@/new/photos/components/mui";
 import { UPLOAD_STAGES } from "@/new/photos/services/upload/types";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import Close from "@mui/icons-material/Close";

@@ -1,5 +1,5 @@
 import { CollectionsSortOptions } from "@/new/photos/components/CollectionsSortOptions";
-import { FilledIconButton } from "@/new/photos/components/mui-custom";
+import { FilledIconButton } from "@/new/photos/components/mui";
 import type { CollectionSummary } from "@/new/photos/types/collection";
 import { CollectionsSortBy } from "@/new/photos/types/collection";
 import { FlexWrapper, FluidContainer } from "@ente/shared/components/Container";

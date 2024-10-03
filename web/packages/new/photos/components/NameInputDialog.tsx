@@ -5,7 +5,7 @@ import SingleInputForm, {
 import { Dialog, DialogContent, DialogTitle } from "@mui/material";
 import { t } from "i18next";
 import React from "react";
-import type { DialogVisiblityProps } from "./mui-custom";
+import type { DialogVisiblityProps } from "./mui";
 
 type NameInputDialogProps = DialogVisiblityProps & {
     /** Title of the dialog. */
