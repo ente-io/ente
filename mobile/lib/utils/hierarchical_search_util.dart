@@ -13,18 +13,14 @@ Future<List<EnteFile>> getFilteredFiles(
 ) async {
   final filteredFiles = <EnteFile>[];
   final files = await SearchService.instance.getAllFiles();
+
   for (EnteFile file in files) {
+    if (file.uploadedFileID == null || file.uploadedFileID == -1) {
+      continue;
+    }
     for (HierarchicalSearchFilter filter in filters) {
-      if (filter is AlbumFilter) {
-        if (filter.isMatch(file) &&
-            file.uploadedFileID != null &&
-            file.uploadedFileID != -1) {
-          filter.matchedUploadedIDs.add(file.uploadedFileID!);
-        }
-      } else {
-        if (filter.isMatch(file)) {
-          filter.matchedUploadedIDs.add(file.uploadedFileID!);
-        }
+      if (filter.isMatch(file)) {
+        filter.matchedUploadedIDs.add(file.uploadedFileID!);
       }
     }
   }
