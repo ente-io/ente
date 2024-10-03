@@ -56,9 +56,14 @@ export const mergeMetadata = (files: EnteFile[]) =>
 export const mergeMetadata1 = (file: EnteFile): EnteFile => {
     const mutableMetadata = file.pubMagicMetadata?.data;
     if (mutableMetadata) {
-        const { editedTime, editedName } = mutableMetadata;
+        const { editedTime, editedName, lat, long } = mutableMetadata;
         if (editedTime) file.metadata.creationTime = editedTime;
         if (editedName) file.metadata.title = editedName;
+        // Use (lat, long) only if both are present and nonzero.
+        if (lat && long) {
+            file.metadata.latitude = lat;
+            file.metadata.longitude = long;
+        }
     }
 
     // In a very rare cases (have found only one so far, a very old file in
