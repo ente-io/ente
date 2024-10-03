@@ -15,7 +15,7 @@ import {
 import React, { useEffect } from "react";
 import { didShowWhatsNew } from "../services/changelog";
 import { FocusVisibleButton } from "./FocusVisibleButton";
-import { SlideTransition } from "./SlideTransition";
+import { SlideUpTransition } from "./mui/SlideUpTransition";
 
 interface WhatsNewProps {
     /** If `true`, then the dialog is shown. */
@@ -38,7 +38,7 @@ export const WhatsNew: React.FC<WhatsNewProps> = ({ open, onClose }) => {
     return (
         <Dialog
             {...{ open, fullScreen }}
-            TransitionComponent={SlideTransition}
+            TransitionComponent={SlideUpTransition}
             maxWidth="xs"
             fullWidth
         >

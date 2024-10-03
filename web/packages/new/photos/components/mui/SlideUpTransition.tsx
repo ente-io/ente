@@ -7,7 +7,7 @@ import React, { forwardRef } from "react";
  * to a MUI {@link Dialog} to get it to use a slide transition (by default, the
  * dialog does a fade transition).
  */
-export const SlideTransition = forwardRef(function Transition(
+export const SlideUpTransition = forwardRef(function Transition(
     props: TransitionProps & { children: React.ReactElement },
     ref: React.Ref<unknown>,
 ) {
