@@ -54,11 +54,12 @@ export const mergeMetadata = (files: EnteFile[]) =>
  * its filename.
  */
 export const mergeMetadata1 = (file: EnteFile): EnteFile => {
-    if (file.pubMagicMetadata?.data.editedTime) {
-        file.metadata.creationTime = file.pubMagicMetadata.data.editedTime;
+    const mutableMetadata = file.pubMagicMetadata?.data;
+    if (mutableMetadata?.editedTime) {
+        file.metadata.creationTime = mutableMetadata.editedTime;
     }
-    if (file.pubMagicMetadata?.data.editedName) {
-        file.metadata.title = file.pubMagicMetadata.data.editedName;
+    if (mutableMetadata?.editedName) {
+        file.metadata.title = mutableMetadata.editedName;
     }
     // In a very rare cases (have found only one so far, a very old file in
     // Vishnu's account, uploaded by an initial dev version of Ente) the photo
