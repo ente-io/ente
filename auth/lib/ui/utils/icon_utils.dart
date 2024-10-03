@@ -28,40 +28,40 @@ class IconUtils {
     String provider, {
     double width = 24,
   }) {
-    final title = _getProviderTitle(provider);
-    final List<String> possibleTitles = [title];
+    final providerTitle = _getProviderTitle(provider);
+    final List<String> titlesList = [providerTitle];
     for(final splitCharacter in _titleSplitCharacters){
-      if (title.contains(splitCharacter)){
-        possibleTitles.add(title.split(splitCharacter)[0]);
+      if (providerTitle.contains(splitCharacter)){
+        titlesList.add(providerTitle.split(splitCharacter)[0]);
       }
     }
-    for(final possibleTitle in possibleTitles){
-      if (_customIcons.containsKey(possibleTitle)) {
+    for(final title in titlesList){
+      if (_customIcons.containsKey(title)) {
         return _getSVGIcon(
-          "assets/custom-icons/icons/${_customIcons[possibleTitle]!.slug ?? possibleTitle}.svg",
-          possibleTitle,
-          _customIcons[possibleTitle]!.color,
+          "assets/custom-icons/icons/${_customIcons[title]!.slug ?? title}.svg",
+          title,
+          _customIcons[title]!.color,
           width,
           context,
         );
-      } else if (_simpleIcons.containsKey(possibleTitle)) {
+      } else if (_simpleIcons.containsKey(title)) {
         return _getSVGIcon(
-          "assets/simple-icons/icons/$possibleTitle.svg",
-          possibleTitle,
-          _simpleIcons[possibleTitle],
+          "assets/simple-icons/icons/$title.svg",
+          title,
+          _simpleIcons[title],
           width,
           context,
         );
       }
     }
-    if (title.isNotEmpty) {
+    if (providerTitle.isNotEmpty) {
       bool showLargeIcon = width > 24;
       return CircleAvatar(
         radius: width / 2,
         backgroundColor: getEnteColorScheme(context).avatarColors[
-            title.hashCode % getEnteColorScheme(context).avatarColors.length],
+            providerTitle.hashCode % getEnteColorScheme(context).avatarColors.length],
         child: Text(
-          title.toUpperCase()[0],
+          providerTitle.toUpperCase()[0],
           // fixed color
           style: showLargeIcon
               ? getEnteTextTheme(context).h3Bold.copyWith(color: Colors.white)
