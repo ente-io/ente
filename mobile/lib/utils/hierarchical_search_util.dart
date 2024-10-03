@@ -1,3 +1,4 @@
+import "package:logging/logging.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
@@ -14,32 +15,36 @@ Future<List<EnteFile>> getFilteredFiles(
   final filteredFiles = <EnteFile>[];
   final files = await SearchService.instance.getAllFiles();
 
-  for (EnteFile file in files) {
-    if (file.uploadedFileID == null || file.uploadedFileID == -1) {
-      continue;
-    }
-    for (HierarchicalSearchFilter filter in filters) {
-      if (filter.isMatch(file)) {
-        filter.matchedUploadedIDs.add(file.uploadedFileID!);
+  try {
+    for (EnteFile file in files) {
+      if (file.uploadedFileID == null || file.uploadedFileID == -1) {
+        continue;
+      }
+      for (HierarchicalSearchFilter filter in filters) {
+        if (filter.isMatch(file)) {
+          filter.matchedUploadedIDs.add(file.uploadedFileID!);
+        }
       }
     }
-  }
 
-  Set<int> filteredUploadedIDs = {};
-  for (int i = 0; i < filters.length; i++) {
-    if (i == 0) {
-      filteredUploadedIDs =
-          filteredUploadedIDs.union(filters[i].getMatchedUploadedIDs());
-    } else {
-      filteredUploadedIDs =
-          filteredUploadedIDs.intersection(filters[i].getMatchedUploadedIDs());
+    Set<int> filteredUploadedIDs = {};
+    for (int i = 0; i < filters.length; i++) {
+      if (i == 0) {
+        filteredUploadedIDs =
+            filteredUploadedIDs.union(filters[i].getMatchedUploadedIDs());
+      } else {
+        filteredUploadedIDs = filteredUploadedIDs
+            .intersection(filters[i].getMatchedUploadedIDs());
+      }
     }
-  }
 
-  final filteredIDtoFile =
-      await FilesDB.instance.getFilesFromIDs(filteredUploadedIDs.toList());
-  for (int id in filteredIDtoFile.keys) {
-    filteredFiles.add(filteredIDtoFile[id]!);
+    final filteredIDtoFile =
+        await FilesDB.instance.getFilesFromIDs(filteredUploadedIDs.toList());
+    for (int id in filteredIDtoFile.keys) {
+      filteredFiles.add(filteredIDtoFile[id]!);
+    }
+  } catch (e) {
+    Logger("HierarchicalSearchUtil").severe("Failed to get filtered files: $e");
   }
 
   return filteredFiles;
@@ -49,13 +54,17 @@ void curateFilters(
   SearchFilterDataProvider searchFilterDataProvider,
   List<EnteFile> files,
 ) async {
-  final albumFilters =
-      await _curateAlbumFilters(searchFilterDataProvider, files);
-  final fileTypeFilters =
-      _curateFileTypeFilters(searchFilterDataProvider, files);
+  try {
+    final albumFilters =
+        await _curateAlbumFilters(searchFilterDataProvider, files);
+    final fileTypeFilters =
+        _curateFileTypeFilters(searchFilterDataProvider, files);
 
-  searchFilterDataProvider
-      .clearAndAddRecommendations([...albumFilters, ...fileTypeFilters]);
+    searchFilterDataProvider
+        .clearAndAddRecommendations([...albumFilters, ...fileTypeFilters]);
+  } catch (e) {
+    Logger("HierarchicalSearchUtil").severe("Failed to curate filters: $e");
+  }
 }
 
 Future<List<AlbumFilter>> _curateAlbumFilters(
