@@ -1,12 +1,16 @@
 import type { CollectionMapping } from "@/base/types/ipc";
+import { FocusVisibleButton } from "@/new/photos/components/FocusVisibleButton";
+import CloseIcon from "@mui/icons-material/Close";
+import FolderIcon from "@mui/icons-material/Folder";
+import FolderCopyIcon from "@mui/icons-material/FolderCopy";
 import {
-    CenteredFlex,
-    SpaceBetweenFlex,
-} from "@ente/shared/components/Container";
-import DialogTitleWithCloseButton, {
-    dialogCloseHandler,
-} from "@ente/shared/components/DialogBox/TitleWithCloseButton";
-import { Button, Dialog, DialogContent, Typography } from "@mui/material";
+    Dialog,
+    DialogContent,
+    DialogTitle,
+    IconButton,
+    Stack,
+    Typography,
+} from "@mui/material";
 import { t } from "i18next";
 
 interface CollectionMappingChoiceModalProps {
@@ -18,44 +22,70 @@ interface CollectionMappingChoiceModalProps {
 export const CollectionMappingChoiceModal: React.FC<
     CollectionMappingChoiceModalProps
 > = ({ open, onClose, didSelect }) => {
-    const handleClose = dialogCloseHandler({ onClose });
-
     return (
-        <Dialog open={open} onClose={handleClose} maxWidth={"sm"} fullWidth>
-            <DialogTitleWithCloseButton onClose={onClose}>
-                {t("MULTI_FOLDER_UPLOAD")}
-            </DialogTitleWithCloseButton>
-            <DialogContent>
-                <CenteredFlex mb={1}>
+        <Dialog
+            open={open}
+            onClose={onClose}
+            fullWidth
+            PaperProps={{
+                sx: {
+                    paddingBlockEnd: "12px",
+                    paddingInline: "12px",
+                    maxWidth: "390px",
+                },
+            }}
+        >
+            <DialogTitle
+                sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    "&&&": { paddingBlockEnd: 0 },
+                }}
+            >
+                <Typography variant="large" fontWeight={"bold"}>
+                    {t("MULTI_FOLDER_UPLOAD")}
+                </Typography>
+                <IconButton
+                    aria-label={t("close")}
+                    color="secondary"
+                    onClick={onClose}
+                    sx={{ marginInlineEnd: "-12px" }}
+                >
+                    <CloseIcon />
+                </IconButton>
+            </DialogTitle>
+            <DialogContent sx={{ "&&&": { paddingBlockStart: "16px" } }}>
+                <Stack sx={{ gap: "16px" }}>
                     <Typography color="text.muted">
                         {t("UPLOAD_STRATEGY_CHOICE")}
                     </Typography>
-                </CenteredFlex>
-                <SpaceBetweenFlex px={2}>
-                    <Button
-                        size="medium"
-                        color="accent"
-                        onClick={() => {
-                            onClose();
-                            didSelect("root");
-                        }}
-                    >
-                        {t("UPLOAD_STRATEGY_SINGLE_COLLECTION")}
-                    </Button>
+                    <Stack sx={{ mt: "4px", gap: "12px" }}>
+                        <FocusVisibleButton
+                            size="medium"
+                            color="accent"
+                            startIcon={<FolderIcon />}
+                            onClick={() => {
+                                onClose();
+                                didSelect("root");
+                            }}
+                        >
+                            {t("UPLOAD_STRATEGY_SINGLE_COLLECTION")}
+                        </FocusVisibleButton>
 
-                    <strong>{t("OR")}</strong>
-
-                    <Button
-                        size="medium"
-                        color="accent"
-                        onClick={() => {
-                            onClose();
-                            didSelect("parent");
-                        }}
-                    >
-                        {t("UPLOAD_STRATEGY_COLLECTION_PER_FOLDER")}
-                    </Button>
-                </SpaceBetweenFlex>
+                        <FocusVisibleButton
+                            size="medium"
+                            color="accent"
+                            startIcon={<FolderCopyIcon />}
+                            onClick={() => {
+                                onClose();
+                                didSelect("parent");
+                            }}
+                        >
+                            {t("UPLOAD_STRATEGY_COLLECTION_PER_FOLDER")}
+                        </FocusVisibleButton>
+                    </Stack>
+                </Stack>
             </DialogContent>
         </Dialog>
     );

@@ -5,14 +5,12 @@ import {
     ItemCard,
     TileTextOverlay,
 } from "@/new/photos/components/ItemCards";
-import {
-    FilledIconButton,
-    UnstyledButton,
-} from "@/new/photos/components/mui-custom";
+import { FilledIconButton } from "@/new/photos/components/mui";
 import {
     IMAGE_CONTAINER_MAX_WIDTH,
     MIN_COLUMNS,
 } from "@/new/photos/components/PhotoList";
+import { UnstyledButton } from "@/new/photos/components/UnstyledButton";
 import type { Person } from "@/new/photos/services/ml/people";
 import type {
     CollectionSummary,

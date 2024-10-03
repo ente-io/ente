@@ -1,5 +1,6 @@
 import { CollectionsSortOptions } from "@/new/photos/components/CollectionsSortOptions";
-import { FilledIconButton } from "@/new/photos/components/mui-custom";
+import { FilledIconButton } from "@/new/photos/components/mui";
+import { SlideUpTransition } from "@/new/photos/components/mui/SlideUpTransition";
 import type { CollectionSummary } from "@/new/photos/types/collection";
 import { CollectionsSortBy } from "@/new/photos/types/collection";
 import { FlexWrapper, FluidContainer } from "@ente/shared/components/Container";
@@ -12,10 +13,7 @@ import {
     Typography,
     useMediaQuery,
 } from "@mui/material";
-import {
-    AllCollectionDialog,
-    Transition,
-} from "components/Collections/AllCollections/dialog";
+import { AllCollectionDialog } from "components/Collections/AllCollections/dialog";
 import { t } from "i18next";
 import AllCollectionContent from "./content";
 
@@ -28,8 +26,6 @@ interface AllCollectionsProps {
     onChangeCollectionsSortBy: (by: CollectionsSortBy) => void;
     isInHiddenSection: boolean;
 }
-
-const LeftSlideTransition = Transition("up");
 
 export default function AllCollections(props: AllCollectionsProps) {
     const {
@@ -51,7 +47,7 @@ export default function AllCollections(props: AllCollectionsProps) {
     return (
         <AllCollectionDialog
             position="flex-end"
-            TransitionComponent={LeftSlideTransition}
+            TransitionComponent={SlideUpTransition}
             onClose={onClose}
             open={open}
             fullScreen={isMobile}

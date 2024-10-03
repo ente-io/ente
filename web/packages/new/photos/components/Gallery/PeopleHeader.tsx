@@ -26,7 +26,7 @@ import React, { useState } from "react";
 import type { FaceCluster } from "../../services/ml/cluster";
 import type { CGroup } from "../../services/user-entity";
 import type { NewAppContextPhotos } from "../../types/context";
-import { SpaceBetweenFlex } from "../mui-custom";
+import { SpaceBetweenFlex } from "../mui";
 import { NameInputDialog } from "../NameInputDialog";
 import type { GalleryBarImplProps } from "./BarImpl";
 import { GalleryItemsHeaderAdapter, GalleryItemsSummary } from "./ListHeader";

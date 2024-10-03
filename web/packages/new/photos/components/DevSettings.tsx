@@ -19,7 +19,7 @@ import { t } from "i18next";
 import React, { useEffect, useState } from "react";
 import { z } from "zod";
 import { FocusVisibleButton } from "./FocusVisibleButton";
-import { SlideTransition } from "./SlideTransition";
+import { SlideUpTransition } from "./mui/SlideUpTransition";
 
 interface DevSettingsProps {
     /** If `true`, then the dialog is shown. */
@@ -44,7 +44,7 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
         <Dialog
             {...{ open, fullScreen }}
             onClose={handleDialogClose}
-            TransitionComponent={SlideTransition}
+            TransitionComponent={SlideUpTransition}
             maxWidth="xs"
             fullWidth
         >
