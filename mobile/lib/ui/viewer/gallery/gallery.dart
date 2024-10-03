@@ -241,7 +241,7 @@ class GalleryState extends State<Gallery> {
                 ?.searchFilterDataProvider;
         if (searchFilterDataProvider != null &&
             !searchFilterDataProvider.isSearchingNotifier.value) {
-          curateAlbumFilters(searchFilterDataProvider, result.files);
+          curateFilters(searchFilterDataProvider, result.files);
         }
       }
 

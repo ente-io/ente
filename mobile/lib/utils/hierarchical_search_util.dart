@@ -49,7 +49,20 @@ Future<List<EnteFile>> getFilteredFiles(
   return filteredFiles;
 }
 
-void curateAlbumFilters(
+void curateFilters(
+  SearchFilterDataProvider searchFilterDataProvider,
+  List<EnteFile> files,
+) async {
+  final albumFilters =
+      await _curateAlbumFilters(searchFilterDataProvider, files);
+  final fileTypeFilters =
+      _curateFileTypeFilters(searchFilterDataProvider, files);
+
+  searchFilterDataProvider
+      .clearAndAddRecommendations([...albumFilters, ...fileTypeFilters]);
+}
+
+Future<List<AlbumFilter>> _curateAlbumFilters(
   SearchFilterDataProvider searchFilterDataProvider,
   List<EnteFile> files,
 ) async {
@@ -82,10 +95,10 @@ void curateAlbumFilters(
     );
   }
 
-  searchFilterDataProvider.clearAndAddRecommendations(albumFilters);
+  return albumFilters;
 }
 
-void curateFileTypeFilters(
+List<FileTypeFilter> _curateFileTypeFilters(
   SearchFilterDataProvider searchFilterDataProvider,
   List<EnteFile> files,
 ) {
@@ -132,5 +145,5 @@ void curateFileTypeFilters(
     );
   }
 
-  searchFilterDataProvider.clearAndAddRecommendations(fileTypeFilters);
+  return fileTypeFilters;
 }

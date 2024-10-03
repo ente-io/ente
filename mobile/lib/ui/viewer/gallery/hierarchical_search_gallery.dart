@@ -81,7 +81,7 @@ class _HierarchicalSearchGalleryState extends State<HierarchicalSearchGallery> {
 
     final filterdFiles = await getFilteredFiles(filters);
     _setFilteredFilesAndReload(filterdFiles);
-    curateAlbumFilters(_searchFilterDataProvider!, filterdFiles);
+    curateFilters(_searchFilterDataProvider!, filterdFiles);
   }
 
   void _setFilteredFilesAndReload(List<EnteFile> files) {
