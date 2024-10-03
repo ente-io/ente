@@ -107,12 +107,13 @@ class CollectionPage extends StatelessWidget {
 
     return GalleryFilesState(
       child: InheritedSearchFilterData(
-        searchFilterDataProvider: SearchFilterDataProvider()
-          ..initialGalleryFilter = AlbumFilter(
+        searchFilterDataProvider: SearchFilterDataProvider(
+          initialGalleryFilter: AlbumFilter(
             collectionID: c.collection.id,
             albumName: c.collection.displayName,
             occurrence: kMostRelevantFilter,
           ),
+        ),
         child: Scaffold(
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(90.0),

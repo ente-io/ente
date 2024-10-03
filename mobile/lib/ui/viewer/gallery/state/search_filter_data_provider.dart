@@ -4,11 +4,10 @@ import "package:photos/models/search/hierarchical/hierarchical_search_filter.dar
 class SearchFilterDataProvider {
   final _appliedFiltersNotifier = _AppliedFiltersNotifier();
   final _recommendedFiltersNotifier = _RecommendedFiltersNotifier();
-
-  //TODO: Make this non-nullable and required so every time this is wrapped
-  //over a gallery's scaffold, it's forced to provide an initial gallery filter
-  HierarchicalSearchFilter? initialGalleryFilter;
   final isSearchingNotifier = ValueNotifier(false);
+  HierarchicalSearchFilter initialGalleryFilter;
+
+  SearchFilterDataProvider({required this.initialGalleryFilter});
 
   List<HierarchicalSearchFilter> get recommendations =>
       _recommendedFiltersNotifier.recommendedFilters;
@@ -24,7 +23,7 @@ class SearchFilterDataProvider {
     _recommendedFiltersNotifier.removeFilters(filters);
     if (!isSearchingNotifier.value) {
       isSearchingNotifier.value = true;
-      _appliedFiltersNotifier.addFilters([initialGalleryFilter!, ...filters]);
+      _appliedFiltersNotifier.addFilters([initialGalleryFilter, ...filters]);
     } else {
       _appliedFiltersNotifier.addFilters(filters);
     }
@@ -75,7 +74,7 @@ class SearchFilterDataProvider {
     _recommendedFiltersNotifier.addFilters(
       filters,
       filtersToAvoid: [
-        initialGalleryFilter!,
+        initialGalleryFilter,
         ...appliedFilters,
         ...recommendations,
       ],

@@ -101,12 +101,13 @@ class _SearchResultPageState extends State<SearchResultPage> {
 
     return GalleryFilesState(
       child: InheritedSearchFilterData(
-        searchFilterDataProvider: SearchFilterDataProvider()
+        searchFilterDataProvider: SearchFilterDataProvider(
           //TODO: Add filter type according to the search result
-          ..initialGalleryFilter = FileTypeFilter(
+          initialGalleryFilter: FileTypeFilter(
             fileType: FileType.image,
             occurrence: kMostRelevantFilter,
           ),
+        ),
         child: Scaffold(
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(90.0),
