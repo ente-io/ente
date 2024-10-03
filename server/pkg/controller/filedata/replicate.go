@@ -98,10 +98,15 @@ func (c *Controller) replicateRowData(ctx context.Context, row filedata.Row) err
 		if err != nil {
 			return stacktrace.Propagate(err, "error fetching metadata object "+row.S3FileMetadataObjectKey())
 		}
-		for bucketID := range wantInBucketIDs {
+		for key := range wantInBucketIDs {
+			bucketID := key
+			if regErr := c.Repo.RegisterReplicationAttempt(ctx, row, bucketID); regErr != nil {
+				return stacktrace.Propagate(regErr, "could not register replication attempt")
+			}
 			if err := c.uploadAndVerify(ctx, row, s3FileMetadata, bucketID); err != nil {
 				return stacktrace.Propagate(err, "error uploading and verifying metadata object")
 			}
+			return c.Repo.MoveBetweenBuckets(row, bucketID, fileDataRepo.InflightRepColumn, fileDataRepo.ReplicationColumn)
 		}
 	} else {
 		log.Infof("No replication pending for file %d and type %s", row.FileID, string(row.Type))
@@ -110,9 +115,6 @@ func (c *Controller) replicateRowData(ctx context.Context, row filedata.Row) err
 }
 
 func (c *Controller) uploadAndVerify(ctx context.Context, row filedata.Row, s3FileMetadata filedata.S3FileMetadata, dstBucketID string) error {
-	if err := c.Repo.RegisterReplicationAttempt(ctx, row, dstBucketID); err != nil {
-		return stacktrace.Propagate(err, "could not register replication attempt")
-	}
 	metadataSize, err := c.uploadObject(s3FileMetadata, row.S3FileMetadataObjectKey(), dstBucketID)
 	if err != nil {
 		return err
@@ -120,5 +122,5 @@ func (c *Controller) uploadAndVerify(ctx context.Context, row filedata.Row, s3Fi
 	if metadataSize != row.Size {
 		return fmt.Errorf("uploaded metadata size %d does not match expected size %d", metadataSize, row.Size)
 	}
-	return c.Repo.MoveBetweenBuckets(row, dstBucketID, fileDataRepo.InflightRepColumn, fileDataRepo.ReplicationColumn)
+	return nil
 }
