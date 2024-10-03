@@ -16,8 +16,8 @@ import SingleInputForm, {
 import { ApiError } from "@ente/shared/error";
 import localForage from "@ente/shared/storage/localForage";
 import {
-    LS_KEYS,
     getData,
+    LS_KEYS,
     setData,
     setLSUser,
 } from "@ente/shared/storage/localStorage";
@@ -40,7 +40,7 @@ import {
     openPasskeyVerificationURL,
     passkeyVerificationRedirectURL,
 } from "../services/passkey";
-import { unstashRedirect } from "../services/redirect";
+import { stashedRedirect, unstashRedirect } from "../services/redirect";
 import { configureSRP } from "../services/srp";
 import type { PageProps } from "../types/page";
 import type { SRPAttributes, SRPSetupAttributes } from "../types/srp";
@@ -59,6 +59,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
     useEffect(() => {
         const main = async () => {
             const user: User = getData(LS_KEYS.USER);
+
             const redirect = await redirectionIfNeeded(user);
             if (redirect) {
                 router.push(redirect);
@@ -264,6 +265,9 @@ const redirectionIfNeeded = async (user: User | undefined) => {
     if (keyAttributes?.encryptedKey && (user.token || user.encryptedToken)) {
         return PAGES.CREDENTIALS;
     }
+
+    // If we're coming here during the recover flow, do not redirect.
+    if (stashedRedirect() == PAGES.RECOVER) return undefined;
 
     // The user might have email verification disabled, but after previously
     // entering their email on the login screen, they might've closed the tab
