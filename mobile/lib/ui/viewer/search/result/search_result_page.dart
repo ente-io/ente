@@ -5,13 +5,17 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file/file.dart';
+import "package:photos/models/file/file_type.dart";
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/gallery_type.dart';
+import "package:photos/models/search/hierarchical/file_type_filter.dart";
+import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
 import 'package:photos/models/search/search_result.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
+import "package:photos/ui/viewer/gallery/hierarchical_search_gallery.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
@@ -97,7 +101,12 @@ class _SearchResultPageState extends State<SearchResultPage> {
 
     return GalleryFilesState(
       child: InheritedSearchFilterData(
-        searchFilterDataProvider: SearchFilterDataProvider(),
+        searchFilterDataProvider: SearchFilterDataProvider()
+          //TODO: Add filter type according to the search result
+          ..initialGalleryFilter = FileTypeFilter(
+            fileType: FileType.image,
+            occurrence: kMostRelevantFilter,
+          ),
         child: Scaffold(
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(90.0),
@@ -112,7 +121,23 @@ class _SearchResultPageState extends State<SearchResultPage> {
             child: Stack(
               alignment: Alignment.bottomCenter,
               children: [
-                gallery,
+                Builder(
+                  builder: (context) {
+                    return ValueListenableBuilder(
+                      valueListenable: InheritedSearchFilterData.of(context)
+                          .searchFilterDataProvider!
+                          .isSearchingNotifier,
+                      builder: (context, value, _) {
+                        return value
+                            ? HierarchicalSearchGallery(
+                                tagPrefix: widget.tagPrefix,
+                                selectedFiles: _selectedFiles,
+                              )
+                            : gallery;
+                      },
+                    );
+                  },
+                ),
                 FileSelectionOverlayBar(
                   SearchResultPage.overlayType,
                   _selectedFiles,
