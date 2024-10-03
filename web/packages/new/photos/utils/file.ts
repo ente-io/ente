@@ -55,12 +55,12 @@ export const mergeMetadata = (files: EnteFile[]) =>
  */
 export const mergeMetadata1 = (file: EnteFile): EnteFile => {
     const mutableMetadata = file.pubMagicMetadata?.data;
-    if (mutableMetadata?.editedTime) {
-        file.metadata.creationTime = mutableMetadata.editedTime;
+    if (mutableMetadata) {
+        const { editedTime, editedName } = mutableMetadata;
+        if (editedTime) file.metadata.creationTime = editedTime;
+        if (editedName) file.metadata.title = editedName;
     }
-    if (mutableMetadata?.editedName) {
-        file.metadata.title = mutableMetadata.editedName;
-    }
+
     // In a very rare cases (have found only one so far, a very old file in
     // Vishnu's account, uploaded by an initial dev version of Ente) the photo
     // has no modification time. Gracefully handle such cases.
