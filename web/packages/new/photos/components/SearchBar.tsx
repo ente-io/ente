@@ -42,7 +42,7 @@ import {
 } from "react-select";
 import AsyncSelect from "react-select/async";
 import { SearchPeopleList } from "./PeopleList";
-import { UnstyledButton } from "./mui-custom";
+import { UnstyledButton } from "./UnstyledButton";
 
 export interface SearchBarProps {
     /**
