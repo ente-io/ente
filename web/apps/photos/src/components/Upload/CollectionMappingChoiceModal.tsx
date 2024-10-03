@@ -29,7 +29,7 @@ export const CollectionMappingChoiceModal: React.FC<
             fullWidth
             PaperProps={{
                 sx: {
-                    paddingBlockEnd: "8px",
+                    paddingBlockEnd: "12px",
                     paddingInline: "12px",
                     maxWidth: "390px",
                 },
@@ -55,12 +55,12 @@ export const CollectionMappingChoiceModal: React.FC<
                     <CloseIcon />
                 </IconButton>
             </DialogTitle>
-            <DialogContent sx={{ "&&&": { paddingBlockStart: "8px" } }}>
+            <DialogContent sx={{ "&&&": { paddingBlockStart: "16px" } }}>
                 <Stack sx={{ gap: "16px" }}>
                     <Typography color="text.muted">
                         {t("UPLOAD_STRATEGY_CHOICE")}
                     </Typography>
-                    <Stack sx={{ mt: "4px", gap: "8px" }}>
+                    <Stack sx={{ mt: "4px", gap: "12px" }}>
                         <FocusVisibleButton
                             size="medium"
                             color="accent"
