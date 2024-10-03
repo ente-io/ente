@@ -1,6 +1,8 @@
 import "package:photos/db/files_db.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/models/file/file_type.dart";
 import "package:photos/models/search/hierarchical/album_filter.dart";
+import "package:photos/models/search/hierarchical/file_type_filter.dart";
 import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/search_service.dart";
@@ -81,4 +83,54 @@ void curateAlbumFilters(
   }
 
   searchFilterDataProvider.clearAndAddRecommendations(albumFilters);
+}
+
+void curateFileTypeFilters(
+  SearchFilterDataProvider searchFilterDataProvider,
+  List<EnteFile> files,
+) {
+  final fileTypeFilters = <FileTypeFilter>[];
+  int photosCount = 0;
+  int videosCount = 0;
+  int livePhotosCount = 0;
+
+  for (EnteFile file in files) {
+    final id = file.uploadedFileID;
+    if (id != null && id != -1) {
+      if (file.fileType == FileType.image) {
+        photosCount++;
+      } else if (file.fileType == FileType.video) {
+        videosCount++;
+      } else if (file.fileType == FileType.livePhoto) {
+        livePhotosCount++;
+      }
+    }
+  }
+
+  if (photosCount > 0) {
+    fileTypeFilters.add(
+      FileTypeFilter(
+        fileType: FileType.image,
+        occurrence: photosCount,
+      ),
+    );
+  }
+  if (videosCount > 0) {
+    fileTypeFilters.add(
+      FileTypeFilter(
+        fileType: FileType.video,
+        occurrence: videosCount,
+      ),
+    );
+  }
+  if (livePhotosCount > 0) {
+    fileTypeFilters.add(
+      FileTypeFilter(
+        fileType: FileType.livePhoto,
+        occurrence: livePhotosCount,
+      ),
+    );
+  }
+
+  searchFilterDataProvider.clearAndAddRecommendations(fileTypeFilters);
 }
