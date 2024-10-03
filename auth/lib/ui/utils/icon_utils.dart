@@ -30,11 +30,7 @@ class IconUtils {
   }) {
     final providerTitle = _getProviderTitle(provider);
     final List<String> titlesList = [providerTitle];
-    for(final splitCharacter in _titleSplitCharacters){
-      if (providerTitle.contains(splitCharacter)){
-        titlesList.add(providerTitle.split(splitCharacter)[0]);
-      }
-    }
+    titlesList.addAll(_titleSplitCharacters.where((char) => providerTitle.contains(char)).map((char) => providerTitle.split(char)[0]));
     for(final title in titlesList){
       if (_customIcons.containsKey(title)) {
         return _getSVGIcon(
