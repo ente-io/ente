@@ -3,9 +3,7 @@ import {
     CenteredFlex,
     SpaceBetweenFlex,
 } from "@ente/shared/components/Container";
-import DialogTitleWithCloseButton, {
-    dialogCloseHandler,
-} from "@ente/shared/components/DialogBox/TitleWithCloseButton";
+import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleWithCloseButton";
 import { Button, Dialog, DialogContent, Typography } from "@mui/material";
 import { t } from "i18next";
 
@@ -18,10 +16,8 @@ interface CollectionMappingChoiceModalProps {
 export const CollectionMappingChoiceModal: React.FC<
     CollectionMappingChoiceModalProps
 > = ({ open, onClose, didSelect }) => {
-    const handleClose = dialogCloseHandler({ onClose });
-
     return (
-        <Dialog open={open} onClose={handleClose} maxWidth={"sm"} fullWidth>
+        <Dialog open={open} onClose={onClose} maxWidth={"sm"} fullWidth>
             <DialogTitleWithCloseButton onClose={onClose}>
                 {t("MULTI_FOLDER_UPLOAD")}
             </DialogTitleWithCloseButton>
