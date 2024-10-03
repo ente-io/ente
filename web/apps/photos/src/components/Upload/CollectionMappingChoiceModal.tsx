@@ -1,10 +1,15 @@
 import type { CollectionMapping } from "@/base/types/ipc";
+import { SpaceBetweenFlex } from "@/new/photos/components/mui";
+import { CenteredFlex } from "@ente/shared/components/Container";
+import CloseIcon from "@mui/icons-material/Close";
 import {
-    CenteredFlex,
-    SpaceBetweenFlex,
-} from "@ente/shared/components/Container";
-import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleWithCloseButton";
-import { Button, Dialog, DialogContent, Typography } from "@mui/material";
+    Button,
+    Dialog,
+    DialogContent,
+    DialogTitle,
+    IconButton,
+    Typography,
+} from "@mui/material";
 import { t } from "i18next";
 
 interface CollectionMappingChoiceModalProps {
@@ -18,9 +23,18 @@ export const CollectionMappingChoiceModal: React.FC<
 > = ({ open, onClose, didSelect }) => {
     return (
         <Dialog open={open} onClose={onClose} maxWidth={"sm"} fullWidth>
-            <DialogTitleWithCloseButton onClose={onClose}>
-                {t("MULTI_FOLDER_UPLOAD")}
-            </DialogTitleWithCloseButton>
+            <DialogTitle>
+                <SpaceBetweenFlex>
+                    {t("MULTI_FOLDER_UPLOAD")}
+                    <IconButton
+                        aria-label={t("close")}
+                        color="secondary"
+                        onClick={onClose}
+                    >
+                        <CloseIcon />
+                    </IconButton>
+                </SpaceBetweenFlex>
+            </DialogTitle>
             <DialogContent>
                 <CenteredFlex mb={1}>
                     <Typography color="text.muted">
