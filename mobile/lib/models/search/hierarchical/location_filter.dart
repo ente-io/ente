@@ -25,7 +25,7 @@ class LocationFilter extends HierarchicalSearchFilter {
 
   @override
   bool isMatch(EnteFile file) {
-    assert(file.hasLocation);
+    if (!file.hasLocation) return false;
     return isFileInsideLocationTag(
       locationTag.centerPoint,
       file.location!,
