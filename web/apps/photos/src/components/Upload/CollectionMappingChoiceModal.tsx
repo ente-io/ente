@@ -27,35 +27,30 @@ export const CollectionMappingChoiceModal: React.FC<
             open={open}
             onClose={onClose}
             fullWidth
-            PaperProps={{
-                sx: {
-                    paddingBlockEnd: "12px",
-                    paddingInline: "12px",
-                    maxWidth: "390px",
-                },
-            }}
+            PaperProps={{ sx: { maxWidth: "360px", padding: "12px" } }}
         >
             <DialogTitle
+                variant="large"
+                fontWeight={"bold"}
                 sx={{
+                    "&&&": { padding: 0 },
+                    marginBlockStart: "4px",
+                    marginInlineStart: 2,
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
-                    "&&&": { paddingBlockEnd: 0 },
                 }}
             >
-                <Typography variant="large" fontWeight={"bold"}>
-                    {t("multi_folder_upload")}
-                </Typography>
+                {t("multi_folder_upload")}
                 <IconButton
                     aria-label={t("close")}
                     color="secondary"
                     onClick={onClose}
-                    sx={{ marginInlineEnd: "-12px" }}
                 >
                     <CloseIcon />
                 </IconButton>
             </DialogTitle>
-            <DialogContent sx={{ "&&&": { paddingBlockStart: "16px" } }}>
+            <DialogContent sx={{ "&&&": { padding: 2 } }}>
                 <Stack sx={{ gap: "16px" }}>
                     <Typography color="text.muted">
                         {t("upload_to_choice")}

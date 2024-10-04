@@ -1,19 +1,12 @@
-import CloseIcon from "@mui/icons-material/Close";
-import { DialogTitle, IconButton, styled, Typography } from "@mui/material";
-import { t } from "i18next";
-import React from "react";
+import { DialogTitle, styled } from "@mui/material";
 
 /**
- * A DialogTitle component that new code should use instead of the MUI
- * {@link DialogTitle} when possible.
+ * A DialogTitle component that resets global {@link DialogTitle} padding
+ * overrides.
  *
- * This reverts some of the global padding styleOverrides instead of disabling
- * them ad-hoc. The intent is that once enough of the existing dialogs have
- * moved to this component, these can be added as a variant in the MUI global
- * styleOverrides, and this component should not be needed them. We can also see
- * if a different variant pattern emerges once we start using this.
- *
- * The global styleOverrides in consideration:
+ * This component is not meant for use in particular, but rather serves as a
+ * documentation point. There are following global styleOverrides that affect
+ * the layout of content within the Dialog:
  *
  *     "& .MuiDialogTitle-root": {
  *         padding: "16px",
@@ -29,38 +22,13 @@ import React from "react";
  *         paddingTop: "16px",
  *     },
  *
+ * However, in practice, each dialog ends up being bespoke to some extent, and
+ * these global overrides come in the way. For now, one approach we can try is
+ * to reset this padding whenever possible, so that in the future we can modify
+ * the global defaults (or remove them altogether).
  */
 export const DialogTitleV3 = styled(DialogTitle)`
     "&&&": {
         padding: 0;
     }
 `;
-
-interface DialogTitleV3WithCloseButtonProps {
-    onClose: () => void;
-}
-
-export const DialogTitleV3WithCloseButton: React.FC<
-    React.PropsWithChildren<DialogTitleV3WithCloseButtonProps>
-> = ({ onClose, children }) => (
-    <DialogTitle
-        sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            "&&&": { paddingBlockEnd: 0 },
-        }}
-    >
-        <Typography variant="large" fontWeight={"bold"}>
-            {children}
-        </Typography>
-        <IconButton
-            aria-label={t("close")}
-            color="secondary"
-            onClick={onClose}
-            sx={{ marginInlineEnd: "-12px" }}
-        >
-            <CloseIcon />
-        </IconButton>
-    </DialogTitle>
-);
