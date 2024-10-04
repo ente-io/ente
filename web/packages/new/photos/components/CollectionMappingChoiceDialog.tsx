@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import { t } from "i18next";
 import React from "react";
-import type { DialogVisiblityProps } from "./mui";
+import { SpaceBetweenFlex, type DialogVisiblityProps } from "./mui";
 
 type CollectionMappingChoiceModalProps = DialogVisiblityProps & {
     didSelect: (mapping: CollectionMapping) => void;
@@ -33,15 +33,8 @@ export const CollectionMappingChoiceDialog: React.FC<
         fullWidth
         PaperProps={{ sx: { maxWidth: "360px", padding: "12px" } }}
     >
-        <DialogTitle
-            sx={{
-                "&&&": { padding: "4px 4px 0 16px" },
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-            }}
-        >
-            {t("multi_folder_upload")}
+        <SpaceBetweenFlex sx={{ paddingInlineEnd: "4px" }}>
+            <DialogTitle>{t("multi_folder_upload")}</DialogTitle>
             <IconButton
                 aria-label={t("close")}
                 color="secondary"
@@ -49,9 +42,14 @@ export const CollectionMappingChoiceDialog: React.FC<
             >
                 <CloseIcon />
             </IconButton>
-        </DialogTitle>
+        </SpaceBetweenFlex>
         <DialogContent
-            sx={{ display: "flex", flexDirection: "column", gap: "20px" }}
+            sx={{
+                display: "flex",
+                flexDirection: "column",
+                "&&": { paddingBlockStart: "12px" },
+                gap: "20px",
+            }}
         >
             <Typography color="text.muted">{t("upload_to_choice")}</Typography>
             <Stack sx={{ gap: "12px" }}>
