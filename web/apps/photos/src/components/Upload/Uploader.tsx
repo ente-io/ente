@@ -2,6 +2,7 @@ import { basename } from "@/base/file";
 import log from "@/base/log";
 import type { CollectionMapping, Electron, ZipItem } from "@/base/types/ipc";
 import type { Collection } from "@/media/collection";
+import { CollectionMappingChoiceDialog } from "@/new/photos/components/CollectionMappingChoiceDialog";
 import { exportMetadataDirectoryName } from "@/new/photos/services/export";
 import type {
     FileAndPath,
@@ -49,7 +50,6 @@ import {
     getRootLevelFileWithFolderNotAllowMessage,
 } from "utils/ui";
 import { SetCollectionNamerAttributes } from "../Collections/CollectionNamer";
-import { CollectionMappingChoiceModal } from "./CollectionMappingChoiceModal";
 import UploadProgress from "./UploadProgress";
 import {
     UploadTypeSelector,
@@ -122,7 +122,7 @@ export default function Uploader({
     const [percentComplete, setPercentComplete] = useState(0);
     const [hasLivePhotos, setHasLivePhotos] = useState(false);
 
-    const [choiceModalView, setChoiceModalView] = useState(false);
+    const [openChoiceDialog, setOpenChoiceDialog] = useState(false);
     const [userNameInputDialogView, setUserNameInputDialogView] =
         useState(false);
     const [importSuggestion, setImportSuggestion] = useState<ImportSuggestion>(
@@ -209,7 +209,7 @@ export default function Uploader({
     const showUserNameInputDialog = () => setUserNameInputDialogView(true);
 
     const handleChoiceModalClose = () => {
-        setChoiceModalView(false);
+        setOpenChoiceDialog(false);
         uploadRunning.current = false;
     };
 
@@ -454,7 +454,7 @@ export default function Uploader({
 
             let showNextModal = () => {};
             if (importSuggestion.hasNestedFolders) {
-                showNextModal = () => setChoiceModalView(true);
+                showNextModal = () => setOpenChoiceDialog(true);
             } else {
                 showNextModal = () =>
                     showCollectionCreateModal(importSuggestion.rootFolderName);
@@ -765,8 +765,8 @@ export default function Uploader({
 
     return (
         <>
-            <CollectionMappingChoiceModal
-                open={choiceModalView}
+            <CollectionMappingChoiceDialog
+                open={openChoiceDialog}
                 onClose={handleChoiceModalClose}
                 didSelect={didSelectCollectionMapping}
             />

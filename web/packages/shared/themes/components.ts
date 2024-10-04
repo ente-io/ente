@@ -47,17 +47,35 @@ export const getComponents = (
                 "& .MuiDialog-paper": {
                     filter: getDropShadowStyle(colors.shadows?.float),
                 },
+                // Reset the MUI default paddings to 16px everywhere.
+                //
+                // This is not a great choice either, usually most dialogs, for
+                // one reason or the other, will need to customize this padding
+                // anyway. But not resetting it to 16px leaves it at the MUI
+                // defaults, which just don't work with our designs.
                 "& .MuiDialogTitle-root": {
+                    // MUI default is '16px 24px'.
                     padding: "16px",
                 },
                 "& .MuiDialogContent-root": {
+                    // MUI default is '20px 24px'.
                     padding: "16px",
-                    overflowY: "overlay",
+                    // If the contents of the dialog's contents exceed the
+                    // available height, show a scrollbar just for the contents
+                    // instead of the entire dialog.
+                    overflowY: "auto",
                 },
                 "& .MuiDialogActions-root": {
+                    // MUI default is way since they cluster the buttons to the
+                    // right, our designs usually want the buttons to align with
+                    // the heading / content.
                     padding: "16px",
                 },
                 ".MuiDialogTitle-root + .MuiDialogContent-root": {
+                    // MUI resets this to 0 when the content doesn't use
+                    // dividers (none of ours do). I feel that is a better
+                    // default, since unlike margins, padding doesn't collapse,
+                    // but changing this now would break existing layouts.
                     paddingTop: "16px",
                 },
             },

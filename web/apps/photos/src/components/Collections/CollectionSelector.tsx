@@ -12,12 +12,12 @@ import type {
 import { FlexWrapper } from "@ente/shared/components/Container";
 import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleWithCloseButton";
 import {
+    Dialog,
     DialogContent,
     styled,
     Typography,
     useMediaQuery,
 } from "@mui/material";
-import { AllCollectionDialog } from "components/Collections/AllCollections/dialog";
 import { t } from "i18next";
 import { useEffect, useState } from "react";
 import { createUnCategorizedCollection } from "services/collectionService";
@@ -51,11 +51,13 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
     collections,
     ...props
 }) => {
-    const isMobile = useMediaQuery("(max-width: 428px)");
+    // Make the dialog fullscreen if the screen is <= the dialog's max width.
+    const isFullScreen = useMediaQuery("(max-width: 494px)");
 
     const [collectionsToShow, setCollectionsToShow] = useState<
         CollectionSummary[]
     >([]);
+
     useEffect(() => {
         if (!attributes || !props.open) {
             return;
@@ -128,12 +130,11 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
     };
 
     return (
-        <AllCollectionDialog
+        <Dialog_
             onClose={onUserTriggeredClose}
             open={props.open}
-            position="center"
-            fullScreen={isMobile}
-            fullWidth={true}
+            fullScreen={isFullScreen}
+            fullWidth
         >
             <DialogTitleWithCloseButton onClose={onUserTriggeredClose}>
                 {attributes.intent === CollectionSelectorIntent.upload
@@ -163,9 +164,24 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
                     ))}
                 </FlexWrapper>
             </DialogContent>
-        </AllCollectionDialog>
+        </Dialog_>
     );
 };
+
+export const AllCollectionMobileBreakpoint = 559;
+
+export const Dialog_ = styled(Dialog)(({ theme }) => ({
+    "& .MuiPaper-root": {
+        maxWidth: "494px",
+    },
+    "& .MuiDialogTitle-root": {
+        padding: "16px",
+        paddingRight: theme.spacing(1),
+    },
+    "& .MuiDialogContent-root": {
+        padding: "16px",
+    },
+}));
 
 interface CollectionSelectorCardProps {
     collectionSummary: CollectionSummary;

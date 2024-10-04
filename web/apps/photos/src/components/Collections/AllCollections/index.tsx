@@ -87,7 +87,11 @@ const AllCollectionsHeader = ({
                             ? t("all_hidden_albums")
                             : t("all_albums")}
                     </Typography>
-                    <Typography variant="small" color={"text.muted"}>
+                    <Typography
+                        variant="small"
+                        fontWeight={"normal"}
+                        color={"text.muted"}
+                    >
                         {t("albums_count", { count: collectionCount })}
                     </Typography>
                 </Box>

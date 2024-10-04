@@ -1,16 +1,6 @@
 import { Box, IconButton, styled } from "@mui/material";
 
 /**
- * Common props to control the display of a dialog-like component.
- */
-export interface DialogVisiblityProps {
-    /** If `true`, the dialog is shown. */
-    open: boolean;
-    /** Callback fired when the dialog wants to be closed. */
-    onClose: () => void;
-}
-
-/**
  * A MUI {@link IconButton} filled in with at faint background.
  */
 export const FilledIconButton = styled(IconButton)(({ theme }) => ({

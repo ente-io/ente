@@ -127,14 +127,10 @@ const Form: React.FC<FormProps> = ({ initialAPIOrigin, onClose }) => {
 
     return (
         <form onSubmit={form.handleSubmit}>
-            <DialogTitle>{t("developer_settings")}</DialogTitle>
-            <DialogContent
-                sx={{
-                    "&&": {
-                        paddingBlock: "8px",
-                    },
-                }}
-            >
+            <DialogTitle sx={{ "&&": { padding: "24px 24px 12px 24px" } }}>
+                {t("developer_settings")}
+            </DialogTitle>
+            <DialogContent sx={{ "&&": { padding: "0 24px 0 24px" } }}>
                 <TextField
                     fullWidth
                     autoFocus
@@ -172,7 +168,7 @@ const Form: React.FC<FormProps> = ({ initialAPIOrigin, onClose }) => {
                     }}
                 />
             </DialogContent>
-            <DialogActions>
+            <DialogActions sx={{ "&&": { padding: "0 24px 24px 24px" } }}>
                 <FocusVisibleButton
                     type="submit"
                     color="accent"
