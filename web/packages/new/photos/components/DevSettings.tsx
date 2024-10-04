@@ -127,7 +127,7 @@ const Form: React.FC<FormProps> = ({ initialAPIOrigin, onClose }) => {
 
     return (
         <form onSubmit={form.handleSubmit}>
-            <DialogTitle sx={{ "&&": { padding: "24px 24px 0px 24px" } }}>
+            <DialogTitle sx={{ "&&": { padding: "24px 24px 12px 24px" } }}>
                 {t("developer_settings")}
             </DialogTitle>
             <DialogContent sx={{ "&&": { padding: "0 24px 0 24px" } }}>
