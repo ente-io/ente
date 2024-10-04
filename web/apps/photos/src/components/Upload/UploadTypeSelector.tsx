@@ -233,39 +233,37 @@ const TakeoutOptions: React.FC<Omit<OptionsProps, "intent">> = ({
                 </SpaceBetweenFlex>
             </DialogTitle>
 
-            <Box p={1.5}>
-                <Stack gap={2.5}>
-                    <Stack gap={1}>
-                        <FocusVisibleButton
-                            color="accent"
-                            fullWidth
-                            onClick={() => onSelect("folders")}
-                        >
-                            {t("select_folder")}
+            <Stack p={1.5} gap={2.5}>
+                <Stack gap={1}>
+                    <FocusVisibleButton
+                        color="accent"
+                        fullWidth
+                        onClick={() => onSelect("folders")}
+                    >
+                        {t("select_folder")}
+                    </FocusVisibleButton>
+                    <FocusVisibleButton
+                        color="secondary"
+                        fullWidth
+                        onClick={() => onSelect("zips")}
+                    >
+                        {t("select_zips")}
+                    </FocusVisibleButton>
+                    <Link
+                        href="https://help.ente.io/photos/migration/from-google-photos/"
+                        target="_blank"
+                        rel="noopener"
+                    >
+                        <FocusVisibleButton color="secondary" fullWidth>
+                            {t("faq")}
                         </FocusVisibleButton>
-                        <FocusVisibleButton
-                            color="secondary"
-                            fullWidth
-                            onClick={() => onSelect("zips")}
-                        >
-                            {t("Select zips")}
-                        </FocusVisibleButton>
-                        <Link
-                            href="https://help.ente.io/photos/migration/from-google-photos/"
-                            target="_blank"
-                            rel="noopener"
-                        >
-                            <FocusVisibleButton color="secondary" fullWidth>
-                                {t("faq")}
-                            </FocusVisibleButton>
-                        </Link>
-                    </Stack>
-
-                    <Typography variant="small" color="text.muted" pb={1}>
-                        {t("takeout_hint")}
-                    </Typography>
+                    </Link>
                 </Stack>
-            </Box>
+
+                <Typography variant="small" color="text.muted" pb={1}>
+                    {t("takeout_hint")}
+                </Typography>
+            </Stack>
         </>
     );
 };
