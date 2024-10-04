@@ -58,7 +58,7 @@ export const getComponents = (
                     padding: "16px",
                 },
                 "& .MuiDialogContent-root": {
-                    // MUI default is '20px 24px' / '16px 24px'.
+                    // MUI default is '20px 24px'.
                     padding: "16px",
                     // If the contents of the dialog's contents exceed the
                     // available height, show a scrollbar just for the contents
@@ -71,6 +71,9 @@ export const getComponents = (
                     padding: "16px",
                 },
                 ".MuiDialogTitle-root + .MuiDialogContent-root": {
+                    // MUI resets this to 0 when the content doesn't use
+                    // dividers (none of ours do). TODO: That is a better
+                    // default, otherwise we end up with double padding.
                     paddingTop: "16px",
                 },
             },
