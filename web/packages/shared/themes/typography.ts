@@ -17,6 +17,13 @@ export const typography: TypographyOptions = {
         fontSize: "22px",
         lineHeight: "27px",
     },
+    h5: {
+        fontSize: "20px",
+        lineHeight: "25px",
+        // Browser default is bold, but MUI resets it to 500 which is too light
+        // for our chosen font.
+        fontWeight: "bold",
+    },
     // h6 is the default variant used by MUI's DialogTitle.
     h6: {
         // The font size and line height belows is the same as large.
@@ -24,7 +31,7 @@ export const typography: TypographyOptions = {
         lineHeight: "22px",
         // Browser default is bold, but MUI resets it to 500 which is too light
         // for our chosen font.
-        fontWeight: "bold"
+        fontWeight: "bold",
     },
     large: {
         fontSize: "18px",

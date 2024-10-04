@@ -220,8 +220,8 @@ const TakeoutOptions: React.FC<Omit<OptionsProps, "intent">> = ({
 }) => {
     return (
         <>
-            <SpaceBetweenFlex sx={{ padding: "8px 8px 8px 0" }}>
-                <DialogTitle>{t("google_takeout")}</DialogTitle>
+            <SpaceBetweenFlex sx={{ padding: "8px 8px 0px 0" }}>
+                <DialogTitle variant="h5">{t("google_takeout")}</DialogTitle>
                 <IconButton
                     aria-label={t("close")}
                     color="secondary"
