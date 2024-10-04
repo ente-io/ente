@@ -98,12 +98,12 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
                 onLoadStart: (controller, navigationAction) async {
                   _logger.info("onLoadStart $navigationAction");
                 },
-                onLoadError: (controller, navigationAction, code, msg) async {
-                  _logger.severe("onLoadError $navigationAction $code $msg");
+                onReceivedError: (controller, navigationAction, code) async {
+                  _logger.severe("onLoadError $navigationAction $code");
                 },
-                onLoadHttpError:
-                    (controller, navigationAction, code, msg) async {
-                  _logger.info("onHttpError with $code and msg = $msg");
+                onReceivedHttpError:
+                    (controller, navigationAction, code) async {
+                  _logger.info("onHttpError with $code");
                 },
                 onLoadStop: (controller, navigationAction) async {
                   _logger.info("onLoadStop $navigationAction");
