@@ -1,12 +1,12 @@
 import { useIsTouchscreen } from "@/base/hooks";
 import { FocusVisibleButton } from "@/new/photos/components/FocusVisibleButton";
 import { SpaceBetweenFlex } from "@/new/photos/components/mui";
+import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";
 import DialogTitleWithCloseButton, {
     dialogCloseHandler,
 } from "@ente/shared/components/DialogBox/TitleWithCloseButton";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ChevronRight from "@mui/icons-material/ChevronRight";
-import CloseIcon from "@mui/icons-material/Close";
 import GoogleIcon from "@mui/icons-material/Google";
 import { default as FileUploadIcon } from "@mui/icons-material/ImageOutlined";
 import { default as FolderUploadIcon } from "@mui/icons-material/PermMediaOutlined";
@@ -14,7 +14,6 @@ import {
     Box,
     Dialog,
     DialogTitle,
-    IconButton,
     Link,
     Stack,
     Typography,
@@ -222,13 +221,7 @@ const TakeoutOptions: React.FC<Omit<OptionsProps, "intent">> = ({
         <>
             <SpaceBetweenFlex sx={{ padding: "8px 8px 0px 0" }}>
                 <DialogTitle variant="h5">{t("google_takeout")}</DialogTitle>
-                <IconButton
-                    aria-label={t("close")}
-                    color="secondary"
-                    onClick={onClose}
-                >
-                    <CloseIcon />
-                </IconButton>
+                <DialogCloseIconButton {...{ onClose }} />
             </SpaceBetweenFlex>
 
             <Stack sx={{ padding: "12px", gap: "20px" }}>

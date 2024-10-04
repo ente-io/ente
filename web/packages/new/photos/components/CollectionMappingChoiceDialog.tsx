@@ -1,19 +1,18 @@
 import type { CollectionMapping } from "@/base/types/ipc";
 import { FocusVisibleButton } from "@/new/photos/components/FocusVisibleButton";
-import CloseIcon from "@mui/icons-material/Close";
 import FolderIcon from "@mui/icons-material/Folder";
 import FolderCopyIcon from "@mui/icons-material/FolderCopy";
 import {
     Dialog,
     DialogContent,
     DialogTitle,
-    IconButton,
     Stack,
     Typography,
 } from "@mui/material";
 import { t } from "i18next";
 import React from "react";
-import { SpaceBetweenFlex, type DialogVisiblityProps } from "./mui";
+import { SpaceBetweenFlex } from "./mui";
+import { DialogCloseIconButton, type DialogVisiblityProps } from "./mui/Dialog";
 
 type CollectionMappingChoiceModalProps = DialogVisiblityProps & {
     didSelect: (mapping: CollectionMapping) => void;
@@ -35,14 +34,9 @@ export const CollectionMappingChoiceDialog: React.FC<
     >
         <SpaceBetweenFlex sx={{ paddingInlineEnd: "4px" }}>
             <DialogTitle>{t("multi_folder_upload")}</DialogTitle>
-            <IconButton
-                aria-label={t("close")}
-                color="secondary"
-                onClick={onClose}
-            >
-                <CloseIcon />
-            </IconButton>
+            <DialogCloseIconButton {...{ onClose }} />
         </SpaceBetweenFlex>
+
         <DialogContent
             sx={{
                 display: "flex",
