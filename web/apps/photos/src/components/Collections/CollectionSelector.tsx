@@ -169,19 +169,18 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
 export const AllCollectionMobileBreakpoint = 559;
 
 export const Dialog_ = styled(Dialog)(({ theme }) => ({
-    "& .MuiDialog-container": {
-        justifyContent: "center",
-        border: "1px solid red",
-    },
     "& .MuiPaper-root": {
         maxWidth: "494px",
     },
     "& .MuiDialogTitle-root": {
-        padding: theme.spacing(2),
+        padding: "16px",
+        // padding: theme.spacing(2),
         paddingRight: theme.spacing(1),
     },
     "& .MuiDialogContent-root": {
-        padding: theme.spacing(2),
+        padding: "16px",
+        overflowY: "overlay",
+        // padding: theme.spacing(2),
     },
     [theme.breakpoints.down(AllCollectionMobileBreakpoint)]: {
         "& .MuiPaper-root": {
