@@ -51,11 +51,13 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
     collections,
     ...props
 }) => {
-    const isMobile = useMediaQuery("(max-width: 428px)");
+    // Make the dialog fullscreen if the screen is <= the dialog's max width.
+    const isFullScreen = useMediaQuery("(max-width: 494px)");
 
     const [collectionsToShow, setCollectionsToShow] = useState<
         CollectionSummary[]
     >([]);
+
     useEffect(() => {
         if (!attributes || !props.open) {
             return;
@@ -131,8 +133,8 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
         <Dialog_
             onClose={onUserTriggeredClose}
             open={props.open}
-            fullScreen={isMobile}
-            fullWidth={true}
+            fullScreen={isFullScreen}
+            fullWidth
         >
             <DialogTitleWithCloseButton onClose={onUserTriggeredClose}>
                 {attributes.intent === CollectionSelectorIntent.upload
@@ -174,21 +176,10 @@ export const Dialog_ = styled(Dialog)(({ theme }) => ({
     },
     "& .MuiDialogTitle-root": {
         padding: "16px",
-        // padding: theme.spacing(2),
         paddingRight: theme.spacing(1),
     },
     "& .MuiDialogContent-root": {
         padding: "16px",
-        overflowY: "overlay",
-        // padding: theme.spacing(2),
-    },
-    [theme.breakpoints.down(AllCollectionMobileBreakpoint)]: {
-        "& .MuiPaper-root": {
-            width: "324px",
-        },
-        "& .MuiDialogContent-root": {
-            padding: 6,
-        },
     },
 }));
 
