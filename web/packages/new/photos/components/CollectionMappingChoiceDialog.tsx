@@ -54,36 +54,34 @@ export const CollectionMappingChoiceDialog: React.FC<
                 <CloseIcon />
             </IconButton>
         </DialogTitle>
-        <DialogContent sx={{ "&&&": { padding: 2 } }}>
-            <Stack sx={{ gap: "16px" }}>
-                <Typography color="text.muted">
-                    {t("upload_to_choice")}
-                </Typography>
-                <Stack sx={{ mt: "4px", gap: "12px" }}>
-                    <FocusVisibleButton
-                        size="medium"
-                        color="accent"
-                        startIcon={<FolderIcon />}
-                        onClick={() => {
-                            onClose();
-                            didSelect("root");
-                        }}
-                    >
-                        {t("upload_to_single_album")}
-                    </FocusVisibleButton>
+        <DialogContent
+            sx={{ display: "flex", flexDirection: "column", gap: "20px" }}
+        >
+            <Typography color="text.muted">{t("upload_to_choice")}</Typography>
+            <Stack sx={{ gap: "12px" }}>
+                <FocusVisibleButton
+                    size="medium"
+                    color="accent"
+                    startIcon={<FolderIcon />}
+                    onClick={() => {
+                        onClose();
+                        didSelect("root");
+                    }}
+                >
+                    {t("upload_to_single_album")}
+                </FocusVisibleButton>
 
-                    <FocusVisibleButton
-                        size="medium"
-                        color="accent"
-                        startIcon={<FolderCopyIcon />}
-                        onClick={() => {
-                            onClose();
-                            didSelect("parent");
-                        }}
-                    >
-                        {t("upload_to_album_per_folder")}
-                    </FocusVisibleButton>
-                </Stack>
+                <FocusVisibleButton
+                    size="medium"
+                    color="accent"
+                    startIcon={<FolderCopyIcon />}
+                    onClick={() => {
+                        onClose();
+                        didSelect("parent");
+                    }}
+                >
+                    {t("upload_to_album_per_folder")}
+                </FocusVisibleButton>
             </Stack>
         </DialogContent>
     </Dialog>
