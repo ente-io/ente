@@ -54,7 +54,7 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
     >();
     // True when we're showing the choice dialog to ask the user to set the
     // collection mapping.
-    const [choiceModalOpen, setChoiceModalOpen] = useState(false);
+    const [openChoiceDialog, setOpenChoiceDialog] = useState(false);
 
     const appContext = useContext(AppContext);
 
@@ -88,7 +88,7 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
             addWatch(path, "root");
         } else {
             setSavedFolderPath(path);
-            setChoiceModalOpen(true);
+            setOpenChoiceDialog(true);
         }
     };
 
@@ -105,10 +105,7 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
     const removeWatch = async (watch: FolderWatch) =>
         watcher.removeWatch(watch.folderPath).then((ws) => setWatches(ws));
 
-    const closeChoiceModal = () => setChoiceModalOpen(false);
-
-    const addWatchWithMapping = (mapping: CollectionMapping) => {
-        closeChoiceModal();
+    const handleCollectionMappingSelect = (mapping: CollectionMapping) => {
         setSavedFolderPath(undefined);
         addWatch(ensure(savedFolderPath), mapping);
     };
@@ -142,9 +139,9 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
                 </DialogContent>
             </Dialog>
             <CollectionMappingChoiceDialog
-                open={choiceModalOpen}
-                onClose={closeChoiceModal}
-                didSelect={addWatchWithMapping}
+                open={openChoiceDialog}
+                onClose={() => setOpenChoiceDialog(false)}
+                didSelect={handleCollectionMappingSelect}
             />
         </>
     );

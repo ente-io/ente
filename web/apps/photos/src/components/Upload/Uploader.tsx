@@ -122,7 +122,7 @@ export default function Uploader({
     const [percentComplete, setPercentComplete] = useState(0);
     const [hasLivePhotos, setHasLivePhotos] = useState(false);
 
-    const [choiceModalView, setChoiceModalView] = useState(false);
+    const [openChoiceDialog, setOpenChoiceDialog] = useState(false);
     const [userNameInputDialogView, setUserNameInputDialogView] =
         useState(false);
     const [importSuggestion, setImportSuggestion] = useState<ImportSuggestion>(
@@ -209,7 +209,7 @@ export default function Uploader({
     const showUserNameInputDialog = () => setUserNameInputDialogView(true);
 
     const handleChoiceModalClose = () => {
-        setChoiceModalView(false);
+        setOpenChoiceDialog(false);
         uploadRunning.current = false;
     };
 
@@ -454,7 +454,7 @@ export default function Uploader({
 
             let showNextModal = () => {};
             if (importSuggestion.hasNestedFolders) {
-                showNextModal = () => setChoiceModalView(true);
+                showNextModal = () => setOpenChoiceDialog(true);
             } else {
                 showNextModal = () =>
                     showCollectionCreateModal(importSuggestion.rootFolderName);
@@ -766,7 +766,7 @@ export default function Uploader({
     return (
         <>
             <CollectionMappingChoiceDialog
-                open={choiceModalView}
+                open={openChoiceDialog}
                 onClose={handleChoiceModalClose}
                 didSelect={didSelectCollectionMapping}
             />
