@@ -352,7 +352,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       //files db before triggering a sync.
       await PhotoManager.stopChangeNotify();
       final AssetEntity? newAsset =
-          await (PhotoManager.editor.saveImage(result, title: fileName));
+          await (PhotoManager.editor.saveImage(result, filename: fileName));
       final newFile = await ente.EnteFile.fromAsset(
         widget.originalFile.deviceFolder ?? '',
         newAsset!,

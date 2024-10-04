@@ -61,9 +61,9 @@ class _WebPageState extends State<WebPage> {
       ),
       backgroundColor: Colors.black,
       body: InAppWebView(
-        initialUrlRequest: URLRequest(url: Uri.parse(widget.url)),
-        initialOptions: InAppWebViewGroupOptions(
-          crossPlatform: InAppWebViewOptions(transparentBackground: true),
+        initialUrlRequest: URLRequest(url: WebUri(widget.url)),
+        initialSettings: InAppWebViewSettings(
+          transparentBackground: true,
         ),
         onLoadStop: (c, url) {
           setState(() {
