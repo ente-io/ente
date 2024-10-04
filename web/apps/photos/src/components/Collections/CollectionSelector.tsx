@@ -12,13 +12,14 @@ import type {
 import { FlexWrapper } from "@ente/shared/components/Container";
 import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleWithCloseButton";
 import {
+    Dialog,
     DialogContent,
     styled,
     Typography,
     useMediaQuery,
 } from "@mui/material";
-import { AllCollectionDialog } from "components/Collections/AllCollections/dialog";
 import { t } from "i18next";
+import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { createUnCategorizedCollection } from "services/collectionService";
 import { CollectionSelectorIntent } from "types/gallery";
@@ -128,7 +129,7 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
     };
 
     return (
-        <AllCollectionDialog
+        <Dialog_
             onClose={onUserTriggeredClose}
             open={props.open}
             position="center"
@@ -163,8 +164,41 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
                     ))}
                 </FlexWrapper>
             </DialogContent>
-        </AllCollectionDialog>
+        </Dialog_>
     );
+};
+
+export const AllCollectionMobileBreakpoint = 559;
+
+export const Dialog_ = styled(Dialog)<{
+    position: "flex-start" | "center" | "flex-end";
+}>(({ theme, position }) => ({
+    "& .MuiDialog-container": {
+        justifyContent: position,
+    },
+    "& .MuiPaper-root": {
+        maxWidth: "494px",
+    },
+    "& .MuiDialogTitle-root": {
+        padding: theme.spacing(2),
+        paddingRight: theme.spacing(1),
+    },
+    "& .MuiDialogContent-root": {
+        padding: theme.spacing(2),
+    },
+    [theme.breakpoints.down(AllCollectionMobileBreakpoint)]: {
+        "& .MuiPaper-root": {
+            width: "324px",
+        },
+        "& .MuiDialogContent-root": {
+            padding: 6,
+        },
+    },
+}));
+
+Dialog_.propTypes = {
+    children: PropTypes.node,
+    onClose: PropTypes.func.isRequired,
 };
 
 interface CollectionSelectorCardProps {
