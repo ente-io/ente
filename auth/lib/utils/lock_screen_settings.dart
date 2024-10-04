@@ -54,7 +54,7 @@ class LockScreenSettings {
   }
 
   bool getOfflineModeWarningStatus() {
-    return _preferences.getBool(keyShowOfflineModeWarning) ?? false;
+    return _preferences.getBool(keyShowOfflineModeWarning) ?? true;
   }
 
   Future<void> runLockScreenChangesMigration() async {

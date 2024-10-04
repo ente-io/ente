@@ -151,7 +151,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
         onTap: () async {
           ButtonResult? result;
           if (_config.hasOptedForOfflineMode() &&
-              !LockScreenSettings.instance.getOfflineModeWarningStatus()) {
+              LockScreenSettings.instance.getOfflineModeWarningStatus()) {
             result = await showChoiceActionSheet(
               context,
               title: context.l10n.warning,
@@ -161,7 +161,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
             );
             if (result?.action == ButtonAction.first) {
               await LockScreenSettings.instance
-                  .setOfflineModeWarningStatus(true);
+                  .setOfflineModeWarningStatus(false);
             } else {
               return;
             }
