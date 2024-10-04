@@ -44,7 +44,7 @@ export const CollectionMappingChoiceModal: React.FC<
                 }}
             >
                 <Typography variant="large" fontWeight={"bold"}>
-                    {t("MULTI_FOLDER_UPLOAD")}
+                    {t("multi_folder_upload")}
                 </Typography>
                 <IconButton
                     aria-label={t("close")}
@@ -58,7 +58,7 @@ export const CollectionMappingChoiceModal: React.FC<
             <DialogContent sx={{ "&&&": { paddingBlockStart: "16px" } }}>
                 <Stack sx={{ gap: "16px" }}>
                     <Typography color="text.muted">
-                        {t("UPLOAD_STRATEGY_CHOICE")}
+                        {t("upload_to_choice")}
                     </Typography>
                     <Stack sx={{ mt: "4px", gap: "12px" }}>
                         <FocusVisibleButton
@@ -70,7 +70,7 @@ export const CollectionMappingChoiceModal: React.FC<
                                 didSelect("root");
                             }}
                         >
-                            {t("UPLOAD_STRATEGY_SINGLE_COLLECTION")}
+                            {t("upload_to_single_album")}
                         </FocusVisibleButton>
 
                         <FocusVisibleButton
@@ -82,7 +82,7 @@ export const CollectionMappingChoiceModal: React.FC<
                                 didSelect("parent");
                             }}
                         >
-                            {t("UPLOAD_STRATEGY_COLLECTION_PER_FOLDER")}
+                            {t("upload_to_album_per_folder")}
                         </FocusVisibleButton>
                     </Stack>
                 </Stack>
