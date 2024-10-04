@@ -66,14 +66,16 @@ export const getComponents = (
                     overflowY: "auto",
                 },
                 "& .MuiDialogActions-root": {
-                    // MUI default is way different, our designs usually want
-                    // the buttons to align with the heading / content.
+                    // MUI default is way since they cluster the buttons to the
+                    // right, our designs usually want the buttons to align with
+                    // the heading / content.
                     padding: "16px",
                 },
                 ".MuiDialogTitle-root + .MuiDialogContent-root": {
                     // MUI resets this to 0 when the content doesn't use
-                    // dividers (none of ours do). TODO: That is a better
-                    // default, otherwise we end up with double padding.
+                    // dividers (none of ours do). I feel that is a better
+                    // default, since unlike margins, padding doesn't collapse,
+                    // but changing this now would break existing layouts.
                     paddingTop: "16px",
                 },
             },
