@@ -2,10 +2,13 @@ import "package:logging/logging.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
+import "package:photos/models/location_tag/location_tag.dart";
 import "package:photos/models/search/hierarchical/album_filter.dart";
 import "package:photos/models/search/hierarchical/file_type_filter.dart";
 import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
+import "package:photos/models/search/hierarchical/location_filter.dart";
 import "package:photos/services/collections_service.dart";
+import "package:photos/services/location_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
 
@@ -59,11 +62,16 @@ void curateFilters(
         await _curateAlbumFilters(searchFilterDataProvider, files);
     final fileTypeFilters =
         _curateFileTypeFilters(searchFilterDataProvider, files);
+    final locationFilters = await _curateLocationFilters(
+      searchFilterDataProvider,
+      files,
+    );
 
-    searchFilterDataProvider
-        .clearAndAddRecommendations([...albumFilters, ...fileTypeFilters]);
+    searchFilterDataProvider.clearAndAddRecommendations(
+      [...albumFilters, ...locationFilters, ...fileTypeFilters],
+    );
   } catch (e) {
-    Logger("HierarchicalSearchUtil").severe("Failed to curate filters: $e");
+    Logger("HierarchicalSearchUtil").severe("Failed to curate filters", e);
   }
 }
 
@@ -151,4 +159,24 @@ List<FileTypeFilter> _curateFileTypeFilters(
   }
 
   return fileTypeFilters;
+}
+
+Future<List<LocationFilter>> _curateLocationFilters(
+  SearchFilterDataProvider searchFilterDataProvider,
+  List<EnteFile> files,
+) async {
+  final locationFilters = <LocationFilter>[];
+  final locationTagToOccurrence =
+      await LocationService.instance.getLocationTagsToOccurance(files);
+
+  for (LocationTag locationTag in locationTagToOccurrence.keys) {
+    locationFilters.add(
+      LocationFilter(
+        locationTag: locationTag,
+        occurrence: locationTagToOccurrence[locationTag]!,
+      ),
+    );
+  }
+
+  return locationFilters;
 }

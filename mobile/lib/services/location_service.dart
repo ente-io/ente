@@ -42,6 +42,20 @@ class LocationService {
     );
   }
 
+  Future<Map<LocationTag, int>> getLocationTagsToOccurance(
+    List<EnteFile> files,
+  ) async {
+    final locationTagEntities =
+        await LocationService.instance.getLocationTags();
+
+    final locationTagToOccurrence = await _computer.compute(
+      _getLocationTagsToOccurenceForIsolate,
+      param: {"files": files, "locationTagEntities": locationTagEntities},
+    );
+
+    return locationTagToOccurrence;
+  }
+
   Future<Map<City, List<EnteFile>>> getFilesInCity(
     List<EnteFile> allFiles,
     String query,
@@ -228,6 +242,39 @@ class LocationService {
       _logger.severe("Failed to load cities", e, s);
     }
   }
+}
+
+Map<LocationTag, int> _getLocationTagsToOccurenceForIsolate(
+  Map args,
+) {
+  final List<EnteFile> files = args["files"];
+
+  final locationTagToOccurence = <LocationTag, int>{};
+  final locationTagEntities =
+      args["locationTagEntities"] as Iterable<LocalEntity<LocationTag>>;
+
+  for (EnteFile file in files) {
+    if (file.uploadedFileID == null ||
+        file.uploadedFileID == -1 ||
+        !file.hasLocation) continue;
+    for (LocalEntity<LocationTag> locationTagEntity in locationTagEntities) {
+      final locationTag = locationTagEntity.item;
+      final fileCoordinates = file.location!;
+      if (isFileInsideLocationTag(
+        locationTag.centerPoint,
+        fileCoordinates,
+        locationTag.radius,
+      )) {
+        locationTagToOccurence.update(
+          locationTag,
+          (value) => value + 1,
+          ifAbsent: () => 1,
+        );
+      }
+    }
+  }
+
+  return locationTagToOccurence;
 }
 
 Future<List<City>> parseCities(Map args) async {
