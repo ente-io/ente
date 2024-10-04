@@ -484,5 +484,5 @@
   "appLockNotEnabled": "App lock not enabled",
   "appLockNotEnabledDescription": "Please enable app lock from Security > App Lock",
   "authToViewPasskey": "Please authenticate to view passkey",
-  "appLockOfflineModeWarning": "You have chosen to proceed without backups. If you forget the applock, all data will be lost, and you'll need to reinstall the app."
+  "appLockOfflineModeWarning": "You have chosen to proceed without backups. If you forget your applock, you will be locked out from accessing your data."
 }
