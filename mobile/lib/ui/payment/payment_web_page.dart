@@ -33,7 +33,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
   final String basePaymentUrl = kWebPaymentBaseEndpoint;
   InAppWebViewController? webView;
   double progress = 0;
-  Uri? initPaymentUrl;
+  WebUri? initPaymentUrl;
 
   @override
   void initState() {
@@ -42,7 +42,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
       setState(() {});
     });
     if (Platform.isAndroid && kDebugMode) {
-      AndroidInAppWebViewController.setWebContentsDebuggingEnabled(true);
+      InAppWebViewController.setWebContentsDebuggingEnabled(true);
     }
     super.initState();
   }
@@ -79,10 +79,8 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
                     this.progress = progress / 100;
                   });
                 },
-                initialOptions: InAppWebViewGroupOptions(
-                  crossPlatform: InAppWebViewOptions(
-                    useShouldOverrideUrlLoading: true,
-                  ),
+                initialSettings: InAppWebViewSettings(
+                  useShouldOverrideUrlLoading: true,
                 ),
                 shouldOverrideUrlLoading: (controller, navigationAction) async {
                   final loadingUri = navigationAction.request.url;
@@ -100,12 +98,12 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
                 onLoadStart: (controller, navigationAction) async {
                   _logger.info("onLoadStart $navigationAction");
                 },
-                onLoadError: (controller, navigationAction, code, msg) async {
-                  _logger.severe("onLoadError $navigationAction $code $msg");
+                onReceivedError: (controller, navigationAction, code) async {
+                  _logger.severe("onLoadError $navigationAction $code");
                 },
-                onLoadHttpError:
-                    (controller, navigationAction, code, msg) async {
-                  _logger.info("onHttpError with $code and msg = $msg");
+                onReceivedHttpError:
+                    (controller, navigationAction, code) async {
+                  _logger.info("onHttpError with $code");
                 },
                 onLoadStop: (controller, navigationAction) async {
                   _logger.info("onLoadStop $navigationAction");
@@ -123,7 +121,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
     super.dispose();
   }
 
-  Uri _getPaymentUrl(String? paymentToken) {
+  WebUri _getPaymentUrl(String? paymentToken) {
     final queryParameters = {
       'productID': widget.planId,
       'paymentToken': paymentToken,
@@ -132,9 +130,13 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
     };
     final tryParse = Uri.tryParse(kWebPaymentBaseEndpoint);
     if (kDebugMode && kWebPaymentBaseEndpoint.startsWith("http://")) {
-      return Uri.http(tryParse!.authority, tryParse.path, queryParameters);
+      return WebUri.uri(
+        Uri.http(tryParse!.authority, tryParse.path, queryParameters),
+      );
     } else {
-      return Uri.https(tryParse!.authority, tryParse.path, queryParameters);
+      return WebUri.uri(
+        Uri.https(tryParse!.authority, tryParse.path, queryParameters),
+      );
     }
   }
 
