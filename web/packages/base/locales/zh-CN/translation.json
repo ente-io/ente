@@ -100,7 +100,6 @@
     "multi_folder_upload": "检测到多个文件夹",
     "upload_to_choice": "你想要上传他们到",
     "upload_to_single_album": "单个相册",
-    "OR": "还是",
     "upload_to_album_per_folder": "独立相册",
     "SESSION_EXPIRED_MESSAGE": "您的会话已过期，请重新登录以继续",
     "SESSION_EXPIRED": "会话已过期",
