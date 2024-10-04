@@ -2,7 +2,7 @@
 
 ## v1.7.6 (Unreleased)
 
--   Parse description from Google Takeout metadata JSON.
+-   Parse description from metadata JSON.
 -   .
 
 ## v1.7.5
