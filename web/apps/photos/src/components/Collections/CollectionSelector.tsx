@@ -19,7 +19,6 @@ import {
     useMediaQuery,
 } from "@mui/material";
 import { t } from "i18next";
-import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { createUnCategorizedCollection } from "services/collectionService";
 import { CollectionSelectorIntent } from "types/gallery";
@@ -132,7 +131,6 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
         <Dialog_
             onClose={onUserTriggeredClose}
             open={props.open}
-            position="center"
             fullScreen={isMobile}
             fullWidth={true}
         >
@@ -170,11 +168,10 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
 
 export const AllCollectionMobileBreakpoint = 559;
 
-export const Dialog_ = styled(Dialog)<{
-    position: "flex-start" | "center" | "flex-end";
-}>(({ theme, position }) => ({
+export const Dialog_ = styled(Dialog)(({ theme }) => ({
     "& .MuiDialog-container": {
-        justifyContent: position,
+        justifyContent: "center",
+        border: "1px solid red",
     },
     "& .MuiPaper-root": {
         maxWidth: "494px",
@@ -195,11 +192,6 @@ export const Dialog_ = styled(Dialog)<{
         },
     },
 }));
-
-Dialog_.propTypes = {
-    children: PropTypes.node,
-    onClose: PropTypes.func.isRequired,
-};
 
 interface CollectionSelectorCardProps {
     collectionSummary: CollectionSummary;
