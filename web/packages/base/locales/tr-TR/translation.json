@@ -100,7 +100,6 @@
     "multi_folder_upload": "Birden fazla klasör algılandı",
     "upload_to_choice": "Bunları yüklemek ister misin?",
     "upload_to_single_album": "Tek bir albüm",
-    "OR": "yada",
     "upload_to_album_per_folder": "Ayrı ayrı albümler",
     "SESSION_EXPIRED_MESSAGE": "Oturum sona erdi, devam etmek için lütfen tekrar giriş yap",
     "SESSION_EXPIRED": "Oturum süresi doldu",

@@ -100,7 +100,6 @@
     "multi_folder_upload": "여러 폴더들이 탐지되었다",
     "upload_to_choice": "그것들을 업로드 하겠습니까",
     "upload_to_single_album": "싱글 앨범",
-    "OR": "또는",
     "upload_to_album_per_folder": "앨범들 분리",
     "SESSION_EXPIRED_MESSAGE": "세션이 만료되었습니다. 계속하려면 다시 로그인하세요",
     "SESSION_EXPIRED": "세션 만료",
