@@ -34,8 +34,6 @@ export const CollectionMappingChoiceDialog: React.FC<
         PaperProps={{ sx: { maxWidth: "360px", padding: "12px" } }}
     >
         <DialogTitle
-            variant="large"
-            fontWeight={"bold"}
             sx={{
                 "&&&": { padding: "4px 4px 0 16px" },
                 display: "flex",
