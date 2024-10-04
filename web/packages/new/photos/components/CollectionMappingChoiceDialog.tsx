@@ -37,9 +37,11 @@ export const CollectionMappingChoiceDialog: React.FC<
             variant="large"
             fontWeight={"bold"}
             sx={{
-                "&&&": { padding: 0 },
-                marginBlockStart: "4px",
-                marginInlineStart: 2,
+                "&&&": {
+                    paddingBlockStart: "4px",
+                    paddingBlockEnd: 0,
+                    paddingInlineEnd: "4px",
+                },
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
