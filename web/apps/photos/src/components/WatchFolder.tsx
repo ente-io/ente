@@ -2,6 +2,7 @@ import { EllipsizedTypography } from "@/base/components/Typography";
 import { ensureElectron } from "@/base/electron";
 import { basename, dirname } from "@/base/file";
 import type { CollectionMapping, FolderWatch } from "@/base/types/ipc";
+import { CollectionMappingChoiceDialog } from "@/new/photos/components/CollectionMappingChoiceDialog";
 import { ensure } from "@/utils/ensure";
 import {
     FlexWrapper,
@@ -28,7 +29,6 @@ import {
     Typography,
     styled,
 } from "@mui/material";
-import { CollectionMappingChoiceModal } from "components/Upload/CollectionMappingChoiceModal";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import React, { useContext, useEffect, useState } from "react";
@@ -141,7 +141,7 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
                     </Stack>
                 </DialogContent>
             </Dialog>
-            <CollectionMappingChoiceModal
+            <CollectionMappingChoiceDialog
                 open={choiceModalOpen}
                 onClose={closeChoiceModal}
                 didSelect={addWatchWithMapping}

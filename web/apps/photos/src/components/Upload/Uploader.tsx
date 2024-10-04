@@ -2,6 +2,7 @@ import { basename } from "@/base/file";
 import log from "@/base/log";
 import type { CollectionMapping, Electron, ZipItem } from "@/base/types/ipc";
 import type { Collection } from "@/media/collection";
+import { CollectionMappingChoiceDialog } from "@/new/photos/components/CollectionMappingChoiceDialog";
 import { exportMetadataDirectoryName } from "@/new/photos/services/export";
 import type {
     FileAndPath,
@@ -49,7 +50,6 @@ import {
     getRootLevelFileWithFolderNotAllowMessage,
 } from "utils/ui";
 import { SetCollectionNamerAttributes } from "../Collections/CollectionNamer";
-import { CollectionMappingChoiceModal } from "./CollectionMappingChoiceModal";
 import UploadProgress from "./UploadProgress";
 import {
     UploadTypeSelector,
@@ -765,7 +765,7 @@ export default function Uploader({
 
     return (
         <>
-            <CollectionMappingChoiceModal
+            <CollectionMappingChoiceDialog
                 open={choiceModalView}
                 onClose={handleChoiceModalClose}
                 didSelect={didSelectCollectionMapping}
