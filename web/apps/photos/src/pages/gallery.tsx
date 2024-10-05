@@ -19,6 +19,7 @@ import downloadManager from "@/new/photos/services/download";
 import {
     getLocalFiles,
     getLocalTrashedFiles,
+    sortFiles,
 } from "@/new/photos/services/files";
 import { peopleSnapshot, peopleSubscribe } from "@/new/photos/services/ml";
 import type { Person } from "@/new/photos/services/ml/people";
@@ -146,7 +147,6 @@ import {
     getSelectedFiles,
     getUniqueFiles,
     handleFileOps,
-    sortFiles,
 } from "utils/file";
 import { isArchivedFile } from "utils/magicMetadata";
 import { getSessionExpiredMessage } from "utils/ui";

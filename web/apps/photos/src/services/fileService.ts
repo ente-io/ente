@@ -6,6 +6,7 @@ import {
     clearCachedThumbnailsIfChanged,
     getLocalFiles,
     setLocalFiles,
+    sortFiles,
 } from "@/new/photos/services/files";
 import {
     EncryptedEnteFile,
@@ -21,7 +22,7 @@ import HTTPService from "@ente/shared/network/HTTPService";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import exportService from "services/export";
 import { SetFiles } from "types/gallery";
-import { decryptFile, getLatestVersionFiles, sortFiles } from "utils/file";
+import { decryptFile, getLatestVersionFiles } from "utils/file";
 import {
     getCollectionLastSyncTime,
     REQUEST_BATCH_SIZE,

@@ -19,13 +19,16 @@ import {
     UpdatePublicURL,
 } from "@/media/collection";
 import { ItemVisibility } from "@/media/file-metadata";
-import { getLocalFiles } from "@/new/photos/services/files";
+import { getLocalFiles, sortFiles } from "@/new/photos/services/files";
 import type {
     CollectionSummaries,
     CollectionSummary,
     CollectionSummaryType,
 } from "@/new/photos/types/collection";
-import { CollectionsSortBy, CollectionSummaryOrder } from "@/new/photos/types/collection";
+import {
+    CollectionSummaryOrder,
+    CollectionsSortBy,
+} from "@/new/photos/types/collection";
 import { EnteFile } from "@/new/photos/types/file";
 import {
     EncryptedMagicMetadata,
@@ -60,11 +63,7 @@ import {
     isSharedOnlyViaLink,
     isValidMoveTarget,
 } from "utils/collection";
-import {
-    getUniqueFiles,
-    groupFilesBasedOnCollectionID,
-    sortFiles,
-} from "utils/file";
+import { getUniqueFiles, groupFilesBasedOnCollectionID } from "utils/file";
 import {
     isArchivedCollection,
     isArchivedFile,
