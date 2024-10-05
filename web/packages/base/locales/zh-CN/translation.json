@@ -303,7 +303,6 @@
     "LARGER_THAN_AVAILABLE_STORAGE_INFO": "这些文件没有上传，因为它们超过了您的存储计划的最大大小限制",
     "TOO_LARGE_INFO": "这些文件没有上传，因为它们超过了我们的最大文件大小限制",
     "THUMBNAIL_GENERATION_FAILED_INFO": "这些文件已上传，但遗憾的是，我们无法为它们生成缩略图。",
-    "select_album": "选择相册",
     "upload_to_album": "上传至相册",
     "add_to_album": "添加到相册",
     "move_to_album": "移动到相册",
