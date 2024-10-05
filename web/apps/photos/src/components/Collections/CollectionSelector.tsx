@@ -5,33 +5,40 @@ import {
     ItemTileOverlay,
     LargeTileTextOverlay,
 } from "@/new/photos/components/ItemCards";
-import type {
-    CollectionSummaries,
-    CollectionSummary,
-} from "@/new/photos/types/collection";
+import {
+    canAddToCollection,
+    canMoveToCollection,
+    CollectionSummaryOrder,
+    type CollectionSummaries,
+    type CollectionSummary,
+} from "@/new/photos/services/collection/ui";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleWithCloseButton";
 import {
+    Dialog,
     DialogContent,
     styled,
     Typography,
     useMediaQuery,
 } from "@mui/material";
-import { AllCollectionDialog } from "components/Collections/AllCollections/dialog";
 import { t } from "i18next";
 import { useEffect, useState } from "react";
-import { createUnCategorizedCollection } from "services/collectionService";
-import { CollectionSelectorIntent } from "types/gallery";
-import {
-    COLLECTION_SORT_ORDER,
-    DUMMY_UNCATEGORIZED_COLLECTION,
-    isAddToAllowedCollection,
-    isMoveToAllowedCollection,
-} from "utils/collection";
+
+export enum CollectionSelectorIntent {
+    upload,
+    add,
+    move,
+    restore,
+    unhide,
+}
 
 export interface CollectionSelectorAttributes {
     callback: (collection: Collection) => void;
     showNextModal: () => void;
+    /**
+     * The {@link intent} modifies the title of the dialog, and also filters
+     * the list of collections the user can select from appropriately.
+     */
     intent: CollectionSelectorIntent;
     fromCollection?: number;
     onCancel?: () => void;
@@ -41,21 +48,34 @@ interface CollectionSelectorProps {
     open: boolean;
     onClose: () => void;
     attributes: CollectionSelectorAttributes;
-    collections: Collection[];
     collectionSummaries: CollectionSummaries;
+    /**
+     * A function to map from a collection ID to a {@link Collection}.
+     *
+     * This is invoked when the user makes a selection, to convert the ID of the
+     * selected collection into a collection object that can be passed to the
+     * {@link callback} attribute of {@link CollectionSelectorAttributes}.
+     */
+    collectionForCollectionID: (collectionID: number) => Promise<Collection>;
 }
 
+/**
+ * A dialog allowing the user to select one of their existing collections or
+ * create a new one.
+ */
 export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
     attributes,
     collectionSummaries,
-    collections,
+    collectionForCollectionID,
     ...props
 }) => {
-    const isMobile = useMediaQuery("(max-width: 428px)");
+    // Make the dialog fullscreen if the screen is <= the dialog's max width.
+    const isFullScreen = useMediaQuery("(max-width: 494px)");
 
     const [collectionsToShow, setCollectionsToShow] = useState<
         CollectionSummary[]
     >([]);
+
     useEffect(() => {
         if (!attributes || !props.open) {
             return;
@@ -68,23 +88,21 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
                     } else if (
                         attributes.intent === CollectionSelectorIntent.add
                     ) {
-                        return isAddToAllowedCollection(type);
+                        return canAddToCollection(type);
                     } else if (
                         attributes.intent === CollectionSelectorIntent.upload
                     ) {
                         return (
-                            isMoveToAllowedCollection(type) ||
-                            type == "uncategorized"
+                            canMoveToCollection(type) || type == "uncategorized"
                         );
                     } else if (
                         attributes.intent === CollectionSelectorIntent.restore
                     ) {
                         return (
-                            isMoveToAllowedCollection(type) ||
-                            type == "uncategorized"
+                            canMoveToCollection(type) || type == "uncategorized"
                         );
                     } else {
-                        return isMoveToAllowedCollection(type);
+                        return canMoveToCollection(type);
                     }
                 })
                 .sort((a, b) => {
@@ -92,8 +110,8 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
                 })
                 .sort((a, b) => {
                     return (
-                        COLLECTION_SORT_ORDER.get(a.type) -
-                        COLLECTION_SORT_ORDER.get(b.type)
+                        CollectionSummaryOrder.get(a.type) -
+                        CollectionSummaryOrder.get(b.type)
                     );
                 });
             if (collectionsToShow.length === 0) {
@@ -110,15 +128,7 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
     }
 
     const handleCollectionClick = async (collectionID: number) => {
-        let selectedCollection: Collection;
-        if (collectionID === DUMMY_UNCATEGORIZED_COLLECTION) {
-            const uncategorizedCollection =
-                await createUnCategorizedCollection();
-            selectedCollection = uncategorizedCollection;
-        } else {
-            selectedCollection = collections.find((c) => c.id === collectionID);
-        }
-        attributes.callback(selectedCollection);
+        attributes.callback(await collectionForCollectionID(collectionID));
         props.onClose();
     };
 
@@ -128,12 +138,11 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
     };
 
     return (
-        <AllCollectionDialog
+        <Dialog_
             onClose={onUserTriggeredClose}
             open={props.open}
-            position="center"
-            fullScreen={isMobile}
-            fullWidth={true}
+            fullScreen={isFullScreen}
+            fullWidth
         >
             <DialogTitleWithCloseButton onClose={onUserTriggeredClose}>
                 {attributes.intent === CollectionSelectorIntent.upload
@@ -163,9 +172,24 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
                     ))}
                 </FlexWrapper>
             </DialogContent>
-        </AllCollectionDialog>
+        </Dialog_>
     );
 };
+
+export const AllCollectionMobileBreakpoint = 559;
+
+export const Dialog_ = styled(Dialog)(({ theme }) => ({
+    "& .MuiPaper-root": {
+        maxWidth: "494px",
+    },
+    "& .MuiDialogTitle-root": {
+        padding: "16px",
+        paddingRight: theme.spacing(1),
+    },
+    "& .MuiDialogContent-root": {
+        padding: "16px",
+    },
+}));
 
 interface CollectionSelectorCardProps {
     collectionSummary: CollectionSummary;

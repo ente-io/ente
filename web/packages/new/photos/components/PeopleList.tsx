@@ -6,7 +6,7 @@ import type { EnteFile } from "@/new/photos/types/file";
 import { Skeleton, Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
-import { UnstyledButton } from "./mui-custom";
+import { UnstyledButton } from "./UnstyledButton";
 
 export interface SearchPeopleListProps {
     people: Person[];

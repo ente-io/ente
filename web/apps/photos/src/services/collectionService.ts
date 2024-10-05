@@ -19,13 +19,16 @@ import {
     UpdatePublicURL,
 } from "@/media/collection";
 import { ItemVisibility } from "@/media/file-metadata";
-import { getLocalFiles } from "@/new/photos/services/files";
 import type {
     CollectionSummaries,
     CollectionSummary,
     CollectionSummaryType,
-} from "@/new/photos/types/collection";
-import { CollectionsSortBy } from "@/new/photos/types/collection";
+} from "@/new/photos/services/collection/ui";
+import {
+    CollectionSummaryOrder,
+    CollectionsSortBy,
+} from "@/new/photos/services/collection/ui";
+import { getLocalFiles, sortFiles } from "@/new/photos/services/files";
 import { EnteFile } from "@/new/photos/types/file";
 import {
     EncryptedMagicMetadata,
@@ -45,7 +48,6 @@ import { FamilyData } from "types/user";
 import {
     ALL_SECTION,
     ARCHIVE_SECTION,
-    COLLECTION_SORT_ORDER,
     DUMMY_UNCATEGORIZED_COLLECTION,
     HIDDEN_ITEMS_SECTION,
     TRASH_SECTION,
@@ -61,11 +63,7 @@ import {
     isSharedOnlyViaLink,
     isValidMoveTarget,
 } from "utils/collection";
-import {
-    getUniqueFiles,
-    groupFilesBasedOnCollectionID,
-    sortFiles,
-} from "utils/file";
+import { getUniqueFiles, groupFilesBasedOnCollectionID } from "utils/file";
 import {
     isArchivedCollection,
     isArchivedFile,
@@ -1089,8 +1087,8 @@ export const sortCollectionSummaries = (
         .sort((a, b) => b.order ?? 0 - a.order ?? 0)
         .sort(
             (a, b) =>
-                COLLECTION_SORT_ORDER.get(a.type) -
-                COLLECTION_SORT_ORDER.get(b.type),
+                CollectionSummaryOrder.get(a.type) -
+                CollectionSummaryOrder.get(b.type),
         );
 
 function compareCollectionsLatestFile(first: EnteFile, second: EnteFile) {

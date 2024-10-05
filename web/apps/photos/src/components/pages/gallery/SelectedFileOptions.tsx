@@ -15,13 +15,11 @@ import UnArchiveIcon from "@mui/icons-material/Unarchive";
 import VisibilityOffOutlined from "@mui/icons-material/VisibilityOffOutlined";
 import VisibilityOutlined from "@mui/icons-material/VisibilityOutlined";
 import { Box, IconButton, Stack, Tooltip } from "@mui/material";
+import { CollectionSelectorIntent } from "components/Collections/CollectionSelector";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import { useContext } from "react";
-import {
-    CollectionSelectorIntent,
-    SetCollectionSelectorAttributes,
-} from "types/gallery";
+import { SetCollectionSelectorAttributes } from "types/gallery";
 import {
     ALL_SECTION,
     ARCHIVE_SECTION,

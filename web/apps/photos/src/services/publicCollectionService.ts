@@ -5,13 +5,14 @@ import type {
     Collection,
     CollectionPublicMagicMetadata,
 } from "@/media/collection";
+import { sortFiles } from "@/new/photos/services/files";
 import { EncryptedEnteFile, EnteFile } from "@/new/photos/types/file";
 import { mergeMetadata } from "@/new/photos/utils/file";
 import { CustomError, parseSharingErrorCodes } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import localForage from "@ente/shared/storage/localForage";
 import { LocalSavedPublicCollectionFiles } from "types/publicCollection";
-import { decryptFile, sortFiles } from "utils/file";
+import { decryptFile } from "utils/file";
 
 const PUBLIC_COLLECTION_FILES_TABLE = "public-collection-files";
 const PUBLIC_COLLECTIONS_TABLE = "public-collections";

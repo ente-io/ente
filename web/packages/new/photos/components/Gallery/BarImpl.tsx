@@ -5,20 +5,18 @@ import {
     ItemCard,
     TileTextOverlay,
 } from "@/new/photos/components/ItemCards";
-import {
-    FilledIconButton,
-    UnstyledButton,
-} from "@/new/photos/components/mui-custom";
+import { FilledIconButton } from "@/new/photos/components/mui";
 import {
     IMAGE_CONTAINER_MAX_WIDTH,
     MIN_COLUMNS,
 } from "@/new/photos/components/PhotoList";
-import type { Person } from "@/new/photos/services/ml/people";
+import { UnstyledButton } from "@/new/photos/components/UnstyledButton";
 import type {
     CollectionSummary,
     CollectionSummaryType,
     CollectionsSortBy,
-} from "@/new/photos/types/collection";
+} from "@/new/photos/services/collection/ui";
+import type { Person } from "@/new/photos/services/ml/people";
 import { ensure } from "@/utils/ensure";
 import { Overlay } from "@ente/shared/components/Container";
 import ArchiveIcon from "@mui/icons-material/Archive";
