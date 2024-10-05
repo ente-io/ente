@@ -27,20 +27,20 @@ import { t } from "i18next";
 import React, { useEffect, useState } from "react";
 import type { DialogVisibilityProps } from "./mui/Dialog";
 
-export type CollectionSelectionAction =
+export type CollectionSelectorAction =
     | "upload"
     | "add"
     | "move"
     | "restore"
     | "unhide";
 
-export interface CollectionSelectionAttributes {
+export interface CollectionSelectorAttributes {
     /**
      * The {@link action} modifies the title of the dialog, and also removes
      * some system collections that don't might not make sense for that
      * particular action.
      */
-    action: CollectionSelectionAction;
+    action: CollectionSelectorAction;
     /**
      * Callback invoked when the user selects one the existing collections
      * listed in the dialog.
@@ -64,12 +64,12 @@ export interface CollectionSelectionAttributes {
     ignoredCollectionID?: number;
 }
 
-type CollectionSelectionDialogProps = DialogVisibilityProps & {
+type CollectionSelectorProps = DialogVisibilityProps & {
     /**
-     * The same {@link CollectionSelectionDialog} can be used for different
+     * The same {@link CollectionSelector} can be used for different
      * purposes by customizing the {@link attributes} prop before opening it.
      */
-    attributes: CollectionSelectionAttributes | undefined;
+    attributes: CollectionSelectorAttributes | undefined;
     /**
      * The collections to list.
      */
@@ -88,9 +88,7 @@ type CollectionSelectionDialogProps = DialogVisibilityProps & {
  * A dialog allowing the user to select one of their existing collections or
  * create a new one.
  */
-export const CollectionSelectionDialog: React.FC<
-    CollectionSelectionDialogProps
-> = ({
+export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
     open,
     onClose,
     attributes,
@@ -202,7 +200,7 @@ const Dialog_ = styled(Dialog)(({ theme }) => ({
     },
 }));
 
-const dialogTitleForAction = (action: CollectionSelectionAction) => {
+const dialogTitleForAction = (action: CollectionSelectorAction) => {
     switch (action) {
         case "upload":
             return t("upload_to_album");

@@ -4,9 +4,9 @@ import { useIsMobileWidth } from "@/base/hooks";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
 import {
-    CollectionSelectionDialog,
-    CollectionSelectorAttributes,
-} from "@/new/photos/components/CollectionSelectionDialog";
+    CollectionSelector,
+    type CollectionSelectorAttributes,
+} from "@/new/photos/components/CollectionSelector";
 import {
     PeopleEmptyState,
     SearchResultsHeader,
@@ -212,10 +212,6 @@ export default function Gallery() {
     });
     const [planModalView, setPlanModalView] = useState(false);
     const [blockingLoad, setBlockingLoad] = useState(false);
-    const [collectionSelectorAttributes, setCollectionSelectorAttributes] =
-        useState<CollectionSelectorAttributes>(null);
-    const [openCollectionSelectionDialog, setOpenCollectionSelectionDialog] =
-        useState(false);
     const [collectionNamerAttributes, setCollectionNamerAttributes] =
         useState<CollectionNamerAttributes>(null);
     const [collectionNamerView, setCollectionNamerView] = useState(false);
@@ -351,6 +347,10 @@ export default function Gallery() {
         new Set<number>(),
     );
 
+    const [openCollectionSelector, setOpenCollectionSelector] = useState(false);
+    const [collectionSelectorAttributes, setCollectionSelectorAttributes] =
+        useState<CollectionSelectorAttributes | undefined>();
+
     const router = useRouter();
 
     // Ensure that the keys in local storage are not malformed by verifying that
@@ -474,10 +474,6 @@ export default function Gallery() {
         const emailList = constructEmailList(user, collections, familyData);
         setEmailList(emailList);
     }, [user, collections, familyData]);
-
-    useEffect(() => {
-        collectionSelectorAttributes && setOpenCollectionSelectionDialog(true);
-    }, [collectionSelectorAttributes]);
 
     useEffect(() => {
         collectionNamerAttributes && setCollectionNamerView(true);
@@ -701,7 +697,7 @@ export default function Gallery() {
         if (
             sidebarView ||
             uploadTypeSelectorView ||
-            openCollectionSelectionDialog ||
+            openCollectionSelector ||
             collectionNamerView ||
             fixCreationTimeView ||
             planModalView ||
@@ -944,7 +940,7 @@ export default function Gallery() {
         (ops: COLLECTION_OPS_TYPE) => async (collection: Collection) => {
             startLoading();
             try {
-                setOpenCollectionSelectionDialog(false);
+                setOpenCollectionSelector(false);
                 const selectedFiles = getSelectedFiles(selected, filteredData);
                 const toProcessFiles =
                     ops === COLLECTION_OPS_TYPE.REMOVE
@@ -1113,7 +1109,12 @@ export default function Gallery() {
         return <div></div>;
     }
 
-    const handleOpenCollectionSelectionDialog = (attributes: CollectionSelectorAttributes)
+    const handleOpenCollectionSelector = (
+        attributes: CollectionSelectorAttributes,
+    ) => {
+        setCollectionSelectorAttributes(attributes);
+        setOpenCollectionSelector(true);
+    };
 
     // `people` will be undefined only when ML is disabled, otherwise it'll be
     // an empty array (even if people are loading).
@@ -1171,9 +1172,9 @@ export default function Gallery() {
                     onHide={setCollectionNamerView.bind(null, false)}
                     attributes={collectionNamerAttributes}
                 />
-                <CollectionSelectionDialog
-                    open={openCollectionSelectionDialog}
-                    onClose={() => setOpenCollectionSelectionDialog(false)}
+                <CollectionSelector
+                    open={openCollectionSelector}
+                    onClose={() => setOpenCollectionSelector(false)}
                     attributes={collectionSelectorAttributes}
                     collectionSummaries={collectionSummaries}
                     collectionForCollectionID={(id) =>
@@ -1251,9 +1252,7 @@ export default function Gallery() {
                         null,
                         false,
                     )}
-                    setCollectionSelectorAttributes={
-                        setCollectionSelectorAttributes
-                    }
+                    onOpenCollectionSelection={handleOpenCollectionSelection}
                     closeCollectionSelector={setOpenCollectionSelectionDialog.bind(
                         null,
                         false,
