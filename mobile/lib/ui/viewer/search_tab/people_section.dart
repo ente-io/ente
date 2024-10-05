@@ -6,7 +6,6 @@ import "package:photos/core/constants.dart";
 import "package:photos/events/event.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/person.dart";
-import "package:photos/models/search/album_search_result.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/recent_searches.dart";
 import "package:photos/models/search/search_constants.dart";
@@ -213,25 +212,13 @@ class SearchExample extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         RecentSearches().add(searchResult.name());
-
-        if (searchResult is GenericSearchResult) {
-          final genericSearchResult = searchResult as GenericSearchResult;
-          if (genericSearchResult.onResultTap != null) {
-            genericSearchResult.onResultTap!(context);
-          } else {
-            routeToPage(
-              context,
-              SearchResultPage(searchResult),
-            );
-          }
-        } else if (searchResult is AlbumSearchResult) {
-          final albumSearchResult = searchResult as GenericSearchResult;
+        final genericSearchResult = searchResult as GenericSearchResult;
+        if (genericSearchResult.onResultTap != null) {
+          genericSearchResult.onResultTap!(context);
+        } else {
           routeToPage(
             context,
-            SearchResultPage(
-              albumSearchResult,
-              tagPrefix: albumSearchResult.heroTag(),
-            ),
+            SearchResultPage(searchResult),
           );
         }
       },
