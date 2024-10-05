@@ -96,6 +96,7 @@ import { useRouter } from "next/router";
 import { AppContext } from "pages/_app";
 import {
     createContext,
+    useCallback,
     useContext,
     useEffect,
     useMemo,
@@ -1105,16 +1106,22 @@ export default function Gallery() {
         setBarMode("people");
     };
 
+    const handleOpenCollectionSelector = useCallback(
+        (attributes: CollectionSelectorAttributes) => {
+            setCollectionSelectorAttributes(attributes);
+            setOpenCollectionSelector(true);
+        },
+        [],
+    );
+
+    const handleCloseCollectionSelector = useCallback(
+        () => setOpenCollectionSelector(false),
+        [],
+    );
+
     if (!collectionSummaries || !filteredData) {
         return <div></div>;
     }
-
-    const handleOpenCollectionSelector = (
-        attributes: CollectionSelectorAttributes,
-    ) => {
-        setCollectionSelectorAttributes(attributes);
-        setOpenCollectionSelector(true);
-    };
 
     // `people` will be undefined only when ML is disabled, otherwise it'll be
     // an empty array (even if people are loading).
@@ -1174,7 +1181,7 @@ export default function Gallery() {
                 />
                 <CollectionSelector
                     open={openCollectionSelector}
-                    onClose={() => setOpenCollectionSelector(false)}
+                    onClose={handleCloseCollectionSelector}
                     attributes={collectionSelectorAttributes}
                     collectionSummaries={collectionSummaries}
                     collectionForCollectionID={(id) =>
@@ -1249,9 +1256,7 @@ export default function Gallery() {
                         false,
                     )}
                     onOpenCollectionSelector={handleOpenCollectionSelector}
-                    onCloseCollectionSelector={() =>
-                        setOpenCollectionSelector(false)
-                    }
+                    onCloseCollectionSelector={handleCloseCollectionSelector}
                     setLoading={setBlockingLoad}
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
                     setShouldDisableDropzone={setShouldDisableDropzone}

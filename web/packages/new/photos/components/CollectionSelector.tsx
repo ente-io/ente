@@ -1,5 +1,3 @@
-// TODO
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type { Collection } from "@/media/collection";
 import {
     AllCollectionTile,
@@ -14,6 +12,7 @@ import {
     type CollectionSummaries,
     type CollectionSummary,
 } from "@/new/photos/services/collection/ui";
+import { ensure } from "@/utils/ensure";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleWithCloseButton";
 import {
@@ -126,8 +125,8 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
             })
             .sort((a, b) => {
                 return (
-                    CollectionSummaryOrder.get(a.type)! -
-                    CollectionSummaryOrder.get(b.type)!
+                    ensure(CollectionSummaryOrder.get(a.type)) -
+                    ensure(CollectionSummaryOrder.get(b.type))
                 );
             });
 
@@ -137,8 +136,7 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
         }
 
         setFilteredCollections(collections);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [collectionSummaries, attributes, open]);
+    }, [collectionSummaries, attributes, open, onClose]);
 
     if (!filteredCollections.length) {
         return <></>;
