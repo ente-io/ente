@@ -13,7 +13,6 @@ import {
     type CollectionSummary,
 } from "@/new/photos/services/collection/ui";
 import { ensure } from "@/utils/ensure";
-import { FlexWrapper } from "@ente/shared/components/Container";
 import {
     Dialog,
     DialogContent,
@@ -173,28 +172,32 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
         >
             <SpaceBetweenFlex sx={{ padding: "10px 8px 9px 0" }}>
                 <DialogTitle variant="h3" fontWeight={"bold"}>
-                    {dialogTitleForAction(action)}
+                    {titleForAction(action)}
                 </DialogTitle>
                 <DialogCloseIconButton onClose={handleClose} />
             </SpaceBetweenFlex>
 
-            <DialogContent>
-                <FlexWrapper flexWrap="wrap" gap={"4px"}>
-                    <AddCollectionButton onClick={onCreateCollection} />
-                    {filteredCollections.map((collectionSummary) => (
-                        <CollectionSelectorCard
-                            key={collectionSummary.id}
-                            collectionSummary={collectionSummary}
-                            onCollectionClick={handleCollectionClick}
-                        />
-                    ))}
-                </FlexWrapper>
-            </DialogContent>
+            <DialogContent_>
+                <AddCollectionButton onClick={onCreateCollection} />
+                {filteredCollections.map((collectionSummary) => (
+                    <CollectionSelectorCard
+                        key={collectionSummary.id}
+                        collectionSummary={collectionSummary}
+                        onCollectionClick={handleCollectionClick}
+                    />
+                ))}
+            </DialogContent_>
         </Dialog>
     );
 };
 
-const dialogTitleForAction = (action: CollectionSelectorAction) => {
+const DialogContent_ = styled(DialogContent)`
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+`;
+
+const titleForAction = (action: CollectionSelectorAction) => {
     switch (action) {
         case "upload":
             return t("upload_to_album");
