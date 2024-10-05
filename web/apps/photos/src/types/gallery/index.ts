@@ -1,5 +1,4 @@
 import type { Collection } from "@/media/collection";
-import { CollectionSelectorAttributes } from "@/new/photos/components/CollectionSelectionDialog";
 import { type SelectionContext } from "@/new/photos/components/Gallery";
 import { EnteFile } from "@/new/photos/types/file";
 import type { User } from "@ente/shared/user/types";
@@ -24,9 +23,6 @@ export type SetSelectedState = React.Dispatch<
 export type SetFiles = React.Dispatch<React.SetStateAction<EnteFile[]>>;
 export type SetCollections = React.Dispatch<React.SetStateAction<Collection[]>>;
 export type SetLoading = React.Dispatch<React.SetStateAction<boolean>>;
-export type SetCollectionSelectorAttributes = React.Dispatch<
-    React.SetStateAction<CollectionSelectorAttributes>
->;
 export type SetFilesDownloadProgressAttributes = (
     value:
         | Partial<FilesDownloadProgressAttributes>

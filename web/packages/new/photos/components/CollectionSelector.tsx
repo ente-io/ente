@@ -61,7 +61,7 @@ export interface CollectionSelectorAttributes {
      * {@link ignoredCollectionID} to omit showing them again in the list of
      * collections.
      */
-    ignoredCollectionID?: number;
+    ignoredCollectionID?: number | undefined;
 }
 
 type CollectionSelectorProps = DialogVisibilityProps & {

@@ -1244,19 +1244,14 @@ export default function Gallery() {
                 <Uploader
                     activeCollection={activeCollection}
                     syncWithRemote={syncWithRemote}
-                    showCollectionSelector={setOpenCollectionSelectionDialog.bind(
-                        null,
-                        true,
-                    )}
                     closeUploadTypeSelector={setUploadTypeSelectorView.bind(
                         null,
                         false,
                     )}
-                    onOpenCollectionSelection={handleOpenCollectionSelection}
-                    closeCollectionSelector={setOpenCollectionSelectionDialog.bind(
-                        null,
-                        false,
-                    )}
+                    onOpenCollectionSelector={handleOpenCollectionSelector}
+                    onCloseCollectionSelector={() =>
+                        setOpenCollectionSelector(false)
+                    }
                     setLoading={setBlockingLoad}
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
                     setShouldDisableDropzone={setShouldDisableDropzone}
@@ -1334,8 +1329,8 @@ export default function Gallery() {
                             showCreateCollectionModal={
                                 showCreateCollectionModal
                             }
-                            setCollectionSelectorAttributes={
-                                setCollectionSelectorAttributes
+                            onOpenCollectionSelector={
+                                handleOpenCollectionSelector
                             }
                             count={selected.count}
                             ownCount={selected.ownCount}
