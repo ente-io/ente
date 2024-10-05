@@ -45,8 +45,6 @@ export const DUMMY_UNCATEGORIZED_COLLECTION = -3;
 export const HIDDEN_ITEMS_SECTION = -4;
 export const ALL_SECTION = 0;
 
-
-
 const SYSTEM_COLLECTION_TYPES = new Set<CollectionSummaryType>([
     "all",
     "archive",

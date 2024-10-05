@@ -107,6 +107,7 @@ import {
     constructEmailList,
     constructUserIDToEmailMap,
     createAlbum,
+    createUnCategorizedCollection,
     getAllLatestCollections,
     getAllLocalCollections,
     getCollectionSummaries,
@@ -131,6 +132,7 @@ import {
     ALL_SECTION,
     ARCHIVE_SECTION,
     COLLECTION_OPS_TYPE,
+    DUMMY_UNCATEGORIZED_COLLECTION,
     HIDDEN_ITEMS_SECTION,
     TRASH_SECTION,
     constructCollectionNameMap,
@@ -1461,3 +1463,19 @@ const HiddenSectionNavbarContents: React.FC<
         </FlexWrapper>
     </HorizontalFlex>
 );
+
+/**
+ * Return the {@link Collection} (from amongst {@link collections}) with the
+ * given {@link collectionID}. As a special case, if collection ID is the
+ * placeholder ID of the uncategorized collection, create it and then return it.
+ */
+const findCollectionByCreatingUncategorizedIfNeeded = async (
+    collections: Collection[],
+    collectionID: number,
+) => {
+    if (collectionID == DUMMY_UNCATEGORIZED_COLLECTION) {
+        return await createUnCategorizedCollection();
+    } else {
+        return collections.find((c) => c.id === collectionID);
+    }
+};
