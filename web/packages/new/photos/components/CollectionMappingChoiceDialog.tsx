@@ -20,8 +20,6 @@ type CollectionMappingChoiceModalProps = DialogVisiblityProps & {
 
 /**
  * A {@link Dialog} that allow the user to choose a collection mapping.
- * @param param0
- * @returns
  */
 export const CollectionMappingChoiceDialog: React.FC<
     CollectionMappingChoiceModalProps

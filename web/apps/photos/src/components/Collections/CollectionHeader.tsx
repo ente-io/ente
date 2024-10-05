@@ -10,7 +10,7 @@ import { SpaceBetweenFlex } from "@/new/photos/components/mui";
 import type {
     CollectionSummary,
     CollectionSummaryType,
-} from "@/new/photos/types/collection";
+} from "@/new/photos/services/collection/ui";
 import { HorizontalFlex } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import OverflowMenu, {

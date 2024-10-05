@@ -1,4 +1,4 @@
-import type { CollectionsSortBy } from "@/new/photos/types/collection";
+import type { CollectionsSortBy } from "@/new/photos/services/collection/ui";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
 import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
 import TickIcon from "@mui/icons-material/Done";

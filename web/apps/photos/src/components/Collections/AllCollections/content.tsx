@@ -3,7 +3,7 @@ import {
     ItemCard,
     LargeTileTextOverlay,
 } from "@/new/photos/components/ItemCards";
-import type { CollectionSummary } from "@/new/photos/types/collection";
+import type { CollectionSummary } from "@/new/photos/services/collection/ui";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import useWindowSize from "@ente/shared/hooks/useWindowSize";
 import { DialogContent, Typography } from "@mui/material";

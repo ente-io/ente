@@ -15,10 +15,13 @@ import {
 } from "@/new/photos/components/SearchBar";
 import { WhatsNew } from "@/new/photos/components/WhatsNew";
 import { shouldShowWhatsNew } from "@/new/photos/services/changelog";
+import type { CollectionSummaries } from "@/new/photos/services/collection/ui";
+import { hasNonSystemCollections } from "@/new/photos/services/collection/ui";
 import downloadManager from "@/new/photos/services/download";
 import {
     getLocalFiles,
     getLocalTrashedFiles,
+    sortFiles,
 } from "@/new/photos/services/files";
 import { peopleSnapshot, peopleSubscribe } from "@/new/photos/services/ml";
 import type { Person } from "@/new/photos/services/ml/people";
@@ -27,7 +30,6 @@ import {
     setSearchCollectionsAndFiles,
 } from "@/new/photos/services/search";
 import type { SearchOption } from "@/new/photos/services/search/types";
-import type { CollectionSummaries } from "@/new/photos/types/collection";
 import { EnteFile } from "@/new/photos/types/file";
 import { mergeMetadata } from "@/new/photos/utils/file";
 import { ensure } from "@/utils/ensure";
@@ -106,6 +108,7 @@ import {
     constructEmailList,
     constructUserIDToEmailMap,
     createAlbum,
+    createUnCategorizedCollection,
     getAllLatestCollections,
     getAllLocalCollections,
     getCollectionSummaries,
@@ -130,6 +133,7 @@ import {
     ALL_SECTION,
     ARCHIVE_SECTION,
     COLLECTION_OPS_TYPE,
+    DUMMY_UNCATEGORIZED_COLLECTION,
     HIDDEN_ITEMS_SECTION,
     TRASH_SECTION,
     constructCollectionNameMap,
@@ -137,7 +141,6 @@ import {
     getDefaultHiddenCollectionIDs,
     getSelectedCollection,
     handleCollectionOps,
-    hasNonSystemCollections,
     splitNormalAndHiddenCollections,
 } from "utils/collection";
 import {
@@ -146,7 +149,6 @@ import {
     getSelectedFiles,
     getUniqueFiles,
     handleFileOps,
-    sortFiles,
 } from "utils/file";
 import { isArchivedFile } from "utils/magicMetadata";
 import { getSessionExpiredMessage } from "utils/ui";
@@ -1175,7 +1177,12 @@ export default function Gallery() {
                     onClose={closeCollectionSelector}
                     collectionSummaries={collectionSummaries}
                     attributes={collectionSelectorAttributes}
-                    collections={collections}
+                    collectionForCollectionID={(id) =>
+                        findCollectionCreatingUncategorizedIfNeeded(
+                            collections,
+                            id,
+                        )
+                    }
                 />
                 <FilesDownloadProgress
                     attributesList={filesDownloadProgressAttributesList}
@@ -1186,6 +1193,7 @@ export default function Gallery() {
                     hide={() => setFixCreationTimeView(false)}
                     attributes={fixCreationTimeAttributes}
                 />
+
                 <NavbarBase
                     sx={{
                         background: "transparent",
@@ -1461,3 +1469,19 @@ const HiddenSectionNavbarContents: React.FC<
         </FlexWrapper>
     </HorizontalFlex>
 );
+
+/**
+ * Return the {@link Collection} (from amongst {@link collections}) with the
+ * given {@link collectionID}. As a special case, if collection ID is the
+ * placeholder ID of the uncategorized collection, create it and then return it.
+ */
+const findCollectionCreatingUncategorizedIfNeeded = async (
+    collections: Collection[],
+    collectionID: number,
+) => {
+    if (collectionID == DUMMY_UNCATEGORIZED_COLLECTION) {
+        return await createUnCategorizedCollection();
+    } else {
+        return collections.find((c) => c.id === collectionID);
+    }
+};

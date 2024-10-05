@@ -4,7 +4,7 @@ import { EnteDrawer } from "@/base/components/EnteDrawer";
 import log from "@/base/log";
 import { savedLogs } from "@/base/log-web";
 import { customAPIHost } from "@/base/origins";
-import type { CollectionSummaries } from "@/new/photos/types/collection";
+import type { CollectionSummaries } from "@/new/photos/services/collection/ui";
 import { initiateEmail, openURL } from "@/new/photos/utils/web";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import { EnteLogo } from "@ente/shared/components/EnteLogo";

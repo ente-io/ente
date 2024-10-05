@@ -13,6 +13,7 @@ import { firstNonEmpty } from "@/utils/array";
 import { ensure } from "@/utils/ensure";
 import { CustomError } from "@ente/shared/error";
 import DiscFullIcon from "@mui/icons-material/DiscFull";
+import { CollectionSelectorIntent } from "components/Collections/CollectionSelector";
 import UserNameInputDialog from "components/UserNameInputDialog";
 import { t } from "i18next";
 import isElectron from "is-electron";
@@ -36,7 +37,6 @@ import type {
 import uploadManager from "services/upload/uploadManager";
 import watcher from "services/watch";
 import {
-    CollectionSelectorIntent,
     SetCollectionSelectorAttributes,
     SetCollections,
     SetFiles,

@@ -64,11 +64,3 @@ export type GalleryContextType = {
     setSelectedFiles: (value) => void;
     selectedFile: SelectedState;
 };
-
-export enum CollectionSelectorIntent {
-    upload,
-    add,
-    move,
-    restore,
-    unhide,
-}
