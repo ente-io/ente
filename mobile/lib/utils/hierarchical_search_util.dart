@@ -19,13 +19,20 @@ Future<List<EnteFile>> getFilteredFiles(
 ) async {
   final filteredFiles = <EnteFile>[];
   final files = await SearchService.instance.getAllFiles();
+  final resultsNeverComputedFilters = <HierarchicalSearchFilter>[];
+
+  for (HierarchicalSearchFilter filter in filters) {
+    if (filter.getMatchedUploadedIDs().isEmpty) {
+      resultsNeverComputedFilters.add(filter);
+    }
+  }
 
   try {
     for (EnteFile file in files) {
       if (file.uploadedFileID == null || file.uploadedFileID == -1) {
         continue;
       }
-      for (HierarchicalSearchFilter filter in filters) {
+      for (HierarchicalSearchFilter filter in resultsNeverComputedFilters) {
         if (filter.isMatch(file)) {
           filter.matchedUploadedIDs.add(file.uploadedFileID!);
         }
