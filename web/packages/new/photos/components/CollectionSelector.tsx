@@ -1,6 +1,6 @@
 import type { Collection } from "@/media/collection";
 import {
-    CollectionTile,
+    CollectionTileButton,
     ItemCard,
     ItemTileOverlay,
     LargeTileTextOverlay,
@@ -180,7 +180,7 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
             <DialogContent_>
                 <AddCollectionButton onClick={onCreateCollection} />
                 {filteredCollections.map((collectionSummary) => (
-                    <CollectionSelectorCard
+                    <CollectionButton
                         key={collectionSummary.id}
                         collectionSummary={collectionSummary}
                         onCollectionClick={handleCollectionClick}
@@ -212,17 +212,17 @@ const titleForAction = (action: CollectionSelectorAction) => {
     }
 };
 
-interface CollectionSelectorCardProps {
+interface CollectionButtonProps {
     collectionSummary: CollectionSummary;
     onCollectionClick: (collectionID: number) => void;
 }
 
-const CollectionSelectorCard: React.FC<CollectionSelectorCardProps> = ({
+const CollectionButton: React.FC<CollectionButtonProps> = ({
     collectionSummary,
     onCollectionClick,
 }) => (
     <ItemCard
-        TileComponent={CollectionTile}
+        TileComponent={CollectionTileButton}
         coverFile={collectionSummary.coverFile}
         onClick={() => onCollectionClick(collectionSummary.id)}
     >
@@ -239,7 +239,7 @@ interface AddCollectionButtonProps {
 const AddCollectionButton: React.FC<AddCollectionButtonProps> = ({
     onClick,
 }) => (
-    <ItemCard TileComponent={CollectionTile} onClick={onClick}>
+    <ItemCard TileComponent={CollectionTileButton} onClick={onClick}>
         <LargeTileTextOverlay>{t("create_albums")}</LargeTileTextOverlay>
         <PlusOverlay>+</PlusOverlay>
     </ItemCard>
