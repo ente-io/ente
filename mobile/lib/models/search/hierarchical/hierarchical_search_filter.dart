@@ -10,7 +10,9 @@ abstract class HierarchicalSearchFilter {
   //adding/removing applied filters. An exception where results can be all files
   //in gallery is when the filter is the initial filter (top level) of the
   //gallery.
-  final Set<int> matchedUploadedIDs = {};
+  final Set<int> matchedUploadedIDs;
+
+  HierarchicalSearchFilter({this.matchedUploadedIDs = const <int>{}});
 
   String name();
   IconData? icon();
