@@ -11,12 +11,12 @@ import {
     MIN_COLUMNS,
 } from "@/new/photos/components/PhotoList";
 import { UnstyledButton } from "@/new/photos/components/UnstyledButton";
-import type { Person } from "@/new/photos/services/ml/people";
 import type {
     CollectionSummary,
     CollectionSummaryType,
     CollectionsSortBy,
-} from "@/new/photos/types/collection";
+} from "@/new/photos/services/collection/ui";
+import type { Person } from "@/new/photos/services/ml/people";
 import { ensure } from "@/utils/ensure";
 import { Overlay } from "@ente/shared/components/Container";
 import ArchiveIcon from "@mui/icons-material/Archive";

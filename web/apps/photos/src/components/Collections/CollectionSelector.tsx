@@ -9,7 +9,7 @@ import {
     CollectionSummaryOrder,
     type CollectionSummaries,
     type CollectionSummary,
-} from "@/new/photos/types/collection";
+} from "@/new/photos/services/collection/ui";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleWithCloseButton";
 import {

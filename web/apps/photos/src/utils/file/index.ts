@@ -113,7 +113,6 @@ export function getSelectedFiles(
     return files.filter((file) => selectedFilesIDs.has(file.id));
 }
 
-
 export async function decryptFile(
     file: EncryptedEnteFile,
     collectionKey: string,

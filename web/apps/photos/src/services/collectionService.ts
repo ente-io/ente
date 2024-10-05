@@ -19,16 +19,16 @@ import {
     UpdatePublicURL,
 } from "@/media/collection";
 import { ItemVisibility } from "@/media/file-metadata";
-import { getLocalFiles, sortFiles } from "@/new/photos/services/files";
 import type {
     CollectionSummaries,
     CollectionSummary,
     CollectionSummaryType,
-} from "@/new/photos/types/collection";
+} from "@/new/photos/services/collection/ui";
 import {
     CollectionSummaryOrder,
     CollectionsSortBy,
-} from "@/new/photos/types/collection";
+} from "@/new/photos/services/collection/ui";
+import { getLocalFiles, sortFiles } from "@/new/photos/services/files";
 import { EnteFile } from "@/new/photos/types/file";
 import {
     EncryptedMagicMetadata,

@@ -8,7 +8,7 @@ import {
     collectionsSortBy,
     type CollectionsSortBy,
     type CollectionSummaries,
-} from "@/new/photos/types/collection";
+} from "@/new/photos/services/collection/ui";
 import { includes } from "@/utils/type-guards";
 import {
     getData,
