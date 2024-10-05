@@ -14,17 +14,21 @@ import {
 } from "@/new/photos/services/collection/ui";
 import { ensure } from "@/utils/ensure";
 import { FlexWrapper } from "@ente/shared/components/Container";
-import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleWithCloseButton";
 import {
     Dialog,
     DialogContent,
+    DialogTitle,
     styled,
     Typography,
     useMediaQuery,
 } from "@mui/material";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
-import type { DialogVisibilityProps } from "./mui/Dialog";
+import { SpaceBetweenFlex } from "./mui";
+import {
+    DialogCloseIconButton,
+    type DialogVisibilityProps,
+} from "./mui/Dialog";
 
 export type CollectionSelectorAction =
     | "upload"
@@ -166,9 +170,13 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
             fullWidth
             fullScreen={isFullScreen}
         >
-            <DialogTitleWithCloseButton onClose={handleClose}>
-                {dialogTitleForAction(action)}
-            </DialogTitleWithCloseButton>
+            <SpaceBetweenFlex sx={{ padding: "10px 8px 9px 0" }}>
+                <DialogTitle variant="h3" fontWeight={"bold"}>
+                    {dialogTitleForAction(action)}
+                </DialogTitle>
+                <DialogCloseIconButton onClose={handleClose} />
+            </SpaceBetweenFlex>
+
             <DialogContent>
                 <FlexWrapper flexWrap="wrap" gap={"4px"}>
                     <AddCollectionButton onClick={onCreateCollection} />
@@ -188,10 +196,6 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
 const Dialog_ = styled(Dialog)`
     & .MuiPaper-root {
         max-width: 494px;
-    }
-    & .MuiDialogTitle-root {
-        padding: 16px;
-        padding-right: 8px;
     }
 `;
 
