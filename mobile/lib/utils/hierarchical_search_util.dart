@@ -1,9 +1,11 @@
 import "package:logging/logging.dart";
+import "package:photos/core/configuration.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/location_tag/location_tag.dart";
 import "package:photos/models/search/hierarchical/album_filter.dart";
+import "package:photos/models/search/hierarchical/contacts_filter.dart";
 import "package:photos/models/search/hierarchical/file_type_filter.dart";
 import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
 import "package:photos/models/search/hierarchical/location_filter.dart";
@@ -66,9 +68,16 @@ void curateFilters(
       searchFilterDataProvider,
       files,
     );
+    final contactsFilters =
+        _curateContactsFilter(searchFilterDataProvider, files);
 
     searchFilterDataProvider.clearAndAddRecommendations(
-      [...albumFilters, ...locationFilters, ...fileTypeFilters],
+      [
+        ...contactsFilters,
+        ...albumFilters,
+        ...locationFilters,
+        ...fileTypeFilters,
+      ],
     );
   } catch (e) {
     Logger("HierarchicalSearchUtil").severe("Failed to curate filters", e);
@@ -179,4 +188,33 @@ Future<List<LocationFilter>> _curateLocationFilters(
   }
 
   return locationFilters;
+}
+
+List<ContactsFilter> _curateContactsFilter(
+  SearchFilterDataProvider searchFilterDataProvider,
+  List<EnteFile> files,
+) {
+  final contactsFilters = <ContactsFilter>[];
+  final ownerIdToOccurrence = <int, int>{};
+
+  for (EnteFile file in files) {
+    if (file.ownerID == Configuration.instance.getUserID() ||
+        file.uploadedFileID == null ||
+        file.uploadedFileID == -1 ||
+        file.ownerID == null) continue;
+    ownerIdToOccurrence[file.ownerID!] =
+        (ownerIdToOccurrence[file.ownerID] ?? 0) + 1;
+  }
+
+  for (int id in ownerIdToOccurrence.keys) {
+    final user = CollectionsService.instance.getFileOwner(id, null);
+    contactsFilters.add(
+      ContactsFilter(
+        user: user,
+        occurrence: ownerIdToOccurrence[id]!,
+      ),
+    );
+  }
+
+  return contactsFilters;
 }

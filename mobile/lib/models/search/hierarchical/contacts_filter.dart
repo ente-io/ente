@@ -14,7 +14,10 @@ class ContactsFilter extends HierarchicalSearchFilter {
 
   @override
   String name() {
-    return "Contacts";
+    if (user.name == null || user.name!.isEmpty) {
+      return user.email;
+    }
+    return user.name!;
   }
 
   @override
