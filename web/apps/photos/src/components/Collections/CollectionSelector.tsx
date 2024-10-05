@@ -21,13 +21,20 @@ import {
 import { t } from "i18next";
 import { useEffect, useState } from "react";
 import { createUnCategorizedCollection } from "services/collectionService";
-import { CollectionSelectorIntent } from "types/gallery";
 import {
     COLLECTION_SORT_ORDER,
     DUMMY_UNCATEGORIZED_COLLECTION,
     isAddToAllowedCollection,
     isMoveToAllowedCollection,
 } from "utils/collection";
+
+export enum CollectionSelectorIntent {
+    upload,
+    add,
+    move,
+    restore,
+    unhide,
+}
 
 export interface CollectionSelectorAttributes {
     callback: (collection: Collection) => void;
