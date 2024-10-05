@@ -1,3 +1,5 @@
+// TODO
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type { Collection } from "@/media/collection";
 import {
     AllCollectionTile,
@@ -22,25 +24,25 @@ import {
     useMediaQuery,
 } from "@mui/material";
 import { t } from "i18next";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import type { DialogVisibilityProps } from "./mui/Dialog";
 
-export enum CollectionSelectorIntent {
-    upload,
-    add,
-    move,
-    restore,
-    unhide,
-}
+export type CollectionSelectionAction =
+    | "upload"
+    | "add"
+    | "move"
+    | "restore"
+    | "unhide";
 
 export interface CollectionSelectorAttributes {
+    /**
+     * The {@link action} modifies the title of the dialog, and also removes
+     * some system collections that don't might not make sense for that
+     * particular action.
+     */
+    action: CollectionSelectionAction;
     callback: (collection: Collection) => void;
     showNextModal: () => void;
-    /**
-     * The {@link intent} modifies the title of the dialog, and also filters
-     * the list of collections the user can select from appropriately.
-     */
-    intent: CollectionSelectorIntent;
     fromCollection?: number;
     onCancel?: () => void;
 }
@@ -50,7 +52,7 @@ type CollectionSelectionDialogProps = DialogVisibilityProps & {
      * The same {@link CollectionSelectionDialog} can be used for different
      * purposes by customizing the {@link attributes} prop before opening it.
      */
-    attributes: CollectionSelectorAttributes;
+    attributes: CollectionSelectorAttributes | undefined;
     /**
      * The collections to list.
      */
@@ -89,60 +91,49 @@ export const CollectionSelectionDialog: React.FC<
         if (!attributes || !open) {
             return;
         }
-        const main = async () => {
-            const collectionsToShow = [...collectionSummaries.values()]
-                ?.filter(({ id, type }) => {
-                    if (id === attributes.fromCollection) {
-                        return false;
-                    } else if (
-                        attributes.intent === CollectionSelectorIntent.add
-                    ) {
-                        return canAddToCollection(type);
-                    } else if (
-                        attributes.intent === CollectionSelectorIntent.upload
-                    ) {
-                        return (
-                            canMoveToCollection(type) || type == "uncategorized"
-                        );
-                    } else if (
-                        attributes.intent === CollectionSelectorIntent.restore
-                    ) {
-                        return (
-                            canMoveToCollection(type) || type == "uncategorized"
-                        );
-                    } else {
-                        return canMoveToCollection(type);
-                    }
-                })
-                .sort((a, b) => {
-                    return a.name.localeCompare(b.name);
-                })
-                .sort((a, b) => {
-                    return (
-                        CollectionSummaryOrder.get(a.type) -
-                        CollectionSummaryOrder.get(b.type)
-                    );
-                });
-            if (collectionsToShow.length === 0) {
-                onClose();
-                attributes.showNextModal();
-            }
-            setCollectionsToShow(collectionsToShow);
-        };
-        main();
+
+        const collectionsToShow = [...collectionSummaries.values()]
+            .filter(({ id, type }) => {
+                if (id === attributes.fromCollection) {
+                    return false;
+                } else if (attributes.action == "add") {
+                    return canAddToCollection(type);
+                } else if (attributes.action == "upload") {
+                    return canMoveToCollection(type) || type == "uncategorized";
+                } else if (attributes.action == "restore") {
+                    return canMoveToCollection(type) || type == "uncategorized";
+                } else {
+                    return canMoveToCollection(type);
+                }
+            })
+            .sort((a, b) => {
+                return a.name.localeCompare(b.name);
+            })
+            .sort((a, b) => {
+                return (
+                    CollectionSummaryOrder.get(a.type)! -
+                    CollectionSummaryOrder.get(b.type)!
+                );
+            });
+        if (collectionsToShow.length === 0) {
+            onClose();
+            attributes.showNextModal();
+        }
+        setCollectionsToShow(collectionsToShow);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [collectionSummaries, attributes, open]);
 
-    if (!collectionsToShow?.length) {
+    if (!collectionsToShow.length) {
         return <></>;
     }
 
     const handleCollectionClick = async (collectionID: number) => {
-        attributes.callback(await collectionForCollectionID(collectionID));
+        attributes?.callback(await collectionForCollectionID(collectionID));
         onClose();
     };
 
     const onUserTriggeredClose = () => {
-        attributes.onCancel?.();
+        attributes?.onCancel?.();
         onClose();
     };
 
@@ -154,18 +145,7 @@ export const CollectionSelectionDialog: React.FC<
             fullWidth
         >
             <DialogTitleWithCloseButton onClose={onUserTriggeredClose}>
-                {attributes.intent === CollectionSelectorIntent.upload
-                    ? t("upload_to_album")
-                    : attributes.intent === CollectionSelectorIntent.add
-                      ? t("add_to_album")
-                      : attributes.intent === CollectionSelectorIntent.move
-                        ? t("move_to_album")
-                        : attributes.intent === CollectionSelectorIntent.restore
-                          ? t("restore_to_album")
-                          : attributes.intent ===
-                              CollectionSelectorIntent.unhide
-                            ? t("unhide_to_album")
-                            : t("select_album")}
+                {dialogTitleForAction(attributes?.action)}
             </DialogTitleWithCloseButton>
             <DialogContent sx={{ "&&&": { padding: 0 } }}>
                 <FlexWrapper flexWrap="wrap" gap={"4px"} padding={"16px"}>
@@ -197,6 +177,25 @@ const Dialog_ = styled(Dialog)(({ theme }) => ({
         padding: "16px",
     },
 }));
+
+const dialogTitleForAction = (
+    action: CollectionSelectionAction | undefined,
+) => {
+    switch (action) {
+        case "upload":
+            return t("upload_to_album");
+        case "add":
+            return t("add_to_album");
+        case "move":
+            return t("move_to_album");
+        case "restore":
+            return t("restore_to_album");
+        case "unhide":
+            return t("unhide_to_album");
+        case undefined:
+            return t("select_album");
+    }
+};
 
 interface CollectionSelectorCardProps {
     collectionSummary: CollectionSummary;

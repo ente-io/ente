@@ -1175,8 +1175,8 @@ export default function Gallery() {
                 <CollectionSelectionDialog
                     open={collectionSelectorView}
                     onClose={closeCollectionSelector}
-                    collectionSummaries={collectionSummaries}
                     attributes={collectionSelectorAttributes}
+                    collectionSummaries={collectionSummaries}
                     collectionForCollectionID={(id) =>
                         findCollectionCreatingUncategorizedIfNeeded(
                             collections,

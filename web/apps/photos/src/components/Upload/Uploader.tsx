@@ -3,7 +3,6 @@ import log from "@/base/log";
 import type { CollectionMapping, Electron, ZipItem } from "@/base/types/ipc";
 import type { Collection } from "@/media/collection";
 import { CollectionMappingChoiceDialog } from "@/new/photos/components/CollectionMappingChoiceDialog";
-import { CollectionSelectorIntent } from "@/new/photos/components/CollectionSelectionDialog";
 import { exportMetadataDirectoryName } from "@/new/photos/services/export";
 import type {
     FileAndPath,
@@ -461,10 +460,10 @@ export default function Uploader({
             }
 
             props.setCollectionSelectorAttributes({
+                action: "upload",
                 callback: uploadFilesToExistingCollection,
                 onCancel: handleCollectionSelectorCancel,
                 showNextModal,
-                intent: CollectionSelectorIntent.upload,
             });
         })();
     }, [webFiles, desktopFiles, desktopFilePaths, desktopZipItems]);
