@@ -39,6 +39,10 @@ export enum CollectionSelectorIntent {
 export interface CollectionSelectorAttributes {
     callback: (collection: Collection) => void;
     showNextModal: () => void;
+    /**
+     * The {@link intent} modifies the title of the dialog, and also filters
+     * the list of collections the user can select from appropriately.
+     */
     intent: CollectionSelectorIntent;
     fromCollection?: number;
     onCancel?: () => void;
@@ -52,6 +56,10 @@ interface CollectionSelectorProps {
     collectionSummaries: CollectionSummaries;
 }
 
+/**
+ * A dialog allowing the user to select one of their existing collections or
+ * create a new one.
+ */
 export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
     attributes,
     collectionSummaries,
