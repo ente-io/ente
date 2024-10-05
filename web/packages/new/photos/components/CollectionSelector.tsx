@@ -169,8 +169,8 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
             <DialogTitleWithCloseButton onClose={handleClose}>
                 {dialogTitleForAction(action)}
             </DialogTitleWithCloseButton>
-            <DialogContent sx={{ "&&&": { padding: 0 } }}>
-                <FlexWrapper flexWrap="wrap" gap={"4px"} padding={"16px"}>
+            <DialogContent>
+                <FlexWrapper flexWrap="wrap" gap={"4px"}>
                     <AddCollectionButton onClick={onCreateCollection} />
                     {filteredCollections.map((collectionSummary) => (
                         <CollectionSelectorCard
@@ -192,9 +192,6 @@ const Dialog_ = styled(Dialog)`
     & .MuiDialogTitle-root {
         padding: 16px;
         padding-right: 8px;
-    }
-    & .MuiDialogContent-root {
-        padding: 16px;
     }
 `;
 
