@@ -214,7 +214,8 @@ export default function Gallery() {
     const [blockingLoad, setBlockingLoad] = useState(false);
     const [collectionSelectorAttributes, setCollectionSelectorAttributes] =
         useState<CollectionSelectorAttributes>(null);
-    const [collectionSelectorView, setCollectionSelectorView] = useState(false);
+    const [openCollectionSelectionDialog, setOpenCollectionSelectionDialog] =
+        useState(false);
     const [collectionNamerAttributes, setCollectionNamerAttributes] =
         useState<CollectionNamerAttributes>(null);
     const [collectionNamerView, setCollectionNamerView] = useState(false);
@@ -475,7 +476,7 @@ export default function Gallery() {
     }, [user, collections, familyData]);
 
     useEffect(() => {
-        collectionSelectorAttributes && setCollectionSelectorView(true);
+        collectionSelectorAttributes && setOpenCollectionSelectionDialog(true);
     }, [collectionSelectorAttributes]);
 
     useEffect(() => {
@@ -700,7 +701,7 @@ export default function Gallery() {
         if (
             sidebarView ||
             uploadTypeSelectorView ||
-            collectionSelectorView ||
+            openCollectionSelectionDialog ||
             collectionNamerView ||
             fixCreationTimeView ||
             planModalView ||
@@ -943,7 +944,7 @@ export default function Gallery() {
         (ops: COLLECTION_OPS_TYPE) => async (collection: Collection) => {
             startLoading();
             try {
-                setCollectionSelectorView(false);
+                setOpenCollectionSelectionDialog(false);
                 const selectedFiles = getSelectedFiles(selected, filteredData);
                 const toProcessFiles =
                     ops === COLLECTION_OPS_TYPE.REMOVE
@@ -1067,10 +1068,6 @@ export default function Gallery() {
         setUploadTypeSelectorIntent(intent ?? "upload");
     };
 
-    const closeCollectionSelector = () => {
-        setCollectionSelectorView(false);
-    };
-
     const openExportModal = () => {
         setExportModalView(true);
     };
@@ -1173,8 +1170,8 @@ export default function Gallery() {
                     attributes={collectionNamerAttributes}
                 />
                 <CollectionSelectionDialog
-                    open={collectionSelectorView}
-                    onClose={closeCollectionSelector}
+                    open={openCollectionSelectionDialog}
+                    onClose={() => setOpenCollectionSelectionDialog(false)}
                     attributes={collectionSelectorAttributes}
                     collectionSummaries={collectionSummaries}
                     collectionForCollectionID={(id) =>
@@ -1244,7 +1241,7 @@ export default function Gallery() {
                 <Uploader
                     activeCollection={activeCollection}
                     syncWithRemote={syncWithRemote}
-                    showCollectionSelector={setCollectionSelectorView.bind(
+                    showCollectionSelector={setOpenCollectionSelectionDialog.bind(
                         null,
                         true,
                     )}
@@ -1255,7 +1252,7 @@ export default function Gallery() {
                     setCollectionSelectorAttributes={
                         setCollectionSelectorAttributes
                     }
-                    closeCollectionSelector={setCollectionSelectorView.bind(
+                    closeCollectionSelector={setOpenCollectionSelectionDialog.bind(
                         null,
                         false,
                     )}
