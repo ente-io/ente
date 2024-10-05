@@ -108,7 +108,10 @@ export const isSystemCollection = (type: CollectionSummaryType) =>
 
 export const areOnlySystemCollections = (
     collectionSummaries: CollectionSummaries,
-) => collectionSummaries.values().every(({ type }) => isSystemCollection(type));
+) =>
+    [...collectionSummaries.values()].every(({ type }) =>
+        isSystemCollection(type),
+    );
 
 export const canAddToCollection = (type: CollectionSummaryType) =>
     !addToDisabledCSTypes.has(type);
