@@ -114,14 +114,9 @@ const hideFromCollectionBarCSTypes = new Set<CollectionSummaryType>([
     "defaultHidden",
 ]);
 
-export const hasNonSystemCollections = (
+export const areOnlySystemCollections = (
     collectionSummaries: CollectionSummaries,
-) => {
-    for (const collectionSummary of collectionSummaries.values()) {
-        if (!isSystemCollection(collectionSummary.type)) return true;
-    }
-    return false;
-};
+) => collectionSummaries.values().every(({ type }) => isSystemCollection(type));
 
 export const canMoveToCollection = (type: CollectionSummaryType) =>
     !moveToDisabledCSTypes.has(type);

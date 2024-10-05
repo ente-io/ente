@@ -5,8 +5,8 @@ import {
 } from "@/new/photos/components/Gallery/BarImpl";
 import { PeopleHeader } from "@/new/photos/components/Gallery/PeopleHeader";
 import {
+    areOnlySystemCollections,
     collectionsSortBy,
-    hasNonSystemCollections,
     isSystemCollection,
     shouldShowOnCollectionBar,
     type CollectionsSortBy,
@@ -122,7 +122,7 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
     const shouldBeHidden = useMemo(
         () =>
             shouldHide ||
-            (!hasNonSystemCollections(toShowCollectionSummaries) &&
+            (areOnlySystemCollections(toShowCollectionSummaries) &&
                 activeCollectionID === ALL_SECTION),
         [shouldHide, toShowCollectionSummaries, activeCollectionID],
     );

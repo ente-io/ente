@@ -16,7 +16,7 @@ import {
 import { WhatsNew } from "@/new/photos/components/WhatsNew";
 import { shouldShowWhatsNew } from "@/new/photos/services/changelog";
 import type { CollectionSummaries } from "@/new/photos/services/collection/ui";
-import { hasNonSystemCollections } from "@/new/photos/services/collection/ui";
+import { areOnlySystemCollections } from "@/new/photos/services/collection/ui";
 import downloadManager from "@/new/photos/services/download";
 import {
     getLocalFiles,
@@ -1264,9 +1264,9 @@ export default function Gallery() {
                     setShouldDisableDropzone={setShouldDisableDropzone}
                     setFiles={setFiles}
                     setCollections={setCollections}
-                    isFirstUpload={
-                        !hasNonSystemCollections(collectionSummaries)
-                    }
+                    isFirstUpload={areOnlySystemCollections(
+                        collectionSummaries,
+                    )}
                     {...{
                         dragAndDropFiles,
                         openFileSelector,
