@@ -34,17 +34,34 @@ export type CollectionSelectionAction =
     | "restore"
     | "unhide";
 
-export interface CollectionSelectorAttributes {
+export interface CollectionSelectionAttributes {
     /**
      * The {@link action} modifies the title of the dialog, and also removes
      * some system collections that don't might not make sense for that
      * particular action.
      */
     action: CollectionSelectionAction;
-    callback: (collection: Collection) => void;
-    showNextModal: () => void;
-    fromCollection?: number;
+    /**
+     * Callback invoked when the user selects one the existing collections
+     * listed in the dialog.
+     */
+    onSelectCollection: (collection: Collection) => void;
+    /**
+     * Callback invoked when the user selects the option to create a new
+     * collection.
+     */
+    onCreateCollection: () => void;
+    /**
+     * Callback invoked when the user cancels the collection selection dialog.
+     */
     onCancel?: () => void;
+    /**
+     * Some actions, like "add" and "move", happen in the context of an existing
+     * collection. In such cases, their ID can be set as the
+     * {@link ignoredCollectionID} to omit showing them again in the list of
+     * collections.
+     */
+    ignoredCollectionID?: number;
 }
 
 type CollectionSelectionDialogProps = DialogVisibilityProps & {
@@ -52,7 +69,7 @@ type CollectionSelectionDialogProps = DialogVisibilityProps & {
      * The same {@link CollectionSelectionDialog} can be used for different
      * purposes by customizing the {@link attributes} prop before opening it.
      */
-    attributes: CollectionSelectorAttributes | undefined;
+    attributes: CollectionSelectionAttributes | undefined;
     /**
      * The collections to list.
      */
@@ -83,7 +100,7 @@ export const CollectionSelectionDialog: React.FC<
     // Make the dialog fullscreen if the screen is <= the dialog's max width.
     const isFullScreen = useMediaQuery("(max-width: 494px)");
 
-    const [collectionsToShow, setCollectionsToShow] = useState<
+    const [filteredCollections, setFilteredCollections] = useState<
         CollectionSummary[]
     >([]);
 
@@ -92,9 +109,9 @@ export const CollectionSelectionDialog: React.FC<
             return;
         }
 
-        const collectionsToShow = [...collectionSummaries.values()]
+        const collections = [...collectionSummaries.values()]
             .filter(({ id, type }) => {
-                if (id === attributes.fromCollection) {
+                if (id === attributes.ignoredCollectionID) {
                     return false;
                 } else if (attributes.action == "add") {
                     return canAddToCollection(type);
@@ -115,48 +132,51 @@ export const CollectionSelectionDialog: React.FC<
                     CollectionSummaryOrder.get(b.type)!
                 );
             });
-        if (collectionsToShow.length === 0) {
+
+        if (collections.length === 0) {
             onClose();
-            attributes.showNextModal();
+            attributes.onCreateCollection();
         }
-        setCollectionsToShow(collectionsToShow);
+
+        setFilteredCollections(collections);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [collectionSummaries, attributes, open]);
+
+    if (!filteredCollections.length) {
+        return <></>;
+    }
 
     if (!attributes) {
         return <></>;
     }
 
-    if (!collectionsToShow.length) {
-        return <></>;
-    }
+    const { action, onSelectCollection, onCancel, onCreateCollection } =
+        attributes;
 
     const handleCollectionClick = async (collectionID: number) => {
-        attributes.callback(await collectionForCollectionID(collectionID));
+        onSelectCollection(await collectionForCollectionID(collectionID));
         onClose();
     };
 
-    const onUserTriggeredClose = () => {
-        attributes.onCancel?.();
+    const handleClose = () => {
+        onCancel?.();
         onClose();
     };
 
     return (
         <Dialog_
             open={open}
-            onClose={onUserTriggeredClose}
+            onClose={handleClose}
             fullScreen={isFullScreen}
             fullWidth
         >
-            <DialogTitleWithCloseButton onClose={onUserTriggeredClose}>
-                {dialogTitleForAction(attributes.action)}
+            <DialogTitleWithCloseButton onClose={handleClose}>
+                {dialogTitleForAction(action)}
             </DialogTitleWithCloseButton>
             <DialogContent sx={{ "&&&": { padding: 0 } }}>
                 <FlexWrapper flexWrap="wrap" gap={"4px"} padding={"16px"}>
-                    <AddCollectionButton
-                        showNextModal={attributes.showNextModal}
-                    />
-                    {collectionsToShow.map((collectionSummary) => (
+                    <AddCollectionButton onClick={onCreateCollection} />
+                    {filteredCollections.map((collectionSummary) => (
                         <CollectionSelectorCard
                             key={collectionSummary.id}
                             collectionSummary={collectionSummary}
@@ -218,13 +238,13 @@ const CollectionSelectorCard: React.FC<CollectionSelectorCardProps> = ({
 );
 
 interface AddCollectionButtonProps {
-    showNextModal: () => void;
+    onClick: () => void;
 }
 
 const AddCollectionButton: React.FC<AddCollectionButtonProps> = ({
-    showNextModal,
+    onClick,
 }) => (
-    <ItemCard TileComponent={AllCollectionTile} onClick={showNextModal}>
+    <ItemCard TileComponent={AllCollectionTile} onClick={onClick}>
         <LargeTileTextOverlay>{t("create_albums")}</LargeTileTextOverlay>
         <ImageContainer>+</ImageContainer>
     </ItemCard>

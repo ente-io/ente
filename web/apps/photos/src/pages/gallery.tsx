@@ -1113,6 +1113,8 @@ export default function Gallery() {
         return <div></div>;
     }
 
+    const handleOpenCollectionSelectionDialog = (attributes: CollectionSelectorAttributes)
+
     // `people` will be undefined only when ML is disabled, otherwise it'll be
     // an empty array (even if people are loading).
     const showPeopleSectionButton = people !== undefined;
