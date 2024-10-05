@@ -164,11 +164,12 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
     };
 
     return (
-        <Dialog_
+        <Dialog
             open={open}
             onClose={handleClose}
             fullWidth
             fullScreen={isFullScreen}
+            PaperProps={{ sx: { maxWidth: "494px" } }}
         >
             <SpaceBetweenFlex sx={{ padding: "10px 8px 9px 0" }}>
                 <DialogTitle variant="h3" fontWeight={"bold"}>
@@ -189,15 +190,9 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
                     ))}
                 </FlexWrapper>
             </DialogContent>
-        </Dialog_>
+        </Dialog>
     );
 };
-
-const Dialog_ = styled(Dialog)`
-    & .MuiPaper-root {
-        max-width: 494px;
-    }
-`;
 
 const dialogTitleForAction = (action: CollectionSelectorAction) => {
     switch (action) {
