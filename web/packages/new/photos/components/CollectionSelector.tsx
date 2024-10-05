@@ -163,8 +163,8 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
         <Dialog_
             open={open}
             onClose={handleClose}
-            fullScreen={isFullScreen}
             fullWidth
+            fullScreen={isFullScreen}
         >
             <DialogTitleWithCloseButton onClose={handleClose}>
                 {dialogTitleForAction(action)}
@@ -242,11 +242,11 @@ const AddCollectionButton: React.FC<AddCollectionButtonProps> = ({
 }) => (
     <ItemCard TileComponent={AllCollectionTile} onClick={onClick}>
         <LargeTileTextOverlay>{t("create_albums")}</LargeTileTextOverlay>
-        <ImageContainer>+</ImageContainer>
+        <PlusOverlay>+</PlusOverlay>
     </ItemCard>
 );
 
-const ImageContainer = styled(ItemTileOverlay)`
+const PlusOverlay = styled(ItemTileOverlay)`
     display: flex;
     justify-content: center;
     align-items: center;
