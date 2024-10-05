@@ -6,9 +6,9 @@ import {
     LargeTileTextOverlay,
 } from "@/new/photos/components/ItemCards";
 import {
+    canAddToCollection,
+    canMoveToCollection,
     CollectionSummaryOrder,
-    isAddToAllowedCollection,
-    isMoveToAllowedCollection,
     type CollectionSummaries,
     type CollectionSummary,
 } from "@/new/photos/services/collection/ui";
@@ -88,23 +88,21 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
                     } else if (
                         attributes.intent === CollectionSelectorIntent.add
                     ) {
-                        return isAddToAllowedCollection(type);
+                        return canAddToCollection(type);
                     } else if (
                         attributes.intent === CollectionSelectorIntent.upload
                     ) {
                         return (
-                            isMoveToAllowedCollection(type) ||
-                            type == "uncategorized"
+                            canMoveToCollection(type) || type == "uncategorized"
                         );
                     } else if (
                         attributes.intent === CollectionSelectorIntent.restore
                     ) {
                         return (
-                            isMoveToAllowedCollection(type) ||
-                            type == "uncategorized"
+                            canMoveToCollection(type) || type == "uncategorized"
                         );
                     } else {
-                        return isMoveToAllowedCollection(type);
+                        return canMoveToCollection(type);
                     }
                 })
                 .sort((a, b) => {

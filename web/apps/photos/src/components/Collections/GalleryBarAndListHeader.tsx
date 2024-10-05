@@ -1,16 +1,14 @@
 import type { Collection } from "@/media/collection";
 import {
-    hasNonSystemCollections,
-    isSystemCollection,
-    shouldBeShownOnCollectionBar,
-} from "@/new/photos/services/collection/ui";
-import {
     GalleryBarImpl,
     type GalleryBarImplProps,
 } from "@/new/photos/components/Gallery/BarImpl";
 import { PeopleHeader } from "@/new/photos/components/Gallery/PeopleHeader";
 import {
     collectionsSortBy,
+    hasNonSystemCollections,
+    isSystemCollection,
+    shouldShowOnCollectionBar,
     type CollectionsSortBy,
     type CollectionSummaries,
 } from "@/new/photos/services/collection/ui";
@@ -212,7 +210,7 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
                 onChangeCollectionsSortBy={setCollectionsSortBy}
                 onShowAllCollections={() => setOpenAllCollectionDialog(true)}
                 collectionSummaries={sortedCollectionSummaries.filter((x) =>
-                    shouldBeShownOnCollectionBar(x.type),
+                    shouldShowOnCollectionBar(x.type),
                 )}
             />
 

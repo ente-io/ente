@@ -77,7 +77,7 @@ export const CollectionSummaryOrder = new Map<CollectionSummaryType, number>([
     ["defaultHidden", 7],
 ]);
 
-const SYSTEM_COLLECTION_TYPES = new Set<CollectionSummaryType>([
+const systemCSTypes = new Set<CollectionSummaryType>([
     "all",
     "archive",
     "trash",
@@ -86,7 +86,7 @@ const SYSTEM_COLLECTION_TYPES = new Set<CollectionSummaryType>([
     "defaultHidden",
 ]);
 
-const ADD_TO_NOT_ALLOWED_COLLECTION = new Set<CollectionSummaryType>([
+const addToDisabledCSTypes = new Set<CollectionSummaryType>([
     "all",
     "archive",
     "incomingShareViewer",
@@ -96,7 +96,7 @@ const ADD_TO_NOT_ALLOWED_COLLECTION = new Set<CollectionSummaryType>([
     "hiddenItems",
 ]);
 
-const MOVE_TO_NOT_ALLOWED_COLLECTION = new Set<CollectionSummaryType>([
+const moveToDisabledCSTypes = new Set<CollectionSummaryType>([
     "all",
     "archive",
     "incomingShareViewer",
@@ -107,7 +107,7 @@ const MOVE_TO_NOT_ALLOWED_COLLECTION = new Set<CollectionSummaryType>([
     "hiddenItems",
 ]);
 
-const HIDE_FROM_COLLECTION_BAR_TYPES = new Set<CollectionSummaryType>([
+const hideFromCollectionBarCSTypes = new Set<CollectionSummaryType>([
     "trash",
     "archive",
     "uncategorized",
@@ -123,18 +123,14 @@ export const hasNonSystemCollections = (
     return false;
 };
 
-export const isMoveToAllowedCollection = (type: CollectionSummaryType) => {
-    return !MOVE_TO_NOT_ALLOWED_COLLECTION.has(type);
-};
+export const canMoveToCollection = (type: CollectionSummaryType) =>
+    !moveToDisabledCSTypes.has(type);
 
-export const isAddToAllowedCollection = (type: CollectionSummaryType) => {
-    return !ADD_TO_NOT_ALLOWED_COLLECTION.has(type);
-};
+export const canAddToCollection = (type: CollectionSummaryType) =>
+    !addToDisabledCSTypes.has(type);
 
-export const isSystemCollection = (type: CollectionSummaryType) => {
-    return SYSTEM_COLLECTION_TYPES.has(type);
-};
+export const isSystemCollection = (type: CollectionSummaryType) =>
+    systemCSTypes.has(type);
 
-export const shouldBeShownOnCollectionBar = (type: CollectionSummaryType) => {
-    return !HIDE_FROM_COLLECTION_BAR_TYPES.has(type);
-};
+export const shouldShowOnCollectionBar = (type: CollectionSummaryType) =>
+    !hideFromCollectionBarCSTypes.has(type);
