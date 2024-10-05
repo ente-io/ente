@@ -1,5 +1,5 @@
 import {
-    AllCollectionTile,
+    CollectionTile,
     ItemCard,
     LargeTileTextOverlay,
 } from "@/new/photos/components/ItemCards";
@@ -166,7 +166,7 @@ const AllCollectionCard: React.FC<AllCollectionCardProps> = ({
     isScrolling,
 }) => (
     <ItemCard
-        TileComponent={AllCollectionTile}
+        TileComponent={CollectionTile}
         coverFile={collectionSummary.coverFile}
         onClick={() => onCollectionClick(collectionSummary.id)}
         isScrolling={isScrolling}

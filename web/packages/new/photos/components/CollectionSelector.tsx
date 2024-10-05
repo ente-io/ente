@@ -1,6 +1,6 @@
 import type { Collection } from "@/media/collection";
 import {
-    AllCollectionTile,
+    CollectionTile,
     ItemCard,
     ItemTileOverlay,
     LargeTileTextOverlay,
@@ -222,7 +222,7 @@ const CollectionSelectorCard: React.FC<CollectionSelectorCardProps> = ({
     onCollectionClick,
 }) => (
     <ItemCard
-        TileComponent={AllCollectionTile}
+        TileComponent={CollectionTile}
         coverFile={collectionSummary.coverFile}
         onClick={() => onCollectionClick(collectionSummary.id)}
     >
@@ -239,7 +239,7 @@ interface AddCollectionButtonProps {
 const AddCollectionButton: React.FC<AddCollectionButtonProps> = ({
     onClick,
 }) => (
-    <ItemCard TileComponent={AllCollectionTile} onClick={onClick}>
+    <ItemCard TileComponent={CollectionTile} onClick={onClick}>
         <LargeTileTextOverlay>{t("create_albums")}</LargeTileTextOverlay>
         <PlusOverlay>+</PlusOverlay>
     </ItemCard>

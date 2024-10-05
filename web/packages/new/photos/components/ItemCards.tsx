@@ -135,10 +135,10 @@ export const BarItemTile = styled(ItemTile)`
 `;
 
 /**
- * A large 150x150 TileComponent used when showing the list of all collections
- * in the all collections view.
+ * A large 150x150 TileComponent used when showing the list of collections in
+ * the all collections view and in the collection selector.
  */
-export const AllCollectionTile = styled(ItemTile)`
+export const CollectionTile = styled(ItemTile)`
     width: 150px;
     height: 150px;
 `;
@@ -171,7 +171,7 @@ export const TileTextOverlay = styled(ItemTileOverlay)`
 
 /**
  * A variation of {@link TileTextOverlay} for use with larger tiles like the
- * {@link AllCollectionTile}.
+ * {@link CollectionTile}.
  */
 export const LargeTileTextOverlay = styled(ItemTileOverlay)`
     padding: 8px;
