@@ -4,7 +4,7 @@ import {
     ItemCard,
     ItemTileOverlay,
     LargeTileTextOverlay,
-} from "@/new/photos/components/ItemCards";
+} from "@/new/photos/components/Tiles";
 import {
     canAddToCollection,
     canMoveToCollection,

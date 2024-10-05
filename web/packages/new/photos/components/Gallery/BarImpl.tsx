@@ -1,15 +1,15 @@
 import { useIsMobileWidth } from "@/base/hooks";
 import { CollectionsSortOptions } from "@/new/photos/components/CollectionsSortOptions";
-import {
-    BarItemTile,
-    ItemCard,
-    TileTextOverlay,
-} from "@/new/photos/components/ItemCards";
 import { FilledIconButton } from "@/new/photos/components/mui";
 import {
     IMAGE_CONTAINER_MAX_WIDTH,
     MIN_COLUMNS,
 } from "@/new/photos/components/PhotoList";
+import {
+    BarItemTile,
+    ItemCard,
+    TileTextOverlay,
+} from "@/new/photos/components/Tiles";
 import { UnstyledButton } from "@/new/photos/components/UnstyledButton";
 import type {
     CollectionSummary,

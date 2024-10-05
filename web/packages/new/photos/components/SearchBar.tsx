@@ -1,6 +1,6 @@
 import { assertionFailed } from "@/base/assert";
 import { useIsMobileWidth } from "@/base/hooks";
-import { ItemCard, PreviewItemTile } from "@/new/photos/components/ItemCards";
+import { ItemCard, PreviewItemTile } from "@/new/photos/components/Tiles";
 import {
     isMLSupported,
     mlStatusSnapshot,

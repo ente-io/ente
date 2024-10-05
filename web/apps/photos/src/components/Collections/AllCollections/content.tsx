@@ -2,7 +2,7 @@ import {
     CollectionTileButton,
     ItemCard,
     LargeTileTextOverlay,
-} from "@/new/photos/components/ItemCards";
+} from "@/new/photos/components/Tiles";
 import type { CollectionSummary } from "@/new/photos/services/collection/ui";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import useWindowSize from "@ente/shared/hooks/useWindowSize";
