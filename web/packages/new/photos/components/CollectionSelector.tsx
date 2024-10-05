@@ -185,18 +185,18 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
     );
 };
 
-const Dialog_ = styled(Dialog)(({ theme }) => ({
-    "& .MuiPaper-root": {
-        maxWidth: "494px",
-    },
-    "& .MuiDialogTitle-root": {
-        padding: "16px",
-        paddingRight: theme.spacing(1),
-    },
-    "& .MuiDialogContent-root": {
-        padding: "16px",
-    },
-}));
+const Dialog_ = styled(Dialog)`
+    & .MuiPaper-root {
+        max-width: 494px;
+    }
+    & .MuiDialogTitle-root {
+        padding: 16px;
+        padding-right: 8px;
+    }
+    & .MuiDialogContent-root {
+        padding: 16px;
+    }
+`;
 
 const dialogTitleForAction = (action: CollectionSelectorAction) => {
     switch (action) {
