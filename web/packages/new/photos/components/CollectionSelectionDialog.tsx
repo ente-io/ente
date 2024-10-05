@@ -123,17 +123,21 @@ export const CollectionSelectionDialog: React.FC<
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [collectionSummaries, attributes, open]);
 
+    if (!attributes) {
+        return <></>;
+    }
+
     if (!collectionsToShow.length) {
         return <></>;
     }
 
     const handleCollectionClick = async (collectionID: number) => {
-        attributes?.callback(await collectionForCollectionID(collectionID));
+        attributes.callback(await collectionForCollectionID(collectionID));
         onClose();
     };
 
     const onUserTriggeredClose = () => {
-        attributes?.onCancel?.();
+        attributes.onCancel?.();
         onClose();
     };
 
@@ -145,7 +149,7 @@ export const CollectionSelectionDialog: React.FC<
             fullWidth
         >
             <DialogTitleWithCloseButton onClose={onUserTriggeredClose}>
-                {dialogTitleForAction(attributes?.action)}
+                {dialogTitleForAction(attributes.action)}
             </DialogTitleWithCloseButton>
             <DialogContent sx={{ "&&&": { padding: 0 } }}>
                 <FlexWrapper flexWrap="wrap" gap={"4px"} padding={"16px"}>
@@ -178,9 +182,7 @@ const Dialog_ = styled(Dialog)(({ theme }) => ({
     },
 }));
 
-const dialogTitleForAction = (
-    action: CollectionSelectionAction | undefined,
-) => {
+const dialogTitleForAction = (action: CollectionSelectionAction) => {
     switch (action) {
         case "upload":
             return t("upload_to_album");
@@ -192,8 +194,6 @@ const dialogTitleForAction = (
             return t("restore_to_album");
         case "unhide":
             return t("unhide_to_album");
-        case undefined:
-            return t("select_album");
     }
 };
 
