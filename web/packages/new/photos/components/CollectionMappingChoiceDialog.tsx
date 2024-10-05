@@ -12,9 +12,12 @@ import {
 import { t } from "i18next";
 import React from "react";
 import { SpaceBetweenFlex } from "./mui";
-import { DialogCloseIconButton, type DialogVisiblityProps } from "./mui/Dialog";
+import {
+    DialogCloseIconButton,
+    type DialogVisibilityProps,
+} from "./mui/Dialog";
 
-type CollectionMappingChoiceModalProps = DialogVisiblityProps & {
+type CollectionMappingChoiceModalProps = DialogVisibilityProps & {
     didSelect: (mapping: CollectionMapping) => void;
 };
 

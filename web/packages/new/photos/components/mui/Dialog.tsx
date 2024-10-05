@@ -6,14 +6,14 @@ import React from "react";
 /**
  * Common props to control the display of a dialog-like component.
  */
-export interface DialogVisiblityProps {
+export interface DialogVisibilityProps {
     /** If `true`, the dialog is shown. */
     open: boolean;
     /** Callback fired when the dialog wants to be closed. */
     onClose: () => void;
 }
 
-type DialogCloseIconButtonProps = Omit<DialogVisiblityProps, "open">;
+type DialogCloseIconButtonProps = Omit<DialogVisibilityProps, "open">;
 
 /**
  * A convenience {@link IconButton} commonly needed on {@link Dialog}s, at the

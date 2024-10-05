@@ -23,6 +23,7 @@ import {
 } from "@mui/material";
 import { t } from "i18next";
 import { useEffect, useState } from "react";
+import type { DialogVisibilityProps } from "./mui/Dialog";
 
 export enum CollectionSelectorIntent {
     upload,
@@ -44,14 +45,15 @@ export interface CollectionSelectorAttributes {
     onCancel?: () => void;
 }
 
-interface CollectionSelectorProps {
-    open: boolean;
-    onClose: () => void;
+type CollectionSelectionDialogProps = DialogVisibilityProps & {
     /**
-     * The same {@link CollectionSelectionDialog} can be used for multiple purposes by
-     * providing attributes specific to each use case.
+     * The same {@link CollectionSelectionDialog} can be used for different
+     * purposes by customizing the {@link attributes} prop before opening it.
      */
     attributes: CollectionSelectorAttributes;
+    /**
+     * The collections to list.
+     */
     collectionSummaries: CollectionSummaries;
     /**
      * A function to map from a collection ID to a {@link Collection}.
@@ -61,17 +63,20 @@ interface CollectionSelectorProps {
      * {@link callback} attribute of {@link CollectionSelectorAttributes}.
      */
     collectionForCollectionID: (collectionID: number) => Promise<Collection>;
-}
+};
 
 /**
  * A dialog allowing the user to select one of their existing collections or
  * create a new one.
  */
-export const CollectionSelectionDialog: React.FC<CollectionSelectorProps> = ({
+export const CollectionSelectionDialog: React.FC<
+    CollectionSelectionDialogProps
+> = ({
+    open,
+    onClose,
     attributes,
     collectionSummaries,
     collectionForCollectionID,
-    ...props
 }) => {
     // Make the dialog fullscreen if the screen is <= the dialog's max width.
     const isFullScreen = useMediaQuery("(max-width: 494px)");
@@ -81,7 +86,7 @@ export const CollectionSelectionDialog: React.FC<CollectionSelectorProps> = ({
     >([]);
 
     useEffect(() => {
-        if (!attributes || !props.open) {
+        if (!attributes || !open) {
             return;
         }
         const main = async () => {
@@ -119,13 +124,13 @@ export const CollectionSelectionDialog: React.FC<CollectionSelectorProps> = ({
                     );
                 });
             if (collectionsToShow.length === 0) {
-                props.onClose();
+                onClose();
                 attributes.showNextModal();
             }
             setCollectionsToShow(collectionsToShow);
         };
         main();
-    }, [collectionSummaries, attributes, props.open]);
+    }, [collectionSummaries, attributes, open]);
 
     if (!collectionsToShow?.length) {
         return <></>;
@@ -133,18 +138,18 @@ export const CollectionSelectionDialog: React.FC<CollectionSelectorProps> = ({
 
     const handleCollectionClick = async (collectionID: number) => {
         attributes.callback(await collectionForCollectionID(collectionID));
-        props.onClose();
+        onClose();
     };
 
     const onUserTriggeredClose = () => {
         attributes.onCancel?.();
-        props.onClose();
+        onClose();
     };
 
     return (
         <Dialog_
+            open={open}
             onClose={onUserTriggeredClose}
-            open={props.open}
             fullScreen={isFullScreen}
             fullWidth
         >
@@ -180,9 +185,7 @@ export const CollectionSelectionDialog: React.FC<CollectionSelectorProps> = ({
     );
 };
 
-export const AllCollectionMobileBreakpoint = 559;
-
-export const Dialog_ = styled(Dialog)(({ theme }) => ({
+const Dialog_ = styled(Dialog)(({ theme }) => ({
     "& .MuiPaper-root": {
         maxWidth: "494px",
     },
