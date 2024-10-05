@@ -8,10 +8,6 @@ import {
     CollectionType,
 } from "@/media/collection";
 import { ItemVisibility } from "@/media/file-metadata";
-import type {
-    CollectionSummaries,
-    CollectionSummaryType,
-} from "@/new/photos/services/collection/ui";
 import { getAllLocalFiles, getLocalFiles } from "@/new/photos/services/files";
 import { EnteFile } from "@/new/photos/types/file";
 import { SUB_TYPE } from "@/new/photos/types/magicMetadata";
@@ -44,43 +40,6 @@ export const TRASH_SECTION = -2;
 export const DUMMY_UNCATEGORIZED_COLLECTION = -3;
 export const HIDDEN_ITEMS_SECTION = -4;
 export const ALL_SECTION = 0;
-
-const SYSTEM_COLLECTION_TYPES = new Set<CollectionSummaryType>([
-    "all",
-    "archive",
-    "trash",
-    "uncategorized",
-    "hiddenItems",
-    "defaultHidden",
-]);
-
-const ADD_TO_NOT_ALLOWED_COLLECTION = new Set<CollectionSummaryType>([
-    "all",
-    "archive",
-    "incomingShareViewer",
-    "trash",
-    "uncategorized",
-    "defaultHidden",
-    "hiddenItems",
-]);
-
-const MOVE_TO_NOT_ALLOWED_COLLECTION = new Set<CollectionSummaryType>([
-    "all",
-    "archive",
-    "incomingShareViewer",
-    "incomingShareCollaborator",
-    "trash",
-    "uncategorized",
-    "defaultHidden",
-    "hiddenItems",
-]);
-
-const HIDE_FROM_COLLECTION_BAR_TYPES = new Set<CollectionSummaryType>([
-    "trash",
-    "archive",
-    "uncategorized",
-    "defaultHidden",
-]);
 
 export enum COLLECTION_OPS_TYPE {
     ADD,
@@ -383,31 +342,6 @@ export const getDefaultHiddenCollectionIDs = (collections: Collection[]) => {
             .filter(isDefaultHiddenCollection)
             .map((collection) => collection.id),
     );
-};
-
-export const hasNonSystemCollections = (
-    collectionSummaries: CollectionSummaries,
-) => {
-    for (const collectionSummary of collectionSummaries.values()) {
-        if (!isSystemCollection(collectionSummary.type)) return true;
-    }
-    return false;
-};
-
-export const isMoveToAllowedCollection = (type: CollectionSummaryType) => {
-    return !MOVE_TO_NOT_ALLOWED_COLLECTION.has(type);
-};
-
-export const isAddToAllowedCollection = (type: CollectionSummaryType) => {
-    return !ADD_TO_NOT_ALLOWED_COLLECTION.has(type);
-};
-
-export const isSystemCollection = (type: CollectionSummaryType) => {
-    return SYSTEM_COLLECTION_TYPES.has(type);
-};
-
-export const shouldBeShownOnCollectionBar = (type: CollectionSummaryType) => {
-    return !HIDE_FROM_COLLECTION_BAR_TYPES.has(type);
 };
 
 export const getUserOwnedCollections = (collections: Collection[]) => {

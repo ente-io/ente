@@ -1,5 +1,10 @@
 import type { Collection } from "@/media/collection";
 import {
+    hasNonSystemCollections,
+    isSystemCollection,
+    shouldBeShownOnCollectionBar,
+} from "@/new/photos/services/collection/ui";
+import {
     GalleryBarImpl,
     type GalleryBarImplProps,
 } from "@/new/photos/components/Gallery/BarImpl";
@@ -29,12 +34,7 @@ import React, {
 } from "react";
 import { sortCollectionSummaries } from "services/collectionService";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
-import {
-    ALL_SECTION,
-    hasNonSystemCollections,
-    isSystemCollection,
-    shouldBeShownOnCollectionBar,
-} from "utils/collection";
+import { ALL_SECTION } from "utils/collection";
 import {
     FilesDownloadProgressAttributes,
     isFilesDownloadCancelled,

@@ -7,6 +7,8 @@ import {
 } from "@/new/photos/components/ItemCards";
 import {
     CollectionSummaryOrder,
+    isAddToAllowedCollection,
+    isMoveToAllowedCollection,
     type CollectionSummaries,
     type CollectionSummary,
 } from "@/new/photos/services/collection/ui";
@@ -21,10 +23,6 @@ import {
 } from "@mui/material";
 import { t } from "i18next";
 import { useEffect, useState } from "react";
-import {
-    isAddToAllowedCollection,
-    isMoveToAllowedCollection,
-} from "utils/collection";
 
 export enum CollectionSelectorIntent {
     upload,

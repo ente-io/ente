@@ -76,3 +76,65 @@ export const CollectionSummaryOrder = new Map<CollectionSummaryType, number>([
     ["trash", 6],
     ["defaultHidden", 7],
 ]);
+
+const SYSTEM_COLLECTION_TYPES = new Set<CollectionSummaryType>([
+    "all",
+    "archive",
+    "trash",
+    "uncategorized",
+    "hiddenItems",
+    "defaultHidden",
+]);
+
+const ADD_TO_NOT_ALLOWED_COLLECTION = new Set<CollectionSummaryType>([
+    "all",
+    "archive",
+    "incomingShareViewer",
+    "trash",
+    "uncategorized",
+    "defaultHidden",
+    "hiddenItems",
+]);
+
+const MOVE_TO_NOT_ALLOWED_COLLECTION = new Set<CollectionSummaryType>([
+    "all",
+    "archive",
+    "incomingShareViewer",
+    "incomingShareCollaborator",
+    "trash",
+    "uncategorized",
+    "defaultHidden",
+    "hiddenItems",
+]);
+
+const HIDE_FROM_COLLECTION_BAR_TYPES = new Set<CollectionSummaryType>([
+    "trash",
+    "archive",
+    "uncategorized",
+    "defaultHidden",
+]);
+
+export const hasNonSystemCollections = (
+    collectionSummaries: CollectionSummaries,
+) => {
+    for (const collectionSummary of collectionSummaries.values()) {
+        if (!isSystemCollection(collectionSummary.type)) return true;
+    }
+    return false;
+};
+
+export const isMoveToAllowedCollection = (type: CollectionSummaryType) => {
+    return !MOVE_TO_NOT_ALLOWED_COLLECTION.has(type);
+};
+
+export const isAddToAllowedCollection = (type: CollectionSummaryType) => {
+    return !ADD_TO_NOT_ALLOWED_COLLECTION.has(type);
+};
+
+export const isSystemCollection = (type: CollectionSummaryType) => {
+    return SYSTEM_COLLECTION_TYPES.has(type);
+};
+
+export const shouldBeShownOnCollectionBar = (type: CollectionSummaryType) => {
+    return !HIDE_FROM_COLLECTION_BAR_TYPES.has(type);
+};
