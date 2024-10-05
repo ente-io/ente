@@ -87,24 +87,13 @@ const systemCSTypes = new Set<CollectionSummaryType>([
 ]);
 
 const addToDisabledCSTypes = new Set<CollectionSummaryType>([
-    "all",
-    "archive",
+    ...systemCSTypes,
     "incomingShareViewer",
-    "trash",
-    "uncategorized",
-    "defaultHidden",
-    "hiddenItems",
 ]);
 
 const moveToDisabledCSTypes = new Set<CollectionSummaryType>([
-    "all",
-    "archive",
-    "incomingShareViewer",
+    ...addToDisabledCSTypes,
     "incomingShareCollaborator",
-    "trash",
-    "uncategorized",
-    "defaultHidden",
-    "hiddenItems",
 ]);
 
 const hideFromCollectionBarCSTypes = new Set<CollectionSummaryType>([
@@ -114,23 +103,21 @@ const hideFromCollectionBarCSTypes = new Set<CollectionSummaryType>([
     "defaultHidden",
 ]);
 
-export const hasNonSystemCollections = (
-    collectionSummaries: CollectionSummaries,
-) => {
-    for (const collectionSummary of collectionSummaries.values()) {
-        if (!isSystemCollection(collectionSummary.type)) return true;
-    }
-    return false;
-};
+export const isSystemCollection = (type: CollectionSummaryType) =>
+    systemCSTypes.has(type);
 
-export const canMoveToCollection = (type: CollectionSummaryType) =>
-    !moveToDisabledCSTypes.has(type);
+export const areOnlySystemCollections = (
+    collectionSummaries: CollectionSummaries,
+) =>
+    [...collectionSummaries.values()].every(({ type }) =>
+        isSystemCollection(type),
+    );
 
 export const canAddToCollection = (type: CollectionSummaryType) =>
     !addToDisabledCSTypes.has(type);
 
-export const isSystemCollection = (type: CollectionSummaryType) =>
-    systemCSTypes.has(type);
+export const canMoveToCollection = (type: CollectionSummaryType) =>
+    !moveToDisabledCSTypes.has(type);
 
 export const shouldShowOnCollectionBar = (type: CollectionSummaryType) =>
     !hideFromCollectionBarCSTypes.has(type);

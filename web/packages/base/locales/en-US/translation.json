@@ -303,7 +303,6 @@
     "LARGER_THAN_AVAILABLE_STORAGE_INFO": "These files were not uploaded as they exceed the maximum size limit for your storage plan",
     "TOO_LARGE_INFO": "These files were not uploaded as they exceed our maximum file size limit",
     "THUMBNAIL_GENERATION_FAILED_INFO": "These files were uploaded, but unfortunately we could not generate the thumbnails for them.",
-    "select_album": "Select album",
     "upload_to_album": "Upload to album",
     "add_to_album": "Add to album",
     "move_to_album": "Move to album",

@@ -5,9 +5,9 @@ import SingleInputForm, {
 import { Dialog, DialogContent, DialogTitle } from "@mui/material";
 import { t } from "i18next";
 import React from "react";
-import { type DialogVisiblityProps } from "./mui/Dialog";
+import { type DialogVisibilityProps } from "./mui/Dialog";
 
-type NameInputDialogProps = DialogVisiblityProps & {
+type NameInputDialogProps = DialogVisibilityProps & {
     /** Title of the dialog. */
     title: string;
     /** Placeholder string to show in the text input when it is empty. */

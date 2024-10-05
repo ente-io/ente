@@ -4,6 +4,10 @@ import { useIsMobileWidth } from "@/base/hooks";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
 import {
+    CollectionSelector,
+    type CollectionSelectorAttributes,
+} from "@/new/photos/components/CollectionSelector";
+import {
     PeopleEmptyState,
     SearchResultsHeader,
 } from "@/new/photos/components/Gallery";
@@ -16,7 +20,7 @@ import {
 import { WhatsNew } from "@/new/photos/components/WhatsNew";
 import { shouldShowWhatsNew } from "@/new/photos/services/changelog";
 import type { CollectionSummaries } from "@/new/photos/services/collection/ui";
-import { hasNonSystemCollections } from "@/new/photos/services/collection/ui";
+import { areOnlySystemCollections } from "@/new/photos/services/collection/ui";
 import downloadManager from "@/new/photos/services/download";
 import {
     getLocalFiles,
@@ -67,10 +71,6 @@ import AuthenticateUserModal from "components/AuthenticateUserModal";
 import CollectionNamer, {
     CollectionNamerAttributes,
 } from "components/Collections/CollectionNamer";
-import {
-    CollectionSelector,
-    CollectionSelectorAttributes,
-} from "components/Collections/CollectionSelector";
 import { GalleryBarAndListHeader } from "components/Collections/GalleryBarAndListHeader";
 import ExportModal from "components/ExportModal";
 import {
@@ -96,6 +96,7 @@ import { useRouter } from "next/router";
 import { AppContext } from "pages/_app";
 import {
     createContext,
+    useCallback,
     useContext,
     useEffect,
     useMemo,
@@ -212,9 +213,6 @@ export default function Gallery() {
     });
     const [planModalView, setPlanModalView] = useState(false);
     const [blockingLoad, setBlockingLoad] = useState(false);
-    const [collectionSelectorAttributes, setCollectionSelectorAttributes] =
-        useState<CollectionSelectorAttributes>(null);
-    const [collectionSelectorView, setCollectionSelectorView] = useState(false);
     const [collectionNamerAttributes, setCollectionNamerAttributes] =
         useState<CollectionNamerAttributes>(null);
     const [collectionNamerView, setCollectionNamerView] = useState(false);
@@ -350,6 +348,10 @@ export default function Gallery() {
         new Set<number>(),
     );
 
+    const [openCollectionSelector, setOpenCollectionSelector] = useState(false);
+    const [collectionSelectorAttributes, setCollectionSelectorAttributes] =
+        useState<CollectionSelectorAttributes | undefined>();
+
     const router = useRouter();
 
     // Ensure that the keys in local storage are not malformed by verifying that
@@ -473,10 +475,6 @@ export default function Gallery() {
         const emailList = constructEmailList(user, collections, familyData);
         setEmailList(emailList);
     }, [user, collections, familyData]);
-
-    useEffect(() => {
-        collectionSelectorAttributes && setCollectionSelectorView(true);
-    }, [collectionSelectorAttributes]);
 
     useEffect(() => {
         collectionNamerAttributes && setCollectionNamerView(true);
@@ -700,7 +698,7 @@ export default function Gallery() {
         if (
             sidebarView ||
             uploadTypeSelectorView ||
-            collectionSelectorView ||
+            openCollectionSelector ||
             collectionNamerView ||
             fixCreationTimeView ||
             planModalView ||
@@ -943,7 +941,7 @@ export default function Gallery() {
         (ops: COLLECTION_OPS_TYPE) => async (collection: Collection) => {
             startLoading();
             try {
-                setCollectionSelectorView(false);
+                setOpenCollectionSelector(false);
                 const selectedFiles = getSelectedFiles(selected, filteredData);
                 const toProcessFiles =
                     ops === COLLECTION_OPS_TYPE.REMOVE
@@ -1067,10 +1065,6 @@ export default function Gallery() {
         setUploadTypeSelectorIntent(intent ?? "upload");
     };
 
-    const closeCollectionSelector = () => {
-        setCollectionSelectorView(false);
-    };
-
     const openExportModal = () => {
         setExportModalView(true);
     };
@@ -1111,6 +1105,19 @@ export default function Gallery() {
         setActivePersonID(personID);
         setBarMode("people");
     };
+
+    const handleOpenCollectionSelector = useCallback(
+        (attributes: CollectionSelectorAttributes) => {
+            setCollectionSelectorAttributes(attributes);
+            setOpenCollectionSelector(true);
+        },
+        [],
+    );
+
+    const handleCloseCollectionSelector = useCallback(
+        () => setOpenCollectionSelector(false),
+        [],
+    );
 
     if (!collectionSummaries || !filteredData) {
         return <div></div>;
@@ -1173,10 +1180,10 @@ export default function Gallery() {
                     attributes={collectionNamerAttributes}
                 />
                 <CollectionSelector
-                    open={collectionSelectorView}
-                    onClose={closeCollectionSelector}
-                    collectionSummaries={collectionSummaries}
+                    open={openCollectionSelector}
+                    onClose={handleCloseCollectionSelector}
                     attributes={collectionSelectorAttributes}
+                    collectionSummaries={collectionSummaries}
                     collectionForCollectionID={(id) =>
                         findCollectionCreatingUncategorizedIfNeeded(
                             collections,
@@ -1244,29 +1251,20 @@ export default function Gallery() {
                 <Uploader
                     activeCollection={activeCollection}
                     syncWithRemote={syncWithRemote}
-                    showCollectionSelector={setCollectionSelectorView.bind(
-                        null,
-                        true,
-                    )}
                     closeUploadTypeSelector={setUploadTypeSelectorView.bind(
                         null,
                         false,
                     )}
-                    setCollectionSelectorAttributes={
-                        setCollectionSelectorAttributes
-                    }
-                    closeCollectionSelector={setCollectionSelectorView.bind(
-                        null,
-                        false,
-                    )}
+                    onOpenCollectionSelector={handleOpenCollectionSelector}
+                    onCloseCollectionSelector={handleCloseCollectionSelector}
                     setLoading={setBlockingLoad}
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
                     setShouldDisableDropzone={setShouldDisableDropzone}
                     setFiles={setFiles}
                     setCollections={setCollections}
-                    isFirstUpload={
-                        !hasNonSystemCollections(collectionSummaries)
-                    }
+                    isFirstUpload={areOnlySystemCollections(
+                        collectionSummaries,
+                    )}
                     {...{
                         dragAndDropFiles,
                         openFileSelector,
@@ -1336,8 +1334,8 @@ export default function Gallery() {
                             showCreateCollectionModal={
                                 showCreateCollectionModal
                             }
-                            setCollectionSelectorAttributes={
-                                setCollectionSelectorAttributes
+                            onOpenCollectionSelector={
+                                handleOpenCollectionSelector
                             }
                             count={selected.count}
                             ownCount={selected.ownCount}
