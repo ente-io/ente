@@ -52,3 +52,27 @@ export const collectionsSortBy = [
  * Type of individual {@link collectionsSortBy} values.
  */
 export type CollectionsSortBy = (typeof collectionsSortBy)[number];
+
+/**
+ * An ordering of collection "categories".
+ *
+ * Within each category, the collections are sorted by the applicable
+ * {@link CollectionsSortBy}.
+ */
+export const CollectionSummaryOrder = new Map<CollectionSummaryType, number>([
+    ["all", 0],
+    ["hiddenItems", 0],
+    ["uncategorized", 1],
+    ["favorites", 2],
+    ["pinned", 3],
+    ["album", 4],
+    ["folder", 4],
+    ["incomingShareViewer", 4],
+    ["incomingShareCollaborator", 4],
+    ["outgoingShare", 4],
+    ["sharedOnlyViaLink", 4],
+    ["archived", 4],
+    ["archive", 5],
+    ["trash", 6],
+    ["defaultHidden", 7],
+]);

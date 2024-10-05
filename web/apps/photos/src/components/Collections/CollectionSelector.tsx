@@ -5,9 +5,10 @@ import {
     ItemTileOverlay,
     LargeTileTextOverlay,
 } from "@/new/photos/components/ItemCards";
-import type {
-    CollectionSummaries,
-    CollectionSummary,
+import {
+    CollectionSummaryOrder,
+    type CollectionSummaries,
+    type CollectionSummary,
 } from "@/new/photos/types/collection";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleWithCloseButton";
@@ -22,7 +23,6 @@ import { t } from "i18next";
 import { useEffect, useState } from "react";
 import { createUnCategorizedCollection } from "services/collectionService";
 import {
-    COLLECTION_SORT_ORDER,
     DUMMY_UNCATEGORIZED_COLLECTION,
     isAddToAllowedCollection,
     isMoveToAllowedCollection,
@@ -109,8 +109,8 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
                 })
                 .sort((a, b) => {
                     return (
-                        COLLECTION_SORT_ORDER.get(a.type) -
-                        COLLECTION_SORT_ORDER.get(b.type)
+                        CollectionSummaryOrder.get(a.type) -
+                        CollectionSummaryOrder.get(b.type)
                     );
                 });
             if (collectionsToShow.length === 0) {

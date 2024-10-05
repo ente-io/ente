@@ -45,23 +45,7 @@ export const DUMMY_UNCATEGORIZED_COLLECTION = -3;
 export const HIDDEN_ITEMS_SECTION = -4;
 export const ALL_SECTION = 0;
 
-export const COLLECTION_SORT_ORDER = new Map<CollectionSummaryType, number>([
-    ["all", 0],
-    ["hiddenItems", 0],
-    ["uncategorized", 1],
-    ["favorites", 2],
-    ["pinned", 3],
-    ["album", 4],
-    ["folder", 4],
-    ["incomingShareViewer", 4],
-    ["incomingShareCollaborator", 4],
-    ["outgoingShare", 4],
-    ["sharedOnlyViaLink", 4],
-    ["archived", 4],
-    ["archive", 5],
-    ["trash", 6],
-    ["defaultHidden", 7],
-]);
+
 
 const SYSTEM_COLLECTION_TYPES = new Set<CollectionSummaryType>([
     "all",
