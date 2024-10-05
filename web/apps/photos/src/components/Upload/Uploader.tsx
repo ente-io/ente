@@ -3,6 +3,7 @@ import log from "@/base/log";
 import type { CollectionMapping, Electron, ZipItem } from "@/base/types/ipc";
 import type { Collection } from "@/media/collection";
 import { CollectionMappingChoiceDialog } from "@/new/photos/components/CollectionMappingChoiceDialog";
+import { CollectionSelectorIntent } from "@/new/photos/components/CollectionSelectionDialog";
 import { exportMetadataDirectoryName } from "@/new/photos/services/export";
 import type {
     FileAndPath,
@@ -13,7 +14,6 @@ import { firstNonEmpty } from "@/utils/array";
 import { ensure } from "@/utils/ensure";
 import { CustomError } from "@ente/shared/error";
 import DiscFullIcon from "@mui/icons-material/DiscFull";
-import { CollectionSelectorIntent } from "components/Collections/CollectionSelector";
 import UserNameInputDialog from "components/UserNameInputDialog";
 import { t } from "i18next";
 import isElectron from "is-electron";

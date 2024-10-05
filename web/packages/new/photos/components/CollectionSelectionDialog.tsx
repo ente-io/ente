@@ -47,6 +47,10 @@ export interface CollectionSelectorAttributes {
 interface CollectionSelectorProps {
     open: boolean;
     onClose: () => void;
+    /**
+     * The same {@link CollectionSelectionDialog} can be used for multiple purposes by
+     * providing attributes specific to each use case.
+     */
     attributes: CollectionSelectorAttributes;
     collectionSummaries: CollectionSummaries;
     /**
@@ -63,7 +67,7 @@ interface CollectionSelectorProps {
  * A dialog allowing the user to select one of their existing collections or
  * create a new one.
  */
-export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
+export const CollectionSelectionDialog: React.FC<CollectionSelectorProps> = ({
     attributes,
     collectionSummaries,
     collectionForCollectionID,

@@ -1,8 +1,8 @@
 import type { Collection } from "@/media/collection";
+import { CollectionSelectorAttributes } from "@/new/photos/components/CollectionSelectionDialog";
 import { type SelectionContext } from "@/new/photos/components/Gallery";
 import { EnteFile } from "@/new/photos/types/file";
 import type { User } from "@ente/shared/user/types";
-import { CollectionSelectorAttributes } from "components/Collections/CollectionSelector";
 import { FilesDownloadProgressAttributes } from "components/FilesDownloadProgress";
 import { TimeStampListItem } from "components/PhotoList";
 

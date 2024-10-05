@@ -1,5 +1,6 @@
 import { SelectionBar } from "@/base/components/Navbar";
 import type { Collection } from "@/media/collection";
+import { CollectionSelectorIntent } from "@/new/photos/components/CollectionSelectionDialog";
 import type { GalleryBarMode } from "@/new/photos/components/Gallery/BarImpl";
 import { FluidContainer } from "@ente/shared/components/Container";
 import ClockIcon from "@mui/icons-material/AccessTime";
@@ -15,7 +16,6 @@ import UnArchiveIcon from "@mui/icons-material/Unarchive";
 import VisibilityOffOutlined from "@mui/icons-material/VisibilityOffOutlined";
 import VisibilityOutlined from "@mui/icons-material/VisibilityOutlined";
 import { Box, IconButton, Stack, Tooltip } from "@mui/material";
-import { CollectionSelectorIntent } from "components/Collections/CollectionSelector";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import { useContext } from "react";

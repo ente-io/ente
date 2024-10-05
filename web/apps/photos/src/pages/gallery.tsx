@@ -4,6 +4,10 @@ import { useIsMobileWidth } from "@/base/hooks";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
 import {
+    CollectionSelectionDialog,
+    CollectionSelectorAttributes,
+} from "@/new/photos/components/CollectionSelectionDialog";
+import {
     PeopleEmptyState,
     SearchResultsHeader,
 } from "@/new/photos/components/Gallery";
@@ -67,10 +71,6 @@ import AuthenticateUserModal from "components/AuthenticateUserModal";
 import CollectionNamer, {
     CollectionNamerAttributes,
 } from "components/Collections/CollectionNamer";
-import {
-    CollectionSelector,
-    CollectionSelectorAttributes,
-} from "components/Collections/CollectionSelector";
 import { GalleryBarAndListHeader } from "components/Collections/GalleryBarAndListHeader";
 import ExportModal from "components/ExportModal";
 import {
@@ -1172,7 +1172,7 @@ export default function Gallery() {
                     onHide={setCollectionNamerView.bind(null, false)}
                     attributes={collectionNamerAttributes}
                 />
-                <CollectionSelector
+                <CollectionSelectionDialog
                     open={collectionSelectorView}
                     onClose={closeCollectionSelector}
                     collectionSummaries={collectionSummaries}
