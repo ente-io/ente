@@ -303,7 +303,6 @@
     "LARGER_THAN_AVAILABLE_STORAGE_INFO": "Deze bestanden zijn niet geüpload omdat ze de maximale grootte van uw opslagplan overschrijden",
     "TOO_LARGE_INFO": "Deze bestanden zijn niet geüpload omdat ze onze limiet voor bestandsgrootte overschrijden",
     "THUMBNAIL_GENERATION_FAILED_INFO": "Deze bestanden zijn geüpload, maar helaas konden we geen thumbnails voor ze genereren.",
-    "select_album": "Album selecteren",
     "upload_to_album": "Uploaden naar album",
     "add_to_album": "Toevoegen aan album",
     "move_to_album": "Verplaats naar album",

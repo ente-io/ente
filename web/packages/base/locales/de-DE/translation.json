@@ -303,7 +303,6 @@
     "LARGER_THAN_AVAILABLE_STORAGE_INFO": "Diese Dateien wurden nicht hochgeladen, da sie die maximale Größe für Ihren Speicherplan überschreiten",
     "TOO_LARGE_INFO": "Diese Dateien wurden nicht hochgeladen, da sie unsere maximale Dateigröße überschreiten",
     "THUMBNAIL_GENERATION_FAILED_INFO": "Diese Dateien wurden hochgeladen, aber leider konnten wir nicht die Thumbnails für sie generieren.",
-    "select_album": "Album auswählen",
     "upload_to_album": "In Album hochladen",
     "add_to_album": "Zum Album hinzufügen",
     "move_to_album": "Zum Album verschieben",

@@ -303,7 +303,6 @@
     "LARGER_THAN_AVAILABLE_STORAGE_INFO": "Questi file non sono stati caricati perché supererebbero la capacità massima del tuo piano di spazio d'archiviazione",
     "TOO_LARGE_INFO": "Questi file non sono stati caricati perché superano il nostro limite di pesantezza di un file",
     "THUMBNAIL_GENERATION_FAILED_INFO": "Questi file sono stati caricati, ma purtroppo non siamo riusciti a generare le relative miniature.",
-    "select_album": "Seleziona album",
     "upload_to_album": "Carica nell'album",
     "add_to_album": "Aggiungi all'album",
     "move_to_album": "Sposta nell'album",

@@ -303,7 +303,6 @@
     "LARGER_THAN_AVAILABLE_STORAGE_INFO": "Te pliki nie zostały przesłane, ponieważ przekraczają maksymalny limit rozmiaru dla Twojego planu pojemności",
     "TOO_LARGE_INFO": "Te pliki nie zostały przesłane, ponieważ przekraczają maksymalny limit rozmiaru pliku",
     "THUMBNAIL_GENERATION_FAILED_INFO": "Te pliki zostały przesłane, ale niestety nie mogliśmy dla nich wygenerować miniatur.",
-    "select_album": "Wybierz album",
     "upload_to_album": "Prześlij do albumu",
     "add_to_album": "Dodaj do albumu",
     "move_to_album": "Przenieś do albumu",
