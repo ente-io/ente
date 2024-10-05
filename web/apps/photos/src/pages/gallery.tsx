@@ -1177,7 +1177,12 @@ export default function Gallery() {
                     onClose={closeCollectionSelector}
                     collectionSummaries={collectionSummaries}
                     attributes={collectionSelectorAttributes}
-                    collections={collections}
+                    collectionForCollectionID={(id) =>
+                        findCollectionCreatingUncategorizedIfNeeded(
+                            collections,
+                            id,
+                        )
+                    }
                 />
                 <FilesDownloadProgress
                     attributesList={filesDownloadProgressAttributesList}
@@ -1188,6 +1193,7 @@ export default function Gallery() {
                     hide={() => setFixCreationTimeView(false)}
                     attributes={fixCreationTimeAttributes}
                 />
+
                 <NavbarBase
                     sx={{
                         background: "transparent",
@@ -1469,7 +1475,7 @@ const HiddenSectionNavbarContents: React.FC<
  * given {@link collectionID}. As a special case, if collection ID is the
  * placeholder ID of the uncategorized collection, create it and then return it.
  */
-const findCollectionByCreatingUncategorizedIfNeeded = async (
+const findCollectionCreatingUncategorizedIfNeeded = async (
     collections: Collection[],
     collectionID: number,
 ) => {

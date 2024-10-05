@@ -21,9 +21,7 @@ import {
 } from "@mui/material";
 import { t } from "i18next";
 import { useEffect, useState } from "react";
-import { createUnCategorizedCollection } from "services/collectionService";
 import {
-    DUMMY_UNCATEGORIZED_COLLECTION,
     isAddToAllowedCollection,
     isMoveToAllowedCollection,
 } from "utils/collection";
@@ -52,8 +50,15 @@ interface CollectionSelectorProps {
     open: boolean;
     onClose: () => void;
     attributes: CollectionSelectorAttributes;
-    collections: Collection[];
     collectionSummaries: CollectionSummaries;
+    /**
+     * A function to map from a collection ID to a {@link Collection}.
+     *
+     * This is invoked when the user makes a selection, to convert the ID of the
+     * selected collection into a collection object that can be passed to the
+     * {@link callback} attribute of {@link CollectionSelectorAttributes}.
+     */
+    collectionForCollectionID: (collectionID: number) => Promise<Collection>;
 }
 
 /**
@@ -63,7 +68,7 @@ interface CollectionSelectorProps {
 export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
     attributes,
     collectionSummaries,
-    collections,
+    collectionForCollectionID,
     ...props
 }) => {
     // Make the dialog fullscreen if the screen is <= the dialog's max width.
@@ -127,15 +132,7 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
     }
 
     const handleCollectionClick = async (collectionID: number) => {
-        let selectedCollection: Collection;
-        if (collectionID === DUMMY_UNCATEGORIZED_COLLECTION) {
-            const uncategorizedCollection =
-                await createUnCategorizedCollection();
-            selectedCollection = uncategorizedCollection;
-        } else {
-            selectedCollection = collections.find((c) => c.id === collectionID);
-        }
-        attributes.callback(selectedCollection);
+        attributes.callback(await collectionForCollectionID(collectionID));
         props.onClose();
     };
 
