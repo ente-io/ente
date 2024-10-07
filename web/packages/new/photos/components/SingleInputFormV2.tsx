@@ -1,7 +1,9 @@
 import log from "@/base/log";
 import { wait } from "@/utils/promise";
+import Done from "@mui/icons-material/Done";
 import {
     Box,
+    CircularProgress,
     Dialog,
     DialogContent,
     DialogTitle,
@@ -10,7 +12,7 @@ import {
 } from "@mui/material";
 import { useFormik } from "formik";
 import { t } from "i18next";
-import React from "react";
+import React, { useState } from "react";
 import { FocusVisibleButton } from "./FocusVisibleButton";
 import type { DialogVisibilityProps } from "./mui/Dialog";
 
@@ -40,6 +42,14 @@ type SingleInputFormProps = Pick<
      * an indeterminate progress indicator is shown.
      */
     onSubmit: ((name: string) => void) | ((name: string) => Promise<void>);
+    /**
+     * Completion handler.
+     *
+     * After a successful completion, the form waits a bit to show a brief
+     * "success indicator" to the user. Post that, it calls this completion
+     * handler to allow the caller to proceed to the next step.
+     */
+    onComplete: () => void;
 };
 
 /**
@@ -59,8 +69,11 @@ export const SingleInputFormV2: React.FC<SingleInputFormProps> = ({
     submitButtonTitle,
     onCancel,
     onSubmit,
+    onComplete,
     ...rest
 }) => {
+    const [isDone, setIsDone] = useState(false);
+
     const formik = useFormik({
         initialValues: {
             value: initialValue ?? "",
@@ -73,6 +86,9 @@ export const SingleInputFormV2: React.FC<SingleInputFormProps> = ({
             }
             try {
                 await onSubmit(value);
+                setIsDone(true);
+                await wait(1000);
+                onComplete();
             } catch (e) {
                 log.error(`Failed to submit input ${value}`, e);
                 setFieldError("value", t("UNKNOWN_ERROR"));
@@ -113,8 +129,21 @@ export const SingleInputFormV2: React.FC<SingleInputFormProps> = ({
                     color="accent"
                     type="submit"
                     disabled={formik.isSubmitting}
+                    sx={{
+                        "&.Mui-disabled": {
+                            backgroundColor: (theme) =>
+                                theme.colors.accent.A500,
+                            color: (theme) => theme.colors.text.base,
+                        },
+                    }}
                 >
-                    {submitButtonTitle}
+                    {isDone ? (
+                        <Done sx={{ fontSize: "20px" }} />
+                    ) : formik.isSubmitting ? (
+                        <CircularProgress size={20} />
+                    ) : (
+                        submitButtonTitle
+                    )}
                 </FocusVisibleButton>
             </Box>
         </form>
@@ -139,7 +168,7 @@ export const SingleInputDialogTest: React.FC<DialogVisibilityProps> = ({
     // };
 
     const handleSubmit = async (value: string) => {
-        await wait(1000);
+        await wait(3000);
         if (value == "t") throw new Error("test");
     };
 
@@ -161,6 +190,7 @@ export const SingleInputDialogTest: React.FC<DialogVisibilityProps> = ({
                     submitButtonTitle="Add person"
                     onCancel={onClose}
                     onSubmit={handleSubmit}
+                    onComplete={onClose}
                 />
             </DialogContent>
         </Dialog>
