@@ -13,7 +13,7 @@
     "PUBLIC_UPLOADER_NAME_MESSAGE": "Pridėkite vardą, kad draugai žinotų, kam padėkoti už šias puikias nuotraukas!",
     "ENTER_EMAIL": "Įveskite el. pašto adresą",
     "EMAIL_ERROR": "Įveskite tinkamą el. paštą.",
-    "REQUIRED": "Privaloma",
+    "required": "Privaloma",
     "EMAIL_SENT": "Patvirtinimo kodas išsiųstas į <a>{{email}}</a>",
     "CHECK_INBOX": "Patikrinkite savo gautieją (ir šlamštą), kad užbaigtumėte patvirtinimą",
     "ENTER_OTT": "Patvirtinimo kodas",

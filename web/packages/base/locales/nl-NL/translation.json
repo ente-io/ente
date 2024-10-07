@@ -13,7 +13,7 @@
     "PUBLIC_UPLOADER_NAME_MESSAGE": "Voeg een naam toe zodat je vrienden weten wie ze moeten bedanken voor deze geweldige foto's!",
     "ENTER_EMAIL": "Vul e-mailadres in",
     "EMAIL_ERROR": "Vul een geldig e-mailadres in",
-    "REQUIRED": "Vereist",
+    "required": "Vereist",
     "EMAIL_SENT": "Verificatiecode verzonden naar <a>{{email}}</a>",
     "CHECK_INBOX": "Controleer je inbox (en spam) om verificatie te voltooien",
     "ENTER_OTT": "Verificatiecode",

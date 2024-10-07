@@ -13,7 +13,7 @@
     "PUBLIC_UPLOADER_NAME_MESSAGE": "请添加一个名字，以便您的朋友知晓该感谢谁拍摄了这些精美的照片！",
     "ENTER_EMAIL": "请输入电子邮件地址",
     "EMAIL_ERROR": "请输入有效的电子邮件",
-    "REQUIRED": "必需的",
+    "required": "必需的",
     "EMAIL_SENT": "验证码已发送至 <a>{{email}}</a>",
     "CHECK_INBOX": "请检查您的收件箱 (或者是在您的“垃圾邮件”列表内) 以完成验证",
     "ENTER_OTT": "验证码",

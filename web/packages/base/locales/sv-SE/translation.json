@@ -13,7 +13,7 @@
     "PUBLIC_UPLOADER_NAME_MESSAGE": "Lägg till ett namn så att dina vänner vet vem de ska tacka för dessa fantastiska bilder!",
     "ENTER_EMAIL": "Ange e-postadress",
     "EMAIL_ERROR": "Ange en giltig e-postadress",
-    "REQUIRED": "Obligatoriskt",
+    "required": "Obligatoriskt",
     "EMAIL_SENT": "Verifikationskoden skickad till <a>{{email}}</a>",
     "CHECK_INBOX": "Kontrollera din inkorg (och skräppost) för att slutföra verifieringen",
     "ENTER_OTT": "Verifieringskod",

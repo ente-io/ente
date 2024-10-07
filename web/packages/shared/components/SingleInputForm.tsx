@@ -87,17 +87,17 @@ export default function SingleInputForm(props: SingleInputFormProps) {
         switch (props.fieldType) {
             case "text":
                 return Yup.object().shape({
-                    inputValue: Yup.string().required(t("REQUIRED")),
+                    inputValue: Yup.string().required(t("required")),
                 });
             case "password":
                 return Yup.object().shape({
-                    inputValue: Yup.string().required(t("REQUIRED")),
+                    inputValue: Yup.string().required(t("required")),
                 });
             case "email":
                 return Yup.object().shape({
                     inputValue: Yup.string()
                         .email(t("EMAIL_ERROR"))
-                        .required(t("REQUIRED")),
+                        .required(t("required")),
                 });
         }
     }, [props.fieldType]);

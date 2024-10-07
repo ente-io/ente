@@ -13,7 +13,7 @@
     "PUBLIC_UPLOADER_NAME_MESSAGE": "Füge einen Namen hinzu, damit deine Freunde wissen, wem sie für diese tollen Fotos zu danken haben!",
     "ENTER_EMAIL": "E-Mail-Adresse eingeben",
     "EMAIL_ERROR": "Geben Sie eine gültige E-Mail-Adresse ein",
-    "REQUIRED": "Erforderlich",
+    "required": "Erforderlich",
     "EMAIL_SENT": "Bestätigungscode an <a>{{email}}</a> gesendet",
     "CHECK_INBOX": "Bitte überprüfe deinen E-Mail-Posteingang (und Spam), um die Verifizierung abzuschließen",
     "ENTER_OTT": "Bestätigungscode",

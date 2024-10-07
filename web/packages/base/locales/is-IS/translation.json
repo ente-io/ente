@@ -13,7 +13,7 @@
     "PUBLIC_UPLOADER_NAME_MESSAGE": "",
     "ENTER_EMAIL": "",
     "EMAIL_ERROR": "",
-    "REQUIRED": "",
+    "required": "",
     "EMAIL_SENT": "",
     "CHECK_INBOX": "",
     "ENTER_OTT": "",

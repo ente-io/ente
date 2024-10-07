@@ -156,7 +156,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                         feedback: "",
                     }}
                     validationSchema={Yup.object().shape({
-                        reason: Yup.string().required(t("REQUIRED")),
+                        reason: Yup.string().required(t("required")),
                     })}
                     validateOnChange={false}
                     validateOnBlur={false}

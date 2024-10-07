@@ -103,13 +103,13 @@ const ChangeEmailForm: React.FC = () => {
                     ? Yup.object().shape({
                           email: Yup.string()
                               .email(t("EMAIL_ERROR"))
-                              .required(t("REQUIRED")),
-                          ott: Yup.string().required(t("REQUIRED")),
+                              .required(t("required")),
+                          ott: Yup.string().required(t("required")),
                       })
                     : Yup.object().shape({
                           email: Yup.string()
                               .email(t("EMAIL_ERROR"))
-                              .required(t("REQUIRED")),
+                              .required(t("required")),
                       })
             }
             validateOnChange={false}

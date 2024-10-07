@@ -13,7 +13,7 @@
     "PUBLIC_UPLOADER_NAME_MESSAGE": "Ajouter un nom afin que vos amis sachent qui remercier pour ces magnifiques photos!",
     "ENTER_EMAIL": "Saisir l'adresse e-mail",
     "EMAIL_ERROR": "Saisir un e-mail valide",
-    "REQUIRED": "Nécessaire",
+    "required": "Nécessaire",
     "EMAIL_SENT": "Code de vérification envoyé à <a>{{email}}</a>",
     "CHECK_INBOX": "Veuillez consulter votre boite de réception (et indésirables) pour poursuivre la vérification",
     "ENTER_OTT": "Code de vérification",

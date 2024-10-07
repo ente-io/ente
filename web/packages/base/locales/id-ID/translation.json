@@ -13,7 +13,7 @@
     "PUBLIC_UPLOADER_NAME_MESSAGE": "Tambahkan nama agar teman Anda tahu kepada siapa harus berterima kasih atas foto-foto hebat ini!",
     "ENTER_EMAIL": "Masukkan alamat email",
     "EMAIL_ERROR": "Masukkan email yang sah",
-    "REQUIRED": "Wajib",
+    "required": "Wajib",
     "EMAIL_SENT": "Kode verifikasi dikirim ke <a>{{email}}</a>",
     "CHECK_INBOX": "Silakan periksa kotak masuk (serta kotak spam) untuk menyelesaikan verifikasi",
     "ENTER_OTT": "Kode verifikasi",

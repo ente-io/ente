@@ -13,7 +13,7 @@
     "PUBLIC_UPLOADER_NAME_MESSAGE": "Lisää nimi, jotta ystäväsi tietävät, ketä kiittää näistä hienoista kuvista!",
     "ENTER_EMAIL": "Syötä sähköpostiosoite",
     "EMAIL_ERROR": "Syötä voimassa oleva sähköpostiosoite",
-    "REQUIRED": "Pakollinen",
+    "required": "Pakollinen",
     "EMAIL_SENT": "Vahvistuskoodi lähetetty osoitteeseen <a>{{email}}</a>",
     "CHECK_INBOX": "Tarkista saapuneet-kansiosi (ja roskaposti) suorittaaksesi vahvistuksen",
     "ENTER_OTT": "Vahvistuskoodi",

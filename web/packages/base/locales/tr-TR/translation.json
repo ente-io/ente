@@ -13,7 +13,7 @@
     "PUBLIC_UPLOADER_NAME_MESSAGE": "Arkadaşlarının bu harika fotoğraflar için kime teşekkür etmeleri gerektiğini bilmeleri için bir isim ekle!",
     "ENTER_EMAIL": "E-posta adresini girin",
     "EMAIL_ERROR": "Geçerli bir e-posta gir",
-    "REQUIRED": "Gerekli",
+    "required": "Gerekli",
     "EMAIL_SENT": "Doğrulama kodu <a>{{email}}</a> adresine gönderildi",
     "CHECK_INBOX": "Lütfen doğrulama işlemini tamamlamak için gelen kutusunu (veya spam) kontrol et",
     "ENTER_OTT": "Doğrulama kodu",
