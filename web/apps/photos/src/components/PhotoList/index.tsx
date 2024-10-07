@@ -1,4 +1,3 @@
-import type { GalleryBarMode } from "@/new/photos/components/Gallery/BarImpl";
 import { EnteFile } from "@/new/photos/types/file";
 import { formattedByteSize } from "@/new/photos/utils/units";
 import { FlexWrapper } from "@ente/shared/components/Container";
@@ -17,12 +16,14 @@ import {
 import { handleSelectCreator } from "utils/photoFrame";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 
+import { assertionFailed } from "@/base/assert";
 import {
     GAP_BTW_TILES,
     IMAGE_CONTAINER_MAX_HEIGHT,
     IMAGE_CONTAINER_MAX_WIDTH,
     MIN_COLUMNS,
 } from "@/new/photos/components/PhotoList";
+import type { PhotoFrameProps } from "components/PhotoFrame";
 
 export const DATE_CONTAINER_HEIGHT = 48;
 export const SIZE_AND_COUNT_CONTAINER_HEIGHT = 72;
@@ -187,10 +188,9 @@ const NothingContainer = styled(ListItemContainer)`
     justify-content: center;
 `;
 
-interface Props {
+type Props = Pick<PhotoFrameProps, "mode" | "modePlus"> & {
     height: number;
     width: number;
-    mode?: GalleryBarMode;
     displayFiles: EnteFile[];
     showAppDownloadBanner: boolean;
     getThumbnail: (
@@ -200,7 +200,7 @@ interface Props {
     ) => JSX.Element;
     activeCollectionID: number;
     activePersonID?: string;
-}
+};
 
 interface ItemData {
     timeStampList: TimeStampListItem[];
@@ -257,6 +257,7 @@ export function PhotoList({
     height,
     width,
     mode,
+    modePlus,
     displayFiles,
     showAppDownloadBanner,
     getThumbnail,
@@ -890,9 +891,25 @@ export function PhotoList({
         renderListItem,
     );
 
+    // The old, mode unaware, behaviour.
+    let key = `${activeCollectionID}`;
+    if (modePlus) {
+        // If the new experimental modePlus prop is provided, use it to derive a
+        // mode specific key.
+        if (modePlus == "search") {
+            key = "search";
+        } else if (modePlus == "people") {
+            if (!activePersonID) {
+                assertionFailed();
+            } else {
+                key = activePersonID;
+            }
+        }
+    }
+
     return (
         <List
-            key={`${activeCollectionID}`}
+            key={key}
             itemData={itemData}
             ref={listRef}
             itemSize={getItemSize(timeStampList)}

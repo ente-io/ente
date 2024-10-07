@@ -1302,6 +1302,7 @@ export default function Gallery() {
                     <PhotoFrame
                         page={PAGES.GALLERY}
                         mode={barMode}
+                        modePlus={isInSearchMode ? "search" : barMode}
                         files={filteredData}
                         syncWithRemote={syncWithRemote}
                         favItemIds={favItemIds}

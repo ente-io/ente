@@ -44,12 +44,18 @@ const Container = styled("div")`
 
 const PHOTOSWIPE_HASH_SUFFIX = "&opened";
 
-interface Props {
+export interface PhotoFrameProps {
     page:
         | PHOTOS_PAGES.GALLERY
         | PHOTOS_PAGES.DEDUPLICATE
         | PHOTOS_PAGES.SHARED_ALBUMS;
     mode?: GalleryBarMode;
+    /**
+     * This is an experimental prop, to see if we can merge the separate
+     * "isInSearchMode" state kept by the gallery to be instead provided as a
+     * another mode in which the gallery operates.
+     */
+    modePlus?: GalleryBarMode | "search";
     files: EnteFile[];
     duplicates?: Duplicate[];
     syncWithRemote: () => Promise<void>;
@@ -79,6 +85,7 @@ const PhotoFrame = ({
     page,
     duplicates,
     mode,
+    modePlus,
     files,
     syncWithRemote,
     favItemIds,
@@ -97,7 +104,7 @@ const PhotoFrame = ({
     setFilesDownloadProgressAttributesCreator,
     selectable,
     onSelectPerson,
-}: Props) => {
+}: PhotoFrameProps) => {
     const [open, setOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
     const [fetching, setFetching] = useState<{ [k: number]: boolean }>({});
@@ -556,6 +563,7 @@ const PhotoFrame = ({
                             height={height}
                             getThumbnail={getThumbnail}
                             mode={mode}
+                            modePlus={modePlus}
                             displayFiles={displayFiles}
                             activeCollectionID={activeCollectionID}
                             activePersonID={activePersonID}
