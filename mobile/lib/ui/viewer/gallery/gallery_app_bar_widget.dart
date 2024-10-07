@@ -23,8 +23,11 @@ import "package:photos/models/metadata/common_keys.dart";
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/service_locator.dart';
 import 'package:photos/services/collections_service.dart';
+import "package:photos/services/location_service.dart";
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/update_service.dart';
+import "package:photos/states/location_screen_state.dart";
+import "package:photos/theme/colors.dart";
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import "package:photos/ui/cast/auto.dart";
 import "package:photos/ui/cast/choose.dart";
@@ -42,6 +45,7 @@ import "package:photos/ui/viewer/gallery/hooks/add_photos_sheet.dart";
 import 'package:photos/ui/viewer/gallery/hooks/pick_cover_photo.dart';
 import "package:photos/ui/viewer/hierarchicial_search/applied_filters.dart";
 import "package:photos/ui/viewer/hierarchicial_search/recommended_filters.dart";
+import "package:photos/ui/viewer/location/edit_location_sheet.dart";
 import 'package:photos/utils/data_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/magic_util.dart';
@@ -88,7 +92,9 @@ enum AlbumPopupAction {
   removeLink,
   cleanUncategorized,
   sortByMostRecent,
-  sortByMostRelevant
+  sortByMostRelevant,
+  editLocation,
+  deleteLocation,
 }
 
 class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
@@ -452,6 +458,20 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                   child: const Icon(CupertinoIcons.pin),
                 ),
         ),
+      if (galleryType == GalleryType.locationTag)
+        EntePopupMenuItem(
+          S.of(context).editLocation,
+          value: AlbumPopupAction.editLocation,
+          icon: Icons.edit_outlined,
+        ),
+      if (galleryType == GalleryType.locationTag)
+        EntePopupMenuItem(
+          S.of(context).deleteLocation,
+          value: AlbumPopupAction.deleteLocation,
+          icon: Icons.delete_outline,
+          iconColor: warning500,
+          labelColor: warning500,
+        ),
     ]);
     final bool isArchived = widget.collection?.isArchived() ?? false;
     final bool isHidden = widget.collection?.isHidden() ?? false;
@@ -571,6 +591,10 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
               await showOnMap();
             } else if (value == AlbumPopupAction.cleanUncategorized) {
               await onCleanUncategorizedClick(context);
+            } else if (value == AlbumPopupAction.editLocation) {
+              editLocation();
+            } else if (value == AlbumPopupAction.deleteLocation) {
+              await deleteLocation();
             } else {
               showToast(context, S.of(context).somethingWentWrong);
             }
@@ -580,6 +604,24 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     }
 
     return actions;
+  }
+
+  void editLocation() {
+    showEditLocationSheet(
+      context,
+      InheritedLocationScreenState.of(context).locationTagEntity,
+    );
+  }
+
+  Future<void> deleteLocation() async {
+    try {
+      await LocationService.instance.deleteLocationTag(
+        InheritedLocationScreenState.of(context).locationTagEntity.id,
+      );
+      Navigator.of(context).pop();
+    } catch (e) {
+      await showGenericErrorDialog(context: context, error: e);
+    }
   }
 
   Future<void> onCleanUncategorizedClick(BuildContext buildContext) async {
