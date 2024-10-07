@@ -11,6 +11,7 @@ import "package:photos/models/selected_files.dart";
 import "package:photos/ui/viewer/actions/file_selection_overlay_bar.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 import "package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart";
+import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 
 class SharedPublicCollectionPage extends StatelessWidget {
@@ -64,31 +65,33 @@ class SharedPublicCollectionPage extends StatelessWidget {
       showSelectAllByDefault: galleryType != GalleryType.sharedPublicCollection,
     );
 
-    return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(50.0),
-        child: GalleryAppBarWidget(
-          galleryType,
-          c.collection.displayName,
-          _selectedFiles,
-          collection: c.collection,
-          files: files,
+    return GalleryFilesState(
+      child: Scaffold(
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(50.0),
+          child: GalleryAppBarWidget(
+            galleryType,
+            c.collection.displayName,
+            _selectedFiles,
+            collection: c.collection,
+            files: files,
+          ),
         ),
-      ),
-      body: SelectionState(
-        selectedFiles: _selectedFiles,
-        child: Stack(
-          alignment: Alignment.bottomCenter,
-          children: [
-            gallery,
-            !isPublicDownload && !isisEnableCollect
-                ? const SizedBox.shrink()
-                : FileSelectionOverlayBar(
-                    galleryType,
-                    _selectedFiles,
-                    collection: c.collection,
-                  ),
-          ],
+        body: SelectionState(
+          selectedFiles: _selectedFiles,
+          child: Stack(
+            alignment: Alignment.bottomCenter,
+            children: [
+              gallery,
+              !isPublicDownload && !isisEnableCollect
+                  ? const SizedBox.shrink()
+                  : FileSelectionOverlayBar(
+                      galleryType,
+                      _selectedFiles,
+                      collection: c.collection,
+                    ),
+            ],
+          ),
         ),
       ),
     );
