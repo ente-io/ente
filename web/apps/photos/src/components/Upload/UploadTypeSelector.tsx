@@ -1,7 +1,7 @@
 import { useIsTouchscreen } from "@/base/hooks";
-import { FocusVisibleButton } from "@/new/photos/components/FocusVisibleButton";
 import { SpaceBetweenFlex } from "@/new/photos/components/mui";
 import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";
+import { FocusVisibleButton } from "@/new/photos/components/mui/FocusVisibleButton";
 import DialogTitleWithCloseButton, {
     dialogCloseHandler,
 } from "@ente/shared/components/DialogBox/TitleWithCloseButton";

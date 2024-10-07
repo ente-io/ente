@@ -14,7 +14,7 @@ import {
 } from "@mui/material";
 import React, { useEffect } from "react";
 import { didShowWhatsNew } from "../services/changelog";
-import { FocusVisibleButton } from "./FocusVisibleButton";
+import { FocusVisibleButton } from "./mui/FocusVisibleButton";
 import { SlideUpTransition } from "./mui/SlideUpTransition";
 
 interface WhatsNewProps {

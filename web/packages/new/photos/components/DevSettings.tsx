@@ -18,7 +18,7 @@ import { useFormik } from "formik";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
 import { z } from "zod";
-import { FocusVisibleButton } from "./FocusVisibleButton";
+import { FocusVisibleButton } from "./mui/FocusVisibleButton";
 import { SlideUpTransition } from "./mui/SlideUpTransition";
 
 interface DevSettingsProps {

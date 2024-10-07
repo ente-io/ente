@@ -11,8 +11,8 @@ import {
 import { useFormik } from "formik";
 import { t } from "i18next";
 import React from "react";
-import { FocusVisibleButton } from "./FocusVisibleButton";
 import type { DialogVisibilityProps } from "./mui/Dialog";
+import { FocusVisibleButton } from "./mui/FocusVisibleButton";
 import { LoadingButton } from "./mui/LoadingButton";
 
 type SingleInputFormProps = Pick<
