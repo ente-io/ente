@@ -173,6 +173,7 @@ export const sidebar = [
                 collapsed: true,
                 items: [
                     { text: "General", link: "/auth/faq/" },
+                    { text: "Installation", link: "/auth/faq/installing" },
                     {
                         text: "Enteception",
                         link: "/auth/faq/enteception/",
