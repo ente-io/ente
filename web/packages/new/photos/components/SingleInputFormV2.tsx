@@ -1,3 +1,4 @@
+import log from "@/base/log";
 import { wait } from "@/utils/promise";
 import {
     Box,
@@ -5,36 +6,77 @@ import {
     DialogContent,
     DialogTitle,
     TextField,
+    type TextFieldProps,
 } from "@mui/material";
 import { useFormik } from "formik";
 import { t } from "i18next";
 import React from "react";
 import { FocusVisibleButton } from "./FocusVisibleButton";
 import type { DialogVisibilityProps } from "./mui/Dialog";
-import log from "@/base/log";
+
+type SingleInputFormProps = Pick<
+    TextFieldProps,
+    "label" | "placeholder" | "autoComplete" | "autoFocus"
+> & {
+    /**
+     * The initial value, if any, to prefill in the input.
+     */
+    initialValue?: string;
+    /**
+     * Title for the submit button.
+     */
+    submitButtonTitle: string;
+    /**
+     * Cancellation handler.
+     *
+     * This function is called when the user activates the cancel button in the
+     * form.
+     */
+    onCancel: () => void;
+    /**
+     * Submission handler.
+     *
+     * During submission, the text input and the submit button are disabled, and
+     * an indeterminate progress indicator is shown.
+     */
+    onSubmit: ((name: string) => void) | ((name: string) => Promise<void>);
+};
 
 /**
  * A TextField and two buttons.
+ *
+ * A common requirement is taking a single textual input from the user. This is
+ * a form suitable for that purpose - it is form containing a single MUI
+ * {@link TextField}, with two accompanying buttons; one to submit, and one to
+ * cancel.
+ *
+ * Submission is handled as an async function, during which the input is
+ * disabled and a loading indicator is shown. Errors during submission are shown
+ * as the helper text associated with the text field.
  */
-export const SingleInputFormV2: React.FC = () => {
+export const SingleInputFormV2: React.FC<SingleInputFormProps> = ({
+    initialValue,
+    submitButtonTitle,
+    onCancel,
+    onSubmit,
+    ...rest
+}) => {
     const formik = useFormik({
         initialValues: {
-            name: "",
+            value: initialValue ?? "",
         },
         onSubmit: async (values, { setFieldError }) => {
-            const name = values.name;
-            if (!name) {
-                setFieldError("name", t("required"));
+            const value = values.value;
+            if (!value) {
+                setFieldError("value", t("required"));
                 return;
             }
             try {
-                await wait(1000);
-                if (values.name == "t") throw new Error("test");
+                await onSubmit(value);
             } catch (e) {
-                log.error(`Failed to submit input ${name}`, e)
-                setFieldError("name", t("UNKNOWN_ERROR"))
+                log.error(`Failed to submit input ${value}`, e);
+                setFieldError("value", t("UNKNOWN_ERROR"));
             }
-            console.log(JSON.stringify(values));
         },
     });
 
@@ -47,21 +89,23 @@ export const SingleInputFormV2: React.FC = () => {
     return (
         <form onSubmit={formik.handleSubmit}>
             <TextField
-                name="name"
-                value={formik.values.name}
+                name="value"
+                value={formik.values.value}
                 onChange={formik.handleChange}
                 type="text"
-                autoComplete="name"
-                autoFocus
                 fullWidth
-                label="Add name"
                 margin="normal"
-                placeholder="Enter name"
-                error={!!formik.errors.name}
-                helperText={formik.errors.name ?? " "}
+                disabled={formik.isSubmitting}
+                error={!!formik.errors.value}
+                helperText={formik.errors.value ?? " "}
+                {...rest}
             />
             <Box sx={{ display: "flex", gap: "12px" }}>
-                <FocusVisibleButton size="large" color="secondary">
+                <FocusVisibleButton
+                    size="large"
+                    color="secondary"
+                    onClick={onCancel}
+                >
                     {t("cancel")}
                 </FocusVisibleButton>
                 <FocusVisibleButton
@@ -70,7 +114,7 @@ export const SingleInputFormV2: React.FC = () => {
                     type="submit"
                     disabled={formik.isSubmitting}
                 >
-                    Add person
+                    {submitButtonTitle}
                 </FocusVisibleButton>
             </Box>
         </form>
@@ -94,6 +138,11 @@ export const SingleInputDialogTest: React.FC<DialogVisibilityProps> = ({
     //     }
     // };
 
+    const handleSubmit = async (value: string) => {
+        await wait(1000);
+        if (value == "t") throw new Error("test");
+    };
+
     return (
         <Dialog
             open={open}
@@ -104,7 +153,15 @@ export const SingleInputDialogTest: React.FC<DialogVisibilityProps> = ({
         >
             <DialogTitle>{"New person"}</DialogTitle>
             <DialogContent sx={{ "&&&": { paddingBlockStart: 0 } }}>
-                <SingleInputFormV2 />
+                <SingleInputFormV2
+                    autoComplete="name"
+                    autoFocus
+                    label="Add name"
+                    placeholder="Enter name"
+                    submitButtonTitle="Add person"
+                    onCancel={onClose}
+                    onSubmit={handleSubmit}
+                />
             </DialogContent>
         </Dialog>
     );
