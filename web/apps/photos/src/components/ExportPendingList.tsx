@@ -1,4 +1,4 @@
-import { ItemCard, PreviewItemTile } from "@/new/photos/components/ItemCards";
+import { ItemCard, PreviewItemTile } from "@/new/photos/components/Tiles";
 import { EnteFile } from "@/new/photos/types/file";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
@@ -65,7 +65,7 @@ const ExportPendingList = (props: Iprops) => {
                 title: t("PENDING_ITEMS"),
                 close: {
                     action: props.onClose,
-                    text: t("CLOSE"),
+                    text: t("close"),
                 },
             }}
         >

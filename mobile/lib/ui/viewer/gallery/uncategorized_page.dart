@@ -13,6 +13,7 @@ import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
+import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 
 class UnCategorizedPage extends StatelessWidget {
@@ -27,8 +28,8 @@ class UnCategorizedPage extends StatelessWidget {
     this.tagPrefix = "Uncategorized_page",
     this.appBarType = GalleryType.uncategorized,
     this.overlayType = GalleryType.uncategorized,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -73,27 +74,29 @@ class UnCategorizedPage extends StatelessWidget {
       initialFiles: null,
       albumName: S.of(context).uncategorized,
     );
-    return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(50.0),
-        child: GalleryAppBarWidget(
-          appBarType,
-          S.of(context).uncategorized,
-          _selectedFiles,
-          collection: collection,
+    return GalleryFilesState(
+      child: Scaffold(
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(50.0),
+          child: GalleryAppBarWidget(
+            appBarType,
+            S.of(context).uncategorized,
+            _selectedFiles,
+            collection: collection,
+          ),
         ),
-      ),
-      body: SelectionState(
-        selectedFiles: _selectedFiles,
-        child: Stack(
-          alignment: Alignment.bottomCenter,
-          children: [
-            gallery,
-            FileSelectionOverlayBar(
-              overlayType,
-              _selectedFiles,
-            ),
-          ],
+        body: SelectionState(
+          selectedFiles: _selectedFiles,
+          child: Stack(
+            alignment: Alignment.bottomCenter,
+            children: [
+              gallery,
+              FileSelectionOverlayBar(
+                overlayType,
+                _selectedFiles,
+              ),
+            ],
+          ),
         ),
       ),
     );

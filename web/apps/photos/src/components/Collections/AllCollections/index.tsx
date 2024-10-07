@@ -1,7 +1,8 @@
 import { CollectionsSortOptions } from "@/new/photos/components/CollectionsSortOptions";
-import { FilledIconButton } from "@/new/photos/components/mui-custom";
-import type { CollectionSummary } from "@/new/photos/types/collection";
-import { CollectionsSortBy } from "@/new/photos/types/collection";
+import { FilledIconButton } from "@/new/photos/components/mui";
+import { SlideUpTransition } from "@/new/photos/components/mui/SlideUpTransition";
+import type { CollectionSummary } from "@/new/photos/services/collection/ui";
+import { CollectionsSortBy } from "@/new/photos/services/collection/ui";
 import { FlexWrapper, FluidContainer } from "@ente/shared/components/Container";
 import Close from "@mui/icons-material/Close";
 import {
@@ -12,10 +13,7 @@ import {
     Typography,
     useMediaQuery,
 } from "@mui/material";
-import {
-    AllCollectionDialog,
-    Transition,
-} from "components/Collections/AllCollections/dialog";
+import { AllCollectionDialog } from "components/Collections/AllCollections/dialog";
 import { t } from "i18next";
 import AllCollectionContent from "./content";
 
@@ -28,8 +26,6 @@ interface AllCollectionsProps {
     onChangeCollectionsSortBy: (by: CollectionsSortBy) => void;
     isInHiddenSection: boolean;
 }
-
-const LeftSlideTransition = Transition("up");
 
 export default function AllCollections(props: AllCollectionsProps) {
     const {
@@ -51,7 +47,7 @@ export default function AllCollections(props: AllCollectionsProps) {
     return (
         <AllCollectionDialog
             position="flex-end"
-            TransitionComponent={LeftSlideTransition}
+            TransitionComponent={SlideUpTransition}
             onClose={onClose}
             open={open}
             fullScreen={isMobile}
@@ -91,7 +87,11 @@ const AllCollectionsHeader = ({
                             ? t("all_hidden_albums")
                             : t("all_albums")}
                     </Typography>
-                    <Typography variant="small" color={"text.muted"}>
+                    <Typography
+                        variant="small"
+                        fontWeight={"normal"}
+                        color={"text.muted"}
+                    >
                         {t("albums_count", { count: collectionCount })}
                     </Typography>
                 </Box>

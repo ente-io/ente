@@ -6,6 +6,8 @@ import downloadManager from "@/new/photos/services/download";
 import { type EnteFile } from "@/new/photos/types/file";
 import { styled } from "@mui/material";
 import React, { useEffect, useState } from "react";
+import { faceCrop } from "../services/ml";
+import { UnstyledButton } from "./UnstyledButton";
 
 interface ItemCardProps {
     /**
@@ -17,10 +19,16 @@ interface ItemCardProps {
      */
     coverFile?: EnteFile | undefined;
     /**
+     * Optional ID of a specific face within {@link coverFile} to show.
+     *
+     * Precondition: {@link faceID} must be an ID of a face that belongs to the
+     * given {@link coverFile}.
+     */
+    coverFaceID?: string | undefined;
+    /**
      * Optional boolean indicating if the user is currently scrolling.
      *
-     * This is used as a hint by the cover file downloader to prioritize
-     * downloads.
+     * This is used as a hint by the file downloader to prioritize downloads.
      */
     isScrolling?: boolean;
     /**
@@ -28,25 +36,50 @@ interface ItemCardProps {
      */
     onClick?: () => void;
 }
+
 /**
  * A generic card that can be be used to represent collections, files, people -
  * anything that (usually) has an associated "cover photo".
+ *
+ * Usually, we provide it a {@link coverFile} prop to set the file whose
+ * thumbnail should be shown in the card. However, an additional
+ * {@link coverFaceID} prop can be used to show the face crop for that specific
+ * face within the cover file.
+ *
+ * Note that while the common use case is to use this with a cover photo (and an
+ * additional cover faceID), both of these are optional and the item card can
+ * also be used as a static component without an associated cover image by
+ * covering it with an opaque overlay.
  */
 export const ItemCard: React.FC<React.PropsWithChildren<ItemCardProps>> = ({
     TileComponent,
     coverFile,
+    coverFaceID,
     isScrolling,
     onClick,
     children,
 }) => {
-    const [coverImageURL, setCoverImageURL] = useState("");
+    const [coverImageURL, setCoverImageURL] = useState<string | undefined>();
 
     useEffect(() => {
         if (!coverFile) return;
-        void downloadManager
-            .getThumbnailForPreview(coverFile, isScrolling)
-            .then((url) => url && setCoverImageURL(url));
-    }, [coverFile, isScrolling]);
+
+        let didCancel = false;
+
+        if (coverFaceID) {
+            void faceCrop(coverFaceID, coverFile).then(
+                (url) => !didCancel && setCoverImageURL(url),
+            );
+        } else {
+            void downloadManager
+                .getThumbnailForPreview(coverFile, isScrolling)
+                .then((url) => !didCancel && setCoverImageURL(url));
+        }
+
+        return () => {
+            didCancel = true;
+        };
+    }, [coverFile, coverFaceID, isScrolling]);
 
     return (
         <TileComponent {...{ onClick }}>
@@ -103,10 +136,32 @@ export const BarItemTile = styled(ItemTile)`
 `;
 
 /**
- * A large 150x150 TileComponent used when showing the list of all collections
- * in the all collections view.
+ * A variant of {@link ItemTile} meant for use when the tile is interactable.
  */
-export const AllCollectionTile = styled(ItemTile)`
+export const ItemTileButton = styled(UnstyledButton)`
+    /* Buttons reset this to center */
+    text-align: inherit;
+
+    /* Rest of this is mostly verbatim from ItemTile ... */
+
+    display: flex;
+    /* Act as container for the absolutely positioned ItemTileOverlays. */
+    position: relative;
+    border-radius: 4px;
+    overflow: hidden;
+    & > img {
+        object-fit: cover;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+    }
+`;
+
+/**
+ * A large 150x150 TileComponent used when showing the list of collections in
+ * the all collections view and in the collection selector.
+ */
+export const CollectionTileButton = styled(ItemTileButton)`
     width: 150px;
     height: 150px;
 `;
@@ -139,7 +194,7 @@ export const TileTextOverlay = styled(ItemTileOverlay)`
 
 /**
  * A variation of {@link TileTextOverlay} for use with larger tiles like the
- * {@link AllCollectionTile}.
+ * {@link CollectionTile}.
  */
 export const LargeTileTextOverlay = styled(ItemTileOverlay)`
     padding: 8px;

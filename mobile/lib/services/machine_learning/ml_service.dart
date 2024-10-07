@@ -133,7 +133,7 @@ class MLService {
       }
       if (_mlControllerStatus == true) {
         // refresh discover section
-        MagicCacheService.instance.updateCache().ignore();
+        MagicCacheService.instance.updateCache(forced: force).ignore();
       }
       await indexAllImages();
       if ((await MLDataDB.instance.getUnclusteredFaceCount()) > 0) {

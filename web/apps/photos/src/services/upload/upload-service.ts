@@ -1014,6 +1014,11 @@ const extractImageOrVideoMetadata = async (
         if (h) publicMagicMetadata.h = ensureInteger(h);
     }
 
+    const caption = parsedMetadataJSON?.description;
+    if (caption) {
+        publicMagicMetadata.caption = caption;
+    }
+
     return { metadata, publicMagicMetadata };
 };
 

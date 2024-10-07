@@ -20,7 +20,7 @@ export const getDownloadAppMessage = (): DialogBoxAttributes => {
             variant: "accent",
         },
         close: {
-            text: t("CLOSE"),
+            text: t("close"),
         },
     };
 };
@@ -182,7 +182,7 @@ export const getEditorCloseConfirmationMessage = (
     content: t("CONFIRM_EDITOR_CLOSE_DESCRIPTION"),
     proceed: {
         action: doClose,
-        text: t("CLOSE"),
+        text: t("close"),
         variant: "critical",
     },
     close: { text: t("cancel") },

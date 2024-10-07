@@ -580,7 +580,6 @@ class _FileSelectionActionsWidgetState
       final page = DetailPage(
         DetailPageConfiguration(
           selectedFiles,
-          null,
           0,
           "guest_view",
         ),
@@ -699,10 +698,7 @@ class _FileSelectionActionsWidgetState
 
   Future<void> _setPersonCover() async {
     final EnteFile file = widget.selectedFiles.files.first;
-    await PersonService.instance.updateAttributes(
-      widget.person!.remoteID,
-      avatarFaceId: file.uploadedFileID.toString(),
-    );
+    await PersonService.instance.updateAvatar(widget.person!, file);
     widget.selectedFiles.clearAll();
     if (mounted) {
       setState(() => {});

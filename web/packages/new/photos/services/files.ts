@@ -38,6 +38,30 @@ export const setLocalFiles = async (
     await localForage.setItem(tableName, files);
 };
 
+/**
+ * Sort the given list of {@link EnteFile}s.
+ *
+ * By default, files are sorted so that the newest one is first. The optional
+ * {@link sortAsc} flag can be set to `true` to sort them so that the oldest one
+ * is first.
+ */
+export const sortFiles = (files: EnteFile[], sortAsc = false) => {
+    // Sort based on the time of creation time of the file.
+    //
+    // For files with same creation time, sort based on the time of last
+    // modification.
+    const factor = sortAsc ? -1 : 1;
+    return files.sort((a, b) => {
+        if (a.metadata.creationTime === b.metadata.creationTime) {
+            return (
+                factor *
+                (b.metadata.modificationTime - a.metadata.modificationTime)
+            );
+        }
+        return factor * (b.metadata.creationTime - a.metadata.creationTime);
+    });
+};
+
 export const TRASH = "file-trash";
 
 export async function getLocalTrash() {

@@ -202,8 +202,8 @@ const createInferenceSession = async (modelPath: string) => {
 };
 
 const cachedCLIPImageSession = makeCachedInferenceSession(
-    "mobileclip_s2_image.onnx",
-    143061211 /* 143 MB */,
+    "mobileclip_s2_image_opset18_rgba_sim.onnx",
+    143093992 /* 143 MB */,
 );
 
 /**
@@ -211,10 +211,14 @@ const cachedCLIPImageSession = makeCachedInferenceSession(
  *
  * The embeddings are computed using ONNX runtime, with MobileCLIP as the model.
  */
-export const computeCLIPImageEmbedding = async (input: Float32Array) => {
+export const computeCLIPImageEmbedding = async (
+    input: Uint8ClampedArray,
+    inputShape: number[],
+) => {
     const session = await cachedCLIPImageSession();
+    const inputArray = new Uint8Array(input.buffer);
     const feeds = {
-        input: new ort.Tensor("float32", input, [1, 3, 256, 256]),
+        input: new ort.Tensor("uint8", inputArray, inputShape),
     };
     const t = Date.now();
     const results = await session.run(feeds);

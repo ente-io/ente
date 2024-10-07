@@ -16,8 +16,8 @@ import SingleInputForm, {
 import { ApiError } from "@ente/shared/error";
 import localForage from "@ente/shared/storage/localForage";
 import {
-    LS_KEYS,
     getData,
+    LS_KEYS,
     setData,
     setLSUser,
 } from "@ente/shared/storage/localStorage";
@@ -33,16 +33,17 @@ import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
+import { getSRPAttributes } from "../api/srp";
 import { putAttributes, sendOtt, verifyOtt } from "../api/user";
 import { PAGES } from "../constants/pages";
 import {
     openPasskeyVerificationURL,
     passkeyVerificationRedirectURL,
 } from "../services/passkey";
-import { unstashRedirect } from "../services/redirect";
+import { stashedRedirect, unstashRedirect } from "../services/redirect";
 import { configureSRP } from "../services/srp";
 import type { PageProps } from "../types/page";
-import type { SRPSetupAttributes } from "../types/srp";
+import type { SRPAttributes, SRPSetupAttributes } from "../types/srp";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
     const { logout, showNavBar, setDialogBoxAttributesV2 } = appContext;
@@ -58,16 +59,10 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
     useEffect(() => {
         const main = async () => {
             const user: User = getData(LS_KEYS.USER);
-            const keyAttributes: KeyAttributes = getData(
-                LS_KEYS.KEY_ATTRIBUTES,
-            );
-            if (!user?.email) {
-                router.push("/");
-            } else if (
-                keyAttributes?.encryptedKey &&
-                (user.token || user.encryptedToken)
-            ) {
-                router.push(PAGES.CREDENTIALS);
+
+            const redirect = await redirectionIfNeeded(user);
+            if (redirect) {
+                router.push(redirect);
             } else {
                 setEmail(user.email);
             }
@@ -253,3 +248,48 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
 };
 
 export default Page;
+
+/**
+ * A function called during page load to see if a redirection is required
+ *
+ * @returns The slug to redirect to, if needed.
+ */
+const redirectionIfNeeded = async (user: User | undefined) => {
+    const email = user?.email;
+    if (!email) {
+        return "/";
+    }
+
+    const keyAttributes: KeyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
+
+    if (keyAttributes?.encryptedKey && (user.token || user.encryptedToken)) {
+        return PAGES.CREDENTIALS;
+    }
+
+    // If we're coming here during the recover flow, do not redirect.
+    if (stashedRedirect() == PAGES.RECOVER) return undefined;
+
+    // The user might have email verification disabled, but after previously
+    // entering their email on the login screen, they might've closed the tab
+    // before proceeding (or opened a us in a new tab at this point).
+    //
+    // In such cases, we'll end up here with an email present.
+    //
+    // To distinguish this scenario from the normal email verification flow, we
+    // can check to see the SRP attributes (the login page would've fetched and
+    // saved them). If they are present and indicate that email verification is
+    // not required, redirect to the password verification page.
+
+    const srpAttributes: SRPAttributes = getData(LS_KEYS.SRP_ATTRIBUTES);
+    if (srpAttributes && !srpAttributes.isEmailMFAEnabled) {
+        // Fetch the latest SRP attributes instead of relying on the potentially
+        // stale stored values. This is an infrequent scenario path, so extra
+        // API calls are fine.
+        const latestSRPAttributes = await getSRPAttributes(email);
+        if (latestSRPAttributes && !latestSRPAttributes.isEmailMFAEnabled) {
+            return PAGES.CREDENTIALS;
+        }
+    }
+
+    return undefined;
+};

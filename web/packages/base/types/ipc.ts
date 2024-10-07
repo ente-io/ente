@@ -553,12 +553,16 @@ export interface ElectronMLWorker {
      * See: [Note: Natural language search using CLIP]
      *
      * The input is a opaque float32 array representing the image. The layout
-     * and exact encoding of the input is specific to our implementation and the
-     * ML model (CLIP) we use.
+     * and exact encoding of the input is specific to the runtime (ONNX) and the
+     * ML model (a MobileCLIP variant) we use. In particular, the image
+     * pre-processing happens within our model itself.
      *
      * @returns A CLIP embedding (an array of 512 floating point values).
      */
-    computeCLIPImageEmbedding: (input: Float32Array) => Promise<Float32Array>;
+    computeCLIPImageEmbedding: (
+        input: Uint8ClampedArray,
+        inputShape: number[],
+    ) => Promise<Float32Array>;
 
     /**
      * Return a CLIP embedding of the given image if we already have the model

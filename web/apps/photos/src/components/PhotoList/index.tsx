@@ -510,7 +510,7 @@ export function PhotoList({
             itemType: ITEM_TYPE.OTHER,
             item: (
                 <NothingContainer span={columns}>
-                    <div>{t("NOTHING_HERE")}</div>
+                    <div>{t("nothing_here")}</div>
                 </NothingContainer>
             ),
             id: "empty-list-banner",

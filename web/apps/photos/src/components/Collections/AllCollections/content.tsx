@@ -1,9 +1,9 @@
 import {
-    AllCollectionTile,
+    CollectionTileButton,
     ItemCard,
     LargeTileTextOverlay,
-} from "@/new/photos/components/ItemCards";
-import type { CollectionSummary } from "@/new/photos/types/collection";
+} from "@/new/photos/components/Tiles";
+import type { CollectionSummary } from "@/new/photos/services/collection/ui";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import useWindowSize from "@ente/shared/hooks/useWindowSize";
 import { DialogContent, Typography } from "@mui/material";
@@ -68,7 +68,7 @@ const AllCollectionRow = React.memo(
             <div style={style}>
                 <FlexWrapper gap={"4px"} padding={"16px"}>
                     {collectionRow.map((item: any) => (
-                        <AllCollectionCard
+                        <CollectionButton
                             isScrolling={isScrolling}
                             onCollectionClick={onCollectionClick}
                             collectionSummary={item}
@@ -160,13 +160,13 @@ interface AllCollectionCardProps {
     isScrolling?: boolean;
 }
 
-const AllCollectionCard: React.FC<AllCollectionCardProps> = ({
+const CollectionButton: React.FC<AllCollectionCardProps> = ({
     onCollectionClick,
     collectionSummary,
     isScrolling,
 }) => (
     <ItemCard
-        TileComponent={AllCollectionTile}
+        TileComponent={CollectionTileButton}
         coverFile={collectionSummary.coverFile}
         onClick={() => onCollectionClick(collectionSummary.id)}
         isScrolling={isScrolling}

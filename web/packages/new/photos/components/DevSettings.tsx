@@ -1,6 +1,6 @@
 import { useIsMobileWidth } from "@/base/hooks";
 import { ensureOk } from "@/base/http";
-import { getKV, removeKV, setKV } from "@/base/kv";
+import { getKVS, removeKV, setKV } from "@/base/kv";
 import log from "@/base/log";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import {
@@ -19,7 +19,7 @@ import { t } from "i18next";
 import React, { useEffect, useState } from "react";
 import { z } from "zod";
 import { FocusVisibleButton } from "./FocusVisibleButton";
-import { SlideTransition } from "./SlideTransition";
+import { SlideUpTransition } from "./mui/SlideUpTransition";
 
 interface DevSettingsProps {
     /** If `true`, then the dialog is shown. */
@@ -44,7 +44,7 @@ export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
         <Dialog
             {...{ open, fullScreen }}
             onClose={handleDialogClose}
-            TransitionComponent={SlideTransition}
+            TransitionComponent={SlideUpTransition}
             maxWidth="xs"
             fullWidth
         >
@@ -69,7 +69,8 @@ const Contents: React.FC<ContentsProps> = (props) => {
     >();
 
     useEffect(
-        () => void getKV("apiOrigin").then((o) => setInitialAPIOrigin(o ?? "")),
+        () =>
+            void getKVS("apiOrigin").then((o) => setInitialAPIOrigin(o ?? "")),
         [],
     );
 
@@ -126,14 +127,10 @@ const Form: React.FC<FormProps> = ({ initialAPIOrigin, onClose }) => {
 
     return (
         <form onSubmit={form.handleSubmit}>
-            <DialogTitle>{t("developer_settings")}</DialogTitle>
-            <DialogContent
-                sx={{
-                    "&&": {
-                        paddingBlock: "8px",
-                    },
-                }}
-            >
+            <DialogTitle sx={{ "&&": { padding: "24px 24px 12px 24px" } }}>
+                {t("developer_settings")}
+            </DialogTitle>
+            <DialogContent sx={{ "&&": { padding: "0 24px 0 24px" } }}>
                 <TextField
                     fullWidth
                     autoFocus
@@ -171,7 +168,7 @@ const Form: React.FC<FormProps> = ({ initialAPIOrigin, onClose }) => {
                     }}
                 />
             </DialogContent>
-            <DialogActions>
+            <DialogActions sx={{ "&&": { padding: "0 24px 24px 24px" } }}>
                 <FocusVisibleButton
                     type="submit"
                     color="accent"

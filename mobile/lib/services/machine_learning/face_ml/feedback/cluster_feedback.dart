@@ -335,7 +335,7 @@ class ClusterFeedbackService {
   }
 
   Future<void> ignoreCluster(String clusterID) async {
-    await PersonService.instance.addPerson('', clusterID);
+    await PersonService.instance.addPerson('', clusterID, isHidden: true);
     Bus.instance.fire(PeopleChangedEvent());
     return;
   }

@@ -658,7 +658,7 @@ const ImageEditorOverlay = (props: IProps) => {
                             />
                         </Tabs>
                     </HorizontalFlex>
-                    <MenuSectionTitle title={t("RESET")} />
+                    <MenuSectionTitle title={t("reset")} />
                     <MenuItemGroup
                         style={{
                             marginBottom: "0.5rem",

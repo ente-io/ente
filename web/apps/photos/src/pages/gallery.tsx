@@ -3,18 +3,29 @@ import { NavbarBase } from "@/base/components/Navbar";
 import { useIsMobileWidth } from "@/base/hooks";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
-import { SearchResultsHeader } from "@/new/photos/components/Gallery";
+import {
+    CollectionSelector,
+    type CollectionSelectorAttributes,
+} from "@/new/photos/components/CollectionSelector";
+import {
+    PeopleEmptyState,
+    SearchResultsHeader,
+} from "@/new/photos/components/Gallery";
 import type { GalleryBarMode } from "@/new/photos/components/Gallery/BarImpl";
+import { GalleryPeopleState } from "@/new/photos/components/Gallery/PeopleHeader";
 import {
     SearchBar,
     type SearchBarProps,
 } from "@/new/photos/components/SearchBar";
 import { WhatsNew } from "@/new/photos/components/WhatsNew";
 import { shouldShowWhatsNew } from "@/new/photos/services/changelog";
+import type { CollectionSummaries } from "@/new/photos/services/collection/ui";
+import { areOnlySystemCollections } from "@/new/photos/services/collection/ui";
 import downloadManager from "@/new/photos/services/download";
 import {
     getLocalFiles,
     getLocalTrashedFiles,
+    sortFiles,
 } from "@/new/photos/services/files";
 import { peopleSnapshot, peopleSubscribe } from "@/new/photos/services/ml";
 import type { Person } from "@/new/photos/services/ml/people";
@@ -23,7 +34,6 @@ import {
     setSearchCollectionsAndFiles,
 } from "@/new/photos/services/search";
 import type { SearchOption } from "@/new/photos/services/search/types";
-import type { CollectionSummaries } from "@/new/photos/types/collection";
 import { EnteFile } from "@/new/photos/types/file";
 import { mergeMetadata } from "@/new/photos/utils/file";
 import { ensure } from "@/utils/ensure";
@@ -61,10 +71,6 @@ import AuthenticateUserModal from "components/AuthenticateUserModal";
 import CollectionNamer, {
     CollectionNamerAttributes,
 } from "components/Collections/CollectionNamer";
-import {
-    CollectionSelector,
-    CollectionSelectorAttributes,
-} from "components/Collections/CollectionSelector";
 import { GalleryBarAndListHeader } from "components/Collections/GalleryBarAndListHeader";
 import ExportModal from "components/ExportModal";
 import {
@@ -90,6 +96,7 @@ import { useRouter } from "next/router";
 import { AppContext } from "pages/_app";
 import {
     createContext,
+    useCallback,
     useContext,
     useEffect,
     useMemo,
@@ -102,6 +109,7 @@ import {
     constructEmailList,
     constructUserIDToEmailMap,
     createAlbum,
+    createUnCategorizedCollection,
     getAllLatestCollections,
     getAllLocalCollections,
     getCollectionSummaries,
@@ -126,6 +134,7 @@ import {
     ALL_SECTION,
     ARCHIVE_SECTION,
     COLLECTION_OPS_TYPE,
+    DUMMY_UNCATEGORIZED_COLLECTION,
     HIDDEN_ITEMS_SECTION,
     TRASH_SECTION,
     constructCollectionNameMap,
@@ -133,7 +142,6 @@ import {
     getDefaultHiddenCollectionIDs,
     getSelectedCollection,
     handleCollectionOps,
-    hasNonSystemCollections,
     splitNormalAndHiddenCollections,
 } from "utils/collection";
 import {
@@ -142,7 +150,6 @@ import {
     getSelectedFiles,
     getUniqueFiles,
     handleFileOps,
-    sortFiles,
 } from "utils/file";
 import { isArchivedFile } from "utils/magicMetadata";
 import { getSessionExpiredMessage } from "utils/ui";
@@ -206,9 +213,6 @@ export default function Gallery() {
     });
     const [planModalView, setPlanModalView] = useState(false);
     const [blockingLoad, setBlockingLoad] = useState(false);
-    const [collectionSelectorAttributes, setCollectionSelectorAttributes] =
-        useState<CollectionSelectorAttributes>(null);
-    const [collectionSelectorView, setCollectionSelectorView] = useState(false);
     const [collectionNamerAttributes, setCollectionNamerAttributes] =
         useState<CollectionNamerAttributes>(null);
     const [collectionNamerView, setCollectionNamerView] = useState(false);
@@ -251,7 +255,7 @@ export default function Gallery() {
         accept: ".zip",
     });
 
-    const syncInProgress = useRef(true);
+    const syncInProgress = useRef(false);
     const syncInterval = useRef<NodeJS.Timeout>();
     const resync = useRef<{ force: boolean; silent: boolean }>();
 
@@ -317,8 +321,8 @@ export default function Gallery() {
     // If visible, what should the (sticky) gallery bar show.
     const [barMode, setBarMode] = useState<GalleryBarMode>("albums");
 
-    // The currently selected person in the gallery bar (if any).
-    const [activePerson, setActivePerson] = useState<Person | undefined>();
+    // The ID of the currently selected person in the gallery bar (if any).
+    const [activePersonID, setActivePersonID] = useState<string | undefined>();
 
     const people = useSyncExternalStore(peopleSubscribe, peopleSnapshot);
 
@@ -343,6 +347,10 @@ export default function Gallery() {
     const [tempHiddenFileIds, setTempHiddenFileIds] = useState(
         new Set<number>(),
     );
+
+    const [openCollectionSelector, setOpenCollectionSelector] = useState(false);
+    const [collectionSelectorAttributes, setCollectionSelectorAttributes] =
+        useState<CollectionSelectorAttributes | undefined>();
 
     const router = useRouter();
 
@@ -469,10 +477,6 @@ export default function Gallery() {
     }, [user, collections, familyData]);
 
     useEffect(() => {
-        collectionSelectorAttributes && setCollectionSelectorView(true);
-    }, [collectionSelectorAttributes]);
-
-    useEffect(() => {
         collectionNamerAttributes && setCollectionNamerView(true);
     }, [collectionNamerAttributes]);
     useEffect(() => {
@@ -526,9 +530,16 @@ export default function Gallery() {
         );
     }, [collections, activeCollectionID]);
 
-    const filteredData = useMemoSingleThreaded(async (): Promise<
-        EnteFile[]
-    > => {
+    // The derived UI state when we are in "people" mode.
+    //
+    // TODO: This spawns even more workarounds below. Move this to a
+    // reducer/store.
+    type DerivedState1 = {
+        filteredData: EnteFile[];
+        galleryPeopleState: GalleryPeopleState | undefined;
+    };
+
+    const derived1: DerivedState1 = useMemoSingleThreaded(async () => {
         if (
             !files ||
             !user ||
@@ -536,32 +547,56 @@ export default function Gallery() {
             !hiddenFiles ||
             !archivedCollections
         ) {
-            return;
+            return { filteredData: [], galleryPeopleState: undefined };
         }
 
         if (activeCollectionID === TRASH_SECTION && !selectedSearchOption) {
-            return getUniqueFiles([
+            const filteredData = getUniqueFiles([
                 ...trashedFiles,
                 ...files.filter((file) => tempDeletedFileIds?.has(file.id)),
             ]);
+            return { filteredData, galleryPeopleState: undefined };
         }
 
         let filteredFiles: EnteFile[] = [];
+        let galleryPeopleState: GalleryPeopleState;
         if (selectedSearchOption) {
             filteredFiles = await filterSearchableFiles(
                 selectedSearchOption.suggestion,
             );
         } else if (barMode == "people") {
-            const pfSet = new Set(ensure(activePerson).fileIDs);
+            let filteredPeople = people ?? [];
+            if (tempDeletedFileIds?.size ?? tempHiddenFileIds?.size) {
+                // Prune the in-memory temp updates from the actual state to
+                // obtain the UI state. Kept inside an preflight check to so
+                // that the common path remains fast.
+                filteredPeople = filteredPeople
+                    .map((p) => ({
+                        ...p,
+                        fileIDs: p.fileIDs.filter(
+                            (id) =>
+                                !tempDeletedFileIds?.has(id) &&
+                                !tempHiddenFileIds?.has(id),
+                        ),
+                    }))
+                    .filter((p) => p.fileIDs.length > 0);
+            }
+            const activePerson =
+                filteredPeople.find((p) => p.id == activePersonID) ??
+                // We don't have an "All" pseudo-album in people mode currently,
+                // so default to the first person in the list.
+                filteredPeople[0];
+            const pfSet = new Set(activePerson?.fileIDs ?? []);
             filteredFiles = getUniqueFiles(
                 files.filter(({ id }) => {
                     if (!pfSet.has(id)) return false;
-                    // TODO-Cluster
-                    // if (tempDeletedFileIds?.has(id)) return false;
-                    // if (tempHiddenFileIds?.has(id)) return false;
                     return true;
                 }),
             );
+            galleryPeopleState = {
+                activePerson,
+                people: filteredPeople,
+            };
         } else {
             const baseFiles = barMode == "hidden-albums" ? hiddenFiles : files;
             filteredFiles = getUniqueFiles(
@@ -627,10 +662,10 @@ export default function Gallery() {
         }
         const sortAsc = activeCollection?.pubMagicMetadata?.data?.asc ?? false;
         if (sortAsc) {
-            return sortFiles(filteredFiles, true);
-        } else {
-            return filteredFiles;
+            filteredFiles = sortFiles(filteredFiles, true);
         }
+
+        return { filteredData: filteredFiles, galleryPeopleState };
     }, [
         barMode,
         files,
@@ -642,8 +677,14 @@ export default function Gallery() {
         selectedSearchOption,
         activeCollectionID,
         archivedCollections,
-        activePerson,
+        people,
+        activePersonID,
     ]);
+
+    const { filteredData, galleryPeopleState } = derived1 ?? {
+        filteredData: [],
+        galleryPeopleState: undefined,
+    };
 
     const selectAll = (e: KeyboardEvent) => {
         // ignore ctrl/cmd + a if the user is typing in a text field
@@ -657,7 +698,7 @@ export default function Gallery() {
         if (
             sidebarView ||
             uploadTypeSelectorView ||
-            collectionSelectorView ||
+            openCollectionSelector ||
             collectionNamerView ||
             fixCreationTimeView ||
             planModalView ||
@@ -675,10 +716,13 @@ export default function Gallery() {
             count: 0,
             collectionID: activeCollectionID,
             context:
-                barMode == "people" && activePerson
-                    ? { mode: "people" as const, personID: activePerson.id }
+                barMode == "people" && galleryPeopleState?.activePerson?.id
+                    ? {
+                          mode: "people" as const,
+                          personID: galleryPeopleState.activePerson.id,
+                      }
                     : {
-                          mode: "albums" as const,
+                          mode: barMode as "albums" | "hidden-albums",
                           collectionID: ensure(activeCollectionID),
                       },
         };
@@ -741,6 +785,7 @@ export default function Gallery() {
             resync.current = { force, silent };
             return;
         }
+        const isForced = syncInProgress.current && force;
         syncInProgress.current = true;
         try {
             const token = getToken();
@@ -761,7 +806,14 @@ export default function Gallery() {
             await syncFiles("normal", normalCollections, setFiles);
             await syncFiles("hidden", hiddenCollections, setHiddenFiles);
             await syncTrash(collections, setTrashedFiles);
-            await sync();
+            // syncWithRemote is called with the force flag set to true before
+            // doing an upload. So it is possible, say when resuming a pending
+            // upload, that we get two syncWithRemotes happening in parallel.
+            //
+            // Do the non-file-related sync only for one of these parallel ones.
+            if (!isForced) {
+                await sync();
+            }
         } catch (e) {
             switch (e.message) {
                 case CustomError.SESSION_EXPIRED:
@@ -889,7 +941,7 @@ export default function Gallery() {
         (ops: COLLECTION_OPS_TYPE) => async (collection: Collection) => {
             startLoading();
             try {
-                setCollectionSelectorView(false);
+                setOpenCollectionSelector(false);
                 const selectedFiles = getSelectedFiles(selected, filteredData);
                 const toProcessFiles =
                     ops === COLLECTION_OPS_TYPE.REMOVE
@@ -996,7 +1048,7 @@ export default function Gallery() {
                 setActiveCollectionID(searchOption.suggestion.collectionID);
             } else {
                 setBarMode("people");
-                setActivePerson(searchOption.suggestion.person);
+                setActivePersonID(searchOption.suggestion.person.id);
             }
         } else {
             setIsInSearchMode(!!searchOption);
@@ -1011,10 +1063,6 @@ export default function Gallery() {
         }
         setUploadTypeSelectorView(true);
         setUploadTypeSelectorIntent(intent ?? "upload");
-    };
-
-    const closeCollectionSelector = () => {
-        setCollectionSelectorView(false);
     };
 
     const openExportModal = () => {
@@ -1049,22 +1097,35 @@ export default function Gallery() {
     };
 
     const handleSelectPerson = (person: Person | undefined) => {
-        // The person bar currently does not have an "all" mode, so default to
-        // the first person when no specific person is provided. This can happen
-        // when the user clicks the "People" header in the search empty state (it
-        // is guaranteed that this header will only be shown if there is at
-        // least one person).
-        setActivePerson(person ?? ensure(people[0]));
+        setActivePersonID(person?.id);
         setBarMode("people");
     };
 
-    if (activePerson) {
-        log.debug(() => ["person", activePerson]);
-    }
+    const handleSelectFileInfoPerson = (personID: string) => {
+        setActivePersonID(personID);
+        setBarMode("people");
+    };
+
+    const handleOpenCollectionSelector = useCallback(
+        (attributes: CollectionSelectorAttributes) => {
+            setCollectionSelectorAttributes(attributes);
+            setOpenCollectionSelector(true);
+        },
+        [],
+    );
+
+    const handleCloseCollectionSelector = useCallback(
+        () => setOpenCollectionSelector(false),
+        [],
+    );
 
     if (!collectionSummaries || !filteredData) {
         return <div></div>;
     }
+
+    // `people` will be undefined only when ML is disabled, otherwise it'll be
+    // an empty array (even if people are loading).
+    const showPeopleSectionButton = people !== undefined;
 
     return (
         <GalleryContext.Provider
@@ -1119,11 +1180,16 @@ export default function Gallery() {
                     attributes={collectionNamerAttributes}
                 />
                 <CollectionSelector
-                    open={collectionSelectorView}
-                    onClose={closeCollectionSelector}
-                    collectionSummaries={collectionSummaries}
+                    open={openCollectionSelector}
+                    onClose={handleCloseCollectionSelector}
                     attributes={collectionSelectorAttributes}
-                    collections={collections}
+                    collectionSummaries={collectionSummaries}
+                    collectionForCollectionID={(id) =>
+                        findCollectionCreatingUncategorizedIfNeeded(
+                            collections,
+                            id,
+                        )
+                    }
                 />
                 <FilesDownloadProgress
                     attributesList={filesDownloadProgressAttributesList}
@@ -1134,8 +1200,14 @@ export default function Gallery() {
                     hide={() => setFixCreationTimeView(false)}
                     attributes={fixCreationTimeAttributes}
                 />
+
                 <NavbarBase
-                    sx={{ background: "transparent", position: "absolute" }}
+                    sx={{
+                        background: "transparent",
+                        position: "absolute",
+                        // Override the default 16px we get from NavbarBase
+                        marginBottom: "12px",
+                    }}
                 >
                     {barMode == "hidden-albums" ? (
                         <HiddenSectionNavbarContents
@@ -1165,8 +1237,9 @@ export default function Gallery() {
                         activeCollectionID,
                         setActiveCollectionID,
                         hiddenCollectionSummaries,
-                        people,
-                        activePerson,
+                        showPeopleSectionButton,
+                        people: galleryPeopleState?.people ?? [],
+                        activePerson: galleryPeopleState?.activePerson,
                         onSelectPerson: handleSelectPerson,
                         setCollectionNamerAttributes,
                         setPhotoListHeader,
@@ -1178,29 +1251,20 @@ export default function Gallery() {
                 <Uploader
                     activeCollection={activeCollection}
                     syncWithRemote={syncWithRemote}
-                    showCollectionSelector={setCollectionSelectorView.bind(
-                        null,
-                        true,
-                    )}
                     closeUploadTypeSelector={setUploadTypeSelectorView.bind(
                         null,
                         false,
                     )}
-                    setCollectionSelectorAttributes={
-                        setCollectionSelectorAttributes
-                    }
-                    closeCollectionSelector={setCollectionSelectorView.bind(
-                        null,
-                        false,
-                    )}
+                    onOpenCollectionSelector={handleOpenCollectionSelector}
+                    onCloseCollectionSelector={handleCloseCollectionSelector}
                     setLoading={setBlockingLoad}
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
                     setShouldDisableDropzone={setShouldDisableDropzone}
                     setFiles={setFiles}
                     setCollections={setCollections}
-                    isFirstUpload={
-                        !hasNonSystemCollections(collectionSummaries)
-                    }
+                    isFirstUpload={areOnlySystemCollections(
+                        collectionSummaries,
+                    )}
                     {...{
                         dragAndDropFiles,
                         openFileSelector,
@@ -1229,6 +1293,11 @@ export default function Gallery() {
                 !hiddenFiles?.length &&
                 activeCollectionID === ALL_SECTION ? (
                     <GalleryEmptyState openUploader={openUploader} />
+                ) : !isInSearchMode &&
+                  !isFirstLoad &&
+                  barMode == "people" &&
+                  !galleryPeopleState?.activePerson ? (
+                    <PeopleEmptyState />
                 ) : (
                     <PhotoFrame
                         page={PAGES.GALLERY}
@@ -1242,7 +1311,7 @@ export default function Gallery() {
                         setTempDeletedFileIds={setTempDeletedFileIds}
                         setIsPhotoSwipeOpen={setIsPhotoSwipeOpen}
                         activeCollectionID={activeCollectionID}
-                        activePersonID={activePerson?.id}
+                        activePersonID={galleryPeopleState?.activePerson?.id}
                         enableDownload={true}
                         fileToCollectionsMap={fileToCollectionsMap}
                         collectionNameMap={collectionNameMap}
@@ -1254,6 +1323,7 @@ export default function Gallery() {
                             setFilesDownloadProgressAttributesCreator
                         }
                         selectable={true}
+                        onSelectPerson={handleSelectFileInfoPerson}
                     />
                 )}
                 {selected.count > 0 &&
@@ -1264,8 +1334,8 @@ export default function Gallery() {
                             showCreateCollectionModal={
                                 showCreateCollectionModal
                             }
-                            setCollectionSelectorAttributes={
-                                setCollectionSelectorAttributes
+                            onOpenCollectionSelector={
+                                handleOpenCollectionSelector
                             }
                             count={selected.count}
                             ownCount={selected.ownCount}
@@ -1397,3 +1467,19 @@ const HiddenSectionNavbarContents: React.FC<
         </FlexWrapper>
     </HorizontalFlex>
 );
+
+/**
+ * Return the {@link Collection} (from amongst {@link collections}) with the
+ * given {@link collectionID}. As a special case, if collection ID is the
+ * placeholder ID of the uncategorized collection, create it and then return it.
+ */
+const findCollectionCreatingUncategorizedIfNeeded = async (
+    collections: Collection[],
+    collectionID: number,
+) => {
+    if (collectionID == DUMMY_UNCATEGORIZED_COLLECTION) {
+        return await createUnCategorizedCollection();
+    } else {
+        return collections.find((c) => c.id === collectionID);
+    }
+};

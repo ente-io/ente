@@ -13,6 +13,19 @@ export interface MLWorkerDelegate {
      * indicating the indexing or clustering status to be updated.
      */
     workerDidUpdateStatus: () => void;
+    /**
+     * Called when the worker indexes some files, but then notices that the main
+     * thread was not awaiting the indexing (e.g. it was not initiated by the
+     * main thread during a sync, but happened because of a live upload).
+     *
+     * In such cases, it uses this method to inform the main thread that some
+     * files were indexed, so that it can update any dependent state (e.g.
+     * clusters).
+     *
+     * It doesn't always call this because otherwise the main thread would need
+     * some extra code to avoid updating the dependent state twice.
+     */
+    workerDidUnawaitedIndex: () => void;
 }
 
 /**

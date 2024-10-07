@@ -33,6 +33,9 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
   int remainingTimeInSeconds = 0;
   final _lockscreenSetting = LockScreenSettings.instance;
   late Brightness _platformBrightness;
+  final bool hasOptedForOfflineMode =
+      Configuration.instance.hasOptedForOfflineMode();
+
   @override
   void initState() {
     _logger.info("initiatingState");
@@ -53,13 +56,15 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.logout_outlined),
-          color: Theme.of(context).iconTheme.color,
-          onPressed: () {
-            _onLogoutTapped(context);
-          },
-        ),
+        leading: hasOptedForOfflineMode
+            ? const SizedBox.shrink()
+            : IconButton(
+                icon: const Icon(Icons.logout_outlined),
+                color: Theme.of(context).iconTheme.color,
+                onPressed: () {
+                  _onLogoutTapped(context);
+                },
+              ),
       ),
       body: GestureDetector(
         onTap: () {

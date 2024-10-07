@@ -1,6 +1,6 @@
 import { assertionFailed } from "@/base/assert";
 import { useIsMobileWidth } from "@/base/hooks";
-import { ItemCard, PreviewItemTile } from "@/new/photos/components/ItemCards";
+import { ItemCard, PreviewItemTile } from "@/new/photos/components/Tiles";
 import {
     isMLSupported,
     mlStatusSnapshot,
@@ -42,7 +42,7 @@ import {
 } from "react-select";
 import AsyncSelect from "react-select/async";
 import { SearchPeopleList } from "./PeopleList";
-import { UnstyledButton } from "./mui-custom";
+import { UnstyledButton } from "./UnstyledButton";
 
 export interface SearchBarProps {
     /**
@@ -418,7 +418,7 @@ const EmptyState: React.FC<Pick<SearchBarProps, "onSelectPerson">> = ({
                     <SearchPeopleList {...{ people, onSelectPerson }} />
                 </>
             )}
-            <Typography variant="mini" sx={{ my: "4px" }}>
+            <Typography variant="mini" sx={{ mt: "5px", mb: "4px" }}>
                 {label}
             </Typography>
         </Box>

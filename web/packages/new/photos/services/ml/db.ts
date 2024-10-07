@@ -3,7 +3,6 @@ import { deleteDB, openDB, type DBSchema } from "idb";
 import type { LocalCLIPIndex } from "./clip";
 import type { FaceCluster } from "./cluster";
 import type { LocalFaceIndex } from "./face";
-import type { CGroup } from "./people";
 
 /**
  * ML DB schema.
@@ -35,14 +34,8 @@ import type { CGroup } from "./people";
  * The face clustering related object stores are the following:
  *
  * -   "face-cluster": Contains {@link FaceCluster} objects, one for each
- *     cluster of faces that either the clustering algorithm produced locally or
- *     were synced from remote. It is indexed by the cluster ID.
- *
- * -   "cluster-group": Contains {@link CGroup} objects, one for each group of
- *     clusters that were synced from remote. The client can also locally
- *     generate cluster groups on certain user interactions, but these too will
- *     eventually get synced with remote. This object store is indexed by the
- *     cgroup ID.
+ *     cluster of faces that either the clustering algorithm produced locally.
+ *     It is indexed by the cluster ID.
  */
 interface MLDBSchema extends DBSchema {
     "file-status": {
@@ -62,9 +55,10 @@ interface MLDBSchema extends DBSchema {
         key: string;
         value: FaceCluster;
     };
+    /* Unused */
     "cluster-group": {
         key: string;
-        value: CGroup;
+        value: unknown;
     };
 }
 
@@ -157,7 +151,7 @@ export const clearMLDB = async () => {
     }
     _mlDB = undefined;
 
-    return deleteDB("face", {
+    return deleteDB("ml", {
         blocked() {
             log.warn(
                 "Waiting for an existing client to close their connection so that we can delete the ML DB",
@@ -392,17 +386,9 @@ export const markIndexingFailed = async (fileID: number) => {
 /**
  * Return all face clusters present locally.
  */
-export const getFaceClusters = async () => {
+export const savedFaceClusters = async () => {
     const db = await mlDB();
     return db.getAll("face-cluster");
-};
-
-/**
- * Return all cluster group entries (aka "cgroups") present locally.
- */
-export const getClusterGroups = async () => {
-    const db = await mlDB();
-    return db.getAll("cluster-group");
 };
 
 /**
@@ -411,34 +397,10 @@ export const getClusterGroups = async () => {
  * This function deletes all entries from the face cluster object store, and
  * then inserts the given {@link clusters} into it.
  */
-// TODO-Cluster
-export const setFaceClusters = async (clusters: FaceCluster[]) => {
+export const saveFaceClusters = async (clusters: FaceCluster[]) => {
     const db = await mlDB();
     const tx = db.transaction("face-cluster", "readwrite");
     await tx.store.clear();
     await Promise.all(clusters.map((cluster) => tx.store.put(cluster)));
-    return tx.done;
-};
-
-/**
- * Update the cluster group store to reflect the given changes.
- *
- * @param diff A list of changes to apply. Each entry is either
- *
- * -   A string, in which case the cluster group with the given string as their
- *     ID should be deleted from the store, or
- *
- * -   A cgroup, in which case it should add or overwrite the entry for the
- *     corresponding cluster group (as identified by its {@link id}).
- */
-export const applyCGroupDiff = async (diff: (string | CGroup)[]) => {
-    const db = await mlDB();
-    const tx = db.transaction("cluster-group", "readwrite");
-    // See: [Note: Diff response will have at most one entry for an id]
-    await Promise.all(
-        diff.map((d) =>
-            typeof d == "string" ? tx.store.delete(d) : tx.store.put(d),
-        ),
-    );
     return tx.done;
 };

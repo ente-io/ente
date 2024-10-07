@@ -48,7 +48,7 @@ import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
 import { pauseVideo, playVideo } from "utils/photoFrame";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import { getTrashFileMessage } from "utils/ui";
-import { FileInfo, type FileInfoExif } from "./FileInfo";
+import { FileInfo, type FileInfoExif, type FileInfoProps } from "./FileInfo";
 import ImageEditorOverlay from "./ImageEditorOverlay";
 import CircularProgressWithLabel from "./styledComponents/CircularProgressWithLabel";
 import { ConversionFailedNotification } from "./styledComponents/ConversionFailedNotification";
@@ -98,7 +98,8 @@ const CaptionContainer = styled("div")(({ theme }) => ({
     backgroundColor: theme.colors.backdrop.faint,
     backdropFilter: `blur(${theme.colors.blur.base})`,
 }));
-interface Iprops {
+
+export interface PhotoViewerProps {
     isOpen: boolean;
     items: any[];
     currentIndex?: number;
@@ -115,9 +116,10 @@ interface Iprops {
     fileToCollectionsMap: Map<number, number[]>;
     collectionNameMap: Map<number, string>;
     setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator;
+    onSelectPerson?: FileInfoProps["onSelectPerson"];
 }
 
-function PhotoViewer(props: Iprops) {
+function PhotoViewer(props: PhotoViewerProps) {
     const galleryContext = useContext(GalleryContext);
     const appContext = useContext(AppContext);
     const publicCollectionGalleryContext = useContext(
@@ -812,7 +814,7 @@ function PhotoViewer(props: Iprops) {
 
                             <button
                                 className="pswp__button pswp__button--custom"
-                                title={t("CLOSE_OPTION")}
+                                title={t("close_key")}
                                 onClick={handleClose}
                             >
                                 <CloseIcon />
@@ -969,6 +971,7 @@ function PhotoViewer(props: Iprops) {
                 refreshPhotoswipe={refreshPhotoswipe}
                 fileToCollectionsMap={props.fileToCollectionsMap}
                 collectionNameMap={props.collectionNameMap}
+                onSelectPerson={props.onSelectPerson}
             />
             <ImageEditorOverlay
                 show={showImageEditorOverlay}

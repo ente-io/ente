@@ -68,7 +68,6 @@ class FileSearchResultWidget extends StatelessWidget {
     final page = DetailPage(
       DetailPageConfiguration(
         List.unmodifiable([file]),
-        null,
         0,
         "file_details",
       ),
