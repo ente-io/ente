@@ -42,7 +42,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
         setDialogBoxAttributesV2({
             title: t("error"),
             close: { variant: "critical" },
-            content: t("UNKNOWN_ERROR"),
+            content: t("generic_error_retry"),
         });
 
     const initiateDelete = async (
@@ -156,7 +156,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                         feedback: "",
                     }}
                     validationSchema={Yup.object().shape({
-                        reason: Yup.string().required(t("REQUIRED")),
+                        reason: Yup.string().required(t("required")),
                     })}
                     validateOnChange={false}
                     validateOnBlur={false}

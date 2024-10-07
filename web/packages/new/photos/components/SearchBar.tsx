@@ -43,6 +43,7 @@ import {
 import AsyncSelect from "react-select/async";
 import { SearchPeopleList } from "./PeopleList";
 import { UnstyledButton } from "./UnstyledButton";
+import type { ButtonishProps } from "./mui";
 
 export interface SearchBarProps {
     /**
@@ -414,7 +415,9 @@ const EmptyState: React.FC<Pick<SearchBarProps, "onSelectPerson">> = ({
         <Box sx={{ textAlign: "left" }}>
             {people && people.length > 0 && (
                 <>
-                    <PeopleHeader onClick={() => onSelectPerson(undefined)} />
+                    <SearchPeopleHeader
+                        onClick={() => onSelectPerson(undefined)}
+                    />
                     <SearchPeopleList {...{ people, onSelectPerson }} />
                 </>
             )}
@@ -425,22 +428,18 @@ const EmptyState: React.FC<Pick<SearchBarProps, "onSelectPerson">> = ({
     );
 };
 
-interface PeopleHeaderProps {
-    onClick: () => void;
-}
-
-const PeopleHeader: React.FC<PeopleHeaderProps> = ({ onClick }) => (
-    <PeopleHeaderButton {...{ onClick }}>
+const SearchPeopleHeader: React.FC<ButtonishProps> = ({ onClick }) => (
+    <SearchPeopleHeaderButton {...{ onClick }}>
         <Stack direction="row" color="text.muted">
             <Typography color="text.base" variant="large">
                 {t("people")}
             </Typography>
             <ChevronRightIcon />
         </Stack>
-    </PeopleHeaderButton>
+    </SearchPeopleHeaderButton>
 );
 
-const PeopleHeaderButton = styled(UnstyledButton)(
+const SearchPeopleHeaderButton = styled(UnstyledButton)(
     ({ theme }) => `
     /* The color for the chevron */
     color: ${theme.colors.stroke.muted};

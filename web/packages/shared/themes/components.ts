@@ -132,7 +132,17 @@ export const getComponents = (
     MuiInputBase: {
         styleOverrides: {
             formControl: {
+                // Give a symmetric border to the input field, by default the
+                // border radius is only applied to the top for the "filled"
+                // variant of input used inside TextFields.
                 borderRadius: "8px",
+                // TODO: Should we also add overflow hidden so that there is no
+                // gap between the filled area and the (full width) border. Not
+                // sure how this might interact with selects.
+                // overflow: "hidden",
+
+                // Hide the bottom border that always appears for the "filled"
+                // variant of input used inside TextFields.
                 "::before": {
                     borderBottom: "none !important",
                 },
@@ -150,7 +160,13 @@ export const getComponents = (
     },
     MuiTextField: {
         defaultProps: {
+            // The MUI default variant is "outlined", override it to use the
+            // "filled" one by default.
             variant: "filled",
+            // Reduce the vertical margins that MUI adds to the TextField.
+            //
+            // Note that this causes things to be too tight when the helper text
+            // is shown, so this is not recommended for new code that we write.
             margin: "dense",
         },
         styleOverrides: {

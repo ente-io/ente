@@ -132,7 +132,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         setDialogBoxAttributesV2({
             title: t("error"),
             close: { variant: "critical" },
-            content: t("UNKNOWN_ERROR"),
+            content: t("generic_error_retry"),
         });
 
     const logout = () => {

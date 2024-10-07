@@ -7,5 +7,5 @@ import type { DialogBoxAttributesV2 } from "./DialogBoxV2/types";
 export const genericErrorAttributes = (): DialogBoxAttributesV2 => ({
     title: t("error"),
     close: { variant: "critical" },
-    content: t("UNKNOWN_ERROR"),
+    content: t("generic_error_retry"),
 });

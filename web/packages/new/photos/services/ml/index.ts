@@ -27,7 +27,7 @@ import { deleteUserEntity } from "../user-entity/remote";
 import type { FaceCluster } from "./cluster";
 import { regenerateFaceCrops } from "./crop";
 import { clearMLDB, getFaceIndex, getIndexableAndIndexedCounts } from "./db";
-import { reconstructPeople, type Person } from "./people";
+import { filterNamedPeople, reconstructPeople, type Person } from "./people";
 import { MLWorker } from "./worker";
 import type { CLIPMatches } from "./worker-types";
 
@@ -575,11 +575,7 @@ const updatePeople = async () => {
     const people = await reconstructPeople();
 
     // Notify the search subsystem of the update (search only uses named ones).
-    setSearchPeople(
-        people
-            .map((p) => (p.name ? { name: p.name, person: p } : undefined))
-            .filter((p) => !!p),
-    );
+    setSearchPeople(filterNamedPeople(people));
 
     // Update our in-memory list of people.
     setPeopleSnapshot(people);

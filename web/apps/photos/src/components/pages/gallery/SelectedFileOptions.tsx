@@ -85,7 +85,7 @@ const SelectedFileOptions = ({
             onCreateCollection: showCreateCollectionModal(
                 COLLECTION_OPS_TYPE.ADD,
             ),
-            ignoredCollectionID:
+            relatedCollectionID:
                 isInSearchMode || peopleMode ? undefined : activeCollectionID,
         });
 
@@ -158,7 +158,7 @@ const SelectedFileOptions = ({
             onCreateCollection: showCreateCollectionModal(
                 COLLECTION_OPS_TYPE.MOVE,
             ),
-            ignoredCollectionID:
+            relatedCollectionID:
                 isInSearchMode || peopleMode ? undefined : activeCollectionID,
         });
     };

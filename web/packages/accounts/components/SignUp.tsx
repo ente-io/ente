@@ -87,7 +87,10 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
                 await sendOtt(email);
             } catch (e) {
                 const message = e instanceof Error ? e.message : "";
-                setFieldError("confirm", `${t("UNKNOWN_ERROR")} ${message}`);
+                setFieldError(
+                    "confirm",
+                    `${t("generic_error_retry")} ${message}`,
+                );
                 throw e;
             }
             try {
@@ -131,9 +134,9 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
                 validationSchema={Yup.object().shape({
                     email: Yup.string()
                         .email(t("EMAIL_ERROR"))
-                        .required(t("REQUIRED")),
-                    passphrase: Yup.string().required(t("REQUIRED")),
-                    confirm: Yup.string().required(t("REQUIRED")),
+                        .required(t("required")),
+                    passphrase: Yup.string().required(t("required")),
+                    confirm: Yup.string().required(t("required")),
                 })}
                 validateOnChange={false}
                 validateOnBlur={false}

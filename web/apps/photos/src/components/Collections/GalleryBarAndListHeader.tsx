@@ -4,6 +4,7 @@ import {
     type GalleryBarImplProps,
 } from "@/new/photos/components/Gallery/BarImpl";
 import { PeopleHeader } from "@/new/photos/components/Gallery/PeopleHeader";
+import { SingleInputDialogTest } from "@/new/photos/components/SingleInputFormV2";
 import {
     areOnlySystemCollections,
     collectionsSortBy,
@@ -107,6 +108,7 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
     const [openCollectionShareView, setOpenCollectionShareView] =
         useState(false);
     const [openAlbumCastDialog, setOpenAlbumCastDialog] = useState(false);
+    const [openPeopleSelector, setOpenPeopleSelector] = useState(false);
 
     const [collectionsSortBy, setCollectionsSortBy] =
         useCollectionsSortByLocalState("updation-time-desc");
@@ -172,7 +174,7 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
                 ) : activePerson ? (
                     <PeopleHeader
                         person={activePerson}
-                        {...{ onSelectPerson, appContext }}
+                        {...{ onSelectPerson, people, appContext }}
                     />
                 ) : (
                     <></>
@@ -187,7 +189,17 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
         activeCollectionID,
         isActiveCollectionDownloadInProgress,
         activePerson,
+        // TODO-Cluster
+        // This causes a loop since it is an array dep
+        // people,
     ]);
+
+    // TODO-Cluster
+    useEffect(() => {
+        if (process.env.NEXT_PUBLIC_ENTE_WIP_CL) {
+            setOpenPeopleSelector(true);
+        }
+    }, []);
 
     if (shouldBeHidden) {
         return <></>;
@@ -237,6 +249,10 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
                 open={openAlbumCastDialog}
                 onClose={() => setOpenAlbumCastDialog(false)}
                 collection={activeCollection}
+            />
+            <SingleInputDialogTest
+                open={openPeopleSelector}
+                onClose={() => setOpenPeopleSelector(false)}
             />
         </>
     );

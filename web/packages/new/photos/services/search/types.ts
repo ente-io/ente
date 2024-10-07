@@ -114,16 +114,3 @@ export type City = Location & {
     /** Name of the city. */
     name: string;
 };
-
-export type NamedPerson = Person & {
-    name: string;
-};
-
-/**
- * What we want is NamedPerson, but I can't get it to TypeScript to accept it in
- * our usage contexts. This is a workaround.
- */
-export interface SearchPerson {
-    person: Person;
-    name: string;
-}

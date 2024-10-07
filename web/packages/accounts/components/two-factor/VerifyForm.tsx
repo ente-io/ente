@@ -48,7 +48,7 @@ export default function VerifyTwoFactor(props: Props) {
                 otpInputRef.current?.focusPrevInput();
             }
             const message = e instanceof Error ? e.message : "";
-            setFieldError("otp", `${t("UNKNOWN_ERROR")} ${message}`);
+            setFieldError("otp", `${t("generic_error_retry")} ${message}`);
         }
         setWaiting(false);
     };

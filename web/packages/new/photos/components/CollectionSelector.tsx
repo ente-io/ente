@@ -1,8 +1,8 @@
 import type { Collection } from "@/media/collection";
 import {
-    CollectionTileButton,
     ItemCard,
-    ItemTileOverlay,
+    LargeTileButton,
+    LargeTilePlusOverlay,
     LargeTileTextOverlay,
 } from "@/new/photos/components/Tiles";
 import {
@@ -23,7 +23,7 @@ import {
 } from "@mui/material";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
-import { SpaceBetweenFlex } from "./mui";
+import { SpaceBetweenFlex, type ButtonishProps } from "./mui";
 import {
     DialogCloseIconButton,
     type DialogVisibilityProps,
@@ -59,11 +59,10 @@ export interface CollectionSelectorAttributes {
     onCancel?: () => void;
     /**
      * Some actions, like "add" and "move", happen in the context of an existing
-     * collection. In such cases, their ID can be set as the
-     * {@link ignoredCollectionID} to omit showing them again in the list of
-     * collections.
+     * collection. In such cases, the ID of this collection can be set as the
+     * {@link relatedCollectionID} to omit showing it in the list again.
      */
-    ignoredCollectionID?: number | undefined;
+    relatedCollectionID?: number | undefined;
 }
 
 type CollectionSelectorProps = DialogVisibilityProps & {
@@ -98,7 +97,7 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
     collectionForCollectionID,
 }) => {
     // Make the dialog fullscreen if the screen is <= the dialog's max width.
-    const isFullScreen = useMediaQuery("(max-width: 494px)");
+    const isFullScreen = useMediaQuery("(max-width: 490px)");
 
     const [filteredCollections, setFilteredCollections] = useState<
         CollectionSummary[]
@@ -111,7 +110,7 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
 
         const collections = [...collectionSummaries.values()]
             .filter(({ id, type }) => {
-                if (id === attributes.ignoredCollectionID) {
+                if (id === attributes.relatedCollectionID) {
                     return false;
                 } else if (attributes.action == "add") {
                     return canAddToCollection(type);
@@ -168,9 +167,9 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
             onClose={handleClose}
             fullWidth
             fullScreen={isFullScreen}
-            PaperProps={{ sx: { maxWidth: "494px" } }}
+            PaperProps={{ sx: { maxWidth: "490px" } }}
         >
-            <SpaceBetweenFlex sx={{ padding: "10px 8px 9px 0" }}>
+            <SpaceBetweenFlex sx={{ padding: "10px 8px 6px 0" }}>
                 <DialogTitle variant="h3" fontWeight={"bold"}>
                     {titleForAction(action)}
                 </DialogTitle>
@@ -222,7 +221,7 @@ const CollectionButton: React.FC<CollectionButtonProps> = ({
     onCollectionClick,
 }) => (
     <ItemCard
-        TileComponent={CollectionTileButton}
+        TileComponent={LargeTileButton}
         coverFile={collectionSummary.coverFile}
         onClick={() => onCollectionClick(collectionSummary.id)}
     >
@@ -232,22 +231,9 @@ const CollectionButton: React.FC<CollectionButtonProps> = ({
     </ItemCard>
 );
 
-interface AddCollectionButtonProps {
-    onClick: () => void;
-}
-
-const AddCollectionButton: React.FC<AddCollectionButtonProps> = ({
-    onClick,
-}) => (
-    <ItemCard TileComponent={CollectionTileButton} onClick={onClick}>
+const AddCollectionButton: React.FC<ButtonishProps> = ({ onClick }) => (
+    <ItemCard TileComponent={LargeTileButton} onClick={onClick}>
         <LargeTileTextOverlay>{t("create_albums")}</LargeTileTextOverlay>
-        <PlusOverlay>+</PlusOverlay>
+        <LargeTilePlusOverlay>+</LargeTilePlusOverlay>
     </ItemCard>
 );
-
-const PlusOverlay = styled(ItemTileOverlay)`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 42px;
-`;

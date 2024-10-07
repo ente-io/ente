@@ -59,7 +59,7 @@ function SetPasswordForm(props: SetPasswordFormProps) {
             }
         } catch (e) {
             const message = e instanceof Error ? e.message : "";
-            setFieldError("confirm", `${t("UNKNOWN_ERROR")} ${message}`);
+            setFieldError("confirm", `${t("generic_error_retry")} ${message}`);
         } finally {
             setLoading(false);
         }
@@ -69,8 +69,8 @@ function SetPasswordForm(props: SetPasswordFormProps) {
         <Formik<SetPasswordFormValues>
             initialValues={{ passphrase: "", confirm: "" }}
             validationSchema={Yup.object().shape({
-                passphrase: Yup.string().required(t("REQUIRED")),
-                confirm: Yup.string().required(t("REQUIRED")),
+                passphrase: Yup.string().required(t("required")),
+                confirm: Yup.string().required(t("required")),
             })}
             validateOnChange={false}
             validateOnBlur={false}

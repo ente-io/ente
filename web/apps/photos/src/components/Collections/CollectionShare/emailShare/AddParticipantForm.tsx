@@ -68,7 +68,7 @@ export default function AddParticipantForm(props: AddParticipantFormProps) {
         switch (props.fieldType) {
             case "text":
                 return Yup.object().shape({
-                    inputValue: Yup.string().required(t("REQUIRED")),
+                    inputValue: Yup.string().required(t("required")),
                 });
             case "email":
                 return Yup.object().shape({

@@ -55,7 +55,7 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
             if (e instanceof Error && e.message == "tv-not-found") {
                 setFieldError(t("tv_not_found"));
             } else {
-                setFieldError(t("UNKNOWN_ERROR"));
+                setFieldError(t("generic_error_retry"));
             }
         }
     };

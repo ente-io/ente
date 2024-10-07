@@ -671,7 +671,7 @@ export default function Uploader({
             default:
                 notification = {
                     variant: "critical",
-                    message: t("UNKNOWN_ERROR"),
+                    message: t("generic_error_retry"),
                     onClick: () => null,
                 };
         }
