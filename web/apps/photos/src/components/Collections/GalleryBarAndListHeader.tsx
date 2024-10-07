@@ -4,6 +4,7 @@ import {
     type GalleryBarImplProps,
 } from "@/new/photos/components/Gallery/BarImpl";
 import { PeopleHeader } from "@/new/photos/components/Gallery/PeopleHeader";
+import { PeopleSelector } from "@/new/photos/components/PeopleSelector";
 import {
     areOnlySystemCollections,
     collectionsSortBy,
@@ -107,6 +108,7 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
     const [openCollectionShareView, setOpenCollectionShareView] =
         useState(false);
     const [openAlbumCastDialog, setOpenAlbumCastDialog] = useState(false);
+    const [openPeopleSelector, setOpenPeopleSelector] = useState(false);
 
     const [collectionsSortBy, setCollectionsSortBy] =
         useCollectionsSortByLocalState("updation-time-desc");
@@ -189,6 +191,13 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
         activePerson,
     ]);
 
+    // TODO-Cluster
+    useEffect(() => {
+        if (process.env.NEXT_PUBLIC_ENTE_WIP_CL) {
+            setOpenPeopleSelector(true);
+        }
+    }, []);
+
     if (shouldBeHidden) {
         return <></>;
     }
@@ -237,6 +246,10 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
                 open={openAlbumCastDialog}
                 onClose={() => setOpenAlbumCastDialog(false)}
                 collection={activeCollection}
+            />
+            <PeopleSelector
+                open={openPeopleSelector}
+                onClose={() => setOpenPeopleSelector(false)}
             />
         </>
     );
