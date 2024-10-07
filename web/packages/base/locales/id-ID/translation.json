@@ -19,6 +19,7 @@
     "ENTER_OTT": "Kode verifikasi",
     "RESEND_MAIL": "Kirim ulang kode",
     "VERIFY": "Verifikasi",
+    "generic_error": "",
     "generic_error_retry": "Terjadi kesalahan, silakan coba lagi",
     "INVALID_CODE": "Kode verifikasi tidak valid",
     "EXPIRED_CODE": "Kode verifikasi Anda telah kedaluwarsa",
