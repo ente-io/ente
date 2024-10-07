@@ -22,6 +22,7 @@ import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/actions/file_selection_overlay_bar.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 import "package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart";
+import "package:photos/ui/viewer/gallery/hierarchical_search_gallery.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
@@ -190,29 +191,47 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
             child: Stack(
               alignment: Alignment.bottomCenter,
               children: [
-                Gallery(
-                  loadingWidget: Column(
-                    children: [
-                      EnteLoadingWidget(
-                        color: getEnteColorScheme(context).strokeMuted,
-                      ),
-                    ],
-                  ),
-                  asyncLoader: (
-                    creationStartTime,
-                    creationEndTime, {
-                    limit,
-                    asc,
-                  }) async {
-                    return snapshot.data as FileLoadResult;
+                Builder(
+                  builder: (context) {
+                    return ValueListenableBuilder(
+                      valueListenable: InheritedSearchFilterData.of(context)
+                          .searchFilterDataProvider!
+                          .isSearchingNotifier,
+                      builder: (context, value, _) {
+                        return value
+                            ? HierarchicalSearchGallery(
+                                tagPrefix: widget.tagPrefix,
+                                selectedFiles: _selectedFiles,
+                              )
+                            : Gallery(
+                                loadingWidget: Column(
+                                  children: [
+                                    EnteLoadingWidget(
+                                      color: getEnteColorScheme(context)
+                                          .strokeMuted,
+                                    ),
+                                  ],
+                                ),
+                                asyncLoader: (
+                                  creationStartTime,
+                                  creationEndTime, {
+                                  limit,
+                                  asc,
+                                }) async {
+                                  return snapshot.data as FileLoadResult;
+                                },
+                                reloadEvent:
+                                    Bus.instance.on<LocalPhotosUpdatedEvent>(),
+                                removalEventTypes: const {
+                                  EventType.deletedFromRemote,
+                                  EventType.deletedFromEverywhere,
+                                },
+                                selectedFiles: _selectedFiles,
+                                tagPrefix: widget.tagPrefix,
+                              );
+                      },
+                    );
                   },
-                  reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
-                  removalEventTypes: const {
-                    EventType.deletedFromRemote,
-                    EventType.deletedFromEverywhere,
-                  },
-                  selectedFiles: _selectedFiles,
-                  tagPrefix: widget.tagPrefix,
                 ),
                 FileSelectionOverlayBar(
                   GalleryType.locationTag,
