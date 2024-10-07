@@ -16,7 +16,7 @@ class ContactsFilter extends HierarchicalSearchFilter {
   @override
   String name() {
     if (user.name == null || user.name!.isEmpty) {
-      return user.email;
+      return user.email.split("@")[0];
     }
     return user.name!;
   }
