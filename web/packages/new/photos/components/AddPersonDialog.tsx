@@ -79,8 +79,6 @@ export const AddPersonDialog: React.FC<AddPersonDialogProps> = ({
 
     // If we're opened without any existing people that can be selected, jump
     // directly to the add person dialog.
-    //
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (open && !openNameInput && !cgroupPeople.length) {
         onClose();
         setOpenNameInput(true);
