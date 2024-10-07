@@ -965,7 +965,7 @@ export default function Gallery() {
                     title: t("error"),
 
                     close: { variant: "critical" },
-                    content: t("UNKNOWN_ERROR"),
+                    content: t("generic_error_retry"),
                 });
             } finally {
                 finishLoading();
@@ -1002,7 +1002,7 @@ export default function Gallery() {
                 title: t("error"),
 
                 close: { variant: "critical" },
-                content: t("UNKNOWN_ERROR"),
+                content: t("generic_error_retry"),
             });
         } finally {
             finishLoading();
@@ -1021,7 +1021,7 @@ export default function Gallery() {
                     title: t("error"),
 
                     close: { variant: "critical" },
-                    content: t("UNKNOWN_ERROR"),
+                    content: t("generic_error_retry"),
                 });
             } finally {
                 finishLoading();

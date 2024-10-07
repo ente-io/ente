@@ -48,7 +48,7 @@ export const NameInputDialog: React.FC<NameInputDialogProps> = ({
             onClose();
         } catch (e) {
             log.error(`Error when submitting value ${inputValue}`, e);
-            setFieldError(t("UNKNOWN_ERROR"));
+            setFieldError(t("generic_error_retry"));
         }
     };
 

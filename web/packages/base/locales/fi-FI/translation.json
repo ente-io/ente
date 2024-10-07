@@ -19,7 +19,7 @@
     "ENTER_OTT": "Vahvistuskoodi",
     "RESEND_MAIL": "Lähetä koodi uudelleen",
     "VERIFY": "Vahvista",
-    "UNKNOWN_ERROR": "Jokin meni vikaan. Yritä uudelleen",
+    "generic_error_retry": "Jokin meni vikaan. Yritä uudelleen",
     "INVALID_CODE": "Virheellinen vahvistuskoodi",
     "EXPIRED_CODE": "Vahvistuskoodisi on vanhentunut",
     "SENDING": "Lähetetään...",

@@ -22,7 +22,7 @@ export function MemberSubscriptionManage({ open, userDetails, onClose }) {
             setDialogMessage({
                 title: t("error"),
                 close: { variant: "critical" },
-                content: t("UNKNOWN_ERROR"),
+                content: t("generic_error_retry"),
             });
         }
     }

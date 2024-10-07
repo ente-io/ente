@@ -19,7 +19,7 @@
     "ENTER_OTT": "Patvirtinimo kodas",
     "RESEND_MAIL": "Siųsti kodą iš naujo",
     "VERIFY": "Patvirtinti",
-    "UNKNOWN_ERROR": "Kažkas nutiko ne taip. Bandykite dar kartą.",
+    "generic_error_retry": "Kažkas nutiko ne taip. Bandykite dar kartą.",
     "INVALID_CODE": "Netinkamas patvirtinimo kodas.",
     "EXPIRED_CODE": "Jūsų patvirtinimo kodo laikas nebegaliojantis.",
     "SENDING": "Siunčiama...",

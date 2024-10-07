@@ -404,7 +404,7 @@ export default function PublicCollectionGallery() {
                 );
             } catch (e) {
                 log.error("failed to derive key for verifyLinkPassword", e);
-                setFieldError(`${t("UNKNOWN_ERROR")} ${e.message}`);
+                setFieldError(`${t("generic_error_retry")} ${e.message}`);
                 return;
             }
             const collectionUID = getPublicCollectionUID(token.current);
@@ -431,7 +431,7 @@ export default function PublicCollectionGallery() {
             appContext.finishLoading();
         } catch (e) {
             log.error("failed to verifyLinkPassword", e);
-            setFieldError(`${t("UNKNOWN_ERROR")} ${e.message}`);
+            setFieldError(`${t("generic_error_retry")} ${e.message}`);
         }
     };
 

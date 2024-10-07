@@ -19,7 +19,7 @@
     "ENTER_OTT": "Código de verificação",
     "RESEND_MAIL": "Reenviar código",
     "VERIFY": "Verificar",
-    "UNKNOWN_ERROR": "Ocorreu um erro. Tente novamente",
+    "generic_error_retry": "Ocorreu um erro. Tente novamente",
     "INVALID_CODE": "Código de verificação inválido",
     "EXPIRED_CODE": "O seu código de verificação expirou",
     "SENDING": "A enviar...",

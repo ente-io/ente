@@ -19,7 +19,7 @@
     "ENTER_OTT": "Verificatiecode",
     "RESEND_MAIL": "Code opnieuw versturen",
     "VERIFY": "Verifiëren",
-    "UNKNOWN_ERROR": "Er is iets fout gegaan, probeer het opnieuw",
+    "generic_error_retry": "Er is iets fout gegaan, probeer het opnieuw",
     "INVALID_CODE": "Ongeldige verificatiecode",
     "EXPIRED_CODE": "Uw verificatiecode is verlopen",
     "SENDING": "Verzenden...",

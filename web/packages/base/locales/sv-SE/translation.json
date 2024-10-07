@@ -19,7 +19,7 @@
     "ENTER_OTT": "Verifieringskod",
     "RESEND_MAIL": "Skicka kod igen",
     "VERIFY": "Bekräfta",
-    "UNKNOWN_ERROR": "Något gick fel, vänligen försök igen",
+    "generic_error_retry": "Något gick fel, vänligen försök igen",
     "INVALID_CODE": "Ogiltig verifieringskod",
     "EXPIRED_CODE": "Din verifieringskod har löpt ut",
     "SENDING": "Skickar...",

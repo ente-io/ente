@@ -19,7 +19,7 @@
     "ENTER_OTT": "인증 코드",
     "RESEND_MAIL": "코드 재전송하기",
     "VERIFY": "인증",
-    "UNKNOWN_ERROR": "문제가 생긴 것 같아요. 다시 시도하세요",
+    "generic_error_retry": "문제가 생긴 것 같아요. 다시 시도하세요",
     "INVALID_CODE": "잘못된 인증 코드",
     "EXPIRED_CODE": "입력한 인증 코드가 만료되었습니다",
     "SENDING": "전송 중...",

@@ -42,7 +42,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
         setDialogBoxAttributesV2({
             title: t("error"),
             close: { variant: "critical" },
-            content: t("UNKNOWN_ERROR"),
+            content: t("generic_error_retry"),
         });
 
     const initiateDelete = async (

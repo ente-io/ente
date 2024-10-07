@@ -155,7 +155,9 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 }
             } else {
                 log.error("OTT verification failed", e);
-                setFieldError(`${t("UNKNOWN_ERROR")} ${JSON.stringify(e)}`);
+                setFieldError(
+                    `${t("generic_error_retry")} ${JSON.stringify(e)}`,
+                );
             }
         }
     };

@@ -19,7 +19,7 @@
     "ENTER_OTT": "Bestätigungscode",
     "RESEND_MAIL": "Code erneut senden",
     "VERIFY": "Überprüfen",
-    "UNKNOWN_ERROR": "Ein Fehler ist aufgetreten, bitte versuche es erneut",
+    "generic_error_retry": "Ein Fehler ist aufgetreten, bitte versuche es erneut",
     "INVALID_CODE": "Falscher Bestätigungscode",
     "EXPIRED_CODE": "Ihr Bestätigungscode ist abgelaufen",
     "SENDING": "Wird gesendet...",

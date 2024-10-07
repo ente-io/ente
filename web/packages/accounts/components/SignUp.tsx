@@ -87,7 +87,10 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
                 await sendOtt(email);
             } catch (e) {
                 const message = e instanceof Error ? e.message : "";
-                setFieldError("confirm", `${t("UNKNOWN_ERROR")} ${message}`);
+                setFieldError(
+                    "confirm",
+                    `${t("generic_error_retry")} ${message}`,
+                );
                 throw e;
             }
             try {

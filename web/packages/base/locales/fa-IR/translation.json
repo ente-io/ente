@@ -19,7 +19,7 @@
     "ENTER_OTT": "",
     "RESEND_MAIL": "",
     "VERIFY": "",
-    "UNKNOWN_ERROR": "",
+    "generic_error_retry": "",
     "INVALID_CODE": "",
     "EXPIRED_CODE": "",
     "SENDING": "",
