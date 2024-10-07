@@ -2,7 +2,7 @@ display_name: Ente Auth
 package_name: enteauth
 license: GPLv3
 
-metainfo: linux/packaging/ente_auth.appdata.xml
+metainfo: linux/packaging/enteauth.appdata.xml
 
 icon: assets/icons/auth-icon.png
 

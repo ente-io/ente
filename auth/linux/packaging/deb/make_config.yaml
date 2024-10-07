@@ -12,7 +12,7 @@ license: GPLv3
 icon: assets/icons/auth-icon.png
 installed_size: 36000
 
-metainfo: linux/packaging/ente_auth.appdata.xml
+metainfo: linux/packaging/enteauth.appdata.xml
 
 dependencies:
   - libwebkit2gtk-4.0-37

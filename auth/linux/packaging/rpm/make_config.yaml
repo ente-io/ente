@@ -11,7 +11,7 @@ include_build_number: false
 
 display_name: Auth
 
-metainfo: linux/packaging/ente_auth.appdata.xml
+metainfo: linux/packaging/enteauth.appdata.xml
 
 requires:
   - libsqlite3x

@@ -8,7 +8,7 @@ licenses:
 icon: assets/icons/auth-icon.png
 installed_size: 36000
 
-metainfo: linux/packaging/ente_auth.appdata.xml
+metainfo: linux/packaging/enteauth.appdata.xml
 
 dependencies:
   - c-ares
@@ -47,12 +47,12 @@ postinstall_scripts:
 
 postupgrade_scripts:
   - post_install
-  
+
 postremove_scripts:
   - gtk-update-icon-cache -q -t -f usr/share/icons/hicolor
   - update-desktop-database -q
   - if [ -e /usr/lib/libsodium.so.23 ]; then
-  -   rm /usr/lib/libsodium.so.23
+  - rm /usr/lib/libsodium.so.23
   - fi
 
 startup_notify: false
