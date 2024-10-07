@@ -59,11 +59,10 @@ export interface CollectionSelectorAttributes {
     onCancel?: () => void;
     /**
      * Some actions, like "add" and "move", happen in the context of an existing
-     * collection. In such cases, their ID can be set as the
-     * {@link ignoredCollectionID} to omit showing them again in the list of
-     * collections.
+     * collection. In such cases, the ID of this collection can be set as the
+     * {@link relatedCollectionID} to omit showing it in the list again.
      */
-    ignoredCollectionID?: number | undefined;
+    relatedCollectionID?: number | undefined;
 }
 
 type CollectionSelectorProps = DialogVisibilityProps & {
@@ -111,7 +110,7 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
 
         const collections = [...collectionSummaries.values()]
             .filter(({ id, type }) => {
-                if (id === attributes.ignoredCollectionID) {
+                if (id === attributes.relatedCollectionID) {
                     return false;
                 } else if (attributes.action == "add") {
                     return canAddToCollection(type);
