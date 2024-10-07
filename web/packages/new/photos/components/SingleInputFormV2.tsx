@@ -2,7 +2,6 @@ import log from "@/base/log";
 import { wait } from "@/utils/promise";
 import {
     Box,
-    CircularProgress,
     Dialog,
     DialogContent,
     DialogTitle,
@@ -12,8 +11,9 @@ import {
 import { useFormik } from "formik";
 import { t } from "i18next";
 import React from "react";
-import { FocusVisibleButton } from "./FocusVisibleButton";
 import type { DialogVisibilityProps } from "./mui/Dialog";
+import { FocusVisibleButton } from "./mui/FocusVisibleButton";
+import { LoadingButton } from "./mui/LoadingButton";
 
 type SingleInputFormProps = Pick<
     TextFieldProps,
@@ -109,24 +109,14 @@ export const SingleInputFormV2: React.FC<SingleInputFormProps> = ({
                 >
                     {t("cancel")}
                 </FocusVisibleButton>
-                <FocusVisibleButton
+                <LoadingButton
                     size="large"
                     color="accent"
                     type="submit"
-                    disabled={formik.isSubmitting}
-                    sx={{
-                        "&.Mui-disabled": {
-                            backgroundColor: "accent.main",
-                            color: "accent.contrastText",
-                        },
-                    }}
+                    loading={formik.isSubmitting}
                 >
-                    {formik.isSubmitting ? (
-                        <CircularProgress size={20} />
-                    ) : (
-                        submitButtonTitle
-                    )}
-                </FocusVisibleButton>
+                    {submitButtonTitle}
+                </LoadingButton>
             </Box>
         </form>
     );
@@ -169,6 +159,7 @@ export const SingleInputDialogTest: React.FC<DialogVisibilityProps> = ({
                     autoFocus
                     label="Add name"
                     placeholder="Enter name"
+                    initialValue="tt"
                     submitButtonTitle="Add person"
                     onCancel={onClose}
                     onSubmit={handleSubmit}

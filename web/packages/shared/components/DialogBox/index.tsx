@@ -1,4 +1,4 @@
-import { FocusVisibleButton } from "@/new/photos/components/FocusVisibleButton";
+import { FocusVisibleButton } from "@/new/photos/components/mui/FocusVisibleButton";
 import {
     Breakpoint,
     DialogActions,
