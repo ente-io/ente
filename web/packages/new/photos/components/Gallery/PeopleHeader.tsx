@@ -201,9 +201,19 @@ const ClusterPersonOptions: React.FC<ClusterPersonOptionsProps> = ({
 }) => {
     const { startLoading, finishLoading } = appContext;
 
+    const [openNameInput, setOpenNameInput] = useState(false);
     const [openAddPersonDialog, setOpenAddPersonDialog] = useState(false);
 
-    const handleAddPerson = () => setOpenAddPersonDialog(true);
+    const handleAddPerson = () => {
+        // TODO-Cluster
+        if (process.env.NEXT_PUBLIC_ENTE_WIP_CL) {
+            // WIP path
+            setOpenAddPersonDialog(true);
+        } else {
+            // Existing path
+            setOpenNameInput(true);
+        }
+    };
 
     // TODO-Cluster
     const addPersonWithName = async (name: string) => {
@@ -214,8 +224,6 @@ const ClusterPersonOptions: React.FC<ClusterPersonOptionsProps> = ({
             finishLoading();
         }
     };
-
-    if (process.env.NEXT_PUBLIC_ENTE_WIP_CL) console.log(addPersonWithName);
 
     return (
         <>
@@ -239,6 +247,16 @@ const ClusterPersonOptions: React.FC<ClusterPersonOptionsProps> = ({
                     </OverflowMenuOption>
                 </OverflowMenu>
             </Stack>
+
+            <NameInputDialog
+                open={openNameInput}
+                onClose={() => setOpenNameInput(false)}
+                title={pt("Add person") /* TODO-Cluster */}
+                placeholder={t("enter_name")}
+                initialValue={""}
+                submitButtonTitle={t("add")}
+                onSubmit={addPersonWithName}
+            />
 
             <AddPersonDialog
                 open={openAddPersonDialog}

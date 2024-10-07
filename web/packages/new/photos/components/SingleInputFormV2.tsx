@@ -69,7 +69,7 @@ export const SingleInputFormV2: React.FC<SingleInputFormProps> = ({
         onSubmit: async (values, { setFieldError }) => {
             const value = values.value;
             if (!value) {
-                setFieldError("value", t("required"));
+                setFieldError("value", t("REQUIRED"));
                 return;
             }
             try {

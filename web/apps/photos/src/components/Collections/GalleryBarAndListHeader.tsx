@@ -189,7 +189,9 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
         activeCollectionID,
         isActiveCollectionDownloadInProgress,
         activePerson,
-        people,
+        // TODO-Cluster
+        // This causes a loop since it is an array dep
+        // people,
     ]);
 
     // TODO-Cluster
