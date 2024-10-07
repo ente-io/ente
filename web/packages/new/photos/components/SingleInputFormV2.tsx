@@ -7,6 +7,7 @@ import {
     DialogContent,
     DialogTitle,
     TextField,
+    type ButtonProps,
     type TextFieldProps,
 } from "@mui/material";
 import { useFormik } from "formik";
@@ -109,28 +110,50 @@ export const SingleInputFormV2: React.FC<SingleInputFormProps> = ({
                 >
                     {t("cancel")}
                 </FocusVisibleButton>
-                <FocusVisibleButton
+                <LoadingButton
                     size="large"
                     color="accent"
                     type="submit"
-                    disabled={formik.isSubmitting}
-                    sx={{
-                        "&.Mui-disabled": {
-                            backgroundColor: "accent.main",
-                            color: "accent.contrastText",
-                        },
-                    }}
+                    loading={formik.isSubmitting}
                 >
-                    {formik.isSubmitting ? (
-                        <CircularProgress size={20} />
-                    ) : (
-                        submitButtonTitle
-                    )}
-                </FocusVisibleButton>
+                    {submitButtonTitle}
+                </LoadingButton>
             </Box>
         </form>
     );
 };
+
+/**
+ * A button that shows a indeterminate progress indicator if the {@link loading}
+ * prop is set.
+ *
+ * TODO: This duplicates the existing SubmitButton and EnteButton. Merge these
+ * three gradually (didn't want to break existing layouts, so will do it
+ * piecewise).
+ */
+export const LoadingButton: React.FC<ButtonProps & { loading?: boolean }> = ({
+    loading,
+    disabled,
+    color,
+    sx,
+    children,
+    ...rest
+}) => (
+    <FocusVisibleButton
+        {...{ color }}
+        disabled={loading ?? disabled}
+        sx={{
+            "&.Mui-disabled": {
+                backgroundColor: "accent.main",
+                color: "accent.contrastText",
+            },
+            ...sx,
+        }}
+        {...rest}
+    >
+        {loading ? <CircularProgress size={20} /> : children}
+    </FocusVisibleButton>
+);
 
 export const SingleInputDialogTest: React.FC<DialogVisibilityProps> = ({
     open,
@@ -169,6 +192,7 @@ export const SingleInputDialogTest: React.FC<DialogVisibilityProps> = ({
                     autoFocus
                     label="Add name"
                     placeholder="Enter name"
+                    initialValue="tt"
                     submitButtonTitle="Add person"
                     onCancel={onClose}
                     onSubmit={handleSubmit}
