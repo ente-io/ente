@@ -13,7 +13,7 @@ type NameInputDialogProps = DialogVisibilityProps & {
     /** Placeholder string to show in the text input when it is empty. */
     placeholder: string;
     /** The existing value, if any, of the text input. */
-    initialValue: string | undefined;
+    initialValue?: string | undefined;
     /** Title of the submit button */
     submitButtonTitle: string;
     /**

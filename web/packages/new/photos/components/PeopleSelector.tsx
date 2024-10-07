@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import { t } from "i18next";
 import React, { useState } from "react";
-import type { CollectionSummary } from "../services/collection/ui";
+import type { Person } from "../services/ml/people";
 import { SpaceBetweenFlex, type ButtonishProps } from "./mui";
 import {
     DialogCloseIconButton,
@@ -33,10 +33,9 @@ export const PeopleSelector: React.FC<PeopleSelectorProps> = ({
 
     const [openNameInput, setOpenNameInput] = useState(false);
 
-    const people: CollectionSummary[] = [];
+    const people: Person[] = [];
 
     const handleAddPerson = () => {
-        console.log("handleAddPerson");
         setOpenNameInput(true);
     };
 
@@ -100,7 +99,6 @@ export const PeopleSelector: React.FC<PeopleSelectorProps> = ({
                 onClose={() => setOpenNameInput(false)}
                 title={pt("New person") /* TODO-Cluster */}
                 placeholder={t("enter_name")}
-                initialValue={""}
                 submitButtonTitle={t("add")}
                 onSubmit={handleAddPersonWithName}
             />
@@ -115,7 +113,7 @@ const DialogContent_ = styled(DialogContent)`
 `;
 
 interface PersonButtonProps {
-    person: CollectionSummary;
+    person: Person;
     onPersonClick: (personID: string) => void;
 }
 
@@ -125,8 +123,9 @@ const PersonButton: React.FC<PersonButtonProps> = ({
 }) => (
     <ItemCard
         TileComponent={LargeTileButton}
-        // coverFile={collectionSummary.coverFile}
-        onClick={() => onPersonClick(person.id.toString())}
+        coverFile={person.displayFaceFile}
+        coverFaceID={person.displayFaceID}
+        onClick={() => onPersonClick(person.id)}
     >
         <LargeTileTextOverlay>
             <Typography>{person.name}</Typography>
