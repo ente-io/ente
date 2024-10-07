@@ -23,6 +23,7 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import { TRASH_SECTION } from "utils/collection";
 import { shouldShowAvatar } from "utils/file";
 import Avatar from "./Avatar";
+import Favorite from "@mui/icons-material/FavoriteRounded";
 
 interface IProps {
     file: EnteFile;
@@ -38,6 +39,7 @@ interface IProps {
     isInsSelectRange: boolean;
     activeCollectionID: number;
     showPlaceholder: boolean;
+    isFav: boolean;
 }
 
 const Check = styled("input")<{ $active: boolean }>`
@@ -119,6 +121,14 @@ export const AvatarOverlay = styled(Overlay)`
     align-items: flex-start;
     padding-right: 5px;
     padding-top: 5px;
+`;
+
+export const FavOverlay = styled(Overlay)`
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-end;
+    padding-left: 5px;
+    padding-bottom: 5px;
 `;
 
 export const InSelectRangeOverLay = styled("div")<{ $active: boolean }>`
@@ -350,6 +360,11 @@ export default function PreviewCard(props: IProps) {
                 <AvatarOverlay>
                     <Avatar file={file} />
                 </AvatarOverlay>
+            )}
+            {props.isFav && (
+                <FavOverlay>
+                    <Favorite/>
+                </FavOverlay>
             )}
 
             <HoverOverlay
