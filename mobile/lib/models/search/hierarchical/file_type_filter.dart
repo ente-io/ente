@@ -20,16 +20,18 @@ extension FileTypeExtension on FileType {
 
 class FileTypeFilter extends HierarchicalSearchFilter {
   final FileType fileType;
+  final String typeName;
   final int occurrence;
 
   FileTypeFilter({
     required this.fileType,
+    required this.typeName,
     required this.occurrence,
   });
 
   @override
   String name() {
-    return fileType.name;
+    return typeName;
   }
 
   @override

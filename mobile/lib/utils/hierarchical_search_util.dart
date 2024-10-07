@@ -1,8 +1,10 @@
 import "dart:developer";
 
+import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/db/files_db.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/location_tag/location_tag.dart";
@@ -70,12 +72,13 @@ Future<List<EnteFile>> getFilteredFiles(
 void curateFilters(
   SearchFilterDataProvider searchFilterDataProvider,
   List<EnteFile> files,
+  BuildContext context,
 ) async {
   try {
     final albumFilters =
         await _curateAlbumFilters(searchFilterDataProvider, files);
     final fileTypeFilters =
-        _curateFileTypeFilters(searchFilterDataProvider, files);
+        _curateFileTypeFilters(searchFilterDataProvider, files, context);
     final locationFilters = await _curateLocationFilters(
       searchFilterDataProvider,
       files,
@@ -85,10 +88,10 @@ void curateFilters(
 
     searchFilterDataProvider.clearAndAddRecommendations(
       [
+        ...fileTypeFilters,
         ...contactsFilters,
         ...albumFilters,
         ...locationFilters,
-        ...fileTypeFilters,
       ],
     );
   } catch (e) {
@@ -135,6 +138,7 @@ Future<List<AlbumFilter>> _curateAlbumFilters(
 List<FileTypeFilter> _curateFileTypeFilters(
   SearchFilterDataProvider searchFilterDataProvider,
   List<EnteFile> files,
+  BuildContext context,
 ) {
   final fileTypeFilters = <FileTypeFilter>[];
   int photosCount = 0;
@@ -158,6 +162,7 @@ List<FileTypeFilter> _curateFileTypeFilters(
     fileTypeFilters.add(
       FileTypeFilter(
         fileType: FileType.image,
+        typeName: S.of(context).photos,
         occurrence: photosCount,
       ),
     );
@@ -166,6 +171,7 @@ List<FileTypeFilter> _curateFileTypeFilters(
     fileTypeFilters.add(
       FileTypeFilter(
         fileType: FileType.video,
+        typeName: S.of(context).videos,
         occurrence: videosCount,
       ),
     );
@@ -174,6 +180,7 @@ List<FileTypeFilter> _curateFileTypeFilters(
     fileTypeFilters.add(
       FileTypeFilter(
         fileType: FileType.livePhoto,
+        typeName: S.of(context).livePhotos,
         occurrence: livePhotosCount,
       ),
     );
