@@ -19,6 +19,7 @@
     "ENTER_OTT": "验证码",
     "RESEND_MAIL": "重新发送验证码",
     "VERIFY": "验证",
+    "generic_error": "",
     "generic_error_retry": "出了点问题，请重试",
     "INVALID_CODE": "验证码无效",
     "EXPIRED_CODE": "您的验证码已过期",

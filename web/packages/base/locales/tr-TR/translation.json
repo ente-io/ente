@@ -19,6 +19,7 @@
     "ENTER_OTT": "Doğrulama kodu",
     "RESEND_MAIL": "Kodu yeniden gönder",
     "VERIFY": "Doğrula",
+    "generic_error": "",
     "generic_error_retry": "Bir şeyler ters gitti, lütfen tekrar dene",
     "INVALID_CODE": "Geçersiz doğrulama kodu",
     "EXPIRED_CODE": "Doğrulama kodunun süresi doldu",

@@ -19,6 +19,7 @@
     "ENTER_OTT": "رمز التحقق",
     "RESEND_MAIL": "إعادة إرسال الرمز",
     "VERIFY": "تحقق",
+    "generic_error": "",
     "generic_error_retry": "حدث خطأ ما، يرجى المحاولة مرة أخرى",
     "INVALID_CODE": "رمز التحقق غير صالح",
     "EXPIRED_CODE": "انتهت صلاحية رمز التحقق الخاص بك",
