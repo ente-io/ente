@@ -26,6 +26,7 @@ import React, { useState } from "react";
 import type { FaceCluster } from "../../services/ml/cluster";
 import type { CGroup } from "../../services/user-entity";
 import type { NewAppContextPhotos } from "../../types/context";
+import { AddPersonDialog } from "../AddPersonDialog";
 import { SpaceBetweenFlex } from "../mui";
 import { NameInputDialog } from "../NameInputDialog";
 import type { GalleryBarImplProps } from "./BarImpl";
@@ -52,15 +53,19 @@ export interface GalleryPeopleState {
     people: Person[];
 }
 
-type PeopleHeaderProps = Pick<GalleryBarImplProps, "onSelectPerson"> & {
+type PeopleHeaderProps = Pick<
+    GalleryBarImplProps,
+    "people" | "onSelectPerson"
+> & {
     person: Person;
     appContext: NewAppContextPhotos;
 };
 
 export const PeopleHeader: React.FC<PeopleHeaderProps> = ({
+    people,
+    onSelectPerson,
     person,
     appContext,
-    onSelectPerson,
 }) => {
     return (
         <GalleryItemsHeaderAdapter>
@@ -80,7 +85,7 @@ export const PeopleHeader: React.FC<PeopleHeaderProps> = ({
                 ) : (
                     <ClusterPersonOptions
                         cluster={person.cluster}
-                        appContext={appContext}
+                        {...{ people, appContext }}
                     />
                 )}
             </SpaceBetweenFlex>
@@ -182,20 +187,25 @@ const CGroupPersonOptions: React.FC<CGroupPersonOptionsProps> = ({
     );
 };
 
-type ClusterPersonOptionsProps = Pick<PeopleHeaderProps, "appContext"> & {
+type ClusterPersonOptionsProps = Pick<
+    PeopleHeaderProps,
+    "people" | "appContext"
+> & {
     cluster: FaceCluster;
 };
 
 const ClusterPersonOptions: React.FC<ClusterPersonOptionsProps> = ({
+    people,
     cluster,
     appContext,
 }) => {
     const { startLoading, finishLoading } = appContext;
 
-    const [openNameInput, setOpenNameInput] = useState(false);
+    const [openAddPersonDialog, setOpenAddPersonDialog] = useState(false);
 
-    const handleAddPerson = () => setOpenNameInput(true);
+    const handleAddPerson = () => setOpenAddPersonDialog(true);
 
+    // TODO-Cluster
     const addPersonWithName = async (name: string) => {
         startLoading();
         try {
@@ -204,6 +214,8 @@ const ClusterPersonOptions: React.FC<ClusterPersonOptionsProps> = ({
             finishLoading();
         }
     };
+
+    if (process.env.NEXT_PUBLIC_ENTE_WIP_CL) console.log(addPersonWithName);
 
     return (
         <>
@@ -228,14 +240,10 @@ const ClusterPersonOptions: React.FC<ClusterPersonOptionsProps> = ({
                 </OverflowMenu>
             </Stack>
 
-            <NameInputDialog
-                open={openNameInput}
-                onClose={() => setOpenNameInput(false)}
-                title={pt("Add person") /* TODO-Cluster */}
-                placeholder={t("enter_name")}
-                initialValue={""}
-                submitButtonTitle={t("add")}
-                onSubmit={addPersonWithName}
+            <AddPersonDialog
+                open={openAddPersonDialog}
+                onClose={() => setOpenAddPersonDialog(false)}
+                {...{ people, cluster }}
             />
         </>
     );

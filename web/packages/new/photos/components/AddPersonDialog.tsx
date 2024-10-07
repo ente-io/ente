@@ -9,6 +9,7 @@ import {
 } from "@mui/material";
 import { t } from "i18next";
 import React, { useState } from "react";
+import type { FaceCluster } from "../services/ml/cluster";
 import type { Person } from "../services/ml/people";
 import { SpaceBetweenFlex, type ButtonishProps } from "./mui";
 import {
@@ -23,24 +24,42 @@ import {
     LargeTileTextOverlay,
 } from "./Tiles";
 
-type PeopleSelectorProps = DialogVisibilityProps;
+type AddPersonDialogProps = DialogVisibilityProps & {
+    /**
+     * The list of people from show the existing named people.
+     */
+    people: Person[];
+    /**
+     * The cluster to add to the selected person (existing or new).
+     */
+    cluster: FaceCluster;
+};
 
-export const PeopleSelector: React.FC<PeopleSelectorProps> = ({
+/**
+ * A dialog allowing the user to select one of the existing named persons they
+ * have, or create a new one, and then associate the provided cluster to it,
+ * creating or updating a remote "person".
+ */
+export const AddPersonDialog: React.FC<AddPersonDialogProps> = ({
     open,
     onClose,
+    people,
+    cluster,
 }) => {
     const isFullScreen = useMediaQuery("(max-width: 490px)");
 
     const [openNameInput, setOpenNameInput] = useState(false);
 
-    const people: Person[] = [];
+    const cgroupPeople: Exclude<Person, { type: "cluster" }>[] = people.filter(
+        (p) => p.type != "cluster",
+    );
 
     const handleAddPerson = () => {
         setOpenNameInput(true);
     };
 
     const handleSelectPerson = (id: string) => {
-        console.log("handleSelectPerson", id);
+        console.log("handleSelectPerson", id, cluster);
     };
 
     const handleAddPersonWithName = (name: string) => {
@@ -62,7 +81,7 @@ export const PeopleSelector: React.FC<PeopleSelectorProps> = ({
     // directly to the add person dialog.
     //
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    if (open && !openNameInput && !people.length) {
+    if (open && !openNameInput && !cgroupPeople.length) {
         onClose();
         setOpenNameInput(true);
         return <></>;
@@ -84,7 +103,7 @@ export const PeopleSelector: React.FC<PeopleSelectorProps> = ({
                 </SpaceBetweenFlex>
                 <DialogContent_>
                     <AddPerson onClick={handleAddPerson} />
-                    {people.map((person) => (
+                    {cgroupPeople.map((person) => (
                         <PersonButton
                             key={person.id}
                             person={person}
@@ -128,7 +147,7 @@ const PersonButton: React.FC<PersonButtonProps> = ({
         onClick={() => onPersonClick(person.id)}
     >
         <LargeTileTextOverlay>
-            <Typography>{person.name}</Typography>
+            <Typography>{person.name ?? ""}</Typography>
         </LargeTileTextOverlay>
     </ItemCard>
 );
