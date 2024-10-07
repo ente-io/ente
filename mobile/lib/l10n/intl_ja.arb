@@ -265,7 +265,7 @@
   "shareTextConfirmOthersVerificationID": "これがあなたのente.io確認用IDであることを確認できますか？ {verificationID}",
   "somethingWentWrong": "エラーが発生しました",
   "sendInvite": "招待を送る",
-  "shareTextRecommendUsingEnte": "Enteをダウンロードして、写真や動画の共有を簡単にしよう\n\nhttps://ente.io",
+  "shareTextRecommendUsingEnte": "Enteをダウンロードして、写真や動画の共有を簡単に！\n\nhttps://ente.io",
   "done": "完了",
   "applyCodeTitle": "コードを適用",
   "enterCodeDescription": "もらったコードを入力して、無料のストレージを入手してください",
@@ -557,7 +557,7 @@
   "sharedPhotoNotifications": "新しい共有写真",
   "sharedPhotoNotificationsExplanation": "誰かが写真を共有アルバムに追加した時に通知を受け取る",
   "advanced": "詳細",
-  "general": "一般",
+  "general": "設定",
   "security": "セキュリティ",
   "authToViewYourRecoveryKey": "リカバリーキーを表示するためには認証が必要です",
   "twofactor": "二段階認証",
@@ -735,9 +735,9 @@
     "type": "text"
   },
   "onEnte": "<branding>Ente</branding>で保管",
-  "name": "名前",
-  "newest": "最新",
-  "lastUpdated": "最終更新",
+  "name": "名前順",
+  "newest": "新しい順",
+  "lastUpdated": "更新された順",
   "deleteEmptyAlbums": "空のアルバムを削除",
   "deleteEmptyAlbumsWithQuestionMark": "空のアルバムを削除しますか？",
   "deleteAlbumsDialogBody": "空のアルバムはすべて削除されます。",
@@ -812,8 +812,8 @@
   "sharedWith": "{emailIDs} と共有中",
   "sharedWithMe": "あなたと共有されたアルバム",
   "sharedByMe": "あなたが共有しました",
-  "doubleYourStorage": "ストレージを倍にしましょう",
-  "referFriendsAnd2xYourPlan": "友達に紹介してあなたのプランを2倍にしよう",
+  "doubleYourStorage": "ストレージを倍にしよう",
+  "referFriendsAnd2xYourPlan": "友達に紹介して2倍",
   "shareAlbumHint": "アルバムを開いて右上のシェアボタンをタップ",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "完全に削除されるまでの日数が項目に表示されます",
   "trashDaysLeft": "{count, plural, =0 {} =1 {1日} other {{count} 日}}",
@@ -1076,7 +1076,7 @@
   "@storageBreakupYou": {
     "description": "Label to indicate how much storage you are using when you are part of a family plan"
   },
-  "storageUsageInfo": "{usedAmount} {usedStorageUnit} の {totalAmount} {totalStorageUnit} が使用されました",
+  "storageUsageInfo": "{usedAmount} {usedStorageUnit} / {totalAmount} {totalStorageUnit} 使用",
   "@storageUsageInfo": {
     "description": "Example: 1.2 GB of 2 GB used or 100 GB or 2TB used"
   },
