@@ -76,7 +76,7 @@ export const SingleInputFormV2: React.FC<SingleInputFormProps> = ({
                 await onSubmit(value);
             } catch (e) {
                 log.error(`Failed to submit input ${value}`, e);
-                setFieldError("value", t("generic_error_retry"));
+                setFieldError("value", t("generic_error"));
             }
         },
     });
