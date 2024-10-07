@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 import "package:flutter/widgets.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
+import "package:photos/models/search/search_types.dart";
 
 ///Not necessary that all top level filters in hierarchical search have to be
 ///a [TopLevelGenericFilter].
@@ -9,10 +10,12 @@ class TopLevelGenericFilter extends HierarchicalSearchFilter {
   final String filterName;
   final int occurrence;
   final IconData? filterIcon;
+  final ResultType filterResultType;
 
   TopLevelGenericFilter({
     required this.filterName,
     required this.occurrence,
+    required this.filterResultType,
     required super.matchedUploadedIDs,
     this.filterIcon,
   });
@@ -36,10 +39,7 @@ class TopLevelGenericFilter extends HierarchicalSearchFilter {
 
   @override
   bool isSameFilter(HierarchicalSearchFilter other) {
-    if (other is TopLevelGenericFilter) {
-      return other.filterName == filterName;
-    }
-    return false;
+    return other.resultType() == filterResultType && other.name() == name();
   }
 
   @override
@@ -55,5 +55,10 @@ class TopLevelGenericFilter extends HierarchicalSearchFilter {
   @override
   int relevance() {
     return occurrence;
+  }
+
+  @override
+  ResultType resultType() {
+    return filterResultType;
   }
 }

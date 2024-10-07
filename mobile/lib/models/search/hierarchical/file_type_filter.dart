@@ -2,6 +2,7 @@ import "package:flutter/material.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
+import "package:photos/models/search/search_types.dart";
 
 extension FileTypeExtension on FileType {
   IconData get icon {
@@ -56,9 +57,11 @@ class FileTypeFilter extends HierarchicalSearchFilter {
 
   @override
   bool isSameFilter(HierarchicalSearchFilter other) {
-    if (other is FileTypeFilter) {
-      return other.fileType == fileType;
-    }
-    return false;
+    return resultType() == other.resultType() && other.name() == name();
+  }
+
+  @override
+  ResultType resultType() {
+    return ResultType.fileType;
   }
 }

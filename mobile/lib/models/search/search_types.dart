@@ -83,6 +83,7 @@ extension ResultTypeExtensions on ResultType {
           filterName: searchResult.name(),
           occurrence: kMostRelevantFilter,
           filterIcon: Icons.calendar_today_outlined,
+          filterResultType: this,
           matchedUploadedIDs:
               filesToUploadedFileIDs(searchResult.resultFiles()),
         );
@@ -91,6 +92,7 @@ extension ResultTypeExtensions on ResultType {
           filterName: searchResult.name(),
           occurrence: kMostRelevantFilter,
           filterIcon: Icons.calendar_today_outlined,
+          filterResultType: this,
           matchedUploadedIDs:
               filesToUploadedFileIDs(searchResult.resultFiles()),
         );
@@ -98,6 +100,7 @@ extension ResultTypeExtensions on ResultType {
         return TopLevelGenericFilter(
           filterName: searchResult.name(),
           occurrence: kMostRelevantFilter,
+          filterResultType: this,
           matchedUploadedIDs:
               filesToUploadedFileIDs(searchResult.resultFiles()),
         );
@@ -105,6 +108,7 @@ extension ResultTypeExtensions on ResultType {
         return TopLevelGenericFilter(
           filterName: searchResult.name(),
           occurrence: kMostRelevantFilter,
+          filterResultType: this,
           matchedUploadedIDs:
               filesToUploadedFileIDs(searchResult.resultFiles()),
         );
@@ -113,6 +117,7 @@ extension ResultTypeExtensions on ResultType {
           filterName: searchResult.name(),
           occurrence: kMostRelevantFilter,
           filterIcon: Icons.description_outlined,
+          filterResultType: this,
           matchedUploadedIDs:
               filesToUploadedFileIDs(searchResult.resultFiles()),
         );
@@ -121,6 +126,7 @@ extension ResultTypeExtensions on ResultType {
           filterName: searchResult.name(),
           occurrence: kMostRelevantFilter,
           filterIcon: Icons.event_outlined,
+          filterResultType: this,
           matchedUploadedIDs:
               filesToUploadedFileIDs(searchResult.resultFiles()),
         );
@@ -129,6 +135,7 @@ extension ResultTypeExtensions on ResultType {
           filterName: searchResult.name(),
           occurrence: kMostRelevantFilter,
           filterIcon: Icons.person_outline,
+          filterResultType: this,
           matchedUploadedIDs:
               filesToUploadedFileIDs(searchResult.resultFiles()),
         );
@@ -137,6 +144,7 @@ extension ResultTypeExtensions on ResultType {
           filterName: searchResult.name(),
           occurrence: kMostRelevantFilter,
           filterIcon: Icons.face_outlined,
+          filterResultType: this,
           matchedUploadedIDs:
               filesToUploadedFileIDs(searchResult.resultFiles()),
         );
@@ -145,6 +153,7 @@ extension ResultTypeExtensions on ResultType {
           filterName: searchResult.name(),
           occurrence: kMostRelevantFilter,
           filterIcon: Icons.auto_awesome_outlined,
+          filterResultType: this,
           matchedUploadedIDs:
               filesToUploadedFileIDs(searchResult.resultFiles()),
         );

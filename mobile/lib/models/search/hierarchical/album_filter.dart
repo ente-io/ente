@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
+import "package:photos/models/search/search_types.dart";
 
 class AlbumFilter extends HierarchicalSearchFilter {
   final int collectionID;
@@ -42,9 +43,11 @@ class AlbumFilter extends HierarchicalSearchFilter {
 
   @override
   bool isSameFilter(HierarchicalSearchFilter other) {
-    if (other is AlbumFilter) {
-      return other.collectionID == collectionID;
-    }
-    return false;
+    return resultType() == other.resultType() && other.name() == name();
+  }
+
+  @override
+  ResultType resultType() {
+    return ResultType.collection;
   }
 }
