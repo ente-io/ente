@@ -71,6 +71,23 @@ not modify the original.
 > functionality within the app itself) for customers who intentionally wish to
 > modify their originals to reflect the associated metadata JSON.
 
+As an example: suppose you have `flower.png`. When you export your library, you
+will end up with:
+
+```
+flower.png
+metadata/flower.png.json
+```
+
+Ente writes this JSON in the same format as Google Takeout so that if a tool
+supports Google Takeout import, it should be able to read the JSON written by
+Ente too
+
+> One small difference is that, to avoid clutter, Ente puts the JSON in the
+> `metadata/` subfolder, while Google puts it next to the file.<br>
+>
+> <br>Ente itself will read it from either place.
+
 ### File creation time.
 
 The photo's data will be preserved verbatim, however when it is written out to

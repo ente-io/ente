@@ -13,7 +13,8 @@ been externally audited.
 
 ### How can I delete or edit codes?
 
-You can delete or edit a code long press (or right click on desktop) on that item.
+You can delete or edit a code long press (or right click on desktop) on that
+item.
 
 ### How can I support this project?
 
@@ -51,7 +52,9 @@ end-to-end encrypted.
 
 ### What information about my codes is stored on Ente server?
 
-Due to E2EE, the server doesn't know anything about the code. Everything is encrypted, including the tags, type, account, issuer, notes, and pinned or trash status, etc."
+Due to E2EE, the server doesn't know anything about the code. Everything is
+encrypted, including the tags, type, account, issuer, notes, and pinned or trash
+status, etc."
 
 ### What does it mean when I receive a message saying my current device is not powerful enough to verify my password?
 
