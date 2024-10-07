@@ -13,7 +13,8 @@ abstract class HierarchicalSearchFilter {
   //gallery.
   final Set<int> matchedUploadedIDs;
 
-  HierarchicalSearchFilter({this.matchedUploadedIDs = const <int>{}});
+  HierarchicalSearchFilter({matchedUploadedIDs})
+      : matchedUploadedIDs = matchedUploadedIDs ?? {};
 
   String name();
   IconData? icon();
