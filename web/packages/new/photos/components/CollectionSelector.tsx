@@ -1,8 +1,8 @@
 import type { Collection } from "@/media/collection";
 import {
-    CollectionTileButton,
     ItemCard,
-    ItemTileOverlay,
+    LargeTileButton,
+    LargeTilePlusOverlay,
     LargeTileTextOverlay,
 } from "@/new/photos/components/Tiles";
 import {
@@ -23,7 +23,7 @@ import {
 } from "@mui/material";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
-import { SpaceBetweenFlex } from "./mui";
+import { SpaceBetweenFlex, type ButtonishProps } from "./mui";
 import {
     DialogCloseIconButton,
     type DialogVisibilityProps,
@@ -221,7 +221,7 @@ const CollectionButton: React.FC<CollectionButtonProps> = ({
     onCollectionClick,
 }) => (
     <ItemCard
-        TileComponent={CollectionTileButton}
+        TileComponent={LargeTileButton}
         coverFile={collectionSummary.coverFile}
         onClick={() => onCollectionClick(collectionSummary.id)}
     >
@@ -231,22 +231,9 @@ const CollectionButton: React.FC<CollectionButtonProps> = ({
     </ItemCard>
 );
 
-interface AddCollectionButtonProps {
-    onClick: () => void;
-}
-
-const AddCollectionButton: React.FC<AddCollectionButtonProps> = ({
-    onClick,
-}) => (
-    <ItemCard TileComponent={CollectionTileButton} onClick={onClick}>
+const AddCollectionButton: React.FC<ButtonishProps> = ({ onClick }) => (
+    <ItemCard TileComponent={LargeTileButton} onClick={onClick}>
         <LargeTileTextOverlay>{t("create_albums")}</LargeTileTextOverlay>
-        <PlusOverlay>+</PlusOverlay>
+        <LargeTilePlusOverlay>+</LargeTilePlusOverlay>
     </ItemCard>
 );
-
-const PlusOverlay = styled(ItemTileOverlay)`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 42px;
-`;

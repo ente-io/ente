@@ -1,6 +1,6 @@
 import {
-    CollectionTileButton,
     ItemCard,
+    LargeTileButton,
     LargeTileTextOverlay,
 } from "@/new/photos/components/Tiles";
 import type { CollectionSummary } from "@/new/photos/services/collection/ui";
@@ -166,7 +166,7 @@ const CollectionButton: React.FC<AllCollectionCardProps> = ({
     isScrolling,
 }) => (
     <ItemCard
-        TileComponent={CollectionTileButton}
+        TileComponent={LargeTileButton}
         coverFile={collectionSummary.coverFile}
         onClick={() => onCollectionClick(collectionSummary.id)}
         isScrolling={isScrolling}

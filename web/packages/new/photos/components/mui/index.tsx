@@ -1,5 +1,10 @@
 import { Box, IconButton, styled } from "@mui/material";
 
+/** Convenience typed props for a component that acts like a push button. */
+export interface ButtonishProps {
+    onClick: () => void;
+}
+
 /**
  * A MUI {@link IconButton} filled in with at faint background.
  */
