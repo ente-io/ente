@@ -33,7 +33,7 @@ export const PeopleSelector: React.FC<PeopleSelectorProps> = ({
 
     const [openNameInput, setOpenNameInput] = useState(false);
 
-    const filteredCollections: CollectionSummary[] = [];
+    const people: CollectionSummary[] = [];
 
     const handleAddPerson = () => {
         console.log("handleAddPerson");
@@ -47,6 +47,27 @@ export const PeopleSelector: React.FC<PeopleSelectorProps> = ({
     const handleAddPersonWithName = (name: string) => {
         console.log("handleAddPersonWithName", name);
     };
+
+    // [Note: Calling setState during rendering]
+    //
+    // Calling setState during rendering should be avoided when there are
+    // cleaner alternatives, but it is not completely verboten, and it has
+    // documented semantics:
+    //
+    // > React will discard the currently rendering component's output and
+    // > immediately attempt to render it again with the new state.
+    // >
+    // > https://react.dev/reference/react/useState
+
+    // If we're opened without any existing people that can be selected, jump
+    // directly to the add person dialog.
+    //
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (open && !openNameInput && !people.length) {
+        onClose();
+        setOpenNameInput(true);
+        return <></>;
+    }
 
     return (
         <>
@@ -64,7 +85,7 @@ export const PeopleSelector: React.FC<PeopleSelectorProps> = ({
                 </SpaceBetweenFlex>
                 <DialogContent_>
                     <AddPerson onClick={handleAddPerson} />
-                    {filteredCollections.map((person) => (
+                    {people.map((person) => (
                         <PersonButton
                             key={person.id}
                             person={person}
@@ -115,7 +136,7 @@ const PersonButton: React.FC<PersonButtonProps> = ({
 
 const AddPerson: React.FC<ButtonishProps> = ({ onClick }) => (
     <ItemCard TileComponent={LargeTileButton} onClick={onClick}>
-        <LargeTileTextOverlay>{t("New person")}</LargeTileTextOverlay>
+        <LargeTileTextOverlay>{pt("New person")}</LargeTileTextOverlay>
         <LargeTilePlusOverlay>+</LargeTilePlusOverlay>
     </ItemCard>
 );
