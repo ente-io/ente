@@ -2,12 +2,10 @@ import log from "@/base/log";
 import { wait } from "@/utils/promise";
 import {
     Box,
-    CircularProgress,
     Dialog,
     DialogContent,
     DialogTitle,
     TextField,
-    type ButtonProps,
     type TextFieldProps,
 } from "@mui/material";
 import { useFormik } from "formik";
@@ -15,6 +13,7 @@ import { t } from "i18next";
 import React from "react";
 import { FocusVisibleButton } from "./FocusVisibleButton";
 import type { DialogVisibilityProps } from "./mui/Dialog";
+import { LoadingButton } from "./mui/LoadingButton";
 
 type SingleInputFormProps = Pick<
     TextFieldProps,
@@ -122,38 +121,6 @@ export const SingleInputFormV2: React.FC<SingleInputFormProps> = ({
         </form>
     );
 };
-
-/**
- * A button that shows a indeterminate progress indicator if the {@link loading}
- * prop is set.
- *
- * TODO: This duplicates the existing SubmitButton and EnteButton. Merge these
- * three gradually (didn't want to break existing layouts, so will do it
- * piecewise).
- */
-export const LoadingButton: React.FC<ButtonProps & { loading?: boolean }> = ({
-    loading,
-    disabled,
-    color,
-    sx,
-    children,
-    ...rest
-}) => (
-    <FocusVisibleButton
-        {...{ color }}
-        disabled={loading ?? disabled}
-        sx={{
-            "&.Mui-disabled": {
-                backgroundColor: "accent.main",
-                color: "accent.contrastText",
-            },
-            ...sx,
-        }}
-        {...rest}
-    >
-        {loading ? <CircularProgress size={20} /> : children}
-    </FocusVisibleButton>
-);
 
 export const SingleInputDialogTest: React.FC<DialogVisibilityProps> = ({
     open,
