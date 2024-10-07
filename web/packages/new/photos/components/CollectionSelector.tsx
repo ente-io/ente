@@ -97,7 +97,7 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
     collectionForCollectionID,
 }) => {
     // Make the dialog fullscreen if the screen is <= the dialog's max width.
-    const isFullScreen = useMediaQuery("(max-width: 494px)");
+    const isFullScreen = useMediaQuery("(max-width: 490px)");
 
     const [filteredCollections, setFilteredCollections] = useState<
         CollectionSummary[]
@@ -167,9 +167,9 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
             onClose={handleClose}
             fullWidth
             fullScreen={isFullScreen}
-            PaperProps={{ sx: { maxWidth: "494px" } }}
+            PaperProps={{ sx: { maxWidth: "490px" } }}
         >
-            <SpaceBetweenFlex sx={{ padding: "10px 8px 9px 0" }}>
+            <SpaceBetweenFlex sx={{ padding: "10px 8px 6px 0" }}>
                 <DialogTitle variant="h3" fontWeight={"bold"}>
                     {titleForAction(action)}
                 </DialogTitle>
