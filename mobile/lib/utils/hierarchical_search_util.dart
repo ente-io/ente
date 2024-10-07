@@ -1,3 +1,5 @@
+import "dart:developer";
+
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/db/files_db.dart";
@@ -33,6 +35,9 @@ Future<List<EnteFile>> getFilteredFiles(
         continue;
       }
       for (HierarchicalSearchFilter filter in resultsNeverComputedFilters) {
+        log(
+          "Computing results for never computed $filter: ${filter.name()}",
+        );
         if (filter.isMatch(file)) {
           filter.matchedUploadedIDs.add(file.uploadedFileID!);
         }

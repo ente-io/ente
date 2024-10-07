@@ -11,6 +11,10 @@ import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/collection/collection.dart";
 import "package:photos/models/collection/collection_items.dart";
+import "package:photos/models/search/album_search_result.dart";
+import "package:photos/models/search/hierarchical/album_filter.dart";
+import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
+import "package:photos/models/search/hierarchical/top_level_generic_filter.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/models/typedefs.dart";
 import "package:photos/services/collections_service.dart";
@@ -19,6 +23,7 @@ import "package:photos/ui/viewer/gallery/collection_page.dart";
 import "package:photos/ui/viewer/location/add_location_sheet.dart";
 import "package:photos/ui/viewer/location/pick_center_point_widget.dart";
 import "package:photos/utils/dialog_util.dart";
+import "package:photos/utils/file_util.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/share_util.dart";
 
@@ -49,6 +54,102 @@ enum SectionType {
   fileCaption,
   contacts,
   fileTypesAndExtension,
+}
+
+extension ResultTypeExtensions on ResultType {
+  HierarchicalSearchFilter toHierarchicalSearchFilter(
+    SearchResult searchResult,
+  ) {
+    switch (this) {
+      case ResultType.collection:
+        return AlbumFilter(
+          collectionID: (searchResult as AlbumSearchResult)
+              .collectionWithThumbnail
+              .collection
+              .id,
+          albumName: searchResult.name(),
+          occurrence: kMostRelevantFilter,
+        );
+      case ResultType.file:
+        throw UnimplementedError();
+
+      /// Location results are never shown from SearchResultsPage
+      case ResultType.location:
+        throw UnimplementedError();
+      case ResultType.locationSuggestion:
+        throw UnimplementedError();
+      case ResultType.month:
+        return TopLevelGenericFilter(
+          filterName: searchResult.name(),
+          occurrence: kMostRelevantFilter,
+          filterIcon: Icons.calendar_today_outlined,
+          matchedUploadedIDs:
+              filesToUploadedFileIDs(searchResult.resultFiles()),
+        );
+      case ResultType.year:
+        return TopLevelGenericFilter(
+          filterName: searchResult.name(),
+          occurrence: kMostRelevantFilter,
+          filterIcon: Icons.calendar_today_outlined,
+          matchedUploadedIDs:
+              filesToUploadedFileIDs(searchResult.resultFiles()),
+        );
+      case ResultType.fileType:
+        return TopLevelGenericFilter(
+          filterName: searchResult.name(),
+          occurrence: kMostRelevantFilter,
+          matchedUploadedIDs:
+              filesToUploadedFileIDs(searchResult.resultFiles()),
+        );
+      case ResultType.fileExtension:
+        return TopLevelGenericFilter(
+          filterName: searchResult.name(),
+          occurrence: kMostRelevantFilter,
+          matchedUploadedIDs:
+              filesToUploadedFileIDs(searchResult.resultFiles()),
+        );
+      case ResultType.fileCaption:
+        return TopLevelGenericFilter(
+          filterName: searchResult.name(),
+          occurrence: kMostRelevantFilter,
+          filterIcon: Icons.description_outlined,
+          matchedUploadedIDs:
+              filesToUploadedFileIDs(searchResult.resultFiles()),
+        );
+      case ResultType.event:
+        return TopLevelGenericFilter(
+          filterName: searchResult.name(),
+          occurrence: kMostRelevantFilter,
+          filterIcon: Icons.event_outlined,
+          matchedUploadedIDs:
+              filesToUploadedFileIDs(searchResult.resultFiles()),
+        );
+      case ResultType.shared:
+        return TopLevelGenericFilter(
+          filterName: searchResult.name(),
+          occurrence: kMostRelevantFilter,
+          filterIcon: Icons.person_outline,
+          matchedUploadedIDs:
+              filesToUploadedFileIDs(searchResult.resultFiles()),
+        );
+      case ResultType.faces:
+        return TopLevelGenericFilter(
+          filterName: searchResult.name(),
+          occurrence: kMostRelevantFilter,
+          filterIcon: Icons.face_outlined,
+          matchedUploadedIDs:
+              filesToUploadedFileIDs(searchResult.resultFiles()),
+        );
+      case ResultType.magic:
+        return TopLevelGenericFilter(
+          filterName: searchResult.name(),
+          occurrence: kMostRelevantFilter,
+          filterIcon: Icons.auto_awesome_outlined,
+          matchedUploadedIDs:
+              filesToUploadedFileIDs(searchResult.resultFiles()),
+        );
+    }
+  }
 }
 
 extension SectionTypeExtensions on SectionType {
