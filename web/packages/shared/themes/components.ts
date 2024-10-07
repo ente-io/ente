@@ -164,6 +164,9 @@ export const getComponents = (
             // "filled" one by default.
             variant: "filled",
             // Reduce the vertical margins that MUI adds to the TextField.
+            //
+            // Note that this causes things to be too tight when the helper text
+            // is shown, so this is not recommended for new code that we write.
             margin: "dense",
         },
         styleOverrides: {

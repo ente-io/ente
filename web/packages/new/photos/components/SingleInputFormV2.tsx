@@ -1,6 +1,6 @@
+import { wait } from "@/utils/promise";
 import {
     Box,
-    Button,
     Dialog,
     DialogContent,
     DialogTitle,
@@ -9,7 +9,9 @@ import {
 import { useFormik } from "formik";
 import { t } from "i18next";
 import React from "react";
+import { FocusVisibleButton } from "./FocusVisibleButton";
 import type { DialogVisibilityProps } from "./mui/Dialog";
+import log from "@/base/log";
 
 /**
  * A TextField and two buttons.
@@ -19,10 +21,29 @@ export const SingleInputFormV2: React.FC = () => {
         initialValues: {
             name: "",
         },
-        onSubmit: (values) => {
+        onSubmit: async (values, { setFieldError }) => {
+            const name = values.name;
+            if (!name) {
+                setFieldError("name", t("required"));
+                return;
+            }
+            try {
+                await wait(1000);
+                if (values.name == "t") throw new Error("test");
+            } catch (e) {
+                log.error(`Failed to submit input ${name}`, e)
+                setFieldError("name", t("UNKNOWN_ERROR"))
+            }
             console.log(JSON.stringify(values));
         },
     });
+
+    // Note: [Use space as default TextField helperText]
+    //
+    // For MUI text fields that use a conditional helperText, e.g. in case of
+    // errors, use an space as the default helperText in the other cases to
+    // avoid a layout shift when the helperText is conditionally shown.
+
     return (
         <form onSubmit={formik.handleSubmit}>
             <TextField
@@ -34,16 +55,23 @@ export const SingleInputFormV2: React.FC = () => {
                 autoFocus
                 fullWidth
                 label="Add name"
+                margin="normal"
                 placeholder="Enter name"
-                helperText=" "
+                error={!!formik.errors.name}
+                helperText={formik.errors.name ?? " "}
             />
-            <Box sx={{ display: "flex", paddingInline: "4px", gap: "12px" }}>
-                <Button size="large" color="secondary">
+            <Box sx={{ display: "flex", gap: "12px" }}>
+                <FocusVisibleButton size="large" color="secondary">
                     {t("cancel")}
-                </Button>
-                <Button size="large" color="accent" type="submit">
+                </FocusVisibleButton>
+                <FocusVisibleButton
+                    size="large"
+                    color="accent"
+                    type="submit"
+                    disabled={formik.isSubmitting}
+                >
                     Add person
-                </Button>
+                </FocusVisibleButton>
             </Box>
         </form>
     );
@@ -75,7 +103,7 @@ export const SingleInputDialogTest: React.FC<DialogVisibilityProps> = ({
             PaperProps={{ sx: { padding: "8px 4px 4px 4px" } }}
         >
             <DialogTitle>{"New person"}</DialogTitle>
-            <DialogContent>
+            <DialogContent sx={{ "&&&": { paddingBlockStart: 0 } }}>
                 <SingleInputFormV2 />
             </DialogContent>
         </Dialog>
