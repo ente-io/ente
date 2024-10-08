@@ -129,6 +129,7 @@ export const FavOverlay = styled(Overlay)`
     align-items: flex-end;
     padding-left: 5px;
     padding-bottom: 5px;
+    opacity: 0.9;
 `;
 
 export const InSelectRangeOverLay = styled("div")<{ $active: boolean }>`
