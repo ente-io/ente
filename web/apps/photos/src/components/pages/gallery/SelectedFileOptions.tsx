@@ -10,12 +10,12 @@ import MoveIcon from "@mui/icons-material/ArrowForward";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
 import DownloadIcon from "@mui/icons-material/Download";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorderRounded";
 import RemoveIcon from "@mui/icons-material/RemoveCircleOutline";
 import RestoreIcon from "@mui/icons-material/Restore";
 import UnArchiveIcon from "@mui/icons-material/Unarchive";
 import VisibilityOffOutlined from "@mui/icons-material/VisibilityOffOutlined";
 import VisibilityOutlined from "@mui/icons-material/VisibilityOutlined";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorderRounded";
 import { Box, IconButton, Stack, Tooltip } from "@mui/material";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
@@ -336,7 +336,9 @@ const SelectedFileOptions = ({
                         {!isFavoriteCollection && (
                             <Tooltip title={t("favorites")}>
                                 <IconButton
-                                    onClick={handleFileOps(FILE_OPS_TYPE.SET_FAVORITE)}
+                                    onClick={handleFileOps(
+                                        FILE_OPS_TYPE.SET_FAVORITE,
+                                    )}
                                 >
                                     <FavoriteBorderIcon />
                                 </IconButton>

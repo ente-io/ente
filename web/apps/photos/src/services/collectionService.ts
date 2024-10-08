@@ -487,7 +487,7 @@ export const createFavoritesCollection = () => {
 
 export const addToFavorites = async (file: EnteFile) => {
     await addMultipleToFavorites([file]);
-}
+};
 
 export const addMultipleToFavorites = async (files: EnteFile[]) => {
     try {
