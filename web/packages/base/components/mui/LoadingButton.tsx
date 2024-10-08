@@ -21,12 +21,17 @@ export const LoadingButton: React.FC<ButtonProps & { loading?: boolean }> = ({
 }) => (
     <FocusVisibleButton
         {...{ color }}
-        disabled={loading ?? disabled}
+        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+        disabled={loading || disabled}
         sx={{
-            "&.Mui-disabled": {
-                backgroundColor: `${color}.main`,
-                color: `${color}.contrastText`,
-            },
+            ...(loading
+                ? {
+                      "&.Mui-disabled": {
+                          backgroundColor: `${color}.main`,
+                          color: `${color}.contrastText`,
+                      },
+                  }
+                : {}),
             ...sx,
         }}
         {...rest}
