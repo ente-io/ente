@@ -35,7 +35,7 @@ import DownloadIcon from "@mui/icons-material/Download";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
 import type { ButtonProps, IconButtonProps } from "@mui/material";
-import { Box, Button, IconButton, Stack, Tooltip } from "@mui/material";
+import { Box, Button, IconButton, Stack, styled, Tooltip } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import bs58 from "bs58";
 import {
@@ -598,22 +598,18 @@ const SharedAlbumNavbar: React.FC<SharedAlbumNavbarProps> = ({
 
 const EnteLinkLogo: React.FC = () => {
     return (
-        <a href="https://ente.io">
-            <Box
-                sx={(theme) => ({
-                    ":hover": {
-                        cursor: "pointer",
-                        svg: {
-                            fill: theme.colors.text.faint,
-                        },
-                    },
-                })}
-            >
-                <EnteLogoSvg />
-            </Box>
-        </a>
+        <A href="https://ente.io">
+            <EnteLogoSvg />
+        </A>
     );
 };
+
+const A = styled("a")(({ theme }) => ({
+    color: theme.colors.text.base,
+    ":hover": {
+        color: theme.palette.accent.main,
+    },
+}));
 
 const AddPhotosButton: React.FC<ButtonProps & IconButtonProps> = (props) => {
     const disabled = !uploadManager.shouldAllowNewUpload();
