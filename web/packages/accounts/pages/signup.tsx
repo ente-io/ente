@@ -1,8 +1,8 @@
 import { PAGES } from "@/accounts/constants/pages";
+import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { customAPIHost } from "@/base/origins";
 import { LS_KEYS, getData } from "@ente/shared//storage/localStorage";
 import { VerticallyCentered } from "@ente/shared/components/Container";
-import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
@@ -34,7 +34,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
     return (
         <VerticallyCentered>
             {loading ? (
-                <EnteSpinner />
+                <ActivityIndicator />
             ) : (
                 <FormPaper>
                     <SignUp {...{ login, router, host }} />

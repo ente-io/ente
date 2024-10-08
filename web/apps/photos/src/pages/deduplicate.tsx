@@ -1,7 +1,7 @@
 import { stashRedirect } from "@/accounts/services/redirect";
+import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { getLocalFiles } from "@/new/photos/services/files";
 import { VerticallyCentered } from "@ente/shared/components/Container";
-import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { ApiError } from "@ente/shared/error";
 import useMemoSingleThreaded from "@ente/shared/hooks/useMemoSingleThreaded";
@@ -170,7 +170,7 @@ export default function Deduplicate() {
     if (!duplicates) {
         return (
             <VerticallyCentered>
-                <EnteSpinner />
+                <ActivityIndicator />
             </VerticallyCentered>
         );
     }

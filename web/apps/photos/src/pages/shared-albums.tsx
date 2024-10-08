@@ -1,3 +1,5 @@
+import { EnteLogoSvg } from "@/base/components/EnteLogo";
+import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { NavbarBase, SelectionBar } from "@/base/components/Navbar";
 import { sharedCryptoWorker } from "@/base/crypto";
 import { useIsMobileWidth, useIsTouchscreen } from "@/base/hooks";
@@ -17,7 +19,6 @@ import {
     FluidContainer,
     VerticallyCentered,
 } from "@ente/shared/components/Container";
-import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
@@ -34,10 +35,9 @@ import DownloadIcon from "@mui/icons-material/Download";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
 import type { ButtonProps, IconButtonProps } from "@mui/material";
-import { Box, Button, IconButton, Stack, Tooltip } from "@mui/material";
+import { Box, Button, IconButton, Stack, styled, Tooltip } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import bs58 from "bs58";
-import { EnteLogo } from "components/EnteLogo";
 import {
     FilesDownloadProgress,
     FilesDownloadProgressAttributes,
@@ -439,7 +439,7 @@ export default function PublicCollectionGallery() {
         if (!publicFiles) {
             return (
                 <VerticallyCentered>
-                    <EnteSpinner />
+                    <ActivityIndicator />
                 </VerticallyCentered>
             );
         }
@@ -536,7 +536,7 @@ export default function PublicCollectionGallery() {
                 />
                 {blockingLoad && (
                     <LoadingOverlay>
-                        <EnteSpinner />
+                        <ActivityIndicator />
                     </LoadingOverlay>
                 )}
                 <Uploader
@@ -581,39 +581,23 @@ interface SharedAlbumNavbarProps {
 }
 const SharedAlbumNavbar: React.FC<SharedAlbumNavbarProps> = ({
     onAddPhotos,
-}) => {
-    return (
-        <NavbarBase>
-            <FluidContainer>
-                <EnteLinkLogo />
-            </FluidContainer>
-            {onAddPhotos ? (
-                <AddPhotosButton onClick={onAddPhotos} />
-            ) : (
-                <GoToEnte />
-            )}
-        </NavbarBase>
-    );
-};
+}) => (
+    <NavbarBase>
+        <FluidContainer>
+            <EnteLogoLink href="https://ente.io">
+                <EnteLogoSvg />
+            </EnteLogoLink>
+        </FluidContainer>
+        {onAddPhotos ? <AddPhotosButton onClick={onAddPhotos} /> : <GoToEnte />}
+    </NavbarBase>
+);
 
-const EnteLinkLogo: React.FC = () => {
-    return (
-        <a href="https://ente.io">
-            <Box
-                sx={(theme) => ({
-                    ":hover": {
-                        cursor: "pointer",
-                        svg: {
-                            fill: theme.colors.text.faint,
-                        },
-                    },
-                })}
-            >
-                <EnteLogo />
-            </Box>
-        </a>
-    );
-};
+const EnteLogoLink = styled("a")(({ theme }) => ({
+    color: theme.colors.text.base,
+    ":hover": {
+        color: theme.palette.accent.main,
+    },
+}));
 
 const AddPhotosButton: React.FC<ButtonProps & IconButtonProps> = (props) => {
     const disabled = !uploadManager.shouldAllowNewUpload();

@@ -5,7 +5,6 @@ import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
 import { CenteredFlex } from "@ente/shared/components/Container";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
-import InfoItem from "@ente/shared/components/Info/InfoItem";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import SingleInputForm from "@ente/shared/components/SingleInputForm";
 import { formatDateTimeFull } from "@ente/shared/time/format";
@@ -303,15 +302,9 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
                             title={t("manage_passkey")}
                             onRootClose={onClose}
                         />
-                        <InfoItem
-                            icon={<CalendarTodayIcon />}
-                            title={t("CREATED_AT")}
-                            caption={formatDateTimeFull(
-                                passkey.createdAt / 1000,
-                            )}
-                            loading={false}
-                            hideEditOption
-                        />
+                        <CreatedAtEntry>
+                            {formatDateTimeFull(passkey.createdAt / 1000)}
+                        </CreatedAtEntry>
                         <MenuItemGroup>
                             <EnteMenuItem
                                 onClick={() => {
@@ -347,6 +340,18 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
         </>
     );
 };
+
+const CreatedAtEntry: React.FC<React.PropsWithChildren> = ({ children }) => (
+    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, pb: 1 }}>
+        <CalendarTodayIcon color="secondary" sx={{ m: "16px" }} />
+        <Box py={0.5}>
+            <Typography>{t("CREATED_AT")}</Typography>
+            <Typography variant="small" color="text.muted">
+                {children}
+            </Typography>
+        </Box>
+    </Box>
+);
 
 interface RenamePasskeyDialogProps {
     /** If `true`, then the dialog is shown. */

@@ -1,4 +1,4 @@
-import EnteSpinner from "@ente/shared/components/EnteSpinner";
+import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { type BoxProps, styled } from "@mui/material";
 import React from "react";
 import CopyButton from "./CopyButton";
@@ -12,7 +12,7 @@ export default function CodeBlock({ code, ...props }: BoxProps<"div", Iprops>) {
     if (!code) {
         return (
             <Wrapper>
-                <EnteSpinner />
+                <ActivityIndicator />
             </Wrapper>
         );
     }

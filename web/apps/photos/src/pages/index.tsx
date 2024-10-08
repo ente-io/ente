@@ -1,10 +1,10 @@
 import { Login } from "@/accounts/components/Login";
 import { SignUp } from "@/accounts/components/SignUp";
+import { EnteLogo } from "@/base/components/EnteLogo";
+import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import log from "@/base/log";
 import { albumsAppOrigin, customAPIHost } from "@/base/origins";
 import { DevSettings } from "@/new/photos/components/DevSettings";
-import { EnteLogo } from "@ente/shared/components/EnteLogo";
-import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { saveKeyInSessionStore } from "@ente/shared/crypto/helpers";
 import localForage from "@ente/shared/storage/localForage";
@@ -120,7 +120,7 @@ export default function LandingPage() {
     return (
         <TappableContainer onMaybeChangeHost={refreshHost}>
             {loading ? (
-                <EnteSpinner />
+                <ActivityIndicator />
             ) : (
                 <>
                     <SlideContainer>

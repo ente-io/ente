@@ -1,9 +1,8 @@
 import type { TwoFactorSecret } from "@/accounts/types/user";
-import EnteSpinner from "@ente/shared/components/EnteSpinner";
-import { t } from "i18next";
-
+import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import LinkButton from "@ente/shared/components/LinkButton";
 import { Typography } from "@mui/material";
+import { t } from "i18next";
 import { LoadingQRCode, QRCode } from "../styledComponents";
 
 interface Iprops {
@@ -20,7 +19,7 @@ export default function SetupQRMode({
             <Typography>{t("TWO_FACTOR_QR_INSTRUCTION")}</Typography>
             {!twoFactorSecret ? (
                 <LoadingQRCode>
-                    <EnteSpinner />
+                    <ActivityIndicator />
                 </LoadingQRCode>
             ) : (
                 <QRCode

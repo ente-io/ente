@@ -1,8 +1,8 @@
+import { EnteLogo } from "@/base/components/EnteLogo";
 import {
     FlexWrapper,
     VerticallyCentered,
 } from "@ente/shared/components/Container";
-import { EnteLogo } from "@ente/shared/components/EnteLogo";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternateOutlined";
 import FolderIcon from "@mui/icons-material/FolderOutlined";
 import { Box, Button, Stack, Typography, styled } from "@mui/material";

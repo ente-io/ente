@@ -1,6 +1,6 @@
+import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { customAPIHost } from "@/base/origins";
 import { VerticallyCentered } from "@ente/shared/components/Container";
-import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { useRouter } from "next/router";
@@ -33,7 +33,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
 
     return loading ? (
         <VerticallyCentered>
-            <EnteSpinner />
+            <ActivityIndicator />
         </VerticallyCentered>
     ) : (
         <VerticallyCentered>

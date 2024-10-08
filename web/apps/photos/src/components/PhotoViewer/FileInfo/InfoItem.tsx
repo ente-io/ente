@@ -1,7 +1,6 @@
 import { FlexWrapper } from "@ente/shared/components/Container";
 import Edit from "@mui/icons-material/Edit";
-import { Box, IconButton, Typography } from "@mui/material";
-import { SmallLoadingSpinner } from "../styledComponents/SmallLoadingSpinner";
+import { Box, CircularProgress, IconButton, Typography } from "@mui/material";
 
 interface Iprops {
     icon: JSX.Element;
@@ -63,7 +62,11 @@ export default function InfoItem({
                 ? customEndButton
                 : !hideEditOption && (
                       <IconButton onClick={openEditor} color="secondary">
-                          {!loading ? <Edit /> : <SmallLoadingSpinner />}
+                          {!loading ? (
+                              <Edit />
+                          ) : (
+                              <CircularProgress size={"24px"} color="inherit" />
+                          )}
                       </IconButton>
                   )}
         </FlexWrapper>
