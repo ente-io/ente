@@ -31,7 +31,7 @@ export default function AuthenticateUserModal({
         setDialogMessage({
             title: t("error"),
             close: { variant: "critical" },
-            content: t("UNKNOWN_ERROR"),
+            content: t("generic_error_retry"),
         });
 
     // This is a altered version of the check we do on the password verification

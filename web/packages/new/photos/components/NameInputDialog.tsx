@@ -5,15 +5,15 @@ import SingleInputForm, {
 import { Dialog, DialogContent, DialogTitle } from "@mui/material";
 import { t } from "i18next";
 import React from "react";
-import type { DialogVisiblityProps } from "./mui-custom";
+import { type DialogVisibilityProps } from "./mui/Dialog";
 
-type NameInputDialogProps = DialogVisiblityProps & {
+type NameInputDialogProps = DialogVisibilityProps & {
     /** Title of the dialog. */
     title: string;
     /** Placeholder string to show in the text input when it is empty. */
     placeholder: string;
     /** The existing value, if any, of the text input. */
-    initialValue: string | undefined;
+    initialValue?: string | undefined;
     /** Title of the submit button */
     submitButtonTitle: string;
     /**
@@ -21,7 +21,7 @@ type NameInputDialogProps = DialogVisiblityProps & {
      *
      * @param name The current value of the text input.
      * */
-    onSubmit: (name: string) => Promise<void>;
+    onSubmit: ((name: string) => void) | ((name: string) => Promise<void>);
 };
 
 /**
@@ -48,12 +48,18 @@ export const NameInputDialog: React.FC<NameInputDialogProps> = ({
             onClose();
         } catch (e) {
             log.error(`Error when submitting value ${inputValue}`, e);
-            setFieldError(t("UNKNOWN_ERROR"));
+            setFieldError(t("generic_error_retry"));
         }
     };
 
     return (
-        <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
+        <Dialog
+            open={open}
+            onClose={onClose}
+            maxWidth="xs"
+            fullWidth
+            PaperProps={{ sx: { padding: "8px 4px 4px 4px" } }}
+        >
             <DialogTitle>{title}</DialogTitle>
             <DialogContent>
                 <SingleInputForm
@@ -62,7 +68,7 @@ export const NameInputDialog: React.FC<NameInputDialogProps> = ({
                     initialValue={initialValue}
                     callback={handleSubmit}
                     buttonText={submitButtonTitle}
-                    submitButtonProps={{ sx: { mt: 1, mb: 2 } }}
+                    submitButtonProps={{ sx: { mt: 2, mb: 1 } }}
                     secondaryButtonAction={onClose}
                 />
             </DialogContent>

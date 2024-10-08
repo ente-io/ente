@@ -7,7 +7,7 @@ import { ComlinkWorker } from "@/base/worker/comlink-worker";
 import type { Collection } from "@/media/collection";
 import { FileType } from "@/media/file-type";
 import { potentialFileTypeFromExtension } from "@/media/live-photo";
-import { getLocalFiles } from "@/new/photos/services/files";
+import { getLocalFiles, sortFiles } from "@/new/photos/services/files";
 import { indexNewUpload } from "@/new/photos/services/ml";
 import type { UploadItem } from "@/new/photos/services/upload/types";
 import {
@@ -28,7 +28,7 @@ import {
 import { getDisableCFUploadProxyFlag } from "services/userService";
 import watcher from "services/watch";
 import { SetFiles } from "types/gallery";
-import { decryptFile, getUserOwnedFiles, sortFiles } from "utils/file";
+import { decryptFile, getUserOwnedFiles } from "utils/file";
 import {
     getMetadataJSONMapKeyForJSON,
     tryParseTakeoutMetadataJSON,

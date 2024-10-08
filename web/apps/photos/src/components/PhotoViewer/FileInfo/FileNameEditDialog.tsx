@@ -19,7 +19,7 @@ export const FileNameEditDialog = ({
             await saveEdits(filename);
             closeEditMode();
         } catch (e) {
-            setFieldError(t("UNKNOWN_ERROR"));
+            setFieldError(t("generic_error_retry"));
         }
     };
     return (

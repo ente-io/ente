@@ -34,7 +34,7 @@ export default function CollectionNamer({ attributes, ...props }: Props) {
             attributes.callback(albumName);
             props.onHide();
         } catch (e) {
-            setFieldError(t("UNKNOWN_ERROR"));
+            setFieldError(t("generic_error_retry"));
         }
     };
 

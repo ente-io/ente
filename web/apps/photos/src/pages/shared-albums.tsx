@@ -7,8 +7,9 @@ import {
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
 } from "@/new/photos/components/Gallery/ListHeader";
-import { SpaceBetweenFlex } from "@/new/photos/components/mui-custom";
+import { SpaceBetweenFlex } from "@/new/photos/components/mui";
 import downloadManager from "@/new/photos/services/download";
+import { sortFiles } from "@/new/photos/services/files";
 import { EnteFile } from "@/new/photos/types/file";
 import { mergeMetadata } from "@/new/photos/utils/file";
 import {
@@ -76,7 +77,7 @@ import {
     downloadCollectionFiles,
     isHiddenCollection,
 } from "utils/collection";
-import { downloadSelectedFiles, getSelectedFiles, sortFiles } from "utils/file";
+import { downloadSelectedFiles, getSelectedFiles } from "utils/file";
 import { formatNumber } from "utils/number/format";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 
@@ -403,7 +404,7 @@ export default function PublicCollectionGallery() {
                 );
             } catch (e) {
                 log.error("failed to derive key for verifyLinkPassword", e);
-                setFieldError(`${t("UNKNOWN_ERROR")} ${e.message}`);
+                setFieldError(`${t("generic_error_retry")} ${e.message}`);
                 return;
             }
             const collectionUID = getPublicCollectionUID(token.current);
@@ -430,7 +431,7 @@ export default function PublicCollectionGallery() {
             appContext.finishLoading();
         } catch (e) {
             log.error("failed to verifyLinkPassword", e);
-            setFieldError(`${t("UNKNOWN_ERROR")} ${e.message}`);
+            setFieldError(`${t("generic_error_retry")} ${e.message}`);
         }
     };
 

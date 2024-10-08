@@ -141,16 +141,6 @@
   "oops": "Opa",
   "suggestFeatures": "Sugerir recursos",
   "faq": "Perguntas frequentes",
-  "faq_q_1": "Quão seguro é o Auth?",
-  "faq_a_1": "Todos os backups de códigos via Auth são armazenados com criptografia de ponta-a-ponta. Isso significa que só você pode acessar os códigos. Nossos apps são de código-aberto e nossa criptografia é auditada por terceiros.",
-  "faq_q_2": "Posso acessar meus códigos no computador?",
-  "faq_a_2": "Você pode acessar seus códigos na web em auth.ente.io.",
-  "faq_q_3": "Como posso excluir códigos?",
-  "faq_a_3": "Você pode excluir um código deslizando para a esquerda sobre esse item.",
-  "faq_q_4": "Como posso apoiar este projeto?",
-  "faq_a_4": "Você pode apoiar o desenvolvimento do projeto com a assinatura do nosso app Photos @ ente.io.",
-  "faq_q_5": "Como ativar o bloqueio facial no Auth",
-  "faq_a_5": "Você pode ativar o bloqueio facial em Configurações → Segurança → Tela de bloqueio.",
   "somethingWentWrongMessage": "Algo deu errado. Tente outra vez",
   "leaveFamily": "Sair da família",
   "leaveFamilyMessage": "Deseja mesmo sair do plano familiar?",
@@ -492,5 +482,6 @@
   "setNewPin": "Definir novo PIN",
   "importFailureDescNew": "Não foi possível analisar o arquivo selecionado.",
   "appLockNotEnabled": "Bloqueio de aplicativo não ativado",
-  "appLockNotEnabledDescription": "Ative o bloqueio de aplicativo em Segurança > Bloqueio de aplicativo"
+  "appLockNotEnabledDescription": "Ative o bloqueio de aplicativo em Segurança > Bloqueio de aplicativo",
+  "authToViewPasskey": "Autentique para ver a sua chave de acesso"
 }

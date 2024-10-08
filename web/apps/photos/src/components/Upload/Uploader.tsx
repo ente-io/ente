@@ -2,6 +2,8 @@ import { basename } from "@/base/file";
 import log from "@/base/log";
 import type { CollectionMapping, Electron, ZipItem } from "@/base/types/ipc";
 import type { Collection } from "@/media/collection";
+import { CollectionMappingChoiceDialog } from "@/new/photos/components/CollectionMappingChoiceDialog";
+import type { CollectionSelectorAttributes } from "@/new/photos/components/CollectionSelector";
 import { exportMetadataDirectoryName } from "@/new/photos/services/export";
 import type {
     FileAndPath,
@@ -34,13 +36,7 @@ import type {
 } from "services/upload/uploadManager";
 import uploadManager from "services/upload/uploadManager";
 import watcher from "services/watch";
-import {
-    CollectionSelectorIntent,
-    SetCollectionSelectorAttributes,
-    SetCollections,
-    SetFiles,
-    SetLoading,
-} from "types/gallery";
+import { SetCollections, SetFiles, SetLoading } from "types/gallery";
 import { NotificationAttributes } from "types/Notification";
 import { getOrCreateAlbum } from "utils/collection";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
@@ -49,7 +45,6 @@ import {
     getRootLevelFileWithFolderNotAllowMessage,
 } from "utils/ui";
 import { SetCollectionNamerAttributes } from "../Collections/CollectionNamer";
-import { CollectionMappingChoiceModal } from "./CollectionMappingChoiceModal";
 import UploadProgress from "./UploadProgress";
 import {
     UploadTypeSelector,
@@ -64,9 +59,17 @@ enum PICKED_UPLOAD_TYPE {
 
 interface Props {
     syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;
-    closeCollectionSelector?: () => void;
     closeUploadTypeSelector: () => void;
-    setCollectionSelectorAttributes?: SetCollectionSelectorAttributes;
+    /**
+     * Show the collection selector with the given {@link attributes}.
+     */
+    onOpenCollectionSelector?: (
+        attributes: CollectionSelectorAttributes,
+    ) => void;
+    /**
+     * Close the collection selector if it is open.
+     */
+    onCloseCollectionSelector?: () => void;
     setCollectionNamerAttributes?: SetCollectionNamerAttributes;
     setLoading: SetLoading;
     setShouldDisableDropzone: (value: boolean) => void;
@@ -122,7 +125,7 @@ export default function Uploader({
     const [percentComplete, setPercentComplete] = useState(0);
     const [hasLivePhotos, setHasLivePhotos] = useState(false);
 
-    const [choiceModalView, setChoiceModalView] = useState(false);
+    const [openChoiceDialog, setOpenChoiceDialog] = useState(false);
     const [userNameInputDialogView, setUserNameInputDialogView] =
         useState(false);
     const [importSuggestion, setImportSuggestion] = useState<ImportSuggestion>(
@@ -209,7 +212,7 @@ export default function Uploader({
     const showUserNameInputDialog = () => setUserNameInputDialogView(true);
 
     const handleChoiceModalClose = () => {
-        setChoiceModalView(false);
+        setOpenChoiceDialog(false);
         uploadRunning.current = false;
     };
 
@@ -454,23 +457,23 @@ export default function Uploader({
 
             let showNextModal = () => {};
             if (importSuggestion.hasNestedFolders) {
-                showNextModal = () => setChoiceModalView(true);
+                showNextModal = () => setOpenChoiceDialog(true);
             } else {
                 showNextModal = () =>
                     showCollectionCreateModal(importSuggestion.rootFolderName);
             }
 
-            props.setCollectionSelectorAttributes({
-                callback: uploadFilesToExistingCollection,
+            props.onOpenCollectionSelector({
+                action: "upload",
+                onSelectCollection: uploadFilesToExistingCollection,
+                onCreateCollection: showNextModal,
                 onCancel: handleCollectionSelectorCancel,
-                showNextModal,
-                intent: CollectionSelectorIntent.upload,
             });
         })();
     }, [webFiles, desktopFiles, desktopFilePaths, desktopZipItems]);
 
     const preCollectionCreationAction = async () => {
-        props.closeCollectionSelector?.();
+        props.onCloseCollectionSelector?.();
         props.setShouldDisableDropzone(!uploadManager.shouldAllowNewUpload());
         setUploadStage(UPLOAD_STAGES.START);
         setUploadProgressView(true);
@@ -668,7 +671,7 @@ export default function Uploader({
             default:
                 notification = {
                     variant: "critical",
-                    message: t("UNKNOWN_ERROR"),
+                    message: t("generic_error_retry"),
                     onClick: () => null,
                 };
         }
@@ -765,8 +768,8 @@ export default function Uploader({
 
     return (
         <>
-            <CollectionMappingChoiceModal
-                open={choiceModalView}
+            <CollectionMappingChoiceDialog
+                open={openChoiceDialog}
                 onClose={handleChoiceModalClose}
                 didSelect={didSelectCollectionMapping}
             />

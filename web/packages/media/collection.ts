@@ -142,6 +142,12 @@ export type CollectionShareeMagicMetadata =
     MagicMetadataCore<CollectionShareeMetadataProps>;
 
 export interface CollectionPublicMagicMetadataProps {
+    /**
+     * If true, then the files within the collection are sorted in ascending
+     * order of their time ("Oldest first").
+     *
+     * The default is desc ("Newest first").
+     */
     asc?: boolean;
     coverID?: number;
 }

@@ -13,7 +13,6 @@ import {
     CenteredFlex,
     HorizontalFlex,
 } from "@ente/shared/components/Container";
-import EnteButton from "@ente/shared/components/EnteButton";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import { downloadUsingAnchor } from "@ente/shared/utils";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
@@ -26,6 +25,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import {
     Backdrop,
     Box,
+    Button,
     CircularProgress,
     IconButton,
     Tab,
@@ -493,6 +493,30 @@ const ImageEditorOverlay = (props: IProps) => {
             log.error("Error saving copy to ente", e);
         }
     };
+
+    const applyCrop = () => {
+        if (!cropBoxRef.current || !canvasRef.current) return;
+
+        const { x1, x2, y1, y2 } = getCropRegionArgs(
+            cropBoxRef.current,
+            canvasRef.current,
+        );
+        setCanvasLoading(true);
+        setTransformationPerformed(true);
+        cropRegionOfCanvas(canvasRef.current, x1, y1, x2, y2);
+        cropRegionOfCanvas(
+            originalSizeCanvasRef.current,
+            x1 / previewCanvasScale,
+            y1 / previewCanvasScale,
+            x2 / previewCanvasScale,
+            y2 / previewCanvasScale,
+        );
+        resetCropBox();
+        setCanvasLoading(false);
+
+        setCurrentTab("transform");
+    };
+
     return (
         <>
             <Backdrop
@@ -540,7 +564,7 @@ const ImageEditorOverlay = (props: IProps) => {
                             }}
                         >
                             <Box
-                                height="90%"
+                                height="88%"
                                 width="100%"
                                 ref={parentRef}
                                 display="flex"
@@ -580,45 +604,13 @@ const ImageEditorOverlay = (props: IProps) => {
                             </Box>
                             {currentTab === "crop" && (
                                 <CenteredFlex marginTop="1rem">
-                                    <EnteButton
+                                    <Button
                                         color="accent"
                                         startIcon={<CropIcon />}
-                                        onClick={() => {
-                                            if (
-                                                !cropBoxRef.current ||
-                                                !canvasRef.current
-                                            )
-                                                return;
-
-                                            const { x1, x2, y1, y2 } =
-                                                getCropRegionArgs(
-                                                    cropBoxRef.current,
-                                                    canvasRef.current,
-                                                );
-                                            setCanvasLoading(true);
-                                            setTransformationPerformed(true);
-                                            cropRegionOfCanvas(
-                                                canvasRef.current,
-                                                x1,
-                                                y1,
-                                                x2,
-                                                y2,
-                                            );
-                                            cropRegionOfCanvas(
-                                                originalSizeCanvasRef.current,
-                                                x1 / previewCanvasScale,
-                                                y1 / previewCanvasScale,
-                                                x2 / previewCanvasScale,
-                                                y2 / previewCanvasScale,
-                                            );
-                                            resetCropBox();
-                                            setCanvasLoading(false);
-
-                                            setCurrentTab("transform");
-                                        }}
+                                        onClick={applyCrop}
                                     >
                                         {t("APPLY_CROP")}
-                                    </EnteButton>
+                                    </Button>
                                 </CenteredFlex>
                             )}
                         </Box>

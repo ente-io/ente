@@ -1,7 +1,7 @@
 import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
 import type { Collection } from "@/media/collection";
-import type { CollectionSummary } from "@/new/photos/types/collection";
+import type { CollectionSummary } from "@/new/photos/services/collection/ui";
 import { DialogProps, Stack } from "@mui/material";
 import { t } from "i18next";
 import EmailShare from "./emailShare";

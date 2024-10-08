@@ -283,7 +283,7 @@ export default function App({ Component, pageProps }: AppProps) {
             setDialogMessage({
                 title: t("error"),
                 close: { variant: "critical" },
-                content: t("UNKNOWN_ERROR"),
+                content: t("generic_error_retry"),
             }),
         [setDialogMessage],
     );
@@ -293,7 +293,7 @@ export default function App({ Component, pageProps }: AppProps) {
             log.error("Error", e),
             setDialogBoxAttributesV2({
                 title: t("error"),
-                content: t("UNKNOWN_ERROR"),
+                content: t("generic_error_retry"),
                 close: { variant: "critical" },
             })
         ),

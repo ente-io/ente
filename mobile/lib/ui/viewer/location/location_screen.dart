@@ -25,6 +25,7 @@ import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/components/title_bar_widget.dart";
 import "package:photos/ui/viewer/actions/file_selection_overlay_bar.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
+import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 import "package:photos/ui/viewer/location/edit_location_sheet.dart";
 import "package:photos/utils/dialog_util.dart";
@@ -37,26 +38,28 @@ class LocationScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final heightOfStatusBar = MediaQuery.of(context).viewPadding.top;
     const heightOfAppBar = 48.0;
-    return Scaffold(
-      appBar: const PreferredSize(
-        preferredSize: Size(double.infinity, heightOfAppBar),
-        child: TitleBarWidget(
-          isSliver: false,
-          isFlexibleSpaceDisabled: true,
-          actionIcons: [LocationScreenPopUpMenu()],
-        ),
-      ),
-      body: Column(
-        children: <Widget>[
-          SizedBox(
-            height: MediaQuery.of(context).size.height -
-                (heightOfAppBar + heightOfStatusBar),
-            width: double.infinity,
-            child: LocationGalleryWidget(
-              tagPrefix: tagPrefix,
-            ),
+    return GalleryFilesState(
+      child: Scaffold(
+        appBar: const PreferredSize(
+          preferredSize: Size(double.infinity, heightOfAppBar),
+          child: TitleBarWidget(
+            isSliver: false,
+            isFlexibleSpaceDisabled: true,
+            actionIcons: [LocationScreenPopUpMenu()],
           ),
-        ],
+        ),
+        body: Column(
+          children: <Widget>[
+            SizedBox(
+              height: MediaQuery.of(context).size.height -
+                  (heightOfAppBar + heightOfStatusBar),
+              width: double.infinity,
+              child: LocationGalleryWidget(
+                tagPrefix: tagPrefix,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
