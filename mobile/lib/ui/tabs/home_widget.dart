@@ -232,25 +232,6 @@ class _HomeWidgetState extends State<HomeWidget> {
     NotificationService.instance
         .initialize(_onDidReceiveNotificationResponse)
         .ignore();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await _initDeeplinkPublicAlbum();
-    });
-  }
-
-  Future<void> _initDeeplinkPublicAlbum() async {
-    // Handle the terminated state
-    final Uri? uri = await getInitialUri();
-    if (uri != null) {
-      await _handlePublicAlbumLink(uri);
-    }
-
-    // Handle the background state
-    _uriLinkEventSubscription = uriLinkStream.listen((Uri? uri) async {
-      if (uri != null) {
-        await _handlePublicAlbumLink(uri);
-      }
-    });
   }
 
   Future<void> _handlePublicAlbumLink(Uri uri) async {
@@ -291,8 +272,12 @@ class _HomeWidgetState extends State<HomeWidget> {
     }
 
     if (result) {
+      final dialog = createProgressDialog(context, "Loading...");
+      await dialog.show();
+
       final List<EnteFile> sharedFiles =
           await _diffFetcher.getPublicFiles(context, collection.id);
+      await dialog.hide();
 
       await routeToPage(
         context,
@@ -359,10 +344,16 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   void _initMediaShareSubscription() {
-    // For sharing images coming from outside the app while the app is in the memory
+    // For sharing images/public links coming from outside the app while the app is in the memory
     _intentDataStreamSubscription =
         ReceiveSharingIntent.instance.getMediaStream().listen(
       (List<SharedMediaFile> value) {
+        if (value[0].path.contains("albums.ente.io")) {
+          final uri = Uri.parse(value[0].path);
+          _handlePublicAlbumLink(uri);
+          return;
+        }
+
         setState(() {
           _shouldRenderCreateCollectionSheet = true;
           _sharedFiles = value;
@@ -372,11 +363,17 @@ class _HomeWidgetState extends State<HomeWidget> {
         _logger.severe("getIntentDataStream error: $err");
       },
     );
-    // For sharing images coming from outside the app while the app is closed
+    // For sharing images/public links coming from outside the app while the app is closed
     ReceiveSharingIntent.instance
         .getInitialMedia()
         .then((List<SharedMediaFile> value) {
       if (mounted) {
+        if (value[0].path.contains("albums.ente.io")) {
+          final uri = Uri.parse(value[0].path);
+          _handlePublicAlbumLink(uri);
+          return;
+        }
+
         setState(() {
           _sharedFiles = value;
           _shouldRenderCreateCollectionSheet = true;
