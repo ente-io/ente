@@ -32,7 +32,6 @@ export const EnteLogo: React.FC<EnteLogoProps> = ({ height }) => (
 
 const LogoImage = styled("img")`
     margin: 3px 0;
-    pointer-events: none;
     vertical-align: middle;
 `;
 
