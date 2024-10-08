@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:xdg_directories/xdg_directories.dart';
 
 class DirectoryUtils {
@@ -19,7 +20,7 @@ class DirectoryUtils {
       }
     }
 
-    directoryPath ??= (await getApplicationDocumentsDirectory()).path;
+    directoryPath ??= (await getLibraryDirectory()).path;
 
     return p.joinAll(
       [
@@ -49,7 +50,12 @@ class DirectoryUtils {
     return await getTemporaryDirectory();
   }
 
+  static String migratedNamingChanges = "migrated_naming_changes.b5";
   static migrateNamingChanges() async {
+    final sharedPrefs = await SharedPreferences.getInstance();
+    if (sharedPrefs.containsKey(migratedNamingChanges)) {
+      return;
+    }
     final databaseFile = File(
       p.join(
         (await getApplicationDocumentsDirectory()).path,
@@ -64,32 +70,60 @@ class DirectoryUtils {
         ".ente.offline_authenticator.db",
       ),
     );
+    Directory oldDataDir;
+    Directory newDataDir;
 
-    final oldDataDir = Directory(
-      p.join(dataHome.path, "ente_auth"),
-    );
-    final newDir = Directory(
-      p.join(dataHome.path, "enteauth"),
-    );
-    await newDir.create(recursive: true);
-
-    if (await databaseFile.exists()) {
-      await databaseFile.rename(
-        p.join(newDir.path, ".ente.authenticator.db"),
+    if (Platform.isLinux) {
+      oldDataDir = Directory(
+        p.join(dataHome.path, "ente_auth"),
+      );
+      newDataDir = Directory(
+        p.join(dataHome.path, "enteauth"),
+      );
+    } else {
+      oldDataDir = Directory(
+        p.join(
+          (await getApplicationDocumentsDirectory()).path,
+          "ente",
+        ),
+      );
+      newDataDir = Directory(
+        p.join(
+          (await getApplicationSupportDirectory()).path,
+        ),
       );
     }
+    await newDataDir.create(recursive: true);
 
-    if (await offlineDatabaseFile.exists()) {
-      await offlineDatabaseFile.rename(
-        p.join(newDir.path, ".ente.offline_authenticator.db"),
+    File newDatabaseFile =
+        File(p.join(newDataDir.path, ".ente.authenticator.db"));
+    if (await databaseFile.exists() && !await newDatabaseFile.exists()) {
+      await databaseFile.copy(newDatabaseFile.path);
+    }
+
+    File newOfflineDatabaseFile =
+        File(p.join(newDataDir.path, ".ente.offline_authenticator.db"));
+    if (await offlineDatabaseFile.exists() &&
+        !await newOfflineDatabaseFile.exists()) {
+      await offlineDatabaseFile.copy(newOfflineDatabaseFile.path);
+    }
+
+    if (Platform.isLinux && await oldDataDir.exists()) {
+      // execute shell command to recursively copy old data dir to new data dir
+      final result = await Process.run(
+        "cp",
+        [
+          "-r",
+          oldDataDir.path,
+          newDataDir.path,
+        ],
       );
+      if (result.exitCode != 0) {
+        logger.warning("Failed to copy old data dir to new data dir");
+        return;
+      }
     }
 
-    if (await oldDataDir.exists()) {
-      await oldDataDir.list().forEach((file) async {
-        await file.rename(p.join(newDir.path, p.basename(file.path)));
-      });
-      await oldDataDir.delete(recursive: true);
-    }
+    sharedPrefs.setBool(migratedNamingChanges, true).ignore();
   }
 }

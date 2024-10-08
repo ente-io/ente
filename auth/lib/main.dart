@@ -70,10 +70,6 @@ void main() async {
     HttpOverrides.global = WindowsHttpOverrides();
   }
 
-  if (Platform.isLinux) {
-    await DirectoryUtils.migrateNamingChanges();
-  }
-
   if (PlatformUtil.isDesktop()) {
     await windowManager.ensureInitialized();
     await WindowListenerService.instance.init();
@@ -81,6 +77,9 @@ void main() async {
       size: WindowListenerService.instance.getWindowSize(),
     );
     await windowManager.waitUntilReadyToShow(windowOptions, () async {
+      if (Platform.isWindows || Platform.isLinux) {
+        await DirectoryUtils.migrateNamingChanges();
+      }
       await windowManager.show();
       await windowManager.focus();
       initSystemTray().ignore();
