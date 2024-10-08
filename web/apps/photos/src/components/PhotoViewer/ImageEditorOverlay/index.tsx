@@ -493,6 +493,30 @@ const ImageEditorOverlay = (props: IProps) => {
             log.error("Error saving copy to ente", e);
         }
     };
+
+    const applyCrop = () => {
+        if (!cropBoxRef.current || !canvasRef.current) return;
+
+        const { x1, x2, y1, y2 } = getCropRegionArgs(
+            cropBoxRef.current,
+            canvasRef.current,
+        );
+        setCanvasLoading(true);
+        setTransformationPerformed(true);
+        cropRegionOfCanvas(canvasRef.current, x1, y1, x2, y2);
+        cropRegionOfCanvas(
+            originalSizeCanvasRef.current,
+            x1 / previewCanvasScale,
+            y1 / previewCanvasScale,
+            x2 / previewCanvasScale,
+            y2 / previewCanvasScale,
+        );
+        resetCropBox();
+        setCanvasLoading(false);
+
+        setCurrentTab("transform");
+    };
+
     return (
         <>
             <Backdrop
@@ -583,39 +607,7 @@ const ImageEditorOverlay = (props: IProps) => {
                                     <EnteButton
                                         color="accent"
                                         startIcon={<CropIcon />}
-                                        onClick={() => {
-                                            if (
-                                                !cropBoxRef.current ||
-                                                !canvasRef.current
-                                            )
-                                                return;
-
-                                            const { x1, x2, y1, y2 } =
-                                                getCropRegionArgs(
-                                                    cropBoxRef.current,
-                                                    canvasRef.current,
-                                                );
-                                            setCanvasLoading(true);
-                                            setTransformationPerformed(true);
-                                            cropRegionOfCanvas(
-                                                canvasRef.current,
-                                                x1,
-                                                y1,
-                                                x2,
-                                                y2,
-                                            );
-                                            cropRegionOfCanvas(
-                                                originalSizeCanvasRef.current,
-                                                x1 / previewCanvasScale,
-                                                y1 / previewCanvasScale,
-                                                x2 / previewCanvasScale,
-                                                y2 / previewCanvasScale,
-                                            );
-                                            resetCropBox();
-                                            setCanvasLoading(false);
-
-                                            setCurrentTab("transform");
-                                        }}
+                                        onClick={applyCrop}
                                     >
                                         {t("APPLY_CROP")}
                                     </EnteButton>
