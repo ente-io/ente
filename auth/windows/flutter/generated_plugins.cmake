@@ -5,7 +5,6 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   app_links
   connectivity_plus
-  desktop_webview_window
   file_saver
   flutter_inappwebview_windows
   flutter_local_authentication

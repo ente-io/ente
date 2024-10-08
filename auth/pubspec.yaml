@@ -19,11 +19,6 @@ dependencies:
   confetti: ^0.8.0
   connectivity_plus: ^6.0.5
   convert: ^3.1.1
-  desktop_webview_window:
-    git:
-      url: https://github.com/MixinNetwork/flutter-plugins
-      ref: main
-      path: packages/desktop_webview_window
   device_info_plus: ^9.1.1
   dio: ^5.4.0
   dotted_border: ^2.0.0+2

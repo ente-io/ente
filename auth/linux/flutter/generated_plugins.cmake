@@ -3,7 +3,6 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-  desktop_webview_window
   file_saver
   flutter_local_authentication
   flutter_secure_storage_linux
