@@ -24,7 +24,7 @@ import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";
 import { downloadUsingAnchor } from "@ente/shared/utils";
 import { t } from "i18next";
-import { addMultipleToFavorites, addToFavorites, moveToHiddenCollection } from "services/collectionService";
+import { addMultipleToFavorites, moveToHiddenCollection } from "services/collectionService";
 import {
     deleteFromTrash,
     trashFiles,

@@ -29,7 +29,6 @@ import {
 import { FILE_OPS_TYPE } from "utils/file";
 import { formatNumber } from "utils/number/format";
 import { getTrashFilesMessage } from "utils/ui";
-import Favorite from "@mui/icons-material/FavoriteRounded";
 
 interface Props {
     handleCollectionOps: (
