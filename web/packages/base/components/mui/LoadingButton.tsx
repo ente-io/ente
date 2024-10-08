@@ -8,9 +8,8 @@ import React from "react";
  *
  * The button is also disabled when in the loading state.
  *
- * TODO: This duplicates the existing SubmitButton and EnteButton. Merge these
- * three gradually (didn't want to break existing layouts, so will do it
- * piecewise).
+ * TODO: This duplicates the existing SubmitButton. Merge these two gradually
+ * (didn't want to break existing layouts, so will do it piecewise).
  */
 export const LoadingButton: React.FC<ButtonProps & { loading?: boolean }> = ({
     loading,
