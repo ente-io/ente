@@ -1128,7 +1128,7 @@ class CollectionsService {
     return null;
   }
 
-  Future<bool> isPublicCollection(int collectionID) async {
+  bool isPublicCollection(int collectionID) {
     return _cachedPublicCollectionID.contains(collectionID);
   }
 
