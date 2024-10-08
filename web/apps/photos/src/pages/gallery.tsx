@@ -1120,7 +1120,7 @@ export default function Gallery() {
         [],
     );
 
-    const updateFavItemIds = async (ids: Set<Number>) => {
+    const updateFavItemIds = async () => {
         const favItemIds = await getFavItemIds(files);
         setFavItemIds(favItemIds);
     };
