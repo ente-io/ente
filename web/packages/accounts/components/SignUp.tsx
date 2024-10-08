@@ -290,7 +290,7 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
                         </VerticallyCentered>
                         <Box mb={4}>
                             <LoadingButton
-                                size="large"
+                                fullWidth
                                 color="accent"
                                 type="submit"
                                 loading={loading}

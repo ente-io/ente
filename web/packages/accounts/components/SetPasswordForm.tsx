@@ -1,6 +1,6 @@
 import { isWeakPassword } from "@/accounts/utils";
+import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import ShowHidePassword from "@ente/shared/components/Form/ShowHidePassword";
-import SubmitButton from "@ente/shared/components/SubmitButton";
 import { Box, Input, TextField, Typography } from "@mui/material";
 import { Formik } from "formik";
 import { t } from "i18next";
@@ -137,12 +137,15 @@ function SetPasswordForm(props: SetPasswordFormProps) {
                     </Typography>
 
                     <Box my={4}>
-                        <SubmitButton
-                            sx={{ my: 0 }}
+                        <LoadingButton
+                            fullWidth
+                            color="accent"
+                            type="submit"
                             loading={loading}
-                            buttonText={props.buttonText}
                             disabled={isWeakPassword(values.passphrase)}
-                        />
+                        >
+                            {props.buttonText}
+                        </LoadingButton>
                         {loading && (
                             <Typography
                                 textAlign="center"
