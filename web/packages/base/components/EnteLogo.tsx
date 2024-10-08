@@ -13,6 +13,8 @@ interface EnteLogoProps {
 /**
  * The Ente logo ("ente" in Montserrat).
  *
+ * **This relies on the presence of images/ente.svg in the public folder.**
+ *
  * This is meant as a standard img element that can be used in places where we
  * need to show the Ente branding. The img is backed by an an SVG.
  *
