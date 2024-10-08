@@ -135,3 +135,44 @@ If needed, Sentry can be stopped by using
 
     cd /home/ente/sentry
     sudo docker compose stop
+
+## Backup / Restore
+
+> [!NOTE]
+>
+> [Upstream docs](https://develop.sentry.dev/self-hosted/backup/#restore)
+
+To backup an existing instance
+
+```sh
+sudo ./scripts/backup.sh
+```
+
+Then retain the following files
+
+```
+sentry/backup.json
+sentry/config.yml
+.env
+```
+
+To restore, run the fresh install. Once it completes, add our custom config
+back, ensuring we don't overwrite anything that the new version has
+
+```sh
+git diff --no-index ../.env .env
+git diff --no-index ../config.yml sentry/config.yml
+```
+
+Copy back the backup and run the restore script
+
+```sh
+cp ../sentry-backup/backup.json sentry
+sudo ./scripts/restore.sh
+```
+
+Now start sentry
+
+```sh
+sudo docker compose up -d
+```
