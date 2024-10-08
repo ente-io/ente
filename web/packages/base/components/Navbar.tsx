@@ -1,5 +1,5 @@
+import { EnteLogo } from "@/base/components/EnteLogo";
 import { CenteredFlex, FlexWrapper } from "@ente/shared/components/Container";
-import { EnteLogo } from "@ente/shared/components/EnteLogo";
 import { styled } from "@mui/material";
 import React from "react";
 
