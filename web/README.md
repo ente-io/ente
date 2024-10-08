@@ -61,7 +61,7 @@ These are the public facing apps. There are other part of the code which are
 accessed as features within the main apps, but in terms of code are
 independently maintained and deployed:
 
--   `apps/accounts`: Passkey support (Coming soon)
+-   `apps/accounts`: Passkey support.
 -   `apps/cast`: Browser and Chromecast casting support.
 -   `apps/payments`: Handle subscription payments.
 
