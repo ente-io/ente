@@ -870,7 +870,7 @@ packages:
     source: hosted
     version: "0.19.0"
   io:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: io
       sha256: "2ec25704aba361659e10e3e5f5d672068d332fc8ac516421d483a11e5cbd061e"

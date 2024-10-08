@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:io/io.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -12,20 +13,11 @@ class DirectoryUtils {
   static Future<String> getDatabasePath(String databaseName) async {
     String? directoryPath;
 
-    if (Platform.isLinux) {
-      try {
-        directoryPath = dataHome.path;
-      } catch (e) {
-        logger.warning("Failed to get dataHome: $e");
-      }
-    }
-
-    directoryPath ??= (await getLibraryDirectory()).path;
+    directoryPath ??= (await getApplicationSupportDirectory()).path;
 
     return p.joinAll(
       [
         directoryPath,
-        "enteauth",
         ".$databaseName",
       ],
     );
@@ -52,70 +44,63 @@ class DirectoryUtils {
 
   static String migratedNamingChanges = "migrated_naming_changes.b5";
   static migrateNamingChanges() async {
-    final sharedPrefs = await SharedPreferences.getInstance();
-    if (sharedPrefs.containsKey(migratedNamingChanges)) {
-      return;
-    }
-    final databaseFile = File(
-      p.join(
-        (await getApplicationDocumentsDirectory()).path,
-        "ente",
-        ".ente.authenticator.db",
-      ),
-    );
-    final offlineDatabaseFile = File(
-      p.join(
-        (await getApplicationDocumentsDirectory()).path,
-        "ente",
-        ".ente.offline_authenticator.db",
-      ),
-    );
-    Directory oldDataDir;
-    Directory newDataDir;
-
-    if (Platform.isLinux) {
-      oldDataDir = Directory(
-        p.join(dataHome.path, "ente_auth"),
-      );
-    } else {
-      oldDataDir = Directory(
+    try {
+      final sharedPrefs = await SharedPreferences.getInstance();
+      if (sharedPrefs.containsKey(migratedNamingChanges)) {
+        return;
+      }
+      final databaseFile = File(
         p.join(
           (await getApplicationDocumentsDirectory()).path,
           "ente",
+          ".ente.authenticator.db",
         ),
       );
-    }
-    newDataDir = await getApplicationSupportDirectory();
-    await newDataDir.create(recursive: true);
-
-    File newDatabaseFile =
-        File(p.join(newDataDir.path, ".ente.authenticator.db"));
-    if (await databaseFile.exists() && !await newDatabaseFile.exists()) {
-      await databaseFile.copy(newDatabaseFile.path);
-    }
-
-    File newOfflineDatabaseFile =
-        File(p.join(newDataDir.path, ".ente.offline_authenticator.db"));
-    if (await offlineDatabaseFile.exists() &&
-        !await newOfflineDatabaseFile.exists()) {
-      await offlineDatabaseFile.copy(newOfflineDatabaseFile.path);
-    }
-
-    if (Platform.isLinux && await oldDataDir.exists()) {
-      final result = await Process.run(
-        "cp",
-        [
-          "-r",
-          "${oldDataDir.path}/*",
-          newDataDir.path,
-        ],
+      final offlineDatabaseFile = File(
+        p.join(
+          (await getApplicationDocumentsDirectory()).path,
+          "ente",
+          ".ente.offline_authenticator.db",
+        ),
       );
-      if (result.exitCode != 0) {
-        logger.warning("Failed to copy old data dir to new data dir");
-        return;
-      }
-    }
+      Directory oldDataDir;
+      Directory newDataDir;
 
-    sharedPrefs.setBool(migratedNamingChanges, true).ignore();
+      if (Platform.isLinux) {
+        oldDataDir = Directory(
+          p.join(dataHome.path, "ente_auth"),
+        );
+      } else {
+        oldDataDir = Directory(
+          p.join(
+            (await getApplicationDocumentsDirectory()).path,
+            "ente",
+          ),
+        );
+      }
+      newDataDir = await getApplicationSupportDirectory();
+      await newDataDir.create(recursive: true);
+
+      File newDatabaseFile =
+          File(p.join(newDataDir.path, ".ente.authenticator.db"));
+      if (await databaseFile.exists() && !await newDatabaseFile.exists()) {
+        await databaseFile.copy(newDatabaseFile.path);
+      }
+
+      File newOfflineDatabaseFile =
+          File(p.join(newDataDir.path, ".ente.offline_authenticator.db"));
+      if (await offlineDatabaseFile.exists() &&
+          !await newOfflineDatabaseFile.exists()) {
+        await offlineDatabaseFile.copy(newOfflineDatabaseFile.path);
+      }
+
+      if (Platform.isLinux && await oldDataDir.exists()) {
+        await copyPath(oldDataDir.path, newDataDir.path);
+      }
+
+      sharedPrefs.setBool(migratedNamingChanges, true).ignore();
+    } catch (e, st) {
+      logger.warning("Migrating Database failed!", e, st);
+    }
   }
 }

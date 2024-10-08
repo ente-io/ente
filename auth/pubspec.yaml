@@ -62,6 +62,7 @@ dependencies:
   gradient_borders: ^1.0.0
   http: ^1.1.0
   intl: ^0.19.0
+  io: ^1.0.4
   json_annotation: ^4.5.0
   local_auth: ^2.3.0
   local_auth_android: ^1.0.37
