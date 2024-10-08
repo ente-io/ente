@@ -1,5 +1,6 @@
 import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { MenuItemGroup } from "@/base/components/Menu";
+import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { Titlebar } from "@/base/components/Titlebar";
 import log from "@/base/log";
 import {
@@ -9,7 +10,6 @@ import {
     mlStatusSubscribe,
     type MLStatus,
 } from "@/new/photos/services/ml";
-import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import {
     Box,
@@ -143,7 +143,7 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
 const Loading: React.FC = () => {
     return (
         <Box textAlign="center" pt={4}>
-            <EnteSpinner />
+            <ActivityIndicator />
         </Box>
     );
 };

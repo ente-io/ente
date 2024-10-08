@@ -2,6 +2,7 @@ import { accountLogout } from "@/accounts/services/logout";
 import type { AccountsContextT } from "@/accounts/types/context";
 import { clientPackageName, staticAppTitle } from "@/base/app";
 import { CustomHead } from "@/base/components/Head";
+import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { AppNavbar } from "@/base/components/Navbar";
 import { setupI18n } from "@/base/i18n";
 import {
@@ -12,7 +13,6 @@ import { ensure } from "@/utils/ensure";
 import { Overlay } from "@ente/shared/components/Container";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
-import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { MessageContainer } from "@ente/shared/components/MessageContainer";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import HTTPService from "@ente/shared/network/HTTPService";
@@ -183,7 +183,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                                 backgroundColor: theme.colors.background.base,
                             })}
                         >
-                            <EnteSpinner />
+                            <ActivityIndicator />
                         </Overlay>
                     )}
                     {isI18nReady && (

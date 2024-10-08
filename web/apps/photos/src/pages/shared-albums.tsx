@@ -1,3 +1,4 @@
+import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { NavbarBase, SelectionBar } from "@/base/components/Navbar";
 import { sharedCryptoWorker } from "@/base/crypto";
 import { useIsMobileWidth, useIsTouchscreen } from "@/base/hooks";
@@ -17,7 +18,6 @@ import {
     FluidContainer,
     VerticallyCentered,
 } from "@ente/shared/components/Container";
-import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
@@ -439,7 +439,7 @@ export default function PublicCollectionGallery() {
         if (!publicFiles) {
             return (
                 <VerticallyCentered>
-                    <EnteSpinner />
+                    <ActivityIndicator />
                 </VerticallyCentered>
             );
         }
@@ -536,7 +536,7 @@ export default function PublicCollectionGallery() {
                 />
                 {blockingLoad && (
                     <LoadingOverlay>
-                        <EnteSpinner />
+                        <ActivityIndicator />
                     </LoadingOverlay>
                 )}
                 <Uploader

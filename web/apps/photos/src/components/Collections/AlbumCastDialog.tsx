@@ -1,9 +1,9 @@
+import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { boxSeal } from "@/base/crypto/libsodium";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
 import { loadCast } from "@/new/photos/utils/chromecast-sender";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
-import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
@@ -167,7 +167,7 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
             {view == "auto" && (
                 <Stack sx={{ pt: 1, gap: 3, textAlign: "center" }}>
                     <div>
-                        <EnteSpinner />
+                        <ActivityIndicator />
                     </div>
                     <Typography>{t("choose_device_from_browser")}</Typography>
                     <Button color="secondary" onClick={() => setView("choose")}>

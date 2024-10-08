@@ -14,6 +14,7 @@ import {
 } from "utils/file";
 
 import { isDesktop } from "@/base/app";
+import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { lowercaseExtension } from "@/base/file";
 import { FileType } from "@/media/file-type";
 import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
@@ -22,7 +23,6 @@ import { extractRawExif, parseExif } from "@/new/photos/services/exif";
 import type { LoadedLivePhotoSourceURL } from "@/new/photos/types/file";
 import { fileLogID } from "@/new/photos/utils/file";
 import { FlexWrapper } from "@ente/shared/components/Container";
-import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import AlbumOutlined from "@mui/icons-material/AlbumOutlined";
 import ChevronLeft from "@mui/icons-material/ChevronLeft";
 import ChevronRight from "@mui/icons-material/ChevronRight";
@@ -799,7 +799,7 @@ function PhotoViewer(props: PhotoViewerProps) {
                                 )}
                             />
                         ) : (
-                            !isSourceLoaded && <EnteSpinner />
+                            !isSourceLoaded && <ActivityIndicator />
                         )}
                     </Box>
 

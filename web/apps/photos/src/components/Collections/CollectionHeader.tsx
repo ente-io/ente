@@ -1,4 +1,5 @@
 import { assertionFailed } from "@/base/assert";
+import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
 import { ItemVisibility } from "@/media/file-metadata";
@@ -12,7 +13,6 @@ import type {
     CollectionSummaryType,
 } from "@/new/photos/services/collection/ui";
 import { HorizontalFlex } from "@ente/shared/components/Container";
-import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import OverflowMenu, {
     StyledMenu,
 } from "@ente/shared/components/OverflowMenu/menu";
@@ -433,7 +433,7 @@ const QuickOptions: React.FC<QuickOptionsProps> = ({
         )}
         {showDownloadQuickOption(type) &&
             (isDownloadInProgress() ? (
-                <EnteSpinner size="20px" sx={{ m: "12px" }} />
+                <ActivityIndicator size="20px" sx={{ m: "12px" }} />
             ) : (
                 <DownloadQuickOption
                     onClick={onDownloadClick}
@@ -554,7 +554,7 @@ const DownloadOption: React.FC<
     <OverflowMenuOption
         startIcon={
             isDownloadInProgress && isDownloadInProgress() ? (
-                <EnteSpinner size="20px" sx={{ cursor: "not-allowed" }} />
+                <ActivityIndicator size="20px" sx={{ cursor: "not-allowed" }} />
             ) : (
                 <FileDownloadOutlinedIcon />
             )

@@ -1,10 +1,10 @@
+import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { sharedCryptoWorker } from "@/base/crypto";
 import type { B64EncryptionResult } from "@/base/crypto/libsodium";
 import { clearLocalStorage } from "@/base/local-storage";
 import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
-import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import LinkButton from "@ente/shared/components/LinkButton";
 import {
@@ -324,7 +324,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
     if (!keyAttributes && !srpAttributes) {
         return (
             <VerticallyCentered>
-                <EnteSpinner />
+                <ActivityIndicator />
             </VerticallyCentered>
         );
     }
@@ -342,7 +342,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         if (!globalThis.electron) {
             return (
                 <VerticallyCentered>
-                    <EnteSpinner />
+                    <ActivityIndicator />
                 </VerticallyCentered>
             );
         }

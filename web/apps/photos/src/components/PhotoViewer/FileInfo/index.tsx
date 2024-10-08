@@ -1,4 +1,5 @@
 import { EnteDrawer } from "@/base/components/EnteDrawer";
+import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { Titlebar } from "@/base/components/Titlebar";
 import { EllipsizedTypography } from "@/base/components/Typography";
 import { nameAndExtension } from "@/base/file";
@@ -29,7 +30,6 @@ import { EnteFile } from "@/new/photos/types/file";
 import { formattedByteSize } from "@/new/photos/utils/units";
 import CopyButton from "@ente/shared/components/CodeBlock/CopyButton";
 import { FlexWrapper } from "@ente/shared/components/Container";
-import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { getPublicMagicMetadataSync } from "@ente/shared/file-metadata";
 import { formatDate, formatTime } from "@ente/shared/time/format";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
@@ -259,7 +259,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                     title={t("DETAILS")}
                     caption={
                         !exif ? (
-                            <EnteSpinner size={12} />
+                            <ActivityIndicator size={12} />
                         ) : !exif.tags ? (
                             t("no_exif")
                         ) : (

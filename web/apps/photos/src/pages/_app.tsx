@@ -1,6 +1,7 @@
 import type { AccountsContextT } from "@/accounts/types/context";
 import { clientPackageName, staticAppTitle } from "@/base/app";
 import { CustomHead } from "@/base/components/Head";
+import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { AppNavbar } from "@/base/components/Navbar";
 import { setupI18n } from "@/base/i18n";
 import log from "@/base/log";
@@ -21,7 +22,6 @@ import {
 } from "@ente/shared/components/DialogBox/types";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
-import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { MessageContainer } from "@ente/shared/components/MessageContainer";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import HTTPService from "@ente/shared/network/HTTPService";
@@ -372,7 +372,7 @@ export default function App({ Component, pageProps }: AppProps) {
                                 backgroundColor: theme.colors.background.base,
                             })}
                         >
-                            <EnteSpinner />
+                            <ActivityIndicator />
                         </Overlay>
                     )}
                     {isI18nReady && (
