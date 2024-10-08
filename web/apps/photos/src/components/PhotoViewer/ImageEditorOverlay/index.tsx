@@ -26,6 +26,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import {
     Backdrop,
     Box,
+    Button,
     CircularProgress,
     IconButton,
     Tab,
@@ -604,13 +605,13 @@ const ImageEditorOverlay = (props: IProps) => {
                             </Box>
                             {currentTab === "crop" && (
                                 <CenteredFlex marginTop="1rem">
-                                    <EnteButton
+                                    <Button
                                         color="accent"
                                         startIcon={<CropIcon />}
                                         onClick={applyCrop}
                                     >
                                         {t("APPLY_CROP")}
-                                    </EnteButton>
+                                    </Button>
                                 </CenteredFlex>
                             )}
                         </Box>
