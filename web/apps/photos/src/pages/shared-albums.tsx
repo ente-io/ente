@@ -1,3 +1,4 @@
+import { EnteLogoSvg } from "@/base/components/EnteLogo";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { NavbarBase, SelectionBar } from "@/base/components/Navbar";
 import { sharedCryptoWorker } from "@/base/crypto";
@@ -37,7 +38,6 @@ import type { ButtonProps, IconButtonProps } from "@mui/material";
 import { Box, Button, IconButton, Stack, Tooltip } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import bs58 from "bs58";
-import { EnteLogo } from "components/EnteLogo";
 import {
     FilesDownloadProgress,
     FilesDownloadProgressAttributes,
@@ -609,7 +609,7 @@ const EnteLinkLogo: React.FC = () => {
                     },
                 })}
             >
-                <EnteLogo />
+                <EnteLogoSvg />
             </Box>
         </a>
     );
