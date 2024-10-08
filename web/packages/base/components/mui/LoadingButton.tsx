@@ -18,24 +18,24 @@ export const LoadingButton: React.FC<ButtonProps & { loading?: boolean }> = ({
     sx,
     children,
     ...rest
-}) => (
-    <FocusVisibleButton
-        {...{ color }}
-        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-        disabled={loading || disabled}
-        sx={{
-            ...(loading
-                ? {
-                      "&.Mui-disabled": {
-                          backgroundColor: `${color}.main`,
-                          color: `${color}.contrastText`,
-                      },
-                  }
-                : {}),
-            ...sx,
-        }}
-        {...rest}
-    >
-        {loading ? <CircularProgress size={20} /> : children}
-    </FocusVisibleButton>
-);
+}) =>
+    loading ? (
+        <FocusVisibleButton
+            {...{ color }}
+            disabled
+            sx={{
+                "&.Mui-disabled": {
+                    backgroundColor: `${color}.main`,
+                    color: `${color}.contrastText`,
+                },
+                ...sx,
+            }}
+            {...rest}
+        >
+            <CircularProgress size={20} />
+        </FocusVisibleButton>
+    ) : (
+        <FocusVisibleButton {...{ color, disabled, sx }} {...rest}>
+            {children}
+        </FocusVisibleButton>
+    );
