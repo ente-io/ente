@@ -24,11 +24,9 @@ interface EnteLogoProps {
  *
  * The img also has a 3px vertical margin on both sides.
  */
-export const EnteLogo: React.FC<EnteLogoProps> = ({ height }) => {
-    return (
-        <LogoImage height={height ?? 18} alt="logo" src="/images/ente.svg" />
-    );
-};
+export const EnteLogo: React.FC<EnteLogoProps> = ({ height }) => (
+    <LogoImage height={height ?? 18} alt="Ente" src="/images/ente.svg" />
+);
 
 const LogoImage = styled("img")`
     margin: 3px 0;
