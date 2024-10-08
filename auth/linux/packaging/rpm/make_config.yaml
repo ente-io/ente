@@ -15,7 +15,6 @@ metainfo: linux/packaging/enteauth.appdata.xml
 
 requires:
   - libsqlite3x
-  - webkit2gtk4.0
   - libsodium
   - libsecret
   - libappindicator
@@ -24,7 +23,7 @@ keywords:
   - Authentication
   - 2FA
 
-generic_name: Ente Authentication
+generic_name: Ente Authenticator
 
 categories:
   - Utility

@@ -11,26 +11,16 @@ installed_size: 36000
 metainfo: linux/packaging/enteauth.appdata.xml
 
 dependencies:
-  - c-ares
-  - ffmpeg
-  - gtk3
-  - http-parser
-  - libevent
-  - libvpx
-  - libxslt
-  - libxss
-  - minizip
-  - nss
-  - re2
-  - snappy
-  - libnotify
+  - sqlite
+  - libsodium
+  - libsecret
   - libappindicator-gtk3
 
 keywords:
   - Authentication
   - 2FA
 
-generic_name: Ente Authentication
+generic_name: Ente Authenticator
 
 categories:
   - Utility
