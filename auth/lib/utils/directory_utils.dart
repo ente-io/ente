@@ -109,12 +109,11 @@ class DirectoryUtils {
     }
 
     if (Platform.isLinux && await oldDataDir.exists()) {
-      // execute shell command to recursively copy old data dir to new data dir
       final result = await Process.run(
         "cp",
         [
           "-r",
-          oldDataDir.path,
+          "${oldDataDir.path}/*",
           newDataDir.path,
         ],
       );
