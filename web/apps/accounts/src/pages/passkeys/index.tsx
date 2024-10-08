@@ -3,7 +3,7 @@ import { MenuItemDivider, MenuItemGroup } from "@/base/components/Menu";
 import { Titlebar } from "@/base/components/Titlebar";
 import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
-import { CenteredFlex, FlexWrapper } from "@ente/shared/components/Container";
+import { CenteredFlex } from "@ente/shared/components/Container";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import SingleInputForm from "@ente/shared/components/SingleInputForm";
@@ -16,7 +16,6 @@ import KeyIcon from "@mui/icons-material/Key";
 import {
     Box,
     Dialog,
-    IconButton,
     Stack,
     Typography,
     styled,
@@ -342,27 +341,17 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
     );
 };
 
-const CreatedAtEntry: React.FC<React.PropsWithChildren> = ({ children }) => {
-    return (
-        <FlexWrapper justifyContent="space-between">
-            <Box display={"flex"} alignItems="flex-start" gap={0.5} pr={1}>
-                <IconButton
-                    color="secondary"
-                    sx={{ "&&": { cursor: "default", m: 0.5 } }}
-                    disableRipple
-                >
-                    <CalendarTodayIcon />
-                </IconButton>
-                <Box py={0.5}>
-                    <Typography>{t("CREATED_AT")}</Typography>
-                    <Typography variant="small" color="text.muted">
-                        {children}
-                    </Typography>
-                </Box>
-            </Box>
-        </FlexWrapper>
-    );
-};
+const CreatedAtEntry: React.FC<React.PropsWithChildren> = ({ children }) => (
+    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, pb: 1 }}>
+        <CalendarTodayIcon color="secondary" sx={{ m: "16px" }} />
+        <Box py={0.5}>
+            <Typography>{t("CREATED_AT")}</Typography>
+            <Typography variant="small" color="text.muted">
+                {children}
+            </Typography>
+        </Box>
+    </Box>
+);
 
 interface RenamePasskeyDialogProps {
     /** If `true`, then the dialog is shown. */
