@@ -323,7 +323,7 @@ const PhotoFrame = ({
             }
             activeCollectionID={activeCollectionID}
             showPlaceholder={isScrolling}
-            isFav={favItemIds.has(item.id)}
+            isFav={favItemIds?.has(item.id)}
         />
     );
 

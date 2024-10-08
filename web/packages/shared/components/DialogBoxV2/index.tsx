@@ -1,8 +1,8 @@
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
+import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import { dialogCloseHandler } from "@ente/shared/components/DialogBox/TitleWithCloseButton";
-import EnteButton from "@ente/shared/components/EnteButton";
 import {
     Box,
-    Button,
     Dialog,
     Stack,
     Typography,
@@ -91,7 +91,7 @@ export default function DialogBoxV2({
                         flex={1}
                     >
                         {attributes.proceed && (
-                            <EnteButton
+                            <LoadingButton
                                 loading={loading}
                                 size="large"
                                 color={attributes.proceed?.variant}
@@ -105,10 +105,10 @@ export default function DialogBoxV2({
                                 disabled={attributes.proceed.disabled}
                             >
                                 {attributes.proceed.text}
-                            </EnteButton>
+                            </LoadingButton>
                         )}
                         {attributes.close && (
-                            <Button
+                            <FocusVisibleButton
                                 size="large"
                                 color={attributes.close?.variant ?? "secondary"}
                                 onClick={() => {
@@ -118,11 +118,11 @@ export default function DialogBoxV2({
                                 }}
                             >
                                 {attributes.close?.text ?? t("ok")}
-                            </Button>
+                            </FocusVisibleButton>
                         )}
                         {attributes.buttons &&
                             attributes.buttons.map((b) => (
-                                <Button
+                                <FocusVisibleButton
                                     size="large"
                                     key={b.text}
                                     color={b.variant}
@@ -133,7 +133,7 @@ export default function DialogBoxV2({
                                     disabled={b.disabled}
                                 >
                                     {b.text}
-                                </Button>
+                                </FocusVisibleButton>
                             ))}
                     </Stack>
                 )}

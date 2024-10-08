@@ -1,3 +1,4 @@
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import type { CollectionMapping } from "@/base/types/ipc";
 import FolderIcon from "@mui/icons-material/Folder";
 import FolderCopyIcon from "@mui/icons-material/FolderCopy";
@@ -15,7 +16,6 @@ import {
     DialogCloseIconButton,
     type DialogVisibilityProps,
 } from "./mui/Dialog";
-import { FocusVisibleButton } from "./mui/FocusVisibleButton";
 
 type CollectionMappingChoiceModalProps = DialogVisibilityProps & {
     didSelect: (mapping: CollectionMapping) => void;

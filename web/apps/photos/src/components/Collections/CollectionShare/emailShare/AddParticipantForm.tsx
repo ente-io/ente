@@ -3,11 +3,12 @@ import {
     MenuItemGroup,
     MenuSectionTitle,
 } from "@/base/components/Menu";
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
+import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
-import SubmitButton from "@ente/shared/components/SubmitButton";
 import DoneIcon from "@mui/icons-material/Done";
-import { Button, FormHelperText, Stack } from "@mui/material";
+import { FormHelperText, Stack } from "@mui/material";
 import TextField from "@mui/material/TextField";
 import Avatar from "components/pages/gallery/Avatar";
 import { Formik, type FormikHelpers } from "formik";
@@ -204,7 +205,7 @@ export default function AddParticipantForm(props: AddParticipantFormProps) {
                     >
                         <Stack direction={"column"} px={"8px"} width={"100%"}>
                             {props.secondaryButtonAction && (
-                                <Button
+                                <FocusVisibleButton
                                     onClick={props.secondaryButtonAction}
                                     size="large"
                                     color="secondary"
@@ -219,20 +220,20 @@ export default function AddParticipantForm(props: AddParticipantFormProps) {
                                     {...restSubmitButtonProps}
                                 >
                                     {t("cancel")}
-                                </Button>
+                                </FocusVisibleButton>
                             )}
 
-                            <SubmitButton
-                                sx={{
-                                    "&&&": {
-                                        mt: 2,
-                                        ...buttonSx,
-                                    },
-                                }}
+                            <LoadingButton
+                                type="submit"
+                                color="accent"
+                                fullWidth
                                 buttonText={props.buttonText}
                                 loading={loading}
+                                sx={{ mt: 2, mb: 4 }}
                                 {...restSubmitButtonProps}
-                            />
+                            >
+                                {props.buttonText}
+                            </LoadingButton>
                         </Stack>
                     </FlexWrapper>
                 </form>

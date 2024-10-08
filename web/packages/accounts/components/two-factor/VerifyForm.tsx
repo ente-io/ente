@@ -1,10 +1,9 @@
 import InvalidInputMessage from "@/accounts/components/two-factor/InvalidInputMessage";
-import { wait } from "@/utils/promise";
+import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import {
     CenteredFlex,
     VerticallyCentered,
 } from "@ente/shared/components/Container";
-import SubmitButton from "@ente/shared/components/SubmitButton";
 import { Box, Typography } from "@mui/material";
 import { Formik, type FormikHelpers } from "formik";
 import { t } from "i18next";
@@ -27,12 +26,9 @@ export type VerifyTwoFactorCallback = (
 export default function VerifyTwoFactor(props: Props) {
     const [waiting, setWaiting] = useState(false);
     const otpInputRef = useRef<OtpInput>(null);
-    const [success, setSuccess] = useState(false);
 
     const markSuccessful = async () => {
         setWaiting(false);
-        setSuccess(true);
-        await wait(1000);
     };
 
     const submitForm = async (
@@ -95,12 +91,16 @@ export default function VerifyTwoFactor(props: Props) {
                                 </CenteredFlex>
                             )}
                         </Box>
-                        <SubmitButton
-                            buttonText={props.buttonText}
+                        <LoadingButton
+                            type="submit"
+                            color="accent"
+                            fullWidth
+                            sx={{ my: 4 }}
                             loading={waiting}
-                            success={success}
                             disabled={values.otp.length < 6}
-                        />
+                        >
+                            {props.buttonText}
+                        </LoadingButton>
                     </form>
                 </VerticallyCentered>
             )}

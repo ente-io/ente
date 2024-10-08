@@ -1,12 +1,11 @@
 import { changeEmail, sendOTTForEmailChange } from "@/accounts/api/user";
+import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import { ensure } from "@/utils/ensure";
-import { wait } from "@/utils/promise";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
 import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
 import LinkButton from "@ente/shared/components/LinkButton";
-import SubmitButton from "@ente/shared/components/SubmitButton";
 import { LS_KEYS, getData, setLSUser } from "@ente/shared/storage/localStorage";
 import { Alert, Box, TextField } from "@mui/material";
 import { Formik, type FormikHelpers } from "formik";
@@ -50,7 +49,6 @@ const ChangeEmailForm: React.FC = () => {
     const [ottInputVisible, setShowOttInputVisibility] = useState(false);
     const [email, setEmail] = useState<string | null>(null);
     const [showMessage, setShowMessage] = useState(false);
-    const [success, setSuccess] = useState(false);
 
     const router = useRouter();
 
@@ -84,8 +82,6 @@ const ChangeEmailForm: React.FC = () => {
             await changeEmail(email, ensure(ott));
             await setLSUser({ ...getData(LS_KEYS.USER), email });
             setLoading(false);
-            setSuccess(true);
-            await wait(1000);
             goToApp();
         } catch (e) {
             setLoading(false);
@@ -165,16 +161,15 @@ const ChangeEmailForm: React.FC = () => {
                                     disabled={loading}
                                 />
                             )}
-                            <SubmitButton
-                                success={success}
-                                sx={{ mt: 2 }}
+                            <LoadingButton
+                                fullWidth
+                                color="accent"
+                                type="submit"
+                                sx={{ mt: 2, mb: 4 }}
                                 loading={loading}
-                                buttonText={
-                                    !ottInputVisible
-                                        ? t("SEND_OTT")
-                                        : t("VERIFY")
-                                }
-                            />
+                            >
+                                {!ottInputVisible ? t("SEND_OTT") : t("VERIFY")}
+                            </LoadingButton>
                         </VerticallyCentered>
                     </form>
 

@@ -1,12 +1,13 @@
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
+import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import ShowHidePassword from "@ente/shared/components/Form/ShowHidePassword";
-import { Button, FormHelperText } from "@mui/material";
+import { FormHelperText } from "@mui/material";
 import TextField from "@mui/material/TextField";
 import { Formik, type FormikHelpers, type FormikState } from "formik";
 import { t } from "i18next";
 import React, { useMemo, useState } from "react";
 import * as Yup from "yup";
-import SubmitButton from "./SubmitButton";
 
 interface formValues {
     inputValue: string;
@@ -170,7 +171,7 @@ export default function SingleInputForm(props: SingleInputFormProps) {
                         flexWrap={props.blockButton ? "wrap-reverse" : "nowrap"}
                     >
                         {props.secondaryButtonAction && (
-                            <Button
+                            <FocusVisibleButton
                                 onClick={props.secondaryButtonAction}
                                 size="large"
                                 color="secondary"
@@ -185,19 +186,24 @@ export default function SingleInputForm(props: SingleInputFormProps) {
                                 {...restSubmitButtonProps}
                             >
                                 {t("cancel")}
-                            </Button>
+                            </FocusVisibleButton>
                         )}
-                        <SubmitButton
+                        <LoadingButton
                             sx={{
                                 "&&&": {
                                     mt: 2,
                                     ...buttonSx,
                                 },
                             }}
-                            buttonText={props.buttonText}
+                            size="large"
+                            variant="contained"
+                            color="accent"
+                            type="submit"
                             loading={loading}
                             {...restSubmitButtonProps}
-                        />
+                        >
+                            {props.buttonText}
+                        </LoadingButton>
                     </FlexWrapper>
                 </form>
             )}

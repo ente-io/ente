@@ -3,9 +3,9 @@ import {
     passkeySessionExpiredErrorMessage,
     saveCredentialsAndNavigateTo,
 } from "@/accounts/services/passkey";
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import log from "@/base/log";
 import { customAPIHost } from "@/base/origins";
-import EnteButton from "@ente/shared/components/EnteButton";
 import { CircularProgress, Stack, Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
@@ -140,23 +140,21 @@ export const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
                     </VerifyingPasskeyStatus>
 
                     <ButtonStack>
-                        <EnteButton
+                        <FocusVisibleButton
                             onClick={handleRetry}
                             fullWidth
                             color="secondary"
-                            type="button"
                         >
                             {t("try_again")}
-                        </EnteButton>
+                        </FocusVisibleButton>
 
-                        <EnteButton
+                        <FocusVisibleButton
                             onClick={handleCheckStatus}
                             fullWidth
                             color="accent"
-                            type="button"
                         >
                             {t("check_status")}
-                        </EnteButton>
+                        </FocusVisibleButton>
                     </ButtonStack>
                 </VerifyingPasskeyMiddle>
 

@@ -14,6 +14,7 @@ import { Overlay } from "@ente/shared/components/Container";
 import { CustomError } from "@ente/shared/error";
 import useLongPress from "@ente/shared/hooks/useLongPress";
 import AlbumOutlined from "@mui/icons-material/AlbumOutlined";
+import Favorite from "@mui/icons-material/FavoriteRounded";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
 import { Tooltip, styled } from "@mui/material";
 import i18n from "i18next";
@@ -23,7 +24,6 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import { TRASH_SECTION } from "utils/collection";
 import { shouldShowAvatar } from "utils/file";
 import Avatar from "./Avatar";
-import Favorite from "@mui/icons-material/FavoriteRounded";
 
 interface IProps {
     file: EnteFile;
@@ -129,6 +129,7 @@ export const FavOverlay = styled(Overlay)`
     align-items: flex-end;
     padding-left: 5px;
     padding-bottom: 5px;
+    opacity: 0.9;
 `;
 
 export const InSelectRangeOverLay = styled("div")<{ $active: boolean }>`
@@ -363,7 +364,7 @@ export default function PreviewCard(props: IProps) {
             )}
             {props.isFav && (
                 <FavOverlay>
-                    <Favorite/>
+                    <Favorite />
                 </FavOverlay>
             )}
 

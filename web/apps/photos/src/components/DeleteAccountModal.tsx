@@ -1,8 +1,9 @@
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
+import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import log from "@/base/log";
 import { initiateEmail } from "@/new/photos/utils/web";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
-import EnteButton from "@ente/shared/components/EnteButton";
-import { Button, Link, Stack, useMediaQuery } from "@mui/material";
+import { Link, Stack, useMediaQuery } from "@mui/material";
 import { Formik, type FormikHelpers } from "formik";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
@@ -200,7 +201,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                                     )}
                                 />
                                 <Stack spacing={"8px"}>
-                                    <EnteButton
+                                    <LoadingButton
                                         type="submit"
                                         size="large"
                                         color="critical"
@@ -208,14 +209,14 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                                         loading={loading}
                                     >
                                         {t("delete_account_confirm")}
-                                    </EnteButton>
-                                    <Button
+                                    </LoadingButton>
+                                    <FocusVisibleButton
                                         size="large"
                                         color={"secondary"}
                                         onClick={onClose}
                                     >
                                         {t("cancel")}
-                                    </Button>
+                                    </FocusVisibleButton>
                                 </Stack>
                             </Stack>
                         </form>
