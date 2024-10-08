@@ -565,7 +565,7 @@ const ImageEditorOverlay = (props: IProps) => {
                             }}
                         >
                             <Box
-                                height="90%"
+                                height="88%"
                                 width="100%"
                                 ref={parentRef}
                                 display="flex"
