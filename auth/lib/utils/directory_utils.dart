@@ -77,9 +77,6 @@ class DirectoryUtils {
       oldDataDir = Directory(
         p.join(dataHome.path, "ente_auth"),
       );
-      newDataDir = Directory(
-        p.join(dataHome.path, "enteauth"),
-      );
     } else {
       oldDataDir = Directory(
         p.join(
@@ -87,12 +84,8 @@ class DirectoryUtils {
           "ente",
         ),
       );
-      newDataDir = Directory(
-        p.join(
-          (await getApplicationSupportDirectory()).path,
-        ),
-      );
     }
+    newDataDir = await getApplicationSupportDirectory();
     await newDataDir.create(recursive: true);
 
     File newDatabaseFile =
