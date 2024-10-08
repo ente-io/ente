@@ -581,30 +581,18 @@ interface SharedAlbumNavbarProps {
 }
 const SharedAlbumNavbar: React.FC<SharedAlbumNavbarProps> = ({
     onAddPhotos,
-}) => {
-    return (
-        <NavbarBase>
-            <FluidContainer>
-                <EnteLinkLogo />
-            </FluidContainer>
-            {onAddPhotos ? (
-                <AddPhotosButton onClick={onAddPhotos} />
-            ) : (
-                <GoToEnte />
-            )}
-        </NavbarBase>
-    );
-};
+}) => (
+    <NavbarBase>
+        <FluidContainer>
+            <EnteLogoLink href="https://ente.io">
+                <EnteLogoSvg />
+            </EnteLogoLink>
+        </FluidContainer>
+        {onAddPhotos ? <AddPhotosButton onClick={onAddPhotos} /> : <GoToEnte />}
+    </NavbarBase>
+);
 
-const EnteLinkLogo: React.FC = () => {
-    return (
-        <A href="https://ente.io">
-            <EnteLogoSvg />
-        </A>
-    );
-};
-
-const A = styled("a")(({ theme }) => ({
+const EnteLogoLink = styled("a")(({ theme }) => ({
     color: theme.colors.text.base,
     ":hover": {
         color: theme.palette.accent.main,
