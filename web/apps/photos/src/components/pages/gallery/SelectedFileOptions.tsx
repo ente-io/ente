@@ -15,6 +15,7 @@ import RestoreIcon from "@mui/icons-material/Restore";
 import UnArchiveIcon from "@mui/icons-material/Unarchive";
 import VisibilityOffOutlined from "@mui/icons-material/VisibilityOffOutlined";
 import VisibilityOutlined from "@mui/icons-material/VisibilityOutlined";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorderRounded";
 import { Box, IconButton, Stack, Tooltip } from "@mui/material";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
@@ -28,6 +29,7 @@ import {
 import { FILE_OPS_TYPE } from "utils/file";
 import { formatNumber } from "utils/number/format";
 import { getTrashFilesMessage } from "utils/ui";
+import Favorite from "@mui/icons-material/FavoriteRounded";
 
 interface Props {
     handleCollectionOps: (
@@ -332,6 +334,15 @@ const SelectedFileOptions = ({
                                 <ClockIcon />
                             </IconButton>
                         </Tooltip>
+                        {!isFavoriteCollection && (
+                            <Tooltip title={t("favorites")}>
+                                <IconButton
+                                    onClick={handleFileOps(FILE_OPS_TYPE.SET_FAVORITE)}
+                                >
+                                    <FavoriteBorderIcon />
+                                </IconButton>
+                            </Tooltip>
+                        )}
                         <Tooltip title={t("download")}>
                             <IconButton
                                 onClick={handleFileOps(FILE_OPS_TYPE.DOWNLOAD)}
