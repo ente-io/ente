@@ -3,9 +3,8 @@ import { MenuItemDivider, MenuItemGroup } from "@/base/components/Menu";
 import { Titlebar } from "@/base/components/Titlebar";
 import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
-import { CenteredFlex } from "@ente/shared/components/Container";
+import { CenteredFlex, FlexWrapper } from "@ente/shared/components/Container";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
-import InfoItem from "@ente/shared/components/Info/InfoItem";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import SingleInputForm from "@ente/shared/components/SingleInputForm";
 import { formatDateTimeFull } from "@ente/shared/time/format";
@@ -17,6 +16,7 @@ import KeyIcon from "@mui/icons-material/Key";
 import {
     Box,
     Dialog,
+    IconButton,
     Stack,
     Typography,
     styled,
@@ -303,15 +303,9 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
                             title={t("manage_passkey")}
                             onRootClose={onClose}
                         />
-                        <InfoItem
-                            icon={<CalendarTodayIcon />}
-                            title={t("CREATED_AT")}
-                            caption={formatDateTimeFull(
-                                passkey.createdAt / 1000,
-                            )}
-                            loading={false}
-                            hideEditOption
-                        />
+                        <CreatedAtEntry>
+                            {formatDateTimeFull(passkey.createdAt / 1000)}
+                        </CreatedAtEntry>
                         <MenuItemGroup>
                             <EnteMenuItem
                                 onClick={() => {
@@ -345,6 +339,28 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
                 />
             )}
         </>
+    );
+};
+
+const CreatedAtEntry: React.FC<React.PropsWithChildren> = ({ children }) => {
+    return (
+        <FlexWrapper justifyContent="space-between">
+            <Box display={"flex"} alignItems="flex-start" gap={0.5} pr={1}>
+                <IconButton
+                    color="secondary"
+                    sx={{ "&&": { cursor: "default", m: 0.5 } }}
+                    disableRipple
+                >
+                    <CalendarTodayIcon />
+                </IconButton>
+                <Box py={0.5}>
+                    <Typography>{t("CREATED_AT")}</Typography>
+                    <Typography variant="small" color="text.muted">
+                        {children}
+                    </Typography>
+                </Box>
+            </Box>
+        </FlexWrapper>
     );
 };
 
