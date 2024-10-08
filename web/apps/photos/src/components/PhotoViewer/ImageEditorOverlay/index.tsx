@@ -13,7 +13,6 @@ import {
     CenteredFlex,
     HorizontalFlex,
 } from "@ente/shared/components/Container";
-import EnteButton from "@ente/shared/components/EnteButton";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import { downloadUsingAnchor } from "@ente/shared/utils";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";

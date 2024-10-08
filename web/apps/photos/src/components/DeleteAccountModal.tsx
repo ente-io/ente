@@ -1,6 +1,6 @@
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
+import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import log from "@/base/log";
-import { FocusVisibleButton } from "@/new/photos/components/mui/FocusVisibleButton";
-import { LoadingButton } from "@/new/photos/components/mui/LoadingButton";
 import { initiateEmail } from "@/new/photos/utils/web";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import { Link, Stack, useMediaQuery } from "@mui/material";

@@ -1,6 +1,6 @@
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import log from "@/base/log";
 import type { TwoFactorAuthorizationResponse } from "@/base/types/credentials";
-import { FocusVisibleButton } from "@/new/photos/components/mui/FocusVisibleButton";
 import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";
 import { VerticallyCentered } from "@ente/shared/components/Container";

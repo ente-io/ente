@@ -1,5 +1,5 @@
-import { FocusVisibleButton } from "@/new/photos/components/mui/FocusVisibleButton";
-import { LoadingButton } from "@/new/photos/components/mui/LoadingButton";
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
+import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import { dialogCloseHandler } from "@ente/shared/components/DialogBox/TitleWithCloseButton";
 import {
     Box,

@@ -1,6 +1,6 @@
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { CircularProgress, type ButtonProps } from "@mui/material";
 import React from "react";
-import { FocusVisibleButton } from "./FocusVisibleButton";
 
 /**
  * A button that shows a indeterminate progress indicator if the {@link loading}
