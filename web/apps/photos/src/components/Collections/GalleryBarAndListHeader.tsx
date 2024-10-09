@@ -3,8 +3,8 @@ import { AddPersonDialog } from "@/new/photos/components/AddPersonDialog";
 import {
     GalleryBarImpl,
     type GalleryBarImplProps,
-} from "@/new/photos/components/Gallery/BarImpl";
-import { PeopleHeader } from "@/new/photos/components/Gallery/PeopleHeader";
+} from "@/new/photos/components/gallery/BarImpl";
+import { PeopleHeader } from "@/new/photos/components/gallery/PeopleHeader";
 import {
     areOnlySystemCollections,
     collectionsSortBy,

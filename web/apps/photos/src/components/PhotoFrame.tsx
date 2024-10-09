@@ -1,6 +1,6 @@
 import log from "@/base/log";
 import { FileType } from "@/media/file-type";
-import type { GalleryBarMode } from "@/new/photos/components/Gallery/BarImpl";
+import type { GalleryBarMode } from "@/new/photos/components/gallery/BarImpl";
 import DownloadManager from "@/new/photos/services/download";
 import type { LivePhotoSourceURL, SourceURLs } from "@/new/photos/types/file";
 import { EnteFile } from "@/new/photos/types/file";
