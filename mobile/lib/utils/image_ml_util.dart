@@ -322,33 +322,14 @@ List<List<int>> _createGrayscaleIntMatrixFromNormalized2List(
       (x) {
         // 0.299 ∙ Red + 0.587 ∙ Green + 0.114 ∙ Blue
         final pixelIndex = startIndex + 3 * (y * width + x);
-        return (0.299 * _unnormalizePixelRange2(imageList[pixelIndex]) +
-                0.587 * _unnormalizePixelRange2(imageList[pixelIndex + 1]) +
-                0.114 * _unnormalizePixelRange2(imageList[pixelIndex + 2]))
+        return (0.299 * ((imageList[pixelIndex] + 1) * 127.5) +
+                0.587 * ((imageList[pixelIndex + 1] + 1) * 127.5) +
+                0.114 * ((imageList[pixelIndex + 2] + 1) * 127.5))
             .round()
             .clamp(0, 255);
-        // return unnormalizePixelRange2(
-        //   (0.299 * imageList[pixelIndex] +
-        //       0.587 * imageList[pixelIndex + 1] +
-        //       0.114 * imageList[pixelIndex + 2]),
-        // ).round().clamp(0, 255);
       },
     ),
   );
-}
-
-/// Function normalizes the pixel value to be in range [-1, 1].
-///
-/// It assumes that the pixel value is originally in range [0, 255]
-double _normalizePixelRange2(num pixelValue) {
-  return (pixelValue / 127.5) - 1;
-}
-
-/// Function unnormalizes the pixel value to be in range [0, 255].
-///
-/// It assumes that the pixel value is originally in range [-1, 1]
-int _unnormalizePixelRange2(double pixelValue) {
-  return ((pixelValue + 1) * 127.5).round().clamp(0, 255);
 }
 
 Future<Image> _cropImage(
@@ -445,11 +426,11 @@ void _warpAffineFloat32List(
 
       // Set the new pixel
       outputList[startIndex + 3 * (yTrans * width + xTrans)] =
-          _normalizePixelRange2(pixel.$1);
+          (pixel.$1 / 127.5) - 1;
       outputList[startIndex + 3 * (yTrans * width + xTrans) + 1] =
-          _normalizePixelRange2(pixel.$2);
+          (pixel.$2 / 127.5) - 1;
       outputList[startIndex + 3 * (yTrans * width + xTrans) + 2] =
-          _normalizePixelRange2(pixel.$3);
+          (pixel.$3 / 127.5) - 1;
     }
   }
 }
