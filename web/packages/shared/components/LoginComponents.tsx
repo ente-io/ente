@@ -11,7 +11,7 @@ import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { VerticallyCentered } from "./Container";
-import type { DialogBoxAttributesV2 } from "./DialogBoxV2/types";
+import type { DialogBoxAttributesV2 } from "./DialogBoxV2";
 import { genericErrorAttributes } from "./ErrorComponents";
 import FormPaper from "./Form/FormPaper";
 import FormPaperFooter from "./Form/FormPaper/Footer";

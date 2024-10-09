@@ -10,7 +10,7 @@ import type { B64EncryptionResult } from "@/base/crypto/libsodium";
 import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
-import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
+import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
 import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";

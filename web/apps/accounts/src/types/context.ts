@@ -1,5 +1,5 @@
 import { ensure } from "@/utils/ensure";
-import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
+import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2";
 import { createContext, useContext } from "react";
 
 /**

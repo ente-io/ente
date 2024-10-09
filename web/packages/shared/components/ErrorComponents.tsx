@@ -1,5 +1,5 @@
 import { t } from "i18next";
-import type { DialogBoxAttributesV2 } from "./DialogBoxV2/types";
+import type { DialogBoxAttributesV2 } from "./DialogBoxV2";
 
 /**
  * {@link DialogBoxAttributesV2} for showing a generic error.

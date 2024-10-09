@@ -1,4 +1,4 @@
-import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
+import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2";
 
 /**
  * Properties expected to be present in the AppContext types for pages that

@@ -11,8 +11,8 @@ import {
 } from "@/base/log-web";
 import { ensure } from "@/utils/ensure";
 import { Overlay } from "@ente/shared/components/Container";
+import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
-import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
 import { MessageContainer } from "@ente/shared/components/MessageContainer";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import HTTPService from "@ente/shared/network/HTTPService";
