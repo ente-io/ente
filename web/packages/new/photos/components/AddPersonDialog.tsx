@@ -1,6 +1,7 @@
 import type { ModalVisibilityProps } from "@/base/components/mui";
 import { pt } from "@/base/i18n";
-import { addPerson } from "@/new/photos/services/ml";
+import { addCGroup, addClusterToCGroup } from "@/new/photos/services/ml";
+import { ensure } from "@/utils/ensure";
 import {
     Dialog,
     DialogContent,
@@ -22,6 +23,7 @@ import {
     LargeTilePlusOverlay,
     LargeTileTextOverlay,
 } from "./Tiles";
+import { useWrapAsyncOperation } from "./use-wrap-async";
 
 type AddPersonDialogProps = ModalVisibilityProps & {
     /**
@@ -57,11 +59,14 @@ export const AddPersonDialog: React.FC<AddPersonDialogProps> = ({
         setOpenNameInput(true);
     };
 
-    const handleSelectPerson = (id: string) => {
-        console.log("handleSelectPerson", id, cluster);
-    };
+    const handleSelectPerson = useWrapAsyncOperation((id: string) =>
+        addClusterToCGroup(
+            cluster,
+            ensure(cgroupPeople.find((p) => p.id == id)).cgroup,
+        ),
+    );
 
-    const handleAddPersonWithName = (name: string) => addPerson(name, cluster);
+    const handleAddPersonWithName = (name: string) => addCGroup(name, cluster);
 
     // [Note: Calling setState during rendering]
     //

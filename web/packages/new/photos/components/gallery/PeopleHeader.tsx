@@ -1,8 +1,8 @@
 import { pt } from "@/base/i18n";
 import {
-    addPerson,
-    deletePerson,
-    renamePerson,
+    addCGroup,
+    deleteCGroup,
+    renameCGroup,
 } from "@/new/photos/services/ml";
 import { type Person } from "@/new/photos/services/ml/people";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
@@ -105,7 +105,7 @@ const CGroupPersonOptions: React.FC<CGroupPersonOptionsProps> = ({
     const renamePersonUsingName = async (name: string) => {
         startLoading();
         try {
-            await renamePerson(name, cgroup);
+            await renameCGroup(name, cgroup);
         } finally {
             finishLoading();
         }
@@ -128,7 +128,7 @@ const CGroupPersonOptions: React.FC<CGroupPersonOptionsProps> = ({
     const doDeletePerson = async () => {
         startLoading();
         try {
-            await deletePerson(cgroup);
+            await deleteCGroup(cgroup);
             // Reset the selection to the default state.
             onSelectPerson(undefined);
         } catch (e) {
@@ -204,7 +204,7 @@ const ClusterPersonOptions: React.FC<ClusterPersonOptionsProps> = ({
     const addPersonWithName = async (name: string) => {
         startLoading();
         try {
-            await addPerson(name, cluster);
+            await addCGroup(name, cluster);
         } finally {
             finishLoading();
         }

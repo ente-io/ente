@@ -720,7 +720,7 @@ const regenerateFaceCropsIfNeeded = async (enteFile: EnteFile) => {
  *
  * @param cluster The underlying cluster to use to populate the cgroup.
  */
-export const addPerson = async (name: string, cluster: FaceCluster) => {
+export const addCGroup = async (name: string, cluster: FaceCluster) => {
     const masterKey = await masterKeyFromSession();
     await addUserEntity(
         "cgroup",
@@ -742,7 +742,7 @@ export const addPerson = async (name: string, cluster: FaceCluster) => {
  *
  * @param cluster The new cluster of faces to associate with this person.
  */
-export const addClusterToPerson = async (
+export const addClusterToCGroup = async (
     cluster: FaceCluster,
     cgroup: CGroup,
 ) => {
@@ -764,7 +764,7 @@ export const addClusterToPerson = async (
  * @param cgroup The existing cgroup underlying the person. This is the (remote)
  * user entity that will get updated.
  */
-export const renamePerson = async (name: string, cgroup: CGroup) => {
+export const renameCGroup = async (name: string, cgroup: CGroup) => {
     const masterKey = await masterKeyFromSession();
     await updateOrCreateUserEntities(
         "cgroup",
@@ -779,7 +779,7 @@ export const renamePerson = async (name: string, cgroup: CGroup) => {
  *
  * @param cgroup The existing cgroup underlying the person.
  */
-export const deletePerson = async ({ id }: CGroup) => {
+export const deleteCGroup = async ({ id }: CGroup) => {
     await deleteUserEntity(id);
     return mlSync();
 };
