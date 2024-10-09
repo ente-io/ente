@@ -95,6 +95,7 @@
     "DELETE_FILES_MESSAGE": "I file selezionati verranno eliminati definitivamente dal tuo account Ente.",
     "delete": "Cancella",
     "delete_key": "Cancella (DEL)",
+    "favorite": "Preferito",
     "favorite_key": "Preferito (L)",
     "unfavorite_key": "Rimuovi dai preferiti (L)",
     "multi_folder_upload": "Selezionate più cartelle",

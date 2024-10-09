@@ -95,6 +95,7 @@
     "DELETE_FILES_MESSAGE": "File yang dipilih akan dihapus secara permanen dari akun Ente Anda.",
     "delete": "Hapus",
     "delete_key": "Hapus (DEL)",
+    "favorite": "Favorit",
     "favorite_key": "Favorit (L)",
     "unfavorite_key": "Hapus favorit (L)",
     "multi_folder_upload": "Beberapa folder terdeteksi",

@@ -95,6 +95,7 @@
     "DELETE_FILES_MESSAGE": "所选文件将从您的账户中永久删除。",
     "delete": "删除",
     "delete_key": "删除(DEL)",
+    "favorite": "收藏",
     "favorite_key": "收藏 (L)",
     "unfavorite_key": "取消收藏 (L)",
     "multi_folder_upload": "检测到多个文件夹",

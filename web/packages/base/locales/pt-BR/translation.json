@@ -95,6 +95,7 @@
     "DELETE_FILES_MESSAGE": "Os arquivos selecionados serão excluídos permanentemente da sua conta ente.",
     "delete": "Excluir",
     "delete_key": "Excluir (DEL)",
+    "favorite": "Favorito",
     "favorite_key": "Favorito (L)",
     "unfavorite_key": "Remover Favorito (L)",
     "multi_folder_upload": "Várias pastas detectadas",

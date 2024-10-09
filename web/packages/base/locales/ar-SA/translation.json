@@ -95,6 +95,7 @@
     "DELETE_FILES_MESSAGE": "سيتم حذف الملفات المحددة نهائيا من حساب Ente الخاص بك.",
     "delete": "حذف",
     "delete_key": "حذف (DEL)",
+    "favorite": "مفضلة",
     "favorite_key": "مفضلة (L)",
     "unfavorite_key": "غير مفضلة (L)",
     "multi_folder_upload": "تم اكتشاف مجلدات متعددة",

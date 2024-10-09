@@ -95,6 +95,7 @@
     "DELETE_FILES_MESSAGE": "Выбранные файлы будут безвозвратно удалены из вашей учетной записи ente.",
     "delete": "Удалить",
     "delete_key": "Удалить (DEL)",
+    "favorite": "Избранное",
     "favorite_key": "Избранное (L)",
     "unfavorite_key": "Неблагоприятный фактор (L)",
     "multi_folder_upload": "Обнаружено несколько папок",

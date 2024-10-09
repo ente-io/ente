@@ -95,6 +95,7 @@
     "DELETE_FILES_MESSAGE": "선택된 파일들은 당신의 Ente계정에서 영구적으로 삭제됩니다.",
     "delete": "삭제",
     "delete_key": "삭제 (DEL)",
+    "favorite": "즐겨찾기",
     "favorite_key": "즐겨찾기 (L)",
     "unfavorite_key": "즐겨찾기해제 (L)",
     "multi_folder_upload": "여러 폴더들이 탐지되었다",

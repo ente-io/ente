@@ -95,6 +95,7 @@
     "DELETE_FILES_MESSAGE": "Ausgewählte Dateien werden dauerhaft aus Ihrem Ente-Konto gelöscht.",
     "delete": "Löschen",
     "delete_key": "Löschen (DEL)",
+    "favorite": "",
     "favorite_key": "Zu Favoriten hinzufügen (L)",
     "unfavorite_key": "Von Favoriten entfernen (L)",
     "multi_folder_upload": "Mehrere Ordner erkannt",

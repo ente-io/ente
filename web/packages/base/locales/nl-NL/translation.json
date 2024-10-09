@@ -95,6 +95,7 @@
     "DELETE_FILES_MESSAGE": "Geselecteerde bestanden zullen permanent worden verwijderd van je Ente account.",
     "delete": "Verwijderen",
     "delete_key": "Verwijderen (DEL)",
+    "favorite": "Favoriet",
     "favorite_key": "Favoriet (L)",
     "unfavorite_key": "Verwijderen uit Favorieten (L)",
     "multi_folder_upload": "Meerdere mappen gedetecteerd",
