@@ -267,7 +267,7 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
                                     label={
                                         <Typography variant="small">
                                             <Trans
-                                                i18nKey={"TERMS_AND_CONDITIONS"}
+                                                i18nKey={"terms_and_conditions"}
                                                 components={{
                                                     a: (
                                                         <Link
