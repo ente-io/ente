@@ -249,7 +249,7 @@ export default function App({ Component, pageProps }: AppProps) {
             log.error("Error", e),
             setDialogBoxAttributesV2({
                 title: t("error"),
-                content: t("generic_error_retry"),
+                content: t("generic_error"),
                 close: { variant: "critical" },
             })
         ),
