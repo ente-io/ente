@@ -3,6 +3,7 @@ import {
     passkeySessionExpiredErrorMessage,
     saveCredentialsAndNavigateTo,
 } from "@/accounts/services/passkey";
+import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import log from "@/base/log";
 import { customAPIHost } from "@/base/origins";
@@ -11,7 +12,6 @@ import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { VerticallyCentered } from "./Container";
-import type { DialogBoxAttributesV2 } from "./DialogBoxV2";
 import FormPaper from "./Form/FormPaper";
 import FormPaperFooter from "./Form/FormPaper/Footer";
 import LinkButton from "./LinkButton";
@@ -74,7 +74,7 @@ interface VerifyingPasskeyProps {
     onRetry: () => void;
     /** Perform the (possibly app specific) logout sequence. */
     logout: () => void;
-    setDialogBoxAttributesV2: (attrs: DialogBoxAttributesV2) => void;
+    setDialogBoxAttributesV2: (attrs: MiniDialogAttributes) => void;
 }
 
 export const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
@@ -205,7 +205,7 @@ const ButtonStack = styled("div")`
  */
 export const sessionExpiredDialogAttributes = (
     onLogin: () => void,
-): DialogBoxAttributesV2 => ({
+): MiniDialogAttributes => ({
     title: t("SESSION_EXPIRED"),
     content: t("SESSION_EXPIRED_MESSAGE"),
     nonClosable: true,
@@ -219,7 +219,7 @@ export const sessionExpiredDialogAttributes = (
 /**
  * {@link DialogBoxAttributesV2} for showing a generic error.
  */
-const genericErrorAttributes = (): DialogBoxAttributesV2 => ({
+const genericErrorAttributes = (): MiniDialogAttributes => ({
     title: t("error"),
     close: { variant: "critical" },
     content: t("generic_error_retry"),

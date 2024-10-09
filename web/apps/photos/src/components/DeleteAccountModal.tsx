@@ -1,9 +1,9 @@
+import { DialogBoxV2 } from "@/base/components/MiniDialog";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import log from "@/base/log";
 import { AppContext } from "@/new/photos/types/context";
 import { initiateEmail } from "@/new/photos/utils/web";
-import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import { Link, Stack, useMediaQuery } from "@mui/material";
 import { Formik, type FormikHelpers } from "formik";
 import { t } from "i18next";

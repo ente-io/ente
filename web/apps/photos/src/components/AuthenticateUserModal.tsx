@@ -1,8 +1,10 @@
 import { checkSessionValidity } from "@/accounts/services/session";
+import {
+    DialogBoxV2,
+    type MiniDialogAttributes,
+} from "@/base/components/MiniDialog";
 import log from "@/base/log";
 import { AppContext } from "@/new/photos/types/context";
-import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2";
-import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import VerifyMasterPasswordForm, {
     type VerifyMasterPasswordFormProps,
 } from "@ente/shared/components/VerifyMasterPasswordForm";
@@ -124,7 +126,7 @@ export default function AuthenticateUserModal({
  */
 const passwordChangedElsewhereDialogAttributes = (
     onLogin: () => void,
-): DialogBoxAttributesV2 => ({
+): MiniDialogAttributes => ({
     title: t("password_changed_elsewhere"),
     content: t("password_changed_elsewhere_message"),
     proceed: {

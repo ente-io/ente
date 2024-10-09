@@ -1,9 +1,9 @@
+import { DialogBoxV2 } from "@/base/components/MiniDialog";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { boxSeal } from "@/base/crypto/libsodium";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
 import { loadCast } from "@/new/photos/utils/chromecast-sender";
-import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";

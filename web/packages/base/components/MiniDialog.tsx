@@ -1,3 +1,7 @@
+// TODO:
+/* eslint-disable @typescript-eslint/prefer-optional-chain */
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
+/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import { dialogCloseHandler } from "@ente/shared/components/DialogBox/TitleWithCloseButton";
@@ -19,7 +23,7 @@ import React, { useState } from "react";
  * meant to confirm some user action. If more customization is needed, it might
  * be a better idea to reach out for a bespoke MUI {@link DialogBox} instead.
  */
-export interface DialogBoxAttributesV2 {
+export interface MiniDialogAttributes {
     icon?: React.ReactNode;
     /**
      * The dialog's title
@@ -87,20 +91,158 @@ export interface DialogBoxAttributesV2 {
     buttonDirection?: "row" | "column";
 }
 
-type IProps = React.PropsWithChildren<
+type MiniDialogProps = React.PropsWithChildren<
     Omit<DialogProps, "onClose"> & {
         onClose: () => void;
-        attributes?: DialogBoxAttributesV2;
+        attributes?: MiniDialogAttributes;
     }
 >;
 
-export default function DialogBoxV2({
+/**
+ * A small, mostly predefined, MUI {@link Dialog} that can be used to notify the
+ * user, or ask for confirmation before actions.
+ *
+ * The rendered dialog can be customized by modifying the {@link attributes}
+ * prop. If you find yourself wanting to customize it further, consider just
+ * creating a new bespoke instantiation of a {@link Dialog}.
+ */
+export function MiniDialog({
     attributes,
     children,
     open,
     onClose,
     ...props
-}: IProps) {
+}: MiniDialogProps) {
+    const [loading, setLoading] = useState(false);
+    if (!attributes) {
+        return <></>;
+    }
+
+    const handleClose = dialogCloseHandler({
+        staticBackdrop: attributes.staticBackdrop,
+        nonClosable: attributes.nonClosable,
+        onClose: onClose,
+    });
+
+    const { PaperProps, ...rest } = props;
+
+    return (
+        <Dialog
+            open={open}
+            onClose={handleClose}
+            PaperProps={{
+                ...PaperProps,
+                sx: {
+                    padding: "8px 12px",
+                    maxWidth: "360px",
+                    ...PaperProps?.sx,
+                },
+            }}
+            {...rest}
+        >
+            <Stack spacing={"36px"} p={"16px"}>
+                <Stack spacing={"19px"}>
+                    {attributes.icon && (
+                        <Box
+                            sx={{
+                                "& > svg": {
+                                    fontSize: "32px",
+                                },
+                            }}
+                        >
+                            {attributes.icon}
+                        </Box>
+                    )}
+                    {attributes.title && (
+                        <Typography variant="large" fontWeight={"bold"}>
+                            {attributes.title}
+                        </Typography>
+                    )}
+                    {children ||
+                        (attributes?.content && (
+                            <Typography color="text.muted">
+                                {attributes.content}
+                            </Typography>
+                        ))}
+                </Stack>
+                {(attributes.proceed ||
+                    attributes.close ||
+                    attributes.buttons?.length) && (
+                    <Stack
+                        spacing={"8px"}
+                        direction={
+                            attributes.buttonDirection === "row"
+                                ? "row-reverse"
+                                : "column"
+                        }
+                        flex={1}
+                    >
+                        {attributes.proceed && (
+                            <LoadingButton
+                                loading={loading}
+                                size="large"
+                                color={attributes.proceed?.variant}
+                                onClick={async () => {
+                                    await attributes.proceed?.action(
+                                        setLoading,
+                                    );
+
+                                    onClose();
+                                }}
+                                disabled={attributes.proceed.disabled}
+                            >
+                                {attributes.proceed.text}
+                            </LoadingButton>
+                        )}
+                        {attributes.close && (
+                            <FocusVisibleButton
+                                size="large"
+                                color={attributes.close?.variant ?? "secondary"}
+                                onClick={() => {
+                                    attributes.close?.action &&
+                                        attributes.close?.action();
+                                    onClose();
+                                }}
+                            >
+                                {attributes.close?.text ?? t("ok")}
+                            </FocusVisibleButton>
+                        )}
+                        {attributes.buttons &&
+                            attributes.buttons.map((b) => (
+                                <FocusVisibleButton
+                                    size="large"
+                                    key={b.text}
+                                    color={b.variant}
+                                    onClick={() => {
+                                        b.action();
+                                        onClose();
+                                    }}
+                                    disabled={b.disabled}
+                                >
+                                    {b.text}
+                                </FocusVisibleButton>
+                            ))}
+                    </Stack>
+                )}
+            </Stack>
+        </Dialog>
+    );
+}
+
+/**
+ * TODO This is a duplicate of MiniDialog. This is for use by call sites that
+ * were using the MiniDialog not as a dialog but as a base container. Such use
+ * cases are better served by directly using the MUI {@link Dialog}, so these
+ * are considered deprecated. Splitting these here so that we can streamline the
+ * API for the notify/confirm case separately.
+ */
+export function DialogBoxV2({
+    attributes,
+    children,
+    open,
+    onClose,
+    ...props
+}: MiniDialogProps) {
     const [loading, setLoading] = useState(false);
     if (!attributes) {
         return <></>;

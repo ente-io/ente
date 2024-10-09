@@ -1,5 +1,7 @@
 import { clientPackageName, staticAppTitle } from "@/base/app";
 import { CustomHead } from "@/base/components/Head";
+import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
+import { DialogBoxV2 } from "@/base/components/MiniDialog";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { AppNavbar } from "@/base/components/Navbar";
 import { setupI18n } from "@/base/i18n";
@@ -16,8 +18,6 @@ import { AppContext } from "@/new/photos/types/context";
 import { Overlay } from "@ente/shared/components/Container";
 import DialogBox from "@ente/shared/components/DialogBox";
 import { DialogBoxAttributes } from "@ente/shared/components/DialogBox/types";
-import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2";
-import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import { MessageContainer } from "@ente/shared/components/MessageContainer";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import HTTPService from "@ente/shared/network/HTTPService";
@@ -71,7 +71,7 @@ export default function App({ Component, pageProps }: AppProps) {
     const loadingBar = useRef(null);
     const [dialogMessage, setDialogMessage] = useState<DialogBoxAttributes>();
     const [dialogBoxAttributeV2, setDialogBoxAttributesV2] = useState<
-        DialogBoxAttributesV2 | undefined
+        MiniDialogAttributes | undefined
     >();
     const [messageDialogView, setMessageDialogView] = useState(false);
     const [dialogBoxV2View, setDialogBoxV2View] = useState(false);
