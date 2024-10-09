@@ -12,7 +12,6 @@ import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { VerticallyCentered } from "./Container";
 import type { DialogBoxAttributesV2 } from "./DialogBoxV2";
-import { genericErrorAttributes } from "./ErrorComponents";
 import FormPaper from "./Form/FormPaper";
 import FormPaperFooter from "./Form/FormPaper/Footer";
 import LinkButton from "./LinkButton";
@@ -215,4 +214,13 @@ export const sessionExpiredDialogAttributes = (
         action: onLogin,
         variant: "accent",
     },
+});
+
+/**
+ * {@link DialogBoxAttributesV2} for showing a generic error.
+ */
+const genericErrorAttributes = (): DialogBoxAttributesV2 => ({
+    title: t("error"),
+    close: { variant: "critical" },
+    content: t("generic_error_retry"),
 });
