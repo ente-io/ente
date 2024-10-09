@@ -39,13 +39,19 @@ const LogoImage = styled("img")`
  * The Ente logo ("ente" in Montserrat), as an inline svg.
  *
  * Having it as an inline SVG has two advantages:
+ *
  * - It does not rely on a corresponding asset in the public folder
  * - It can be styled using CSS.
+ *
+ * The default height of the SVG element is 18px, same as the {@link EnteLogo}
+ * img (Unlike the img, it does not have any extra margin).
+ *
+ * The size can be customized by providing a {@link height} prop (the SVG will
+ * preserve its aspect ratio when fitting inside the provided viewport).
  */
-export const EnteLogoSvg: React.FC = () => (
+export const EnteLogoSVG: React.FC<EnteLogoProps> = ({ height }) => (
     <svg
-        width="50"
-        height="26"
+        height={height ?? "18"}
         viewBox="0 0 43 13"
         fill="currentColor"
         xmlns="http://www.w3.org/2000/svg"
