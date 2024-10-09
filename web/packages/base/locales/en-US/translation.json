@@ -33,7 +33,6 @@
     "INCORRECT_PASSPHRASE": "Incorrect password",
     "ENTER_ENC_PASSPHRASE": "Please enter a password that we can use to encrypt your data",
     "PASSPHRASE_DISCLAIMER": "We don't store your password, so if you forget it, <strong>we will not be able to help you </strong>recover your data without a recovery key.",
-    "WHERE_YOUR_BEST_PHOTOS_LIVE": "Where your best photos live",
     "key_generation_in_progress": "Generating encryption keys...",
     "PASSPHRASE_HINT": "Password",
     "CONFIRM_PASSPHRASE": "Confirm password",
