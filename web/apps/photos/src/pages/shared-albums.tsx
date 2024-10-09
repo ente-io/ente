@@ -1,4 +1,4 @@
-import { EnteLogoSvg } from "@/base/components/EnteLogo";
+import { EnteLogoSVG } from "@/base/components/EnteLogo";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { NavbarBase, SelectionBar } from "@/base/components/Navbar";
 import { sharedCryptoWorker } from "@/base/crypto";
@@ -585,7 +585,7 @@ const SharedAlbumNavbar: React.FC<SharedAlbumNavbarProps> = ({
     <NavbarBase>
         <FluidContainer>
             <EnteLogoLink href="https://ente.io">
-                <EnteLogoSvg />
+                <EnteLogoSVG />
             </EnteLogoLink>
         </FluidContainer>
         {onAddPhotos ? <AddPhotosButton onClick={onAddPhotos} /> : <GoToEnte />}
