@@ -1,7 +1,7 @@
 import { SelectionBar } from "@/base/components/Navbar";
 import type { Collection } from "@/media/collection";
 import type { CollectionSelectorAttributes } from "@/new/photos/components/CollectionSelector";
-import type { GalleryBarMode } from "@/new/photos/components/Gallery/BarImpl";
+import type { GalleryBarMode } from "@/new/photos/components/gallery/BarImpl";
 import { FluidContainer } from "@ente/shared/components/Container";
 import ClockIcon from "@mui/icons-material/AccessTime";
 import AddIcon from "@mui/icons-material/Add";

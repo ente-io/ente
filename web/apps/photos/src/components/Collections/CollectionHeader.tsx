@@ -6,7 +6,7 @@ import { ItemVisibility } from "@/media/file-metadata";
 import {
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
-} from "@/new/photos/components/Gallery/ListHeader";
+} from "@/new/photos/components/gallery/ListHeader";
 import { SpaceBetweenFlex } from "@/new/photos/components/mui";
 import type {
     CollectionSummary,

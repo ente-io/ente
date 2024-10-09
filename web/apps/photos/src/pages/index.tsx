@@ -249,7 +249,8 @@ const SlideContainer = styled("div")`
 `;
 
 const Logo_ = styled("div")`
-    margin-block-end: 64px;
+    margin-block-start: 32px;
+    margin-block-end: 48px;
 `;
 
 const MobileBox = styled("div")`

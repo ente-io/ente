@@ -1,12 +1,3 @@
-/**
- * @file code that really belongs to pages/gallery.tsx itself (or related
- * files), but it written here in a separate file so that we can write in this
- * package that has TypeScript strict mode enabled.
- *
- * Once the original gallery.tsx is strict mode, this code can be inlined back
- * there.
- */
-
 import { pt } from "@/base/i18n";
 import {
     addPerson,
@@ -29,6 +20,7 @@ import type { NewAppContextPhotos } from "../../types/context";
 import { AddPersonDialog } from "../AddPersonDialog";
 import { SpaceBetweenFlex } from "../mui";
 import { NameInputDialog } from "../NameInputDialog";
+import { SingleInputDialog } from "../SingleInputForm";
 import type { GalleryBarImplProps } from "./BarImpl";
 import { GalleryItemsHeaderAdapter, GalleryItemsSummary } from "./ListHeader";
 
@@ -174,11 +166,14 @@ const CGroupPersonOptions: React.FC<CGroupPersonOptionsProps> = ({
                 </OverflowMenuOption>
             </OverflowMenu>
 
-            <NameInputDialog
+            <SingleInputDialog
                 open={openAddNameInput}
                 onClose={() => setOpenAddNameInput(false)}
                 title={pt("Rename person") /* TODO-Cluster pt()'s */}
+                label={pt("Name")}
                 placeholder={t("enter_name")}
+                autoComplete="name"
+                autoFocus
                 initialValue={cgroup.data.name ?? ""}
                 submitButtonTitle={t("rename")}
                 onSubmit={renamePersonUsingName}

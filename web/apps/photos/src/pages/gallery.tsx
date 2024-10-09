@@ -9,16 +9,16 @@ import {
     type CollectionSelectorAttributes,
 } from "@/new/photos/components/CollectionSelector";
 import {
-    PeopleEmptyState,
-    SearchResultsHeader,
-} from "@/new/photos/components/Gallery";
-import type { GalleryBarMode } from "@/new/photos/components/Gallery/BarImpl";
-import { GalleryPeopleState } from "@/new/photos/components/Gallery/PeopleHeader";
-import {
     SearchBar,
     type SearchBarProps,
 } from "@/new/photos/components/SearchBar";
 import { WhatsNew } from "@/new/photos/components/WhatsNew";
+import {
+    PeopleEmptyState,
+    SearchResultsHeader,
+} from "@/new/photos/components/gallery";
+import type { GalleryBarMode } from "@/new/photos/components/gallery/BarImpl";
+import { GalleryPeopleState } from "@/new/photos/components/gallery/PeopleHeader";
 import { shouldShowWhatsNew } from "@/new/photos/services/changelog";
 import type { CollectionSummaries } from "@/new/photos/services/collection/ui";
 import { areOnlySystemCollections } from "@/new/photos/services/collection/ui";
