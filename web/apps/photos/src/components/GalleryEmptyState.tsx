@@ -13,7 +13,7 @@ import uploadManager from "services/upload/uploadManager";
 export default function GalleryEmptyState({ openUploader }) {
     return (
         <Wrapper>
-            <Stack sx={{ flex: "none", paddingBlock: "12px 48px" }}>
+            <Stack sx={{ flex: "none", paddingBlock: "12px 32px" }}>
                 <VerticallyCentered sx={{ flex: "none" }}>
                     <Typography
                         variant="h3"
@@ -29,12 +29,12 @@ export default function GalleryEmptyState({ openUploader }) {
                         }}
                     >
                         <Trans
-                            i18nKey="WELCOME_TO_ENTE_HEADING"
+                            i18nKey="welcome_to_ente_title"
                             components={{ a: <EnteLogoSVG /> }}
                         />
                     </Typography>
                     <Typography variant="h2">
-                        {t("WELCOME_TO_ENTE_SUBHEADING")}
+                        {t("welcome_to_ente_subtitle")}
                     </Typography>
                 </VerticallyCentered>
             </Stack>
