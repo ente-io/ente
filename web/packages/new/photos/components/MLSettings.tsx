@@ -3,7 +3,6 @@ import { MenuItemGroup } from "@/base/components/Menu";
 import type { NestedDrawerVisibilityProps } from "@/base/components/mui";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { Titlebar } from "@/base/components/Titlebar";
-import log from "@/base/log";
 import {
     disableML,
     enableML,
@@ -30,18 +29,14 @@ import React, { useEffect, useState, useSyncExternalStore } from "react";
 import { Trans } from "react-i18next";
 import { useAppContext, type NewAppContextPhotos } from "../types/context";
 import { openURL } from "../utils/web";
+import { useWrapAsyncOperation } from "./use-wrap-async";
 
 export const MLSettings: React.FC<NestedDrawerVisibilityProps> = ({
     open,
     onClose,
     onRootClose,
 }) => {
-    const {
-        startLoading,
-        finishLoading,
-        setDialogBoxAttributesV2,
-        somethingWentWrong,
-    } = useAppContext();
+    const { setDialogBoxAttributesV2 } = useAppContext();
 
     const mlStatus = useSyncExternalStore(mlStatusSubscribe, mlStatusSnapshot);
     const [openFaceConsent, setOpenFaceConsent] = useState(false);
@@ -58,31 +53,13 @@ export const MLSettings: React.FC<NestedDrawerVisibilityProps> = ({
 
     const handleEnableML = () => setOpenFaceConsent(true);
 
-    const handleConsent = async () => {
-        startLoading();
-        try {
-            await enableML();
-            // Close the FaceConsent drawer, come back to ourselves.
-            setOpenFaceConsent(false);
-        } catch (e) {
-            log.error("Failed to enable ML", e);
-            somethingWentWrong();
-        } finally {
-            finishLoading();
-        }
-    };
+    const handleConsent = useWrapAsyncOperation(async () => {
+        await enableML();
+        // Close the FaceConsent drawer, come back to ourselves.
+        setOpenFaceConsent(false);
+    });
 
-    const handleDisableML = async () => {
-        startLoading();
-        try {
-            await disableML();
-        } catch (e) {
-            log.error("Failed to disable ML", e);
-            somethingWentWrong();
-        } finally {
-            finishLoading();
-        }
-    };
+    const handleDisableML = useWrapAsyncOperation(disableML);
 
     let component: React.ReactNode;
     if (!mlStatus) {
