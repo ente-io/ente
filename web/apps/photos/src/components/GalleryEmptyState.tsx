@@ -23,7 +23,7 @@ const NonDraggableImage = styled("img")`
 export default function GalleryEmptyState({ openUploader }) {
     return (
         <Wrapper>
-            <Stack sx={{ flex: "none", py: 1.5 }}>
+            <Stack sx={{ flex: "none", paddingBlock: "12px 48px" }}>
                 <VerticallyCentered sx={{ flex: "none" }}>
                     <Typography
                         variant="h3"
@@ -46,9 +46,6 @@ export default function GalleryEmptyState({ openUploader }) {
                         {t("WELCOME_TO_ENTE_SUBHEADING")}
                     </Typography>
                 </VerticallyCentered>
-                <Typography mt={3.5} color="text.muted">
-                    {t("WHERE_YOUR_BEST_PHOTOS_LIVE")}
-                </Typography>
             </Stack>
             <NonDraggableImage
                 height={287.57}
