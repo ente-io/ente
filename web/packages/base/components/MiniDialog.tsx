@@ -230,6 +230,26 @@ export function MiniDialog({
     );
 }
 
+// TODO: Sketch of a possible approach to using this. Haven't throught this
+// through, just noting down the outline inspired by an API I saw.
+// /**
+//  * A React hook for simplifying use of MiniDialog within the photos app context.
+//  *
+//  * It relies on the presence of the {@link setDialogBoxAttributesV2} function
+//  * provided by the Photos app's {@link AppContext}.
+//  */
+// export const useConfirm = (attr) => {
+//     const {setDialogBoxAttributesV2} = useAppContext();
+//     return () => {
+//         new Promise((resolve) => {
+//         setDialogBoxAttributesV2(
+//             proceed: {
+//                 action: attr.action.then(resolve)
+//             }
+//         )
+//     }
+// }
+
 /**
  * TODO This is a duplicate of MiniDialog. This is for use by call sites that
  * were using the MiniDialog not as a dialog but as a base container. Such use
