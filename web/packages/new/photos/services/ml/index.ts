@@ -735,6 +735,28 @@ export const addPerson = async (name: string, cluster: FaceCluster) => {
 };
 
 /**
+ * Add a new cluster to an existing named person.
+ *
+ * @param cgroup The existing cgroup underlying the person. This is the (remote)
+ * user entity that will get updated.
+ *
+ * @param cluster The new cluster of faces to associate with this person.
+ */
+export const addClusterToPerson = async (
+    cluster: FaceCluster,
+    cgroup: CGroup,
+) => {
+    const masterKey = await masterKeyFromSession();
+    const assigned = cgroup.data.assigned.concat([cluster]);
+    await updateOrCreateUserEntities(
+        "cgroup",
+        [{ ...cgroup, data: { ...cgroup.data, assigned } }],
+        masterKey,
+    );
+    return mlSync();
+};
+
+/**
  * Rename an existing named person.
  *
  * @param name The new name to use.
