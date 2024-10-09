@@ -1,6 +1,6 @@
 import "dart:async";
 import "dart:io" show File, Platform;
-import "dart:math" show exp, min, pi;
+import "dart:math" show min;
 import "dart:typed_data" show Float32List, Uint8List;
 import "dart:ui";
 
@@ -22,15 +22,6 @@ final _logger = Logger("ImageMlUtil");
 
 /// These are 8 bit unsigned integers in range 0-255 for each RGB channel
 typedef RGB = (int, int, int);
-
-const gaussianKernelSize = 5;
-const gaussianKernelRadius = gaussianKernelSize ~/ 2;
-const gaussianSigma = 10.0;
-final List<List<double>> gaussianKernel =
-    create2DGaussianKernel(gaussianKernelSize, gaussianSigma);
-
-const maxKernelSize = gaussianKernelSize;
-const maxKernelRadius = maxKernelSize ~/ 2;
 
 Future<(Image, Uint8List)> decodeImageFromPath(String imagePath) async {
   try {
@@ -185,12 +176,6 @@ Future<(Float32List, Dimensions)> preprocessImageToFloat32ChannelsFirst(
   RGB Function(num, num, Image, Uint8List) getPixel = _getPixelBilinear,
   maintainAspectRatio = true,
 }) async {
-  final normFunction = normalization == 2
-      ? _normalizePixelRange2
-      : normalization == 1
-          ? _normalizePixelRange1
-          : _normalizePixelNoRange;
-
   double scaleW = requiredWidth / image.width;
   double scaleH = requiredHeight / image.height;
   if (maintainAspectRatio) {
@@ -221,9 +206,9 @@ Future<(Float32List, Dimensions)> preprocessImageToFloat32ChannelsFirst(
           rawRgbaBytes,
         );
       }
-      buffer[pixelIndex] = normFunction(pixel.$1);
-      buffer[pixelIndex + channelOffsetGreen] = normFunction(pixel.$2);
-      buffer[pixelIndex + channelOffsetBlue] = normFunction(pixel.$3);
+      buffer[pixelIndex] = pixel.$1 / 255;
+      buffer[pixelIndex + channelOffsetGreen] = pixel.$2 / 255;
+      buffer[pixelIndex + channelOffsetBlue] = pixel.$3 / 255;
       pixelIndex++;
     }
   }
@@ -308,14 +293,9 @@ RGB _readPixelColor(
   Uint8List rgbaBytes,
 ) {
   if (y < 0 || y >= image.height || x < 0 || x >= image.width) {
-    if (y < -maxKernelRadius ||
-        y >= image.height + maxKernelRadius ||
-        x < -maxKernelRadius ||
-        x >= image.width + maxKernelRadius) {
-      _logger.severe(
-        '`readPixelColor`: Invalid pixel coordinates, out of bounds. x: $x, y: $y',
-      );
-    }
+    _logger.severe(
+      '`readPixelColor`: Invalid pixel coordinates, out of bounds. x: $x, y: $y',
+    );
     return const (114, 114, 114);
   }
 
@@ -327,29 +307,6 @@ RGB _readPixelColor(
     rgbaBytes[byteOffset + 1], // green
     rgbaBytes[byteOffset + 2] // blue
   );
-}
-
-RGB _getPixelBlurred(
-  int x,
-  int y,
-  Image image,
-  Uint8List rgbaBytes,
-) {
-  double r = 0, g = 0, b = 0;
-  for (int ky = 0; ky < gaussianKernelSize; ky++) {
-    for (int kx = 0; kx < gaussianKernelSize; kx++) {
-      final int px = (x - gaussianKernelRadius + kx);
-      final int py = (y - gaussianKernelRadius + ky);
-
-      final RGB pixelRgbTuple = _readPixelColor(px, py, image, rgbaBytes);
-      final double weight = gaussianKernel[ky][kx];
-
-      r += pixelRgbTuple.$1 * weight;
-      g += pixelRgbTuple.$2 * weight;
-      b += pixelRgbTuple.$3 * weight;
-    }
-  }
-  return (r.round(), g.round(), b.round());
 }
 
 List<List<int>> _createGrayscaleIntMatrixFromNormalized2List(
@@ -392,17 +349,6 @@ double _normalizePixelRange2(num pixelValue) {
 /// It assumes that the pixel value is originally in range [-1, 1]
 int _unnormalizePixelRange2(double pixelValue) {
   return ((pixelValue + 1) * 127.5).round().clamp(0, 255);
-}
-
-/// Function normalizes the pixel value to be in range [0, 1].
-///
-/// It assumes that the pixel value is originally in range [0, 255]
-double _normalizePixelRange1(num pixelValue) {
-  return (pixelValue / 255);
-}
-
-double _normalizePixelNoRange(num pixelValue) {
-  return pixelValue.toDouble();
 }
 
 Future<Image> _cropImage(
@@ -529,9 +475,8 @@ RGB _getPixelBilinear(
   num fx,
   num fy,
   Image image,
-  Uint8List rawRgbaBytes, {
-  bool antiAlias = false,
-}) {
+  Uint8List rawRgbaBytes,
+) {
   // Clamp to image boundaries
   fx = fx.clamp(0, image.width - 1);
   fy = fy.clamp(0, image.height - 1);
@@ -546,13 +491,11 @@ RGB _getPixelBilinear(
   final dx1 = 1.0 - dx;
   final dy1 = 1.0 - dy;
 
-  // Get the original pixels (with gaussian blur if antialias)
-  final RGB Function(int, int, Image, Uint8List) readPixel =
-      antiAlias ? _getPixelBlurred : _readPixelColor;
-  final RGB pixel1 = readPixel(x0, y0, image, rawRgbaBytes);
-  final RGB pixel2 = readPixel(x1, y0, image, rawRgbaBytes);
-  final RGB pixel3 = readPixel(x0, y1, image, rawRgbaBytes);
-  final RGB pixel4 = readPixel(x1, y1, image, rawRgbaBytes);
+  // Get the original pixels
+  final RGB pixel1 = _readPixelColor(x0, y0, image, rawRgbaBytes);
+  final RGB pixel2 = _readPixelColor(x1, y0, image, rawRgbaBytes);
+  final RGB pixel3 = _readPixelColor(x0, y1, image, rawRgbaBytes);
+  final RGB pixel4 = _readPixelColor(x1, y1, image, rawRgbaBytes);
 
   int bilinear(
     num val1,
@@ -661,31 +604,4 @@ RGB _getPixelBicubic(num fx, num fy, Image image, Uint8List rawRgbaBytes) {
   // final c3 = cubic(dy, ip3, ic3, in3, ia3);
 
   return (c0, c1, c2); // (red, green, blue)
-}
-
-List<List<double>> create2DGaussianKernel(int size, double sigma) {
-  final List<List<double>> kernel =
-      List.generate(size, (_) => List<double>.filled(size, 0));
-  double sum = 0.0;
-  final int center = size ~/ 2;
-
-  for (int y = 0; y < size; y++) {
-    for (int x = 0; x < size; x++) {
-      final int dx = x - center;
-      final int dy = y - center;
-      final double g = (1 / (2 * pi * sigma * sigma)) *
-          exp(-(dx * dx + dy * dy) / (2 * sigma * sigma));
-      kernel[y][x] = g;
-      sum += g;
-    }
-  }
-
-  // Normalize the kernel
-  for (int y = 0; y < size; y++) {
-    for (int x = 0; x < size; x++) {
-      kernel[y][x] /= sum;
-    }
-  }
-
-  return kernel;
 }
