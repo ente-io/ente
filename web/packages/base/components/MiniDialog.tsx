@@ -130,6 +130,7 @@ export function MiniDialog({
         <Dialog
             open={open}
             onClose={handleClose}
+            fullWidth
             PaperProps={{
                 ...PaperProps,
                 sx: {
