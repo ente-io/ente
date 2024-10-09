@@ -1,5 +1,4 @@
 import type { Collection } from "@/media/collection";
-import { AddPersonDialog } from "@/new/photos/components/AddPersonDialog";
 import {
     GalleryBarImpl,
     type GalleryBarImplProps,
@@ -99,7 +98,6 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
     const [openCollectionShareView, setOpenCollectionShareView] =
         useState(false);
     const [openAlbumCastDialog, setOpenAlbumCastDialog] = useState(false);
-    const [openPeopleSelector, setOpenPeopleSelector] = useState(false);
 
     const [collectionsSortBy, setCollectionsSortBy] =
         useCollectionsSortByLocalState("updation-time-desc");
@@ -185,13 +183,6 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
         // people,
     ]);
 
-    // TODO-Cluster
-    useEffect(() => {
-        if (process.env.NEXT_PUBLIC_ENTE_WIP_CL) {
-            setOpenPeopleSelector(true);
-        }
-    }, []);
-
     if (shouldBeHidden) {
         return <></>;
     }
@@ -240,12 +231,6 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
                 open={openAlbumCastDialog}
                 onClose={() => setOpenAlbumCastDialog(false)}
                 collection={activeCollection}
-            />
-            <AddPersonDialog
-                open={openPeopleSelector}
-                onClose={() => setOpenPeopleSelector(false)}
-                people={[]}
-                cluster={{ id: "test", faces: [] }}
             />
         </>
     );
