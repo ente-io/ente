@@ -23,13 +23,7 @@ const NonDraggableImage = styled("img")`
 export default function GalleryEmptyState({ openUploader }) {
     return (
         <Wrapper>
-            <Stack
-                sx={{
-                    flex: "none",
-                    pt: 1.5,
-                    pb: 1.5,
-                }}
-            >
+            <Stack sx={{ flex: "none", py: 1.5 }}>
                 <VerticallyCentered sx={{ flex: "none" }}>
                     <Typography
                         variant="h3"
