@@ -27,7 +27,6 @@ import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import PeopleIcon from "@mui/icons-material/People";
 import PushPin from "@mui/icons-material/PushPin";
 import { Box, IconButton, Stack, Typography, styled } from "@mui/material";
-import Tooltip from "@mui/material/Tooltip";
 import { t } from "i18next";
 import React, {
     memo,
@@ -528,13 +527,11 @@ const CardText: React.FC<CardTextProps> = ({ text }) => (
 );
 
 const TruncatedText: React.FC<CardTextProps> = ({ text }) => (
-    <Tooltip title={text}>
-        <Box height={"2.1em"} overflow="hidden">
-            <Ellipsized variant="small" sx={{ wordBreak: "break-word" }}>
-                {text}
-            </Ellipsized>
-        </Box>
-    </Tooltip>
+    <Box height={"2.1em"} overflow="hidden">
+        <Ellipsized variant="small" sx={{ wordBreak: "break-word" }}>
+            {text}
+        </Ellipsized>
+    </Box>
 );
 
 const Ellipsized = styled(Typography)`
@@ -598,7 +595,7 @@ const PersonCard: React.FC<PersonCardProps> = ({
     activePerson,
     onSelectPerson,
 }) => (
-    <Box>
+    <div>
         <ItemCard
             TileComponent={BarItemTile}
             coverFile={person.displayFaceFile}
@@ -608,5 +605,5 @@ const PersonCard: React.FC<PersonCardProps> = ({
             {person.name && <CardText text={person.name} />}
         </ItemCard>
         {activePerson?.id === person.id && <ActiveIndicator />}
-    </Box>
+    </div>
 );
