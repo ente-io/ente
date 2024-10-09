@@ -1,60 +1,27 @@
 import React from "react";
-import type { NewAppContextPhotos } from "../types/context";
+import { useAppContext } from "../types/context";
 
 /**
- * Return a wrap function.
+ * Wrap an asynchronous operation (e.g. API calls) in an global activity
+ * indicator and error handler.
  *
- * This returned wrap function itself takes an async function, and will return a
- * new function that wraps the provided async function (a) in an error handler,
- * and (b) shows the global loading bar when the function runs.
+ * This function takes a async function, and wraps it in a function that starts
+ * the global activity indicator, lets the promise resolve, and then stop the
+ * activity indicator. If the promise rejects, then it shows a generic error.
  *
- * This legend of the three functions that are involved might help:
- *
- * - useWrap: () => wrap
- * - wrap: (f) => void
- * - f: async () => Promise<void>
+ * The global activity indicator and error alert triggering mechanism is
+ * obtained from the app context.
  */
-export const useWrapLoadError = (
-    /** See: [Note: Migrating components that need the app context]. */
-    { startLoading, finishLoading, onGenericError }: NewAppContextPhotos,
-) =>
-    React.useCallback(
-        (f: () => Promise<void>) => {
-            const wrapped = async () => {
-                startLoading();
-                try {
-                    await f();
-                } catch (e) {
-                    onGenericError(e);
-                } finally {
-                    finishLoading();
-                }
-            };
-            return (): void => void wrapped();
-        },
-        [onGenericError, startLoading, finishLoading],
-    );
-
-/**
- * A variant of {@link useWrapLoadError} that does not handle the error, only
- * does the loading indicator. It also returns the async function directly
- * instead of voiding the await.
- */
-export const useWrapLoadAsync = (
-    /** See: [Note: Migrating components that need the app context]. */
-    { startLoading, finishLoading }: NewAppContextPhotos,
-) =>
-    React.useCallback(
-        (f: () => Promise<void>) => {
-            const wrapped = async () => {
-                startLoading();
-                try {
-                    await f();
-                } finally {
-                    finishLoading();
-                }
-            };
-            return wrapped;
-        },
-        [startLoading, finishLoading],
-    );
+export const useWrapAsyncOperation = (f: () => Promise<void>) => {
+    const { startLoading, finishLoading, onGenericError } = useAppContext();
+    return React.useCallback(async () => {
+        startLoading();
+        try {
+            await f();
+        } catch (e) {
+            onGenericError(e);
+        } finally {
+            finishLoading();
+        }
+    }, [f, startLoading, finishLoading, onGenericError]);
+};
