@@ -73,7 +73,6 @@ export default function App({ Component, pageProps }: AppProps) {
     const [dialogBoxAttributeV2, setDialogBoxAttributesV2] = useState<
         DialogBoxAttributesV2 | undefined
     >();
-    useState<DialogBoxAttributes>(null);
     const [messageDialogView, setMessageDialogView] = useState(false);
     const [dialogBoxV2View, setDialogBoxV2View] = useState(false);
     const [watchFolderView, setWatchFolderView] = useState(false);
