@@ -509,29 +509,19 @@ const CollectionBarCard: React.FC<CollectionBarCardProps> = ({
             coverFile={collectionSummary.coverFile}
             onClick={() => onSelectCollectionID(collectionSummary.id)}
         >
-            <CardText text={collectionSummary.name} />
+            <CardText>{collectionSummary.name}</CardText>
             <CollectionBarCardIcon type={collectionSummary.type} />
         </ItemCard>
         {activeCollectionID === collectionSummary.id && <ActiveIndicator />}
     </div>
 );
 
-interface CardTextProps {
-    text: string;
-}
-
-const CardText: React.FC<CardTextProps> = ({ text }) => (
+const CardText: React.FC<React.PropsWithChildren> = ({ children }) => (
     <TileTextOverlay>
-        <TruncatedText {...{ text }} />
+        <Box height={"2.1em"}>
+            <Ellipsized variant="small">{children}</Ellipsized>
+        </Box>
     </TileTextOverlay>
-);
-
-const TruncatedText: React.FC<CardTextProps> = ({ text }) => (
-    <Box height={"2.1em"} overflow="hidden">
-        <Ellipsized variant="small" sx={{ wordBreak: "break-word" }}>
-            {text}
-        </Ellipsized>
-    </Box>
 );
 
 const Ellipsized = styled(Typography)`
@@ -541,6 +531,7 @@ const Ellipsized = styled(Typography)`
     -webkit-line-clamp: 2; // number of lines to show
     line-clamp: 2;
     -webkit-box-orient: vertical;
+    word-break: break-word;
 `;
 
 interface CollectionBarCardIconProps {
@@ -602,7 +593,7 @@ const PersonCard: React.FC<PersonCardProps> = ({
             coverFaceID={person.displayFaceID}
             onClick={() => onSelectPerson(person)}
         >
-            {person.name && <CardText text={person.name} />}
+            {person.name && <CardText>{person.name}</CardText>}
         </ItemCard>
         {activePerson?.id === person.id && <ActiveIndicator />}
     </div>

@@ -10,8 +10,8 @@ import { styled, Typography } from "@mui/material";
  */
 export const EllipsizedTypography = styled(Typography)`
     /* Initial value of overflow is visible. Set overflow (the handling of
-      content that is too small for the container in the inline direction) to
-      hidden instead. */
+       content that is too small for the container in the inline direction) to
+       hidden instead. */
     overflow: hidden;
     /* Specify handling of text when it overflows, asking the browser to insert
        ellipsis instead of clipping. */
