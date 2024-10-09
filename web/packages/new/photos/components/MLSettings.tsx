@@ -1,5 +1,6 @@
 import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { MenuItemGroup } from "@/base/components/Menu";
+import type { NestedDrawerVisibilityProps } from "@/base/components/mui";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { Titlebar } from "@/base/components/Titlebar";
 import log from "@/base/log";
@@ -27,32 +28,20 @@ import {
 import { t } from "i18next";
 import React, { useEffect, useState, useSyncExternalStore } from "react";
 import { Trans } from "react-i18next";
-import type { NewAppContextPhotos } from "../types/context";
+import { useAppContext, type NewAppContextPhotos } from "../types/context";
 import { openURL } from "../utils/web";
 
-interface MLSettingsProps {
-    /** If `true`, then this drawer page is shown. */
-    open: boolean;
-    /** Called when the user wants to go back from this drawer page. */
-    onClose: () => void;
-    /** Called when the user wants to close the entire stack of drawers. */
-    onRootClose: () => void;
-    /** See: [Note: Migrating components that need the app context]. */
-    appContext: NewAppContextPhotos;
-}
-
-export const MLSettings: React.FC<MLSettingsProps> = ({
+export const MLSettings: React.FC<NestedDrawerVisibilityProps> = ({
     open,
     onClose,
     onRootClose,
-    appContext,
 }) => {
     const {
         startLoading,
         finishLoading,
         setDialogBoxAttributesV2,
         somethingWentWrong,
-    } = appContext;
+    } = useAppContext();
 
     const mlStatus = useSyncExternalStore(mlStatusSubscribe, mlStatusSnapshot);
     const [openFaceConsent, setOpenFaceConsent] = useState(false);
@@ -178,7 +167,7 @@ const EnableML: React.FC<EnableMLProps> = ({ onEnable }) => {
     );
 };
 
-type FaceConsentProps = Omit<MLSettingsProps, "appContext"> & {
+type FaceConsentProps = NestedDrawerVisibilityProps & {
     /** Called when the user provides their consent. */
     onConsent: () => void;
 };
