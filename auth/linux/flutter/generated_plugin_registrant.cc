@@ -6,7 +6,6 @@
 
 #include "generated_plugin_registrant.h"
 
-#include <desktop_webview_window/desktop_webview_window_plugin.h>
 #include <file_saver/file_saver_plugin.h>
 #include <flutter_local_authentication/flutter_local_authentication_plugin.h>
 #include <flutter_secure_storage_linux/flutter_secure_storage_linux_plugin.h>
@@ -20,9 +19,6 @@
 #include <window_manager/window_manager_plugin.h>
 
 void fl_register_plugins(FlPluginRegistry* registry) {
-  g_autoptr(FlPluginRegistrar) desktop_webview_window_registrar =
-      fl_plugin_registry_get_registrar_for_plugin(registry, "DesktopWebviewWindowPlugin");
-  desktop_webview_window_plugin_register_with_registrar(desktop_webview_window_registrar);
   g_autoptr(FlPluginRegistrar) file_saver_registrar =
       fl_plugin_registry_get_registrar_for_plugin(registry, "FileSaverPlugin");
   file_saver_plugin_register_with_registrar(file_saver_registrar);
