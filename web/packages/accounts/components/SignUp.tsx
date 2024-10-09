@@ -299,7 +299,7 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
                                     isWeakPassword(values.passphrase)
                                 }
                             >
-                                {t("CREATE_ACCOUNT")}
+                                {t("create_account")}
                             </LoadingButton>
                             {loading && (
                                 <Typography
@@ -308,7 +308,7 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
                                     color="text.muted"
                                     variant="small"
                                 >
-                                    {t("KEY_GENERATION_IN_PROGRESS_MESSAGE")}
+                                    {t("key_generation_in_progress")}
                                 </Typography>
                             )}
                         </Box>

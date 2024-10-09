@@ -345,7 +345,7 @@ const CreatedAtEntry: React.FC<React.PropsWithChildren> = ({ children }) => (
     <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, pb: 1 }}>
         <CalendarTodayIcon color="secondary" sx={{ m: "16px" }} />
         <Box py={0.5}>
-            <Typography>{t("CREATED_AT")}</Typography>
+            <Typography>{t("created_at")}</Typography>
             <Typography variant="small" color="text.muted">
                 {children}
             </Typography>

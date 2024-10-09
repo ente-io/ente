@@ -153,7 +153,7 @@ function SetPasswordForm(props: SetPasswordFormProps) {
                                 color="text.muted"
                                 variant="small"
                             >
-                                {t("KEY_GENERATION_IN_PROGRESS_MESSAGE")}
+                                {t("key_generation_in_progress")}
                             </Typography>
                         )}
                     </Box>
