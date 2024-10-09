@@ -1,4 +1,7 @@
+import type { ModalVisibilityProps } from "@/base/components/mui";
 import { pt } from "@/base/i18n";
+import { addCGroup, addClusterToCGroup } from "@/new/photos/services/ml";
+import { ensure } from "@/utils/ensure";
 import {
     Dialog,
     DialogContent,
@@ -12,10 +15,7 @@ import React, { useState } from "react";
 import type { FaceCluster } from "../services/ml/cluster";
 import type { Person } from "../services/ml/people";
 import { SpaceBetweenFlex, type ButtonishProps } from "./mui";
-import {
-    DialogCloseIconButton,
-    type DialogVisibilityProps,
-} from "./mui/Dialog";
+import { DialogCloseIconButton } from "./mui/Dialog";
 import { SingleInputDialog } from "./SingleInputForm";
 import {
     ItemCard,
@@ -23,8 +23,9 @@ import {
     LargeTilePlusOverlay,
     LargeTileTextOverlay,
 } from "./Tiles";
+import { useWrapAsyncOperation } from "./use-wrap-async";
 
-type AddPersonDialogProps = DialogVisibilityProps & {
+type AddPersonDialogProps = ModalVisibilityProps & {
     /**
      * The list of people from show the existing named people.
      */
@@ -54,17 +55,16 @@ export const AddPersonDialog: React.FC<AddPersonDialogProps> = ({
         (p) => p.type != "cluster",
     );
 
-    const handleAddPerson = () => {
-        setOpenNameInput(true);
-    };
+    const handleAddPerson = () => setOpenNameInput(true);
 
-    const handleSelectPerson = (id: string) => {
-        console.log("handleSelectPerson", id, cluster);
-    };
+    const handleSelectPerson = useWrapAsyncOperation((id: string) =>
+        addClusterToCGroup(
+            ensure(cgroupPeople.find((p) => p.id == id)).cgroup,
+            cluster,
+        ),
+    );
 
-    const handleAddPersonWithName = (name: string) => {
-        console.log("handleAddPersonWithName", name);
-    };
+    const handleAddPersonWithName = (name: string) => addCGroup(name, cluster);
 
     // [Note: Calling setState during rendering]
     //

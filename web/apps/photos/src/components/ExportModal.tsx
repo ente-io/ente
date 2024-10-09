@@ -1,5 +1,6 @@
 import { EnteSwitch } from "@/base/components/EnteSwitch";
 import log from "@/base/log";
+import { AppContext } from "@/new/photos/types/context";
 import { EnteFile } from "@/new/photos/types/file";
 import ChangeDirectoryOption from "@ente/shared/components/ChangeDirectoryOption";
 import {
@@ -18,7 +19,6 @@ import {
 } from "@mui/material";
 import { t } from "i18next";
 import isElectron from "is-electron";
-import { AppContext } from "pages/_app";
 import { useContext, useEffect, useState } from "react";
 import exportService, {
     ExportStage,

@@ -1,3 +1,4 @@
+import type { ModalVisibilityProps } from "@/base/components/mui";
 import type { Collection } from "@/media/collection";
 import {
     ItemCard,
@@ -24,10 +25,7 @@ import {
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
 import { SpaceBetweenFlex, type ButtonishProps } from "./mui";
-import {
-    DialogCloseIconButton,
-    type DialogVisibilityProps,
-} from "./mui/Dialog";
+import { DialogCloseIconButton } from "./mui/Dialog";
 
 export type CollectionSelectorAction =
     | "upload"
@@ -65,7 +63,7 @@ export interface CollectionSelectorAttributes {
     relatedCollectionID?: number | undefined;
 }
 
-type CollectionSelectorProps = DialogVisibilityProps & {
+type CollectionSelectorProps = ModalVisibilityProps & {
     /**
      * The same {@link CollectionSelector} can be used for different
      * purposes by customizing the {@link attributes} prop before opening it.

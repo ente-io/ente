@@ -1,4 +1,4 @@
-import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
+import { DialogBoxV2 } from "@/base/components/MiniDialog";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";

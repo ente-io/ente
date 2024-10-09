@@ -1,4 +1,4 @@
-import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
+import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
 
 /**
  * Properties expected to be present in the AppContext types for pages that
@@ -9,5 +9,5 @@ export interface AccountsContextT {
     logout: () => void;
     /** Show or hide the app's navigation bar. */
     showNavBar: (show: boolean) => void;
-    setDialogBoxAttributesV2: (attrs: DialogBoxAttributesV2) => void;
+    setDialogBoxAttributesV2: (attrs: MiniDialogAttributes) => void;
 }

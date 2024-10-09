@@ -1,13 +1,15 @@
 import { staticAppTitle } from "@/base/app";
 import { CustomHead } from "@/base/components/Head";
+import {
+    type MiniDialogAttributes,
+    MiniDialog,
+} from "@/base/components/MiniDialog";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { AppNavbar } from "@/base/components/Navbar";
 import { setupI18n } from "@/base/i18n";
 import { disableDiskLogs } from "@/base/log";
 import { logUnhandledErrorsAndRejections } from "@/base/log-web";
 import { Overlay } from "@ente/shared/components/Container";
-import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
-import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
 import { getTheme } from "@ente/shared/themes";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import { CssBaseline } from "@mui/material";
@@ -23,7 +25,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     const [isI18nReady, setIsI18nReady] = useState<boolean>(false);
     const [showNavbar, setShowNavbar] = useState(false);
     const [dialogBoxAttributeV2, setDialogBoxAttributesV2] = useState<
-        DialogBoxAttributesV2 | undefined
+        MiniDialogAttributes | undefined
     >();
     const [dialogBoxV2View, setDialogBoxV2View] = useState(false);
 
@@ -53,7 +55,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
             <ThemeProvider theme={getTheme(THEME_COLOR.DARK, "photos")}>
                 <CssBaseline enableColorScheme />
-                <DialogBoxV2
+                <MiniDialog
                     sx={{ zIndex: 1600 }}
                     open={dialogBoxV2View}
                     onClose={closeDialogBoxV2}

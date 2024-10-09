@@ -1,8 +1,8 @@
 import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { MenuItemGroup } from "@/base/components/Menu";
+import type { NestedDrawerVisibilityProps } from "@/base/components/mui";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { Titlebar } from "@/base/components/Titlebar";
-import log from "@/base/log";
 import {
     disableML,
     enableML,
@@ -27,32 +27,16 @@ import {
 import { t } from "i18next";
 import React, { useEffect, useState, useSyncExternalStore } from "react";
 import { Trans } from "react-i18next";
-import type { NewAppContextPhotos } from "../types/context";
+import { useAppContext, type AppContextT } from "../types/context";
 import { openURL } from "../utils/web";
+import { useWrapAsyncOperation } from "./use-wrap-async";
 
-interface MLSettingsProps {
-    /** If `true`, then this drawer page is shown. */
-    open: boolean;
-    /** Called when the user wants to go back from this drawer page. */
-    onClose: () => void;
-    /** Called when the user wants to close the entire stack of drawers. */
-    onRootClose: () => void;
-    /** See: [Note: Migrating components that need the app context]. */
-    appContext: NewAppContextPhotos;
-}
-
-export const MLSettings: React.FC<MLSettingsProps> = ({
+export const MLSettings: React.FC<NestedDrawerVisibilityProps> = ({
     open,
     onClose,
     onRootClose,
-    appContext,
 }) => {
-    const {
-        startLoading,
-        finishLoading,
-        setDialogBoxAttributesV2,
-        somethingWentWrong,
-    } = appContext;
+    const { setDialogBoxAttributesV2 } = useAppContext();
 
     const mlStatus = useSyncExternalStore(mlStatusSubscribe, mlStatusSnapshot);
     const [openFaceConsent, setOpenFaceConsent] = useState(false);
@@ -69,31 +53,13 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
 
     const handleEnableML = () => setOpenFaceConsent(true);
 
-    const handleConsent = async () => {
-        startLoading();
-        try {
-            await enableML();
-            // Close the FaceConsent drawer, come back to ourselves.
-            setOpenFaceConsent(false);
-        } catch (e) {
-            log.error("Failed to enable ML", e);
-            somethingWentWrong();
-        } finally {
-            finishLoading();
-        }
-    };
+    const handleConsent = useWrapAsyncOperation(async () => {
+        await enableML();
+        // Close the FaceConsent drawer, come back to ourselves.
+        setOpenFaceConsent(false);
+    });
 
-    const handleDisableML = async () => {
-        startLoading();
-        try {
-            await disableML();
-        } catch (e) {
-            log.error("Failed to disable ML", e);
-            somethingWentWrong();
-        } finally {
-            finishLoading();
-        }
-    };
+    const handleDisableML = useWrapAsyncOperation(disableML);
 
     let component: React.ReactNode;
     if (!mlStatus) {
@@ -178,7 +144,7 @@ const EnableML: React.FC<EnableMLProps> = ({ onEnable }) => {
     );
 };
 
-type FaceConsentProps = Omit<MLSettingsProps, "appContext"> & {
+type FaceConsentProps = NestedDrawerVisibilityProps & {
     /** Called when the user provides their consent. */
     onConsent: () => void;
 };
@@ -287,7 +253,7 @@ interface ManageMLProps {
     /** Called when the user wants to disable ML. */
     onDisableML: () => void;
     /** Subset of appContext. */
-    setDialogBoxAttributesV2: NewAppContextPhotos["setDialogBoxAttributesV2"];
+    setDialogBoxAttributesV2: AppContextT["setDialogBoxAttributesV2"];
 }
 
 const ManageML: React.FC<ManageMLProps> = ({

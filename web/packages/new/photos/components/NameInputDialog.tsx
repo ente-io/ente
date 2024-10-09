@@ -1,3 +1,4 @@
+import type { ModalVisibilityProps } from "@/base/components/mui";
 import log from "@/base/log";
 import SingleInputForm, {
     type SingleInputFormProps,
@@ -5,9 +6,8 @@ import SingleInputForm, {
 import { Dialog, DialogContent, DialogTitle } from "@mui/material";
 import { t } from "i18next";
 import React from "react";
-import { type DialogVisibilityProps } from "./mui/Dialog";
 
-type NameInputDialogProps = DialogVisibilityProps & {
+type NameInputDialogProps = ModalVisibilityProps & {
     /** Title of the dialog. */
     title: string;
     /** Placeholder string to show in the text input when it is empty. */

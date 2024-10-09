@@ -1,5 +1,5 @@
+import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
 import { ensure } from "@/utils/ensure";
-import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
 import { createContext, useContext } from "react";
 
 /**
@@ -8,7 +8,7 @@ import { createContext, useContext } from "react";
 interface AppContextT {
     /** Show or hide the app's navigation bar. */
     showNavBar: (show: boolean) => void;
-    setDialogBoxAttributesV2: (attrs: DialogBoxAttributesV2) => void;
+    setDialogBoxAttributesV2: (attrs: MiniDialogAttributes) => void;
 }
 
 /**

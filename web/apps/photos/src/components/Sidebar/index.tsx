@@ -7,6 +7,7 @@ import log from "@/base/log";
 import { savedLogs } from "@/base/log-web";
 import { customAPIHost } from "@/base/origins";
 import type { CollectionSummaries } from "@/new/photos/services/collection/ui";
+import { AppContext } from "@/new/photos/types/context";
 import { initiateEmail, openURL } from "@/new/photos/utils/web";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
@@ -44,7 +45,6 @@ import LinkButton from "components/pages/gallery/LinkButton";
 import { t } from "i18next";
 import isElectron from "is-electron";
 import { useRouter } from "next/router";
-import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";
 import React, {
     MouseEventHandler,

@@ -1,6 +1,6 @@
+import { AppContext } from "@/new/photos/types/context";
 import Notification from "components/Notification";
 import { t } from "i18next";
-import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";
 import { useContext } from "react";
 

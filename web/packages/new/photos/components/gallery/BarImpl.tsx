@@ -27,7 +27,6 @@ import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import PeopleIcon from "@mui/icons-material/People";
 import PushPin from "@mui/icons-material/PushPin";
 import { Box, IconButton, Stack, Typography, styled } from "@mui/material";
-import Tooltip from "@mui/material/Tooltip";
 import { t } from "i18next";
 import React, {
     memo,
@@ -510,31 +509,19 @@ const CollectionBarCard: React.FC<CollectionBarCardProps> = ({
             coverFile={collectionSummary.coverFile}
             onClick={() => onSelectCollectionID(collectionSummary.id)}
         >
-            <CardText text={collectionSummary.name} />
+            <CardText>{collectionSummary.name}</CardText>
             <CollectionBarCardIcon type={collectionSummary.type} />
         </ItemCard>
         {activeCollectionID === collectionSummary.id && <ActiveIndicator />}
     </div>
 );
 
-interface CardTextProps {
-    text: string;
-}
-
-const CardText: React.FC<CardTextProps> = ({ text }) => (
+const CardText: React.FC<React.PropsWithChildren> = ({ children }) => (
     <TileTextOverlay>
-        <TruncatedText {...{ text }} />
-    </TileTextOverlay>
-);
-
-const TruncatedText: React.FC<CardTextProps> = ({ text }) => (
-    <Tooltip title={text}>
-        <Box height={"2.1em"} overflow="hidden">
-            <Ellipsized variant="small" sx={{ wordBreak: "break-word" }}>
-                {text}
-            </Ellipsized>
+        <Box height={"2.1em"}>
+            <Ellipsized variant="small">{children}</Ellipsized>
         </Box>
-    </Tooltip>
+    </TileTextOverlay>
 );
 
 const Ellipsized = styled(Typography)`
@@ -544,6 +531,7 @@ const Ellipsized = styled(Typography)`
     -webkit-line-clamp: 2; // number of lines to show
     line-clamp: 2;
     -webkit-box-orient: vertical;
+    word-break: break-word;
 `;
 
 interface CollectionBarCardIconProps {
@@ -598,15 +586,15 @@ const PersonCard: React.FC<PersonCardProps> = ({
     activePerson,
     onSelectPerson,
 }) => (
-    <Box>
+    <div>
         <ItemCard
             TileComponent={BarItemTile}
             coverFile={person.displayFaceFile}
             coverFaceID={person.displayFaceID}
             onClick={() => onSelectPerson(person)}
         >
-            {person.name && <CardText text={person.name} />}
+            {person.name && <CardText>{person.name}</CardText>}
         </ItemCard>
         {activePerson?.id === person.id && <ActiveIndicator />}
-    </Box>
+    </div>
 );

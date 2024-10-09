@@ -1,3 +1,4 @@
+import type { ModalVisibilityProps } from "@/base/components/mui";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import log from "@/base/log";
@@ -12,7 +13,6 @@ import {
 import { useFormik } from "formik";
 import { t } from "i18next";
 import React from "react";
-import type { DialogVisibilityProps } from "./mui/Dialog";
 
 type SingleInputFormProps = Pick<
     TextFieldProps,
@@ -126,7 +126,7 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = ({
     );
 };
 
-type SingleInputDialogProps = DialogVisibilityProps &
+type SingleInputDialogProps = ModalVisibilityProps &
     Omit<SingleInputFormProps, "onCancel"> & {
         /** Title of the dialog. */
         title: string;

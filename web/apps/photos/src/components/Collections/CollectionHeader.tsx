@@ -12,6 +12,7 @@ import type {
     CollectionSummary,
     CollectionSummaryType,
 } from "@/new/photos/services/collection/ui";
+import { AppContext } from "@/new/photos/types/context";
 import { HorizontalFlex } from "@ente/shared/components/Container";
 import OverflowMenu, {
     StyledMenu,
@@ -36,7 +37,6 @@ import { Box, IconButton, Stack, Tooltip } from "@mui/material";
 import { SetCollectionNamerAttributes } from "components/Collections/CollectionNamer";
 import { UnPinIcon } from "components/icons/UnPinIcon";
 import { t } from "i18next";
-import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";
 import React, { useCallback, useContext, useRef, useState } from "react";
 import { Trans } from "react-i18next";

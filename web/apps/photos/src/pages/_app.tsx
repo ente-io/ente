@@ -1,6 +1,7 @@
-import type { AccountsContextT } from "@/accounts/types/context";
 import { clientPackageName, staticAppTitle } from "@/base/app";
 import { CustomHead } from "@/base/components/Head";
+import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
+import { MiniDialog } from "@/base/components/MiniDialog";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { AppNavbar } from "@/base/components/Navbar";
 import { setupI18n } from "@/base/i18n";
@@ -13,15 +14,10 @@ import { AppUpdate } from "@/base/types/ipc";
 import DownloadManager from "@/new/photos/services/download";
 import { runMigrations } from "@/new/photos/services/migrations";
 import { initML, isMLSupported } from "@/new/photos/services/ml";
-import { ensure } from "@/utils/ensure";
+import { AppContext } from "@/new/photos/types/context";
 import { Overlay } from "@ente/shared/components/Container";
 import DialogBox from "@ente/shared/components/DialogBox";
-import {
-    DialogBoxAttributes,
-    SetDialogBoxAttributes,
-} from "@ente/shared/components/DialogBox/types";
-import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
-import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
+import { DialogBoxAttributes } from "@ente/shared/components/DialogBox/types";
 import { MessageContainer } from "@ente/shared/components/MessageContainer";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import HTTPService from "@ente/shared/network/HTTPService";
@@ -47,14 +43,7 @@ import isElectron from "is-electron";
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
 import "photoswipe/dist/photoswipe.css";
-import {
-    createContext,
-    useCallback,
-    useContext,
-    useEffect,
-    useRef,
-    useState,
-} from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import LoadingBar from "react-top-loading-bar";
 import { resumeExportsIfNeeded } from "services/export";
 import { photosLogout } from "services/logout";
@@ -63,43 +52,11 @@ import {
     updateMapEnabledStatus,
 } from "services/userService";
 import "styles/global.css";
-import {
-    NotificationAttributes,
-    SetNotificationAttributes,
-} from "types/Notification";
+import { NotificationAttributes } from "types/Notification";
 import {
     getUpdateAvailableForDownloadMessage,
     getUpdateReadyToInstallMessage,
 } from "utils/ui";
-
-/**
- * Properties available via {@link AppContext} to the Photos app's React tree.
- */
-type AppContextT = AccountsContextT & {
-    mapEnabled: boolean;
-    updateMapEnabled: (enabled: boolean) => Promise<void>;
-    startLoading: () => void;
-    finishLoading: () => void;
-    closeMessageDialog: () => void;
-    setDialogMessage: SetDialogBoxAttributes;
-    setNotificationAttributes: SetNotificationAttributes;
-    watchFolderView: boolean;
-    setWatchFolderView: (isOpen: boolean) => void;
-    watchFolderFiles: FileList;
-    setWatchFolderFiles: (files: FileList) => void;
-    themeColor: THEME_COLOR;
-    setThemeColor: (themeColor: THEME_COLOR) => void;
-    somethingWentWrong: () => void;
-    onGenericError: (error: unknown) => void;
-    isCFProxyDisabled: boolean;
-    setIsCFProxyDisabled: (disabled: boolean) => void;
-};
-
-/** The React {@link Context} available to all pages. */
-export const AppContext = createContext<AppContextT | undefined>(undefined);
-
-/** Utility hook to reduce amount of boilerplate in account related pages. */
-export const useAppContext = () => ensure(useContext(AppContext));
 
 export default function App({ Component, pageProps }: AppProps) {
     const router = useRouter();
@@ -114,9 +71,8 @@ export default function App({ Component, pageProps }: AppProps) {
     const loadingBar = useRef(null);
     const [dialogMessage, setDialogMessage] = useState<DialogBoxAttributes>();
     const [dialogBoxAttributeV2, setDialogBoxAttributesV2] = useState<
-        DialogBoxAttributesV2 | undefined
+        MiniDialogAttributes | undefined
     >();
-    useState<DialogBoxAttributes>(null);
     const [messageDialogView, setMessageDialogView] = useState(false);
     const [dialogBoxV2View, setDialogBoxV2View] = useState(false);
     const [watchFolderView, setWatchFolderView] = useState(false);
@@ -274,7 +230,10 @@ export default function App({ Component, pageProps }: AppProps) {
         }, 100);
     };
 
-    const closeMessageDialog = () => setMessageDialogView(false);
+    const closeMessageDialog = useCallback(
+        () => setMessageDialogView(false),
+        [],
+    );
     const closeDialogBoxV2 = () => setDialogBoxV2View(false);
 
     // Use `onGenericError` instead.
@@ -293,21 +252,21 @@ export default function App({ Component, pageProps }: AppProps) {
             log.error("Error", e),
             setDialogBoxAttributesV2({
                 title: t("error"),
-                content: t("generic_error_retry"),
+                content: t("generic_error"),
                 close: { variant: "critical" },
             })
         ),
         [setDialogBoxAttributesV2],
     );
 
-    const logout = () => {
+    const logout = useCallback(() => {
         void photosLogout().then(() => router.push("/"));
-    };
+    }, [router]);
 
     const appContext = {
         showNavBar,
-        startLoading,
-        finishLoading,
+        startLoading, // <- changes on each render (TODO Fix)
+        finishLoading, // <- changes on each render
         closeMessageDialog,
         setDialogMessage,
         watchFolderView,
@@ -321,7 +280,7 @@ export default function App({ Component, pageProps }: AppProps) {
         onGenericError,
         setDialogBoxAttributesV2,
         mapEnabled,
-        updateMapEnabled,
+        updateMapEnabled, // <- changes on each render
         isCFProxyDisabled,
         setIsCFProxyDisabled,
         logout,
@@ -348,7 +307,7 @@ export default function App({ Component, pageProps }: AppProps) {
                     onClose={closeMessageDialog}
                     attributes={dialogMessage}
                 />
-                <DialogBoxV2
+                <MiniDialog
                     sx={{ zIndex: 1600 }}
                     open={dialogBoxV2View}
                     onClose={closeDialogBoxV2}

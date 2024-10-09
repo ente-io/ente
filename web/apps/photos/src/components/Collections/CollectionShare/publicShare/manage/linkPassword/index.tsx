@@ -3,9 +3,9 @@ import type {
     PublicURL,
     UpdatePublicURL,
 } from "@/media/collection";
+import { AppContext } from "@/new/photos/types/context";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import { t } from "i18next";
-import { AppContext } from "pages/_app";
 import { useContext, useState } from "react";
 import { PublicLinkSetPassword } from "./setPassword";
 

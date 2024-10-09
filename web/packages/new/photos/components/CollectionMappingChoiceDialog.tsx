@@ -1,3 +1,4 @@
+import type { ModalVisibilityProps } from "@/base/components/mui";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import type { CollectionMapping } from "@/base/types/ipc";
 import FolderIcon from "@mui/icons-material/Folder";
@@ -12,12 +13,9 @@ import {
 import { t } from "i18next";
 import React from "react";
 import { SpaceBetweenFlex } from "./mui";
-import {
-    DialogCloseIconButton,
-    type DialogVisibilityProps,
-} from "./mui/Dialog";
+import { DialogCloseIconButton } from "./mui/Dialog";
 
-type CollectionMappingChoiceModalProps = DialogVisibilityProps & {
+type CollectionMappingChoiceModalProps = ModalVisibilityProps & {
     didSelect: (mapping: CollectionMapping) => void;
 };
 
