@@ -486,12 +486,16 @@ export const createFavoritesCollection = () => {
 };
 
 export const addToFavorites = async (file: EnteFile) => {
+    await addMultipleToFavorites([file]);
+};
+
+export const addMultipleToFavorites = async (files: EnteFile[]) => {
     try {
         let favCollection = await getFavCollection();
         if (!favCollection) {
             favCollection = await createFavoritesCollection();
         }
-        await addToCollection(favCollection, [file]);
+        await addToCollection(favCollection, files);
     } catch (e) {
         log.error("failed to add to favorite", e);
     }

@@ -24,7 +24,10 @@ import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";
 import { downloadUsingAnchor } from "@ente/shared/utils";
 import { t } from "i18next";
-import { moveToHiddenCollection } from "services/collectionService";
+import {
+    addMultipleToFavorites,
+    moveToHiddenCollection,
+} from "services/collectionService";
 import {
     deleteFromTrash,
     trashFiles,
@@ -46,6 +49,7 @@ export enum FILE_OPS_TYPE {
     HIDE,
     TRASH,
     DELETE_PERMANENTLY,
+    SET_FAVORITE,
 }
 
 export async function downloadFile(file: EnteFile) {
@@ -598,6 +602,7 @@ export const handleFileOps = async (
             | ((prev: { files: EnteFile[] }) => { files: EnteFile[] }),
     ) => void,
     setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator,
+    updateFavItemIds: (ids: Set<Number>) => void,
 ) => {
     switch (ops) {
         case FILE_OPS_TYPE.TRASH:
@@ -628,6 +633,10 @@ export const handleFileOps = async (
             break;
         case FILE_OPS_TYPE.UNARCHIVE:
             await changeFilesVisibility(files, ItemVisibility.visible);
+            break;
+        case FILE_OPS_TYPE.SET_FAVORITE:
+            await setBulkFavorite(files);
+            updateFavItemIds(new Set(files.map((f) => f.id)));
             break;
     }
 };
@@ -680,4 +689,12 @@ const fixTimeHelper = async (
     }) => void,
 ) => {
     setFixCreationTimeAttributes({ files: selectedFiles });
+};
+
+const setBulkFavorite = async (files: EnteFile[]) => {
+    try {
+        await addMultipleToFavorites(files);
+    } catch (e) {
+        log.error("Could not add to favorites", e);
+    }
 };

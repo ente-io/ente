@@ -992,6 +992,7 @@ export default function Gallery() {
                     setTempHiddenFileIds,
                     setFixCreationTimeAttributes,
                     setFilesDownloadProgressAttributesCreator,
+                    updateFavItemIds,
                 );
             }
             clearSelection();
@@ -1118,6 +1119,11 @@ export default function Gallery() {
         () => setOpenCollectionSelector(false),
         [],
     );
+
+    const updateFavItemIds = async () => {
+        const favItemIds = await getFavItemIds(files);
+        setFavItemIds(favItemIds);
+    };
 
     if (!collectionSummaries || !filteredData) {
         return <div></div>;

@@ -10,6 +10,7 @@ import MoveIcon from "@mui/icons-material/ArrowForward";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
 import DownloadIcon from "@mui/icons-material/Download";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorderRounded";
 import RemoveIcon from "@mui/icons-material/RemoveCircleOutline";
 import RestoreIcon from "@mui/icons-material/Restore";
 import UnArchiveIcon from "@mui/icons-material/Unarchive";
@@ -332,6 +333,17 @@ const SelectedFileOptions = ({
                                 <ClockIcon />
                             </IconButton>
                         </Tooltip>
+                        {!isFavoriteCollection && (
+                            <Tooltip title={t("favorites")}>
+                                <IconButton
+                                    onClick={handleFileOps(
+                                        FILE_OPS_TYPE.SET_FAVORITE,
+                                    )}
+                                >
+                                    <FavoriteBorderIcon />
+                                </IconButton>
+                            </Tooltip>
+                        )}
                         <Tooltip title={t("download")}>
                             <IconButton
                                 onClick={handleFileOps(FILE_OPS_TYPE.DOWNLOAD)}
