@@ -585,7 +585,7 @@ const SharedAlbumNavbar: React.FC<SharedAlbumNavbarProps> = ({
     <NavbarBase>
         <FluidContainer>
             <EnteLogoLink href="https://ente.io">
-                <EnteLogoSVG />
+                <EnteLogoSVG height={15} />
             </EnteLogoLink>
         </FluidContainer>
         {onAddPhotos ? <AddPhotosButton onClick={onAddPhotos} /> : <GoToEnte />}
@@ -594,7 +594,7 @@ const SharedAlbumNavbar: React.FC<SharedAlbumNavbarProps> = ({
 
 const EnteLogoLink = styled("a")(({ theme }) => ({
     // Remove the excess space at the top.
-    svg: { verticalAlign: "bottom" },
+    svg: { verticalAlign: "middle" },
     color: theme.colors.text.base,
     ":hover": {
         color: theme.palette.accent.main,
