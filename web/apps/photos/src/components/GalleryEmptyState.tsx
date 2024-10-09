@@ -1,4 +1,4 @@
-import { EnteLogo } from "@/base/components/EnteLogo";
+import { EnteLogoSVG } from "@/base/components/EnteLogo";
 import {
     FlexWrapper,
     VerticallyCentered,
@@ -31,10 +31,21 @@ export default function GalleryEmptyState({ openUploader }) {
                 }}
             >
                 <VerticallyCentered sx={{ flex: "none" }}>
-                    <Typography variant="h3" color="text.muted" mb={1}>
+                    <Typography
+                        variant="h3"
+                        color="text.muted"
+                        sx={{
+                            marginBlockEnd: 1,
+                            svg: {
+                                color: "text.base",
+                                verticalAlign: "middle",
+                                marginBlockEnd: "2px",
+                            },
+                        }}
+                    >
                         <Trans
                             i18nKey="WELCOME_TO_ENTE_HEADING"
-                            components={{ a: <EnteLogo /> }}
+                            components={{ a: <EnteLogoSVG /> }}
                         />
                     </Typography>
                     <Typography variant="h2">
