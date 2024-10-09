@@ -33,7 +33,6 @@
     "INCORRECT_PASSPHRASE": "Väärä salasana",
     "ENTER_ENC_PASSPHRASE": "Anna salasana, jota voimme käyttää salaamaan tietosi",
     "PASSPHRASE_DISCLAIMER": "Emme säilytä salasanaasi, joten jos unohdat sen, <strong>emme voi auttaa sinua </strong>palauttamaan tietojasi ilman palautusavainta.",
-    "WHERE_YOUR_BEST_PHOTOS_LIVE": "",
     "key_generation_in_progress": "",
     "PASSPHRASE_HINT": "",
     "CONFIRM_PASSPHRASE": "",

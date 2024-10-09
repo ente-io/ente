@@ -33,7 +33,6 @@
     "INCORRECT_PASSPHRASE": "Neteisingas slaptažodis.",
     "ENTER_ENC_PASSPHRASE": "Įveskite slaptažodį, kurį galime naudoti jūsų duomenims šifruoti",
     "PASSPHRASE_DISCLAIMER": "Jūsų slaptažodžio nesaugome, todėl jei jį pamiršite, be atkūrimo rakto <strong>negalėsime padėti </strong>atkurti duomenų.",
-    "WHERE_YOUR_BEST_PHOTOS_LIVE": "Kur saugomos geriausios nuotraukos",
     "key_generation_in_progress": "Generuojami šifravimo raktai...",
     "PASSPHRASE_HINT": "Slaptažodis",
     "CONFIRM_PASSPHRASE": "Patvirtinti slaptažodį",

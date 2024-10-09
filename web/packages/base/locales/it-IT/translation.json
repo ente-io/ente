@@ -33,7 +33,6 @@
     "INCORRECT_PASSPHRASE": "Password sbagliata",
     "ENTER_ENC_PASSPHRASE": "Inserisci una password per crittografare i tuoi dati",
     "PASSPHRASE_DISCLAIMER": "Non memorizziamo la tua password, quindi se la dimentichi, <strong>non saremo in grado di aiutarti </strong>a recuperare i tuoi dati senza una chiave di recupero.",
-    "WHERE_YOUR_BEST_PHOTOS_LIVE": "Dove vivono le tue migliori foto",
     "key_generation_in_progress": "Generazione delle chiavi di crittografia...",
     "PASSPHRASE_HINT": "Password",
     "CONFIRM_PASSPHRASE": "Conferma la password",

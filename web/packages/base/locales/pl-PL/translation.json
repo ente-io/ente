@@ -33,7 +33,6 @@
     "INCORRECT_PASSPHRASE": "Nieprawidłowe hasło",
     "ENTER_ENC_PASSPHRASE": "Wprowadź hasło, którego możemy użyć do zaszyfrowania Twoich danych",
     "PASSPHRASE_DISCLAIMER": "Nie przechowujemy Twojego hasła, więc jeśli je zapomnisz, <strong>nie będziemy w stanie Ci pomóc </strong>odzyskać Twoich danych bez klucza odzyskiwania.",
-    "WHERE_YOUR_BEST_PHOTOS_LIVE": "Gdzie żyją Twoje najlepsze zdjęcia",
     "key_generation_in_progress": "Generowanie kluczy szyfrujących...",
     "PASSPHRASE_HINT": "Hasło",
     "CONFIRM_PASSPHRASE": "Potwierdź hasło",

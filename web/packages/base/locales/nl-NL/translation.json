@@ -33,7 +33,6 @@
     "INCORRECT_PASSPHRASE": "Onjuist wachtwoord",
     "ENTER_ENC_PASSPHRASE": "Voer een wachtwoord in dat we kunnen gebruiken om je gegevens te versleutelen",
     "PASSPHRASE_DISCLAIMER": "We slaan je wachtwoord niet op, dus als je het vergeet, <strong>zullen we u niet kunnen helpen </strong>uw data te herstellen zonder een herstelcode.",
-    "WHERE_YOUR_BEST_PHOTOS_LIVE": "De woonplaats van uw beste foto's",
     "key_generation_in_progress": "Encryptiesleutels genereren...",
     "PASSPHRASE_HINT": "Wachtwoord",
     "CONFIRM_PASSPHRASE": "Wachtwoord bevestigen",

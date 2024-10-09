@@ -33,7 +33,6 @@
     "INCORRECT_PASSPHRASE": "Yanlış parola",
     "ENTER_ENC_PASSPHRASE": "Lütfen verilerini şifrelemek için kullanabileceğimiz bir parola gir",
     "PASSPHRASE_DISCLAIMER": "Parolanı saklamıyoruz, dolayısıyla unutursan kurtarma anahtarın olmadan verilerini kurtarmana <strong>yardım edemeyiz</strong>.",
-    "WHERE_YOUR_BEST_PHOTOS_LIVE": "En iyi fotoğraflarının yaşadığı yer",
     "key_generation_in_progress": "Şifreleme anahtarları oluşturuluyor...",
     "PASSPHRASE_HINT": "Parola",
     "CONFIRM_PASSPHRASE": "Parolayı onayla",
