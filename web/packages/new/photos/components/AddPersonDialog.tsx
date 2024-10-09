@@ -1,4 +1,5 @@
 import { pt } from "@/base/i18n";
+import { addPerson } from "@/new/photos/services/ml";
 import {
     Dialog,
     DialogContent,
@@ -62,9 +63,7 @@ export const AddPersonDialog: React.FC<AddPersonDialogProps> = ({
         console.log("handleSelectPerson", id, cluster);
     };
 
-    const handleAddPersonWithName = (name: string) => {
-        console.log("handleAddPersonWithName", name);
-    };
+    const handleAddPersonWithName = (name: string) => addPerson(name, cluster);
 
     // [Note: Calling setState during rendering]
     //

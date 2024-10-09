@@ -3,7 +3,7 @@ import {
     addPerson,
     deletePerson,
     renamePerson,
-} from "@/new/photos/services/ml/";
+} from "@/new/photos/services/ml";
 import { type Person } from "@/new/photos/services/ml/people";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
 import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
