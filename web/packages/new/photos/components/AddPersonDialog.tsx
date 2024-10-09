@@ -1,3 +1,4 @@
+import type { ModalVisibilityProps } from "@/base/components/mui";
 import { pt } from "@/base/i18n";
 import { addPerson } from "@/new/photos/services/ml";
 import {
@@ -13,10 +14,7 @@ import React, { useState } from "react";
 import type { FaceCluster } from "../services/ml/cluster";
 import type { Person } from "../services/ml/people";
 import { SpaceBetweenFlex, type ButtonishProps } from "./mui";
-import {
-    DialogCloseIconButton,
-    type DialogVisibilityProps,
-} from "./mui/Dialog";
+import { DialogCloseIconButton } from "./mui/Dialog";
 import { SingleInputDialog } from "./SingleInputForm";
 import {
     ItemCard,
@@ -25,7 +23,7 @@ import {
     LargeTileTextOverlay,
 } from "./Tiles";
 
-type AddPersonDialogProps = DialogVisibilityProps & {
+type AddPersonDialogProps = ModalVisibilityProps & {
     /**
      * The list of people from show the existing named people.
      */
