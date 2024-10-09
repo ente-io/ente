@@ -1,10 +1,10 @@
 import type { Collection } from "@/media/collection";
+import { AddPersonDialog } from "@/new/photos/components/AddPersonDialog";
 import {
     GalleryBarImpl,
     type GalleryBarImplProps,
 } from "@/new/photos/components/Gallery/BarImpl";
 import { PeopleHeader } from "@/new/photos/components/Gallery/PeopleHeader";
-import { SingleInputDialogTest } from "@/new/photos/components/SingleInputFormV2";
 import {
     areOnlySystemCollections,
     collectionsSortBy,
@@ -250,9 +250,11 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
                 onClose={() => setOpenAlbumCastDialog(false)}
                 collection={activeCollection}
             />
-            <SingleInputDialogTest
+            <AddPersonDialog
                 open={openPeopleSelector}
                 onClose={() => setOpenPeopleSelector(false)}
+                people={[]}
+                cluster={{ id: "test", faces: [] }}
             />
         </>
     );

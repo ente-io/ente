@@ -1,7 +1,6 @@
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import log from "@/base/log";
-import { wait } from "@/utils/promise";
 import {
     Box,
     Dialog,
@@ -35,10 +34,15 @@ type SingleInputFormProps = Pick<
      */
     onCancel: () => void;
     /**
-     * Submission handler.
+     * Submission handler. A callback invoked when the submit button is pressed.
      *
      * During submission, the text input and the submit button are disabled, and
      * an indeterminate progress indicator is shown.
+     *
+     * If this function rejects then a generic error helper text is shown below
+     * the text input, and the input (/ buttons) reenabled.
+     *
+     * @param name The current value of the text input.
      */
     onSubmit: ((name: string) => void) | ((name: string) => Promise<void>);
 };
@@ -122,26 +126,31 @@ export const SingleInputFormV2: React.FC<SingleInputFormProps> = ({
     );
 };
 
-export const SingleInputDialogTest: React.FC<DialogVisibilityProps> = ({
+type SingleInputDialogProps = DialogVisibilityProps &
+    Omit<SingleInputFormProps, "onCancel"> & {
+        /** Title of the dialog. */
+        title: string;
+    };
+
+/**
+ * A dialog that can be used to ask for a single text input using a
+ * {@link SingleInputFormV2}.
+ *
+ * If the submission handler provided to this component resolves successfully,
+ * then the dialog is closed.
+ *
+ * See also: {@link CollectionNamer}, its older sibling.
+ */
+export const SingleInputDialog: React.FC<SingleInputDialogProps> = ({
     open,
     onClose,
+    onSubmit,
+    title,
+    ...rest
 }) => {
-    // const handleSubmit: SingleInputFormProps["callback"] = async (
-    //     inputValue,
-    //     setFieldError,
-    // ) => {
-    //     try {
-    //         await onSubmit(inputValue);
-    //         onClose();
-    //     } catch (e) {
-    //         log.error(`Error when submitting value ${inputValue}`, e);
-    //         setFieldError(t("generic_error_retry"));
-    //     }
-    // };
-
     const handleSubmit = async (value: string) => {
-        await wait(3000);
-        if (value == "t") throw new Error("test");
+        await onSubmit(value);
+        onClose();
     };
 
     return (
@@ -152,17 +161,12 @@ export const SingleInputDialogTest: React.FC<DialogVisibilityProps> = ({
             fullWidth
             PaperProps={{ sx: { padding: "8px 4px 4px 4px" } }}
         >
-            <DialogTitle>{"New person"}</DialogTitle>
+            <DialogTitle>{title}</DialogTitle>
             <DialogContent sx={{ "&&&": { paddingBlockStart: 0 } }}>
                 <SingleInputFormV2
-                    autoComplete="name"
-                    autoFocus
-                    label="Add name"
-                    placeholder="Enter name"
-                    initialValue="tt"
-                    submitButtonTitle="Add person"
                     onCancel={onClose}
                     onSubmit={handleSubmit}
+                    {...rest}
                 />
             </DialogContent>
         </Dialog>
