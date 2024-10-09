@@ -334,7 +334,7 @@ const SelectedFileOptions = ({
                             </IconButton>
                         </Tooltip>
                         {!isFavoriteCollection && (
-                            <Tooltip title={t("favorites")}>
+                            <Tooltip title={t("favorite")}>
                                 <IconButton
                                     onClick={handleFileOps(
                                         FILE_OPS_TYPE.SET_FAVORITE,
