@@ -16,7 +16,7 @@ import { t } from "i18next";
 import React, { useState } from "react";
 import type { FaceCluster } from "../../services/ml/cluster";
 import type { CGroup } from "../../services/user-entity";
-import type { NewAppContextPhotos } from "../../types/context";
+import { useAppContext } from "../../types/context";
 import { AddPersonDialog } from "../AddPersonDialog";
 import { SpaceBetweenFlex } from "../mui";
 import { NameInputDialog } from "../NameInputDialog";
@@ -50,14 +50,12 @@ type PeopleHeaderProps = Pick<
     "people" | "onSelectPerson"
 > & {
     person: Person;
-    appContext: NewAppContextPhotos;
 };
 
 export const PeopleHeader: React.FC<PeopleHeaderProps> = ({
     people,
     onSelectPerson,
     person,
-    appContext,
 }) => {
     return (
         <GalleryItemsHeaderAdapter>
@@ -72,12 +70,12 @@ export const PeopleHeader: React.FC<PeopleHeaderProps> = ({
                 {person.type == "cgroup" ? (
                     <CGroupPersonOptions
                         cgroup={person.cgroup}
-                        {...{ onSelectPerson, appContext }}
+                        {...{ onSelectPerson }}
                     />
                 ) : (
                     <ClusterPersonOptions
                         cluster={person.cluster}
-                        {...{ people, appContext }}
+                        {...{ people }}
                     />
                 )}
             </SpaceBetweenFlex>
@@ -85,16 +83,12 @@ export const PeopleHeader: React.FC<PeopleHeaderProps> = ({
     );
 };
 
-type CGroupPersonOptionsProps = Pick<
-    PeopleHeaderProps,
-    "appContext" | "onSelectPerson"
-> & {
+type CGroupPersonOptionsProps = Pick<PeopleHeaderProps, "onSelectPerson"> & {
     cgroup: CGroup;
 };
 
 const CGroupPersonOptions: React.FC<CGroupPersonOptionsProps> = ({
     cgroup,
-    appContext,
     onSelectPerson,
 }) => {
     const {
@@ -102,7 +96,7 @@ const CGroupPersonOptions: React.FC<CGroupPersonOptionsProps> = ({
         finishLoading,
         onGenericError,
         setDialogBoxAttributesV2,
-    } = appContext;
+    } = useAppContext();
 
     const [openAddNameInput, setOpenAddNameInput] = useState(false);
 
@@ -182,19 +176,15 @@ const CGroupPersonOptions: React.FC<CGroupPersonOptionsProps> = ({
     );
 };
 
-type ClusterPersonOptionsProps = Pick<
-    PeopleHeaderProps,
-    "people" | "appContext"
-> & {
+type ClusterPersonOptionsProps = Pick<PeopleHeaderProps, "people"> & {
     cluster: FaceCluster;
 };
 
 const ClusterPersonOptions: React.FC<ClusterPersonOptionsProps> = ({
     people,
     cluster,
-    appContext,
 }) => {
-    const { startLoading, finishLoading } = appContext;
+    const { startLoading, finishLoading } = useAppContext();
 
     const [openNameInput, setOpenNameInput] = useState(false);
     const [openAddPersonDialog, setOpenAddPersonDialog] = useState(false);

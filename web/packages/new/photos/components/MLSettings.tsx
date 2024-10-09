@@ -27,7 +27,7 @@ import {
 import { t } from "i18next";
 import React, { useEffect, useState, useSyncExternalStore } from "react";
 import { Trans } from "react-i18next";
-import { useAppContext, type NewAppContextPhotos } from "../types/context";
+import { useAppContext, type AppContextT } from "../types/context";
 import { openURL } from "../utils/web";
 import { useWrapAsyncOperation } from "./use-wrap-async";
 
@@ -253,7 +253,7 @@ interface ManageMLProps {
     /** Called when the user wants to disable ML. */
     onDisableML: () => void;
     /** Subset of appContext. */
-    setDialogBoxAttributesV2: NewAppContextPhotos["setDialogBoxAttributesV2"];
+    setDialogBoxAttributesV2: AppContextT["setDialogBoxAttributesV2"];
 }
 
 const ManageML: React.FC<ManageMLProps> = ({

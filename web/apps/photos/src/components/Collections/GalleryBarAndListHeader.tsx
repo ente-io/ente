@@ -13,7 +13,6 @@ import {
     type CollectionsSortBy,
     type CollectionSummaries,
 } from "@/new/photos/services/collection/ui";
-import { AppContext } from "@/new/photos/types/context";
 import { includes } from "@/utils/type-guards";
 import {
     getData,
@@ -24,13 +23,7 @@ import AllCollections from "components/Collections/AllCollections";
 import { SetCollectionNamerAttributes } from "components/Collections/CollectionNamer";
 import CollectionShare from "components/Collections/CollectionShare";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
-import React, {
-    useCallback,
-    useContext,
-    useEffect,
-    useMemo,
-    useState,
-} from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { sortCollectionSummaries } from "services/collectionService";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
 import { ALL_SECTION } from "utils/collection";
@@ -101,8 +94,6 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
     filesDownloadProgressAttributesList,
     setFilesDownloadProgressAttributesCreator,
 }) => {
-    const appContext = useContext(AppContext);
-
     const [openAllCollectionDialog, setOpenAllCollectionDialog] =
         useState(false);
     const [openCollectionShareView, setOpenCollectionShareView] =
@@ -174,7 +165,7 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
                 ) : activePerson ? (
                     <PeopleHeader
                         person={activePerson}
-                        {...{ onSelectPerson, people, appContext }}
+                        {...{ onSelectPerson, people }}
                     />
                 ) : (
                     <></>
