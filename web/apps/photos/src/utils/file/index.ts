@@ -602,7 +602,7 @@ export const handleFileOps = async (
             | ((prev: { files: EnteFile[] }) => { files: EnteFile[] }),
     ) => void,
     setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator,
-    updateFavItemIds: (ids: Set<Number>) => void,
+    refreshFavItemIds: () => void,
 ) => {
     switch (ops) {
         case FILE_OPS_TYPE.TRASH:
@@ -635,8 +635,7 @@ export const handleFileOps = async (
             await changeFilesVisibility(files, ItemVisibility.visible);
             break;
         case FILE_OPS_TYPE.SET_FAVORITE:
-            await setBulkFavorite(files);
-            updateFavItemIds(new Set(files.map((f) => f.id)));
+            await setBulkFavorite(files, refreshFavItemIds);
             break;
     }
 };
@@ -691,9 +690,13 @@ const fixTimeHelper = async (
     setFixCreationTimeAttributes({ files: selectedFiles });
 };
 
-const setBulkFavorite = async (files: EnteFile[]) => {
+const setBulkFavorite = async (
+    files: EnteFile[],
+    refreshFavItemIds: () => void,
+) => {
     try {
         await addMultipleToFavorites(files);
+        refreshFavItemIds();
     } catch (e) {
         log.error("Could not add to favorites", e);
     }

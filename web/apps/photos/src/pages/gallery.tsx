@@ -992,7 +992,7 @@ export default function Gallery() {
                     setTempHiddenFileIds,
                     setFixCreationTimeAttributes,
                     setFilesDownloadProgressAttributesCreator,
-                    updateFavItemIds,
+                    refreshFavItemIds,
                 );
             }
             clearSelection();
@@ -1120,7 +1120,7 @@ export default function Gallery() {
         [],
     );
 
-    const updateFavItemIds = async () => {
+    const refreshFavItemIds = async () => {
         const favItemIds = await getFavItemIds(files);
         setFavItemIds(favItemIds);
     };
