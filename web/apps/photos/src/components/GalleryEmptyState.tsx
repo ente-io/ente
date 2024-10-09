@@ -13,7 +13,7 @@ import uploadManager from "services/upload/uploadManager";
 export default function GalleryEmptyState({ openUploader }) {
     return (
         <Wrapper>
-            <Stack sx={{ flex: "none", paddingBlock: "12px 48px" }}>
+            <Stack sx={{ flex: "none", paddingBlock: "12px 32px" }}>
                 <VerticallyCentered sx={{ flex: "none" }}>
                     <Typography
                         variant="h3"
