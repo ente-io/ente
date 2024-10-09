@@ -230,7 +230,10 @@ export default function App({ Component, pageProps }: AppProps) {
         }, 100);
     };
 
-    const closeMessageDialog = () => setMessageDialogView(false);
+    const closeMessageDialog = useCallback(
+        () => setMessageDialogView(false),
+        [],
+    );
     const closeDialogBoxV2 = () => setDialogBoxV2View(false);
 
     // Use `onGenericError` instead.
@@ -256,14 +259,14 @@ export default function App({ Component, pageProps }: AppProps) {
         [setDialogBoxAttributesV2],
     );
 
-    const logout = () => {
+    const logout = useCallback(() => {
         void photosLogout().then(() => router.push("/"));
-    };
+    }, [router]);
 
     const appContext = {
         showNavBar,
-        startLoading,
-        finishLoading,
+        startLoading, // <- changes on each render (TODO Fix)
+        finishLoading, // <- changes on each render
         closeMessageDialog,
         setDialogMessage,
         watchFolderView,
@@ -277,7 +280,7 @@ export default function App({ Component, pageProps }: AppProps) {
         onGenericError,
         setDialogBoxAttributesV2,
         mapEnabled,
-        updateMapEnabled,
+        updateMapEnabled, // <- changes on each render
         isCFProxyDisabled,
         setIsCFProxyDisabled,
         logout,
