@@ -12,16 +12,21 @@ import { useAppContext } from "../types/context";
  * The global activity indicator and error alert triggering mechanism is
  * obtained from the app context.
  */
-export const useWrapAsyncOperation = (f: () => Promise<void>) => {
+export const useWrapAsyncOperation = <T extends unknown[]>(
+    f: (...args: T) => Promise<void>,
+) => {
     const { startLoading, finishLoading, onGenericError } = useAppContext();
-    return React.useCallback(async () => {
-        startLoading();
-        try {
-            await f();
-        } catch (e) {
-            onGenericError(e);
-        } finally {
-            finishLoading();
-        }
-    }, [f, startLoading, finishLoading, onGenericError]);
+    return React.useCallback(
+        async (...args: T) => {
+            startLoading();
+            try {
+                await f(...args);
+            } catch (e) {
+                onGenericError(e);
+            } finally {
+                finishLoading();
+            }
+        },
+        [f, startLoading, finishLoading, onGenericError],
+    );
 };
