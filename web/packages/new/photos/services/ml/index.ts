@@ -743,8 +743,8 @@ export const addCGroup = async (name: string, cluster: FaceCluster) => {
  * @param cluster The new cluster of faces to associate with this person.
  */
 export const addClusterToCGroup = async (
-    cluster: FaceCluster,
     cgroup: CGroup,
+    cluster: FaceCluster,
 ) => {
     const masterKey = await masterKeyFromSession();
     const assigned = cgroup.data.assigned.concat([cluster]);
@@ -764,7 +764,7 @@ export const addClusterToCGroup = async (
  * @param cgroup The existing cgroup underlying the person. This is the (remote)
  * user entity that will get updated.
  */
-export const renameCGroup = async (name: string, cgroup: CGroup) => {
+export const renameCGroup = async (cgroup: CGroup, name: string) => {
     const masterKey = await masterKeyFromSession();
     await updateOrCreateUserEntities(
         "cgroup",

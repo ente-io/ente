@@ -21,6 +21,7 @@ import { AddPersonDialog } from "../AddPersonDialog";
 import { SpaceBetweenFlex } from "../mui";
 import { NameInputDialog } from "../NameInputDialog";
 import { SingleInputDialog } from "../SingleInputForm";
+import { useWrapAsyncOperation } from "../use-wrap-async";
 import type { GalleryBarImplProps } from "./BarImpl";
 import { GalleryItemsHeaderAdapter, GalleryItemsSummary } from "./ListHeader";
 
@@ -91,25 +92,15 @@ const CGroupPersonOptions: React.FC<CGroupPersonOptionsProps> = ({
     cgroup,
     onSelectPerson,
 }) => {
-    const {
-        startLoading,
-        finishLoading,
-        onGenericError,
-        setDialogBoxAttributesV2,
-    } = useAppContext();
+    const { setDialogBoxAttributesV2 } = useAppContext();
 
     const [openAddNameInput, setOpenAddNameInput] = useState(false);
 
     const handleRenamePerson = () => setOpenAddNameInput(true);
 
-    const renamePersonUsingName = async (name: string) => {
-        startLoading();
-        try {
-            await renameCGroup(name, cgroup);
-        } finally {
-            finishLoading();
-        }
-    };
+    const renamePersonUsingName = useWrapAsyncOperation((name: string) =>
+        renameCGroup(cgroup, name),
+    );
 
     const handleDeletePerson = () =>
         setDialogBoxAttributesV2({
@@ -120,23 +111,16 @@ const CGroupPersonOptions: React.FC<CGroupPersonOptionsProps> = ({
             close: { text: t("cancel") },
             proceed: {
                 text: t("reset"),
-                action: doDeletePerson,
+                action: deletePerson,
             },
             buttonDirection: "row",
         });
 
-    const doDeletePerson = async () => {
-        startLoading();
-        try {
-            await deleteCGroup(cgroup);
-            // Reset the selection to the default state.
-            onSelectPerson(undefined);
-        } catch (e) {
-            onGenericError(e);
-        } finally {
-            finishLoading();
-        }
-    };
+    const deletePerson = useWrapAsyncOperation(async () => {
+        await deleteCGroup(cgroup);
+        // Reset the selection to the default state.
+        onSelectPerson(undefined);
+    });
 
     return (
         <>

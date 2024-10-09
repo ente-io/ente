@@ -1,4 +1,4 @@
-import React from "react";
+import { useCallback } from "react";
 import { useAppContext } from "../types/context";
 
 /**
@@ -16,7 +16,7 @@ export const useWrapAsyncOperation = <T extends unknown[]>(
     f: (...args: T) => Promise<void>,
 ) => {
     const { startLoading, finishLoading, onGenericError } = useAppContext();
-    return React.useCallback(
+    return useCallback(
         async (...args: T) => {
             startLoading();
             try {

@@ -55,14 +55,12 @@ export const AddPersonDialog: React.FC<AddPersonDialogProps> = ({
         (p) => p.type != "cluster",
     );
 
-    const handleAddPerson = () => {
-        setOpenNameInput(true);
-    };
+    const handleAddPerson = () => setOpenNameInput(true);
 
     const handleSelectPerson = useWrapAsyncOperation((id: string) =>
         addClusterToCGroup(
-            cluster,
             ensure(cgroupPeople.find((p) => p.id == id)).cgroup,
+            cluster,
         ),
     );
 
