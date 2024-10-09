@@ -783,8 +783,8 @@ class SearchService {
         if (!fileIdToClusterID.containsKey(f.uploadedFileID ?? -1)) {
           continue;
         }
-        final cluserIds = fileIdToClusterID[f.uploadedFileID ?? -1]!;
-        for (final cluster in cluserIds) {
+        final clusterIds = fileIdToClusterID[f.uploadedFileID ?? -1]!;
+        for (final cluster in clusterIds) {
           final PersonEntity? p =
               personIdToPerson[clusterIDToPersonID[cluster] ?? ""];
           if (p != null) {
