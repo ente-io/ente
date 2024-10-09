@@ -33,7 +33,6 @@
     "INCORRECT_PASSPHRASE": "كلمة المرور غير صحيحة",
     "ENTER_ENC_PASSPHRASE": "الرجاء إدخال كلمة المرور التي يمكننا استخدامها لتشفير بياناتك",
     "PASSPHRASE_DISCLAIMER": "نحن لا نخزن كلمة مرورك، لذا إذا نسيتها، <strong>لن نتمكن من مساعدتك </strong>في استرداد بياناتك دون مفتاح الاسترداد.",
-    "WHERE_YOUR_BEST_PHOTOS_LIVE": "أين تعيش أفضل صورك",
     "key_generation_in_progress": "جار توليد مفاتيح التشفير...",
     "PASSPHRASE_HINT": "كلمة المرور",
     "CONFIRM_PASSPHRASE": "تأكيد كلمة المرور",

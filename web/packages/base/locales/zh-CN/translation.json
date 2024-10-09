@@ -33,7 +33,6 @@
     "INCORRECT_PASSPHRASE": "密码错误",
     "ENTER_ENC_PASSPHRASE": "请输入我们可以用来加密您数据的密码",
     "PASSPHRASE_DISCLAIMER": "我们不会存储您的密码，因此如果您忘记密码， <strong>我们将无法帮助您</strong>在没有恢复密钥的情况下恢复您的数据。",
-    "WHERE_YOUR_BEST_PHOTOS_LIVE": "存放您照片的最好的地方",
     "key_generation_in_progress": "正在生成加密密钥...",
     "PASSPHRASE_HINT": "密码",
     "CONFIRM_PASSPHRASE": "请确认密码",

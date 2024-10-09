@@ -33,7 +33,6 @@
     "INCORRECT_PASSPHRASE": "Kata sandi salah",
     "ENTER_ENC_PASSPHRASE": "Silakan masukkan kata sandi yang dapat kami gunakan untuk mengenkripsi data Anda",
     "PASSPHRASE_DISCLAIMER": "Kami tidak menyimpan kata sandi Anda, jadi jika Anda lupa, <strong>kami tidak akan dapat membantu Anda </strong>memulihkan data tanpa kunci pemulihan.",
-    "WHERE_YOUR_BEST_PHOTOS_LIVE": "Tempat foto terbaik Anda",
     "key_generation_in_progress": "Menghasilkan kunci enkripsi...",
     "PASSPHRASE_HINT": "Kata sandi",
     "CONFIRM_PASSPHRASE": "Konfirmasi kata sandi",

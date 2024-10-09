@@ -33,7 +33,6 @@
     "INCORRECT_PASSPHRASE": "Contraseña incorrecta",
     "ENTER_ENC_PASSPHRASE": "Introducir una contraseña que podamos usar para cifrar sus datos",
     "PASSPHRASE_DISCLAIMER": "No guardamos su contraseña, así que si la olvida, <strong>no podremos ayudarte </strong>a recuperar tus datos sin una clave de recuperación.",
-    "WHERE_YOUR_BEST_PHOTOS_LIVE": "Donde vivan su mejores fotos",
     "key_generation_in_progress": "Generando claves de encriptación...",
     "PASSPHRASE_HINT": "Contraseña",
     "CONFIRM_PASSPHRASE": "Confirmar contraseña",
