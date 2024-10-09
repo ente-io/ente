@@ -333,17 +333,18 @@ const SelectedFileOptions = ({
                                 <ClockIcon />
                             </IconButton>
                         </Tooltip>
-                        {!isFavoriteCollection && (
-                            <Tooltip title={t("favorite")}>
-                                <IconButton
-                                    onClick={handleFileOps(
-                                        FILE_OPS_TYPE.SET_FAVORITE,
-                                    )}
-                                >
-                                    <FavoriteBorderIcon />
-                                </IconButton>
-                            </Tooltip>
-                        )}
+                        {!isFavoriteCollection &&
+                            activeCollectionID != ARCHIVE_SECTION && (
+                                <Tooltip title={t("favorite")}>
+                                    <IconButton
+                                        onClick={handleFileOps(
+                                            FILE_OPS_TYPE.SET_FAVORITE,
+                                        )}
+                                    >
+                                        <FavoriteBorderIcon />
+                                    </IconButton>
+                                </Tooltip>
+                            )}
                         <Tooltip title={t("download")}>
                             <IconButton
                                 onClick={handleFileOps(FILE_OPS_TYPE.DOWNLOAD)}
