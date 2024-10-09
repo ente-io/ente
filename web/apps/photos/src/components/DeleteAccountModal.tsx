@@ -88,7 +88,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
             title: t("delete_account"),
             content: <Trans i18nKey="delete_account_confirm_message" />,
             proceed: {
-                text: t("DELETE"),
+                text: t("delete"),
                 action: solveChallengeAndDeleteAccount,
                 variant: "critical",
             },
@@ -109,7 +109,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                 />
             ),
             proceed: {
-                text: t("DELETE"),
+                text: t("delete"),
                 action: () => initiateEmail(emailID),
                 variant: "critical",
             },

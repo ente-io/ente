@@ -101,7 +101,7 @@ const SelectedFileOptions = ({
             content: t("DELETE_FILES_MESSAGE"),
             proceed: {
                 action: handleFileOps(FILE_OPS_TYPE.DELETE_PERMANENTLY),
-                text: t("DELETE"),
+                text: t("delete"),
                 variant: "critical",
             },
             close: { text: t("cancel") },
@@ -222,7 +222,7 @@ const SelectedFileOptions = ({
                                 <VisibilityOffOutlined />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title={t("DELETE")}>
+                        <Tooltip title={t("delete")}>
                             <IconButton onClick={trashHandler}>
                                 <DeleteIcon />
                             </IconButton>
@@ -256,7 +256,7 @@ const SelectedFileOptions = ({
                                 <VisibilityOffOutlined />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title={t("DELETE")}>
+                        <Tooltip title={t("delete")}>
                             <IconButton onClick={trashHandler}>
                                 <DeleteIcon />
                             </IconButton>
@@ -289,7 +289,7 @@ const SelectedFileOptions = ({
                                 <MoveIcon />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title={t("DELETE")}>
+                        <Tooltip title={t("delete")}>
                             <IconButton onClick={trashHandler}>
                                 <DeleteIcon />
                             </IconButton>
@@ -318,7 +318,7 @@ const SelectedFileOptions = ({
                             </IconButton>
                         </Tooltip>
 
-                        <Tooltip title={t("DELETE")}>
+                        <Tooltip title={t("delete")}>
                             <IconButton onClick={trashHandler}>
                                 <DeleteIcon />
                             </IconButton>
@@ -406,7 +406,7 @@ const SelectedFileOptions = ({
                                 <VisibilityOffOutlined />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title={t("DELETE")}>
+                        <Tooltip title={t("delete")}>
                             <IconButton onClick={trashHandler}>
                                 <DeleteIcon />
                             </IconButton>

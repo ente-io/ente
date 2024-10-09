@@ -284,7 +284,7 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
             title: t("delete_passkey"),
             content: t("delete_passkey_confirmation"),
             proceed: {
-                text: t("DELETE"),
+                text: t("delete"),
                 action: handleDelete,
                 variant: "critical",
             },

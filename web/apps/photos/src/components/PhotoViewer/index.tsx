@@ -849,7 +849,7 @@ function PhotoViewer(props: PhotoViewerProps) {
                             {isOwnFile && !props.isTrashCollection && (
                                 <button
                                     className="pswp__button pswp__button--custom"
-                                    title={t("DELETE_OPTION")}
+                                    title={t("delete_key")}
                                     onClick={() => {
                                         confirmTrashFile(
                                             photoSwipe?.currItem as EnteFile,
@@ -908,8 +908,8 @@ function PhotoViewer(props: PhotoViewerProps) {
                                         <button
                                             title={
                                                 isFav
-                                                    ? t("UNFAVORITE_OPTION")
-                                                    : t("FAVORITE_OPTION")
+                                                    ? t("unfavorite_key")
+                                                    : t("favorite_key")
                                             }
                                             className="pswp__button pswp__button--custom"
                                             onClick={() => {

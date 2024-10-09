@@ -44,7 +44,7 @@ export default function DeduplicateOptions({
                     {formatNumber(count)} {t("SELECTED")}
                 </Box>
             </FluidContainer>
-            <Tooltip title={t("DELETE")}>
+            <Tooltip title={t("delete")}>
                 <IconButton onClick={trashHandler}>
                     <DeleteIcon />
                 </IconButton>
