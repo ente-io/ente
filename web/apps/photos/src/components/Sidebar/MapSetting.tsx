@@ -2,6 +2,7 @@ import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { MenuItemGroup } from "@/base/components/Menu";
 import { Titlebar } from "@/base/components/Titlebar";
 import log from "@/base/log";
+import { AppContext } from "@/new/photos/types/context";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import {
     Box,
@@ -12,7 +13,6 @@ import {
     Typography,
 } from "@mui/material";
 import { t } from "i18next";
-import { AppContext } from "pages/_app";
 import React, { useContext, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 import { getMapEnabledStatus } from "services/userService";

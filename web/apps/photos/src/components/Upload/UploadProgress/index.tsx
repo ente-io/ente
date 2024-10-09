@@ -1,6 +1,6 @@
 import { UPLOAD_STAGES } from "@/new/photos/services/upload/types";
+import { AppContext } from "@/new/photos/types/context";
 import { t } from "i18next";
-import { AppContext } from "pages/_app";
 import { useContext, useEffect, useState } from "react";
 import type {
     InProgressUpload,

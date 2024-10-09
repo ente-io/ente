@@ -7,6 +7,7 @@ import {
 import { nameAndExtension } from "@/base/file";
 import log from "@/base/log";
 import downloadManager from "@/new/photos/services/download";
+import { AppContext } from "@/new/photos/types/context";
 import { EnteFile } from "@/new/photos/types/file";
 import { ensure } from "@/utils/ensure";
 import {
@@ -33,7 +34,6 @@ import {
     Typography,
 } from "@mui/material";
 import { t } from "i18next";
-import { AppContext } from "pages/_app";
 import type { Dispatch, MutableRefObject, SetStateAction } from "react";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { getLocalCollections } from "services/collectionService";

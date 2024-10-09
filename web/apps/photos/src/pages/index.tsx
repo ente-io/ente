@@ -5,6 +5,7 @@ import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import log from "@/base/log";
 import { albumsAppOrigin, customAPIHost } from "@/base/origins";
 import { DevSettings } from "@/new/photos/components/DevSettings";
+import { useAppContext } from "@/new/photos/types/context";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { saveKeyInSessionStore } from "@ente/shared/crypto/helpers";
 import localForage from "@ente/shared/storage/localForage";
@@ -24,7 +25,6 @@ import { CarouselProvider, DotGroup, Slide, Slider } from "pure-react-carousel";
 import "pure-react-carousel/dist/react-carousel.es.css";
 import { useCallback, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
-import { useAppContext } from "./_app";
 
 export default function LandingPage() {
     const { showNavBar, setDialogMessage } = useAppContext();

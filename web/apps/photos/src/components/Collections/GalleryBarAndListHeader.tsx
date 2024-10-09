@@ -13,6 +13,7 @@ import {
     type CollectionsSortBy,
     type CollectionSummaries,
 } from "@/new/photos/services/collection/ui";
+import { AppContext } from "@/new/photos/types/context";
 import { includes } from "@/utils/type-guards";
 import {
     getData,
@@ -23,7 +24,6 @@ import AllCollections from "components/Collections/AllCollections";
 import { SetCollectionNamerAttributes } from "components/Collections/CollectionNamer";
 import CollectionShare from "components/Collections/CollectionShare";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
-import { AppContext } from "pages/_app";
 import React, {
     useCallback,
     useContext,

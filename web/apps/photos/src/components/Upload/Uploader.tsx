@@ -10,6 +10,8 @@ import type {
     UploadItem,
 } from "@/new/photos/services/upload/types";
 import { UPLOAD_STAGES } from "@/new/photos/services/upload/types";
+import { AppContext } from "@/new/photos/types/context";
+import { NotificationAttributes } from "@/new/photos/types/notification";
 import { firstNonEmpty } from "@/utils/array";
 import { ensure } from "@/utils/ensure";
 import { CustomError } from "@ente/shared/error";
@@ -17,7 +19,6 @@ import DiscFullIcon from "@mui/icons-material/DiscFull";
 import UserNameInputDialog from "components/UserNameInputDialog";
 import { t } from "i18next";
 import isElectron from "is-electron";
-import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";
 import { useContext, useEffect, useRef, useState } from "react";
 import billingService from "services/billingService";
@@ -37,7 +38,6 @@ import type {
 import uploadManager from "services/upload/uploadManager";
 import watcher from "services/watch";
 import { SetCollections, SetFiles, SetLoading } from "types/gallery";
-import { NotificationAttributes } from "types/Notification";
 import { getOrCreateAlbum } from "utils/collection";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import {

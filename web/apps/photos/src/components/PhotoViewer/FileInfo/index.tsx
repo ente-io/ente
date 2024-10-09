@@ -26,6 +26,7 @@ import {
     isMLEnabled,
     type AnnotatedFaceID,
 } from "@/new/photos/services/ml";
+import { AppContext } from "@/new/photos/types/context";
 import { EnteFile } from "@/new/photos/types/file";
 import { formattedByteSize } from "@/new/photos/utils/units";
 import CopyButton from "@ente/shared/components/CodeBlock/CopyButton";
@@ -50,7 +51,6 @@ import {
 import { Chip } from "components/Chip";
 import LinkButton from "components/pages/gallery/LinkButton";
 import { t } from "i18next";
-import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import { changeFileName, updateExistingFilePubMetadata } from "utils/file";

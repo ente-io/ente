@@ -9,13 +9,13 @@ import {
 } from "@/base/i18n";
 import { MLSettings } from "@/new/photos/components/MLSettings";
 import { isMLSupported } from "@/new/photos/services/ml";
+import { AppContext } from "@/new/photos/types/context";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import ScienceIcon from "@mui/icons-material/Science";
 import { Box, DialogProps, Stack } from "@mui/material";
 import DropdownInput from "components/DropdownInput";
 import { t } from "i18next";
-import { AppContext } from "pages/_app";
 import React, { useContext, useState } from "react";
 import { AdvancedSettings } from "./AdvancedSettings";
 import { MapSettings } from "./MapSetting";

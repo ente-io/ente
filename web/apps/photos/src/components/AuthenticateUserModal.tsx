@@ -1,5 +1,6 @@
 import { checkSessionValidity } from "@/accounts/services/session";
 import log from "@/base/log";
+import { AppContext } from "@/new/photos/types/context";
 import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
 import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
 import VerifyMasterPasswordForm, {
@@ -8,7 +9,6 @@ import VerifyMasterPasswordForm, {
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import type { KeyAttributes, User } from "@ente/shared/user/types";
 import { t } from "i18next";
-import { AppContext } from "pages/_app";
 import { useCallback, useContext, useEffect, useState } from "react";
 
 interface Iprops {

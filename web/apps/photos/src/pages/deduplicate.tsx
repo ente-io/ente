@@ -1,6 +1,7 @@
 import { stashRedirect } from "@/accounts/services/redirect";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { getLocalFiles } from "@/new/photos/services/files";
+import { AppContext } from "@/new/photos/types/context";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { ApiError } from "@ente/shared/error";
@@ -13,7 +14,6 @@ import DeduplicateOptions from "components/pages/dedupe/SelectedFileOptions";
 import PhotoFrame from "components/PhotoFrame";
 import { t } from "i18next";
 import { default as Router, default as router } from "next/router";
-import { AppContext } from "pages/_app";
 import { createContext, useContext, useEffect, useState } from "react";
 import {
     getAllLatestCollections,
