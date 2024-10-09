@@ -9,14 +9,13 @@ import {
 } from "@/base/i18n";
 import { MLSettings } from "@/new/photos/components/MLSettings";
 import { isMLSupported } from "@/new/photos/services/ml";
-import { AppContext } from "@/new/photos/types/context";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import ScienceIcon from "@mui/icons-material/Science";
 import { Box, DialogProps, Stack } from "@mui/material";
 import DropdownInput from "components/DropdownInput";
 import { t } from "i18next";
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import { AdvancedSettings } from "./AdvancedSettings";
 import { MapSettings } from "./MapSetting";
 import type { SettingsDrawerProps } from "./types";
@@ -26,8 +25,6 @@ export const Preferences: React.FC<SettingsDrawerProps> = ({
     onClose,
     onRootClose,
 }) => {
-    const appContext = useContext(AppContext);
-
     const [advancedSettingsView, setAdvancedSettingsView] = useState(false);
     const [mapSettingsView, setMapSettingsView] = useState(false);
     const [openMLSettings, setOpenMLSettings] = useState(false);
@@ -101,7 +98,6 @@ export const Preferences: React.FC<SettingsDrawerProps> = ({
                 open={openMLSettings}
                 onClose={() => setOpenMLSettings(false)}
                 onRootClose={handleRootClose}
-                appContext={appContext}
             />
             <MapSettings
                 open={mapSettingsView}
