@@ -59,7 +59,7 @@ type SingleInputFormProps = Pick<
  * disabled and a loading indicator is shown. Errors during submission are shown
  * as the helper text associated with the text field.
  */
-export const SingleInputFormV2: React.FC<SingleInputFormProps> = ({
+export const SingleInputForm: React.FC<SingleInputFormProps> = ({
     initialValue,
     submitButtonTitle,
     onCancel,
@@ -134,7 +134,7 @@ type SingleInputDialogProps = DialogVisibilityProps &
 
 /**
  * A dialog that can be used to ask for a single text input using a
- * {@link SingleInputFormV2}.
+ * {@link SingleInputForm}.
  *
  * If the submission handler provided to this component resolves successfully,
  * then the dialog is closed.
@@ -163,7 +163,7 @@ export const SingleInputDialog: React.FC<SingleInputDialogProps> = ({
         >
             <DialogTitle>{title}</DialogTitle>
             <DialogContent sx={{ "&&&": { paddingBlockStart: 0 } }}>
-                <SingleInputFormV2
+                <SingleInputForm
                     onCancel={onClose}
                     onSubmit={handleSubmit}
                     {...rest}

@@ -16,7 +16,7 @@ import {
     DialogCloseIconButton,
     type DialogVisibilityProps,
 } from "./mui/Dialog";
-import { SingleInputDialog } from "./SingleInputFormV2";
+import { SingleInputDialog } from "./SingleInputForm";
 import {
     ItemCard,
     LargeTileButton,
@@ -119,7 +119,7 @@ export const AddPersonDialog: React.FC<AddPersonDialogProps> = ({
                 placeholder={t("enter_name")}
                 autoComplete="name"
                 autoFocus
-                submitButtonTitle={pt("Add person")}
+                submitButtonTitle={t("add")}
                 onSubmit={handleAddPersonWithName}
             />
         </>
