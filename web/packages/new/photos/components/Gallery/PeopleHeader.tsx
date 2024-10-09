@@ -1,12 +1,3 @@
-/**
- * @file code that really belongs to pages/gallery.tsx itself (or related
- * files), but it written here in a separate file so that we can write in this
- * package that has TypeScript strict mode enabled.
- *
- * Once the original gallery.tsx is strict mode, this code can be inlined back
- * there.
- */
-
 import { pt } from "@/base/i18n";
 import {
     addPerson,
