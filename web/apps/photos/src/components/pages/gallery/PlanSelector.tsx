@@ -161,7 +161,7 @@ function PlanSelectorCard(props: PlanSelectorCardProps) {
                 props.closeModal();
                 appContext.setDialogMessage({
                     title: t("OPEN_PLAN_SELECTOR_MODAL_FAILED"),
-                    content: t("UNKNOWN_ERROR"),
+                    content: t("generic_error_retry"),
                     close: { text: t("close"), variant: "secondary" },
                     proceed: {
                         text: t("REOPEN_PLAN_SELECTOR_MODAL"),
@@ -696,7 +696,7 @@ function ManageSubscription({
             log.error("Could not redirect to family portal", e);
             setDialogMessage({
                 title: t("error"),
-                content: t("UNKNOWN_ERROR"),
+                content: t("generic_error_retry"),
                 close: { variant: "critical" },
             });
         }

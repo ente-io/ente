@@ -7,6 +7,7 @@ import { type EnteFile } from "@/new/photos/types/file";
 import { styled } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { faceCrop } from "../services/ml";
+import { UnstyledButton } from "./UnstyledButton";
 
 interface ItemCardProps {
     /**
@@ -101,7 +102,7 @@ export const ItemCard: React.FC<React.PropsWithChildren<ItemCardProps>> = ({
  * Use {@link ItemTileOverlay} (usually via one of its presets) to overlay
  * content on top of the tile.
  */
-export const ItemTile = styled("div")`
+export const BaseTile = styled("div")`
     display: flex;
     /* Act as container for the absolutely positioned ItemTileOverlays. */
     position: relative;
@@ -121,7 +122,7 @@ export const ItemTile = styled("div")`
  * A 48x48 TileComponent used in search result dropdown's preview files and
  * other places.
  */
-export const PreviewItemTile = styled(ItemTile)`
+export const PreviewItemTile = styled(BaseTile)`
     width: 48px;
     height: 48px;
 `;
@@ -129,16 +130,38 @@ export const PreviewItemTile = styled(ItemTile)`
 /**
  * A rectangular, TV-ish tile used in the gallery bar.
  */
-export const BarItemTile = styled(ItemTile)`
+export const BarItemTile = styled(BaseTile)`
     width: 90px;
     height: 64px;
 `;
 
 /**
- * A large 150x150 TileComponent used when showing the list of all collections
- * in the all collections view.
+ * A variant of {@link BaseTile} meant for use when the tile is interactable.
  */
-export const AllCollectionTile = styled(ItemTile)`
+export const BaseTileButton = styled(UnstyledButton)`
+    /* Buttons reset this to center */
+    text-align: inherit;
+
+    /* Rest of this is mostly verbatim from ItemTile ... */
+
+    display: flex;
+    /* Act as container for the absolutely positioned ItemTileOverlays. */
+    position: relative;
+    border-radius: 4px;
+    overflow: hidden;
+    & > img {
+        object-fit: cover;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+    }
+`;
+
+/**
+ * A large 150x150 TileComponent used when, for example, when showing the list
+ * of collections in the all collections view and in the collection selector.
+ */
+export const LargeTileButton = styled(BaseTileButton)`
     width: 150px;
     height: 150px;
 `;
@@ -146,7 +169,8 @@ export const AllCollectionTile = styled(ItemTile)`
 /**
  * An empty overlay on top of the nearest relative positioned ancestor.
  *
- * This is meant to be used in tandem with {@link ItemTile}.
+ * This is meant to be used in tandem with a derivate of {@link BaseTile} or
+ * {@link BaseTileButton}.
  */
 export const ItemTileOverlay = styled("div")`
     position: absolute;
@@ -171,7 +195,7 @@ export const TileTextOverlay = styled(ItemTileOverlay)`
 
 /**
  * A variation of {@link TileTextOverlay} for use with larger tiles like the
- * {@link AllCollectionTile}.
+ * {@link CollectionTile}.
  */
 export const LargeTileTextOverlay = styled(ItemTileOverlay)`
     padding: 8px;
@@ -180,4 +204,15 @@ export const LargeTileTextOverlay = styled(ItemTileOverlay)`
         rgba(0, 0, 0, 0.1) 0%,
         rgba(0, 0, 0, 0.5) 86.46%
     );
+`;
+
+/**
+ * A container for "+", suitable for use with a {@link LargeTileTextOverlay}.
+ */
+export const LargeTilePlusOverlay = styled(ItemTileOverlay)`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 42px;
+    color: ${({ theme }) => theme.colors.stroke.muted};
 `;

@@ -3,6 +3,7 @@ import { PasswordStrengthHint } from "@/accounts/components/PasswordStrength";
 import { PAGES } from "@/accounts/constants/pages";
 import { isWeakPassword } from "@/accounts/utils";
 import { generateKeyAndSRPAttributes } from "@/accounts/utils/srp";
+import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import log from "@/base/log";
 import { LS_KEYS, setLSUser } from "@ente/shared//storage/localStorage";
 import { VerticallyCentered } from "@ente/shared/components/Container";
@@ -10,7 +11,6 @@ import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
 import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
 import ShowHidePassword from "@ente/shared/components/Form/ShowHidePassword";
 import LinkButton from "@ente/shared/components/LinkButton";
-import SubmitButton from "@ente/shared/components/SubmitButton";
 import {
     generateAndSaveIntermediateKeyAttributes,
     saveKeyInSessionStore,
@@ -87,7 +87,10 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
                 await sendOtt(email);
             } catch (e) {
                 const message = e instanceof Error ? e.message : "";
-                setFieldError("confirm", `${t("UNKNOWN_ERROR")} ${message}`);
+                setFieldError(
+                    "confirm",
+                    `${t("generic_error_retry")} ${message}`,
+                );
                 throw e;
             }
             try {
@@ -131,9 +134,9 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
                 validationSchema={Yup.object().shape({
                     email: Yup.string()
                         .email(t("EMAIL_ERROR"))
-                        .required(t("REQUIRED")),
-                    passphrase: Yup.string().required(t("REQUIRED")),
-                    confirm: Yup.string().required(t("REQUIRED")),
+                        .required(t("required")),
+                    passphrase: Yup.string().required(t("required")),
+                    confirm: Yup.string().required(t("required")),
                 })}
                 validateOnChange={false}
                 validateOnBlur={false}
@@ -286,15 +289,18 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
                             </FormGroup>
                         </VerticallyCentered>
                         <Box mb={4}>
-                            <SubmitButton
-                                sx={{ my: 0 }}
-                                buttonText={t("CREATE_ACCOUNT")}
+                            <LoadingButton
+                                fullWidth
+                                color="accent"
+                                type="submit"
                                 loading={loading}
                                 disabled={
                                     !acceptTerms ||
                                     isWeakPassword(values.passphrase)
                                 }
-                            />
+                            >
+                                {t("CREATE_ACCOUNT")}
+                            </LoadingButton>
                             {loading && (
                                 <Typography
                                     mt={1}

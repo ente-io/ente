@@ -352,7 +352,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       //files db before triggering a sync.
       await PhotoManager.stopChangeNotify();
       final AssetEntity? newAsset =
-          await (PhotoManager.editor.saveImage(result, title: fileName));
+          await (PhotoManager.editor.saveImage(result, filename: fileName));
       final newFile = await ente.EnteFile.fromAsset(
         widget.originalFile.deviceFolder ?? '',
         newAsset!,
@@ -377,12 +377,8 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       showShortToast(context, S.of(context).editsSaved);
       _logger.info("Original file " + widget.originalFile.toString());
       _logger.info("Saved edits to file " + newFile.toString());
-      final existingFiles = widget.detailPageConfig.files;
-      final files = (await widget.detailPageConfig.asyncLoader!(
-        existingFiles[existingFiles.length - 1].creationTime!,
-        existingFiles[0].creationTime!,
-      ))
-          .files;
+      final files = widget.detailPageConfig.files;
+
       // the index could be -1 if the files fetched doesn't contain the newly
       // edited files
       int selectionIndex =

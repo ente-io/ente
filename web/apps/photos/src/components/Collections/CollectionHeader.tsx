@@ -6,11 +6,11 @@ import {
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
 } from "@/new/photos/components/Gallery/ListHeader";
-import { SpaceBetweenFlex } from "@/new/photos/components/mui-custom";
+import { SpaceBetweenFlex } from "@/new/photos/components/mui";
 import type {
     CollectionSummary,
     CollectionSummaryType,
-} from "@/new/photos/types/collection";
+} from "@/new/photos/services/collection/ui";
 import { HorizontalFlex } from "@ente/shared/components/Container";
 import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import OverflowMenu, {
@@ -146,7 +146,7 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
             log.error("Collection action failed", e);
             setDialogMessage({
                 title: t("error"),
-                content: t("UNKNOWN_ERROR"),
+                content: t("generic_error_retry"),
                 close: { variant: "critical" },
             });
         },

@@ -10,14 +10,17 @@ import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/account/request_pwd_verification_page.dart';
 import 'package:ente_auth/ui/account/sessions_page.dart';
+import 'package:ente_auth/ui/components/buttons/button_widget.dart';
 import 'package:ente_auth/ui/components/captioned_text_widget.dart';
 import 'package:ente_auth/ui/components/expandable_menu_item_widget.dart';
 import 'package:ente_auth/ui/components/menu_item_widget.dart';
+import 'package:ente_auth/ui/components/models/button_result.dart';
 import 'package:ente_auth/ui/components/toggle_switch_widget.dart';
 import 'package:ente_auth/ui/settings/common_settings.dart';
 import 'package:ente_auth/ui/settings/lock_screen/lock_screen_options.dart';
 import 'package:ente_auth/utils/auth_util.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
+import 'package:ente_auth/utils/lock_screen_settings.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
 import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
@@ -146,10 +149,27 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
         onTap: () async {
+          ButtonResult? result;
+          if (_config.hasOptedForOfflineMode() &&
+              LockScreenSettings.instance.getOfflineModeWarningStatus()) {
+            result = await showChoiceActionSheet(
+              context,
+              title: context.l10n.warning,
+              body: context.l10n.appLockOfflineModeWarning,
+              secondButtonLabel: context.l10n.cancel,
+              firstButtonLabel: context.l10n.ok,
+            );
+            if (result?.action == ButtonAction.first) {
+              await LockScreenSettings.instance
+                  .setOfflineModeWarningStatus(false);
+            } else {
+              return;
+            }
+          }
           if (await Configuration.instance.shouldShowLockScreen()) {
             final bool result = await requestAuthentication(
               context,
-              context.l10n.about,
+              context.l10n.authToChangeLockscreenSetting,
             );
             if (result) {
               await Navigator.of(context).push(

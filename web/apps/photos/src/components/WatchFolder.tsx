@@ -2,6 +2,7 @@ import { EllipsizedTypography } from "@/base/components/Typography";
 import { ensureElectron } from "@/base/electron";
 import { basename, dirname } from "@/base/file";
 import type { CollectionMapping, FolderWatch } from "@/base/types/ipc";
+import { CollectionMappingChoiceDialog } from "@/new/photos/components/CollectionMappingChoiceDialog";
 import { ensure } from "@/utils/ensure";
 import {
     FlexWrapper,
@@ -28,7 +29,6 @@ import {
     Typography,
     styled,
 } from "@mui/material";
-import { CollectionMappingChoiceModal } from "components/Upload/CollectionMappingChoiceModal";
 import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import React, { useContext, useEffect, useState } from "react";
@@ -54,7 +54,7 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
     >();
     // True when we're showing the choice dialog to ask the user to set the
     // collection mapping.
-    const [choiceModalOpen, setChoiceModalOpen] = useState(false);
+    const [openChoiceDialog, setOpenChoiceDialog] = useState(false);
 
     const appContext = useContext(AppContext);
 
@@ -88,7 +88,7 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
             addWatch(path, "root");
         } else {
             setSavedFolderPath(path);
-            setChoiceModalOpen(true);
+            setOpenChoiceDialog(true);
         }
     };
 
@@ -105,10 +105,7 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
     const removeWatch = async (watch: FolderWatch) =>
         watcher.removeWatch(watch.folderPath).then((ws) => setWatches(ws));
 
-    const closeChoiceModal = () => setChoiceModalOpen(false);
-
-    const addWatchWithMapping = (mapping: CollectionMapping) => {
-        closeChoiceModal();
+    const handleCollectionMappingSelect = (mapping: CollectionMapping) => {
         setSavedFolderPath(undefined);
         addWatch(ensure(savedFolderPath), mapping);
     };
@@ -141,10 +138,10 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
                     </Stack>
                 </DialogContent>
             </Dialog>
-            <CollectionMappingChoiceModal
-                open={choiceModalOpen}
-                onClose={closeChoiceModal}
-                didSelect={addWatchWithMapping}
+            <CollectionMappingChoiceDialog
+                open={openChoiceDialog}
+                onClose={() => setOpenChoiceDialog(false)}
+                didSelect={handleCollectionMappingSelect}
             />
         </>
     );

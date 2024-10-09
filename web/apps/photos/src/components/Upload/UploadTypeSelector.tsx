@@ -1,7 +1,8 @@
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { useIsTouchscreen } from "@/base/hooks";
-import { FocusVisibleButton } from "@/new/photos/components/FocusVisibleButton";
+import { SpaceBetweenFlex } from "@/new/photos/components/mui";
+import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";
 import DialogTitleWithCloseButton, {
-    DialogTitleWithCloseButtonSm,
     dialogCloseHandler,
 } from "@ente/shared/components/DialogBox/TitleWithCloseButton";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
@@ -9,7 +10,14 @@ import ChevronRight from "@mui/icons-material/ChevronRight";
 import GoogleIcon from "@mui/icons-material/Google";
 import { default as FileUploadIcon } from "@mui/icons-material/ImageOutlined";
 import { default as FolderUploadIcon } from "@mui/icons-material/PermMediaOutlined";
-import { Box, Dialog, Link, Stack, Typography } from "@mui/material";
+import {
+    Box,
+    Dialog,
+    DialogTitle,
+    Link,
+    Stack,
+    Typography,
+} from "@mui/material";
 import { t } from "i18next";
 import React, { useContext, useEffect, useState } from "react";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
@@ -211,43 +219,42 @@ const TakeoutOptions: React.FC<Omit<OptionsProps, "intent">> = ({
 }) => {
     return (
         <>
-            <DialogTitleWithCloseButtonSm onClose={onClose}>
-                {t("google_takeout")}
-            </DialogTitleWithCloseButtonSm>
+            <SpaceBetweenFlex sx={{ padding: "8px 8px 0px 0" }}>
+                <DialogTitle variant="h5">{t("google_takeout")}</DialogTitle>
+                <DialogCloseIconButton {...{ onClose }} />
+            </SpaceBetweenFlex>
 
-            <Box p={1.5}>
-                <Stack gap={2.5}>
-                    <Stack gap={1}>
-                        <FocusVisibleButton
-                            color="accent"
-                            fullWidth
-                            onClick={() => onSelect("folders")}
-                        >
-                            {t("select_folder")}
+            <Stack sx={{ padding: "12px", gap: "20px" }}>
+                <Stack gap={1}>
+                    <FocusVisibleButton
+                        color="accent"
+                        fullWidth
+                        onClick={() => onSelect("folders")}
+                    >
+                        {t("select_folder")}
+                    </FocusVisibleButton>
+                    <FocusVisibleButton
+                        color="secondary"
+                        fullWidth
+                        onClick={() => onSelect("zips")}
+                    >
+                        {t("select_zips")}
+                    </FocusVisibleButton>
+                    <Link
+                        href="https://help.ente.io/photos/migration/from-google-photos/"
+                        target="_blank"
+                        rel="noopener"
+                    >
+                        <FocusVisibleButton color="secondary" fullWidth>
+                            {t("faq")}
                         </FocusVisibleButton>
-                        <FocusVisibleButton
-                            color="secondary"
-                            fullWidth
-                            onClick={() => onSelect("zips")}
-                        >
-                            {t("Select zips")}
-                        </FocusVisibleButton>
-                        <Link
-                            href="https://help.ente.io/photos/migration/from-google-photos/"
-                            target="_blank"
-                            rel="noopener"
-                        >
-                            <FocusVisibleButton color="secondary" fullWidth>
-                                {t("faq")}
-                            </FocusVisibleButton>
-                        </Link>
-                    </Stack>
-
-                    <Typography variant="small" color="text.muted" pb={1}>
-                        {t("takeout_hint")}
-                    </Typography>
+                    </Link>
                 </Stack>
-            </Box>
+
+                <Typography variant="small" color="text.muted" pb={1}>
+                    {t("takeout_hint")}
+                </Typography>
+            </Stack>
         </>
     );
 };

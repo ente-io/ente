@@ -1,6 +1,5 @@
-import { Dialog, Slide, styled } from "@mui/material";
+import { Dialog, styled } from "@mui/material";
 import PropTypes from "prop-types";
-import React from "react";
 
 export const AllCollectionMobileBreakpoint = 559;
 
@@ -34,10 +33,3 @@ AllCollectionDialog.propTypes = {
     children: PropTypes.node,
     onClose: PropTypes.func.isRequired,
 };
-
-export const Transition = (direction: "left" | "right" | "up") =>
-    React.forwardRef(
-        (props: { children: React.ReactElement<any, any> }, ref) => {
-            return <Slide direction={direction} ref={ref} {...props} />;
-        },
-    );

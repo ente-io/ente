@@ -1,5 +1,6 @@
 import { SelectionBar } from "@/base/components/Navbar";
 import type { Collection } from "@/media/collection";
+import type { CollectionSelectorAttributes } from "@/new/photos/components/CollectionSelector";
 import type { GalleryBarMode } from "@/new/photos/components/Gallery/BarImpl";
 import { FluidContainer } from "@ente/shared/components/Container";
 import ClockIcon from "@mui/icons-material/AccessTime";
@@ -19,10 +20,6 @@ import { t } from "i18next";
 import { AppContext } from "pages/_app";
 import { useContext } from "react";
 import {
-    CollectionSelectorIntent,
-    SetCollectionSelectorAttributes,
-} from "types/gallery";
-import {
     ALL_SECTION,
     ARCHIVE_SECTION,
     COLLECTION_OPS_TYPE,
@@ -38,7 +35,15 @@ interface Props {
     ) => (...args: any[]) => void;
     handleFileOps: (opsType: FILE_OPS_TYPE) => (...args: any[]) => void;
     showCreateCollectionModal: (opsType: COLLECTION_OPS_TYPE) => () => void;
-    setCollectionSelectorAttributes: SetCollectionSelectorAttributes;
+    /**
+     * Callback to open a dialog where the user can choose a collection.
+     *
+     * The reason for opening the dialog and other properties are passed as the
+     * {@link attributes} argument.
+     */
+    onOpenCollectionSelector: (
+        attributes: CollectionSelectorAttributes,
+    ) => void;
     count: number;
     ownCount: number;
     clearSelection: () => void;
@@ -54,7 +59,7 @@ interface Props {
 
 const SelectedFileOptions = ({
     showCreateCollectionModal,
-    setCollectionSelectorAttributes,
+    onOpenCollectionSelector,
     handleCollectionOps,
     handleFileOps,
     selectedCollection,
@@ -74,12 +79,14 @@ const SelectedFileOptions = ({
     const peopleMode = barMode == "people";
 
     const addToCollection = () =>
-        setCollectionSelectorAttributes({
-            callback: handleCollectionOps(COLLECTION_OPS_TYPE.ADD),
-            showNextModal: showCreateCollectionModal(COLLECTION_OPS_TYPE.ADD),
-            intent: CollectionSelectorIntent.add,
-            fromCollection:
-                !isInSearchMode && !peopleMode ? activeCollectionID : undefined,
+        onOpenCollectionSelector({
+            action: "add",
+            onSelectCollection: handleCollectionOps(COLLECTION_OPS_TYPE.ADD),
+            onCreateCollection: showCreateCollectionModal(
+                COLLECTION_OPS_TYPE.ADD,
+            ),
+            relatedCollectionID:
+                isInSearchMode || peopleMode ? undefined : activeCollectionID,
         });
 
     const trashHandler = () =>
@@ -100,12 +107,14 @@ const SelectedFileOptions = ({
         });
 
     const restoreHandler = () =>
-        setCollectionSelectorAttributes({
-            callback: handleCollectionOps(COLLECTION_OPS_TYPE.RESTORE),
-            showNextModal: showCreateCollectionModal(
+        onOpenCollectionSelector({
+            action: "restore",
+            onSelectCollection: handleCollectionOps(
                 COLLECTION_OPS_TYPE.RESTORE,
             ),
-            intent: CollectionSelectorIntent.restore,
+            onCreateCollection: showCreateCollectionModal(
+                COLLECTION_OPS_TYPE.RESTORE,
+            ),
         });
 
     const removeFromCollectionHandler = () => {
@@ -143,22 +152,24 @@ const SelectedFileOptions = ({
     };
 
     const moveToCollection = () => {
-        setCollectionSelectorAttributes({
-            callback: handleCollectionOps(COLLECTION_OPS_TYPE.MOVE),
-            showNextModal: showCreateCollectionModal(COLLECTION_OPS_TYPE.MOVE),
-            intent: CollectionSelectorIntent.move,
-            fromCollection:
-                !isInSearchMode && !peopleMode ? activeCollectionID : undefined,
+        onOpenCollectionSelector({
+            action: "move",
+            onSelectCollection: handleCollectionOps(COLLECTION_OPS_TYPE.MOVE),
+            onCreateCollection: showCreateCollectionModal(
+                COLLECTION_OPS_TYPE.MOVE,
+            ),
+            relatedCollectionID:
+                isInSearchMode || peopleMode ? undefined : activeCollectionID,
         });
     };
 
     const unhideToCollection = () => {
-        setCollectionSelectorAttributes({
-            callback: handleCollectionOps(COLLECTION_OPS_TYPE.UNHIDE),
-            showNextModal: showCreateCollectionModal(
+        onOpenCollectionSelector({
+            action: "unhide",
+            onSelectCollection: handleCollectionOps(COLLECTION_OPS_TYPE.UNHIDE),
+            onCreateCollection: showCreateCollectionModal(
                 COLLECTION_OPS_TYPE.UNHIDE,
             ),
-            intent: CollectionSelectorIntent.unhide,
         });
     };
 

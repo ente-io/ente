@@ -14,6 +14,7 @@ import { Overlay } from "@ente/shared/components/Container";
 import { CustomError } from "@ente/shared/error";
 import useLongPress from "@ente/shared/hooks/useLongPress";
 import AlbumOutlined from "@mui/icons-material/AlbumOutlined";
+import Favorite from "@mui/icons-material/FavoriteRounded";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
 import { Tooltip, styled } from "@mui/material";
 import i18n from "i18next";
@@ -38,6 +39,7 @@ interface IProps {
     isInsSelectRange: boolean;
     activeCollectionID: number;
     showPlaceholder: boolean;
+    isFav: boolean;
 }
 
 const Check = styled("input")<{ $active: boolean }>`
@@ -119,6 +121,15 @@ export const AvatarOverlay = styled(Overlay)`
     align-items: flex-start;
     padding-right: 5px;
     padding-top: 5px;
+`;
+
+export const FavOverlay = styled(Overlay)`
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-end;
+    padding-left: 5px;
+    padding-bottom: 5px;
+    opacity: 0.9;
 `;
 
 export const InSelectRangeOverLay = styled("div")<{ $active: boolean }>`
@@ -350,6 +361,11 @@ export default function PreviewCard(props: IProps) {
                 <AvatarOverlay>
                     <Avatar file={file} />
                 </AvatarOverlay>
+            )}
+            {props.isFav && (
+                <FavOverlay>
+                    <Favorite />
+                </FavOverlay>
             )}
 
             <HoverOverlay

@@ -577,7 +577,6 @@ class _FileSelectionActionsWidgetState
       final page = DetailPage(
         DetailPageConfiguration(
           selectedFiles,
-          null,
           0,
           "guest_view",
         ),

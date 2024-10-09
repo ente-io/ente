@@ -126,6 +126,13 @@ export type Person = (
 };
 
 /**
+ * A {@link Person} whose name is not empty.
+ */
+export type NamedPerson = Person & {
+    name: string;
+};
+
+/**
  * Construct in-memory people using the data present locally, ignoring faces
  * belonging to deleted and hidden files.
  *
@@ -272,3 +279,19 @@ export const reconstructPeople = async (): Promise<Person[]> => {
  */
 const resolvedAvatarFaceID = (avatarFaceID: string | undefined) =>
     avatarFaceID?.split("_").length == 1 ? undefined : avatarFaceID;
+
+/**
+ * Return only those from amongst {@link people} that have a name defined.
+ *
+ * @param people List of all people, named and unnamed.
+ */
+export const filterNamedPeople = (people: Person[]): NamedPerson[] => {
+    const namedPeople: NamedPerson[] = [];
+    for (const person of people) {
+        const name = person.name;
+        if (name) {
+            namedPeople.push({ ...person, name });
+        }
+    }
+    return namedPeople;
+};

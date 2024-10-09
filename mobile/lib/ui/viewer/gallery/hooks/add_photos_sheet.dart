@@ -23,6 +23,7 @@ import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
+import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/photo_manager_util.dart";
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
@@ -279,36 +280,38 @@ class _DelayedGalleryState extends State<DelayedGallery> {
   @override
   Widget build(BuildContext context) {
     if (_showGallery) {
-      return Gallery(
-        inSelectionMode: true,
-        asyncLoader: (
-          creationStartTime,
-          creationEndTime, {
-          limit,
-          asc,
-        }) {
-          return FilesDB.instance.getAllPendingOrUploadedFiles(
+      return GalleryFilesState(
+        child: Gallery(
+          inSelectionMode: true,
+          asyncLoader: (
             creationStartTime,
-            creationEndTime,
-            Configuration.instance.getUserID()!,
-            limit: limit,
-            asc: asc,
-            filterOptions: DBFilterOptions(
-              hideIgnoredForUpload: true,
-              dedupeUploadID: true,
-              ignoredCollectionIDs: widget.hiddenCollectionIDs,
+            creationEndTime, {
+            limit,
+            asc,
+          }) {
+            return FilesDB.instance.getAllPendingOrUploadedFiles(
+              creationStartTime,
+              creationEndTime,
+              Configuration.instance.getUserID()!,
+              limit: limit,
+              asc: asc,
+              filterOptions: DBFilterOptions(
+                hideIgnoredForUpload: true,
+                dedupeUploadID: true,
+                ignoredCollectionIDs: widget.hiddenCollectionIDs,
+              ),
+              applyOwnerCheck: true,
+            );
+          },
+          tagPrefix: "pick_add_photos_gallery",
+          selectedFiles: widget.selectedFiles,
+          showSelectAllByDefault: true,
+          sortAsyncFn: () => false,
+        ).animate().fadeIn(
+              duration: const Duration(milliseconds: 175),
+              curve: Curves.easeOutCirc,
             ),
-            applyOwnerCheck: true,
-          );
-        },
-        tagPrefix: "pick_add_photos_gallery",
-        selectedFiles: widget.selectedFiles,
-        showSelectAllByDefault: true,
-        sortAsyncFn: () => false,
-      ).animate().fadeIn(
-            duration: const Duration(milliseconds: 175),
-            curve: Curves.easeOutCirc,
-          );
+      );
     } else {
       return const EnteLoadingWidget();
     }

@@ -17,6 +17,7 @@ import "package:photos/ui/viewer/gallery/empty_album_state.dart";
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
+import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 
 class CollectionPage extends StatelessWidget {
@@ -30,8 +31,8 @@ class CollectionPage extends StatelessWidget {
     this.tagPrefix = "collection",
     this.hasVerifiedLock = false,
     this.isFromCollectPhotos = false,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final _selectedFiles = SelectedFiles();
 
@@ -98,35 +99,37 @@ class CollectionPage extends StatelessWidget {
           ? const SizedBox(height: 20)
           : const SizedBox(height: 212),
     );
-    return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(50.0),
-        child: GalleryAppBarWidget(
-          galleryType,
-          c.collection.displayName,
-          _selectedFiles,
-          collection: c.collection,
-          isFromCollectPhotos: isFromCollectPhotos,
+    return GalleryFilesState(
+      child: Scaffold(
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(50.0),
+          child: GalleryAppBarWidget(
+            galleryType,
+            c.collection.displayName,
+            _selectedFiles,
+            collection: c.collection,
+            isFromCollectPhotos: isFromCollectPhotos,
+          ),
         ),
-      ),
-      bottomNavigationBar: isFromCollectPhotos
-          ? CollectPhotosBottomButtons(
-              c.collection,
-              selectedFiles: _selectedFiles,
-            )
-          : const SizedBox.shrink(),
-      body: SelectionState(
-        selectedFiles: _selectedFiles,
-        child: Stack(
-          alignment: Alignment.bottomCenter,
-          children: [
-            gallery,
-            FileSelectionOverlayBar(
-              galleryType,
-              _selectedFiles,
-              collection: c.collection,
-            ),
-          ],
+        bottomNavigationBar: isFromCollectPhotos
+            ? CollectPhotosBottomButtons(
+                c.collection,
+                selectedFiles: _selectedFiles,
+              )
+            : const SizedBox.shrink(),
+        body: SelectionState(
+          selectedFiles: _selectedFiles,
+          child: Stack(
+            alignment: Alignment.bottomCenter,
+            children: [
+              gallery,
+              FileSelectionOverlayBar(
+                galleryType,
+                _selectedFiles,
+                collection: c.collection,
+              ),
+            ],
+          ),
         ),
       ),
     );
