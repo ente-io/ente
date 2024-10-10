@@ -7,7 +7,7 @@ import log from "@/base/log";
 import { savedLogs } from "@/base/log-web";
 import { customAPIHost } from "@/base/origins";
 import type { CollectionSummaries } from "@/new/photos/services/collection/ui";
-import { AppContext } from "@/new/photos/types/context";
+import { AppContext, useAppContext } from "@/new/photos/types/context";
 import { initiateEmail, openURL } from "@/new/photos/utils/web";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
@@ -667,7 +667,7 @@ const ExitSection: React.FC = () => {
 };
 
 const DebugSection: React.FC = () => {
-    const appContext = useContext(AppContext);
+    const { showMiniDialog } = useAppContext();
     const [appVersion, setAppVersion] = useState<string | undefined>();
     const [host, setHost] = useState<string | undefined>();
 
@@ -679,7 +679,7 @@ const DebugSection: React.FC = () => {
     });
 
     const confirmLogDownload = () =>
-        appContext.setDialogMessage({
+        showMiniDialog({
             title: t("DOWNLOAD_LOGS"),
             content: <Trans i18nKey={"DOWNLOAD_LOGS_MESSAGE"} />,
             proceed: {
