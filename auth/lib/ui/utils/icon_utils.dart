@@ -131,7 +131,9 @@ class IconUtils {
         );
         if (icon["altNames"] != null) {
           for (final name in icon["altNames"]) {
-            _customIcons[name] = CustomIconData(
+            _customIcons[name.toString()
+                .replaceAll(' ', '')
+                .toLowerCase()] = CustomIconData(
               icon["slug"],
               icon["hex"],
             );
