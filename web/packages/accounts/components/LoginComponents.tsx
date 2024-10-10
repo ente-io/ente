@@ -5,16 +5,17 @@ import {
 } from "@/accounts/services/passkey";
 import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
+import { genericErrorDialogAttributes } from "@/base/components/utils/mini-dialog";
 import log from "@/base/log";
 import { customAPIHost } from "@/base/origins";
+import { VerticallyCentered } from "@ente/shared/components/Container";
+import FormPaper from "@ente/shared/components/Form/FormPaper";
+import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
+import LinkButton from "@ente/shared/components/LinkButton";
 import { CircularProgress, Stack, Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
-import { VerticallyCentered } from "./Container";
-import FormPaper from "./Form/FormPaper";
-import FormPaperFooter from "./Form/FormPaper/Footer";
-import LinkButton from "./LinkButton";
 
 export const PasswordHeader: React.FC<React.PropsWithChildren> = ({
     children,
@@ -74,7 +75,7 @@ interface VerifyingPasskeyProps {
     onRetry: () => void;
     /** Perform the (possibly app specific) logout sequence. */
     logout: () => void;
-    setDialogBoxAttributesV2: (attrs: MiniDialogAttributes) => void;
+    showMiniDialog: (attrs: MiniDialogAttributes) => void;
 }
 
 export const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
@@ -82,7 +83,7 @@ export const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
     email,
     onRetry,
     logout,
-    setDialogBoxAttributesV2,
+    showMiniDialog,
 }) => {
     type VerificationStatus = "waiting" | "checking" | "pending";
     const [verificationStatus, setVerificationStatus] =
@@ -104,11 +105,11 @@ export const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
             else router.push(await saveCredentialsAndNavigateTo(response));
         } catch (e) {
             log.error("Passkey verification status check failed", e);
-            setDialogBoxAttributesV2(
+            showMiniDialog(
                 e instanceof Error &&
                     e.message == passkeySessionExpiredErrorMessage
                     ? sessionExpiredDialogAttributes(logout)
-                    : genericErrorAttributes(),
+                    : genericErrorDialogAttributes(),
             );
             setVerificationStatus("waiting");
         }
@@ -194,11 +195,10 @@ const ButtonStack = styled("div")`
 `;
 
 /**
- * {@link DialogBoxAttributesV2} for showing the error when the user's session
- * has expired.
+ * {@link MiniDialogAttributes} for showing asking the user to login again when
+ * their session has expired.
  *
- * It asks them to login again. There is one button, which allows them to
- * logout.
+ * There is one button, which allows them to logout.
  *
  * @param onLogin Called when the user presses the "Login" button on the error
  * dialog.
@@ -207,20 +207,11 @@ export const sessionExpiredDialogAttributes = (
     onLogin: () => void,
 ): MiniDialogAttributes => ({
     title: t("SESSION_EXPIRED"),
-    content: t("SESSION_EXPIRED_MESSAGE"),
+    message: t("SESSION_EXPIRED_MESSAGE"),
     nonClosable: true,
-    proceed: {
+    continue: {
         text: t("login"),
         action: onLogin,
-        variant: "accent",
     },
-});
-
-/**
- * {@link DialogBoxAttributesV2} for showing a generic error.
- */
-const genericErrorAttributes = (): MiniDialogAttributes => ({
-    title: t("error"),
-    close: { variant: "critical" },
-    content: t("generic_error_retry"),
+    cancel: false,
 });

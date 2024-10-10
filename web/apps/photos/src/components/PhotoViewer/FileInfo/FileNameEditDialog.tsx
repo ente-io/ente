@@ -1,4 +1,5 @@
-import { DialogBoxV2 } from "@/base/components/MiniDialog";
+import { TitledMiniDialog } from "@/base/components/MiniDialog";
+import { photosDialogZIndex } from "@/new/photos/components/z-index";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
@@ -23,13 +24,11 @@ export const FileNameEditDialog = ({
         }
     };
     return (
-        <DialogBoxV2
-            sx={{ zIndex: 1600 }}
+        <TitledMiniDialog
+            sx={{ zIndex: photosDialogZIndex }}
             open={isInEditMode}
             onClose={closeEditMode}
-            attributes={{
-                title: t("rename_file"),
-            }}
+            title={t("rename_file")}
         >
             <SingleInputForm
                 initialValue={filename}
@@ -41,6 +40,6 @@ export const FileNameEditDialog = ({
                 secondaryButtonAction={closeEditMode}
                 submitButtonProps={{ sx: { mt: 1, mb: 2 } }}
             />
-        </DialogBoxV2>
+        </TitledMiniDialog>
     );
 };

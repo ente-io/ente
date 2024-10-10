@@ -1,3 +1,4 @@
+import { photosDialogZIndex } from "@/new/photos/components/z-index";
 import { AppContext } from "@/new/photos/types/context";
 import Notification from "components/Notification";
 import { t } from "i18next";
@@ -123,7 +124,7 @@ export const FilesDownloadProgress: React.FC<FilesDownloadProgressProps> = ({
                     horizontal="left"
                     sx={{
                         "&&": { bottom: `${index * 80 + 20}px` },
-                        zIndex: 1600,
+                        zIndex: photosDialogZIndex,
                     }}
                     open={isFilesDownloadStarted(attributes)}
                     onClose={handleClose(attributes)}

@@ -1,15 +1,11 @@
-import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
+import type { AccountsContextT } from "@/accounts/types/context";
 import { ensure } from "@/utils/ensure";
 import { createContext, useContext } from "react";
 
 /**
  * The type of the context for pages in the accounts app.
  */
-interface AppContextT {
-    /** Show or hide the app's navigation bar. */
-    showNavBar: (show: boolean) => void;
-    setDialogBoxAttributesV2: (attrs: MiniDialogAttributes) => void;
-}
+type AppContextT = Omit<AccountsContextT, "logout">;
 
 /**
  * The React {@link Context} available to all nodes in the React tree.

@@ -2,12 +2,13 @@ import { accountLogout } from "@/accounts/services/logout";
 import type { AccountsContextT } from "@/accounts/types/context";
 import { clientPackageName, staticAppTitle } from "@/base/app";
 import { CustomHead } from "@/base/components/Head";
-import {
-    type MiniDialogAttributes,
-    MiniDialog,
-} from "@/base/components/MiniDialog";
+import { AttributedMiniDialog } from "@/base/components/MiniDialog";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { AppNavbar } from "@/base/components/Navbar";
+import {
+    genericErrorDialogAttributes,
+    useAttributedMiniDialog,
+} from "@/base/components/utils/mini-dialog";
 import { setupI18n } from "@/base/i18n";
 import {
     logStartupBanner,
@@ -39,6 +40,7 @@ import React, {
     useState,
 } from "react";
 import LoadingBar, { type LoadingBarRef } from "react-top-loading-bar";
+
 import "../../public/css/global.css";
 
 /**
@@ -68,10 +70,8 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     const [showNavbar, setShowNavBar] = useState(false);
     const isLoadingBarRunning = useRef<boolean>(false);
     const loadingBar = useRef<LoadingBarRef>(null);
-    const [dialogBoxAttributeV2, setDialogBoxAttributesV2] = useState<
-        MiniDialogAttributes | undefined
-    >();
-    const [dialogBoxV2View, setDialogBoxV2View] = useState(false);
+
+    const { showMiniDialog, miniDialogProps } = useAttributedMiniDialog();
     const [themeColor, setThemeColor] = useLocalState(
         LS_KEYS.THEME,
         THEME_COLOR.DARK,
@@ -111,16 +111,13 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         };
     }, []);
 
-    useEffect(() => {
-        setDialogBoxV2View(true);
-    }, [dialogBoxAttributeV2]);
-
     const showNavBar = (show: boolean) => setShowNavBar(show);
 
     const startLoading = () => {
         !isLoadingBarRunning.current && loadingBar.current?.continuousStart();
         isLoadingBarRunning.current = true;
     };
+
     const finishLoading = () => {
         setTimeout(() => {
             isLoadingBarRunning.current && loadingBar.current?.complete();
@@ -128,14 +125,8 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         }, 100);
     };
 
-    const closeDialogBoxV2 = () => setDialogBoxV2View(false);
-
     const somethingWentWrong = () =>
-        setDialogBoxAttributesV2({
-            title: t("error"),
-            close: { variant: "critical" },
-            content: t("generic_error_retry"),
-        });
+        showMiniDialog(genericErrorDialogAttributes());
 
     const logout = () => {
         void accountLogout().then(() => router.push("/"));
@@ -144,7 +135,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     const appContext = {
         logout,
         showNavBar,
-        setDialogBoxAttributesV2,
+        showMiniDialog,
         startLoading,
         finishLoading,
         themeColor,
@@ -167,12 +158,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
                 <LoadingBar color="#51cd7c" ref={loadingBar} />
 
-                <MiniDialog
-                    sx={{ zIndex: 1600 }}
-                    open={dialogBoxV2View}
-                    onClose={closeDialogBoxV2}
-                    attributes={dialogBoxAttributeV2}
-                />
+                <AttributedMiniDialog {...miniDialogProps} />
 
                 <AppContext.Provider value={appContext}>
                     {(loading || !isI18nReady) && (

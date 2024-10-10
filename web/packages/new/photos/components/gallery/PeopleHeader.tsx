@@ -92,7 +92,7 @@ const CGroupPersonOptions: React.FC<CGroupPersonOptionsProps> = ({
     cgroup,
     onSelectPerson,
 }) => {
-    const { setDialogBoxAttributesV2 } = useAppContext();
+    const { showMiniDialog } = useAppContext();
 
     const [openAddNameInput, setOpenAddNameInput] = useState(false);
 
@@ -103,17 +103,16 @@ const CGroupPersonOptions: React.FC<CGroupPersonOptionsProps> = ({
     );
 
     const handleDeletePerson = () =>
-        setDialogBoxAttributesV2({
+        showMiniDialog({
             title: pt("Reset person?"),
-            content: pt(
+            message: pt(
                 "The name, face groupings and suggestions for this person will be reset",
             ),
-            close: { text: t("cancel") },
-            proceed: {
+            continue: {
                 text: t("reset"),
+                color: "primary",
                 action: deletePerson,
             },
-            buttonDirection: "row",
         });
 
     const deletePerson = useWrapAsyncOperation(async () => {

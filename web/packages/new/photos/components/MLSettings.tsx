@@ -27,7 +27,7 @@ import {
 import { t } from "i18next";
 import React, { useEffect, useState, useSyncExternalStore } from "react";
 import { Trans } from "react-i18next";
-import { useAppContext, type AppContextT } from "../types/context";
+import { useAppContext } from "../types/context";
 import { openURL } from "../utils/web";
 import { useWrapAsyncOperation } from "./use-wrap-async";
 
@@ -36,8 +36,6 @@ export const MLSettings: React.FC<NestedDrawerVisibilityProps> = ({
     onClose,
     onRootClose,
 }) => {
-    const { setDialogBoxAttributesV2 } = useAppContext();
-
     const mlStatus = useSyncExternalStore(mlStatusSubscribe, mlStatusSnapshot);
     const [openFaceConsent, setOpenFaceConsent] = useState(false);
 
@@ -68,10 +66,7 @@ export const MLSettings: React.FC<NestedDrawerVisibilityProps> = ({
         component = <EnableML onEnable={handleEnableML} />;
     } else {
         component = (
-            <ManageML
-                {...{ mlStatus, setDialogBoxAttributesV2 }}
-                onDisableML={handleDisableML}
-            />
+            <ManageML {...{ mlStatus }} onDisableML={handleDisableML} />
         );
     }
 
@@ -252,15 +247,11 @@ interface ManageMLProps {
     mlStatus: Exclude<MLStatus, { phase: "disabled" }>;
     /** Called when the user wants to disable ML. */
     onDisableML: () => void;
-    /** Subset of appContext. */
-    setDialogBoxAttributesV2: AppContextT["setDialogBoxAttributesV2"];
 }
 
-const ManageML: React.FC<ManageMLProps> = ({
-    mlStatus,
-    onDisableML,
-    setDialogBoxAttributesV2,
-}) => {
+const ManageML: React.FC<ManageMLProps> = ({ mlStatus, onDisableML }) => {
+    const { showMiniDialog } = useAppContext();
+
     const { phase, nSyncedFiles, nTotalFiles } = mlStatus;
 
     let status: string;
@@ -289,19 +280,17 @@ const ManageML: React.FC<ManageMLProps> = ({
             ? `${Math.round((100 * nSyncedFiles) / nTotalFiles)}%`
             : `${nSyncedFiles} / ${nTotalFiles}`;
 
-    const confirmDisableML = () => {
-        setDialogBoxAttributesV2({
+    const confirmDisableML = () =>
+        showMiniDialog({
             title: t("ml_search_disable"),
-            content: t("ml_search_disable_confirm"),
-            close: { text: t("cancel") },
-            proceed: {
-                variant: "critical",
+            message: t("ml_search_disable_confirm"),
+            continue: {
                 text: t("disable"),
+                color: "critical",
                 action: onDisableML,
             },
             buttonDirection: "row",
         });
-    };
 
     return (
         <Stack px={"16px"} py={"20px"} gap={4}>

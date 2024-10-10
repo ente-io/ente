@@ -1,6 +1,7 @@
 import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { MenuItemDivider, MenuItemGroup } from "@/base/components/Menu";
 import { Titlebar } from "@/base/components/Titlebar";
+import { errorDialogAttributes } from "@/base/components/utils/mini-dialog";
 import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
 import { CenteredFlex } from "@ente/shared/components/Container";
@@ -34,7 +35,7 @@ import {
 import { useAppContext } from "../../types/context";
 
 const Page: React.FC = () => {
-    const { showNavBar, setDialogBoxAttributesV2 } = useAppContext();
+    const { showNavBar, showMiniDialog } = useAppContext();
 
     const [token, setToken] = useState<string | undefined>();
     const [passkeys, setPasskeys] = useState<Passkey[]>([]);
@@ -44,12 +45,8 @@ const Page: React.FC = () => {
     >();
 
     const showPasskeyFetchFailedErrorDialog = useCallback(() => {
-        setDialogBoxAttributesV2({
-            title: t("error"),
-            content: t("passkey_fetch_failed"),
-            close: {},
-        });
-    }, [setDialogBoxAttributesV2]);
+        showMiniDialog(errorDialogAttributes(t("passkey_fetch_failed")));
+    }, [showMiniDialog]);
 
     useEffect(() => {
         showNavBar(true);
@@ -263,34 +260,26 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
     passkey,
     onUpdateOrDeletePasskey,
 }) => {
-    const { setDialogBoxAttributesV2 } = useAppContext();
+    const { showMiniDialog } = useAppContext();
 
     const [showRenameDialog, setShowRenameDialog] = useState(false);
 
-    const showDeleteConfirmationDialog = useCallback(() => {
-        const handleDelete = async (setLoading: (value: boolean) => void) => {
-            setLoading(true);
-            try {
-                await deletePasskey(ensure(token), ensure(passkey).id);
-                onUpdateOrDeletePasskey();
-            } catch (e) {
-                log.error("Failed to delete passkey", e);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        setDialogBoxAttributesV2({
-            title: t("delete_passkey"),
-            content: t("delete_passkey_confirmation"),
-            proceed: {
-                text: t("delete"),
-                action: handleDelete,
-                variant: "critical",
-            },
-            close: { text: t("cancel") },
-        });
-    }, [token, passkey, onUpdateOrDeletePasskey, setDialogBoxAttributesV2]);
+    const showDeleteConfirmationDialog = useCallback(
+        () =>
+            showMiniDialog({
+                title: t("delete_passkey"),
+                message: t("delete_passkey_confirmation"),
+                continue: {
+                    text: t("delete"),
+                    color: "critical",
+                    action: async () => {
+                        await deletePasskey(ensure(token), ensure(passkey).id);
+                        onUpdateOrDeletePasskey();
+                    },
+                },
+            }),
+        [showMiniDialog, token, passkey, onUpdateOrDeletePasskey],
+    );
 
     return (
         <>

@@ -1,3 +1,4 @@
+import { sessionExpiredDialogAttributes } from "@/accounts/components/LoginComponents";
 import { stashRedirect } from "@/accounts/services/redirect";
 import { EnteLogo } from "@/base/components/EnteLogo";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
@@ -7,7 +8,6 @@ import {
     HorizontalFlex,
     VerticallyCentered,
 } from "@ente/shared/components/Container";
-import { sessionExpiredDialogAttributes } from "@ente/shared/components/LoginComponents";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
 import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
 import { AUTH_PAGES as PAGES } from "@ente/shared/constants/pages";
@@ -23,7 +23,7 @@ import { getAuthCodes } from "services/remote";
 import { AppContext } from "./_app";
 
 const Page: React.FC = () => {
-    const { logout, showNavBar, setDialogBoxAttributesV2 } = ensure(
+    const { logout, showNavBar, showMiniDialog } = ensure(
         useContext(AppContext),
     );
     const router = useRouter();
@@ -32,7 +32,7 @@ const Page: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState("");
 
     const showSessionExpiredDialog = () =>
-        setDialogBoxAttributesV2(sessionExpiredDialogAttributes(logout));
+        showMiniDialog(sessionExpiredDialogAttributes(logout));
 
     useEffect(() => {
         const fetchCodes = async () => {

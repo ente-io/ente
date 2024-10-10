@@ -1,9 +1,12 @@
 import { clientPackageName, staticAppTitle } from "@/base/app";
 import { CustomHead } from "@/base/components/Head";
-import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
-import { MiniDialog } from "@/base/components/MiniDialog";
+import { AttributedMiniDialog } from "@/base/components/MiniDialog";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { AppNavbar } from "@/base/components/Navbar";
+import {
+    genericErrorDialogAttributes,
+    useAttributedMiniDialog,
+} from "@/base/components/utils/mini-dialog";
 import { setupI18n } from "@/base/i18n";
 import log from "@/base/log";
 import {
@@ -11,6 +14,7 @@ import {
     logUnhandledErrorsAndRejections,
 } from "@/base/log-web";
 import { AppUpdate } from "@/base/types/ipc";
+import { photosDialogZIndex } from "@/new/photos/components/z-index";
 import DownloadManager from "@/new/photos/services/download";
 import { runMigrations } from "@/new/photos/services/migrations";
 import { initML, isMLSupported } from "@/new/photos/services/ml";
@@ -70,17 +74,15 @@ export default function App({ Component, pageProps }: AppProps) {
     const isLoadingBarRunning = useRef(false);
     const loadingBar = useRef(null);
     const [dialogMessage, setDialogMessage] = useState<DialogBoxAttributes>();
-    const [dialogBoxAttributeV2, setDialogBoxAttributesV2] = useState<
-        MiniDialogAttributes | undefined
-    >();
     const [messageDialogView, setMessageDialogView] = useState(false);
-    const [dialogBoxV2View, setDialogBoxV2View] = useState(false);
     const [watchFolderView, setWatchFolderView] = useState(false);
     const [watchFolderFiles, setWatchFolderFiles] = useState<FileList>(null);
     const [notificationView, setNotificationView] = useState(false);
     const closeNotification = () => setNotificationView(false);
     const [notificationAttributes, setNotificationAttributes] =
         useState<NotificationAttributes>(null);
+
+    const { showMiniDialog, miniDialogProps } = useAttributedMiniDialog();
     const [themeColor, setThemeColor] = useLocalState(
         LS_KEYS.THEME,
         THEME_COLOR.DARK,
@@ -200,23 +202,15 @@ export default function App({ Component, pageProps }: AppProps) {
     }, [dialogMessage]);
 
     useEffect(() => {
-        setDialogBoxV2View(true);
-    }, [dialogBoxAttributeV2]);
-
-    useEffect(() => {
         setNotificationView(true);
     }, [notificationAttributes]);
 
     const showNavBar = (show: boolean) => setShowNavBar(show);
 
     const updateMapEnabled = async (enabled: boolean) => {
-        try {
-            await updateMapEnabledStatus(enabled);
-            setLocalMapEnabled(enabled);
-            setMapEnabled(enabled);
-        } catch (e) {
-            log.error("Error while updating mapEnabled", e);
-        }
+        await updateMapEnabledStatus(enabled);
+        setLocalMapEnabled(enabled);
+        setMapEnabled(enabled);
     };
 
     const startLoading = () => {
@@ -234,7 +228,6 @@ export default function App({ Component, pageProps }: AppProps) {
         () => setMessageDialogView(false),
         [],
     );
-    const closeDialogBoxV2 = () => setDialogBoxV2View(false);
 
     // Use `onGenericError` instead.
     const somethingWentWrong = useCallback(
@@ -244,20 +237,13 @@ export default function App({ Component, pageProps }: AppProps) {
                 close: { variant: "critical" },
                 content: t("generic_error_retry"),
             }),
-        [setDialogMessage],
+        [],
     );
 
-    const onGenericError = useCallback(
-        (e: unknown) => (
-            log.error("Error", e),
-            setDialogBoxAttributesV2({
-                title: t("error"),
-                content: t("generic_error"),
-                close: { variant: "critical" },
-            })
-        ),
-        [setDialogBoxAttributesV2],
-    );
+    const onGenericError = useCallback((e: unknown) => {
+        log.error("Error", e);
+        showMiniDialog(genericErrorDialogAttributes());
+    }, []);
 
     const logout = useCallback(() => {
         void photosLogout().then(() => router.push("/"));
@@ -276,9 +262,9 @@ export default function App({ Component, pageProps }: AppProps) {
         setNotificationAttributes,
         themeColor,
         setThemeColor,
+        showMiniDialog,
         somethingWentWrong,
         onGenericError,
-        setDialogBoxAttributesV2,
         mapEnabled,
         updateMapEnabled, // <- changes on each render
         isCFProxyDisabled,
@@ -301,17 +287,15 @@ export default function App({ Component, pageProps }: AppProps) {
                 <LoadingBar color="#51cd7c" ref={loadingBar} />
 
                 <DialogBox
-                    sx={{ zIndex: 1600 }}
+                    sx={{ zIndex: photosDialogZIndex }}
                     size="xs"
                     open={messageDialogView}
                     onClose={closeMessageDialog}
                     attributes={dialogMessage}
                 />
-                <MiniDialog
-                    sx={{ zIndex: 1600 }}
-                    open={dialogBoxV2View}
-                    onClose={closeDialogBoxV2}
-                    attributes={dialogBoxAttributeV2}
+                <AttributedMiniDialog
+                    sx={{ zIndex: photosDialogZIndex }}
+                    {...miniDialogProps}
                 />
 
                 <Notification

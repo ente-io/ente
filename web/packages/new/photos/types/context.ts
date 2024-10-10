@@ -17,10 +17,10 @@ export type AppContextT = AccountsContextT & {
      * Hide the global activity indicator.
      */
     finishLoading: () => void;
+    onGenericError: (error: unknown) => void;
     somethingWentWrong: () => void;
     setDialogMessage: SetDialogBoxAttributes;
     setNotificationAttributes: SetNotificationAttributes;
-    onGenericError: (error: unknown) => void;
     closeMessageDialog: () => void;
     mapEnabled: boolean;
     updateMapEnabled: (enabled: boolean) => Promise<void>;

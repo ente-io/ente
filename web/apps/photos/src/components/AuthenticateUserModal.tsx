@@ -1,6 +1,6 @@
 import { checkSessionValidity } from "@/accounts/services/session";
 import {
-    DialogBoxV2,
+    TitledMiniDialog,
     type MiniDialogAttributes,
 } from "@/base/components/MiniDialog";
 import log from "@/base/log";
@@ -24,8 +24,7 @@ export default function AuthenticateUserModal({
     onClose,
     onAuthenticate,
 }: Iprops) {
-    const { setDialogMessage, setDialogBoxAttributesV2, logout } =
-        useContext(AppContext);
+    const { setDialogMessage, showMiniDialog, logout } = useContext(AppContext);
     const [user, setUser] = useState<User>();
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
 
@@ -46,7 +45,7 @@ export default function AuthenticateUserModal({
             const session = await checkSessionValidity();
             if (session.status != "valid") {
                 onClose();
-                setDialogBoxAttributesV2(
+                showMiniDialog(
                     passwordChangedElsewhereDialogAttributes(logout),
                 );
             }
@@ -55,7 +54,7 @@ export default function AuthenticateUserModal({
             // potentially transient issues.
             log.warn("Ignoring error when determining session validity", e);
         }
-    }, [setDialogBoxAttributesV2, logout]);
+    }, [showMiniDialog, logout]);
 
     useEffect(() => {
         const main = async () => {
@@ -98,13 +97,11 @@ export default function AuthenticateUserModal({
         };
 
     return (
-        <DialogBoxV2
+        <TitledMiniDialog
             open={open}
             onClose={onClose}
             sx={{ position: "absolute" }}
-            attributes={{
-                title: t("password"),
-            }}
+            title={t("password")}
         >
             <VerifyMasterPasswordForm
                 buttonText={t("AUTHENTICATE")}
@@ -113,7 +110,7 @@ export default function AuthenticateUserModal({
                 keyAttributes={keyAttributes}
                 submitButtonProps={{ sx: { mb: 0 } }}
             />
-        </DialogBoxV2>
+        </TitledMiniDialog>
     );
 }
 
@@ -128,11 +125,10 @@ const passwordChangedElsewhereDialogAttributes = (
     onLogin: () => void,
 ): MiniDialogAttributes => ({
     title: t("password_changed_elsewhere"),
-    content: t("password_changed_elsewhere_message"),
-    proceed: {
+    message: t("password_changed_elsewhere_message"),
+    continue: {
         text: t("login"),
         action: onLogin,
-        variant: "accent",
     },
-    close: { text: t("cancel") },
+    cancel: false,
 });

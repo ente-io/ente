@@ -7,12 +7,6 @@ import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import LinkButton from "@ente/shared/components/LinkButton";
-import {
-    LoginFlowFormFooter,
-    PasswordHeader,
-    VerifyingPasskey,
-    sessionExpiredDialogAttributes,
-} from "@ente/shared/components/LoginComponents";
 import VerifyMasterPasswordForm, {
     type VerifyMasterPasswordFormProps,
 } from "@ente/shared/components/VerifyMasterPasswordForm";
@@ -46,6 +40,12 @@ import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
 import { getSRPAttributes } from "../api/srp";
+import {
+    LoginFlowFormFooter,
+    PasswordHeader,
+    VerifyingPasskey,
+    sessionExpiredDialogAttributes,
+} from "../components/LoginComponents";
 import { PAGES } from "../constants/pages";
 import {
     openPasskeyVerificationURL,
@@ -66,7 +66,7 @@ import type { PageProps } from "../types/page";
 import type { SRPAttributes } from "../types/srp";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
-    const { logout, showNavBar, setDialogBoxAttributesV2 } = appContext;
+    const { logout, showNavBar, showMiniDialog } = appContext;
 
     const [srpAttributes, setSrpAttributes] = useState<SRPAttributes>();
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
@@ -82,7 +82,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
 
     const validateSession = useCallback(async () => {
         const showSessionExpiredDialog = () =>
-            setDialogBoxAttributesV2(sessionExpiredDialogAttributes(logout));
+            showMiniDialog(sessionExpiredDialogAttributes(logout));
 
         try {
             const session = await checkSessionValidity();
@@ -114,7 +114,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             // potentially transient issues.
             log.warn("Ignoring error when determining session validity", e);
         }
-    }, [setDialogBoxAttributesV2, logout]);
+    }, [showMiniDialog, logout]);
 
     useEffect(() => {
         const main = async () => {
@@ -354,7 +354,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 onRetry={() =>
                     openPasskeyVerificationURL(passkeyVerificationData)
                 }
-                {...{ logout, setDialogBoxAttributesV2 }}
+                {...{ logout, showMiniDialog }}
             />
         );
     }
