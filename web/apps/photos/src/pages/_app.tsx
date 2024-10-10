@@ -5,6 +5,7 @@ import { AttributedMiniDialog } from "@/base/components/MiniDialog";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { AppNavbar } from "@/base/components/Navbar";
 import { setupI18n } from "@/base/i18n";
+import ErrorOutline from "@mui/icons-material/ErrorOutline";
 import log from "@/base/log";
 import {
     logStartupBanner,
@@ -258,6 +259,7 @@ export default function App({ Component, pageProps }: AppProps) {
             log.error("Error", e),
             setDialogBoxAttributesV2({
                 title: t("error"),
+                icon: <ErrorOutline />,
                 content: t("generic_error"),
                 close: { variant: "critical" },
             })
