@@ -231,25 +231,6 @@ export interface DialogBoxV2Attributes {
      * reset or override these customizations.
      */
     title?: React.ReactNode;
-    /**
-     * Customize the cancel (dismiss) action button offered by the dialog box.
-     *
-     * Usually dialog boxes should have a cancel action, but this can be skipped
-     * to only show one of the other types of buttons.
-     */
-    close?: {
-        /** The string to use as the label for the cancel button. */
-        text?: string;
-        /** The color of the button. */
-        variant?: ButtonProps["color"];
-        /**
-         * The function to call when the user cancels.
-         *
-         * If provided, this callback is invoked before closing the dialog.
-         */
-        action?: () => void;
-    };
-    buttonDirection?: "row" | "column";
 }
 
 type DialogBoxV2Props = React.PropsWithChildren<
@@ -302,31 +283,6 @@ export function DialogBoxV2({
                     )}
                     {children}
                 </Stack>
-                {attributes.close && (
-                    <Stack
-                        spacing={"8px"}
-                        direction={
-                            attributes.buttonDirection === "row"
-                                ? "row-reverse"
-                                : "column"
-                        }
-                        flex={1}
-                    >
-                        {attributes.close && (
-                            <FocusVisibleButton
-                                size="large"
-                                color={attributes.close?.variant ?? "secondary"}
-                                onClick={() => {
-                                    attributes.close?.action &&
-                                        attributes.close?.action();
-                                    onClose();
-                                }}
-                            >
-                                {attributes.close?.text ?? t("ok")}
-                            </FocusVisibleButton>
-                        )}
-                    </Stack>
-                )}
             </Stack>
         </Dialog>
     );
