@@ -496,6 +496,11 @@
       "title": "PayPal"
     },
     {
+      "title": "PBTech",
+      "slug": "pbtech",
+      "hex": "f08222"
+    },
+    {
       "title": "pCloud"
     },
     {
@@ -534,6 +539,10 @@
     {
       "title": "Real-Debrid",
       "slug": "real_debrid"
+    },
+    {
+      "title": "RealMe",
+      "slug": "realme"
     },
     {
       "title": "Registro br",
@@ -579,6 +588,13 @@
     },
     {
       "title": "SimpleLogin"
+    },
+    {
+      "title": "Simplicity",
+      "altNames": [
+        "simplicitynz",
+        "simplicity.kiwi"
+      ]
     },
     {
       "title": "Sipgate"
