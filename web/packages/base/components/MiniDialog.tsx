@@ -228,7 +228,6 @@ export function MiniDialog({
 // }
 
 export interface DialogBoxV2Attributes {
-    icon?: React.ReactNode;
     /**
      * The dialog's title.
      *
@@ -240,10 +239,7 @@ export interface DialogBoxV2Attributes {
     title?: React.ReactNode;
     staticBackdrop?: boolean;
     nonClosable?: boolean;
-    /**
-     * The dialog's content.
-     */
-    content?: React.ReactNode;
+
     /**
      * Customize the cancel (dismiss) action button offered by the dialog box.
      *
@@ -339,28 +335,12 @@ export function DialogBoxV2({
         >
             <Stack spacing={"36px"} p={"16px"}>
                 <Stack spacing={"19px"}>
-                    {attributes.icon && (
-                        <Box
-                            sx={{
-                                "& > svg": {
-                                    fontSize: "32px",
-                                },
-                            }}
-                        >
-                            {attributes.icon}
-                        </Box>
-                    )}
                     {attributes.title && (
                         <Typography variant="large" fontWeight={"bold"}>
                             {attributes.title}
                         </Typography>
                     )}
-                    {children ||
-                        (attributes?.content && (
-                            <Typography color="text.muted">
-                                {attributes.content}
-                            </Typography>
-                        ))}
+                    {children}
                 </Stack>
                 {(attributes.proceed || attributes.close) && (
                     <Stack
