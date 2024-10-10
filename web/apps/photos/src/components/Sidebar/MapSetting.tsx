@@ -65,7 +65,7 @@ export const MapSettings: React.FC<SettingsDrawerProps> = ({
             <Stack spacing={"4px"} py={"12px"}>
                 <Titlebar
                     onClose={onClose}
-                    title={t("MAP")}
+                    title={t("map")}
                     onRootClose={handleRootClose}
                 />
 
@@ -77,7 +77,7 @@ export const MapSettings: React.FC<SettingsDrawerProps> = ({
                                     onClick={openModifyMapEnabled}
                                     variant="toggle"
                                     checked={mapEnabled}
-                                    label={t("MAP_SETTINGS")}
+                                    label={t("map_settings")}
                                 />
                             </MenuItemGroup>
                         </Box>

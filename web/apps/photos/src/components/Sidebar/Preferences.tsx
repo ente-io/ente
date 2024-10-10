@@ -69,7 +69,7 @@ export const Preferences: React.FC<SettingsDrawerProps> = ({
                         <EnteMenuItem
                             onClick={openMapSettings}
                             endIcon={<ChevronRight />}
-                            label={t("MAP")}
+                            label={t("map")}
                         />
                         <EnteMenuItem
                             onClick={openAdvancedSettings}
