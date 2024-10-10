@@ -1,9 +1,7 @@
 import { staticAppTitle } from "@/base/app";
 import { CustomHead } from "@/base/components/Head";
-import {
-    type MiniDialogAttributes,
-    AttributedMiniDialog,
-} from "@/base/components/MiniDialog";
+import { useAttributedMiniDialog } from "@/base/components/hooks/use-mini-dialog";
+import { AttributedMiniDialog } from "@/base/components/MiniDialog";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { AppNavbar } from "@/base/components/Navbar";
 import { setupI18n } from "@/base/i18n";
@@ -16,7 +14,7 @@ import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import { t } from "i18next";
 import type { AppProps } from "next/app";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { AppContext } from "../types/context";
 
 import "styles/global.css";
@@ -24,23 +22,7 @@ import "styles/global.css";
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     const [isI18nReady, setIsI18nReady] = useState<boolean>(false);
     const [showNavbar, setShowNavbar] = useState(false);
-
-    // Mini Dialog scaffolding --
-
-    const [miniDialogAttributes, setMiniDialogAttributes] = useState<
-        MiniDialogAttributes | undefined
-    >();
-
-    const [openMiniDialog, setOpenMiniDialog] = useState(false);
-
-    const showMiniDialog = useCallback((attributes: MiniDialogAttributes) => {
-        setMiniDialogAttributes(attributes);
-        setOpenMiniDialog(true);
-    }, []);
-
-    const closeMiniDialog = useCallback(() => setOpenMiniDialog(false), []);
-
-    // --
+    const { showMiniDialog, miniDialogProps } = useAttributedMiniDialog();
 
     useEffect(() => {
         disableDiskLogs();
@@ -49,10 +31,13 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         return () => logUnhandledErrorsAndRejections(false);
     }, []);
 
-    const appContext = {
-        showNavBar: setShowNavbar,
-        setDialogBoxAttributesV2,
-    };
+    const appContext = useMemo(
+        () => ({
+            showNavBar: setShowNavbar,
+            showMiniDialog,
+        }),
+        [showMiniDialog],
+    );
 
     const title = isI18nReady ? t("title_accounts") : staticAppTitle;
 
@@ -62,11 +47,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
             <ThemeProvider theme={getTheme(THEME_COLOR.DARK, "photos")}>
                 <CssBaseline enableColorScheme />
-                <AttributedMiniDialog
-                    open={dialogBoxV2View}
-                    onClose={closeDialogBoxV2}
-                    attributes={dialogBoxAttributeV2}
-                />
+                <AttributedMiniDialog {...miniDialogProps} />
 
                 <AppContext.Provider value={appContext}>
                     {!isI18nReady && (
