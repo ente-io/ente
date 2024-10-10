@@ -260,7 +260,7 @@ export default function App({ Component, pageProps }: AppProps) {
             setDialogBoxAttributesV2({
                 title: t("error"),
                 icon: <ErrorOutline />,
-                content: t("generic_error"),
+                message: t("generic_error"),
                 close: { variant: "critical" },
             })
         ),

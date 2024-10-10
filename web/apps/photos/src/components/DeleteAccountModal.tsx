@@ -43,7 +43,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
         setDialogBoxAttributesV2({
             title: t("error"),
             close: { variant: "critical" },
-            content: t("generic_error_retry"),
+            message: t("generic_error_retry"),
         });
 
     const initiateDelete = async (
@@ -86,7 +86,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
     const confirmAccountDeletion = () => {
         setDialogBoxAttributesV2({
             title: t("delete_account"),
-            content: <Trans i18nKey="delete_account_confirm_message" />,
+            message: <Trans i18nKey="delete_account_confirm_message" />,
             proceed: {
                 text: t("delete"),
                 action: solveChallengeAndDeleteAccount,
@@ -101,7 +101,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
 
         setDialogBoxAttributesV2({
             title: t("delete_account"),
-            content: (
+            message: (
                 <Trans
                     i18nKey="delete_account_manually_message"
                     components={{ a: <Link href={`mailto:${emailID}`} /> }}

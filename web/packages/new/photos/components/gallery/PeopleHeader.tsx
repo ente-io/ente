@@ -105,7 +105,7 @@ const CGroupPersonOptions: React.FC<CGroupPersonOptionsProps> = ({
     const handleDeletePerson = () =>
         setDialogBoxAttributesV2({
             title: pt("Reset person?"),
-            content: pt(
+            message: pt(
                 "The name, face groupings and suggestions for this person will be reset",
             ),
             close: { text: t("cancel") },

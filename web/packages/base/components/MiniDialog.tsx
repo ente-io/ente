@@ -33,20 +33,50 @@ export interface MiniDialogAttributes {
      * An optional component shown next to the title.
      */
     icon?: React.ReactNode;
-    staticBackdrop?: boolean;
-    nonClosable?: boolean;
     /**
      * The dialog's message.
      *
      * This will be usually be a string, but the prop accepts any React node to
      * allow passing a i18next <Trans /> component.
      */
-    content?: React.ReactNode;
+    message?: React.ReactNode;
+    /**
+     * If `true`, then clicks in the backdrop are ignored. The default behaviour
+     * is to close the dialog when the background is clicked.
+     */
+    staticBackdrop?: boolean;
+    /**
+     * If `true`, then the dialog cannot be closed (e.g. with the ESC key, or
+     * clicking on the backdrop) except through one of the explicitly provided
+     * actions.
+     */
+    nonClosable?: boolean;
+    /**
+     * Customize the primary action button offered by the dialog box.
+     *
+     * This is provided by boxes which serve as some sort of confirmation. For
+     * dialogs which are informational notifications, this is usually skipped,
+     * only the {@link close} action button is configured.
+     */
+    proceed?: {
+        /** The string to use as the label for the primary action button. */
+        text: string;
+        /** The color of the button. */
+        variant?: ButtonProps["color"];
+        /**
+         * The function to call when the user presses the primary action button.
+         *
+         * It is passed a {@link setLoading} function that can be used to show
+         * or hide loading indicator or the primary action button.
+         */
+        action:
+            | (() => void | Promise<void>)
+            | ((setLoading: (value: boolean) => void) => void | Promise<void>);
+    };
     /**
      * Customize the cancel (dismiss) action button offered by the dialog box.
      *
-     * Usually dialog boxes should have a cancel action, but this can be skipped
-     * to only show one of the other types of buttons.
+     * Usually all dialog boxes should have a cancel action.
      */
     close?: {
         /** The string to use as the label for the cancel button. */
@@ -60,24 +90,7 @@ export interface MiniDialogAttributes {
          */
         action?: () => void;
     };
-    /**
-     * Customize the primary action button offered by the dialog box.
-     */
-    proceed?: {
-        /** The string to use as the label for the primary action. */
-        text: string;
-        /**
-         * The function to call when the user presses the primary action button.
-         *
-         * It is passed a {@link setLoading} function that can be used to show
-         * or hide loading indicator or the primary action button.
-         */
-        action:
-            | (() => void | Promise<void>)
-            | ((setLoading: (value: boolean) => void) => void | Promise<void>);
-        variant?: ButtonProps["color"];
-        disabled?: boolean;
-    };
+    /** The direction in which the buttons are stacked. Default is "column". */
     buttonDirection?: "row" | "column";
 }
 
@@ -145,11 +158,10 @@ export const AttributedMiniDialog: React.FC<
                     {attributes.icon}
                 </Box>
             )}
-
             <DialogContent>
-                {attributes.content && (
+                {attributes.message && (
                     <Typography color="text.muted">
-                        {attributes.content}
+                        {attributes.message}
                     </Typography>
                 )}
                 {children}
@@ -160,7 +172,7 @@ export const AttributedMiniDialog: React.FC<
                             gap: "12px",
                         }}
                         direction={
-                            attributes.buttonDirection === "row"
+                            attributes.buttonDirection == "row"
                                 ? "row-reverse"
                                 : "column"
                         }
@@ -168,7 +180,7 @@ export const AttributedMiniDialog: React.FC<
                         {attributes.proceed && (
                             <LoadingButton
                                 loading={loading}
-                                size="large"
+                                fullWidth
                                 color={attributes.proceed?.variant}
                                 onClick={async () => {
                                     await attributes.proceed?.action(
@@ -177,14 +189,13 @@ export const AttributedMiniDialog: React.FC<
 
                                     onClose();
                                 }}
-                                disabled={attributes.proceed.disabled}
                             >
                                 {attributes.proceed.text}
                             </LoadingButton>
                         )}
                         {attributes.close && (
                             <FocusVisibleButton
-                                size="large"
+                                fullWidth
                                 color={attributes.close?.variant ?? "secondary"}
                                 onClick={() => {
                                     attributes.close?.action &&

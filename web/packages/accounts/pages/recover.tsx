@@ -101,7 +101,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         setDialogBoxAttributesV2({
             title: t("sorry"),
             close: {},
-            content: t("NO_RECOVERY_KEY_MESSAGE"),
+            message: t("NO_RECOVERY_KEY_MESSAGE"),
         });
 
     return (

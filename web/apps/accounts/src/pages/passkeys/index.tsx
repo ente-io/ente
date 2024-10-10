@@ -46,7 +46,7 @@ const Page: React.FC = () => {
     const showPasskeyFetchFailedErrorDialog = useCallback(() => {
         setDialogBoxAttributesV2({
             title: t("error"),
-            content: t("passkey_fetch_failed"),
+            message: t("passkey_fetch_failed"),
             close: {},
         });
     }, [setDialogBoxAttributesV2]);
@@ -282,7 +282,7 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
 
         setDialogBoxAttributesV2({
             title: t("delete_passkey"),
-            content: t("delete_passkey_confirmation"),
+            message: t("delete_passkey_confirmation"),
             proceed: {
                 text: t("delete"),
                 action: handleDelete,

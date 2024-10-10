@@ -151,7 +151,7 @@ const Page: React.FC<RecoverPageProps> = ({ appContext, twoFactorType }) => {
         appContext.setDialogBoxAttributesV2({
             title: t("contact_support"),
             close: dialogClose ?? {},
-            content: (
+            message: (
                 <Trans
                     i18nKey={"NO_TWO_FACTOR_RECOVERY_KEY_MESSAGE"}
                     components={{

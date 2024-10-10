@@ -292,7 +292,7 @@ const ManageML: React.FC<ManageMLProps> = ({
     const confirmDisableML = () => {
         setDialogBoxAttributesV2({
             title: t("ml_search_disable"),
-            content: t("ml_search_disable_confirm"),
+            message: t("ml_search_disable_confirm"),
             close: { text: t("cancel") },
             proceed: {
                 variant: "critical",

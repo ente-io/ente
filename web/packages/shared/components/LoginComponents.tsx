@@ -207,7 +207,7 @@ export const sessionExpiredDialogAttributes = (
     onLogin: () => void,
 ): MiniDialogAttributes => ({
     title: t("SESSION_EXPIRED"),
-    content: t("SESSION_EXPIRED_MESSAGE"),
+    message: t("SESSION_EXPIRED_MESSAGE"),
     nonClosable: true,
     proceed: {
         text: t("login"),
@@ -222,5 +222,5 @@ export const sessionExpiredDialogAttributes = (
 const genericErrorAttributes = (): MiniDialogAttributes => ({
     title: t("error"),
     close: { variant: "critical" },
-    content: t("generic_error_retry"),
+    message: t("generic_error_retry"),
 });
