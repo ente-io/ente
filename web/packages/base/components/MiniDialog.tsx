@@ -1,7 +1,3 @@
-// TODO:
-/* eslint-disable @typescript-eslint/prefer-optional-chain */
-/* eslint-disable @typescript-eslint/no-unnecessary-condition */
-/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import type { ButtonProps } from "@mui/material";
@@ -147,7 +143,7 @@ export const AttributedMiniDialog: React.FC<
             }}
             {...rest}
         >
-            {(attributes.icon || attributes.title) && (
+            {(attributes.icon ?? attributes.title) && (
                 <Box
                     sx={{
                         display: "flex",
@@ -186,14 +182,14 @@ export const AttributedMiniDialog: React.FC<
                         <LoadingButton
                             loading={loading}
                             fullWidth
-                            color={attributes.continue?.color ?? "accent"}
-                            autoFocus={attributes.continue?.autoFocus}
+                            color={attributes.continue.color ?? "accent"}
+                            autoFocus={attributes.continue.autoFocus}
                             onClick={async () => {
                                 await attributes.continue?.action?.(setLoading);
                                 onClose();
                             }}
                         >
-                            {attributes.continue?.text ?? t("ok")}
+                            {attributes.continue.text ?? t("ok")}
                         </LoadingButton>
                     )}
                     {attributes.cancel && (
