@@ -5,7 +5,7 @@ import "dart:typed_data" show Float32List, Uint8List;
 import "dart:ui";
 
 import 'package:flutter/painting.dart' as paint show decodeImageFromList;
-import "package:heif_converter/heif_converter.dart";
+import "package:flutter_image_compress/flutter_image_compress.dart";
 import "package:logging/logging.dart";
 import 'package:ml_linalg/linalg.dart';
 import "package:photos/models/ml/face/box.dart";
@@ -40,27 +40,29 @@ Future<(Image, Uint8List)> decodeImageFromPath(String imagePath) async {
     return (image, rawRgbaBytes);
   } catch (e, s) {
     final format = imagePath.split('.').last;
-    if (Platform.isAndroid) {
-      _logger.info('Cannot decode $format, converting to JPG on Android');
-      final String? jpgPath =
-          await HeifConverter.convert(imagePath, format: 'jpg');
-      if (jpgPath != null) {
-        _logger.info('Conversion successful, decoding JPG');
-        final imageData = await File(jpgPath).readAsBytes();
-        final image = await decodeImageFromData(imageData);
-        final rawRgbaBytes = await _getRawRgbaBytes(image);
-        return (image, rawRgbaBytes);
-      }
-      _logger.info('Unable to convert $format to JPG');
+    _logger.info(
+      'Cannot decode $format on ${Platform.isAndroid ? "Android" : "iOS"}, converting to jpeg',
+    );
+    try {
+      final Uint8List? convertedData =
+          await FlutterImageCompress.compressWithFile(
+        imagePath,
+        format: CompressFormat.jpeg,
+      );
+      final image = await decodeImageFromData(convertedData!);
+      final rawRgbaBytes = await _getRawRgbaBytes(image);
+      _logger.info('Conversion successful, jpeg decoded');
+      return (image, rawRgbaBytes);
+    } catch (e) {
+      _logger.severe(
+        'Error decoding image of format $format on ${Platform.isAndroid ? "Android" : "iOS"}',
+        e,
+        s,
+      );
+      throw Exception(
+        'InvalidImageFormatException: Error decoding image of format $format',
+      );
     }
-    _logger.severe(
-      'Error decoding image of format $format (Android: ${Platform.isAndroid})',
-      e,
-      s,
-    );
-    throw Exception(
-      'InvalidImageFormatException: Error decoding image of format $format',
-    );
   }
 }
 
