@@ -183,7 +183,12 @@ export const AttributedMiniDialog: React.FC<
             )}
             <DialogContent>
                 {attributes.message && (
-                    <Typography color="text.muted">
+                    <Typography
+                        component={
+                            typeof attributes.message == "string" ? "p" : "div"
+                        }
+                        color="text.muted"
+                    >
                         {attributes.message}
                     </Typography>
                 )}
