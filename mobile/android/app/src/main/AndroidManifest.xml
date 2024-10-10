@@ -10,7 +10,7 @@
         android:fullBackupContent="false"
         android:largeHeap="true">
 
-        <activity android:name=".MainActivity" android:launchMode="singleTop"
+        <activity android:name=".MainActivity" android:launchMode="singleTask"
             android:theme="@style/LaunchTheme"
             android:exported="true"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
@@ -46,6 +46,16 @@
                 <data android:mimeType="video/*" />
             </intent-filter>
 
+            <!-- App Link --> 
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data 
+                    android:scheme="https" 
+                    android:host="albums.ente.io"/>
+            </intent-filter>
+            
             <!-- file provider to share files having a file:// URI -->
 
             <!--Filter

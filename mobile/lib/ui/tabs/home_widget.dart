@@ -1,4 +1,5 @@
 import 'dart:async';
+import "dart:convert";
 import "dart:io";
 
 import 'package:flutter/material.dart';
@@ -24,7 +25,9 @@ import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/models/collection/collection.dart";
 import 'package:photos/models/collection/collection_items.dart';
+import "package:photos/models/file/file.dart";
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
@@ -52,9 +55,12 @@ import "package:photos/ui/settings_page.dart";
 import "package:photos/ui/tabs/shared_collections_tab.dart";
 import "package:photos/ui/tabs/user_collections_tab.dart";
 import "package:photos/ui/viewer/gallery/collection_page.dart";
+import "package:photos/ui/viewer/gallery/shared_public_collection_page.dart";
 import "package:photos/ui/viewer/search/search_widget.dart";
 import 'package:photos/ui/viewer/search_tab/search_tab.dart';
+import "package:photos/utils/crypto_util.dart";
 import 'package:photos/utils/dialog_util.dart';
+import "package:photos/utils/diff_fetcher.dart";
 import "package:photos/utils/navigation_util.dart";
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:uni_links/uni_links.dart';
@@ -100,6 +106,8 @@ class _HomeWidgetState extends State<HomeWidget> {
   late StreamSubscription<BackupFoldersUpdatedEvent> _backupFoldersUpdatedEvent;
   late StreamSubscription<AccountConfiguredEvent> _accountConfiguredEvent;
   late StreamSubscription<CollectionUpdatedEvent> _collectionUpdatedEvent;
+  late StreamSubscription<Uri?> _uriLinkEventSubscription;
+  final DiffFetcher _diffFetcher = DiffFetcher();
 
   @override
   void initState() {
@@ -226,6 +234,64 @@ class _HomeWidgetState extends State<HomeWidget> {
         .ignore();
   }
 
+  Future<void> _handlePublicAlbumLink(Uri uri) async {
+    bool result = true;
+    final Collection collection =
+        await CollectionsService.instance.getPublicCollection(context, uri);
+    final publicUrl = collection.publicURLs![0];
+    if (publicUrl!.passwordEnabled) {
+      await showTextInputDialog(
+        context,
+        title: S.of(context).enterPassword,
+        submitButtonLabel: S.of(context).ok,
+        alwaysShowSuccessState: false,
+        onSubmit: (String text) async {
+          if (text.trim() == "") {
+            return;
+          }
+          try {
+            final hashedPassword = await CryptoUtil.deriveKey(
+              utf8.encode(text),
+              CryptoUtil.base642bin(publicUrl.nonce!),
+              publicUrl.memLimit!,
+              publicUrl.opsLimit!,
+            );
+
+            result = await CollectionsService.instance
+                .verifyPublicCollectionPassword(
+              context,
+              CryptoUtil.bin2base64(hashedPassword),
+              collection.id,
+            );
+          } catch (e, s) {
+            _logger.severe("Failed to decrypt password for album", e, s);
+            await showGenericErrorDialog(context: context, error: e);
+          }
+        },
+      );
+    }
+
+    if (result) {
+      final dialog = createProgressDialog(context, "Loading...");
+      await dialog.show();
+
+      final List<EnteFile> sharedFiles =
+          await _diffFetcher.getPublicFiles(context, collection.id);
+      await dialog.hide();
+
+      await routeToPage(
+        context,
+        SharedPublicCollectionPage(
+          files: sharedFiles,
+          CollectionWithThumbnail(
+            collection,
+            null,
+          ),
+        ),
+      );
+    }
+  }
+
   Future<void> _autoLogoutAlert() async {
     final AlertDialog alert = AlertDialog(
       title: Text(S.of(context).sessionExpired),
@@ -273,14 +339,21 @@ class _HomeWidgetState extends State<HomeWidget> {
     _collectionUpdatedEvent.cancel();
     isOnSearchTabNotifier.dispose();
     _pageController.dispose();
+    _uriLinkEventSubscription.cancel();
     super.dispose();
   }
 
   void _initMediaShareSubscription() {
-    // For sharing images coming from outside the app while the app is in the memory
+    // For sharing images/public links coming from outside the app while the app is in the memory
     _intentDataStreamSubscription =
         ReceiveSharingIntent.instance.getMediaStream().listen(
       (List<SharedMediaFile> value) {
+        if (value[0].path.contains("albums.ente.io")) {
+          final uri = Uri.parse(value[0].path);
+          _handlePublicAlbumLink(uri);
+          return;
+        }
+
         setState(() {
           _shouldRenderCreateCollectionSheet = true;
           _sharedFiles = value;
@@ -290,11 +363,17 @@ class _HomeWidgetState extends State<HomeWidget> {
         _logger.severe("getIntentDataStream error: $err");
       },
     );
-    // For sharing images coming from outside the app while the app is closed
+    // For sharing images/public links coming from outside the app while the app is closed
     ReceiveSharingIntent.instance
         .getInitialMedia()
         .then((List<SharedMediaFile> value) {
       if (mounted) {
+        if (value[0].path.contains("albums.ente.io")) {
+          final uri = Uri.parse(value[0].path);
+          _handlePublicAlbumLink(uri);
+          return;
+        }
+
         setState(() {
           _sharedFiles = value;
           _shouldRenderCreateCollectionSheet = true;
