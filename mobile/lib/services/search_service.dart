@@ -864,7 +864,7 @@ class SearchService {
         facesResult.add(
           GenericSearchResult(
             ResultType.faces,
-            "",
+            clusterName,
             files,
             params: {
               kClusterParamId: clusterId,

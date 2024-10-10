@@ -4,17 +4,22 @@ import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
 import "package:photos/db/files_db.dart";
+import "package:photos/db/ml/db.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/location_tag/location_tag.dart";
+import "package:photos/models/ml/face/person.dart";
 import "package:photos/models/search/hierarchical/album_filter.dart";
 import "package:photos/models/search/hierarchical/contacts_filter.dart";
+import "package:photos/models/search/hierarchical/face_filter.dart";
 import "package:photos/models/search/hierarchical/file_type_filter.dart";
 import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
 import "package:photos/models/search/hierarchical/location_filter.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/location_service.dart";
+import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
+import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
 
@@ -85,9 +90,11 @@ void curateFilters(
     );
     final contactsFilters =
         _curateContactsFilter(searchFilterDataProvider, files);
+    final faceFilters = await curateFaceFilters(files);
 
     searchFilterDataProvider.clearAndAddRecommendations(
       [
+        ...faceFilters,
         ...fileTypeFilters,
         ...contactsFilters,
         ...albumFilters,
@@ -236,4 +243,96 @@ List<ContactsFilter> _curateContactsFilter(
   }
 
   return contactsFilters;
+}
+
+Future<List<FaceFilter>> curateFaceFilters(
+  List<EnteFile> files,
+) async {
+  try {
+    final faceFilters = <FaceFilter>[];
+    final Map<int, Set<String>> fileIdToClusterID =
+        await MLDataDB.instance.getFileIdToClusterIds();
+    final Map<String, PersonEntity> personIdToPerson =
+        await PersonService.instance.getPersonsMap();
+    final clusterIDToPersonID =
+        await MLDataDB.instance.getClusterIDToPersonID();
+
+    final Map<String, List<EnteFile>> clusterIdToFiles = {};
+    final Map<String, List<EnteFile>> personIdToFiles = {};
+
+    for (final f in files) {
+      if (!fileIdToClusterID.containsKey(f.uploadedFileID ?? -1)) {
+        continue;
+      }
+      final clusterIds = fileIdToClusterID[f.uploadedFileID ?? -1]!;
+      for (final cluster in clusterIds) {
+        final PersonEntity? p =
+            personIdToPerson[clusterIDToPersonID[cluster] ?? ""];
+        if (p != null) {
+          if (personIdToFiles.containsKey(p.remoteID)) {
+            personIdToFiles[p.remoteID]!.add(f);
+          } else {
+            personIdToFiles[p.remoteID] = [f];
+          }
+        } else {
+          if (clusterIdToFiles.containsKey(cluster)) {
+            clusterIdToFiles[cluster]!.add(f);
+          } else {
+            clusterIdToFiles[cluster] = [f];
+          }
+        }
+      }
+    }
+
+    for (final personID in personIdToFiles.keys) {
+      final files = personIdToFiles[personID]!;
+      if (files.isEmpty) {
+        continue;
+      }
+      final PersonEntity p = personIdToPerson[personID]!;
+      if (p.data.isIgnored) continue;
+
+      faceFilters.add(
+        FaceFilter(
+          personId: personID,
+          clusterId: null,
+          faceName: p.data.name,
+          faceFile: files.first,
+          occurrence: files.length,
+        ),
+      );
+    }
+
+    for (final clusterId in clusterIdToFiles.keys) {
+      final files = clusterIdToFiles[clusterId]!;
+      final String clusterName = clusterId;
+
+      if (clusterIDToPersonID[clusterId] != null) {
+        // This should not happen, means a faceID is assigned to multiple persons.
+        Logger("hierarchical_search_util").severe(
+          "`getAllFace`: Cluster $clusterId should not have person id ${clusterIDToPersonID[clusterId]}",
+        );
+      }
+      if (files.length < kMinimumClusterSizeSearchResult &&
+          clusterIdToFiles.keys.length > 3) {
+        continue;
+      }
+
+      faceFilters.add(
+        FaceFilter(
+          personId: null,
+          clusterId: clusterId,
+          faceName: clusterName,
+          faceFile: files.first,
+          occurrence: files.length,
+        ),
+      );
+    }
+
+    return faceFilters;
+  } catch (e, s) {
+    Logger("hierarchical_search_util")
+        .severe("Error in curating face filters", e, s);
+    rethrow;
+  }
 }
