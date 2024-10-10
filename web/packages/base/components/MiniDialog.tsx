@@ -52,44 +52,50 @@ export interface MiniDialogAttributes {
      */
     nonClosable?: boolean;
     /**
-     * Customize the primary action button offered by the dialog box.
+     * Customize the primary action button shown in the dialog.
      *
      * This is provided by boxes which serve as some sort of confirmation. For
      * dialogs which are informational notifications, this is usually skipped,
      * only the {@link close} action button is configured.
      */
-    proceed?: {
-        /** The string to use as the label for the primary action button. */
-        text: string;
-        /** The color of the button. */
-        variant?: ButtonProps["color"];
+    continue?: {
         /**
-         * The function to call when the user presses the primary action button.
+         * The string to use as the label for the primary action button.
+         *
+         * Default is `t("ok")`.
+         */
+        text?: string;
+        /**
+         * The color of the button.
+         *
+         * Default is "accent".
+         */
+        color?: ButtonProps["color"];
+        /**
+         * If `true`, the primary action button is auto focused when the dialog
+         * is opened, allowing the user to confirm just by pressing ENTER.
+         */
+        autoFocus?: boolean;
+        /**
+         * The function to call when the user activates the button.
+         *
+         * Default is to close the dialog.
          *
          * It is passed a {@link setLoading} function that can be used to show
          * or hide loading indicator or the primary action button.
          */
-        action:
+        action?:
             | (() => void | Promise<void>)
             | ((setLoading: (value: boolean) => void) => void | Promise<void>);
     };
     /**
-     * Customize the cancel (dismiss) action button offered by the dialog box.
+     * The string to use as the label for the cancel button.
      *
-     * Usually all dialog boxes should have a cancel action.
+     * Default is `t("cancel")`.
+     *
+     * Set this to `false` to omit the cancel button altogether.
      */
-    close?: {
-        /** The string to use as the label for the cancel button. */
-        text?: string;
-        /** The color of the button. */
-        variant?: ButtonProps["color"];
-        /**
-         * The function to call when the user cancels.
-         *
-         * If provided, this callback is invoked before closing the dialog.
-         */
-        action?: () => void;
-    };
+    cancel?: string | false;
     /** The direction in which the buttons are stacked. Default is "column". */
     buttonDirection?: "row" | "column";
 }
