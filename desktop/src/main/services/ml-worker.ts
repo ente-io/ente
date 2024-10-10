@@ -194,15 +194,10 @@ const downloadModel = async (saveLocation: string, name: string) => {
  */
 const createInferenceSession = async (modelPath: string) => {
     return await ort.InferenceSession.create(modelPath, {
-        executionProviders: ["cpu"],
-        // Be more conservative with RAM usage.
-        enableCpuMemArena: true,
         // Restrict the number of threads to 1.
         intraOpNumThreads: 1,
-        executionMode: "sequential",
-        interOpNumThreads: 1,
-        // Use all graph optimizations.
-        graphOptimizationLevel: "all",
+        // Be more conservative with RAM usage.
+        enableCpuMemArena: false,
     });
 };
 
