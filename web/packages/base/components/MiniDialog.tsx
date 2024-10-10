@@ -76,12 +76,6 @@ export interface MiniDialogAttributes {
         variant?: ButtonProps["color"];
         disabled?: boolean;
     };
-    secondary?: {
-        text: string;
-        action: () => void;
-        variant?: ButtonProps["color"];
-        disabled?: boolean;
-    };
     buttonDirection?: "row" | "column";
 }
 
@@ -239,7 +233,6 @@ export interface DialogBoxV2Attributes {
     title?: React.ReactNode;
     staticBackdrop?: boolean;
     nonClosable?: boolean;
-
     /**
      * Customize the cancel (dismiss) action button offered by the dialog box.
      *
@@ -257,30 +250,6 @@ export interface DialogBoxV2Attributes {
          * If provided, this callback is invoked before closing the dialog.
          */
         action?: () => void;
-    };
-    /**
-     * Customize the primary action button offered by the dialog box.
-     */
-    proceed?: {
-        /** The string to use as the label for the primary action. */
-        text: string;
-        /**
-         * The function to call when the user presses the primary action button.
-         *
-         * It is passed a {@link setLoading} function that can be used to show
-         * or hide loading indicator or the primary action button.
-         */
-        action:
-            | (() => void | Promise<void>)
-            | ((setLoading: (value: boolean) => void) => void | Promise<void>);
-        variant?: ButtonProps["color"];
-        disabled?: boolean;
-    };
-    secondary?: {
-        text: string;
-        action: () => void;
-        variant?: ButtonProps["color"];
-        disabled?: boolean;
     };
     buttonDirection?: "row" | "column";
 }
@@ -306,7 +275,6 @@ export function DialogBoxV2({
     onClose,
     ...props
 }: DialogBoxV2Props) {
-    const [loading, setLoading] = useState(false);
     if (!attributes) {
         return <></>;
     }
@@ -342,7 +310,7 @@ export function DialogBoxV2({
                     )}
                     {children}
                 </Stack>
-                {(attributes.proceed || attributes.close) && (
+                {attributes.close && (
                     <Stack
                         spacing={"8px"}
                         direction={
@@ -352,23 +320,6 @@ export function DialogBoxV2({
                         }
                         flex={1}
                     >
-                        {attributes.proceed && (
-                            <LoadingButton
-                                loading={loading}
-                                size="large"
-                                color={attributes.proceed?.variant}
-                                onClick={async () => {
-                                    await attributes.proceed?.action(
-                                        setLoading,
-                                    );
-
-                                    onClose();
-                                }}
-                                disabled={attributes.proceed.disabled}
-                            >
-                                {attributes.proceed.text}
-                            </LoadingButton>
-                        )}
                         {attributes.close && (
                             <FocusVisibleButton
                                 size="large"
