@@ -9,6 +9,8 @@ import type { ButtonProps } from "@mui/material";
 import {
     Box,
     Dialog,
+    DialogContent,
+    DialogTitle,
     Stack,
     Typography,
     type DialogProps,
@@ -259,19 +261,17 @@ export function DialogBoxV2({
             PaperProps={{
                 ...PaperProps,
                 sx: {
-                    padding: "8px 12px",
+                    // padding: "8px 12px",
                     maxWidth: "360px",
                     ...PaperProps?.sx,
                 },
             }}
             {...rest}
         >
-            <Stack spacing={"19px"} p={"16px"}>
-                <Typography variant="large" fontWeight={"bold"}>
-                    {title}
-                </Typography>
-                {children}
-            </Stack>
+            <DialogTitle sx={{ "&&&": { paddingBlock: "18px 0" } }}>
+                {title}
+            </DialogTitle>
+            <DialogContent>{children}</DialogContent>
         </Dialog>
     );
 }
