@@ -23,23 +23,23 @@ import React, { useState } from "react";
  */
 export interface MiniDialogAttributes {
     /**
-     * An optional icon shown above the title.
-     */
-    icon?: React.ReactNode;
-    /**
      * The dialog's title.
      *
-     * While optional, it is usually provided. It will almost always be a
-     * string, but the prop accepts any React node to allow passing a i18next
-     * <Trans /> component.
+     * This will be usually be a string, but the prop accepts any React node to
+     * allow passing a i18next <Trans /> component.
      */
     title?: React.ReactNode;
+    /**
+     * An optional component shown next to the title.
+     */
+    icon?: React.ReactNode;
     staticBackdrop?: boolean;
     nonClosable?: boolean;
     /**
      * The dialog's message.
      *
-     * Similar to {@link title}, this is usually provided, and a string.
+     * This will be usually be a string, but the prop accepts any React node to
+     * allow passing a i18next <Trans /> component.
      */
     content?: React.ReactNode;
     /**
@@ -125,24 +125,27 @@ export const AttributedMiniDialog: React.FC<
             }}
             {...rest}
         >
-            {attributes.icon && (
+            {(attributes.icon || attributes.title) && (
                 <Box
                     sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
                         "& > svg": {
                             fontSize: "32px",
+                            color: "text.faint",
                         },
-                        color: "text.muted",
-                        padding: "20px 16px 0px 16px",
+                        padding: "24px 16px 16px 16px",
                     }}
                 >
+                    {attributes.title && (
+                        <DialogTitle sx={{ "&&&": { padding: 0 } }}>
+                            {attributes.title}
+                        </DialogTitle>
+                    )}
                     {attributes.icon}
                 </Box>
             )}
-            {attributes.title && (
-                <DialogTitle sx={{ "&&&": { paddingBlock: "24px 16px" } }}>
-                    {attributes.title}
-                </DialogTitle>
-            )}
+
             <DialogContent>
                 {attributes.content && (
                     <Typography color="text.muted">
