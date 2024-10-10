@@ -56,7 +56,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
             <ThemeProvider theme={getTheme(THEME_COLOR.DARK, "photos")}>
                 <CssBaseline enableColorScheme />
                 <MiniDialog
-                    sx={{ zIndex: 1600 }}
                     open={dialogBoxV2View}
                     onClose={closeDialogBoxV2}
                     attributes={dialogBoxAttributeV2}

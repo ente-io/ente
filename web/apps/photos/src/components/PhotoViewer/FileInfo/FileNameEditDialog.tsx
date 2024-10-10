@@ -1,4 +1,5 @@
 import { TitledMiniDialog } from "@/base/components/MiniDialog";
+import { photosDialogZIndex } from "@/new/photos/components/z-index";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
@@ -24,7 +25,7 @@ export const FileNameEditDialog = ({
     };
     return (
         <TitledMiniDialog
-            sx={{ zIndex: 1600 }}
+            sx={{ zIndex: photosDialogZIndex }}
             open={isInEditMode}
             onClose={closeEditMode}
             title={t("rename_file")}

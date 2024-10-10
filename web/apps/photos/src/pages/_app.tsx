@@ -11,6 +11,7 @@ import {
     logUnhandledErrorsAndRejections,
 } from "@/base/log-web";
 import { AppUpdate } from "@/base/types/ipc";
+import { photosDialogZIndex } from "@/new/photos/components/z-index";
 import DownloadManager from "@/new/photos/services/download";
 import { runMigrations } from "@/new/photos/services/migrations";
 import { initML, isMLSupported } from "@/new/photos/services/ml";
@@ -301,14 +302,14 @@ export default function App({ Component, pageProps }: AppProps) {
                 <LoadingBar color="#51cd7c" ref={loadingBar} />
 
                 <DialogBox
-                    sx={{ zIndex: 1600 }}
+                    sx={{ zIndex: photosDialogZIndex }}
                     size="xs"
                     open={messageDialogView}
                     onClose={closeMessageDialog}
                     attributes={dialogMessage}
                 />
                 <MiniDialog
-                    sx={{ zIndex: 1600 }}
+                    sx={{ zIndex: photosDialogZIndex }}
                     open={dialogBoxV2View}
                     onClose={closeDialogBoxV2}
                     attributes={dialogBoxAttributeV2}

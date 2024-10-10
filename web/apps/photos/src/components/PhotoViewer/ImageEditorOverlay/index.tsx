@@ -6,6 +6,7 @@ import {
 } from "@/base/components/Menu";
 import { nameAndExtension } from "@/base/file";
 import log from "@/base/log";
+import { photosDialogZIndex } from "@/new/photos/components/z-index";
 import downloadManager from "@/new/photos/services/download";
 import { AppContext } from "@/new/photos/types/context";
 import { EnteFile } from "@/new/photos/types/file";
@@ -522,7 +523,7 @@ const ImageEditorOverlay = (props: IProps) => {
             <Backdrop
                 sx={{
                     background: "#000",
-                    zIndex: 1600,
+                    zIndex: photosDialogZIndex,
                     width: "100%",
                 }}
                 open

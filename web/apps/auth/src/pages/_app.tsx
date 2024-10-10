@@ -168,7 +168,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                 <LoadingBar color="#51cd7c" ref={loadingBar} />
 
                 <MiniDialog
-                    sx={{ zIndex: 1600 }}
                     open={dialogBoxV2View}
                     onClose={closeDialogBoxV2}
                     attributes={dialogBoxAttributeV2}

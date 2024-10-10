@@ -18,7 +18,7 @@ import {
     UnclusteredFaceList,
 } from "@/new/photos/components/PeopleList";
 import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker";
-import { photoSwipeZIndex } from "@/new/photos/components/PhotoViewer";
+import { fileInfoDrawerZIndex } from "@/new/photos/components/z-index";
 import { tagNumericValue, type RawExifTags } from "@/new/photos/services/exif";
 import {
     AnnotatedFacesForFile,
@@ -382,7 +382,7 @@ const parseExifInfo = (
 const FileInfoSidebar = styled((props: DialogProps) => (
     <EnteDrawer {...props} anchor="right" />
 ))({
-    zIndex: photoSwipeZIndex + 1,
+    zIndex: fileInfoDrawerZIndex,
     "& .MuiPaper-root": {
         padding: 8,
     },
