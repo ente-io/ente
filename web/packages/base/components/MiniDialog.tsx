@@ -4,7 +4,6 @@
 /* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
-import { dialogCloseHandler } from "@ente/shared/components/DialogBox/TitleWithCloseButton";
 import type { ButtonProps } from "@mui/material";
 import {
     Box,
@@ -122,11 +121,10 @@ export const AttributedMiniDialog: React.FC<
         return <></>;
     }
 
-    const handleClose = dialogCloseHandler({
-        staticBackdrop: attributes.staticBackdrop,
-        nonClosable: attributes.nonClosable,
-        onClose: onClose,
-    });
+    const handleClose = () => {
+        if (attributes.nonClosable) return;
+        onClose();
+    };
 
     const { PaperProps, ...rest } = props;
 
@@ -171,49 +169,38 @@ export const AttributedMiniDialog: React.FC<
                     </Typography>
                 )}
                 {children}
-                {(attributes.proceed || attributes.close) && (
-                    <Stack
-                        sx={{
-                            paddingBlockStart: "24px",
-                            gap: "12px",
-                        }}
-                        direction={
-                            attributes.buttonDirection == "row"
-                                ? "row-reverse"
-                                : "column"
-                        }
-                    >
-                        {attributes.proceed && (
-                            <LoadingButton
-                                loading={loading}
-                                fullWidth
-                                color={attributes.proceed?.variant}
-                                onClick={async () => {
-                                    await attributes.proceed?.action(
-                                        setLoading,
-                                    );
-
-                                    onClose();
-                                }}
-                            >
-                                {attributes.proceed.text}
-                            </LoadingButton>
-                        )}
-                        {attributes.close && (
-                            <FocusVisibleButton
-                                fullWidth
-                                color={attributes.close?.variant ?? "secondary"}
-                                onClick={() => {
-                                    attributes.close?.action &&
-                                        attributes.close?.action();
-                                    onClose();
-                                }}
-                            >
-                                {attributes.close?.text ?? t("ok")}
-                            </FocusVisibleButton>
-                        )}
-                    </Stack>
-                )}
+                <Stack
+                    sx={{ paddingBlockStart: "24px", gap: "12px" }}
+                    direction={
+                        attributes.buttonDirection == "row"
+                            ? "row-reverse"
+                            : "column"
+                    }
+                >
+                    {attributes.continue && (
+                        <LoadingButton
+                            loading={loading}
+                            fullWidth
+                            color={attributes.continue?.color ?? "accent"}
+                            autoFocus={attributes.continue?.autoFocus}
+                            onClick={async () => {
+                                await attributes.continue?.action?.(setLoading);
+                                onClose();
+                            }}
+                        >
+                            {attributes.continue?.text ?? t("ok")}
+                        </LoadingButton>
+                    )}
+                    {attributes.cancel && (
+                        <FocusVisibleButton
+                            fullWidth
+                            color="secondary"
+                            onClick={onClose}
+                        >
+                            {attributes.cancel ?? t("cancel")}
+                        </FocusVisibleButton>
+                    )}
+                </Stack>
             </DialogContent>
         </Dialog>
     );
