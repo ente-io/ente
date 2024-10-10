@@ -72,21 +72,16 @@ export interface MiniDialogAttributes {
          */
         autoFocus?: boolean;
         /**
-         * If `true`, close the dialog after {@link action} completes.
-         * TODO: Test/Impl/Is this needed?
-         */
-        autoClose?: boolean;
-        /**
          * The function to call when the user activates the button.
          *
-         * Default is to close the dialog.
+         * If this function returns a promise, then an activity indicator will
+         * be shown on the button until the promise settles.
          *
-         * It is passed a {@link setLoading} function that can be used to show
-         * or hide loading indicator or the primary action button.
+         * If this function is not provided, or if the function completes /
+         * fullfills, then then the dialog is automatically closed. Otherwise
+         * (that is, if the provided function throws), the dialog remains open.
          */
-        action?:
-            | (() => void | Promise<void>)
-            | ((setLoading: (value: boolean) => void) => void | Promise<void>);
+        action?: () => void | Promise<void>;
     };
     /**
      * The string to use as the label for the cancel button.
@@ -185,8 +180,14 @@ export const AttributedMiniDialog: React.FC<
                             color={attributes.continue.color ?? "accent"}
                             autoFocus={attributes.continue.autoFocus}
                             onClick={async () => {
-                                await attributes.continue?.action?.(setLoading);
-                                onClose();
+                                setLoading(true);
+                                try {
+                                    await attributes.continue?.action?.();
+                                    setLoading(false);
+                                    onClose();
+                                } catch {
+                                    setLoading(false);
+                                }
                             }}
                         >
                             {attributes.continue.text ?? t("ok")}
