@@ -9,7 +9,6 @@ import "package:heif_converter/heif_converter.dart";
 import "package:logging/logging.dart";
 import 'package:ml_linalg/linalg.dart';
 import "package:photos/models/ml/face/box.dart";
-import "package:photos/models/ml/face/dimension.dart";
 import 'package:photos/services/machine_learning/face_ml/face_alignment/alignment_result.dart';
 import 'package:photos/services/machine_learning/face_ml/face_alignment/similarity_transform.dart';
 import 'package:photos/services/machine_learning/face_ml/face_detection/detection.dart';
@@ -167,55 +166,6 @@ Future<List<Uint8List>> generateFaceThumbnailsUsingCanvas(
   }
 }
 
-Future<(Float32List, Dimensions)> preprocessImageToFloat32ChannelsFirst(
-  Image image,
-  Uint8List rawRgbaBytes, {
-  required int normalization,
-  required int requiredWidth,
-  required int requiredHeight,
-  RGB Function(num, num, Image, Uint8List) getPixel = _getPixelBilinear,
-  maintainAspectRatio = true,
-}) async {
-  double scaleW = requiredWidth / image.width;
-  double scaleH = requiredHeight / image.height;
-  if (maintainAspectRatio) {
-    final scale =
-        min(requiredWidth / image.width, requiredHeight / image.height);
-    scaleW = scale;
-    scaleH = scale;
-  }
-  final scaledWidth = (image.width * scaleW).round().clamp(0, requiredWidth);
-  final scaledHeight = (image.height * scaleH).round().clamp(0, requiredHeight);
-
-  final processedBytes = Float32List(3 * requiredHeight * requiredWidth);
-
-  final buffer = Float32List.view(processedBytes.buffer);
-  int pixelIndex = 0;
-  final int channelOffsetGreen = requiredHeight * requiredWidth;
-  final int channelOffsetBlue = 2 * requiredHeight * requiredWidth;
-  for (var h = 0; h < requiredHeight; h++) {
-    for (var w = 0; w < requiredWidth; w++) {
-      late RGB pixel;
-      if (w >= scaledWidth || h >= scaledHeight) {
-        pixel = const (114, 114, 114);
-      } else {
-        pixel = getPixel(
-          w / scaleW,
-          h / scaleH,
-          image,
-          rawRgbaBytes,
-        );
-      }
-      buffer[pixelIndex] = pixel.$1 / 255;
-      buffer[pixelIndex + channelOffsetGreen] = pixel.$2 / 255;
-      buffer[pixelIndex + channelOffsetBlue] = pixel.$3 / 255;
-      pixelIndex++;
-    }
-  }
-
-  return (processedBytes, Dimensions(width: scaledWidth, height: scaledHeight));
-}
-
 Future<(Float32List, List<AlignmentResult>, List<bool>, List<double>, Size)>
     preprocessToMobileFaceNetFloat32List(
   Image image,
@@ -293,9 +243,11 @@ RGB _readPixelColor(
   Uint8List rgbaBytes,
 ) {
   if (y < 0 || y >= image.height || x < 0 || x >= image.width) {
-    _logger.severe(
-      '`readPixelColor`: Invalid pixel coordinates, out of bounds. x: $x, y: $y',
-    );
+    if (y < -2 || y >= image.height + 2 || x < -2 || x >= image.width + 2) {
+      _logger.severe(
+        '`readPixelColor`: Invalid pixel coordinates, out of bounds. x: $x, y: $y',
+      );
+    }
     return const (114, 114, 114);
   }
 
@@ -450,49 +402,6 @@ Future<Uint8List> _cropAndEncodeCanvas(
     height: height,
   );
   return await _encodeImageToPng(croppedImage);
-}
-
-RGB _getPixelBilinear(
-  num fx,
-  num fy,
-  Image image,
-  Uint8List rawRgbaBytes,
-) {
-  // Clamp to image boundaries
-  fx = fx.clamp(0, image.width - 1);
-  fy = fy.clamp(0, image.height - 1);
-
-  // Get the surrounding coordinates and their weights
-  final int x0 = fx.floor();
-  final int x1 = fx.ceil();
-  final int y0 = fy.floor();
-  final int y1 = fy.ceil();
-  final dx = fx - x0;
-  final dy = fy - y0;
-  final dx1 = 1.0 - dx;
-  final dy1 = 1.0 - dy;
-
-  // Get the original pixels
-  final RGB pixel1 = _readPixelColor(x0, y0, image, rawRgbaBytes);
-  final RGB pixel2 = _readPixelColor(x1, y0, image, rawRgbaBytes);
-  final RGB pixel3 = _readPixelColor(x0, y1, image, rawRgbaBytes);
-  final RGB pixel4 = _readPixelColor(x1, y1, image, rawRgbaBytes);
-
-  int bilinear(
-    num val1,
-    num val2,
-    num val3,
-    num val4,
-  ) =>
-      (val1 * dx1 * dy1 + val2 * dx * dy1 + val3 * dx1 * dy + val4 * dx * dy)
-          .round();
-
-  // Calculate the weighted sum of pixels
-  final int r = bilinear(pixel1.$1, pixel2.$1, pixel3.$1, pixel4.$1);
-  final int g = bilinear(pixel1.$2, pixel2.$2, pixel3.$2, pixel4.$2);
-  final int b = bilinear(pixel1.$3, pixel2.$3, pixel3.$3, pixel4.$3);
-
-  return (r, g, b);
 }
 
 /// Get the pixel value using Bicubic Interpolation. Code taken mainly from https://github.com/brendan-duncan/image/blob/6e407612752ffdb90b28cd5863c7f65856349348/lib/src/image/image.dart#L697
