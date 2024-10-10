@@ -237,6 +237,11 @@ export default function App({ Component, pageProps }: AppProps) {
     );
     const closeDialogBoxV2 = () => setDialogBoxV2View(false);
 
+    const showMiniDialog = useCallback((attributes: MiniDialogAttributes) => {
+        setDialogBoxAttributesV2(attributes);
+        setDialogBoxV2View(true);
+    }, []);
+
     // Use `onGenericError` instead.
     const somethingWentWrong = useCallback(
         () =>
@@ -277,6 +282,7 @@ export default function App({ Component, pageProps }: AppProps) {
         setNotificationAttributes,
         themeColor,
         setThemeColor,
+        showMiniDialog,
         somethingWentWrong,
         onGenericError,
         setDialogBoxAttributesV2,
