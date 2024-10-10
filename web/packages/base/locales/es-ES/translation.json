@@ -453,7 +453,7 @@
     "FAMILY_PLAN": "Plan familiar",
     "debug_logs": "Logs de depuración",
     "download_logs": "Descargar logs",
-    "download_logs_message": "<p>Esto descargará los registros de depuración, que puede enviarnos por correo electrónico para ayudarnos a depurar su problema.</p><p> Tenga en cuenta que los nombres de los archivos se incluirán para ayudar al seguimiento de problemas con archivos específicos. </p>",
+    "download_logs_message": "<p>Esto descargará los registros de depuración, que puede enviarnos por correo electrónico para ayudarnos a depurar su problema.</p><p>Tenga en cuenta que los nombres de los archivos se incluirán para ayudar al seguimiento de problemas con archivos específicos.</p>",
     "WEAK_DEVICE": "El navegador web que está utilizando no es lo suficientemente poderoso para cifrar sus fotos. Por favor, intente iniciar sesión en ente en su computadora, o descargue la aplicación ente para móvil/escritorio.",
     "drag_and_drop_hint": "O arrastre y suelte en la ventana ente",
     "AUTHENTICATE": "Autenticado",
@@ -498,7 +498,7 @@
     "language": "Idioma",
     "advanced": "Avanzado",
     "EXPORT_DIRECTORY_DOES_NOT_EXIST": "Archivo de exportación inválido",
-    "EXPORT_DIRECTORY_DOES_NOT_EXIST_MESSAGE": "<p>El directorio de exportación seleccionado no existe.</p><p> Por favor, seleccione un directorio válido.</p>",
+    "EXPORT_DIRECTORY_DOES_NOT_EXIST_MESSAGE": "<p>El directorio de exportación seleccionado no existe.</p><p>Por favor, seleccione un directorio válido.</p>",
     "SUBSCRIPTION_VERIFICATION_ERROR": "Falló la verificación de la suscripción",
     "storage_unit": {
         "b": "B",

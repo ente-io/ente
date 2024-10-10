@@ -384,7 +384,7 @@
     "ADD_MORE": "",
     "VIEWERS": "",
     "OR_ADD_EXISTING": "",
-    "REMOVE_PARTICIPANT_MESSAGE": "<p>{{selectedEmail}} akan dikeluarkan dari album ini</p> <p>Semua foto yang ia tambahkan juga akan dihapus dari album ini</p>",
+    "REMOVE_PARTICIPANT_MESSAGE": "<p>{{selectedEmail}} akan dikeluarkan dari album ini</p><p>Semua foto yang ia tambahkan juga akan dihapus dari album ini</p>",
     "NOT_FOUND": "404 - tidak ditemukan",
     "LINK_EXPIRED": "Link telah kedaluwarsa",
     "LINK_EXPIRED_MESSAGE": "Link ini telah kedaluwarsa atau sudah dinonaktifkan!",
