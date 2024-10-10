@@ -236,7 +236,7 @@
     "file_name": "إسم الملف",
     "CAPTION_PLACEHOLDER": "إضافة وصف",
     "location": "الموقع",
-    "SHOW_ON_MAP": "عرض على OpenStreetMap",
+    "view_on_map": "عرض على OpenStreetMap",
     "MAP": "خريطة",
     "MAP_SETTINGS": "إعدادات الخريطة",
     "enable_map": "تمكين الخريطة",

@@ -236,7 +236,7 @@
     "file_name": "Filnamn",
     "CAPTION_PLACEHOLDER": "Lägg till en beskrivning",
     "location": "",
-    "SHOW_ON_MAP": "",
+    "view_on_map": "",
     "MAP": "Karta",
     "MAP_SETTINGS": "",
     "enable_map": "",

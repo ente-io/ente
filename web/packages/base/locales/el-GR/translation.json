@@ -236,7 +236,7 @@
     "file_name": "Όνομα αρχείου",
     "CAPTION_PLACEHOLDER": "Προσθήκη περιγραφής",
     "location": "Τοποθεσία",
-    "SHOW_ON_MAP": "Προβολή στο OpenStreetMap",
+    "view_on_map": "Προβολή στο OpenStreetMap",
     "MAP": "Χάρτης",
     "MAP_SETTINGS": "Ρυθμίσεις Χάρτη",
     "enable_map": "Ενεργοποίηση χάρτη",

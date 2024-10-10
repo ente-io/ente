@@ -236,7 +236,7 @@
     "file_name": "Failo pavadinimas",
     "CAPTION_PLACEHOLDER": "Pridėti aprašymą",
     "location": "Vietovė",
-    "SHOW_ON_MAP": "Peržiūrėti žemėlapyje „OpenStreetMap“",
+    "view_on_map": "Peržiūrėti žemėlapyje „OpenStreetMap“",
     "MAP": "Žemėlapis",
     "MAP_SETTINGS": "Žemėlapio nustatymai",
     "enable_map": "Įjungti žemėlapį",

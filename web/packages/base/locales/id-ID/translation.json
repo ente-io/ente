@@ -236,7 +236,7 @@
     "file_name": "Nama file",
     "CAPTION_PLACEHOLDER": "Tambah keterangan",
     "location": "",
-    "SHOW_ON_MAP": "Lihat di OpenStreetMap",
+    "view_on_map": "Lihat di OpenStreetMap",
     "MAP": "Peta",
     "MAP_SETTINGS": "Pengaturan Peta",
     "enable_map": "Aktifkan peta",

@@ -216,7 +216,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                                         rel="noopener"
                                         sx={{ fontWeight: "bold" }}
                                     >
-                                        {t("SHOW_ON_MAP")}
+                                        {t("view_on_map")}
                                     </Link>
                                 ) : (
                                     <LinkButton

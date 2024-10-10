@@ -236,7 +236,7 @@
     "file_name": "Nazwa pliku",
     "CAPTION_PLACEHOLDER": "Dodaj opis",
     "location": "Lokalizacja",
-    "SHOW_ON_MAP": "Pokaż na OpenStreetMap",
+    "view_on_map": "Pokaż na OpenStreetMap",
     "MAP": "Mapa",
     "MAP_SETTINGS": "Ustawienia Mapy",
     "enable_map": "Włącz mapę",

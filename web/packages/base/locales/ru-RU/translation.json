@@ -236,7 +236,7 @@
     "file_name": "Имя файла",
     "CAPTION_PLACEHOLDER": "Добавьте описание",
     "location": "Местоположение",
-    "SHOW_ON_MAP": "Просмотр на OpenStreetMap",
+    "view_on_map": "Просмотр на OpenStreetMap",
     "MAP": "Карта",
     "MAP_SETTINGS": "Настройки карты",
     "enable_map": "Включить отображение",

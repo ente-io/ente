@@ -236,7 +236,7 @@
     "file_name": "文件名",
     "CAPTION_PLACEHOLDER": "添加说明",
     "location": "地理位置",
-    "SHOW_ON_MAP": "在 OpenStreetMap 上查看",
+    "view_on_map": "在 OpenStreetMap 上查看",
     "MAP": "地图",
     "MAP_SETTINGS": "地图设置",
     "enable_map": "启用地图",

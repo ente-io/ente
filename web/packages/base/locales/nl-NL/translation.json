@@ -236,7 +236,7 @@
     "file_name": "Bestandsnaam",
     "CAPTION_PLACEHOLDER": "Voeg een beschrijving toe",
     "location": "Locatie",
-    "SHOW_ON_MAP": "Bekijk op OpenStreetMap",
+    "view_on_map": "Bekijk op OpenStreetMap",
     "MAP": "Kaart",
     "MAP_SETTINGS": "Kaart instellingen",
     "enable_map": "Kaarten inschakelen",
