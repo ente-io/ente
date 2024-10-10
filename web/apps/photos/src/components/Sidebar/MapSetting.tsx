@@ -65,7 +65,7 @@ export const MapSettings: React.FC<SettingsDrawerProps> = ({
             <Stack spacing={"4px"} py={"12px"}>
                 <Titlebar
                     onClose={onClose}
-                    title={t("MAP")}
+                    title={t("map")}
                     onRootClose={handleRootClose}
                 />
 
@@ -77,7 +77,7 @@ export const MapSettings: React.FC<SettingsDrawerProps> = ({
                                     onClick={openModifyMapEnabled}
                                     variant="toggle"
                                     checked={mapEnabled}
-                                    label={t("MAP_SETTINGS")}
+                                    label={t("map_settings")}
                                 />
                             </MenuItemGroup>
                         </Box>
@@ -166,7 +166,7 @@ function EnableMap({ onClose, enableMap, onRootClose }) {
         <Stack spacing={"4px"} py={"12px"}>
             <Titlebar
                 onClose={onClose}
-                title={t("ENABLE_MAPS")}
+                title={t("enable_maps_confirm")}
                 onRootClose={onRootClose}
             />
             <Stack py={"20px"} px={"8px"} spacing={"32px"}>
@@ -174,7 +174,7 @@ function EnableMap({ onClose, enableMap, onRootClose }) {
                     {" "}
                     <Typography color="text.muted">
                         <Trans
-                            i18nKey={"ENABLE_MAP_DESCRIPTION"}
+                            i18nKey={"enable_maps_confirm_message"}
                             components={{
                                 a: (
                                     <Link
@@ -205,13 +205,13 @@ function DisableMap({ onClose, disableMap, onRootClose }) {
         <Stack spacing={"4px"} py={"12px"}>
             <Titlebar
                 onClose={onClose}
-                title={t("DISABLE_MAPS")}
+                title={t("disable_maps_confirm")}
                 onRootClose={onRootClose}
             />
             <Stack py={"20px"} px={"8px"} spacing={"32px"}>
                 <Box px={"8px"}>
                     <Typography color="text.muted">
-                        <Trans i18nKey={"DISABLE_MAP_DESCRIPTION"} />
+                        <Trans i18nKey={"disable_maps_confirm_message"} />
                     </Typography>
                 </Box>
                 <Stack px={"8px"} spacing={"8px"}>

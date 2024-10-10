@@ -734,8 +734,8 @@ export default ImageEditorOverlay;
 const confirmEditorCloseDialogAttributes = (
     onConfirm: () => void,
 ): MiniDialogAttributes => ({
-    title: t("CONFIRM_EDITOR_CLOSE_MESSAGE"),
-    message: t("CONFIRM_EDITOR_CLOSE_DESCRIPTION"),
+    title: t("confirm_editor_close"),
+    message: t("confirm_editor_close_message"),
     continue: {
         text: t("close"),
         color: "critical",

@@ -206,8 +206,8 @@ const ButtonStack = styled("div")`
 export const sessionExpiredDialogAttributes = (
     onLogin: () => void,
 ): MiniDialogAttributes => ({
-    title: t("SESSION_EXPIRED"),
-    message: t("SESSION_EXPIRED_MESSAGE"),
+    title: t("session_expired"),
+    message: t("session_expired_message"),
     nonClosable: true,
     continue: {
         text: t("login"),

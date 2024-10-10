@@ -680,8 +680,8 @@ const DebugSection: React.FC = () => {
 
     const confirmLogDownload = () =>
         showMiniDialog({
-            title: t("DOWNLOAD_LOGS"),
-            message: <Trans i18nKey={"DOWNLOAD_LOGS_MESSAGE"} />,
+            title: t("download_logs"),
+            message: <Trans i18nKey={"download_logs_message"} />,
             continue: {
                 text: t("download"),
                 action: downloadLogs,

@@ -124,8 +124,8 @@ export const getSubscriptionPurchaseSuccessMessage = (
 export const getSessionExpiredMessage = (
     action: () => void,
 ): DialogBoxAttributes => ({
-    title: t("SESSION_EXPIRED"),
-    content: t("SESSION_EXPIRED_MESSAGE"),
+    title: t("session_expired"),
+    content: t("session_expired_message"),
 
     nonClosable: true,
     proceed: {
