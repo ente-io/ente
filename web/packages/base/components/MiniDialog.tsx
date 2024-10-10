@@ -266,13 +266,11 @@ export function DialogBoxV2({
             }}
             {...rest}
         >
-            <Stack spacing={"36px"} p={"16px"}>
-                <Stack spacing={"19px"}>
-                    <Typography variant="large" fontWeight={"bold"}>
-                        {title}
-                    </Typography>
-                    {children}
-                </Stack>
+            <Stack spacing={"19px"} p={"16px"}>
+                <Typography variant="large" fontWeight={"bold"}>
+                    {title}
+                </Typography>
+                {children}
             </Stack>
         </Dialog>
     );
