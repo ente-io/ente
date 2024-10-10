@@ -1,5 +1,5 @@
 import Page_ from "@/accounts/pages/generate";
-import { useAppContext } from "@/new/photos/types/context";
+import { useAppContext } from "./_app";
 
 const Page = () => <Page_ appContext={useAppContext()} />;
 

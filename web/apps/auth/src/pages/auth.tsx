@@ -2,7 +2,7 @@ import { stashRedirect } from "@/accounts/services/redirect";
 import { EnteLogo } from "@/base/components/EnteLogo";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { NavbarBase } from "@/base/components/Navbar";
-import { AppContext } from "@/new/photos/types/context";
+import { AppContext } from "./_app";
 import { ensure } from "@/utils/ensure";
 import {
     HorizontalFlex,
