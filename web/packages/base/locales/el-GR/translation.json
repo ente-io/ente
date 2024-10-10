@@ -574,8 +574,8 @@
         "crop": "Περικοπή"
     },
     "CONVERT": "Μετατροπή",
-    "CONFIRM_EDITOR_CLOSE_MESSAGE": "",
-    "CONFIRM_EDITOR_CLOSE_DESCRIPTION": "",
+    "confirm_editor_close": "",
+    "confirm_editor_close_message": "",
     "BRIGHTNESS": "Φωτεινότητα",
     "CONTRAST": "Αντίθεση",
     "SATURATION": "Κορεσμός",

@@ -574,8 +574,8 @@
         "crop": "裁剪"
     },
     "CONVERT": "转换",
-    "CONFIRM_EDITOR_CLOSE_MESSAGE": "您确定要关闭编辑器吗？",
-    "CONFIRM_EDITOR_CLOSE_DESCRIPTION": "下载已编辑的图片或将副本保存到 Ente 以保留您的更改。",
+    "confirm_editor_close": "您确定要关闭编辑器吗？",
+    "confirm_editor_close_message": "下载已编辑的图片或将副本保存到 Ente 以保留您的更改。",
     "BRIGHTNESS": "亮度",
     "CONTRAST": "对比度",
     "SATURATION": "饱和度",

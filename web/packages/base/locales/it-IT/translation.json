@@ -574,8 +574,8 @@
         "crop": "Ritaglia"
     },
     "CONVERT": "Converti",
-    "CONFIRM_EDITOR_CLOSE_MESSAGE": "Sei sicuro di voler chiudere l'editor?",
-    "CONFIRM_EDITOR_CLOSE_DESCRIPTION": "Scarica la tua immagine modificata oppure salvane una copia su Ente per preservare le modifiche.",
+    "confirm_editor_close": "Sei sicuro di voler chiudere l'editor?",
+    "confirm_editor_close_message": "Scarica la tua immagine modificata oppure salvane una copia su Ente per preservare le modifiche.",
     "BRIGHTNESS": "Luminosità",
     "CONTRAST": "Contrasto",
     "SATURATION": "Saturazione",

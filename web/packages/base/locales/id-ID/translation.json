@@ -574,8 +574,8 @@
         "crop": "Potong"
     },
     "CONVERT": "",
-    "CONFIRM_EDITOR_CLOSE_MESSAGE": "Apakah kamu yakin ingin menutup editor?",
-    "CONFIRM_EDITOR_CLOSE_DESCRIPTION": "",
+    "confirm_editor_close": "Apakah kamu yakin ingin menutup editor?",
+    "confirm_editor_close_message": "",
     "BRIGHTNESS": "Kecerahan",
     "CONTRAST": "Kontras",
     "SATURATION": "",

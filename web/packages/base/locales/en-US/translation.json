@@ -574,8 +574,8 @@
         "crop": "Crop"
     },
     "CONVERT": "Convert",
-    "CONFIRM_EDITOR_CLOSE_MESSAGE": "Are you sure you want to close the editor?",
-    "CONFIRM_EDITOR_CLOSE_DESCRIPTION": "Download your edited image or save a copy to Ente to persist your changes.",
+    "confirm_editor_close": "Are you sure you want to close the editor?",
+    "confirm_editor_close_message": "Download your edited image or save a copy to Ente to persist your changes.",
     "BRIGHTNESS": "Brightness",
     "CONTRAST": "Contrast",
     "SATURATION": "Saturation",

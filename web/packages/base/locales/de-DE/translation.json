@@ -574,8 +574,8 @@
         "crop": "Zuschneiden"
     },
     "CONVERT": "Konvertieren",
-    "CONFIRM_EDITOR_CLOSE_MESSAGE": "Editor wirklich schließen?",
-    "CONFIRM_EDITOR_CLOSE_DESCRIPTION": "Lade dein bearbeitetes Bild herunter oder speichere es in Ente, um die Änderungen nicht zu verlieren.",
+    "confirm_editor_close": "Editor wirklich schließen?",
+    "confirm_editor_close_message": "Lade dein bearbeitetes Bild herunter oder speichere es in Ente, um die Änderungen nicht zu verlieren.",
     "BRIGHTNESS": "Helligkeit",
     "CONTRAST": "Kontrast",
     "SATURATION": "Sättigung",

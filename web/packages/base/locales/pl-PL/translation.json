@@ -574,8 +574,8 @@
         "crop": "Przytnij"
     },
     "CONVERT": "Konwertuj",
-    "CONFIRM_EDITOR_CLOSE_MESSAGE": "Czy na pewno chcesz zamknąć edytor?",
-    "CONFIRM_EDITOR_CLOSE_DESCRIPTION": "Pobierz edytowany obraz lub zapisz kopię do Ente, aby utrzymać zmiany.",
+    "confirm_editor_close": "Czy na pewno chcesz zamknąć edytor?",
+    "confirm_editor_close_message": "Pobierz edytowany obraz lub zapisz kopię do Ente, aby utrzymać zmiany.",
     "BRIGHTNESS": "Jasność",
     "CONTRAST": "Kontrast",
     "SATURATION": "Nasycenie",

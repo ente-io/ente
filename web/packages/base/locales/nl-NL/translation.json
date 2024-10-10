@@ -574,8 +574,8 @@
         "crop": "Bijsnijden"
     },
     "CONVERT": "Converteren",
-    "CONFIRM_EDITOR_CLOSE_MESSAGE": "Weet u zeker dat u de editor wilt afsluiten?",
-    "CONFIRM_EDITOR_CLOSE_DESCRIPTION": "Download uw bewerkte afbeelding of sla een kopie op in Ente om uw wijzigingen te behouden.",
+    "confirm_editor_close": "Weet u zeker dat u de editor wilt afsluiten?",
+    "confirm_editor_close_message": "Download uw bewerkte afbeelding of sla een kopie op in Ente om uw wijzigingen te behouden.",
     "BRIGHTNESS": "Helderheid",
     "CONTRAST": "Contrast",
     "SATURATION": "Saturatie",

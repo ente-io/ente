@@ -574,8 +574,8 @@
         "crop": "Rogner"
     },
     "CONVERT": "Convertir",
-    "CONFIRM_EDITOR_CLOSE_MESSAGE": "Êtes-vous sûr de vouloir fermer l'éditeur ?",
-    "CONFIRM_EDITOR_CLOSE_DESCRIPTION": "Téléchargez votre image modifiée ou enregistrez une copie sur Ente pour maintenir vos modifications.",
+    "confirm_editor_close": "Êtes-vous sûr de vouloir fermer l'éditeur ?",
+    "confirm_editor_close_message": "Téléchargez votre image modifiée ou enregistrez une copie sur Ente pour maintenir vos modifications.",
     "BRIGHTNESS": "Luminosité",
     "CONTRAST": "Contraste",
     "SATURATION": "Saturation",
