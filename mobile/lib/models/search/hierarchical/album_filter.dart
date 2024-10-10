@@ -43,6 +43,12 @@ class AlbumFilter extends HierarchicalSearchFilter {
 
   @override
   bool isSameFilter(HierarchicalSearchFilter other) {
+    if (other is AlbumFilter) {
+      return other.collectionID == collectionID;
+    }
+    // (other is AlbumFilter) can be false and this.resultType() can be same as
+    // other.resultType() if other is a TopLevelGenericFilter of resultType
+    // ResultType.collection
     return resultType() == other.resultType() && other.name() == name();
   }
 

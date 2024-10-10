@@ -57,6 +57,12 @@ class FileTypeFilter extends HierarchicalSearchFilter {
 
   @override
   bool isSameFilter(HierarchicalSearchFilter other) {
+    if (other is FileTypeFilter) {
+      return other.fileType == fileType;
+    }
+    // (other is FileTypeFilter) can be false and this.resultType() can be same as
+    // other.resultType() if other is a TopLevelGenericFilter of resultType
+    // ResultType.fileType
     return resultType() == other.resultType() && other.name() == name();
   }
 

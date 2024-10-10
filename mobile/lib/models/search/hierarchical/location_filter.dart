@@ -41,6 +41,17 @@ class LocationFilter extends HierarchicalSearchFilter {
 
   @override
   bool isSameFilter(HierarchicalSearchFilter other) {
+    if (other is LocationFilter) {
+      return other.locationTag.radius.toString() +
+              other.locationTag.centerPoint.toString() +
+              other.locationTag.name ==
+          locationTag.radius.toString() +
+              locationTag.centerPoint.toString() +
+              locationTag.name;
+    }
+    // (other is LocationFilter) can be false and this.resultType() can be same as
+    // other.resultType() if other is a TopLevelGenericFilter of resultType
+    // ResultType.location
     return resultType() == other.resultType() && other.name() == name();
   }
 

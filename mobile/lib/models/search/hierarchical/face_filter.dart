@@ -49,6 +49,12 @@ class FaceFilter extends HierarchicalSearchFilter {
 
   @override
   bool isSameFilter(HierarchicalSearchFilter other) {
+    if (other is FaceFilter) {
+      return other.id == id;
+    }
+    // (other is FaceFilter) can be false and this.resultType() can be same as
+    // other.resultType() if other is a TopLevelGenericFilter of resultType
+    // ResultType.faces
     return resultType() == other.resultType() && other.name() == name();
   }
 
