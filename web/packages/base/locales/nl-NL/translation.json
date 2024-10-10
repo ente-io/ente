@@ -122,7 +122,7 @@
     "NO_RECOVERY_KEY": "Geen herstelsleutel?",
     "INCORRECT_RECOVERY_KEY": "Onjuiste herstelsleutel",
     "sorry": "Sorry",
-    "NO_RECOVERY_KEY_MESSAGE": "Door de aard van ons end-to-end encryptieprotocol kunnen je gegevens niet worden ontsleuteld zonder je wachtwoord of herstelsleutel",
+    "no_recovery_key_message": "Door de aard van ons end-to-end encryptieprotocol kunnen je gegevens niet worden ontsleuteld zonder je wachtwoord of herstelsleutel",
     "NO_TWO_FACTOR_RECOVERY_KEY_MESSAGE": "Stuur een e-mail naar <a>{{emailID}}</a> vanaf het door jou geregistreerde e-mailadres",
     "contact_support": "Klantenservice",
     "request_feature": "Vraag nieuwe functie aan",

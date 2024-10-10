@@ -122,7 +122,7 @@
     "NO_RECOVERY_KEY": "Kurtarma anahtarı yok mu?",
     "INCORRECT_RECOVERY_KEY": "Kurtarma anahtarı yanlış",
     "sorry": "Üzgünüz",
-    "NO_RECOVERY_KEY_MESSAGE": "Uçtan uca şifreleme protokolümüzün doğası gereği, verilerin parolan veya kurtarma anahtarın olmadan çözülemez",
+    "no_recovery_key_message": "Uçtan uca şifreleme protokolümüzün doğası gereği, verilerin parolan veya kurtarma anahtarın olmadan çözülemez",
     "NO_TWO_FACTOR_RECOVERY_KEY_MESSAGE": "Lütfen kaydolduğun e-posta adresinden <a>{{emailID}}</a> adresine bir e-posta bırak",
     "contact_support": "Destek ile iletişime geç",
     "request_feature": "Özellik İste",

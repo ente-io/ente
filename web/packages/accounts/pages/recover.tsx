@@ -100,7 +100,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
     const showNoRecoveryKeyMessage = () =>
         showMiniDialog({
             title: t("sorry"),
-            message: t("NO_RECOVERY_KEY_MESSAGE"),
+            message: t("no_recovery_key_message"),
             continue: { color: "secondary" },
             cancel: false,
         });

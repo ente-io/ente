@@ -122,7 +122,7 @@
     "NO_RECOVERY_KEY": "No hay clave de recuperación?",
     "INCORRECT_RECOVERY_KEY": "Clave de recuperación incorrecta",
     "sorry": "Lo sentimos",
-    "NO_RECOVERY_KEY_MESSAGE": "Debido a la naturaleza de nuestro protocolo de cifrado de extremo a extremo, sus datos no pueden ser descifrados sin su contraseña o clave de recuperación",
+    "no_recovery_key_message": "Debido a la naturaleza de nuestro protocolo de cifrado de extremo a extremo, sus datos no pueden ser descifrados sin su contraseña o clave de recuperación",
     "NO_TWO_FACTOR_RECOVERY_KEY_MESSAGE": "Por favor, envíe un email a <a>{{emailID}}</a> desde su dirección de correo electrónico registrada",
     "contact_support": "Contacta con soporte",
     "request_feature": "Solicitar una función",

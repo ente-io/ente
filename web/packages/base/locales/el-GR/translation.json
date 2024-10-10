@@ -122,7 +122,7 @@
     "NO_RECOVERY_KEY": "Χωρίς κλειδί ανάκτησης;",
     "INCORRECT_RECOVERY_KEY": "Εσφαλμένο κλειδί ανάκτησης",
     "sorry": "Συγνώμη",
-    "NO_RECOVERY_KEY_MESSAGE": "",
+    "no_recovery_key_message": "",
     "NO_TWO_FACTOR_RECOVERY_KEY_MESSAGE": "Παρακαλώ αφήστε ένα μήνυμα ηλ. ταχυδρομείου στο <a>{{emailID}}</a> από την καταχωρημένη διεύθυνση σας",
     "contact_support": "Επικοινωνήστε με την υποστήριξη",
     "request_feature": "Αίτηση Λειτουργίας",

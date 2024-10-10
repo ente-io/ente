@@ -122,7 +122,7 @@
     "NO_RECOVERY_KEY": "Pas de clé de récupération?",
     "INCORRECT_RECOVERY_KEY": "Clé de récupération non valide",
     "sorry": "Désolé",
-    "NO_RECOVERY_KEY_MESSAGE": "En raison de notre protocole de chiffrement de bout en bout, vos données ne peuvent être décryptées sans votre mot de passe ou clé de récupération",
+    "no_recovery_key_message": "En raison de notre protocole de chiffrement de bout en bout, vos données ne peuvent être décryptées sans votre mot de passe ou clé de récupération",
     "NO_TWO_FACTOR_RECOVERY_KEY_MESSAGE": "Veuillez envoyer un e-mail à <a>{{emailID}}</a> depuis votre adresse enregistrée",
     "contact_support": "Contacter le support",
     "request_feature": "Soumettre une idée",
