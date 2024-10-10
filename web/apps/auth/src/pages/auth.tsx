@@ -2,7 +2,6 @@ import { stashRedirect } from "@/accounts/services/redirect";
 import { EnteLogo } from "@/base/components/EnteLogo";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { NavbarBase } from "@/base/components/Navbar";
-import { AppContext } from "./_app";
 import { ensure } from "@/utils/ensure";
 import {
     HorizontalFlex,
@@ -21,6 +20,7 @@ import { useRouter } from "next/router";
 import React, { useContext, useEffect, useState } from "react";
 import { generateOTPs, type Code } from "services/code";
 import { getAuthCodes } from "services/remote";
+import { AppContext } from "./_app";
 
 const Page: React.FC = () => {
     const { logout, showNavBar, setDialogBoxAttributesV2 } = ensure(
