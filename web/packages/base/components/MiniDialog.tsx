@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import { t } from "i18next";
 import React, { useState } from "react";
+import log from "../log";
 
 /**
  * Customize the contents of an {@link AttributedMiniDialog}.
@@ -70,7 +71,7 @@ export interface MiniDialogAttributes {
          * If `true`, the primary action button is auto focused when the dialog
          * is opened, allowing the user to confirm just by pressing ENTER.
          */
-        autoFocus?: boolean;
+        autoFocus?: ButtonProps["autoFocus"];
         /**
          * The function to call when the user activates the button.
          *
@@ -78,18 +79,20 @@ export interface MiniDialogAttributes {
          * be shown on the button until the promise settles.
          *
          * If this function is not provided, or if the function completes /
-         * fullfills, then then the dialog is automatically closed. Otherwise
-         * (that is, if the provided function throws), the dialog remains open.
+         * fullfills, then then the dialog is automatically closed.
+         *
+         * Otherwise (that is, if the provided function throws), the dialog
+         * remains open, showing a generic error.
          *
          * That's quite a mouthful, here's a flowchart:
          *
          * - Not provided: Close
          * - Provided sync:
          *   - Success: Close
-         *   - Failure: Remain open
+         *   - Failure: Remain open, showing generic error
          * - Provided async:
          *   - Success: Close
-         *   - Failure: Remain open
+         *   - Failure: Remain open, showing generic error
          */
         action?: () => void | Promise<void>;
     };
@@ -121,15 +124,20 @@ type MiniDialogProps = Omit<DialogProps, "onClose"> & {
 export const AttributedMiniDialog: React.FC<
     React.PropsWithChildren<MiniDialogProps>
 > = ({ open, onClose, attributes, children, ...props }) => {
-    const [loading, setLoading] = useState(false);
+    const [phase, setPhase] = useState<"loading" | "failed" | undefined>();
 
     if (!attributes) {
         return <></>;
     }
 
+    const resetPhaseAndClose = () => {
+        setPhase(undefined);
+        onClose();
+    };
+
     const handleClose = () => {
         if (attributes.nonClosable) return;
-        onClose();
+        resetPhaseAndClose();
     };
 
     const { PaperProps, ...rest } = props;
@@ -188,20 +196,25 @@ export const AttributedMiniDialog: React.FC<
                             : "column"
                     }
                 >
+                    {phase == "failed" && (
+                        <Typography variant="small" color="critical.main">
+                            {t("generic_error")}
+                        </Typography>
+                    )}
                     {attributes.continue && (
                         <LoadingButton
-                            loading={loading}
+                            loading={phase == "loading"}
                             fullWidth
                             color={attributes.continue.color ?? "accent"}
                             autoFocus={attributes.continue.autoFocus}
                             onClick={async () => {
-                                setLoading(true);
+                                setPhase("loading");
                                 try {
                                     await attributes.continue?.action?.();
-                                    setLoading(false);
-                                    onClose();
-                                } catch {
-                                    setLoading(false);
+                                    resetPhaseAndClose();
+                                } catch (e) {
+                                    log.error("Error", e);
+                                    setPhase("failed");
                                 }
                             }}
                         >
@@ -212,7 +225,7 @@ export const AttributedMiniDialog: React.FC<
                         <FocusVisibleButton
                             fullWidth
                             color="secondary"
-                            onClick={onClose}
+                            onClick={resetPhaseAndClose}
                         >
                             {attributes.cancel ?? t("cancel")}
                         </FocusVisibleButton>
