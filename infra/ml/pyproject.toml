@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "ipykernel>=6.29.5",
     "matplotlib>=3.9.2",
     "numpy>=2.1.2",
     "onnx>=1.17.0",
@@ -15,6 +16,7 @@ dependencies = [
     "opencv-python>=4.10.0.84",
     "pandas>=2.2.3",
     "pillow>=10.4.0",
+    "pip>=24.2",
     "pyyaml>=6.0.2",
     "requests>=2.32.3",
     "scipy>=1.14.1",

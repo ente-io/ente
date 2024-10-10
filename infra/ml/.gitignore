@@ -17,3 +17,6 @@ wheels/
 
 # Imported repos
 CLIP/mobileclip_repo/
+
+# Data
+data/flickr8k_captions.txt
