@@ -31,12 +31,11 @@ class PersonFaceWidget extends StatelessWidget {
     this.useFullFile = true,
     this.thumbnailFallback = true,
     this.faceCrop,
-    Key? key,
-  })  : assert(
+    super.key,
+  }) : assert(
           personId != null || clusterID != null,
           "PersonFaceWidget requires either personId or clusterID to be non-null",
-        ),
-        super(key: key);
+        );
 
   @override
   Widget build(BuildContext context) {
