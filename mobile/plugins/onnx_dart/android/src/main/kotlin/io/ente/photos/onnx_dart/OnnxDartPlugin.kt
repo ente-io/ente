@@ -235,6 +235,8 @@ class OnnxDartPlugin: FlutterPlugin, MethodCallHandler {
   private fun createSession(env: OrtEnvironment, modalPath: String): OrtSession? {
     val sessionOptions = OrtSession.SessionOptions()
     sessionOptions.addCPU(true)
+    sessionOptions.setInterOpNumThreads(1)
+    sessionOptions.setIntraOpNumThreads(1)
     sessionOptions.setOptimizationLevel(OrtSession.SessionOptions.OptLevel.ALL_OPT)
     return env.createSession(modalPath, sessionOptions)
   }
