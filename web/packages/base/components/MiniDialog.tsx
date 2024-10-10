@@ -192,7 +192,7 @@ export const AttributedMiniDialog: React.FC<
                             {attributes.continue.text ?? t("ok")}
                         </LoadingButton>
                     )}
-                    {attributes.cancel && (
+                    {attributes.cancel !== false && (
                         <FocusVisibleButton
                             fullWidth
                             color="secondary"
