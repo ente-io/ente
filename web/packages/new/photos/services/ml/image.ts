@@ -5,53 +5,6 @@ import { ensure } from "@/utils/ensure";
 import { Matrix, inverse } from "ml-matrix";
 import { clamp } from "./math";
 
-/**
- * Returns the pixel value (RGB) at the given coordinates ({@link fx},
- * {@link fy}) using bilinear interpolation.
- */
-export function pixelRGBBilinear(
-    fx: number,
-    fy: number,
-    imageData: Uint8ClampedArray,
-    imageWidth: number,
-    imageHeight: number,
-) {
-    // Clamp to image boundaries.
-    fx = clamp(fx, 0, imageWidth - 1);
-    fy = clamp(fy, 0, imageHeight - 1);
-
-    // Get the surrounding coordinates and their weights.
-    const x0 = Math.floor(fx);
-    const x1 = Math.ceil(fx);
-    const y0 = Math.floor(fy);
-    const y1 = Math.ceil(fy);
-    const dx = fx - x0;
-    const dy = fy - y0;
-    const dx1 = 1.0 - dx;
-    const dy1 = 1.0 - dy;
-
-    // Get the original pixels.
-    const pixel1 = pixelRGBA(imageData, imageWidth, imageHeight, x0, y0);
-    const pixel2 = pixelRGBA(imageData, imageWidth, imageHeight, x1, y0);
-    const pixel3 = pixelRGBA(imageData, imageWidth, imageHeight, x0, y1);
-    const pixel4 = pixelRGBA(imageData, imageWidth, imageHeight, x1, y1);
-
-    const bilinear = (val1: number, val2: number, val3: number, val4: number) =>
-        Math.round(
-            val1 * dx1 * dy1 +
-                val2 * dx * dy1 +
-                val3 * dx1 * dy +
-                val4 * dx * dy,
-        );
-
-    // Return interpolated pixel colors.
-    return {
-        r: bilinear(pixel1.r, pixel2.r, pixel3.r, pixel4.r),
-        g: bilinear(pixel1.g, pixel2.g, pixel3.g, pixel4.g),
-        b: bilinear(pixel1.b, pixel2.b, pixel3.b, pixel4.b),
-    };
-}
-
 const pixelRGBA = (
     imageData: Uint8ClampedArray,
     width: number,

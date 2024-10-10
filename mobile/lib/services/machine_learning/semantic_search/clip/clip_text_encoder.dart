@@ -7,12 +7,10 @@ import 'package:photos/services/machine_learning/semantic_search/clip/clip_text_
 import "package:photos/utils/ml_util.dart";
 
 class ClipTextEncoder extends MlModel {
-  // static const _kRemoteBucketModelPath = "clip-text-vit-32-float32-int32.onnx"; // Unquantized model
   static const kRemoteBucketModelPath =
-      "mobileclip_s2_text_int32.onnx"; // Quantized model
+      "mobileclip_s2_text_opset18_quant.onnx"; // Quantized model
   static const _kVocabRemotePath = "bpe_simple_vocab_16e6.txt";
 
-  // static const kRemoteBucketModelPath = "clip-text-vit-32-uint8.onnx";
   static const _modelName = "ClipTextEncoder";
 
   @override

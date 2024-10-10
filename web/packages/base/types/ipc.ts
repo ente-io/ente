@@ -594,7 +594,10 @@ export interface ElectronMLWorker {
      * Both the input and output are opaque binary data whose internal structure
      * is specific to our implementation and the model (YOLO) we use.
      */
-    detectFaces: (input: Float32Array) => Promise<Float32Array>;
+    detectFaces: (
+        input: Uint8ClampedArray,
+        inputShape: number[],
+    ) => Promise<Float32Array>;
 
     /**
      * Return a MobileFaceNet embeddings for the given faces.

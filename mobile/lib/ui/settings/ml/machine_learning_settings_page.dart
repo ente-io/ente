@@ -5,6 +5,8 @@ import "package:intl/intl.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
+import "package:photos/services/machine_learning/face_ml/face_detection/face_detection_service.dart";
+import "package:photos/services/machine_learning/face_ml/face_embedding/face_embedding_service.dart";
 import "package:photos/services/machine_learning/machine_learning_controller.dart";
 import "package:photos/services/machine_learning/ml_service.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
@@ -296,9 +298,9 @@ class _ModelLoadingStateState extends State<ModelLoadingState> {
         title = "Image Model";
       } else if (url.contains(ClipTextEncoder.kRemoteBucketModelPath)) {
         title = "Text Model";
-      } else if (url.contains("yolov5s_face")) {
+      } else if (url.contains(FaceDetectionService.kRemoteBucketModelPath)) {
         title = "Face Detection Model";
-      } else if (url.contains("mobilefacenet")) {
+      } else if (url.contains(FaceEmbeddingService.kRemoteBucketModelPath)) {
         title = "Face Embedding Model";
       }
       if (title.isNotEmpty) {
