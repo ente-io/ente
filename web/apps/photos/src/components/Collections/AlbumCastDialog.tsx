@@ -138,7 +138,7 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
         <DialogBoxV2
             open={open}
             onClose={onClose}
-            attributes={{ title: t("cast_album_to_tv") }}
+            title={t("cast_album_to_tv")}
             sx={{ zIndex: 1600 }}
         >
             {view == "choose" && (

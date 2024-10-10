@@ -42,9 +42,7 @@ export default function CollectionNamer({ attributes, ...props }: Props) {
         <DialogBoxV2
             open={props.show}
             onClose={props.onHide}
-            attributes={{
-                title: attributes.title,
-            }}
+            title={attributes.title}
         >
             <SingleInputForm
                 callback={onSubmit}

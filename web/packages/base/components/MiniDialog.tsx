@@ -221,22 +221,18 @@ export function MiniDialog({
 //     }
 // }
 
-export interface DialogBoxV2Attributes {
-    /**
-     * The dialog's title.
-     *
-     * Usually this will be a string, but it can be any {@link ReactNode}. Note
-     * that it always gets wrapped in a Typography element to set the font
-     * style, so if your ReactNode wants to do its own thing, it'll need to
-     * reset or override these customizations.
-     */
-    title?: React.ReactNode;
-}
-
 type DialogBoxV2Props = React.PropsWithChildren<
     Omit<DialogProps, "onClose"> & {
         onClose: () => void;
-        attributes?: DialogBoxV2Attributes;
+        /**
+         * The dialog's title.
+         *
+         * Usually this will be a string, but it can be any {@link ReactNode}. Note
+         * that it always gets wrapped in a Typography element to set the font
+         * style, so if your ReactNode wants to do its own thing, it'll need to
+         * reset or override these customizations.
+         */
+        title?: React.ReactNode;
     }
 >;
 
@@ -248,16 +244,12 @@ type DialogBoxV2Props = React.PropsWithChildren<
  * API for the notify/confirm case separately.
  */
 export function DialogBoxV2({
-    attributes,
+    title,
     children,
     open,
     onClose,
     ...props
 }: DialogBoxV2Props) {
-    if (!attributes) {
-        return <></>;
-    }
-
     const { PaperProps, ...rest } = props;
 
     return (
@@ -276,11 +268,9 @@ export function DialogBoxV2({
         >
             <Stack spacing={"36px"} p={"16px"}>
                 <Stack spacing={"19px"}>
-                    {attributes.title && (
-                        <Typography variant="large" fontWeight={"bold"}>
-                            {attributes.title}
-                        </Typography>
-                    )}
+                    <Typography variant="large" fontWeight={"bold"}>
+                        {title}
+                    </Typography>
                     {children}
                 </Stack>
             </Stack>

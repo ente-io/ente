@@ -27,9 +27,7 @@ export const FileNameEditDialog = ({
             sx={{ zIndex: 1600 }}
             open={isInEditMode}
             onClose={closeEditMode}
-            attributes={{
-                title: t("rename_file"),
-            }}
+            title={t("rename_file")}
         >
             <SingleInputForm
                 initialValue={filename}

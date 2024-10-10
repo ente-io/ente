@@ -62,9 +62,7 @@ const ExportPendingList = (props: Iprops) => {
             PaperProps={{
                 sx: { maxWidth: "444px" },
             }}
-            attributes={{
-                title: t("PENDING_ITEMS"),
-            }}
+            title={t("PENDING_ITEMS")}
         >
             <ItemList
                 maxHeight={240}

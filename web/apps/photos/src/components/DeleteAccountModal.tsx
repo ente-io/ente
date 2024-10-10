@@ -143,9 +143,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                 open={open}
                 onClose={onClose}
                 fullScreen={isMobile}
-                attributes={{
-                    title: t("delete_account"),
-                }}
+                title={t("delete_account")}
             >
                 <Formik<FormValues>
                     initialValues={{
