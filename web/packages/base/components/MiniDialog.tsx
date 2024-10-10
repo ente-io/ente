@@ -80,6 +80,16 @@ export interface MiniDialogAttributes {
          * If this function is not provided, or if the function completes /
          * fullfills, then then the dialog is automatically closed. Otherwise
          * (that is, if the provided function throws), the dialog remains open.
+         *
+         * That's quite a mouthful, here's a flowchart:
+         *
+         * - Not provided: Close
+         * - Provided sync:
+         *   - Success: Close
+         *   - Failure: Remain open
+         * - Provided async:
+         *   - Success: Close
+         *   - Failure: Remain open
          */
         action?: () => void | Promise<void>;
     };
