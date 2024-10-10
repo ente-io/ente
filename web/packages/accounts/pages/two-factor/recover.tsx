@@ -70,10 +70,7 @@ const Page: React.FC<RecoverPageProps> = ({ appContext, twoFactorType }) => {
                 const resp = await recoverTwoFactor(sid, twoFactorType);
                 setDoesHaveEncryptedRecoveryKey(!!resp.encryptedSecret);
                 if (!resp.encryptedSecret) {
-                    showContactSupportDialog({
-                        text: t("GO_BACK"),
-                        action: router.back,
-                    });
+                    showContactSupportDialog({ action: router.back });
                 } else {
                     setEncryptedTwoFactorSecret({
                         encryptedData: resp.encryptedSecret,
@@ -89,10 +86,7 @@ const Page: React.FC<RecoverPageProps> = ({ appContext, twoFactorType }) => {
                 } else {
                     log.error("two factor recovery page setup failed", e);
                     setDoesHaveEncryptedRecoveryKey(false);
-                    showContactSupportDialog({
-                        text: t("GO_BACK"),
-                        action: router.back,
-                    });
+                    showContactSupportDialog({ action: router.back });
                 }
             }
         };
