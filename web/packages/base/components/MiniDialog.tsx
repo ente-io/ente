@@ -223,55 +223,50 @@ export function MiniDialog({
 //     }
 // }
 
-type DialogBoxV2Props = React.PropsWithChildren<
-    Omit<DialogProps, "onClose"> & {
-        onClose: () => void;
-        /**
-         * The dialog's title.
-         *
-         * Usually this will be a string, but it can be any {@link ReactNode}. Note
-         * that it always gets wrapped in a Typography element to set the font
-         * style, so if your ReactNode wants to do its own thing, it'll need to
-         * reset or override these customizations.
-         */
-        title?: React.ReactNode;
-    }
->;
+type TitledMiniDialogProps = Omit<DialogProps, "onClose"> & {
+    onClose: () => void;
+    /**
+     * The dialog's title.
+     */
+    title?: React.ReactNode;
+};
 
 /**
- * TODO This is a duplicate of MiniDialog. This is for use by call sites that
- * were using the MiniDialog not as a dialog but as a base container. Such use
- * cases are better served by directly using the MUI {@link Dialog}, so these
- * are considered deprecated. Splitting these here so that we can streamline the
- * API for the notify/confirm case separately.
+ * MiniDialog in a "shell" form.
+ *
+ * This is a {@link Dialog} for use at places which need more customization than
+ * what {@link MiniDialog} provides, but wish to retain the same size and
+ * general look without duplicating the MiniDialog code.
+ *
+ * It does three things:
+ *
+ * - Sets a fixed size same as {@link MiniDialog}, and sets up similar padding.
+ * - Takes the title as a prop, and wraps it in a {@link DialogTitle}.
+ * - Wraps children in a scrollable {@link DialogContent}.
  */
-export function DialogBoxV2({
-    title,
-    children,
-    open,
-    onClose,
-    ...props
-}: DialogBoxV2Props) {
+export const TitledMiniDialog: React.FC<
+    React.PropsWithChildren<TitledMiniDialogProps>
+> = ({ title, children, open, onClose, ...props }) => {
     const { PaperProps, ...rest } = props;
 
     return (
         <Dialog
             open={open}
             onClose={onClose}
+            fullWidth
             PaperProps={{
                 ...PaperProps,
                 sx: {
-                    // padding: "8px 12px",
                     maxWidth: "360px",
                     ...PaperProps?.sx,
                 },
             }}
             {...rest}
         >
-            <DialogTitle sx={{ "&&&": { paddingBlock: "18px 0" } }}>
+            <DialogTitle sx={{ "&&&": { paddingBlock: "24px 16px" } }}>
                 {title}
             </DialogTitle>
             <DialogContent>{children}</DialogContent>
         </Dialog>
     );
-}
+};

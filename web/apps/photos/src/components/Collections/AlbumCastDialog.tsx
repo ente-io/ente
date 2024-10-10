@@ -1,4 +1,4 @@
-import { DialogBoxV2 } from "@/base/components/MiniDialog";
+import { TitledMiniDialog } from "@/base/components/MiniDialog";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { boxSeal } from "@/base/crypto/libsodium";
 import log from "@/base/log";
@@ -135,7 +135,7 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
     }, [open]);
 
     return (
-        <DialogBoxV2
+        <TitledMiniDialog
             open={open}
             onClose={onClose}
             title={t("cast_album_to_tv")}
@@ -213,6 +213,6 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
                     </Button>
                 </>
             )}
-        </DialogBoxV2>
+        </TitledMiniDialog>
     );
 };

@@ -1,4 +1,4 @@
-import { DialogBoxV2 } from "@/base/components/MiniDialog";
+import { TitledMiniDialog } from "@/base/components/MiniDialog";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { ItemCard, PreviewItemTile } from "@/new/photos/components/Tiles";
 import { EnteFile } from "@/new/photos/types/file";
@@ -55,10 +55,9 @@ const ExportPendingList = (props: Iprops) => {
     };
 
     return (
-        <DialogBoxV2
+        <TitledMiniDialog
             open={props.isOpen}
             onClose={props.onClose}
-            fullWidth
             PaperProps={{
                 sx: { maxWidth: "444px" },
             }}
@@ -79,7 +78,7 @@ const ExportPendingList = (props: Iprops) => {
             >
                 {t("close")}
             </FocusVisibleButton>
-        </DialogBoxV2>
+        </TitledMiniDialog>
     );
 };
 

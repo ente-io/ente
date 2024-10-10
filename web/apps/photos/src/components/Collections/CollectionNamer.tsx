@@ -1,4 +1,4 @@
-import { DialogBoxV2 } from "@/base/components/MiniDialog";
+import { TitledMiniDialog } from "@/base/components/MiniDialog";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
@@ -39,7 +39,7 @@ export default function CollectionNamer({ attributes, ...props }: Props) {
     };
 
     return (
-        <DialogBoxV2
+        <TitledMiniDialog
             open={props.show}
             onClose={props.onHide}
             title={attributes.title}
@@ -53,6 +53,6 @@ export default function CollectionNamer({ attributes, ...props }: Props) {
                 submitButtonProps={{ sx: { mt: 1, mb: 2 } }}
                 secondaryButtonAction={props.onHide}
             />
-        </DialogBoxV2>
+        </TitledMiniDialog>
     );
 }

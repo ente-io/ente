@@ -1,6 +1,6 @@
 import { checkSessionValidity } from "@/accounts/services/session";
 import {
-    DialogBoxV2,
+    TitledMiniDialog,
     type MiniDialogAttributes,
 } from "@/base/components/MiniDialog";
 import log from "@/base/log";
@@ -98,7 +98,7 @@ export default function AuthenticateUserModal({
         };
 
     return (
-        <DialogBoxV2
+        <TitledMiniDialog
             open={open}
             onClose={onClose}
             sx={{ position: "absolute" }}
@@ -111,7 +111,7 @@ export default function AuthenticateUserModal({
                 keyAttributes={keyAttributes}
                 submitButtonProps={{ sx: { mb: 0 } }}
             />
-        </DialogBoxV2>
+        </TitledMiniDialog>
     );
 }
 

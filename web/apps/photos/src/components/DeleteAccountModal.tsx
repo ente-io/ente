@@ -1,4 +1,4 @@
-import { DialogBoxV2 } from "@/base/components/MiniDialog";
+import { TitledMiniDialog } from "@/base/components/MiniDialog";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import log from "@/base/log";
@@ -138,7 +138,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
 
     return (
         <>
-            <DialogBoxV2
+            <TitledMiniDialog
                 fullWidth
                 open={open}
                 onClose={onClose}
@@ -216,7 +216,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                         </form>
                     )}
                 </Formik>
-            </DialogBoxV2>
+            </TitledMiniDialog>
         </>
     );
 };

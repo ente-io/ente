@@ -1,4 +1,4 @@
-import { DialogBoxV2 } from "@/base/components/MiniDialog";
+import { TitledMiniDialog } from "@/base/components/MiniDialog";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
@@ -23,7 +23,7 @@ export const FileNameEditDialog = ({
         }
     };
     return (
-        <DialogBoxV2
+        <TitledMiniDialog
             sx={{ zIndex: 1600 }}
             open={isInEditMode}
             onClose={closeEditMode}
@@ -39,6 +39,6 @@ export const FileNameEditDialog = ({
                 secondaryButtonAction={closeEditMode}
                 submitButtonProps={{ sx: { mt: 1, mb: 2 } }}
             />
-        </DialogBoxV2>
+        </TitledMiniDialog>
     );
 };
