@@ -24,8 +24,7 @@ export default function AuthenticateUserModal({
     onClose,
     onAuthenticate,
 }: Iprops) {
-    const { setDialogMessage, setDialogBoxAttributesV2, logout } =
-        useContext(AppContext);
+    const { setDialogMessage, showMiniDialog, logout } = useContext(AppContext);
     const [user, setUser] = useState<User>();
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
 
@@ -46,7 +45,7 @@ export default function AuthenticateUserModal({
             const session = await checkSessionValidity();
             if (session.status != "valid") {
                 onClose();
-                setDialogBoxAttributesV2(
+                showMiniDialog(
                     passwordChangedElsewhereDialogAttributes(logout),
                 );
             }
@@ -55,7 +54,7 @@ export default function AuthenticateUserModal({
             // potentially transient issues.
             log.warn("Ignoring error when determining session validity", e);
         }
-    }, [setDialogBoxAttributesV2, logout]);
+    }, [showMiniDialog, logout]);
 
     useEffect(() => {
         const main = async () => {
@@ -127,10 +126,8 @@ const passwordChangedElsewhereDialogAttributes = (
 ): MiniDialogAttributes => ({
     title: t("password_changed_elsewhere"),
     message: t("password_changed_elsewhere_message"),
-    proceed: {
+    continue: {
         text: t("login"),
         action: onLogin,
-        variant: "accent",
     },
-    close: { text: t("cancel") },
 });

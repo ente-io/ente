@@ -1,4 +1,5 @@
 import { EnteDrawer } from "@/base/components/EnteDrawer";
+import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { Titlebar } from "@/base/components/Titlebar";
 import { EllipsizedTypography } from "@/base/components/Typography";
@@ -53,12 +54,9 @@ import LinkButton from "components/pages/gallery/LinkButton";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
 import React, { useContext, useEffect, useMemo, useState } from "react";
+import { Trans } from "react-i18next";
 import { changeFileName, updateExistingFilePubMetadata } from "utils/file";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
-import {
-    getMapDisableConfirmationDialog,
-    getMapEnableConfirmationDialog,
-} from "utils/ui";
 import { FileNameEditDialog } from "./FileNameEditDialog";
 import InfoItem from "./InfoItem";
 import MapBox from "./MapBox";
@@ -101,7 +99,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     closePhotoViewer,
     onSelectPerson,
 }) => {
-    const { mapEnabled, updateMapEnabled, setDialogBoxAttributesV2 } =
+    const { mapEnabled, updateMapEnabled, showMiniDialog } =
         useContext(AppContext);
     const galleryContext = useContext(GalleryContext);
     const publicCollectionGalleryContext = useContext(
@@ -151,13 +149,13 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     };
 
     const openEnableMapConfirmationDialog = () =>
-        setDialogBoxAttributesV2(
-            getMapEnableConfirmationDialog(() => updateMapEnabled(true)),
+        showMiniDialog(
+            confirmEnableMapsDialogAttributes(() => updateMapEnabled(true)),
         );
 
     const openDisableMapConfirmationDialog = () =>
-        setDialogBoxAttributesV2(
-            getMapDisableConfirmationDialog(() => updateMapEnabled(false)),
+        showMiniDialog(
+            confirmDisableMapsDialogAttributes(() => updateMapEnabled(false)),
         );
 
     const handleSelectFace = (annotatedFaceID: AnnotatedFaceID) => {
@@ -378,6 +376,35 @@ const parseExifInfo = (
     }
     return info;
 };
+
+const confirmEnableMapsDialogAttributes = (
+    onConfirm: () => void,
+): MiniDialogAttributes => ({
+    title: t("ENABLE_MAPS"),
+    message: (
+        <Trans
+            i18nKey={"ENABLE_MAP_DESCRIPTION"}
+            components={{
+                a: (
+                    <Link
+                        target="_blank"
+                        rel="noopener"
+                        href="https://www.openstreetmap.org/"
+                    />
+                ),
+            }}
+        />
+    ),
+    continue: { text: t("enable"), action: onConfirm },
+});
+
+const confirmDisableMapsDialogAttributes = (
+    onConfirm: () => void,
+): MiniDialogAttributes => ({
+    title: t("DISABLE_MAPS"),
+    message: <Trans i18nKey={"DISABLE_MAP_DESCRIPTION"} />,
+    continue: { text: t("disable"), action: onConfirm },
+});
 
 const FileInfoSidebar = styled((props: DialogProps) => (
     <EnteDrawer {...props} anchor="right" />

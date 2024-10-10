@@ -46,7 +46,7 @@ import type { PageProps } from "../types/page";
 import type { SRPAttributes, SRPSetupAttributes } from "../types/srp";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
-    const { logout, showNavBar, setDialogBoxAttributesV2 } = appContext;
+    const { logout, showNavBar, showMiniDialog } = appContext;
 
     const [email, setEmail] = useState("");
     const [resend, setResend] = useState(0);
@@ -202,7 +202,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 onRetry={() =>
                     openPasskeyVerificationURL(passkeyVerificationData)
                 }
-                {...{ logout, setDialogBoxAttributesV2 }}
+                {...{ logout, showMiniDialog }}
             />
         );
     }

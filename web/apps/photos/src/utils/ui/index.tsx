@@ -1,3 +1,4 @@
+import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
 import { ensureElectron } from "@/base/electron";
 import { AppUpdate } from "@/base/types/ipc";
 import { openURL } from "@/new/photos/utils/web";
@@ -134,45 +135,6 @@ export const getSessionExpiredMessage = (
         action,
         variant: "accent",
     },
-});
-
-export const getMapEnableConfirmationDialog = (
-    enableMapHelper,
-): DialogBoxAttributes => ({
-    title: t("ENABLE_MAPS"),
-    content: (
-        <Trans
-            i18nKey={"ENABLE_MAP_DESCRIPTION"}
-            components={{
-                a: (
-                    <Link
-                        target="_blank"
-                        rel="noopener"
-                        href="https://www.openstreetmap.org/"
-                    />
-                ),
-            }}
-        />
-    ),
-    proceed: {
-        action: enableMapHelper,
-        text: t("enable"),
-        variant: "accent",
-    },
-    close: { text: t("cancel") },
-});
-
-export const getMapDisableConfirmationDialog = (
-    disableMapHelper,
-): DialogBoxAttributes => ({
-    title: t("DISABLE_MAPS"),
-    content: <Trans i18nKey={"DISABLE_MAP_DESCRIPTION"} />,
-    proceed: {
-        action: disableMapHelper,
-        text: t("disable"),
-        variant: "accent",
-    },
-    close: { text: t("cancel") },
 });
 
 export const getEditorCloseConfirmationMessage = (

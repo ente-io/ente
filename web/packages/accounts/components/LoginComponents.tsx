@@ -75,7 +75,7 @@ interface VerifyingPasskeyProps {
     onRetry: () => void;
     /** Perform the (possibly app specific) logout sequence. */
     logout: () => void;
-    setDialogBoxAttributesV2: (attrs: MiniDialogAttributes) => void;
+    showMiniDialog: (attrs: MiniDialogAttributes) => void;
 }
 
 export const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
@@ -83,7 +83,7 @@ export const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
     email,
     onRetry,
     logout,
-    setDialogBoxAttributesV2,
+    showMiniDialog,
 }) => {
     type VerificationStatus = "waiting" | "checking" | "pending";
     const [verificationStatus, setVerificationStatus] =
@@ -105,7 +105,7 @@ export const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
             else router.push(await saveCredentialsAndNavigateTo(response));
         } catch (e) {
             log.error("Passkey verification status check failed", e);
-            setDialogBoxAttributesV2(
+            showMiniDialog(
                 e instanceof Error &&
                     e.message == passkeySessionExpiredErrorMessage
                     ? sessionExpiredDialogAttributes(logout)

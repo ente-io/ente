@@ -1,7 +1,6 @@
 import { TitledMiniDialog } from "@/base/components/MiniDialog";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
-import log from "@/base/log";
 import { AppContext } from "@/new/photos/types/context";
 import { initiateEmail } from "@/new/photos/utils/web";
 import { Link, Stack, useMediaQuery } from "@mui/material";
@@ -28,7 +27,7 @@ interface FormValues {
 }
 
 const DeleteAccountModal = ({ open, onClose }: Iprops) => {
-    const { setDialogBoxAttributesV2, logout } = useContext(AppContext);
+    const { showMiniDialog, onGenericError, logout } = useContext(AppContext);
     const { authenticateUser } = useContext(GalleryContext);
 
     const [loading, setLoading] = useState(false);
@@ -38,13 +37,6 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
     const reasonAndFeedbackRef = useRef<{ reason: string; feedback: string }>();
 
     const isMobile = useMediaQuery("(max-width: 428px)");
-
-    const somethingWentWrong = () =>
-        setDialogBoxAttributesV2({
-            title: t("error"),
-            close: { variant: "critical" },
-            message: t("generic_error_retry"),
-        });
 
     const initiateDelete = async (
         { reason, feedback }: FormValues,
@@ -76,30 +68,28 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                 askToMailForDeletion();
             }
         } catch (e) {
-            log.error("Error while initiating account deletion", e);
-            somethingWentWrong();
+            onGenericError(e);
         } finally {
             setLoading(false);
         }
     };
 
     const confirmAccountDeletion = () => {
-        setDialogBoxAttributesV2({
+        showMiniDialog({
             title: t("delete_account"),
             message: <Trans i18nKey="delete_account_confirm_message" />,
-            proceed: {
+            continue: {
                 text: t("delete"),
+                color: "critical",
                 action: solveChallengeAndDeleteAccount,
-                variant: "critical",
             },
-            close: { text: t("cancel") },
         });
     };
 
     const askToMailForDeletion = () => {
         const emailID = "account-deletion@ente.io";
 
-        setDialogBoxAttributesV2({
+        showMiniDialog({
             title: t("delete_account"),
             message: (
                 <Trans
@@ -108,15 +98,15 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                     values={{ emailID }}
                 />
             ),
-            proceed: {
+            continue: {
                 text: t("delete"),
+                color: "critical",
                 action: () => initiateEmail(emailID),
-                variant: "critical",
             },
-            close: { text: t("cancel") },
         });
     };
 
+    /* mark: uses-loading */
     const solveChallengeAndDeleteAccount = async (
         setLoading: (value: boolean) => void,
     ) => {
@@ -129,8 +119,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
             await deleteAccount(decryptedChallenge, reason, feedback);
             logout();
         } catch (e) {
-            log.error("solveChallengeAndDeleteAccount failed", e);
-            somethingWentWrong();
+            onGenericError(e);
         } finally {
             setLoading(false);
         }
