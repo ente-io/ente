@@ -12,3 +12,8 @@ In case you're using VSCode, make sure you've installed the [Jupyter](https://ma
 2. Run `uv sync` once
 3. Run `source .venv/bin/activate` once
 4. In any notebook, make sure to select the virtual environment kernel from `.venv/bin/python` in the top (right corner on VSCode)
+
+## Notebooks and git
+
+Please make sure to always clear output data inside a notebook before committing changes to git.
+Jupyter notebooks are known to not always work nicely with Git versioning control when there is output in them.
