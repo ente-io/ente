@@ -71,7 +71,7 @@ const MapBox: React.FC<MapBoxProps> = ({
         <MapBoxEnableContainer>
             <MapButton onClick={openUpdateMapConfirmationDialog}>
                 {" "}
-                {t("ENABLE_MAP")}
+                {t("enable_map")}
             </MapButton>
         </MapBoxEnableContainer>
     );

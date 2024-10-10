@@ -229,7 +229,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                                             fontWeight: "bold",
                                         }}
                                     >
-                                        {t("DISABLE_MAP")}
+                                        {t("disable_map")}
                                     </LinkButton>
                                 )
                             }
@@ -380,10 +380,10 @@ const parseExifInfo = (
 const confirmEnableMapsDialogAttributes = (
     onConfirm: () => void,
 ): MiniDialogAttributes => ({
-    title: t("ENABLE_MAPS"),
+    title: t("enable_maps_confirm"),
     message: (
         <Trans
-            i18nKey={"ENABLE_MAP_DESCRIPTION"}
+            i18nKey={"enable_maps_confirm_message"}
             components={{
                 a: (
                     <Link
@@ -401,8 +401,8 @@ const confirmEnableMapsDialogAttributes = (
 const confirmDisableMapsDialogAttributes = (
     onConfirm: () => void,
 ): MiniDialogAttributes => ({
-    title: t("DISABLE_MAPS"),
-    message: <Trans i18nKey={"DISABLE_MAP_DESCRIPTION"} />,
+    title: t("disable_maps_confirm"),
+    message: <Trans i18nKey={"disable_maps_confirm_message"} />,
     continue: { text: t("disable"), color: "critical", action: onConfirm },
 });
 
