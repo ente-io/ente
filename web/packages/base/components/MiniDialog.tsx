@@ -98,6 +98,7 @@ export const AttributedMiniDialog: React.FC<
     React.PropsWithChildren<MiniDialogProps>
 > = ({ open, onClose, attributes, children, ...props }) => {
     const [loading, setLoading] = useState(false);
+
     if (!attributes) {
         return <></>;
     }
@@ -118,47 +119,48 @@ export const AttributedMiniDialog: React.FC<
             PaperProps={{
                 ...PaperProps,
                 sx: {
-                    padding: "8px 12px",
                     maxWidth: "360px",
                     ...PaperProps?.sx,
                 },
             }}
             {...rest}
         >
-            <Stack spacing={"36px"} p={"16px"}>
-                <Stack spacing={"19px"}>
-                    {attributes.icon && (
-                        <Box
-                            sx={{
-                                "& > svg": {
-                                    fontSize: "32px",
-                                },
-                            }}
-                        >
-                            {attributes.icon}
-                        </Box>
-                    )}
-                    {attributes.title && (
-                        <Typography variant="large" fontWeight={"bold"}>
-                            {attributes.title}
-                        </Typography>
-                    )}
-                    {children ||
-                        (attributes?.content && (
-                            <Typography color="text.muted">
-                                {attributes.content}
-                            </Typography>
-                        ))}
-                </Stack>
+            {attributes.icon && (
+                <Box
+                    sx={{
+                        "& > svg": {
+                            fontSize: "32px",
+                        },
+                        color: "text.muted",
+                        padding: "20px 16px 0px 16px",
+                    }}
+                >
+                    {attributes.icon}
+                </Box>
+            )}
+            {attributes.title && (
+                <DialogTitle sx={{ "&&&": { paddingBlock: "24px 16px" } }}>
+                    {attributes.title}
+                </DialogTitle>
+            )}
+            <DialogContent>
+                {attributes.content && (
+                    <Typography color="text.muted">
+                        {attributes.content}
+                    </Typography>
+                )}
+                {children}
                 {(attributes.proceed || attributes.close) && (
                     <Stack
-                        spacing={"8px"}
+                        sx={{
+                            paddingBlockStart: "24px",
+                            gap: "12px",
+                        }}
                         direction={
                             attributes.buttonDirection === "row"
                                 ? "row-reverse"
                                 : "column"
                         }
-                        flex={1}
                     >
                         {attributes.proceed && (
                             <LoadingButton
@@ -192,7 +194,7 @@ export const AttributedMiniDialog: React.FC<
                         )}
                     </Stack>
                 )}
-            </Stack>
+            </DialogContent>
         </Dialog>
     );
 };
