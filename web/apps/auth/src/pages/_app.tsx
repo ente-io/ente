@@ -4,7 +4,7 @@ import { clientPackageName, staticAppTitle } from "@/base/app";
 import { CustomHead } from "@/base/components/Head";
 import {
     type MiniDialogAttributes,
-    MiniDialog,
+    AttributedMiniDialog,
 } from "@/base/components/MiniDialog";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { AppNavbar } from "@/base/components/Navbar";
@@ -134,7 +134,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         setDialogBoxAttributesV2({
             title: t("error"),
             close: { variant: "critical" },
-            content: t("generic_error_retry"),
+            message: t("generic_error_retry"),
         });
 
     const logout = () => {
@@ -167,7 +167,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
                 <LoadingBar color="#51cd7c" ref={loadingBar} />
 
-                <MiniDialog
+                <AttributedMiniDialog
                     open={dialogBoxV2View}
                     onClose={closeDialogBoxV2}
                     attributes={dialogBoxAttributeV2}
