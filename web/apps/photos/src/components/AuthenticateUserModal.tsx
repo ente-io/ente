@@ -130,4 +130,5 @@ const passwordChangedElsewhereDialogAttributes = (
         text: t("login"),
         action: onLogin,
     },
+    cancel: false,
 });

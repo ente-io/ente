@@ -72,7 +72,6 @@ const Page: React.FC<RecoverPageProps> = ({ appContext, twoFactorType }) => {
                 if (!resp.encryptedSecret) {
                     showContactSupportDialog({
                         text: t("GO_BACK"),
-                        autoClose: true,
                         action: router.back,
                     });
                 } else {
@@ -92,7 +91,6 @@ const Page: React.FC<RecoverPageProps> = ({ appContext, twoFactorType }) => {
                     setDoesHaveEncryptedRecoveryKey(false);
                     showContactSupportDialog({
                         text: t("GO_BACK"),
-                        autoClose: true,
                         action: router.back,
                     });
                 }

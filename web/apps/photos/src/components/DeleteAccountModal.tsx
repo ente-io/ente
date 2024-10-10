@@ -106,23 +106,13 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
         });
     };
 
-    /* mark: uses-loading */
-    const solveChallengeAndDeleteAccount = async (
-        setLoading: (value: boolean) => void,
-    ) => {
-        try {
-            setLoading(true);
-            const decryptedChallenge = await decryptDeleteAccountChallenge(
-                deleteAccountChallenge.current,
-            );
-            const { reason, feedback } = reasonAndFeedbackRef.current;
-            await deleteAccount(decryptedChallenge, reason, feedback);
-            logout();
-        } catch (e) {
-            onGenericError(e);
-        } finally {
-            setLoading(false);
-        }
+    const solveChallengeAndDeleteAccount = async () => {
+        const decryptedChallenge = await decryptDeleteAccountChallenge(
+            deleteAccountChallenge.current,
+        );
+        const { reason, feedback } = reasonAndFeedbackRef.current;
+        await deleteAccount(decryptedChallenge, reason, feedback);
+        logout();
     };
 
     return (
