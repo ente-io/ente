@@ -9,7 +9,9 @@ import "package:photos/utils/ml_util.dart";
 
 class ClipImageEncoder extends MlModel {
   static const kRemoteBucketModelPath =
-      "mobileclip_s2_image_opset18_rgba_sim.onnx";
+      "mobileclip_s2_image_opset18_rgba_opt.onnx"; // FP32 model
+  // static const kRemoteBucketModelPath =
+  //     "mobileclip_s2_image_opset18_fp16.onnx"; // FP16 model
   static const _modelName = "ClipImageEncoder";
 
   @override

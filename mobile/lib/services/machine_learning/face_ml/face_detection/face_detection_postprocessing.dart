@@ -6,7 +6,7 @@ List<FaceDetectionRelative> yoloOnnxFilterExtractDetections(
   double minScoreSigmoidThreshold,
   int inputWidth,
   int inputHeight, {
-  required List<List<double>> results, // // [25200, 16]
+  required List<List<double>> results, // // [detections, 16]
 }) {
   final outputDetections = <FaceDetectionRelative>[];
   final output = <List<double>>[];
@@ -26,12 +26,7 @@ List<FaceDetectionRelative> yoloOnnxFilterExtractDetections(
   }
 
   if (output.isEmpty) {
-    double maxScore = 0;
-    for (final result in results) {
-      if (result[4] > maxScore) {
-        maxScore = result[4];
-      }
-    }
+    return outputDetections;
   }
 
   for (final List<double> rawDetection in output) {
