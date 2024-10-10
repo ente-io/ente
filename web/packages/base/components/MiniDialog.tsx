@@ -81,12 +81,10 @@ export interface MiniDialogAttributes {
     buttonDirection?: "row" | "column";
 }
 
-type MiniDialogProps = React.PropsWithChildren<
-    Omit<DialogProps, "onClose"> & {
-        onClose: () => void;
-        attributes?: MiniDialogAttributes;
-    }
->;
+type MiniDialogProps = Omit<DialogProps, "onClose"> & {
+    onClose: () => void;
+    attributes?: MiniDialogAttributes;
+};
 
 /**
  * A small, mostly predefined, MUI {@link Dialog} that can be used to notify the
@@ -96,13 +94,9 @@ type MiniDialogProps = React.PropsWithChildren<
  * prop. If you find yourself wanting to customize it further, consider either
  * using a {@link TitledMiniDialog} or {@link Dialog}.
  */
-export function AttributedMiniDialog({
-    attributes,
-    children,
-    open,
-    onClose,
-    ...props
-}: MiniDialogProps) {
+export const AttributedMiniDialog: React.FC<
+    React.PropsWithChildren<MiniDialogProps>
+> = ({ open, onClose, attributes, children, ...props }) => {
     const [loading, setLoading] = useState(false);
     if (!attributes) {
         return <></>;
@@ -201,7 +195,7 @@ export function AttributedMiniDialog({
             </Stack>
         </Dialog>
     );
-}
+};
 
 // TODO: Sketch of a possible approach to using this. Haven't throught this
 // through, just noting down the outline inspired by an API I saw.
