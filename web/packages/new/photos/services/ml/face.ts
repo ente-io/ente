@@ -12,13 +12,6 @@ import type { ElectronMLWorker } from "@/base/types/ipc";
 import type { EnteFile } from "@/new/photos/types/file";
 import { Matrix } from "ml-matrix";
 import { getSimilarityTransformation } from "similarity-transformation";
-import {
-    applyToPoint,
-    compose,
-    scale,
-    translate,
-    type Matrix as TransformationMatrix,
-} from "transformation-matrix";
 import type { ImageBitmapAndData } from "./blob";
 import {
     grayscaleIntMatrixFromNormalized2List,
@@ -462,36 +455,31 @@ const transformYOLOFaceDetections = (
     inBox: Box,
     toBox: Box,
 ): YOLOFaceDetection[] => {
-    const transform = boxTransformationMatrix(inBox, toBox);
-    return yoloFaceDetections.map((f) => ({
-        box: transformBox(f.box, transform),
-        landmarks: f.landmarks.map((p) => applyToPoint(transform, p)),
-        score: f.score,
-    }));
-};
+    const scaleX = toBox.width / inBox.width;
+    const scaleY = toBox.height / inBox.height;
+    const translateX = toBox.x - inBox.x;
+    const translateY = toBox.y - inBox.y;
 
-const boxTransformationMatrix = (
-    inBox: Box,
-    toBox: Box,
-): TransformationMatrix =>
-    compose(
-        translate(toBox.x - inBox.x, toBox.y - inBox.y),
-        scale(toBox.width / inBox.width, toBox.height / inBox.height),
-    );
+    const correctDetections: YOLOFaceDetection[] = [];
 
-const transformBox = (box: Box, transform: TransformationMatrix): Box => {
-    const topLeft = applyToPoint(transform, { x: box.x, y: box.y });
-    const bottomRight = applyToPoint(transform, {
-        x: box.x + box.width,
-        y: box.y + box.height,
-    });
+    for (const detection of yoloFaceDetections) {
+        const score = detection.score;
 
-    return {
-        x: topLeft.x,
-        y: topLeft.y,
-        width: bottomRight.x - topLeft.x,
-        height: bottomRight.y - topLeft.y,
-    };
+        const box = detection.box;
+        box.x = (box.x + translateX) * scaleX;
+        box.y = (box.y + translateY) * scaleY;
+        box.width *= scaleX;
+        box.height *= scaleY;
+
+        const landmarks = detection.landmarks;
+        landmarks.forEach((p) => {
+            p.x = (p.x + translateX) * scaleX;
+            p.y = (p.y + translateY) * scaleY;
+        });
+        correctDetections.push({ score, box, landmarks });
+    }
+
+    return correctDetections;
 };
 
 const makeFaceID = (fileID: number, box: Box, image: Dimensions) => {
