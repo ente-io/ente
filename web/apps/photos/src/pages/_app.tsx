@@ -1,7 +1,7 @@
 import { clientPackageName, staticAppTitle } from "@/base/app";
 import { CustomHead } from "@/base/components/Head";
 import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
-import { MiniDialog } from "@/base/components/MiniDialog";
+import { AttributedMiniDialog } from "@/base/components/MiniDialog";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { AppNavbar } from "@/base/components/Navbar";
 import { setupI18n } from "@/base/i18n";
@@ -308,7 +308,7 @@ export default function App({ Component, pageProps }: AppProps) {
                     onClose={closeMessageDialog}
                     attributes={dialogMessage}
                 />
-                <MiniDialog
+                <AttributedMiniDialog
                     sx={{ zIndex: photosDialogZIndex }}
                     open={dialogBoxV2View}
                     onClose={closeDialogBoxV2}

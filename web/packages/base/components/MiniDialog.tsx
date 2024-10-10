@@ -19,27 +19,27 @@ import { t } from "i18next";
 import React, { useState } from "react";
 
 /**
- * Customize the properties of the dialog box.
- *
- * Our custom dialog box helpers are meant for small message boxes, usually
- * meant to confirm some user action. If more customization is needed, it might
- * be a better idea to reach out for a bespoke MUI {@link DialogBox} instead.
+ * Customize the contents of an {@link AttributedMiniDialog}.
  */
 export interface MiniDialogAttributes {
+    /**
+     * An optional icon shown above the title.
+     */
     icon?: React.ReactNode;
     /**
      * The dialog's title.
      *
-     * Usually this will be a string, but it can be any {@link ReactNode}. Note
-     * that it always gets wrapped in a Typography element to set the font
-     * style, so if your ReactNode wants to do its own thing, it'll need to
-     * reset or override these customizations.
+     * While optional, it is usually provided. It will almost always be a
+     * string, but the prop accepts any React node to allow passing a i18next
+     * <Trans /> component.
      */
     title?: React.ReactNode;
     staticBackdrop?: boolean;
     nonClosable?: boolean;
     /**
-     * The dialog's content.
+     * The dialog's message.
+     *
+     * Similar to {@link title}, this is usually provided, and a string.
      */
     content?: React.ReactNode;
     /**
@@ -93,10 +93,10 @@ type MiniDialogProps = React.PropsWithChildren<
  * user, or ask for confirmation before actions.
  *
  * The rendered dialog can be customized by modifying the {@link attributes}
- * prop. If you find yourself wanting to customize it further, consider just
- * creating a new bespoke instantiation of a {@link Dialog}.
+ * prop. If you find yourself wanting to customize it further, consider either
+ * using a {@link TitledMiniDialog} or {@link Dialog}.
  */
-export function MiniDialog({
+export function AttributedMiniDialog({
     attributes,
     children,
     open,
@@ -235,18 +235,18 @@ type TitledMiniDialogProps = Omit<DialogProps, "onClose"> & {
  * MiniDialog in a "shell" form.
  *
  * This is a {@link Dialog} for use at places which need more customization than
- * what {@link MiniDialog} provides, but wish to retain the same size and
- * general look without duplicating the MiniDialog code.
+ * what {@link AttributedMiniDialog} provides, but wish to retain a similar look
+ * and feel without duplicating code.
  *
  * It does three things:
  *
- * - Sets a fixed size same as {@link MiniDialog}, and sets up similar padding.
+ * - Sets a fixed size and padding similar to {@link AttributedMiniDialog}.
  * - Takes the title as a prop, and wraps it in a {@link DialogTitle}.
  * - Wraps children in a scrollable {@link DialogContent}.
  */
 export const TitledMiniDialog: React.FC<
     React.PropsWithChildren<TitledMiniDialogProps>
-> = ({ title, children, open, onClose, ...props }) => {
+> = ({ open, onClose, title, children, ...props }) => {
     const { PaperProps, ...rest } = props;
 
     return (

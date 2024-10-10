@@ -2,7 +2,7 @@ import { staticAppTitle } from "@/base/app";
 import { CustomHead } from "@/base/components/Head";
 import {
     type MiniDialogAttributes,
-    MiniDialog,
+    AttributedMiniDialog,
 } from "@/base/components/MiniDialog";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { AppNavbar } from "@/base/components/Navbar";
@@ -55,7 +55,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
             <ThemeProvider theme={getTheme(THEME_COLOR.DARK, "photos")}>
                 <CssBaseline enableColorScheme />
-                <MiniDialog
+                <AttributedMiniDialog
                     open={dialogBoxV2View}
                     onClose={closeDialogBoxV2}
                     attributes={dialogBoxAttributeV2}
