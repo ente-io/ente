@@ -1,3 +1,5 @@
+import ErrorOutline from "@mui/icons-material/ErrorOutline";
+import { t } from "i18next";
 import { useCallback, useState } from "react";
 import type { MiniDialogAttributes } from "../MiniDialog";
 
@@ -27,5 +29,31 @@ export const useAttributedMiniDialog = () => {
             onClose: onCloseMiniDialog,
             attributes: miniDialogAttributes,
         },
+    };
+};
+
+/**
+ * A convenience function to construct {@link MiniDialogAttributes} for showing
+ * error dialogs.
+ *
+ * It takes one or two arguments.
+ *
+ * - If both are provided, then the first one is taken as the title and the
+ *   second one as the message.
+ *
+ * - Otherwise it sets a default title and use the only argument as the message.
+ */
+export const errorAttributes = (
+    messageOrTitle: string,
+    optionalMessage?: string,
+): MiniDialogAttributes => {
+    const title = optionalMessage ? messageOrTitle : t("error");
+    const message = optionalMessage ? optionalMessage : messageOrTitle;
+
+    return {
+        title,
+        icon: <ErrorOutline />,
+        message,
+        continue: { color: "critical" },
     };
 };

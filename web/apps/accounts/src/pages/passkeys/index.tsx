@@ -34,7 +34,7 @@ import {
 import { useAppContext } from "../../types/context";
 
 const Page: React.FC = () => {
-    const { showNavBar, setDialogBoxAttributesV2 } = useAppContext();
+    const { showNavBar, showMiniDialog } = useAppContext();
 
     const [token, setToken] = useState<string | undefined>();
     const [passkeys, setPasskeys] = useState<Passkey[]>([]);
@@ -44,12 +44,12 @@ const Page: React.FC = () => {
     >();
 
     const showPasskeyFetchFailedErrorDialog = useCallback(() => {
-        setDialogBoxAttributesV2({
+        showMiniDialog({
             title: t("error"),
             message: t("passkey_fetch_failed"),
-            close: {},
+            cancel: false,
         });
-    }, [setDialogBoxAttributesV2]);
+    }, [showMiniDialog]);
 
     useEffect(() => {
         showNavBar(true);

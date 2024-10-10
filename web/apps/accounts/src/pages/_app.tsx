@@ -1,9 +1,9 @@
 import { staticAppTitle } from "@/base/app";
 import { CustomHead } from "@/base/components/Head";
-import { useAttributedMiniDialog } from "@/base/components/hooks/use-mini-dialog";
 import { AttributedMiniDialog } from "@/base/components/MiniDialog";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { AppNavbar } from "@/base/components/Navbar";
+import { useAttributedMiniDialog } from "@/base/hooks/use-mini-dialog";
 import { setupI18n } from "@/base/i18n";
 import { disableDiskLogs } from "@/base/log";
 import { logUnhandledErrorsAndRejections } from "@/base/log-web";
