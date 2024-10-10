@@ -5,7 +5,6 @@ import { AttributedMiniDialog } from "@/base/components/MiniDialog";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { AppNavbar } from "@/base/components/Navbar";
 import { setupI18n } from "@/base/i18n";
-import ErrorOutline from "@mui/icons-material/ErrorOutline";
 import log from "@/base/log";
 import {
     logStartupBanner,
@@ -37,6 +36,7 @@ import { getTheme } from "@ente/shared/themes";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import type { User } from "@ente/shared/user/types";
 import ArrowForward from "@mui/icons-material/ArrowForward";
+import ErrorOutline from "@mui/icons-material/ErrorOutline";
 import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import Notification from "components/Notification";
@@ -251,7 +251,7 @@ export default function App({ Component, pageProps }: AppProps) {
                 close: { variant: "critical" },
                 content: t("generic_error_retry"),
             }),
-        [setDialogMessage],
+        [],
     );
 
     const onGenericError = useCallback(
@@ -264,7 +264,7 @@ export default function App({ Component, pageProps }: AppProps) {
                 close: { variant: "critical" },
             })
         ),
-        [setDialogBoxAttributesV2],
+        [],
     );
 
     const logout = useCallback(() => {
