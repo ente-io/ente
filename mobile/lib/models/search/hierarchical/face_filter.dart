@@ -4,8 +4,8 @@ import "package:photos/models/search/hierarchical/hierarchical_search_filter.dar
 import "package:photos/models/search/search_types.dart";
 
 class FaceFilter extends HierarchicalSearchFilter {
-  ///clusterID or personID
-  final int id;
+  final String? personId;
+  final String? clusterId;
 
   ///If name is not available, use string of memories count instead. It should be
   ///of the same format as SearchResult.name();
@@ -14,11 +14,15 @@ class FaceFilter extends HierarchicalSearchFilter {
   final int occurrence;
 
   FaceFilter({
-    required this.id,
+    required this.personId,
+    required this.clusterId,
     required this.faceName,
     required this.faceFile,
     required this.occurrence,
-  });
+  }) : assert(
+          personId != null || clusterId != null,
+          "personId or clusterId must be provided",
+        );
 
   @override
   String name() {
@@ -50,7 +54,7 @@ class FaceFilter extends HierarchicalSearchFilter {
   @override
   bool isSameFilter(HierarchicalSearchFilter other) {
     if (other is FaceFilter) {
-      return other.id == id;
+      return other.personId == personId && other.clusterId == clusterId;
     }
     // (other is FaceFilter) can be false and this.resultType() can be same as
     // other.resultType() if other is a TopLevelGenericFilter of resultType
