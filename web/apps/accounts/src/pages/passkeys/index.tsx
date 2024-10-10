@@ -1,6 +1,7 @@
 import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { MenuItemDivider, MenuItemGroup } from "@/base/components/Menu";
 import { Titlebar } from "@/base/components/Titlebar";
+import { mdErrorAttributes } from "@/base/components/utils/mini-dialog";
 import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
 import { CenteredFlex } from "@ente/shared/components/Container";
@@ -44,11 +45,7 @@ const Page: React.FC = () => {
     >();
 
     const showPasskeyFetchFailedErrorDialog = useCallback(() => {
-        showMiniDialog({
-            title: t("error"),
-            message: t("passkey_fetch_failed"),
-            cancel: false,
-        });
+        showMiniDialog(mdErrorAttributes(t("passkey_fetch_failed")));
     }, [showMiniDialog]);
 
     useEffect(() => {
@@ -263,11 +260,12 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
     passkey,
     onUpdateOrDeletePasskey,
 }) => {
-    const { setDialogBoxAttributesV2 } = useAppContext();
+    const { showMiniDialog } = useAppContext();
 
     const [showRenameDialog, setShowRenameDialog] = useState(false);
 
     const showDeleteConfirmationDialog = useCallback(() => {
+        /* mark: uses-loading */
         const handleDelete = async (setLoading: (value: boolean) => void) => {
             setLoading(true);
             try {
@@ -280,17 +278,16 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
             }
         };
 
-        setDialogBoxAttributesV2({
+        showMiniDialog({
             title: t("delete_passkey"),
             message: t("delete_passkey_confirmation"),
-            proceed: {
+            continue: {
                 text: t("delete"),
+                color: "critical",
                 action: handleDelete,
-                variant: "critical",
             },
-            close: { text: t("cancel") },
         });
-    }, [token, passkey, onUpdateOrDeletePasskey, setDialogBoxAttributesV2]);
+    }, [showMiniDialog, token, passkey, onUpdateOrDeletePasskey]);
 
     return (
         <>

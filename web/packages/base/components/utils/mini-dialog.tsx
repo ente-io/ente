@@ -43,7 +43,7 @@ export const useAttributedMiniDialog = () => {
  *
  * - Otherwise it sets a default title and use the only argument as the message.
  */
-export const errorAttributes = (
+export const mdErrorAttributes = (
     messageOrTitle: string,
     optionalMessage?: string,
 ): MiniDialogAttributes => {
