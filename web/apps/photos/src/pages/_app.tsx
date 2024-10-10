@@ -1,9 +1,12 @@
 import { clientPackageName, staticAppTitle } from "@/base/app";
 import { CustomHead } from "@/base/components/Head";
-import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
 import { AttributedMiniDialog } from "@/base/components/MiniDialog";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { AppNavbar } from "@/base/components/Navbar";
+import {
+    genericErrorDialogAttributes,
+    useAttributedMiniDialog,
+} from "@/base/components/utils/mini-dialog";
 import { setupI18n } from "@/base/i18n";
 import log from "@/base/log";
 import {
@@ -36,7 +39,6 @@ import { getTheme } from "@ente/shared/themes";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import type { User } from "@ente/shared/user/types";
 import ArrowForward from "@mui/icons-material/ArrowForward";
-import ErrorOutline from "@mui/icons-material/ErrorOutline";
 import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import Notification from "components/Notification";
@@ -72,17 +74,15 @@ export default function App({ Component, pageProps }: AppProps) {
     const isLoadingBarRunning = useRef(false);
     const loadingBar = useRef(null);
     const [dialogMessage, setDialogMessage] = useState<DialogBoxAttributes>();
-    const [dialogBoxAttributeV2, setDialogBoxAttributesV2] = useState<
-        MiniDialogAttributes | undefined
-    >();
     const [messageDialogView, setMessageDialogView] = useState(false);
-    const [dialogBoxV2View, setDialogBoxV2View] = useState(false);
     const [watchFolderView, setWatchFolderView] = useState(false);
     const [watchFolderFiles, setWatchFolderFiles] = useState<FileList>(null);
     const [notificationView, setNotificationView] = useState(false);
     const closeNotification = () => setNotificationView(false);
     const [notificationAttributes, setNotificationAttributes] =
         useState<NotificationAttributes>(null);
+
+    const { showMiniDialog, miniDialogProps } = useAttributedMiniDialog();
     const [themeColor, setThemeColor] = useLocalState(
         LS_KEYS.THEME,
         THEME_COLOR.DARK,
@@ -202,10 +202,6 @@ export default function App({ Component, pageProps }: AppProps) {
     }, [dialogMessage]);
 
     useEffect(() => {
-        setDialogBoxV2View(true);
-    }, [dialogBoxAttributeV2]);
-
-    useEffect(() => {
         setNotificationView(true);
     }, [notificationAttributes]);
 
@@ -236,12 +232,6 @@ export default function App({ Component, pageProps }: AppProps) {
         () => setMessageDialogView(false),
         [],
     );
-    const closeDialogBoxV2 = () => setDialogBoxV2View(false);
-
-    const showMiniDialog = useCallback((attributes: MiniDialogAttributes) => {
-        setDialogBoxAttributesV2(attributes);
-        setDialogBoxV2View(true);
-    }, []);
 
     // Use `onGenericError` instead.
     const somethingWentWrong = useCallback(
@@ -254,18 +244,10 @@ export default function App({ Component, pageProps }: AppProps) {
         [],
     );
 
-    const onGenericError = useCallback(
-        (e: unknown) => (
-            log.error("Error", e),
-            setDialogBoxAttributesV2({
-                title: t("error"),
-                icon: <ErrorOutline />,
-                message: t("generic_error"),
-                close: { variant: "critical" },
-            })
-        ),
-        [],
-    );
+    const onGenericError = useCallback((e: unknown) => {
+        log.error("Error", e);
+        showMiniDialog(genericErrorDialogAttributes());
+    }, []);
 
     const logout = useCallback(() => {
         void photosLogout().then(() => router.push("/"));
@@ -287,7 +269,6 @@ export default function App({ Component, pageProps }: AppProps) {
         showMiniDialog,
         somethingWentWrong,
         onGenericError,
-        setDialogBoxAttributesV2,
         mapEnabled,
         updateMapEnabled, // <- changes on each render
         isCFProxyDisabled,
@@ -318,9 +299,7 @@ export default function App({ Component, pageProps }: AppProps) {
                 />
                 <AttributedMiniDialog
                     sx={{ zIndex: photosDialogZIndex }}
-                    open={dialogBoxV2View}
-                    onClose={closeDialogBoxV2}
-                    attributes={dialogBoxAttributeV2}
+                    {...miniDialogProps}
                 />
 
                 <Notification

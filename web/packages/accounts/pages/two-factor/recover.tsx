@@ -42,7 +42,7 @@ export interface RecoverPageProps {
 }
 
 const Page: React.FC<RecoverPageProps> = ({ appContext, twoFactorType }) => {
-    const { logout } = appContext;
+    const { showMiniDialog, logout } = appContext;
 
     const [encryptedTwoFactorSecret, setEncryptedTwoFactorSecret] =
         useState<Omit<B64EncryptionResult, "key"> | null>(null);
@@ -72,6 +72,7 @@ const Page: React.FC<RecoverPageProps> = ({ appContext, twoFactorType }) => {
                 if (!resp.encryptedSecret) {
                     showContactSupportDialog({
                         text: t("GO_BACK"),
+                        autoClose: true,
                         action: router.back,
                     });
                 } else {
@@ -91,6 +92,7 @@ const Page: React.FC<RecoverPageProps> = ({ appContext, twoFactorType }) => {
                     setDoesHaveEncryptedRecoveryKey(false);
                     showContactSupportDialog({
                         text: t("GO_BACK"),
+                        autoClose: true,
                         action: router.back,
                     });
                 }
@@ -146,11 +148,10 @@ const Page: React.FC<RecoverPageProps> = ({ appContext, twoFactorType }) => {
     };
 
     const showContactSupportDialog = (
-        dialogClose?: MiniDialogAttributes["close"],
+        dialogContinue?: MiniDialogAttributes["continue"],
     ) => {
-        appContext.setDialogBoxAttributesV2({
+        showMiniDialog({
             title: t("contact_support"),
-            close: dialogClose ?? {},
             message: (
                 <Trans
                     i18nKey={"NO_TWO_FACTOR_RECOVERY_KEY_MESSAGE"}
@@ -160,6 +161,8 @@ const Page: React.FC<RecoverPageProps> = ({ appContext, twoFactorType }) => {
                     values={{ emailID: "support@ente.io" }}
                 />
             ),
+            continue: { color: "secondary", ...(dialogContinue ?? {}) },
+            cancel: false,
         });
     };
 

@@ -4,6 +4,7 @@ import {
     MenuItemGroup,
     MenuSectionTitle,
 } from "@/base/components/Menu";
+import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
 import { nameAndExtension } from "@/base/file";
 import log from "@/base/log";
 import { photosDialogZIndex } from "@/new/photos/components/z-index";
@@ -39,7 +40,6 @@ import type { Dispatch, MutableRefObject, SetStateAction } from "react";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { getLocalCollections } from "services/collectionService";
 import uploadManager from "services/upload/uploadManager";
-import { getEditorCloseConfirmationMessage } from "utils/ui";
 import ColoursMenu from "./ColoursMenu";
 import CropMenu, { cropRegionOfCanvas, getCropRegionArgs } from "./CropMenu";
 import FreehandCropRegion from "./FreehandCropRegion";
@@ -84,7 +84,7 @@ export interface CropBoxProps {
 }
 
 const ImageEditorOverlay = (props: IProps) => {
-    const appContext = useContext(AppContext);
+    const { showMiniDialog } = useContext(AppContext);
 
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const originalSizeCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -442,9 +442,7 @@ const ImageEditorOverlay = (props: IProps) => {
 
     const handleCloseWithConfirmation = () => {
         if (transformationPerformed || coloursAdjusted) {
-            appContext.setDialogBoxAttributesV2(
-                getEditorCloseConfirmationMessage(handleClose),
-            );
+            showMiniDialog(confirmEditorCloseDialogAttributes(handleClose));
         } else {
             handleClose();
         }
@@ -732,6 +730,18 @@ const ImageEditorOverlay = (props: IProps) => {
 };
 
 export default ImageEditorOverlay;
+
+const confirmEditorCloseDialogAttributes = (
+    onConfirm: () => void,
+): MiniDialogAttributes => ({
+    title: t("CONFIRM_EDITOR_CLOSE_MESSAGE"),
+    message: t("CONFIRM_EDITOR_CLOSE_DESCRIPTION"),
+    continue: {
+        text: t("close"),
+        color: "critical",
+        action: onConfirm,
+    },
+});
 
 /**
  * Create a new {@link File} with the contents of the given canvas.

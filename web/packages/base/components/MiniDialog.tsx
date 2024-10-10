@@ -76,6 +76,11 @@ export interface MiniDialogAttributes {
          */
         autoFocus?: boolean;
         /**
+         * If `true`, close the dialog after {@link action} completes.
+         * TODO: Test/Impl/Is this needed?
+         */
+        autoClose?: boolean;
+        /**
          * The function to call when the user activates the button.
          *
          * Default is to close the dialog.
