@@ -208,14 +208,9 @@ export default function App({ Component, pageProps }: AppProps) {
     const showNavBar = (show: boolean) => setShowNavBar(show);
 
     const updateMapEnabled = async (enabled: boolean) => {
-        try {
-            await updateMapEnabledStatus(enabled);
-            setLocalMapEnabled(enabled);
-            setMapEnabled(enabled);
-        } catch (e) {
-            // TODO: Handle the error here.
-            log.error("Error while updating mapEnabled", e);
-        }
+        await updateMapEnabledStatus(enabled);
+        setLocalMapEnabled(enabled);
+        setMapEnabled(enabled);
     };
 
     const startLoading = () => {
