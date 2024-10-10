@@ -123,7 +123,7 @@
     "INCORRECT_RECOVERY_KEY": "Εσφαλμένο κλειδί ανάκτησης",
     "sorry": "Συγνώμη",
     "no_recovery_key_message": "",
-    "NO_TWO_FACTOR_RECOVERY_KEY_MESSAGE": "Παρακαλώ αφήστε ένα μήνυμα ηλ. ταχυδρομείου στο <a>{{emailID}}</a> από την καταχωρημένη διεύθυνση σας",
+    "no_two_factor_recovery_key_message": "Παρακαλώ αφήστε ένα μήνυμα ηλ. ταχυδρομείου στο <a>{{emailID}}</a> από την καταχωρημένη διεύθυνση σας",
     "contact_support": "Επικοινωνήστε με την υποστήριξη",
     "request_feature": "Αίτηση Λειτουργίας",
     "support": "Υποστήριξη",

@@ -123,7 +123,7 @@
     "INCORRECT_RECOVERY_KEY": "Kunci pemulihan salah",
     "sorry": "Maaf",
     "no_recovery_key_message": "Karena sifat protokol enkripsi ujung ke ujung kami, data kamu tidak dapat didekripsi tanpa sandi atau kunci pemulihan kamu",
-    "NO_TWO_FACTOR_RECOVERY_KEY_MESSAGE": "Silakan kirimkan email ke <a>{{emailID}}</a> dari alamat email terdaftar kamu",
+    "no_two_factor_recovery_key_message": "Silakan kirimkan email ke <a>{{emailID}}</a> dari alamat email terdaftar kamu",
     "contact_support": "Hubungi dukungan",
     "request_feature": "Minta Fitur",
     "support": "Dukungan",

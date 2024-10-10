@@ -123,7 +123,7 @@
     "INCORRECT_RECOVERY_KEY": "Nieprawidłowy klucz odzyskiwania",
     "sorry": "Przepraszamy",
     "no_recovery_key_message": "Ze względu na charakter naszego protokołu szyfrowania end-to-end, Twoje dane nie mogą być odszyfrowane bez hasła lub klucza odzyskiwania",
-    "NO_TWO_FACTOR_RECOVERY_KEY_MESSAGE": "Wyślij wiadomość e-mail na <a>{{emailID}}</a> z zarejestrowanego adresu e-mail",
+    "no_two_factor_recovery_key_message": "Wyślij wiadomość e-mail na <a>{{emailID}}</a> z zarejestrowanego adresu e-mail",
     "contact_support": "Skontaktuj się z pomocą techniczną",
     "request_feature": "Zaproponuj Funkcję",
     "support": "Wsparcie Techniczne",

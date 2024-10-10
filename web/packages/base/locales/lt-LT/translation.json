@@ -123,7 +123,7 @@
     "INCORRECT_RECOVERY_KEY": "Neteisingas atkūrimo raktas.",
     "sorry": "Atsiprašome",
     "no_recovery_key_message": "Dėl mūsų visapusio šifravimo protokolo pobūdžio jūsų duomenų negalima iššifruoti be slaptažodžio arba atkūrimo rakto",
-    "NO_TWO_FACTOR_RECOVERY_KEY_MESSAGE": "Iš savo registruoto el. pašto adreso parašykite el. laišką adresu <a>{{{emailID}}</a>",
+    "no_two_factor_recovery_key_message": "Iš savo registruoto el. pašto adreso parašykite el. laišką adresu <a>{{{emailID}}</a>",
     "contact_support": "Susisiekti su palaikymo komanda",
     "request_feature": "Prašyti funkcijos",
     "support": "Palaikymas",
