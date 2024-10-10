@@ -4,7 +4,6 @@ import type { SetDialogBoxAttributes } from "@ente/shared/components/DialogBox/t
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import { createContext, useContext } from "react";
 import type { SetNotificationAttributes } from "./notification";
-import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
 
 /**
  * The type of the React context available to all pages in the photos app.
@@ -18,18 +17,10 @@ export type AppContextT = AccountsContextT & {
      * Hide the global activity indicator.
      */
     finishLoading: () => void;
-    /**
-     * Show a "mini dialog" with the given attributes.
-     *
-     * Mini dialogs (see {@link AttributedMiniDialog}) are meant for simple
-     * confirmation or notication dialogs. Their appearance and functionality
-     * can be customized by providing relevant {@link MiniDialogAttributes}.
-     */
-    showMiniDialog: (attributes: MiniDialogAttributes) => void;
+    onGenericError: (error: unknown) => void;
     somethingWentWrong: () => void;
     setDialogMessage: SetDialogBoxAttributes;
     setNotificationAttributes: SetNotificationAttributes;
-    onGenericError: (error: unknown) => void;
     closeMessageDialog: () => void;
     mapEnabled: boolean;
     updateMapEnabled: (enabled: boolean) => Promise<void>;

@@ -682,13 +682,9 @@ const DebugSection: React.FC = () => {
         showMiniDialog({
             title: t("DOWNLOAD_LOGS"),
             message: <Trans i18nKey={"DOWNLOAD_LOGS_MESSAGE"} />,
-            proceed: {
+            continue: {
                 text: t("download"),
-                variant: "accent",
                 action: downloadLogs,
-            },
-            close: {
-                text: t("cancel"),
             },
         });
 

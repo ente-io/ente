@@ -16,7 +16,7 @@ import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import { t } from "i18next";
 import type { AppProps } from "next/app";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { AppContext } from "../types/context";
 
 import "styles/global.css";
@@ -24,10 +24,23 @@ import "styles/global.css";
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     const [isI18nReady, setIsI18nReady] = useState<boolean>(false);
     const [showNavbar, setShowNavbar] = useState(false);
-    const [dialogBoxAttributeV2, setDialogBoxAttributesV2] = useState<
+
+    // Mini Dialog scaffolding --
+
+    const [miniDialogAttributes, setMiniDialogAttributes] = useState<
         MiniDialogAttributes | undefined
     >();
-    const [dialogBoxV2View, setDialogBoxV2View] = useState(false);
+
+    const [openMiniDialog, setOpenMiniDialog] = useState(false);
+
+    const showMiniDialog = useCallback((attributes: MiniDialogAttributes) => {
+        setMiniDialogAttributes(attributes);
+        setOpenMiniDialog(true);
+    }, []);
+
+    const closeMiniDialog = useCallback(() => setOpenMiniDialog(false), []);
+
+    // --
 
     useEffect(() => {
         disableDiskLogs();
@@ -35,12 +48,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         logUnhandledErrorsAndRejections(true);
         return () => logUnhandledErrorsAndRejections(false);
     }, []);
-
-    useEffect(() => {
-        setDialogBoxV2View(true);
-    }, [dialogBoxAttributeV2]);
-
-    const closeDialogBoxV2 = () => setDialogBoxV2View(false);
 
     const appContext = {
         showNavBar: setShowNavbar,
