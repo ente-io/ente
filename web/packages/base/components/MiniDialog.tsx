@@ -26,7 +26,7 @@ import React, { useState } from "react";
 export interface MiniDialogAttributes {
     icon?: React.ReactNode;
     /**
-     * The dialog's title
+     * The dialog's title.
      *
      * Usually this will be a string, but it can be any {@link ReactNode}. Note
      * that it always gets wrapped in a Typography element to set the font
@@ -82,12 +82,6 @@ export interface MiniDialogAttributes {
         variant?: ButtonProps["color"];
         disabled?: boolean;
     };
-    buttons?: {
-        text: string;
-        action: () => void;
-        variant: ButtonProps["color"];
-        disabled?: boolean;
-    }[];
     buttonDirection?: "row" | "column";
 }
 
@@ -166,9 +160,7 @@ export function MiniDialog({
                             </Typography>
                         ))}
                 </Stack>
-                {(attributes.proceed ||
-                    attributes.close ||
-                    attributes.buttons?.length) && (
+                {(attributes.proceed || attributes.close) && (
                     <Stack
                         spacing={"8px"}
                         direction={
@@ -208,21 +200,6 @@ export function MiniDialog({
                                 {attributes.close?.text ?? t("ok")}
                             </FocusVisibleButton>
                         )}
-                        {attributes.buttons &&
-                            attributes.buttons.map((b) => (
-                                <FocusVisibleButton
-                                    size="large"
-                                    key={b.text}
-                                    color={b.variant}
-                                    onClick={() => {
-                                        b.action();
-                                        onClose();
-                                    }}
-                                    disabled={b.disabled}
-                                >
-                                    {b.text}
-                                </FocusVisibleButton>
-                            ))}
                     </Stack>
                 )}
             </Stack>
@@ -316,9 +293,7 @@ export function DialogBoxV2({
                             </Typography>
                         ))}
                 </Stack>
-                {(attributes.proceed ||
-                    attributes.close ||
-                    attributes.buttons?.length) && (
+                {(attributes.proceed || attributes.close) && (
                     <Stack
                         spacing={"8px"}
                         direction={
@@ -358,21 +333,6 @@ export function DialogBoxV2({
                                 {attributes.close?.text ?? t("ok")}
                             </FocusVisibleButton>
                         )}
-                        {attributes.buttons &&
-                            attributes.buttons.map((b) => (
-                                <FocusVisibleButton
-                                    size="large"
-                                    key={b.text}
-                                    color={b.variant}
-                                    onClick={() => {
-                                        b.action();
-                                        onClose();
-                                    }}
-                                    disabled={b.disabled}
-                                >
-                                    {b.text}
-                                </FocusVisibleButton>
-                            ))}
                     </Stack>
                 )}
             </Stack>
