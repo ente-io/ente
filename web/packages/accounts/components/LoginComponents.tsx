@@ -7,14 +7,14 @@ import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import log from "@/base/log";
 import { customAPIHost } from "@/base/origins";
+import { VerticallyCentered } from "@ente/shared/components/Container";
+import FormPaper from "@ente/shared/components/Form/FormPaper";
+import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
+import LinkButton from "@ente/shared/components/LinkButton";
 import { CircularProgress, Stack, Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
-import { VerticallyCentered } from "./Container";
-import FormPaper from "./Form/FormPaper";
-import FormPaperFooter from "./Form/FormPaper/Footer";
-import LinkButton from "./LinkButton";
 
 export const PasswordHeader: React.FC<React.PropsWithChildren> = ({
     children,

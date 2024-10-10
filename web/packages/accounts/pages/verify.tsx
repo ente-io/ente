@@ -6,10 +6,6 @@ import { VerticallyCentered } from "@ente/shared/components/Container";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
 import LinkButton from "@ente/shared/components/LinkButton";
-import {
-    LoginFlowFormFooter,
-    VerifyingPasskey,
-} from "@ente/shared/components/LoginComponents";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
@@ -35,6 +31,10 @@ import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 import { getSRPAttributes } from "../api/srp";
 import { putAttributes, sendOtt, verifyOtt } from "../api/user";
+import {
+    LoginFlowFormFooter,
+    VerifyingPasskey,
+} from "../components/LoginComponents";
 import { PAGES } from "../constants/pages";
 import {
     openPasskeyVerificationURL,

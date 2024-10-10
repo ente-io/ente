@@ -7,12 +7,6 @@ import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import LinkButton from "@ente/shared/components/LinkButton";
-import {
-    LoginFlowFormFooter,
-    PasswordHeader,
-    VerifyingPasskey,
-    sessionExpiredDialogAttributes,
-} from "@ente/shared/components/LoginComponents";
 import VerifyMasterPasswordForm, {
     type VerifyMasterPasswordFormProps,
 } from "@ente/shared/components/VerifyMasterPasswordForm";
@@ -46,6 +40,12 @@ import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
 import { getSRPAttributes } from "../api/srp";
+import {
+    LoginFlowFormFooter,
+    PasswordHeader,
+    VerifyingPasskey,
+    sessionExpiredDialogAttributes,
+} from "../components/LoginComponents";
 import { PAGES } from "../constants/pages";
 import {
     openPasskeyVerificationURL,
