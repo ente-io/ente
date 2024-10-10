@@ -55,6 +55,7 @@ export const errorDialogAttributes = (
         icon: <ErrorOutline />,
         message,
         continue: { color: "critical" },
+        cancel: false,
     };
 };
 

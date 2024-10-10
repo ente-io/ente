@@ -213,6 +213,7 @@ export default function App({ Component, pageProps }: AppProps) {
             setLocalMapEnabled(enabled);
             setMapEnabled(enabled);
         } catch (e) {
+            // TODO: Handle the error here.
             log.error("Error while updating mapEnabled", e);
         }
     };

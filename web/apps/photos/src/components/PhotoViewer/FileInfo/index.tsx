@@ -403,7 +403,7 @@ const confirmDisableMapsDialogAttributes = (
 ): MiniDialogAttributes => ({
     title: t("DISABLE_MAPS"),
     message: <Trans i18nKey={"DISABLE_MAP_DESCRIPTION"} />,
-    continue: { text: t("disable"), action: onConfirm },
+    continue: { text: t("disable"), color: "critical", action: onConfirm },
 });
 
 const FileInfoSidebar = styled((props: DialogProps) => (
