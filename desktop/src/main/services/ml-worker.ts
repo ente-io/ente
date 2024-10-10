@@ -194,16 +194,21 @@ const downloadModel = async (saveLocation: string, name: string) => {
  */
 const createInferenceSession = async (modelPath: string) => {
     return await ort.InferenceSession.create(modelPath, {
+        executionProviders: ["cpu"],
+        // Be more conservative with RAM usage.
+        enableCpuMemArena: true,
         // Restrict the number of threads to 1.
         intraOpNumThreads: 1,
-        // Be more conservative with RAM usage.
-        enableCpuMemArena: false,
+        executionMode: "sequential",
+        interOpNumThreads: 1,
+        // Use all graph optimizations.
+        graphOptimizationLevel: "all",
     });
 };
 
 const cachedCLIPImageSession = makeCachedInferenceSession(
-    "mobileclip_s2_image_opset18_rgba_sim.onnx",
-    143093992 /* 143 MB */,
+    "mobileclip_s2_image_opset18_rgba_opt.onnx",
+    143099752 /* 143 MB */,
 );
 
 /**
@@ -228,8 +233,8 @@ export const computeCLIPImageEmbedding = async (
 };
 
 const cachedCLIPTextSession = makeCachedInferenceSession(
-    "mobileclip_s2_text_int32.onnx",
-    253895600 /* 253 MB */,
+    "mobileclip_s2_text_opset18_quant.onnx",
+    67144712 /* 67 MB */,
 );
 
 let _tokenizer: Tokenizer | undefined;
@@ -273,17 +278,21 @@ export const computeCLIPTextEmbeddingIfAvailable = async (text: string) => {
 };
 
 const cachedFaceDetectionSession = makeCachedInferenceSession(
-    "yolov5s_face_640_640_dynamic.onnx",
-    30762872 /* 29 MB */,
+    "yolov5s_face_opset18_rgba_opt.onnx",
+    28952612 /* 29 MB */,
 );
 
 /**
  * Face detection with the YOLO model and ONNX runtime.
  */
-export const detectFaces = async (input: Float32Array) => {
+export const detectFaces = async (
+    input: Uint8ClampedArray,
+    inputShape: number[],
+) => {
     const session = await cachedFaceDetectionSession();
+    const inputArray = new Uint8Array(input.buffer);
     const feeds = {
-        input: new ort.Tensor("float32", input, [1, 3, 640, 640]),
+        input: new ort.Tensor("uint8", inputArray, inputShape),
     };
     const t = Date.now();
     const results = await session.run(feeds);
