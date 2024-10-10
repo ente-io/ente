@@ -1,7 +1,7 @@
 import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { MenuItemDivider, MenuItemGroup } from "@/base/components/Menu";
 import { Titlebar } from "@/base/components/Titlebar";
-import { mdErrorAttributes } from "@/base/components/utils/mini-dialog";
+import { errorDialogAttributes } from "@/base/components/utils/mini-dialog";
 import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
 import { CenteredFlex } from "@ente/shared/components/Container";
@@ -45,7 +45,7 @@ const Page: React.FC = () => {
     >();
 
     const showPasskeyFetchFailedErrorDialog = useCallback(() => {
-        showMiniDialog(mdErrorAttributes(t("passkey_fetch_failed")));
+        showMiniDialog(errorDialogAttributes(t("passkey_fetch_failed")));
     }, [showMiniDialog]);
 
     useEffect(() => {

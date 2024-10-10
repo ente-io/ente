@@ -5,6 +5,7 @@ import {
 } from "@/accounts/services/passkey";
 import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
+import { genericErrorDialogAttributes } from "@/base/components/utils/mini-dialog";
 import log from "@/base/log";
 import { customAPIHost } from "@/base/origins";
 import { VerticallyCentered } from "@ente/shared/components/Container";
@@ -108,7 +109,7 @@ export const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
                 e instanceof Error &&
                     e.message == passkeySessionExpiredErrorMessage
                     ? sessionExpiredDialogAttributes(logout)
-                    : genericErrorAttributes(),
+                    : genericErrorDialogAttributes(),
             );
             setVerificationStatus("waiting");
         }
@@ -194,11 +195,10 @@ const ButtonStack = styled("div")`
 `;
 
 /**
- * {@link DialogBoxAttributesV2} for showing the error when the user's session
- * has expired.
+ * {@link MiniDialogAttributes} for showing asking the user to login again when
+ * their session has expired.
  *
- * It asks them to login again. There is one button, which allows them to
- * logout.
+ * There is one button, which allows them to logout.
  *
  * @param onLogin Called when the user presses the "Login" button on the error
  * dialog.
@@ -214,13 +214,4 @@ export const sessionExpiredDialogAttributes = (
         action: onLogin,
     },
     cancel: false,
-});
-
-/**
- * {@link DialogBoxAttributesV2} for showing a generic error.
- */
-const genericErrorAttributes = (): MiniDialogAttributes => ({
-    title: t("error"),
-    close: { variant: "critical" },
-    message: t("generic_error_retry"),
 });
