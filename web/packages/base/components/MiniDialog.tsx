@@ -231,8 +231,6 @@ export interface DialogBoxV2Attributes {
      * reset or override these customizations.
      */
     title?: React.ReactNode;
-    staticBackdrop?: boolean;
-    nonClosable?: boolean;
     /**
      * Customize the cancel (dismiss) action button offered by the dialog box.
      *
@@ -279,18 +277,12 @@ export function DialogBoxV2({
         return <></>;
     }
 
-    const handleClose = dialogCloseHandler({
-        staticBackdrop: attributes.staticBackdrop,
-        nonClosable: attributes.nonClosable,
-        onClose: onClose,
-    });
-
     const { PaperProps, ...rest } = props;
 
     return (
         <Dialog
             open={open}
-            onClose={handleClose}
+            onClose={onClose}
             PaperProps={{
                 ...PaperProps,
                 sx: {
