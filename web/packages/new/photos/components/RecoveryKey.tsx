@@ -52,8 +52,7 @@ export function RecoveryKey({ ...props }: Props) {
         }
         const main = async () => {
             try {
-                const recoveryKey = await getRecoveryKey();
-                setRecoveryKey(bip39.entropyToMnemonic(recoveryKey));
+                setRecoveryKey(await getRecoveryKeyMnemonic());
             } catch (e) {
                 log.error("Failed to generate recovery key", e);
                 somethingWentWrong();
@@ -110,3 +109,6 @@ const DashedBorderWrapper = styled(Box)(({ theme }) => ({
     border: `1px dashed ${theme.palette.grey.A400}`,
     borderRadius: theme.spacing(1),
 }));
+
+const getRecoveryKeyMnemonic = async () =>
+    bip39.entropyToMnemonic(await getRecoveryKey());
