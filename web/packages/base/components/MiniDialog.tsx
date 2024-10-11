@@ -108,6 +108,8 @@ export interface MiniDialogAttributes {
               text: string;
               action: () => void;
           };
+    /** The direction in which the buttons are stacked. Default is "column". */
+    buttonDirection?: "row" | "column";
 }
 
 type MiniDialogProps = Omit<DialogProps, "onClose"> & {
@@ -207,7 +209,10 @@ export const AttributedMiniDialog: React.FC<
                     </Typography>
                 )}
                 {children}
-                <Stack sx={{ paddingBlockStart: "24px", gap: "12px" }}>
+                <Stack
+                    sx={{ paddingBlockStart: "24px", gap: "12px" }}
+                    direction={attributes.buttonDirection ?? "column"}
+                >
                     {phase == "failed" && (
                         <Typography variant="small" color="critical.main">
                             {t("generic_error")}
