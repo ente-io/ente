@@ -48,8 +48,10 @@ export const PeopleEmptyState: React.FC = () => (
         <Typography
             color="text.muted"
             sx={{
-                // Approximately compensate for the hidden section bar
-                paddingBlockEnd: "86px",
+                // Approximately compensate for the hidden section bar (86px),
+                // and then add a bit extra padding so that the message appears
+                // visually off the center, towards the top.
+                paddingBlockEnd: "126px",
             }}
         >
             {pt("People will appear here once indexing completes")}
