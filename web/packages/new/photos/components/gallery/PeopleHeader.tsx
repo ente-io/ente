@@ -1,10 +1,6 @@
 import { useModalVisibility } from "@/base/components/utils/modal";
 import { pt } from "@/base/i18n";
-import {
-    addCGroup,
-    deleteCGroup,
-    renameCGroup,
-} from "@/new/photos/services/ml";
+import { deleteCGroup, renameCGroup } from "@/new/photos/services/ml";
 import { type Person } from "@/new/photos/services/ml/people";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
 import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
@@ -14,13 +10,12 @@ import MoreHoriz from "@mui/icons-material/MoreHoriz";
 import { IconButton, Stack, Tooltip } from "@mui/material";
 import { ClearIcon } from "@mui/x-date-pickers";
 import { t } from "i18next";
-import React, { useState } from "react";
+import React from "react";
 import type { FaceCluster } from "../../services/ml/cluster";
 import type { CGroup } from "../../services/user-entity";
 import { useAppContext } from "../../types/context";
 import { AddPersonDialog } from "../AddPersonDialog";
 import { SpaceBetweenFlex } from "../mui";
-import { NameInputDialog } from "../NameInputDialog";
 import { SingleInputDialog } from "../SingleInputForm";
 import { useWrapAsyncOperation } from "../use-wrap-async";
 import type { GalleryBarImplProps } from "./BarImpl";
@@ -166,37 +161,14 @@ const ClusterPersonOptions: React.FC<ClusterPersonOptionsProps> = ({
     people,
     cluster,
 }) => {
-    const { startLoading, finishLoading } = useAppContext();
-
-    const [openNameInput, setOpenNameInput] = useState(false);
-    const [openAddPersonDialog, setOpenAddPersonDialog] = useState(false);
-
-    const handleAddPerson = () => {
-        // TODO-Cluster
-        if (process.env.NEXT_PUBLIC_ENTE_WIP_CL) {
-            // WIP path
-            setOpenAddPersonDialog(true);
-        } else {
-            // Existing path
-            setOpenNameInput(true);
-        }
-    };
-
-    // TODO-Cluster
-    const addPersonWithName = async (name: string) => {
-        startLoading();
-        try {
-            await addCGroup(name, cluster);
-        } finally {
-            finishLoading();
-        }
-    };
+    const { show: showAddPerson, props: addPersonVisibilityProps } =
+        useModalVisibility();
 
     return (
         <>
             <Stack direction="row" sx={{ alignItems: "center", gap: 2 }}>
                 <Tooltip title={pt("Add a name")}>
-                    <IconButton onClick={handleAddPerson}>
+                    <IconButton onClick={showAddPerson}>
                         <AddIcon />
                     </IconButton>
                 </Tooltip>
@@ -208,26 +180,15 @@ const ClusterPersonOptions: React.FC<ClusterPersonOptionsProps> = ({
                     <OverflowMenuOption
                         startIcon={<AddIcon />}
                         centerAlign
-                        onClick={handleAddPerson}
+                        onClick={showAddPerson}
                     >
                         {pt("Add a name")}
                     </OverflowMenuOption>
                 </OverflowMenu>
             </Stack>
 
-            <NameInputDialog
-                open={openNameInput}
-                onClose={() => setOpenNameInput(false)}
-                title={pt("Add person") /* TODO-Cluster */}
-                placeholder={t("enter_name")}
-                initialValue={""}
-                submitButtonTitle={t("add")}
-                onSubmit={addPersonWithName}
-            />
-
             <AddPersonDialog
-                open={openAddPersonDialog}
-                onClose={() => setOpenAddPersonDialog(false)}
+                {...addPersonVisibilityProps}
                 {...{ people, cluster }}
             />
         </>
