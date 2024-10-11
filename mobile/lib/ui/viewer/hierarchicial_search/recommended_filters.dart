@@ -1,8 +1,8 @@
 import "package:flutter/material.dart";
 import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
-import "package:photos/ui/components/buttons/chip_button_widget.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
+import "package:photos/ui/viewer/hierarchicial_search/filter_chip.dart";
 
 class RecommendedFilters extends StatefulWidget {
   const RecommendedFilters({super.key});
@@ -48,12 +48,12 @@ class _RecommendedFiltersState extends State<RecommendedFilters> {
       itemBuilder: (context, index) {
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: ChipButtonWidget(
-            _recommendations[index].name(),
-            leadingIcon: _recommendations[index].icon(),
+          child: EnteFilterChip(
+            label: _recommendations[index].name(),
             onTap: () {
               _searchFilterDataProvider.applyFilters([_recommendations[index]]);
             },
+            leadingIcon: _recommendations[index].icon(),
           ),
         );
       },

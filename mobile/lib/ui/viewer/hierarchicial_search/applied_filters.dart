@@ -1,8 +1,8 @@
 import "package:flutter/material.dart";
 import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
-import "package:photos/ui/components/buttons/chip_button_widget.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
+import "package:photos/ui/viewer/hierarchicial_search/filter_chip.dart";
 
 class AppliedFilters extends StatefulWidget {
   const AppliedFilters({super.key});
@@ -48,13 +48,13 @@ class _AppliedFiltersState extends State<AppliedFilters> {
       itemBuilder: (context, index) {
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: ChipButtonWidget(
-            _appliedFilters[index].name(),
-            leadingIcon: _appliedFilters[index].icon(),
+          child: EnteFilterChip(
+            label: _appliedFilters[index].name(),
             onTap: () {
               _searchFilterDataProvider
                   .removeAppliedFilters([_appliedFilters[index]]);
             },
+            leadingIcon: _appliedFilters[index].icon(),
           ),
         );
       },
