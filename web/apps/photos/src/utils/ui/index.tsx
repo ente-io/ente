@@ -8,24 +8,6 @@ import { t } from "i18next";
 import { Trans } from "react-i18next";
 import { Subscription } from "types/billing";
 
-export const getDownloadAppMessage = (): DialogBoxAttributes => {
-    return {
-        title: t("download_app"),
-        content: t("download_app_message"),
-
-        proceed: {
-            text: t("download"),
-            action: downloadApp,
-            variant: "accent",
-        },
-        close: {
-            text: t("close"),
-        },
-    };
-};
-
-const downloadApp = () => openURL("https://ente.io/download/desktop");
-
 export const getTrashFilesMessage = (
     deleteFileHelper,
 ): DialogBoxAttributes => ({
@@ -70,6 +52,8 @@ export const getUpdateReadyToInstallMessage = ({
     },
     staticBackdrop: true,
 });
+
+const downloadApp = () => openURL("https://ente.io/download/desktop");
 
 export const getUpdateAvailableForDownloadMessage = ({
     version,

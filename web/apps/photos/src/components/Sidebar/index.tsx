@@ -8,6 +8,7 @@ import log from "@/base/log";
 import { savedLogs } from "@/base/log-web";
 import { customAPIHost } from "@/base/origins";
 import { RecoveryKey } from "@/new/photos/components/RecoveryKey";
+import { downloadAppDialogAttributes } from "@/new/photos/components/utils/dialog";
 import type { CollectionSummaries } from "@/new/photos/services/collection/ui";
 import { AppContext, useAppContext } from "@/new/photos/types/context";
 import { downloadString, initiateEmail, openURL } from "@/new/photos/utils/web";
@@ -74,7 +75,6 @@ import {
     DUMMY_UNCATEGORIZED_COLLECTION,
     TRASH_SECTION,
 } from "utils/collection";
-import { getDownloadAppMessage } from "utils/ui";
 import { isFamilyAdmin, isPartOfFamily } from "utils/user/family";
 import { testUpload } from "../../../tests/upload.test";
 import { MemberSubscriptionManage } from "../MemberSubscriptionManage";
@@ -461,13 +461,12 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
 
     const redirectToDeduplicatePage = () => router.push(PAGES.DEDUPLICATE);
 
-    const toggleTheme = () => {
+    const toggleTheme = () =>
         setThemeColor(
             themeColor === THEME_COLOR.DARK
                 ? THEME_COLOR.LIGHT
                 : THEME_COLOR.DARK,
         );
-    };
 
     return (
         <>
@@ -501,7 +500,6 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
                 onClick={showTwoFactor}
                 label={t("TWO_FACTOR")}
             />
-
             <EnteMenuItem
                 variant="secondary"
                 onClick={redirectToAccountsPage}
@@ -550,7 +548,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
 };
 
 const HelpSection: React.FC = () => {
-    const { setDialogMessage } = useContext(AppContext);
+    const { showMiniDialog } = useContext(AppContext);
     const { openExportModal } = useContext(GalleryContext);
 
     const requestFeature = () =>
@@ -561,7 +559,7 @@ const HelpSection: React.FC = () => {
     const handleExport = () =>
         isDesktop
             ? openExportModal()
-            : setDialogMessage(getDownloadAppMessage());
+            : showMiniDialog(downloadAppDialogAttributes());
 
     return (
         <>
