@@ -1,3 +1,8 @@
+/* eslint-disable @typescript-eslint/no-floating-promises */
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { errorDialogAttributes } from "@/base/components/utils/mini-dialog";
 import { useIsMobileWidth } from "@/base/hooks";
 import log from "@/base/log";
@@ -30,7 +35,7 @@ interface Props {
     onHide: () => void;
 }
 
-function RecoveryKey({ ...props }: Props) {
+export function RecoveryKey({ ...props }: Props) {
     const { showMiniDialog } = useAppContext();
 
     const [recoveryKey, setRecoveryKey] = useState<string | null>(null);
@@ -100,7 +105,6 @@ function RecoveryKey({ ...props }: Props) {
         </Dialog>
     );
 }
-export default RecoveryKey;
 
 const DashedBorderWrapper = styled(Box)(({ theme }) => ({
     border: `1px dashed ${theme.palette.grey.A400}`,
