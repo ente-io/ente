@@ -1,8 +1,4 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
-/* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { errorDialogAttributes } from "@/base/components/utils/mini-dialog";
 import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import { useIsMobileWidth } from "@/base/hooks";
@@ -14,7 +10,6 @@ import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleW
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import {
     Box,
-    Button,
     Dialog,
     DialogActions,
     DialogContent,
@@ -23,13 +18,11 @@ import {
 } from "@mui/material";
 import * as bip39 from "bip39";
 import { t } from "i18next";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { downloadString } from "../utils/web";
 
 // mobile client library only supports english.
 bip39.setDefaultWordlist("english");
-
-const RECOVERY_KEY_FILE_NAME = "ente-recovery-key.txt";
 
 export const RecoveryKey: React.FC<ModalVisibilityProps> = ({
     open,
@@ -37,34 +30,32 @@ export const RecoveryKey: React.FC<ModalVisibilityProps> = ({
 }) => {
     const { showMiniDialog } = useAppContext();
 
-    const [recoveryKey, setRecoveryKey] = useState<string | null>(null);
+    const [recoveryKey, setRecoveryKey] = useState<string | undefined>();
     const fullScreen = useIsMobileWidth();
 
-    const somethingWentWrong = () =>
-        showMiniDialog(
-            errorDialogAttributes(t("RECOVER_KEY_GENERATION_FAILED")),
-        );
+    const handleLoadError = useCallback(
+        (e: unknown) => {
+            log.error("Failed to generate recovery key", e);
+            showMiniDialog(
+                errorDialogAttributes(t("RECOVER_KEY_GENERATION_FAILED")),
+            );
+            onClose();
+        },
+        [onClose, showMiniDialog],
+    );
 
     useEffect(() => {
-        if (!open) {
-            return;
-        }
-        const main = async () => {
-            try {
-                setRecoveryKey(await getRecoveryKeyMnemonic());
-            } catch (e) {
-                log.error("Failed to generate recovery key", e);
-                somethingWentWrong();
-                onClose();
-            }
-        };
-        main();
-    }, [open]);
+        if (!open) return;
 
-    function onSaveClick() {
+        void getRecoveryKeyMnemonic()
+            .then((key) => setRecoveryKey(key))
+            .catch(handleLoadError);
+    }, [open, handleLoadError]);
+
+    const handleSaveClick = () => {
         downloadRecoveryKeyMnemonic(ensure(recoveryKey));
         onClose();
-    }
+    };
 
     return (
         <Dialog
@@ -93,12 +84,20 @@ export const RecoveryKey: React.FC<ModalVisibilityProps> = ({
                 </DashedBorderWrapper>
             </DialogContent>
             <DialogActions>
-                <Button color="secondary" size="large" onClick={onClose}>
+                <FocusVisibleButton
+                    color="secondary"
+                    fullWidth
+                    onClick={onClose}
+                >
                     {t("do_this_later")}
-                </Button>
-                <Button color="accent" size="large" onClick={onSaveClick}>
+                </FocusVisibleButton>
+                <FocusVisibleButton
+                    color="accent"
+                    fullWidth
+                    onClick={handleSaveClick}
+                >
                     {t("save_key")}
-                </Button>
+                </FocusVisibleButton>
             </DialogActions>
         </Dialog>
     );
@@ -113,4 +112,4 @@ const getRecoveryKeyMnemonic = async () =>
     bip39.entropyToMnemonic(await getRecoveryKey());
 
 const downloadRecoveryKeyMnemonic = (key: string) =>
-    downloadString(key, RECOVERY_KEY_FILE_NAME);
+    downloadString(key, "ente-recovery-key.txt");
