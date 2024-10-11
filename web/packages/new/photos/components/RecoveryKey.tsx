@@ -37,7 +37,7 @@ export const RecoveryKey: React.FC<ModalVisibilityProps> = ({
         (e: unknown) => {
             log.error("Failed to generate recovery key", e);
             showMiniDialog(
-                errorDialogAttributes(t("RECOVER_KEY_GENERATION_FAILED")),
+                errorDialogAttributes(t("recovery_key_generation_failed")),
             );
             onClose();
         },
@@ -75,12 +75,10 @@ export const RecoveryKey: React.FC<ModalVisibilityProps> = ({
                 {t("recovery_key")}
             </DialogTitleWithCloseButton>
             <DialogContent>
-                <Typography mb={3}>{t("RECOVERY_KEY_DESCRIPTION")}</Typography>
+                <Typography mb={3}>{t("recovery_key_description")}</Typography>
                 <DashedBorderWrapper>
                     <CodeBlock code={recoveryKey} />
-                    <Typography m={2}>
-                        {t("KEY_NOT_STORED_DISCLAIMER")}
-                    </Typography>
+                    <Typography m={2}>{t("key_not_stored_note")}</Typography>
                 </DashedBorderWrapper>
             </DialogContent>
             <DialogActions>

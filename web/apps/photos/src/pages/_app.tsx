@@ -123,7 +123,7 @@ export default function App({ Component, pageProps }: AppProps) {
                 setNotificationAttributes({
                     endIcon: <ArrowForward />,
                     variant: "secondary",
-                    message: t("UPDATE_AVAILABLE"),
+                    message: t("update_available"),
                     onClick: () =>
                         showMiniDialog(
                             updateAvailableForDownloadDialogAttributes(update),
