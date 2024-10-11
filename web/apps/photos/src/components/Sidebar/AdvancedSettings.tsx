@@ -1,14 +1,14 @@
 import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { MenuItemGroup, MenuSectionTitle } from "@/base/components/Menu";
 import { Titlebar } from "@/base/components/Titlebar";
+import type { NestedDrawerVisibilityProps } from "@/base/components/utils/modal";
 import { AppContext } from "@/new/photos/types/context";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import { Box, DialogProps, Stack } from "@mui/material";
 import { t } from "i18next";
 import React, { useContext } from "react";
-import type { SettingsDrawerProps } from "./types";
 
-export const AdvancedSettings: React.FC<SettingsDrawerProps> = ({
+export const AdvancedSettings: React.FC<NestedDrawerVisibilityProps> = ({
     open,
     onClose,
     onRootClose,

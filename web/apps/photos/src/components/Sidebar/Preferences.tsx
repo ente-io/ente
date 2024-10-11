@@ -1,6 +1,7 @@
 import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { MenuItemGroup, MenuSectionTitle } from "@/base/components/Menu";
 import { Titlebar } from "@/base/components/Titlebar";
+import type { NestedDrawerVisibilityProps } from "@/base/components/utils/modal";
 import {
     getLocaleInUse,
     setLocaleInUse,
@@ -18,9 +19,8 @@ import { t } from "i18next";
 import React, { useState } from "react";
 import { AdvancedSettings } from "./AdvancedSettings";
 import { MapSettings } from "./MapSetting";
-import type { SettingsDrawerProps } from "./types";
 
-export const Preferences: React.FC<SettingsDrawerProps> = ({
+export const Preferences: React.FC<NestedDrawerVisibilityProps> = ({
     open,
     onClose,
     onRootClose,

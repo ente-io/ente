@@ -427,7 +427,6 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
     const router = useRouter();
     const appContext = useContext(AppContext);
     const {
-        setDialogMessage,
         startLoading,
         watchFolderView,
         setWatchFolderView,
@@ -437,23 +436,13 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
 
     const { show: showRecoveryKey, props: recoveryKeyVisibilityProps } =
         useModalVisibility();
-    const [twoFactorModalView, setTwoFactorModalView] = useState(false);
-    const [preferencesView, setPreferencesView] = useState(false);
+    const { show: showTwoFactor, props: twoFactorVisibilityProps } =
+        useModalVisibility();
+    const { show: showPreferences, props: preferencesVisibilityProps } =
+        useModalVisibility();
 
-    const openPreferencesOptions = () => setPreferencesView(true);
-    const closePreferencesOptions = () => setPreferencesView(false);
-
-    const openTwoFactorModal = () => setTwoFactorModalView(true);
-    const closeTwoFactorModal = () => setTwoFactorModalView(false);
-
-    const openWatchFolder = () => {
-        if (isElectron()) {
-            setWatchFolderView(true);
-        } else {
-            setDialogMessage(getDownloadAppMessage());
-        }
-    };
-    const closeWatchFolder = () => setWatchFolderView(false);
+    const showWatchFolder = () => setWatchFolderView(true);
+    const handleCloseWatchFolder = () => setWatchFolderView(false);
 
     const redirectToChangePasswordPage = () => {
         closeSidebar();
@@ -467,12 +456,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
 
     const redirectToAccountsPage = async () => {
         closeSidebar();
-
-        try {
-            await openAccountsManagePasskeysPage();
-        } catch (e) {
-            log.error("failed to redirect to accounts page", e);
-        }
+        await openAccountsManagePasskeysPage();
     };
 
     const redirectToDeduplicatePage = () => router.push(PAGES.DEDUPLICATE);
@@ -489,7 +473,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
         <>
             {isElectron() && (
                 <EnteMenuItem
-                    onClick={openWatchFolder}
+                    onClick={showWatchFolder}
                     variant="secondary"
                     label={t("WATCH_FOLDERS")}
                 />
@@ -514,7 +498,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
             )}
             <EnteMenuItem
                 variant="secondary"
-                onClick={openTwoFactorModal}
+                onClick={showTwoFactor}
                 label={t("TWO_FACTOR")}
             />
 
@@ -529,40 +513,36 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
                 onClick={redirectToChangePasswordPage}
                 label={t("CHANGE_PASSWORD")}
             />
-
             <EnteMenuItem
                 variant="secondary"
                 onClick={redirectToChangeEmailPage}
                 label={t("CHANGE_EMAIL")}
             />
-
             <EnteMenuItem
                 variant="secondary"
                 onClick={redirectToDeduplicatePage}
                 label={t("DEDUPLICATE_FILES")}
             />
-
             <EnteMenuItem
                 variant="secondary"
-                onClick={openPreferencesOptions}
+                onClick={showPreferences}
                 label={t("preferences")}
             />
+
             <RecoveryKey {...recoveryKeyVisibilityProps} />
             <TwoFactorModal
-                show={twoFactorModalView}
-                onHide={closeTwoFactorModal}
+                {...twoFactorVisibilityProps}
                 closeSidebar={closeSidebar}
                 setLoading={startLoading}
             />
             {isElectron() && (
                 <WatchFolder
                     open={watchFolderView}
-                    onClose={closeWatchFolder}
+                    onClose={handleCloseWatchFolder}
                 />
             )}
             <Preferences
-                open={preferencesView}
-                onClose={closePreferencesOptions}
+                {...preferencesVisibilityProps}
                 onRootClose={closeSidebar}
             />
         </>
