@@ -11,8 +11,6 @@ import { IconButton, Stack, Tooltip } from "@mui/material";
 import { ClearIcon } from "@mui/x-date-pickers";
 import { t } from "i18next";
 import React from "react";
-import type { FaceCluster } from "../../services/ml/cluster";
-import type { CGroup } from "../../services/user-entity";
 import { useAppContext } from "../../types/context";
 import { AddPersonDialog } from "../AddPersonDialog";
 import { SpaceBetweenFlex } from "../mui";
@@ -60,15 +58,10 @@ export const PeopleHeader: React.FC<PeopleHeaderProps> = ({
                 {person.type == "cgroup" ? (
                     <CGroupPersonHeader
                         person={person}
-                        cgroup={person.cgroup}
                         {...{ onSelectPerson }}
                     />
                 ) : (
-                    <ClusterPersonHeader
-                        person={person}
-                        cluster={person.cluster}
-                        {...{ people }}
-                    />
+                    <ClusterPersonHeader person={person} {...{ people }} />
                 )}
             </SpaceBetweenFlex>
         </GalleryItemsHeaderAdapter>
@@ -76,15 +69,15 @@ export const PeopleHeader: React.FC<PeopleHeaderProps> = ({
 };
 
 type CGroupPersonHeaderProps = Pick<PeopleHeaderProps, "onSelectPerson"> & {
-    person: Person;
-    cgroup: CGroup;
+    person: Exclude<Person, { type: "cluster" }>;
 };
 
 const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({
     person,
-    cgroup,
     onSelectPerson,
 }) => {
+    const cgroup = person.cgroup;
+
     const { showMiniDialog } = useAppContext();
 
     const { show: showNameInput, props: nameInputVisibilityProps } =
@@ -159,15 +152,15 @@ const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({
 };
 
 type ClusterPersonHeaderProps = Pick<PeopleHeaderProps, "people"> & {
-    person: Person;
-    cluster: FaceCluster;
+    person: Exclude<Person, { type: "cgroup" }>;
 };
 
 const ClusterPersonHeader: React.FC<ClusterPersonHeaderProps> = ({
     people,
     person,
-    cluster,
 }) => {
+    const cluster = person.cluster;
+
     const { show: showAddPerson, props: addPersonVisibilityProps } =
         useModalVisibility();
 
