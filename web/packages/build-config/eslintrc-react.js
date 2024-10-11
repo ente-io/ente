@@ -22,5 +22,8 @@ module.exports = {
         ],
         /* Next.js supports the JSX transform introduced in React 17 */
         "react/react-in-jsx-scope": "off",
+        /* Without React in scope, this rule starts causing false positives (We
+           don't use prop types in our own code anyways). */
+        "react/prop-types": "off",
     },
 };

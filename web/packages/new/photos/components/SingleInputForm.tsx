@@ -1,6 +1,6 @@
-import type { ModalVisibilityProps } from "@/base/components/mui";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
+import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import log from "@/base/log";
 import {
     Box,

@@ -4,6 +4,7 @@ import type { CollectionMapping, Electron, ZipItem } from "@/base/types/ipc";
 import type { Collection } from "@/media/collection";
 import { CollectionMappingChoiceDialog } from "@/new/photos/components/CollectionMappingChoiceDialog";
 import type { CollectionSelectorAttributes } from "@/new/photos/components/CollectionSelector";
+import { downloadAppDialogAttributes } from "@/new/photos/components/utils/download";
 import { exportMetadataDirectoryName } from "@/new/photos/services/export";
 import type {
     FileAndPath,
@@ -40,10 +41,7 @@ import watcher from "services/watch";
 import { SetCollections, SetFiles, SetLoading } from "types/gallery";
 import { getOrCreateAlbum } from "utils/collection";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
-import {
-    getDownloadAppMessage,
-    getRootLevelFileWithFolderNotAllowMessage,
-} from "utils/ui";
+import { getRootLevelFileWithFolderNotAllowMessage } from "utils/ui";
 import { SetCollectionNamerAttributes } from "../Collections/CollectionNamer";
 import UploadProgress from "./UploadProgress";
 import {
@@ -705,7 +703,7 @@ export default function Uploader({
             if (openZipFileSelector && electron) {
                 openZipFileSelector();
             } else {
-                appContext.setDialogMessage(getDownloadAppMessage());
+                appContext.showMiniDialog(downloadAppDialogAttributes());
             }
         }
     };

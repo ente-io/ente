@@ -1,6 +1,7 @@
 import { stashRedirect } from "@/accounts/services/redirect";
 import { NavbarBase } from "@/base/components/Navbar";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { useModalVisibility } from "@/base/components/utils/modal";
 import { useIsMobileWidth } from "@/base/hooks";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
@@ -218,7 +219,6 @@ export default function Gallery() {
     const [collectionNamerView, setCollectionNamerView] = useState(false);
     const [shouldDisableDropzone, setShouldDisableDropzone] = useState(false);
     const [isPhotoSwipeOpen, setIsPhotoSwipeOpen] = useState(false);
-    const [openWhatsNew, setOpenWhatsNew] = useState(false);
 
     const {
         // A function to call to get the props we should apply to the container,
@@ -352,6 +352,9 @@ export default function Gallery() {
     const [collectionSelectorAttributes, setCollectionSelectorAttributes] =
         useState<CollectionSelectorAttributes | undefined>();
 
+    const { show: showWhatsNew, props: whatsNewVisibilityProps } =
+        useModalVisibility();
+
     const router = useRouter();
 
     // Ensure that the keys in local storage are not malformed by verifying that
@@ -420,7 +423,7 @@ export default function Gallery() {
             );
             if (electron) {
                 electron.onMainWindowFocus(() => syncWithRemote(false, true));
-                if (await shouldShowWhatsNew(electron)) setOpenWhatsNew(true);
+                if (await shouldShowWhatsNew(electron)) showWhatsNew();
             }
         };
         main();
@@ -1289,10 +1292,7 @@ export default function Gallery() {
                     sidebarView={sidebarView}
                     closeSidebar={closeSidebar}
                 />
-                <WhatsNew
-                    open={openWhatsNew}
-                    onClose={() => setOpenWhatsNew(false)}
-                />
+                <WhatsNew {...whatsNewVisibilityProps} />
                 {!isInSearchMode &&
                 !isFirstLoad &&
                 !files?.length &&

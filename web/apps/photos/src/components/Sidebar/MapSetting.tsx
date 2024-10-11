@@ -1,6 +1,7 @@
 import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { MenuItemGroup } from "@/base/components/Menu";
 import { Titlebar } from "@/base/components/Titlebar";
+import type { NestedDrawerVisibilityProps } from "@/base/components/utils/modal";
 import log from "@/base/log";
 import { AppContext } from "@/new/photos/types/context";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
@@ -16,9 +17,8 @@ import { t } from "i18next";
 import React, { useContext, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 import { getMapEnabledStatus } from "services/userService";
-import type { SettingsDrawerProps } from "./types";
 
-export const MapSettings: React.FC<SettingsDrawerProps> = ({
+export const MapSettings: React.FC<NestedDrawerVisibilityProps> = ({
     open,
     onClose,
     onRootClose,

@@ -1,5 +1,5 @@
-import type { ModalVisibilityProps } from "@/base/components/mui";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
+import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import type { CollectionMapping } from "@/base/types/ipc";
 import FolderIcon from "@mui/icons-material/Folder";
 import FolderCopyIcon from "@mui/icons-material/FolderCopy";

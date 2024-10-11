@@ -1,0 +1,115 @@
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
+import { errorDialogAttributes } from "@/base/components/utils/mini-dialog";
+import type { ModalVisibilityProps } from "@/base/components/utils/modal";
+import { useIsMobileWidth } from "@/base/hooks";
+import log from "@/base/log";
+import { useAppContext } from "@/new/photos/types/context";
+import { ensure } from "@/utils/ensure";
+import CodeBlock from "@ente/shared/components/CodeBlock";
+import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleWithCloseButton";
+import { getRecoveryKey } from "@ente/shared/crypto/helpers";
+import {
+    Box,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    Typography,
+    styled,
+} from "@mui/material";
+import * as bip39 from "bip39";
+import { t } from "i18next";
+import { useCallback, useEffect, useState } from "react";
+import { downloadString } from "../utils/web";
+
+// mobile client library only supports english.
+bip39.setDefaultWordlist("english");
+
+export const RecoveryKey: React.FC<ModalVisibilityProps> = ({
+    open,
+    onClose,
+}) => {
+    const { showMiniDialog } = useAppContext();
+
+    const [recoveryKey, setRecoveryKey] = useState<string | undefined>();
+    const fullScreen = useIsMobileWidth();
+
+    const handleLoadError = useCallback(
+        (e: unknown) => {
+            log.error("Failed to generate recovery key", e);
+            showMiniDialog(
+                errorDialogAttributes(t("RECOVER_KEY_GENERATION_FAILED")),
+            );
+            onClose();
+        },
+        [onClose, showMiniDialog],
+    );
+
+    useEffect(() => {
+        if (!open) return;
+
+        void getRecoveryKeyMnemonic()
+            .then((key) => setRecoveryKey(key))
+            .catch(handleLoadError);
+    }, [open, handleLoadError]);
+
+    const handleSaveClick = () => {
+        downloadRecoveryKeyMnemonic(ensure(recoveryKey));
+        onClose();
+    };
+
+    return (
+        <Dialog
+            fullScreen={fullScreen}
+            open={open}
+            onClose={onClose}
+            // [Note: maxWidth "xs" on MUI dialogs]
+            //
+            // While logically the "xs" breakpoint doesn't make sense as a
+            // maxWidth value (since as a breakpoint it's value is 0), in
+            // practice MUI has hardcoded its value to a reasonable 444px.
+            // https://github.com/mui/material-ui/issues/34646.
+            maxWidth="xs"
+            fullWidth
+        >
+            <DialogTitleWithCloseButton onClose={onClose}>
+                {t("recovery_key")}
+            </DialogTitleWithCloseButton>
+            <DialogContent>
+                <Typography mb={3}>{t("RECOVERY_KEY_DESCRIPTION")}</Typography>
+                <DashedBorderWrapper>
+                    <CodeBlock code={recoveryKey} />
+                    <Typography m={2}>
+                        {t("KEY_NOT_STORED_DISCLAIMER")}
+                    </Typography>
+                </DashedBorderWrapper>
+            </DialogContent>
+            <DialogActions>
+                <FocusVisibleButton
+                    color="secondary"
+                    fullWidth
+                    onClick={onClose}
+                >
+                    {t("do_this_later")}
+                </FocusVisibleButton>
+                <FocusVisibleButton
+                    color="accent"
+                    fullWidth
+                    onClick={handleSaveClick}
+                >
+                    {t("save_key")}
+                </FocusVisibleButton>
+            </DialogActions>
+        </Dialog>
+    );
+};
+
+const DashedBorderWrapper = styled(Box)(({ theme }) => ({
+    border: `1px dashed ${theme.palette.grey.A400}`,
+    borderRadius: theme.spacing(1),
+}));
+
+const getRecoveryKeyMnemonic = async () =>
+    bip39.entropyToMnemonic(await getRecoveryKey());
+
+const downloadRecoveryKeyMnemonic = (key: string) =>
+    downloadString(key, "ente-recovery-key.txt");

@@ -1,4 +1,4 @@
-import type { ModalVisibilityProps } from "@/base/components/mui";
+import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import CloseIcon from "@mui/icons-material/Close";
 import { IconButton } from "@mui/material";
 import { t } from "i18next";

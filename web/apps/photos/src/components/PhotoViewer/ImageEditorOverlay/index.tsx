@@ -11,13 +11,13 @@ import { photosDialogZIndex } from "@/new/photos/components/z-index";
 import downloadManager from "@/new/photos/services/download";
 import { AppContext } from "@/new/photos/types/context";
 import { EnteFile } from "@/new/photos/types/file";
+import { downloadAndRevokeObjectURL } from "@/new/photos/utils/web";
 import { ensure } from "@/utils/ensure";
 import {
     CenteredFlex,
     HorizontalFlex,
 } from "@ente/shared/components/Container";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
-import { downloadUsingAnchor } from "@ente/shared/utils";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
@@ -462,8 +462,7 @@ const ImageEditorOverlay = (props: IProps) => {
         if (!canvasRef.current) return;
 
         const f = await getEditedFile();
-        // Revokes the URL after downloading.
-        downloadUsingAnchor(URL.createObjectURL(f), f.name);
+        downloadAndRevokeObjectURL(URL.createObjectURL(f), f.name);
     };
 
     const saveCopyToEnte = async () => {

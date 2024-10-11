@@ -1,30 +1,8 @@
-import { ensureElectron } from "@/base/electron";
-import { AppUpdate } from "@/base/types/ipc";
-import { openURL } from "@/new/photos/utils/web";
 import { DialogBoxAttributes } from "@ente/shared/components/DialogBox/types";
-import AutoAwesomeOutlinedIcon from "@mui/icons-material/AutoAwesomeOutlined";
 import InfoOutlined from "@mui/icons-material/InfoRounded";
 import { t } from "i18next";
 import { Trans } from "react-i18next";
 import { Subscription } from "types/billing";
-
-export const getDownloadAppMessage = (): DialogBoxAttributes => {
-    return {
-        title: t("download_app"),
-        content: t("download_app_message"),
-
-        proceed: {
-            text: t("download"),
-            action: downloadApp,
-            variant: "accent",
-        },
-        close: {
-            text: t("close"),
-        },
-    };
-};
-
-const downloadApp = () => openURL("https://ente.io/download/desktop");
 
 export const getTrashFilesMessage = (
     deleteFileHelper,
@@ -50,43 +28,6 @@ export const getTrashFileMessage = (deleteFileHelper): DialogBoxAttributes => ({
         autoFocus: true,
     },
     close: { text: t("cancel") },
-});
-
-export const getUpdateReadyToInstallMessage = ({
-    version,
-}: AppUpdate): DialogBoxAttributes => ({
-    icon: <AutoAwesomeOutlinedIcon />,
-    title: t("UPDATE_AVAILABLE"),
-    content: t("UPDATE_INSTALLABLE_MESSAGE"),
-    proceed: {
-        action: () => ensureElectron().updateAndRestart(),
-        text: t("INSTALL_NOW"),
-        variant: "accent",
-    },
-    close: {
-        text: t("INSTALL_ON_NEXT_LAUNCH"),
-        variant: "secondary",
-        action: () => ensureElectron().updateOnNextRestart(version),
-    },
-    staticBackdrop: true,
-});
-
-export const getUpdateAvailableForDownloadMessage = ({
-    version,
-}: AppUpdate): DialogBoxAttributes => ({
-    icon: <AutoAwesomeOutlinedIcon />,
-    title: t("UPDATE_AVAILABLE"),
-    content: t("UPDATE_AVAILABLE_MESSAGE"),
-    close: {
-        text: t("IGNORE_THIS_VERSION"),
-        variant: "secondary",
-        action: () => ensureElectron().skipAppUpdate(version),
-    },
-    proceed: {
-        action: downloadApp,
-        text: t("DOWNLOAD_AND_INSTALL"),
-        variant: "accent",
-    },
 });
 
 export const getRootLevelFileWithFolderNotAllowMessage =

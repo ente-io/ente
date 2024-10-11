@@ -335,10 +335,9 @@ const detectFaces = async (
     imageData: ImageData,
     electron: ElectronMLWorker,
 ): Promise<YOLOFaceDetection[]> => {
-    // The image pre-preprocessing
-    // happens within the model itself, using ONNX primitives. This is more
-    // performant and also saves us from having to reinvent (say) the
-    // antialising wheels.
+    // The image pre-preprocessing happens within the model itself, using ONNX
+    // primitives. This is more performant and also saves us from having to
+    // reinvent (say) the antialising wheels.
     const {
         height: imageHeight,
         width: imageWidth,
@@ -364,7 +363,8 @@ const detectFaces = async (
 };
 
 /**
- * Calculate image scaling done inside ONNX model run preprocessing. Needed to correct the output.
+ * Calculate image scaling done inside ONNX model run preprocessing. Needed to
+ * correct the output.
  */
 const getScaledSize = (imageWidth: number, imageHeight: number) => {
     const requiredWidth = 640;

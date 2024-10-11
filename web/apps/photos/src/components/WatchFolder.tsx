@@ -1,4 +1,8 @@
 import { EllipsizedTypography } from "@/base/components/Typography";
+import {
+    useModalVisibility,
+    type ModalVisibilityProps,
+} from "@/base/components/utils/modal";
 import { ensureElectron } from "@/base/electron";
 import { basename, dirname } from "@/base/file";
 import type { CollectionMapping, FolderWatch } from "@/base/types/ipc";
@@ -34,17 +38,15 @@ import { t } from "i18next";
 import React, { useContext, useEffect, useState } from "react";
 import watcher from "services/watch";
 
-interface WatchFolderProps {
-    open: boolean;
-    onClose: () => void;
-}
-
 /**
  * View the state of and manage folder watches.
  *
  * This is the screen that controls that "watch folder" feature in the app.
  */
-export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
+export const WatchFolder: React.FC<ModalVisibilityProps> = ({
+    open,
+    onClose,
+}) => {
     // The folders we are watching
     const [watches, setWatches] = useState<FolderWatch[] | undefined>();
     // Temporarily stash the folder path while we show a choice dialog to the
@@ -52,9 +54,8 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
     const [savedFolderPath, setSavedFolderPath] = useState<
         string | undefined
     >();
-    // True when we're showing the choice dialog to ask the user to set the
-    // collection mapping.
-    const [openChoiceDialog, setOpenChoiceDialog] = useState(false);
+    const { show: showMappingChoice, props: mappingChoiceVisibilityProps } =
+        useModalVisibility();
 
     const appContext = useContext(AppContext);
 
@@ -88,7 +89,7 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
             addWatch(path, "root");
         } else {
             setSavedFolderPath(path);
-            setOpenChoiceDialog(true);
+            showMappingChoice();
         }
     };
 
@@ -139,8 +140,7 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
                 </DialogContent>
             </Dialog>
             <CollectionMappingChoiceDialog
-                open={openChoiceDialog}
-                onClose={() => setOpenChoiceDialog(false)}
+                {...mappingChoiceVisibilityProps}
                 didSelect={handleCollectionMappingSelect}
             />
         </>

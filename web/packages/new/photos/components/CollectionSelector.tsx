@@ -1,4 +1,4 @@
-import type { ModalVisibilityProps } from "@/base/components/mui";
+import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import type { Collection } from "@/media/collection";
 import {
     ItemCard,

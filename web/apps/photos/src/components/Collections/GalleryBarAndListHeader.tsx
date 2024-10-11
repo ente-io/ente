@@ -1,3 +1,4 @@
+import { useModalVisibility } from "@/base/components/utils/modal";
 import type { Collection } from "@/media/collection";
 import {
     GalleryBarImpl,
@@ -93,11 +94,12 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
     filesDownloadProgressAttributesList,
     setFilesDownloadProgressAttributesCreator,
 }) => {
-    const [openAllCollectionDialog, setOpenAllCollectionDialog] =
-        useState(false);
-    const [openCollectionShareView, setOpenCollectionShareView] =
-        useState(false);
-    const [openAlbumCastDialog, setOpenAlbumCastDialog] = useState(false);
+    const { show: showAllCollections, props: allCollectionsVisibilityProps } =
+        useModalVisibility();
+    const { show: showCollectionShare, props: collectionShareVisibilityProps } =
+        useModalVisibility();
+    const { show: showCollectionCast, props: collectionCastVisibilityProps } =
+        useModalVisibility();
 
     const [collectionsSortBy, setCollectionsSortBy] =
         useCollectionsSortByLocalState("updation-time-desc");
@@ -155,10 +157,8 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
                         collectionSummary={toShowCollectionSummaries.get(
                             activeCollectionID,
                         )}
-                        onCollectionShare={() =>
-                            setOpenCollectionShareView(true)
-                        }
-                        onCollectionCast={() => setOpenAlbumCastDialog(true)}
+                        onCollectionShare={showCollectionShare}
+                        onCollectionCast={showCollectionCast}
                     />
                 ) : activePerson ? (
                     <PeopleHeader
@@ -178,6 +178,8 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
         activeCollectionID,
         isActiveCollectionDownloadInProgress,
         activePerson,
+        showCollectionShare,
+        showCollectionCast,
         // TODO-Cluster
         // This causes a loop since it is an array dep
         // people,
@@ -202,15 +204,14 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
                 }}
                 onSelectCollectionID={setActiveCollectionID}
                 onChangeCollectionsSortBy={setCollectionsSortBy}
-                onShowAllCollections={() => setOpenAllCollectionDialog(true)}
+                onShowAllCollections={showAllCollections}
                 collectionSummaries={sortedCollectionSummaries.filter((x) =>
                     shouldShowOnCollectionBar(x.type),
                 )}
             />
 
             <AllCollections
-                open={openAllCollectionDialog}
-                onClose={() => setOpenAllCollectionDialog(false)}
+                {...allCollectionsVisibilityProps}
                 collectionSummaries={sortedCollectionSummaries.filter(
                     (x) => !isSystemCollection(x.type),
                 )}
@@ -220,16 +221,14 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
                 isInHiddenSection={mode == "hidden-albums"}
             />
             <CollectionShare
+                {...collectionShareVisibilityProps}
                 collectionSummary={toShowCollectionSummaries.get(
                     activeCollectionID,
                 )}
-                open={openCollectionShareView}
-                onClose={() => setOpenCollectionShareView(false)}
                 collection={activeCollection}
             />
             <AlbumCastDialog
-                open={openAlbumCastDialog}
-                onClose={() => setOpenAlbumCastDialog(false)}
+                {...collectionCastVisibilityProps}
                 collection={activeCollection}
             />
         </>

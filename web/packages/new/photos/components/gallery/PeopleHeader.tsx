@@ -1,3 +1,4 @@
+import { useModalVisibility } from "@/base/components/utils/modal";
 import { pt } from "@/base/i18n";
 import {
     addCGroup,
@@ -94,11 +95,10 @@ const CGroupPersonOptions: React.FC<CGroupPersonOptionsProps> = ({
 }) => {
     const { showMiniDialog } = useAppContext();
 
-    const [openAddNameInput, setOpenAddNameInput] = useState(false);
+    const { show: showNameInput, props: nameInputVisibilityProps } =
+        useModalVisibility();
 
-    const handleRenamePerson = () => setOpenAddNameInput(true);
-
-    const renamePersonUsingName = useWrapAsyncOperation((name: string) =>
+    const handleRename = useWrapAsyncOperation((name: string) =>
         renameCGroup(cgroup, name),
     );
 
@@ -130,7 +130,7 @@ const CGroupPersonOptions: React.FC<CGroupPersonOptionsProps> = ({
                 <OverflowMenuOption
                     startIcon={<EditIcon />}
                     centerAlign
-                    onClick={handleRenamePerson}
+                    onClick={showNameInput}
                 >
                     {t("rename")}
                 </OverflowMenuOption>
@@ -144,8 +144,7 @@ const CGroupPersonOptions: React.FC<CGroupPersonOptionsProps> = ({
             </OverflowMenu>
 
             <SingleInputDialog
-                open={openAddNameInput}
-                onClose={() => setOpenAddNameInput(false)}
+                {...nameInputVisibilityProps}
                 title={pt("Rename person") /* TODO-Cluster pt()'s */}
                 label={pt("Name")}
                 placeholder={t("enter_name")}
@@ -153,7 +152,7 @@ const CGroupPersonOptions: React.FC<CGroupPersonOptionsProps> = ({
                 autoFocus
                 initialValue={cgroup.data.name ?? ""}
                 submitButtonTitle={t("rename")}
-                onSubmit={renamePersonUsingName}
+                onSubmit={handleRename}
             />
         </>
     );

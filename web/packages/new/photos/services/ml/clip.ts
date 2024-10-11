@@ -112,8 +112,9 @@ const computeEmbedding = async (
     imageData: ImageData,
     electron: ElectronMLWorker,
 ): Promise<Float32Array> => {
-    // The image pre-preprocessing happens within the model itself, using ONNX primitives. This is more
-    // performant and also saves us from having to reinvent (say) the antialising wheels.
+    // The image pre-preprocessing happens within the model itself, using ONNX
+    // primitives. This is more performant and also saves us from having to
+    // reinvent (say) the antialising wheels.
     const { height, width, data: pixelData } = imageData;
     const inputShape = [height, width, 4]; // [H, W, C]
     return normalized(

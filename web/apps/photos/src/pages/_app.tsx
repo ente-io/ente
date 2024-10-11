@@ -14,6 +14,10 @@ import {
     logUnhandledErrorsAndRejections,
 } from "@/base/log-web";
 import { AppUpdate } from "@/base/types/ipc";
+import {
+    updateAvailableForDownloadDialogAttributes,
+    updateReadyToInstallDialogAttributes,
+} from "@/new/photos/components/utils/download";
 import { photosDialogZIndex } from "@/new/photos/components/z-index";
 import DownloadManager from "@/new/photos/services/download";
 import { runMigrations } from "@/new/photos/services/migrations";
@@ -57,10 +61,6 @@ import {
 } from "services/userService";
 import "styles/global.css";
 import { NotificationAttributes } from "types/Notification";
-import {
-    getUpdateAvailableForDownloadMessage,
-    getUpdateReadyToInstallMessage,
-} from "utils/ui";
 
 export default function App({ Component, pageProps }: AppProps) {
     const router = useRouter();
@@ -118,15 +118,15 @@ export default function App({ Component, pageProps }: AppProps) {
 
         const showUpdateDialog = (update: AppUpdate) => {
             if (update.autoUpdatable) {
-                setDialogMessage(getUpdateReadyToInstallMessage(update));
+                showMiniDialog(updateReadyToInstallDialogAttributes(update));
             } else {
                 setNotificationAttributes({
                     endIcon: <ArrowForward />,
                     variant: "secondary",
                     message: t("UPDATE_AVAILABLE"),
                     onClick: () =>
-                        setDialogMessage(
-                            getUpdateAvailableForDownloadMessage(update),
+                        showMiniDialog(
+                            updateAvailableForDownloadDialogAttributes(update),
                         ),
                 });
             }

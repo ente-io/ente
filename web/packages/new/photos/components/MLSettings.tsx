@@ -1,8 +1,8 @@
 import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { MenuItemGroup } from "@/base/components/Menu";
-import type { NestedDrawerVisibilityProps } from "@/base/components/mui";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { Titlebar } from "@/base/components/Titlebar";
+import type { NestedDrawerVisibilityProps } from "@/base/components/utils/modal";
 import {
     disableML,
     enableML,
@@ -289,7 +289,6 @@ const ManageML: React.FC<ManageMLProps> = ({ mlStatus, onDisableML }) => {
                 color: "critical",
                 action: onDisableML,
             },
-            buttonDirection: "row",
         });
 
     return (

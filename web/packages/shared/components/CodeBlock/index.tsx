@@ -5,7 +5,7 @@ import CopyButton from "./CopyButton";
 import { CodeWrapper, CopyButtonWrapper, Wrapper } from "./styledComponents";
 
 type Iprops = React.PropsWithChildren<{
-    code: string | null;
+    code: string | null | undefined;
 }>;
 
 export default function CodeBlock({ code, ...props }: BoxProps<"div", Iprops>) {

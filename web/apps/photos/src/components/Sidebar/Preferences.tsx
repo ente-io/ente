@@ -2,6 +2,10 @@ import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { MenuItemGroup, MenuSectionTitle } from "@/base/components/Menu";
 import { Titlebar } from "@/base/components/Titlebar";
 import {
+    useModalVisibility,
+    type NestedDrawerVisibilityProps,
+} from "@/base/components/utils/modal";
+import {
     getLocaleInUse,
     setLocaleInUse,
     supportedLocales,
@@ -15,25 +19,23 @@ import ScienceIcon from "@mui/icons-material/Science";
 import { Box, DialogProps, Stack } from "@mui/material";
 import DropdownInput from "components/DropdownInput";
 import { t } from "i18next";
-import React, { useState } from "react";
+import React from "react";
 import { AdvancedSettings } from "./AdvancedSettings";
 import { MapSettings } from "./MapSetting";
-import type { SettingsDrawerProps } from "./types";
 
-export const Preferences: React.FC<SettingsDrawerProps> = ({
+export const Preferences: React.FC<NestedDrawerVisibilityProps> = ({
     open,
     onClose,
     onRootClose,
 }) => {
-    const [advancedSettingsView, setAdvancedSettingsView] = useState(false);
-    const [mapSettingsView, setMapSettingsView] = useState(false);
-    const [openMLSettings, setOpenMLSettings] = useState(false);
-
-    const openAdvancedSettings = () => setAdvancedSettingsView(true);
-    const closeAdvancedSettings = () => setAdvancedSettingsView(false);
-
-    const openMapSettings = () => setMapSettingsView(true);
-    const closeMapSettings = () => setMapSettingsView(false);
+    const { show: showMapSettings, props: mapSettingsVisibilityProps } =
+        useModalVisibility();
+    const {
+        show: showAdvancedSettings,
+        props: advancedSettingsVisibilityProps,
+    } = useModalVisibility();
+    const { show: showMLSettings, props: mlSettingsVisibilityProps } =
+        useModalVisibility();
 
     const handleRootClose = () => {
         onClose();
@@ -67,12 +69,12 @@ export const Preferences: React.FC<SettingsDrawerProps> = ({
                     <Stack py="20px" spacing="24px">
                         <LanguageSelector />
                         <EnteMenuItem
-                            onClick={openMapSettings}
+                            onClick={showMapSettings}
                             endIcon={<ChevronRight />}
                             label={t("map")}
                         />
                         <EnteMenuItem
-                            onClick={openAdvancedSettings}
+                            onClick={showAdvancedSettings}
                             endIcon={<ChevronRight />}
                             label={t("advanced")}
                         />
@@ -85,7 +87,7 @@ export const Preferences: React.FC<SettingsDrawerProps> = ({
                                 <MenuItemGroup>
                                     <EnteMenuItem
                                         endIcon={<ChevronRight />}
-                                        onClick={() => setOpenMLSettings(true)}
+                                        onClick={showMLSettings}
                                         label={t("ml_search")}
                                     />
                                 </MenuItemGroup>
@@ -94,20 +96,17 @@ export const Preferences: React.FC<SettingsDrawerProps> = ({
                     </Stack>
                 </Box>
             </Stack>
-            <MLSettings
-                open={openMLSettings}
-                onClose={() => setOpenMLSettings(false)}
-                onRootClose={handleRootClose}
-            />
             <MapSettings
-                open={mapSettingsView}
-                onClose={closeMapSettings}
+                {...mapSettingsVisibilityProps}
                 onRootClose={onRootClose}
             />
             <AdvancedSettings
-                open={advancedSettingsView}
-                onClose={closeAdvancedSettings}
+                {...advancedSettingsVisibilityProps}
                 onRootClose={onRootClose}
+            />
+            <MLSettings
+                {...mlSettingsVisibilityProps}
+                onRootClose={handleRootClose}
             />
         </EnteDrawer>
     );
@@ -118,10 +117,8 @@ const LanguageSelector = () => {
 
     const updateCurrentLocale = (newLocale: SupportedLocale) => {
         setLocaleInUse(newLocale);
-        // Enhancement: Is this full reload needed?
-        //
-        // Likely yes, because we use the global `t` instance instead of the
-        // useTranslation hook.
+        // A full reload is needed because we use the global `t` instance
+        // instead of the useTranslation hook.
         window.location.reload();
     };
 
