@@ -46,7 +46,7 @@ export const GalleryItemsSummary: React.FC<GalleryItemsSummaryProps> = ({
     nameProps,
     fileCount,
     endIcon,
-    onNameClick
+    onNameClick,
 }) => (
     <div>
         <Typography variant="h3" {...(nameProps ?? {})} onClick={onNameClick}>
