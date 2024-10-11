@@ -39,6 +39,13 @@ export const getComponents = (
         },
     },
     MuiDialog: {
+        defaultProps: {
+            // This is required to prevent console errors about aria-hiding a
+            // focused button when the dialog is closed.
+            //
+            // https://github.com/mui/material-ui/issues/43106#issuecomment-2314809028
+            closeAfterTransition: false,
+        },
         styleOverrides: {
             root: {
                 ".MuiBackdrop-root": {
@@ -52,7 +59,7 @@ export const getComponents = (
                 // This is not a great choice either, usually most dialogs, for
                 // one reason or the other, will need to customize this padding
                 // anyway. But not resetting it to 16px leaves it at the MUI
-                // defaults, which just don't work with our designs.
+                // defaults, which just doesn't work well with our designs.
                 "& .MuiDialogTitle-root": {
                     // MUI default is '16px 24px'.
                     padding: "16px",
@@ -66,9 +73,9 @@ export const getComponents = (
                     overflowY: "auto",
                 },
                 "& .MuiDialogActions-root": {
-                    // MUI default is way since they cluster the buttons to the
-                    // right, our designs usually want the buttons to align with
-                    // the heading / content.
+                    // MUI default is way off for us since they cluster the
+                    // buttons to the right, while our designs usually want the
+                    // buttons to align with the heading / content.
                     padding: "16px",
                 },
                 ".MuiDialogTitle-root + .MuiDialogContent-root": {

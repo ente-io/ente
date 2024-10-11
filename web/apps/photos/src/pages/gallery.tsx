@@ -1,5 +1,7 @@
 import { stashRedirect } from "@/accounts/services/redirect";
 import { NavbarBase } from "@/base/components/Navbar";
+import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { useModalVisibility } from "@/base/components/utils/modal";
 import { useIsMobileWidth } from "@/base/hooks";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
@@ -8,16 +10,16 @@ import {
     type CollectionSelectorAttributes,
 } from "@/new/photos/components/CollectionSelector";
 import {
-    PeopleEmptyState,
-    SearchResultsHeader,
-} from "@/new/photos/components/Gallery";
-import type { GalleryBarMode } from "@/new/photos/components/Gallery/BarImpl";
-import { GalleryPeopleState } from "@/new/photos/components/Gallery/PeopleHeader";
-import {
     SearchBar,
     type SearchBarProps,
 } from "@/new/photos/components/SearchBar";
 import { WhatsNew } from "@/new/photos/components/WhatsNew";
+import {
+    PeopleEmptyState,
+    SearchResultsHeader,
+} from "@/new/photos/components/gallery";
+import type { GalleryBarMode } from "@/new/photos/components/gallery/BarImpl";
+import { GalleryPeopleState } from "@/new/photos/components/gallery/PeopleHeader";
 import { shouldShowWhatsNew } from "@/new/photos/services/changelog";
 import type { CollectionSummaries } from "@/new/photos/services/collection/ui";
 import { areOnlySystemCollections } from "@/new/photos/services/collection/ui";
@@ -34,6 +36,7 @@ import {
     setSearchCollectionsAndFiles,
 } from "@/new/photos/services/search";
 import type { SearchOption } from "@/new/photos/services/search/types";
+import { AppContext } from "@/new/photos/types/context";
 import { EnteFile } from "@/new/photos/types/file";
 import { mergeMetadata } from "@/new/photos/utils/file";
 import { ensure } from "@/utils/ensure";
@@ -42,7 +45,6 @@ import {
     FlexWrapper,
     HorizontalFlex,
 } from "@ente/shared/components/Container";
-import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import { CustomError } from "@ente/shared/error";
@@ -93,7 +95,6 @@ import PlanSelector from "components/pages/gallery/PlanSelector";
 import SelectedFileOptions from "components/pages/gallery/SelectedFileOptions";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import { AppContext } from "pages/_app";
 import {
     createContext,
     useCallback,
@@ -218,7 +219,6 @@ export default function Gallery() {
     const [collectionNamerView, setCollectionNamerView] = useState(false);
     const [shouldDisableDropzone, setShouldDisableDropzone] = useState(false);
     const [isPhotoSwipeOpen, setIsPhotoSwipeOpen] = useState(false);
-    const [openWhatsNew, setOpenWhatsNew] = useState(false);
 
     const {
         // A function to call to get the props we should apply to the container,
@@ -352,6 +352,9 @@ export default function Gallery() {
     const [collectionSelectorAttributes, setCollectionSelectorAttributes] =
         useState<CollectionSelectorAttributes | undefined>();
 
+    const { show: showWhatsNew, props: whatsNewVisibilityProps } =
+        useModalVisibility();
+
     const router = useRouter();
 
     // Ensure that the keys in local storage are not malformed by verifying that
@@ -420,7 +423,7 @@ export default function Gallery() {
             );
             if (electron) {
                 electron.onMainWindowFocus(() => syncWithRemote(false, true));
-                if (await shouldShowWhatsNew(electron)) setOpenWhatsNew(true);
+                if (await shouldShowWhatsNew(electron)) showWhatsNew();
             }
         };
         main();
@@ -992,6 +995,7 @@ export default function Gallery() {
                     setTempHiddenFileIds,
                     setFixCreationTimeAttributes,
                     setFilesDownloadProgressAttributesCreator,
+                    refreshFavItemIds,
                 );
             }
             clearSelection();
@@ -1029,7 +1033,7 @@ export default function Gallery() {
         };
         return () =>
             setCollectionNamerAttributes({
-                title: t("CREATE_COLLECTION"),
+                title: t("new_album"),
                 buttonText: t("CREATE"),
                 autoFilledName: "",
                 callback,
@@ -1119,6 +1123,11 @@ export default function Gallery() {
         [],
     );
 
+    const refreshFavItemIds = async () => {
+        const favItemIds = await getFavItemIds(files);
+        setFavItemIds(favItemIds);
+    };
+
     if (!collectionSummaries || !filteredData) {
         return <div></div>;
     }
@@ -1159,7 +1168,7 @@ export default function Gallery() {
                 />
                 {blockingLoad && (
                     <LoadingOverlay>
-                        <EnteSpinner />
+                        <ActivityIndicator />
                     </LoadingOverlay>
                 )}
                 {isFirstLoad && (
@@ -1283,10 +1292,7 @@ export default function Gallery() {
                     sidebarView={sidebarView}
                     closeSidebar={closeSidebar}
                 />
-                <WhatsNew
-                    open={openWhatsNew}
-                    onClose={() => setOpenWhatsNew(false)}
-                />
+                <WhatsNew {...whatsNewVisibilityProps} />
                 {!isInSearchMode &&
                 !isFirstLoad &&
                 !files?.length &&

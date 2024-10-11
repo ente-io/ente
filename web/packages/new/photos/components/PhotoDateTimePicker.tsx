@@ -1,5 +1,4 @@
 import type { ParsedMetadataDate } from "@/media/file-metadata";
-import { photoSwipeZIndex } from "@/new/photos/components/PhotoViewer";
 import {
     LocalizationProvider,
     MobileDateTimePicker,
@@ -7,6 +6,7 @@ import {
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
 import React, { useState } from "react";
+import { fileInfoDrawerZIndex } from "./z-index";
 
 interface PhotoDateTimePickerProps {
     /**
@@ -105,7 +105,7 @@ export const PhotoDateTimePicker: React.FC<PhotoDateTimePickerProps> = ({
                        photo viewer and the info drawer */
                     dialog: {
                         sx: {
-                            zIndex: photoSwipeZIndex + 2,
+                            zIndex: fileInfoDrawerZIndex + 1,
                         },
                     },
                 }}

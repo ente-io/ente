@@ -3,13 +3,12 @@ import { EnteFile } from "@/new/photos/types/file";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import Close from "@mui/icons-material/Close";
 import Done from "@mui/icons-material/Done";
-import { Box, IconButton, TextField } from "@mui/material";
+import { Box, CircularProgress, IconButton, TextField } from "@mui/material";
 import { Formik } from "formik";
 import { t } from "i18next";
 import { useState } from "react";
 import { changeCaption, updateExistingFilePubMetadata } from "utils/file";
 import * as Yup from "yup";
-import { SmallLoadingSpinner } from "../styledComponents/SmallLoadingSpinner";
 
 export const MAX_CAPTION_SIZE = 5000;
 
@@ -103,7 +102,10 @@ export function RenderCaption({
                             <FlexWrapper justifyContent={"flex-end"}>
                                 <IconButton type="submit" disabled={loading}>
                                     {loading ? (
-                                        <SmallLoadingSpinner />
+                                        <CircularProgress
+                                            size={"18px"}
+                                            color="inherit"
+                                        />
                                     ) : (
                                         <Done />
                                     )}

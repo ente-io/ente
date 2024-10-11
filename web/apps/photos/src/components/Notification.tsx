@@ -1,5 +1,6 @@
 import { EllipsizedTypography } from "@/base/components/Typography";
 import { FilledIconButton } from "@/new/photos/components/mui";
+import { NotificationAttributes } from "@/new/photos/types/notification";
 import CloseIcon from "@mui/icons-material/Close";
 import InfoIcon from "@mui/icons-material/InfoOutlined";
 import {
@@ -11,7 +12,6 @@ import {
     Theme,
     type ButtonProps,
 } from "@mui/material";
-import { NotificationAttributes } from "types/Notification";
 
 interface Iprops {
     open: boolean;

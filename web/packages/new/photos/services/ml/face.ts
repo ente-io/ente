@@ -12,17 +12,9 @@ import type { ElectronMLWorker } from "@/base/types/ipc";
 import type { EnteFile } from "@/new/photos/types/file";
 import { Matrix } from "ml-matrix";
 import { getSimilarityTransformation } from "similarity-transformation";
-import {
-    applyToPoint,
-    compose,
-    scale,
-    translate,
-    type Matrix as TransformationMatrix,
-} from "transformation-matrix";
 import type { ImageBitmapAndData } from "./blob";
 import {
     grayscaleIntMatrixFromNormalized2List,
-    pixelRGBBilinear,
     warpAffineFloat32List,
 } from "./image";
 import { clamp } from "./math";
@@ -343,69 +335,52 @@ const detectFaces = async (
     imageData: ImageData,
     electron: ElectronMLWorker,
 ): Promise<YOLOFaceDetection[]> => {
-    const rect = ({ width, height }: Dimensions) => ({
-        x: 0,
-        y: 0,
-        width,
-        height,
-    });
+    // The image pre-preprocessing happens within the model itself, using ONNX
+    // primitives. This is more performant and also saves us from having to
+    // reinvent (say) the antialising wheels.
+    const {
+        height: imageHeight,
+        width: imageWidth,
+        data: pixelData,
+    } = imageData;
+    const inputShape = [imageHeight, imageWidth, 4]; // [H, W, C]
 
-    const { yoloInput, yoloSize } =
-        convertToYOLOInputFloat32ChannelsFirst(imageData);
-    const yoloOutput = await electron.detectFaces(yoloInput);
+    const scaledSize = getScaledSize(imageWidth, imageHeight);
+    const yoloOutput = await electron.detectFaces(pixelData, inputShape);
     const faces = filterExtractDetectionsFromYOLOOutput(yoloOutput);
     const faceDetections = transformYOLOFaceDetections(
         faces,
-        rect(yoloSize),
-        rect(imageData),
+        {
+            x: (640 - scaledSize.width) / 2,
+            y: (640 - scaledSize.height) / 2,
+            width: scaledSize.width,
+            height: scaledSize.height,
+        },
+        { x: 0, y: 0, width: imageWidth, height: imageHeight },
     );
 
-    return naiveNonMaxSuppression(faceDetections, 0.4);
+    return faceDetections;
 };
 
 /**
- * Convert {@link imageData} into the format that the YOLOv5 face detection
- * model expects.
+ * Calculate image scaling done inside ONNX model run preprocessing. Needed to
+ * correct the output.
  */
-const convertToYOLOInputFloat32ChannelsFirst = (imageData: ImageData) => {
+const getScaledSize = (imageWidth: number, imageHeight: number) => {
     const requiredWidth = 640;
     const requiredHeight = 640;
 
-    const { width, height, data: pixelData } = imageData;
-
-    // Maintain aspect ratio.
-    const scale = Math.min(requiredWidth / width, requiredHeight / height);
-
-    const scaledWidth = clamp(Math.round(width * scale), 0, requiredWidth);
-    const scaledHeight = clamp(Math.round(height * scale), 0, requiredHeight);
-
-    const yoloInput = new Float32Array(1 * 3 * requiredWidth * requiredHeight);
-    const yoloSize = { width: scaledWidth, height: scaledHeight };
-
-    // Populate the Float32Array with normalized pixel values.
-    let pi = 0;
-    const channelOffsetGreen = requiredHeight * requiredWidth;
-    const channelOffsetBlue = 2 * requiredHeight * requiredWidth;
-    for (let h = 0; h < requiredHeight; h++) {
-        for (let w = 0; w < requiredWidth; w++) {
-            const { r, g, b } =
-                w >= scaledWidth || h >= scaledHeight
-                    ? { r: 114, g: 114, b: 114 }
-                    : pixelRGBBilinear(
-                          w / scale,
-                          h / scale,
-                          pixelData,
-                          width,
-                          height,
-                      );
-            yoloInput[pi] = r / 255.0;
-            yoloInput[pi + channelOffsetGreen] = g / 255.0;
-            yoloInput[pi + channelOffsetBlue] = b / 255.0;
-            pi++;
-        }
-    }
-
-    return { yoloInput, yoloSize };
+    const scale = Math.min(
+        requiredWidth / imageWidth,
+        requiredHeight / imageHeight,
+    );
+    const scaledWidth = clamp(Math.round(imageWidth * scale), 0, requiredWidth);
+    const scaledHeight = clamp(
+        Math.round(imageHeight * scale),
+        0,
+        requiredHeight,
+    );
+    return { width: scaledWidth, height: scaledHeight };
 };
 
 interface YOLOFaceDetection {
@@ -480,107 +455,31 @@ const transformYOLOFaceDetections = (
     inBox: Box,
     toBox: Box,
 ): YOLOFaceDetection[] => {
-    const transform = boxTransformationMatrix(inBox, toBox);
-    return yoloFaceDetections.map((f) => ({
-        box: transformBox(f.box, transform),
-        landmarks: f.landmarks.map((p) => applyToPoint(transform, p)),
-        score: f.score,
-    }));
-};
+    const scaleX = toBox.width / inBox.width;
+    const scaleY = toBox.height / inBox.height;
+    const translateX = toBox.x - inBox.x;
+    const translateY = toBox.y - inBox.y;
 
-const boxTransformationMatrix = (
-    inBox: Box,
-    toBox: Box,
-): TransformationMatrix =>
-    compose(
-        translate(toBox.x, toBox.y),
-        scale(toBox.width / inBox.width, toBox.height / inBox.height),
-    );
+    const correctDetections: YOLOFaceDetection[] = [];
 
-const transformBox = (box: Box, transform: TransformationMatrix): Box => {
-    const topLeft = applyToPoint(transform, { x: box.x, y: box.y });
-    const bottomRight = applyToPoint(transform, {
-        x: box.x + box.width,
-        y: box.y + box.height,
-    });
+    for (const detection of yoloFaceDetections) {
+        const score = detection.score;
 
-    return {
-        x: topLeft.x,
-        y: topLeft.y,
-        width: bottomRight.x - topLeft.x,
-        height: bottomRight.y - topLeft.y,
-    };
-};
+        const box = detection.box;
+        box.x = (box.x + translateX) * scaleX;
+        box.y = (box.y + translateY) * scaleY;
+        box.width *= scaleX;
+        box.height *= scaleY;
 
-/**
- * Remove overlapping faces from an array of face detections through non-maximum
- * suppression algorithm.
- *
- * This function sorts the detections by their score in descending order, then
- * iterates over them.
- *
- * For each detection, it calculates the Intersection over Union (IoU) with all
- * other detections.
- *
- * If the IoU is greater than or equal to the specified threshold
- * (`iouThreshold`), the other detection is considered overlapping and is
- * removed.
- *
- * @param detections - An array of YOLO face detections to remove overlapping
- * faces from.
- *
- * @param iouThreshold - The minimum IoU between two detections for them to be
- * considered overlapping.
- *
- * @returns An array of face detections with overlapping faces removed
- */
-const naiveNonMaxSuppression = (
-    detections: YOLOFaceDetection[],
-    iouThreshold: number,
-): YOLOFaceDetection[] => {
-    // Sort the detections by score, the highest first.
-    detections.sort((a, b) => b.score - a.score);
-
-    // Loop through the detections and calculate the IOU.
-    for (let i = 0; i < detections.length - 1; i++) {
-        for (let j = i + 1; j < detections.length; j++) {
-            const iou = intersectionOverUnion(detections[i]!, detections[j]!);
-            if (iou >= iouThreshold) {
-                detections.splice(j, 1);
-                j--;
-            }
-        }
+        const landmarks = detection.landmarks;
+        landmarks.forEach((p) => {
+            p.x = (p.x + translateX) * scaleX;
+            p.y = (p.y + translateY) * scaleY;
+        });
+        correctDetections.push({ score, box, landmarks });
     }
 
-    return detections;
-};
-
-const intersectionOverUnion = (a: FaceDetection, b: FaceDetection): number => {
-    const intersectionMinX = Math.max(a.box.x, b.box.x);
-    const intersectionMinY = Math.max(a.box.y, b.box.y);
-    const intersectionMaxX = Math.min(
-        a.box.x + a.box.width,
-        b.box.x + b.box.width,
-    );
-    const intersectionMaxY = Math.min(
-        a.box.y + a.box.height,
-        b.box.y + b.box.height,
-    );
-
-    const intersectionWidth = intersectionMaxX - intersectionMinX;
-    const intersectionHeight = intersectionMaxY - intersectionMinY;
-
-    if (intersectionWidth < 0 || intersectionHeight < 0) {
-        return 0.0; // If boxes do not overlap, IoU is 0
-    }
-
-    const areaA = a.box.width * a.box.height;
-    const areaB = b.box.width * b.box.height;
-
-    const intersectionArea = intersectionWidth * intersectionHeight;
-    const unionArea = areaA + areaB - intersectionArea;
-
-    return intersectionArea / unionArea;
+    return correctDetections;
 };
 
 const makeFaceID = (fileID: number, box: Box, image: Dimensions) => {

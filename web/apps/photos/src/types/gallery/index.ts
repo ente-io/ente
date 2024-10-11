@@ -1,5 +1,5 @@
 import type { Collection } from "@/media/collection";
-import { type SelectionContext } from "@/new/photos/components/Gallery";
+import { type SelectionContext } from "@/new/photos/components/gallery";
 import { EnteFile } from "@/new/photos/types/file";
 import type { User } from "@ente/shared/user/types";
 import { FilesDownloadProgressAttributes } from "components/FilesDownloadProgress";

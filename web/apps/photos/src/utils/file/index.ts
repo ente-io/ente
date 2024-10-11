@@ -19,12 +19,15 @@ import { detectFileTypeInfo } from "@/new/photos/utils/detect-type";
 import { mergeMetadata } from "@/new/photos/utils/file";
 import { safeFileName } from "@/new/photos/utils/native-fs";
 import { writeStream } from "@/new/photos/utils/native-stream";
+import { downloadAndRevokeObjectURL } from "@/new/photos/utils/web";
 import { withTimeout } from "@/utils/promise";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";
-import { downloadUsingAnchor } from "@ente/shared/utils";
 import { t } from "i18next";
-import { moveToHiddenCollection } from "services/collectionService";
+import {
+    addMultipleToFavorites,
+    moveToHiddenCollection,
+} from "services/collectionService";
 import {
     deleteFromTrash,
     trashFiles,
@@ -46,6 +49,7 @@ export enum FILE_OPS_TYPE {
     HIDE,
     TRASH,
     DELETE_PERMANENTLY,
+    SET_FAVORITE,
 }
 
 export async function downloadFile(file: EnteFile) {
@@ -66,8 +70,8 @@ export async function downloadFile(file: EnteFile) {
             const tempVideoURL = URL.createObjectURL(
                 new Blob([videoData], { type: videoType.mimeType }),
             );
-            downloadUsingAnchor(tempImageURL, imageFileName);
-            downloadUsingAnchor(tempVideoURL, videoFileName);
+            downloadAndRevokeObjectURL(tempImageURL, imageFileName);
+            downloadAndRevokeObjectURL(tempVideoURL, videoFileName);
         } else {
             const fileType = await detectFileTypeInfo(
                 new File([fileBlob], file.metadata.title),
@@ -77,7 +81,7 @@ export async function downloadFile(file: EnteFile) {
             ).blob();
             fileBlob = new Blob([fileBlob], { type: fileType.mimeType });
             const tempURL = URL.createObjectURL(fileBlob);
-            downloadUsingAnchor(tempURL, file.metadata.title);
+            downloadAndRevokeObjectURL(tempURL, file.metadata.title);
         }
     } catch (e) {
         log.error("failed to download file", e);
@@ -598,6 +602,7 @@ export const handleFileOps = async (
             | ((prev: { files: EnteFile[] }) => { files: EnteFile[] }),
     ) => void,
     setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator,
+    refreshFavItemIds: () => void,
 ) => {
     switch (ops) {
         case FILE_OPS_TYPE.TRASH:
@@ -628,6 +633,9 @@ export const handleFileOps = async (
             break;
         case FILE_OPS_TYPE.UNARCHIVE:
             await changeFilesVisibility(files, ItemVisibility.visible);
+            break;
+        case FILE_OPS_TYPE.SET_FAVORITE:
+            await setBulkFavorite(files, refreshFavItemIds);
             break;
     }
 };
@@ -680,4 +688,16 @@ const fixTimeHelper = async (
     }) => void,
 ) => {
     setFixCreationTimeAttributes({ files: selectedFiles });
+};
+
+const setBulkFavorite = async (
+    files: EnteFile[],
+    refreshFavItemIds: () => void,
+) => {
+    try {
+        await addMultipleToFavorites(files);
+        refreshFavItemIds();
+    } catch (e) {
+        log.error("Could not add to favorites", e);
+    }
 };

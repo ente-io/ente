@@ -2,11 +2,11 @@ import { t } from "i18next";
 import { useContext } from "react";
 
 import { disableTwoFactor } from "@/accounts/api/user";
+import { AppContext } from "@/new/photos/types/context";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { LS_KEYS, getData, setLSUser } from "@ente/shared/storage/localStorage";
 import { Button, Grid } from "@mui/material";
 import router from "next/router";
-import { AppContext } from "pages/_app";
 
 interface Iprops {
     closeDialog: () => void;

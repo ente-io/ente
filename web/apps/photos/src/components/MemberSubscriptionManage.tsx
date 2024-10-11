@@ -1,4 +1,5 @@
 import { useIsMobileWidth } from "@/base/hooks";
+import { AppContext } from "@/new/photos/types/context";
 import {
     FlexWrapper,
     VerticallyCentered,
@@ -6,7 +7,6 @@ import {
 import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleWithCloseButton";
 import { Box, Button, Dialog, DialogContent, Typography } from "@mui/material";
 import { t } from "i18next";
-import { AppContext } from "pages/_app";
 import { useContext } from "react";
 import billingService from "services/billingService";
 import { getFamilyPlanAdmin } from "utils/user/family";

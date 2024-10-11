@@ -1,7 +1,8 @@
 import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { MenuItemGroup } from "@/base/components/Menu";
+import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { Titlebar } from "@/base/components/Titlebar";
-import log from "@/base/log";
+import type { NestedDrawerVisibilityProps } from "@/base/components/utils/modal";
 import {
     disableML,
     enableML,
@@ -9,7 +10,6 @@ import {
     mlStatusSubscribe,
     type MLStatus,
 } from "@/new/photos/services/ml";
-import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import {
     Box,
@@ -27,33 +27,15 @@ import {
 import { t } from "i18next";
 import React, { useEffect, useState, useSyncExternalStore } from "react";
 import { Trans } from "react-i18next";
-import type { NewAppContextPhotos } from "../types/context";
+import { useAppContext } from "../types/context";
 import { openURL } from "../utils/web";
+import { useWrapAsyncOperation } from "./use-wrap-async";
 
-interface MLSettingsProps {
-    /** If `true`, then this drawer page is shown. */
-    open: boolean;
-    /** Called when the user wants to go back from this drawer page. */
-    onClose: () => void;
-    /** Called when the user wants to close the entire stack of drawers. */
-    onRootClose: () => void;
-    /** See: [Note: Migrating components that need the app context]. */
-    appContext: NewAppContextPhotos;
-}
-
-export const MLSettings: React.FC<MLSettingsProps> = ({
+export const MLSettings: React.FC<NestedDrawerVisibilityProps> = ({
     open,
     onClose,
     onRootClose,
-    appContext,
 }) => {
-    const {
-        startLoading,
-        finishLoading,
-        setDialogBoxAttributesV2,
-        somethingWentWrong,
-    } = appContext;
-
     const mlStatus = useSyncExternalStore(mlStatusSubscribe, mlStatusSnapshot);
     const [openFaceConsent, setOpenFaceConsent] = useState(false);
 
@@ -69,31 +51,13 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
 
     const handleEnableML = () => setOpenFaceConsent(true);
 
-    const handleConsent = async () => {
-        startLoading();
-        try {
-            await enableML();
-            // Close the FaceConsent drawer, come back to ourselves.
-            setOpenFaceConsent(false);
-        } catch (e) {
-            log.error("Failed to enable ML", e);
-            somethingWentWrong();
-        } finally {
-            finishLoading();
-        }
-    };
+    const handleConsent = useWrapAsyncOperation(async () => {
+        await enableML();
+        // Close the FaceConsent drawer, come back to ourselves.
+        setOpenFaceConsent(false);
+    });
 
-    const handleDisableML = async () => {
-        startLoading();
-        try {
-            await disableML();
-        } catch (e) {
-            log.error("Failed to disable ML", e);
-            somethingWentWrong();
-        } finally {
-            finishLoading();
-        }
-    };
+    const handleDisableML = useWrapAsyncOperation(disableML);
 
     let component: React.ReactNode;
     if (!mlStatus) {
@@ -102,10 +66,7 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
         component = <EnableML onEnable={handleEnableML} />;
     } else {
         component = (
-            <ManageML
-                {...{ mlStatus, setDialogBoxAttributesV2 }}
-                onDisableML={handleDisableML}
-            />
+            <ManageML {...{ mlStatus }} onDisableML={handleDisableML} />
         );
     }
 
@@ -143,7 +104,7 @@ export const MLSettings: React.FC<MLSettingsProps> = ({
 const Loading: React.FC = () => {
     return (
         <Box textAlign="center" pt={4}>
-            <EnteSpinner />
+            <ActivityIndicator />
         </Box>
     );
 };
@@ -178,7 +139,7 @@ const EnableML: React.FC<EnableMLProps> = ({ onEnable }) => {
     );
 };
 
-type FaceConsentProps = Omit<MLSettingsProps, "appContext"> & {
+type FaceConsentProps = NestedDrawerVisibilityProps & {
     /** Called when the user provides their consent. */
     onConsent: () => void;
 };
@@ -286,15 +247,11 @@ interface ManageMLProps {
     mlStatus: Exclude<MLStatus, { phase: "disabled" }>;
     /** Called when the user wants to disable ML. */
     onDisableML: () => void;
-    /** Subset of appContext. */
-    setDialogBoxAttributesV2: NewAppContextPhotos["setDialogBoxAttributesV2"];
 }
 
-const ManageML: React.FC<ManageMLProps> = ({
-    mlStatus,
-    onDisableML,
-    setDialogBoxAttributesV2,
-}) => {
+const ManageML: React.FC<ManageMLProps> = ({ mlStatus, onDisableML }) => {
+    const { showMiniDialog } = useAppContext();
+
     const { phase, nSyncedFiles, nTotalFiles } = mlStatus;
 
     let status: string;
@@ -323,19 +280,16 @@ const ManageML: React.FC<ManageMLProps> = ({
             ? `${Math.round((100 * nSyncedFiles) / nTotalFiles)}%`
             : `${nSyncedFiles} / ${nTotalFiles}`;
 
-    const confirmDisableML = () => {
-        setDialogBoxAttributesV2({
+    const confirmDisableML = () =>
+        showMiniDialog({
             title: t("ml_search_disable"),
-            content: t("ml_search_disable_confirm"),
-            close: { text: t("cancel") },
-            proceed: {
-                variant: "critical",
+            message: t("ml_search_disable_confirm"),
+            continue: {
                 text: t("disable"),
+                color: "critical",
                 action: onDisableML,
             },
-            buttonDirection: "row",
         });
-    };
 
     return (
         <Stack px={"16px"} py={"20px"} gap={4}>

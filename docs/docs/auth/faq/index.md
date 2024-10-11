@@ -63,4 +63,4 @@ original device, are incompatible with your current device (likely because it's
 less powerful).
 
 If you recover your account via your current device and reset the password, it
-will re-generate a key that will be compatible on both devices.
+will re-generate a key with different parameters, that is equally strong, and is compatible on both devices.

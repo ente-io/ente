@@ -1,1 +1,1 @@
-fotos,fotografia,família,privacidade,nuvem,backup,vídeos,foto,criptografia,armazenamento,álbum,alternativa
+fotos,fotografia,família,privacidade,nuvem,cópiadesegurança,vídeos,foto,criptografia,armazenamento,álbum,alternativa

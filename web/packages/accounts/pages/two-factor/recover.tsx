@@ -5,12 +5,12 @@ import {
 } from "@/accounts/api/user";
 import { PAGES } from "@/accounts/constants/pages";
 import type { AccountsContextT } from "@/accounts/types/context";
+import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
 import { sharedCryptoWorker } from "@/base/crypto";
 import type { B64EncryptionResult } from "@/base/crypto/libsodium";
 import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
-import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
 import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
@@ -42,7 +42,7 @@ export interface RecoverPageProps {
 }
 
 const Page: React.FC<RecoverPageProps> = ({ appContext, twoFactorType }) => {
-    const { logout } = appContext;
+    const { showMiniDialog, logout } = appContext;
 
     const [encryptedTwoFactorSecret, setEncryptedTwoFactorSecret] =
         useState<Omit<B64EncryptionResult, "key"> | null>(null);
@@ -70,10 +70,7 @@ const Page: React.FC<RecoverPageProps> = ({ appContext, twoFactorType }) => {
                 const resp = await recoverTwoFactor(sid, twoFactorType);
                 setDoesHaveEncryptedRecoveryKey(!!resp.encryptedSecret);
                 if (!resp.encryptedSecret) {
-                    showContactSupportDialog({
-                        text: t("GO_BACK"),
-                        action: router.back,
-                    });
+                    showContactSupportDialog({ action: router.back });
                 } else {
                     setEncryptedTwoFactorSecret({
                         encryptedData: resp.encryptedSecret,
@@ -89,10 +86,7 @@ const Page: React.FC<RecoverPageProps> = ({ appContext, twoFactorType }) => {
                 } else {
                     log.error("two factor recovery page setup failed", e);
                     setDoesHaveEncryptedRecoveryKey(false);
-                    showContactSupportDialog({
-                        text: t("GO_BACK"),
-                        action: router.back,
-                    });
+                    showContactSupportDialog({ action: router.back });
                 }
             }
         };
@@ -146,20 +140,21 @@ const Page: React.FC<RecoverPageProps> = ({ appContext, twoFactorType }) => {
     };
 
     const showContactSupportDialog = (
-        dialogClose?: DialogBoxAttributesV2["close"],
+        dialogContinue?: MiniDialogAttributes["continue"],
     ) => {
-        appContext.setDialogBoxAttributesV2({
+        showMiniDialog({
             title: t("contact_support"),
-            close: dialogClose ?? {},
-            content: (
+            message: (
                 <Trans
-                    i18nKey={"NO_TWO_FACTOR_RECOVERY_KEY_MESSAGE"}
+                    i18nKey={"no_two_factor_recovery_key_message"}
                     components={{
                         a: <Link href="mailto:support@ente.io" />,
                     }}
                     values={{ emailID: "support@ente.io" }}
                 />
             ),
+            continue: { color: "secondary", ...(dialogContinue ?? {}) },
+            cancel: false,
         });
     };
 

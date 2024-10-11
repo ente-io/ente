@@ -1,7 +1,7 @@
 import log from "@/base/log";
 import { FileType } from "@/media/file-type";
-import type { SelectionContext } from "@/new/photos/components/Gallery";
-import type { GalleryBarMode } from "@/new/photos/components/Gallery/BarImpl";
+import type { SelectionContext } from "@/new/photos/components/gallery";
+import type { GalleryBarMode } from "@/new/photos/components/gallery/BarImpl";
 import type { LivePhotoSourceURL, SourceURLs } from "@/new/photos/types/file";
 import { EnteFile } from "@/new/photos/types/file";
 import { ensure } from "@/utils/ensure";

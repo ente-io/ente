@@ -1,5 +1,5 @@
+import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import log from "@/base/log";
-import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { styled } from "@mui/material";
 import { PairingCode } from "components/PairingCode";
 import { useRouter } from "next/router";
@@ -102,7 +102,7 @@ const Container = styled("div")`
 
 const Spinner: React.FC = () => (
     <Spinner_>
-        <EnteSpinner />
+        <ActivityIndicator />
     </Spinner_>
 );
 

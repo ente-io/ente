@@ -4,17 +4,20 @@ import {
     MenuItemGroup,
     MenuSectionTitle,
 } from "@/base/components/Menu";
+import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
 import { nameAndExtension } from "@/base/file";
 import log from "@/base/log";
+import { photosDialogZIndex } from "@/new/photos/components/z-index";
 import downloadManager from "@/new/photos/services/download";
+import { AppContext } from "@/new/photos/types/context";
 import { EnteFile } from "@/new/photos/types/file";
+import { downloadAndRevokeObjectURL } from "@/new/photos/utils/web";
 import { ensure } from "@/utils/ensure";
 import {
     CenteredFlex,
     HorizontalFlex,
 } from "@ente/shared/components/Container";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
-import { downloadUsingAnchor } from "@ente/shared/utils";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
@@ -33,12 +36,10 @@ import {
     Typography,
 } from "@mui/material";
 import { t } from "i18next";
-import { AppContext } from "pages/_app";
 import type { Dispatch, MutableRefObject, SetStateAction } from "react";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { getLocalCollections } from "services/collectionService";
 import uploadManager from "services/upload/uploadManager";
-import { getEditorCloseConfirmationMessage } from "utils/ui";
 import ColoursMenu from "./ColoursMenu";
 import CropMenu, { cropRegionOfCanvas, getCropRegionArgs } from "./CropMenu";
 import FreehandCropRegion from "./FreehandCropRegion";
@@ -83,7 +84,7 @@ export interface CropBoxProps {
 }
 
 const ImageEditorOverlay = (props: IProps) => {
-    const appContext = useContext(AppContext);
+    const { showMiniDialog } = useContext(AppContext);
 
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const originalSizeCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -441,9 +442,7 @@ const ImageEditorOverlay = (props: IProps) => {
 
     const handleCloseWithConfirmation = () => {
         if (transformationPerformed || coloursAdjusted) {
-            appContext.setDialogBoxAttributesV2(
-                getEditorCloseConfirmationMessage(handleClose),
-            );
+            showMiniDialog(confirmEditorCloseDialogAttributes(handleClose));
         } else {
             handleClose();
         }
@@ -463,8 +462,7 @@ const ImageEditorOverlay = (props: IProps) => {
         if (!canvasRef.current) return;
 
         const f = await getEditedFile();
-        // Revokes the URL after downloading.
-        downloadUsingAnchor(URL.createObjectURL(f), f.name);
+        downloadAndRevokeObjectURL(URL.createObjectURL(f), f.name);
     };
 
     const saveCopyToEnte = async () => {
@@ -522,7 +520,7 @@ const ImageEditorOverlay = (props: IProps) => {
             <Backdrop
                 sx={{
                     background: "#000",
-                    zIndex: 1600,
+                    zIndex: photosDialogZIndex,
                     width: "100%",
                 }}
                 open
@@ -731,6 +729,18 @@ const ImageEditorOverlay = (props: IProps) => {
 };
 
 export default ImageEditorOverlay;
+
+const confirmEditorCloseDialogAttributes = (
+    onConfirm: () => void,
+): MiniDialogAttributes => ({
+    title: t("confirm_editor_close"),
+    message: t("confirm_editor_close_message"),
+    continue: {
+        text: t("close"),
+        color: "critical",
+        action: onConfirm,
+    },
+});
 
 /**
  * Create a new {@link File} with the contents of the given canvas.
