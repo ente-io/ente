@@ -3,7 +3,16 @@ import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import { AppContext } from "@/new/photos/types/context";
 import { initiateEmail } from "@/new/photos/utils/web";
-import { Link, Stack } from "@mui/material";
+import {
+    Checkbox,
+    FormControlLabel,
+    FormGroup,
+    Link,
+    Stack,
+    TextField,
+    Typography,
+    type TypographyProps,
+} from "@mui/material";
 import { Formik, type FormikHelpers } from "formik";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
@@ -12,9 +21,7 @@ import { Trans } from "react-i18next";
 import { deleteAccount, getAccountDeleteChallenge } from "services/userService";
 import { decryptDeleteAccountChallenge } from "utils/crypto";
 import * as Yup from "yup";
-import { CheckboxInput } from "./CheckboxInput";
 import DropdownInput, { DropdownOption } from "./DropdownInput";
-import MultilineInput from "./MultilineInput";
 
 interface Iprops {
     onClose: () => void;
@@ -213,3 +220,95 @@ const deleteReasonOptions = (): DropdownOption<DeleteReason>[] =>
         label: t(`delete_reason.${reason}`),
         value: reason,
     }));
+
+interface MultilineInputProps {
+    label: string;
+    labelProps?: TypographyProps;
+    message?: string;
+    messageProps?: TypographyProps;
+    placeholder?: string;
+    value: string;
+    rowCount: number;
+    onChange: (value: string) => void;
+}
+
+function MultilineInput({
+    label,
+    labelProps,
+    message,
+    messageProps,
+    placeholder,
+    value,
+    rowCount,
+    onChange,
+}: MultilineInputProps) {
+    return (
+        <Stack spacing={"4px"}>
+            <Typography {...labelProps}>{label}</Typography>
+            <TextField
+                variant="standard"
+                multiline
+                rows={rowCount}
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                placeholder={placeholder}
+                sx={(theme) => ({
+                    border: "1px solid",
+                    borderColor: theme.colors.stroke.faint,
+                    borderRadius: "8px",
+                    padding: "12px",
+                    ".MuiInputBase-formControl": {
+                        "::before, ::after": {
+                            borderBottom: "none !important",
+                        },
+                    },
+                })}
+            />
+            <Typography
+                px={"8px"}
+                variant="small"
+                color="text.secondary"
+                {...messageProps}
+            >
+                {message}
+            </Typography>
+        </Stack>
+    );
+}
+
+interface CheckboxInputProps {
+    disabled?: boolean;
+    checked: boolean;
+    onChange: (value: boolean) => void;
+    label: string;
+    labelProps?: TypographyProps;
+}
+
+function CheckboxInput({
+    disabled,
+    checked,
+    onChange,
+    label,
+    labelProps,
+}: CheckboxInputProps) {
+    return (
+        <FormGroup sx={{ width: "100%" }}>
+            <FormControlLabel
+                control={
+                    <Checkbox
+                        size="small"
+                        disabled={disabled}
+                        checked={checked}
+                        onChange={(e) => onChange(e.target.checked)}
+                        color="accent"
+                    />
+                }
+                label={
+                    <Typography color="text.secondary" {...labelProps}>
+                        {label}
+                    </Typography>
+                }
+            />
+        </FormGroup>
+    );
+}
