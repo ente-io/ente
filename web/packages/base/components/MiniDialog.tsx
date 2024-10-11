@@ -173,7 +173,7 @@ export const AttributedMiniDialog: React.FC<
             onClose={handleClose}
             {...rest}
         >
-            {(attributes.icon ?? attributes.title) && (
+            {(attributes.icon ?? attributes.title) ? (
                 <Box
                     sx={{
                         display: "flex",
@@ -192,6 +192,8 @@ export const AttributedMiniDialog: React.FC<
                     )}
                     {attributes.icon}
                 </Box>
+            ) : (
+                <Box sx={{ height: "8px" }} /> /* Spacer */
             )}
             <DialogContent>
                 {attributes.message && (
