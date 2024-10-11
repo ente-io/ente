@@ -8,7 +8,7 @@ import log from "@/base/log";
 import { savedLogs } from "@/base/log-web";
 import { customAPIHost } from "@/base/origins";
 import { RecoveryKey } from "@/new/photos/components/RecoveryKey";
-import { downloadAppDialogAttributes } from "@/new/photos/components/utils/dialog";
+import { downloadAppDialogAttributes } from "@/new/photos/components/utils/download";
 import type { CollectionSummaries } from "@/new/photos/services/collection/ui";
 import { AppContext, useAppContext } from "@/new/photos/types/context";
 import { downloadString, initiateEmail, openURL } from "@/new/photos/utils/web";

@@ -4,7 +4,7 @@ import type { CollectionMapping, Electron, ZipItem } from "@/base/types/ipc";
 import type { Collection } from "@/media/collection";
 import { CollectionMappingChoiceDialog } from "@/new/photos/components/CollectionMappingChoiceDialog";
 import type { CollectionSelectorAttributes } from "@/new/photos/components/CollectionSelector";
-import { downloadAppDialogAttributes } from "@/new/photos/components/utils/dialog";
+import { downloadAppDialogAttributes } from "@/new/photos/components/utils/download";
 import { exportMetadataDirectoryName } from "@/new/photos/services/export";
 import type {
     FileAndPath,

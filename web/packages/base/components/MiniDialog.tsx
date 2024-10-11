@@ -37,11 +37,6 @@ export interface MiniDialogAttributes {
      */
     message?: React.ReactNode;
     /**
-     * If `true`, then clicks in the backdrop are ignored. The default behaviour
-     * is to close the dialog when the background is clicked.
-     */
-    staticBackdrop?: boolean;
-    /**
      * If `true`, then the dialog cannot be closed (e.g. with the ESC key, or
      * clicking on the backdrop) except through one of the explicitly provided
      * actions.
@@ -102,8 +97,17 @@ export interface MiniDialogAttributes {
      * Default is `t("cancel")`.
      *
      * Set this to `false` to omit the cancel button altogether.
+     *
+     * The object form allows providing both the button title and the action
+     * handler (synchronous). The dialog is always closed on clicks.
      */
-    cancel?: string | false;
+    cancel?:
+        | string
+        | false
+        | {
+              text: string;
+              action: () => void;
+          };
 }
 
 type MiniDialogProps = Omit<DialogProps, "onClose"> & {
@@ -137,6 +141,21 @@ export const AttributedMiniDialog: React.FC<
         if (attributes.nonClosable) return;
         resetPhaseAndClose();
     };
+
+    const [cancelTitle, handleCancel] = ((
+        c: MiniDialogAttributes["cancel"],
+    ) => {
+        if (c === false) return [undefined, undefined];
+        if (c === undefined) return [t("cancel"), resetPhaseAndClose];
+        if (typeof c == "string") return [c, resetPhaseAndClose];
+        return [
+            c.text,
+            () => {
+                resetPhaseAndClose();
+                c.action();
+            },
+        ];
+    })(attributes.cancel);
 
     const { PaperProps, ...rest } = props;
 
@@ -212,13 +231,13 @@ export const AttributedMiniDialog: React.FC<
                             {attributes.continue.text ?? t("ok")}
                         </LoadingButton>
                     )}
-                    {attributes.cancel !== false && (
+                    {cancelTitle && (
                         <FocusVisibleButton
                             fullWidth
                             color="secondary"
-                            onClick={resetPhaseAndClose}
+                            onClick={handleCancel}
                         >
-                            {attributes.cancel ?? t("cancel")}
+                            {cancelTitle}
                         </FocusVisibleButton>
                     )}
                 </Stack>
