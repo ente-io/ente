@@ -48,7 +48,7 @@ class _RecommendedFiltersState extends State<RecommendedFilters> {
       itemBuilder: (context, index) {
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: EnteFilterChip(
+          child: GenericFilterChip(
             label: _recommendations[index].name(),
             onTap: () {
               _searchFilterDataProvider.applyFilters([_recommendations[index]]);
