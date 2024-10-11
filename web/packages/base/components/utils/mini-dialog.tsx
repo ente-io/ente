@@ -9,25 +9,25 @@ import type { MiniDialogAttributes } from "../MiniDialog";
  * to pass on to the {@link AttributedMiniDialog}.
  */
 export const useAttributedMiniDialog = () => {
-    const [miniDialogAttributes, setMiniDialogAttributes] = useState<
+    const [attributes, setAttributes] = useState<
         MiniDialogAttributes | undefined
     >();
 
-    const [openMiniDialog, setOpenMiniDialog] = useState(false);
+    const [open, setOpen] = useState(false);
 
     const showMiniDialog = useCallback((attributes: MiniDialogAttributes) => {
-        setMiniDialogAttributes(attributes);
-        setOpenMiniDialog(true);
+        setAttributes(attributes);
+        setOpen(true);
     }, []);
 
-    const onCloseMiniDialog = useCallback(() => setOpenMiniDialog(false), []);
+    const onCloseMiniDialog = useCallback(() => setOpen(false), []);
 
     return {
         showMiniDialog,
         miniDialogProps: {
-            open: openMiniDialog,
+            open: open,
             onClose: onCloseMiniDialog,
-            attributes: miniDialogAttributes,
+            attributes: attributes,
         },
     };
 };
