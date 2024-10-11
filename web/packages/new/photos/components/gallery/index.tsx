@@ -12,7 +12,8 @@ import type { SearchOption } from "@/new/photos/services/search/types";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import { Typography } from "@mui/material";
 import { t } from "i18next";
-import React from "react";
+import React, { useSyncExternalStore } from "react";
+import { mlStatusSnapshot, mlStatusSubscribe } from "../../services/ml";
 import { GalleryItemsHeaderAdapter, GalleryItemsSummary } from "./ListHeader";
 
 /**
@@ -43,16 +44,30 @@ export const SearchResultsHeader: React.FC<SearchResultsHeaderProps> = ({
     </GalleryItemsHeaderAdapter>
 );
 
-export const PeopleEmptyState: React.FC = () => (
-    <VerticallyCentered>
-        <Typography
-            color="text.muted"
-            sx={{
-                // Approximately compensate for the hidden section bar
-                paddingBlockEnd: "86px",
-            }}
-        >
-            {pt("People will appear here once indexing completes")}
-        </Typography>
-    </VerticallyCentered>
-);
+export const PeopleEmptyState: React.FC = () => {
+    const mlStatus = useSyncExternalStore(mlStatusSubscribe, mlStatusSnapshot);
+
+    const message =
+        mlStatus?.phase == "done"
+            ? pt(
+                  "People will appear here when there are sufficient photos of a person",
+              )
+            : pt("People will appear here once sync completes");
+
+    return (
+        <VerticallyCentered>
+            <Typography
+                color="text.muted"
+                sx={{
+                    mx: 1,
+                    // Approximately compensate for the hidden section bar (86px),
+                    // and then add a bit extra padding so that the message appears
+                    // visually off the center, towards the top.
+                    paddingBlockEnd: "126px",
+                }}
+            >
+                {message}
+            </Typography>
+        </VerticallyCentered>
+    );
+};

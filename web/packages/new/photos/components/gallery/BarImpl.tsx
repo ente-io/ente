@@ -226,16 +226,20 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
         ],
     );
 
-    const controls1 = isMobile && mode != "people" && (
-        <Box display="flex" alignItems={"center"} gap={1}>
-            <CollectionsSortOptions
-                activeSortBy={collectionsSortBy}
-                onChangeSortBy={onChangeCollectionsSortBy}
-                disableTriggerButtonBackground
-            />
-            <IconButton onClick={onShowAllCollections}>
-                <ExpandMore />
-            </IconButton>
+    const controls1 = isMobile && (
+        <Box display="flex" alignItems={"center"} gap={1} minHeight={"64px"}>
+            {mode != "people" && (
+                <>
+                    <CollectionsSortOptions
+                        activeSortBy={collectionsSortBy}
+                        onChangeSortBy={onChangeCollectionsSortBy}
+                        disableTriggerButtonBackground
+                    />
+                    <IconButton onClick={onShowAllCollections}>
+                        <ExpandMore />
+                    </IconButton>
+                </>
+            )}
         </Box>
     );
 

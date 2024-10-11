@@ -108,6 +108,8 @@ export interface MiniDialogAttributes {
               text: string;
               action: () => void;
           };
+    /** The direction in which the buttons are stacked. Default is "column". */
+    buttonDirection?: "row" | "column";
 }
 
 type MiniDialogProps = Omit<DialogProps, "onClose"> & {
@@ -173,7 +175,7 @@ export const AttributedMiniDialog: React.FC<
             onClose={handleClose}
             {...rest}
         >
-            {(attributes.icon ?? attributes.title) && (
+            {(attributes.icon ?? attributes.title) ? (
                 <Box
                     sx={{
                         display: "flex",
@@ -192,6 +194,8 @@ export const AttributedMiniDialog: React.FC<
                     )}
                     {attributes.icon}
                 </Box>
+            ) : (
+                <Box sx={{ height: "8px" }} /> /* Spacer */
             )}
             <DialogContent>
                 {attributes.message && (
@@ -205,7 +209,10 @@ export const AttributedMiniDialog: React.FC<
                     </Typography>
                 )}
                 {children}
-                <Stack sx={{ paddingBlockStart: "24px", gap: "12px" }}>
+                <Stack
+                    sx={{ paddingBlockStart: "24px", gap: "12px" }}
+                    direction={attributes.buttonDirection ?? "column"}
+                >
                     {phase == "failed" && (
                         <Typography variant="small" color="critical.main">
                             {t("generic_error")}

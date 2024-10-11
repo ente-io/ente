@@ -26,6 +26,15 @@ interface GalleryItemsSummaryProps {
      * An optional element, usually an icon, placed after the file count.
      */
     endIcon?: React.ReactNode;
+    /**
+     * An optional click handler for the name.
+     *
+     * Note: Do not use this as the primary / only mechanism for the
+     * corresponding functionality to be invoked, since this click handler will
+     * be accessible only to sighted mouse users. However, it is fine to use it
+     * as an alternate means of invoking some function.
+     */
+    onNameClick?: () => void;
 }
 
 /**
@@ -37,9 +46,10 @@ export const GalleryItemsSummary: React.FC<GalleryItemsSummaryProps> = ({
     nameProps,
     fileCount,
     endIcon,
+    onNameClick,
 }) => (
     <div>
-        <Typography variant="h3" {...(nameProps ?? {})}>
+        <Typography variant="h3" {...(nameProps ?? {})} onClick={onNameClick}>
             {name}
         </Typography>
 
