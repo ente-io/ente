@@ -1,5 +1,6 @@
 import { assertionFailed } from "@/base/assert";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { useModalVisibility } from "@/base/components/utils/modal";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
 import { ItemVisibility } from "@/media/file-metadata";
@@ -38,7 +39,7 @@ import { SetCollectionNamerAttributes } from "components/Collections/CollectionN
 import { UnPinIcon } from "components/icons/UnPinIcon";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
-import React, { useCallback, useContext, useRef, useState } from "react";
+import React, { useCallback, useContext, useRef } from "react";
 import { Trans } from "react-i18next";
 import * as CollectionAPI from "services/collectionService";
 import * as TrashService from "services/trashService";
@@ -139,7 +140,9 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
         useContext(AppContext);
     const { syncWithRemote } = useContext(GalleryContext);
     const overFlowMenuIconRef = useRef<SVGSVGElement>(null);
-    const [openSortOrderMenu, setOpenSortOrderMenu] = useState(false);
+
+    const { show: showSortOrderMenu, props: sortOrderMenuVisibilityProps } =
+        useModalVisibility();
 
     const handleError = useCallback(
         (e: unknown) => {
@@ -323,10 +326,6 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
         setActiveCollectionID(HIDDEN_ITEMS_SECTION);
     });
 
-    const showSortOrderMenu = () => setOpenSortOrderMenu(true);
-
-    const closeSortOrderMenu = () => setOpenSortOrderMenu(false);
-
     const changeSortOrderAsc = wrap(() =>
         changeCollectionSortOrder(activeCollection, true),
     );
@@ -397,8 +396,7 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
                 )}
             </OverflowMenu>
             <CollectionSortOrderMenu
-                open={openSortOrderMenu}
-                onClose={closeSortOrderMenu}
+                {...sortOrderMenuVisibilityProps}
                 overFlowMenuIconRef={overFlowMenuIconRef}
                 onAscClick={changeSortOrderAsc}
                 onDescClick={changeSortOrderDesc}
