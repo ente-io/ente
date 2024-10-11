@@ -1,5 +1,8 @@
 import { EllipsizedTypography } from "@/base/components/Typography";
-import type { ModalVisibilityProps } from "@/base/components/utils/modal";
+import {
+    useModalVisibility,
+    type ModalVisibilityProps,
+} from "@/base/components/utils/modal";
 import { ensureElectron } from "@/base/electron";
 import { basename, dirname } from "@/base/file";
 import type { CollectionMapping, FolderWatch } from "@/base/types/ipc";
@@ -51,9 +54,8 @@ export const WatchFolder: React.FC<ModalVisibilityProps> = ({
     const [savedFolderPath, setSavedFolderPath] = useState<
         string | undefined
     >();
-    // True when we're showing the choice dialog to ask the user to set the
-    // collection mapping.
-    const [openChoiceDialog, setOpenChoiceDialog] = useState(false);
+    const { show: showMappingChoice, props: mappingChoiceVisibilityProps } =
+        useModalVisibility();
 
     const appContext = useContext(AppContext);
 
@@ -87,7 +89,7 @@ export const WatchFolder: React.FC<ModalVisibilityProps> = ({
             addWatch(path, "root");
         } else {
             setSavedFolderPath(path);
-            setOpenChoiceDialog(true);
+            showMappingChoice();
         }
     };
 
@@ -138,8 +140,7 @@ export const WatchFolder: React.FC<ModalVisibilityProps> = ({
                 </DialogContent>
             </Dialog>
             <CollectionMappingChoiceDialog
-                open={openChoiceDialog}
-                onClose={() => setOpenChoiceDialog(false)}
+                {...mappingChoiceVisibilityProps}
                 didSelect={handleCollectionMappingSelect}
             />
         </>

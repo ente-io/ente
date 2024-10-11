@@ -1,27 +1,14 @@
-import log from "@/base/log";
-import { EnteFile } from "@/new/photos/types/file";
-import Photoswipe from "photoswipe";
-import PhotoswipeUIDefault from "photoswipe/dist/photoswipe-ui-default";
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
-import {
-    addToFavorites,
-    removeFromFavorites,
-} from "services/collectionService";
-import {
-    copyFileToClipboard,
-    downloadSingleFile,
-    getFileFromURL,
-} from "utils/file";
-
 import { isDesktop } from "@/base/app";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { lowercaseExtension } from "@/base/file";
+import log from "@/base/log";
 import { FileType } from "@/media/file-type";
 import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
 import downloadManager from "@/new/photos/services/download";
 import { extractRawExif, parseExif } from "@/new/photos/services/exif";
 import { AppContext } from "@/new/photos/types/context";
 import type { LoadedLivePhotoSourceURL } from "@/new/photos/types/file";
+import { EnteFile } from "@/new/photos/types/file";
 import { fileLogID } from "@/new/photos/utils/file";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import AlbumOutlined from "@mui/icons-material/AlbumOutlined";
@@ -43,8 +30,20 @@ import { Box, Button, styled } from "@mui/material";
 import { t } from "i18next";
 import isElectron from "is-electron";
 import { GalleryContext } from "pages/gallery";
+import Photoswipe from "photoswipe";
+import PhotoswipeUIDefault from "photoswipe/dist/photoswipe-ui-default";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import {
+    addToFavorites,
+    removeFromFavorites,
+} from "services/collectionService";
 import { trashFiles } from "services/fileService";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
+import {
+    copyFileToClipboard,
+    downloadSingleFile,
+    getFileFromURL,
+} from "utils/file";
 import { pauseVideo, playVideo } from "utils/photoFrame";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import { getTrashFileMessage } from "utils/ui";

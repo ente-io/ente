@@ -3,6 +3,7 @@ import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { Titlebar } from "@/base/components/Titlebar";
 import { EllipsizedTypography } from "@/base/components/Typography";
+import { useModalVisibility } from "@/base/components/utils/modal";
 import { nameAndExtension } from "@/base/file";
 import log from "@/base/log";
 import type { Location } from "@/base/types";
@@ -107,7 +108,8 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     );
 
     const [exifInfo, setExifInfo] = useState<ExifInfo | undefined>();
-    const [openRawExif, setOpenRawExif] = useState(false);
+    const { show: showRawExif, props: rawExifVisibilityProps } =
+        useModalVisibility();
     const [annotatedFaces, setAnnotatedFaces] = useState<
         AnnotatedFacesForFile | undefined
     >();
@@ -262,7 +264,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                             t("no_exif")
                         ) : (
                             <LinkButton
-                                onClick={() => setOpenRawExif(true)}
+                                onClick={showRawExif}
                                 sx={{
                                     textDecoration: "none",
                                     color: "text.muted",
@@ -319,8 +321,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
             </Stack>
 
             <RawExif
-                open={openRawExif}
-                onClose={() => setOpenRawExif(false)}
+                {...rawExifVisibilityProps}
                 onInfoClose={handleCloseInfo}
                 tags={exif?.tags}
                 fileName={file.metadata.title}
