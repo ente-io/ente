@@ -57,20 +57,15 @@ export const PeopleHeader: React.FC<PeopleHeaderProps> = ({
     return (
         <GalleryItemsHeaderAdapter>
             <SpaceBetweenFlex>
-                <GalleryItemsSummary
-                    name={
-                        person.name ?? pt("Unnamed person") /* TODO-Cluster */
-                    }
-                    nameProps={person.name ? {} : { color: "text.muted" }}
-                    fileCount={person.fileIDs.length}
-                />
                 {person.type == "cgroup" ? (
-                    <CGroupPersonOptions
+                    <CGroupPersonHeader
+                        person={person}
                         cgroup={person.cgroup}
                         {...{ onSelectPerson }}
                     />
                 ) : (
-                    <ClusterPersonOptions
+                    <ClusterPersonHeader
+                        person={person}
                         cluster={person.cluster}
                         {...{ people }}
                     />
@@ -80,11 +75,13 @@ export const PeopleHeader: React.FC<PeopleHeaderProps> = ({
     );
 };
 
-type CGroupPersonOptionsProps = Pick<PeopleHeaderProps, "onSelectPerson"> & {
+type CGroupPersonHeaderProps = Pick<PeopleHeaderProps, "onSelectPerson"> & {
+    person: Person;
     cgroup: CGroup;
 };
 
-const CGroupPersonOptions: React.FC<CGroupPersonOptionsProps> = ({
+const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({
+    person,
     cgroup,
     onSelectPerson,
 }) => {
@@ -116,8 +113,16 @@ const CGroupPersonOptions: React.FC<CGroupPersonOptionsProps> = ({
         onSelectPerson(undefined);
     });
 
+    // While technically it is possible for the cgroup not to have a name,
+    // logical wise we shouldn't be ending up here without a name.
+    const name = cgroup.data.name ?? "";
+
     return (
         <>
+            <GalleryItemsSummary
+                name={name}
+                fileCount={person.fileIDs.length}
+            />
             <OverflowMenu
                 ariaControls={"person-options"}
                 triggerButtonIcon={<MoreHoriz />}
@@ -145,7 +150,7 @@ const CGroupPersonOptions: React.FC<CGroupPersonOptionsProps> = ({
                 placeholder={t("enter_name")}
                 autoComplete="name"
                 autoFocus
-                initialValue={cgroup.data.name ?? ""}
+                initialValue={name}
                 submitButtonTitle={t("rename")}
                 onSubmit={handleRename}
             />
@@ -153,12 +158,14 @@ const CGroupPersonOptions: React.FC<CGroupPersonOptionsProps> = ({
     );
 };
 
-type ClusterPersonOptionsProps = Pick<PeopleHeaderProps, "people"> & {
+type ClusterPersonHeaderProps = Pick<PeopleHeaderProps, "people"> & {
+    person: Person;
     cluster: FaceCluster;
 };
 
-const ClusterPersonOptions: React.FC<ClusterPersonOptionsProps> = ({
+const ClusterPersonHeader: React.FC<ClusterPersonHeaderProps> = ({
     people,
+    person,
     cluster,
 }) => {
     const { show: showAddPerson, props: addPersonVisibilityProps } =
@@ -166,6 +173,11 @@ const ClusterPersonOptions: React.FC<ClusterPersonOptionsProps> = ({
 
     return (
         <>
+            <GalleryItemsSummary
+                name={pt("Unnamed person") /* TODO-Cluster */}
+                nameProps={{ color: "text.muted" }}
+                fileCount={person.fileIDs.length}
+            />
             <Stack direction="row" sx={{ alignItems: "center", gap: 2 }}>
                 <Tooltip title={pt("Add a name")}>
                     <IconButton onClick={showAddPerson}>
