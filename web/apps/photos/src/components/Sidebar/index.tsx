@@ -612,43 +612,33 @@ const HelpSection: React.FC = () => {
 };
 
 const ExitSection: React.FC = () => {
-    const { setDialogMessage, logout } = useContext(AppContext);
+    const { showMiniDialog, logout } = useContext(AppContext);
 
-    const [deleteAccountModalView, setDeleteAccountModalView] = useState(false);
+    const { show: showDeleteAccount, props: deleteAccountVisibilityProps } =
+        useModalVisibility();
 
-    const closeDeleteAccountModal = () => setDeleteAccountModalView(false);
-    const openDeleteAccountModal = () => setDeleteAccountModalView(true);
-
-    const confirmLogout = () => {
-        setDialogMessage({
+    const handleLogout = () =>
+        showMiniDialog({
             title: t("logout_message"),
-            proceed: {
-                text: t("logout"),
-                action: logout,
-                variant: "critical",
-            },
-            close: { text: t("cancel") },
+            continue: { text: t("logout"), color: "critical", action: logout },
+            buttonDirection: "row"
         });
-    };
 
     return (
         <>
             <EnteMenuItem
-                onClick={confirmLogout}
+                onClick={handleLogout}
                 color="critical"
                 label={t("logout")}
                 variant="secondary"
             />
             <EnteMenuItem
-                onClick={openDeleteAccountModal}
+                onClick={showDeleteAccount}
                 color="critical"
                 variant="secondary"
                 label={t("delete_account")}
             />
-            <DeleteAccountModal
-                open={deleteAccountModalView}
-                onClose={closeDeleteAccountModal}
-            />
+            <DeleteAccountModal {...deleteAccountVisibilityProps} />
         </>
     );
 };
