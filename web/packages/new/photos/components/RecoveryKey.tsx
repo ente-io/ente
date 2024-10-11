@@ -1,9 +1,11 @@
+/* eslint-disable react/prop-types */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import { errorDialogAttributes } from "@/base/components/utils/mini-dialog";
+import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import { useIsMobileWidth } from "@/base/hooks";
 import log from "@/base/log";
 import { useAppContext } from "@/new/photos/types/context";
@@ -30,12 +32,10 @@ bip39.setDefaultWordlist("english");
 
 const RECOVERY_KEY_FILE_NAME = "ente-recovery-key.txt";
 
-interface Props {
-    show: boolean;
-    onHide: () => void;
-}
-
-export function RecoveryKey({ ...props }: Props) {
+export const RecoveryKey: React.FC<ModalVisibilityProps> = ({
+    open,
+    onClose,
+}) => {
     const { showMiniDialog } = useAppContext();
 
     const [recoveryKey, setRecoveryKey] = useState<string | null>(null);
@@ -47,7 +47,7 @@ export function RecoveryKey({ ...props }: Props) {
         );
 
     useEffect(() => {
-        if (!props.show) {
+        if (!open) {
             return;
         }
         const main = async () => {
@@ -56,22 +56,22 @@ export function RecoveryKey({ ...props }: Props) {
             } catch (e) {
                 log.error("Failed to generate recovery key", e);
                 somethingWentWrong();
-                props.onHide();
+                onClose();
             }
         };
         main();
-    }, [props.show]);
+    }, [open]);
 
     function onSaveClick() {
         downloadAsFile(RECOVERY_KEY_FILE_NAME, ensure(recoveryKey));
-        props.onHide();
+        onClose();
     }
 
     return (
         <Dialog
             fullScreen={fullScreen}
-            open={props.show}
-            onClose={props.onHide}
+            open={open}
+            onClose={onClose}
             // [Note: maxWidth "xs" on MUI dialogs]
             //
             // While logically the "xs" breakpoint doesn't make sense as a
@@ -81,7 +81,7 @@ export function RecoveryKey({ ...props }: Props) {
             maxWidth="xs"
             fullWidth
         >
-            <DialogTitleWithCloseButton onClose={props.onHide}>
+            <DialogTitleWithCloseButton onClose={onClose}>
                 {t("recovery_key")}
             </DialogTitleWithCloseButton>
             <DialogContent>
@@ -94,7 +94,7 @@ export function RecoveryKey({ ...props }: Props) {
                 </DashedBorderWrapper>
             </DialogContent>
             <DialogActions>
-                <Button color="secondary" size="large" onClick={props.onHide}>
+                <Button color="secondary" size="large" onClick={onClose}>
                     {t("do_this_later")}
                 </Button>
                 <Button color="accent" size="large" onClick={onSaveClick}>
@@ -103,7 +103,7 @@ export function RecoveryKey({ ...props }: Props) {
             </DialogActions>
         </Dialog>
     );
-}
+};
 
 const DashedBorderWrapper = styled(Box)(({ theme }) => ({
     border: `1px dashed ${theme.palette.grey.A400}`,

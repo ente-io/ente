@@ -1,4 +1,4 @@
-import type { ModalVisibilityProps } from "@/base/components/mui";
+import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import { pt } from "@/base/i18n";
 import { addCGroup, addClusterToCGroup } from "@/new/photos/services/ml";
 import { ensure } from "@/utils/ensure";

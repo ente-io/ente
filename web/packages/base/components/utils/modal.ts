@@ -1,3 +1,5 @@
+import { useCallback, useState } from "react";
+
 /**
  * Common props that control the display of a modal (e.g. dialog, drawer)
  * component.
@@ -23,4 +25,19 @@ export type NestedDrawerVisibilityProps = ModalVisibilityProps & {
      * `onRootClose` suitable for passing to its children.
      */
     onRootClose: () => void;
+};
+
+/**
+ * A convenience hook for keeping the state for opening and closing a modal, and
+ * exposing a function to close the modal whose identity is stable.
+ *
+ * These props can be passed verbatim to our components that expect
+ * {@link ModalVisibilityProps}.
+ */
+export const useModalVisibilityProps = () => {
+    const [open, setOpen] = useState(false);
+
+    const onClose = useCallback(() => setOpen(false), []);
+
+    return { open, onClose };
 };

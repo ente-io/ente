@@ -1,4 +1,4 @@
-import type { ModalVisibilityProps } from "@/base/components/mui";
+import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import log from "@/base/log";
 import SingleInputForm, {
     type SingleInputFormProps,

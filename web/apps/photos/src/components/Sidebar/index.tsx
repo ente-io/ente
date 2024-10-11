@@ -3,6 +3,7 @@ import { isDesktop } from "@/base/app";
 import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { EnteLogo } from "@/base/components/EnteLogo";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { useModalVisibilityProps } from "@/base/components/utils/modal";
 import log from "@/base/log";
 import { savedLogs } from "@/base/log-web";
 import { customAPIHost } from "@/base/origins";
@@ -435,15 +436,12 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
         setThemeColor,
     } = appContext;
 
-    const [recoverModalView, setRecoveryModalView] = useState(false);
+    const recoveryKeyVisibility = useModalVisibilityProps();
     const [twoFactorModalView, setTwoFactorModalView] = useState(false);
     const [preferencesView, setPreferencesView] = useState(false);
 
     const openPreferencesOptions = () => setPreferencesView(true);
     const closePreferencesOptions = () => setPreferencesView(false);
-
-    const openRecoveryKeyModal = () => setRecoveryModalView(true);
-    const closeRecoveryKeyModal = () => setRecoveryModalView(false);
 
     const openTwoFactorModal = () => setTwoFactorModalView(true);
     const closeTwoFactorModal = () => setTwoFactorModalView(false);
@@ -549,10 +547,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
                 onClick={openPreferencesOptions}
                 label={t("preferences")}
             />
-            <RecoveryKey
-                show={recoverModalView}
-                onHide={closeRecoveryKeyModal}
-            />
+            <RecoveryKey {...recoveryKeyVisibility} />
             <TwoFactorModal
                 show={twoFactorModalView}
                 onHide={closeTwoFactorModal}
