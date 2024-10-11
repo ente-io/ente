@@ -15,7 +15,6 @@ import { useAppContext } from "../../types/context";
 import { AddPersonDialog } from "../AddPersonDialog";
 import { SpaceBetweenFlex } from "../mui";
 import { SingleInputDialog } from "../SingleInputForm";
-import { useWrapAsyncOperation } from "../use-wrap-async";
 import type { GalleryBarImplProps } from "./BarImpl";
 import { GalleryItemsHeaderAdapter, GalleryItemsSummary } from "./ListHeader";
 
@@ -83,9 +82,7 @@ const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({
     const { show: showNameInput, props: nameInputVisibilityProps } =
         useModalVisibility();
 
-    const handleRename = useWrapAsyncOperation((name: string) =>
-        renameCGroup(cgroup, name),
-    );
+    const handleRename = (name: string) => renameCGroup(cgroup, name);
 
     const handleReset = () =>
         showMiniDialog({
