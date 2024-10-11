@@ -479,13 +479,6 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
 
     const redirectToDeduplicatePage = () => router.push(PAGES.DEDUPLICATE);
 
-    const somethingWentWrong = () =>
-        setDialogMessage({
-            title: t("error"),
-            content: t("RECOVER_KEY_GENERATION_FAILED"),
-            close: { variant: "critical" },
-        });
-
     const toggleTheme = () => {
         setThemeColor(
             themeColor === THEME_COLOR.DARK
@@ -559,7 +552,6 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
             <RecoveryKey
                 show={recoverModalView}
                 onHide={closeRecoveryKeyModal}
-                somethingWentWrong={somethingWentWrong}
             />
             <TwoFactorModal
                 show={twoFactorModalView}

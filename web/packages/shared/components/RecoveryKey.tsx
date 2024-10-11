@@ -1,6 +1,7 @@
-import { useIsMobileWidth } from "@/base/hooks";
-import { useAppContext } from "@/new/photos/types/context";
 import { errorDialogAttributes } from "@/base/components/utils/mini-dialog";
+import { useIsMobileWidth } from "@/base/hooks";
+import log from "@/base/log";
+import { useAppContext } from "@/new/photos/types/context";
 import { ensure } from "@/utils/ensure";
 import CodeBlock from "@ente/shared/components/CodeBlock";
 import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleWithCloseButton";
@@ -27,17 +28,18 @@ const RECOVERY_KEY_FILE_NAME = "ente-recovery-key.txt";
 interface Props {
     show: boolean;
     onHide: () => void;
-    somethingWentWrong: any;
 }
 
-function RecoveryKey({ somethingWentWrong, ...props }: Props) {
+function RecoveryKey({ ...props }: Props) {
     const { showMiniDialog } = useAppContext();
 
     const [recoveryKey, setRecoveryKey] = useState<string | null>(null);
     const fullScreen = useIsMobileWidth();
 
-    const somethingWentWrong1 = () =>
-        showMiniDialog(errorDialogAttributes(t("RECOVER_KEY_GENERATION_FAILED")))
+    const somethingWentWrong = () =>
+        showMiniDialog(
+            errorDialogAttributes(t("RECOVER_KEY_GENERATION_FAILED")),
+        );
 
     useEffect(() => {
         if (!props.show) {
@@ -48,7 +50,8 @@ function RecoveryKey({ somethingWentWrong, ...props }: Props) {
                 const recoveryKey = await getRecoveryKey();
                 setRecoveryKey(bip39.entropyToMnemonic(recoveryKey));
             } catch (e) {
-                somethingWentWrong1();
+                log.error("Failed to generate recovery key", e);
+                somethingWentWrong();
                 props.onHide();
             }
         };
