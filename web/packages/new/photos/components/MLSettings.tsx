@@ -289,7 +289,6 @@ const ManageML: React.FC<ManageMLProps> = ({ mlStatus, onDisableML }) => {
                 color: "critical",
                 action: onDisableML,
             },
-            buttonDirection: "row",
         });
 
     return (

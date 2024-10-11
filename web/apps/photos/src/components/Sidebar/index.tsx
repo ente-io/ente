@@ -621,7 +621,6 @@ const ExitSection: React.FC = () => {
         showMiniDialog({
             title: t("logout_message"),
             continue: { text: t("logout"), color: "critical", action: logout },
-            buttonDirection: "row"
         });
 
     return (
