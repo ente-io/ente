@@ -34,10 +34,11 @@ export type NestedDrawerVisibilityProps = ModalVisibilityProps & {
  * These props can be passed verbatim to our components that expect
  * {@link ModalVisibilityProps}.
  */
-export const useModalVisibilityProps = () => {
+export const useModalVisibility = () => {
     const [open, setOpen] = useState(false);
 
+    const show = useCallback(() => setOpen(true), []);
     const onClose = useCallback(() => setOpen(false), []);
 
-    return { open, onClose };
+    return { show, props: { open, onClose } };
 };

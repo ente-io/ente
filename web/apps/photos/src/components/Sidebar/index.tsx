@@ -3,14 +3,14 @@ import { isDesktop } from "@/base/app";
 import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { EnteLogo } from "@/base/components/EnteLogo";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import { useModalVisibilityProps } from "@/base/components/utils/modal";
+import { useModalVisibility } from "@/base/components/utils/modal";
 import log from "@/base/log";
 import { savedLogs } from "@/base/log-web";
 import { customAPIHost } from "@/base/origins";
 import { RecoveryKey } from "@/new/photos/components/RecoveryKey";
 import type { CollectionSummaries } from "@/new/photos/services/collection/ui";
 import { AppContext, useAppContext } from "@/new/photos/types/context";
-import { initiateEmail, openURL } from "@/new/photos/utils/web";
+import { downloadString, initiateEmail, openURL } from "@/new/photos/utils/web";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ThemeSwitcher from "@ente/shared/components/ThemeSwitcher";
@@ -23,7 +23,6 @@ import {
     setLSUser,
 } from "@ente/shared/storage/localStorage";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
-import { downloadAsFile } from "@ente/shared/utils";
 import ArchiveOutlined from "@mui/icons-material/ArchiveOutlined";
 import CategoryIcon from "@mui/icons-material/Category";
 import CloseIcon from "@mui/icons-material/Close";
@@ -436,7 +435,8 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
         setThemeColor,
     } = appContext;
 
-    const recoveryKeyVisibility = useModalVisibilityProps();
+    const { show: showRecoveryKey, props: recoveryKeyVisibilityProps } =
+        useModalVisibility();
     const [twoFactorModalView, setTwoFactorModalView] = useState(false);
     const [preferencesView, setPreferencesView] = useState(false);
 
@@ -496,7 +496,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
             )}
             <EnteMenuItem
                 variant="secondary"
-                onClick={openRecoveryKeyModal}
+                onClick={showRecoveryKey}
                 label={t("recovery_key")}
             />
             {isInternalUserViaEmailCheck() && (
@@ -547,7 +547,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
                 onClick={openPreferencesOptions}
                 label={t("preferences")}
             />
-            <RecoveryKey {...recoveryKeyVisibility} />
+            <RecoveryKey {...recoveryKeyVisibilityProps} />
             <TwoFactorModal
                 show={twoFactorModalView}
                 onHide={closeTwoFactorModal}
@@ -678,7 +678,7 @@ const DebugSection: React.FC = () => {
     const downloadLogs = () => {
         log.info("Downloading logs");
         if (electron) electron.openLogDirectory();
-        else downloadAsFile(`debug_logs_${Date.now()}.txt`, savedLogs());
+        else downloadString(savedLogs(), `debug_logs_${Date.now()}.txt`);
     };
 
     return (
