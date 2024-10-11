@@ -112,7 +112,7 @@
     "recovery_key": "Recovery key",
     "do_this_later": "Do this later",
     "save_key": "Save Key",
-    "RECOVERY_KEY_DESCRIPTION": "If you forget your password, the only way you can recover your data is with this key.",
+    "recovery_key_description": "If you forget your password, the only way you can recover your data is with this key.",
     "RECOVER_KEY_GENERATION_FAILED": "Recovery code could not be generated, please try again",
     "KEY_NOT_STORED_DISCLAIMER": "We don't store this key, so please save this in a safe place",
     "FORGOT_PASSWORD": "Forgot password",

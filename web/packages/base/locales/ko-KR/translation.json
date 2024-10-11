@@ -112,7 +112,7 @@
     "recovery_key": "키 복구하기",
     "do_this_later": "나중에 저장하기",
     "save_key": "키 저장하기",
-    "RECOVERY_KEY_DESCRIPTION": "암호 분실시, 오직 이 키를 이용해야만 데이터를 복구할 수 있습니다.",
+    "recovery_key_description": "암호 분실시, 오직 이 키를 이용해야만 데이터를 복구할 수 있습니다.",
     "RECOVER_KEY_GENERATION_FAILED": "",
     "KEY_NOT_STORED_DISCLAIMER": "",
     "FORGOT_PASSWORD": "",

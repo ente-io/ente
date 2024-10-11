@@ -112,7 +112,7 @@
     "recovery_key": "Herstelsleutel",
     "do_this_later": "Doe dit later",
     "save_key": "Sleutel opslaan",
-    "RECOVERY_KEY_DESCRIPTION": "Als je je wachtwoord vergeet, kun je alleen met deze sleutel je gegevens herstellen.",
+    "recovery_key_description": "Als je je wachtwoord vergeet, kun je alleen met deze sleutel je gegevens herstellen.",
     "RECOVER_KEY_GENERATION_FAILED": "Herstelcode kon niet worden gegenereerd, probeer het opnieuw",
     "KEY_NOT_STORED_DISCLAIMER": "We slaan deze sleutel niet op, bewaar dit op een veilige plaats",
     "FORGOT_PASSWORD": "Wachtwoord vergeten",

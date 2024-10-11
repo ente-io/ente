@@ -112,7 +112,7 @@
     "recovery_key": "Wiederherstellungsschlüssel",
     "do_this_later": "Auf später verschieben",
     "save_key": "Schlüssel speichern",
-    "RECOVERY_KEY_DESCRIPTION": "Falls du dein Passwort vergisst, kannst du deine Daten nur mit diesem Schlüssel wiederherstellen.",
+    "recovery_key_description": "Falls du dein Passwort vergisst, kannst du deine Daten nur mit diesem Schlüssel wiederherstellen.",
     "RECOVER_KEY_GENERATION_FAILED": "Wiederherstellungsschlüssel konnte nicht generiert werden, bitte versuche es erneut",
     "KEY_NOT_STORED_DISCLAIMER": "Wir speichern diesen Schlüssel nicht, also speichere ihn bitte an einem sicheren Ort",
     "FORGOT_PASSWORD": "Passwort vergessen",

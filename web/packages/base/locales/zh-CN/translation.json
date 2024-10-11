@@ -112,7 +112,7 @@
     "recovery_key": "恢复密钥",
     "do_this_later": "稍后再做",
     "save_key": "保存密钥",
-    "RECOVERY_KEY_DESCRIPTION": "如果您忘记了密码，恢复数据的唯一方法就是使用此密钥。",
+    "recovery_key_description": "如果您忘记了密码，恢复数据的唯一方法就是使用此密钥。",
     "RECOVER_KEY_GENERATION_FAILED": "无法生成恢复代码，请重试",
     "KEY_NOT_STORED_DISCLAIMER": "我们不存储此密钥，因此请将其保存在安全的地方",
     "FORGOT_PASSWORD": "忘记密码",

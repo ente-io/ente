@@ -112,7 +112,7 @@
     "recovery_key": "Atkūrimo raktas",
     "do_this_later": "Daryti tai vėliau",
     "save_key": "Išsaugoti raktą",
-    "RECOVERY_KEY_DESCRIPTION": "Jei pamiršote slaptažodį, vienintelis būdas atkurti duomenis – naudoti šį raktą.",
+    "recovery_key_description": "Jei pamiršote slaptažodį, vienintelis būdas atkurti duomenis – naudoti šį raktą.",
     "RECOVER_KEY_GENERATION_FAILED": "Atkūrimo kodo nepavyko sugeneruoti. Bandykite dar kartą.",
     "KEY_NOT_STORED_DISCLAIMER": "Šio rakto mes nesaugome, todėl išsaugokite jį saugioje vietoje",
     "FORGOT_PASSWORD": "Pamiršau slaptažodį",

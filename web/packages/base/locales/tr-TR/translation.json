@@ -112,7 +112,7 @@
     "recovery_key": "Kurtarma anahtarı",
     "do_this_later": "Sonra yap",
     "save_key": "Anahtarı kaydet",
-    "RECOVERY_KEY_DESCRIPTION": "Eğer parolanı unutursan, verilerini kurtarabileceğin tek yol bu anahtardır.",
+    "recovery_key_description": "Eğer parolanı unutursan, verilerini kurtarabileceğin tek yol bu anahtardır.",
     "RECOVER_KEY_GENERATION_FAILED": "Kurtarma kodu oluşturulamadı, lütfen tekrar dene",
     "KEY_NOT_STORED_DISCLAIMER": "Bu anahtarı saklamıyoruz, bu nedenle lütfen güvenli bir yerde sakla",
     "FORGOT_PASSWORD": "Parolamı unuttum",
