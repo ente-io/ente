@@ -39,4 +39,13 @@ class AlbumSearchResult extends SearchResult {
       occurrence: kMostRelevantFilter,
     );
   }
+
+  @override
+  HierarchicalSearchFilter getHierarchicalSearchResult() {
+    return AlbumFilter(
+      collectionID: collectionWithThumbnail.collection.id,
+      albumName: collectionWithThumbnail.collection.displayName,
+      occurrence: kMostRelevantFilter,
+    );
+  }
 }

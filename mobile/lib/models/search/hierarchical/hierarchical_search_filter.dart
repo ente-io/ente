@@ -18,6 +18,10 @@ abstract class HierarchicalSearchFilter {
 
   String name();
   IconData? icon();
+
+  /// Will be [kmostRelevantFilter] if the filter is a Top-levl filter. For
+  /// example, when searching for an album 'A' and opening it, when
+  /// hierarchical search starts, the album 'A' will be the top level filter.
   int relevance();
   bool isMatch(EnteFile file);
   Set<int> getMatchedUploadedIDs();

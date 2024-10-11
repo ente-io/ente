@@ -16,6 +16,7 @@ import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/discover/prompt.dart";
 import "package:photos/models/search/generic_search_result.dart";
+import "package:photos/models/search/hierarchical/magic_filter.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
@@ -140,10 +141,12 @@ GenericSearchResult? toGenericSearchResult(
             ResultType.magic,
             title,
             enteFilesInMagicCache,
+            hierarchicalSearchFilter: MagicFilter(),
           ).heroTag(),
         ),
       );
     },
+    hierarchicalSearchFilter: MagicFilter(),
   );
 }
 

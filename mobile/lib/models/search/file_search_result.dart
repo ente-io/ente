@@ -33,4 +33,9 @@ class FileSearchResult extends SearchResult {
   HierarchicalSearchFilter toHierarchicalSearchFilter() {
     throw UnimplementedError();
   }
+
+  @override
+  HierarchicalSearchFilter getHierarchicalSearchResult() {
+    throw UnimplementedError();
+  }
 }

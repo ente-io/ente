@@ -19,6 +19,7 @@ class FaceFilter extends HierarchicalSearchFilter {
     required this.faceName,
     required this.faceFile,
     required this.occurrence,
+    super.matchedUploadedIDs,
   }) : assert(
           personId != null || clusterId != null,
           "personId or clusterId must be provided",

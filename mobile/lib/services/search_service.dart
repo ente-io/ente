@@ -24,6 +24,12 @@ import "package:photos/models/location_tag/location_tag.dart";
 import "package:photos/models/ml/face/person.dart";
 import 'package:photos/models/search/album_search_result.dart';
 import 'package:photos/models/search/generic_search_result.dart';
+import "package:photos/models/search/hierarchical/contacts_filter.dart";
+import "package:photos/models/search/hierarchical/face_filter.dart";
+import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
+import "package:photos/models/search/hierarchical/location_filter.dart";
+import "package:photos/models/search/hierarchical/magic_filter.dart";
+import "package:photos/models/search/hierarchical/top_level_generic_filter.dart";
 import "package:photos/models/search/search_constants.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/service_locator.dart";
@@ -40,6 +46,7 @@ import "package:photos/ui/viewer/people/cluster_page.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
 import "package:photos/ui/viewer/search/result/magic_result_screen.dart";
 import 'package:photos/utils/date_time_util.dart';
+import "package:photos/utils/file_util.dart";
 import "package:photos/utils/navigation_util.dart";
 import 'package:tuple/tuple.dart';
 
@@ -169,6 +176,12 @@ class SearchService {
               ResultType.year,
               yearData.year,
               filesInYear,
+              hierarchicalSearchFilter: TopLevelGenericFilter(
+                filterName: yearData.year,
+                occurrence: kMostRelevantFilter,
+                filterResultType: ResultType.year,
+                matchedUploadedIDs: filesToUploadedFileIDs(filesInYear),
+              ),
             ),
           );
         }
@@ -223,6 +236,12 @@ class SearchService {
           ResultType.year,
           yearData.year,
           filesInYear,
+          hierarchicalSearchFilter: TopLevelGenericFilter(
+            filterName: yearData.year,
+            occurrence: kMostRelevantFilter,
+            filterResultType: ResultType.year,
+            matchedUploadedIDs: filesToUploadedFileIDs(filesInYear),
+          ),
         );
       }
     }
@@ -248,6 +267,12 @@ class SearchService {
             ResultType.month,
             month.name,
             matchedFiles,
+            hierarchicalSearchFilter: TopLevelGenericFilter(
+              filterName: month.name,
+              occurrence: kMostRelevantFilter,
+              filterResultType: ResultType.month,
+              matchedUploadedIDs: filesToUploadedFileIDs(matchedFiles),
+            ),
           ),
         );
       }
@@ -271,6 +296,12 @@ class SearchService {
           ResultType.month,
           month.name,
           matchedFiles,
+          hierarchicalSearchFilter: TopLevelGenericFilter(
+            filterName: month.name,
+            occurrence: kMostRelevantFilter,
+            filterResultType: ResultType.month,
+            matchedUploadedIDs: filesToUploadedFileIDs(matchedFiles),
+          ),
         );
       }
     }
@@ -297,7 +328,17 @@ class SearchService {
         );
         if (matchedFiles.isNotEmpty) {
           searchResults.add(
-            GenericSearchResult(ResultType.event, holiday.name, matchedFiles),
+            GenericSearchResult(
+              ResultType.event,
+              holiday.name,
+              matchedFiles,
+              hierarchicalSearchFilter: TopLevelGenericFilter(
+                filterName: holiday.name,
+                occurrence: kMostRelevantFilter,
+                filterResultType: ResultType.event,
+                matchedUploadedIDs: filesToUploadedFileIDs(matchedFiles),
+              ),
+            ),
           );
         }
       }
@@ -321,6 +362,12 @@ class SearchService {
           ResultType.event,
           holiday.name,
           matchedFiles,
+          hierarchicalSearchFilter: TopLevelGenericFilter(
+            filterName: holiday.name,
+            occurrence: kMostRelevantFilter,
+            filterResultType: ResultType.event,
+            matchedUploadedIDs: filesToUploadedFileIDs(matchedFiles),
+          ),
         );
       }
     }
@@ -344,6 +391,12 @@ class SearchService {
               ResultType.fileType,
               fileTypeString,
               matchedFiles,
+              hierarchicalSearchFilter: TopLevelGenericFilter(
+                filterName: fileTypeString,
+                occurrence: kMostRelevantFilter,
+                filterResultType: ResultType.fileType,
+                matchedUploadedIDs: filesToUploadedFileIDs(matchedFiles),
+              ),
             ),
           );
         }
@@ -383,11 +436,18 @@ class SearchService {
       }
 
       fileTypesAndMatchingFiles.forEach((key, value) {
+        final name = getHumanReadableString(context, key);
         searchResults.add(
           GenericSearchResult(
             ResultType.fileType,
-            getHumanReadableString(context, key),
+            name,
             value,
+            hierarchicalSearchFilter: TopLevelGenericFilter(
+              filterName: name,
+              occurrence: kMostRelevantFilter,
+              filterResultType: ResultType.fileType,
+              matchedUploadedIDs: filesToUploadedFileIDs(value),
+            ),
           ),
         );
       });
@@ -398,6 +458,12 @@ class SearchService {
             ResultType.fileExtension,
             key + "s",
             value,
+            hierarchicalSearchFilter: TopLevelGenericFilter(
+              filterName: key + "s",
+              occurrence: kMostRelevantFilter,
+              filterResultType: ResultType.fileExtension,
+              matchedUploadedIDs: filesToUploadedFileIDs(value),
+            ),
           ),
         );
       });
@@ -545,8 +611,19 @@ class SearchService {
       }
 
       relevantDescAndFiles.forEach((key, value) {
+        final listOfFiles = value.toList();
         searchResults.add(
-          GenericSearchResult(ResultType.fileCaption, key, value.toList()),
+          GenericSearchResult(
+            ResultType.fileCaption,
+            key,
+            listOfFiles,
+            hierarchicalSearchFilter: TopLevelGenericFilter(
+              filterName: key,
+              occurrence: kMostRelevantFilter,
+              filterResultType: ResultType.fileCaption,
+              matchedUploadedIDs: filesToUploadedFileIDs(listOfFiles),
+            ),
+          ),
         );
       });
       if (limit != null) {
@@ -585,6 +662,12 @@ class SearchService {
           ResultType.fileCaption,
           query,
           captionMatch,
+          hierarchicalSearchFilter: TopLevelGenericFilter(
+            filterName: query,
+            occurrence: kMostRelevantFilter,
+            filterResultType: ResultType.fileCaption,
+            matchedUploadedIDs: filesToUploadedFileIDs(captionMatch),
+          ),
         ),
       );
     }
@@ -594,6 +677,12 @@ class SearchService {
           ResultType.file,
           query,
           displayNameMatch,
+          hierarchicalSearchFilter: TopLevelGenericFilter(
+            filterName: query,
+            occurrence: kMostRelevantFilter,
+            filterResultType: ResultType.file,
+            matchedUploadedIDs: filesToUploadedFileIDs(displayNameMatch),
+          ),
         ),
       );
     }
@@ -627,6 +716,12 @@ class SearchService {
           ResultType.fileExtension,
           entry.key.toUpperCase(),
           entry.value,
+          hierarchicalSearchFilter: TopLevelGenericFilter(
+            filterName: entry.key.toUpperCase(),
+            occurrence: kMostRelevantFilter,
+            filterResultType: ResultType.fileExtension,
+            matchedUploadedIDs: filesToUploadedFileIDs(entry.value),
+          ),
         ),
       );
     }
@@ -686,6 +781,12 @@ class SearchService {
             ResultType.fileType,
             "No Location Tag",
             noLocationTagFiles,
+            hierarchicalSearchFilter: TopLevelGenericFilter(
+              filterName: "No Location Tag",
+              occurrence: kMostRelevantFilter,
+              filterResultType: ResultType.fileType,
+              matchedUploadedIDs: filesToUploadedFileIDs(noLocationTagFiles),
+            ),
           ),
         );
       }
@@ -710,6 +811,11 @@ class SearchService {
                 ),
               );
             },
+            hierarchicalSearchFilter: LocationFilter(
+              locationTag: entry.key.item,
+              occurrence: kMostRelevantFilter,
+              matchedUploadedIDs: filesToUploadedFileIDs(entry.value),
+            ),
           ),
         );
       }
@@ -727,11 +833,25 @@ class SearchService {
     for (final city in sortedByResultCount) {
       // If the location tag already exists for a city, don't add it again
       if (!locationTagNames.contains(city.city)) {
+        final a =
+            (defaultCityRadius * scaleFactor(city.lat)) / kilometersPerDegree;
+        const b = defaultCityRadius / kilometersPerDegree;
         searchResults.add(
           GenericSearchResult(
             ResultType.location,
             city.city,
             results[city]!,
+            hierarchicalSearchFilter: LocationFilter(
+              locationTag: LocationTag(
+                name: city.city,
+                radius: defaultCityRadius,
+                centerPoint: Location(latitude: city.lat, longitude: city.lng),
+                aSquare: a * a,
+                bSquare: b * b,
+              ),
+              occurrence: kMostRelevantFilter,
+              matchedUploadedIDs: filesToUploadedFileIDs(results[city]!),
+            ),
           ),
         );
       }
@@ -834,6 +954,14 @@ class SearchService {
                 ),
               );
             },
+            hierarchicalSearchFilter: FaceFilter(
+              personId: p.remoteID,
+              clusterId: null,
+              faceName: p.data.name,
+              faceFile: files.first,
+              occurrence: kMostRelevantFilter,
+              matchedUploadedIDs: filesToUploadedFileIDs(files),
+            ),
           ),
         );
       }
@@ -880,6 +1008,14 @@ class SearchService {
                 ),
               );
             },
+            hierarchicalSearchFilter: FaceFilter(
+              personId: null,
+              clusterId: clusterId,
+              faceName: clusterName,
+              faceFile: files.first,
+              occurrence: kMostRelevantFilter,
+              matchedUploadedIDs: filesToUploadedFileIDs(files),
+            ),
           ),
         );
       }
@@ -950,6 +1086,11 @@ class SearchService {
                   ),
                 );
               },
+              hierarchicalSearchFilter: LocationFilter(
+                locationTag: entry.key.item,
+                occurrence: kMostRelevantFilter,
+                matchedUploadedIDs: filesToUploadedFileIDs(entry.value),
+              ),
             ),
           );
         }
@@ -961,6 +1102,9 @@ class SearchService {
           ..sort((a, b) => results[b]!.length.compareTo(results[a]!.length));
         for (final city in sortedByResultCount) {
           if (results[city]!.length <= 1) continue;
+          final a =
+              (defaultCityRadius * scaleFactor(city.lat)) / kilometersPerDegree;
+          const b = defaultCityRadius / kilometersPerDegree;
           tagSearchResults.add(
             GenericSearchResult(
               ResultType.locationSuggestion,
@@ -974,6 +1118,18 @@ class SearchService {
                   radius: defaultCityRadius,
                 );
               },
+              hierarchicalSearchFilter: LocationFilter(
+                locationTag: LocationTag(
+                  name: city.city,
+                  radius: defaultCityRadius,
+                  centerPoint:
+                      Location(latitude: city.lat, longitude: city.lng),
+                  aSquare: a * a,
+                  bSquare: b * b,
+                ),
+                occurrence: kMostRelevantFilter,
+                matchedUploadedIDs: filesToUploadedFileIDs(results[city]!),
+              ),
             ),
           );
         }
@@ -1003,11 +1159,18 @@ class SearchService {
         order: 'DESC',
       );
       if (matchedFiles.isNotEmpty) {
+        final name = '$day ${potentialDate.item2.name} ${year ?? ''}';
         searchResults.add(
           GenericSearchResult(
             ResultType.event,
-            '$day ${potentialDate.item2.name} ${year ?? ''}',
+            name,
             matchedFiles,
+            hierarchicalSearchFilter: TopLevelGenericFilter(
+              filterName: name,
+              occurrence: kMostRelevantFilter,
+              filterResultType: ResultType.event,
+              matchedUploadedIDs: filesToUploadedFileIDs(matchedFiles),
+            ),
           ),
         );
       }
@@ -1042,11 +1205,16 @@ class SearchService {
                 files,
                 name: query,
                 enableGrouping: false,
-                heroTag: GenericSearchResult(ResultType.magic, query, files)
-                    .heroTag(),
+                heroTag: GenericSearchResult(
+                  ResultType.magic,
+                  query,
+                  files,
+                  hierarchicalSearchFilter: MagicFilter(),
+                ).heroTag(),
               ),
             );
           },
+          hierarchicalSearchFilter: MagicFilter(),
         ),
       );
     }
@@ -1087,12 +1255,18 @@ class SearchService {
       order: 'DESC',
     );
 
+    final name = DateFormat.yMMMd(Localizations.localeOf(context).languageCode)
+        .format(originalDateTime.toLocal());
     return GenericSearchResult(
       ResultType.event,
-      DateFormat.yMMMd(Localizations.localeOf(context).languageCode).format(
-        DateTime.fromMicrosecondsSinceEpoch(creationTime).toLocal(),
-      ),
+      name,
       matchedFiles,
+      hierarchicalSearchFilter: TopLevelGenericFilter(
+        filterName: name,
+        occurrence: kMostRelevantFilter,
+        filterResultType: ResultType.event,
+        matchedUploadedIDs: filesToUploadedFileIDs(matchedFiles),
+      ),
     );
   }
 
@@ -1125,6 +1299,11 @@ class SearchService {
           ResultType.shared,
           key.name != null && key.name!.isNotEmpty ? key.name! : key.email,
           value,
+          hierarchicalSearchFilter: ContactsFilter(
+            user: key,
+            occurrence: kMostRelevantFilter,
+            matchedUploadedIDs: filesToUploadedFileIDs(value),
+          ),
         ),
       );
     });
@@ -1155,13 +1334,19 @@ class SearchService {
       }
 
       peopleToSharedFiles.forEach((key, value) {
+        final name = key.name != null && key.name!.isNotEmpty
+            ? key.name!
+            : key.email.split("@")[0];
         searchResults.add(
           GenericSearchResult(
             ResultType.shared,
-            key.name != null && key.name!.isNotEmpty
-                ? key.name!
-                : key.email.split("@")[0],
+            name,
             value,
+            hierarchicalSearchFilter: ContactsFilter(
+              user: key,
+              occurrence: kMostRelevantFilter,
+              matchedUploadedIDs: filesToUploadedFileIDs(value),
+            ),
           ),
         );
       });

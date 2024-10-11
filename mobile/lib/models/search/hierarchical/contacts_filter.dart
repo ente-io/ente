@@ -11,6 +11,7 @@ class ContactsFilter extends HierarchicalSearchFilter {
   ContactsFilter({
     required this.user,
     required this.occurrence,
+    super.matchedUploadedIDs,
   });
 
   @override

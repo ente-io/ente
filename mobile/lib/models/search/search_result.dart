@@ -15,5 +15,7 @@ abstract class SearchResult {
 
   List<EnteFile> resultFiles();
 
+  HierarchicalSearchFilter getHierarchicalSearchResult();
+
   HierarchicalSearchFilter toHierarchicalSearchFilter();
 }

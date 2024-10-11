@@ -94,7 +94,7 @@ class LocationService {
 
     try {
       final a =
-          (radius * _scaleFactor(centerPoint.latitude!)) / kilometersPerDegree;
+          (radius * scaleFactor(centerPoint.latitude!)) / kilometersPerDegree;
       final b = radius / kilometersPerDegree;
       final locationTag = LocationTag(
         name: location,
@@ -181,7 +181,7 @@ class LocationService {
         return;
       }
       final a =
-          (radius * _scaleFactor(centerPoint.latitude!)) / kilometersPerDegree;
+          (radius * scaleFactor(centerPoint.latitude!)) / kilometersPerDegree;
       final b = radius / kilometersPerDegree;
       final updatedLoationTag = locationTagEntity.item.copyWith(
         centerPoint: centerPoint,
@@ -321,8 +321,7 @@ bool isFileInsideLocationTag(
   Location fileCoordinates,
   double radius,
 ) {
-  final a =
-      (radius * _scaleFactor(centerPoint.latitude!)) / kilometersPerDegree;
+  final a = (radius * scaleFactor(centerPoint.latitude!)) / kilometersPerDegree;
   final b = radius / kilometersPerDegree;
   final x = centerPoint.latitude! - fileCoordinates.latitude!;
   final y = centerPoint.longitude! - fileCoordinates.longitude!;
@@ -336,7 +335,7 @@ bool isFileInsideLocationTag(
 ///in the magnitude of the latitude on the caritesian plane. When latitude is
 ///0 degrees, the ellipse is a circle with a = b = r. When latitude incrases,
 ///the major axis (a) has to be scaled by the secant of the latitude.
-double _scaleFactor(double lat) {
+double scaleFactor(double lat) {
   return 1 / cos(lat * (pi / 180));
 }
 

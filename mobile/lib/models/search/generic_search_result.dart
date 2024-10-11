@@ -10,11 +10,13 @@ class GenericSearchResult extends SearchResult {
   final ResultType _type;
   final Function(BuildContext context)? onResultTap;
   final Map<String, dynamic> params;
+  final HierarchicalSearchFilter hierarchicalSearchFilter;
 
   GenericSearchResult(
     this._type,
     this._name,
     this._files, {
+    required this.hierarchicalSearchFilter,
     this.onResultTap,
     this.params = const {},
   });
@@ -42,5 +44,10 @@ class GenericSearchResult extends SearchResult {
   @override
   HierarchicalSearchFilter toHierarchicalSearchFilter() {
     return _type.toHierarchicalSearchFilter(this);
+  }
+
+  @override
+  getHierarchicalSearchResult() {
+    return hierarchicalSearchFilter;
   }
 }
