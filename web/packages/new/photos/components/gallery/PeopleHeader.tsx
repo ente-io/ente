@@ -177,6 +177,7 @@ const ClusterPersonHeader: React.FC<ClusterPersonHeaderProps> = ({
                 name={pt("Unnamed person") /* TODO-Cluster */}
                 nameProps={{ color: "text.muted" }}
                 fileCount={person.fileIDs.length}
+                onNameClick={showAddPerson}
             />
             <Stack direction="row" sx={{ alignItems: "center", gap: 2 }}>
                 <Tooltip title={pt("Add a name")}>
