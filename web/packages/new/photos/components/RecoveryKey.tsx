@@ -78,9 +78,7 @@ export const RecoveryKey: React.FC<ModalVisibilityProps> = ({
                 <Typography mb={3}>{t("recovery_key_description")}</Typography>
                 <DashedBorderWrapper>
                     <CodeBlock code={recoveryKey} />
-                    <Typography m={2}>
-                        {t("KEY_NOT_STORED_DISCLAIMER")}
-                    </Typography>
+                    <Typography m={2}>{t("key_not_stored_note")}</Typography>
                 </DashedBorderWrapper>
             </DialogContent>
             <DialogActions>
