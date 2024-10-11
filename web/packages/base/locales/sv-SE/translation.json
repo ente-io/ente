@@ -114,7 +114,7 @@
     "save_key": "Spara nyckel",
     "recovery_key_description": "",
     "key_not_stored_note": "",
-    "RECOVER_KEY_GENERATION_FAILED": "",
+    "recovery_key_generation_failed": "",
     "FORGOT_PASSWORD": "Glömt lösenord",
     "RECOVER_ACCOUNT": "Återställ konto",
     "RECOVERY_KEY_HINT": "Återställningsnyckel",

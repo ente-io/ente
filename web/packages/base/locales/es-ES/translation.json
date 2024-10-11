@@ -114,7 +114,7 @@
     "save_key": "Guardar Clave",
     "recovery_key_description": "Si olvida su contraseña, la única forma de recuperar sus datos es con esta clave.",
     "key_not_stored_note": "No almacenamos esta clave, así que por favor guarde esto en un lugar seguro",
-    "RECOVER_KEY_GENERATION_FAILED": "El código de recuperación no pudo ser generado, por favor inténtalo de nuevo",
+    "recovery_key_generation_failed": "El código de recuperación no pudo ser generado, por favor inténtalo de nuevo",
     "FORGOT_PASSWORD": "Contraseña olvidada",
     "RECOVER_ACCOUNT": "Recuperar cuenta",
     "RECOVERY_KEY_HINT": "Clave de recuperación",

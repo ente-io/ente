@@ -114,7 +114,7 @@
     "save_key": "Simpan Kunci",
     "recovery_key_description": "Jika Anda lupa kata sandi, satu-satunya cara memulihkan data Anda adalah dengan kunci ini.",
     "key_not_stored_note": "Kami tidak menyimpan kunci ini, jadi harap simpan kunci ini dengan aman",
-    "RECOVER_KEY_GENERATION_FAILED": "Tidak dapat menghasilkan kode pemulihan, silakan coba lagi",
+    "recovery_key_generation_failed": "Tidak dapat menghasilkan kode pemulihan, silakan coba lagi",
     "FORGOT_PASSWORD": "Lupa sandi",
     "RECOVER_ACCOUNT": "Pulihkan akun",
     "RECOVERY_KEY_HINT": "Kunci pemulihan",

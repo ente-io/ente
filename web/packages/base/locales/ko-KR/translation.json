@@ -114,7 +114,7 @@
     "save_key": "키 저장하기",
     "recovery_key_description": "암호 분실시, 오직 이 키를 이용해야만 데이터를 복구할 수 있습니다.",
     "key_not_stored_note": "",
-    "RECOVER_KEY_GENERATION_FAILED": "",
+    "recovery_key_generation_failed": "",
     "FORGOT_PASSWORD": "",
     "RECOVER_ACCOUNT": "",
     "RECOVERY_KEY_HINT": "",

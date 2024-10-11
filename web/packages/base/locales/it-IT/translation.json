@@ -114,7 +114,7 @@
     "save_key": "Salva Chiave",
     "recovery_key_description": "Se dimentichi la tua password, l'unico modo per recuperare i tuoi dati è con questa chiave.",
     "key_not_stored_note": "Non memorizziamo questa chiave, quindi salvala in un luogo sicuro",
-    "RECOVER_KEY_GENERATION_FAILED": "Impossibile generare il codice di recupero, riprova",
+    "recovery_key_generation_failed": "Impossibile generare il codice di recupero, riprova",
     "FORGOT_PASSWORD": "Password dimenticata",
     "RECOVER_ACCOUNT": "Recupera account",
     "RECOVERY_KEY_HINT": "Chiave di recupero",

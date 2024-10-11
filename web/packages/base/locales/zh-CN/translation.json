@@ -114,7 +114,7 @@
     "save_key": "保存密钥",
     "recovery_key_description": "如果您忘记了密码，恢复数据的唯一方法就是使用此密钥。",
     "key_not_stored_note": "我们不存储此密钥，因此请将其保存在安全的地方",
-    "RECOVER_KEY_GENERATION_FAILED": "无法生成恢复代码，请重试",
+    "recovery_key_generation_failed": "无法生成恢复代码，请重试",
     "FORGOT_PASSWORD": "忘记密码",
     "RECOVER_ACCOUNT": "恢复账户",
     "RECOVERY_KEY_HINT": "恢复密钥",

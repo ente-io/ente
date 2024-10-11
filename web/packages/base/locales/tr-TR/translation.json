@@ -114,7 +114,7 @@
     "save_key": "Anahtarı kaydet",
     "recovery_key_description": "Eğer parolanı unutursan, verilerini kurtarabileceğin tek yol bu anahtardır.",
     "key_not_stored_note": "Bu anahtarı saklamıyoruz, bu nedenle lütfen güvenli bir yerde sakla",
-    "RECOVER_KEY_GENERATION_FAILED": "Kurtarma kodu oluşturulamadı, lütfen tekrar dene",
+    "recovery_key_generation_failed": "Kurtarma kodu oluşturulamadı, lütfen tekrar dene",
     "FORGOT_PASSWORD": "Parolamı unuttum",
     "RECOVER_ACCOUNT": "Hesabı kurtar",
     "RECOVERY_KEY_HINT": "Kurtarma anahtarı",

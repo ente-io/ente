@@ -114,7 +114,7 @@
     "save_key": "Zapisz Klucz",
     "recovery_key_description": "Jeśli zapomnisz swojego hasła, jedynym sposobem na odzyskanie Twoich danych jest ten klucz.",
     "key_not_stored_note": "Nie przechowujemy tego klucza, prosimy zapisać to w bezpiecznym miejscu",
-    "RECOVER_KEY_GENERATION_FAILED": "Nie można wygenerować kodu odzyskiwania, spróbuj ponownie",
+    "recovery_key_generation_failed": "Nie można wygenerować kodu odzyskiwania, spróbuj ponownie",
     "FORGOT_PASSWORD": "Nie pamiętam hasła",
     "RECOVER_ACCOUNT": "Odzyskaj konto",
     "RECOVERY_KEY_HINT": "Klucz odzyskiwania",
