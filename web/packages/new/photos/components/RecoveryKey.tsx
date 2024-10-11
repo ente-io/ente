@@ -1,4 +1,3 @@
-/* eslint-disable react/prop-types */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
