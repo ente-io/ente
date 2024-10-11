@@ -3,7 +3,7 @@ import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import { AppContext } from "@/new/photos/types/context";
 import { initiateEmail } from "@/new/photos/utils/web";
-import { Link, Stack, useMediaQuery } from "@mui/material";
+import { Link, Stack } from "@mui/material";
 import { Formik, type FormikHelpers } from "formik";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
@@ -35,8 +35,6 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
 
     const [acceptDataDeletion, setAcceptDataDeletion] = useState(false);
     const reasonAndFeedbackRef = useRef<{ reason: string; feedback: string }>();
-
-    const isMobile = useMediaQuery("(max-width: 428px)");
 
     const initiateDelete = async (
         { reason, feedback }: FormValues,
@@ -74,7 +72,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
         }
     };
 
-    const confirmAccountDeletion = () => {
+    const confirmAccountDeletion = () =>
         showMiniDialog({
             title: t("delete_account"),
             message: <Trans i18nKey="delete_account_confirm_message" />,
@@ -84,7 +82,6 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                 action: solveChallengeAndDeleteAccount,
             },
         });
-    };
 
     const askToMailForDeletion = () => {
         const emailID = "account-deletion@ente.io";
@@ -117,10 +114,8 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
 
     return (
         <TitledMiniDialog
-            fullWidth
             open={open}
             onClose={onClose}
-            fullScreen={isMobile}
             title={t("delete_account")}
         >
             <Formik<FormValues>
