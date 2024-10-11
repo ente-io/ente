@@ -87,7 +87,7 @@ const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({
         renameCGroup(cgroup, name),
     );
 
-    const handleDeletePerson = () =>
+    const handleReset = () =>
         showMiniDialog({
             title: pt("Reset person?"),
             message: pt(
@@ -96,15 +96,13 @@ const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({
             continue: {
                 text: t("reset"),
                 color: "primary",
-                action: deletePerson,
+                action: async () => {
+                    await deleteCGroup(cgroup);
+                    // Reset the selection to the default state.
+                    onSelectPerson(undefined);
+                },
             },
         });
-
-    const deletePerson = useWrapAsyncOperation(async () => {
-        await deleteCGroup(cgroup);
-        // Reset the selection to the default state.
-        onSelectPerson(undefined);
-    });
 
     // While technically it is possible for the cgroup not to have a name,
     // logical wise we shouldn't be ending up here without a name.
@@ -130,7 +128,7 @@ const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({
                 <OverflowMenuOption
                     startIcon={<ClearIcon />}
                     centerAlign
-                    onClick={handleDeletePerson}
+                    onClick={handleReset}
                 >
                     {pt("Reset")}
                 </OverflowMenuOption>
