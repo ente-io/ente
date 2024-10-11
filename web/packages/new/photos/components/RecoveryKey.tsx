@@ -12,7 +12,6 @@ import { ensure } from "@/utils/ensure";
 import CodeBlock from "@ente/shared/components/CodeBlock";
 import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleWithCloseButton";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
-import { downloadAsFile } from "@ente/shared/utils";
 import {
     Box,
     Button,
@@ -25,6 +24,7 @@ import {
 import * as bip39 from "bip39";
 import { t } from "i18next";
 import { useEffect, useState } from "react";
+import { downloadString } from "../utils/web";
 
 // mobile client library only supports english.
 bip39.setDefaultWordlist("english");
@@ -62,7 +62,7 @@ export const RecoveryKey: React.FC<ModalVisibilityProps> = ({
     }, [open]);
 
     function onSaveClick() {
-        downloadAsFile(RECOVERY_KEY_FILE_NAME, ensure(recoveryKey));
+        downloadRecoveryKeyMnemonic(ensure(recoveryKey));
         onClose();
     }
 
@@ -111,3 +111,6 @@ const DashedBorderWrapper = styled(Box)(({ theme }) => ({
 
 const getRecoveryKeyMnemonic = async () =>
     bip39.entropyToMnemonic(await getRecoveryKey());
+
+const downloadRecoveryKeyMnemonic = (key: string) =>
+    downloadString(key, RECOVERY_KEY_FILE_NAME);

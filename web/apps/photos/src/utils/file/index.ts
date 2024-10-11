@@ -19,10 +19,10 @@ import { detectFileTypeInfo } from "@/new/photos/utils/detect-type";
 import { mergeMetadata } from "@/new/photos/utils/file";
 import { safeFileName } from "@/new/photos/utils/native-fs";
 import { writeStream } from "@/new/photos/utils/native-stream";
+import { downloadAndRevokeObjectURL } from "@/new/photos/utils/web";
 import { withTimeout } from "@/utils/promise";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";
-import { downloadUsingAnchor } from "@ente/shared/utils";
 import { t } from "i18next";
 import {
     addMultipleToFavorites,
@@ -70,8 +70,8 @@ export async function downloadFile(file: EnteFile) {
             const tempVideoURL = URL.createObjectURL(
                 new Blob([videoData], { type: videoType.mimeType }),
             );
-            downloadUsingAnchor(tempImageURL, imageFileName);
-            downloadUsingAnchor(tempVideoURL, videoFileName);
+            downloadAndRevokeObjectURL(tempImageURL, imageFileName);
+            downloadAndRevokeObjectURL(tempVideoURL, videoFileName);
         } else {
             const fileType = await detectFileTypeInfo(
                 new File([fileBlob], file.metadata.title),
@@ -81,7 +81,7 @@ export async function downloadFile(file: EnteFile) {
             ).blob();
             fileBlob = new Blob([fileBlob], { type: fileType.mimeType });
             const tempURL = URL.createObjectURL(fileBlob);
-            downloadUsingAnchor(tempURL, file.metadata.title);
+            downloadAndRevokeObjectURL(tempURL, file.metadata.title);
         }
     } catch (e) {
         log.error("failed to download file", e);
