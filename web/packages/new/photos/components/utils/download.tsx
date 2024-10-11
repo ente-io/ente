@@ -19,16 +19,16 @@ const downloadApp = () => openURL("https://ente.io/download/desktop");
 export const updateReadyToInstallDialogAttributes = ({
     version,
 }: AppUpdate): MiniDialogAttributes => ({
-    title: t("UPDATE_AVAILABLE"),
-    message: t("UPDATE_INSTALLABLE_MESSAGE"),
+    title: t("update_available"),
+    message: t("update_installable_message"),
     icon: <AutoAwesomeOutlined />,
     nonClosable: true,
     continue: {
-        text: t("INSTALL_NOW"),
+        text: t("install_now"),
         action: () => ensureElectron().updateAndRestart(),
     },
     cancel: {
-        text: t("INSTALL_ON_NEXT_LAUNCH"),
+        text: t("install_on_next_launch"),
         action: () => ensureElectron().updateOnNextRestart(version),
     },
 });
@@ -36,15 +36,15 @@ export const updateReadyToInstallDialogAttributes = ({
 export const updateAvailableForDownloadDialogAttributes = ({
     version,
 }: AppUpdate): MiniDialogAttributes => ({
-    title: t("UPDATE_AVAILABLE"),
-    message: t("UPDATE_AVAILABLE_MESSAGE"),
+    title: t("update_available"),
+    message: t("update_available_message"),
     icon: <AutoAwesomeOutlined />,
     continue: {
-        text: t("DOWNLOAD_AND_INSTALL"),
+        text: t("download_and_install"),
         action: downloadApp,
     },
     cancel: {
-        text: t("IGNORE_THIS_VERSION"),
+        text: t("ignore_this_version"),
         action: () => ensureElectron().skipAppUpdate(version),
     },
 });
