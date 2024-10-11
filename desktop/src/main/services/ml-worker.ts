@@ -153,6 +153,8 @@ const modelPathDownloadingIfNeeded = async (
 ) => {
     const modelPath = modelSavePath(modelName);
 
+    await cleanupOldModelsIfNeeded();
+
     if (!existsSync(modelPath)) {
         log.info("CLIP image model not found, downloading");
         await downloadModel(modelPath, modelName);
@@ -167,6 +169,33 @@ const modelPathDownloadingIfNeeded = async (
     }
 
     return modelPath;
+};
+
+/**
+ * Cleanup old models.
+ *
+ * This code runs whenever we need to download a new model, which usually
+ * happens when we update a model, so this is a great time to go through the
+ * list of previously existent but now unused models, and delete them if they
+ * exist to clean up the user's disk space.
+ */
+const cleanupOldModelsIfNeeded = async () => {
+    const oldModelNames = [
+        "clip-image-vit-32-float32.onnx",
+        "clip-text-vit-32-uint8.onnx",
+        "mobileclip_s2_image.onnx",
+        "mobileclip_s2_image_opset18_rgba_sim.onnx",
+        "mobileclip_s2_text_int32.onnx",
+        "yolov5s_face_640_640_dynamic.onnx",
+    ];
+
+    for (const modelName of oldModelNames) {
+        const modelPath = modelSavePath(modelName);
+        if (existsSync(modelPath)) {
+            log.info(`Removing unused ML model at ${modelPath}`);
+            await fs.rm(modelPath);
+        }
+    }
 };
 
 /** Return the path where the given {@link modelName} is meant to be saved */
