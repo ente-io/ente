@@ -1,3 +1,4 @@
+import { CenteredBox } from "@/base/components/mui/Container";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
@@ -319,21 +320,23 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
             fullScreen={isSmallWidth}
             PaperProps={{ sx: { minHeight: "60svh" } }}
         >
-            <DialogTitle sx={{ "&&&": { pt: "20px" } }}>
+            <DialogTitle sx={{ "&&&": { py: "20px" } }}>
                 {pt(`${person.name}?`)}
             </DialogTitle>
-            <DialogContent>
+            <DialogContent dividers sx={{ display: "flex" }}>
                 {!suggestions ? (
-                    phase == "loading" ? (
-                        <ActivityIndicator />
-                    ) : (
-                        <Typography
-                            color="text.muted"
-                            sx={{ textAlign: "center" }}
-                        >
-                            {pt("No more suggestions for now")}
-                        </Typography>
-                    )
+                    <CenteredBox>
+                        {phase == "loading" || true ? (
+                            <ActivityIndicator />
+                        ) : (
+                            <Typography
+                                color="text.muted"
+                                sx={{ textAlign: "center" }}
+                            >
+                                {pt("No more suggestions for now")}
+                            </Typography>
+                        )}
+                    </CenteredBox>
                 ) : (
                     <ul>
                         {suggestions.map((suggestion) => (
@@ -344,7 +347,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                     </ul>
                 )}
             </DialogContent>
-            <DialogActions>
+            <DialogActions sx={{ "&&": { pt: "12px" } }}>
                 <FocusVisibleButton
                     fullWidth
                     color="secondary"
