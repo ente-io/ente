@@ -119,8 +119,8 @@ const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({
             },
         });
 
-    // While technically it is possible for the cgroup not to have a name,
-    // logical wise we shouldn't be ending up here without a name.
+    // While technically it is possible for the cgroup not to have a name, logic
+    // wise we shouldn't be ending up here without a name.
     const name = cgroup.data.name ?? "";
 
     return (
