@@ -272,7 +272,6 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                 message: pt(
                     "You have unsaved changes. These will be lost if you close without saving",
                 ),
-                buttonDirection: "row",
                 continue: {
                     text: pt("Discard changes"),
                     color: "critical",
@@ -351,12 +350,12 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                     color="secondary"
                     onClick={handleClose}
                 >
-                    {t("cancel")}
+                    {t("close")}
                 </FocusVisibleButton>
                 <LoadingButton
-                    disabled={!suggestions}
-                    loading={phase == "saving"}
                     fullWidth
+                    disabled={!unsavedChanges}
+                    loading={phase == "saving"}
                     color={"accent"}
                     onClick={handleSave}
                 >
