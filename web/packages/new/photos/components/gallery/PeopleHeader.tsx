@@ -1,13 +1,21 @@
-import { useModalVisibility } from "@/base/components/utils/modal";
+import {
+    useModalVisibility,
+    type ModalVisibilityProps,
+} from "@/base/components/utils/modal";
 import { pt } from "@/base/i18n";
 import { deleteCGroup, renameCGroup } from "@/new/photos/services/ml";
-import { type Person } from "@/new/photos/services/ml/people";
+import {
+    type CGroupPerson,
+    type ClusterPerson,
+    type Person,
+} from "@/new/photos/services/ml/people";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
 import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
+import FaceRetouchingNatural from "@mui/icons-material/FaceRetouchingNatural";
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
-import { IconButton, Stack, Tooltip } from "@mui/material";
+import { Dialog, DialogTitle, IconButton, Stack, Tooltip } from "@mui/material";
 import { ClearIcon } from "@mui/x-date-pickers";
 import { t } from "i18next";
 import React from "react";
@@ -68,7 +76,7 @@ export const PeopleHeader: React.FC<PeopleHeaderProps> = ({
 };
 
 type CGroupPersonHeaderProps = Pick<PeopleHeaderProps, "onSelectPerson"> & {
-    person: Exclude<Person, { type: "cluster" }>;
+    person: CGroupPerson;
 };
 
 const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({
@@ -80,6 +88,8 @@ const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({
     const { showMiniDialog } = useAppContext();
 
     const { show: showNameInput, props: nameInputVisibilityProps } =
+        useModalVisibility();
+    const { show: showSuggestions, props: suggestionsVisibilityProps } =
         useModalVisibility();
 
     const handleRename = (name: string) => renameCGroup(cgroup, name);
@@ -129,6 +139,15 @@ const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({
                 >
                     {pt("Reset")}
                 </OverflowMenuOption>
+                {process.env.NEXT_PUBLIC_ENTE_WIP_CL /* TODO-Cluster */ && (
+                    <OverflowMenuOption
+                        startIcon={<FaceRetouchingNatural />}
+                        centerAlign
+                        onClick={showSuggestions}
+                    >
+                        {pt("Review suggestions")}
+                    </OverflowMenuOption>
+                )}
             </OverflowMenu>
 
             <SingleInputDialog
@@ -142,12 +161,17 @@ const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({
                 submitButtonTitle={t("rename")}
                 onSubmit={handleRename}
             />
+
+            <SuggestionsDialog
+                {...suggestionsVisibilityProps}
+                {...{ person }}
+            />
         </>
     );
 };
 
 type ClusterPersonHeaderProps = Pick<PeopleHeaderProps, "people"> & {
-    person: Exclude<Person, { type: "cgroup" }>;
+    person: ClusterPerson;
 };
 
 const ClusterPersonHeader: React.FC<ClusterPersonHeaderProps> = ({
@@ -193,5 +217,21 @@ const ClusterPersonHeader: React.FC<ClusterPersonHeaderProps> = ({
                 {...{ people, cluster }}
             />
         </>
+    );
+};
+
+type SuggestionsDialogProps = ModalVisibilityProps & {
+    person: CGroupPerson;
+};
+
+const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
+    person,
+    ...rest
+}) => {
+    console.log(person);
+    return (
+        <Dialog {...rest}>
+            <DialogTitle>Test</DialogTitle>
+        </Dialog>
     );
 };
