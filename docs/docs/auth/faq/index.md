@@ -40,14 +40,14 @@ incorrect time when various privacy settings are enabled.
 
 You can access your codes on the web at [auth.ente.io](https://auth.ente.io).
 
-### Does Ente Authenticator require an account?
+### Does Ente Auth require an account?
 
-Answer: No, Ente Authenticator does not require an account. You can choose to
-use the app without backups if you prefer.
+No, Ente Auth does not require an account. You can choose to use the app without
+backups if you prefer.
 
-### Can I use the Ente 2FA app on multiple devices and sync them?
+### Can I use Ente Auth on multiple devices and sync them?
 
-Yes, you can download the Ente app on multiple devices and sync the codes,
+Yes, you can download the Ente Auth on multiple devices and sync the codes,
 end-to-end encrypted.
 
 ### What information about my codes is stored on Ente server?
