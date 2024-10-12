@@ -432,6 +432,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
         setWatchFolderView,
         themeColor,
         setThemeColor,
+        showMiniDialog,
     } = appContext;
 
     const { show: showRecoveryKey, props: recoveryKeyVisibilityProps } =
@@ -527,7 +528,10 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
                 label={t("preferences")}
             />
 
-            <RecoveryKey {...recoveryKeyVisibilityProps} />
+            <RecoveryKey
+                {...recoveryKeyVisibilityProps}
+                {...{ showMiniDialog }}
+            />
             <TwoFactorModal
                 {...twoFactorVisibilityProps}
                 closeSidebar={closeSidebar}
