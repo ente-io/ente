@@ -1,4 +1,7 @@
-import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import {
+    ActivityIndicator,
+    ErrorIndicator,
+} from "@/base/components/mui/ActivityIndicator";
 import { CenteredBox } from "@/base/components/mui/Container";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
@@ -250,10 +253,10 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
     onClose,
     person,
 }) => {
-    const { showMiniDialog } = useAppContext();
+    const { showMiniDialog, onGenericError } = useAppContext();
 
     const [phase, setPhase] = useState<
-        "loading" | "failed" | "saving" | undefined
+        "loading" | "fetch-failed" | "saving" | undefined
     >();
     const [suggestions, setSuggestions] = useState<PersonSuggestion[]>([]);
     const [unsavedChanges /*, setUnsavedChanges */] = useState(false);
@@ -292,7 +295,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
             resetPhaseAndClose();
         } catch (e) {
             log.error("Failed to save suggestion review", e);
-            setPhase("failed");
+            onGenericError(e);
         }
     };
 
@@ -302,14 +305,28 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
         setPhase("loading");
 
         let ignore = false;
-        void suggestionsForPerson(person).then(async (suggestions) => {
-            setPhase(undefined);
-            if (!ignore) setSuggestions(suggestions);
-        });
+
+        const go = async () => {
+            try {
+                const suggestions = await suggestionsForPerson(person);
+                if (!ignore) {
+                    setPhase(undefined);
+                    setSuggestions(suggestions);
+                }
+            } catch (e) {
+                log.error("Failed to generate suggestions", e);
+                if (!ignore) {
+                    setPhase("fetch-failed");
+                }
+            }
+        };
+
+        void go();
+
         return () => {
             ignore = true;
         };
-    }, [open, person]);
+    }, [open, person, onGenericError]);
 
     console.log({ open, person });
 
@@ -331,6 +348,10 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                         <ActivityIndicator>
                             {pt("Finding similar faces...")}
                         </ActivityIndicator>
+                    </CenteredBox>
+                ) : phase == "fetch-failed" ? (
+                    <CenteredBox>
+                        <ErrorIndicator />
                     </CenteredBox>
                 ) : suggestions.length == 0 ? (
                     <CenteredBox>
