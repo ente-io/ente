@@ -8,7 +8,7 @@ import { AppNavbar } from "@/base/components/Navbar";
 import {
     genericErrorDialogAttributes,
     useAttributedMiniDialog,
-} from "@/base/components/utils/mini-dialog";
+} from "@/base/components/utils/dialog";
 import { setupI18n } from "@/base/i18n";
 import {
     logStartupBanner,
