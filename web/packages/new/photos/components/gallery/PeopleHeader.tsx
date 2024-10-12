@@ -327,7 +327,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                 {!suggestions ? (
                     <CenteredBox>
                         {phase == "loading" || true ? (
-                            <ActivityIndicator />
+                            <ActivityIndicator>{pt("Finding similar faces...")}</ActivityIndicator>
                         ) : (
                             <Typography
                                 color="text.muted"
