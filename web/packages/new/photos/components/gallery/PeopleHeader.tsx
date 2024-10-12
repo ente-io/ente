@@ -2,6 +2,7 @@ import {
     useModalVisibility,
     type ModalVisibilityProps,
 } from "@/base/components/utils/modal";
+import { useIsSmallWidth } from "@/base/hooks";
 import { pt } from "@/base/i18n";
 import { deleteCGroup, renameCGroup } from "@/new/photos/services/ml";
 import {
@@ -13,7 +14,7 @@ import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
 import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
-import FaceRetouchingNatural from "@mui/icons-material/FaceRetouchingNatural";
+import ListAltOutlined from "@mui/icons-material/ListAltOutlined";
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
 import { Dialog, DialogTitle, IconButton, Stack, Tooltip } from "@mui/material";
 import { ClearIcon } from "@mui/x-date-pickers";
@@ -141,7 +142,7 @@ const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({
                 </OverflowMenuOption>
                 {process.env.NEXT_PUBLIC_ENTE_WIP_CL /* TODO-Cluster */ && (
                     <OverflowMenuOption
-                        startIcon={<FaceRetouchingNatural />}
+                        startIcon={<ListAltOutlined />}
                         centerAlign
                         onClick={showSuggestions}
                     >
@@ -228,9 +229,11 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
     person,
     ...rest
 }) => {
+    const isSmallWidth = useIsSmallWidth();
+
     console.log(person);
     return (
-        <Dialog {...rest}>
+        <Dialog {...rest} maxWidth="sm" fullWidth fullScreen={isSmallWidth}>
             <DialogTitle>Test</DialogTitle>
         </Dialog>
     );

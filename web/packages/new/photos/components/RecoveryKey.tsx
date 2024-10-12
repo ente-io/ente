@@ -1,7 +1,7 @@
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { errorDialogAttributes } from "@/base/components/utils/mini-dialog";
 import type { ModalVisibilityProps } from "@/base/components/utils/modal";
-import { useIsMobileWidth } from "@/base/hooks";
+import { useIsSmallWidth } from "@/base/hooks";
 import log from "@/base/log";
 import { useAppContext } from "@/new/photos/types/context";
 import { ensure } from "@/utils/ensure";
@@ -31,7 +31,7 @@ export const RecoveryKey: React.FC<ModalVisibilityProps> = ({
     const { showMiniDialog } = useAppContext();
 
     const [recoveryKey, setRecoveryKey] = useState<string | undefined>();
-    const fullScreen = useIsMobileWidth();
+    const fullScreen = useIsSmallWidth();
 
     const handleLoadError = useCallback(
         (e: unknown) => {

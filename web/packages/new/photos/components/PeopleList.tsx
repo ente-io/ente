@@ -1,4 +1,4 @@
-import { useIsMobileWidth } from "@/base/hooks";
+import { useIsSmallWidth } from "@/base/hooks";
 import { pt } from "@/base/i18n";
 import { faceCrop, type AnnotatedFaceID } from "@/new/photos/services/ml";
 import type { Person } from "@/new/photos/services/ml/people";
@@ -20,12 +20,12 @@ export const SearchPeopleList: React.FC<SearchPeopleListProps> = ({
     people,
     onSelectPerson,
 }) => {
-    const isMobileWidth = useIsMobileWidth();
+    const isSmallWidth = useIsSmallWidth();
     return (
         <SearchPeopleContainer
             sx={{ justifyContent: people.length > 3 ? "center" : "start" }}
         >
-            {people.slice(0, isMobileWidth ? 6 : 7).map((person) => (
+            {people.slice(0, isSmallWidth ? 6 : 7).map((person) => (
                 <SearchPersonButton
                     key={person.id}
                     onClick={() => onSelectPerson(person)}
