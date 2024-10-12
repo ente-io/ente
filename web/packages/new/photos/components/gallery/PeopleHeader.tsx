@@ -1,10 +1,13 @@
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
+import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import {
     useModalVisibility,
     type ModalVisibilityProps,
 } from "@/base/components/utils/modal";
 import { useIsSmallWidth } from "@/base/hooks";
 import { pt } from "@/base/i18n";
+import log from "@/base/log";
 import {
     deleteCGroup,
     renameCGroup,
@@ -16,6 +19,7 @@ import {
     type Person,
     type PersonSuggestion,
 } from "@/new/photos/services/ml/people";
+import { wait } from "@/utils/promise";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
 import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
 import AddIcon from "@mui/icons-material/Add";
@@ -24,11 +28,13 @@ import ListAltOutlined from "@mui/icons-material/ListAltOutlined";
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
 import {
     Dialog,
+    DialogActions,
     DialogContent,
     DialogTitle,
     IconButton,
     Stack,
     Tooltip,
+    Typography,
 } from "@mui/material";
 import { ClearIcon } from "@mui/x-date-pickers";
 import { t } from "i18next";
@@ -243,11 +249,54 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
     onClose,
     person,
 }) => {
+    const { showMiniDialog } = useAppContext();
+
+    const [phase, setPhase] = useState<
+        "loading" | "failed" | "saving" | undefined
+    >();
     const [suggestions, setSuggestions] = useState<
         PersonSuggestion[] | undefined
     >();
+    const [unsavedChanges /*, setUnsavedChanges */] = useState(false);
 
     const isSmallWidth = useIsSmallWidth();
+
+    const resetPhaseAndClose = () => {
+        setPhase(undefined);
+        onClose();
+    };
+
+    const handleClose = () => {
+        if (unsavedChanges) {
+            showMiniDialog({
+                message: pt(
+                    "You have unsaved changes. These will be lost if you close without saving",
+                ),
+                buttonDirection: "row",
+                continue: {
+                    text: pt("Discard changes"),
+                    color: "critical",
+                    action: resetPhaseAndClose,
+                },
+            });
+            return;
+        }
+
+        resetPhaseAndClose();
+    };
+
+    const handleSave = async () => {
+        setPhase("saving");
+        try {
+            // TODO-Cluster
+            // await attributes.continue?.action?.();
+            await wait(3000);
+            resetPhaseAndClose();
+        } catch (e) {
+            log.error("Failed to save suggestion review", e);
+            setPhase("failed");
+        }
+    };
 
     useEffect(() => {
         if (!open) return;
@@ -264,7 +313,8 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
     console.log({ open, person });
     return (
         <Dialog
-            {...{ open, onClose }}
+            open={open}
+            onClose={handleClose}
             maxWidth="sm"
             fullWidth
             fullScreen={isSmallWidth}
@@ -275,7 +325,16 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
             </DialogTitle>
             <DialogContent>
                 {!suggestions ? (
-                    <ActivityIndicator />
+                    phase == "loading" ? (
+                        <ActivityIndicator />
+                    ) : (
+                        <Typography
+                            color="text.muted"
+                            sx={{ textAlign: "center" }}
+                        >
+                            {pt("No more suggestions for now")}
+                        </Typography>
+                    )
                 ) : (
                     <ul>
                         {suggestions.map((suggestion) => (
@@ -286,6 +345,24 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                     </ul>
                 )}
             </DialogContent>
+            <DialogActions>
+                <FocusVisibleButton
+                    fullWidth
+                    color="secondary"
+                    onClick={handleClose}
+                >
+                    {t("cancel")}
+                </FocusVisibleButton>
+                <LoadingButton
+                    disabled={!suggestions}
+                    loading={phase == "saving"}
+                    fullWidth
+                    color={"accent"}
+                    onClick={handleSave}
+                >
+                    {t("save")}
+                </LoadingButton>
+            </DialogActions>
         </Dialog>
     );
 };
