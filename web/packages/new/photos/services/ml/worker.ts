@@ -45,6 +45,7 @@ import {
     type RawRemoteMLData,
     type RemoteMLData,
 } from "./ml-data";
+import { suggestionsForPerson, type CGroupPerson } from "./people";
 import type { CLIPMatches, MLWorkerDelegate } from "./worker-types";
 
 /**
@@ -338,6 +339,13 @@ export class MLWorker {
     private updateClusteringProgress(progress: ClusteringProgress | undefined) {
         this.clusteringProgess = progress;
         this.delegate?.workerDidUpdateStatus();
+    }
+
+    /**
+     * Return suggestions for the given cgroup {@link person}.
+     */
+    async suggestionsForPerson(person: CGroupPerson) {
+        return suggestionsForPerson(person);
     }
 }
 

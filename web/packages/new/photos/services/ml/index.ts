@@ -27,7 +27,12 @@ import { deleteUserEntity } from "../user-entity/remote";
 import type { FaceCluster } from "./cluster";
 import { regenerateFaceCrops } from "./crop";
 import { clearMLDB, getIndexableAndIndexedCounts, savedFaceIndex } from "./db";
-import { filterNamedPeople, reconstructPeople, type Person } from "./people";
+import {
+    filterNamedPeople,
+    reconstructPeople,
+    type CGroupPerson,
+    type Person,
+} from "./people";
 import { MLWorker } from "./worker";
 import type { CLIPMatches } from "./worker-types";
 
@@ -783,3 +788,11 @@ export const deleteCGroup = async ({ id }: CGroup) => {
     await deleteUserEntity(id);
     return mlSync();
 };
+
+/**
+ * Return suggestions for the given {@link person}.
+ *
+ * The suggestion computation happens in a web worker.
+ */
+export const suggestionsForPerson = async (person: CGroupPerson) =>
+    worker().then((w) => w.suggestionsForPerson(person));
