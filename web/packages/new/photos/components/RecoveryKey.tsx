@@ -1,9 +1,9 @@
+import { type MiniDialogAttributes } from "@/base/components/MiniDialog";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { errorDialogAttributes } from "@/base/components/utils/mini-dialog";
 import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import { useIsSmallWidth } from "@/base/hooks";
 import log from "@/base/log";
-import { useAppContext } from "@/new/photos/types/context";
 import { ensure } from "@/utils/ensure";
 import CodeBlock from "@ente/shared/components/CodeBlock";
 import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleWithCloseButton";
@@ -24,12 +24,15 @@ import { downloadString } from "../utils/web";
 // mobile client library only supports english.
 bip39.setDefaultWordlist("english");
 
-export const RecoveryKey: React.FC<ModalVisibilityProps> = ({
+type RecoveryKeyProps = ModalVisibilityProps & {
+    showMiniDialog: (attributes: MiniDialogAttributes) => void;
+};
+
+export const RecoveryKey: React.FC<RecoveryKeyProps> = ({
     open,
     onClose,
+    showMiniDialog,
 }) => {
-    const { showMiniDialog } = useAppContext();
-
     const [recoveryKey, setRecoveryKey] = useState<string | undefined>();
     const fullScreen = useIsSmallWidth();
 

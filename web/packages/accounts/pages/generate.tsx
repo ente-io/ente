@@ -32,7 +32,7 @@ import { appHomeRoute } from "../services/redirect";
 import type { PageProps } from "../types/page";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
-    const { logout } = appContext;
+    const { logout, showMiniDialog } = appContext;
 
     const [token, setToken] = useState<string>();
     const [user, setUser] = useState<User>();
@@ -107,6 +107,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                         setOpenRecoveryKey(false);
                         router.push(appHomeRoute);
                     }}
+                    showMiniDialog={showMiniDialog}
                 />
             ) : (
                 <VerticallyCentered>
