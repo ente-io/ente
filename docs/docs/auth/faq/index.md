@@ -13,8 +13,8 @@ been externally audited.
 
 ### How can I delete or edit codes?
 
-You can delete or edit a code long press (or right click on desktop) on that
-item.
+You can delete or edit a code by long pressing (or right clicking on desktop) on
+that item.
 
 ### How can I support this project?
 
@@ -25,15 +25,15 @@ at [ente.io](https://ente.io).
 
 You can enable FaceID lock under Settings → Security → Lockscreen.
 
-### Why does the desktop and mobile app displays different code?
+### Why do the desktop and mobile apps display different codes?
 
-Please verify that the time on both your mobile and desktop is same.
+Please verify that the time on both your mobile and desktop is the same.
 
-The codes depend on time. If the time is the same on both browser and mobile,
-the codes you see will be the same.
+The codes depend on time. If the time is the same on both your browser and
+mobile, the codes you see will be the same.
 
-Usually this discrepancy occurs because the time in your browser might be
-incorrect. In particular, multiple users who have reported that Firefox provides
+Usually, this discrepancy occurs because the time in your browser might be
+incorrect. In particular, multiple users have reported that Firefox provides
 incorrect time when various privacy settings are enabled.
 
 ### Can I access my codes on web?
@@ -63,4 +63,5 @@ original device, are incompatible with your current device (likely because it's
 less powerful).
 
 If you recover your account via your current device and reset the password, it
-will re-generate a key with different parameters, that is equally strong, and is compatible on both devices.
+will re-generate a key with different parameters, that is equally strong, and is
+compatible on both devices.
