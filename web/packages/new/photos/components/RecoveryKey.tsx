@@ -1,6 +1,6 @@
 import { type MiniDialogAttributes } from "@/base/components/MiniDialog";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import { errorDialogAttributes } from "@/base/components/utils/mini-dialog";
+import { errorDialogAttributes } from "@/base/components/utils/dialog";
 import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import { useIsSmallWidth } from "@/base/hooks";
 import log from "@/base/log";

@@ -2,8 +2,9 @@ import type { EnteFile } from "../../types/file";
 import { getLocalFiles } from "../files";
 import { savedCGroups, type CGroup } from "../user-entity";
 import type { FaceCluster } from "./cluster";
-import { getFaceIndexes, savedFaceClusters } from "./db";
+import { savedFaceClusters, savedFaceIndexes } from "./db";
 import { fileIDFromFaceID } from "./face";
+import { dotProduct } from "./math";
 
 /**
  * A cgroup ("cluster group") is a group of clusters (possibly containing just a
@@ -167,7 +168,7 @@ export const reconstructPeople = async (): Promise<Person[]> => {
         { faceID: string; file: EnteFile; score: number }
     >();
 
-    const faceIndexes = await getFaceIndexes();
+    const faceIndexes = await savedFaceIndexes();
     for (const { faces } of faceIndexes) {
         for (const { faceID, score } of faces) {
             const fileID = fileIDFromFaceID(faceID);
@@ -304,4 +305,64 @@ export const filterNamedPeople = (people: Person[]): NamedPerson[] => {
         }
     }
     return namedPeople;
+};
+
+export type PersonSuggestion = FaceCluster;
+
+/**
+ * Returns suggestions for the given person.
+ */
+export const suggestionsForPerson = async (person: CGroupPerson) => {
+    const personClusters = person.cgroup.data.assigned;
+    // TODO-Cluster: Persist this.
+    const ignoredClusters: FaceCluster[] = [];
+
+    const clusters = await savedFaceClusters();
+    const faceIndexes = await savedFaceIndexes();
+
+    const embeddingByFaceID = new Map(
+        faceIndexes
+            .map(({ faces }) =>
+                faces.map(
+                    (f) => [f.faceID, new Float32Array(f.embedding)] as const,
+                ),
+            )
+            .flat(),
+    );
+
+    const personClusterIDs = new Set(personClusters.map(({ id }) => id));
+    const ignoredClusterIDs = new Set(ignoredClusters.map(({ id }) => id));
+
+    const personFaceEmbeddings = personClusters
+        .map(({ faces }) => faces.map((id) => embeddingByFaceID.get(id)))
+        .flat()
+        .filter((e) => !!e);
+
+    const suggestedClusters: FaceCluster[] = [];
+    for (const cluster of clusters) {
+        const { id, faces } = cluster;
+
+        if (faces.length < 2) continue;
+
+        if (personClusterIDs.has(id)) continue;
+        if (ignoredClusterIDs.has(id)) continue;
+
+        let suggest = false;
+        for (const fi of faces) {
+            const ei = embeddingByFaceID.get(fi);
+            if (!ei) continue;
+            for (const ej of personFaceEmbeddings) {
+                const csim = dotProduct(ei, ej);
+                if (csim >= 0.6) {
+                    suggest = true;
+                    break;
+                }
+            }
+            if (suggest) break;
+        }
+
+        if (suggest) suggestedClusters.push(cluster);
+    }
+
+    return suggestedClusters.sort((a, b) => b.faces.length - a.faces.length);
 };

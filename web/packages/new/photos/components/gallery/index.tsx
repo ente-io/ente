@@ -12,8 +12,8 @@ import type { SearchOption } from "@/new/photos/services/search/types";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import { Typography } from "@mui/material";
 import { t } from "i18next";
-import React, { useSyncExternalStore } from "react";
-import { mlStatusSnapshot, mlStatusSubscribe } from "../../services/ml";
+import React from "react";
+import { useMLStatus } from "../utils/ml";
 import { GalleryItemsHeaderAdapter, GalleryItemsSummary } from "./ListHeader";
 
 /**
@@ -45,7 +45,7 @@ export const SearchResultsHeader: React.FC<SearchResultsHeaderProps> = ({
 );
 
 export const PeopleEmptyState: React.FC = () => {
-    const mlStatus = useSyncExternalStore(mlStatusSubscribe, mlStatusSnapshot);
+    const mlStatus = useMLStatus();
 
     const message =
         mlStatus?.phase == "done"

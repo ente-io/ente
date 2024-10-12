@@ -1,15 +1,29 @@
 import {
+    ActivityIndicator,
+    ErrorIndicator,
+} from "@/base/components/mui/ActivityIndicator";
+import { CenteredBox } from "@/base/components/mui/Container";
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
+import { LoadingButton } from "@/base/components/mui/LoadingButton";
+import {
     useModalVisibility,
     type ModalVisibilityProps,
 } from "@/base/components/utils/modal";
 import { useIsSmallWidth } from "@/base/hooks";
 import { pt } from "@/base/i18n";
-import { deleteCGroup, renameCGroup } from "@/new/photos/services/ml";
+import log from "@/base/log";
+import {
+    deleteCGroup,
+    renameCGroup,
+    suggestionsForPerson,
+} from "@/new/photos/services/ml";
 import {
     type CGroupPerson,
     type ClusterPerson,
     type Person,
+    type PersonSuggestion,
 } from "@/new/photos/services/ml/people";
+import { wait } from "@/utils/promise";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
 import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
 import AddIcon from "@mui/icons-material/Add";
@@ -18,15 +32,17 @@ import ListAltOutlined from "@mui/icons-material/ListAltOutlined";
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
 import {
     Dialog,
+    DialogActions,
     DialogContent,
     DialogTitle,
     IconButton,
     Stack,
     Tooltip,
+    Typography,
 } from "@mui/material";
 import { ClearIcon } from "@mui/x-date-pickers";
 import { t } from "i18next";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useAppContext } from "../../types/context";
 import { AddPersonDialog } from "../AddPersonDialog";
 import { SpaceBetweenFlex } from "../mui";
@@ -233,24 +249,147 @@ type SuggestionsDialogProps = ModalVisibilityProps & {
 };
 
 const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
+    open,
+    onClose,
     person,
-    ...rest
 }) => {
+    const { showMiniDialog, onGenericError } = useAppContext();
+
+    const [phase, setPhase] = useState<
+        "loading" | "fetch-failed" | "saving" | undefined
+    >();
+    const [suggestions, setSuggestions] = useState<PersonSuggestion[]>([]);
+    const [unsavedChanges /*, setUnsavedChanges */] = useState(false);
+
     const isSmallWidth = useIsSmallWidth();
 
-    console.log(person);
+    const resetPhaseAndClose = () => {
+        setPhase(undefined);
+        onClose();
+    };
+
+    const handleClose = () => {
+        if (unsavedChanges) {
+            showMiniDialog({
+                message: pt(
+                    "You have unsaved changes. These will be lost if you close without saving",
+                ),
+                continue: {
+                    text: pt("Discard changes"),
+                    color: "critical",
+                    action: resetPhaseAndClose,
+                },
+            });
+            return;
+        }
+
+        resetPhaseAndClose();
+    };
+
+    const handleSave = async () => {
+        setPhase("saving");
+        try {
+            // TODO-Cluster
+            // await attributes.continue?.action?.();
+            await wait(3000);
+            resetPhaseAndClose();
+        } catch (e) {
+            log.error("Failed to save suggestion review", e);
+            onGenericError(e);
+        }
+    };
+
+    useEffect(() => {
+        if (!open) return;
+
+        setPhase("loading");
+
+        let ignore = false;
+
+        const go = async () => {
+            try {
+                const suggestions = await suggestionsForPerson(person);
+                if (!ignore) {
+                    setPhase(undefined);
+                    setSuggestions(suggestions);
+                }
+            } catch (e) {
+                log.error("Failed to generate suggestions", e);
+                if (!ignore) {
+                    setPhase("fetch-failed");
+                }
+            }
+        };
+
+        void go();
+
+        return () => {
+            ignore = true;
+        };
+    }, [open, person, onGenericError]);
+
+    console.log({ open, person });
+
     return (
         <Dialog
-            {...rest}
+            open={open}
+            onClose={handleClose}
             maxWidth="sm"
             fullWidth
             fullScreen={isSmallWidth}
-            PaperProps={{ sx: { minHeight: "60svh" } }}
+            PaperProps={{ sx: { minHeight: "80svh" } }}
         >
-            <DialogTitle sx={{ "&&&": { pt: "20px" } }}>
+            <DialogTitle sx={{ "&&&": { py: "20px" } }}>
                 {pt(`${person.name}?`)}
             </DialogTitle>
-            <DialogContent>Test</DialogContent>
+            <DialogContent dividers sx={{ display: "flex" }}>
+                {phase == "loading" ? (
+                    <CenteredBox>
+                        <ActivityIndicator>
+                            {pt("Finding similar faces...")}
+                        </ActivityIndicator>
+                    </CenteredBox>
+                ) : phase == "fetch-failed" ? (
+                    <CenteredBox>
+                        <ErrorIndicator />
+                    </CenteredBox>
+                ) : suggestions.length == 0 ? (
+                    <CenteredBox>
+                        <Typography
+                            color="text.muted"
+                            sx={{ textAlign: "center" }}
+                        >
+                            {pt("No more suggestions for now")}
+                        </Typography>
+                    </CenteredBox>
+                ) : (
+                    <ul>
+                        {suggestions.map((suggestion) => (
+                            <li
+                                key={suggestion.id}
+                            >{`${suggestion.faces.length} faces`}</li>
+                        ))}
+                    </ul>
+                )}
+            </DialogContent>
+            <DialogActions sx={{ "&&": { pt: "12px" } }}>
+                <FocusVisibleButton
+                    fullWidth
+                    color="secondary"
+                    onClick={handleClose}
+                >
+                    {t("close")}
+                </FocusVisibleButton>
+                <LoadingButton
+                    fullWidth
+                    disabled={!unsavedChanges}
+                    loading={phase == "saving"}
+                    color={"accent"}
+                    onClick={handleSave}
+                >
+                    {t("save")}
+                </LoadingButton>
+            </DialogActions>
         </Dialog>
     );
 };

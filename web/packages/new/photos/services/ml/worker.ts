@@ -32,9 +32,9 @@ import {
 } from "./cluster";
 import { saveFaceCrops } from "./crop";
 import {
-    getFaceIndexes,
     getIndexableFileIDs,
     markIndexingFailed,
+    savedFaceIndexes,
     saveIndexes,
     updateAssumingLocalFiles,
 } from "./db";
@@ -45,6 +45,7 @@ import {
     type RawRemoteMLData,
     type RemoteMLData,
 } from "./ml-data";
+import { suggestionsForPerson, type CGroupPerson } from "./people";
 import type { CLIPMatches, MLWorkerDelegate } from "./worker-types";
 
 /**
@@ -327,7 +328,7 @@ export class MLWorker {
      */
     async clusterFaces(masterKey: Uint8Array) {
         const clusters = await clusterFaces(
-            await getFaceIndexes(),
+            await savedFaceIndexes(),
             await getAllLocalFiles(),
             (progress) => this.updateClusteringProgress(progress),
         );
@@ -338,6 +339,13 @@ export class MLWorker {
     private updateClusteringProgress(progress: ClusteringProgress | undefined) {
         this.clusteringProgess = progress;
         this.delegate?.workerDidUpdateStatus();
+    }
+
+    /**
+     * Return suggestions for the given cgroup {@link person}.
+     */
+    async suggestionsForPerson(person: CGroupPerson) {
+        return suggestionsForPerson(person);
     }
 }
 
