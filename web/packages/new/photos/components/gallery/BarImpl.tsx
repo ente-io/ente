@@ -1,4 +1,4 @@
-import { useIsMobileWidth } from "@/base/hooks";
+import { useIsSmallWidth } from "@/base/hooks";
 import { CollectionsSortOptions } from "@/new/photos/components/CollectionsSortOptions";
 import { FilledIconButton } from "@/new/photos/components/mui";
 import {
@@ -119,7 +119,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
     activePerson,
     onSelectPerson,
 }) => {
-    const isMobile = useIsMobileWidth();
+    const isSmallWidth = useIsSmallWidth();
 
     const [canScrollLeft, setCanScrollLeft] = useState(false);
     const [canScrollRight, setCanScrollRight] = useState(false);
@@ -226,7 +226,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
         ],
     );
 
-    const controls1 = isMobile && (
+    const controls1 = isSmallWidth && (
         <Box display="flex" alignItems={"center"} gap={1} minHeight={"64px"}>
             {mode != "people" && (
                 <>
@@ -243,7 +243,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
         </Box>
     );
 
-    const controls2 = !isMobile && mode != "people" && (
+    const controls2 = !isSmallWidth && mode != "people" && (
         <Box display="flex" alignItems={"center"} gap={1} height={"64px"}>
             <CollectionsSortOptions
                 activeSortBy={collectionsSortBy}

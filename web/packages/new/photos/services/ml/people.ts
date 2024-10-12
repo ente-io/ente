@@ -126,6 +126,16 @@ export type Person = (
 };
 
 /**
+ * A person of type "cgroup".
+ */
+export type CGroupPerson = Exclude<Person, { type: "cluster" }>;
+
+/**
+ * A person of type "cluster".
+ */
+export type ClusterPerson = Exclude<Person, { type: "cgroup" }>;
+
+/**
  * A {@link Person} whose name is not empty.
  */
 export type NamedPerson = Person & {

@@ -2,7 +2,7 @@ import { EnteLogoSVG } from "@/base/components/EnteLogo";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { NavbarBase, SelectionBar } from "@/base/components/Navbar";
 import { sharedCryptoWorker } from "@/base/crypto";
-import { useIsMobileWidth, useIsTouchscreen } from "@/base/hooks";
+import { useIsSmallWidth, useIsTouchscreen } from "@/base/hooks";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
 import {
@@ -603,13 +603,13 @@ const EnteLogoLink = styled("a")(({ theme }) => ({
 
 const AddPhotosButton: React.FC<ButtonProps & IconButtonProps> = (props) => {
     const disabled = !uploadManager.shouldAllowNewUpload();
-    const isMobileWidth = useIsMobileWidth();
+    const isSmallWidth = useIsSmallWidth();
 
     const icon = <AddPhotoAlternateOutlined />;
 
     return (
         <Box>
-            {isMobileWidth ? (
+            {isSmallWidth ? (
                 <IconButton {...props} disabled={disabled}>
                     {icon}
                 </IconButton>

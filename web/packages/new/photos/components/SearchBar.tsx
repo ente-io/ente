@@ -1,5 +1,5 @@
 import { assertionFailed } from "@/base/assert";
-import { useIsMobileWidth } from "@/base/hooks";
+import { useIsSmallWidth } from "@/base/hooks";
 import { ItemCard, PreviewItemTile } from "@/new/photos/components/Tiles";
 import {
     isMLSupported,
@@ -104,11 +104,11 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     onShowSearchInput,
     ...rest
 }) => {
-    const isMobileWidth = useIsMobileWidth();
+    const isSmallWidth = useIsSmallWidth();
 
     return (
         <Box sx={{ flex: 1, px: ["4px", "24px"] }}>
-            {isMobileWidth && !isInSearchMode ? (
+            {isSmallWidth && !isInSearchMode ? (
                 <MobileSearchArea onSearch={onShowSearchInput} />
             ) : (
                 <SearchInput {...{ isInSearchMode }} {...rest} />
