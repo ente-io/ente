@@ -1,5 +1,5 @@
-import { CenteredBox } from "@/base/components/mui/Container";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { CenteredBox } from "@/base/components/mui/Container";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import {
@@ -255,9 +255,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
     const [phase, setPhase] = useState<
         "loading" | "failed" | "saving" | undefined
     >();
-    const [suggestions, setSuggestions] = useState<
-        PersonSuggestion[] | undefined
-    >();
+    const [suggestions, setSuggestions] = useState<PersonSuggestion[]>([]);
     const [unsavedChanges /*, setUnsavedChanges */] = useState(false);
 
     const isSmallWidth = useIsSmallWidth();
@@ -301,8 +299,11 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
     useEffect(() => {
         if (!open) return;
 
+        setPhase("loading");
+
         let ignore = false;
-        void suggestionsForPerson(person).then((suggestions) => {
+        void suggestionsForPerson(person).then(async (suggestions) => {
+            setPhase(undefined);
             if (!ignore) setSuggestions(suggestions);
         });
         return () => {
@@ -311,6 +312,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
     }, [open, person]);
 
     console.log({ open, person });
+
     return (
         <Dialog
             open={open}
@@ -318,24 +320,26 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
             maxWidth="sm"
             fullWidth
             fullScreen={isSmallWidth}
-            PaperProps={{ sx: { minHeight: "60svh" } }}
+            PaperProps={{ sx: { minHeight: "80svh" } }}
         >
             <DialogTitle sx={{ "&&&": { py: "20px" } }}>
                 {pt(`${person.name}?`)}
             </DialogTitle>
             <DialogContent dividers sx={{ display: "flex" }}>
-                {!suggestions ? (
+                {phase == "loading" ? (
                     <CenteredBox>
-                        {phase == "loading" || true ? (
-                            <ActivityIndicator>{pt("Finding similar faces...")}</ActivityIndicator>
-                        ) : (
-                            <Typography
-                                color="text.muted"
-                                sx={{ textAlign: "center" }}
-                            >
-                                {pt("No more suggestions for now")}
-                            </Typography>
-                        )}
+                        <ActivityIndicator>
+                            {pt("Finding similar faces...")}
+                        </ActivityIndicator>
+                    </CenteredBox>
+                ) : suggestions.length == 0 ? (
+                    <CenteredBox>
+                        <Typography
+                            color="text.muted"
+                            sx={{ textAlign: "center" }}
+                        >
+                            {pt("No more suggestions for now")}
+                        </Typography>
                     </CenteredBox>
                 ) : (
                     <ul>
