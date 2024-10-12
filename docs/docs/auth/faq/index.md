@@ -54,7 +54,7 @@ end-to-end encrypted.
 
 Due to E2EE, the server doesn't know anything about the code. Everything is
 encrypted, including the tags, type, account, issuer, notes, and pinned or trash
-status, etc."
+status, etc.
 
 ### What does it mean when I receive a message saying my current device is not powerful enough to verify my password?
 
