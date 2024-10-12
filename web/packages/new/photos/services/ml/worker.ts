@@ -32,9 +32,9 @@ import {
 } from "./cluster";
 import { saveFaceCrops } from "./crop";
 import {
-    getFaceIndexes,
     getIndexableFileIDs,
     markIndexingFailed,
+    savedFaceIndexes,
     saveIndexes,
     updateAssumingLocalFiles,
 } from "./db";
@@ -327,7 +327,7 @@ export class MLWorker {
      */
     async clusterFaces(masterKey: Uint8Array) {
         const clusters = await clusterFaces(
-            await getFaceIndexes(),
+            await savedFaceIndexes(),
             await getAllLocalFiles(),
             (progress) => this.updateClusteringProgress(progress),
         );

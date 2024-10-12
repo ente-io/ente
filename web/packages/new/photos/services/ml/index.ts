@@ -26,7 +26,7 @@ import {
 import { deleteUserEntity } from "../user-entity/remote";
 import type { FaceCluster } from "./cluster";
 import { regenerateFaceCrops } from "./crop";
-import { clearMLDB, getFaceIndex, getIndexableAndIndexedCounts } from "./db";
+import { clearMLDB, getIndexableAndIndexedCounts, savedFaceIndex } from "./db";
 import { filterNamedPeople, reconstructPeople, type Person } from "./people";
 import { MLWorker } from "./worker";
 import type { CLIPMatches } from "./worker-types";
@@ -633,7 +633,7 @@ export const getAnnotatedFacesForFile = async (
     const annotatedFaceIDs: AnnotatedFaceID[] = [];
     const otherFaceIDs: string[] = [];
 
-    const index = await getFaceIndex(enteFile.id);
+    const index = await savedFaceIndex(enteFile.id);
     if (!index) return { annotatedFaceIDs, otherFaceIDs };
 
     const people = _state.peopleSnapshot ?? [];
@@ -702,7 +702,7 @@ export const faceCrop = async (faceID: string, enteFile: EnteFile) => {
  * the file (updating the "face-crops" {@link BlobCache}).
  */
 const regenerateFaceCropsIfNeeded = async (enteFile: EnteFile) => {
-    const index = await getFaceIndex(enteFile.id);
+    const index = await savedFaceIndex(enteFile.id);
     if (!index) return;
 
     const cache = await blobCache("face-crops");
