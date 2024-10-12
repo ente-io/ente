@@ -7,9 +7,9 @@ description: Frequently asked questions about Ente Auth
 
 ### How secure is Ente Auth?
 
-All codes you backup via Ente is stored with end-to-end encryption. This means only
-you can access your codes. Our apps are open source and our cryptography has
-been externally audited.
+All codes you backup via Ente is stored with end-to-end encryption. This means
+only you can access your codes. Our apps are open source and our cryptography
+has been externally audited.
 
 ### How can I delete or edit codes?
 
