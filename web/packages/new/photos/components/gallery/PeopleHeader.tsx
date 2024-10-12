@@ -16,7 +16,14 @@ import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import ListAltOutlined from "@mui/icons-material/ListAltOutlined";
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
-import { Dialog, DialogTitle, IconButton, Stack, Tooltip } from "@mui/material";
+import {
+    Dialog,
+    DialogContent,
+    DialogTitle,
+    IconButton,
+    Stack,
+    Tooltip,
+} from "@mui/material";
 import { ClearIcon } from "@mui/x-date-pickers";
 import { t } from "i18next";
 import React from "react";
@@ -233,8 +240,17 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
 
     console.log(person);
     return (
-        <Dialog {...rest} maxWidth="sm" fullWidth fullScreen={isSmallWidth}>
-            <DialogTitle>Test</DialogTitle>
+        <Dialog
+            {...rest}
+            maxWidth="sm"
+            fullWidth
+            fullScreen={isSmallWidth}
+            PaperProps={{ sx: { minHeight: "60svh" } }}
+        >
+            <DialogTitle sx={{ "&&&": { pt: "20px" } }}>
+                {pt(`${person.name}?`)}
+            </DialogTitle>
+            <DialogContent>Test</DialogContent>
         </Dialog>
     );
 };
