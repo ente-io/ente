@@ -3,13 +3,7 @@ import { MenuItemGroup } from "@/base/components/Menu";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { Titlebar } from "@/base/components/Titlebar";
 import type { NestedDrawerVisibilityProps } from "@/base/components/utils/modal";
-import {
-    disableML,
-    enableML,
-    mlStatusSnapshot,
-    mlStatusSubscribe,
-    type MLStatus,
-} from "@/new/photos/services/ml";
+import { disableML, enableML, type MLStatus } from "@/new/photos/services/ml";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import {
     Box,
@@ -25,18 +19,19 @@ import {
     type DialogProps,
 } from "@mui/material";
 import { t } from "i18next";
-import React, { useEffect, useState, useSyncExternalStore } from "react";
+import React, { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 import { useAppContext } from "../types/context";
 import { openURL } from "../utils/web";
 import { useWrapAsyncOperation } from "./use-wrap-async";
+import { useMLStatus } from "./utils/ml";
 
 export const MLSettings: React.FC<NestedDrawerVisibilityProps> = ({
     open,
     onClose,
     onRootClose,
 }) => {
-    const mlStatus = useSyncExternalStore(mlStatusSubscribe, mlStatusSnapshot);
+    const mlStatus = useMLStatus();
     const [openFaceConsent, setOpenFaceConsent] = useState(false);
 
     const handleRootClose = () => {

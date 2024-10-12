@@ -31,6 +31,7 @@ import { useAppContext } from "../../types/context";
 import { AddPersonDialog } from "../AddPersonDialog";
 import { SpaceBetweenFlex } from "../mui";
 import { SingleInputDialog } from "../SingleInputForm";
+import { usePeople } from "../utils/ml";
 import type { GalleryBarImplProps } from "./BarImpl";
 import { GalleryItemsHeaderAdapter, GalleryItemsSummary } from "./ListHeader";
 
@@ -236,9 +237,10 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
     person,
     ...rest
 }) => {
+    const people = usePeople();
     const isSmallWidth = useIsSmallWidth();
 
-    console.log(person);
+    console.log({ open: rest.open, person, people });
     return (
         <Dialog
             {...rest}

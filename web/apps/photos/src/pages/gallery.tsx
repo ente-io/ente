@@ -20,6 +20,7 @@ import {
 } from "@/new/photos/components/gallery";
 import type { GalleryBarMode } from "@/new/photos/components/gallery/BarImpl";
 import { GalleryPeopleState } from "@/new/photos/components/gallery/PeopleHeader";
+import { usePeople } from "@/new/photos/components/utils/ml";
 import { shouldShowWhatsNew } from "@/new/photos/services/changelog";
 import type { CollectionSummaries } from "@/new/photos/services/collection/ui";
 import { areOnlySystemCollections } from "@/new/photos/services/collection/ui";
@@ -29,7 +30,6 @@ import {
     getLocalTrashedFiles,
     sortFiles,
 } from "@/new/photos/services/files";
-import { peopleSnapshot, peopleSubscribe } from "@/new/photos/services/ml";
 import type { Person } from "@/new/photos/services/ml/people";
 import {
     filterSearchableFiles,
@@ -103,7 +103,6 @@ import {
     useMemo,
     useRef,
     useState,
-    useSyncExternalStore,
 } from "react";
 import { useDropzone } from "react-dropzone";
 import {
@@ -324,7 +323,7 @@ export default function Gallery() {
     // The ID of the currently selected person in the gallery bar (if any).
     const [activePersonID, setActivePersonID] = useState<string | undefined>();
 
-    const people = useSyncExternalStore(peopleSubscribe, peopleSnapshot);
+    const people = usePeople();
 
     const [isClipSearchResult, setIsClipSearchResult] =
         useState<boolean>(false);

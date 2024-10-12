@@ -1,13 +1,7 @@
 import { assertionFailed } from "@/base/assert";
 import { useIsSmallWidth } from "@/base/hooks";
 import { ItemCard, PreviewItemTile } from "@/new/photos/components/Tiles";
-import {
-    isMLSupported,
-    mlStatusSnapshot,
-    mlStatusSubscribe,
-    peopleSnapshot,
-    peopleSubscribe,
-} from "@/new/photos/services/ml";
+import { isMLSupported, mlStatusSnapshot } from "@/new/photos/services/ml";
 import type { Person } from "@/new/photos/services/ml/people";
 import { searchOptionsForString } from "@/new/photos/services/search";
 import type { SearchOption } from "@/new/photos/services/search/types";
@@ -30,7 +24,7 @@ import {
 } from "@mui/material";
 import { t } from "i18next";
 import pDebounce from "p-debounce";
-import React, { useMemo, useRef, useState, useSyncExternalStore } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import {
     components as SelectComponents,
     type ControlProps,
@@ -44,6 +38,7 @@ import AsyncSelect from "react-select/async";
 import { SearchPeopleList } from "./PeopleList";
 import { UnstyledButton } from "./UnstyledButton";
 import type { ButtonishProps } from "./mui";
+import { useMLStatus, usePeople } from "./utils/ml";
 
 export interface SearchBarProps {
     /**
@@ -382,8 +377,8 @@ const shouldShowEmptyState = (inputValue: string) => {
 const EmptyState: React.FC<Pick<SearchBarProps, "onSelectPerson">> = ({
     onSelectPerson,
 }) => {
-    const mlStatus = useSyncExternalStore(mlStatusSubscribe, mlStatusSnapshot);
-    const people = useSyncExternalStore(peopleSubscribe, peopleSnapshot);
+    const mlStatus = useMLStatus();
+    const people = usePeople();
 
     if (!mlStatus || mlStatus.phase == "disabled") {
         // The preflight check should've prevented us from coming here.
