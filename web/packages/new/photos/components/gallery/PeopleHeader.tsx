@@ -1,14 +1,20 @@
+import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import {
     useModalVisibility,
     type ModalVisibilityProps,
 } from "@/base/components/utils/modal";
 import { useIsSmallWidth } from "@/base/hooks";
 import { pt } from "@/base/i18n";
-import { deleteCGroup, renameCGroup } from "@/new/photos/services/ml";
+import {
+    deleteCGroup,
+    renameCGroup,
+    suggestionsForPerson,
+} from "@/new/photos/services/ml";
 import {
     type CGroupPerson,
     type ClusterPerson,
     type Person,
+    type PersonSuggestion,
 } from "@/new/photos/services/ml/people";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
 import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
@@ -26,12 +32,11 @@ import {
 } from "@mui/material";
 import { ClearIcon } from "@mui/x-date-pickers";
 import { t } from "i18next";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useAppContext } from "../../types/context";
 import { AddPersonDialog } from "../AddPersonDialog";
 import { SpaceBetweenFlex } from "../mui";
 import { SingleInputDialog } from "../SingleInputForm";
-import { usePeople } from "../utils/ml";
 import type { GalleryBarImplProps } from "./BarImpl";
 import { GalleryItemsHeaderAdapter, GalleryItemsSummary } from "./ListHeader";
 
@@ -234,16 +239,32 @@ type SuggestionsDialogProps = ModalVisibilityProps & {
 };
 
 const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
+    open,
+    onClose,
     person,
-    ...rest
 }) => {
-    const people = usePeople();
+    const [suggestions, setSuggestions] = useState<
+        PersonSuggestion[] | undefined
+    >();
+
     const isSmallWidth = useIsSmallWidth();
 
-    console.log({ open: rest.open, person, people });
+    useEffect(() => {
+        if (!open) return;
+
+        let ignore = false;
+        void suggestionsForPerson(person).then((suggestions) => {
+            if (!ignore) setSuggestions(suggestions);
+        });
+        return () => {
+            ignore = true;
+        };
+    }, [open, person]);
+
+    console.log({ open, person });
     return (
         <Dialog
-            {...rest}
+            {...{ open, onClose }}
             maxWidth="sm"
             fullWidth
             fullScreen={isSmallWidth}
@@ -252,7 +273,19 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
             <DialogTitle sx={{ "&&&": { pt: "20px" } }}>
                 {pt(`${person.name}?`)}
             </DialogTitle>
-            <DialogContent>Test</DialogContent>
+            <DialogContent>
+                {!suggestions ? (
+                    <ActivityIndicator />
+                ) : (
+                    <ul>
+                        {suggestions.map((suggestion) => (
+                            <li
+                                key={suggestion.id}
+                            >{`${suggestion.faces.length} faces`}</li>
+                        ))}
+                    </ul>
+                )}
+            </DialogContent>
         </Dialog>
     );
 };

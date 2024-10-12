@@ -307,6 +307,8 @@ export const filterNamedPeople = (people: Person[]): NamedPerson[] => {
     return namedPeople;
 };
 
+export type PersonSuggestion = FaceCluster;
+
 /**
  * Returns suggestions for the given person.
  */
