@@ -7,7 +7,7 @@ description: Frequently asked questions about Ente Auth
 
 ### How secure is Ente Auth?
 
-All codes you backup via Ente is stored end-to-end encrypted. This means only
+All codes you backup via Ente is stored with end-to-end encryption. This means only
 you can access your codes. Our apps are open source and our cryptography has
 been externally audited.
 
@@ -34,7 +34,7 @@ mobile, the codes you see will be the same.
 
 Usually, this discrepancy occurs because the time in your browser might be
 incorrect. In particular, multiple users have reported that Firefox provides
-incorrect time when various privacy settings are enabled.
+incorrect time when certain privacy settings are enabled.
 
 ### Can I access my codes on web?
 
@@ -47,21 +47,21 @@ backups if you prefer.
 
 ### Can I use Ente Auth on multiple devices and sync them?
 
-Yes, you can download the Ente Auth on multiple devices and sync the codes,
-end-to-end encrypted.
+Yes, you can download Ente Auth on multiple devices and sync the codes with
+end-to-end encryption.
 
 ### What information about my codes is stored on Ente server?
 
-Due to E2EE, the server doesn't know anything about the code. Everything is
-encrypted, including the tags, type, account, issuer, notes, and pinned or trash
+Due to E2EE, the server doesn't know anything about your codes. Everything is
+encrypted, including the tags, type, account, issuer, notes, pinned or trash
 status, etc.
 
-### What does it mean when I receive a message saying my current device is not powerful enough to verify my password?
+### What does it mean when I receive a message saying that my current device isn't powerful enough to verify my password?
 
 This means that the parameters that were used to derive your master-key on your
 original device, are incompatible with your current device (likely because it's
 less powerful).
 
-If you recover your account via your current device and reset the password, it
-will re-generate a key with different parameters, that is equally strong, and is
-compatible on both devices.
+If you recover your account using your current device and reset the password, a
+new key will be generated with different parameters. This new key will be
+equally strong and compatible with both devices.
