@@ -342,6 +342,8 @@ export const suggestionsForPerson = async (person: CGroupPerson) => {
     for (const cluster of clusters) {
         const { id, faces } = cluster;
 
+        if (faces.length < 2) continue;
+
         if (personClusterIDs.has(id)) continue;
         if (ignoredClusterIDs.has(id)) continue;
 
