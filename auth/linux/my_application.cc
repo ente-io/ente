@@ -5,6 +5,10 @@
 #include <gdk/gdkx.h>
 #endif
 
+#ifdef GDK_WINDOWING_WAYLAND
+#include <gdk/gdkwayland.h>
+#endif
+
 #include "flutter/generated_plugin_registrant.h"
 
 struct _MyApplication
@@ -38,6 +42,7 @@ static void my_application_activate(GApplication *application)
   // If running on Wayland assume the header bar will work (may need changing
   // if future cases occur).
   gboolean use_header_bar = TRUE;
+
 #ifdef GDK_WINDOWING_X11
   GdkScreen *screen = gtk_window_get_screen(window);
   if (GDK_IS_X11_SCREEN(screen))
@@ -49,6 +54,21 @@ static void my_application_activate(GApplication *application)
     }
   }
 #endif
+
+#ifdef GDK_WINDOWING_WAYLAND
+  GdkDisplay* display = gtk_widget_get_display(GTK_WIDGET(window));
+  if (GDK_IS_WAYLAND_DISPLAY(display)) {
+    // Check the XDG_CURRENT_DESKTOP environment variable to determine the
+    // desktop environment.
+    const gchar* current_desktop = g_getenv("XDG_CURRENT_DESKTOP");
+    if (current_desktop != NULL && g_str_has_prefix(current_desktop, "GNOME")) {
+      use_header_bar = TRUE;
+    } else {
+      use_header_bar = FALSE;
+    }
+  }
+#endif
+
   if (use_header_bar)
   {
     GtkHeaderBar *header_bar = GTK_HEADER_BAR(gtk_header_bar_new());
