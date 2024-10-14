@@ -37,6 +37,8 @@ import {
     DialogContent,
     DialogTitle,
     IconButton,
+    List,
+    ListItem,
     Stack,
     Tooltip,
     Typography,
@@ -257,7 +259,21 @@ interface SuggestionsDialogState {
      * This is a workaround for the lack of stable identity of the person prop.
      */
     personID: string | undefined;
+    /**
+     * List of clusters (suitably augmented for the UI display) which might
+     * belong to the person, and being offered to the user as suggestions.
+     */
     suggestions: PersonSuggestion[];
+    /**
+     * IDs of the clusters (suggestions) that the user has accepted (as also
+     * belonging to the person under consideration).
+     */
+    acceptedSuggestionIDs: Set<string>;
+    /**
+     * IDs of the clusters (suggestions) that the user has rejected (as not
+     * belonging to the person under consideration).
+     */
+    rejectedSuggestionIDs: Set<string>;
 }
 
 type SuggestionsDialogAction =
@@ -273,6 +289,8 @@ const initialSuggestionsDialogState: SuggestionsDialogState = {
     fetchFailed: false,
     hasUnsavedChanges: false,
     suggestions: [],
+    acceptedSuggestionIDs: new Set(),
+    rejectedSuggestionIDs: new Set(),
 };
 
 const suggestionsDialogReducer = (
@@ -287,23 +305,17 @@ const suggestionsDialogReducer = (
                 fetchFailed: false,
                 hasUnsavedChanges: false,
                 suggestions: [],
+                acceptedSuggestionIDs: new Set(),
+                rejectedSuggestionIDs: new Set(),
             };
         case "fetchFailed":
             if (action.personID != state.personID) return state;
-            return {
-                activity: undefined,
-                personID: state.personID,
-                fetchFailed: true,
-                hasUnsavedChanges: false,
-                suggestions: [],
-            };
+            return { ...state, activity: undefined, fetchFailed: true };
         case "fetched":
             if (action.personID != state.personID) return state;
             return {
+                ...state,
                 activity: undefined,
-                personID: state.personID,
-                fetchFailed: false,
-                hasUnsavedChanges: false,
                 suggestions: action.suggestions,
             };
         case "save":
@@ -437,17 +449,13 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                         </Typography>
                     </CenteredBox>
                 ) : (
-                    <ul>
-                        {state.suggestions.map((suggestion) => (
-                            <li key={suggestion.id}>
-                                <SuggestionRow
-                                    suggestion={suggestion}
-                                    onAccept={handleAccept}
-                                    onReject={handleReject}
-                                />
-                            </li>
-                        ))}
-                    </ul>
+                    <SuggestionsList
+                        suggestions={state.suggestions}
+                        acceptedSuggestionIDs={state.acceptedSuggestionIDs}
+                        rejectedSuggestionIDs={state.rejectedSuggestionIDs}
+                        onAccept={handleAccept}
+                        onReject={handleReject}
+                    />
                 )}
             </DialogContent>
             <DialogActions sx={{ "&&": { pt: "12px" } }}>
@@ -472,30 +480,65 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
     );
 };
 
-interface SuggestionRowProps {
-    suggestion: PersonSuggestion;
-    /** "Yes" */
+type SuggestionsListProps = Pick<
+    SuggestionsDialogState,
+    "suggestions" | "acceptedSuggestionIDs" | "rejectedSuggestionIDs"
+> & {
+    /**
+     * Callback invoked when the user selects the "Yes" option next to a
+     * suggestion.
+     */
     onAccept: (suggestion: PersonSuggestion) => void;
-    /** "No" */
+    /**
+     * Callback invoked when the user selects the "No" option next to a
+     * suggestion.
+     */
     onReject: (suggestion: PersonSuggestion) => void;
-}
+};
 
-const SuggestionRow: React.FC<SuggestionRowProps> = ({
-    suggestion,
+const SuggestionsList: React.FC<SuggestionsListProps> = ({
+    suggestions,
+    acceptedSuggestionIDs,
+    rejectedSuggestionIDs,
     onAccept,
     onReject,
-}) => {
-    return (
-        <SpaceBetweenFlex>
-            <Typography>{`${suggestion.faces.length} faces`}</Typography>
-            <Box sx={{ display: "flex", gap: 1 }}>
-                <FocusVisibleButton
-                    color="accent"
-                    onClick={() => onAccept(suggestion)}
-                >
-                    {pt("Yes")}
-                </FocusVisibleButton>
-            </Box>
-        </SpaceBetweenFlex>
-    );
-};
+}) => (
+    <List sx={{ width: "100%" }}>
+        {suggestions.map((suggestion) => (
+            <ListItem
+                sx={{
+                    paddingInline: 0,
+                    border: "1px solid red",
+                    justifyContent: "space-between",
+                }}
+                key={suggestion.id}
+            >
+                <Typography>{`${suggestion.faces.length} faces ntaoheu naoehtu aosnehu asoenuh aoenuht`}</Typography>
+                <Box sx={{ display: "flex", gap: 1 }}>
+                    <FocusVisibleButton
+                        color="accent"
+                        variant={
+                            acceptedSuggestionIDs.has(suggestion.id)
+                                ? "contained"
+                                : "text"
+                        }
+                        onClick={() => onAccept(suggestion)}
+                    >
+                        {pt("Yes")}
+                    </FocusVisibleButton>
+                    <FocusVisibleButton
+                        color="critical"
+                        variant={
+                            rejectedSuggestionIDs.has(suggestion.id)
+                                ? "contained"
+                                : "text"
+                        }
+                        onClick={() => onAccept(suggestion)}
+                    >
+                        {pt("No")}
+                    </FocusVisibleButton>
+                </Box>
+            </ListItem>
+        ))}
+    </List>
+);
