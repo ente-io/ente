@@ -100,7 +100,7 @@ class _SearchResultPageState extends State<SearchResultPage> {
       child: InheritedSearchFilterData(
         searchFilterDataProvider: SearchFilterDataProvider(
           initialGalleryFilter:
-              widget.searchResult.toHierarchicalSearchFilter(),
+              widget.searchResult.getHierarchicalSearchFilter(),
         ),
         child: Scaffold(
           appBar: PreferredSize(

@@ -42,12 +42,7 @@ class GenericSearchResult extends SearchResult {
   }
 
   @override
-  HierarchicalSearchFilter toHierarchicalSearchFilter() {
-    return _type.toHierarchicalSearchFilter(this);
-  }
-
-  @override
-  getHierarchicalSearchResult() {
+  HierarchicalSearchFilter getHierarchicalSearchFilter() {
     return hierarchicalSearchFilter;
   }
 }

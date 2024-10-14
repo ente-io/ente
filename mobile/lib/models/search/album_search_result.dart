@@ -32,16 +32,7 @@ class AlbumSearchResult extends SearchResult {
   }
 
   @override
-  HierarchicalSearchFilter toHierarchicalSearchFilter() {
-    return AlbumFilter(
-      collectionID: collectionWithThumbnail.collection.id,
-      albumName: collectionWithThumbnail.collection.displayName,
-      occurrence: kMostRelevantFilter,
-    );
-  }
-
-  @override
-  HierarchicalSearchFilter getHierarchicalSearchResult() {
+  HierarchicalSearchFilter getHierarchicalSearchFilter() {
     return AlbumFilter(
       collectionID: collectionWithThumbnail.collection.id,
       albumName: collectionWithThumbnail.collection.displayName,
