@@ -1,3 +1,4 @@
+import { assertionFailed } from "@/base/assert";
 import log from "@/base/log";
 import type { EnteFile } from "../../types/file";
 import { getLocalFiles } from "../files";
@@ -143,6 +144,19 @@ export type ClusterPerson = Exclude<Person, { type: "cgroup" }>;
 export type NamedPerson = Person & {
     name: string;
 };
+
+/**
+ * A face ID annotated with the {@link EnteFile} that contains it.
+ *
+ * Both these pieces of information are needed for a UI element to show the
+ * face.
+ */
+export interface PreviewableFace {
+    /** The ID of the face to display. */
+    faceID: string;
+    /** The {@link EnteFile} which contains this face. */
+    enteFile: EnteFile;
+}
 
 /**
  * Construct in-memory people using the data present locally, ignoring faces
@@ -308,7 +322,23 @@ export const filterNamedPeople = (people: Person[]): NamedPerson[] => {
     return namedPeople;
 };
 
-export type PersonSuggestion = FaceCluster;
+export interface PersonSuggestion {
+    /**
+     * The ID of the suggestion. This is the same as the cluster's ID,
+     * duplicated here for the UI's convenience.
+     */
+    id: string;
+    /**
+     * The underlying {@link FaceCluster} that is being offered as the
+     * suggestion.
+     */
+    cluster: FaceCluster;
+    /**
+     * A list of up to 3 "preview" faces for this cluster, each annotated with
+     * the corresponding {@link EnteFile} that contains them.
+     */
+    previewFaces: PreviewableFace[];
+}
 
 /**
  * Returns suggestions for the given person.
@@ -367,13 +397,41 @@ export const suggestionsForPerson = async (person: CGroupPerson) => {
         if (suggest) suggestedClusters.push(cluster);
     }
 
-    const result = suggestedClusters.sort(
-        (a, b) => b.faces.length - a.faces.length,
-    );
+    suggestedClusters.sort((a, b) => b.faces.length - a.faces.length);
+
+    // Annotate the clusters with the information that the UI needs to show its
+    // preview faces.
+
+    const files = await getLocalFiles("normal");
+    const fileByID = new Map(files.map((f) => [f.id, f]));
+
+    const suggestions = suggestedClusters.map((cluster) => {
+        const previewFaces = cluster.faces
+            .slice(0, 3)
+            .map((faceID) => {
+                const fileID = fileIDFromFaceID(faceID);
+                if (!fileID) {
+                    assertionFailed();
+                    return undefined;
+                }
+                const file = fileByID.get(fileID);
+                if (!file) {
+                    // TODO-Cluster: This might be a hidden/trash file, so this
+                    // assert is not appropriate, we instead need a "until 3".
+                    // assertionFailed();
+                    return undefined;
+                }
+                return { enteFile: file, faceID };
+            })
+            .filter((f) => !!f);
+
+        const id = cluster.id;
+        return { id, cluster, previewFaces };
+    });
 
     log.info(
-        `Generated ${result.length} suggestions for ${person.id} (${Date.now() - startTime} ms)`,
+        `Generated ${suggestions.length} suggestions for ${person.id} (${Date.now() - startTime} ms)`,
     );
 
-    return result;
+    return suggestions;
 };

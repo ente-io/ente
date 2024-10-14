@@ -1,7 +1,7 @@
 import { useIsSmallWidth } from "@/base/hooks";
 import { pt } from "@/base/i18n";
 import { faceCrop, type AnnotatedFaceID } from "@/new/photos/services/ml";
-import type { Person } from "@/new/photos/services/ml/people";
+import type { Person, PreviewableFace } from "@/new/photos/services/ml/people";
 import type { EnteFile } from "@/new/photos/types/file";
 import { Skeleton, Typography, styled } from "@mui/material";
 import { t } from "i18next";
@@ -198,7 +198,7 @@ export interface SuggestionFaceListProps {
      * Faces, each annotated with the corresponding {@link EnteFile}, to show in
      * the list.
      */
-    faces: { enteFile: EnteFile; faceID: string }[];
+    faces: [];
 }
 
 /**
@@ -228,14 +228,10 @@ const SuggestionFaceList_ = styled("div")`
     gap: 5px;
 `;
 
-interface FaceCropImageViewProps {
-    /** The ID of the face to display. */
-    faceID: string;
-    /** The {@link EnteFile} which contains this face. */
-    enteFile: EnteFile;
+type FaceCropImageViewProps = PreviewableFace & {
     /** Width and height for the placeholder. */
     placeholderDimension: number;
-}
+};
 
 /**
  * An image view showing the face crop for the given face.

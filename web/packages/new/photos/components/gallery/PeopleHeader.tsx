@@ -381,7 +381,6 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
         const go = async () => {
             try {
                 const suggestions = await suggestionsForPerson(person);
-                console.log("fetching");
                 dispatch({ type: "fetched", personID, suggestions });
             } catch (e) {
                 log.error("Failed to generate suggestions", e);
@@ -425,8 +424,6 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
             onGenericError(e);
         }
     };
-
-    console.log({ f: "render", open, person, state });
 
     return (
         <Dialog
@@ -518,7 +515,7 @@ const SuggestionsList: React.FC<SuggestionsListProps> = ({
                 }}
                 key={suggestion.id}
             >
-                <Typography>{`${suggestion.faces.length} faces ntaoheu naoehtu aosnehu asoenuh aoenuht`}</Typography>
+                <Typography>{`${suggestion.previewFaces.length} faces ntaoheu naoehtu aosnehu asoenuh aoenuht`}</Typography>
                 <ToggleButtonGroup
                     value={markedSuggestionIDs.get(suggestion.id)}
                     exclusive
