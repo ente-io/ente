@@ -31,6 +31,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import ListAltOutlined from "@mui/icons-material/ListAltOutlined";
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
 import {
+    Box,
     Dialog,
     DialogActions,
     DialogContent,
@@ -337,37 +338,6 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
         onClose();
     };
 
-    const handleClose = () => {
-        if (state.hasUnsavedChanges) {
-            showMiniDialog({
-                message: pt(
-                    "You have unsaved changes. These will be lost if you close without saving",
-                ),
-                continue: {
-                    text: pt("Discard changes"),
-                    color: "critical",
-                    action: resetPersonAndClose,
-                },
-            });
-
-            return;
-        }
-
-        resetPersonAndClose();
-    };
-
-    const handleSave = async () => {
-        try {
-            // TODO-Cluster
-            // await attributes.continue?.action?.();
-            await wait(3000);
-            resetPersonAndClose();
-        } catch (e) {
-            log.error("Failed to save suggestion review", e);
-            onGenericError(e);
-        }
-    };
-
     useEffect(() => {
         if (!open) return;
 
@@ -393,6 +363,45 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
         void go();
     }, [open, person, state.personID]);
 
+    const handleClose = () => {
+        if (state.hasUnsavedChanges) {
+            showMiniDialog({
+                message: pt(
+                    "You have unsaved changes. These will be lost if you close without saving",
+                ),
+                continue: {
+                    text: pt("Discard changes"),
+                    color: "critical",
+                    action: resetPersonAndClose,
+                },
+            });
+
+            return;
+        }
+
+        resetPersonAndClose();
+    };
+
+    const handleAccept = (suggestion: PersonSuggestion) => {
+        console.log("Accept", suggestion);
+    };
+
+    const handleReject = (suggestion: PersonSuggestion) => {
+        console.log("Reject", suggestion);
+    };
+
+    const handleSave = async () => {
+        try {
+            // TODO-Cluster
+            // await attributes.continue?.action?.();
+            await wait(3000);
+            resetPersonAndClose();
+        } catch (e) {
+            log.error("Failed to save suggestion review", e);
+            onGenericError(e);
+        }
+    };
+
     console.log({ f: "render", open, person, state });
 
     return (
@@ -405,7 +414,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
             PaperProps={{ sx: { minHeight: "80svh" } }}
         >
             <DialogTitle sx={{ "&&&": { py: "20px" } }}>
-                {pt(`${person.name}?`)}
+                {person.name && pt(`${person.name}?`)}
             </DialogTitle>
             <DialogContent dividers sx={{ display: "flex" }}>
                 {state.activity == "fetching" ? (
@@ -430,9 +439,13 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                 ) : (
                     <ul>
                         {state.suggestions.map((suggestion) => (
-                            <li
-                                key={suggestion.id}
-                            >{`${suggestion.faces.length} faces`}</li>
+                            <li key={suggestion.id}>
+                                <SuggestionRow
+                                    suggestion={suggestion}
+                                    onAccept={handleAccept}
+                                    onReject={handleReject}
+                                />
+                            </li>
                         ))}
                     </ul>
                 )}
@@ -456,5 +469,33 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                 </LoadingButton>
             </DialogActions>
         </Dialog>
+    );
+};
+
+interface SuggestionRowProps {
+    suggestion: PersonSuggestion;
+    /** "Yes" */
+    onAccept: (suggestion: PersonSuggestion) => void;
+    /** "No" */
+    onReject: (suggestion: PersonSuggestion) => void;
+}
+
+const SuggestionRow: React.FC<SuggestionRowProps> = ({
+    suggestion,
+    onAccept,
+    onReject,
+}) => {
+    return (
+        <SpaceBetweenFlex>
+            <Typography>{`${suggestion.faces.length} faces`}</Typography>
+            <Box sx={{ display: "flex", gap: 1 }}>
+                <FocusVisibleButton
+                    color="accent"
+                    onClick={() => onAccept(suggestion)}
+                >
+                    {pt("Yes")}
+                </FocusVisibleButton>
+            </Box>
+        </SpaceBetweenFlex>
     );
 };
