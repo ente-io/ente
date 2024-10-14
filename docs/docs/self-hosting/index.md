@@ -16,7 +16,25 @@ the same code we use for our own cloud service.
 
 ## Getting started
 
-Start the server
+### Dependencies 
+
+Please follow the steps below to install all the necessary dependencies to run Ente on a fresh server or VPS.
+
+The commands and package names may vary depending on the operating system and it's package managers.
+
+```sh 
+# installing npm and yarn 
+
+sudo apt update 
+sudo apt install nodejs npm
+sudo npm install -g yarn // to install yarn globally
+``` 
+
+#### Installing Docker 
+
+Refer to [How to install Docker from the APT repository](https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository) for detailed instructions.
+
+#### Start the server
 
 ```sh
 git clone https://github.com/ente-io/ente
