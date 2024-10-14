@@ -483,5 +483,6 @@
   "importFailureDescNew": "无法解析选定的文件。",
   "appLockNotEnabled": "应用锁未启用",
   "appLockNotEnabledDescription": "请从“安全”>“应用锁”启用应用锁",
-  "authToViewPasskey": "请验证身份以查看通行密钥"
+  "authToViewPasskey": "请验证身份以查看通行密钥",
+  "appLockOfflineModeWarning": "您已选择继续而不备份。如果您忘记了应用锁，您将无法访问数据。"
 }
