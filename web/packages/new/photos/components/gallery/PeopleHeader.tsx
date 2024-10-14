@@ -42,7 +42,7 @@ import {
 } from "@mui/material";
 import { ClearIcon } from "@mui/x-date-pickers";
 import { t } from "i18next";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useReducer } from "react";
 import { useAppContext } from "../../types/context";
 import { AddPersonDialog } from "../AddPersonDialog";
 import { SpaceBetweenFlex } from "../mui";
@@ -248,6 +248,44 @@ type SuggestionsDialogProps = ModalVisibilityProps & {
     person: CGroupPerson;
 };
 
+interface SuggestionsDialogState {
+    phase: "loading" | "fetchFailed" | "saving" | undefined;
+    hasUnsavedChanges: boolean;
+    suggestions: PersonSuggestion[];
+}
+
+type SuggestionsDialogAction =
+    | { type: "load" }
+    | { type: "fetchFailure" }
+    | { type: "fetch"; suggestions: PersonSuggestion[] }
+    | { type: "save" };
+
+const initialSuggestionsDialogState: SuggestionsDialogState = {
+    phase: "loading",
+    hasUnsavedChanges: false,
+    suggestions: [],
+};
+
+const suggestionsDialogReducer = (
+    state: SuggestionsDialogState,
+    action: SuggestionsDialogAction,
+): SuggestionsDialogState => {
+    switch (action.type) {
+        case "load":
+            return initialSuggestionsDialogState;
+        case "fetchFailure":
+            return { ...state, phase: "fetchFailed" };
+        case "fetch":
+            return {
+                ...state,
+                phase: undefined,
+                suggestions: action.suggestions,
+            };
+        case "save":
+            return { ...state, phase: "saving" };
+    }
+};
+
 const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
     open,
     onClose,
@@ -255,21 +293,19 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
 }) => {
     const { showMiniDialog, onGenericError } = useAppContext();
 
-    const [phase, setPhase] = useState<
-        "loading" | "fetch-failed" | "saving" | undefined
-    >();
-    const [suggestions, setSuggestions] = useState<PersonSuggestion[]>([]);
-    const [unsavedChanges /*, setUnsavedChanges */] = useState(false);
+    const [{ hasUnsavedChanges, phase, suggestions }, dispatch] = useReducer(
+        suggestionsDialogReducer,
+        initialSuggestionsDialogState,
+    );
 
     const isSmallWidth = useIsSmallWidth();
 
     const resetPhaseAndClose = () => {
-        setPhase(undefined);
         onClose();
     };
 
     const handleClose = () => {
-        if (unsavedChanges) {
+        if (hasUnsavedChanges) {
             showMiniDialog({
                 message: pt(
                     "You have unsaved changes. These will be lost if you close without saving",
@@ -280,6 +316,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                     action: resetPhaseAndClose,
                 },
             });
+
             return;
         }
 
@@ -287,7 +324,6 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
     };
 
     const handleSave = async () => {
-        setPhase("saving");
         try {
             // TODO-Cluster
             // await attributes.continue?.action?.();
@@ -302,8 +338,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
     useEffect(() => {
         if (!open) return;
 
-        setPhase("loading");
-        setSuggestions([]);
+        dispatch({ type: "load" });
 
         let ignore = false;
 
@@ -311,13 +346,12 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
             try {
                 const suggestions = await suggestionsForPerson(person);
                 if (!ignore) {
-                    setPhase(undefined);
-                    setSuggestions(suggestions);
+                    dispatch({ type: "fetch", suggestions });
                 }
             } catch (e) {
                 log.error("Failed to generate suggestions", e);
                 if (!ignore) {
-                    setPhase("fetch-failed");
+                    dispatch({ type: "fetchFailure" });
                 }
             }
         };
@@ -327,7 +361,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
         return () => {
             ignore = true;
         };
-    }, [open, person, onGenericError]);
+    }, [open, person]);
 
     console.log({ open, person });
 
@@ -350,7 +384,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                             {pt("Finding similar faces...")}
                         </ActivityIndicator>
                     </CenteredBox>
-                ) : phase == "fetch-failed" ? (
+                ) : phase == "fetchFailed" ? (
                     <CenteredBox>
                         <ErrorIndicator />
                     </CenteredBox>
@@ -383,7 +417,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                 </FocusVisibleButton>
                 <LoadingButton
                     fullWidth
-                    disabled={!unsavedChanges}
+                    disabled={!hasUnsavedChanges}
                     loading={phase == "saving"}
                     color={"accent"}
                     onClick={handleSave}
