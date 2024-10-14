@@ -252,17 +252,23 @@ interface SuggestionsDialogState {
     activity: "fetching" | "saving" | undefined;
     fetchFailed: boolean;
     hasUnsavedChanges?: boolean;
+    /**
+     * This is a workaround for the lack of stable identity of the person prop.
+     */
+    personID: string | undefined;
     suggestions: PersonSuggestion[];
 }
 
 type SuggestionsDialogAction =
-    | { type: "fetch" }
+    | { type: "fetch"; personID: string }
     | { type: "fetchFailed" }
     | { type: "fetched"; suggestions: PersonSuggestion[] }
-    | { type: "save" };
+    | { type: "save" }
+    | { type: "close" };
 
 const initialSuggestionsDialogState: SuggestionsDialogState = {
-    activity: "fetching",
+    activity: undefined,
+    personID: undefined,
     fetchFailed: false,
     hasUnsavedChanges: false,
     suggestions: [],
@@ -274,18 +280,31 @@ const suggestionsDialogReducer = (
 ): SuggestionsDialogState => {
     switch (action.type) {
         case "fetch":
-            return initialSuggestionsDialogState;
+            return {
+                ...state,
+                activity: "fetching",
+                fetchFailed: false,
+                hasUnsavedChanges: false,
+                personID: action.personID,
+            };
         case "fetchFailed":
             return { ...state, fetchFailed: true };
         case "fetched":
             return {
+                ...state,
                 activity: undefined,
-                fetchFailed: false,
-                hasUnsavedChanges: false,
                 suggestions: action.suggestions,
             };
         case "save":
             return { ...state, activity: "saving" };
+        case "close":
+            // Reset the person ID when closing the dialog so that the
+            // suggestions are recomputed the next time the dialog is reopened
+            // (even for the same person).
+            //
+            // We cannot reset the suggestions themselves since they would cause
+            // the dialog to lose its visual state during the closing animation.
+            return { ...state, personID: undefined };
     }
 };
 
@@ -301,11 +320,13 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
         initialSuggestionsDialogState,
     );
 
-    const { activity, fetchFailed, hasUnsavedChanges, suggestions } = state;
+    const { activity, personID, fetchFailed, hasUnsavedChanges, suggestions } =
+        state;
 
     const isSmallWidth = useIsSmallWidth();
 
-    const resetPhaseAndClose = () => {
+    const resetPersonAndClose = () => {
+        dispatch({ type: "close" });
         onClose();
     };
 
@@ -318,14 +339,14 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                 continue: {
                     text: pt("Discard changes"),
                     color: "critical",
-                    action: resetPhaseAndClose,
+                    action: resetPersonAndClose,
                 },
             });
 
             return;
         }
 
-        resetPhaseAndClose();
+        resetPersonAndClose();
     };
 
     const handleSave = async () => {
@@ -333,7 +354,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
             // TODO-Cluster
             // await attributes.continue?.action?.();
             await wait(3000);
-            resetPhaseAndClose();
+            resetPersonAndClose();
         } catch (e) {
             log.error("Failed to save suggestion review", e);
             onGenericError(e);
@@ -343,7 +364,12 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
     useEffect(() => {
         if (!open) return;
 
-        dispatch({ type: "fetch" });
+        // Avoid recomputing when the person object changes without its identity
+        // changing. This is a workaround, a better fix would be to fix upstream
+        // to guarantee a stable identity of the person object itself.
+        if (person.id == personID) return;
+
+        dispatch({ type: "fetch", personID: person.id });
 
         let ignore = false;
 
@@ -366,7 +392,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
         return () => {
             ignore = true;
         };
-    }, [open, person]);
+    }, [open, person, personID]);
 
     console.log({ open, person });
 
