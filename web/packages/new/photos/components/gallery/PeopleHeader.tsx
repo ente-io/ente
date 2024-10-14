@@ -27,11 +27,12 @@ import { wait } from "@/utils/promise";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
 import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
 import AddIcon from "@mui/icons-material/Add";
+import CheckIcon from "@mui/icons-material/Check";
+import ClearIcon from "@mui/icons-material/Clear";
 import EditIcon from "@mui/icons-material/Edit";
 import ListAltOutlined from "@mui/icons-material/ListAltOutlined";
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
 import {
-    Box,
     Dialog,
     DialogActions,
     DialogContent,
@@ -40,10 +41,11 @@ import {
     List,
     ListItem,
     Stack,
+    ToggleButton,
+    ToggleButtonGroup,
     Tooltip,
     Typography,
 } from "@mui/material";
-import { ClearIcon } from "@mui/x-date-pickers";
 import { t } from "i18next";
 import React, { useEffect, useReducer } from "react";
 import { useAppContext } from "../../types/context";
@@ -179,7 +181,10 @@ const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({
 
             <SingleInputDialog
                 {...nameInputVisibilityProps}
-                title={pt("Rename person") /* TODO-Cluster pt()'s */}
+                title={
+                    pt("Rename person") /* TODO-Cluster pt()'s
+                    also remove "UNIDENTIFIED_FACES": "Unidentified faces" */
+                }
                 label={pt("Name")}
                 placeholder={t("enter_name")}
                 autoComplete="name"
@@ -268,27 +273,19 @@ interface SuggestionsDialogState {
      */
     suggestions: PersonSuggestion[];
     /**
-     * A boolean corresponing to each clusters (suggestions) that the user has
+     * An entry corresponding to each clusters (suggestions) that the user has
      * either explicitly accepted or rejected.
-     *
-     * Each entry is keyed by the ID of the cluster. There will only be entries
-     * for which the user has explicitly made a choice.
-     *
-     * - If the user has accepted the corresponding cluster (as belonging to the
-     *   person under consideration), then the value will be true.
-     *
-     * - If the user has rejected the corresponding cluster, then the value will
-     *   be false.
      */
-    markedSuggestionIDs: Map<string, boolean>;
+    markedSuggestionIDs: Map<string, NonNullable<SuggestionMark>>;
 }
+
+type SuggestionMark = "yes" | "no" | undefined;
 
 type SuggestionsDialogAction =
     | { type: "fetch"; personID: string }
     | { type: "fetchFailed"; personID: string }
     | { type: "fetched"; personID: string; suggestions: PersonSuggestion[] }
-    | { type: "toggleAccept"; suggestion: PersonSuggestion }
-    | { type: "toggleReject"; suggestion: PersonSuggestion }
+    | { type: "mark"; suggestion: PersonSuggestion; value: SuggestionMark }
     | { type: "save" }
     | { type: "close" };
 
@@ -323,26 +320,13 @@ const suggestionsDialogReducer = (
                 activity: undefined,
                 suggestions: action.suggestions,
             };
-        case "toggleAccept": {
+        case "mark": {
             const markedSuggestionIDs = new Map(state.markedSuggestionIDs);
             const id = action.suggestion.id;
-            if (markedSuggestionIDs.get(id) === true) {
-                markedSuggestionIDs.delete(id);
+            if (action.value == "yes" || action.value == "no") {
+                markedSuggestionIDs.set(id, action.value);
             } else {
-                markedSuggestionIDs.set(id, true);
-            }
-            return {
-                ...state,
-                markedSuggestionIDs,
-            };
-        }
-        case "toggleReject": {
-            const markedSuggestionIDs = new Map(state.markedSuggestionIDs);
-            const id = action.suggestion.id;
-            if (markedSuggestionIDs.get(id) === false) {
                 markedSuggestionIDs.delete(id);
-            } else {
-                markedSuggestionIDs.set(id, false);
             }
             return {
                 ...state,
@@ -427,11 +411,8 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
         resetPersonAndClose();
     };
 
-    const handleToggleAccept = (suggestion: PersonSuggestion) =>
-        dispatch({ type: "toggleAccept", suggestion });
-
-    const handleToggleReject = (suggestion: PersonSuggestion) =>
-        dispatch({ type: "toggleReject", suggestion });
+    const handleMark = (suggestion: PersonSuggestion, value: SuggestionMark) =>
+        dispatch({ type: "mark", suggestion, value });
 
     const handleSave = async () => {
         try {
@@ -483,8 +464,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                     <SuggestionsList
                         suggestions={state.suggestions}
                         markedSuggestionIDs={state.markedSuggestionIDs}
-                        onToggleAccept={handleToggleAccept}
-                        onToggleReject={handleToggleReject}
+                        onMarkSuggestion={handleMark}
                     />
                 )}
             </DialogContent>
@@ -515,22 +495,19 @@ type SuggestionsListProps = Pick<
     "suggestions" | "markedSuggestionIDs"
 > & {
     /**
-     * Callback invoked when the user selects the "Yes" option next to a
-     * suggestion.
+     * Callback invoked when the user toggles the value associated with the
+     * given suggestion.
      */
-    onToggleAccept: (suggestion: PersonSuggestion) => void;
-    /**
-     * Callback invoked when the user selects the "No" option next to a
-     * suggestion.
-     */
-    onToggleReject: (suggestion: PersonSuggestion) => void;
+    onMarkSuggestion: (
+        suggestion: PersonSuggestion,
+        value: SuggestionMark,
+    ) => void;
 };
 
 const SuggestionsList: React.FC<SuggestionsListProps> = ({
     suggestions,
     markedSuggestionIDs,
-    onToggleAccept,
-    onToggleReject,
+    onMarkSuggestion,
 }) => (
     <List sx={{ width: "100%" }}>
         {suggestions.map((suggestion) => (
@@ -542,30 +519,24 @@ const SuggestionsList: React.FC<SuggestionsListProps> = ({
                 key={suggestion.id}
             >
                 <Typography>{`${suggestion.faces.length} faces ntaoheu naoehtu aosnehu asoenuh aoenuht`}</Typography>
-                <Box sx={{ display: "flex", gap: 1 }}>
-                    <FocusVisibleButton
-                        color="accent"
-                        variant={
-                            markedSuggestionIDs.get(suggestion.id) === true
-                                ? "contained"
-                                : "text"
-                        }
-                        onClick={() => onToggleAccept(suggestion)}
-                    >
-                        {pt("Yes")}
-                    </FocusVisibleButton>
-                    <FocusVisibleButton
-                        color="critical"
-                        variant={
-                            markedSuggestionIDs.get(suggestion.id) === false
-                                ? "contained"
-                                : "text"
-                        }
-                        onClick={() => onToggleReject(suggestion)}
-                    >
-                        {pt("No")}
-                    </FocusVisibleButton>
-                </Box>
+                <ToggleButtonGroup
+                    value={markedSuggestionIDs.get(suggestion.id)}
+                    exclusive
+                    onChange={(_, v) =>
+                        onMarkSuggestion(
+                            suggestion,
+                            // Dance for TypeScript to recognize the type.
+                            v == "yes" ? "yes" : v == "no" ? "no" : undefined,
+                        )
+                    }
+                >
+                    <ToggleButton value="yes" aria-label={pt("Yes")}>
+                        <CheckIcon />
+                    </ToggleButton>
+                    <ToggleButton value="no" aria-label={t("no")}>
+                        <ClearIcon />
+                    </ToggleButton>
+                </ToggleButtonGroup>
             </ListItem>
         ))}
     </List>
