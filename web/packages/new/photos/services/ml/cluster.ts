@@ -45,17 +45,6 @@ export type ClusterFace = Omit<Face, "embedding"> & {
     isBadFace: boolean;
 };
 
-export interface ClusterPreview {
-    clusterSize: number;
-    faces: ClusterPreviewFace[];
-}
-
-export interface ClusterPreviewFace {
-    face: ClusterFace;
-    cosineSimilarity: number;
-    wasMerged: boolean;
-}
-
 /**
  * Generates clusters from the given faces using a batched form of linear
  * clustering, with a bit of lookback (and a dollop of heuristics) to get the
