@@ -253,12 +253,15 @@ type SuggestionsDialogProps = ModalVisibilityProps & {
 
 interface SuggestionsDialogState {
     activity: "fetching" | "saving" | undefined;
-    fetchFailed: boolean;
-    hasUnsavedChanges?: boolean;
     /**
-     * This is a workaround for the lack of stable identity of the person prop.
+     * This is a workaround for the lack of stable identity of the person prop
+     * passed to the dialog (on which we trigger the suggestion computation.)
      */
     personID: string | undefined;
+    /**
+     * True if "fetching" failed.
+     */
+    fetchFailed: boolean;
     /**
      * List of clusters (suitably augmented for the UI display) which might
      * belong to the person, and being offered to the user as suggestions.
@@ -280,6 +283,8 @@ type SuggestionsDialogAction =
     | { type: "fetch"; personID: string }
     | { type: "fetchFailed"; personID: string }
     | { type: "fetched"; personID: string; suggestions: PersonSuggestion[] }
+    | { type: "accept"; suggestion: PersonSuggestion }
+    | { type: "reject"; suggestion: PersonSuggestion }
     | { type: "save" }
     | { type: "close" };
 
@@ -287,7 +292,6 @@ const initialSuggestionsDialogState: SuggestionsDialogState = {
     activity: undefined,
     personID: undefined,
     fetchFailed: false,
-    hasUnsavedChanges: false,
     suggestions: [],
     acceptedSuggestionIDs: new Set(),
     rejectedSuggestionIDs: new Set(),
@@ -303,7 +307,6 @@ const suggestionsDialogReducer = (
                 activity: "fetching",
                 personID: action.personID,
                 fetchFailed: false,
-                hasUnsavedChanges: false,
                 suggestions: [],
                 acceptedSuggestionIDs: new Set(),
                 rejectedSuggestionIDs: new Set(),
@@ -318,6 +321,28 @@ const suggestionsDialogReducer = (
                 activity: undefined,
                 suggestions: action.suggestions,
             };
+        case "accept": {
+            const acceptedSuggestionIDs = new Set(state.acceptedSuggestionIDs);
+            const rejectedSuggestionIDs = new Set(state.rejectedSuggestionIDs);
+            acceptedSuggestionIDs.add(action.suggestion.id);
+            rejectedSuggestionIDs.delete(action.suggestion.id);
+            return {
+                ...state,
+                acceptedSuggestionIDs,
+                rejectedSuggestionIDs,
+            };
+        }
+        case "reject": {
+            const acceptedSuggestionIDs = new Set(state.acceptedSuggestionIDs);
+            const rejectedSuggestionIDs = new Set(state.rejectedSuggestionIDs);
+            acceptedSuggestionIDs.delete(action.suggestion.id);
+            rejectedSuggestionIDs.add(action.suggestion.id);
+            return {
+                ...state,
+                acceptedSuggestionIDs,
+                rejectedSuggestionIDs,
+            };
+        }
         case "save":
             return { ...state, activity: "saving" };
         case "close":
@@ -343,6 +368,8 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
         initialSuggestionsDialogState,
     );
 
+    const hasUnsavedChanges =
+        state.acceptedSuggestionIDs.size + state.rejectedSuggestionIDs.size > 0;
     const isSmallWidth = useIsSmallWidth();
 
     const resetPersonAndClose = () => {
@@ -376,7 +403,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
     }, [open, person, state.personID]);
 
     const handleClose = () => {
-        if (state.hasUnsavedChanges) {
+        if (hasUnsavedChanges) {
             showMiniDialog({
                 message: pt(
                     "You have unsaved changes. These will be lost if you close without saving",
@@ -394,13 +421,11 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
         resetPersonAndClose();
     };
 
-    const handleAccept = (suggestion: PersonSuggestion) => {
-        console.log("Accept", suggestion);
-    };
+    const handleAccept = (suggestion: PersonSuggestion) =>
+        dispatch({ type: "accept", suggestion });
 
-    const handleReject = (suggestion: PersonSuggestion) => {
-        console.log("Reject", suggestion);
-    };
+    const handleReject = (suggestion: PersonSuggestion) =>
+        dispatch({ type: "reject", suggestion });
 
     const handleSave = async () => {
         try {
@@ -468,7 +493,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                 </FocusVisibleButton>
                 <LoadingButton
                     fullWidth
-                    disabled={!state.hasUnsavedChanges}
+                    disabled={!hasUnsavedChanges}
                     loading={state.activity == "saving"}
                     color={"accent"}
                     onClick={handleSave}
@@ -508,7 +533,6 @@ const SuggestionsList: React.FC<SuggestionsListProps> = ({
             <ListItem
                 sx={{
                     paddingInline: 0,
-                    border: "1px solid red",
                     justifyContent: "space-between",
                 }}
                 key={suggestion.id}
@@ -533,7 +557,7 @@ const SuggestionsList: React.FC<SuggestionsListProps> = ({
                                 ? "contained"
                                 : "text"
                         }
-                        onClick={() => onAccept(suggestion)}
+                        onClick={() => onReject(suggestion)}
                     >
                         {pt("No")}
                     </FocusVisibleButton>
