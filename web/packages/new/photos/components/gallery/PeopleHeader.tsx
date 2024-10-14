@@ -261,8 +261,8 @@ interface SuggestionsDialogState {
 
 type SuggestionsDialogAction =
     | { type: "fetch"; personID: string }
-    | { type: "fetchFailed" }
-    | { type: "fetched"; suggestions: PersonSuggestion[] }
+    | { type: "fetchFailed"; personID: string }
+    | { type: "fetched"; personID: string; suggestions: PersonSuggestion[] }
     | { type: "save" }
     | { type: "close" };
 
@@ -281,18 +281,28 @@ const suggestionsDialogReducer = (
     switch (action.type) {
         case "fetch":
             return {
-                ...state,
                 activity: "fetching",
+                personID: action.personID,
                 fetchFailed: false,
                 hasUnsavedChanges: false,
-                personID: action.personID,
+                suggestions: [],
             };
         case "fetchFailed":
-            return { ...state, fetchFailed: true };
-        case "fetched":
+            if (action.personID != state.personID) return state;
             return {
-                ...state,
                 activity: undefined,
+                personID: state.personID,
+                fetchFailed: true,
+                hasUnsavedChanges: false,
+                suggestions: [],
+            };
+        case "fetched":
+            if (action.personID != state.personID) return state;
+            return {
+                activity: undefined,
+                personID: state.personID,
+                fetchFailed: false,
+                hasUnsavedChanges: false,
                 suggestions: action.suggestions,
             };
         case "save":
@@ -320,9 +330,6 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
         initialSuggestionsDialogState,
     );
 
-    const { activity, personID, fetchFailed, hasUnsavedChanges, suggestions } =
-        state;
-
     const isSmallWidth = useIsSmallWidth();
 
     const resetPersonAndClose = () => {
@@ -331,7 +338,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
     };
 
     const handleClose = () => {
-        if (hasUnsavedChanges) {
+        if (state.hasUnsavedChanges) {
             showMiniDialog({
                 message: pt(
                     "You have unsaved changes. These will be lost if you close without saving",
@@ -367,34 +374,26 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
         // Avoid recomputing when the person object changes without its identity
         // changing. This is a workaround, a better fix would be to fix upstream
         // to guarantee a stable identity of the person object itself.
-        if (person.id == personID) return;
+        const personID = person.id;
+        if (person.id == state.personID) return;
 
-        dispatch({ type: "fetch", personID: person.id });
-
-        let ignore = false;
+        dispatch({ type: "fetch", personID });
 
         const go = async () => {
             try {
                 const suggestions = await suggestionsForPerson(person);
-                if (!ignore) {
-                    dispatch({ type: "fetched", suggestions });
-                }
+                console.log("fetching");
+                dispatch({ type: "fetched", personID, suggestions });
             } catch (e) {
                 log.error("Failed to generate suggestions", e);
-                if (!ignore) {
-                    dispatch({ type: "fetchFailed" });
-                }
+                dispatch({ type: "fetchFailed", personID });
             }
         };
 
         void go();
+    }, [open, person, state.personID]);
 
-        return () => {
-            ignore = true;
-        };
-    }, [open, person, personID]);
-
-    console.log({ open, person });
+    console.log({ f: "render", open, person, state });
 
     return (
         <Dialog
@@ -409,17 +408,17 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                 {pt(`${person.name}?`)}
             </DialogTitle>
             <DialogContent dividers sx={{ display: "flex" }}>
-                {activity == "fetching" ? (
+                {state.activity == "fetching" ? (
                     <CenteredBox>
                         <ActivityIndicator>
                             {pt("Finding similar faces...")}
                         </ActivityIndicator>
                     </CenteredBox>
-                ) : fetchFailed ? (
+                ) : state.fetchFailed ? (
                     <CenteredBox>
                         <ErrorIndicator />
                     </CenteredBox>
-                ) : suggestions.length == 0 ? (
+                ) : state.suggestions.length == 0 ? (
                     <CenteredBox>
                         <Typography
                             color="text.muted"
@@ -430,7 +429,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                     </CenteredBox>
                 ) : (
                     <ul>
-                        {suggestions.map((suggestion) => (
+                        {state.suggestions.map((suggestion) => (
                             <li
                                 key={suggestion.id}
                             >{`${suggestion.faces.length} faces`}</li>
@@ -448,8 +447,8 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                 </FocusVisibleButton>
                 <LoadingButton
                     fullWidth
-                    disabled={!hasUnsavedChanges}
-                    loading={activity == "saving"}
+                    disabled={!state.hasUnsavedChanges}
+                    loading={state.activity == "saving"}
                     color={"accent"}
                     onClick={handleSave}
                 >

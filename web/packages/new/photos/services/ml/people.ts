@@ -1,3 +1,4 @@
+import log from "@/base/log";
 import type { EnteFile } from "../../types/file";
 import { getLocalFiles } from "../files";
 import { savedCGroups, type CGroup } from "../user-entity";
@@ -313,6 +314,8 @@ export type PersonSuggestion = FaceCluster;
  * Returns suggestions for the given person.
  */
 export const suggestionsForPerson = async (person: CGroupPerson) => {
+    const startTime = Date.now();
+
     const personClusters = person.cgroup.data.assigned;
     // TODO-Cluster: Persist this.
     const ignoredClusters: FaceCluster[] = [];
@@ -364,5 +367,13 @@ export const suggestionsForPerson = async (person: CGroupPerson) => {
         if (suggest) suggestedClusters.push(cluster);
     }
 
-    return suggestedClusters.sort((a, b) => b.faces.length - a.faces.length);
+    const result = suggestedClusters.sort(
+        (a, b) => b.faces.length - a.faces.length,
+    );
+
+    log.info(
+        `Generated ${result.length} suggestions for ${person.id} (${Date.now() - startTime} ms)`,
+    );
+
+    return result;
 };
