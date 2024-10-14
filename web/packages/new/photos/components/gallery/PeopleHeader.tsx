@@ -268,23 +268,27 @@ interface SuggestionsDialogState {
      */
     suggestions: PersonSuggestion[];
     /**
-     * IDs of the clusters (suggestions) that the user has accepted (as also
-     * belonging to the person under consideration).
+     * A boolean corresponing to each clusters (suggestions) that the user has
+     * either explicitly accepted or rejected.
+     *
+     * Each entry is keyed by the ID of the cluster. There will only be entries
+     * for which the user has explicitly made a choice.
+     *
+     * - If the user has accepted the corresponding cluster (as belonging to the
+     *   person under consideration), then the value will be true.
+     *
+     * - If the user has rejected the corresponding cluster, then the value will
+     *   be false.
      */
-    acceptedSuggestionIDs: Set<string>;
-    /**
-     * IDs of the clusters (suggestions) that the user has rejected (as not
-     * belonging to the person under consideration).
-     */
-    rejectedSuggestionIDs: Set<string>;
+    markedSuggestionIDs: Map<string, boolean>;
 }
 
 type SuggestionsDialogAction =
     | { type: "fetch"; personID: string }
     | { type: "fetchFailed"; personID: string }
     | { type: "fetched"; personID: string; suggestions: PersonSuggestion[] }
-    | { type: "accept"; suggestion: PersonSuggestion }
-    | { type: "reject"; suggestion: PersonSuggestion }
+    | { type: "toggleAccept"; suggestion: PersonSuggestion }
+    | { type: "toggleReject"; suggestion: PersonSuggestion }
     | { type: "save" }
     | { type: "close" };
 
@@ -293,8 +297,7 @@ const initialSuggestionsDialogState: SuggestionsDialogState = {
     personID: undefined,
     fetchFailed: false,
     suggestions: [],
-    acceptedSuggestionIDs: new Set(),
-    rejectedSuggestionIDs: new Set(),
+    markedSuggestionIDs: new Map(),
 };
 
 const suggestionsDialogReducer = (
@@ -308,8 +311,7 @@ const suggestionsDialogReducer = (
                 personID: action.personID,
                 fetchFailed: false,
                 suggestions: [],
-                acceptedSuggestionIDs: new Set(),
-                rejectedSuggestionIDs: new Set(),
+                markedSuggestionIDs: new Map(),
             };
         case "fetchFailed":
             if (action.personID != state.personID) return state;
@@ -321,26 +323,30 @@ const suggestionsDialogReducer = (
                 activity: undefined,
                 suggestions: action.suggestions,
             };
-        case "accept": {
-            const acceptedSuggestionIDs = new Set(state.acceptedSuggestionIDs);
-            const rejectedSuggestionIDs = new Set(state.rejectedSuggestionIDs);
-            acceptedSuggestionIDs.add(action.suggestion.id);
-            rejectedSuggestionIDs.delete(action.suggestion.id);
+        case "toggleAccept": {
+            const markedSuggestionIDs = new Map(state.markedSuggestionIDs);
+            const id = action.suggestion.id;
+            if (markedSuggestionIDs.get(id) === true) {
+                markedSuggestionIDs.delete(id);
+            } else {
+                markedSuggestionIDs.set(id, true);
+            }
             return {
                 ...state,
-                acceptedSuggestionIDs,
-                rejectedSuggestionIDs,
+                markedSuggestionIDs,
             };
         }
-        case "reject": {
-            const acceptedSuggestionIDs = new Set(state.acceptedSuggestionIDs);
-            const rejectedSuggestionIDs = new Set(state.rejectedSuggestionIDs);
-            acceptedSuggestionIDs.delete(action.suggestion.id);
-            rejectedSuggestionIDs.add(action.suggestion.id);
+        case "toggleReject": {
+            const markedSuggestionIDs = new Map(state.markedSuggestionIDs);
+            const id = action.suggestion.id;
+            if (markedSuggestionIDs.get(id) === false) {
+                markedSuggestionIDs.delete(id);
+            } else {
+                markedSuggestionIDs.set(id, false);
+            }
             return {
                 ...state,
-                acceptedSuggestionIDs,
-                rejectedSuggestionIDs,
+                markedSuggestionIDs,
             };
         }
         case "save":
@@ -368,9 +374,9 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
         initialSuggestionsDialogState,
     );
 
-    const hasUnsavedChanges =
-        state.acceptedSuggestionIDs.size + state.rejectedSuggestionIDs.size > 0;
     const isSmallWidth = useIsSmallWidth();
+
+    const hasUnsavedChanges = state.markedSuggestionIDs.size > 0;
 
     const resetPersonAndClose = () => {
         dispatch({ type: "close" });
@@ -421,11 +427,11 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
         resetPersonAndClose();
     };
 
-    const handleAccept = (suggestion: PersonSuggestion) =>
-        dispatch({ type: "accept", suggestion });
+    const handleToggleAccept = (suggestion: PersonSuggestion) =>
+        dispatch({ type: "toggleAccept", suggestion });
 
-    const handleReject = (suggestion: PersonSuggestion) =>
-        dispatch({ type: "reject", suggestion });
+    const handleToggleReject = (suggestion: PersonSuggestion) =>
+        dispatch({ type: "toggleReject", suggestion });
 
     const handleSave = async () => {
         try {
@@ -476,10 +482,9 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                 ) : (
                     <SuggestionsList
                         suggestions={state.suggestions}
-                        acceptedSuggestionIDs={state.acceptedSuggestionIDs}
-                        rejectedSuggestionIDs={state.rejectedSuggestionIDs}
-                        onAccept={handleAccept}
-                        onReject={handleReject}
+                        markedSuggestionIDs={state.markedSuggestionIDs}
+                        onToggleAccept={handleToggleAccept}
+                        onToggleReject={handleToggleReject}
                     />
                 )}
             </DialogContent>
@@ -507,26 +512,25 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
 
 type SuggestionsListProps = Pick<
     SuggestionsDialogState,
-    "suggestions" | "acceptedSuggestionIDs" | "rejectedSuggestionIDs"
+    "suggestions" | "markedSuggestionIDs"
 > & {
     /**
      * Callback invoked when the user selects the "Yes" option next to a
      * suggestion.
      */
-    onAccept: (suggestion: PersonSuggestion) => void;
+    onToggleAccept: (suggestion: PersonSuggestion) => void;
     /**
      * Callback invoked when the user selects the "No" option next to a
      * suggestion.
      */
-    onReject: (suggestion: PersonSuggestion) => void;
+    onToggleReject: (suggestion: PersonSuggestion) => void;
 };
 
 const SuggestionsList: React.FC<SuggestionsListProps> = ({
     suggestions,
-    acceptedSuggestionIDs,
-    rejectedSuggestionIDs,
-    onAccept,
-    onReject,
+    markedSuggestionIDs,
+    onToggleAccept,
+    onToggleReject,
 }) => (
     <List sx={{ width: "100%" }}>
         {suggestions.map((suggestion) => (
@@ -542,22 +546,22 @@ const SuggestionsList: React.FC<SuggestionsListProps> = ({
                     <FocusVisibleButton
                         color="accent"
                         variant={
-                            acceptedSuggestionIDs.has(suggestion.id)
+                            markedSuggestionIDs.get(suggestion.id) === true
                                 ? "contained"
                                 : "text"
                         }
-                        onClick={() => onAccept(suggestion)}
+                        onClick={() => onToggleAccept(suggestion)}
                     >
                         {pt("Yes")}
                     </FocusVisibleButton>
                     <FocusVisibleButton
                         color="critical"
                         variant={
-                            rejectedSuggestionIDs.has(suggestion.id)
+                            markedSuggestionIDs.get(suggestion.id) === false
                                 ? "contained"
                                 : "text"
                         }
-                        onClick={() => onReject(suggestion)}
+                        onClick={() => onToggleReject(suggestion)}
                     >
                         {pt("No")}
                     </FocusVisibleButton>
