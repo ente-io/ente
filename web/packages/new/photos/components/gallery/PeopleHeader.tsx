@@ -303,6 +303,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
         if (!open) return;
 
         setPhase("loading");
+        setSuggestions([]);
 
         let ignore = false;
 
