@@ -249,19 +249,21 @@ type SuggestionsDialogProps = ModalVisibilityProps & {
 };
 
 interface SuggestionsDialogState {
-    phase: "loading" | "fetchFailed" | "saving" | undefined;
-    hasUnsavedChanges: boolean;
+    activity: "fetching" | "saving" | undefined;
+    fetchFailed: boolean;
+    hasUnsavedChanges?: boolean;
     suggestions: PersonSuggestion[];
 }
 
 type SuggestionsDialogAction =
-    | { type: "load" }
-    | { type: "fetchFailure" }
-    | { type: "fetch"; suggestions: PersonSuggestion[] }
+    | { type: "fetch" }
+    | { type: "fetchFailed" }
+    | { type: "fetched"; suggestions: PersonSuggestion[] }
     | { type: "save" };
 
 const initialSuggestionsDialogState: SuggestionsDialogState = {
-    phase: "loading",
+    activity: "fetching",
+    fetchFailed: false,
     hasUnsavedChanges: false,
     suggestions: [],
 };
@@ -271,18 +273,19 @@ const suggestionsDialogReducer = (
     action: SuggestionsDialogAction,
 ): SuggestionsDialogState => {
     switch (action.type) {
-        case "load":
-            return initialSuggestionsDialogState;
-        case "fetchFailure":
-            return { ...state, phase: "fetchFailed" };
         case "fetch":
+            return initialSuggestionsDialogState;
+        case "fetchFailed":
+            return { ...state, fetchFailed: true };
+        case "fetched":
             return {
-                ...state,
-                phase: undefined,
+                activity: undefined,
+                fetchFailed: false,
+                hasUnsavedChanges: false,
                 suggestions: action.suggestions,
             };
         case "save":
-            return { ...state, phase: "saving" };
+            return { ...state, activity: "saving" };
     }
 };
 
@@ -293,10 +296,12 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
 }) => {
     const { showMiniDialog, onGenericError } = useAppContext();
 
-    const [{ hasUnsavedChanges, phase, suggestions }, dispatch] = useReducer(
+    const [state, dispatch] = useReducer(
         suggestionsDialogReducer,
         initialSuggestionsDialogState,
     );
+
+    const { activity, fetchFailed, hasUnsavedChanges, suggestions } = state;
 
     const isSmallWidth = useIsSmallWidth();
 
@@ -338,7 +343,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
     useEffect(() => {
         if (!open) return;
 
-        dispatch({ type: "load" });
+        dispatch({ type: "fetch" });
 
         let ignore = false;
 
@@ -346,12 +351,12 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
             try {
                 const suggestions = await suggestionsForPerson(person);
                 if (!ignore) {
-                    dispatch({ type: "fetch", suggestions });
+                    dispatch({ type: "fetched", suggestions });
                 }
             } catch (e) {
                 log.error("Failed to generate suggestions", e);
                 if (!ignore) {
-                    dispatch({ type: "fetchFailure" });
+                    dispatch({ type: "fetchFailed" });
                 }
             }
         };
@@ -378,13 +383,13 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                 {pt(`${person.name}?`)}
             </DialogTitle>
             <DialogContent dividers sx={{ display: "flex" }}>
-                {phase == "loading" ? (
+                {activity == "fetching" ? (
                     <CenteredBox>
                         <ActivityIndicator>
                             {pt("Finding similar faces...")}
                         </ActivityIndicator>
                     </CenteredBox>
-                ) : phase == "fetchFailed" ? (
+                ) : fetchFailed ? (
                     <CenteredBox>
                         <ErrorIndicator />
                     </CenteredBox>
@@ -418,7 +423,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                 <LoadingButton
                     fullWidth
                     disabled={!hasUnsavedChanges}
-                    loading={phase == "saving"}
+                    loading={activity == "saving"}
                     color={"accent"}
                     onClick={handleSave}
                 >
