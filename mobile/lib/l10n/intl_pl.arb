@@ -150,7 +150,7 @@
   "tryAgain": "Spróbuj ponownie",
   "viewRecoveryKey": "Zobacz klucz odzyskiwania",
   "confirmRecoveryKey": "Potwierdź klucz odzyskiwania",
-  "recoveryKeyVerifyReason": "Twój klucz odzyskiwania to jedyny sposób na odzyskanie zdjęć, jeśli zapomnisz hasła. Klucz odzyskiwania można znaleźć w menu Ustawienia > Bezpieczeństwo.\n\nProsimy wprowadzić swój klucz odzyskiwania tutaj, aby sprawdzić, czy został on poprawnie zapisany.",
+  "recoveryKeyVerifyReason": "Twój klucz odzyskiwania jest jedynym sposobem na odzyskanie zdjęć, jeśli zapomnisz hasła. Klucz odzyskiwania można znaleźć w Ustawieniach > Konto.\n\nWprowadź tutaj swój klucz odzyskiwania, aby sprawdzić, czy został zapisany poprawnie.",
   "confirmYourRecoveryKey": "Potwierdź klucz odzyskiwania",
   "addViewer": "Dodaj widza",
   "addCollaborator": "Dodaj współuczestnika",

@@ -150,7 +150,7 @@
   "tryAgain": "Inténtalo de nuevo",
   "viewRecoveryKey": "Ver código de recuperación",
   "confirmRecoveryKey": "Confirmar clave de recuperación",
-  "recoveryKeyVerifyReason": "Tu clave de recuperación es la única forma de recuperar tus fotos si olvida su contraseña. Puedes encontrar tu clave de recuperación en Ajustes > Cuenta.\n\nPor favor, introduce tu clave de recuperación aquí para verificar que la has guardado correctamente.",
+  "recoveryKeyVerifyReason": "Tu clave de recuperación es la única forma de recuperar tus fotos si olvidas tu contraseña. Puedes encontrar tu clave de recuperación en Ajustes > Cuenta.\n\nPor favor, introduce tu clave de recuperación aquí para verificar que la has guardado correctamente.",
   "confirmYourRecoveryKey": "Confirma tu clave de recuperación",
   "addViewer": "Añadir espectador",
   "addCollaborator": "Agregar colaborador",

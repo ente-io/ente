@@ -150,7 +150,7 @@
   "tryAgain": "请再试一次",
   "viewRecoveryKey": "查看恢复密钥",
   "confirmRecoveryKey": "确认恢复密钥",
-  "recoveryKeyVerifyReason": "如果您忘记了您的密码，您的恢复密钥是恢复您的照片的唯一途径。 您可以在“设置 > 账户”中找到您的恢复密钥。\n\n请在此输入您的恢复密钥以确认您已经正确地保存了它。",
+  "recoveryKeyVerifyReason": "如果您忘记了密码，恢复密钥是恢复照片的唯一方法。您可以在“设置”>“账户”中找到恢复密钥。\n\n请在此处输入恢复密钥，以验证您是否已正确保存。",
   "confirmYourRecoveryKey": "确认您的恢复密钥",
   "addViewer": "添加查看者",
   "addCollaborator": "添加协作者",
