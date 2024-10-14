@@ -26,3 +26,10 @@ browser APIs instead of going via the file system.
 Note that the app will detect and skip over already uploaded items into an
 album, so dragging and dropping the same folder again to upload to the same
 album is fine.
+
+> The underlying reason for this crash seeems to be the
+> [4GB RAM usage limit for Electron apps](https://www.electronjs.org/blog/v8-memory-cage).
+> We try to upload large videos by streaming them instead of reading them all in
+> at once, but in some cases, even the streaming them seems to exceed the 4GB
+> limit. We're trying to understand when this happens a bit more precisely, and
+> if required, reimplement our uploads in a different way to avoid these.
