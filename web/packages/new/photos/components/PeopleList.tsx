@@ -193,6 +193,41 @@ const UnclusteredFace = styled("div")`
     }
 `;
 
+export interface SuggestionFaceListProps {
+    /**
+     * Faces, each annotated with the corresponding {@link EnteFile}, to show in
+     * the list.
+     */
+    faces: { enteFile: EnteFile; faceID: string }[];
+}
+
+/**
+ * Show the sampling of faces from a given cluster that is being offered as a
+ * suggestion to the user.
+ */
+export const SuggestionFaceList: React.FC<SuggestionFaceListProps> = ({
+    faces,
+}) => {
+    return (
+        <SuggestionFaceList_>
+            {faces.map(({ enteFile, faceID }) => (
+                <UnclusteredFace key={faceID}>
+                    <FaceCropImageView
+                        placeholderDimension={112}
+                        {...{ enteFile, faceID }}
+                    />
+                </UnclusteredFace>
+            ))}
+        </SuggestionFaceList_>
+    );
+};
+
+const SuggestionFaceList_ = styled("div")`
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+`;
+
 interface FaceCropImageViewProps {
     /** The ID of the face to display. */
     faceID: string;
