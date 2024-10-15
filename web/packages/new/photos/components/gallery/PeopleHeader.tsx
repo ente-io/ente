@@ -547,7 +547,8 @@ interface SuggestionOrChoiceListProps {
 
 const SuggestionOrChoiceList: React.FC<SuggestionOrChoiceListProps> = ({
     items,
-    onMarkItem: onMarkCluster,
+    marks,
+    onMarkItem,
 }) => (
     <List dense sx={{ width: "100%" }}>
         {items.map((item) => (
@@ -568,11 +569,9 @@ const SuggestionOrChoiceList: React.FC<SuggestionOrChoiceListProps> = ({
                 </Stack>
                 {!item.fixed && (
                     <ToggleButtonGroup
-                        value={item.mark}
+                        value={marks.get(item.id) ?? toItemValue(item.accepted)}
                         exclusive
-                        onChange={(_, v) =>
-                            onMarkCluster(item.id, toClusterMark(v))
-                        }
+                        onChange={(_, v) => onMarkItem(item, toClusterMark(v))}
                     >
                         <ToggleButton value="no" aria-label={t("no")}>
                             <ClearIcon />
@@ -587,6 +586,9 @@ const SuggestionOrChoiceList: React.FC<SuggestionOrChoiceListProps> = ({
     </List>
 );
 
-// Dance for TypeScript to recognize the type.
+const toItemValue = (accepted?: boolean) =>
+    accepted ? "yes" : accepted === false ? "no" : undefined;
+
 const toClusterMark = (v: unknown) =>
+    // This dance is needed for TypeScript to recognize the type.
     v == "yes" ? "yes" : v == "no" ? "no" : undefined;

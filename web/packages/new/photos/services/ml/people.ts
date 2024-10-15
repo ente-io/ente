@@ -469,7 +469,7 @@ export const suggestionsAndChoicesForPerson = async (
     // that is what we'd have ended up with if we sorted by size.
 
     const firstChoice = { ...ensure(acceptedChoices[0]), fixed: true };
-    const restChoices = acceptedChoices.concat(ignoredChoices);
+    const restChoices = acceptedChoices.slice(1).concat(ignoredChoices);
     sortBySize(restChoices);
 
     const choices = [firstChoice, ...restChoices];
