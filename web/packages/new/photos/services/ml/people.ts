@@ -1,6 +1,7 @@
 import { assertionFailed } from "@/base/assert";
 import log from "@/base/log";
 import type { EnteFile } from "@/media/file";
+import { shuffled } from "@/utils/array";
 import { getLocalFiles } from "../files";
 import { savedCGroups, type CGroup } from "../user-entity";
 import type { FaceCluster } from "./cluster";
@@ -371,6 +372,12 @@ export const suggestionsForPerson = async (person: CGroupPerson) => {
         .flat()
         .filter((e) => !!e);
 
+    // Randomly sample faces to limit the O(n^2) cost.
+    const sampledPersonFaceEmbeddings = shuffled(personFaceEmbeddings).slice(
+        0,
+        100,
+    );
+
     const suggestedClusters: FaceCluster[] = [];
     for (const cluster of clusters) {
         const { id, faces } = cluster;
@@ -384,7 +391,7 @@ export const suggestionsForPerson = async (person: CGroupPerson) => {
         for (const fi of faces) {
             const ei = embeddingByFaceID.get(fi);
             if (!ei) continue;
-            for (const ej of personFaceEmbeddings) {
+            for (const ej of sampledPersonFaceEmbeddings) {
                 const csim = dotProduct(ei, ej);
                 if (csim >= 0.6) {
                     suggest = true;
