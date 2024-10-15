@@ -272,29 +272,21 @@ interface SuggestionsDialogState {
      * new suggestions.
      */
     showChoices: boolean;
-    /**
-     * The underlying data we fetched.
-     */
-    suggestionsAndChoices: PersonSuggestionsAndChoices | undefined;
-    /**
-     * The list of markable clusters derived from {@link suggestionsAndChoices}
-     * and other UI state.
-     */
-    markableClusters: MarkableCluster[];
+    /** Fetched choices. */
+    choices: SCItem[];
+    /** Fetched suggestions. */
+    suggestions: SCItem[];
     /**
      * An entry corresponding to each
-     * - suggestions that the user has either explicitly accepted or rejected.
      * - saved choice for which the user has changed their mind.
+     * - suggestion that the user has either explicitly accepted or rejected.
      */
-    markedClusterIDs: Map<string, NonNullable<ClusterMark>>;
+    marks: Map<string, SCMark>;
 }
 
-type ClusterMark = "yes" | "no" | undefined;
+type SCItem = PreviewableCluster & { fixed?: boolean; accepted?: boolean };
 
-type MarkableCluster = PreviewableCluster & {
-    fixed?: boolean;
-    mark: ClusterMark;
-};
+type SCMark = "yes" | "no" | undefined;
 
 type SuggestionsDialogAction =
     | { type: "fetch"; personID: string }
@@ -304,7 +296,7 @@ type SuggestionsDialogAction =
           personID: string;
           suggestionsAndChoices: PersonSuggestionsAndChoices;
       }
-    | { type: "mark"; clusterID: string; value: ClusterMark }
+    | { type: "mark"; item: SCItem; value: SCMark }
     | { type: "save" }
     | { type: "toggleHistory" }
     | { type: "close" };
@@ -314,42 +306,22 @@ const initialSuggestionsDialogState: SuggestionsDialogState = {
     personID: undefined,
     fetchFailed: false,
     showChoices: false,
-    suggestionsAndChoices: undefined,
-    markableClusters: [],
-    markedClusterIDs: new Map(),
+    choices: [],
+    suggestions: [],
+    marks: new Map(),
 };
 
 const suggestionsDialogReducer = (
     state: SuggestionsDialogState,
     action: SuggestionsDialogAction,
 ): SuggestionsDialogState => {
-    const updatingMarkableClusters = (s: SuggestionsDialogState) => {
-        let markableClusters: MarkableCluster[];
-        if (s.showChoices) {
-            markableClusters = (s.suggestionsAndChoices?.suggestions ?? []).map(
-                (c) => {
-                    return { ...c, mark: s.markedClusterIDs.get(c.id) };
-                },
-            );
-        } else {
-            markableClusters = (s.suggestionsAndChoices?.choices ?? []).map(
-                (c) => {
-                    return {
-                        ...c,
-                        mark:
-                            s.markedClusterIDs.get(c.id) ??
-                            (c.accepted ? "yes" : "no"),
-                    };
-                },
-            );
-        }
-        return { ...s, markableClusters };
-    };
-
     switch (action.type) {
         case "fetch":
             return {
                 ...initialSuggestionsDialogState,
+                choices: [],
+                suggestions: [],
+                marks: new Map(),
                 activity: "fetching",
                 personID: action.personID,
             };
@@ -358,26 +330,26 @@ const suggestionsDialogReducer = (
             return { ...state, activity: undefined, fetchFailed: true };
         case "fetched":
             if (action.personID != state.personID) return state;
-            return updatingMarkableClusters({
+            return {
                 ...state,
                 activity: undefined,
-                suggestionsAndChoices: action.suggestionsAndChoices,
-            });
+                choices: action.suggestionsAndChoices.choices,
+                suggestions: action.suggestionsAndChoices.suggestions,
+            };
         case "mark": {
-            const markedClusterIDs = new Map(state.markedClusterIDs);
-            const id = action.clusterID;
-            if (action.value == "yes" || action.value == "no") {
-                markedClusterIDs.set(id, action.value);
+            const marks = new Map(state.marks);
+            const { item, value } = action;
+            // If this was a new suggestion, prune off marks created as a result
+            // of the user toggling the item back to its original unset state.
+            if (item.accepted === undefined && value === undefined) {
+                marks.delete(item.id);
             } else {
-                markedClusterIDs.delete(id);
+                marks.set(item.id, value);
             }
-            return updatingMarkableClusters({ ...state, markedClusterIDs });
+            return { ...state, marks };
         }
         case "toggleHistory":
-            return updatingMarkableClusters({
-                ...state,
-                showChoices: !state.showChoices,
-            });
+            return { ...state, showChoices: !state.showChoices };
         case "save":
             return { ...state, activity: "saving" };
         case "close":
@@ -405,7 +377,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
 
     const isSmallWidth = useIsSmallWidth();
 
-    const hasUnsavedChanges = state.markedClusterIDs.size > 0;
+    const hasUnsavedChanges = state.marks.size > 0;
 
     const resetPersonAndClose = () => {
         dispatch({ type: "close" });
@@ -456,8 +428,8 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
         resetPersonAndClose();
     };
 
-    const handleMark = (clusterID: string, value: ClusterMark) =>
-        dispatch({ type: "mark", clusterID, value });
+    const handleMark = (item: SCItem, value: SCMark) =>
+        dispatch({ type: "mark", item, value });
 
     const handleSave = async () => {
         try {
@@ -518,7 +490,13 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                     <CenteredBox>
                         <ErrorIndicator />
                     </CenteredBox>
-                ) : !state.showChoices && state.markableClusters.length == 0 ? (
+                ) : state.showChoices ? (
+                    <SuggestionOrChoiceList
+                        items={state.choices}
+                        marks={state.marks}
+                        onMarkItem={handleMark}
+                    />
+                ) : state.suggestions.length == 0 ? (
                     <CenteredBox>
                         <Typography
                             color="text.muted"
@@ -528,9 +506,10 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                         </Typography>
                     </CenteredBox>
                 ) : (
-                    <MarkableClusterList
-                        clusters={state.markableClusters}
-                        onMarkCluster={handleMark}
+                    <SuggestionOrChoiceList
+                        items={state.suggestions}
+                        marks={state.marks}
+                        onMarkItem={handleMark}
                     />
                 )}
             </DialogContent>
@@ -556,23 +535,24 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
     );
 };
 
-interface MarkableClusterListProps {
-    clusters: (PreviewableCluster & { fixed?: boolean; mark: ClusterMark })[];
+interface SuggestionOrChoiceListProps {
+    items: SCItem[];
+    marks: Map<string, SCMark>;
     /**
      * Callback invoked when the user changes the value associated with the
-     * given cluster.
+     * given suggestion or choice.
      */
-    onMarkCluster: (id: string, value: ClusterMark) => void;
+    onMarkItem: (item: SCItem, value: SCMark) => void;
 }
 
-const MarkableClusterList: React.FC<MarkableClusterListProps> = ({
-    clusters,
-    onMarkCluster,
+const SuggestionOrChoiceList: React.FC<SuggestionOrChoiceListProps> = ({
+    items,
+    onMarkItem: onMarkCluster,
 }) => (
     <List dense sx={{ width: "100%" }}>
-        {clusters.map((cluster) => (
+        {items.map((item) => (
             <ListItem
-                key={cluster.id}
+                key={item.id}
                 sx={{
                     paddingInline: 0,
                     paddingBlockEnd: "24px",
@@ -582,16 +562,16 @@ const MarkableClusterList: React.FC<MarkableClusterListProps> = ({
                 <Stack sx={{ gap: "10px" }}>
                     <Typography variant="small" color="text.muted">
                         {/* Use the face count as as stand-in for the photo count */}
-                        {t("photos_count", { count: cluster.faces.length })}
+                        {t("photos_count", { count: item.faces.length })}
                     </Typography>
-                    <SuggestionFaceList faces={cluster.previewFaces} />
+                    <SuggestionFaceList faces={item.previewFaces} />
                 </Stack>
-                {!cluster.fixed && (
+                {!item.fixed && (
                     <ToggleButtonGroup
-                        value={cluster.mark}
+                        value={item.mark}
                         exclusive
                         onChange={(_, v) =>
-                            onMarkCluster(cluster.id, toClusterMark(v))
+                            onMarkCluster(item.id, toClusterMark(v))
                         }
                     >
                         <ToggleButton value="no" aria-label={t("no")}>
