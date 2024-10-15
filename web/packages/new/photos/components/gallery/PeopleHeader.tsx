@@ -541,11 +541,11 @@ const SuggestionsList: React.FC<SuggestionsListProps> = ({
                         )
                     }
                 >
-                    <ToggleButton value="yes" aria-label={pt("Yes")}>
-                        <CheckIcon />
-                    </ToggleButton>
                     <ToggleButton value="no" aria-label={t("no")}>
                         <ClearIcon />
+                    </ToggleButton>
+                    <ToggleButton value="yes" aria-label={pt("Yes")}>
+                        <CheckIcon />
                     </ToggleButton>
                 </ToggleButtonGroup>
             </ListItem>
