@@ -281,12 +281,10 @@ interface SuggestionsDialogState {
      * - saved choice for which the user has changed their mind.
      * - suggestion that the user has either explicitly accepted or rejected.
      */
-    marks: Map<string, SCMark>;
+    marks: Map<string, boolean | undefined>;
 }
 
 type SCItem = PreviewableCluster & { fixed?: boolean; accepted?: boolean };
-
-type SCMark = "yes" | "no" | undefined;
 
 type SuggestionsDialogAction =
     | { type: "fetch"; personID: string }
@@ -296,7 +294,7 @@ type SuggestionsDialogAction =
           personID: string;
           suggestionsAndChoices: PersonSuggestionsAndChoices;
       }
-    | { type: "mark"; item: SCItem; value: SCMark }
+    | { type: "mark"; item: SCItem; value: boolean | undefined }
     | { type: "save" }
     | { type: "toggleHistory" }
     | { type: "close" };
@@ -339,9 +337,13 @@ const suggestionsDialogReducer = (
         case "mark": {
             const marks = new Map(state.marks);
             const { item, value } = action;
-            // If this was a new suggestion, prune off marks created as a result
-            // of the user toggling the item back to its original unset state.
             if (item.accepted === undefined && value === undefined) {
+                // If this was a suggestion, prune marks created as a result of
+                // the user toggling the item back to its original unset state.
+                marks.delete(item.id);
+            } else if (item.accepted && value === item.accepted) {
+                // If this is a choice, prune marks which match the choice's
+                // accepted state.
                 marks.delete(item.id);
             } else {
                 marks.set(item.id, value);
@@ -428,7 +430,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
         resetPersonAndClose();
     };
 
-    const handleMark = (item: SCItem, value: SCMark) =>
+    const handleMark = (item: SCItem, value: boolean | undefined) =>
         dispatch({ type: "mark", item, value });
 
     const handleSave = async () => {
@@ -539,12 +541,12 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
 
 interface SuggestionOrChoiceListProps {
     items: SCItem[];
-    marks: Map<string, SCMark>;
+    marks: Map<string, boolean | undefined>;
     /**
      * Callback invoked when the user changes the value associated with the
      * given suggestion or choice.
      */
-    onMarkItem: (item: SCItem, value: SCMark) => void;
+    onMarkItem: (item: SCItem, value: boolean | undefined) => void;
 }
 
 const SuggestionOrChoiceList: React.FC<SuggestionOrChoiceListProps> = ({
@@ -571,9 +573,9 @@ const SuggestionOrChoiceList: React.FC<SuggestionOrChoiceListProps> = ({
                 </Stack>
                 {!item.fixed && (
                     <ToggleButtonGroup
-                        value={marks.get(item.id) ?? toItemValue(item.accepted)}
+                        value={fromItemValue(item, marks)}
                         exclusive
-                        onChange={(_, v) => onMarkItem(item, toClusterMark(v))}
+                        onChange={(_, v) => onMarkItem(item, toItemValue(v))}
                     >
                         <ToggleButton value="no" aria-label={t("no")}>
                             <ClearIcon />
@@ -588,9 +590,16 @@ const SuggestionOrChoiceList: React.FC<SuggestionOrChoiceListProps> = ({
     </List>
 );
 
-const toItemValue = (accepted?: boolean) =>
-    accepted ? "yes" : accepted === false ? "no" : undefined;
+const fromItemValue = (
+    item: SCItem,
+    marks: Map<string, boolean | undefined>,
+) => {
+    // Use the in-memory state if available.
+    if (marks.has(item.id)) return marks.get(item.id);
+    // Use the original state of the choice (when applicable).
+    return item.accepted ? "yes" : item.accepted === false ? "no" : undefined;
+};
 
-const toClusterMark = (v: unknown) =>
+const toItemValue = (v: unknown) =>
     // This dance is needed for TypeScript to recognize the type.
-    v == "yes" ? "yes" : v == "no" ? "no" : undefined;
+    v == "yes" ? true : v == "no" ? false : undefined;
