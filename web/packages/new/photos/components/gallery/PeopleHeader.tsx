@@ -474,6 +474,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                 </Stack>
                 {state.choices.length > 1 && (
                     <IconButton
+                        disableTouchRipple
                         onClick={() => dispatch({ type: "toggleHistory" })}
                         aria-label={
                             !state.showChoices
@@ -490,7 +491,11 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                     </IconButton>
                 )}
             </SpaceBetweenFlex>
-            <DialogContent sx={{ display: "flex", "&&&": { pt: 0 } }}>
+            <DialogContent
+                /* Reset scroll position on switching view */
+                key={`${state.showChoices}`}
+                sx={{ display: "flex", "&&&": { pt: 0 } }}
+            >
                 {state.activity == "fetching" ? (
                     <CenteredBox>
                         <ActivityIndicator>
