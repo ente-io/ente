@@ -6,8 +6,3 @@ export interface MagicMetadataCore<T> {
 }
 
 export type EncryptedMagicMetadata = MagicMetadataCore<string>;
-
-export interface UpdateMagicMetadataRequest {
-    id: number;
-    magicMetadata: EncryptedMagicMetadata;
-}
