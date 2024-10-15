@@ -7,10 +7,6 @@ export interface MagicMetadataCore<T> {
 
 export type EncryptedMagicMetadata = MagicMetadataCore<string>;
 
-export interface BulkUpdateMagicMetadataRequest {
-    metadataList: UpdateMagicMetadataRequest[];
-}
-
 export interface UpdateMagicMetadataRequest {
     id: number;
     magicMetadata: EncryptedMagicMetadata;

@@ -15,7 +15,7 @@ import {
     FileWithUpdatedPublicMagicMetadata,
     TrashRequest,
 } from "@/new/photos/types/file";
-import { BulkUpdateMagicMetadataRequest } from "@/new/photos/types/magicMetadata";
+import type { UpdateMagicMetadataRequest } from "@/new/photos/types/magicMetadata";
 import { mergeMetadata } from "@/new/photos/utils/file";
 import { batch } from "@/utils/array";
 import HTTPService from "@ente/shared/network/HTTPService";
@@ -190,6 +190,10 @@ export const deleteFromTrash = async (filesToDelete: number[]) => {
         throw e;
     }
 };
+
+export interface BulkUpdateMagicMetadataRequest {
+    metadataList: UpdateMagicMetadataRequest[];
+}
 
 export const updateFileMagicMetadata = async (
     fileWithUpdatedMagicMetadataList: FileWithUpdatedMagicMetadata[],
