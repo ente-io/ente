@@ -115,8 +115,9 @@ class GalleryState extends State<Gallery> {
   @override
   void initState() {
     super.initState();
+    // end the tag with x to avoid `.` in the end if logger name
     _logTag =
-        "Gallery_${widget.tagPrefix}${kDebugMode ? "_" + widget.albumName! : ""}";
+        "Gallery_${widget.tagPrefix}${kDebugMode ? "_" + widget.albumName! : ""}_x";
     _logger = Logger(_logTag);
     _logger.finest("init Gallery");
     _debouncer = Debouncer(
