@@ -1282,8 +1282,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Ottimo! La tua chiave di recupero è valida. Grazie per averla verificata.\n\nRicordati di salvare la tua chiave di recupero in un posto sicuro."),
         "recoveryKeyVerified": MessageLookupByLibrary.simpleMessage(
             "Chiave di recupero verificata"),
-        "recoveryKeyVerifyReason": MessageLookupByLibrary.simpleMessage(
-            "La tua chiave di recupero è l\'unico modo per recuperare le foto se ti dimentichi la password. Puoi trovare la tua chiave di recupero in Impostazioni > Account.\n\nInserisci qui la tua chiave di recupero per verificare di averla salvata correttamente."),
         "recoverySuccessful":
             MessageLookupByLibrary.simpleMessage("Recupero riuscito!"),
         "recreatePasswordBody": MessageLookupByLibrary.simpleMessage(

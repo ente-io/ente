@@ -1,21 +1,27 @@
+import { TitledMiniDialog } from "@/base/components/MiniDialog";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
-import log from "@/base/log";
+import { AppContext } from "@/new/photos/types/context";
 import { initiateEmail } from "@/new/photos/utils/web";
-import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
-import { Link, Stack, useMediaQuery } from "@mui/material";
+import {
+    Checkbox,
+    FormControlLabel,
+    FormGroup,
+    Link,
+    Stack,
+    TextField,
+    Typography,
+    type TypographyProps,
+} from "@mui/material";
 import { Formik, type FormikHelpers } from "formik";
 import { t } from "i18next";
-import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";
 import { useContext, useRef, useState } from "react";
 import { Trans } from "react-i18next";
 import { deleteAccount, getAccountDeleteChallenge } from "services/userService";
 import { decryptDeleteAccountChallenge } from "utils/crypto";
 import * as Yup from "yup";
-import { CheckboxInput } from "./CheckboxInput";
 import DropdownInput, { DropdownOption } from "./DropdownInput";
-import MultilineInput from "./MultilineInput";
 
 interface Iprops {
     onClose: () => void;
@@ -28,7 +34,7 @@ interface FormValues {
 }
 
 const DeleteAccountModal = ({ open, onClose }: Iprops) => {
-    const { setDialogBoxAttributesV2, logout } = useContext(AppContext);
+    const { showMiniDialog, onGenericError, logout } = useContext(AppContext);
     const { authenticateUser } = useContext(GalleryContext);
 
     const [loading, setLoading] = useState(false);
@@ -36,15 +42,6 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
 
     const [acceptDataDeletion, setAcceptDataDeletion] = useState(false);
     const reasonAndFeedbackRef = useRef<{ reason: string; feedback: string }>();
-
-    const isMobile = useMediaQuery("(max-width: 428px)");
-
-    const somethingWentWrong = () =>
-        setDialogBoxAttributesV2({
-            title: t("error"),
-            close: { variant: "critical" },
-            content: t("generic_error_retry"),
-        });
 
     const initiateDelete = async (
         { reason, feedback }: FormValues,
@@ -76,154 +73,130 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                 askToMailForDeletion();
             }
         } catch (e) {
-            log.error("Error while initiating account deletion", e);
-            somethingWentWrong();
+            onGenericError(e);
         } finally {
             setLoading(false);
         }
     };
 
-    const confirmAccountDeletion = () => {
-        setDialogBoxAttributesV2({
+    const confirmAccountDeletion = () =>
+        showMiniDialog({
             title: t("delete_account"),
-            content: <Trans i18nKey="delete_account_confirm_message" />,
-            proceed: {
-                text: t("DELETE"),
+            message: <Trans i18nKey="delete_account_confirm_message" />,
+            continue: {
+                text: t("delete"),
+                color: "critical",
                 action: solveChallengeAndDeleteAccount,
-                variant: "critical",
             },
-            close: { text: t("cancel") },
         });
-    };
 
     const askToMailForDeletion = () => {
         const emailID = "account-deletion@ente.io";
 
-        setDialogBoxAttributesV2({
+        showMiniDialog({
             title: t("delete_account"),
-            content: (
+            message: (
                 <Trans
                     i18nKey="delete_account_manually_message"
                     components={{ a: <Link href={`mailto:${emailID}`} /> }}
                     values={{ emailID }}
                 />
             ),
-            proceed: {
-                text: t("DELETE"),
+            continue: {
+                text: t("delete"),
+                color: "critical",
                 action: () => initiateEmail(emailID),
-                variant: "critical",
             },
-            close: { text: t("cancel") },
         });
     };
 
-    const solveChallengeAndDeleteAccount = async (
-        setLoading: (value: boolean) => void,
-    ) => {
-        try {
-            setLoading(true);
-            const decryptedChallenge = await decryptDeleteAccountChallenge(
-                deleteAccountChallenge.current,
-            );
-            const { reason, feedback } = reasonAndFeedbackRef.current;
-            await deleteAccount(decryptedChallenge, reason, feedback);
-            logout();
-        } catch (e) {
-            log.error("solveChallengeAndDeleteAccount failed", e);
-            somethingWentWrong();
-        } finally {
-            setLoading(false);
-        }
+    const solveChallengeAndDeleteAccount = async () => {
+        const decryptedChallenge = await decryptDeleteAccountChallenge(
+            deleteAccountChallenge.current,
+        );
+        const { reason, feedback } = reasonAndFeedbackRef.current;
+        await deleteAccount(decryptedChallenge, reason, feedback);
+        logout();
     };
 
     return (
-        <>
-            <DialogBoxV2
-                fullWidth
-                open={open}
-                onClose={onClose}
-                fullScreen={isMobile}
-                attributes={{
-                    title: t("delete_account"),
-                    secondary: {
-                        action: onClose,
-                        text: t("cancel"),
-                    },
+        <TitledMiniDialog
+            open={open}
+            onClose={onClose}
+            title={t("delete_account")}
+        >
+            <Formik<FormValues>
+                initialValues={{
+                    reason: "",
+                    feedback: "",
                 }}
+                validationSchema={Yup.object().shape({
+                    reason: Yup.string().required(t("required")),
+                })}
+                validateOnChange={false}
+                validateOnBlur={false}
+                onSubmit={initiateDelete}
             >
-                <Formik<FormValues>
-                    initialValues={{
-                        reason: "",
-                        feedback: "",
-                    }}
-                    validationSchema={Yup.object().shape({
-                        reason: Yup.string().required(t("required")),
-                    })}
-                    validateOnChange={false}
-                    validateOnBlur={false}
-                    onSubmit={initiateDelete}
-                >
-                    {({
-                        values,
-                        errors,
-                        handleChange,
-                        handleSubmit,
-                    }): JSX.Element => (
-                        <form noValidate onSubmit={handleSubmit}>
-                            <Stack spacing={"24px"}>
-                                <DropdownInput
-                                    options={deleteReasonOptions()}
-                                    label={t("delete_account_reason_label")}
-                                    placeholder={t(
-                                        "delete_account_reason_placeholder",
-                                    )}
-                                    selected={values.reason}
-                                    setSelected={handleChange("reason")}
-                                    messageProps={{ color: "critical.main" }}
-                                    message={errors.reason}
-                                />
-                                <MultilineInput
-                                    label={t("delete_account_feedback_label")}
-                                    placeholder={t(
-                                        "delete_account_feedback_placeholder",
-                                    )}
-                                    value={values.feedback}
-                                    onChange={handleChange("feedback")}
-                                    message={errors.feedback}
-                                    messageProps={{ color: "critical.main" }}
-                                    rowCount={3}
-                                />
-                                <CheckboxInput
-                                    checked={acceptDataDeletion}
-                                    onChange={setAcceptDataDeletion}
-                                    label={t(
-                                        "delete_account_confirm_checkbox_label",
-                                    )}
-                                />
-                                <Stack spacing={"8px"}>
-                                    <LoadingButton
-                                        type="submit"
-                                        size="large"
-                                        color="critical"
-                                        disabled={!acceptDataDeletion}
-                                        loading={loading}
-                                    >
-                                        {t("delete_account_confirm")}
-                                    </LoadingButton>
-                                    <FocusVisibleButton
-                                        size="large"
-                                        color={"secondary"}
-                                        onClick={onClose}
-                                    >
-                                        {t("cancel")}
-                                    </FocusVisibleButton>
-                                </Stack>
+                {({
+                    values,
+                    errors,
+                    handleChange,
+                    handleSubmit,
+                }): JSX.Element => (
+                    <form noValidate onSubmit={handleSubmit}>
+                        <Stack spacing={"24px"}>
+                            <DropdownInput
+                                options={deleteReasonOptions()}
+                                label={t("delete_account_reason_label")}
+                                placeholder={t(
+                                    "delete_account_reason_placeholder",
+                                )}
+                                selected={values.reason}
+                                setSelected={handleChange("reason")}
+                                messageProps={{ color: "critical.main" }}
+                                message={errors.reason}
+                            />
+                            <MultilineInput
+                                label={t("delete_account_feedback_label")}
+                                placeholder={t(
+                                    "delete_account_feedback_placeholder",
+                                )}
+                                value={values.feedback}
+                                onChange={handleChange("feedback")}
+                                message={errors.feedback}
+                                messageProps={{ color: "critical.main" }}
+                                rowCount={3}
+                            />
+                            <CheckboxInput
+                                checked={acceptDataDeletion}
+                                onChange={setAcceptDataDeletion}
+                                label={t(
+                                    "delete_account_confirm_checkbox_label",
+                                )}
+                            />
+                            <Stack spacing={"8px"}>
+                                <LoadingButton
+                                    type="submit"
+                                    size="large"
+                                    color="critical"
+                                    disabled={!acceptDataDeletion}
+                                    loading={loading}
+                                >
+                                    {t("delete_account_confirm")}
+                                </LoadingButton>
+                                <FocusVisibleButton
+                                    size="large"
+                                    color={"secondary"}
+                                    onClick={onClose}
+                                >
+                                    {t("cancel")}
+                                </FocusVisibleButton>
                             </Stack>
-                        </form>
-                    )}
-                </Formik>
-            </DialogBoxV2>
-        </>
+                        </Stack>
+                    </form>
+                )}
+            </Formik>
+        </TitledMiniDialog>
     );
 };
 
@@ -247,3 +220,95 @@ const deleteReasonOptions = (): DropdownOption<DeleteReason>[] =>
         label: t(`delete_reason.${reason}`),
         value: reason,
     }));
+
+interface MultilineInputProps {
+    label: string;
+    labelProps?: TypographyProps;
+    message?: string;
+    messageProps?: TypographyProps;
+    placeholder?: string;
+    value: string;
+    rowCount: number;
+    onChange: (value: string) => void;
+}
+
+function MultilineInput({
+    label,
+    labelProps,
+    message,
+    messageProps,
+    placeholder,
+    value,
+    rowCount,
+    onChange,
+}: MultilineInputProps) {
+    return (
+        <Stack spacing={"4px"}>
+            <Typography {...labelProps}>{label}</Typography>
+            <TextField
+                variant="standard"
+                multiline
+                rows={rowCount}
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                placeholder={placeholder}
+                sx={(theme) => ({
+                    border: "1px solid",
+                    borderColor: theme.colors.stroke.faint,
+                    borderRadius: "8px",
+                    padding: "12px",
+                    ".MuiInputBase-formControl": {
+                        "::before, ::after": {
+                            borderBottom: "none !important",
+                        },
+                    },
+                })}
+            />
+            <Typography
+                px={"8px"}
+                variant="small"
+                color="text.secondary"
+                {...messageProps}
+            >
+                {message}
+            </Typography>
+        </Stack>
+    );
+}
+
+interface CheckboxInputProps {
+    disabled?: boolean;
+    checked: boolean;
+    onChange: (value: boolean) => void;
+    label: string;
+    labelProps?: TypographyProps;
+}
+
+function CheckboxInput({
+    disabled,
+    checked,
+    onChange,
+    label,
+    labelProps,
+}: CheckboxInputProps) {
+    return (
+        <FormGroup sx={{ width: "100%" }}>
+            <FormControlLabel
+                control={
+                    <Checkbox
+                        size="small"
+                        disabled={disabled}
+                        checked={checked}
+                        onChange={(e) => onChange(e.target.checked)}
+                        color="accent"
+                    />
+                }
+                label={
+                    <Typography color="text.secondary" {...labelProps}>
+                        {label}
+                    </Typography>
+                }
+            />
+        </FormGroup>
+    );
+}

@@ -1,4 +1,5 @@
 import log from "@/base/log";
+import { fileLogID, type EnteFile } from "@/media/file";
 import {
     decryptPublicMagicMetadata,
     fileCreationPhotoDate,
@@ -9,8 +10,6 @@ import { FileType } from "@/media/file-type";
 import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker";
 import downloadManager from "@/new/photos/services/download";
 import { extractExifDates } from "@/new/photos/services/exif";
-import { EnteFile } from "@/new/photos/types/file";
-import { fileLogID } from "@/new/photos/utils/file";
 import { ensure } from "@/utils/ensure";
 import DialogBox from "@ente/shared/components/DialogBox/";
 import {
@@ -277,21 +276,21 @@ type SetProgressTracker = React.Dispatch<
 >;
 
 const updateFiles = async (
-    enteFiles: EnteFile[],
+    files: EnteFile[],
     fixOption: FixOption,
     customDate: ParsedMetadataDate | undefined,
     setProgressTracker: SetProgressTracker,
 ) => {
-    setProgressTracker({ current: 0, total: enteFiles.length });
+    setProgressTracker({ current: 0, total: files.length });
     let hadErrors = false;
-    for (const [i, enteFile] of enteFiles.entries()) {
+    for (const [i, file] of files.entries()) {
         try {
-            await updateEnteFileDate(enteFile, fixOption, customDate);
+            await updateEnteFileDate(file, fixOption, customDate);
         } catch (e) {
-            log.error(`Failed to update date of ${fileLogID(enteFile)}`, e);
+            log.error(`Failed to update date of ${fileLogID(file)}`, e);
             hadErrors = true;
         } finally {
-            setProgressTracker({ current: i + 1, total: enteFiles.length });
+            setProgressTracker({ current: i + 1, total: files.length });
         }
     }
     return hadErrors;

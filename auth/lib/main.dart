@@ -7,7 +7,6 @@ import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/constants.dart';
 import 'package:ente_auth/core/logging/super_logging.dart';
 import 'package:ente_auth/core/network.dart';
-import 'package:ente_auth/core/win_http_client.dart';
 import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/locale.dart';
 import 'package:ente_auth/services/authenticator_service.dart';
@@ -65,9 +64,6 @@ Future<void> initSystemTray() async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  if (Platform.isWindows) {
-    HttpOverrides.global = WindowsHttpOverrides();
-  }
 
   if (PlatformUtil.isDesktop()) {
     await windowManager.ensureInitialized();

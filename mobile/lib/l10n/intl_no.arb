@@ -149,7 +149,6 @@
   "tryAgain": "Prøv igjen",
   "viewRecoveryKey": "Vis gjenopprettingsnøkkel",
   "confirmRecoveryKey": "Bekreft gjenopprettingsnøkkel",
-  "recoveryKeyVerifyReason": "Gjenopprettings nøkkelen er den eneste måten å gjenopprette bildene dine hvis du glemmer passordet ditt. Du kan finne gjenopprettingsnøkkelen din i Innstillinger > Sikkerhet.\n\nVennligst skriv inn gjenopprettingsnøkkelen din her for å bekrefte at du har lagret den riktig.",
   "confirmYourRecoveryKey": "Bekreft din gjenopprettingsnøkkel",
   "addViewer": "Legg til seer",
   "addCollaborator": "Legg til samarbeidspartner",

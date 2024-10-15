@@ -1,6 +1,6 @@
 import { decryptBlob } from "@/base/crypto";
 import log from "@/base/log";
-import type { EnteFile } from "@/new/photos/types/file";
+import type { EnteFile } from "@/media/file";
 import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
 import { gunzip, gzip } from "../../utils/gzip";
@@ -208,7 +208,7 @@ const remoteMLDataFromJSONString = (jsonString: string) => {
 };
 
 /**
- * Update the ML data stored for given {@link enteFile} on remote.
+ * Update the ML data stored for given {@link file} on remote.
  *
  * This allows other clients to directly pull the ML data instead of needing to
  * re-index.
@@ -219,5 +219,5 @@ const remoteMLDataFromJSONString = (jsonString: string) => {
  *
  * See: [Note: Preserve unknown ML data fields].
  */
-export const putMLData = async (enteFile: EnteFile, mlData: RawRemoteMLData) =>
-    putFileData(enteFile, "mldata", await gzip(JSON.stringify(mlData)));
+export const putMLData = async (file: EnteFile, mlData: RawRemoteMLData) =>
+    putFileData(file, "mldata", await gzip(JSON.stringify(mlData)));

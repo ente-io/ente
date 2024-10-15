@@ -1,9 +1,14 @@
-import type { EnteFile } from "../../types/file";
+import { assertionFailed } from "@/base/assert";
+import log from "@/base/log";
+import type { EnteFile } from "@/media/file";
+import { shuffled } from "@/utils/array";
+import { ensure } from "@/utils/ensure";
 import { getLocalFiles } from "../files";
 import { savedCGroups, type CGroup } from "../user-entity";
-import type { FaceCluster } from "./cluster";
-import { getFaceIndexes, savedFaceClusters } from "./db";
+import { type FaceCluster } from "./cluster";
+import { savedFaceClusters, savedFaceIndexes } from "./db";
 import { fileIDFromFaceID } from "./face";
+import { dotProduct } from "./math";
 
 /**
  * A cgroup ("cluster group") is a group of clusters (possibly containing just a
@@ -126,11 +131,34 @@ export type Person = (
 };
 
 /**
+ * A person of type "cgroup".
+ */
+export type CGroupPerson = Exclude<Person, { type: "cluster" }>;
+
+/**
+ * A person of type "cluster".
+ */
+export type ClusterPerson = Exclude<Person, { type: "cgroup" }>;
+
+/**
  * A {@link Person} whose name is not empty.
  */
 export type NamedPerson = Person & {
     name: string;
 };
+
+/**
+ * A face ID annotated with the {@link EnteFile} that contains it.
+ *
+ * Both these pieces of information are needed for a UI element to show the
+ * face.
+ */
+export interface PreviewableFace {
+    /** The ID of the face to display. */
+    faceID: string;
+    /** The {@link EnteFile} which contains this face. */
+    file: EnteFile;
+}
 
 /**
  * Construct in-memory people using the data present locally, ignoring faces
@@ -157,7 +185,7 @@ export const reconstructPeople = async (): Promise<Person[]> => {
         { faceID: string; file: EnteFile; score: number }
     >();
 
-    const faceIndexes = await getFaceIndexes();
+    const faceIndexes = await savedFaceIndexes();
     for (const { faces } of faceIndexes) {
         for (const { faceID, score } of faces) {
             const fileID = fileIDFromFaceID(faceID);
@@ -294,4 +322,165 @@ export const filterNamedPeople = (people: Person[]): NamedPerson[] => {
         }
     }
     return namedPeople;
+};
+
+export type PreviewableCluster = FaceCluster & {
+    /**
+     * A list of up to 3 "preview" faces for the cluster, each annotated with
+     * the corresponding {@link EnteFile} that contains them.
+     */
+    previewFaces: PreviewableFace[];
+};
+
+export interface PersonSuggestionsAndChoices {
+    /**
+     * Previously saved choices.
+     *
+     * These are clusters (sorted by size) that the user had previously merged
+     * or explicitly ignored from the person under consideration.
+     *
+     * The {@link accepted} flag will true for the entries that correspond to
+     * accepted clusters, and false for those that the user had ignored.
+     *
+     * This array is guaranteed to be non-empty, and it is guaranteed that the
+     * first item is a merged cluster (i.e. a cluster for which accepted is
+     * true), even if there exists an ignored cluster with a larger size. The
+     * rest of the entries are intermixed and sorted by size normally.
+     *
+     * For convenience of the UI, teh first entry will have also have the
+     * {@link fixed} flag set.
+     */
+    choices: (PreviewableCluster & { fixed?: boolean; accepted: boolean })[];
+    /**
+     * New suggestions to offer to the user.
+     */
+    suggestions: PreviewableCluster[];
+}
+
+/**
+ * Returns suggestions and existing choices for the given person.
+ */
+export const _suggestionsAndChoicesForPerson = async (
+    person: CGroupPerson,
+): Promise<PersonSuggestionsAndChoices> => {
+    const startTime = Date.now();
+
+    const personClusters = person.cgroup.data.assigned;
+    // TODO-Cluster: Persist this.
+    const ignoredClusters: FaceCluster[] = [];
+
+    const clusters = await savedFaceClusters();
+    const faceIndexes = await savedFaceIndexes();
+
+    const embeddingByFaceID = new Map(
+        faceIndexes
+            .map(({ faces }) =>
+                faces.map(
+                    (f) => [f.faceID, new Float32Array(f.embedding)] as const,
+                ),
+            )
+            .flat(),
+    );
+
+    const personClusterIDs = new Set(personClusters.map(({ id }) => id));
+    const ignoredClusterIDs = new Set(ignoredClusters.map(({ id }) => id));
+
+    const personFaceEmbeddings = personClusters
+        .map(({ faces }) => faces.map((id) => embeddingByFaceID.get(id)))
+        .flat()
+        .filter((e) => !!e);
+
+    // Randomly sample faces to limit the O(n^2) cost.
+    const sampledPersonFaceEmbeddings = shuffled(personFaceEmbeddings).slice(
+        0,
+        100,
+    );
+
+    const suggestedClusters: FaceCluster[] = [];
+    for (const cluster of clusters) {
+        const { id, faces } = cluster;
+
+        if (faces.length < 2) continue;
+
+        if (personClusterIDs.has(id)) continue;
+        if (ignoredClusterIDs.has(id)) continue;
+
+        let suggest = false;
+        for (const fi of faces) {
+            const ei = embeddingByFaceID.get(fi);
+            if (!ei) continue;
+            for (const ej of sampledPersonFaceEmbeddings) {
+                const csim = dotProduct(ei, ej);
+                if (csim >= 0.6) {
+                    suggest = true;
+                    break;
+                }
+            }
+            if (suggest) break;
+        }
+
+        if (suggest) suggestedClusters.push(cluster);
+    }
+
+    // Annotate the clusters with the information that the UI needs to show its
+    // preview faces.
+
+    const files = await getLocalFiles("normal");
+    const fileByID = new Map(files.map((f) => [f.id, f]));
+
+    const toPreviewable = (cluster: FaceCluster) => {
+        const previewFaces: PreviewableFace[] = [];
+        for (const faceID of cluster.faces) {
+            const fileID = fileIDFromFaceID(faceID);
+            if (!fileID) {
+                assertionFailed();
+                continue;
+            }
+
+            const file = fileByID.get(fileID);
+            if (!file) {
+                // This might be a hidden/trash file, and it is thus not
+                // appropriate to use it as a preview file anyway.
+                continue;
+            }
+
+            previewFaces.push({ file, faceID });
+
+            if (previewFaces.length == 4) break;
+        }
+
+        return { ...cluster, previewFaces };
+    };
+
+    const sortBySize = (entries: { faces: unknown[] }[]) =>
+        entries.sort((a, b) => b.faces.length - a.faces.length);
+
+    const acceptedChoices = personClusters
+        .map(toPreviewable)
+        .map((p) => ({ ...p, accepted: true }));
+
+    sortBySize(acceptedChoices);
+
+    const ignoredChoices = ignoredClusters
+        .map(toPreviewable)
+        .map((p) => ({ ...p, accepted: false }));
+
+    // Ensure that the first item in the choices is not an ignored one, even if
+    // that is what we'd have ended up with if we sorted by size.
+
+    const firstChoice = { ...ensure(acceptedChoices[0]), fixed: true };
+    const restChoices = acceptedChoices.slice(1).concat(ignoredChoices);
+    sortBySize(restChoices);
+
+    const choices = [firstChoice, ...restChoices];
+
+    sortBySize(suggestedClusters);
+    // Limit to the number of suggestions shown in a single go.
+    const suggestions = suggestedClusters.slice(0, 80).map(toPreviewable);
+
+    log.info(
+        `Generated ${suggestions.length} suggestions for ${person.id} (${Date.now() - startTime} ms)`,
+    );
+
+    return { choices, suggestions };
 };

@@ -1,4 +1,4 @@
-import { EnteFile } from "@/new/photos/types/file";
+import { EnteFile } from "@/media/file";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import { formatDateTime } from "@ente/shared/time/format";
 import {

@@ -29,7 +29,7 @@ export const LoadingButton: React.FC<ButtonProps & { loading?: boolean }> = ({
             }}
             {...rest}
         >
-            <CircularProgress size={20} />
+            <CircularProgress size={20} sx={{ color: "inherit" }} />
         </FocusVisibleButton>
     ) : (
         <FocusVisibleButton {...{ color, disabled, sx }} {...rest}>

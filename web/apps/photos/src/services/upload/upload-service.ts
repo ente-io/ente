@@ -7,7 +7,16 @@ import { ensureElectron } from "@/base/electron";
 import { basename, nameAndExtension } from "@/base/file";
 import log from "@/base/log";
 import { CustomErrorMessage } from "@/base/types/ipc";
-import { hasFileHash } from "@/media/file";
+import {
+    EncryptedMagicMetadata,
+    EnteFile,
+    hasFileHash,
+    MetadataFileAttributes,
+    S3FileAttributes,
+    type EncryptedEnteFile,
+    type FilePublicMagicMetadata,
+    type FilePublicMagicMetadataProps,
+} from "@/media/file";
 import type {
     Metadata,
     ParsedMetadata,
@@ -22,15 +31,6 @@ import {
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
     UPLOAD_RESULT,
 } from "@/new/photos/services/upload/types";
-import {
-    EnteFile,
-    MetadataFileAttributes,
-    S3FileAttributes,
-    type EncryptedEnteFile,
-    type FilePublicMagicMetadata,
-    type FilePublicMagicMetadataProps,
-} from "@/new/photos/types/file";
-import { EncryptedMagicMetadata } from "@/new/photos/types/magicMetadata";
 import { detectFileTypeInfoFromChunk } from "@/new/photos/utils/detect-type";
 import { readStream } from "@/new/photos/utils/native-stream";
 import { ensure, ensureInteger, ensureNumber } from "@/utils/ensure";

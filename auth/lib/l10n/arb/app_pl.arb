@@ -460,7 +460,7 @@
   "viewRawCodes": "Zobacz surowe kody",
   "rawCodes": "Surowe kody",
   "rawCodeData": "Dane surowego kodu",
-  "appLock": "Blokada dostępu do aplikacji",
+  "appLock": "Blokada aplikacji",
   "noSystemLockFound": "Nie znaleziono blokady systemowej",
   "toEnableAppLockPleaseSetupDevicePasscodeOrScreen": "Aby włączyć blokadę aplikacji, należy skonfigurować hasło urządzenia lub blokadę ekranu w ustawieniach systemu.",
   "autoLock": "Automatyczna blokada",
@@ -482,6 +482,7 @@
   "setNewPin": "Ustaw nowy kod PIN",
   "importFailureDescNew": "Nie udało się przetworzyć wybranego pliku.",
   "appLockNotEnabled": "Blokada aplikacji nie jest włączona",
-  "appLockNotEnabledDescription": "Prosimy włączyć blokadę aplikacji z Zabezpieczenia > Blokada Aplikacji",
-  "authToViewPasskey": "Prosimy uwierzytelnić się, aby wyświetlić klucz dostępu"
+  "appLockNotEnabledDescription": "Prosimy włączyć blokadę aplikacji z Zabezpieczenia > Blokada aplikacji",
+  "authToViewPasskey": "Prosimy uwierzytelnić się, aby wyświetlić klucz dostępu",
+  "appLockOfflineModeWarning": "Wybrano kontynuowanie bez kopii zapasowych. Jeśli zapomnisz blokady aplikacji, utracisz dostęp do swoich danych."
 }

@@ -1,0 +1,11 @@
+{
+  "@@locale ": "en",
+  "enterYourEmailAddress": "Увядзіце свой адрас электроннай пошты",
+  "accountWelcomeBack": "З вяртаннем!",
+  "email": "Электронная пошта",
+  "invalidEmailAddress": "Няправільны адрас электроннай пошты",
+  "enterValidEmail": "Калі ласка, увядзіце сапраўдны адрас электронная пошты.",
+  "deleteAccount": "Выдаліць уліковы запіс",
+  "feedback": "Водгук",
+  "password": "Пароль"
+}

@@ -1,4 +1,5 @@
 import log from "@/base/log";
+import { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import {
     GAP_BTW_TILES,
@@ -9,7 +10,6 @@ import {
     StaticThumbnail,
 } from "@/new/photos/components/PlaceholderThumbnails";
 import DownloadManager from "@/new/photos/services/download";
-import { EnteFile } from "@/new/photos/types/file";
 import { Overlay } from "@ente/shared/components/Container";
 import { CustomError } from "@ente/shared/error";
 import useLongPress from "@ente/shared/hooks/useLongPress";

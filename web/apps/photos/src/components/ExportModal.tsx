@@ -1,6 +1,7 @@
 import { EnteSwitch } from "@/base/components/EnteSwitch";
 import log from "@/base/log";
-import { EnteFile } from "@/new/photos/types/file";
+import { EnteFile } from "@/media/file";
+import { AppContext } from "@/new/photos/types/context";
 import ChangeDirectoryOption from "@ente/shared/components/ChangeDirectoryOption";
 import {
     SpaceBetweenFlex,
@@ -18,7 +19,6 @@ import {
 } from "@mui/material";
 import { t } from "i18next";
 import isElectron from "is-electron";
-import { AppContext } from "pages/_app";
 import { useContext, useEffect, useState } from "react";
 import exportService, {
     ExportStage,
