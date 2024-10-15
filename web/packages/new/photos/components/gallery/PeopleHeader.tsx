@@ -30,7 +30,6 @@ import AddIcon from "@mui/icons-material/Add";
 import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
 import EditIcon from "@mui/icons-material/Edit";
-import ChecklistRtlIcon from '@mui/icons-material/ChecklistRtl';
 import ListAltOutlinedIcon from "@mui/icons-material/ListAltOutlined";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import RestoreIcon from "@mui/icons-material/Restore";
@@ -462,21 +461,21 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                         {person.name ?? " "}
                     </Typography>
                 </Stack>
-                <Tooltip
-                    title={
+                <IconButton
+                    onClick={handleToggleHistory}
+                    aria-label={
                         !state.showSavedSuggestions
                             ? pt("Saved suggestions")
                             : pt("Review suggestions")
                     }
+                    sx={{
+                        backgroundColor: state.showSavedSuggestions
+                            ? (theme) => theme.colors.fill.muted
+                            : "transparent",
+                    }}
                 >
-                    <IconButton onClick={handleToggleHistory}>
-                        {state.showSavedSuggestions ? (
-                            <ChecklistRtlIcon />
-                        ) : (
-                            <RestoreIcon />
-                        )}
-                    </IconButton>
-                </Tooltip>
+                    <RestoreIcon />
+                </IconButton>
             </SpaceBetweenFlex>
             <DialogContent sx={{ display: "flex", "&&&": { pt: 0 } }}>
                 {state.activity == "fetching" ? (
