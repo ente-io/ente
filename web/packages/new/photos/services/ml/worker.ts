@@ -44,7 +44,7 @@ import {
     type RawRemoteMLData,
     type RemoteMLData,
 } from "./ml-data";
-import { suggestionsForPerson, type CGroupPerson } from "./people";
+import { suggestionsAndChoicesForPerson, type CGroupPerson } from "./people";
 import type { CLIPMatches, MLWorkerDelegate } from "./worker-types";
 
 /**
@@ -341,10 +341,10 @@ export class MLWorker {
     }
 
     /**
-     * Return suggestions for the given cgroup {@link person}.
+     * Return suggestions and choices for the given cgroup {@link person}.
      */
-    async suggestionsForPerson(person: CGroupPerson) {
-        return suggestionsForPerson(person);
+    async suggestionsAndChoicesForPerson(person: CGroupPerson) {
+        return suggestionsAndChoicesForPerson(person);
     }
 }
 
