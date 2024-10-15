@@ -360,7 +360,7 @@ export interface PersonSuggestionsAndChoices {
 /**
  * Returns suggestions and existing choices for the given person.
  */
-export const suggestionsAndChoicesForPerson = async (
+export const _suggestionsAndChoicesForPerson = async (
     person: CGroupPerson,
 ): Promise<PersonSuggestionsAndChoices> => {
     const startTime = Date.now();

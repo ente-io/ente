@@ -62,7 +62,7 @@ export type ClusterFace = Omit<Face, "embedding"> & {
  * other interactions with the worker (where this code runs) do not get stalled
  * while clustering is in progress.
  */
-export const clusterFaces = async (
+export const _clusterFaces = async (
     faceIndexes: FaceIndex[],
     localFiles: EnteFile[],
     onProgress: (progress: ClusteringProgress) => void,

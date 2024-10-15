@@ -12,9 +12,12 @@ import {
 import { useIsSmallWidth } from "@/base/hooks";
 import { pt } from "@/base/i18n";
 import log from "@/base/log";
-import { deleteCGroup, renameCGroup } from "@/new/photos/services/ml";
 import {
+    deleteCGroup,
+    renameCGroup,
     suggestionsAndChoicesForPerson,
+} from "@/new/photos/services/ml";
+import {
     type CGroupPerson,
     type ClusterPerson,
     type Person,
