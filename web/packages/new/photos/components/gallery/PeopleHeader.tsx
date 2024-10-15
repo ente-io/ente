@@ -268,18 +268,19 @@ interface SuggestionsDialogState {
      */
     fetchFailed: boolean;
     /**
-     * True if we should show the previously saved choice view.
+     * True if we should show the previously saved choice view instead of the
+     * new suggestions.
      */
-    showSavedChoices: boolean;
+    showChoices: boolean;
     /**
-     * List of clusters (suitably augmented for the UI display) which might
-     * belong to the person, and being offered to the user as suggestions.
+     * The underlying data we fetched.
      */
-    suggestions: PersonSuggestionsAndChoices["suggestions"];
+    suggestionsAndChoices: PersonSuggestionsAndChoices | undefined;
     /**
-     * List of previously saved choices (suitabley augmented for UI display).
+     * The list of markable clusters derived from {@link suggestionsAndChoices}
+     * and other UI state.
      */
-    savedChoices: PersonSuggestionsAndChoices["choices"];
+    markableClusters: MarkableCluster[];
     /**
      * An entry corresponding to each
      * - suggestions that the user has either explicitly accepted or rejected.
@@ -289,6 +290,11 @@ interface SuggestionsDialogState {
 }
 
 type ClusterMark = "yes" | "no" | undefined;
+
+type MarkableCluster = PreviewableCluster & {
+    fixed?: boolean;
+    mark: ClusterMark;
+};
 
 type SuggestionsDialogAction =
     | { type: "fetch"; personID: string }
@@ -308,8 +314,8 @@ const initialSuggestionsDialogState: SuggestionsDialogState = {
     personID: undefined,
     fetchFailed: false,
     showChoices: false,
-    choices: [],
-    suggestions: [],
+    suggestionsAndChoices: undefined,
+    markableClusters: [],
     markedClusterIDs: new Map(),
 };
 
@@ -317,6 +323,29 @@ const suggestionsDialogReducer = (
     state: SuggestionsDialogState,
     action: SuggestionsDialogAction,
 ): SuggestionsDialogState => {
+    const updatingMarkableClusters = (s: SuggestionsDialogState) => {
+        let markableClusters: MarkableCluster[];
+        if (s.showChoices) {
+            markableClusters = (s.suggestionsAndChoices?.suggestions ?? []).map(
+                (c) => {
+                    return { ...c, mark: s.markedClusterIDs.get(c.id) };
+                },
+            );
+        } else {
+            markableClusters = (s.suggestionsAndChoices?.choices ?? []).map(
+                (c) => {
+                    return {
+                        ...c,
+                        mark:
+                            s.markedClusterIDs.get(c.id) ??
+                            (c.accepted ? "yes" : "no"),
+                    };
+                },
+            );
+        }
+        return { ...s, markableClusters };
+    };
+
     switch (action.type) {
         case "fetch":
             return {
@@ -329,12 +358,11 @@ const suggestionsDialogReducer = (
             return { ...state, activity: undefined, fetchFailed: true };
         case "fetched":
             if (action.personID != state.personID) return state;
-            return {
+            return updatingMarkableClusters({
                 ...state,
                 activity: undefined,
-                suggestions: action.suggestionsAndChoices.suggestions,
-                savedChoices: action.suggestionsAndChoices.choices,
-            };
+                suggestionsAndChoices: action.suggestionsAndChoices,
+            });
         case "mark": {
             const markedClusterIDs = new Map(state.markedClusterIDs);
             const id = action.clusterID;
@@ -343,13 +371,13 @@ const suggestionsDialogReducer = (
             } else {
                 markedClusterIDs.delete(id);
             }
-            return { ...state, markedClusterIDs };
+            return updatingMarkableClusters({ ...state, markedClusterIDs });
         }
         case "toggleHistory":
-            return {
+            return updatingMarkableClusters({
                 ...state,
-                showSavedChoices: !state.showSavedChoices,
-            };
+                showChoices: !state.showChoices,
+            });
         case "save":
             return { ...state, activity: "saving" };
         case "close":
@@ -455,7 +483,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
             <SpaceBetweenFlex sx={{ padding: "20px 16px 16px 16px" }}>
                 <Stack sx={{ gap: "8px" }}>
                     <DialogTitle sx={{ "&&&": { p: 0 } }}>
-                        {state.showSavedChoices
+                        {state.showChoices
                             ? pt("Saved suggestions")
                             : pt("Review suggestions")}
                     </DialogTitle>
@@ -466,12 +494,12 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                 <IconButton
                     onClick={() => dispatch({ type: "toggleHistory" })}
                     aria-label={
-                        !state.showSavedChoices
+                        !state.showChoices
                             ? pt("Saved suggestions")
                             : pt("Review suggestions")
                     }
                     sx={{
-                        backgroundColor: state.showSavedChoices
+                        backgroundColor: state.showChoices
                             ? (theme) => theme.colors.fill.muted
                             : "transparent",
                     }}
@@ -490,7 +518,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                     <CenteredBox>
                         <ErrorIndicator />
                     </CenteredBox>
-                ) : state.suggestions.length == 0 ? (
+                ) : !state.showChoices && state.markableClusters.length == 0 ? (
                     <CenteredBox>
                         <Typography
                             color="text.muted"
@@ -500,9 +528,8 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                         </Typography>
                     </CenteredBox>
                 ) : (
-                    <SuggestionsList
-                        suggestions={state.suggestions}
-                        markedClusterIDs={state.markedClusterIDs}
+                    <MarkableClusterList
+                        clusters={state.markableClusters}
                         onMarkCluster={handleMark}
                     />
                 )}
@@ -529,16 +556,16 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
     );
 };
 
-interface MarkedClusterListProps {
+interface MarkableClusterListProps {
     clusters: (PreviewableCluster & { fixed?: boolean; mark: ClusterMark })[];
     /**
      * Callback invoked when the user changes the value associated with the
      * given cluster.
      */
-    onMarkCluster: (clusterID: string, value: ClusterMark) => void;
+    onMarkCluster: (id: string, value: ClusterMark) => void;
 }
 
-const MarkedClusterList: React.FC<MarkedClusterListProps> = ({
+const MarkableClusterList: React.FC<MarkableClusterListProps> = ({
     clusters,
     onMarkCluster,
 }) => (
@@ -561,7 +588,7 @@ const MarkedClusterList: React.FC<MarkedClusterListProps> = ({
                 </Stack>
                 {!cluster.fixed && (
                     <ToggleButtonGroup
-                        value={cluster.marked}
+                        value={cluster.mark}
                         exclusive
                         onChange={(_, v) =>
                             onMarkCluster(cluster.id, toClusterMark(v))
