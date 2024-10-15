@@ -15,11 +15,11 @@ import type {
     FileMagicMetadata,
     FilePublicMagicMetadata,
 } from "@/media/file";
+import { mergeMetadata1 } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
 import { heicToJPEG } from "@/media/heic-convert";
 import { decodeLivePhoto } from "@/media/live-photo";
-import { mergeMetadata1 } from "@/new/photos/utils/file";
 import { shuffled } from "@/utils/array";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
