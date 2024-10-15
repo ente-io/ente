@@ -48,6 +48,20 @@ func (h *FileHandler) GetFilesData(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resp)
 }
 
+func (h *FileHandler) FileDataStatusDiff(ctx *gin.Context) {
+	var req fileData.IndexDiffRequest
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, ente.NewBadRequestWithMessage(err.Error()))
+		return
+	}
+	resp, err := h.FileDataCtrl.FileDataStatusDiff(ctx, req)
+	if err != nil {
+		handler.Error(ctx, err)
+		return
+	}
+	ctx.JSON(http.StatusOK, resp)
+}
+
 func (h *FileHandler) GetFileData(ctx *gin.Context) {
 	var req fileData.GetFileData
 	if err := ctx.ShouldBindJSON(&req); err != nil {
