@@ -42,6 +42,18 @@ export interface EncryptedEnteFile {
     updationTime: number;
 }
 
+/**
+ * A File.
+ *
+ * An EnteFile represents a file in Ente. It does not contain the actual data.
+ *
+ * To disambiguate it from the web {@link File} type, we prefix it with Ente.
+ *
+ * All files have an id (numeric) that is unique across all the files stored by
+ * an Ente instance. Each file is also always associated with a collection, and
+ * has an owner (both of these linkages are stored as the corresponding numeric
+ * IDs within the EnteFile structure).
+ */
 export interface EnteFile
     extends Omit<
         EncryptedEnteFile,
