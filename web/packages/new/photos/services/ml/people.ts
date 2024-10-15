@@ -2,9 +2,10 @@ import { assertionFailed } from "@/base/assert";
 import log from "@/base/log";
 import type { EnteFile } from "@/media/file";
 import { shuffled } from "@/utils/array";
+import { ensure } from "@/utils/ensure";
 import { getLocalFiles } from "../files";
 import { savedCGroups, type CGroup } from "../user-entity";
-import type { FaceCluster } from "./cluster";
+import { type FaceCluster } from "./cluster";
 import { savedFaceClusters, savedFaceIndexes } from "./db";
 import { fileIDFromFaceID } from "./face";
 import { dotProduct } from "./math";
@@ -323,28 +324,44 @@ export const filterNamedPeople = (people: Person[]): NamedPerson[] => {
     return namedPeople;
 };
 
-export interface PersonSuggestion {
+export type PreviewableCluster = FaceCluster & {
     /**
-     * The ID of the suggestion. This is the same as the cluster's ID,
-     * duplicated here for the UI's convenience.
-     */
-    id: string;
-    /**
-     * The underlying {@link FaceCluster} that is being offered as the
-     * suggestion.
-     */
-    cluster: FaceCluster;
-    /**
-     * A list of up to 3 "preview" faces for this cluster, each annotated with
+     * A list of up to 3 "preview" faces for the cluster, each annotated with
      * the corresponding {@link EnteFile} that contains them.
      */
     previewFaces: PreviewableFace[];
+};
+
+interface PersonSuggestionsAndChoices {
+    /**
+     * Previously saved choices.
+     *
+     * The first entry is always the primary cluster, and will have the
+     * {@link isPrimary} flag set.
+     *
+     * Rest of the entries are clusters (sorted by size) that the user had
+     * previously merged or explicitly ignored from the person under
+     * consideration.
+     *
+     * The ignored flag will be true for the entries that correspond to ignored
+     * clusters.
+     */
+    choices: (PreviewableCluster & {
+        isPrimary?: boolean;
+        ignored?: boolean;
+    })[];
+    /**
+     * New suggestions to offer to the user.
+     */
+    suggestions: PreviewableCluster[];
 }
 
 /**
- * Returns suggestions for the given person.
+ * Returns suggestions and existing choices for the given person.
  */
-export const suggestionsForPerson = async (person: CGroupPerson) => {
+export const suggestionsAndChoicesForPerson = async (
+    person: CGroupPerson,
+): Promise<PersonSuggestionsAndChoices> => {
     const startTime = Date.now();
 
     const personClusters = person.cgroup.data.assigned;
@@ -412,7 +429,7 @@ export const suggestionsForPerson = async (person: CGroupPerson) => {
     const files = await getLocalFiles("normal");
     const fileByID = new Map(files.map((f) => [f.id, f]));
 
-    const suggestions = suggestedClusters.map((cluster) => {
+    const toPreviewable = (cluster: FaceCluster) => {
         const previewFaces: PreviewableFace[] = [];
         for (const faceID of cluster.faces) {
             const fileID = fileIDFromFaceID(faceID);
@@ -433,13 +450,22 @@ export const suggestionsForPerson = async (person: CGroupPerson) => {
             if (previewFaces.length == 4) break;
         }
 
-        const id = cluster.id;
-        return { id, cluster, previewFaces };
-    });
+        return { ...cluster, previewFaces };
+    };
+
+    const choices = [
+        { ...toPreviewable(ensure(personClusters[0])), isPrimary: true },
+        ...personClusters.slice(1).map(toPreviewable),
+        ...ignoredClusters
+            .map(toPreviewable)
+            .map((p) => ({ ...p, ignored: true })),
+    ];
+
+    const suggestions = suggestedClusters.map(toPreviewable);
 
     log.info(
         `Generated ${suggestions.length} suggestions for ${person.id} (${Date.now() - startTime} ms)`,
     );
 
-    return suggestions;
+    return { choices, suggestions };
 };
