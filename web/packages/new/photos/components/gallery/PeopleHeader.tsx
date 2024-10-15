@@ -463,21 +463,23 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                         {person.name ?? " "}
                     </Typography>
                 </Stack>
-                <IconButton
-                    onClick={() => dispatch({ type: "toggleHistory" })}
-                    aria-label={
-                        !state.showChoices
-                            ? pt("Saved suggestions")
-                            : pt("Review suggestions")
-                    }
-                    sx={{
-                        backgroundColor: state.showChoices
-                            ? (theme) => theme.colors.fill.muted
-                            : "transparent",
-                    }}
-                >
-                    <RestoreIcon />
-                </IconButton>
+                {state.choices.length > 1 && (
+                    <IconButton
+                        onClick={() => dispatch({ type: "toggleHistory" })}
+                        aria-label={
+                            !state.showChoices
+                                ? pt("Saved suggestions")
+                                : pt("Review suggestions")
+                        }
+                        sx={{
+                            backgroundColor: state.showChoices
+                                ? (theme) => theme.colors.fill.muted
+                                : "transparent",
+                        }}
+                    >
+                        <RestoreIcon />
+                    </IconButton>
+                )}
             </SpaceBetweenFlex>
             <DialogContent sx={{ display: "flex", "&&&": { pt: 0 } }}>
                 {state.activity == "fetching" ? (
