@@ -454,11 +454,18 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
             fullScreen={isSmallWidth}
             PaperProps={{ sx: { minHeight: "80svh" } }}
         >
-            <SpaceBetweenFlex sx={{ padding: "20px 16px 16px 16px" }}>
+            <SpaceBetweenFlex
+                sx={{
+                    padding: "20px 16px 16px 16px",
+                    backgroundColor: state.showChoices
+                        ? (theme) => theme.colors.fill.faint
+                        : "transparent",
+                }}
+            >
                 <Stack sx={{ gap: "8px" }}>
                     <DialogTitle sx={{ "&&&": { p: 0 } }}>
                         {state.showChoices
-                            ? pt("Saved suggestions")
+                            ? pt("Saved choices")
                             : pt("Review suggestions")}
                     </DialogTitle>
                     <Typography color="text.muted">
