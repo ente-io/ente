@@ -336,20 +336,20 @@ export interface PersonSuggestionsAndChoices {
     /**
      * Previously saved choices.
      *
-     * The first entry is always the primary cluster, and will have the
-     * {@link isPrimary} flag set.
-     *
-     * Rest of the entries are clusters (sorted by size) that the user had
-     * previously merged or explicitly ignored from the person under
-     * consideration.
+     * These are clusters (sorted by size) that the user had previously merged
+     * or explicitly ignored from the person under consideration.
      *
      * The ignored flag will be true for the entries that correspond to ignored
      * clusters.
+     *
+     * This array is guaranteed to be non-empty, and it is guaranteed that the
+     * first item is a merged cluster (i.e. a cluster for which the ignored flag
+     * is not set), even if there exists an ignored cluster with a larger size.
+     * The rest of the entries are intermixed and sorted by size normally.
+     *
+     * The first entry will have the {@link fixed} flag set.
      */
-    choices: (PreviewableCluster & {
-        isPrimary?: boolean;
-        ignored?: boolean;
-    })[];
+    choices: (PreviewableCluster & { fixed?: boolean, ignored?: boolean })[];
     /**
      * New suggestions to offer to the user.
      */
@@ -421,8 +421,6 @@ export const suggestionsAndChoicesForPerson = async (
         if (suggest) suggestedClusters.push(cluster);
     }
 
-    suggestedClusters.sort((a, b) => b.faces.length - a.faces.length);
-
     // Annotate the clusters with the information that the UI needs to show its
     // preview faces.
 
@@ -453,14 +451,25 @@ export const suggestionsAndChoicesForPerson = async (
         return { ...cluster, previewFaces };
     };
 
-    const choices = [
-        { ...toPreviewable(ensure(personClusters[0])), isPrimary: true },
-        ...personClusters.slice(1).map(toPreviewable),
-        ...ignoredClusters
-            .map(toPreviewable)
-            .map((p) => ({ ...p, ignored: true })),
-    ];
+    const sortBySize = (entries: { faces: unknown[] }[]) =>
+        entries.sort((a, b) => b.faces.length - a.faces.length);
 
+    const acceptedChoices = personClusters.map(toPreviewable);
+    sortBySize(acceptedChoices);
+
+    const ignoredChoices = ignoredClusters
+        .map(toPreviewable)
+        .map((p) => ({ ...p, ignored: true }));
+
+    // Ensure that the first item in the choices is not an ignored one, even if
+    // that is what we'd have ended up with if we sorted by size.
+    const firstChoice = {...ensure(acceptedChoices[0]), fixed: true};
+    const restChoices = acceptedChoices.concat(ignoredChoices);
+    sortBySize(restChoices);
+
+    const choices = [firstChoice, ...restChoices];
+
+    sortBySize(suggestedClusters);
     const suggestions = suggestedClusters.map(toPreviewable);
 
     log.info(
