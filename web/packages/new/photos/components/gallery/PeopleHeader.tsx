@@ -30,11 +30,11 @@ import AddIcon from "@mui/icons-material/Add";
 import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
 import EditIcon from "@mui/icons-material/Edit";
-import ListAltOutlined from "@mui/icons-material/ListAltOutlined";
-import MoreHoriz from "@mui/icons-material/MoreHoriz";
+import ChecklistRtlIcon from '@mui/icons-material/ChecklistRtl';
+import ListAltOutlinedIcon from "@mui/icons-material/ListAltOutlined";
+import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import RestoreIcon from "@mui/icons-material/Restore";
 import {
-    Box,
     Dialog,
     DialogActions,
     DialogContent,
@@ -155,7 +155,7 @@ const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({
             />
             <OverflowMenu
                 ariaControls={"person-options"}
-                triggerButtonIcon={<MoreHoriz />}
+                triggerButtonIcon={<MoreHorizIcon />}
             >
                 <OverflowMenuOption
                     startIcon={<EditIcon />}
@@ -173,7 +173,7 @@ const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({
                 </OverflowMenuOption>
                 {process.env.NEXT_PUBLIC_ENTE_WIP_CL /* TODO-Cluster */ && (
                     <OverflowMenuOption
-                        startIcon={<ListAltOutlined />}
+                        startIcon={<ListAltOutlinedIcon />}
                         centerAlign
                         onClick={showSuggestions}
                     >
@@ -235,7 +235,7 @@ const ClusterPersonHeader: React.FC<ClusterPersonHeaderProps> = ({
 
                 <OverflowMenu
                     ariaControls={"person-options"}
-                    triggerButtonIcon={<MoreHoriz />}
+                    triggerButtonIcon={<MoreHorizIcon />}
                 >
                     <OverflowMenuOption
                         startIcon={<AddIcon />}
@@ -271,6 +271,10 @@ interface SuggestionsDialogState {
      */
     fetchFailed: boolean;
     /**
+     * True if we should show the existing clusters.
+     */
+    showSavedSuggestions: boolean;
+    /**
      * List of clusters (suitably augmented for the UI display) which might
      * belong to the person, and being offered to the user as suggestions.
      */
@@ -290,12 +294,14 @@ type SuggestionsDialogAction =
     | { type: "fetched"; personID: string; suggestions: PersonSuggestion[] }
     | { type: "mark"; suggestion: PersonSuggestion; value: SuggestionMark }
     | { type: "save" }
+    | { type: "toggleHistory" }
     | { type: "close" };
 
 const initialSuggestionsDialogState: SuggestionsDialogState = {
     activity: undefined,
     personID: undefined,
     fetchFailed: false,
+    showSavedSuggestions: false,
     suggestions: [],
     markedSuggestionIDs: new Map(),
 };
@@ -310,6 +316,7 @@ const suggestionsDialogReducer = (
                 activity: "fetching",
                 personID: action.personID,
                 fetchFailed: false,
+                showSavedSuggestions: false,
                 suggestions: [],
                 markedSuggestionIDs: new Map(),
             };
@@ -336,6 +343,11 @@ const suggestionsDialogReducer = (
                 markedSuggestionIDs,
             };
         }
+        case "toggleHistory":
+            return {
+                ...state,
+                showSavedSuggestions: !state.showSavedSuggestions,
+            };
         case "save":
             return { ...state, activity: "saving" };
         case "close":
@@ -416,6 +428,8 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
     const handleMark = (suggestion: PersonSuggestion, value: SuggestionMark) =>
         dispatch({ type: "mark", suggestion, value });
 
+    const handleToggleHistory = () => dispatch({ type: "toggleHistory" });
+
     const handleSave = async () => {
         try {
             // TODO-Cluster
@@ -437,27 +451,33 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
             fullScreen={isSmallWidth}
             PaperProps={{ sx: { minHeight: "80svh" } }}
         >
-            <Box
-                sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "flex-start",
-                    padding: "20px 16px 16px 16px",
-                    // border: "1px solid tomato",
-                }}
-            >
+            <SpaceBetweenFlex sx={{ padding: "20px 16px 16px 16px" }}>
                 <Stack sx={{ gap: "8px" }}>
                     <DialogTitle sx={{ "&&&": { p: 0 } }}>
-                        {pt("Review suggestions")}
+                        {state.showSavedSuggestions
+                            ? pt("Saved suggestions")
+                            : pt("Review suggestions")}
                     </DialogTitle>
                     <Typography color="text.muted">
                         {person.name ?? " "}
                     </Typography>
                 </Stack>
-                <IconButton>
-                    <RestoreIcon />
-                </IconButton>
-            </Box>
+                <Tooltip
+                    title={
+                        !state.showSavedSuggestions
+                            ? pt("Saved suggestions")
+                            : pt("Review suggestions")
+                    }
+                >
+                    <IconButton onClick={handleToggleHistory}>
+                        {state.showSavedSuggestions ? (
+                            <ChecklistRtlIcon />
+                        ) : (
+                            <RestoreIcon />
+                        )}
+                    </IconButton>
+                </Tooltip>
+            </SpaceBetweenFlex>
             <DialogContent sx={{ display: "flex", "&&&": { pt: 0 } }}>
                 {state.activity == "fetching" ? (
                     <CenteredBox>
