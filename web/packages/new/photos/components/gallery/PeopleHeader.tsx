@@ -12,16 +12,15 @@ import {
 import { useIsSmallWidth } from "@/base/hooks";
 import { pt } from "@/base/i18n";
 import log from "@/base/log";
+import { deleteCGroup, renameCGroup } from "@/new/photos/services/ml";
 import {
-    deleteCGroup,
-    renameCGroup,
-    suggestionsForPerson,
-} from "@/new/photos/services/ml";
-import {
+    suggestionsAndChoicesForPerson,
     type CGroupPerson,
     type ClusterPerson,
     type Person,
     type PersonSuggestion,
+    type PersonSuggestionsAndChoices,
+    type PreviewableCluster,
 } from "@/new/photos/services/ml/people";
 import { wait } from "@/utils/promise";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
@@ -270,28 +269,37 @@ interface SuggestionsDialogState {
      */
     fetchFailed: boolean;
     /**
-     * True if we should show the existing clusters.
+     * True if we should show the previously saved choice view.
      */
-    showSavedSuggestions: boolean;
+    showSavedChoices: boolean;
     /**
      * List of clusters (suitably augmented for the UI display) which might
      * belong to the person, and being offered to the user as suggestions.
      */
     suggestions: PersonSuggestion[];
     /**
-     * An entry corresponding to each clusters (suggestions) that the user has
-     * either explicitly accepted or rejected.
+     * List of previously saved choices (suitabley augmented for UI display).
      */
-    markedSuggestionIDs: Map<string, NonNullable<SuggestionMark>>;
+    savedChoices: PersonSuggestionsAndChoices["choices"];
+    /**
+     * An entry corresponding to each
+     * - suggestions that the user has either explicitly accepted or rejected.
+     * - saved choice for which the user has changed their mind.
+     */
+    markedClusterIDs: Map<string, NonNullable<ClusterMark>>;
 }
 
-type SuggestionMark = "yes" | "no" | undefined;
+type ClusterMark = "yes" | "no" | undefined;
 
 type SuggestionsDialogAction =
     | { type: "fetch"; personID: string }
     | { type: "fetchFailed"; personID: string }
-    | { type: "fetched"; personID: string; suggestions: PersonSuggestion[] }
-    | { type: "mark"; suggestion: PersonSuggestion; value: SuggestionMark }
+    | {
+          type: "fetched";
+          personID: string;
+          suggestionsAndChoices: PersonSuggestionsAndChoices;
+      }
+    | { type: "mark"; suggestion: PreviewableCluster; value: ClusterMark }
     | { type: "save" }
     | { type: "toggleHistory" }
     | { type: "close" };
@@ -300,9 +308,10 @@ const initialSuggestionsDialogState: SuggestionsDialogState = {
     activity: undefined,
     personID: undefined,
     fetchFailed: false,
-    showSavedSuggestions: false,
+    showSavedChoices: false,
+    savedChoices: [],
     suggestions: [],
-    markedSuggestionIDs: new Map(),
+    markedClusterIDs: new Map(),
 };
 
 const suggestionsDialogReducer = (
@@ -312,12 +321,9 @@ const suggestionsDialogReducer = (
     switch (action.type) {
         case "fetch":
             return {
+                ...initialSuggestionsDialogState,
                 activity: "fetching",
                 personID: action.personID,
-                fetchFailed: false,
-                showSavedSuggestions: false,
-                suggestions: [],
-                markedSuggestionIDs: new Map(),
             };
         case "fetchFailed":
             if (action.personID != state.personID) return state;
@@ -327,25 +333,23 @@ const suggestionsDialogReducer = (
             return {
                 ...state,
                 activity: undefined,
-                suggestions: action.suggestions,
+                suggestions: action.suggestionsAndChoices.suggestions,
+                savedChoices: action.suggestionsAndChoices.choices,
             };
         case "mark": {
-            const markedSuggestionIDs = new Map(state.markedSuggestionIDs);
+            const markedClusterIDs = new Map(state.markedClusterIDs);
             const id = action.suggestion.id;
             if (action.value == "yes" || action.value == "no") {
-                markedSuggestionIDs.set(id, action.value);
+                markedClusterIDs.set(id, action.value);
             } else {
-                markedSuggestionIDs.delete(id);
+                markedClusterIDs.delete(id);
             }
-            return {
-                ...state,
-                markedSuggestionIDs,
-            };
+            return { ...state, markedClusterIDs };
         }
         case "toggleHistory":
             return {
                 ...state,
-                showSavedSuggestions: !state.showSavedSuggestions,
+                showSavedChoices: !state.showSavedChoices,
             };
         case "save":
             return { ...state, activity: "saving" };
@@ -374,7 +378,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
 
     const isSmallWidth = useIsSmallWidth();
 
-    const hasUnsavedChanges = state.markedSuggestionIDs.size > 0;
+    const hasUnsavedChanges = state.markedClusterIDs.size > 0;
 
     const resetPersonAndClose = () => {
         dispatch({ type: "close" });
@@ -394,8 +398,9 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
 
         const go = async () => {
             try {
-                const suggestions = await suggestionsForPerson(person);
-                dispatch({ type: "fetched", personID, suggestions });
+                const { choices, suggestions } =
+                    await suggestionsAndChoicesForPerson(person);
+                dispatch({ type: "fetched", personID, choices, suggestions });
             } catch (e) {
                 log.error("Failed to generate suggestions", e);
                 dispatch({ type: "fetchFailed", personID });
@@ -424,7 +429,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
         resetPersonAndClose();
     };
 
-    const handleMark = (suggestion: PersonSuggestion, value: SuggestionMark) =>
+    const handleMark = (suggestion: PersonSuggestion, value: ClusterMark) =>
         dispatch({ type: "mark", suggestion, value });
 
     const handleToggleHistory = () => dispatch({ type: "toggleHistory" });
@@ -453,7 +458,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
             <SpaceBetweenFlex sx={{ padding: "20px 16px 16px 16px" }}>
                 <Stack sx={{ gap: "8px" }}>
                     <DialogTitle sx={{ "&&&": { p: 0 } }}>
-                        {state.showSavedSuggestions
+                        {state.showSavedChoices
                             ? pt("Saved suggestions")
                             : pt("Review suggestions")}
                     </DialogTitle>
@@ -464,12 +469,12 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                 <IconButton
                     onClick={handleToggleHistory}
                     aria-label={
-                        !state.showSavedSuggestions
+                        !state.showSavedChoices
                             ? pt("Saved suggestions")
                             : pt("Review suggestions")
                     }
                     sx={{
-                        backgroundColor: state.showSavedSuggestions
+                        backgroundColor: state.showSavedChoices
                             ? (theme) => theme.colors.fill.muted
                             : "transparent",
                     }}
@@ -537,7 +542,7 @@ type SuggestionsListProps = Pick<
      */
     onMarkSuggestion: (
         suggestion: PersonSuggestion,
-        value: SuggestionMark,
+        value: ClusterMark,
     ) => void;
 };
 

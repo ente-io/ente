@@ -332,7 +332,7 @@ export type PreviewableCluster = FaceCluster & {
     previewFaces: PreviewableFace[];
 };
 
-interface PersonSuggestionsAndChoices {
+export interface PersonSuggestionsAndChoices {
     /**
      * Previously saved choices.
      *
