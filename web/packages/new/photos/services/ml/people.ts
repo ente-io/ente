@@ -339,17 +339,18 @@ export interface PersonSuggestionsAndChoices {
      * These are clusters (sorted by size) that the user had previously merged
      * or explicitly ignored from the person under consideration.
      *
-     * The ignored flag will be true for the entries that correspond to ignored
-     * clusters.
+     * The {@link accepted} flag will true for the entries that correspond to
+     * accepted clusters, and false for those that the user had ignored.
      *
      * This array is guaranteed to be non-empty, and it is guaranteed that the
-     * first item is a merged cluster (i.e. a cluster for which the ignored flag
-     * is not set), even if there exists an ignored cluster with a larger size.
-     * The rest of the entries are intermixed and sorted by size normally.
+     * first item is a merged cluster (i.e. a cluster for which accepted is
+     * true), even if there exists an ignored cluster with a larger size. The
+     * rest of the entries are intermixed and sorted by size normally.
      *
-     * The first entry will have the {@link fixed} flag set.
+     * For convenience of the UI, teh first entry will have also have the
+     * {@link fixed} flag set.
      */
-    choices: (PreviewableCluster & { fixed?: boolean, ignored?: boolean })[];
+    choices: (PreviewableCluster & { fixed?: boolean; accepted: boolean })[];
     /**
      * New suggestions to offer to the user.
      */
@@ -454,16 +455,20 @@ export const suggestionsAndChoicesForPerson = async (
     const sortBySize = (entries: { faces: unknown[] }[]) =>
         entries.sort((a, b) => b.faces.length - a.faces.length);
 
-    const acceptedChoices = personClusters.map(toPreviewable);
+    const acceptedChoices = personClusters
+        .map(toPreviewable)
+        .map((p) => ({ ...p, accepted: true }));
+
     sortBySize(acceptedChoices);
 
     const ignoredChoices = ignoredClusters
         .map(toPreviewable)
-        .map((p) => ({ ...p, ignored: true }));
+        .map((p) => ({ ...p, accepted: false }));
 
     // Ensure that the first item in the choices is not an ignored one, even if
     // that is what we'd have ended up with if we sorted by size.
-    const firstChoice = {...ensure(acceptedChoices[0]), fixed: true};
+
+    const firstChoice = { ...ensure(acceptedChoices[0]), fixed: true };
     const restChoices = acceptedChoices.concat(ignoredChoices);
     sortBySize(restChoices);
 
