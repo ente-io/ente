@@ -1288,7 +1288,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "recoveryKeyVerified": MessageLookupByLibrary.simpleMessage(
             "Wiederherstellungs-Schlüssel überprüft"),
         "recoveryKeyVerifyReason": MessageLookupByLibrary.simpleMessage(
-            "Dein Wiederherstellungsschlüssel ist die einzige Möglichkeit, deine Fotos wiederherzustellen, solltest du dein Passwort vergessen haben. Du kannst diesen unter \"Einstellungen\" und dann \"Konto\" wiederfinden.\n\nBitte gib unten deinen Wiederherstellungsschlüssel ein, um sicherzustellen, dass du ihn korrekt hinterlegt hast."),
+            "Dein Wiederherstellungsschlüssel ist die einzige Möglichkeit, auf deine Fotos zuzugreifen, solltest du dein Passwort vergessen. Du findest ihn unter Einstellungen > Konto.\n\nBitte gib deinen Wiederherstellungsschlüssel hier ein, um sicherzugehen, dass du ihn korrekt gesichert hast."),
         "recoverySuccessful": MessageLookupByLibrary.simpleMessage(
             "Wiederherstellung erfolgreich!"),
         "recreatePasswordBody": MessageLookupByLibrary.simpleMessage(

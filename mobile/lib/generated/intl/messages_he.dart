@@ -674,8 +674,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "נהדר! מפתח השחזור תקין. אנחנו מודים לך על האימות.\n\nאנא תזכור לגבות את מפתח השחזור שלך באופן בטוח."),
         "recoveryKeyVerified":
             MessageLookupByLibrary.simpleMessage("מפתח השחזור אומת"),
-        "recoveryKeyVerifyReason": MessageLookupByLibrary.simpleMessage(
-            "מפתח השחזור שלך הוא הדרך היחידה לשחזר את התמונות שלך במקרה ותשכח את הסיסמא שלך. אתה יכול למצוא את מפתח השחזור שלך ב-הגדרות > אבטחה.\n\nאנא הכנס את מפתח השחזור שלך כאן על מנת לוודא ששמרת אותו כשורה."),
         "recoverySuccessful":
             MessageLookupByLibrary.simpleMessage("השחזור עבר בהצלחה!"),
         "recreatePasswordBody": MessageLookupByLibrary.simpleMessage(
