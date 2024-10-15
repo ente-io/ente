@@ -609,10 +609,10 @@ const fromItemValue = (
     item: SCItem,
     marks: Map<string, boolean | undefined>,
 ) => {
-    // Use the in-memory state if available.
-    if (marks.has(item.id)) return marks.get(item.id);
-    // Use the original state of the choice (when applicable).
-    return item.accepted ? "yes" : item.accepted === false ? "no" : undefined;
+    // Use the in-memory state if available. For choices, fallback to their
+    // original state.
+    const resolved = marks.has(item.id) ? marks.get(item.id) : item.accepted;
+    return resolved ? "yes" : resolved === false ? "no" : undefined;
 };
 
 const toItemValue = (v: unknown) =>
