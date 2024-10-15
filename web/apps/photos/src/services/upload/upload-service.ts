@@ -23,6 +23,7 @@ import {
     UPLOAD_RESULT,
 } from "@/new/photos/services/upload/types";
 import {
+    EncryptedMagicMetadata,
     EnteFile,
     MetadataFileAttributes,
     S3FileAttributes,
@@ -30,7 +31,6 @@ import {
     type FilePublicMagicMetadata,
     type FilePublicMagicMetadataProps,
 } from "@/new/photos/types/file";
-import { EncryptedMagicMetadata } from "@/new/photos/types/magicMetadata";
 import { detectFileTypeInfoFromChunk } from "@/new/photos/utils/detect-type";
 import { readStream } from "@/new/photos/utils/native-stream";
 import { ensure, ensureInteger, ensureNumber } from "@/utils/ensure";

@@ -30,8 +30,7 @@ import {
     CollectionsSortBy,
 } from "@/new/photos/services/collection/ui";
 import { getLocalFiles, sortFiles } from "@/new/photos/services/files";
-import { EnteFile } from "@/new/photos/types/file";
-import { EncryptedMagicMetadata } from "@/new/photos/types/magicMetadata";
+import { EncryptedMagicMetadata, EnteFile } from "@/new/photos/types/file";
 import { batch } from "@/utils/array";
 import { CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";

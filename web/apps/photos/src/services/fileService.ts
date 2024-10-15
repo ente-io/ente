@@ -8,6 +8,7 @@ import {
     setLocalFiles,
     sortFiles,
 } from "@/new/photos/services/files";
+import type { EncryptedMagicMetadata } from "@/new/photos/types/file";
 import {
     EncryptedEnteFile,
     EnteFile,
@@ -27,7 +28,6 @@ import {
     REQUEST_BATCH_SIZE,
     setCollectionLastSyncTime,
 } from "./collectionService";
-import type { EncryptedMagicMetadata } from "@/new/photos/types/magicMetadata";
 
 /**
  * Fetch all files of the given {@link type}, belonging to the given

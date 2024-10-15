@@ -3,7 +3,7 @@ import type { EnteFile } from "@/new/photos/types/file";
 import {
     type EncryptedMagicMetadata,
     type MagicMetadataCore,
-} from "@/new/photos/types/magicMetadata";
+} from "@/new/photos/types/file";
 
 // TODO: Audit this file
 

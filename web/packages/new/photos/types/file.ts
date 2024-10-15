@@ -1,8 +1,4 @@
 import { type Metadata, ItemVisibility } from "@/media/file-metadata";
-import {
-    type EncryptedMagicMetadata,
-    type MagicMetadataCore,
-} from "./magicMetadata";
 
 export interface MetadataFileAttributes {
     encryptedData: string;
@@ -17,6 +13,15 @@ export interface FileInfo {
     fileSize: number;
     thumbSize: number;
 }
+
+export interface MagicMetadataCore<T> {
+    version: number;
+    count: number;
+    header: string;
+    data: T;
+}
+
+export type EncryptedMagicMetadata = MagicMetadataCore<string>;
 
 export interface EncryptedEnteFile {
     id: number;
