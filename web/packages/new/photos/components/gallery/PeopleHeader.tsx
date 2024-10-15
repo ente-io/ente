@@ -19,6 +19,7 @@ import {
     type ClusterPerson,
     type Person,
     type PersonSuggestionsAndChoices,
+    type PreviewableCluster,
 } from "@/new/photos/services/ml/people";
 import { wait } from "@/utils/promise";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
@@ -306,8 +307,8 @@ const initialSuggestionsDialogState: SuggestionsDialogState = {
     activity: undefined,
     personID: undefined,
     fetchFailed: false,
-    showSavedChoices: false,
-    savedChoices: [],
+    showChoices: false,
+    choices: [],
     suggestions: [],
     markedClusterIDs: new Map(),
 };
@@ -528,58 +529,57 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
     );
 };
 
-type SuggestionsListProps = Pick<
-    SuggestionsDialogState,
-    "suggestions" | "markedClusterIDs"
-> & {
+interface MarkedClusterListProps {
+    clusters: (PreviewableCluster & { fixed?: boolean; mark: ClusterMark })[];
     /**
      * Callback invoked when the user changes the value associated with the
      * given cluster.
      */
     onMarkCluster: (clusterID: string, value: ClusterMark) => void;
-};
+}
 
-const SuggestionsList: React.FC<SuggestionsListProps> = ({
-    suggestions,
-    markedClusterIDs,
+const MarkedClusterList: React.FC<MarkedClusterListProps> = ({
+    clusters,
     onMarkCluster,
 }) => (
     <List dense sx={{ width: "100%" }}>
-        {suggestions.map((suggestion) => (
+        {clusters.map((cluster) => (
             <ListItem
+                key={cluster.id}
                 sx={{
                     paddingInline: 0,
                     paddingBlockEnd: "24px",
                     justifyContent: "space-between",
                 }}
-                key={suggestion.id}
             >
                 <Stack sx={{ gap: "10px" }}>
                     <Typography variant="small" color="text.muted">
                         {/* Use the face count as as stand-in for the photo count */}
-                        {t("photos_count", { count: suggestion.faces.length })}
+                        {t("photos_count", { count: cluster.faces.length })}
                     </Typography>
-                    <SuggestionFaceList faces={suggestion.previewFaces} />
+                    <SuggestionFaceList faces={cluster.previewFaces} />
                 </Stack>
-                <ToggleButtonGroup
-                    value={markedClusterIDs.get(suggestion.id)}
-                    exclusive
-                    onChange={(_, v) =>
-                        onMarkCluster(
-                            suggestion.id,
-                            // Dance for TypeScript to recognize the type.
-                            v == "yes" ? "yes" : v == "no" ? "no" : undefined,
-                        )
-                    }
-                >
-                    <ToggleButton value="no" aria-label={t("no")}>
-                        <ClearIcon />
-                    </ToggleButton>
-                    <ToggleButton value="yes" aria-label={pt("Yes")}>
-                        <CheckIcon />
-                    </ToggleButton>
-                </ToggleButtonGroup>
+                {!cluster.fixed && (
+                    <ToggleButtonGroup
+                        value={cluster.marked}
+                        exclusive
+                        onChange={(_, v) =>
+                            onMarkCluster(cluster.id, toClusterMark(v))
+                        }
+                    >
+                        <ToggleButton value="no" aria-label={t("no")}>
+                            <ClearIcon />
+                        </ToggleButton>
+                        <ToggleButton value="yes" aria-label={pt("Yes")}>
+                            <CheckIcon />
+                        </ToggleButton>
+                    </ToggleButtonGroup>
+                )}
             </ListItem>
         ))}
     </List>
 );
+
+// Dance for TypeScript to recognize the type.
+const toClusterMark = (v: unknown) =>
+    v == "yes" ? "yes" : v == "no" ? "no" : undefined;

@@ -475,7 +475,8 @@ export const suggestionsAndChoicesForPerson = async (
     const choices = [firstChoice, ...restChoices];
 
     sortBySize(suggestedClusters);
-    const suggestions = suggestedClusters.map(toPreviewable);
+    // Limit to the number of suggestions shown in a single go.
+    const suggestions = suggestedClusters.slice(0, 80).map(toPreviewable);
 
     log.info(
         `Generated ${suggestions.length} suggestions for ${person.id} (${Date.now() - startTime} ms)`,
