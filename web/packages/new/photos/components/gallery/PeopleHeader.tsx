@@ -51,6 +51,7 @@ import React, { useEffect, useReducer } from "react";
 import { useAppContext } from "../../types/context";
 import { AddPersonDialog } from "../AddPersonDialog";
 import { SpaceBetweenFlex } from "../mui";
+import { SuggestionFaceList } from "../PeopleList";
 import { SingleInputDialog } from "../SingleInputForm";
 import type { GalleryBarImplProps } from "./BarImpl";
 import { GalleryItemsHeaderAdapter, GalleryItemsSummary } from "./ListHeader";
@@ -515,7 +516,10 @@ const SuggestionsList: React.FC<SuggestionsListProps> = ({
                 }}
                 key={suggestion.id}
             >
-                <Typography>{`${suggestion.previewFaces.length} faces ntaoheu naoehtu aosnehu asoenuh aoenuht`}</Typography>
+                <Stack>
+                    <SuggestionFaceList faces={suggestion.previewFaces} />
+                    <Typography>{`${suggestion.previewFaces.length} faces ntaoheu naoehtu aosnehu asoenuh aoenuht`}</Typography>
+                </Stack>
                 <ToggleButtonGroup
                     value={markedSuggestionIDs.get(suggestion.id)}
                     exclusive
