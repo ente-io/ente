@@ -510,18 +510,25 @@ const SuggestionsList: React.FC<SuggestionsListProps> = ({
     markedSuggestionIDs,
     onMarkSuggestion,
 }) => (
-    <List disablePadding sx={{ width: "100%" }}>
+    <List dense disablePadding sx={{ width: "100%" }}>
         {suggestions.map((suggestion) => (
             <ListItem
                 sx={{
                     paddingInline: 0,
+                    paddingBlockEnd: "24px",
+
                     justifyContent: "space-between",
                 }}
                 key={suggestion.id}
             >
-                <Stack>
+                <Stack sx={{ gap: "10px" }}>
+                    <Typography variant="small" color="text.muted">
+                        {/* Use the face count as as stand-in for the photo count */}
+                        {t("photos_count", {
+                            count: suggestion.cluster.faces.length,
+                        })}
+                    </Typography>
                     <SuggestionFaceList faces={suggestion.previewFaces} />
-                    <Typography>{`${suggestion.previewFaces.length} faces ntaoheu naoehtu aosnehu asoenuh aoenuht`}</Typography>
                 </Stack>
                 <ToggleButtonGroup
                     value={markedSuggestionIDs.get(suggestion.id)}

@@ -225,8 +225,7 @@ export const SuggestionFaceList: React.FC<SuggestionFaceListProps> = ({
 const SuggestionFaceList_ = styled("div")`
     display: flex;
     flex-wrap: wrap;
-    gap: 2px;
-    border: 1px solid tomato;
+    gap: 6px;
 `;
 
 const SuggestionFace = styled("div")`
