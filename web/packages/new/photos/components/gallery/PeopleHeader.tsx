@@ -18,9 +18,7 @@ import {
     type CGroupPerson,
     type ClusterPerson,
     type Person,
-    type PersonSuggestion,
     type PersonSuggestionsAndChoices,
-    type PreviewableCluster,
 } from "@/new/photos/services/ml/people";
 import { wait } from "@/utils/promise";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
@@ -276,7 +274,7 @@ interface SuggestionsDialogState {
      * List of clusters (suitably augmented for the UI display) which might
      * belong to the person, and being offered to the user as suggestions.
      */
-    suggestions: PersonSuggestion[];
+    suggestions: PersonSuggestionsAndChoices["suggestions"];
     /**
      * List of previously saved choices (suitabley augmented for UI display).
      */
@@ -299,7 +297,7 @@ type SuggestionsDialogAction =
           personID: string;
           suggestionsAndChoices: PersonSuggestionsAndChoices;
       }
-    | { type: "mark"; suggestion: PreviewableCluster; value: ClusterMark }
+    | { type: "mark"; clusterID: string; value: ClusterMark }
     | { type: "save" }
     | { type: "toggleHistory" }
     | { type: "close" };
@@ -338,7 +336,7 @@ const suggestionsDialogReducer = (
             };
         case "mark": {
             const markedClusterIDs = new Map(state.markedClusterIDs);
-            const id = action.suggestion.id;
+            const id = action.clusterID;
             if (action.value == "yes" || action.value == "no") {
                 markedClusterIDs.set(id, action.value);
             } else {
@@ -398,11 +396,11 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
 
         const go = async () => {
             try {
-                const { choices, suggestions } =
+                const suggestionsAndChoices =
                     await suggestionsAndChoicesForPerson(person);
-                dispatch({ type: "fetched", personID, choices, suggestions });
+                dispatch({ type: "fetched", personID, suggestionsAndChoices });
             } catch (e) {
-                log.error("Failed to generate suggestions", e);
+                log.error("Failed to fetch suggestions and choices", e);
                 dispatch({ type: "fetchFailed", personID });
             }
         };
@@ -429,10 +427,8 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
         resetPersonAndClose();
     };
 
-    const handleMark = (suggestion: PersonSuggestion, value: ClusterMark) =>
-        dispatch({ type: "mark", suggestion, value });
-
-    const handleToggleHistory = () => dispatch({ type: "toggleHistory" });
+    const handleMark = (clusterID: string, value: ClusterMark) =>
+        dispatch({ type: "mark", clusterID, value });
 
     const handleSave = async () => {
         try {
@@ -467,7 +463,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                     </Typography>
                 </Stack>
                 <IconButton
-                    onClick={handleToggleHistory}
+                    onClick={() => dispatch({ type: "toggleHistory" })}
                     aria-label={
                         !state.showSavedChoices
                             ? pt("Saved suggestions")
@@ -505,8 +501,8 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                 ) : (
                     <SuggestionsList
                         suggestions={state.suggestions}
-                        markedSuggestionIDs={state.markedSuggestionIDs}
-                        onMarkSuggestion={handleMark}
+                        markedClusterIDs={state.markedClusterIDs}
+                        onMarkCluster={handleMark}
                     />
                 )}
             </DialogContent>
@@ -534,24 +530,21 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
 
 type SuggestionsListProps = Pick<
     SuggestionsDialogState,
-    "suggestions" | "markedSuggestionIDs"
+    "suggestions" | "markedClusterIDs"
 > & {
     /**
-     * Callback invoked when the user toggles the value associated with the
-     * given suggestion.
+     * Callback invoked when the user changes the value associated with the
+     * given cluster.
      */
-    onMarkSuggestion: (
-        suggestion: PersonSuggestion,
-        value: ClusterMark,
-    ) => void;
+    onMarkCluster: (clusterID: string, value: ClusterMark) => void;
 };
 
 const SuggestionsList: React.FC<SuggestionsListProps> = ({
     suggestions,
-    markedSuggestionIDs,
-    onMarkSuggestion,
+    markedClusterIDs,
+    onMarkCluster,
 }) => (
-    <List dense disablePadding sx={{ width: "100%" }}>
+    <List dense sx={{ width: "100%" }}>
         {suggestions.map((suggestion) => (
             <ListItem
                 sx={{
@@ -564,18 +557,16 @@ const SuggestionsList: React.FC<SuggestionsListProps> = ({
                 <Stack sx={{ gap: "10px" }}>
                     <Typography variant="small" color="text.muted">
                         {/* Use the face count as as stand-in for the photo count */}
-                        {t("photos_count", {
-                            count: suggestion.cluster.faces.length,
-                        })}
+                        {t("photos_count", { count: suggestion.faces.length })}
                     </Typography>
                     <SuggestionFaceList faces={suggestion.previewFaces} />
                 </Stack>
                 <ToggleButtonGroup
-                    value={markedSuggestionIDs.get(suggestion.id)}
+                    value={markedClusterIDs.get(suggestion.id)}
                     exclusive
                     onChange={(_, v) =>
-                        onMarkSuggestion(
-                            suggestion,
+                        onMarkCluster(
+                            suggestion.id,
                             // Dance for TypeScript to recognize the type.
                             v == "yes" ? "yes" : v == "no" ? "no" : undefined,
                         )
