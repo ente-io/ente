@@ -1311,7 +1311,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "recoveryKeyVerified": MessageLookupByLibrary.simpleMessage(
             "Clé de récupération vérifiée"),
         "recoveryKeyVerifyReason": MessageLookupByLibrary.simpleMessage(
-            "Votre clé de récupération est la seule façon de récupérer vos photos si vous oubliez votre mot de passe. Vous pouvez trouver votre clé de récupération dans Paramètres > Compte.\n\nVeuillez entrer votre clé de récupération ici pour vous assurer que vous l\'avez enregistrée correctement."),
+            "Votre clé de récupération est la seule façon de récupérer vos photos si vous oubliez votre mot de passe. Vous pouvez trouver votre clé de récupération dans Paramètres > Compte.\n\nVeuillez saisir votre clé de récupération ici pour vous assurer de l\'avoir enregistré correctement."),
         "recoverySuccessful":
             MessageLookupByLibrary.simpleMessage("Restauration réussie !"),
         "recreatePasswordBody": MessageLookupByLibrary.simpleMessage(

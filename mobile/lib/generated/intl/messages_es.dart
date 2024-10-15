@@ -148,6 +148,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m45(toEmail) => "Por favor, envía los registros a ${toEmail}";
 
+  static String m46(folderName) => "Procesando ${folderName}...";
+
   static String m47(storeName) => "Califícanos en ${storeName}";
 
   static String m48(storageInGB) =>
@@ -318,6 +320,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "androidSignInTitle":
             MessageLookupByLibrary.simpleMessage("Autentificación requerida"),
         "appLock": MessageLookupByLibrary.simpleMessage("Aplicación bloqueada"),
+        "appLockDescriptions": MessageLookupByLibrary.simpleMessage(
+            "Escoge entre la pantalla de bloqueo por defecto de tu dispositivo y una pantalla de bloqueo personalizada con un PIN o contraseña."),
         "appVersion": m10,
         "appleId": MessageLookupByLibrary.simpleMessage("ID de Apple"),
         "apply": MessageLookupByLibrary.simpleMessage("Aplicar"),
@@ -363,6 +367,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Por favor, autentícate para configurar la autenticación de dos factores"),
         "authToInitiateAccountDeletion": MessageLookupByLibrary.simpleMessage(
             "Por favor, autentícate para iniciar la eliminación de la cuenta"),
+        "authToViewPasskey": MessageLookupByLibrary.simpleMessage(
+            "Por favor, autentícate para ver tu clave de acceso"),
         "authToViewYourActiveSessions": MessageLookupByLibrary.simpleMessage(
             "Por favor, autentícate para ver tus sesiones activas"),
         "authToViewYourHiddenFiles": MessageLookupByLibrary.simpleMessage(
@@ -404,6 +410,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Ajustes de copia de seguridad"),
         "backupStatus": MessageLookupByLibrary.simpleMessage(
             "Estado de la copia de seguridad"),
+        "backupStatusDescription": MessageLookupByLibrary.simpleMessage(
+            "Los elementos que han sido respaldados aparecerán aquí"),
         "backupVideos":
             MessageLookupByLibrary.simpleMessage("Respaldar vídeos"),
         "blackFridaySale":
@@ -494,10 +502,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "collageLayout": MessageLookupByLibrary.simpleMessage("Disposición"),
         "collageSaved": MessageLookupByLibrary.simpleMessage(
             "Collage guardado en la galería"),
+        "collect": MessageLookupByLibrary.simpleMessage("Recolectar"),
         "collectEventPhotos":
             MessageLookupByLibrary.simpleMessage("Recopilar fotos del evento"),
         "collectPhotos":
             MessageLookupByLibrary.simpleMessage("Recolectar fotos"),
+        "collectPhotosDescription": MessageLookupByLibrary.simpleMessage(
+            "Crea un enlace donde tus amigos pueden subir fotos en su calidad original."),
         "color": MessageLookupByLibrary.simpleMessage("Color"),
         "confirm": MessageLookupByLibrary.simpleMessage("Confirmar"),
         "confirm2FADisable": MessageLookupByLibrary.simpleMessage(
@@ -654,6 +665,26 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Deshabilitando la autenticación de dos factores..."),
         "discord": MessageLookupByLibrary.simpleMessage("Discord"),
+        "discover": MessageLookupByLibrary.simpleMessage("Descubrir"),
+        "discover_babies": MessageLookupByLibrary.simpleMessage("Bebés"),
+        "discover_celebrations":
+            MessageLookupByLibrary.simpleMessage("Celebraciones"),
+        "discover_food": MessageLookupByLibrary.simpleMessage("Comida"),
+        "discover_greenery": MessageLookupByLibrary.simpleMessage("Verdor"),
+        "discover_hills": MessageLookupByLibrary.simpleMessage("Colinas"),
+        "discover_identity": MessageLookupByLibrary.simpleMessage("Identidad"),
+        "discover_memes": MessageLookupByLibrary.simpleMessage("Memes"),
+        "discover_notes": MessageLookupByLibrary.simpleMessage("Notas"),
+        "discover_pets": MessageLookupByLibrary.simpleMessage("Mascotas"),
+        "discover_receipts": MessageLookupByLibrary.simpleMessage("Recibos"),
+        "discover_screenshots":
+            MessageLookupByLibrary.simpleMessage("Capturas de pantalla"),
+        "discover_selfies": MessageLookupByLibrary.simpleMessage("Selfies"),
+        "discover_sunset": MessageLookupByLibrary.simpleMessage("Atardecer"),
+        "discover_visiting_cards":
+            MessageLookupByLibrary.simpleMessage("Tarjetas de visita"),
+        "discover_wallpapers":
+            MessageLookupByLibrary.simpleMessage("Fondos de pantalla"),
         "dismiss": MessageLookupByLibrary.simpleMessage("Descartar"),
         "distanceInKMUnit": MessageLookupByLibrary.simpleMessage("km"),
         "doNotSignOut":
@@ -978,6 +1009,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "loadingYourPhotos":
             MessageLookupByLibrary.simpleMessage("Cargando tus fotos..."),
         "localGallery": MessageLookupByLibrary.simpleMessage("Galería local"),
+        "localSyncErrorMessage": MessageLookupByLibrary.simpleMessage(
+            "Parece que algo salió mal ya que la sincronización de fotos locales está tomando más tiempo del esperado. Por favor contacta con nuestro equipo de soporte"),
         "location": MessageLookupByLibrary.simpleMessage("Ubicación"),
         "locationName":
             MessageLookupByLibrary.simpleMessage("Nombre de la ubicación"),
@@ -1014,6 +1047,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "machineLearning":
             MessageLookupByLibrary.simpleMessage("Aprendizaje automático"),
         "magicSearch": MessageLookupByLibrary.simpleMessage("Búsqueda mágica"),
+        "magicSearchHint": MessageLookupByLibrary.simpleMessage(
+            "La búsqueda mágica permite buscar fotos por su contenido. Por ejemplo, \"flor\", \"carro rojo\", \"documentos de identidad\""),
         "manage": MessageLookupByLibrary.simpleMessage("Administrar"),
         "manageDeviceStorage": MessageLookupByLibrary.simpleMessage(
             "Administrar almacenamiento del dispositivo"),
@@ -1039,8 +1074,12 @@ class MessageLookup extends MessageLookupByLibrary {
             "Entiendo y deseo habilitar el aprendizaje automático"),
         "mlConsentDescription": MessageLookupByLibrary.simpleMessage(
             "Si habilitas el aprendizaje automático, Ente extraerá información como la geometría de la cara de los archivos, incluyendo aquellos compartidos contigo.\n\nEsto sucederá en tu dispositivo, y cualquier información biométrica generada será encriptada de extremo a extremo."),
+        "mlConsentPrivacy": MessageLookupByLibrary.simpleMessage(
+            "Por favor, haz clic aquí para más detalles sobre esta característica en nuestra política de privacidad"),
         "mlConsentTitle": MessageLookupByLibrary.simpleMessage(
             "¿Habilitar aprendizaje automático?"),
+        "mlIndexingDescription": MessageLookupByLibrary.simpleMessage(
+            "Por favor ten en cuenta que el aprendizaje automático dará como resultado un mayor ancho de banda y uso de batería hasta que todos los elementos estén indexados. Considera usar la aplicación de escritorio para una indexación más rápida. Todos los resultados se sincronizarán automáticamente."),
         "mobileWebDesktop":
             MessageLookupByLibrary.simpleMessage("Celular, Web, Computadora"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Moderada"),
@@ -1231,6 +1270,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Copias de seguridad privadas"),
         "privateSharing":
             MessageLookupByLibrary.simpleMessage("Compartir en privado"),
+        "processingImport": m46,
         "publicLinkCreated":
             MessageLookupByLibrary.simpleMessage("Enlace público creado"),
         "publicLinkEnabled":
@@ -1259,7 +1299,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "recoveryKeyVerified": MessageLookupByLibrary.simpleMessage(
             "Clave de recuperación verificada"),
         "recoveryKeyVerifyReason": MessageLookupByLibrary.simpleMessage(
-            "Tu clave de recuperación es la única forma de recuperar tus fotos si olvida su contraseña. Puedes encontrar tu clave de recuperación en Ajustes > Cuenta.\n\nPor favor, introduce tu clave de recuperación aquí para verificar que la has guardado correctamente."),
+            "Tu clave de recuperación es la única forma de recuperar tus fotos si olvidas tu contraseña. Puedes encontrar tu clave de recuperación en Ajustes > Cuenta.\n\nPor favor, introduce tu clave de recuperación aquí para verificar que la has guardado correctamente."),
         "recoverySuccessful":
             MessageLookupByLibrary.simpleMessage("¡Recuperación exitosa!"),
         "recreatePasswordBody": MessageLookupByLibrary.simpleMessage(
@@ -1730,6 +1770,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Ver todos los datos EXIF"),
         "viewLargeFiles":
             MessageLookupByLibrary.simpleMessage("Archivos grandes"),
+        "viewLargeFilesDesc": MessageLookupByLibrary.simpleMessage(
+            "Ver los archivos que consumen la mayor cantidad de almacenamiento."),
         "viewLogs": MessageLookupByLibrary.simpleMessage("Ver Registros"),
         "viewRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Ver código de recuperación"),

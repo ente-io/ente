@@ -415,8 +415,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Grymt! Din återställningsnyckel är giltig. Tack för att du verifierade.\n\nKom ihåg att hålla din återställningsnyckel säker med backups."),
         "recoveryKeyVerified": MessageLookupByLibrary.simpleMessage(
             "Återställningsnyckel verifierad"),
-        "recoveryKeyVerifyReason": MessageLookupByLibrary.simpleMessage(
-            "Din återställningsnyckel är det enda sättet att återställa dina foton om du glömmer ditt lösenord. Du hittar din återställningsnyckel i Inställningar > Säkerhet.\n\nAnge din återställningsnyckel här för att verifiera att du har sparat den ordentligt."),
         "recoverySuccessful":
             MessageLookupByLibrary.simpleMessage("Återställning lyckades!"),
         "recreatePasswordBody": MessageLookupByLibrary.simpleMessage(

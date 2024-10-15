@@ -1230,8 +1230,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Отлично! Ваш ключ восстановления действителен. Спасибо за проверку.\n\nПожалуйста, не забудьте сохранить ключ восстановления в безопасном месте."),
         "recoveryKeyVerified": MessageLookupByLibrary.simpleMessage(
             "Ключ восстановления подтвержден"),
-        "recoveryKeyVerifyReason": MessageLookupByLibrary.simpleMessage(
-            "Ваш ключ восстановления - это единственный способ восстановить ваши фотографии, если вы забыли пароль. Вы можете найти ключ восстановления в Настройки > Безопасность.\n\nПожалуйста, введите здесь ваш ключ восстановления, чтобы убедиться, что вы сохранили его правильно."),
         "recoverySuccessful": MessageLookupByLibrary.simpleMessage(
             "Восстановление прошло успешно!"),
         "recreatePasswordBody": MessageLookupByLibrary.simpleMessage(

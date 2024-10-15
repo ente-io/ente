@@ -316,10 +316,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
       MLDataDB.instance,
       preferences,
     );
-
-    if (flagService.internalUser) {
-      MagicCacheService.instance.init(preferences);
-    }
+    MagicCacheService.instance.init(preferences);
 
     initComplete = true;
     _logger.info("Initialization done");
