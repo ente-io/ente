@@ -1,6 +1,7 @@
 import { sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
 import { type Electron } from "@/base/types/ipc";
+import { downloadAndRevokeObjectURL } from "@/base/utils/web";
 import {
     EncryptedEnteFile,
     EnteFile,
@@ -19,7 +20,6 @@ import { updateExifIfNeededAndPossible } from "@/new/photos/services/exif-update
 import { detectFileTypeInfo } from "@/new/photos/utils/detect-type";
 import { safeFileName } from "@/new/photos/utils/native-fs";
 import { writeStream } from "@/new/photos/utils/native-stream";
-import { downloadAndRevokeObjectURL } from "@/new/photos/utils/web";
 import { withTimeout } from "@/utils/promise";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";

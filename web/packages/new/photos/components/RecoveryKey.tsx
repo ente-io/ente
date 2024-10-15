@@ -4,6 +4,7 @@ import { errorDialogAttributes } from "@/base/components/utils/dialog";
 import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import { useIsSmallWidth } from "@/base/hooks";
 import log from "@/base/log";
+import { downloadString } from "@/base/utils/web";
 import { ensure } from "@/utils/ensure";
 import CodeBlock from "@ente/shared/components/CodeBlock";
 import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleWithCloseButton";
@@ -19,7 +20,6 @@ import {
 import * as bip39 from "bip39";
 import { t } from "i18next";
 import { useCallback, useEffect, useState } from "react";
-import { downloadString } from "../utils/web";
 
 // mobile client library only supports english.
 bip39.setDefaultWordlist("english");
