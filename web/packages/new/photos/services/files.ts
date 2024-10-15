@@ -1,5 +1,5 @@
 import { blobCache } from "@/base/blob-cache";
-import { type EnteFile, type Trash } from "@/media/file";
+import { mergeMetadata, type EnteFile, type Trash } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import localForage from "@ente/shared/storage/localForage";
 

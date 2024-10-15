@@ -1,5 +1,5 @@
 import log from "@/base/log";
-import { type EnteFile, fileLogID } from "@/media/file";
+import { fileLogID, type EnteFile } from "@/media/file";
 import {
     decryptPublicMagicMetadata,
     fileCreationPhotoDate,

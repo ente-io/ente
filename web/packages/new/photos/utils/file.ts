@@ -2,8 +2,6 @@ import { isDesktop } from "@/base/app";
 import log from "@/base/log";
 import { CustomErrorMessage } from "@/base/types/ipc";
 import { workerBridge } from "@/base/worker/worker-bridge";
-import type { EnteFile } from "@/media/file";
-import { mergeMetadata1 } from "@/media/file";
 import { needsJPEGConversion } from "@/media/formats";
 import { heicToJPEG } from "@/media/heic-convert";
 import { detectFileTypeInfo } from "./detect-type";
