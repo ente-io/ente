@@ -435,10 +435,13 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
             fullScreen={isSmallWidth}
             PaperProps={{ sx: { minHeight: "80svh" } }}
         >
-            <DialogTitle sx={{ "&&&": { py: "20px" } }}>
-                {person.name && pt(`${person.name}?`)}
-            </DialogTitle>
-            <DialogContent dividers sx={{ display: "flex" }}>
+            <Stack sx={{ padding: "20px 16px 16px 16px", gap: "8px" }}>
+                <DialogTitle sx={{ "&&&": { p: 0 } }}>
+                    {pt("Review suggestions")}
+                </DialogTitle>
+                <Typography color="text.muted">{person.name ?? " "}</Typography>
+            </Stack>
+            <DialogContent sx={{ display: "flex", "&&&": { pt: 0 } }}>
                 {state.activity == "fetching" ? (
                     <CenteredBox>
                         <ActivityIndicator>
@@ -507,7 +510,7 @@ const SuggestionsList: React.FC<SuggestionsListProps> = ({
     markedSuggestionIDs,
     onMarkSuggestion,
 }) => (
-    <List sx={{ width: "100%" }}>
+    <List disablePadding sx={{ width: "100%" }}>
         {suggestions.map((suggestion) => (
             <ListItem
                 sx={{
