@@ -21,6 +21,12 @@
       "hex": "000000"
     },
     {
+      "title": "aliyun",
+      "altNames": [
+        "阿里云"
+      ]
+    },
+    {
       "title": "Amazon"
     },
     {
@@ -31,6 +37,16 @@
       "title": "AscendEX"
     },
     {
+      "title": "BaiduCloud",
+      "altNames": [
+        "百度云",
+        "baiduyun"
+      ]
+    },
+   {
+      "title": "Band"
+    },
+    {
       "title": "Battle.net",
       "slug": "battlenet",
       "altNames": [
@@ -39,9 +55,22 @@
       ]
     },
     {
+      "title": "BBS.NGA",
+      "altNames": [
+        "NGA玩家社区",
+        "NGA社区"
+      ]
+    },
+    {
       "title": "Bethesda",
       "altNames": [
         "Bethesda Softworks"
+      ]
+    },
+    {
+      "title": "Binance",
+      "altNames": [
+        "币安"
       ]
     },
     {
@@ -328,6 +357,12 @@
       "hex": "D3D800"
     },
     {
+      "title": "jianguoyun",
+      "altNames": [
+        "坚果云"
+      ]
+    },
+    {
       "title": "Kagi"
     },
     {
@@ -357,7 +392,21 @@
       "slug": "laposte"
     },
     {
+      "title": "Lark",
+      "altNames": [
+        "飞书"
+      ]
+    },
+    {
       "title": "Letterboxd"
+    },
+   {
+      "title": "Linux.Do",
+      "slug": "LINUX_DO",
+      "altNames": [
+        "LINUX DO",
+        "LinxDo"
+      ]
     },
     {
       "title": "Local",
@@ -447,6 +496,13 @@
       "slug": "name_com"
     },
     {
+      "title": "NeteaseMail",
+      "altNames": [
+        "网易邮箱",
+        "Mail.163"
+      ]
+    },
+    {
       "title": "NextDNS"
     },
     {
@@ -458,6 +514,12 @@
     {
       "title": "ngrok",
       "hex": "858585"
+    },
+    {
+      "title": "Nintendo",
+      "altNames": [
+        "任天堂"
+      ]
     },
     {
       "title": "Njalla"
@@ -487,7 +549,10 @@
     },
     {
       "title": "okx",
-      "hex": "000000"
+      "hex": "000000",
+      "altNames": [
+        "欧易"
+      ]
     },
     {
       "title": "Parsec"
@@ -535,6 +600,13 @@
     },
     {
       "title": "Proxmox"
+    },
+    {
+      "title": "qiniuyun",
+      "altNames": [
+        "七牛云",
+        "qiniu"
+      ]
     },
     {
       "title": "Real-Debrid",
@@ -642,6 +714,14 @@
       "title": "TCPShield"
     },
     {
+      "title": "tencent cloud",
+      "slug": "tencent_cloud"
+      "altNames": [
+        "腾讯云",
+        "tencentcloud"
+      ]
+    },
+    {
       "title": "Techlore",
       "altNames": [
         "Techlore Courses",
@@ -662,6 +742,12 @@
     {
       "title": "Titan"
     },    
+    {
+      "title": "tianyiyun",
+      "altNames": [
+        "天翼云"
+      ]
+    },
     {
       "title": "TorGuard"
     },
@@ -712,6 +798,12 @@
       "title": "Vikunja"
     },
     {
+      "title": "volcengine",
+      "altNames": [
+        "火山引擎"
+      ]
+    },
+   {
       "title": "WARGAMING.NET"
     },
     {
