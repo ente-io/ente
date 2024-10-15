@@ -32,7 +32,9 @@ import ClearIcon from "@mui/icons-material/Clear";
 import EditIcon from "@mui/icons-material/Edit";
 import ListAltOutlined from "@mui/icons-material/ListAltOutlined";
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
+import RestoreIcon from "@mui/icons-material/Restore";
 import {
+    Box,
     Dialog,
     DialogActions,
     DialogContent,
@@ -435,12 +437,27 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
             fullScreen={isSmallWidth}
             PaperProps={{ sx: { minHeight: "80svh" } }}
         >
-            <Stack sx={{ padding: "20px 16px 16px 16px", gap: "8px" }}>
-                <DialogTitle sx={{ "&&&": { p: 0 } }}>
-                    {pt("Review suggestions")}
-                </DialogTitle>
-                <Typography color="text.muted">{person.name ?? " "}</Typography>
-            </Stack>
+            <Box
+                sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "flex-start",
+                    padding: "20px 16px 16px 16px",
+                    // border: "1px solid tomato",
+                }}
+            >
+                <Stack sx={{ gap: "8px" }}>
+                    <DialogTitle sx={{ "&&&": { p: 0 } }}>
+                        {pt("Review suggestions")}
+                    </DialogTitle>
+                    <Typography color="text.muted">
+                        {person.name ?? " "}
+                    </Typography>
+                </Stack>
+                <IconButton>
+                    <RestoreIcon />
+                </IconButton>
+            </Box>
             <DialogContent sx={{ display: "flex", "&&&": { pt: 0 } }}>
                 {state.activity == "fetching" ? (
                     <CenteredBox>
@@ -516,7 +533,6 @@ const SuggestionsList: React.FC<SuggestionsListProps> = ({
                 sx={{
                     paddingInline: 0,
                     paddingBlockEnd: "24px",
-
                     justifyContent: "space-between",
                 }}
                 key={suggestion.id}
