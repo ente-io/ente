@@ -1,5 +1,5 @@
 import log from "@/base/log";
-import { EnteFile } from "@/media/file";
+import { type EnteFile, fileLogID } from "@/media/file";
 import {
     decryptPublicMagicMetadata,
     fileCreationPhotoDate,
@@ -10,7 +10,6 @@ import { FileType } from "@/media/file-type";
 import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker";
 import downloadManager from "@/new/photos/services/download";
 import { extractExifDates } from "@/new/photos/services/exif";
-import { fileLogID } from "@/new/photos/utils/file";
 import { ensure } from "@/utils/ensure";
 import DialogBox from "@ente/shared/components/DialogBox/";
 import {

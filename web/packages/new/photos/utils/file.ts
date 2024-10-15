@@ -17,16 +17,6 @@ import { detectFileTypeInfo } from "./detect-type";
 let _isNativeJPEGConversionAvailable = true;
 
 /**
- * @returns a string to use as an identifier when logging information about the
- * given {@link file}. The returned string contains the file name (for ease of
- * debugging) and the file ID (for exactness).
- */
-export const fileLogID = (file: EnteFile) =>
-    // TODO: Remove this when file/metadata types have optionality annotations.
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    `file ${file.metadata.title ?? "-"} (${file.id})`;
-
-/**
  * Update the in-memory representation of an array of {@link EnteFile} to
  * reflect user edits since the file was uploaded.
  *

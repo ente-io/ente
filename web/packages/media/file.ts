@@ -218,5 +218,15 @@ export interface EncryptedTrashItem {
 
 export type Trash = TrashItem[];
 
+/**
+ * @returns a string to use as an identifier when logging information about the
+ * given {@link file}. The returned string contains the file name (for ease of
+ * debugging) and the file ID (for exactness).
+ */
+export const fileLogID = (file: EnteFile) =>
+    // TODO: Remove this when file/metadata types have optionality annotations.
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    `file ${file.metadata.title ?? "-"} (${file.id})`;
+
 export const hasFileHash = (file: Metadata) =>
     !!file.hash || (!!file.imageHash && !!file.videoHash);
