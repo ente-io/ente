@@ -7,14 +7,10 @@ import { sharedCryptoWorker } from "@/base/crypto";
 import { type CryptoWorker } from "@/base/crypto/worker";
 import log from "@/base/log";
 import { customAPIOrigin } from "@/base/origins";
+import type { EnteFile, LivePhotoSourceURL, SourceURLs } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import * as ffmpeg from "@/new/photos/services/ffmpeg";
-import type {
-    EnteFile,
-    LivePhotoSourceURL,
-    SourceURLs,
-} from "@/new/photos/types/file";
 import { renderableImageBlob } from "@/new/photos/utils/file";
 import { ensure } from "@/utils/ensure";
 import { CustomError } from "@ente/shared/error";

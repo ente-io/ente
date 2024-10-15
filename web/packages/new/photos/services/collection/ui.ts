@@ -1,4 +1,4 @@
-import type { EnteFile } from "@/new/photos/types/file";
+import type { EnteFile } from "@/media/file";
 
 export type CollectionSummaryType =
     | "folder"

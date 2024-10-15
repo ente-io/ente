@@ -1,9 +1,9 @@
 import log from "@/base/log";
+import type { LivePhotoSourceURL, SourceURLs } from "@/media/file";
+import { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import type { SelectionContext } from "@/new/photos/components/gallery";
 import type { GalleryBarMode } from "@/new/photos/components/gallery/BarImpl";
-import type { LivePhotoSourceURL, SourceURLs } from "@/new/photos/types/file";
-import { EnteFile } from "@/new/photos/types/file";
 import { ensure } from "@/utils/ensure";
 import { SetSelectedState } from "types/gallery";
 

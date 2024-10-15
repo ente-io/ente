@@ -1,6 +1,6 @@
 import { assertionFailed } from "@/base/assert";
 import log from "@/base/log";
-import type { EnteFile } from "../../types/file";
+import type { EnteFile } from "@/media/file";
 import { getLocalFiles } from "../files";
 import { savedCGroups, type CGroup } from "../user-entity";
 import type { FaceCluster } from "./cluster";
@@ -155,7 +155,7 @@ export interface PreviewableFace {
     /** The ID of the face to display. */
     faceID: string;
     /** The {@link EnteFile} which contains this face. */
-    enteFile: EnteFile;
+    file: EnteFile;
 }
 
 /**
@@ -421,7 +421,7 @@ export const suggestionsForPerson = async (person: CGroupPerson) => {
                     // assertionFailed();
                     return undefined;
                 }
-                return { enteFile: file, faceID };
+                return { file, faceID };
             })
             .filter((f) => !!f);
 

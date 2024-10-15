@@ -1,3 +1,4 @@
+import { RecoveryKey } from "@/accounts/components/RecoveryKey";
 import { openAccountsManagePasskeysPage } from "@/accounts/services/passkey";
 import { isDesktop } from "@/base/app";
 import { EnteDrawer } from "@/base/components/EnteDrawer";
@@ -7,11 +8,11 @@ import { useModalVisibility } from "@/base/components/utils/modal";
 import log from "@/base/log";
 import { savedLogs } from "@/base/log-web";
 import { customAPIHost } from "@/base/origins";
-import { RecoveryKey } from "@/new/photos/components/RecoveryKey";
+import { downloadString } from "@/base/utils/web";
 import { downloadAppDialogAttributes } from "@/new/photos/components/utils/download";
 import type { CollectionSummaries } from "@/new/photos/services/collection/ui";
 import { AppContext, useAppContext } from "@/new/photos/types/context";
-import { downloadString, initiateEmail, openURL } from "@/new/photos/utils/web";
+import { initiateEmail, openURL } from "@/new/photos/utils/web";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ThemeSwitcher from "@ente/shared/components/ThemeSwitcher";

@@ -1,4 +1,4 @@
-import { EnteFile } from "@/new/photos/types/file";
+import { EnteFile } from "@/media/file";
 import { formattedByteSize } from "@/new/photos/utils/units";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import { formatDate } from "@ente/shared/time/format";

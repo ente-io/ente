@@ -16,8 +16,10 @@ import {
     MoveToCollectionRequest,
     PublicURL,
     RemoveFromCollectionRequest,
+    SUB_TYPE,
     UpdatePublicURL,
 } from "@/media/collection";
+import { EncryptedMagicMetadata, EnteFile } from "@/media/file";
 import { ItemVisibility } from "@/media/file-metadata";
 import type {
     CollectionSummaries,
@@ -29,12 +31,6 @@ import {
     CollectionsSortBy,
 } from "@/new/photos/services/collection/ui";
 import { getLocalFiles, sortFiles } from "@/new/photos/services/files";
-import { EnteFile } from "@/new/photos/types/file";
-import {
-    EncryptedMagicMetadata,
-    SUB_TYPE,
-    UpdateMagicMetadataRequest,
-} from "@/new/photos/types/magicMetadata";
 import { batch } from "@/utils/array";
 import { CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
@@ -70,6 +66,7 @@ import {
     isPinnedCollection,
     updateMagicMetadata,
 } from "utils/magicMetadata";
+import { UpdateMagicMetadataRequest } from "./fileService";
 import { getPublicKey } from "./userService";
 
 const COLLECTION_TABLE = "collections";

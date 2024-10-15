@@ -6,11 +6,11 @@ import {
     CollectionMagicMetadataProps,
     CollectionPublicMagicMetadataProps,
     CollectionType,
+    SUB_TYPE,
 } from "@/media/collection";
+import { EnteFile } from "@/media/file";
 import { ItemVisibility } from "@/media/file-metadata";
 import { getAllLocalFiles, getLocalFiles } from "@/new/photos/services/files";
-import { EnteFile } from "@/new/photos/types/file";
-import { SUB_TYPE } from "@/new/photos/types/magicMetadata";
 import { safeDirectoryName } from "@/new/photos/utils/native-fs";
 import { CustomError } from "@ente/shared/error";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";

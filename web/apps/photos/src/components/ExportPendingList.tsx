@@ -1,7 +1,7 @@
 import { TitledMiniDialog } from "@/base/components/MiniDialog";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
+import { EnteFile } from "@/media/file";
 import { ItemCard, PreviewItemTile } from "@/new/photos/components/Tiles";
-import { EnteFile } from "@/new/photos/types/file";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import { Box, styled } from "@mui/material";
 import ItemList from "components/ItemList";

@@ -2,21 +2,21 @@ import { encryptMetadataJSON } from "@/base/crypto";
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
 import type { Collection } from "@/media/collection";
+import type { EncryptedMagicMetadata } from "@/media/file";
+import {
+    EncryptedEnteFile,
+    EnteFile,
+    FileWithUpdatedMagicMetadata,
+    FileWithUpdatedPublicMagicMetadata,
+    mergeMetadata,
+    TrashRequest,
+} from "@/media/file";
 import {
     clearCachedThumbnailsIfChanged,
     getLocalFiles,
     setLocalFiles,
     sortFiles,
 } from "@/new/photos/services/files";
-import {
-    EncryptedEnteFile,
-    EnteFile,
-    FileWithUpdatedMagicMetadata,
-    FileWithUpdatedPublicMagicMetadata,
-    TrashRequest,
-} from "@/new/photos/types/file";
-import { BulkUpdateMagicMetadataRequest } from "@/new/photos/types/magicMetadata";
-import { mergeMetadata } from "@/new/photos/utils/file";
 import { batch } from "@/utils/array";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
@@ -190,6 +190,15 @@ export const deleteFromTrash = async (filesToDelete: number[]) => {
         throw e;
     }
 };
+
+export interface UpdateMagicMetadataRequest {
+    id: number;
+    magicMetadata: EncryptedMagicMetadata;
+}
+
+export interface BulkUpdateMagicMetadataRequest {
+    metadataList: UpdateMagicMetadataRequest[];
+}
 
 export const updateFileMagicMetadata = async (
     fileWithUpdatedMagicMetadataList: FileWithUpdatedMagicMetadata[],
