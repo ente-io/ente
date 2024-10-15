@@ -98,7 +98,7 @@ class Face {
       faceID,
       fileID,
       parseAsDoubleList(json['embedding'] as List),
-      json['score'] as double,
+      parseIntOrDoubleAsDouble(json['score'])!,
       Detection.fromJson(json['detection'] as Map<String, dynamic>),
       // high value means t
       parseIntOrDoubleAsDouble(json['blur']) ?? kLapacianDefault,
