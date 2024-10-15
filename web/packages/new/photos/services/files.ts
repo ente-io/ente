@@ -2,7 +2,6 @@ import { blobCache } from "@/base/blob-cache";
 import { type EnteFile, type Trash } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import localForage from "@ente/shared/storage/localForage";
-import { mergeMetadata } from "../utils/file";
 
 const FILES_TABLE = "files";
 const HIDDEN_FILES_TABLE = "hidden-files";

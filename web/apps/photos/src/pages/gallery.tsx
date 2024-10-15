@@ -5,7 +5,7 @@ import { useModalVisibility } from "@/base/components/utils/modal";
 import { useIsSmallWidth } from "@/base/hooks";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
-import { EnteFile } from "@/media/file";
+import { type EnteFile, mergeMetadata } from "@/media/file";
 import {
     CollectionSelector,
     type CollectionSelectorAttributes,
@@ -38,7 +38,6 @@ import {
 } from "@/new/photos/services/search";
 import type { SearchOption } from "@/new/photos/services/search/types";
 import { AppContext } from "@/new/photos/types/context";
-import { mergeMetadata } from "@/new/photos/utils/file";
 import { ensure } from "@/utils/ensure";
 import {
     CenteredFlex,

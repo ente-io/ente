@@ -1,7 +1,7 @@
 import { ensureElectron } from "@/base/electron";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
-import { EnteFile } from "@/media/file";
+import { mergeMetadata, type EnteFile } from "@/media/file";
 import {
     fileCreationPhotoDate,
     fileLocation,
@@ -16,7 +16,6 @@ import {
     exportTrashDirectoryName,
 } from "@/new/photos/services/export";
 import { getAllLocalFiles } from "@/new/photos/services/files";
-import { mergeMetadata } from "@/new/photos/utils/file";
 import { safeDirectoryName, safeFileName } from "@/new/photos/utils/native-fs";
 import { writeStream } from "@/new/photos/utils/native-stream";
 import { wait } from "@/utils/promise";

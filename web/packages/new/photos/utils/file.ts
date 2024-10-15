@@ -18,15 +18,6 @@ import { detectFileTypeInfo } from "./detect-type";
 let _isNativeJPEGConversionAvailable = true;
 
 /**
- * Update the in-memory representation of an array of {@link EnteFile} to
- * reflect user edits since the file was uploaded.
- *
- * This is a list variant of {@link mergeMetadata1}.
- */
-export const mergeMetadata = (files: EnteFile[]) =>
-    files.map((file) => mergeMetadata1(file));
-
-/**
  * Return a new {@link Blob} containing data in a format that the browser
  * (likely) knows how to render (in an img tag, or on the canvas).
  *

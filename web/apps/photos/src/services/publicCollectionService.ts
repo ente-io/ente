@@ -5,9 +5,9 @@ import type {
     Collection,
     CollectionPublicMagicMetadata,
 } from "@/media/collection";
-import { EncryptedEnteFile, EnteFile } from "@/media/file";
+import type { EncryptedEnteFile, EnteFile } from "@/media/file";
+import { mergeMetadata } from "@/media/file";
 import { sortFiles } from "@/new/photos/services/files";
-import { mergeMetadata } from "@/new/photos/utils/file";
 import { CustomError, parseSharingErrorCodes } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import localForage from "@ente/shared/storage/localForage";

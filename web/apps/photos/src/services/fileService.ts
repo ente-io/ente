@@ -8,6 +8,7 @@ import {
     EnteFile,
     FileWithUpdatedMagicMetadata,
     FileWithUpdatedPublicMagicMetadata,
+    mergeMetadata,
     TrashRequest,
 } from "@/media/file";
 import {
@@ -16,7 +17,6 @@ import {
     setLocalFiles,
     sortFiles,
 } from "@/new/photos/services/files";
-import { mergeMetadata } from "@/new/photos/utils/file";
 import { batch } from "@/utils/array";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";

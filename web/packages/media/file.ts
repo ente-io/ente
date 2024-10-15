@@ -268,5 +268,14 @@ export const mergeMetadata1 = (file: EnteFile): EnteFile => {
     return file;
 };
 
+/**
+ * Update the in-memory representation of an array of {@link EnteFile} to
+ * reflect user edits since the file was uploaded.
+ *
+ * This is a list variant of {@link mergeMetadata1}.
+ */
+export const mergeMetadata = (files: EnteFile[]) =>
+    files.map((file) => mergeMetadata1(file));
+
 export const hasFileHash = (file: Metadata) =>
     !!file.hash || (!!file.imageHash && !!file.videoHash);

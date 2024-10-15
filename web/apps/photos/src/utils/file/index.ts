@@ -9,6 +9,7 @@ import {
     FilePublicMagicMetadata,
     FilePublicMagicMetadataProps,
     FileWithUpdatedMagicMetadata,
+    mergeMetadata,
 } from "@/media/file";
 import { ItemVisibility } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
@@ -16,7 +17,6 @@ import { decodeLivePhoto } from "@/media/live-photo";
 import DownloadManager from "@/new/photos/services/download";
 import { updateExifIfNeededAndPossible } from "@/new/photos/services/exif-update";
 import { detectFileTypeInfo } from "@/new/photos/utils/detect-type";
-import { mergeMetadata } from "@/new/photos/utils/file";
 import { safeFileName } from "@/new/photos/utils/native-fs";
 import { writeStream } from "@/new/photos/utils/native-stream";
 import { downloadAndRevokeObjectURL } from "@/new/photos/utils/web";
