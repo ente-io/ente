@@ -155,7 +155,7 @@ export interface PreviewableFace {
     /** The ID of the face to display. */
     faceID: string;
     /** The {@link EnteFile} which contains this face. */
-    enteFile: EnteFile;
+    file: EnteFile;
 }
 
 /**
@@ -421,7 +421,7 @@ export const suggestionsForPerson = async (person: CGroupPerson) => {
                     // assertionFailed();
                     return undefined;
                 }
-                return { enteFile: file, faceID };
+                return { file, faceID };
             })
             .filter((f) => !!f);
 

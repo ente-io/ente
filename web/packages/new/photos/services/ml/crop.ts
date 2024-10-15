@@ -14,7 +14,7 @@ import { clamp } from "./math";
  * indexing pipeline itself. But we need to regenerate them locally if the user
  * views that item on any other client.
  *
- * @param enteFile The {@link EnteFile} whose face crops we want to generate.
+ * @param file The {@link EnteFile} whose face crops we want to generate.
  *
  * @param faceIndex The {@link FaceIndex} containing information about the faces
  * detected in the given image.
@@ -23,10 +23,10 @@ import { clamp } from "./math";
  * retrieved from the {@link BlobCache} named "face-crops".
  */
 export const regenerateFaceCrops = async (
-    enteFile: EnteFile,
+    file: EnteFile,
     faceIndex: FaceIndex,
 ) => {
-    const renderableBlob = await fetchRenderableEnteFileBlob(enteFile);
+    const renderableBlob = await fetchRenderableEnteFileBlob(file);
     const imageBitmap = await createImageBitmap(renderableBlob);
 
     try {

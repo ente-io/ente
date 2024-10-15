@@ -181,7 +181,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                 />
 
                 <CreationTime
-                    {...{ enteFile: file, shouldDisableEdits, scheduleUpdate }}
+                    {...{ file, shouldDisableEdits, scheduleUpdate }}
                 />
 
                 <RenderFileName
@@ -308,12 +308,12 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                 {isMLEnabled() && annotatedFaces && (
                     <>
                         <AnnotatedFacePeopleList
-                            enteFile={file}
+                            file={file}
                             annotatedFaceIDs={annotatedFaces.annotatedFaceIDs}
                             onSelectFace={handleSelectFace}
                         />
                         <UnclusteredFaceList
-                            enteFile={file}
+                            file={file}
                             faceIDs={annotatedFaces.otherFaceIDs}
                         />
                     </>
@@ -417,13 +417,13 @@ const FileInfoSidebar = styled((props: DialogProps) => (
 });
 
 interface CreationTimeProps {
-    enteFile: EnteFile;
+    file: EnteFile;
     shouldDisableEdits: boolean;
     scheduleUpdate: () => void;
 }
 
 export const CreationTime: React.FC<CreationTimeProps> = ({
-    enteFile,
+    file,
     shouldDisableEdits,
     scheduleUpdate,
 }) => {
@@ -433,13 +433,13 @@ export const CreationTime: React.FC<CreationTimeProps> = ({
     const openEditMode = () => setIsInEditMode(true);
     const closeEditMode = () => setIsInEditMode(false);
 
-    const publicMagicMetadata = getPublicMagicMetadataSync(enteFile);
-    const originalDate = fileCreationPhotoDate(enteFile, publicMagicMetadata);
+    const publicMagicMetadata = getPublicMagicMetadataSync(file);
+    const originalDate = fileCreationPhotoDate(file, publicMagicMetadata);
 
     const saveEdits = async (pickedTime: ParsedMetadataDate) => {
         try {
             setLoading(true);
-            if (isInEditMode && enteFile) {
+            if (isInEditMode && file) {
                 // [Note: Don't modify offsetTime when editing date via picker]
                 //
                 // Use the updated date time (both in its canonical dateTime
@@ -459,7 +459,7 @@ export const CreationTime: React.FC<CreationTimeProps> = ({
                     return;
                 }
 
-                await updateRemotePublicMagicMetadata(enteFile, {
+                await updateRemotePublicMagicMetadata(file, {
                     dateTime,
                     editedTime: timestamp,
                 });
