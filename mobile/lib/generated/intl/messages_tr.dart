@@ -1067,8 +1067,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Harika! Kurtarma anahtarınız geçerlidir. Doğrulama için teşekkür ederim.\n\nLütfen kurtarma anahtarınızı güvenli bir şekilde yedeklediğinizden emin olun."),
         "recoveryKeyVerified":
             MessageLookupByLibrary.simpleMessage("Kurtarma kodu doğrulandı"),
-        "recoveryKeyVerifyReason": MessageLookupByLibrary.simpleMessage(
-            "Eğer şifrenizi unutursanız, fotoğraflarınızı kurtarmanın tek yolu kurtarma anahtarınızdır. Kurtarma anahtarınızı Ayarlar > Güvenlik bölümünde bulabilirsiniz.\n\nLütfen kurtarma anahtarınızı buraya girerek doğru bir şekilde kaydettiğinizi doğrulayın."),
         "recoverySuccessful":
             MessageLookupByLibrary.simpleMessage("Kurtarma başarılı!"),
         "recreatePasswordBody": MessageLookupByLibrary.simpleMessage(

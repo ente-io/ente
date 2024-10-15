@@ -1047,7 +1047,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "太棒了！ 您的恢复密钥是有效的。 感谢您的验证。\n\n请记住要安全备份您的恢复密钥。"),
         "recoveryKeyVerified": MessageLookupByLibrary.simpleMessage("恢复密钥已验证"),
         "recoveryKeyVerifyReason": MessageLookupByLibrary.simpleMessage(
-            "如果您忘记了您的密码，您的恢复密钥是恢复您的照片的唯一途径。 您可以在“设置 > 账户”中找到您的恢复密钥。\n\n请在此输入您的恢复密钥以确认您已经正确地保存了它。"),
+            "如果您忘记了密码，恢复密钥是恢复照片的唯一方法。您可以在“设置”>“账户”中找到恢复密钥。\n\n请在此处输入恢复密钥，以验证您是否已正确保存。"),
         "recoverySuccessful": MessageLookupByLibrary.simpleMessage("恢复成功!"),
         "recreatePasswordBody": MessageLookupByLibrary.simpleMessage(
             "当前设备的功能不足以验证您的密码，但我们可以以适用于所有设备的方式重新生成。\n\n请使用您的恢复密钥登录并重新生成您的密码（如果您希望，可以再次使用相同的密码）。"),

@@ -1252,8 +1252,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Super! Je herstelsleutel is geldig. Bedankt voor het verifiëren.\n\nVergeet niet om je herstelsleutel veilig te bewaren."),
         "recoveryKeyVerified": MessageLookupByLibrary.simpleMessage(
             "Herstel sleutel geverifieerd"),
-        "recoveryKeyVerifyReason": MessageLookupByLibrary.simpleMessage(
-            "Je herstelsleutel is de enige manier om je foto\'s te herstellen als je je wachtwoord bent vergeten. Je vindt je herstelsleutel in Instellingen > Account.\n\nVoer hier je herstelsleutel in om te controleren of je hem correct hebt opgeslagen."),
         "recoverySuccessful":
             MessageLookupByLibrary.simpleMessage("Herstel succesvol!"),
         "recreatePasswordBody": MessageLookupByLibrary.simpleMessage(
