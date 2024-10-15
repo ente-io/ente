@@ -430,7 +430,7 @@ export const suggestionsForPerson = async (person: CGroupPerson) => {
 
             previewFaces.push({ file, faceID });
 
-            if (previewFaces.length == 3) break;
+            if (previewFaces.length == 4) break;
         }
 
         const id = cluster.id;
