@@ -49,7 +49,8 @@ import {
     Typography,
 } from "@mui/material";
 import { t } from "i18next";
-import React, { useEffect, useReducer } from "react";
+import React, { useEffect, useReducer, useState } from "react";
+import { isInternalUser } from "../../services/feature-flags";
 import { useAppContext } from "../../types/context";
 import { AddPersonDialog } from "../AddPersonDialog";
 import { SpaceBetweenFlex } from "../mui";
@@ -118,11 +119,16 @@ const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({
     const cgroup = person.cgroup;
 
     const { showMiniDialog } = useAppContext();
+    const [showReviewOption, setShowReviewOption] = useState(false);
 
     const { show: showNameInput, props: nameInputVisibilityProps } =
         useModalVisibility();
     const { show: showSuggestions, props: suggestionsVisibilityProps } =
         useModalVisibility();
+
+    useEffect(() => {
+        void isInternalUser().then((b) => setShowReviewOption(b));
+    }, []);
 
     const handleRename = (name: string) => renameCGroup(cgroup, name);
 
@@ -171,7 +177,7 @@ const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({
                 >
                     {pt("Reset")}
                 </OverflowMenuOption>
-                {process.env.NEXT_PUBLIC_ENTE_WIP_CL /* TODO-Cluster */ && (
+                {showReviewOption /* TODO-Cluster */ && (
                     <OverflowMenuOption
                         startIcon={<ListAltOutlinedIcon />}
                         centerAlign
@@ -547,7 +553,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                     color={"accent"}
                     onClick={handleSave}
                 >
-                    {t("save")}
+                    {hasUnsavedChanges ? pt("TODO Not impl") : t("save")}
                 </LoadingButton>
             </DialogActions>
         </Dialog>
