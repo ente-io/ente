@@ -150,7 +150,7 @@
   "tryAgain": "Réessayer",
   "viewRecoveryKey": "Voir la clé de récupération",
   "confirmRecoveryKey": "Confirmer la clé de récupération",
-  "recoveryKeyVerifyReason": "Votre clé de récupération est la seule façon de récupérer vos photos si vous oubliez votre mot de passe. Vous pouvez trouver votre clé de récupération dans Paramètres > Compte.\n\nVeuillez entrer votre clé de récupération ici pour vous assurer que vous l'avez enregistrée correctement.",
+  "recoveryKeyVerifyReason": "Votre clé de récupération est la seule façon de récupérer vos photos si vous oubliez votre mot de passe. Vous pouvez trouver votre clé de récupération dans Paramètres > Compte.\n\nVeuillez saisir votre clé de récupération ici pour vous assurer de l'avoir enregistré correctement.",
   "confirmYourRecoveryKey": "Confirmer la clé de récupération",
   "addViewer": "Ajouter un observateur",
   "addCollaborator": "Ajouter un collaborateur",
