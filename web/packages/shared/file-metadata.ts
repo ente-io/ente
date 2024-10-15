@@ -1,9 +1,9 @@
 import { isDevBuild } from "@/base/env";
+import type { EnteFile } from "@/media/file";
 import {
     decryptPublicMagicMetadata,
     type PublicMagicMetadata,
 } from "@/media/file-metadata";
-import type { EnteFile } from "@/new/photos/types/file";
 import { fileLogID } from "@/new/photos/utils/file";
 
 /**

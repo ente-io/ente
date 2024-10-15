@@ -1,6 +1,6 @@
 import { decryptBlob } from "@/base/crypto";
 import log from "@/base/log";
-import type { EnteFile } from "@/new/photos/types/file";
+import type { EnteFile } from "@/media/file";
 import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
 import { gunzip, gzip } from "../../utils/gzip";

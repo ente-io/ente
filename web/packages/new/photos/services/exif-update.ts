@@ -1,8 +1,8 @@
 import { lowercaseExtension } from "@/base/file";
 import log from "@/base/log";
+import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import piexif from "piexifjs";
-import type { EnteFile } from "../types/file";
 
 /**
  * Return a new stream after applying Exif updates if applicable to the given

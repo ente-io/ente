@@ -5,6 +5,7 @@ import { sharedCryptoWorker } from "@/base/crypto";
 import { useIsSmallWidth, useIsTouchscreen } from "@/base/hooks";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
+import { EnteFile } from "@/media/file";
 import {
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
@@ -13,7 +14,6 @@ import { SpaceBetweenFlex } from "@/new/photos/components/mui";
 import downloadManager from "@/new/photos/services/download";
 import { sortFiles } from "@/new/photos/services/files";
 import { AppContext } from "@/new/photos/types/context";
-import { EnteFile } from "@/new/photos/types/file";
 import { mergeMetadata } from "@/new/photos/utils/file";
 import {
     CenteredFlex,

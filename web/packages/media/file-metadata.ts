@@ -2,10 +2,7 @@ import { decryptMetadataJSON, encryptMetadataJSON } from "@/base/crypto";
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { apiURL } from "@/base/origins";
 import { type Location } from "@/base/types";
-import {
-    type EnteFile,
-    type FilePublicMagicMetadata,
-} from "@/new/photos/types/file";
+import { type EnteFile, type FilePublicMagicMetadata } from "@/media/file";
 import { mergeMetadata1 } from "@/new/photos/utils/file";
 import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";

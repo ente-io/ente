@@ -1,6 +1,6 @@
 import { blobCache } from "@/base/blob-cache";
+import type { EnteFile } from "@/media/file";
 import { ensure } from "@/utils/ensure";
-import type { EnteFile } from "../../types/file";
 import { fetchRenderableEnteFileBlob } from "./blob";
 import { type Box, type FaceIndex } from "./face";
 import { clamp } from "./math";

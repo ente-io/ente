@@ -1,7 +1,7 @@
 import { encryptBlobB64 } from "@/base/crypto";
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { apiURL } from "@/base/origins";
-import type { EnteFile } from "@/new/photos/types/file";
+import type { EnteFile } from "@/media/file";
 import { z } from "zod";
 
 /**

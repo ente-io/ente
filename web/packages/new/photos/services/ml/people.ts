@@ -1,6 +1,6 @@
 import { assertionFailed } from "@/base/assert";
 import log from "@/base/log";
-import type { EnteFile } from "../../types/file";
+import type { EnteFile } from "@/media/file";
 import { getLocalFiles } from "../files";
 import { savedCGroups, type CGroup } from "../user-entity";
 import type { FaceCluster } from "./cluster";

@@ -1,9 +1,9 @@
 import { assertionFailed } from "@/base/assert";
 import { newNonSecureID } from "@/base/id-worker";
 import log from "@/base/log";
+import type { EnteFile } from "@/media/file";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
-import type { EnteFile } from "../../types/file";
 import { savedCGroups, updateOrCreateUserEntities } from "../user-entity";
 import { savedFaceClusters, saveFaceClusters } from "./db";
 import {

@@ -19,6 +19,7 @@ import {
     SUB_TYPE,
     UpdatePublicURL,
 } from "@/media/collection";
+import { EncryptedMagicMetadata, EnteFile } from "@/media/file";
 import { ItemVisibility } from "@/media/file-metadata";
 import type {
     CollectionSummaries,
@@ -30,7 +31,6 @@ import {
     CollectionsSortBy,
 } from "@/new/photos/services/collection/ui";
 import { getLocalFiles, sortFiles } from "@/new/photos/services/files";
-import { EncryptedMagicMetadata, EnteFile } from "@/new/photos/types/file";
 import { batch } from "@/utils/array";
 import { CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";

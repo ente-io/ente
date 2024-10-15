@@ -1,8 +1,8 @@
 import { useIsSmallWidth } from "@/base/hooks";
 import { pt } from "@/base/i18n";
+import type { EnteFile } from "@/media/file";
 import { faceCrop, type AnnotatedFaceID } from "@/new/photos/services/ml";
 import type { Person, PreviewableFace } from "@/new/photos/services/ml/people";
-import type { EnteFile } from "@/new/photos/types/file";
 import { Skeleton, Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";

@@ -1,9 +1,9 @@
-import { ItemVisibility } from "@/media/file-metadata";
-import type { EnteFile } from "@/new/photos/types/file";
+import type { EnteFile } from "@/media/file";
 import {
     type EncryptedMagicMetadata,
     type MagicMetadataCore,
-} from "@/new/photos/types/file";
+} from "@/media/file";
+import { ItemVisibility } from "@/media/file-metadata";
 
 // TODO: Audit this file
 

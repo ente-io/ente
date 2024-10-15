@@ -9,16 +9,16 @@ import { sharedCryptoWorker } from "@/base/crypto";
 import { nameAndExtension } from "@/base/file";
 import log from "@/base/log";
 import { apiURL, customAPIOrigin } from "@/base/origins";
-import { FileType } from "@/media/file-type";
-import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
-import { heicToJPEG } from "@/media/heic-convert";
-import { decodeLivePhoto } from "@/media/live-photo";
 import type {
     EncryptedEnteFile,
     EnteFile,
     FileMagicMetadata,
     FilePublicMagicMetadata,
-} from "@/new/photos/types/file";
+} from "@/media/file";
+import { FileType } from "@/media/file-type";
+import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
+import { heicToJPEG } from "@/media/heic-convert";
+import { decodeLivePhoto } from "@/media/live-photo";
 import { mergeMetadata1 } from "@/new/photos/utils/file";
 import { shuffled } from "@/utils/array";
 import { ensure } from "@/utils/ensure";

@@ -2,20 +2,20 @@ import { encryptMetadataJSON } from "@/base/crypto";
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
 import type { Collection } from "@/media/collection";
-import {
-    clearCachedThumbnailsIfChanged,
-    getLocalFiles,
-    setLocalFiles,
-    sortFiles,
-} from "@/new/photos/services/files";
-import type { EncryptedMagicMetadata } from "@/new/photos/types/file";
+import type { EncryptedMagicMetadata } from "@/media/file";
 import {
     EncryptedEnteFile,
     EnteFile,
     FileWithUpdatedMagicMetadata,
     FileWithUpdatedPublicMagicMetadata,
     TrashRequest,
-} from "@/new/photos/types/file";
+} from "@/media/file";
+import {
+    clearCachedThumbnailsIfChanged,
+    getLocalFiles,
+    setLocalFiles,
+    sortFiles,
+} from "@/new/photos/services/files";
 import { mergeMetadata } from "@/new/photos/utils/file";
 import { batch } from "@/utils/array";
 import HTTPService from "@ente/shared/network/HTTPService";

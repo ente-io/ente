@@ -1,9 +1,9 @@
 import { basename } from "@/base/file";
 import type { ElectronMLWorker } from "@/base/types/ipc";
+import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import { ensure } from "@/utils/ensure";
-import type { EnteFile } from "../../types/file";
 import { renderableImageBlob } from "../../utils/file";
 import { readStream } from "../../utils/native-stream";
 import DownloadManager from "../download";

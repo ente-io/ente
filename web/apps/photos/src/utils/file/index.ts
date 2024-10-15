@@ -1,11 +1,6 @@
 import { sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
 import { type Electron } from "@/base/types/ipc";
-import { ItemVisibility } from "@/media/file-metadata";
-import { FileType } from "@/media/file-type";
-import { decodeLivePhoto } from "@/media/live-photo";
-import DownloadManager from "@/new/photos/services/download";
-import { updateExifIfNeededAndPossible } from "@/new/photos/services/exif-update";
 import {
     EncryptedEnteFile,
     EnteFile,
@@ -14,7 +9,12 @@ import {
     FilePublicMagicMetadata,
     FilePublicMagicMetadataProps,
     FileWithUpdatedMagicMetadata,
-} from "@/new/photos/types/file";
+} from "@/media/file";
+import { ItemVisibility } from "@/media/file-metadata";
+import { FileType } from "@/media/file-type";
+import { decodeLivePhoto } from "@/media/live-photo";
+import DownloadManager from "@/new/photos/services/download";
+import { updateExifIfNeededAndPossible } from "@/new/photos/services/exif-update";
 import { detectFileTypeInfo } from "@/new/photos/utils/detect-type";
 import { mergeMetadata } from "@/new/photos/utils/file";
 import { safeFileName } from "@/new/photos/utils/native-fs";

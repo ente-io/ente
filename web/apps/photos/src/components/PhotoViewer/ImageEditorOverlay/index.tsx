@@ -7,10 +7,10 @@ import {
 import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
 import { nameAndExtension } from "@/base/file";
 import log from "@/base/log";
+import { EnteFile } from "@/media/file";
 import { photosDialogZIndex } from "@/new/photos/components/z-index";
 import downloadManager from "@/new/photos/services/download";
 import { AppContext } from "@/new/photos/types/context";
-import { EnteFile } from "@/new/photos/types/file";
 import { downloadAndRevokeObjectURL } from "@/new/photos/utils/web";
 import { ensure } from "@/utils/ensure";
 import {

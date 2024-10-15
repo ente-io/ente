@@ -5,7 +5,7 @@ import { getKVN } from "@/base/kv";
 import { ensureAuthToken } from "@/base/local-user";
 import log from "@/base/log";
 import type { ElectronMLWorker } from "@/base/types/ipc";
-import type { EnteFile } from "@/new/photos/types/file";
+import type { EnteFile } from "@/media/file";
 import { fileLogID } from "@/new/photos/utils/file";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";

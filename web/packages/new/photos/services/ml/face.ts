@@ -9,7 +9,7 @@
 
 import { assertionFailed } from "@/base/assert";
 import type { ElectronMLWorker } from "@/base/types/ipc";
-import type { EnteFile } from "@/new/photos/types/file";
+import type { EnteFile } from "@/media/file";
 import { Matrix } from "ml-matrix";
 import { getSimilarityTransformation } from "similarity-transformation";
 import type { ImageBitmapAndData } from "./blob";

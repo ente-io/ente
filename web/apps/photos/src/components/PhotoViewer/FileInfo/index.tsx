@@ -7,6 +7,7 @@ import { useModalVisibility } from "@/base/components/utils/modal";
 import { nameAndExtension } from "@/base/file";
 import log from "@/base/log";
 import type { Location } from "@/base/types";
+import { EnteFile } from "@/media/file";
 import type { ParsedMetadata } from "@/media/file-metadata";
 import {
     fileCreationPhotoDate,
@@ -29,7 +30,6 @@ import {
     type AnnotatedFaceID,
 } from "@/new/photos/services/ml";
 import { AppContext } from "@/new/photos/types/context";
-import { EnteFile } from "@/new/photos/types/file";
 import { formattedByteSize } from "@/new/photos/utils/units";
 import CopyButton from "@ente/shared/components/CodeBlock/CopyButton";
 import { FlexWrapper } from "@ente/shared/components/Container";
