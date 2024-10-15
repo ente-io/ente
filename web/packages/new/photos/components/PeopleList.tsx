@@ -211,12 +211,12 @@ export const SuggestionFaceList: React.FC<SuggestionFaceListProps> = ({
     return (
         <SuggestionFaceList_>
             {faces.map(({ file, faceID }) => (
-                <UnclusteredFace key={faceID}>
+                <SuggestionFace key={faceID}>
                     <FaceCropImageView
                         placeholderDimension={112}
                         {...{ file, faceID }}
                     />
-                </UnclusteredFace>
+                </SuggestionFace>
             ))}
         </SuggestionFaceList_>
     );
@@ -225,7 +225,18 @@ export const SuggestionFaceList: React.FC<SuggestionFaceListProps> = ({
 const SuggestionFaceList_ = styled("div")`
     display: flex;
     flex-wrap: wrap;
-    gap: 5px;
+    gap: 6px;
+`;
+
+const SuggestionFace = styled("div")`
+    width: 87px;
+    height: 87px;
+    border-radius: 50%;
+    overflow: hidden;
+    & > img {
+        width: 100%;
+        height: 100%;
+    }
 `;
 
 type FaceCropImageViewProps = PreviewableFace & {

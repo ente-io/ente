@@ -133,7 +133,7 @@ const normalized = (embedding: Float32Array) => {
  * The result can also be `undefined`, which indicates that the download for the
  * ML model is still in progress (trying again later should succeed).
  */
-export const clipMatches = async (
+export const _clipMatches = async (
     searchPhrase: string,
     electron: ElectronMLWorker,
 ): Promise<CLIPMatches | undefined> => {

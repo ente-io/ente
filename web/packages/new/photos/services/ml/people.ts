@@ -1,9 +1,11 @@
 import { assertionFailed } from "@/base/assert";
 import log from "@/base/log";
 import type { EnteFile } from "@/media/file";
+import { shuffled } from "@/utils/array";
+import { ensure } from "@/utils/ensure";
 import { getLocalFiles } from "../files";
 import { savedCGroups, type CGroup } from "../user-entity";
-import type { FaceCluster } from "./cluster";
+import { type FaceCluster } from "./cluster";
 import { savedFaceClusters, savedFaceIndexes } from "./db";
 import { fileIDFromFaceID } from "./face";
 import { dotProduct } from "./math";
@@ -322,28 +324,45 @@ export const filterNamedPeople = (people: Person[]): NamedPerson[] => {
     return namedPeople;
 };
 
-export interface PersonSuggestion {
+export type PreviewableCluster = FaceCluster & {
     /**
-     * The ID of the suggestion. This is the same as the cluster's ID,
-     * duplicated here for the UI's convenience.
-     */
-    id: string;
-    /**
-     * The underlying {@link FaceCluster} that is being offered as the
-     * suggestion.
-     */
-    cluster: FaceCluster;
-    /**
-     * A list of up to 3 "preview" faces for this cluster, each annotated with
+     * A list of up to 3 "preview" faces for the cluster, each annotated with
      * the corresponding {@link EnteFile} that contains them.
      */
     previewFaces: PreviewableFace[];
+};
+
+export interface PersonSuggestionsAndChoices {
+    /**
+     * Previously saved choices.
+     *
+     * These are clusters (sorted by size) that the user had previously merged
+     * or explicitly ignored from the person under consideration.
+     *
+     * The {@link accepted} flag will true for the entries that correspond to
+     * accepted clusters, and false for those that the user had ignored.
+     *
+     * This array is guaranteed to be non-empty, and it is guaranteed that the
+     * first item is a merged cluster (i.e. a cluster for which accepted is
+     * true), even if there exists an ignored cluster with a larger size. The
+     * rest of the entries are intermixed and sorted by size normally.
+     *
+     * For convenience of the UI, teh first entry will have also have the
+     * {@link fixed} flag set.
+     */
+    choices: (PreviewableCluster & { fixed?: boolean; accepted: boolean })[];
+    /**
+     * New suggestions to offer to the user.
+     */
+    suggestions: PreviewableCluster[];
 }
 
 /**
- * Returns suggestions for the given person.
+ * Returns suggestions and existing choices for the given person.
  */
-export const suggestionsForPerson = async (person: CGroupPerson) => {
+export const _suggestionsAndChoicesForPerson = async (
+    person: CGroupPerson,
+): Promise<PersonSuggestionsAndChoices> => {
     const startTime = Date.now();
 
     const personClusters = person.cgroup.data.assigned;
@@ -371,6 +390,12 @@ export const suggestionsForPerson = async (person: CGroupPerson) => {
         .flat()
         .filter((e) => !!e);
 
+    // Randomly sample faces to limit the O(n^2) cost.
+    const sampledPersonFaceEmbeddings = shuffled(personFaceEmbeddings).slice(
+        0,
+        100,
+    );
+
     const suggestedClusters: FaceCluster[] = [];
     for (const cluster of clusters) {
         const { id, faces } = cluster;
@@ -384,7 +409,7 @@ export const suggestionsForPerson = async (person: CGroupPerson) => {
         for (const fi of faces) {
             const ei = embeddingByFaceID.get(fi);
             if (!ei) continue;
-            for (const ej of personFaceEmbeddings) {
+            for (const ej of sampledPersonFaceEmbeddings) {
                 const csim = dotProduct(ei, ej);
                 if (csim >= 0.6) {
                     suggest = true;
@@ -397,41 +422,65 @@ export const suggestionsForPerson = async (person: CGroupPerson) => {
         if (suggest) suggestedClusters.push(cluster);
     }
 
-    suggestedClusters.sort((a, b) => b.faces.length - a.faces.length);
-
     // Annotate the clusters with the information that the UI needs to show its
     // preview faces.
 
     const files = await getLocalFiles("normal");
     const fileByID = new Map(files.map((f) => [f.id, f]));
 
-    const suggestions = suggestedClusters.map((cluster) => {
-        const previewFaces = cluster.faces
-            .slice(0, 3)
-            .map((faceID) => {
-                const fileID = fileIDFromFaceID(faceID);
-                if (!fileID) {
-                    assertionFailed();
-                    return undefined;
-                }
-                const file = fileByID.get(fileID);
-                if (!file) {
-                    // TODO-Cluster: This might be a hidden/trash file, so this
-                    // assert is not appropriate, we instead need a "until 3".
-                    // assertionFailed();
-                    return undefined;
-                }
-                return { file, faceID };
-            })
-            .filter((f) => !!f);
+    const toPreviewable = (cluster: FaceCluster) => {
+        const previewFaces: PreviewableFace[] = [];
+        for (const faceID of cluster.faces) {
+            const fileID = fileIDFromFaceID(faceID);
+            if (!fileID) {
+                assertionFailed();
+                continue;
+            }
 
-        const id = cluster.id;
-        return { id, cluster, previewFaces };
-    });
+            const file = fileByID.get(fileID);
+            if (!file) {
+                // This might be a hidden/trash file, and it is thus not
+                // appropriate to use it as a preview file anyway.
+                continue;
+            }
+
+            previewFaces.push({ file, faceID });
+
+            if (previewFaces.length == 4) break;
+        }
+
+        return { ...cluster, previewFaces };
+    };
+
+    const sortBySize = (entries: { faces: unknown[] }[]) =>
+        entries.sort((a, b) => b.faces.length - a.faces.length);
+
+    const acceptedChoices = personClusters
+        .map(toPreviewable)
+        .map((p) => ({ ...p, accepted: true }));
+
+    sortBySize(acceptedChoices);
+
+    const ignoredChoices = ignoredClusters
+        .map(toPreviewable)
+        .map((p) => ({ ...p, accepted: false }));
+
+    // Ensure that the first item in the choices is not an ignored one, even if
+    // that is what we'd have ended up with if we sorted by size.
+
+    const firstChoice = { ...ensure(acceptedChoices[0]), fixed: true };
+    const restChoices = acceptedChoices.slice(1).concat(ignoredChoices);
+    sortBySize(restChoices);
+
+    const choices = [firstChoice, ...restChoices];
+
+    sortBySize(suggestedClusters);
+    // Limit to the number of suggestions shown in a single go.
+    const suggestions = suggestedClusters.slice(0, 80).map(toPreviewable);
 
     log.info(
         `Generated ${suggestions.length} suggestions for ${person.id} (${Date.now() - startTime} ms)`,
     );
 
-    return suggestions;
+    return { choices, suggestions };
 };
