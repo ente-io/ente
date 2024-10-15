@@ -16,6 +16,7 @@ import {
     MoveToCollectionRequest,
     PublicURL,
     RemoveFromCollectionRequest,
+    SUB_TYPE,
     UpdatePublicURL,
 } from "@/media/collection";
 import { ItemVisibility } from "@/media/file-metadata";
@@ -32,7 +33,6 @@ import { getLocalFiles, sortFiles } from "@/new/photos/services/files";
 import { EnteFile } from "@/new/photos/types/file";
 import {
     EncryptedMagicMetadata,
-    SUB_TYPE,
     UpdateMagicMetadataRequest,
 } from "@/new/photos/types/magicMetadata";
 import { batch } from "@/utils/array";
