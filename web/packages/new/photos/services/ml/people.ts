@@ -406,24 +406,25 @@ export const suggestionsForPerson = async (person: CGroupPerson) => {
     const fileByID = new Map(files.map((f) => [f.id, f]));
 
     const suggestions = suggestedClusters.map((cluster) => {
-        const previewFaces = cluster.faces
-            .slice(0, 3)
-            .map((faceID) => {
-                const fileID = fileIDFromFaceID(faceID);
-                if (!fileID) {
-                    assertionFailed();
-                    return undefined;
-                }
-                const file = fileByID.get(fileID);
-                if (!file) {
-                    // TODO-Cluster: This might be a hidden/trash file, so this
-                    // assert is not appropriate, we instead need a "until 3".
-                    // assertionFailed();
-                    return undefined;
-                }
-                return { file, faceID };
-            })
-            .filter((f) => !!f);
+        const previewFaces: PreviewableFace[] = [];
+        for (const faceID of cluster.faces) {
+            const fileID = fileIDFromFaceID(faceID);
+            if (!fileID) {
+                assertionFailed();
+                continue;
+            }
+
+            const file = fileByID.get(fileID);
+            if (!file) {
+                // This might be a hidden/trash file, and it is thus not
+                // appropriate to use it as a preview file anyway.
+                continue;
+            }
+
+            previewFaces.push({ file, faceID });
+
+            if (previewFaces.length == 3) break;
+        }
 
         const id = cluster.id;
         return { id, cluster, previewFaces };
