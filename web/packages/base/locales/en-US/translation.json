@@ -410,7 +410,7 @@
     "folder": "Folder",
     "google_takeout": "Google takeout",
     "DEDUPLICATE_FILES": "Deduplicate files",
-    "NO_DUPLICATES_FOUND": "You've no duplicate files that can be cleared",
+    "NO_DUPLICATES_FOUND": "You have no duplicate files that can be cleared",
     "FILES": "files",
     "EACH": "each",
     "DEDUPLICATE_BASED_ON_SIZE": "The following files were clubbed based on their sizes, please review and delete items you believe are duplicates",
