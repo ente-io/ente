@@ -355,8 +355,6 @@
     "DATE_TIME_DIGITIZED": "Exif: skaitmeninta datos laikas",
     "METADATA_DATE": "Exif: metaduomenų data",
     "CUSTOM_TIME": "Pasirinktinis laikas",
-    "REOPEN_PLAN_SELECTOR_MODAL": "Iš naujo atidaryti planus",
-    "OPEN_PLAN_SELECTOR_MODAL_FAILED": "Nepavyko atidaryti planų.",
     "sharing_details": "Bendrinimo išsami informacija",
     "modify_sharing": "Modifikuoti bendrinimą",
     "ADD_COLLABORATORS": "Pridėti bendradarbių",
