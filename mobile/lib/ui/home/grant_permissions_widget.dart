@@ -138,6 +138,7 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
                 );
                 // ignore: unawaited_futures
                 showDialog(
+                  useRootNavigator: false,
                   context: context,
                   builder: (BuildContext context) {
                     return alert;

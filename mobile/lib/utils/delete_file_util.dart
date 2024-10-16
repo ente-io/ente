@@ -424,6 +424,7 @@ Future<List<String>> deleteLocalFilesInBatches(
   );
   // ignore: unawaited_futures
   showDialog(
+    useRootNavigator: false,
     context: context,
     builder: (context) {
       return dialog;

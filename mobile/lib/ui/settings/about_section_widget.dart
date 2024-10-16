@@ -71,6 +71,7 @@ class AboutSectionWidget extends StatelessWidget {
                       if (shouldUpdate) {
                         // ignore: unawaited_futures
                         showDialog(
+                          useRootNavigator: false,
                           context: context,
                           builder: (BuildContext context) {
                             return AppUpdateDialog(
