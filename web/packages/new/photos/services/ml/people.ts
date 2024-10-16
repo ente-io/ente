@@ -363,6 +363,7 @@ export interface PersonSuggestionsAndChoices {
 export const _suggestionsAndChoicesForPerson = async (
     person: CGroupPerson,
 ): Promise<PersonSuggestionsAndChoices> => {
+    console.time("prep");
     const startTime = Date.now();
 
     const personClusters = person.cgroup.data.assigned;
@@ -396,6 +397,10 @@ export const _suggestionsAndChoicesForPerson = async (
         100,
     );
 
+    console.timeEnd("prep");
+
+    console.time("loop");
+
     const suggestedClusters: FaceCluster[] = [];
     for (const cluster of clusters) {
         const { id, faces } = cluster;
@@ -421,6 +426,10 @@ export const _suggestionsAndChoicesForPerson = async (
 
         if (suggest) suggestedClusters.push(cluster);
     }
+
+    console.timeEnd("loop");
+
+    console.time("post");
 
     // Annotate the clusters with the information that the UI needs to show its
     // preview faces.
@@ -484,6 +493,8 @@ export const _suggestionsAndChoicesForPerson = async (
     sortBySize(suggestedClusters);
     // Limit to the number of suggestions shown in a single go.
     const suggestions = toPreviewableList(suggestedClusters.slice(0, 80));
+
+    console.timeEnd("post");
 
     log.info(
         `Generated ${suggestions.length} suggestions for ${person.id} (${Date.now() - startTime} ms)`,
