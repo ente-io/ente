@@ -50,9 +50,9 @@ export const PeopleEmptyState: React.FC = () => {
     const message =
         mlStatus?.phase == "done"
             ? pt(
-                  "People will appear here when there are sufficient photos of a person",
+                  "People will be shown here after there are sufficient photos of a person",
               )
-            : pt("People will appear here once sync completes");
+            : pt("Syncing...");
 
     return (
         <VerticallyCentered>
