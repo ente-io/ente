@@ -156,10 +156,14 @@ const localeName = (locale: SupportedLocale) => {
         case "es-ES":
             return "Español";
         case "pt-BR":
-            return "Brazilian Portuguese";
+            return "Português Brasileiro";
         case "ru-RU":
-            return "Russian";
+            return "Русский";
         case "pl-PL":
-            return "Polish";
+            return "Polski";
+        case "it-IT":
+            return "Italiano";
+        case "lt-LT":
+            return "Lietuvių kalba";
     }
 };
