@@ -1737,7 +1737,7 @@ packages:
     description:
       path: "."
       ref: ios_only
-      resolved-ref: "70e163745e082b81235d7330b9d5e8c110ed68e4"
+      resolved-ref: "212b2cab85647c6d2ffee213dc3b875ef2bf6504"
       url: "https://github.com/ente-io/onnxruntime.git"
     source: git
     version: "1.4.1"
