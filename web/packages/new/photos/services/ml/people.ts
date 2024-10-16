@@ -407,43 +407,24 @@ export const _suggestionsAndChoicesForPerson = async (
         if (personClusterIDs.has(id)) continue;
         if (ignoredClusterIDs.has(id)) continue;
 
-        if (process.env.NEXT_PUBLIC_ENTE_WIP_CL_TODO) {
-            /* direct compare method TODO-Cluster remove me */
-            let suggest = false;
-            for (const fi of faces) {
-                const ei = embeddingByFaceID.get(fi);
-                if (!ei) continue;
-                for (const ej of sampledPersonEmbeddings) {
-                    const csim = dotProduct(ei, ej);
-                    if (csim >= 0.6) {
-                        suggest = true;
-                        break;
-                    }
-                }
-                if (suggest) break;
+        const sampledOtherEmbeddings = randomSample(faces, 50)
+            .map((id) => embeddingByFaceID.get(id))
+            .filter((e) => !!e);
+
+        // Sort all cosine similarities pairs, and consider their median.
+        const csims: number[] = [];
+        for (const other of sampledOtherEmbeddings) {
+            for (const embedding of sampledPersonEmbeddings) {
+                csims.push(dotProduct(embedding, other));
             }
+        }
+        csims.sort();
 
-            if (suggest) candidateClustersAndSimilarity.push([cluster, 0]);
-        } else {
-            const sampledOtherEmbeddings = randomSample(faces, 50)
-                .map((id) => embeddingByFaceID.get(id))
-                .filter((e) => !!e);
+        if (csims.length == 0) continue;
 
-            /* cosine similarities */
-            const csims: number[] = [];
-            for (const other of sampledOtherEmbeddings) {
-                for (const embedding of sampledPersonEmbeddings) {
-                    csims.push(dotProduct(embedding, other));
-                }
-            }
-            csims.sort();
-
-            if (csims.length == 0) continue;
-
-            const medianSim = ensure(csims[Math.floor(csims.length / 2)]);
-            if (medianSim > 0.48) {
-                candidateClustersAndSimilarity.push([cluster, medianSim]);
-            }
+        const medianSim = ensure(csims[Math.floor(csims.length / 2)]);
+        if (medianSim > 0.48) {
+            candidateClustersAndSimilarity.push([cluster, medianSim]);
         }
     }
 
@@ -451,6 +432,7 @@ export const _suggestionsAndChoicesForPerson = async (
 
     console.time("post");
 
+    // Sort suggestions by the (median) cosine similarity.
     candidateClustersAndSimilarity.sort(([, a], [, b]) => b - a);
     const suggestedClusters = candidateClustersAndSimilarity.map(([c]) => c);
 
@@ -513,7 +495,6 @@ export const _suggestionsAndChoicesForPerson = async (
 
     const choices = [firstChoice, ...restChoices];
 
-    // sortBySize(suggestedClusters);
     // Limit to the number of suggestions shown in a single go.
     const suggestions = toPreviewableList(suggestedClusters.slice(0, 80));
 
