@@ -392,16 +392,13 @@ export const _suggestionsAndChoicesForPerson = async (
         .filter((e) => !!e);
 
     // Randomly sample faces to limit the O(n^2) cost.
-    const sampledPersonFaceEmbeddings = shuffled(personFaceEmbeddings).slice(
-        0,
-        100,
-    );
+    const sampledPersonEmbeddings = randomSample(personFaceEmbeddings, 50);
 
     console.timeEnd("prep");
 
     console.time("loop");
 
-    const suggestedClusters: FaceCluster[] = [];
+    const candidateClustersAndSimilarity: [FaceCluster, number][] = [];
     for (const cluster of clusters) {
         const { id, faces } = cluster;
 
@@ -410,26 +407,52 @@ export const _suggestionsAndChoicesForPerson = async (
         if (personClusterIDs.has(id)) continue;
         if (ignoredClusterIDs.has(id)) continue;
 
-        let suggest = false;
-        for (const fi of faces) {
-            const ei = embeddingByFaceID.get(fi);
-            if (!ei) continue;
-            for (const ej of sampledPersonFaceEmbeddings) {
-                const csim = dotProduct(ei, ej);
-                if (csim >= 0.6) {
-                    suggest = true;
-                    break;
+        if (process.env.NEXT_PUBLIC_ENTE_WIP_CL_TODO) {
+            /* direct compare method TODO-Cluster remove me */
+            let suggest = false;
+            for (const fi of faces) {
+                const ei = embeddingByFaceID.get(fi);
+                if (!ei) continue;
+                for (const ej of sampledPersonEmbeddings) {
+                    const csim = dotProduct(ei, ej);
+                    if (csim >= 0.6) {
+                        suggest = true;
+                        break;
+                    }
+                }
+                if (suggest) break;
+            }
+
+            if (suggest) candidateClustersAndSimilarity.push([cluster, 0]);
+        } else {
+            const sampledOtherEmbeddings = randomSample(faces, 50)
+                .map((id) => embeddingByFaceID.get(id))
+                .filter((e) => !!e);
+
+            /* cosine similarities */
+            const csims: number[] = [];
+            for (const other of sampledOtherEmbeddings) {
+                for (const embedding of sampledPersonEmbeddings) {
+                    csims.push(dotProduct(embedding, other));
                 }
             }
-            if (suggest) break;
-        }
+            csims.sort();
 
-        if (suggest) suggestedClusters.push(cluster);
+            if (csims.length == 0) continue;
+
+            const medianSim = ensure(csims[Math.floor(csims.length / 2)]);
+            if (medianSim > 0.48) {
+                candidateClustersAndSimilarity.push([cluster, medianSim]);
+            }
+        }
     }
 
     console.timeEnd("loop");
 
     console.time("post");
+
+    candidateClustersAndSimilarity.sort(([, a], [, b]) => b - a);
+    const suggestedClusters = candidateClustersAndSimilarity.map(([c]) => c);
 
     // Annotate the clusters with the information that the UI needs to show its
     // preview faces.
@@ -502,3 +525,6 @@ export const _suggestionsAndChoicesForPerson = async (
 
     return { choices, suggestions };
 };
+
+const randomSample = <T>(items: T[], n: number) =>
+    items.length < n ? items : shuffled(items).slice(0, n);
