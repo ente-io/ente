@@ -363,7 +363,6 @@ export interface PersonSuggestionsAndChoices {
 export const _suggestionsAndChoicesForPerson = async (
     person: CGroupPerson,
 ): Promise<PersonSuggestionsAndChoices> => {
-    console.time("prep");
     const startTime = Date.now();
 
     const personClusters = person.cgroup.data.assigned;
@@ -394,10 +393,6 @@ export const _suggestionsAndChoicesForPerson = async (
     // Randomly sample faces to limit the O(n^2) cost.
     const sampledPersonEmbeddings = randomSample(personFaceEmbeddings, 50);
 
-    console.timeEnd("prep");
-
-    console.time("loop");
-
     const candidateClustersAndSimilarity: [FaceCluster, number][] = [];
     for (const cluster of clusters) {
         const { id, faces } = cluster;
@@ -407,50 +402,28 @@ export const _suggestionsAndChoicesForPerson = async (
         if (personClusterIDs.has(id)) continue;
         if (ignoredClusterIDs.has(id)) continue;
 
-        if (process.env.NEXT_PUBLIC_ENTE_WIP_CL_TODO) {
-            /* direct compare method TODO-Cluster remove me */
-            let suggest = false;
-            for (const fi of faces) {
-                const ei = embeddingByFaceID.get(fi);
-                if (!ei) continue;
-                for (const ej of sampledPersonEmbeddings) {
-                    const csim = dotProduct(ei, ej);
-                    if (csim >= 0.6) {
-                        suggest = true;
-                        break;
-                    }
-                }
-                if (suggest) break;
+        const sampledOtherEmbeddings = randomSample(faces, 50)
+            .map((id) => embeddingByFaceID.get(id))
+            .filter((e) => !!e);
+
+        // Sort all cosine similarities pairs, and consider their median.
+        const csims: number[] = [];
+        for (const other of sampledOtherEmbeddings) {
+            for (const embedding of sampledPersonEmbeddings) {
+                csims.push(dotProduct(embedding, other));
             }
+        }
+        csims.sort();
 
-            if (suggest) candidateClustersAndSimilarity.push([cluster, 0]);
-        } else {
-            const sampledOtherEmbeddings = randomSample(faces, 50)
-                .map((id) => embeddingByFaceID.get(id))
-                .filter((e) => !!e);
+        if (csims.length == 0) continue;
 
-            /* cosine similarities */
-            const csims: number[] = [];
-            for (const other of sampledOtherEmbeddings) {
-                for (const embedding of sampledPersonEmbeddings) {
-                    csims.push(dotProduct(embedding, other));
-                }
-            }
-            csims.sort();
-
-            if (csims.length == 0) continue;
-
-            const medianSim = ensure(csims[Math.floor(csims.length / 2)]);
-            if (medianSim > 0.48) {
-                candidateClustersAndSimilarity.push([cluster, medianSim]);
-            }
+        const medianSim = ensure(csims[Math.floor(csims.length / 2)]);
+        if (medianSim > 0.48) {
+            candidateClustersAndSimilarity.push([cluster, medianSim]);
         }
     }
 
-    console.timeEnd("loop");
-
-    console.time("post");
-
+    // Sort suggestions by the (median) cosine similarity.
     candidateClustersAndSimilarity.sort(([, a], [, b]) => b - a);
     const suggestedClusters = candidateClustersAndSimilarity.map(([c]) => c);
 
@@ -513,11 +486,8 @@ export const _suggestionsAndChoicesForPerson = async (
 
     const choices = [firstChoice, ...restChoices];
 
-    // sortBySize(suggestedClusters);
     // Limit to the number of suggestions shown in a single go.
     const suggestions = toPreviewableList(suggestedClusters.slice(0, 80));
-
-    console.timeEnd("post");
 
     log.info(
         `Generated ${suggestions.length} suggestions for ${person.id} (${Date.now() - startTime} ms)`,
@@ -526,5 +496,29 @@ export const _suggestionsAndChoicesForPerson = async (
     return { choices, suggestions };
 };
 
-const randomSample = <T>(items: T[], n: number) =>
-    items.length < n ? items : shuffled(items).slice(0, n);
+/**
+ * Return a random sample of {@link n} elements from the given {@link items}.
+ *
+ * Functionally this is equivalent to `shuffled(items).slice(0, n)`, except it
+ * tries to be a bit faster for long arrays when we need only a small sample
+ * from it. In a few tests, this indeed makes a substantial difference.
+ */
+const randomSample = <T>(items: T[], n: number) => {
+    if (items.length <= n) return items;
+    if (n == 0) return [];
+
+    if (n > items.length / 3) {
+        // Avoid using the random sampling without replacement method if a
+        // significant proportion of the original items are needed, otherwise we
+        // might run into long retry loop at the tail end (hitting the same
+        // indexes again an again).
+        return shuffled(items).slice(0, n);
+    }
+
+    const ix = new Set<number>();
+    while (ix.size < n) {
+        ix.add(Math.floor(Math.random() * items.length));
+    }
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return [...ix].map((i) => items[i]!);
+};
