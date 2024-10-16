@@ -852,7 +852,7 @@ class SearchService {
         final String clusterName = clusterId;
 
         if (clusterIDToPersonID[clusterId] != null) {
-          // This should not happen, means a faceID is assigned to multiple persons.
+          // This should not happen, means a clusterID is assigned to a personID of a person that no longer exists
           _logger.severe(
             "`getAllFace`: Cluster $clusterId should not have person id ${clusterIDToPersonID[clusterId]}",
           );
