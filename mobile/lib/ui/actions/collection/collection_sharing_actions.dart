@@ -695,6 +695,7 @@ class CollectionActions {
     );
 
     return showDialog(
+      useRootNavigator: false,
       context: context,
       builder: (BuildContext context) {
         return alert;

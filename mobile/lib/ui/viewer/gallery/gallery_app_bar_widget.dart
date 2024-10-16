@@ -781,6 +781,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       final result = await showDialog<ButtonAction?>(
         context: context,
         barrierDismissible: true,
+        useRootNavigator: false,
         builder: (BuildContext context) {
           return const CastChooseDialog();
         },
@@ -792,6 +793,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       await Future.delayed(const Duration(milliseconds: 100));
       if (result == ButtonAction.first) {
         await showDialog(
+          useRootNavigator: false,
           context: context,
           barrierDismissible: true,
           builder: (BuildContext bContext) {

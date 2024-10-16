@@ -116,6 +116,7 @@ class DebugSectionWidget extends StatelessWidget {
     );
 
     showDialog(
+      useRootNavigator: false,
       context: context,
       builder: (BuildContext context) {
         return alert;

@@ -153,6 +153,7 @@ class ProgressDialog {
             context: _context!,
             barrierDismissible: _barrierDismissible,
             barrierColor: _barrierColor,
+            useRootNavigator: false,
             builder: (BuildContext context) {
               _dismissingContext = context;
               return PopScope(
