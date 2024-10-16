@@ -28,7 +28,6 @@ import {
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { t } from "i18next";
-import { GalleryContext } from "pages/gallery";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { Trans } from "react-i18next";
 import billingService, { type PlansResponse } from "services/billingService";
@@ -106,8 +105,7 @@ function PlanSelectorCard(props: PlanSelectorCardProps) {
     const [planPeriod, setPlanPeriod] = useState<PLAN_PERIOD>(
         subscription?.period || PLAN_PERIOD.MONTH,
     );
-    const galleryContext = useContext(GalleryContext);
-    const appContext = useContext(AppContext);
+    const { showMiniDialog, setDialogMessage } = useContext(AppContext);
     const bonusData = useMemo(() => {
         const userDetails = getLocalUserDetails();
         if (!userDetails) {
@@ -156,9 +154,7 @@ function PlanSelectorCard(props: PlanSelectorCardProps) {
             } catch (e) {
                 log.error("plan selector modal open failed", e);
                 props.closeModal();
-                appContext.showMiniDialog(
-                    genericRetriableErrorDialogAttributes(),
-                );
+                showMiniDialog(genericRetriableErrorDialogAttributes());
             } finally {
                 props.setLoading(false);
             }
@@ -174,7 +170,7 @@ function PlanSelectorCard(props: PlanSelectorCardProps) {
                     await billingService.buySubscription(plan.stripeID);
                 } catch (e) {
                     props.setLoading(false);
-                    appContext.setDialogMessage({
+                    setDialogMessage({
                         title: t("error"),
                         content: t("SUBSCRIPTION_PURCHASE_FAILED"),
                         close: { variant: "critical" },
@@ -183,7 +179,7 @@ function PlanSelectorCard(props: PlanSelectorCardProps) {
                 break;
 
             case "updateSubscriptionToPlan":
-                appContext.setDialogMessage({
+                setDialogMessage({
                     title: t("update_subscription_title"),
                     content: t("UPDATE_SUBSCRIPTION_MESSAGE"),
                     proceed: {
@@ -191,7 +187,7 @@ function PlanSelectorCard(props: PlanSelectorCardProps) {
                         action: updateSubscription.bind(
                             null,
                             plan,
-                            appContext.setDialogMessage,
+                            setDialogMessage,
                             props.setLoading,
                             props.closeModal,
                         ),
@@ -202,7 +198,7 @@ function PlanSelectorCard(props: PlanSelectorCardProps) {
                 break;
 
             case "cancelOnMobile":
-                appContext.setDialogMessage({
+                setDialogMessage({
                     title: t("CANCEL_SUBSCRIPTION_ON_MOBILE"),
                     content: t("CANCEL_SUBSCRIPTION_ON_MOBILE_MESSAGE"),
                     close: { variant: "secondary" },
@@ -210,7 +206,7 @@ function PlanSelectorCard(props: PlanSelectorCardProps) {
                 break;
 
             case "contactSupport":
-                appContext.setDialogMessage({
+                setDialogMessage({
                     title: t("MANAGE_PLAN"),
                     content: (
                         <Trans

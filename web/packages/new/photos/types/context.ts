@@ -17,8 +17,17 @@ export type AppContextT = AccountsContextT & {
      * Hide the global activity indicator.
      */
     finishLoading: () => void;
+    /**
+     * Show a generic error dialog, and log the given error.
+     */
     onGenericError: (error: unknown) => void;
+    /**
+     * Deprecated, use onGenericError instead.
+     */
     somethingWentWrong: () => void;
+    /**
+     * Deprecated, use showMiniDialog instead.
+     */
     setDialogMessage: SetDialogBoxAttributes;
     setNotificationAttributes: SetNotificationAttributes;
     mapEnabled: boolean;
