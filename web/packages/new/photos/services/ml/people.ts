@@ -513,7 +513,7 @@ export const _suggestionsAndChoicesForPerson = async (
 
     const choices = [firstChoice, ...restChoices];
 
-    sortBySize(suggestedClusters);
+    // sortBySize(suggestedClusters);
     // Limit to the number of suggestions shown in a single go.
     const suggestions = toPreviewableList(suggestedClusters.slice(0, 80));
 
