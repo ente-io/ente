@@ -19,7 +19,7 @@
     "ENTER_OTT": "Codice di verifica",
     "RESEND_MAIL": "Reinvia codice",
     "VERIFY": "Verifica",
-    "generic_error": "",
+    "generic_error": "Qualcosa è andato storto",
     "generic_error_retry": "Qualcosa è andato storto, per favore riprova",
     "INVALID_CODE": "Codice di verifica non valido",
     "EXPIRED_CODE": "Il tuo codice di verifica è scaduto",
