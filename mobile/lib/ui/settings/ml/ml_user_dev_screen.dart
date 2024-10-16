@@ -79,6 +79,7 @@ class _MLUserDeveloperOptionsState extends State<MLUserDeveloperOptions> {
                         onChanged: () async {
                           try {
                             await localSettings.toggleRemoteFetch();
+                            _logger.info('Remote fetch is turned ${localSettings.remoteFetchEnabled ? 'on' : 'off'}');
                             if (mounted) {
                               setState(() {});
                             }
