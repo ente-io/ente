@@ -133,10 +133,6 @@ function PlanSelectorCard(props: PlanSelectorCardProps) {
                 : PLAN_PERIOD.MONTH,
         );
     };
-    function onReopenClick() {
-        appContext.closeMessageDialog();
-        galleryContext.showPlanSelectorModal();
-    }
     useEffect(() => {
         const main = async () => {
             try {

@@ -21,7 +21,6 @@ export type AppContextT = AccountsContextT & {
     somethingWentWrong: () => void;
     setDialogMessage: SetDialogBoxAttributes;
     setNotificationAttributes: SetNotificationAttributes;
-    closeMessageDialog: () => void;
     mapEnabled: boolean;
     updateMapEnabled: (enabled: boolean) => Promise<void>;
     watchFolderView: boolean;

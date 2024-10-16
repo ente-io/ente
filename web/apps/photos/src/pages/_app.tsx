@@ -224,11 +224,6 @@ export default function App({ Component, pageProps }: AppProps) {
         }, 100);
     };
 
-    const closeMessageDialog = useCallback(
-        () => setMessageDialogView(false),
-        [],
-    );
-
     // Use `onGenericError` instead.
     const somethingWentWrong = useCallback(
         () =>
@@ -253,7 +248,6 @@ export default function App({ Component, pageProps }: AppProps) {
         showNavBar,
         startLoading, // <- changes on each render (TODO Fix)
         finishLoading, // <- changes on each render
-        closeMessageDialog,
         setDialogMessage,
         watchFolderView,
         setWatchFolderView,
@@ -290,7 +284,7 @@ export default function App({ Component, pageProps }: AppProps) {
                     sx={{ zIndex: photosDialogZIndex }}
                     size="xs"
                     open={messageDialogView}
-                    onClose={closeMessageDialog}
+                    onClose={() => setMessageDialogView(false)}
                     attributes={dialogMessage}
                 />
                 <AttributedMiniDialog
