@@ -57,6 +57,54 @@ Dockerfile mentioned in the
 [notes](https://help.ente.io/self-hosting/guides/external-s3) created by a
 community member.
 
+## Running the Web App as a Systemd Service  
+You can also run the web app as a systemd service and reverse proxy 
+it with a webserver like Nginx or caddy. 
+
+Below is a [battle tested](https://github.com/ente-io/ente/discussions/1183#discussioncomment-10948025) 
+systemd service example: 
+
+```ini 
+[Unit]
+Description=Run Ente Web as a service
+
+[Service]
+Type=simple
+Restart=always
+WorkingDirectory=/path/to/ente/web-app
+Environment=NEXT_PUBLIC_ENTE_ENDPOINT=http://localhost:8000
+ExecStart=/usr/bin/yarn dev
+
+# If the above doesn't work, try this as an alternative:
+# ExecStart=yarn dev  
+
+# You can add this to verify if yarn is installed
+# ExecStartPre=yarn --version
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Note: Please do not forget to set the right path for `WorkingDirectory` in the above. 
+
+To debug in case of any issues, you could use `journalctl` utility or enable logging 
+in systemd by adding 2 more lines to the ente.service file. 
+
+```ini 
+# The log file paths can be customised
+StandardOutput=/var/log/ente-out.log 
+StandardError=/var/log/ente-err.log 
+```
+
+Follow the below steps to configure and enable the service. 
+
+```sh 
+sudo touch /etc/systemd/system/ente-web.service 
+sudo systemctl enable ente-web.service 
+sudo systemctl daemon-reload && sudo systemctl start ente-web.service  
+```
+
+
 ## Public sharing
 
 If you'd also like to enable public sharing on the web app you're running,
