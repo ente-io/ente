@@ -366,12 +366,17 @@ export const _suggestionsAndChoicesForPerson = async (
     console.time("prep");
     const startTime = Date.now();
 
+    console.time("prep/1");
+
     const personClusters = person.cgroup.data.assigned;
     // TODO-Cluster: Persist this.
     const ignoredClusters: FaceCluster[] = [];
 
     const clusters = await savedFaceClusters();
     const faceIndexes = await savedFaceIndexes();
+
+    console.timeEnd("prep/1");
+    console.time("prep/2");
 
     const embeddingByFaceID = new Map(
         faceIndexes
@@ -383,6 +388,9 @@ export const _suggestionsAndChoicesForPerson = async (
             .flat(),
     );
 
+    console.timeEnd("prep/2");
+    console.time("prep/3");
+
     const personClusterIDs = new Set(personClusters.map(({ id }) => id));
     const ignoredClusterIDs = new Set(ignoredClusters.map(({ id }) => id));
 
@@ -391,9 +399,13 @@ export const _suggestionsAndChoicesForPerson = async (
         .flat()
         .filter((e) => !!e);
 
+    console.timeEnd("prep/3");
+    console.time("prep/4");
+
     // Randomly sample faces to limit the O(n^2) cost.
     const sampledPersonEmbeddings = randomSample(personFaceEmbeddings, 50);
 
+    console.timeEnd("prep/4");
     console.timeEnd("prep");
 
     console.time("loop");
@@ -507,5 +519,34 @@ export const _suggestionsAndChoicesForPerson = async (
     return { choices, suggestions };
 };
 
-const randomSample = <T>(items: T[], n: number) =>
+/**
+ * Return a random sample of {@link n} elements from the given {@link items}.
+ *
+ * Functionally this is equivalent to `shuffled(items).slice(0, n)`, except it
+ * tries to be a bit faster for long arrays when we need only a small sample
+ * from it.
+ */
+const randomSample = <T>(items: T[], n: number) => {
+    if (items.length <= n) return items;
+    if (n == 0) return [];
+
+    if (n > items.length / 3) {
+        // Avoid using the random sampling without replacement method if a
+        // significant proportion of the original items are needed, otherwise we
+        // might run into long retry loop at the tail end (hitting the same
+        // indexes again an again).
+        return shuffled(items).slice(0, n);
+    }
+
+    const ix = new Set<number>();
+    while (ix.size < n) {
+        ix.add(Math.floor(Math.random() * items.length))
+    }
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return [...ix].map((i) => items[i]!);
+}
+
+
+const randomSampleOld = <T>(items: T[], n: number) => {
     items.length < n ? items : shuffled(items).slice(0, n);
+}
