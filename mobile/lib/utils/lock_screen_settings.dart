@@ -29,7 +29,7 @@ class LockScreenSettings {
     Duration(minutes: 5),
     Duration(minutes: 30),
   ];
-  void init(SharedPreferences prefs) async {
+  Future<void> init(SharedPreferences prefs) async {
     _secureStorage = const FlutterSecureStorage();
     _preferences = prefs;
 
