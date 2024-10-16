@@ -449,21 +449,28 @@ export const _suggestionsAndChoicesForPerson = async (
             if (previewFaces.length == 4) break;
         }
 
+        if (previewFaces.length == 0) return undefined;
+
         return { ...cluster, previewFaces };
     };
+
+    const toPreviewableList = (clusters: FaceCluster[]) =>
+        clusters.map(toPreviewable).filter((p) => !!p);
 
     const sortBySize = (entries: { faces: unknown[] }[]) =>
         entries.sort((a, b) => b.faces.length - a.faces.length);
 
-    const acceptedChoices = personClusters
-        .map(toPreviewable)
-        .map((p) => ({ ...p, accepted: true }));
+    const acceptedChoices = toPreviewableList(personClusters).map((p) => ({
+        ...p,
+        accepted: true,
+    }));
 
     sortBySize(acceptedChoices);
 
-    const ignoredChoices = ignoredClusters
-        .map(toPreviewable)
-        .map((p) => ({ ...p, accepted: false }));
+    const ignoredChoices = toPreviewableList(ignoredClusters).map((p) => ({
+        ...p,
+        accepted: false,
+    }));
 
     // Ensure that the first item in the choices is not an ignored one, even if
     // that is what we'd have ended up with if we sorted by size.
@@ -476,7 +483,7 @@ export const _suggestionsAndChoicesForPerson = async (
 
     sortBySize(suggestedClusters);
     // Limit to the number of suggestions shown in a single go.
-    const suggestions = suggestedClusters.slice(0, 80).map(toPreviewable);
+    const suggestions = toPreviewableList(suggestedClusters.slice(0, 80));
 
     log.info(
         `Generated ${suggestions.length} suggestions for ${person.id} (${Date.now() - startTime} ms)`,
