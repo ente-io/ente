@@ -363,6 +363,7 @@ export interface PersonSuggestionsAndChoices {
 export const _suggestionsAndChoicesForPerson = async (
     person: CGroupPerson,
 ): Promise<PersonSuggestionsAndChoices> => {
+    console.time("prep");
     const startTime = Date.now();
 
     const personClusters = person.cgroup.data.assigned;
@@ -391,12 +392,13 @@ export const _suggestionsAndChoicesForPerson = async (
         .filter((e) => !!e);
 
     // Randomly sample faces to limit the O(n^2) cost.
-    const sampledPersonFaceEmbeddings = shuffled(personFaceEmbeddings).slice(
-        0,
-        100,
-    );
+    const sampledPersonEmbeddings = randomSample(personFaceEmbeddings, 50);
 
-    const suggestedClusters: FaceCluster[] = [];
+    console.timeEnd("prep");
+
+    console.time("loop");
+
+    const candidateClustersAndSimilarity: [FaceCluster, number][] = [];
     for (const cluster of clusters) {
         const { id, faces } = cluster;
 
@@ -405,22 +407,52 @@ export const _suggestionsAndChoicesForPerson = async (
         if (personClusterIDs.has(id)) continue;
         if (ignoredClusterIDs.has(id)) continue;
 
-        let suggest = false;
-        for (const fi of faces) {
-            const ei = embeddingByFaceID.get(fi);
-            if (!ei) continue;
-            for (const ej of sampledPersonFaceEmbeddings) {
-                const csim = dotProduct(ei, ej);
-                if (csim >= 0.6) {
-                    suggest = true;
-                    break;
+        if (process.env.NEXT_PUBLIC_ENTE_WIP_CL_TODO) {
+            /* direct compare method TODO-Cluster remove me */
+            let suggest = false;
+            for (const fi of faces) {
+                const ei = embeddingByFaceID.get(fi);
+                if (!ei) continue;
+                for (const ej of sampledPersonEmbeddings) {
+                    const csim = dotProduct(ei, ej);
+                    if (csim >= 0.6) {
+                        suggest = true;
+                        break;
+                    }
+                }
+                if (suggest) break;
+            }
+
+            if (suggest) candidateClustersAndSimilarity.push([cluster, 0]);
+        } else {
+            const sampledOtherEmbeddings = randomSample(faces, 50)
+                .map((id) => embeddingByFaceID.get(id))
+                .filter((e) => !!e);
+
+            /* cosine similarities */
+            const csims: number[] = [];
+            for (const other of sampledOtherEmbeddings) {
+                for (const embedding of sampledPersonEmbeddings) {
+                    csims.push(dotProduct(embedding, other));
                 }
             }
-            if (suggest) break;
-        }
+            csims.sort();
 
-        if (suggest) suggestedClusters.push(cluster);
+            if (csims.length == 0) continue;
+
+            const medianSim = ensure(csims[Math.floor(csims.length / 2)]);
+            if (medianSim > 0.48) {
+                candidateClustersAndSimilarity.push([cluster, medianSim]);
+            }
+        }
     }
+
+    console.timeEnd("loop");
+
+    console.time("post");
+
+    candidateClustersAndSimilarity.sort(([, a], [, b]) => b - a);
+    const suggestedClusters = candidateClustersAndSimilarity.map(([c]) => c);
 
     // Annotate the clusters with the information that the UI needs to show its
     // preview faces.
@@ -449,21 +481,28 @@ export const _suggestionsAndChoicesForPerson = async (
             if (previewFaces.length == 4) break;
         }
 
+        if (previewFaces.length == 0) return undefined;
+
         return { ...cluster, previewFaces };
     };
+
+    const toPreviewableList = (clusters: FaceCluster[]) =>
+        clusters.map(toPreviewable).filter((p) => !!p);
 
     const sortBySize = (entries: { faces: unknown[] }[]) =>
         entries.sort((a, b) => b.faces.length - a.faces.length);
 
-    const acceptedChoices = personClusters
-        .map(toPreviewable)
-        .map((p) => ({ ...p, accepted: true }));
+    const acceptedChoices = toPreviewableList(personClusters).map((p) => ({
+        ...p,
+        accepted: true,
+    }));
 
     sortBySize(acceptedChoices);
 
-    const ignoredChoices = ignoredClusters
-        .map(toPreviewable)
-        .map((p) => ({ ...p, accepted: false }));
+    const ignoredChoices = toPreviewableList(ignoredClusters).map((p) => ({
+        ...p,
+        accepted: false,
+    }));
 
     // Ensure that the first item in the choices is not an ignored one, even if
     // that is what we'd have ended up with if we sorted by size.
@@ -474,9 +513,11 @@ export const _suggestionsAndChoicesForPerson = async (
 
     const choices = [firstChoice, ...restChoices];
 
-    sortBySize(suggestedClusters);
+    // sortBySize(suggestedClusters);
     // Limit to the number of suggestions shown in a single go.
-    const suggestions = suggestedClusters.slice(0, 80).map(toPreviewable);
+    const suggestions = toPreviewableList(suggestedClusters.slice(0, 80));
+
+    console.timeEnd("post");
 
     log.info(
         `Generated ${suggestions.length} suggestions for ${person.id} (${Date.now() - startTime} ms)`,
@@ -484,3 +525,6 @@ export const _suggestionsAndChoicesForPerson = async (
 
     return { choices, suggestions };
 };
+
+const randomSample = <T>(items: T[], n: number) =>
+    items.length < n ? items : shuffled(items).slice(0, n);
