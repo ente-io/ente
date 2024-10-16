@@ -1,3 +1,4 @@
+import { genericRetriableErrorDialogAttributes } from "@/base/components/utils/dialog";
 import log from "@/base/log";
 import { AppContext } from "@/new/photos/types/context";
 import { bytesInGB, formattedStorageByteSize } from "@/new/photos/utils/units";
@@ -159,16 +160,9 @@ function PlanSelectorCard(props: PlanSelectorCardProps) {
             } catch (e) {
                 log.error("plan selector modal open failed", e);
                 props.closeModal();
-                appContext.setDialogMessage({
-                    title: t("OPEN_PLAN_SELECTOR_MODAL_FAILED"),
-                    content: t("generic_error_retry"),
-                    close: { text: t("close"), variant: "secondary" },
-                    proceed: {
-                        text: t("REOPEN_PLAN_SELECTOR_MODAL"),
-                        variant: "accent",
-                        action: onReopenClick,
-                    },
-                });
+                appContext.showMiniDialog(
+                    genericRetriableErrorDialogAttributes(),
+                );
             } finally {
                 props.setLoading(false);
             }

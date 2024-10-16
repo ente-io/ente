@@ -61,3 +61,6 @@ export const errorDialogAttributes = (
 
 export const genericErrorDialogAttributes = () =>
     errorDialogAttributes(t("generic_error"));
+
+export const genericRetriableErrorDialogAttributes = () =>
+    errorDialogAttributes(t("generic_error_retry"));
