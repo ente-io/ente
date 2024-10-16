@@ -363,10 +363,7 @@ export interface PersonSuggestionsAndChoices {
 export const _suggestionsAndChoicesForPerson = async (
     person: CGroupPerson,
 ): Promise<PersonSuggestionsAndChoices> => {
-    console.time("prep");
     const startTime = Date.now();
-
-    console.time("prep/1");
 
     const personClusters = person.cgroup.data.assigned;
     // TODO-Cluster: Persist this.
@@ -374,9 +371,6 @@ export const _suggestionsAndChoicesForPerson = async (
 
     const clusters = await savedFaceClusters();
     const faceIndexes = await savedFaceIndexes();
-
-    console.timeEnd("prep/1");
-    console.time("prep/2");
 
     const embeddingByFaceID = new Map(
         faceIndexes
@@ -388,9 +382,6 @@ export const _suggestionsAndChoicesForPerson = async (
             .flat(),
     );
 
-    console.timeEnd("prep/2");
-    console.time("prep/3");
-
     const personClusterIDs = new Set(personClusters.map(({ id }) => id));
     const ignoredClusterIDs = new Set(ignoredClusters.map(({ id }) => id));
 
@@ -399,16 +390,8 @@ export const _suggestionsAndChoicesForPerson = async (
         .flat()
         .filter((e) => !!e);
 
-    console.timeEnd("prep/3");
-    console.time("prep/4");
-
     // Randomly sample faces to limit the O(n^2) cost.
     const sampledPersonEmbeddings = randomSample(personFaceEmbeddings, 50);
-
-    console.timeEnd("prep/4");
-    console.timeEnd("prep");
-
-    console.time("loop");
 
     const candidateClustersAndSimilarity: [FaceCluster, number][] = [];
     for (const cluster of clusters) {
@@ -439,10 +422,6 @@ export const _suggestionsAndChoicesForPerson = async (
             candidateClustersAndSimilarity.push([cluster, medianSim]);
         }
     }
-
-    console.timeEnd("loop");
-
-    console.time("post");
 
     // Sort suggestions by the (median) cosine similarity.
     candidateClustersAndSimilarity.sort(([, a], [, b]) => b - a);
@@ -510,8 +489,6 @@ export const _suggestionsAndChoicesForPerson = async (
     // Limit to the number of suggestions shown in a single go.
     const suggestions = toPreviewableList(suggestedClusters.slice(0, 80));
 
-    console.timeEnd("post");
-
     log.info(
         `Generated ${suggestions.length} suggestions for ${person.id} (${Date.now() - startTime} ms)`,
     );
@@ -524,7 +501,7 @@ export const _suggestionsAndChoicesForPerson = async (
  *
  * Functionally this is equivalent to `shuffled(items).slice(0, n)`, except it
  * tries to be a bit faster for long arrays when we need only a small sample
- * from it.
+ * from it. In a few tests, this indeed makes a substantial difference.
  */
 const randomSample = <T>(items: T[], n: number) => {
     if (items.length <= n) return items;
@@ -540,13 +517,8 @@ const randomSample = <T>(items: T[], n: number) => {
 
     const ix = new Set<number>();
     while (ix.size < n) {
-        ix.add(Math.floor(Math.random() * items.length))
+        ix.add(Math.floor(Math.random() * items.length));
     }
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return [...ix].map((i) => items[i]!);
-}
-
-
-const randomSampleOld = <T>(items: T[], n: number) => {
-    items.length < n ? items : shuffled(items).slice(0, n);
-}
+};
