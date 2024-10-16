@@ -355,8 +355,6 @@
     "DATE_TIME_DIGITIZED": "Exif:DateTimeDigitized",
     "METADATA_DATE": "Exif:MetadataDate",
     "CUSTOM_TIME": "Niestandardowy czas",
-    "REOPEN_PLAN_SELECTOR_MODAL": "Otwórz ponownie plany",
-    "OPEN_PLAN_SELECTOR_MODAL_FAILED": "Nie udało się otworzyć planów",
     "sharing_details": "Udostępnianie szczegółów",
     "modify_sharing": "Modyfikuj udostępnianie",
     "ADD_COLLABORATORS": "Dodaj współuczestników",

@@ -355,8 +355,6 @@
     "DATE_TIME_DIGITIZED": "Exif: Fecha Digitalizado",
     "METADATA_DATE": "",
     "CUSTOM_TIME": "Hora personalizada",
-    "REOPEN_PLAN_SELECTOR_MODAL": "Reabrir planes",
-    "OPEN_PLAN_SELECTOR_MODAL_FAILED": "Error al abrir los planes",
     "sharing_details": "Compartir detalles",
     "modify_sharing": "Modificar compartir",
     "ADD_COLLABORATORS": "",

@@ -355,8 +355,6 @@
     "DATE_TIME_DIGITIZED": "Exif:数字化时间",
     "METADATA_DATE": "Exif：元数据日期",
     "CUSTOM_TIME": "自定义时间",
-    "REOPEN_PLAN_SELECTOR_MODAL": "重新启动计划",
-    "OPEN_PLAN_SELECTOR_MODAL_FAILED": "未能打开计划",
     "sharing_details": "共享的详细信息",
     "modify_sharing": "更改共享",
     "ADD_COLLABORATORS": "添加协作者",
