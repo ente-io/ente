@@ -33,6 +33,10 @@ class LockScreenSettings {
     _secureStorage = const FlutterSecureStorage();
     _preferences = prefs;
 
+    /// Workaround to check if "lateinit property activity has not been
+    ///  initialized" PlatformException goes away.
+    await Future.delayed(const Duration(milliseconds: 500));
+
     ///Workaround for privacyScreen not working when app is killed and opened.
     await setHideAppContent(getShouldHideAppContent());
   }
