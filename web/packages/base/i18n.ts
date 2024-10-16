@@ -28,6 +28,8 @@ export const supportedLocales = [
     "pt-BR" /* Portuguese, Brazilian */,
     "ru-RU" /* Russian */,
     "pl-PL" /* Polish */,
+    "it-IT" /* Italian */,
+    "lt-LT" /* Lithuanian */,
 ] as const;
 
 /** The type of {@link supportedLocales}. */
@@ -177,6 +179,10 @@ const closestSupportedLocale = (
             return "ru-RU";
         } else if (ls.startsWith("pl")) {
             return "pl-PL";
+        } else if (ls.startsWith("it")) {
+            return "it-IT";
+        } else if (ls.startsWith("lt")) {
+            return "lt-LT";
         }
     }
 

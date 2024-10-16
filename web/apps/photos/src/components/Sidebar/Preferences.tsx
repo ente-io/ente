@@ -161,5 +161,9 @@ const localeName = (locale: SupportedLocale) => {
             return "Russian";
         case "pl-PL":
             return "Polish";
+        case "it-IT":
+            return "Italiano";
+        case "lt-LT":
+            return "Lietuvių kalba";
     }
 };
