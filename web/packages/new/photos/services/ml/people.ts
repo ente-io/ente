@@ -408,15 +408,15 @@ export const _suggestionsAndChoicesForPerson = async (
         // Ignore singleton clusters.
         if (faces.length < 2) continue;
 
-        // Already part of the person.
-        if (personClusterIDs.has(id)) continue;
-
         // User has explicitly asked us to ignore this cluster. Add it to the
         // list of rejected clusters that we return to the UI for listing out.
         if (rejectedClusterIDs.has(id)) {
             rejectedClusters.push(cluster);
             continue;
         }
+
+        // Already part of the person (and not rejected).
+        if (personClusterIDs.has(id)) continue;
 
         const sampledOtherEmbeddings = randomSample(faces, 50)
             .map((id) => embeddingByFaceID.get(id))
