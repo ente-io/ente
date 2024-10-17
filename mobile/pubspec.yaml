@@ -113,7 +113,8 @@ dependencies:
   logging: ^1.0.1
   lottie: ^1.2.2
   maps_launcher: ^2.2.1
-  media_extension: ^1.0.1
+  media_extension:
+    git: "https://github.com/AmanRajSinghMourya/media_extension.git"
   media_kit: ^1.1.10+1
   media_kit_libs_video: ^1.0.4
   media_kit_video: ^1.2.4

@@ -284,14 +284,16 @@ class _FileSelectionActionsWidgetState
         onTap: _onGuestViewClick,
       ),
     );
-    items.add(
-      SelectionActionButton(
-        icon: Icons.grid_view_outlined,
-        labelText: S.of(context).createCollage,
-        onTap: _onCreateCollageClicked,
-        shouldShow: showCollageOption,
-      ),
-    );
+    if (widget.type != GalleryType.sharedPublicCollection) {
+      items.add(
+        SelectionActionButton(
+          icon: Icons.grid_view_outlined,
+          labelText: S.of(context).createCollage,
+          onTap: _onCreateCollageClicked,
+          shouldShow: showCollageOption,
+        ),
+      );
+    }
 
     if (widget.type.showDeleteOption()) {
       items.add(
@@ -422,19 +424,20 @@ class _FileSelectionActionsWidgetState
         ),
       );
     }
-
-    items.add(
-      SelectionActionButton(
-        labelText: S.of(context).share,
-        icon: Icons.adaptive.share_outlined,
-        key: shareButtonKey,
-        onTap: () => shareSelected(
-          context,
-          shareButtonKey,
-          widget.selectedFiles.files.toList(),
+    if (widget.type != GalleryType.sharedPublicCollection) {
+      items.add(
+        SelectionActionButton(
+          labelText: S.of(context).share,
+          icon: Icons.adaptive.share_outlined,
+          key: shareButtonKey,
+          onTap: () => shareSelected(
+            context,
+            shareButtonKey,
+            widget.selectedFiles.files.toList(),
+          ),
         ),
-      ),
-    );
+      );
+    }
 
     // if (widget.type == GalleryType.cluster && widget.clusterID != null) {
     if (widget.type == GalleryType.cluster && widget.clusterID != null) {
