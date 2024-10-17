@@ -14,6 +14,7 @@ class AlbumFilter extends HierarchicalSearchFilter {
     required this.collectionID,
     required this.albumName,
     required this.occurrence,
+    super.matchedUploadedIDs,
   });
 
   @override
@@ -46,10 +47,7 @@ class AlbumFilter extends HierarchicalSearchFilter {
     if (other is AlbumFilter) {
       return other.collectionID == collectionID;
     }
-    // (other is AlbumFilter) can be false and this.resultType() can be same as
-    // other.resultType() if other is a TopLevelGenericFilter of resultType
-    // ResultType.collection
-    return resultType() == other.resultType() && other.name() == name();
+    return false;
   }
 
   @override

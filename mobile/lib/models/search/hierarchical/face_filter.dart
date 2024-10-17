@@ -58,10 +58,7 @@ class FaceFilter extends HierarchicalSearchFilter {
     if (other is FaceFilter) {
       return other.personId == personId && other.clusterId == clusterId;
     }
-    // (other is FaceFilter) can be false and this.resultType() can be same as
-    // other.resultType() if other is a TopLevelGenericFilter of resultType
-    // ResultType.faces
-    return resultType() == other.resultType() && other.name() == name();
+    return false;
   }
 
   @override

@@ -42,10 +42,7 @@ class ContactsFilter extends HierarchicalSearchFilter {
     if (other is ContactsFilter) {
       return other.user.id == user.id;
     }
-    // (other is ContactsFilter) can be false and this.resultType() can be same as
-    // other.resultType() if other is a TopLevelGenericFilter of resultType
-    // ResultType.shared
-    return resultType() == other.resultType() && other.name() == name();
+    return false;
   }
 
   @override

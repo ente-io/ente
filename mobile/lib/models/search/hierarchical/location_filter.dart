@@ -50,10 +50,7 @@ class LocationFilter extends HierarchicalSearchFilter {
               locationTag.centerPoint.toString() +
               locationTag.name;
     }
-    // (other is LocationFilter) can be false and this.resultType() can be same as
-    // other.resultType() if other is a TopLevelGenericFilter of resultType
-    // ResultType.location
-    return resultType() == other.resultType() && other.name() == name();
+    return false;
   }
 
   @override
