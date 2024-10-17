@@ -1,18 +1,22 @@
 import { getKV, setKV } from "@/base/kv";
 import { z } from "zod";
 
-/** cgroupID -> clusterIDs */
+/**
+ * Zod schema for {@link ClusterIDsByCGroupID}.
+ */
 const ClusterIDsByCGroupID = z.record(z.string(), z.array(z.string()));
 
 /**
+ * cgroupID -> clusterIDs
+ *
  * A record containing an array of clusters (represented by their IDs), keyed by
  * the corresponding cgroup ID.
  */
 export type ClusterIDsByCGroupID = z.infer<typeof ClusterIDsByCGroupID>;
 
 /**
- * Return the list of locally persisted clusters that the user has rejected as
- * not belonging to a particular person.
+ * Return the locally persisted record of clusters per person that the user has
+ * rejected as not belonging to that person.
  *
  * [Note: Persistent KV pairs related to ML]
  *
@@ -30,5 +34,15 @@ export const savedRejectedClusters = async (): Promise<ClusterIDsByCGroupID> =>
  *
  * Sibling of {@link savedRejectedClusters}.
  */
-export const saveRejectedClusters = (entries: ClusterIDsByCGroupID[]) =>
+export const saveRejectedClusters = (entries: ClusterIDsByCGroupID) =>
     setKV("rejectedClusters", entries);
+
+/**
+ * Return the list of locally persisted clusters that the user has rejected as
+ * not belonging to a particular person (as identified by the person's
+ * {@link cgroupID}).
+ */
+export const savedRejectedClustersForCGroup = async (
+    cgroupID: string,
+): Promise<string[]> =>
+    savedRejectedClusters().then((cs) => cs[cgroupID] ?? []);

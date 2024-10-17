@@ -8,6 +8,7 @@ import { savedCGroups, type CGroup } from "../user-entity";
 import { type FaceCluster } from "./cluster";
 import { savedFaceClusters, savedFaceIndexes } from "./db";
 import { fileIDFromFaceID } from "./face";
+import { savedRejectedClustersForCGroup } from "./kvdb";
 import { dotProduct } from "./math";
 
 /**
@@ -366,8 +367,10 @@ export const _suggestionsAndChoicesForPerson = async (
     const startTime = Date.now();
 
     const personClusters = person.cgroup.data.assigned;
-    // TODO-Cluster: Persist this.
-    const ignoredClusters: FaceCluster[] = [];
+    const personClusterIDs = new Set(personClusters.map(({ id }) => id));
+    const rejectedClusterIDs = new Set(
+        await savedRejectedClustersForCGroup(person.cgroup.id),
+    );
 
     const clusters = await savedFaceClusters();
     const faceIndexes = await savedFaceIndexes();
@@ -382,9 +385,6 @@ export const _suggestionsAndChoicesForPerson = async (
             .flat(),
     );
 
-    const personClusterIDs = new Set(personClusters.map(({ id }) => id));
-    const ignoredClusterIDs = new Set(ignoredClusters.map(({ id }) => id));
-
     const personFaceEmbeddings = personClusters
         .map(({ faces }) => faces.map((id) => embeddingByFaceID.get(id)))
         .flat()
@@ -394,13 +394,22 @@ export const _suggestionsAndChoicesForPerson = async (
     const sampledPersonEmbeddings = randomSample(personFaceEmbeddings, 50);
 
     const candidateClustersAndSimilarity: [FaceCluster, number][] = [];
+    const rejectedClusters: FaceCluster[] = [];
     for (const cluster of clusters) {
         const { id, faces } = cluster;
 
+        // Ignore singleton clusters.
         if (faces.length < 2) continue;
 
+        // Already part of the person.
         if (personClusterIDs.has(id)) continue;
-        if (ignoredClusterIDs.has(id)) continue;
+
+        // User has explicitly asked us to ignore this cluster. Add it to the
+        // list of rejected clusters that we return to the UI for listing out.
+        if (rejectedClusterIDs.has(id)) {
+            rejectedClusters.push(cluster);
+            continue;
+        }
 
         const sampledOtherEmbeddings = randomSample(faces, 50)
             .map((id) => embeddingByFaceID.get(id))
@@ -472,7 +481,7 @@ export const _suggestionsAndChoicesForPerson = async (
 
     sortBySize(acceptedChoices);
 
-    const ignoredChoices = toPreviewableList(ignoredClusters).map((p) => ({
+    const ignoredChoices = toPreviewableList(rejectedClusters).map((p) => ({
         ...p,
         accepted: false,
     }));
