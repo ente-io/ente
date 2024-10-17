@@ -287,12 +287,12 @@ interface SuggestionsDialogState {
     /**
      * An entry corresponding to each
      * - saved choice for which the user has changed their mind.
-     * - suggestion that the user has either explicitly accepted or rejected.
+     * - suggestion that the user has either explicitly assigned or rejected.
      */
     marks: Map<string, boolean | undefined>;
 }
 
-type SCItem = PreviewableCluster & { fixed?: boolean; accepted?: boolean };
+type SCItem = PreviewableCluster & { fixed?: boolean; assigned?: boolean };
 
 type SuggestionsDialogAction =
     | { type: "fetch"; personID: string }
@@ -345,13 +345,13 @@ const suggestionsDialogReducer = (
         case "mark": {
             const marks = new Map(state.marks);
             const { item, value } = action;
-            if (item.accepted === undefined && value === undefined) {
+            if (item.assigned === undefined && value === undefined) {
                 // If this was a suggestion, prune marks created as a result of
                 // the user toggling the item back to its original unset state.
                 marks.delete(item.id);
-            } else if (item.accepted && value === item.accepted) {
+            } else if (item.assigned && value === item.assigned) {
                 // If this is a choice, prune marks which match the choice's
-                // accepted state.
+                // assigned state.
                 marks.delete(item.id);
             } else {
                 marks.set(item.id, value);
@@ -447,7 +447,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
             // This state will not include the effects of the `dispatch({ type:
             // "save"})` above, but that's fine, that only toggles the activity
             // which is not going to affect the state that is saved.
-            await saveSuggestionsAndChoices(state);
+            await saveSuggestionsAndChoices(person, state);
             resetPersonAndClose();
         } catch (e) {
             log.error("Failed to save suggestion review", e);
@@ -618,7 +618,7 @@ const fromItemValue = (
 ) => {
     // Use the in-memory state if available. For choices, fallback to their
     // original state.
-    const resolved = marks.has(item.id) ? marks.get(item.id) : item.accepted;
+    const resolved = marks.has(item.id) ? marks.get(item.id) : item.assigned;
     return resolved ? "yes" : resolved === false ? "no" : undefined;
 };
 
@@ -629,4 +629,11 @@ const toItemValue = (v: unknown) =>
 /**
  * Implementation for the "save" action on the SuggestionsDialog.
  */
-const saveSuggestionsAndChoices = async (state: SuggestionsDialogState) => {};
+const saveSuggestionsAndChoices = async (
+    person: CGroupPerson,
+    state: SuggestionsDialogState,
+) => {
+    // const assigned = person.cgroup.data.assigned
+    // for (const [clusterID, assigned] of state.marks) {
+    // }
+};

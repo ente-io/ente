@@ -337,21 +337,21 @@ export interface PersonSuggestionsAndChoices {
     /**
      * Previously saved choices.
      *
-     * These are clusters (sorted by size) that the user had previously merged
-     * or explicitly ignored from the person under consideration.
+     * These are clusters (sorted by size) that the user had previously assigned
+     * to or explicitly rejected from the person under consideration.
      *
-     * The {@link accepted} flag will true for the entries that correspond to
-     * accepted clusters, and false for those that the user had ignored.
+     * The {@link assigned} flag will true for the entries that correspond to
+     * assigned clusters, and false for those that the user had rejected.
      *
      * This array is guaranteed to be non-empty, and it is guaranteed that the
-     * first item is a merged cluster (i.e. a cluster for which accepted is
+     * first item is a merged cluster (i.e. a cluster for which assigned is
      * true), even if there exists an ignored cluster with a larger size. The
      * rest of the entries are intermixed and sorted by size normally.
      *
-     * For convenience of the UI, teh first entry will have also have the
+     * For convenience of the UI, the first entry will have also have the
      * {@link fixed} flag set.
      */
-    choices: (PreviewableCluster & { fixed?: boolean; accepted: boolean })[];
+    choices: (PreviewableCluster & { fixed?: boolean; assigned: boolean })[];
     /**
      * New suggestions to offer to the user.
      */
@@ -474,23 +474,23 @@ export const _suggestionsAndChoicesForPerson = async (
     const sortBySize = (entries: { faces: unknown[] }[]) =>
         entries.sort((a, b) => b.faces.length - a.faces.length);
 
-    const acceptedChoices = toPreviewableList(personClusters).map((p) => ({
+    const assignedChoices = toPreviewableList(personClusters).map((p) => ({
         ...p,
-        accepted: true,
+        assigned: true,
     }));
 
-    sortBySize(acceptedChoices);
+    sortBySize(assignedChoices);
 
-    const ignoredChoices = toPreviewableList(rejectedClusters).map((p) => ({
+    const rejectedChoices = toPreviewableList(rejectedClusters).map((p) => ({
         ...p,
-        accepted: false,
+        assigned: false,
     }));
 
     // Ensure that the first item in the choices is not an ignored one, even if
     // that is what we'd have ended up with if we sorted by size.
 
-    const firstChoice = { ...ensure(acceptedChoices[0]), fixed: true };
-    const restChoices = acceptedChoices.slice(1).concat(ignoredChoices);
+    const firstChoice = { ...ensure(assignedChoices[0]), fixed: true };
+    const restChoices = assignedChoices.slice(1).concat(rejectedChoices);
     sortBySize(restChoices);
 
     const choices = [firstChoice, ...restChoices];
