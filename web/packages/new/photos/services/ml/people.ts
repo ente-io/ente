@@ -556,8 +556,9 @@ export const updateChoices = async (
     let assignedClusters = [...cgroup.data.assigned];
     let rejectedClusterIDs = await savedRejectedClustersForCGroup(cgroup.id);
 
-    let didUpdateAssigned = false;
-    let didUpdateRejected = false;
+    let assignCount = 0;
+    let rejectCount = 0;
+
     for (const [clusterID, assigned] of updates) {
         if (assigned) {
             // TODO-Cluster sanity check, remove after wrapping up dev
@@ -567,13 +568,13 @@ export const updateChoices = async (
 
             // Add it to the list of assigned clusters for the person.
             assignedClusters.push(ensure(clustersByID.get(clusterID)));
-            didUpdateAssigned = true;
+            assignCount += 1;
             // Remove it from the list of rejected clusters (if needed).
             if (rejectedClusterIDs.includes(clusterID)) {
                 rejectedClusterIDs = rejectedClusterIDs.filter(
-                    (id) => id !== clusterID,
+                    (id) => id != clusterID,
                 );
-                didUpdateRejected = true;
+                rejectCount += 1;
             }
         } else {
             // TODO-Cluster sanity check, remove after wrapping up dev
@@ -586,19 +587,23 @@ export const updateChoices = async (
                 assignedClusters = assignedClusters.filter(
                     ({ id }) => id != clusterID,
                 );
-                didUpdateAssigned = true;
+                assignCount += 1;
             }
             // Add it to the list of rejected clusters.
             rejectedClusterIDs.push(clusterID);
-            didUpdateRejected = true;
+            rejectCount += 1;
         }
     }
 
-    if (didUpdateAssigned) {
+    if (assignCount > 0) {
         await updateAssignedClustersForCGroup(cgroup, assignedClusters);
     }
 
-    if (didUpdateRejected) {
+    if (rejectCount > 0) {
         await saveRejectedClustersForCGroup(cgroup.id, rejectedClusterIDs);
     }
+
+    log.info(
+        `Applied ${assignCount} assigns and ${rejectCount} rejects to cgroup`,
+    );
 };
