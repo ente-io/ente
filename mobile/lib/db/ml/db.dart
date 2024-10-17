@@ -982,21 +982,34 @@ class MLDataDB {
     }
   }
 
-  Future<List<int>> getFileIDsFromFace(List<String> faceIDs) async {
-    final fileIDS = <int>[];
-    String inParam = "";
-    for (String faceID in faceIDs) {
-      inParam += "'$faceID', ";
-    }
-    inParam = inParam.substring(0, inParam.length - 2);
+  Future<List<int>> getFileIDsOfPersonID(String personID) async {
     final db = await instance.asyncDB;
     final result = await db.getAll(
-      'SELECT $fileIDColumn FROM $facesTable WHERE $faceIDColumn IN ($inParam)',
+      '''
+        SELECT DISTINCT $facesTable.$fileIDColumn
+        FROM $clusterPersonTable
+        JOIN $faceClustersTable ON $clusterPersonTable.$clusterIDColumn = $faceClustersTable.$clusterIDColumn
+        JOIN $facesTable ON $faceClustersTable.$faceIDColumn = $facesTable.$faceIDColumn
+        WHERE $clusterPersonTable.$personIdColumn = ?
+    ''',
+      [personID],
     );
 
-    for (var row in result) {
-      fileIDS.add(row[fileIDColumn] as int);
-    }
-    return fileIDS;
+    return [for (final row in result) row[fileIDColumn]];
+  }
+
+  Future<List<int>> getFileIDsOfClusterID(String clusterID) async {
+    final db = await instance.asyncDB;
+    final result = await db.getAll(
+      '''
+        SELECT DISTINCT $facesTable.$fileIDColumn
+        FROM $faceClustersTable 
+        JOIN $facesTable ON $faceClustersTable.$faceIDColumn = $facesTable.$faceIDColumn
+        WHERE $faceClustersTable.$clusterIDColumn = ?
+    ''',
+      [clusterID],
+    );
+
+    return [for (final row in result) row[fileIDColumn]];
   }
 }

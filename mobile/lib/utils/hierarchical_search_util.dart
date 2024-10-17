@@ -33,30 +33,23 @@ Future<List<EnteFile>> getFilteredFiles(
   for (HierarchicalSearchFilter filter in filters) {
     if (filter is FaceFilter && filter.getMatchedUploadedIDs().isEmpty) {
       try {
+        final stopwatch = Stopwatch()..start();
+
         if (filter.personId != null) {
-          //getFilesForPerson
-          final personClusterIDs = await MLDataDB.instance.getPersonClusterIDs(
+          final fileIDs = await MLDataDB.instance.getFileIDsOfPersonID(
             filter.personId!,
           );
-          final cluterToFaceIDs =
-              await MLDataDB.instance.getClusterToFaceIDs(personClusterIDs);
-
-          final faceIDs = <String>[];
-          for (Iterable<String> faceIDsIterable in cluterToFaceIDs.values) {
-            faceIDs.addAll(faceIDsIterable);
-          }
-
-          final fileIDs = await MLDataDB.instance.getFileIDsFromFace(faceIDs);
           filter.matchedUploadedIDs.addAll(fileIDs);
         } else if (filter.clusterId != null) {
-          //getFilesForCluster
-
-          final cluterToFaceIDs =
-              await MLDataDB.instance.getClusterToFaceIDs({filter.clusterId!});
-          final faceIDs = cluterToFaceIDs.values.expand((e) => e).toList();
-          final fileIDs = await MLDataDB.instance.getFileIDsFromFace(faceIDs);
+          final fileIDs = await MLDataDB.instance.getFileIDsOfClusterID(
+            filter.clusterId!,
+          );
           filter.matchedUploadedIDs.addAll(fileIDs);
         }
+        log(
+          "Time taken to get files for person/cluster ${filter.personId ?? filter.clusterId}: ${stopwatch.elapsedMilliseconds}ms",
+        );
+        stopwatch.stop();
       } catch (e) {
         log("Error in face filter: $e");
       }
