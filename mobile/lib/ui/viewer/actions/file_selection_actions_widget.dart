@@ -59,12 +59,12 @@ class FileSelectionActionsWidget extends StatefulWidget {
   const FileSelectionActionsWidget(
     this.type,
     this.selectedFiles, {
-    Key? key,
+    super.key,
     this.collection,
     this.person,
     this.clusterID,
     this.deviceCollection,
-  }) : super(key: key);
+  });
 
   @override
   State<FileSelectionActionsWidget> createState() =>
