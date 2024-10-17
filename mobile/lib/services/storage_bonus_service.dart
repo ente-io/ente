@@ -6,7 +6,7 @@ class StorageBonusService {
   late StorageBonusGateway gateway;
   late SharedPreferences prefs;
 
-  final int minTapCountBeforeHidingBanner = 5;
+  final int minTapCountBeforeHidingBanner = 1;
   final String _showStorageBonusTapCount = "showStorageBonus.tap_count";
 
   void init(SharedPreferences preferences) {
