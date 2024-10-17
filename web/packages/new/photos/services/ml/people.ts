@@ -4,10 +4,18 @@ import type { EnteFile } from "@/media/file";
 import { shuffled } from "@/utils/array";
 import { ensure } from "@/utils/ensure";
 import { getLocalFiles } from "../files";
-import { savedCGroups, type CGroup } from "../user-entity";
-import { type FaceCluster } from "./cluster";
-import { savedFaceClusters, savedFaceIndexes } from "./db";
+import {
+    savedCGroups,
+    updateOrCreateUserEntities,
+    type CGroup,
+} from "../user-entity";
+import type { FaceCluster } from "./cluster";
+import { savedFaceClusters, savedFaceIndexes, saveFaceClusters } from "./db";
 import { fileIDFromFaceID } from "./face";
+import {
+    savedRejectedClustersForCGroup,
+    saveRejectedClustersForCGroup,
+} from "./kvdb";
 import { dotProduct } from "./math";
 
 /**
@@ -336,21 +344,21 @@ export interface PersonSuggestionsAndChoices {
     /**
      * Previously saved choices.
      *
-     * These are clusters (sorted by size) that the user had previously merged
-     * or explicitly ignored from the person under consideration.
+     * These are clusters (sorted by size) that the user had previously assigned
+     * to or explicitly rejected from the person under consideration.
      *
-     * The {@link accepted} flag will true for the entries that correspond to
-     * accepted clusters, and false for those that the user had ignored.
+     * The {@link assigned} flag will true for the entries that correspond to
+     * assigned clusters, and false for those that the user had rejected.
      *
      * This array is guaranteed to be non-empty, and it is guaranteed that the
-     * first item is a merged cluster (i.e. a cluster for which accepted is
+     * first item is a merged cluster (i.e. a cluster for which assigned is
      * true), even if there exists an ignored cluster with a larger size. The
      * rest of the entries are intermixed and sorted by size normally.
      *
-     * For convenience of the UI, teh first entry will have also have the
+     * For convenience of the UI, the first entry will have also have the
      * {@link fixed} flag set.
      */
-    choices: (PreviewableCluster & { fixed?: boolean; accepted: boolean })[];
+    choices: (PreviewableCluster & { fixed?: boolean; assigned: boolean })[];
     /**
      * New suggestions to offer to the user.
      */
@@ -366,10 +374,12 @@ export const _suggestionsAndChoicesForPerson = async (
     const startTime = Date.now();
 
     const personClusters = person.cgroup.data.assigned;
-    // TODO-Cluster: Persist this.
-    const ignoredClusters: FaceCluster[] = [];
+    const personClusterIDs = new Set(personClusters.map(({ id }) => id));
+    const rejectedClusterIDs = new Set(
+        await savedRejectedClustersForCGroup(person.cgroup.id),
+    );
 
-    const clusters = await savedFaceClusters();
+    const localClusters = await savedFaceClusters();
     const faceIndexes = await savedFaceIndexes();
 
     const embeddingByFaceID = new Map(
@@ -382,9 +392,6 @@ export const _suggestionsAndChoicesForPerson = async (
             .flat(),
     );
 
-    const personClusterIDs = new Set(personClusters.map(({ id }) => id));
-    const ignoredClusterIDs = new Set(ignoredClusters.map(({ id }) => id));
-
     const personFaceEmbeddings = personClusters
         .map(({ faces }) => faces.map((id) => embeddingByFaceID.get(id)))
         .flat()
@@ -394,13 +401,24 @@ export const _suggestionsAndChoicesForPerson = async (
     const sampledPersonEmbeddings = randomSample(personFaceEmbeddings, 50);
 
     const candidateClustersAndSimilarity: [FaceCluster, number][] = [];
-    for (const cluster of clusters) {
+    const rejectedClusters: FaceCluster[] = [];
+    for (const cluster of localClusters) {
         const { id, faces } = cluster;
 
+        // User has explicitly asked us to ignore this cluster. Add it to the
+        // list of rejected clusters that we return to the UI for listing out.
+        // Keep this check first so that we pick these up even if we get e.g.
+        // singleton clusters from remote.
+        if (rejectedClusterIDs.has(id)) {
+            rejectedClusters.push(cluster);
+            continue;
+        }
+
+        // Ignore singleton clusters.
         if (faces.length < 2) continue;
 
-        if (personClusterIDs.has(id)) continue;
-        if (ignoredClusterIDs.has(id)) continue;
+        // TODO-Cluster sanity check, remove after dev
+        if (personClusterIDs.has(id)) assertionFailed();
 
         const sampledOtherEmbeddings = randomSample(faces, 50)
             .map((id) => embeddingByFaceID.get(id))
@@ -465,23 +483,23 @@ export const _suggestionsAndChoicesForPerson = async (
     const sortBySize = (entries: { faces: unknown[] }[]) =>
         entries.sort((a, b) => b.faces.length - a.faces.length);
 
-    const acceptedChoices = toPreviewableList(personClusters).map((p) => ({
+    const assignedChoices = toPreviewableList(personClusters).map((p) => ({
         ...p,
-        accepted: true,
+        assigned: true,
     }));
 
-    sortBySize(acceptedChoices);
+    sortBySize(assignedChoices);
 
-    const ignoredChoices = toPreviewableList(ignoredClusters).map((p) => ({
+    const rejectedChoices = toPreviewableList(rejectedClusters).map((p) => ({
         ...p,
-        accepted: false,
+        assigned: false,
     }));
 
     // Ensure that the first item in the choices is not an ignored one, even if
     // that is what we'd have ended up with if we sorted by size.
 
-    const firstChoice = { ...ensure(acceptedChoices[0]), fixed: true };
-    const restChoices = acceptedChoices.slice(1).concat(ignoredChoices);
+    const firstChoice = { ...ensure(assignedChoices[0]), fixed: true };
+    const restChoices = assignedChoices.slice(1).concat(rejectedChoices);
     sortBySize(restChoices);
 
     const choices = [firstChoice, ...restChoices];
@@ -521,4 +539,153 @@ const randomSample = <T>(items: T[], n: number) => {
     }
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return [...ix].map((i) => items[i]!);
+};
+
+/**
+ * A map specifying the changes to make when the user presses the save button on
+ * the people suggestions dialog.
+ *
+ * Each entry is a (clusterID, assigned) pair.
+ *
+ * * Entries with assigned `true` should be assigned to the cgroup,
+ * * Entries with assigned `false` should be rejected from the cgroup.
+ * * Entries with assigned `undefined` should be reset - i.e. they should be
+ *   removed from both the assigned and rejected choices associated with the
+ *   cgroup (if needed).
+ */
+export type PersonSuggestionUpdates = Map<string, boolean | undefined>;
+
+/**
+ * Implementation for the "save" action on the SuggestionsDialog.
+ *
+ * This function modifies remote and local state to reflect the given
+ * {@link updates} for {@link cgroup}.
+ *
+ * @param cgroup The cgroup that we want to update.
+ *
+ * @param updates The changes to make. See {@link PersonSuggestionUpdates}.
+ *
+ * @param masterKey The user's masterKey, which is is used to encrypt and
+ * decrypt the entity key associated with cgroups.
+ */
+export const _applyPersonSuggestionUpdates = async (
+    cgroup: CGroup,
+    updates: PersonSuggestionUpdates,
+    masterKey: Uint8Array,
+) => {
+    let localClusters = await savedFaceClusters();
+
+    let assignedClusters = [...cgroup.data.assigned];
+    let rejectedClusterIDs = await savedRejectedClustersForCGroup(cgroup.id);
+
+    let assignUpdateCount = 0;
+    let rejectUpdateCount = 0;
+
+    // Add cluster with `clusterID` to the list of assigned clusters.
+    const assign = (clusterID: string) => {
+        // Remove it from the locally saved clusters,
+        const [updatedLocalClusters, cluster] = localClusters.reduce<
+            [FaceCluster[], FaceCluster | undefined]
+        >(
+            ([clusters, removedCluster], c) => {
+                if (c.id == clusterID) return [clusters, c];
+                clusters.push(c);
+                return [clusters, removedCluster];
+            },
+            [[], undefined],
+        );
+
+        localClusters = updatedLocalClusters;
+        // And add it to the ones that'll get synced with remote.
+        assignedClusters.push(ensure(cluster));
+        assignUpdateCount += 1;
+    };
+
+    // Remove cluster with `clusterID` from the list of assigned clusters (if
+    // needed).
+    const unassignIfNeeded = (clusterID: string) => {
+        if (assignedClusters.find(({ id }) => id == clusterID)) {
+            const [updatedAssignedClusters, cluster] = assignedClusters.reduce<
+                [FaceCluster[], FaceCluster | undefined]
+            >(
+                ([clusters, foundCluster], c) => {
+                    if (c.id == clusterID) return [clusters, c];
+                    clusters.push(c);
+                    return [clusters, foundCluster];
+                },
+                [[], undefined],
+            );
+
+            assignedClusters = updatedAssignedClusters;
+            assignUpdateCount += 1;
+            // Prior to this, this cluster was not saved locally, since it was
+            // part of the remote data. Since we're removing it from the remote
+            // state, add it to the local state instead so that the user can see
+            // (local only) entries from their recent rejections.
+            localClusters.push(ensure(cluster));
+        }
+    };
+
+    // Add `clusterID` to the list of rejected clusters.
+    const reject = (clusterID: string) => {
+        rejectedClusterIDs.push(clusterID);
+        rejectUpdateCount += 1;
+    };
+
+    // Remove `clusterID` from the list of rejected clusters (if needed).
+    const unrejectIfNeeded = (clusterID: string) => {
+        if (rejectedClusterIDs.includes(clusterID)) {
+            rejectedClusterIDs = rejectedClusterIDs.filter(
+                (id) => id != clusterID,
+            );
+            rejectUpdateCount += 1;
+        }
+    };
+
+    for (const [clusterID, assigned] of updates.entries()) {
+        switch (assigned) {
+            case true /* assign */:
+                // TODO-Cluster sanity check, remove after wrapping up dev
+                if (assignedClusters.find(({ id }) => id == clusterID)) {
+                    assertionFailed();
+                }
+
+                assign(clusterID);
+                unrejectIfNeeded(clusterID);
+                break;
+
+            case false /* reject */:
+                // TODO-Cluster sanity check, remove after wrapping up dev
+                if (rejectedClusterIDs.includes(clusterID)) {
+                    assertionFailed();
+                }
+
+                unassignIfNeeded(clusterID);
+                reject(clusterID);
+                break;
+
+            case undefined /* reset */:
+                unassignIfNeeded(clusterID);
+                unrejectIfNeeded(clusterID);
+                break;
+        }
+    }
+
+    if (assignUpdateCount > 0) {
+        const assigned = assignedClusters;
+        await updateOrCreateUserEntities(
+            "cgroup",
+            [{ ...cgroup, data: { ...cgroup.data, assigned } }],
+            masterKey,
+        );
+        await saveFaceClusters(localClusters);
+    }
+
+    if (rejectUpdateCount > 0) {
+        await saveRejectedClustersForCGroup(cgroup.id, rejectedClusterIDs);
+    }
+
+    log.info(
+        `Updated ${assignUpdateCount} assigns and ${rejectUpdateCount} rejects for ${cgroup.id}`,
+    );
 };

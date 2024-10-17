@@ -28,10 +28,12 @@ import type { FaceCluster } from "./cluster";
 import { regenerateFaceCrops } from "./crop";
 import { clearMLDB, getIndexableAndIndexedCounts, savedFaceIndex } from "./db";
 import {
+    _applyPersonSuggestionUpdates,
     filterNamedPeople,
     reconstructPeople,
     type CGroupPerson,
     type Person,
+    type PersonSuggestionUpdates,
 } from "./people";
 import { MLWorker } from "./worker";
 import type { CLIPMatches } from "./worker-types";
@@ -750,9 +752,25 @@ export const addCGroup = async (name: string, cluster: FaceCluster) => {
 export const addClusterToCGroup = async (
     cgroup: CGroup,
     cluster: FaceCluster,
+) =>
+    updateAssignedClustersForCGroup(
+        cgroup,
+        cgroup.data.assigned.concat([cluster]),
+    );
+
+/**
+ * Update the clusters assigned to an existing named person.
+ *
+ * @param cgroup The existing cgroup underlying the person. This is the (remote)
+ * user entity that will get updated.
+ *
+ * @param cluster The new value of the face clusters assigned to this person.
+ */
+export const updateAssignedClustersForCGroup = async (
+    cgroup: CGroup,
+    assigned: FaceCluster[],
 ) => {
     const masterKey = await masterKeyFromSession();
-    const assigned = cgroup.data.assigned.concat([cluster]);
     await updateOrCreateUserEntities(
         "cgroup",
         [{ ...cgroup, data: { ...cgroup.data, assigned } }],
@@ -796,3 +814,17 @@ export const deleteCGroup = async ({ id }: CGroup) => {
  */
 export const suggestionsAndChoicesForPerson = async (person: CGroupPerson) =>
     worker().then((w) => w.suggestionsAndChoicesForPerson(person));
+
+/**
+ * Implementation for the "save" action on the SuggestionsDialog.
+ *
+ * See {@link _applyPersonSuggestionUpdates} for more details.
+ */
+export const applyPersonSuggestionUpdates = async (
+    cgroup: CGroup,
+    updates: PersonSuggestionUpdates,
+) => {
+    const masterKey = await masterKeyFromSession();
+    await _applyPersonSuggestionUpdates(cgroup, updates, masterKey);
+    return mlSync();
+};
