@@ -184,6 +184,16 @@ class _FileSelectionActionsWidgetState
       }
     }
 
+    if (widget.type == GalleryType.cluster && widget.clusterID != null) {
+      items.add(
+        SelectionActionButton(
+          labelText: S.of(context).remove,
+          icon: CupertinoIcons.minus,
+          onTap: anyUploadedFiles ? _onRemoveFromClusterClicked : null,
+        ),
+      );
+    }
+
     final showUploadIcon = widget.type == GalleryType.localFolder &&
         split.ownedByCurrentUser.isEmpty;
     if (widget.type.showAddToAlbum()) {
@@ -435,17 +445,6 @@ class _FileSelectionActionsWidgetState
         ),
       ),
     );
-
-    // if (widget.type == GalleryType.cluster && widget.clusterID != null) {
-    if (widget.type == GalleryType.cluster && widget.clusterID != null) {
-      items.add(
-        SelectionActionButton(
-          labelText: 'Remove',
-          icon: CupertinoIcons.minus,
-          onTap: anyUploadedFiles ? _onRemoveFromClusterClicked : null,
-        ),
-      );
-    }
 
     if (items.isNotEmpty) {
       final scrollController = ScrollController();
