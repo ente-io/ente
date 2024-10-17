@@ -1011,7 +1011,7 @@ class SearchService {
             hierarchicalSearchFilter: FaceFilter(
               personId: null,
               clusterId: clusterId,
-              faceName: clusterName,
+              faceName: null,
               faceFile: files.first,
               occurrence: kMostRelevantFilter,
               matchedUploadedIDs: filesToUploadedFileIDs(files),

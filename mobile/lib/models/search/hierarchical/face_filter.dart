@@ -5,10 +5,7 @@ import "package:photos/models/search/hierarchical/hierarchical_search_filter.dar
 class FaceFilter extends HierarchicalSearchFilter {
   final String? personId;
   final String? clusterId;
-
-  ///Since name is not available when personID is null, use clusterId instead
-  ///as name.
-  final String faceName;
+  final String? faceName;
   final EnteFile faceFile;
   final int occurrence;
 
@@ -26,7 +23,7 @@ class FaceFilter extends HierarchicalSearchFilter {
 
   @override
   String name() {
-    return faceName;
+    return faceName ?? "";
   }
 
   @override

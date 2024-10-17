@@ -322,7 +322,7 @@ Future<List<FaceFilter>> curateFaceFilters(
         FaceFilter(
           personId: null,
           clusterId: clusterId,
-          faceName: clusterName,
+          faceName: null,
           faceFile: files.first,
           occurrence: files.length,
         ),
