@@ -198,6 +198,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       Future.delayed(Duration.zero, () {
         if (value) {
           showDialog(
+            useRootNavigator: false,
             context: context,
             builder: (BuildContext context) {
               return AppUpdateDialog(
@@ -252,6 +253,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     );
 
     await showDialog(
+      useRootNavigator: false,
       context: context,
       builder: (BuildContext context) {
         return alert;

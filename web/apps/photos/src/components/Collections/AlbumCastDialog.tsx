@@ -1,9 +1,10 @@
+import { TitledMiniDialog } from "@/base/components/MiniDialog";
+import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { boxSeal } from "@/base/crypto/libsodium";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
+import { photosDialogZIndex } from "@/new/photos/components/z-index";
 import { loadCast } from "@/new/photos/utils/chromecast-sender";
-import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
-import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
@@ -55,7 +56,7 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
             if (e instanceof Error && e.message == "tv-not-found") {
                 setFieldError(t("tv_not_found"));
             } else {
-                setFieldError(t("UNKNOWN_ERROR"));
+                setFieldError(t("generic_error_retry"));
             }
         }
     };
@@ -135,11 +136,11 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
     }, [open]);
 
     return (
-        <DialogBoxV2
+        <TitledMiniDialog
             open={open}
             onClose={onClose}
-            attributes={{ title: t("cast_album_to_tv") }}
-            sx={{ zIndex: 1600 }}
+            title={t("cast_album_to_tv")}
+            sx={{ zIndex: photosDialogZIndex }}
         >
             {view == "choose" && (
                 <Stack sx={{ py: 1, gap: 4 }}>
@@ -167,7 +168,7 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
             {view == "auto" && (
                 <Stack sx={{ pt: 1, gap: 3, textAlign: "center" }}>
                     <div>
-                        <EnteSpinner />
+                        <ActivityIndicator />
                     </div>
                     <Typography>{t("choose_device_from_browser")}</Typography>
                     <Button color="secondary" onClick={() => setView("choose")}>
@@ -213,6 +214,6 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
                     </Button>
                 </>
             )}
-        </DialogBoxV2>
+        </TitledMiniDialog>
     );
 };

@@ -1283,7 +1283,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "recoveryKeyVerified": MessageLookupByLibrary.simpleMessage(
             "Klucz odzyskiwania zweryfikowany"),
         "recoveryKeyVerifyReason": MessageLookupByLibrary.simpleMessage(
-            "Twój klucz odzyskiwania to jedyny sposób na odzyskanie zdjęć, jeśli zapomnisz hasła. Klucz odzyskiwania można znaleźć w menu Ustawienia > Bezpieczeństwo.\n\nProsimy wprowadzić swój klucz odzyskiwania tutaj, aby sprawdzić, czy został on poprawnie zapisany."),
+            "Twój klucz odzyskiwania jest jedynym sposobem na odzyskanie zdjęć, jeśli zapomnisz hasła. Klucz odzyskiwania można znaleźć w Ustawieniach > Konto.\n\nWprowadź tutaj swój klucz odzyskiwania, aby sprawdzić, czy został zapisany poprawnie."),
         "recoverySuccessful":
             MessageLookupByLibrary.simpleMessage("Odzyskano pomyślnie!"),
         "recreatePasswordBody": MessageLookupByLibrary.simpleMessage(

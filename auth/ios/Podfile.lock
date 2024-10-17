@@ -50,10 +50,10 @@ PODS:
   - flutter_inappwebview_ios (0.0.1):
     - Flutter
     - flutter_inappwebview_ios/Core (= 0.0.1)
-    - OrderedSet (~> 5.0)
+    - OrderedSet (~> 6.0.3)
   - flutter_inappwebview_ios/Core (0.0.1):
     - Flutter
-    - OrderedSet (~> 5.0)
+    - OrderedSet (~> 6.0.3)
   - flutter_local_authentication (1.2.0):
     - Flutter
   - flutter_local_notifications (0.0.1):
@@ -71,7 +71,7 @@ PODS:
   - move_to_background (0.0.1):
     - Flutter
   - MTBBarcodeScanner (5.0.11)
-  - OrderedSet (5.0.0)
+  - OrderedSet (6.0.3)
   - package_info_plus (0.4.5):
     - Flutter
   - path_provider_foundation (0.0.1):
@@ -85,11 +85,11 @@ PODS:
   - SDWebImage (5.19.7):
     - SDWebImage/Core (= 5.19.7)
   - SDWebImage/Core (5.19.7)
-  - Sentry/HybridSDK (8.33.0)
-  - sentry_flutter (8.7.0):
+  - Sentry/HybridSDK (8.36.0)
+  - sentry_flutter (8.9.0):
     - Flutter
     - FlutterMacOS
-    - Sentry/HybridSDK (= 8.33.0)
+    - Sentry/HybridSDK (= 8.36.0)
   - share_plus (0.0.1):
     - Flutter
   - shared_preferences_foundation (0.0.1):
@@ -231,7 +231,7 @@ SPEC CHECKSUMS:
   fk_user_agent: 1f47ec39291e8372b1d692b50084b0d54103c545
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   flutter_email_sender: 10a22605f92809a11ef52b2f412db806c6082d40
-  flutter_inappwebview_ios: 97215cf7d4677db55df76782dbd2930c5e1c1ea0
+  flutter_inappwebview_ios: 6f63631e2c62a7c350263b13fa5427aedefe81d4
   flutter_local_authentication: 1172a4dd88f6306dadce067454e2c4caf07977bb
   flutter_local_notifications: 4cde75091f6327eb8517fa068a0a5950212d2086
   flutter_native_splash: edf599c81f74d093a4daf8e17bd7a018854bc778
@@ -240,14 +240,14 @@ SPEC CHECKSUMS:
   local_auth_darwin: 66e40372f1c29f383a314c738c7446e2f7fdadc3
   move_to_background: 39a5b79b26d577b0372cbe8a8c55e7aa9fcd3a2d
   MTBBarcodeScanner: f453b33c4b7dfe545d8c6484ed744d55671788cb
-  OrderedSet: aaeb196f7fef5a9edf55d89760da9176ad40b93c
+  OrderedSet: e539b66b644ff081c73a262d24ad552a69be3a94
   package_info_plus: 58f0028419748fad15bf008b270aaa8e54380b1c
   path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
   privacy_screen: 1a131c052ceb3c3659934b003b0d397c2381a24e
   qr_code_scanner: bb67d64904c3b9658ada8c402e8b4d406d5d796e
   SDWebImage: 8a6b7b160b4d710e2a22b6900e25301075c34cb3
-  Sentry: 8560050221424aef0bebc8e31eedf00af80f90a6
-  sentry_flutter: e26b861f744e5037a3faf9bf56603ec65d658a61
+  Sentry: f8374b5415bc38dfb5645941b3ae31230fbeae57
+  sentry_flutter: 0eb93e5279eb41e2392212afe1ccd2fecb4f8cbe
   share_plus: 8875f4f2500512ea181eef553c3e27dba5135aad
   shared_preferences_foundation: fcdcbc04712aee1108ac7fda236f363274528f78
   sodium_libs: 1faae17af662384acbd13e41867a0008cd2e2318

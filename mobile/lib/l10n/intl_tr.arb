@@ -150,7 +150,6 @@
   "tryAgain": "Tekrar deneyiniz",
   "viewRecoveryKey": "Kurtarma anahtarını görüntüle",
   "confirmRecoveryKey": "Kurtarma anahtarını doğrula",
-  "recoveryKeyVerifyReason": "Eğer şifrenizi unutursanız, fotoğraflarınızı kurtarmanın tek yolu kurtarma anahtarınızdır. Kurtarma anahtarınızı Ayarlar > Güvenlik bölümünde bulabilirsiniz.\n\nLütfen kurtarma anahtarınızı buraya girerek doğru bir şekilde kaydettiğinizi doğrulayın.",
   "confirmYourRecoveryKey": "Kurtarma anahtarını doğrulayın",
   "addViewer": "Görüntüleyici ekle",
   "addCollaborator": "Düzenleyici ekle",

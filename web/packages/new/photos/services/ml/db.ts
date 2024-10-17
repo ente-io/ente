@@ -206,7 +206,7 @@ const newFileStatus = (fileID: number): FileStatus => ({
 /**
  * Return the {@link FaceIndex}, if any, for {@link fileID}.
  */
-export const getFaceIndex = async (fileID: number) => {
+export const savedFaceIndex = async (fileID: number) => {
     const db = await mlDB();
     return db.get("face-index", fileID);
 };
@@ -214,7 +214,7 @@ export const getFaceIndex = async (fileID: number) => {
 /**
  * Return all face indexes present locally.
  */
-export const getFaceIndexes = async () => {
+export const savedFaceIndexes = async () => {
     const db = await mlDB();
     return await db.getAll("face-index");
 };
@@ -222,7 +222,7 @@ export const getFaceIndexes = async () => {
 /**
  * Return all CLIP indexes present locally.
  */
-export const getCLIPIndexes = async () => {
+export const savedCLIPIndexes = async () => {
     const db = await mlDB();
     return await db.getAll("clip-index");
 };

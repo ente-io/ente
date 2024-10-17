@@ -321,8 +321,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Flott! Din gjenopprettingsnøkkel er gyldig. Takk for bekreftelsen.\n\nVennligst husk å holde gjenopprettingsnøkkelen din trygt sikkerhetskopiert."),
         "recoveryKeyVerified": MessageLookupByLibrary.simpleMessage(
             "Gjenopprettingsnøkkel bekreftet"),
-        "recoveryKeyVerifyReason": MessageLookupByLibrary.simpleMessage(
-            "Gjenopprettings nøkkelen er den eneste måten å gjenopprette bildene dine hvis du glemmer passordet ditt. Du kan finne gjenopprettingsnøkkelen din i Innstillinger > Sikkerhet.\n\nVennligst skriv inn gjenopprettingsnøkkelen din her for å bekrefte at du har lagret den riktig."),
         "recoverySuccessful": MessageLookupByLibrary.simpleMessage(
             "Gjenopprettingen var vellykket!"),
         "recreatePasswordBody": MessageLookupByLibrary.simpleMessage(

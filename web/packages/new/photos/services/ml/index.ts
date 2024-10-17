@@ -9,8 +9,8 @@ import log from "@/base/log";
 import { masterKeyFromSession } from "@/base/session-store";
 import type { Electron } from "@/base/types/ipc";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
+import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
-import type { EnteFile } from "@/new/photos/types/file";
 import { ensure } from "@/utils/ensure";
 import { throttled } from "@/utils/promise";
 import { proxy, transfer } from "comlink";
@@ -26,8 +26,13 @@ import {
 import { deleteUserEntity } from "../user-entity/remote";
 import type { FaceCluster } from "./cluster";
 import { regenerateFaceCrops } from "./crop";
-import { clearMLDB, getFaceIndex, getIndexableAndIndexedCounts } from "./db";
-import { reconstructPeople, type Person } from "./people";
+import { clearMLDB, getIndexableAndIndexedCounts, savedFaceIndex } from "./db";
+import {
+    filterNamedPeople,
+    reconstructPeople,
+    type CGroupPerson,
+    type Person,
+} from "./people";
 import { MLWorker } from "./worker";
 import type { CLIPMatches } from "./worker-types";
 
@@ -364,17 +369,17 @@ const updateClustersAndPeople = async () => {
  * part of the batch jobs, but that might require downloading the file's
  * contents again.
  *
- * @param enteFile The {@link EnteFile} that got uploaded.
+ * @param file The {@link EnteFile} that got uploaded.
  *
  * @param uploadItem The item that was uploaded. This can be used to get at the
  * contents of the file that got uploaded. In case of live photos, this is the
  * image part of the live photo that was uploaded.
  */
-export const indexNewUpload = (enteFile: EnteFile, uploadItem: UploadItem) => {
+export const indexNewUpload = (file: EnteFile, uploadItem: UploadItem) => {
     if (!isMLEnabled()) return;
-    if (enteFile.metadata.fileType !== FileType.image) return;
-    log.debug(() => ["ml/liveq", { enteFile, uploadItem }]);
-    void worker().then((w) => w.onUpload(enteFile, uploadItem));
+    if (file.metadata.fileType !== FileType.image) return;
+    log.debug(() => ["ml/liveq", { file, uploadItem }]);
+    void worker().then((w) => w.onUpload(file, uploadItem));
 };
 
 export type MLStatus =
@@ -575,11 +580,7 @@ const updatePeople = async () => {
     const people = await reconstructPeople();
 
     // Notify the search subsystem of the update (search only uses named ones).
-    setSearchPeople(
-        people
-            .map((p) => (p.name ? { name: p.name, person: p } : undefined))
-            .filter((p) => !!p),
-    );
+    setSearchPeople(filterNamedPeople(people));
 
     // Update our in-memory list of people.
     setPeopleSnapshot(people);
@@ -629,15 +630,15 @@ export interface AnnotatedFacesForFile {
 }
 
 /**
- * Return the list of faces found in the given {@link enteFile}.
+ * Return the list of faces found in the given {@link file}.
  */
 export const getAnnotatedFacesForFile = async (
-    enteFile: EnteFile,
+    file: EnteFile,
 ): Promise<AnnotatedFacesForFile> => {
     const annotatedFaceIDs: AnnotatedFaceID[] = [];
     const otherFaceIDs: string[] = [];
 
-    const index = await getFaceIndex(enteFile.id);
+    const index = await savedFaceIndex(file.id);
     if (!index) return { annotatedFaceIDs, otherFaceIDs };
 
     const people = _state.peopleSnapshot ?? [];
@@ -675,14 +676,14 @@ export const getAnnotatedFacesForFile = async (
  *
  * @param faceID The id of the face whose face crop we want.
  *
- * @param enteFile The {@link EnteFile} that contains this face.
+ * @param file The {@link EnteFile} that contains this face.
  */
-export const faceCrop = async (faceID: string, enteFile: EnteFile) => {
-    let inFlight = _state.inFlightFaceCropRegens.get(enteFile.id);
+export const faceCrop = async (faceID: string, file: EnteFile) => {
+    let inFlight = _state.inFlightFaceCropRegens.get(file.id);
 
     if (!inFlight) {
-        inFlight = regenerateFaceCropsIfNeeded(enteFile);
-        _state.inFlightFaceCropRegens.set(enteFile.id, inFlight);
+        inFlight = regenerateFaceCropsIfNeeded(file);
+        _state.inFlightFaceCropRegens.set(file.id, inFlight);
     }
 
     await inFlight;
@@ -705,8 +706,8 @@ export const faceCrop = async (faceID: string, enteFile: EnteFile) => {
  * present locally. If so, then regenerate the face crops for all the faces in
  * the file (updating the "face-crops" {@link BlobCache}).
  */
-const regenerateFaceCropsIfNeeded = async (enteFile: EnteFile) => {
-    const index = await getFaceIndex(enteFile.id);
+const regenerateFaceCropsIfNeeded = async (file: EnteFile) => {
+    const index = await savedFaceIndex(file.id);
     if (!index) return;
 
     const cache = await blobCache("face-crops");
@@ -714,7 +715,7 @@ const regenerateFaceCropsIfNeeded = async (enteFile: EnteFile) => {
     let needsRegen = false;
     for (const id of faceIDs) if (!(await cache.has(id))) needsRegen = true;
 
-    if (needsRegen) await regenerateFaceCrops(enteFile, index);
+    if (needsRegen) await regenerateFaceCrops(file, index);
 };
 
 /**
@@ -724,7 +725,7 @@ const regenerateFaceCropsIfNeeded = async (enteFile: EnteFile) => {
  *
  * @param cluster The underlying cluster to use to populate the cgroup.
  */
-export const addPerson = async (name: string, cluster: FaceCluster) => {
+export const addCGroup = async (name: string, cluster: FaceCluster) => {
     const masterKey = await masterKeyFromSession();
     await addUserEntity(
         "cgroup",
@@ -739,6 +740,28 @@ export const addPerson = async (name: string, cluster: FaceCluster) => {
 };
 
 /**
+ * Add a new cluster to an existing named person.
+ *
+ * @param cgroup The existing cgroup underlying the person. This is the (remote)
+ * user entity that will get updated.
+ *
+ * @param cluster The new cluster of faces to associate with this person.
+ */
+export const addClusterToCGroup = async (
+    cgroup: CGroup,
+    cluster: FaceCluster,
+) => {
+    const masterKey = await masterKeyFromSession();
+    const assigned = cgroup.data.assigned.concat([cluster]);
+    await updateOrCreateUserEntities(
+        "cgroup",
+        [{ ...cgroup, data: { ...cgroup.data, assigned } }],
+        masterKey,
+    );
+    return mlSync();
+};
+
+/**
  * Rename an existing named person.
  *
  * @param name The new name to use.
@@ -746,7 +769,7 @@ export const addPerson = async (name: string, cluster: FaceCluster) => {
  * @param cgroup The existing cgroup underlying the person. This is the (remote)
  * user entity that will get updated.
  */
-export const renamePerson = async (name: string, cgroup: CGroup) => {
+export const renameCGroup = async (cgroup: CGroup, name: string) => {
     const masterKey = await masterKeyFromSession();
     await updateOrCreateUserEntities(
         "cgroup",
@@ -761,7 +784,15 @@ export const renamePerson = async (name: string, cgroup: CGroup) => {
  *
  * @param cgroup The existing cgroup underlying the person.
  */
-export const deletePerson = async ({ id }: CGroup) => {
+export const deleteCGroup = async ({ id }: CGroup) => {
     await deleteUserEntity(id);
     return mlSync();
 };
+
+/**
+ * Return suggestions for the given {@link person}.
+ *
+ * The suggestion computation happens in a web worker.
+ */
+export const suggestionsAndChoicesForPerson = async (person: CGroupPerson) =>
+    worker().then((w) => w.suggestionsAndChoicesForPerson(person));

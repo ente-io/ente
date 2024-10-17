@@ -12,9 +12,9 @@ import type {
     FolderWatchSyncedFile,
 } from "@/base/types/ipc";
 import type { Collection } from "@/media/collection";
+import { EncryptedEnteFile } from "@/media/file";
 import { getLocalFiles } from "@/new/photos/services/files";
 import { UPLOAD_RESULT } from "@/new/photos/services/upload/types";
-import { EncryptedEnteFile } from "@/new/photos/types/file";
 import { ensureString } from "@/utils/ensure";
 import debounce from "debounce";
 import uploadManager, {

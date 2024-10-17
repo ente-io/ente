@@ -22,6 +22,10 @@ class MessageLookup extends MessageLookupByLibrary {
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
+        "askDeleteReason": MessageLookupByLibrary.simpleMessage(
+            "Jaký je váš hlavní důvod, proč mažete svůj účet?"),
+        "checkInboxAndSpamFolder": MessageLookupByLibrary.simpleMessage(
+            "Zkontrolujte prosím svou doručenou poštu (a spam) pro dokončení ověření"),
         "incorrectRecoveryKeyBody": MessageLookupByLibrary.simpleMessage("")
       };
 }

@@ -1,19 +1,10 @@
+import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import CloseIcon from "@mui/icons-material/Close";
 import { IconButton } from "@mui/material";
 import { t } from "i18next";
 import React from "react";
 
-/**
- * Common props to control the display of a dialog-like component.
- */
-export interface DialogVisiblityProps {
-    /** If `true`, the dialog is shown. */
-    open: boolean;
-    /** Callback fired when the dialog wants to be closed. */
-    onClose: () => void;
-}
-
-type DialogCloseIconButtonProps = Omit<DialogVisiblityProps, "open">;
+type DialogCloseIconButtonProps = Omit<ModalVisibilityProps, "open">;
 
 /**
  * A convenience {@link IconButton} commonly needed on {@link Dialog}s, at the

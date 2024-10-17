@@ -7,11 +7,11 @@ list(APPEND FLUTTER_PLUGIN_LIST
   connectivity_plus
   desktop_webview_window
   file_saver
+  flutter_inappwebview_windows
   flutter_local_authentication
   flutter_secure_storage_windows
   local_auth_windows
   screen_retriever
-  sentry_flutter
   share_plus
   sodium_libs
   sqlite3_flutter_libs
@@ -21,6 +21,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST
+  sentry_flutter
 )
 
 set(PLUGIN_BUNDLED_LIBRARIES)

@@ -1,5 +1,5 @@
 import type { PublicURL } from "@/media/collection";
-import { EnteFile } from "@/new/photos/types/file";
+import { EnteFile } from "@/media/file";
 import { TimeStampListItem } from "components/PhotoList";
 
 export interface PublicCollectionGalleryContextType {

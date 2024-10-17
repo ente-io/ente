@@ -2,14 +2,11 @@ import { decryptMetadataJSON, encryptMetadataJSON } from "@/base/crypto";
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { apiURL } from "@/base/origins";
 import { type Location } from "@/base/types";
-import {
-    type EnteFile,
-    type FilePublicMagicMetadata,
-} from "@/new/photos/types/file";
-import { mergeMetadata1 } from "@/new/photos/utils/file";
+import { type EnteFile, type FilePublicMagicMetadata } from "@/media/file";
 import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
+import { mergeMetadata1 } from "./file";
 import { FileType } from "./file-type";
 
 /**
@@ -276,7 +273,7 @@ const PublicMagicMetadata = z
     .passthrough();
 
 /**
- * Return the public magic metadata for the given {@link enteFile}.
+ * Return the public magic metadata for the given {@link file}.
  *
  * The file we persist in our local db has the metadata in the encrypted form
  * that we get it from remote. We decrypt when we read it, and also hang the
@@ -286,9 +283,9 @@ const PublicMagicMetadata = z
  * `undefined`.
  */
 export const decryptPublicMagicMetadata = async (
-    enteFile: EnteFile,
+    file: EnteFile,
 ): Promise<PublicMagicMetadata | undefined> => {
-    const envelope = enteFile.pubMagicMetadata;
+    const envelope = file.pubMagicMetadata;
     if (!envelope) return undefined;
 
     // TODO: This function can be optimized to directly return the cached value
@@ -302,7 +299,7 @@ export const decryptPublicMagicMetadata = async (
             ? await decryptMetadataJSON({
                   encryptedDataB64: envelope.data,
                   decryptionHeaderB64: envelope.header,
-                  keyB64: enteFile.key,
+                  keyB64: file.key,
               })
             : envelope.data;
     const result = PublicMagicMetadata.parse(
@@ -335,13 +332,13 @@ const withoutNullAndUndefinedValues = (o: object) =>
  * For all the details and nuance, see {@link createPhotoDate}.
  */
 export const fileCreationPhotoDate = (
-    enteFile: EnteFile,
+    file: EnteFile,
     publicMagicMetadata: PublicMagicMetadata | undefined,
 ) =>
     createPhotoDate(
         publicMagicMetadata?.dateTime ??
             publicMagicMetadata?.editedTime ??
-            enteFile.metadata.creationTime,
+            file.metadata.creationTime,
     );
 
 /**
@@ -355,24 +352,24 @@ export const fileCreationPhotoDate = (
  * updates as part of the diff and update the {@link EnteFile} that is persisted
  * in our local db.
  *
- * @param enteFile The {@link EnteFile} whose public magic metadata we want to
+ * @param file The {@link EnteFile} whose public magic metadata we want to
  * update.
  *
  * @param metadataUpdates A subset of {@link PublicMagicMetadata} containing the
  * fields that we want to add or update.
  */
 export const updateRemotePublicMagicMetadata = async (
-    enteFile: EnteFile,
+    file: EnteFile,
     metadataUpdates: Partial<PublicMagicMetadata>,
 ) => {
-    const existingMetadata = await decryptPublicMagicMetadata(enteFile);
+    const existingMetadata = await decryptPublicMagicMetadata(file);
 
     const updatedMetadata = { ...(existingMetadata ?? {}), ...metadataUpdates };
 
-    const metadataVersion = enteFile.pubMagicMetadata?.version ?? 1;
+    const metadataVersion = file.pubMagicMetadata?.version ?? 1;
 
     const updateRequest = await updateMagicMetadataRequest(
-        enteFile,
+        file,
         updatedMetadata,
         metadataVersion,
     );
@@ -383,15 +380,15 @@ export const updateRemotePublicMagicMetadata = async (
 
     // Modify the in-memory object to use the updated envelope. This steps are
     // quite ad-hoc, as is the concept of updating the object in place.
-    enteFile.pubMagicMetadata = updatedEnvelope as FilePublicMagicMetadata;
+    file.pubMagicMetadata = updatedEnvelope as FilePublicMagicMetadata;
     // The correct version will come in the updated EnteFile we get in the
     // response of the /diff. Temporarily bump it for the in place edits.
-    enteFile.pubMagicMetadata.version = enteFile.pubMagicMetadata.version + 1;
+    file.pubMagicMetadata.version = file.pubMagicMetadata.version + 1;
     // Re-read the data.
-    await decryptPublicMagicMetadata(enteFile);
+    await decryptPublicMagicMetadata(file);
     // Re-jig the other bits of EnteFile that depend on its public magic
     // metadata.
-    mergeMetadata1(enteFile);
+    mergeMetadata1(file);
 };
 
 /**
@@ -453,11 +450,11 @@ interface UpdateMagicMetadataRequest {
 
 /**
  * Construct an remote update request payload from the public or private magic
- * metadata JSON object for an {@link enteFile}, using the provided
+ * metadata JSON object for an {@link file}, using the provided
  * {@link encryptMetadataF} function to encrypt the JSON.
  */
 const updateMagicMetadataRequest = async (
-    enteFile: EnteFile,
+    file: EnteFile,
     metadata: PrivateMagicMetadata | PublicMagicMetadata,
     metadataVersion: number,
 ): Promise<UpdateMagicMetadataRequest> => {
@@ -468,13 +465,13 @@ const updateMagicMetadataRequest = async (
     );
 
     const { encryptedDataB64, decryptionHeaderB64 } = await encryptMetadataJSON(
-        { jsonValue: Object.fromEntries(validEntries), keyB64: enteFile.key },
+        { jsonValue: Object.fromEntries(validEntries), keyB64: file.key },
     );
 
     return {
         metadataList: [
             {
-                id: enteFile.id,
+                id: file.id,
                 magicMetadata: {
                     version: metadataVersion,
                     count: validEntries.length,
@@ -769,16 +766,16 @@ export const createPhotoDate = (
 /**
  * Return the GPS coordinates (if any) present in the given {@link EnteFile}.
  */
-export const fileLocation = (enteFile: EnteFile): Location | undefined => {
+export const fileLocation = (file: EnteFile): Location | undefined => {
     // TODO: EnteFile types. Need to verify that metadata itself, and
     // metadata.lat/lng can not be null (I think they likely can, if so need to
     // update the types). Need to supress the linter meanwhile.
 
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    if (!enteFile.metadata) return undefined;
+    if (!file.metadata) return undefined;
 
-    const latitude = nullToUndefined(enteFile.metadata.latitude);
-    const longitude = nullToUndefined(enteFile.metadata.longitude);
+    const latitude = nullToUndefined(file.metadata.latitude);
+    const longitude = nullToUndefined(file.metadata.longitude);
 
     if (latitude === undefined || longitude === undefined) return undefined;
 

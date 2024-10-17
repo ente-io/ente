@@ -1,6 +1,8 @@
 import { SelectionBar } from "@/base/components/Navbar";
 import type { Collection } from "@/media/collection";
-import type { GalleryBarMode } from "@/new/photos/components/Gallery/BarImpl";
+import type { CollectionSelectorAttributes } from "@/new/photos/components/CollectionSelector";
+import type { GalleryBarMode } from "@/new/photos/components/gallery/BarImpl";
+import { AppContext } from "@/new/photos/types/context";
 import { FluidContainer } from "@ente/shared/components/Container";
 import ClockIcon from "@mui/icons-material/AccessTime";
 import AddIcon from "@mui/icons-material/Add";
@@ -9,17 +11,15 @@ import MoveIcon from "@mui/icons-material/ArrowForward";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
 import DownloadIcon from "@mui/icons-material/Download";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorderRounded";
 import RemoveIcon from "@mui/icons-material/RemoveCircleOutline";
 import RestoreIcon from "@mui/icons-material/Restore";
 import UnArchiveIcon from "@mui/icons-material/Unarchive";
 import VisibilityOffOutlined from "@mui/icons-material/VisibilityOffOutlined";
 import VisibilityOutlined from "@mui/icons-material/VisibilityOutlined";
 import { Box, IconButton, Stack, Tooltip } from "@mui/material";
-import { CollectionSelectorIntent } from "components/Collections/CollectionSelector";
 import { t } from "i18next";
-import { AppContext } from "pages/_app";
 import { useContext } from "react";
-import { SetCollectionSelectorAttributes } from "types/gallery";
 import {
     ALL_SECTION,
     ARCHIVE_SECTION,
@@ -36,7 +36,15 @@ interface Props {
     ) => (...args: any[]) => void;
     handleFileOps: (opsType: FILE_OPS_TYPE) => (...args: any[]) => void;
     showCreateCollectionModal: (opsType: COLLECTION_OPS_TYPE) => () => void;
-    setCollectionSelectorAttributes: SetCollectionSelectorAttributes;
+    /**
+     * Callback to open a dialog where the user can choose a collection.
+     *
+     * The reason for opening the dialog and other properties are passed as the
+     * {@link attributes} argument.
+     */
+    onOpenCollectionSelector: (
+        attributes: CollectionSelectorAttributes,
+    ) => void;
     count: number;
     ownCount: number;
     clearSelection: () => void;
@@ -52,7 +60,7 @@ interface Props {
 
 const SelectedFileOptions = ({
     showCreateCollectionModal,
-    setCollectionSelectorAttributes,
+    onOpenCollectionSelector,
     handleCollectionOps,
     handleFileOps,
     selectedCollection,
@@ -72,12 +80,14 @@ const SelectedFileOptions = ({
     const peopleMode = barMode == "people";
 
     const addToCollection = () =>
-        setCollectionSelectorAttributes({
-            callback: handleCollectionOps(COLLECTION_OPS_TYPE.ADD),
-            showNextModal: showCreateCollectionModal(COLLECTION_OPS_TYPE.ADD),
-            intent: CollectionSelectorIntent.add,
-            fromCollection:
-                !isInSearchMode && !peopleMode ? activeCollectionID : undefined,
+        onOpenCollectionSelector({
+            action: "add",
+            onSelectCollection: handleCollectionOps(COLLECTION_OPS_TYPE.ADD),
+            onCreateCollection: showCreateCollectionModal(
+                COLLECTION_OPS_TYPE.ADD,
+            ),
+            relatedCollectionID:
+                isInSearchMode || peopleMode ? undefined : activeCollectionID,
         });
 
     const trashHandler = () =>
@@ -91,19 +101,21 @@ const SelectedFileOptions = ({
             content: t("DELETE_FILES_MESSAGE"),
             proceed: {
                 action: handleFileOps(FILE_OPS_TYPE.DELETE_PERMANENTLY),
-                text: t("DELETE"),
+                text: t("delete"),
                 variant: "critical",
             },
             close: { text: t("cancel") },
         });
 
     const restoreHandler = () =>
-        setCollectionSelectorAttributes({
-            callback: handleCollectionOps(COLLECTION_OPS_TYPE.RESTORE),
-            showNextModal: showCreateCollectionModal(
+        onOpenCollectionSelector({
+            action: "restore",
+            onSelectCollection: handleCollectionOps(
                 COLLECTION_OPS_TYPE.RESTORE,
             ),
-            intent: CollectionSelectorIntent.restore,
+            onCreateCollection: showCreateCollectionModal(
+                COLLECTION_OPS_TYPE.RESTORE,
+            ),
         });
 
     const removeFromCollectionHandler = () => {
@@ -141,22 +153,24 @@ const SelectedFileOptions = ({
     };
 
     const moveToCollection = () => {
-        setCollectionSelectorAttributes({
-            callback: handleCollectionOps(COLLECTION_OPS_TYPE.MOVE),
-            showNextModal: showCreateCollectionModal(COLLECTION_OPS_TYPE.MOVE),
-            intent: CollectionSelectorIntent.move,
-            fromCollection:
-                !isInSearchMode && !peopleMode ? activeCollectionID : undefined,
+        onOpenCollectionSelector({
+            action: "move",
+            onSelectCollection: handleCollectionOps(COLLECTION_OPS_TYPE.MOVE),
+            onCreateCollection: showCreateCollectionModal(
+                COLLECTION_OPS_TYPE.MOVE,
+            ),
+            relatedCollectionID:
+                isInSearchMode || peopleMode ? undefined : activeCollectionID,
         });
     };
 
     const unhideToCollection = () => {
-        setCollectionSelectorAttributes({
-            callback: handleCollectionOps(COLLECTION_OPS_TYPE.UNHIDE),
-            showNextModal: showCreateCollectionModal(
+        onOpenCollectionSelector({
+            action: "unhide",
+            onSelectCollection: handleCollectionOps(COLLECTION_OPS_TYPE.UNHIDE),
+            onCreateCollection: showCreateCollectionModal(
                 COLLECTION_OPS_TYPE.UNHIDE,
             ),
-            intent: CollectionSelectorIntent.unhide,
         });
     };
 
@@ -208,7 +222,7 @@ const SelectedFileOptions = ({
                                 <VisibilityOffOutlined />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title={t("DELETE")}>
+                        <Tooltip title={t("delete")}>
                             <IconButton onClick={trashHandler}>
                                 <DeleteIcon />
                             </IconButton>
@@ -242,7 +256,7 @@ const SelectedFileOptions = ({
                                 <VisibilityOffOutlined />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title={t("DELETE")}>
+                        <Tooltip title={t("delete")}>
                             <IconButton onClick={trashHandler}>
                                 <DeleteIcon />
                             </IconButton>
@@ -275,7 +289,7 @@ const SelectedFileOptions = ({
                                 <MoveIcon />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title={t("DELETE")}>
+                        <Tooltip title={t("delete")}>
                             <IconButton onClick={trashHandler}>
                                 <DeleteIcon />
                             </IconButton>
@@ -304,7 +318,7 @@ const SelectedFileOptions = ({
                             </IconButton>
                         </Tooltip>
 
-                        <Tooltip title={t("DELETE")}>
+                        <Tooltip title={t("delete")}>
                             <IconButton onClick={trashHandler}>
                                 <DeleteIcon />
                             </IconButton>
@@ -319,6 +333,18 @@ const SelectedFileOptions = ({
                                 <ClockIcon />
                             </IconButton>
                         </Tooltip>
+                        {!isFavoriteCollection &&
+                            activeCollectionID != ARCHIVE_SECTION && (
+                                <Tooltip title={t("favorite")}>
+                                    <IconButton
+                                        onClick={handleFileOps(
+                                            FILE_OPS_TYPE.SET_FAVORITE,
+                                        )}
+                                    >
+                                        <FavoriteBorderIcon />
+                                    </IconButton>
+                                </Tooltip>
+                            )}
                         <Tooltip title={t("download")}>
                             <IconButton
                                 onClick={handleFileOps(FILE_OPS_TYPE.DOWNLOAD)}
@@ -381,7 +407,7 @@ const SelectedFileOptions = ({
                                 <VisibilityOffOutlined />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title={t("DELETE")}>
+                        <Tooltip title={t("delete")}>
                             <IconButton onClick={trashHandler}>
                                 <DeleteIcon />
                             </IconButton>

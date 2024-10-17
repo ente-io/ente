@@ -1,10 +1,10 @@
+import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import log from "@/base/log";
 import type { TwoFactorAuthorizationResponse } from "@/base/types/credentials";
 import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";
 import { VerticallyCentered } from "@ente/shared/components/Container";
-import EnteButton from "@ente/shared/components/EnteButton";
-import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import InfoIcon from "@mui/icons-material/Info";
 import KeyIcon from "@mui/icons-material/Key";
 import { Paper, Typography, styled } from "@mui/material";
@@ -272,7 +272,7 @@ const redirectToURL = (url: URL) => {
 const Loading: React.FC = () => {
     return (
         <VerticallyCentered>
-            <EnteSpinner />
+            <ActivityIndicator />
         </VerticallyCentered>
     );
 };
@@ -366,15 +366,9 @@ const Verify: React.FC<VerifyProps> = ({ onVerify }) => {
                 {t("passkey_verify_description")}
             </Typography>
             <ButtonStack>
-                <EnteButton
-                    onClick={onVerify}
-                    fullWidth
-                    color="accent"
-                    type="button"
-                    variant="contained"
-                >
+                <FocusVisibleButton onClick={onVerify} fullWidth color="accent">
                     {t("VERIFY")}
-                </EnteButton>
+                </FocusVisibleButton>
             </ButtonStack>
         </Content>
     );
@@ -416,25 +410,22 @@ const RetriableFailed: React.FC<RetriableFailedProps> = ({
                     : t("passkey_login_generic_error")}
             </Typography>
             <ButtonStack>
-                <EnteButton
+                <FocusVisibleButton
                     onClick={onRetry}
                     fullWidth
                     color="secondary"
-                    type="button"
-                    variant="contained"
                 >
                     {t("try_again")}
-                </EnteButton>
+                </FocusVisibleButton>
                 {onRecover && (
-                    <EnteButton
+                    <FocusVisibleButton
                         onClick={onRecover}
                         fullWidth
                         color="primary"
-                        type="button"
                         variant="text"
                     >
                         {t("RECOVER_TWO_FACTOR")}
-                    </EnteButton>
+                    </FocusVisibleButton>
                 )}
             </ButtonStack>
         </Content>
@@ -504,15 +495,14 @@ const RedirectingApp: React.FC<RedirectingAppProps> = ({ onRetry }) => {
                 {t("redirect_close_instructions")}
             </Typography>
             <ButtonStack>
-                <EnteButton
+                <FocusVisibleButton
                     onClick={onRetry}
                     fullWidth
                     color="primary"
-                    type="button"
                     variant="text"
                 >
                     {t("redirect_again")}
-                </EnteButton>
+                </FocusVisibleButton>
             </ButtonStack>
         </Content>
     );

@@ -1,12 +1,13 @@
+import { useModalVisibility } from "@/base/components/utils/modal";
 import type { Collection } from "@/media/collection";
 import {
     GalleryBarImpl,
     type GalleryBarImplProps,
-} from "@/new/photos/components/Gallery/BarImpl";
-import { PeopleHeader } from "@/new/photos/components/Gallery/PeopleHeader";
+} from "@/new/photos/components/gallery/BarImpl";
+import { PeopleHeader } from "@/new/photos/components/gallery/PeopleHeader";
 import {
+    areOnlySystemCollections,
     collectionsSortBy,
-    hasNonSystemCollections,
     isSystemCollection,
     shouldShowOnCollectionBar,
     type CollectionsSortBy,
@@ -22,14 +23,7 @@ import AllCollections from "components/Collections/AllCollections";
 import { SetCollectionNamerAttributes } from "components/Collections/CollectionNamer";
 import CollectionShare from "components/Collections/CollectionShare";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
-import { AppContext } from "pages/_app";
-import React, {
-    useCallback,
-    useContext,
-    useEffect,
-    useMemo,
-    useState,
-} from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { sortCollectionSummaries } from "services/collectionService";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
 import { ALL_SECTION } from "utils/collection";
@@ -100,13 +94,12 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
     filesDownloadProgressAttributesList,
     setFilesDownloadProgressAttributesCreator,
 }) => {
-    const appContext = useContext(AppContext);
-
-    const [openAllCollectionDialog, setOpenAllCollectionDialog] =
-        useState(false);
-    const [openCollectionShareView, setOpenCollectionShareView] =
-        useState(false);
-    const [openAlbumCastDialog, setOpenAlbumCastDialog] = useState(false);
+    const { show: showAllCollections, props: allCollectionsVisibilityProps } =
+        useModalVisibility();
+    const { show: showCollectionShare, props: collectionShareVisibilityProps } =
+        useModalVisibility();
+    const { show: showCollectionCast, props: collectionCastVisibilityProps } =
+        useModalVisibility();
 
     const [collectionsSortBy, setCollectionsSortBy] =
         useCollectionsSortByLocalState("updation-time-desc");
@@ -122,7 +115,7 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
     const shouldBeHidden = useMemo(
         () =>
             shouldHide ||
-            (!hasNonSystemCollections(toShowCollectionSummaries) &&
+            (areOnlySystemCollections(toShowCollectionSummaries) &&
                 activeCollectionID === ALL_SECTION),
         [shouldHide, toShowCollectionSummaries, activeCollectionID],
     );
@@ -164,15 +157,13 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
                         collectionSummary={toShowCollectionSummaries.get(
                             activeCollectionID,
                         )}
-                        onCollectionShare={() =>
-                            setOpenCollectionShareView(true)
-                        }
-                        onCollectionCast={() => setOpenAlbumCastDialog(true)}
+                        onCollectionShare={showCollectionShare}
+                        onCollectionCast={showCollectionCast}
                     />
                 ) : activePerson ? (
                     <PeopleHeader
                         person={activePerson}
-                        {...{ onSelectPerson, appContext }}
+                        {...{ onSelectPerson, people }}
                     />
                 ) : (
                     <></>
@@ -187,6 +178,11 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
         activeCollectionID,
         isActiveCollectionDownloadInProgress,
         activePerson,
+        showCollectionShare,
+        showCollectionCast,
+        // TODO-Cluster
+        // This causes a loop since it is an array dep
+        // people,
     ]);
 
     if (shouldBeHidden) {
@@ -208,15 +204,14 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
                 }}
                 onSelectCollectionID={setActiveCollectionID}
                 onChangeCollectionsSortBy={setCollectionsSortBy}
-                onShowAllCollections={() => setOpenAllCollectionDialog(true)}
+                onShowAllCollections={showAllCollections}
                 collectionSummaries={sortedCollectionSummaries.filter((x) =>
                     shouldShowOnCollectionBar(x.type),
                 )}
             />
 
             <AllCollections
-                open={openAllCollectionDialog}
-                onClose={() => setOpenAllCollectionDialog(false)}
+                {...allCollectionsVisibilityProps}
                 collectionSummaries={sortedCollectionSummaries.filter(
                     (x) => !isSystemCollection(x.type),
                 )}
@@ -226,16 +221,14 @@ export const GalleryBarAndListHeader: React.FC<CollectionsProps> = ({
                 isInHiddenSection={mode == "hidden-albums"}
             />
             <CollectionShare
+                {...collectionShareVisibilityProps}
                 collectionSummary={toShowCollectionSummaries.get(
                     activeCollectionID,
                 )}
-                open={openCollectionShareView}
-                onClose={() => setOpenCollectionShareView(false)}
                 collection={activeCollection}
             />
             <AlbumCastDialog
-                open={openAlbumCastDialog}
-                onClose={() => setOpenAlbumCastDialog(false)}
+                {...collectionCastVisibilityProps}
                 collection={activeCollection}
             />
         </>

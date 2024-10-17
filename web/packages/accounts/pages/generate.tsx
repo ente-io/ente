@@ -1,19 +1,19 @@
 import { putAttributes } from "@/accounts/api/user";
+import { RecoveryKey } from "@/accounts/components/RecoveryKey";
 import SetPasswordForm, {
     type SetPasswordFormProps,
 } from "@/accounts/components/SetPasswordForm";
 import { PAGES } from "@/accounts/constants/pages";
 import { configureSRP } from "@/accounts/services/srp";
 import { generateKeyAndSRPAttributes } from "@/accounts/utils/srp";
+import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
-import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
 import FormTitle from "@ente/shared/components/Form/FormPaper/Title";
 import LinkButton from "@ente/shared/components/LinkButton";
-import RecoveryKey from "@ente/shared/components/RecoveryKey";
 import {
     generateAndSaveIntermediateKeyAttributes,
     saveKeyInSessionStore,
@@ -32,11 +32,11 @@ import { appHomeRoute } from "../services/redirect";
 import type { PageProps } from "../types/page";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
-    const { logout } = appContext;
+    const { logout, showMiniDialog } = appContext;
 
     const [token, setToken] = useState<string>();
     const [user, setUser] = useState<User>();
-    const [recoverModalView, setRecoveryModalView] = useState(false);
+    const [openRecoveryKey, setOpenRecoveryKey] = useState(false);
     const [loading, setLoading] = useState(true);
 
     const router = useRouter();
@@ -53,7 +53,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 router.push("/");
             } else if (key) {
                 if (justSignedUp()) {
-                    setRecoveryModalView(true);
+                    setOpenRecoveryKey(true);
                     setLoading(false);
                 } else {
                     router.push(appHomeRoute);
@@ -87,7 +87,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             );
             await saveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, masterKey);
             setJustSignedUp(true);
-            setRecoveryModalView(true);
+            setOpenRecoveryKey(true);
         } catch (e) {
             log.error("failed to generate password", e);
             setFieldError("passphrase", t("PASSWORD_GENERATION_FAILED"));
@@ -98,17 +98,16 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         <>
             {loading || !user ? (
                 <VerticallyCentered>
-                    <EnteSpinner />
+                    <ActivityIndicator />
                 </VerticallyCentered>
-            ) : recoverModalView ? (
+            ) : openRecoveryKey ? (
                 <RecoveryKey
-                    show={recoverModalView}
-                    onHide={() => {
-                        setRecoveryModalView(false);
+                    open={openRecoveryKey}
+                    onClose={() => {
+                        setOpenRecoveryKey(false);
                         router.push(appHomeRoute);
                     }}
-                    /* TODO: Why is this error being ignored */
-                    somethingWentWrong={() => {}}
+                    showMiniDialog={showMiniDialog}
                 />
             ) : (
                 <VerticallyCentered>

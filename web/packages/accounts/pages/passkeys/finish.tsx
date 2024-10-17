@@ -1,8 +1,8 @@
+import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { fromB64URLSafeNoPaddingString } from "@/base/crypto/libsodium";
 import log from "@/base/log";
 import { nullToUndefined } from "@/utils/transform";
 import { VerticallyCentered } from "@ente/shared/components/Container";
-import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import {
     LS_KEYS,
     getData,
@@ -41,7 +41,7 @@ const Page: React.FC<PageProps> = () => {
 
     return (
         <VerticallyCentered>
-            <EnteSpinner />
+            <ActivityIndicator />
         </VerticallyCentered>
     );
 };

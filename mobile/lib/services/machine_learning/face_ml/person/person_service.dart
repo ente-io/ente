@@ -113,13 +113,12 @@ class PersonService {
     PersonData personData,
     Map<String, Set<String>> dbPersonCluster,
   ) {
-    bool result = false;
     if ((personData.assigned?.length ?? 0) != dbPersonCluster.length) {
       log(
         "Person ${personData.name} has ${personData.assigned?.length} clusters, but ${dbPersonCluster.length} clusters found in DB",
         name: "PersonService",
       );
-      result = true;
+      return true;
     } else {
       for (ClusterInfo info in personData.assigned!) {
         final dbCluster = dbPersonCluster[info.id];
@@ -128,15 +127,14 @@ class PersonService {
             "Cluster ${info.id} not found in DB for person ${personData.name}",
             name: "PersonService",
           );
-          result = true;
-          continue;
+          return true;
         }
         if (info.faces.length != dbCluster.length) {
           log(
             "Cluster ${info.id} has ${info.faces.length} faces, but ${dbCluster.length} faces found in DB",
             name: "PersonService",
           );
-          result = true;
+          return true;
         }
         for (var faceId in info.faces) {
           if (!dbCluster.contains(faceId)) {
@@ -144,12 +142,12 @@ class PersonService {
               "Face $faceId not found in cluster ${info.id} for person ${personData.name}",
               name: "PersonService",
             );
-            result = true;
+            return true;
           }
         }
       }
     }
-    return result;
+    return false;
   }
 
   Future<PersonEntity> addPerson(

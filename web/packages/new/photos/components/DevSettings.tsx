@@ -1,4 +1,5 @@
-import { useIsMobileWidth } from "@/base/hooks";
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
+import { useIsSmallWidth } from "@/base/hooks";
 import { ensureOk } from "@/base/http";
 import { getKVS, removeKV, setKV } from "@/base/kv";
 import log from "@/base/log";
@@ -18,7 +19,6 @@ import { useFormik } from "formik";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
 import { z } from "zod";
-import { FocusVisibleButton } from "./FocusVisibleButton";
 import { SlideUpTransition } from "./mui/SlideUpTransition";
 
 interface DevSettingsProps {
@@ -33,7 +33,7 @@ interface DevSettingsProps {
  * See: [Note: Configuring custom server].
  */
 export const DevSettings: React.FC<DevSettingsProps> = ({ open, onClose }) => {
-    const fullScreen = useIsMobileWidth();
+    const fullScreen = useIsSmallWidth();
 
     const handleDialogClose: ModalProps["onClose"] = (_, reason: string) => {
         // Don't close on backdrop clicks.

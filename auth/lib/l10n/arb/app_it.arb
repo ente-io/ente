@@ -483,5 +483,6 @@
   "importFailureDescNew": "Impossibile elaborare il file selezionato.",
   "appLockNotEnabled": "Blocco app non abilitato",
   "appLockNotEnabledDescription": "Si prega di abilitare il blocco dell'app da Sicurezza > Blocco App",
-  "authToViewPasskey": "Autenticati per visualizzare le tue passkey"
+  "authToViewPasskey": "Autenticati per visualizzare le tue passkey",
+  "appLockOfflineModeWarning": "Hai scelto di procedere senza backup. Se dimentichi il tuo codice di blocco dell'app, non potrai più accedere ai tuoi dati."
 }

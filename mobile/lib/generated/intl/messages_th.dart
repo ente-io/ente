@@ -265,8 +265,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "ยอดเยี่ยม! คีย์การกู้คืนของคุณถูกต้อง ขอบคุณสำหรับการยืนยัน\n\nโปรดอย่าลืมสำรองคีย์การกู้คืนของคุณไว้อย่างปลอดภัย"),
         "recoveryKeyVerified":
             MessageLookupByLibrary.simpleMessage("ยืนยันคีย์การกู้คืนแล้ว"),
-        "recoveryKeyVerifyReason": MessageLookupByLibrary.simpleMessage(
-            "คีย์การกู้คืนเป็นวิธีเดียวที่จะกู้คืนรูปภาพของคุณหากคุณลืมรหัสผ่าน คุณสามารถหาคีย์การกู้คืนของคุณได้ในการตั้งค่า > ความปลอดภัย\n\nโปรดป้อนคีย์การกู้คืนของคุณที่นี่เพื่อยืนยันว่าคุณได้บันทึกไว้อย่างถูกต้อง"),
         "recoverySuccessful":
             MessageLookupByLibrary.simpleMessage("กู้คืนสำเร็จ!"),
         "recreatePasswordBody": MessageLookupByLibrary.simpleMessage(

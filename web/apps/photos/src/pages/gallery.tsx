@@ -1,44 +1,49 @@
 import { stashRedirect } from "@/accounts/services/redirect";
 import { NavbarBase } from "@/base/components/Navbar";
-import { useIsMobileWidth } from "@/base/hooks";
+import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { useModalVisibility } from "@/base/components/utils/modal";
+import { useIsSmallWidth } from "@/base/hooks";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
+import { type EnteFile, mergeMetadata } from "@/media/file";
 import {
-    PeopleEmptyState,
-    SearchResultsHeader,
-} from "@/new/photos/components/Gallery";
-import type { GalleryBarMode } from "@/new/photos/components/Gallery/BarImpl";
-import { GalleryPeopleState } from "@/new/photos/components/Gallery/PeopleHeader";
+    CollectionSelector,
+    type CollectionSelectorAttributes,
+} from "@/new/photos/components/CollectionSelector";
 import {
     SearchBar,
     type SearchBarProps,
 } from "@/new/photos/components/SearchBar";
 import { WhatsNew } from "@/new/photos/components/WhatsNew";
+import {
+    PeopleEmptyState,
+    SearchResultsHeader,
+} from "@/new/photos/components/gallery";
+import type { GalleryBarMode } from "@/new/photos/components/gallery/BarImpl";
+import { GalleryPeopleState } from "@/new/photos/components/gallery/PeopleHeader";
+import { usePeople } from "@/new/photos/components/utils/ml";
 import { shouldShowWhatsNew } from "@/new/photos/services/changelog";
 import type { CollectionSummaries } from "@/new/photos/services/collection/ui";
-import { hasNonSystemCollections } from "@/new/photos/services/collection/ui";
+import { areOnlySystemCollections } from "@/new/photos/services/collection/ui";
 import downloadManager from "@/new/photos/services/download";
 import {
     getLocalFiles,
     getLocalTrashedFiles,
     sortFiles,
 } from "@/new/photos/services/files";
-import { peopleSnapshot, peopleSubscribe } from "@/new/photos/services/ml";
 import type { Person } from "@/new/photos/services/ml/people";
 import {
     filterSearchableFiles,
     setSearchCollectionsAndFiles,
 } from "@/new/photos/services/search";
 import type { SearchOption } from "@/new/photos/services/search/types";
-import { EnteFile } from "@/new/photos/types/file";
-import { mergeMetadata } from "@/new/photos/utils/file";
+import { AppContext } from "@/new/photos/types/context";
 import { ensure } from "@/utils/ensure";
 import {
     CenteredFlex,
     FlexWrapper,
     HorizontalFlex,
 } from "@ente/shared/components/Container";
-import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import { CustomError } from "@ente/shared/error";
@@ -67,10 +72,6 @@ import AuthenticateUserModal from "components/AuthenticateUserModal";
 import CollectionNamer, {
     CollectionNamerAttributes,
 } from "components/Collections/CollectionNamer";
-import {
-    CollectionSelector,
-    CollectionSelectorAttributes,
-} from "components/Collections/CollectionSelector";
 import { GalleryBarAndListHeader } from "components/Collections/GalleryBarAndListHeader";
 import ExportModal from "components/ExportModal";
 import {
@@ -93,15 +94,14 @@ import PlanSelector from "components/pages/gallery/PlanSelector";
 import SelectedFileOptions from "components/pages/gallery/SelectedFileOptions";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import { AppContext } from "pages/_app";
 import {
     createContext,
+    useCallback,
     useContext,
     useEffect,
     useMemo,
     useRef,
     useState,
-    useSyncExternalStore,
 } from "react";
 import { useDropzone } from "react-dropzone";
 import {
@@ -212,15 +212,11 @@ export default function Gallery() {
     });
     const [planModalView, setPlanModalView] = useState(false);
     const [blockingLoad, setBlockingLoad] = useState(false);
-    const [collectionSelectorAttributes, setCollectionSelectorAttributes] =
-        useState<CollectionSelectorAttributes>(null);
-    const [collectionSelectorView, setCollectionSelectorView] = useState(false);
     const [collectionNamerAttributes, setCollectionNamerAttributes] =
         useState<CollectionNamerAttributes>(null);
     const [collectionNamerView, setCollectionNamerView] = useState(false);
     const [shouldDisableDropzone, setShouldDisableDropzone] = useState(false);
     const [isPhotoSwipeOpen, setIsPhotoSwipeOpen] = useState(false);
-    const [openWhatsNew, setOpenWhatsNew] = useState(false);
 
     const {
         // A function to call to get the props we should apply to the container,
@@ -326,7 +322,7 @@ export default function Gallery() {
     // The ID of the currently selected person in the gallery bar (if any).
     const [activePersonID, setActivePersonID] = useState<string | undefined>();
 
-    const people = useSyncExternalStore(peopleSubscribe, peopleSnapshot);
+    const people = usePeople();
 
     const [isClipSearchResult, setIsClipSearchResult] =
         useState<boolean>(false);
@@ -349,6 +345,13 @@ export default function Gallery() {
     const [tempHiddenFileIds, setTempHiddenFileIds] = useState(
         new Set<number>(),
     );
+
+    const [openCollectionSelector, setOpenCollectionSelector] = useState(false);
+    const [collectionSelectorAttributes, setCollectionSelectorAttributes] =
+        useState<CollectionSelectorAttributes | undefined>();
+
+    const { show: showWhatsNew, props: whatsNewVisibilityProps } =
+        useModalVisibility();
 
     const router = useRouter();
 
@@ -418,7 +421,7 @@ export default function Gallery() {
             );
             if (electron) {
                 electron.onMainWindowFocus(() => syncWithRemote(false, true));
-                if (await shouldShowWhatsNew(electron)) setOpenWhatsNew(true);
+                if (await shouldShowWhatsNew(electron)) showWhatsNew();
             }
         };
         main();
@@ -473,10 +476,6 @@ export default function Gallery() {
         const emailList = constructEmailList(user, collections, familyData);
         setEmailList(emailList);
     }, [user, collections, familyData]);
-
-    useEffect(() => {
-        collectionSelectorAttributes && setCollectionSelectorView(true);
-    }, [collectionSelectorAttributes]);
 
     useEffect(() => {
         collectionNamerAttributes && setCollectionNamerView(true);
@@ -700,7 +699,7 @@ export default function Gallery() {
         if (
             sidebarView ||
             uploadTypeSelectorView ||
-            collectionSelectorView ||
+            openCollectionSelector ||
             collectionNamerView ||
             fixCreationTimeView ||
             planModalView ||
@@ -943,7 +942,7 @@ export default function Gallery() {
         (ops: COLLECTION_OPS_TYPE) => async (collection: Collection) => {
             startLoading();
             try {
-                setCollectionSelectorView(false);
+                setOpenCollectionSelector(false);
                 const selectedFiles = getSelectedFiles(selected, filteredData);
                 const toProcessFiles =
                     ops === COLLECTION_OPS_TYPE.REMOVE
@@ -967,7 +966,7 @@ export default function Gallery() {
                     title: t("error"),
 
                     close: { variant: "critical" },
-                    content: t("UNKNOWN_ERROR"),
+                    content: t("generic_error_retry"),
                 });
             } finally {
                 finishLoading();
@@ -994,6 +993,7 @@ export default function Gallery() {
                     setTempHiddenFileIds,
                     setFixCreationTimeAttributes,
                     setFilesDownloadProgressAttributesCreator,
+                    refreshFavItemIds,
                 );
             }
             clearSelection();
@@ -1004,7 +1004,7 @@ export default function Gallery() {
                 title: t("error"),
 
                 close: { variant: "critical" },
-                content: t("UNKNOWN_ERROR"),
+                content: t("generic_error_retry"),
             });
         } finally {
             finishLoading();
@@ -1023,7 +1023,7 @@ export default function Gallery() {
                     title: t("error"),
 
                     close: { variant: "critical" },
-                    content: t("UNKNOWN_ERROR"),
+                    content: t("generic_error_retry"),
                 });
             } finally {
                 finishLoading();
@@ -1031,7 +1031,7 @@ export default function Gallery() {
         };
         return () =>
             setCollectionNamerAttributes({
-                title: t("CREATE_COLLECTION"),
+                title: t("new_album"),
                 buttonText: t("CREATE"),
                 autoFilledName: "",
                 callback,
@@ -1065,10 +1065,6 @@ export default function Gallery() {
         }
         setUploadTypeSelectorView(true);
         setUploadTypeSelectorIntent(intent ?? "upload");
-    };
-
-    const closeCollectionSelector = () => {
-        setCollectionSelectorView(false);
     };
 
     const openExportModal = () => {
@@ -1112,6 +1108,24 @@ export default function Gallery() {
         setBarMode("people");
     };
 
+    const handleOpenCollectionSelector = useCallback(
+        (attributes: CollectionSelectorAttributes) => {
+            setCollectionSelectorAttributes(attributes);
+            setOpenCollectionSelector(true);
+        },
+        [],
+    );
+
+    const handleCloseCollectionSelector = useCallback(
+        () => setOpenCollectionSelector(false),
+        [],
+    );
+
+    const refreshFavItemIds = async () => {
+        const favItemIds = await getFavItemIds(files);
+        setFavItemIds(favItemIds);
+    };
+
     if (!collectionSummaries || !filteredData) {
         return <div></div>;
     }
@@ -1152,7 +1166,7 @@ export default function Gallery() {
                 />
                 {blockingLoad && (
                     <LoadingOverlay>
-                        <EnteSpinner />
+                        <ActivityIndicator />
                     </LoadingOverlay>
                 )}
                 {isFirstLoad && (
@@ -1173,10 +1187,10 @@ export default function Gallery() {
                     attributes={collectionNamerAttributes}
                 />
                 <CollectionSelector
-                    open={collectionSelectorView}
-                    onClose={closeCollectionSelector}
-                    collectionSummaries={collectionSummaries}
+                    open={openCollectionSelector}
+                    onClose={handleCloseCollectionSelector}
                     attributes={collectionSelectorAttributes}
+                    collectionSummaries={collectionSummaries}
                     collectionForCollectionID={(id) =>
                         findCollectionCreatingUncategorizedIfNeeded(
                             collections,
@@ -1244,29 +1258,20 @@ export default function Gallery() {
                 <Uploader
                     activeCollection={activeCollection}
                     syncWithRemote={syncWithRemote}
-                    showCollectionSelector={setCollectionSelectorView.bind(
-                        null,
-                        true,
-                    )}
                     closeUploadTypeSelector={setUploadTypeSelectorView.bind(
                         null,
                         false,
                     )}
-                    setCollectionSelectorAttributes={
-                        setCollectionSelectorAttributes
-                    }
-                    closeCollectionSelector={setCollectionSelectorView.bind(
-                        null,
-                        false,
-                    )}
+                    onOpenCollectionSelector={handleOpenCollectionSelector}
+                    onCloseCollectionSelector={handleCloseCollectionSelector}
                     setLoading={setBlockingLoad}
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
                     setShouldDisableDropzone={setShouldDisableDropzone}
                     setFiles={setFiles}
                     setCollections={setCollections}
-                    isFirstUpload={
-                        !hasNonSystemCollections(collectionSummaries)
-                    }
+                    isFirstUpload={areOnlySystemCollections(
+                        collectionSummaries,
+                    )}
                     {...{
                         dragAndDropFiles,
                         openFileSelector,
@@ -1285,10 +1290,7 @@ export default function Gallery() {
                     sidebarView={sidebarView}
                     closeSidebar={closeSidebar}
                 />
-                <WhatsNew
-                    open={openWhatsNew}
-                    onClose={() => setOpenWhatsNew(false)}
-                />
+                <WhatsNew {...whatsNewVisibilityProps} />
                 {!isInSearchMode &&
                 !isFirstLoad &&
                 !files?.length &&
@@ -1304,6 +1306,7 @@ export default function Gallery() {
                     <PhotoFrame
                         page={PAGES.GALLERY}
                         mode={barMode}
+                        modePlus={isInSearchMode ? "search" : barMode}
                         files={filteredData}
                         syncWithRemote={syncWithRemote}
                         favItemIds={favItemIds}
@@ -1336,8 +1339,8 @@ export default function Gallery() {
                             showCreateCollectionModal={
                                 showCreateCollectionModal
                             }
-                            setCollectionSelectorAttributes={
-                                setCollectionSelectorAttributes
+                            onOpenCollectionSelector={
+                                handleOpenCollectionSelector
                             }
                             count={selected.count}
                             ownCount={selected.ownCount}
@@ -1423,13 +1426,13 @@ const SidebarButton: React.FC<IconButtonProps> = (props) => (
 
 const UploadButton: React.FC<ButtonProps & IconButtonProps> = (props) => {
     const disabled = !uploadManager.shouldAllowNewUpload();
-    const isMobileWidth = useIsMobileWidth();
+    const isSmallWidth = useIsSmallWidth();
 
     const icon = <FileUploadOutlinedIcon />;
 
     return (
         <Box>
-            {isMobileWidth ? (
+            {isSmallWidth ? (
                 <IconButton {...props} disabled={disabled}>
                     {icon}
                 </IconButton>

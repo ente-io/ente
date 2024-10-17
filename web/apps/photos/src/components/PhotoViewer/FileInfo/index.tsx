@@ -1,9 +1,13 @@
 import { EnteDrawer } from "@/base/components/EnteDrawer";
+import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
+import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { Titlebar } from "@/base/components/Titlebar";
 import { EllipsizedTypography } from "@/base/components/Typography";
+import { useModalVisibility } from "@/base/components/utils/modal";
 import { nameAndExtension } from "@/base/file";
 import log from "@/base/log";
 import type { Location } from "@/base/types";
+import { EnteFile } from "@/media/file";
 import type { ParsedMetadata } from "@/media/file-metadata";
 import {
     fileCreationPhotoDate,
@@ -17,7 +21,7 @@ import {
     UnclusteredFaceList,
 } from "@/new/photos/components/PeopleList";
 import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker";
-import { photoSwipeZIndex } from "@/new/photos/components/PhotoViewer";
+import { fileInfoDrawerZIndex } from "@/new/photos/components/z-index";
 import { tagNumericValue, type RawExifTags } from "@/new/photos/services/exif";
 import {
     AnnotatedFacesForFile,
@@ -25,11 +29,10 @@ import {
     isMLEnabled,
     type AnnotatedFaceID,
 } from "@/new/photos/services/ml";
-import { EnteFile } from "@/new/photos/types/file";
+import { AppContext } from "@/new/photos/types/context";
 import { formattedByteSize } from "@/new/photos/utils/units";
 import CopyButton from "@ente/shared/components/CodeBlock/CopyButton";
 import { FlexWrapper } from "@ente/shared/components/Container";
-import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { getPublicMagicMetadataSync } from "@ente/shared/file-metadata";
 import { formatDate, formatTime } from "@ente/shared/time/format";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
@@ -50,15 +53,11 @@ import {
 import { Chip } from "components/Chip";
 import LinkButton from "components/pages/gallery/LinkButton";
 import { t } from "i18next";
-import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";
 import React, { useContext, useEffect, useMemo, useState } from "react";
+import { Trans } from "react-i18next";
 import { changeFileName, updateExistingFilePubMetadata } from "utils/file";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
-import {
-    getMapDisableConfirmationDialog,
-    getMapEnableConfirmationDialog,
-} from "utils/ui";
 import { FileNameEditDialog } from "./FileNameEditDialog";
 import InfoItem from "./InfoItem";
 import MapBox from "./MapBox";
@@ -101,7 +100,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     closePhotoViewer,
     onSelectPerson,
 }) => {
-    const { mapEnabled, updateMapEnabled, setDialogBoxAttributesV2 } =
+    const { mapEnabled, updateMapEnabled, showMiniDialog } =
         useContext(AppContext);
     const galleryContext = useContext(GalleryContext);
     const publicCollectionGalleryContext = useContext(
@@ -109,7 +108,8 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     );
 
     const [exifInfo, setExifInfo] = useState<ExifInfo | undefined>();
-    const [openRawExif, setOpenRawExif] = useState(false);
+    const { show: showRawExif, props: rawExifVisibilityProps } =
+        useModalVisibility();
     const [annotatedFaces, setAnnotatedFaces] = useState<
         AnnotatedFacesForFile | undefined
     >();
@@ -151,13 +151,13 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     };
 
     const openEnableMapConfirmationDialog = () =>
-        setDialogBoxAttributesV2(
-            getMapEnableConfirmationDialog(() => updateMapEnabled(true)),
+        showMiniDialog(
+            confirmEnableMapsDialogAttributes(() => updateMapEnabled(true)),
         );
 
     const openDisableMapConfirmationDialog = () =>
-        setDialogBoxAttributesV2(
-            getMapDisableConfirmationDialog(() => updateMapEnabled(false)),
+        showMiniDialog(
+            confirmDisableMapsDialogAttributes(() => updateMapEnabled(false)),
         );
 
     const handleSelectFace = (annotatedFaceID: AnnotatedFaceID) => {
@@ -181,7 +181,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                 />
 
                 <CreationTime
-                    {...{ enteFile: file, shouldDisableEdits, scheduleUpdate }}
+                    {...{ file, shouldDisableEdits, scheduleUpdate }}
                 />
 
                 <RenderFileName
@@ -218,7 +218,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                                         rel="noopener"
                                         sx={{ fontWeight: "bold" }}
                                     >
-                                        {t("SHOW_ON_MAP")}
+                                        {t("view_on_map")}
                                     </Link>
                                 ) : (
                                     <LinkButton
@@ -231,7 +231,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                                             fontWeight: "bold",
                                         }}
                                     >
-                                        {t("DISABLE_MAP")}
+                                        {t("disable_map")}
                                     </LinkButton>
                                 )
                             }
@@ -259,12 +259,12 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                     title={t("DETAILS")}
                     caption={
                         !exif ? (
-                            <EnteSpinner size={12} />
+                            <ActivityIndicator size={12} />
                         ) : !exif.tags ? (
                             t("no_exif")
                         ) : (
                             <LinkButton
-                                onClick={() => setOpenRawExif(true)}
+                                onClick={showRawExif}
                                 sx={{
                                     textDecoration: "none",
                                     color: "text.muted",
@@ -308,12 +308,12 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                 {isMLEnabled() && annotatedFaces && (
                     <>
                         <AnnotatedFacePeopleList
-                            enteFile={file}
+                            file={file}
                             annotatedFaceIDs={annotatedFaces.annotatedFaceIDs}
                             onSelectFace={handleSelectFace}
                         />
                         <UnclusteredFaceList
-                            enteFile={file}
+                            file={file}
                             faceIDs={annotatedFaces.otherFaceIDs}
                         />
                     </>
@@ -321,8 +321,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
             </Stack>
 
             <RawExif
-                open={openRawExif}
-                onClose={() => setOpenRawExif(false)}
+                {...rawExifVisibilityProps}
                 onInfoClose={handleCloseInfo}
                 tags={exif?.tags}
                 fileName={file.metadata.title}
@@ -379,23 +378,52 @@ const parseExifInfo = (
     return info;
 };
 
+const confirmEnableMapsDialogAttributes = (
+    onConfirm: () => void,
+): MiniDialogAttributes => ({
+    title: t("enable_maps_confirm"),
+    message: (
+        <Trans
+            i18nKey={"enable_maps_confirm_message"}
+            components={{
+                a: (
+                    <Link
+                        target="_blank"
+                        rel="noopener"
+                        href="https://www.openstreetmap.org/"
+                    />
+                ),
+            }}
+        />
+    ),
+    continue: { text: t("enable"), action: onConfirm },
+});
+
+const confirmDisableMapsDialogAttributes = (
+    onConfirm: () => void,
+): MiniDialogAttributes => ({
+    title: t("disable_maps_confirm"),
+    message: <Trans i18nKey={"disable_maps_confirm_message"} />,
+    continue: { text: t("disable"), color: "critical", action: onConfirm },
+});
+
 const FileInfoSidebar = styled((props: DialogProps) => (
     <EnteDrawer {...props} anchor="right" />
 ))({
-    zIndex: photoSwipeZIndex + 1,
+    zIndex: fileInfoDrawerZIndex,
     "& .MuiPaper-root": {
         padding: 8,
     },
 });
 
 interface CreationTimeProps {
-    enteFile: EnteFile;
+    file: EnteFile;
     shouldDisableEdits: boolean;
     scheduleUpdate: () => void;
 }
 
 export const CreationTime: React.FC<CreationTimeProps> = ({
-    enteFile,
+    file,
     shouldDisableEdits,
     scheduleUpdate,
 }) => {
@@ -405,13 +433,13 @@ export const CreationTime: React.FC<CreationTimeProps> = ({
     const openEditMode = () => setIsInEditMode(true);
     const closeEditMode = () => setIsInEditMode(false);
 
-    const publicMagicMetadata = getPublicMagicMetadataSync(enteFile);
-    const originalDate = fileCreationPhotoDate(enteFile, publicMagicMetadata);
+    const publicMagicMetadata = getPublicMagicMetadataSync(file);
+    const originalDate = fileCreationPhotoDate(file, publicMagicMetadata);
 
     const saveEdits = async (pickedTime: ParsedMetadataDate) => {
         try {
             setLoading(true);
-            if (isInEditMode && enteFile) {
+            if (isInEditMode && file) {
                 // [Note: Don't modify offsetTime when editing date via picker]
                 //
                 // Use the updated date time (both in its canonical dateTime
@@ -431,7 +459,7 @@ export const CreationTime: React.FC<CreationTimeProps> = ({
                     return;
                 }
 
-                await updateRemotePublicMagicMetadata(enteFile, {
+                await updateRemotePublicMagicMetadata(file, {
                     dateTime,
                     editedTime: timestamp,
                 });

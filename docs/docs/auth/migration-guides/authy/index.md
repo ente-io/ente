@@ -212,7 +212,7 @@ If this didn't work, refer to
 
 1. Open Ente Authenticator on your phone
 2. Log in to your account (if you haven't already), or press "Use without
-       backups".
+   backups".
 3. Click the add button in the bottom right of the app.
 4. Select "Scan a QR code" and scan the code from the browser.
 

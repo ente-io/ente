@@ -1,13 +1,7 @@
 import { assertionFailed } from "@/base/assert";
-import { useIsMobileWidth } from "@/base/hooks";
-import { ItemCard, PreviewItemTile } from "@/new/photos/components/ItemCards";
-import {
-    isMLSupported,
-    mlStatusSnapshot,
-    mlStatusSubscribe,
-    peopleSnapshot,
-    peopleSubscribe,
-} from "@/new/photos/services/ml";
+import { useIsSmallWidth } from "@/base/hooks";
+import { ItemCard, PreviewItemTile } from "@/new/photos/components/Tiles";
+import { isMLSupported, mlStatusSnapshot } from "@/new/photos/services/ml";
 import type { Person } from "@/new/photos/services/ml/people";
 import { searchOptionsForString } from "@/new/photos/services/search";
 import type { SearchOption } from "@/new/photos/services/search/types";
@@ -30,7 +24,7 @@ import {
 } from "@mui/material";
 import { t } from "i18next";
 import pDebounce from "p-debounce";
-import React, { useMemo, useRef, useState, useSyncExternalStore } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import {
     components as SelectComponents,
     type ControlProps,
@@ -43,6 +37,8 @@ import {
 import AsyncSelect from "react-select/async";
 import { SearchPeopleList } from "./PeopleList";
 import { UnstyledButton } from "./UnstyledButton";
+import type { ButtonishProps } from "./mui";
+import { useMLStatus, usePeople } from "./utils/ml";
 
 export interface SearchBarProps {
     /**
@@ -103,11 +99,11 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     onShowSearchInput,
     ...rest
 }) => {
-    const isMobileWidth = useIsMobileWidth();
+    const isSmallWidth = useIsSmallWidth();
 
     return (
         <Box sx={{ flex: 1, px: ["4px", "24px"] }}>
-            {isMobileWidth && !isInSearchMode ? (
+            {isSmallWidth && !isInSearchMode ? (
                 <MobileSearchArea onSearch={onShowSearchInput} />
             ) : (
                 <SearchInput {...{ isInSearchMode }} {...rest} />
@@ -381,8 +377,8 @@ const shouldShowEmptyState = (inputValue: string) => {
 const EmptyState: React.FC<Pick<SearchBarProps, "onSelectPerson">> = ({
     onSelectPerson,
 }) => {
-    const mlStatus = useSyncExternalStore(mlStatusSubscribe, mlStatusSnapshot);
-    const people = useSyncExternalStore(peopleSubscribe, peopleSnapshot);
+    const mlStatus = useMLStatus();
+    const people = usePeople();
 
     if (!mlStatus || mlStatus.phase == "disabled") {
         // The preflight check should've prevented us from coming here.
@@ -414,7 +410,9 @@ const EmptyState: React.FC<Pick<SearchBarProps, "onSelectPerson">> = ({
         <Box sx={{ textAlign: "left" }}>
             {people && people.length > 0 && (
                 <>
-                    <PeopleHeader onClick={() => onSelectPerson(undefined)} />
+                    <SearchPeopleHeader
+                        onClick={() => onSelectPerson(undefined)}
+                    />
                     <SearchPeopleList {...{ people, onSelectPerson }} />
                 </>
             )}
@@ -425,22 +423,18 @@ const EmptyState: React.FC<Pick<SearchBarProps, "onSelectPerson">> = ({
     );
 };
 
-interface PeopleHeaderProps {
-    onClick: () => void;
-}
-
-const PeopleHeader: React.FC<PeopleHeaderProps> = ({ onClick }) => (
-    <PeopleHeaderButton {...{ onClick }}>
+const SearchPeopleHeader: React.FC<ButtonishProps> = ({ onClick }) => (
+    <SearchPeopleHeaderButton {...{ onClick }}>
         <Stack direction="row" color="text.muted">
             <Typography color="text.base" variant="large">
                 {t("people")}
             </Typography>
             <ChevronRightIcon />
         </Stack>
-    </PeopleHeaderButton>
+    </SearchPeopleHeaderButton>
 );
 
-const PeopleHeaderButton = styled(UnstyledButton)(
+const SearchPeopleHeaderButton = styled(UnstyledButton)(
     ({ theme }) => `
     /* The color for the chevron */
     color: ${theme.colors.stroke.muted};
