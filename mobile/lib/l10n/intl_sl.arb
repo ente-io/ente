@@ -1,4 +1,5 @@
 {
   "@@locale ": "en",
-  "personName": "Person name"
+  "personName": "Person name",
+  "addNewPerson": "Add new person"
 }

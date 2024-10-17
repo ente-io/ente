@@ -817,5 +817,6 @@
   "create": "צור",
   "viewAll": "הצג הכל",
   "hiding": "מחביא...",
-  "personName": "Person name"
+  "personName": "Person name",
+  "addNewPerson": "Add new person"
 }

@@ -1,5 +1,6 @@
 {
   "@@locale ": "en",
   "enterYourEmailAddress": "Εισάγετε την διεύθυνση ηλ. ταχυδρομείου σας",
-  "personName": "Person name"
+  "personName": "Person name",
+  "addNewPerson": "Add new person"
 }

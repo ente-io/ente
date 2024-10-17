@@ -111,6 +111,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "addItem": m4,
         "addLocationButton": MessageLookupByLibrary.simpleMessage("Lägg till"),
         "addMore": MessageLookupByLibrary.simpleMessage("Lägg till fler"),
+        "addNewPerson": MessageLookupByLibrary.simpleMessage("Add new person"),
         "addPhotos": MessageLookupByLibrary.simpleMessage("Lägg till foton"),
         "addViewer": MessageLookupByLibrary.simpleMessage("Lägg till bildvy"),
         "addedAs": MessageLookupByLibrary.simpleMessage("Lades till som"),

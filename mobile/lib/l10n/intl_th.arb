@@ -296,5 +296,6 @@
   },
   "maps": "แผนที่",
   "enableMaps": "เปิดใช้งานแผนที่",
-  "personName": "Person name"
+  "personName": "Person name",
+  "addNewPerson": "Add new person"
 }

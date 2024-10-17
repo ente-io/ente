@@ -50,5 +50,6 @@
   "noRecoveryKeyNoDecryption": "Вашы даныя не могуць быць расшыфраваны без пароля або ключа аднаўлення па прычыне архітэктуры наша пратакола скразнога шыфравання",
   "verifyEmail": "Праверыць электронную пошту",
   "toResetVerifyEmail": "Праверце электронную пошту, каб скінуць свой пароль.",
-  "personName": "Person name"
+  "personName": "Person name",
+  "addNewPerson": "Add new person"
 }

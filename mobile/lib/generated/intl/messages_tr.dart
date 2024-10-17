@@ -215,6 +215,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "addLocationButton": MessageLookupByLibrary.simpleMessage("Ekle"),
         "addMore": MessageLookupByLibrary.simpleMessage("Daha fazla ekle"),
         "addNew": MessageLookupByLibrary.simpleMessage("Yeni ekle"),
+        "addNewPerson": MessageLookupByLibrary.simpleMessage("Add new person"),
         "addOnPageSubtitle":
             MessageLookupByLibrary.simpleMessage("Eklentilerin ayrıntıları"),
         "addOnValidTill": m5,

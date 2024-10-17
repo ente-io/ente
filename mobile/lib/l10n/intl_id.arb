@@ -1144,5 +1144,6 @@
   "left": "Kiri",
   "right": "Kanan",
   "whatsNew": "Hal yang baru",
-  "personName": "Person name"
+  "personName": "Person name",
+  "addNewPerson": "Add new person"
 }

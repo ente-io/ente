@@ -81,6 +81,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "addCollaborator":
             MessageLookupByLibrary.simpleMessage("Legg til samarbeidspartner"),
         "addMore": MessageLookupByLibrary.simpleMessage("Legg til flere"),
+        "addNewPerson": MessageLookupByLibrary.simpleMessage("Add new person"),
         "addViewer": MessageLookupByLibrary.simpleMessage("Legg til seer"),
         "addedAs": MessageLookupByLibrary.simpleMessage("Lagt til som"),
         "advanced": MessageLookupByLibrary.simpleMessage("Avansert"),

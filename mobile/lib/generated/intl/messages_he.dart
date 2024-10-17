@@ -144,6 +144,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "addItem": m4,
         "addLocationButton": MessageLookupByLibrary.simpleMessage("הוסף"),
         "addMore": MessageLookupByLibrary.simpleMessage("הוסף עוד"),
+        "addNewPerson": MessageLookupByLibrary.simpleMessage("Add new person"),
         "addPhotos": MessageLookupByLibrary.simpleMessage("הוסף תמונות"),
         "addToAlbum": MessageLookupByLibrary.simpleMessage("הוסף לאלבום"),
         "addViewer": MessageLookupByLibrary.simpleMessage("הוסף צופה"),

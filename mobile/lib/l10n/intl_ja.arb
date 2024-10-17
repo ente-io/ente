@@ -1344,5 +1344,6 @@
   "mostRelevant": "関連度順",
   "loadingYourPhotos": "写真を読み込んでいます...",
   "processingImport": "{folderName} を処理中...",
-  "personName": "Person name"
+  "personName": "Person name",
+  "addNewPerson": "Add new person"
 }

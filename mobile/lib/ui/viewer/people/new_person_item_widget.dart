@@ -36,7 +36,7 @@ class NewPersonItemWidget extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(left: 12),
                   child: Text(
-                    'Add new person',
+                    S.of(context).addNewPerson,
                     style:
                         textTheme.body.copyWith(color: colorScheme.textMuted),
                   ),

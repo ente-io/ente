@@ -251,6 +251,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "addLocationButton": MessageLookupByLibrary.simpleMessage("Ajouter"),
         "addMore": MessageLookupByLibrary.simpleMessage("Ajouter"),
         "addNew": MessageLookupByLibrary.simpleMessage("Ajouter un nouveau"),
+        "addNewPerson": MessageLookupByLibrary.simpleMessage("Add new person"),
         "addOnPageSubtitle": MessageLookupByLibrary.simpleMessage(
             "Détails des modules complémentaires"),
         "addOnValidTill": m5,

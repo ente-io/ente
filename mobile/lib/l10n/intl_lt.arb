@@ -135,5 +135,6 @@
   "mostRelevant": "Aktualiausia",
   "loadingYourPhotos": "Įkeliamos nuotraukos...",
   "processingImport": "Apdorojama {folderName}...",
-  "personName": "Person name"
+  "personName": "Person name",
+  "addNewPerson": "Add new person"
 }

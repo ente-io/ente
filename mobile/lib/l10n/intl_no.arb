@@ -372,5 +372,6 @@
   "general": "Generelt",
   "security": "Sikkerhet",
   "authToViewYourRecoveryKey": "Vennligst autentiser deg for å se gjennopprettingsnøkkelen din",
-  "personName": "Person name"
+  "personName": "Person name",
+  "addNewPerson": "Add new person"
 }

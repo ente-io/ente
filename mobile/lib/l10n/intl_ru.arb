@@ -1301,5 +1301,6 @@
   "thisWillRemovePublicLinksOfAllSelectedQuickLinks": "Это удалит публичные ссылки на все выбранные быстрые ссылки.",
   "guestView": "Гостевой вид",
   "guestViewEnablePreSteps": "Чтобы включить гостевой вид, настройте пароль устройства или блокировку экрана в настройках системы.",
-  "personName": "Person name"
+  "personName": "Person name",
+  "addNewPerson": "Add new person"
 }

@@ -1343,5 +1343,6 @@
   "mostRelevant": "Найактуальніші",
   "loadingYourPhotos": "Завантажуємо фотографії...",
   "processingImport": "Оброблюємо «{folderName}»...",
-  "personName": "Person name"
+  "personName": "Person name",
+  "addNewPerson": "Add new person"
 }

@@ -35,6 +35,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "activeSessions":
             MessageLookupByLibrary.simpleMessage("Aktyvūs seansai"),
         "addLocationButton": MessageLookupByLibrary.simpleMessage("Pridėti"),
+        "addNewPerson": MessageLookupByLibrary.simpleMessage("Add new person"),
         "appLockDescriptions": MessageLookupByLibrary.simpleMessage(
             "Pasirinkite tarp numatytojo įrenginio užrakinimo ekrano ir pasirinktinio užrakinimo ekrano su PIN kodu arba slaptažodžiu."),
         "appVersion": m10,

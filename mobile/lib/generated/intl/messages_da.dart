@@ -34,6 +34,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Velkommen tilbage!"),
         "activeSessions":
             MessageLookupByLibrary.simpleMessage("Aktive sessioner"),
+        "addNewPerson": MessageLookupByLibrary.simpleMessage("Add new person"),
         "addOnPageSubtitle":
             MessageLookupByLibrary.simpleMessage("Oplysninger om tilføjelser"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(

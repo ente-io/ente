@@ -1344,5 +1344,6 @@
   "mostRelevant": "Más relevante",
   "loadingYourPhotos": "Cargando tus fotos...",
   "processingImport": "Procesando {folderName}...",
-  "personName": "Person name"
+  "personName": "Person name",
+  "addNewPerson": "Add new person"
 }

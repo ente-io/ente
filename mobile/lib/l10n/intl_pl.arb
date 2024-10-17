@@ -1344,5 +1344,6 @@
   "mostRelevant": "Najbardziej trafne",
   "loadingYourPhotos": "Wczytywanie Twoich zdjęć...",
   "processingImport": "Przetwarzanie {folderName}...",
-  "personName": "Person name"
+  "personName": "Person name",
+  "addNewPerson": "Add new person"
 }

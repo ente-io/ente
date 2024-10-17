@@ -26,6 +26,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("З вяртаннем!"),
         "activeSessions":
             MessageLookupByLibrary.simpleMessage("Актыўныя сеансы"),
+        "addNewPerson": MessageLookupByLibrary.simpleMessage("Add new person"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "Якая асноўная прычына выдалення вашага ўліковага запісу?"),
         "cancel": MessageLookupByLibrary.simpleMessage("Скасаваць"),

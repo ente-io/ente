@@ -453,5 +453,6 @@
   "guestView": "Gästvy",
   "showPerson": "Visa person",
   "sort": "Sortera",
-  "personName": "Person name"
+  "personName": "Person name",
+  "addNewPerson": "Add new person"
 }

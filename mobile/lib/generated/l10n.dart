@@ -9755,6 +9755,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Add new person`
+  String get addNewPerson {
+    return Intl.message(
+      'Add new person',
+      name: 'addNewPerson',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

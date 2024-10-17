@@ -58,6 +58,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("افزودن ایمیل جدید"),
         "addCollaborator": MessageLookupByLibrary.simpleMessage("افزودن همکار"),
         "addMore": MessageLookupByLibrary.simpleMessage("افزودن بیشتر"),
+        "addNewPerson": MessageLookupByLibrary.simpleMessage("Add new person"),
         "addViewer": MessageLookupByLibrary.simpleMessage("افزودن بیننده"),
         "addedAs": MessageLookupByLibrary.simpleMessage("اضافه شده به عنوان"),
         "advanced": MessageLookupByLibrary.simpleMessage("پیشرفته"),

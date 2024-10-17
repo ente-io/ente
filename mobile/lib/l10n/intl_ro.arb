@@ -851,5 +851,6 @@
   "copyEmailAddress": "Copiați adresa de e-mail",
   "exportLogs": "Exportați jurnalele",
   "addViewers": "{count, plural, one {Adăugați observator} few {Adăugați observatori} other {Adăugați observatori}}",
-  "personName": "Person name"
+  "personName": "Person name",
+  "addNewPerson": "Add new person"
 }

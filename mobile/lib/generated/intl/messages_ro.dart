@@ -180,6 +180,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "addCollaborator":
             MessageLookupByLibrary.simpleMessage("Adăugare colaborator"),
         "addMore": MessageLookupByLibrary.simpleMessage("Adăugați mai mulți"),
+        "addNewPerson": MessageLookupByLibrary.simpleMessage("Add new person"),
         "addOnValidTill": m5,
         "addViewer":
             MessageLookupByLibrary.simpleMessage("Adăugare observator"),

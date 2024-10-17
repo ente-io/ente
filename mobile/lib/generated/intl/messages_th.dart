@@ -62,6 +62,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("เพิ่มผู้ทำงานร่วมกัน"),
         "addItem": m4,
         "addMore": MessageLookupByLibrary.simpleMessage("เพิ่มอีก"),
+        "addNewPerson": MessageLookupByLibrary.simpleMessage("Add new person"),
         "addToAlbum": MessageLookupByLibrary.simpleMessage("เพิ่มไปยังอัลบั้ม"),
         "addViewer": MessageLookupByLibrary.simpleMessage("เพิ่มผู้ชม"),
         "after1Day": MessageLookupByLibrary.simpleMessage("หลังจาก 1 วัน"),

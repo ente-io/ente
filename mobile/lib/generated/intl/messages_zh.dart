@@ -224,6 +224,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "addLocationButton": MessageLookupByLibrary.simpleMessage("添加"),
         "addMore": MessageLookupByLibrary.simpleMessage("添加更多"),
         "addNew": MessageLookupByLibrary.simpleMessage("新建"),
+        "addNewPerson": MessageLookupByLibrary.simpleMessage("Add new person"),
         "addOnPageSubtitle": MessageLookupByLibrary.simpleMessage("附加组件详情"),
         "addOnValidTill": m5,
         "addOns": MessageLookupByLibrary.simpleMessage("附加组件"),
