@@ -138,5 +138,6 @@ class RemoteAssetsService {
     }
 
     checkRemovedOldAssets = true;
+    _logger.info("Old ML models cleaned up");
   }
 }
