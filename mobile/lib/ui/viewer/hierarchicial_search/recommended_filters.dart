@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:photos/models/search/hierarchical/face_filter.dart";
 import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
@@ -46,15 +47,22 @@ class _RecommendedFiltersState extends State<RecommendedFilters> {
   Widget build(BuildContext context) {
     return ListView.builder(
       itemBuilder: (context, index) {
+        final filter = _recommendations[index];
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: GenericFilterChip(
-            label: _recommendations[index].name(),
-            onTap: () {
-              _searchFilterDataProvider.applyFilters([_recommendations[index]]);
-            },
-            leadingIcon: _recommendations[index].icon(),
-          ),
+          child: filter is FaceFilter
+              ? FaceFilterChip(
+                  personId: filter.personId,
+                  clusterId: filter.clusterId,
+                  faceThumbnailFile: filter.faceFile,
+                )
+              : GenericFilterChip(
+                  label: filter.name(),
+                  onTap: () {
+                    _searchFilterDataProvider.applyFilters([filter]);
+                  },
+                  leadingIcon: filter.icon(),
+                ),
         );
       },
       scrollDirection: Axis.horizontal,

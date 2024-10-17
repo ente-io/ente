@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/models/search/hierarchical/face_filter.dart";
 import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
-import "package:photos/models/search/search_types.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
 import "package:photos/ui/viewer/hierarchicial_search/filter_chip.dart";
@@ -49,13 +49,12 @@ class _AppliedFiltersState extends State<AppliedFilters> {
     return ListView.builder(
       itemBuilder: (context, index) {
         final filter = _appliedFilters[index];
-        final isFaceFilter = filter.resultType() == ResultType.faces;
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: isFaceFilter
+          child: filter is FaceFilter
               ? FaceFilterChip(
-                  personId: "",
-                  clusterId: "",
+                  personId: filter.personId,
+                  clusterId: filter.clusterId,
                   faceThumbnailFile: EnteFile(),
                 )
               : GenericFilterChip(
