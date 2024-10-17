@@ -405,15 +405,17 @@ export const _suggestionsAndChoicesForPerson = async (
     for (const cluster of localClusters) {
         const { id, faces } = cluster;
 
-        // Ignore singleton clusters.
-        if (faces.length < 2) continue;
-
         // User has explicitly asked us to ignore this cluster. Add it to the
         // list of rejected clusters that we return to the UI for listing out.
+        // Keep this check first so that we pick these up even if we get e.g.
+        // singleton clusters from remote.
         if (rejectedClusterIDs.has(id)) {
             rejectedClusters.push(cluster);
             continue;
         }
+
+        // Ignore singleton clusters.
+        if (faces.length < 2) continue;
 
         // TODO-Cluster sanity check, remove after dev
         if (personClusterIDs.has(id)) assertionFailed();
