@@ -1,4 +1,3 @@
-import { assertionFailed } from "@/base/assert";
 import {
     ActivityIndicator,
     ErrorIndicator,
@@ -17,16 +16,15 @@ import {
     deleteCGroup,
     renameCGroup,
     suggestionsAndChoicesForPerson,
-    updateAssignedClustersForCGroup,
 } from "@/new/photos/services/ml";
 import {
+    updateChoices,
     type CGroupPerson,
     type ClusterPerson,
     type Person,
     type PersonSuggestionsAndChoices,
     type PreviewableCluster,
 } from "@/new/photos/services/ml/people";
-import { ensure } from "@/utils/ensure";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
 import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
 import AddIcon from "@mui/icons-material/Add";
@@ -53,10 +51,6 @@ import {
 import { t } from "i18next";
 import React, { useEffect, useReducer, useState } from "react";
 import { isInternalUser } from "../../services/feature-flags";
-import {
-    savedRejectedClustersForCGroup,
-    saveRejectedClustersForCGroup,
-} from "../../services/ml/kvdb";
 import { useAppContext } from "../../types/context";
 import { AddPersonDialog } from "../AddPersonDialog";
 import { SpaceBetweenFlex } from "../mui";
@@ -451,10 +445,11 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
     const handleSave = async () => {
         dispatch({ type: "save" });
         try {
-            // This state will not include the effects of the `dispatch({ type:
-            // "save"})` above, but that's fine, that only toggles the activity
-            // which is not going to affect the state that is saved.
-            await saveSuggestionsAndChoices(person, state);
+            const updates = [...state.marks.entries()].filter(
+                ([, v]) => v !== undefined,
+            );
+            await updateChoices(person.cgroup, updates);
+
             resetPersonAndClose();
         } catch (e) {
             log.error("Failed to save suggestion review", e);
@@ -632,78 +627,3 @@ const fromItemValue = (
 const toItemValue = (v: unknown) =>
     // This dance is needed for TypeScript to recognize the type.
     v == "yes" ? true : v == "no" ? false : undefined;
-
-/**
- * Implementation for the "save" action on the SuggestionsDialog.
- */
-const saveSuggestionsAndChoices = async (
-    person: CGroupPerson,
-    state: SuggestionsDialogState,
-) => {
-    let assignedClusters = [...person.cgroup.data.assigned];
-    let rejectedClusterIDs = await savedRejectedClustersForCGroup(person.id);
-
-    const clusterForID = (id: string) => {
-        const suggestion = state.suggestions.find((s) => s.id == id);
-        if (suggestion) {
-            return { id, faces: suggestion.faces };
-        }
-        const choice = state.choices.find((c) => c.id == id);
-        if (choice) {
-            return { id, faces: choice.faces };
-        }
-        return undefined;
-    };
-
-    let didUpdateAssigned = false;
-    let didUpdateRejected = false;
-    for (const [clusterID, assigned] of state.marks.entries()) {
-        if (assigned) {
-            // TODO-Cluster sanity check, remove after wrapping up dev
-            if (assignedClusters.find(({ id }) => id == clusterID)) {
-                assertionFailed();
-            }
-
-            // Add it to the list of assigned clusters for the person.
-            assignedClusters.push(ensure(clusterForID(clusterID)));
-            didUpdateAssigned = true;
-            // Remove it from the list of rejected clusters (if needed).
-            if (rejectedClusterIDs.includes(clusterID)) {
-                rejectedClusterIDs = rejectedClusterIDs.filter(
-                    (id) => id !== clusterID,
-                );
-                didUpdateRejected = true;
-            }
-        } else {
-            // TODO-Cluster sanity check, remove after wrapping up dev
-            if (rejectedClusterIDs.includes(clusterID)) {
-                assertionFailed();
-            }
-
-            // Remove it from the list of assigned clusters (if needed).
-            if (assignedClusters.find(({ id }) => id == clusterID)) {
-                assignedClusters = assignedClusters.filter(
-                    ({ id }) => id != clusterID,
-                );
-                didUpdateAssigned = true;
-            }
-            // Add it to the list of rejected clusters.
-            rejectedClusterIDs.push(clusterID);
-            didUpdateRejected = true;
-        }
-    }
-
-    if (didUpdateAssigned) {
-        await updateAssignedClustersForCGroup(
-            ensure(person.cgroup),
-            assignedClusters,
-        );
-    }
-
-    if (didUpdateRejected) {
-        await saveRejectedClustersForCGroup(
-            person.cgroup.id,
-            rejectedClusterIDs,
-        );
-    }
-};

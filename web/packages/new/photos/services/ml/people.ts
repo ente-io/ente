@@ -1,11 +1,13 @@
 import { assertionFailed } from "@/base/assert";
 import log from "@/base/log";
 import type { EnteFile } from "@/media/file";
+import { updateAssignedClustersForCGroup } from "@/new/photos/services/ml";
 import { shuffled } from "@/utils/array";
 import { ensure } from "@/utils/ensure";
+import { saveRejectedClustersForCGroup } from "../../services/ml/kvdb";
 import { getLocalFiles } from "../files";
 import { savedCGroups, type CGroup } from "../user-entity";
-import { type FaceCluster } from "./cluster";
+import type { FaceCluster } from "./cluster";
 import { savedFaceClusters, savedFaceIndexes } from "./db";
 import { fileIDFromFaceID } from "./face";
 import { savedRejectedClustersForCGroup } from "./kvdb";
@@ -530,4 +532,73 @@ const randomSample = <T>(items: T[], n: number) => {
     }
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return [...ix].map((i) => items[i]!);
+};
+
+/**
+ * Implementation for the "save" action on the SuggestionsDialog.
+ *
+ * This function modifies remote and local state to reflect the given
+ * {@link updates} for {@link cgroup}.
+ *
+ * @param cgroup The cgroup that we want to update.
+ *
+ * @param updates The changes to make. Each entry is a (clusterID, assigned)
+ * pair. Entries with a assigned value `true` should be assigned to the cgroup,
+ * while entries with assigned `false` should be rejected from the cgroup.
+ */
+export const updateChoices = async (
+    cgroup: CGroup,
+    updates: [string, boolean][],
+) => {
+    const clusters = await savedFaceClusters();
+    const clustersByID = new Map(clusters.map((c) => [c.id, c]));
+
+    let assignedClusters = [...cgroup.data.assigned];
+    let rejectedClusterIDs = await savedRejectedClustersForCGroup(cgroup.id);
+
+    let didUpdateAssigned = false;
+    let didUpdateRejected = false;
+    for (const [clusterID, assigned] of updates) {
+        if (assigned) {
+            // TODO-Cluster sanity check, remove after wrapping up dev
+            if (assignedClusters.find(({ id }) => id == clusterID)) {
+                assertionFailed();
+            }
+
+            // Add it to the list of assigned clusters for the person.
+            assignedClusters.push(ensure(clustersByID.get(clusterID)));
+            didUpdateAssigned = true;
+            // Remove it from the list of rejected clusters (if needed).
+            if (rejectedClusterIDs.includes(clusterID)) {
+                rejectedClusterIDs = rejectedClusterIDs.filter(
+                    (id) => id !== clusterID,
+                );
+                didUpdateRejected = true;
+            }
+        } else {
+            // TODO-Cluster sanity check, remove after wrapping up dev
+            if (rejectedClusterIDs.includes(clusterID)) {
+                assertionFailed();
+            }
+
+            // Remove it from the list of assigned clusters (if needed).
+            if (assignedClusters.find(({ id }) => id == clusterID)) {
+                assignedClusters = assignedClusters.filter(
+                    ({ id }) => id != clusterID,
+                );
+                didUpdateAssigned = true;
+            }
+            // Add it to the list of rejected clusters.
+            rejectedClusterIDs.push(clusterID);
+            didUpdateRejected = true;
+        }
+    }
+
+    if (didUpdateAssigned) {
+        await updateAssignedClustersForCGroup(cgroup, assignedClusters);
+    }
+
+    if (didUpdateRejected) {
+        await saveRejectedClustersForCGroup(cgroup.id, rejectedClusterIDs);
+    }
 };
