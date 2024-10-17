@@ -2,6 +2,7 @@ import "package:dio/dio.dart";
 import "package:ente_cast/ente_cast.dart";
 import "package:ente_cast_normal/ente_cast_normal.dart";
 import "package:ente_feature_flag/ente_feature_flag.dart";
+import "package:photos/services/storage_bonus_service.dart";
 import "package:photos/utils/local_settings.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
@@ -39,4 +40,13 @@ LocalSettings? _localSettings;
 LocalSettings get localSettings {
   _localSettings ??= LocalSettings(ServiceLocator.instance.prefs);
   return _localSettings!;
+}
+
+StorageBonusService? _storageBonusService;
+StorageBonusService get storageBonusService {
+  _storageBonusService ??= StorageBonusService(
+    ServiceLocator.instance.prefs,
+    ServiceLocator.instance.enteDio,
+  );
+  return _storageBonusService!;
 }

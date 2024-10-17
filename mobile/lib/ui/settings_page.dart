@@ -8,7 +8,6 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/opened_settings_event.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/service_locator.dart";
-import "package:photos/services/storage_bonus_service.dart";
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/components/notification_widget.dart";
@@ -88,7 +87,7 @@ class SettingsPage extends StatelessWidget {
     contents.add(const SizedBox(height: 8));
     if (hasLoggedIn) {
       final showStorageBonusBanner =
-          StorageBonusService.instance.shouldShowStorageBonus();
+          storageBonusService.shouldShowStorageBonus();
       contents.addAll([
         const StorageCardWidget(),
         (showStorageBonusBanner)
@@ -102,7 +101,7 @@ class SettingsPage extends StatelessWidget {
                     subText: S.of(context).referFriendsAnd2xYourPlan,
                     type: NotificationType.goldenBanner,
                     onTap: () async {
-                      StorageBonusService.instance.markStorageBonusAsDone();
+                      storageBonusService.markStorageBonusAsDone();
                       // ignore: unawaited_futures
                       routeToPage(context, const ReferralScreen());
                     },

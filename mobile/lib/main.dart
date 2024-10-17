@@ -45,7 +45,6 @@ import "package:photos/services/notification_service.dart";
 import 'package:photos/services/push_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/services/search_service.dart';
-import "package:photos/services/storage_bonus_service.dart";
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/trash_sync_service.dart';
 import 'package:photos/services/update_service.dart';
@@ -288,7 +287,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     MemoriesService.instance.init(preferences);
     LocalFileUpdateService.instance.init(preferences);
     SearchService.instance.init();
-    StorageBonusService.instance.init(preferences);
     FileDataService.instance.init(preferences);
     _logger.info("RemoteFileMLService done");
     if (!isBackground &&
