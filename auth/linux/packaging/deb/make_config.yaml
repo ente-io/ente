@@ -1,5 +1,7 @@
-display_name: Auth
-package_name: auth
+display_name: Ente Auth
+package_name: enteauth
+include_build_number: false
+
 maintainer:
   name: Ente.io Developers
   email: auth@ente.io
@@ -10,10 +12,9 @@ license: GPLv3
 icon: assets/icons/auth-icon.png
 installed_size: 36000
 
-metainfo: linux/packaging/ente_auth.appdata.xml
+metainfo: linux/packaging/enteauth.appdata.xml
 
 dependencies:
-  - libwebkit2gtk-4.0-37
   - libsqlite3-0
   - libsodium23
   - libsecret-1-0
@@ -25,7 +26,7 @@ keywords:
   - Authentication
   - 2FA
 
-generic_name: Ente Authentication
+generic_name: Ente Authenticator
 
 categories:
   - Utility
