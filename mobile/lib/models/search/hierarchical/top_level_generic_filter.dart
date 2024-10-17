@@ -41,7 +41,7 @@ class TopLevelGenericFilter extends HierarchicalSearchFilter {
 
   @override
   bool isSameFilter(HierarchicalSearchFilter other) {
-    return other.resultType() == filterResultType && other.name() == name();
+    return other.name() == name();
   }
 
   @override
@@ -57,10 +57,5 @@ class TopLevelGenericFilter extends HierarchicalSearchFilter {
   @override
   int relevance() {
     return occurrence;
-  }
-
-  @override
-  ResultType resultType() {
-    return filterResultType;
   }
 }

@@ -1,7 +1,6 @@
 import "package:flutter/material.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
-import "package:photos/models/search/search_types.dart";
 
 class FaceFilter extends HierarchicalSearchFilter {
   final String? personId;
@@ -59,10 +58,5 @@ class FaceFilter extends HierarchicalSearchFilter {
       return other.personId == personId && other.clusterId == clusterId;
     }
     return false;
-  }
-
-  @override
-  ResultType resultType() {
-    return ResultType.faces;
   }
 }

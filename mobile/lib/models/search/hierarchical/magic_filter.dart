@@ -1,7 +1,6 @@
 import "package:flutter/widgets.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
-import "package:photos/models/search/search_types.dart";
 
 class MagicFilter extends HierarchicalSearchFilter {
   @override
@@ -37,12 +36,6 @@ class MagicFilter extends HierarchicalSearchFilter {
   @override
   int relevance() {
     // TODO: implement relevance
-    throw UnimplementedError();
-  }
-
-  @override
-  ResultType resultType() {
-    // TODO: implement resultType
     throw UnimplementedError();
   }
 }

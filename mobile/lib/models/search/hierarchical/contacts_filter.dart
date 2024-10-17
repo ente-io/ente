@@ -2,7 +2,6 @@ import "package:flutter/material.dart";
 import "package:photos/models/api/collection/user.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
-import "package:photos/models/search/search_types.dart";
 
 class ContactsFilter extends HierarchicalSearchFilter {
   final User user;
@@ -48,10 +47,5 @@ class ContactsFilter extends HierarchicalSearchFilter {
   @override
   IconData? icon() {
     return Icons.person_outlined;
-  }
-
-  @override
-  ResultType resultType() {
-    return ResultType.shared;
   }
 }
