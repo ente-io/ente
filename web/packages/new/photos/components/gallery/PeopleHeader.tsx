@@ -350,9 +350,9 @@ const suggestionsDialogReducer = (
                 // If this was a suggestion, prune marks created as a result of
                 // the user toggling the item back to its original unset state.
                 marks.delete(item.id);
-            } else if (item.assigned && value === item.assigned) {
+            } else if (item.assigned !== undefined && value === item.assigned) {
                 // If this is a choice, prune marks which match the choice's
-                // assigned state.
+                // original assigned state.
                 marks.delete(item.id);
             } else {
                 marks.set(item.id, value);
@@ -445,11 +445,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
     const handleSave = async () => {
         dispatch({ type: "save" });
         try {
-            const updates = [...state.marks.entries()].filter(
-                ([, v]) => v !== undefined,
-            );
-            await updateChoices(person.cgroup, updates);
-
+            await updateChoices(person.cgroup, [...state.marks.entries()]);
             resetPersonAndClose();
         } catch (e) {
             log.error("Failed to save suggestion review", e);

@@ -543,12 +543,16 @@ const randomSample = <T>(items: T[], n: number) => {
  * @param cgroup The cgroup that we want to update.
  *
  * @param updates The changes to make. Each entry is a (clusterID, assigned)
- * pair. Entries with a assigned value `true` should be assigned to the cgroup,
- * while entries with assigned `false` should be rejected from the cgroup.
+ * pair.
+ *
+ * * Entries with assigned `true` should be assigned to the cgroup,
+ * * Entries with assigned `false` should be rejected from the cgroup.
+ * * Entries with assigned `undefined` should be removed from both the assigned
+ *   and rejected choices associated with the cgroup.
  */
 export const updateChoices = async (
     cgroup: CGroup,
-    updates: [string, boolean][],
+    updates: [string, boolean | undefined][],
 ) => {
     const clusters = await savedFaceClusters();
     const clustersByID = new Map(clusters.map((c) => [c.id, c]));
@@ -556,54 +560,81 @@ export const updateChoices = async (
     let assignedClusters = [...cgroup.data.assigned];
     let rejectedClusterIDs = await savedRejectedClustersForCGroup(cgroup.id);
 
-    let assignCount = 0;
-    let rejectCount = 0;
+    let assignUpdateCount = 0;
+    let rejectUpdateCount = 0;
+
+    // Add cluster for `clusterID` to the list of assigned clusters for the
+    // person.
+    const assign = (clusterID: string) => {
+        assignedClusters.push(ensure(clustersByID.get(clusterID)));
+        assignUpdateCount += 1;
+    };
+
+    // Remove cluster with `clusterID` from the list of assigned clusters (if
+    // needed).
+    const unassignIfNeeded = (clusterID: string) => {
+        if (assignedClusters.find(({ id }) => id == clusterID)) {
+            assignedClusters = assignedClusters.filter(
+                ({ id }) => id != clusterID,
+            );
+            assignUpdateCount += 1;
+        }
+    };
+
+    // Add `clusterID` to the list of rejected clusters.
+    const reject = (clusterID: string) => {
+        rejectedClusterIDs.push(clusterID);
+        rejectUpdateCount += 1;
+    };
+
+    // Remove `clusterID` from the list of rejected clusters (if needed).
+    const unrejectIfNeeded = (clusterID: string) => {
+        if (rejectedClusterIDs.includes(clusterID)) {
+            rejectedClusterIDs = rejectedClusterIDs.filter(
+                (id) => id != clusterID,
+            );
+            rejectUpdateCount += 1;
+        }
+    };
 
     for (const [clusterID, assigned] of updates) {
-        if (assigned) {
-            // TODO-Cluster sanity check, remove after wrapping up dev
-            if (assignedClusters.find(({ id }) => id == clusterID)) {
-                assertionFailed();
-            }
+        switch (assigned) {
+            case true /* assign */:
+                // TODO-Cluster sanity check, remove after wrapping up dev
+                if (assignedClusters.find(({ id }) => id == clusterID)) {
+                    assertionFailed();
+                }
 
-            // Add it to the list of assigned clusters for the person.
-            assignedClusters.push(ensure(clustersByID.get(clusterID)));
-            assignCount += 1;
-            // Remove it from the list of rejected clusters (if needed).
-            if (rejectedClusterIDs.includes(clusterID)) {
-                rejectedClusterIDs = rejectedClusterIDs.filter(
-                    (id) => id != clusterID,
-                );
-                rejectCount += 1;
-            }
-        } else {
-            // TODO-Cluster sanity check, remove after wrapping up dev
-            if (rejectedClusterIDs.includes(clusterID)) {
-                assertionFailed();
-            }
+                assign(clusterID);
+                unrejectIfNeeded(clusterID);
+                break;
 
-            // Remove it from the list of assigned clusters (if needed).
-            if (assignedClusters.find(({ id }) => id == clusterID)) {
-                assignedClusters = assignedClusters.filter(
-                    ({ id }) => id != clusterID,
-                );
-                assignCount += 1;
-            }
-            // Add it to the list of rejected clusters.
-            rejectedClusterIDs.push(clusterID);
-            rejectCount += 1;
+            case false /* reject */:
+                // TODO-Cluster sanity check, remove after wrapping up dev
+                if (rejectedClusterIDs.includes(clusterID)) {
+                    assertionFailed();
+                }
+
+                unassignIfNeeded(clusterID);
+                reject(clusterID);
+                break;
+
+            case undefined /* reset */:
+                unassignIfNeeded(clusterID);
+                unrejectIfNeeded(clusterID);
+                break;
         }
     }
 
-    if (assignCount > 0) {
+    if (assignUpdateCount > 0) {
         await updateAssignedClustersForCGroup(cgroup, assignedClusters);
     }
 
-    if (rejectCount > 0) {
+    if (rejectUpdateCount > 0) {
         await saveRejectedClustersForCGroup(cgroup.id, rejectedClusterIDs);
     }
 
     log.info(
-        `Applied ${assignCount} assigns and ${rejectCount} rejects to cgroup`,
+        `Updated ${assignUpdateCount} assigns and ${rejectUpdateCount} rejects for ${cgroup.id}`,
     );
 };
