@@ -222,8 +222,7 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
                 child: Padding(
                   padding: const EdgeInsets.only(right: 12),
                   child: ListView.separated(
-                    itemCount:
-                        searchResults.length + (shouldShowAddPerson ? 1 : 0),
+                    itemCount: searchResults.length + 1,
                     itemBuilder: (context, index) {
                       if (index == 0 && shouldShowAddPerson) {
                         return GestureDetector(
@@ -238,8 +237,21 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
                           },
                         );
                       }
-                      final person =
-                          searchResults[index - (shouldShowAddPerson ? 1 : 0)];
+                      if (index == 0 && !shouldShowAddPerson) {
+                        return Padding(
+                          padding: const EdgeInsets.fromLTRB(0, 8, 0, 16),
+                          child: Center(
+                            child: Text(
+                              "Merge with existing",
+                              style: getEnteTextTheme(context).body.copyWith(
+                                    color:
+                                        getEnteColorScheme(context).textMuted,
+                                  ),
+                            ),
+                          ),
+                        );
+                      }
+                      final person = searchResults[index - 1];
                       return PersonRowItem(
                         person: person.$1,
                         personFile: person.$2,
