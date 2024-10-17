@@ -56,6 +56,7 @@ class _AppliedFiltersState extends State<AppliedFilters> {
                   personId: filter.personId,
                   clusterId: filter.clusterId,
                   faceThumbnailFile: EnteFile(),
+                  name: filter.name(),
                 )
               : GenericFilterChip(
                   label: filter.name(),
