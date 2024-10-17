@@ -237,6 +237,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Je comprends que si je perds mon mot de passe, je perdrai mes données puisque mes données sont <underline>chiffrées de bout en bout</underline>."),
         "activeSessions":
             MessageLookupByLibrary.simpleMessage("Sessions actives"),
+        "add": MessageLookupByLibrary.simpleMessage("Add"),
         "addAName": MessageLookupByLibrary.simpleMessage("Ajouter un nom"),
         "addANewEmail":
             MessageLookupByLibrary.simpleMessage("Ajouter un nouvel email"),
@@ -250,6 +251,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Ajouter la localisation"),
         "addLocationButton": MessageLookupByLibrary.simpleMessage("Ajouter"),
         "addMore": MessageLookupByLibrary.simpleMessage("Ajouter"),
+        "addName": MessageLookupByLibrary.simpleMessage("Add name"),
+        "addNameOrMerge":
+            MessageLookupByLibrary.simpleMessage("Add name or merge"),
         "addNew": MessageLookupByLibrary.simpleMessage("Ajouter un nouveau"),
         "addNewPerson": MessageLookupByLibrary.simpleMessage("Add new person"),
         "addOnPageSubtitle": MessageLookupByLibrary.simpleMessage(
@@ -802,6 +806,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "exportLogs": MessageLookupByLibrary.simpleMessage("Exporter les logs"),
         "exportYourData":
             MessageLookupByLibrary.simpleMessage("Exportez vos données"),
+        "extraPhotosFound":
+            MessageLookupByLibrary.simpleMessage("Extra photos found"),
+        "extraPhotosFoundFor": MessageLookupByLibrary.simpleMessage(
+            "Extra photos found for \$text"),
         "faceRecognition":
             MessageLookupByLibrary.simpleMessage("Reconnaissance faciale"),
         "faces": MessageLookupByLibrary.simpleMessage("Visages"),
@@ -1078,6 +1086,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "matrix": MessageLookupByLibrary.simpleMessage("Matrix"),
         "memoryCount": m0,
         "merchandise": MessageLookupByLibrary.simpleMessage("Marchandise"),
+        "mergeWithExisting":
+            MessageLookupByLibrary.simpleMessage("Merge with existing"),
         "mlConsent": MessageLookupByLibrary.simpleMessage(
             "Activer l\'apprentissage automatique"),
         "mlConsentConfirmation": MessageLookupByLibrary.simpleMessage(
@@ -1120,6 +1130,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Impossible de se connecter à Ente, veuillez vérifier vos paramètres réseau et contacter le support si l\'erreur persiste."),
         "never": MessageLookupByLibrary.simpleMessage("Jamais"),
         "newAlbum": MessageLookupByLibrary.simpleMessage("Nouvel album"),
+        "newPerson": MessageLookupByLibrary.simpleMessage("New person"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("Nouveau à Ente"),
         "newest": MessageLookupByLibrary.simpleMessage("Le plus récent"),
         "next": MessageLookupByLibrary.simpleMessage("Suivant"),

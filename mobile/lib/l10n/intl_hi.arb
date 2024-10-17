@@ -50,5 +50,12 @@
   "verifyEmail": "ईमेल सत्यापित करें",
   "toResetVerifyEmail": "अपना पासवर्ड रीसेट करने के लिए, कृपया पहले अपना ईमेल सत्यापित करें।",
   "personName": "Person name",
-  "addNewPerson": "Add new person"
+  "addNewPerson": "Add new person",
+  "addNameOrMerge": "Add name or merge",
+  "mergeWithExisting": "Merge with existing",
+  "newPerson": "New person",
+  "addName": "Add name",
+  "add": "Add",
+  "extraPhotosFoundFor": "Extra photos found for $text",
+  "extraPhotosFound": "Extra photos found"
 }

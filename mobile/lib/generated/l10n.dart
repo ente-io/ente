@@ -9765,6 +9765,76 @@ class S {
       args: [],
     );
   }
+
+  /// `Add name or merge`
+  String get addNameOrMerge {
+    return Intl.message(
+      'Add name or merge',
+      name: 'addNameOrMerge',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Merge with existing`
+  String get mergeWithExisting {
+    return Intl.message(
+      'Merge with existing',
+      name: 'mergeWithExisting',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `New person`
+  String get newPerson {
+    return Intl.message(
+      'New person',
+      name: 'newPerson',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add name`
+  String get addName {
+    return Intl.message(
+      'Add name',
+      name: 'addName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add`
+  String get add {
+    return Intl.message(
+      'Add',
+      name: 'add',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Extra photos found for $text`
+  String get extraPhotosFoundFor {
+    return Intl.message(
+      'Extra photos found for \$text',
+      name: 'extraPhotosFoundFor',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Extra photos found`
+  String get extraPhotosFound {
+    return Intl.message(
+      'Extra photos found',
+      name: 'extraPhotosFound',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

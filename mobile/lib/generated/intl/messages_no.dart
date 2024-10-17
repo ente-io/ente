@@ -76,11 +76,15 @@ class MessageLookup extends MessageLookupByLibrary {
         "ackPasswordLostWarning": MessageLookupByLibrary.simpleMessage(
             "Jeg forstår at dersom jeg mister passordet mitt, kan jeg miste dataen min, siden daten er <underline>ende-til-ende-kryptert</underline>."),
         "activeSessions": MessageLookupByLibrary.simpleMessage("Aktive økter"),
+        "add": MessageLookupByLibrary.simpleMessage("Add"),
         "addANewEmail":
             MessageLookupByLibrary.simpleMessage("Legg til ny e-post"),
         "addCollaborator":
             MessageLookupByLibrary.simpleMessage("Legg til samarbeidspartner"),
         "addMore": MessageLookupByLibrary.simpleMessage("Legg til flere"),
+        "addName": MessageLookupByLibrary.simpleMessage("Add name"),
+        "addNameOrMerge":
+            MessageLookupByLibrary.simpleMessage("Add name or merge"),
         "addNewPerson": MessageLookupByLibrary.simpleMessage("Add new person"),
         "addViewer": MessageLookupByLibrary.simpleMessage("Legg til seer"),
         "addedAs": MessageLookupByLibrary.simpleMessage("Lagt til som"),
@@ -217,6 +221,10 @@ class MessageLookup extends MessageLookupByLibrary {
             "Skriv inn din gjenopprettingsnøkkel"),
         "expiredLinkInfo": MessageLookupByLibrary.simpleMessage(
             "Denne lenken er utløpt. Vennligst velg en ny utløpstid eller deaktiver lenkeutløp."),
+        "extraPhotosFound":
+            MessageLookupByLibrary.simpleMessage("Extra photos found"),
+        "extraPhotosFoundFor": MessageLookupByLibrary.simpleMessage(
+            "Extra photos found for \$text"),
         "failedToLoadAlbums":
             MessageLookupByLibrary.simpleMessage("Kunne ikke laste inn album"),
         "familyPlans":
@@ -272,11 +280,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "manageParticipants":
             MessageLookupByLibrary.simpleMessage("Administrer"),
         "memoryCount": m0,
+        "mergeWithExisting":
+            MessageLookupByLibrary.simpleMessage("Merge with existing"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Moderat"),
         "movedToTrash":
             MessageLookupByLibrary.simpleMessage("Flyttet til papirkurven"),
         "never": MessageLookupByLibrary.simpleMessage("Aldri"),
         "newAlbum": MessageLookupByLibrary.simpleMessage("Nytt album"),
+        "newPerson": MessageLookupByLibrary.simpleMessage("New person"),
         "noDeviceLimit": MessageLookupByLibrary.simpleMessage("Ingen"),
         "noRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "Ingen gjenopprettingsnøkkel?"),

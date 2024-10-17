@@ -229,6 +229,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Я розумію, що якщо я втрачу свій пароль, я можу втратити свої дані, тому що вони є захищені <underline>наскрізним шифруванням</underline>."),
         "activeSessions":
             MessageLookupByLibrary.simpleMessage("Активні сеанси"),
+        "add": MessageLookupByLibrary.simpleMessage("Add"),
         "addAName": MessageLookupByLibrary.simpleMessage("Додати ім\'я"),
         "addANewEmail":
             MessageLookupByLibrary.simpleMessage("Додати нову пошту"),
@@ -242,6 +243,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Додати розташування"),
         "addLocationButton": MessageLookupByLibrary.simpleMessage("Додати"),
         "addMore": MessageLookupByLibrary.simpleMessage("Додати більше"),
+        "addName": MessageLookupByLibrary.simpleMessage("Add name"),
+        "addNameOrMerge":
+            MessageLookupByLibrary.simpleMessage("Add name or merge"),
         "addNew": MessageLookupByLibrary.simpleMessage("Додати нове"),
         "addNewPerson": MessageLookupByLibrary.simpleMessage("Add new person"),
         "addOnPageSubtitle":
@@ -779,6 +783,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Експортування журналів"),
         "exportYourData":
             MessageLookupByLibrary.simpleMessage("Експортувати дані"),
+        "extraPhotosFound":
+            MessageLookupByLibrary.simpleMessage("Extra photos found"),
+        "extraPhotosFoundFor": MessageLookupByLibrary.simpleMessage(
+            "Extra photos found for \$text"),
         "faceRecognition":
             MessageLookupByLibrary.simpleMessage("Розпізнавання обличчя"),
         "faces": MessageLookupByLibrary.simpleMessage("Обличчя"),
@@ -1048,6 +1056,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "matrix": MessageLookupByLibrary.simpleMessage("Matrix"),
         "memoryCount": m0,
         "merchandise": MessageLookupByLibrary.simpleMessage("Товари"),
+        "mergeWithExisting":
+            MessageLookupByLibrary.simpleMessage("Merge with existing"),
         "mlConsent":
             MessageLookupByLibrary.simpleMessage("Увімкнути машинне навчання"),
         "mlConsentConfirmation": MessageLookupByLibrary.simpleMessage(
@@ -1089,6 +1099,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Не вдалося під\'єднатися до Ente. Перевірте налаштування мережі. Зверніться до нашої команди підтримки, якщо помилка залишиться."),
         "never": MessageLookupByLibrary.simpleMessage("Ніколи"),
         "newAlbum": MessageLookupByLibrary.simpleMessage("Новий альбом"),
+        "newPerson": MessageLookupByLibrary.simpleMessage("New person"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("Уперше на Ente"),
         "newest": MessageLookupByLibrary.simpleMessage("Найновіші"),
         "next": MessageLookupByLibrary.simpleMessage("Далі"),

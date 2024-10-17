@@ -34,7 +34,11 @@ class MessageLookup extends MessageLookupByLibrary {
             "Suprantu, kad jei prarasiu slaptažodį, galiu prarasti savo duomenis, kadangi mano duomenys yra <underline>visapusiškai užšifruota</underline>."),
         "activeSessions":
             MessageLookupByLibrary.simpleMessage("Aktyvūs seansai"),
+        "add": MessageLookupByLibrary.simpleMessage("Add"),
         "addLocationButton": MessageLookupByLibrary.simpleMessage("Pridėti"),
+        "addName": MessageLookupByLibrary.simpleMessage("Add name"),
+        "addNameOrMerge":
+            MessageLookupByLibrary.simpleMessage("Add name or merge"),
         "addNewPerson": MessageLookupByLibrary.simpleMessage("Add new person"),
         "appLockDescriptions": MessageLookupByLibrary.simpleMessage(
             "Pasirinkite tarp numatytojo įrenginio užrakinimo ekrano ir pasirinktinio užrakinimo ekrano su PIN kodu arba slaptažodžiu."),
@@ -115,6 +119,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "enterYourPassword":
             MessageLookupByLibrary.simpleMessage("Įveskite savo slaptažodį"),
         "exif": MessageLookupByLibrary.simpleMessage("EXIF"),
+        "extraPhotosFound":
+            MessageLookupByLibrary.simpleMessage("Extra photos found"),
+        "extraPhotosFoundFor": MessageLookupByLibrary.simpleMessage(
+            "Extra photos found for \$text"),
         "faq": MessageLookupByLibrary.simpleMessage("DUK"),
         "feedback": MessageLookupByLibrary.simpleMessage("Atsiliepimai"),
         "howItWorks": MessageLookupByLibrary.simpleMessage("Kaip tai veikia"),
@@ -144,8 +152,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "mastodon": MessageLookupByLibrary.simpleMessage("„Mastodon“"),
         "matrix": MessageLookupByLibrary.simpleMessage("„Matrix“"),
         "merchandise": MessageLookupByLibrary.simpleMessage("Atributika"),
+        "mergeWithExisting":
+            MessageLookupByLibrary.simpleMessage("Merge with existing"),
         "mostRecent": MessageLookupByLibrary.simpleMessage("Naujausia"),
         "mostRelevant": MessageLookupByLibrary.simpleMessage("Aktualiausia"),
+        "newPerson": MessageLookupByLibrary.simpleMessage("New person"),
         "noExifData": MessageLookupByLibrary.simpleMessage("Nėra EXIF duomenų"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
             "Dėl mūsų visapusio šifravimo protokolo pobūdžio jūsų duomenų negalima iššifruoti be slaptažodžio arba atkūrimo rakto"),

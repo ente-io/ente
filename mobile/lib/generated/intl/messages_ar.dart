@@ -26,6 +26,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("مرحبًا مجددًا!"),
         "ackPasswordLostWarning": MessageLookupByLibrary.simpleMessage(
             "أُدركُ أنّني فقدتُ كلمة مروري، فقد أفقد بياناتي لأن بياناتي <underline>مشفرة تشفيرًا تامًّا من النهاية إلى النهاية</underline>."),
+        "add": MessageLookupByLibrary.simpleMessage("Add"),
+        "addName": MessageLookupByLibrary.simpleMessage("Add name"),
+        "addNameOrMerge":
+            MessageLookupByLibrary.simpleMessage("Add name or merge"),
         "addNewPerson": MessageLookupByLibrary.simpleMessage("Add new person"),
         "cancel": MessageLookupByLibrary.simpleMessage("إلغاء"),
         "decrypting": MessageLookupByLibrary.simpleMessage("فك التشفير..."),
@@ -34,6 +38,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("أدخل عنوان بريدك الإلكتروني"),
         "enterYourRecoveryKey":
             MessageLookupByLibrary.simpleMessage("أدخل رمز الاسترداد"),
+        "extraPhotosFound":
+            MessageLookupByLibrary.simpleMessage("Extra photos found"),
+        "extraPhotosFoundFor": MessageLookupByLibrary.simpleMessage(
+            "Extra photos found for \$text"),
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("نسيت كلمة المرور"),
         "incorrectRecoveryKeyBody": MessageLookupByLibrary.simpleMessage(
@@ -42,6 +50,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("مفتاح الاسترداد غير صحيح"),
         "invalidEmailAddress": MessageLookupByLibrary.simpleMessage(
             "عنوان البريد الإلكتروني غير صالح"),
+        "mergeWithExisting":
+            MessageLookupByLibrary.simpleMessage("Merge with existing"),
+        "newPerson": MessageLookupByLibrary.simpleMessage("New person"),
         "noRecoveryKey":
             MessageLookupByLibrary.simpleMessage("ما من مفتاح استرداد؟"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(

@@ -1302,5 +1302,12 @@
   "guestView": "Гостевой вид",
   "guestViewEnablePreSteps": "Чтобы включить гостевой вид, настройте пароль устройства или блокировку экрана в настройках системы.",
   "personName": "Person name",
-  "addNewPerson": "Add new person"
+  "addNewPerson": "Add new person",
+  "addNameOrMerge": "Add name or merge",
+  "mergeWithExisting": "Merge with existing",
+  "newPerson": "New person",
+  "addName": "Add name",
+  "add": "Add",
+  "extraPhotosFoundFor": "Extra photos found for $text",
+  "extraPhotosFound": "Extra photos found"
 }

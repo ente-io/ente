@@ -238,6 +238,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Entiendo que si pierdo mi contraseña podría perder mis datos, ya que mis datos están <underline>cifrados de extremo a extremo</underline>."),
         "activeSessions":
             MessageLookupByLibrary.simpleMessage("Sesiónes activas"),
+        "add": MessageLookupByLibrary.simpleMessage("Add"),
         "addAName": MessageLookupByLibrary.simpleMessage("Añade un nombre"),
         "addANewEmail": MessageLookupByLibrary.simpleMessage(
             "Agregar nuevo correo electrónico"),
@@ -251,6 +252,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Agregar ubicación"),
         "addLocationButton": MessageLookupByLibrary.simpleMessage("Añadir"),
         "addMore": MessageLookupByLibrary.simpleMessage("Añadir más"),
+        "addName": MessageLookupByLibrary.simpleMessage("Add name"),
+        "addNameOrMerge":
+            MessageLookupByLibrary.simpleMessage("Add name or merge"),
         "addNew": MessageLookupByLibrary.simpleMessage("Añadir nuevo"),
         "addNewPerson": MessageLookupByLibrary.simpleMessage("Add new person"),
         "addOnPageSubtitle": MessageLookupByLibrary.simpleMessage(
@@ -795,6 +799,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Exportar registros"),
         "exportYourData":
             MessageLookupByLibrary.simpleMessage("Exportar tus datos"),
+        "extraPhotosFound":
+            MessageLookupByLibrary.simpleMessage("Extra photos found"),
+        "extraPhotosFoundFor": MessageLookupByLibrary.simpleMessage(
+            "Extra photos found for \$text"),
         "faceRecognition":
             MessageLookupByLibrary.simpleMessage("Reconocimiento facial"),
         "faces": MessageLookupByLibrary.simpleMessage("Caras"),
@@ -1069,6 +1077,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "matrix": MessageLookupByLibrary.simpleMessage("Matrix"),
         "memoryCount": m0,
         "merchandise": MessageLookupByLibrary.simpleMessage("Mercancías"),
+        "mergeWithExisting":
+            MessageLookupByLibrary.simpleMessage("Merge with existing"),
         "mlConsent": MessageLookupByLibrary.simpleMessage(
             "Habilitar aprendizaje automático"),
         "mlConsentConfirmation": MessageLookupByLibrary.simpleMessage(
@@ -1109,6 +1119,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "No se puede conectar a Ente. Por favor, comprueba tu configuración de red y ponte en contacto con el soporte técnico si el error persiste."),
         "never": MessageLookupByLibrary.simpleMessage("Nunca"),
         "newAlbum": MessageLookupByLibrary.simpleMessage("Nuevo álbum"),
+        "newPerson": MessageLookupByLibrary.simpleMessage("New person"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("Nuevo en Ente"),
         "newest": MessageLookupByLibrary.simpleMessage("Más reciente"),
         "next": MessageLookupByLibrary.simpleMessage("Siguiente"),

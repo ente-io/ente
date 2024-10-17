@@ -39,7 +39,7 @@ String _actionName(
   String text = "";
   switch (type) {
     case PersonActionType.assignPerson:
-      text = "Add name";
+      text = S.of(context).addNameOrMerge;
       break;
   }
   return text;
@@ -242,7 +242,7 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
                           padding: const EdgeInsets.fromLTRB(0, 8, 0, 16),
                           child: Center(
                             child: Text(
-                              "Merge with existing",
+                              S.of(context).mergeWithExisting,
                               style: getEnteTextTheme(context).body.copyWith(
                                     color:
                                         getEnteColorScheme(context).textMuted,
@@ -292,9 +292,9 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
   }) async {
     final result = await showTextInputDialog(
       context,
-      title: "New person",
-      submitButtonLabel: 'Add',
-      hintText: 'Add name',
+      title: S.of(context).newPerson,
+      submitButtonLabel: S.of(context).add,
+      hintText: S.of(context).addName,
       alwaysShowSuccessState: false,
       initialValue: initValue,
       textCapitalization: TextCapitalization.words,
@@ -313,7 +313,7 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
           final bool extraPhotosFound = await ClusterFeedbackService.instance
               .checkAndDoAutomaticMerges(p, personClusterID: clusterID);
           if (extraPhotosFound) {
-            showShortToast(context, "Extra photos found for $text");
+            showShortToast(context, S.of(context).extraPhotosFound);
           }
           Bus.instance.fire(PeopleChangedEvent());
           Navigator.pop(context, p);
