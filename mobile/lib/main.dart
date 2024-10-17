@@ -228,7 +228,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     CryptoUtil.init();
 
     _logger.info("Lockscreen init");
-    LockScreenSettings.instance.init(preferences);
+    unawaited(LockScreenSettings.instance.init(preferences));
 
     _logger.info("Configuration init");
     await Configuration.instance.init();

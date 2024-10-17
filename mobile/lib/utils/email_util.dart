@@ -72,6 +72,7 @@ Future<void> sendLogs(
         onTap: () async {
           // ignore: unawaited_futures
           showDialog(
+            useRootNavigator: false,
             context: context,
             builder: (BuildContext context) {
               return LogFileViewer(SuperLogging.logFile!);

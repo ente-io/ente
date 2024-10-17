@@ -347,6 +347,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
 
     // ignore: unawaited_futures
     showDialog(
+      useRootNavigator: false,
       context: context,
       builder: (BuildContext context) {
         return alert;

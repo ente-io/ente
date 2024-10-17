@@ -209,6 +209,7 @@ class _SessionsPageState extends State<SessionsPage> {
     );
 
     showDialog(
+      useRootNavigator: false,
       context: context,
       builder: (BuildContext context) {
         return alert;

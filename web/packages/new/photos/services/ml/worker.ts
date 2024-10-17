@@ -18,14 +18,14 @@ import {
     type ImageBitmapAndData,
 } from "./blob";
 import {
+    _clipMatches,
     clearCachedCLIPIndexes,
     clipIndexingVersion,
-    clipMatches,
     indexCLIP,
     type CLIPIndex,
 } from "./clip";
 import {
-    clusterFaces,
+    _clusterFaces,
     reconcileClusters,
     type ClusteringProgress,
 } from "./cluster";
@@ -44,7 +44,7 @@ import {
     type RawRemoteMLData,
     type RemoteMLData,
 } from "./ml-data";
-import { suggestionsForPerson, type CGroupPerson } from "./people";
+import { _suggestionsAndChoicesForPerson, type CGroupPerson } from "./people";
 import type { CLIPMatches, MLWorkerDelegate } from "./worker-types";
 
 /**
@@ -207,7 +207,7 @@ export class MLWorker {
      * Find {@link CLIPMatches} for a given normalized {@link searchPhrase}.
      */
     async clipMatches(searchPhrase: string): Promise<CLIPMatches | undefined> {
-        return clipMatches(searchPhrase, ensure(this.electron));
+        return _clipMatches(searchPhrase, ensure(this.electron));
     }
 
     private async tick() {
@@ -326,7 +326,7 @@ export class MLWorker {
      * cgroups if needed.
      */
     async clusterFaces(masterKey: Uint8Array) {
-        const clusters = await clusterFaces(
+        const clusters = await _clusterFaces(
             await savedFaceIndexes(),
             await getAllLocalFiles(),
             (progress) => this.updateClusteringProgress(progress),
@@ -341,10 +341,10 @@ export class MLWorker {
     }
 
     /**
-     * Return suggestions for the given cgroup {@link person}.
+     * Return suggestions and choices for the given cgroup {@link person}.
      */
-    async suggestionsForPerson(person: CGroupPerson) {
-        return suggestionsForPerson(person);
+    async suggestionsAndChoicesForPerson(person: CGroupPerson) {
+        return _suggestionsAndChoicesForPerson(person);
     }
 }
 

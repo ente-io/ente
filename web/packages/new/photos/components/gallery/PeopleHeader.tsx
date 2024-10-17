@@ -15,13 +15,14 @@ import log from "@/base/log";
 import {
     deleteCGroup,
     renameCGroup,
-    suggestionsForPerson,
+    suggestionsAndChoicesForPerson,
 } from "@/new/photos/services/ml";
 import {
     type CGroupPerson,
     type ClusterPerson,
     type Person,
-    type PersonSuggestion,
+    type PersonSuggestionsAndChoices,
+    type PreviewableCluster,
 } from "@/new/photos/services/ml/people";
 import { wait } from "@/utils/promise";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
@@ -30,8 +31,9 @@ import AddIcon from "@mui/icons-material/Add";
 import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
 import EditIcon from "@mui/icons-material/Edit";
-import ListAltOutlined from "@mui/icons-material/ListAltOutlined";
-import MoreHoriz from "@mui/icons-material/MoreHoriz";
+import ListAltOutlinedIcon from "@mui/icons-material/ListAltOutlined";
+import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
+import RestoreIcon from "@mui/icons-material/Restore";
 import {
     Dialog,
     DialogActions,
@@ -47,10 +49,12 @@ import {
     Typography,
 } from "@mui/material";
 import { t } from "i18next";
-import React, { useEffect, useReducer } from "react";
+import React, { useEffect, useReducer, useState } from "react";
+import { isInternalUser } from "../../services/feature-flags";
 import { useAppContext } from "../../types/context";
 import { AddPersonDialog } from "../AddPersonDialog";
 import { SpaceBetweenFlex } from "../mui";
+import { SuggestionFaceList } from "../PeopleList";
 import { SingleInputDialog } from "../SingleInputForm";
 import type { GalleryBarImplProps } from "./BarImpl";
 import { GalleryItemsHeaderAdapter, GalleryItemsSummary } from "./ListHeader";
@@ -115,11 +119,16 @@ const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({
     const cgroup = person.cgroup;
 
     const { showMiniDialog } = useAppContext();
+    const [showReviewOption, setShowReviewOption] = useState(false);
 
     const { show: showNameInput, props: nameInputVisibilityProps } =
         useModalVisibility();
     const { show: showSuggestions, props: suggestionsVisibilityProps } =
         useModalVisibility();
+
+    useEffect(() => {
+        void isInternalUser().then((b) => setShowReviewOption(b));
+    }, []);
 
     const handleRename = (name: string) => renameCGroup(cgroup, name);
 
@@ -152,7 +161,7 @@ const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({
             />
             <OverflowMenu
                 ariaControls={"person-options"}
-                triggerButtonIcon={<MoreHoriz />}
+                triggerButtonIcon={<MoreHorizIcon />}
             >
                 <OverflowMenuOption
                     startIcon={<EditIcon />}
@@ -168,9 +177,9 @@ const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({
                 >
                     {pt("Reset")}
                 </OverflowMenuOption>
-                {process.env.NEXT_PUBLIC_ENTE_WIP_CL /* TODO-Cluster */ && (
+                {showReviewOption /* TODO-Cluster */ && (
                     <OverflowMenuOption
-                        startIcon={<ListAltOutlined />}
+                        startIcon={<ListAltOutlinedIcon />}
                         centerAlign
                         onClick={showSuggestions}
                     >
@@ -232,7 +241,7 @@ const ClusterPersonHeader: React.FC<ClusterPersonHeaderProps> = ({
 
                 <OverflowMenu
                     ariaControls={"person-options"}
-                    triggerButtonIcon={<MoreHoriz />}
+                    triggerButtonIcon={<MoreHorizIcon />}
                 >
                     <OverflowMenuOption
                         startIcon={<AddIcon />}
@@ -268,33 +277,45 @@ interface SuggestionsDialogState {
      */
     fetchFailed: boolean;
     /**
-     * List of clusters (suitably augmented for the UI display) which might
-     * belong to the person, and being offered to the user as suggestions.
+     * True if we should show the previously saved choice view instead of the
+     * new suggestions.
      */
-    suggestions: PersonSuggestion[];
+    showChoices: boolean;
+    /** Fetched choices. */
+    choices: SCItem[];
+    /** Fetched suggestions. */
+    suggestions: SCItem[];
     /**
-     * An entry corresponding to each clusters (suggestions) that the user has
-     * either explicitly accepted or rejected.
+     * An entry corresponding to each
+     * - saved choice for which the user has changed their mind.
+     * - suggestion that the user has either explicitly accepted or rejected.
      */
-    markedSuggestionIDs: Map<string, NonNullable<SuggestionMark>>;
+    marks: Map<string, boolean | undefined>;
 }
 
-type SuggestionMark = "yes" | "no" | undefined;
+type SCItem = PreviewableCluster & { fixed?: boolean; accepted?: boolean };
 
 type SuggestionsDialogAction =
     | { type: "fetch"; personID: string }
     | { type: "fetchFailed"; personID: string }
-    | { type: "fetched"; personID: string; suggestions: PersonSuggestion[] }
-    | { type: "mark"; suggestion: PersonSuggestion; value: SuggestionMark }
+    | {
+          type: "fetched";
+          personID: string;
+          suggestionsAndChoices: PersonSuggestionsAndChoices;
+      }
+    | { type: "mark"; item: SCItem; value: boolean | undefined }
     | { type: "save" }
+    | { type: "toggleHistory" }
     | { type: "close" };
 
 const initialSuggestionsDialogState: SuggestionsDialogState = {
     activity: undefined,
     personID: undefined,
     fetchFailed: false,
+    showChoices: false,
+    choices: [],
     suggestions: [],
-    markedSuggestionIDs: new Map(),
+    marks: new Map(),
 };
 
 const suggestionsDialogReducer = (
@@ -304,11 +325,12 @@ const suggestionsDialogReducer = (
     switch (action.type) {
         case "fetch":
             return {
+                ...initialSuggestionsDialogState,
+                choices: [],
+                suggestions: [],
+                marks: new Map(),
                 activity: "fetching",
                 personID: action.personID,
-                fetchFailed: false,
-                suggestions: [],
-                markedSuggestionIDs: new Map(),
             };
         case "fetchFailed":
             if (action.personID != state.personID) return state;
@@ -318,21 +340,27 @@ const suggestionsDialogReducer = (
             return {
                 ...state,
                 activity: undefined,
-                suggestions: action.suggestions,
+                choices: action.suggestionsAndChoices.choices,
+                suggestions: action.suggestionsAndChoices.suggestions,
             };
         case "mark": {
-            const markedSuggestionIDs = new Map(state.markedSuggestionIDs);
-            const id = action.suggestion.id;
-            if (action.value == "yes" || action.value == "no") {
-                markedSuggestionIDs.set(id, action.value);
+            const marks = new Map(state.marks);
+            const { item, value } = action;
+            if (item.accepted === undefined && value === undefined) {
+                // If this was a suggestion, prune marks created as a result of
+                // the user toggling the item back to its original unset state.
+                marks.delete(item.id);
+            } else if (item.accepted && value === item.accepted) {
+                // If this is a choice, prune marks which match the choice's
+                // accepted state.
+                marks.delete(item.id);
             } else {
-                markedSuggestionIDs.delete(id);
+                marks.set(item.id, value);
             }
-            return {
-                ...state,
-                markedSuggestionIDs,
-            };
+            return { ...state, marks };
         }
+        case "toggleHistory":
+            return { ...state, showChoices: !state.showChoices };
         case "save":
             return { ...state, activity: "saving" };
         case "close":
@@ -360,7 +388,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
 
     const isSmallWidth = useIsSmallWidth();
 
-    const hasUnsavedChanges = state.markedSuggestionIDs.size > 0;
+    const hasUnsavedChanges = state.marks.size > 0;
 
     const resetPersonAndClose = () => {
         dispatch({ type: "close" });
@@ -380,10 +408,11 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
 
         const go = async () => {
             try {
-                const suggestions = await suggestionsForPerson(person);
-                dispatch({ type: "fetched", personID, suggestions });
+                const suggestionsAndChoices =
+                    await suggestionsAndChoicesForPerson(person);
+                dispatch({ type: "fetched", personID, suggestionsAndChoices });
             } catch (e) {
-                log.error("Failed to generate suggestions", e);
+                log.error("Failed to fetch suggestions and choices", e);
                 dispatch({ type: "fetchFailed", personID });
             }
         };
@@ -410,8 +439,8 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
         resetPersonAndClose();
     };
 
-    const handleMark = (suggestion: PersonSuggestion, value: SuggestionMark) =>
-        dispatch({ type: "mark", suggestion, value });
+    const handleMark = (item: SCItem, value: boolean | undefined) =>
+        dispatch({ type: "mark", item, value });
 
     const handleSave = async () => {
         try {
@@ -434,10 +463,48 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
             fullScreen={isSmallWidth}
             PaperProps={{ sx: { minHeight: "80svh" } }}
         >
-            <DialogTitle sx={{ "&&&": { py: "20px" } }}>
-                {person.name && pt(`${person.name}?`)}
-            </DialogTitle>
-            <DialogContent dividers sx={{ display: "flex" }}>
+            <SpaceBetweenFlex
+                sx={{
+                    padding: "20px 16px 16px 16px",
+                    backgroundColor: state.showChoices
+                        ? (theme) => theme.colors.fill.faint
+                        : "transparent",
+                }}
+            >
+                <Stack sx={{ gap: "8px" }}>
+                    <DialogTitle sx={{ "&&&": { p: 0 } }}>
+                        {state.showChoices
+                            ? pt("Saved choices")
+                            : pt("Review suggestions")}
+                    </DialogTitle>
+                    <Typography color="text.muted">
+                        {person.name ?? " "}
+                    </Typography>
+                </Stack>
+                {state.choices.length > 1 && (
+                    <IconButton
+                        disableTouchRipple
+                        onClick={() => dispatch({ type: "toggleHistory" })}
+                        aria-label={
+                            !state.showChoices
+                                ? pt("Saved suggestions")
+                                : pt("Review suggestions")
+                        }
+                        sx={{
+                            backgroundColor: state.showChoices
+                                ? (theme) => theme.colors.fill.muted
+                                : "transparent",
+                        }}
+                    >
+                        <RestoreIcon />
+                    </IconButton>
+                )}
+            </SpaceBetweenFlex>
+            <DialogContent
+                /* Reset scroll position on switching view */
+                key={`${state.showChoices}`}
+                sx={{ display: "flex", "&&&": { pt: 0 } }}
+            >
                 {state.activity == "fetching" ? (
                     <CenteredBox>
                         <ActivityIndicator>
@@ -448,6 +515,12 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                     <CenteredBox>
                         <ErrorIndicator />
                     </CenteredBox>
+                ) : state.showChoices ? (
+                    <SuggestionOrChoiceList
+                        items={state.choices}
+                        marks={state.marks}
+                        onMarkItem={handleMark}
+                    />
                 ) : state.suggestions.length == 0 ? (
                     <CenteredBox>
                         <Typography
@@ -458,10 +531,10 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                         </Typography>
                     </CenteredBox>
                 ) : (
-                    <SuggestionsList
-                        suggestions={state.suggestions}
-                        markedSuggestionIDs={state.markedSuggestionIDs}
-                        onMarkSuggestion={handleMark}
+                    <SuggestionOrChoiceList
+                        items={state.suggestions}
+                        marks={state.marks}
+                        onMarkItem={handleMark}
                     />
                 )}
             </DialogContent>
@@ -480,61 +553,74 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                     color={"accent"}
                     onClick={handleSave}
                 >
-                    {t("save")}
+                    {hasUnsavedChanges ? pt("TODO Not impl") : t("save")}
                 </LoadingButton>
             </DialogActions>
         </Dialog>
     );
 };
 
-type SuggestionsListProps = Pick<
-    SuggestionsDialogState,
-    "suggestions" | "markedSuggestionIDs"
-> & {
+interface SuggestionOrChoiceListProps {
+    items: SCItem[];
+    marks: Map<string, boolean | undefined>;
     /**
-     * Callback invoked when the user toggles the value associated with the
-     * given suggestion.
+     * Callback invoked when the user changes the value associated with the
+     * given suggestion or choice.
      */
-    onMarkSuggestion: (
-        suggestion: PersonSuggestion,
-        value: SuggestionMark,
-    ) => void;
-};
+    onMarkItem: (item: SCItem, value: boolean | undefined) => void;
+}
 
-const SuggestionsList: React.FC<SuggestionsListProps> = ({
-    suggestions,
-    markedSuggestionIDs,
-    onMarkSuggestion,
+const SuggestionOrChoiceList: React.FC<SuggestionOrChoiceListProps> = ({
+    items,
+    marks,
+    onMarkItem,
 }) => (
-    <List sx={{ width: "100%" }}>
-        {suggestions.map((suggestion) => (
+    <List dense sx={{ width: "100%" }}>
+        {items.map((item) => (
             <ListItem
+                key={item.id}
                 sx={{
                     paddingInline: 0,
+                    paddingBlockEnd: "24px",
                     justifyContent: "space-between",
                 }}
-                key={suggestion.id}
             >
-                <Typography>{`${suggestion.previewFaces.length} faces ntaoheu naoehtu aosnehu asoenuh aoenuht`}</Typography>
-                <ToggleButtonGroup
-                    value={markedSuggestionIDs.get(suggestion.id)}
-                    exclusive
-                    onChange={(_, v) =>
-                        onMarkSuggestion(
-                            suggestion,
-                            // Dance for TypeScript to recognize the type.
-                            v == "yes" ? "yes" : v == "no" ? "no" : undefined,
-                        )
-                    }
-                >
-                    <ToggleButton value="yes" aria-label={pt("Yes")}>
-                        <CheckIcon />
-                    </ToggleButton>
-                    <ToggleButton value="no" aria-label={t("no")}>
-                        <ClearIcon />
-                    </ToggleButton>
-                </ToggleButtonGroup>
+                <Stack sx={{ gap: "10px" }}>
+                    <Typography variant="small" color="text.muted">
+                        {/* Use the face count as as stand-in for the photo count */}
+                        {t("photos_count", { count: item.faces.length })}
+                    </Typography>
+                    <SuggestionFaceList faces={item.previewFaces} />
+                </Stack>
+                {!item.fixed && (
+                    <ToggleButtonGroup
+                        value={fromItemValue(item, marks)}
+                        exclusive
+                        onChange={(_, v) => onMarkItem(item, toItemValue(v))}
+                    >
+                        <ToggleButton value="no" aria-label={t("no")}>
+                            <ClearIcon />
+                        </ToggleButton>
+                        <ToggleButton value="yes" aria-label={pt("Yes")}>
+                            <CheckIcon />
+                        </ToggleButton>
+                    </ToggleButtonGroup>
+                )}
             </ListItem>
         ))}
     </List>
 );
+
+const fromItemValue = (
+    item: SCItem,
+    marks: Map<string, boolean | undefined>,
+) => {
+    // Use the in-memory state if available. For choices, fallback to their
+    // original state.
+    const resolved = marks.has(item.id) ? marks.get(item.id) : item.accepted;
+    return resolved ? "yes" : resolved === false ? "no" : undefined;
+};
+
+const toItemValue = (v: unknown) =>
+    // This dance is needed for TypeScript to recognize the type.
+    v == "yes" ? true : v == "no" ? false : undefined;

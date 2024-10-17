@@ -794,5 +794,5 @@ export const deleteCGroup = async ({ id }: CGroup) => {
  *
  * The suggestion computation happens in a web worker.
  */
-export const suggestionsForPerson = async (person: CGroupPerson) =>
-    worker().then((w) => w.suggestionsForPerson(person));
+export const suggestionsAndChoicesForPerson = async (person: CGroupPerson) =>
+    worker().then((w) => w.suggestionsAndChoicesForPerson(person));

@@ -176,6 +176,7 @@ class SettingsPage extends StatelessWidget {
 
   Future<void> _showVerifyIdentityDialog(BuildContext context) async {
     await showDialog(
+      useRootNavigator: false,
       context: context,
       builder: (BuildContext context) {
         return VerifyIdentifyDialog(self: true);

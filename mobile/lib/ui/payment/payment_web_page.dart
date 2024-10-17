@@ -143,6 +143,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
   // show dialog to handle accidental back press.
   Future<bool> _buildPageExitWidget(BuildContext context) async {
     final result = await showDialog(
+      useRootNavigator: false,
       context: context,
       builder: (context) => AlertDialog(
         title: Text(S.of(context).areYouSureYouWantToExit),
@@ -199,6 +200,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
 
   Future<void> _handlePaymentFailure(String reason) async {
     await showDialog(
+      useRootNavigator: false,
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
@@ -251,6 +253,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
   // warn the user to wait for sometime before trying another payment
   Future<dynamic> _showExitPageDialog({String? title, String? content}) {
     return showDialog(
+      useRootNavigator: false,
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
