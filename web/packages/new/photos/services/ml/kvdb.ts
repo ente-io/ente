@@ -15,8 +15,8 @@ const ClusterIDsByCGroupID = z.record(z.string(), z.array(z.string()));
 export type ClusterIDsByCGroupID = z.infer<typeof ClusterIDsByCGroupID>;
 
 /**
- * Return the locally persisted record of clusters per person that the user has
- * rejected as not belonging to that person.
+ * Return the locally persisted record of clusters per cgroup that the user has
+ * rejected as not belonging to that cgroup.
  *
  * [Note: Persistent KV pairs related to ML]
  *
@@ -39,10 +39,22 @@ export const saveRejectedClusters = (entries: ClusterIDsByCGroupID) =>
 
 /**
  * Return the list of locally persisted clusters that the user has rejected as
- * not belonging to a particular person (as identified by the person's
- * {@link cgroupID}).
+ * not belonging to a particular cgroup (as identified by its {@link cgroupID}).
  */
 export const savedRejectedClustersForCGroup = async (
     cgroupID: string,
 ): Promise<string[]> =>
     savedRejectedClusters().then((cs) => cs[cgroupID] ?? []);
+
+/**
+ * Update the locally persisted record of rejected clusters for the given cgroup
+ * (as identified by its {@link cgroupID}).
+ */
+export const saveRejectedClustersForCGroup = async (
+    cgroupID: string,
+    clusterIDs: string[],
+) => {
+    const rejectedClusters = await savedRejectedClusters();
+    rejectedClusters[cgroupID] = clusterIDs;
+    return saveRejectedClusters(rejectedClusters);
+};

@@ -17,6 +17,7 @@ import {
     deleteCGroup,
     renameCGroup,
     suggestionsAndChoicesForPerson,
+    updateAssignedClustersForCGroup,
 } from "@/new/photos/services/ml";
 import {
     type CGroupPerson,
@@ -52,7 +53,10 @@ import {
 import { t } from "i18next";
 import React, { useEffect, useReducer, useState } from "react";
 import { isInternalUser } from "../../services/feature-flags";
-import { savedRejectedClustersForCGroup } from "../../services/ml/kvdb";
+import {
+    savedRejectedClustersForCGroup,
+    saveRejectedClustersForCGroup,
+} from "../../services/ml/kvdb";
 import { useAppContext } from "../../types/context";
 import { AddPersonDialog } from "../AddPersonDialog";
 import { SpaceBetweenFlex } from "../mui";
@@ -690,20 +694,16 @@ const saveSuggestionsAndChoices = async (
     }
 
     if (didUpdateAssigned) {
-        addClusterToCGroup(
+        await updateAssignedClustersForCGroup(
             ensure(person.cgroup),
-            cluster,
-        ),
-
-    }
-
-    const newlyAddedClusterIDs = new Set<string>();
-    const newlyRemovedClusterIDs = new Set<string>();
-    for (const [clusterID, assigned] of state.marks.entries()) {
-        (assigned ? newlyAddedClusterIDs : newlyRemovedClusterIDs).add(
-            clusterID,
+            assignedClusters,
         );
     }
 
-    const updatedAssignedClusters = assignedClusters.filter();
+    if (didUpdateRejected) {
+        await saveRejectedClustersForCGroup(
+            person.cgroup.id,
+            rejectedClusterIDs,
+        );
+    }
 };
