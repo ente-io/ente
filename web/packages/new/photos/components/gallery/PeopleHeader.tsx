@@ -358,7 +358,7 @@ const suggestionsDialogReducer = (
             } else {
                 updates.set(item.id, value);
             }
-            return { ...state, updates: updates };
+            return { ...state, updates };
         }
         case "toggleHistory":
             return { ...state, showChoices: !state.showChoices };
