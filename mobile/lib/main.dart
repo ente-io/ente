@@ -24,6 +24,7 @@ import 'package:photos/core/network/network.dart';
 import "package:photos/db/ml/db.dart";
 import 'package:photos/db/upload_locks_db.dart';
 import 'package:photos/ente_theme_data.dart';
+import "package:photos/extensions/stop_watch.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
@@ -197,6 +198,7 @@ void _headlessTaskHandler(HeadlessTask task) {
 Future<void> _init(bool isBackground, {String via = ''}) async {
   try {
     bool initComplete = false;
+    final TimeLogger tlog = TimeLogger();
     Future.delayed(const Duration(seconds: 15), () {
       if (!initComplete && !isBackground) {
         _logger.severe("Stuck on splash screen for >= 15 seconds");
@@ -209,79 +211,79 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     });
     if (!isBackground) _heartBeatOnInit(0);
     _isProcessRunning = true;
-    _logger.info("Initializing...  inBG =$isBackground via: $via");
+    _logger.info("Initializing...  inBG =$isBackground via: $via $tlog");
     final SharedPreferences preferences = await SharedPreferences.getInstance();
     final PackageInfo packageInfo = await PackageInfo.fromPlatform();
     await _logFGHeartBeatInfo(preferences);
-    _logger.info("_logFGHeartBeatInfo done");
+    _logger.info("_logFGHeartBeatInfo done $tlog");
     unawaited(_scheduleHeartBeat(preferences, isBackground));
     NotificationService.instance.init(preferences);
     AppLifecycleService.instance.init(preferences);
     if (isBackground) {
-      AppLifecycleService.instance.onAppInBackground('init via: $via');
+      AppLifecycleService.instance.onAppInBackground('init via: $via $tlog');
     } else {
-      AppLifecycleService.instance.onAppInForeground('init via: $via');
+      AppLifecycleService.instance.onAppInForeground('init via: $via $tlog');
     }
     // Start workers asynchronously. No need to wait for them to start
     Computer.shared().turnOn(workersCount: 4).ignore();
     CryptoUtil.init();
 
-    _logger.info("Lockscreen init");
+    _logger.info("Lockscreen init $tlog");
     unawaited(LockScreenSettings.instance.init(preferences));
 
-    _logger.info("Configuration init");
+    _logger.info("Configuration init $tlog");
     await Configuration.instance.init();
-    _logger.info("Configuration done");
+    _logger.info("Configuration done $tlog");
 
-    _logger.info("NetworkClient init");
+    _logger.info("NetworkClient init $tlog");
     await NetworkClient.instance.init(packageInfo);
-    _logger.info("NetworkClient init done");
+    _logger.info("NetworkClient init done $tlog");
 
     ServiceLocator.instance
         .init(preferences, NetworkClient.instance.enteDio, packageInfo);
 
-    _logger.info("UserService init");
+    _logger.info("UserService init $tlog");
     await UserService.instance.init();
-    _logger.info("UserService init done");
+    _logger.info("UserService init done $tlog");
 
-    _logger.info("LocationService init");
+    _logger.info("LocationService init $tlog");
     LocationService.instance.init(preferences);
-    _logger.info("LocationService init done");
+    _logger.info("LocationService init done $tlog");
 
-    _logger.info("UserRemoteFlagService init");
+    _logger.info("UserRemoteFlagService init $tlog");
     await UserRemoteFlagService.instance.init();
-    _logger.info("UserRemoteFlagService init done");
+    _logger.info("UserRemoteFlagService init done $tlog");
 
-    _logger.info("BillingService init");
+    _logger.info("BillingService init $tlog");
     BillingService.instance.init();
-    _logger.info("BillingService init done");
+    _logger.info("BillingService init done $tlog");
 
-    _logger.info("CollectionsService init");
+    _logger.info("CollectionsService init $tlog");
     await CollectionsService.instance.init(preferences);
-    _logger.info("CollectionsService init done");
+    _logger.info("CollectionsService init done $tlog");
 
     FavoritesService.instance.initFav().ignore();
 
-    _logger.info("FileUploader init");
+    _logger.info("FileUploader init $tlog");
     await FileUploader.instance.init(preferences, isBackground);
-    _logger.info("FileUploader init done");
+    _logger.info("FileUploader init done $tlog");
 
-    _logger.info("LocalSyncService init");
+    _logger.info("LocalSyncService init $tlog");
     await LocalSyncService.instance.init(preferences);
-    _logger.info("LocalSyncService init done");
+    _logger.info("LocalSyncService init done $tlog");
 
     TrashSyncService.instance.init(preferences);
     RemoteSyncService.instance.init(preferences);
 
-    _logger.info("SyncService init");
+    _logger.info("SyncService init $tlog");
     await SyncService.instance.init(preferences);
-    _logger.info("SyncService init done");
+    _logger.info("SyncService init done $tlog");
 
     MemoriesService.instance.init(preferences);
     LocalFileUpdateService.instance.init(preferences);
     SearchService.instance.init();
     FileDataService.instance.init(preferences);
-    _logger.info("RemoteFileMLService done");
+    _logger.info("RemoteFileMLService done $tlog");
     if (!isBackground &&
         Platform.isAndroid &&
         await HomeWidgetService.instance.countHomeWidgets() == 0) {
@@ -296,11 +298,11 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
         );
       });
     }
-    _logger.info("PushService/HomeWidget done");
+    _logger.info("PushService/HomeWidget done $tlog");
     unawaited(SemanticSearchService.instance.init());
     MachineLearningController.instance.init();
 
-    _logger.info("MachineLearningController done");
+    _logger.info("MachineLearningController done $tlog");
     unawaited(MLService.instance.init());
     PersonService.init(
       entityService,
@@ -310,9 +312,9 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     MagicCacheService.instance.init(preferences);
 
     initComplete = true;
-    _logger.info("Initialization done");
+    _logger.info("Initialization done $tlog");
   } catch (e, s) {
-    _logger.severe("Error in init", e, s);
+    _logger.severe("Error in init ", e, s);
     rethrow;
   }
 }
