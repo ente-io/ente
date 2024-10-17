@@ -150,6 +150,7 @@
   "tryAgain": "Riprova",
   "viewRecoveryKey": "Visualizza chiave di recupero",
   "confirmRecoveryKey": "Conferma chiave di recupero",
+  "recoveryKeyVerifyReason": "Se hai dimenticato la password, la tua chiave di ripristino è l'unico modo per recuperare le tue foto. La puoi trovare in Impostazioni > Account.\n\nInserisci la tua chiave di recupero per verificare di averla salvata correttamente.",
   "confirmYourRecoveryKey": "Conferma la tua chiave di recupero",
   "addViewer": "Aggiungi in sola lettura",
   "addCollaborator": "Aggiungi collaboratore",
