@@ -767,7 +767,6 @@
     "description": "Display text for an action which triggers a restore of item from trash",
     "type": "text"
   },
-  "trashDaysLeft": "{count, plural, one {} few {{count} zile}=0 {} =1 {O zi} other {{count} de zile}}",
   "@trashDaysLeft": {
     "description": "Text to indicate number of days remaining before permanent deletion",
     "placeholders": {

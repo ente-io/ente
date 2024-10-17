@@ -5,7 +5,6 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import "package:photos/core/configuration.dart";
-import "package:photos/core/network/network.dart";
 import "package:photos/db/entities_db.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/gateways/entity_gw.dart";
@@ -20,19 +19,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 class EntityService {
   static const int fetchLimit = 500;
   final _logger = Logger((EntityService).toString());
+  final SharedPreferences _prefs;
+  final EntityGateway _gateway;
   final _config = Configuration.instance;
-  late SharedPreferences _prefs;
-  late EntityGateway _gateway;
-  late FilesDB _db;
+  late final FilesDB _db = FilesDB.instance;
 
-  EntityService._privateConstructor();
-
-  static final EntityService instance = EntityService._privateConstructor();
-
-  Future<void> init() async {
-    _prefs = await SharedPreferences.getInstance();
-    _db = FilesDB.instance;
-    _gateway = EntityGateway(NetworkClient.instance.enteDio);
+  EntityService(this._prefs, this._gateway) {
+    debugPrint("EntityService constructor");
   }
 
   String _getEntityKeyPrefix(EntityType type) {

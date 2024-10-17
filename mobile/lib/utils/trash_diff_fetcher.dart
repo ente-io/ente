@@ -6,7 +6,7 @@ import 'package:photos/core/network/network.dart';
 import 'package:photos/models/file/trash_file.dart';
 import "package:photos/models/metadata/file_magic.dart";
 import 'package:photos/utils/crypto_util.dart';
-import 'package:photos/utils/file_download_util.dart';
+import "package:photos/utils/file_key.dart";
 
 class TrashDiffFetcher {
   final _logger = Logger("TrashDiffFetcher");
