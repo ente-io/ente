@@ -29,7 +29,6 @@ import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/collections_service.dart';
-import "package:photos/services/entity_service.dart";
 import 'package:photos/services/favorites_service.dart';
 import "package:photos/services/filedata/filedata_service.dart";
 import 'package:photos/services/home_widget_service.dart';
@@ -245,10 +244,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     await UserService.instance.init();
     _logger.info("UserService init done");
 
-    _logger.info("EntityService init");
-    await EntityService.instance.init();
-    _logger.info("EntityService init done");
-
     _logger.info("LocationService init");
     LocationService.instance.init(preferences);
     _logger.info("LocationService init done");
@@ -308,7 +303,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _logger.info("MachineLearningController done");
     unawaited(MLService.instance.init());
     PersonService.init(
-      EntityService.instance,
+      entityService,
       MLDataDB.instance,
       preferences,
     );

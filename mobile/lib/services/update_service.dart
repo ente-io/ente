@@ -23,7 +23,7 @@ class UpdateService {
   UpdateService(SharedPreferences prefs, PackageInfo packageInfo)
       : _prefs = prefs,
         _packageInfo = packageInfo {
-    debugPrint("UpdateService constructor called");
+    debugPrint("UpdateService constructor");
   }
 
   Future<bool> showChangeLog() async {

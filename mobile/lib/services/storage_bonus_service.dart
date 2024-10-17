@@ -1,4 +1,5 @@
 import "package:dio/dio.dart";
+import "package:flutter/foundation.dart";
 import "package:photos/gateways/storage_bonus_gw.dart";
 import "package:photos/models/api/storage_bonus/storage_bonus.dart";
 import "package:shared_preferences/shared_preferences.dart";
@@ -11,7 +12,9 @@ class StorageBonusService {
   final String _showStorageBonusTapCount = "showStorageBonus.tap_count";
 
   StorageBonusService(this.prefs, Dio enteDio)
-      : gateway = StorageBonusGateway(enteDio);
+      : gateway = StorageBonusGateway(enteDio) {
+    debugPrint("StorageBonusService constructor");
+  }
 
   // returns true if _showStorageBonusTapCount value is less than minTapCountBeforeHidingBanner
   bool shouldShowStorageBonus() {
