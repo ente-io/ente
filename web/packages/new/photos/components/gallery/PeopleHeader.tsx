@@ -25,6 +25,7 @@ import {
     type PersonSuggestionsAndChoices,
     type PreviewableCluster,
 } from "@/new/photos/services/ml/people";
+import { ensure } from "@/utils/ensure";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
 import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
 import AddIcon from "@mui/icons-material/Add";
@@ -647,7 +648,7 @@ const saveSuggestionsAndChoices = async (
         if (choice) {
             return { id, faces: choice.faces };
         }
-        throw new Error(`Unexpected cluster ${id}`);
+        return undefined;
     };
 
     let didUpdateAssigned = false;
@@ -660,7 +661,7 @@ const saveSuggestionsAndChoices = async (
             }
 
             // Add it to the list of assigned clusters for the person.
-            assignedClusters.push(clusterForID(clusterID));
+            assignedClusters.push(ensure(clusterForID(clusterID)));
             didUpdateAssigned = true;
             // Remove it from the list of rejected clusters (if needed).
             if (rejectedClusterIDs.includes(clusterID)) {
@@ -686,6 +687,14 @@ const saveSuggestionsAndChoices = async (
             rejectedClusterIDs.push(clusterID);
             didUpdateRejected = true;
         }
+    }
+
+    if (didUpdateAssigned) {
+        addClusterToCGroup(
+            ensure(person.cgroup),
+            cluster,
+        ),
+
     }
 
     const newlyAddedClusterIDs = new Set<string>();
