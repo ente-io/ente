@@ -24,7 +24,6 @@ import {
     type PersonSuggestionsAndChoices,
     type PreviewableCluster,
 } from "@/new/photos/services/ml/people";
-import { wait } from "@/utils/promise";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
 import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
 import AddIcon from "@mui/icons-material/Add";
@@ -443,10 +442,12 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
         dispatch({ type: "mark", item, value });
 
     const handleSave = async () => {
+        dispatch({ type: "save" });
         try {
-            // TODO-Cluster
-            // await attributes.continue?.action?.();
-            await wait(3000);
+            // This state will not include the effects of the `dispatch({ type:
+            // "save"})` above, but that's fine, that only toggles the activity
+            // which is not going to affect the state that is saved.
+            await saveSuggestionsAndChoices(state);
             resetPersonAndClose();
         } catch (e) {
             log.error("Failed to save suggestion review", e);
@@ -553,7 +554,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                     color={"accent"}
                     onClick={handleSave}
                 >
-                    {hasUnsavedChanges ? pt("TODO Not impl") : t("save")}
+                    {t("save")}
                 </LoadingButton>
             </DialogActions>
         </Dialog>
@@ -624,3 +625,8 @@ const fromItemValue = (
 const toItemValue = (v: unknown) =>
     // This dance is needed for TypeScript to recognize the type.
     v == "yes" ? true : v == "no" ? false : undefined;
+
+/**
+ * Implementation for the "save" action on the SuggestionsDialog.
+ */
+const saveSuggestionsAndChoices = async (state: SuggestionsDialogState) => {};
