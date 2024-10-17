@@ -41,7 +41,7 @@ class FaceFilter extends HierarchicalSearchFilter {
 
   @override
   bool isMatch(EnteFile file) {
-    return false;
+    throw UnimplementedError();
   }
 
   @override

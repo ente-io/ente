@@ -981,4 +981,22 @@ class MLDataDB {
       _logger.severe('Error dropping feedback tables', e);
     }
   }
+
+  Future<List<int>> getFileIDsFromFace(List<String> faceIDs) async {
+    final fileIDS = <int>[];
+    String inParam = "";
+    for (String faceID in faceIDs) {
+      inParam += "'$faceID', ";
+    }
+    inParam = inParam.substring(0, inParam.length - 2);
+    final db = await instance.asyncDB;
+    final result = await db.getAll(
+      'SELECT $fileIDColumn FROM $facesTable WHERE $faceIDColumn IN ($inParam)',
+    );
+
+    for (var row in result) {
+      fileIDS.add(row[fileIDColumn] as int);
+    }
+    return fileIDS;
+  }
 }

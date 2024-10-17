@@ -56,6 +56,9 @@ class _RecommendedFiltersState extends State<RecommendedFilters> {
                   clusterId: filter.clusterId,
                   faceThumbnailFile: filter.faceFile,
                   name: filter.name(),
+                  onTap: () {
+                    _searchFilterDataProvider.applyFilters([filter]);
+                  },
                 )
               : GenericFilterChip(
                   label: filter.name(),

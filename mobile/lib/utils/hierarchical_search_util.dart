@@ -31,7 +31,36 @@ Future<List<EnteFile>> getFilteredFiles(
   final resultsNeverComputedFilters = <HierarchicalSearchFilter>[];
 
   for (HierarchicalSearchFilter filter in filters) {
-    if (filter.getMatchedUploadedIDs().isEmpty) {
+    if (filter is FaceFilter && filter.getMatchedUploadedIDs().isEmpty) {
+      try {
+        if (filter.personId != null) {
+          //getFilesForPerson
+          final personClusterIDs = await MLDataDB.instance.getPersonClusterIDs(
+            filter.personId!,
+          );
+          final cluterToFaceIDs =
+              await MLDataDB.instance.getClusterToFaceIDs(personClusterIDs);
+
+          final faceIDs = <String>[];
+          for (Iterable<String> faceIDsIterable in cluterToFaceIDs.values) {
+            faceIDs.addAll(faceIDsIterable);
+          }
+
+          final fileIDs = await MLDataDB.instance.getFileIDsFromFace(faceIDs);
+          filter.matchedUploadedIDs.addAll(fileIDs);
+        } else if (filter.clusterId != null) {
+          //getFilesForCluster
+
+          final cluterToFaceIDs =
+              await MLDataDB.instance.getClusterToFaceIDs({filter.clusterId!});
+          final faceIDs = cluterToFaceIDs.values.expand((e) => e).toList();
+          final fileIDs = await MLDataDB.instance.getFileIDsFromFace(faceIDs);
+          filter.matchedUploadedIDs.addAll(fileIDs);
+        }
+      } catch (e) {
+        log("Error in face filter: $e");
+      }
+    } else if (filter.getMatchedUploadedIDs().isEmpty) {
       resultsNeverComputedFilters.add(filter);
     }
   }

@@ -57,6 +57,9 @@ class _AppliedFiltersState extends State<AppliedFilters> {
                   clusterId: filter.clusterId,
                   faceThumbnailFile: EnteFile(),
                   name: filter.name(),
+                  onTap: () {
+                    _searchFilterDataProvider.removeAppliedFilters([filter]);
+                  },
                 )
               : GenericFilterChip(
                   label: filter.name(),
