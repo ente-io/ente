@@ -11,21 +11,19 @@ import 'package:tuple/tuple.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class UpdateService {
-  UpdateService._privateConstructor();
-
-  static final UpdateService instance = UpdateService._privateConstructor();
   static const kUpdateAvailableShownTimeKey = "update_available_shown_time_key";
   static const changeLogVersionKey = "update_change_log_key";
   static const currentChangeLogVersion = 24;
 
   LatestVersionInfo? _latestVersion;
   final _logger = Logger("UpdateService");
-  late PackageInfo _packageInfo;
-  late SharedPreferences _prefs;
+  final PackageInfo _packageInfo;
+  final SharedPreferences _prefs;
 
-  Future<void> init() async {
-    _packageInfo = await PackageInfo.fromPlatform();
-    _prefs = await SharedPreferences.getInstance();
+  UpdateService(SharedPreferences prefs, PackageInfo packageInfo)
+      : _prefs = prefs,
+        _packageInfo = packageInfo {
+    debugPrint("UpdateService constructor called");
   }
 
   Future<bool> showChangeLog() async {

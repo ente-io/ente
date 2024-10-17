@@ -12,6 +12,7 @@ import "package:flutter/services.dart";
 import "package:flutter_displaymode/flutter_displaymode.dart";
 import 'package:logging/logging.dart';
 import "package:media_kit/media_kit.dart";
+import "package:package_info_plus/package_info_plus.dart";
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/app.dart';
 import "package:photos/audio_session_handler.dart";
@@ -47,7 +48,6 @@ import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/services/search_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/trash_sync_service.dart';
-import 'package:photos/services/update_service.dart';
 import 'package:photos/services/user_remote_flag_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/tools/app_lock.dart';
@@ -176,7 +176,7 @@ Future<void> _runInBackground(String taskId) async {
     [
       _homeWidgetSync(),
       () async {
-        UpdateService.instance.showUpdateNotification().ignore();
+        updateService.showUpdateNotification().ignore();
         await _sync('bgSync');
       }(),
     ],
@@ -212,7 +212,8 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _isProcessRunning = true;
     _logger.info("Initializing...  inBG =$isBackground via: $via");
     final SharedPreferences preferences = await SharedPreferences.getInstance();
-    await _logFGHeartBeatInfo();
+    final PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    await _logFGHeartBeatInfo(preferences);
     _logger.info("_logFGHeartBeatInfo done");
     unawaited(_scheduleHeartBeat(preferences, isBackground));
     NotificationService.instance.init(preferences);
@@ -234,10 +235,11 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _logger.info("Configuration done");
 
     _logger.info("NetworkClient init");
-    await NetworkClient.instance.init();
+    await NetworkClient.instance.init(packageInfo);
     _logger.info("NetworkClient init done");
 
-    ServiceLocator.instance.init(preferences, NetworkClient.instance.enteDio);
+    ServiceLocator.instance
+        .init(preferences, NetworkClient.instance.enteDio, packageInfo);
 
     _logger.info("UserService init");
     await UserService.instance.init();
@@ -254,10 +256,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _logger.info("UserRemoteFlagService init");
     await UserRemoteFlagService.instance.init();
     _logger.info("UserRemoteFlagService init done");
-
-    _logger.info("UpdateService init");
-    await UpdateService.instance.init();
-    _logger.info("UpdateService init done");
 
     _logger.info("BillingService init");
     BillingService.instance.init();
@@ -459,9 +457,8 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   }
 }
 
-Future<void> _logFGHeartBeatInfo() async {
+Future<void> _logFGHeartBeatInfo(SharedPreferences prefs) async {
   final bool isRunningInFG = await _isRunningInForeground();
-  final prefs = await SharedPreferences.getInstance();
   await prefs.reload();
   final lastFGTaskHeartBeatTime = prefs.getInt(kLastFGTaskHeartBeatTime) ?? 0;
   final String lastRun = lastFGTaskHeartBeatTime == 0

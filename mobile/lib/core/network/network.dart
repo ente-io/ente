@@ -14,9 +14,8 @@ class NetworkClient {
   late Dio _dio;
   late Dio _enteDio;
 
-  Future<void> init() async {
+  Future<void> init(PackageInfo packageInfo) async {
     await FkUserAgent.init();
-    final packageInfo = await PackageInfo.fromPlatform();
     final endpoint = Configuration.instance.getHttpEndpoint();
     _dio = Dio(
       BaseOptions(

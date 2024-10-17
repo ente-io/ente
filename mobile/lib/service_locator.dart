@@ -2,22 +2,26 @@ import "package:dio/dio.dart";
 import "package:ente_cast/ente_cast.dart";
 import "package:ente_cast_normal/ente_cast_normal.dart";
 import "package:ente_feature_flag/ente_feature_flag.dart";
+import "package:package_info_plus/package_info_plus.dart";
 import "package:photos/services/storage_bonus_service.dart";
+import "package:photos/services/update_service.dart";
 import "package:photos/utils/local_settings.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class ServiceLocator {
   late final SharedPreferences prefs;
   late final Dio enteDio;
+  late final PackageInfo packageInfo;
 
   // instance
   ServiceLocator._privateConstructor();
 
   static final ServiceLocator instance = ServiceLocator._privateConstructor();
 
-  init(SharedPreferences prefs, Dio enteDio) {
+  init(SharedPreferences prefs, Dio enteDio, PackageInfo packageInfo) {
     this.prefs = prefs;
     this.enteDio = enteDio;
+    this.packageInfo = packageInfo;
   }
 }
 
@@ -49,4 +53,13 @@ StorageBonusService get storageBonusService {
     ServiceLocator.instance.enteDio,
   );
   return _storageBonusService!;
+}
+
+UpdateService? _updateService;
+UpdateService get updateService {
+  _updateService ??= UpdateService(
+    ServiceLocator.instance.prefs,
+    ServiceLocator.instance.packageInfo,
+  );
+  return _updateService!;
 }
