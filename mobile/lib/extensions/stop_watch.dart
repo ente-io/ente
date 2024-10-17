@@ -50,7 +50,7 @@ class TimeLogger {
     if (diff > logThreshold) {
       res = "[$context: $diff ms]";
     } else {
-      res = "";
+      res = "[]";
     }
     _start = DateTime.now();
     return res;
