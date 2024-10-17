@@ -816,5 +816,6 @@
   "addPhotos": "הוסף תמונות",
   "create": "צור",
   "viewAll": "הצג הכל",
-  "hiding": "מחביא..."
+  "hiding": "מחביא...",
+  "personName": "Person name"
 }

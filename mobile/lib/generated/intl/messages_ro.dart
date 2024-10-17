@@ -776,6 +776,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Toate articolele din coșul de gunoi vor fi șterse definitiv\n\nAceastă acțiune nu poate fi anulată"),
         "permanentlyDelete":
             MessageLookupByLibrary.simpleMessage("Ștergere definitivă"),
+        "personName": MessageLookupByLibrary.simpleMessage("Person name"),
         "photoGridSize":
             MessageLookupByLibrary.simpleMessage("Dimensiunea grilei foto"),
         "photoSmallCase": MessageLookupByLibrary.simpleMessage("fotografie"),

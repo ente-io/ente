@@ -980,6 +980,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "permanentlyDelete": MessageLookupByLibrary.simpleMessage("永久删除"),
         "permanentlyDeleteFromDevice":
             MessageLookupByLibrary.simpleMessage("要从设备中永久删除吗？"),
+        "personName": MessageLookupByLibrary.simpleMessage("Person name"),
         "photoDescriptions": MessageLookupByLibrary.simpleMessage("照片说明"),
         "photoGridSize": MessageLookupByLibrary.simpleMessage("照片网格大小"),
         "photoSmallCase": MessageLookupByLibrary.simpleMessage("照片"),

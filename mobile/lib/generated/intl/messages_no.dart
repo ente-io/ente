@@ -295,6 +295,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Vi lagrer ikke dette passordet, så hvis du glemmer det, <underline>kan vi ikke dekryptere dataene dine</underline>"),
         "pendingItems":
             MessageLookupByLibrary.simpleMessage("Ventende elementer"),
+        "personName": MessageLookupByLibrary.simpleMessage("Person name"),
         "photoGridSize":
             MessageLookupByLibrary.simpleMessage("Bilderutenettstørrelse"),
         "photoSmallCase": MessageLookupByLibrary.simpleMessage("bilde"),

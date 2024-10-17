@@ -985,6 +985,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Kalıcı olarak sil"),
         "permanentlyDeleteFromDevice": MessageLookupByLibrary.simpleMessage(
             "Cihazdan kalıcı olarak silinsin mi?"),
+        "personName": MessageLookupByLibrary.simpleMessage("Person name"),
         "photoDescriptions":
             MessageLookupByLibrary.simpleMessage("Fotoğraf Açıklaması"),
         "photoGridSize":

@@ -1199,6 +1199,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Permanent verwijderen"),
         "permanentlyDeleteFromDevice": MessageLookupByLibrary.simpleMessage(
             "Permanent verwijderen van apparaat?"),
+        "personName": MessageLookupByLibrary.simpleMessage("Person name"),
         "photoDescriptions":
             MessageLookupByLibrary.simpleMessage("Foto beschrijvingen"),
         "photoGridSize":

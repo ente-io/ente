@@ -241,6 +241,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("ผู้คนที่ใช้รหัสของคุณ"),
         "permanentlyDelete":
             MessageLookupByLibrary.simpleMessage("ลบอย่างถาวร"),
+        "personName": MessageLookupByLibrary.simpleMessage("Person name"),
         "photoSmallCase": MessageLookupByLibrary.simpleMessage("รูปภาพ"),
         "pleaseTryAgain":
             MessageLookupByLibrary.simpleMessage("กรุณาลองอีกครั้ง"),

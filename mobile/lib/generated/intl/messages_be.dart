@@ -85,6 +85,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "ok": MessageLookupByLibrary.simpleMessage("Добра"),
         "oops": MessageLookupByLibrary.simpleMessage("Вой"),
         "password": MessageLookupByLibrary.simpleMessage("Пароль"),
+        "personName": MessageLookupByLibrary.simpleMessage("Person name"),
         "recoverButton": MessageLookupByLibrary.simpleMessage("Аднавіць"),
         "recoverySuccessful":
             MessageLookupByLibrary.simpleMessage("Паспяховае аднаўленне!"),

@@ -9745,6 +9745,16 @@ class S {
       args: [folderName],
     );
   }
+
+  /// `Person name`
+  String get personName {
+    return Intl.message(
+      'Person name',
+      name: 'personName',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

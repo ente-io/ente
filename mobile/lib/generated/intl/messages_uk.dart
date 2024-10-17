@@ -1191,6 +1191,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Остаточно видалити"),
         "permanentlyDeleteFromDevice": MessageLookupByLibrary.simpleMessage(
             "Остаточно видалити з пристрою?"),
+        "personName": MessageLookupByLibrary.simpleMessage("Person name"),
         "photoDescriptions":
             MessageLookupByLibrary.simpleMessage("Опис фотографії"),
         "photoGridSize":

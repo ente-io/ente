@@ -107,6 +107,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "ok": MessageLookupByLibrary.simpleMessage("Ok"),
         "oops": MessageLookupByLibrary.simpleMessage("Ups"),
         "password": MessageLookupByLibrary.simpleMessage("Adgangskode"),
+        "personName": MessageLookupByLibrary.simpleMessage("Person name"),
         "pleaseContactSupportAndWeWillBeHappyToHelp":
             MessageLookupByLibrary.simpleMessage(
                 "Kontakt support@ente.io og vi vil være glade for at hjælpe!"),

@@ -1343,5 +1343,6 @@
   "mostRecent": "Od najnowszych",
   "mostRelevant": "Najbardziej trafne",
   "loadingYourPhotos": "Wczytywanie Twoich zdjęć...",
-  "processingImport": "Przetwarzanie {folderName}..."
+  "processingImport": "Przetwarzanie {folderName}...",
+  "personName": "Person name"
 }

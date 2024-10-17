@@ -134,7 +134,7 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
                             right: 16,
                           ),
                           child: TextInputWidget(
-                            hintText: 'Person name',
+                            hintText: S.of(context).personName,
                             prefixIcon: Icons.search_rounded,
                             onChange: (value) {
                               setState(() {

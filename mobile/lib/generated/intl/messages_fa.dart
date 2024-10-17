@@ -273,6 +273,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "passwordStrength": m41,
         "passwordWarning": MessageLookupByLibrary.simpleMessage(
             "ما این رمز عبور را ذخیره نمی‌کنیم، بنابراین اگر فراموش کنید، <underline>نمی‌توانیم اطلاعات شما را رمزگشایی کنیم</underline>"),
+        "personName": MessageLookupByLibrary.simpleMessage("Person name"),
         "photoSmallCase": MessageLookupByLibrary.simpleMessage("عکس"),
         "pleaseGrantPermissions":
             MessageLookupByLibrary.simpleMessage("لطفا دسترسی بدهید"),

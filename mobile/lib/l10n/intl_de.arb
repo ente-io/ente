@@ -1343,5 +1343,6 @@
   "mostRecent": "Neuste",
   "mostRelevant": "Nach Relevanz",
   "loadingYourPhotos": "Lade deine Fotos...",
-  "processingImport": "Verarbeite {folderName}..."
+  "processingImport": "Verarbeite {folderName}...",
+  "personName": "Person name"
 }

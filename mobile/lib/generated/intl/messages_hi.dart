@@ -82,6 +82,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "ok": MessageLookupByLibrary.simpleMessage("ठीक है"),
         "oops": MessageLookupByLibrary.simpleMessage("ओह!"),
         "password": MessageLookupByLibrary.simpleMessage("पासवर्ड"),
+        "personName": MessageLookupByLibrary.simpleMessage("Person name"),
         "recoverButton": MessageLookupByLibrary.simpleMessage("पुनः प्राप्त"),
         "recoverySuccessful":
             MessageLookupByLibrary.simpleMessage("रिकवरी सफल हुई!"),

@@ -452,5 +452,6 @@
   "next": "Nästa",
   "guestView": "Gästvy",
   "showPerson": "Visa person",
-  "sort": "Sortera"
+  "sort": "Sortera",
+  "personName": "Person name"
 }

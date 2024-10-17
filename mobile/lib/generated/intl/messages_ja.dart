@@ -1031,6 +1031,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "permanentlyDelete": MessageLookupByLibrary.simpleMessage("完全に削除"),
         "permanentlyDeleteFromDevice":
             MessageLookupByLibrary.simpleMessage("デバイスから完全に削除しますか？"),
+        "personName": MessageLookupByLibrary.simpleMessage("Person name"),
         "photoDescriptions": MessageLookupByLibrary.simpleMessage("写真の説明"),
         "photoGridSize": MessageLookupByLibrary.simpleMessage("写真のグリッドサイズ"),
         "photoSmallCase": MessageLookupByLibrary.simpleMessage("写真"),

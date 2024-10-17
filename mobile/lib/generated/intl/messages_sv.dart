@@ -386,6 +386,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "passwordStrength": m41,
         "passwordWarning": MessageLookupByLibrary.simpleMessage(
             "Vi lagrar inte detta lösenord, så om du glömmer bort det, <underline>kan vi inte dekryptera dina data</underline>"),
+        "personName": MessageLookupByLibrary.simpleMessage("Person name"),
         "photoSmallCase": MessageLookupByLibrary.simpleMessage("foto"),
         "pleaseCheckYourInternetConnectionAndTryAgain":
             MessageLookupByLibrary.simpleMessage(

@@ -153,6 +153,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "oops": MessageLookupByLibrary.simpleMessage("Ups"),
         "passkey": MessageLookupByLibrary.simpleMessage("Slaptaraktas"),
         "password": MessageLookupByLibrary.simpleMessage("Slaptažodis"),
+        "personName": MessageLookupByLibrary.simpleMessage("Person name"),
         "photoSmallCase": MessageLookupByLibrary.simpleMessage("nuotrauka"),
         "privacyPolicyTitle":
             MessageLookupByLibrary.simpleMessage("Privatumo politika"),

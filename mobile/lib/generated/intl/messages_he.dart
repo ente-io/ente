@@ -622,6 +622,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("אנשים משתמשים בקוד שלך"),
         "permanentlyDelete":
             MessageLookupByLibrary.simpleMessage("למחוק לצמיתות?"),
+        "personName": MessageLookupByLibrary.simpleMessage("Person name"),
         "photoGridSize":
             MessageLookupByLibrary.simpleMessage("גודל לוח של התמונה"),
         "photoSmallCase": MessageLookupByLibrary.simpleMessage("תמונה"),
