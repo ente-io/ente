@@ -28,10 +28,12 @@ import type { FaceCluster } from "./cluster";
 import { regenerateFaceCrops } from "./crop";
 import { clearMLDB, getIndexableAndIndexedCounts, savedFaceIndex } from "./db";
 import {
+    _applyPersonSuggestionUpdates,
     filterNamedPeople,
     reconstructPeople,
     type CGroupPerson,
     type Person,
+    type PersonSuggestionUpdates,
 } from "./people";
 import { MLWorker } from "./worker";
 import type { CLIPMatches } from "./worker-types";
@@ -812,3 +814,17 @@ export const deleteCGroup = async ({ id }: CGroup) => {
  */
 export const suggestionsAndChoicesForPerson = async (person: CGroupPerson) =>
     worker().then((w) => w.suggestionsAndChoicesForPerson(person));
+
+/**
+ * Implementation for the "save" action on the SuggestionsDialog.
+ *
+ * See {@link _applyPersonSuggestionUpdates} for more details.
+ */
+export const applyPersonSuggestionUpdates = async (
+    cgroup: CGroup,
+    updates: PersonSuggestionUpdates,
+) => {
+    const masterKey = await masterKeyFromSession();
+    await _applyPersonSuggestionUpdates(cgroup, updates, masterKey);
+    return mlSync();
+};

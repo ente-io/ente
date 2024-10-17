@@ -13,16 +13,17 @@ import { useIsSmallWidth } from "@/base/hooks";
 import { pt } from "@/base/i18n";
 import log from "@/base/log";
 import {
+    applyPersonSuggestionUpdates,
     deleteCGroup,
     renameCGroup,
     suggestionsAndChoicesForPerson,
 } from "@/new/photos/services/ml";
 import {
-    updateChoices,
     type CGroupPerson,
     type ClusterPerson,
     type Person,
     type PersonSuggestionsAndChoices,
+    type PersonSuggestionUpdates,
     type PreviewableCluster,
 } from "@/new/photos/services/ml/people";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
@@ -290,7 +291,7 @@ interface SuggestionsDialogState {
      * - saved choice for which the user has changed their mind.
      * - suggestion that the user has either explicitly assigned or rejected.
      */
-    marks: Map<string, boolean | undefined>;
+    updates: PersonSuggestionUpdates;
 }
 
 type SCItem = PreviewableCluster & { fixed?: boolean; assigned?: boolean };
@@ -303,7 +304,7 @@ type SuggestionsDialogAction =
           personID: string;
           suggestionsAndChoices: PersonSuggestionsAndChoices;
       }
-    | { type: "mark"; item: SCItem; value: boolean | undefined }
+    | { type: "updateItem"; item: SCItem; value: boolean | undefined }
     | { type: "save" }
     | { type: "toggleHistory" }
     | { type: "close" };
@@ -315,7 +316,7 @@ const initialSuggestionsDialogState: SuggestionsDialogState = {
     showChoices: false,
     choices: [],
     suggestions: [],
-    marks: new Map(),
+    updates: new Map(),
 };
 
 const suggestionsDialogReducer = (
@@ -328,7 +329,7 @@ const suggestionsDialogReducer = (
                 ...initialSuggestionsDialogState,
                 choices: [],
                 suggestions: [],
-                marks: new Map(),
+                updates: new Map(),
                 activity: "fetching",
                 personID: action.personID,
             };
@@ -343,21 +344,21 @@ const suggestionsDialogReducer = (
                 choices: action.suggestionsAndChoices.choices,
                 suggestions: action.suggestionsAndChoices.suggestions,
             };
-        case "mark": {
-            const marks = new Map(state.marks);
+        case "updateItem": {
+            const updates = new Map(state.updates);
             const { item, value } = action;
             if (item.assigned === undefined && value === undefined) {
-                // If this was a suggestion, prune marks created as a result of
-                // the user toggling the item back to its original unset state.
-                marks.delete(item.id);
+                // If this was a suggestion, prune previous updates since the
+                // use has toggled the item back to its original unset state.
+                updates.delete(item.id);
             } else if (item.assigned !== undefined && value === item.assigned) {
-                // If this is a choice, prune marks which match the choice's
+                // If this is a choice, prune updates which match the choice's
                 // original assigned state.
-                marks.delete(item.id);
+                updates.delete(item.id);
             } else {
-                marks.set(item.id, value);
+                updates.set(item.id, value);
             }
-            return { ...state, marks };
+            return { ...state, updates: updates };
         }
         case "toggleHistory":
             return { ...state, showChoices: !state.showChoices };
@@ -388,7 +389,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
 
     const isSmallWidth = useIsSmallWidth();
 
-    const hasUnsavedChanges = state.marks.size > 0;
+    const hasUnsavedChanges = state.updates.size > 0;
 
     const resetPersonAndClose = () => {
         dispatch({ type: "close" });
@@ -439,13 +440,13 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
         resetPersonAndClose();
     };
 
-    const handleMark = (item: SCItem, value: boolean | undefined) =>
-        dispatch({ type: "mark", item, value });
+    const handleUpdateItem = (item: SCItem, value: boolean | undefined) =>
+        dispatch({ type: "updateItem", item, value });
 
     const handleSave = async () => {
         dispatch({ type: "save" });
         try {
-            await updateChoices(person.cgroup, [...state.marks.entries()]);
+            await applyPersonSuggestionUpdates(person.cgroup, state.updates);
             resetPersonAndClose();
         } catch (e) {
             log.error("Failed to save suggestion review", e);
@@ -517,8 +518,8 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                 ) : state.showChoices ? (
                     <SuggestionOrChoiceList
                         items={state.choices}
-                        marks={state.marks}
-                        onMarkItem={handleMark}
+                        updates={state.updates}
+                        onUpdateItem={handleUpdateItem}
                     />
                 ) : state.suggestions.length == 0 ? (
                     <CenteredBox>
@@ -532,8 +533,8 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                 ) : (
                     <SuggestionOrChoiceList
                         items={state.suggestions}
-                        marks={state.marks}
-                        onMarkItem={handleMark}
+                        updates={state.updates}
+                        onUpdateItem={handleUpdateItem}
                     />
                 )}
             </DialogContent>
@@ -561,18 +562,18 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
 
 interface SuggestionOrChoiceListProps {
     items: SCItem[];
-    marks: Map<string, boolean | undefined>;
+    updates: PersonSuggestionUpdates;
     /**
      * Callback invoked when the user changes the value associated with the
      * given suggestion or choice.
      */
-    onMarkItem: (item: SCItem, value: boolean | undefined) => void;
+    onUpdateItem: (item: SCItem, value: boolean | undefined) => void;
 }
 
 const SuggestionOrChoiceList: React.FC<SuggestionOrChoiceListProps> = ({
     items,
-    marks,
-    onMarkItem,
+    updates,
+    onUpdateItem,
 }) => (
     <List dense sx={{ width: "100%" }}>
         {items.map((item) => (
@@ -593,9 +594,9 @@ const SuggestionOrChoiceList: React.FC<SuggestionOrChoiceListProps> = ({
                 </Stack>
                 {!item.fixed && (
                     <ToggleButtonGroup
-                        value={fromItemValue(item, marks)}
+                        value={fromItemValue(item, updates)}
                         exclusive
-                        onChange={(_, v) => onMarkItem(item, toItemValue(v))}
+                        onChange={(_, v) => onUpdateItem(item, toItemValue(v))}
                     >
                         <ToggleButton value="no" aria-label={t("no")}>
                             <ClearIcon />
@@ -610,13 +611,12 @@ const SuggestionOrChoiceList: React.FC<SuggestionOrChoiceListProps> = ({
     </List>
 );
 
-const fromItemValue = (
-    item: SCItem,
-    marks: Map<string, boolean | undefined>,
-) => {
+const fromItemValue = (item: SCItem, updates: PersonSuggestionUpdates) => {
     // Use the in-memory state if available. For choices, fallback to their
     // original state.
-    const resolved = marks.has(item.id) ? marks.get(item.id) : item.assigned;
+    const resolved = updates.has(item.id)
+        ? updates.get(item.id)
+        : item.assigned;
     return resolved ? "yes" : resolved === false ? "no" : undefined;
 };
 

@@ -1,16 +1,21 @@
 import { assertionFailed } from "@/base/assert";
 import log from "@/base/log";
 import type { EnteFile } from "@/media/file";
-import { updateAssignedClustersForCGroup } from "@/new/photos/services/ml";
 import { shuffled } from "@/utils/array";
 import { ensure } from "@/utils/ensure";
-import { saveRejectedClustersForCGroup } from "../../services/ml/kvdb";
 import { getLocalFiles } from "../files";
-import { savedCGroups, type CGroup } from "../user-entity";
+import {
+    savedCGroups,
+    updateOrCreateUserEntities,
+    type CGroup,
+} from "../user-entity";
 import type { FaceCluster } from "./cluster";
 import { savedFaceClusters, savedFaceIndexes } from "./db";
 import { fileIDFromFaceID } from "./face";
-import { savedRejectedClustersForCGroup } from "./kvdb";
+import {
+    savedRejectedClustersForCGroup,
+    saveRejectedClustersForCGroup,
+} from "./kvdb";
 import { dotProduct } from "./math";
 
 /**
@@ -535,6 +540,20 @@ const randomSample = <T>(items: T[], n: number) => {
 };
 
 /**
+ * A map specifying the changes to make when the user presses the save button on
+ * the people suggestions dialog.
+ *
+ * Each entry is a (clusterID, assigned) pair.
+ *
+ * * Entries with assigned `true` should be assigned to the cgroup,
+ * * Entries with assigned `false` should be rejected from the cgroup.
+ * * Entries with assigned `undefined` should be reset - i.e. they should be
+ *   removed from both the assigned and rejected choices associated with the
+ *   cgroup (if needed).
+ */
+export type PersonSuggestionUpdates = Map<string, boolean | undefined>;
+
+/**
  * Implementation for the "save" action on the SuggestionsDialog.
  *
  * This function modifies remote and local state to reflect the given
@@ -542,17 +561,15 @@ const randomSample = <T>(items: T[], n: number) => {
  *
  * @param cgroup The cgroup that we want to update.
  *
- * @param updates The changes to make. Each entry is a (clusterID, assigned)
- * pair.
+ * @param updates The changes to make. See {@link PersonSuggestionUpdates}.
  *
- * * Entries with assigned `true` should be assigned to the cgroup,
- * * Entries with assigned `false` should be rejected from the cgroup.
- * * Entries with assigned `undefined` should be removed from both the assigned
- *   and rejected choices associated with the cgroup.
+ * @param masterKey The user's masterKey, which is is used to encrypt and
+ * decrypt the entity key associated with cgroups.
  */
-export const updateChoices = async (
+export const _applyPersonSuggestionUpdates = async (
     cgroup: CGroup,
-    updates: [string, boolean | undefined][],
+    updates: PersonSuggestionUpdates,
+    masterKey: Uint8Array,
 ) => {
     const clusters = await savedFaceClusters();
     const clustersByID = new Map(clusters.map((c) => [c.id, c]));
@@ -597,7 +614,7 @@ export const updateChoices = async (
         }
     };
 
-    for (const [clusterID, assigned] of updates) {
+    for (const [clusterID, assigned] of updates.entries()) {
         switch (assigned) {
             case true /* assign */:
                 // TODO-Cluster sanity check, remove after wrapping up dev
@@ -627,7 +644,12 @@ export const updateChoices = async (
     }
 
     if (assignUpdateCount > 0) {
-        await updateAssignedClustersForCGroup(cgroup, assignedClusters);
+        const assigned = assignedClusters;
+        await updateOrCreateUserEntities(
+            "cgroup",
+            [{ ...cgroup, data: { ...cgroup.data, assigned } }],
+            masterKey,
+        );
     }
 
     if (rejectUpdateCount > 0) {
