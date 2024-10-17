@@ -135,7 +135,7 @@ class UpdateService {
     return _packageInfo.packageName.startsWith("io.ente.photos.independent");
   }
 
-  bool isFdroidFlavor() {
+  bool isFDroidFlavor() {
     if (Platform.isIOS) {
       return false;
     }
@@ -146,12 +146,12 @@ class UpdateService {
     if (Platform.isIOS) {
       return false;
     }
-    return !isIndependentFlavor() && !isFdroidFlavor();
+    return !isIndependentFlavor() && !isFDroidFlavor();
   }
 
   // getRateDetails returns details about the place
   Tuple2<String, String> getRateDetails() {
-    if (isFdroidFlavor() || isIndependentFlavor()) {
+    if (isFDroidFlavor() || isIndependentFlavor()) {
       return const Tuple2(
         "AlternativeTo",
         "https://alternativeto.net/software/ente/about/",
