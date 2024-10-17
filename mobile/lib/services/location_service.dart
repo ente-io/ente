@@ -13,7 +13,7 @@ import "package:photos/models/file/file.dart";
 import "package:photos/models/local_entity_data.dart";
 import "package:photos/models/location/location.dart";
 import 'package:photos/models/location_tag/location_tag.dart';
-import "package:photos/services/entity_service.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/remote_assets_service.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
@@ -36,7 +36,7 @@ class LocationService {
   }
 
   Future<Iterable<LocalEntity<LocationTag>>> _getStoredLocationTags() async {
-    final data = await EntityService.instance.getEntities(EntityType.location);
+    final data = await entityService.getEntities(EntityType.location);
     return data.map(
       (e) => LocalEntity(LocationTag.fromJson(json.decode(e.data)), e.id),
     );
@@ -89,8 +89,10 @@ class LocationService {
         bSquare: b * b,
         centerPoint: centerPoint,
       );
-      await EntityService.instance
-          .addOrUpdate(EntityType.location, locationTag.toJson());
+      await entityService.addOrUpdate(
+        EntityType.location,
+        locationTag.toJson(),
+      );
       Bus.instance.fire(LocationTagUpdatedEvent(LocTagEventType.add));
     } catch (e, s) {
       _logger.severe("Failed to add location tag", e, s);
@@ -177,7 +179,7 @@ class LocationService {
         name: name,
       );
 
-      await EntityService.instance.addOrUpdate(
+      await entityService.addOrUpdate(
         EntityType.location,
         updatedLoationTag.toJson(),
         id: locationTagEntity.id,
@@ -198,7 +200,7 @@ class LocationService {
 
   Future<void> deleteLocationTag(String locTagEntityId) async {
     try {
-      await EntityService.instance.deleteEntry(
+      await entityService.deleteEntry(
         locTagEntityId,
       );
       Bus.instance.fire(

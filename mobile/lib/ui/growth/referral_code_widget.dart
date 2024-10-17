@@ -4,7 +4,7 @@ import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/user_details.dart";
-import "package:photos/services/storage_bonus_service.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/utils/dialog_util.dart";
 
@@ -104,9 +104,7 @@ class ReferralCodeWidget extends StatelessWidget {
         }
 
         try {
-          await StorageBonusService.instance
-              .getGateway()
-              .updateCode(text.trim().toUpperCase());
+          await storageBonusService.updateCode(text);
           notifyParent?.call();
         } catch (e, s) {
           Logger("ReferralCodeWidget").severe("Failed to update code", e, s);

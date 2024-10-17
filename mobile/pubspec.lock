@@ -679,14 +679,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.0"
-  fk_user_agent:
-    dependency: "direct main"
-    description:
-      name: fk_user_agent
-      sha256: fd6c94e120786985a292d12f61422a581f4e851148d5940af38b819357b8ad0d
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.1.0"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -2563,6 +2555,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.2"
+  ua_client_hints:
+    dependency: "direct main"
+    description:
+      name: ua_client_hints
+      sha256: dfea54a1b4d259c057d0f33f198094cf4e09e1a21d347baadbe6dbd3d820c0d4
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.4.0"
   uni_links:
     dependency: "direct main"
     description:

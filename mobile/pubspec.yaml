@@ -67,7 +67,6 @@ dependencies:
     git: https://github.com/jesims/file_saver.git
   firebase_core: ^3.6.0
   firebase_messaging: ^15.1.3
-  fk_user_agent: ^2.0.1
   flutter:
     sdk: flutter
   flutter_animate: ^4.1.0
@@ -171,8 +170,10 @@ dependencies:
   syncfusion_flutter_sliders: ^25.2.5
   synchronized: ^3.1.0
   tuple: ^2.0.0
+  ua_client_hints: ^1.4.0
   uni_links: ^0.5.1
   url_launcher: ^6.3.0
+
   uuid: ^4.5.0
   video_editor:
     git:

@@ -206,9 +206,6 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m67(count) =>
       "${Intl.plural(count, zero: '', one: '1 день', few: '${count} дні', many: '${count} днів', other: '${count} днів')}";
 
-  static String m68(count) =>
-      "${Intl.plural(count, few: 'Зберігаємо ${count} спогади...', many: 'Зберігаємо ${count} спогадів...', other: '')}";
-
   static String m69(endDate) => "Діє до ${endDate}";
 
   static String m70(email) => "Підтвердити ${email}";
@@ -1706,7 +1703,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "upgrade": MessageLookupByLibrary.simpleMessage("Покращити"),
         "uploadingFilesToAlbum": MessageLookupByLibrary.simpleMessage(
             "Завантажуємо файли до альбому..."),
-        "uploadingMultipleMemories": m68,
         "uploadingSingleMemory":
             MessageLookupByLibrary.simpleMessage("Зберігаємо 1 спогад..."),
         "upto50OffUntil4thDec":
