@@ -1,3 +1,4 @@
+import { assertionFailed } from "@/base/assert";
 import {
     ActivityIndicator,
     ErrorIndicator,
@@ -50,6 +51,7 @@ import {
 import { t } from "i18next";
 import React, { useEffect, useReducer, useState } from "react";
 import { isInternalUser } from "../../services/feature-flags";
+import { savedRejectedClustersForCGroup } from "../../services/ml/kvdb";
 import { useAppContext } from "../../types/context";
 import { AddPersonDialog } from "../AddPersonDialog";
 import { SpaceBetweenFlex } from "../mui";
@@ -633,7 +635,66 @@ const saveSuggestionsAndChoices = async (
     person: CGroupPerson,
     state: SuggestionsDialogState,
 ) => {
-    // const assigned = person.cgroup.data.assigned
-    // for (const [clusterID, assigned] of state.marks) {
-    // }
+    let assignedClusters = [...person.cgroup.data.assigned];
+    let rejectedClusterIDs = await savedRejectedClustersForCGroup(person.id);
+
+    const clusterForID = (id: string) => {
+        const suggestion = state.suggestions.find((s) => s.id == id);
+        if (suggestion) {
+            return { id, faces: suggestion.faces };
+        }
+        const choice = state.choices.find((c) => c.id == id);
+        if (choice) {
+            return { id, faces: choice.faces };
+        }
+        throw new Error(`Unexpected cluster ${id}`);
+    };
+
+    let didUpdateAssigned = false;
+    let didUpdateRejected = false;
+    for (const [clusterID, assigned] of state.marks.entries()) {
+        if (assigned) {
+            // TODO-Cluster sanity check, remove after wrapping up dev
+            if (assignedClusters.find(({ id }) => id == clusterID)) {
+                assertionFailed();
+            }
+
+            // Add it to the list of assigned clusters for the person.
+            assignedClusters.push(clusterForID(clusterID));
+            didUpdateAssigned = true;
+            // Remove it from the list of rejected clusters (if needed).
+            if (rejectedClusterIDs.includes(clusterID)) {
+                rejectedClusterIDs = rejectedClusterIDs.filter(
+                    (id) => id !== clusterID,
+                );
+                didUpdateRejected = true;
+            }
+        } else {
+            // TODO-Cluster sanity check, remove after wrapping up dev
+            if (rejectedClusterIDs.includes(clusterID)) {
+                assertionFailed();
+            }
+
+            // Remove it from the list of assigned clusters (if needed).
+            if (assignedClusters.find(({ id }) => id == clusterID)) {
+                assignedClusters = assignedClusters.filter(
+                    ({ id }) => id != clusterID,
+                );
+                didUpdateAssigned = true;
+            }
+            // Add it to the list of rejected clusters.
+            rejectedClusterIDs.push(clusterID);
+            didUpdateRejected = true;
+        }
+    }
+
+    const newlyAddedClusterIDs = new Set<string>();
+    const newlyRemovedClusterIDs = new Set<string>();
+    for (const [clusterID, assigned] of state.marks.entries()) {
+        (assigned ? newlyAddedClusterIDs : newlyRemovedClusterIDs).add(
+            clusterID,
+        );
+    }
+
+    const updatedAssignedClusters = assignedClusters.filter();
 };
