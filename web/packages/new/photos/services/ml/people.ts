@@ -10,7 +10,7 @@ import {
     type CGroup,
 } from "../user-entity";
 import type { FaceCluster } from "./cluster";
-import { savedFaceClusters, savedFaceIndexes } from "./db";
+import { savedFaceClusters, savedFaceIndexes, saveFaceClusters } from "./db";
 import { fileIDFromFaceID } from "./face";
 import {
     savedRejectedClustersForCGroup,
@@ -379,7 +379,7 @@ export const _suggestionsAndChoicesForPerson = async (
         await savedRejectedClustersForCGroup(person.cgroup.id),
     );
 
-    const clusters = await savedFaceClusters();
+    const localClusters = await savedFaceClusters();
     const faceIndexes = await savedFaceIndexes();
 
     const embeddingByFaceID = new Map(
@@ -402,7 +402,7 @@ export const _suggestionsAndChoicesForPerson = async (
 
     const candidateClustersAndSimilarity: [FaceCluster, number][] = [];
     const rejectedClusters: FaceCluster[] = [];
-    for (const cluster of clusters) {
+    for (const cluster of localClusters) {
         const { id, faces } = cluster;
 
         // Ignore singleton clusters.
@@ -415,8 +415,8 @@ export const _suggestionsAndChoicesForPerson = async (
             continue;
         }
 
-        // Already part of the person (and not rejected).
-        if (personClusterIDs.has(id)) continue;
+        // TODO-Cluster sanity check, remove after dev
+        if (personClusterIDs.has(id)) assertionFailed();
 
         const sampledOtherEmbeddings = randomSample(faces, 50)
             .map((id) => embeddingByFaceID.get(id))
@@ -571,8 +571,7 @@ export const _applyPersonSuggestionUpdates = async (
     updates: PersonSuggestionUpdates,
     masterKey: Uint8Array,
 ) => {
-    const clusters = await savedFaceClusters();
-    const clustersByID = new Map(clusters.map((c) => [c.id, c]));
+    let localClusters = await savedFaceClusters();
 
     let assignedClusters = [...cgroup.data.assigned];
     let rejectedClusterIDs = await savedRejectedClustersForCGroup(cgroup.id);
@@ -580,10 +579,23 @@ export const _applyPersonSuggestionUpdates = async (
     let assignUpdateCount = 0;
     let rejectUpdateCount = 0;
 
-    // Add cluster for `clusterID` to the list of assigned clusters for the
-    // person.
+    // Add cluster with `clusterID` to the list of assigned clusters.
     const assign = (clusterID: string) => {
-        assignedClusters.push(ensure(clustersByID.get(clusterID)));
+        // Remove it from the locally saved clusters,
+        const [updatedLocalClusters, cluster] = localClusters.reduce<
+            [FaceCluster[], FaceCluster | undefined]
+        >(
+            ([clusters, removedCluster], c) => {
+                if (c.id == clusterID) return [clusters, c];
+                clusters.push(c);
+                return [clusters, removedCluster];
+            },
+            [[], undefined],
+        );
+
+        localClusters = updatedLocalClusters;
+        // And add it to the ones that'll get synced with remote.
+        assignedClusters.push(ensure(cluster));
         assignUpdateCount += 1;
     };
 
@@ -591,10 +603,24 @@ export const _applyPersonSuggestionUpdates = async (
     // needed).
     const unassignIfNeeded = (clusterID: string) => {
         if (assignedClusters.find(({ id }) => id == clusterID)) {
-            assignedClusters = assignedClusters.filter(
-                ({ id }) => id != clusterID,
+            const [updatedAssignedClusters, cluster] = assignedClusters.reduce<
+                [FaceCluster[], FaceCluster | undefined]
+            >(
+                ([clusters, foundCluster], c) => {
+                    if (c.id == clusterID) return [clusters, c];
+                    clusters.push(c);
+                    return [clusters, foundCluster];
+                },
+                [[], undefined],
             );
+
+            assignedClusters = updatedAssignedClusters;
             assignUpdateCount += 1;
+            // Prior to this, this cluster was not saved locally, since it was
+            // part of the remote data. Since we're removing it from the remote
+            // state, add it to the local state instead so that the user can see
+            // (local only) entries from their recent rejections.
+            localClusters.push(ensure(cluster));
         }
     };
 
@@ -650,6 +676,7 @@ export const _applyPersonSuggestionUpdates = async (
             [{ ...cgroup, data: { ...cgroup.data, assigned } }],
             masterKey,
         );
+        await saveFaceClusters(localClusters);
     }
 
     if (rejectUpdateCount > 0) {
