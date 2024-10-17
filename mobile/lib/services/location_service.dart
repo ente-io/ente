@@ -90,7 +90,9 @@ class LocationService {
         centerPoint: centerPoint,
       );
       await entityService.addOrUpdate(
-          EntityType.location, locationTag.toJson());
+        EntityType.location,
+        locationTag.toJson(),
+      );
       Bus.instance.fire(LocationTagUpdatedEvent(LocTagEventType.add));
     } catch (e, s) {
       _logger.severe("Failed to add location tag", e, s);
