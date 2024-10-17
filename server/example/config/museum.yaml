@@ -1,0 +1,46 @@
+# HTTP connection parameters
+http:
+    # If true, bind to 443 and use TLS.
+    # By default, this is false, and museum will bind to 8080 without TLS.
+    # use-tls: true
+
+# Specify the base endpoints for various apps
+apps:
+    # Default is https://albums.ente.io
+    #
+    # If you're running a self hosted instance and wish to serve public links,
+    # set this to the URL where your albums web app is running.
+    public-albums: https://ente.yourdomain.co.uk
+
+# SMTP configuration (optional)
+#
+# Configure credentials here for sending mails from museum (e.g. OTP emails).
+#
+# The smtp credentials will be used if the host is specified. Otherwise it will
+# try to use the transmail credentials. Ideally, one of smtp or transmail should
+# be configured for a production instance.
+#
+# username and password are optional (e.g. if you're using a local relay server
+# and don't need authentication).
+#smtp:
+#    host:
+#    port:
+#    username:
+#    password:
+#    # The email address from which to send the email. Set this to an email
+#    # address whose credentials you're providing.
+#    email:
+
+s3:
+    are_local_buckets: true
+    b2-eu-cen:
+        key: test
+        secret: testtest
+        endpoint: https://minio.yourdomain.co.uk
+        region: eu-central-2
+        bucket: b2-eu-cen
+        
+# Add this once you have done the CLI part
+#internal:
+#    admins:
+#        - 1580559962386438

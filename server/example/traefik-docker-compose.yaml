@@ -1,0 +1,136 @@
+# Below is a working Traefik Docker Compose example.
+# It will expose Ente through your reverse proxy allowing you to securely access it externally.
+
+services:
+  museum:
+    # Uncomment below if you prefer to build
+    #build:
+      #context: .
+      #args:
+        #GIT_COMMIT: development-cluster
+    image: ghcr.io/ente-io/server
+    #ports:
+    #  - 8080:8080 # API
+    #  - 2112:2112 # Prometheus metrics
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      # Pass-in the config to connect to the DB and MinIO
+      ENTE_CREDENTIALS_FILE: /credentials.yaml
+     # ENTE_CLI_SECRETS_PATH: /cli-data/secret.txt
+     # ENTE_CLI_CONFIG_PATH: /cli-data/
+    volumes:
+      - /home/ubuntu/docker/ente/custom-logs:/var/logs
+      - /home/ubuntu/docker/ente/museum.yaml:/museum.yaml:ro
+      - /home/ubuntu/docker/ente/scripts/compose/credentials.yaml:/credentials.yaml:ro
+      #- /home/ubuntu/docker/ente/cli-data:/cli-data
+     # - /home/ubuntu/docker/ente/exports/ente-photos:/exports
+      - /home/ubuntu/docker/ente/data:/data:ro
+    networks:
+      - ente
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.ente.entrypoints=http"
+      - "traefik.http.routers.ente.rule=Host(`ente.yourdomain.co.uk`)"
+      - "traefik.http.middlewares.ente-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.ente.middlewares=ente-https-redirect"
+      - "traefik.http.routers.ente-secure.entrypoints=https"
+      - "traefik.http.routers.ente-secure.rule=Host(`ente.yourdomain.co.uk`)"
+      - "traefik.http.routers.ente-secure.tls=true"
+      - "traefik.http.routers.ente-secure.tls.certresolver=cloudflare"
+      - "traefik.http.routers.ente-secure.service=ente"
+      - "traefik.http.services.ente.loadbalancer.server.port=8080" # make sure the loadbalancer is the last line!!!
+      # Configure CORS middleware if needed
+      - "traefik.http.middlewares.ente-secure-cors.headers.accesscontrolallowmethods=GET,HEAD,POST,PUT,DELETE"
+      - "traefik.http.middlewares.ente-secure-cors.headers.accesscontrolallowheaders=*"
+      - "traefik.http.middlewares.ente-secure-cors.headers.accesscontrolalloworiginlist=https://ente.yourdomain.co.uk,https://minio.yourdomain.co.uk"  # Add other origins if needed
+      - "traefik.http.middlewares.ente-secure-cors.headers.accesscontrolmaxage=3000"
+      - "traefik.http.middlewares.ente-secure-cors.headers.accessControlExposeHeaders=ETag"
+      - "traefik.http.middlewares.ente-secure-cors.headers.addvaryheader=true"
+      - "traefik.http.routers.ente-secure.middlewares=ente-secure-cors"
+
+
+#  # Resolve "localhost:3200" in the museum container to the minio container.
+  socat:
+    image: alpine/socat
+    network_mode: service:museum
+    depends_on:
+      - museum
+    command: "TCP-LISTEN:3200,fork,reuseaddr TCP:minio:3200"
+
+  postgres:
+    image: postgres:15
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: pguser
+      POSTGRES_PASSWORD: pgpass
+      POSTGRES_DB: ente_db
+    # Wait for postgres to be accept connections before starting museum.
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "pg_isready",
+          "-q",
+          "-d",
+          "ente_db",
+          "-U",
+          "pguser"
+        ]
+      start_period: 40s
+      start_interval: 1s
+    volumes:
+      - /home/ubuntu/docker/ente/postgres-data:/var/lib/postgresql/data
+    networks:
+      - ente
+
+  minio:
+    image: minio/minio
+    # Use different ports than the minio defaults to avoid conflicting
+    # with the ports used by Prometheus.
+    ports:
+      - 3200:3200 # API
+      - 3201:3201 # Console
+    environment:
+      MINIO_ROOT_USER: test
+      MINIO_ROOT_PASSWORD: testtest
+      MINIO_SERVER_URL: https://minio.yourdomain.co.uk
+    command: server /data --address ":3200" --console-address ":3201"
+    volumes:
+      - /home/ubuntu/docker/ente/minio-data:/data
+    networks:
+      - ente
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.minio.entrypoints=http"
+      - "traefik.http.routers.minio.rule=Host(`minio.yourdomain.co.uk`)"
+      - "traefik.http.middlewares.minio-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.minio.middlewares=minio-https-redirect"
+      - "traefik.http.routers.minio-secure.entrypoints=https"
+      - "traefik.http.routers.minio-secure.rule=Host(`minio.yourdomain.co.uk`)"
+      - "traefik.http.routers.minio-secure.tls=true"
+      - "traefik.http.routers.minio-secure.tls.certresolver=cloudflare"
+      - "traefik.http.routers.minio-secure.service=minio"
+      - "traefik.http.services.minio.loadbalancer.server.port=3200"
+
+  minio-provision:
+    image: minio/mc
+    depends_on:
+      - minio
+    volumes:
+      - /home/ubuntu/docker/ente/scripts/compose/minio-provision.sh:/provision.sh:ro
+      - /home/ubuntu/docker/ente/minio-data:/data
+    networks:
+      - ente
+    entrypoint: sh /provision.sh
+
+networks:
+  ente:
+  proxy:
+    external: true
