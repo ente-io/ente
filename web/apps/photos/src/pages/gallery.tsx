@@ -21,6 +21,7 @@ import {
 } from "@/new/photos/components/gallery";
 import type { GalleryBarMode } from "@/new/photos/components/gallery/BarImpl";
 import { GalleryPeopleState } from "@/new/photos/components/gallery/PeopleHeader";
+import { usePeopleStateSnapshot } from "@/new/photos/components/utils/ml";
 import { shouldShowWhatsNew } from "@/new/photos/services/changelog";
 import type { CollectionSummaries } from "@/new/photos/services/collection/ui";
 import { areOnlySystemCollections } from "@/new/photos/services/collection/ui";
@@ -30,7 +31,6 @@ import {
     getLocalTrashedFiles,
     sortFiles,
 } from "@/new/photos/services/files";
-import { peopleSnapshot, peopleSubscribe } from "@/new/photos/services/ml";
 import type { Person } from "@/new/photos/services/ml/people";
 import {
     filterSearchableFiles,
@@ -102,7 +102,6 @@ import {
     useMemo,
     useRef,
     useState,
-    useSyncExternalStore,
 } from "react";
 import { useDropzone } from "react-dropzone";
 import {
@@ -323,10 +322,7 @@ export default function Gallery() {
     // The ID of the currently selected person in the gallery bar (if any).
     const [activePersonID, setActivePersonID] = useState<string | undefined>();
 
-    const { people, visiblePeople } = useSyncExternalStore(
-        peopleSubscribe,
-        peopleSnapshot,
-    );
+    const peopleState = usePeopleStateSnapshot();
 
     const [isClipSearchResult, setIsClipSearchResult] =
         useState<boolean>(false);
@@ -570,8 +566,8 @@ export default function Gallery() {
                 selectedSearchOption.suggestion,
             );
         } else if (barMode == "people") {
-            let filteredPeople = people ?? [];
-            let filteredVisiblePeople = visiblePeople ?? [];
+            let filteredPeople = peopleState?.people ?? [];
+            let filteredVisiblePeople = peopleState?.visiblePeople ?? [];
             if (tempDeletedFileIds?.size ?? tempHiddenFileIds?.size) {
                 // Prune the in-memory temp updates from the actual state to
                 // obtain the UI state. Kept inside an preflight check to so
@@ -615,7 +611,7 @@ export default function Gallery() {
             );
             galleryPeopleState = {
                 activePerson,
-                people: filteredPeople,
+                people: filteredVisiblePeople,
             };
         } else {
             const baseFiles = barMode == "hidden-albums" ? hiddenFiles : files;
@@ -697,7 +693,7 @@ export default function Gallery() {
         selectedSearchOption,
         activeCollectionID,
         archivedCollections,
-        people,
+        peopleState,
         activePersonID,
     ]);
 
@@ -1149,9 +1145,9 @@ export default function Gallery() {
         return <div></div>;
     }
 
-    // `people` will be undefined only when ML is disabled, otherwise it'll be
-    // an empty array (even if people are loading).
-    const showPeopleSectionButton = people !== undefined;
+    // `peopleState` will be undefined only when ML is disabled, otherwise it'll
+    // be contain empty arrays (even if people are loading).
+    const showPeopleSectionButton = peopleState !== undefined;
 
     return (
         <GalleryContext.Provider

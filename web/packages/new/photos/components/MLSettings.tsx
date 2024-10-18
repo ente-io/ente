@@ -23,7 +23,7 @@ import React, { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 import { useAppContext } from "../types/context";
 import { openURL } from "../utils/web";
-import { useMLStatus } from "./utils/ml";
+import { useMLStatusSnapshot } from "./utils/ml";
 import { useWrapAsyncOperation } from "./utils/use-wrap-async";
 
 export const MLSettings: React.FC<NestedDrawerVisibilityProps> = ({
@@ -31,7 +31,7 @@ export const MLSettings: React.FC<NestedDrawerVisibilityProps> = ({
     onClose,
     onRootClose,
 }) => {
-    const mlStatus = useMLStatus();
+    const mlStatus = useMLStatusSnapshot();
     const [openFaceConsent, setOpenFaceConsent] = useState(false);
 
     const handleRootClose = () => {

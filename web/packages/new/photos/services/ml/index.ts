@@ -30,9 +30,9 @@ import { clearMLDB, getIndexableAndIndexedCounts, savedFaceIndex } from "./db";
 import {
     _applyPersonSuggestionUpdates,
     filterNamedPeople,
-    reconstructPeopleSnapshot,
+    reconstructPeopleState,
     type CGroupPerson,
-    type PeopleSnapshot,
+    type PeopleState,
     type PersonSuggestionUpdates,
 } from "./people";
 import { MLWorker } from "./worker";
@@ -84,20 +84,20 @@ class MLState {
     mlStatusSnapshot: MLStatus | undefined;
 
     /**
-     * Subscriptions to updates to the list of {@link Person}s we know about.
+     * Subscriptions to updates to the {@link PeopleState}.
      *
-     * See {@link peopleSubscribe}.
+     * See {@link peopleStateSubscribe}.
      */
-    peopleListeners: (() => void)[] = [];
+    peopleStateListeners: (() => void)[] = [];
 
     /**
-     * Snapshot of the list of {@link Person}s and other pre-computed state. Use
-     * the {@link peopleSnapshot} function to access this data.
+     * Snapshot of the {@link PeopleState}s. Use the {@link peopleStateSnapshot}
+     * function to access this data.
      *
      * It will be `undefined` only if ML is disabled. Otherwise, it will be an
      * empty array even if the snapshot is pending its first sync.
      */
-    peopleSnapshot: PeopleSnapshot | undefined;
+    peopleStateSnapshot: PeopleState | undefined;
 
     /**
      * In flight face crop regeneration promises indexed by the IDs of the files
@@ -195,7 +195,7 @@ export const isMLSupported = isDesktop;
  */
 export const initML = () => {
     _state.isMLEnabled = isMLEnabledLocal();
-    resetPeopleSnapshot();
+    resetPeopleStateSnapshot();
 };
 
 export const logoutML = async () => {
@@ -232,7 +232,7 @@ export const enableML = async () => {
     setIsMLEnabledLocal(true);
     _state.isMLEnabled = true;
     setInterimScheduledStatus();
-    resetPeopleSnapshot();
+    resetPeopleStateSnapshot();
     // Trigger updates, but don't wait for them to finish.
     void updateMLStatusSnapshot().then(mlSync);
 };
@@ -250,7 +250,7 @@ export const disableML = async () => {
     _state.isSyncing = false;
     await terminateMLWorker();
     triggerStatusUpdate();
-    resetPeopleSnapshot();
+    resetPeopleStateSnapshot();
 };
 
 /**
@@ -357,7 +357,7 @@ const updateClustersAndPeople = async () => {
     await (await worker()).clusterFaces(masterKey);
 
     // Update the people shown in the UI.
-    await updatePeople();
+    await updatePeopleState();
 };
 
 /**
@@ -537,18 +537,18 @@ const workerDidUpdateStatus = throttled(updateMLStatusSnapshot, 2000);
 /**
  * A function that can be used to subscribe to updates to {@link Person}s.
  *
- * This, along with {@link peopleSnapshot}, is meant to be used as arguments to
- * React's {@link useSyncExternalStore}.
+ * This, along with {@link peopleStateSnapshot}, is meant to be used as
+ * arguments to React's {@link useSyncExternalStore}.
  *
  * @param callback A function that will be invoked whenever the result of
- * {@link peopleSnapshot} changes.
+ * {@link peopleStateSnapshot} changes.
  *
  * @returns A function that can be used to clear the subscription.
  */
-export const peopleSubscribe = (onChange: () => void): (() => void) => {
-    _state.peopleListeners.push(onChange);
+export const peopleStateSubscribe = (onChange: () => void): (() => void) => {
+    _state.peopleStateListeners.push(onChange);
     return () => {
-        _state.peopleListeners = _state.peopleListeners.filter(
+        _state.peopleStateListeners = _state.peopleStateListeners.filter(
             (l) => l != onChange,
         );
     };
@@ -560,41 +560,41 @@ export const peopleSubscribe = (onChange: () => void): (() => void) => {
  *
  * Otherwise, if ML is disabled, set the people snapshot to `undefined`.
  */
-const resetPeopleSnapshot = () =>
-    setPeopleSnapshot(
+const resetPeopleStateSnapshot = () =>
+    setPeopleStateSnapshot(
         _state.isMLEnabled
             ? { people: [], visiblePeople: [], personByFaceID: new Map() }
             : undefined,
     );
 
 /**
- * Return the last known, cached {@link people}.
+ * Return the last known, cached {@link PeopleState}.
  *
- * This, along with {@link peopleSnapshot}, is meant to be used as arguments to
- * React's {@link useSyncExternalStore}.
+ * This, along with {@link peopleStateSubscribe}, is meant to be used as
+ * arguments to React's {@link useSyncExternalStore}.
  *
  * A return value of `undefined` indicates that ML is disabled. In all other
- * cases, the list will be either empty (if we're either still loading the
- * initial list of people, or if the user doesn't have any people), or, well,
- * non-empty.
+ * cases, the list of people will be either empty (if we're either still loading
+ * the initial list of people, or if the user doesn't have any people), or,
+ * well, non-empty.
  */
-export const peopleSnapshot = () => _state.peopleSnapshot;
+export const peopleStateSnapshot = () => _state.peopleStateSnapshot;
 
-// Update our, and the search subsystem's, snapshot of people by reconstructing
-// it from the latest local state.
-const updatePeople = async () => {
-    const snapshot = await reconstructPeopleSnapshot();
+// Update our, and the search subsystem's, snapshot of people state by
+// reconstructing it from the latest local state.
+const updatePeopleState = async () => {
+    const state = await reconstructPeopleState();
 
     // Notify the search subsystem of the update (search only uses named ones).
-    setSearchPeople(filterNamedPeople(snapshot.visiblePeople));
+    setSearchPeople(filterNamedPeople(state.visiblePeople));
 
-    // Update our in-memory list of people.
-    setPeopleSnapshot(snapshot);
+    // Update our in-memory state.
+    setPeopleStateSnapshot(state);
 };
 
-const setPeopleSnapshot = (snapshot: PeopleSnapshot | undefined) => {
-    _state.peopleSnapshot = snapshot;
-    _state.peopleListeners.forEach((l) => l());
+const setPeopleStateSnapshot = (snapshot: PeopleState | undefined) => {
+    _state.peopleStateSnapshot = snapshot;
+    _state.peopleStateListeners.forEach((l) => l());
 };
 
 /**
@@ -631,7 +631,7 @@ export const getAnnotatedFacesForFile = async (
     const index = await savedFaceIndex(file.id);
     if (!index) return [];
 
-    const personByFaceID = _state.peopleSnapshot?.personByFaceID;
+    const personByFaceID = _state.peopleStateSnapshot?.personByFaceID;
     if (!personByFaceID) return [];
 
     const sortableFaces: [AnnotatedFaceID, number][] = [];

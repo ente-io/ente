@@ -168,7 +168,10 @@ export interface PreviewableFace {
     file: EnteFile;
 }
 
-export interface PeopleSnapshot {
+/**
+ * Pre-computed in-memory state for UI that deals with people.
+ */
+export interface PeopleState {
     /**
      * List of all people.
      *
@@ -196,14 +199,14 @@ export interface PeopleSnapshot {
 }
 
 /**
- * Construct an in-memory people snapshot using the data present locally,
- * ignoring faces belonging to deleted and hidden files.
+ * Construct an in-memory people state using the data present locally, ignoring
+ * faces belonging to deleted and hidden files.
  *
  * This function is meant to run after files, cgroups and faces have been synced
  * with remote, and clustering has completed. It uses the current local state to
  * construct an in-memory list of {@link Person}s on which the UI will operate.
  */
-export const reconstructPeopleSnapshot = async (): Promise<PeopleSnapshot> => {
+export const reconstructPeopleState = async (): Promise<PeopleState> => {
     const files = await getLocalFiles("normal");
     const fileByID = new Map(files.map((f) => [f.id, f]));
 

@@ -13,7 +13,7 @@ import { VerticallyCentered } from "@ente/shared/components/Container";
 import { Typography } from "@mui/material";
 import { t } from "i18next";
 import React from "react";
-import { useMLStatus } from "../utils/ml";
+import { useMLStatusSnapshot } from "../utils/ml";
 import { GalleryItemsHeaderAdapter, GalleryItemsSummary } from "./ListHeader";
 
 /**
@@ -45,7 +45,7 @@ export const SearchResultsHeader: React.FC<SearchResultsHeaderProps> = ({
 );
 
 export const PeopleEmptyState: React.FC = () => {
-    const mlStatus = useMLStatus();
+    const mlStatus = useMLStatusSnapshot();
 
     const message =
         mlStatus?.phase == "done"
