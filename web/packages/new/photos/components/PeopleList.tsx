@@ -107,7 +107,7 @@ export const FilePeopleList: React.FC<FilePeopleListProps> = ({
                         <FaceCropImageView
                             faceID={annotatedFaceID.faceID}
                             file={file}
-                            placeholderDimension={112}
+                            placeholderDimension={79}
                         />
                     </AnnotatedFaceButton>
                 ))}
@@ -127,8 +127,8 @@ const FileFaceList = styled("div")`
 
 const AnnotatedFaceButton = styled(UnstyledButton)(
     ({ theme }) => `
-    width: 112px;
-    height: 112px;
+    width: 79px;
+    height: 79px;
     border-radius: 50%;
     overflow: hidden;
     & > img {
@@ -162,7 +162,7 @@ export const SuggestionFaceList: React.FC<SuggestionFaceListProps> = ({
             {faces.map(({ file, faceID }) => (
                 <SuggestionFace key={faceID}>
                     <FaceCropImageView
-                        placeholderDimension={112}
+                        placeholderDimension={79}
                         {...{ file, faceID }}
                     />
                 </SuggestionFace>
