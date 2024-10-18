@@ -16,10 +16,7 @@ import {
     type ParsedMetadataDate,
 } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
-import {
-    SpaceBetweenFlex,
-    type ButtonishProps,
-} from "@/new/photos/components/mui";
+import { type ButtonishProps } from "@/new/photos/components/mui";
 import { ChipButton } from "@/new/photos/components/mui/ChipButton";
 import { FilePeopleList } from "@/new/photos/components/PeopleList";
 import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker";
@@ -442,38 +439,48 @@ const InfoItem: React.FC<React.PropsWithChildren<InfoItemProps>> = ({
     trailingButton,
     children,
 }) => (
-    <SpaceBetweenFlex sx={{ flex: 1, gap: "8px" }}>
-        <Box sx={{ display: "flex", alignItems: "flex-start", gap: "4px" }}>
-            <IconButton
-                color="secondary"
-                sx={{ "&&": { cursor: "default", m: 0.5 } }}
-                disableRipple
-            >
-                {icon}
-            </IconButton>
-            <Box pt={1}>
-                {children ? (
-                    children
-                ) : (
-                    <>
-                        <Typography sx={{ wordBreak: "break-all" }}>
-                            {title}
-                        </Typography>
-                        <Typography
-                            variant="small"
-                            color="text.muted"
-                            {...(typeof caption == "string"
-                                ? {}
-                                : { component: "div" })}
-                        >
-                            {caption}
-                        </Typography>
-                    </>
-                )}
-            </Box>
+    <Box
+        sx={{
+            display: "flex",
+            alignItems: "flex-start",
+            flex: 1,
+            gap: "12px",
+        }}
+    >
+        <Box
+            sx={{
+                width: "48px",
+                aspectRatio: 1,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                color: "text.faint",
+            }}
+        >
+            {icon}
+        </Box>
+        <Box sx={{ flex: 1, mt: "4px" }}>
+            {children ? (
+                children
+            ) : (
+                <>
+                    <Typography sx={{ wordBreak: "break-all" }}>
+                        {title}
+                    </Typography>
+                    <Typography
+                        variant="small"
+                        color="text.muted"
+                        {...(typeof caption == "string"
+                            ? {}
+                            : { component: "div" })}
+                    >
+                        {caption}
+                    </Typography>
+                </>
+            )}
         </Box>
         {trailingButton}
-    </SpaceBetweenFlex>
+    </Box>
 );
 
 type EditButtonProps = ButtonishProps & {
