@@ -412,10 +412,14 @@ interface InfoItemProps {
     icon: React.ReactNode;
     /**
      * The primary content / title of the info entry.
+     *
+     * Only used if {@link children} are not specified.
      */
     title?: string;
     /**
      * The secondary information / subtext associated with the info entry.
+     *
+     * Only used if {@link children} are not specified.
      */
     caption?: React.ReactNode;
     /**
@@ -452,19 +456,15 @@ const InfoItem: React.FC<React.PropsWithChildren<InfoItemProps>> = ({
                         <Typography sx={{ wordBreak: "break-all" }}>
                             {title}
                         </Typography>
-                        {!caption || typeof caption == "string" ? (
-                            <Typography variant="small" color="text.muted">
-                                {caption}
-                            </Typography>
-                        ) : (
-                            <Typography
-                                variant="small"
-                                component="div"
-                                color="text.muted"
-                            >
-                                {caption}
-                            </Typography>
-                        )}
+                        <Typography
+                            variant="small"
+                            color="text.muted"
+                            {...(typeof caption == "string"
+                                ? {}
+                                : { component: "div" })}
+                        >
+                            {caption}
+                        </Typography>
                     </>
                 )}
             </Box>
