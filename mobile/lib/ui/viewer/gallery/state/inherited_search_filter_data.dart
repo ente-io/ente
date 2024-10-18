@@ -10,6 +10,8 @@ class InheritedSearchFilterData extends InheritedWidget {
 
   final SearchFilterDataProvider? searchFilterDataProvider;
 
+  bool get isHierarchicalSearchable => searchFilterDataProvider != null;
+
   static InheritedSearchFilterData? maybeOf(BuildContext context) {
     return context
         .dependOnInheritedWidgetOfExactType<InheritedSearchFilterData>();

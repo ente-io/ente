@@ -19,9 +19,13 @@ class _RecommendedFiltersState extends State<RecommendedFilters> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final temp = InheritedSearchFilterData.of(context).searchFilterDataProvider;
-    assert(temp != null, "SearchFilterDataProvider is null");
-    _searchFilterDataProvider = temp!;
+    final inheritedSearchFilterData = InheritedSearchFilterData.of(context);
+    assert(
+      inheritedSearchFilterData.isHierarchicalSearchable,
+      "Do not use this widget if gallery is not hierarchical searchable",
+    );
+    _searchFilterDataProvider =
+        inheritedSearchFilterData.searchFilterDataProvider!;
     _recommendations = _searchFilterDataProvider.recommendations;
 
     _searchFilterDataProvider.removeListener(
