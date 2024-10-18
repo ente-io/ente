@@ -32,7 +32,9 @@ class LocationService {
 
   void init(SharedPreferences preferences) {
     prefs = preferences;
-    _loadCities();
+    Future.delayed(const Duration(seconds: 3), () {
+      _loadCities();
+    });
   }
 
   Future<Iterable<LocalEntity<LocationTag>>> _getStoredLocationTags() async {
