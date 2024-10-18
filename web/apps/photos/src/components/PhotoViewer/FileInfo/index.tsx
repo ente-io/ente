@@ -16,7 +16,10 @@ import {
     type ParsedMetadataDate,
 } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
-import type { ButtonishProps } from "@/new/photos/components/mui";
+import {
+    SpaceBetweenFlex,
+    type ButtonishProps,
+} from "@/new/photos/components/mui";
 import { ChipButton } from "@/new/photos/components/mui/ChipButton";
 import { FilePeopleList } from "@/new/photos/components/PeopleList";
 import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker";
@@ -439,8 +442,8 @@ const InfoItem: React.FC<React.PropsWithChildren<InfoItemProps>> = ({
     trailingButton,
     children,
 }) => (
-    <FlexWrapper justifyContent="space-between">
-        <Box display={"flex"} alignItems="flex-start" gap={0.5} pr={1}>
+    <SpaceBetweenFlex sx={{ flex: 1, gap: "8px" }}>
+        <Box sx={{ display: "flex", alignItems: "flex-start", gap: "4px" }}>
             <IconButton
                 color="secondary"
                 sx={{ "&&": { cursor: "default", m: 0.5 } }}
@@ -448,7 +451,7 @@ const InfoItem: React.FC<React.PropsWithChildren<InfoItemProps>> = ({
             >
                 {icon}
             </IconButton>
-            <Box py={0.5}>
+            <Box pt={1}>
                 {children ? (
                     children
                 ) : (
@@ -470,7 +473,7 @@ const InfoItem: React.FC<React.PropsWithChildren<InfoItemProps>> = ({
             </Box>
         </Box>
         {trailingButton}
-    </FlexWrapper>
+    </SpaceBetweenFlex>
 );
 
 type EditButtonProps = ButtonishProps & {
