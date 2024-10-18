@@ -33,7 +33,6 @@ import {
     reconstructPeopleSnapshot,
     type CGroupPerson,
     type PeopleSnapshot,
-    type Person,
     type PersonSuggestionUpdates,
 } from "./people";
 import { MLWorker } from "./worker";

@@ -16,15 +16,11 @@ import {
     type ParsedMetadataDate,
 } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
-import {
-    FileOtherFaceList,
-    FilePeopleList,
-} from "@/new/photos/components/PeopleList";
+import { FilePeopleList } from "@/new/photos/components/PeopleList";
 import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker";
 import { fileInfoDrawerZIndex } from "@/new/photos/components/utils/z-index";
 import { tagNumericValue, type RawExifTags } from "@/new/photos/services/exif";
 import {
-    AnnotatedFacesForFile,
     getAnnotatedFacesForFile,
     isMLEnabled,
     type AnnotatedFaceID,
@@ -110,9 +106,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     const [exifInfo, setExifInfo] = useState<ExifInfo | undefined>();
     const { show: showRawExif, props: rawExifVisibilityProps } =
         useModalVisibility();
-    const [annotatedFaces, setAnnotatedFaces] = useState<
-        AnnotatedFacesForFile | undefined
-    >();
+    const [annotatedFaces, setAnnotatedFaces] = useState<AnnotatedFaceID[]>([]);
 
     const location = useMemo(() => {
         if (file) {
@@ -305,18 +299,12 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                     </InfoItem>
                 )}
 
-                {isMLEnabled() && annotatedFaces && (
-                    <>
-                        <FilePeopleList
-                            file={file}
-                            annotatedFaceIDs={annotatedFaces.annotatedFaceIDs}
-                            onSelectFace={handleSelectFace}
-                        />
-                        <FileOtherFaceList
-                            file={file}
-                            faceIDs={annotatedFaces.otherFaceIDs}
-                        />
-                    </>
+                {isMLEnabled() && annotatedFaces.length > 0 && (
+                    <FilePeopleList
+                        file={file}
+                        annotatedFaceIDs={annotatedFaces}
+                        onSelectFace={handleSelectFace}
+                    />
                 )}
             </Stack>
 

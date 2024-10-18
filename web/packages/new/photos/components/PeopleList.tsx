@@ -1,5 +1,4 @@
 import { useIsSmallWidth } from "@/base/hooks";
-import { pt } from "@/base/i18n";
 import type { EnteFile } from "@/media/file";
 import { faceCrop, type AnnotatedFaceID } from "@/new/photos/services/ml";
 import type { Person, PreviewableFace } from "@/new/photos/services/ml/people";
@@ -97,6 +96,7 @@ export const FilePeopleList: React.FC<FilePeopleListProps> = ({
         <>
             <Typography variant="large" p={1}>
                 {t("people")}
+                {/*t("UNIDENTIFIED_FACES")  TODO-Cluster remove */}
             </Typography>
             <FileFaceList>
                 {annotatedFaceIDs.map((annotatedFaceID) => (
@@ -141,59 +141,6 @@ const AnnotatedFaceButton = styled(UnstyledButton)(
     }
 `,
 );
-
-export interface FileOtherFaceListProps {
-    /**
-     * The {@link EnteFile} whose information we are showing.
-     */
-    file: EnteFile;
-    /**
-     * The list of faces in the file that are not associated with a person.
-     */
-    faceIDs: string[];
-}
-
-/**
- * Show the list of faces in the given file that are not associated with a
- * specific person.
- */
-export const FileOtherFaceList: React.FC<FileOtherFaceListProps> = ({
-    file,
-    faceIDs,
-}) => {
-    if (faceIDs.length == 0) return <></>;
-
-    return (
-        <>
-            <Typography variant="large" p={1}>
-                {pt("Other faces")}
-                {/*t("UNIDENTIFIED_FACES")  TODO-Cluster */}
-            </Typography>
-            <FileFaceList>
-                {faceIDs.map((faceID) => (
-                    <FileOtherFace key={faceID}>
-                        <FaceCropImageView
-                            placeholderDimension={112}
-                            {...{ file, faceID }}
-                        />
-                    </FileOtherFace>
-                ))}
-            </FileFaceList>
-        </>
-    );
-};
-
-const FileOtherFace = styled("div")`
-    width: 112px;
-    height: 112px;
-    margin: 5px;
-    border-radius: 50%;
-    overflow: hidden;
-    & > img {
-        width: 100%;
-        height: 100%;
-    }
-`;
 
 export interface SuggestionFaceListProps {
     /**
