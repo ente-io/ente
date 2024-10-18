@@ -26,6 +26,11 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("З вяртаннем!"),
         "activeSessions":
             MessageLookupByLibrary.simpleMessage("Актыўныя сеансы"),
+        "add": MessageLookupByLibrary.simpleMessage("Add"),
+        "addName": MessageLookupByLibrary.simpleMessage("Add name"),
+        "addNameOrMerge":
+            MessageLookupByLibrary.simpleMessage("Add name or merge"),
+        "addNewPerson": MessageLookupByLibrary.simpleMessage("Add new person"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "Якая асноўная прычына выдалення вашага ўліковага запісу?"),
         "cancel": MessageLookupByLibrary.simpleMessage("Скасаваць"),
@@ -67,6 +72,10 @@ class MessageLookup extends MessageLookupByLibrary {
             "Увядзіце свой адрас электроннай пошты"),
         "enterYourRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "Увядзіце свой ключ аднаўлення"),
+        "extraPhotosFound":
+            MessageLookupByLibrary.simpleMessage("Extra photos found"),
+        "extraPhotosFoundFor": MessageLookupByLibrary.simpleMessage(
+            "Extra photos found for \$text"),
         "feedback": MessageLookupByLibrary.simpleMessage("Водгук"),
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("Забыліся пароль"),
@@ -78,6 +87,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "Памылковы адрас электроннай пошты"),
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
             "Калі ласка, дапамажыце нам з гэтай інфармацыяй"),
+        "mergeWithExisting":
+            MessageLookupByLibrary.simpleMessage("Merge with existing"),
+        "newPerson": MessageLookupByLibrary.simpleMessage("New person"),
         "noRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Няма ключа аднаўлення?"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
@@ -85,6 +97,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "ok": MessageLookupByLibrary.simpleMessage("Добра"),
         "oops": MessageLookupByLibrary.simpleMessage("Вой"),
         "password": MessageLookupByLibrary.simpleMessage("Пароль"),
+        "personName": MessageLookupByLibrary.simpleMessage("Person name"),
         "recoverButton": MessageLookupByLibrary.simpleMessage("Аднавіць"),
         "recoverySuccessful":
             MessageLookupByLibrary.simpleMessage("Паспяховае аднаўленне!"),

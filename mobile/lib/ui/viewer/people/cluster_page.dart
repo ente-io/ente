@@ -153,6 +153,50 @@ class _ClusterPageState extends State<ClusterPage> {
         ),
         body: Column(
           children: [
+            showNamingBanner
+                ? Dismissible(
+                    key: const Key("namingBanner"),
+                    direction: DismissDirection.horizontal,
+                    onDismissed: (direction) {
+                      setState(() {
+                        userDismissedNamingBanner = true;
+                      });
+                    },
+                    child: PeopleBanner(
+                      type: PeopleBannerType.addName,
+                      faceWidget: PersonFaceWidget(
+                        files.first,
+                        clusterID: widget.clusterID,
+                      ),
+                      actionIcon: Icons.add_outlined,
+                      text: S.of(context).addAName,
+                      subText: S.of(context).findPeopleByName,
+                      onTap: () async {
+                        if (widget.personID == null) {
+                          final result = await showAssignPersonAction(
+                            context,
+                            clusterID: widget.clusterID,
+                          );
+                          if (result != null &&
+                              result is (PersonEntity, EnteFile)) {
+                            Navigator.pop(context);
+                            // ignore: unawaited_futures
+                            routeToPage(
+                              context,
+                              PeoplePage(person: result.$1),
+                            );
+                          } else if (result != null && result is PersonEntity) {
+                            Navigator.pop(context);
+                            // ignore: unawaited_futures
+                            routeToPage(context, PeoplePage(person: result));
+                          }
+                        } else {
+                          showShortToast(context, "No personID or clusterID");
+                        }
+                      },
+                    ),
+                  )
+                : const SizedBox.shrink(),
             Expanded(
               child: SelectionState(
                 selectedFiles: _selectedFiles,
@@ -169,53 +213,6 @@ class _ClusterPageState extends State<ClusterPage> {
                 ),
               ),
             ),
-            showNamingBanner
-                ? SafeArea(
-                    child: Dismissible(
-                      key: const Key("namingBanner"),
-                      direction: DismissDirection.horizontal,
-                      onDismissed: (direction) {
-                        setState(() {
-                          userDismissedNamingBanner = true;
-                        });
-                      },
-                      child: PeopleBanner(
-                        type: PeopleBannerType.addName,
-                        faceWidget: PersonFaceWidget(
-                          files.first,
-                          clusterID: widget.clusterID,
-                        ),
-                        actionIcon: Icons.add_outlined,
-                        text: S.of(context).addAName,
-                        subText: S.of(context).findPeopleByName,
-                        onTap: () async {
-                          if (widget.personID == null) {
-                            final result = await showAssignPersonAction(
-                              context,
-                              clusterID: widget.clusterID,
-                            );
-                            if (result != null &&
-                                result is (PersonEntity, EnteFile)) {
-                              Navigator.pop(context);
-                              // ignore: unawaited_futures
-                              routeToPage(
-                                context,
-                                PeoplePage(person: result.$1),
-                              );
-                            } else if (result != null &&
-                                result is PersonEntity) {
-                              Navigator.pop(context);
-                              // ignore: unawaited_futures
-                              routeToPage(context, PeoplePage(person: result));
-                            }
-                          } else {
-                            showShortToast(context, "No personID or clusterID");
-                          }
-                        },
-                      ),
-                    ),
-                  )
-                : const SizedBox.shrink(),
           ],
         ),
       ),

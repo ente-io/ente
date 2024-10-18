@@ -236,6 +236,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "ackPasswordLostWarning": MessageLookupByLibrary.simpleMessage(
             "Rozumiem, że jeśli utracę hasło, mogę utracić dane, ponieważ moje dane są <underline>całkowicie zaszyfrowane</underline>."),
         "activeSessions": MessageLookupByLibrary.simpleMessage("Aktywne sesje"),
+        "add": MessageLookupByLibrary.simpleMessage("Add"),
         "addAName": MessageLookupByLibrary.simpleMessage("Dodaj nazwę"),
         "addANewEmail":
             MessageLookupByLibrary.simpleMessage("Dodaj nowy adres e-mail"),
@@ -249,7 +250,11 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Dodaj lokalizację"),
         "addLocationButton": MessageLookupByLibrary.simpleMessage("Dodaj"),
         "addMore": MessageLookupByLibrary.simpleMessage("Dodaj więcej"),
+        "addName": MessageLookupByLibrary.simpleMessage("Add name"),
+        "addNameOrMerge":
+            MessageLookupByLibrary.simpleMessage("Add name or merge"),
         "addNew": MessageLookupByLibrary.simpleMessage("Dodaj nowe"),
+        "addNewPerson": MessageLookupByLibrary.simpleMessage("Add new person"),
         "addOnPageSubtitle":
             MessageLookupByLibrary.simpleMessage("Szczegóły dodatków"),
         "addOnValidTill": m5,
@@ -780,6 +785,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "exportLogs": MessageLookupByLibrary.simpleMessage("Eksportuj logi"),
         "exportYourData":
             MessageLookupByLibrary.simpleMessage("Eksportuj swoje dane"),
+        "extraPhotosFound":
+            MessageLookupByLibrary.simpleMessage("Extra photos found"),
+        "extraPhotosFoundFor": MessageLookupByLibrary.simpleMessage(
+            "Extra photos found for \$text"),
         "faceRecognition":
             MessageLookupByLibrary.simpleMessage("Rozpoznawanie twarzy"),
         "faces": MessageLookupByLibrary.simpleMessage("Twarze"),
@@ -1052,6 +1061,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "matrix": MessageLookupByLibrary.simpleMessage("Matrix"),
         "memoryCount": m0,
         "merchandise": MessageLookupByLibrary.simpleMessage("Sklep"),
+        "mergeWithExisting":
+            MessageLookupByLibrary.simpleMessage("Merge with existing"),
         "mlConsent":
             MessageLookupByLibrary.simpleMessage("Włącz uczenie maszynowe"),
         "mlConsentConfirmation": MessageLookupByLibrary.simpleMessage(
@@ -1095,6 +1106,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Nie można połączyć się z Ente, sprawdź ustawienia sieci i skontaktuj się z pomocą techniczną, jeśli błąd będzie się powtarzał."),
         "never": MessageLookupByLibrary.simpleMessage("Nigdy"),
         "newAlbum": MessageLookupByLibrary.simpleMessage("Nowy album"),
+        "newPerson": MessageLookupByLibrary.simpleMessage("New person"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("Nowy/a do Ente"),
         "newest": MessageLookupByLibrary.simpleMessage("Najnowsze"),
         "next": MessageLookupByLibrary.simpleMessage("Dalej"),
@@ -1195,6 +1207,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Usuń trwale"),
         "permanentlyDeleteFromDevice":
             MessageLookupByLibrary.simpleMessage("Trwale usunąć z urządzenia?"),
+        "personName": MessageLookupByLibrary.simpleMessage("Person name"),
         "photoDescriptions":
             MessageLookupByLibrary.simpleMessage("Opisy zdjęć"),
         "photoGridSize":

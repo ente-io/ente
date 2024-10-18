@@ -204,15 +204,15 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.locationTag:
       case GalleryType.quickLink:
       case GalleryType.magic:
+      case GalleryType.peopleTag:
+      case GalleryType.cluster:
         return true;
 
       case GalleryType.hiddenSection:
-      case GalleryType.peopleTag:
       case GalleryType.hiddenOwnedCollection:
       case GalleryType.localFolder:
       case GalleryType.trash:
       case GalleryType.favorite:
-      case GalleryType.cluster:
       case GalleryType.sharedCollection:
         return false;
     }

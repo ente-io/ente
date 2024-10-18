@@ -295,5 +295,14 @@
     "description": "Label for the map view"
   },
   "maps": "แผนที่",
-  "enableMaps": "เปิดใช้งานแผนที่"
+  "enableMaps": "เปิดใช้งานแผนที่",
+  "personName": "Person name",
+  "addNewPerson": "Add new person",
+  "addNameOrMerge": "Add name or merge",
+  "mergeWithExisting": "Merge with existing",
+  "newPerson": "New person",
+  "addName": "Add name",
+  "add": "Add",
+  "extraPhotosFoundFor": "Extra photos found for $text",
+  "extraPhotosFound": "Extra photos found"
 }
