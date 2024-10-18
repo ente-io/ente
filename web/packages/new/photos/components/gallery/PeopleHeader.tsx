@@ -223,6 +223,7 @@ const ClusterPersonHeader: React.FC<ClusterPersonHeaderProps> = ({
 
     const confirmIgnore = () =>
         showMiniDialog({
+            title: pt("Ignore person?"),
             message: pt(
                 "This face grouping will not be shown in the people list",
             ),
@@ -231,7 +232,6 @@ const ClusterPersonHeader: React.FC<ClusterPersonHeaderProps> = ({
                 color: "primary",
                 action: () => ignoreCluster(cluster),
             },
-            buttonDirection: "row",
         });
 
     return (
