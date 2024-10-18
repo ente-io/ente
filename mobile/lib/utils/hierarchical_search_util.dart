@@ -111,16 +111,12 @@ void curateFilters(
   BuildContext context,
 ) async {
   try {
-    final albumFilters =
-        await _curateAlbumFilters(searchFilterDataProvider, files);
-    final fileTypeFilters =
-        _curateFileTypeFilters(searchFilterDataProvider, files, context);
+    final albumFilters = await _curateAlbumFilters(files);
+    final fileTypeFilters = _curateFileTypeFilters(files, context);
     final locationFilters = await _curateLocationFilters(
-      searchFilterDataProvider,
       files,
     );
-    final contactsFilters =
-        _curateContactsFilter(searchFilterDataProvider, files);
+    final contactsFilters = _curateContactsFilter(files);
     final faceFilters = await curateFaceFilters(files);
 
     searchFilterDataProvider.clearAndAddRecommendations(
@@ -138,7 +134,6 @@ void curateFilters(
 }
 
 Future<List<AlbumFilter>> _curateAlbumFilters(
-  SearchFilterDataProvider searchFilterDataProvider,
   List<EnteFile> files,
 ) async {
   final albumFilters = <AlbumFilter>[];
@@ -174,7 +169,6 @@ Future<List<AlbumFilter>> _curateAlbumFilters(
 }
 
 List<FileTypeFilter> _curateFileTypeFilters(
-  SearchFilterDataProvider searchFilterDataProvider,
   List<EnteFile> files,
   BuildContext context,
 ) {
@@ -228,7 +222,6 @@ List<FileTypeFilter> _curateFileTypeFilters(
 }
 
 Future<List<LocationFilter>> _curateLocationFilters(
-  SearchFilterDataProvider searchFilterDataProvider,
   List<EnteFile> files,
 ) async {
   final locationFilters = <LocationFilter>[];
@@ -248,7 +241,6 @@ Future<List<LocationFilter>> _curateLocationFilters(
 }
 
 List<ContactsFilter> _curateContactsFilter(
-  SearchFilterDataProvider searchFilterDataProvider,
   List<EnteFile> files,
 ) {
   final contactsFilters = <ContactsFilter>[];
