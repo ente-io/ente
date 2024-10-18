@@ -17,8 +17,8 @@ import {
 } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
 import {
-    AnnotatedFacePeopleList,
-    UnclusteredFaceList,
+    FileOtherFaceList,
+    FilePeopleList,
 } from "@/new/photos/components/PeopleList";
 import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker";
 import { fileInfoDrawerZIndex } from "@/new/photos/components/utils/z-index";
@@ -307,12 +307,12 @@ export const FileInfo: React.FC<FileInfoProps> = ({
 
                 {isMLEnabled() && annotatedFaces && (
                     <>
-                        <AnnotatedFacePeopleList
+                        <FilePeopleList
                             file={file}
                             annotatedFaceIDs={annotatedFaces.annotatedFaceIDs}
                             onSelectFace={handleSelectFace}
                         />
-                        <UnclusteredFaceList
+                        <FileOtherFaceList
                             file={file}
                             faceIDs={annotatedFaces.otherFaceIDs}
                         />

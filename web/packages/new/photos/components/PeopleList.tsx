@@ -67,7 +67,7 @@ const SearchPersonButton = styled(UnstyledButton)(
 `,
 );
 
-export interface AnnotatedFacePeopleListProps {
+export interface FilePeopleListProps {
     /**
      * The {@link EnteFile} whose information we are showing.
      */
@@ -86,9 +86,11 @@ export interface AnnotatedFacePeopleListProps {
  * Show the list of faces in the given file that are associated with a specific
  * person.
  */
-export const AnnotatedFacePeopleList: React.FC<
-    AnnotatedFacePeopleListProps
-> = ({ file, annotatedFaceIDs, onSelectFace }) => {
+export const FilePeopleList: React.FC<FilePeopleListProps> = ({
+    file,
+    annotatedFaceIDs,
+    onSelectFace,
+}) => {
     if (annotatedFaceIDs.length == 0) return <></>;
 
     return (
@@ -140,7 +142,7 @@ const AnnotatedFaceButton = styled(UnstyledButton)(
 `,
 );
 
-export interface UnclusteredFaceListProps {
+export interface FileOtherFaceListProps {
     /**
      * The {@link EnteFile} whose information we are showing.
      */
@@ -155,7 +157,7 @@ export interface UnclusteredFaceListProps {
  * Show the list of faces in the given file that are not associated with a
  * specific person.
  */
-export const UnclusteredFaceList: React.FC<UnclusteredFaceListProps> = ({
+export const FileOtherFaceList: React.FC<FileOtherFaceListProps> = ({
     file,
     faceIDs,
 }) => {
@@ -169,19 +171,19 @@ export const UnclusteredFaceList: React.FC<UnclusteredFaceListProps> = ({
             </Typography>
             <FileFaceList>
                 {faceIDs.map((faceID) => (
-                    <UnclusteredFace key={faceID}>
+                    <FileOtherFace key={faceID}>
                         <FaceCropImageView
                             placeholderDimension={112}
                             {...{ file, faceID }}
                         />
-                    </UnclusteredFace>
+                    </FileOtherFace>
                 ))}
             </FileFaceList>
         </>
     );
 };
 
-const UnclusteredFace = styled("div")`
+const FileOtherFace = styled("div")`
     width: 112px;
     height: 112px;
     margin: 5px;
