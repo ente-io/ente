@@ -573,7 +573,7 @@ export const _applyPersonSuggestionUpdates = async (
     updates: PersonSuggestionUpdates,
     masterKey: Uint8Array,
 ) => {
-    let localClusters = await savedFaceClusters();
+    const localClusters = await savedFaceClusters();
 
     let assignedClusters = [...cgroup.data.assigned];
     let rejectedClusterIDs = await savedRejectedClustersForCGroup(cgroup.id);
@@ -583,20 +583,7 @@ export const _applyPersonSuggestionUpdates = async (
 
     // Add cluster with `clusterID` to the list of assigned clusters.
     const assign = (clusterID: string) => {
-        // Remove it from the locally saved clusters,
-        const [updatedLocalClusters, cluster] = localClusters.reduce<
-            [FaceCluster[], FaceCluster | undefined]
-        >(
-            ([clusters, removedCluster], c) => {
-                if (c.id == clusterID) return [clusters, c];
-                clusters.push(c);
-                return [clusters, removedCluster];
-            },
-            [[], undefined],
-        );
-
-        localClusters = updatedLocalClusters;
-        // And add it to the ones that'll get synced with remote.
+        const cluster = localClusters.find((c) => c.id == clusterID);
         assignedClusters.push(ensure(cluster));
         assignUpdateCount += 1;
     };
@@ -618,10 +605,10 @@ export const _applyPersonSuggestionUpdates = async (
 
             assignedClusters = updatedAssignedClusters;
             assignUpdateCount += 1;
-            // Prior to this, this cluster was not saved locally, since it was
+            // Prior to this, this cluster was not saved locally since it was
             // part of the remote data. Since we're removing it from the remote
             // state, add it to the local state instead so that the user can see
-            // (local only) entries from their recent rejections.
+            // it in their saved choices (local only).
             localClusters.push(ensure(cluster));
         }
     };
