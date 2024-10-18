@@ -2,9 +2,9 @@ import { haveWindow } from "@/base/env";
 import { type Location } from "@/base/types";
 import { Button, styled, type ButtonProps } from "@mui/material";
 import { type CSSProperties } from "@mui/material/styles/createTypography";
+import { t } from "i18next";
 import { useEffect, useRef } from "react";
 
-import { t } from "i18next";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css"; // Re-uses images from ~leaflet package
 import "leaflet/dist/leaflet.css";
 haveWindow() && require("leaflet-defaulticon-compatibility");
@@ -70,7 +70,6 @@ const MapBox: React.FC<MapBoxProps> = ({
     ) : (
         <MapBoxEnableContainer>
             <MapButton onClick={openUpdateMapConfirmationDialog}>
-                {" "}
                 {t("enable_map")}
             </MapButton>
         </MapBoxEnableContainer>
