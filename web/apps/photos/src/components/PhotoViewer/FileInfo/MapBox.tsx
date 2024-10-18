@@ -1,7 +1,7 @@
 import { haveWindow } from "@/base/env";
 import { type Location } from "@/base/types";
-import { Button, styled, type ButtonProps } from "@mui/material";
-import { type CSSProperties } from "@mui/material/styles/createTypography";
+import { ChipButton } from "@/new/photos/components/mui/ChipButton";
+import { styled } from "@mui/material";
 import { t } from "i18next";
 import { useEffect, useRef } from "react";
 
@@ -69,18 +69,11 @@ const MapBox: React.FC<MapBoxProps> = ({
         <MapBoxContainer ref={mapBoxContainerRef} />
     ) : (
         <MapBoxEnableContainer>
-            <MapButton onClick={openUpdateMapConfirmationDialog}>
+            <ChipButton onClick={openUpdateMapConfirmationDialog}>
                 {t("enable_map")}
-            </MapButton>
+            </ChipButton>
         </MapBoxEnableContainer>
     );
 };
 
 export default MapBox;
-
-export const MapButton = styled((props: ButtonProps) => (
-    <Button color="secondary" {...props} />
-))(({ theme }) => ({
-    ...(theme.typography.small as CSSProperties),
-    padding: "8px",
-}));
