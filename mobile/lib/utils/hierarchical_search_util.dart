@@ -336,7 +336,6 @@ Future<List<FaceFilter>> curateFaceFilters(
 
     for (final clusterId in clusterIdToFiles.keys) {
       final files = clusterIdToFiles[clusterId]!;
-      final String clusterName = clusterId;
 
       if (clusterIDToPersonID[clusterId] != null) {
         // This should not happen, means a faceID is assigned to multiple persons.

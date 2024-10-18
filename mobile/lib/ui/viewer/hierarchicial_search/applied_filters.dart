@@ -1,5 +1,4 @@
 import "package:flutter/material.dart";
-import "package:photos/models/file/file.dart";
 import "package:photos/models/search/hierarchical/face_filter.dart";
 import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
@@ -55,7 +54,7 @@ class _AppliedFiltersState extends State<AppliedFilters> {
               ? FaceFilterChip(
                   personId: filter.personId,
                   clusterId: filter.clusterId,
-                  faceThumbnailFile: EnteFile(),
+                  faceThumbnailFile: filter.faceFile,
                   name: filter.name(),
                   onTap: () {
                     _searchFilterDataProvider.removeAppliedFilters([filter]);
