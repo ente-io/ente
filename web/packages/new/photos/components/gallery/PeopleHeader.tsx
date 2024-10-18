@@ -33,6 +33,7 @@ import AddIcon from "@mui/icons-material/Add";
 import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
 import EditIcon from "@mui/icons-material/Edit";
+import HideImageOutlinedIcon from "@mui/icons-material/HideImageOutlined";
 import ListAltOutlinedIcon from "@mui/icons-material/ListAltOutlined";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import RestoreIcon from "@mui/icons-material/Restore";
@@ -222,17 +223,16 @@ const ClusterPersonHeader: React.FC<ClusterPersonHeaderProps> = ({
 
     const confirmIgnore = () =>
         showMiniDialog({
-            title: pt("Ignore"),
             message: pt(
-                "This face grouping will be not be shown in the people list",
+                "This face grouping will not be shown in the people list",
             ),
             continue: {
-                text: t("yes"),
-                action: ignore,
+                text: pt("Ignore"),
+                color: "primary",
+                action: () => ignoreCluster(cluster),
             },
+            buttonDirection: "row",
         });
-
-    const ignore = () => ignoreCluster(cluster);
 
     return (
         <>
@@ -254,18 +254,18 @@ const ClusterPersonHeader: React.FC<ClusterPersonHeaderProps> = ({
                     triggerButtonIcon={<MoreHorizIcon />}
                 >
                     <OverflowMenuOption
-                        startIcon={<EditIcon />}
-                        centerAlign
-                        onClick={confirmIgnore}
-                    >
-                        {pt("Ignore")}
-                    </OverflowMenuOption>
-                    <OverflowMenuOption
                         startIcon={<AddIcon />}
                         centerAlign
                         onClick={showAddPerson}
                     >
                         {pt("Add a name")}
+                    </OverflowMenuOption>
+                    <OverflowMenuOption
+                        startIcon={<HideImageOutlinedIcon />}
+                        centerAlign
+                        onClick={confirmIgnore}
+                    >
+                        {pt("Ignore")}
                     </OverflowMenuOption>
                 </OverflowMenu>
             </Stack>
