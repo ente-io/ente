@@ -92,8 +92,8 @@ class FaceDetectionRelative extends Detection {
     // Calculate the scaling
     final double scaleX = originalSize.width / newSize.width;
     final double scaleY = originalSize.height / newSize.height;
-    const double translateX = 0;
-    const double translateY = 0;
+    final double translateX = - ((originalSize.width - newSize.width) / 2) / originalSize.width;
+    final double translateY = - ((originalSize.height - newSize.height) / 2) / originalSize.height;
 
     // Transform Box
     _transformBox(box, scaleX, scaleY, translateX, translateY);
@@ -117,10 +117,10 @@ class FaceDetectionRelative extends Detection {
     double translateX,
     double translateY,
   ) {
-    box[0] = (box[0] * scaleX + translateX).clamp(0.0, 1.0);
-    box[1] = (box[1] * scaleY + translateY).clamp(0.0, 1.0);
-    box[2] = (box[2] * scaleX + translateX).clamp(0.0, 1.0);
-    box[3] = (box[3] * scaleY + translateY).clamp(0.0, 1.0);
+    box[0] = ((box[0] + translateX) * scaleX).clamp(0.0, 1.0);
+    box[1] = ((box[1] + translateY) * scaleY).clamp(0.0, 1.0);
+    box[2] = ((box[2] + translateX) * scaleX).clamp(0.0, 1.0);
+    box[3] = ((box[3] + translateY) * scaleY).clamp(0.0, 1.0);
   }
 
   List<double> _transformPoint(
@@ -131,8 +131,8 @@ class FaceDetectionRelative extends Detection {
     double translateY,
   ) {
     return [
-      (point[0] * scaleX + translateX).clamp(0.0, 1.0),
-      (point[1] * scaleY + translateY).clamp(0.0, 1.0),
+      ((point[0] + translateX) * scaleX).clamp(0.0, 1.0),
+      ((point[1] + translateY) * scaleY).clamp(0.0, 1.0),
     ];
   }
 

@@ -12,7 +12,7 @@ import "package:photos/models/metadata/file_magic.dart";
 import "package:photos/services/collections_service.dart";
 import 'package:photos/utils/crypto_util.dart';
 import "package:photos/utils/dialog_util.dart";
-import 'package:photos/utils/file_download_util.dart';
+import "package:photos/utils/file_key.dart";
 
 class DiffFetcher {
   final _logger = Logger("DiffFetcher");

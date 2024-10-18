@@ -100,7 +100,9 @@ export default function VerifyMasterPasswordForm({
                         setFieldError(t("INCORRECT_PASSPHRASE"));
                         break;
                     default:
-                        setFieldError(`${t("UNKNOWN_ERROR")} ${e.message}`);
+                        setFieldError(
+                            `${t("generic_error_retry")} ${e.message}`,
+                        );
                 }
             }
         }

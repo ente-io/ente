@@ -5,6 +5,7 @@ import log from "@/base/log";
 import type { Electron } from "@/base/types/ipc";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
 import type { Collection } from "@/media/collection";
+import { EncryptedEnteFile, EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { potentialFileTypeFromExtension } from "@/media/live-photo";
 import { getLocalFiles, sortFiles } from "@/new/photos/services/files";
@@ -15,7 +16,6 @@ import {
     UPLOAD_RESULT,
     UPLOAD_STAGES,
 } from "@/new/photos/services/upload/types";
-import { EncryptedEnteFile, EnteFile } from "@/new/photos/types/file";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import { CustomError } from "@ente/shared/error";

@@ -14,7 +14,7 @@ import 'package:photos/core/network/network.dart';
 import 'package:photos/models/file/file.dart';
 import "package:photos/services/collections_service.dart";
 import 'package:photos/utils/crypto_util.dart';
-import 'package:photos/utils/file_download_util.dart';
+import "package:photos/utils/file_key.dart";
 import 'package:photos/utils/file_uploader_util.dart';
 import 'package:photos/utils/file_util.dart';
 

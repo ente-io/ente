@@ -1,8 +1,8 @@
 import { lowercaseExtension } from "@/base/file";
 import log from "@/base/log";
+import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import piexif from "piexifjs";
-import type { EnteFile } from "../types/file";
 
 /**
  * Return a new stream after applying Exif updates if applicable to the given
@@ -17,25 +17,25 @@ import type { EnteFile } from "../types/file";
  * -   For JPEG files, the DateTimeOriginal Exif entry is updated to reflect the
  *     time that the user edited within Ente.
  *
- * @param enteFile The {@link EnteFile} whose data we want.
+ * @param file The {@link EnteFile} whose data we want.
  *
  * @param stream A {@link ReadableStream} containing the original data for
- * {@link enteFile}.
+ * {@link file}.
  *
  * @returns A new {@link ReadableStream} with updates if any updates were
  * needed, otherwise return the original stream.
  */
 export const updateExifIfNeededAndPossible = async (
-    enteFile: EnteFile,
+    file: EnteFile,
     stream: ReadableStream<Uint8Array>,
 ): Promise<ReadableStream<Uint8Array>> => {
     // Not needed: Not an image.
-    if (enteFile.metadata.fileType != FileType.image) return stream;
+    if (file.metadata.fileType != FileType.image) return stream;
 
     // Not needed: Time was not edited.
-    if (!enteFile.pubMagicMetadata?.data.editedTime) return stream;
+    if (!file.pubMagicMetadata?.data.editedTime) return stream;
 
-    const fileName = enteFile.metadata.title;
+    const fileName = file.metadata.title;
     const extension = lowercaseExtension(fileName);
     // Not possible: Not a JPEG (likely).
     if (extension != "jpeg" && extension != "jpg") return stream;
@@ -44,7 +44,7 @@ export const updateExifIfNeededAndPossible = async (
     try {
         const updatedBlob = await setJPEGExifDateTimeOriginal(
             blob,
-            new Date(enteFile.pubMagicMetadata.data.editedTime / 1000),
+            new Date(file.pubMagicMetadata.data.editedTime / 1000),
         );
         return updatedBlob.stream();
     } catch (e) {

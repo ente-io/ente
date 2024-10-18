@@ -1,14 +1,16 @@
 import { checkSessionValidity } from "@/accounts/services/session";
+import {
+    TitledMiniDialog,
+    type MiniDialogAttributes,
+} from "@/base/components/MiniDialog";
 import log from "@/base/log";
-import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
-import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
+import { AppContext } from "@/new/photos/types/context";
 import VerifyMasterPasswordForm, {
     type VerifyMasterPasswordFormProps,
 } from "@ente/shared/components/VerifyMasterPasswordForm";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import type { KeyAttributes, User } from "@ente/shared/user/types";
 import { t } from "i18next";
-import { AppContext } from "pages/_app";
 import { useCallback, useContext, useEffect, useState } from "react";
 
 interface Iprops {
@@ -22,8 +24,7 @@ export default function AuthenticateUserModal({
     onClose,
     onAuthenticate,
 }: Iprops) {
-    const { setDialogMessage, setDialogBoxAttributesV2, logout } =
-        useContext(AppContext);
+    const { setDialogMessage, showMiniDialog, logout } = useContext(AppContext);
     const [user, setUser] = useState<User>();
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
 
@@ -31,7 +32,7 @@ export default function AuthenticateUserModal({
         setDialogMessage({
             title: t("error"),
             close: { variant: "critical" },
-            content: t("UNKNOWN_ERROR"),
+            content: t("generic_error_retry"),
         });
 
     // This is a altered version of the check we do on the password verification
@@ -44,7 +45,7 @@ export default function AuthenticateUserModal({
             const session = await checkSessionValidity();
             if (session.status != "valid") {
                 onClose();
-                setDialogBoxAttributesV2(
+                showMiniDialog(
                     passwordChangedElsewhereDialogAttributes(logout),
                 );
             }
@@ -53,7 +54,7 @@ export default function AuthenticateUserModal({
             // potentially transient issues.
             log.warn("Ignoring error when determining session validity", e);
         }
-    }, [setDialogBoxAttributesV2, logout]);
+    }, [showMiniDialog, logout]);
 
     useEffect(() => {
         const main = async () => {
@@ -96,13 +97,11 @@ export default function AuthenticateUserModal({
         };
 
     return (
-        <DialogBoxV2
+        <TitledMiniDialog
             open={open}
             onClose={onClose}
             sx={{ position: "absolute" }}
-            attributes={{
-                title: t("password"),
-            }}
+            title={t("password")}
         >
             <VerifyMasterPasswordForm
                 buttonText={t("AUTHENTICATE")}
@@ -111,7 +110,7 @@ export default function AuthenticateUserModal({
                 keyAttributes={keyAttributes}
                 submitButtonProps={{ sx: { mb: 0 } }}
             />
-        </DialogBoxV2>
+        </TitledMiniDialog>
     );
 }
 
@@ -124,13 +123,12 @@ export default function AuthenticateUserModal({
  */
 const passwordChangedElsewhereDialogAttributes = (
     onLogin: () => void,
-): DialogBoxAttributesV2 => ({
+): MiniDialogAttributes => ({
     title: t("password_changed_elsewhere"),
-    content: t("password_changed_elsewhere_message"),
-    proceed: {
+    message: t("password_changed_elsewhere_message"),
+    continue: {
         text: t("login"),
         action: onLogin,
-        variant: "accent",
     },
-    close: { text: t("cancel") },
+    cancel: false,
 });

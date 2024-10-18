@@ -1,23 +1,27 @@
 import { stashRedirect } from "@/accounts/services/redirect";
 import { NavbarBase } from "@/base/components/Navbar";
-import { useIsMobileWidth } from "@/base/hooks";
+import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { useModalVisibility } from "@/base/components/utils/modal";
+import { useIsSmallWidth } from "@/base/hooks";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
+import { type EnteFile, mergeMetadata } from "@/media/file";
 import {
     CollectionSelector,
     type CollectionSelectorAttributes,
 } from "@/new/photos/components/CollectionSelector";
 import {
-    PeopleEmptyState,
-    SearchResultsHeader,
-} from "@/new/photos/components/Gallery";
-import type { GalleryBarMode } from "@/new/photos/components/Gallery/BarImpl";
-import { GalleryPeopleState } from "@/new/photos/components/Gallery/PeopleHeader";
-import {
     SearchBar,
     type SearchBarProps,
 } from "@/new/photos/components/SearchBar";
 import { WhatsNew } from "@/new/photos/components/WhatsNew";
+import {
+    PeopleEmptyState,
+    SearchResultsHeader,
+} from "@/new/photos/components/gallery";
+import type { GalleryBarMode } from "@/new/photos/components/gallery/BarImpl";
+import { GalleryPeopleState } from "@/new/photos/components/gallery/PeopleHeader";
+import { usePeopleStateSnapshot } from "@/new/photos/components/utils/ml";
 import { shouldShowWhatsNew } from "@/new/photos/services/changelog";
 import type { CollectionSummaries } from "@/new/photos/services/collection/ui";
 import { areOnlySystemCollections } from "@/new/photos/services/collection/ui";
@@ -27,22 +31,19 @@ import {
     getLocalTrashedFiles,
     sortFiles,
 } from "@/new/photos/services/files";
-import { peopleSnapshot, peopleSubscribe } from "@/new/photos/services/ml";
 import type { Person } from "@/new/photos/services/ml/people";
 import {
     filterSearchableFiles,
     setSearchCollectionsAndFiles,
 } from "@/new/photos/services/search";
 import type { SearchOption } from "@/new/photos/services/search/types";
-import { EnteFile } from "@/new/photos/types/file";
-import { mergeMetadata } from "@/new/photos/utils/file";
+import { AppContext } from "@/new/photos/types/context";
 import { ensure } from "@/utils/ensure";
 import {
     CenteredFlex,
     FlexWrapper,
     HorizontalFlex,
 } from "@ente/shared/components/Container";
-import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import { CustomError } from "@ente/shared/error";
@@ -93,7 +94,6 @@ import PlanSelector from "components/pages/gallery/PlanSelector";
 import SelectedFileOptions from "components/pages/gallery/SelectedFileOptions";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import { AppContext } from "pages/_app";
 import {
     createContext,
     useCallback,
@@ -102,7 +102,6 @@ import {
     useMemo,
     useRef,
     useState,
-    useSyncExternalStore,
 } from "react";
 import { useDropzone } from "react-dropzone";
 import {
@@ -218,7 +217,6 @@ export default function Gallery() {
     const [collectionNamerView, setCollectionNamerView] = useState(false);
     const [shouldDisableDropzone, setShouldDisableDropzone] = useState(false);
     const [isPhotoSwipeOpen, setIsPhotoSwipeOpen] = useState(false);
-    const [openWhatsNew, setOpenWhatsNew] = useState(false);
 
     const {
         // A function to call to get the props we should apply to the container,
@@ -324,7 +322,7 @@ export default function Gallery() {
     // The ID of the currently selected person in the gallery bar (if any).
     const [activePersonID, setActivePersonID] = useState<string | undefined>();
 
-    const people = useSyncExternalStore(peopleSubscribe, peopleSnapshot);
+    const peopleState = usePeopleStateSnapshot();
 
     const [isClipSearchResult, setIsClipSearchResult] =
         useState<boolean>(false);
@@ -351,6 +349,9 @@ export default function Gallery() {
     const [openCollectionSelector, setOpenCollectionSelector] = useState(false);
     const [collectionSelectorAttributes, setCollectionSelectorAttributes] =
         useState<CollectionSelectorAttributes | undefined>();
+
+    const { show: showWhatsNew, props: whatsNewVisibilityProps } =
+        useModalVisibility();
 
     const router = useRouter();
 
@@ -420,7 +421,7 @@ export default function Gallery() {
             );
             if (electron) {
                 electron.onMainWindowFocus(() => syncWithRemote(false, true));
-                if (await shouldShowWhatsNew(electron)) setOpenWhatsNew(true);
+                if (await shouldShowWhatsNew(electron)) showWhatsNew();
             }
         };
         main();
@@ -565,27 +566,42 @@ export default function Gallery() {
                 selectedSearchOption.suggestion,
             );
         } else if (barMode == "people") {
-            let filteredPeople = people ?? [];
+            let filteredPeople = peopleState?.people ?? [];
+            let filteredVisiblePeople = peopleState?.visiblePeople ?? [];
             if (tempDeletedFileIds?.size ?? tempHiddenFileIds?.size) {
                 // Prune the in-memory temp updates from the actual state to
                 // obtain the UI state. Kept inside an preflight check to so
                 // that the common path remains fast.
-                filteredPeople = filteredPeople
-                    .map((p) => ({
-                        ...p,
-                        fileIDs: p.fileIDs.filter(
-                            (id) =>
-                                !tempDeletedFileIds?.has(id) &&
-                                !tempHiddenFileIds?.has(id),
-                        ),
-                    }))
-                    .filter((p) => p.fileIDs.length > 0);
+                const filterTemp = (ps: Person[]) =>
+                    ps
+                        .map((p) => ({
+                            ...p,
+                            fileIDs: p.fileIDs.filter(
+                                (id) =>
+                                    !tempDeletedFileIds?.has(id) &&
+                                    !tempHiddenFileIds?.has(id),
+                            ),
+                        }))
+                        .filter((p) => p.fileIDs.length > 0);
+                filteredPeople = filterTemp(filteredPeople);
+                filteredVisiblePeople = filterTemp(filteredVisiblePeople);
             }
-            const activePerson =
-                filteredPeople.find((p) => p.id == activePersonID) ??
-                // We don't have an "All" pseudo-album in people mode currently,
-                // so default to the first person in the list.
-                filteredPeople[0];
+            const findByID = (ps: Person[]) =>
+                ps.find((p) => p.id == activePersonID);
+            let activePerson = findByID(filteredVisiblePeople);
+            if (!activePerson) {
+                // This might be one of the normally hidden small clusters.
+                activePerson = findByID(filteredPeople);
+                if (activePerson) {
+                    // Temporarily add this person's entry to the list of people
+                    // surfaced in the people section.
+                    filteredVisiblePeople.push(activePerson);
+                } else {
+                    // We don't have an "All" pseudo-album in people mode, so
+                    // default to the first person in the list.
+                    activePerson = filteredVisiblePeople[0];
+                }
+            }
             const pfSet = new Set(activePerson?.fileIDs ?? []);
             filteredFiles = getUniqueFiles(
                 files.filter(({ id }) => {
@@ -595,7 +611,7 @@ export default function Gallery() {
             );
             galleryPeopleState = {
                 activePerson,
-                people: filteredPeople,
+                people: filteredVisiblePeople,
             };
         } else {
             const baseFiles = barMode == "hidden-albums" ? hiddenFiles : files;
@@ -677,7 +693,7 @@ export default function Gallery() {
         selectedSearchOption,
         activeCollectionID,
         archivedCollections,
-        people,
+        peopleState,
         activePersonID,
     ]);
 
@@ -965,7 +981,7 @@ export default function Gallery() {
                     title: t("error"),
 
                     close: { variant: "critical" },
-                    content: t("UNKNOWN_ERROR"),
+                    content: t("generic_error_retry"),
                 });
             } finally {
                 finishLoading();
@@ -992,6 +1008,7 @@ export default function Gallery() {
                     setTempHiddenFileIds,
                     setFixCreationTimeAttributes,
                     setFilesDownloadProgressAttributesCreator,
+                    refreshFavItemIds,
                 );
             }
             clearSelection();
@@ -1002,7 +1019,7 @@ export default function Gallery() {
                 title: t("error"),
 
                 close: { variant: "critical" },
-                content: t("UNKNOWN_ERROR"),
+                content: t("generic_error_retry"),
             });
         } finally {
             finishLoading();
@@ -1021,7 +1038,7 @@ export default function Gallery() {
                     title: t("error"),
 
                     close: { variant: "critical" },
-                    content: t("UNKNOWN_ERROR"),
+                    content: t("generic_error_retry"),
                 });
             } finally {
                 finishLoading();
@@ -1029,7 +1046,7 @@ export default function Gallery() {
         };
         return () =>
             setCollectionNamerAttributes({
-                title: t("CREATE_COLLECTION"),
+                title: t("new_album"),
                 buttonText: t("CREATE"),
                 autoFilledName: "",
                 callback,
@@ -1119,13 +1136,18 @@ export default function Gallery() {
         [],
     );
 
+    const refreshFavItemIds = async () => {
+        const favItemIds = await getFavItemIds(files);
+        setFavItemIds(favItemIds);
+    };
+
     if (!collectionSummaries || !filteredData) {
         return <div></div>;
     }
 
-    // `people` will be undefined only when ML is disabled, otherwise it'll be
-    // an empty array (even if people are loading).
-    const showPeopleSectionButton = people !== undefined;
+    // `peopleState` will be undefined only when ML is disabled, otherwise it'll
+    // be contain empty arrays (even if people are loading).
+    const showPeopleSectionButton = peopleState !== undefined;
 
     return (
         <GalleryContext.Provider
@@ -1159,7 +1181,7 @@ export default function Gallery() {
                 />
                 {blockingLoad && (
                     <LoadingOverlay>
-                        <EnteSpinner />
+                        <ActivityIndicator />
                     </LoadingOverlay>
                 )}
                 {isFirstLoad && (
@@ -1283,10 +1305,7 @@ export default function Gallery() {
                     sidebarView={sidebarView}
                     closeSidebar={closeSidebar}
                 />
-                <WhatsNew
-                    open={openWhatsNew}
-                    onClose={() => setOpenWhatsNew(false)}
-                />
+                <WhatsNew {...whatsNewVisibilityProps} />
                 {!isInSearchMode &&
                 !isFirstLoad &&
                 !files?.length &&
@@ -1302,6 +1321,7 @@ export default function Gallery() {
                     <PhotoFrame
                         page={PAGES.GALLERY}
                         mode={barMode}
+                        modePlus={isInSearchMode ? "search" : barMode}
                         files={filteredData}
                         syncWithRemote={syncWithRemote}
                         favItemIds={favItemIds}
@@ -1421,13 +1441,13 @@ const SidebarButton: React.FC<IconButtonProps> = (props) => (
 
 const UploadButton: React.FC<ButtonProps & IconButtonProps> = (props) => {
     const disabled = !uploadManager.shouldAllowNewUpload();
-    const isMobileWidth = useIsMobileWidth();
+    const isSmallWidth = useIsSmallWidth();
 
     const icon = <FileUploadOutlinedIcon />;
 
     return (
         <Box>
-            {isMobileWidth ? (
+            {isSmallWidth ? (
                 <IconButton {...props} disabled={disabled}>
                     {icon}
                 </IconButton>

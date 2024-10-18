@@ -1,5 +1,5 @@
 import log from "@/base/log";
-import { EnteFile } from "@/new/photos/types/file";
+import { EnteFile } from "@/media/file";
 import { styled, useTheme } from "@mui/material";
 import { GalleryContext } from "pages/gallery";
 import React, { useContext, useLayoutEffect, useState } from "react";

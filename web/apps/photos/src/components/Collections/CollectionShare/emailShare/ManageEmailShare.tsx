@@ -10,6 +10,7 @@ import {
     type Collection,
     type CollectionUser,
 } from "@/media/collection";
+import { AppContext } from "@/new/photos/types/context";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import Add from "@mui/icons-material/Add";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
@@ -19,7 +20,6 @@ import Photo from "@mui/icons-material/Photo";
 import { DialogProps, Stack } from "@mui/material";
 import Avatar from "components/pages/gallery/Avatar";
 import { t } from "i18next";
-import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";
 import { useContext, useRef, useState } from "react";
 import { unshareCollection } from "services/collectionService";

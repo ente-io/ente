@@ -29,12 +29,11 @@ import "package:photos/models/collection/collection.dart";
 import 'package:photos/models/collection/collection_items.dart';
 import "package:photos/models/file/file.dart";
 import 'package:photos/models/selected_files.dart';
+import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
-import "package:photos/services/entity_service.dart";
 import 'package:photos/services/local_sync_service.dart';
 import "package:photos/services/notification_service.dart";
-import 'package:photos/services/update_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/states/user_details_state.dart';
 import 'package:photos/theme/colors.dart';
@@ -202,19 +201,20 @@ class _HomeWidgetState extends State<HomeWidget> {
       },
     );
     _initDeepLinks();
-    UpdateService.instance.shouldShowUpdateNotification().then((value) {
+    updateService.shouldShowUpdateNotification().then((value) {
       Future.delayed(Duration.zero, () {
         if (value) {
           showDialog(
+            useRootNavigator: false,
             context: context,
             builder: (BuildContext context) {
               return AppUpdateDialog(
-                UpdateService.instance.getLatestVersionInfo(),
+                updateService.getLatestVersionInfo(),
               );
             },
             barrierColor: Colors.black.withOpacity(0.85),
           );
-          UpdateService.instance.resetUpdateAvailableShownTime();
+          updateService.resetUpdateAvailableShownTime();
         }
       });
     });
@@ -318,6 +318,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     );
 
     await showDialog(
+      useRootNavigator: false,
       context: context,
       builder: (BuildContext context) {
         return alert;
@@ -454,7 +455,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       return const LandingPageWidget();
     }
     if (!LocalSyncService.instance.hasGrantedPermissions()) {
-      EntityService.instance.syncEntities();
+      entityService.syncEntities();
       return const GrantPermissionsWidget();
     }
     if (!LocalSyncService.instance.hasCompletedFirstImport()) {
@@ -617,7 +618,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   showChangeLog(BuildContext context) async {
-    final bool show = await UpdateService.instance.showChangeLog();
+    final bool show = await updateService.showChangeLog();
     if (!show || !Configuration.instance.isLoggedIn()) {
       return;
     }
@@ -643,7 +644,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       },
     );
     // Do not show change dialog again
-    UpdateService.instance.hideChangeLog().ignore();
+    updateService.hideChangeLog().ignore();
   }
 
   void _onDidReceiveNotificationResponse(

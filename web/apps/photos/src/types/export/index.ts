@@ -1,4 +1,4 @@
-import { EnteFile } from "@/new/photos/types/file";
+import { EnteFile } from "@/media/file";
 import type { ExportStage } from "services/export";
 
 export interface ExportProgress {

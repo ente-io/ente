@@ -1,7 +1,8 @@
 import { SelectionBar } from "@/base/components/Navbar";
 import type { Collection } from "@/media/collection";
 import type { CollectionSelectorAttributes } from "@/new/photos/components/CollectionSelector";
-import type { GalleryBarMode } from "@/new/photos/components/Gallery/BarImpl";
+import type { GalleryBarMode } from "@/new/photos/components/gallery/BarImpl";
+import { AppContext } from "@/new/photos/types/context";
 import { FluidContainer } from "@ente/shared/components/Container";
 import ClockIcon from "@mui/icons-material/AccessTime";
 import AddIcon from "@mui/icons-material/Add";
@@ -10,6 +11,7 @@ import MoveIcon from "@mui/icons-material/ArrowForward";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
 import DownloadIcon from "@mui/icons-material/Download";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorderRounded";
 import RemoveIcon from "@mui/icons-material/RemoveCircleOutline";
 import RestoreIcon from "@mui/icons-material/Restore";
 import UnArchiveIcon from "@mui/icons-material/Unarchive";
@@ -17,7 +19,6 @@ import VisibilityOffOutlined from "@mui/icons-material/VisibilityOffOutlined";
 import VisibilityOutlined from "@mui/icons-material/VisibilityOutlined";
 import { Box, IconButton, Stack, Tooltip } from "@mui/material";
 import { t } from "i18next";
-import { AppContext } from "pages/_app";
 import { useContext } from "react";
 import {
     ALL_SECTION,
@@ -85,7 +86,7 @@ const SelectedFileOptions = ({
             onCreateCollection: showCreateCollectionModal(
                 COLLECTION_OPS_TYPE.ADD,
             ),
-            ignoredCollectionID:
+            relatedCollectionID:
                 isInSearchMode || peopleMode ? undefined : activeCollectionID,
         });
 
@@ -100,7 +101,7 @@ const SelectedFileOptions = ({
             content: t("DELETE_FILES_MESSAGE"),
             proceed: {
                 action: handleFileOps(FILE_OPS_TYPE.DELETE_PERMANENTLY),
-                text: t("DELETE"),
+                text: t("delete"),
                 variant: "critical",
             },
             close: { text: t("cancel") },
@@ -158,7 +159,7 @@ const SelectedFileOptions = ({
             onCreateCollection: showCreateCollectionModal(
                 COLLECTION_OPS_TYPE.MOVE,
             ),
-            ignoredCollectionID:
+            relatedCollectionID:
                 isInSearchMode || peopleMode ? undefined : activeCollectionID,
         });
     };
@@ -221,7 +222,7 @@ const SelectedFileOptions = ({
                                 <VisibilityOffOutlined />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title={t("DELETE")}>
+                        <Tooltip title={t("delete")}>
                             <IconButton onClick={trashHandler}>
                                 <DeleteIcon />
                             </IconButton>
@@ -255,7 +256,7 @@ const SelectedFileOptions = ({
                                 <VisibilityOffOutlined />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title={t("DELETE")}>
+                        <Tooltip title={t("delete")}>
                             <IconButton onClick={trashHandler}>
                                 <DeleteIcon />
                             </IconButton>
@@ -288,7 +289,7 @@ const SelectedFileOptions = ({
                                 <MoveIcon />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title={t("DELETE")}>
+                        <Tooltip title={t("delete")}>
                             <IconButton onClick={trashHandler}>
                                 <DeleteIcon />
                             </IconButton>
@@ -317,7 +318,7 @@ const SelectedFileOptions = ({
                             </IconButton>
                         </Tooltip>
 
-                        <Tooltip title={t("DELETE")}>
+                        <Tooltip title={t("delete")}>
                             <IconButton onClick={trashHandler}>
                                 <DeleteIcon />
                             </IconButton>
@@ -332,6 +333,18 @@ const SelectedFileOptions = ({
                                 <ClockIcon />
                             </IconButton>
                         </Tooltip>
+                        {!isFavoriteCollection &&
+                            activeCollectionID != ARCHIVE_SECTION && (
+                                <Tooltip title={t("favorite")}>
+                                    <IconButton
+                                        onClick={handleFileOps(
+                                            FILE_OPS_TYPE.SET_FAVORITE,
+                                        )}
+                                    >
+                                        <FavoriteBorderIcon />
+                                    </IconButton>
+                                </Tooltip>
+                            )}
                         <Tooltip title={t("download")}>
                             <IconButton
                                 onClick={handleFileOps(FILE_OPS_TYPE.DOWNLOAD)}
@@ -394,7 +407,7 @@ const SelectedFileOptions = ({
                                 <VisibilityOffOutlined />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title={t("DELETE")}>
+                        <Tooltip title={t("delete")}>
                             <IconButton onClick={trashHandler}>
                                 <DeleteIcon />
                             </IconButton>

@@ -7,7 +7,7 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/diff_sync_complete_event.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/models/api/entity/type.dart";
-import "package:photos/services/entity_service.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/face_ml/face_detection/detection.dart";
 import "package:photos/services/machine_learning/face_ml/face_detection/face_detection_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_embedding/face_embedding_service.dart";
@@ -61,7 +61,7 @@ class FaceRecognitionService {
       return;
     }
     _isSyncing = true;
-    await EntityService.instance.syncEntity(EntityType.cgroup);
+    await entityService.syncEntity(EntityType.cgroup);
     if (_shouldSyncPeople) {
       await PersonService.instance.reconcileClusters();
       Bus.instance.fire(PeopleChangedEvent(type: PeopleEventType.syncDone));

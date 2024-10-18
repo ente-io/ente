@@ -4,12 +4,15 @@ import type { CollectionMapping, Electron, ZipItem } from "@/base/types/ipc";
 import type { Collection } from "@/media/collection";
 import { CollectionMappingChoiceDialog } from "@/new/photos/components/CollectionMappingChoiceDialog";
 import type { CollectionSelectorAttributes } from "@/new/photos/components/CollectionSelector";
+import { downloadAppDialogAttributes } from "@/new/photos/components/utils/download";
 import { exportMetadataDirectoryName } from "@/new/photos/services/export";
 import type {
     FileAndPath,
     UploadItem,
 } from "@/new/photos/services/upload/types";
 import { UPLOAD_STAGES } from "@/new/photos/services/upload/types";
+import { AppContext } from "@/new/photos/types/context";
+import { NotificationAttributes } from "@/new/photos/types/notification";
 import { firstNonEmpty } from "@/utils/array";
 import { ensure } from "@/utils/ensure";
 import { CustomError } from "@ente/shared/error";
@@ -17,7 +20,6 @@ import DiscFullIcon from "@mui/icons-material/DiscFull";
 import UserNameInputDialog from "components/UserNameInputDialog";
 import { t } from "i18next";
 import isElectron from "is-electron";
-import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";
 import { useContext, useEffect, useRef, useState } from "react";
 import billingService from "services/billingService";
@@ -37,13 +39,9 @@ import type {
 import uploadManager from "services/upload/uploadManager";
 import watcher from "services/watch";
 import { SetCollections, SetFiles, SetLoading } from "types/gallery";
-import { NotificationAttributes } from "types/Notification";
 import { getOrCreateAlbum } from "utils/collection";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
-import {
-    getDownloadAppMessage,
-    getRootLevelFileWithFolderNotAllowMessage,
-} from "utils/ui";
+import { getRootLevelFileWithFolderNotAllowMessage } from "utils/ui";
 import { SetCollectionNamerAttributes } from "../Collections/CollectionNamer";
 import UploadProgress from "./UploadProgress";
 import {
@@ -671,7 +669,7 @@ export default function Uploader({
             default:
                 notification = {
                     variant: "critical",
-                    message: t("UNKNOWN_ERROR"),
+                    message: t("generic_error_retry"),
                     onClick: () => null,
                 };
         }
@@ -684,7 +682,7 @@ export default function Uploader({
 
     const showCollectionCreateModal = (suggestedName: string) => {
         props.setCollectionNamerAttributes({
-            title: t("CREATE_COLLECTION"),
+            title: t("new_album"),
             buttonText: t("CREATE"),
             autoFilledName: suggestedName,
             callback: uploadToSingleNewCollection,
@@ -705,7 +703,7 @@ export default function Uploader({
             if (openZipFileSelector && electron) {
                 openZipFileSelector();
             } else {
-                appContext.setDialogMessage(getDownloadAppMessage());
+                appContext.showMiniDialog(downloadAppDialogAttributes());
             }
         }
     };

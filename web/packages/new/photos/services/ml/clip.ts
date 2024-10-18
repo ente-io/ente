@@ -1,6 +1,6 @@
 import type { ElectronMLWorker } from "@/base/types/ipc";
 import type { ImageBitmapAndData } from "./blob";
-import { getCLIPIndexes } from "./db";
+import { savedCLIPIndexes } from "./db";
 import { dotProduct, norm } from "./math";
 import type { CLIPMatches } from "./worker-types";
 
@@ -112,10 +112,9 @@ const computeEmbedding = async (
     imageData: ImageData,
     electron: ElectronMLWorker,
 ): Promise<Float32Array> => {
-    // In contrast to the face detection model, the image pre-preprocessing
-    // happens within the model itself, using ONNX primitives. This is more
-    // performant and also saves us from having to reinvent (say) the
-    // antialising wheels.
+    // The image pre-preprocessing happens within the model itself, using ONNX
+    // primitives. This is more performant and also saves us from having to
+    // reinvent (say) the antialising wheels.
     const { height, width, data: pixelData } = imageData;
     const inputShape = [height, width, 4]; // [H, W, C]
     return normalized(
@@ -134,7 +133,7 @@ const normalized = (embedding: Float32Array) => {
  * The result can also be `undefined`, which indicates that the download for the
  * ML model is still in progress (trying again later should succeed).
  */
-export const clipMatches = async (
+export const _clipMatches = async (
     searchPhrase: string,
     electron: ElectronMLWorker,
 ): Promise<CLIPMatches | undefined> => {
@@ -170,7 +169,7 @@ let _cachedCLIPIndexes:
  * produces potentially new CLIP indexes).
  */
 const cachedOrReadCLIPIndexes = async () =>
-    (_cachedCLIPIndexes ??= (await getCLIPIndexes()).map(
+    (_cachedCLIPIndexes ??= (await savedCLIPIndexes()).map(
         ({ fileID, embedding }) => ({
             fileID,
             embedding: new Float32Array(embedding),

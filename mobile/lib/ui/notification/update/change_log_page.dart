@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
-import 'package:photos/services/update_service.dart';
+import "package:photos/service_locator.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/divider_widget.dart';
@@ -64,7 +64,7 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
                       labelText: S.of(context).continueLabel,
                       icon: Icons.arrow_forward_outlined,
                       onTap: () async {
-                        await UpdateService.instance.hideChangeLog();
+                        await updateService.hideChangeLog();
                         if (mounted && Navigator.of(context).canPop()) {
                           Navigator.of(context).pop();
                         }
@@ -80,7 +80,7 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
                       icon: Icons.favorite_rounded,
                       iconColor: enteColorScheme.primary500,
                       onTap: () async {
-                        await UpdateService.instance.launchReviewUrl();
+                        await updateService.launchReviewUrl();
                       },
                     ),
                     const SizedBox(height: 8),

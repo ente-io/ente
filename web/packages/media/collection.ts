@@ -1,10 +1,9 @@
-import { ItemVisibility } from "@/media/file-metadata";
-import type { EnteFile } from "@/new/photos/types/file";
+import type { EnteFile } from "@/media/file";
 import {
     type EncryptedMagicMetadata,
     type MagicMetadataCore,
-    SUB_TYPE,
-} from "@/new/photos/types/magicMetadata";
+} from "@/media/file";
+import { ItemVisibility } from "@/media/file-metadata";
 
 // TODO: Audit this file
 
@@ -124,6 +123,12 @@ export type CollectionToFileMap = Map<number, EnteFile>;
 export interface RemoveFromCollectionRequest {
     collectionID: number;
     fileIDs: number[];
+}
+
+export enum SUB_TYPE {
+    DEFAULT = 0,
+    DEFAULT_HIDDEN = 1,
+    QUICK_LINK_COLLECTION = 2,
 }
 
 export interface CollectionMagicMetadataProps {

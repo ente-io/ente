@@ -150,7 +150,6 @@
   "tryAgain": "Попробовать снова",
   "viewRecoveryKey": "Просмотреть ключ восстановления",
   "confirmRecoveryKey": "Подтвердите ключ восстановления",
-  "recoveryKeyVerifyReason": "Ваш ключ восстановления - это единственный способ восстановить ваши фотографии, если вы забыли пароль. Вы можете найти ключ восстановления в Настройки > Безопасность.\n\nПожалуйста, введите здесь ваш ключ восстановления, чтобы убедиться, что вы сохранили его правильно.",
   "confirmYourRecoveryKey": "Подтвердите ваш ключ восстановления",
   "addViewer": "Добавить наблюдателя",
   "addCollaborator": "Добавить соавтора",
@@ -1301,5 +1300,14 @@
   "removePublicLinks": "Удалить публичные ссылки",
   "thisWillRemovePublicLinksOfAllSelectedQuickLinks": "Это удалит публичные ссылки на все выбранные быстрые ссылки.",
   "guestView": "Гостевой вид",
-  "guestViewEnablePreSteps": "Чтобы включить гостевой вид, настройте пароль устройства или блокировку экрана в настройках системы."
+  "guestViewEnablePreSteps": "Чтобы включить гостевой вид, настройте пароль устройства или блокировку экрана в настройках системы.",
+  "personName": "Person name",
+  "addNewPerson": "Add new person",
+  "addNameOrMerge": "Add name or merge",
+  "mergeWithExisting": "Merge with existing",
+  "newPerson": "New person",
+  "addName": "Add name",
+  "add": "Add",
+  "extraPhotosFoundFor": "Extra photos found for $text",
+  "extraPhotosFound": "Extra photos found"
 }

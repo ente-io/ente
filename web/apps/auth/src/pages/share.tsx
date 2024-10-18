@@ -1,5 +1,5 @@
+import { EnteLogo } from "@/base/components/EnteLogo";
 import { decryptMetadataJSON_New } from "@/base/crypto";
-import { EnteLogo } from "@ente/shared/components/EnteLogo";
 import React, { useEffect, useMemo, useState } from "react";
 
 interface SharedCode {

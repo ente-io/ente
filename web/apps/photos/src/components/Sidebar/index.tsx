@@ -1,16 +1,20 @@
+import { RecoveryKey } from "@/accounts/components/RecoveryKey";
 import { openAccountsManagePasskeysPage } from "@/accounts/services/passkey";
 import { isDesktop } from "@/base/app";
 import { EnteDrawer } from "@/base/components/EnteDrawer";
+import { EnteLogo } from "@/base/components/EnteLogo";
+import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { useModalVisibility } from "@/base/components/utils/modal";
 import log from "@/base/log";
 import { savedLogs } from "@/base/log-web";
 import { customAPIHost } from "@/base/origins";
+import { downloadString } from "@/base/utils/web";
+import { downloadAppDialogAttributes } from "@/new/photos/components/utils/download";
 import type { CollectionSummaries } from "@/new/photos/services/collection/ui";
+import { AppContext, useAppContext } from "@/new/photos/types/context";
 import { initiateEmail, openURL } from "@/new/photos/utils/web";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
-import { EnteLogo } from "@ente/shared/components/EnteLogo";
-import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
-import RecoveryKey from "@ente/shared/components/RecoveryKey";
 import ThemeSwitcher from "@ente/shared/components/ThemeSwitcher";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
@@ -21,7 +25,6 @@ import {
     setLSUser,
 } from "@ente/shared/storage/localStorage";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
-import { downloadAsFile } from "@ente/shared/utils";
 import ArchiveOutlined from "@mui/icons-material/ArchiveOutlined";
 import CategoryIcon from "@mui/icons-material/Category";
 import CloseIcon from "@mui/icons-material/Close";
@@ -44,7 +47,6 @@ import LinkButton from "components/pages/gallery/LinkButton";
 import { t } from "i18next";
 import isElectron from "is-electron";
 import { useRouter } from "next/router";
-import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";
 import React, {
     MouseEventHandler,
@@ -74,7 +76,6 @@ import {
     DUMMY_UNCATEGORIZED_COLLECTION,
     TRASH_SECTION,
 } from "utils/collection";
-import { getDownloadAppMessage } from "utils/ui";
 import { isFamilyAdmin, isPartOfFamily } from "utils/user/family";
 import { testUpload } from "../../../tests/upload.test";
 import { MemberSubscriptionManage } from "../MemberSubscriptionManage";
@@ -427,35 +428,23 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
     const router = useRouter();
     const appContext = useContext(AppContext);
     const {
-        setDialogMessage,
         startLoading,
         watchFolderView,
         setWatchFolderView,
         themeColor,
         setThemeColor,
+        showMiniDialog,
     } = appContext;
 
-    const [recoverModalView, setRecoveryModalView] = useState(false);
-    const [twoFactorModalView, setTwoFactorModalView] = useState(false);
-    const [preferencesView, setPreferencesView] = useState(false);
+    const { show: showRecoveryKey, props: recoveryKeyVisibilityProps } =
+        useModalVisibility();
+    const { show: showTwoFactor, props: twoFactorVisibilityProps } =
+        useModalVisibility();
+    const { show: showPreferences, props: preferencesVisibilityProps } =
+        useModalVisibility();
 
-    const openPreferencesOptions = () => setPreferencesView(true);
-    const closePreferencesOptions = () => setPreferencesView(false);
-
-    const openRecoveryKeyModal = () => setRecoveryModalView(true);
-    const closeRecoveryKeyModal = () => setRecoveryModalView(false);
-
-    const openTwoFactorModal = () => setTwoFactorModalView(true);
-    const closeTwoFactorModal = () => setTwoFactorModalView(false);
-
-    const openWatchFolder = () => {
-        if (isElectron()) {
-            setWatchFolderView(true);
-        } else {
-            setDialogMessage(getDownloadAppMessage());
-        }
-    };
-    const closeWatchFolder = () => setWatchFolderView(false);
+    const showWatchFolder = () => setWatchFolderView(true);
+    const handleCloseWatchFolder = () => setWatchFolderView(false);
 
     const redirectToChangePasswordPage = () => {
         closeSidebar();
@@ -469,43 +458,30 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
 
     const redirectToAccountsPage = async () => {
         closeSidebar();
-
-        try {
-            await openAccountsManagePasskeysPage();
-        } catch (e) {
-            log.error("failed to redirect to accounts page", e);
-        }
+        await openAccountsManagePasskeysPage();
     };
 
     const redirectToDeduplicatePage = () => router.push(PAGES.DEDUPLICATE);
 
-    const somethingWentWrong = () =>
-        setDialogMessage({
-            title: t("error"),
-            content: t("RECOVER_KEY_GENERATION_FAILED"),
-            close: { variant: "critical" },
-        });
-
-    const toggleTheme = () => {
+    const toggleTheme = () =>
         setThemeColor(
             themeColor === THEME_COLOR.DARK
                 ? THEME_COLOR.LIGHT
                 : THEME_COLOR.DARK,
         );
-    };
 
     return (
         <>
             {isElectron() && (
                 <EnteMenuItem
-                    onClick={openWatchFolder}
+                    onClick={showWatchFolder}
                     variant="secondary"
                     label={t("WATCH_FOLDERS")}
                 />
             )}
             <EnteMenuItem
                 variant="secondary"
-                onClick={openRecoveryKeyModal}
+                onClick={showRecoveryKey}
                 label={t("recovery_key")}
             />
             {isInternalUserViaEmailCheck() && (
@@ -523,10 +499,9 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
             )}
             <EnteMenuItem
                 variant="secondary"
-                onClick={openTwoFactorModal}
+                onClick={showTwoFactor}
                 label={t("TWO_FACTOR")}
             />
-
             <EnteMenuItem
                 variant="secondary"
                 onClick={redirectToAccountsPage}
@@ -538,44 +513,39 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
                 onClick={redirectToChangePasswordPage}
                 label={t("CHANGE_PASSWORD")}
             />
-
             <EnteMenuItem
                 variant="secondary"
                 onClick={redirectToChangeEmailPage}
                 label={t("CHANGE_EMAIL")}
             />
-
             <EnteMenuItem
                 variant="secondary"
                 onClick={redirectToDeduplicatePage}
                 label={t("DEDUPLICATE_FILES")}
             />
-
             <EnteMenuItem
                 variant="secondary"
-                onClick={openPreferencesOptions}
+                onClick={showPreferences}
                 label={t("preferences")}
             />
+
             <RecoveryKey
-                show={recoverModalView}
-                onHide={closeRecoveryKeyModal}
-                somethingWentWrong={somethingWentWrong}
+                {...recoveryKeyVisibilityProps}
+                {...{ showMiniDialog }}
             />
             <TwoFactorModal
-                show={twoFactorModalView}
-                onHide={closeTwoFactorModal}
+                {...twoFactorVisibilityProps}
                 closeSidebar={closeSidebar}
                 setLoading={startLoading}
             />
             {isElectron() && (
                 <WatchFolder
                     open={watchFolderView}
-                    onClose={closeWatchFolder}
+                    onClose={handleCloseWatchFolder}
                 />
             )}
             <Preferences
-                open={preferencesView}
-                onClose={closePreferencesOptions}
+                {...preferencesVisibilityProps}
                 onRootClose={closeSidebar}
             />
         </>
@@ -583,7 +553,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
 };
 
 const HelpSection: React.FC = () => {
-    const { setDialogMessage } = useContext(AppContext);
+    const { showMiniDialog } = useContext(AppContext);
     const { openExportModal } = useContext(GalleryContext);
 
     const requestFeature = () =>
@@ -594,7 +564,7 @@ const HelpSection: React.FC = () => {
     const handleExport = () =>
         isDesktop
             ? openExportModal()
-            : setDialogMessage(getDownloadAppMessage());
+            : showMiniDialog(downloadAppDialogAttributes());
 
     return (
         <>
@@ -615,7 +585,7 @@ const HelpSection: React.FC = () => {
                 label={t("EXPORT")}
                 endIcon={
                     exportService.isExportInProgress() && (
-                        <EnteSpinner size="20px" />
+                        <ActivityIndicator size="20px" />
                     )
                 }
                 variant="secondary"
@@ -625,49 +595,39 @@ const HelpSection: React.FC = () => {
 };
 
 const ExitSection: React.FC = () => {
-    const { setDialogMessage, logout } = useContext(AppContext);
+    const { showMiniDialog, logout } = useContext(AppContext);
 
-    const [deleteAccountModalView, setDeleteAccountModalView] = useState(false);
+    const { show: showDeleteAccount, props: deleteAccountVisibilityProps } =
+        useModalVisibility();
 
-    const closeDeleteAccountModal = () => setDeleteAccountModalView(false);
-    const openDeleteAccountModal = () => setDeleteAccountModalView(true);
-
-    const confirmLogout = () => {
-        setDialogMessage({
-            title: t("logout_message"),
-            proceed: {
-                text: t("logout"),
-                action: logout,
-                variant: "critical",
-            },
-            close: { text: t("cancel") },
+    const handleLogout = () =>
+        showMiniDialog({
+            message: t("logout_message"),
+            continue: { text: t("logout"), color: "critical", action: logout },
+            buttonDirection: "row",
         });
-    };
 
     return (
         <>
             <EnteMenuItem
-                onClick={confirmLogout}
+                onClick={handleLogout}
                 color="critical"
                 label={t("logout")}
                 variant="secondary"
             />
             <EnteMenuItem
-                onClick={openDeleteAccountModal}
+                onClick={showDeleteAccount}
                 color="critical"
                 variant="secondary"
                 label={t("delete_account")}
             />
-            <DeleteAccountModal
-                open={deleteAccountModalView}
-                onClose={closeDeleteAccountModal}
-            />
+            <DeleteAccountModal {...deleteAccountVisibilityProps} />
         </>
     );
 };
 
 const DebugSection: React.FC = () => {
-    const appContext = useContext(AppContext);
+    const { showMiniDialog } = useAppContext();
     const [appVersion, setAppVersion] = useState<string | undefined>();
     const [host, setHost] = useState<string | undefined>();
 
@@ -679,23 +639,19 @@ const DebugSection: React.FC = () => {
     });
 
     const confirmLogDownload = () =>
-        appContext.setDialogMessage({
-            title: t("DOWNLOAD_LOGS"),
-            content: <Trans i18nKey={"DOWNLOAD_LOGS_MESSAGE"} />,
-            proceed: {
+        showMiniDialog({
+            title: t("download_logs"),
+            message: <Trans i18nKey={"download_logs_message"} />,
+            continue: {
                 text: t("download"),
-                variant: "accent",
                 action: downloadLogs,
-            },
-            close: {
-                text: t("cancel"),
             },
         });
 
     const downloadLogs = () => {
         log.info("Downloading logs");
         if (electron) electron.openLogDirectory();
-        else downloadAsFile(`debug_logs_${Date.now()}.txt`, savedLogs());
+        else downloadString(savedLogs(), `debug_logs_${Date.now()}.txt`);
     };
 
     return (

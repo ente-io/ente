@@ -150,7 +150,7 @@
   "tryAgain": "Erneut versuchen",
   "viewRecoveryKey": "Wiederherstellungsschlüssel anzeigen",
   "confirmRecoveryKey": "Wiederherstellungsschlüssel bestätigen",
-  "recoveryKeyVerifyReason": "Dein Wiederherstellungsschlüssel ist die einzige Möglichkeit, deine Fotos wiederherzustellen, solltest du dein Passwort vergessen haben. Du kannst diesen unter \"Einstellungen\" und dann \"Konto\" wiederfinden.\n\nBitte gib unten deinen Wiederherstellungsschlüssel ein, um sicherzustellen, dass du ihn korrekt hinterlegt hast.",
+  "recoveryKeyVerifyReason": "Dein Wiederherstellungsschlüssel ist die einzige Möglichkeit, auf deine Fotos zuzugreifen, solltest du dein Passwort vergessen. Du findest ihn unter Einstellungen > Konto.\n\nBitte gib deinen Wiederherstellungsschlüssel hier ein, um sicherzugehen, dass du ihn korrekt gesichert hast.",
   "confirmYourRecoveryKey": "Bestätige deinen Wiederherstellungsschlüssel",
   "addViewer": "Album teilen",
   "addCollaborator": "Bearbeiter hinzufügen",
@@ -1343,5 +1343,14 @@
   "mostRecent": "Neuste",
   "mostRelevant": "Nach Relevanz",
   "loadingYourPhotos": "Lade deine Fotos...",
-  "processingImport": "Verarbeite {folderName}..."
+  "processingImport": "Verarbeite {folderName}...",
+  "personName": "Person name",
+  "addNewPerson": "Add new person",
+  "addNameOrMerge": "Add name or merge",
+  "mergeWithExisting": "Merge with existing",
+  "newPerson": "New person",
+  "addName": "Add name",
+  "add": "Add",
+  "extraPhotosFoundFor": "Extra photos found for $text",
+  "extraPhotosFound": "Extra photos found"
 }

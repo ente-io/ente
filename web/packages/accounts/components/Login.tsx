@@ -39,10 +39,12 @@ export const Login: React.FC<LoginProps> = ({ signUp, host }) => {
             }
         } catch (e) {
             if (e instanceof Error) {
-                setFieldError(`${t("UNKNOWN_ERROR")} (reason:${e.message})`);
+                setFieldError(
+                    `${t("generic_error_retry")} (reason:${e.message})`,
+                );
             } else {
                 setFieldError(
-                    `${t("UNKNOWN_ERROR")} (reason:${JSON.stringify(e)})`,
+                    `${t("generic_error_retry")} (reason:${JSON.stringify(e)})`,
                 );
             }
         }

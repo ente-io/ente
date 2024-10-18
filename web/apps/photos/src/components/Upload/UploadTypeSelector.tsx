@@ -1,5 +1,5 @@
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { useIsTouchscreen } from "@/base/hooks";
-import { FocusVisibleButton } from "@/new/photos/components/FocusVisibleButton";
 import { SpaceBetweenFlex } from "@/new/photos/components/mui";
 import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";
 import DialogTitleWithCloseButton, {
@@ -89,6 +89,7 @@ export const UploadTypeSelector: React.FC<UploadTypeSelectorProps> = ({
     return (
         <Dialog
             open={open}
+            fullWidth
             PaperProps={{
                 sx: (theme) => ({
                     maxWidth: "375px",

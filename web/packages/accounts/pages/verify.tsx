@@ -1,15 +1,11 @@
 import type { UserVerificationResponse } from "@/accounts/types/user";
+import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
-import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
 import LinkButton from "@ente/shared/components/LinkButton";
-import {
-    LoginFlowFormFooter,
-    VerifyingPasskey,
-} from "@ente/shared/components/LoginComponents";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
@@ -35,6 +31,10 @@ import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 import { getSRPAttributes } from "../api/srp";
 import { putAttributes, sendOtt, verifyOtt } from "../api/user";
+import {
+    LoginFlowFormFooter,
+    VerifyingPasskey,
+} from "../components/LoginComponents";
 import { PAGES } from "../constants/pages";
 import {
     openPasskeyVerificationURL,
@@ -46,7 +46,7 @@ import type { PageProps } from "../types/page";
 import type { SRPAttributes, SRPSetupAttributes } from "../types/srp";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
-    const { logout, showNavBar, setDialogBoxAttributesV2 } = appContext;
+    const { logout, showNavBar, showMiniDialog } = appContext;
 
     const [email, setEmail] = useState("");
     const [resend, setResend] = useState(0);
@@ -155,7 +155,9 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 }
             } else {
                 log.error("OTT verification failed", e);
-                setFieldError(`${t("UNKNOWN_ERROR")} ${JSON.stringify(e)}`);
+                setFieldError(
+                    `${t("generic_error_retry")} ${JSON.stringify(e)}`,
+                );
             }
         }
     };
@@ -170,7 +172,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
     if (!email) {
         return (
             <VerticallyCentered>
-                <EnteSpinner />
+                <ActivityIndicator />
             </VerticallyCentered>
         );
     }
@@ -188,7 +190,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         if (!globalThis.electron) {
             return (
                 <VerticallyCentered>
-                    <EnteSpinner />
+                    <ActivityIndicator />
                 </VerticallyCentered>
             );
         }
@@ -200,7 +202,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 onRetry={() =>
                     openPasskeyVerificationURL(passkeyVerificationData)
                 }
-                {...{ logout, setDialogBoxAttributesV2 }}
+                {...{ logout, showMiniDialog }}
             />
         );
     }

@@ -1,30 +1,30 @@
-Ente é um aplicativo simples para fazer backup e compartilhar suas fotos e vídeos.
+Ente é um aplicativo simples para copiar com segurança automaticamente e organizar suas fotos e vídeos.
 
-Se você esteve procurando uma alternativa amigável à privacidade para preservar suas memórias, você veio ao lugar certo. Com Ente, elas são armazenadas com criptografia de ponta a ponta (e2ee). Isso significa que só você pode vê-las.
+Se você esteve procurando por uma alternativa amigável à privacidade para preservar suas memórias, você veio no lugar certo. Com Ente, elas são armazenadas com criptografia de ponta a ponta (e2ee). Isso significa que só você pode vê-las.
 
-Temos aplicativos de código aberto em todas as plataformas, Android, iOS, web e desktop, e suas fotos irão sincronizar perfeitamente entre todas elas de forma criptografada (e2ee).
+Nós rmos aplicativos de código aberto em todas as plataformas, Android, iOS, web e desktop, e suas fotos vão sincronizar perfeitamente entre todas elas de forma criptografada (e2ee).
 
 Ente também torna simples compartilhar seus álbuns com seus entes queridos. Você pode compartilhá-los diretamente com outros usuários do Ente, criptografados de ponta a ponta; ou com links publicamente visíveis.
 
-Seus dados criptografados são replicados em locais diferentes, incluindo um abrigo avançado em Paris. Levamos a sério a nossa postura e fazemos com que seja fácil garantir que suas memórias vivam.
+Seus dados criptografados são replicados em locais diferentes, incluindo um abrigo avançado em Paris. Nós levamos a sério a nossa postura e fazemos que seja fácil garantir que suas memórias vivam.
 
-Estamos aqui para se tornar o app de fotos mais seguro de todos, venha entrar em nossa jornada!
+Estamos aqui para se tornar o aplicativo de fotos mais seguro de todos, venha e participe de nossa jornada!
 
 ✨ RECURSOS
--    Cópia de qualidade original, porque cada pixel é importante
--    Planos de família, para que você possa compartilhar o armazenamento com sua família
-- Pastas compartilhadas, caso você queira que seu parceiro aproveite seus cliques da "Câmera"
+-    Cópia de resolução original, por cada pixel é importante
+-    Planos familiares, para você poder compartilhar o armazenamento com sua família
+- Pastas compartilhadas, caso você queira que seu parceiro aproveite seus cliques na "Câmera"
 -    Links de álbuns, que podem ser protegidos com uma senha e definidos para expirar
--    Capacidade de liberar espaço, removendo arquivos que foram salvos com segurança
--    Editor de imagens, para adicionar toques finais
--    Favoritar, esconder e reviver suas memórias, pois elas são preciosas
--    Importar com um clique do Google, Apple, seu disco rígido e muito mais
+-    Capacidade de liberar espaço, removendo arquivos salvos com segurança
+-    Editor de imagens, para adicionar últimos toques
+-    Favoritar, ocultar e reviver suas memórias, pois elas são preciosas
+-    Importar num só clique do Google, Apple, seu disco rígido e muito mais
 -    Tema escuro, porque suas fotos parecem bem nele
 -    2FA, 3FA, Autenticação biométrica
--    e MUITO MAIS!
+-    e MUITO mais!
 
 💲 PREÇO
-Não oferecemos planos gratuitos para sempre, porque é importante para nós que permaneçamos sustentáveis e resistamos à prova do tempo. Em vez disso, oferecemos planos acessíveis que você pode compartilhar livremente com sua família. Você pode encontrar mais informações em ente.io.
+Nós não oferecemos planos grátis para sempre, porque é importante para nós que permaneçamos sustentáveis e resistamos à prova do tempo. Em vez disso, oferecemos planos acessíveis que você pode compartilhar livremente com seus familiares. Você pode encontrar mais informações em ente.io.
 
-🙋 SUPORTE
-Temos orgulho em oferecer apoio humano. Se você é nosso cliente pago, você pode entrar em contato com o team@ente.io e esperar uma resposta da nossa equipe dentro de 24 horas.
+🙋 AJUDA
+Nós temos orgulho em oferecer apoio humano. Se você é um cliente pago, você pode contatar em team@ente.io e esperar uma resposta de nossa equipe dentro de 1 dia.
