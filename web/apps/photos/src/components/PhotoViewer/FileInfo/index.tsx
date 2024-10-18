@@ -33,6 +33,7 @@ import { getPublicMagicMetadataSync } from "@ente/shared/file-metadata";
 import { formatDate, formatTime } from "@ente/shared/time/format";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import CameraOutlined from "@mui/icons-material/CameraOutlined";
+import Edit from "@mui/icons-material/Edit";
 import FolderOutlined from "@mui/icons-material/FolderOutlined";
 import LocationOnOutlined from "@mui/icons-material/LocationOnOutlined";
 import PhotoOutlined from "@mui/icons-material/PhotoOutlined";
@@ -40,7 +41,9 @@ import TextSnippetOutlined from "@mui/icons-material/TextSnippetOutlined";
 import VideocamOutlined from "@mui/icons-material/VideocamOutlined";
 import {
     Box,
+    CircularProgress,
     DialogProps,
+    IconButton,
     Link,
     Stack,
     styled,
@@ -55,7 +58,6 @@ import { Trans } from "react-i18next";
 import { changeFileName, updateExistingFilePubMetadata } from "utils/file";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import { FileNameEditDialog } from "./FileNameEditDialog";
-import InfoItem from "./InfoItem";
 import MapBox from "./MapBox";
 import { RenderCaption } from "./RenderCaption";
 
@@ -403,6 +405,77 @@ const FileInfoSidebar = styled((props: DialogProps) => (
         padding: 8,
     },
 });
+
+interface InfoItemProps {
+    icon: JSX.Element;
+    title?: string;
+    caption?: string | JSX.Element;
+    openEditor?: any;
+    loading?: boolean;
+    hideEditOption?: any;
+    customEndButton?: any;
+    children?: any;
+}
+
+function InfoItem({
+    icon,
+    title,
+    caption,
+    openEditor,
+    loading,
+    hideEditOption,
+    customEndButton,
+    children,
+}: InfoItemProps): JSX.Element {
+    return (
+        <FlexWrapper justifyContent="space-between">
+            <Box display={"flex"} alignItems="flex-start" gap={0.5} pr={1}>
+                <IconButton
+                    color="secondary"
+                    sx={{ "&&": { cursor: "default", m: 0.5 } }}
+                    disableRipple
+                >
+                    {icon}
+                </IconButton>
+                <Box py={0.5}>
+                    {children ? (
+                        children
+                    ) : (
+                        <>
+                            <Typography sx={{ wordBreak: "break-all" }}>
+                                {title}
+                            </Typography>
+                            {!caption || typeof caption == "string" ? (
+                                <Typography variant="small" color="text.muted">
+                                    {caption}
+                                </Typography>
+                            ) : (
+                                <Typography
+                                    variant="small"
+                                    component="div"
+                                    color="text.muted"
+                                >
+                                    {caption}
+                                </Typography>
+                            )}
+                        </>
+                    )}
+                </Box>
+            </Box>
+            {customEndButton
+                ? customEndButton
+                : !hideEditOption && (
+                      <IconButton onClick={openEditor} color="secondary">
+                          {!loading ? (
+                              <Edit />
+                          ) : (
+                              <CircularProgress size={"24px"} color="inherit" />
+                          )}
+                      </IconButton>
+                  )}
+        </FlexWrapper>
+    );
+}
 
 interface CreationTimeProps {
     file: EnteFile;
