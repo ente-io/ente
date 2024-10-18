@@ -36,12 +36,12 @@ import { formatDate, formatTime } from "@ente/shared/time/format";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import CameraOutlinedIcon from "@mui/icons-material/CameraOutlined";
 import EditIcon from "@mui/icons-material/Edit";
+import FaceRetouchingNaturalIcon from "@mui/icons-material/FaceRetouchingNatural";
 import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import PhotoOutlinedIcon from "@mui/icons-material/PhotoOutlined";
 import TextSnippetOutlinedIcon from "@mui/icons-material/TextSnippetOutlined";
 import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
-import FaceRetouchingNaturalIcon from '@mui/icons-material/FaceRetouchingNatural';
 import {
     Box,
     CircularProgress,
@@ -280,7 +280,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                             file={file}
                             annotatedFaceIDs={annotatedFaces}
                             onSelectFace={handleSelectFace}
-                        />{" "}
+                        />
                     </InfoItem>
                 )}
                 {showCollectionChips && (
