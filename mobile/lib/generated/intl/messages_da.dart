@@ -34,6 +34,11 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Velkommen tilbage!"),
         "activeSessions":
             MessageLookupByLibrary.simpleMessage("Aktive sessioner"),
+        "add": MessageLookupByLibrary.simpleMessage("Add"),
+        "addName": MessageLookupByLibrary.simpleMessage("Add name"),
+        "addNameOrMerge":
+            MessageLookupByLibrary.simpleMessage("Add name or merge"),
+        "addNewPerson": MessageLookupByLibrary.simpleMessage("Add new person"),
         "addOnPageSubtitle":
             MessageLookupByLibrary.simpleMessage("Oplysninger om tilføjelser"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
@@ -76,6 +81,10 @@ class MessageLookup extends MessageLookupByLibrary {
             "Indtast venligst en gyldig email adresse."),
         "enterYourEmailAddress":
             MessageLookupByLibrary.simpleMessage("Indtast din email adresse"),
+        "extraPhotosFound":
+            MessageLookupByLibrary.simpleMessage("Extra photos found"),
+        "extraPhotosFoundFor": MessageLookupByLibrary.simpleMessage(
+            "Extra photos found for \$text"),
         "familyPlanPortalTitle":
             MessageLookupByLibrary.simpleMessage("Familie"),
         "feedback": MessageLookupByLibrary.simpleMessage("Feedback"),
@@ -100,13 +109,17 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Langt tryk på en e-mail for at bekræfte slutningen af krypteringen."),
         "manage": MessageLookupByLibrary.simpleMessage("Administrér"),
         "memoryCount": m0,
+        "mergeWithExisting":
+            MessageLookupByLibrary.simpleMessage("Merge with existing"),
         "mlIndexingDescription": MessageLookupByLibrary.simpleMessage(
             "Bemærk venligst, at maskinindlæring vil resultere i en højere båndbredde og batteriforbrug, indtil alle elementer er indekseret. Overvej at bruge desktop app til hurtigere indeksering, vil alle resultater blive synkroniseret automatisk."),
         "moments": MessageLookupByLibrary.simpleMessage("Øjeblikke"),
+        "newPerson": MessageLookupByLibrary.simpleMessage("New person"),
         "next": MessageLookupByLibrary.simpleMessage("Næste"),
         "ok": MessageLookupByLibrary.simpleMessage("Ok"),
         "oops": MessageLookupByLibrary.simpleMessage("Ups"),
         "password": MessageLookupByLibrary.simpleMessage("Adgangskode"),
+        "personName": MessageLookupByLibrary.simpleMessage("Person name"),
         "pleaseContactSupportAndWeWillBeHappyToHelp":
             MessageLookupByLibrary.simpleMessage(
                 "Kontakt support@ente.io og vi vil være glade for at hjælpe!"),

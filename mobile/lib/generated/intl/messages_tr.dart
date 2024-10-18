@@ -204,6 +204,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Şifremi kaybedersem, verilerim <underline>uçtan uca şifrelendiği</underline> için verilerimi kaybedebileceğimi farkındayım."),
         "activeSessions":
             MessageLookupByLibrary.simpleMessage("Aktif oturumlar"),
+        "add": MessageLookupByLibrary.simpleMessage("Add"),
         "addANewEmail":
             MessageLookupByLibrary.simpleMessage("Yeni e-posta ekle"),
         "addCollaborator":
@@ -214,7 +215,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "addLocation": MessageLookupByLibrary.simpleMessage("Konum Ekle"),
         "addLocationButton": MessageLookupByLibrary.simpleMessage("Ekle"),
         "addMore": MessageLookupByLibrary.simpleMessage("Daha fazla ekle"),
+        "addName": MessageLookupByLibrary.simpleMessage("Add name"),
+        "addNameOrMerge":
+            MessageLookupByLibrary.simpleMessage("Add name or merge"),
         "addNew": MessageLookupByLibrary.simpleMessage("Yeni ekle"),
+        "addNewPerson": MessageLookupByLibrary.simpleMessage("Add new person"),
         "addOnPageSubtitle":
             MessageLookupByLibrary.simpleMessage("Eklentilerin ayrıntıları"),
         "addOnValidTill": m5,
@@ -660,6 +665,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Günlüğü dışa aktar"),
         "exportYourData":
             MessageLookupByLibrary.simpleMessage("Veriyi dışarı aktar"),
+        "extraPhotosFound":
+            MessageLookupByLibrary.simpleMessage("Extra photos found"),
+        "extraPhotosFoundFor": MessageLookupByLibrary.simpleMessage(
+            "Extra photos found for \$text"),
         "faces": MessageLookupByLibrary.simpleMessage("Yüzler"),
         "failedToApplyCode":
             MessageLookupByLibrary.simpleMessage("Uygulanırken hata oluştu"),
@@ -882,6 +891,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "matrix": MessageLookupByLibrary.simpleMessage("Matrix"),
         "memoryCount": m0,
         "merchandise": MessageLookupByLibrary.simpleMessage("Ürünler"),
+        "mergeWithExisting":
+            MessageLookupByLibrary.simpleMessage("Merge with existing"),
         "mobileWebDesktop":
             MessageLookupByLibrary.simpleMessage("Mobil, Web, Masaüstü"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Ilımlı"),
@@ -906,6 +917,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Ente\'ye bağlanılamıyor. Lütfen ağ ayarlarınızı kontrol edin ve hata devam ederse destek ekibiyle iletişime geçin."),
         "never": MessageLookupByLibrary.simpleMessage("Asla"),
         "newAlbum": MessageLookupByLibrary.simpleMessage("Yeni albüm"),
+        "newPerson": MessageLookupByLibrary.simpleMessage("New person"),
         "newest": MessageLookupByLibrary.simpleMessage("En yeni"),
         "no": MessageLookupByLibrary.simpleMessage("Hayır"),
         "noAlbumsSharedByYouYet": MessageLookupByLibrary.simpleMessage(
@@ -985,6 +997,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Kalıcı olarak sil"),
         "permanentlyDeleteFromDevice": MessageLookupByLibrary.simpleMessage(
             "Cihazdan kalıcı olarak silinsin mi?"),
+        "personName": MessageLookupByLibrary.simpleMessage("Person name"),
         "photoDescriptions":
             MessageLookupByLibrary.simpleMessage("Fotoğraf Açıklaması"),
         "photoGridSize":

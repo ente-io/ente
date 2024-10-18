@@ -175,11 +175,16 @@ class MessageLookup extends MessageLookupByLibrary {
             "Înțeleg că dacă îmi pierd parola, îmi pot pierde datele, deoarece datele mele sunt <underline>criptate integral</underline>."),
         "activeSessions":
             MessageLookupByLibrary.simpleMessage("Sesiuni active"),
+        "add": MessageLookupByLibrary.simpleMessage("Add"),
         "addANewEmail":
             MessageLookupByLibrary.simpleMessage("Adăugați un e-mail nou"),
         "addCollaborator":
             MessageLookupByLibrary.simpleMessage("Adăugare colaborator"),
         "addMore": MessageLookupByLibrary.simpleMessage("Adăugați mai mulți"),
+        "addName": MessageLookupByLibrary.simpleMessage("Add name"),
+        "addNameOrMerge":
+            MessageLookupByLibrary.simpleMessage("Add name or merge"),
+        "addNewPerson": MessageLookupByLibrary.simpleMessage("Add new person"),
         "addOnValidTill": m5,
         "addViewer":
             MessageLookupByLibrary.simpleMessage("Adăugare observator"),
@@ -542,6 +547,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Exportați jurnalele"),
         "exportYourData":
             MessageLookupByLibrary.simpleMessage("Export de date"),
+        "extraPhotosFound":
+            MessageLookupByLibrary.simpleMessage("Extra photos found"),
+        "extraPhotosFoundFor": MessageLookupByLibrary.simpleMessage(
+            "Extra photos found for \$text"),
         "failedToApplyCode":
             MessageLookupByLibrary.simpleMessage("Codul nu a putut fi aplicat"),
         "failedToCancel":
@@ -686,6 +695,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "matrix": MessageLookupByLibrary.simpleMessage("Matrix"),
         "memoryCount": m0,
         "merchandise": MessageLookupByLibrary.simpleMessage("Produse"),
+        "mergeWithExisting":
+            MessageLookupByLibrary.simpleMessage("Merge with existing"),
         "mlConsent":
             MessageLookupByLibrary.simpleMessage("Activați învățarea automată"),
         "mlConsentConfirmation": MessageLookupByLibrary.simpleMessage(
@@ -711,6 +722,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Nu se poate conecta la Ente, vă rugăm să verificați setările de rețea și să contactați asistenta dacă eroarea persistă."),
         "never": MessageLookupByLibrary.simpleMessage("Niciodată"),
         "newAlbum": MessageLookupByLibrary.simpleMessage("Album nou"),
+        "newPerson": MessageLookupByLibrary.simpleMessage("New person"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("Nou la Ente"),
         "newest": MessageLookupByLibrary.simpleMessage("Cele mai noi"),
         "no": MessageLookupByLibrary.simpleMessage("Nu"),
@@ -776,6 +788,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Toate articolele din coșul de gunoi vor fi șterse definitiv\n\nAceastă acțiune nu poate fi anulată"),
         "permanentlyDelete":
             MessageLookupByLibrary.simpleMessage("Ștergere definitivă"),
+        "personName": MessageLookupByLibrary.simpleMessage("Person name"),
         "photoGridSize":
             MessageLookupByLibrary.simpleMessage("Dimensiunea grilei foto"),
         "photoSmallCase": MessageLookupByLibrary.simpleMessage("fotografie"),

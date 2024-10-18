@@ -57,11 +57,16 @@ class MessageLookup extends MessageLookupByLibrary {
             "ฉันเข้าใจว่าหากฉันทำรหัสผ่านหาย ข้อมูลของฉันอาจสูญหายเนื่องจากข้อมูลของฉัน<underline>มีการเข้ารหัสจากต้นทางถึงปลายทาง</underline>"),
         "activeSessions":
             MessageLookupByLibrary.simpleMessage("เซสชันที่ใช้งานอยู่"),
+        "add": MessageLookupByLibrary.simpleMessage("Add"),
         "addANewEmail": MessageLookupByLibrary.simpleMessage("เพิ่มอีเมลใหม่"),
         "addCollaborator":
             MessageLookupByLibrary.simpleMessage("เพิ่มผู้ทำงานร่วมกัน"),
         "addItem": m4,
         "addMore": MessageLookupByLibrary.simpleMessage("เพิ่มอีก"),
+        "addName": MessageLookupByLibrary.simpleMessage("Add name"),
+        "addNameOrMerge":
+            MessageLookupByLibrary.simpleMessage("Add name or merge"),
+        "addNewPerson": MessageLookupByLibrary.simpleMessage("Add new person"),
         "addToAlbum": MessageLookupByLibrary.simpleMessage("เพิ่มไปยังอัลบั้ม"),
         "addViewer": MessageLookupByLibrary.simpleMessage("เพิ่มผู้ชม"),
         "after1Day": MessageLookupByLibrary.simpleMessage("หลังจาก 1 วัน"),
@@ -165,6 +170,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("ใส่รหัสผ่านของคุณ"),
         "enterYourRecoveryKey":
             MessageLookupByLibrary.simpleMessage("ป้อนคีย์การกู้คืน"),
+        "extraPhotosFound":
+            MessageLookupByLibrary.simpleMessage("Extra photos found"),
+        "extraPhotosFoundFor": MessageLookupByLibrary.simpleMessage(
+            "Extra photos found for \$text"),
         "faq": MessageLookupByLibrary.simpleMessage("คำถามที่พบบ่อย"),
         "favorite": MessageLookupByLibrary.simpleMessage("ชื่นชอบ"),
         "feedback": MessageLookupByLibrary.simpleMessage("ความคิดเห็น"),
@@ -212,10 +221,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "manageParticipants": MessageLookupByLibrary.simpleMessage("จัดการ"),
         "map": MessageLookupByLibrary.simpleMessage("แผนที่"),
         "maps": MessageLookupByLibrary.simpleMessage("แผนที่"),
+        "mergeWithExisting":
+            MessageLookupByLibrary.simpleMessage("Merge with existing"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("ปานกลาง"),
         "moveItem": m37,
         "moveToAlbum": MessageLookupByLibrary.simpleMessage("ย้ายไปยังอัลบั้ม"),
         "name": MessageLookupByLibrary.simpleMessage("ชื่อ"),
+        "newPerson": MessageLookupByLibrary.simpleMessage("New person"),
         "newest": MessageLookupByLibrary.simpleMessage("ใหม่สุด"),
         "noRecoveryKey":
             MessageLookupByLibrary.simpleMessage("ไม่มีคีย์การกู้คืน?"),
@@ -241,6 +253,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("ผู้คนที่ใช้รหัสของคุณ"),
         "permanentlyDelete":
             MessageLookupByLibrary.simpleMessage("ลบอย่างถาวร"),
+        "personName": MessageLookupByLibrary.simpleMessage("Person name"),
         "photoSmallCase": MessageLookupByLibrary.simpleMessage("รูปภาพ"),
         "pleaseTryAgain":
             MessageLookupByLibrary.simpleMessage("กรุณาลองอีกครั้ง"),

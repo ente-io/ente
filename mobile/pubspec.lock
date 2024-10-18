@@ -1077,14 +1077,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.2"
-  heif_converter:
-    dependency: "direct main"
-    description:
-      name: heif_converter
-      sha256: "63ffc2a72026942de3fcb61450da197100759936085c8279aef35b995b3c1bb3"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.0"
   hex:
     dependency: transitive
     description:

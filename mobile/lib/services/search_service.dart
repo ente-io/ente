@@ -765,7 +765,10 @@ class SearchService {
     return clusterIDToFiles;
   }
 
-  Future<List<GenericSearchResult>> getAllFace(int? limit) async {
+  Future<List<GenericSearchResult>> getAllFace(
+    int? limit, {
+    int minClusterSize = kMinimumClusterSizeSearchResult,
+  }) async {
     try {
       debugPrint("getting faces");
       final Map<int, Set<String>> fileIdToClusterID =
@@ -852,15 +855,12 @@ class SearchService {
         final String clusterName = clusterId;
 
         if (clusterIDToPersonID[clusterId] != null) {
-          // This should not happen, means a faceID is assigned to multiple persons.
+          // This should not happen, means a clusterID is assigned to a personID of a person that no longer exists
           _logger.severe(
             "`getAllFace`: Cluster $clusterId should not have person id ${clusterIDToPersonID[clusterId]}",
           );
         }
-        if (files.length < kMinimumClusterSizeSearchResult &&
-            sortedClusterIds.length > 3) {
-          continue;
-        }
+        if (files.length < minClusterSize) continue;
         facesResult.add(
           GenericSearchResult(
             ResultType.faces,
@@ -882,6 +882,20 @@ class SearchService {
             },
           ),
         );
+      }
+      if (facesResult.isEmpty) {
+        int newMinimum = minClusterSize;
+        for (final int minimum in kLowerMinimumClusterSizes) {
+          if (minimum < minClusterSize) {
+            newMinimum = minimum;
+            break;
+          }
+        }
+        if (newMinimum < minClusterSize) {
+          return getAllFace(limit, minClusterSize: newMinimum);
+        } else {
+          return [];
+        }
       }
       if (limit != null) {
         return facesResult.sublist(0, min(limit, facesResult.length));
