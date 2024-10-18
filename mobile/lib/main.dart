@@ -30,7 +30,6 @@ import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/collections_service.dart';
-import 'package:photos/services/ervice.dart';
 import 'package:photos/services/favorites_service.dart';
 import "package:photos/services/filedata/filedata_service.dart";
 import 'package:photos/services/home_widget_service.dart';
@@ -40,12 +39,13 @@ import "package:photos/services/machine_learning/face_ml/person/person_service.d
 import "package:photos/services/machine_learning/machine_learning_controller.dart";
 import 'package:photos/services/machine_learning/ml_service.dart';
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
-import "package:photos/services/magic_cache_service.dart";
 import 'package:photos/services/memories_service.dart';
 import "package:photos/services/notification_service.dart";
 import 'package:photos/services/push_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/services/search_service.dart';
+import "package:photos/services/sync_service.dart";
+import "package:photos/services/user_service.dart";
 import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/ui/tools/lock_screen.dart';
 import 'package:photos/utils/crypto_util.dart';
@@ -288,7 +288,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _logger.info("PushService/HomeWidget done $tlog");
     unawaited(SemanticSearchService.instance.init());
     MachineLearningController.instance.init();
-
     _logger.info("MachineLearningController done $tlog");
     unawaited(MLService.instance.init());
     PersonService.init(
@@ -296,8 +295,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
       MLDataDB.instance,
       preferences,
     );
-    MagicCacheService.instance.init(preferences);
-
     initComplete = true;
     _logger.info("Initialization done $tlog");
   } catch (e, s) {

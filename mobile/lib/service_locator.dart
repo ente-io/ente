@@ -6,6 +6,7 @@ import "package:package_info_plus/package_info_plus.dart";
 import "package:photos/gateways/entity_gw.dart";
 import "package:photos/services/entity_service.dart";
 import "package:photos/services/location_service.dart";
+import "package:photos/services/magic_cache_service.dart";
 import "package:photos/services/storage_bonus_service.dart";
 import "package:photos/services/trash_sync_service.dart";
 import "package:photos/services/update_service.dart";
@@ -104,4 +105,12 @@ UserRemoteFlagService get userRemoteFlagService {
     ServiceLocator.instance.prefs,
   );
   return _userRemoteFlagService!;
+}
+
+MagicCacheService? _magicCacheService;
+MagicCacheService get magicCacheService {
+  _magicCacheService ??= MagicCacheService(
+    ServiceLocator.instance.prefs,
+  );
+  return _magicCacheService!;
 }
