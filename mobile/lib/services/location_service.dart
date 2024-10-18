@@ -23,6 +23,9 @@ class LocationService {
   final Computer _computer = Computer.shared();
 
   LocationService._privateConstructor();
+  // If the discovery section is loaded before the cities are loaded, then we
+  // need to refresh the discovery section after the cities are loaded.
+  bool reloadLocationDiscoverySection = false;
 
   static final LocationService instance = LocationService._privateConstructor();
 
@@ -48,6 +51,9 @@ class LocationService {
     List<EnteFile> allFiles,
     String query,
   ) async {
+    if (allFiles.isEmpty && query.isEmpty) {
+      reloadLocationDiscoverySection = true;
+    }
     final EnteWatch w = EnteWatch("cities_search")..start();
     w.log('start for files ${allFiles.length} and query $query');
     final result = await _computer.compute(
@@ -225,8 +231,13 @@ class LocationService {
           await _computer.compute(parseCities, param: {"filePath": file.path});
       final endTime = DateTime.now();
       _logger.info(
-        "Loaded cities in ${(endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)}ms",
+        "Loaded cities in ${(endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)}ms, reloadingDiscovery: $reloadLocationDiscoverySection",
       );
+      if (reloadLocationDiscoverySection) {
+        reloadLocationDiscoverySection = false;
+        Bus.instance
+            .fire(LocationTagUpdatedEvent(LocTagEventType.dataSetLoaded));
+      }
     } catch (e, s) {
       _logger.severe("Failed to load cities", e, s);
     }
