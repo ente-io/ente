@@ -16,6 +16,7 @@ import {
     type ParsedMetadataDate,
 } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
+import type { ButtonishProps } from "@/new/photos/components/mui";
 import { ChipButton } from "@/new/photos/components/mui/ChipButton";
 import { FilePeopleList } from "@/new/photos/components/PeopleList";
 import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker";
@@ -196,7 +197,6 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                         caption={
                             <BasicDeviceCamera {...{ parsedExif: exifInfo }} />
                         }
-                        hideEditOption
                     />
                 )}
 
@@ -231,7 +231,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                                     </LinkButton>
                                 )
                             }
-                            customEndButton={
+                            trailingButton={
                                 <CopyButton
                                     code={openStreetMapLink(location)}
                                     color="secondary"
@@ -271,10 +271,9 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                             </LinkButton>
                         )
                     }
-                    hideEditOption
                 />
                 {showCollectionChips && (
-                    <InfoItem icon={<FolderOutlinedIcon />} hideEditOption>
+                    <InfoItem icon={<FolderOutlinedIcon />}>
                         <Box
                             display={"flex"}
                             gap={1}
@@ -419,10 +418,11 @@ interface InfoItemProps {
      * The secondary information / subtext associated with the info entry.
      */
     caption?: React.ReactNode;
-    openEditor?: any;
-    loading?: boolean;
-    hideEditOption?: any;
-    customEndButton?: any;
+    /**
+     * A component, usually a button (e.g. an "edit button"), shown at the
+     * trailing edge of the info entry.
+     */
+    trailingButton?: React.ReactNode;
 }
 
 /**
@@ -432,10 +432,7 @@ const InfoItem: React.FC<React.PropsWithChildren<InfoItemProps>> = ({
     icon,
     title,
     caption,
-    openEditor,
-    loading,
-    hideEditOption,
-    customEndButton,
+    trailingButton,
     children,
 }) => (
     <FlexWrapper justifyContent="space-between">
@@ -472,18 +469,25 @@ const InfoItem: React.FC<React.PropsWithChildren<InfoItemProps>> = ({
                 )}
             </Box>
         </Box>
-        {customEndButton
-            ? customEndButton
-            : !hideEditOption && (
-                  <IconButton onClick={openEditor} color="secondary">
-                      {!loading ? (
-                          <EditIcon />
-                      ) : (
-                          <CircularProgress size={"24px"} color="inherit" />
-                      )}
-                  </IconButton>
-              )}
+        {trailingButton}
     </FlexWrapper>
+);
+
+type EditButtonProps = ButtonishProps & {
+    /**
+     * If true, then an activity indicator is shown in place of the edit icon.
+     */
+    loading?: boolean;
+};
+
+const EditButton: React.FC<EditButtonProps> = ({ onClick, loading }) => (
+    <IconButton onClick={onClick} disabled={loading} color="secondary">
+        {!loading ? (
+            <EditIcon />
+        ) : (
+            <CircularProgress size={"24px"} color="inherit" />
+        )}
+    </IconButton>
 );
 
 interface CreationTimeProps {
@@ -551,9 +555,14 @@ export const CreationTime: React.FC<CreationTimeProps> = ({
                     icon={<CalendarTodayIcon />}
                     title={formatDate(originalDate)}
                     caption={formatTime(originalDate)}
-                    openEditor={openEditMode}
-                    loading={loading}
-                    hideEditOption={shouldDisableEdits || isInEditMode}
+                    trailingButton={
+                        shouldDisableEdits || (
+                            <EditButton
+                                onClick={openEditMode}
+                                loading={loading}
+                            />
+                        )
+                    }
                 />
                 {isInEditMode && (
                     <PhotoDateTimePicker
@@ -618,8 +627,9 @@ const RenderFileName: React.FC<RenderFileNameProps> = ({
                 }
                 title={[fileName, extension].join(".")}
                 caption={getCaption(file, exifInfo)}
-                openEditor={openEditMode}
-                hideEditOption={shouldDisableEdits || isInEditMode}
+                trailingButton={
+                    shouldDisableEdits || <EditButton onClick={openEditMode} />
+                }
             />
             <FileNameEditDialog
                 isInEditMode={isInEditMode}
