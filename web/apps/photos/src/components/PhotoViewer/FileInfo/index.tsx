@@ -447,18 +447,7 @@ const InfoItem: React.FC<React.PropsWithChildren<InfoItemProps>> = ({
             gap: "12px",
         }}
     >
-        <Box
-            sx={{
-                width: "48px",
-                aspectRatio: 1,
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                color: "text.faint",
-            }}
-        >
-            {icon}
-        </Box>
+        <InfoItemIconContainer>{icon}</InfoItemIconContainer>
         <Box sx={{ flex: 1, mt: "4px" }}>
             {children ? (
                 children
@@ -481,6 +470,17 @@ const InfoItem: React.FC<React.PropsWithChildren<InfoItemProps>> = ({
         </Box>
         {trailingButton}
     </Box>
+);
+
+const InfoItemIconContainer = styled("div")(
+    ({ theme }) => `
+    width: 48px;
+    aspect-ratio: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: ${theme.colors.stroke.muted}
+`,
 );
 
 type EditButtonProps = ButtonishProps & {
