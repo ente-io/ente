@@ -9,7 +9,7 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/location_tag_updated_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
-import "package:photos/services/location_service.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/services/user_remote_flag_service.dart";
 import "package:photos/states/location_screen_state.dart";
@@ -105,8 +105,8 @@ class _LocationTagsWidgetState extends State<LocationTagsWidget> {
 
   Future<List<Widget>> _getLocationTags() async {
     // await Future.delayed(const Duration(seconds: 1));
-    final locationTags = await LocationService.instance
-        .enclosingLocationTags(widget.file.location!);
+    final locationTags =
+        await locationService.enclosingLocationTags(widget.file.location!);
     if (locationTags.isEmpty) {
       if (mounted) {
         setState(() {
@@ -183,7 +183,7 @@ class _InfoMapState extends State<InfoMap> {
   @override
   void initState() {
     super.initState();
-    _hasEnabledMap = UserRemoteFlagService.instance
+    _hasEnabledMap = userRemoteFlagService
         .getCachedBoolValue(UserRemoteFlagService.mapEnabled);
     _fileLat = widget.file.location!.latitude!;
     _fileLng = widget.file.location!.longitude!;

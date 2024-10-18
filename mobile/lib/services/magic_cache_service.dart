@@ -155,28 +155,25 @@ class MagicCacheService {
   /// lot of other things are happening.
   static const _kCacheUpdateDelay = Duration(seconds: 10);
 
-  late SharedPreferences _prefs;
-  final Logger _logger = Logger((MagicCacheService).toString());
-  MagicCacheService._privateConstructor();
+  final SharedPreferences _prefs;
+  late final Logger _logger = Logger((MagicCacheService).toString());
 
   Future<List<MagicCache>>? _magicCacheFuture;
   Future<List<Prompt>>? _promptFuture;
   final Set<String> _pendingUpdateReason = {};
   bool _isUpdateInProgress = false;
 
-  static final MagicCacheService instance =
-      MagicCacheService._privateConstructor();
-
-  void init(SharedPreferences preferences) {
-    _logger.info("Initializing MagicCacheService");
-    _prefs = preferences;
-    Future.delayed(_kCacheUpdateDelay, () {
-      _updateCacheIfTheTimeHasCome();
-    });
+  MagicCacheService(this._prefs) {
+    _logger.fine("MagicCacheService constructor");
     Bus.instance.on<FileUploadedEvent>().listen((event) {
       queueUpdate("File uploaded");
     });
+    Future.delayed(_kCacheUpdateDelay, () {
+      _updateCacheIfTheTimeHasCome();
+    });
   }
+
+
 
   Future<void> _resetLastMagicCacheUpdateTime() async {
     await _prefs.setInt(

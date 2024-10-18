@@ -1,6 +1,7 @@
 import "package:flutter/cupertino.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/button_result.dart';
+import "package:photos/service_locator.dart";
 import "package:photos/services/user_remote_flag_service.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/dialog_widget.dart";
@@ -9,7 +10,7 @@ import "package:photos/utils/toast_util.dart";
 
 Future<bool> requestForMapEnable(BuildContext context) async {
   const String flagName = UserRemoteFlagService.mapEnabled;
-  if (UserRemoteFlagService.instance.getCachedBoolValue(flagName)) {
+  if (userRemoteFlagService.getCachedBoolValue(flagName)) {
     return true;
   }
 
@@ -25,7 +26,7 @@ Future<bool> requestForMapEnable(BuildContext context) async {
         labelText: S.of(context).enableMaps,
         isInAlert: true,
         onTap: () async {
-          await UserRemoteFlagService.instance.setBoolValue(
+          await userRemoteFlagService.setBoolValue(
             flagName,
             true,
           );
@@ -51,6 +52,5 @@ Future<bool> requestForMapEnable(BuildContext context) async {
 
 //For debugging.
 void disableMap() {
-  UserRemoteFlagService.instance
-      .setBoolValue(UserRemoteFlagService.mapEnabled, false);
+  userRemoteFlagService.setBoolValue(UserRemoteFlagService.mapEnabled, false);
 }

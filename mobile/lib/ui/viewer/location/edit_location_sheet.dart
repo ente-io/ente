@@ -5,7 +5,7 @@ import "package:photos/core/constants.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/local_entity_data.dart";
 import "package:photos/models/location_tag/location_tag.dart";
-import "package:photos/services/location_service.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/states/location_state.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -244,7 +244,7 @@ class _EditLocationSheetState extends State<EditLocationSheet> {
 
   Future<void> _editLocation() async {
     final locationTagState = InheritedLocationTagData.of(context);
-    await LocationService.instance.updateLocationTag(
+    await locationService.updateLocationTag(
       locationTagEntity: locationTagState.locationTagEntity!,
       newRadius: locationTagState.selectedRadius,
       newName: _textEditingController.text.trim(),

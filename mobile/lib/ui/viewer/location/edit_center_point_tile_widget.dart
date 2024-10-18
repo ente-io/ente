@@ -1,7 +1,7 @@
 import "package:flutter/material.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/location/location.dart";
-import "package:photos/services/location_service.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/states/location_state.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
@@ -14,7 +14,7 @@ class EditCenterPointTileWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
-    final centerPointInDMS = LocationService.instance.convertLocationToDMS(
+    final centerPointInDMS = locationService.convertLocationToDMS(
       InheritedLocationTagData.of(context).centerPoint,
     );
     return Row(

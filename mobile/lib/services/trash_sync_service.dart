@@ -4,7 +4,6 @@ import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/core/network/network.dart';
 import 'package:photos/db/trash_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/force_reload_trash_page_event.dart';
@@ -20,16 +19,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class TrashSyncService {
   final _logger = Logger("TrashSyncService");
-  final _diffFetcher = TrashDiffFetcher();
+  final TrashDiffFetcher _diffFetcher;
   final _trashDB = TrashDB.instance;
   static const kLastTrashSyncTime = "last_trash_sync_time";
   late SharedPreferences _prefs;
+  final Dio _enteDio;
 
-  TrashSyncService._privateConstructor();
-
-  static final TrashSyncService instance =
-      TrashSyncService._privateConstructor();
-  final _enteDio = NetworkClient.instance.enteDio;
+  TrashSyncService(this._prefs, this._enteDio)
+      : _diffFetcher = TrashDiffFetcher(_enteDio) {
+    _logger.fine("TrashSyncService constructor");
+  }
 
   void init(SharedPreferences preferences) {
     _prefs = preferences;

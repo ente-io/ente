@@ -7,8 +7,8 @@ import "package:logging/logging.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/location/location.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/files_service.dart";
-import "package:photos/services/location_service.dart";
 import "package:photos/theme/effects.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/map/map_button.dart";
@@ -97,8 +97,7 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
             child: ValueListenableBuilder(
               valueListenable: selectedLocation,
               builder: (context, value, _) {
-                final locationInDMS =
-                    LocationService.instance.convertLocationToDMS(
+                final locationInDMS = locationService.convertLocationToDMS(
                   Location(
                     latitude: value?.latitude,
                     longitude: value?.longitude,
