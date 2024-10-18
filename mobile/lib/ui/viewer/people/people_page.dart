@@ -18,6 +18,7 @@ import "package:photos/services/machine_learning/face_ml/feedback/cluster_feedba
 import "package:photos/services/search_service.dart";
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
+import "package:photos/ui/viewer/gallery/hierarchical_search_gallery.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
@@ -147,36 +148,55 @@ class _PeoplePageState extends State<PeoplePage> {
                         child: Stack(
                           alignment: Alignment.bottomCenter,
                           children: [
-                            Gallery(
-                              asyncLoader: (
-                                creationStartTime,
-                                creationEndTime, {
-                                limit,
-                                asc,
-                              }) async {
-                                final result = await loadPersonFiles();
-                                return Future.value(
-                                  FileLoadResult(
-                                    result,
-                                    false,
-                                  ),
-                                );
+                            ValueListenableBuilder(
+                              valueListenable:
+                                  InheritedSearchFilterData.of(context)
+                                      .searchFilterDataProvider!
+                                      .isSearchingNotifier,
+                              builder: (
+                                context,
+                                value,
+                                _,
+                              ) {
+                                return value
+                                    ? HierarchicalSearchGallery(
+                                        tagPrefix: widget.tagPrefix,
+                                        selectedFiles: _selectedFiles,
+                                      )
+                                    : Gallery(
+                                        asyncLoader: (
+                                          creationStartTime,
+                                          creationEndTime, {
+                                          limit,
+                                          asc,
+                                        }) async {
+                                          final result =
+                                              await loadPersonFiles();
+                                          return Future.value(
+                                            FileLoadResult(
+                                              result,
+                                              false,
+                                            ),
+                                          );
+                                        },
+                                        reloadEvent: Bus.instance
+                                            .on<LocalPhotosUpdatedEvent>(),
+                                        forceReloadEvents: [
+                                          Bus.instance.on<PeopleChangedEvent>(),
+                                        ],
+                                        removalEventTypes: const {
+                                          EventType.deletedFromRemote,
+                                          EventType.deletedFromEverywhere,
+                                          EventType.hide,
+                                        },
+                                        tagPrefix:
+                                            widget.tagPrefix + widget.tagPrefix,
+                                        selectedFiles: _selectedFiles,
+                                        initialFiles: personFiles.isNotEmpty
+                                            ? [personFiles.first]
+                                            : [],
+                                      );
                               },
-                              reloadEvent:
-                                  Bus.instance.on<LocalPhotosUpdatedEvent>(),
-                              forceReloadEvents: [
-                                Bus.instance.on<PeopleChangedEvent>(),
-                              ],
-                              removalEventTypes: const {
-                                EventType.deletedFromRemote,
-                                EventType.deletedFromEverywhere,
-                                EventType.hide,
-                              },
-                              tagPrefix: widget.tagPrefix + widget.tagPrefix,
-                              selectedFiles: _selectedFiles,
-                              initialFiles: personFiles.isNotEmpty
-                                  ? [personFiles.first]
-                                  : [],
                             ),
                             FileSelectionOverlayBar(
                               PeoplePage.overlayType,
