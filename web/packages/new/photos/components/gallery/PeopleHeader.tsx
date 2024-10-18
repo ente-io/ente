@@ -70,7 +70,7 @@ import {
     LargeTilePlusOverlay,
     LargeTileTextOverlay,
 } from "../Tiles";
-import { useWrapAsyncOperation } from "../use-wrap-async";
+import { useWrapAsyncOperation } from "../utils/use-wrap-async";
 import type { GalleryBarImplProps } from "./BarImpl";
 import { GalleryItemsHeaderAdapter, GalleryItemsSummary } from "./ListHeader";
 
