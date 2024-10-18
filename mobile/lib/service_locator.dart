@@ -5,6 +5,7 @@ import "package:ente_feature_flag/ente_feature_flag.dart";
 import "package:package_info_plus/package_info_plus.dart";
 import "package:photos/gateways/entity_gw.dart";
 import "package:photos/services/entity_service.dart";
+import "package:photos/services/location_service.dart";
 import "package:photos/services/storage_bonus_service.dart";
 import "package:photos/services/update_service.dart";
 import "package:photos/utils/local_settings.dart";
@@ -77,4 +78,10 @@ EntityService get entityService {
     EntityGateway(ServiceLocator.instance.enteDio),
   );
   return _entityService!;
+}
+
+LocationService? _locationService;
+LocationService get locationService {
+  _locationService ??= LocationService(ServiceLocator.instance.prefs);
+  return _locationService!;
 }

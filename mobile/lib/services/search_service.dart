@@ -634,8 +634,7 @@ class SearchService {
   }
 
   Future<List<GenericSearchResult>> getLocationResults(String query) async {
-    final locationTagEntities =
-        (await LocationService.instance.getLocationTags());
+    final locationTagEntities = (await locationService.getLocationTags());
     final Map<LocalEntity<LocationTag>, List<EnteFile>> result = {};
     final bool showNoLocationTag = query.length > 2 &&
         "No Location Tag".toLowerCase().startsWith(query.toLowerCase());
@@ -720,8 +719,7 @@ class SearchService {
     if (allCitiesSearch) {
       query = '';
     }
-    final results =
-        await LocationService.instance.getFilesInCity(allFiles, query);
+    final results = await locationService.getFilesInCity(allFiles, query);
     final List<City> sortedByResultCount = results.keys.toList()
       ..sort((a, b) => results[b]!.length.compareTo(results[a]!.length));
     for (final city in sortedByResultCount) {
@@ -898,8 +896,7 @@ class SearchService {
     try {
       final Map<LocalEntity<LocationTag>, List<EnteFile>> tagToItemsMap = {};
       final List<GenericSearchResult> tagSearchResults = [];
-      final locationTagEntities =
-          (await LocationService.instance.getLocationTags());
+      final locationTagEntities = (await locationService.getLocationTags());
       final allFiles = await getAllFiles();
       final List<EnteFile> filesWithNoLocTag = [];
 
@@ -955,8 +952,8 @@ class SearchService {
         }
       }
       if (limit == null || tagSearchResults.length < limit) {
-        final results = await LocationService.instance
-            .getFilesInCity(filesWithNoLocTag, '');
+        final results =
+            await locationService.getFilesInCity(filesWithNoLocTag, '');
         final List<City> sortedByResultCount = results.keys.toList()
           ..sort((a, b) => results[b]!.length.compareTo(results[a]!.length));
         for (final city in sortedByResultCount) {

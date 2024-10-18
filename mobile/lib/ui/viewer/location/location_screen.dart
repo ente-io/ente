@@ -118,7 +118,7 @@ class LocationScreenPopUpMenu extends StatelessWidget {
               );
             } else if (value == "delete") {
               try {
-                await LocationService.instance.deleteLocationTag(
+                await locationService.deleteLocationTag(
                   InheritedLocationScreenState.of(context).locationTagEntity.id,
                 );
                 Navigator.of(context).pop();

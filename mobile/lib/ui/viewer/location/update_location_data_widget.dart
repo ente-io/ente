@@ -97,8 +97,7 @@ class _UpdateLocationDataWidgetState extends State<UpdateLocationDataWidget> {
             child: ValueListenableBuilder(
               valueListenable: selectedLocation,
               builder: (context, value, _) {
-                final locationInDMS =
-                    LocationService.instance.convertLocationToDMS(
+                final locationInDMS = locationService.convertLocationToDMS(
                   Location(
                     latitude: value?.latitude,
                     longitude: value?.longitude,

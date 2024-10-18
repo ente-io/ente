@@ -3,6 +3,7 @@ import "dart:io";
 import "dart:math";
 
 import "package:computer/computer.dart";
+import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
@@ -18,23 +19,20 @@ import "package:photos/services/remote_assets_service.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class LocationService {
-  late SharedPreferences prefs;
+  final SharedPreferences prefs;
   final Logger _logger = Logger((LocationService).toString());
   final Computer _computer = Computer.shared();
 
-  LocationService._privateConstructor();
   // If the discovery section is loaded before the cities are loaded, then we
   // need to refresh the discovery section after the cities are loaded.
   bool reloadLocationDiscoverySection = false;
-
-  static final LocationService instance = LocationService._privateConstructor();
 
   static const kCitiesRemotePath = "https://static.ente.io/world_cities.json";
 
   List<City> _cities = [];
 
-  void init(SharedPreferences preferences) {
-    prefs = preferences;
+  LocationService(this.prefs) {
+    debugPrint('LocationService constructor');
     Future.delayed(const Duration(seconds: 3), () {
       _loadCities();
     });

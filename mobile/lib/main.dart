@@ -35,7 +35,6 @@ import "package:photos/services/filedata/filedata_service.dart";
 import 'package:photos/services/home_widget_service.dart';
 import 'package:photos/services/local_file_update_service.dart';
 import 'package:photos/services/local_sync_service.dart';
-import "package:photos/services/location_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/machine_learning_controller.dart";
 import 'package:photos/services/machine_learning/ml_service.dart';
@@ -245,10 +244,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _logger.info("UserService init $tlog");
     await UserService.instance.init();
     _logger.info("UserService init done $tlog");
-
-    _logger.info("LocationService init $tlog");
-    LocationService.instance.init(preferences);
-    _logger.info("LocationService init done $tlog");
 
     _logger.info("UserRemoteFlagService init $tlog");
     await UserRemoteFlagService.instance.init();
