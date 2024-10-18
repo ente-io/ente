@@ -233,7 +233,9 @@ class _MachineLearningSettingsPageState
     } else {
       MLService.instance.pauseIndexingAndClustering();
       await userRemoteFlagService.setBoolValue(
-          UserRemoteFlagService.mlEnabled, false);
+        UserRemoteFlagService.mlEnabled,
+        false,
+      );
     }
     if (mounted) {
       setState(() {});
