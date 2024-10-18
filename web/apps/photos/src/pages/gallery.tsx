@@ -21,7 +21,7 @@ import {
 } from "@/new/photos/components/gallery";
 import type { GalleryBarMode } from "@/new/photos/components/gallery/BarImpl";
 import { GalleryPeopleState } from "@/new/photos/components/gallery/PeopleHeader";
-import { usePeople } from "@/new/photos/components/utils/ml";
+import { usePeopleStateSnapshot } from "@/new/photos/components/utils/ml";
 import { shouldShowWhatsNew } from "@/new/photos/services/changelog";
 import type { CollectionSummaries } from "@/new/photos/services/collection/ui";
 import { areOnlySystemCollections } from "@/new/photos/services/collection/ui";
@@ -322,7 +322,7 @@ export default function Gallery() {
     // The ID of the currently selected person in the gallery bar (if any).
     const [activePersonID, setActivePersonID] = useState<string | undefined>();
 
-    const people = usePeople();
+    const peopleState = usePeopleStateSnapshot();
 
     const [isClipSearchResult, setIsClipSearchResult] =
         useState<boolean>(false);
@@ -566,27 +566,42 @@ export default function Gallery() {
                 selectedSearchOption.suggestion,
             );
         } else if (barMode == "people") {
-            let filteredPeople = people ?? [];
+            let filteredPeople = peopleState?.people ?? [];
+            let filteredVisiblePeople = peopleState?.visiblePeople ?? [];
             if (tempDeletedFileIds?.size ?? tempHiddenFileIds?.size) {
                 // Prune the in-memory temp updates from the actual state to
                 // obtain the UI state. Kept inside an preflight check to so
                 // that the common path remains fast.
-                filteredPeople = filteredPeople
-                    .map((p) => ({
-                        ...p,
-                        fileIDs: p.fileIDs.filter(
-                            (id) =>
-                                !tempDeletedFileIds?.has(id) &&
-                                !tempHiddenFileIds?.has(id),
-                        ),
-                    }))
-                    .filter((p) => p.fileIDs.length > 0);
+                const filterTemp = (ps: Person[]) =>
+                    ps
+                        .map((p) => ({
+                            ...p,
+                            fileIDs: p.fileIDs.filter(
+                                (id) =>
+                                    !tempDeletedFileIds?.has(id) &&
+                                    !tempHiddenFileIds?.has(id),
+                            ),
+                        }))
+                        .filter((p) => p.fileIDs.length > 0);
+                filteredPeople = filterTemp(filteredPeople);
+                filteredVisiblePeople = filterTemp(filteredVisiblePeople);
             }
-            const activePerson =
-                filteredPeople.find((p) => p.id == activePersonID) ??
-                // We don't have an "All" pseudo-album in people mode currently,
-                // so default to the first person in the list.
-                filteredPeople[0];
+            const findByID = (ps: Person[]) =>
+                ps.find((p) => p.id == activePersonID);
+            let activePerson = findByID(filteredVisiblePeople);
+            if (!activePerson) {
+                // This might be one of the normally hidden small clusters.
+                activePerson = findByID(filteredPeople);
+                if (activePerson) {
+                    // Temporarily add this person's entry to the list of people
+                    // surfaced in the people section.
+                    filteredVisiblePeople.push(activePerson);
+                } else {
+                    // We don't have an "All" pseudo-album in people mode, so
+                    // default to the first person in the list.
+                    activePerson = filteredVisiblePeople[0];
+                }
+            }
             const pfSet = new Set(activePerson?.fileIDs ?? []);
             filteredFiles = getUniqueFiles(
                 files.filter(({ id }) => {
@@ -596,7 +611,7 @@ export default function Gallery() {
             );
             galleryPeopleState = {
                 activePerson,
-                people: filteredPeople,
+                people: filteredVisiblePeople,
             };
         } else {
             const baseFiles = barMode == "hidden-albums" ? hiddenFiles : files;
@@ -678,7 +693,7 @@ export default function Gallery() {
         selectedSearchOption,
         activeCollectionID,
         archivedCollections,
-        people,
+        peopleState,
         activePersonID,
     ]);
 
@@ -1130,9 +1145,9 @@ export default function Gallery() {
         return <div></div>;
     }
 
-    // `people` will be undefined only when ML is disabled, otherwise it'll be
-    // an empty array (even if people are loading).
-    const showPeopleSectionButton = people !== undefined;
+    // `peopleState` will be undefined only when ML is disabled, otherwise it'll
+    // be contain empty arrays (even if people are loading).
+    const showPeopleSectionButton = peopleState !== undefined;
 
     return (
         <GalleryContext.Provider

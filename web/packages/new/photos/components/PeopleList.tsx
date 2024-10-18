@@ -1,5 +1,4 @@
 import { useIsSmallWidth } from "@/base/hooks";
-import { pt } from "@/base/i18n";
 import type { EnteFile } from "@/media/file";
 import { faceCrop, type AnnotatedFaceID } from "@/new/photos/services/ml";
 import type { Person, PreviewableFace } from "@/new/photos/services/ml/people";
@@ -67,7 +66,7 @@ const SearchPersonButton = styled(UnstyledButton)(
 `,
 );
 
-export interface AnnotatedFacePeopleListProps {
+export interface FilePeopleListProps {
     /**
      * The {@link EnteFile} whose information we are showing.
      */
@@ -86,15 +85,18 @@ export interface AnnotatedFacePeopleListProps {
  * Show the list of faces in the given file that are associated with a specific
  * person.
  */
-export const AnnotatedFacePeopleList: React.FC<
-    AnnotatedFacePeopleListProps
-> = ({ file, annotatedFaceIDs, onSelectFace }) => {
+export const FilePeopleList: React.FC<FilePeopleListProps> = ({
+    file,
+    annotatedFaceIDs,
+    onSelectFace,
+}) => {
     if (annotatedFaceIDs.length == 0) return <></>;
 
     return (
         <>
             <Typography variant="large" p={1}>
                 {t("people")}
+                {/*t("UNIDENTIFIED_FACES")  TODO-Cluster remove */}
             </Typography>
             <FileFaceList>
                 {annotatedFaceIDs.map((annotatedFaceID) => (
@@ -139,59 +141,6 @@ const AnnotatedFaceButton = styled(UnstyledButton)(
     }
 `,
 );
-
-export interface UnclusteredFaceListProps {
-    /**
-     * The {@link EnteFile} whose information we are showing.
-     */
-    file: EnteFile;
-    /**
-     * The list of faces in the file that are not associated with a person.
-     */
-    faceIDs: string[];
-}
-
-/**
- * Show the list of faces in the given file that are not associated with a
- * specific person.
- */
-export const UnclusteredFaceList: React.FC<UnclusteredFaceListProps> = ({
-    file,
-    faceIDs,
-}) => {
-    if (faceIDs.length == 0) return <></>;
-
-    return (
-        <>
-            <Typography variant="large" p={1}>
-                {pt("Other faces")}
-                {/*t("UNIDENTIFIED_FACES")  TODO-Cluster */}
-            </Typography>
-            <FileFaceList>
-                {faceIDs.map((faceID) => (
-                    <UnclusteredFace key={faceID}>
-                        <FaceCropImageView
-                            placeholderDimension={112}
-                            {...{ file, faceID }}
-                        />
-                    </UnclusteredFace>
-                ))}
-            </FileFaceList>
-        </>
-    );
-};
-
-const UnclusteredFace = styled("div")`
-    width: 112px;
-    height: 112px;
-    margin: 5px;
-    border-radius: 50%;
-    overflow: hidden;
-    & > img {
-        width: 100%;
-        height: 100%;
-    }
-`;
 
 export interface SuggestionFaceListProps {
     /**

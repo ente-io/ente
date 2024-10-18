@@ -30,9 +30,9 @@ import { clearMLDB, getIndexableAndIndexedCounts, savedFaceIndex } from "./db";
 import {
     _applyPersonSuggestionUpdates,
     filterNamedPeople,
-    reconstructPeople,
+    reconstructPeopleState,
     type CGroupPerson,
-    type Person,
+    type PeopleState,
     type PersonSuggestionUpdates,
 } from "./people";
 import { MLWorker } from "./worker";
@@ -84,20 +84,20 @@ class MLState {
     mlStatusSnapshot: MLStatus | undefined;
 
     /**
-     * Subscriptions to updates to the list of {@link Person}s we know about.
+     * Subscriptions to updates to the {@link PeopleState}.
      *
-     * See {@link peopleSubscribe}.
+     * See {@link peopleStateSubscribe}.
      */
-    peopleListeners: (() => void)[] = [];
+    peopleStateListeners: (() => void)[] = [];
 
     /**
-     * Snapshot of the {@link Person}s returned by the {@link peopleSnapshot}
-     * function.
+     * Snapshot of the {@link PeopleState}s. Use the {@link peopleStateSnapshot}
+     * function to access this data.
      *
      * It will be `undefined` only if ML is disabled. Otherwise, it will be an
      * empty array even if the snapshot is pending its first sync.
      */
-    peopleSnapshot: Person[] | undefined;
+    peopleStateSnapshot: PeopleState | undefined;
 
     /**
      * In flight face crop regeneration promises indexed by the IDs of the files
@@ -195,7 +195,7 @@ export const isMLSupported = isDesktop;
  */
 export const initML = () => {
     _state.isMLEnabled = isMLEnabledLocal();
-    resetPeopleSnapshot();
+    resetPeopleStateSnapshot();
 };
 
 export const logoutML = async () => {
@@ -232,7 +232,7 @@ export const enableML = async () => {
     setIsMLEnabledLocal(true);
     _state.isMLEnabled = true;
     setInterimScheduledStatus();
-    resetPeopleSnapshot();
+    resetPeopleStateSnapshot();
     // Trigger updates, but don't wait for them to finish.
     void updateMLStatusSnapshot().then(mlSync);
 };
@@ -250,7 +250,7 @@ export const disableML = async () => {
     _state.isSyncing = false;
     await terminateMLWorker();
     triggerStatusUpdate();
-    resetPeopleSnapshot();
+    resetPeopleStateSnapshot();
 };
 
 /**
@@ -357,7 +357,7 @@ const updateClustersAndPeople = async () => {
     await (await worker()).clusterFaces(masterKey);
 
     // Update the people shown in the UI.
-    await updatePeople();
+    await updatePeopleState();
 };
 
 /**
@@ -537,18 +537,18 @@ const workerDidUpdateStatus = throttled(updateMLStatusSnapshot, 2000);
 /**
  * A function that can be used to subscribe to updates to {@link Person}s.
  *
- * This, along with {@link peopleSnapshot}, is meant to be used as arguments to
- * React's {@link useSyncExternalStore}.
+ * This, along with {@link peopleStateSnapshot}, is meant to be used as
+ * arguments to React's {@link useSyncExternalStore}.
  *
  * @param callback A function that will be invoked whenever the result of
- * {@link peopleSnapshot} changes.
+ * {@link peopleStateSnapshot} changes.
  *
  * @returns A function that can be used to clear the subscription.
  */
-export const peopleSubscribe = (onChange: () => void): (() => void) => {
-    _state.peopleListeners.push(onChange);
+export const peopleStateSubscribe = (onChange: () => void): (() => void) => {
+    _state.peopleStateListeners.push(onChange);
     return () => {
-        _state.peopleListeners = _state.peopleListeners.filter(
+        _state.peopleStateListeners = _state.peopleStateListeners.filter(
             (l) => l != onChange,
         );
     };
@@ -560,37 +560,41 @@ export const peopleSubscribe = (onChange: () => void): (() => void) => {
  *
  * Otherwise, if ML is disabled, set the people snapshot to `undefined`.
  */
-const resetPeopleSnapshot = () =>
-    setPeopleSnapshot(_state.isMLEnabled ? [] : undefined);
+const resetPeopleStateSnapshot = () =>
+    setPeopleStateSnapshot(
+        _state.isMLEnabled
+            ? { people: [], visiblePeople: [], personByFaceID: new Map() }
+            : undefined,
+    );
 
 /**
- * Return the last known, cached {@link people}.
+ * Return the last known, cached {@link PeopleState}.
  *
- * This, along with {@link peopleSnapshot}, is meant to be used as arguments to
- * React's {@link useSyncExternalStore}.
+ * This, along with {@link peopleStateSubscribe}, is meant to be used as
+ * arguments to React's {@link useSyncExternalStore}.
  *
  * A return value of `undefined` indicates that ML is disabled. In all other
- * cases, the list will be either empty (if we're either still loading the
- * initial list of people, or if the user doesn't have any people), or, well,
- * non-empty.
+ * cases, the list of people will be either empty (if we're either still loading
+ * the initial list of people, or if the user doesn't have any people), or,
+ * well, non-empty.
  */
-export const peopleSnapshot = () => _state.peopleSnapshot;
+export const peopleStateSnapshot = () => _state.peopleStateSnapshot;
 
-// Update our, and the search subsystem's, snapshot of people by reconstructing
-// it from the latest local state.
-const updatePeople = async () => {
-    const people = await reconstructPeople();
+// Update our, and the search subsystem's, snapshot of people state by
+// reconstructing it from the latest local state.
+const updatePeopleState = async () => {
+    const state = await reconstructPeopleState();
 
     // Notify the search subsystem of the update (search only uses named ones).
-    setSearchPeople(filterNamedPeople(people));
+    setSearchPeople(filterNamedPeople(state.visiblePeople));
 
-    // Update our in-memory list of people.
-    setPeopleSnapshot(people);
+    // Update our in-memory state.
+    setPeopleStateSnapshot(state);
 };
 
-const setPeopleSnapshot = (snapshot: Person[] | undefined) => {
-    _state.peopleSnapshot = snapshot;
-    _state.peopleListeners.forEach((l) => l());
+const setPeopleStateSnapshot = (snapshot: PeopleState | undefined) => {
+    _state.peopleStateSnapshot = snapshot;
+    _state.peopleStateListeners.forEach((l) => l());
 };
 
 /**
@@ -609,26 +613,13 @@ export const clipMatches = (
 ): Promise<CLIPMatches | undefined> =>
     worker().then((w) => w.clipMatches(searchPhrase));
 
-/** A face ID annotated with the ID of the person to which it is associated. */
+/**
+ * A face ID annotated with the ID of the person or cluster with which it is
+ * associated.
+ */
 export interface AnnotatedFaceID {
     faceID: string;
     personID: string;
-}
-
-/**
- * List of faces found in a file
- *
- * It is actually a pair of lists, one annotated by the person ids, and one with
- * just the face ids.
- */
-export interface AnnotatedFacesForFile {
-    /**
-     * A list of {@link AnnotatedFaceID}s for all faces in the file that are
-     * also associated with a {@link Person}.
-     */
-    annotatedFaceIDs: AnnotatedFaceID[];
-    /* A list of the remaining face (ids). */
-    otherFaceIDs: string[];
 }
 
 /**
@@ -636,38 +627,25 @@ export interface AnnotatedFacesForFile {
  */
 export const getAnnotatedFacesForFile = async (
     file: EnteFile,
-): Promise<AnnotatedFacesForFile> => {
-    const annotatedFaceIDs: AnnotatedFaceID[] = [];
-    const otherFaceIDs: string[] = [];
-
+): Promise<AnnotatedFaceID[]> => {
     const index = await savedFaceIndex(file.id);
-    if (!index) return { annotatedFaceIDs, otherFaceIDs };
+    if (!index) return [];
 
-    const people = _state.peopleSnapshot ?? [];
+    const personByFaceID = _state.peopleStateSnapshot?.personByFaceID;
+    if (!personByFaceID) return [];
 
-    const faceIDToPersonID = new Map<string, string>();
-    for (const person of people) {
-        let faceIDs: string[];
-        if (person.type == "cgroup") {
-            faceIDs = person.cgroup.data.assigned.map((c) => c.faces).flat();
-        } else {
-            faceIDs = person.cluster.faces;
-        }
-        for (const faceID of faceIDs) {
-            faceIDToPersonID.set(faceID, person.id);
-        }
-    }
-
+    const sortableFaces: [AnnotatedFaceID, number][] = [];
     for (const { faceID } of index.faces) {
-        const personID = faceIDToPersonID.get(faceID);
-        if (personID) {
-            annotatedFaceIDs.push({ faceID, personID });
-        } else {
-            otherFaceIDs.push(faceID);
-        }
+        const person = personByFaceID.get(faceID);
+        if (!person) continue;
+        sortableFaces.push([
+            { faceID, personID: person.id },
+            person.fileIDs.length,
+        ]);
     }
 
-    return { annotatedFaceIDs, otherFaceIDs };
+    sortableFaces.sort(([, a], [, b]) => b - a);
+    return sortableFaces.map(([f]) => f);
 };
 
 /**
@@ -826,5 +804,27 @@ export const applyPersonSuggestionUpdates = async (
 ) => {
     const masterKey = await masterKeyFromSession();
     await _applyPersonSuggestionUpdates(cgroup, updates, masterKey);
+    return mlSync();
+};
+
+/**
+ * Ignore/hide a cluster.
+ *
+ * This converts the cluster into a cgroup so that it can be synced with remote,
+ * setting the hidden flag so that it is not surfaced in the UI.
+ *
+ * @param cluster The {@link FaceCluster} to hide.
+ */
+export const ignoreCluster = async (cluster: FaceCluster) => {
+    const masterKey = await masterKeyFromSession();
+    await addUserEntity(
+        "cgroup",
+        {
+            name: "",
+            assigned: [cluster],
+            isHidden: true,
+        },
+        masterKey,
+    );
     return mlSync();
 };

@@ -169,17 +169,44 @@ export interface PreviewableFace {
 }
 
 /**
- * Construct in-memory people using the data present locally, ignoring faces
- * belonging to deleted and hidden files.
+ * Pre-computed in-memory state for UI that deals with people.
+ */
+export interface PeopleState {
+    /**
+     * List of all people.
+     *
+     * The list is sorted such that named people are first, then the local only
+     * unnamed clusters. Within each section, people are sorted by the number of
+     * files that they reference.
+     */
+    people: Person[];
+    /**
+     * List of all people who should be normally shown in the UI.
+     *
+     * By default, people derived from small, local-only clusters are not
+     * surfaced in the UI. Such people will be present in the {@link people}
+     * list, but not in the {@link visiblePeople} list. The user can still see
+     * these people by clicking on one of the faces they contain from a photo's
+     * info view.
+     */
+    visiblePeople: Person[];
+    /**
+     * faceID => person
+     *
+     * {@link people}, but indexed by face (ids).
+     */
+    personByFaceID: Map<string, Person>;
+}
+
+/**
+ * Construct an in-memory people state using the data present locally, ignoring
+ * faces belonging to deleted and hidden files.
  *
  * This function is meant to run after files, cgroups and faces have been synced
  * with remote, and clustering has completed. It uses the current local state to
  * construct an in-memory list of {@link Person}s on which the UI will operate.
- *
- * @return A list of {@link Person}s, sorted by the number of files that they
- * reference.
  */
-export const reconstructPeople = async (): Promise<Person[]> => {
+export const reconstructPeopleState = async (): Promise<PeopleState> => {
     const files = await getLocalFiles("normal");
     const fileByID = new Map(files.map((f) => [f.id, f]));
 
@@ -286,9 +313,6 @@ export const reconstructPeople = async (): Promise<Person[]> => {
         const mostRecentFace = faces[0];
         if (!mostRecentFace) return undefined;
 
-        // Ignore clusters with too few visible faces.
-        if (faces.length < 10) return undefined;
-
         return {
             type: "cluster",
             cluster,
@@ -305,7 +329,27 @@ export const reconstructPeople = async (): Promise<Person[]> => {
             .filter((c) => !!c)
             .sort((a, b) => b.fileIDs.length - a.fileIDs.length);
 
-    return sorted(cgroupPeople).concat(sorted(clusterPeople));
+    const people = sorted(cgroupPeople).concat(sorted(clusterPeople));
+
+    const visiblePeople = people.filter((p) => {
+        // Ignore local only clusters with too few visible faces.
+        if (p.type == "cluster" && p.cluster.faces.length < 10) return false;
+        return true;
+    });
+
+    // Reverse map for easy lookup.
+    const personByFaceID = new Map<string, Person>();
+    for (const person of people) {
+        const faceIDs =
+            person.type == "cgroup"
+                ? person.cgroup.data.assigned.map((c) => c.faces).flat()
+                : person.cluster.faces;
+        for (const faceID of faceIDs) {
+            personByFaceID.set(faceID, person);
+        }
+    }
+
+    return { people, visiblePeople, personByFaceID };
 };
 
 /**
@@ -573,7 +617,7 @@ export const _applyPersonSuggestionUpdates = async (
     updates: PersonSuggestionUpdates,
     masterKey: Uint8Array,
 ) => {
-    let localClusters = await savedFaceClusters();
+    const localClusters = await savedFaceClusters();
 
     let assignedClusters = [...cgroup.data.assigned];
     let rejectedClusterIDs = await savedRejectedClustersForCGroup(cgroup.id);
@@ -583,20 +627,7 @@ export const _applyPersonSuggestionUpdates = async (
 
     // Add cluster with `clusterID` to the list of assigned clusters.
     const assign = (clusterID: string) => {
-        // Remove it from the locally saved clusters,
-        const [updatedLocalClusters, cluster] = localClusters.reduce<
-            [FaceCluster[], FaceCluster | undefined]
-        >(
-            ([clusters, removedCluster], c) => {
-                if (c.id == clusterID) return [clusters, c];
-                clusters.push(c);
-                return [clusters, removedCluster];
-            },
-            [[], undefined],
-        );
-
-        localClusters = updatedLocalClusters;
-        // And add it to the ones that'll get synced with remote.
+        const cluster = localClusters.find((c) => c.id == clusterID);
         assignedClusters.push(ensure(cluster));
         assignUpdateCount += 1;
     };
@@ -618,10 +649,10 @@ export const _applyPersonSuggestionUpdates = async (
 
             assignedClusters = updatedAssignedClusters;
             assignUpdateCount += 1;
-            // Prior to this, this cluster was not saved locally, since it was
+            // Prior to this, this cluster was not saved locally since it was
             // part of the remote data. Since we're removing it from the remote
             // state, add it to the local state instead so that the user can see
-            // (local only) entries from their recent rejections.
+            // it in their saved choices (local only).
             localClusters.push(ensure(cluster));
         }
     };
