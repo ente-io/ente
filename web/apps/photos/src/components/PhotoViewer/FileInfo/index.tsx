@@ -272,6 +272,15 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                         )
                     }
                 />
+                {isMLEnabled() && annotatedFaces.length > 0 && (
+                    <InfoItem icon={<FolderOutlinedIcon />}>
+                        <FilePeopleList
+                            file={file}
+                            annotatedFaceIDs={annotatedFaces}
+                            onSelectFace={handleSelectFace}
+                        />{" "}
+                    </InfoItem>
+                )}
                 {showCollectionChips && (
                     <InfoItem icon={<FolderOutlinedIcon />}>
                         <Box
@@ -298,14 +307,6 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                                 ))}
                         </Box>
                     </InfoItem>
-                )}
-
-                {isMLEnabled() && annotatedFaces.length > 0 && (
-                    <FilePeopleList
-                        file={file}
-                        annotatedFaceIDs={annotatedFaces}
-                        onSelectFace={handleSelectFace}
-                    />
                 )}
             </Stack>
 
