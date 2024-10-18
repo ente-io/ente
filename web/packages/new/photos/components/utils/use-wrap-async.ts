@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { useAppContext } from "../types/context";
+import { useAppContext } from "../../types/context";
 
 /**
  * Wrap an asynchronous operation (e.g. API calls) in an global activity

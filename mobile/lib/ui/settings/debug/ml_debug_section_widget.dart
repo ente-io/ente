@@ -16,6 +16,7 @@ import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
 import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
+import "package:photos/ui/components/toggle_switch_widget.dart";
 import 'package:photos/ui/settings/common_settings.dart';
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/ml_util.dart";
@@ -57,8 +58,10 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
 
   Widget _getSectionOptions(BuildContext context) {
     final Logger logger = Logger("MLDebugSectionWidget");
+    final colorScheme = getEnteColorScheme(context);
     return Column(
       children: [
+        sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: FutureBuilder<IndexStatus>(
             future: getIndexStatus(),
@@ -66,85 +69,99 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
               if (snapshot.hasData) {
                 final IndexStatus status = snapshot.data!;
                 return CaptionedTextWidget(
-                  title: localSettings.isMLIndexingEnabled
-                      ? "Disable ML (${status.indexedItems} files indexed)"
-                      : "Enable ML (${status.indexedItems} files indexed)",
+                  title: "ML (${status.indexedItems} indexed)",
                 );
               }
               return const SizedBox.shrink();
             },
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
-          trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
-          onTap: () async {
-            try {
-              final isEnabled = await localSettings.toggleMLIndexing();
-              if (isEnabled) {
-                await MLService.instance.init();
-                await SemanticSearchService.instance.init();
-                unawaited(MLService.instance.runAllML(force: true));
-              } else {
-                MLService.instance.pauseIndexingAndClustering();
+          menuItemColor: colorScheme.fillFaint,
+          trailingWidget: ToggleSwitchWidget(
+            value: () => localSettings.isMLIndexingEnabled,
+            onChanged: () async {
+              try {
+                final isEnabled = await localSettings.toggleMLIndexing();
+                logger.info('ML indexing turned ${isEnabled ? 'on' : 'off'}');
+                if (isEnabled) {
+                  await MLService.instance.init();
+                  await SemanticSearchService.instance.init();
+                  unawaited(MLService.instance.runAllML(force: true));
+                } else {
+                  MLService.instance.pauseIndexingAndClustering();
+                }
+                if (mounted) {
+                  setState(() {});
+                }
+              } catch (e, s) {
+                logger.warning('indexing failed ', e, s);
+                await showGenericErrorDialog(context: context, error: e);
               }
-              if (mounted) {
-                setState(() {});
-              }
-            } catch (e, s) {
-              logger.warning('indexing failed ', e, s);
-              await showGenericErrorDialog(context: context, error: e);
-            }
-          },
+            },
+          ),
+          singleBorderRadius: 8,
+          isGestureDetectorDisabled: true,
         ),
         sectionOptionSpacing,
         MenuItemWidget(
-          captionedTextWidget: CaptionedTextWidget(
-            title: localSettings.remoteFetchEnabled
-                ? "Disable remote fetch"
-                : "Enable remote fetch",
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Remote fetch",
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
-          trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
-          onTap: () async {
-            try {
-              await localSettings.toggleRemoteFetch();
-              if (mounted) {
-                setState(() {});
+          menuItemColor: colorScheme.fillFaint,
+          trailingWidget: ToggleSwitchWidget(
+            value: () => localSettings.remoteFetchEnabled,
+            onChanged: () async {
+              try {
+                await localSettings.toggleRemoteFetch();
+                logger.info(
+                  'Remote fetch is turned ${localSettings.remoteFetchEnabled ? 'on' : 'off'}',
+                );
+                if (mounted) {
+                  setState(() {});
+                }
+              } catch (e, s) {
+                logger.warning(
+                  'Remote fetch toggle failed ',
+                  e,
+                  s,
+                );
+                await showGenericErrorDialog(
+                  context: context,
+                  error: e,
+                );
               }
-            } catch (e, s) {
-              logger.warning('Remote fetch toggle failed ', e, s);
-              await showGenericErrorDialog(context: context, error: e);
-            }
-          },
+            },
+          ),
+          singleBorderRadius: 8,
+          isGestureDetectorDisabled: true,
         ),
         sectionOptionSpacing,
         MenuItemWidget(
-          captionedTextWidget: CaptionedTextWidget(
-            title: MLService.instance.debugIndexingDisabled
-                ? "Enable auto indexing (debug)"
-                : "Disable auto indexing (debug)",
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Auto indexing",
           ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
-          trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
-          onTap: () async {
-            try {
-              MLService.instance.debugIndexingDisabled =
-                  !MLService.instance.debugIndexingDisabled;
-              if (MLService.instance.debugIndexingDisabled) {
-                MLService.instance.pauseIndexingAndClustering();
-              } else {
-                unawaited(MLService.instance.runAllML());
+          menuItemColor: colorScheme.fillFaint,
+          trailingWidget: ToggleSwitchWidget(
+            value: () => !MLService.instance.debugIndexingDisabled,
+            onChanged: () async {
+              try {
+                MLService.instance.debugIndexingDisabled =
+                    !MLService.instance.debugIndexingDisabled;
+                if (MLService.instance.debugIndexingDisabled) {
+                  MLService.instance.pauseIndexingAndClustering();
+                } else {
+                  unawaited(MLService.instance.runAllML());
+                }
+                if (mounted) {
+                  setState(() {});
+                }
+              } catch (e, s) {
+                logger.warning('debugIndexingDisabled toggle failed ', e, s);
+                await showGenericErrorDialog(context: context, error: e);
               }
-              if (mounted) {
-                setState(() {});
-              }
-            } catch (e, s) {
-              logger.warning('debugIndexingDisabled toggle failed ', e, s);
-              await showGenericErrorDialog(context: context, error: e);
-            }
-          },
+            },
+          ),
+          singleBorderRadius: 8,
+          isGestureDetectorDisabled: true,
         ),
         sectionOptionSpacing,
         MenuItemWidget(

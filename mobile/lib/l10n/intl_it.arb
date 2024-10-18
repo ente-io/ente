@@ -150,6 +150,7 @@
   "tryAgain": "Riprova",
   "viewRecoveryKey": "Visualizza chiave di recupero",
   "confirmRecoveryKey": "Conferma chiave di recupero",
+  "recoveryKeyVerifyReason": "Se hai dimenticato la password, la tua chiave di ripristino è l'unico modo per recuperare le tue foto. La puoi trovare in Impostazioni > Account.\n\nInserisci la tua chiave di recupero per verificare di averla salvata correttamente.",
   "confirmYourRecoveryKey": "Conferma la tua chiave di recupero",
   "addViewer": "Aggiungi in sola lettura",
   "addCollaborator": "Aggiungi collaboratore",
@@ -1342,5 +1343,14 @@
   "mostRecent": "Più recenti",
   "mostRelevant": "Più rilevanti",
   "loadingYourPhotos": "Caricando le tue foto...",
-  "processingImport": "Elaborando {folderName}..."
+  "processingImport": "Elaborando {folderName}...",
+  "personName": "Person name",
+  "addNewPerson": "Add new person",
+  "addNameOrMerge": "Add name or merge",
+  "mergeWithExisting": "Merge with existing",
+  "newPerson": "New person",
+  "addName": "Add name",
+  "add": "Add",
+  "extraPhotosFoundFor": "Extra photos found for $text",
+  "extraPhotosFound": "Extra photos found"
 }

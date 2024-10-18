@@ -153,7 +153,7 @@ export const _clusterFaces = async (
     }
 
     const t = `(${Date.now() - startTime} ms)`;
-    log.info(`Generated ${clusters.length} clusters from ${total} faces ${t}`);
+    log.info(`Refreshed ${clusters.length} clusters from ${total} faces ${t}`);
 
     return clusters;
 };

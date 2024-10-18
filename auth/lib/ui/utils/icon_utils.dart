@@ -17,6 +17,7 @@ class IconUtils {
   final Map<String, CustomIconData> _customIcons = {};
   // Map of icon-color to its luminance
   final Map<Color, double> _colorLuminance = {};
+  final List<String> _titleSplitCharacters = ['(', '.'];
 
   Future<void> init() async {
     await _loadJson();
@@ -27,31 +28,36 @@ class IconUtils {
     String provider, {
     double width = 24,
   }) {
-    final title = _getProviderTitle(provider);
-    if (_customIcons.containsKey(title)) {
-      return _getSVGIcon(
-        "assets/custom-icons/icons/${_customIcons[title]!.slug ?? title}.svg",
-        title,
-        _customIcons[title]!.color,
-        width,
-        context,
-      );
-    } else if (_simpleIcons.containsKey(title)) {
-      return _getSVGIcon(
-        "assets/simple-icons/icons/$title.svg",
-        title,
-        _simpleIcons[title],
-        width,
-        context,
-      );
-    } else if (title.isNotEmpty) {
+    final providerTitle = _getProviderTitle(provider);
+    final List<String> titlesList = [providerTitle];
+    titlesList.addAll(_titleSplitCharacters.where((char) => providerTitle.contains(char)).map((char) => providerTitle.split(char)[0]));
+    for(final title in titlesList){
+      if (_customIcons.containsKey(title)) {
+        return _getSVGIcon(
+          "assets/custom-icons/icons/${_customIcons[title]!.slug ?? title}.svg",
+          title,
+          _customIcons[title]!.color,
+          width,
+          context,
+        );
+      } else if (_simpleIcons.containsKey(title)) {
+        return _getSVGIcon(
+          "assets/simple-icons/icons/$title.svg",
+          title,
+          _simpleIcons[title],
+          width,
+          context,
+        );
+      }
+    }
+    if (providerTitle.isNotEmpty) {
       bool showLargeIcon = width > 24;
       return CircleAvatar(
         radius: width / 2,
         backgroundColor: getEnteColorScheme(context).avatarColors[
-            title.hashCode % getEnteColorScheme(context).avatarColors.length],
+            providerTitle.hashCode % getEnteColorScheme(context).avatarColors.length],
         child: Text(
-          title.toUpperCase()[0],
+          providerTitle.toUpperCase()[0],
           // fixed color
           style: showLargeIcon
               ? getEnteTextTheme(context).h3Bold.copyWith(color: Colors.white)
@@ -146,7 +152,7 @@ class IconUtils {
   }
 
   String _getProviderTitle(String provider) {
-    return provider.split(RegExp(r'[.(]'))[0].replaceAll(' ', '').toLowerCase();
+    return provider.replaceAll(' ', '').toLowerCase();
   }
 }
 

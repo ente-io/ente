@@ -57,8 +57,7 @@ class _PeoplePageState extends State<PeoplePage> {
       smallestClusterSize != null &&
       smallestClusterSize! >= kMinimumClusterSizeSearchResult &&
       files != null &&
-      files!.isNotEmpty &&
-      files!.length > 200);
+      files!.isNotEmpty);
 
   bool userDismissedSuggestionBanner = false;
 

@@ -220,6 +220,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "ackPasswordLostWarning": MessageLookupByLibrary.simpleMessage(
             "もしパスワードを忘れたら、自身のデータを失うことを理解しました"),
         "activeSessions": MessageLookupByLibrary.simpleMessage("アクティブなセッション"),
+        "add": MessageLookupByLibrary.simpleMessage("Add"),
         "addAName": MessageLookupByLibrary.simpleMessage("名前を追加"),
         "addANewEmail": MessageLookupByLibrary.simpleMessage("新しいEメールアドレスを追加"),
         "addCollaborator": MessageLookupByLibrary.simpleMessage("コラボレーターを追加"),
@@ -229,7 +230,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "addLocation": MessageLookupByLibrary.simpleMessage("位置情報を追加"),
         "addLocationButton": MessageLookupByLibrary.simpleMessage("追加"),
         "addMore": MessageLookupByLibrary.simpleMessage("さらに追加"),
+        "addName": MessageLookupByLibrary.simpleMessage("Add name"),
+        "addNameOrMerge":
+            MessageLookupByLibrary.simpleMessage("Add name or merge"),
         "addNew": MessageLookupByLibrary.simpleMessage("新規追加"),
+        "addNewPerson": MessageLookupByLibrary.simpleMessage("Add new person"),
         "addOnPageSubtitle": MessageLookupByLibrary.simpleMessage("アドオンの詳細"),
         "addOnValidTill": m5,
         "addOns": MessageLookupByLibrary.simpleMessage("アドオン"),
@@ -675,6 +680,10 @@ class MessageLookup extends MessageLookupByLibrary {
             "このリンクは期限切れです。新たな期限を設定するか、期限設定そのものを無くすか、選択してください"),
         "exportLogs": MessageLookupByLibrary.simpleMessage("ログのエクスポート"),
         "exportYourData": MessageLookupByLibrary.simpleMessage("データをエクスポート"),
+        "extraPhotosFound":
+            MessageLookupByLibrary.simpleMessage("Extra photos found"),
+        "extraPhotosFoundFor": MessageLookupByLibrary.simpleMessage(
+            "Extra photos found for \$text"),
         "faceRecognition": MessageLookupByLibrary.simpleMessage("顔認識"),
         "faces": MessageLookupByLibrary.simpleMessage("顔"),
         "failedToApplyCode":
@@ -909,6 +918,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "matrix": MessageLookupByLibrary.simpleMessage("Matrix"),
         "memoryCount": m0,
         "merchandise": MessageLookupByLibrary.simpleMessage("グッズ"),
+        "mergeWithExisting":
+            MessageLookupByLibrary.simpleMessage("Merge with existing"),
         "mlConsent": MessageLookupByLibrary.simpleMessage("機械学習を有効にする"),
         "mlConsentConfirmation":
             MessageLookupByLibrary.simpleMessage("機械学習を可能にしたい"),
@@ -944,6 +955,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Enteに接続できませんでした。ネットワーク設定を確認し、エラーが解決しない場合はサポートにお問い合わせください。"),
         "never": MessageLookupByLibrary.simpleMessage("なし"),
         "newAlbum": MessageLookupByLibrary.simpleMessage("新しいアルバム"),
+        "newPerson": MessageLookupByLibrary.simpleMessage("New person"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("Enteを初めて使用する"),
         "newest": MessageLookupByLibrary.simpleMessage("新しい順"),
         "next": MessageLookupByLibrary.simpleMessage("次へ"),
@@ -1031,6 +1043,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "permanentlyDelete": MessageLookupByLibrary.simpleMessage("完全に削除"),
         "permanentlyDeleteFromDevice":
             MessageLookupByLibrary.simpleMessage("デバイスから完全に削除しますか？"),
+        "personName": MessageLookupByLibrary.simpleMessage("Person name"),
         "photoDescriptions": MessageLookupByLibrary.simpleMessage("写真の説明"),
         "photoGridSize": MessageLookupByLibrary.simpleMessage("写真のグリッドサイズ"),
         "photoSmallCase": MessageLookupByLibrary.simpleMessage("写真"),

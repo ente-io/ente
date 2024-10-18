@@ -6,7 +6,7 @@ Most of the code is in [Jupyter Notebooks](https://jupyter.org/), which facilita
 
 ## Running any notebook
 
-In case you're using VSCode, make sure you've installed the [Jupyter](https://marketplace.visualstudio.com/items?itemName=ms-toolsai.jupyter) extension.
+In case you're using VSCode, make sure you've installed the [Jupyter](https://marketplace.visualstudio.com/items?itemName=ms-toolsai.jupyter) extension and only have a [single window](https://github.com/microsoft/vscode/issues/125993#issuecomment-2099627960) open.
 
 1. [Install uv](https://docs.astral.sh/uv/getting-started/installation/)
 2. Run `uv sync`

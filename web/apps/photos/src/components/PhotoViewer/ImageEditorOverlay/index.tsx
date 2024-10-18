@@ -9,7 +9,7 @@ import { nameAndExtension } from "@/base/file";
 import log from "@/base/log";
 import { downloadAndRevokeObjectURL } from "@/base/utils/web";
 import { EnteFile } from "@/media/file";
-import { photosDialogZIndex } from "@/new/photos/components/z-index";
+import { photosDialogZIndex } from "@/new/photos/components/utils/z-index";
 import downloadManager from "@/new/photos/services/download";
 import { AppContext } from "@/new/photos/types/context";
 import { ensure } from "@/utils/ensure";

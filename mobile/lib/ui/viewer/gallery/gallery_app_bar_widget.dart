@@ -25,7 +25,6 @@ import 'package:photos/service_locator.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/location_service.dart";
 import 'package:photos/services/sync_service.dart';
-import 'package:photos/services/update_service.dart';
 import "package:photos/states/location_screen_state.dart";
 import "package:photos/theme/colors.dart";
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
@@ -304,7 +303,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       body: S.of(context).youHaveSuccessfullyFreedUp(formatBytes(status.size)),
       firstButtonLabel: S.of(context).rateUs,
       firstButtonOnTap: () async {
-        await UpdateService.instance.launchReviewUrl();
+        await updateService.launchReviewUrl();
       },
       firstButtonType: ButtonType.primary,
       secondButtonLabel: S.of(context).ok,
