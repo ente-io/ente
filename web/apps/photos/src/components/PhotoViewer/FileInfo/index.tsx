@@ -407,17 +407,28 @@ const FileInfoSidebar = styled((props: DialogProps) => (
 });
 
 interface InfoItemProps {
-    icon: JSX.Element;
+    /**
+     * The icon associated with the info entry.
+     */
+    icon: React.ReactNode;
+    /**
+     * The primary content / title of the info entry.
+     */
     title?: string;
-    caption?: string | JSX.Element;
+    /**
+     * The secondary information / subtext associated with the info entry.
+     */
+    caption?: React.ReactNode;
     openEditor?: any;
     loading?: boolean;
     hideEditOption?: any;
     customEndButton?: any;
-    children?: any;
 }
 
-const InfoItem: React.FC<InfoItemProps> = ({
+/**
+ * An entry in the file info panel listing.
+ */
+const InfoItem: React.FC<React.PropsWithChildren<InfoItemProps>> = ({
     icon,
     title,
     caption,
