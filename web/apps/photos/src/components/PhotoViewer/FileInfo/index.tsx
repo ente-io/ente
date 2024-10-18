@@ -41,6 +41,7 @@ import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import PhotoOutlinedIcon from "@mui/icons-material/PhotoOutlined";
 import TextSnippetOutlinedIcon from "@mui/icons-material/TextSnippetOutlined";
 import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
+import FaceRetouchingNaturalIcon from '@mui/icons-material/FaceRetouchingNatural';
 import {
     Box,
     CircularProgress,
@@ -273,7 +274,8 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                     }
                 />
                 {isMLEnabled() && annotatedFaces.length > 0 && (
-                    <InfoItem icon={<FolderOutlinedIcon />}>
+                    <InfoItem icon={<FaceRetouchingNaturalIcon />}>
+                        {/*t("UNIDENTIFIED_FACES")  TODO-Cluster remove */}
                         <FilePeopleList
                             file={file}
                             annotatedFaceIDs={annotatedFaces}
