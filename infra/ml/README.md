@@ -13,6 +13,8 @@ In case you're using VSCode, make sure you've installed the [Jupyter](https://ma
 3. Run `uv venv`
 4. In any notebook, make sure to select the virtual environment kernel from `.venv/bin/python` in the top (right corner on VSCode)
 
+Also, in case you use VSCode please make sure to only have a [single window](https://github.com/microsoft/vscode/issues/125993#issuecomment-2099627960) open.
+
 ## Notebooks and git
 
 Please make sure to always clear output data inside a notebook before committing changes to git.
