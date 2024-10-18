@@ -81,6 +81,7 @@ void main() async {
 
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
   await _runInForeground(savedThemeMode);
+
   unawaited(BackgroundFetch.registerHeadlessTask(_headlessTaskHandler));
   if (Platform.isAndroid) FlutterDisplayMode.setHighRefreshRate().ignore();
   SystemChrome.setSystemUIOverlayStyle(
@@ -101,11 +102,6 @@ Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
     _logger.info("Starting app in foreground");
     await _init(false, via: 'mainMethod');
     final Locale locale = await getLocale();
-    if (Platform.isAndroid) {
-      unawaited(_scheduleFGHomeWidgetSync());
-    }
-    unawaited(_scheduleFGSync('appStart in FG'));
-
     runApp(
       AppLock(
         builder: (args) =>
@@ -119,6 +115,10 @@ Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
         savedThemeMode: _themeMode(savedThemeMode),
       ),
     );
+    if (Platform.isAndroid) {
+      unawaited(_scheduleFGHomeWidgetSync());
+    }
+    unawaited(_scheduleFGSync('appStart in FG'));
   });
 }
 
