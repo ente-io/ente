@@ -620,8 +620,7 @@ export const clipMatches = (
  */
 export interface AnnotatedFaceID {
     faceID: string;
-    personID: string | undefined;
-    clusterID: string | undefined;
+    personID: string;
 }
 
 /**
@@ -633,29 +632,21 @@ export const getAnnotatedFacesForFile = async (
     const index = await savedFaceIndex(file.id);
     if (!index) return [];
 
-    const faceIDToPersonID = new Map<string, string>();
-    const people = _state.peopleSnapshot ?? [];
-    for (const person of people) {
-        const faceIDs =
-            person.type == "cgroup"
-                ? person.cgroup.data.assigned.map((c) => c.faces).flat()
-                : person.cluster.faces;
-        for (const faceID of faceIDs) {
-            faceIDToPersonID.set(faceID, person.id);
-        }
-    }
+    const personByFaceID = _state.peopleSnapshot?.personByFaceID;
+    if (!personByFaceID) return [];
 
-    const sortableFaces: { face: AnnotatedFaceID; clusterSize: number }[] = [];
+    const sortableFaces: [AnnotatedFaceID, number][] = [];
     for (const { faceID } of index.faces) {
-        const personID = faceIDToPersonID.get(faceID);
-        if (personID) {
-            annotatedFaceIDs.push({ faceID, personID });
-        } else {
-            otherFaceIDs.push(faceID);
-        }
+        const person = personByFaceID.get(faceID);
+        if (!person) continue;
+        sortableFaces.push([
+            { faceID, personID: person.id },
+            person.fileIDs.length,
+        ]);
     }
 
-    return { annotatedFaceIDs, otherFaceIDs };
+    sortableFaces.sort(([, a], [, b]) => b - a);
+    return sortableFaces.map(([f]) => f);
 };
 
 /**

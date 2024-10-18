@@ -136,15 +136,6 @@ export type Person = (
      * The {@link EnteFile} which contains the display face.
      */
     displayFaceFile: EnteFile;
-    /**
-     * `true` if this person should be normally shown in the UI.
-     *
-     * By default, people derived from small, local-only clusters are not
-     * surfaced in the UI (For such people, this flag will be set to false). The
-     * user can still see these people by clicking on one of the faces they
-     * contain from a photo's info view.
-     */
-    isVisible: boolean;
 };
 
 /**
@@ -189,9 +180,11 @@ export interface PeopleSnapshot {
     /**
      * List of all people who should be normally shown in the UI.
      *
-     * These are just people whose {@link isVisible} property is true. This list
-     * is easily derivable from {@link people}, it is only maintained as a
-     * separate list for convenience.
+     * By default, people derived from small, local-only clusters are not
+     * surfaced in the UI. Such people will be present in the {@link people}
+     * list, but not in the {@link visiblePeople} list. The user can still see
+     * these people by clicking on one of the faces they contain from a photo's
+     * info view.
      */
     visiblePeople: Person[];
     /**
@@ -317,9 +310,6 @@ export const reconstructPeopleSnapshot = async (): Promise<PeopleSnapshot> => {
         const mostRecentFace = faces[0];
         if (!mostRecentFace) return undefined;
 
-        // Ignore clusters with too few visible faces.
-        if (faces.length < 10) return undefined;
-
         return {
             type: "cluster",
             cluster,
@@ -336,7 +326,27 @@ export const reconstructPeopleSnapshot = async (): Promise<PeopleSnapshot> => {
             .filter((c) => !!c)
             .sort((a, b) => b.fileIDs.length - a.fileIDs.length);
 
-    return sorted(cgroupPeople).concat(sorted(clusterPeople));
+    const people = sorted(cgroupPeople).concat(sorted(clusterPeople));
+
+    const visiblePeople = people.filter((p) => {
+        // Ignore local only clusters with too few visible faces.
+        if (p.type == "cluster" && p.cluster.faces.length < 10) return false;
+        return true;
+    });
+
+    // Reverse map for easy lookup.
+    const personByFaceID = new Map<string, Person>();
+    for (const person of people) {
+        const faceIDs =
+            person.type == "cgroup"
+                ? person.cgroup.data.assigned.map((c) => c.faces).flat()
+                : person.cluster.faces;
+        for (const faceID of faceIDs) {
+            personByFaceID.set(faceID, person);
+        }
+    }
+
+    return { people, visiblePeople, personByFaceID };
 };
 
 /**

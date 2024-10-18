@@ -576,19 +576,19 @@ export default function Gallery() {
                 // Prune the in-memory temp updates from the actual state to
                 // obtain the UI state. Kept inside an preflight check to so
                 // that the common path remains fast.
-                filteredPeople = filteredPeople
-                    .map((p) => ({
-                        ...p,
-                        fileIDs: p.fileIDs.filter(
-                            (id) =>
-                                !tempDeletedFileIds?.has(id) &&
-                                !tempHiddenFileIds?.has(id),
-                        ),
-                    }))
-                    .filter((p) => p.fileIDs.length > 0);
-                filteredVisiblePeople = filteredPeople.filter(
-                    (p) => p.isVisible,
-                );
+                const filterTemp = (ps: Person[]) =>
+                    ps
+                        .map((p) => ({
+                            ...p,
+                            fileIDs: p.fileIDs.filter(
+                                (id) =>
+                                    !tempDeletedFileIds?.has(id) &&
+                                    !tempHiddenFileIds?.has(id),
+                            ),
+                        }))
+                        .filter((p) => p.fileIDs.length > 0);
+                filteredPeople = filterTemp(filteredPeople);
+                filteredVisiblePeople = filterTemp(filteredVisiblePeople);
             }
             const findByID = (ps: Person[]) =>
                 ps.find((p) => p.id == activePersonID);
