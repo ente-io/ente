@@ -1,8 +1,8 @@
 import { haveWindow } from "@/base/env";
 import { type Location } from "@/base/types";
-import { styled } from "@mui/material";
+import { Button, styled, type ButtonProps } from "@mui/material";
+import { type CSSProperties } from "@mui/material/styles/createTypography";
 import { useEffect, useRef } from "react";
-import { MapButton } from "./MapButton";
 
 import { t } from "i18next";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css"; // Re-uses images from ~leaflet package
@@ -78,3 +78,10 @@ const MapBox: React.FC<MapBoxProps> = ({
 };
 
 export default MapBox;
+
+export const MapButton = styled((props: ButtonProps) => (
+    <Button color="secondary" {...props} />
+))(({ theme }) => ({
+    ...(theme.typography.small as CSSProperties),
+    padding: "8px",
+}));
