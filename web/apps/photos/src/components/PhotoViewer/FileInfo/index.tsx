@@ -417,7 +417,7 @@ interface InfoItemProps {
     children?: any;
 }
 
-function InfoItem({
+const InfoItem: React.FC<InfoItemProps> = ({
     icon,
     title,
     caption,
@@ -426,56 +426,54 @@ function InfoItem({
     hideEditOption,
     customEndButton,
     children,
-}: InfoItemProps): JSX.Element {
-    return (
-        <FlexWrapper justifyContent="space-between">
-            <Box display={"flex"} alignItems="flex-start" gap={0.5} pr={1}>
-                <IconButton
-                    color="secondary"
-                    sx={{ "&&": { cursor: "default", m: 0.5 } }}
-                    disableRipple
-                >
-                    {icon}
-                </IconButton>
-                <Box py={0.5}>
-                    {children ? (
-                        children
-                    ) : (
-                        <>
-                            <Typography sx={{ wordBreak: "break-all" }}>
-                                {title}
+}) => (
+    <FlexWrapper justifyContent="space-between">
+        <Box display={"flex"} alignItems="flex-start" gap={0.5} pr={1}>
+            <IconButton
+                color="secondary"
+                sx={{ "&&": { cursor: "default", m: 0.5 } }}
+                disableRipple
+            >
+                {icon}
+            </IconButton>
+            <Box py={0.5}>
+                {children ? (
+                    children
+                ) : (
+                    <>
+                        <Typography sx={{ wordBreak: "break-all" }}>
+                            {title}
+                        </Typography>
+                        {!caption || typeof caption == "string" ? (
+                            <Typography variant="small" color="text.muted">
+                                {caption}
                             </Typography>
-                            {!caption || typeof caption == "string" ? (
-                                <Typography variant="small" color="text.muted">
-                                    {caption}
-                                </Typography>
-                            ) : (
-                                <Typography
-                                    variant="small"
-                                    component="div"
-                                    color="text.muted"
-                                >
-                                    {caption}
-                                </Typography>
-                            )}
-                        </>
-                    )}
-                </Box>
+                        ) : (
+                            <Typography
+                                variant="small"
+                                component="div"
+                                color="text.muted"
+                            >
+                                {caption}
+                            </Typography>
+                        )}
+                    </>
+                )}
             </Box>
-            {customEndButton
-                ? customEndButton
-                : !hideEditOption && (
-                      <IconButton onClick={openEditor} color="secondary">
-                          {!loading ? (
-                              <EditIcon />
-                          ) : (
-                              <CircularProgress size={"24px"} color="inherit" />
-                          )}
-                      </IconButton>
-                  )}
-        </FlexWrapper>
-    );
-}
+        </Box>
+        {customEndButton
+            ? customEndButton
+            : !hideEditOption && (
+                  <IconButton onClick={openEditor} color="secondary">
+                      {!loading ? (
+                          <EditIcon />
+                      ) : (
+                          <CircularProgress size={"24px"} color="inherit" />
+                      )}
+                  </IconButton>
+              )}
+    </FlexWrapper>
+);
 
 interface CreationTimeProps {
     file: EnteFile;
