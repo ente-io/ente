@@ -14,8 +14,8 @@ export const useMLStatus = () =>
     useSyncExternalStore(mlStatusSubscribe, mlStatusSnapshot);
 
 /**
- * A convenience hook that returns {@link peopleSnapshot}, subscribing to
- * updates.
+ * A convenience hook that returns visible people array from the
+ * {@link peopleSnapshot}, and also subscribes to updates.
  */
-export const usePeople = () =>
-    useSyncExternalStore(peopleSubscribe, peopleSnapshot);
+export const useVisiblePeople = () =>
+    useSyncExternalStore(peopleSubscribe, peopleSnapshot)?.visiblePeople;

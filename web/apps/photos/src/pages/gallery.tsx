@@ -21,7 +21,6 @@ import {
 } from "@/new/photos/components/gallery";
 import type { GalleryBarMode } from "@/new/photos/components/gallery/BarImpl";
 import { GalleryPeopleState } from "@/new/photos/components/gallery/PeopleHeader";
-import { usePeople } from "@/new/photos/components/utils/ml";
 import { shouldShowWhatsNew } from "@/new/photos/services/changelog";
 import type { CollectionSummaries } from "@/new/photos/services/collection/ui";
 import { areOnlySystemCollections } from "@/new/photos/services/collection/ui";
@@ -31,6 +30,7 @@ import {
     getLocalTrashedFiles,
     sortFiles,
 } from "@/new/photos/services/files";
+import { peopleSnapshot, peopleSubscribe } from "@/new/photos/services/ml";
 import type { Person } from "@/new/photos/services/ml/people";
 import {
     filterSearchableFiles,
@@ -102,6 +102,7 @@ import {
     useMemo,
     useRef,
     useState,
+    useSyncExternalStore,
 } from "react";
 import { useDropzone } from "react-dropzone";
 import {
@@ -322,7 +323,10 @@ export default function Gallery() {
     // The ID of the currently selected person in the gallery bar (if any).
     const [activePersonID, setActivePersonID] = useState<string | undefined>();
 
-    const people = usePeople();
+    const { people, visiblePeople } = useSyncExternalStore(
+        peopleSubscribe,
+        peopleSnapshot,
+    );
 
     const [isClipSearchResult, setIsClipSearchResult] =
         useState<boolean>(false);
@@ -567,6 +571,7 @@ export default function Gallery() {
             );
         } else if (barMode == "people") {
             let filteredPeople = people ?? [];
+            let filteredVisiblePeople = visiblePeople ?? [];
             if (tempDeletedFileIds?.size ?? tempHiddenFileIds?.size) {
                 // Prune the in-memory temp updates from the actual state to
                 // obtain the UI state. Kept inside an preflight check to so
@@ -581,12 +586,26 @@ export default function Gallery() {
                         ),
                     }))
                     .filter((p) => p.fileIDs.length > 0);
+                filteredVisiblePeople = filteredPeople.filter(
+                    (p) => p.isVisible,
+                );
             }
-            const activePerson =
-                filteredPeople.find((p) => p.id == activePersonID) ??
-                // We don't have an "All" pseudo-album in people mode currently,
-                // so default to the first person in the list.
-                filteredPeople[0];
+            const findByID = (ps: Person[]) =>
+                ps.find((p) => p.id == activePersonID);
+            let activePerson = findByID(filteredVisiblePeople);
+            if (!activePerson) {
+                // This might be one of the normally hidden small clusters.
+                activePerson = findByID(filteredPeople);
+                if (activePerson) {
+                    // Temporarily add this person's entry to the list of people
+                    // surfaced in the people section.
+                    filteredVisiblePeople.push(activePerson);
+                } else {
+                    // We don't have an "All" pseudo-album in people mode, so
+                    // default to the first person in the list.
+                    activePerson = filteredVisiblePeople[0];
+                }
+            }
             const pfSet = new Set(activePerson?.fileIDs ?? []);
             filteredFiles = getUniqueFiles(
                 files.filter(({ id }) => {

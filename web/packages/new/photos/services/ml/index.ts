@@ -30,8 +30,9 @@ import { clearMLDB, getIndexableAndIndexedCounts, savedFaceIndex } from "./db";
 import {
     _applyPersonSuggestionUpdates,
     filterNamedPeople,
-    reconstructPeople,
+    reconstructPeopleSnapshot,
     type CGroupPerson,
+    type PeopleSnapshot,
     type Person,
     type PersonSuggestionUpdates,
 } from "./people";
@@ -91,13 +92,13 @@ class MLState {
     peopleListeners: (() => void)[] = [];
 
     /**
-     * Snapshot of the {@link Person}s returned by the {@link peopleSnapshot}
-     * function.
+     * Snapshot of the list of {@link Person}s and other pre-computed state. Use
+     * the {@link peopleSnapshot} function to access this data.
      *
      * It will be `undefined` only if ML is disabled. Otherwise, it will be an
      * empty array even if the snapshot is pending its first sync.
      */
-    peopleSnapshot: Person[] | undefined;
+    peopleSnapshot: PeopleSnapshot | undefined;
 
     /**
      * In flight face crop regeneration promises indexed by the IDs of the files
@@ -561,7 +562,11 @@ export const peopleSubscribe = (onChange: () => void): (() => void) => {
  * Otherwise, if ML is disabled, set the people snapshot to `undefined`.
  */
 const resetPeopleSnapshot = () =>
-    setPeopleSnapshot(_state.isMLEnabled ? [] : undefined);
+    setPeopleSnapshot(
+        _state.isMLEnabled
+            ? { people: [], visiblePeople: [], personByFaceID: new Map() }
+            : undefined,
+    );
 
 /**
  * Return the last known, cached {@link people}.
@@ -579,16 +584,16 @@ export const peopleSnapshot = () => _state.peopleSnapshot;
 // Update our, and the search subsystem's, snapshot of people by reconstructing
 // it from the latest local state.
 const updatePeople = async () => {
-    const people = await reconstructPeople();
+    const snapshot = await reconstructPeopleSnapshot();
 
     // Notify the search subsystem of the update (search only uses named ones).
-    setSearchPeople(filterNamedPeople(people));
+    setSearchPeople(filterNamedPeople(snapshot.visiblePeople));
 
     // Update our in-memory list of people.
-    setPeopleSnapshot(people);
+    setPeopleSnapshot(snapshot);
 };
 
-const setPeopleSnapshot = (snapshot: Person[] | undefined) => {
+const setPeopleSnapshot = (snapshot: PeopleSnapshot | undefined) => {
     _state.peopleSnapshot = snapshot;
     _state.peopleListeners.forEach((l) => l());
 };
@@ -609,26 +614,14 @@ export const clipMatches = (
 ): Promise<CLIPMatches | undefined> =>
     worker().then((w) => w.clipMatches(searchPhrase));
 
-/** A face ID annotated with the ID of the person to which it is associated. */
+/**
+ * A face ID annotated with the ID of the person or cluster with which it is
+ * associated.
+ */
 export interface AnnotatedFaceID {
     faceID: string;
-    personID: string;
-}
-
-/**
- * List of faces found in a file
- *
- * It is actually a pair of lists, one annotated by the person ids, and one with
- * just the face ids.
- */
-export interface AnnotatedFacesForFile {
-    /**
-     * A list of {@link AnnotatedFaceID}s for all faces in the file that are
-     * also associated with a {@link Person}.
-     */
-    annotatedFaceIDs: AnnotatedFaceID[];
-    /* A list of the remaining face (ids). */
-    otherFaceIDs: string[];
+    personID: string | undefined;
+    clusterID: string | undefined;
 }
 
 /**
@@ -636,28 +629,23 @@ export interface AnnotatedFacesForFile {
  */
 export const getAnnotatedFacesForFile = async (
     file: EnteFile,
-): Promise<AnnotatedFacesForFile> => {
-    const annotatedFaceIDs: AnnotatedFaceID[] = [];
-    const otherFaceIDs: string[] = [];
-
+): Promise<AnnotatedFaceID[]> => {
     const index = await savedFaceIndex(file.id);
-    if (!index) return { annotatedFaceIDs, otherFaceIDs };
-
-    const people = _state.peopleSnapshot ?? [];
+    if (!index) return [];
 
     const faceIDToPersonID = new Map<string, string>();
+    const people = _state.peopleSnapshot ?? [];
     for (const person of people) {
-        let faceIDs: string[];
-        if (person.type == "cgroup") {
-            faceIDs = person.cgroup.data.assigned.map((c) => c.faces).flat();
-        } else {
-            faceIDs = person.cluster.faces;
-        }
+        const faceIDs =
+            person.type == "cgroup"
+                ? person.cgroup.data.assigned.map((c) => c.faces).flat()
+                : person.cluster.faces;
         for (const faceID of faceIDs) {
             faceIDToPersonID.set(faceID, person.id);
         }
     }
 
+    const sortableFaces: { face: AnnotatedFaceID; clusterSize: number }[] = [];
     for (const { faceID } of index.faces) {
         const personID = faceIDToPersonID.get(faceID);
         if (personID) {

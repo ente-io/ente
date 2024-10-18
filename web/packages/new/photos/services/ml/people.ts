@@ -136,6 +136,15 @@ export type Person = (
      * The {@link EnteFile} which contains the display face.
      */
     displayFaceFile: EnteFile;
+    /**
+     * `true` if this person should be normally shown in the UI.
+     *
+     * By default, people derived from small, local-only clusters are not
+     * surfaced in the UI (For such people, this flag will be set to false). The
+     * user can still see these people by clicking on one of the faces they
+     * contain from a photo's info view.
+     */
+    isVisible: boolean;
 };
 
 /**
@@ -168,18 +177,40 @@ export interface PreviewableFace {
     file: EnteFile;
 }
 
+export interface PeopleSnapshot {
+    /**
+     * List of all people.
+     *
+     * The list is sorted such that named people are first, then the local only
+     * unnamed clusters. Within each section, people are sorted by the number of
+     * files that they reference.
+     */
+    people: Person[];
+    /**
+     * List of all people who should be normally shown in the UI.
+     *
+     * These are just people whose {@link isVisible} property is true. This list
+     * is easily derivable from {@link people}, it is only maintained as a
+     * separate list for convenience.
+     */
+    visiblePeople: Person[];
+    /**
+     * faceID => person
+     *
+     * {@link people}, but indexed by face (ids).
+     */
+    personByFaceID: Map<string, Person>;
+}
+
 /**
- * Construct in-memory people using the data present locally, ignoring faces
- * belonging to deleted and hidden files.
+ * Construct an in-memory people snapshot using the data present locally,
+ * ignoring faces belonging to deleted and hidden files.
  *
  * This function is meant to run after files, cgroups and faces have been synced
  * with remote, and clustering has completed. It uses the current local state to
  * construct an in-memory list of {@link Person}s on which the UI will operate.
- *
- * @return A list of {@link Person}s, sorted by the number of files that they
- * reference.
  */
-export const reconstructPeople = async (): Promise<Person[]> => {
+export const reconstructPeopleSnapshot = async (): Promise<PeopleSnapshot> => {
     const files = await getLocalFiles("normal");
     const fileByID = new Map(files.map((f) => [f.id, f]));
 
