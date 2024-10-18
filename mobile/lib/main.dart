@@ -30,6 +30,7 @@ import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/services/ervice.dart';
 import 'package:photos/services/favorites_service.dart';
 import "package:photos/services/filedata/filedata_service.dart";
 import 'package:photos/services/home_widget_service.dart';
@@ -45,9 +46,6 @@ import "package:photos/services/notification_service.dart";
 import 'package:photos/services/push_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/services/search_service.dart';
-import 'package:photos/services/sync_service.dart';
-import 'package:photos/services/trash_sync_service.dart';
-import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/ui/tools/lock_screen.dart';
 import 'package:photos/utils/crypto_util.dart';
@@ -262,7 +260,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     await LocalSyncService.instance.init(preferences);
     _logger.info("LocalSyncService init done $tlog");
 
-    TrashSyncService.instance.init(preferences);
     RemoteSyncService.instance.init(preferences);
 
     _logger.info("SyncService init $tlog");

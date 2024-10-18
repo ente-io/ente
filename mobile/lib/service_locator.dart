@@ -7,6 +7,7 @@ import "package:photos/gateways/entity_gw.dart";
 import "package:photos/services/entity_service.dart";
 import "package:photos/services/location_service.dart";
 import "package:photos/services/storage_bonus_service.dart";
+import "package:photos/services/trash_sync_service.dart";
 import "package:photos/services/update_service.dart";
 import "package:photos/services/user_remote_flag_service.dart";
 import "package:photos/utils/local_settings.dart";
@@ -79,6 +80,15 @@ EntityService get entityService {
     EntityGateway(ServiceLocator.instance.enteDio),
   );
   return _entityService!;
+}
+
+TrashSyncService? _trashSyncService;
+TrashSyncService get trashSyncService {
+  _trashSyncService ??= TrashSyncService(
+    ServiceLocator.instance.prefs,
+    ServiceLocator.instance.enteDio,
+  );
+  return _trashSyncService!;
 }
 
 LocationService? _locationService;

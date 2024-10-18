@@ -17,9 +17,9 @@ import 'package:photos/models/file/file.dart';
 import "package:photos/models/files_split.dart";
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/models/trash_item_request.dart';
+import "package:photos/service_locator.dart";
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/services/sync_service.dart';
-import 'package:photos/services/trash_sync_service.dart';
 import 'package:photos/ui/common/linear_progress_dialog.dart';
 import 'package:photos/ui/components/action_sheet_widget.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
@@ -97,8 +97,7 @@ Future<void> deleteFilesFromEverywhere(
     try {
       final fileIDs =
           uploadedFilesToBeTrashed.map((item) => item.fileID).toList();
-      await TrashSyncService.instance
-          .trashFilesOnServer(uploadedFilesToBeTrashed);
+      await trashSyncService.trashFilesOnServer(uploadedFilesToBeTrashed);
       await FilesDB.instance.deleteMultipleUploadedFiles(fileIDs);
     } catch (e) {
       _logger.severe(e);
@@ -160,7 +159,7 @@ Future<void> deleteFilesFromRemoteOnly(
     trashRequests.add(TrashRequest(file.uploadedFileID!, file.collectionID!));
   }
   try {
-    await TrashSyncService.instance.trashFilesOnServer(trashRequests);
+    await trashSyncService.trashFilesOnServer(trashRequests);
     await FilesDB.instance.deleteMultipleUploadedFiles(uploadedFileIDs);
   } catch (e, s) {
     _logger.severe("Failed to delete files from remote", e, s);
@@ -260,7 +259,7 @@ Future<bool> deleteFromTrash(BuildContext context, List<EnteFile> files) async {
     firstButtonOnTap: () async {
       try {
         didDeletionStart = true;
-        await TrashSyncService.instance.deleteFromTrash(files);
+        await trashSyncService.deleteFromTrash(files);
         Bus.instance.fire(
           FilesUpdatedEvent(
             files,
@@ -301,7 +300,7 @@ Future<bool> emptyTrash(BuildContext context) async {
     isCritical: true,
     firstButtonOnTap: () async {
       try {
-        await TrashSyncService.instance.emptyTrash();
+        await trashSyncService.emptyTrash();
       } catch (e, s) {
         _logger.info("failed empty trash", e, s);
         rethrow;

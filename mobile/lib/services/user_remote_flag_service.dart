@@ -13,7 +13,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class UserRemoteFlagService {
   final Dio _enteDio;
-  final _logger = Logger((UserRemoteFlagService).toString());
+  late final _logger = Logger((UserRemoteFlagService).toString());
   final SharedPreferences _prefs;
 
   static const String recoveryVerificationFlag = "recoveryKeyVerified";
