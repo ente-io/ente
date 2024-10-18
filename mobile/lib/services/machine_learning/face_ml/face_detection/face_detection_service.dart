@@ -14,7 +14,7 @@ class YOLOFaceInterpreterRunException implements Exception {}
 
 /// This class is responsible for running the face detection model (YOLOv5Face) on ONNX runtime, and can be accessed through the singleton instance [FaceDetectionService.instance].
 class FaceDetectionService extends MlModel {
-  static const kRemoteBucketModelPath = "yolov5s_face_opset18_rgba_opt.onnx";
+  static const kRemoteBucketModelPath = "yolov5s_face_opset18_rgba_opt_nosplits.onnx";
   static const _modelName = "YOLOv5Face";
 
   @override
