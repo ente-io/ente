@@ -6,6 +6,7 @@ import "package:photos/core/constants.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/selected_files.dart";
 import "package:photos/services/app_lifecycle_service.dart";
+import "package:photos/services/collections_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/file/detail_page.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
@@ -37,6 +38,8 @@ class GalleryFileWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isFileSelected = selectedFiles?.isFileSelected(file) ?? false;
+    final isPublicFile =
+        CollectionsService.instance.isPublicCollection(file.collectionID!);
     Color selectionColor = Colors.white;
     if (isFileSelected && file.isUploaded && file.ownerID != currentUserID) {
       final avatarColors = getEnteColorScheme(context).avatarColors;
@@ -53,7 +56,7 @@ class GalleryFileWidget extends StatelessWidget {
       thumbnailSize: photoGridSize < photoGridSizeDefault
           ? thumbnailLargeSize
           : thumbnailSmallSize,
-      shouldShowOwnerAvatar: !isFileSelected,
+      shouldShowOwnerAvatar: !(isFileSelected || isPublicFile),
       shouldShowVideoDuration: true,
     );
     return GestureDetector(

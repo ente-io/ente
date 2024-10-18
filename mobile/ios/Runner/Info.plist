@@ -114,5 +114,16 @@
                 <key>NSLocalNetworkUsageDescription</key>
                 <string>${PRODUCT_NAME} uses the local network to discover Cast-enabled devices on your WiFi
                 network.</string>
+		<key>CFBundleURLTypes</key>
+		<array>
+			<dict>
+				<key>CFBundleURLName</key>
+				<string>albums.ente.io</string>
+				<key>CFBundleURLSchemes</key>
+				<array>
+				<string>https</string>
+				</array>
+			</dict>
+		</array>
 	</dict>
 </plist>
