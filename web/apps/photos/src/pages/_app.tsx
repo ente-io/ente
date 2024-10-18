@@ -18,7 +18,7 @@ import {
     updateAvailableForDownloadDialogAttributes,
     updateReadyToInstallDialogAttributes,
 } from "@/new/photos/components/utils/download";
-import { photosDialogZIndex } from "@/new/photos/components/z-index";
+import { photosDialogZIndex } from "@/new/photos/components/utils/z-index";
 import DownloadManager from "@/new/photos/services/download";
 import { runMigrations } from "@/new/photos/services/migrations";
 import { initML, isMLSupported } from "@/new/photos/services/ml";

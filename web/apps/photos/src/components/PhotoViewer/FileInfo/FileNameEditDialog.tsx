@@ -1,5 +1,5 @@
 import { TitledMiniDialog } from "@/base/components/MiniDialog";
-import { photosDialogZIndex } from "@/new/photos/components/z-index";
+import { photosDialogZIndex } from "@/new/photos/components/utils/z-index";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";

@@ -21,7 +21,7 @@ import {
     UnclusteredFaceList,
 } from "@/new/photos/components/PeopleList";
 import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker";
-import { fileInfoDrawerZIndex } from "@/new/photos/components/z-index";
+import { fileInfoDrawerZIndex } from "@/new/photos/components/utils/z-index";
 import { tagNumericValue, type RawExifTags } from "@/new/photos/services/exif";
 import {
     AnnotatedFacesForFile,
