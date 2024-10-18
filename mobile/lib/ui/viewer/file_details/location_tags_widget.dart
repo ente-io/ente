@@ -183,7 +183,7 @@ class _InfoMapState extends State<InfoMap> {
   @override
   void initState() {
     super.initState();
-    _hasEnabledMap = UserRemoteFlagService.instance
+    _hasEnabledMap = userRemoteFlagService
         .getCachedBoolValue(UserRemoteFlagService.mapEnabled);
     _fileLat = widget.file.location!.latitude!;
     _fileLng = widget.file.location!.longitude!;

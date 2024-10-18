@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:bip39/bip39.dart' as bip39;
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -8,8 +6,8 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/notification_event.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/service_locator.dart";
 import 'package:photos/services/local_authentication_service.dart';
-import 'package:photos/services/user_remote_flag_service.dart';
 import 'package:photos/services/user_service.dart';
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/account/recovery_key_page.dart';
@@ -42,7 +40,7 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
       final String recoveryKeyWords = bip39.entropyToMnemonic(recoveryKey);
       if (inputKey == recoveryKey || inputKey == recoveryKeyWords) {
         try {
-          await UserRemoteFlagService.instance.markRecoveryVerificationAsDone();
+          await userRemoteFlagService.markRecoveryVerificationAsDone();
         } catch (e) {
           await dialog.hide();
           if (e is DioError && e.type == DioErrorType.other) {

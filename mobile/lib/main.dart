@@ -47,7 +47,6 @@ import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/services/search_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/trash_sync_service.dart';
-import 'package:photos/services/user_remote_flag_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/ui/tools/lock_screen.dart';
@@ -244,10 +243,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _logger.info("UserService init $tlog");
     await UserService.instance.init();
     _logger.info("UserService init done $tlog");
-
-    _logger.info("UserRemoteFlagService init $tlog");
-    await UserRemoteFlagService.instance.init();
-    _logger.info("UserRemoteFlagService init done $tlog");
 
     _logger.info("BillingService init $tlog");
     BillingService.instance.init();

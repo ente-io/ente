@@ -210,7 +210,7 @@ class _MachineLearningSettingsPageState
   }
 
   Future<void> toggleIndexingState() async {
-    final hasGivenConsent = UserRemoteFlagService.instance
+    final hasGivenConsent = userRemoteFlagService
         .getCachedBoolValue(UserRemoteFlagService.mlEnabled);
     if (!localSettings.isMLIndexingEnabled && !hasGivenConsent) {
       final result = await Navigator.push(
@@ -232,8 +232,8 @@ class _MachineLearningSettingsPageState
       unawaited(MLService.instance.runAllML(force: true));
     } else {
       MLService.instance.pauseIndexingAndClustering();
-      await UserRemoteFlagService.instance
-          .setBoolValue(UserRemoteFlagService.mlEnabled, false);
+      await userRemoteFlagService.setBoolValue(
+          UserRemoteFlagService.mlEnabled, false);
     }
     if (mounted) {
       setState(() {});
