@@ -828,3 +828,25 @@ export const applyPersonSuggestionUpdates = async (
     await _applyPersonSuggestionUpdates(cgroup, updates, masterKey);
     return mlSync();
 };
+
+/**
+ * Ignore/hide a cluster.
+ *
+ * This converts the cluster into a cgroup so that it can be synced with remote,
+ * setting the hidden flag so that it is not surfaced in the UI.
+ *
+ * @param cluster The {@link FaceCluster} to hide.
+ */
+export const ignoreCluster = async (cluster: FaceCluster) => {
+    const masterKey = await masterKeyFromSession();
+    await addUserEntity(
+        "cgroup",
+        {
+            name: "",
+            assigned: [cluster],
+            isHidden: true,
+        },
+        masterKey,
+    );
+    return mlSync();
+};

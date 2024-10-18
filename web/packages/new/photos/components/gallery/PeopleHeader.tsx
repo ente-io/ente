@@ -15,6 +15,7 @@ import log from "@/base/log";
 import {
     applyPersonSuggestionUpdates,
     deleteCGroup,
+    ignoreCluster,
     renameCGroup,
     suggestionsAndChoicesForPerson,
 } from "@/new/photos/services/ml";
@@ -50,8 +51,7 @@ import {
     Typography,
 } from "@mui/material";
 import { t } from "i18next";
-import React, { useEffect, useReducer, useState } from "react";
-import { isInternalUser } from "../../services/feature-flags";
+import React, { useEffect, useReducer } from "react";
 import { useAppContext } from "../../types/context";
 import { AddPersonDialog } from "../AddPersonDialog";
 import { SpaceBetweenFlex } from "../mui";
@@ -120,16 +120,11 @@ const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({
     const cgroup = person.cgroup;
 
     const { showMiniDialog } = useAppContext();
-    const [showReviewOption, setShowReviewOption] = useState(false);
 
     const { show: showNameInput, props: nameInputVisibilityProps } =
         useModalVisibility();
     const { show: showSuggestions, props: suggestionsVisibilityProps } =
         useModalVisibility();
-
-    useEffect(() => {
-        void isInternalUser().then((b) => setShowReviewOption(b));
-    }, []);
 
     const handleRename = (name: string) => renameCGroup(cgroup, name);
 
@@ -165,6 +160,13 @@ const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({
                 triggerButtonIcon={<MoreHorizIcon />}
             >
                 <OverflowMenuOption
+                    startIcon={<ListAltOutlinedIcon />}
+                    centerAlign
+                    onClick={showSuggestions}
+                >
+                    {pt("Review suggestions")}
+                </OverflowMenuOption>
+                <OverflowMenuOption
                     startIcon={<EditIcon />}
                     centerAlign
                     onClick={showNameInput}
@@ -178,15 +180,6 @@ const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({
                 >
                     {pt("Reset")}
                 </OverflowMenuOption>
-                {showReviewOption /* TODO-Cluster */ && (
-                    <OverflowMenuOption
-                        startIcon={<ListAltOutlinedIcon />}
-                        centerAlign
-                        onClick={showSuggestions}
-                    >
-                        {pt("Review suggestions")}
-                    </OverflowMenuOption>
-                )}
             </OverflowMenu>
 
             <SingleInputDialog
@@ -222,8 +215,24 @@ const ClusterPersonHeader: React.FC<ClusterPersonHeaderProps> = ({
 }) => {
     const cluster = person.cluster;
 
+    const { showMiniDialog } = useAppContext();
+
     const { show: showAddPerson, props: addPersonVisibilityProps } =
         useModalVisibility();
+
+    const confirmIgnore = () =>
+        showMiniDialog({
+            title: pt("Ignore"),
+            message: pt(
+                "This face grouping will be not be shown in the people list",
+            ),
+            continue: {
+                text: t("yes"),
+                action: ignore,
+            },
+        });
+
+    const ignore = () => ignoreCluster(cluster);
 
     return (
         <>
@@ -244,6 +253,13 @@ const ClusterPersonHeader: React.FC<ClusterPersonHeaderProps> = ({
                     ariaControls={"person-options"}
                     triggerButtonIcon={<MoreHorizIcon />}
                 >
+                    <OverflowMenuOption
+                        startIcon={<EditIcon />}
+                        centerAlign
+                        onClick={confirmIgnore}
+                    >
+                        {pt("Ignore")}
+                    </OverflowMenuOption>
                     <OverflowMenuOption
                         startIcon={<AddIcon />}
                         centerAlign
