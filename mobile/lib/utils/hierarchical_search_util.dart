@@ -26,21 +26,29 @@ import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart"
 Future<List<EnteFile>> getFilteredFiles(
   List<HierarchicalSearchFilter> filters,
 ) async {
+  final logger = Logger("HierarchicalSearchUtil");
   final filteredFiles = <EnteFile>[];
   final files = await SearchService.instance.getAllFiles();
   final resultsNeverComputedFilters = <HierarchicalSearchFilter>[];
 
+  logger.info("Getting filtered files for Filters: $filters");
   for (HierarchicalSearchFilter filter in filters) {
     if (filter is FaceFilter && filter.getMatchedUploadedIDs().isEmpty) {
       try {
         final stopwatch = Stopwatch()..start();
 
         if (filter.personId != null) {
+          logger.info(
+            "Fetching files for never fetched person ${filter.personId}",
+          );
           final fileIDs = await MLDataDB.instance.getFileIDsOfPersonID(
             filter.personId!,
           );
           filter.matchedUploadedIDs.addAll(fileIDs);
         } else if (filter.clusterId != null) {
+          logger.info(
+            "Fetching files for never fetched cluster ${filter.clusterId}",
+          );
           final fileIDs = await MLDataDB.instance.getFileIDsOfClusterID(
             filter.clusterId!,
           );
@@ -53,7 +61,8 @@ Future<List<EnteFile>> getFilteredFiles(
       } catch (e) {
         log("Error in face filter: $e");
       }
-    } else if (filter.getMatchedUploadedIDs().isEmpty) {
+    } else if (filter is! FaceFilter &&
+        filter.getMatchedUploadedIDs().isEmpty) {
       resultsNeverComputedFilters.add(filter);
     }
   }
