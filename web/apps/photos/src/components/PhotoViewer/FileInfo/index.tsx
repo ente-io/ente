@@ -16,6 +16,7 @@ import {
     type ParsedMetadataDate,
 } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
+import { ChipButton } from "@/new/photos/components/mui/ChipButton";
 import { FilePeopleList } from "@/new/photos/components/PeopleList";
 import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker";
 import { fileInfoDrawerZIndex } from "@/new/photos/components/utils/z-index";
@@ -49,7 +50,6 @@ import {
     styled,
     Typography,
 } from "@mui/material";
-import { Chip } from "components/Chip";
 import LinkButton from "components/pages/gallery/LinkButton";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
@@ -288,14 +288,14 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                                     collectionNameMap.has(collectionID),
                                 )
                                 ?.map((collectionID) => (
-                                    <Chip
+                                    <ChipButton
                                         key={collectionID}
                                         onClick={() =>
                                             onCollectionChipClick(collectionID)
                                         }
                                     >
                                         {collectionNameMap.get(collectionID)}
-                                    </Chip>
+                                    </ChipButton>
                                 ))}
                         </Box>
                     </InfoItem>
