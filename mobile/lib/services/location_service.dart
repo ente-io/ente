@@ -227,7 +227,6 @@ class LocationService {
       _logger.info(
         "Loaded cities in ${(endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)}ms",
       );
-      _logger.info("Loaded cities");
     } catch (e, s) {
       _logger.severe("Failed to load cities", e, s);
     }
