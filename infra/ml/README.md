@@ -6,14 +6,12 @@ Most of the code is in [Jupyter Notebooks](https://jupyter.org/), which facilita
 
 ## Running any notebook
 
-In case you're using VSCode, make sure you've installed the [Jupyter](https://marketplace.visualstudio.com/items?itemName=ms-toolsai.jupyter) extension.
+In case you're using VSCode, make sure you've installed the [Jupyter](https://marketplace.visualstudio.com/items?itemName=ms-toolsai.jupyter) extension and only have a [single window](https://github.com/microsoft/vscode/issues/125993#issuecomment-2099627960) open.
 
 1. [Install uv](https://docs.astral.sh/uv/getting-started/installation/)
 2. Run `uv sync`
 3. Run `uv venv`
 4. In any notebook, make sure to select the virtual environment kernel from `.venv/bin/python` in the top (right corner on VSCode)
-
-Also, in case you use VSCode please make sure to only have a [single window](https://github.com/microsoft/vscode/issues/125993#issuecomment-2099627960) open.
 
 ## Notebooks and git
 
