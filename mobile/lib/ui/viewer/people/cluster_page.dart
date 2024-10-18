@@ -200,13 +200,22 @@ class _ClusterPageState extends State<ClusterPage> {
                               // ignore: unawaited_futures
                               routeToPage(
                                 context,
-                                PeoplePage(person: result.$1),
+                                PeoplePage(
+                                  person: result.$1,
+                                  searchResult: null,
+                                ),
                               );
                             } else if (result != null &&
                                 result is PersonEntity) {
                               Navigator.pop(context);
                               // ignore: unawaited_futures
-                              routeToPage(context, PeoplePage(person: result));
+                              routeToPage(
+                                context,
+                                PeoplePage(
+                                  person: result,
+                                  searchResult: null,
+                                ),
+                              );
                             }
                           } else {
                             showShortToast(context, "No personID or clusterID");

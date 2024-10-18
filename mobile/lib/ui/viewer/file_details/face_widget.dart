@@ -119,6 +119,7 @@ class _FaceWidgetState extends State<FaceWidget> {
                   MaterialPageRoute(
                     builder: (context) => PeoplePage(
                       person: widget.person!,
+                      searchResult: null,
                     ),
                   ),
                 );

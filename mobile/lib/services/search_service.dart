@@ -951,6 +951,23 @@ class SearchService {
                 PeoplePage(
                   tagPrefix: "${ResultType.faces.toString()}_${p.data.name}",
                   person: p,
+                  searchResult: GenericSearchResult(
+                    ResultType.faces,
+                    p.data.name,
+                    files,
+                    params: {
+                      kPersonParamID: personID,
+                      kFileID: files.first.uploadedFileID,
+                    },
+                    hierarchicalSearchFilter: FaceFilter(
+                      personId: p.remoteID,
+                      clusterId: null,
+                      faceName: p.data.name,
+                      faceFile: files.first,
+                      occurrence: kMostRelevantFilter,
+                      matchedUploadedIDs: filesToUploadedFileIDs(files),
+                    ),
+                  ),
                 ),
               );
             },

@@ -265,10 +265,22 @@ class SearchExample extends StatelessWidget {
                         if (result != null &&
                             result is (PersonEntity, EnteFile)) {
                           // ignore: unawaited_futures
-                          routeToPage(context, PeoplePage(person: result.$1));
+                          routeToPage(
+                            context,
+                            PeoplePage(
+                              person: result.$1,
+                              searchResult: null,
+                            ),
+                          );
                         } else if (result != null && result is PersonEntity) {
                           // ignore: unawaited_futures
-                          routeToPage(context, PeoplePage(person: result));
+                          routeToPage(
+                            context,
+                            PeoplePage(
+                              person: result,
+                              searchResult: null,
+                            ),
+                          );
                         }
                       },
                       child: Padding(

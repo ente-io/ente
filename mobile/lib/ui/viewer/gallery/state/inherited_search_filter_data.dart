@@ -8,6 +8,7 @@ class InheritedSearchFilterData extends InheritedWidget {
     required super.child,
   });
 
+  /// Pass null if gallery doesn't need hierarchical search
   final SearchFilterDataProvider? searchFilterDataProvider;
 
   bool get isHierarchicalSearchable => searchFilterDataProvider != null;

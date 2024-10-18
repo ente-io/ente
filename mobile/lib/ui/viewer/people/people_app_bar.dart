@@ -15,6 +15,8 @@ import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
+import "package:photos/ui/viewer/hierarchicial_search/applied_filters.dart";
+import "package:photos/ui/viewer/hierarchicial_search/recommended_filters.dart";
 import "package:photos/ui/viewer/people/add_person_action_sheet.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
 import "package:photos/ui/viewer/people/person_cluster_suggestion.dart";
@@ -34,8 +36,8 @@ class PeopleAppBar extends StatefulWidget {
     this.title,
     this.selectedFiles,
     this.person, {
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<PeopleAppBar> createState() => _AppBarWidgetState();
@@ -87,12 +89,39 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
     return AppBar(
       elevation: 0,
       centerTitle: false,
-      title: Text(
-        _appBarTitle!,
-        style:
-            Theme.of(context).textTheme.headlineSmall!.copyWith(fontSize: 16),
-        maxLines: 2,
-        overflow: TextOverflow.ellipsis,
+      // title: Text(
+      //   _appBarTitle!,
+      //   style:
+      //       Theme.of(context).textTheme.headlineSmall!.copyWith(fontSize: 16),
+      //   maxLines: 2,
+      //   overflow: TextOverflow.ellipsis,
+      // ),
+      title: Expanded(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Expanded(
+              child: Text(
+                _appBarTitle!,
+                style: Theme.of(context)
+                    .textTheme
+                    .headlineSmall!
+                    .copyWith(fontSize: 16),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(
+              width: 200,
+              height: 50,
+              child: AppliedFilters(),
+            ),
+          ],
+        ),
+      ),
+      bottom: const PreferredSize(
+        preferredSize: Size.fromHeight(0),
+        child: Flexible(child: RecommendedFilters()),
       ),
       actions: _getDefaultActions(context),
     );
@@ -294,10 +323,22 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
       Navigator.pop(context);
       if (result != null && result is (PersonEntity, EnteFile)) {
         // ignore: unawaited_futures
-        routeToPage(context, PeoplePage(person: result.$1));
+        routeToPage(
+          context,
+          PeoplePage(
+            person: result.$1,
+            searchResult: null,
+          ),
+        );
       } else if (result != null && result is PersonEntity) {
         // ignore: unawaited_futures
-        routeToPage(context, PeoplePage(person: result));
+        routeToPage(
+          context,
+          PeoplePage(
+            person: result,
+            searchResult: null,
+          ),
+        );
       }
     }
   }
