@@ -32,13 +32,13 @@ import { FlexWrapper } from "@ente/shared/components/Container";
 import { getPublicMagicMetadataSync } from "@ente/shared/file-metadata";
 import { formatDate, formatTime } from "@ente/shared/time/format";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import CameraOutlined from "@mui/icons-material/CameraOutlined";
-import Edit from "@mui/icons-material/Edit";
-import FolderOutlined from "@mui/icons-material/FolderOutlined";
-import LocationOnOutlined from "@mui/icons-material/LocationOnOutlined";
-import PhotoOutlined from "@mui/icons-material/PhotoOutlined";
-import TextSnippetOutlined from "@mui/icons-material/TextSnippetOutlined";
-import VideocamOutlined from "@mui/icons-material/VideocamOutlined";
+import CameraOutlinedIcon from "@mui/icons-material/CameraOutlined";
+import EditIcon from "@mui/icons-material/Edit";
+import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
+import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
+import PhotoOutlinedIcon from "@mui/icons-material/PhotoOutlined";
+import TextSnippetOutlinedIcon from "@mui/icons-material/TextSnippetOutlined";
+import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
 import {
     Box,
     CircularProgress,
@@ -191,7 +191,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
 
                 {exifInfo?.takenOnDevice && (
                     <InfoItem
-                        icon={<CameraOutlined />}
+                        icon={<CameraOutlinedIcon />}
                         title={exifInfo?.takenOnDevice}
                         caption={
                             <BasicDeviceCamera {...{ parsedExif: exifInfo }} />
@@ -203,7 +203,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                 {location && (
                     <>
                         <InfoItem
-                            icon={<LocationOnOutlined />}
+                            icon={<LocationOnOutlinedIcon />}
                             title={t("location")}
                             caption={
                                 !mapEnabled ||
@@ -251,7 +251,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                     </>
                 )}
                 <InfoItem
-                    icon={<TextSnippetOutlined />}
+                    icon={<TextSnippetOutlinedIcon />}
                     title={t("DETAILS")}
                     caption={
                         !exif ? (
@@ -274,7 +274,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                     hideEditOption
                 />
                 {showCollectionChips && (
-                    <InfoItem icon={<FolderOutlined />} hideEditOption>
+                    <InfoItem icon={<FolderOutlinedIcon />} hideEditOption>
                         <Box
                             display={"flex"}
                             gap={1}
@@ -467,7 +467,7 @@ function InfoItem({
                 : !hideEditOption && (
                       <IconButton onClick={openEditor} color="secondary">
                           {!loading ? (
-                              <Edit />
+                              <EditIcon />
                           ) : (
                               <CircularProgress size={"24px"} color="inherit" />
                           )}
@@ -602,9 +602,9 @@ const RenderFileName: React.FC<RenderFileNameProps> = ({
             <InfoItem
                 icon={
                     file.metadata.fileType === FileType.video ? (
-                        <VideocamOutlined />
+                        <VideocamOutlinedIcon />
                     ) : (
-                        <PhotoOutlined />
+                        <PhotoOutlinedIcon />
                     )
                 }
                 title={[fileName, extension].join(".")}
