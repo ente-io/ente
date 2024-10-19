@@ -133,7 +133,7 @@ export type GalleryAction =
               | { activePerson: Person | undefined; people: Person[] }
               | undefined;
       }
-    | { type: "setDerived"; favoriteFileIDs: Set<number> }
+    | { type: "setDerived" }
     | {
           type: "setNormalCollections";
           collections: Collection[];
@@ -148,8 +148,7 @@ export type GalleryAction =
     | { type: "uploadFile"; file: EnteFile }
     | { type: "resetHiddenFiles"; hiddenFiles: EnteFile[] }
     | { type: "fetchHiddenFiles"; hiddenFiles: EnteFile[] }
-    | { type: "setTrashedFiles"; trashedFiles: EnteFile[] }
-    | { type: "refreshFavorites"; favoriteFileIDs: Set<number> };
+    | { type: "setTrashedFiles"; trashedFiles: EnteFile[] };
 
 const initialGalleryState: GalleryState = {
     user: undefined,
@@ -191,6 +190,10 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 trashedFiles: action.trashedFiles,
                 archivedCollectionIDs: deriveArchivedCollectionIDs(collections),
                 hiddenFileIDs: deriveHiddenFileIDs(action.hiddenFiles),
+                favoriteFileIDs: deriveFavoriteFileIDs(
+                    collections,
+                    action.files,
+                ),
             };
         }
         case "set":
@@ -203,7 +206,6 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
         case "setDerived":
             return {
                 ...state,
-                favoriteFileIDs: action.favoriteFileIDs,
             };
         case "setNormalCollections":
             return {
@@ -211,6 +213,10 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 collections: action.collections,
                 archivedCollectionIDs: deriveArchivedCollectionIDs(
                     action.collections,
+                ),
+                favoriteFileIDs: deriveFavoriteFileIDs(
+                    action.collections,
+                    state.files,
                 ),
             };
         case "setAllCollections":
@@ -221,26 +227,48 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 archivedCollectionIDs: deriveArchivedCollectionIDs(
                     action.collections,
                 ),
-            };
-        case "resetFiles":
-            return { ...state, files: sortFiles(mergeMetadata(action.files)) };
-        case "fetchFiles":
-            return {
-                ...state,
-                files: sortFiles(
-                    mergeMetadata(
-                        getLatestVersionFiles([
-                            ...state.files,
-                            ...action.files,
-                        ]),
-                    ),
+                favoriteFileIDs: deriveFavoriteFileIDs(
+                    action.collections,
+                    state.files,
                 ),
             };
-        case "uploadFile":
+        case "resetFiles": {
+            const files = sortFiles(mergeMetadata(action.files));
             return {
                 ...state,
-                files: sortFiles([...state.files, action.file]),
+                files,
+                favoriteFileIDs: deriveFavoriteFileIDs(
+                    state.collections,
+                    files,
+                ),
             };
+        }
+        case "fetchFiles": {
+            const files = sortFiles(
+                mergeMetadata(
+                    getLatestVersionFiles([...state.files, ...action.files]),
+                ),
+            );
+            return {
+                ...state,
+                files,
+                favoriteFileIDs: deriveFavoriteFileIDs(
+                    state.collections,
+                    files,
+                ),
+            };
+        }
+        case "uploadFile": {
+            const files = sortFiles([...state.files, action.file]);
+            return {
+                ...state,
+                files,
+                favoriteFileIDs: deriveFavoriteFileIDs(
+                    state.collections,
+                    files,
+                ),
+            };
+        }
         case "resetHiddenFiles": {
             const hiddenFiles = sortFiles(mergeMetadata(action.hiddenFiles));
             return {
@@ -266,8 +294,6 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
         }
         case "setTrashedFiles":
             return { ...state, trashedFiles: action.trashedFiles };
-        case "refreshFavorites":
-            return { ...state, favoriteFileIDs: action.favoriteFileIDs };
     }
 };
 
@@ -283,7 +309,6 @@ export const setDerivativeState = (
     hiddenFiles: EnteFile[],
     archivedCollections: Set<number>,
 ) => {
-    const favoriteFileIDs = deriveFavoriteFileIDs(collections, files);
     const defaultHiddenCollectionIDs =
         getDefaultHiddenCollectionIDs(hiddenCollections);
     // setDefaultHiddenCollectionIDs(defaultHiddenCollectionIDs);
@@ -317,7 +342,6 @@ export const setDerivativeState = (
     // setHiddenCollectionSummaries(hiddenCollectionSummaries);
 
     return {
-        favoriteFileIDs,
         defaultHiddenCollectionIDs,
         mergedCollectionSummaries,
         hiddenCollectionSummaries,

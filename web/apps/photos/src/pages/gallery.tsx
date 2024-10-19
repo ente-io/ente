@@ -125,7 +125,6 @@ import {
     createUnCategorizedCollection,
     getAllLatestCollections,
     getAllLocalCollections,
-    getFavItemIds,
 } from "services/collectionService";
 import { syncFiles } from "services/fileService";
 import { preFileInfoSync, sync } from "services/sync";
@@ -444,7 +443,6 @@ export default function Gallery() {
             return;
         }
         const {
-            favoriteFileIDs,
             defaultHiddenCollectionIDs,
             mergedCollectionSummaries,
             hiddenCollectionSummaries,
@@ -461,7 +459,6 @@ export default function Gallery() {
         // the behaviour of the old code. Without this, the "Nothing here"
         // message flashes for a second.
         wait(0).then(() => {
-            dispatch({ type: "setDerived", favoriteFileIDs });
             setDefaultHiddenCollectionIDs(defaultHiddenCollectionIDs);
             setCollectionSummaries(mergedCollectionSummaries);
             setHiddenCollectionSummaries(hiddenCollectionSummaries);
@@ -993,7 +990,6 @@ export default function Gallery() {
                     setTempHiddenFileIds,
                     setFixCreationTimeAttributes,
                     setFilesDownloadProgressAttributesCreator,
-                    refreshFavItemIds,
                 );
             }
             clearSelection();
@@ -1120,11 +1116,6 @@ export default function Gallery() {
         () => setOpenCollectionSelector(false),
         [],
     );
-
-    const refreshFavItemIds = async () => {
-        const favoriteFileIDs = await getFavItemIds(files);
-        dispatch({ type: "refreshFavorites", favoriteFileIDs });
-    };
 
     if (!collectionSummaries || !filteredData) {
         return <div></div>;

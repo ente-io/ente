@@ -319,19 +319,6 @@ export const getCollection = async (
     }
 };
 
-export const getFavItemIds = async (
-    files: EnteFile[],
-): Promise<Set<number>> => {
-    const favCollection = await getFavCollection();
-    if (!favCollection) return new Set();
-
-    return new Set(
-        files
-            .filter((file) => file.collectionID === favCollection.id)
-            .map((file): number => file.id),
-    );
-};
-
 export const createAlbum = (albumName: string) => {
     return createCollection(albumName, CollectionType.album);
 };
