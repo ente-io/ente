@@ -1,7 +1,11 @@
 //TODO Review entire file
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 
-import { CollectionType, type Collection } from "@/media/collection";
+import {
+    COLLECTION_ROLE,
+    CollectionType,
+    type Collection,
+} from "@/media/collection";
 import type { EnteFile } from "@/media/file";
 import type { User } from "@ente/shared/user/types";
 import { t } from "i18next";
@@ -13,7 +17,6 @@ import {
     getDefaultHiddenCollectionIDs,
     HIDDEN_ITEMS_SECTION,
     isDefaultHiddenCollection,
-    isIncomingCollabShare,
     isIncomingShare,
     TRASH_SECTION,
 } from "../../services/collection";
@@ -337,6 +340,13 @@ const getCollectionCoverFiles = (
     });
     return coverFiles;
 };
+
+function isIncomingCollabShare(collection: Collection, user: User) {
+    // TODO: Need to audit the types
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    const sharee = collection.sharees?.find((sharee) => sharee.id === user.id);
+    return sharee?.role === COLLECTION_ROLE.COLLABORATOR;
+}
 
 function isOutgoingShare(collection: Collection, user: User): boolean {
     return collection.owner.id === user.id && collection.sharees?.length > 0;

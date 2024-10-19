@@ -1,4 +1,4 @@
-import { COLLECTION_ROLE, SUB_TYPE, type Collection } from "@/media/collection";
+import { SUB_TYPE, type Collection } from "@/media/collection";
 import type { User } from "@ente/shared/user/types";
 
 export const ARCHIVE_SECTION = -1;
@@ -22,11 +22,4 @@ export const isDefaultHiddenCollection = (collection: Collection) =>
 
 export function isIncomingShare(collection: Collection, user: User) {
     return collection.owner.id !== user.id;
-}
-
-export function isIncomingCollabShare(collection: Collection, user: User) {
-    // TODO: Need to audit the types
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    const sharee = collection.sharees?.find((sharee) => sharee.id === user.id);
-    return sharee?.role === COLLECTION_ROLE.COLLABORATOR;
 }
