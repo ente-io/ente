@@ -378,6 +378,7 @@ Future<List<MagicFilter>> curateMagicFilters(List<EnteFile> files) async {
         MagicFilter(
           filterName: magicCache.title,
           occurrence: intersection.length,
+          matchedUploadedIDs: magicCache.fileUploadedIDs.toSet(),
         ),
       );
     }
