@@ -16,10 +16,7 @@ import {
     isIncomingShare,
 } from "@/new/photos/services/collection";
 import { getAllLocalFiles, getLocalFiles } from "@/new/photos/services/files";
-import {
-    isArchivedCollection,
-    updateMagicMetadata,
-} from "@/new/photos/services/magic-metadata";
+import { updateMagicMetadata } from "@/new/photos/services/magic-metadata";
 import { safeDirectoryName } from "@/new/photos/utils/native-fs";
 import { CustomError } from "@ente/shared/error";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
@@ -328,14 +325,6 @@ export const changeCollectionSubType = async (
         log.error("change collection subType failed", e);
         throw e;
     }
-};
-
-export const getArchivedCollections = (collections: Collection[]) => {
-    return new Set<number>(
-        collections
-            .filter(isArchivedCollection)
-            .map((collection) => collection.id),
-    );
 };
 
 export const getUserOwnedCollections = (collections: Collection[]) => {

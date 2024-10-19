@@ -185,7 +185,7 @@ export function getUniqueFiles(files: EnteFile[]) {
     return uniqueFiles;
 }
 
-export const getArchivedCollections = (collections: Collection[]) => {
+const getArchivedCollections = (collections: Collection[]) => {
     return new Set<number>(
         collections
             .filter(isArchivedCollection)
@@ -193,7 +193,7 @@ export const getArchivedCollections = (collections: Collection[]) => {
     );
 };
 
-export function getCollectionSummaries(
+function getCollectionSummaries(
     user: User,
     collections: Collection[],
     files: EnteFile[],
@@ -284,9 +284,7 @@ export function getCollectionSummaries(
 
 export type CollectionToFileMap = Map<number, EnteFile>;
 
-export const getCollectionLatestFiles = (
-    files: EnteFile[],
-): CollectionToFileMap => {
+const getCollectionLatestFiles = (files: EnteFile[]): CollectionToFileMap => {
     const latestFiles = new Map<number, EnteFile>();
 
     files.forEach((file) => {
@@ -297,7 +295,7 @@ export const getCollectionLatestFiles = (
     return latestFiles;
 };
 
-export const getCollectionCoverFiles = (
+const getCollectionCoverFiles = (
     files: EnteFile[],
     collections: Collection[],
 ): CollectionToFileMap => {
@@ -340,15 +338,15 @@ export const getCollectionCoverFiles = (
     return coverFiles;
 };
 
-export function isOutgoingShare(collection: Collection, user: User): boolean {
+function isOutgoingShare(collection: Collection, user: User): boolean {
     return collection.owner.id === user.id && collection.sharees?.length > 0;
 }
 
-export function isSharedOnlyViaLink(collection: Collection) {
+function isSharedOnlyViaLink(collection: Collection) {
     return collection.publicURLs?.length && !collection.sharees?.length;
 }
 
-export function getDummyUncategorizedCollectionSummary(): CollectionSummary {
+function getDummyUncategorizedCollectionSummary(): CollectionSummary {
     return {
         id: DUMMY_UNCATEGORIZED_COLLECTION,
         name: t("section_uncategorized"),
@@ -368,7 +366,7 @@ export function getDummyUncategorizedCollectionSummary(): CollectionSummary {
     };
 }
 
-export function getHiddenItemsSummary(
+function getHiddenItemsSummary(
     hiddenFiles: EnteFile[],
     hiddenCollections: Collection[],
 ): CollectionSummary {
@@ -401,7 +399,7 @@ export function getHiddenItemsSummary(
     };
 }
 
-export function getSectionSummaries(
+function getSectionSummaries(
     files: EnteFile[],
     trashedFiles: EnteFile[],
     archivedCollections: Set<number>,
@@ -420,9 +418,7 @@ export function getSectionSummaries(
     return collectionSummaries;
 }
 
-export function getArchivedSectionSummary(
-    files: EnteFile[],
-): CollectionSummary {
+function getArchivedSectionSummary(files: EnteFile[]): CollectionSummary {
     const archivedFiles = getUniqueFiles(
         files.filter((file) => isArchivedFile(file)),
     );
@@ -503,7 +499,7 @@ function getAllSectionVisibleFiles(
     return allSectionVisibleFiles;
 }
 
-export function getTrashedCollectionSummary(
+function getTrashedCollectionSummary(
     trashedFiles: EnteFile[],
 ): CollectionSummary {
     return {
