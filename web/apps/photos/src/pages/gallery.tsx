@@ -35,7 +35,6 @@ import {
     TRASH_SECTION,
     isHiddenCollection,
 } from "@/new/photos/services/collection";
-import type { CollectionSummaries } from "@/new/photos/services/collection/ui";
 import { areOnlySystemCollections } from "@/new/photos/services/collection/ui";
 import downloadManager from "@/new/photos/services/download";
 import {
@@ -252,10 +251,6 @@ export default function Gallery() {
         logout,
         ...appContext
     } = useContext(AppContext);
-    const [collectionSummaries, setCollectionSummaries] =
-        useState<CollectionSummaries>();
-    const [hiddenCollectionSummaries, setHiddenCollectionSummaries] =
-        useState<CollectionSummaries>();
     const [userIDToEmailMap, setUserIDToEmailMap] =
         useState<Map<number, string>>(null);
     const [emailList, setEmailList] = useState<string[]>(null);
@@ -346,6 +341,8 @@ export default function Gallery() {
     const archivedCollectionIDs = state.archivedCollectionIDs;
     const defaultHiddenCollectionIDs = state.defaultHiddenCollectionIDs;
     const hiddenFileIDs = state.hiddenFileIDs;
+    const collectionSummaries = state.collectionSummaries;
+    const hiddenCollectionSummaries = state.hiddenCollectionSummaries;
 
     if (process.env.NEXT_PUBLIC_ENTE_WIP_CL) {
         console.log("render", { collections, hiddenCollections, files });

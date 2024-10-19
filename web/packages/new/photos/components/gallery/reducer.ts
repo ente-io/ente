@@ -104,7 +104,19 @@ export interface GalleryState {
      */
     favoriteFileIDs: Set<number>;
 
-    /*--<  UI state  >--*/
+    /*--<  Derived UI state  >--*/
+
+    /**
+     * A map of massaged collections suitable for being directly consumed by the
+     * UI (indexed by the collection IDs).
+     */
+    collectionSummaries: Map<number, CollectionSummary>;
+    /**
+     * A version of {@link collectionSummaries} but for hidden collections.
+     */
+    hiddenCollectionSummaries: Map<number, CollectionSummary>;
+
+    /*--<  Transient UI state  >--*/
 
     filteredData: EnteFile[];
     /**
@@ -162,11 +174,13 @@ const initialGalleryState: GalleryState = {
     files: [],
     hiddenFiles: [],
     trashedFiles: [],
-    filteredData: [],
     archivedCollectionIDs: new Set(),
     defaultHiddenCollectionIDs: new Set(),
     hiddenFileIDs: new Set(),
     favoriteFileIDs: new Set(),
+    collectionSummaries: new Map(),
+    hiddenCollectionSummaries: new Map(),
+    filteredData: [],
     activePerson: undefined,
     people: [],
 };
@@ -310,50 +324,6 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
 export const useGalleryReducer = () =>
     useReducer(galleryReducer, initialGalleryState);
 
-export const setDerivativeState = (
-    user: User,
-    collections: Collection[],
-    hiddenCollections: Collection[],
-    files: EnteFile[],
-    trashedFiles: EnteFile[],
-    hiddenFiles: EnteFile[],
-    archivedCollections: Set<number>,
-) => {
-    const collectionSummaries = getCollectionSummaries(
-        user,
-        collections,
-        files,
-    );
-    const sectionSummaries = getSectionSummaries(
-        files,
-        trashedFiles,
-        archivedCollections,
-    );
-    const hiddenCollectionSummaries = getCollectionSummaries(
-        user,
-        hiddenCollections,
-        hiddenFiles,
-    );
-    const hiddenItemsSummaries = getHiddenItemsSummary(
-        hiddenFiles,
-        hiddenCollections,
-    );
-    hiddenCollectionSummaries.set(HIDDEN_ITEMS_SECTION, hiddenItemsSummaries);
-    const mergedCollectionSummaries = mergeMaps(
-        collectionSummaries,
-        sectionSummaries,
-    );
-    // TODO: Move to reducer
-    // setCollectionSummaries(mergeMaps(collectionSummaries, sectionSummaries));
-    // TODO: Move to reducer
-    // setHiddenCollectionSummaries(hiddenCollectionSummaries);
-
-    return {
-        mergedCollectionSummaries,
-        hiddenCollectionSummaries,
-    };
-};
-
 /**
  * File IDs themselves are unique across all the files for the user (in fact,
  * they're unique across all the files in an Ente instance). However, we still
@@ -417,6 +387,51 @@ const deriveFavoriteFileIDs = (
         }
     }
     return new Set();
+};
+
+/**
+ * Helper function to compute collection summaries from their dependencies.
+ */
+export const deriveCollectionSummaries = (
+    user: User,
+    collections: Collection[],
+    files: EnteFile[],
+    trashedFiles: EnteFile[],
+    archivedCollections: Set<number>,
+) => {
+    const collectionSummaries = getCollectionSummaries(
+        user,
+        collections,
+        files,
+    );
+    const sectionSummaries = getSectionSummaries(
+        files,
+        trashedFiles,
+        archivedCollections,
+    );
+    return mergeMaps(collectionSummaries, sectionSummaries);
+};
+
+/**
+ * Helper function to compute hidden collection summaries from their
+ * dependencies.
+ */
+export const deriveHiddenCollectionSummaries = (
+    user: User,
+    hiddenCollections: Collection[],
+    hiddenFiles: EnteFile[],
+) => {
+    const hiddenCollectionSummaries = getCollectionSummaries(
+        user,
+        hiddenCollections,
+        hiddenFiles,
+    );
+    const hiddenItemsSummaries = getHiddenItemsSummary(
+        hiddenFiles,
+        hiddenCollections,
+    );
+    hiddenCollectionSummaries.set(HIDDEN_ITEMS_SECTION, hiddenItemsSummaries);
+    return hiddenCollectionSummaries;
 };
 
 function getCollectionSummaries(
