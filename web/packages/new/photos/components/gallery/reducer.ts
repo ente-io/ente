@@ -41,6 +41,10 @@ import type { Person } from "../../services/ml/people";
 export interface GalleryState {
     filteredData: EnteFile[];
     /**
+     * File IDs of all the files that the user has marked as a favorite.
+     */
+    favFileIDs: Set<number>;
+    /**
      * The currently selected person, if any.
      *
      * Whenever this is present, it is guaranteed to be one of the items from
@@ -62,10 +66,12 @@ export type GalleryAction =
               | { activePerson: Person | undefined; people: Person[] }
               | undefined;
       }
-    | { type: "dummy" };
+    | { type: "setDerived"; favFileIDs: Set<number> }
+    | { type: "setFavorites"; favFileIDs: Set<number> };
 
 const initialGalleryState: GalleryState = {
     filteredData: [],
+    favFileIDs: new Set(),
     activePerson: undefined,
     people: [],
 };
@@ -75,14 +81,22 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
     action,
 ) => {
     switch (action.type) {
-        case "dummy":
-            return state;
         case "set":
             return {
                 ...state,
                 filteredData: action.filteredData,
                 activePerson: action.galleryPeopleState?.activePerson,
                 people: action.galleryPeopleState?.people,
+            };
+        case "setDerived":
+            return {
+                ...state,
+                favFileIDs: action.favFileIDs,
+            };
+        case "setFavorites":
+            return {
+                ...state,
+                favFileIDs: action.favFileIDs,
             };
     }
 };
@@ -98,10 +112,10 @@ export const setDerivativeState = (
     trashedFiles: EnteFile[],
     hiddenFiles: EnteFile[],
 ) => {
-    let favItemIds = new Set<number>();
+    let favFileIDs = new Set<number>();
     for (const collection of collections) {
         if (collection.type === CollectionType.favorites) {
-            favItemIds = new Set(
+            favFileIDs = new Set(
                 files
                     .filter((file) => file.collectionID === collection.id)
                     .map((file): number => file.id),
@@ -109,8 +123,6 @@ export const setDerivativeState = (
             break;
         }
     }
-    // TODO: Move to reducer
-    // setFavItemIds(favItemIds);
     const archivedCollections = getArchivedCollections(collections);
     // TODO: Move to reducer
     // setArchivedCollections(archivedCollections);
@@ -150,7 +162,7 @@ export const setDerivativeState = (
     // setHiddenCollectionSummaries(hiddenCollectionSummaries);
 
     return {
-        favItemIds,
+        favFileIDs,
         archivedCollections,
         defaultHiddenCollectionIDs,
         hiddenFileIds,

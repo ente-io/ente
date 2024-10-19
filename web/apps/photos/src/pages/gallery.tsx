@@ -202,8 +202,6 @@ export default function Gallery() {
     const [hiddenFiles, setHiddenFiles] = useState<EnteFile[]>(null);
     const [trashedFiles, setTrashedFiles] = useState<EnteFile[]>(null);
 
-    const [favItemIds, setFavItemIds] = useState<Set<number>>();
-
     const [isFirstLoad, setIsFirstLoad] = useState(false);
     const [selected, setSelected] = useState<SelectedState>({
         ownCount: 0,
@@ -446,7 +444,7 @@ export default function Gallery() {
             return;
         }
         const {
-            favItemIds,
+            favFileIDs,
             archivedCollections,
             defaultHiddenCollectionIDs,
             hiddenFileIds,
@@ -464,7 +462,7 @@ export default function Gallery() {
         // the behaviour of the old code. Without this, the "Nothing here"
         // message flashes for a second.
         wait(0).then(() => {
-            setFavItemIds(favItemIds);
+            dispatch({ type: "setDerived", favFileIDs });
             setArchivedCollections(archivedCollections);
             setDefaultHiddenCollectionIDs(defaultHiddenCollectionIDs);
             setHiddenFileIds(hiddenFileIds);
@@ -1108,8 +1106,8 @@ export default function Gallery() {
     );
 
     const refreshFavItemIds = async () => {
-        const favItemIds = await getFavItemIds(files);
-        setFavItemIds(favItemIds);
+        const favFileIDs = await getFavItemIds(files);
+        dispatch({ type: "setFavorites", favFileIDs });
     };
 
     if (!collectionSummaries || !filteredData) {
@@ -1295,7 +1293,7 @@ export default function Gallery() {
                         modePlus={isInSearchMode ? "search" : barMode}
                         files={filteredData}
                         syncWithRemote={syncWithRemote}
-                        favItemIds={favItemIds}
+                        favItemIds={state.favFileIDs}
                         setSelected={setSelected}
                         selected={selected}
                         tempDeletedFileIds={tempDeletedFileIds}
