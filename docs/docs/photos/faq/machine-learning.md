@@ -1,6 +1,7 @@
 ---
 title: Machine Learning FAQ
-description: Frequently asked questions about several features of Ente's ML suite
+description:
+    Frequently asked questions about several features of Ente's ML suite
 ---
 
 # Machine Learning
@@ -48,10 +49,10 @@ First, make sure the person is not named. If you already gave a name, then first
 press `Remove person label` in the top right menu. Now inside the unnamed
 grouping, press `Ignore person` from the top right menu.
 
-To undo this action, go to a **photo containing the person**. Go to the **file info**
-section of the photo and press on the **face thumbnail of the ignored person**. This
-will take you to the grouping of this person. Here you can press `Show person`
-to undo ignoring the person.
+To undo this action, go to a **photo containing the person**. Go to the **file
+info** section of the photo and press on the **face thumbnail of the ignored
+person**. This will take you to the grouping of this person. Here you can press
+`Show person` to undo ignoring the person.
 
 ### Desktop
 
@@ -65,6 +66,6 @@ can't prevent all cases where this goes wrong, we've added a option to help you
 correct the model in such cases.
 
 If you find a mixed grouping of several different babies, you can use the
-`mixed grouping` option in the top right menu of said grouping. Activating
-this option will make the model re-evaluate the grouping with stricter settings,
+`mixed grouping` option in the top right menu of said grouping. Activating this
+option will make the model re-evaluate the grouping with stricter settings,
 hopefully separating the different babies in different new groupings.
