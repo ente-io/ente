@@ -178,7 +178,7 @@ export const GalleryContext = createContext<GalleryContextType>(
 /**
  * The default view for logged in users.
  *
- * I heard you like ascii art.
+ * I heard you like ASCII art.
  *
  *        Navbar / Search         ^
  *     ---------------------      |
@@ -190,8 +190,6 @@ export const GalleryContext = createContext<GalleryContextType>(
  */
 export default function Gallery() {
     const [state, dispatch] = useGalleryReducer();
-    const [defaultHiddenCollectionIDs, setDefaultHiddenCollectionIDs] =
-        useState<Set<number>>();
 
     const [isFirstLoad, setIsFirstLoad] = useState(false);
     const [selected, setSelected] = useState<SelectedState>({
@@ -346,6 +344,7 @@ export default function Gallery() {
     const hiddenFiles = state.hiddenFiles;
     const trashedFiles = state.trashedFiles;
     const archivedCollectionIDs = state.archivedCollectionIDs;
+    const defaultHiddenCollectionIDs = state.defaultHiddenCollectionIDs;
     const hiddenFileIDs = state.hiddenFileIDs;
 
     if (process.env.NEXT_PUBLIC_ENTE_WIP_CL) {
@@ -442,24 +441,20 @@ export default function Gallery() {
         if (!user || !files || !collections || !hiddenFiles || !trashedFiles) {
             return;
         }
-        const {
-            defaultHiddenCollectionIDs,
-            mergedCollectionSummaries,
-            hiddenCollectionSummaries,
-        } = setDerivativeState(
-            user,
-            collections,
-            hiddenCollections,
-            files,
-            trashedFiles,
-            hiddenFiles,
-            archivedCollectionIDs,
-        );
+        const { mergedCollectionSummaries, hiddenCollectionSummaries } =
+            setDerivativeState(
+                user,
+                collections,
+                hiddenCollections,
+                files,
+                trashedFiles,
+                hiddenFiles,
+                archivedCollectionIDs,
+            );
         // This wait(0) is a hack, but it is not a new one, this merely retains
         // the behaviour of the old code. Without this, the "Nothing here"
         // message flashes for a second.
         wait(0).then(() => {
-            setDefaultHiddenCollectionIDs(defaultHiddenCollectionIDs);
             setCollectionSummaries(mergedCollectionSummaries);
             setHiddenCollectionSummaries(hiddenCollectionSummaries);
         });

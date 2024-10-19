@@ -92,6 +92,10 @@ export interface GalleryState {
      */
     archivedCollectionIDs: Set<number>;
     /**
+     * Collection IDs of default hidden collections.
+     */
+    defaultHiddenCollectionIDs: Set<number>;
+    /**
      * File IDs of the files that the user has hidden.
      */
     hiddenFileIDs: Set<number>;
@@ -160,6 +164,7 @@ const initialGalleryState: GalleryState = {
     trashedFiles: [],
     filteredData: [],
     archivedCollectionIDs: new Set(),
+    defaultHiddenCollectionIDs: new Set(),
     hiddenFileIDs: new Set(),
     favoriteFileIDs: new Set(),
     activePerson: undefined,
@@ -189,6 +194,8 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 hiddenFiles: action.hiddenFiles,
                 trashedFiles: action.trashedFiles,
                 archivedCollectionIDs: deriveArchivedCollectionIDs(collections),
+                defaultHiddenCollectionIDs:
+                    deriveDefaultHiddenCollectionIDs(hiddenCollections),
                 hiddenFileIDs: deriveHiddenFileIDs(action.hiddenFiles),
                 favoriteFileIDs: deriveFavoriteFileIDs(
                     collections,
@@ -226,6 +233,9 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 hiddenCollections: action.hiddenCollections,
                 archivedCollectionIDs: deriveArchivedCollectionIDs(
                     action.collections,
+                ),
+                defaultHiddenCollectionIDs: deriveDefaultHiddenCollectionIDs(
+                    action.hiddenCollections,
                 ),
                 favoriteFileIDs: deriveFavoriteFileIDs(
                     action.collections,
@@ -309,9 +319,6 @@ export const setDerivativeState = (
     hiddenFiles: EnteFile[],
     archivedCollections: Set<number>,
 ) => {
-    const defaultHiddenCollectionIDs =
-        getDefaultHiddenCollectionIDs(hiddenCollections);
-    // setDefaultHiddenCollectionIDs(defaultHiddenCollectionIDs);
     const collectionSummaries = getCollectionSummaries(
         user,
         collections,
@@ -342,7 +349,6 @@ export const setDerivativeState = (
     // setHiddenCollectionSummaries(hiddenCollectionSummaries);
 
     return {
-        defaultHiddenCollectionIDs,
         mergedCollectionSummaries,
         hiddenCollectionSummaries,
     };
@@ -372,7 +378,30 @@ export const uniqueFilesByID = (files: EnteFile[]) => {
 };
 
 /**
- * Helper function to compute favorite file IDs from its dependencies.
+ * Helper function to compute archived collection IDs from their dependencies.
+ */
+const deriveArchivedCollectionIDs = (collections: Collection[]) =>
+    new Set<number>(
+        collections
+            .filter(isArchivedCollection)
+            .map((collection) => collection.id),
+    );
+
+/**
+ * Helper function to compute the default hidden collection IDs from theirq
+ * dependencies.
+ */
+const deriveDefaultHiddenCollectionIDs = (hiddenCollections: Collection[]) =>
+    getDefaultHiddenCollectionIDs(hiddenCollections);
+
+/**
+ * Helper function to compute hidden file IDs from their dependencies.
+ */
+const deriveHiddenFileIDs = (hiddenFiles: EnteFile[]) =>
+    new Set<number>(hiddenFiles.map((f) => f.id));
+
+/**
+ * Helper function to compute favorite file IDs from their dependencies.
  */
 const deriveFavoriteFileIDs = (
     collections: Collection[],
@@ -389,22 +418,6 @@ const deriveFavoriteFileIDs = (
     }
     return new Set();
 };
-
-/**
- * Helper function to compute hidden file IDs from its dependencies.
- */
-const deriveHiddenFileIDs = (hiddenFiles: EnteFile[]) =>
-    new Set<number>(hiddenFiles.map((f) => f.id));
-
-/**
- * Helper function to compute archived collection IDs from its dependencies.
- */
-const deriveArchivedCollectionIDs = (collections: Collection[]) =>
-    new Set<number>(
-        collections
-            .filter(isArchivedCollection)
-            .map((collection) => collection.id),
-    );
 
 function getCollectionSummaries(
     user: User,
