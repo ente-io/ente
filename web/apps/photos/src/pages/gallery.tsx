@@ -353,6 +353,10 @@ export default function Gallery() {
     const collections = state.collections;
     const hiddenCollections = state.hiddenCollections;
 
+    if (process.env.NEXT_PUBLIC_ENTE_WIP_CL) {
+        console.log("render", { collections, hiddenCollections, files });
+    }
+
     const router = useRouter();
 
     // Ensure that the keys in local storage are not malformed by verifying that
