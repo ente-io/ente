@@ -28,7 +28,6 @@ import "package:photos/extensions/stop_watch.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
-import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
 import "package:photos/services/filedata/filedata_service.dart";
@@ -241,10 +240,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _logger.info("UserService init $tlog");
     await UserService.instance.init();
     _logger.info("UserService init done $tlog");
-
-    _logger.info("BillingService init $tlog");
-    BillingService.instance.init();
-    _logger.info("BillingService init done $tlog");
 
     _logger.info("CollectionsService init $tlog");
     await CollectionsService.instance.init(preferences);
