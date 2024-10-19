@@ -60,7 +60,10 @@ export async function updateMagicMetadata<T>(
         originalMagicMetadata.data = await cryptoWorker.decryptMetadataJSON({
             encryptedDataB64: originalMagicMetadata.data,
             decryptionHeaderB64: originalMagicMetadata.header,
-            // @ts-expect-error TODO: Need to use zod here.
+            // See: [Note: strict mode migration]
+            //
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
             keyB64: decryptionKey,
         });
     }
@@ -77,7 +80,10 @@ export async function updateMagicMetadata<T>(
     const magicMetadata = {
         ...originalMagicMetadata,
         data: nonEmptyMagicMetadataProps,
-        // @ts-expect-error TODO review this file
+        // See: [Note: strict mode migration]
+        //
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         count: Object.keys(nonEmptyMagicMetadataProps).length,
     };
 
@@ -87,9 +93,15 @@ export async function updateMagicMetadata<T>(
 export const getNewMagicMetadata = <T>(): MagicMetadataCore<T> => {
     return {
         version: 1,
-        // @ts-expect-error TODO review this file
+        // See: [Note: strict mode migration]
+        //
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         data: null,
-        // @ts-expect-error TODO review this file
+        // See: [Note: strict mode migration]
+        //
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         header: null,
         count: 0,
     };
@@ -97,7 +109,10 @@ export const getNewMagicMetadata = <T>(): MagicMetadataCore<T> => {
 
 export const getNonEmptyMagicMetadataProps = <T>(magicMetadataProps: T): T => {
     return Object.fromEntries(
-        // @ts-expect-error TODO review this file
+        // See: [Note: strict mode migration]
+        //
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         Object.entries(magicMetadataProps).filter(
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             ([_, v]) => v !== null && v !== undefined,

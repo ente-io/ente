@@ -9,7 +9,10 @@ import {
     GalleryItemsSummary,
 } from "@/new/photos/components/gallery/ListHeader";
 import { SpaceBetweenFlex } from "@/new/photos/components/mui";
-import { ALL_SECTION, HIDDEN_ITEMS_SECTION } from "@/new/photos/services/collection";
+import {
+    ALL_SECTION,
+    HIDDEN_ITEMS_SECTION,
+} from "@/new/photos/services/collection";
 import type {
     CollectionSummary,
     CollectionSummaryType,

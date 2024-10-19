@@ -11,6 +11,7 @@ import {
     GalleryItemsSummary,
 } from "@/new/photos/components/gallery/ListHeader";
 import { SpaceBetweenFlex } from "@/new/photos/components/mui";
+import { ALL_SECTION } from "@/new/photos/services/collection";
 import downloadManager from "@/new/photos/services/download";
 import { sortFiles } from "@/new/photos/services/files";
 import { AppContext } from "@/new/photos/types/context";
@@ -71,11 +72,7 @@ import {
     SetFilesDownloadProgressAttributes,
     SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
-import {
-    ALL_SECTION,
-    downloadCollectionFiles,
-    isHiddenCollection,
-} from "utils/collection";
+import { downloadCollectionFiles, isHiddenCollection } from "utils/collection";
 import { downloadSelectedFiles, getSelectedFiles } from "utils/file";
 import { formatNumber } from "utils/number/format";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";

@@ -6,7 +6,10 @@ export const groupFilesBasedOnCollectionID = (files: EnteFile[]) => {
     for (const file of files) {
         const id = file.collectionID;
         if (!result.has(id)) result.set(id, []);
-        // @ts-expect-error TODO: Review types
+        // See: [Note: strict mode migration]
+        //
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         result.get(id).push(file);
     }
     return result;

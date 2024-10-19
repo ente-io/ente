@@ -140,11 +140,11 @@ export const setDerivativeState = (
         hiddenCollections,
     );
     hiddenCollectionSummaries.set(HIDDEN_ITEMS_SECTION, hiddenItemsSummaries);
-    // TODO: Move to reducer
     const mergedCollectionSummaries = mergeMaps(
         collectionSummaries,
         sectionSummaries,
     );
+    // TODO: Move to reducer
     // setCollectionSummaries(mergeMaps(collectionSummaries, sectionSummaries));
     // TODO: Move to reducer
     // setHiddenCollectionSummaries(hiddenCollectionSummaries);
@@ -248,7 +248,10 @@ export function getCollectionSummaries(
         collectionSummaries.set(collection.id, {
             id: collection.id,
             name: CollectionSummaryItemName,
-            // @ts-expect-error TODO Review types
+            // See: [Note: strict mode migration]
+            //
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
             latestFile: collectionLatestFiles.get(collection.id),
             coverFile: collectionCoverFiles.get(collection.id),
             fileCount: collectionFilesCount.get(collection.id) ?? 0,
@@ -308,11 +311,17 @@ export const getCollectionCoverFiles = (
         if (collection.pubMagicMetadata?.data?.asc) {
             coverFiles.set(
                 collection.id,
-                // @ts-expect-error TODO Review types
+                // See: [Note: strict mode migration]
+                //
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore
                 collectionFiles[collectionFiles.length - 1],
             );
         } else {
-            // @ts-expect-error TODO Review types
+            // See: [Note: strict mode migration]
+            //
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
             coverFiles.set(collection.id, collectionFiles[0]);
         }
     });
@@ -332,9 +341,15 @@ export function getDummyUncategorizedCollectionSummary(): CollectionSummary {
         id: DUMMY_UNCATEGORIZED_COLLECTION,
         name: t("section_uncategorized"),
         type: "uncategorized",
-        // @ts-expect-error TODO Review types
+        // See: [Note: strict mode migration]
+        //
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         latestFile: null,
-        // @ts-expect-error TODO Review types
+        // See: [Note: strict mode migration]
+        //
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         coverFile: null,
         fileCount: 0,
         updationTime: 0,
@@ -360,10 +375,16 @@ export function getHiddenItemsSummary(
         name: t("hidden_items"),
         type: "hiddenItems",
         coverFile: hiddenItems?.[0],
-        // @ts-expect-error TODO Review types
+        // See: [Note: strict mode migration]
+        //
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         latestFile: hiddenItems?.[0],
         fileCount: hiddenItems?.length,
-        // @ts-expect-error TODO Review types
+        // See: [Note: strict mode migration]
+        //
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         updationTime: hiddenItems?.[0]?.updationTime,
     };
 }
@@ -397,12 +418,21 @@ export function getArchivedSectionSummary(
         id: ARCHIVE_SECTION,
         name: t("section_archive"),
         type: "archive",
-        // @ts-expect-error TODO Review types
+        // See: [Note: strict mode migration]
+        //
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         coverFile: null,
-        // @ts-expect-error TODO Review types
+        // See: [Note: strict mode migration]
+        //
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         latestFile: archivedFiles?.[0],
         fileCount: archivedFiles?.length ?? 0,
-        // @ts-expect-error TODO Review types
+        // See: [Note: strict mode migration]
+        //
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         updationTime: archivedFiles?.[0]?.updationTime,
     };
 }
@@ -420,10 +450,16 @@ function getAllSectionSummary(
         name: t("section_all"),
         type: "all",
         coverFile: allSectionFiles?.[0],
-        // @ts-expect-error TODO Review types
+        // See: [Note: strict mode migration]
+        //
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         latestFile: allSectionFiles?.[0],
         fileCount: allSectionFiles?.length || 0,
-        // @ts-expect-error TODO Review types
+        // See: [Note: strict mode migration]
+        //
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         updationTime: allSectionFiles?.[0]?.updationTime,
     };
 }
@@ -462,12 +498,21 @@ export function getTrashedCollectionSummary(
         id: TRASH_SECTION,
         name: t("section_trash"),
         type: "trash",
-        // @ts-expect-error TODO Review types
+        // See: [Note: strict mode migration]
+        //
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         coverFile: null,
-        // @ts-expect-error TODO Review types
+        // See: [Note: strict mode migration]
+        //
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         latestFile: trashedFiles?.[0],
         fileCount: trashedFiles?.length,
-        // @ts-expect-error TODO Review types
+        // See: [Note: strict mode migration]
+        //
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         updationTime: trashedFiles?.[0]?.updationTime,
     };
 }
