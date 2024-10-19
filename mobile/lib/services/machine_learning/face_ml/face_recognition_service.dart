@@ -28,7 +28,7 @@ class FaceRecognitionService {
 
   bool get isInitialized => _isInitialized;
 
-  bool _shouldSyncPeople = false;
+  bool _shouldReconcilePeople = false;
   bool _isSyncing = false;
 
   Future<void> init() async {
@@ -45,7 +45,7 @@ class FaceRecognitionService {
     // Listen on PeopleChanged
     Bus.instance.on<PeopleChangedEvent>().listen((event) {
       if (event.type == PeopleEventType.syncDone) return;
-      _shouldSyncPeople = true;
+      _shouldReconcilePeople = true;
     });
 
     _isInitialized = true;
@@ -61,11 +61,12 @@ class FaceRecognitionService {
       return;
     }
     _isSyncing = true;
-    await entityService.syncEntity(EntityType.cgroup);
-    if (_shouldSyncPeople) {
+    if (_shouldReconcilePeople) {
       await PersonService.instance.reconcileClusters();
       Bus.instance.fire(PeopleChangedEvent(type: PeopleEventType.syncDone));
-      _shouldSyncPeople = false;
+      _shouldReconcilePeople = false;
+    } else {
+      await entityService.syncEntity(EntityType.cgroup);
     }
     _isSyncing = false;
   }
