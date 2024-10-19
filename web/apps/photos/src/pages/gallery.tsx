@@ -873,7 +873,7 @@ export default function Gallery() {
         };
     };
 
-    const setDerivativeState = async (
+    const setDerivativeState = (
         user: User,
         collections: Collection[],
         hiddenCollections: Collection[],
@@ -881,11 +881,10 @@ export default function Gallery() {
         trashedFiles: EnteFile[],
         hiddenFiles: EnteFile[],
     ) => {
-        const favItemIds = await getFavItemIds(files);
-        let favItemIds2 = new Set();
+        let favItemIds = new Set<number>();
         for (const collection of collections) {
             if (collection.type === CollectionType.favorites) {
-                favItemIds2 = new Set(
+                favItemIds = new Set(
                     files
                         .filter((file) => file.collectionID === collection.id)
                         .map((file): number => file.id),
@@ -893,7 +892,6 @@ export default function Gallery() {
                 break;
             }
         }
-        console.log({ favItemIds, favItemIds2 });
         setFavItemIds(favItemIds);
         const archivedCollections = getArchivedCollections(collections);
         setArchivedCollections(archivedCollections);
