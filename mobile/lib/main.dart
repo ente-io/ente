@@ -282,8 +282,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     }
     _logger.info("PushService/HomeWidget done $tlog");
     unawaited(SemanticSearchService.instance.init());
-    MachineLearningController.instance.init();
-    _logger.info("MachineLearningController done $tlog");
     unawaited(MLService.instance.init());
     PersonService.init(
       entityService,

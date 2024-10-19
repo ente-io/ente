@@ -11,9 +11,6 @@ import "package:photos/events/machine_learning_control_event.dart";
 class MachineLearningController {
   MachineLearningController._privateConstructor();
 
-  static final MachineLearningController instance =
-      MachineLearningController._privateConstructor();
-
   final _logger = Logger("MachineLearningController");
 
   static const kMaximumTemperature = 42; // 42 degree celsius
@@ -29,8 +26,8 @@ class MachineLearningController {
 
   bool get isDeviceHealthy => _isDeviceHealthy;
 
-  void init() {
-    _logger.info('init called');
+  MachineLearningController() {
+    _logger.info('MachineLearningController constructor');
     _startInteractionTimer(kDefaultInteractionTimeout);
     if (Platform.isIOS) {
       BatteryInfoPlugin()
