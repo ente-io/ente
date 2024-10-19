@@ -42,7 +42,7 @@ class _LocationScreenState extends State<LocationScreen> {
   @override
   Widget build(BuildContext context) {
     final heightOfStatusBar = MediaQuery.of(context).viewPadding.top;
-    const heightOfAppBar = 48.0;
+    const heightOfAppBar = 90.0;
     final locationTag =
         InheritedLocationScreenState.of(context).locationTagEntity.item;
 

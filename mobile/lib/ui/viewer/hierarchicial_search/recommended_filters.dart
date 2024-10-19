@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:photos/core/constants.dart";
 import "package:photos/models/search/hierarchical/face_filter.dart";
 import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
@@ -49,33 +50,40 @@ class _RecommendedFiltersState extends State<RecommendedFilters> {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemBuilder: (context, index) {
-        final filter = _recommendations[index];
-        return Padding(
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: SizedBox(
+        height: kFilterChipHeight,
+        child: ListView.builder(
+          itemBuilder: (context, index) {
+            final filter = _recommendations[index];
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: filter is FaceFilter
+                  ? FaceFilterChip(
+                      personId: filter.personId,
+                      clusterId: filter.clusterId,
+                      faceThumbnailFile: filter.faceFile,
+                      name: filter.name(),
+                      onTap: () {
+                        _searchFilterDataProvider.applyFilters([filter]);
+                      },
+                    )
+                  : GenericFilterChip(
+                      label: filter.name(),
+                      onTap: () {
+                        _searchFilterDataProvider.applyFilters([filter]);
+                      },
+                      leadingIcon: filter.icon(),
+                    ),
+            );
+          },
+          clipBehavior: Clip.none,
+          scrollDirection: Axis.horizontal,
+          itemCount: _recommendations.length,
           padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: filter is FaceFilter
-              ? FaceFilterChip(
-                  personId: filter.personId,
-                  clusterId: filter.clusterId,
-                  faceThumbnailFile: filter.faceFile,
-                  name: filter.name(),
-                  onTap: () {
-                    _searchFilterDataProvider.applyFilters([filter]);
-                  },
-                )
-              : GenericFilterChip(
-                  label: filter.name(),
-                  onTap: () {
-                    _searchFilterDataProvider.applyFilters([filter]);
-                  },
-                  leadingIcon: filter.icon(),
-                ),
-        );
-      },
-      scrollDirection: Axis.horizontal,
-      itemCount: _recommendations.length,
-      padding: const EdgeInsets.symmetric(horizontal: 4),
+        ),
+      ),
     );
   }
 

@@ -1,4 +1,6 @@
+import "package:flutter/material.dart";
 import "package:flutter/widgets.dart";
+import "package:photos/core/constants.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/search/result/person_face_widget.dart";
@@ -22,7 +24,12 @@ class GenericFilterChip extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: getEnteColorScheme(context).fillFaint,
-          borderRadius: const BorderRadius.all(Radius.circular(8)),
+          borderRadius:
+              const BorderRadius.all(Radius.circular(kFilterChipHeight / 2)),
+          border: Border.all(
+            color: getEnteColorScheme(context).strokeFaint,
+            width: 0.5,
+          ),
         ),
         child: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -74,18 +81,23 @@ class FaceFilterChip extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: getEnteColorScheme(context).fillFaint,
-          borderRadius: const BorderRadius.all(Radius.circular(8)),
+          borderRadius:
+              const BorderRadius.all(Radius.circular(kFilterChipHeight / 2)),
+          border: Border.all(
+            color: getEnteColorScheme(context).strokeFaint,
+            width: 0.5,
+          ),
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          padding: EdgeInsets.only(right: name.isNotEmpty ? 8.0 : 0),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               ClipOval(
                 child: SizedBox(
-                  width: 32,
-                  height: 32,
+                  width: kFilterChipHeight,
+                  height: kFilterChipHeight,
                   child: PersonFaceWidget(
                     faceThumbnailFile,
                     personId: personId,

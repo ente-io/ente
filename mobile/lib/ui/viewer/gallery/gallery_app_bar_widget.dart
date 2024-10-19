@@ -7,6 +7,7 @@ import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
+import "package:photos/core/constants.dart";
 import 'package:photos/core/event_bus.dart';
 import "package:photos/core/network/network.dart";
 import "package:photos/db/files_db.dart";
@@ -154,7 +155,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                   ),
                   const SizedBox(
                     width: 200,
-                    height: 50,
+                    height: kFilterChipHeight,
                     child: AppliedFilters(),
                   ),
                 ],

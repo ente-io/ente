@@ -126,7 +126,7 @@ class _PeoplePageState extends State<PeoplePage> {
             : null,
         child: Scaffold(
           appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(50.0),
+            preferredSize: const Size.fromHeight(90.0),
             child: PeopleAppBar(
               GalleryType.peopleTag,
               widget.person.data.name,
