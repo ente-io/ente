@@ -672,10 +672,11 @@ export default function Gallery() {
                     }
                 }),
             );
-        }
-        const sortAsc = activeCollection?.pubMagicMetadata?.data?.asc ?? false;
-        if (sortAsc) {
-            filteredFiles = sortFiles(filteredFiles, true);
+            const sortAsc =
+                activeCollection?.pubMagicMetadata?.data?.asc ?? false;
+            if (sortAsc) {
+                filteredFiles = sortFiles(filteredFiles, true);
+            }
         }
 
         dispatch({
