@@ -26,8 +26,6 @@ class FaceRecognitionService {
 
   bool _isInitialized = false;
 
-  bool get isInitialized => _isInitialized;
-
   bool _shouldReconcilePeople = false;
   bool _isSyncing = false;
 
