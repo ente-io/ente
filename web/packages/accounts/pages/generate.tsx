@@ -1,4 +1,5 @@
 import { putAttributes } from "@/accounts/api/user";
+import { RecoveryKey } from "@/accounts/components/RecoveryKey";
 import SetPasswordForm, {
     type SetPasswordFormProps,
 } from "@/accounts/components/SetPasswordForm";
@@ -7,7 +8,6 @@ import { configureSRP } from "@/accounts/services/srp";
 import { generateKeyAndSRPAttributes } from "@/accounts/utils/srp";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import log from "@/base/log";
-import { RecoveryKey } from "@/new/photos/components/RecoveryKey";
 import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
@@ -32,7 +32,7 @@ import { appHomeRoute } from "../services/redirect";
 import type { PageProps } from "../types/page";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
-    const { logout } = appContext;
+    const { logout, showMiniDialog } = appContext;
 
     const [token, setToken] = useState<string>();
     const [user, setUser] = useState<User>();
@@ -107,6 +107,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                         setOpenRecoveryKey(false);
                         router.push(appHomeRoute);
                     }}
+                    showMiniDialog={showMiniDialog}
                 />
             ) : (
                 <VerticallyCentered>

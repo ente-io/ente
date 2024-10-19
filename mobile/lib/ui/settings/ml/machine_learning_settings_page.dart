@@ -7,7 +7,6 @@ import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/face_ml/face_detection/face_detection_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_embedding/face_embedding_service.dart";
-import "package:photos/services/machine_learning/machine_learning_controller.dart";
 import "package:photos/services/machine_learning/ml_service.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_text_encoder.dart";
@@ -52,7 +51,7 @@ class _MachineLearningSettingsPageState
   void initState() {
     super.initState();
     _wakeLock.enable();
-    MachineLearningController.instance.forceOverrideML(turnOn: true);
+    machineLearningController.forceOverrideML(turnOn: true);
     if (!MLService.instance.areModelsDownloaded) {
       _timer = Timer.periodic(const Duration(seconds: 10), (timer) {
         if (mounted) {
@@ -69,7 +68,7 @@ class _MachineLearningSettingsPageState
   void dispose() {
     super.dispose();
     _wakeLock.disable();
-    MachineLearningController.instance.forceOverrideML(turnOn: false);
+    machineLearningController.forceOverrideML(turnOn: false);
     _timer?.cancel();
     _advancedOptionsTimer?.cancel();
   }
@@ -210,7 +209,7 @@ class _MachineLearningSettingsPageState
   }
 
   Future<void> toggleIndexingState() async {
-    final hasGivenConsent = UserRemoteFlagService.instance
+    final hasGivenConsent = userRemoteFlagService
         .getCachedBoolValue(UserRemoteFlagService.mlEnabled);
     if (!localSettings.isMLIndexingEnabled && !hasGivenConsent) {
       final result = await Navigator.push(
@@ -232,8 +231,10 @@ class _MachineLearningSettingsPageState
       unawaited(MLService.instance.runAllML(force: true));
     } else {
       MLService.instance.pauseIndexingAndClustering();
-      await UserRemoteFlagService.instance
-          .setBoolValue(UserRemoteFlagService.mlEnabled, false);
+      await userRemoteFlagService.setBoolValue(
+        UserRemoteFlagService.mlEnabled,
+        false,
+      );
     }
     if (mounted) {
       setState(() {});
@@ -422,7 +423,7 @@ class MLStatusWidgetState extends State<MLStatusWidget> {
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               final bool isDeviceHealthy =
-                  MachineLearningController.instance.isDeviceHealthy;
+                  machineLearningController.isDeviceHealthy;
               final int indexedFiles = snapshot.data!.indexedItems;
               final int pendingFiles = snapshot.data!.pendingItems;
               final bool hasWifi = snapshot.data!.hasWifiEnabled!;

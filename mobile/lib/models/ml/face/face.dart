@@ -98,10 +98,10 @@ class Face {
       faceID,
       fileID,
       parseAsDoubleList(json['embedding'] as List),
-      json['score'] as double,
+      parseIntOrDoubleAsDouble(json['score'])!,
       Detection.fromJson(json['detection'] as Map<String, dynamic>),
       // high value means t
-      (json['blur'] ?? kLapacianDefault) as double,
+      parseIntOrDoubleAsDouble(json['blur']) ?? kLapacianDefault,
     );
   }
 
@@ -114,6 +114,13 @@ class Face {
         'score': score,
         'blur': blur,
       };
+}
+
+double? parseIntOrDoubleAsDouble(dynamic value) {
+  if (value == null) return null;
+  if (value is int) return value * 1.0;
+  if (value is double) return value;
+  return null;
 }
 
 List<double> parseAsDoubleList(List<dynamic> inputList) {

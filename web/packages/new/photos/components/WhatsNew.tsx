@@ -1,6 +1,6 @@
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { ensureElectron } from "@/base/electron";
-import { useIsMobileWidth } from "@/base/hooks";
+import { useIsSmallWidth } from "@/base/hooks";
 import { ut } from "@/base/i18n";
 import ArrowForward from "@mui/icons-material/ArrowForward";
 import {
@@ -29,7 +29,7 @@ interface WhatsNewProps {
  * last time this dialog was shown.
  */
 export const WhatsNew: React.FC<WhatsNewProps> = ({ open, onClose }) => {
-    const fullScreen = useIsMobileWidth();
+    const fullScreen = useIsSmallWidth();
 
     useEffect(() => {
         if (open) void didShowWhatsNew(ensureElectron());

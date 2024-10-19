@@ -1,4 +1,4 @@
-import { photosDialogZIndex } from "@/new/photos/components/z-index";
+import { photosDialogZIndex } from "@/new/photos/components/utils/z-index";
 import { AppContext } from "@/new/photos/types/context";
 import Notification from "components/Notification";
 import { t } from "i18next";

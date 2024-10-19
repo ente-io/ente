@@ -9,6 +9,8 @@ import "package:photos/core/network/network.dart";
 class RemoteAssetsService {
   static final _logger = Logger("RemoteAssetsService");
 
+  bool checkRemovedOldAssets = false;
+
   RemoteAssetsService._privateConstructor();
   final StreamController<(String, int, int)> _progressController =
       StreamController<(String, int, int)>.broadcast();
@@ -33,6 +35,7 @@ class RemoteAssetsService {
   }
 
   Future<String> getAssetPath(String remotePath, {bool refetch = false}) async {
+    await cleanupOldModelsIfNeeded();
     final file = await getAsset(remotePath, refetch: refetch);
     return file.path;
   }
@@ -111,5 +114,31 @@ class RemoteAssetsService {
     );
 
     _logger.info("Downloaded " + url);
+  }
+
+  Future<void> cleanupOldModelsIfNeeded() async {
+    if (checkRemovedOldAssets) return;
+    const oldModelNames = [
+      "https://models.ente.io/clip-image-vit-32-float32.onnx",
+      "https://models.ente.io/clip-text-vit-32-uint8.onnx",
+      "https://models.ente.io/mobileclip_s2_image.onnx",
+      "https://models.ente.io/mobileclip_s2_image_opset18_rgba_sim.onnx",
+      "https://models.ente.io/mobileclip_s2_text_int32.onnx",
+      "https://models.ente.io/yolov5s_face_640_640_dynamic.onnx",
+      "https://models.ente.io/yolov5s_face_opset18_rgba_opt.onnx",
+    ];
+
+    for (final remotePath in oldModelNames) {
+      final localPath = await _getLocalPath(remotePath);
+      if (File(localPath).existsSync()) {
+        _logger.info(
+          'Removing unused ML model ${remotePath.split('/').last} at $localPath',
+        );
+        await File(localPath).delete();
+      }
+    }
+
+    checkRemovedOldAssets = true;
+    _logger.info("Old ML models cleaned up");
   }
 }

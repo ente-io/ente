@@ -5,8 +5,7 @@ import { getKVN } from "@/base/kv";
 import { ensureAuthToken } from "@/base/local-user";
 import log from "@/base/log";
 import type { ElectronMLWorker } from "@/base/types/ipc";
-import type { EnteFile } from "@/new/photos/types/file";
-import { fileLogID } from "@/new/photos/utils/file";
+import { fileLogID, type EnteFile } from "@/media/file";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import { expose, wrap } from "comlink";
@@ -19,22 +18,22 @@ import {
     type ImageBitmapAndData,
 } from "./blob";
 import {
+    _clipMatches,
     clearCachedCLIPIndexes,
     clipIndexingVersion,
-    clipMatches,
     indexCLIP,
     type CLIPIndex,
 } from "./clip";
 import {
-    clusterFaces,
+    _clusterFaces,
     reconcileClusters,
     type ClusteringProgress,
 } from "./cluster";
 import { saveFaceCrops } from "./crop";
 import {
-    getFaceIndexes,
     getIndexableFileIDs,
     markIndexingFailed,
+    savedFaceIndexes,
     saveIndexes,
     updateAssumingLocalFiles,
 } from "./db";
@@ -45,6 +44,7 @@ import {
     type RawRemoteMLData,
     type RemoteMLData,
 } from "./ml-data";
+import { _suggestionsAndChoicesForPerson, type CGroupPerson } from "./people";
 import type { CLIPMatches, MLWorkerDelegate } from "./worker-types";
 
 /**
@@ -66,8 +66,8 @@ const idleDurationStart = 5; /* 5 seconds */
 const idleDurationMax = 16 * 60; /* 16 minutes */
 
 interface IndexableItem {
-    /** The {@link EnteFile} to index (potentially). */
-    enteFile: EnteFile;
+    /** The {@link EnteFile} to (potentially) index. */
+    file: EnteFile;
     /** If the file was uploaded from the current client, then its contents. */
     uploadItem: UploadItem | undefined;
     /** The existing ML data on remote corresponding to this file. */
@@ -182,7 +182,7 @@ export class MLWorker {
      * representation of the file's contents with us and won't need to download
      * the file from remote.
      */
-    onUpload(enteFile: EnteFile, uploadItem: UploadItem) {
+    onUpload(file: EnteFile, uploadItem: UploadItem) {
         // Add the recently uploaded file to the live indexing queue.
         //
         // Limit the queue to some maximum so that we don't keep growing
@@ -196,7 +196,7 @@ export class MLWorker {
         if (this.liveQ.length < 200) {
             // The file is just being uploaded, and so will not have any
             // pre-existing ML data on remote.
-            this.liveQ.push({ enteFile, uploadItem, remoteMLData: undefined });
+            this.liveQ.push({ file, uploadItem, remoteMLData: undefined });
             this.wakeUp();
         } else {
             log.debug(() => "Ignoring upload item since liveQ is full");
@@ -207,7 +207,7 @@ export class MLWorker {
      * Find {@link CLIPMatches} for a given normalized {@link searchPhrase}.
      */
     async clipMatches(searchPhrase: string): Promise<CLIPMatches | undefined> {
-        return clipMatches(searchPhrase, ensure(this.electron));
+        return _clipMatches(searchPhrase, ensure(this.electron));
     }
 
     private async tick() {
@@ -307,7 +307,7 @@ export class MLWorker {
 
         // Return files after annotating them with their existing ML data.
         return Array.from(fileByID, ([id, file]) => ({
-            enteFile: file,
+            file,
             uploadItem: undefined,
             remoteMLData: mlDataByID.get(id),
         }));
@@ -326,8 +326,8 @@ export class MLWorker {
      * cgroups if needed.
      */
     async clusterFaces(masterKey: Uint8Array) {
-        const clusters = await clusterFaces(
-            await getFaceIndexes(),
+        const clusters = await _clusterFaces(
+            await savedFaceIndexes(),
             await getAllLocalFiles(),
             (progress) => this.updateClusteringProgress(progress),
         );
@@ -338,6 +338,13 @@ export class MLWorker {
     private updateClusteringProgress(progress: ClusteringProgress | undefined) {
         this.clusteringProgess = progress;
         this.delegate?.workerDidUpdateStatus();
+    }
+
+    /**
+     * Return suggestions and choices for the given cgroup {@link person}.
+     */
+    async suggestionsAndChoicesForPerson(person: CGroupPerson) {
+        return _suggestionsAndChoicesForPerson(person);
     }
 }
 
@@ -487,11 +494,11 @@ const syncWithLocalFilesAndGetFilesToIndex = async (
  * then remote will return a 413 Request Entity Too Large).
  */
 const index = async (
-    { enteFile, uploadItem, remoteMLData }: IndexableItem,
+    { file, uploadItem, remoteMLData }: IndexableItem,
     electron: ElectronMLWorker,
 ) => {
-    const f = fileLogID(enteFile);
-    const fileID = enteFile.id;
+    const f = fileLogID(file);
+    const fileID = file.id;
 
     // Massage the existing data (if any) that we got from remote to the form
     // that the rest of this function operates on.
@@ -541,7 +548,7 @@ const index = async (
     // There is at least one ML data type that still needs to be indexed.
 
     const renderableBlob = await fetchRenderableBlob(
-        enteFile,
+        file,
         uploadItem,
         electron,
     );
@@ -557,7 +564,7 @@ const index = async (
         //
         // See: [Note: Transient and permanent indexing failures]
         log.error(`Failed to get image data for indexing ${f}`, e);
-        await markIndexingFailed(enteFile.id);
+        await markIndexingFailed(file.id);
         throw e;
     }
 
@@ -569,13 +576,13 @@ const index = async (
 
         try {
             [faceIndex, clipIndex] = await Promise.all([
-                existingFaceIndex ?? indexFaces(enteFile, image, electron),
+                existingFaceIndex ?? indexFaces(file, image, electron),
                 existingCLIPIndex ?? indexCLIP(image, electron),
             ]);
         } catch (e) {
             // See: [Note: Transient and permanent indexing failures]
             log.error(`Failed to index ${f}`, e);
-            await markIndexingFailed(enteFile.id);
+            await markIndexingFailed(file.id);
             throw e;
         }
 
@@ -613,11 +620,11 @@ const index = async (
         log.debug(() => ["Uploading ML data", rawMLData]);
 
         try {
-            await putMLData(enteFile, rawMLData);
+            await putMLData(file, rawMLData);
         } catch (e) {
             // See: [Note: Transient and permanent indexing failures]
             log.error(`Failed to put ML data for ${f}`, e);
-            if (isHTTP4xxError(e)) await markIndexingFailed(enteFile.id);
+            if (isHTTP4xxError(e)) await markIndexingFailed(file.id);
             throw e;
         }
 

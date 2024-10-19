@@ -9,6 +9,7 @@ import "package:photos/core/constants.dart";
 import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/subscription.dart';
+import "package:photos/service_locator.dart";
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common/loading_widget.dart';
@@ -29,7 +30,7 @@ class PaymentWebPage extends StatefulWidget {
 class _PaymentWebPageState extends State<PaymentWebPage> {
   final _logger = Logger("PaymentWebPageState");
   final UserService userService = UserService.instance;
-  final BillingService billingService = BillingService.instance;
+  late final BillingService billService = billingService;
   final String basePaymentUrl = kWebPaymentBaseEndpoint;
   InAppWebViewController? webView;
   double progress = 0;
@@ -143,6 +144,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
   // show dialog to handle accidental back press.
   Future<bool> _buildPageExitWidget(BuildContext context) async {
     final result = await showDialog(
+      useRootNavigator: false,
       context: context,
       builder: (context) => AlertDialog(
         title: Text(S.of(context).areYouSureYouWantToExit),
@@ -199,6 +201,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
 
   Future<void> _handlePaymentFailure(String reason) async {
     await showDialog(
+      useRootNavigator: false,
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
@@ -227,7 +230,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
     final checkoutSessionID = queryParams['session_id'] ?? '';
     try {
       // ignore: unused_local_variable
-      final response = await billingService.verifySubscription(
+      final response = await billService.verifySubscription(
         widget.planId,
         checkoutSessionID,
         paymentProvider: stripe,
@@ -251,6 +254,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
   // warn the user to wait for sometime before trying another payment
   Future<dynamic> _showExitPageDialog({String? title, String? content}) {
     return showDialog(
+      useRootNavigator: false,
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(

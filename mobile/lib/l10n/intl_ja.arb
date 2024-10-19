@@ -150,7 +150,7 @@
   "tryAgain": "もう一度試してください",
   "viewRecoveryKey": "リカバリキーを表示",
   "confirmRecoveryKey": "リカバリーキーを確認",
-  "recoveryKeyVerifyReason": "パスワードを忘れた場合、リカバリキーは写真を復元する唯一の方法です。 リカバリキーは、設定 > セキュリティ で見つけることができます。\n\nリカバリーキーをここに入力して、正しく保存したことを確認してください。",
+  "recoveryKeyVerifyReason": "パスワードを忘れた場合、リカバリーキーは写真を復元するための唯一の方法になります。なお、設定 > アカウント でリカバリーキーを確認することができます。\n \n\nここにリカバリーキーを入力して、正しく保存できていることを確認してください。",
   "confirmYourRecoveryKey": "リカバリーキーを確認",
   "addViewer": "ビューアーを追加",
   "addCollaborator": "コラボレーターを追加",
@@ -345,7 +345,7 @@
   "disableLinkMessage": "\"{albumName}\" にアクセスするための公開リンクが削除されます。",
   "sharing": "共有中...",
   "youCannotShareWithYourself": "自分自身と共有することはできません",
-  "archive": "アーカイブする",
+  "archive": "アーカイブ",
   "createAlbumActionHint": "長押しで写真を選択し、+をクリックしてアルバムを作成します",
   "importing": "インポート中...",
   "failedToLoadAlbums": "アルバムの読み込みに失敗しました",
@@ -1343,5 +1343,14 @@
   "mostRecent": "新しい順",
   "mostRelevant": "関連度順",
   "loadingYourPhotos": "写真を読み込んでいます...",
-  "processingImport": "{folderName} を処理中..."
+  "processingImport": "{folderName} を処理中...",
+  "personName": "Person name",
+  "addNewPerson": "Add new person",
+  "addNameOrMerge": "Add name or merge",
+  "mergeWithExisting": "Merge with existing",
+  "newPerson": "New person",
+  "addName": "Add name",
+  "add": "Add",
+  "extraPhotosFoundFor": "Extra photos found for $text",
+  "extraPhotosFound": "Extra photos found"
 }

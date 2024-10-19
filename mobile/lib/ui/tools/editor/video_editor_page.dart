@@ -99,6 +99,15 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
+      onPopInvoked: (didPop) {
+        if (!didPop) {
+          if (_isExporting.value) {
+            return;
+          } else {
+            replacePage(context, DetailPage(widget.detailPageConfig));
+          }
+        }
+      },
       child: Scaffold(
         appBar: AppBar(
           elevation: 0,

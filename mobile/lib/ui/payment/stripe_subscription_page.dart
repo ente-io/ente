@@ -9,7 +9,7 @@ import "package:photos/generated/l10n.dart";
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/models/subscription.dart';
 import 'package:photos/models/user_details.dart';
-import 'package:photos/services/billing_service.dart';
+import "package:photos/service_locator.dart";
 import 'package:photos/services/user_service.dart';
 import "package:photos/theme/colors.dart";
 import 'package:photos/theme/ente_theme.dart';
@@ -46,7 +46,7 @@ class StripeSubscriptionPage extends StatefulWidget {
 }
 
 class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
-  final _billingService = BillingService.instance;
+  late final _billingService = billingService;
   final _userService = UserService.instance;
   Subscription? _currentSubscription;
   late ProgressDialog _dialog;
@@ -484,7 +484,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                 (route) => false,
               );
               unawaited(
-                BillingService.instance.verifySubscription(
+                _billingService.verifySubscription(
                   freeProductID,
                   "",
                   paymentProvider: "ente",
@@ -609,7 +609,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
               (route) => false,
             );
             unawaited(
-              BillingService.instance.verifySubscription(
+              _billingService.verifySubscription(
                 freeProductID,
                 "",
                 paymentProvider: "ente",

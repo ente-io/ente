@@ -3,7 +3,7 @@ import { CustomHead } from "@/base/components/Head";
 import { AttributedMiniDialog } from "@/base/components/MiniDialog";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { AppNavbar } from "@/base/components/Navbar";
-import { useAttributedMiniDialog } from "@/base/components/utils/mini-dialog";
+import { useAttributedMiniDialog } from "@/base/components/utils/dialog";
 import { setupI18n } from "@/base/i18n";
 import { disableDiskLogs } from "@/base/log";
 import { logUnhandledErrorsAndRejections } from "@/base/log-web";

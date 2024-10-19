@@ -1,7 +1,7 @@
 import { EnteSwitch } from "@/base/components/EnteSwitch";
 import log from "@/base/log";
+import { EnteFile } from "@/media/file";
 import { AppContext } from "@/new/photos/types/context";
-import { EnteFile } from "@/new/photos/types/file";
 import ChangeDirectoryOption from "@ente/shared/components/ChangeDirectoryOption";
 import {
     SpaceBetweenFlex,

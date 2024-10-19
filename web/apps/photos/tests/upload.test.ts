@@ -1,4 +1,5 @@
 import { FileType } from "@/media/file-type";
+import { groupFilesBasedOnCollectionID } from "@/new/photos/services/file";
 import { getLocalFiles } from "@/new/photos/services/files";
 import { getLocalCollections } from "services/collectionService";
 import { parseDateFromDigitGroups } from "services/upload/date";
@@ -9,7 +10,6 @@ import {
     getMetadataJSONMapKeyForJSON,
 } from "services/upload/takeout";
 import { getUserDetailsV2 } from "services/userService";
-import { groupFilesBasedOnCollectionID } from "utils/file";
 
 const DATE_TIME_PARSING_TEST_FILE_NAMES = [
     {

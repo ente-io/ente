@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import "package:photos/app.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
-import 'package:photos/services/billing_service.dart';
+import "package:photos/service_locator.dart";
 import 'package:photos/services/user_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/components/captioned_text_widget.dart";
@@ -118,7 +118,7 @@ class GeneralSectionWidget extends StatelessWidget {
     final userDetails =
         await UserService.instance.getUserDetailsV2(memoryCount: false);
     // ignore: unawaited_futures
-    BillingService.instance.launchFamilyPortal(context, userDetails);
+    billingService.launchFamilyPortal(context, userDetails);
   }
 
   void _onNotificationsTapped(BuildContext context) {

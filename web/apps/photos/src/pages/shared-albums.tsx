@@ -2,19 +2,22 @@ import { EnteLogoSVG } from "@/base/components/EnteLogo";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { NavbarBase, SelectionBar } from "@/base/components/Navbar";
 import { sharedCryptoWorker } from "@/base/crypto";
-import { useIsMobileWidth, useIsTouchscreen } from "@/base/hooks";
+import { useIsSmallWidth, useIsTouchscreen } from "@/base/hooks";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
+import { type EnteFile, mergeMetadata } from "@/media/file";
 import {
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
 } from "@/new/photos/components/gallery/ListHeader";
 import { SpaceBetweenFlex } from "@/new/photos/components/mui";
+import {
+    ALL_SECTION,
+    isHiddenCollection,
+} from "@/new/photos/services/collection";
 import downloadManager from "@/new/photos/services/download";
 import { sortFiles } from "@/new/photos/services/files";
 import { AppContext } from "@/new/photos/types/context";
-import { EnteFile } from "@/new/photos/types/file";
-import { mergeMetadata } from "@/new/photos/utils/file";
 import {
     CenteredFlex,
     FluidContainer,
@@ -72,11 +75,7 @@ import {
     SetFilesDownloadProgressAttributes,
     SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
-import {
-    ALL_SECTION,
-    downloadCollectionFiles,
-    isHiddenCollection,
-} from "utils/collection";
+import { downloadCollectionFiles } from "utils/collection";
 import { downloadSelectedFiles, getSelectedFiles } from "utils/file";
 import { formatNumber } from "utils/number/format";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
@@ -544,7 +543,7 @@ export default function PublicCollectionGallery() {
                     uploadCollection={publicCollection}
                     setLoading={setBlockingLoad}
                     setShouldDisableDropzone={setShouldDisableDropzone}
-                    setFiles={setPublicFiles}
+                    onUploadFile={(file) => sortFiles([...publicFiles, file])}
                     uploadTypeSelectorView={uploadTypeSelectorView}
                     closeUploadTypeSelector={closeUploadTypeSelectorView}
                     showSessionExpiredMessage={showPublicLinkExpiredMessage}
@@ -603,13 +602,13 @@ const EnteLogoLink = styled("a")(({ theme }) => ({
 
 const AddPhotosButton: React.FC<ButtonProps & IconButtonProps> = (props) => {
     const disabled = !uploadManager.shouldAllowNewUpload();
-    const isMobileWidth = useIsMobileWidth();
+    const isSmallWidth = useIsSmallWidth();
 
     const icon = <AddPhotoAlternateOutlined />;
 
     return (
         <Box>
-            {isMobileWidth ? (
+            {isSmallWidth ? (
                 <IconButton {...props} disabled={disabled}>
                     {icon}
                 </IconButton>

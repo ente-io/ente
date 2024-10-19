@@ -9,7 +9,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
-import 'package:photos/services/update_service.dart';
+import "package:photos/service_locator.dart";
 import 'package:photos/ui/account/email_entry_page.dart';
 import 'package:photos/ui/account/login_page.dart';
 import 'package:photos/ui/account/password_entry_page.dart';
@@ -224,7 +224,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
   }
 
   Future<void> _navigateToSignUpPage() async {
-    UpdateService.instance.hideChangeLog().ignore();
+    updateService.hideChangeLog().ignore();
     Widget page;
     if (Configuration.instance.getEncryptedToken() == null) {
       page = const EmailEntryPage();
@@ -254,7 +254,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
   }
 
   void _navigateToSignInPage() {
-    UpdateService.instance.hideChangeLog().ignore();
+    updateService.hideChangeLog().ignore();
     Widget page;
     if (Configuration.instance.getEncryptedToken() == null) {
       page = const LoginPage();

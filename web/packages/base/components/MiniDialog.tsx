@@ -161,6 +161,39 @@ export const AttributedMiniDialog: React.FC<
 
     const { PaperProps, ...rest } = props;
 
+    const errorIndicator = phase == "failed" && (
+        <Typography variant="small" color="critical.main">
+            {t("generic_error")}
+        </Typography>
+    );
+
+    const loadingButton = attributes.continue && (
+        <LoadingButton
+            loading={phase == "loading"}
+            fullWidth
+            color={attributes.continue.color ?? "accent"}
+            autoFocus={attributes.continue.autoFocus}
+            onClick={async () => {
+                setPhase("loading");
+                try {
+                    await attributes.continue?.action?.();
+                    resetPhaseAndClose();
+                } catch (e) {
+                    log.error("Error", e);
+                    setPhase("failed");
+                }
+            }}
+        >
+            {attributes.continue.text ?? t("ok")}
+        </LoadingButton>
+    );
+
+    const cancelButton = cancelTitle && (
+        <FocusVisibleButton fullWidth color="secondary" onClick={handleCancel}>
+            {cancelTitle}
+        </FocusVisibleButton>
+    );
+
     return (
         <Dialog
             open={open}
@@ -180,11 +213,15 @@ export const AttributedMiniDialog: React.FC<
                     sx={{
                         display: "flex",
                         justifyContent: "space-between",
+                        alignItems: "center",
                         "& > svg": {
                             fontSize: "32px",
                             color: "text.faint",
                         },
-                        padding: "24px 16px 16px 16px",
+                        padding:
+                            attributes.icon && attributes.title
+                                ? "20px 16px 16px 16px"
+                                : "24px 16px 16px 16px",
                     }}
                 >
                     {attributes.title && (
@@ -213,39 +250,17 @@ export const AttributedMiniDialog: React.FC<
                     sx={{ paddingBlockStart: "24px", gap: "12px" }}
                     direction={attributes.buttonDirection ?? "column"}
                 >
-                    {phase == "failed" && (
-                        <Typography variant="small" color="critical.main">
-                            {t("generic_error")}
-                        </Typography>
-                    )}
-                    {attributes.continue && (
-                        <LoadingButton
-                            loading={phase == "loading"}
-                            fullWidth
-                            color={attributes.continue.color ?? "accent"}
-                            autoFocus={attributes.continue.autoFocus}
-                            onClick={async () => {
-                                setPhase("loading");
-                                try {
-                                    await attributes.continue?.action?.();
-                                    resetPhaseAndClose();
-                                } catch (e) {
-                                    log.error("Error", e);
-                                    setPhase("failed");
-                                }
-                            }}
-                        >
-                            {attributes.continue.text ?? t("ok")}
-                        </LoadingButton>
-                    )}
-                    {cancelTitle && (
-                        <FocusVisibleButton
-                            fullWidth
-                            color="secondary"
-                            onClick={handleCancel}
-                        >
-                            {cancelTitle}
-                        </FocusVisibleButton>
+                    {errorIndicator}
+                    {attributes.buttonDirection == "row" ? (
+                        <>
+                            {cancelButton}
+                            {loadingButton}
+                        </>
+                    ) : (
+                        <>
+                            {loadingButton}
+                            {cancelButton}
+                        </>
                     )}
                 </Stack>
             </DialogContent>

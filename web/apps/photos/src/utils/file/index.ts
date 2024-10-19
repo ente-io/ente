@@ -1,11 +1,7 @@
 import { sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
 import { type Electron } from "@/base/types/ipc";
-import { ItemVisibility } from "@/media/file-metadata";
-import { FileType } from "@/media/file-type";
-import { decodeLivePhoto } from "@/media/live-photo";
-import DownloadManager from "@/new/photos/services/download";
-import { updateExifIfNeededAndPossible } from "@/new/photos/services/exif-update";
+import { downloadAndRevokeObjectURL } from "@/base/utils/web";
 import {
     EncryptedEnteFile,
     EnteFile,
@@ -14,12 +10,20 @@ import {
     FilePublicMagicMetadata,
     FilePublicMagicMetadataProps,
     FileWithUpdatedMagicMetadata,
-} from "@/new/photos/types/file";
+    mergeMetadata,
+} from "@/media/file";
+import { ItemVisibility } from "@/media/file-metadata";
+import { FileType } from "@/media/file-type";
+import { decodeLivePhoto } from "@/media/live-photo";
+import DownloadManager from "@/new/photos/services/download";
+import { updateExifIfNeededAndPossible } from "@/new/photos/services/exif-update";
+import {
+    isArchivedFile,
+    updateMagicMetadata,
+} from "@/new/photos/services/magic-metadata";
 import { detectFileTypeInfo } from "@/new/photos/utils/detect-type";
-import { mergeMetadata } from "@/new/photos/utils/file";
 import { safeFileName } from "@/new/photos/utils/native-fs";
 import { writeStream } from "@/new/photos/utils/native-stream";
-import { downloadAndRevokeObjectURL } from "@/new/photos/utils/web";
 import { withTimeout } from "@/utils/promise";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";
@@ -39,7 +43,6 @@ import {
     SetFilesDownloadProgressAttributes,
     SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
-import { isArchivedFile, updateMagicMetadata } from "utils/magicMetadata";
 
 export enum FILE_OPS_TYPE {
     DOWNLOAD,
@@ -88,17 +91,6 @@ export async function downloadFile(file: EnteFile) {
         throw e;
     }
 }
-
-/** Segment the given {@link files} into lists indexed by their collection ID */
-export const groupFilesBasedOnCollectionID = (files: EnteFile[]) => {
-    const result = new Map<number, EnteFile[]>();
-    for (const file of files) {
-        const id = file.collectionID;
-        if (!result.has(id)) result.set(id, []);
-        result.get(id).push(file);
-    }
-    return result;
-};
 
 function getSelectedFileIds(selectedFiles: SelectedState) {
     const filesIDs: number[] = [];
@@ -258,20 +250,6 @@ export async function getFileFromURL(fileURL: string, name: string) {
     const fileBlob = await (await fetch(fileURL)).blob();
     const fileFile = new File([fileBlob], name);
     return fileFile;
-}
-
-export function getUniqueFiles(files: EnteFile[]) {
-    const idSet = new Set<number>();
-    const uniqueFiles = files.filter((file) => {
-        if (!idSet.has(file.id)) {
-            idSet.add(file.id);
-            return true;
-        } else {
-            return false;
-        }
-    });
-
-    return uniqueFiles;
 }
 
 export async function downloadFilesWithProgress(
@@ -519,22 +497,6 @@ export const copyFileToClipboard = async (fileURL: string) => {
     await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
 };
 
-export function getLatestVersionFiles(files: EnteFile[]) {
-    const latestVersionFiles = new Map<string, EnteFile>();
-    files.forEach((file) => {
-        const uid = `${file.collectionID}-${file.id}`;
-        if (
-            !latestVersionFiles.has(uid) ||
-            latestVersionFiles.get(uid).updationTime < file.updationTime
-        ) {
-            latestVersionFiles.set(uid, file);
-        }
-    });
-    return Array.from(latestVersionFiles.values()).filter(
-        (file) => !file.isDeleted,
-    );
-}
-
 export function getPersonalFiles(
     files: EnteFile[],
     user: User,
@@ -602,7 +564,6 @@ export const handleFileOps = async (
             | ((prev: { files: EnteFile[] }) => { files: EnteFile[] }),
     ) => void,
     setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator,
-    refreshFavItemIds: () => void,
 ) => {
     switch (ops) {
         case FILE_OPS_TYPE.TRASH:
@@ -635,7 +596,7 @@ export const handleFileOps = async (
             await changeFilesVisibility(files, ItemVisibility.visible);
             break;
         case FILE_OPS_TYPE.SET_FAVORITE:
-            await setBulkFavorite(files, refreshFavItemIds);
+            await addMultipleToFavorites(files);
             break;
     }
 };
@@ -688,16 +649,4 @@ const fixTimeHelper = async (
     }) => void,
 ) => {
     setFixCreationTimeAttributes({ files: selectedFiles });
-};
-
-const setBulkFavorite = async (
-    files: EnteFile[],
-    refreshFavItemIds: () => void,
-) => {
-    try {
-        await addMultipleToFavorites(files);
-        refreshFavItemIds();
-    } catch (e) {
-        log.error("Could not add to favorites", e);
-    }
 };

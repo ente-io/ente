@@ -7,6 +7,7 @@ import { useModalVisibility } from "@/base/components/utils/modal";
 import { nameAndExtension } from "@/base/file";
 import log from "@/base/log";
 import type { Location } from "@/base/types";
+import { EnteFile } from "@/media/file";
 import type { ParsedMetadata } from "@/media/file-metadata";
 import {
     fileCreationPhotoDate,
@@ -15,42 +16,42 @@ import {
     type ParsedMetadataDate,
 } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
-import {
-    AnnotatedFacePeopleList,
-    UnclusteredFaceList,
-} from "@/new/photos/components/PeopleList";
+import { type ButtonishProps } from "@/new/photos/components/mui";
+import { ChipButton } from "@/new/photos/components/mui/ChipButton";
+import { FilePeopleList } from "@/new/photos/components/PeopleList";
 import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker";
-import { fileInfoDrawerZIndex } from "@/new/photos/components/z-index";
+import { fileInfoDrawerZIndex } from "@/new/photos/components/utils/z-index";
 import { tagNumericValue, type RawExifTags } from "@/new/photos/services/exif";
 import {
-    AnnotatedFacesForFile,
     getAnnotatedFacesForFile,
     isMLEnabled,
     type AnnotatedFaceID,
 } from "@/new/photos/services/ml";
 import { AppContext } from "@/new/photos/types/context";
-import { EnteFile } from "@/new/photos/types/file";
 import { formattedByteSize } from "@/new/photos/utils/units";
 import CopyButton from "@ente/shared/components/CodeBlock/CopyButton";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import { getPublicMagicMetadataSync } from "@ente/shared/file-metadata";
 import { formatDate, formatTime } from "@ente/shared/time/format";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import CameraOutlined from "@mui/icons-material/CameraOutlined";
-import FolderOutlined from "@mui/icons-material/FolderOutlined";
-import LocationOnOutlined from "@mui/icons-material/LocationOnOutlined";
-import PhotoOutlined from "@mui/icons-material/PhotoOutlined";
-import TextSnippetOutlined from "@mui/icons-material/TextSnippetOutlined";
-import VideocamOutlined from "@mui/icons-material/VideocamOutlined";
+import CameraOutlinedIcon from "@mui/icons-material/CameraOutlined";
+import EditIcon from "@mui/icons-material/Edit";
+import FaceRetouchingNaturalIcon from "@mui/icons-material/FaceRetouchingNatural";
+import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
+import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
+import PhotoOutlinedIcon from "@mui/icons-material/PhotoOutlined";
+import TextSnippetOutlinedIcon from "@mui/icons-material/TextSnippetOutlined";
+import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
 import {
     Box,
+    CircularProgress,
     DialogProps,
+    IconButton,
     Link,
     Stack,
     styled,
     Typography,
 } from "@mui/material";
-import { Chip } from "components/Chip";
 import LinkButton from "components/pages/gallery/LinkButton";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
@@ -59,7 +60,6 @@ import { Trans } from "react-i18next";
 import { changeFileName, updateExistingFilePubMetadata } from "utils/file";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import { FileNameEditDialog } from "./FileNameEditDialog";
-import InfoItem from "./InfoItem";
 import MapBox from "./MapBox";
 import { RenderCaption } from "./RenderCaption";
 
@@ -110,9 +110,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     const [exifInfo, setExifInfo] = useState<ExifInfo | undefined>();
     const { show: showRawExif, props: rawExifVisibilityProps } =
         useModalVisibility();
-    const [annotatedFaces, setAnnotatedFaces] = useState<
-        AnnotatedFacesForFile | undefined
-    >();
+    const [annotatedFaces, setAnnotatedFaces] = useState<AnnotatedFaceID[]>([]);
 
     const location = useMemo(() => {
         if (file) {
@@ -181,7 +179,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                 />
 
                 <CreationTime
-                    {...{ enteFile: file, shouldDisableEdits, scheduleUpdate }}
+                    {...{ file, shouldDisableEdits, scheduleUpdate }}
                 />
 
                 <RenderFileName
@@ -195,19 +193,18 @@ export const FileInfo: React.FC<FileInfoProps> = ({
 
                 {exifInfo?.takenOnDevice && (
                     <InfoItem
-                        icon={<CameraOutlined />}
+                        icon={<CameraOutlinedIcon />}
                         title={exifInfo?.takenOnDevice}
                         caption={
                             <BasicDeviceCamera {...{ parsedExif: exifInfo }} />
                         }
-                        hideEditOption
                     />
                 )}
 
                 {location && (
                     <>
                         <InfoItem
-                            icon={<LocationOnOutlined />}
+                            icon={<LocationOnOutlinedIcon />}
                             title={t("location")}
                             caption={
                                 !mapEnabled ||
@@ -235,7 +232,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                                     </LinkButton>
                                 )
                             }
-                            customEndButton={
+                            trailingButton={
                                 <CopyButton
                                     code={openStreetMapLink(location)}
                                     color="secondary"
@@ -255,7 +252,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                     </>
                 )}
                 <InfoItem
-                    icon={<TextSnippetOutlined />}
+                    icon={<TextSnippetOutlinedIcon />}
                     title={t("DETAILS")}
                     caption={
                         !exif ? (
@@ -275,10 +272,19 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                             </LinkButton>
                         )
                     }
-                    hideEditOption
                 />
+                {isMLEnabled() && annotatedFaces.length > 0 && (
+                    <InfoItem icon={<FaceRetouchingNaturalIcon />}>
+                        {/*t("UNIDENTIFIED_FACES")  TODO-Cluster remove */}
+                        <FilePeopleList
+                            file={file}
+                            annotatedFaceIDs={annotatedFaces}
+                            onSelectFace={handleSelectFace}
+                        />
+                    </InfoItem>
+                )}
                 {showCollectionChips && (
-                    <InfoItem icon={<FolderOutlined />} hideEditOption>
+                    <InfoItem icon={<FolderOutlinedIcon />}>
                         <Box
                             display={"flex"}
                             gap={1}
@@ -292,31 +298,17 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                                     collectionNameMap.has(collectionID),
                                 )
                                 ?.map((collectionID) => (
-                                    <Chip
+                                    <ChipButton
                                         key={collectionID}
                                         onClick={() =>
                                             onCollectionChipClick(collectionID)
                                         }
                                     >
                                         {collectionNameMap.get(collectionID)}
-                                    </Chip>
+                                    </ChipButton>
                                 ))}
                         </Box>
                     </InfoItem>
-                )}
-
-                {isMLEnabled() && annotatedFaces && (
-                    <>
-                        <AnnotatedFacePeopleList
-                            enteFile={file}
-                            annotatedFaceIDs={annotatedFaces.annotatedFaceIDs}
-                            onSelectFace={handleSelectFace}
-                        />
-                        <UnclusteredFaceList
-                            enteFile={file}
-                            faceIDs={annotatedFaces.otherFaceIDs}
-                        />
-                    </>
                 )}
             </Stack>
 
@@ -416,14 +408,109 @@ const FileInfoSidebar = styled((props: DialogProps) => (
     },
 });
 
+interface InfoItemProps {
+    /**
+     * The icon associated with the info entry.
+     */
+    icon: React.ReactNode;
+    /**
+     * The primary content / title of the info entry.
+     *
+     * Only used if {@link children} are not specified.
+     */
+    title?: string;
+    /**
+     * The secondary information / subtext associated with the info entry.
+     *
+     * Only used if {@link children} are not specified.
+     */
+    caption?: React.ReactNode;
+    /**
+     * A component, usually a button (e.g. an "edit button"), shown at the
+     * trailing edge of the info entry.
+     */
+    trailingButton?: React.ReactNode;
+}
+
+/**
+ * An entry in the file info panel listing.
+ */
+const InfoItem: React.FC<React.PropsWithChildren<InfoItemProps>> = ({
+    icon,
+    title,
+    caption,
+    trailingButton,
+    children,
+}) => (
+    <Box
+        sx={{
+            display: "flex",
+            alignItems: "flex-start",
+            flex: 1,
+            gap: "12px",
+        }}
+    >
+        <InfoItemIconContainer>{icon}</InfoItemIconContainer>
+        <Box sx={{ flex: 1, mt: "4px" }}>
+            {children ? (
+                children
+            ) : (
+                <>
+                    <Typography sx={{ wordBreak: "break-all" }}>
+                        {title}
+                    </Typography>
+                    <Typography
+                        variant="small"
+                        color="text.muted"
+                        {...(typeof caption == "string"
+                            ? {}
+                            : { component: "div" })}
+                    >
+                        {caption}
+                    </Typography>
+                </>
+            )}
+        </Box>
+        {trailingButton}
+    </Box>
+);
+
+const InfoItemIconContainer = styled("div")(
+    ({ theme }) => `
+    width: 48px;
+    aspect-ratio: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: ${theme.colors.stroke.muted}
+`,
+);
+
+type EditButtonProps = ButtonishProps & {
+    /**
+     * If true, then an activity indicator is shown in place of the edit icon.
+     */
+    loading?: boolean;
+};
+
+const EditButton: React.FC<EditButtonProps> = ({ onClick, loading }) => (
+    <IconButton onClick={onClick} disabled={loading} color="secondary">
+        {!loading ? (
+            <EditIcon />
+        ) : (
+            <CircularProgress size={"24px"} color="inherit" />
+        )}
+    </IconButton>
+);
+
 interface CreationTimeProps {
-    enteFile: EnteFile;
+    file: EnteFile;
     shouldDisableEdits: boolean;
     scheduleUpdate: () => void;
 }
 
 export const CreationTime: React.FC<CreationTimeProps> = ({
-    enteFile,
+    file,
     shouldDisableEdits,
     scheduleUpdate,
 }) => {
@@ -433,13 +520,13 @@ export const CreationTime: React.FC<CreationTimeProps> = ({
     const openEditMode = () => setIsInEditMode(true);
     const closeEditMode = () => setIsInEditMode(false);
 
-    const publicMagicMetadata = getPublicMagicMetadataSync(enteFile);
-    const originalDate = fileCreationPhotoDate(enteFile, publicMagicMetadata);
+    const publicMagicMetadata = getPublicMagicMetadataSync(file);
+    const originalDate = fileCreationPhotoDate(file, publicMagicMetadata);
 
     const saveEdits = async (pickedTime: ParsedMetadataDate) => {
         try {
             setLoading(true);
-            if (isInEditMode && enteFile) {
+            if (isInEditMode && file) {
                 // [Note: Don't modify offsetTime when editing date via picker]
                 //
                 // Use the updated date time (both in its canonical dateTime
@@ -459,7 +546,7 @@ export const CreationTime: React.FC<CreationTimeProps> = ({
                     return;
                 }
 
-                await updateRemotePublicMagicMetadata(enteFile, {
+                await updateRemotePublicMagicMetadata(file, {
                     dateTime,
                     editedTime: timestamp,
                 });
@@ -481,9 +568,14 @@ export const CreationTime: React.FC<CreationTimeProps> = ({
                     icon={<CalendarTodayIcon />}
                     title={formatDate(originalDate)}
                     caption={formatTime(originalDate)}
-                    openEditor={openEditMode}
-                    loading={loading}
-                    hideEditOption={shouldDisableEdits || isInEditMode}
+                    trailingButton={
+                        shouldDisableEdits || (
+                            <EditButton
+                                onClick={openEditMode}
+                                loading={loading}
+                            />
+                        )
+                    }
                 />
                 {isInEditMode && (
                     <PhotoDateTimePicker
@@ -541,15 +633,16 @@ const RenderFileName: React.FC<RenderFileNameProps> = ({
             <InfoItem
                 icon={
                     file.metadata.fileType === FileType.video ? (
-                        <VideocamOutlined />
+                        <VideocamOutlinedIcon />
                     ) : (
-                        <PhotoOutlined />
+                        <PhotoOutlinedIcon />
                     )
                 }
                 title={[fileName, extension].join(".")}
                 caption={getCaption(file, exifInfo)}
-                openEditor={openEditMode}
-                hideEditOption={shouldDisableEdits || isInEditMode}
+                trailingButton={
+                    shouldDisableEdits || <EditButton onClick={openEditMode} />
+                }
             />
             <FileNameEditDialog
                 isInEditMode={isInEditMode}

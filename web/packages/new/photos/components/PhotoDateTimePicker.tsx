@@ -6,7 +6,7 @@ import {
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
 import React, { useState } from "react";
-import { fileInfoDrawerZIndex } from "./z-index";
+import { fileInfoDrawerZIndex } from "./utils/z-index";
 
 interface PhotoDateTimePickerProps {
     /**

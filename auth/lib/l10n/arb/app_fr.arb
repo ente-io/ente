@@ -478,5 +478,6 @@
   "enterPin": "Saisir le code PIN",
   "setNewPin": "Définir un nouveau code PIN",
   "importFailureDescNew": "Impossible de lire le fichier sélectionné.",
-  "authToViewPasskey": "Veuillez vous authentifier pour afficher la clé d'accès"
+  "authToViewPasskey": "Veuillez vous authentifier pour afficher la clé d'accès",
+  "appLockOfflineModeWarning": "Vous avez choisi de fonctionner sans sauvegardes. Si vous oubliez votre outil Applock, vous serez bloqué dans l'accès à vos données."
 }

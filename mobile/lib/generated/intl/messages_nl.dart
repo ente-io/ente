@@ -146,6 +146,8 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m45(toEmail) =>
       "Verstuur de logboeken alstublieft naar ${toEmail}";
 
+  static String m46(folderName) => "Verwerken van ${folderName}...";
+
   static String m47(storeName) => "Beoordeel ons op ${storeName}";
 
   static String m48(storageInGB) =>
@@ -236,6 +238,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Ik begrijp dat als ik mijn wachtwoord verlies, ik mijn gegevens kan verliezen omdat mijn gegevens <underline>end-to-end versleuteld</underline> zijn."),
         "activeSessions":
             MessageLookupByLibrary.simpleMessage("Actieve sessies"),
+        "add": MessageLookupByLibrary.simpleMessage("Add"),
         "addAName": MessageLookupByLibrary.simpleMessage("Een naam toevoegen"),
         "addANewEmail":
             MessageLookupByLibrary.simpleMessage("Nieuw e-mailadres toevoegen"),
@@ -249,7 +252,11 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Locatie toevoegen"),
         "addLocationButton": MessageLookupByLibrary.simpleMessage("Toevoegen"),
         "addMore": MessageLookupByLibrary.simpleMessage("Meer toevoegen"),
+        "addName": MessageLookupByLibrary.simpleMessage("Add name"),
+        "addNameOrMerge":
+            MessageLookupByLibrary.simpleMessage("Add name or merge"),
         "addNew": MessageLookupByLibrary.simpleMessage("Nieuwe toevoegen"),
+        "addNewPerson": MessageLookupByLibrary.simpleMessage("Add new person"),
         "addOnPageSubtitle":
             MessageLookupByLibrary.simpleMessage("Details van add-ons"),
         "addOnValidTill": m5,
@@ -497,10 +504,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "collageLayout": MessageLookupByLibrary.simpleMessage("Layout"),
         "collageSaved": MessageLookupByLibrary.simpleMessage(
             "Collage opgeslagen in gallerij"),
+        "collect": MessageLookupByLibrary.simpleMessage("Verzamelen"),
         "collectEventPhotos": MessageLookupByLibrary.simpleMessage(
             "Foto\'s van gebeurtenissen verzamelen"),
         "collectPhotos":
             MessageLookupByLibrary.simpleMessage("Foto\'s verzamelen"),
+        "collectPhotosDescription": MessageLookupByLibrary.simpleMessage(
+            "Maak een link waarin je vrienden foto\'s kunnen uploaden in de originele kwaliteit."),
         "color": MessageLookupByLibrary.simpleMessage("Kleur"),
         "confirm": MessageLookupByLibrary.simpleMessage("Bevestig"),
         "confirm2FADisable": MessageLookupByLibrary.simpleMessage(
@@ -657,6 +667,27 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Tweestapsverificatie uitschakelen..."),
         "discord": MessageLookupByLibrary.simpleMessage("Discord"),
+        "discover": MessageLookupByLibrary.simpleMessage("Ontdek"),
+        "discover_babies": MessageLookupByLibrary.simpleMessage("Baby\'s"),
+        "discover_celebrations":
+            MessageLookupByLibrary.simpleMessage("Vieringen"),
+        "discover_food": MessageLookupByLibrary.simpleMessage("Voedsel"),
+        "discover_greenery": MessageLookupByLibrary.simpleMessage("Natuur"),
+        "discover_hills": MessageLookupByLibrary.simpleMessage("Heuvels"),
+        "discover_identity": MessageLookupByLibrary.simpleMessage("Identiteit"),
+        "discover_memes": MessageLookupByLibrary.simpleMessage("Memes"),
+        "discover_notes": MessageLookupByLibrary.simpleMessage("Notities"),
+        "discover_pets": MessageLookupByLibrary.simpleMessage("Huisdieren"),
+        "discover_receipts": MessageLookupByLibrary.simpleMessage("Bonnen"),
+        "discover_screenshots":
+            MessageLookupByLibrary.simpleMessage("Schermafbeeldingen"),
+        "discover_selfies": MessageLookupByLibrary.simpleMessage("Selfies"),
+        "discover_sunset":
+            MessageLookupByLibrary.simpleMessage("Zonsondergang"),
+        "discover_visiting_cards":
+            MessageLookupByLibrary.simpleMessage("Visite kaartjes"),
+        "discover_wallpapers":
+            MessageLookupByLibrary.simpleMessage("Achtergronden"),
         "dismiss": MessageLookupByLibrary.simpleMessage("Afwijzen"),
         "distanceInKMUnit": MessageLookupByLibrary.simpleMessage("km"),
         "doNotSignOut": MessageLookupByLibrary.simpleMessage("Niet uitloggen"),
@@ -763,6 +794,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Logboek exporteren"),
         "exportYourData":
             MessageLookupByLibrary.simpleMessage("Exporteer je gegevens"),
+        "extraPhotosFound":
+            MessageLookupByLibrary.simpleMessage("Extra photos found"),
+        "extraPhotosFoundFor": MessageLookupByLibrary.simpleMessage(
+            "Extra photos found for \$text"),
         "faceRecognition":
             MessageLookupByLibrary.simpleMessage("Gezichtsherkenning"),
         "faces": MessageLookupByLibrary.simpleMessage("Gezichten"),
@@ -974,7 +1009,11 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Uw foto\'s laden..."),
         "loadingModel":
             MessageLookupByLibrary.simpleMessage("Modellen downloaden..."),
+        "loadingYourPhotos": MessageLookupByLibrary.simpleMessage(
+            "Je foto\'s worden geladen..."),
         "localGallery": MessageLookupByLibrary.simpleMessage("Lokale galerij"),
+        "localSyncErrorMessage": MessageLookupByLibrary.simpleMessage(
+            "Het lijkt erop dat er iets mis is gegaan omdat het synchroniseren van lokale foto\'s meer tijd kost dan verwacht. Neem contact op met ons supportteam"),
         "location": MessageLookupByLibrary.simpleMessage("Locatie"),
         "locationName": MessageLookupByLibrary.simpleMessage("Locatie naam"),
         "locationTagFeatureDescription": MessageLookupByLibrary.simpleMessage(
@@ -1027,6 +1066,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "matrix": MessageLookupByLibrary.simpleMessage("Matrix"),
         "memoryCount": m0,
         "merchandise": MessageLookupByLibrary.simpleMessage("Merchandise"),
+        "mergeWithExisting":
+            MessageLookupByLibrary.simpleMessage("Merge with existing"),
         "mlConsent":
             MessageLookupByLibrary.simpleMessage("Schakel machine learning in"),
         "mlConsentConfirmation": MessageLookupByLibrary.simpleMessage(
@@ -1048,6 +1089,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "moments": MessageLookupByLibrary.simpleMessage("Momenten"),
         "monthly": MessageLookupByLibrary.simpleMessage("Maandelijks"),
         "moreDetails": MessageLookupByLibrary.simpleMessage("Meer details"),
+        "mostRecent": MessageLookupByLibrary.simpleMessage("Meest recent"),
+        "mostRelevant": MessageLookupByLibrary.simpleMessage("Meest relevant"),
         "moveItem": m37,
         "moveToAlbum":
             MessageLookupByLibrary.simpleMessage("Verplaats naar album"),
@@ -1059,12 +1102,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "movingFilesToAlbum": MessageLookupByLibrary.simpleMessage(
             "Bestanden verplaatsen naar album..."),
         "name": MessageLookupByLibrary.simpleMessage("Naam"),
+        "nameTheAlbum": MessageLookupByLibrary.simpleMessage("Album benoemen"),
         "networkConnectionRefusedErr": MessageLookupByLibrary.simpleMessage(
             "Kan geen verbinding maken met Ente, probeer het later opnieuw. Als de fout zich blijft voordoen, neem dan contact op met support."),
         "networkHostLookUpErr": MessageLookupByLibrary.simpleMessage(
             "Kan geen verbinding maken met Ente, controleer uw netwerkinstellingen en neem contact op met ondersteuning als de fout zich blijft voordoen."),
         "never": MessageLookupByLibrary.simpleMessage("Nooit"),
         "newAlbum": MessageLookupByLibrary.simpleMessage("Nieuw album"),
+        "newPerson": MessageLookupByLibrary.simpleMessage("New person"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("Nieuw bij Ente"),
         "newest": MessageLookupByLibrary.simpleMessage("Nieuwste"),
         "next": MessageLookupByLibrary.simpleMessage("Volgende"),
@@ -1166,6 +1211,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Permanent verwijderen"),
         "permanentlyDeleteFromDevice": MessageLookupByLibrary.simpleMessage(
             "Permanent verwijderen van apparaat?"),
+        "personName": MessageLookupByLibrary.simpleMessage("Person name"),
         "photoDescriptions":
             MessageLookupByLibrary.simpleMessage("Foto beschrijvingen"),
         "photoGridSize":
@@ -1227,6 +1273,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "privateBackups":
             MessageLookupByLibrary.simpleMessage("Privé back-ups"),
         "privateSharing": MessageLookupByLibrary.simpleMessage("Privé delen"),
+        "processingImport": m46,
         "publicLinkCreated":
             MessageLookupByLibrary.simpleMessage("Publieke link aangemaakt"),
         "publicLinkEnabled":
@@ -1475,6 +1522,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharing": MessageLookupByLibrary.simpleMessage("Delen..."),
         "showMemories":
             MessageLookupByLibrary.simpleMessage("Toon herinneringen"),
+        "showPerson": MessageLookupByLibrary.simpleMessage("Toon persoon"),
         "signOutFromOtherDevices":
             MessageLookupByLibrary.simpleMessage("Log uit op andere apparaten"),
         "signOutOtherBody": MessageLookupByLibrary.simpleMessage(
@@ -1515,6 +1563,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease":
             MessageLookupByLibrary.simpleMessage(
                 "Sorry, we konden geen beveiligde sleutels genereren op dit apparaat.\n\nGelieve je aan te melden vanaf een ander apparaat."),
+        "sort": MessageLookupByLibrary.simpleMessage("Sorteren"),
         "sortAlbumsBy": MessageLookupByLibrary.simpleMessage("Sorteren op"),
         "sortNewestFirst":
             MessageLookupByLibrary.simpleMessage("Nieuwste eerst"),
@@ -1537,6 +1586,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "subAlreadyLinkedErrMessage": m62,
         "subWillBeCancelledOn": m63,
         "subscribe": MessageLookupByLibrary.simpleMessage("Abonneer"),
+        "subscribeToEnableSharing": MessageLookupByLibrary.simpleMessage(
+            "Je hebt een actief betaald abonnement nodig om delen mogelijk te maken."),
         "subscription": MessageLookupByLibrary.simpleMessage("Abonnement"),
         "success": MessageLookupByLibrary.simpleMessage("Succes"),
         "successfullyArchived":

@@ -1,5 +1,5 @@
 import log from "@/base/log";
-import { EnteFile } from "@/new/photos/types/file";
+import { EnteFile } from "@/media/file";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import Close from "@mui/icons-material/Close";
 import Done from "@mui/icons-material/Done";

@@ -679,14 +679,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.0"
-  fk_user_agent:
-    dependency: "direct main"
-    description:
-      name: fk_user_agent
-      sha256: fd6c94e120786985a292d12f61422a581f4e851148d5940af38b819357b8ad0d
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.1.0"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -1085,14 +1077,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.2"
-  heif_converter:
-    dependency: "direct main"
-    description:
-      name: heif_converter
-      sha256: "63ffc2a72026942de3fcb61450da197100759936085c8279aef35b995b3c1bb3"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.0"
   hex:
     dependency: transitive
     description:
@@ -1737,7 +1721,7 @@ packages:
     description:
       path: "."
       ref: ios_only
-      resolved-ref: "70e163745e082b81235d7330b9d5e8c110ed68e4"
+      resolved-ref: "212b2cab85647c6d2ffee213dc3b875ef2bf6504"
       url: "https://github.com/ente-io/onnxruntime.git"
     source: git
     version: "1.4.1"
@@ -2563,6 +2547,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.2"
+  ua_client_hints:
+    dependency: "direct main"
+    description:
+      name: ua_client_hints
+      sha256: dfea54a1b4d259c057d0f33f198094cf4e09e1a21d347baadbe6dbd3d820c0d4
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.4.0"
   uni_links:
     dependency: "direct main"
     description:

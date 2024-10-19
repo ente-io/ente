@@ -9,7 +9,7 @@
 
 import { assertionFailed } from "@/base/assert";
 import type { ElectronMLWorker } from "@/base/types/ipc";
-import type { EnteFile } from "@/new/photos/types/file";
+import type { EnteFile } from "@/media/file";
 import { Matrix } from "ml-matrix";
 import { getSimilarityTransformation } from "similarity-transformation";
 import type { ImageBitmapAndData } from "./blob";
@@ -249,7 +249,7 @@ export const fileIDFromFaceID = (faceID: string) => {
  * remote storage so that their other devices can download them instead of
  * needing to reindex.
  *
- * @param enteFile The {@link EnteFile} to index.
+ * @param file The {@link EnteFile} to index.
  *
  * @param image The file's contents.
  *
@@ -257,13 +257,13 @@ export const fileIDFromFaceID = (faceID: string) => {
  * our Node.js layer to run the ONNX inference.
  */
 export const indexFaces = async (
-    enteFile: EnteFile,
+    file: EnteFile,
     { data: imageData }: ImageBitmapAndData,
     electron: ElectronMLWorker,
 ): Promise<FaceIndex> => ({
     width: imageData.width,
     height: imageData.height,
-    faces: await indexFaces_(enteFile.id, imageData, electron),
+    faces: await indexFaces_(file.id, imageData, electron),
 });
 
 const indexFaces_ = async (

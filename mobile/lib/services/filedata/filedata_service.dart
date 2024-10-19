@@ -9,7 +9,7 @@ import "package:photos/models/file/file.dart";
 import "package:photos/services/filedata/model/enc_file_data.dart";
 import "package:photos/services/filedata/model/file_data.dart";
 import "package:photos/services/filedata/model/response.dart";
-import "package:photos/utils/file_download_util.dart";
+import "package:photos/utils/file_key.dart";
 import "package:photos/utils/gzip.dart";
 import "package:shared_preferences/shared_preferences.dart";
 

@@ -13,7 +13,7 @@
   "qrCode": "QR Code",
   "importEnterSetupKey": "Insira uma chave de configuração",
   "importAccountPageTitle": "Inserir detalhes da conta",
-  "secretCanNotBeEmpty": "O segredo não pode estar vazio",
+  "secretCanNotBeEmpty": "A chave secreta não pode estar vazia",
   "bothIssuerAndAccountCanNotBeEmpty": "O emissor e a conta não podem estar vazios",
   "incorrectDetails": "Detalhes incorretos",
   "pleaseVerifyDetails": "Verifique os detalhes e tente novamente",
@@ -43,7 +43,7 @@
   "pleaseLoginAgain": "Entre novamente",
   "loggingOut": "Saindo...",
   "timeBasedKeyType": "Baseado no horário (TOTP)",
-  "counterBasedKeyType": "Baseado num contador (HOTP)",
+  "counterBasedKeyType": "Baseado no contador (HOTP)",
   "saveAction": "Salvar",
   "nextTotpTitle": "avançar",
   "deleteCodeTitle": "Excluir código?",
@@ -96,7 +96,7 @@
   "data": "Dados",
   "importCodes": "Importar códigos",
   "importTypePlainText": "Texto simples",
-  "importTypeEnteEncrypted": "Exportação do Ente criptografada",
+  "importTypeEnteEncrypted": "Exportação criptografada do Ente",
   "passwordForDecryptingExport": "Senha para descriptografar a exportação",
   "passwordEmptyError": "A senha não pode estar vazia",
   "importFromApp": "Importar códigos do {appName}",
@@ -483,5 +483,6 @@
   "importFailureDescNew": "Não foi possível analisar o arquivo selecionado.",
   "appLockNotEnabled": "Bloqueio de aplicativo não ativado",
   "appLockNotEnabledDescription": "Ative o bloqueio de aplicativo em Segurança > Bloqueio de aplicativo",
-  "authToViewPasskey": "Autentique para ver a sua chave de acesso"
+  "authToViewPasskey": "Autentique para ver a sua chave de acesso",
+  "appLockOfflineModeWarning": "Você prosseguiu sem cópias de segurança. Caso, se esqueça de seu aplicativo de bloqueio, você não poderá mais acessar seus dados."
 }

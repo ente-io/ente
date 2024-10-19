@@ -13,4 +13,5 @@ enum LocTagEventType {
   add,
   update,
   delete,
+  dataSetLoaded,
 }

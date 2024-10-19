@@ -2,6 +2,11 @@ import { SelectionBar } from "@/base/components/Navbar";
 import type { Collection } from "@/media/collection";
 import type { CollectionSelectorAttributes } from "@/new/photos/components/CollectionSelector";
 import type { GalleryBarMode } from "@/new/photos/components/gallery/BarImpl";
+import {
+    ALL_SECTION,
+    ARCHIVE_SECTION,
+    TRASH_SECTION,
+} from "@/new/photos/services/collection";
 import { AppContext } from "@/new/photos/types/context";
 import { FluidContainer } from "@ente/shared/components/Container";
 import ClockIcon from "@mui/icons-material/AccessTime";
@@ -20,12 +25,7 @@ import VisibilityOutlined from "@mui/icons-material/VisibilityOutlined";
 import { Box, IconButton, Stack, Tooltip } from "@mui/material";
 import { t } from "i18next";
 import { useContext } from "react";
-import {
-    ALL_SECTION,
-    ARCHIVE_SECTION,
-    COLLECTION_OPS_TYPE,
-    TRASH_SECTION,
-} from "utils/collection";
+import { COLLECTION_OPS_TYPE } from "utils/collection";
 import { FILE_OPS_TYPE } from "utils/file";
 import { formatNumber } from "utils/number/format";
 import { getTrashFilesMessage } from "utils/ui";

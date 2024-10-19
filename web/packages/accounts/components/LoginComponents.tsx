@@ -5,7 +5,7 @@ import {
 } from "@/accounts/services/passkey";
 import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import { genericErrorDialogAttributes } from "@/base/components/utils/mini-dialog";
+import { genericErrorDialogAttributes } from "@/base/components/utils/dialog";
 import log from "@/base/log";
 import { customAPIHost } from "@/base/origins";
 import { VerticallyCentered } from "@ente/shared/components/Container";

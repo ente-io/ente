@@ -1,8 +1,10 @@
+// TODO: Review this file
+/* eslint-disable @typescript-eslint/prefer-optional-chain */
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 import { sharedCryptoWorker } from "@/base/crypto";
 import type { Collection } from "@/media/collection";
+import type { EnteFile, MagicMetadataCore } from "@/media/file";
 import { ItemVisibility } from "@/media/file-metadata";
-import { EnteFile } from "@/new/photos/types/file";
-import { MagicMetadataCore } from "@/new/photos/types/magicMetadata";
 
 export function isArchivedFile(item: EnteFile): boolean {
     if (!item || !item.magicMetadata || !item.magicMetadata.data) {
@@ -58,6 +60,10 @@ export async function updateMagicMetadata<T>(
         originalMagicMetadata.data = await cryptoWorker.decryptMetadataJSON({
             encryptedDataB64: originalMagicMetadata.data,
             decryptionHeaderB64: originalMagicMetadata.header,
+            // See: [Note: strict mode migration]
+            //
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
             keyB64: decryptionKey,
         });
     }
@@ -74,6 +80,10 @@ export async function updateMagicMetadata<T>(
     const magicMetadata = {
         ...originalMagicMetadata,
         data: nonEmptyMagicMetadataProps,
+        // See: [Note: strict mode migration]
+        //
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         count: Object.keys(nonEmptyMagicMetadataProps).length,
     };
 
@@ -83,7 +93,15 @@ export async function updateMagicMetadata<T>(
 export const getNewMagicMetadata = <T>(): MagicMetadataCore<T> => {
     return {
         version: 1,
+        // See: [Note: strict mode migration]
+        //
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         data: null,
+        // See: [Note: strict mode migration]
+        //
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         header: null,
         count: 0,
     };
@@ -91,6 +109,10 @@ export const getNewMagicMetadata = <T>(): MagicMetadataCore<T> => {
 
 export const getNonEmptyMagicMetadataProps = <T>(magicMetadataProps: T): T => {
     return Object.fromEntries(
+        // See: [Note: strict mode migration]
+        //
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         Object.entries(magicMetadataProps).filter(
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             ([_, v]) => v !== null && v !== undefined,

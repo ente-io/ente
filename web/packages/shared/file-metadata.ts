@@ -1,10 +1,9 @@
 import { isDevBuild } from "@/base/env";
+import { type EnteFile, fileLogID } from "@/media/file";
 import {
     decryptPublicMagicMetadata,
     type PublicMagicMetadata,
 } from "@/media/file-metadata";
-import type { EnteFile } from "@/new/photos/types/file";
-import { fileLogID } from "@/new/photos/utils/file";
 
 /**
  * On-demand decrypt the public magic metadata for an {@link EnteFile} for code
@@ -18,16 +17,16 @@ import { fileLogID } from "@/new/photos/utils/file";
  * check and should be a no-op in usually. On debug builds it'll throw if it
  * finds its assumptions broken.
  */
-export const getPublicMagicMetadataSync = (enteFile: EnteFile) => {
-    if (!enteFile.pubMagicMetadata) return undefined;
-    if (typeof enteFile.pubMagicMetadata.data == "string") {
+export const getPublicMagicMetadataSync = (file: EnteFile) => {
+    if (!file.pubMagicMetadata) return undefined;
+    if (typeof file.pubMagicMetadata.data == "string") {
         if (isDevBuild)
             throw new Error(
-                `Public magic metadata for ${fileLogID(enteFile)} had not been decrypted even when the file reached the UI layer`,
+                `Public magic metadata for ${fileLogID(file)} had not been decrypted even when the file reached the UI layer`,
             );
-        decryptPublicMagicMetadata(enteFile);
+        decryptPublicMagicMetadata(file);
     }
     // This cast is unavoidable in the current setup. We need to refactor the
     // types so that this cast in not needed.
-    return enteFile.pubMagicMetadata.data as PublicMagicMetadata;
+    return file.pubMagicMetadata.data as PublicMagicMetadata;
 };

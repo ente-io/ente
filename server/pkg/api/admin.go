@@ -491,11 +491,7 @@ func (h *AdminHandler) UpdateBonus(c *gin.Context) {
 }
 
 func (h *AdminHandler) RecoverAccount(c *gin.Context) {
-	err := h.isFreshAdminToken(c)
-	if err != nil {
-		handler.Error(c, stacktrace.Propagate(err, ""))
-		return
-	}
+
 	var request ente.RecoverAccountRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, "Bad request"))
@@ -516,7 +512,7 @@ func (h *AdminHandler) RecoverAccount(c *gin.Context) {
 		"req_ctx":    "account_recovery",
 	})
 	logger.Info("Initiate account recovery")
-	err = h.UserController.HandleAccountRecovery(c, request)
+	err := h.UserController.HandleAccountRecovery(c, request)
 	if err != nil {
 		logger.WithError(err).Error("Failed to recover account")
 		handler.Error(c, stacktrace.Propagate(err, ""))

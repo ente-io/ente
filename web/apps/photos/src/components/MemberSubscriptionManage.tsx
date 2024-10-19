@@ -1,4 +1,4 @@
-import { useIsMobileWidth } from "@/base/hooks";
+import { useIsSmallWidth } from "@/base/hooks";
 import { AppContext } from "@/new/photos/types/context";
 import {
     FlexWrapper,
@@ -13,7 +13,7 @@ import { getFamilyPlanAdmin } from "utils/user/family";
 
 export function MemberSubscriptionManage({ open, userDetails, onClose }) {
     const { setDialogMessage } = useContext(AppContext);
-    const fullScreen = useIsMobileWidth();
+    const fullScreen = useIsSmallWidth();
 
     async function onLeaveFamilyClick() {
         try {
