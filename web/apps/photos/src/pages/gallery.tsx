@@ -264,9 +264,6 @@ export default function Gallery() {
     const [emailList, setEmailList] = useState<string[]>(null);
     const [activeCollectionID, setActiveCollectionID] =
         useState<number>(undefined);
-    const [hiddenFileIds, setHiddenFileIds] = useState<Set<number>>(
-        new Set<number>(),
-    );
     const [fixCreationTimeView, setFixCreationTimeView] = useState(false);
     const [fixCreationTimeAttributes, setFixCreationTimeAttributes] =
         useState<FixCreationTimeAttributes>(null);
@@ -349,7 +346,8 @@ export default function Gallery() {
     const files = state.files;
     const hiddenFiles = state.hiddenFiles;
     const trashedFiles = state.trashedFiles;
-    const archivedCollections = state.archivedCollectionIDs;
+    const archivedCollectionIDs = state.archivedCollectionIDs;
+    const hiddenFileIDs = state.hiddenFileIDs;
 
     if (process.env.NEXT_PUBLIC_ENTE_WIP_CL) {
         console.log("render", { collections, hiddenCollections, files });
@@ -446,9 +444,8 @@ export default function Gallery() {
             return;
         }
         const {
-            favFileIDs,
+            favoriteFileIDs,
             defaultHiddenCollectionIDs,
-            hiddenFileIds,
             mergedCollectionSummaries,
             hiddenCollectionSummaries,
         } = setDerivativeState(
@@ -458,15 +455,14 @@ export default function Gallery() {
             files,
             trashedFiles,
             hiddenFiles,
-            archivedCollections,
+            archivedCollectionIDs,
         );
         // This wait(0) is a hack, but it is not a new one, this merely retains
         // the behaviour of the old code. Without this, the "Nothing here"
         // message flashes for a second.
         wait(0).then(() => {
-            dispatch({ type: "setDerived", favFileIDs });
+            dispatch({ type: "setDerived", favoriteFileIDs });
             setDefaultHiddenCollectionIDs(defaultHiddenCollectionIDs);
-            setHiddenFileIds(hiddenFileIds);
             setCollectionSummaries(mergedCollectionSummaries);
             setHiddenCollectionSummaries(hiddenCollectionSummaries);
         });
@@ -556,7 +552,7 @@ export default function Gallery() {
             !user ||
             !trashedFiles ||
             !hiddenFiles ||
-            !archivedCollections
+            !archivedCollectionIDs
         ) {
             dispatch({
                 type: "set",
@@ -643,7 +639,7 @@ export default function Gallery() {
                     }
 
                     // archived collections files can only be seen in their respective collection
-                    if (archivedCollections.has(item.collectionID)) {
+                    if (archivedCollectionIDs.has(item.collectionID)) {
                         if (activeCollectionID === item.collectionID) {
                             return true;
                         } else {
@@ -674,7 +670,7 @@ export default function Gallery() {
                     // ALL SECTION - show all files
                     if (activeCollectionID === ALL_SECTION) {
                         // show all files except the ones in hidden collections
-                        if (hiddenFileIds.has(item.id)) {
+                        if (hiddenFileIDs.has(item.id)) {
                             return false;
                         } else {
                             return true;
@@ -708,10 +704,10 @@ export default function Gallery() {
         hiddenFiles,
         tempDeletedFileIds,
         tempHiddenFileIds,
-        hiddenFileIds,
+        hiddenFileIDs,
         selectedSearchOption,
         activeCollectionID,
-        archivedCollections,
+        archivedCollectionIDs,
         peopleState,
         activePersonID,
     ]);
@@ -1126,8 +1122,8 @@ export default function Gallery() {
     );
 
     const refreshFavItemIds = async () => {
-        const favFileIDs = await getFavItemIds(files);
-        dispatch({ type: "setFavorites", favFileIDs });
+        const favoriteFileIDs = await getFavItemIds(files);
+        dispatch({ type: "refreshFavorites", favoriteFileIDs });
     };
 
     if (!collectionSummaries || !filteredData) {
@@ -1317,7 +1313,7 @@ export default function Gallery() {
                         modePlus={isInSearchMode ? "search" : barMode}
                         files={filteredData}
                         syncWithRemote={syncWithRemote}
-                        favItemIds={state.favFileIDs}
+                        favItemIds={state.favoriteFileIDs}
                         setSelected={setSelected}
                         selected={selected}
                         tempDeletedFileIds={tempDeletedFileIds}

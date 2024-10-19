@@ -92,9 +92,13 @@ export interface GalleryState {
      */
     archivedCollectionIDs: Set<number>;
     /**
+     * File IDs of the files that the user has hidden.
+     */
+    hiddenFileIDs: Set<number>;
+    /**
      * File IDs of all the files that the user has marked as a favorite.
      */
-    favFileIDs: Set<number>;
+    favoriteFileIDs: Set<number>;
 
     /*--<  UI state  >--*/
 
@@ -129,7 +133,7 @@ export type GalleryAction =
               | { activePerson: Person | undefined; people: Person[] }
               | undefined;
       }
-    | { type: "setDerived"; favFileIDs: Set<number> }
+    | { type: "setDerived"; favoriteFileIDs: Set<number> }
     | {
           type: "setNormalCollections";
           collections: Collection[];
@@ -145,7 +149,7 @@ export type GalleryAction =
     | { type: "resetHiddenFiles"; hiddenFiles: EnteFile[] }
     | { type: "fetchHiddenFiles"; hiddenFiles: EnteFile[] }
     | { type: "setTrashedFiles"; trashedFiles: EnteFile[] }
-    | { type: "setFavorites"; favFileIDs: Set<number> };
+    | { type: "refreshFavorites"; favoriteFileIDs: Set<number> };
 
 const initialGalleryState: GalleryState = {
     user: undefined,
@@ -157,7 +161,8 @@ const initialGalleryState: GalleryState = {
     trashedFiles: [],
     filteredData: [],
     archivedCollectionIDs: new Set(),
-    favFileIDs: new Set(),
+    hiddenFileIDs: new Set(),
+    favoriteFileIDs: new Set(),
     activePerson: undefined,
     people: [],
 };
@@ -184,7 +189,8 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 files: action.files,
                 hiddenFiles: action.hiddenFiles,
                 trashedFiles: action.trashedFiles,
-                archivedCollectionIDs: getArchivedCollectionIDs(collections),
+                archivedCollectionIDs: deriveArchivedCollectionIDs(collections),
+                hiddenFileIDs: deriveHiddenFileIDs(action.hiddenFiles),
             };
         }
         case "set":
@@ -197,13 +203,13 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
         case "setDerived":
             return {
                 ...state,
-                favFileIDs: action.favFileIDs,
+                favoriteFileIDs: action.favoriteFileIDs,
             };
         case "setNormalCollections":
             return {
                 ...state,
                 collections: action.collections,
-                archivedCollectionIDs: getArchivedCollectionIDs(
+                archivedCollectionIDs: deriveArchivedCollectionIDs(
                     action.collections,
                 ),
             };
@@ -212,7 +218,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 ...state,
                 collections: action.collections,
                 hiddenCollections: action.hiddenCollections,
-                archivedCollectionIDs: getArchivedCollectionIDs(
+                archivedCollectionIDs: deriveArchivedCollectionIDs(
                     action.collections,
                 ),
             };
@@ -235,27 +241,33 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 ...state,
                 files: sortFiles([...state.files, action.file]),
             };
-        case "resetHiddenFiles":
+        case "resetHiddenFiles": {
+            const hiddenFiles = sortFiles(mergeMetadata(action.hiddenFiles));
             return {
                 ...state,
-                hiddenFiles: sortFiles(mergeMetadata(action.hiddenFiles)),
+                hiddenFiles,
+                hiddenFileIDs: deriveHiddenFileIDs(hiddenFiles),
             };
-        case "fetchHiddenFiles":
-            return {
-                ...state,
-                hiddenFiles: sortFiles(
-                    mergeMetadata(
-                        getLatestVersionFiles([
-                            ...state.hiddenFiles,
-                            ...action.hiddenFiles,
-                        ]),
-                    ),
+        }
+        case "fetchHiddenFiles": {
+            const hiddenFiles = sortFiles(
+                mergeMetadata(
+                    getLatestVersionFiles([
+                        ...state.hiddenFiles,
+                        ...action.hiddenFiles,
+                    ]),
                 ),
+            );
+            return {
+                ...state,
+                hiddenFiles,
+                hiddenFileIDs: deriveHiddenFileIDs(hiddenFiles),
             };
+        }
         case "setTrashedFiles":
             return { ...state, trashedFiles: action.trashedFiles };
-        case "setFavorites":
-            return { ...state, favFileIDs: action.favFileIDs };
+        case "refreshFavorites":
+            return { ...state, favoriteFileIDs: action.favoriteFileIDs };
     }
 };
 
@@ -271,23 +283,10 @@ export const setDerivativeState = (
     hiddenFiles: EnteFile[],
     archivedCollections: Set<number>,
 ) => {
-    let favFileIDs = new Set<number>();
-    for (const collection of collections) {
-        if (collection.type === CollectionType.favorites) {
-            favFileIDs = new Set(
-                files
-                    .filter((file) => file.collectionID === collection.id)
-                    .map((file): number => file.id),
-            );
-            break;
-        }
-    }
+    const favoriteFileIDs = deriveFavoriteFileIDs(collections, files);
     const defaultHiddenCollectionIDs =
         getDefaultHiddenCollectionIDs(hiddenCollections);
     // setDefaultHiddenCollectionIDs(defaultHiddenCollectionIDs);
-    const hiddenFileIds = new Set<number>(hiddenFiles.map((f) => f.id));
-    // TODO: Move to reducer
-    // setHiddenFileIds(hiddenFileIds);
     const collectionSummaries = getCollectionSummaries(
         user,
         collections,
@@ -318,9 +317,8 @@ export const setDerivativeState = (
     // setHiddenCollectionSummaries(hiddenCollectionSummaries);
 
     return {
-        favFileIDs,
+        favoriteFileIDs,
         defaultHiddenCollectionIDs,
-        hiddenFileIds,
         mergedCollectionSummaries,
         hiddenCollectionSummaries,
     };
@@ -349,7 +347,35 @@ export const uniqueFilesByID = (files: EnteFile[]) => {
     });
 };
 
-const getArchivedCollectionIDs = (collections: Collection[]) =>
+/**
+ * Helper function to compute favorite file IDs from its dependencies.
+ */
+const deriveFavoriteFileIDs = (
+    collections: Collection[],
+    files: EnteFile[],
+): Set<number> => {
+    for (const collection of collections) {
+        if (collection.type === CollectionType.favorites) {
+            return new Set(
+                files
+                    .filter((file) => file.collectionID === collection.id)
+                    .map((file): number => file.id),
+            );
+        }
+    }
+    return new Set();
+};
+
+/**
+ * Helper function to compute hidden file IDs from its dependencies.
+ */
+const deriveHiddenFileIDs = (hiddenFiles: EnteFile[]) =>
+    new Set<number>(hiddenFiles.map((f) => f.id));
+
+/**
+ * Helper function to compute archived collection IDs from its dependencies.
+ */
+const deriveArchivedCollectionIDs = (collections: Collection[]) =>
     new Set<number>(
         collections
             .filter(isArchivedCollection)
