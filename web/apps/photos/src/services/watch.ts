@@ -20,7 +20,7 @@ import debounce from "debounce";
 import uploadManager, {
     type UploadItemWithCollection,
 } from "services/upload/uploadManager";
-import { groupFilesBasedOnCollectionID } from "utils/file";
+import { groupFilesBasedOnCollectionID } from "@/new/photos/services/file";
 import { removeFromCollection } from "./collectionService";
 
 /**

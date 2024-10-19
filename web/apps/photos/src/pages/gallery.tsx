@@ -1360,14 +1360,6 @@ const preloadImage = (imgBasePath: string) => {
     new Image().srcset = srcset.join(",");
 };
 
-const mergeMaps = <K, V>(map1: Map<K, V>, map2: Map<K, V>) => {
-    const mergedMap = new Map<K, V>(map1);
-    map2.forEach((value, key) => {
-        mergedMap.set(key, value);
-    });
-    return mergedMap;
-};
-
 type NormalNavbarContentsProps = SearchBarProps & {
     openSidebar: () => void;
     openUploader: () => void;

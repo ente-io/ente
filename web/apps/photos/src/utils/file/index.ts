@@ -92,17 +92,6 @@ export async function downloadFile(file: EnteFile) {
     }
 }
 
-/** Segment the given {@link files} into lists indexed by their collection ID */
-export const groupFilesBasedOnCollectionID = (files: EnteFile[]) => {
-    const result = new Map<number, EnteFile[]>();
-    for (const file of files) {
-        const id = file.collectionID;
-        if (!result.has(id)) result.set(id, []);
-        result.get(id).push(file);
-    }
-    return result;
-};
-
 function getSelectedFileIds(selectedFiles: SelectedState) {
     const filesIDs: number[] = [];
     for (const [key, val] of Object.entries(selectedFiles)) {

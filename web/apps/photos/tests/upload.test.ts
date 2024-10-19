@@ -9,7 +9,7 @@ import {
     getMetadataJSONMapKeyForJSON,
 } from "services/upload/takeout";
 import { getUserDetailsV2 } from "services/userService";
-import { groupFilesBasedOnCollectionID } from "utils/file";
+import { groupFilesBasedOnCollectionID } from "@/new/photos/services/file";
 
 const DATE_TIME_PARSING_TEST_FILE_NAMES = [
     {

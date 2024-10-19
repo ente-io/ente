@@ -339,54 +339,6 @@ export const getCollection = async (
     }
 };
 
-export const getCollectionLatestFiles = (
-    files: EnteFile[],
-): CollectionToFileMap => {
-    const latestFiles = new Map<number, EnteFile>();
-
-    files.forEach((file) => {
-        if (!latestFiles.has(file.collectionID)) {
-            latestFiles.set(file.collectionID, file);
-        }
-    });
-    return latestFiles;
-};
-
-export const getCollectionCoverFiles = (
-    files: EnteFile[],
-    collections: Collection[],
-): CollectionToFileMap => {
-    const collectionIDToFileMap = groupFilesBasedOnCollectionID(files);
-
-    const coverFiles = new Map<number, EnteFile>();
-
-    collections.forEach((collection) => {
-        const collectionFiles = collectionIDToFileMap.get(collection.id);
-        if (!collectionFiles || collectionFiles.length === 0) {
-            return;
-        }
-        const coverID = collection.pubMagicMetadata?.data?.coverID;
-        if (typeof coverID === "number" && coverID > 0) {
-            const coverFile = collectionFiles.find(
-                (file) => file.id === coverID,
-            );
-            if (coverFile) {
-                coverFiles.set(collection.id, coverFile);
-                return;
-            }
-        }
-        if (collection.pubMagicMetadata?.data?.asc) {
-            coverFiles.set(
-                collection.id,
-                collectionFiles[collectionFiles.length - 1],
-            );
-        } else {
-            coverFiles.set(collection.id, collectionFiles[0]);
-        }
-    });
-    return coverFiles;
-};
-
 export const getFavItemIds = async (
     files: EnteFile[],
 ): Promise<Set<number>> => {
@@ -1105,34 +1057,6 @@ function compareCollectionsLatestFile(first: EnteFile, second: EnteFile) {
             return -1;
         }
     }
-}
-
-export function getDummyUncategorizedCollectionSummary(): CollectionSummary {
-    return {
-        id: DUMMY_UNCATEGORIZED_COLLECTION,
-        name: t("section_uncategorized"),
-        type: "uncategorized",
-        latestFile: null,
-        coverFile: null,
-        fileCount: 0,
-        updationTime: 0,
-    };
-}
-
-
-
-export function getTrashedCollectionSummary(
-    trashedFiles: EnteFile[],
-): CollectionSummary {
-    return {
-        id: TRASH_SECTION,
-        name: t("section_trash"),
-        type: "trash",
-        coverFile: null,
-        latestFile: trashedFiles?.[0],
-        fileCount: trashedFiles?.length,
-        updationTime: trashedFiles?.[0]?.updationTime,
-    };
 }
 
 export async function getUncategorizedCollection(

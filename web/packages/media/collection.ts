@@ -118,8 +118,6 @@ export interface collectionAttributes {
     pathDecryptionNonce?: string;
 }
 
-export type CollectionToFileMap = Map<number, EnteFile>;
-
 export interface RemoveFromCollectionRequest {
     collectionID: number;
     fileIDs: number[];

@@ -1,12 +1,6 @@
+//TODO Review entire file
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/**
- * @file code that really belongs to pages/gallery.tsx itself (or related
- * files), but it written here in a separate file so that we can write in this
- * package that has TypeScript strict mode enabled.
- *
- * Once the original gallery.tsx is strict mode, this code can be inlined back
- * there.
- */
 
 import { CollectionType, type Collection } from "@/media/collection";
 import type { EnteFile } from "@/media/file";
@@ -29,6 +23,7 @@ import type {
     CollectionSummary,
     CollectionSummaryType,
 } from "../../services/collection/ui";
+import { groupFilesBasedOnCollectionID } from "../../services/file";
 import {
     isArchivedCollection,
     isArchivedFile,
@@ -236,6 +231,7 @@ export function getCollectionSummaries(
         collectionSummaries.set(collection.id, {
             id: collection.id,
             name: CollectionSummaryItemName,
+            // @ts-expect-error TODO Review types
             latestFile: collectionLatestFiles.get(collection.id),
             coverFile: collectionCoverFiles.get(collection.id),
             fileCount: collectionFilesCount.get(collection.id) ?? 0,
@@ -254,12 +250,78 @@ export function getCollectionSummaries(
     return collectionSummaries;
 }
 
+export type CollectionToFileMap = Map<number, EnteFile>;
+
+export const getCollectionLatestFiles = (
+    files: EnteFile[],
+): CollectionToFileMap => {
+    const latestFiles = new Map<number, EnteFile>();
+
+    files.forEach((file) => {
+        if (!latestFiles.has(file.collectionID)) {
+            latestFiles.set(file.collectionID, file);
+        }
+    });
+    return latestFiles;
+};
+
+export const getCollectionCoverFiles = (
+    files: EnteFile[],
+    collections: Collection[],
+): CollectionToFileMap => {
+    const collectionIDToFileMap = groupFilesBasedOnCollectionID(files);
+
+    const coverFiles = new Map<number, EnteFile>();
+
+    collections.forEach((collection) => {
+        const collectionFiles = collectionIDToFileMap.get(collection.id);
+        if (!collectionFiles || collectionFiles.length === 0) {
+            return;
+        }
+        const coverID = collection.pubMagicMetadata?.data?.coverID;
+        if (typeof coverID === "number" && coverID > 0) {
+            const coverFile = collectionFiles.find(
+                (file) => file.id === coverID,
+            );
+            if (coverFile) {
+                coverFiles.set(collection.id, coverFile);
+                return;
+            }
+        }
+        if (collection.pubMagicMetadata?.data?.asc) {
+            coverFiles.set(
+                collection.id,
+                // @ts-expect-error TODO Review types
+                collectionFiles[collectionFiles.length - 1],
+            );
+        } else {
+            // @ts-expect-error TODO Review types
+            coverFiles.set(collection.id, collectionFiles[0]);
+        }
+    });
+    return coverFiles;
+};
+
 export function isOutgoingShare(collection: Collection, user: User): boolean {
     return collection.owner.id === user.id && collection.sharees?.length > 0;
 }
 
 export function isSharedOnlyViaLink(collection: Collection) {
     return collection.publicURLs?.length && !collection.sharees?.length;
+}
+
+export function getDummyUncategorizedCollectionSummary(): CollectionSummary {
+    return {
+        id: DUMMY_UNCATEGORIZED_COLLECTION,
+        name: t("section_uncategorized"),
+        type: "uncategorized",
+        // @ts-expect-error TODO Review types
+        latestFile: null,
+        // @ts-expect-error TODO Review types
+        coverFile: null,
+        fileCount: 0,
+        updationTime: 0,
+    };
 }
 
 export function getHiddenItemsSummary(
@@ -281,8 +343,10 @@ export function getHiddenItemsSummary(
         name: t("hidden_items"),
         type: "hiddenItems",
         coverFile: hiddenItems?.[0],
+        // @ts-expect-error TODO Review types
         latestFile: hiddenItems?.[0],
         fileCount: hiddenItems?.length,
+        // @ts-expect-error TODO Review types
         updationTime: hiddenItems?.[0]?.updationTime,
     };
 }
@@ -316,9 +380,12 @@ export function getArchivedSectionSummary(
         id: ARCHIVE_SECTION,
         name: t("section_archive"),
         type: "archive",
+        // @ts-expect-error TODO Review types
         coverFile: null,
+        // @ts-expect-error TODO Review types
         latestFile: archivedFiles?.[0],
         fileCount: archivedFiles?.length,
+        // @ts-expect-error TODO Review types
         updationTime: archivedFiles?.[0]?.updationTime,
     };
 }
@@ -336,8 +403,10 @@ function getAllSectionSummary(
         name: t("section_all"),
         type: "all",
         coverFile: allSectionFiles?.[0],
+        // @ts-expect-error TODO Review types
         latestFile: allSectionFiles?.[0],
         fileCount: allSectionFiles?.length || 0,
+        // @ts-expect-error TODO Review types
         updationTime: allSectionFiles?.[0]?.updationTime,
     };
 }
@@ -368,3 +437,28 @@ function getAllSectionVisibleFiles(
     );
     return allSectionVisibleFiles;
 }
+
+export function getTrashedCollectionSummary(
+    trashedFiles: EnteFile[],
+): CollectionSummary {
+    return {
+        id: TRASH_SECTION,
+        name: t("section_trash"),
+        type: "trash",
+        // @ts-expect-error TODO Review types
+        coverFile: null,
+        // @ts-expect-error TODO Review types
+        latestFile: trashedFiles?.[0],
+        fileCount: trashedFiles?.length,
+        // @ts-expect-error TODO Review types
+        updationTime: trashedFiles?.[0]?.updationTime,
+    };
+}
+
+const mergeMaps = <K, V>(map1: Map<K, V>, map2: Map<K, V>) => {
+    const mergedMap = new Map<K, V>(map1);
+    map2.forEach((value, key) => {
+        mergedMap.set(key, value);
+    });
+    return mergedMap;
+};
