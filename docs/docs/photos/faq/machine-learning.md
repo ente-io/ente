@@ -13,13 +13,13 @@ persons.
 ### Mobile
 
 First, make sure one of the two person groupings is assigned a name through the
-**Add a name** banner. Then for the second grouping, use the same banner but now
+`Add a name` banner. Then for the second grouping, use the same banner but now
 instead of typing the name again, tap on the already given name that should now
 be listed.
 
 De-merging a certain grouping can be done by going to the person, pressing
-**review suggestions** and then the top right **history icon**. Now press on the
-**minus icon** beside the group you want to de-merge.
+`review suggestions` and then the top right `history icon`. Now press on the
+`minus icon` beside the group you want to de-merge.
 
 ### Desktop
 
@@ -31,7 +31,7 @@ support merging persons. This will be added soon.
 ### Mobile
 
 Inside the person group, long-press the image you want to use as cover. Then
-press **Use as cover**.
+press `Use as cover`.
 
 ### Desktop
 
@@ -45,12 +45,12 @@ Yes! You can tell the app not to show certain persons.
 ### Mobile
 
 First, make sure the person is not named. If you already gave a name, then first
-press **Remove person label** in the top right menu. Now inside the unnamed
-grouping, press **Ignore person** from the top right menu.
+press `Remove person label` in the top right menu. Now inside the unnamed
+grouping, press `Ignore person` from the top right menu.
 
-To undo this action, go to a photo containing the person. Go to the file info
-section of the photo and press on the face thumbnail of the ignored person. This
-will take you to the grouping of this person. Here you can press **Show person**
+To undo this action, go to a **photo containing the person**. Go to the **file info**
+section of the photo and press on the **face thumbnail of the ignored person**. This
+will take you to the grouping of this person. Here you can press `Show person`
 to undo ignoring the person.
 
 ### Desktop
@@ -65,6 +65,6 @@ can't prevent all cases where this goes wrong, we've added a option to help you
 correct the model in such cases.
 
 If you find a mixed grouping of several different babies, you can use the
-**mixed grouping** option in the top right menu of said grouping. Activating
+`mixed grouping` option in the top right menu of said grouping. Activating
 this option will make the model re-evaluate the grouping with stricter settings,
 hopefully separating the different babies in different new groupings.
