@@ -16,12 +16,15 @@ import "package:photos/models/search/hierarchical/face_filter.dart";
 import "package:photos/models/search/hierarchical/file_type_filter.dart";
 import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
 import "package:photos/models/search/hierarchical/location_filter.dart";
+import "package:photos/models/search/hierarchical/magic_filter.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/location_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
+import "package:photos/services/magic_cache_service.dart";
 import "package:photos/services/search_service.dart";
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
+import "package:photos/utils/file_util.dart";
 
 Future<List<EnteFile>> getFilteredFiles(
   List<HierarchicalSearchFilter> filters,
@@ -118,9 +121,11 @@ void curateFilters(
     );
     final contactsFilters = _curateContactsFilter(files);
     final faceFilters = await curateFaceFilters(files);
+    final magicFilters = await curateMagicFilters(files);
 
     searchFilterDataProvider.clearAndAddRecommendations(
       [
+        ...magicFilters,
         ...faceFilters,
         ...fileTypeFilters,
         ...contactsFilters,
@@ -357,4 +362,26 @@ Future<List<FaceFilter>> curateFaceFilters(
         .severe("Error in curating face filters", e, s);
     rethrow;
   }
+}
+
+Future<List<MagicFilter>> curateMagicFilters(List<EnteFile> files) async {
+  final magicFilters = <MagicFilter>[];
+
+  final magicCaches = await MagicCacheService.instance.getMagicCache();
+  final filesUploadedFileIDs = filesToUploadedFileIDs(files);
+  for (MagicCache magicCache in magicCaches) {
+    final uploadedIDs = magicCache.fileUploadedIDs.toSet();
+    final intersection = uploadedIDs.intersection(filesUploadedFileIDs);
+
+    if (intersection.length > 3) {
+      magicFilters.add(
+        MagicFilter(
+          filterName: magicCache.title,
+          occurrence: intersection.length,
+        ),
+      );
+    }
+  }
+
+  return magicFilters;
 }

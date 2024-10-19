@@ -1240,12 +1240,20 @@ class SearchService {
                   ResultType.magic,
                   query,
                   files,
-                  hierarchicalSearchFilter: MagicFilter(),
+                  hierarchicalSearchFilter: MagicFilter(
+                    filterName: query,
+                    occurrence: kMostRelevantFilter,
+                    matchedUploadedIDs: filesToUploadedFileIDs(files),
+                  ),
                 ).heroTag(),
               ),
             );
           },
-          hierarchicalSearchFilter: MagicFilter(),
+          hierarchicalSearchFilter: MagicFilter(
+            filterName: query,
+            occurrence: kMostRelevantFilter,
+            matchedUploadedIDs: filesToUploadedFileIDs(files),
+          ),
         ),
       );
     }

@@ -1,41 +1,48 @@
-import "package:flutter/widgets.dart";
+import "package:flutter/material.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
 
 class MagicFilter extends HierarchicalSearchFilter {
+  final String filterName;
+  final int occurrence;
+
+  MagicFilter({
+    required this.filterName,
+    required this.occurrence,
+    super.matchedUploadedIDs,
+  });
+
   @override
   Set<int> getMatchedUploadedIDs() {
-    // TODO: implement getMatchedUploadedIDs
-    throw UnimplementedError();
+    return matchedUploadedIDs;
   }
 
   @override
   IconData? icon() {
-    // TODO: implement icon
-    throw UnimplementedError();
+    return Icons.auto_awesome;
   }
 
   @override
   bool isMatch(EnteFile file) {
-    // TODO: implement isMatch
     throw UnimplementedError();
   }
 
   @override
   bool isSameFilter(HierarchicalSearchFilter other) {
-    // TODO: implement isSameFilter
-    throw UnimplementedError();
+    if (other is MagicFilter && other.name() == name()) {
+      return true;
+    }
+
+    return false;
   }
 
   @override
   String name() {
-    // TODO: implement name
-    throw UnimplementedError();
+    return filterName;
   }
 
   @override
   int relevance() {
-    // TODO: implement relevance
-    throw UnimplementedError();
+    return occurrence;
   }
 }
