@@ -20,7 +20,7 @@ import {
     SearchResultsHeader,
 } from "@/new/photos/components/gallery";
 import type { GalleryBarMode } from "@/new/photos/components/gallery/BarImpl";
-import { GalleryPeopleState } from "@/new/photos/components/gallery/PeopleHeader";
+import { useGalleryReducer } from "@/new/photos/components/gallery/reducer";
 import { usePeopleStateSnapshot } from "@/new/photos/components/utils/ml";
 import { shouldShowWhatsNew } from "@/new/photos/services/changelog";
 import type { CollectionSummaries } from "@/new/photos/services/collection/ui";
@@ -190,6 +190,7 @@ export const GalleryContext = createContext<GalleryContextType>(
  *           Photo List           v
  */
 export default function Gallery() {
+    const [state, dispatch] = useGalleryReducer();
     const [user, setUser] = useState(null);
     const [familyData, setFamilyData] = useState<FamilyData>(null);
     const [collections, setCollections] = useState<Collection[]>(null);
@@ -531,16 +532,8 @@ export default function Gallery() {
         );
     }, [collections, activeCollectionID]);
 
-    // The derived UI state when we are in "people" mode.
-    //
-    // TODO: This spawns even more workarounds below. Move this to a
-    // reducer/store.
-    type DerivedState1 = {
-        filteredData: EnteFile[];
-        galleryPeopleState: GalleryPeopleState | undefined;
-    };
-
-    const derived1: DerivedState1 = useMemoSingleThreaded(async () => {
+    // TODO: Make this a normal useEffect.
+    useMemoSingleThreaded(async () => {
         if (
             !files ||
             !user ||
@@ -556,11 +549,18 @@ export default function Gallery() {
                 ...trashedFiles,
                 ...files.filter((file) => tempDeletedFileIds?.has(file.id)),
             ]);
-            return { filteredData, galleryPeopleState: undefined };
+            dispatch({
+                type: "set",
+                filteredData,
+                galleryPeopleState: undefined,
+            });
+            return;
         }
 
         let filteredFiles: EnteFile[] = [];
-        let galleryPeopleState: GalleryPeopleState;
+        let galleryPeopleState:
+            | { activePerson: Person | undefined; people: Person[] }
+            | undefined;
         if (selectedSearchOption) {
             filteredFiles = await filterSearchableFiles(
                 selectedSearchOption.suggestion,
@@ -681,7 +681,11 @@ export default function Gallery() {
             filteredFiles = sortFiles(filteredFiles, true);
         }
 
-        return { filteredData: filteredFiles, galleryPeopleState };
+        dispatch({
+            type: "set",
+            filteredData: filteredFiles,
+            galleryPeopleState,
+        });
     }, [
         barMode,
         files,
@@ -697,10 +701,7 @@ export default function Gallery() {
         activePersonID,
     ]);
 
-    const { filteredData, galleryPeopleState } = derived1 ?? {
-        filteredData: [],
-        galleryPeopleState: undefined,
-    };
+    const { filteredData, ...galleryPeopleState } = state;
 
     const selectAll = (e: KeyboardEvent) => {
         // ignore ctrl/cmd + a if the user is typing in a text field
