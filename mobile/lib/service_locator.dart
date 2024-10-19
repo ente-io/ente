@@ -7,6 +7,7 @@ import "package:photos/gateways/entity_gw.dart";
 import "package:photos/services/billing_service.dart";
 import "package:photos/services/entity_service.dart";
 import "package:photos/services/location_service.dart";
+import "package:photos/services/machine_learning/face_ml/face_recognition_service.dart";
 import "package:photos/services/machine_learning/machine_learning_controller.dart";
 import "package:photos/services/magic_cache_service.dart";
 import "package:photos/services/storage_bonus_service.dart";
@@ -129,4 +130,10 @@ MachineLearningController? _machineLearningController;
 MachineLearningController get machineLearningController {
   _machineLearningController ??= MachineLearningController();
   return _machineLearningController!;
+}
+
+FaceRecognitionService? _faceRecognitionService;
+FaceRecognitionService get faceRecognitionService {
+  _faceRecognitionService ??= FaceRecognitionService();
+  return _faceRecognitionService!;
 }
