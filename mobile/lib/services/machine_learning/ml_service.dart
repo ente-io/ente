@@ -74,9 +74,6 @@ class MLService {
     // Activate FaceRecognitionService
     await FaceRecognitionService.instance.init();
 
-    // Download models if not already downloaded
-    unawaited(_ensureDownloadedModels(firstTime));
-
     // Listen on MachineLearningController
     Bus.instance.on<MachineLearningControlEvent>().listen((event) {
       if (localSettings.isMLIndexingEnabled == false) {
