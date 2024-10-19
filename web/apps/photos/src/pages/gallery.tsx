@@ -193,9 +193,6 @@ export default function Gallery() {
     const [state, dispatch] = useGalleryReducer();
     const [defaultHiddenCollectionIDs, setDefaultHiddenCollectionIDs] =
         useState<Set<number>>();
-    const [files, setFiles] = useState<EnteFile[]>(null);
-    const [hiddenFiles, setHiddenFiles] = useState<EnteFile[]>(null);
-    const [trashedFiles, setTrashedFiles] = useState<EnteFile[]>(null);
 
     const [isFirstLoad, setIsFirstLoad] = useState(false);
     const [selected, setSelected] = useState<SelectedState>({
@@ -352,6 +349,9 @@ export default function Gallery() {
     const familyData = state.familyData;
     const collections = state.collections;
     const hiddenCollections = state.hiddenCollections;
+    const files = state.files;
+    const hiddenFiles = state.hiddenFiles;
+    const trashedFiles = state.trashedFiles;
 
     if (process.env.NEXT_PUBLIC_ENTE_WIP_CL) {
         console.log("render", { collections, hiddenCollections, files });
@@ -406,10 +406,15 @@ export default function Gallery() {
             );
             const allCollections = await getAllLocalCollections();
             const trashedFiles = await getLocalTrashedFiles();
-            dispatch({ type: "mount", user, familyData, allCollections });
-            setFiles(files);
-            setTrashedFiles(trashedFiles);
-            setHiddenFiles(hiddenFiles);
+            dispatch({
+                type: "mount",
+                user,
+                familyData,
+                allCollections,
+                files,
+                hiddenFiles,
+                trashedFiles,
+            });
             await syncWithRemote(true);
             setIsFirstLoad(false);
             setJustSignedUp(false);
@@ -1255,7 +1260,9 @@ export default function Gallery() {
                     setLoading={setBlockingLoad}
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
                     setShouldDisableDropzone={setShouldDisableDropzone}
-                    setFiles={setFiles}
+                    onUploadFile={(file) =>
+                        dispatch({ type: "uploadFile", file })
+                    }
                     setCollections={(collections) =>
                         dispatch({ type: "setNormalCollections", collections })
                     }

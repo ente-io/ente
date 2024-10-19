@@ -25,6 +25,7 @@ import type {
     CollectionSummaryType,
 } from "../../services/collection/ui";
 import { groupFilesBasedOnCollectionID } from "../../services/file";
+import { sortFiles } from "../../services/files";
 import {
     isArchivedCollection,
     isArchivedFile,
@@ -63,6 +64,18 @@ export interface GalleryState {
      * The user's hidden collections.
      */
     hiddenCollections: Collection[];
+    /**
+     * The user's normal (non-hidden, non-trash) files.
+     */
+    files: EnteFile[];
+    /**
+     * The user's hidden files.
+     */
+    hiddenFiles: EnteFile[];
+    /**
+     * The user's files that are in Trash.
+     */
+    trashedFiles: EnteFile[];
 
     filteredData: EnteFile[];
     /**
@@ -88,6 +101,9 @@ export type GalleryAction =
           user: User;
           familyData: FamilyData;
           allCollections: Collection[];
+          files: EnteFile[];
+          hiddenFiles: EnteFile[];
+          trashedFiles: EnteFile[];
       }
     | {
           type: "set";
@@ -106,6 +122,10 @@ export type GalleryAction =
           collections: Collection[];
           hiddenCollections: Collection[];
       }
+    | { type: "uploadFile"; file: EnteFile }
+    | { type: "setFiles"; files: EnteFile[] }
+    | { type: "setHiddenFiles"; hiddenFiles: EnteFile[] }
+    | { type: "setTrashedFiles"; trashedFiles: EnteFile[] }
     | { type: "setFavorites"; favFileIDs: Set<number> };
 
 const initialGalleryState: GalleryState = {
@@ -113,6 +133,9 @@ const initialGalleryState: GalleryState = {
     familyData: undefined,
     collections: [],
     hiddenCollections: [],
+    files: [],
+    hiddenFiles: [],
+    trashedFiles: [],
     filteredData: [],
     favFileIDs: new Set(),
     activePerson: undefined,
@@ -132,13 +155,15 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 action.allCollections,
                 isHiddenCollection,
             );
-
             return {
                 ...state,
                 user: action.user,
                 familyData: action.familyData,
                 collections: collections,
                 hiddenCollections: hiddenCollections,
+                files: action.files,
+                hiddenFiles: action.hiddenFiles,
+                trashedFiles: action.trashedFiles,
             };
         }
         case "set":
@@ -164,11 +189,19 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 collections: action.collections,
                 hiddenCollections: action.hiddenCollections,
             };
-        case "setFavorites":
+        case "uploadFile":
             return {
                 ...state,
-                favFileIDs: action.favFileIDs,
+                files: sortFiles([...state.files, action.file]),
             };
+        case "setFiles":
+            return { ...state, files: action.files };
+        case "setHiddenFiles":
+            return { ...state, hiddenFiles: action.hiddenFiles };
+        case "setTrashedFiles":
+            return { ...state, trashedFiles: action.trashedFiles };
+        case "setFavorites":
+            return { ...state, favFileIDs: action.favFileIDs };
     }
 };
 
