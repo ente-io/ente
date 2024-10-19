@@ -51,6 +51,7 @@ import {
 import type { SearchOption } from "@/new/photos/services/search/types";
 import { AppContext } from "@/new/photos/types/context";
 import { ensure } from "@/utils/ensure";
+import { wait } from "@/utils/promise";
 import {
     CenteredFlex,
     FlexWrapper,
@@ -459,12 +460,17 @@ export default function Gallery() {
             trashedFiles,
             hiddenFiles,
         );
-        setFavItemIds(favItemIds);
-        setArchivedCollections(archivedCollections);
-        setDefaultHiddenCollectionIDs(defaultHiddenCollectionIDs);
-        setHiddenFileIds(hiddenFileIds);
-        setCollectionSummaries(mergedCollectionSummaries);
-        setHiddenCollectionSummaries(hiddenCollectionSummaries);
+        // This wait(0) is a hack, but it is not a new one, this merely retains
+        // the behaviour of the old code. Without this, the "Nothing here"
+        // message flashes for a second.
+        wait(0).then(() => {
+            setFavItemIds(favItemIds);
+            setArchivedCollections(archivedCollections);
+            setDefaultHiddenCollectionIDs(defaultHiddenCollectionIDs);
+            setHiddenFileIds(hiddenFileIds);
+            setCollectionSummaries(mergedCollectionSummaries);
+            setHiddenCollectionSummaries(hiddenCollectionSummaries);
+        });
     }, [
         collections,
         hiddenCollections,
