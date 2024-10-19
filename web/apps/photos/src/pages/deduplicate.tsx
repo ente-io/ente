@@ -1,5 +1,6 @@
 import { stashRedirect } from "@/accounts/services/redirect";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { ALL_SECTION } from "@/new/photos/services/collection";
 import { getLocalFiles } from "@/new/photos/services/files";
 import { AppContext } from "@/new/photos/types/context";
 import { VerticallyCentered } from "@ente/shared/components/Container";
@@ -27,7 +28,6 @@ import {
     DefaultDeduplicateContext,
 } from "types/deduplicate";
 import { SelectedState } from "types/gallery";
-import { ALL_SECTION } from "utils/collection";
 import { constructFileToCollectionMap, getSelectedFiles } from "utils/file";
 
 export const DeduplicateContext = createContext<DeduplicateContextType>(

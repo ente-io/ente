@@ -5,6 +5,7 @@ import {
     type GalleryBarImplProps,
 } from "@/new/photos/components/gallery/BarImpl";
 import { PeopleHeader } from "@/new/photos/components/gallery/PeopleHeader";
+import { ALL_SECTION } from "@/new/photos/services/collection";
 import {
     areOnlySystemCollections,
     collectionsSortBy,
@@ -26,7 +27,6 @@ import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { sortCollectionSummaries } from "services/collectionService";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
-import { ALL_SECTION } from "utils/collection";
 import {
     FilesDownloadProgressAttributes,
     isFilesDownloadCancelled,

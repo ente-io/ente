@@ -13,6 +13,7 @@ import type {
 } from "@/base/types/ipc";
 import type { Collection } from "@/media/collection";
 import { EncryptedEnteFile } from "@/media/file";
+import { groupFilesBasedOnCollectionID } from "@/new/photos/services/file";
 import { getLocalFiles } from "@/new/photos/services/files";
 import { UPLOAD_RESULT } from "@/new/photos/services/upload/types";
 import { ensureString } from "@/utils/ensure";
@@ -20,7 +21,6 @@ import debounce from "debounce";
 import uploadManager, {
     type UploadItemWithCollection,
 } from "services/upload/uploadManager";
-import { groupFilesBasedOnCollectionID } from "utils/file";
 import { removeFromCollection } from "./collectionService";
 
 /**

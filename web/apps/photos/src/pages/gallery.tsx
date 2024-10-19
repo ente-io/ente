@@ -4,8 +4,8 @@ import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { useModalVisibility } from "@/base/components/utils/modal";
 import { useIsSmallWidth } from "@/base/hooks";
 import log from "@/base/log";
-import type { Collection } from "@/media/collection";
-import { type EnteFile, mergeMetadata } from "@/media/file";
+import { type Collection } from "@/media/collection";
+import { mergeMetadata, type EnteFile } from "@/media/file";
 import {
     CollectionSelector,
     type CollectionSelectorAttributes,
@@ -20,9 +20,20 @@ import {
     SearchResultsHeader,
 } from "@/new/photos/components/gallery";
 import type { GalleryBarMode } from "@/new/photos/components/gallery/BarImpl";
-import { GalleryPeopleState } from "@/new/photos/components/gallery/PeopleHeader";
+import {
+    getUniqueFiles,
+    setDerivativeState,
+    useGalleryReducer,
+} from "@/new/photos/components/gallery/reducer";
 import { usePeopleStateSnapshot } from "@/new/photos/components/utils/ml";
 import { shouldShowWhatsNew } from "@/new/photos/services/changelog";
+import {
+    ALL_SECTION,
+    ARCHIVE_SECTION,
+    DUMMY_UNCATEGORIZED_COLLECTION,
+    HIDDEN_ITEMS_SECTION,
+    TRASH_SECTION,
+} from "@/new/photos/services/collection";
 import type { CollectionSummaries } from "@/new/photos/services/collection/ui";
 import { areOnlySystemCollections } from "@/new/photos/services/collection/ui";
 import downloadManager from "@/new/photos/services/download";
@@ -31,6 +42,7 @@ import {
     getLocalTrashedFiles,
     sortFiles,
 } from "@/new/photos/services/files";
+import { isArchivedFile } from "@/new/photos/services/magic-metadata";
 import type { Person } from "@/new/photos/services/ml/people";
 import {
     filterSearchableFiles,
@@ -39,6 +51,7 @@ import {
 import type { SearchOption } from "@/new/photos/services/search/types";
 import { AppContext } from "@/new/photos/types/context";
 import { ensure } from "@/utils/ensure";
+import { wait } from "@/utils/promise";
 import {
     CenteredFlex,
     FlexWrapper,
@@ -62,7 +75,6 @@ import {
     clearKeys,
     getKey,
 } from "@ente/shared/storage/sessionStorage";
-import type { User } from "@ente/shared/user/types";
 import ArrowBack from "@mui/icons-material/ArrowBack";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -111,10 +123,7 @@ import {
     createUnCategorizedCollection,
     getAllLatestCollections,
     getAllLocalCollections,
-    getCollectionSummaries,
     getFavItemIds,
-    getHiddenItemsSummary,
-    getSectionSummaries,
 } from "services/collectionService";
 import { syncFiles } from "services/fileService";
 import { preFileInfoSync, sync } from "services/sync";
@@ -130,15 +139,8 @@ import {
 import { FamilyData } from "types/user";
 import { checkSubscriptionPurchase } from "utils/billing";
 import {
-    ALL_SECTION,
-    ARCHIVE_SECTION,
     COLLECTION_OPS_TYPE,
-    DUMMY_UNCATEGORIZED_COLLECTION,
-    HIDDEN_ITEMS_SECTION,
-    TRASH_SECTION,
     constructCollectionNameMap,
-    getArchivedCollections,
-    getDefaultHiddenCollectionIDs,
     getSelectedCollection,
     handleCollectionOps,
     splitNormalAndHiddenCollections,
@@ -147,10 +149,8 @@ import {
     FILE_OPS_TYPE,
     constructFileToCollectionMap,
     getSelectedFiles,
-    getUniqueFiles,
     handleFileOps,
 } from "utils/file";
-import { isArchivedFile } from "utils/magicMetadata";
 import { getSessionExpiredMessage } from "utils/ui";
 import { getLocalFamilyData } from "utils/user/family";
 
@@ -190,6 +190,7 @@ export const GalleryContext = createContext<GalleryContextType>(
  *           Photo List           v
  */
 export default function Gallery() {
+    const [state, dispatch] = useGalleryReducer();
     const [user, setUser] = useState(null);
     const [familyData, setFamilyData] = useState<FamilyData>(null);
     const [collections, setCollections] = useState<Collection[]>(null);
@@ -200,8 +201,6 @@ export default function Gallery() {
     const [files, setFiles] = useState<EnteFile[]>(null);
     const [hiddenFiles, setHiddenFiles] = useState<EnteFile[]>(null);
     const [trashedFiles, setTrashedFiles] = useState<EnteFile[]>(null);
-
-    const [favItemIds, setFavItemIds] = useState<Set<number>>();
 
     const [isFirstLoad, setIsFirstLoad] = useState(false);
     const [selected, setSelected] = useState<SelectedState>({
@@ -444,7 +443,14 @@ export default function Gallery() {
         if (!user || !files || !collections || !hiddenFiles || !trashedFiles) {
             return;
         }
-        setDerivativeState(
+        const {
+            favFileIDs,
+            archivedCollections,
+            defaultHiddenCollectionIDs,
+            hiddenFileIds,
+            mergedCollectionSummaries,
+            hiddenCollectionSummaries,
+        } = setDerivativeState(
             user,
             collections,
             hiddenCollections,
@@ -452,6 +458,17 @@ export default function Gallery() {
             trashedFiles,
             hiddenFiles,
         );
+        // This wait(0) is a hack, but it is not a new one, this merely retains
+        // the behaviour of the old code. Without this, the "Nothing here"
+        // message flashes for a second.
+        wait(0).then(() => {
+            dispatch({ type: "setDerived", favFileIDs });
+            setArchivedCollections(archivedCollections);
+            setDefaultHiddenCollectionIDs(defaultHiddenCollectionIDs);
+            setHiddenFileIds(hiddenFileIds);
+            setCollectionSummaries(mergedCollectionSummaries);
+            setHiddenCollectionSummaries(hiddenCollectionSummaries);
+        });
     }, [
         collections,
         hiddenCollections,
@@ -531,16 +548,8 @@ export default function Gallery() {
         );
     }, [collections, activeCollectionID]);
 
-    // The derived UI state when we are in "people" mode.
-    //
-    // TODO: This spawns even more workarounds below. Move this to a
-    // reducer/store.
-    type DerivedState1 = {
-        filteredData: EnteFile[];
-        galleryPeopleState: GalleryPeopleState | undefined;
-    };
-
-    const derived1: DerivedState1 = useMemoSingleThreaded(async () => {
+    // TODO: Make this a normal useEffect.
+    useMemoSingleThreaded(async () => {
         if (
             !files ||
             !user ||
@@ -548,19 +557,18 @@ export default function Gallery() {
             !hiddenFiles ||
             !archivedCollections
         ) {
-            return { filteredData: [], galleryPeopleState: undefined };
-        }
-
-        if (activeCollectionID === TRASH_SECTION && !selectedSearchOption) {
-            const filteredData = getUniqueFiles([
-                ...trashedFiles,
-                ...files.filter((file) => tempDeletedFileIds?.has(file.id)),
-            ]);
-            return { filteredData, galleryPeopleState: undefined };
+            dispatch({
+                type: "set",
+                filteredData: [],
+                galleryPeopleState: undefined,
+            });
+            return;
         }
 
         let filteredFiles: EnteFile[] = [];
-        let galleryPeopleState: GalleryPeopleState;
+        let galleryPeopleState:
+            | { activePerson: Person | undefined; people: Person[] }
+            | undefined;
         if (selectedSearchOption) {
             filteredFiles = await filterSearchableFiles(
                 selectedSearchOption.suggestion,
@@ -613,6 +621,11 @@ export default function Gallery() {
                 activePerson,
                 people: filteredVisiblePeople,
             };
+        } else if (activeCollectionID === TRASH_SECTION) {
+            filteredFiles = getUniqueFiles([
+                ...trashedFiles,
+                ...files.filter((file) => tempDeletedFileIds?.has(file.id)),
+            ]);
         } else {
             const baseFiles = barMode == "hidden-albums" ? hiddenFiles : files;
             filteredFiles = getUniqueFiles(
@@ -675,13 +688,18 @@ export default function Gallery() {
                     }
                 }),
             );
-        }
-        const sortAsc = activeCollection?.pubMagicMetadata?.data?.asc ?? false;
-        if (sortAsc) {
-            filteredFiles = sortFiles(filteredFiles, true);
+            const sortAsc =
+                activeCollection?.pubMagicMetadata?.data?.asc ?? false;
+            if (sortAsc) {
+                filteredFiles = sortFiles(filteredFiles, true);
+            }
         }
 
-        return { filteredData: filteredFiles, galleryPeopleState };
+        dispatch({
+            type: "set",
+            filteredData: filteredFiles,
+            galleryPeopleState,
+        });
     }, [
         barMode,
         files,
@@ -697,10 +715,7 @@ export default function Gallery() {
         activePersonID,
     ]);
 
-    const { filteredData, galleryPeopleState } = derived1 ?? {
-        filteredData: [],
-        galleryPeopleState: undefined,
-    };
+    const { filteredData, ...galleryPeopleState } = state;
 
     const selectAll = (e: KeyboardEvent) => {
         // ignore ctrl/cmd + a if the user is typing in a text field
@@ -872,52 +887,6 @@ export default function Gallery() {
         return () => {
             document.removeEventListener("keydown", handleKeyUp);
         };
-    };
-
-    const setDerivativeState = async (
-        user: User,
-        collections: Collection[],
-        hiddenCollections: Collection[],
-        files: EnteFile[],
-        trashedFiles: EnteFile[],
-        hiddenFiles: EnteFile[],
-    ) => {
-        const favItemIds = await getFavItemIds(files);
-        setFavItemIds(favItemIds);
-        const archivedCollections = getArchivedCollections(collections);
-        setArchivedCollections(archivedCollections);
-        const defaultHiddenCollectionIDs =
-            getDefaultHiddenCollectionIDs(hiddenCollections);
-        setDefaultHiddenCollectionIDs(defaultHiddenCollectionIDs);
-        const hiddenFileIds = new Set<number>(hiddenFiles.map((f) => f.id));
-        setHiddenFileIds(hiddenFileIds);
-        const collectionSummaries = getCollectionSummaries(
-            user,
-            collections,
-            files,
-        );
-        const sectionSummaries = getSectionSummaries(
-            files,
-            trashedFiles,
-            archivedCollections,
-        );
-        const hiddenCollectionSummaries = getCollectionSummaries(
-            user,
-            hiddenCollections,
-            hiddenFiles,
-        );
-        const hiddenItemsSummaries = getHiddenItemsSummary(
-            hiddenFiles,
-            hiddenCollections,
-        );
-        hiddenCollectionSummaries.set(
-            HIDDEN_ITEMS_SECTION,
-            hiddenItemsSummaries,
-        );
-        setCollectionSummaries(
-            mergeMaps(collectionSummaries, sectionSummaries),
-        );
-        setHiddenCollectionSummaries(hiddenCollectionSummaries);
     };
 
     const setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator =
@@ -1137,8 +1106,8 @@ export default function Gallery() {
     );
 
     const refreshFavItemIds = async () => {
-        const favItemIds = await getFavItemIds(files);
-        setFavItemIds(favItemIds);
+        const favFileIDs = await getFavItemIds(files);
+        dispatch({ type: "setFavorites", favFileIDs });
     };
 
     if (!collectionSummaries || !filteredData) {
@@ -1324,7 +1293,7 @@ export default function Gallery() {
                         modePlus={isInSearchMode ? "search" : barMode}
                         files={filteredData}
                         syncWithRemote={syncWithRemote}
-                        favItemIds={favItemIds}
+                        favItemIds={state.favFileIDs}
                         setSelected={setSelected}
                         selected={selected}
                         tempDeletedFileIds={tempDeletedFileIds}
@@ -1406,14 +1375,6 @@ const preloadImage = (imgBasePath: string) => {
     const srcset = [];
     for (let i = 1; i <= 3; i++) srcset.push(`${imgBasePath}/${i}x.png ${i}x`);
     new Image().srcset = srcset.join(",");
-};
-
-const mergeMaps = <K, V>(map1: Map<K, V>, map2: Map<K, V>) => {
-    const mergedMap = new Map<K, V>(map1);
-    map2.forEach((value, key) => {
-        mergedMap.set(key, value);
-    });
-    return mergedMap;
 };
 
 type NormalNavbarContentsProps = SearchBarProps & {
