@@ -13,9 +13,9 @@ import 'package:media_extension/media_extension_action_types.dart';
 import 'package:photos/ente_theme_data.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
+import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import "package:photos/services/home_widget_service.dart";
-import "package:photos/services/machine_learning/machine_learning_controller.dart";
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/tabs/home_widget.dart';
 import "package:photos/ui/viewer/actions/file_viewer.dart";
@@ -96,7 +96,7 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     if (Platform.isAndroid || kDebugMode) {
       return Listener(
         onPointerDown: (event) {
-          MachineLearningController.instance.onUserInteraction();
+          machineLearningController.onUserInteraction();
         },
         child: AdaptiveTheme(
           light: lightThemeData,
@@ -124,21 +124,26 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
         ),
       );
     } else {
-      return MaterialApp(
-        title: "ente",
-        themeMode: ThemeMode.system,
-        theme: lightThemeData,
-        darkTheme: darkThemeData,
-        home: const HomeWidget(),
-        debugShowCheckedModeBanner: false,
-        builder: EasyLoading.init(),
-        locale: locale,
-        supportedLocales: appSupportedLocales,
-        localeListResolutionCallback: localResolutionCallBack,
-        localizationsDelegates: const [
-          ...AppLocalizations.localizationsDelegates,
-          S.delegate,
-        ],
+      return Listener(
+        onPointerDown: (event) {
+          machineLearningController.onUserInteraction();
+        },
+        child: MaterialApp(
+          title: "ente",
+          themeMode: ThemeMode.system,
+          theme: lightThemeData,
+          darkTheme: darkThemeData,
+          home: const HomeWidget(),
+          debugShowCheckedModeBanner: false,
+          builder: EasyLoading.init(),
+          locale: locale,
+          supportedLocales: appSupportedLocales,
+          localeListResolutionCallback: localResolutionCallBack,
+          localizationsDelegates: const [
+            ...AppLocalizations.localizationsDelegates,
+            S.delegate,
+          ],
+        ),
       );
     }
   }

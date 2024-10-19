@@ -104,8 +104,6 @@ PODS:
   - GoogleUtilities/UserDefaults (8.0.2):
     - GoogleUtilities/Logger
     - GoogleUtilities/Privacy
-  - heif_converter (1.0.0):
-    - Flutter
   - home_widget (0.0.1):
     - Flutter
   - image_editor_common (1.0.0):
@@ -262,7 +260,6 @@ DEPENDENCIES:
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
   - flutter_sodium (from `.symlinks/plugins/flutter_sodium/ios`)
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
-  - heif_converter (from `.symlinks/plugins/heif_converter/ios`)
   - home_widget (from `.symlinks/plugins/home_widget/ios`)
   - image_editor_common (from `.symlinks/plugins/image_editor_common/ios`)
   - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
@@ -361,8 +358,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_sodium/ios"
   fluttertoast:
     :path: ".symlinks/plugins/fluttertoast/ios"
-  heif_converter:
-    :path: ".symlinks/plugins/heif_converter/ios"
   home_widget:
     :path: ".symlinks/plugins/home_widget/ios"
   image_editor_common:
@@ -465,7 +460,6 @@ SPEC CHECKSUMS:
   fluttertoast: e9a18c7be5413da53898f660530c56f35edfba9c
   GoogleDataTransport: aae35b7ea0c09004c3797d53c8c41f66f219d6a7
   GoogleUtilities: 26a3abef001b6533cf678d3eb38fd3f614b7872d
-  heif_converter: e3802659e4104e27e28c4d7bff07903da2f69318
   home_widget: 0434835a4c9a75704264feff6be17ea40e0f0d57
   image_editor_common: d6f6644ae4a6de80481e89fe6d0a8c49e30b4b43
   image_picker_ios: c560581cceedb403a6ff17f2f816d7fea1421fc1

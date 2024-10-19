@@ -8,21 +8,19 @@ import {
     EnteFile,
     FileWithUpdatedMagicMetadata,
     FileWithUpdatedPublicMagicMetadata,
-    mergeMetadata,
     TrashRequest,
 } from "@/media/file";
+import { getLatestVersionFiles } from "@/new/photos/services/file";
 import {
     clearCachedThumbnailsIfChanged,
     getLocalFiles,
     setLocalFiles,
-    sortFiles,
 } from "@/new/photos/services/files";
 import { batch } from "@/utils/array";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import exportService from "services/export";
-import { SetFiles } from "types/gallery";
-import { decryptFile, getLatestVersionFiles } from "utils/file";
+import { decryptFile } from "utils/file";
 import {
     getCollectionLastSyncTime,
     REQUEST_BATCH_SIZE,
@@ -33,21 +31,27 @@ import {
  * Fetch all files of the given {@link type}, belonging to the given
  * {@link collections}, from remote and update our local database.
  *
+ * If this is the initial read, or if the count of files we have differs from
+ * the state of the local database (these two are expected to be the same case),
+ * then the {@link onResetFiles} callback is invoked to give the caller a chance
+ * to bring its state up to speed.
+ *
  * In addition to updating the local database, it also calls the provided
- * {@link setFiles} callback with the latest decrypted files after each batch
- * the new and/or updated files are received from remote.
+ * {@link onFetchFiles} callback with the latest decrypted files after each
+ * batch the new and/or updated files are received from remote.
  */
 export const syncFiles = async (
     type: "normal" | "hidden",
     collections: Collection[],
-    setFiles: SetFiles,
+    onResetFiles: (fs: EnteFile[]) => void,
+    onFetchFiles: (fs: EnteFile[]) => void,
 ) => {
     const localFiles = await getLocalFiles(type);
     let files = await removeDeletedCollectionFiles(collections, localFiles);
     let didUpdateFiles = false;
     if (files.length !== localFiles.length) {
         await setLocalFiles(type, files);
-        setFiles(sortFiles(mergeMetadata(files)));
+        onResetFiles(files);
         didUpdateFiles = true;
     }
     for (const collection of collections) {
@@ -59,7 +63,7 @@ export const syncFiles = async (
             continue;
         }
 
-        const newFiles = await getFiles(collection, lastSyncTime, setFiles);
+        const newFiles = await getFiles(collection, lastSyncTime, onFetchFiles);
         await clearCachedThumbnailsIfChanged(localFiles, newFiles);
         files = getLatestVersionFiles([...files, ...newFiles]);
         await setLocalFiles(type, files);
@@ -72,7 +76,7 @@ export const syncFiles = async (
 export const getFiles = async (
     collection: Collection,
     sinceTime: number,
-    setFiles: SetFiles,
+    onFetchFiles: (fs: EnteFile[]) => void,
 ): Promise<EnteFile[]> => {
     try {
         let decryptedFiles: EnteFile[] = [];
@@ -105,16 +109,7 @@ export const getFiles = async (
             );
             decryptedFiles = [...decryptedFiles, ...newDecryptedFilesBatch];
 
-            setFiles((files) =>
-                sortFiles(
-                    mergeMetadata(
-                        getLatestVersionFiles([
-                            ...(files || []),
-                            ...decryptedFiles,
-                        ]),
-                    ),
-                ),
-            );
+            onFetchFiles(decryptedFiles);
             if (resp.data.diff.length) {
                 time = resp.data.diff.slice(-1)[0].updationTime;
             }

@@ -42,6 +42,26 @@
         }
     },
     {
+        "relation": ["delegate_permission/common.handle_all_urls"],
+        "target": {
+          "namespace": "android_app",
+          "package_name": "io.ente.photos",
+          "sha256_cert_fingerprints": [
+                "35:ED:56:81:B7:0B:B3:BD:35:D9:0D:85:6A:F5:69:4C:50:4D:EF:46:AA:D8:3F:77:7B:1C:67:5C:F4:51:35:0B"
+            ]
+        }
+    },
+    {
+        "relation": ["delegate_permission/common.handle_all_urls"],
+        "target": {
+          "namespace": "android_app",
+          "package_name": "io.ente.photos.independent",
+          "sha256_cert_fingerprints": [
+                "35:ED:56:81:B7:0B:B3:BD:35:D9:0D:85:6A:F5:69:4C:50:4D:EF:46:AA:D8:3F:77:7B:1C:67:5C:F4:51:35:0B"
+            ]
+        }
+    },
+    {
         "relation": [
             "delegate_permission/common.get_login_creds"
         ],

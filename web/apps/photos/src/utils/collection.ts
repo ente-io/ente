@@ -10,7 +10,14 @@ import {
 } from "@/media/collection";
 import { EnteFile } from "@/media/file";
 import { ItemVisibility } from "@/media/file-metadata";
+import {
+    getDefaultHiddenCollectionIDs,
+    isDefaultHiddenCollection,
+    isHiddenCollection,
+    isIncomingShare,
+} from "@/new/photos/services/collection";
 import { getAllLocalFiles, getLocalFiles } from "@/new/photos/services/files";
+import { updateMagicMetadata } from "@/new/photos/services/magic-metadata";
 import { safeDirectoryName } from "@/new/photos/utils/native-fs";
 import { CustomError } from "@ente/shared/error";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
@@ -33,13 +40,6 @@ import {
 } from "services/collectionService";
 import { SetFilesDownloadProgressAttributes } from "types/gallery";
 import { downloadFilesWithProgress } from "utils/file";
-import { isArchivedCollection, updateMagicMetadata } from "utils/magicMetadata";
-
-export const ARCHIVE_SECTION = -1;
-export const TRASH_SECTION = -2;
-export const DUMMY_UNCATEGORIZED_COLLECTION = -3;
-export const HIDDEN_ITEMS_SECTION = -4;
-export const ALL_SECTION = 0;
 
 export enum COLLECTION_OPS_TYPE {
     ADD,
@@ -328,22 +328,6 @@ export const changeCollectionSubType = async (
     }
 };
 
-export const getArchivedCollections = (collections: Collection[]) => {
-    return new Set<number>(
-        collections
-            .filter(isArchivedCollection)
-            .map((collection) => collection.id),
-    );
-};
-
-export const getDefaultHiddenCollectionIDs = (collections: Collection[]) => {
-    return new Set<number>(
-        collections
-            .filter(isDefaultHiddenCollection)
-            .map((collection) => collection.id),
-    );
-};
-
 export const getUserOwnedCollections = (collections: Collection[]) => {
     const user: User = getData(LS_KEYS.USER);
     if (!user?.id) {
@@ -352,35 +336,12 @@ export const getUserOwnedCollections = (collections: Collection[]) => {
     return collections.filter((collection) => collection.owner.id === user.id);
 };
 
-export const isDefaultHiddenCollection = (collection: Collection) =>
-    collection.magicMetadata?.data.subType === SUB_TYPE.DEFAULT_HIDDEN;
-
-export const isHiddenCollection = (collection: Collection) =>
-    collection.magicMetadata?.data.visibility === ItemVisibility.hidden;
-
 export const isQuickLinkCollection = (collection: Collection) =>
     collection.magicMetadata?.data.subType === SUB_TYPE.QUICK_LINK_COLLECTION;
-
-export function isOutgoingShare(collection: Collection, user: User): boolean {
-    return collection.owner.id === user.id && collection.sharees?.length > 0;
-}
-
-export function isIncomingShare(collection: Collection, user: User) {
-    return collection.owner.id !== user.id;
-}
 
 export function isIncomingViewerShare(collection: Collection, user: User) {
     const sharee = collection.sharees?.find((sharee) => sharee.id === user.id);
     return sharee?.role === COLLECTION_ROLE.VIEWER;
-}
-
-export function isIncomingCollabShare(collection: Collection, user: User) {
-    const sharee = collection.sharees?.find((sharee) => sharee.id === user.id);
-    return sharee?.role === COLLECTION_ROLE.COLLABORATOR;
-}
-
-export function isSharedOnlyViaLink(collection: Collection) {
-    return collection.publicURLs?.length && !collection.sharees?.length;
 }
 
 export function isValidMoveTarget(
@@ -428,24 +389,6 @@ export function getNonHiddenCollections(
 
 export function getHiddenCollections(collections: Collection[]): Collection[] {
     return collections.filter((collection) => isHiddenCollection(collection));
-}
-
-export async function splitNormalAndHiddenCollections(
-    collections: Collection[],
-): Promise<{
-    normalCollections: Collection[];
-    hiddenCollections: Collection[];
-}> {
-    const normalCollections = [];
-    const hiddenCollections = [];
-    for (const collection of collections) {
-        if (isHiddenCollection(collection)) {
-            hiddenCollections.push(collection);
-        } else {
-            normalCollections.push(collection);
-        }
-    }
-    return { normalCollections, hiddenCollections };
 }
 
 export function constructCollectionNameMap(

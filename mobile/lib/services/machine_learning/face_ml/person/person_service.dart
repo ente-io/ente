@@ -252,8 +252,13 @@ class PersonService {
   }
 
   Future<void> fetchRemoteClusterFeedback() async {
-    await entityService.syncEntities();
+    await entityService.syncEntity(EntityType.cgroup);
     final entities = await entityService.getEntities(EntityType.cgroup);
+    // todo: (neerajg) perf change, this can be expensive to do on every sync
+    // especially when we have a lot of people. We should only do this when the
+    // last sync time is updated for cgroup entity type. To avoid partial update,
+    // we need to maintain a lastSyncTime value whenever this data is processed
+    // and stored in the db.
     entities.sort((a, b) => a.updatedAt.compareTo(b.updatedAt));
     final Map<String, String> faceIdToClusterID = {};
     final Map<String, String> clusterToPersonID = {};
@@ -286,7 +291,6 @@ class PersonService {
         );
       }
     }
-
     logger.info("Storing feedback for ${faceIdToClusterID.length} faces");
     await faceMLDataDB.updateFaceIdToClusterId(faceIdToClusterID);
     await faceMLDataDB.bulkAssignClusterToPersonID(clusterToPersonID);

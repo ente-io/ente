@@ -3,6 +3,7 @@ import type { LivePhotoSourceURL, SourceURLs } from "@/media/file";
 import { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import type { GalleryBarMode } from "@/new/photos/components/gallery/BarImpl";
+import { TRASH_SECTION } from "@/new/photos/services/collection";
 import DownloadManager from "@/new/photos/services/download";
 import { PHOTOS_PAGES } from "@ente/shared/constants/pages";
 import { CustomError } from "@ente/shared/error";
@@ -19,7 +20,6 @@ import {
     SelectedState,
     SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
-import { TRASH_SECTION } from "utils/collection";
 import {
     handleSelectCreator,
     updateFileMsrcProps,
