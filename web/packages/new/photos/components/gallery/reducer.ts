@@ -29,6 +29,7 @@ import {
     isPinnedCollection,
 } from "../../services/magic-metadata";
 import type { Person } from "../../services/ml/people";
+import type { FamilyData } from "../../services/user";
 
 /**
  * Derived UI state backing the gallery.
@@ -50,8 +51,7 @@ export interface GalleryState {
     /**
      * Family plan related information for the logged in {@link User}.
      */
-    familyData: Fami, setFamilyData] = useState<FamilyData>(null);
-
+    familyData: FamilyData | undefined;
 
     filteredData: EnteFile[];
     /**
@@ -74,9 +74,10 @@ export interface GalleryState {
 // TODO: dummy actions for gradual migration to reducers
 export type GalleryAction =
     | {
-        type: "mount",
-        user: User,
-    }
+          type: "mount";
+          user: User;
+          familyData: FamilyData;
+      }
     | {
           type: "set";
           filteredData: EnteFile[];
@@ -85,12 +86,16 @@ export type GalleryAction =
               | undefined;
       }
     | { type: "setDerived"; favFileIDs: Set<number> }
-    | { type: "setFavorites"; favFileIDs: Set<number> }
-    | { type: "setNormalAndHiddenCollections";
-        normalCollections: Collection[]; hiddenCollections: Collection[]; };
+    | { type: "setFavorites"; favFileIDs: Set<number> };
+// | {
+//       type: "setNormalAndHiddenCollections";
+//       normalCollections: Collection[];
+//       hiddenCollections: Collection[];
+//   };
 
 const initialGalleryState: GalleryState = {
     user: undefined,
+    familyData: undefined,
     filteredData: [],
     favFileIDs: new Set(),
     activePerson: undefined,
@@ -105,8 +110,9 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
         case "mount":
             return {
                 ...state,
-                user: action.user
-            }
+                user: action.user,
+                familyData: action.familyData,
+            };
         case "set":
             return {
                 ...state,

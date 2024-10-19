@@ -49,7 +49,6 @@ import {
     setSearchCollectionsAndFiles,
 } from "@/new/photos/services/search";
 import type { SearchOption } from "@/new/photos/services/search/types";
-import type { FamilyData } from "@/new/photos/services/user";
 import { AppContext } from "@/new/photos/types/context";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
@@ -191,7 +190,6 @@ export const GalleryContext = createContext<GalleryContextType>(
  */
 export default function Gallery() {
     const [state, dispatch] = useGalleryReducer();
-    const [familyData, setFamilyData] = useState<FamilyData>(null);
     const [collections, setCollections] = useState<Collection[]>(null);
     const [hiddenCollections, setHiddenCollections] =
         useState<Collection[]>(null);
@@ -351,6 +349,10 @@ export default function Gallery() {
     const { show: showWhatsNew, props: whatsNewVisibilityProps } =
         useModalVisibility();
 
+    // TODO: Temp
+    const user = state.user;
+    const familyData = state.familyData;
+
     const router = useRouter();
 
     // Ensure that the keys in local storage are not malformed by verifying that
@@ -403,8 +405,7 @@ export default function Gallery() {
                 await splitNormalAndHiddenCollections(collections);
             const trashedFiles = await getLocalTrashedFiles();
 
-            setUser(user);
-            setFamilyData(familyData);
+            dispatch({ type: "mount", user, familyData });
             setFiles(files);
             setTrashedFiles(trashedFiles);
             setHiddenFiles(hiddenFiles);
