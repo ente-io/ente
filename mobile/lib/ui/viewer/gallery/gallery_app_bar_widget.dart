@@ -164,7 +164,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             // actions: _getDefaultActions(context),
             bottom: galleryType == GalleryType.searchResults ||
                     galleryType == GalleryType.ownedCollection ||
-                    galleryType == GalleryType.locationTag
+                    galleryType == GalleryType.locationTag ||
+                    galleryType == GalleryType.magic
                 ? const PreferredSize(
                     preferredSize: Size.fromHeight(0),
                     child: Flexible(child: RecommendedFilters()),

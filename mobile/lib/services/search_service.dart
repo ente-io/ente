@@ -1246,6 +1246,11 @@ class SearchService {
                     matchedUploadedIDs: filesToUploadedFileIDs(files),
                   ),
                 ).heroTag(),
+                magicFilter: MagicFilter(
+                  filterName: query,
+                  occurrence: kMostRelevantFilter,
+                  matchedUploadedIDs: filesToUploadedFileIDs(files),
+                ),
               ),
             );
           },
