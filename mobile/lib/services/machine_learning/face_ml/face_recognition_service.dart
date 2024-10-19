@@ -19,10 +19,10 @@ import "package:photos/utils/image_ml_util.dart";
 class FaceRecognitionService {
   static final _logger = Logger("FaceRecognitionService");
 
-  // Singleton pattern
-  FaceRecognitionService._privateConstructor();
-  static final instance = FaceRecognitionService._privateConstructor();
-  factory FaceRecognitionService() => instance;
+  FaceRecognitionService() {
+    _logger.finest("FaceRecognitionService constructor");
+    init();
+  }
 
   bool _isInitialized = false;
 

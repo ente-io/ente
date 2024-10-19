@@ -20,7 +20,6 @@ import "package:photos/services/machine_learning/face_ml/face_clustering/face_db
 import 'package:photos/services/machine_learning/face_ml/face_detection/face_detection_service.dart';
 import 'package:photos/services/machine_learning/face_ml/face_embedding/face_embedding_service.dart';
 import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
-import "package:photos/services/machine_learning/face_ml/face_recognition_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
 import 'package:photos/services/machine_learning/ml_result.dart';
@@ -71,9 +70,6 @@ class MLService {
     client = "${packageInfo.packageName}/${packageInfo.version}";
     _logger.info("client: $client");
 
-    // Activate FaceRecognitionService
-    await FaceRecognitionService.instance.init();
-
     // Listen on MachineLearningController
     Bus.instance.on<MachineLearningControlEvent>().listen((event) {
       if (localSettings.isMLIndexingEnabled == false) {
@@ -105,7 +101,7 @@ class MLService {
   }
 
   Future<void> sync() async {
-    await FaceRecognitionService.instance.sync();
+    await faceRecognitionService.sync();
   }
 
   Future<void> runAllML({bool force = false}) async {
