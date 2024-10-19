@@ -271,9 +271,6 @@ export default function Gallery() {
     const [fixCreationTimeAttributes, setFixCreationTimeAttributes] =
         useState<FixCreationTimeAttributes>(null);
 
-    const [archivedCollections, setArchivedCollections] =
-        useState<Set<number>>();
-
     const showPlanSelectorModal = () => setPlanModalView(true);
 
     const [uploadTypeSelectorView, setUploadTypeSelectorView] = useState(false);
@@ -352,6 +349,7 @@ export default function Gallery() {
     const files = state.files;
     const hiddenFiles = state.hiddenFiles;
     const trashedFiles = state.trashedFiles;
+    const archivedCollections = state.archivedCollectionIDs;
 
     if (process.env.NEXT_PUBLIC_ENTE_WIP_CL) {
         console.log("render", { collections, hiddenCollections, files });
@@ -449,7 +447,6 @@ export default function Gallery() {
         }
         const {
             favFileIDs,
-            archivedCollections,
             defaultHiddenCollectionIDs,
             hiddenFileIds,
             mergedCollectionSummaries,
@@ -461,13 +458,13 @@ export default function Gallery() {
             files,
             trashedFiles,
             hiddenFiles,
+            archivedCollections,
         );
         // This wait(0) is a hack, but it is not a new one, this merely retains
         // the behaviour of the old code. Without this, the "Nothing here"
         // message flashes for a second.
         wait(0).then(() => {
             dispatch({ type: "setDerived", favFileIDs });
-            setArchivedCollections(archivedCollections);
             setDefaultHiddenCollectionIDs(defaultHiddenCollectionIDs);
             setHiddenFileIds(hiddenFileIds);
             setCollectionSummaries(mergedCollectionSummaries);

@@ -47,6 +47,8 @@ import type { FamilyData } from "../../services/user";
  * the UI state until the operation completes.
  */
 export interface GalleryState {
+    /*--<  Mostly static state  >--*/
+
     /**
      * The logged in {@link User}.
      *
@@ -59,6 +61,8 @@ export interface GalleryState {
      * Family plan related information for the logged in {@link User}.
      */
     familyData: FamilyData | undefined;
+
+    /*--<  Primary state: Files and collections  >--*/
 
     /**
      * The user's non-hidden collections.
@@ -81,11 +85,20 @@ export interface GalleryState {
      */
     trashedFiles: EnteFile[];
 
-    filteredData: EnteFile[];
+    /*--<  Derived state  >--*/
+
+    /**
+     * Collection IDs of archived collections.
+     */
+    archivedCollectionIDs: Set<number>;
     /**
      * File IDs of all the files that the user has marked as a favorite.
      */
     favFileIDs: Set<number>;
+
+    /*--<  UI state  >--*/
+
+    filteredData: EnteFile[];
     /**
      * The currently selected person, if any.
      *
@@ -143,6 +156,7 @@ const initialGalleryState: GalleryState = {
     hiddenFiles: [],
     trashedFiles: [],
     filteredData: [],
+    archivedCollectionIDs: new Set(),
     favFileIDs: new Set(),
     activePerson: undefined,
     people: [],
@@ -170,6 +184,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 files: action.files,
                 hiddenFiles: action.hiddenFiles,
                 trashedFiles: action.trashedFiles,
+                archivedCollectionIDs: getArchivedCollectionIDs(collections),
             };
         }
         case "set":
@@ -188,12 +203,18 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
             return {
                 ...state,
                 collections: action.collections,
+                archivedCollectionIDs: getArchivedCollectionIDs(
+                    action.collections,
+                ),
             };
         case "setAllCollections":
             return {
                 ...state,
                 collections: action.collections,
                 hiddenCollections: action.hiddenCollections,
+                archivedCollectionIDs: getArchivedCollectionIDs(
+                    action.collections,
+                ),
             };
         case "resetFiles":
             return { ...state, files: sortFiles(mergeMetadata(action.files)) };
@@ -248,6 +269,7 @@ export const setDerivativeState = (
     files: EnteFile[],
     trashedFiles: EnteFile[],
     hiddenFiles: EnteFile[],
+    archivedCollections: Set<number>,
 ) => {
     let favFileIDs = new Set<number>();
     for (const collection of collections) {
@@ -260,9 +282,6 @@ export const setDerivativeState = (
             break;
         }
     }
-    const archivedCollections = getArchivedCollections(collections);
-    // TODO: Move to reducer
-    // setArchivedCollections(archivedCollections);
     const defaultHiddenCollectionIDs =
         getDefaultHiddenCollectionIDs(hiddenCollections);
     // setDefaultHiddenCollectionIDs(defaultHiddenCollectionIDs);
@@ -300,7 +319,6 @@ export const setDerivativeState = (
 
     return {
         favFileIDs,
-        archivedCollections,
         defaultHiddenCollectionIDs,
         hiddenFileIds,
         mergedCollectionSummaries,
@@ -322,13 +340,12 @@ export function getUniqueFiles(files: EnteFile[]) {
     return uniqueFiles;
 }
 
-const getArchivedCollections = (collections: Collection[]) => {
-    return new Set<number>(
+const getArchivedCollectionIDs = (collections: Collection[]) =>
+    new Set<number>(
         collections
             .filter(isArchivedCollection)
             .map((collection) => collection.id),
     );
-};
 
 function getCollectionSummaries(
     user: User,
