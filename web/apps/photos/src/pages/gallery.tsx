@@ -21,8 +21,8 @@ import {
 } from "@/new/photos/components/gallery";
 import type { GalleryBarMode } from "@/new/photos/components/gallery/BarImpl";
 import {
-    getUniqueFiles,
     setDerivativeState,
+    uniqueFilesByID,
     useGalleryReducer,
 } from "@/new/photos/components/gallery/reducer";
 import { usePeopleStateSnapshot } from "@/new/photos/components/utils/ml";
@@ -436,7 +436,7 @@ export default function Gallery() {
         () =>
             setSearchCollectionsAndFiles({
                 collections: collections ?? [],
-                files: getUniqueFiles(files ?? []),
+                files: uniqueFilesByID(files ?? []),
             }),
         [collections, files],
     );
@@ -612,7 +612,7 @@ export default function Gallery() {
                 }
             }
             const pfSet = new Set(activePerson?.fileIDs ?? []);
-            filteredFiles = getUniqueFiles(
+            filteredFiles = uniqueFilesByID(
                 files.filter(({ id }) => {
                     if (!pfSet.has(id)) return false;
                     return true;
@@ -623,13 +623,13 @@ export default function Gallery() {
                 people: filteredVisiblePeople,
             };
         } else if (activeCollectionID === TRASH_SECTION) {
-            filteredFiles = getUniqueFiles([
+            filteredFiles = uniqueFilesByID([
                 ...trashedFiles,
                 ...files.filter((file) => tempDeletedFileIds?.has(file.id)),
             ]);
         } else {
             const baseFiles = barMode == "hidden-albums" ? hiddenFiles : files;
-            filteredFiles = getUniqueFiles(
+            filteredFiles = uniqueFilesByID(
                 baseFiles.filter((item) => {
                     if (tempDeletedFileIds?.has(item.id)) {
                         return false;
