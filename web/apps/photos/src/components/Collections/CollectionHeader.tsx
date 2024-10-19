@@ -12,6 +12,7 @@ import { SpaceBetweenFlex } from "@/new/photos/components/mui";
 import {
     ALL_SECTION,
     HIDDEN_ITEMS_SECTION,
+    isHiddenCollection,
 } from "@/new/photos/services/collection";
 import type {
     CollectionSummary,
@@ -58,7 +59,6 @@ import {
     changeCollectionVisibility,
     downloadCollectionHelper,
     downloadDefaultHiddenCollectionHelper,
-    isHiddenCollection,
 } from "utils/collection";
 
 interface CollectionHeaderProps {

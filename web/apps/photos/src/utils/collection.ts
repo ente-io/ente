@@ -13,6 +13,7 @@ import { ItemVisibility } from "@/media/file-metadata";
 import {
     getDefaultHiddenCollectionIDs,
     isDefaultHiddenCollection,
+    isHiddenCollection,
     isIncomingShare,
 } from "@/new/photos/services/collection";
 import { getAllLocalFiles, getLocalFiles } from "@/new/photos/services/files";
@@ -335,9 +336,6 @@ export const getUserOwnedCollections = (collections: Collection[]) => {
     return collections.filter((collection) => collection.owner.id === user.id);
 };
 
-export const isHiddenCollection = (collection: Collection) =>
-    collection.magicMetadata?.data.visibility === ItemVisibility.hidden;
-
 export const isQuickLinkCollection = (collection: Collection) =>
     collection.magicMetadata?.data.subType === SUB_TYPE.QUICK_LINK_COLLECTION;
 
@@ -391,24 +389,6 @@ export function getNonHiddenCollections(
 
 export function getHiddenCollections(collections: Collection[]): Collection[] {
     return collections.filter((collection) => isHiddenCollection(collection));
-}
-
-export async function splitNormalAndHiddenCollections(
-    collections: Collection[],
-): Promise<{
-    normalCollections: Collection[];
-    hiddenCollections: Collection[];
-}> {
-    const normalCollections = [];
-    const hiddenCollections = [];
-    for (const collection of collections) {
-        if (isHiddenCollection(collection)) {
-            hiddenCollections.push(collection);
-        } else {
-            normalCollections.push(collection);
-        }
-    }
-    return { normalCollections, hiddenCollections };
 }
 
 export function constructCollectionNameMap(

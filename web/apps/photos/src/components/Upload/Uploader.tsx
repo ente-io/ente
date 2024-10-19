@@ -38,7 +38,7 @@ import type {
 } from "services/upload/uploadManager";
 import uploadManager from "services/upload/uploadManager";
 import watcher from "services/watch";
-import { SetCollections, SetFiles, SetLoading } from "types/gallery";
+import { SetFiles, SetLoading } from "types/gallery";
 import { getOrCreateAlbum } from "utils/collection";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import { getRootLevelFileWithFolderNotAllowMessage } from "utils/ui";
@@ -73,7 +73,7 @@ interface Props {
     setShouldDisableDropzone: (value: boolean) => void;
     showCollectionSelector?: () => void;
     setFiles: SetFiles;
-    setCollections?: SetCollections;
+    setCollections?: (cs: Collection[]) => void;
     isFirstUpload?: boolean;
     uploadTypeSelectorView: boolean;
     showSessionExpiredMessage: () => void;

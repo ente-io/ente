@@ -33,6 +33,7 @@ import {
     DUMMY_UNCATEGORIZED_COLLECTION,
     HIDDEN_ITEMS_SECTION,
     TRASH_SECTION,
+    isHiddenCollection,
 } from "@/new/photos/services/collection";
 import type { CollectionSummaries } from "@/new/photos/services/collection/ui";
 import { areOnlySystemCollections } from "@/new/photos/services/collection/ui";
@@ -50,6 +51,7 @@ import {
 } from "@/new/photos/services/search";
 import type { SearchOption } from "@/new/photos/services/search/types";
 import { AppContext } from "@/new/photos/types/context";
+import { splitByPredicate } from "@/utils/array";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import {
@@ -142,7 +144,6 @@ import {
     constructCollectionNameMap,
     getSelectedCollection,
     handleCollectionOps,
-    splitNormalAndHiddenCollections,
 } from "utils/collection";
 import {
     FILE_OPS_TYPE,
@@ -190,9 +191,6 @@ export const GalleryContext = createContext<GalleryContextType>(
  */
 export default function Gallery() {
     const [state, dispatch] = useGalleryReducer();
-    const [collections, setCollections] = useState<Collection[]>(null);
-    const [hiddenCollections, setHiddenCollections] =
-        useState<Collection[]>(null);
     const [defaultHiddenCollectionIDs, setDefaultHiddenCollectionIDs] =
         useState<Set<number>>();
     const [files, setFiles] = useState<EnteFile[]>(null);
@@ -352,6 +350,8 @@ export default function Gallery() {
     // TODO: Temp
     const user = state.user;
     const familyData = state.familyData;
+    const collections = state.collections;
+    const hiddenCollections = state.hiddenCollections;
 
     const router = useRouter();
 
@@ -400,17 +400,12 @@ export default function Gallery() {
             const hiddenFiles = sortFiles(
                 mergeMetadata(await getLocalFiles("hidden")),
             );
-            const collections = await getAllLocalCollections();
-            const { normalCollections, hiddenCollections } =
-                await splitNormalAndHiddenCollections(collections);
+            const allCollections = await getAllLocalCollections();
             const trashedFiles = await getLocalTrashedFiles();
-
-            dispatch({ type: "mount", user, familyData });
+            dispatch({ type: "mount", user, familyData, allCollections });
             setFiles(files);
             setTrashedFiles(trashedFiles);
             setHiddenFiles(hiddenFiles);
-            setCollections(normalCollections);
-            setHiddenCollections(hiddenCollections);
             await syncWithRemote(true);
             setIsFirstLoad(false);
             setJustSignedUp(false);
@@ -829,14 +824,19 @@ export default function Gallery() {
             }
             !silent && startLoading();
             await preFileInfoSync();
-            const collections = await getAllLatestCollections();
-            const { normalCollections, hiddenCollections } =
-                await splitNormalAndHiddenCollections(collections);
-            setCollections(normalCollections);
-            setHiddenCollections(hiddenCollections);
-            await syncFiles("normal", normalCollections, setFiles);
+            const allCollections = await getAllLatestCollections();
+            const [hiddenCollections, collections] = splitByPredicate(
+                allCollections,
+                isHiddenCollection,
+            );
+            dispatch({
+                type: "setAllCollections",
+                collections,
+                hiddenCollections,
+            });
+            await syncFiles("normal", collections, setFiles);
             await syncFiles("hidden", hiddenCollections, setHiddenFiles);
-            await syncTrash(collections, setTrashedFiles);
+            await syncTrash(allCollections, setTrashedFiles);
             // syncWithRemote is called with the force flag set to true before
             // doing an upload. So it is possible, say when resuming a pending
             // upload, that we get two syncWithRemotes happening in parallel.
@@ -1252,7 +1252,9 @@ export default function Gallery() {
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
                     setShouldDisableDropzone={setShouldDisableDropzone}
                     setFiles={setFiles}
-                    setCollections={setCollections}
+                    setCollections={(collections) =>
+                        dispatch({ type: "setNormalCollections", collections })
+                    }
                     isFirstUpload={areOnlySystemCollections(
                         collectionSummaries,
                     )}

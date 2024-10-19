@@ -42,10 +42,10 @@ import {
     changeCollectionSubType,
     getHiddenCollections,
     getNonHiddenCollections,
-    isHiddenCollection,
     isQuickLinkCollection,
     isValidMoveTarget,
 } from "utils/collection";
+import { isHiddenCollection } from "@/new/photos/services/collection";
 import { UpdateMagicMetadataRequest } from "./fileService";
 import { getPublicKey } from "./userService";
 

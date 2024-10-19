@@ -4,6 +4,8 @@ import {
     type Collection,
 } from "@/media/collection";
 import type { EnteFile } from "@/media/file";
+import { isHiddenCollection } from "@/new/photos/services/collection";
+import { splitByPredicate } from "@/utils/array";
 import type { User } from "@ente/shared/user/types";
 import { t } from "i18next";
 import React, { useReducer } from "react";
@@ -53,6 +55,15 @@ export interface GalleryState {
      */
     familyData: FamilyData | undefined;
 
+    /**
+     * The user's non-hidden collections.
+     */
+    collections: Collection[];
+    /**
+     * The user's hidden collections.
+     */
+    hiddenCollections: Collection[];
+
     filteredData: EnteFile[];
     /**
      * File IDs of all the files that the user has marked as a favorite.
@@ -71,12 +82,12 @@ export interface GalleryState {
     people: Person[] | undefined;
 }
 
-// TODO: dummy actions for gradual migration to reducers
 export type GalleryAction =
     | {
           type: "mount";
           user: User;
           familyData: FamilyData;
+          allCollections: Collection[];
       }
     | {
           type: "set";
@@ -86,16 +97,22 @@ export type GalleryAction =
               | undefined;
       }
     | { type: "setDerived"; favFileIDs: Set<number> }
+    | {
+          type: "setNormalCollections";
+          collections: Collection[];
+      }
+    | {
+          type: "setAllCollections";
+          collections: Collection[];
+          hiddenCollections: Collection[];
+      }
     | { type: "setFavorites"; favFileIDs: Set<number> };
-// | {
-//       type: "setNormalAndHiddenCollections";
-//       normalCollections: Collection[];
-//       hiddenCollections: Collection[];
-//   };
 
 const initialGalleryState: GalleryState = {
     user: undefined,
     familyData: undefined,
+    collections: [],
+    hiddenCollections: [],
     filteredData: [],
     favFileIDs: new Set(),
     activePerson: undefined,
@@ -107,12 +124,20 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
     action,
 ) => {
     switch (action.type) {
-        case "mount":
+        case "mount": {
+            const [hiddenCollections, collections] = splitByPredicate(
+                action.allCollections,
+                isHiddenCollection,
+            );
+
             return {
                 ...state,
                 user: action.user,
                 familyData: action.familyData,
+                collections: collections,
+                hiddenCollections: hiddenCollections,
             };
+        }
         case "set":
             return {
                 ...state,
@@ -124,6 +149,17 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
             return {
                 ...state,
                 favFileIDs: action.favFileIDs,
+            };
+        case "setNormalCollections":
+            return {
+                ...state,
+                collections: action.collections,
+            };
+        case "setAllCollections":
+            return {
+                ...state,
+                collections: action.collections,
+                hiddenCollections: action.hiddenCollections,
             };
         case "setFavorites":
             return {

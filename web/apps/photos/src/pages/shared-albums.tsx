@@ -72,7 +72,8 @@ import {
     SetFilesDownloadProgressAttributes,
     SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
-import { downloadCollectionFiles, isHiddenCollection } from "utils/collection";
+import { downloadCollectionFiles } from "utils/collection";
+import { isHiddenCollection } from "@/new/photos/services/collection";
 import { downloadSelectedFiles, getSelectedFiles } from "utils/file";
 import { formatNumber } from "utils/number/format";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
