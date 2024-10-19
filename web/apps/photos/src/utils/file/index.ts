@@ -17,6 +17,10 @@ import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import DownloadManager from "@/new/photos/services/download";
 import { updateExifIfNeededAndPossible } from "@/new/photos/services/exif-update";
+import {
+    isArchivedFile,
+    updateMagicMetadata,
+} from "@/new/photos/services/magic-metadata";
 import { detectFileTypeInfo } from "@/new/photos/utils/detect-type";
 import { safeFileName } from "@/new/photos/utils/native-fs";
 import { writeStream } from "@/new/photos/utils/native-stream";
@@ -39,7 +43,6 @@ import {
     SetFilesDownloadProgressAttributes,
     SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
-import { isArchivedFile, updateMagicMetadata } from "utils/magicMetadata";
 
 export enum FILE_OPS_TYPE {
     DOWNLOAD,
@@ -258,20 +261,6 @@ export async function getFileFromURL(fileURL: string, name: string) {
     const fileBlob = await (await fetch(fileURL)).blob();
     const fileFile = new File([fileBlob], name);
     return fileFile;
-}
-
-export function getUniqueFiles(files: EnteFile[]) {
-    const idSet = new Set<number>();
-    const uniqueFiles = files.filter((file) => {
-        if (!idSet.has(file.id)) {
-            idSet.add(file.id);
-            return true;
-        } else {
-            return false;
-        }
-    });
-
-    return uniqueFiles;
 }
 
 export async function downloadFilesWithProgress(

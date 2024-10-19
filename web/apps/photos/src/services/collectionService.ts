@@ -31,6 +31,12 @@ import {
     CollectionsSortBy,
 } from "@/new/photos/services/collection/ui";
 import { getLocalFiles, sortFiles } from "@/new/photos/services/files";
+import {
+    isArchivedCollection,
+    isArchivedFile,
+    isPinnedCollection,
+    updateMagicMetadata,
+} from "@/new/photos/services/magic-metadata";
 import { batch } from "@/utils/array";
 import { CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
@@ -60,12 +66,6 @@ import {
     isValidMoveTarget,
 } from "utils/collection";
 import { getUniqueFiles, groupFilesBasedOnCollectionID } from "utils/file";
-import {
-    isArchivedCollection,
-    isArchivedFile,
-    isPinnedCollection,
-    updateMagicMetadata,
-} from "utils/magicMetadata";
 import { UpdateMagicMetadataRequest } from "./fileService";
 import { getPublicKey } from "./userService";
 
@@ -1107,156 +1107,6 @@ function compareCollectionsLatestFile(first: EnteFile, second: EnteFile) {
     }
 }
 
-export function getCollectionSummaries(
-    user: User,
-    collections: Collection[],
-    files: EnteFile[],
-): CollectionSummaries {
-    const collectionSummaries: CollectionSummaries = new Map();
-    const collectionLatestFiles = getCollectionLatestFiles(files);
-    const collectionCoverFiles = getCollectionCoverFiles(files, collections);
-    const collectionFilesCount = getCollectionsFileCount(files);
-
-    let hasUncategorizedCollection = false;
-    for (const collection of collections) {
-        if (
-            !hasUncategorizedCollection &&
-            collection.type === CollectionType.uncategorized
-        ) {
-            hasUncategorizedCollection = true;
-        }
-        let type: CollectionSummaryType;
-        if (isIncomingShare(collection, user)) {
-            if (isIncomingCollabShare(collection, user)) {
-                type = "incomingShareCollaborator";
-            } else {
-                type = "incomingShareViewer";
-            }
-        } else if (isOutgoingShare(collection, user)) {
-            type = "outgoingShare";
-        } else if (isSharedOnlyViaLink(collection)) {
-            type = "sharedOnlyViaLink";
-        } else if (isArchivedCollection(collection)) {
-            type = "archived";
-        } else if (isDefaultHiddenCollection(collection)) {
-            type = "defaultHidden";
-        } else if (isPinnedCollection(collection)) {
-            type = "pinned";
-        } else {
-            // Directly use the collection type
-            // TODO: The constants can be aligned once collection type goes from
-            // an enum to an union.
-            switch (collection.type) {
-                case CollectionType.folder:
-                    type = "folder";
-                    break;
-                case CollectionType.favorites:
-                    type = "favorites";
-                    break;
-                case CollectionType.album:
-                    type = "album";
-                    break;
-                case CollectionType.uncategorized:
-                    type = "uncategorized";
-                    break;
-            }
-        }
-
-        let CollectionSummaryItemName: string;
-        if (type == "uncategorized") {
-            CollectionSummaryItemName = t("section_uncategorized");
-        } else if (type == "favorites") {
-            CollectionSummaryItemName = t("favorites");
-        } else {
-            CollectionSummaryItemName = collection.name;
-        }
-
-        collectionSummaries.set(collection.id, {
-            id: collection.id,
-            name: CollectionSummaryItemName,
-            latestFile: collectionLatestFiles.get(collection.id),
-            coverFile: collectionCoverFiles.get(collection.id),
-            fileCount: collectionFilesCount.get(collection.id) ?? 0,
-            updationTime: collection.updationTime,
-            type: type,
-            order: collection.magicMetadata?.data?.order ?? 0,
-        });
-    }
-    if (!hasUncategorizedCollection) {
-        collectionSummaries.set(
-            DUMMY_UNCATEGORIZED_COLLECTION,
-            getDummyUncategorizedCollectionSummary(),
-        );
-    }
-
-    return collectionSummaries;
-}
-
-function getCollectionsFileCount(files: EnteFile[]): Map<number, number> {
-    const collectionIDToFileMap = groupFilesBasedOnCollectionID(files);
-    const collectionFilesCount = new Map<number, number>();
-    for (const [id, files] of collectionIDToFileMap) {
-        collectionFilesCount.set(id, files.length);
-    }
-    return collectionFilesCount;
-}
-
-export function getSectionSummaries(
-    files: EnteFile[],
-    trashedFiles: EnteFile[],
-    archivedCollections: Set<number>,
-): CollectionSummaries {
-    const collectionSummaries: CollectionSummaries = new Map();
-    collectionSummaries.set(
-        ALL_SECTION,
-        getAllSectionSummary(files, archivedCollections),
-    );
-    collectionSummaries.set(
-        TRASH_SECTION,
-        getTrashedCollectionSummary(trashedFiles),
-    );
-    collectionSummaries.set(ARCHIVE_SECTION, getArchivedSectionSummary(files));
-
-    return collectionSummaries;
-}
-
-function getAllSectionSummary(
-    files: EnteFile[],
-    archivedCollections: Set<number>,
-): CollectionSummary {
-    const allSectionFiles = getAllSectionVisibleFiles(
-        files,
-        archivedCollections,
-    );
-    return {
-        id: ALL_SECTION,
-        name: t("section_all"),
-        type: "all",
-        coverFile: allSectionFiles?.[0],
-        latestFile: allSectionFiles?.[0],
-        fileCount: allSectionFiles?.length || 0,
-        updationTime: allSectionFiles?.[0]?.updationTime,
-    };
-}
-
-function getAllSectionVisibleFiles(
-    files: EnteFile[],
-    archivedCollections: Set<number>,
-): EnteFile[] {
-    const allSectionVisibleFiles = getUniqueFiles(
-        files.filter((file) => {
-            if (
-                isArchivedFile(file) ||
-                archivedCollections.has(file.collectionID)
-            ) {
-                return false;
-            }
-            return true;
-        }),
-    );
-    return allSectionVisibleFiles;
-}
-
 export function getDummyUncategorizedCollectionSummary(): CollectionSummary {
     return {
         id: DUMMY_UNCATEGORIZED_COLLECTION,
@@ -1269,47 +1119,7 @@ export function getDummyUncategorizedCollectionSummary(): CollectionSummary {
     };
 }
 
-export function getArchivedSectionSummary(
-    files: EnteFile[],
-): CollectionSummary {
-    const archivedFiles = getUniqueFiles(
-        files.filter((file) => isArchivedFile(file)),
-    );
-    return {
-        id: ARCHIVE_SECTION,
-        name: t("section_archive"),
-        type: "archive",
-        coverFile: null,
-        latestFile: archivedFiles?.[0],
-        fileCount: archivedFiles?.length,
-        updationTime: archivedFiles?.[0]?.updationTime,
-    };
-}
 
-export function getHiddenItemsSummary(
-    hiddenFiles: EnteFile[],
-    hiddenCollections: Collection[],
-): CollectionSummary {
-    const defaultHiddenCollectionIds = new Set(
-        hiddenCollections
-            .filter((collection) => isDefaultHiddenCollection(collection))
-            .map((collection) => collection.id),
-    );
-    const hiddenItems = getUniqueFiles(
-        hiddenFiles.filter((file) =>
-            defaultHiddenCollectionIds.has(file.collectionID),
-        ),
-    );
-    return {
-        id: HIDDEN_ITEMS_SECTION,
-        name: t("hidden_items"),
-        type: "hiddenItems",
-        coverFile: hiddenItems?.[0],
-        latestFile: hiddenItems?.[0],
-        fileCount: hiddenItems?.length,
-        updationTime: hiddenItems?.[0]?.updationTime,
-    };
-}
 
 export function getTrashedCollectionSummary(
     trashedFiles: EnteFile[],

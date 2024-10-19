@@ -1,6 +1,9 @@
+// TODO: Review this file
+/* eslint-disable @typescript-eslint/prefer-optional-chain */
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 import { sharedCryptoWorker } from "@/base/crypto";
 import type { Collection } from "@/media/collection";
-import { EnteFile, MagicMetadataCore } from "@/media/file";
+import type { EnteFile, MagicMetadataCore } from "@/media/file";
 import { ItemVisibility } from "@/media/file-metadata";
 
 export function isArchivedFile(item: EnteFile): boolean {
@@ -57,6 +60,7 @@ export async function updateMagicMetadata<T>(
         originalMagicMetadata.data = await cryptoWorker.decryptMetadataJSON({
             encryptedDataB64: originalMagicMetadata.data,
             decryptionHeaderB64: originalMagicMetadata.header,
+            // @ts-expect-error TODO: Need to use zod here.
             keyB64: decryptionKey,
         });
     }
@@ -73,6 +77,7 @@ export async function updateMagicMetadata<T>(
     const magicMetadata = {
         ...originalMagicMetadata,
         data: nonEmptyMagicMetadataProps,
+        // @ts-expect-error TODO review this file
         count: Object.keys(nonEmptyMagicMetadataProps).length,
     };
 
@@ -82,7 +87,9 @@ export async function updateMagicMetadata<T>(
 export const getNewMagicMetadata = <T>(): MagicMetadataCore<T> => {
     return {
         version: 1,
+        // @ts-expect-error TODO review this file
         data: null,
+        // @ts-expect-error TODO review this file
         header: null,
         count: 0,
     };
@@ -90,6 +97,7 @@ export const getNewMagicMetadata = <T>(): MagicMetadataCore<T> => {
 
 export const getNonEmptyMagicMetadataProps = <T>(magicMetadataProps: T): T => {
     return Object.fromEntries(
+        // @ts-expect-error TODO review this file
         Object.entries(magicMetadataProps).filter(
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             ([_, v]) => v !== null && v !== undefined,

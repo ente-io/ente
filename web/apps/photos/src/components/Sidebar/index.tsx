@@ -10,6 +10,11 @@ import { savedLogs } from "@/base/log-web";
 import { customAPIHost } from "@/base/origins";
 import { downloadString } from "@/base/utils/web";
 import { downloadAppDialogAttributes } from "@/new/photos/components/utils/download";
+import {
+    ARCHIVE_SECTION,
+    DUMMY_UNCATEGORIZED_COLLECTION,
+    TRASH_SECTION,
+} from "@/new/photos/services/collection";
 import type { CollectionSummaries } from "@/new/photos/services/collection/ui";
 import { AppContext, useAppContext } from "@/new/photos/types/context";
 import { initiateEmail, openURL } from "@/new/photos/utils/web";
@@ -71,11 +76,6 @@ import {
     isSubscriptionCancelled,
     isSubscriptionPastDue,
 } from "utils/billing";
-import {
-    ARCHIVE_SECTION,
-    DUMMY_UNCATEGORIZED_COLLECTION,
-    TRASH_SECTION,
-} from "utils/collection";
 import { isFamilyAdmin, isPartOfFamily } from "utils/user/family";
 import { testUpload } from "../../../tests/upload.test";
 import { MemberSubscriptionManage } from "../MemberSubscriptionManage";

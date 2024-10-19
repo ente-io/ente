@@ -13,6 +13,10 @@ import type {
     CollectionSummary,
     CollectionSummaryType,
 } from "@/new/photos/services/collection/ui";
+import {
+    isArchivedCollection,
+    isPinnedCollection,
+} from "@/new/photos/services/magic-metadata";
 import { AppContext } from "@/new/photos/types/context";
 import { HorizontalFlex } from "@ente/shared/components/Container";
 import OverflowMenu, {
@@ -54,7 +58,6 @@ import {
     HIDDEN_ITEMS_SECTION,
     isHiddenCollection,
 } from "utils/collection";
-import { isArchivedCollection, isPinnedCollection } from "utils/magicMetadata";
 
 interface CollectionHeaderProps {
     collectionSummary: CollectionSummary;

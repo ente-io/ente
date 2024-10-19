@@ -62,7 +62,6 @@ import {
     clearKeys,
     getKey,
 } from "@ente/shared/storage/sessionStorage";
-import type { User } from "@ente/shared/user/types";
 import ArrowBack from "@mui/icons-material/ArrowBack";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -150,7 +149,7 @@ import {
     getUniqueFiles,
     handleFileOps,
 } from "utils/file";
-import { isArchivedFile } from "utils/magicMetadata";
+import { isArchivedFile } from "@/new/photos/services/magic-metadata";
 import { getSessionExpiredMessage } from "utils/ui";
 import { getLocalFamilyData } from "utils/user/family";
 
@@ -871,62 +870,6 @@ export default function Gallery() {
         return () => {
             document.removeEventListener("keydown", handleKeyUp);
         };
-    };
-
-    const setDerivativeState = (
-        user: User,
-        collections: Collection[],
-        hiddenCollections: Collection[],
-        files: EnteFile[],
-        trashedFiles: EnteFile[],
-        hiddenFiles: EnteFile[],
-    ) => {
-        let favItemIds = new Set<number>();
-        for (const collection of collections) {
-            if (collection.type === CollectionType.favorites) {
-                favItemIds = new Set(
-                    files
-                        .filter((file) => file.collectionID === collection.id)
-                        .map((file): number => file.id),
-                );
-                break;
-            }
-        }
-        setFavItemIds(favItemIds);
-        const archivedCollections = getArchivedCollections(collections);
-        setArchivedCollections(archivedCollections);
-        const defaultHiddenCollectionIDs =
-            getDefaultHiddenCollectionIDs(hiddenCollections);
-        setDefaultHiddenCollectionIDs(defaultHiddenCollectionIDs);
-        const hiddenFileIds = new Set<number>(hiddenFiles.map((f) => f.id));
-        setHiddenFileIds(hiddenFileIds);
-        const collectionSummaries = getCollectionSummaries(
-            user,
-            collections,
-            files,
-        );
-        const sectionSummaries = getSectionSummaries(
-            files,
-            trashedFiles,
-            archivedCollections,
-        );
-        const hiddenCollectionSummaries = getCollectionSummaries(
-            user,
-            hiddenCollections,
-            hiddenFiles,
-        );
-        const hiddenItemsSummaries = getHiddenItemsSummary(
-            hiddenFiles,
-            hiddenCollections,
-        );
-        hiddenCollectionSummaries.set(
-            HIDDEN_ITEMS_SECTION,
-            hiddenItemsSummaries,
-        );
-        setCollectionSummaries(
-            mergeMaps(collectionSummaries, sectionSummaries),
-        );
-        setHiddenCollectionSummaries(hiddenCollectionSummaries);
     };
 
     const setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator =
