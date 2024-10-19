@@ -17,8 +17,8 @@ import "package:photos/models/search/hierarchical/file_type_filter.dart";
 import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
 import "package:photos/models/search/hierarchical/location_filter.dart";
 import "package:photos/models/search/hierarchical/magic_filter.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
-import "package:photos/services/location_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/magic_cache_service.dart";
@@ -231,7 +231,7 @@ Future<List<LocationFilter>> _curateLocationFilters(
 ) async {
   final locationFilters = <LocationFilter>[];
   final locationTagToOccurrence =
-      await LocationService.instance.getLocationTagsToOccurance(files);
+      await locationService.getLocationTagsToOccurance(files);
 
   for (LocationTag locationTag in locationTagToOccurrence.keys) {
     locationFilters.add(
@@ -367,7 +367,7 @@ Future<List<FaceFilter>> curateFaceFilters(
 Future<List<MagicFilter>> curateMagicFilters(List<EnteFile> files) async {
   final magicFilters = <MagicFilter>[];
 
-  final magicCaches = await MagicCacheService.instance.getMagicCache();
+  final magicCaches = await magicCacheService.getMagicCache();
   final filesUploadedFileIDs = filesToUploadedFileIDs(files);
   for (MagicCache magicCache in magicCaches) {
     final uploadedIDs = magicCache.fileUploadedIDs.toSet();

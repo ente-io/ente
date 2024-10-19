@@ -48,8 +48,7 @@ class LocationService {
   Future<Map<LocationTag, int>> getLocationTagsToOccurance(
     List<EnteFile> files,
   ) async {
-    final locationTagEntities =
-        await LocationService.instance.getLocationTags();
+    final locationTagEntities = await locationService.getLocationTags();
 
     final locationTagToOccurrence = await _computer.compute(
       _getLocationTagsToOccurenceForIsolate,

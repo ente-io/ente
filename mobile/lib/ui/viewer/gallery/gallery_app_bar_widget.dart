@@ -24,7 +24,6 @@ import "package:photos/models/metadata/common_keys.dart";
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/service_locator.dart';
 import 'package:photos/services/collections_service.dart';
-import "package:photos/services/location_service.dart";
 import 'package:photos/services/sync_service.dart';
 import "package:photos/states/location_screen_state.dart";
 import "package:photos/theme/colors.dart";
@@ -617,7 +616,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
   Future<void> deleteLocation() async {
     try {
-      await LocationService.instance.deleteLocationTag(
+      await locationService.deleteLocationTag(
         InheritedLocationScreenState.of(context).locationTagEntity.id,
       );
       Navigator.of(context).pop();
