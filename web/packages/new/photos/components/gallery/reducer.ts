@@ -7,6 +7,7 @@ import type { EnteFile } from "@/media/file";
 import { mergeMetadata } from "@/media/file";
 import { isHiddenCollection } from "@/new/photos/services/collection";
 import { splitByPredicate } from "@/utils/array";
+import { ensure } from "@/utils/ensure";
 import type { User } from "@ente/shared/user/types";
 import { t } from "i18next";
 import React, { useReducer } from "react";
@@ -149,7 +150,6 @@ export type GalleryAction =
               | { activePerson: Person | undefined; people: Person[] }
               | undefined;
       }
-    | { type: "setDerived" }
     | {
           type: "setNormalCollections";
           collections: Collection[];
@@ -198,6 +198,8 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 action.allCollections,
                 isHiddenCollection,
             );
+            const archivedCollectionIDs =
+                deriveArchivedCollectionIDs(collections);
             return {
                 ...state,
                 user: action.user,
@@ -207,13 +209,25 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 files: action.files,
                 hiddenFiles: action.hiddenFiles,
                 trashedFiles: action.trashedFiles,
-                archivedCollectionIDs: deriveArchivedCollectionIDs(collections),
+                archivedCollectionIDs,
                 defaultHiddenCollectionIDs:
                     deriveDefaultHiddenCollectionIDs(hiddenCollections),
                 hiddenFileIDs: deriveHiddenFileIDs(action.hiddenFiles),
                 favoriteFileIDs: deriveFavoriteFileIDs(
                     collections,
                     action.files,
+                ),
+                collectionSummaries: deriveCollectionSummaries(
+                    action.user,
+                    collections,
+                    action.files,
+                    action.trashedFiles,
+                    archivedCollectionIDs,
+                ),
+                hiddenCollectionSummaries: deriveHiddenCollectionSummaries(
+                    action.user,
+                    hiddenCollections,
+                    action.hiddenFiles,
                 ),
             };
         }
@@ -224,30 +238,36 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 activePerson: action.galleryPeopleState?.activePerson,
                 people: action.galleryPeopleState?.people,
             };
-        case "setDerived":
-            return {
-                ...state,
-            };
-        case "setNormalCollections":
+        case "setNormalCollections": {
+            const archivedCollectionIDs = deriveArchivedCollectionIDs(
+                action.collections,
+            );
             return {
                 ...state,
                 collections: action.collections,
-                archivedCollectionIDs: deriveArchivedCollectionIDs(
-                    action.collections,
-                ),
+                archivedCollectionIDs,
                 favoriteFileIDs: deriveFavoriteFileIDs(
                     action.collections,
                     state.files,
                 ),
+                collectionSummaries: deriveCollectionSummaries(
+                    ensure(state.user),
+                    action.collections,
+                    state.files,
+                    state.trashedFiles,
+                    archivedCollectionIDs,
+                ),
             };
-        case "setAllCollections":
+        }
+        case "setAllCollections": {
+            const archivedCollectionIDs = deriveArchivedCollectionIDs(
+                action.collections,
+            );
             return {
                 ...state,
                 collections: action.collections,
                 hiddenCollections: action.hiddenCollections,
-                archivedCollectionIDs: deriveArchivedCollectionIDs(
-                    action.collections,
-                ),
+                archivedCollectionIDs,
                 defaultHiddenCollectionIDs: deriveDefaultHiddenCollectionIDs(
                     action.hiddenCollections,
                 ),
@@ -255,7 +275,20 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     action.collections,
                     state.files,
                 ),
+                collectionSummaries: deriveCollectionSummaries(
+                    ensure(state.user),
+                    action.collections,
+                    state.files,
+                    state.trashedFiles,
+                    archivedCollectionIDs,
+                ),
+                hiddenCollectionSummaries: deriveHiddenCollectionSummaries(
+                    ensure(state.user),
+                    action.hiddenCollections,
+                    state.hiddenFiles,
+                ),
             };
+        }
         case "resetFiles": {
             const files = sortFiles(mergeMetadata(action.files));
             return {
@@ -264,6 +297,13 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 favoriteFileIDs: deriveFavoriteFileIDs(
                     state.collections,
                     files,
+                ),
+                collectionSummaries: deriveCollectionSummaries(
+                    ensure(state.user),
+                    state.collections,
+                    files,
+                    state.trashedFiles,
+                    state.archivedCollectionIDs,
                 ),
             };
         }
@@ -280,6 +320,13 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     state.collections,
                     files,
                 ),
+                collectionSummaries: deriveCollectionSummaries(
+                    ensure(state.user),
+                    state.collections,
+                    files,
+                    state.trashedFiles,
+                    state.archivedCollectionIDs,
+                ),
             };
         }
         case "uploadFile": {
@@ -291,6 +338,15 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     state.collections,
                     files,
                 ),
+                // TODO: Consider batching this instead of doing it per file
+                // upload to speed up uploads. Perf test first though.
+                collectionSummaries: deriveCollectionSummaries(
+                    ensure(state.user),
+                    state.collections,
+                    files,
+                    state.trashedFiles,
+                    state.archivedCollectionIDs,
+                ),
             };
         }
         case "resetHiddenFiles": {
@@ -299,6 +355,11 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 ...state,
                 hiddenFiles,
                 hiddenFileIDs: deriveHiddenFileIDs(hiddenFiles),
+                hiddenCollectionSummaries: deriveHiddenCollectionSummaries(
+                    ensure(state.user),
+                    state.hiddenCollections,
+                    hiddenFiles,
+                ),
             };
         }
         case "fetchHiddenFiles": {
@@ -314,10 +375,25 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 ...state,
                 hiddenFiles,
                 hiddenFileIDs: deriveHiddenFileIDs(hiddenFiles),
+                hiddenCollectionSummaries: deriveHiddenCollectionSummaries(
+                    ensure(state.user),
+                    state.hiddenCollections,
+                    hiddenFiles,
+                ),
             };
         }
         case "setTrashedFiles":
-            return { ...state, trashedFiles: action.trashedFiles };
+            return {
+                ...state,
+                trashedFiles: action.trashedFiles,
+                collectionSummaries: deriveCollectionSummaries(
+                    ensure(state.user),
+                    state.collections,
+                    state.files,
+                    action.trashedFiles,
+                    state.archivedCollectionIDs,
+                ),
+            };
     }
 };
 
@@ -397,7 +473,7 @@ export const deriveCollectionSummaries = (
     collections: Collection[],
     files: EnteFile[],
     trashedFiles: EnteFile[],
-    archivedCollections: Set<number>,
+    archivedCollectionIDs: Set<number>,
 ) => {
     const collectionSummaries = getCollectionSummaries(
         user,
@@ -407,7 +483,7 @@ export const deriveCollectionSummaries = (
     const sectionSummaries = getSectionSummaries(
         files,
         trashedFiles,
-        archivedCollections,
+        archivedCollectionIDs,
     );
     return mergeMaps(collectionSummaries, sectionSummaries);
 };

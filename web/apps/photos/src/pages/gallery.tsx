@@ -21,7 +21,6 @@ import {
 } from "@/new/photos/components/gallery";
 import type { GalleryBarMode } from "@/new/photos/components/gallery/BarImpl";
 import {
-    setDerivativeState,
     uniqueFilesByID,
     useGalleryReducer,
 } from "@/new/photos/components/gallery/reducer";
@@ -52,7 +51,6 @@ import type { SearchOption } from "@/new/photos/services/search/types";
 import { AppContext } from "@/new/photos/types/context";
 import { splitByPredicate } from "@/utils/array";
 import { ensure } from "@/utils/ensure";
-import { wait } from "@/utils/promise";
 import {
     CenteredFlex,
     FlexWrapper,
@@ -433,36 +431,6 @@ export default function Gallery() {
             }),
         [collections, files],
     );
-
-    useEffect(() => {
-        if (!user || !files || !collections || !hiddenFiles || !trashedFiles) {
-            return;
-        }
-        const { mergedCollectionSummaries, hiddenCollectionSummaries } =
-            setDerivativeState(
-                user,
-                collections,
-                hiddenCollections,
-                files,
-                trashedFiles,
-                hiddenFiles,
-                archivedCollectionIDs,
-            );
-        // This wait(0) is a hack, but it is not a new one, this merely retains
-        // the behaviour of the old code. Without this, the "Nothing here"
-        // message flashes for a second.
-        wait(0).then(() => {
-            setCollectionSummaries(mergedCollectionSummaries);
-            setHiddenCollectionSummaries(hiddenCollectionSummaries);
-        });
-    }, [
-        collections,
-        hiddenCollections,
-        files,
-        hiddenFiles,
-        trashedFiles,
-        user,
-    ]);
 
     useEffect(() => {
         if (!collections || !user) {
@@ -1109,7 +1077,8 @@ export default function Gallery() {
         [],
     );
 
-    if (!collectionSummaries || !filteredData) {
+    if (!user || !filteredData) {
+        // Don't render until we get the logged in user and dispatch "mount".
         return <div></div>;
     }
 
