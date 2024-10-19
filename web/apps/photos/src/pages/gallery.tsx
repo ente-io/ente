@@ -857,7 +857,9 @@ export default function Gallery() {
                 (hiddenFiles) =>
                     dispatch({ type: "fetchHiddenFiles", hiddenFiles }),
             );
-            await syncTrash(allCollections, setTrashedFiles);
+            await syncTrash(allCollections, (trashedFiles: EnteFile[]) =>
+                dispatch({ type: "setTrashedFiles", trashedFiles }),
+            );
             // syncWithRemote is called with the force flag set to true before
             // doing an upload. So it is possible, say when resuming a pending
             // upload, that we get two syncWithRemotes happening in parallel.
