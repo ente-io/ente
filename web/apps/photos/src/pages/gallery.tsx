@@ -541,17 +541,9 @@ export default function Gallery() {
             !hiddenFiles ||
             !archivedCollections
         ) {
-            return { filteredData: [], galleryPeopleState: undefined };
-        }
-
-        if (activeCollectionID === TRASH_SECTION && !selectedSearchOption) {
-            const filteredData = getUniqueFiles([
-                ...trashedFiles,
-                ...files.filter((file) => tempDeletedFileIds?.has(file.id)),
-            ]);
             dispatch({
                 type: "set",
-                filteredData,
+                filteredData: [],
                 galleryPeopleState: undefined,
             });
             return;
@@ -613,6 +605,11 @@ export default function Gallery() {
                 activePerson,
                 people: filteredVisiblePeople,
             };
+        } else if (activeCollectionID === TRASH_SECTION) {
+            filteredFiles = getUniqueFiles([
+                ...trashedFiles,
+                ...files.filter((file) => tempDeletedFileIds?.has(file.id)),
+            ]);
         } else {
             const baseFiles = barMode == "hidden-albums" ? hiddenFiles : files;
             filteredFiles = getUniqueFiles(
