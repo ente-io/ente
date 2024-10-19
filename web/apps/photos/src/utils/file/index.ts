@@ -497,22 +497,6 @@ export const copyFileToClipboard = async (fileURL: string) => {
     await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
 };
 
-export function getLatestVersionFiles(files: EnteFile[]) {
-    const latestVersionFiles = new Map<string, EnteFile>();
-    files.forEach((file) => {
-        const uid = `${file.collectionID}-${file.id}`;
-        if (
-            !latestVersionFiles.has(uid) ||
-            latestVersionFiles.get(uid).updationTime < file.updationTime
-        ) {
-            latestVersionFiles.set(uid, file);
-        }
-    });
-    return Array.from(latestVersionFiles.values()).filter(
-        (file) => !file.isDeleted,
-    );
-}
-
 export function getPersonalFiles(
     files: EnteFile[],
     user: User,
@@ -580,7 +564,6 @@ export const handleFileOps = async (
             | ((prev: { files: EnteFile[] }) => { files: EnteFile[] }),
     ) => void,
     setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator,
-    refreshFavItemIds: () => void,
 ) => {
     switch (ops) {
         case FILE_OPS_TYPE.TRASH:
@@ -613,7 +596,7 @@ export const handleFileOps = async (
             await changeFilesVisibility(files, ItemVisibility.visible);
             break;
         case FILE_OPS_TYPE.SET_FAVORITE:
-            await setBulkFavorite(files, refreshFavItemIds);
+            await addMultipleToFavorites(files);
             break;
     }
 };
@@ -666,16 +649,4 @@ const fixTimeHelper = async (
     }) => void,
 ) => {
     setFixCreationTimeAttributes({ files: selectedFiles });
-};
-
-const setBulkFavorite = async (
-    files: EnteFile[],
-    refreshFavItemIds: () => void,
-) => {
-    try {
-        await addMultipleToFavorites(files);
-        refreshFavItemIds();
-    } catch (e) {
-        log.error("Could not add to favorites", e);
-    }
 };

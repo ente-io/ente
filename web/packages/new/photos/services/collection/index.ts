@@ -1,4 +1,5 @@
 import { SUB_TYPE, type Collection } from "@/media/collection";
+import { ItemVisibility } from "@/media/file-metadata";
 import type { User } from "@ente/shared/user/types";
 
 export const ARCHIVE_SECTION = -1;
@@ -23,3 +24,8 @@ export const isDefaultHiddenCollection = (collection: Collection) =>
 export function isIncomingShare(collection: Collection, user: User) {
     return collection.owner.id !== user.id;
 }
+
+export const isHiddenCollection = (collection: Collection) =>
+    // TODO: Need to audit the types
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    collection.magicMetadata?.data.visibility === ItemVisibility.hidden;

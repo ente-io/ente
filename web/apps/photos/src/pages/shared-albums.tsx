@@ -11,7 +11,10 @@ import {
     GalleryItemsSummary,
 } from "@/new/photos/components/gallery/ListHeader";
 import { SpaceBetweenFlex } from "@/new/photos/components/mui";
-import { ALL_SECTION } from "@/new/photos/services/collection";
+import {
+    ALL_SECTION,
+    isHiddenCollection,
+} from "@/new/photos/services/collection";
 import downloadManager from "@/new/photos/services/download";
 import { sortFiles } from "@/new/photos/services/files";
 import { AppContext } from "@/new/photos/types/context";
@@ -72,7 +75,7 @@ import {
     SetFilesDownloadProgressAttributes,
     SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
-import { downloadCollectionFiles, isHiddenCollection } from "utils/collection";
+import { downloadCollectionFiles } from "utils/collection";
 import { downloadSelectedFiles, getSelectedFiles } from "utils/file";
 import { formatNumber } from "utils/number/format";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
@@ -540,7 +543,7 @@ export default function PublicCollectionGallery() {
                     uploadCollection={publicCollection}
                     setLoading={setBlockingLoad}
                     setShouldDisableDropzone={setShouldDisableDropzone}
-                    setFiles={setPublicFiles}
+                    onUploadFile={(file) => sortFiles([...publicFiles, file])}
                     uploadTypeSelectorView={uploadTypeSelectorView}
                     closeUploadTypeSelector={closeUploadTypeSelectorView}
                     showSessionExpiredMessage={showPublicLinkExpiredMessage}

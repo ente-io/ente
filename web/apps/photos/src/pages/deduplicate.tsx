@@ -131,7 +131,12 @@ export default function Deduplicate() {
             // there in an ad-hoc manner. For now, this fixes the issue with the
             // UI not updating if the user deletes only some of the duplicates.
             const collections = await getAllLatestCollections();
-            await syncFiles("normal", collections, () => {});
+            await syncFiles(
+                "normal",
+                collections,
+                () => {},
+                () => {},
+            );
             await syncTrash(collections, () => {});
         } catch (e) {
             if (
