@@ -25,6 +25,8 @@ export function isIncomingShare(collection: Collection, user: User) {
 }
 
 export function isIncomingCollabShare(collection: Collection, user: User) {
+    // TODO: Need to audit the types
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     const sharee = collection.sharees?.find((sharee) => sharee.id === user.id);
     return sharee?.role === COLLECTION_ROLE.COLLABORATOR;
 }

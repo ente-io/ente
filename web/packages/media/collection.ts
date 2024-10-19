@@ -1,4 +1,3 @@
-import type { EnteFile } from "@/media/file";
 import {
     type EncryptedMagicMetadata,
     type MagicMetadataCore,

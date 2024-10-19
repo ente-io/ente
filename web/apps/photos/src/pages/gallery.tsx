@@ -4,7 +4,7 @@ import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { useModalVisibility } from "@/base/components/utils/modal";
 import { useIsSmallWidth } from "@/base/hooks";
 import log from "@/base/log";
-import { CollectionType, type Collection } from "@/media/collection";
+import { type Collection } from "@/media/collection";
 import { mergeMetadata, type EnteFile } from "@/media/file";
 import {
     CollectionSelector,
@@ -20,9 +20,20 @@ import {
     SearchResultsHeader,
 } from "@/new/photos/components/gallery";
 import type { GalleryBarMode } from "@/new/photos/components/gallery/BarImpl";
-import { useGalleryReducer } from "@/new/photos/components/gallery/reducer";
+import {
+    getUniqueFiles,
+    setDerivativeState,
+    useGalleryReducer,
+} from "@/new/photos/components/gallery/reducer";
 import { usePeopleStateSnapshot } from "@/new/photos/components/utils/ml";
 import { shouldShowWhatsNew } from "@/new/photos/services/changelog";
+import {
+    ALL_SECTION,
+    ARCHIVE_SECTION,
+    DUMMY_UNCATEGORIZED_COLLECTION,
+    HIDDEN_ITEMS_SECTION,
+    TRASH_SECTION,
+} from "@/new/photos/services/collection";
 import type { CollectionSummaries } from "@/new/photos/services/collection/ui";
 import { areOnlySystemCollections } from "@/new/photos/services/collection/ui";
 import downloadManager from "@/new/photos/services/download";
@@ -31,6 +42,7 @@ import {
     getLocalTrashedFiles,
     sortFiles,
 } from "@/new/photos/services/files";
+import { isArchivedFile } from "@/new/photos/services/magic-metadata";
 import type { Person } from "@/new/photos/services/ml/people";
 import {
     filterSearchableFiles,
@@ -110,10 +122,7 @@ import {
     createUnCategorizedCollection,
     getAllLatestCollections,
     getAllLocalCollections,
-    getCollectionSummaries,
     getFavItemIds,
-    getHiddenItemsSummary,
-    getSectionSummaries,
 } from "services/collectionService";
 import { syncFiles } from "services/fileService";
 import { preFileInfoSync, sync } from "services/sync";
@@ -129,15 +138,8 @@ import {
 import { FamilyData } from "types/user";
 import { checkSubscriptionPurchase } from "utils/billing";
 import {
-    ALL_SECTION,
-    ARCHIVE_SECTION,
     COLLECTION_OPS_TYPE,
-    DUMMY_UNCATEGORIZED_COLLECTION,
-    HIDDEN_ITEMS_SECTION,
-    TRASH_SECTION,
     constructCollectionNameMap,
-    getArchivedCollections,
-    getDefaultHiddenCollectionIDs,
     getSelectedCollection,
     handleCollectionOps,
     splitNormalAndHiddenCollections,
@@ -146,10 +148,8 @@ import {
     FILE_OPS_TYPE,
     constructFileToCollectionMap,
     getSelectedFiles,
-    getUniqueFiles,
     handleFileOps,
 } from "utils/file";
-import { isArchivedFile } from "@/new/photos/services/magic-metadata";
 import { getSessionExpiredMessage } from "utils/ui";
 import { getLocalFamilyData } from "utils/user/family";
 
@@ -444,7 +444,14 @@ export default function Gallery() {
         if (!user || !files || !collections || !hiddenFiles || !trashedFiles) {
             return;
         }
-        setDerivativeState(
+        const {
+            favItemIds,
+            archivedCollections,
+            defaultHiddenCollectionIDs,
+            hiddenFileIds,
+            mergedCollectionSummaries,
+            hiddenCollectionSummaries,
+        } = setDerivativeState(
             user,
             collections,
             hiddenCollections,
@@ -452,6 +459,12 @@ export default function Gallery() {
             trashedFiles,
             hiddenFiles,
         );
+        setFavItemIds(favItemIds);
+        setArchivedCollections(archivedCollections);
+        setDefaultHiddenCollectionIDs(defaultHiddenCollectionIDs);
+        setHiddenFileIds(hiddenFileIds);
+        setCollectionSummaries(mergedCollectionSummaries);
+        setHiddenCollectionSummaries(hiddenCollectionSummaries);
     }, [
         collections,
         hiddenCollections,

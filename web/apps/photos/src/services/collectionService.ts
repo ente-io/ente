@@ -8,7 +8,6 @@ import {
     CollectionMagicMetadataProps,
     CollectionPublicMagicMetadata,
     CollectionShareeMagicMetadata,
-    CollectionToFileMap,
     CollectionType,
     CreatePublicAccessTokenRequest,
     EncryptedCollection,
@@ -21,22 +20,15 @@ import {
 } from "@/media/collection";
 import { EncryptedMagicMetadata, EnteFile } from "@/media/file";
 import { ItemVisibility } from "@/media/file-metadata";
-import type {
-    CollectionSummaries,
-    CollectionSummary,
-    CollectionSummaryType,
-} from "@/new/photos/services/collection/ui";
+import { isDefaultHiddenCollection } from "@/new/photos/services/collection";
+import type { CollectionSummary } from "@/new/photos/services/collection/ui";
 import {
     CollectionSummaryOrder,
     CollectionsSortBy,
 } from "@/new/photos/services/collection/ui";
+import { groupFilesBasedOnCollectionID } from "@/new/photos/services/file";
 import { getLocalFiles, sortFiles } from "@/new/photos/services/files";
-import {
-    isArchivedCollection,
-    isArchivedFile,
-    isPinnedCollection,
-    updateMagicMetadata,
-} from "@/new/photos/services/magic-metadata";
+import { updateMagicMetadata } from "@/new/photos/services/magic-metadata";
 import { batch } from "@/utils/array";
 import { CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
@@ -45,27 +37,15 @@ import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { getActualKey } from "@ente/shared/user";
 import type { User } from "@ente/shared/user/types";
-import { t } from "i18next";
 import { FamilyData } from "types/user";
 import {
-    ALL_SECTION,
-    ARCHIVE_SECTION,
-    DUMMY_UNCATEGORIZED_COLLECTION,
-    HIDDEN_ITEMS_SECTION,
-    TRASH_SECTION,
     changeCollectionSubType,
     getHiddenCollections,
     getNonHiddenCollections,
-    isDefaultHiddenCollection,
     isHiddenCollection,
-    isIncomingCollabShare,
-    isIncomingShare,
-    isOutgoingShare,
     isQuickLinkCollection,
-    isSharedOnlyViaLink,
     isValidMoveTarget,
 } from "utils/collection";
-import { getUniqueFiles, groupFilesBasedOnCollectionID } from "utils/file";
 import { UpdateMagicMetadataRequest } from "./fileService";
 import { getPublicKey } from "./userService";
 

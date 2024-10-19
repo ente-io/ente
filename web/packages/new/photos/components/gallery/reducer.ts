@@ -1,6 +1,5 @@
 //TODO Review entire file
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
 import { CollectionType, type Collection } from "@/media/collection";
 import type { EnteFile } from "@/media/file";
@@ -110,14 +109,17 @@ export const setDerivativeState = (
             break;
         }
     }
-    setFavItemIds(favItemIds);
+    // TODO: Move to reducer
+    // setFavItemIds(favItemIds);
     const archivedCollections = getArchivedCollections(collections);
-    setArchivedCollections(archivedCollections);
+    // TODO: Move to reducer
+    // setArchivedCollections(archivedCollections);
     const defaultHiddenCollectionIDs =
         getDefaultHiddenCollectionIDs(hiddenCollections);
-    setDefaultHiddenCollectionIDs(defaultHiddenCollectionIDs);
+    // setDefaultHiddenCollectionIDs(defaultHiddenCollectionIDs);
     const hiddenFileIds = new Set<number>(hiddenFiles.map((f) => f.id));
-    setHiddenFileIds(hiddenFileIds);
+    // TODO: Move to reducer
+    // setHiddenFileIds(hiddenFileIds);
     const collectionSummaries = getCollectionSummaries(
         user,
         collections,
@@ -138,8 +140,23 @@ export const setDerivativeState = (
         hiddenCollections,
     );
     hiddenCollectionSummaries.set(HIDDEN_ITEMS_SECTION, hiddenItemsSummaries);
-    setCollectionSummaries(mergeMaps(collectionSummaries, sectionSummaries));
-    setHiddenCollectionSummaries(hiddenCollectionSummaries);
+    // TODO: Move to reducer
+    const mergedCollectionSummaries = mergeMaps(
+        collectionSummaries,
+        sectionSummaries,
+    );
+    // setCollectionSummaries(mergeMaps(collectionSummaries, sectionSummaries));
+    // TODO: Move to reducer
+    // setHiddenCollectionSummaries(hiddenCollectionSummaries);
+
+    return {
+        favItemIds,
+        archivedCollections,
+        defaultHiddenCollectionIDs,
+        hiddenFileIds,
+        mergedCollectionSummaries,
+        hiddenCollectionSummaries,
+    };
 };
 
 export function getUniqueFiles(files: EnteFile[]) {
@@ -384,7 +401,7 @@ export function getArchivedSectionSummary(
         coverFile: null,
         // @ts-expect-error TODO Review types
         latestFile: archivedFiles?.[0],
-        fileCount: archivedFiles?.length,
+        fileCount: archivedFiles?.length ?? 0,
         // @ts-expect-error TODO Review types
         updationTime: archivedFiles?.[0]?.updationTime,
     };

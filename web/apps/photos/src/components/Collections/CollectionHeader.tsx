@@ -9,6 +9,7 @@ import {
     GalleryItemsSummary,
 } from "@/new/photos/components/gallery/ListHeader";
 import { SpaceBetweenFlex } from "@/new/photos/components/mui";
+import { ALL_SECTION, HIDDEN_ITEMS_SECTION } from "@/new/photos/services/collection";
 import type {
     CollectionSummary,
     CollectionSummaryType,
@@ -49,13 +50,11 @@ import * as CollectionAPI from "services/collectionService";
 import * as TrashService from "services/trashService";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
 import {
-    ALL_SECTION,
     changeCollectionOrder,
     changeCollectionSortOrder,
     changeCollectionVisibility,
     downloadCollectionHelper,
     downloadDefaultHiddenCollectionHelper,
-    HIDDEN_ITEMS_SECTION,
     isHiddenCollection,
 } from "utils/collection";
 

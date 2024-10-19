@@ -10,7 +10,11 @@ import {
 } from "@/media/collection";
 import { EnteFile } from "@/media/file";
 import { ItemVisibility } from "@/media/file-metadata";
-import { getDefaultHiddenCollectionIDs, isDefaultHiddenCollection, isIncomingShare } from "@/new/photos/services/collection";
+import {
+    getDefaultHiddenCollectionIDs,
+    isDefaultHiddenCollection,
+    isIncomingShare,
+} from "@/new/photos/services/collection";
 import { getAllLocalFiles, getLocalFiles } from "@/new/photos/services/files";
 import {
     isArchivedCollection,
@@ -38,8 +42,6 @@ import {
 } from "services/collectionService";
 import { SetFilesDownloadProgressAttributes } from "types/gallery";
 import { downloadFilesWithProgress } from "utils/file";
-
-
 
 export enum COLLECTION_OPS_TYPE {
     ADD,
@@ -349,8 +351,6 @@ export const isHiddenCollection = (collection: Collection) =>
 
 export const isQuickLinkCollection = (collection: Collection) =>
     collection.magicMetadata?.data.subType === SUB_TYPE.QUICK_LINK_COLLECTION;
-
-
 
 export function isIncomingViewerShare(collection: Collection, user: User) {
     const sharee = collection.sharees?.find((sharee) => sharee.id === user.id);
