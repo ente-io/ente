@@ -69,3 +69,5 @@ If you find a mixed grouping of several different babies, you can use the
 `mixed grouping` option in the top right menu of said grouping. Activating this
 option will make the model re-evaluate the grouping with stricter settings,
 hopefully separating the different babies in different new groupings.
+
+Please note this functionality is currently only available on mobile. 
