@@ -1,6 +1,3 @@
-//TODO Review entire file
-/* eslint-disable @typescript-eslint/no-unnecessary-condition */
-
 import {
     COLLECTION_ROLE,
     CollectionType,
@@ -272,6 +269,7 @@ function getCollectionSummaries(
             fileCount: collectionFilesCount.get(collection.id) ?? 0,
             updationTime: collection.updationTime,
             type: type,
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             order: collection.magicMetadata?.data?.order ?? 0,
         });
     }
@@ -311,6 +309,7 @@ const getCollectionCoverFiles = (
         if (!collectionFiles || collectionFiles.length === 0) {
             return;
         }
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         const coverID = collection.pubMagicMetadata?.data?.coverID;
         if (typeof coverID === "number" && coverID > 0) {
             const coverFile = collectionFiles.find(
@@ -321,6 +320,7 @@ const getCollectionCoverFiles = (
                 return;
             }
         }
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (collection.pubMagicMetadata?.data?.asc) {
             coverFiles.set(
                 collection.id,
@@ -349,10 +349,12 @@ function isIncomingCollabShare(collection: Collection, user: User) {
 }
 
 function isOutgoingShare(collection: Collection, user: User): boolean {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     return collection.owner.id === user.id && collection.sharees?.length > 0;
 }
 
 function isSharedOnlyViaLink(collection: Collection) {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     return collection.publicURLs?.length && !collection.sharees?.length;
 }
 
@@ -394,17 +396,21 @@ function getHiddenItemsSummary(
         id: HIDDEN_ITEMS_SECTION,
         name: t("hidden_items"),
         type: "hiddenItems",
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         coverFile: hiddenItems?.[0],
         // See: [Note: strict mode migration]
         //
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         latestFile: hiddenItems?.[0],
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         fileCount: hiddenItems?.length,
         // See: [Note: strict mode migration]
         //
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         updationTime: hiddenItems?.[0]?.updationTime,
     };
 }
@@ -445,12 +451,15 @@ function getArchivedSectionSummary(files: EnteFile[]): CollectionSummary {
         //
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         latestFile: archivedFiles?.[0],
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         fileCount: archivedFiles?.length ?? 0,
         // See: [Note: strict mode migration]
         //
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         updationTime: archivedFiles?.[0]?.updationTime,
     };
 }
@@ -467,17 +476,21 @@ function getAllSectionSummary(
         id: ALL_SECTION,
         name: t("section_all"),
         type: "all",
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         coverFile: allSectionFiles?.[0],
         // See: [Note: strict mode migration]
         //
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         latestFile: allSectionFiles?.[0],
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         fileCount: allSectionFiles?.length || 0,
         // See: [Note: strict mode migration]
         //
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         updationTime: allSectionFiles?.[0]?.updationTime,
     };
 }
@@ -525,12 +538,15 @@ function getTrashedCollectionSummary(
         //
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         latestFile: trashedFiles?.[0],
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         fileCount: trashedFiles?.length,
         // See: [Note: strict mode migration]
         //
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         updationTime: trashedFiles?.[0]?.updationTime,
     };
 }
