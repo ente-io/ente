@@ -8,7 +8,6 @@ import {
     EnteFile,
     FileWithUpdatedMagicMetadata,
     FileWithUpdatedPublicMagicMetadata,
-    mergeMetadata,
     TrashRequest,
 } from "@/media/file";
 import { getLatestVersionFiles } from "@/new/photos/services/file";
@@ -16,7 +15,6 @@ import {
     clearCachedThumbnailsIfChanged,
     getLocalFiles,
     setLocalFiles,
-    sortFiles,
 } from "@/new/photos/services/files";
 import { batch } from "@/utils/array";
 import HTTPService from "@ente/shared/network/HTTPService";
@@ -33,6 +31,11 @@ import {
  * Fetch all files of the given {@link type}, belonging to the given
  * {@link collections}, from remote and update our local database.
  *
+ * If this is the initial read, or if the count of files we have differs from
+ * the state of the local database (these two are expected to be the same case),
+ * then the {@link onResetFiles} callback is invoked to give the caller a chance
+ * to bring its state up to speed.
+ *
  * In addition to updating the local database, it also calls the provided
  * {@link onFetchFiles} callback with the latest decrypted files after each
  * batch the new and/or updated files are received from remote.
@@ -40,6 +43,7 @@ import {
 export const syncFiles = async (
     type: "normal" | "hidden",
     collections: Collection[],
+    onResetFiles: (fs: EnteFile[]) => void,
     onFetchFiles: (fs: EnteFile[]) => void,
 ) => {
     const localFiles = await getLocalFiles(type);
@@ -47,7 +51,7 @@ export const syncFiles = async (
     let didUpdateFiles = false;
     if (files.length !== localFiles.length) {
         await setLocalFiles(type, files);
-        setFiles(sortFiles(mergeMetadata(files)));
+        onResetFiles(files);
         didUpdateFiles = true;
     }
     for (const collection of collections) {

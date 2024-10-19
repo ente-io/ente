@@ -843,10 +843,20 @@ export default function Gallery() {
                 collections,
                 hiddenCollections,
             });
-            await syncFiles("normal", collections, (files) =>
-                dispatch({ type: "fetchFiles", files }),
+            await syncFiles(
+                "normal",
+                collections,
+                (files) => dispatch({ type: "resetFiles", files }),
+                (files) => dispatch({ type: "fetchFiles", files }),
             );
-            await syncFiles("hidden", hiddenCollections, setHiddenFiles);
+            await syncFiles(
+                "hidden",
+                hiddenCollections,
+                (hiddenFiles) =>
+                    dispatch({ type: "resetHiddenFiles", hiddenFiles }),
+                (hiddenFiles) =>
+                    dispatch({ type: "fetchHiddenFiles", hiddenFiles }),
+            );
             await syncTrash(allCollections, setTrashedFiles);
             // syncWithRemote is called with the force flag set to true before
             // doing an upload. So it is possible, say when resuming a pending

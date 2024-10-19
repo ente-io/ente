@@ -126,10 +126,11 @@ export type GalleryAction =
           collections: Collection[];
           hiddenCollections: Collection[];
       }
+    | { type: "resetFiles"; files: EnteFile[] }
     | { type: "fetchFiles"; files: EnteFile[] }
     | { type: "uploadFile"; file: EnteFile }
-    | { type: "setFiles"; files: EnteFile[] }
-    | { type: "setHiddenFiles"; hiddenFiles: EnteFile[] }
+    | { type: "resetHiddenFiles"; hiddenFiles: EnteFile[] }
+    | { type: "fetchHiddenFiles"; hiddenFiles: EnteFile[] }
     | { type: "setTrashedFiles"; trashedFiles: EnteFile[] }
     | { type: "setFavorites"; favFileIDs: Set<number> };
 
@@ -194,6 +195,8 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 collections: action.collections,
                 hiddenCollections: action.hiddenCollections,
             };
+        case "resetFiles":
+            return { ...state, files: sortFiles(mergeMetadata(action.files)) };
         case "fetchFiles":
             return {
                 ...state,
@@ -211,10 +214,23 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 ...state,
                 files: sortFiles([...state.files, action.file]),
             };
-        case "setFiles":
-            return { ...state, files: action.files };
-        case "setHiddenFiles":
-            return { ...state, hiddenFiles: action.hiddenFiles };
+        case "resetHiddenFiles":
+            return {
+                ...state,
+                hiddenFiles: sortFiles(mergeMetadata(action.hiddenFiles)),
+            };
+        case "fetchHiddenFiles":
+            return {
+                ...state,
+                hiddenFiles: sortFiles(
+                    mergeMetadata(
+                        getLatestVersionFiles([
+                            ...state.hiddenFiles,
+                            ...action.hiddenFiles,
+                        ]),
+                    ),
+                ),
+            };
         case "setTrashedFiles":
             return { ...state, trashedFiles: action.trashedFiles };
         case "setFavorites":
