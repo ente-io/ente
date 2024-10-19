@@ -5,7 +5,6 @@ import "dart:typed_data" show Uint8List;
 
 import "package:flutter/foundation.dart" show kDebugMode;
 import "package:logging/logging.dart";
-import "package:package_info_plus/package_info_plus.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
@@ -68,7 +67,7 @@ class MLService {
     _logger.info("init called");
 
     // Get client name
-    final packageInfo = await PackageInfo.fromPlatform();
+    final packageInfo = ServiceLocator.instance.packageInfo;
     client = "${packageInfo.packageName}/${packageInfo.version}";
     _logger.info("client: $client");
 
