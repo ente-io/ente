@@ -4,6 +4,7 @@ import {
     type Collection,
 } from "@/media/collection";
 import type { EnteFile } from "@/media/file";
+import { mergeMetadata } from "@/media/file";
 import { isHiddenCollection } from "@/new/photos/services/collection";
 import { splitByPredicate } from "@/utils/array";
 import type { User } from "@ente/shared/user/types";
@@ -24,7 +25,10 @@ import type {
     CollectionSummary,
     CollectionSummaryType,
 } from "../../services/collection/ui";
-import { groupFilesBasedOnCollectionID } from "../../services/file";
+import {
+    getLatestVersionFiles,
+    groupFilesBasedOnCollectionID,
+} from "../../services/file";
 import { sortFiles } from "../../services/files";
 import {
     isArchivedCollection,
@@ -122,6 +126,7 @@ export type GalleryAction =
           collections: Collection[];
           hiddenCollections: Collection[];
       }
+    | { type: "fetchFiles"; files: EnteFile[] }
     | { type: "uploadFile"; file: EnteFile }
     | { type: "setFiles"; files: EnteFile[] }
     | { type: "setHiddenFiles"; hiddenFiles: EnteFile[] }
@@ -188,6 +193,18 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 ...state,
                 collections: action.collections,
                 hiddenCollections: action.hiddenCollections,
+            };
+        case "fetchFiles":
+            return {
+                ...state,
+                files: sortFiles(
+                    mergeMetadata(
+                        getLatestVersionFiles([
+                            ...state.files,
+                            ...action.files,
+                        ]),
+                    ),
+                ),
             };
         case "uploadFile":
             return {

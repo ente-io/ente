@@ -497,22 +497,6 @@ export const copyFileToClipboard = async (fileURL: string) => {
     await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
 };
 
-export function getLatestVersionFiles(files: EnteFile[]) {
-    const latestVersionFiles = new Map<string, EnteFile>();
-    files.forEach((file) => {
-        const uid = `${file.collectionID}-${file.id}`;
-        if (
-            !latestVersionFiles.has(uid) ||
-            latestVersionFiles.get(uid).updationTime < file.updationTime
-        ) {
-            latestVersionFiles.set(uid, file);
-        }
-    });
-    return Array.from(latestVersionFiles.values()).filter(
-        (file) => !file.isDeleted,
-    );
-}
-
 export function getPersonalFiles(
     files: EnteFile[],
     user: User,

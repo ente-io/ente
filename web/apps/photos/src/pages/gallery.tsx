@@ -843,7 +843,9 @@ export default function Gallery() {
                 collections,
                 hiddenCollections,
             });
-            await syncFiles("normal", collections, setFiles);
+            await syncFiles("normal", collections, (files) =>
+                dispatch({ type: "fetchFiles", files }),
+            );
             await syncFiles("hidden", hiddenCollections, setHiddenFiles);
             await syncTrash(allCollections, setTrashedFiles);
             // syncWithRemote is called with the force flag set to true before

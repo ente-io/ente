@@ -11,6 +11,7 @@ import {
     mergeMetadata,
     TrashRequest,
 } from "@/media/file";
+import { getLatestVersionFiles } from "@/new/photos/services/file";
 import {
     clearCachedThumbnailsIfChanged,
     getLocalFiles,
@@ -21,8 +22,7 @@ import { batch } from "@/utils/array";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import exportService from "services/export";
-import { SetFiles } from "types/gallery";
-import { decryptFile, getLatestVersionFiles } from "utils/file";
+import { decryptFile } from "utils/file";
 import {
     getCollectionLastSyncTime,
     REQUEST_BATCH_SIZE,
@@ -34,13 +34,13 @@ import {
  * {@link collections}, from remote and update our local database.
  *
  * In addition to updating the local database, it also calls the provided
- * {@link setFiles} callback with the latest decrypted files after each batch
- * the new and/or updated files are received from remote.
+ * {@link onFetchFiles} callback with the latest decrypted files after each
+ * batch the new and/or updated files are received from remote.
  */
 export const syncFiles = async (
     type: "normal" | "hidden",
     collections: Collection[],
-    setFiles: SetFiles,
+    onFetchFiles: (fs: EnteFile[]) => void,
 ) => {
     const localFiles = await getLocalFiles(type);
     let files = await removeDeletedCollectionFiles(collections, localFiles);
@@ -59,7 +59,7 @@ export const syncFiles = async (
             continue;
         }
 
-        const newFiles = await getFiles(collection, lastSyncTime, setFiles);
+        const newFiles = await getFiles(collection, lastSyncTime, onFetchFiles);
         await clearCachedThumbnailsIfChanged(localFiles, newFiles);
         files = getLatestVersionFiles([...files, ...newFiles]);
         await setLocalFiles(type, files);
@@ -72,7 +72,7 @@ export const syncFiles = async (
 export const getFiles = async (
     collection: Collection,
     sinceTime: number,
-    setFiles: SetFiles,
+    onFetchFiles: (fs: EnteFile[]) => void,
 ): Promise<EnteFile[]> => {
     try {
         let decryptedFiles: EnteFile[] = [];
@@ -105,16 +105,7 @@ export const getFiles = async (
             );
             decryptedFiles = [...decryptedFiles, ...newDecryptedFilesBatch];
 
-            setFiles((files) =>
-                sortFiles(
-                    mergeMetadata(
-                        getLatestVersionFiles([
-                            ...(files || []),
-                            ...decryptedFiles,
-                        ]),
-                    ),
-                ),
-            );
+            onFetchFiles(decryptedFiles);
             if (resp.data.diff.length) {
                 time = resp.data.diff.slice(-1)[0].updationTime;
             }
