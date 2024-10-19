@@ -20,7 +20,10 @@ import {
 } from "@/media/collection";
 import { EncryptedMagicMetadata, EnteFile } from "@/media/file";
 import { ItemVisibility } from "@/media/file-metadata";
-import { isDefaultHiddenCollection } from "@/new/photos/services/collection";
+import {
+    isDefaultHiddenCollection,
+    isHiddenCollection,
+} from "@/new/photos/services/collection";
 import type { CollectionSummary } from "@/new/photos/services/collection/ui";
 import {
     CollectionSummaryOrder,
@@ -45,7 +48,6 @@ import {
     isQuickLinkCollection,
     isValidMoveTarget,
 } from "utils/collection";
-import { isHiddenCollection } from "@/new/photos/services/collection";
 import { UpdateMagicMetadataRequest } from "./fileService";
 import { getPublicKey } from "./userService";
 

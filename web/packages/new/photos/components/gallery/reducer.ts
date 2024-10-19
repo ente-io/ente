@@ -475,17 +475,23 @@ export const deriveCollectionSummaries = (
     trashedFiles: EnteFile[],
     archivedCollectionIDs: Set<number>,
 ) => {
-    const collectionSummaries = getCollectionSummaries(
+    const collectionSummaries = createCollectionSummaries(
         user,
         collections,
         files,
     );
+
     const sectionSummaries = getSectionSummaries(
         files,
         trashedFiles,
         archivedCollectionIDs,
     );
-    return mergeMaps(collectionSummaries, sectionSummaries);
+
+    for (const [key, value] of sectionSummaries) {
+        collectionSummaries.set(key, value);
+    }
+
+    return collectionSummaries;
 };
 
 /**
@@ -497,7 +503,7 @@ export const deriveHiddenCollectionSummaries = (
     hiddenCollections: Collection[],
     hiddenFiles: EnteFile[],
 ) => {
-    const hiddenCollectionSummaries = getCollectionSummaries(
+    const hiddenCollectionSummaries = createCollectionSummaries(
         user,
         hiddenCollections,
         hiddenFiles,
@@ -510,11 +516,11 @@ export const deriveHiddenCollectionSummaries = (
     return hiddenCollectionSummaries;
 };
 
-function getCollectionSummaries(
+const createCollectionSummaries = (
     user: User,
     collections: Collection[],
     files: EnteFile[],
-): CollectionSummaries {
+): CollectionSummaries => {
     const collectionSummaries: CollectionSummaries = new Map();
     const collectionLatestFiles = getCollectionLatestFiles(files);
     const collectionCoverFiles = getCollectionCoverFiles(files, collections);
@@ -590,6 +596,7 @@ function getCollectionSummaries(
             order: collection.magicMetadata?.data?.order ?? 0,
         });
     }
+
     if (!hasUncategorizedCollection) {
         collectionSummaries.set(
             DUMMY_UNCATEGORIZED_COLLECTION,
@@ -598,7 +605,7 @@ function getCollectionSummaries(
     }
 
     return collectionSummaries;
-}
+};
 
 export type CollectionToFileMap = Map<number, EnteFile>;
 
@@ -867,11 +874,3 @@ function getTrashedCollectionSummary(
         updationTime: trashedFiles?.[0]?.updationTime,
     };
 }
-
-const mergeMaps = <K, V>(map1: Map<K, V>, map2: Map<K, V>) => {
-    const mergedMap = new Map<K, V>(map1);
-    map2.forEach((value, key) => {
-        mergedMap.set(key, value);
-    });
-    return mergedMap;
-};
