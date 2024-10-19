@@ -109,8 +109,10 @@ class EntityService {
     }
   }
 
-  Future<int> _remoteToLocalSync(EntityType type,
-      {int prevFetchCount = 0}) async {
+  Future<int> _remoteToLocalSync(
+    EntityType type, {
+    int prevFetchCount = 0,
+  }) async {
     final int lastSyncTime =
         _prefs.getInt(_getEntityLastSyncTimePrefix(type)) ?? 0;
     final List<EntityData> result = await _gateway.getDiff(
@@ -173,8 +175,10 @@ class EntityService {
     await _prefs.setInt(_getEntityLastSyncTimePrefix(type), maxSyncTime);
     if (hasMoreItems) {
       _logger.info("Diff limit reached, pulling again");
-      await _remoteToLocalSync(type,
-          prevFetchCount: prevFetchCount + result.length);
+      await _remoteToLocalSync(
+        type,
+        prevFetchCount: prevFetchCount + result.length,
+      );
     }
     return prevFetchCount + result.length;
   }
