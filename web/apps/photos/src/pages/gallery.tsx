@@ -49,6 +49,7 @@ import {
     setSearchCollectionsAndFiles,
 } from "@/new/photos/services/search";
 import type { SearchOption } from "@/new/photos/services/search/types";
+import type { FamilyData } from "@/new/photos/services/user";
 import { AppContext } from "@/new/photos/types/context";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
@@ -136,7 +137,6 @@ import {
     SetFilesDownloadProgressAttributes,
     SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
-import { FamilyData } from "types/user";
 import { checkSubscriptionPurchase } from "utils/billing";
 import {
     COLLECTION_OPS_TYPE,
@@ -191,7 +191,6 @@ export const GalleryContext = createContext<GalleryContextType>(
  */
 export default function Gallery() {
     const [state, dispatch] = useGalleryReducer();
-    const [user, setUser] = useState(null);
     const [familyData, setFamilyData] = useState<FamilyData>(null);
     const [collections, setCollections] = useState<Collection[]>(null);
     const [hiddenCollections, setHiddenCollections] =

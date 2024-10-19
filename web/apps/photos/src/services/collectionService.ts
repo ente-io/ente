@@ -29,6 +29,7 @@ import {
 import { groupFilesBasedOnCollectionID } from "@/new/photos/services/file";
 import { getLocalFiles, sortFiles } from "@/new/photos/services/files";
 import { updateMagicMetadata } from "@/new/photos/services/magic-metadata";
+import type { FamilyData } from "@/new/photos/services/user";
 import { batch } from "@/utils/array";
 import { CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
@@ -37,7 +38,6 @@ import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { getActualKey } from "@ente/shared/user";
 import type { User } from "@ente/shared/user/types";
-import { FamilyData } from "types/user";
 import {
     changeCollectionSubType,
     getHiddenCollections,

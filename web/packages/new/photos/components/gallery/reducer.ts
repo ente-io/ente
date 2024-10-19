@@ -39,6 +39,20 @@ import type { Person } from "../../services/ml/people";
  * the UI state until the operation completes.
  */
 export interface GalleryState {
+    /**
+     * The logged in {@link User}.
+     *
+     * This is expected to be undefined only for a brief duration until the code
+     * for the initial "mount" runs (If we're not logged in, then the gallery
+     * will redirect the user to an appropriate authentication page).
+     */
+    user: User | undefined;
+    /**
+     * Family plan related information for the logged in {@link User}.
+     */
+    familyData: Fami, setFamilyData] = useState<FamilyData>(null);
+
+
     filteredData: EnteFile[];
     /**
      * File IDs of all the files that the user has marked as a favorite.
@@ -60,6 +74,10 @@ export interface GalleryState {
 // TODO: dummy actions for gradual migration to reducers
 export type GalleryAction =
     | {
+        type: "mount",
+        user: User,
+    }
+    | {
           type: "set";
           filteredData: EnteFile[];
           galleryPeopleState:
@@ -67,9 +85,12 @@ export type GalleryAction =
               | undefined;
       }
     | { type: "setDerived"; favFileIDs: Set<number> }
-    | { type: "setFavorites"; favFileIDs: Set<number> };
+    | { type: "setFavorites"; favFileIDs: Set<number> }
+    | { type: "setNormalAndHiddenCollections";
+        normalCollections: Collection[]; hiddenCollections: Collection[]; };
 
 const initialGalleryState: GalleryState = {
+    user: undefined,
     filteredData: [],
     favFileIDs: new Set(),
     activePerson: undefined,
@@ -81,6 +102,11 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
     action,
 ) => {
     switch (action.type) {
+        case "mount":
+            return {
+                ...state,
+                user: action.user
+            }
         case "set":
             return {
                 ...state,

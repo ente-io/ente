@@ -1,7 +1,7 @@
 import log from "@/base/log";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";
-import { FamilyData, FamilyMember } from "types/user";
+import type { FamilyData, FamilyMember } from "@/new/photos/services/user";
 
 export function getLocalFamilyData(): FamilyData {
     return getData(LS_KEYS.FAMILY_DATA);
