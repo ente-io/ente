@@ -4,8 +4,8 @@ import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { useModalVisibility } from "@/base/components/utils/modal";
 import { useIsSmallWidth } from "@/base/hooks";
 import log from "@/base/log";
-import type { Collection } from "@/media/collection";
-import { type EnteFile, mergeMetadata } from "@/media/file";
+import { CollectionType, type Collection } from "@/media/collection";
+import { mergeMetadata, type EnteFile } from "@/media/file";
 import {
     CollectionSelector,
     type CollectionSelectorAttributes,
@@ -882,6 +882,18 @@ export default function Gallery() {
         hiddenFiles: EnteFile[],
     ) => {
         const favItemIds = await getFavItemIds(files);
+        let favItemIds2 = new Set();
+        for (const collection of collections) {
+            if (collection.type === CollectionType.favorites) {
+                favItemIds2 = new Set(
+                    files
+                        .filter((file) => file.collectionID === collection.id)
+                        .map((file): number => file.id),
+                );
+                break;
+            }
+        }
+        console.log({ favItemIds, favItemIds2 });
         setFavItemIds(favItemIds);
         const archivedCollections = getArchivedCollections(collections);
         setArchivedCollections(archivedCollections);
