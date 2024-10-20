@@ -37,6 +37,9 @@
       "title": "AscendEX"
     },
     {
+      "title": "Aternos"
+    },    
+    {
       "title": "BaiduCloud",
       "altNames": [
         "百度云",
@@ -227,6 +230,9 @@
       "slug": "dusnet"
     },
     {
+      "title": "EA"
+    },       
+    {
       "title": "eBay"
     },    
     {
@@ -239,6 +245,9 @@
         "Murena"
       ]
     },
+    {
+      "title": "Eneba"
+    },     
     {
       "title": "ente",
       "hex": "1DB954"
@@ -260,6 +269,9 @@
     {
       "title": "Estateguru"
     },
+    {
+      "title": "Faceit"
+    },      
     {
       "title": "Fanatical"
     },    
@@ -327,6 +339,9 @@
         "Hugging Face"
       ]
     },
+    {
+      "title": "Humble Bundle"
+    },    
     {
       "title": "IceDrive"
     },
@@ -452,6 +467,9 @@
     },
     {
       "title": "Microsoft"
+    },
+    {
+      "title": "Minecraft"
     },
     {
       "title": "Migros"
@@ -581,6 +599,9 @@
       "title": "Pingvin Share"
     },
     {
+      "title": "PlayerAuctions"
+    },    
+    {
       "title": "Plutus",
       "hex": "DEC685"
     },
@@ -703,12 +724,18 @@
       "slug": "standardnotes"
     },
     {
+      "title": "Steam"
+    },      
+    {
       "title": "Surfshark"
     },
     {
       "title": "Synology DSM",
       "slug": "synology_dsm"
     },
+    {
+      "title": "Teamviewer"
+    },      
     {
       "title": "T-Mobile",
       "altNames": [
@@ -837,6 +864,9 @@
     {
       "title": "WYZE"
     },
+    {
+      "title": "Xbox"
+    },       
     {
       "title": "yahoo"
     },
