@@ -1013,7 +1013,10 @@ export const sortCollectionSummaries = (
                 CollectionSummaryOrder.get(b.type),
         );
 
-function compareCollectionsLatestFile(first: EnteFile, second: EnteFile) {
+function compareCollectionsLatestFile(
+    first: EnteFile | undefined,
+    second: EnteFile | undefined,
+) {
     if (!first) {
         return 1;
     } else if (!second) {

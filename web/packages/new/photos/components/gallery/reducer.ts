@@ -75,14 +75,20 @@ export interface GalleryState {
     hiddenCollections: Collection[];
     /**
      * The user's normal (non-hidden, non-trash) files.
+     *
+     * The list is sorted so that the newest file is first.
      */
     files: EnteFile[];
     /**
      * The user's hidden files.
+     *
+     * The list is sorted so that the newest file is first.
      */
     hiddenFiles: EnteFile[];
     /**
      * The user's files that are in Trash.
+     *
+     * The list is sorted so that the newest file is first.
      */
     trashedFiles: EnteFile[];
 
@@ -411,8 +417,8 @@ export const useGalleryReducer = () =>
  * have two "Collection File" entries for it, both with the same file ID, but
  * with different collection IDs.
  *
- * This function returns files such that only one of these entries (arbitrarily
- * picked in case of dupes) is returned.
+ * This function returns files such that only one of these entries (the newer
+ * one in case of dupes) is returned.
  */
 export const uniqueFilesByID = (files: EnteFile[]) => {
     const seen = new Set<number>();
@@ -522,8 +528,12 @@ const createCollectionSummaries = (
     files: EnteFile[],
 ) => {
     const collectionSummaries = new Map<number, CollectionSummary>();
-    const collectionLatestFiles = getCollectionLatestFiles(files);
-    const collectionCoverFiles = getCollectionCoverFiles(files, collections);
+
+    const filesByCollection = groupFilesByCollectionID(files);
+    const collectionCoverFiles = getCollectionCoverFiles(
+        collections,
+        filesByCollection,
+    );
     const collectionFilesCount = getCollectionsFileCount(files);
 
     let hasUncategorizedCollection = false;
@@ -583,11 +593,7 @@ const createCollectionSummaries = (
         collectionSummaries.set(collection.id, {
             id: collection.id,
             name: CollectionSummaryItemName,
-            // See: [Note: strict mode migration]
-            //
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            latestFile: collectionLatestFiles.get(collection.id),
+            latestFile: filesByCollection.get(collection.id)?.[0],
             coverFile: collectionCoverFiles.get(collection.id),
             fileCount: collectionFilesCount.get(collection.id) ?? 0,
             updationTime: collection.updationTime,
@@ -607,30 +613,14 @@ const createCollectionSummaries = (
     return collectionSummaries;
 };
 
-type CollectionToFileMap = Map<number, EnteFile>;
-
-// TODO: This seems to rely on some sort order. Document.
-const getCollectionLatestFiles = (files: EnteFile[]): CollectionToFileMap => {
-    const latestFiles = new Map<number, EnteFile>();
-
-    files.forEach((file) => {
-        if (!latestFiles.has(file.collectionID)) {
-            latestFiles.set(file.collectionID, file);
-        }
-    });
-    return latestFiles;
-};
-
 const getCollectionCoverFiles = (
-    files: EnteFile[],
     collections: Collection[],
-): CollectionToFileMap => {
-    const collectionIDToFileMap = groupFilesByCollectionID(files);
-
+    filesByCollection: Map<number, EnteFile[]>,
+): Map<number, EnteFile> => {
     const coverFiles = new Map<number, EnteFile>();
 
     collections.forEach((collection) => {
-        const collectionFiles = collectionIDToFileMap.get(collection.id);
+        const collectionFiles = filesByCollection.get(collection.id);
         if (!collectionFiles || collectionFiles.length === 0) {
             return;
         }
@@ -688,11 +678,7 @@ function getDummyUncategorizedCollectionSummary(): CollectionSummary {
         id: DUMMY_UNCATEGORIZED_COLLECTION,
         name: t("section_uncategorized"),
         type: "uncategorized",
-        // See: [Note: strict mode migration]
-        //
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        latestFile: null,
+        latestFile: undefined,
         // See: [Note: strict mode migration]
         //
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment

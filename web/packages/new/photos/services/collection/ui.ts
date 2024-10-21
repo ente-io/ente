@@ -22,12 +22,32 @@ export type CollectionSummaryType =
  * directly shown in the UI.
  */
 export interface CollectionSummary {
-    /** The "UI" type for the collection. */
+    /**
+     * The "UI" type for the collection or pseudo-collection.
+     */
     type: CollectionSummaryType;
+    /**
+     * The ID of the underlying collection, or one of the predefined placeholder
+     * IDs for the pseudo-collections.
+     */
     id: number;
+    /**
+     * The name of the collection or pseudo-collection.
+     */
     name: string;
+    /**
+     * The newest file in the collection or pseudo-collection (if it is not
+     * empty).
+     */
+    latestFile: EnteFile | undefined;
+    /**
+     * The file to show as the cover for the collection or pseudo-collection.
+     */
     coverFile: EnteFile | undefined;
-    latestFile: EnteFile;
+    /**
+     * The number of files in the underlying collection, or the number of files
+     * that belong to this pseudo-collection.
+     */
     fileCount: number;
     updationTime: number;
     order?: number;
