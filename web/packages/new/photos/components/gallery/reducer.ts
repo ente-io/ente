@@ -464,7 +464,11 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 searchResults: action.searchResults,
             };
         case "exitSearch":
-            return { ...state, searchResults: undefined };
+            return {
+                ...state,
+                isInSearchMode: false,
+                searchResults: undefined,
+            };
     }
 };
 

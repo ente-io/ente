@@ -277,9 +277,6 @@ export default function Gallery() {
     const closeAuthenticateUserModal = () =>
         setAuthenticateUserModalView(false);
 
-    // True if we're in "search mode". See: [Note: "search mode"].
-    const [isInSearchMode, setIsInSearchMode] = useState(false);
-
     // The option selected by the user selected from the search bar dropdown.
     const [selectedSearchOption, setSelectedSearchOption] = useState<
         SearchOption | undefined
@@ -337,6 +334,7 @@ export default function Gallery() {
     const fileToCollectionsMap = state.fileCollectionIDs;
     const collectionSummaries = state.collectionSummaries;
     const hiddenCollectionSummaries = state.hiddenCollectionSummaries;
+    const isInSearchMode = state.isInSearchMode;
 
     if (process.env.NEXT_PUBLIC_ENTE_WIP_CL) {
         console.log("render", { collections, hiddenCollections, files });
@@ -981,7 +979,7 @@ export default function Gallery() {
     ) => {
         const type = searchOption?.suggestion.type;
         if (type == "collection" || type == "person") {
-            setIsInSearchMode(false);
+            dispatch({ type: "exitSearch" });
             setSelectedSearchOption(undefined);
             if (type == "collection") {
                 setBarMode("albums");
@@ -990,9 +988,12 @@ export default function Gallery() {
                 setBarMode("people");
                 setActivePersonID(searchOption.suggestion.person.id);
             }
-        } else {
-            setIsInSearchMode(!!searchOption);
+        } else if (searchOption) {
+            dispatch({ type: "enterSearchMode" });
             setSelectedSearchOption(searchOption);
+        } else {
+            dispatch({ type: "exitSearch" });
+            setSelectedSearchOption(undefined);
         }
         setIsClipSearchResult(type == "clip");
     };
@@ -1016,10 +1017,12 @@ export default function Gallery() {
     const handleShowCollection = (collectionID: number) => {
         setBarMode("albums");
         setActiveCollectionID(collectionID);
-        setIsInSearchMode(false);
+        // TODO: type: "showAlbum"
+        // setIsInSearchMode(false);
+        dispatch({ type: "exitSearch" });
     };
 
-    const handleShowSearchInput = () => setIsInSearchMode(true);
+    const handleShowSearchInput = () => dispatch({ type: "enterSearchMode" });
 
     const openHiddenSection: GalleryContextType["openHiddenSection"] = (
         callback,
