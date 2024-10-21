@@ -152,6 +152,9 @@
       ]
     },
     {
+      "title": "Box"
+    },       
+    {
       "title": "Bybit"
     },
     {
@@ -230,6 +233,9 @@
       "slug": "dusnet"
     },
     {
+      "title": "Dropbox"
+    },      
+    {
       "title": "EA"
     },       
     {
@@ -255,6 +261,9 @@
     {
       "title": "enom"
     },
+    {
+      "title": "Evernote"
+    },      
     {
       "title": "Epic Games",
       "slug": "epic_games",
@@ -300,6 +309,9 @@
     {
       "title": "Google"
     },
+    {
+      "title": "Google Drive"
+    },    
     {
       "title": "Gosuslugi",
       "slug": "Gosuslugi",
@@ -348,6 +360,9 @@
     {
       "title": "ID.me",
       "slug": "IDme"
+    }, 
+    {
+      "title": "Idrive"
     },    
     {
       "title": "Infomaniak"
@@ -383,6 +398,9 @@
         "坚果云"
       ]
     },
+    {
+      "title": "Jottacloud"
+    },     
     {
       "title": "Kagi"
     },
@@ -516,6 +534,12 @@
       ]
     },
     {
+      "title": "N-able"
+    }, 
+    {
+      "title": "Myprimobox"
+    },      
+    {
       "title": "Name.com",
       "slug": "name_com"
     },
@@ -549,6 +573,9 @@
       "title": "Njalla"
     },
     {
+      "title": "Nordlocker"
+    },     
+    {
       "title": "Notesnook"
     },
     {
@@ -563,6 +590,15 @@
     {
       "title": "Odido"
     },
+    {
+      "title": "Obsidian"
+    }, 
+    {
+      "title": "Onedrive"
+    },   
+    {
+      "title": "Onehub"
+    },      
     {
       "title": "OpenObserve",
       "slug": "open_observe",
@@ -629,12 +665,21 @@
       "title": "Proxmox"
     },
     {
+      "title": "Put.io"
+    },    
+    {
       "title": "qiniuyun",
       "altNames": [
         "七牛云",
         "qiniu"
       ]
     },
+    {
+      "title": "Rapidgator"
+    }, 
+    {
+      "title": "QNAP"
+    },     
     {
       "title": "Real-Debrid",
       "slug": "real_debrid"
@@ -658,6 +703,12 @@
       "title": "Revolt",
       "hex": "858585"
     },
+    {
+      "title": "Restorecord"
+    },
+    {
+      "title": "Rewind"
+    },      
     {
       "title": "RippleMatch"
     },
@@ -732,6 +783,12 @@
     {
       "title": "Synology DSM",
       "slug": "synology_dsm"
+    },
+    {
+      "title": "Sync"
+    },   
+        {
+      "title": "Synology"
     },
     {
       "title": "Teamviewer"
@@ -818,6 +875,9 @@
       "slug": "ubuntu_one"
     },
     {
+      "title": "Updraftplus"
+    },    
+    {
       "title": "Unity",
       "hex": "858585"
     },
@@ -845,6 +905,9 @@
     {
       "title": "Wealthsimple"
     },
+    {
+      "title": "Wetransfer"
+    },     
     {
       "title": "WHMCS"
     },
