@@ -17,8 +17,8 @@ import "package:photos/utils/toast_util.dart";
 
 class DeleteAccountPage extends StatefulWidget {
   const DeleteAccountPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<DeleteAccountPage> createState() => _DeleteAccountPageState();

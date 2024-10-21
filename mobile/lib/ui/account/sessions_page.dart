@@ -184,7 +184,7 @@ class _SessionsPageState extends State<SessionsPage> {
             ),
           ),
           onPressed: () async {
-            Navigator.of(context, rootNavigator: true).pop('dialog');
+            Navigator.of(context).pop('dialog');
             if (isLoggingOutFromThisDevice) {
               await UserService.instance.logout(context);
             } else {
@@ -202,7 +202,7 @@ class _SessionsPageState extends State<SessionsPage> {
             ),
           ),
           onPressed: () {
-            Navigator.of(context, rootNavigator: true).pop('dialog');
+            Navigator.of(context).pop('dialog');
           },
         ),
       ],
