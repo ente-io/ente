@@ -816,7 +816,6 @@
   "referFriendsAnd2xYourPlan": "Recomandați un prieten și dublați-vă planul",
   "shareAlbumHint": "Deschideți un album și atingeți butonul de distribuire din dreapta sus pentru a distribui.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Articolele afișează numărul de zile rămase până la ștergerea definitivă",
-  "trashDaysLeft": "{count, plural, one {} few {{count} zile}=0 {} =1 {O zi} other {{count} de zile}}",
   "@trashDaysLeft": {
     "description": "Text to indicate number of days remaining before permanent deletion",
     "placeholders": {
