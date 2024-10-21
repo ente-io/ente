@@ -137,7 +137,6 @@ import {
 import { checkSubscriptionPurchase } from "utils/billing";
 import {
     COLLECTION_OPS_TYPE,
-    constructCollectionNameMap,
     getSelectedCollection,
     handleCollectionOps,
 } from "utils/collection";
@@ -339,6 +338,7 @@ export default function Gallery() {
     const archivedCollectionIDs = state.archivedCollectionIDs;
     const defaultHiddenCollectionIDs = state.defaultHiddenCollectionIDs;
     const hiddenFileIDs = state.hiddenFileIDs;
+    const collectionNameMap = state.allCollectionNameByID;
     const collectionSummaries = state.collectionSummaries;
     const hiddenCollectionSummaries = state.hiddenCollectionSummaries;
 
@@ -749,16 +749,6 @@ export default function Gallery() {
     const fileToCollectionsMap = useMemoSingleThreaded(() => {
         return constructFileToCollectionMap(files);
     }, [files]);
-
-    const collectionNameMap = useMemo(() => {
-        if (!collections || !hiddenCollections) {
-            return new Map();
-        }
-        return constructCollectionNameMap([
-            ...collections,
-            ...hiddenCollections,
-        ]);
-    }, [collections, hiddenCollections]);
 
     const showSessionExpiredMessage = () => {
         setDialogMessage(getSessionExpiredMessage(logout));

@@ -11,8 +11,8 @@ import {
 import { EnteFile } from "@/media/file";
 import { ItemVisibility } from "@/media/file-metadata";
 import {
+    DEFAULT_HIDDEN_COLLECTION_USER_FACING_NAME,
     findDefaultHiddenCollectionIDs,
-    isDefaultHiddenCollection,
     isHiddenCollection,
     isIncomingShare,
 } from "@/new/photos/services/collection";
@@ -390,26 +390,6 @@ export function getNonHiddenCollections(
 export function getHiddenCollections(collections: Collection[]): Collection[] {
     return collections.filter((collection) => isHiddenCollection(collection));
 }
-
-export function constructCollectionNameMap(
-    collections: Collection[],
-): Map<number, string> {
-    return new Map<number, string>(
-        (collections ?? []).map((collection) => [
-            collection.id,
-            getCollectionUserFacingName(collection),
-        ]),
-    );
-}
-
-const DEFAULT_HIDDEN_COLLECTION_USER_FACING_NAME = "Hidden";
-
-export const getCollectionUserFacingName = (collection: Collection) => {
-    if (isDefaultHiddenCollection(collection)) {
-        return DEFAULT_HIDDEN_COLLECTION_USER_FACING_NAME;
-    }
-    return collection.name;
-};
 
 export const getOrCreateAlbum = async (
     albumName: string,

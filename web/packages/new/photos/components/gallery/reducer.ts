@@ -5,7 +5,10 @@ import {
 } from "@/media/collection";
 import type { EnteFile } from "@/media/file";
 import { mergeMetadata } from "@/media/file";
-import { isHiddenCollection } from "@/new/photos/services/collection";
+import {
+    createCollectionNameByID,
+    isHiddenCollection,
+} from "@/new/photos/services/collection";
 import { splitByPredicate } from "@/utils/array";
 import { ensure } from "@/utils/ensure";
 import type { User } from "@ente/shared/user/types";
@@ -109,6 +112,13 @@ export interface GalleryState {
      * File IDs of all the files that the user has marked as a favorite.
      */
     favoriteFileIDs: Set<number>;
+    /**
+     * User visible collection names indexed by collection IDs for fast lookup.
+     *
+     * This map will contain entries for all (both normal and hidden)
+     * collections.
+     */
+    allCollectionNameByID: Map<number, string>;
 
     /*--<  Derived UI state  >--*/
 
@@ -183,6 +193,7 @@ const initialGalleryState: GalleryState = {
     defaultHiddenCollectionIDs: new Set(),
     hiddenFileIDs: new Set(),
     favoriteFileIDs: new Set(),
+    allCollectionNameByID: new Map(),
     collectionSummaries: new Map(),
     hiddenCollectionSummaries: new Map(),
     filteredData: [],
@@ -222,6 +233,9 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     collections,
                     action.files,
                 ),
+                allCollectionNameByID: createCollectionNameByID(
+                    action.allCollections,
+                ),
                 collectionSummaries: deriveCollectionSummaries(
                     action.user,
                     collections,
@@ -255,6 +269,9 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     action.collections,
                     state.files,
                 ),
+                allCollectionNameByID: createCollectionNameByID(
+                    action.collections.concat(state.hiddenCollections),
+                ),
                 collectionSummaries: deriveCollectionSummaries(
                     ensure(state.user),
                     action.collections,
@@ -279,6 +296,9 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 favoriteFileIDs: deriveFavoriteFileIDs(
                     action.collections,
                     state.files,
+                ),
+                allCollectionNameByID: createCollectionNameByID(
+                    action.collections.concat(action.hiddenCollections),
                 ),
                 collectionSummaries: deriveCollectionSummaries(
                     ensure(state.user),
