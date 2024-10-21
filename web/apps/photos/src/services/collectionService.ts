@@ -1003,7 +1003,7 @@ export const sortCollectionSummaries = (
                         compareCollectionsLatestFile(b.latestFile, a.latestFile)
                     );
                 case "updation-time-desc":
-                    return b.updationTime - a.updationTime;
+                    return (b.updationTime ?? 0) - (a.updationTime ?? 0);
             }
         })
         .sort((a, b) => b.order ?? 0 - a.order ?? 0)

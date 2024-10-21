@@ -62,7 +62,12 @@ export interface CollectionSummary {
      * that belong to this pseudo-collection.
      */
     fileCount: number;
-    updationTime: number;
+    /**
+     * The time when the collection was last updated. For pseudo-collections
+     * this will (usually) be the updation time of the latest file that it
+     * contains.
+     */
+    updationTime: number | undefined;
     order?: number;
 }
 

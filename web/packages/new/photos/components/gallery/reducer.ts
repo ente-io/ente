@@ -22,7 +22,6 @@ import {
     TRASH_SECTION,
 } from "../../services/collection";
 import type {
-    CollectionSummaries,
     CollectionSummary,
     CollectionSummaryType,
 } from "../../services/collection/ui";
@@ -487,10 +486,16 @@ export const deriveCollectionSummaries = (
         files,
     );
 
-    collectionSummaries.set(
-        ALL_SECTION,
-        getAllSectionSummary(files, archivedCollectionIDs),
+    const allSectionFiles = findAllSectionVisibleFiles(
+        files,
+        archivedCollectionIDs,
     );
+    collectionSummaries.set(ALL_SECTION, {
+        id: ALL_SECTION,
+        type: "all",
+        name: t("section_all"),
+        ...pseudoCollectionOptionsForFiles(allSectionFiles),
+    });
     collectionSummaries.set(
         TRASH_SECTION,
         getTrashedCollectionSummary(trashedFiles),
@@ -499,6 +504,13 @@ export const deriveCollectionSummaries = (
 
     return collectionSummaries;
 };
+
+const pseudoCollectionOptionsForFiles = (files: EnteFile[]) => ({
+    coverFile: files[0],
+    latestFile: files[0],
+    fileCount: files.length,
+    updationTime: files[0]?.updationTime,
+});
 
 /**
  * Helper function to compute hidden collection summaries from their
@@ -676,16 +688,6 @@ const isSharedOnlyViaLink = (collection: Collection) =>
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     collection.publicURLs?.length && !collection.sharees?.length;
 
-function getSectionSummaries(
-    files: EnteFile[],
-    trashedFiles: EnteFile[],
-    archivedCollections: Set<number>,
-): CollectionSummaries {
-    const collectionSummaries: CollectionSummaries = new Map();
-
-    return collectionSummaries;
-}
-
 function getArchivedSectionSummary(files: EnteFile[]): CollectionSummary {
     const archivedFiles = uniqueFilesByID(
         files.filter((file) => isArchivedFile(file)),
@@ -716,54 +718,20 @@ function getArchivedSectionSummary(files: EnteFile[]): CollectionSummary {
     };
 }
 
-function getAllSectionSummary(
+/**
+ * Return all list of files that should be shown in the "All" section.
+ */
+const findAllSectionVisibleFiles = (
     files: EnteFile[],
-    archivedCollections: Set<number>,
-): CollectionSummary {
-    const allSectionFiles = getAllSectionVisibleFiles(
-        files,
-        archivedCollections,
+    archivedCollectionIDs: Set<number>,
+) =>
+    uniqueFilesByID(
+        files.filter(
+            (file) =>
+                !isArchivedFile(file) &&
+                !archivedCollectionIDs.has(file.collectionID),
+        ),
     );
-    return {
-        id: ALL_SECTION,
-        name: t("section_all"),
-        type: "all",
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        coverFile: allSectionFiles?.[0],
-        // See: [Note: strict mode migration]
-        //
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        latestFile: allSectionFiles?.[0],
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        fileCount: allSectionFiles?.length || 0,
-        // See: [Note: strict mode migration]
-        //
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        updationTime: allSectionFiles?.[0]?.updationTime,
-    };
-}
-
-function getAllSectionVisibleFiles(
-    files: EnteFile[],
-    archivedCollections: Set<number>,
-): EnteFile[] {
-    const allSectionVisibleFiles = uniqueFilesByID(
-        files.filter((file) => {
-            if (
-                isArchivedFile(file) ||
-                archivedCollections.has(file.collectionID)
-            ) {
-                return false;
-            }
-            return true;
-        }),
-    );
-    return allSectionVisibleFiles;
-}
 
 function getTrashedCollectionSummary(
     trashedFiles: EnteFile[],
