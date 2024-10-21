@@ -127,8 +127,7 @@ class _GrantPermissionsWidgetState extends State<GrantPermissionsWidget> {
                                 ),
                       ),
                       onPressed: () {
-                        Navigator.of(context, rootNavigator: true)
-                            .pop('dialog');
+                        Navigator.of(context).pop('dialog');
                         if (Platform.isIOS) {
                           PhotoManager.openSetting();
                         }
