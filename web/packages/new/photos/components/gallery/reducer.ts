@@ -151,6 +151,15 @@ export interface GalleryState {
      * The list of people to show.
      */
     people: Person[] | undefined;
+    /**
+     * List of files that match the selected search option.
+     *
+     * The search dropdown shows a list of options ("suggestions") that match
+     * the user's search term. If the user selects from one of these options,
+     * then we run a search to find all files that match that suggestion, and
+     * set this value to the result.
+     */
+    searchResults: EnteFile[];
 }
 
 export type GalleryAction =
@@ -184,7 +193,8 @@ export type GalleryAction =
     | { type: "uploadFile"; file: EnteFile }
     | { type: "resetHiddenFiles"; hiddenFiles: EnteFile[] }
     | { type: "fetchHiddenFiles"; hiddenFiles: EnteFile[] }
-    | { type: "setTrashedFiles"; trashedFiles: EnteFile[] };
+    | { type: "setTrashedFiles"; trashedFiles: EnteFile[] }
+    | { type: "searchResults"; searchResults: EnteFile[] };
 
 const initialGalleryState: GalleryState = {
     user: undefined,
@@ -205,6 +215,7 @@ const initialGalleryState: GalleryState = {
     filteredData: [],
     activePerson: undefined,
     people: [],
+    searchResults: [],
 };
 
 const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
@@ -428,6 +439,11 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     action.trashedFiles,
                     state.archivedCollectionIDs,
                 ),
+            };
+        case "searchResults":
+            return {
+                ...state,
+                searchResults: action.searchResults,
             };
     }
 };
