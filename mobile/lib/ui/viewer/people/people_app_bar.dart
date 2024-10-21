@@ -16,6 +16,7 @@ import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
+import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/hierarchicial_search/applied_filters.dart";
 import "package:photos/ui/viewer/hierarchicial_search/recommended_filters.dart";
 import "package:photos/ui/viewer/people/add_person_action_sheet.dart";
@@ -87,45 +88,55 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
 
   @override
   Widget build(BuildContext context) {
-    return AppBar(
-      elevation: 0,
-      centerTitle: false,
-      // title: Text(
-      //   _appBarTitle!,
-      //   style:
-      //       Theme.of(context).textTheme.headlineSmall!.copyWith(fontSize: 16),
-      //   maxLines: 2,
-      //   overflow: TextOverflow.ellipsis,
-      // ),
-      title: Expanded(
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Expanded(
-              child: Text(
-                _appBarTitle!,
-                style: Theme.of(context)
-                    .textTheme
-                    .headlineSmall!
-                    .copyWith(fontSize: 16),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
+    final inheritedSearchFilterData =
+        InheritedSearchFilterData.maybeOf(context);
+    final isHierarchicalSearchable =
+        inheritedSearchFilterData?.isHierarchicalSearchable ?? false;
+    return isHierarchicalSearchable
+        ? ValueListenableBuilder(
+            valueListenable: inheritedSearchFilterData!
+                .searchFilterDataProvider!.isSearchingNotifier,
+            child: const PreferredSize(
+              preferredSize: Size.fromHeight(0),
+              child: Flexible(child: RecommendedFilters()),
             ),
-            const SizedBox(
-              width: 200,
-              height: kFilterChipHeight,
-              child: AppliedFilters(),
+            builder: (context, isSearching, child) {
+              return AppBar(
+                elevation: 0,
+                centerTitle: false,
+                title: isSearching
+                    ? const SizedBox(
+                        height: kFilterChipHeight,
+                        child: AppliedFilters(),
+                      )
+                    : Text(
+                        _appBarTitle!,
+                        style: Theme.of(context)
+                            .textTheme
+                            .headlineSmall!
+                            .copyWith(fontSize: 16),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                bottom: child as PreferredSizeWidget,
+                actions: isSearching ? null : _getDefaultActions(context),
+              );
+            },
+          )
+        : AppBar(
+            elevation: 0,
+            centerTitle: false,
+            title: Text(
+              _appBarTitle!,
+              style: Theme.of(context)
+                  .textTheme
+                  .headlineSmall!
+                  .copyWith(fontSize: 16),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
-          ],
-        ),
-      ),
-      bottom: const PreferredSize(
-        preferredSize: Size.fromHeight(0),
-        child: Flexible(child: RecommendedFilters()),
-      ),
-      actions: _getDefaultActions(context),
-    );
+            actions: _getDefaultActions(context),
+          );
   }
 
   Future<dynamic> _renamePerson(BuildContext context) async {
