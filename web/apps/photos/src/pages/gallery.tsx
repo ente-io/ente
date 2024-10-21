@@ -1023,9 +1023,7 @@ export default function Gallery() {
     const handleChangeBarMode = (mode: GalleryBarMode) =>
         mode == "people"
             ? dispatch({ type: "showPeople" })
-            : dispatch({
-                  type: "showAll",
-              });
+            : dispatch({ type: "showAll" });
 
     const openHiddenSection: GalleryContextType["openHiddenSection"] = (
         callback,

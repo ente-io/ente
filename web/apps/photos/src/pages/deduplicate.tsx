@@ -115,7 +115,7 @@ export default function Deduplicate() {
     }, [duplicates]);
 
     const fileToCollectionsMap = useMemoSingleThreaded(() => {
-        return createFileCollectionIDs(duplicateFiles);
+        return createFileCollectionIDs(duplicateFiles ?? []);
     }, [duplicateFiles]);
 
     const deleteFileHelper = async () => {
