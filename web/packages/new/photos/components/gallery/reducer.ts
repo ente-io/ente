@@ -487,15 +487,15 @@ export const deriveCollectionSummaries = (
         files,
     );
 
-    const sectionSummaries = getSectionSummaries(
-        files,
-        trashedFiles,
-        archivedCollectionIDs,
+    collectionSummaries.set(
+        ALL_SECTION,
+        getAllSectionSummary(files, archivedCollectionIDs),
     );
-
-    for (const [key, value] of sectionSummaries) {
-        collectionSummaries.set(key, value);
-    }
+    collectionSummaries.set(
+        TRASH_SECTION,
+        getTrashedCollectionSummary(trashedFiles),
+    );
+    collectionSummaries.set(ARCHIVE_SECTION, getArchivedSectionSummary(files));
 
     return collectionSummaries;
 };
@@ -682,15 +682,6 @@ function getSectionSummaries(
     archivedCollections: Set<number>,
 ): CollectionSummaries {
     const collectionSummaries: CollectionSummaries = new Map();
-    collectionSummaries.set(
-        ALL_SECTION,
-        getAllSectionSummary(files, archivedCollections),
-    );
-    collectionSummaries.set(
-        TRASH_SECTION,
-        getTrashedCollectionSummary(trashedFiles),
-    );
-    collectionSummaries.set(ARCHIVE_SECTION, getArchivedSectionSummary(files));
 
     return collectionSummaries;
 }

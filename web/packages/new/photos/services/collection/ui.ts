@@ -22,7 +22,12 @@ export type CollectionSummaryType =
  * directly shown in the UI.
  *
  * TODO: Rename me to CollectionOrSection
- * Known sections: HIDDEN_ITEMS_SECTION, DUMMY_UNCATEGORIZED_COLLECTION
+ * Known sections:
+ * - DUMMY_UNCATEGORIZED_COLLECTION
+ * - ALL_SECTION
+ * - TRASH_SECTION
+ * - HIDDEN_ITEMS_SECTION
+ * - ARCHIVE_SECTION
  */
 export interface CollectionSummary {
     /**
