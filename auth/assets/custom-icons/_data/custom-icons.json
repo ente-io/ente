@@ -116,6 +116,12 @@
       "title": "Bitwarden"
     },
     {
+      "title": "Black Desert"
+    },
+    {
+      "title": "Blizzard"
+    },    
+    {
       "title": "Bloom Host",
       "slug": "bloom_host",
       "altNames": [
@@ -130,6 +136,9 @@
         "blockchain.com Exchange"
       ]
     },
+    {
+      "title": "Bohemia"
+    },      
     {
       "title": "BorgBase",
       "altNames": [
@@ -163,6 +172,9 @@
     {
       "title": "Capacities"
     },
+    {
+      "title": "Capcom"
+    },     
     {
       "title": "CERN"
     },
@@ -276,8 +288,14 @@
       "title": "Esketit"
     },
     {
+      "title": "ESL Gaming"
+    },    
+    {
       "title": "Estateguru"
     },
+    {
+      "title": "Eve Online"
+    },    
     {
       "title": "Faceit"
     },      
@@ -327,8 +345,14 @@
       ]
     },
     {
-      "title": "Guideline"
+      "title": "Gree"
     },    
+    {
+      "title": "Guideline"
+    }, 
+    {
+      "title": "Guildwars2"
+    },      
     {
       "title": "Gusto"
     },    
@@ -408,6 +432,9 @@
       "title": "Kick"
     },
     {
+      "title": "Kinguin"
+    },      
+    {
       "title": "Kite"
     },
     {
@@ -439,6 +466,9 @@
     {
       "title": "Letterboxd"
     },
+    {
+      "title": "Lichess"
+    },    
    {
       "title": "Linux.Do",
       "slug": "LINUX_DO",
@@ -503,6 +533,9 @@
       ]
     },
     {
+      "title": "Modrinth"
+    },    
+    {
       "title": "Mozilla"
     },
     {
@@ -551,8 +584,14 @@
       ]
     },
     {
+      "title": "Nexon"
+    },    
+    {
       "title": "NextDNS"
     },
+    {
+      "title": "Nexusmods"
+    },    
     {
       "title": "Newton",
       "altNames": [
@@ -636,6 +675,9 @@
     },
     {
       "title": "PlayerAuctions"
+    },
+    {
+      "title": "Playstation"
     },    
     {
       "title": "Plutus",
@@ -665,8 +707,14 @@
       "title": "Proxmox"
     },
     {
-      "title": "Put.io"
+      "title": "PSN Profiles"
     },    
+    {
+      "title": "Put.io"
+    }, 
+    {
+      "title": "QNAP"
+    },     
     {
       "title": "qiniuyun",
       "altNames": [
@@ -676,10 +724,10 @@
     },
     {
       "title": "Rapidgator"
-    }, 
+    },
     {
-      "title": "QNAP"
-    },     
+      "title": "Razer"
+    },    
     {
       "title": "Real-Debrid",
       "slug": "real_debrid"
@@ -713,6 +761,9 @@
       "title": "RippleMatch"
     },
     {
+      "title": "Roblox"
+    },    
+    {
       "title": "Rockstar Games",
       "slug": "rockstar_games"
     },
@@ -734,8 +785,14 @@
       "title": "service-bw"
     },
     {
+      "title": "Shadow"
+    },       
+    {
       "title": "Shakepay"
     },
+    {
+      "title": "Side Quest"
+    },      
     {
       "title": "SimpleLogin"
     },
@@ -771,6 +828,9 @@
       "title": "Snapchat"
     },
     {
+      "title": "Square Enix"
+    },    
+    {
       "title": "Standard Notes",
       "slug": "standardnotes"
     },
@@ -792,6 +852,9 @@
     },
     {
       "title": "Teamviewer"
+    },
+    {
+      "title": "Technic"
     },      
     {
       "title": "T-Mobile",
@@ -891,6 +954,9 @@
       "title": "Vikunja"
     },
     {
+      "title": "VRChat"
+    },    
+    {
       "title": "volcengine",
       "altNames": [
         "火山引擎"
@@ -899,6 +965,9 @@
    {
       "title": "WARGAMING.NET"
     },
+   {
+      "title": "Warner Bros Games"
+    },    
     {
       "title": "Wealthfront"
     },
