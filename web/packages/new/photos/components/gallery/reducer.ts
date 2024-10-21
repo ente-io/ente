@@ -152,14 +152,27 @@ export interface GalleryState {
      */
     people: Person[] | undefined;
     /**
+     * `true` if we are in "search mode".
+     *
+     * We will always be in search mode if we are showing search results, but we
+     * also may be in search mode earlier on smaller screens, where the search
+     * input is only shown on entering search mode. See: [Note: "Search mode"].
+     *
+     * That is, {@link isInSearchMode} may be true even when
+     * {@link searchResults} is undefined.
+     */
+    isInSearchMode: boolean;
+    /**
      * List of files that match the selected search option.
+     *
+     * This will be set only if we are showing search results.
      *
      * The search dropdown shows a list of options ("suggestions") that match
      * the user's search term. If the user selects from one of these options,
      * then we run a search to find all files that match that suggestion, and
      * set this value to the result.
      */
-    searchResults: EnteFile[];
+    searchResults: EnteFile[] | undefined;
 }
 
 export type GalleryAction =
@@ -194,7 +207,9 @@ export type GalleryAction =
     | { type: "resetHiddenFiles"; hiddenFiles: EnteFile[] }
     | { type: "fetchHiddenFiles"; hiddenFiles: EnteFile[] }
     | { type: "setTrashedFiles"; trashedFiles: EnteFile[] }
-    | { type: "searchResults"; searchResults: EnteFile[] };
+    | { type: "searchResults"; searchResults: EnteFile[] }
+    | { type: "enterSearchMode" }
+    | { type: "exitSearch" };
 
 const initialGalleryState: GalleryState = {
     user: undefined,
@@ -215,7 +230,8 @@ const initialGalleryState: GalleryState = {
     filteredData: [],
     activePerson: undefined,
     people: [],
-    searchResults: [],
+    isInSearchMode: false,
+    searchResults: undefined,
 };
 
 const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
@@ -440,11 +456,15 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     state.archivedCollectionIDs,
                 ),
             };
+        case "enterSearchMode":
+            return { ...state, isInSearchMode: true };
         case "searchResults":
             return {
                 ...state,
                 searchResults: action.searchResults,
             };
+        case "exitSearch":
+            return { ...state, searchResults: undefined };
     }
 };
 
