@@ -42,6 +42,11 @@ export interface CollectionSummary {
     latestFile: EnteFile | undefined;
     /**
      * The file to show as the cover for the collection or pseudo-collection.
+     *
+     * This can be one of
+     * - A file explicitly chosen by the user.
+     * - The latest file.
+     * - The oldest file (if the user has set a reverse sort on the collection).
      */
     coverFile: EnteFile | undefined;
     /**

@@ -76,19 +76,19 @@ export interface GalleryState {
     /**
      * The user's normal (non-hidden, non-trash) files.
      *
-     * The list is sorted so that the newest file is first.
+     * The list is sorted so that newer files are first.
      */
     files: EnteFile[];
     /**
      * The user's hidden files.
      *
-     * The list is sorted so that the newest file is first.
+     * The list is sorted so that newer files are first.
      */
     hiddenFiles: EnteFile[];
     /**
      * The user's files that are in Trash.
      *
-     * The list is sorted so that the newest file is first.
+     * The list is sorted so that newer files are first.
      */
     trashedFiles: EnteFile[];
 
@@ -530,10 +530,7 @@ const createCollectionSummaries = (
     const collectionSummaries = new Map<number, CollectionSummary>();
 
     const filesByCollection = groupFilesByCollectionID(files);
-    const collectionCoverFiles = getCollectionCoverFiles(
-        collections,
-        filesByCollection,
-    );
+    const coverFiles = findCoverFiles(collections, filesByCollection);
     const collectionFilesCount = getCollectionsFileCount(files);
 
     let hasUncategorizedCollection = false;
@@ -594,7 +591,7 @@ const createCollectionSummaries = (
             id: collection.id,
             name: CollectionSummaryItemName,
             latestFile: filesByCollection.get(collection.id)?.[0],
-            coverFile: collectionCoverFiles.get(collection.id),
+            coverFile: coverFiles.get(collection.id),
             fileCount: collectionFilesCount.get(collection.id) ?? 0,
             updationTime: collection.updationTime,
             type: type,
@@ -613,46 +610,36 @@ const createCollectionSummaries = (
     return collectionSummaries;
 };
 
-const getCollectionCoverFiles = (
+const findCoverFiles = (
     collections: Collection[],
     filesByCollection: Map<number, EnteFile[]>,
 ): Map<number, EnteFile> => {
     const coverFiles = new Map<number, EnteFile>();
-
-    collections.forEach((collection) => {
+    for (const collection of collections) {
         const collectionFiles = filesByCollection.get(collection.id);
-        if (!collectionFiles || collectionFiles.length === 0) {
-            return;
-        }
+        if (!collectionFiles || collectionFiles.length == 0) continue;
+
+        let coverFile: EnteFile | undefined;
+
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         const coverID = collection.pubMagicMetadata?.data?.coverID;
         if (typeof coverID === "number" && coverID > 0) {
-            const coverFile = collectionFiles.find(
-                (file) => file.id === coverID,
-            );
-            if (coverFile) {
-                coverFiles.set(collection.id, coverFile);
-                return;
+            coverFile = collectionFiles.find(({ id }) => id === coverID);
+        }
+
+        if (!coverFile) {
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+            if (collection.pubMagicMetadata?.data?.asc) {
+                coverFile = collectionFiles[collectionFiles.length - 1];
+            } else {
+                coverFile = collectionFiles[0];
             }
         }
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        if (collection.pubMagicMetadata?.data?.asc) {
-            coverFiles.set(
-                collection.id,
-                // See: [Note: strict mode migration]
-                //
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore
-                collectionFiles[collectionFiles.length - 1],
-            );
-        } else {
-            // See: [Note: strict mode migration]
-            //
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            coverFiles.set(collection.id, collectionFiles[0]);
+
+        if (coverFile) {
+            coverFiles.set(collection.id, coverFile);
         }
-    });
+    }
     return coverFiles;
 };
 
