@@ -57,19 +57,6 @@ Future<Map<String, IfdTag>?> getExifFromSourceFile(File originFile) async {
   }
 }
 
-Future<FFProbeProps?> getVideoPropsAsyncV2(File originalFile) async {
-  return Computer.shared().compute(
-    getVideoPropsComputer,
-    param: {"file": originalFile},
-    taskName: "getVideoPropsAsyncV2",
-  );
-}
-
-Future<FFProbeProps?> getVideoPropsComputer(Map<String, dynamic> args) {
-  final File originalFile = args["file"];
-  return getVideoPropsAsync(originalFile);
-}
-
 Future<Map<String, dynamic>> getXmp(File file) async {
   return Computer.shared().compute(
     _getXMPComputer,
