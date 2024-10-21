@@ -1,5 +1,5 @@
 import { FileType } from "@/media/file-type";
-import { groupFilesBasedOnCollectionID } from "@/new/photos/services/file";
+import { groupFilesByCollectionID } from "@/new/photos/services/file";
 import { getLocalFiles } from "@/new/photos/services/files";
 import { getLocalCollections } from "services/collectionService";
 import { parseDateFromDigitGroups } from "services/upload/date";
@@ -153,7 +153,7 @@ async function totalCollectionCountCheck(expectedState) {
 async function collectionWiseFileCount(expectedState) {
     const files = await getLocalFiles();
     const collections = await getLocalCollections();
-    const collectionToFilesMap = groupFilesBasedOnCollectionID(files);
+    const collectionToFilesMap = groupFilesByCollectionID(files);
     const collectionIDToNameMap = new Map(
         collections.map((collection) => [collection.id, collection.name]),
     );

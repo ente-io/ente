@@ -28,7 +28,7 @@ import type {
 } from "../../services/collection/ui";
 import {
     getLatestVersionFiles,
-    groupFilesBasedOnCollectionID,
+    groupFilesByCollectionID,
 } from "../../services/file";
 import { sortFiles } from "../../services/files";
 import {
@@ -108,8 +108,8 @@ export interface GalleryState {
     /*--<  Derived UI state  >--*/
 
     /**
-     * A map of massaged collections suitable for being directly consumed by the
-     * UI (indexed by the collection IDs).
+     * A map of collections massage to a form suitable for being directly
+     * consumed by the UI, indexed by the collection IDs.
      */
     collectionSummaries: Map<number, CollectionSummary>;
     /**
@@ -520,8 +520,8 @@ const createCollectionSummaries = (
     user: User,
     collections: Collection[],
     files: EnteFile[],
-): CollectionSummaries => {
-    const collectionSummaries: CollectionSummaries = new Map();
+) => {
+    const collectionSummaries = new Map<number, CollectionSummary>();
     const collectionLatestFiles = getCollectionLatestFiles(files);
     const collectionCoverFiles = getCollectionCoverFiles(files, collections);
     const collectionFilesCount = getCollectionsFileCount(files);
@@ -607,8 +607,9 @@ const createCollectionSummaries = (
     return collectionSummaries;
 };
 
-export type CollectionToFileMap = Map<number, EnteFile>;
+type CollectionToFileMap = Map<number, EnteFile>;
 
+// TODO: This seems to rely on some sort order. Document.
 const getCollectionLatestFiles = (files: EnteFile[]): CollectionToFileMap => {
     const latestFiles = new Map<number, EnteFile>();
 
@@ -624,7 +625,7 @@ const getCollectionCoverFiles = (
     files: EnteFile[],
     collections: Collection[],
 ): CollectionToFileMap => {
-    const collectionIDToFileMap = groupFilesBasedOnCollectionID(files);
+    const collectionIDToFileMap = groupFilesByCollectionID(files);
 
     const coverFiles = new Map<number, EnteFile>();
 
@@ -820,7 +821,7 @@ function getAllSectionSummary(
 }
 
 function getCollectionsFileCount(files: EnteFile[]): Map<number, number> {
-    const collectionIDToFileMap = groupFilesBasedOnCollectionID(files);
+    const collectionIDToFileMap = groupFilesByCollectionID(files);
     const collectionFilesCount = new Map<number, number>();
     for (const [id, files] of collectionIDToFileMap) {
         collectionFilesCount.set(id, files.length);
