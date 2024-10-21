@@ -1169,14 +1169,5 @@
   "invalidEndpoint": "Geçersiz uç nokta",
   "invalidEndpointMessage": "Üzgünüz, girdiğiniz uç nokta geçersiz. Lütfen geçerli bir uç nokta girin ve tekrar deneyin.",
   "endpointUpdatedMessage": "Fatura başarıyla güncellendi",
-  "customEndpoint": "{endpoint}'e bağlanıldı",
-  "personName": "Person name",
-  "addNewPerson": "Add new person",
-  "addNameOrMerge": "Add name or merge",
-  "mergeWithExisting": "Merge with existing",
-  "newPerson": "New person",
-  "addName": "Add name",
-  "add": "Add",
-  "extraPhotosFoundFor": "Extra photos found for $text",
-  "extraPhotosFound": "Extra photos found"
+  "customEndpoint": "{endpoint}'e bağlanıldı"
 }

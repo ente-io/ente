@@ -1343,14 +1343,5 @@
   "mostRecent": "新しい順",
   "mostRelevant": "関連度順",
   "loadingYourPhotos": "写真を読み込んでいます...",
-  "processingImport": "{folderName} を処理中...",
-  "personName": "Person name",
-  "addNewPerson": "Add new person",
-  "addNameOrMerge": "Add name or merge",
-  "mergeWithExisting": "Merge with existing",
-  "newPerson": "New person",
-  "addName": "Add name",
-  "add": "Add",
-  "extraPhotosFoundFor": "Extra photos found for $text",
-  "extraPhotosFound": "Extra photos found"
+  "processingImport": "{folderName} を処理中..."
 }
