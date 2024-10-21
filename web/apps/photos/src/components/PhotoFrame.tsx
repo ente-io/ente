@@ -2,7 +2,7 @@ import log from "@/base/log";
 import type { LivePhotoSourceURL, SourceURLs } from "@/media/file";
 import { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
-import type { GalleryBarMode } from "@/new/photos/components/gallery/BarImpl";
+import type { GalleryBarMode } from "@/new/photos/components/gallery/reducer";
 import { TRASH_SECTION } from "@/new/photos/services/collection";
 import DownloadManager from "@/new/photos/services/download";
 import { PHOTOS_PAGES } from "@ente/shared/constants/pages";

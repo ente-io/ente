@@ -19,10 +19,10 @@ import {
     PeopleEmptyState,
     SearchResultsHeader,
 } from "@/new/photos/components/gallery";
-import type { GalleryBarMode } from "@/new/photos/components/gallery/BarImpl";
 import {
     uniqueFilesByID,
     useGalleryReducer,
+    type GalleryBarMode,
 } from "@/new/photos/components/gallery/reducer";
 import { usePeopleStateSnapshot } from "@/new/photos/components/utils/ml";
 import { shouldShowWhatsNew } from "@/new/photos/services/changelog";
@@ -246,8 +246,6 @@ export default function Gallery() {
     const [userIDToEmailMap, setUserIDToEmailMap] =
         useState<Map<number, string>>(null);
     const [emailList, setEmailList] = useState<string[]>(null);
-    const [activeCollectionID, setActiveCollectionID] =
-        useState<number>(undefined);
     const [fixCreationTimeView, setFixCreationTimeView] = useState(false);
     const [fixCreationTimeAttributes, setFixCreationTimeAttributes] =
         useState<FixCreationTimeAttributes>(null);
@@ -281,12 +279,6 @@ export default function Gallery() {
     const [selectedSearchOption, setSelectedSearchOption] = useState<
         SearchOption | undefined
     >();
-
-    // If visible, what should the (sticky) gallery bar show.
-    const [barMode, setBarMode] = useState<GalleryBarMode>("albums");
-
-    // The ID of the currently selected person in the gallery bar (if any).
-    const [activePersonID, setActivePersonID] = useState<string | undefined>();
 
     const peopleState = usePeopleStateSnapshot();
 
@@ -334,6 +326,9 @@ export default function Gallery() {
     const fileToCollectionsMap = state.fileCollectionIDs;
     const collectionSummaries = state.collectionSummaries;
     const hiddenCollectionSummaries = state.hiddenCollectionSummaries;
+    const barMode = state.barMode ?? "albums";
+    const activeCollectionID = state.activeCollectionID;
+    const activePersonID = state.activePersonID;
     const isInSearchMode = state.isInSearchMode;
 
     if (process.env.NEXT_PUBLIC_ENTE_WIP_CL) {
@@ -373,7 +368,7 @@ export default function Gallery() {
             }
             await downloadManager.init(token);
             setupSelectAllKeyBoardShortcutHandler();
-            setActiveCollectionID(ALL_SECTION);
+            dispatch({ type: "showAll" });
             setIsFirstLoad(isFirstLogin());
             if (justSignedUp()) {
                 setPlanModalView(true);
@@ -979,15 +974,18 @@ export default function Gallery() {
     ) => {
         const type = searchOption?.suggestion.type;
         if (type == "collection" || type == "person") {
-            dispatch({ type: "exitSearch" });
-            setSelectedSearchOption(undefined);
             if (type == "collection") {
-                setBarMode("albums");
-                setActiveCollectionID(searchOption.suggestion.collectionID);
+                dispatch({
+                    type: "showNormalOrHiddenCollectionSummary",
+                    collectionSummaryID: searchOption.suggestion.collectionID,
+                });
             } else {
-                setBarMode("people");
-                setActivePersonID(searchOption.suggestion.person.id);
+                dispatch({
+                    type: "showPerson",
+                    personID: searchOption.suggestion.person.id,
+                });
             }
+            setSelectedSearchOption(undefined);
         } else if (searchOption) {
             dispatch({ type: "enterSearchMode" });
             setSelectedSearchOption(searchOption);
@@ -1014,40 +1012,34 @@ export default function Gallery() {
         setExportModalView(false);
     };
 
-    const handleShowCollection = (collectionID: number) => {
-        setBarMode("albums");
-        setActiveCollectionID(collectionID);
-        // TODO: type: "showAlbum"
-        // setIsInSearchMode(false);
-        dispatch({ type: "exitSearch" });
-    };
+    const handleSetActiveCollectionID = (
+        collectionSummaryID: number | undefined,
+    ) =>
+        dispatch({
+            type: "showNormalOrHiddenCollectionSummary",
+            collectionSummaryID,
+        });
 
-    const handleShowSearchInput = () => dispatch({ type: "enterSearchMode" });
+    const handleChangeBarMode = (mode: GalleryBarMode) =>
+        mode == "people"
+            ? dispatch({ type: "showPeople" })
+            : dispatch({
+                  type: "showAll",
+              });
 
     const openHiddenSection: GalleryContextType["openHiddenSection"] = (
         callback,
     ) => {
         authenticateUser(() => {
-            setBarMode("hidden-albums");
-            setActiveCollectionID(HIDDEN_ITEMS_SECTION);
+            dispatch({ type: "showHidden" });
             callback?.();
         });
     };
 
-    const exitHiddenSection = () => {
-        setBarMode("albums");
-        setActiveCollectionID(ALL_SECTION);
-    };
-
-    const handleSelectPerson = (person: Person | undefined) => {
-        setActivePersonID(person?.id);
-        setBarMode("people");
-    };
-
-    const handleSelectFileInfoPerson = (personID: string) => {
-        setActivePersonID(personID);
-        setBarMode("people");
-    };
+    const handleSelectPerson = (person: Person | undefined) =>
+        person
+            ? dispatch({ type: "showPerson", personID: person.id })
+            : dispatch({ type: "showPeople" });
 
     const handleOpenCollectionSelector = useCallback(
         (attributes: CollectionSelectorAttributes) => {
@@ -1076,8 +1068,12 @@ export default function Gallery() {
             value={{
                 ...defaultGalleryContext,
                 showPlanSelectorModal,
-                setActiveCollectionID,
-                onShowCollection: handleShowCollection,
+                setActiveCollectionID: handleSetActiveCollectionID,
+                onShowCollection: (id) =>
+                    dispatch({
+                        type: "showNormalOrHiddenCollectionSummary",
+                        collectionSummaryID: id,
+                    }),
                 syncWithRemote,
                 setBlockingLoad,
                 photoListHeader,
@@ -1155,7 +1151,7 @@ export default function Gallery() {
                 >
                     {barMode == "hidden-albums" ? (
                         <HiddenSectionNavbarContents
-                            onBack={exitHiddenSection}
+                            onBack={() => dispatch({ type: "showAll" })}
                         />
                     ) : (
                         <NormalNavbarContents
@@ -1163,7 +1159,8 @@ export default function Gallery() {
                                 openSidebar,
                                 openUploader,
                                 isInSearchMode,
-                                onShowSearchInput: handleShowSearchInput,
+                                onShowSearchInput: () =>
+                                    dispatch({ type: "enterSearchMode" }),
                                 onSelectSearchOption: handleSelectSearchOption,
                                 onSelectPerson: handleSelectPerson,
                             }}
@@ -1175,11 +1172,11 @@ export default function Gallery() {
                     {...{
                         shouldHide: isInSearchMode,
                         mode: barMode,
-                        onChangeMode: setBarMode,
+                        onChangeMode: handleChangeBarMode,
                         collectionSummaries,
                         activeCollection,
                         activeCollectionID,
-                        setActiveCollectionID,
+                        setActiveCollectionID: handleSetActiveCollectionID,
                         hiddenCollectionSummaries,
                         showPeopleSectionButton,
                         people: galleryPeopleState?.people ?? [],
@@ -1269,7 +1266,9 @@ export default function Gallery() {
                             setFilesDownloadProgressAttributesCreator
                         }
                         selectable={true}
-                        onSelectPerson={handleSelectFileInfoPerson}
+                        onSelectPerson={(personID) => {
+                            dispatch({ type: "showPerson", personID });
+                        }}
                     />
                 )}
                 {selected.count > 0 &&

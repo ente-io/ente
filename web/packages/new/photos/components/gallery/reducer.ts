@@ -43,6 +43,25 @@ import type { Person } from "../../services/ml/people";
 import type { FamilyData } from "../../services/user";
 
 /**
+ * Specifies what the bar at the top of the gallery is displaying currently.
+ */
+export type GalleryBarMode = "albums" | "hidden-albums" | "people";
+
+/**
+ * Specifies what the gallery is currently displaying.
+ *
+ * TODO: An experiment at consolidating state.
+ */
+export type GalleryFocus =
+    | {
+          type: "albums" | "hidden-albums";
+          activeCollectionID: number;
+          activeCollection: Collection | undefined;
+          activeCollectionSummary: CollectionSummary;
+      }
+    | { type: "people"; activePersonID: string; activePerson: Person };
+
+/**
  * Derived UI state backing the gallery.
  *
  * This might be different from the actual different from the actual underlying
@@ -139,6 +158,18 @@ export interface GalleryState {
 
     /*--<  Transient UI state  >--*/
 
+    /**
+     * If visible, what should the (sticky) gallery bar show.
+     */
+    barMode: GalleryBarMode | undefined;
+    /**
+     * The section / area, and the item within it, that the gallery is currently
+     * showing.
+     */
+    focus: GalleryFocus | undefined;
+    activeCollectionID: number | undefined;
+    activePersonID: string | undefined;
+
     filteredData: EnteFile[];
     /**
      * The currently selected person, if any.
@@ -207,6 +238,14 @@ export type GalleryAction =
     | { type: "resetHiddenFiles"; hiddenFiles: EnteFile[] }
     | { type: "fetchHiddenFiles"; hiddenFiles: EnteFile[] }
     | { type: "setTrashedFiles"; trashedFiles: EnteFile[] }
+    | { type: "showAll" }
+    | { type: "showHidden" }
+    | {
+          type: "showNormalOrHiddenCollectionSummary";
+          collectionSummaryID: number | undefined;
+      }
+    | { type: "showPeople" }
+    | { type: "showPerson"; personID: string }
     | { type: "searchResults"; searchResults: EnteFile[] }
     | { type: "enterSearchMode" }
     | { type: "exitSearch" };
@@ -227,6 +266,10 @@ const initialGalleryState: GalleryState = {
     fileCollectionIDs: new Map(),
     collectionSummaries: new Map(),
     hiddenCollectionSummaries: new Map(),
+    barMode: undefined,
+    focus: undefined,
+    activeCollectionID: undefined,
+    activePersonID: undefined,
     filteredData: [],
     activePerson: undefined,
     people: [],
@@ -455,6 +498,52 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     action.trashedFiles,
                     state.archivedCollectionIDs,
                 ),
+            };
+        case "showAll":
+            return {
+                ...state,
+                barMode: "albums",
+                activeCollectionID: ALL_SECTION,
+                isInSearchMode: false,
+                searchResults: undefined,
+            };
+        case "showHidden":
+            return {
+                ...state,
+                barMode: "hidden-albums",
+                activeCollectionID: HIDDEN_ITEMS_SECTION,
+                isInSearchMode: false,
+                searchResults: undefined,
+            };
+        case "showNormalOrHiddenCollectionSummary":
+            return {
+                ...state,
+                barMode:
+                    action.collectionSummaryID !== undefined &&
+                    state.hiddenCollectionSummaries.has(
+                        action.collectionSummaryID,
+                    )
+                        ? "hidden-albums"
+                        : "albums",
+                activeCollectionID: action.collectionSummaryID ?? ALL_SECTION,
+                isInSearchMode: false,
+                searchResults: undefined,
+            };
+        case "showPeople":
+            return {
+                ...state,
+                barMode: "people",
+                activePersonID: undefined,
+                isInSearchMode: false,
+                searchResults: undefined,
+            };
+        case "showPerson":
+            return {
+                ...state,
+                barMode: "people",
+                activePersonID: action.personID,
+                isInSearchMode: false,
+                searchResults: undefined,
             };
         case "enterSearchMode":
             return { ...state, isInSearchMode: true };
