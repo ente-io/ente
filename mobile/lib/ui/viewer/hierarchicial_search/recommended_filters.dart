@@ -54,34 +54,40 @@ class _RecommendedFiltersState extends State<RecommendedFilters> {
       padding: const EdgeInsets.only(bottom: 8),
       child: SizedBox(
         height: kFilterChipHeight,
-        child: ListView.builder(
-          itemBuilder: (context, index) {
-            final filter = _recommendations[index];
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: filter is FaceFilter
-                  ? FaceFilterChip(
-                      personId: filter.personId,
-                      clusterId: filter.clusterId,
-                      faceThumbnailFile: filter.faceFile,
-                      name: filter.name(),
-                      onTap: () {
-                        _searchFilterDataProvider.applyFilters([filter]);
-                      },
-                    )
-                  : GenericFilterChip(
-                      label: filter.name(),
-                      onTap: () {
-                        _searchFilterDataProvider.applyFilters([filter]);
-                      },
-                      leadingIcon: filter.icon(),
-                    ),
-            );
-          },
-          clipBehavior: Clip.none,
-          scrollDirection: Axis.horizontal,
-          itemCount: _recommendations.length,
-          padding: const EdgeInsets.symmetric(horizontal: 4),
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 500),
+          switchInCurve: Curves.easeInOutExpo,
+          switchOutCurve: Curves.easeInOutExpo,
+          child: ListView.builder(
+            key: ValueKey(_recommendations.length),
+            itemBuilder: (context, index) {
+              final filter = _recommendations[index];
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: filter is FaceFilter
+                    ? FaceFilterChip(
+                        personId: filter.personId,
+                        clusterId: filter.clusterId,
+                        faceThumbnailFile: filter.faceFile,
+                        name: filter.name(),
+                        onTap: () {
+                          _searchFilterDataProvider.applyFilters([filter]);
+                        },
+                      )
+                    : GenericFilterChip(
+                        label: filter.name(),
+                        onTap: () {
+                          _searchFilterDataProvider.applyFilters([filter]);
+                        },
+                        leadingIcon: filter.icon(),
+                      ),
+              );
+            },
+            clipBehavior: Clip.none,
+            scrollDirection: Axis.horizontal,
+            itemCount: _recommendations.length,
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+          ),
         ),
       ),
     );
