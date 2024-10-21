@@ -491,16 +491,28 @@ export const deriveCollectionSummaries = (
         archivedCollectionIDs,
     );
     collectionSummaries.set(ALL_SECTION, {
+        ...pseudoCollectionOptionsForFiles(allSectionFiles),
         id: ALL_SECTION,
         type: "all",
         name: t("section_all"),
-        ...pseudoCollectionOptionsForFiles(allSectionFiles),
     });
-    collectionSummaries.set(
-        TRASH_SECTION,
-        getTrashedCollectionSummary(trashedFiles),
+    collectionSummaries.set(TRASH_SECTION, {
+        ...pseudoCollectionOptionsForFiles(trashedFiles),
+        id: TRASH_SECTION,
+        name: t("section_trash"),
+        type: "trash",
+        coverFile: undefined,
+    });
+    const archivedFiles = uniqueFilesByID(
+        files.filter((file) => isArchivedFile(file)),
     );
-    collectionSummaries.set(ARCHIVE_SECTION, getArchivedSectionSummary(files));
+    collectionSummaries.set(ARCHIVE_SECTION, {
+        ...pseudoCollectionOptionsForFiles(archivedFiles),
+        id: ARCHIVE_SECTION,
+        name: t("section_archive"),
+        type: "archive",
+        coverFile: undefined,
+    });
 
     return collectionSummaries;
 };
@@ -527,23 +539,15 @@ export const deriveHiddenCollectionSummaries = (
         hiddenFiles,
     );
 
-    const cids = findDefaultHiddenCollectionIDs(hiddenCollections);
+    const dhcIDs = findDefaultHiddenCollectionIDs(hiddenCollections);
     const defaultHiddenFiles = uniqueFilesByID(
-        hiddenFiles.filter((file) => cids.has(file.collectionID)),
+        hiddenFiles.filter((file) => dhcIDs.has(file.collectionID)),
     );
     hiddenCollectionSummaries.set(HIDDEN_ITEMS_SECTION, {
+        ...pseudoCollectionOptionsForFiles(defaultHiddenFiles),
         id: HIDDEN_ITEMS_SECTION,
         name: t("hidden_items"),
         type: "hiddenItems",
-        coverFile: defaultHiddenFiles[0],
-        latestFile: defaultHiddenFiles[0],
-        fileCount: defaultHiddenFiles.length,
-        // See: [Note: strict mode migration]
-        //
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        updationTime: defaultHiddenFiles[0]?.updationTime,
     });
 
     return hiddenCollectionSummaries;
@@ -627,13 +631,10 @@ const createCollectionSummaries = (
 
     if (!hasUncategorizedCollection) {
         collectionSummaries.set(DUMMY_UNCATEGORIZED_COLLECTION, {
+            ...pseudoCollectionOptionsForFiles([]),
             id: DUMMY_UNCATEGORIZED_COLLECTION,
             type: "uncategorized",
             name: t("section_uncategorized"),
-            latestFile: undefined,
-            coverFile: undefined,
-            fileCount: 0,
-            updationTime: 0,
         });
     }
 
@@ -688,36 +689,6 @@ const isSharedOnlyViaLink = (collection: Collection) =>
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     collection.publicURLs?.length && !collection.sharees?.length;
 
-function getArchivedSectionSummary(files: EnteFile[]): CollectionSummary {
-    const archivedFiles = uniqueFilesByID(
-        files.filter((file) => isArchivedFile(file)),
-    );
-    return {
-        id: ARCHIVE_SECTION,
-        name: t("section_archive"),
-        type: "archive",
-        // See: [Note: strict mode migration]
-        //
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        coverFile: null,
-        // See: [Note: strict mode migration]
-        //
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        latestFile: archivedFiles?.[0],
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        fileCount: archivedFiles?.length ?? 0,
-        // See: [Note: strict mode migration]
-        //
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        updationTime: archivedFiles?.[0]?.updationTime,
-    };
-}
-
 /**
  * Return all list of files that should be shown in the "All" section.
  */
@@ -732,32 +703,3 @@ const findAllSectionVisibleFiles = (
                 !archivedCollectionIDs.has(file.collectionID),
         ),
     );
-
-function getTrashedCollectionSummary(
-    trashedFiles: EnteFile[],
-): CollectionSummary {
-    return {
-        id: TRASH_SECTION,
-        name: t("section_trash"),
-        type: "trash",
-        // See: [Note: strict mode migration]
-        //
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        coverFile: null,
-        // See: [Note: strict mode migration]
-        //
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        latestFile: trashedFiles?.[0],
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        fileCount: trashedFiles?.length,
-        // See: [Note: strict mode migration]
-        //
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        updationTime: trashedFiles?.[0]?.updationTime,
-    };
-}

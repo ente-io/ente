@@ -21,7 +21,7 @@ export type CollectionSummaryType =
  * A massaged version of a real or pseudo- {@link Collection} suitable for being
  * directly shown in the UI.
  *
- * TODO: Rename me to CollectionOrSection
+ * TODO: Rename me to CollectionOrSection? FileGroup? FileListing?
  * Known sections:
  * - DUMMY_UNCATEGORIZED_COLLECTION
  * - ALL_SECTION
