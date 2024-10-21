@@ -180,6 +180,7 @@ class TextInputDialog extends StatefulWidget {
   final TextEditingController? textEditingController;
   final List<TextInputFormatter>? textInputFormatter;
   final TextInputType? textInputType;
+  final bool popnavAfterSubmission;
   const TextInputDialog({
     required this.title,
     this.body,
@@ -200,6 +201,7 @@ class TextInputDialog extends StatefulWidget {
     this.textEditingController,
     this.textInputFormatter,
     this.textInputType,
+    this.popnavAfterSubmission = true,
     super.key,
   });
 
@@ -273,7 +275,7 @@ class _TextInputDialogState extends State<TextInputDialog> {
                 maxLength: widget.maxLength,
                 submitNotifier: _submitNotifier,
                 onSubmit: widget.onSubmit,
-                popNavAfterSubmission: true,
+                popNavAfterSubmission: widget.popnavAfterSubmission,
                 showOnlyLoadingState: widget.showOnlyLoadingState,
                 textCapitalization: widget.textCapitalization,
                 alwaysShowSuccessState: widget.alwaysShowSuccessState,
