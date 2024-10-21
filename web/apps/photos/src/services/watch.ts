@@ -13,7 +13,7 @@ import type {
 } from "@/base/types/ipc";
 import type { Collection } from "@/media/collection";
 import { EncryptedEnteFile } from "@/media/file";
-import { groupFilesBasedOnCollectionID } from "@/new/photos/services/file";
+import { groupFilesByCollectionID } from "@/new/photos/services/file";
 import { getLocalFiles } from "@/new/photos/services/files";
 import { UPLOAD_RESULT } from "@/new/photos/services/upload/types";
 import { ensureString } from "@/utils/ensure";
@@ -496,7 +496,7 @@ class FolderWatcher {
             return false;
         });
 
-        const filesByCollectionID = groupFilesBasedOnCollectionID(filesToTrash);
+        const filesByCollectionID = groupFilesByCollectionID(filesToTrash);
         for (const [id, files] of filesByCollectionID.entries()) {
             await removeFromCollection(id, files);
         }

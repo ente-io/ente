@@ -1,19 +1,18 @@
 import type { EnteFile } from "@/media/file";
 
-/** Segment the given {@link files} into lists indexed by their collection ID */
-export const groupFilesBasedOnCollectionID = (files: EnteFile[]) => {
-    const result = new Map<number, EnteFile[]>();
-    for (const file of files) {
+/**
+ * Segment the given {@link files} into lists indexed by their collection ID.
+ *
+ * Order is preserved.
+ */
+export const groupFilesByCollectionID = (files: EnteFile[]) =>
+    files.reduce((result, file) => {
         const id = file.collectionID;
-        if (!result.has(id)) result.set(id, []);
-        // See: [Note: strict mode migration]
-        //
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        result.get(id).push(file);
-    }
-    return result;
-};
+        let cfs = result.get(id);
+        if (!cfs) result.set(id, (cfs = []));
+        cfs.push(file);
+        return result;
+    }, new Map<number, EnteFile[]>());
 
 export function getLatestVersionFiles(files: EnteFile[]) {
     const latestVersionFiles = new Map<string, EnteFile>();
