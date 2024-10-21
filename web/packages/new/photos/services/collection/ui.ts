@@ -23,14 +23,14 @@ export type CollectionSummaryType =
  */
 export interface CollectionSummary {
     /**
-     * The "UI" type for the collection or pseudo-collection.
-     */
-    type: CollectionSummaryType;
-    /**
      * The ID of the underlying collection, or one of the predefined placeholder
      * IDs for the pseudo-collections.
      */
     id: number;
+    /**
+     * The "UI" type for the collection or pseudo-collection.
+     */
+    type: CollectionSummaryType;
     /**
      * The name of the collection or pseudo-collection.
      */

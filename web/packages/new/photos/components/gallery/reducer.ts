@@ -534,12 +534,10 @@ const createCollectionSummaries = (
 
     let hasUncategorizedCollection = false;
     for (const collection of collections) {
-        if (
-            !hasUncategorizedCollection &&
-            collection.type === CollectionType.uncategorized
-        ) {
+        if (collection.type === CollectionType.uncategorized) {
             hasUncategorizedCollection = true;
         }
+
         let type: CollectionSummaryType;
         if (isIncomingShare(collection, user)) {
             if (isIncomingCollabShare(collection, user)) {
@@ -577,34 +575,39 @@ const createCollectionSummaries = (
             }
         }
 
-        let CollectionSummaryItemName: string;
+        let name: string;
         if (type == "uncategorized") {
-            CollectionSummaryItemName = t("section_uncategorized");
+            name = t("section_uncategorized");
         } else if (type == "favorites") {
-            CollectionSummaryItemName = t("favorites");
+            name = t("favorites");
         } else {
-            CollectionSummaryItemName = collection.name;
+            name = collection.name;
         }
 
         const collectionFiles = filesByCollection.get(collection.id);
         collectionSummaries.set(collection.id, {
             id: collection.id,
-            name: CollectionSummaryItemName,
+            type,
+            name,
             latestFile: collectionFiles?.[0],
             coverFile: coverFiles.get(collection.id),
             fileCount: collectionFiles?.length ?? 0,
             updationTime: collection.updationTime,
-            type: type,
             // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             order: collection.magicMetadata?.data?.order ?? 0,
         });
     }
 
     if (!hasUncategorizedCollection) {
-        collectionSummaries.set(
-            DUMMY_UNCATEGORIZED_COLLECTION,
-            getDummyUncategorizedCollectionSummary(),
-        );
+        collectionSummaries.set(DUMMY_UNCATEGORIZED_COLLECTION, {
+            id: DUMMY_UNCATEGORIZED_COLLECTION,
+            type: "uncategorized",
+            name: t("section_uncategorized"),
+            latestFile: undefined,
+            coverFile: undefined,
+            fileCount: 0,
+            updationTime: 0,
+        });
     }
 
     return collectionSummaries;
@@ -643,38 +646,20 @@ const findCoverFiles = (
     return coverFiles;
 };
 
-function isIncomingCollabShare(collection: Collection, user: User) {
+const isIncomingCollabShare = (collection: Collection, user: User) => {
     // TODO: Need to audit the types
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     const sharee = collection.sharees?.find((sharee) => sharee.id === user.id);
     return sharee?.role === COLLECTION_ROLE.COLLABORATOR;
-}
+};
 
-function isOutgoingShare(collection: Collection, user: User): boolean {
+const isOutgoingShare = (collection: Collection, user: User) =>
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    return collection.owner.id === user.id && collection.sharees?.length > 0;
-}
+    collection.owner.id === user.id && collection.sharees?.length > 0;
 
-function isSharedOnlyViaLink(collection: Collection) {
+const isSharedOnlyViaLink = (collection: Collection) =>
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    return collection.publicURLs?.length && !collection.sharees?.length;
-}
-
-function getDummyUncategorizedCollectionSummary(): CollectionSummary {
-    return {
-        id: DUMMY_UNCATEGORIZED_COLLECTION,
-        name: t("section_uncategorized"),
-        type: "uncategorized",
-        latestFile: undefined,
-        // See: [Note: strict mode migration]
-        //
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        coverFile: null,
-        fileCount: 0,
-        updationTime: 0,
-    };
-}
+    collection.publicURLs?.length && !collection.sharees?.length;
 
 function getHiddenItemsSummary(
     hiddenFiles: EnteFile[],
