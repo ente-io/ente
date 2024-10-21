@@ -18,8 +18,7 @@ Future<bool> checkIfPanorama(EnteFile enteFile) async {
   }
   try {
     final result = XMPExtractor().extract(file.readAsBytesSync());
-    if (result["GPano:ProjectionType"] == "cylindrical" ||
-        result["GPano:ProjectionType"] == "equirectangular") {
+    if (checkPanoramaFromXMP(result)) {
       return true;
     }
   } catch (_) {}
@@ -30,7 +29,7 @@ Future<bool> checkIfPanorama(EnteFile enteFile) async {
   return element?.printable == "6";
 }
 
-bool? checkPanoramaFromXMP(Map<String, dynamic> xmpData) {
+bool checkPanoramaFromXMP(Map<String, dynamic> xmpData) {
   if (xmpData["GPano:ProjectionType"] == "cylindrical" ||
       xmpData["GPano:ProjectionType"] == "equirectangular") {
     return true;
