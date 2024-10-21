@@ -531,7 +531,6 @@ const createCollectionSummaries = (
 
     const filesByCollection = groupFilesByCollectionID(files);
     const coverFiles = findCoverFiles(collections, filesByCollection);
-    const collectionFilesCount = getCollectionsFileCount(files);
 
     let hasUncategorizedCollection = false;
     for (const collection of collections) {
@@ -587,12 +586,13 @@ const createCollectionSummaries = (
             CollectionSummaryItemName = collection.name;
         }
 
+        const collectionFiles = filesByCollection.get(collection.id);
         collectionSummaries.set(collection.id, {
             id: collection.id,
             name: CollectionSummaryItemName,
-            latestFile: filesByCollection.get(collection.id)?.[0],
+            latestFile: collectionFiles?.[0],
             coverFile: coverFiles.get(collection.id),
-            fileCount: collectionFilesCount.get(collection.id) ?? 0,
+            fileCount: collectionFiles?.length ?? 0,
             updationTime: collection.updationTime,
             type: type,
             // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
@@ -791,15 +791,6 @@ function getAllSectionSummary(
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         updationTime: allSectionFiles?.[0]?.updationTime,
     };
-}
-
-function getCollectionsFileCount(files: EnteFile[]): Map<number, number> {
-    const collectionIDToFileMap = groupFilesByCollectionID(files);
-    const collectionFilesCount = new Map<number, number>();
-    for (const [id, files] of collectionIDToFileMap) {
-        collectionFilesCount.set(id, files.length);
-    }
-    return collectionFilesCount;
 }
 
 function getAllSectionVisibleFiles(
