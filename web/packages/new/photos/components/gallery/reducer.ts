@@ -29,6 +29,7 @@ import type {
     CollectionSummaryType,
 } from "../../services/collection/ui";
 import {
+    createFileCollectionIDs,
     getLatestVersionFiles,
     groupFilesByCollectionID,
 } from "../../services/file";
@@ -119,6 +120,10 @@ export interface GalleryState {
      * collections.
      */
     allCollectionNameByID: Map<number, string>;
+    /**
+     * A list of collection IDs to which a file belongs, indexed by file ID.
+     */
+    fileCollectionIDs: Map<number, number[]>;
 
     /*--<  Derived UI state  >--*/
 
@@ -194,6 +199,7 @@ const initialGalleryState: GalleryState = {
     hiddenFileIDs: new Set(),
     favoriteFileIDs: new Set(),
     allCollectionNameByID: new Map(),
+    fileCollectionIDs: new Map(),
     collectionSummaries: new Map(),
     hiddenCollectionSummaries: new Map(),
     filteredData: [],
@@ -236,6 +242,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 allCollectionNameByID: createCollectionNameByID(
                     action.allCollections,
                 ),
+                fileCollectionIDs: createFileCollectionIDs(action.files),
                 collectionSummaries: deriveCollectionSummaries(
                     action.user,
                     collections,
@@ -323,6 +330,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     state.collections,
                     files,
                 ),
+                fileCollectionIDs: createFileCollectionIDs(action.files),
                 collectionSummaries: deriveCollectionSummaries(
                     ensure(state.user),
                     state.collections,
@@ -345,6 +353,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     state.collections,
                     files,
                 ),
+                fileCollectionIDs: createFileCollectionIDs(action.files),
                 collectionSummaries: deriveCollectionSummaries(
                     ensure(state.user),
                     state.collections,
@@ -363,6 +372,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     state.collections,
                     files,
                 ),
+                fileCollectionIDs: createFileCollectionIDs(files),
                 // TODO: Consider batching this instead of doing it per file
                 // upload to speed up uploads. Perf test first though.
                 collectionSummaries: deriveCollectionSummaries(

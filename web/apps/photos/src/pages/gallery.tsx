@@ -140,12 +140,7 @@ import {
     getSelectedCollection,
     handleCollectionOps,
 } from "utils/collection";
-import {
-    FILE_OPS_TYPE,
-    constructFileToCollectionMap,
-    getSelectedFiles,
-    handleFileOps,
-} from "utils/file";
+import { FILE_OPS_TYPE, getSelectedFiles, handleFileOps } from "utils/file";
 import { getSessionExpiredMessage } from "utils/ui";
 import { getLocalFamilyData } from "utils/user/family";
 
@@ -339,6 +334,7 @@ export default function Gallery() {
     const defaultHiddenCollectionIDs = state.defaultHiddenCollectionIDs;
     const hiddenFileIDs = state.hiddenFileIDs;
     const collectionNameMap = state.allCollectionNameByID;
+    const fileToCollectionsMap = state.fileCollectionIDs;
     const collectionSummaries = state.collectionSummaries;
     const hiddenCollectionSummaries = state.hiddenCollectionSummaries;
 
@@ -745,10 +741,6 @@ export default function Gallery() {
             clearSelection,
         };
     }, [selectAll, clearSelection]);
-
-    const fileToCollectionsMap = useMemoSingleThreaded(() => {
-        return constructFileToCollectionMap(files);
-    }, [files]);
 
     const showSessionExpiredMessage = () => {
         setDialogMessage(getSessionExpiredMessage(logout));

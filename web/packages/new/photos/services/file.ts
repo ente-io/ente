@@ -14,6 +14,19 @@ export const groupFilesByCollectionID = (files: EnteFile[]) =>
         return result;
     }, new Map<number, EnteFile[]>());
 
+/**
+ * Construct a map from file IDs to the list of collections (IDs) to which the
+ * file belongs.
+ */
+export const createFileCollectionIDs = (files: EnteFile[]) =>
+    files.reduce((result, file) => {
+        const id = file.id;
+        let fs = result.get(id);
+        if (!fs) result.set(id, (fs = []));
+        fs.push(file.collectionID);
+        return result;
+    }, new Map<number, number[]>());
+
 export function getLatestVersionFiles(files: EnteFile[]) {
     const latestVersionFiles = new Map<string, EnteFile>();
     files.forEach((file) => {
