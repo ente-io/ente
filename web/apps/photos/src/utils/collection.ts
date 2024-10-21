@@ -11,7 +11,7 @@ import {
 import { EnteFile } from "@/media/file";
 import { ItemVisibility } from "@/media/file-metadata";
 import {
-    getDefaultHiddenCollectionIDs,
+    findDefaultHiddenCollectionIDs,
     isDefaultHiddenCollection,
     isHiddenCollection,
     isIncomingShare,
@@ -118,7 +118,7 @@ export async function downloadDefaultHiddenCollectionHelper(
     try {
         const hiddenCollections = await getLocalCollections("hidden");
         const defaultHiddenCollectionsIds =
-            getDefaultHiddenCollectionIDs(hiddenCollections);
+            findDefaultHiddenCollectionIDs(hiddenCollections);
         const hiddenFiles = await getLocalFiles("hidden");
         const defaultHiddenCollectionFiles = hiddenFiles.filter((file) =>
             defaultHiddenCollectionsIds.has(file.collectionID),

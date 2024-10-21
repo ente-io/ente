@@ -15,7 +15,7 @@ import {
     ALL_SECTION,
     ARCHIVE_SECTION,
     DUMMY_UNCATEGORIZED_COLLECTION,
-    getDefaultHiddenCollectionIDs,
+    findDefaultHiddenCollectionIDs,
     HIDDEN_ITEMS_SECTION,
     isDefaultHiddenCollection,
     isIncomingShare,
@@ -444,7 +444,7 @@ const deriveArchivedCollectionIDs = (collections: Collection[]) =>
  * dependencies.
  */
 const deriveDefaultHiddenCollectionIDs = (hiddenCollections: Collection[]) =>
-    getDefaultHiddenCollectionIDs(hiddenCollections);
+    findDefaultHiddenCollectionIDs(hiddenCollections);
 
 /**
  * Helper function to compute hidden file IDs from their dependencies.
@@ -514,11 +514,26 @@ export const deriveHiddenCollectionSummaries = (
         hiddenCollections,
         hiddenFiles,
     );
-    const hiddenItemsSummaries = getHiddenItemsSummary(
-        hiddenFiles,
-        hiddenCollections,
+
+    const cids = findDefaultHiddenCollectionIDs(hiddenCollections);
+    const defaultHiddenFiles = uniqueFilesByID(
+        hiddenFiles.filter((file) => cids.has(file.collectionID)),
     );
-    hiddenCollectionSummaries.set(HIDDEN_ITEMS_SECTION, hiddenItemsSummaries);
+    hiddenCollectionSummaries.set(HIDDEN_ITEMS_SECTION, {
+        id: HIDDEN_ITEMS_SECTION,
+        name: t("hidden_items"),
+        type: "hiddenItems",
+        coverFile: defaultHiddenFiles[0],
+        latestFile: defaultHiddenFiles[0],
+        fileCount: defaultHiddenFiles.length,
+        // See: [Note: strict mode migration]
+        //
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        updationTime: defaultHiddenFiles[0]?.updationTime,
+    });
+
     return hiddenCollectionSummaries;
 };
 
@@ -660,43 +675,6 @@ const isOutgoingShare = (collection: Collection, user: User) =>
 const isSharedOnlyViaLink = (collection: Collection) =>
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     collection.publicURLs?.length && !collection.sharees?.length;
-
-function getHiddenItemsSummary(
-    hiddenFiles: EnteFile[],
-    hiddenCollections: Collection[],
-): CollectionSummary {
-    const defaultHiddenCollectionIds = new Set(
-        hiddenCollections
-            .filter((collection) => isDefaultHiddenCollection(collection))
-            .map((collection) => collection.id),
-    );
-    const hiddenItems = uniqueFilesByID(
-        hiddenFiles.filter((file) =>
-            defaultHiddenCollectionIds.has(file.collectionID),
-        ),
-    );
-    return {
-        id: HIDDEN_ITEMS_SECTION,
-        name: t("hidden_items"),
-        type: "hiddenItems",
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        coverFile: hiddenItems?.[0],
-        // See: [Note: strict mode migration]
-        //
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        latestFile: hiddenItems?.[0],
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        fileCount: hiddenItems?.length,
-        // See: [Note: strict mode migration]
-        //
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        updationTime: hiddenItems?.[0]?.updationTime,
-    };
-}
 
 function getSectionSummaries(
     files: EnteFile[],
