@@ -517,17 +517,6 @@ export function getIDBasedSortedFiles(files: EnteFile[]) {
     return files.sort((a, b) => a.id - b.id);
 }
 
-export function constructFileToCollectionMap(files: EnteFile[]) {
-    const fileToCollectionsMap = new Map<number, number[]>();
-    (files ?? []).forEach((file) => {
-        if (!fileToCollectionsMap.get(file.id)) {
-            fileToCollectionsMap.set(file.id, []);
-        }
-        fileToCollectionsMap.get(file.id).push(file.collectionID);
-    });
-    return fileToCollectionsMap;
-}
-
 export const shouldShowAvatar = (file: EnteFile, user: User) => {
     if (!file || !user) {
         return false;

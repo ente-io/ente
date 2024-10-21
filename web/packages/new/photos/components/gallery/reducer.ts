@@ -5,7 +5,10 @@ import {
 } from "@/media/collection";
 import type { EnteFile } from "@/media/file";
 import { mergeMetadata } from "@/media/file";
-import { isHiddenCollection } from "@/new/photos/services/collection";
+import {
+    createCollectionNameByID,
+    isHiddenCollection,
+} from "@/new/photos/services/collection";
 import { splitByPredicate } from "@/utils/array";
 import { ensure } from "@/utils/ensure";
 import type { User } from "@ente/shared/user/types";
@@ -26,6 +29,7 @@ import type {
     CollectionSummaryType,
 } from "../../services/collection/ui";
 import {
+    createFileCollectionIDs,
     getLatestVersionFiles,
     groupFilesByCollectionID,
 } from "../../services/file";
@@ -37,6 +41,25 @@ import {
 } from "../../services/magic-metadata";
 import type { Person } from "../../services/ml/people";
 import type { FamilyData } from "../../services/user";
+
+/**
+ * Specifies what the bar at the top of the gallery is displaying currently.
+ */
+export type GalleryBarMode = "albums" | "hidden-albums" | "people";
+
+/**
+ * Specifies what the gallery is currently displaying.
+ *
+ * TODO: An experiment at consolidating state.
+ */
+export type GalleryFocus =
+    | {
+          type: "albums" | "hidden-albums";
+          activeCollectionID: number;
+          activeCollection: Collection | undefined;
+          activeCollectionSummary: CollectionSummary;
+      }
+    | { type: "people"; activePersonID: string; activePerson: Person };
 
 /**
  * Derived UI state backing the gallery.
@@ -109,6 +132,17 @@ export interface GalleryState {
      * File IDs of all the files that the user has marked as a favorite.
      */
     favoriteFileIDs: Set<number>;
+    /**
+     * User visible collection names indexed by collection IDs for fast lookup.
+     *
+     * This map will contain entries for all (both normal and hidden)
+     * collections.
+     */
+    allCollectionNameByID: Map<number, string>;
+    /**
+     * A list of collection IDs to which a file belongs, indexed by file ID.
+     */
+    fileCollectionIDs: Map<number, number[]>;
 
     /*--<  Derived UI state  >--*/
 
@@ -124,6 +158,18 @@ export interface GalleryState {
 
     /*--<  Transient UI state  >--*/
 
+    /**
+     * If visible, what should the (sticky) gallery bar show.
+     */
+    barMode: GalleryBarMode | undefined;
+    /**
+     * The section / area, and the item within it, that the gallery is currently
+     * showing.
+     */
+    focus: GalleryFocus | undefined;
+    activeCollectionID: number | undefined;
+    activePersonID: string | undefined;
+
     filteredData: EnteFile[];
     /**
      * The currently selected person, if any.
@@ -136,6 +182,28 @@ export interface GalleryState {
      * The list of people to show.
      */
     people: Person[] | undefined;
+    /**
+     * `true` if we are in "search mode".
+     *
+     * We will always be in search mode if we are showing search results, but we
+     * also may be in search mode earlier on smaller screens, where the search
+     * input is only shown on entering search mode. See: [Note: "Search mode"].
+     *
+     * That is, {@link isInSearchMode} may be true even when
+     * {@link searchResults} is undefined.
+     */
+    isInSearchMode: boolean;
+    /**
+     * List of files that match the selected search option.
+     *
+     * This will be set only if we are showing search results.
+     *
+     * The search dropdown shows a list of options ("suggestions") that match
+     * the user's search term. If the user selects from one of these options,
+     * then we run a search to find all files that match that suggestion, and
+     * set this value to the result.
+     */
+    searchResults: EnteFile[] | undefined;
 }
 
 export type GalleryAction =
@@ -169,7 +237,18 @@ export type GalleryAction =
     | { type: "uploadFile"; file: EnteFile }
     | { type: "resetHiddenFiles"; hiddenFiles: EnteFile[] }
     | { type: "fetchHiddenFiles"; hiddenFiles: EnteFile[] }
-    | { type: "setTrashedFiles"; trashedFiles: EnteFile[] };
+    | { type: "setTrashedFiles"; trashedFiles: EnteFile[] }
+    | { type: "showAll" }
+    | { type: "showHidden" }
+    | {
+          type: "showNormalOrHiddenCollectionSummary";
+          collectionSummaryID: number | undefined;
+      }
+    | { type: "showPeople" }
+    | { type: "showPerson"; personID: string }
+    | { type: "searchResults"; searchResults: EnteFile[] }
+    | { type: "enterSearchMode" }
+    | { type: "exitSearch" };
 
 const initialGalleryState: GalleryState = {
     user: undefined,
@@ -183,11 +262,19 @@ const initialGalleryState: GalleryState = {
     defaultHiddenCollectionIDs: new Set(),
     hiddenFileIDs: new Set(),
     favoriteFileIDs: new Set(),
+    allCollectionNameByID: new Map(),
+    fileCollectionIDs: new Map(),
     collectionSummaries: new Map(),
     hiddenCollectionSummaries: new Map(),
+    barMode: undefined,
+    focus: undefined,
+    activeCollectionID: undefined,
+    activePersonID: undefined,
     filteredData: [],
     activePerson: undefined,
     people: [],
+    isInSearchMode: false,
+    searchResults: undefined,
 };
 
 const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
@@ -222,6 +309,10 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     collections,
                     action.files,
                 ),
+                allCollectionNameByID: createCollectionNameByID(
+                    action.allCollections,
+                ),
+                fileCollectionIDs: createFileCollectionIDs(action.files),
                 collectionSummaries: deriveCollectionSummaries(
                     action.user,
                     collections,
@@ -255,6 +346,9 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     action.collections,
                     state.files,
                 ),
+                allCollectionNameByID: createCollectionNameByID(
+                    action.collections.concat(state.hiddenCollections),
+                ),
                 collectionSummaries: deriveCollectionSummaries(
                     ensure(state.user),
                     action.collections,
@@ -280,6 +374,9 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     action.collections,
                     state.files,
                 ),
+                allCollectionNameByID: createCollectionNameByID(
+                    action.collections.concat(action.hiddenCollections),
+                ),
                 collectionSummaries: deriveCollectionSummaries(
                     ensure(state.user),
                     action.collections,
@@ -303,6 +400,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     state.collections,
                     files,
                 ),
+                fileCollectionIDs: createFileCollectionIDs(action.files),
                 collectionSummaries: deriveCollectionSummaries(
                     ensure(state.user),
                     state.collections,
@@ -325,6 +423,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     state.collections,
                     files,
                 ),
+                fileCollectionIDs: createFileCollectionIDs(action.files),
                 collectionSummaries: deriveCollectionSummaries(
                     ensure(state.user),
                     state.collections,
@@ -343,6 +442,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     state.collections,
                     files,
                 ),
+                fileCollectionIDs: createFileCollectionIDs(files),
                 // TODO: Consider batching this instead of doing it per file
                 // upload to speed up uploads. Perf test first though.
                 collectionSummaries: deriveCollectionSummaries(
@@ -398,6 +498,65 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     action.trashedFiles,
                     state.archivedCollectionIDs,
                 ),
+            };
+        case "showAll":
+            return {
+                ...state,
+                barMode: "albums",
+                activeCollectionID: ALL_SECTION,
+                isInSearchMode: false,
+                searchResults: undefined,
+            };
+        case "showHidden":
+            return {
+                ...state,
+                barMode: "hidden-albums",
+                activeCollectionID: HIDDEN_ITEMS_SECTION,
+                isInSearchMode: false,
+                searchResults: undefined,
+            };
+        case "showNormalOrHiddenCollectionSummary":
+            return {
+                ...state,
+                barMode:
+                    action.collectionSummaryID !== undefined &&
+                    state.hiddenCollectionSummaries.has(
+                        action.collectionSummaryID,
+                    )
+                        ? "hidden-albums"
+                        : "albums",
+                activeCollectionID: action.collectionSummaryID ?? ALL_SECTION,
+                isInSearchMode: false,
+                searchResults: undefined,
+            };
+        case "showPeople":
+            return {
+                ...state,
+                barMode: "people",
+                activePersonID: undefined,
+                isInSearchMode: false,
+                searchResults: undefined,
+            };
+        case "showPerson":
+            return {
+                ...state,
+                barMode: "people",
+                activePersonID: action.personID,
+                isInSearchMode: false,
+                searchResults: undefined,
+            };
+        case "enterSearchMode":
+            return { ...state, isInSearchMode: true };
+        case "searchResults":
+            return {
+                ...state,
+                searchResults: action.searchResults,
+            };
+        case "exitSearch":
+            return {
+                ...state,
+                isInSearchMode: false,
+                searchResults: undefined,
             };
     }
 };
