@@ -9,6 +9,10 @@ import {
 } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
+import {
+    createCollectionNameByID,
+    getCollectionUserFacingName,
+} from "@/new/photos/services/collection";
 import downloadManager from "@/new/photos/services/download";
 import { updateExifIfNeededAndPossible } from "@/new/photos/services/exif-update";
 import {
@@ -34,10 +38,6 @@ import {
     ExportUIUpdaters,
     FileExportNames,
 } from "types/export";
-import {
-    constructCollectionNameMap,
-    getCollectionUserFacingName,
-} from "utils/collection";
 import { getAllLocalCollections } from "../collectionService";
 import { migrateExport } from "./migration";
 
@@ -330,7 +330,7 @@ class ExportService {
                 convertCollectionIDExportNameObjectToMap(
                     exportRecord.collectionExportNames,
                 );
-            const collectionIDNameMap = constructCollectionNameMap(collections);
+            const collectionIDNameMap = createCollectionNameByID(collections);
 
             const renamedCollections = getRenamedExportedCollections(
                 collections,

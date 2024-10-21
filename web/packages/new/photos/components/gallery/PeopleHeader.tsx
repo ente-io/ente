@@ -74,27 +74,6 @@ import { useWrapAsyncOperation } from "../utils/use-wrap-async";
 import type { GalleryBarImplProps } from "./BarImpl";
 import { GalleryItemsHeaderAdapter, GalleryItemsSummary } from "./ListHeader";
 
-/**
- * Derived UI state backing the gallery when it is in "people" mode.
- *
- * This may be different from the actual underlying state since there might be
- * unsynced data (hidden or deleted that have not yet been synced with remote)
- * that should be taken into account for the UI state.
- */
-export interface GalleryPeopleState {
-    /**
-     * The currently selected person, if any.
-     *
-     * Whenever this is present, it is guaranteed to be one of the items from
-     * within {@link people}.
-     */
-    activePerson: Person | undefined;
-    /**
-     * The list of people to show.
-     */
-    people: Person[];
-}
-
 type PeopleHeaderProps = Pick<
     GalleryBarImplProps,
     "people" | "onSelectPerson"
@@ -483,10 +462,10 @@ const initialSuggestionsDialogState: SuggestionsDialogState = {
     updates: new Map(),
 };
 
-const suggestionsDialogReducer = (
-    state: SuggestionsDialogState,
-    action: SuggestionsDialogAction,
-): SuggestionsDialogState => {
+const suggestionsDialogReducer: React.Reducer<
+    SuggestionsDialogState,
+    SuggestionsDialogAction
+> = (state, action) => {
     switch (action.type) {
         case "fetch":
             return {

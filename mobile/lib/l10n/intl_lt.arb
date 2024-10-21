@@ -135,13 +135,10 @@
   "mostRelevant": "Aktualiausia",
   "loadingYourPhotos": "Įkeliamos nuotraukos...",
   "processingImport": "Apdorojama {folderName}...",
-  "personName": "Person name",
-  "addNewPerson": "Add new person",
-  "addNameOrMerge": "Add name or merge",
-  "mergeWithExisting": "Merge with existing",
-  "newPerson": "New person",
-  "addName": "Add name",
-  "add": "Add",
-  "extraPhotosFoundFor": "Extra photos found for $text",
-  "extraPhotosFound": "Extra photos found"
+  "personName": "Asmens vardas",
+  "addNewPerson": "Pridėti naują asmenį",
+  "newPerson": "Naujas asmuo",
+  "add": "Pridėti",
+  "extraPhotosFoundFor": "Rastos papildomos nuotraukos, skirtos $text",
+  "extraPhotosFound": "Rastos papildomos nuotraukos"
 }

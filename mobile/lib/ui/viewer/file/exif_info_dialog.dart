@@ -41,7 +41,7 @@ class ExifInfoDialog extends StatelessWidget {
             style: textTheme.body,
           ),
           onPressed: () {
-            Navigator.of(context, rootNavigator: true).pop('dialog');
+            Navigator.of(context).pop('dialog');
           },
         ),
       ],

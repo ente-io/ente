@@ -100,15 +100,19 @@ class EntityService {
     }
   }
 
-  Future<void> syncEntity(EntityType type) async {
+  Future<int> syncEntity(EntityType type) async {
     try {
-      await _remoteToLocalSync(type);
+      return _remoteToLocalSync(type);
     } catch (e) {
       _logger.severe("Failed to sync entities", e);
+      return -1;
     }
   }
 
-  Future<void> _remoteToLocalSync(EntityType type) async {
+  Future<int> _remoteToLocalSync(
+    EntityType type, {
+    int prevFetchCount = 0,
+  }) async {
     final int lastSyncTime =
         _prefs.getInt(_getEntityLastSyncTimePrefix(type)) ?? 0;
     final List<EntityData> result = await _gateway.getDiff(
@@ -117,7 +121,7 @@ class EntityService {
       limit: fetchLimit,
     );
     if (result.isEmpty) {
-      return;
+      return prevFetchCount;
     }
     final bool hasMoreItems = result.length == fetchLimit;
     _logger.info("${result.length} entries of type $type fetched");
@@ -161,6 +165,7 @@ class EntityService {
           );
         } catch (e, s) {
           _logger.severe("Failed to decrypted data for key $type", e, s);
+          rethrow;
         }
       }
       if (entities.isNotEmpty) {
@@ -170,8 +175,12 @@ class EntityService {
     await _prefs.setInt(_getEntityLastSyncTimePrefix(type), maxSyncTime);
     if (hasMoreItems) {
       _logger.info("Diff limit reached, pulling again");
-      await _remoteToLocalSync(type);
+      await _remoteToLocalSync(
+        type,
+        prevFetchCount: prevFetchCount + result.length,
+      );
     }
+    return prevFetchCount + result.length;
   }
 
   Future<Uint8List> getOrCreateEntityKey(EntityType type) async {

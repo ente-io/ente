@@ -26,6 +26,10 @@ import { FileType, type FileTypeInfo } from "@/media/file-type";
 import { encodeLivePhoto } from "@/media/live-photo";
 import { extractExif } from "@/new/photos/services/exif";
 import * as ffmpeg from "@/new/photos/services/ffmpeg";
+import {
+    getNonEmptyMagicMetadataProps,
+    updateMagicMetadata,
+} from "@/new/photos/services/magic-metadata";
 import type { UploadItem } from "@/new/photos/services/upload/types";
 import {
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
@@ -40,10 +44,6 @@ import {
     PublicUploadProps,
     type LivePhotoAssets,
 } from "services/upload/uploadManager";
-import {
-    getNonEmptyMagicMetadataProps,
-    updateMagicMetadata,
-} from "utils/magicMetadata";
 import * as convert from "xml-js";
 import { tryParseEpochMicrosecondsFromFileName } from "./date";
 import publicUploadHttpClient from "./publicUploadHttpClient";

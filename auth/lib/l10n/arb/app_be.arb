@@ -12,7 +12,14 @@
   "secret": "Сакрэт",
   "notes": "Нататкі",
   "codeTagHint": "Тэг",
+  "accountKeyType": "Тып ключа",
+  "sessionExpired": "Сеанс завяршыўся",
+  "@sessionExpired": {
+    "description": "Title of the dialog when the users current session is invalid/expired"
+  },
+  "pleaseLoginAgain": "Аўтарызуйцеся яшчэ раз",
   "saveAction": "Захаваць",
+  "trash": "Сметніца",
   "blog": "Блог",
   "changePassword": "Змяніць пароль",
   "data": "Даныя",

@@ -28,28 +28,22 @@ import "package:photos/extensions/stop_watch.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
-import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
 import "package:photos/services/filedata/filedata_service.dart";
 import 'package:photos/services/home_widget_service.dart';
 import 'package:photos/services/local_file_update_service.dart';
 import 'package:photos/services/local_sync_service.dart';
-import "package:photos/services/location_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
-import "package:photos/services/machine_learning/machine_learning_controller.dart";
 import 'package:photos/services/machine_learning/ml_service.dart';
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
-import "package:photos/services/magic_cache_service.dart";
 import 'package:photos/services/memories_service.dart';
 import "package:photos/services/notification_service.dart";
 import 'package:photos/services/push_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/services/search_service.dart';
-import 'package:photos/services/sync_service.dart';
-import 'package:photos/services/trash_sync_service.dart';
-import 'package:photos/services/user_remote_flag_service.dart';
-import 'package:photos/services/user_service.dart';
+import "package:photos/services/sync_service.dart";
+import "package:photos/services/user_service.dart";
 import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/ui/tools/lock_screen.dart';
 import 'package:photos/utils/crypto_util.dart';
@@ -246,18 +240,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     await UserService.instance.init();
     _logger.info("UserService init done $tlog");
 
-    _logger.info("LocationService init $tlog");
-    LocationService.instance.init(preferences);
-    _logger.info("LocationService init done $tlog");
-
-    _logger.info("UserRemoteFlagService init $tlog");
-    await UserRemoteFlagService.instance.init();
-    _logger.info("UserRemoteFlagService init done $tlog");
-
-    _logger.info("BillingService init $tlog");
-    BillingService.instance.init();
-    _logger.info("BillingService init done $tlog");
-
     _logger.info("CollectionsService init $tlog");
     await CollectionsService.instance.init(preferences);
     _logger.info("CollectionsService init done $tlog");
@@ -272,7 +254,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     await LocalSyncService.instance.init(preferences);
     _logger.info("LocalSyncService init done $tlog");
 
-    TrashSyncService.instance.init(preferences);
     RemoteSyncService.instance.init(preferences);
 
     _logger.info("SyncService init $tlog");
@@ -300,17 +281,12 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     }
     _logger.info("PushService/HomeWidget done $tlog");
     unawaited(SemanticSearchService.instance.init());
-    MachineLearningController.instance.init();
-
-    _logger.info("MachineLearningController done $tlog");
     unawaited(MLService.instance.init());
     PersonService.init(
       entityService,
       MLDataDB.instance,
       preferences,
     );
-    MagicCacheService.instance.init(preferences);
-
     initComplete = true;
     _logger.info("Initialization done $tlog");
   } catch (e, s) {

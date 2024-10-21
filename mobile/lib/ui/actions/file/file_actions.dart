@@ -101,7 +101,7 @@ Future<void> showSingleFileDeleteSheet(
         isInAlert: true,
         onTap: () async {
           await deleteFilesFromEverywhere(context, [file]);
-          Navigator.of(context, rootNavigator: true).pop();
+          Navigator.of(context).pop();
           if (onFileRemoved != null) {
             onFileRemoved(file);
           }

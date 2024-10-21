@@ -9,10 +9,19 @@ import {
     GalleryItemsSummary,
 } from "@/new/photos/components/gallery/ListHeader";
 import { SpaceBetweenFlex } from "@/new/photos/components/mui";
+import {
+    ALL_SECTION,
+    HIDDEN_ITEMS_SECTION,
+    isHiddenCollection,
+} from "@/new/photos/services/collection";
 import type {
     CollectionSummary,
     CollectionSummaryType,
 } from "@/new/photos/services/collection/ui";
+import {
+    isArchivedCollection,
+    isPinnedCollection,
+} from "@/new/photos/services/magic-metadata";
 import { AppContext } from "@/new/photos/types/context";
 import { HorizontalFlex } from "@ente/shared/components/Container";
 import OverflowMenu, {
@@ -45,16 +54,12 @@ import * as CollectionAPI from "services/collectionService";
 import * as TrashService from "services/trashService";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
 import {
-    ALL_SECTION,
     changeCollectionOrder,
     changeCollectionSortOrder,
     changeCollectionVisibility,
     downloadCollectionHelper,
     downloadDefaultHiddenCollectionHelper,
-    HIDDEN_ITEMS_SECTION,
-    isHiddenCollection,
 } from "utils/collection";
-import { isArchivedCollection, isPinnedCollection } from "utils/magicMetadata";
 
 interface CollectionHeaderProps {
     collectionSummary: CollectionSummary;

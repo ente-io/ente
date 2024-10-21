@@ -229,7 +229,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
             ),
           ),
           onPressed: () {
-            Navigator.of(context, rootNavigator: true).pop('dialog');
+            Navigator.of(context).pop('dialog');
           },
         ),
         TextButton(
@@ -241,7 +241,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           ),
           onPressed: () async {
             await UserService.instance.disableTwoFactor(context);
-            Navigator.of(context, rootNavigator: true).pop('dialog');
+            Navigator.of(context).pop('dialog');
           },
         ),
       ],
