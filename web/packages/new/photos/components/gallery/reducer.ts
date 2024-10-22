@@ -1010,6 +1010,20 @@ export const deriveFilteredFilesAlbumFocus = (state: GalleryState) => {
 
 /**
  * Helper function to compute the sorted list of files to show when we're
+ * showing the "Trash".
+ */
+export const deriveFilteredFilesTrash = ({
+    files,
+    trashedFiles,
+    tempDeletedFileIDs,
+}: GalleryState) =>
+    uniqueFilesByID([
+        ...trashedFiles,
+        ...files.filter((file) => tempDeletedFileIDs.has(file.id)),
+    ]);
+
+/**
+ * Helper function to compute the sorted list of files to show when we're
  * in the "hidden-albums" focus.
  */
 export const deriveFilteredFilesHiddenAlbumsFocus = (state: GalleryState) => {

@@ -21,6 +21,7 @@ import {
 } from "@/new/photos/components/gallery";
 import {
     deriveFilteredFilesAlbumishFocus,
+    deriveFilteredFilesTrash,
     uniqueFilesByID,
     useGalleryReducer,
     type GalleryBarMode,
@@ -556,10 +557,7 @@ export default function Gallery() {
                 people: filteredVisiblePeople,
             };
         } else if (activeCollectionID === TRASH_SECTION) {
-            filteredFiles = uniqueFilesByID([
-                ...trashedFiles,
-                ...files.filter((file) => tempDeletedFileIDs?.has(file.id)),
-            ]);
+            filteredFiles = deriveFilteredFilesTrash(state);
         } else {
             filteredFiles = deriveFilteredFilesAlbumishFocus(state);
         }
