@@ -109,7 +109,7 @@ class _GenericFilterChipState extends State<GenericFilterChip> {
                     child: Icon(
                       Icons.close_rounded,
                       size: 14,
-                      color: getEnteColorScheme(context).textBase,
+                      color: getEnteColorScheme(context).textMuted,
                     ),
                   ),
                 )
@@ -128,6 +128,7 @@ class FaceFilterChip extends StatefulWidget {
   final VoidCallback apply;
   final VoidCallback remove;
   final bool isApplied;
+  final bool isInAllFiltersView;
 
   const FaceFilterChip({
     required this.personId,
@@ -137,6 +138,7 @@ class FaceFilterChip extends StatefulWidget {
     required this.apply,
     required this.remove,
     required this.isApplied,
+    this.isInAllFiltersView = false,
     super.key,
   });
 
@@ -146,11 +148,15 @@ class FaceFilterChip extends StatefulWidget {
 
 class _FaceFilterChipState extends State<FaceFilterChip> {
   late bool _isApplied;
+  double scale = 1.0;
 
   @override
   void initState() {
     super.initState();
     _isApplied = widget.isApplied;
+    if (widget.isInAllFiltersView) {
+      scale = 1.5;
+    }
   }
 
   @override
@@ -179,24 +185,30 @@ class _FaceFilterChipState extends State<FaceFilterChip> {
           Container(
             decoration: BoxDecoration(
               color: getEnteColorScheme(context).fillFaint,
-              borderRadius: const BorderRadius.all(
-                Radius.circular(kFilterChipHeight / 2),
+              borderRadius: BorderRadius.all(
+                Radius.circular(kFilterChipHeight * scale / 2),
               ),
               border: Border.all(
-                color: getEnteColorScheme(context).strokeFaint,
-                width: 0.5,
+                color: widget.isInAllFiltersView
+                    ? getEnteColorScheme(context).strokeMuted
+                    : getEnteColorScheme(context).strokeFaint,
+                width: widget.isInAllFiltersView ? 1 : 0.5,
               ),
             ),
             child: Padding(
-              padding: EdgeInsets.only(right: widget.name.isNotEmpty ? 8.0 : 0),
+              padding: EdgeInsets.only(
+                right: !widget.isInAllFiltersView && widget.name.isNotEmpty
+                    ? 8.0
+                    : 0,
+              ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   ClipOval(
                     child: SizedBox(
-                      width: kFilterChipHeight,
-                      height: kFilterChipHeight,
+                      width: kFilterChipHeight * scale,
+                      height: kFilterChipHeight * scale,
                       child: PersonFaceWidget(
                         widget.faceThumbnailFile,
                         personId: widget.personId,
@@ -205,7 +217,7 @@ class _FaceFilterChipState extends State<FaceFilterChip> {
                       ),
                     ),
                   ),
-                  widget.name.isNotEmpty
+                  !widget.isInAllFiltersView && widget.name.isNotEmpty
                       ? Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 4),
                           child: Text(
@@ -230,14 +242,14 @@ class _FaceFilterChipState extends State<FaceFilterChip> {
                         color: getEnteColorScheme(context).strokeMuted,
                         width: 0.5,
                       ),
-                      borderRadius: const BorderRadius.all(
-                        Radius.circular(8),
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(8 * scale),
                       ),
                     ),
                     child: Icon(
                       Icons.close_rounded,
                       size: 14,
-                      color: getEnteColorScheme(context).textBase,
+                      color: getEnteColorScheme(context).textMuted,
                     ),
                   ),
                 )

@@ -1,7 +1,9 @@
 import "package:flutter/material.dart";
+import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/models/search/hierarchical/face_filter.dart";
 import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
@@ -74,13 +76,15 @@ class _RecommendedFiltersState extends State<RecommendedFilters> {
                   icon: Icons.sort,
                   iconButtonType: IconButtonType.rounded,
                   onTap: () {
-                    showModalBottomSheet(
+                    showBarModalBottomSheet(
                       context: context,
                       builder: (context) {
                         return FilterOptionsBottomSheet(
                           _searchFilterDataProvider,
                         );
                       },
+                      backgroundColor:
+                          getEnteColorScheme(context).backgroundElevated2,
                     );
                   },
                 );

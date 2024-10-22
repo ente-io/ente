@@ -383,3 +383,54 @@ Future<List<MagicFilter>> curateMagicFilters(List<EnteFile> files) async {
 
   return magicFilters;
 }
+
+Map<String, List<HierarchicalSearchFilter>> getFiltersForBottomSheet(
+  SearchFilterDataProvider searchFilterDataProvider,
+) {
+  final faceFilters =
+      searchFilterDataProvider.appliedFilters.whereType<FaceFilter>().toList();
+  faceFilters
+      .addAll(searchFilterDataProvider.recommendations.whereType<FaceFilter>());
+
+  final albumFilters =
+      searchFilterDataProvider.appliedFilters.whereType<AlbumFilter>().toList();
+  albumFilters.addAll(
+    searchFilterDataProvider.recommendations.whereType<AlbumFilter>(),
+  );
+
+  final fileTypeFilters = searchFilterDataProvider.appliedFilters
+      .whereType<FileTypeFilter>()
+      .toList();
+  fileTypeFilters.addAll(
+    searchFilterDataProvider.recommendations.whereType<FileTypeFilter>(),
+  );
+
+  final locationFilters = searchFilterDataProvider.appliedFilters
+      .whereType<LocationFilter>()
+      .toList();
+  locationFilters.addAll(
+    searchFilterDataProvider.recommendations.whereType<LocationFilter>(),
+  );
+
+  final contactsFilters = searchFilterDataProvider.appliedFilters
+      .whereType<ContactsFilter>()
+      .toList();
+  contactsFilters.addAll(
+    searchFilterDataProvider.recommendations.whereType<ContactsFilter>(),
+  );
+
+  final magicFilters =
+      searchFilterDataProvider.appliedFilters.whereType<MagicFilter>().toList();
+  magicFilters.addAll(
+    searchFilterDataProvider.recommendations.whereType<MagicFilter>(),
+  );
+
+  return {
+    "faceFilters": faceFilters,
+    "albumFilters": albumFilters,
+    "fileTypeFilters": fileTypeFilters,
+    "locationFilters": locationFilters,
+    "contactsFilters": contactsFilters,
+    "magicFilters": magicFilters,
+  };
+}
