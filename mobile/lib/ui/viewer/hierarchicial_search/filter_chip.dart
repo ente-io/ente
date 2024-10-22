@@ -102,6 +102,7 @@ class FaceFilterChip extends StatelessWidget {
                     faceThumbnailFile,
                     personId: personId,
                     clusterID: clusterId,
+                    thumbnailFallback: false,
                   ),
                 ),
               ),
