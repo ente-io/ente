@@ -950,33 +950,107 @@ const findAllSectionVisibleFiles = (
  * showing either "albums" or "hidden-albums".
  */
 export const deriveFilteredFilesAlbumishFocus = (state: GalleryState) => {
+    if (state.barMode == "albums") {
+        return deriveFilteredFilesAlbumFocus(state);
+    } else {
+        return deriveFilteredFilesHiddenAlbumsFocus(state);
+    }
+};
+
+/**
+ * Helper function to compute the sorted list of files to show when we're
+ * in the "albums" focus.
+ */
+export const deriveFilteredFilesAlbumFocus = (state: GalleryState) => {
     const {
-        barMode,
         collections,
-        hiddenCollections,
         files,
-        hiddenFiles,
         archivedCollectionIDs,
-        defaultHiddenCollectionIDs,
         hiddenFileIDs,
         tempDeletedFileIDs,
         tempHiddenFileIDs,
         activeCollectionID,
     } = state;
 
-    const baseFiles = barMode == "hidden-albums" ? hiddenFiles : files;
-
-    const activeCollection = (
-        barMode == "albums" ? collections : hiddenCollections
-    ).find((collection) => collection.id === activeCollectionID);
+    const activeCollection = collections.find(
+        (collection) => collection.id === activeCollectionID,
+    );
 
     const filteredFiles = uniqueFilesByID(
-        baseFiles.filter((item) => {
+        files.filter((item) => {
             if (tempDeletedFileIDs.has(item.id)) {
                 return false;
             }
 
-            if (barMode != "hidden-albums" && tempHiddenFileIDs.has(item.id)) {
+            if (tempHiddenFileIDs.has(item.id)) {
+                return false;
+            }
+
+            // archived collections files can only be seen in their respective collection
+            if (archivedCollectionIDs.has(item.collectionID)) {
+                if (activeCollectionID === item.collectionID) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+
+            // Archived files can only be seen in archive section or their respective collection
+            if (isArchivedFile(item)) {
+                if (
+                    activeCollectionID === ARCHIVE_SECTION ||
+                    activeCollectionID === item.collectionID
+                ) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+
+            // ALL SECTION - show all files
+            if (activeCollectionID === ALL_SECTION) {
+                // show all files except the ones in hidden collections
+                if (hiddenFileIDs.has(item.id)) {
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+
+            // COLLECTION SECTION - show files in the active collection
+            if (activeCollectionID === item.collectionID) {
+                return true;
+            } else {
+                return false;
+            }
+        }),
+    );
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    const sortAsc = activeCollection?.pubMagicMetadata?.data?.asc ?? false;
+    return sortAsc ? sortFiles(filteredFiles, true) : filteredFiles;
+};
+
+/**
+ * Helper function to compute the sorted list of files to show when we're
+ * in the "hidden-albums" focus.
+ */
+export const deriveFilteredFilesHiddenAlbumsFocus = (state: GalleryState) => {
+    const {
+        hiddenCollections,
+        hiddenFiles,
+        archivedCollectionIDs,
+        defaultHiddenCollectionIDs,
+        tempDeletedFileIDs,
+        activeCollectionID,
+    } = state;
+
+    const activeCollection = hiddenCollections.find(
+        (collection) => collection.id === activeCollectionID,
+    );
+
+    const filteredFiles = uniqueFilesByID(
+        hiddenFiles.filter((item) => {
+            if (tempDeletedFileIDs.has(item.id)) {
                 return false;
             }
 
@@ -1006,16 +1080,6 @@ export const deriveFilteredFilesAlbumishFocus = (state: GalleryState) => {
                     return true;
                 } else {
                     return false;
-                }
-            }
-
-            // ALL SECTION - show all files
-            if (activeCollectionID === ALL_SECTION) {
-                // show all files except the ones in hidden collections
-                if (hiddenFileIDs.has(item.id)) {
-                    return false;
-                } else {
-                    return true;
                 }
             }
 
