@@ -21,6 +21,7 @@ import {
 } from "@/new/photos/components/gallery";
 import {
     deriveFilteredFilesAlbumishFocus,
+    deriveFilteredFilesPeopleFocus,
     deriveFilteredFilesTrash,
     uniqueFilesByID,
     useGalleryReducer,
@@ -500,7 +501,7 @@ export default function Gallery() {
             return;
         }
 
-        let filteredFiles: EnteFile[] = [];
+        let filteredFiles: EnteFile[];
         let galleryPeopleState:
             | { activePerson: Person | undefined; people: Person[] }
             | undefined;
@@ -509,53 +510,9 @@ export default function Gallery() {
                 selectedSearchOption.suggestion,
             );
         } else if (barMode == "people") {
-            let filteredPeople = peopleState?.people ?? [];
-            let filteredVisiblePeople = peopleState?.visiblePeople ?? [];
-            if (tempDeletedFileIDs?.size ?? tempHiddenFileIDs?.size) {
-                // Prune the in-memory temp updates from the actual state to
-                // obtain the UI state. Kept inside an preflight check to so
-                // that the common path remains fast.
-                const filterTemp = (ps: Person[]) =>
-                    ps
-                        .map((p) => ({
-                            ...p,
-                            fileIDs: p.fileIDs.filter(
-                                (id) =>
-                                    !tempDeletedFileIDs?.has(id) &&
-                                    !tempHiddenFileIDs?.has(id),
-                            ),
-                        }))
-                        .filter((p) => p.fileIDs.length > 0);
-                filteredPeople = filterTemp(filteredPeople);
-                filteredVisiblePeople = filterTemp(filteredVisiblePeople);
-            }
-            const findByID = (ps: Person[]) =>
-                ps.find((p) => p.id == activePersonID);
-            let activePerson = findByID(filteredVisiblePeople);
-            if (!activePerson) {
-                // This might be one of the normally hidden small clusters.
-                activePerson = findByID(filteredPeople);
-                if (activePerson) {
-                    // Temporarily add this person's entry to the list of people
-                    // surfaced in the people section.
-                    filteredVisiblePeople.push(activePerson);
-                } else {
-                    // We don't have an "All" pseudo-album in people mode, so
-                    // default to the first person in the list.
-                    activePerson = filteredVisiblePeople[0];
-                }
-            }
-            const pfSet = new Set(activePerson?.fileIDs ?? []);
-            filteredFiles = uniqueFilesByID(
-                files.filter(({ id }) => {
-                    if (!pfSet.has(id)) return false;
-                    return true;
-                }),
-            );
-            galleryPeopleState = {
-                activePerson,
-                people: filteredVisiblePeople,
-            };
+            const z = deriveFilteredFilesPeopleFocus(state);
+            filteredFiles = z.filteredFiles;
+            galleryPeopleState = z.galleryPeopleState;
         } else if (activeCollectionID === TRASH_SECTION) {
             filteredFiles = deriveFilteredFilesTrash(state);
         } else {

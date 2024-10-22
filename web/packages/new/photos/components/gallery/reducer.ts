@@ -1074,3 +1074,63 @@ const sortAndUniqueFilteredFiles = (
     const sortAsc = activeCollection?.pubMagicMetadata?.data?.asc ?? false;
     return sortAsc ? sortFiles(uniqueFiles, true) : uniqueFiles;
 };
+
+/**
+ * Helper function to compute the sorted list of files to show when we're
+ * in the "people" focus.
+ */
+export const deriveFilteredFilesPeopleFocus = ({
+    files,
+    tempDeletedFileIDs,
+    tempHiddenFileIDs,
+    peopleState,
+    activePersonID,
+}: GalleryState) => {
+    let filteredPeople = peopleState?.people ?? [];
+    let filteredVisiblePeople = peopleState?.visiblePeople ?? [];
+    if (tempDeletedFileIDs.size + tempHiddenFileIDs.size > 0) {
+        // Prune the in-memory temp updates from the actual state to
+        // obtain the UI state. Kept inside an preflight check to so
+        // that the common path remains fast.
+        const filterTemp = (ps: Person[]) =>
+            ps
+                .map((p) => ({
+                    ...p,
+                    fileIDs: p.fileIDs.filter(
+                        (id) =>
+                            !tempDeletedFileIDs.has(id) &&
+                            !tempHiddenFileIDs.has(id),
+                    ),
+                }))
+                .filter((p) => p.fileIDs.length > 0);
+        filteredPeople = filterTemp(filteredPeople);
+        filteredVisiblePeople = filterTemp(filteredVisiblePeople);
+    }
+    const findByID = (ps: Person[]) => ps.find((p) => p.id == activePersonID);
+    let activePerson = findByID(filteredVisiblePeople);
+    if (!activePerson) {
+        // This might be one of the normally hidden small clusters.
+        activePerson = findByID(filteredPeople);
+        if (activePerson) {
+            // Temporarily add this person's entry to the list of people
+            // surfaced in the people section.
+            filteredVisiblePeople.push(activePerson);
+        } else {
+            // We don't have an "All" pseudo-album in people mode, so
+            // default to the first person in the list.
+            activePerson = filteredVisiblePeople[0];
+        }
+    }
+    const pfSet = new Set(activePerson?.fileIDs ?? []);
+    const filteredFiles = uniqueFilesByID(
+        files.filter(({ id }) => {
+            if (!pfSet.has(id)) return false;
+            return true;
+        }),
+    );
+    const galleryPeopleState = {
+        activePerson,
+        people: filteredVisiblePeople,
+    };
+    return { filteredFiles, galleryPeopleState };
+};
