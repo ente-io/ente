@@ -323,9 +323,7 @@ export default function Gallery() {
     const activePersonID = state.activePersonID;
     const isInSearchMode = state.isInSearchMode;
 
-    if (process.env.NEXT_PUBLIC_ENTE_WIP_CL) {
-        console.log("render", { collections, hiddenCollections, files });
-    }
+    if (process.env.NEXT_PUBLIC_ENTE_WIP_CL) console.log("render", { state });
 
     const router = useRouter();
 
