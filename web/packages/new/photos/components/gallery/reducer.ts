@@ -39,7 +39,7 @@ import {
     isArchivedFile,
     isPinnedCollection,
 } from "../../services/magic-metadata";
-import type { Person } from "../../services/ml/people";
+import type { PeopleState, Person } from "../../services/ml/people";
 import type { FamilyData } from "../../services/user";
 
 /**
@@ -54,12 +54,35 @@ export type GalleryBarMode = "albums" | "hidden-albums" | "people";
  */
 export type GalleryFocus =
     | {
+          /**
+           * We're either in the "Albums" section, or are displaying the hidden
+           * albums.
+           */
           type: "albums" | "hidden-albums";
           activeCollectionID: number;
           activeCollection: Collection | undefined;
           activeCollectionSummary: CollectionSummary;
       }
-    | { type: "people"; activePersonID: string; activePerson: Person };
+    | {
+          /**
+           * We're in the "People" section.
+           */
+          type: "people";
+          /**
+           * The list of people to show in the gallery bar.
+           *
+           * Note that this can be different from the underlying list of people,
+           * and can temporarily include a person from outside that list.
+           */
+          people: Person[];
+          /**
+           * The currently selected person in the gallery bar.
+           *
+           * It is guaranteed that {@link activePerson} will be one of the
+           * objects from among {@link people}.
+           */
+          activePerson: Person;
+      };
 
 /**
  * Derived UI state backing the gallery.
@@ -85,7 +108,7 @@ export interface GalleryState {
      */
     familyData: FamilyData | undefined;
 
-    /*--<  Primary state: Files and collections  >--*/
+    /*--<  Primary state: Files, collections, people  >--*/
 
     /**
      * The user's non-hidden collections.
@@ -113,6 +136,11 @@ export interface GalleryState {
      * The list is sorted so that newer files are first.
      */
     trashedFiles: EnteFile[];
+    /**
+     * Latest snapshot of people related state, as reported by
+     * {@link usePeopleStateSnapshot}.
+     */
+    peopleState: PeopleState | undefined;
 
     /*--<  Derived state  >--*/
 
@@ -156,6 +184,24 @@ export interface GalleryState {
      */
     hiddenCollectionSummaries: Map<number, CollectionSummary>;
 
+    /*--<  In-flight updates  >--*/
+
+    /**
+     * File IDs of the files that have been just been deleted by the user.
+     *
+     * The delete on remote for these has either completed, or is currently in
+     * flight, but the local state has not yet been updated. We stash these
+     * changes here temporarily so that the UI can reflect the changes until our
+     * local state also gets synced in a bit.
+     */
+    tempDeletedFileIDs: Set<number>;
+
+    /**
+     * Variant of {@link tempDeletedFileIDs} for files that have just been
+     * hidden.
+     */
+    tempHiddenFileIDs: Set<number>;
+
     /*--<  Transient UI state  >--*/
 
     /**
@@ -168,6 +214,12 @@ export interface GalleryState {
      */
     focus: GalleryFocus | undefined;
     activeCollectionID: number | undefined;
+    /**
+     * The currently selected person, if any.
+     *
+     * When present, it is used to derive the {@link activePerson} property of
+     * the {@link focus}.
+     */
     activePersonID: string | undefined;
 
     filteredData: EnteFile[];
@@ -232,12 +284,17 @@ export type GalleryAction =
           collections: Collection[];
           hiddenCollections: Collection[];
       }
-    | { type: "resetFiles"; files: EnteFile[] }
+    | { type: "setFiles"; files: EnteFile[] }
     | { type: "fetchFiles"; files: EnteFile[] }
     | { type: "uploadFile"; file: EnteFile }
-    | { type: "resetHiddenFiles"; hiddenFiles: EnteFile[] }
+    | { type: "setHiddenFiles"; hiddenFiles: EnteFile[] }
     | { type: "fetchHiddenFiles"; hiddenFiles: EnteFile[] }
     | { type: "setTrashedFiles"; trashedFiles: EnteFile[] }
+    | { type: "setPeopleState"; peopleState: PeopleState | undefined }
+    | { type: "markTempDeleted"; files: EnteFile[] }
+    | { type: "clearTempDeleted" }
+    | { type: "markTempHidden"; files: EnteFile[] }
+    | { type: "clearTempHidden" }
     | { type: "showAll" }
     | { type: "showHidden" }
     | {
@@ -258,6 +315,7 @@ const initialGalleryState: GalleryState = {
     files: [],
     hiddenFiles: [],
     trashedFiles: [],
+    peopleState: undefined,
     archivedCollectionIDs: new Set(),
     defaultHiddenCollectionIDs: new Set(),
     hiddenFileIDs: new Set(),
@@ -266,6 +324,8 @@ const initialGalleryState: GalleryState = {
     fileCollectionIDs: new Map(),
     collectionSummaries: new Map(),
     hiddenCollectionSummaries: new Map(),
+    tempDeletedFileIDs: new Set<number>(),
+    tempHiddenFileIDs: new Set<number>(),
     barMode: undefined,
     focus: undefined,
     activeCollectionID: undefined,
@@ -281,9 +341,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
     state,
     action,
 ) => {
-    if (process.env.NEXT_PUBLIC_ENTE_WIP_CL) {
-        console.log("dispatch", action);
-    }
+    if (process.env.NEXT_PUBLIC_ENTE_WIP_CL) console.log("dispatch", action);
     switch (action.type) {
         case "mount": {
             const [hiddenCollections, collections] = splitByPredicate(
@@ -391,7 +449,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 ),
             };
         }
-        case "resetFiles": {
+        case "setFiles": {
             const files = sortFiles(mergeMetadata(action.files));
             return {
                 ...state,
@@ -454,7 +512,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 ),
             };
         }
-        case "resetHiddenFiles": {
+        case "setHiddenFiles": {
             const hiddenFiles = sortFiles(mergeMetadata(action.hiddenFiles));
             return {
                 ...state,
@@ -499,6 +557,30 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     state.archivedCollectionIDs,
                 ),
             };
+        case "setPeopleState":
+            return { ...state, peopleState: action.peopleState };
+        case "markTempDeleted":
+            return {
+                ...state,
+                tempDeletedFileIDs: new Set(
+                    [...state.tempDeletedFileIDs].concat(
+                        action.files.map((f) => f.id),
+                    ),
+                ),
+            };
+        case "clearTempDeleted":
+            return { ...state, tempDeletedFileIDs: new Set() };
+        case "markTempHidden":
+            return {
+                ...state,
+                tempHiddenFileIDs: new Set(
+                    [...state.tempHiddenFileIDs].concat(
+                        action.files.map((f) => f.id),
+                    ),
+                ),
+            };
+        case "clearTempHidden":
+            return { ...state, tempHiddenFileIDs: new Set() };
         case "showAll":
             return {
                 ...state,

@@ -294,16 +294,6 @@ export default function Gallery() {
         setFilesDownloadProgressAttributesList,
     ] = useState<FilesDownloadProgressAttributes[]>([]);
 
-    // tempDeletedFileIds and tempHiddenFileIds are used to keep track of files
-    // that are deleted/hidden in the current session but not yet synced with
-    // the server.
-    const [tempDeletedFileIds, setTempDeletedFileIds] = useState(
-        new Set<number>(),
-    );
-    const [tempHiddenFileIds, setTempHiddenFileIds] = useState(
-        new Set<number>(),
-    );
-
     const [openCollectionSelector, setOpenCollectionSelector] = useState(false);
     const [collectionSelectorAttributes, setCollectionSelectorAttributes] =
         useState<CollectionSelectorAttributes | undefined>();
@@ -326,6 +316,8 @@ export default function Gallery() {
     const fileToCollectionsMap = state.fileCollectionIDs;
     const collectionSummaries = state.collectionSummaries;
     const hiddenCollectionSummaries = state.hiddenCollectionSummaries;
+    const tempDeletedFileIDs = state.tempDeletedFileIDs;
+    const tempHiddenFileIDs = state.tempHiddenFileIDs;
     const barMode = state.barMode ?? "albums";
     const activeCollectionID = state.activeCollectionID;
     const activePersonID = state.activePersonID;
@@ -469,6 +461,10 @@ export default function Gallery() {
     }, [router.isReady]);
 
     useEffect(() => {
+        dispatch({ type: "setPeopleState", peopleState });
+    }, [peopleState]);
+
+    useEffect(() => {
         if (isInSearchMode && selectedSearchOption) {
             setPhotoListHeader({
                 height: 104,
@@ -519,7 +515,7 @@ export default function Gallery() {
         } else if (barMode == "people") {
             let filteredPeople = peopleState?.people ?? [];
             let filteredVisiblePeople = peopleState?.visiblePeople ?? [];
-            if (tempDeletedFileIds?.size ?? tempHiddenFileIds?.size) {
+            if (tempDeletedFileIDs?.size ?? tempHiddenFileIDs?.size) {
                 // Prune the in-memory temp updates from the actual state to
                 // obtain the UI state. Kept inside an preflight check to so
                 // that the common path remains fast.
@@ -529,8 +525,8 @@ export default function Gallery() {
                             ...p,
                             fileIDs: p.fileIDs.filter(
                                 (id) =>
-                                    !tempDeletedFileIds?.has(id) &&
-                                    !tempHiddenFileIds?.has(id),
+                                    !tempDeletedFileIDs?.has(id) &&
+                                    !tempHiddenFileIDs?.has(id),
                             ),
                         }))
                         .filter((p) => p.fileIDs.length > 0);
@@ -567,19 +563,19 @@ export default function Gallery() {
         } else if (activeCollectionID === TRASH_SECTION) {
             filteredFiles = uniqueFilesByID([
                 ...trashedFiles,
-                ...files.filter((file) => tempDeletedFileIds?.has(file.id)),
+                ...files.filter((file) => tempDeletedFileIDs?.has(file.id)),
             ]);
         } else {
             const baseFiles = barMode == "hidden-albums" ? hiddenFiles : files;
             filteredFiles = uniqueFilesByID(
                 baseFiles.filter((item) => {
-                    if (tempDeletedFileIds?.has(item.id)) {
+                    if (tempDeletedFileIDs?.has(item.id)) {
                         return false;
                     }
 
                     if (
                         barMode != "hidden-albums" &&
-                        tempHiddenFileIds?.has(item.id)
+                        tempHiddenFileIDs?.has(item.id)
                     ) {
                         return false;
                     }
@@ -648,8 +644,8 @@ export default function Gallery() {
         files,
         trashedFiles,
         hiddenFiles,
-        tempDeletedFileIds,
-        tempHiddenFileIds,
+        tempDeletedFileIDs,
+        tempHiddenFileIDs,
         hiddenFileIDs,
         selectedSearchOption,
         activeCollectionID,
@@ -771,14 +767,14 @@ export default function Gallery() {
             await syncFiles(
                 "normal",
                 collections,
-                (files) => dispatch({ type: "resetFiles", files }),
+                (files) => dispatch({ type: "setFiles", files }),
                 (files) => dispatch({ type: "fetchFiles", files }),
             );
             await syncFiles(
                 "hidden",
                 hiddenCollections,
                 (hiddenFiles) =>
-                    dispatch({ type: "resetHiddenFiles", hiddenFiles }),
+                    dispatch({ type: "setHiddenFiles", hiddenFiles }),
                 (hiddenFiles) =>
                     dispatch({ type: "fetchHiddenFiles", hiddenFiles }),
             );
@@ -806,8 +802,8 @@ export default function Gallery() {
                     log.error("syncWithRemote failed", e);
             }
         } finally {
-            setTempDeletedFileIds(new Set());
-            setTempHiddenFileIds(new Set());
+            dispatch({ type: "clearTempDeleted" });
+            dispatch({ type: "clearTempHidden" });
             !silent && finishLoading();
         }
         syncInProgress.current = false;
@@ -921,8 +917,10 @@ export default function Gallery() {
                 await handleFileOps(
                     ops,
                     toProcessFiles,
-                    setTempDeletedFileIds,
-                    setTempHiddenFileIds,
+                    (files) => dispatch({ type: "markTempDeleted", files }),
+                    () => dispatch({ type: "clearTempDeleted" }),
+                    (files) => dispatch({ type: "markTempHidden", files }),
+                    () => dispatch({ type: "clearTempHidden" }),
                     setFixCreationTimeAttributes,
                     setFilesDownloadProgressAttributesCreator,
                 );
@@ -1248,8 +1246,9 @@ export default function Gallery() {
                         favItemIds={state.favoriteFileIDs}
                         setSelected={setSelected}
                         selected={selected}
-                        tempDeletedFileIds={tempDeletedFileIds}
-                        setTempDeletedFileIds={setTempDeletedFileIds}
+                        markTempDeleted={(files) =>
+                            dispatch({ type: "markTempDeleted", files })
+                        }
                         setIsPhotoSwipeOpen={setIsPhotoSwipeOpen}
                         activeCollectionID={activeCollectionID}
                         activePersonID={galleryPeopleState?.activePerson?.id}
