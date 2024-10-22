@@ -34,6 +34,12 @@ class _GenericFilterChipState extends State<GenericFilterChip> {
   }
 
   @override
+  void didUpdateWidget(covariant GenericFilterChip oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _isApplied = widget.isApplied;
+  }
+
+  @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
