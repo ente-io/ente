@@ -16,6 +16,7 @@ class RecommendedFilters extends StatefulWidget {
 class _RecommendedFiltersState extends State<RecommendedFilters> {
   late SearchFilterDataProvider _searchFilterDataProvider;
   late List<HierarchicalSearchFilter> _recommendations;
+  int _filtersUpdateCount = 0;
 
   @override
   void didChangeDependencies() {
@@ -28,6 +29,11 @@ class _RecommendedFiltersState extends State<RecommendedFilters> {
     _searchFilterDataProvider =
         inheritedSearchFilterData.searchFilterDataProvider!;
     _recommendations = _searchFilterDataProvider.recommendations;
+
+    if (_recommendations.length > kMaxAppbarFilters) {
+      _recommendations = _recommendations.sublist(0, kMaxAppbarFilters);
+      _filtersUpdateCount++;
+    }
 
     _searchFilterDataProvider.removeListener(
       fromRecommended: true,
@@ -59,7 +65,7 @@ class _RecommendedFiltersState extends State<RecommendedFilters> {
           switchInCurve: Curves.easeInOutExpo,
           switchOutCurve: Curves.easeInOutExpo,
           child: ListView.builder(
-            key: ValueKey(_recommendations.length),
+            key: ValueKey(_filtersUpdateCount),
             itemBuilder: (context, index) {
               final filter = _recommendations[index];
               return Padding(
@@ -95,7 +101,11 @@ class _RecommendedFiltersState extends State<RecommendedFilters> {
 
   void onRecommendedFiltersUpdate() {
     setState(() {
+      _filtersUpdateCount++;
       _recommendations = _searchFilterDataProvider.recommendations;
+      if (_recommendations.length > kMaxAppbarFilters) {
+        _recommendations = _recommendations.sublist(0, kMaxAppbarFilters);
+      }
     });
   }
 }

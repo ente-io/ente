@@ -3,12 +3,16 @@ import "package:photos/models/search/hierarchical/hierarchical_search_filter.dar
 
 class SearchFilterDataProvider {
   final _appliedFiltersNotifier = _AppliedFiltersNotifier();
+
+  /// [_recommededFiltersNotifier.value] are filters sorted by decreasing
+  /// order of relevance
   final _recommendedFiltersNotifier = _RecommendedFiltersNotifier();
   final isSearchingNotifier = ValueNotifier(false);
   HierarchicalSearchFilter initialGalleryFilter;
 
   SearchFilterDataProvider({required this.initialGalleryFilter});
 
+  /// [recommendations] are sorted by decreasing order of relevance
   List<HierarchicalSearchFilter> get recommendations =>
       _recommendedFiltersNotifier.recommendedFilters;
   List<HierarchicalSearchFilter> get appliedFilters =>
@@ -71,6 +75,7 @@ class SearchFilterDataProvider {
   }
 
   void _safelyAddToRecommended(List<HierarchicalSearchFilter> filters) {
+    filters.sort((a, b) => b.relevance().compareTo(a.relevance()));
     _recommendedFiltersNotifier.addFilters(
       filters,
       filtersToAvoid: [
