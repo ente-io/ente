@@ -976,58 +976,54 @@ export const deriveFilteredFilesAlbumFocus = (state: GalleryState) => {
         (collection) => collection.id === activeCollectionID,
     );
 
-    const filteredFiles = uniqueFilesByID(
-        files.filter((item) => {
-            if (tempDeletedFileIDs.has(item.id)) {
-                return false;
-            }
+    const filteredFiles = files.filter((item) => {
+        if (tempDeletedFileIDs.has(item.id)) {
+            return false;
+        }
 
-            if (tempHiddenFileIDs.has(item.id)) {
-                return false;
-            }
+        if (tempHiddenFileIDs.has(item.id)) {
+            return false;
+        }
 
-            // archived collections files can only be seen in their respective collection
-            if (archivedCollectionIDs.has(item.collectionID)) {
-                if (activeCollectionID === item.collectionID) {
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-
-            // Archived files can only be seen in archive section or their respective collection
-            if (isArchivedFile(item)) {
-                if (
-                    activeCollectionID === ARCHIVE_SECTION ||
-                    activeCollectionID === item.collectionID
-                ) {
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-
-            // ALL SECTION - show all files
-            if (activeCollectionID === ALL_SECTION) {
-                // show all files except the ones in hidden collections
-                if (hiddenFileIDs.has(item.id)) {
-                    return false;
-                } else {
-                    return true;
-                }
-            }
-
-            // COLLECTION SECTION - show files in the active collection
+        // archived collections files can only be seen in their respective collection
+        if (archivedCollectionIDs.has(item.collectionID)) {
             if (activeCollectionID === item.collectionID) {
                 return true;
             } else {
                 return false;
             }
-        }),
-    );
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    const sortAsc = activeCollection?.pubMagicMetadata?.data?.asc ?? false;
-    return sortAsc ? sortFiles(filteredFiles, true) : filteredFiles;
+        }
+
+        // Archived files can only be seen in archive section or their respective collection
+        if (isArchivedFile(item)) {
+            if (
+                activeCollectionID === ARCHIVE_SECTION ||
+                activeCollectionID === item.collectionID
+            ) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        // ALL SECTION - show all files
+        if (activeCollectionID === ALL_SECTION) {
+            // show all files except the ones in hidden collections
+            if (hiddenFileIDs.has(item.id)) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+
+        // COLLECTION SECTION - show files in the active collection
+        if (activeCollectionID === item.collectionID) {
+            return true;
+        } else {
+            return false;
+        }
+    });
+    return sortAndUniqueFilteredFiles(filteredFiles, activeCollection);
 };
 
 /**
@@ -1048,50 +1044,66 @@ export const deriveFilteredFilesHiddenAlbumsFocus = (state: GalleryState) => {
         (collection) => collection.id === activeCollectionID,
     );
 
-    const filteredFiles = uniqueFilesByID(
-        hiddenFiles.filter((item) => {
-            if (tempDeletedFileIDs.has(item.id)) {
-                return false;
-            }
+    const filteredFiles = hiddenFiles.filter((item) => {
+        if (tempDeletedFileIDs.has(item.id)) {
+            return false;
+        }
 
-            // archived collections files can only be seen in their respective collection
-            if (archivedCollectionIDs.has(item.collectionID)) {
-                if (activeCollectionID === item.collectionID) {
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-
-            // HIDDEN ITEMS SECTION - show all individual hidden files
-            if (
-                activeCollectionID === HIDDEN_ITEMS_SECTION &&
-                defaultHiddenCollectionIDs.has(item.collectionID)
-            ) {
-                return true;
-            }
-
-            // Archived files can only be seen in archive section or their respective collection
-            if (isArchivedFile(item)) {
-                if (
-                    activeCollectionID === ARCHIVE_SECTION ||
-                    activeCollectionID === item.collectionID
-                ) {
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-
-            // COLLECTION SECTION - show files in the active collection
+        // archived collections files can only be seen in their respective collection
+        if (archivedCollectionIDs.has(item.collectionID)) {
             if (activeCollectionID === item.collectionID) {
                 return true;
             } else {
                 return false;
             }
-        }),
-    );
+        }
+
+        // HIDDEN ITEMS SECTION - show all individual hidden files
+        if (
+            activeCollectionID === HIDDEN_ITEMS_SECTION &&
+            defaultHiddenCollectionIDs.has(item.collectionID)
+        ) {
+            return true;
+        }
+
+        // Archived files can only be seen in archive section or their respective collection
+        if (isArchivedFile(item)) {
+            if (
+                activeCollectionID === ARCHIVE_SECTION ||
+                activeCollectionID === item.collectionID
+            ) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        // COLLECTION SECTION - show files in the active collection
+        if (activeCollectionID === item.collectionID) {
+            return true;
+        } else {
+            return false;
+        }
+    });
+
+    return sortAndUniqueFilteredFiles(filteredFiles, activeCollection);
+};
+
+/**
+ * Prepare the list of files for being shown in the gallery.
+ *
+ * This functions uniques the given collection files so that there is only one
+ * entry per file ID. Then it sorts them if needed if the active collection
+ * prefers them to be sorted oldest first (by default, lists of collection files
+ * are sorted newest first, and we assume that {@link files} are already sorted
+ * that way).
+ */
+const sortAndUniqueFilteredFiles = (
+    files: EnteFile[],
+    activeCollection: Collection | undefined,
+) => {
+    const uniqueFiles = uniqueFilesByID(files);
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     const sortAsc = activeCollection?.pubMagicMetadata?.data?.asc ?? false;
-    return sortAsc ? sortFiles(filteredFiles, true) : filteredFiles;
+    return sortAsc ? sortFiles(uniqueFiles, true) : uniqueFiles;
 };
