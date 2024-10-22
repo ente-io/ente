@@ -1242,8 +1242,9 @@ export default function Gallery() {
                         favItemIds={state.favoriteFileIDs}
                         setSelected={setSelected}
                         selected={selected}
-                        tempDeletedFileIds={tempDeletedFileIds}
-                        setTempDeletedFileIds={setTempDeletedFileIds}
+                        markTempDeleted={(files) =>
+                            dispatch({ type: "markTempDeleted", files })
+                        }
                         setIsPhotoSwipeOpen={setIsPhotoSwipeOpen}
                         activeCollectionID={activeCollectionID}
                         activePersonID={galleryPeopleState?.activePerson?.id}

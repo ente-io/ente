@@ -64,8 +64,7 @@ export interface PhotoFrameProps {
         selected: SelectedState | ((selected: SelectedState) => SelectedState),
     ) => void;
     selected: SelectedState;
-    tempDeletedFileIds?: Set<number>;
-    setTempDeletedFileIds?: (value: Set<number>) => void;
+    markTempDeleted?: (tempDeletedFiles: EnteFile[]) => void;
     /** This will be set if mode is not "people". */
     activeCollectionID: number;
     /** This will be set if mode is "people". */
@@ -91,8 +90,7 @@ const PhotoFrame = ({
     favItemIds,
     setSelected,
     selected,
-    tempDeletedFileIds,
-    setTempDeletedFileIds,
+    markTempDeleted,
     activeCollectionID,
     activePersonID,
     enableDownload,
@@ -581,8 +579,7 @@ const PhotoFrame = ({
                 gettingData={getSlideData}
                 getConvertedItem={getConvertedItem}
                 favItemIds={favItemIds}
-                tempDeletedFileIds={tempDeletedFileIds}
-                setTempDeletedFileIds={setTempDeletedFileIds}
+                markTempDeleted={markTempDeleted}
                 isTrashCollection={activeCollectionID === TRASH_SECTION}
                 isInHiddenSection={isInHiddenSection}
                 enableDownload={enableDownload}
