@@ -461,6 +461,10 @@ export default function Gallery() {
     }, [router.isReady]);
 
     useEffect(() => {
+        dispatch({ type: "setPeopleState", peopleState });
+    }, [peopleState]);
+
+    useEffect(() => {
         if (isInSearchMode && selectedSearchOption) {
             setPhotoListHeader({
                 height: 104,
@@ -763,14 +767,14 @@ export default function Gallery() {
             await syncFiles(
                 "normal",
                 collections,
-                (files) => dispatch({ type: "resetFiles", files }),
+                (files) => dispatch({ type: "setFiles", files }),
                 (files) => dispatch({ type: "fetchFiles", files }),
             );
             await syncFiles(
                 "hidden",
                 hiddenCollections,
                 (hiddenFiles) =>
-                    dispatch({ type: "resetHiddenFiles", hiddenFiles }),
+                    dispatch({ type: "setHiddenFiles", hiddenFiles }),
                 (hiddenFiles) =>
                     dispatch({ type: "fetchHiddenFiles", hiddenFiles }),
             );

@@ -39,7 +39,7 @@ import {
     isArchivedFile,
     isPinnedCollection,
 } from "../../services/magic-metadata";
-import type { Person } from "../../services/ml/people";
+import type { PeopleState, Person } from "../../services/ml/people";
 import type { FamilyData } from "../../services/user";
 
 /**
@@ -85,7 +85,7 @@ export interface GalleryState {
      */
     familyData: FamilyData | undefined;
 
-    /*--<  Primary state: Files and collections  >--*/
+    /*--<  Primary state: Files, collections, people  >--*/
 
     /**
      * The user's non-hidden collections.
@@ -113,6 +113,11 @@ export interface GalleryState {
      * The list is sorted so that newer files are first.
      */
     trashedFiles: EnteFile[];
+    /**
+     * Latest snapshot of people related state, as reported by
+     * {@link usePeopleStateSnapshot}.
+     */
+    peopleState: PeopleState | undefined;
 
     /*--<  Derived state  >--*/
 
@@ -250,12 +255,13 @@ export type GalleryAction =
           collections: Collection[];
           hiddenCollections: Collection[];
       }
-    | { type: "resetFiles"; files: EnteFile[] }
+    | { type: "setFiles"; files: EnteFile[] }
     | { type: "fetchFiles"; files: EnteFile[] }
     | { type: "uploadFile"; file: EnteFile }
-    | { type: "resetHiddenFiles"; hiddenFiles: EnteFile[] }
+    | { type: "setHiddenFiles"; hiddenFiles: EnteFile[] }
     | { type: "fetchHiddenFiles"; hiddenFiles: EnteFile[] }
     | { type: "setTrashedFiles"; trashedFiles: EnteFile[] }
+    | { type: "setPeopleState"; peopleState: PeopleState | undefined }
     | { type: "markTempDeleted"; files: EnteFile[] }
     | { type: "clearTempDeleted" }
     | { type: "markTempHidden"; files: EnteFile[] }
@@ -280,6 +286,7 @@ const initialGalleryState: GalleryState = {
     files: [],
     hiddenFiles: [],
     trashedFiles: [],
+    peopleState: undefined,
     archivedCollectionIDs: new Set(),
     defaultHiddenCollectionIDs: new Set(),
     hiddenFileIDs: new Set(),
@@ -415,7 +422,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 ),
             };
         }
-        case "resetFiles": {
+        case "setFiles": {
             const files = sortFiles(mergeMetadata(action.files));
             return {
                 ...state,
@@ -478,7 +485,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 ),
             };
         }
-        case "resetHiddenFiles": {
+        case "setHiddenFiles": {
             const hiddenFiles = sortFiles(mergeMetadata(action.hiddenFiles));
             return {
                 ...state,
@@ -523,6 +530,8 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     state.archivedCollectionIDs,
                 ),
             };
+        case "setPeopleState":
+            return { ...state, peopleState: action.peopleState };
         case "markTempDeleted":
             return {
                 ...state,
