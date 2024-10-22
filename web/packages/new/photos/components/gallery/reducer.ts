@@ -978,42 +978,33 @@ export const deriveFilteredFilesAlbumFocus = (state: GalleryState) => {
 
     const filteredFiles = files.filter((file) => {
         if (tempDeletedFileIDs.has(file.id)) return false;
+        if (hiddenFileIDs.has(file.id)) return false;
         if (tempHiddenFileIDs.has(file.id)) return false;
 
-        // archived collections files can only be seen in their respective collection
+        // Files in archived collections can only be seen in their respective
+        // collection.
         if (archivedCollectionIDs.has(file.collectionID)) {
-            if (activeCollectionID === file.collectionID) {
-                return true;
-            } else {
-                return false;
-            }
+            return activeCollectionID === file.collectionID;
         }
 
-        // Archived files can only be seen in archive section or their respective collection
+        // Archived files can only be seen in the archive section, or in their
+        // respective collection.
         if (isArchivedFile(file)) {
-            if (
+            return (
                 activeCollectionID === ARCHIVE_SECTION ||
                 activeCollectionID === file.collectionID
-            ) {
-                return true;
-            } else {
-                return false;
-            }
+            );
         }
 
-        // ALL SECTION - show all files
+        // Show all remaining (non-hidden, non-archived) files in "All".
         if (activeCollectionID === ALL_SECTION) {
-            // show all files except the ones in hidden collections
-            if (hiddenFileIDs.has(file.id)) {
-                return false;
-            } else {
-                return true;
-            }
+            return true;
         }
 
-        // Show files in the active collection
+        // Show files that belong to the active collection.
         return activeCollectionID === file.collectionID;
     });
+
     return sortAndUniqueFilteredFiles(filteredFiles, activeCollection);
 };
 
@@ -1037,16 +1028,16 @@ export const deriveFilteredFilesHiddenAlbumsFocus = (state: GalleryState) => {
     const filteredFiles = hiddenFiles.filter((file) => {
         if (tempDeletedFileIDs.has(file.id)) return false;
 
-        // Hidden items sections shows all standalone hidden files.
+        // "Hidden" shows all standalone hidden files.
         if (
             activeCollectionID === HIDDEN_ITEMS_SECTION &&
             defaultHiddenCollectionIDs.has(file.collectionID)
         ) {
             return true;
-        } else {
-            // Show files in the active collection.
-            return activeCollectionID === file.collectionID;
         }
+
+        // Show files that belong to the active collection.
+        return activeCollectionID === file.collectionID;
     });
 
     return sortAndUniqueFilteredFiles(filteredFiles, activeCollection);
