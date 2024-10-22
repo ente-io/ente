@@ -11,6 +11,7 @@ abstract class HierarchicalSearchFilter {
   //in gallery is when the filter is the initial filter (top level) of the
   //gallery.
   final Set<int> matchedUploadedIDs;
+  bool isApplied = false;
 
   HierarchicalSearchFilter({matchedUploadedIDs})
       : matchedUploadedIDs = matchedUploadedIDs ?? {};

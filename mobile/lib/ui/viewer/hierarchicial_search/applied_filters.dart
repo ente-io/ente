@@ -66,10 +66,14 @@ class _AppliedFiltersState extends State<AppliedFilters> {
                 )
               : GenericFilterChip(
                   label: filter.name(),
-                  onTap: () {
+                  apply: () {
+                    _searchFilterDataProvider.applyFilters([filter]);
+                  },
+                  remove: () {
                     _searchFilterDataProvider.removeAppliedFilters([filter]);
                   },
                   leadingIcon: filter.icon(),
+                  isApplied: filter.isApplied,
                 ),
         );
       },

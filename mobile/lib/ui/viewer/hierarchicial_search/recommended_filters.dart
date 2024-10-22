@@ -2,9 +2,11 @@ import "package:flutter/material.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/models/search/hierarchical/face_filter.dart";
 import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
+import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
 import "package:photos/ui/viewer/hierarchicial_search/filter_chip.dart";
+import "package:photos/ui/viewer/hierarchicial_search/filter_options_bottom_sheet.dart";
 
 class RecommendedFilters extends StatefulWidget {
   const RecommendedFilters({super.key});
@@ -67,7 +69,23 @@ class _RecommendedFiltersState extends State<RecommendedFilters> {
           child: ListView.builder(
             key: ValueKey(_filtersUpdateCount),
             itemBuilder: (context, index) {
-              final filter = _recommendations[index];
+              if (index == 0) {
+                return IconButtonWidget(
+                  icon: Icons.sort,
+                  iconButtonType: IconButtonType.rounded,
+                  onTap: () {
+                    showModalBottomSheet(
+                      context: context,
+                      builder: (context) {
+                        return FilterOptionsBottomSheet(
+                          _searchFilterDataProvider,
+                        );
+                      },
+                    );
+                  },
+                );
+              }
+              final filter = _recommendations[index - 1];
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4),
                 child: filter is FaceFilter
@@ -82,16 +100,21 @@ class _RecommendedFiltersState extends State<RecommendedFilters> {
                       )
                     : GenericFilterChip(
                         label: filter.name(),
-                        onTap: () {
+                        apply: () {
                           _searchFilterDataProvider.applyFilters([filter]);
                         },
+                        remove: () {
+                          _searchFilterDataProvider
+                              .removeAppliedFilters([filter]);
+                        },
                         leadingIcon: filter.icon(),
+                        isApplied: filter.isApplied,
                       ),
               );
             },
             clipBehavior: Clip.none,
             scrollDirection: Axis.horizontal,
-            itemCount: _recommendations.length,
+            itemCount: _recommendations.length + 1,
             padding: const EdgeInsets.symmetric(horizontal: 4),
           ),
         ),

@@ -25,16 +25,26 @@ class SearchFilterDataProvider {
 
   void applyFilters(List<HierarchicalSearchFilter> filters) {
     _recommendedFiltersNotifier.removeFilters(filters);
+
+    late final List<HierarchicalSearchFilter> allFiltersToAdd;
     if (!isSearchingNotifier.value) {
       isSearchingNotifier.value = true;
-      _appliedFiltersNotifier.addFilters([initialGalleryFilter, ...filters]);
+      allFiltersToAdd = [initialGalleryFilter, ...filters];
     } else {
-      _appliedFiltersNotifier.addFilters(filters);
+      allFiltersToAdd = filters;
     }
+
+    for (HierarchicalSearchFilter filter in allFiltersToAdd) {
+      filter.isApplied = true;
+    }
+    _appliedFiltersNotifier.addFilters(allFiltersToAdd);
   }
 
   void removeAppliedFilters(List<HierarchicalSearchFilter> filters) {
     _appliedFiltersNotifier.removeFilters(filters);
+    for (HierarchicalSearchFilter filter in filters) {
+      filter.isApplied = false;
+    }
     _safelyAddToRecommended(filters);
   }
 
