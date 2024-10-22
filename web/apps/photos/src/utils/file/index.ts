@@ -542,9 +542,8 @@ export const handleFileOps = async (
     setTempDeletedFileIds: (
         tempDeletedFileIds: Set<number> | ((prev: Set<number>) => Set<number>),
     ) => void,
-    setTempHiddenFileIds: (
-        tempHiddenFileIds: Set<number> | ((prev: Set<number>) => Set<number>),
-    ) => void,
+    markTempHidden: (tempHiddenFiles: EnteFile[]) => void,
+    clearTempHidden: () => void,
     setFixCreationTimeAttributes: (
         fixCreationTimeAttributes:
             | {
@@ -562,7 +561,13 @@ export const handleFileOps = async (
             await deleteFileHelper(files, true, setTempDeletedFileIds);
             break;
         case FILE_OPS_TYPE.HIDE:
-            await hideFilesHelper(files, setTempHiddenFileIds);
+            try {
+                markTempHidden(files);
+                await moveToHiddenCollection(files);
+            } catch (e) {
+                clearTempHidden();
+                throw e;
+            }
             break;
         case FILE_OPS_TYPE.DOWNLOAD: {
             const setSelectedFileDownloadProgressAttributes =
@@ -609,24 +614,6 @@ const deleteFileHelper = async (
         }
     } catch (e) {
         setTempDeletedFileIds(new Set());
-        throw e;
-    }
-};
-
-const hideFilesHelper = async (
-    selectedFiles: EnteFile[],
-    setTempHiddenFileIds: (
-        tempHiddenFileIds: Set<number> | ((prev: Set<number>) => Set<number>),
-    ) => void,
-) => {
-    try {
-        setTempHiddenFileIds((hiddenFileIds) => {
-            selectedFiles.forEach((file) => hiddenFileIds.add(file.id));
-            return new Set(hiddenFileIds);
-        });
-        await moveToHiddenCollection(selectedFiles);
-    } catch (e) {
-        setTempHiddenFileIds(new Set());
         throw e;
     }
 };

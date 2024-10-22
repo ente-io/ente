@@ -300,9 +300,6 @@ export default function Gallery() {
     const [tempDeletedFileIds, setTempDeletedFileIds] = useState(
         new Set<number>(),
     );
-    const [tempHiddenFileIds, setTempHiddenFileIds] = useState(
-        new Set<number>(),
-    );
 
     const [openCollectionSelector, setOpenCollectionSelector] = useState(false);
     const [collectionSelectorAttributes, setCollectionSelectorAttributes] =
@@ -326,6 +323,7 @@ export default function Gallery() {
     const fileToCollectionsMap = state.fileCollectionIDs;
     const collectionSummaries = state.collectionSummaries;
     const hiddenCollectionSummaries = state.hiddenCollectionSummaries;
+    const tempHiddenFileIDs = state.tempHiddenFileIDs;
     const barMode = state.barMode ?? "albums";
     const activeCollectionID = state.activeCollectionID;
     const activePersonID = state.activePersonID;
@@ -519,7 +517,7 @@ export default function Gallery() {
         } else if (barMode == "people") {
             let filteredPeople = peopleState?.people ?? [];
             let filteredVisiblePeople = peopleState?.visiblePeople ?? [];
-            if (tempDeletedFileIds?.size ?? tempHiddenFileIds?.size) {
+            if (tempDeletedFileIds?.size ?? tempHiddenFileIDs?.size) {
                 // Prune the in-memory temp updates from the actual state to
                 // obtain the UI state. Kept inside an preflight check to so
                 // that the common path remains fast.
@@ -530,7 +528,7 @@ export default function Gallery() {
                             fileIDs: p.fileIDs.filter(
                                 (id) =>
                                     !tempDeletedFileIds?.has(id) &&
-                                    !tempHiddenFileIds?.has(id),
+                                    !tempHiddenFileIDs?.has(id),
                             ),
                         }))
                         .filter((p) => p.fileIDs.length > 0);
@@ -579,7 +577,7 @@ export default function Gallery() {
 
                     if (
                         barMode != "hidden-albums" &&
-                        tempHiddenFileIds?.has(item.id)
+                        tempHiddenFileIDs?.has(item.id)
                     ) {
                         return false;
                     }
@@ -649,7 +647,7 @@ export default function Gallery() {
         trashedFiles,
         hiddenFiles,
         tempDeletedFileIds,
-        tempHiddenFileIds,
+        tempHiddenFileIDs,
         hiddenFileIDs,
         selectedSearchOption,
         activeCollectionID,
@@ -807,7 +805,7 @@ export default function Gallery() {
             }
         } finally {
             setTempDeletedFileIds(new Set());
-            setTempHiddenFileIds(new Set());
+            dispatch({ type: "clearTempHidden" });
             !silent && finishLoading();
         }
         syncInProgress.current = false;
@@ -922,7 +920,9 @@ export default function Gallery() {
                     ops,
                     toProcessFiles,
                     setTempDeletedFileIds,
-                    setTempHiddenFileIds,
+                    (files: EnteFile[]) =>
+                        dispatch({ type: "markTempHidden", files }),
+                    () => dispatch({ type: "clearTempHidden" }),
                     setFixCreationTimeAttributes,
                     setFilesDownloadProgressAttributesCreator,
                 );
