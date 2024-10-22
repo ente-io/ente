@@ -256,6 +256,8 @@ export type GalleryAction =
     | { type: "resetHiddenFiles"; hiddenFiles: EnteFile[] }
     | { type: "fetchHiddenFiles"; hiddenFiles: EnteFile[] }
     | { type: "setTrashedFiles"; trashedFiles: EnteFile[] }
+    | { type: "markTempDeleted"; files: EnteFile[] }
+    | { type: "clearTempDeleted" }
     | { type: "markTempHidden"; files: EnteFile[] }
     | { type: "clearTempHidden" }
     | { type: "showAll" }
@@ -521,6 +523,17 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     state.archivedCollectionIDs,
                 ),
             };
+        case "markTempDeleted":
+            return {
+                ...state,
+                tempDeletedFileIDs: new Set(
+                    [...state.tempDeletedFileIDs].concat(
+                        action.files.map((f) => f.id),
+                    ),
+                ),
+            };
+        case "clearTempDeleted":
+            return { ...state, tempDeletedFileIDs: new Set() };
         case "markTempHidden":
             return {
                 ...state,
