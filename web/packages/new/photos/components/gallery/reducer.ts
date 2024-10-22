@@ -159,20 +159,18 @@ export interface GalleryState {
     /*--<  In-flight updates  >--*/
 
     /**
-     * File IDs of the files that have been deleted in the current session, but
-     * have not yet been synced with the remote.
+     * File IDs of the files that have been just been deleted by the user.
      *
-     * These are stashed here temporarily to provide a more responsive user
-     * feedback.
+     * The delete on remote for these has either completed, or is currently in
+     * flight, but the local state has not yet been updated. We stash these
+     * changes here temporarily so that the UI can reflect the changes until our
+     * local state also gets synced in a bit.
      */
     tempDeletedFileIDs: Set<number>;
 
     /**
-     * File IDs of the files that have been hidden in the current session, but
-     * have not yet been synced with the remote.
-     *
-     * These are stashed here temporarily to provide a more responsive user
-     * feedback.
+     * Variant of {@link tempDeletedFileIDs} for files that have just been
+     * hidden.
      */
     tempHiddenFileIDs: Set<number>;
 
