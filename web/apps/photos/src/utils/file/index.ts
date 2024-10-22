@@ -539,9 +539,8 @@ export const shouldShowAvatar = (file: EnteFile, user: User) => {
 export const handleFileOps = async (
     ops: FILE_OPS_TYPE,
     files: EnteFile[],
-    setTempDeletedFileIds: (
-        tempDeletedFileIds: Set<number> | ((prev: Set<number>) => Set<number>),
-    ) => void,
+    markTempDeleted: (tempDeletedFiles: EnteFile[]) => void,
+    clearTempDeleted: () => void,
     markTempHidden: (tempHiddenFiles: EnteFile[]) => void,
     clearTempHidden: () => void,
     setFixCreationTimeAttributes: (
@@ -555,10 +554,22 @@ export const handleFileOps = async (
 ) => {
     switch (ops) {
         case FILE_OPS_TYPE.TRASH:
-            await deleteFileHelper(files, false, setTempDeletedFileIds);
+            try {
+                markTempDeleted(files);
+                await trashFiles(files);
+            } catch (e) {
+                clearTempDeleted();
+                throw e;
+            }
             break;
         case FILE_OPS_TYPE.DELETE_PERMANENTLY:
-            await deleteFileHelper(files, true, setTempDeletedFileIds);
+            try {
+                markTempDeleted(files);
+                await deleteFromTrash(files.map((file) => file.id));
+            } catch (e) {
+                clearTempDeleted();
+                throw e;
+            }
             break;
         case FILE_OPS_TYPE.HIDE:
             try {
@@ -592,29 +603,6 @@ export const handleFileOps = async (
         case FILE_OPS_TYPE.SET_FAVORITE:
             await addMultipleToFavorites(files);
             break;
-    }
-};
-
-const deleteFileHelper = async (
-    selectedFiles: EnteFile[],
-    permanent: boolean,
-    setTempDeletedFileIds: (
-        tempDeletedFileIds: Set<number> | ((prev: Set<number>) => Set<number>),
-    ) => void,
-) => {
-    try {
-        setTempDeletedFileIds((deletedFileIds) => {
-            selectedFiles.forEach((file) => deletedFileIds.add(file.id));
-            return new Set(deletedFileIds);
-        });
-        if (permanent) {
-            await deleteFromTrash(selectedFiles.map((file) => file.id));
-        } else {
-            await trashFiles(selectedFiles);
-        }
-    } catch (e) {
-        setTempDeletedFileIds(new Set());
-        throw e;
     }
 };
 

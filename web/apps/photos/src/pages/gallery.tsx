@@ -294,13 +294,6 @@ export default function Gallery() {
         setFilesDownloadProgressAttributesList,
     ] = useState<FilesDownloadProgressAttributes[]>([]);
 
-    // tempDeletedFileIds and tempHiddenFileIds are used to keep track of files
-    // that are deleted/hidden in the current session but not yet synced with
-    // the server.
-    const [tempDeletedFileIds, setTempDeletedFileIds] = useState(
-        new Set<number>(),
-    );
-
     const [openCollectionSelector, setOpenCollectionSelector] = useState(false);
     const [collectionSelectorAttributes, setCollectionSelectorAttributes] =
         useState<CollectionSelectorAttributes | undefined>();
@@ -323,6 +316,7 @@ export default function Gallery() {
     const fileToCollectionsMap = state.fileCollectionIDs;
     const collectionSummaries = state.collectionSummaries;
     const hiddenCollectionSummaries = state.hiddenCollectionSummaries;
+    const tempDeletedFileIDs = state.tempDeletedFileIDs;
     const tempHiddenFileIDs = state.tempHiddenFileIDs;
     const barMode = state.barMode ?? "albums";
     const activeCollectionID = state.activeCollectionID;
@@ -517,7 +511,7 @@ export default function Gallery() {
         } else if (barMode == "people") {
             let filteredPeople = peopleState?.people ?? [];
             let filteredVisiblePeople = peopleState?.visiblePeople ?? [];
-            if (tempDeletedFileIds?.size ?? tempHiddenFileIDs?.size) {
+            if (tempDeletedFileIDs?.size ?? tempHiddenFileIDs?.size) {
                 // Prune the in-memory temp updates from the actual state to
                 // obtain the UI state. Kept inside an preflight check to so
                 // that the common path remains fast.
@@ -527,7 +521,7 @@ export default function Gallery() {
                             ...p,
                             fileIDs: p.fileIDs.filter(
                                 (id) =>
-                                    !tempDeletedFileIds?.has(id) &&
+                                    !tempDeletedFileIDs?.has(id) &&
                                     !tempHiddenFileIDs?.has(id),
                             ),
                         }))
@@ -565,13 +559,13 @@ export default function Gallery() {
         } else if (activeCollectionID === TRASH_SECTION) {
             filteredFiles = uniqueFilesByID([
                 ...trashedFiles,
-                ...files.filter((file) => tempDeletedFileIds?.has(file.id)),
+                ...files.filter((file) => tempDeletedFileIDs?.has(file.id)),
             ]);
         } else {
             const baseFiles = barMode == "hidden-albums" ? hiddenFiles : files;
             filteredFiles = uniqueFilesByID(
                 baseFiles.filter((item) => {
-                    if (tempDeletedFileIds?.has(item.id)) {
+                    if (tempDeletedFileIDs?.has(item.id)) {
                         return false;
                     }
 
@@ -646,7 +640,7 @@ export default function Gallery() {
         files,
         trashedFiles,
         hiddenFiles,
-        tempDeletedFileIds,
+        tempDeletedFileIDs,
         tempHiddenFileIDs,
         hiddenFileIDs,
         selectedSearchOption,
@@ -804,7 +798,7 @@ export default function Gallery() {
                     log.error("syncWithRemote failed", e);
             }
         } finally {
-            setTempDeletedFileIds(new Set());
+            dispatch({ type: "clearTempDeleted" });
             dispatch({ type: "clearTempHidden" });
             !silent && finishLoading();
         }
@@ -919,9 +913,9 @@ export default function Gallery() {
                 await handleFileOps(
                     ops,
                     toProcessFiles,
-                    setTempDeletedFileIds,
-                    (files: EnteFile[]) =>
-                        dispatch({ type: "markTempHidden", files }),
+                    (files) => dispatch({ type: "markTempDeleted", files }),
+                    () => dispatch({ type: "clearTempDeleted" }),
+                    (files) => dispatch({ type: "markTempHidden", files }),
                     () => dispatch({ type: "clearTempHidden" }),
                     setFixCreationTimeAttributes,
                     setFilesDownloadProgressAttributesCreator,
