@@ -110,7 +110,6 @@ import {
     useCallback,
     useContext,
     useEffect,
-    useMemo,
     useRef,
     useState,
 } from "react";
@@ -305,7 +304,6 @@ export default function Gallery() {
     const user = state.user;
     const familyData = state.familyData;
     const collections = state.collections;
-    const hiddenCollections = state.hiddenCollections;
     const files = state.files;
     const hiddenFiles = state.hiddenFiles;
     const trashedFiles = state.trashedFiles;
@@ -319,6 +317,7 @@ export default function Gallery() {
     const tempHiddenFileIDs = state.tempHiddenFileIDs;
     const barMode = state.barMode ?? "albums";
     const activeCollectionID = state.activeCollectionID;
+    const activeCollection = state.activeCollection;
     const activePersonID = state.activePersonID;
     const isInSearchMode = state.isInSearchMode;
 
@@ -474,15 +473,6 @@ export default function Gallery() {
             });
         }
     }, [isInSearchMode, selectedSearchOption]);
-
-    const activeCollection = useMemo(() => {
-        if (!collections || !hiddenCollections) {
-            return null;
-        }
-        return [...collections, ...hiddenCollections].find(
-            (collection) => collection.id === activeCollectionID,
-        );
-    }, [collections, activeCollectionID]);
 
     // TODO: Make this a normal useEffect.
     useMemoSingleThreaded(async () => {

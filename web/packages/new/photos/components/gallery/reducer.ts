@@ -215,6 +215,16 @@ export interface GalleryState {
     focus: GalleryFocus | undefined;
     activeCollectionID: number | undefined;
     /**
+     * If the active collection ID is for a collection and not a
+     * pseudo-collection, this property will be set to the corresponding
+     * {@link Collection}.
+     *
+     * It is guaranteed that this will be one of the {@link collections} (when
+     * we are in the "albums" focus) or {@link hiddenCollections} (when we are
+     * in "hidden-albums" focus).
+     */
+    activeCollection: Collection | undefined;
+    /**
      * The currently selected person, if any.
      *
      * When present, it is used to derive the {@link activePerson} property of
@@ -329,6 +339,7 @@ const initialGalleryState: GalleryState = {
     barMode: undefined,
     focus: undefined,
     activeCollectionID: undefined,
+    activeCollection: undefined,
     activePersonID: undefined,
     filteredData: [],
     activePerson: undefined,
@@ -586,6 +597,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 ...state,
                 barMode: "albums",
                 activeCollectionID: ALL_SECTION,
+                activeCollection: undefined,
                 isInSearchMode: false,
                 searchResults: undefined,
             };
@@ -594,6 +606,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 ...state,
                 barMode: "hidden-albums",
                 activeCollectionID: HIDDEN_ITEMS_SECTION,
+                activeCollection: undefined,
                 isInSearchMode: false,
                 searchResults: undefined,
             };
@@ -608,6 +621,9 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                         ? "hidden-albums"
                         : "albums",
                 activeCollectionID: action.collectionSummaryID ?? ALL_SECTION,
+                activeCollection: state.collections
+                    .concat(state.hiddenCollections)
+                    .find(({ id }) => id === action.collectionSummaryID),
                 isInSearchMode: false,
                 searchResults: undefined,
             };
@@ -963,18 +979,14 @@ export const deriveFilteredFilesAlbumishFocus = (state: GalleryState) => {
  */
 export const deriveFilteredFilesAlbumFocus = (state: GalleryState) => {
     const {
-        collections,
         files,
         archivedCollectionIDs,
         hiddenFileIDs,
         tempDeletedFileIDs,
         tempHiddenFileIDs,
         activeCollectionID,
+        activeCollection,
     } = state;
-
-    const activeCollection = collections.find(
-        (collection) => collection.id === activeCollectionID,
-    );
 
     const filteredFiles = files.filter((file) => {
         if (tempDeletedFileIDs.has(file.id)) return false;
@@ -1028,16 +1040,12 @@ export const deriveFilteredFilesTrash = ({
  */
 export const deriveFilteredFilesHiddenAlbumsFocus = (state: GalleryState) => {
     const {
-        hiddenCollections,
         hiddenFiles,
         defaultHiddenCollectionIDs,
         tempDeletedFileIDs,
         activeCollectionID,
+        activeCollection,
     } = state;
-
-    const activeCollection = hiddenCollections.find(
-        (collection) => collection.id === activeCollectionID,
-    );
 
     const filteredFiles = hiddenFiles.filter((file) => {
         if (tempDeletedFileIDs.has(file.id)) return false;
