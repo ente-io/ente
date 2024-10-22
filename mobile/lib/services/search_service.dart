@@ -26,6 +26,7 @@ import 'package:photos/models/search/album_search_result.dart';
 import 'package:photos/models/search/generic_search_result.dart';
 import "package:photos/models/search/hierarchical/contacts_filter.dart";
 import "package:photos/models/search/hierarchical/face_filter.dart";
+import "package:photos/models/search/hierarchical/file_type_filter.dart";
 import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
 import "package:photos/models/search/hierarchical/location_filter.dart";
 import "package:photos/models/search/hierarchical/magic_filter.dart";
@@ -390,10 +391,10 @@ class SearchService {
               ResultType.fileType,
               fileTypeString,
               matchedFiles,
-              hierarchicalSearchFilter: TopLevelGenericFilter(
-                filterName: fileTypeString,
+              hierarchicalSearchFilter: FileTypeFilter(
+                fileType: fileType,
+                typeName: fileTypeString,
                 occurrence: kMostRelevantFilter,
-                filterResultType: ResultType.fileType,
                 matchedUploadedIDs: filesToUploadedFileIDs(matchedFiles),
               ),
             ),
@@ -441,10 +442,10 @@ class SearchService {
             ResultType.fileType,
             name,
             value,
-            hierarchicalSearchFilter: TopLevelGenericFilter(
-              filterName: name,
+            hierarchicalSearchFilter: FileTypeFilter(
+              fileType: key,
+              typeName: name,
               occurrence: kMostRelevantFilter,
-              filterResultType: ResultType.fileType,
               matchedUploadedIDs: filesToUploadedFileIDs(value),
             ),
           ),
