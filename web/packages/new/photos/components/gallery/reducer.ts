@@ -54,12 +54,35 @@ export type GalleryBarMode = "albums" | "hidden-albums" | "people";
  */
 export type GalleryFocus =
     | {
+          /**
+           * We're either in the "Albums" section, or are displaying the hidden
+           * albums.
+           */
           type: "albums" | "hidden-albums";
           activeCollectionID: number;
           activeCollection: Collection | undefined;
           activeCollectionSummary: CollectionSummary;
       }
-    | { type: "people"; activePersonID: string; activePerson: Person };
+    | {
+          /**
+           * We're in the "People" section.
+           */
+          type: "people";
+          /**
+           * The list of people to show in the gallery bar.
+           *
+           * Note that this can be different from the underlying list of people,
+           * and can temporarily include a person from outside that list.
+           */
+          people: Person[];
+          /**
+           * The currently selected person in the gallery bar.
+           *
+           * It is guaranteed that {@link activePerson} will be one of the
+           * objects from among {@link people}.
+           */
+          activePerson: Person;
+      };
 
 /**
  * Derived UI state backing the gallery.
@@ -191,6 +214,12 @@ export interface GalleryState {
      */
     focus: GalleryFocus | undefined;
     activeCollectionID: number | undefined;
+    /**
+     * The currently selected person, if any.
+     *
+     * When present, it is used to derive the {@link activePerson} property of
+     * the {@link focus}.
+     */
     activePersonID: string | undefined;
 
     filteredData: EnteFile[];
@@ -312,9 +341,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
     state,
     action,
 ) => {
-    if (process.env.NEXT_PUBLIC_ENTE_WIP_CL) {
-        console.log("dispatch", action);
-    }
+    if (process.env.NEXT_PUBLIC_ENTE_WIP_CL) console.log("dispatch", action);
     switch (action.type) {
         case "mount": {
             const [hiddenCollections, collections] = splitByPredicate(
