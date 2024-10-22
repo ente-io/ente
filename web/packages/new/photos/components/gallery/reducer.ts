@@ -156,6 +156,26 @@ export interface GalleryState {
      */
     hiddenCollectionSummaries: Map<number, CollectionSummary>;
 
+    /*--<  In-flight updates  >--*/
+
+    /**
+     * File IDs of the files that have been deleted in the current session, but
+     * have not yet been synced with the remote.
+     *
+     * These are stashed here temporarily to provide a more responsive user
+     * feedback.
+     */
+    tempDeletedFileIDs: Set<number>;
+
+    /**
+     * File IDs of the files that have been hidden in the current session, but
+     * have not yet been synced with the remote.
+     *
+     * These are stashed here temporarily to provide a more responsive user
+     * feedback.
+     */
+    tempHiddenFileIDs: Set<number>;
+
     /*--<  Transient UI state  >--*/
 
     /**
@@ -266,6 +286,8 @@ const initialGalleryState: GalleryState = {
     fileCollectionIDs: new Map(),
     collectionSummaries: new Map(),
     hiddenCollectionSummaries: new Map(),
+    tempDeletedFileIDs: new Set<number>(),
+    tempHiddenFileIDs: new Set<number>(),
     barMode: undefined,
     focus: undefined,
     activeCollectionID: undefined,
