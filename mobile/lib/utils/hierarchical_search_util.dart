@@ -340,10 +340,7 @@ Future<List<FaceFilter>> curateFaceFilters(
           "`getAllFace`: Cluster $clusterId should not have person id ${clusterIDToPersonID[clusterId]}",
         );
       }
-      if (files.length < kMinimumClusterSizeSearchResult &&
-          clusterIdToFiles.keys.length > 3) {
-        continue;
-      }
+      if (files.length < kMinimumClusterSizeSearchResult) continue;
 
       faceFilters.add(
         FaceFilter(
