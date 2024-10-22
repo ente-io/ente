@@ -20,6 +20,7 @@ import {
     SearchResultsHeader,
 } from "@/new/photos/components/gallery";
 import {
+    deriveFilteredFilesAlbumishFocus,
     uniqueFilesByID,
     useGalleryReducer,
     type GalleryBarMode,
@@ -28,9 +29,7 @@ import { usePeopleStateSnapshot } from "@/new/photos/components/utils/ml";
 import { shouldShowWhatsNew } from "@/new/photos/services/changelog";
 import {
     ALL_SECTION,
-    ARCHIVE_SECTION,
     DUMMY_UNCATEGORIZED_COLLECTION,
-    HIDDEN_ITEMS_SECTION,
     TRASH_SECTION,
     isHiddenCollection,
 } from "@/new/photos/services/collection";
@@ -41,7 +40,6 @@ import {
     getLocalTrashedFiles,
     sortFiles,
 } from "@/new/photos/services/files";
-import { isArchivedFile } from "@/new/photos/services/magic-metadata";
 import type { Person } from "@/new/photos/services/ml/people";
 import {
     filterSearchableFiles,
@@ -310,7 +308,6 @@ export default function Gallery() {
     const hiddenFiles = state.hiddenFiles;
     const trashedFiles = state.trashedFiles;
     const archivedCollectionIDs = state.archivedCollectionIDs;
-    const defaultHiddenCollectionIDs = state.defaultHiddenCollectionIDs;
     const hiddenFileIDs = state.hiddenFileIDs;
     const collectionNameMap = state.allCollectionNameByID;
     const fileToCollectionsMap = state.fileCollectionIDs;
@@ -564,72 +561,7 @@ export default function Gallery() {
                 ...files.filter((file) => tempDeletedFileIDs?.has(file.id)),
             ]);
         } else {
-            const baseFiles = barMode == "hidden-albums" ? hiddenFiles : files;
-            filteredFiles = uniqueFilesByID(
-                baseFiles.filter((item) => {
-                    if (tempDeletedFileIDs?.has(item.id)) {
-                        return false;
-                    }
-
-                    if (
-                        barMode != "hidden-albums" &&
-                        tempHiddenFileIDs?.has(item.id)
-                    ) {
-                        return false;
-                    }
-
-                    // archived collections files can only be seen in their respective collection
-                    if (archivedCollectionIDs.has(item.collectionID)) {
-                        if (activeCollectionID === item.collectionID) {
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    }
-
-                    // HIDDEN ITEMS SECTION - show all individual hidden files
-                    if (
-                        activeCollectionID === HIDDEN_ITEMS_SECTION &&
-                        defaultHiddenCollectionIDs.has(item.collectionID)
-                    ) {
-                        return true;
-                    }
-
-                    // Archived files can only be seen in archive section or their respective collection
-                    if (isArchivedFile(item)) {
-                        if (
-                            activeCollectionID === ARCHIVE_SECTION ||
-                            activeCollectionID === item.collectionID
-                        ) {
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    }
-
-                    // ALL SECTION - show all files
-                    if (activeCollectionID === ALL_SECTION) {
-                        // show all files except the ones in hidden collections
-                        if (hiddenFileIDs.has(item.id)) {
-                            return false;
-                        } else {
-                            return true;
-                        }
-                    }
-
-                    // COLLECTION SECTION - show files in the active collection
-                    if (activeCollectionID === item.collectionID) {
-                        return true;
-                    } else {
-                        return false;
-                    }
-                }),
-            );
-            const sortAsc =
-                activeCollection?.pubMagicMetadata?.data?.asc ?? false;
-            if (sortAsc) {
-                filteredFiles = sortFiles(filteredFiles, true);
-            }
+            filteredFiles = deriveFilteredFilesAlbumishFocus(state);
         }
 
         dispatch({
