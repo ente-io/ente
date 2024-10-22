@@ -1,7 +1,7 @@
 double? parseIntOrDoubleAsDouble(dynamic value) {
   if (value == null) return null;
-  if (value is int) return value * 1.0;
   if (value is double) return value;
+  if (value is int) return value * 1.0;
   return null;
 }
 
