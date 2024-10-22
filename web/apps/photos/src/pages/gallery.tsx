@@ -315,11 +315,18 @@ export default function Gallery() {
     const hiddenCollectionSummaries = state.hiddenCollectionSummaries;
     const tempDeletedFileIDs = state.tempDeletedFileIDs;
     const tempHiddenFileIDs = state.tempHiddenFileIDs;
-    const barMode = state.barMode ?? "albums";
-    const activeCollectionID = state.activeCollectionID;
-    const activeCollection = state.activeCollection;
-    const activePersonID = state.activePersonID;
+    const barMode = state.focus.type ?? "albums";
+    const activeCollectionID =
+        state.focus.type == "people"
+            ? undefined
+            : state.focus.activeCollectionSummaryID;
+    const activeCollection =
+        state.focus.type == "people" ? undefined : state.focus.activeCollection;
+    const activePerson =
+        state.focus.type == "people" ? state.focus.activePerson : undefined;
+    const activePersonID = activePerson?.id;
     const isInSearchMode = state.isInSearchMode;
+    const filteredFiles = state.filteredFiles;
 
     if (process.env.NEXT_PUBLIC_ENTE_WIP_CL) console.log("render", { state });
 
@@ -484,8 +491,8 @@ export default function Gallery() {
             !archivedCollectionIDs
         ) {
             dispatch({
-                type: "set",
-                filteredData: [],
+                type: "setFilteredFiles",
+                filteredFiles: [],
                 galleryPeopleState: undefined,
             });
             return;
@@ -510,8 +517,8 @@ export default function Gallery() {
         }
 
         dispatch({
-            type: "set",
-            filteredData: filteredFiles,
+            type: "setFilteredFiles",
+            filteredFiles,
             galleryPeopleState,
         });
     }, [
@@ -528,8 +535,6 @@ export default function Gallery() {
         peopleState,
         activePersonID,
     ]);
-
-    const { filteredData, ...galleryPeopleState } = state;
 
     const selectAll = (e: KeyboardEvent) => {
         // ignore ctrl/cmd + a if the user is typing in a text field
@@ -550,7 +555,7 @@ export default function Gallery() {
             exportModalView ||
             authenticateUserModalView ||
             isPhotoSwipeOpen ||
-            !filteredData?.length ||
+            !filteredFiles?.length ||
             !user
         ) {
             return;
@@ -561,10 +566,10 @@ export default function Gallery() {
             count: 0,
             collectionID: activeCollectionID,
             context:
-                barMode == "people" && galleryPeopleState?.activePerson?.id
+                barMode == "people" && activePersonID
                     ? {
                           mode: "people" as const,
-                          personID: galleryPeopleState.activePerson.id,
+                          personID: activePersonID,
                       }
                     : {
                           mode: barMode as "albums" | "hidden-albums",
@@ -572,7 +577,7 @@ export default function Gallery() {
                       },
         };
 
-        filteredData.forEach((item) => {
+        filteredFiles.forEach((item) => {
             if (item.ownerID === user.id) {
                 selected.ownCount++;
             }
@@ -746,7 +751,7 @@ export default function Gallery() {
             startLoading();
             try {
                 setOpenCollectionSelector(false);
-                const selectedFiles = getSelectedFiles(selected, filteredData);
+                const selectedFiles = getSelectedFiles(selected, filteredFiles);
                 const toProcessFiles =
                     ops === COLLECTION_OPS_TYPE.REMOVE
                         ? selectedFiles
@@ -782,7 +787,7 @@ export default function Gallery() {
             // passing files here instead of filteredData for hide ops because we want to move all files copies to hidden collection
             const selectedFiles = getSelectedFiles(
                 selected,
-                ops === FILE_OPS_TYPE.HIDE ? files : filteredData,
+                ops === FILE_OPS_TYPE.HIDE ? files : filteredFiles,
             );
             const toProcessFiles =
                 ops === FILE_OPS_TYPE.DOWNLOAD
@@ -925,7 +930,7 @@ export default function Gallery() {
         [],
     );
 
-    if (!user || !filteredData) {
+    if (!user || !filteredFiles) {
         // Don't render until we get the logged in user and dispatch "mount".
         return <div></div>;
     }
@@ -1050,8 +1055,11 @@ export default function Gallery() {
                         setActiveCollectionID: handleSetActiveCollectionID,
                         hiddenCollectionSummaries,
                         showPeopleSectionButton,
-                        people: galleryPeopleState?.people ?? [],
-                        activePerson: galleryPeopleState?.activePerson,
+                        people:
+                            (state.focus.type == "people"
+                                ? state.focus.people
+                                : undefined) ?? [],
+                        activePerson,
                         onSelectPerson: handleSelectPerson,
                         setCollectionNamerAttributes,
                         setPhotoListHeader,
@@ -1109,14 +1117,14 @@ export default function Gallery() {
                 ) : !isInSearchMode &&
                   !isFirstLoad &&
                   barMode == "people" &&
-                  !galleryPeopleState?.activePerson ? (
+                  !activePerson ? (
                     <PeopleEmptyState />
                 ) : (
                     <PhotoFrame
                         page={PAGES.GALLERY}
                         mode={barMode}
                         modePlus={isInSearchMode ? "search" : barMode}
-                        files={filteredData}
+                        files={filteredFiles}
                         syncWithRemote={syncWithRemote}
                         favItemIds={state.favoriteFileIDs}
                         setSelected={setSelected}
@@ -1126,7 +1134,7 @@ export default function Gallery() {
                         }
                         setIsPhotoSwipeOpen={setIsPhotoSwipeOpen}
                         activeCollectionID={activeCollectionID}
-                        activePersonID={galleryPeopleState?.activePerson?.id}
+                        activePersonID={activePerson?.id}
                         enableDownload={true}
                         fileToCollectionsMap={fileToCollectionsMap}
                         collectionNameMap={collectionNameMap}

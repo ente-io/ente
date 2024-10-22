@@ -44,13 +44,16 @@ import type { FamilyData } from "../../services/user";
 
 /**
  * Specifies what the bar at the top of the gallery is displaying currently.
+ *
+ * TODO: Deprecated(?). Use GalleryFocus instead. Deprecated if it can be used
+ * in all cases where the bar mode was in use.
  */
 export type GalleryBarMode = "albums" | "hidden-albums" | "people";
 
 /**
  * Specifies what the gallery is currently displaying.
  *
- * TODO: An experiment at consolidating state.
+ * This can be overridden by a search.
  */
 export type GalleryFocus =
     | {
@@ -59,7 +62,16 @@ export type GalleryFocus =
            * albums.
            */
           type: "albums" | "hidden-albums";
-          activeCollectionID: number;
+          activeCollectionSummaryID: number;
+          /**
+           * If the active collection ID is for a collection and not a
+           * pseudo-collection, this property will be set to the corresponding
+           * {@link Collection}.
+           *
+           * It is guaranteed that this will be one of the {@link collections}
+           * (when we are in the "albums" focus) or {@link hiddenCollections}
+           * (when we are in "hidden-albums" focus).
+           */
           activeCollection: Collection | undefined;
           activeCollectionSummary: CollectionSummary;
       }
@@ -195,66 +207,22 @@ export interface GalleryState {
      * local state also gets synced in a bit.
      */
     tempDeletedFileIDs: Set<number>;
-
     /**
      * Variant of {@link tempDeletedFileIDs} for files that have just been
      * hidden.
      */
     tempHiddenFileIDs: Set<number>;
 
-    /*--<  Transient UI state  >--*/
+    /*--<  State that underlies transient UI state  >--*/
 
-    /**
-     * If visible, what should the (sticky) gallery bar show.
-     */
-    barMode: GalleryBarMode | undefined;
-    /**
-     * The section / area, and the item within it, that the gallery is currently
-     * showing.
-     */
-    focus: GalleryFocus | undefined;
-    activeCollectionID: number | undefined;
-    /**
-     * If the active collection ID is for a collection and not a
-     * pseudo-collection, this property will be set to the corresponding
-     * {@link Collection}.
-     *
-     * It is guaranteed that this will be one of the {@link collections} (when
-     * we are in the "albums" focus) or {@link hiddenCollections} (when we are
-     * in "hidden-albums" focus).
-     */
-    activeCollection: Collection | undefined;
     /**
      * The currently selected person, if any.
      *
      * When present, it is used to derive the {@link activePerson} property of
-     * the {@link focus}.
+     * the {@link focus}. UI code should use the focus, this is meant as the
+     * underlying primitive state.
      */
-    activePersonID: string | undefined;
-
-    filteredData: EnteFile[];
-    /**
-     * The currently selected person, if any.
-     *
-     * Whenever this is present, it is guaranteed to be one of the items from
-     * within {@link people}.
-     */
-    activePerson: Person | undefined;
-    /**
-     * The list of people to show.
-     */
-    people: Person[] | undefined;
-    /**
-     * `true` if we are in "search mode".
-     *
-     * We will always be in search mode if we are showing search results, but we
-     * also may be in search mode earlier on smaller screens, where the search
-     * input is only shown on entering search mode. See: [Note: "Search mode"].
-     *
-     * That is, {@link isInSearchMode} may be true even when
-     * {@link searchResults} is undefined.
-     */
-    isInSearchMode: boolean;
+    selectedPersonID: string | undefined;
     /**
      * List of files that match the selected search option.
      *
@@ -266,6 +234,31 @@ export interface GalleryState {
      * set this value to the result.
      */
     searchResults: EnteFile[] | undefined;
+
+    /*--<  Transient UI state  >--*/
+
+    /**
+     * The section, and the item within it, that the gallery is currently
+     * showing.
+     *
+     * This can be temporarily overridden when we display search results.
+     */
+    focus: GalleryFocus | undefined;
+    /**
+     * The files to show, uniqued and sorted appropriately.
+     */
+    filteredFiles: EnteFile[] | undefined;
+    /**
+     * `true` if we are in "search mode".
+     *
+     * We will always be in search mode if we are showing search results, but we
+     * also may be in search mode earlier on smaller screens, where the search
+     * input is only shown on entering search mode. See: [Note: "Search mode"].
+     *
+     * That is, {@link isInSearchMode} may be true even when
+     * {@link searchResults} is undefined.
+     */
+    isInSearchMode: boolean;
 }
 
 export type GalleryAction =
@@ -279,8 +272,8 @@ export type GalleryAction =
           trashedFiles: EnteFile[];
       }
     | {
-          type: "set";
-          filteredData: EnteFile[];
+          type: "setFilteredFiles";
+          filteredFiles: EnteFile[];
           galleryPeopleState:
               | { activePerson: Person | undefined; people: Person[] }
               | undefined;
