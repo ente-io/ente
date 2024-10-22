@@ -1025,7 +1025,6 @@ export const deriveFilteredFilesHiddenAlbumsFocus = (state: GalleryState) => {
     const {
         hiddenCollections,
         hiddenFiles,
-        archivedCollectionIDs,
         defaultHiddenCollectionIDs,
         tempDeletedFileIDs,
         activeCollectionID,
@@ -1038,25 +1037,16 @@ export const deriveFilteredFilesHiddenAlbumsFocus = (state: GalleryState) => {
     const filteredFiles = hiddenFiles.filter((file) => {
         if (tempDeletedFileIDs.has(file.id)) return false;
 
-        // archived collections files can only be seen in their respective collection
-        if (archivedCollectionIDs.has(file.collectionID)) {
-            if (activeCollectionID === file.collectionID) {
-                return true;
-            } else {
-                return false;
-            }
-        }
-
-        // HIDDEN ITEMS SECTION - show all individual hidden files
+        // Hidden items sections shows all standalone hidden files.
         if (
             activeCollectionID === HIDDEN_ITEMS_SECTION &&
             defaultHiddenCollectionIDs.has(file.collectionID)
         ) {
             return true;
+        } else {
+            // Show files in the active collection.
+            return activeCollectionID === file.collectionID;
         }
-
-        // Show files in the active collection
-        return activeCollectionID === file.collectionID;
     });
 
     return sortAndUniqueFilteredFiles(filteredFiles, activeCollection);
