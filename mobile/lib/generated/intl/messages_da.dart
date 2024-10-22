@@ -20,12 +20,12 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'da';
 
-  static String m0(count, formattedCount) =>
+  static String m2(count, formattedCount) =>
       "${Intl.plural(count, zero: 'ingen minder', one: '${formattedCount} minde', other: '${formattedCount} minder')}";
 
-  static String m1(count) => "${count} valgt";
+  static String m3(count) => "${count} valgt";
 
-  static String m2(verificationID) =>
+  static String m4(verificationID) =>
       "Hey, kan du bekræfte, at dette er dit ente.io verifikation ID: ${verificationID}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -34,11 +34,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Velkommen tilbage!"),
         "activeSessions":
             MessageLookupByLibrary.simpleMessage("Aktive sessioner"),
-        "add": MessageLookupByLibrary.simpleMessage("Add"),
-        "addName": MessageLookupByLibrary.simpleMessage("Add name"),
-        "addNameOrMerge":
-            MessageLookupByLibrary.simpleMessage("Add name or merge"),
-        "addNewPerson": MessageLookupByLibrary.simpleMessage("Add new person"),
         "addOnPageSubtitle":
             MessageLookupByLibrary.simpleMessage("Oplysninger om tilføjelser"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
@@ -81,10 +76,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Indtast venligst en gyldig email adresse."),
         "enterYourEmailAddress":
             MessageLookupByLibrary.simpleMessage("Indtast din email adresse"),
-        "extraPhotosFound":
-            MessageLookupByLibrary.simpleMessage("Extra photos found"),
-        "extraPhotosFoundFor": MessageLookupByLibrary.simpleMessage(
-            "Extra photos found for \$text"),
         "familyPlanPortalTitle":
             MessageLookupByLibrary.simpleMessage("Familie"),
         "feedback": MessageLookupByLibrary.simpleMessage("Feedback"),
@@ -108,18 +99,14 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Langt tryk på en e-mail for at bekræfte slutningen af krypteringen."),
         "manage": MessageLookupByLibrary.simpleMessage("Administrér"),
-        "memoryCount": m0,
-        "mergeWithExisting":
-            MessageLookupByLibrary.simpleMessage("Merge with existing"),
+        "memoryCount": m2,
         "mlIndexingDescription": MessageLookupByLibrary.simpleMessage(
             "Bemærk venligst, at maskinindlæring vil resultere i en højere båndbredde og batteriforbrug, indtil alle elementer er indekseret. Overvej at bruge desktop app til hurtigere indeksering, vil alle resultater blive synkroniseret automatisk."),
         "moments": MessageLookupByLibrary.simpleMessage("Øjeblikke"),
-        "newPerson": MessageLookupByLibrary.simpleMessage("New person"),
         "next": MessageLookupByLibrary.simpleMessage("Næste"),
         "ok": MessageLookupByLibrary.simpleMessage("Ok"),
         "oops": MessageLookupByLibrary.simpleMessage("Ups"),
         "password": MessageLookupByLibrary.simpleMessage("Adgangskode"),
-        "personName": MessageLookupByLibrary.simpleMessage("Person name"),
         "pleaseContactSupportAndWeWillBeHappyToHelp":
             MessageLookupByLibrary.simpleMessage(
                 "Kontakt support@ente.io og vi vil være glade for at hjælpe!"),
@@ -130,9 +117,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchHint1":
             MessageLookupByLibrary.simpleMessage("Hurtig, søgning på enheden"),
         "selectReason": MessageLookupByLibrary.simpleMessage("Vælg årsag"),
-        "selectedPhotos": m1,
+        "selectedPhotos": m3,
         "sendEmail": MessageLookupByLibrary.simpleMessage("Send email"),
-        "shareTextConfirmOthersVerificationID": m2,
+        "shareTextConfirmOthersVerificationID": m4,
         "somethingWentWrongPleaseTryAgain":
             MessageLookupByLibrary.simpleMessage(
                 "Noget gik galt, prøv venligst igen"),
