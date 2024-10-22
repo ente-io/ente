@@ -60,9 +60,13 @@ class _AppliedFiltersState extends State<AppliedFilters> {
                   clusterId: filter.clusterId,
                   faceThumbnailFile: filter.faceFile,
                   name: filter.name(),
-                  onTap: () {
+                  apply: () {
+                    _searchFilterDataProvider.applyFilters([filter]);
+                  },
+                  remove: () {
                     _searchFilterDataProvider.removeAppliedFilters([filter]);
                   },
+                  isApplied: filter.isApplied,
                 )
               : GenericFilterChip(
                   label: filter.name(),

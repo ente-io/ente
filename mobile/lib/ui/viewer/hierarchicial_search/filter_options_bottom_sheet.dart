@@ -29,9 +29,13 @@ class FilterOptionsBottomSheet extends StatelessWidget {
                       clusterId: filter.clusterId,
                       faceThumbnailFile: filter.faceFile,
                       name: filter.name(),
-                      onTap: () {
+                      apply: () {
                         searchFilterDataProvider.applyFilters([filter]);
                       },
+                      remove: () {
+                        searchFilterDataProvider.removeAppliedFilters([filter]);
+                      },
+                      isApplied: filter.isApplied,
                     )
                   : GenericFilterChip(
                       label: filter.name(),
