@@ -31,6 +31,11 @@ type AdminOttReq struct {
 	ExpiryTime int64  `json:"expiryTime" binding:"required"`
 }
 
+type LogoutSessionReq struct {
+	Token  string `json:"token" binding:"required"`
+	UserID int64  `json:"userID" binding:"required"`
+}
+
 func (a AdminOttReq) Validate() error {
 	if !a.App.IsValid() {
 		return errors.New("invalid app")
