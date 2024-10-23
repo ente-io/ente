@@ -29,7 +29,7 @@ const bip39 = require("bip39");
 bip39.setDefaultWordlist("english");
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
-    const { showNavBar, setDialogBoxAttributesV2 } = appContext;
+    const { showNavBar, showMiniDialog } = appContext;
 
     const [keyAttributes, setKeyAttributes] = useState<
         KeyAttributes | undefined
@@ -98,10 +98,11 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
     };
 
     const showNoRecoveryKeyMessage = () =>
-        setDialogBoxAttributesV2({
+        showMiniDialog({
             title: t("sorry"),
-            close: {},
-            content: t("NO_RECOVERY_KEY_MESSAGE"),
+            message: t("no_recovery_key_message"),
+            continue: { color: "secondary" },
+            cancel: false,
         });
 
     return (

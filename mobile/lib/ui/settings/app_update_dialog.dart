@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
+import "package:photos/service_locator.dart";
 import 'package:photos/services/update_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import "package:photos/ui/components/buttons/button_widget.dart";
@@ -82,7 +83,7 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
       ],
     );
     final shouldForceUpdate =
-        UpdateService.instance.shouldForceUpdate(widget.latestVersionInfo!);
+        updateService.shouldForceUpdate(widget.latestVersionInfo!);
     return PopScope(
       canPop: !shouldForceUpdate,
       child: AlertDialog(

@@ -59,12 +59,12 @@ class FileSelectionActionsWidget extends StatefulWidget {
   const FileSelectionActionsWidget(
     this.type,
     this.selectedFiles, {
-    Key? key,
+    super.key,
     this.collection,
     this.person,
     this.clusterID,
     this.deviceCollection,
-  }) : super(key: key);
+  });
 
   @override
   State<FileSelectionActionsWidget> createState() =>
@@ -182,6 +182,16 @@ class _FileSelectionActionsWidgetState
           ),
         );
       }
+    }
+
+    if (widget.type == GalleryType.cluster && widget.clusterID != null) {
+      items.add(
+        SelectionActionButton(
+          labelText: S.of(context).remove,
+          icon: CupertinoIcons.minus,
+          onTap: anyUploadedFiles ? _onRemoveFromClusterClicked : null,
+        ),
+      );
     }
 
     final showUploadIcon = widget.type == GalleryType.localFolder &&
@@ -435,17 +445,6 @@ class _FileSelectionActionsWidgetState
         ),
       ),
     );
-
-    // if (widget.type == GalleryType.cluster && widget.clusterID != null) {
-    if (widget.type == GalleryType.cluster && widget.clusterID != null) {
-      items.add(
-        SelectionActionButton(
-          labelText: 'Remove',
-          icon: CupertinoIcons.minus,
-          onTap: anyUploadedFiles ? _onRemoveFromClusterClicked : null,
-        ),
-      );
-    }
 
     if (items.isNotEmpty) {
       final scrollController = ScrollController();

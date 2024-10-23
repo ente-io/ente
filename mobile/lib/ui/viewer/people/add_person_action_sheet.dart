@@ -39,7 +39,7 @@ String _actionName(
   String text = "";
   switch (type) {
     case PersonActionType.assignPerson:
-      text = "Add name";
+      text = S.of(context).addNameOrMerge;
       break;
   }
   return text;
@@ -134,7 +134,7 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
                             right: 16,
                           ),
                           child: TextInputWidget(
-                            hintText: 'Person name',
+                            hintText: S.of(context).personName,
                             prefixIcon: Icons.search_rounded,
                             onChange: (value) {
                               setState(() {
@@ -222,8 +222,7 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
                 child: Padding(
                   padding: const EdgeInsets.only(right: 12),
                   child: ListView.separated(
-                    itemCount:
-                        searchResults.length + (shouldShowAddPerson ? 1 : 0),
+                    itemCount: searchResults.length + 1,
                     itemBuilder: (context, index) {
                       if (index == 0 && shouldShowAddPerson) {
                         return GestureDetector(
@@ -238,8 +237,21 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
                           },
                         );
                       }
-                      final person =
-                          searchResults[index - (shouldShowAddPerson ? 1 : 0)];
+                      if (index == 0 && !shouldShowAddPerson) {
+                        return Padding(
+                          padding: const EdgeInsets.fromLTRB(0, 8, 0, 16),
+                          child: Center(
+                            child: Text(
+                              S.of(context).mergeWithExisting,
+                              style: getEnteTextTheme(context).body.copyWith(
+                                    color:
+                                        getEnteColorScheme(context).textMuted,
+                                  ),
+                            ),
+                          ),
+                        );
+                      }
+                      final person = searchResults[index - 1];
                       return PersonRowItem(
                         person: person.$1,
                         personFile: person.$2,
@@ -280,9 +292,9 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
   }) async {
     final result = await showTextInputDialog(
       context,
-      title: "New person",
-      submitButtonLabel: 'Add',
-      hintText: 'Add name',
+      title: S.of(context).newPerson,
+      submitButtonLabel: S.of(context).add,
+      hintText: S.of(context).addName,
       alwaysShowSuccessState: false,
       initialValue: initValue,
       textCapitalization: TextCapitalization.words,
@@ -301,7 +313,7 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
           final bool extraPhotosFound = await ClusterFeedbackService.instance
               .checkAndDoAutomaticMerges(p, personClusterID: clusterID);
           if (extraPhotosFound) {
-            showShortToast(context, "Extra photos found for $text");
+            showShortToast(context, S.of(context).extraPhotosFound);
           }
           Bus.instance.fire(PeopleChangedEvent());
           Navigator.pop(context, p);

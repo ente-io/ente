@@ -1,9 +1,9 @@
 import { basename } from "@/base/file";
 import type { ElectronMLWorker } from "@/base/types/ipc";
+import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import { ensure } from "@/utils/ensure";
-import type { EnteFile } from "../../types/file";
 import { renderableImageBlob } from "../../utils/file";
 import { readStream } from "../../utils/native-stream";
 import DownloadManager from "../download";
@@ -66,7 +66,7 @@ export const createImageBitmapAndData = async (
  * handle, we convert it into a JPEG blob so that it can subsequently be used to
  * create an {@link ImageBitmap}.
  *
- * @param enteFile The {@link EnteFile} to index.
+ * @param file The {@link EnteFile} to index.
  *
  * @param uploadItem If we're called during the upload process, then this will
  * be set to the {@link UploadItem} that was uploaded. This way, we can directly
@@ -77,26 +77,26 @@ export const createImageBitmapAndData = async (
  * call our Node.js layer for various functionality).
  */
 export const fetchRenderableBlob = async (
-    enteFile: EnteFile,
+    file: EnteFile,
     uploadItem: UploadItem | undefined,
     electron: ElectronMLWorker,
 ): Promise<Blob> =>
     uploadItem
-        ? await fetchRenderableUploadItemBlob(enteFile, uploadItem, electron)
-        : await fetchRenderableEnteFileBlob(enteFile);
+        ? await fetchRenderableUploadItemBlob(file, uploadItem, electron)
+        : await fetchRenderableEnteFileBlob(file);
 
 const fetchRenderableUploadItemBlob = async (
-    enteFile: EnteFile,
+    file: EnteFile,
     uploadItem: UploadItem,
     electron: ElectronMLWorker,
 ) => {
-    const fileType = enteFile.metadata.fileType;
+    const fileType = file.metadata.fileType;
     if (fileType == FileType.video) {
-        const thumbnailData = await DownloadManager.getThumbnail(enteFile);
+        const thumbnailData = await DownloadManager.getThumbnail(file);
         return new Blob([ensure(thumbnailData)]);
     } else {
         const blob = await readNonVideoUploadItem(uploadItem, electron);
-        return renderableImageBlob(enteFile.metadata.title, blob);
+        return renderableImageBlob(file.metadata.title, blob);
     }
 };
 
@@ -143,26 +143,26 @@ const readNonVideoUploadItem = async (
  * -  The original will be converted to JPEG if needed.
  */
 export const fetchRenderableEnteFileBlob = async (
-    enteFile: EnteFile,
+    file: EnteFile,
 ): Promise<Blob> => {
-    const fileType = enteFile.metadata.fileType;
+    const fileType = file.metadata.fileType;
     if (fileType == FileType.video) {
-        const thumbnailData = await DownloadManager.getThumbnail(enteFile);
+        const thumbnailData = await DownloadManager.getThumbnail(file);
         return new Blob([ensure(thumbnailData)]);
     }
 
-    const fileStream = await DownloadManager.getFile(enteFile);
+    const fileStream = await DownloadManager.getFile(file);
     const originalImageBlob = await new Response(fileStream).blob();
 
     if (fileType == FileType.livePhoto) {
         const { imageFileName, imageData } = await decodeLivePhoto(
-            enteFile.metadata.title,
+            file.metadata.title,
             originalImageBlob,
         );
         return renderableImageBlob(imageFileName, new Blob([imageData]));
     } else if (fileType == FileType.image) {
         return await renderableImageBlob(
-            enteFile.metadata.title,
+            file.metadata.title,
             originalImageBlob,
         );
     } else {

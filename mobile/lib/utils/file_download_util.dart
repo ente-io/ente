@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import "package:computer/computer.dart";
 import 'package:dio/dio.dart';
 import "package:flutter/foundation.dart";
 import 'package:logging/logging.dart';
@@ -14,12 +13,12 @@ import "package:photos/events/local_photos_updated_event.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/ignored_file.dart";
-import 'package:photos/services/collections_service.dart';
 import "package:photos/services/ignored_files_service.dart";
 import "package:photos/services/local_sync_service.dart";
 import 'package:photos/utils/crypto_util.dart';
 import "package:photos/utils/data_util.dart";
 import "package:photos/utils/fake_progress.dart";
+import "package:photos/utils/file_key.dart";
 import "package:photos/utils/file_util.dart";
 
 final _logger = Logger("file_download_util");
@@ -102,27 +101,6 @@ Future<File?> downloadAndDecrypt(
     _logger.severe("$logPrefix failed to download or decrypt", e, s);
     return null;
   }
-}
-
-Uint8List getFileKey(EnteFile file) {
-  final encryptedKey = CryptoUtil.base642bin(file.encryptedKey!);
-  final nonce = CryptoUtil.base642bin(file.keyDecryptionNonce!);
-  final collectionKey =
-      CollectionsService.instance.getCollectionKey(file.collectionID!);
-  return CryptoUtil.decryptSync(encryptedKey, collectionKey, nonce);
-}
-
-Future<Uint8List> getFileKeyUsingBgWorker(EnteFile file) async {
-  final collectionKey =
-      CollectionsService.instance.getCollectionKey(file.collectionID!);
-  return await Computer.shared().compute(
-    _decryptFileKey,
-    param: <String, dynamic>{
-      "encryptedKey": file.encryptedKey,
-      "keyDecryptionNonce": file.keyDecryptionNonce,
-      "collectionKey": collectionKey,
-    },
-  );
 }
 
 Future<void> downloadToGallery(EnteFile file) async {
@@ -214,14 +192,4 @@ Future<void> _saveLivePhotoOnDroid(
     "remoteDownload",
   );
   await IgnoredFilesService.instance.cacheAndInsert([ignoreVideoFile]);
-}
-
-Uint8List _decryptFileKey(Map<String, dynamic> args) {
-  final encryptedKey = CryptoUtil.base642bin(args["encryptedKey"]);
-  final nonce = CryptoUtil.base642bin(args["keyDecryptionNonce"]);
-  return CryptoUtil.decryptSync(
-    encryptedKey,
-    args["collectionKey"],
-    nonce,
-  );
 }

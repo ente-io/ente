@@ -1,18 +1,29 @@
 import { assertionFailed } from "@/base/assert";
+import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { useModalVisibility } from "@/base/components/utils/modal";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
 import { ItemVisibility } from "@/media/file-metadata";
 import {
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
-} from "@/new/photos/components/Gallery/ListHeader";
+} from "@/new/photos/components/gallery/ListHeader";
 import { SpaceBetweenFlex } from "@/new/photos/components/mui";
+import {
+    ALL_SECTION,
+    HIDDEN_ITEMS_SECTION,
+    isHiddenCollection,
+} from "@/new/photos/services/collection";
 import type {
     CollectionSummary,
     CollectionSummaryType,
 } from "@/new/photos/services/collection/ui";
+import {
+    isArchivedCollection,
+    isPinnedCollection,
+} from "@/new/photos/services/magic-metadata";
+import { AppContext } from "@/new/photos/types/context";
 import { HorizontalFlex } from "@ente/shared/components/Container";
-import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import OverflowMenu, {
     StyledMenu,
 } from "@ente/shared/components/OverflowMenu/menu";
@@ -36,24 +47,19 @@ import { Box, IconButton, Stack, Tooltip } from "@mui/material";
 import { SetCollectionNamerAttributes } from "components/Collections/CollectionNamer";
 import { UnPinIcon } from "components/icons/UnPinIcon";
 import { t } from "i18next";
-import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";
-import React, { useCallback, useContext, useRef, useState } from "react";
+import React, { useCallback, useContext, useRef } from "react";
 import { Trans } from "react-i18next";
 import * as CollectionAPI from "services/collectionService";
 import * as TrashService from "services/trashService";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
 import {
-    ALL_SECTION,
     changeCollectionOrder,
     changeCollectionSortOrder,
     changeCollectionVisibility,
     downloadCollectionHelper,
     downloadDefaultHiddenCollectionHelper,
-    HIDDEN_ITEMS_SECTION,
-    isHiddenCollection,
 } from "utils/collection";
-import { isArchivedCollection, isPinnedCollection } from "utils/magicMetadata";
 
 interface CollectionHeaderProps {
     collectionSummary: CollectionSummary;
@@ -139,7 +145,9 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
         useContext(AppContext);
     const { syncWithRemote } = useContext(GalleryContext);
     const overFlowMenuIconRef = useRef<SVGSVGElement>(null);
-    const [openSortOrderMenu, setOpenSortOrderMenu] = useState(false);
+
+    const { show: showSortOrderMenu, props: sortOrderMenuVisibilityProps } =
+        useModalVisibility();
 
     const handleError = useCallback(
         (e: unknown) => {
@@ -323,10 +331,6 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
         setActiveCollectionID(HIDDEN_ITEMS_SECTION);
     });
 
-    const showSortOrderMenu = () => setOpenSortOrderMenu(true);
-
-    const closeSortOrderMenu = () => setOpenSortOrderMenu(false);
-
     const changeSortOrderAsc = wrap(() =>
         changeCollectionSortOrder(activeCollection, true),
     );
@@ -397,8 +401,7 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
                 )}
             </OverflowMenu>
             <CollectionSortOrderMenu
-                open={openSortOrderMenu}
-                onClose={closeSortOrderMenu}
+                {...sortOrderMenuVisibilityProps}
                 overFlowMenuIconRef={overFlowMenuIconRef}
                 onAscClick={changeSortOrderAsc}
                 onDescClick={changeSortOrderDesc}
@@ -433,7 +436,7 @@ const QuickOptions: React.FC<QuickOptionsProps> = ({
         )}
         {showDownloadQuickOption(type) &&
             (isDownloadInProgress() ? (
-                <EnteSpinner size="20px" sx={{ m: "12px" }} />
+                <ActivityIndicator size="20px" sx={{ m: "12px" }} />
             ) : (
                 <DownloadQuickOption
                     onClick={onDownloadClick}
@@ -554,7 +557,7 @@ const DownloadOption: React.FC<
     <OverflowMenuOption
         startIcon={
             isDownloadInProgress && isDownloadInProgress() ? (
-                <EnteSpinner size="20px" sx={{ cursor: "not-allowed" }} />
+                <ActivityIndicator size="20px" sx={{ cursor: "not-allowed" }} />
             ) : (
                 <FileDownloadOutlinedIcon />
             )

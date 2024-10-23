@@ -1,11 +1,7 @@
 import { sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
 import { type Electron } from "@/base/types/ipc";
-import { ItemVisibility } from "@/media/file-metadata";
-import { FileType } from "@/media/file-type";
-import { decodeLivePhoto } from "@/media/live-photo";
-import DownloadManager from "@/new/photos/services/download";
-import { updateExifIfNeededAndPossible } from "@/new/photos/services/exif-update";
+import { downloadAndRevokeObjectURL } from "@/base/utils/web";
 import {
     EncryptedEnteFile,
     EnteFile,
@@ -14,17 +10,28 @@ import {
     FilePublicMagicMetadata,
     FilePublicMagicMetadataProps,
     FileWithUpdatedMagicMetadata,
-} from "@/new/photos/types/file";
+    mergeMetadata,
+} from "@/media/file";
+import { ItemVisibility } from "@/media/file-metadata";
+import { FileType } from "@/media/file-type";
+import { decodeLivePhoto } from "@/media/live-photo";
+import DownloadManager from "@/new/photos/services/download";
+import { updateExifIfNeededAndPossible } from "@/new/photos/services/exif-update";
+import {
+    isArchivedFile,
+    updateMagicMetadata,
+} from "@/new/photos/services/magic-metadata";
 import { detectFileTypeInfo } from "@/new/photos/utils/detect-type";
-import { mergeMetadata } from "@/new/photos/utils/file";
 import { safeFileName } from "@/new/photos/utils/native-fs";
 import { writeStream } from "@/new/photos/utils/native-stream";
 import { withTimeout } from "@/utils/promise";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";
-import { downloadUsingAnchor } from "@ente/shared/utils";
 import { t } from "i18next";
-import { moveToHiddenCollection } from "services/collectionService";
+import {
+    addMultipleToFavorites,
+    moveToHiddenCollection,
+} from "services/collectionService";
 import {
     deleteFromTrash,
     trashFiles,
@@ -36,7 +43,6 @@ import {
     SetFilesDownloadProgressAttributes,
     SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
-import { isArchivedFile, updateMagicMetadata } from "utils/magicMetadata";
 
 export enum FILE_OPS_TYPE {
     DOWNLOAD,
@@ -46,6 +52,7 @@ export enum FILE_OPS_TYPE {
     HIDE,
     TRASH,
     DELETE_PERMANENTLY,
+    SET_FAVORITE,
 }
 
 export async function downloadFile(file: EnteFile) {
@@ -66,8 +73,8 @@ export async function downloadFile(file: EnteFile) {
             const tempVideoURL = URL.createObjectURL(
                 new Blob([videoData], { type: videoType.mimeType }),
             );
-            downloadUsingAnchor(tempImageURL, imageFileName);
-            downloadUsingAnchor(tempVideoURL, videoFileName);
+            downloadAndRevokeObjectURL(tempImageURL, imageFileName);
+            downloadAndRevokeObjectURL(tempVideoURL, videoFileName);
         } else {
             const fileType = await detectFileTypeInfo(
                 new File([fileBlob], file.metadata.title),
@@ -77,24 +84,13 @@ export async function downloadFile(file: EnteFile) {
             ).blob();
             fileBlob = new Blob([fileBlob], { type: fileType.mimeType });
             const tempURL = URL.createObjectURL(fileBlob);
-            downloadUsingAnchor(tempURL, file.metadata.title);
+            downloadAndRevokeObjectURL(tempURL, file.metadata.title);
         }
     } catch (e) {
         log.error("failed to download file", e);
         throw e;
     }
 }
-
-/** Segment the given {@link files} into lists indexed by their collection ID */
-export const groupFilesBasedOnCollectionID = (files: EnteFile[]) => {
-    const result = new Map<number, EnteFile[]>();
-    for (const file of files) {
-        const id = file.collectionID;
-        if (!result.has(id)) result.set(id, []);
-        result.get(id).push(file);
-    }
-    return result;
-};
 
 function getSelectedFileIds(selectedFiles: SelectedState) {
     const filesIDs: number[] = [];
@@ -254,20 +250,6 @@ export async function getFileFromURL(fileURL: string, name: string) {
     const fileBlob = await (await fetch(fileURL)).blob();
     const fileFile = new File([fileBlob], name);
     return fileFile;
-}
-
-export function getUniqueFiles(files: EnteFile[]) {
-    const idSet = new Set<number>();
-    const uniqueFiles = files.filter((file) => {
-        if (!idSet.has(file.id)) {
-            idSet.add(file.id);
-            return true;
-        } else {
-            return false;
-        }
-    });
-
-    return uniqueFiles;
 }
 
 export async function downloadFilesWithProgress(
@@ -515,22 +497,6 @@ export const copyFileToClipboard = async (fileURL: string) => {
     await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
 };
 
-export function getLatestVersionFiles(files: EnteFile[]) {
-    const latestVersionFiles = new Map<string, EnteFile>();
-    files.forEach((file) => {
-        const uid = `${file.collectionID}-${file.id}`;
-        if (
-            !latestVersionFiles.has(uid) ||
-            latestVersionFiles.get(uid).updationTime < file.updationTime
-        ) {
-            latestVersionFiles.set(uid, file);
-        }
-    });
-    return Array.from(latestVersionFiles.values()).filter(
-        (file) => !file.isDeleted,
-    );
-}
-
 export function getPersonalFiles(
     files: EnteFile[],
     user: User,
@@ -628,6 +594,9 @@ export const handleFileOps = async (
             break;
         case FILE_OPS_TYPE.UNARCHIVE:
             await changeFilesVisibility(files, ItemVisibility.visible);
+            break;
+        case FILE_OPS_TYPE.SET_FAVORITE:
+            await addMultipleToFavorites(files);
             break;
     }
 };

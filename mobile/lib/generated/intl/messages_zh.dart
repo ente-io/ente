@@ -214,6 +214,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "ackPasswordLostWarning": MessageLookupByLibrary.simpleMessage(
             "我明白，如果我丢失密码，我可能会丢失我的数据，因为我的数据是 <underline>端到端加密的</underline>。"),
         "activeSessions": MessageLookupByLibrary.simpleMessage("已登录的设备"),
+        "add": MessageLookupByLibrary.simpleMessage("Add"),
         "addAName": MessageLookupByLibrary.simpleMessage("添加一个名称"),
         "addANewEmail": MessageLookupByLibrary.simpleMessage("添加新的电子邮件"),
         "addCollaborator": MessageLookupByLibrary.simpleMessage("添加协作者"),
@@ -223,7 +224,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "addLocation": MessageLookupByLibrary.simpleMessage("添加地点"),
         "addLocationButton": MessageLookupByLibrary.simpleMessage("添加"),
         "addMore": MessageLookupByLibrary.simpleMessage("添加更多"),
+        "addName": MessageLookupByLibrary.simpleMessage("Add name"),
+        "addNameOrMerge":
+            MessageLookupByLibrary.simpleMessage("Add name or merge"),
         "addNew": MessageLookupByLibrary.simpleMessage("新建"),
+        "addNewPerson": MessageLookupByLibrary.simpleMessage("Add new person"),
         "addOnPageSubtitle": MessageLookupByLibrary.simpleMessage("附加组件详情"),
         "addOnValidTill": m5,
         "addOns": MessageLookupByLibrary.simpleMessage("附加组件"),
@@ -647,6 +652,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("此链接已过期。请选择新的过期时间或禁用链接有效期。"),
         "exportLogs": MessageLookupByLibrary.simpleMessage("导出日志"),
         "exportYourData": MessageLookupByLibrary.simpleMessage("导出您的数据"),
+        "extraPhotosFound":
+            MessageLookupByLibrary.simpleMessage("Extra photos found"),
+        "extraPhotosFoundFor": MessageLookupByLibrary.simpleMessage(
+            "Extra photos found for \$text"),
         "faceRecognition": MessageLookupByLibrary.simpleMessage("人脸识别"),
         "faces": MessageLookupByLibrary.simpleMessage("人脸"),
         "failedToApplyCode": MessageLookupByLibrary.simpleMessage("无法使用此代码"),
@@ -864,6 +873,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "matrix": MessageLookupByLibrary.simpleMessage("Matrix"),
         "memoryCount": m0,
         "merchandise": MessageLookupByLibrary.simpleMessage("商品"),
+        "mergeWithExisting":
+            MessageLookupByLibrary.simpleMessage("Merge with existing"),
         "mlConsent": MessageLookupByLibrary.simpleMessage("启用机器学习"),
         "mlConsentConfirmation":
             MessageLookupByLibrary.simpleMessage("我了解了，并希望启用机器学习"),
@@ -899,6 +910,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "无法连接到 Ente，请检查您的网络设置，如果错误仍然存在，请联系支持人员。"),
         "never": MessageLookupByLibrary.simpleMessage("永不"),
         "newAlbum": MessageLookupByLibrary.simpleMessage("新建相册"),
+        "newPerson": MessageLookupByLibrary.simpleMessage("New person"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("初来 Ente"),
         "newest": MessageLookupByLibrary.simpleMessage("最新"),
         "next": MessageLookupByLibrary.simpleMessage("下一步"),
@@ -980,6 +992,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "permanentlyDelete": MessageLookupByLibrary.simpleMessage("永久删除"),
         "permanentlyDeleteFromDevice":
             MessageLookupByLibrary.simpleMessage("要从设备中永久删除吗？"),
+        "personName": MessageLookupByLibrary.simpleMessage("Person name"),
         "photoDescriptions": MessageLookupByLibrary.simpleMessage("照片说明"),
         "photoGridSize": MessageLookupByLibrary.simpleMessage("照片网格大小"),
         "photoSmallCase": MessageLookupByLibrary.simpleMessage("照片"),
@@ -1047,7 +1060,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "太棒了！ 您的恢复密钥是有效的。 感谢您的验证。\n\n请记住要安全备份您的恢复密钥。"),
         "recoveryKeyVerified": MessageLookupByLibrary.simpleMessage("恢复密钥已验证"),
         "recoveryKeyVerifyReason": MessageLookupByLibrary.simpleMessage(
-            "如果您忘记了您的密码，您的恢复密钥是恢复您的照片的唯一途径。 您可以在“设置 > 账户”中找到您的恢复密钥。\n\n请在此输入您的恢复密钥以确认您已经正确地保存了它。"),
+            "如果您忘记了密码，恢复密钥是恢复照片的唯一方法。您可以在“设置”>“账户”中找到恢复密钥。\n\n请在此处输入恢复密钥，以验证您是否已正确保存。"),
         "recoverySuccessful": MessageLookupByLibrary.simpleMessage("恢复成功!"),
         "recreatePasswordBody": MessageLookupByLibrary.simpleMessage(
             "当前设备的功能不足以验证您的密码，但我们可以以适用于所有设备的方式重新生成。\n\n请使用您的恢复密钥登录并重新生成您的密码（如果您希望，可以再次使用相同的密码）。"),

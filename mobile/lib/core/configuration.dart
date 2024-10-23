@@ -22,7 +22,6 @@ import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/models/key_attributes.dart';
 import 'package:photos/models/key_gen_result.dart';
 import 'package:photos/models/private_key_attributes.dart';
-import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
 import "package:photos/services/home_widget_service.dart";
@@ -216,7 +215,6 @@ class Configuration {
       CollectionsService.instance.clearCache();
       FavoritesService.instance.clearCache();
       MemoriesService.instance.clearCache();
-      BillingService.instance.clearCache();
       SearchService.instance.clearCache();
       unawaited(HomeWidgetService.instance.clearHomeWidget());
       Bus.instance.fire(UserLoggedOutEvent());

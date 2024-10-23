@@ -1,11 +1,11 @@
 import { SelectionBar } from "@/base/components/Navbar";
+import { AppContext } from "@/new/photos/types/context";
 import { FluidContainer } from "@ente/shared/components/Container";
 import BackButton from "@mui/icons-material/ArrowBackOutlined";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Box, IconButton, Tooltip } from "@mui/material";
 import { t } from "i18next";
-import { AppContext } from "pages/_app";
 import { useContext } from "react";
 import { formatNumber } from "utils/number/format";
 import { getTrashFilesMessage } from "utils/ui";
@@ -44,7 +44,7 @@ export default function DeduplicateOptions({
                     {formatNumber(count)} {t("SELECTED")}
                 </Box>
             </FluidContainer>
-            <Tooltip title={t("DELETE")}>
+            <Tooltip title={t("delete")}>
                 <IconButton onClick={trashHandler}>
                     <DeleteIcon />
                 </IconButton>

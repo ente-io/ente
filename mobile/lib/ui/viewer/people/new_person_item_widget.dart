@@ -1,5 +1,6 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/theme/ente_theme.dart';
 
 ///https://www.figma.com/file/SYtMyLBs5SAOkTbfMMzhqt/ente-Visual-Design?node-id=10854%3A57947&t=H5AvR79OYDnB9ekw-4
@@ -36,7 +37,7 @@ class NewPersonItemWidget extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(left: 12),
                   child: Text(
-                    'Add new person',
+                    S.of(context).addNewPerson,
                     style:
                         textTheme.body.copyWith(color: colorScheme.textMuted),
                   ),

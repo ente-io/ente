@@ -22,11 +22,13 @@ Future<ButtonResult?> showDialogWidget({
   required List<ButtonWidget> buttons,
   IconData? icon,
   bool isDismissible = true,
+  bool useRootNavigator = false,
 }) {
   return showDialog(
     barrierDismissible: isDismissible,
     barrierColor: backdropFaintDark,
     context: context,
+    useRootNavigator: useRootNavigator,
     builder: (context) {
       final widthOfScreen = MediaQuery.of(context).size.width;
       final isMobileSmall = widthOfScreen <= mobileSmallThreshold;

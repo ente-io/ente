@@ -1,10 +1,8 @@
-import { useIsMobileWidth } from "@/base/hooks";
-import { pt } from "@/base/i18n";
+import { useIsSmallWidth } from "@/base/hooks";
+import type { EnteFile } from "@/media/file";
 import { faceCrop, type AnnotatedFaceID } from "@/new/photos/services/ml";
-import type { Person } from "@/new/photos/services/ml/people";
-import type { EnteFile } from "@/new/photos/types/file";
-import { Skeleton, Typography, styled } from "@mui/material";
-import { t } from "i18next";
+import type { Person, PreviewableFace } from "@/new/photos/services/ml/people";
+import { Skeleton, styled } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { UnstyledButton } from "./UnstyledButton";
 
@@ -20,19 +18,19 @@ export const SearchPeopleList: React.FC<SearchPeopleListProps> = ({
     people,
     onSelectPerson,
 }) => {
-    const isMobileWidth = useIsMobileWidth();
+    const isSmallWidth = useIsSmallWidth();
     return (
         <SearchPeopleContainer
             sx={{ justifyContent: people.length > 3 ? "center" : "start" }}
         >
-            {people.slice(0, isMobileWidth ? 6 : 7).map((person) => (
+            {people.slice(0, isSmallWidth ? 6 : 7).map((person) => (
                 <SearchPersonButton
                     key={person.id}
                     onClick={() => onSelectPerson(person)}
                 >
                     <FaceCropImageView
                         faceID={person.displayFaceID}
-                        enteFile={person.displayFaceFile}
+                        file={person.displayFaceFile}
                         placeholderDimension={87}
                     />
                 </SearchPersonButton>
@@ -67,11 +65,11 @@ const SearchPersonButton = styled(UnstyledButton)(
 `,
 );
 
-export interface AnnotatedFacePeopleListProps {
+export interface FilePeopleListProps {
     /**
      * The {@link EnteFile} whose information we are showing.
      */
-    enteFile: EnteFile;
+    file: EnteFile;
     /**
      * The list of faces in the file that are associated with a person.
      */
@@ -86,47 +84,38 @@ export interface AnnotatedFacePeopleListProps {
  * Show the list of faces in the given file that are associated with a specific
  * person.
  */
-export const AnnotatedFacePeopleList: React.FC<
-    AnnotatedFacePeopleListProps
-> = ({ enteFile, annotatedFaceIDs, onSelectFace }) => {
-    if (annotatedFaceIDs.length == 0) return <></>;
+export const FilePeopleList: React.FC<FilePeopleListProps> = ({
+    file,
+    annotatedFaceIDs,
+    onSelectFace,
+}) => (
+    <FilePeopleList_>
+        {annotatedFaceIDs.map((annotatedFaceID) => (
+            <AnnotatedFaceButton
+                key={annotatedFaceID.faceID}
+                onClick={() => onSelectFace(annotatedFaceID)}
+            >
+                <FaceCropImageView
+                    faceID={annotatedFaceID.faceID}
+                    file={file}
+                    placeholderDimension={65}
+                />
+            </AnnotatedFaceButton>
+        ))}
+    </FilePeopleList_>
+);
 
-    return (
-        <>
-            <Typography variant="large" p={1}>
-                {t("people")}
-            </Typography>
-            <FileFaceList>
-                {annotatedFaceIDs.map((annotatedFaceID) => (
-                    <AnnotatedFaceButton
-                        key={annotatedFaceID.faceID}
-                        onClick={() => onSelectFace(annotatedFaceID)}
-                    >
-                        <FaceCropImageView
-                            faceID={annotatedFaceID.faceID}
-                            enteFile={enteFile}
-                            placeholderDimension={112}
-                        />
-                    </AnnotatedFaceButton>
-                ))}
-            </FileFaceList>
-        </>
-    );
-};
-
-const FileFaceList = styled("div")`
+const FilePeopleList_ = styled("div")`
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    gap: 5px;
-    margin: 5px;
+    gap: 8px;
+    margin-block-end: 5px;
 `;
 
 const AnnotatedFaceButton = styled(UnstyledButton)(
     ({ theme }) => `
-    width: 112px;
-    height: 112px;
+    width: 65px;
+    height: 65px;
     border-radius: 50%;
     overflow: hidden;
     & > img {
@@ -140,51 +129,44 @@ const AnnotatedFaceButton = styled(UnstyledButton)(
 `,
 );
 
-export interface UnclusteredFaceListProps {
+export interface SuggestionFaceListProps {
     /**
-     * The {@link EnteFile} whose information we are showing.
+     * Faces, each annotated with the corresponding {@link EnteFile}, to show in
+     * the list.
      */
-    enteFile: EnteFile;
-    /**
-     * The list of faces in the file that are not associated with a person.
-     */
-    faceIDs: string[];
+    faces: PreviewableFace[];
 }
 
 /**
- * Show the list of faces in the given file that are not associated with a
- * specific person.
+ * Show the sampling of faces from a given cluster that is being offered as a
+ * suggestion to the user.
  */
-export const UnclusteredFaceList: React.FC<UnclusteredFaceListProps> = ({
-    enteFile,
-    faceIDs,
+export const SuggestionFaceList: React.FC<SuggestionFaceListProps> = ({
+    faces,
 }) => {
-    if (faceIDs.length == 0) return <></>;
-
     return (
-        <>
-            <Typography variant="large" p={1}>
-                {pt("Other faces")}
-                {/*t("UNIDENTIFIED_FACES")  TODO-Cluster */}
-            </Typography>
-            <FileFaceList>
-                {faceIDs.map((faceID) => (
-                    <UnclusteredFace key={faceID}>
-                        <FaceCropImageView
-                            placeholderDimension={112}
-                            {...{ enteFile, faceID }}
-                        />
-                    </UnclusteredFace>
-                ))}
-            </FileFaceList>
-        </>
+        <SuggestionFaceList_>
+            {faces.map(({ file, faceID }) => (
+                <SuggestionFace key={faceID}>
+                    <FaceCropImageView
+                        placeholderDimension={65}
+                        {...{ file, faceID }}
+                    />
+                </SuggestionFace>
+            ))}
+        </SuggestionFaceList_>
     );
 };
 
-const UnclusteredFace = styled("div")`
-    width: 112px;
-    height: 112px;
-    margin: 5px;
+const SuggestionFaceList_ = styled("div")`
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+`;
+
+const SuggestionFace = styled("div")`
+    width: 87px;
+    height: 87px;
     border-radius: 50%;
     overflow: hidden;
     & > img {
@@ -193,14 +175,10 @@ const UnclusteredFace = styled("div")`
     }
 `;
 
-interface FaceCropImageViewProps {
-    /** The ID of the face to display. */
-    faceID: string;
-    /** The {@link EnteFile} which contains this face. */
-    enteFile: EnteFile;
+type FaceCropImageViewProps = PreviewableFace & {
     /** Width and height for the placeholder. */
     placeholderDimension: number;
-}
+};
 
 /**
  * An image view showing the face crop for the given face.
@@ -213,7 +191,7 @@ interface FaceCropImageViewProps {
  */
 const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
     faceID,
-    enteFile,
+    file,
     placeholderDimension,
 }) => {
     const [url, setURL] = useState<string | undefined>();
@@ -221,14 +199,12 @@ const FaceCropImageView: React.FC<FaceCropImageViewProps> = ({
     useEffect(() => {
         let didCancel = false;
 
-        void faceCrop(faceID, enteFile).then(
-            (url) => !didCancel && setURL(url),
-        );
+        void faceCrop(faceID, file).then((url) => !didCancel && setURL(url));
 
         return () => {
             didCancel = true;
         };
-    }, [faceID, enteFile]);
+    }, [faceID, file]);
 
     return url ? (
         <img style={{ objectFit: "cover" }} src={url} />

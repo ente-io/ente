@@ -1,28 +1,15 @@
-import log from "@/base/log";
-import { EnteFile } from "@/new/photos/types/file";
-import Photoswipe from "photoswipe";
-import PhotoswipeUIDefault from "photoswipe/dist/photoswipe-ui-default";
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
-import {
-    addToFavorites,
-    removeFromFavorites,
-} from "services/collectionService";
-import {
-    copyFileToClipboard,
-    downloadSingleFile,
-    getFileFromURL,
-} from "utils/file";
-
 import { isDesktop } from "@/base/app";
+import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { lowercaseExtension } from "@/base/file";
+import log from "@/base/log";
+import type { LoadedLivePhotoSourceURL } from "@/media/file";
+import { type EnteFile, fileLogID } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
 import downloadManager from "@/new/photos/services/download";
 import { extractRawExif, parseExif } from "@/new/photos/services/exif";
-import type { LoadedLivePhotoSourceURL } from "@/new/photos/types/file";
-import { fileLogID } from "@/new/photos/utils/file";
+import { AppContext } from "@/new/photos/types/context";
 import { FlexWrapper } from "@ente/shared/components/Container";
-import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import AlbumOutlined from "@mui/icons-material/AlbumOutlined";
 import ChevronLeft from "@mui/icons-material/ChevronLeft";
 import ChevronRight from "@mui/icons-material/ChevronRight";
@@ -41,10 +28,21 @@ import ZoomInOutlinedIcon from "@mui/icons-material/ZoomInOutlined";
 import { Box, Button, styled } from "@mui/material";
 import { t } from "i18next";
 import isElectron from "is-electron";
-import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";
+import Photoswipe from "photoswipe";
+import PhotoswipeUIDefault from "photoswipe/dist/photoswipe-ui-default";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import {
+    addToFavorites,
+    removeFromFavorites,
+} from "services/collectionService";
 import { trashFiles } from "services/fileService";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
+import {
+    copyFileToClipboard,
+    downloadSingleFile,
+    getFileFromURL,
+} from "utils/file";
 import { pauseVideo, playVideo } from "utils/photoFrame";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import { getTrashFileMessage } from "utils/ui";
@@ -799,7 +797,7 @@ function PhotoViewer(props: PhotoViewerProps) {
                                 )}
                             />
                         ) : (
-                            !isSourceLoaded && <EnteSpinner />
+                            !isSourceLoaded && <ActivityIndicator />
                         )}
                     </Box>
 
@@ -849,7 +847,7 @@ function PhotoViewer(props: PhotoViewerProps) {
                             {isOwnFile && !props.isTrashCollection && (
                                 <button
                                     className="pswp__button pswp__button--custom"
-                                    title={t("DELETE_OPTION")}
+                                    title={t("delete_key")}
                                     onClick={() => {
                                         confirmTrashFile(
                                             photoSwipe?.currItem as EnteFile,
@@ -908,8 +906,8 @@ function PhotoViewer(props: PhotoViewerProps) {
                                         <button
                                             title={
                                                 isFav
-                                                    ? t("UNFAVORITE_OPTION")
-                                                    : t("FAVORITE_OPTION")
+                                                    ? t("unfavorite_key")
+                                                    : t("favorite_key")
                                             }
                                             className="pswp__button pswp__button--custom"
                                             onClick={() => {

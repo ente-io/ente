@@ -20,6 +20,10 @@ export const SpaceBetweenFlex = styled(FlexWrapper)`
     justify-content: space-between;
 `;
 
+/**
+ * Deprecated, use {@link CenteredFlex} from @/base/components/mui/container
+ * instead
+ */
 export const CenteredFlex = styled(FlexWrapper)`
     justify-content: center;
 `;

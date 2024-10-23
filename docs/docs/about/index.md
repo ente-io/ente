@@ -46,6 +46,8 @@ the name, and also led to the adoption of "Ducky", Ente's mascot:
 
 </div>
 
+For the full origin story of Ducky you can check out [this blog post](https://ente.io/blog/ducky/).
+
 ### How do I pronounce Ente?
 
 en-_tay_. Like ca<i>fe</i>.

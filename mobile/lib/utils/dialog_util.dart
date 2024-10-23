@@ -48,12 +48,14 @@ Future<ButtonResult?> showErrorDialog(
   String title,
   String? body, {
   bool isDismissable = true,
+  bool useRootNavigator = false,
 }) async {
   return showDialogWidget(
     context: context,
     title: title,
     body: body,
     isDismissible: isDismissable,
+    useRootNavigator: useRootNavigator,
     buttons: [
       ButtonWidget(
         buttonType: ButtonType.secondary,
@@ -354,10 +356,12 @@ Future<dynamic> showTextInputDialog(
   TextEditingController? textEditingController,
   List<TextInputFormatter>? textInputFormatter,
   TextInputType? textInputType,
+  bool useRootNavigator = false,
 }) {
   return showDialog(
     barrierColor: backdropFaintDark,
     context: context,
+    useRootNavigator: useRootNavigator,
     builder: (context) {
       final bottomInset = MediaQuery.of(context).viewInsets.bottom;
       final isKeyboardUp = bottomInset > 100;

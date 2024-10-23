@@ -168,6 +168,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                               },
                               onLongPress: () {
                                 showDialog(
+                                  useRootNavigator: false,
                                   context: context,
                                   builder: (BuildContext context) {
                                     return VerifyIdentifyDialog(

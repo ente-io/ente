@@ -3,6 +3,7 @@
 ## v1.7.6 (Unreleased)
 
 -   Parse description from metadata JSON.
+-   Support Italian and Lithuanian translations.
 -   .
 
 ## v1.7.5

@@ -1,7 +1,7 @@
 import { encryptBlobB64 } from "@/base/crypto";
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { apiURL } from "@/base/origins";
-import type { EnteFile } from "@/new/photos/types/file";
+import type { EnteFile } from "@/media/file";
 import { z } from "zod";
 
 /**
@@ -79,10 +79,10 @@ export const fetchFileData = async (
  * Upload file data associated with the given file to remote.
  *
  * This function will save or update the given data as the latest file data of
- * {@link type} associated with the given {@link enteFile}. The data will be
- * end-to-end encrypted using the given {@link enteFile}'s key before uploading.
+ * {@link type} associated with the given {@link file}. The data will be
+ * end-to-end encrypted using the given {@link file}'s key before uploading.
  *
- * @param enteFile {@link EnteFile} which this data is associated with.
+ * @param file {@link EnteFile} which this data is associated with.
  *
  * @param type The {@link FileDataType} which we are uploading.
  *
@@ -90,20 +90,20 @@ export const fetchFileData = async (
  * {@link type} specific.
  */
 export const putFileData = async (
-    enteFile: EnteFile,
+    file: EnteFile,
     type: FileDataType,
     data: Uint8Array,
 ) => {
     const { encryptedData, decryptionHeader } = await encryptBlobB64(
         data,
-        enteFile.key,
+        file.key,
     );
 
     const res = await fetch(await apiURL("/files/data"), {
         method: "PUT",
         headers: await authenticatedRequestHeaders(),
         body: JSON.stringify({
-            fileID: enteFile.id,
+            fileID: file.id,
             type,
             encryptedData,
             decryptionHeader,

@@ -2,13 +2,12 @@ import { ensureElectron } from "@/base/electron";
 import { nameAndExtension } from "@/base/file";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
+import { type EnteFile, mergeMetadata } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import downloadManager from "@/new/photos/services/download";
 import { exportMetadataDirectoryName } from "@/new/photos/services/export";
 import { getAllLocalFiles } from "@/new/photos/services/files";
-import { EnteFile } from "@/new/photos/types/file";
-import { mergeMetadata } from "@/new/photos/utils/file";
 import {
     safeDirectoryName,
     safeFileName,

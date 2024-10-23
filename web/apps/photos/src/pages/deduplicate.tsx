@@ -1,7 +1,9 @@
 import { stashRedirect } from "@/accounts/services/redirect";
+import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { ALL_SECTION } from "@/new/photos/services/collection";
 import { getLocalFiles } from "@/new/photos/services/files";
+import { AppContext } from "@/new/photos/types/context";
 import { VerticallyCentered } from "@ente/shared/components/Container";
-import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { ApiError } from "@ente/shared/error";
 import useMemoSingleThreaded from "@ente/shared/hooks/useMemoSingleThreaded";
@@ -13,7 +15,6 @@ import DeduplicateOptions from "components/pages/dedupe/SelectedFileOptions";
 import PhotoFrame from "components/PhotoFrame";
 import { t } from "i18next";
 import { default as Router, default as router } from "next/router";
-import { AppContext } from "pages/_app";
 import { createContext, useContext, useEffect, useState } from "react";
 import {
     getAllLatestCollections,
@@ -27,7 +28,6 @@ import {
     DefaultDeduplicateContext,
 } from "types/deduplicate";
 import { SelectedState } from "types/gallery";
-import { ALL_SECTION } from "utils/collection";
 import { constructFileToCollectionMap, getSelectedFiles } from "utils/file";
 
 export const DeduplicateContext = createContext<DeduplicateContextType>(
@@ -131,7 +131,12 @@ export default function Deduplicate() {
             // there in an ad-hoc manner. For now, this fixes the issue with the
             // UI not updating if the user deletes only some of the duplicates.
             const collections = await getAllLatestCollections();
-            await syncFiles("normal", collections, () => {});
+            await syncFiles(
+                "normal",
+                collections,
+                () => {},
+                () => {},
+            );
             await syncTrash(collections, () => {});
         } catch (e) {
             if (
@@ -170,7 +175,7 @@ export default function Deduplicate() {
     if (!duplicates) {
         return (
             <VerticallyCentered>
-                <EnteSpinner />
+                <ActivityIndicator />
             </VerticallyCentered>
         );
     }

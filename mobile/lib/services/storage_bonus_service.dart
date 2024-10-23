@@ -1,23 +1,20 @@
-import "package:photos/core/network/network.dart";
+import "package:dio/dio.dart";
+import "package:flutter/foundation.dart";
 import "package:photos/gateways/storage_bonus_gw.dart";
+import "package:photos/models/api/storage_bonus/storage_bonus.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class StorageBonusService {
-  late StorageBonusGateway gateway;
-  late SharedPreferences prefs;
+  final StorageBonusGateway gateway;
+  final SharedPreferences prefs;
 
-  final int minTapCountBeforeHidingBanner = 5;
+  final int minTapCountBeforeHidingBanner = 1;
   final String _showStorageBonusTapCount = "showStorageBonus.tap_count";
 
-  void init(SharedPreferences preferences) {
-    prefs = preferences;
-    gateway = StorageBonusGateway(NetworkClient.instance.enteDio);
+  StorageBonusService(this.prefs, Dio enteDio)
+      : gateway = StorageBonusGateway(enteDio) {
+    debugPrint("StorageBonusService constructor");
   }
-
-  StorageBonusService._privateConstructor();
-
-  static StorageBonusService instance =
-      StorageBonusService._privateConstructor();
 
   // returns true if _showStorageBonusTapCount value is less than minTapCountBeforeHidingBanner
   bool shouldShowStorageBonus() {
@@ -30,8 +27,19 @@ class StorageBonusService {
     prefs.setInt(_showStorageBonusTapCount, tapCount + 1).ignore();
   }
 
-  // getter for gateway
-  StorageBonusGateway getGateway() {
-    return gateway;
+  Future<void> applyCode(String code) {
+    return gateway.claimReferralCode(code.trim().toUpperCase());
+  }
+
+  Future<void> updateCode(String code) {
+    return gateway.updateCode(code.trim().toUpperCase());
+  }
+
+  Future<ReferralView> getReferralView() {
+    return gateway.getReferralView();
+  }
+
+  Future<BonusDetails> getBonusDetails() {
+    return gateway.getBonusDetails();
   }
 }

@@ -2,5 +2,14 @@
   "@@locale ": "en",
   "askDeleteReason": "Jaký je váš hlavní důvod, proč mažete svůj účet?",
   "incorrectRecoveryKeyBody": "",
-  "checkInboxAndSpamFolder": "Zkontrolujte prosím svou doručenou poštu (a spam) pro dokončení ověření"
+  "checkInboxAndSpamFolder": "Zkontrolujte prosím svou doručenou poštu (a spam) pro dokončení ověření",
+  "personName": "Person name",
+  "addNewPerson": "Add new person",
+  "addNameOrMerge": "Add name or merge",
+  "mergeWithExisting": "Merge with existing",
+  "newPerson": "New person",
+  "addName": "Add name",
+  "add": "Add",
+  "extraPhotosFoundFor": "Extra photos found for $text",
+  "extraPhotosFound": "Extra photos found"
 }

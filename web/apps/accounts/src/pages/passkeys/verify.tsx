@@ -1,10 +1,10 @@
+import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import log from "@/base/log";
 import type { TwoFactorAuthorizationResponse } from "@/base/types/credentials";
 import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";
 import { VerticallyCentered } from "@ente/shared/components/Container";
-import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import InfoIcon from "@mui/icons-material/Info";
 import KeyIcon from "@mui/icons-material/Key";
 import { Paper, Typography, styled } from "@mui/material";
@@ -272,7 +272,7 @@ const redirectToURL = (url: URL) => {
 const Loading: React.FC = () => {
     return (
         <VerticallyCentered>
-            <EnteSpinner />
+            <ActivityIndicator />
         </VerticallyCentered>
     );
 };
