@@ -117,7 +117,8 @@ class DirectoryUtils {
       }
 
       File newOfflineDatabaseFile = File(
-          p.join(newDataDir.path, "${prefix}ente.offline_authenticator.db"));
+        p.join(newDataDir.path, "${prefix}ente.offline_authenticator.db"),
+      );
       if (await offlineDatabaseFile.exists() &&
           !await newOfflineDatabaseFile.exists()) {
         await offlineDatabaseFile.copy(newOfflineDatabaseFile.path);
