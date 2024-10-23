@@ -44,24 +44,33 @@ import type { FamilyData } from "../../services/user";
 
 /**
  * Specifies what the bar at the top of the gallery is displaying currently.
+ *
+ * TODO: Deprecated(?). Use GalleryView instead. Deprecated if it can be used in
+ * all cases where the bar mode was in use.
  */
 export type GalleryBarMode = "albums" | "hidden-albums" | "people";
 
 /**
  * Specifies what the gallery is currently displaying.
  *
- * TODO: An experiment at consolidating state.
+ * This can be overridden by the display of search results.
  */
-export type GalleryFocus =
+export type GalleryView =
     | {
           /**
-           * We're either in the "Albums" section, or are displaying the hidden
-           * albums.
+           * We're either in the "Albums" or "Hidden albums" section.
            */
           type: "albums" | "hidden-albums";
-          activeCollectionID: number;
+          activeCollectionSummaryID: number;
+          /**
+           * If the active collection ID is for a collection and not a
+           * pseudo-collection, this property will be set to the corresponding
+           * {@link Collection}.
+           *
+           * It is guaranteed that this will be one of the {@link collections}
+           * or {@link hiddenCollections}.
+           */
           activeCollection: Collection | undefined;
-          activeCollectionSummary: CollectionSummary;
       }
     | {
           /**
@@ -74,14 +83,14 @@ export type GalleryFocus =
            * Note that this can be different from the underlying list of people,
            * and can temporarily include a person from outside that list.
            */
-          people: Person[];
+          visiblePeople: Person[];
           /**
-           * The currently selected person in the gallery bar.
+           * The currently selected person in the gallery bar, if any.
            *
-           * It is guaranteed that {@link activePerson} will be one of the
-           * objects from among {@link people}.
+           * It is guaranteed that when it is set, {@link activePerson} will be
+           * one of the objects from among {@link people}.
            */
-          activePerson: Person;
+          activePerson: Person | undefined;
       };
 
 /**
@@ -195,45 +204,58 @@ export interface GalleryState {
      * local state also gets synced in a bit.
      */
     tempDeletedFileIDs: Set<number>;
-
     /**
      * Variant of {@link tempDeletedFileIDs} for files that have just been
      * hidden.
      */
     tempHiddenFileIDs: Set<number>;
 
-    /*--<  Transient UI state  >--*/
+    /*--<  State that underlies transient UI state  >--*/
 
     /**
-     * If visible, what should the (sticky) gallery bar show.
+     * The currently selected collection summary, if any.
+     *
+     * When present, this is used to derive the
+     * {@link activeCollectionSummaryID} property of the {@link view}.
+     *
+     * UI code should use the {@link view}, this property is meant as the
+     * underlying primitive state. In particular, this does not get reset when
+     * we switch sections, which allows us to come back to the same active
+     * collection (if possible) on switching back.
      */
-    barMode: GalleryBarMode | undefined;
-    /**
-     * The section / area, and the item within it, that the gallery is currently
-     * showing.
-     */
-    focus: GalleryFocus | undefined;
-    activeCollectionID: number | undefined;
+    selectedCollectionSummaryID: number | undefined;
     /**
      * The currently selected person, if any.
      *
      * When present, it is used to derive the {@link activePerson} property of
-     * the {@link focus}.
-     */
-    activePersonID: string | undefined;
-
-    filteredData: EnteFile[];
-    /**
-     * The currently selected person, if any.
+     * the {@link view}.
      *
-     * Whenever this is present, it is guaranteed to be one of the items from
-     * within {@link people}.
+     * UI code should use the {@link view}, this property is meant as the
+     * underlying primitive state. In particular, this does not get reset when
+     * we switch sections, which allows us to come back to the same person (if
+     * possible) on switching back.
      */
-    activePerson: Person | undefined;
+    selectedPersonID: string | undefined;
     /**
-     * The list of people to show.
+     * List of files that match the selected search option.
+     *
+     * This will be set only if we are showing search results.
+     *
+     * The search dropdown shows a list of options ("suggestions") that match
+     * the user's search term. If the user selects from one of these options,
+     * then we run a search to find all files that match that suggestion, and
+     * set this value to the result.
      */
-    people: Person[] | undefined;
+    searchResults: EnteFile[] | undefined;
+
+    /*--<  Transient UI state  >--*/
+
+    /**
+     * The view, and the item within it, that the gallery is currently showing.
+     *
+     * This can be temporarily overridden when we display search results.
+     */
+    view: GalleryView | undefined;
     /**
      * `true` if we are in "search mode".
      *
@@ -246,16 +268,9 @@ export interface GalleryState {
      */
     isInSearchMode: boolean;
     /**
-     * List of files that match the selected search option.
-     *
-     * This will be set only if we are showing search results.
-     *
-     * The search dropdown shows a list of options ("suggestions") that match
-     * the user's search term. If the user selects from one of these options,
-     * then we run a search to find all files that match that suggestion, and
-     * set this value to the result.
+     * The files to show, uniqued and sorted appropriately.
      */
-    searchResults: EnteFile[] | undefined;
+    filteredFiles: EnteFile[] | undefined;
 }
 
 export type GalleryAction =
@@ -267,13 +282,6 @@ export type GalleryAction =
           files: EnteFile[];
           hiddenFiles: EnteFile[];
           trashedFiles: EnteFile[];
-      }
-    | {
-          type: "set";
-          filteredData: EnteFile[];
-          galleryPeopleState:
-              | { activePerson: Person | undefined; people: Person[] }
-              | undefined;
       }
     | {
           type: "setNormalCollections";
@@ -297,6 +305,7 @@ export type GalleryAction =
     | { type: "clearTempHidden" }
     | { type: "showAll" }
     | { type: "showHidden" }
+    | { type: "showAlbums" }
     | {
           type: "showNormalOrHiddenCollectionSummary";
           collectionSummaryID: number | undefined;
@@ -305,7 +314,8 @@ export type GalleryAction =
     | { type: "showPerson"; personID: string }
     | { type: "searchResults"; searchResults: EnteFile[] }
     | { type: "enterSearchMode" }
-    | { type: "exitSearch" };
+    | { type: "exitSearch" }
+    | { type: "setFilteredFiles"; filteredFiles: EnteFile[] };
 
 const initialGalleryState: GalleryState = {
     user: undefined,
@@ -326,15 +336,12 @@ const initialGalleryState: GalleryState = {
     hiddenCollectionSummaries: new Map(),
     tempDeletedFileIDs: new Set<number>(),
     tempHiddenFileIDs: new Set<number>(),
-    barMode: undefined,
-    focus: undefined,
-    activeCollectionID: undefined,
-    activePersonID: undefined,
-    filteredData: [],
-    activePerson: undefined,
-    people: [],
-    isInSearchMode: false,
+    selectedCollectionSummaryID: undefined,
+    selectedPersonID: undefined,
     searchResults: undefined,
+    view: undefined,
+    filteredFiles: undefined,
+    isInSearchMode: false,
 };
 
 const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
@@ -383,15 +390,13 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     hiddenCollections,
                     action.hiddenFiles,
                 ),
+                view: {
+                    type: "albums",
+                    activeCollectionSummaryID: ALL_SECTION,
+                    activeCollection: undefined,
+                },
             };
         }
-        case "set":
-            return {
-                ...state,
-                filteredData: action.filteredData,
-                activePerson: action.galleryPeopleState?.activePerson,
-                people: action.galleryPeopleState?.people,
-            };
         case "setNormalCollections": {
             const archivedCollectionIDs = deriveArchivedCollectionIDs(
                 action.collections,
@@ -584,49 +589,93 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
         case "showAll":
             return {
                 ...state,
-                barMode: "albums",
-                activeCollectionID: ALL_SECTION,
-                isInSearchMode: false,
                 searchResults: undefined,
+                selectedCollectionSummaryID: undefined,
+                view: {
+                    type: "albums",
+                    activeCollectionSummaryID: ALL_SECTION,
+                    activeCollection: undefined,
+                },
+                isInSearchMode: false,
             };
         case "showHidden":
             return {
                 ...state,
-                barMode: "hidden-albums",
-                activeCollectionID: HIDDEN_ITEMS_SECTION,
-                isInSearchMode: false,
                 searchResults: undefined,
+                selectedCollectionSummaryID: undefined,
+                view: {
+                    type: "hidden-albums",
+                    activeCollectionSummaryID: HIDDEN_ITEMS_SECTION,
+                    activeCollection: undefined,
+                },
+                isInSearchMode: false,
             };
+        case "showAlbums": {
+            const { view, selectedCollectionSummaryID } =
+                deriveAlbumsViewAndSelectedID(
+                    state.collections,
+                    state.collectionSummaries,
+                    state.selectedCollectionSummaryID,
+                );
+            return {
+                ...state,
+                searchResults: undefined,
+                selectedCollectionSummaryID,
+                view,
+                isInSearchMode: false,
+            };
+        }
         case "showNormalOrHiddenCollectionSummary":
             return {
                 ...state,
-                barMode:
-                    action.collectionSummaryID !== undefined &&
-                    state.hiddenCollectionSummaries.has(
-                        action.collectionSummaryID,
-                    )
-                        ? "hidden-albums"
-                        : "albums",
-                activeCollectionID: action.collectionSummaryID ?? ALL_SECTION,
-                isInSearchMode: false,
                 searchResults: undefined,
+                selectedCollectionSummaryID: action.collectionSummaryID,
+                view: {
+                    type:
+                        action.collectionSummaryID !== undefined &&
+                        state.hiddenCollectionSummaries.has(
+                            action.collectionSummaryID,
+                        )
+                            ? "hidden-albums"
+                            : "albums",
+                    activeCollectionSummaryID:
+                        action.collectionSummaryID ?? ALL_SECTION,
+                    activeCollection: state.collections
+                        .concat(state.hiddenCollections)
+                        .find(({ id }) => id === action.collectionSummaryID),
+                },
+                isInSearchMode: false,
             };
-        case "showPeople":
+        case "showPeople": {
+            const view = derivePeopleView(
+                state.peopleState,
+                state.tempDeletedFileIDs,
+                state.tempHiddenFileIDs,
+                state.selectedPersonID,
+            );
             return {
                 ...state,
-                barMode: "people",
-                activePersonID: undefined,
-                isInSearchMode: false,
                 searchResults: undefined,
+                selectedPersonID: view.activePerson?.id,
+                view,
+                isInSearchMode: false,
             };
-        case "showPerson":
+        }
+        case "showPerson": {
+            const view = derivePeopleView(
+                state.peopleState,
+                state.tempDeletedFileIDs,
+                state.tempHiddenFileIDs,
+                action.personID,
+            );
             return {
                 ...state,
-                barMode: "people",
-                activePersonID: action.personID,
-                isInSearchMode: false,
                 searchResults: undefined,
+                selectedPersonID: view.activePerson?.id,
+                view,
+                isInSearchMode: false,
             };
+        }
         case "enterSearchMode":
             return { ...state, isInSearchMode: true };
         case "searchResults":
@@ -640,6 +689,8 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 isInSearchMode: false,
                 searchResults: undefined,
             };
+        case "setFilteredFiles":
+            return { ...state, filteredFiles: action.filteredFiles };
     }
 };
 
@@ -944,3 +995,222 @@ const findAllSectionVisibleFiles = (
                 !archivedCollectionIDs.has(file.collectionID),
         ),
     );
+
+/**
+ * Helper function to derive the {@link GalleryView} from its dependencies when
+ * we are switching to (or back to) the "albums" view.
+ */
+const deriveAlbumsViewAndSelectedID = (
+    collections: GalleryState["collections"],
+    collectionSummaries: GalleryState["collectionSummaries"],
+    selectedCollectionSummaryID: GalleryState["selectedCollectionSummaryID"],
+) => {
+    // Make sure that the last selected ID is still valid by searching for it.
+    const activeCollectionSummaryID = selectedCollectionSummaryID
+        ? collectionSummaries.get(selectedCollectionSummaryID)?.id
+        : undefined;
+    const activeCollection = activeCollectionSummaryID
+        ? collections.find(({ id }) => id == activeCollectionSummaryID)
+        : undefined;
+    return {
+        selectedCollectionSummaryID: activeCollectionSummaryID,
+        view: {
+            type: "albums" as const,
+            activeCollectionSummaryID: activeCollectionSummaryID ?? ALL_SECTION,
+            activeCollection,
+        },
+    };
+};
+
+/**
+ * Helper function to derive the {@link GalleryView} from its dependencies when
+ * we are switching to (or back to) the "people" view.
+ */
+const derivePeopleView = (
+    peopleState: GalleryState["peopleState"],
+    tempDeletedFileIDs: GalleryState["tempDeletedFileIDs"],
+    tempHiddenFileIDs: GalleryState["tempHiddenFileIDs"],
+    selectedPersonID: GalleryState["selectedPersonID"],
+): Extract<GalleryView, { type: "people" }> => {
+    let people = peopleState?.people ?? [];
+    let visiblePeople = peopleState?.visiblePeople ?? [];
+    if (tempDeletedFileIDs.size + tempHiddenFileIDs.size > 0) {
+        // Prune the in-memory temp updates from the actual state to
+        // obtain the UI state. Kept inside an preflight check to so
+        // that the common path remains fast.
+        const filterTemp = (ps: Person[]) =>
+            ps
+                .map((p) => ({
+                    ...p,
+                    fileIDs: p.fileIDs.filter(
+                        (id) =>
+                            !tempDeletedFileIDs.has(id) &&
+                            !tempHiddenFileIDs.has(id),
+                    ),
+                }))
+                .filter((p) => p.fileIDs.length > 0);
+        people = filterTemp(people);
+        visiblePeople = filterTemp(visiblePeople);
+    }
+    const findByID = (ps: Person[]) => ps.find((p) => p.id == selectedPersonID);
+    let activePerson = findByID(visiblePeople);
+    if (!activePerson) {
+        // This might be one of the normally hidden small clusters.
+        activePerson = findByID(people);
+        if (activePerson) {
+            // Temporarily add this person's entry to the list of people
+            // surfaced in the people section.
+            visiblePeople.push(activePerson);
+        } else {
+            // We don't have an "All" pseudo-album in people mode, so default to
+            // the first person in the list (if any).
+            activePerson = visiblePeople[0];
+        }
+    }
+
+    return { type: "people", visiblePeople, activePerson };
+};
+
+/**
+ * Helper function to compute the sorted list of files to show when we're
+ * showing either "albums" or "hidden-albums".
+ */
+export const deriveAlbumishFilteredFiles = (state: GalleryState) => {
+    const view = state.view;
+    if (view?.type == "albums") {
+        return deriveAlbumsFilteredFiles(state, view);
+    } else if (view?.type == "hidden-albums") {
+        return deriveHiddenAlbumsFilteredFiles(state, view);
+    } else {
+        // TODO: Setup the types so that we don't come here.
+        throw new Error("Not implemented");
+    }
+};
+
+/**
+ * Helper function to compute the sorted list of files to show when we're
+ * in the "albums" view.
+ */
+export const deriveAlbumsFilteredFiles = (
+    state: GalleryState,
+    view: Extract<GalleryView, { type: "albums" | "hidden-albums" }>,
+) => {
+    const {
+        files,
+        archivedCollectionIDs,
+        hiddenFileIDs,
+        tempDeletedFileIDs,
+        tempHiddenFileIDs,
+    } = state;
+    const activeCollectionSummaryID = view.activeCollectionSummaryID;
+
+    const filteredFiles = files.filter((file) => {
+        if (tempDeletedFileIDs.has(file.id)) return false;
+        if (hiddenFileIDs.has(file.id)) return false;
+        if (tempHiddenFileIDs.has(file.id)) return false;
+
+        // Files in archived collections can only be seen in their respective
+        // collection.
+        if (archivedCollectionIDs.has(file.collectionID)) {
+            return activeCollectionSummaryID === file.collectionID;
+        }
+
+        // Archived files can only be seen in the archive section, or in their
+        // respective collection.
+        if (isArchivedFile(file)) {
+            return (
+                activeCollectionSummaryID === ARCHIVE_SECTION ||
+                activeCollectionSummaryID === file.collectionID
+            );
+        }
+
+        // Show all remaining (non-hidden, non-archived) files in "All".
+        if (activeCollectionSummaryID === ALL_SECTION) {
+            return true;
+        }
+
+        // Show files that belong to the active collection.
+        return activeCollectionSummaryID === file.collectionID;
+    });
+
+    return sortAndUniqueFilteredFiles(filteredFiles, view.activeCollection);
+};
+
+/**
+ * Helper function to compute the sorted list of files to show when we're
+ * showing the "Trash".
+ */
+export const deriveTrashFilteredFiles = ({
+    files,
+    trashedFiles,
+    tempDeletedFileIDs,
+}: GalleryState) =>
+    uniqueFilesByID([
+        ...trashedFiles,
+        ...files.filter((file) => tempDeletedFileIDs.has(file.id)),
+    ]);
+
+/**
+ * Helper function to compute the sorted list of files to show when we're
+ * in the "hidden-albums" view.
+ */
+export const deriveHiddenAlbumsFilteredFiles = (
+    state: GalleryState,
+    view: Extract<GalleryView, { type: "albums" | "hidden-albums" }>,
+) => {
+    const { hiddenFiles, defaultHiddenCollectionIDs, tempDeletedFileIDs } =
+        state;
+    const activeCollectionSummaryID = view.activeCollectionSummaryID;
+
+    const filteredFiles = hiddenFiles.filter((file) => {
+        if (tempDeletedFileIDs.has(file.id)) return false;
+
+        // "Hidden" shows all standalone hidden files.
+        if (
+            activeCollectionSummaryID === HIDDEN_ITEMS_SECTION &&
+            defaultHiddenCollectionIDs.has(file.collectionID)
+        ) {
+            return true;
+        }
+
+        // Show files that belong to the active collection.
+        return activeCollectionSummaryID === file.collectionID;
+    });
+
+    return sortAndUniqueFilteredFiles(filteredFiles, view.activeCollection);
+};
+
+/**
+ * Prepare the list of files for being shown in the gallery.
+ *
+ * This functions uniques the given collection files so that there is only one
+ * entry per file ID. Then it sorts them if the active collection prefers them
+ * to be sorted oldest first (by default, lists of collection files are sorted
+ * newest first, and we assume that {@link files} are already sorted that way).
+ */
+const sortAndUniqueFilteredFiles = (
+    files: EnteFile[],
+    activeCollection: Collection | undefined,
+) => {
+    const uniqueFiles = uniqueFilesByID(files);
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    const sortAsc = activeCollection?.pubMagicMetadata?.data?.asc ?? false;
+    return sortAsc ? sortFiles(uniqueFiles, true) : uniqueFiles;
+};
+
+/**
+ * Helper function to compute the sorted list of files to show when we're
+ * in the "people" view.
+ */
+export const derivePeopleFilteredFiles = (
+    { files }: GalleryState,
+    view: Extract<GalleryView, { type: "people" }>,
+) => {
+    const pfSet = new Set(view.activePerson?.fileIDs ?? []);
+    return uniqueFilesByID(
+        files.filter(({ id }) => {
+            if (!pfSet.has(id)) return false;
+            return true;
+        }),
+    );
+};
