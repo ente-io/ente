@@ -238,6 +238,14 @@ export interface GalleryState {
      */
     selectedPersonID: string | undefined;
     /**
+     * If present, this person is tacked on the the list of visible people
+     * temporarily (until the user switches out from the people view).
+     *
+     * This is needed to retain a usually non-visible but temporarily selected
+     * person in the people bar until the user switches to some other view.
+     */
+    extraVisiblePerson: Person | undefined;
+    /**
      * List of files that match the selected search option.
      *
      * This will be set only if we are showing search results.
@@ -341,6 +349,7 @@ const initialGalleryState: GalleryState = {
     tempHiddenFileIDs: new Set<number>(),
     selectedCollectionSummaryID: undefined,
     selectedPersonID: undefined,
+    extraVisiblePerson: undefined,
     searchResults: undefined,
     view: undefined,
     filteredFiles: [],
@@ -609,8 +618,9 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
         case "showAll":
             return refreshingFilteredFilesIfShowingAlbums({
                 ...state,
-                searchResults: undefined,
                 selectedCollectionSummaryID: undefined,
+                extraVisiblePerson: undefined,
+                searchResults: undefined,
                 view: {
                     type: "albums",
                     activeCollectionSummaryID: ALL_SECTION,
@@ -621,8 +631,9 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
         case "showHidden":
             return refreshingFilteredFilesIfShowingHiddenAlbums({
                 ...state,
-                searchResults: undefined,
                 selectedCollectionSummaryID: undefined,
+                extraVisiblePerson: undefined,
+                searchResults: undefined,
                 view: {
                     type: "hidden-albums",
                     activeCollectionSummaryID: HIDDEN_ITEMS_SECTION,
@@ -639,8 +650,9 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 );
             return refreshingFilteredFilesIfShowingAlbums({
                 ...state,
-                searchResults: undefined,
                 selectedCollectionSummaryID,
+                extraVisiblePerson: undefined,
+                searchResults: undefined,
                 view,
                 isInSearchMode: false,
             });
@@ -648,8 +660,9 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
         case "showNormalOrHiddenCollectionSummary":
             return refreshingFilteredFilesIfShowingAlbumsOrHiddenAlbums({
                 ...state,
-                searchResults: undefined,
                 selectedCollectionSummaryID: action.collectionSummaryID,
+                extraVisiblePerson: undefined,
+                searchResults: undefined,
                 view: {
                     type:
                         action.collectionSummaryID !== undefined &&
@@ -667,34 +680,38 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 isInSearchMode: false,
             });
         case "showPeople": {
-            const view = derivePeopleView(
+            const { view, extraVisiblePerson } = derivePeopleView(
                 state.peopleState,
                 state.tempDeletedFileIDs,
                 state.tempHiddenFileIDs,
                 state.selectedPersonID,
+                state.extraVisiblePerson,
             );
             const filteredFiles = derivePeopleFilteredFiles(state.files, view);
             return {
                 ...state,
-                searchResults: undefined,
                 selectedPersonID: view.activePerson?.id,
+                extraVisiblePerson,
+                searchResults: undefined,
                 view,
                 isInSearchMode: false,
                 filteredFiles,
             };
         }
         case "showPerson": {
-            const view = derivePeopleView(
+            const { view, extraVisiblePerson } = derivePeopleView(
                 state.peopleState,
                 state.tempDeletedFileIDs,
                 state.tempHiddenFileIDs,
                 action.personID,
+                state.extraVisiblePerson,
             );
             const filteredFiles = derivePeopleFilteredFiles(state.files, view);
             return {
                 ...state,
                 searchResults: undefined,
                 selectedPersonID: view.activePerson?.id,
+                extraVisiblePerson,
                 view,
                 isInSearchMode: false,
                 filteredFiles,
@@ -1058,7 +1075,11 @@ const derivePeopleView = (
     tempDeletedFileIDs: GalleryState["tempDeletedFileIDs"],
     tempHiddenFileIDs: GalleryState["tempHiddenFileIDs"],
     selectedPersonID: GalleryState["selectedPersonID"],
-): Extract<GalleryView, { type: "people" }> => {
+    extraVisiblePerson: GalleryState["extraVisiblePerson"],
+): {
+    view: Extract<GalleryView, { type: "people" }>;
+    extraVisiblePerson: GalleryState["extraVisiblePerson"];
+} => {
     let people = peopleState?.people ?? [];
     let visiblePeople = peopleState?.visiblePeople ?? [];
     if (tempDeletedFileIDs.size + tempHiddenFileIDs.size > 0) {
@@ -1079,7 +1100,9 @@ const derivePeopleView = (
         people = filterTemp(people);
         visiblePeople = filterTemp(visiblePeople);
     }
-    const findByIDIn = (ps: Person[]) => ps.find((p) => p.id == selectedPersonID);
+
+    const findByIDIn = (ps: Person[]) =>
+        ps.find((p) => p.id == selectedPersonID);
     let activePerson = findByIDIn(visiblePeople);
     if (!activePerson) {
         // This might be one of the normally hidden small clusters.
@@ -1087,7 +1110,7 @@ const derivePeopleView = (
         if (activePerson) {
             // Temporarily add this person's entry to the list of people
             // surfaced in the people view.
-            visiblePeople.push(activePerson);
+            extraVisiblePerson = activePerson;
         } else {
             // We don't have an "All" pseudo-album in people view, so default to
             // the first person in the list (if any).
@@ -1095,7 +1118,15 @@ const derivePeopleView = (
         }
     }
 
-    return { type: "people", visiblePeople, activePerson };
+    const view = {
+        type: "people" as const,
+        visiblePeople: extraVisiblePerson
+            ? visiblePeople.concat([extraVisiblePerson])
+            : visiblePeople,
+        activePerson,
+    };
+
+    return { view, extraVisiblePerson };
 };
 
 /**
