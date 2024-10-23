@@ -9,6 +9,7 @@ import 'package:photos/services/machine_learning/face_ml/face_embedding/face_emb
 import "package:photos/services/machine_learning/ml_models_overview.dart";
 import 'package:photos/services/machine_learning/ml_result.dart';
 import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
+import "package:photos/services/remote_assets_service.dart";
 import "package:photos/utils/ml_util.dart";
 
 class MLIndexingIsolate extends SuperIsolate {
@@ -24,6 +25,8 @@ class MLIndexingIsolate extends SuperIsolate {
 
   @override
   bool get shouldAutomaticDispose => true;
+
+  bool? indexingModelsCleanedLocally;
 
   @override
   Future<void> onDispose() async {
@@ -127,6 +130,23 @@ class MLIndexingIsolate extends SuperIsolate {
       _logger.severe("Could not load models in MLIndexingIsolate", e, s);
       rethrow;
     }
+  }
+
+  Future<void> cleanupLocalIndexingModels() async {
+    if (indexingModelsCleanedLocally == true) return;
+    await _releaseModels();
+
+    final List<String> remoteModelPaths = [];
+
+    for (final model in MLModels.values) {
+      if (!model.isIndexingModel) continue;
+      final mlModel = model.model;
+      remoteModelPaths.add(mlModel.modelRemotePath);
+    }
+
+    await RemoteAssetsService.instance.cleanupSelectedModels(remoteModelPaths);
+
+    indexingModelsCleanedLocally = true;
   }
 
   Future<void> _releaseModels() async {
