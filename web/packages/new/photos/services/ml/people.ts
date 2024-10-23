@@ -418,7 +418,6 @@ export const _suggestionsAndChoicesForPerson = async (
     const startTime = Date.now();
 
     const personClusters = person.cgroup.data.assigned;
-    const personClusterIDs = new Set(personClusters.map(({ id }) => id));
     const rejectedClusterIDs = new Set(
         await savedRejectedClustersForCGroup(person.cgroup.id),
     );
@@ -460,9 +459,6 @@ export const _suggestionsAndChoicesForPerson = async (
 
         // Ignore singleton clusters.
         if (faces.length < 2) continue;
-
-        // TODO-Cluster sanity check, remove after dev
-        if (personClusterIDs.has(id)) assertionFailed();
 
         const sampledOtherEmbeddings = randomSample(faces, 50)
             .map((id) => embeddingByFaceID.get(id))
@@ -676,21 +672,11 @@ export const _applyPersonSuggestionUpdates = async (
     for (const [clusterID, assigned] of updates.entries()) {
         switch (assigned) {
             case true /* assign */:
-                // TODO-Cluster sanity check, remove after wrapping up dev
-                if (assignedClusters.find(({ id }) => id == clusterID)) {
-                    assertionFailed();
-                }
-
                 assign(clusterID);
                 unrejectIfNeeded(clusterID);
                 break;
 
             case false /* reject */:
-                // TODO-Cluster sanity check, remove after wrapping up dev
-                if (rejectedClusterIDs.includes(clusterID)) {
-                    assertionFailed();
-                }
-
                 unassignIfNeeded(clusterID);
                 reject(clusterID);
                 break;
