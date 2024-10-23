@@ -854,11 +854,6 @@ export default function Gallery() {
         });
     };
 
-    const handleSelectPerson = (personID: string | undefined) =>
-        personID
-            ? dispatch({ type: "showPerson", personID })
-            : dispatch({ type: "showPeople" });
-
     const handleOpenCollectionSelector = useCallback(
         (attributes: CollectionSelectorAttributes) => {
             setCollectionSelectorAttributes(attributes);
@@ -980,7 +975,10 @@ export default function Gallery() {
                                 onShowSearchInput: () =>
                                     dispatch({ type: "enterSearchMode" }),
                                 onSelectSearchOption: handleSelectSearchOption,
-                                onSelectPerson: handleSelectPerson,
+                                onSelectPeople: () =>
+                                    dispatch({ type: "showPeople" }),
+                                onSelectPerson: (personID) =>
+                                    dispatch({ type: "showPerson", personID }),
                             }}
                         />
                     )}
@@ -1003,7 +1001,8 @@ export default function Gallery() {
                                 ? state.view.visiblePeople
                                 : undefined) ?? [],
                         activePerson,
-                        onSelectPerson: handleSelectPerson,
+                        onSelectPerson: (personID) =>
+                            dispatch({ type: "showPerson", personID }),
                         setCollectionNamerAttributes,
                         setPhotoListHeader,
                         setFilesDownloadProgressAttributesCreator,

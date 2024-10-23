@@ -95,11 +95,6 @@ export interface GalleryBarImplProps {
      */
     activePerson: Person | undefined;
     /**
-     * Called when the selection should be moved to first person in the bar (if
-     * any).
-     */
-    onResetPersonSelection: () => void;
-    /**
      * Called when the selection should be moved to a new person in the bar.
      */
     onSelectPerson: (personID: string) => void;

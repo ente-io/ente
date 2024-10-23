@@ -76,7 +76,7 @@ import { GalleryItemsHeaderAdapter, GalleryItemsSummary } from "./ListHeader";
 
 type PeopleHeaderProps = Pick<
     GalleryBarImplProps,
-    "people" | "onSelectPerson" | "onResetPersonSelection"
+    "people" | "onSelectPerson"
 > & {
     person: Person;
 };
@@ -84,17 +84,13 @@ type PeopleHeaderProps = Pick<
 export const PeopleHeader: React.FC<PeopleHeaderProps> = ({
     people,
     onSelectPerson,
-    onResetPersonSelection,
     person,
 }) => {
     return (
         <GalleryItemsHeaderAdapter>
             <SpaceBetweenFlex>
                 {person.type == "cgroup" ? (
-                    <CGroupPersonHeader
-                        person={person}
-                        {...{ onResetPersonSelection }}
-                    />
+                    <CGroupPersonHeader person={person} />
                 ) : (
                     <ClusterPersonHeader
                         person={person}
@@ -106,17 +102,11 @@ export const PeopleHeader: React.FC<PeopleHeaderProps> = ({
     );
 };
 
-type CGroupPersonHeaderProps = Pick<
-    PeopleHeaderProps,
-    "onResetPersonSelection"
-> & {
+interface CGroupPersonHeaderProps {
     person: CGroupPerson;
-};
+}
 
-const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({
-    person,
-    onResetPersonSelection,
-}) => {
+const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({ person }) => {
     const cgroup = person.cgroup;
 
     const { showMiniDialog } = useAppContext();
@@ -137,10 +127,7 @@ const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({
             continue: {
                 text: t("reset"),
                 color: "primary",
-                action: async () => {
-                    await deleteCGroup(cgroup);
-                    onResetPersonSelection();
-                },
+                action: () => deleteCGroup(cgroup),
             },
         });
 

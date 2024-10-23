@@ -68,11 +68,12 @@ export interface SearchBarProps {
      */
     onSelectSearchOption: (o: SearchOption | undefined) => void;
     /**
-     * Called when the user selects a person shown in the empty state view, or
-     * clicks the people list header itself.
-     *
-     * @param personID The person ID of the selected person, or `undefined` if
-     * the user clicked the generic "People" header.
+     * Called when the user selects the generic "People" header in the empty
+     * state view.
+     */
+    onSelectPeople: () => void;
+    /**
+     * Called when the user selects a person shown in the empty state view.
      */
     onSelectPerson: (personID: string | undefined) => void;
 }
@@ -126,6 +127,7 @@ const MobileSearchArea: React.FC<MobileSearchAreaProps> = ({ onSearch }) => (
 const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
     isInSearchMode,
     onSelectSearchOption,
+    onSelectPeople,
     onSelectPerson,
 }) => {
     // A ref to the top level Select.
@@ -184,6 +186,11 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
         onSelectSearchOption(undefined);
     };
 
+    const handleSelectPeople = () => {
+        resetSearch();
+        onSelectPeople();
+    };
+
     const handleSelectPerson = (personID: string | undefined) => {
         resetSearch();
         onSelectPerson(personID);
@@ -218,7 +225,10 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
                 placeholder={t("search_hint")}
                 noOptionsMessage={({ inputValue }) =>
                     shouldShowEmptyState(inputValue) ? (
-                        <EmptyState onSelectPerson={handleSelectPerson} />
+                        <EmptyState
+                            onSelectPeople={handleSelectPeople}
+                            onSelectPerson={handleSelectPerson}
+                        />
                     ) : null
                 }
             />
@@ -372,9 +382,9 @@ const shouldShowEmptyState = (inputValue: string) => {
  * The view shown in the menu area when the user has not typed anything in the
  * search box.
  */
-const EmptyState: React.FC<Pick<SearchBarProps, "onSelectPerson">> = ({
-    onSelectPerson,
-}) => {
+const EmptyState: React.FC<
+    Pick<SearchBarProps, "onSelectPeople" | "onSelectPerson">
+> = ({ onSelectPeople, onSelectPerson }) => {
     const mlStatus = useMLStatusSnapshot();
     const people = usePeopleStateSnapshot()?.visiblePeople;
 
@@ -408,9 +418,7 @@ const EmptyState: React.FC<Pick<SearchBarProps, "onSelectPerson">> = ({
         <Box sx={{ textAlign: "left" }}>
             {people && people.length > 0 && (
                 <>
-                    <SearchPeopleHeader
-                        onClick={() => onSelectPerson(undefined)}
-                    />
+                    <SearchPeopleHeader onClick={onSelectPeople} />
                     <SearchPeopleList {...{ people, onSelectPerson }} />
                 </>
             )}
