@@ -343,6 +343,22 @@ func (h *AdminHandler) AddOtt(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{})
 }
 
+func (h *AdminHandler) TerminateSession(c *gin.Context) {
+	var request ente.LogoutSessionReq
+	if err := c.ShouldBindJSON(&request); err != nil {
+		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Bad request"))
+		return
+	}
+	go h.DiscordController.NotifyAdminAction(
+		fmt.Sprintf("Admin (%d) terminating session for user %d", auth.GetUserID(c.Request.Header), request.UserID))
+	err := h.UserController.TerminateSession(request.UserID, request.Token)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{})
+}
+
 func (h *AdminHandler) UpdateFeatureFlag(c *gin.Context) {
 	var request ente.AdminUpdateKeyValueRequest
 	if err := c.ShouldBindJSON(&request); err != nil {

@@ -1,7 +1,7 @@
 import { SelectionBar } from "@/base/components/Navbar";
 import type { Collection } from "@/media/collection";
 import type { CollectionSelectorAttributes } from "@/new/photos/components/CollectionSelector";
-import type { GalleryBarMode } from "@/new/photos/components/gallery/BarImpl";
+import type { GalleryBarMode } from "@/new/photos/components/gallery/reducer";
 import {
     ALL_SECTION,
     ARCHIVE_SECTION,

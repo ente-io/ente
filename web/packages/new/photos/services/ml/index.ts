@@ -704,10 +704,12 @@ const regenerateFaceCropsIfNeeded = async (file: EnteFile) => {
  * @param name Name of the new cgroup user entity.
  *
  * @param cluster The underlying cluster to use to populate the cgroup.
+ *
+ * @returns The entity ID of the newly created cgroup.
  */
 export const addCGroup = async (name: string, cluster: FaceCluster) => {
     const masterKey = await masterKeyFromSession();
-    await addUserEntity(
+    const id = await addUserEntity(
         "cgroup",
         {
             name,
@@ -716,7 +718,8 @@ export const addCGroup = async (name: string, cluster: FaceCluster) => {
         },
         masterKey,
     );
-    return mlSync();
+    await mlSync();
+    return id;
 };
 
 /**

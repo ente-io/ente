@@ -1,3 +1,5 @@
+import "package:photos/utils/parse.dart";
+
 /// Bounding box of a face.
 ///
 /// [ x] and [y] are the minimum coordinates, so the top left corner of the box.
@@ -19,10 +21,12 @@ class FaceBox {
 
   factory FaceBox.fromJson(Map<String, dynamic> json) {
     return FaceBox(
-      x: (json['x'] as double?) ?? (json['xMin'] as double),
-      y: (json['y'] as double?) ?? (json['yMin'] as double),
-      width: json['width'] as double,
-      height: json['height'] as double,
+      x: parseIntOrDoubleAsDouble(json['x']) ??
+          parseIntOrDoubleAsDouble(json['xMin'])!,
+      y: parseIntOrDoubleAsDouble(json['y']) ??
+          parseIntOrDoubleAsDouble(json['yMin'])!,
+      width: parseIntOrDoubleAsDouble(json['width'])!,
+      height: parseIntOrDoubleAsDouble(json['height'])!,
     );
   }
 

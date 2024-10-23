@@ -141,12 +141,12 @@ func (c *ClICtrl) validateTOTP(ctx context.Context, authResp *api.AuthorizationR
 	}
 }
 
-func (c *ClICtrl) verifyPassKey(ctx context.Context, authResp *api.AuthorizationResponse) (*api.AuthorizationResponse, error) {
+func (c *ClICtrl) verifyPassKey(ctx context.Context, authResp *api.AuthorizationResponse, app api.App) (*api.AuthorizationResponse, error) {
 	if !authResp.IsPasskeyRequired() {
 		return authResp, nil
 	}
 	baseAccountUrl := viper.GetString("endpoint.accounts")
-	passkeyAuthUrl := fmt.Sprintf("%s/passkeys/verify?passkeySessionID=%s&redirect=ente-cli://passkey&clientPackage=io.ente.photos", baseAccountUrl, authResp.PassKeySessionID)
+	passkeyAuthUrl := fmt.Sprintf("%s/passkeys/verify?passkeySessionID=%s&redirect=ente-cli://passkey&clientPackage=%s", baseAccountUrl, authResp.PassKeySessionID, app.ClientPkg())
 	fmt.Printf("Open this url in browser to verify passkey: %s\n", passkeyAuthUrl)
 	err := browser.OpenURL(passkeyAuthUrl)
 	if err != nil {

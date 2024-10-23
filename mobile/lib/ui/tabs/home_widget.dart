@@ -239,7 +239,7 @@ class _HomeWidgetState extends State<HomeWidget> {
             ),
           ),
           onPressed: () async {
-            Navigator.of(context, rootNavigator: true).pop('dialog');
+            Navigator.of(context).pop('dialog');
             Navigator.of(context).popUntil((route) => route.isFirst);
             final dialog =
                 createProgressDialog(context, S.of(context).loggingOut);

@@ -150,22 +150,25 @@ export const userEntityDiff = async (
 
 /**
  * Create a new user entity with the given {@link type} on remote.
+ *
+ * @returns The ID of the newly created entity.
  */
 export const postUserEntity = async (
     type: EntityType,
     { encryptedData, decryptionHeader }: EncryptedBlobB64,
-) =>
-    ensureOk(
-        await fetch(await apiURL("/user-entity/entity"), {
-            method: "POST",
-            headers: await authenticatedRequestHeaders(),
-            body: JSON.stringify({
-                type,
-                encryptedData: encryptedData,
-                header: decryptionHeader,
-            }),
+) => {
+    const res = await fetch(await apiURL("/user-entity/entity"), {
+        method: "POST",
+        headers: await authenticatedRequestHeaders(),
+        body: JSON.stringify({
+            type,
+            encryptedData: encryptedData,
+            header: decryptionHeader,
         }),
-    );
+    });
+    ensureOk(res);
+    return z.object({ id: z.string() }).parse(await res.json()).id;
+};
 
 /**
  * Update an existing remote user entity with the given {@link id} and

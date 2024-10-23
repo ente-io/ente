@@ -247,7 +247,7 @@ export const AttributedMiniDialog: React.FC<
                 )}
                 {children}
                 <Stack
-                    sx={{ paddingBlockStart: "24px", gap: "12px" }}
+                    sx={{ paddingBlockStart: "24px", gap: "8px" }}
                     direction={attributes.buttonDirection ?? "column"}
                 >
                     {errorIndicator}

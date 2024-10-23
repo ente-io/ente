@@ -50,13 +50,41 @@
   "noRecoveryKeyNoDecryption": "Вашы даныя не могуць быць расшыфраваны без пароля або ключа аднаўлення па прычыне архітэктуры наша пратакола скразнога шыфравання",
   "verifyEmail": "Праверыць электронную пошту",
   "toResetVerifyEmail": "Праверце электронную пошту, каб скінуць свой пароль.",
-  "personName": "Person name",
-  "addNewPerson": "Add new person",
-  "addNameOrMerge": "Add name or merge",
-  "mergeWithExisting": "Merge with existing",
-  "newPerson": "New person",
-  "addName": "Add name",
-  "add": "Add",
-  "extraPhotosFoundFor": "Extra photos found for $text",
-  "extraPhotosFound": "Extra photos found"
+  "checkInboxAndSpamFolder": "Праверце свае ўваходныя лісты (і спам) для завяршэння праверкі",
+  "tapToEnterCode": "Націсніце, каб увесці код",
+  "resendEmail": "Адправіць ліст яшчэ раз",
+  "weHaveSendEmailTo": "Ліст адпраўлены на электронную пошту <green>{email}</green>",
+  "@weHaveSendEmailTo": {
+    "description": "Text to indicate that we have sent a mail to the user",
+    "placeholders": {
+      "email": {
+        "description": "The email address of the user",
+        "type": "String",
+        "example": "example@ente.io"
+      }
+    }
+  },
+  "setPasswordTitle": "Задаць пароль",
+  "changePasswordTitle": "Змяніць пароль",
+  "resetPasswordTitle": "Скінуць пароль",
+  "encryptionKeys": "Ключы шыфравання",
+  "passwordWarning": "Мы не захоўваем гэты пароль і <underline>мы не зможам расшыфраваць вашы даныя</underline>, калі вы забудзеце яго",
+  "enterPasswordToEncrypt": "Увядзіце пароль, каб мы маглі выкарыстаць яго для расшыфроўкі вашых даных",
+  "enterNewPasswordToEncrypt": "Увядзіце новы пароль, каб мы маглі выкарыстаць яго для расшыфроўкі вашых даных",
+  "weakStrength": "Ненадзейны",
+  "strongStrength": "Надзейны",
+  "moderateStrength": "Умераны",
+  "passwordStrength": "Надзейнасць пароля: {passwordStrengthValue}",
+  "@passwordStrength": {
+    "description": "Text to indicate the password strength",
+    "placeholders": {
+      "passwordStrengthValue": {
+        "description": "The strength of the password as a string",
+        "type": "String",
+        "example": "Weak or Moderate or Strong"
+      }
+    },
+    "message": "Password Strength: {passwordStrengthText}"
+  },
+  "passwordChangedSuccessfully": "Пароль паспяхова зменены"
 }

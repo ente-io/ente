@@ -2,7 +2,7 @@ import log from "@/base/log";
 import type { LivePhotoSourceURL, SourceURLs } from "@/media/file";
 import { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
-import type { GalleryBarMode } from "@/new/photos/components/gallery/BarImpl";
+import type { GalleryBarMode } from "@/new/photos/components/gallery/reducer";
 import { TRASH_SECTION } from "@/new/photos/services/collection";
 import DownloadManager from "@/new/photos/services/download";
 import { PHOTOS_PAGES } from "@ente/shared/constants/pages";
@@ -64,8 +64,7 @@ export interface PhotoFrameProps {
         selected: SelectedState | ((selected: SelectedState) => SelectedState),
     ) => void;
     selected: SelectedState;
-    tempDeletedFileIds?: Set<number>;
-    setTempDeletedFileIds?: (value: Set<number>) => void;
+    markTempDeleted?: (tempDeletedFiles: EnteFile[]) => void;
     /** This will be set if mode is not "people". */
     activeCollectionID: number;
     /** This will be set if mode is "people". */
@@ -91,8 +90,7 @@ const PhotoFrame = ({
     favItemIds,
     setSelected,
     selected,
-    tempDeletedFileIds,
-    setTempDeletedFileIds,
+    markTempDeleted,
     activeCollectionID,
     activePersonID,
     enableDownload,
@@ -581,8 +579,7 @@ const PhotoFrame = ({
                 gettingData={getSlideData}
                 getConvertedItem={getConvertedItem}
                 favItemIds={favItemIds}
-                tempDeletedFileIds={tempDeletedFileIds}
-                setTempDeletedFileIds={setTempDeletedFileIds}
+                markTempDeleted={markTempDeleted}
                 isTrashCollection={activeCollectionID === TRASH_SECTION}
                 isInHiddenSection={isInHiddenSection}
                 enableDownload={enableDownload}
