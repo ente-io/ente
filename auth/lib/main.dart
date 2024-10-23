@@ -73,9 +73,7 @@ void main() async {
       size: WindowListenerService.instance.getWindowSize(),
     );
     await windowManager.waitUntilReadyToShow(windowOptions, () async {
-      if (PlatformUtil.isDesktop()) {
-        await DirectoryUtils.migrateNamingChanges();
-      }
+      await DirectoryUtils.migrateNamingChanges();
       await windowManager.show();
       await windowManager.focus();
       initSystemTray().ignore();

@@ -49,14 +49,14 @@ class DirectoryUtils {
       if (sharedPrefs.containsKey(migratedNamingChanges)) {
         return;
       }
-      final databaseFile = File(
+      var databaseFile = File(
         p.join(
           (await getApplicationDocumentsDirectory()).path,
           "ente",
           ".ente.authenticator.db",
         ),
       );
-      final offlineDatabaseFile = File(
+      var offlineDatabaseFile = File(
         p.join(
           (await getApplicationDocumentsDirectory()).path,
           "ente",
@@ -89,6 +89,18 @@ class DirectoryUtils {
         );
       } else {
         oldDataDir = await getApplicationDocumentsDirectory();
+        databaseFile = File(
+          p.join(
+            (await getApplicationDocumentsDirectory()).path,
+            "ente.authenticator.db",
+          ),
+        );
+        offlineDatabaseFile = File(
+          p.join(
+            (await getApplicationDocumentsDirectory()).path,
+            "ente.offline_authenticator.db",
+          ),
+        );
       }
 
       if (tempDir?.existsSync() ?? false) {
@@ -97,14 +109,15 @@ class DirectoryUtils {
       newDataDir = await getApplicationSupportDirectory();
       await newDataDir.create(recursive: true);
 
+      final prefix = Platform.isMacOS ? "" : ".";
       File newDatabaseFile =
-          File(p.join(newDataDir.path, ".ente.authenticator.db"));
+          File(p.join(newDataDir.path, "${prefix}ente.authenticator.db"));
       if (await databaseFile.exists() && !await newDatabaseFile.exists()) {
         await databaseFile.copy(newDatabaseFile.path);
       }
 
-      File newOfflineDatabaseFile =
-          File(p.join(newDataDir.path, ".ente.offline_authenticator.db"));
+      File newOfflineDatabaseFile = File(
+          p.join(newDataDir.path, "${prefix}ente.offline_authenticator.db"));
       if (await offlineDatabaseFile.exists() &&
           !await newOfflineDatabaseFile.exists()) {
         await offlineDatabaseFile.copy(newOfflineDatabaseFile.path);
