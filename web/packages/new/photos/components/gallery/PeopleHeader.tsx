@@ -40,6 +40,7 @@ import HideImageOutlinedIcon from "@mui/icons-material/HideImageOutlined";
 import ListAltOutlinedIcon from "@mui/icons-material/ListAltOutlined";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import RestoreIcon from "@mui/icons-material/Restore";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import {
     Dialog,
     DialogActions,
@@ -90,7 +91,11 @@ export const PeopleHeader: React.FC<PeopleHeaderProps> = ({
         <GalleryItemsHeaderAdapter>
             <SpaceBetweenFlex>
                 {person.type == "cgroup" ? (
-                    <CGroupPersonHeader person={person} />
+                    person.isHidden ? (
+                        <IgnoredPersonHeader person={person} />
+                    ) : (
+                        <CGroupPersonHeader person={person} />
+                    )
                 ) : (
                     <ClusterPersonHeader
                         person={person}
@@ -133,7 +138,7 @@ const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({ person }) => {
 
     // While technically it is possible for the cgroup not to have a name, logic
     // wise we shouldn't be ending up here without a name (this state is
-    // expected to be reached only for named persons).
+    // expected to be reached only for unignored named persons).
     const name = cgroup.data.name ?? "";
 
     return (
@@ -187,6 +192,40 @@ const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({ person }) => {
                 {...suggestionsVisibilityProps}
                 {...{ person }}
             />
+        </>
+    );
+};
+
+interface IgnoredPersonHeaderProps {
+    person: CGroupPerson;
+}
+
+const IgnoredPersonHeader: React.FC<IgnoredPersonHeaderProps> = ({
+    person,
+}) => {
+    const cgroup = person.cgroup;
+
+    const handleUndoIgnore = useWrapAsyncOperation(() => deleteCGroup(cgroup));
+
+    return (
+        <>
+            <GalleryItemsSummary
+                name={pt("Ignored")}
+                nameProps={{ color: "text.muted" }}
+                fileCount={person.fileIDs.length}
+            />
+            <OverflowMenu
+                ariaControls={"person-options"}
+                triggerButtonIcon={<MoreHorizIcon />}
+            >
+                <OverflowMenuOption
+                    startIcon={<VisibilityOutlinedIcon />}
+                    centerAlign
+                    onClick={handleUndoIgnore}
+                >
+                    {pt("Show person")}
+                </OverflowMenuOption>
+            </OverflowMenu>
         </>
     );
 };
