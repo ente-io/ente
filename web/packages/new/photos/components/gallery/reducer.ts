@@ -585,8 +585,28 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     state.archivedCollectionIDs,
                 ),
             });
-        case "setPeopleState":
-            return { ...state, peopleState: action.peopleState };
+        case "setPeopleState": {
+            const peopleState = action.peopleState;
+
+            if (state.view?.type != "people") return { ...state, peopleState };
+
+            const { view, extraVisiblePerson } = derivePeopleView(
+                peopleState,
+                state.tempDeletedFileIDs,
+                state.tempHiddenFileIDs,
+                state.selectedPersonID,
+                state.extraVisiblePerson,
+            );
+            const filteredFiles = derivePeopleFilteredFiles(state.files, view);
+            return {
+                ...state,
+                peopleState,
+                selectedPersonID: view.activePerson?.id,
+                extraVisiblePerson,
+                view,
+                filteredFiles,
+            };
+        }
         case "markTempDeleted":
             return refreshingFilteredFilesIfShowingAlbumsOrHiddenAlbums({
                 ...state,
@@ -1212,8 +1232,8 @@ const deriveAlbumsFilteredFiles = (
 };
 
 /**
- * Return a new state by recomputing the {@link filteredFiles} property if when
- * we're showing the "hidden-albums" view.
+ * Return a new state by recomputing the {@link filteredFiles} property if we're
+ * showing the "hidden-albums" view.
  *
  * See {@link refreshingFilteredFilesIfShowingAlbums} for more details.
  */
