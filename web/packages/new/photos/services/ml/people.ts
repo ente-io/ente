@@ -252,15 +252,7 @@ export const reconstructPeopleState = async (): Promise<PeopleState> => {
     const cgroups = await savedCGroups();
     const cgroupPeople: Interim = cgroups.map((cgroup) => {
         const { id, data } = cgroup;
-        const { name, isHidden, assigned } = data;
-
-        // Hidden cgroups are clusters specifically marked so as to not be shown
-        // in the UI.
-        if (isHidden) return undefined;
-
-        // Older versions of the mobile app marked hidden cgroups by setting
-        // their name to an empty string.
-        if (!name) return undefined;
+        const { name, assigned } = data;
 
         // Person faces from all the clusters assigned to this cgroup, sorted by
         // recency (then score).
@@ -332,8 +324,27 @@ export const reconstructPeopleState = async (): Promise<PeopleState> => {
     const people = sorted(cgroupPeople).concat(sorted(clusterPeople));
 
     const visiblePeople = people.filter((p) => {
-        // Ignore local only clusters with too few visible faces.
-        if (p.type == "cluster" && p.cluster.faces.length < 10) return false;
+        switch (p.type) {
+            case "cgroup": {
+                const { name, isHidden } = p.cgroup.data;
+
+                // Hidden cgroups are clusters specifically marked so as to not be shown
+                // in the UI.
+                if (isHidden) return false;
+
+                // Older versions of the mobile app marked hidden cgroups by setting
+                // their name to an empty string.
+                if (!name) return false;
+
+                break;
+            }
+
+            case "cluster":
+                // Ignore local only clusters with too few visible faces.
+                if (p.cluster.faces.length < 10) return false;
+        }
+
+        // Show it.
         return true;
     });
 
