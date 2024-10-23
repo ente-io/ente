@@ -1,6 +1,7 @@
 import "dart:math";
 
 import "package:flutter/cupertino.dart";
+import "package:flutter/material.dart";
 import "package:intl/intl.dart";
 import 'package:logging/logging.dart';
 import "package:photos/core/constants.dart";
@@ -181,6 +182,7 @@ class SearchService {
                 occurrence: kMostRelevantFilter,
                 filterResultType: ResultType.year,
                 matchedUploadedIDs: filesToUploadedFileIDs(filesInYear),
+                filterIcon: Icons.calendar_month_outlined,
               ),
             ),
           );
@@ -241,6 +243,7 @@ class SearchService {
             occurrence: kMostRelevantFilter,
             filterResultType: ResultType.year,
             matchedUploadedIDs: filesToUploadedFileIDs(filesInYear),
+            filterIcon: Icons.calendar_month_outlined,
           ),
         );
       }
@@ -272,6 +275,7 @@ class SearchService {
               occurrence: kMostRelevantFilter,
               filterResultType: ResultType.month,
               matchedUploadedIDs: filesToUploadedFileIDs(matchedFiles),
+              filterIcon: Icons.calendar_month_outlined,
             ),
           ),
         );
@@ -301,6 +305,7 @@ class SearchService {
             occurrence: kMostRelevantFilter,
             filterResultType: ResultType.month,
             matchedUploadedIDs: filesToUploadedFileIDs(matchedFiles),
+            filterIcon: Icons.calendar_month_outlined,
           ),
         );
       }
@@ -337,6 +342,7 @@ class SearchService {
                 occurrence: kMostRelevantFilter,
                 filterResultType: ResultType.event,
                 matchedUploadedIDs: filesToUploadedFileIDs(matchedFiles),
+                filterIcon: Icons.event_outlined,
               ),
             ),
           );
@@ -367,6 +373,7 @@ class SearchService {
             occurrence: kMostRelevantFilter,
             filterResultType: ResultType.event,
             matchedUploadedIDs: filesToUploadedFileIDs(matchedFiles),
+            filterIcon: Icons.event_outlined,
           ),
         );
       }
@@ -463,6 +470,7 @@ class SearchService {
               occurrence: kMostRelevantFilter,
               filterResultType: ResultType.fileExtension,
               matchedUploadedIDs: filesToUploadedFileIDs(value),
+              filterIcon: CupertinoIcons.doc_text,
             ),
           ),
         );
@@ -622,6 +630,7 @@ class SearchService {
               occurrence: kMostRelevantFilter,
               filterResultType: ResultType.fileCaption,
               matchedUploadedIDs: filesToUploadedFileIDs(listOfFiles),
+              filterIcon: Icons.description_outlined,
             ),
           ),
         );
@@ -667,6 +676,7 @@ class SearchService {
             occurrence: kMostRelevantFilter,
             filterResultType: ResultType.fileCaption,
             matchedUploadedIDs: filesToUploadedFileIDs(captionMatch),
+            filterIcon: Icons.description_outlined,
           ),
         ),
       );
@@ -721,6 +731,7 @@ class SearchService {
             occurrence: kMostRelevantFilter,
             filterResultType: ResultType.fileExtension,
             matchedUploadedIDs: filesToUploadedFileIDs(entry.value),
+            filterIcon: CupertinoIcons.doc_text,
           ),
         ),
       );
@@ -785,6 +796,7 @@ class SearchService {
               occurrence: kMostRelevantFilter,
               filterResultType: ResultType.fileType,
               matchedUploadedIDs: filesToUploadedFileIDs(noLocationTagFiles),
+              filterIcon: Icons.not_listed_location_outlined,
             ),
           ),
         );
@@ -1198,6 +1210,7 @@ class SearchService {
               occurrence: kMostRelevantFilter,
               filterResultType: ResultType.event,
               matchedUploadedIDs: filesToUploadedFileIDs(matchedFiles),
+              filterIcon: Icons.event_outlined,
             ),
           ),
         );
@@ -1307,6 +1320,7 @@ class SearchService {
         occurrence: kMostRelevantFilter,
         filterResultType: ResultType.event,
         matchedUploadedIDs: filesToUploadedFileIDs(matchedFiles),
+        filterIcon: Icons.event_outlined,
       ),
     );
   }
