@@ -901,7 +901,7 @@ export default function Gallery() {
     const handleChangeBarMode = (mode: GalleryBarMode) =>
         mode == "people"
             ? dispatch({ type: "showPeople" })
-            : dispatch({ type: "showAll" });
+            : dispatch({ type: "showAlbums" });
 
     const openHiddenSection: GalleryContextType["openHiddenSection"] = (
         callback,
@@ -1027,7 +1027,7 @@ export default function Gallery() {
                 >
                     {barMode == "hidden-albums" ? (
                         <HiddenSectionNavbarContents
-                            onBack={() => dispatch({ type: "showAll" })}
+                            onBack={() => dispatch({ type: "showAlbums" })}
                         />
                     ) : (
                         <NormalNavbarContents
