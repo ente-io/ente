@@ -271,7 +271,7 @@ export interface GalleryState {
     /**
      * The files to show, uniqued and sorted appropriately.
      */
-    filteredFiles: EnteFile[] | undefined;
+    filteredFiles: EnteFile[];
 }
 
 export type GalleryAction =
@@ -341,7 +341,7 @@ const initialGalleryState: GalleryState = {
     selectedPersonID: undefined,
     searchResults: undefined,
     view: undefined,
-    filteredFiles: undefined,
+    filteredFiles: [],
     isInSearchMode: false,
 };
 
@@ -358,6 +358,12 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
             );
             const archivedCollectionIDs =
                 deriveArchivedCollectionIDs(collections);
+            const hiddenFileIDs = deriveHiddenFileIDs(action.hiddenFiles);
+            const view = {
+                type: "albums" as const,
+                activeCollectionSummaryID: ALL_SECTION,
+                activeCollection: undefined,
+            }
             return {
                 ...state,
                 user: action.user,
@@ -370,7 +376,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 archivedCollectionIDs,
                 defaultHiddenCollectionIDs:
                     deriveDefaultHiddenCollectionIDs(hiddenCollections),
-                hiddenFileIDs: deriveHiddenFileIDs(action.hiddenFiles),
+                hiddenFileIDs,
                 favoriteFileIDs: deriveFavoriteFileIDs(
                     collections,
                     action.files,
@@ -391,11 +397,15 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     hiddenCollections,
                     action.hiddenFiles,
                 ),
-                view: {
-                    type: "albums",
-                    activeCollectionSummaryID: ALL_SECTION,
-                    activeCollection: undefined,
-                },
+                view,
+                filteredFiles: deriveAlbumsFilteredFiles(
+                    action.files,
+                    archivedCollectionIDs,
+                    hiddenFileIDs,
+                    state.tempDeletedFileIDs,
+                    state.tempHiddenFileIDs,
+                    view,
+                )
             };
         }
         case "setNormalCollections": {
@@ -1093,18 +1103,14 @@ export const deriveAlbumishFilteredFiles = (state: GalleryState) => {
  * in the "albums" view.
  */
 export const deriveAlbumsFilteredFiles = (
-    state: GalleryState,
+    files: GalleryState["files"],
+    archivedCollectionIDs: GalleryState["archivedCollectionIDs"],
+    hiddenFileIDs: GalleryState["hiddenFileIDs"],
+    tempDeletedFileIDs: GalleryState["tempDeletedFileIDs"],
+    tempHiddenFileIDs: GalleryState["tempHiddenFileIDs"],
     view: Extract<GalleryView, { type: "albums" | "hidden-albums" }>,
 ) => {
-    const {
-        files,
-        archivedCollectionIDs,
-        hiddenFileIDs,
-        tempDeletedFileIDs,
-        tempHiddenFileIDs,
-    } = state;
     const activeCollectionSummaryID = view.activeCollectionSummaryID;
-
     const filteredFiles = files.filter((file) => {
         if (tempDeletedFileIDs.has(file.id)) return false;
         if (hiddenFileIDs.has(file.id)) return false;
@@ -1156,13 +1162,12 @@ export const deriveTrashFilteredFiles = ({
  * in the "hidden-albums" view.
  */
 export const deriveHiddenAlbumsFilteredFiles = (
-    state: GalleryState,
+    hiddenFiles: GalleryState["hiddenFiles"],
+    defaultHiddenCollectionIDs: GalleryState["defaultHiddenCollectionIDs"],
+    tempDeletedFileIDs: GalleryState["tempDeletedFileIDs"],
     view: Extract<GalleryView, { type: "albums" | "hidden-albums" }>,
 ) => {
-    const { hiddenFiles, defaultHiddenCollectionIDs, tempDeletedFileIDs } =
-        state;
     const activeCollectionSummaryID = view.activeCollectionSummaryID;
-
     const filteredFiles = hiddenFiles.filter((file) => {
         if (tempDeletedFileIDs.has(file.id)) return false;
 
