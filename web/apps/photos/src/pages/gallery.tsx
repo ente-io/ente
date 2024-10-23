@@ -315,15 +315,15 @@ export default function Gallery() {
     const hiddenCollectionSummaries = state.hiddenCollectionSummaries;
     const tempDeletedFileIDs = state.tempDeletedFileIDs;
     const tempHiddenFileIDs = state.tempHiddenFileIDs;
-    const barMode = state.view.type ?? "albums";
+    const barMode = state.view?.type ?? "albums";
     const activeCollectionID =
-        state.view.type == "people"
+        state.view?.type == "people"
             ? undefined
-            : state.view.activeCollectionSummaryID;
+            : state.view?.activeCollectionSummaryID;
     const activeCollection =
-        state.view.type == "people" ? undefined : state.view.activeCollection;
+        state.view?.type == "people" ? undefined : state.view?.activeCollection;
     const activePerson =
-        state.view.type == "people" ? state.view.activePerson : undefined;
+        state.view?.type == "people" ? state.view.activePerson : undefined;
     const activePersonID = activePerson?.id;
     const isInSearchMode = state.isInSearchMode;
     const filteredFiles = state.filteredFiles;
@@ -502,7 +502,7 @@ export default function Gallery() {
             filteredFiles = await filterSearchableFiles(
                 selectedSearchOption.suggestion,
             );
-        } else if (state.view.type == "people") {
+        } else if (state.view?.type == "people") {
             filteredFiles = derivePeopleFilteredFiles(state, state.view);
         } else if (activeCollectionID === TRASH_SECTION) {
             filteredFiles = deriveTrashFilteredFiles(state);

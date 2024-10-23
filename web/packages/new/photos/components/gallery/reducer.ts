@@ -45,8 +45,8 @@ import type { FamilyData } from "../../services/user";
 /**
  * Specifies what the bar at the top of the gallery is displaying currently.
  *
- * TODO: Deprecated(?). Use GalleryFocus instead. Deprecated if it can be used
- * in all cases where the bar mode was in use.
+ * TODO: Deprecated(?). Use GalleryView instead. Deprecated if it can be used in
+ * all cases where the bar mode was in use.
  */
 export type GalleryBarMode = "albums" | "hidden-albums" | "people";
 
@@ -68,8 +68,7 @@ export type GalleryView =
            * {@link Collection}.
            *
            * It is guaranteed that this will be one of the {@link collections}
-           * (when we are in the "albums" focus) or {@link hiddenCollections}
-           * (when we are in "hidden-albums" focus).
+           * or {@link hiddenCollections}.
            */
           activeCollection: Collection | undefined;
       }
@@ -217,22 +216,24 @@ export interface GalleryState {
      * The currently selected collection summary, if any.
      *
      * When present, this is used to derive the
-     * {@link activeCollectionSummaryID} property of the {@link focus}. UI code
-     * should use the {@link focus}, this property is meant as the underlying
-     * primitive state. In particular, this does not get reset when we switch
-     * sections, which allows us to come back to the same active collection on
-     * switching back.
-     * */
+     * {@link activeCollectionSummaryID} property of the {@link view}.
+     *
+     * UI code should use the {@link view}, this property is meant as the
+     * underlying primitive state. In particular, this does not get reset when
+     * we switch sections, which allows us to come back to the same active
+     * collection (if possible) on switching back.
+     */
     selectedCollectionSummaryID: number | undefined;
     /**
      * The currently selected person, if any.
      *
      * When present, it is used to derive the {@link activePerson} property of
-     * the {@link focus}. UI code should use the {@link focus}, this property is
-     * meant as the underlying primitive state. In particular, this does not get
-     * reset when we switch sections (i.e. it retains its value even when the
-     * {@link focus} property changes). This allows us to come back to the same
-     * person (if possible) when the user switches back to the people section.
+     * the {@link view}.
+     *
+     * UI code should use the {@link view}, this property is meant as the
+     * underlying primitive state. In particular, this does not get reset when
+     * we switch sections, which allows us to come back to the same person (if
+     * possible) on switching back.
      */
     selectedPersonID: string | undefined;
     /**
@@ -656,7 +657,7 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 ...state,
                 searchResults: undefined,
                 selectedPersonID: view.activePerson?.id,
-                focus: view,
+                view,
                 isInSearchMode: false,
             };
         }
@@ -1101,7 +1102,7 @@ export const deriveAlbumsFilteredFiles = (
         tempDeletedFileIDs,
         tempHiddenFileIDs,
     } = state;
-    const activeCollectionID = view.activeCollection?.id;
+    const activeCollectionSummaryID = view.activeCollectionSummaryID;
 
     const filteredFiles = files.filter((file) => {
         if (tempDeletedFileIDs.has(file.id)) return false;
@@ -1111,25 +1112,25 @@ export const deriveAlbumsFilteredFiles = (
         // Files in archived collections can only be seen in their respective
         // collection.
         if (archivedCollectionIDs.has(file.collectionID)) {
-            return activeCollectionID === file.collectionID;
+            return activeCollectionSummaryID === file.collectionID;
         }
 
         // Archived files can only be seen in the archive section, or in their
         // respective collection.
         if (isArchivedFile(file)) {
             return (
-                activeCollectionID === ARCHIVE_SECTION ||
-                activeCollectionID === file.collectionID
+                activeCollectionSummaryID === ARCHIVE_SECTION ||
+                activeCollectionSummaryID === file.collectionID
             );
         }
 
         // Show all remaining (non-hidden, non-archived) files in "All".
-        if (activeCollectionID === ALL_SECTION) {
+        if (activeCollectionSummaryID === ALL_SECTION) {
             return true;
         }
 
         // Show files that belong to the active collection.
-        return activeCollectionID === file.collectionID;
+        return activeCollectionSummaryID === file.collectionID;
     });
 
     return sortAndUniqueFilteredFiles(filteredFiles, view.activeCollection);
@@ -1159,21 +1160,21 @@ export const deriveHiddenAlbumsFilteredFiles = (
 ) => {
     const { hiddenFiles, defaultHiddenCollectionIDs, tempDeletedFileIDs } =
         state;
-    const activeCollectionID = view.activeCollection?.id;
+    const activeCollectionSummaryID = view.activeCollectionSummaryID;
 
     const filteredFiles = hiddenFiles.filter((file) => {
         if (tempDeletedFileIDs.has(file.id)) return false;
 
         // "Hidden" shows all standalone hidden files.
         if (
-            activeCollectionID === HIDDEN_ITEMS_SECTION &&
+            activeCollectionSummaryID === HIDDEN_ITEMS_SECTION &&
             defaultHiddenCollectionIDs.has(file.collectionID)
         ) {
             return true;
         }
 
         // Show files that belong to the active collection.
-        return activeCollectionID === file.collectionID;
+        return activeCollectionSummaryID === file.collectionID;
     });
 
     return sortAndUniqueFilteredFiles(filteredFiles, view.activeCollection);
