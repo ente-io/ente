@@ -80,8 +80,9 @@ export type GalleryView =
           /**
            * The list of people to show in the gallery bar.
            *
-           * Note that this can be different from the underlying list of people,
-           * and can temporarily include a person from outside that list.
+           * Note that this can be different from the underlying list of
+           * visiblePeople in the {@link peopleState}, and can temporarily
+           * include a person from outside that list.
            */
           visiblePeople: Person[];
           /**
@@ -1059,10 +1060,10 @@ const derivePeopleView = (
         activePerson = findByID(people);
         if (activePerson) {
             // Temporarily add this person's entry to the list of people
-            // surfaced in the people section.
+            // surfaced in the people view.
             visiblePeople.push(activePerson);
         } else {
-            // We don't have an "All" pseudo-album in people mode, so default to
+            // We don't have an "All" pseudo-album in people view, so default to
             // the first person in the list (if any).
             activePerson = visiblePeople[0];
         }

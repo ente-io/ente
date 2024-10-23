@@ -7,7 +7,6 @@ import { searchOptionsForString } from "@/new/photos/services/search";
 import type { SearchOption } from "@/new/photos/services/search/types";
 import { nullToUndefined } from "@/utils/transform";
 import CalendarIcon from "@mui/icons-material/CalendarMonth";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
 import ImageIcon from "@mui/icons-material/Image";
 import LocationIcon from "@mui/icons-material/LocationOn";
@@ -425,12 +424,7 @@ const EmptyState: React.FC<Pick<SearchBarProps, "onSelectPerson">> = ({
 
 const SearchPeopleHeader: React.FC<ButtonishProps> = ({ onClick }) => (
     <SearchPeopleHeaderButton {...{ onClick }}>
-        <Stack direction="row" color="text.muted">
-            <Typography color="text.base" variant="large">
-                {t("people")}
-            </Typography>
-            <ChevronRightIcon />
-        </Stack>
+        <Typography color="text.muted">{t("people")}</Typography>
     </SearchPeopleHeaderButton>
 );
 
