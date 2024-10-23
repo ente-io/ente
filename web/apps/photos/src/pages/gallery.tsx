@@ -873,7 +873,7 @@ export default function Gallery() {
     }
 
     // `peopleState` will be undefined only when ML is disabled, otherwise it'll
-    // be contain empty arrays (even if people are loading).
+    // be present, with empty arrays, even if people data is still syncing.
     const showPeopleSectionButton = peopleState !== undefined;
 
     return (
@@ -1058,8 +1058,8 @@ export default function Gallery() {
                     <GalleryEmptyState openUploader={openUploader} />
                 ) : !isInSearchMode &&
                   !isFirstLoad &&
-                  barMode == "people" &&
-                  !activePerson ? (
+                  state.view.type == "people" &&
+                  !state.view.activePerson ? (
                     <PeopleEmptyState />
                 ) : (
                     <PhotoFrame
