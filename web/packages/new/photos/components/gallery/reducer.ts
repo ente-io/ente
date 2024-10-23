@@ -1121,6 +1121,15 @@ const derivePeopleView = (
         visiblePeople = filterTemp(visiblePeople);
     }
 
+    // We might have an extraVisiblePerson that is now part of the visible ones
+    // when the user un-ignores a person. If that's the case, clear it out
+    // (otherwise we'll end up with two entries).
+    if (extraVisiblePerson) {
+        if (visiblePeople.find((p) => p.id == extraVisiblePerson?.id)) {
+            extraVisiblePerson = undefined;
+        }
+    }
+
     const findByIDIn = (ps: Person[]) =>
         ps.find((p) => p.id == selectedPersonID);
     let activePerson = findByIDIn(visiblePeople);
