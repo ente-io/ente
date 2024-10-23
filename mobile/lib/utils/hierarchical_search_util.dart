@@ -98,11 +98,11 @@ Future<List<EnteFile>> getFilteredFiles(
       }
     }
 
-    final filteredIDtoFile =
-        await FilesDB.instance.getFilesFromIDs(filteredUploadedIDs.toList());
-    for (int id in filteredIDtoFile.keys) {
-      filteredFiles.add(filteredIDtoFile[id]!);
-    }
+    filteredFiles.addAll(
+      await FilesDB.instance.getFilesFromIDs(
+        filteredUploadedIDs.toList(),
+      ),
+    );
   } catch (e) {
     Logger("HierarchicalSearchUtil").severe("Failed to get filtered files: $e");
   }

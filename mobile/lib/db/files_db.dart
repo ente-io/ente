@@ -1513,6 +1513,27 @@ class FilesDB {
     return result;
   }
 
+  Future<List<EnteFile>> getFilesFromIDs(
+    List<int> ids, {
+    bool asc = false,
+  }) async {
+    final order = (asc ? 'ASC' : 'DESC');
+    if (ids.isEmpty) {
+      return [];
+    }
+    String inParam = "";
+    for (final id in ids) {
+      inParam += "'" + id.toString() + "',";
+    }
+    inParam = inParam.substring(0, inParam.length - 1);
+    final db = await instance.sqliteAsyncDB;
+    final results = await db.getAll(
+      'SELECT * FROM $filesTable WHERE $columnUploadedFileID IN ($inParam) ORDER BY $columnCreationTime $order',
+    );
+
+    return convertToFiles(results);
+  }
+
   Future<Map<int, EnteFile>> getFilesFromGeneratedIDs(List<int> ids) async {
     final result = <int, EnteFile>{};
     if (ids.isEmpty) {
