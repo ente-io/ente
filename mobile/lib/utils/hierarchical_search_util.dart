@@ -3,6 +3,7 @@ import "dart:developer";
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
+import "package:photos/core/constants.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/generated/l10n.dart";
@@ -432,11 +433,40 @@ Map<String, List<HierarchicalSearchFilter>> getFiltersForBottomSheet(
 
   return {
     "faceFilters": faceFilters,
-    "albumFilters": albumFilters,
-    "fileTypeFilters": fileTypeFilters,
+    "magicFilters": magicFilters,
     "locationFilters": locationFilters,
     "contactsFilters": contactsFilters,
-    "magicFilters": magicFilters,
+    "albumFilters": albumFilters,
+    "fileTypeFilters": fileTypeFilters,
     "topLevelGenericFilter": topLevelGenericFilter,
   };
+}
+
+List<HierarchicalSearchFilter> getRecommendedFiltersForAppBar(
+  SearchFilterDataProvider searchFilterDataProvider,
+) {
+  List<HierarchicalSearchFilter> recommendations =
+      searchFilterDataProvider.recommendations;
+  if (recommendations.length > kMaxAppbarFilters) {
+    recommendations = recommendations.sublist(0, kMaxAppbarFilters);
+  }
+
+  final topLevelGenericRecco =
+      recommendations.whereType<TopLevelGenericFilter>().toList();
+  final faceReccos = recommendations.whereType<FaceFilter>().toList();
+  final magicReccos = recommendations.whereType<MagicFilter>().toList();
+  final locationReccos = recommendations.whereType<LocationFilter>().toList();
+  final contactsReccos = recommendations.whereType<ContactsFilter>().toList();
+  final albumReccos = recommendations.whereType<AlbumFilter>().toList();
+  final fileTypeReccos = recommendations.whereType<FileTypeFilter>().toList();
+
+  return [
+    ...topLevelGenericRecco,
+    ...faceReccos,
+    ...magicReccos,
+    ...locationReccos,
+    ...contactsReccos,
+    ...albumReccos,
+    ...fileTypeReccos,
+  ];
 }

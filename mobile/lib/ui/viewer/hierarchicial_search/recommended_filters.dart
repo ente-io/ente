@@ -8,6 +8,7 @@ import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
 import "package:photos/ui/viewer/hierarchicial_search/filter_chip.dart";
 import "package:photos/ui/viewer/hierarchicial_search/filter_options_bottom_sheet.dart";
+import "package:photos/utils/hierarchical_search_util.dart";
 
 class RecommendedFilters extends StatefulWidget {
   const RecommendedFilters({super.key});
@@ -31,12 +32,9 @@ class _RecommendedFiltersState extends State<RecommendedFilters> {
     );
     _searchFilterDataProvider =
         inheritedSearchFilterData.searchFilterDataProvider!;
-    _recommendations = _searchFilterDataProvider.recommendations;
-
-    if (_recommendations.length > kMaxAppbarFilters) {
-      _recommendations = _recommendations.sublist(0, kMaxAppbarFilters);
-      _filtersUpdateCount++;
-    }
+    _recommendations =
+        getRecommendedFiltersForAppBar(_searchFilterDataProvider);
+    _filtersUpdateCount++;
 
     _searchFilterDataProvider.removeListener(
       fromRecommended: true,
@@ -154,10 +152,8 @@ class _RecommendedFiltersState extends State<RecommendedFilters> {
   void onRecommendedFiltersUpdate() {
     setState(() {
       _filtersUpdateCount++;
-      _recommendations = _searchFilterDataProvider.recommendations;
-      if (_recommendations.length > kMaxAppbarFilters) {
-        _recommendations = _recommendations.sublist(0, kMaxAppbarFilters);
-      }
+      _recommendations =
+          getRecommendedFiltersForAppBar(_searchFilterDataProvider);
     });
   }
 }
