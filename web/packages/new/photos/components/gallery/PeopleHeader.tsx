@@ -307,8 +307,8 @@ const AddPersonDialog: React.FC<AddPersonDialogProps> = ({
     );
 
     const handleAddPersonWithName = async (name: string) => {
-        await addCGroup(name, cluster);
-        // TODO-Cluster:  onSelectPerson(person);
+        const personID = await addCGroup(name, cluster);
+        onSelectPerson(personID);
     };
 
     // [Note: Calling setState during rendering]
