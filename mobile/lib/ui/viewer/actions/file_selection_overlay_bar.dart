@@ -53,7 +53,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     _hasSelectedFilesNotifier.dispose();
     widget.selectedFiles.removeListener(_selectedFilesListener);
     _searchFilterDataProvider?.removeListener(
-      listener: _updateGalleryTypeIfRequired,
+      listener: _filterAppliedListener,
       fromApplied: true,
     );
     super.dispose();
@@ -75,11 +75,11 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
           inheritedSearchFilterData!.searchFilterDataProvider;
 
       _searchFilterDataProvider!.removeListener(
-        listener: _updateGalleryTypeIfRequired,
+        listener: _filterAppliedListener,
         fromApplied: true,
       );
       _searchFilterDataProvider!.addListener(
-        listener: _updateGalleryTypeIfRequired,
+        listener: _filterAppliedListener,
         toApplied: true,
       );
     }
@@ -158,6 +158,11 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
 
   _selectedFilesListener() {
     _hasSelectedFilesNotifier.value = widget.selectedFiles.files.isNotEmpty;
+  }
+
+  void _filterAppliedListener() {
+    widget.selectedFiles.clearAll();
+    _updateGalleryTypeIfRequired();
   }
 
   /// This method is used to update the GalleryType if the initial filter is
