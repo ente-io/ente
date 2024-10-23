@@ -117,6 +117,7 @@ class DirectoryUtils {
       sharedPrefs.setBool(migratedNamingChanges, true).ignore();
     } catch (e, st) {
       logger.warning("Migrating Database failed!", e, st);
+      rethrow;
     }
   }
 }
