@@ -793,7 +793,7 @@ const deriveFavoriteFileIDs = (
 /**
  * Compute collection summaries from their dependencies.
  */
-export const deriveCollectionSummaries = (
+const deriveCollectionSummaries = (
     user: User,
     collections: Collection[],
     files: EnteFile[],
@@ -847,7 +847,7 @@ const pseudoCollectionOptionsForFiles = (files: EnteFile[]) => ({
 /**
  * Compute hidden collection summaries from their dependencies.
  */
-export const deriveHiddenCollectionSummaries = (
+const deriveHiddenCollectionSummaries = (
     user: User,
     hiddenCollections: Collection[],
     hiddenFiles: EnteFile[],
@@ -1079,11 +1079,11 @@ const derivePeopleView = (
         people = filterTemp(people);
         visiblePeople = filterTemp(visiblePeople);
     }
-    const findByID = (ps: Person[]) => ps.find((p) => p.id == selectedPersonID);
-    let activePerson = findByID(visiblePeople);
+    const findByIDIn = (ps: Person[]) => ps.find((p) => p.id == selectedPersonID);
+    let activePerson = findByIDIn(visiblePeople);
     if (!activePerson) {
         // This might be one of the normally hidden small clusters.
-        activePerson = findByID(people);
+        activePerson = findByIDIn(people);
         if (activePerson) {
             // Temporarily add this person's entry to the list of people
             // surfaced in the people view.
@@ -1108,7 +1108,7 @@ const derivePeopleView = (
  * function for recomputing filtered files whenever any bit of the underlying
  * state that could affect the "albums" view changes (and we're showing it).
  */
-export const refreshingFilteredFilesIfShowingAlbums = (state: GalleryState) => {
+const refreshingFilteredFilesIfShowingAlbums = (state: GalleryState) => {
     if (state.view?.type == "albums") {
         const filteredFiles = deriveAlbumsFilteredFiles(
             state.files,
@@ -1186,9 +1186,7 @@ const deriveAlbumsFilteredFiles = (
  *
  * See {@link refreshingFilteredFilesIfShowingAlbums} for more details.
  */
-export const refreshingFilteredFilesIfShowingHiddenAlbums = (
-    state: GalleryState,
-) => {
+const refreshingFilteredFilesIfShowingHiddenAlbums = (state: GalleryState) => {
     if (state.view?.type == "hidden-albums") {
         const filteredFiles = deriveHiddenAlbumsFilteredFiles(
             state.hiddenFiles,
@@ -1207,7 +1205,7 @@ export const refreshingFilteredFilesIfShowingHiddenAlbums = (
  * "hidden-albums". This is useful if something that potentially affects both
  * scenarios changes.
  */
-export const refreshingFilteredFilesIfShowingAlbumsOrHiddenAlbums = (
+const refreshingFilteredFilesIfShowingAlbumsOrHiddenAlbums = (
     state: GalleryState,
 ) =>
     refreshingFilteredFilesIfShowingHiddenAlbums(
