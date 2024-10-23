@@ -266,6 +266,9 @@ export interface GalleryState {
      *
      * That is, {@link isInSearchMode} may be true even when
      * {@link searchResults} is undefined.
+     *
+     * We will be _showing_ search results if both {@link isInSearchMode} is
+     * `true` and {@link searchResults} is defined.
      */
     isInSearchMode: boolean;
     /**
@@ -313,10 +316,9 @@ export type GalleryAction =
       }
     | { type: "showPeople" }
     | { type: "showPerson"; personID: string }
-    | { type: "searchResults"; searchResults: EnteFile[] }
+    | { type: "setSearchResults"; searchResults: EnteFile[] }
     | { type: "enterSearchMode" }
-    | { type: "exitSearch" }
-    | { type: "setFilteredFiles"; filteredFiles: EnteFile[] };
+    | { type: "exitSearch" };
 
 const initialGalleryState: GalleryState = {
     user: undefined,
@@ -671,12 +673,14 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 state.tempHiddenFileIDs,
                 state.selectedPersonID,
             );
+            const filteredFiles = derivePeopleFilteredFiles(state.files, view);
             return {
                 ...state,
                 searchResults: undefined,
                 selectedPersonID: view.activePerson?.id,
                 view,
                 isInSearchMode: false,
+                filteredFiles,
             };
         }
         case "showPerson": {
@@ -686,20 +690,29 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 state.tempHiddenFileIDs,
                 action.personID,
             );
+            const filteredFiles = derivePeopleFilteredFiles(state.files, view);
             return {
                 ...state,
                 searchResults: undefined,
                 selectedPersonID: view.activePerson?.id,
                 view,
                 isInSearchMode: false,
+                filteredFiles,
             };
         }
-        case "enterSearchMode":
-            return { ...state, isInSearchMode: true };
-        case "searchResults":
+        case "setSearchResults":
             return {
                 ...state,
                 searchResults: action.searchResults,
+                filteredFiles: state.isInSearchMode
+                    ? action.searchResults
+                    : state.filteredFiles,
+            };
+        case "enterSearchMode":
+            return {
+                ...state,
+                isInSearchMode: true,
+                filteredFiles: state.searchResults ?? state.filteredFiles,
             };
         case "exitSearch":
             return {
@@ -707,8 +720,6 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                 isInSearchMode: false,
                 searchResults: undefined,
             };
-        case "setFilteredFiles":
-            return { ...state, filteredFiles: action.filteredFiles };
     }
 };
 
@@ -1255,7 +1266,7 @@ const sortAndUniqueFilteredFiles = (
  * the dependencies change.
  */
 const derivePeopleFilteredFiles = (
-    { files }: GalleryState,
+    files: GalleryState["files"],
     view: Extract<GalleryView, { type: "people" }>,
 ) => {
     const pfSet = new Set(view.activePerson?.fileIDs ?? []);
