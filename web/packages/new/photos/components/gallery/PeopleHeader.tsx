@@ -76,7 +76,7 @@ import { GalleryItemsHeaderAdapter, GalleryItemsSummary } from "./ListHeader";
 
 type PeopleHeaderProps = Pick<
     GalleryBarImplProps,
-    "people" | "onSelectPerson"
+    "people" | "onSelectPerson" | "onResetPersonSelection"
 > & {
     person: Person;
 };
@@ -84,6 +84,7 @@ type PeopleHeaderProps = Pick<
 export const PeopleHeader: React.FC<PeopleHeaderProps> = ({
     people,
     onSelectPerson,
+    onResetPersonSelection,
     person,
 }) => {
     return (
@@ -92,7 +93,7 @@ export const PeopleHeader: React.FC<PeopleHeaderProps> = ({
                 {person.type == "cgroup" ? (
                     <CGroupPersonHeader
                         person={person}
-                        {...{ onSelectPerson }}
+                        {...{ onResetPersonSelection }}
                     />
                 ) : (
                     <ClusterPersonHeader
@@ -105,13 +106,16 @@ export const PeopleHeader: React.FC<PeopleHeaderProps> = ({
     );
 };
 
-type CGroupPersonHeaderProps = Pick<PeopleHeaderProps, "onSelectPerson"> & {
+type CGroupPersonHeaderProps = Pick<
+    PeopleHeaderProps,
+    "onResetPersonSelection"
+> & {
     person: CGroupPerson;
 };
 
 const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({
     person,
-    onSelectPerson,
+    onResetPersonSelection,
 }) => {
     const cgroup = person.cgroup;
 
@@ -135,8 +139,7 @@ const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({
                 color: "primary",
                 action: async () => {
                     await deleteCGroup(cgroup);
-                    // Reset the selection to the default state.
-                    onSelectPerson(undefined);
+                    onResetPersonSelection();
                 },
             },
         });
@@ -312,7 +315,7 @@ const AddPersonDialog: React.FC<AddPersonDialogProps> = ({
             onClose();
             const person = ensure(cgroupPeople.find((p) => p.id == personID));
             await addClusterToCGroup(person.cgroup, cluster);
-            onSelectPerson(person);
+            onSelectPerson(personID);
         },
     );
 
