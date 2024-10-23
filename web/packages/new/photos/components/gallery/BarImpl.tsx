@@ -95,10 +95,9 @@ export interface GalleryBarImplProps {
      */
     activePerson: Person | undefined;
     /**
-     * Called when the selection should be moved to a new person in the bar, or
-     * reset to the default state (when {@link person} is `undefined`).
+     * Called when the selection should be moved to a new person in the bar.
      */
-    onSelectPerson: (person: Person | undefined) => void;
+    onSelectPerson: (personID: string) => void;
 }
 
 export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
@@ -423,7 +422,7 @@ type ItemData =
           type: "people";
           people: Person[];
           activePerson: Person | undefined;
-          onSelectPerson: (person: Person) => void;
+          onSelectPerson: (personID: string) => void;
       };
 
 const getItemCount = (data: ItemData) => {
@@ -578,7 +577,7 @@ const ActiveIndicator = styled("div")`
 interface PersonCardProps {
     person: Person;
     activePerson: Person | undefined;
-    onSelectPerson: (person: Person) => void;
+    onSelectPerson: (personID: string) => void;
 }
 
 const PersonCard: React.FC<PersonCardProps> = ({
@@ -591,7 +590,7 @@ const PersonCard: React.FC<PersonCardProps> = ({
             TileComponent={BarItemTile}
             coverFile={person.displayFaceFile}
             coverFaceID={person.displayFaceID}
-            onClick={() => onSelectPerson(person)}
+            onClick={() => onSelectPerson(person.id)}
         >
             {person.name && <CardText>{person.name}</CardText>}
         </ItemCard>

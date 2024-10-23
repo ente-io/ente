@@ -585,8 +585,28 @@ const galleryReducer: React.Reducer<GalleryState, GalleryAction> = (
                     state.archivedCollectionIDs,
                 ),
             });
-        case "setPeopleState":
-            return { ...state, peopleState: action.peopleState };
+        case "setPeopleState": {
+            const peopleState = action.peopleState;
+
+            if (state.view?.type != "people") return { ...state, peopleState };
+
+            const { view, extraVisiblePerson } = derivePeopleView(
+                peopleState,
+                state.tempDeletedFileIDs,
+                state.tempHiddenFileIDs,
+                state.selectedPersonID,
+                state.extraVisiblePerson,
+            );
+            const filteredFiles = derivePeopleFilteredFiles(state.files, view);
+            return {
+                ...state,
+                peopleState,
+                selectedPersonID: view.activePerson?.id,
+                extraVisiblePerson,
+                view,
+                filteredFiles,
+            };
+        }
         case "markTempDeleted":
             return refreshingFilteredFilesIfShowingAlbumsOrHiddenAlbums({
                 ...state,
@@ -1101,6 +1121,15 @@ const derivePeopleView = (
         visiblePeople = filterTemp(visiblePeople);
     }
 
+    // We might have an extraVisiblePerson that is now part of the visible ones
+    // when the user un-ignores a person. If that's the case (which we can
+    // detect by its absence from the list of underlying people, since its ID
+    // would've changed), clear it out, otherwise we'll end up with two entries.
+    if (extraVisiblePerson) {
+        if (!people.find((p) => p.id == extraVisiblePerson?.id))
+            extraVisiblePerson = undefined;
+    }
+
     const findByIDIn = (ps: Person[]) =>
         ps.find((p) => p.id == selectedPersonID);
     let activePerson = findByIDIn(visiblePeople);
@@ -1212,8 +1241,8 @@ const deriveAlbumsFilteredFiles = (
 };
 
 /**
- * Return a new state by recomputing the {@link filteredFiles} property if when
- * we're showing the "hidden-albums" view.
+ * Return a new state by recomputing the {@link filteredFiles} property if we're
+ * showing the "hidden-albums" view.
  *
  * See {@link refreshingFilteredFilesIfShowingAlbums} for more details.
  */

@@ -110,7 +110,7 @@ export interface CGroupUserEntityData {
  * transmission and storage.
  */
 export type Person = (
-    | { type: "cgroup"; cgroup: CGroup }
+    | { type: "cgroup"; cgroup: CGroup; isHidden: boolean }
     | { type: "cluster"; cluster: FaceCluster }
 ) & {
     /**
@@ -252,15 +252,13 @@ export const reconstructPeopleState = async (): Promise<PeopleState> => {
     const cgroups = await savedCGroups();
     const cgroupPeople: Interim = cgroups.map((cgroup) => {
         const { id, data } = cgroup;
-        const { name, isHidden, assigned } = data;
+        const { name, assigned } = data;
 
-        // Hidden cgroups are clusters specifically marked so as to not be shown
-        // in the UI.
-        if (isHidden) return undefined;
+        let isHidden = data.isHidden;
 
         // Older versions of the mobile app marked hidden cgroups by setting
         // their name to an empty string.
-        if (!name) return undefined;
+        if (!name) isHidden = true;
 
         // Person faces from all the clusters assigned to this cgroup, sorted by
         // recency (then score).
@@ -301,6 +299,7 @@ export const reconstructPeopleState = async (): Promise<PeopleState> => {
             fileIDs,
             displayFaceID,
             displayFaceFile,
+            isHidden,
         };
     });
 
@@ -332,8 +331,21 @@ export const reconstructPeopleState = async (): Promise<PeopleState> => {
     const people = sorted(cgroupPeople).concat(sorted(clusterPeople));
 
     const visiblePeople = people.filter((p) => {
-        // Ignore local only clusters with too few visible faces.
-        if (p.type == "cluster" && p.cluster.faces.length < 10) return false;
+        switch (p.type) {
+            case "cgroup":
+                // Hidden cgroups are clusters specifically marked so as to not
+                // be shown in the UI. The user can still see them from within
+                // file info if they wish.
+                if (p.isHidden) return false;
+                break;
+
+            case "cluster":
+                // Ignore local only clusters with too few visible faces.
+                if (p.cluster.faces.length < 10) return false;
+                break;
+        }
+
+        // Show it.
         return true;
     });
 
@@ -418,7 +430,6 @@ export const _suggestionsAndChoicesForPerson = async (
     const startTime = Date.now();
 
     const personClusters = person.cgroup.data.assigned;
-    const personClusterIDs = new Set(personClusters.map(({ id }) => id));
     const rejectedClusterIDs = new Set(
         await savedRejectedClustersForCGroup(person.cgroup.id),
     );
@@ -460,9 +471,6 @@ export const _suggestionsAndChoicesForPerson = async (
 
         // Ignore singleton clusters.
         if (faces.length < 2) continue;
-
-        // TODO-Cluster sanity check, remove after dev
-        if (personClusterIDs.has(id)) assertionFailed();
 
         const sampledOtherEmbeddings = randomSample(faces, 50)
             .map((id) => embeddingByFaceID.get(id))
@@ -676,21 +684,11 @@ export const _applyPersonSuggestionUpdates = async (
     for (const [clusterID, assigned] of updates.entries()) {
         switch (assigned) {
             case true /* assign */:
-                // TODO-Cluster sanity check, remove after wrapping up dev
-                if (assignedClusters.find(({ id }) => id == clusterID)) {
-                    assertionFailed();
-                }
-
                 assign(clusterID);
                 unrejectIfNeeded(clusterID);
                 break;
 
             case false /* reject */:
-                // TODO-Cluster sanity check, remove after wrapping up dev
-                if (rejectedClusterIDs.includes(clusterID)) {
-                    assertionFailed();
-                }
-
                 unassignIfNeeded(clusterID);
                 reject(clusterID);
                 break;
