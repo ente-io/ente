@@ -406,7 +406,6 @@ const EmptyState: React.FC<
             label = t("indexing_fetching", mlStatus);
             break;
         case "clustering":
-            // TODO-Cluster
             label = t("indexing_people", mlStatus);
             break;
         case "done":
