@@ -81,6 +81,7 @@ class _FilterOptionsBottomSheetState extends State<FilterOptionsBottomSheet> {
                               Navigator.of(context).pop();
                             },
                             isApplied: filter.isApplied,
+                            isInAllFiltersView: true,
                           ),
                     ],
                   ),
