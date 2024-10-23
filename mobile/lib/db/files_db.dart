@@ -1492,7 +1492,7 @@ class FilesDB {
     return rows.isNotEmpty;
   }
 
-  Future<Map<int, EnteFile>> getFilesFromIDs(List<int> ids) async {
+  Future<Map<int, EnteFile>> getFileIDToFileFromIDs(List<int> ids) async {
     final result = <int, EnteFile>{};
     if (ids.isEmpty) {
       return result;

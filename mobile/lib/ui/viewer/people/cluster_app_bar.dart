@@ -199,8 +199,7 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
           await MLDataDB.instance.deleteClusterSummary(widget.clusterID);
           await MLDataDB.instance
               .clusterSummaryUpdate(breakupResult.newClusterSummaries);
-          await MLDataDB.instance
-              .updateFaceIdToClusterId(newFaceIdToClusterID);
+          await MLDataDB.instance.updateFaceIdToClusterId(newFaceIdToClusterID);
 
           // Find the biggest cluster
           biggestClusterID = '';
@@ -217,7 +216,7 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
               .map((e) => getFileIdFromFaceId(e))
               .toList();
           biggestClusterFiles = await FilesDB.instance
-              .getFilesFromIDs(
+              .getFileIDToFileFromIDs(
                 biggestClusterFileIDs,
               )
               .then((mapping) => mapping.values.toList());
@@ -261,7 +260,7 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
         .map((e) => getFileIdFromFaceId(e))
         .toList();
 
-    final fileIDtoFile = await FilesDB.instance.getFilesFromIDs(
+    final fileIDtoFile = await FilesDB.instance.getFileIDToFileFromIDs(
       allFileIDs,
     );
 

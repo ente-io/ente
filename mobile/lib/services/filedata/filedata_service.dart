@@ -88,7 +88,7 @@ class FileDataService {
     }
     final inputs = <_DecoderInput>[];
     final fileMap = await FilesDB.instance
-        .getFilesFromIDs(remoteData.map((e) => e.fileID).toList());
+        .getFileIDToFileFromIDs(remoteData.map((e) => e.fileID).toList());
     for (final data in remoteData) {
       final file = fileMap[data.fileID];
       if (file == null) {

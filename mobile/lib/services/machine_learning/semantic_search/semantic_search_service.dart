@@ -146,7 +146,7 @@ class SemanticSearchService {
     }
 
     final filesMap = await FilesDB.instance
-        .getFilesFromIDs(queryResults.map((e) => e.id).toList());
+        .getFileIDToFileFromIDs(queryResults.map((e) => e.id).toList());
 
     final ignoredCollections =
         CollectionsService.instance.getHiddenCollectionIds();
