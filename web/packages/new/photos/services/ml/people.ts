@@ -110,7 +110,7 @@ export interface CGroupUserEntityData {
  * transmission and storage.
  */
 export type Person = (
-    | { type: "cgroup"; cgroup: CGroup }
+    | { type: "cgroup"; cgroup: CGroup; isHidden: boolean }
     | { type: "cluster"; cluster: FaceCluster }
 ) & {
     /**
@@ -254,6 +254,12 @@ export const reconstructPeopleState = async (): Promise<PeopleState> => {
         const { id, data } = cgroup;
         const { name, assigned } = data;
 
+        let isHidden = data.isHidden;
+
+        // Older versions of the mobile app marked hidden cgroups by setting
+        // their name to an empty string.
+        if (!name) isHidden = true;
+
         // Person faces from all the clusters assigned to this cgroup, sorted by
         // recency (then score).
         const faces = personFacesSortedNewestFirst(
@@ -293,6 +299,7 @@ export const reconstructPeopleState = async (): Promise<PeopleState> => {
             fileIDs,
             displayFaceID,
             displayFaceFile,
+            isHidden,
         };
     });
 
@@ -325,23 +332,17 @@ export const reconstructPeopleState = async (): Promise<PeopleState> => {
 
     const visiblePeople = people.filter((p) => {
         switch (p.type) {
-            case "cgroup": {
-                const { name, isHidden } = p.cgroup.data;
-
-                // Hidden cgroups are clusters specifically marked so as to not be shown
-                // in the UI.
-                if (isHidden) return false;
-
-                // Older versions of the mobile app marked hidden cgroups by setting
-                // their name to an empty string.
-                if (!name) return false;
-
+            case "cgroup":
+                // Hidden cgroups are clusters specifically marked so as to not
+                // be shown in the UI. The user can still see them from within
+                // file info if they wish.
+                if (p.isHidden) return false;
                 break;
-            }
 
             case "cluster":
                 // Ignore local only clusters with too few visible faces.
                 if (p.cluster.faces.length < 10) return false;
+                break;
         }
 
         // Show it.
