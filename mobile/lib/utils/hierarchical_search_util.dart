@@ -17,6 +17,7 @@ import "package:photos/models/search/hierarchical/file_type_filter.dart";
 import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
 import "package:photos/models/search/hierarchical/location_filter.dart";
 import "package:photos/models/search/hierarchical/magic_filter.dart";
+import "package:photos/models/search/hierarchical/top_level_generic_filter.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
@@ -425,6 +426,10 @@ Map<String, List<HierarchicalSearchFilter>> getFiltersForBottomSheet(
     searchFilterDataProvider.recommendations.whereType<MagicFilter>(),
   );
 
+  final topLevelGenericFilter = searchFilterDataProvider.appliedFilters
+      .whereType<TopLevelGenericFilter>()
+      .toList();
+
   return {
     "faceFilters": faceFilters,
     "albumFilters": albumFilters,
@@ -432,5 +437,6 @@ Map<String, List<HierarchicalSearchFilter>> getFiltersForBottomSheet(
     "locationFilters": locationFilters,
     "contactsFilters": contactsFilters,
     "magicFilters": magicFilters,
+    "topLevelGenericFilter": topLevelGenericFilter,
   };
 }
