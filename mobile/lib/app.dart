@@ -25,7 +25,7 @@ class EnteApp extends StatefulWidget {
   final Future<void> Function(String) runBackgroundTask;
   final Future<void> Function(String) killBackgroundTask;
   final AdaptiveThemeMode? savedThemeMode;
-  final Locale locale;
+  final Locale? locale;
 
   const EnteApp(
     this.runBackgroundTask,
@@ -46,7 +46,7 @@ class EnteApp extends StatefulWidget {
 
 class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
   final _logger = Logger("EnteAppState");
-  late Locale locale;
+  late Locale? locale;
 
   @override
   void initState() {
