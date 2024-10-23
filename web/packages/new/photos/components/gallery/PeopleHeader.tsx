@@ -302,12 +302,13 @@ const AddPersonDialog: React.FC<AddPersonDialogProps> = ({
 
     const handleAddPerson = () => setOpenNameInput(true);
 
-    const handleSelectPerson = useWrapAsyncOperation((id: string) =>
-        addClusterToCGroup(
+    const handleSelectPerson = useWrapAsyncOperation(async (id: string) => {
+        onClose();
+        await addClusterToCGroup(
             ensure(cgroupPeople.find((p) => p.id == id)).cgroup,
             cluster,
-        ),
-    );
+        );
+    });
 
     const handleAddPersonWithName = (name: string) => addCGroup(name, cluster);
 
