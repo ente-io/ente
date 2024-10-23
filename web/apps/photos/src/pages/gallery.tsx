@@ -20,9 +20,6 @@ import {
     SearchResultsHeader,
 } from "@/new/photos/components/gallery";
 import {
-    deriveAlbumishFilteredFiles,
-    derivePeopleFilteredFiles,
-    deriveTrashFilteredFiles,
     uniqueFilesByID,
     useGalleryReducer,
     type GalleryBarMode,
@@ -32,7 +29,6 @@ import { shouldShowWhatsNew } from "@/new/photos/services/changelog";
 import {
     ALL_SECTION,
     DUMMY_UNCATEGORIZED_COLLECTION,
-    TRASH_SECTION,
     isHiddenCollection,
 } from "@/new/photos/services/collection";
 import { areOnlySystemCollections } from "@/new/photos/services/collection/ui";
@@ -306,15 +302,7 @@ export default function Gallery() {
     const collections = state.collections;
     const files = state.files;
     const hiddenFiles = state.hiddenFiles;
-    const trashedFiles = state.trashedFiles;
-    const archivedCollectionIDs = state.archivedCollectionIDs;
-    const hiddenFileIDs = state.hiddenFileIDs;
-    const collectionNameMap = state.allCollectionNameByID;
-    const fileToCollectionsMap = state.fileCollectionIDs;
     const collectionSummaries = state.collectionSummaries;
-    const hiddenCollectionSummaries = state.hiddenCollectionSummaries;
-    const tempDeletedFileIDs = state.tempDeletedFileIDs;
-    const tempHiddenFileIDs = state.tempHiddenFileIDs;
     const barMode = state.view?.type ?? "albums";
     const activeCollectionID =
         state.view?.type == "people"
@@ -328,7 +316,7 @@ export default function Gallery() {
     const isInSearchMode = state.isInSearchMode;
     const filteredFiles = state.filteredFiles;
 
-    if (process.env.NEXT_PUBLIC_ENTE_WIP_CL) console.log("render", { state });
+    if (process.env.NEXT_PUBLIC_ENTE_WIP_CL) console.log("render", state);
 
     const router = useRouter();
 
@@ -483,51 +471,13 @@ export default function Gallery() {
 
     // TODO: Make this a normal useEffect.
     useMemoSingleThreaded(async () => {
-        if (
-            !files ||
-            !user ||
-            !trashedFiles ||
-            !hiddenFiles ||
-            !archivedCollectionIDs
-        ) {
-            dispatch({
-                type: "setFilteredFiles",
-                filteredFiles: [],
-            });
-            return;
-        }
-
-        let filteredFiles: EnteFile[];
         if (selectedSearchOption) {
-            filteredFiles = await filterSearchableFiles(
+            const searchResults = await filterSearchableFiles(
                 selectedSearchOption.suggestion,
             );
-        } else if (state.view?.type == "people") {
-            filteredFiles = derivePeopleFilteredFiles(state, state.view);
-        } else if (activeCollectionID === TRASH_SECTION) {
-            filteredFiles = deriveTrashFilteredFiles(state);
-        } else {
-            filteredFiles = deriveAlbumishFilteredFiles(state);
+            dispatch({ type: "setSearchResults", searchResults });
         }
-
-        dispatch({
-            type: "setFilteredFiles",
-            filteredFiles,
-        });
-    }, [
-        barMode,
-        files,
-        trashedFiles,
-        hiddenFiles,
-        tempDeletedFileIDs,
-        tempHiddenFileIDs,
-        hiddenFileIDs,
-        selectedSearchOption,
-        activeCollectionID,
-        archivedCollectionIDs,
-        peopleState,
-        activePersonID,
-    ]);
+    }, [selectedSearchOption]);
 
     const selectAll = (e: KeyboardEvent) => {
         // ignore ctrl/cmd + a if the user is typing in a text field
@@ -923,8 +873,8 @@ export default function Gallery() {
         [],
     );
 
-    if (!user || !filteredFiles) {
-        // Don't render until we get the logged in user and dispatch "mount".
+    if (!user) {
+        // Don't render until we dispatch "mount" with the logged in user.
         return <div></div>;
     }
 
@@ -1046,7 +996,8 @@ export default function Gallery() {
                         activeCollection,
                         activeCollectionID,
                         setActiveCollectionID: handleSetActiveCollectionID,
-                        hiddenCollectionSummaries,
+                        hiddenCollectionSummaries:
+                            state.hiddenCollectionSummaries,
                         showPeopleSectionButton,
                         people:
                             (state.view.type == "people"
@@ -1129,8 +1080,8 @@ export default function Gallery() {
                         activeCollectionID={activeCollectionID}
                         activePersonID={activePerson?.id}
                         enableDownload={true}
-                        fileToCollectionsMap={fileToCollectionsMap}
-                        collectionNameMap={collectionNameMap}
+                        fileToCollectionsMap={state.fileCollectionIDs}
+                        collectionNameMap={state.allCollectionNameByID}
                         showAppDownloadBanner={
                             files.length < 30 && !isInSearchMode
                         }
@@ -1185,7 +1136,7 @@ export default function Gallery() {
                 <ExportModal
                     show={exportModalView}
                     onHide={closeExportModal}
-                    collectionNameMap={collectionNameMap}
+                    collectionNameMap={state.allCollectionNameByID}
                 />
                 <AuthenticateUserModal
                     open={authenticateUserModalView}
