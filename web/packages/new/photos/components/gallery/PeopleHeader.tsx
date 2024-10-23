@@ -95,7 +95,10 @@ export const PeopleHeader: React.FC<PeopleHeaderProps> = ({
                         {...{ onSelectPerson }}
                     />
                 ) : (
-                    <ClusterPersonHeader person={person} {...{ people }} />
+                    <ClusterPersonHeader
+                        person={person}
+                        {...{ people, onSelectPerson }}
+                    />
                 )}
             </SpaceBetweenFlex>
         </GalleryItemsHeaderAdapter>
@@ -198,12 +201,16 @@ const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({
     );
 };
 
-type ClusterPersonHeaderProps = Pick<PeopleHeaderProps, "people"> & {
+type ClusterPersonHeaderProps = Pick<
+    PeopleHeaderProps,
+    "people" | "onSelectPerson"
+> & {
     person: ClusterPerson;
 };
 
 const ClusterPersonHeader: React.FC<ClusterPersonHeaderProps> = ({
     people,
+    onSelectPerson,
     person,
 }) => {
     const cluster = person.cluster;
@@ -264,22 +271,19 @@ const ClusterPersonHeader: React.FC<ClusterPersonHeaderProps> = ({
 
             <AddPersonDialog
                 {...addPersonVisibilityProps}
-                {...{ people, cluster }}
+                {...{ people, onSelectPerson, cluster }}
             />
         </>
     );
 };
 
-type AddPersonDialogProps = ModalVisibilityProps & {
-    /**
-     * The list of people from show the existing named people.
-     */
-    people: Person[];
-    /**
-     * The cluster to add to the selected person (existing or new).
-     */
-    cluster: FaceCluster;
-};
+type AddPersonDialogProps = ModalVisibilityProps &
+    Pick<PeopleHeaderProps, "people" | "onSelectPerson"> & {
+        /**
+         * The cluster to add to the selected person (existing or new).
+         */
+        cluster: FaceCluster;
+    };
 
 /**
  * A dialog allowing the user to select one of the existing named persons they
@@ -290,6 +294,7 @@ const AddPersonDialog: React.FC<AddPersonDialogProps> = ({
     open,
     onClose,
     people,
+    onSelectPerson,
     cluster,
 }) => {
     const isFullScreen = useMediaQuery("(max-width: 490px)");
@@ -302,15 +307,19 @@ const AddPersonDialog: React.FC<AddPersonDialogProps> = ({
 
     const handleAddPerson = () => setOpenNameInput(true);
 
-    const handleSelectPerson = useWrapAsyncOperation(async (id: string) => {
-        onClose();
-        await addClusterToCGroup(
-            ensure(cgroupPeople.find((p) => p.id == id)).cgroup,
-            cluster,
-        );
-    });
+    const handleAddPersonBySelect = useWrapAsyncOperation(
+        async (personID: string) => {
+            onClose();
+            const person = ensure(cgroupPeople.find((p) => p.id == personID));
+            await addClusterToCGroup(person.cgroup, cluster);
+            onSelectPerson(person);
+        },
+    );
 
-    const handleAddPersonWithName = (name: string) => addCGroup(name, cluster);
+    const handleAddPersonWithName = async (name: string) => {
+        await addCGroup(name, cluster);
+        // TODO-Cluster:  onSelectPerson(person);
+    };
 
     // [Note: Calling setState during rendering]
     //
@@ -351,7 +360,7 @@ const AddPersonDialog: React.FC<AddPersonDialogProps> = ({
                         <PersonButton
                             key={person.id}
                             person={person}
-                            onPersonClick={handleSelectPerson}
+                            onPersonClick={handleAddPersonBySelect}
                         />
                     ))}
                 </DialogContent_>
