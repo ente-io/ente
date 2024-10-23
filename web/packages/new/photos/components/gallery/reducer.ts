@@ -1201,7 +1201,7 @@ const sortAndUniqueFilteredFiles = (
  * Helper function to compute the sorted list of files to show when we're
  * in the "people" view.
  */
-export const derivePeopleFilteredFilesPeopleFocus = (
+export const derivePeopleFilteredFiles = (
     { files }: GalleryState,
     view: Extract<GalleryView, { type: "people" }>,
 ) => {

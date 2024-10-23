@@ -20,9 +20,9 @@ import {
     SearchResultsHeader,
 } from "@/new/photos/components/gallery";
 import {
-    deriveFilteredFilesAlbumishFocus,
-    deriveFilteredFilesPeopleFocus,
-    deriveFilteredFilesTrash,
+    deriveAlbumishFilteredFiles,
+    derivePeopleFilteredFiles,
+    deriveTrashFilteredFiles,
     uniqueFilesByID,
     useGalleryReducer,
     type GalleryBarMode,
@@ -315,15 +315,15 @@ export default function Gallery() {
     const hiddenCollectionSummaries = state.hiddenCollectionSummaries;
     const tempDeletedFileIDs = state.tempDeletedFileIDs;
     const tempHiddenFileIDs = state.tempHiddenFileIDs;
-    const barMode = state.focus.type ?? "albums";
+    const barMode = state.view.type ?? "albums";
     const activeCollectionID =
-        state.focus.type == "people"
+        state.view.type == "people"
             ? undefined
-            : state.focus.activeCollectionSummaryID;
+            : state.view.activeCollectionSummaryID;
     const activeCollection =
-        state.focus.type == "people" ? undefined : state.focus.activeCollection;
+        state.view.type == "people" ? undefined : state.view.activeCollection;
     const activePerson =
-        state.focus.type == "people" ? state.focus.activePerson : undefined;
+        state.view.type == "people" ? state.view.activePerson : undefined;
     const activePersonID = activePerson?.id;
     const isInSearchMode = state.isInSearchMode;
     const filteredFiles = state.filteredFiles;
@@ -493,33 +493,26 @@ export default function Gallery() {
             dispatch({
                 type: "setFilteredFiles",
                 filteredFiles: [],
-                galleryPeopleState: undefined,
             });
             return;
         }
 
         let filteredFiles: EnteFile[];
-        let galleryPeopleState:
-            | { activePerson: Person | undefined; people: Person[] }
-            | undefined;
         if (selectedSearchOption) {
             filteredFiles = await filterSearchableFiles(
                 selectedSearchOption.suggestion,
             );
-        } else if (barMode == "people") {
-            const z = deriveFilteredFilesPeopleFocus(state);
-            filteredFiles = z.filteredFiles;
-            galleryPeopleState = z.galleryPeopleState;
+        } else if (state.view.type == "people") {
+            filteredFiles = derivePeopleFilteredFiles(state, state.view);
         } else if (activeCollectionID === TRASH_SECTION) {
-            filteredFiles = deriveFilteredFilesTrash(state);
+            filteredFiles = deriveTrashFilteredFiles(state);
         } else {
-            filteredFiles = deriveFilteredFilesAlbumishFocus(state);
+            filteredFiles = deriveAlbumishFilteredFiles(state);
         }
 
         dispatch({
             type: "setFilteredFiles",
             filteredFiles,
-            galleryPeopleState,
         });
     }, [
         barMode,
@@ -1056,8 +1049,8 @@ export default function Gallery() {
                         hiddenCollectionSummaries,
                         showPeopleSectionButton,
                         people:
-                            (state.focus.type == "people"
-                                ? state.focus.people
+                            (state.view.type == "people"
+                                ? state.view.visiblePeople
                                 : undefined) ?? [],
                         activePerson,
                         onSelectPerson: handleSelectPerson,
