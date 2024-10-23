@@ -1122,12 +1122,12 @@ const derivePeopleView = (
     }
 
     // We might have an extraVisiblePerson that is now part of the visible ones
-    // when the user un-ignores a person. If that's the case, clear it out
-    // (otherwise we'll end up with two entries).
+    // when the user un-ignores a person. If that's the case (which we can
+    // detect by its absence from the list of underlying people, since its ID
+    // would've changed), clear it out, otherwise we'll end up with two entries.
     if (extraVisiblePerson) {
-        if (visiblePeople.find((p) => p.id == extraVisiblePerson?.id)) {
+        if (!people.find((p) => p.id == extraVisiblePerson?.id))
             extraVisiblePerson = undefined;
-        }
     }
 
     const findByIDIn = (ps: Person[]) =>
