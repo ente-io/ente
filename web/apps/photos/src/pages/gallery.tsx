@@ -38,7 +38,6 @@ import {
     getLocalTrashedFiles,
     sortFiles,
 } from "@/new/photos/services/files";
-import type { Person } from "@/new/photos/services/ml/people";
 import {
     filterSearchableFiles,
     setSearchCollectionsAndFiles,
@@ -855,9 +854,9 @@ export default function Gallery() {
         });
     };
 
-    const handleSelectPerson = (person: Person | undefined) =>
-        person
-            ? dispatch({ type: "showPerson", personID: person.id })
+    const handleSelectPerson = (personID: string | undefined) =>
+        personID
+            ? dispatch({ type: "showPerson", personID })
             : dispatch({ type: "showPeople" });
 
     const handleOpenCollectionSelector = useCallback(

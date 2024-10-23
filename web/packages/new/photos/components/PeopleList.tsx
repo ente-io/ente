@@ -8,7 +8,7 @@ import { UnstyledButton } from "./UnstyledButton";
 
 export interface SearchPeopleListProps {
     people: Person[];
-    onSelectPerson: (person: Person) => void;
+    onSelectPerson: (personID: string) => void;
 }
 
 /**
@@ -26,7 +26,7 @@ export const SearchPeopleList: React.FC<SearchPeopleListProps> = ({
             {people.slice(0, isSmallWidth ? 6 : 7).map((person) => (
                 <SearchPersonButton
                     key={person.id}
-                    onClick={() => onSelectPerson(person)}
+                    onClick={() => onSelectPerson(person.id)}
                 >
                     <FaceCropImageView
                         faceID={person.displayFaceID}

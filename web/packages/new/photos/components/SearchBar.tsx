@@ -2,7 +2,6 @@ import { assertionFailed } from "@/base/assert";
 import { useIsSmallWidth } from "@/base/hooks";
 import { ItemCard, PreviewItemTile } from "@/new/photos/components/Tiles";
 import { isMLSupported, mlStatusSnapshot } from "@/new/photos/services/ml";
-import type { Person } from "@/new/photos/services/ml/people";
 import { searchOptionsForString } from "@/new/photos/services/search";
 import type { SearchOption } from "@/new/photos/services/search/types";
 import { nullToUndefined } from "@/utils/transform";
@@ -72,10 +71,10 @@ export interface SearchBarProps {
      * Called when the user selects a person shown in the empty state view, or
      * clicks the people list header itself.
      *
-     * @param person The selected person, or `undefined` if the user clicked the
-     * generic people header.
+     * @param personID The person ID of the selected person, or `undefined` if
+     * the user clicked the generic "People" header.
      */
-    onSelectPerson: (person: Person | undefined) => void;
+    onSelectPerson: (personID: string | undefined) => void;
 }
 
 /**
@@ -185,9 +184,9 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
         onSelectSearchOption(undefined);
     };
 
-    const handleSelectPerson = (person: Person | undefined) => {
+    const handleSelectPerson = (personID: string | undefined) => {
         resetSearch();
-        onSelectPerson(person);
+        onSelectPerson(personID);
     };
 
     const handleFocus = () => {
