@@ -4,7 +4,6 @@ import "package:photos/core/constants.dart";
 import "package:photos/models/search/hierarchical/face_filter.dart";
 import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
 import "package:photos/theme/ente_theme.dart";
-import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
 import "package:photos/ui/viewer/hierarchicial_search/filter_chip.dart";
@@ -72,9 +71,7 @@ class _RecommendedFiltersState extends State<RecommendedFilters> {
             key: ValueKey(_filtersUpdateCount),
             itemBuilder: (context, index) {
               if (index == 0) {
-                return IconButtonWidget(
-                  icon: Icons.sort,
-                  iconButtonType: IconButtonType.rounded,
+                return GestureDetector(
                   onTap: () {
                     showBarModalBottomSheet(
                       context: context,
@@ -87,6 +84,28 @@ class _RecommendedFiltersState extends State<RecommendedFilters> {
                           getEnteColorScheme(context).backgroundElevated2,
                     );
                   },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: getEnteColorScheme(context).fillFaint,
+                        borderRadius: const BorderRadius.all(
+                          Radius.circular(kFilterChipHeight / 2),
+                        ),
+                        border: Border.all(
+                          color: getEnteColorScheme(context).strokeFaint,
+                          width: 0.5,
+                        ),
+                      ),
+                      child: const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Icon(
+                          Icons.filter_list_rounded,
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                  ),
                 );
               }
               final filter = _recommendations[index - 1];
