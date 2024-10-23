@@ -149,7 +149,7 @@ export const SuggestionFaceList: React.FC<SuggestionFaceListProps> = ({
             {faces.map(({ file, faceID }) => (
                 <SuggestionFace key={faceID}>
                     <FaceCropImageView
-                        placeholderDimension={65}
+                        placeholderDimension={87}
                         {...{ file, faceID }}
                     />
                 </SuggestionFace>
