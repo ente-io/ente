@@ -62,7 +62,8 @@ class _RecommendedFiltersState extends State<RecommendedFilters> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: SizedBox(
-        height: kFilterChipHeight,
+        // +1 to account for the filter's outer stroke width
+        height: kFilterChipHeight + 1,
         child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 500),
           switchInCurve: Curves.easeInOutExpo,

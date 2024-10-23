@@ -58,7 +58,8 @@ class _GenericFilterChipState extends State<GenericFilterChip> {
         clipBehavior: Clip.none,
         children: [
           SizedBox(
-            height: kFilterChipHeight,
+            // +1 to account for the filter's outer stroke width
+            height: kFilterChipHeight + 1,
             child: Container(
               decoration: BoxDecoration(
                 color: getEnteColorScheme(context).fillFaint,
@@ -195,69 +196,64 @@ class _FaceFilterChipState extends State<FaceFilterChip> {
               _isApplied = !_isApplied;
             });
           },
-          child: SizedBox(
-            height: kFilterChipHeight * scale,
-            child: Container(
-              decoration: BoxDecoration(
-                color: getEnteColorScheme(context).fillFaint,
-                borderRadius: BorderRadius.all(
-                  Radius.circular(kFilterChipHeight * scale / 2),
-                ),
-                border: Border.all(
-                  color: widget.isInAllFiltersView
-                      ? getEnteColorScheme(context).strokeMuted
-                      : getEnteColorScheme(context).strokeFaint,
-                  width: widget.isInAllFiltersView ? 1 : 0.5,
-                ),
+          child: Container(
+            decoration: BoxDecoration(
+              color: getEnteColorScheme(context).fillFaint,
+              borderRadius: BorderRadius.all(
+                Radius.circular(kFilterChipHeight * scale / 2),
               ),
-              child: Padding(
-                padding: EdgeInsets.only(
-                  right: !widget.isInAllFiltersView && widget.name.isNotEmpty
-                      ? 8.0
-                      : 0,
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ClipOval(
-                      child: SizedBox(
-                        width: kFilterChipHeight * scale,
-                        height: kFilterChipHeight * scale,
-                        child: PersonFaceWidget(
-                          widget.faceThumbnailFile,
-                          personId: widget.personId,
-                          clusterID: widget.clusterId,
-                          thumbnailFallback: false,
-                        ),
+              border: Border.all(
+                color: getEnteColorScheme(context).strokeFaint,
+                width: widget.isInAllFiltersView ? 1 : 0.5,
+              ),
+            ),
+            child: Padding(
+              padding: EdgeInsets.only(
+                right: !widget.isInAllFiltersView && widget.name.isNotEmpty
+                    ? 8.0
+                    : 0,
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ClipOval(
+                    child: SizedBox(
+                      width: kFilterChipHeight * scale,
+                      height: kFilterChipHeight * scale,
+                      child: PersonFaceWidget(
+                        widget.faceThumbnailFile,
+                        personId: widget.personId,
+                        clusterID: widget.clusterId,
+                        thumbnailFallback: false,
                       ),
                     ),
-                    !widget.isInAllFiltersView && widget.name.isNotEmpty
-                        ? Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 4),
-                            child: Text(
-                              widget.name,
-                              style: getEnteTextTheme(context).miniBold,
-                            ),
-                          )
-                        : const SizedBox.shrink(),
-                    _isApplied && !widget.isInAllFiltersView
-                        ? const SizedBox(width: 4)
-                        : const SizedBox.shrink(),
-                    _isApplied && !widget.isInAllFiltersView
-                        ? Icon(
-                            Icons.close_rounded,
-                            size: 16,
-                            color: getEnteColorScheme(context).textMuted,
-                          )
-                        : const SizedBox.shrink(),
-                    _isApplied &&
-                            widget.name.isEmpty &&
-                            !widget.isInAllFiltersView
-                        ? const SizedBox(width: 8)
-                        : const SizedBox.shrink(),
-                  ],
-                ),
+                  ),
+                  !widget.isInAllFiltersView && widget.name.isNotEmpty
+                      ? Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          child: Text(
+                            widget.name,
+                            style: getEnteTextTheme(context).miniBold,
+                          ),
+                        )
+                      : const SizedBox.shrink(),
+                  _isApplied && !widget.isInAllFiltersView
+                      ? const SizedBox(width: 4)
+                      : const SizedBox.shrink(),
+                  _isApplied && !widget.isInAllFiltersView
+                      ? Icon(
+                          Icons.close_rounded,
+                          size: 16,
+                          color: getEnteColorScheme(context).textMuted,
+                        )
+                      : const SizedBox.shrink(),
+                  _isApplied &&
+                          widget.name.isEmpty &&
+                          !widget.isInAllFiltersView
+                      ? const SizedBox(width: 8)
+                      : const SizedBox.shrink(),
+                ],
               ),
             ),
           ),

@@ -153,7 +153,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                     centerTitle: false,
                     title: isSearching
                         ? const SizedBox(
-                            height: kFilterChipHeight,
+                            // +1 to account for the filter's outer stroke width
+                            height: kFilterChipHeight + 1,
                             child: AppliedFilters(),
                           )
                         : Text(
