@@ -134,5 +134,11 @@
   "mostRecent": "Naujausia",
   "mostRelevant": "Aktualiausia",
   "loadingYourPhotos": "Įkeliamos nuotraukos...",
-  "processingImport": "Apdorojama {folderName}..."
+  "processingImport": "Apdorojama {folderName}...",
+  "personName": "Asmens vardas",
+  "addNewPerson": "Pridėti naują asmenį",
+  "newPerson": "Naujas asmuo",
+  "add": "Pridėti",
+  "extraPhotosFoundFor": "Rastos papildomos nuotraukos, skirtos $text",
+  "extraPhotosFound": "Rastos papildomos nuotraukos"
 }

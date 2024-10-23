@@ -84,7 +84,7 @@ class _DeleteEmptyAlbumsState extends State<DeleteEmptyAlbums> {
                   onTap: () async {
                     await _deleteEmptyAlbums();
                     if (!_isCancelled) {
-                      Navigator.of(context, rootNavigator: true).pop();
+                      Navigator.of(context).pop();
                     }
                     Bus.instance.fire(
                       CollectionUpdatedEvent(
@@ -104,7 +104,7 @@ class _DeleteEmptyAlbumsState extends State<DeleteEmptyAlbums> {
                   shouldStickToDarkTheme: true,
                   onTap: () async {
                     _isCancelled = true;
-                    Navigator.of(context, rootNavigator: true).pop();
+                    Navigator.of(context).pop();
                   },
                 ),
               ],

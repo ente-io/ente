@@ -30,10 +30,10 @@ class PeopleSection extends StatefulWidget {
   final int limit;
 
   const PeopleSection({
-    Key? key,
+    super.key,
     required this.examples,
     this.limit = 7,
-  }) : super(key: key);
+  });
 
   @override
   State<PeopleSection> createState() => _PeopleSectionState();

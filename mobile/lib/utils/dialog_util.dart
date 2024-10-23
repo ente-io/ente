@@ -357,6 +357,7 @@ Future<dynamic> showTextInputDialog(
   List<TextInputFormatter>? textInputFormatter,
   TextInputType? textInputType,
   bool useRootNavigator = false,
+  bool popnavAfterSubmission = true,
 }) {
   return showDialog(
     barrierColor: backdropFaintDark,
@@ -388,6 +389,7 @@ Future<dynamic> showTextInputDialog(
             textEditingController: textEditingController,
             textInputFormatter: textInputFormatter,
             textInputType: textInputType,
+            popnavAfterSubmission: popnavAfterSubmission,
           ),
         ),
       );

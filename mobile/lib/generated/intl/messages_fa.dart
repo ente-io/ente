@@ -54,10 +54,15 @@ class MessageLookup extends MessageLookupByLibrary {
             "من درک می‌کنم که اگر رمز عبور خود را گم کنم، ممکن است اطلاعات خود را از دست بدهم، زیرا اطلاعات من <underline>رمزگذاری سرتاسر شده است</underline>."),
         "activeSessions":
             MessageLookupByLibrary.simpleMessage("دستگاه‌های فعال"),
+        "add": MessageLookupByLibrary.simpleMessage("Add"),
         "addANewEmail":
             MessageLookupByLibrary.simpleMessage("افزودن ایمیل جدید"),
         "addCollaborator": MessageLookupByLibrary.simpleMessage("افزودن همکار"),
         "addMore": MessageLookupByLibrary.simpleMessage("افزودن بیشتر"),
+        "addName": MessageLookupByLibrary.simpleMessage("Add name"),
+        "addNameOrMerge":
+            MessageLookupByLibrary.simpleMessage("Add name or merge"),
+        "addNewPerson": MessageLookupByLibrary.simpleMessage("Add new person"),
         "addViewer": MessageLookupByLibrary.simpleMessage("افزودن بیننده"),
         "addedAs": MessageLookupByLibrary.simpleMessage("اضافه شده به عنوان"),
         "advanced": MessageLookupByLibrary.simpleMessage("پیشرفته"),
@@ -197,6 +202,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "error": MessageLookupByLibrary.simpleMessage("خطا"),
         "everywhere": MessageLookupByLibrary.simpleMessage("همه جا"),
         "existingUser": MessageLookupByLibrary.simpleMessage("کاربر موجود"),
+        "extraPhotosFound":
+            MessageLookupByLibrary.simpleMessage("Extra photos found"),
+        "extraPhotosFoundFor": MessageLookupByLibrary.simpleMessage(
+            "Extra photos found for \$text"),
         "familyPlanPortalTitle":
             MessageLookupByLibrary.simpleMessage("خانوادگی"),
         "familyPlans":
@@ -256,8 +265,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "mastodon": MessageLookupByLibrary.simpleMessage("ماستودون"),
         "matrix": MessageLookupByLibrary.simpleMessage("ماتریس"),
         "merchandise": MessageLookupByLibrary.simpleMessage("کالا"),
+        "mergeWithExisting":
+            MessageLookupByLibrary.simpleMessage("Merge with existing"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("متوسط"),
         "never": MessageLookupByLibrary.simpleMessage("هرگز"),
+        "newPerson": MessageLookupByLibrary.simpleMessage("New person"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("کاربر جدید Ente"),
         "no": MessageLookupByLibrary.simpleMessage("خیر"),
         "noRecoveryKey":
@@ -273,6 +285,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "passwordStrength": m41,
         "passwordWarning": MessageLookupByLibrary.simpleMessage(
             "ما این رمز عبور را ذخیره نمی‌کنیم، بنابراین اگر فراموش کنید، <underline>نمی‌توانیم اطلاعات شما را رمزگشایی کنیم</underline>"),
+        "personName": MessageLookupByLibrary.simpleMessage("Person name"),
         "photoSmallCase": MessageLookupByLibrary.simpleMessage("عکس"),
         "pleaseGrantPermissions":
             MessageLookupByLibrary.simpleMessage("لطفا دسترسی بدهید"),

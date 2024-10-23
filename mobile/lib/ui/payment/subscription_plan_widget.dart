@@ -2,7 +2,7 @@ import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import "package:flutter/scheduler.dart";
 import "package:flutter_animate/flutter_animate.dart";
-import "package:photos/services/update_service.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/utils/data_util.dart';
@@ -163,7 +163,7 @@ class _Price extends StatelessWidget {
       final priceDouble = double.parse(priceWithoutCurrency);
       final pricePerMonth = priceDouble / 12;
       final pricePerMonthString = pricePerMonth.toStringAsFixed(2);
-      final bool isPlayStore = UpdateService.instance.isPlayStoreFlavor();
+      final bool isPlayStore = updateService.isPlayStoreFlavor();
       return Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [

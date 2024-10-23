@@ -355,8 +355,6 @@
     "DATE_TIME_DIGITIZED": "Exif:DateTimeDigitized",
     "METADATA_DATE": "Exif:MetadataDate",
     "CUSTOM_TIME": "Custom time",
-    "REOPEN_PLAN_SELECTOR_MODAL": "Re-open plans",
-    "OPEN_PLAN_SELECTOR_MODAL_FAILED": "Failed to open plans",
     "sharing_details": "Sharing details",
     "modify_sharing": "Modify sharing",
     "ADD_COLLABORATORS": "Add collaborators",

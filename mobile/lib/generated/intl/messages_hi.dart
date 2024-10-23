@@ -25,6 +25,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "accountWelcomeBack":
             MessageLookupByLibrary.simpleMessage("आपका पुनः स्वागत है"),
         "activeSessions": MessageLookupByLibrary.simpleMessage("एक्टिव सेशन"),
+        "add": MessageLookupByLibrary.simpleMessage("Add"),
+        "addName": MessageLookupByLibrary.simpleMessage("Add name"),
+        "addNameOrMerge":
+            MessageLookupByLibrary.simpleMessage("Add name or merge"),
+        "addNewPerson": MessageLookupByLibrary.simpleMessage("Add new person"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "आपका अकाउंट हटाने का मुख्य कारण क्या है?"),
         "cancel": MessageLookupByLibrary.simpleMessage("रद्द करें"),
@@ -64,6 +69,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("अपना ईमेल ऐड्रेस डालें"),
         "enterYourRecoveryKey":
             MessageLookupByLibrary.simpleMessage("अपनी रिकवरी कुंजी दर्ज करें"),
+        "extraPhotosFound":
+            MessageLookupByLibrary.simpleMessage("Extra photos found"),
+        "extraPhotosFoundFor": MessageLookupByLibrary.simpleMessage(
+            "Extra photos found for \$text"),
         "feedback": MessageLookupByLibrary.simpleMessage("प्रतिपुष्टि"),
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("पासवर्ड भूल गए"),
@@ -75,6 +84,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("अमान्य ईमेल ऐड्रेस"),
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
             "कृपया हमें इस जानकारी के लिए सहायता करें"),
+        "mergeWithExisting":
+            MessageLookupByLibrary.simpleMessage("Merge with existing"),
+        "newPerson": MessageLookupByLibrary.simpleMessage("New person"),
         "noRecoveryKey":
             MessageLookupByLibrary.simpleMessage("रिकवरी कुंजी नहीं है?"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
@@ -82,6 +94,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "ok": MessageLookupByLibrary.simpleMessage("ठीक है"),
         "oops": MessageLookupByLibrary.simpleMessage("ओह!"),
         "password": MessageLookupByLibrary.simpleMessage("पासवर्ड"),
+        "personName": MessageLookupByLibrary.simpleMessage("Person name"),
         "recoverButton": MessageLookupByLibrary.simpleMessage("पुनः प्राप्त"),
         "recoverySuccessful":
             MessageLookupByLibrary.simpleMessage("रिकवरी सफल हुई!"),

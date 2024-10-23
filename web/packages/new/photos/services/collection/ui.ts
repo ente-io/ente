@@ -20,16 +20,54 @@ export type CollectionSummaryType =
 /**
  * A massaged version of a real or pseudo- {@link Collection} suitable for being
  * directly shown in the UI.
+ *
+ * TODO: Rename me to CollectionOrSection? FileGroup? FileListing?
+ * Known sections:
+ * - DUMMY_UNCATEGORIZED_COLLECTION
+ * - ALL_SECTION
+ * - TRASH_SECTION
+ * - HIDDEN_ITEMS_SECTION
+ * - ARCHIVE_SECTION
  */
 export interface CollectionSummary {
-    /** The "UI" type for the collection. */
-    type: CollectionSummaryType;
+    /**
+     * The ID of the underlying collection, or one of the predefined placeholder
+     * IDs for the pseudo-collections.
+     */
     id: number;
+    /**
+     * The "UI" type for the collection or pseudo-collection.
+     */
+    type: CollectionSummaryType;
+    /**
+     * The name of the collection or pseudo-collection.
+     */
     name: string;
+    /**
+     * The newest file in the collection or pseudo-collection (if it is not
+     * empty).
+     */
+    latestFile: EnteFile | undefined;
+    /**
+     * The file to show as the cover for the collection or pseudo-collection.
+     *
+     * This can be one of
+     * - A file explicitly chosen by the user.
+     * - The latest file.
+     * - The oldest file (if the user has set a reverse sort on the collection).
+     */
     coverFile: EnteFile | undefined;
-    latestFile: EnteFile;
+    /**
+     * The number of files in the underlying collection, or the number of files
+     * that belong to this pseudo-collection.
+     */
     fileCount: number;
-    updationTime: number;
+    /**
+     * The time when the collection was last updated. For pseudo-collections
+     * this will (usually) be the updation time of the latest file that it
+     * contains.
+     */
+    updationTime: number | undefined;
     order?: number;
 }
 

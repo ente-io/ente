@@ -5,7 +5,6 @@ import "dart:typed_data" show Uint8List;
 
 import "package:flutter/foundation.dart" show kDebugMode;
 import "package:logging/logging.dart";
-import "package:package_info_plus/package_info_plus.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/db.dart";
@@ -21,13 +20,11 @@ import "package:photos/services/machine_learning/face_ml/face_clustering/face_db
 import 'package:photos/services/machine_learning/face_ml/face_detection/face_detection_service.dart';
 import 'package:photos/services/machine_learning/face_ml/face_embedding/face_embedding_service.dart';
 import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
-import "package:photos/services/machine_learning/face_ml/face_recognition_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
 import 'package:photos/services/machine_learning/ml_result.dart';
 import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
-import "package:photos/services/magic_cache_service.dart";
 import "package:photos/utils/ml_util.dart";
 import "package:photos/utils/network_util.dart";
 import "package:synchronized/synchronized.dart";
@@ -69,15 +66,9 @@ class MLService {
     _logger.info("init called");
 
     // Get client name
-    final packageInfo = await PackageInfo.fromPlatform();
+    final packageInfo = ServiceLocator.instance.packageInfo;
     client = "${packageInfo.packageName}/${packageInfo.version}";
     _logger.info("client: $client");
-
-    // Activate FaceRecognitionService
-    await FaceRecognitionService.instance.init();
-
-    // Download models if not already downloaded
-    unawaited(_ensureDownloadedModels(firstTime));
 
     // Listen on MachineLearningController
     Bus.instance.on<MachineLearningControlEvent>().listen((event) {
@@ -110,7 +101,7 @@ class MLService {
   }
 
   Future<void> sync() async {
-    await FaceRecognitionService.instance.sync();
+    await faceRecognitionService.sync();
   }
 
   Future<void> runAllML({bool force = false}) async {
@@ -133,7 +124,7 @@ class MLService {
       }
       if (_mlControllerStatus == true) {
         // refresh discover section
-        MagicCacheService.instance.updateCache(forced: force).ignore();
+        magicCacheService.updateCache(forced: force).ignore();
       }
       await indexAllImages();
       if ((await MLDataDB.instance.getUnclusteredFaceCount()) > 0) {
@@ -141,7 +132,7 @@ class MLService {
       }
       if (_mlControllerStatus == true) {
         // refresh discover section
-        MagicCacheService.instance.updateCache().ignore();
+        magicCacheService.updateCache().ignore();
       }
     } catch (e, s) {
       _logger.severe("runAllML failed", e, s);
@@ -213,7 +204,7 @@ class MLService {
         fileAnalyzedCount += sumFutures;
       }
       if (fileAnalyzedCount > 0) {
-        MagicCacheService.instance.queueUpdate('fileIndexed');
+        magicCacheService.queueUpdate('fileIndexed');
       }
       _logger.info(
         "`indexAllImages()` finished. Analyzed $fileAnalyzedCount images, in ${stopwatch.elapsed.inSeconds} seconds (avg of ${stopwatch.elapsed.inSeconds / fileAnalyzedCount} seconds per image)",

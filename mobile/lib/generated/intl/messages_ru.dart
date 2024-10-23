@@ -226,6 +226,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Я понимаю, что если я потеряю свой пароль, я могу потерять свои данные, так как мои данные в <underline>сквозном шифровании</underline>."),
         "activeSessions":
             MessageLookupByLibrary.simpleMessage("Активные сеансы"),
+        "add": MessageLookupByLibrary.simpleMessage("Add"),
         "addAName": MessageLookupByLibrary.simpleMessage("Добавить имя"),
         "addANewEmail": MessageLookupByLibrary.simpleMessage(
             "Добавить новый адрес эл. почты"),
@@ -238,7 +239,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "addLocation": MessageLookupByLibrary.simpleMessage("Добавить место"),
         "addLocationButton": MessageLookupByLibrary.simpleMessage("Добавить"),
         "addMore": MessageLookupByLibrary.simpleMessage("Добавить еще"),
+        "addName": MessageLookupByLibrary.simpleMessage("Add name"),
+        "addNameOrMerge":
+            MessageLookupByLibrary.simpleMessage("Add name or merge"),
         "addNew": MessageLookupByLibrary.simpleMessage("Добавить новое"),
+        "addNewPerson": MessageLookupByLibrary.simpleMessage("Add new person"),
         "addOnPageSubtitle":
             MessageLookupByLibrary.simpleMessage("Подробнее о расширениях"),
         "addOnValidTill": m5,
@@ -740,6 +745,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "exportLogs": MessageLookupByLibrary.simpleMessage("Экспорт логов"),
         "exportYourData":
             MessageLookupByLibrary.simpleMessage("Экспорт данных"),
+        "extraPhotosFound":
+            MessageLookupByLibrary.simpleMessage("Extra photos found"),
+        "extraPhotosFoundFor": MessageLookupByLibrary.simpleMessage(
+            "Extra photos found for \$text"),
         "faceRecognition":
             MessageLookupByLibrary.simpleMessage("Распознавание лиц"),
         "faces": MessageLookupByLibrary.simpleMessage("Лица"),
@@ -1003,6 +1012,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "matrix": MessageLookupByLibrary.simpleMessage("Matrix"),
         "memoryCount": m0,
         "merchandise": MessageLookupByLibrary.simpleMessage("Товары"),
+        "mergeWithExisting":
+            MessageLookupByLibrary.simpleMessage("Merge with existing"),
         "mlConsent":
             MessageLookupByLibrary.simpleMessage("Включить машинное обучение"),
         "mlConsentConfirmation": MessageLookupByLibrary.simpleMessage(
@@ -1041,6 +1052,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Не удается подключиться к Ente, пожалуйста, проверьте настройки своей сети и обратитесь в службу поддержки, если ошибка повторится."),
         "never": MessageLookupByLibrary.simpleMessage("Никогда"),
         "newAlbum": MessageLookupByLibrary.simpleMessage("Новый альбом"),
+        "newPerson": MessageLookupByLibrary.simpleMessage("New person"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("Впервые в Ente"),
         "newest": MessageLookupByLibrary.simpleMessage("Самые новые"),
         "next": MessageLookupByLibrary.simpleMessage("Далее"),
@@ -1142,6 +1154,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Удалить безвозвратно"),
         "permanentlyDeleteFromDevice": MessageLookupByLibrary.simpleMessage(
             "Удалить с устройства навсегда?"),
+        "personName": MessageLookupByLibrary.simpleMessage("Person name"),
         "photoDescriptions":
             MessageLookupByLibrary.simpleMessage("Описание фотографии"),
         "photoGridSize":

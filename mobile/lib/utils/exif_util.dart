@@ -10,6 +10,7 @@ import "package:ffmpeg_kit_flutter_min/media_information_session.dart";
 import "package:flutter/foundation.dart";
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
+import "package:motion_photos/src/xmp_extractor.dart";
 import "package:photos/models/ffmpeg/ffprobe_props.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/location/location.dart";
@@ -54,6 +55,19 @@ Future<Map<String, IfdTag>?> getExifFromSourceFile(File originFile) async {
     _logger.severe("failed to get exif from origin file", e, s);
     return null;
   }
+}
+
+Future<Map<String, dynamic>> getXmp(File file) async {
+  return Computer.shared().compute(
+    _getXMPComputer,
+    param: {"file": file},
+    taskName: "getXMPAsync",
+  );
+}
+
+Map<String, dynamic> _getXMPComputer(Map<String, dynamic> args) {
+  final File originalFile = args["file"] as File;
+  return XMPExtractor().extract(originalFile.readAsBytesSync());
 }
 
 Future<FFProbeProps?> getVideoPropsAsync(File originalFile) async {

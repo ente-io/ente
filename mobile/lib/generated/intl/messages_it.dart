@@ -235,6 +235,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Comprendo che se perdo la password potrei perdere l\'accesso ai miei dati poiché sono <underline>criptati end-to-end</underline>."),
         "activeSessions":
             MessageLookupByLibrary.simpleMessage("Sessioni attive"),
+        "add": MessageLookupByLibrary.simpleMessage("Add"),
         "addAName": MessageLookupByLibrary.simpleMessage("Aggiungi un nome"),
         "addANewEmail":
             MessageLookupByLibrary.simpleMessage("Aggiungi una nuova email"),
@@ -247,7 +248,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "addLocation": MessageLookupByLibrary.simpleMessage("Aggiungi luogo"),
         "addLocationButton": MessageLookupByLibrary.simpleMessage("Aggiungi"),
         "addMore": MessageLookupByLibrary.simpleMessage("Aggiungi altri"),
+        "addName": MessageLookupByLibrary.simpleMessage("Add name"),
+        "addNameOrMerge":
+            MessageLookupByLibrary.simpleMessage("Add name or merge"),
         "addNew": MessageLookupByLibrary.simpleMessage("Aggiungi nuovo"),
+        "addNewPerson": MessageLookupByLibrary.simpleMessage("Add new person"),
         "addOnPageSubtitle": MessageLookupByLibrary.simpleMessage(
             "Dettagli dei componenti aggiuntivi"),
         "addOnValidTill": m5,
@@ -780,6 +785,10 @@ class MessageLookup extends MessageLookupByLibrary {
             "Questo link è scaduto. Si prega di selezionare un nuovo orario di scadenza o disabilitare la scadenza del link."),
         "exportLogs": MessageLookupByLibrary.simpleMessage("Esporta log"),
         "exportYourData": MessageLookupByLibrary.simpleMessage("Esporta dati"),
+        "extraPhotosFound":
+            MessageLookupByLibrary.simpleMessage("Extra photos found"),
+        "extraPhotosFoundFor": MessageLookupByLibrary.simpleMessage(
+            "Extra photos found for \$text"),
         "faceRecognition":
             MessageLookupByLibrary.simpleMessage("Riconoscimento facciale"),
         "faces": MessageLookupByLibrary.simpleMessage("Volti"),
@@ -1051,6 +1060,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "matrix": MessageLookupByLibrary.simpleMessage("Matrix"),
         "memoryCount": m0,
         "merchandise": MessageLookupByLibrary.simpleMessage("Merchandise"),
+        "mergeWithExisting":
+            MessageLookupByLibrary.simpleMessage("Merge with existing"),
         "mlConsent": MessageLookupByLibrary.simpleMessage(
             "Abilita l\'apprendimento automatico"),
         "mlConsentConfirmation": MessageLookupByLibrary.simpleMessage(
@@ -1093,6 +1104,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Impossibile connettersi a Ente, controlla le impostazioni di rete e contatta l\'assistenza se l\'errore persiste."),
         "never": MessageLookupByLibrary.simpleMessage("Mai"),
         "newAlbum": MessageLookupByLibrary.simpleMessage("Nuovo album"),
+        "newPerson": MessageLookupByLibrary.simpleMessage("New person"),
         "newToEnte":
             MessageLookupByLibrary.simpleMessage("Prima volta con Ente"),
         "newest": MessageLookupByLibrary.simpleMessage("Più recenti"),
@@ -1196,6 +1208,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Elimina definitivamente"),
         "permanentlyDeleteFromDevice": MessageLookupByLibrary.simpleMessage(
             "Eliminare definitivamente dal dispositivo?"),
+        "personName": MessageLookupByLibrary.simpleMessage("Person name"),
         "photoDescriptions":
             MessageLookupByLibrary.simpleMessage("Descrizioni delle foto"),
         "photoGridSize":
@@ -1282,6 +1295,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Ottimo! La tua chiave di recupero è valida. Grazie per averla verificata.\n\nRicordati di salvare la tua chiave di recupero in un posto sicuro."),
         "recoveryKeyVerified": MessageLookupByLibrary.simpleMessage(
             "Chiave di recupero verificata"),
+        "recoveryKeyVerifyReason": MessageLookupByLibrary.simpleMessage(
+            "Se hai dimenticato la password, la tua chiave di ripristino è l\'unico modo per recuperare le tue foto. La puoi trovare in Impostazioni > Account.\n\nInserisci la tua chiave di recupero per verificare di averla salvata correttamente."),
         "recoverySuccessful":
             MessageLookupByLibrary.simpleMessage("Recupero riuscito!"),
         "recreatePasswordBody": MessageLookupByLibrary.simpleMessage(

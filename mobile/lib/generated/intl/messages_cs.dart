@@ -22,10 +22,23 @@ class MessageLookup extends MessageLookupByLibrary {
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
+        "add": MessageLookupByLibrary.simpleMessage("Add"),
+        "addName": MessageLookupByLibrary.simpleMessage("Add name"),
+        "addNameOrMerge":
+            MessageLookupByLibrary.simpleMessage("Add name or merge"),
+        "addNewPerson": MessageLookupByLibrary.simpleMessage("Add new person"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "Jaký je váš hlavní důvod, proč mažete svůj účet?"),
         "checkInboxAndSpamFolder": MessageLookupByLibrary.simpleMessage(
             "Zkontrolujte prosím svou doručenou poštu (a spam) pro dokončení ověření"),
-        "incorrectRecoveryKeyBody": MessageLookupByLibrary.simpleMessage("")
+        "extraPhotosFound":
+            MessageLookupByLibrary.simpleMessage("Extra photos found"),
+        "extraPhotosFoundFor": MessageLookupByLibrary.simpleMessage(
+            "Extra photos found for \$text"),
+        "incorrectRecoveryKeyBody": MessageLookupByLibrary.simpleMessage(""),
+        "mergeWithExisting":
+            MessageLookupByLibrary.simpleMessage("Merge with existing"),
+        "newPerson": MessageLookupByLibrary.simpleMessage("New person"),
+        "personName": MessageLookupByLibrary.simpleMessage("Person name")
       };
 }

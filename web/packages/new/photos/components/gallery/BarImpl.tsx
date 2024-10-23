@@ -42,11 +42,7 @@ import {
     type ListChildComponentProps,
     areEqual,
 } from "react-window";
-
-/**
- * Specifies what the bar is displaying currently.
- */
-export type GalleryBarMode = "albums" | "hidden-albums" | "people";
+import type { GalleryBarMode } from "./reducer";
 
 export interface GalleryBarImplProps {
     /**

@@ -355,8 +355,6 @@
     "DATE_TIME_DIGITIZED": "Exif:DatumTijdDigitaliseerd",
     "METADATA_DATE": "Exif:MetadataDatum",
     "CUSTOM_TIME": "Aangepaste tijd",
-    "REOPEN_PLAN_SELECTOR_MODAL": "Abonnementen heropenen",
-    "OPEN_PLAN_SELECTOR_MODAL_FAILED": "Kon abonnementen niet openen",
     "sharing_details": "Delen van informatie",
     "modify_sharing": "Delen wijzigen",
     "ADD_COLLABORATORS": "Samenwerker toevoegen",

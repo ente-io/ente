@@ -89,6 +89,7 @@ export const UploadTypeSelector: React.FC<UploadTypeSelectorProps> = ({
     return (
         <Dialog
             open={open}
+            fullWidth
             PaperProps={{
                 sx: (theme) => ({
                     maxWidth: "375px",

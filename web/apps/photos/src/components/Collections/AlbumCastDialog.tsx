@@ -3,7 +3,7 @@ import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { boxSeal } from "@/base/crypto/libsodium";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
-import { photosDialogZIndex } from "@/new/photos/components/z-index";
+import { photosDialogZIndex } from "@/new/photos/components/utils/z-index";
 import { loadCast } from "@/new/photos/utils/chromecast-sender";
 import SingleInputForm, {
     type SingleInputFormProps,

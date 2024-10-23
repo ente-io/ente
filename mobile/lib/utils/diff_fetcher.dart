@@ -7,7 +7,7 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/metadata/file_magic.dart";
 import 'package:photos/utils/crypto_util.dart';
-import 'package:photos/utils/file_download_util.dart';
+import "package:photos/utils/file_key.dart";
 
 class DiffFetcher {
   final _logger = Logger("DiffFetcher");

@@ -956,7 +956,6 @@
   "encryptingBackup": "Шифруємо резервну копію...",
   "syncStopped": "Синхронізацію зупинено",
   "syncProgress": "{completed} / {total} спогадів збережено",
-  "uploadingMultipleMemories": "{count, plural, other {} few {Зберігаємо {count} спогади...} many {Зберігаємо {count} спогадів...}}",
   "uploadingSingleMemory": "Зберігаємо 1 спогад...",
   "@syncProgress": {
     "description": "Text to tell user how many memories have been preserved",

@@ -1,5 +1,7 @@
 import { stashRedirect } from "@/accounts/services/redirect";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { ALL_SECTION } from "@/new/photos/services/collection";
+import { createFileCollectionIDs } from "@/new/photos/services/file";
 import { getLocalFiles } from "@/new/photos/services/files";
 import { AppContext } from "@/new/photos/types/context";
 import { VerticallyCentered } from "@ente/shared/components/Container";
@@ -27,8 +29,7 @@ import {
     DefaultDeduplicateContext,
 } from "types/deduplicate";
 import { SelectedState } from "types/gallery";
-import { ALL_SECTION } from "utils/collection";
-import { constructFileToCollectionMap, getSelectedFiles } from "utils/file";
+import { getSelectedFiles } from "utils/file";
 
 export const DeduplicateContext = createContext<DeduplicateContextType>(
     DefaultDeduplicateContext,
@@ -114,7 +115,7 @@ export default function Deduplicate() {
     }, [duplicates]);
 
     const fileToCollectionsMap = useMemoSingleThreaded(() => {
-        return constructFileToCollectionMap(duplicateFiles);
+        return createFileCollectionIDs(duplicateFiles ?? []);
     }, [duplicateFiles]);
 
     const deleteFileHelper = async () => {
@@ -131,7 +132,12 @@ export default function Deduplicate() {
             // there in an ad-hoc manner. For now, this fixes the issue with the
             // UI not updating if the user deletes only some of the duplicates.
             const collections = await getAllLatestCollections();
-            await syncFiles("normal", collections, () => {});
+            await syncFiles(
+                "normal",
+                collections,
+                () => {},
+                () => {},
+            );
             await syncTrash(collections, () => {});
         } catch (e) {
             if (

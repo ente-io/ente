@@ -38,7 +38,7 @@ import AsyncSelect from "react-select/async";
 import { SearchPeopleList } from "./PeopleList";
 import { UnstyledButton } from "./UnstyledButton";
 import type { ButtonishProps } from "./mui";
-import { useMLStatus, usePeople } from "./utils/ml";
+import { useMLStatusSnapshot, usePeopleStateSnapshot } from "./utils/ml";
 
 export interface SearchBarProps {
     /**
@@ -377,8 +377,8 @@ const shouldShowEmptyState = (inputValue: string) => {
 const EmptyState: React.FC<Pick<SearchBarProps, "onSelectPerson">> = ({
     onSelectPerson,
 }) => {
-    const mlStatus = useMLStatus();
-    const people = usePeople();
+    const mlStatus = useMLStatusSnapshot();
+    const people = usePeopleStateSnapshot()?.visiblePeople;
 
     if (!mlStatus || mlStatus.phase == "disabled") {
         // The preflight check should've prevented us from coming here.

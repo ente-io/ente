@@ -355,8 +355,6 @@
     "DATE_TIME_DIGITIZED": "Exif:дата и время определены",
     "METADATA_DATE": "Exif:метаданные",
     "CUSTOM_TIME": "Пользовательское время",
-    "REOPEN_PLAN_SELECTOR_MODAL": "Повторно открывайте планы",
-    "OPEN_PLAN_SELECTOR_MODAL_FAILED": "Не удалось раскрыть планы",
     "sharing_details": "Обмен подробностями",
     "modify_sharing": "Изменить общий доступ",
     "ADD_COLLABORATORS": "Добавление соавторов",

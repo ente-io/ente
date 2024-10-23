@@ -18,3 +18,6 @@ const kMinFaceDetectionScore = FaceDetectionService.kMinScoreSigmoidThreshold;
 
 /// The minimum cluster size for displaying a cluster in the UI
 const kMinimumClusterSizeSearchResult = 10;
+
+/// The minimum cluster sizes to try when the normal minimum doesn't return any results
+const kLowerMinimumClusterSizes = [5, 3, 2, 1];

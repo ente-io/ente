@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 // import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/errors.dart';
-import 'package:photos/core/network/network.dart';
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/models/subscription.dart';
@@ -31,17 +30,17 @@ const kFamilyPlanManagementUrl = String.fromEnvironment(
 );
 
 class BillingService {
-  BillingService._privateConstructor();
-
-  static final BillingService instance = BillingService._privateConstructor();
-
-  final _logger = Logger("BillingService");
-  final _enteDio = NetworkClient.instance.enteDio;
+  late final _logger = Logger("BillingService");
+  final Dio _enteDio;
 
   // ignore: unused_field
   bool _isOnSubscriptionPage = false;
 
   Future<BillingPlans>? _future;
+  BillingService(this._enteDio) {
+    _logger.finest("BillingService constructor");
+    init();
+  }
 
   void init() {
     // if (Platform.isIOS && kDebugMode) {
