@@ -66,17 +66,33 @@ class DirectoryUtils {
       Directory oldDataDir;
       Directory newDataDir;
 
+      Directory? tempDir;
       if (Platform.isLinux) {
         oldDataDir = Directory(
           p.join(dataHome.path, "ente_auth"),
         );
-      } else {
+        tempDir = Directory(
+          p.join(dataHome.path, "enteauth"),
+        );
+      } else if (Platform.isWindows) {
         oldDataDir = Directory(
           p.join(
             (await getApplicationDocumentsDirectory()).path,
             "ente",
           ),
         );
+        tempDir = Directory(
+          p.join(
+            (await getApplicationDocumentsDirectory()).path,
+            "enteauth",
+          ),
+        );
+      } else {
+        oldDataDir = await getApplicationDocumentsDirectory();
+      }
+
+      if (tempDir?.existsSync() ?? false) {
+        oldDataDir = tempDir!;
       }
       newDataDir = await getApplicationSupportDirectory();
       await newDataDir.create(recursive: true);
