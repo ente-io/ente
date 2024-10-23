@@ -1,6 +1,5 @@
 import "dart:async";
-import "dart:math" show min;
-import 'dart:typed_data' show Int32List, Uint8List;
+import 'dart:typed_data' show Float32List, Uint8List;
 import 'dart:ui' as ui show Image;
 
 import 'package:logging/logging.dart';
@@ -8,13 +7,15 @@ import "package:onnx_dart/onnx_dart.dart";
 import 'package:onnxruntime/onnxruntime.dart';
 import "package:photos/models/ml/face/dimension.dart";
 import 'package:photos/services/machine_learning/face_ml/face_detection/detection.dart';
+import "package:photos/services/machine_learning/face_ml/face_detection/face_detection_postprocessing.dart";
 import "package:photos/services/machine_learning/ml_model.dart";
+import "package:photos/utils/image_ml_util.dart";
 
 class YOLOFaceInterpreterRunException implements Exception {}
 
 /// This class is responsible for running the face detection model (YOLOv5Face) on ONNX runtime, and can be accessed through the singleton instance [FaceDetectionService.instance].
 class FaceDetectionService extends MlModel {
-  static const kRemoteBucketModelPath = "yolov5s_face_opset18_rgba_opt_nosplits.onnx";
+  static const kRemoteBucketModelPath = "yolov5s_face_640_640_dynamic.onnx";
   static const _modelName = "YOLOv5Face";
 
   @override
@@ -54,32 +55,34 @@ class FaceDetectionService extends MlModel {
     );
 
     final startTime = DateTime.now();
-    final inputShape = <int>[image.height, image.width, 4]; // [H, W, C]
-    final scaledSize = _getScaledSize(image.width, image.height);
+
+    final (inputImageList, scaledSize) = await preprocessImageYoloFace(
+      image,
+      rawRgbaBytes,
+    );
+    final preprocessingTime = DateTime.now();
+    final preprocessingMs =
+        preprocessingTime.difference(startTime).inMilliseconds;
 
     // Run inference
-    List<List<double>>? nestedResults = [];
+    List<List<List<double>>>? nestedResults = [];
     try {
       if (MlModel.usePlatformPlugin) {
-        nestedResults =
-            await _runPlatformPluginPredict(rawRgbaBytes, inputShape);
+        nestedResults = await _runPlatformPluginPredict(inputImageList);
       } else {
         nestedResults = _runFFIBasedPredict(
-          rawRgbaBytes,
-          inputShape,
           sessionAddress,
-        ); // [detections, 16]
+          inputImageList,
+        );
       }
       final inferenceTime = DateTime.now();
+      final inferenceMs =
+          inferenceTime.difference(preprocessingTime).inMilliseconds;
       _logger.info(
-        'Face detection is finished, in ${inferenceTime.difference(startTime).inMilliseconds} ms',
+        'Face detection is finished, in ${inferenceTime.difference(startTime).inMilliseconds} ms (preprocessing: $preprocessingMs ms, inference: $inferenceMs ms)',
       );
     } catch (e, s) {
-      _logger.severe(
-        'Error while running inference (PlatformPlugin: ${MlModel.usePlatformPlugin})',
-        e,
-        s,
-      );
+      _logger.severe('Error while running inference (PlatformPlugin: ${MlModel.usePlatformPlugin})', e, s);
       throw YOLOFaceInterpreterRunException();
     }
     try {
@@ -92,20 +95,26 @@ class FaceDetectionService extends MlModel {
     }
   }
 
-  static List<List<double>>? _runFFIBasedPredict(
-    Uint8List inputImageList,
-    List<int> inputImageShape,
+  static List<List<List<double>>>? _runFFIBasedPredict(
     int sessionAddress,
+    Float32List inputImageList,
   ) {
+    const inputShape = [
+      1,
+      3,
+      kInputHeight,
+      kInputWidth,
+    ];
     final inputOrt = OrtValueTensor.createTensorWithDataList(
       inputImageList,
-      inputImageShape,
+      inputShape,
     );
     final inputs = {'input': inputOrt};
     final runOptions = OrtRunOptions();
     final session = OrtSession.fromAddress(sessionAddress);
     final List<OrtValue?> outputs = session.run(runOptions, inputs);
-    final result = outputs[0]?.value as List<List<double>>; // [detections, 16]
+    final result =
+        outputs[0]?.value as List<List<List<double>>>; // [1, 25200, 16]
     inputOrt.release();
     runOptions.release();
     for (var element in outputs) {
@@ -115,36 +124,41 @@ class FaceDetectionService extends MlModel {
     return result;
   }
 
-  static Future<List<List<double>>> _runPlatformPluginPredict(
-    Uint8List inputImageList,
-    List<int> inputImageShape,
+  static Future<List<List<List<double>>>> _runPlatformPluginPredict(
+    Float32List inputImageList,
   ) async {
     final OnnxDart plugin = OnnxDart();
-    final result = await plugin.predictRgba(
+    final result = await plugin.predict(
       inputImageList,
-      Int32List.fromList(inputImageShape),
       _modelName,
     );
 
     final int resultLength = result!.length;
-    assert(resultLength % 16 == 0);
-    final int detections = resultLength ~/ 16;
+    assert(resultLength % 25200 * 16 == 0);
+    const int outerLength = 1;
+    const int middleLength = 25200;
+    const int innerLength = 16;
     return List.generate(
-      detections,
-      (index) => result.sublist(index * 16, (index + 1) * 16).toList(),
+      outerLength,
+      (_) => List.generate(
+        middleLength,
+        (j) => result.sublist(j * innerLength, (j + 1) * innerLength).toList(),
+      ),
     );
   }
 
   static List<FaceDetectionRelative> _yoloPostProcessOutputs(
-    List<List<double>> nestedResults,
+    List<List<List<double>>> nestedResults,
     Dimensions scaledSize,
   ) {
+    final firstResults = nestedResults[0]; // [25200, 16]
+
     // Filter output
-    final relativeDetections = _yoloOnnxFilterExtractDetections(
+    var relativeDetections = _yoloOnnxFilterExtractDetections(
       kMinScoreSigmoidThreshold,
       kInputWidth,
       kInputHeight,
-      results: nestedResults,
+      results: firstResults,
     );
 
     // Account for the fact that the aspect ratio was maintained
@@ -158,15 +172,13 @@ class FaceDetectionService extends MlModel {
       );
     }
 
+    // Non-maximum suppression to remove duplicate detections
+    relativeDetections = naiveNonMaxSuppression(
+      detections: relativeDetections,
+      iouThreshold: kIouThreshold,
+    );
+
     return relativeDetections;
-  }
-
-  static Dimensions _getScaledSize(int imageWidth, int imageHeight) {
-    final scale = min(kInputWidth / imageWidth, kInputHeight / imageHeight);
-    final scaledWidth = (imageWidth * scale).round().clamp(0, kInputWidth);
-    final scaledHeight = (imageHeight * scale).round().clamp(0, kInputHeight);
-
-    return Dimensions(width: scaledWidth, height: scaledHeight);
   }
 }
 
