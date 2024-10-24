@@ -84,7 +84,7 @@ class ClusterFeedbackService {
       final clusterIdToFaceIDs =
           await MLDataDB.instance.getClusterToFaceIDs(suggestionClusterIDs);
       final Map<String, List<EnteFile>> clusterIDToFiles = {};
-      final allFiles = await SearchService.instance.getAllFiles();
+      final allFiles = await SearchService.instance.getAllFilesForSearch();
       for (final f in allFiles) {
         if (!fileIdToClusterID.containsKey(f.uploadedFileID ?? -1)) {
           continue;

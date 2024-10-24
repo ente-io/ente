@@ -36,6 +36,7 @@ import "package:photos/models/search/search_constants.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/services/collections_service.dart';
+import "package:photos/services/filter/db_filters.dart";
 import "package:photos/services/location_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
@@ -53,6 +54,8 @@ import 'package:tuple/tuple.dart';
 
 class SearchService {
   Future<List<EnteFile>>? _cachedFilesFuture;
+  Future<List<EnteFile>>? _cachedFilesForSearch;
+  Future<List<EnteFile>>? _cachedFilesForHierarchicalSearch;
   Future<List<EnteFile>>? _cachedHiddenFilesFuture;
   final _logger = Logger((SearchService).toString());
   final _collectionService = CollectionsService.instance;
@@ -66,6 +69,8 @@ class SearchService {
     Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
       // only invalidate, let the load happen on demand
       _cachedFilesFuture = null;
+      _cachedFilesForSearch = null;
+      _cachedFilesForHierarchicalSearch = null;
       _cachedHiddenFilesFuture = null;
     });
   }
@@ -74,16 +79,56 @@ class SearchService {
     return CollectionsService.instance.getHiddenCollectionIds();
   }
 
-  Future<List<EnteFile>> getAllFiles() async {
-    if (_cachedFilesFuture != null) {
-      return _cachedFilesFuture!;
+  Future<List<EnteFile>> getAllFilesForSearch() async {
+    if (_cachedFilesFuture != null && _cachedFilesForSearch != null) {
+      return _cachedFilesForSearch!;
     }
-    _logger.fine("Reading all files from db");
-    _cachedFilesFuture = FilesDB.instance.getAllFilesFromDB(
-      ignoreCollections(),
-      dedupeByUploadId: false,
-    );
-    return _cachedFilesFuture!;
+
+    if (_cachedFilesFuture == null) {
+      _logger.fine("Reading all files from db");
+      _cachedFilesFuture = FilesDB.instance.getAllFilesFromDB(
+        ignoreCollections(),
+        dedupeByUploadId: false,
+      );
+    }
+
+    _cachedFilesForSearch = _cachedFilesFuture!.then((files) {
+      return applyDBFilters(
+        files,
+        DBFilterOptions(
+          dedupeUploadID: true,
+        ),
+      );
+    });
+
+    return _cachedFilesForSearch!;
+  }
+
+  Future<List<EnteFile>> getAllFilesForHierarchicalSearch() async {
+    if (_cachedFilesFuture != null &&
+        _cachedFilesForHierarchicalSearch != null) {
+      return _cachedFilesForHierarchicalSearch!;
+    }
+
+    if (_cachedFilesFuture == null) {
+      _logger.fine("Reading all files from db");
+      _cachedFilesFuture = FilesDB.instance.getAllFilesFromDB(
+        ignoreCollections(),
+        dedupeByUploadId: false,
+      );
+    }
+
+    _cachedFilesForHierarchicalSearch = _cachedFilesFuture!.then((files) {
+      return applyDBFilters(
+        files,
+        DBFilterOptions(
+          dedupeUploadID: false,
+          onlyUploadedFiles: true,
+        ),
+      );
+    });
+
+    return _cachedFilesForHierarchicalSearch!;
   }
 
   Future<List<EnteFile>> getHiddenFiles() async {
@@ -100,6 +145,8 @@ class SearchService {
 
   void clearCache() {
     _cachedFilesFuture = null;
+    _cachedFilesForSearch = null;
+    _cachedFilesForHierarchicalSearch = null;
     _cachedHiddenFilesFuture = null;
   }
 
@@ -386,7 +433,7 @@ class SearchService {
     String query,
   ) async {
     final List<GenericSearchResult> searchResults = [];
-    final List<EnteFile> allFiles = await getAllFiles();
+    final List<EnteFile> allFiles = await getAllFilesForSearch();
     for (var fileType in FileType.values) {
       final String fileTypeString = getHumanReadableString(context, fileType);
       if (fileTypeString.toLowerCase().startsWith(query.toLowerCase())) {
@@ -417,7 +464,7 @@ class SearchService {
     int? limit,
   ) async {
     final List<GenericSearchResult> searchResults = [];
-    final List<EnteFile> allFiles = await getAllFiles();
+    final List<EnteFile> allFiles = await getAllFilesForSearch();
     final fileTypesAndMatchingFiles = <FileType, List<EnteFile>>{};
     final extensionsAndMatchingFiles = <String, List<EnteFile>>{};
     try {
@@ -497,7 +544,7 @@ class SearchService {
   ) async {
     try {
       final List<GenericSearchResult> searchResults = [];
-      final List<EnteFile> allFiles = await getAllFiles();
+      final List<EnteFile> allFiles = await getAllFilesForSearch();
 
       //each list element will be substrings from a description mapped by
       //word count = 1 and word count > 1
@@ -654,7 +701,7 @@ class SearchService {
       return searchResults;
     }
     final RegExp pattern = RegExp(query, caseSensitive: false);
-    final List<EnteFile> allFiles = await getAllFiles();
+    final List<EnteFile> allFiles = await getAllFilesForSearch();
     final List<EnteFile> captionMatch = <EnteFile>[];
     final List<EnteFile> displayNameMatch = <EnteFile>[];
     for (EnteFile eachFile in allFiles) {
@@ -707,7 +754,7 @@ class SearchService {
       return searchResults;
     }
 
-    final List<EnteFile> allFiles = await getAllFiles();
+    final List<EnteFile> allFiles = await getAllFilesForSearch();
     final Map<String, List<EnteFile>> resultMap = <String, List<EnteFile>>{};
 
     for (EnteFile eachFile in allFiles) {
@@ -752,7 +799,7 @@ class SearchService {
         result[tag] = [];
       }
     }
-    final allFiles = await getAllFiles();
+    final allFiles = await getAllFilesForSearch();
     for (EnteFile file in allFiles) {
       if (file.hasLocation) {
         for (LocalEntity<LocationTag> tag in result.keys) {
@@ -877,7 +924,7 @@ class SearchService {
         await MLDataDB.instance.getFileIdToClusterIDSet(personID);
     _logger.info('faceDbDone getClusterFilesForPersonID $personID');
     final Map<String, List<EnteFile>> clusterIDToFiles = {};
-    final allFiles = await getAllFiles();
+    final allFiles = await getAllFilesForSearch();
     for (final f in allFiles) {
       if (!fileIdToClusterID.containsKey(f.uploadedFileID ?? -1)) {
         continue;
@@ -911,7 +958,7 @@ class SearchService {
       final List<GenericSearchResult> facesResult = [];
       final Map<String, List<EnteFile>> clusterIdToFiles = {};
       final Map<String, List<EnteFile>> personIdToFiles = {};
-      final allFiles = await getAllFiles();
+      final allFiles = await getAllFilesForSearch();
       for (final f in allFiles) {
         if (!fileIdToClusterID.containsKey(f.uploadedFileID ?? -1)) {
           continue;
@@ -1076,7 +1123,7 @@ class SearchService {
       final Map<LocalEntity<LocationTag>, List<EnteFile>> tagToItemsMap = {};
       final List<GenericSearchResult> tagSearchResults = [];
       final locationTagEntities = (await locationService.getLocationTags());
-      final allFiles = await getAllFiles();
+      final allFiles = await getAllFilesForSearch();
       final List<EnteFile> filesWithNoLocTag = [];
 
       for (int i = 0; i < locationTagEntities.length; i++) {
@@ -1278,7 +1325,7 @@ class SearchService {
   Future<GenericSearchResult?> getRandomDateResults(
     BuildContext context,
   ) async {
-    final allFiles = await getAllFiles();
+    final allFiles = await getAllFilesForSearch();
     if (allFiles.isEmpty) return null;
 
     final length = allFiles.length;
@@ -1330,7 +1377,7 @@ class SearchService {
   ) async {
     final lowerCaseQuery = query.toLowerCase();
     final searchResults = <GenericSearchResult>[];
-    final allFiles = await getAllFiles();
+    final allFiles = await getAllFilesForSearch();
     final peopleToSharedFiles = <User, List<EnteFile>>{};
     for (EnteFile file in allFiles) {
       if (file.isOwner) continue;
@@ -1371,7 +1418,7 @@ class SearchService {
   ) async {
     try {
       final searchResults = <GenericSearchResult>[];
-      final allFiles = await getAllFiles();
+      final allFiles = await getAllFilesForSearch();
       final peopleToSharedFiles = <User, List<EnteFile>>{};
       int peopleCount = 0;
       for (EnteFile file in allFiles) {

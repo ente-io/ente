@@ -188,8 +188,6 @@ class MagicCacheService {
     });
   }
 
-
-
   Future<void> _resetLastMagicCacheUpdateTime() async {
     await _prefs.setInt(
       _lastMagicCacheUpdateTime,
@@ -339,7 +337,8 @@ class MagicCacheService {
         promptMap[p.title] = p;
       }
       final List<GenericSearchResult> genericSearchResults = [];
-      final List<EnteFile> files = await SearchService.instance.getAllFiles();
+      final List<EnteFile> files =
+          await SearchService.instance.getAllFilesForSearch();
       for (EnteFile file in files) {
         if (!file.isUploaded) continue;
         for (MagicCache magicCache in magicCaches) {

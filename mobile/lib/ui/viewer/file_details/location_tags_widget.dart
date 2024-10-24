@@ -347,7 +347,7 @@ class _InfoMapState extends State<InfoMap> {
           .push(
         MaterialPageRoute(
           builder: (context) => MapScreen(
-            filesFutureFn: SearchService.instance.getAllFiles,
+            filesFutureFn: SearchService.instance.getAllFilesForSearch,
             center: LatLng(
               _fileLat,
               _fileLng,

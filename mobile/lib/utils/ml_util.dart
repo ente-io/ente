@@ -88,7 +88,7 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
   final Set<int> queuedFiledIDs = {};
 
   // Get all regular files and all hidden files
-  final enteFiles = await SearchService.instance.getAllFiles();
+  final enteFiles = await SearchService.instance.getAllFilesForSearch();
   final hiddenFiles = await SearchService.instance.getHiddenFiles();
 
   // Sort out what should be indexed and in what order

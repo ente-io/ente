@@ -79,7 +79,8 @@ class _FaceWidgetState extends State<FaceWidget> {
                 if (existingClusterID != null) {
                   final fileIdsToClusterIds =
                       await MLDataDB.instance.getFileIdToClusterIds();
-                  final files = await SearchService.instance.getAllFiles();
+                  final files =
+                      await SearchService.instance.getAllFilesForSearch();
                   final clusterFiles = files
                       .where(
                         (file) =>
@@ -126,7 +127,8 @@ class _FaceWidgetState extends State<FaceWidget> {
               } else if (widget.clusterID != null) {
                 final fileIdsToClusterIds =
                     await MLDataDB.instance.getFileIdToClusterIds();
-                final files = await SearchService.instance.getAllFiles();
+                final files =
+                    await SearchService.instance.getAllFilesForSearch();
                 final clusterFiles = files
                     .where(
                       (file) =>

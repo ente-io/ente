@@ -33,7 +33,7 @@ Future<List<EnteFile>> getFilteredFiles(
 ) async {
   final logger = Logger("HierarchicalSearchUtil");
   final filteredFiles = <EnteFile>[];
-  final files = await SearchService.instance.getAllFiles();
+  final files = await SearchService.instance.getAllFilesForHierarchicalSearch();
   final resultsNeverComputedFilters = <HierarchicalSearchFilter>[];
   final ignoredCollections =
       CollectionsService.instance.archivedOrHiddenCollectionIds();
