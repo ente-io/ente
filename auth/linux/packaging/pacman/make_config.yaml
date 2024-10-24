@@ -1,5 +1,5 @@
-display_name: Auth
-package_name: auth
+display_name: Ente Auth
+package_name: enteauth
 maintainer:
   name: Ente.io Developers
   email: auth@ente.io
@@ -8,29 +8,18 @@ licenses:
 icon: assets/icons/auth-icon.png
 installed_size: 36000
 
-metainfo: linux/packaging/ente_auth.appdata.xml
+metainfo: linux/packaging/enteauth.appdata.xml
 
 dependencies:
-  - c-ares
-  - ffmpeg
-  - gtk3
-  - http-parser
-  - libevent
-  - libvpx
-  - libxslt
-  - libxss
-  - minizip
-  - nss
-  - re2
-  - snappy
-  - libnotify
+  - sqlite
+  - libsecret
   - libappindicator-gtk3
 
 keywords:
   - Authentication
   - 2FA
 
-generic_name: Ente Authentication
+generic_name: Ente Authenticator
 
 categories:
   - Utility
@@ -47,12 +36,12 @@ postinstall_scripts:
 
 postupgrade_scripts:
   - post_install
-  
+
 postremove_scripts:
   - gtk-update-icon-cache -q -t -f usr/share/icons/hicolor
   - update-desktop-database -q
   - if [ -e /usr/lib/libsodium.so.23 ]; then
-  -   rm /usr/lib/libsodium.so.23
+  - rm /usr/lib/libsodium.so.23
   - fi
 
 startup_notify: false

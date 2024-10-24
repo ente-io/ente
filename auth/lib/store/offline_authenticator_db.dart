@@ -37,8 +37,9 @@ class OfflineAuthenticatorDB {
         ),
       );
     }
-    final Directory documentsDirectory =
-        await getApplicationDocumentsDirectory();
+    final Directory documentsDirectory = Platform.isMacOS
+        ? await getApplicationSupportDirectory()
+        : await getApplicationDocumentsDirectory();
     final String path = join(documentsDirectory.path, _databaseName);
     debugPrint(path);
     return await openDatabase(

@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:desktop_webview_window/desktop_webview_window.dart';
 import 'package:ente_auth/ui/common/web_page.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/cupertino.dart';
@@ -31,17 +30,7 @@ class PlatformUtil {
 
   static openWebView(BuildContext context, String title, String url) async {
     if (PlatformUtil.isDesktop()) {
-      if (!await WebviewWindow.isWebviewAvailable()) {
-        await launchUrlString(url);
-        return;
-      }
-
-      final webview = await WebviewWindow.create(
-        configuration: CreateConfiguration(
-          title: title,
-        ),
-      );
-      webview.launch(url);
+      await launchUrlString(url);
       return;
     }
     await Navigator.of(context).push(
