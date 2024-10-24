@@ -25,6 +25,7 @@ import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
 import 'package:photos/services/machine_learning/ml_result.dart';
 import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
+import "package:photos/services/user_remote_flag_service.dart";
 import "package:photos/utils/ml_util.dart";
 import "package:photos/utils/network_util.dart";
 import "package:synchronized/synchronized.dart";
@@ -62,8 +63,10 @@ class MLService {
   static const _kForceClusteringFaceCount = 8000;
 
   /// Only call this function once at app startup, after that you can directly call [runAllML]
-  Future<void> init({bool firstTime = false}) async {
+  Future<void> init() async {
     if (_isInitialized) return;
+    if (!userRemoteFlagService
+        .getCachedBoolValue(UserRemoteFlagService.mlEnabled)) return;
     _logger.info("init called");
 
     // Get client name
@@ -73,7 +76,8 @@ class MLService {
 
     // Listen on MachineLearningController
     Bus.instance.on<MachineLearningControlEvent>().listen((event) {
-      // if (!canFetch()) return;
+      if (!userRemoteFlagService
+          .getCachedBoolValue(UserRemoteFlagService.mlEnabled)) return;
 
       _mlControllerStatus = event.shouldRun;
       if (_mlControllerStatus) {
@@ -177,7 +181,7 @@ class MLService {
 
   /// Analyzes all the images in the user library with the latest ml version and stores the results in the database.
   ///
-  /// This function first fetches from remote and checks if the image has already been analyzed 
+  /// This function first fetches from remote and checks if the image has already been analyzed
   /// with the lastest faceMlVersion and stored on remote or local database. If so, it skips the image.
   Future<void> fetchAndIndexAllImages() async {
     if (_cannotRunMLFunction()) return;
@@ -613,7 +617,7 @@ class MLService {
   void _logStatus() {
     final String status = '''
     isInternalUser: ${flagService.internalUser}
-    ML Lite: ${!localSettings.isMLIndexingEnabled}
+    Local indexing: ${localSettings.isMLIndexingEnabled}
     canRunMLController: $_mlControllerStatus
     isIndexingOrClusteringRunning: $_isIndexingOrClusteringRunning
     shouldPauseIndexingAndClustering: $_shouldPauseIndexingAndClustering

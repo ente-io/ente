@@ -78,7 +78,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
             value: () => localSettings.isMLIndexingEnabled,
             onChanged: () async {
               try {
-                final isEnabled = await localSettings.toggleMLIndexing();
+                final isEnabled = await localSettings.toggleLocalMLIndexing();
                 logger.info('ML indexing turned ${isEnabled ? 'on' : 'off'}');
                 if (isEnabled) {
                   await MLService.instance.init();

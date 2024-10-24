@@ -7,6 +7,7 @@ import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/face_ml/face_detection/face_detection_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_embedding/face_embedding_service.dart";
+import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
 import "package:photos/services/machine_learning/ml_service.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_text_encoder.dart";
@@ -76,7 +77,8 @@ class _MachineLearningSettingsPageState
 
   @override
   Widget build(BuildContext context) {
-    final hasEnabled = localSettings.isMLIndexingEnabled;
+    final hasEnabled = userRemoteFlagService
+        .getCachedBoolValue(UserRemoteFlagService.mlEnabled);
     return Scaffold(
       body: CustomScrollView(
         primary: false,
@@ -91,7 +93,6 @@ class _MachineLearningSettingsPageState
                   _titleTapCount++;
                   if (_titleTapCount >= 7) {
                     _titleTapCount = 0;
-                    // showShortToast(context, "Advanced options enabled");
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (BuildContext context) {
@@ -169,7 +170,7 @@ class _MachineLearningSettingsPageState
                           buttonType: ButtonType.primary,
                           labelText: context.l10n.enable,
                           onTap: () async {
-                            await toggleIndexingState();
+                            await toggleMlConsent();
                           },
                         ),
                         const SizedBox(height: 12),
@@ -209,10 +210,19 @@ class _MachineLearningSettingsPageState
     );
   }
 
-  Future<void> toggleIndexingState() async {
-    final hasGivenConsent = userRemoteFlagService
+  Future<void> toggleMlConsent() async {
+    final oldMlConsent = userRemoteFlagService
         .getCachedBoolValue(UserRemoteFlagService.mlEnabled);
-    if (!localSettings.isMLIndexingEnabled && !hasGivenConsent) {
+    final mlConsent = !oldMlConsent;
+    await userRemoteFlagService.setBoolValue(
+      UserRemoteFlagService.mlEnabled,
+      mlConsent,
+    );
+    if (!mlConsent) {
+      MLService.instance.pauseIndexingAndClustering();
+      unawaited(
+        MLIndexingIsolate.instance.cleanupLocalIndexingModels(),
+      );
       final result = await Navigator.push(
         context,
         MaterialPageRoute(
@@ -224,18 +234,10 @@ class _MachineLearningSettingsPageState
       if (result == null || result == false) {
         return;
       }
-    }
-    final isEnabled = await localSettings.toggleMLIndexing();
-    if (isEnabled) {
-      await MLService.instance.init(firstTime: true);
+    } else {
+      await MLService.instance.init();
       await SemanticSearchService.instance.init();
       unawaited(MLService.instance.runAllML(force: true));
-    } else {
-      MLService.instance.pauseIndexingAndClustering();
-      await userRemoteFlagService.setBoolValue(
-        UserRemoteFlagService.mlEnabled,
-        false,
-      );
     }
     if (mounted) {
       setState(() {});
@@ -244,66 +246,75 @@ class _MachineLearningSettingsPageState
 
   Widget _getMlSettings(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
-    final hasEnabled = localSettings.isMLIndexingEnabled;
+    final hasEnabled = userRemoteFlagService
+        .getCachedBoolValue(UserRemoteFlagService.mlEnabled);
+    if (!hasEnabled) {
+      return const SizedBox.shrink();
+    }
     return Column(
       children: [
-        if (hasEnabled)
-          MenuItemWidget(
-            captionedTextWidget: CaptionedTextWidget(
-              title: S.of(context).enabled,
-            ),
-            menuItemColor: colorScheme.fillFaint,
-            trailingWidget: ToggleSwitchWidget(
-              value: () => localSettings.isMLIndexingEnabled,
-              onChanged: () async {
-                await toggleIndexingState();
-              },
-            ),
-            singleBorderRadius: 8,
-            alignCaptionedTextToLeft: true,
-            isGestureDetectorDisabled: true,
+        MenuItemWidget(
+          captionedTextWidget: CaptionedTextWidget(
+            title: S.of(context).enabled,
           ),
-        if (hasEnabled)
-          const SizedBox(
-            height: 4,
+          menuItemColor: colorScheme.fillFaint,
+          trailingWidget: ToggleSwitchWidget(
+            value: () => hasEnabled,
+            onChanged: () async {
+              await toggleMlConsent();
+            },
           ),
-        if (hasEnabled)
-          ExpandableMenuItemWidget(
-            title: "Advanced configuration",
-            selectionOptionsWidget: Column(
-              children: [
-                const SizedBox(
-                  height: 2,
+          singleBorderRadius: 8,
+          alignCaptionedTextToLeft: true,
+          isGestureDetectorDisabled: true,
+        ),
+        const SizedBox(
+          height: 4,
+        ),
+        ExpandableMenuItemWidget(
+          title: "Configuration",
+          selectionOptionsWidget: Column(
+            children: [
+              const SizedBox(
+                height: 2,
+              ),
+              MenuItemWidget(
+                captionedTextWidget: const CaptionedTextWidget(
+                  title: "Local indexing",
                 ),
-                MenuItemWidget(
-                  captionedTextWidget: const CaptionedTextWidget(
-                    title: "Local indexing",
-                  ),
-                  menuItemColor: colorScheme.fillFaint,
-                  trailingWidget: ToggleSwitchWidget(
-                    value: () => localSettings.isMLIndexingEnabled,
-                    onChanged: () async {
-                      await localSettings.toggleMLIndexing();
-                      if (mounted) {
-                        setState(() {});
-                      }
-                    },
-                  ),
-                  singleBorderRadius: 8,
-                  isGestureDetectorDisabled: true,
+                menuItemColor: colorScheme.fillFaint,
+                trailingWidget: ToggleSwitchWidget(
+                  value: () => localSettings.isMLIndexingEnabled,
+                  onChanged: () async {
+                    final localIndexing =
+                        await localSettings.toggleLocalMLIndexing();
+                    if (localIndexing) {
+                      unawaited(MLService.instance.runAllML(force: true));
+                    } else {
+                      MLService.instance.pauseIndexingAndClustering();
+                      unawaited(
+                        MLIndexingIsolate.instance.cleanupLocalIndexingModels(),
+                      );
+                    }
+
+                    if (mounted) {
+                      setState(() {});
+                    }
+                  },
                 ),
-              ],
-            ),
-            leadingIcon: Icons.settings_outlined,
+                singleBorderRadius: 8,
+                isGestureDetectorDisabled: true,
+              ),
+            ],
           ),
-        if (hasEnabled)
-          const SizedBox(
-            height: 12,
-          ),
-        if (hasEnabled)
-          MLService.instance.areModelsDownloaded
-              ? const MLStatusWidget()
-              : const ModelLoadingState(),
+          leadingIcon: Icons.settings_outlined,
+        ),
+        const SizedBox(
+          height: 12,
+        ),
+        MLService.instance.areModelsDownloaded
+            ? const MLStatusWidget()
+            : const ModelLoadingState(),
       ],
     );
   }

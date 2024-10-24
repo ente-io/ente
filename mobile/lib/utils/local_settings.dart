@@ -57,11 +57,8 @@ class LocalSettings {
     return getRateUsShownCount() < kRateUsPromptThreshold;
   }
 
-  //  remove `enable_face_indexing`fallback after sometime, affects internal users only
   bool get isMLIndexingEnabled =>
-      _prefs.getBool(_kisMLIndexingEnabled) ??
-      _prefs.getBool('enable_face_indexing') ??
-      false;
+      _prefs.getBool(_kisMLIndexingEnabled) ?? false;
 
   bool get userEnabledMultiplePart =>
       _prefs.getBool(kEnableMultiplePart) ?? false;
@@ -72,7 +69,7 @@ class LocalSettings {
   }
 
   /// toggleFaceIndexing toggles the face indexing setting and returns the new value
-  Future<bool> toggleMLIndexing() async {
+  Future<bool> toggleLocalMLIndexing() async {
     await _prefs.setBool(_kisMLIndexingEnabled, !isMLIndexingEnabled);
     return isMLIndexingEnabled;
   }
