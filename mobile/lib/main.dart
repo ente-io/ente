@@ -29,6 +29,7 @@ import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
+import "package:photos/services/deeplink_service.dart";
 import 'package:photos/services/favorites_service.dart';
 import "package:photos/services/filedata/filedata_service.dart";
 import 'package:photos/services/home_widget_service.dart';
@@ -212,6 +213,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     _logger.info("_logFGHeartBeatInfo done $tlog");
     unawaited(_scheduleHeartBeat(preferences, isBackground));
     NotificationService.instance.init(preferences);
+    DeeplinkService.instance.init(preferences);
     AppLifecycleService.instance.init(preferences);
     if (isBackground) {
       AppLifecycleService.instance.onAppInBackground('init via: $via $tlog');
