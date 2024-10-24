@@ -218,7 +218,7 @@ class AddPhotosPhotoWidget extends StatelessWidget {
   // This custom method is required to enforce English as the default fallback
   // instead of Chinese.
   Future<AssetPickerTextDelegate> _getAssetPickerTextDelegate() async {
-    final Locale locale = await getLocale();
+    final Locale locale = (await getLocale())!;
     switch (locale.languageCode.toLowerCase()) {
       case "en":
         return const EnglishAssetPickerTextDelegate();

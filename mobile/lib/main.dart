@@ -95,7 +95,7 @@ Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
   return await _runWithLogs(() async {
     _logger.info("Starting app in foreground");
     await _init(false, via: 'mainMethod');
-    final Locale locale = await getLocale();
+    final Locale? locale = await getLocale(noFallback: true);
     runApp(
       AppLock(
         builder: (args) =>
