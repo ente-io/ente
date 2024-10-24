@@ -539,12 +539,10 @@ export const shouldShowAvatar = (file: EnteFile, user: User) => {
 export const handleFileOps = async (
     ops: FILE_OPS_TYPE,
     files: EnteFile[],
-    setTempDeletedFileIds: (
-        tempDeletedFileIds: Set<number> | ((prev: Set<number>) => Set<number>),
-    ) => void,
-    setTempHiddenFileIds: (
-        tempHiddenFileIds: Set<number> | ((prev: Set<number>) => Set<number>),
-    ) => void,
+    markTempDeleted: (tempDeletedFiles: EnteFile[]) => void,
+    clearTempDeleted: () => void,
+    markTempHidden: (tempHiddenFiles: EnteFile[]) => void,
+    clearTempHidden: () => void,
     setFixCreationTimeAttributes: (
         fixCreationTimeAttributes:
             | {
@@ -556,13 +554,31 @@ export const handleFileOps = async (
 ) => {
     switch (ops) {
         case FILE_OPS_TYPE.TRASH:
-            await deleteFileHelper(files, false, setTempDeletedFileIds);
+            try {
+                markTempDeleted(files);
+                await trashFiles(files);
+            } catch (e) {
+                clearTempDeleted();
+                throw e;
+            }
             break;
         case FILE_OPS_TYPE.DELETE_PERMANENTLY:
-            await deleteFileHelper(files, true, setTempDeletedFileIds);
+            try {
+                markTempDeleted(files);
+                await deleteFromTrash(files.map((file) => file.id));
+            } catch (e) {
+                clearTempDeleted();
+                throw e;
+            }
             break;
         case FILE_OPS_TYPE.HIDE:
-            await hideFilesHelper(files, setTempHiddenFileIds);
+            try {
+                markTempHidden(files);
+                await moveToHiddenCollection(files);
+            } catch (e) {
+                clearTempHidden();
+                throw e;
+            }
             break;
         case FILE_OPS_TYPE.DOWNLOAD: {
             const setSelectedFileDownloadProgressAttributes =
@@ -587,47 +603,6 @@ export const handleFileOps = async (
         case FILE_OPS_TYPE.SET_FAVORITE:
             await addMultipleToFavorites(files);
             break;
-    }
-};
-
-const deleteFileHelper = async (
-    selectedFiles: EnteFile[],
-    permanent: boolean,
-    setTempDeletedFileIds: (
-        tempDeletedFileIds: Set<number> | ((prev: Set<number>) => Set<number>),
-    ) => void,
-) => {
-    try {
-        setTempDeletedFileIds((deletedFileIds) => {
-            selectedFiles.forEach((file) => deletedFileIds.add(file.id));
-            return new Set(deletedFileIds);
-        });
-        if (permanent) {
-            await deleteFromTrash(selectedFiles.map((file) => file.id));
-        } else {
-            await trashFiles(selectedFiles);
-        }
-    } catch (e) {
-        setTempDeletedFileIds(new Set());
-        throw e;
-    }
-};
-
-const hideFilesHelper = async (
-    selectedFiles: EnteFile[],
-    setTempHiddenFileIds: (
-        tempHiddenFileIds: Set<number> | ((prev: Set<number>) => Set<number>),
-    ) => void,
-) => {
-    try {
-        setTempHiddenFileIds((hiddenFileIds) => {
-            selectedFiles.forEach((file) => hiddenFileIds.add(file.id));
-            return new Set(hiddenFileIds);
-        });
-        await moveToHiddenCollection(selectedFiles);
-    } catch (e) {
-        setTempHiddenFileIds(new Set());
-        throw e;
     }
 };
 

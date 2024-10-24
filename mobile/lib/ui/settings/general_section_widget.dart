@@ -70,7 +70,7 @@ class GeneralSectionWidget extends StatelessWidget {
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
-            final locale = await getLocale();
+            final locale = (await getLocale())!;
             await routeToPage(
               context,
               LanguageSelectorPage(

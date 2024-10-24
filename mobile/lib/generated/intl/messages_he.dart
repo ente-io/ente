@@ -20,108 +20,108 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'he';
 
-  static String m4(count) =>
+  static String m6(count) =>
       "${Intl.plural(count, one: 'הוסף פריט', two: 'הוסף פריטים', many: 'הוסף פריטים', other: 'הוסף פריטים')}";
 
-  static String m9(count) =>
+  static String m11(count) =>
       "${Intl.plural(count, zero: 'אין משתתפים', one: '1 משתתף', two: '2 משתתפים', other: '${count} משתתפים')}";
 
-  static String m12(paymentProvider) =>
+  static String m14(paymentProvider) =>
       "אנא בטל את המנוי הקיים מ-${paymentProvider} קודם";
 
-  static String m13(user) =>
+  static String m15(user) =>
       "${user} לא יוכל להוסיף עוד תמונות לאלבום זה\n\nהם עדיין יכולו להסיר תמונות קיימות שנוספו על ידיהם";
 
-  static String m14(isFamilyMember, storageAmountInGb) =>
+  static String m16(isFamilyMember, storageAmountInGb) =>
       "${Intl.select(isFamilyMember, {
             'true': 'קיבלת ${storageAmountInGb} GB עד כה',
             'false': 'קיבלת ${storageAmountInGb} GB עד כה',
             'other': 'קיבלת ${storageAmountInGb} GB עד כה!',
           })}";
 
-  static String m16(familyAdminEmail) =>
+  static String m18(familyAdminEmail) =>
       "אנא צור קשר עם <green>${familyAdminEmail}</green> על מנת לנהל את המנוי שלך";
 
-  static String m17(provider) =>
+  static String m19(provider) =>
       "אנא צור איתנו קשר ב-support@ente.io על מנת לנהל את המנוי ${provider}.";
 
-  static String m19(count) =>
+  static String m21(count) =>
       "${Intl.plural(count, one: 'מחק ${count} פריט', two: 'מחק ${count} פריטים', other: 'מחק ${count} פריטים')}";
 
-  static String m20(currentlyDeleting, totalCount) =>
+  static String m22(currentlyDeleting, totalCount) =>
       "מוחק ${currentlyDeleting} / ${totalCount}";
 
-  static String m21(albumName) =>
+  static String m23(albumName) =>
       "זה יסיר את הלינק הפומבי שדרכו ניתן לגשת ל\"${albumName}\".";
 
-  static String m22(supportEmail) =>
+  static String m24(supportEmail) =>
       "אנא תשלח דוא\"ל ל${supportEmail} מהכתובת דוא\"ל שנרשמת איתה";
 
-  static String m24(count, formattedSize) =>
+  static String m26(count, formattedSize) =>
       "${count} קבצים, כל אחד ${formattedSize}";
 
-  static String m26(email) =>
+  static String m28(email) =>
       "לא נמצא חשבון ente ל-${email}.\n\nשלח להם הזמנה על מנת לשתף תמונות.";
 
-  static String m29(storageAmountInGB) =>
+  static String m31(storageAmountInGB) =>
       "${storageAmountInGB} GB כל פעם שמישהו נרשם עבור תוכנית בתשלום ומחיל את הקוד שלך";
 
-  static String m30(endDate) => "ניסיון חינם בתוקף עד ל-${endDate}";
-
-  static String m35(count) =>
-      "${Intl.plural(count, one: '${count} פריט', two: '${count} פריטים', many: '${count} פריטים', other: '${count} פריטים')}";
-
-  static String m36(expiryTime) => "תוקף הקישור יפוג ב-${expiryTime}";
-
-  static String m0(count, formattedCount) =>
-      "${Intl.plural(count, one: '${formattedCount} זכרון', two: '${formattedCount} זכרונות', many: '${formattedCount} זכרונות', other: '${formattedCount} זכרונות')}";
+  static String m32(endDate) => "ניסיון חינם בתוקף עד ל-${endDate}";
 
   static String m37(count) =>
+      "${Intl.plural(count, one: '${count} פריט', two: '${count} פריטים', many: '${count} פריטים', other: '${count} פריטים')}";
+
+  static String m38(expiryTime) => "תוקף הקישור יפוג ב-${expiryTime}";
+
+  static String m2(count, formattedCount) =>
+      "${Intl.plural(count, one: '${formattedCount} זכרון', two: '${formattedCount} זכרונות', many: '${formattedCount} זכרונות', other: '${formattedCount} זכרונות')}";
+
+  static String m39(count) =>
       "${Intl.plural(count, one: 'הזז פריט', two: 'הזז פריטים', many: 'הזז פריטים', other: 'הזז פריטים')}";
 
-  static String m41(passwordStrengthValue) =>
+  static String m0(passwordStrengthValue) =>
       "חוזק הסיסמא: ${passwordStrengthValue}";
 
-  static String m42(providerName) =>
+  static String m43(providerName) =>
       "אנא דבר עם התמיכה של ${providerName} אם אתה חוייבת";
 
-  static String m47(storeName) => "דרג אותנו ב-${storeName}";
+  static String m48(storeName) => "דרג אותנו ב-${storeName}";
 
-  static String m48(storageInGB) => "3. שניכים מקבלים ${storageInGB} GB* בחינם";
+  static String m49(storageInGB) => "3. שניכים מקבלים ${storageInGB} GB* בחינם";
 
-  static String m49(userEmail) =>
+  static String m50(userEmail) =>
       "${userEmail} יוסר מהאלבום המשותף הזה\n\nגם תמונות שנוספו על ידיהם יוסרו מהאלבום";
 
-  static String m1(count) => "${count} נבחרו";
+  static String m3(count) => "${count} נבחרו";
 
-  static String m52(count, yourCount) => "${count} נבחרו (${yourCount} שלך)";
+  static String m53(count, yourCount) => "${count} נבחרו (${yourCount} שלך)";
 
-  static String m53(verificationID) =>
+  static String m54(verificationID) =>
       "הנה מזהה האימות שלי: ${verificationID} עבור ente.io.";
 
-  static String m2(verificationID) =>
+  static String m4(verificationID) =>
       "היי, תוכל לוודא שזה מזהה האימות שלך של ente.io: ${verificationID}";
 
-  static String m55(numberOfPeople) =>
+  static String m56(numberOfPeople) =>
       "${Intl.plural(numberOfPeople, zero: 'שתף עם אנשים ספציפיים', one: 'שותף עם איש 1', two: 'שותף עם 2 אנשים', other: 'שותף עם ${numberOfPeople} אנשים')}";
 
-  static String m56(emailIDs) => "הושתף ע\"י ${emailIDs}";
+  static String m57(emailIDs) => "הושתף ע\"י ${emailIDs}";
 
-  static String m57(fileType) => "${fileType} יימחק מהמכשיר שלך.";
+  static String m58(fileType) => "${fileType} יימחק מהמכשיר שלך.";
 
-  static String m60(storageAmountInGB) => "${storageAmountInGB} GB";
+  static String m61(storageAmountInGB) => "${storageAmountInGB} GB";
 
-  static String m63(endDate) => "המנוי שלך יבוטל ב-${endDate}";
+  static String m64(endDate) => "המנוי שלך יבוטל ב-${endDate}";
 
-  static String m64(completed, total) => "${completed}/${total} זכרונות נשמרו";
+  static String m65(completed, total) => "${completed}/${total} זכרונות נשמרו";
 
-  static String m65(storageAmountInGB) => "הם גם יקבלו ${storageAmountInGB} GB";
+  static String m66(storageAmountInGB) => "הם גם יקבלו ${storageAmountInGB} GB";
 
-  static String m66(email) => "זה מזהה האימות של ${email}";
+  static String m67(email) => "זה מזהה האימות של ${email}";
 
-  static String m70(email) => "אמת ${email}";
+  static String m71(email) => "אמת ${email}";
 
-  static String m71(email) => "שלחנו דוא\"ל ל<green>${email}</green>";
+  static String m1(email) => "שלחנו דוא\"ל ל<green>${email}</green>";
 
   static String m72(count) =>
       "${Intl.plural(count, one: 'לפני ${count} שנה', two: 'לפני ${count} שנים', many: 'לפני ${count} שנים', other: 'לפני ${count} שנים')}";
@@ -138,17 +138,12 @@ class MessageLookup extends MessageLookupByLibrary {
             "אני מבין שאם אאבד את הסיסמא, אני עלול לאבד את המידע שלי מכיוון שהמידע שלי <underline>מוצפן מקצה אל קצה</underline>."),
         "activeSessions":
             MessageLookupByLibrary.simpleMessage("חיבורים פעילים"),
-        "add": MessageLookupByLibrary.simpleMessage("Add"),
         "addANewEmail": MessageLookupByLibrary.simpleMessage("הוסף דוא\"ל חדש"),
         "addCollaborator":
             MessageLookupByLibrary.simpleMessage("הוסף משתף פעולה"),
-        "addItem": m4,
+        "addItem": m6,
         "addLocationButton": MessageLookupByLibrary.simpleMessage("הוסף"),
         "addMore": MessageLookupByLibrary.simpleMessage("הוסף עוד"),
-        "addName": MessageLookupByLibrary.simpleMessage("Add name"),
-        "addNameOrMerge":
-            MessageLookupByLibrary.simpleMessage("Add name or merge"),
-        "addNewPerson": MessageLookupByLibrary.simpleMessage("Add new person"),
         "addPhotos": MessageLookupByLibrary.simpleMessage("הוסף תמונות"),
         "addToAlbum": MessageLookupByLibrary.simpleMessage("הוסף לאלבום"),
         "addViewer": MessageLookupByLibrary.simpleMessage("הוסף צופה"),
@@ -163,7 +158,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "after1Week": MessageLookupByLibrary.simpleMessage("אחרי שבוע 1"),
         "after1Year": MessageLookupByLibrary.simpleMessage("אחרי שנה 1"),
         "albumOwner": MessageLookupByLibrary.simpleMessage("בעלים"),
-        "albumParticipantsCount": m9,
+        "albumParticipantsCount": m11,
         "albumTitle": MessageLookupByLibrary.simpleMessage("כותרת האלבום"),
         "albumUpdated": MessageLookupByLibrary.simpleMessage("האלבום עודכן"),
         "albums": MessageLookupByLibrary.simpleMessage("אלבומים"),
@@ -249,9 +244,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "canOnlyRemoveFilesOwnedByYou": MessageLookupByLibrary.simpleMessage(
             "יכול להסיר רק קבצים שבבעלותך"),
         "cancel": MessageLookupByLibrary.simpleMessage("בטל"),
-        "cancelOtherSubscription": m12,
+        "cancelOtherSubscription": m14,
         "cancelSubscription": MessageLookupByLibrary.simpleMessage("בטל מנוי"),
-        "cannotAddMorePhotosAfterBecomingViewer": m13,
+        "cannotAddMorePhotosAfterBecomingViewer": m15,
         "cannotDeleteSharedFiles": MessageLookupByLibrary.simpleMessage(
             "לא ניתן למחוק את הקבצים המשותפים"),
         "changeEmail": MessageLookupByLibrary.simpleMessage("שנה דוא\"ל"),
@@ -267,7 +262,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("תבע מקום אחסון בחינם"),
         "claimMore": MessageLookupByLibrary.simpleMessage("תבע עוד!"),
         "claimed": MessageLookupByLibrary.simpleMessage("נתבע"),
-        "claimedStorageSoFar": m14,
+        "claimedStorageSoFar": m16,
         "click": MessageLookupByLibrary.simpleMessage("• לחץ"),
         "close": MessageLookupByLibrary.simpleMessage("סגור"),
         "clubByCaptureTime":
@@ -307,10 +302,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("אמת את מפתח השחזור"),
         "confirmYourRecoveryKey":
             MessageLookupByLibrary.simpleMessage("אמת את מפתח השחזור"),
-        "contactFamilyAdmin": m16,
+        "contactFamilyAdmin": m18,
         "contactSupport":
             MessageLookupByLibrary.simpleMessage("צור קשר עם התמיכה"),
-        "contactToManageSubscription": m17,
+        "contactToManageSubscription": m19,
         "continueLabel": MessageLookupByLibrary.simpleMessage("המשך"),
         "continueOnFreeTrial":
             MessageLookupByLibrary.simpleMessage("המשך עם ניסיון חינמי"),
@@ -368,9 +363,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("למחוק אלבומים ריקים?"),
         "deleteFromBoth": MessageLookupByLibrary.simpleMessage("מחק משניהם"),
         "deleteFromDevice": MessageLookupByLibrary.simpleMessage("מחק מהמכשיר"),
-        "deleteItemCount": m19,
+        "deleteItemCount": m21,
         "deletePhotos": MessageLookupByLibrary.simpleMessage("מחק תמונות"),
-        "deleteProgress": m20,
+        "deleteProgress": m22,
         "deleteReason1":
             MessageLookupByLibrary.simpleMessage("חסר מאפיין מרכזי שאני צריך"),
         "deleteReason2": MessageLookupByLibrary.simpleMessage(
@@ -395,7 +390,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "צופים יכולים עדיין לקחת צילומי מסך או לשמור עותק של התמונות שלך בעזרת כלים חיצוניים"),
         "disableDownloadWarningTitle":
             MessageLookupByLibrary.simpleMessage("שים לב"),
-        "disableLinkMessage": m21,
+        "disableLinkMessage": m23,
         "disableTwofactor":
             MessageLookupByLibrary.simpleMessage("השבת דו-גורמי"),
         "discord": MessageLookupByLibrary.simpleMessage("Discord"),
@@ -406,12 +401,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "download": MessageLookupByLibrary.simpleMessage("הורד"),
         "downloadFailed": MessageLookupByLibrary.simpleMessage("ההורדה נכשלה"),
         "downloading": MessageLookupByLibrary.simpleMessage("מוריד..."),
-        "dropSupportEmail": m22,
-        "duplicateItemsGroup": m24,
+        "dropSupportEmail": m24,
+        "duplicateItemsGroup": m26,
         "edit": MessageLookupByLibrary.simpleMessage("ערוך"),
         "eligible": MessageLookupByLibrary.simpleMessage("זכאי"),
         "email": MessageLookupByLibrary.simpleMessage("דוא\"ל"),
-        "emailNoEnteAccount": m26,
+        "emailNoEnteAccount": m28,
         "emailVerificationToggle":
             MessageLookupByLibrary.simpleMessage("אימות מייל"),
         "empty": MessageLookupByLibrary.simpleMessage("ריק"),
@@ -454,10 +449,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "exportLogs": MessageLookupByLibrary.simpleMessage("ייצוא לוגים"),
         "exportYourData":
             MessageLookupByLibrary.simpleMessage("ייצוא הנתונים שלך"),
-        "extraPhotosFound":
-            MessageLookupByLibrary.simpleMessage("Extra photos found"),
-        "extraPhotosFoundFor": MessageLookupByLibrary.simpleMessage(
-            "Extra photos found for \$text"),
         "failedToApplyCode":
             MessageLookupByLibrary.simpleMessage("נכשל בהחלת הקוד"),
         "failedToCancel": MessageLookupByLibrary.simpleMessage("הביטול נכשל"),
@@ -484,11 +475,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "forgotPassword": MessageLookupByLibrary.simpleMessage("שכחתי סיסמה"),
         "freeStorageClaimed":
             MessageLookupByLibrary.simpleMessage("מקום אחסון בחינם נתבע"),
-        "freeStorageOnReferralSuccess": m29,
+        "freeStorageOnReferralSuccess": m31,
         "freeStorageUsable":
             MessageLookupByLibrary.simpleMessage("מקום אחסון שמיש"),
         "freeTrial": MessageLookupByLibrary.simpleMessage("ניסיון חינמי"),
-        "freeTrialValidTill": m30,
+        "freeTrialValidTill": m32,
         "freeUpDeviceSpace":
             MessageLookupByLibrary.simpleMessage("פנה אחסון במכשיר"),
         "freeUpSpace": MessageLookupByLibrary.simpleMessage("פנה מקום"),
@@ -526,7 +517,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "invite": MessageLookupByLibrary.simpleMessage("הזמן"),
         "inviteYourFriends":
             MessageLookupByLibrary.simpleMessage("הזמן את חברייך"),
-        "itemCount": m35,
+        "itemCount": m37,
         "itemsWillBeRemovedFromAlbum": MessageLookupByLibrary.simpleMessage(
             "הפריטים שנבחרו יוסרו מהאלבום הזה"),
         "keepPhotos": MessageLookupByLibrary.simpleMessage("השאר תמונות"),
@@ -548,7 +539,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("מגבלת כמות מכשירים"),
         "linkEnabled": MessageLookupByLibrary.simpleMessage("מאופשר"),
         "linkExpired": MessageLookupByLibrary.simpleMessage("פג תוקף"),
-        "linkExpiresOn": m36,
+        "linkExpiresOn": m38,
         "linkExpiry": MessageLookupByLibrary.simpleMessage("תאריך תפוגה ללינק"),
         "linkHasExpired":
             MessageLookupByLibrary.simpleMessage("הקישור פג תוקף"),
@@ -576,15 +567,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "maps": MessageLookupByLibrary.simpleMessage("מפות"),
         "mastodon": MessageLookupByLibrary.simpleMessage("Mastodon"),
         "matrix": MessageLookupByLibrary.simpleMessage("Matrix"),
-        "memoryCount": m0,
+        "memoryCount": m2,
         "merchandise": MessageLookupByLibrary.simpleMessage("סחורה"),
-        "mergeWithExisting":
-            MessageLookupByLibrary.simpleMessage("Merge with existing"),
         "mobileWebDesktop":
             MessageLookupByLibrary.simpleMessage("פלאפון, דפדפן, שולחן עבודה"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("מתונה"),
         "monthly": MessageLookupByLibrary.simpleMessage("חודשי"),
-        "moveItem": m37,
+        "moveItem": m39,
         "moveToAlbum": MessageLookupByLibrary.simpleMessage("הזז לאלבום"),
         "movedToTrash": MessageLookupByLibrary.simpleMessage("הועבר לאשפה"),
         "movingFilesToAlbum":
@@ -592,7 +581,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "name": MessageLookupByLibrary.simpleMessage("שם"),
         "never": MessageLookupByLibrary.simpleMessage("לעולם לא"),
         "newAlbum": MessageLookupByLibrary.simpleMessage("אלבום חדש"),
-        "newPerson": MessageLookupByLibrary.simpleMessage("New person"),
         "newest": MessageLookupByLibrary.simpleMessage("החדש ביותר"),
         "no": MessageLookupByLibrary.simpleMessage("לא"),
         "noDeviceLimit": MessageLookupByLibrary.simpleMessage("אין"),
@@ -624,17 +612,16 @@ class MessageLookup extends MessageLookupByLibrary {
         "passwordChangedSuccessfully":
             MessageLookupByLibrary.simpleMessage("הססמה הוחלפה בהצלחה"),
         "passwordLock": MessageLookupByLibrary.simpleMessage("נעילת סיסמא"),
-        "passwordStrength": m41,
+        "passwordStrength": m0,
         "passwordWarning": MessageLookupByLibrary.simpleMessage(
             "אנחנו לא שומרים את הסיסמא הזו, לכן אם אתה שוכח אותה, <underline>אנחנו לא יכולים לפענח את המידע שלך</underline>"),
         "paymentDetails": MessageLookupByLibrary.simpleMessage("פרטי תשלום"),
         "paymentFailed": MessageLookupByLibrary.simpleMessage("התשלום נכשל"),
-        "paymentFailedTalkToProvider": m42,
+        "paymentFailedTalkToProvider": m43,
         "peopleUsingYourCode":
             MessageLookupByLibrary.simpleMessage("אנשים משתמשים בקוד שלך"),
         "permanentlyDelete":
             MessageLookupByLibrary.simpleMessage("למחוק לצמיתות?"),
-        "personName": MessageLookupByLibrary.simpleMessage("Person name"),
         "photoGridSize":
             MessageLookupByLibrary.simpleMessage("גודל לוח של התמונה"),
         "photoSmallCase": MessageLookupByLibrary.simpleMessage("תמונה"),
@@ -672,7 +659,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "raiseTicket": MessageLookupByLibrary.simpleMessage("צור ticket"),
         "rateTheApp": MessageLookupByLibrary.simpleMessage("דרג את האפליקציה"),
         "rateUs": MessageLookupByLibrary.simpleMessage("דרג אותנו"),
-        "rateUsOnStore": m47,
+        "rateUsOnStore": m48,
         "recover": MessageLookupByLibrary.simpleMessage("שחזר"),
         "recoverAccount": MessageLookupByLibrary.simpleMessage("שחזר חשבון"),
         "recoverButton": MessageLookupByLibrary.simpleMessage("שחזר"),
@@ -698,7 +685,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "1. תמסור את הקוד הזה לחברייך"),
         "referralStep2": MessageLookupByLibrary.simpleMessage(
             "2. הם נרשמים עבור תוכנית בתשלום"),
-        "referralStep3": m48,
+        "referralStep3": m49,
         "referrals": MessageLookupByLibrary.simpleMessage("הפניות"),
         "referralsAreCurrentlyPaused":
             MessageLookupByLibrary.simpleMessage("הפניות כרגע מושהות"),
@@ -714,7 +701,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("הסר מהאלבום?"),
         "removeLink": MessageLookupByLibrary.simpleMessage("הסרת קישור"),
         "removeParticipant": MessageLookupByLibrary.simpleMessage("הסר משתתף"),
-        "removeParticipantBody": m49,
+        "removeParticipantBody": m50,
         "removePublicLink":
             MessageLookupByLibrary.simpleMessage("הסר לינק ציבורי"),
         "removeShareItemsWarning": MessageLookupByLibrary.simpleMessage(
@@ -765,8 +752,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "selectedFoldersWillBeEncryptedAndBackedUp":
             MessageLookupByLibrary.simpleMessage(
                 "התיקיות שנבחרו יוצפנו ויגובו"),
-        "selectedPhotos": m1,
-        "selectedPhotosWithYours": m52,
+        "selectedPhotos": m3,
+        "selectedPhotosWithYours": m53,
         "send": MessageLookupByLibrary.simpleMessage("שלח"),
         "sendEmail": MessageLookupByLibrary.simpleMessage("שלח דוא\"ל"),
         "sendInvite": MessageLookupByLibrary.simpleMessage("שלח הזמנה"),
@@ -785,15 +772,15 @@ class MessageLookup extends MessageLookupByLibrary {
         "shareAnAlbumNow":
             MessageLookupByLibrary.simpleMessage("שתף אלבום עכשיו"),
         "shareLink": MessageLookupByLibrary.simpleMessage("שתף קישור"),
-        "shareMyVerificationID": m53,
+        "shareMyVerificationID": m54,
         "shareOnlyWithThePeopleYouWant":
             MessageLookupByLibrary.simpleMessage("שתף רק אם אנשים שאתה בוחר"),
-        "shareTextConfirmOthersVerificationID": m2,
+        "shareTextConfirmOthersVerificationID": m4,
         "shareTextRecommendUsingEnte": MessageLookupByLibrary.simpleMessage(
             "הורד את ente על מנת שנוכל לשתף תמונות וסרטונים באיכות המקור באופן קל\n\nhttps://ente.io"),
         "shareWithNonenteUsers": MessageLookupByLibrary.simpleMessage(
             "שתף עם משתמשים שהם לא של ente"),
-        "shareWithPeopleSectionTitle": m55,
+        "shareWithPeopleSectionTitle": m56,
         "shareYourFirstAlbum":
             MessageLookupByLibrary.simpleMessage("שתף את האלבום הראשון שלך"),
         "sharedAlbumSectionDescription": MessageLookupByLibrary.simpleMessage(
@@ -804,13 +791,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "sharedPhotoNotificationsExplanation":
             MessageLookupByLibrary.simpleMessage(
                 "קבל התראות כשמישהו מוסיף תמונה לאלבום משותף שאתה חלק ממנו"),
-        "sharedWith": m56,
+        "sharedWith": m57,
         "sharedWithMe": MessageLookupByLibrary.simpleMessage("שותף איתי"),
         "sharing": MessageLookupByLibrary.simpleMessage("משתף..."),
         "showMemories": MessageLookupByLibrary.simpleMessage("הצג זכרונות"),
         "signUpTerms": MessageLookupByLibrary.simpleMessage(
             "אני מסכים ל<u-terms>תנאי שירות</u-terms> ול<u-policy>מדיניות הפרטיות</u-policy>"),
-        "singleFileDeleteFromDevice": m57,
+        "singleFileDeleteFromDevice": m58,
         "singleFileDeleteHighlight":
             MessageLookupByLibrary.simpleMessage("זה יימחק מכל האלבומים."),
         "skip": MessageLookupByLibrary.simpleMessage("דלג"),
@@ -839,18 +826,18 @@ class MessageLookup extends MessageLookupByLibrary {
         "storage": MessageLookupByLibrary.simpleMessage("אחסון"),
         "storageBreakupFamily": MessageLookupByLibrary.simpleMessage("משפחה"),
         "storageBreakupYou": MessageLookupByLibrary.simpleMessage("אתה"),
-        "storageInGB": m60,
+        "storageInGB": m61,
         "storageLimitExceeded":
             MessageLookupByLibrary.simpleMessage("גבול מקום האחסון נחרג"),
         "strongStrength": MessageLookupByLibrary.simpleMessage("חזקה"),
-        "subWillBeCancelledOn": m63,
+        "subWillBeCancelledOn": m64,
         "subscribe": MessageLookupByLibrary.simpleMessage("הרשם"),
         "subscription": MessageLookupByLibrary.simpleMessage("מנוי"),
         "success": MessageLookupByLibrary.simpleMessage("הצלחה"),
         "suggestFeatures":
             MessageLookupByLibrary.simpleMessage("הציעו מאפיינים"),
         "support": MessageLookupByLibrary.simpleMessage("תמיכה"),
-        "syncProgress": m64,
+        "syncProgress": m65,
         "syncing": MessageLookupByLibrary.simpleMessage("מסנכרן..."),
         "systemTheme": MessageLookupByLibrary.simpleMessage("מערכת"),
         "tapToCopy": MessageLookupByLibrary.simpleMessage("הקש כדי להעתיק"),
@@ -866,12 +853,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "theDownloadCouldNotBeCompleted":
             MessageLookupByLibrary.simpleMessage("לא ניתן להשלים את ההורדה"),
         "theme": MessageLookupByLibrary.simpleMessage("ערכת נושא"),
-        "theyAlsoGetXGb": m65,
+        "theyAlsoGetXGb": m66,
         "thisCanBeUsedToRecoverYourAccountIfYou":
             MessageLookupByLibrary.simpleMessage(
                 "זה יכול לשמש לשחזור החשבון שלך במקרה ותאבד את הגורם השני"),
         "thisDevice": MessageLookupByLibrary.simpleMessage("מכשיר זה"),
-        "thisIsPersonVerificationId": m66,
+        "thisIsPersonVerificationId": m67,
         "thisIsYourVerificationId":
             MessageLookupByLibrary.simpleMessage("זה מזהה האימות שלך"),
         "thisWillLogYouOutOfTheFollowingDevice":
@@ -915,7 +902,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "verificationId": MessageLookupByLibrary.simpleMessage("מזהה אימות"),
         "verify": MessageLookupByLibrary.simpleMessage("אמת"),
         "verifyEmail": MessageLookupByLibrary.simpleMessage("אימות דוא\"ל"),
-        "verifyEmailID": m70,
+        "verifyEmailID": m71,
         "verifyIDLabel": MessageLookupByLibrary.simpleMessage("אמת"),
         "verifyPassword": MessageLookupByLibrary.simpleMessage("אמת סיסמא"),
         "verifyingRecoveryKey":
@@ -932,7 +919,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "אנא בקר ב-web.ente.io על מנת לנהל את המנוי שלך"),
         "weAreOpenSource":
             MessageLookupByLibrary.simpleMessage("הקוד שלנו פתוח!"),
-        "weHaveSendEmailTo": m71,
+        "weHaveSendEmailTo": m1,
         "weakStrength": MessageLookupByLibrary.simpleMessage("חלשה"),
         "welcomeBack": MessageLookupByLibrary.simpleMessage("ברוך שובך!"),
         "yearly": MessageLookupByLibrary.simpleMessage("שנתי"),
