@@ -19,6 +19,7 @@ import "package:photos/ui/common/web_page.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/components/captioned_text_widget.dart";
+import "package:photos/ui/components/expandable_menu_item_widget.dart";
 import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
 import "package:photos/ui/components/menu_section_description_widget.dart";
 import "package:photos/ui/components/menu_section_title.dart";
@@ -262,14 +263,47 @@ class _MachineLearningSettingsPageState
             alignCaptionedTextToLeft: true,
             isGestureDetectorDisabled: true,
           ),
-        const SizedBox(
-          height: 12,
-        ),
-        hasEnabled
-            ? MLService.instance.areModelsDownloaded
-                ? const MLStatusWidget()
-                : const ModelLoadingState()
-            : const SizedBox.shrink(),
+        if (hasEnabled)
+          const SizedBox(
+            height: 4,
+          ),
+        if (hasEnabled)
+          ExpandableMenuItemWidget(
+            title: "Advanced configuration",
+            selectionOptionsWidget: Column(
+              children: [
+                const SizedBox(
+                  height: 2,
+                ),
+                MenuItemWidget(
+                  captionedTextWidget: const CaptionedTextWidget(
+                    title: "Local indexing",
+                  ),
+                  menuItemColor: colorScheme.fillFaint,
+                  trailingWidget: ToggleSwitchWidget(
+                    value: () => localSettings.isMLIndexingEnabled,
+                    onChanged: () async {
+                      await localSettings.toggleMLIndexing();
+                      if (mounted) {
+                        setState(() {});
+                      }
+                    },
+                  ),
+                  singleBorderRadius: 8,
+                  isGestureDetectorDisabled: true,
+                ),
+              ],
+            ),
+            leadingIcon: Icons.settings_outlined,
+          ),
+        if (hasEnabled)
+          const SizedBox(
+            height: 12,
+          ),
+        if (hasEnabled)
+          MLService.instance.areModelsDownloaded
+              ? const MLStatusWidget()
+              : const ModelLoadingState(),
       ],
     );
   }
