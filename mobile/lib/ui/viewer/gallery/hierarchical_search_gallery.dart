@@ -1,7 +1,6 @@
 import "dart:async";
-import "dart:developer";
-
 import "package:flutter/material.dart";
+import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/files_updated_event.dart";
 import "package:photos/events/local_photos_updated_event.dart";
@@ -29,6 +28,7 @@ class HierarchicalSearchGallery extends StatefulWidget {
 }
 
 class _HierarchicalSearchGalleryState extends State<HierarchicalSearchGallery> {
+  final _logger = Logger("HierarchicalSearchGallery");
   StreamSubscription<LocalPhotosUpdatedEvent>? _filesUpdatedEvent;
   late SearchFilterDataProvider? _searchFilterDataProvider;
   List<EnteFile> _filterdFiles = <EnteFile>[];
@@ -56,18 +56,18 @@ class _HierarchicalSearchGalleryState extends State<HierarchicalSearchGallery> {
           }
         });
 
-        _searchFilterDataProvider = InheritedSearchFilterData.maybeOf(context)
-            ?.searchFilterDataProvider;
+        _searchFilterDataProvider =
+            InheritedSearchFilterData.of(context).searchFilterDataProvider;
+        assert(_searchFilterDataProvider != null);
 
-        if (_searchFilterDataProvider != null) {
-          _searchFilterDataProvider!
-              .removeListener(fromApplied: true, listener: _onFiltersUpdated);
-          _searchFilterDataProvider!
-              .addListener(toApplied: true, listener: _onFiltersUpdated);
-        }
+        _searchFilterDataProvider!
+            .removeListener(fromApplied: true, listener: _onFiltersUpdated);
+        _searchFilterDataProvider!
+            .addListener(toApplied: true, listener: _onFiltersUpdated);
+
         _onFiltersUpdated();
       } catch (e) {
-        log('An error occurred: $e');
+        _logger.severe('Something went wrong: $e');
       }
     });
   }
