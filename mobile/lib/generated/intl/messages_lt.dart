@@ -20,11 +20,11 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'lt';
 
-  static String m10(versionValue) => "Versija: ${versionValue}";
+  static String m12(versionValue) => "Versija: ${versionValue}";
 
-  static String m46(folderName) => "Apdorojama ${folderName}...";
+  static String m47(folderName) => "Apdorojama ${folderName}...";
 
-  static String m60(storageAmountInGB) => "${storageAmountInGB} GB";
+  static String m61(storageAmountInGB) => "${storageAmountInGB} GB";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -34,15 +34,13 @@ class MessageLookup extends MessageLookupByLibrary {
             "Suprantu, kad jei prarasiu slaptažodį, galiu prarasti savo duomenis, kadangi mano duomenys yra <underline>visapusiškai užšifruota</underline>."),
         "activeSessions":
             MessageLookupByLibrary.simpleMessage("Aktyvūs seansai"),
-        "add": MessageLookupByLibrary.simpleMessage("Add"),
+        "add": MessageLookupByLibrary.simpleMessage("Pridėti"),
         "addLocationButton": MessageLookupByLibrary.simpleMessage("Pridėti"),
-        "addName": MessageLookupByLibrary.simpleMessage("Add name"),
-        "addNameOrMerge":
-            MessageLookupByLibrary.simpleMessage("Add name or merge"),
-        "addNewPerson": MessageLookupByLibrary.simpleMessage("Add new person"),
+        "addNewPerson":
+            MessageLookupByLibrary.simpleMessage("Pridėti naują asmenį"),
         "appLockDescriptions": MessageLookupByLibrary.simpleMessage(
             "Pasirinkite tarp numatytojo įrenginio užrakinimo ekrano ir pasirinktinio užrakinimo ekrano su PIN kodu arba slaptažodžiu."),
-        "appVersion": m10,
+        "appVersion": m12,
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "Kokia yra pagrindinė priežastis, dėl kurios ištrinate savo paskyrą?"),
         "authToViewPasskey": MessageLookupByLibrary.simpleMessage(
@@ -119,10 +117,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "enterYourPassword":
             MessageLookupByLibrary.simpleMessage("Įveskite savo slaptažodį"),
         "exif": MessageLookupByLibrary.simpleMessage("EXIF"),
-        "extraPhotosFound":
-            MessageLookupByLibrary.simpleMessage("Extra photos found"),
+        "extraPhotosFound": MessageLookupByLibrary.simpleMessage(
+            "Rastos papildomos nuotraukos"),
         "extraPhotosFoundFor": MessageLookupByLibrary.simpleMessage(
-            "Extra photos found for \$text"),
+            "Rastos papildomos nuotraukos, skirtos \$text"),
         "faq": MessageLookupByLibrary.simpleMessage("DUK"),
         "feedback": MessageLookupByLibrary.simpleMessage("Atsiliepimai"),
         "howItWorks": MessageLookupByLibrary.simpleMessage("Kaip tai veikia"),
@@ -152,11 +150,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "mastodon": MessageLookupByLibrary.simpleMessage("„Mastodon“"),
         "matrix": MessageLookupByLibrary.simpleMessage("„Matrix“"),
         "merchandise": MessageLookupByLibrary.simpleMessage("Atributika"),
-        "mergeWithExisting":
-            MessageLookupByLibrary.simpleMessage("Merge with existing"),
         "mostRecent": MessageLookupByLibrary.simpleMessage("Naujausia"),
         "mostRelevant": MessageLookupByLibrary.simpleMessage("Aktualiausia"),
-        "newPerson": MessageLookupByLibrary.simpleMessage("New person"),
+        "newPerson": MessageLookupByLibrary.simpleMessage("Naujas asmuo"),
         "noExifData": MessageLookupByLibrary.simpleMessage("Nėra EXIF duomenų"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
             "Dėl mūsų visapusio šifravimo protokolo pobūdžio jūsų duomenų negalima iššifruoti be slaptažodžio arba atkūrimo rakto"),
@@ -165,11 +161,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "oops": MessageLookupByLibrary.simpleMessage("Ups"),
         "passkey": MessageLookupByLibrary.simpleMessage("Slaptaraktas"),
         "password": MessageLookupByLibrary.simpleMessage("Slaptažodis"),
-        "personName": MessageLookupByLibrary.simpleMessage("Person name"),
+        "personName": MessageLookupByLibrary.simpleMessage("Asmens vardas"),
         "photoSmallCase": MessageLookupByLibrary.simpleMessage("nuotrauka"),
         "privacyPolicyTitle":
             MessageLookupByLibrary.simpleMessage("Privatumo politika"),
-        "processingImport": m46,
+        "processingImport": m47,
         "recoverButton": MessageLookupByLibrary.simpleMessage("Atkurti"),
         "recoverySuccessful":
             MessageLookupByLibrary.simpleMessage("Atkūrimas sėkmingas."),
@@ -192,7 +188,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "sort": MessageLookupByLibrary.simpleMessage("Rikiuoti"),
         "storage": MessageLookupByLibrary.simpleMessage("Saugykla"),
         "storageBreakupYou": MessageLookupByLibrary.simpleMessage("Jūs"),
-        "storageInGB": m60,
+        "storageInGB": m61,
         "subscribe": MessageLookupByLibrary.simpleMessage("Prenumeruoti"),
         "subscribeToEnableSharing": MessageLookupByLibrary.simpleMessage(
             "Kad įjungtumėte bendrinimą, reikia aktyvios mokamos prenumeratos."),

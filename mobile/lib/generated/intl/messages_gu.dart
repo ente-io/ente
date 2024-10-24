@@ -21,19 +21,5 @@ class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'gu';
 
   final messages = _notInlinedMessages(_notInlinedMessages);
-  static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
-        "add": MessageLookupByLibrary.simpleMessage("Add"),
-        "addName": MessageLookupByLibrary.simpleMessage("Add name"),
-        "addNameOrMerge":
-            MessageLookupByLibrary.simpleMessage("Add name or merge"),
-        "addNewPerson": MessageLookupByLibrary.simpleMessage("Add new person"),
-        "extraPhotosFound":
-            MessageLookupByLibrary.simpleMessage("Extra photos found"),
-        "extraPhotosFoundFor": MessageLookupByLibrary.simpleMessage(
-            "Extra photos found for \$text"),
-        "mergeWithExisting":
-            MessageLookupByLibrary.simpleMessage("Merge with existing"),
-        "newPerson": MessageLookupByLibrary.simpleMessage("New person"),
-        "personName": MessageLookupByLibrary.simpleMessage("Person name")
-      };
+  static Map<String, Function> _notInlinedMessages(_) => <String, Function>{};
 }

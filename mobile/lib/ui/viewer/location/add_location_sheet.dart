@@ -4,7 +4,7 @@ import "package:modal_bottom_sheet/modal_bottom_sheet.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/location/location.dart";
-import "package:photos/services/location_service.dart";
+import "package:photos/service_locator.dart";
 import 'package:photos/states/location_state.dart';
 import "package:photos/theme/colors.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -255,7 +255,7 @@ class _AddLocationSheetState extends State<AddLocationSheet> {
     final coordinates = locationData.centerPoint;
     final radius = locationData.selectedRadius;
 
-    await LocationService.instance.addLocation(
+    await locationService.addLocation(
       _textEditingController.text.trim(),
       coordinates,
       radius,

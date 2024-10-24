@@ -8,7 +8,7 @@ import { UnstyledButton } from "./UnstyledButton";
 
 export interface SearchPeopleListProps {
     people: Person[];
-    onSelectPerson: (person: Person) => void;
+    onSelectPerson: (personID: string) => void;
 }
 
 /**
@@ -26,7 +26,7 @@ export const SearchPeopleList: React.FC<SearchPeopleListProps> = ({
             {people.slice(0, isSmallWidth ? 6 : 7).map((person) => (
                 <SearchPersonButton
                     key={person.id}
-                    onClick={() => onSelectPerson(person)}
+                    onClick={() => onSelectPerson(person.id)}
                 >
                     <FaceCropImageView
                         faceID={person.displayFaceID}
@@ -98,7 +98,7 @@ export const FilePeopleList: React.FC<FilePeopleListProps> = ({
                 <FaceCropImageView
                     faceID={annotatedFaceID.faceID}
                     file={file}
-                    placeholderDimension={64}
+                    placeholderDimension={65}
                 />
             </AnnotatedFaceButton>
         ))}
@@ -114,8 +114,8 @@ const FilePeopleList_ = styled("div")`
 
 const AnnotatedFaceButton = styled(UnstyledButton)(
     ({ theme }) => `
-    width: 64px;
-    height: 64px;
+    width: 65px;
+    height: 65px;
     border-radius: 50%;
     overflow: hidden;
     & > img {
@@ -149,7 +149,7 @@ export const SuggestionFaceList: React.FC<SuggestionFaceListProps> = ({
             {faces.map(({ file, faceID }) => (
                 <SuggestionFace key={faceID}>
                     <FaceCropImageView
-                        placeholderDimension={64}
+                        placeholderDimension={87}
                         {...{ file, faceID }}
                     />
                 </SuggestionFace>

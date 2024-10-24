@@ -24,17 +24,26 @@ const List<Locale> appSupportedLocales = <Locale>[
   Locale("zh", "CN"),
 ];
 
+Locale? autoDetectedLocale;
+
 Locale localResolutionCallBack(locales, supportedLocales) {
   for (Locale locale in locales) {
-    if (appSupportedLocales.contains(locale)) {
-      return locale;
+    for (Locale supportedLocale in appSupportedLocales) {
+      if (supportedLocale == locale) {
+        autoDetectedLocale = supportedLocale;
+        return supportedLocale;
+      } else if (supportedLocale.languageCode == locale.languageCode) {
+        autoDetectedLocale = supportedLocale;
+        return supportedLocale;
+      }
     }
   }
-  // if device language is not supported by the app, use en as default
   return const Locale('en');
 }
 
-Future<Locale> getLocale() async {
+Future<Locale?> getLocale({
+  bool noFallback = false,
+}) async {
   final String? savedValue =
       (await SharedPreferences.getInstance()).getString('locale');
   // if savedLocale is not null and is supported by the app, return it
@@ -49,6 +58,12 @@ Future<Locale> getLocale() async {
     if (appSupportedLocales.contains(savedLocale)) {
       return savedLocale;
     }
+  }
+  if (autoDetectedLocale != null) {
+    return autoDetectedLocale!;
+  }
+  if (noFallback) {
+    return null;
   }
   return const Locale('en');
 }

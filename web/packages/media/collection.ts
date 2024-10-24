@@ -1,4 +1,3 @@
-import type { EnteFile } from "@/media/file";
 import {
     type EncryptedMagicMetadata,
     type MagicMetadataCore,
@@ -117,8 +116,6 @@ export interface collectionAttributes {
     encryptedPath?: string;
     pathDecryptionNonce?: string;
 }
-
-export type CollectionToFileMap = Map<number, EnteFile>;
 
 export interface RemoveFromCollectionRequest {
     collectionID: number;

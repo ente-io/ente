@@ -1,4 +1,5 @@
 import { FileType } from "@/media/file-type";
+import { groupFilesByCollectionID } from "@/new/photos/services/file";
 import { getLocalFiles } from "@/new/photos/services/files";
 import { getLocalCollections } from "services/collectionService";
 import { parseDateFromDigitGroups } from "services/upload/date";
@@ -9,7 +10,6 @@ import {
     getMetadataJSONMapKeyForJSON,
 } from "services/upload/takeout";
 import { getUserDetailsV2 } from "services/userService";
-import { groupFilesBasedOnCollectionID } from "utils/file";
 
 const DATE_TIME_PARSING_TEST_FILE_NAMES = [
     {
@@ -153,7 +153,7 @@ async function totalCollectionCountCheck(expectedState) {
 async function collectionWiseFileCount(expectedState) {
     const files = await getLocalFiles();
     const collections = await getLocalCollections();
-    const collectionToFilesMap = groupFilesBasedOnCollectionID(files);
+    const collectionToFilesMap = groupFilesByCollectionID(files);
     const collectionIDToNameMap = new Map(
         collections.map((collection) => [collection.id, collection.name]),
     );

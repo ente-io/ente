@@ -106,8 +106,7 @@ export interface PhotoViewerProps {
     getConvertedItem: (instance: any, index: number, item: EnteFile) => void;
     id?: string;
     favItemIds: Set<number>;
-    tempDeletedFileIds: Set<number>;
-    setTempDeletedFileIds?: (value: Set<number>) => void;
+    markTempDeleted?: (tempDeletedFiles: EnteFile[]) => void;
     isTrashCollection: boolean;
     isInHiddenSection: boolean;
     enableDownload: boolean;
@@ -124,7 +123,7 @@ function PhotoViewer(props: PhotoViewerProps) {
         PublicCollectionGalleryContext,
     );
 
-    const { isOpen, items } = props;
+    const { isOpen, items, markTempDeleted } = props;
 
     const pswpElement = useRef<HTMLDivElement>();
     const [photoSwipe, setPhotoSwipe] =
@@ -537,13 +536,11 @@ function PhotoViewer(props: PhotoViewerProps) {
     };
 
     const trashFile = async (file: EnteFile) => {
-        const { tempDeletedFileIds, setTempDeletedFileIds } = props;
         try {
             appContext.startLoading();
             await trashFiles([file]);
             appContext.finishLoading();
-            tempDeletedFileIds.add(file.id);
-            setTempDeletedFileIds(new Set(tempDeletedFileIds));
+            markTempDeleted?.([file]);
             updateItems(props.items.filter((item) => item.id !== file.id));
             needUpdate.current = true;
         } catch (e) {

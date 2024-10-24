@@ -1344,13 +1344,13 @@
   "mostRelevant": "Nach Relevanz",
   "loadingYourPhotos": "Lade deine Fotos...",
   "processingImport": "Verarbeite {folderName}...",
-  "personName": "Person name",
-  "addNewPerson": "Add new person",
-  "addNameOrMerge": "Add name or merge",
-  "mergeWithExisting": "Merge with existing",
-  "newPerson": "New person",
-  "addName": "Add name",
-  "add": "Add",
-  "extraPhotosFoundFor": "Extra photos found for $text",
-  "extraPhotosFound": "Extra photos found"
+  "personName": "Name der Person",
+  "addNewPerson": "Neue Person hinzufügen",
+  "addNameOrMerge": "Name hinzufügen oder zusammenführen",
+  "mergeWithExisting": "Mit vorhandenem zusammenführen",
+  "newPerson": "Neue Person",
+  "addName": "Name hinzufügen",
+  "add": "Hinzufügen",
+  "extraPhotosFoundFor": "Zusätzliche Fotos gefunden für $text",
+  "extraPhotosFound": "Zusätzliche Fotos gefunden"
 }

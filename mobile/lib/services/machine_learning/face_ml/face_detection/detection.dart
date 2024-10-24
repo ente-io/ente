@@ -92,8 +92,8 @@ class FaceDetectionRelative extends Detection {
     // Calculate the scaling
     final double scaleX = originalSize.width / newSize.width;
     final double scaleY = originalSize.height / newSize.height;
-    final double translateX = - ((originalSize.width - newSize.width) / 2) / originalSize.width;
-    final double translateY = - ((originalSize.height - newSize.height) / 2) / originalSize.height;
+    const double translateX = 0;
+    const double translateY = 0;
 
     // Transform Box
     _transformBox(box, scaleX, scaleY, translateX, translateY);

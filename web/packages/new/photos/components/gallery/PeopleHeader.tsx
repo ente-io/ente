@@ -40,6 +40,7 @@ import HideImageOutlinedIcon from "@mui/icons-material/HideImageOutlined";
 import ListAltOutlinedIcon from "@mui/icons-material/ListAltOutlined";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import RestoreIcon from "@mui/icons-material/Restore";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import {
     Dialog,
     DialogActions,
@@ -74,27 +75,6 @@ import { useWrapAsyncOperation } from "../utils/use-wrap-async";
 import type { GalleryBarImplProps } from "./BarImpl";
 import { GalleryItemsHeaderAdapter, GalleryItemsSummary } from "./ListHeader";
 
-/**
- * Derived UI state backing the gallery when it is in "people" mode.
- *
- * This may be different from the actual underlying state since there might be
- * unsynced data (hidden or deleted that have not yet been synced with remote)
- * that should be taken into account for the UI state.
- */
-export interface GalleryPeopleState {
-    /**
-     * The currently selected person, if any.
-     *
-     * Whenever this is present, it is guaranteed to be one of the items from
-     * within {@link people}.
-     */
-    activePerson: Person | undefined;
-    /**
-     * The list of people to show.
-     */
-    people: Person[];
-}
-
 type PeopleHeaderProps = Pick<
     GalleryBarImplProps,
     "people" | "onSelectPerson"
@@ -111,26 +91,27 @@ export const PeopleHeader: React.FC<PeopleHeaderProps> = ({
         <GalleryItemsHeaderAdapter>
             <SpaceBetweenFlex>
                 {person.type == "cgroup" ? (
-                    <CGroupPersonHeader
-                        person={person}
-                        {...{ onSelectPerson }}
-                    />
+                    person.isHidden ? (
+                        <IgnoredPersonHeader person={person} />
+                    ) : (
+                        <CGroupPersonHeader person={person} />
+                    )
                 ) : (
-                    <ClusterPersonHeader person={person} {...{ people }} />
+                    <ClusterPersonHeader
+                        person={person}
+                        {...{ people, onSelectPerson }}
+                    />
                 )}
             </SpaceBetweenFlex>
         </GalleryItemsHeaderAdapter>
     );
 };
 
-type CGroupPersonHeaderProps = Pick<PeopleHeaderProps, "onSelectPerson"> & {
+interface CGroupPersonHeaderProps {
     person: CGroupPerson;
-};
+}
 
-const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({
-    person,
-    onSelectPerson,
-}) => {
+const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({ person }) => {
     const cgroup = person.cgroup;
 
     const { showMiniDialog } = useAppContext();
@@ -151,17 +132,13 @@ const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({
             continue: {
                 text: t("reset"),
                 color: "primary",
-                action: async () => {
-                    await deleteCGroup(cgroup);
-                    // Reset the selection to the default state.
-                    onSelectPerson(undefined);
-                },
+                action: () => deleteCGroup(cgroup),
             },
         });
 
     // While technically it is possible for the cgroup not to have a name, logic
     // wise we shouldn't be ending up here without a name (this state is
-    // expected to be reached only for named persons).
+    // expected to be reached only for unignored named persons).
     const name = cgroup.data.name ?? "";
 
     return (
@@ -219,12 +196,50 @@ const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({
     );
 };
 
-type ClusterPersonHeaderProps = Pick<PeopleHeaderProps, "people"> & {
+interface IgnoredPersonHeaderProps {
+    person: CGroupPerson;
+}
+
+const IgnoredPersonHeader: React.FC<IgnoredPersonHeaderProps> = ({
+    person,
+}) => {
+    const cgroup = person.cgroup;
+
+    const handleUndoIgnore = useWrapAsyncOperation(() => deleteCGroup(cgroup));
+
+    return (
+        <>
+            <GalleryItemsSummary
+                name={pt("Ignored")}
+                nameProps={{ color: "text.muted" }}
+                fileCount={person.fileIDs.length}
+            />
+            <OverflowMenu
+                ariaControls={"person-options"}
+                triggerButtonIcon={<MoreHorizIcon />}
+            >
+                <OverflowMenuOption
+                    startIcon={<VisibilityOutlinedIcon />}
+                    centerAlign
+                    onClick={handleUndoIgnore}
+                >
+                    {pt("Show person")}
+                </OverflowMenuOption>
+            </OverflowMenu>
+        </>
+    );
+};
+
+type ClusterPersonHeaderProps = Pick<
+    PeopleHeaderProps,
+    "people" | "onSelectPerson"
+> & {
     person: ClusterPerson;
 };
 
 const ClusterPersonHeader: React.FC<ClusterPersonHeaderProps> = ({
     people,
+    onSelectPerson,
     person,
 }) => {
     const cluster = person.cluster;
@@ -285,22 +300,19 @@ const ClusterPersonHeader: React.FC<ClusterPersonHeaderProps> = ({
 
             <AddPersonDialog
                 {...addPersonVisibilityProps}
-                {...{ people, cluster }}
+                {...{ people, onSelectPerson, cluster }}
             />
         </>
     );
 };
 
-type AddPersonDialogProps = ModalVisibilityProps & {
-    /**
-     * The list of people from show the existing named people.
-     */
-    people: Person[];
-    /**
-     * The cluster to add to the selected person (existing or new).
-     */
-    cluster: FaceCluster;
-};
+type AddPersonDialogProps = ModalVisibilityProps &
+    Pick<PeopleHeaderProps, "people" | "onSelectPerson"> & {
+        /**
+         * The cluster to add to the selected person (existing or new).
+         */
+        cluster: FaceCluster;
+    };
 
 /**
  * A dialog allowing the user to select one of the existing named persons they
@@ -311,6 +323,7 @@ const AddPersonDialog: React.FC<AddPersonDialogProps> = ({
     open,
     onClose,
     people,
+    onSelectPerson,
     cluster,
 }) => {
     const isFullScreen = useMediaQuery("(max-width: 490px)");
@@ -323,14 +336,19 @@ const AddPersonDialog: React.FC<AddPersonDialogProps> = ({
 
     const handleAddPerson = () => setOpenNameInput(true);
 
-    const handleSelectPerson = useWrapAsyncOperation((id: string) =>
-        addClusterToCGroup(
-            ensure(cgroupPeople.find((p) => p.id == id)).cgroup,
-            cluster,
-        ),
+    const handleAddPersonBySelect = useWrapAsyncOperation(
+        async (personID: string) => {
+            onClose();
+            const person = ensure(cgroupPeople.find((p) => p.id == personID));
+            await addClusterToCGroup(person.cgroup, cluster);
+            onSelectPerson(personID);
+        },
     );
 
-    const handleAddPersonWithName = (name: string) => addCGroup(name, cluster);
+    const handleAddPersonWithName = async (name: string) => {
+        const personID = await addCGroup(name, cluster);
+        onSelectPerson(personID);
+    };
 
     // [Note: Calling setState during rendering]
     //
@@ -371,7 +389,7 @@ const AddPersonDialog: React.FC<AddPersonDialogProps> = ({
                         <PersonButton
                             key={person.id}
                             person={person}
-                            onPersonClick={handleSelectPerson}
+                            onPersonClick={handleAddPersonBySelect}
                         />
                     ))}
                 </DialogContent_>
@@ -483,10 +501,10 @@ const initialSuggestionsDialogState: SuggestionsDialogState = {
     updates: new Map(),
 };
 
-const suggestionsDialogReducer = (
-    state: SuggestionsDialogState,
-    action: SuggestionsDialogAction,
-): SuggestionsDialogState => {
+const suggestionsDialogReducer: React.Reducer<
+    SuggestionsDialogState,
+    SuggestionsDialogAction
+> = (state, action) => {
     switch (action.type) {
         case "fetch":
             return {
