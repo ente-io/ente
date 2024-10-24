@@ -32,6 +32,7 @@ import 'package:photos/models/selected_files.dart';
 import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
+import "package:photos/services/deeplink_service.dart";
 import 'package:photos/services/local_sync_service.dart';
 import "package:photos/services/notification_service.dart";
 import 'package:photos/services/user_service.dart';
@@ -232,6 +233,9 @@ class _HomeWidgetState extends State<HomeWidget> {
     NotificationService.instance
         .initialize(_onDidReceiveNotificationResponse)
         .ignore();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      DeeplinkService.instance.requestDeeplinkPermissions(context).ignore();
+    });
   }
 
   Future<void> _handlePublicAlbumLink(Uri uri) async {
