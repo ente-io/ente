@@ -58,7 +58,6 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
 
   Widget _getSectionOptions(BuildContext context) {
     final Logger logger = Logger("MLDebugSectionWidget");
-    final colorScheme = getEnteColorScheme(context);
     return Column(
       children: [
         sectionOptionSpacing,
