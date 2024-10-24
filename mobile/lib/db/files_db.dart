@@ -1516,6 +1516,8 @@ class FilesDB {
   Future<List<EnteFile>> getFilesFromIDs(
     List<int> ids, {
     bool asc = false,
+    bool dedupeByUploadId = false,
+    Set<int> collectionsToIgnore = const {},
   }) async {
     final order = (asc ? 'ASC' : 'DESC');
     if (ids.isEmpty) {
@@ -1531,7 +1533,17 @@ class FilesDB {
       'SELECT * FROM $filesTable WHERE $columnUploadedFileID IN ($inParam) ORDER BY $columnCreationTime $order',
     );
 
-    return convertToFiles(results);
+    final files = convertToFiles(results);
+
+    final result = await applyDBFilters(
+      files,
+      DBFilterOptions(
+        ignoredCollectionIDs: collectionsToIgnore,
+        dedupeUploadID: dedupeByUploadId,
+      ),
+    );
+
+    return result;
   }
 
   Future<Map<int, EnteFile>> getFilesFromGeneratedIDs(List<int> ids) async {

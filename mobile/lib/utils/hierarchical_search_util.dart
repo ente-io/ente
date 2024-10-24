@@ -35,6 +35,8 @@ Future<List<EnteFile>> getFilteredFiles(
   final filteredFiles = <EnteFile>[];
   final files = await SearchService.instance.getAllFiles();
   final resultsNeverComputedFilters = <HierarchicalSearchFilter>[];
+  final ignoredCollections =
+      CollectionsService.instance.archivedOrHiddenCollectionIds();
 
   logger.info("Getting filtered files for Filters: $filters");
   for (HierarchicalSearchFilter filter in filters) {
@@ -101,6 +103,8 @@ Future<List<EnteFile>> getFilteredFiles(
     filteredFiles.addAll(
       await FilesDB.instance.getFilesFromIDs(
         filteredUploadedIDs.toList(),
+        dedupeByUploadId: true,
+        collectionsToIgnore: ignoredCollections,
       ),
     );
   } catch (e) {
