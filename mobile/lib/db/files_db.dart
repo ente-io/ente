@@ -1523,18 +1523,13 @@ class FilesDB {
     if (ids.isEmpty) {
       return [];
     }
-    String inParam = "";
-    for (final id in ids) {
-      inParam += "'" + id.toString() + "',";
-    }
-    inParam = inParam.substring(0, inParam.length - 1);
+
+    final inParam = ids.map((id) => "'$id'").join(',');
     final db = await instance.sqliteAsyncDB;
     final results = await db.getAll(
       'SELECT * FROM $filesTable WHERE $columnUploadedFileID IN ($inParam) ORDER BY $columnCreationTime $order',
     );
-
     final files = convertToFiles(results);
-
     final result = await applyDBFilters(
       files,
       DBFilterOptions(
