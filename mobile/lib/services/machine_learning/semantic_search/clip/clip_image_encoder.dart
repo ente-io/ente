@@ -1,17 +1,15 @@
-import "dart:typed_data" show Int32List, Uint8List;
+import "dart:typed_data" show Uint8List, Float32List;
 import "dart:ui" show Image;
 
 import "package:logging/logging.dart";
 import "package:onnx_dart/onnx_dart.dart";
 import "package:onnxruntime/onnxruntime.dart";
 import "package:photos/services/machine_learning/ml_model.dart";
+import "package:photos/utils/image_ml_util.dart";
 import "package:photos/utils/ml_util.dart";
 
 class ClipImageEncoder extends MlModel {
-  static const kRemoteBucketModelPath =
-      "mobileclip_s2_image_opset18_rgba_opt.onnx"; // FP32 model
-  // static const kRemoteBucketModelPath =
-  //     "mobileclip_s2_image_opset18_fp16.onnx"; // FP16 model
+  static const kRemoteBucketModelPath = "mobileclip_s2_image.onnx";
   static const _modelName = "ClipImageEncoder";
 
   @override
@@ -36,13 +34,16 @@ class ClipImageEncoder extends MlModel {
     int? enteFileID,
   ]) async {
     final startTime = DateTime.now();
-    final inputShape = <int>[image.height, image.width, 4]; // [H, W, C]
+    final inputList = await preprocessImageClip(image, rawRgbaBytes);
+    final preprocessingTime = DateTime.now();
+    final preprocessingMs =
+        preprocessingTime.difference(startTime).inMilliseconds;
     late List<double> result;
     try {
       if (MlModel.usePlatformPlugin) {
-        result = await _runPlatformPluginPredict(rawRgbaBytes, inputShape);
+        result = await _runPlatformPluginPredict(inputList);
       } else {
-        result = _runFFIBasedPredict(rawRgbaBytes, inputShape, sessionAddress);
+        result = _runFFIBasedPredict(inputList, sessionAddress);
       }
     } catch (e, stackTrace) {
       _logger.severe(
@@ -52,22 +53,21 @@ class ClipImageEncoder extends MlModel {
       );
       rethrow;
     }
-    final totalMs = DateTime.now().difference(startTime).inMilliseconds;
+    final inferTime = DateTime.now();
+    final inferenceMs = inferTime.difference(preprocessingTime).inMilliseconds;
+    final totalMs = inferTime.difference(startTime).inMilliseconds;
     _logger.info(
-      "Clip image predict took $totalMs ms${enteFileID != null ? " with fileID $enteFileID" : ""}",
+      "Clip image predict took $totalMs ms${enteFileID != null ? " with fileID $enteFileID" : ""} (inference: $inferenceMs ms, preprocessing: $preprocessingMs ms)",
     );
     return result;
   }
 
   static List<double> _runFFIBasedPredict(
-    Uint8List inputImageList,
-    List<int> inputImageShape,
+    Float32List inputList,
     int sessionAddress,
   ) {
-    final inputOrt = OrtValueTensor.createTensorWithDataList(
-      inputImageList,
-      inputImageShape,
-    );
+    final inputOrt =
+        OrtValueTensor.createTensorWithDataList(inputList, [1, 3, 256, 256]);
     final inputs = {'input': inputOrt};
     final session = OrtSession.fromAddress(sessionAddress);
     final runOptions = OrtRunOptions();
@@ -83,13 +83,11 @@ class ClipImageEncoder extends MlModel {
   }
 
   static Future<List<double>> _runPlatformPluginPredict(
-    Uint8List inputImageList,
-    List<int> inputImageShape,
+    Float32List inputList,
   ) async {
     final OnnxDart plugin = OnnxDart();
-    final result = await plugin.predictRgba(
-      inputImageList,
-      Int32List.fromList(inputImageShape),
+    final result = await plugin.predict(
+      inputList,
       _modelName,
     );
     final List<double> embedding = result!.sublist(0, 512);

@@ -268,3 +268,11 @@ aws s3api put-bucket-cors --bucket YOUR_S3_BUCKET --cors-configuration file://co
 ```
 
 Upload should now work.
+
+## Related
+
+Some other users have also shared their setups.
+
+-   [Using Traefik](https://github.com/ente-io/ente/pull/3663)
+
+-   [Building custom images from source (Linux)](https://github.com/ente-io/ente/discussions/3778)

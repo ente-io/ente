@@ -17,6 +17,10 @@ import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import DownloadManager from "@/new/photos/services/download";
 import { updateExifIfNeededAndPossible } from "@/new/photos/services/exif-update";
+import {
+    isArchivedFile,
+    updateMagicMetadata,
+} from "@/new/photos/services/magic-metadata";
 import { detectFileTypeInfo } from "@/new/photos/utils/detect-type";
 import { safeFileName } from "@/new/photos/utils/native-fs";
 import { writeStream } from "@/new/photos/utils/native-stream";
@@ -39,7 +43,6 @@ import {
     SetFilesDownloadProgressAttributes,
     SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
-import { isArchivedFile, updateMagicMetadata } from "utils/magicMetadata";
 
 export enum FILE_OPS_TYPE {
     DOWNLOAD,
@@ -88,17 +91,6 @@ export async function downloadFile(file: EnteFile) {
         throw e;
     }
 }
-
-/** Segment the given {@link files} into lists indexed by their collection ID */
-export const groupFilesBasedOnCollectionID = (files: EnteFile[]) => {
-    const result = new Map<number, EnteFile[]>();
-    for (const file of files) {
-        const id = file.collectionID;
-        if (!result.has(id)) result.set(id, []);
-        result.get(id).push(file);
-    }
-    return result;
-};
 
 function getSelectedFileIds(selectedFiles: SelectedState) {
     const filesIDs: number[] = [];
@@ -258,20 +250,6 @@ export async function getFileFromURL(fileURL: string, name: string) {
     const fileBlob = await (await fetch(fileURL)).blob();
     const fileFile = new File([fileBlob], name);
     return fileFile;
-}
-
-export function getUniqueFiles(files: EnteFile[]) {
-    const idSet = new Set<number>();
-    const uniqueFiles = files.filter((file) => {
-        if (!idSet.has(file.id)) {
-            idSet.add(file.id);
-            return true;
-        } else {
-            return false;
-        }
-    });
-
-    return uniqueFiles;
 }
 
 export async function downloadFilesWithProgress(
@@ -519,22 +497,6 @@ export const copyFileToClipboard = async (fileURL: string) => {
     await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
 };
 
-export function getLatestVersionFiles(files: EnteFile[]) {
-    const latestVersionFiles = new Map<string, EnteFile>();
-    files.forEach((file) => {
-        const uid = `${file.collectionID}-${file.id}`;
-        if (
-            !latestVersionFiles.has(uid) ||
-            latestVersionFiles.get(uid).updationTime < file.updationTime
-        ) {
-            latestVersionFiles.set(uid, file);
-        }
-    });
-    return Array.from(latestVersionFiles.values()).filter(
-        (file) => !file.isDeleted,
-    );
-}
-
 export function getPersonalFiles(
     files: EnteFile[],
     user: User,
@@ -553,17 +515,6 @@ export function getPersonalFiles(
 
 export function getIDBasedSortedFiles(files: EnteFile[]) {
     return files.sort((a, b) => a.id - b.id);
-}
-
-export function constructFileToCollectionMap(files: EnteFile[]) {
-    const fileToCollectionsMap = new Map<number, number[]>();
-    (files ?? []).forEach((file) => {
-        if (!fileToCollectionsMap.get(file.id)) {
-            fileToCollectionsMap.set(file.id, []);
-        }
-        fileToCollectionsMap.get(file.id).push(file.collectionID);
-    });
-    return fileToCollectionsMap;
 }
 
 export const shouldShowAvatar = (file: EnteFile, user: User) => {
@@ -588,12 +539,10 @@ export const shouldShowAvatar = (file: EnteFile, user: User) => {
 export const handleFileOps = async (
     ops: FILE_OPS_TYPE,
     files: EnteFile[],
-    setTempDeletedFileIds: (
-        tempDeletedFileIds: Set<number> | ((prev: Set<number>) => Set<number>),
-    ) => void,
-    setTempHiddenFileIds: (
-        tempHiddenFileIds: Set<number> | ((prev: Set<number>) => Set<number>),
-    ) => void,
+    markTempDeleted: (tempDeletedFiles: EnteFile[]) => void,
+    clearTempDeleted: () => void,
+    markTempHidden: (tempHiddenFiles: EnteFile[]) => void,
+    clearTempHidden: () => void,
     setFixCreationTimeAttributes: (
         fixCreationTimeAttributes:
             | {
@@ -602,17 +551,34 @@ export const handleFileOps = async (
             | ((prev: { files: EnteFile[] }) => { files: EnteFile[] }),
     ) => void,
     setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator,
-    refreshFavItemIds: () => void,
 ) => {
     switch (ops) {
         case FILE_OPS_TYPE.TRASH:
-            await deleteFileHelper(files, false, setTempDeletedFileIds);
+            try {
+                markTempDeleted(files);
+                await trashFiles(files);
+            } catch (e) {
+                clearTempDeleted();
+                throw e;
+            }
             break;
         case FILE_OPS_TYPE.DELETE_PERMANENTLY:
-            await deleteFileHelper(files, true, setTempDeletedFileIds);
+            try {
+                markTempDeleted(files);
+                await deleteFromTrash(files.map((file) => file.id));
+            } catch (e) {
+                clearTempDeleted();
+                throw e;
+            }
             break;
         case FILE_OPS_TYPE.HIDE:
-            await hideFilesHelper(files, setTempHiddenFileIds);
+            try {
+                markTempHidden(files);
+                await moveToHiddenCollection(files);
+            } catch (e) {
+                clearTempHidden();
+                throw e;
+            }
             break;
         case FILE_OPS_TYPE.DOWNLOAD: {
             const setSelectedFileDownloadProgressAttributes =
@@ -635,49 +601,8 @@ export const handleFileOps = async (
             await changeFilesVisibility(files, ItemVisibility.visible);
             break;
         case FILE_OPS_TYPE.SET_FAVORITE:
-            await setBulkFavorite(files, refreshFavItemIds);
+            await addMultipleToFavorites(files);
             break;
-    }
-};
-
-const deleteFileHelper = async (
-    selectedFiles: EnteFile[],
-    permanent: boolean,
-    setTempDeletedFileIds: (
-        tempDeletedFileIds: Set<number> | ((prev: Set<number>) => Set<number>),
-    ) => void,
-) => {
-    try {
-        setTempDeletedFileIds((deletedFileIds) => {
-            selectedFiles.forEach((file) => deletedFileIds.add(file.id));
-            return new Set(deletedFileIds);
-        });
-        if (permanent) {
-            await deleteFromTrash(selectedFiles.map((file) => file.id));
-        } else {
-            await trashFiles(selectedFiles);
-        }
-    } catch (e) {
-        setTempDeletedFileIds(new Set());
-        throw e;
-    }
-};
-
-const hideFilesHelper = async (
-    selectedFiles: EnteFile[],
-    setTempHiddenFileIds: (
-        tempHiddenFileIds: Set<number> | ((prev: Set<number>) => Set<number>),
-    ) => void,
-) => {
-    try {
-        setTempHiddenFileIds((hiddenFileIds) => {
-            selectedFiles.forEach((file) => hiddenFileIds.add(file.id));
-            return new Set(hiddenFileIds);
-        });
-        await moveToHiddenCollection(selectedFiles);
-    } catch (e) {
-        setTempHiddenFileIds(new Set());
-        throw e;
     }
 };
 
@@ -688,16 +613,4 @@ const fixTimeHelper = async (
     }) => void,
 ) => {
     setFixCreationTimeAttributes({ files: selectedFiles });
-};
-
-const setBulkFavorite = async (
-    files: EnteFile[],
-    refreshFavItemIds: () => void,
-) => {
-    try {
-        await addMultipleToFavorites(files);
-        refreshFavItemIds();
-    } catch (e) {
-        log.error("Could not add to favorites", e);
-    }
 };

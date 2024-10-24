@@ -13,14 +13,12 @@ import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/dialog_util.dart';
-import 'package:photos/utils/email_util.dart';
 import "package:photos/utils/toast_util.dart";
-import "package:styled_text/styled_text.dart";
 
 class DeleteAccountPage extends StatefulWidget {
   const DeleteAccountPage({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<DeleteAccountPage> createState() => _DeleteAccountPageState();
@@ -256,8 +254,6 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
         }
         if (deleteChallengeResponse.allowDelete) {
           await _delete(context, deleteChallengeResponse);
-        } else {
-          await _requestEmailForDeletion(context);
         }
       },
       isDismissible: false,
@@ -292,66 +288,5 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
       Logger("DeleteAccount").severe("failed to delete", e, s);
       await showGenericErrorDialog(context: context, error: e);
     }
-  }
-
-  Future<void> _requestEmailForDeletion(BuildContext context) async {
-    final AlertDialog alert = AlertDialog(
-      title: Text(
-        S.of(context).deleteAccount,
-        style: const TextStyle(
-          color: Colors.red,
-        ),
-      ),
-      content: StyledText(
-        text:
-            "${S.of(context).deleteEmailRequest}\n\n${S.of(context).deleteRequestSLAText}",
-        tags: {
-          'warning': StyledTextTag(
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.orange[300],
-            ),
-          ),
-        },
-      ),
-      actions: [
-        TextButton(
-          child: Text(
-            S.of(context).sendEmail,
-            style: const TextStyle(
-              color: Colors.red,
-            ),
-          ),
-          onPressed: () async {
-            Navigator.of(context, rootNavigator: true).pop('dialog');
-            await sendEmail(
-              context,
-              to: 'account-deletion@ente.io',
-              subject: '[${S.of(context).deleteAccount}]',
-            );
-          },
-        ),
-        TextButton(
-          child: Text(
-            S.of(context).ok,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-          ),
-          onPressed: () {
-            Navigator.of(context, rootNavigator: true).pop('dialog');
-          },
-        ),
-      ],
-    );
-
-    // ignore: unawaited_futures
-    showDialog(
-      useRootNavigator: false,
-      context: context,
-      builder: (BuildContext context) {
-        return alert;
-      },
-    );
   }
 }

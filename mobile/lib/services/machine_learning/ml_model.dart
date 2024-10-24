@@ -140,7 +140,6 @@ abstract class MlModel {
     ONNXEnvFFI.instance.initONNX(modelName);
     try {
       final sessionOptions = OrtSessionOptions()
-        ..appendCPUProvider(CPUFlags.useArena)
         ..setInterOpNumThreads(1)
         ..setIntraOpNumThreads(1)
         ..setSessionGraphOptimizationLevel(

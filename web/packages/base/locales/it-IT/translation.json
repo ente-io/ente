@@ -220,7 +220,7 @@
     "photos_count_zero": "Nessuna memoria",
     "photos_count_one": "1 ricordo",
     "photos_count": "{{count, number}} ricordi",
-    "terms_and_conditions": "Accetto i <u-terms>termini di servizio</u-terms> e la <u-policy>privacy policy</u-policy>",
+    "terms_and_conditions": "Accetto i <a>termini di servizio</a> e la <b>privacy policy</b>",
     "SELECTED": "selezionato",
     "people": "Persone",
     "indexing_scheduled": "L'indicizzazione è programmata...",

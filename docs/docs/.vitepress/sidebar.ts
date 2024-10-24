@@ -130,6 +130,10 @@ export const sidebar = [
                         text: "Photo dates",
                         link: "/photos/faq/photo-dates",
                     },
+                    {
+                        text: "Machine Learning",
+                        link: "/photos/faq/machine-learning",
+                    },
                 ],
             },
             {

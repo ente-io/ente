@@ -59,3 +59,28 @@ export const batch = <T>(xs: T[], batchSize: number): T[][] => {
     }
     return batches;
 };
+
+/**
+ * Split an array into two arrays - those that satisify the given
+ * {@link predicate}, and those that don't.
+ *
+ * @param xs The array to split.
+ *
+ * @param predicate A function invoked for each element, to decide which part of
+ * the split it will belong to.
+ *
+ * @returns A tuple with two arrays. The first of these arrays contains all
+ * elements for which the predicate returned `true`, and the second array
+ * contains the rest of the elements.
+ */
+export const splitByPredicate = <T>(
+    xs: T[],
+    predicate: (t: T) => boolean,
+): [T[], T[]] =>
+    xs.reduce<[T[], T[]]>(
+        (result, x) => {
+            (predicate(x) ? result[0] : result[1]).push(x);
+            return result;
+        },
+        [[], []],
+    );

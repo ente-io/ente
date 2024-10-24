@@ -8,7 +8,7 @@ import type { Collection } from "@/media/collection";
 import { EncryptedEnteFile, EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { potentialFileTypeFromExtension } from "@/media/live-photo";
-import { getLocalFiles, sortFiles } from "@/new/photos/services/files";
+import { getLocalFiles } from "@/new/photos/services/files";
 import { indexNewUpload } from "@/new/photos/services/ml";
 import type { UploadItem } from "@/new/photos/services/upload/types";
 import {
@@ -27,7 +27,6 @@ import {
 } from "services/publicCollectionService";
 import { getDisableCFUploadProxyFlag } from "services/userService";
 import watcher from "services/watch";
-import { SetFiles } from "types/gallery";
 import { decryptFile, getUserOwnedFiles } from "utils/file";
 import {
     getMetadataJSONMapKeyForJSON,
@@ -326,7 +325,7 @@ class UploadManager {
     private itemsToBeUploaded: ClusteredUploadItem[];
     private failedItems: ClusteredUploadItem[];
     private existingFiles: EnteFile[];
-    private setFiles: SetFiles;
+    private onUploadFile: (file: EnteFile) => void;
     private collections: Map<number, Collection>;
     private uploadInProgress: boolean;
     private publicUploadProps: PublicUploadProps;
@@ -340,7 +339,7 @@ class UploadManager {
 
     public async init(
         progressUpdater: ProgressUpdater,
-        setFiles: SetFiles,
+        onUploadFile: (file: EnteFile) => void,
         publicCollectProps: PublicUploadProps,
         isCFUploadProxyDisabled: boolean,
     ) {
@@ -352,7 +351,7 @@ class UploadManager {
         }
         this.isCFUploadProxyDisabled = isCFUploadProxyDisabled;
         UploadService.init(publicCollectProps);
-        this.setFiles = setFiles;
+        this.onUploadFile = onUploadFile;
         this.publicUploadProps = publicCollectProps;
     }
 
@@ -682,11 +681,7 @@ class UploadManager {
             throw Error("decrypted file can't be undefined");
         }
         this.existingFiles.push(decryptedFile);
-        this.updateUIFiles(decryptedFile);
-    }
-
-    private updateUIFiles(decryptedFile: EnteFile) {
-        this.setFiles((files) => sortFiles([...files, decryptedFile]));
+        this.onUploadFile(decryptedFile);
     }
 
     public shouldAllowNewUpload = () => {

@@ -109,7 +109,7 @@ class DebugSectionWidget extends StatelessWidget {
         TextButton(
           child: const Text("OK"),
           onPressed: () {
-            Navigator.of(context, rootNavigator: true).pop('dialog');
+            Navigator.of(context).pop('dialog');
           },
         ),
       ],

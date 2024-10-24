@@ -47,7 +47,7 @@ class _CreationTimeItemState extends State<CreationTimeItem> {
   }
 
   void _showDateTimePicker(EnteFile file) async {
-    final Locale locale = await getLocale();
+    final Locale locale = (await getLocale())!;
     final localeType = getFromLocalString(locale);
     final dateResult = await DatePickerBdaya.showDatePicker(
       context,

@@ -1,5 +1,3 @@
-import type { Collection } from "@/media/collection";
-import { EnteFile } from "@/media/file";
 import { type SelectionContext } from "@/new/photos/components/gallery";
 import type { User } from "@ente/shared/user/types";
 import { FilesDownloadProgressAttributes } from "components/FilesDownloadProgress";
@@ -20,8 +18,6 @@ export type SelectedState = {
 export type SetSelectedState = React.Dispatch<
     React.SetStateAction<SelectedState>
 >;
-export type SetFiles = React.Dispatch<React.SetStateAction<EnteFile[]>>;
-export type SetCollections = React.Dispatch<React.SetStateAction<Collection[]>>;
 export type SetLoading = React.Dispatch<React.SetStateAction<boolean>>;
 export type SetFilesDownloadProgressAttributes = (
     value:

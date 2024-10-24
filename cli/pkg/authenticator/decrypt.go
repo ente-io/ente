@@ -21,7 +21,7 @@ type _KDF struct {
 	Salt     string `json:"salt"`
 }
 
-func DecryptExport(inputPath string, outputPath string) error {
+func DecryptExport(inputPath string, outputPath string, password string) error {
 	exportFile, err := internal.ResolvePath(inputPath)
 	if err != nil {
 		return fmt.Errorf("error resolving exportFile path (in): %v", err)
@@ -45,10 +45,13 @@ func DecryptExport(inputPath string, outputPath string) error {
 		return fmt.Errorf("unsupported export version: %d", export.Version)
 	}
 
-	password, err := internal.GetSensitiveField("Enter password to decrypt export")
-	if err != nil {
-		return err
+	if password == "" {
+		password, err = internal.GetSensitiveField("Enter password to decrypt export")
+		if err != nil {
+			return err
+		}
 	}
+
 	fmt.Printf("\n....")
 	key, err := eCrypto.DeriveArgonKey(password, export.KDFParams.Salt, export.KDFParams.MemLimit, export.KDFParams.OpsLimit)
 	if err != nil {

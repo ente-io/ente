@@ -1,7 +1,7 @@
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
 import type { Collection } from "@/media/collection";
-import { EncryptedTrashItem, Trash } from "@/media/file";
+import { EncryptedTrashItem, Trash, type EnteFile } from "@/media/file";
 import {
     getLocalTrash,
     getTrashedFiles,
@@ -10,7 +10,6 @@ import {
 import HTTPService from "@ente/shared/network/HTTPService";
 import localForage from "@ente/shared/storage/localForage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
-import { SetFiles } from "types/gallery";
 import { decryptFile } from "utils/file";
 import { getCollection } from "./collectionService";
 
@@ -45,7 +44,7 @@ async function getLastSyncTime() {
 }
 export async function syncTrash(
     collections: Collection[],
-    setTrashedFiles: SetFiles,
+    setTrashedFiles: (fs: EnteFile[]) => void,
 ): Promise<void> {
     const trash = await getLocalTrash();
     collections = [...collections, ...(await getLocalDeletedCollections())];
@@ -69,7 +68,7 @@ export async function syncTrash(
 export const updateTrash = async (
     collections: Map<number, Collection>,
     sinceTime: number,
-    setTrashedFiles: SetFiles,
+    setTrashedFiles: (fs: EnteFile[]) => void,
     currentTrash: Trash,
 ): Promise<Trash> => {
     try {

@@ -187,6 +187,7 @@ const cleanupOldModelsIfNeeded = async () => {
         "mobileclip_s2_image_opset18_rgba_sim.onnx",
         "mobileclip_s2_text_int32.onnx",
         "yolov5s_face_640_640_dynamic.onnx",
+        "yolov5s_face_opset18_rgba_opt.onnx",
     ];
 
     for (const modelName of oldModelNames) {
@@ -302,8 +303,8 @@ export const computeCLIPTextEmbeddingIfAvailable = async (text: string) => {
 };
 
 const cachedFaceDetectionSession = makeCachedInferenceSession(
-    "yolov5s_face_opset18_rgba_opt.onnx",
-    28952612 /* 29 MB */,
+    "yolov5s_face_opset18_rgba_opt_nosplits.onnx",
+    28952651 /* 29 MB */,
 );
 
 /**

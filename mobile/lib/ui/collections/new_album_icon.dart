@@ -34,8 +34,8 @@ class NewAlbumIcon extends StatelessWidget {
           alwaysShowSuccessState: false,
           initialValue: "",
           textCapitalization: TextCapitalization.words,
+          popnavAfterSubmission: false,
           onSubmit: (String text) async {
-            // indicates user cancelled the rename request
             if (text.trim() == "") {
               return;
             }
@@ -44,10 +44,11 @@ class NewAlbumIcon extends StatelessWidget {
               final Collection c =
                   await CollectionsService.instance.createAlbum(text);
               // ignore: unawaited_futures
-              routeToPage(
+              await routeToPage(
                 context,
                 CollectionPage(CollectionWithThumbnail(c, null)),
               );
+              Navigator.of(context).pop();
             } catch (e, s) {
               Logger("CreateNewAlbumIcon")
                   .severe("Failed to rename album", e, s);
@@ -55,6 +56,7 @@ class NewAlbumIcon extends StatelessWidget {
             }
           },
         );
+
         if (result is Exception) {
           await showGenericErrorDialog(context: context, error: result);
         }

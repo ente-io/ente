@@ -12,14 +12,5 @@
   "feedback": "피드백",
   "confirmAccountDeletion": "계정 삭제 확인",
   "deleteAccountPermanentlyButton": "계정을 영구적으로 삭제",
-  "yourAccountHasBeenDeleted": "계정이 삭제되었습니다.",
-  "personName": "Person name",
-  "addNewPerson": "Add new person",
-  "addNameOrMerge": "Add name or merge",
-  "mergeWithExisting": "Merge with existing",
-  "newPerson": "New person",
-  "addName": "Add name",
-  "add": "Add",
-  "extraPhotosFoundFor": "Extra photos found for $text",
-  "extraPhotosFound": "Extra photos found"
+  "yourAccountHasBeenDeleted": "계정이 삭제되었습니다."
 }

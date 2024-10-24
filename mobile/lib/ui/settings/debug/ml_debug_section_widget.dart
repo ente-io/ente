@@ -7,11 +7,9 @@ import "package:photos/db/ml/db.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/service_locator.dart";
-import "package:photos/services/machine_learning/face_ml/face_recognition_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/services/machine_learning/ml_service.dart';
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
-import "package:photos/services/magic_cache_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
@@ -239,7 +237,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           trailingIconIsMuted: true,
           onTap: () async {
             try {
-              await MagicCacheService.instance.updateCache(forced: true);
+              await magicCacheService.updateCache(forced: true);
             } catch (e, s) {
               logger.warning('Update discover failed', e, s);
               await showGenericErrorDialog(context: context, error: e);
@@ -256,7 +254,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           trailingIconIsMuted: true,
           onTap: () async {
             try {
-              await FaceRecognitionService.instance.sync();
+              await faceRecognitionService.sync();
               showShortToast(context, "Done");
             } catch (e, s) {
               logger.warning('sync person mappings failed ', e, s);

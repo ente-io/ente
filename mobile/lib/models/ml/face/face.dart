@@ -4,6 +4,7 @@ import "package:photos/models/ml/face/dimension.dart";
 import "package:photos/models/ml/face/landmark.dart";
 import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
 import "package:photos/services/machine_learning/ml_result.dart";
+import "package:photos/utils/parse.dart";
 
 // FileInfo contains the image width and height of the image the face was detected in.
 class FileInfo {
@@ -114,29 +115,4 @@ class Face {
         'score': score,
         'blur': blur,
       };
-}
-
-double? parseIntOrDoubleAsDouble(dynamic value) {
-  if (value == null) return null;
-  if (value is int) return value * 1.0;
-  if (value is double) return value;
-  return null;
-}
-
-List<double> parseAsDoubleList(List<dynamic> inputList) {
-  if (inputList.isEmpty) return const [];
-
-  if (inputList is List<double>) return inputList;
-  return List<double>.generate(
-    inputList.length,
-    (index) {
-      final value = inputList[index];
-      if (value is int) return value.toDouble();
-      if (value is double) return value;
-      throw FormatException(
-        'Invalid type at index $index: ${value.runtimeType}',
-      );
-    },
-    growable: false,
-  );
 }

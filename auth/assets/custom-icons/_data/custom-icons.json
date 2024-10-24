@@ -5,7 +5,7 @@
     },
     {
       "title": "23andme"
-    },    
+    },
     {
       "title": "3Commas"
     },
@@ -43,7 +43,7 @@
         "baiduyun"
       ]
     },
-   {
+    {
       "title": "Band"
     },
     {
@@ -228,7 +228,7 @@
     },
     {
       "title": "eBay"
-    },    
+    },
     {
       "title": "ecitizen kenya",
       "slug": "ecitizen_kenya"
@@ -298,10 +298,10 @@
     },
     {
       "title": "Guideline"
-    },    
+    },
     {
       "title": "Gusto"
-    },    
+    },
     {
       "title": "Habbo"
     },
@@ -327,7 +327,7 @@
     {
       "title": "ID.me",
       "slug": "IDme"
-    },    
+    },
     {
       "title": "Infomaniak"
     },
@@ -400,7 +400,7 @@
     {
       "title": "Letterboxd"
     },
-   {
+    {
       "title": "Linux.Do",
       "slug": "LINUX_DO",
       "altNames": [
@@ -420,7 +420,7 @@
     {
       "title": "Login.gov",
       "slug": "login_gov"
-    },    
+    },
     {
       "title": "Marketplace.tf",
       "slug": "marketplacedottf"
@@ -709,13 +709,13 @@
         "T Mobile",
         "T-Mobile ID"
       ]
-    },    
+    },
     {
       "title": "TCPShield"
     },
     {
       "title": "tencent cloud",
-      "slug": "tencent_cloud"
+      "slug": "tencent_cloud",
       "altNames": [
         "腾讯云",
         "tencentcloud"
@@ -741,7 +741,7 @@
     },
     {
       "title": "Titan"
-    },    
+    },
     {
       "title": "tianyiyun",
       "altNames": [
@@ -803,7 +803,7 @@
         "火山引擎"
       ]
     },
-   {
+    {
       "title": "WARGAMING.NET"
     },
     {

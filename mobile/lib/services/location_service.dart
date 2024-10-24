@@ -3,6 +3,7 @@ import "dart:io";
 import "dart:math";
 
 import "package:computer/computer.dart";
+import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
@@ -18,21 +19,23 @@ import "package:photos/services/remote_assets_service.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class LocationService {
-  late SharedPreferences prefs;
+  final SharedPreferences prefs;
   final Logger _logger = Logger((LocationService).toString());
   final Computer _computer = Computer.shared();
 
-  LocationService._privateConstructor();
-
-  static final LocationService instance = LocationService._privateConstructor();
+  // If the discovery section is loaded before the cities are loaded, then we
+  // need to refresh the discovery section after the cities are loaded.
+  bool reloadLocationDiscoverySection = false;
 
   static const kCitiesRemotePath = "https://static.ente.io/world_cities.json";
 
   List<City> _cities = [];
 
-  void init(SharedPreferences preferences) {
-    prefs = preferences;
-    _loadCities();
+  LocationService(this.prefs) {
+    debugPrint('LocationService constructor');
+    Future.delayed(const Duration(seconds: 3), () {
+      _loadCities();
+    });
   }
 
   Future<Iterable<LocalEntity<LocationTag>>> _getStoredLocationTags() async {
@@ -46,6 +49,9 @@ class LocationService {
     List<EnteFile> allFiles,
     String query,
   ) async {
+    if (allFiles.isEmpty && query.isEmpty) {
+      reloadLocationDiscoverySection = true;
+    }
     final EnteWatch w = EnteWatch("cities_search")..start();
     w.log('start for files ${allFiles.length} and query $query');
     final result = await _computer.compute(
@@ -223,9 +229,13 @@ class LocationService {
           await _computer.compute(parseCities, param: {"filePath": file.path});
       final endTime = DateTime.now();
       _logger.info(
-        "Loaded cities in ${(endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)}ms",
+        "Loaded cities in ${(endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)}ms, reloadingDiscovery: $reloadLocationDiscoverySection",
       );
-      _logger.info("Loaded cities");
+      if (reloadLocationDiscoverySection) {
+        reloadLocationDiscoverySection = false;
+        Bus.instance
+            .fire(LocationTagUpdatedEvent(LocTagEventType.dataSetLoaded));
+      }
     } catch (e, s) {
       _logger.severe("Failed to load cities", e, s);
     }
