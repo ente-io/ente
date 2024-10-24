@@ -214,16 +214,7 @@ class _MachineLearningSettingsPageState
   Future<void> toggleMlConsent() async {
     final oldMlConsent = userRemoteFlagService
         .getCachedBoolValue(UserRemoteFlagService.mlEnabled);
-    final mlConsent = !oldMlConsent;
-    await userRemoteFlagService.setBoolValue(
-      UserRemoteFlagService.mlEnabled,
-      mlConsent,
-    );
-    if (!mlConsent) {
-      MLService.instance.pauseIndexingAndClustering();
-      unawaited(
-        MLIndexingIsolate.instance.cleanupLocalIndexingModels(),
-      );
+    if (!oldMlConsent) { // Go to consent page first if not enabled
       final result = await Navigator.push(
         context,
         MaterialPageRoute(
@@ -235,6 +226,17 @@ class _MachineLearningSettingsPageState
       if (result == null || result == false) {
         return;
       }
+    }
+    final mlConsent = !oldMlConsent;
+    await userRemoteFlagService.setBoolValue(
+      UserRemoteFlagService.mlEnabled,
+      mlConsent,
+    );
+    if (!mlConsent) {
+      MLService.instance.pauseIndexingAndClustering();
+      unawaited(
+        MLIndexingIsolate.instance.cleanupLocalIndexingModels(),
+      );
     } else {
       await MLService.instance.init();
       await SemanticSearchService.instance.init();
