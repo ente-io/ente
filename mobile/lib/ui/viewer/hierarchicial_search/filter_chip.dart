@@ -54,82 +54,51 @@ class _GenericFilterChipState extends State<GenericFilterChip> {
           _isApplied = !_isApplied;
         });
       },
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          SizedBox(
-            // +1 to account for the filter's outer stroke width
-            height: kFilterChipHeight + 1,
-            child: Container(
-              decoration: BoxDecoration(
-                color: getEnteColorScheme(context).fillFaint,
-                borderRadius: const BorderRadius.all(
-                  Radius.circular(kFilterChipHeight / 2),
-                ),
-                border: Border.all(
-                  color: getEnteColorScheme(context).strokeFaint,
-                  width: 0.5,
-                ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    widget.leadingIcon != null
-                        ? Icon(
-                            widget.leadingIcon,
-                            size: 16,
-                          )
-                        : const SizedBox.shrink(),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: Text(
-                        widget.label,
-                        style: getEnteTextTheme(context).miniBold,
-                      ),
-                    ),
-                    _isApplied && !widget.isInAllFiltersView
-                        ? const SizedBox(width: 4)
-                        : const SizedBox.shrink(),
-                    _isApplied && !widget.isInAllFiltersView
-                        ? Icon(
-                            Icons.close_rounded,
-                            size: 16,
-                            color: getEnteColorScheme(context).textMuted,
-                          )
-                        : const SizedBox.shrink(),
-                  ],
-                ),
-              ),
+      child: SizedBox(
+        // +1 to account for the filter's outer stroke width
+        height: kFilterChipHeight + 1,
+        child: Container(
+          decoration: BoxDecoration(
+            color: getEnteColorScheme(context).fillFaint,
+            borderRadius: const BorderRadius.all(
+              Radius.circular(kFilterChipHeight / 2),
+            ),
+            border: Border.all(
+              color: getEnteColorScheme(context).strokeFaint,
+              width: 0.5,
             ),
           ),
-          _isApplied && widget.isInAllFiltersView
-              ? Positioned(
-                  top: -4,
-                  right: -4,
-                  child: Container(
-                    padding: const EdgeInsets.all(1),
-                    decoration: BoxDecoration(
-                      color: getEnteColorScheme(context).backgroundElevated2,
-                      border: Border.all(
-                        color: getEnteColorScheme(context).strokeMuted,
-                        width: 0.5,
-                      ),
-                      borderRadius: const BorderRadius.all(
-                        Radius.circular(8),
-                      ),
-                    ),
-                    child: Icon(
-                      Icons.close_rounded,
-                      size: 14,
-                      color: getEnteColorScheme(context).textMuted,
-                    ),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                widget.leadingIcon != null
+                    ? Icon(
+                        widget.leadingIcon,
+                        size: 16,
+                      )
+                    : const SizedBox.shrink(),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Text(
+                    widget.label,
+                    style: getEnteTextTheme(context).miniBold,
                   ),
-                )
-              : const SizedBox.shrink(),
-        ],
+                ),
+                _isApplied ? const SizedBox(width: 4) : const SizedBox.shrink(),
+                _isApplied
+                    ? Icon(
+                        Icons.close_rounded,
+                        size: 16,
+                        color: getEnteColorScheme(context).textMuted,
+                      )
+                    : const SizedBox.shrink(),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
