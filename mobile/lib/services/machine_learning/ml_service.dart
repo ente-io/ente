@@ -110,7 +110,10 @@ class MLService {
 
   bool canFetch() {
     if (localSettings.isMLIndexingEnabled) return true;
-    if (lastRemoteFetch == null) return true;
+    if (lastRemoteFetch == null) {
+      lastRemoteFetch = DateTime.now().millisecondsSinceEpoch;
+      return true;
+    }
     final intDiff = DateTime.now().millisecondsSinceEpoch - lastRemoteFetch!;
     final bool canFetch = intDiff > _kRemoteFetchCooldownOnLite;
     if (canFetch) {
