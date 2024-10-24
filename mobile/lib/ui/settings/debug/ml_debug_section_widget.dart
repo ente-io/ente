@@ -8,8 +8,10 @@ import "package:photos/events/people_changed_event.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
+import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
 import 'package:photos/services/machine_learning/ml_service.dart';
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
+import "package:photos/services/user_remote_flag_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
@@ -75,17 +77,27 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           ),
           menuItemColor: colorScheme.fillFaint,
           trailingWidget: ToggleSwitchWidget(
-            value: () => localSettings.isMLIndexingEnabled,
+            value: () => userRemoteFlagService
+                .getCachedBoolValue(UserRemoteFlagService.mlEnabled),
             onChanged: () async {
               try {
-                final isEnabled = await localSettings.toggleLocalMLIndexing();
-                logger.info('ML indexing turned ${isEnabled ? 'on' : 'off'}');
-                if (isEnabled) {
+                final oldMlConsent = userRemoteFlagService
+                    .getCachedBoolValue(UserRemoteFlagService.mlEnabled);
+                final mlConsent = !oldMlConsent;
+                await userRemoteFlagService.setBoolValue(
+                  UserRemoteFlagService.mlEnabled,
+                  mlConsent,
+                );
+                logger.info('ML consent turned ${mlConsent ? 'on' : 'off'}');
+                if (!mlConsent) {
+                  MLService.instance.pauseIndexingAndClustering();
+                  unawaited(
+                    MLIndexingIsolate.instance.cleanupLocalIndexingModels(),
+                  );
+                } else {
                   await MLService.instance.init();
                   await SemanticSearchService.instance.init();
                   unawaited(MLService.instance.runAllML(force: true));
-                } else {
-                  MLService.instance.pauseIndexingAndClustering();
                 }
                 if (mounted) {
                   setState(() {});
@@ -126,6 +138,33 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
                   context: context,
                   error: e,
                 );
+              }
+            },
+          ),
+          singleBorderRadius: 8,
+          isGestureDetectorDisabled: true,
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Local indexing",
+          ),
+          menuItemColor: colorScheme.fillFaint,
+          trailingWidget: ToggleSwitchWidget(
+            value: () => localSettings.isMLIndexingEnabled,
+            onChanged: () async {
+              final localIndexing = await localSettings.toggleLocalMLIndexing();
+              if (localIndexing) {
+                unawaited(MLService.instance.runAllML(force: true));
+              } else {
+                MLService.instance.pauseIndexingAndClustering();
+                unawaited(
+                  MLIndexingIsolate.instance.cleanupLocalIndexingModels(),
+                );
+              }
+
+              if (mounted) {
+                setState(() {});
               }
             },
           ),
