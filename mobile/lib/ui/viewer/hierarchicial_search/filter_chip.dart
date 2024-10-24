@@ -122,7 +122,7 @@ class _FaceFilterChipState extends State<FaceFilterChip> {
   void initState() {
     super.initState();
     if (widget.isInAllFiltersView) {
-      scale = 1.5;
+      scale = 1.75;
     }
   }
 
