@@ -514,6 +514,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "collectPhotosDescription": MessageLookupByLibrary.simpleMessage(
             "Utwórz link, w którym Twoi znajomi mogą przesyłać zdjęcia w oryginalnej jakości."),
         "color": MessageLookupByLibrary.simpleMessage("Kolor"),
+        "configuration": MessageLookupByLibrary.simpleMessage("Configuration"),
         "confirm": MessageLookupByLibrary.simpleMessage("Potwierdź"),
         "confirm2FADisable": MessageLookupByLibrary.simpleMessage(
             "Czy na pewno chcesz wyłączyć uwierzytelnianie dwustopniowe?"),
@@ -1006,6 +1007,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "loadingYourPhotos":
             MessageLookupByLibrary.simpleMessage("Wczytywanie Twoich zdjęć..."),
         "localGallery": MessageLookupByLibrary.simpleMessage("Galeria lokalna"),
+        "localIndexing": MessageLookupByLibrary.simpleMessage("Local indexing"),
         "localSyncErrorMessage": MessageLookupByLibrary.simpleMessage(
             "Wygląda na to, że coś poszło nie tak, ponieważ lokalna synchronizacja zdjęć zajmuje więcej czasu, niż oczekiwano. Skontaktuj się z naszym zespołem pomocy technicznej"),
         "location": MessageLookupByLibrary.simpleMessage("Lokalizacja"),

@@ -1,3 +1,5 @@
 {
-  "@@locale ": "en"
+  "@@locale ": "en",
+  "configuration": "Configuration",
+  "localIndexing": "Local indexing"
 }

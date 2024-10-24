@@ -50,6 +50,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "changeEmail": MessageLookupByLibrary.simpleMessage("Keisti el. paštą"),
         "collect": MessageLookupByLibrary.simpleMessage("Rinkti"),
         "color": MessageLookupByLibrary.simpleMessage("Spalva"),
+        "configuration": MessageLookupByLibrary.simpleMessage("Configuration"),
         "confirmAccountDeletion": MessageLookupByLibrary.simpleMessage(
             "Patvirtinti paskyros ištrynimą"),
         "confirmDeletePrompt": MessageLookupByLibrary.simpleMessage(
@@ -139,6 +140,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "lightTheme": MessageLookupByLibrary.simpleMessage("Šviesi"),
         "loadingYourPhotos":
             MessageLookupByLibrary.simpleMessage("Įkeliamos nuotraukos..."),
+        "localIndexing": MessageLookupByLibrary.simpleMessage("Local indexing"),
         "localSyncErrorMessage": MessageLookupByLibrary.simpleMessage(
             "Atrodo, kad kažkas nutiko ne taip, nes vietinių nuotraukų sinchronizavimas trunka ilgiau nei tikėtasi. Susisiekite su mūsų palaikymo komanda."),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Prisijungti"),

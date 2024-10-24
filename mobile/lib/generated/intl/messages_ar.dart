@@ -27,6 +27,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "ackPasswordLostWarning": MessageLookupByLibrary.simpleMessage(
             "أُدركُ أنّني فقدتُ كلمة مروري، فقد أفقد بياناتي لأن بياناتي <underline>مشفرة تشفيرًا تامًّا من النهاية إلى النهاية</underline>."),
         "cancel": MessageLookupByLibrary.simpleMessage("إلغاء"),
+        "configuration": MessageLookupByLibrary.simpleMessage("Configuration"),
         "decrypting": MessageLookupByLibrary.simpleMessage("فك التشفير..."),
         "email": MessageLookupByLibrary.simpleMessage("البريد الإلكتروني"),
         "enterYourEmailAddress":
@@ -41,6 +42,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("مفتاح الاسترداد غير صحيح"),
         "invalidEmailAddress": MessageLookupByLibrary.simpleMessage(
             "عنوان البريد الإلكتروني غير صالح"),
+        "localIndexing": MessageLookupByLibrary.simpleMessage("Local indexing"),
         "noRecoveryKey":
             MessageLookupByLibrary.simpleMessage("ما من مفتاح استرداد؟"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(

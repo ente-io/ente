@@ -9835,6 +9835,26 @@ class S {
       args: [],
     );
   }
+
+  /// `Configuration`
+  String get configuration {
+    return Intl.message(
+      'Configuration',
+      name: 'configuration',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Local indexing`
+  String get localIndexing {
+    return Intl.message(
+      'Local indexing',
+      name: 'localIndexing',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

@@ -1352,5 +1352,7 @@
   "addName": "Adicionar pessoa",
   "add": "Adicionar",
   "extraPhotosFoundFor": "Fotos adicionais encontradas para $text",
-  "extraPhotosFound": "Fotos adicionais encontradas"
+  "extraPhotosFound": "Fotos adicionais encontradas",
+  "configuration": "Configuration",
+  "localIndexing": "Local indexing"
 }

@@ -214,7 +214,8 @@ class _MachineLearningSettingsPageState
   Future<void> toggleMlConsent() async {
     final oldMlConsent = userRemoteFlagService
         .getCachedBoolValue(UserRemoteFlagService.mlEnabled);
-    if (!oldMlConsent) { // Go to consent page first if not enabled
+    // Go to consent page first if not enabled
+    if (!oldMlConsent) {
       final result = await Navigator.push(
         context,
         MaterialPageRoute(
@@ -257,7 +258,7 @@ class _MachineLearningSettingsPageState
     return Column(
       children: [
         ExpandableMenuItemWidget(
-          title: "Configuration",
+          title: S.of(context).configuration,
           selectionOptionsWidget: Column(
             children: [
               sectionOptionSpacing,
@@ -277,8 +278,8 @@ class _MachineLearningSettingsPageState
               ),
               sectionOptionSpacing,
               MenuItemWidget(
-                captionedTextWidget: const CaptionedTextWidget(
-                  title: "Local indexing",
+                captionedTextWidget: CaptionedTextWidget(
+                  title: S.of(context).localIndexing,
                 ),
                 menuItemColor: colorScheme.fillFaint,
                 trailingWidget: ToggleSwitchWidget(

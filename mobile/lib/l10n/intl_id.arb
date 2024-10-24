@@ -1143,5 +1143,7 @@
   "rotate": "Putar",
   "left": "Kiri",
   "right": "Kanan",
-  "whatsNew": "Hal yang baru"
+  "whatsNew": "Hal yang baru",
+  "configuration": "Configuration",
+  "localIndexing": "Local indexing"
 }

@@ -1,4 +1,6 @@
 {
   "@@locale ": "en",
-  "enterYourEmailAddress": "Εισάγετε την διεύθυνση ηλ. ταχυδρομείου σας"
+  "enterYourEmailAddress": "Εισάγετε την διεύθυνση ηλ. ταχυδρομείου σας",
+  "configuration": "Configuration",
+  "localIndexing": "Local indexing"
 }

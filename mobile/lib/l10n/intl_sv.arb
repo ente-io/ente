@@ -452,5 +452,7 @@
   "next": "Nästa",
   "guestView": "Gästvy",
   "showPerson": "Visa person",
-  "sort": "Sortera"
+  "sort": "Sortera",
+  "configuration": "Configuration",
+  "localIndexing": "Local indexing"
 }

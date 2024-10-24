@@ -41,6 +41,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "backedUpFolders":
             MessageLookupByLibrary.simpleMessage("Sikkerhedskopierede mapper"),
         "cancel": MessageLookupByLibrary.simpleMessage("Annuller"),
+        "configuration": MessageLookupByLibrary.simpleMessage("Configuration"),
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("Bekræft Sletning Af Konto"),
         "confirmPassword":
@@ -94,6 +95,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "invite": MessageLookupByLibrary.simpleMessage("Inviter"),
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
             "Hjælp os venligst med disse oplysninger"),
+        "localIndexing": MessageLookupByLibrary.simpleMessage("Local indexing"),
         "loggingOut": MessageLookupByLibrary.simpleMessage("Logger ud..."),
         "longPressAnEmailToVerifyEndToEndEncryption":
             MessageLookupByLibrary.simpleMessage(
