@@ -58,7 +58,8 @@ class LocalSettings {
     return getRateUsShownCount() < kRateUsPromptThreshold;
   }
 
-  bool get isMLIndexingEnabled => _prefs.getBool(_kisMLIndexingEnabled) ?? enoughRamForLocalIndexing;
+  bool get isMLIndexingEnabled =>
+      _prefs.getBool(_kisMLIndexingEnabled) ?? enoughRamForLocalIndexing;
 
   bool get userEnabledMultiplePart =>
       _prefs.getBool(kEnableMultiplePart) ?? false;
