@@ -3,8 +3,8 @@
 This is handy, e.g., when creating test environments with large disks, where we
 still need a graphical session to run the desktop app.
 
-Create a vanilla non-graphical Ubuntu instance (these steps should work for
-other distros too, the commands will change).
+Create a normal Ubuntu instance (tweak the exact commands if using a different
+distro).
 
 Install
 
