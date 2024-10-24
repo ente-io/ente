@@ -1,4 +1,5 @@
 import 'package:photos/core/constants.dart';
+import "package:photos/utils/ram_check_util.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 
 enum AlbumSortKey {
@@ -57,7 +58,7 @@ class LocalSettings {
     return getRateUsShownCount() < kRateUsPromptThreshold;
   }
 
-  bool get isMLIndexingEnabled => _prefs.getBool(_kisMLIndexingEnabled) ?? true;
+  bool get isMLIndexingEnabled => _prefs.getBool(_kisMLIndexingEnabled) ?? enoughRamForLocalIndexing;
 
   bool get userEnabledMultiplePart =>
       _prefs.getBool(kEnableMultiplePart) ?? false;

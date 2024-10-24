@@ -28,6 +28,7 @@ import "package:photos/services/machine_learning/semantic_search/semantic_search
 import "package:photos/services/user_remote_flag_service.dart";
 import "package:photos/utils/ml_util.dart";
 import "package:photos/utils/network_util.dart";
+import "package:photos/utils/ram_check_util.dart";
 import "package:synchronized/synchronized.dart";
 
 class MLService {
@@ -68,6 +69,9 @@ class MLService {
     if (!userRemoteFlagService
         .getCachedBoolValue(UserRemoteFlagService.mlEnabled)) return;
     _logger.info("init called");
+
+    // Check if the device has enough RAM to run local indexing
+    await checkDeviceTotalRAM();
 
     // Get client name
     final packageInfo = ServiceLocator.instance.packageInfo;
