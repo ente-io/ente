@@ -58,7 +58,7 @@ class LocalSettings {
   }
 
   bool get isMLIndexingEnabled =>
-      _prefs.getBool(_kisMLIndexingEnabled) ?? false;
+      _prefs.getBool(_kisMLIndexingEnabled) ?? true;
 
   bool get userEnabledMultiplePart =>
       _prefs.getBool(kEnableMultiplePart) ?? false;
