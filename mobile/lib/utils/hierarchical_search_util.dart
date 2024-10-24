@@ -32,7 +32,7 @@ Future<List<EnteFile>> getFilteredFiles(
   List<HierarchicalSearchFilter> filters,
 ) async {
   final logger = Logger("HierarchicalSearchUtil");
-  final filteredFiles = <EnteFile>[];
+  late final List<EnteFile> filteredFiles;
   final files = await SearchService.instance.getAllFilesForHierarchicalSearch();
   final resultsNeverComputedFilters = <HierarchicalSearchFilter>[];
   final ignoredCollections =
@@ -61,9 +61,7 @@ Future<List<EnteFile>> getFilteredFiles(
           );
           filter.matchedUploadedIDs.addAll(fileIDs);
         }
-        log(
-          "Time taken to get files for person/cluster ${filter.personId ?? filter.clusterId}: ${stopwatch.elapsedMilliseconds}ms",
-        );
+
         stopwatch.stop();
       } catch (e) {
         log("Error in face filter: $e");
@@ -80,9 +78,6 @@ Future<List<EnteFile>> getFilteredFiles(
         continue;
       }
       for (HierarchicalSearchFilter filter in resultsNeverComputedFilters) {
-        log(
-          "Computing results for never computed $filter: ${filter.name()}",
-        );
         if (filter.isMatch(file)) {
           filter.matchedUploadedIDs.add(file.uploadedFileID!);
         }
@@ -100,12 +95,10 @@ Future<List<EnteFile>> getFilteredFiles(
       }
     }
 
-    filteredFiles.addAll(
-      await FilesDB.instance.getFilesFromIDs(
-        filteredUploadedIDs.toList(),
-        dedupeByUploadId: true,
-        collectionsToIgnore: ignoredCollections,
-      ),
+    filteredFiles = await FilesDB.instance.getFilesFromIDs(
+      filteredUploadedIDs.toList(),
+      dedupeByUploadId: true,
+      collectionsToIgnore: ignoredCollections,
     );
   } catch (e) {
     Logger("HierarchicalSearchUtil").severe("Failed to get filtered files: $e");
