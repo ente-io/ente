@@ -27,32 +27,15 @@ class GenericFilterChip extends StatefulWidget {
 }
 
 class _GenericFilterChipState extends State<GenericFilterChip> {
-  late bool _isApplied;
-
-  @override
-  void initState() {
-    super.initState();
-    _isApplied = widget.isApplied;
-  }
-
-  @override
-  void didUpdateWidget(covariant GenericFilterChip oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _isApplied = widget.isApplied;
-  }
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        setState(() {
-          if (_isApplied) {
-            widget.remove();
-          } else {
-            widget.apply();
-          }
-          _isApplied = !_isApplied;
-        });
+        if (widget.isApplied) {
+          widget.remove();
+        } else {
+          widget.apply();
+        }
       },
       child: SizedBox(
         // +1 to account for the filter's outer stroke width
@@ -87,8 +70,10 @@ class _GenericFilterChipState extends State<GenericFilterChip> {
                     style: getEnteTextTheme(context).miniBold,
                   ),
                 ),
-                _isApplied ? const SizedBox(width: 4) : const SizedBox.shrink(),
-                _isApplied
+                widget.isApplied
+                    ? const SizedBox(width: 2)
+                    : const SizedBox.shrink(),
+                widget.isApplied
                     ? Icon(
                         Icons.close_rounded,
                         size: 16,
@@ -131,22 +116,14 @@ class FaceFilterChip extends StatefulWidget {
 }
 
 class _FaceFilterChipState extends State<FaceFilterChip> {
-  late bool _isApplied;
   double scale = 1.0;
 
   @override
   void initState() {
     super.initState();
-    _isApplied = widget.isApplied;
     if (widget.isInAllFiltersView) {
       scale = 1.5;
     }
-  }
-
-  @override
-  void didUpdateWidget(covariant FaceFilterChip oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _isApplied = widget.isApplied;
   }
 
   @override
@@ -156,14 +133,11 @@ class _FaceFilterChipState extends State<FaceFilterChip> {
       children: [
         GestureDetector(
           onTap: () {
-            setState(() {
-              if (_isApplied) {
-                widget.remove();
-              } else {
-                widget.apply();
-              }
-              _isApplied = !_isApplied;
-            });
+            if (widget.isApplied) {
+              widget.remove();
+            } else {
+              widget.apply();
+            }
           },
           child: Container(
             decoration: BoxDecoration(
@@ -207,17 +181,17 @@ class _FaceFilterChipState extends State<FaceFilterChip> {
                           ),
                         )
                       : const SizedBox.shrink(),
-                  _isApplied && !widget.isInAllFiltersView
-                      ? const SizedBox(width: 4)
+                  widget.isApplied && !widget.isInAllFiltersView
+                      ? SizedBox(width: widget.name.isNotEmpty ? 2 : 4)
                       : const SizedBox.shrink(),
-                  _isApplied && !widget.isInAllFiltersView
+                  widget.isApplied && !widget.isInAllFiltersView
                       ? Icon(
                           Icons.close_rounded,
                           size: 16,
                           color: getEnteColorScheme(context).textMuted,
                         )
                       : const SizedBox.shrink(),
-                  _isApplied &&
+                  widget.isApplied &&
                           widget.name.isEmpty &&
                           !widget.isInAllFiltersView
                       ? const SizedBox(width: 8)
@@ -227,7 +201,7 @@ class _FaceFilterChipState extends State<FaceFilterChip> {
             ),
           ),
         ),
-        _isApplied && widget.isInAllFiltersView
+        widget.isApplied && widget.isInAllFiltersView
             ? Positioned(
                 top: -4,
                 right: -4,
