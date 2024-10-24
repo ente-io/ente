@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+aria-label="Google Drive" role="img"
+viewBox="0 0 512 512">
+
+<rect
+width="512" height="512"
+rx="15%"
+fill="#ffffff"/>
+
+<g fill="#2684fc">
+
+<path id="b" d="M337 301l53 96q-3 2-10 2h-247.6 q-6 0-10-2l55-95"/>
+
+</g>
+
+<g fill="#ea4335">
+
+<path id="c" d="M335 301l55 96q6-3 10-10l43-76q2-6 2-10"/>
+
+</g>
+
+<g transform="rotate(120 256 256)">
+
+<use href="#b" fill="#00ac47"/>
+
+<use href="#c" fill="#0066da"/>
+
+</g>
+
+<g transform="rotate(240 256 256)">
+
+<use href="#b" fill="#ffba00"/>
+
+<use href="#c" fill="#00832d"/>
+
+</g>
+
+</svg>
