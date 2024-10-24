@@ -28,6 +28,7 @@ import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/components/title_bar_widget.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
+import "package:photos/ui/settings/common_settings.dart";
 import "package:photos/ui/settings/ml/enable_ml_consent.dart";
 import "package:photos/ui/settings/ml/ml_user_dev_screen.dart";
 import "package:photos/utils/ml_util.dart";
@@ -253,31 +254,26 @@ class _MachineLearningSettingsPageState
     }
     return Column(
       children: [
-        MenuItemWidget(
-          captionedTextWidget: CaptionedTextWidget(
-            title: S.of(context).enabled,
-          ),
-          menuItemColor: colorScheme.fillFaint,
-          trailingWidget: ToggleSwitchWidget(
-            value: () => hasEnabled,
-            onChanged: () async {
-              await toggleMlConsent();
-            },
-          ),
-          singleBorderRadius: 8,
-          alignCaptionedTextToLeft: true,
-          isGestureDetectorDisabled: true,
-        ),
-        const SizedBox(
-          height: 4,
-        ),
         ExpandableMenuItemWidget(
           title: "Configuration",
           selectionOptionsWidget: Column(
             children: [
-              const SizedBox(
-                height: 2,
+              sectionOptionSpacing,
+              MenuItemWidget(
+                captionedTextWidget: CaptionedTextWidget(
+                  title: S.of(context).enabled,
+                ),
+                menuItemColor: colorScheme.fillFaint,
+                trailingWidget: ToggleSwitchWidget(
+                  value: () => hasEnabled,
+                  onChanged: () async {
+                    await toggleMlConsent();
+                  },
+                ),
+                singleBorderRadius: 8,
+                isGestureDetectorDisabled: true,
               ),
+              sectionOptionSpacing,
               MenuItemWidget(
                 captionedTextWidget: const CaptionedTextWidget(
                   title: "Local indexing",
