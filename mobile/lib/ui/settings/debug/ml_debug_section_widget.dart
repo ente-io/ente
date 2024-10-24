@@ -75,7 +75,6 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
               return const SizedBox.shrink();
             },
           ),
-          menuItemColor: colorScheme.fillFaint,
           trailingWidget: ToggleSwitchWidget(
             value: () => userRemoteFlagService
                 .getCachedBoolValue(UserRemoteFlagService.mlEnabled),
@@ -116,7 +115,6 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           captionedTextWidget: const CaptionedTextWidget(
             title: "Remote fetch",
           ),
-          menuItemColor: colorScheme.fillFaint,
           trailingWidget: ToggleSwitchWidget(
             value: () => localSettings.remoteFetchEnabled,
             onChanged: () async {
@@ -149,7 +147,6 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           captionedTextWidget: const CaptionedTextWidget(
             title: "Local indexing",
           ),
-          menuItemColor: colorScheme.fillFaint,
           trailingWidget: ToggleSwitchWidget(
             value: () => localSettings.isMLIndexingEnabled,
             onChanged: () async {
@@ -176,7 +173,6 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           captionedTextWidget: const CaptionedTextWidget(
             title: "Auto indexing",
           ),
-          menuItemColor: colorScheme.fillFaint,
           trailingWidget: ToggleSwitchWidget(
             value: () => !MLService.instance.debugIndexingDisabled,
             onChanged: () async {

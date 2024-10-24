@@ -249,7 +249,6 @@ class _MachineLearningSettingsPageState
   }
 
   Widget _getMlSettings(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
     final hasEnabled = userRemoteFlagService
         .getCachedBoolValue(UserRemoteFlagService.mlEnabled);
     if (!hasEnabled) {
@@ -266,7 +265,6 @@ class _MachineLearningSettingsPageState
                 captionedTextWidget: CaptionedTextWidget(
                   title: S.of(context).enabled,
                 ),
-                menuItemColor: colorScheme.fillFaint,
                 trailingWidget: ToggleSwitchWidget(
                   value: () => hasEnabled,
                   onChanged: () async {
@@ -281,7 +279,6 @@ class _MachineLearningSettingsPageState
                 captionedTextWidget: CaptionedTextWidget(
                   title: S.of(context).localIndexing,
                 ),
-                menuItemColor: colorScheme.fillFaint,
                 trailingWidget: ToggleSwitchWidget(
                   value: () => localSettings.isMLIndexingEnabled,
                   onChanged: () async {
