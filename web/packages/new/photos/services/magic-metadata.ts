@@ -13,7 +13,7 @@ export function isArchivedFile(item: EnteFile): boolean {
     return item.magicMetadata.data.visibility === ItemVisibility.archived;
 }
 
-export function isArchivedCollection(item: Collection): boolean {
+export const isArchivedCollection = (item: Collection) => {
     if (!item) {
         return false;
     }
@@ -28,7 +28,7 @@ export function isArchivedCollection(item: Collection): boolean {
         );
     }
     return false;
-}
+};
 
 export function isPinnedCollection(item: Collection) {
     if (

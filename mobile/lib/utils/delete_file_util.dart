@@ -328,60 +328,69 @@ Future<bool> deleteLocalFiles(
   final List<String> deletedIDs = [];
   final List<String> localAssetIDs = [];
   final List<String> localSharedMediaIDs = [];
-  for (String id in localIDs) {
-    if (id.startsWith(oldSharedMediaIdentifier) ||
-        id.startsWith(sharedMediaIdentifier)) {
-      localSharedMediaIDs.add(id);
-    } else {
-      localAssetIDs.add(id);
+  try {
+    for (String id in localIDs) {
+      if (id.startsWith(oldSharedMediaIdentifier) ||
+          id.startsWith(sharedMediaIdentifier)) {
+        localSharedMediaIDs.add(id);
+      } else {
+        localAssetIDs.add(id);
+      }
     }
-  }
-  deletedIDs.addAll(await _tryDeleteSharedMediaFiles(localSharedMediaIDs));
+    deletedIDs.addAll(await _tryDeleteSharedMediaFiles(localSharedMediaIDs));
 
-  final bool shouldDeleteInBatches =
-      await isAndroidSDKVersionLowerThan(android11SDKINT);
-  if (shouldDeleteInBatches) {
-    _logger.info("Deleting in batches");
-    deletedIDs.addAll(await deleteLocalFilesInBatches(context, localAssetIDs));
-  } else {
-    _logger.info("Deleting in one shot");
-    deletedIDs.addAll(await _deleteLocalFilesInOneShot(context, localAssetIDs));
-  }
-  // In IOS, the library returns no error and fail to delete any file is
-  // there's any shared file. As a stop-gap solution, we initiate deletion in
-  // batches. Similar in Android, for large number of files, we have observed
-  // that the library fails to delete any file. So, we initiate deletion in
-  // batches.
-  if (deletedIDs.isEmpty) {
-    deletedIDs.addAll(
-      await deleteLocalFilesInBatches(
-        context,
-        localAssetIDs,
-        maximumBatchSize: 1000,
-        minimumBatchSize: 10,
-      ),
-    );
-    _logger
-        .severe("iOS free-space fallback, deleted ${deletedIDs.length} files "
-            "in batches}");
-  }
-  if (deletedIDs.isNotEmpty) {
-    final deletedFiles = await FilesDB.instance.getLocalFiles(deletedIDs);
-    await FilesDB.instance.deleteLocalFiles(deletedIDs);
-    _logger.info(deletedFiles.length.toString() + " files deleted locally");
-    Bus.instance.fire(
-      LocalPhotosUpdatedEvent(deletedFiles, source: "deleteLocal"),
-    );
-    return true;
-  } else {
-    //On android 10, even if files were deleted, deletedIDs is empty.
-    //This is a workaround so that users are not shown an error message on
-    //android 10
-    if (!await isAndroidSDKVersionLowerThan(android11SDKINT)) {
-      showToast(context, S.of(context).couldNotFreeUpSpace);
-      return false;
+    final bool shouldDeleteInBatches =
+        await isAndroidSDKVersionLowerThan(android11SDKINT);
+    if (shouldDeleteInBatches) {
+      _logger.info("Deleting in batches");
+      deletedIDs
+          .addAll(await deleteLocalFilesInBatches(context, localAssetIDs));
+    } else {
+      _logger.info("Deleting in one shot");
+      deletedIDs
+          .addAll(await _deleteLocalFilesInOneShot(context, localAssetIDs));
     }
-    return true;
+    // In IOS, the library returns no error and fail to delete any file is
+    // there's any shared file. As a stop-gap solution, we initiate deletion in
+    // batches. Similar in Android, for large number of files, we have observed
+    // that the library fails to delete any file. So, we initiate deletion in
+    // batches.
+    if (deletedIDs.isEmpty) {
+      deletedIDs.addAll(
+        await deleteLocalFilesInBatches(
+          context,
+          localAssetIDs,
+          maximumBatchSize: 1000,
+          minimumBatchSize: 10,
+        ),
+      );
+      _logger
+          .severe("iOS free-space fallback, deleted ${deletedIDs.length} files "
+              "in batches}");
+    }
+
+    if (deletedIDs.isNotEmpty) {
+      final deletedFiles = await FilesDB.instance.getLocalFiles(deletedIDs);
+      await FilesDB.instance.deleteLocalFiles(deletedIDs);
+      _logger.info(deletedFiles.length.toString() + " files deleted locally");
+      Bus.instance.fire(
+        LocalPhotosUpdatedEvent(deletedFiles, source: "deleteLocal"),
+      );
+      return true;
+    } else {
+      //On android 10, even if files were deleted, deletedIDs is empty.
+      //This is a workaround so that users are not shown an error message on
+      //android 10
+      if (!await isAndroidSDKVersionLowerThan(android11SDKINT)) {
+        showToast(context, S.of(context).couldNotFreeUpSpace);
+        return false;
+      }
+      return true;
+    }
+  } catch (e, s) {
+    _logger.severe("Could not delete local files", e, s);
+    showToast(context, S.of(context).couldNotFreeUpSpace);
+    return false;
   }
 }
 

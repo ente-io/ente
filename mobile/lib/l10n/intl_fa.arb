@@ -307,14 +307,5 @@
   "developerSettings": "تنظیمات توسعه‌دهنده",
   "search": "جستجو",
   "whatsNew": "تغییرات جدید",
-  "reviewSuggestions": "مرور پیشنهادها",
-  "personName": "Person name",
-  "addNewPerson": "Add new person",
-  "addNameOrMerge": "Add name or merge",
-  "mergeWithExisting": "Merge with existing",
-  "newPerson": "New person",
-  "addName": "Add name",
-  "add": "Add",
-  "extraPhotosFoundFor": "Extra photos found for $text",
-  "extraPhotosFound": "Extra photos found"
+  "reviewSuggestions": "مرور پیشنهادها"
 }

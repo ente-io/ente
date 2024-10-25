@@ -108,8 +108,12 @@ class SemanticSearchService {
   }
 
   Future<List<EmbeddingVector>> getClipVectors() async {
-    _logger.info("Pulling cached clip embeddings");
+    if (_cachedImageEmbeddingVectors != null) {
+      return _cachedImageEmbeddingVectors!;
+    }
     _cachedImageEmbeddingVectors ??= MLDataDB.instance.getAllClipVectors();
+    _logger.info("read all embeddings from DB");
+
     return _cachedImageEmbeddingVectors!;
   }
 

@@ -49,7 +49,7 @@ class _AdvancedSectionWidgetState extends State<AdvancedSectionWidget> {
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
-            final locale = await getLocale();
+            final locale = (await getLocale())!;
             // ignore: unawaited_futures
             routeToPage(
               context,

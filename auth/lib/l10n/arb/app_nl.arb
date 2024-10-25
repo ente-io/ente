@@ -19,6 +19,20 @@
   "pleaseVerifyDetails": "Controleer uw gegevens en probeer het opnieuw",
   "codeIssuerHint": "Uitgever",
   "codeSecretKeyHint": "Geheime Sleutel",
+  "secret": "Geheim",
+  "all": "Alle",
+  "notes": "Notities",
+  "notesLengthLimit": "Notities kunnen maximaal {count} tekens lang zijn",
+  "@notesLengthLimit": {
+    "description": "Text to indicate the maximum number of characters allowed for notes",
+    "placeholders": {
+      "count": {
+        "description": "The maximum number of characters allowed for notes",
+        "type": "int",
+        "example": "100"
+      }
+    }
+  },
   "codeAccountHint": "Account (u@domein.nl)",
   "codeTagHint": "Label",
   "accountKeyType": "Type sleutel",
@@ -34,6 +48,9 @@
   "nextTotpTitle": "volgende",
   "deleteCodeTitle": "Code verwijderen?",
   "deleteCodeMessage": "Weet u zeker dat u deze code wilt verwijderen? Deze actie is onomkeerbaar.",
+  "trashCode": "Verwijder code?",
+  "trashCodeMessage": "Weet je zeker dat je de code voor {account} wilt verwijderen?",
+  "trash": "Prullenbak",
   "viewLogsAction": "Bekijk logs",
   "sendLogsDescription": "Hiermee zullen logs verzonden worden om ons te helpen uw probleem op te lossen. Hoewel we voorzorgsmaatregelen nemen om ervoor te zorgen dat gevoelige informatie niet wordt gelogd, raden we u aan deze logs te bekijken voordat u ze deelt.",
   "preparingLogsTitle": "Logs aan het voorbereiden...",
@@ -100,6 +117,7 @@
   "emailVerificationToggle": "E-mailverificatie",
   "emailVerificationEnableWarning": "Als u de 2FA van uw e-mail bij ons opslaat, kan de verificatie van die e-mail resulteren in een riskante impasse. Als u bent uitgesloten van een van beide diensten, kunt u zich mogelijk niet meer aanmelden bij de andere.",
   "authToChangeEmailVerificationSetting": "Gelieve te verifiëren om de e-mailverificatie te wijzigen",
+  "authenticateGeneric": "Graag verifiëren",
   "authToViewYourRecoveryKey": "Graag verifiëren om uw herstelsleutel te bekijken",
   "authToChangeYourEmail": "Graag verifiëren om je e-mailadres te wijzigen",
   "authToChangeYourPassword": "Graag verifiëren om je wachtwoord te wijzigen",
@@ -127,6 +145,8 @@
   "leaveFamily": "Familie verlaten",
   "leaveFamilyMessage": "Weet je zeker dat je het familie-plan wil verlaten?",
   "inFamilyPlanMessage": "Je hebt een familie-plan!",
+  "hintForMobile": "Druk lang op een code om te bewerken of te verwijderen.",
+  "hintForDesktop": "Klik met de rechtermuisknop op een code om te bewerken of te verwijderen.",
   "scan": "Scannen",
   "scanACode": "Scan een code",
   "verify": "Verifiëren",
@@ -182,6 +202,10 @@
   "scanAQrCode": "Scan QR-code",
   "enterDetailsManually": "Voer gegevens handmatig in",
   "edit": "Bewerken",
+  "share": "Delen",
+  "shareCodes": "Codes delen",
+  "shareCodesDuration": "Selecteer de duur waarvoor je codes wilt delen.",
+  "restore": "Herstellen",
   "copiedToClipboard": "Gekopieerd naar klembord",
   "copiedNextToClipboard": "Volgende code gekopieerd naar klembord",
   "error": "Foutmelding",
@@ -335,6 +359,7 @@
   "sigInBackupReminder": "Exporteer de codes zodat je een back-up hebt waarvandaan je kan herstellen.",
   "offlineModeWarning": "Je hebt ervoor gekozen om verder te gaan zonder back-ups. Neem handmatige back-ups om ervoor te zorgen dat jouw codes veilig zijn.",
   "showLargeIcons": "Grote iconen",
+  "compactMode": "Compacte weergave",
   "shouldHideCode": "Verberg codes",
   "doubleTapToViewHiddenCode": "Je kunt dubbel klikken op een item om code te bekijken",
   "focusOnSearchBar": "Focus zoekveld na starten app",
@@ -455,5 +480,9 @@
   "pinLock": "Pin vergrendeling",
   "enterPin": "Pin invoeren",
   "setNewPin": "Nieuwe pin instellen",
-  "importFailureDescNew": "Kon het geselecteerde bestand niet lezen."
+  "importFailureDescNew": "Kon het geselecteerde bestand niet lezen.",
+  "appLockNotEnabled": "App-vergrendeling niet ingeschakeld",
+  "appLockNotEnabledDescription": "Schakel app vergrendeling in vanuit Beveiliging > App vergrendeling",
+  "authToViewPasskey": "Verifieer uzelf om uw passkey te bekijken",
+  "appLockOfflineModeWarning": "Je hebt ervoor gekozen om verder te gaan zonder backups. Als je jouw applock vergeet, wordt je uitgesloten van toegang tot je gegevens."
 }

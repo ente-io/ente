@@ -30,6 +30,8 @@ class MLDataDB {
 
   static const _databaseName = "ente.ml.db";
 
+  static Logger get logger => _logger;
+
   // static const _databaseVersion = 1;
 
   MLDataDB._privateConstructor();

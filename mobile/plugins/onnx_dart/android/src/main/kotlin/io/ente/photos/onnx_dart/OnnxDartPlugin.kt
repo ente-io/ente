@@ -172,30 +172,20 @@ class OnnxDartPlugin: FlutterPlugin, MethodCallHandler {
 
       try {
         val env = OrtEnvironment.getEnvironment()
-        var inputTensorShape: LongArray = longArrayOf(1, 112, 112, 3)
+        var inputTensorShape: LongArray = longArrayOf(1, 3, 640, 640)
         when (modelType) {
           ModelType.MobileFaceNet -> {
             val totalSize = inputDataFloat!!.size.toLong() / FACENET_SINGLE_INPUT_SIZE
-            if (totalSize != 1.toLong()) {
             inputTensorShape = longArrayOf(totalSize, 112, 112, 3)
-            }
           }
           ModelType.ClipImageEncoder -> {
-            if (inputShapeArray != null) {
-              inputTensorShape = inputShapeArray.map { it.toLong() }.toLongArray()
-            } else {
-              result.error("INVALID_ARGUMENT", "Input shape is missing for clip image input", null)
-            }
+            inputTensorShape = longArrayOf(1, 3, 256, 256)
           }
           ModelType.ClipTextEncoder -> {
             inputTensorShape = longArrayOf(1, 77)
           }
           ModelType.YOLOv5Face -> {
-            if (inputShapeArray != null) {
-              inputTensorShape = inputShapeArray.map { it.toLong() }.toLongArray()
-            } else {
-              result.error("INVALID_ARGUMENT", "Input shape is missing for YOLOv5Face input", null)
-            }
+            inputTensorShape = longArrayOf(1, 3, 640, 640)
           }
         }
 
@@ -212,11 +202,20 @@ class OnnxDartPlugin: FlutterPlugin, MethodCallHandler {
             inputs["input"] = inputTensor
         }
         val outputs = session.run(inputs)
-        val outputTensor = (outputs[0].value as Array<FloatArray>)
-        val flatList = outputTensor.flattenToFloatArray()
-        withContext(Dispatchers.Main) {
-          result.success(flatList)
+        if (modelType == ModelType.YOLOv5Face) {
+          val outputTensor = (outputs[0].value as Array<Array<FloatArray>>).get(0)
+          val flatList = outputTensor.flattenToFloatArray()
+          withContext(Dispatchers.Main) {
+            result.success(flatList)
+          }
+        } else {
+          val outputTensor = (outputs[0].value as Array<FloatArray>)
+          val flatList = outputTensor.flattenToFloatArray()
+          withContext(Dispatchers.Main) {
+            result.success(flatList)
+          }
         }
+
         outputs.close()
         inputTensor.close()
       } catch (e: OrtException) {
@@ -234,7 +233,6 @@ class OnnxDartPlugin: FlutterPlugin, MethodCallHandler {
 
   private fun createSession(env: OrtEnvironment, modalPath: String): OrtSession? {
     val sessionOptions = OrtSession.SessionOptions()
-    sessionOptions.addCPU(true)
     sessionOptions.setInterOpNumThreads(1)
     sessionOptions.setIntraOpNumThreads(1)
     sessionOptions.setOptimizationLevel(OrtSession.SessionOptions.OptLevel.ALL_OPT)

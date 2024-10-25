@@ -1343,14 +1343,5 @@
   "mostRecent": "最近",
   "mostRelevant": "最相关",
   "loadingYourPhotos": "正在加载您的照片...",
-  "processingImport": "正在处理 {folderName}...",
-  "personName": "Person name",
-  "addNewPerson": "Add new person",
-  "addNameOrMerge": "Add name or merge",
-  "mergeWithExisting": "Merge with existing",
-  "newPerson": "New person",
-  "addName": "Add name",
-  "add": "Add",
-  "extraPhotosFoundFor": "Extra photos found for $text",
-  "extraPhotosFound": "Extra photos found"
+  "processingImport": "正在处理 {folderName}..."
 }

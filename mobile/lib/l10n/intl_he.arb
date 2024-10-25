@@ -816,14 +816,5 @@
   "addPhotos": "הוסף תמונות",
   "create": "צור",
   "viewAll": "הצג הכל",
-  "hiding": "מחביא...",
-  "personName": "Person name",
-  "addNewPerson": "Add new person",
-  "addNameOrMerge": "Add name or merge",
-  "mergeWithExisting": "Merge with existing",
-  "newPerson": "New person",
-  "addName": "Add name",
-  "add": "Add",
-  "extraPhotosFoundFor": "Extra photos found for $text",
-  "extraPhotosFound": "Extra photos found"
+  "hiding": "מחביא..."
 }

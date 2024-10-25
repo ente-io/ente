@@ -29,7 +29,7 @@ import {
     CollectionSummaryOrder,
     CollectionsSortBy,
 } from "@/new/photos/services/collection/ui";
-import { groupFilesBasedOnCollectionID } from "@/new/photos/services/file";
+import { groupFilesByCollectionID } from "@/new/photos/services/file";
 import { getLocalFiles, sortFiles } from "@/new/photos/services/files";
 import { updateMagicMetadata } from "@/new/photos/services/magic-metadata";
 import type { FamilyData } from "@/new/photos/services/user";
@@ -586,7 +586,7 @@ export const removeUserFiles = async (
         const toRemoveFilesCopiesInOtherCollections = allFiles.filter((f) => {
             return toRemoveFilesIds.has(f.id);
         });
-        const groupiedFiles = groupFilesBasedOnCollectionID(
+        const groupedFiles = groupFilesByCollectionID(
             toRemoveFilesCopiesInOtherCollections,
         );
 
@@ -594,7 +594,7 @@ export const removeUserFiles = async (
         const collectionsMap = new Map(collections.map((c) => [c.id, c]));
         const user: User = getData(LS_KEYS.USER);
 
-        for (const [targetCollectionID, files] of groupiedFiles.entries()) {
+        for (const [targetCollectionID, files] of groupedFiles.entries()) {
             const targetCollection = collectionsMap.get(targetCollectionID);
             if (
                 !isValidMoveTarget(sourceCollectionID, targetCollection, user)
@@ -1003,7 +1003,7 @@ export const sortCollectionSummaries = (
                         compareCollectionsLatestFile(b.latestFile, a.latestFile)
                     );
                 case "updation-time-desc":
-                    return b.updationTime - a.updationTime;
+                    return (b.updationTime ?? 0) - (a.updationTime ?? 0);
             }
         })
         .sort((a, b) => b.order ?? 0 - a.order ?? 0)
@@ -1013,7 +1013,10 @@ export const sortCollectionSummaries = (
                 CollectionSummaryOrder.get(b.type),
         );
 
-function compareCollectionsLatestFile(first: EnteFile, second: EnteFile) {
+function compareCollectionsLatestFile(
+    first: EnteFile | undefined,
+    second: EnteFile | undefined,
+) {
     if (!first) {
         return 1;
     } else if (!second) {
@@ -1070,8 +1073,8 @@ export async function moveToHiddenCollection(files: EnteFile[]) {
         if (!hiddenCollection) {
             hiddenCollection = await createHiddenCollection();
         }
-        const groupiedFiles = groupFilesBasedOnCollectionID(files);
-        for (const [collectionID, files] of groupiedFiles.entries()) {
+        const groupedFiles = groupFilesByCollectionID(files);
+        for (const [collectionID, files] of groupedFiles.entries()) {
             if (collectionID === hiddenCollection.id) {
                 continue;
             }
@@ -1088,8 +1091,8 @@ export async function unhideToCollection(
     files: EnteFile[],
 ) {
     try {
-        const groupiedFiles = groupFilesBasedOnCollectionID(files);
-        for (const [collectionID, files] of groupiedFiles.entries()) {
+        const groupedFiles = groupFilesByCollectionID(files);
+        for (const [collectionID, files] of groupedFiles.entries()) {
             if (collectionID === collection.id) {
                 continue;
             }
