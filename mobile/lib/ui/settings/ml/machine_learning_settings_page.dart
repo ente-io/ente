@@ -280,7 +280,7 @@ class _MachineLearningSettingsPageState
                   title: S.of(context).localIndexing,
                 ),
                 trailingWidget: ToggleSwitchWidget(
-                  value: () => localSettings.isMLIndexingEnabled,
+                  value: () => localSettings.isMLLocalIndexingEnabled,
                   onChanged: () async {
                     final localIndexing =
                         await localSettings.toggleLocalMLIndexing();
@@ -309,7 +309,7 @@ class _MachineLearningSettingsPageState
           height: 12,
         ),
         MLIndexingIsolate.instance.areModelsDownloaded ||
-                !localSettings.isMLIndexingEnabled
+                !localSettings.isMLLocalIndexingEnabled
             ? const MLStatusWidget()
             : const ModelLoadingState(),
       ],

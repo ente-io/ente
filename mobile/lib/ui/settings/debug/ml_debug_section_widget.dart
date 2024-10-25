@@ -147,7 +147,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
             title: "Local indexing",
           ),
           trailingWidget: ToggleSwitchWidget(
-            value: () => localSettings.isMLIndexingEnabled,
+            value: () => localSettings.isMLLocalIndexingEnabled,
             onChanged: () async {
               final localIndexing = await localSettings.toggleLocalMLIndexing();
               if (localIndexing) {

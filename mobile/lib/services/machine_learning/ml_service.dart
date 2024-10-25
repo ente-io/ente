@@ -101,7 +101,7 @@ class MLService {
   }
 
   bool canFetch() {
-    if (localSettings.isMLIndexingEnabled) return true;
+    if (localSettings.isMLLocalIndexingEnabled) return true;
     if (lastRemoteFetch == null) {
       lastRemoteFetch = DateTime.now().millisecondsSinceEpoch;
       return true;
@@ -196,7 +196,7 @@ class MLService {
 
       stream:
       await for (final chunk in instructionStream) {
-        if (!localSettings.isMLIndexingEnabled) {
+        if (!localSettings.isMLLocalIndexingEnabled) {
           await MLIndexingIsolate.instance.cleanupLocalIndexingModels();
           continue;
         } else if (!await canUseHighBandwidth()) {
@@ -560,7 +560,7 @@ class MLService {
   void _logStatus() {
     final String status = '''
     isInternalUser: ${flagService.internalUser}
-    Local indexing: ${localSettings.isMLIndexingEnabled}
+    Local indexing: ${localSettings.isMLLocalIndexingEnabled}
     canRunMLController: $_mlControllerStatus
     isIndexingOrClusteringRunning: $_isIndexingOrClusteringRunning
     shouldPauseIndexingAndClustering: $_shouldPauseIndexingAndClustering

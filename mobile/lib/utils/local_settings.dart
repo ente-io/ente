@@ -11,7 +11,7 @@ enum AlbumSortKey {
 class LocalSettings {
   static const kCollectionSortPref = "collection_sort_pref";
   static const kPhotoGridSize = "photo_grid_size";
-  static const _kisMLIndexingEnabled = "ls.enable_ml_idx";
+  static const _kisMLLocalIndexingEnabled = "ls.ml_local_indexing";
   static const kRateUsShownCount = "rate_us_shown_count";
   static const kEnableMultiplePart = "ls.enable_multiple_part";
   static const kRateUsPromptThreshold = 2;
@@ -58,8 +58,8 @@ class LocalSettings {
     return getRateUsShownCount() < kRateUsPromptThreshold;
   }
 
-  bool get isMLIndexingEnabled =>
-      _prefs.getBool(_kisMLIndexingEnabled) ?? enoughRamForLocalIndexing;
+  bool get isMLLocalIndexingEnabled =>
+      _prefs.getBool(_kisMLLocalIndexingEnabled) ?? enoughRamForLocalIndexing;
 
   bool get userEnabledMultiplePart =>
       _prefs.getBool(kEnableMultiplePart) ?? false;
@@ -71,8 +71,8 @@ class LocalSettings {
 
   /// toggleFaceIndexing toggles the face indexing setting and returns the new value
   Future<bool> toggleLocalMLIndexing() async {
-    await _prefs.setBool(_kisMLIndexingEnabled, !isMLIndexingEnabled);
-    return isMLIndexingEnabled;
+    await _prefs.setBool(_kisMLLocalIndexingEnabled, !isMLLocalIndexingEnabled);
+    return isMLLocalIndexingEnabled;
   }
 
   //#region todo:(NG) remove this section, only needed for internal testing to see
