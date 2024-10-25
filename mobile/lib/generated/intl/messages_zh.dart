@@ -431,6 +431,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "collectPhotosDescription":
             MessageLookupByLibrary.simpleMessage("创建一个您的朋友可以上传原图的链接。"),
         "color": MessageLookupByLibrary.simpleMessage("颜色"),
+        "configuration": MessageLookupByLibrary.simpleMessage("Configuration"),
         "confirm": MessageLookupByLibrary.simpleMessage("确认"),
         "confirm2FADisable":
             MessageLookupByLibrary.simpleMessage("您确定要禁用双重认证吗？"),
@@ -820,6 +821,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "loadingYourPhotos":
             MessageLookupByLibrary.simpleMessage("正在加载您的照片..."),
         "localGallery": MessageLookupByLibrary.simpleMessage("本地相册"),
+        "localIndexing": MessageLookupByLibrary.simpleMessage("Local indexing"),
         "localSyncErrorMessage": MessageLookupByLibrary.simpleMessage(
             "似乎出了点问题，因为本地照片同步耗时比预期的要长。请联系我们的支持团队"),
         "location": MessageLookupByLibrary.simpleMessage("地理位置"),

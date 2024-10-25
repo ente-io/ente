@@ -1352,5 +1352,7 @@
   "addName": "Dodaj nazwę",
   "add": "Dodaj",
   "extraPhotosFoundFor": "Znaleziono dodatkowe zdjęcia dla $text",
-  "extraPhotosFound": "Znaleziono dodatkowe zdjęcia"
+  "extraPhotosFound": "Znaleziono dodatkowe zdjęcia",
+  "configuration": "Configuration",
+  "localIndexing": "Local indexing"
 }

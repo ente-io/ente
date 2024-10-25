@@ -487,6 +487,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "collectPhotos":
             MessageLookupByLibrary.simpleMessage("Собрать фотографии"),
         "color": MessageLookupByLibrary.simpleMessage("Цвет"),
+        "configuration": MessageLookupByLibrary.simpleMessage("Configuration"),
         "confirm": MessageLookupByLibrary.simpleMessage("Подтвердить"),
         "confirm2FADisable": MessageLookupByLibrary.simpleMessage(
             "Вы уверены, что хотите отключить двухфакторную аутентификацию?"),
@@ -953,6 +954,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Загрузка моделей..."),
         "localGallery":
             MessageLookupByLibrary.simpleMessage("Локальная галерея"),
+        "localIndexing": MessageLookupByLibrary.simpleMessage("Local indexing"),
         "location": MessageLookupByLibrary.simpleMessage("Местоположение"),
         "locationName":
             MessageLookupByLibrary.simpleMessage("Название локации"),

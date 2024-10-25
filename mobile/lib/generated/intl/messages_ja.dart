@@ -448,6 +448,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "collectPhotosDescription":
             MessageLookupByLibrary.simpleMessage("友達が写真をアップロードできるリンクを作成できます"),
         "color": MessageLookupByLibrary.simpleMessage("色"),
+        "configuration": MessageLookupByLibrary.simpleMessage("Configuration"),
         "confirm": MessageLookupByLibrary.simpleMessage("確認"),
         "confirm2FADisable":
             MessageLookupByLibrary.simpleMessage("2 要素認証を無効にしてよろしいですか。"),
@@ -862,6 +863,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "loadingYourPhotos":
             MessageLookupByLibrary.simpleMessage("写真を読み込んでいます..."),
         "localGallery": MessageLookupByLibrary.simpleMessage("デバイス上のギャラリー"),
+        "localIndexing": MessageLookupByLibrary.simpleMessage("Local indexing"),
         "localSyncErrorMessage": MessageLookupByLibrary.simpleMessage(
             "ローカルの写真の同期には予想以上の時間がかかっています。問題が発生したようです。サポートチームまでご連絡ください。"),
         "location": MessageLookupByLibrary.simpleMessage("場所"),

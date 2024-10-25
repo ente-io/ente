@@ -173,6 +173,7 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Samarbetspartner kan lägga till foton och videor till det delade albumet."),
         "collectPhotos": MessageLookupByLibrary.simpleMessage("Samla in foton"),
         "color": MessageLookupByLibrary.simpleMessage("Färg"),
+        "configuration": MessageLookupByLibrary.simpleMessage("Configuration"),
         "confirm": MessageLookupByLibrary.simpleMessage("Bekräfta"),
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("Bekräfta radering av konto"),
@@ -329,6 +330,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "linkHasExpired":
             MessageLookupByLibrary.simpleMessage("Länk har upphört att gälla"),
         "linkNeverExpires": MessageLookupByLibrary.simpleMessage("Aldrig"),
+        "localIndexing": MessageLookupByLibrary.simpleMessage("Local indexing"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("Lås"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Logga in"),
         "loginSessionExpiredDetails": MessageLookupByLibrary.simpleMessage(

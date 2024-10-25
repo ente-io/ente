@@ -400,6 +400,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "collectPhotos":
             MessageLookupByLibrary.simpleMessage("Colectare fotografii"),
         "color": MessageLookupByLibrary.simpleMessage("Culoare"),
+        "configuration": MessageLookupByLibrary.simpleMessage("Configuration"),
         "confirm": MessageLookupByLibrary.simpleMessage("Confirmare"),
         "confirm2FADisable": MessageLookupByLibrary.simpleMessage(
             "Sigur doriți dezactivarea autentificării cu doi factori?"),
@@ -794,6 +795,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "loadingModel":
             MessageLookupByLibrary.simpleMessage("Se descarcă modelele..."),
         "localGallery": MessageLookupByLibrary.simpleMessage("Galerie locală"),
+        "localIndexing": MessageLookupByLibrary.simpleMessage("Local indexing"),
         "location": MessageLookupByLibrary.simpleMessage("Locație"),
         "locationName": MessageLookupByLibrary.simpleMessage("Numele locației"),
         "locationTagFeatureDescription": MessageLookupByLibrary.simpleMessage(

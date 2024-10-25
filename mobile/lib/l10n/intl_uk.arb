@@ -1342,5 +1342,7 @@
   "mostRecent": "Останні",
   "mostRelevant": "Найактуальніші",
   "loadingYourPhotos": "Завантажуємо фотографії...",
-  "processingImport": "Оброблюємо «{folderName}»..."
+  "processingImport": "Оброблюємо «{folderName}»...",
+  "configuration": "Configuration",
+  "localIndexing": "Local indexing"
 }

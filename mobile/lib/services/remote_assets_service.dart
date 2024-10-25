@@ -128,7 +128,14 @@ class RemoteAssetsService {
       "https://models.ente.io/yolov5s_face_opset18_rgba_opt_nosplits.onnx",
     ];
 
-    for (final remotePath in oldModelNames) {
+    await cleanupSelectedModels(oldModelNames);
+
+    checkRemovedOldAssets = true;
+    _logger.info("Old ML models cleaned up");
+  }
+
+  Future<void> cleanupSelectedModels(List<String> modelRemotePaths) async {
+    for (final remotePath in modelRemotePaths) {
       final localPath = await _getLocalPath(remotePath);
       if (File(localPath).existsSync()) {
         _logger.info(
@@ -137,8 +144,5 @@ class RemoteAssetsService {
         await File(localPath).delete();
       }
     }
-
-    checkRemovedOldAssets = true;
-    _logger.info("Old ML models cleaned up");
   }
 }

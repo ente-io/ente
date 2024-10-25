@@ -110,6 +110,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "همکاران می‌توانند عکس‌ها و ویدیوها را به آلبوم اشتراک گذاری شده اضافه کنند."),
         "color": MessageLookupByLibrary.simpleMessage("رنگ"),
+        "configuration": MessageLookupByLibrary.simpleMessage("Configuration"),
         "confirm": MessageLookupByLibrary.simpleMessage("تایید"),
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("تایید حذف حساب کاربری"),
@@ -241,6 +242,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "lightTheme": MessageLookupByLibrary.simpleMessage("روشن"),
         "loadMessage2": MessageLookupByLibrary.simpleMessage(
             "ما تا کنون بیش از ۳۰ میلیون خاطره را حفظ کرده‌ایم"),
+        "localIndexing": MessageLookupByLibrary.simpleMessage("Local indexing"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("قفل"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("ورود"),
         "loggingOut": MessageLookupByLibrary.simpleMessage("در حال خروج..."),

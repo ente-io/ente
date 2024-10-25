@@ -28,6 +28,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "आपका अकाउंट हटाने का मुख्य कारण क्या है?"),
         "cancel": MessageLookupByLibrary.simpleMessage("रद्द करें"),
+        "configuration": MessageLookupByLibrary.simpleMessage("Configuration"),
         "confirmAccountDeletion": MessageLookupByLibrary.simpleMessage(
             "अकाउंट डिलीट करने की पुष्टि करें"),
         "confirmPassword":
@@ -75,6 +76,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("अमान्य ईमेल ऐड्रेस"),
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
             "कृपया हमें इस जानकारी के लिए सहायता करें"),
+        "localIndexing": MessageLookupByLibrary.simpleMessage("Local indexing"),
         "noRecoveryKey":
             MessageLookupByLibrary.simpleMessage("रिकवरी कुंजी नहीं है?"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(

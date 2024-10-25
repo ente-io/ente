@@ -1044,5 +1044,7 @@
   },
   "enable": "Activare",
   "enabled": "Activat",
-  "moreDetails": "Mai multe detalii"
+  "moreDetails": "Mai multe detalii",
+  "configuration": "Configuration",
+  "localIndexing": "Local indexing"
 }

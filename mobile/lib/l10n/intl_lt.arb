@@ -140,5 +140,7 @@
   "newPerson": "Naujas asmuo",
   "add": "Pridėti",
   "extraPhotosFoundFor": "Rastos papildomos nuotraukos, skirtos $text",
-  "extraPhotosFound": "Rastos papildomos nuotraukos"
+  "extraPhotosFound": "Rastos papildomos nuotraukos",
+  "configuration": "Configuration",
+  "localIndexing": "Local indexing"
 }

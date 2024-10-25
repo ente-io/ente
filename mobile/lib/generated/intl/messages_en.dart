@@ -496,6 +496,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "collectPhotosDescription": MessageLookupByLibrary.simpleMessage(
             "Create a link where your friends can upload photos in original quality."),
         "color": MessageLookupByLibrary.simpleMessage("Color"),
+        "configuration": MessageLookupByLibrary.simpleMessage("Configuration"),
         "confirm": MessageLookupByLibrary.simpleMessage("Confirm"),
         "confirm2FADisable": MessageLookupByLibrary.simpleMessage(
             "Are you sure you want to disable two-factor authentication?"),
@@ -972,6 +973,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "loadingYourPhotos":
             MessageLookupByLibrary.simpleMessage("Loading your photos..."),
         "localGallery": MessageLookupByLibrary.simpleMessage("Local gallery"),
+        "localIndexing": MessageLookupByLibrary.simpleMessage("Local indexing"),
         "localSyncErrorMessage": MessageLookupByLibrary.simpleMessage(
             "Looks like something went wrong since local photos sync is taking more time than expected. Please reach out to our support team"),
         "location": MessageLookupByLibrary.simpleMessage("Location"),

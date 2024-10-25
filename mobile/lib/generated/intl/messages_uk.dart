@@ -501,6 +501,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "collectPhotosDescription": MessageLookupByLibrary.simpleMessage(
             "Створіть посилання, за яким ваші друзі зможуть завантажувати фотографії в оригінальній якості."),
         "color": MessageLookupByLibrary.simpleMessage("Колір"),
+        "configuration": MessageLookupByLibrary.simpleMessage("Configuration"),
         "confirm": MessageLookupByLibrary.simpleMessage("Підтвердити"),
         "confirm2FADisable": MessageLookupByLibrary.simpleMessage(
             "Ви впевнені, що хочете вимкнути двоетапну перевірку?"),
@@ -991,6 +992,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Завантажуємо фотографії..."),
         "localGallery":
             MessageLookupByLibrary.simpleMessage("Локальна галерея"),
+        "localIndexing": MessageLookupByLibrary.simpleMessage("Local indexing"),
         "localSyncErrorMessage": MessageLookupByLibrary.simpleMessage(
             "Схоже, щось пішло не так, оскільки локальна синхронізація фотографій займає більше часу, ніж очікувалося. Зверніться до нашої служби підтримки"),
         "location": MessageLookupByLibrary.simpleMessage("Розташування"),

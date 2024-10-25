@@ -1343,5 +1343,7 @@
   "mostRecent": "Più recenti",
   "mostRelevant": "Più rilevanti",
   "loadingYourPhotos": "Caricando le tue foto...",
-  "processingImport": "Elaborando {folderName}..."
+  "processingImport": "Elaborando {folderName}...",
+  "configuration": "Configuration",
+  "localIndexing": "Local indexing"
 }

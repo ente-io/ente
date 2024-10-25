@@ -27,6 +27,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "askDeleteReason":
             MessageLookupByLibrary.simpleMessage("계정을 삭제하는 가장 큰 이유가 무엇인가요?"),
         "cancel": MessageLookupByLibrary.simpleMessage("닫기"),
+        "configuration": MessageLookupByLibrary.simpleMessage("Configuration"),
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("계정 삭제 확인"),
         "deleteAccount": MessageLookupByLibrary.simpleMessage("계정 삭제"),
@@ -40,6 +41,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "feedback": MessageLookupByLibrary.simpleMessage("피드백"),
         "invalidEmailAddress":
             MessageLookupByLibrary.simpleMessage("잘못된 이메일 주소"),
+        "localIndexing": MessageLookupByLibrary.simpleMessage("Local indexing"),
         "verify": MessageLookupByLibrary.simpleMessage("인증"),
         "yourAccountHasBeenDeleted":
             MessageLookupByLibrary.simpleMessage("계정이 삭제되었습니다.")

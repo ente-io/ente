@@ -39,6 +39,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Змяніць пароль"),
         "checkInboxAndSpamFolder": MessageLookupByLibrary.simpleMessage(
             "Праверце свае ўваходныя лісты (і спам) для завяршэння праверкі"),
+        "configuration": MessageLookupByLibrary.simpleMessage("Configuration"),
         "confirmAccountDeletion": MessageLookupByLibrary.simpleMessage(
             "Пацвердзіць выдаленне ўліковага запісу"),
         "confirmDeletePrompt": MessageLookupByLibrary.simpleMessage(
@@ -94,6 +95,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Памылковы адрас электроннай пошты"),
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
             "Калі ласка, дапамажыце нам з гэтай інфармацыяй"),
+        "localIndexing": MessageLookupByLibrary.simpleMessage("Local indexing"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Умераны"),
         "noRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Няма ключа аднаўлення?"),
