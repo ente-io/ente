@@ -107,7 +107,7 @@ Future<List<EnteFile>> getFilteredFiles(
   return filteredFiles;
 }
 
-void curateFilters(
+Future<void> curateFilters(
   SearchFilterDataProvider searchFilterDataProvider,
   List<EnteFile> files,
   BuildContext context,

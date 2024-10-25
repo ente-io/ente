@@ -7,6 +7,7 @@ import "package:photos/events/local_photos_updated_event.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file_load_result.dart";
 import "package:photos/models/selected_files.dart";
+import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
@@ -33,6 +34,7 @@ class _HierarchicalSearchGalleryState extends State<HierarchicalSearchGallery> {
   late SearchFilterDataProvider? _searchFilterDataProvider;
   List<EnteFile> _filterdFiles = <EnteFile>[];
   int _filteredFilesVersion = 0;
+  final _isLoading = ValueNotifier<bool>(false);
 
   @override
   void initState() {
@@ -79,24 +81,24 @@ class _HierarchicalSearchGalleryState extends State<HierarchicalSearchGallery> {
       return;
     }
 
+    _isLoading.value = true;
     final filterdFiles = await getFilteredFiles(filters);
-    _setFilteredFilesAndReload(filterdFiles);
-    curateFilters(_searchFilterDataProvider!, filterdFiles, context);
+
+    _setFilteredFiles(filterdFiles);
+    await curateFilters(_searchFilterDataProvider!, filterdFiles, context);
+    _isLoading.value = false;
   }
 
-  void _setFilteredFilesAndReload(List<EnteFile> files) {
-    if (mounted) {
-      setState(() {
-        _filterdFiles = files;
-        GalleryFilesState.of(context).setGalleryFiles = files;
-        _filteredFilesVersion++;
-      });
-    }
+  void _setFilteredFiles(List<EnteFile> files) {
+    _filterdFiles = files;
+    GalleryFilesState.of(context).setGalleryFiles = files;
+    _filteredFilesVersion++;
   }
 
   @override
   void dispose() {
     _filesUpdatedEvent?.cancel();
+    _isLoading.dispose();
     if (_searchFilterDataProvider != null) {
       _searchFilterDataProvider!
           .removeListener(fromApplied: true, listener: _onFiltersUpdated);
@@ -106,26 +108,43 @@ class _HierarchicalSearchGalleryState extends State<HierarchicalSearchGallery> {
 
   @override
   Widget build(BuildContext context) {
-    return Gallery(
-      key: ValueKey(_filteredFilesVersion),
-      asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
-        final files = _filterdFiles
-            .where(
-              (file) =>
-                  file.creationTime! >= creationStartTime &&
-                  file.creationTime! <= creationEndTime,
-            )
-            .toList();
-        return FileLoadResult(files, false);
+    return ValueListenableBuilder(
+      valueListenable: _isLoading,
+      builder: (context, isLoading, _) {
+        return AnimatedSwitcher(
+          duration: const Duration(milliseconds: 500),
+          switchInCurve: Curves.easeInOutExpo,
+          switchOutCurve: Curves.easeInOutExpo,
+          child: isLoading
+              ? const EnteLoadingWidget()
+              : Gallery(
+                  key: ValueKey(_filteredFilesVersion),
+                  asyncLoader: (
+                    creationStartTime,
+                    creationEndTime, {
+                    limit,
+                    asc,
+                  }) async {
+                    final files = _filterdFiles
+                        .where(
+                          (file) =>
+                              file.creationTime! >= creationStartTime &&
+                              file.creationTime! <= creationEndTime,
+                        )
+                        .toList();
+                    return FileLoadResult(files, false);
+                  },
+                  tagPrefix: widget.tagPrefix,
+                  reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
+                  removalEventTypes: const {
+                    EventType.deletedFromRemote,
+                    EventType.deletedFromEverywhere,
+                    EventType.hide,
+                  },
+                  selectedFiles: widget.selectedFiles,
+                ),
+        );
       },
-      tagPrefix: widget.tagPrefix,
-      reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
-      removalEventTypes: const {
-        EventType.deletedFromRemote,
-        EventType.deletedFromEverywhere,
-        EventType.hide,
-      },
-      selectedFiles: widget.selectedFiles,
     );
   }
 }
