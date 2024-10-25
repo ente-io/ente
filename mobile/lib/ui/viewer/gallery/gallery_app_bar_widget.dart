@@ -149,7 +149,6 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                 ),
                 builder: (context, isSearching, child) {
                   return AppBar(
-                    leadingWidth: isSearching ? 28 : null,
                     elevation: 0,
                     centerTitle: false,
                     title: isSearching
