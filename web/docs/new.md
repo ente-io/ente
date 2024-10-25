@@ -12,6 +12,9 @@ development, here is a recommended workflow:
 4. Install **node** on your machine. There are myriad ways to do this, here are
    some examples:
 
+    - OS agnostic: Install [NVM](https://github.com/nvm-sh/nvm), then
+      `nvm install 20 && corepack enable`.
+
     - macOS: `brew install node@20`
 
     - Ubuntu: `sudo apt install nodejs npm && sudo npm i -g corepack`
@@ -20,7 +23,6 @@ development, here is a recommended workflow:
    manager (**Yarn**):
 
     ```sh
-
     corepack enable
     ```
 
