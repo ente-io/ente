@@ -126,6 +126,7 @@ class MLIndexingIsolate extends SuperIsolate {
         FaceEmbeddingService.instance.downloadModel(forceRefresh),
         ClipImageEncoder.instance.downloadModel(forceRefresh),
       ]);
+      indexingModelsCleanedLocally = false;
       areModelsDownloaded = true;
     });
   }
