@@ -28,8 +28,6 @@ class MLIndexingIsolate extends SuperIsolate {
   @override
   bool get shouldAutomaticDispose => true;
 
-  bool? indexingModelsCleanedLocally;
-
   final _initModelLock = Lock();
   final _downloadModelLock = Lock();
 
@@ -126,7 +124,6 @@ class MLIndexingIsolate extends SuperIsolate {
         FaceEmbeddingService.instance.downloadModel(forceRefresh),
         ClipImageEncoder.instance.downloadModel(forceRefresh),
       ]);
-      indexingModelsCleanedLocally = false;
       areModelsDownloaded = true;
     });
   }
@@ -197,7 +194,7 @@ class MLIndexingIsolate extends SuperIsolate {
   }
 
   Future<void> cleanupLocalIndexingModels() async {
-    if (indexingModelsCleanedLocally == true) return;
+    if (!areModelsDownloaded) return;
     await _releaseModels();
 
     final List<String> remoteModelPaths = [];
@@ -211,7 +208,6 @@ class MLIndexingIsolate extends SuperIsolate {
     await RemoteAssetsService.instance.cleanupSelectedModels(remoteModelPaths);
 
     areModelsDownloaded = false;
-    indexingModelsCleanedLocally = true;
   }
 
   Future<void> _releaseModels() async {
