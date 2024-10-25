@@ -75,8 +75,10 @@ class _RecommendedFiltersState extends State<RecommendedFilters> {
                     showBarModalBottomSheet(
                       context: context,
                       builder: (context) {
-                        return FilterOptionsBottomSheet(
-                          _searchFilterDataProvider,
+                        return SafeArea(
+                          child: FilterOptionsBottomSheet(
+                            _searchFilterDataProvider,
+                          ),
                         );
                       },
                       backgroundColor:
