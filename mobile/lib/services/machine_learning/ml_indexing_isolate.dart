@@ -11,6 +11,8 @@ import 'package:photos/services/machine_learning/ml_result.dart';
 import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
 import "package:photos/services/remote_assets_service.dart";
 import "package:photos/utils/ml_util.dart";
+import "package:photos/utils/network_util.dart";
+import "package:synchronized/synchronized.dart";
 
 class MLIndexingIsolate extends SuperIsolate {
   @override
@@ -27,6 +29,11 @@ class MLIndexingIsolate extends SuperIsolate {
   bool get shouldAutomaticDispose => true;
 
   bool? indexingModelsCleanedLocally;
+
+  final _initModelLock = Lock();
+  final _downloadModelLock = Lock();
+
+  bool areModelsDownloaded = false;
 
   @override
   Future<void> onDispose() async {
@@ -89,7 +96,63 @@ class MLIndexingIsolate extends SuperIsolate {
     return result;
   }
 
-  Future<void> loadModels({
+  void triggerModelsDownload() {
+    if (!areModelsDownloaded && !_downloadModelLock.locked) {
+      _logger.info("Models not downloaded, starting download");
+      unawaited(ensureDownloadedModels());
+    }
+  }
+
+  Future<void> ensureDownloadedModels([bool forceRefresh = false]) async {
+    if (_downloadModelLock.locked) {
+      _logger.finest("Download models already in progress");
+      return;
+    }
+    return _downloadModelLock.synchronized(() async {
+      if (areModelsDownloaded) {
+        _logger.finest("Models already downloaded");
+        return;
+      }
+      final goodInternet = await canUseHighBandwidth();
+      if (!goodInternet) {
+        _logger.info(
+          "Cannot download models because user is not connected to wifi",
+        );
+        return;
+      }
+      _logger.info('Downloading models');
+      await Future.wait([
+        FaceDetectionService.instance.downloadModel(forceRefresh),
+        FaceEmbeddingService.instance.downloadModel(forceRefresh),
+        ClipImageEncoder.instance.downloadModel(forceRefresh),
+      ]);
+      areModelsDownloaded = true;
+    });
+  }
+
+  Future<void> ensureLoadedModels(FileMLInstruction instruction) async {
+    return _initModelLock.synchronized(() async {
+      final faceDetectionLoaded = FaceDetectionService.instance.isInitialized;
+      final faceEmbeddingLoaded = FaceEmbeddingService.instance.isInitialized;
+      final facesModelsLoaded = faceDetectionLoaded && faceEmbeddingLoaded;
+      final clipModelsLoaded = ClipImageEncoder.instance.isInitialized;
+
+      final shouldLoadFaces = instruction.shouldRunFaces && !facesModelsLoaded;
+      final shouldLoadClip = instruction.shouldRunClip && !clipModelsLoaded;
+      if (!shouldLoadFaces && !shouldLoadClip) {
+        return;
+      }
+
+      _logger.info(
+        'Loading models. faces: $shouldLoadFaces, clip: $shouldLoadClip',
+      );
+      await MLIndexingIsolate.instance
+          ._loadModels(loadFaces: shouldLoadFaces, loadClip: shouldLoadClip);
+      _logger.info('Models loaded');
+    });
+  }
+
+  Future<void> _loadModels({
     required bool loadFaces,
     required bool loadClip,
   }) async {
@@ -146,6 +209,7 @@ class MLIndexingIsolate extends SuperIsolate {
 
     await RemoteAssetsService.instance.cleanupSelectedModels(remoteModelPaths);
 
+    areModelsDownloaded = false;
     indexingModelsCleanedLocally = true;
   }
 

@@ -55,7 +55,7 @@ class _MachineLearningSettingsPageState
     super.initState();
     _wakeLock.enable();
     machineLearningController.forceOverrideML(turnOn: true);
-    if (!MLService.instance.areModelsDownloaded) {
+    if (!MLIndexingIsolate.instance.areModelsDownloaded) {
       _timer = Timer.periodic(const Duration(seconds: 10), (timer) {
         if (mounted) {
           setState(() {});
@@ -308,7 +308,8 @@ class _MachineLearningSettingsPageState
         const SizedBox(
           height: 12,
         ),
-        MLService.instance.areModelsDownloaded
+        MLIndexingIsolate.instance.areModelsDownloaded ||
+                !localSettings.isMLIndexingEnabled
             ? const MLStatusWidget()
             : const ModelLoadingState(),
       ],
@@ -374,7 +375,7 @@ class _ModelLoadingStateState extends State<ModelLoadingState> {
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 if (snapshot.data!) {
-                  MLService.instance.triggerModelsDownload();
+                  MLIndexingIsolate.instance.triggerModelsDownload();
                   return CaptionedTextWidget(
                     title: S.of(context).loadingModel,
                     key: const ValueKey("loading_model"),

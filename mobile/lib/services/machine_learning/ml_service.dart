@@ -17,19 +17,15 @@ import "package:photos/services/filedata/filedata_service.dart";
 import "package:photos/services/filedata/model/file_data.dart";
 import 'package:photos/services/machine_learning/face_ml/face_clustering/face_clustering_service.dart';
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_db_info_for_clustering.dart";
-import 'package:photos/services/machine_learning/face_ml/face_detection/face_detection_service.dart';
-import 'package:photos/services/machine_learning/face_ml/face_embedding/face_embedding_service.dart';
 import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
 import 'package:photos/services/machine_learning/ml_result.dart';
-import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import "package:photos/services/user_remote_flag_service.dart";
 import "package:photos/utils/ml_util.dart";
 import "package:photos/utils/network_util.dart";
 import "package:photos/utils/ram_check_util.dart";
-import "package:synchronized/synchronized.dart";
 
 class MLService {
   final _logger = Logger("MLService");
@@ -39,11 +35,7 @@ class MLService {
   static final instance = MLService._privateConstructor();
   factory MLService() => instance;
 
-  final _initModelLock = Lock();
-  final _downloadModelLock = Lock();
-
   bool _isInitialized = false;
-  bool areModelsDownloaded = false;
 
   int? lastRemoteFetch;
   static const int _kRemoteFetchCooldownOnLite = 1000 * 60 * 5;
@@ -213,7 +205,7 @@ class MLService {
           );
           break stream;
         } else {
-          await _ensureDownloadedModels();
+          await MLIndexingIsolate.instance.ensureDownloadedModels();
         }
         final futures = <Future<bool>>[];
         for (final instruction in chunk) {
@@ -221,7 +213,7 @@ class MLService {
             _logger.info("indexAllImages() was paused, stopping");
             break stream;
           }
-          await _ensureLoadedModels(instruction);
+          await MLIndexingIsolate.instance.ensureLoadedModels(instruction);
           futures.add(processImage(instruction));
         }
         final awaitedFutures = await Future.wait(futures);
@@ -527,62 +519,6 @@ class MLService {
       );
       return false;
     }
-  }
-
-  void triggerModelsDownload() {
-    if (!areModelsDownloaded && !_downloadModelLock.locked) {
-      _logger.info("Models not downloaded, starting download");
-      unawaited(_ensureDownloadedModels());
-    }
-  }
-
-  Future<void> _ensureDownloadedModels([bool forceRefresh = false]) async {
-    if (_downloadModelLock.locked) {
-      _logger.finest("Download models already in progress");
-    }
-    return _downloadModelLock.synchronized(() async {
-      if (areModelsDownloaded) {
-        _logger.finest("Models already downloaded");
-        return;
-      }
-      final goodInternet = await canUseHighBandwidth();
-      if (!goodInternet) {
-        _logger.info(
-          "Cannot download models because user is not connected to wifi",
-        );
-        return;
-      }
-      _logger.info('Downloading models');
-      await Future.wait([
-        FaceDetectionService.instance.downloadModel(forceRefresh),
-        FaceEmbeddingService.instance.downloadModel(forceRefresh),
-        ClipImageEncoder.instance.downloadModel(forceRefresh),
-      ]);
-      areModelsDownloaded = true;
-    });
-  }
-
-  Future<void> _ensureLoadedModels(FileMLInstruction instruction) async {
-    return _initModelLock.synchronized(() async {
-      final faceDetectionLoaded = FaceDetectionService.instance.isInitialized;
-      final faceEmbeddingLoaded = FaceEmbeddingService.instance.isInitialized;
-      final facesModelsLoaded = faceDetectionLoaded && faceEmbeddingLoaded;
-      final clipModelsLoaded = ClipImageEncoder.instance.isInitialized;
-
-      final shouldLoadFaces = instruction.shouldRunFaces && !facesModelsLoaded;
-      final shouldLoadClip = instruction.shouldRunClip && !clipModelsLoaded;
-      if (!shouldLoadFaces && !shouldLoadClip) {
-        return;
-      }
-
-      _logger.info(
-        'Loading models. faces: $shouldLoadFaces, clip: $shouldLoadClip',
-      );
-      await MLIndexingIsolate.instance
-          .loadModels(loadFaces: shouldLoadFaces, loadClip: shouldLoadClip);
-      _logger.info('Models loaded');
-      _logStatus();
-    });
   }
 
   bool _cannotRunMLFunction({String function = ""}) {
