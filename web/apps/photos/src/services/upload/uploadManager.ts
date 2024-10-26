@@ -918,6 +918,7 @@ const clusterLivePhotos = async (
  * it in an informed manner).
  */
 const logAboutMemoryPressureIfNeeded = () => {
+    logMem();
     if (!globalThis.electron) return;
     // performance.memory is deprecated in general as a Web standard, and is
     // also not available in the DOM types provided by TypeScript. However, it
@@ -931,4 +932,21 @@ const logAboutMemoryPressureIfNeeded = () => {
             `Memory usage (${heapSize} bytes of ${heapLimit} bytes) exceeds the high water mark`,
         );
     }
+};
+
+// Debugging memory consumption
+let started = false;
+const logMem = () => {
+    if (!globalThis.electron) return;
+    if (started) return;
+    started = true;
+    setInterval(() => {
+        const heapUsed = Math.round(
+            (performance as any).memory.usedJSHeapSize / 1024 ** 2,
+        );
+        const heapTotal = Math.round(
+            (performance as any).memory.usedJSHeapSize / 1024 ** 2,
+        );
+        log.info({ heapUsed, heapTotal });
+    }, 100);
 };
