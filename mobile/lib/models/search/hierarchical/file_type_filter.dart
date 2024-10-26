@@ -27,6 +27,7 @@ class FileTypeFilter extends HierarchicalSearchFilter {
     required this.fileType,
     required this.typeName,
     required this.occurrence,
+    super.filterTypeName = "fileTypeFilter",
     super.matchedUploadedIDs,
   });
 

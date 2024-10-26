@@ -11,6 +11,7 @@ class LocationFilter extends HierarchicalSearchFilter {
   LocationFilter({
     required this.locationTag,
     required this.occurrence,
+    super.filterTypeName = "locationFilter",
     super.matchedUploadedIDs,
   });
 

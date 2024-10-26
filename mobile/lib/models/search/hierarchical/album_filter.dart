@@ -13,6 +13,7 @@ class AlbumFilter extends HierarchicalSearchFilter {
     required this.collectionID,
     required this.albumName,
     required this.occurrence,
+    super.filterTypeName = "albumFilter",
     super.matchedUploadedIDs,
   });
 

@@ -9,6 +9,7 @@ class MagicFilter extends HierarchicalSearchFilter {
   MagicFilter({
     required this.filterName,
     required this.occurrence,
+    super.filterTypeName = "magicFilter",
     super.matchedUploadedIDs,
   });
 

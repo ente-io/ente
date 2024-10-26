@@ -10,6 +10,7 @@ class ContactsFilter extends HierarchicalSearchFilter {
   ContactsFilter({
     required this.user,
     required this.occurrence,
+    super.filterTypeName = "contactsFilter",
     super.matchedUploadedIDs,
   });
 

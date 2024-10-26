@@ -19,6 +19,7 @@ class TopLevelGenericFilter extends HierarchicalSearchFilter {
     required this.occurrence,
     required this.filterResultType,
     required super.matchedUploadedIDs,
+    super.filterTypeName = "topLevelGenericFilter",
     this.filterIcon,
   });
 
