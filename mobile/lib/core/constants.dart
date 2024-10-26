@@ -109,4 +109,4 @@ final tempDirCleanUpInterval = kDebugMode
     : const Duration(hours: 6).inMicroseconds;
 
 const kFilterChipHeight = 32.0;
-const kMaxAppbarFilters = 16;
+const kMaxAppbarFilters = 14;

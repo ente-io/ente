@@ -442,23 +442,66 @@ Map<String, List<HierarchicalSearchFilter>> getFiltersForBottomSheet(
 List<HierarchicalSearchFilter> getRecommendedFiltersForAppBar(
   SearchFilterDataProvider searchFilterDataProvider,
 ) {
-  List<HierarchicalSearchFilter> recommendations =
-      searchFilterDataProvider.recommendations;
-  if (recommendations.length > kMaxAppbarFilters) {
-    recommendations = recommendations.sublist(0, kMaxAppbarFilters);
+  final recommendations = searchFilterDataProvider.recommendations;
+
+  final mostRelevantFilterFromEachType = <HierarchicalSearchFilter>[];
+  int index = 0;
+  final totalRecommendations = recommendations.length;
+
+  // Add the most relevant filter from each type available in the first half of
+  // the recommendations list
+  for (final filter in recommendations) {
+    if (mostRelevantFilterFromEachType
+        .every((element) => element.runtimeType != filter.runtimeType)) {
+      mostRelevantFilterFromEachType.add(filter);
+    }
+
+    if (mostRelevantFilterFromEachType.length ==
+            (FilterTypeNames.values.length) ||
+        (index + 1) / totalRecommendations > 0.5) {
+      break;
+    }
+    index++;
   }
 
-  final topLevelGenericRecco =
-      recommendations.whereType<TopLevelGenericFilter>().toList();
-  final faceReccos = recommendations.whereType<FaceFilter>().toList();
-  final magicReccos = recommendations.whereType<MagicFilter>().toList();
-  final locationReccos = recommendations.whereType<LocationFilter>().toList();
-  final contactsReccos = recommendations.whereType<ContactsFilter>().toList();
-  final albumReccos = recommendations.whereType<AlbumFilter>().toList();
-  final fileTypeReccos = recommendations.whereType<FileTypeFilter>().toList();
+  final curatedRecommendations = <HierarchicalSearchFilter>[
+    ...mostRelevantFilterFromEachType,
+  ];
+  for (HierarchicalSearchFilter recommendation in recommendations) {
+    if (curatedRecommendations.length >= kMaxAppbarFilters) {
+      break;
+    }
+    if (mostRelevantFilterFromEachType.every(
+      (element) => !element.isSameFilter(recommendation),
+    )) {
+      curatedRecommendations.add(recommendation);
+    }
+  }
+
+  final faceReccos = <FaceFilter>[];
+  final magicReccos = <MagicFilter>[];
+  final locationReccos = <LocationFilter>[];
+  final contactsReccos = <ContactsFilter>[];
+  final albumReccos = <AlbumFilter>[];
+  final fileTypeReccos = <FileTypeFilter>[];
+
+  for (var recommendation in curatedRecommendations) {
+    if (recommendation is FaceFilter) {
+      faceReccos.add(recommendation);
+    } else if (recommendation is MagicFilter) {
+      magicReccos.add(recommendation);
+    } else if (recommendation is LocationFilter) {
+      locationReccos.add(recommendation);
+    } else if (recommendation is ContactsFilter) {
+      contactsReccos.add(recommendation);
+    } else if (recommendation is AlbumFilter) {
+      albumReccos.add(recommendation);
+    } else if (recommendation is FileTypeFilter) {
+      fileTypeReccos.add(recommendation);
+    }
+  }
 
   return [
-    ...topLevelGenericRecco,
     ...faceReccos,
     ...magicReccos,
     ...locationReccos,
