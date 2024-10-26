@@ -25,7 +25,7 @@ class DeeplinkService {
   Future<void> requestDeeplinkPermissions(BuildContext context) async {
     if (!hasConfiguredDeeplinkPermissions() &&
         RemoteSyncService.instance.isFirstRemoteSyncDone()) {
-      final choice = await showChoiceDialog(
+      final choice = await showChoiceActionSheet(
         isDismissible: false,
         context,
         title: "",
