@@ -242,6 +242,17 @@ class _HomeWidgetState extends State<HomeWidget> {
     bool result = true;
     final Collection collection =
         await CollectionsService.instance.getPublicCollection(context, uri);
+
+    if (collection.owner!.id! == Configuration.instance.getUserID()) {
+      await routeToPage(
+        context,
+        CollectionPage(
+          CollectionWithThumbnail(collection, null),
+        ),
+      );
+      return;
+    }
+
     final publicUrl = collection.publicURLs![0];
     if (publicUrl!.passwordEnabled) {
       await showTextInputDialog(
