@@ -69,19 +69,6 @@ export const allowWindowClose = (): void => {
  * We call this at the end of this file.
  */
 const main = () => {
-    // Debugging memory consumption
-    app.commandLine.appendSwitch("js-flags", "--trace_gc --trace_gc_verbose");
-    app.commandLine.appendSwitch("enable-logging");
-    app.commandLine.appendSwitch("log-file", "chromium.log");
-    app.commandLine.appendSwitch("log-level", "4");
-    app.commandLine.appendSwitch("v", "4");
-    setInterval(() => {
-        const { usedHeapSize, heapSizeLimit } = process.getHeapStatistics();
-        const heapUsed = Math.round(usedHeapSize / 1024);
-        const heapLimit = Math.round(heapSizeLimit / 1024);
-        log.info({ heapUsed, heapLimit });
-    }, 100);
-
     const gotTheLock = app.requestSingleInstanceLock();
     if (!gotTheLock) {
         app.quit();
