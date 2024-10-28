@@ -424,6 +424,7 @@ func main() {
 	privateAPI.GET("/files/preview/v2/:fileID", fileHandler.GetThumbnail)
 
 	privateAPI.PUT("/files/data", fileHandler.PutFileData)
+	privateAPI.POST("/files/data/status-diff", fileHandler.FileDataStatusDiff)
 	privateAPI.POST("/files/data/fetch", fileHandler.GetFilesData)
 	privateAPI.GET("/files/data/fetch", fileHandler.GetFileData)
 	privateAPI.GET("/files/data/preview-upload-url", fileHandler.GetPreviewUploadURL)

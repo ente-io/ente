@@ -12,6 +12,19 @@ type Entity struct {
 	DecryptionHeader string          `json:"decryptionHeader"`
 }
 
+type IndexDiffRequest struct {
+	LastUpdated int64 `form:"lastUpdated" binding:"required"`
+}
+
+type IndexStatus struct {
+	FileID    int64           `json:"fileID" binding:"required"`
+	UserID    int64           `json:"userID" binding:"required"`
+	Type      ente.ObjectType `json:"type" binding:"required"`
+	IsDeleted bool            `json:"isDeleted" binding:"required"`
+	Size      int64           `json:"size"  binding:"required"`
+	UpdatedAt int64           `json:"updatedAt"  binding:"required"`
+}
+
 // GetFilesData should only be used for getting the preview video playlist and derived metadata.
 type GetFilesData struct {
 	FileIDs []int64         `json:"fileIDs" binding:"required"`
