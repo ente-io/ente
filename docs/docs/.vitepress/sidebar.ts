@@ -257,6 +257,10 @@ export const sidebar = [
                         text: "DB migration",
                         link: "/self-hosting/guides/db-migration",
                     },
+                    {
+                        text: "Hosting Ente without Docker",
+                        link: "/self-hosting/guides/standalone-ente",
+                    },
                 ],
             },
             {

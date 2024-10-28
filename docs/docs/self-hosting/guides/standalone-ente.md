@@ -1,9 +1,9 @@
 ---
 title: Installing Ente Standalone (without Docker)
-description: Guide for installing and setting up Ente standalone without docker.
+description: Installing and setting up Ente standalone without docker.
 ---
 
-# Guide to Installing and Deploying Ente Standalone (without Docker)
+# Installing and Deploying Ente Standalone (without Docker)
 
 ## Running Museum (Ente's server) without Docker
 
@@ -34,7 +34,7 @@ sudo apt install postgresql
 sudo apt install libsodium23 libsodium-dev 
 ```
 
-The package `libsodium23` might be installed already in some cases. 
+The package `libsodium23` might be installed already in some cases.
 
 Installing pkg-config
 
@@ -62,4 +62,28 @@ sudo systemctl enable postgresql
 sudo systemctl daemon-reload && sudo systemctl start postgresql
 ```
 
-# 
+### Create user 
+
+```sh 
+createuser -s postgres
+```
+
+## Start Museum 
+
+```
+export ENTE_DB_USER=postgres 
+cd ente/server
+go run cmd/museum/main.go
+```
+
+For live reloads, install [air](https://github.com/air-verse/air#installation). Then you can just call air after declaring the required environment variables. For example,
+
+```
+ENTE_DB_USER=ente_user
+air
+```
+
+Once you are done with setting and running Museum, all you are left to do is run the web app and reverse_proxy it with a webserver. You can check the following resources for Deploying your web app. 
+
+1. [Hosting the Web App](https://help.ente.io/self-hosting/guides/web-app).
+2. [Running Ente Web app as a systemd Service](https://gist.github.com/mngshm/72e32bd483c2129621ed0d74412492fd)
