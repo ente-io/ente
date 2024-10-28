@@ -22,9 +22,7 @@ class MessageLookup extends MessageLookupByLibrary {
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
-        "configuration": MessageLookupByLibrary.simpleMessage("Configuration"),
         "enterYourEmailAddress": MessageLookupByLibrary.simpleMessage(
-            "Εισάγετε την διεύθυνση ηλ. ταχυδρομείου σας"),
-        "localIndexing": MessageLookupByLibrary.simpleMessage("Local indexing")
+            "Εισάγετε την διεύθυνση ηλ. ταχυδρομείου σας")
       };
 }

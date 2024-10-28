@@ -102,6 +102,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Jag förstår att om jag förlorar mitt lösenord kan jag förlora mina data eftersom min data är <underline>end-to-end-krypterad</underline>."),
         "activeSessions":
             MessageLookupByLibrary.simpleMessage("Aktiva sessioner"),
+        "add": MessageLookupByLibrary.simpleMessage("Lägg till"),
         "addANewEmail": MessageLookupByLibrary.simpleMessage(
             "Lägg till en ny e-postadress"),
         "addCollaborator":
@@ -111,6 +112,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "addItem": m6,
         "addLocationButton": MessageLookupByLibrary.simpleMessage("Lägg till"),
         "addMore": MessageLookupByLibrary.simpleMessage("Lägg till fler"),
+        "addName": MessageLookupByLibrary.simpleMessage("Lägg till namn"),
         "addPhotos": MessageLookupByLibrary.simpleMessage("Lägg till foton"),
         "addViewer": MessageLookupByLibrary.simpleMessage("Lägg till bildvy"),
         "addedAs": MessageLookupByLibrary.simpleMessage("Lades till som"),
@@ -173,7 +175,6 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Samarbetspartner kan lägga till foton och videor till det delade albumet."),
         "collectPhotos": MessageLookupByLibrary.simpleMessage("Samla in foton"),
         "color": MessageLookupByLibrary.simpleMessage("Färg"),
-        "configuration": MessageLookupByLibrary.simpleMessage("Configuration"),
         "confirm": MessageLookupByLibrary.simpleMessage("Bekräfta"),
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("Bekräfta radering av konto"),
@@ -330,7 +331,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "linkHasExpired":
             MessageLookupByLibrary.simpleMessage("Länk har upphört att gälla"),
         "linkNeverExpires": MessageLookupByLibrary.simpleMessage("Aldrig"),
-        "localIndexing": MessageLookupByLibrary.simpleMessage("Local indexing"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("Lås"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Logga in"),
         "loginSessionExpiredDetails": MessageLookupByLibrary.simpleMessage(
@@ -361,6 +361,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "name": MessageLookupByLibrary.simpleMessage("Namn"),
         "never": MessageLookupByLibrary.simpleMessage("Aldrig"),
         "newAlbum": MessageLookupByLibrary.simpleMessage("Nytt album"),
+        "newPerson": MessageLookupByLibrary.simpleMessage("Ny person"),
         "next": MessageLookupByLibrary.simpleMessage("Nästa"),
         "no": MessageLookupByLibrary.simpleMessage("Nej"),
         "noDeviceLimit": MessageLookupByLibrary.simpleMessage("Ingen"),

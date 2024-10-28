@@ -515,7 +515,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "collectPhotosDescription": MessageLookupByLibrary.simpleMessage(
             "Erstelle einen Link, mit dem deine Freunde Fotos in Originalqualität hochladen können."),
         "color": MessageLookupByLibrary.simpleMessage("Farbe"),
-        "configuration": MessageLookupByLibrary.simpleMessage("Configuration"),
+        "configuration": MessageLookupByLibrary.simpleMessage("Konfiguration"),
         "confirm": MessageLookupByLibrary.simpleMessage("Bestätigen"),
         "confirm2FADisable": MessageLookupByLibrary.simpleMessage(
             "Bist du sicher, dass du die Zwei-Faktor-Authentifizierung (2FA) deaktivieren willst?"),
@@ -1016,7 +1016,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "loadingYourPhotos":
             MessageLookupByLibrary.simpleMessage("Lade deine Fotos..."),
         "localGallery": MessageLookupByLibrary.simpleMessage("Lokale Galerie"),
-        "localIndexing": MessageLookupByLibrary.simpleMessage("Local indexing"),
+        "localIndexing":
+            MessageLookupByLibrary.simpleMessage("Lokale Indizierung"),
         "localSyncErrorMessage": MessageLookupByLibrary.simpleMessage(
             "Es sieht so aus, als ob etwas schiefgelaufen ist, da die lokale Foto-Synchronisierung länger dauert als erwartet. Bitte kontaktiere unser Support-Team"),
         "location": MessageLookupByLibrary.simpleMessage("Standort"),
