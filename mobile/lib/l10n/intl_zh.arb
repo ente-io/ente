@@ -1343,7 +1343,5 @@
   "mostRecent": "最近",
   "mostRelevant": "最相关",
   "loadingYourPhotos": "正在加载您的照片...",
-  "processingImport": "正在处理 {folderName}...",
-  "configuration": "Configuration",
-  "localIndexing": "Local indexing"
+  "processingImport": "正在处理 {folderName}..."
 }

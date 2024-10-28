@@ -956,6 +956,7 @@
   "encryptingBackup": "Шифруємо резервну копію...",
   "syncStopped": "Синхронізацію зупинено",
   "syncProgress": "{completed} / {total} спогадів збережено",
+  "uploadingMultipleMemories": "{count, plural, few {Зберігаємо {count} спогади...} many {Зберігаємо {count} спогадів...}}",
   "uploadingSingleMemory": "Зберігаємо 1 спогад...",
   "@syncProgress": {
     "description": "Text to tell user how many memories have been preserved",
@@ -1343,6 +1344,15 @@
   "mostRelevant": "Найактуальніші",
   "loadingYourPhotos": "Завантажуємо фотографії...",
   "processingImport": "Оброблюємо «{folderName}»...",
-  "configuration": "Configuration",
-  "localIndexing": "Local indexing"
+  "personName": "Ім'я особи",
+  "addNewPerson": "Додати нову особу",
+  "addNameOrMerge": "Додати назву або об'єднати",
+  "mergeWithExisting": "Об'єднати з наявним",
+  "newPerson": "Нова особа",
+  "addName": "Додати ім'я",
+  "add": "Додати",
+  "extraPhotosFoundFor": "Знайдено додаткові фотографії для $text",
+  "extraPhotosFound": "Знайдено додаткові фотографії",
+  "configuration": "Налаштування",
+  "localIndexing": "Локальне індексування"
 }
