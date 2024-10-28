@@ -326,15 +326,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.10"
-  desktop_webview_window:
-    dependency: "direct main"
-    description:
-      path: "packages/desktop_webview_window"
-      ref: main
-      resolved-ref: "3e4247ba5b71049704395b70b5a827fb113b88ea"
-      url: "https://github.com/MixinNetwork/flutter-plugins"
-    source: git
-    version: "0.2.4"
   device_info_plus:
     dependency: "direct main"
     description:
@@ -879,7 +870,7 @@ packages:
     source: hosted
     version: "0.19.0"
   io:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: io
       sha256: "2ec25704aba361659e10e3e5f5d672068d332fc8ac516421d483a11e5cbd061e"
@@ -1821,7 +1812,7 @@ packages:
     source: hosted
     version: "0.4.2"
   xdg_directories:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: xdg_directories
       sha256: "7a3f37b05d989967cdddcbb571f1ea834867ae2faa29725fd085180e0883aa15"

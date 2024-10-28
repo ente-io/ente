@@ -37,6 +37,7 @@ import {
 } from "@/new/photos/services/upload/types";
 import { detectFileTypeInfoFromChunk } from "@/new/photos/utils/detect-type";
 import { readStream } from "@/new/photos/utils/native-stream";
+import { mergeUint8Arrays } from "@/utils/array";
 import { ensure, ensureInteger, ensureNumber } from "@/utils/ensure";
 import { CustomError, handleUploadError } from "@ente/shared/error";
 import { addToCollection } from "services/collectionService";
@@ -1573,9 +1574,7 @@ async function combineChunksToFormUploadPart(
         if (done) {
             break;
         }
-        for (let index = 0; index < chunk.length; index++) {
-            combinedChunks.push(chunk[index]);
-        }
+        combinedChunks.push(chunk);
     }
-    return Uint8Array.from(combinedChunks);
+    return mergeUint8Arrays(combinedChunks);
 }

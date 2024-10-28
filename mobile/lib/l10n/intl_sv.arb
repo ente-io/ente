@@ -452,5 +452,8 @@
   "next": "Nästa",
   "guestView": "Gästvy",
   "showPerson": "Visa person",
-  "sort": "Sortera"
+  "sort": "Sortera",
+  "newPerson": "Ny person",
+  "addName": "Lägg till namn",
+  "add": "Lägg till"
 }

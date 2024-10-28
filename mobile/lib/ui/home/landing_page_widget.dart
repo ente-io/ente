@@ -89,7 +89,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
                       child: Text("Lang"),
                     ),
                     onTap: () async {
-                      final locale = await getLocale();
+                      final locale = (await getLocale())!;
                       // ignore: unawaited_futures
                       routeToPage(
                         context,

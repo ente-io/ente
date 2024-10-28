@@ -1,6 +1,6 @@
 {
     "name": "ente",
-    "version": "1.7.6-beta",
+    "version": "1.7.7-beta",
     "private": true,
     "description": "Desktop client for Ente Photos",
     "repository": "github:ente-io/photos-desktop",
@@ -48,7 +48,7 @@
         "ajv": "^8.17.1",
         "concurrently": "^8.2.2",
         "cross-env": "^7.0.3",
-        "electron": "^30.4.0",
+        "electron": "^33.0.2",
         "electron-builder": "^25.0.5",
         "eslint": "^9",
         "prettier": "^3.3.3",

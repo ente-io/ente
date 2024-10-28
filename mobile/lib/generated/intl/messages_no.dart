@@ -128,6 +128,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Samarbeidspartnere kan legge til bilder og videoer i det delte albumet."),
         "collectPhotos": MessageLookupByLibrary.simpleMessage("Samle bilder"),
+        "configuration": MessageLookupByLibrary.simpleMessage("Configuration"),
         "confirm": MessageLookupByLibrary.simpleMessage("Bekreft"),
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("Bekreft sletting av konto"),
@@ -257,6 +258,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "linkHasExpired":
             MessageLookupByLibrary.simpleMessage("Lenken har utløpt"),
         "linkNeverExpires": MessageLookupByLibrary.simpleMessage("Aldri"),
+        "localIndexing": MessageLookupByLibrary.simpleMessage("Local indexing"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("Lås"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Logg inn"),
         "loginTerms": MessageLookupByLibrary.simpleMessage(

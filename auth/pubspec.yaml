@@ -1,6 +1,6 @@
 name: ente_auth
 description: ente two-factor authenticator
-version: 4.0.2+402
+version: 4.0.3+403
 publish_to: none
 
 environment:
@@ -19,11 +19,6 @@ dependencies:
   confetti: ^0.8.0
   connectivity_plus: ^6.0.5
   convert: ^3.1.1
-  desktop_webview_window:
-    git:
-      url: https://github.com/MixinNetwork/flutter-plugins
-      ref: main
-      path: packages/desktop_webview_window
   device_info_plus: ^9.1.1
   dio: ^5.4.0
   dotted_border: ^2.0.0+2
@@ -67,6 +62,7 @@ dependencies:
   gradient_borders: ^1.0.0
   http: ^1.1.0
   intl: ^0.19.0
+  io: ^1.0.4
   json_annotation: ^4.5.0
   local_auth: ^2.3.0
   local_auth_android: ^1.0.37
@@ -105,6 +101,7 @@ dependencies:
   uuid: ^4.2.2
   win32: ^5.1.1
   window_manager: ^0.4.2
+  xdg_directories: ^1.0.4
 
 dependency_overrides:
   flutter_secure_storage_linux:

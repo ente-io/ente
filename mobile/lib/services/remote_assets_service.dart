@@ -121,14 +121,21 @@ class RemoteAssetsService {
     const oldModelNames = [
       "https://models.ente.io/clip-image-vit-32-float32.onnx",
       "https://models.ente.io/clip-text-vit-32-uint8.onnx",
-      "https://models.ente.io/mobileclip_s2_image.onnx",
       "https://models.ente.io/mobileclip_s2_image_opset18_rgba_sim.onnx",
+      "https://models.ente.io/mobileclip_s2_image_opset18_rgba_opt.onnx",
       "https://models.ente.io/mobileclip_s2_text_int32.onnx",
-      "https://models.ente.io/yolov5s_face_640_640_dynamic.onnx",
       "https://models.ente.io/yolov5s_face_opset18_rgba_opt.onnx",
+      "https://models.ente.io/yolov5s_face_opset18_rgba_opt_nosplits.onnx",
     ];
 
-    for (final remotePath in oldModelNames) {
+    await cleanupSelectedModels(oldModelNames);
+
+    checkRemovedOldAssets = true;
+    _logger.info("Old ML models cleaned up");
+  }
+
+  Future<void> cleanupSelectedModels(List<String> modelRemotePaths) async {
+    for (final remotePath in modelRemotePaths) {
       final localPath = await _getLocalPath(remotePath);
       if (File(localPath).existsSync()) {
         _logger.info(
@@ -137,8 +144,5 @@ class RemoteAssetsService {
         await File(localPath).delete();
       }
     }
-
-    checkRemovedOldAssets = true;
-    _logger.info("Old ML models cleaned up");
   }
 }
