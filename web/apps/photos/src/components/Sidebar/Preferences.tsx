@@ -165,5 +165,7 @@ const localeName = (locale: SupportedLocale) => {
             return "Italiano";
         case "lt-LT":
             return "Lietuvių kalba";
+        case "uk-UA":
+            return "українська";
     }
 };
