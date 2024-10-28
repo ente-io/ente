@@ -816,15 +816,6 @@
   "referFriendsAnd2xYourPlan": "Recomandați un prieten și dublați-vă planul",
   "shareAlbumHint": "Deschideți un album și atingeți butonul de distribuire din dreapta sus pentru a distribui.",
   "itemsShowTheNumberOfDaysRemainingBeforePermanentDeletion": "Articolele afișează numărul de zile rămase până la ștergerea definitivă",
-  "@trashDaysLeft": {
-    "description": "Text to indicate number of days remaining before permanent deletion",
-    "placeholders": {
-      "count": {
-        "example": "1|2|3",
-        "type": "int"
-      }
-    }
-  },
   "deleteAll": "Ștergeți tot",
   "renameAlbum": "Redenumire album",
   "convertToAlbum": "Convertire în album",
@@ -883,6 +874,63 @@
   "clubByFileName": "Grupare după numele fișierului",
   "count": "Total",
   "totalSize": "Dimensiune totală",
+  "longpressOnAnItemToViewInFullscreen": "Apăsați lung pe un articol pentru a-l vizualiza pe tot ecranul",
+  "decryptingVideo": "Se decriptează videoclipul...",
+  "authToViewYourMemories": "Vă rugăm să vă autentificați pentru a vă vizualiza amintirile",
+  "unlock": "Deblocare",
+  "freeUpSpace": "Eliberați spațiu",
+  "freeUpSpaceSaving": "{count, plural, one {Poate fi șters de pe dispozitiv pentru a elibera {formattedSize}} few {Pot fi șterse de pe dispozitiv pentru a elibera {formattedSize}} other {Pot fi șterse de pe dispozitiv pentru a elibera {formattedSize}}}",
+  "filesBackedUpInAlbum": "{count, plural, one {Un fișier din acest album a fost deja salvat în siguranță} few {{formattedNumber} fișiere din acest album au fost deja salvate în siguranță} other {{formattedNumber} de fișiere din acest album au fost deja salvate în siguranță}}",
+  "@filesBackedUpInAlbum": {
+    "description": "Text to tell user how many files have been backed up in the album",
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
+      },
+      "formattedNumber": {
+        "content": "{formattedNumber}",
+        "example": "1,000",
+        "type": "String"
+      }
+    }
+  },
+  "filesBackedUpFromDevice": "{count, plural, one {Un fișier de pe acest dispozitiv a fost deja salvat în siguranță} few {{formattedNumber} fișiere de pe acest dispozitiv au fost deja salvate în siguranță} other {{formattedNumber} de fișiere de pe acest dispozitiv fost deja salvate în siguranță}}",
+  "@filesBackedUpFromDevice": {
+    "description": "Text to tell user how many files have been backed up from this device",
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
+      },
+      "formattedNumber": {
+        "content": "{formattedNumber}",
+        "example": "1,000",
+        "type": "String"
+      }
+    }
+  },
+  "@freeUpSpaceSaving": {
+    "description": "Text to tell user how much space they can free up by deleting items from the device"
+  },
+  "freeUpAccessPostDelete": "Încă {count, plural, one {îl puteți} few {le puteți} other {le puteți}} accesa pe Ente cât timp aveți un abonament activ",
+  "@freeUpAccessPostDelete": {
+    "placeholders": {
+      "count": {
+        "example": "1",
+        "type": "int"
+      }
+    }
+  },
+  "freeUpAmount": "Eliberați {sizeInMBorGB}",
+  "thisEmailIsAlreadyInUse": "Această adresă de e-mail este deja folosită",
+  "incorrectCode": "Cod incorect",
+  "authenticationFailedPleaseTryAgain": "Autentificare eșuată, încercați din nou",
+  "verificationFailedPleaseTryAgain": "Verificare eșuată, încercați din nou",
+  "authenticating": "Autentificare...",
+  "authenticationSuccessful": "Autentificare cu succes!",
+  "incorrectRecoveryKey": "Cheie de recuperare incorectă",
+  "theRecoveryKeyYouEnteredIsIncorrect": "Cheia de recuperare introdusă este incorectă",
   "emptyTrash": "Goliți coșul de gunoi?",
   "permDeleteWarning": "Toate articolele din coșul de gunoi vor fi șterse definitiv\n\nAceastă acțiune nu poate fi anulată",
   "theyWillBeDeletedFromAllAlbums": "Acestea vor fi șterse din toate albumele.",
@@ -1044,7 +1092,5 @@
   },
   "enable": "Activare",
   "enabled": "Activat",
-  "moreDetails": "Mai multe detalii",
-  "configuration": "Configuration",
-  "localIndexing": "Local indexing"
+  "moreDetails": "Mai multe detalii"
 }

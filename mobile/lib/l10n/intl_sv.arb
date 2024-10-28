@@ -453,6 +453,7 @@
   "guestView": "Gästvy",
   "showPerson": "Visa person",
   "sort": "Sortera",
-  "configuration": "Configuration",
-  "localIndexing": "Local indexing"
+  "newPerson": "Ny person",
+  "addName": "Lägg till namn",
+  "add": "Lägg till"
 }

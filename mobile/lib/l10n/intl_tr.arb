@@ -1169,7 +1169,5 @@
   "invalidEndpoint": "Geçersiz uç nokta",
   "invalidEndpointMessage": "Üzgünüz, girdiğiniz uç nokta geçersiz. Lütfen geçerli bir uç nokta girin ve tekrar deneyin.",
   "endpointUpdatedMessage": "Fatura başarıyla güncellendi",
-  "customEndpoint": "{endpoint}'e bağlanıldı",
-  "configuration": "Configuration",
-  "localIndexing": "Local indexing"
+  "customEndpoint": "{endpoint}'e bağlanıldı"
 }

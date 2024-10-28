@@ -371,7 +371,5 @@
   "advanced": "Avansert",
   "general": "Generelt",
   "security": "Sikkerhet",
-  "authToViewYourRecoveryKey": "Vennligst autentiser deg for å se gjennopprettingsnøkkelen din",
-  "configuration": "Configuration",
-  "localIndexing": "Local indexing"
+  "authToViewYourRecoveryKey": "Vennligst autentiser deg for å se gjennopprettingsnøkkelen din"
 }

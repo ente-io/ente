@@ -1343,6 +1343,15 @@
   "mostRelevant": "Найактуальніші",
   "loadingYourPhotos": "Завантажуємо фотографії...",
   "processingImport": "Оброблюємо «{folderName}»...",
-  "configuration": "Configuration",
-  "localIndexing": "Local indexing"
+  "personName": "Ім'я особи",
+  "addNewPerson": "Додати нову особу",
+  "addNameOrMerge": "Додати назву або об'єднати",
+  "mergeWithExisting": "Об'єднати з наявним",
+  "newPerson": "Нова особа",
+  "addName": "Додати ім'я",
+  "add": "Додати",
+  "extraPhotosFoundFor": "Знайдено додаткові фотографії для $text",
+  "extraPhotosFound": "Знайдено додаткові фотографії",
+  "configuration": "Налаштування",
+  "localIndexing": "Локальне індексування"
 }

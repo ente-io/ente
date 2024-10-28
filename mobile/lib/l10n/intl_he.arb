@@ -816,7 +816,5 @@
   "addPhotos": "הוסף תמונות",
   "create": "צור",
   "viewAll": "הצג הכל",
-  "hiding": "מחביא...",
-  "configuration": "Configuration",
-  "localIndexing": "Local indexing"
+  "hiding": "מחביא..."
 }
