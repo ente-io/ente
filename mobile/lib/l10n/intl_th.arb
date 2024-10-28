@@ -295,7 +295,5 @@
     "description": "Label for the map view"
   },
   "maps": "แผนที่",
-  "enableMaps": "เปิดใช้งานแผนที่",
-  "configuration": "Configuration",
-  "localIndexing": "Local indexing"
+  "enableMaps": "เปิดใช้งานแผนที่"
 }
