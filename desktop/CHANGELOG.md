@@ -1,10 +1,9 @@
 # CHANGELOG
 
-## v1.7.6 (Unreleased)
+## v1.7.6
 
 -   Parse description from metadata JSON.
 -   Support Italian, Ukrainian and Lithuanian translations.
--   .
 
 ## v1.7.5
 
