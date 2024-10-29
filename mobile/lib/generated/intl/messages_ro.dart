@@ -185,9 +185,6 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m67(email) => "Acesta este ID-ul de verificare al ${email}";
 
-  static String m68(count) =>
-      "${Intl.plural(count, zero: '', one: 'O zi', few: '${count} zile', other: '${count} de zile')}";
-
   static String m70(endDate) => "Valabil până pe ${endDate}";
 
   static String m71(email) => "Verificare ${email}";
@@ -1373,7 +1370,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "total": MessageLookupByLibrary.simpleMessage("total"),
         "totalSize": MessageLookupByLibrary.simpleMessage("Dimensiune totală"),
         "trash": MessageLookupByLibrary.simpleMessage("Coș de gunoi"),
-        "trashDaysLeft": m68,
         "tryAgain": MessageLookupByLibrary.simpleMessage("Încercați din nou"),
         "turnOnBackupForAutoUpload": MessageLookupByLibrary.simpleMessage(
             "Activați copia de rezervă pentru a încărca automat fișierele adăugate la acest dosar de pe dispozitiv în Ente."),
