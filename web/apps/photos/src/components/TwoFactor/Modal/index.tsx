@@ -5,7 +5,6 @@ import { Dialog, DialogContent, styled } from "@mui/material";
 import { t } from "i18next";
 import { useEffect, useState } from "react";
 import { getTwoFactorStatus } from "services/userService";
-import { SetLoading } from "types/gallery";
 import TwoFactorModalManageSection from "./Manage";
 import TwoFactorModalSetupSection from "./Setup";
 
@@ -16,7 +15,6 @@ const TwoFactorDialog = styled(Dialog)(({ theme }) => ({
 }));
 
 type Props = ModalVisibilityProps & {
-    setLoading: SetLoading;
     closeSidebar: () => void;
 };
 

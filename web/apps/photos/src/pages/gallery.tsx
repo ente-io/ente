@@ -43,7 +43,7 @@ import {
     setSearchCollectionsAndFiles,
 } from "@/new/photos/services/search";
 import type { SearchOption } from "@/new/photos/services/search/types";
-import { AppContext } from "@/new/photos/types/context";
+import { useAppContext } from "@/new/photos/types/context";
 import { splitByPredicate } from "@/utils/array";
 import { ensure } from "@/utils/ensure";
 import {
@@ -100,14 +100,7 @@ import PlanSelector from "components/pages/gallery/PlanSelector";
 import SelectedFileOptions from "components/pages/gallery/SelectedFileOptions";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import {
-    createContext,
-    useCallback,
-    useContext,
-    useEffect,
-    useRef,
-    useState,
-} from "react";
+import { createContext, useCallback, useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import {
     constructEmailList,
@@ -231,12 +224,12 @@ export default function Gallery() {
     const resync = useRef<{ force: boolean; silent: boolean }>();
 
     const {
-        startLoading,
-        finishLoading,
+        showLoadingBar,
+        hideLoadingBar,
         setDialogMessage,
         logout,
         ...appContext
-    } = useContext(AppContext);
+    } = useAppContext();
     const [userIDToEmailMap, setUserIDToEmailMap] =
         useState<Map<number, string>>(null);
     const [emailList, setEmailList] = useState<string[]>(null);
@@ -574,7 +567,7 @@ export default function Gallery() {
             if (!tokenValid) {
                 throw new Error(CustomError.SESSION_EXPIRED);
             }
-            !silent && startLoading();
+            !silent && showLoadingBar();
             await preFileInfoSync();
             const allCollections = await getAllLatestCollections();
             const [hiddenCollections, collections] = splitByPredicate(
@@ -626,7 +619,7 @@ export default function Gallery() {
         } finally {
             dispatch({ type: "clearTempDeleted" });
             dispatch({ type: "clearTempHidden" });
-            !silent && finishLoading();
+            !silent && hideLoadingBar();
         }
         syncInProgress.current = false;
         if (resync.current) {
@@ -690,7 +683,7 @@ export default function Gallery() {
 
     const collectionOpsHelper =
         (ops: COLLECTION_OPS_TYPE) => async (collection: Collection) => {
-            startLoading();
+            showLoadingBar();
             try {
                 setOpenCollectionSelector(false);
                 const selectedFiles = getSelectedFiles(selected, filteredFiles);
@@ -719,12 +712,12 @@ export default function Gallery() {
                     content: t("generic_error_retry"),
                 });
             } finally {
-                finishLoading();
+                hideLoadingBar();
             }
         };
 
     const fileOpsHelper = (ops: FILE_OPS_TYPE) => async () => {
-        startLoading();
+        showLoadingBar();
         try {
             // passing files here instead of filteredData for hide ops because we want to move all files copies to hidden collection
             const selectedFiles = getSelectedFiles(
@@ -758,14 +751,14 @@ export default function Gallery() {
                 content: t("generic_error_retry"),
             });
         } finally {
-            finishLoading();
+            hideLoadingBar();
         }
     };
 
     const showCreateCollectionModal = (ops: COLLECTION_OPS_TYPE) => {
         const callback = async (collectionName: string) => {
             try {
-                startLoading();
+                showLoadingBar();
                 const collection = await createAlbum(collectionName);
                 await collectionOpsHelper(ops)(collection);
             } catch (e) {
@@ -777,7 +770,7 @@ export default function Gallery() {
                     content: t("generic_error_retry"),
                 });
             } finally {
-                finishLoading();
+                hideLoadingBar();
             }
         };
         return () =>

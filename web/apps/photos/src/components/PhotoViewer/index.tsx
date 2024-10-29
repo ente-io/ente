@@ -118,7 +118,8 @@ export interface PhotoViewerProps {
 
 function PhotoViewer(props: PhotoViewerProps) {
     const galleryContext = useContext(GalleryContext);
-    const appContext = useContext(AppContext);
+    const { showLoadingBar, hideLoadingBar, setDialogMessage } =
+        useContext(AppContext);
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext,
     );
@@ -537,9 +538,12 @@ function PhotoViewer(props: PhotoViewerProps) {
 
     const trashFile = async (file: EnteFile) => {
         try {
-            appContext.startLoading();
-            await trashFiles([file]);
-            appContext.finishLoading();
+            showLoadingBar();
+            try {
+                await trashFiles([file]);
+            } finally {
+                hideLoadingBar();
+            }
             markTempDeleted?.([file]);
             updateItems(props.items.filter((item) => item.id !== file.id));
             needUpdate.current = true;
@@ -552,7 +556,7 @@ function PhotoViewer(props: PhotoViewerProps) {
         if (!file || !isOwnFile || props.isTrashCollection) {
             return;
         }
-        appContext.setDialogMessage(getTrashFileMessage(() => trashFile(file)));
+        setDialogMessage(getTrashFileMessage(() => trashFile(file)));
     };
 
     const handleArrowClick = (
@@ -683,9 +687,9 @@ function PhotoViewer(props: PhotoViewerProps) {
 
     const copyToClipboardHelper = async (file: EnteFile) => {
         if (file && props.enableDownload && shouldShowCopyOption) {
-            appContext.startLoading();
+            showLoadingBar();
             await copyFileToClipboard(file.src);
-            appContext.finishLoading();
+            hideLoadingBar();
         }
     };
 

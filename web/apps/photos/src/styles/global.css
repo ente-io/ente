@@ -125,10 +125,6 @@ body {
     display: none;
 }
 
-.bg-upload-progress-bar {
-    background-color: #51cd7c;
-}
-
 .carousel-inner {
     padding-bottom: 50px !important;
 }
@@ -161,10 +157,4 @@ div.otp-input input:focus {
     -webkit-transition: 0.5s;
     transition: 0.5s;
     outline: none;
-}
-
-.flash-message {
-    padding: 16px;
-    display: flex;
-    align-items: center;
 }
