@@ -140,6 +140,11 @@ For more details, see [translations.md](translations.md).
 
 -   [react-select](https://react-select.com/) is used for search dropdowns.
 
+-   [react-top-loading-bar](https://github.com/klendi/react-top-loading-bar) is
+    used for showing a progress indicator for global actions (This shouldn't be
+    used always, it is only meant as a fallback when there isn't an otherwise
+    suitable place for showing a local activity indicator).
+
 ## Utilities
 
 -   [comlink](https://github.com/GoogleChromeLabs/comlink) provides a minimal
