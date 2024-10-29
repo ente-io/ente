@@ -117,5 +117,9 @@
   "saveKey": "Захаваць ключ",
   "recoveryKeyCopiedToClipboard": "Ключ аднаўлення скапіяваны ў буфер абмену",
   "recoverAccount": "Аднавіць уліковы запіс",
-  "recover": "Аднавіць"
+  "recover": "Аднавіць",
+  "resetPerson": "Reset person",
+  "areYouSureYouWantToResetThisPerson": "Are you sure you want to reset this person?",
+  "allPersonGroupingWillReset": "All groupings for this person will be reset, and you will lose all suggestions made for this person",
+  "yesResetPerson": "Yes, reset person"
 }

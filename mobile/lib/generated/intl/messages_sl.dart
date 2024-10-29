@@ -22,7 +22,13 @@ class MessageLookup extends MessageLookupByLibrary {
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
-        "configuration": MessageLookupByLibrary.simpleMessage("Configuration"),
-        "localIndexing": MessageLookupByLibrary.simpleMessage("Local indexing")
+        "allPersonGroupingWillReset": MessageLookupByLibrary.simpleMessage(
+            "All groupings for this person will be reset, and you will lose all suggestions made for this person"),
+        "areYouSureYouWantToResetThisPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Are you sure you want to reset this person?"),
+        "resetPerson": MessageLookupByLibrary.simpleMessage("Reset person"),
+        "yesResetPerson":
+            MessageLookupByLibrary.simpleMessage("Yes, reset person")
       };
 }

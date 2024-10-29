@@ -102,6 +102,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Jag förstår att om jag förlorar mitt lösenord kan jag förlora mina data eftersom min data är <underline>end-to-end-krypterad</underline>."),
         "activeSessions":
             MessageLookupByLibrary.simpleMessage("Aktiva sessioner"),
+        "add": MessageLookupByLibrary.simpleMessage("Lägg till"),
         "addANewEmail": MessageLookupByLibrary.simpleMessage(
             "Lägg till en ny e-postadress"),
         "addCollaborator":
@@ -111,6 +112,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "addItem": m6,
         "addLocationButton": MessageLookupByLibrary.simpleMessage("Lägg till"),
         "addMore": MessageLookupByLibrary.simpleMessage("Lägg till fler"),
+        "addName": MessageLookupByLibrary.simpleMessage("Lägg till namn"),
         "addPhotos": MessageLookupByLibrary.simpleMessage("Lägg till foton"),
         "addViewer": MessageLookupByLibrary.simpleMessage("Lägg till bildvy"),
         "addedAs": MessageLookupByLibrary.simpleMessage("Lades till som"),
@@ -124,6 +126,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "albumUpdated":
             MessageLookupByLibrary.simpleMessage("Album uppdaterat"),
         "albums": MessageLookupByLibrary.simpleMessage("Album"),
+        "allPersonGroupingWillReset": MessageLookupByLibrary.simpleMessage(
+            "All groupings for this person will be reset, and you will lose all suggestions made for this person"),
         "allowAddPhotosDescription": MessageLookupByLibrary.simpleMessage(
             "Tillåt personer med länken att även lägga till foton i det delade albumet."),
         "allowAddingPhotos":
@@ -136,6 +140,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "applyCodeTitle": MessageLookupByLibrary.simpleMessage("Använd kod"),
         "areYouSureYouWantToLogout": MessageLookupByLibrary.simpleMessage(
             "Är du säker på att du vill logga ut?"),
+        "areYouSureYouWantToResetThisPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Are you sure you want to reset this person?"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "Vad är den främsta anledningen till att du raderar ditt konto?"),
         "authenticationFailedPleaseTryAgain":
@@ -173,7 +180,6 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Samarbetspartner kan lägga till foton och videor till det delade albumet."),
         "collectPhotos": MessageLookupByLibrary.simpleMessage("Samla in foton"),
         "color": MessageLookupByLibrary.simpleMessage("Färg"),
-        "configuration": MessageLookupByLibrary.simpleMessage("Configuration"),
         "confirm": MessageLookupByLibrary.simpleMessage("Bekräfta"),
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("Bekräfta radering av konto"),
@@ -330,7 +336,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "linkHasExpired":
             MessageLookupByLibrary.simpleMessage("Länk har upphört att gälla"),
         "linkNeverExpires": MessageLookupByLibrary.simpleMessage("Aldrig"),
-        "localIndexing": MessageLookupByLibrary.simpleMessage("Local indexing"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("Lås"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("Logga in"),
         "loginSessionExpiredDetails": MessageLookupByLibrary.simpleMessage(
@@ -361,6 +366,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "name": MessageLookupByLibrary.simpleMessage("Namn"),
         "never": MessageLookupByLibrary.simpleMessage("Aldrig"),
         "newAlbum": MessageLookupByLibrary.simpleMessage("Nytt album"),
+        "newPerson": MessageLookupByLibrary.simpleMessage("Ny person"),
         "next": MessageLookupByLibrary.simpleMessage("Nästa"),
         "no": MessageLookupByLibrary.simpleMessage("Nej"),
         "noDeviceLimit": MessageLookupByLibrary.simpleMessage("Ingen"),
@@ -434,6 +440,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Skicka e-postmeddelandet igen"),
         "resetPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Återställ lösenord"),
+        "resetPerson": MessageLookupByLibrary.simpleMessage("Reset person"),
         "resetToDefault":
             MessageLookupByLibrary.simpleMessage("Återställ till standard"),
         "retry": MessageLookupByLibrary.simpleMessage("Försök igen"),
@@ -587,6 +594,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "yesDelete": MessageLookupByLibrary.simpleMessage("Ja, radera"),
         "yesLogout": MessageLookupByLibrary.simpleMessage("Ja, logga ut"),
         "yesRenew": MessageLookupByLibrary.simpleMessage("Ja, förnya"),
+        "yesResetPerson":
+            MessageLookupByLibrary.simpleMessage("Yes, reset person"),
         "you": MessageLookupByLibrary.simpleMessage("Du"),
         "yourAccountHasBeenDeleted":
             MessageLookupByLibrary.simpleMessage("Ditt konto har raderats")
