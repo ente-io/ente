@@ -426,15 +426,13 @@ interface UtilitySectionProps {
 
 const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
     const router = useRouter();
-    const appContext = useContext(AppContext);
     const {
-        startLoading,
         watchFolderView,
         setWatchFolderView,
         themeColor,
         setThemeColor,
         showMiniDialog,
-    } = appContext;
+    } = useAppContext();
 
     const { show: showRecoveryKey, props: recoveryKeyVisibilityProps } =
         useModalVisibility();
@@ -536,7 +534,6 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
             <TwoFactorModal
                 {...twoFactorVisibilityProps}
                 closeSidebar={closeSidebar}
-                setLoading={startLoading}
             />
             {isElectron() && (
                 <WatchFolder

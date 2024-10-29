@@ -41,7 +41,7 @@ export default function ManageEmailShare({
     onRootClose,
     peopleCount,
 }: Iprops) {
-    const appContext = useContext(AppContext);
+    const { showLoadingBar, hideLoadingBar } = useContext(AppContext);
     const galleryContext = useContext(GalleryContext);
 
     const [addParticipantView, setAddParticipantView] = useState(false);
@@ -80,11 +80,11 @@ export default function ManageEmailShare({
 
     const collectionUnshare = async (email: string) => {
         try {
-            appContext.startLoading();
+            showLoadingBar();
             await unshareCollection(collection, email);
             await galleryContext.syncWithRemote(false, true);
         } finally {
-            appContext.finishLoading();
+            hideLoadingBar();
         }
     };
 

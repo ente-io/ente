@@ -141,7 +141,7 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
     setFilesDownloadProgressAttributesCreator,
     isActiveCollectionDownloadInProgress,
 }) => {
-    const { startLoading, finishLoading, setDialogMessage } =
+    const { showLoadingBar, hideLoadingBar, setDialogMessage } =
         useContext(AppContext);
     const { syncWithRemote } = useContext(GalleryContext);
     const overFlowMenuIconRef = useRef<SVGSVGElement>(null);
@@ -169,19 +169,19 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
     const wrap = useCallback(
         (f: () => Promise<void>) => {
             const wrapped = async () => {
-                startLoading();
+                showLoadingBar();
                 try {
                     await f();
                 } catch (e) {
                     handleError(e);
                 } finally {
                     void syncWithRemote(false, true);
-                    finishLoading();
+                    hideLoadingBar();
                 }
             };
             return (): void => void wrapped();
         },
-        [handleError, syncWithRemote, startLoading, finishLoading],
+        [handleError, syncWithRemote, showLoadingBar, hideLoadingBar],
     );
 
     const showRenameCollectionModal = () => {
