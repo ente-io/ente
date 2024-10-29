@@ -111,6 +111,7 @@ const fileDataTable = 'filedata';
 const createFileDataTable = '''
 CREATE TABLE IF NOT EXISTS $fileDataTable ( 
   $fileIDColumn INTEGER NOT NULL,
+  user_id INTEGER NOT NULL,
   type TEXT NOT NULL,
   size INTEGER NOT NULL,
   updated_at INTEGER NOT NULL,

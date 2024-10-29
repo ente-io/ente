@@ -125,6 +125,7 @@ class MLService {
       }
       if (_cannotRunMLFunction() && !force) return;
       _isRunningML = true;
+      FileDataService.instance.syncDiff().ignore();
 
       await sync();
 
