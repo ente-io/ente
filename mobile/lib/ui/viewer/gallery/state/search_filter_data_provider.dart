@@ -1,5 +1,7 @@
 import "package:flutter/material.dart";
+import "package:photos/models/search/hierarchical/face_filter.dart";
 import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
+import "package:photos/models/search/hierarchical/only_them_filter.dart";
 
 class SearchFilterDataProvider {
   final _appliedFiltersNotifier = _AppliedFiltersNotifier();
@@ -38,6 +40,10 @@ class SearchFilterDataProvider {
       filter.isApplied = true;
     }
     _appliedFiltersNotifier.addFilters(allFiltersToAdd);
+
+    if (filters.any((e) => e is OnlyThemFilter)) {
+      _appliedFiltersNotifier.removeAllFaceFilters();
+    }
   }
 
   void removeAppliedFilters(List<HierarchicalSearchFilter> filters) {
@@ -109,6 +115,11 @@ class _AppliedFiltersNotifier extends ChangeNotifier {
 
   void removeFilters(List<HierarchicalSearchFilter> filters) {
     _appliedFilters.removeWhere((filter) => filters.contains(filter));
+    notifyListeners();
+  }
+
+  void removeAllFaceFilters() {
+    _appliedFilters.removeWhere((element) => element is FaceFilter);
     notifyListeners();
   }
 }
