@@ -18,6 +18,7 @@ import "package:photos/models/search/hierarchical/file_type_filter.dart";
 import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
 import "package:photos/models/search/hierarchical/location_filter.dart";
 import "package:photos/models/search/hierarchical/magic_filter.dart";
+import "package:photos/models/search/hierarchical/only_them_filter.dart";
 import "package:photos/models/search/hierarchical/top_level_generic_filter.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/collections_service.dart";
@@ -121,9 +122,14 @@ Future<void> curateFilters(
     final contactsFilters = _curateContactsFilter(files);
     final faceFilters = await curateFaceFilters(files);
     final magicFilters = await curateMagicFilters(files);
+    final onlyThemFilter = getOnlyThemFilter(
+      searchFilterDataProvider,
+      faceFilters,
+    );
 
     searchFilterDataProvider.clearAndAddRecommendations(
       [
+        ...onlyThemFilter,
         ...magicFilters,
         ...faceFilters,
         ...fileTypeFilters,
@@ -134,6 +140,24 @@ Future<void> curateFilters(
     );
   } catch (e) {
     Logger("HierarchicalSearchUtil").severe("Failed to curate filters", e);
+  }
+}
+
+List<OnlyThemFilter> getOnlyThemFilter(
+  SearchFilterDataProvider searchFilterDataProvider,
+  List<FaceFilter> recommendedFaceFilters,
+) {
+  final appliedFaceFilters =
+      searchFilterDataProvider.appliedFilters.whereType<FaceFilter>().toList();
+  if (appliedFaceFilters.isEmpty || appliedFaceFilters.length > 4) {
+    return [];
+  } else {
+    final onlyThemFilter = OnlyThemFilter(
+      faceFilters: appliedFaceFilters,
+      faceFiltersToAvoid: recommendedFaceFilters,
+      occurrence: kMostRelevantFilter,
+    );
+    return [onlyThemFilter];
   }
 }
 
@@ -386,6 +410,13 @@ Future<List<MagicFilter>> curateMagicFilters(List<EnteFile> files) async {
 Map<String, List<HierarchicalSearchFilter>> getFiltersForBottomSheet(
   SearchFilterDataProvider searchFilterDataProvider,
 ) {
+  final onlyThemFilter = searchFilterDataProvider.appliedFilters
+      .whereType<OnlyThemFilter>()
+      .toList();
+  onlyThemFilter.addAll(
+    searchFilterDataProvider.recommendations.whereType<OnlyThemFilter>(),
+  );
+
   final faceFilters =
       searchFilterDataProvider.appliedFilters.whereType<FaceFilter>().toList();
   faceFilters
@@ -429,6 +460,7 @@ Map<String, List<HierarchicalSearchFilter>> getFiltersForBottomSheet(
       .toList();
 
   return {
+    "onlyThemFilter": onlyThemFilter,
     "faceFilters": faceFilters,
     "magicFilters": magicFilters,
     "locationFilters": locationFilters,
@@ -484,9 +516,12 @@ List<HierarchicalSearchFilter> getRecommendedFiltersForAppBar(
   final contactsReccos = <ContactsFilter>[];
   final albumReccos = <AlbumFilter>[];
   final fileTypeReccos = <FileTypeFilter>[];
+  final onlyThemFilter = <OnlyThemFilter>[];
 
   for (var recommendation in curatedRecommendations) {
-    if (recommendation is FaceFilter) {
+    if (recommendation is OnlyThemFilter) {
+      onlyThemFilter.add(recommendation);
+    } else if (recommendation is FaceFilter) {
       faceReccos.add(recommendation);
     } else if (recommendation is MagicFilter) {
       magicReccos.add(recommendation);
@@ -502,6 +537,7 @@ List<HierarchicalSearchFilter> getRecommendedFiltersForAppBar(
   }
 
   return [
+    ...onlyThemFilter,
     ...faceReccos,
     ...magicReccos,
     ...locationReccos,

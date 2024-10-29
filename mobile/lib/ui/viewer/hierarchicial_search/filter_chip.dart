@@ -229,3 +229,92 @@ class _FaceFilterChipState extends State<FaceFilterChip> {
     );
   }
 }
+
+class OnlyThemFilterChip extends StatelessWidget {
+  final List<String> personIds;
+  final List<String> clusterIds;
+  final VoidCallback apply;
+  final VoidCallback remove;
+  final bool isApplied;
+  final bool isInAllFiltersView;
+  const OnlyThemFilterChip({
+    required this.personIds,
+    required this.clusterIds,
+    required this.apply,
+    required this.remove,
+    required this.isApplied,
+    this.isInAllFiltersView = false,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        if (isApplied) {
+          remove();
+        } else {
+          apply();
+        }
+      },
+      child: SizedBox(
+        // +1 to account for the filter's outer stroke width
+        height: kFilterChipHeight + 1,
+        child: Container(
+          decoration: BoxDecoration(
+            color: getEnteColorScheme(context).fillFaint,
+            borderRadius: const BorderRadius.all(
+              Radius.circular(kFilterChipHeight / 2),
+            ),
+            border: Border.all(
+              color: getEnteColorScheme(context).strokeFaint,
+              width: 0.5,
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _OnlyThemFilterThumbnail(
+                  personIds: personIds,
+                  clusterIds: clusterIds,
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Text(
+                    "Only them",
+                    style: getEnteTextTheme(context).miniBold,
+                  ),
+                ),
+                isApplied ? const SizedBox(width: 2) : const SizedBox.shrink(),
+                isApplied
+                    ? Icon(
+                        Icons.close_rounded,
+                        size: 16,
+                        color: getEnteColorScheme(context).textMuted,
+                      )
+                    : const SizedBox.shrink(),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _OnlyThemFilterThumbnail extends StatelessWidget {
+  final List<String> personIds;
+  final List<String> clusterIds;
+  const _OnlyThemFilterThumbnail({
+    required this.personIds,
+    required this.clusterIds,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return const SizedBox.shrink();
+  }
+}

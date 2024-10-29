@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 import "package:photos/models/search/hierarchical/face_filter.dart";
 import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
+import "package:photos/models/search/hierarchical/only_them_filter.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
@@ -73,18 +74,31 @@ class _AppliedFiltersState extends State<AppliedFilters> {
                       },
                       isApplied: filter.isApplied,
                     )
-                  : GenericFilterChip(
-                      label: filter.name(),
-                      apply: () {
-                        _searchFilterDataProvider.applyFilters([filter]);
-                      },
-                      remove: () {
-                        _searchFilterDataProvider
-                            .removeAppliedFilters([filter]);
-                      },
-                      leadingIcon: filter.icon(),
-                      isApplied: filter.isApplied,
-                    ),
+                  : filter is OnlyThemFilter
+                      ? OnlyThemFilterChip(
+                          personIds: filter.personIDs,
+                          clusterIds: filter.clusterIDs,
+                          apply: () {
+                            _searchFilterDataProvider.applyFilters([filter]);
+                          },
+                          remove: () {
+                            _searchFilterDataProvider
+                                .removeAppliedFilters([filter]);
+                          },
+                          isApplied: filter.isApplied,
+                        )
+                      : GenericFilterChip(
+                          label: filter.name(),
+                          apply: () {
+                            _searchFilterDataProvider.applyFilters([filter]);
+                          },
+                          remove: () {
+                            _searchFilterDataProvider
+                                .removeAppliedFilters([filter]);
+                          },
+                          leadingIcon: filter.icon(),
+                          isApplied: filter.isApplied,
+                        ),
             );
           },
           scrollDirection: Axis.horizontal,
