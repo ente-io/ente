@@ -191,15 +191,23 @@ For more details, see [translations.md](translations.md).
 -   [chrono-node](https://github.com/wanasit/chrono) is used for parsing natural
     language queries into dates for showing search results.
 
+-   [matrix](https://github.com/mljs/matrix) is mathematical matrix abstraction
+    by the machine learning code. It is used alongwith
+    [similarity-transformation](https://github.com/shaileshpandit/similarity-transformation-js)
+    during face alignment.
+
+### UI
+
 -   [react-top-loading-bar](https://github.com/klendi/react-top-loading-bar) is
     used for showing a progress indicator for global actions (This shouldn't be
     used always, it is only meant as a fallback when there isn't an otherwise
     suitable place for showing a local activity indicator).
 
--   [matrix](https://github.com/mljs/matrix) is mathematical matrix abstraction
-    by the machine learning code. It is used alongwith
-    [similarity-transformation](https://github.com/shaileshpandit/similarity-transformation-js)
-    during face alignment.
+-   [pure-react-carousel](https://github.com/express-labs/pure-react-carousel)
+    is used for the feature carousel on the welcome (login / signup) screen.
+
+-   [react-otp-input](https://github.com/devfolioco/react-otp-input) is used to
+    render a segmented OTP input field.
 
 ## Auth app specific
 
