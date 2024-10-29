@@ -218,10 +218,8 @@ export default function App({ Component, pageProps }: AppProps) {
         isLoadingBarRunning.current = true;
     };
     const finishLoading = () => {
-        setTimeout(() => {
-            isLoadingBarRunning.current && loadingBar.current?.complete();
-            isLoadingBarRunning.current = false;
-        }, 100);
+        isLoadingBarRunning.current && loadingBar.current?.complete();
+        isLoadingBarRunning.current = false;
     };
 
     // Use `onGenericError` instead.

@@ -119,10 +119,8 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     };
 
     const finishLoading = () => {
-        setTimeout(() => {
-            isLoadingBarRunning.current && loadingBar.current?.complete();
-            isLoadingBarRunning.current = false;
-        }, 100);
+        isLoadingBarRunning.current && loadingBar.current?.complete();
+        isLoadingBarRunning.current = false;
     };
 
     const somethingWentWrong = () =>
