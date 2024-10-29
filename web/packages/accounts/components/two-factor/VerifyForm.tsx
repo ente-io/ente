@@ -4,7 +4,7 @@ import {
     CenteredFlex,
     VerticallyCentered,
 } from "@ente/shared/components/Container";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, styled } from "@mui/material";
 import { Formik, type FormikHelpers } from "formik";
 import { t } from "i18next";
 import { useRef, useState } from "react";
@@ -71,17 +71,21 @@ export default function VerifyTwoFactor(props: Props) {
                         </Typography>
                         <Box my={2}>
                             <OtpInput
-                                ref={otpInputRef}
-                                shouldAutoFocus
                                 value={values.otp}
                                 onChange={onChange(
                                     handleChange("otp"),
                                     submitForm,
                                 )}
                                 numInputs={6}
-                                separator={"-"}
-                                isInputNum
-                                className={"otp-input"}
+                                // ref={otpInputRef}
+                                renderSeparator={<span>-</span>}
+                                renderInput={(props) => (
+                                    <IndividualInput {...props} />
+                                )}
+                                shouldAutoFocus
+                                // separator={"-"}
+                                // isInputNum
+                                // className={"otp-input"}
                             />
                             {errors.otp && (
                                 <CenteredFlex sx={{ mt: 1 }}>
@@ -107,3 +111,22 @@ export default function VerifyTwoFactor(props: Props) {
         </Formik>
     );
 }
+
+const IndividualInput = styled("input")(
+    ({ theme }) => `
+    font-size: 2rem;
+    padding: 4px 12px;
+    min-width: 3rem;
+    margin-inline: 8px;
+    border: 1px solid ${theme.colors.accent.A700};
+    border-radius: 1px;
+    outline-color: ${theme.colors.accent.A300};
+    transition: 0.5s;
+
+    @media (width < 30em) {
+        font-size: 1rem;
+        padding: 4px;
+        min-width: 2rem;
+    }
+`,
+);

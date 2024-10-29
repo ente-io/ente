@@ -27,7 +27,7 @@
         "piexifjs": "^1.0.6",
         "pure-react-carousel": "^1.30.1",
         "react-dropzone": "^14.2",
-        "react-otp-input": "^2.3.1",
+        "react-otp-input": "^3.1.1",
         "react-select": "^5.8.0",
         "react-top-loading-bar": "^2.3.1",
         "react-virtualized-auto-sizer": "^1.0",
