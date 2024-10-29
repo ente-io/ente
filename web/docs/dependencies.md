@@ -132,13 +132,16 @@ with Next.js.
 
 For more details, see [translations.md](translations.md).
 
-### Others
+### Other UI components
 
 -   [formik](https://github.com/jaredpalmer/formik) provides an easier to use
     abstraction for dealing with form state, validation and submission states
     when using React.
 
 -   [react-select](https://react-select.com/) is used for search dropdowns.
+
+-   [react-otp-input](https://github.com/devfolioco/react-otp-input) is used to
+    render a segmented OTP input field for 2FA authentication.
 
 ## Utilities
 
@@ -205,9 +208,6 @@ For more details, see [translations.md](translations.md).
 
 -   [pure-react-carousel](https://github.com/express-labs/pure-react-carousel)
     is used for the feature carousel on the welcome (login / signup) screen.
-
--   [react-otp-input](https://github.com/devfolioco/react-otp-input) is used to
-    render a segmented OTP input field.
 
 ## Auth app specific
 
