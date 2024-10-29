@@ -112,9 +112,10 @@ export default function VerifyTwoFactor(props: Props) {
 
 const IndividualInput = styled("input")(
     ({ theme }) => `
-    font-size: 2rem;
-    padding: 4px 12px;
-    min-width: 3rem;
+    font-size: 1.5rem;
+    padding: 4px;
+    width: 40px !important;
+    aspect-ratio: 1;
     margin-inline: 8px;
     border: 1px solid ${theme.colors.accent.A700};
     border-radius: 1px;
@@ -124,7 +125,7 @@ const IndividualInput = styled("input")(
     ${theme.breakpoints.down("sm")} {
         font-size: 1rem;
         padding: 4px;
-        min-width: 2rem;
+        width: 32px !important;
     }
 `,
 );
