@@ -125,10 +125,6 @@ body {
     display: none;
 }
 
-.bg-upload-progress-bar {
-    background-color: #51cd7c;
-}
-
 .carousel-inner {
     padding-bottom: 50px !important;
 }
