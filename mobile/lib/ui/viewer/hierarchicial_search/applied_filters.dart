@@ -76,8 +76,7 @@ class _AppliedFiltersState extends State<AppliedFilters> {
                     )
                   : filter is OnlyThemFilter
                       ? OnlyThemFilterChip(
-                          personIds: filter.personIDs,
-                          clusterIds: filter.clusterIDs,
+                          faceFilters: filter.faceFilters,
                           apply: () {
                             _searchFilterDataProvider.applyFilters([filter]);
                           },

@@ -7,23 +7,13 @@ class OnlyThemFilter extends HierarchicalSearchFilter {
   final List<FaceFilter> faceFilters;
   final List<FaceFilter> faceFiltersToAvoid;
   final int occurrence;
-  final _personIDs = <String>[];
-  final _clusterIDs = <String>[];
 
   OnlyThemFilter({
     required this.faceFilters,
     required this.faceFiltersToAvoid,
     required this.occurrence,
     super.filterTypeName = "onlyThemFilter",
-  }) {
-    for (var filter in faceFilters) {
-      if (filter.personId != null) {
-        _personIDs.add(filter.personId!);
-      } else {
-        _clusterIDs.add(filter.clusterId!);
-      }
-    }
-  }
+  });
 
   @override
   String name() {
@@ -57,7 +47,4 @@ class OnlyThemFilter extends HierarchicalSearchFilter {
     }
     return false;
   }
-
-  List<String> get personIDs => _personIDs;
-  List<String> get clusterIDs => _clusterIDs;
 }

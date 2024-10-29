@@ -130,8 +130,7 @@ class _RecommendedFiltersState extends State<RecommendedFilters> {
                       )
                     : filter is OnlyThemFilter
                         ? OnlyThemFilterChip(
-                            personIds: filter.personIDs,
-                            clusterIds: filter.clusterIDs,
+                            faceFilters: filter.faceFilters,
                             apply: () {
                               _searchFilterDataProvider.applyFilters([filter]);
                             },

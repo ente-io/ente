@@ -69,8 +69,7 @@ class _FilterOptionsBottomSheetState extends State<FilterOptionsBottomSheet> {
                           )
                         else if (filter is OnlyThemFilter)
                           OnlyThemFilterChip(
-                            personIds: filter.personIDs,
-                            clusterIds: filter.clusterIDs,
+                            faceFilters: filter.faceFilters,
                             apply: () {
                               widget.searchFilterDataProvider
                                   .applyFilters([filter]);
