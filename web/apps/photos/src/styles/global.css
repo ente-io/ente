@@ -162,9 +162,3 @@ div.otp-input input:focus {
     transition: 0.5s;
     outline: none;
 }
-
-.flash-message {
-    padding: 16px;
-    display: flex;
-    align-items: center;
-}
