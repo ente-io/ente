@@ -37,7 +37,8 @@ import LinkIcon from "@mui/icons-material/Link";
 import LogoutIcon from "@mui/icons-material/Logout";
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
 import PeopleIcon from "@mui/icons-material/People";
-import PushPinOutlined from "@mui/icons-material/PushPinOutlined";
+import PushPinIcon from "@mui/icons-material/PushPin";
+import PushPinOutlinedIcon from "@mui/icons-material/PushPinOutlined";
 import SortIcon from "@mui/icons-material/Sort";
 import TvIcon from "@mui/icons-material/Tv";
 import Unarchive from "@mui/icons-material/Unarchive";
@@ -45,7 +46,6 @@ import VisibilityOffOutlined from "@mui/icons-material/VisibilityOffOutlined";
 import VisibilityOutlined from "@mui/icons-material/VisibilityOutlined";
 import { Box, IconButton, Stack, Tooltip } from "@mui/material";
 import { SetCollectionNamerAttributes } from "components/Collections/CollectionNamer";
-import { UnPinIcon } from "components/icons/UnPinIcon";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
 import React, { useCallback, useContext, useRef } from "react";
@@ -654,14 +654,14 @@ const AlbumCollectionOptions: React.FC<AlbumCollectionOptionsProps> = ({
         {isPinned ? (
             <OverflowMenuOption
                 onClick={onUnpinClick}
-                startIcon={<UnPinIcon />}
+                startIcon={<PushPinOutlinedIcon />}
             >
                 {t("unpin_album")}
             </OverflowMenuOption>
         ) : (
             <OverflowMenuOption
                 onClick={onPinClick}
-                startIcon={<PushPinOutlined />}
+                startIcon={<PushPinIcon />}
             >
                 {t("pin_album")}
             </OverflowMenuOption>
