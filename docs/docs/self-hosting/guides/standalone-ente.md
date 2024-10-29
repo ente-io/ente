@@ -70,7 +70,7 @@ createuser -s postgres
 
 ## Start Museum 
 
-```
+```sh
 export ENTE_DB_USER=postgres 
 cd ente/server
 go run cmd/museum/main.go
@@ -78,7 +78,7 @@ go run cmd/museum/main.go
 
 For live reloads, install [air](https://github.com/air-verse/air#installation). Then you can just call air after declaring the required environment variables. For example,
 
-```
+```sh
 ENTE_DB_USER=ente_user
 air
 ```
