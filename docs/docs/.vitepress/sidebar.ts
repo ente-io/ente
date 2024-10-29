@@ -295,6 +295,10 @@ export const sidebar = [
                         text: "Yarn",
                         link: "/self-hosting/troubleshooting/yarn",
                     },
+                    {
+                        text: "Ente CLI Secrets",
+                        link: "/self-hosting/troubleshooting/keyring",
+                    },
                 ],
             },
         ],
