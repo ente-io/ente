@@ -42,8 +42,10 @@ class _FilterOptionsBottomSheetState extends State<FilterOptionsBottomSheet> {
             children: [
               for (String filterName in _filters.keys)
                 Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                   child: Wrap(
                     spacing: 6,
                     runSpacing: 6,

@@ -84,6 +84,7 @@ class _FaceFilterChipState extends State<FaceFilterChip> {
                         personId: widget.personId,
                         clusterID: widget.clusterId,
                         thumbnailFallback: false,
+                        useFullFile: false,
                       ),
                     ),
                   ),
