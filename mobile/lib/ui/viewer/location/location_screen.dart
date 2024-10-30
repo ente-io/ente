@@ -106,7 +106,7 @@ class _LocationGalleryWidgetState extends State<LocationGalleryWidget> {
     super.initState();
 
     final collectionsToHide =
-        CollectionsService.instance.archivedOrHiddenCollectionIds();
+        CollectionsService.instance.getHiddenCollectionIds();
     fileLoadResult = FilesDB.instance
         .fetchAllUploadedAndSharedFilesWithLocation(
       galleryLoadStartTime,
