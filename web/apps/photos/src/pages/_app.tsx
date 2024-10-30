@@ -23,7 +23,6 @@ import { photosDialogZIndex } from "@/new/photos/components/utils/z-index";
 import DownloadManager from "@/new/photos/services/download";
 import { runMigrations } from "@/new/photos/services/migrations";
 import { initML, isMLSupported } from "@/new/photos/services/ml";
-import { initSettings } from "@/new/photos/services/settings";
 import { AppContext } from "@/new/photos/types/context";
 import { Overlay } from "@ente/shared/components/Container";
 import DialogBox from "@ente/shared/components/DialogBox";
