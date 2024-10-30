@@ -5,6 +5,30 @@ import { apiURL } from "@/base/origins";
 import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
 
+/**
+ * Internal in-memory state shared by the functions in this module.
+ *
+ * This entire object will be reset on logout.
+ */
+class SettingsState {
+    /**
+     * In-memory flag that tracks if maps are enabled.
+     *
+     * -   On app start, this is read from local storage in
+     *     {@link initSettings}.
+     *
+     * -   It gets updated when we sync with remote (once per app start in
+     *     {@link triggerRemoteFlagsFetchIfNeeded}, and whenever the user opens
+     *     the preferences panel).
+     *
+     * -   It gets updated when the user toggles the corresponding setting on
+     *     this device.
+     *
+     * -   It is cleared in {@link logoutML}.
+     */
+    isMapEnabled = false;
+}
+
 let _fetchTimeout: ReturnType<typeof setTimeout> | undefined;
 let _haveFetched = false;
 
@@ -57,13 +81,13 @@ let _haveFetched = false;
  *    the default. Otherwise the now fetched result is saved to local storage
  *    and the corresponding value returned.
  */
-export const triggerFeatureFlagsFetchIfNeeded = () => {
+export const triggerRemoteFlagsFetchIfNeeded = () => {
     if (_haveFetched) return;
     if (_fetchTimeout) return;
     // Not critical, so fetch these after some delay.
     _fetchTimeout = setTimeout(() => {
         _fetchTimeout = undefined;
-        void fetchAndSaveFeatureFlags().then(() => {
+        void fetchAndSaveRemoteFlags().then(() => {
             _haveFetched = true;
         });
     }, 2000);
@@ -78,10 +102,10 @@ export const clearFeatureFlagSessionState = () => {
 };
 
 /**
- * Fetch feature flags (potentially user specific) from remote and save them in
- * local storage for subsequent lookup.
+ * Fetch remote flags from remote and save them in local storage for subsequent
+ * lookup.
  */
-const fetchAndSaveFeatureFlags = () =>
+const fetchAndSaveRemoteFlags = () =>
     fetchFeatureFlags()
         .then((res) => res.text())
         .then(saveFlagJSONString);
@@ -114,7 +138,7 @@ const remoteFeatureFlagsFetchingIfNeeded = async () => {
     let ff = remoteFeatureFlags();
     if (!ff) {
         try {
-            await fetchAndSaveFeatureFlags();
+            await fetchAndSaveRemoteFlags();
         } catch (e) {
             log.warn("Ignoring error when fetching feature flags", e);
         }
