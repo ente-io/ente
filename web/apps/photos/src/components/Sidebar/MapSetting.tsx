@@ -1,5 +1,5 @@
-import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { MenuItemGroup } from "@/base/components/Menu";
+import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
 import type { NestedDrawerVisibilityProps } from "@/base/components/utils/modal";
 import log from "@/base/log";
@@ -54,7 +54,7 @@ export const MapSettings: React.FC<NestedDrawerVisibilityProps> = ({
     };
 
     return (
-        <EnteDrawer
+        <SidebarDrawer
             transitionDuration={0}
             open={open}
             onClose={handleDrawerClose}
@@ -90,7 +90,7 @@ export const MapSettings: React.FC<NestedDrawerVisibilityProps> = ({
                 onClose={closeModifyMapEnabled}
                 onRootClose={handleRootClose}
             />
-        </EnteDrawer>
+        </SidebarDrawer>
     );
 };
 
@@ -132,7 +132,7 @@ const ModifyMapEnabled = ({ open, onClose, onRootClose, mapEnabled }) => {
 
     return (
         <Box>
-            <EnteDrawer
+            <SidebarDrawer
                 anchor="left"
                 transitionDuration={0}
                 open={open}
@@ -156,7 +156,7 @@ const ModifyMapEnabled = ({ open, onClose, onRootClose, mapEnabled }) => {
                         onRootClose={handleRootClose}
                     />
                 )}
-            </EnteDrawer>
+            </SidebarDrawer>
         </Box>
     );
 };

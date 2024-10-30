@@ -1,9 +1,9 @@
 import { RecoveryKey } from "@/accounts/components/RecoveryKey";
 import { openAccountsManagePasskeysPage } from "@/accounts/services/passkey";
 import { isDesktop } from "@/base/app";
-import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { EnteLogo } from "@/base/components/EnteLogo";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import { useModalVisibility } from "@/base/components/utils/modal";
 import log from "@/base/log";
 import { savedLogs } from "@/base/log-web";
@@ -94,7 +94,7 @@ export default function Sidebar({
     closeSidebar,
 }: Iprops) {
     return (
-        <DrawerSidebar open={sidebarView} onClose={closeSidebar}>
+        <RootSidebarDrawer open={sidebarView} onClose={closeSidebar}>
             <HeaderSection closeSidebar={closeSidebar} />
             <Divider />
             <UserDetailsSection sidebarView={sidebarView} />
@@ -111,11 +111,11 @@ export default function Sidebar({
                 <Divider />
                 <DebugSection />
             </Stack>
-        </DrawerSidebar>
+        </RootSidebarDrawer>
     );
 }
 
-const DrawerSidebar = styled(EnteDrawer)(({ theme }) => ({
+const RootSidebarDrawer = styled(SidebarDrawer)(({ theme }) => ({
     "& .MuiPaper-root": {
         padding: theme.spacing(1.5),
     },
