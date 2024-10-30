@@ -14,7 +14,7 @@ import { FileType } from "@/media/file-type";
 import { ensure } from "@/utils/ensure";
 import { throttled } from "@/utils/promise";
 import { proxy, transfer } from "comlink";
-import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
+import { getRemoteFlag, updateRemoteFlag } from "../settings";
 import { setSearchPeople } from "../search";
 import type { UploadItem } from "../upload/types";
 import {
