@@ -5,12 +5,10 @@ import "package:photos/models/search/hierarchical/hierarchical_search_filter.dar
 
 class OnlyThemFilter extends HierarchicalSearchFilter {
   final List<FaceFilter> faceFilters;
-  final List<FaceFilter> faceFiltersToAvoid;
   final int occurrence;
 
   OnlyThemFilter({
     required this.faceFilters,
-    required this.faceFiltersToAvoid,
     required this.occurrence,
     super.filterTypeName = "onlyThemFilter",
   });

@@ -67,6 +67,45 @@ Future<List<EnteFile>> getFilteredFiles(
       } catch (e) {
         log("Error in face filter: $e");
       }
+    } else if (filter is OnlyThemFilter) {
+      late Set<int> intersectionOfSelectedFaceFiltersFileIDs;
+      final selectedClusterIDs = <String>[];
+      final selectedPersonIDs = <String>[];
+      int index = 0;
+
+      for (final faceFilter in filter.faceFilters) {
+        if (index == 0) {
+          intersectionOfSelectedFaceFiltersFileIDs =
+              faceFilter.getMatchedUploadedIDs();
+        } else {
+          intersectionOfSelectedFaceFiltersFileIDs =
+              intersectionOfSelectedFaceFiltersFileIDs
+                  .intersection(faceFilter.getMatchedUploadedIDs());
+        }
+        index++;
+
+        if (faceFilter.clusterId != null) {
+          selectedClusterIDs.add(faceFilter.clusterId!);
+        } else {
+          selectedPersonIDs.add(faceFilter.personId!);
+        }
+      }
+
+      await MLDataDB.instance
+          .getPersonsClusterIDs(selectedPersonIDs)
+          .then((clusterIDs) {
+        selectedClusterIDs.addAll(clusterIDs);
+      });
+
+      final clusterIDsToAvoid = await MLDataDB.instance
+          .getAllClusterIDs(exceptClusters: selectedClusterIDs);
+
+      final fileIDsToAvoid =
+          await MLDataDB.instance.getFileIDsOfClusterIDs(clusterIDsToAvoid);
+
+      final result =
+          intersectionOfSelectedFaceFiltersFileIDs.difference(fileIDsToAvoid);
+      filter.matchedUploadedIDs.addAll(result);
     } else if (filter is! FaceFilter &&
         filter.getMatchedUploadedIDs().isEmpty) {
       resultsNeverComputedFilters.add(filter);
@@ -147,6 +186,9 @@ List<OnlyThemFilter> getOnlyThemFilter(
   SearchFilterDataProvider searchFilterDataProvider,
   List<FaceFilter> recommendedFaceFilters,
 ) {
+  recommendedFaceFilters.removeWhere(
+    (e) => e.isSameFilter(searchFilterDataProvider.initialGalleryFilter),
+  );
   final appliedFaceFilters =
       searchFilterDataProvider.appliedFilters.whereType<FaceFilter>().toList();
   if (appliedFaceFilters.isEmpty || appliedFaceFilters.length > 4) {
@@ -154,7 +196,6 @@ List<OnlyThemFilter> getOnlyThemFilter(
   } else {
     final onlyThemFilter = OnlyThemFilter(
       faceFilters: appliedFaceFilters,
-      faceFiltersToAvoid: recommendedFaceFilters,
       occurrence: kMostRelevantFilter,
     );
     return [onlyThemFilter];

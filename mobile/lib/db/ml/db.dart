@@ -228,6 +228,15 @@ class MLDataDB {
     return maps.map((e) => e[clusterIDColumn] as String).toSet();
   }
 
+  Future<Set<String>> getPersonsClusterIDs(List<String> personID) async {
+    final db = await instance.asyncDB;
+    final inParam = personID.map((e) => "'$e'").join(',');
+    final List<Map<String, dynamic>> maps = await db.getAll(
+      'SELECT $clusterIDColumn FROM $clusterPersonTable WHERE $personIdColumn IN ($inParam)',
+    );
+    return maps.map((e) => e[clusterIDColumn] as String).toSet();
+  }
+
   Future<void> clearTable() async {
     final db = await instance.asyncDB;
 
@@ -1013,5 +1022,35 @@ class MLDataDB {
     );
 
     return [for (final row in result) row[fileIDColumn]];
+  }
+
+  Future<Set<int>> getFileIDsOfClusterIDs(Set<String> clusterIDs) async {
+    final db = await instance.asyncDB;
+    final inParam = clusterIDs.map((e) => "'$e'").join(',');
+
+    final result = await db.getAll(
+      '''
+        SELECT DISTINCT $facesTable.$fileIDColumn
+        FROM $faceClustersTable 
+        JOIN $facesTable ON $faceClustersTable.$faceIDColumn = $facesTable.$faceIDColumn
+        WHERE $faceClustersTable.$clusterIDColumn IN ($inParam)
+    ''',
+    );
+
+    return <int>{for (final row in result) row[fileIDColumn]};
+  }
+
+  Future<Set<String>> getAllClusterIDs({List<String>? exceptClusters}) async {
+    final notInParam = exceptClusters?.map((e) => "'$e'").join(',') ?? '';
+    final db = await instance.asyncDB;
+    final result = await db.getAll(
+      '''
+        SELECT DISTINCT $clusterIDColumn
+        FROM $faceClustersTable 
+        WHERE $clusterIDColumn NOT IN ($notInParam)
+    ''',
+    );
+
+    return <String>{for (final row in result) row[clusterIDColumn]};
   }
 }
