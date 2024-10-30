@@ -1,5 +1,5 @@
-import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { MenuItemDivider, MenuItemGroup } from "@/base/components/Menu";
+import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
 import type {
     Collection,
@@ -84,7 +84,7 @@ export function ManageLinkExpiry({
                     }
                 />
             </MenuItemGroup>
-            <EnteDrawer
+            <SidebarDrawer
                 anchor="right"
                 open={shareExpiryOptionsModalView}
                 onClose={handleDrawerClose}
@@ -115,7 +115,7 @@ export function ManageLinkExpiry({
                         </MenuItemGroup>
                     </Stack>
                 </Stack>
-            </EnteDrawer>
+            </SidebarDrawer>
         </>
     );
 }

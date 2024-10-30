@@ -1,6 +1,6 @@
-import { EnteDrawer } from "@/base/components/EnteDrawer";
 import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
 import { EllipsizedTypography } from "@/base/components/Typography";
 import { useModalVisibility } from "@/base/components/utils/modal";
@@ -400,7 +400,7 @@ const confirmDisableMapsDialogAttributes = (
 });
 
 const FileInfoSidebar = styled((props: DialogProps) => (
-    <EnteDrawer {...props} anchor="right" />
+    <SidebarDrawer {...props} anchor="right" />
 ))({
     zIndex: fileInfoDrawerZIndex,
     "& .MuiPaper-root": {
