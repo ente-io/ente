@@ -16,6 +16,7 @@ import {
     TRASH_SECTION,
 } from "@/new/photos/services/collection";
 import type { CollectionSummaries } from "@/new/photos/services/collection/ui";
+import { isInternalUser } from "@/new/photos/services/settings";
 import { AppContext, useAppContext } from "@/new/photos/types/context";
 import { initiateEmail, openURL } from "@/new/photos/utils/web";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
@@ -482,7 +483,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
                 onClick={showRecoveryKey}
                 label={t("recovery_key")}
             />
-            {isInternalUserViaEmailCheck() && (
+            {isInternalUser() && (
                 <EnteMenuItem
                     onClick={toggleTheme}
                     variant="secondary"
@@ -653,7 +654,7 @@ const DebugSection: React.FC = () => {
 
     return (
         <>
-            {isInternalUserViaEmailCheck() && (
+            {isInternalUser() && (
                 <EnteMenuItem
                     variant="secondary"
                     onClick={testUpload}
@@ -673,12 +674,4 @@ const DebugSection: React.FC = () => {
             </Stack>
         </>
     );
-};
-
-// TODO: Legacy synchronous check, use the one from remote-store.ts instead.
-const isInternalUserViaEmailCheck = () => {
-    const userEmail = getData(LS_KEYS.USER)?.email;
-    if (!userEmail) return false;
-
-    return userEmail.endsWith("@ente.io");
 };

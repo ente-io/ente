@@ -34,12 +34,15 @@ class SettingsState {
 
     /**
      * In-memory flag that tracks if the current user is an internal user.
+     *
+     * See: [Note: Remote flag lifecycle].
      */
     isInternalUser = false;
 
     /**
      * In-memory flag that tracks if maps are enabled.
      *
+     * See: [Note: Remote flag lifecycle].
      */
     isMapEnabled = false;
 }
@@ -102,7 +105,6 @@ let _state = new SettingsState();
  *     for frequent use during UI rendering.
  *
  * 5.  Everything gets reset to the default state on {@link logoutSettings}.
- *
  */
 export const triggerSettingsSyncIfNeeded = () => {
     if (!_state.haveSynced) void syncSettings();
@@ -156,25 +158,13 @@ const FeatureFlags = z.object({
 
 type FeatureFlags = z.infer<typeof FeatureFlags>;
 
-const remoteFeatureFlagsFetchingIfNeeded = async () => {
-    let ff = savedRemoteFeatureFlags();
-    if (!ff) {
-        try {
-            await syncSettings();
-        } catch (e) {
-            log.warn("Ignoring error when fetching feature flags", e);
-        }
-        ff = savedRemoteFeatureFlags();
-    }
-    return ff;
-};
-
 const readInMemoryFlagsFromLocalStorage = () => {
     const flags = savedRemoteFeatureFlags();
-    _state.isInternalUser = flags?.internalUser ?? isInternalUserViaEmail();
+    // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+    _state.isInternalUser = flags?.internalUser || isInternalUserViaEmail();
 };
 
-export const isInternalUserViaEmail = () => {
+const isInternalUserViaEmail = () => {
     const user = localUser();
     return !!user?.email.endsWith("@ente.io");
 };
