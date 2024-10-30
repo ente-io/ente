@@ -16,32 +16,30 @@ import { z } from "zod";
  */
 class SettingsState {
     /**
-     * The ID of the user whose settings these are.
+     * An arbitrary token to identify the current login.
      *
      * It is used to discard stale completions.
      */
-    userID: string | undefined = undefined;
+    id: number;
+
+    constructor() {
+        this.id = Math.random();
+    }
 
     /**
      * True if we have performed a fetch for the logged in user since the app
      * started.
      */
-    haveFetched = false;
+    haveSynced = false;
+
+    /**
+     * In-memory flag that tracks if the current user is an internal user.
+     */
+    isInternalUser = false;
 
     /**
      * In-memory flag that tracks if maps are enabled.
      *
-     * -   On app start, this is read from local storage in
-     *     {@link initSettings}.
-     *
-     * -   It gets updated when we sync with remote (once per app start in
-     *     {@link triggerSettingsSyncIfNeeded}, and whenever the user opens the
-     *     preferences panel).
-     *
-     * -   It gets updated when the user toggles the corresponding setting on
-     *     this device.
-     *
-     * -   It is cleared in {@link logoutML}.
      */
     isMapEnabled = false;
 }
@@ -83,23 +81,35 @@ let _state = new SettingsState();
  *
  * There is a single API (/remote-store/update) to update the state on remote.
  *
- * At a high level, this is how the app manages this state:
+ * [Note: Remote flag lifecycle]
  *
- * 1.  On app start remote flags are fetched once and saved in local storage. If
- *     this fetch fails, we try again periodically (on every "sync") until
- *     success.
+ * At a high level, this is how the app manages remote flags:
  *
- * 2. Attempts to access any individual feature flag (e.g.
- *    {@link isInternalUser}) returns the corresponding value from local storage
- *    (substituting a default if needed).
+ * 1.  On app start, the initial are read from local storage in
+ *     {@link initSettings}.
  *
- * 3. However, if perchance the fetch-on-app-start hasn't completed yet (or had
- *    failed), then a new fetch is tried. If even this fetch fails, we return
- *    the default. Otherwise the now fetched result is saved to local storage
- *    and the corresponding value returned.
+ * 2.  On app start, as part of the normal sync with remote, remote flags are
+ *     fetched once and saved in local storage, and the in-memory state updated
+ *     to reflect the latest values ({@link triggerSettingsSyncIfNeeded}). If
+ *     this fetch fails, we try again periodically (on every sync with remote)
+ *     until success.
+ *
+ * 3.  Some operations like opening the preferences panel or updating a value
+ *     also cause an unconditional fetch and update ({@link syncSettings}).
+ *
+ * 4.  The individual getter functions for the flags (e.g.
+ *     {@link isInternalUser}) return the in-memory values, and so are suitable
+ *     for frequent use during UI rendering.
+ *
+ * 5.  Everything gets reset to the default state on {@link logoutSettings}.
+ *
  */
 export const triggerSettingsSyncIfNeeded = () => {
-    if (!_state.haveFetched) void fetchAndSaveRemoteFlags();
+    if (!_state.haveSynced) void syncSettings();
+};
+
+export const initSettings = () => {
+    readInMemoryFlagsFromLocalStorage();
 };
 
 export const logoutSettings = () => {
@@ -108,15 +118,18 @@ export const logoutSettings = () => {
 
 /**
  * Fetch remote flags from remote and save them in local storage for subsequent
- * lookup.
+ * lookup. Then use the results to update our in memory state if needed.
  */
-const fetchAndSaveRemoteFlags = async () => {
-    const userID = _state.userID;
+export const syncSettings = async () => {
+    const id = _state.id;
     const jsonString = await fetchFeatureFlags().then((res) => res.text());
-    if (jsonString && _state.userID == userID) {
-        saveFlagJSONString(jsonString);
-        _state.haveFetched = true;
+    if (_state.id != id) {
+        log.info("Discarding stale settings sync not for the current login");
+        return;
     }
+    saveRemoteFeatureFlagsJSONString(jsonString);
+    readInMemoryFlagsFromLocalStorage();
+    _state.haveSynced = true;
 };
 
 const fetchFeatureFlags = async () => {
@@ -127,10 +140,10 @@ const fetchFeatureFlags = async () => {
     return res;
 };
 
-const saveFlagJSONString = (s: string) =>
+const saveRemoteFeatureFlagsJSONString = (s: string) =>
     localStorage.setItem("remoteFeatureFlags", s);
 
-const remoteFeatureFlags = () => {
+const savedRemoteFeatureFlags = () => {
     const s = localStorage.getItem("remoteFeatureFlags");
     if (!s) return undefined;
     return FeatureFlags.parse(JSON.parse(s));
@@ -144,16 +157,26 @@ const FeatureFlags = z.object({
 type FeatureFlags = z.infer<typeof FeatureFlags>;
 
 const remoteFeatureFlagsFetchingIfNeeded = async () => {
-    let ff = remoteFeatureFlags();
+    let ff = savedRemoteFeatureFlags();
     if (!ff) {
         try {
-            await fetchAndSaveRemoteFlags();
+            await syncSettings();
         } catch (e) {
             log.warn("Ignoring error when fetching feature flags", e);
         }
-        ff = remoteFeatureFlags();
+        ff = savedRemoteFeatureFlags();
     }
     return ff;
+};
+
+const readInMemoryFlagsFromLocalStorage = () => {
+    const flags = savedRemoteFeatureFlags();
+    _state.isInternalUser = flags?.internalUser ?? isInternalUserViaEmail();
+};
+
+export const isInternalUserViaEmail = () => {
+    const user = localUser();
+    return !!user?.email.endsWith("@ente.io");
 };
 
 /**
@@ -162,26 +185,8 @@ const remoteFeatureFlagsFetchingIfNeeded = async () => {
  * 1. Emails that end in `@ente.io` are considered as internal users.
  * 2. If the "internalUser" remote feature flag is set, the user is internal.
  * 3. Otherwise false.
- *
- * See also: [Note: Feature Flags].
  */
-export const isInternalUser = async () => {
-    const user = localUser();
-    if (user?.email.endsWith("@ente.io")) return true;
-
-    const flags = await remoteFeatureFlagsFetchingIfNeeded();
-    return flags?.internalUser ?? false;
-};
-
-/**
- * Return `true` if the current user is marked as a "beta" user.
- *
- * See also: [Note: Feature Flags].
- */
-export const isBetaUser = async () => {
-    const flags = await remoteFeatureFlagsFetchingIfNeeded();
-    return flags?.betaUser ?? false;
-};
+export const isInternalUser = () => _state.isInternalUser;
 
 /**
  * Fetch the value for the given {@link key} from remote store.
