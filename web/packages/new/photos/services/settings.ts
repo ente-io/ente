@@ -2,12 +2,11 @@
  * @file Storage (in-memory, local, remote) and update of various settings.
  */
 
-import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { localUser } from "@/base/local-user";
 import log from "@/base/log";
-import { apiURL } from "@/base/origins";
 import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
+import { fetchFeatureFlags } from "./remote-store";
 
 /**
  * Internal in-memory state shared by the functions in this module.
@@ -61,29 +60,6 @@ let _state = new SettingsState();
  *
  * The local cache will also be updated if an individual flag is changed.
  *
- * [Note: Remote flags]
- *
- * The remote store provides a unified interface for persisting varied "remote
- * flags":
- *
- * -   User preferences like "mapEnabled"
- *
- * -   Feature flags like "isInternalUser"
- *
- * There are two APIs to get the current state from remote:
- *
- * 1.  GET /remote-store/feature-flags fetches the combined state (nb: even
- *     though the name of the endpoint has the word feature-flags, it also
- *     includes user preferences).
- *
- * 2.  GET /remote-store fetches individual values.
- *
- * Usually 1 is what we use, since it gets us everything in a single go, and
- * which we can also easily cache in local storage by saving the entire response
- * JSON blob.
- *
- * There is a single API (/remote-store/update) to update the state on remote.
- *
  * [Note: Remote flag lifecycle]
  *
  * At a high level, this is how the app manages remote flags:
@@ -134,14 +110,6 @@ export const syncSettings = async () => {
     _state.haveSynced = true;
 };
 
-const fetchFeatureFlags = async () => {
-    const res = await fetch(await apiURL("/remote-store/feature-flags"), {
-        headers: await authenticatedRequestHeaders(),
-    });
-    ensureOk(res);
-    return res;
-};
-
 const saveRemoteFeatureFlagsJSONString = (s: string) =>
     localStorage.setItem("remoteFeatureFlags", s);
 
@@ -177,44 +145,3 @@ const isInternalUserViaEmail = () => {
  * 3. Otherwise false.
  */
 export const isInternalUser = () => _state.isInternalUser;
-
-/**
- * Fetch the value for the given {@link key} from remote store.
- *
- * If the key is not present in the remote store, return {@link defaultValue}.
- */
-export const getRemoteValue = async (key: string, defaultValue: string) => {
-    const url = await apiURL("/remote-store");
-    const params = new URLSearchParams({ key, defaultValue });
-    const res = await fetch(`${url}?${params.toString()}`, {
-        headers: await authenticatedRequestHeaders(),
-    });
-    ensureOk(res);
-    return GetRemoteStoreResponse.parse(await res.json())?.value;
-};
-
-const GetRemoteStoreResponse = z.object({ value: z.string() }).nullable();
-
-/**
- * Convenience wrapper over {@link getRemoteValue} that returns booleans.
- */
-export const getRemoteFlag = async (key: string) =>
-    (await getRemoteValue(key, "false")) == "true";
-
-/**
- * Update or insert {@link value} for the given {@link key} into remote store.
- */
-export const updateRemoteValue = async (key: string, value: string) =>
-    ensureOk(
-        await fetch(await apiURL("/remote-store/update"), {
-            method: "POST",
-            headers: await authenticatedRequestHeaders(),
-            body: JSON.stringify({ key, value }),
-        }),
-    );
-
-/**
- * Convenience wrapper over {@link updateRemoteValue} that sets booleans.
- */
-export const updateRemoteFlag = (key: string, value: boolean) =>
-    updateRemoteValue(key, JSON.stringify(value));
