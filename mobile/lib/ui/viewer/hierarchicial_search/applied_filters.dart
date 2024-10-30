@@ -66,7 +66,6 @@ class _AppliedFiltersState extends State<AppliedFilters> {
                       personId: filter.personId,
                       clusterId: filter.clusterId,
                       faceThumbnailFile: filter.faceFile,
-                      name: filter.name(),
                       apply: () {
                         _searchFilterDataProvider.applyFilters([filter]);
                       },

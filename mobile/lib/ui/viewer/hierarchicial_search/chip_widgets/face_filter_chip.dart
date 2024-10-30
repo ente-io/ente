@@ -8,7 +8,6 @@ class FaceFilterChip extends StatefulWidget {
   final String? personId;
   final String? clusterId;
   final EnteFile faceThumbnailFile;
-  final String name;
   final VoidCallback apply;
   final VoidCallback remove;
   final bool isApplied;
@@ -18,7 +17,6 @@ class FaceFilterChip extends StatefulWidget {
     required this.personId,
     required this.clusterId,
     required this.faceThumbnailFile,
-    required this.name,
     required this.apply,
     required this.remove,
     required this.isApplied,
@@ -65,55 +63,37 @@ class _FaceFilterChipState extends State<FaceFilterChip> {
                 width: widget.isInAllFiltersView ? 1 : 0.5,
               ),
             ),
-            child: Padding(
-              padding: EdgeInsets.only(
-                right: !widget.isInAllFiltersView && widget.name.isNotEmpty
-                    ? 8.0
-                    : 0,
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ClipOval(
-                    child: SizedBox(
-                      width: kFilterChipHeight * scale,
-                      height: kFilterChipHeight * scale,
-                      child: PersonFaceWidget(
-                        widget.faceThumbnailFile,
-                        personId: widget.personId,
-                        clusterID: widget.clusterId,
-                        thumbnailFallback: false,
-                        useFullFile: false,
-                      ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ClipOval(
+                  child: SizedBox(
+                    width: kFilterChipHeight * scale,
+                    height: kFilterChipHeight * scale,
+                    child: PersonFaceWidget(
+                      widget.faceThumbnailFile,
+                      personId: widget.personId,
+                      clusterID: widget.clusterId,
+                      thumbnailFallback: false,
+                      useFullFile: false,
                     ),
                   ),
-                  !widget.isInAllFiltersView && widget.name.isNotEmpty
-                      ? Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 4),
-                          child: Text(
-                            widget.name,
-                            style: getEnteTextTheme(context).miniBold,
-                          ),
-                        )
-                      : const SizedBox.shrink(),
-                  widget.isApplied && !widget.isInAllFiltersView
-                      ? SizedBox(width: widget.name.isNotEmpty ? 2 : 4)
-                      : const SizedBox.shrink(),
-                  widget.isApplied && !widget.isInAllFiltersView
-                      ? Icon(
-                          Icons.close_rounded,
-                          size: 16,
-                          color: getEnteColorScheme(context).textMuted,
-                        )
-                      : const SizedBox.shrink(),
-                  widget.isApplied &&
-                          widget.name.isEmpty &&
-                          !widget.isInAllFiltersView
-                      ? const SizedBox(width: 8)
-                      : const SizedBox.shrink(),
-                ],
-              ),
+                ),
+                widget.isApplied && !widget.isInAllFiltersView
+                    ? const SizedBox(width: 4)
+                    : const SizedBox.shrink(),
+                widget.isApplied && !widget.isInAllFiltersView
+                    ? Icon(
+                        Icons.close_rounded,
+                        size: 16,
+                        color: getEnteColorScheme(context).textMuted,
+                      )
+                    : const SizedBox.shrink(),
+                widget.isApplied && !widget.isInAllFiltersView
+                    ? const SizedBox(width: 8)
+                    : const SizedBox.shrink(),
+              ],
             ),
           ),
         ),

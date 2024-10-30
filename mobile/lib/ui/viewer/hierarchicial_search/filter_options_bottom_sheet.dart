@@ -57,7 +57,6 @@ class _FilterOptionsBottomSheetState extends State<FilterOptionsBottomSheet> {
                             personId: filter.personId,
                             clusterId: filter.clusterId,
                             faceThumbnailFile: filter.faceFile,
-                            name: filter.name(),
                             isInAllFiltersView: true,
                             apply: () {
                               widget.searchFilterDataProvider
