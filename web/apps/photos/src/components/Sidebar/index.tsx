@@ -121,8 +121,6 @@ const DrawerSidebar = styled(EnteDrawer)(({ theme }) => ({
     },
 }));
 
-DrawerSidebar.defaultProps = { anchor: "left" };
-
 interface HeaderSectionProps {
     closeSidebar: () => void;
 }
