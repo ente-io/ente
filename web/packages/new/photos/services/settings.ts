@@ -1,3 +1,7 @@
+/**
+ * @file Storage (in-memory, local, remote) and update of various settings.
+ */
+
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { localUser } from "@/base/local-user";
 import log from "@/base/log";
@@ -31,8 +35,8 @@ class SettingsState {
      *     {@link initSettings}.
      *
      * -   It gets updated when we sync with remote (once per app start in
-     *     {@link triggerRemoteFlagsFetchIfNeeded}, and whenever the user opens
-     *     the preferences panel).
+     *     {@link triggerSettingsSyncIfNeeded}, and whenever the user opens the
+     *     preferences panel).
      *
      * -   It gets updated when the user toggles the corresponding setting on
      *     this device.
@@ -94,7 +98,7 @@ let _state = new SettingsState();
  *    the default. Otherwise the now fetched result is saved to local storage
  *    and the corresponding value returned.
  */
-export const triggerRemoteFlagsFetchIfNeeded = () => {
+export const triggerSettingsSyncIfNeeded = () => {
     if (!_state.haveFetched) void fetchAndSaveRemoteFlags();
 };
 

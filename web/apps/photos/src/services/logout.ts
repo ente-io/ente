@@ -1,9 +1,9 @@
 import { accountLogout } from "@/accounts/services/logout";
 import log from "@/base/log";
 import DownloadManager from "@/new/photos/services/download";
-import { logoutSettings } from "@/new/photos/services/remote-store";
 import { logoutML, terminateMLWorker } from "@/new/photos/services/ml";
 import { logoutSearch } from "@/new/photos/services/search";
+import { logoutSettings } from "@/new/photos/services/settings";
 import exportService from "./export";
 
 /**
