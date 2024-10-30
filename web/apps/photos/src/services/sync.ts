@@ -1,6 +1,6 @@
 import { isMLSupported, mlStatusSync, mlSync } from "@/new/photos/services/ml";
-import { triggerSettingsSyncIfNeeded } from "@/new/photos/services/settings";
 import { searchDataSync } from "@/new/photos/services/search";
+import { triggerSettingsSyncIfNeeded } from "@/new/photos/services/settings";
 import { syncMapEnabled } from "services/userService";
 
 /**
