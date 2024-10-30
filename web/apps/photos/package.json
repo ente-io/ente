@@ -24,7 +24,6 @@
         "ml-matrix": "^6.11",
         "p-debounce": "^4.0.0",
         "photoswipe": "file:./thirdparty/photoswipe",
-        "piexifjs": "^1.0.6",
         "pure-react-carousel": "^1.30.1",
         "react-dropzone": "^14.2",
         "react-select": "^5.8.0",
