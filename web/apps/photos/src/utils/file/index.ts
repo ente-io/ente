@@ -431,11 +431,7 @@ async function downloadFileDesktop(
             file.metadata.title,
             fs.exists,
         );
-        await writeStream(
-            electron,
-            `${downloadDir}/${fileExportName}`,
-            stream,
-        );
+        await writeStream(electron, `${downloadDir}/${fileExportName}`, stream);
     }
 }
 
