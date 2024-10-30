@@ -12,6 +12,19 @@ import { z } from "zod";
  */
 class SettingsState {
     /**
+     * The ID of the user whose settings these are.
+     *
+     * It is used to discard stale completions.
+     */
+    userID: string | undefined = undefined;
+
+    /**
+     * True if we have performed a fetch for the logged in user since the app
+     * started.
+     */
+    haveFetched = false;
+
+    /**
      * In-memory flag that tracks if maps are enabled.
      *
      * -   On app start, this is read from local storage in
@@ -29,8 +42,8 @@ class SettingsState {
     isMapEnabled = false;
 }
 
-let _fetchTimeout: ReturnType<typeof setTimeout> | undefined;
-let _haveFetched = false;
+/** State shared by the functions in this module. See {@link SettingsState}. */
+let _state = new SettingsState();
 
 /**
  * Fetch remote flags (feature flags and other user specific preferences) from
@@ -82,33 +95,25 @@ let _haveFetched = false;
  *    and the corresponding value returned.
  */
 export const triggerRemoteFlagsFetchIfNeeded = () => {
-    if (_haveFetched) return;
-    if (_fetchTimeout) return;
-    // Not critical, so fetch these after some delay.
-    _fetchTimeout = setTimeout(() => {
-        _fetchTimeout = undefined;
-        void fetchAndSaveRemoteFlags().then(() => {
-            _haveFetched = true;
-        });
-    }, 2000);
+    if (!_state.haveFetched) void fetchAndSaveRemoteFlags();
 };
 
-export const clearFeatureFlagSessionState = () => {
-    if (_fetchTimeout) {
-        clearTimeout(_fetchTimeout);
-        _fetchTimeout = undefined;
-    }
-    _haveFetched = false;
+export const logoutSettings = () => {
+    _state = new SettingsState();
 };
 
 /**
  * Fetch remote flags from remote and save them in local storage for subsequent
  * lookup.
  */
-const fetchAndSaveRemoteFlags = () =>
-    fetchFeatureFlags()
-        .then((res) => res.text())
-        .then(saveFlagJSONString);
+const fetchAndSaveRemoteFlags = async () => {
+    const userID = _state.userID;
+    const jsonString = await fetchFeatureFlags().then((res) => res.text());
+    if (jsonString && _state.userID == userID) {
+        saveFlagJSONString(jsonString);
+        _state.haveFetched = true;
+    }
+};
 
 const fetchFeatureFlags = async () => {
     const res = await fetch(await apiURL("/remote-store/feature-flags"), {

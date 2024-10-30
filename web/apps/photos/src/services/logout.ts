@@ -1,7 +1,7 @@
 import { accountLogout } from "@/accounts/services/logout";
 import log from "@/base/log";
 import DownloadManager from "@/new/photos/services/download";
-import { clearFeatureFlagSessionState } from "@/new/photos/services/remote-store";
+import { logoutSettings } from "@/new/photos/services/remote-store";
 import { logoutML, terminateMLWorker } from "@/new/photos/services/ml";
 import { logoutSearch } from "@/new/photos/services/search";
 import exportService from "./export";
@@ -37,9 +37,9 @@ export const photosLogout = async () => {
     log.info("logout (photos)");
 
     try {
-        clearFeatureFlagSessionState();
+        logoutSettings();
     } catch (e) {
-        ignoreError("feature-flag", e);
+        ignoreError("settings", e);
     }
 
     try {
