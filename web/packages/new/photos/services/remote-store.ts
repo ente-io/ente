@@ -9,23 +9,46 @@ let _fetchTimeout: ReturnType<typeof setTimeout> | undefined;
 let _haveFetched = false;
 
 /**
- * Fetch feature flags (potentially user specific) from remote and save them in
- * local storage for subsequent lookup.
+ * Fetch remote flags (feature flags and other user specific preferences) from
+ * remote and save them in local storage for subsequent lookup.
  *
- * It fetches only once per session, and so is safe to call as arbitrarily many
- * times. Remember to call {@link clearFeatureFlagSessionState} on logout to
- * clear any in memory state so that these can be fetched again on the
+ * It fetches only once per app lifetime, and so is safe to call as arbitrarily
+ * many times. Remember to call {@link clearFeatureFlagSessionState} on logout
+ * to clear any in memory state so that these can be fetched again on the
  * subsequent login.
  *
- * [Note: Feature Flags]
+ * The local cache will also be updated if an individual flag is changed.
  *
- * The workflow with feature flags is:
+ * [Note: Remote flags]
  *
- * 1. On app start feature flags are fetched once and saved in local storage. If
- *    this fetch fails, we try again periodically (on every "sync") until
- *    success.
+ * The remote store provides a unified interface for persisting varied "remote
+ * flags":
  *
- * 2. Attempts to access any individual feature flage (e.g.
+ * -   User preferences like "mapEnabled"
+ *
+ * -   Feature flags like "isInternalUser"
+ *
+ * There are two APIs to get the current state from remote:
+ *
+ * 1.  GET /remote-store/feature-flags fetches the combined state (nb: even
+ *     though the name of the endpoint has the word feature-flags, it also
+ *     includes user preferences).
+ *
+ * 2.  GET /remote-store fetches individual values.
+ *
+ * Usually 1 is what we use, since it gets us everything in a single go, and
+ * which we can also easily cache in local storage by saving the entire response
+ * JSON blob.
+ *
+ * There is a single API (/remote-store/update) to update the state on remote.
+ *
+ * At a high level, this is how the app manages this state:
+ *
+ * 1.  On app start remote flags are fetched once and saved in local storage. If
+ *     this fetch fails, we try again periodically (on every "sync") until
+ *     success.
+ *
+ * 2. Attempts to access any individual feature flag (e.g.
  *    {@link isInternalUser}) returns the corresponding value from local storage
  *    (substituting a default if needed).
  *
