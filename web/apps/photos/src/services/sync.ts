@@ -1,13 +1,13 @@
-import { triggerFeatureFlagsFetchIfNeeded } from "@/new/photos/services/feature-flags";
 import { isMLSupported, mlStatusSync, mlSync } from "@/new/photos/services/ml";
 import { searchDataSync } from "@/new/photos/services/search";
+import { triggerSettingsSyncIfNeeded } from "@/new/photos/services/settings";
 import { syncMapEnabled } from "services/userService";
 
 /**
  * Part 1 of {@link sync}. See TODO below for why this is split.
  */
 export const preFileInfoSync = async () => {
-    triggerFeatureFlagsFetchIfNeeded();
+    triggerSettingsSyncIfNeeded();
     await Promise.all([isMLSupported && mlStatusSync()]);
 };
 
