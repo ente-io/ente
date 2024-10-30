@@ -101,7 +101,6 @@ export default function App({ Component, pageProps }: AppProps) {
         HTTPService.setHeaders({ "X-Client-Package": clientPackageName });
         logUnhandledErrorsAndRejections(true);
         void runMigrations();
-        initSettings();
         return () => logUnhandledErrorsAndRejections(false);
     }, []);
 

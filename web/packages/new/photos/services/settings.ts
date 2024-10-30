@@ -86,6 +86,12 @@ export const triggerSettingsSyncIfNeeded = () => {
     if (!_state.haveSynced) void syncSettings();
 };
 
+/**
+ * Read in the locally persisted settings into memory, but otherwise do not
+ * initiate any network requests to fetch the latest values.
+ *
+ * This assumes that the user is already logged in.
+ */
 export const initSettings = () => {
     readInMemoryFlagsFromLocalStorage();
 };
