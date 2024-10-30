@@ -1,4 +1,4 @@
-import { triggerFeatureFlagsFetchIfNeeded } from "@/new/photos/services/feature-flags";
+import { triggerFeatureFlagsFetchIfNeeded } from "@/new/photos/services/remote-store";
 import { isMLSupported, mlStatusSync, mlSync } from "@/new/photos/services/ml";
 import { searchDataSync } from "@/new/photos/services/search";
 import { syncMapEnabled } from "services/userService";

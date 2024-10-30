@@ -675,7 +675,7 @@ const DebugSection: React.FC = () => {
     );
 };
 
-// TODO: Legacy synchronous check, use the one for feature-flags.ts instead.
+// TODO: Legacy synchronous check, use the one from remote-store.ts instead.
 const isInternalUserViaEmailCheck = () => {
     const userEmail = getData(LS_KEYS.USER)?.email;
     if (!userEmail) return false;
