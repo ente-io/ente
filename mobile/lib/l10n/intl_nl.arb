@@ -1343,7 +1343,5 @@
   "mostRecent": "Meest recent",
   "mostRelevant": "Meest relevant",
   "loadingYourPhotos": "Je foto's worden geladen...",
-  "processingImport": "Verwerken van {folderName}...",
-  "configuration": "Configuration",
-  "localIndexing": "Local indexing"
+  "processingImport": "Verwerken van {folderName}..."
 }

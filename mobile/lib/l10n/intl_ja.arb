@@ -1343,7 +1343,5 @@
   "mostRecent": "新しい順",
   "mostRelevant": "関連度順",
   "loadingYourPhotos": "写真を読み込んでいます...",
-  "processingImport": "{folderName} を処理中...",
-  "configuration": "Configuration",
-  "localIndexing": "Local indexing"
+  "processingImport": "{folderName} を処理中..."
 }

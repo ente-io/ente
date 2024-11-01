@@ -1,4 +1,4 @@
-import { EnteDrawer } from "@/base/components/EnteDrawer";
+import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
 import type { Collection } from "@/media/collection";
 import type { CollectionSummary } from "@/new/photos/services/collection/ui";
@@ -32,7 +32,7 @@ function CollectionShare({ collectionSummary, ...props }: Props) {
     const { type } = collectionSummary;
 
     return (
-        <EnteDrawer
+        <SidebarDrawer
             anchor="right"
             open={props.open}
             onClose={handleDrawerClose}
@@ -75,7 +75,7 @@ function CollectionShare({ collectionSummary, ...props }: Props) {
                     )}
                 </Stack>
             </Stack>
-        </EnteDrawer>
+        </SidebarDrawer>
     );
 }
 export default CollectionShare;

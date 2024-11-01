@@ -30,6 +30,7 @@ export const supportedLocales = [
     "pl-PL" /* Polish */,
     "it-IT" /* Italian */,
     "lt-LT" /* Lithuanian */,
+    "uk-UA" /* Ukrainian */,
 ] as const;
 
 /** The type of {@link supportedLocales}. */
@@ -183,6 +184,8 @@ const closestSupportedLocale = (
             return "it-IT";
         } else if (ls.startsWith("lt")) {
             return "lt-LT";
+        } else if (ls.startsWith("uk")) {
+            return "uk-UA";
         }
     }
 

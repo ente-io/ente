@@ -1353,6 +1353,6 @@
   "add": "Hinzufügen",
   "extraPhotosFoundFor": "Zusätzliche Fotos gefunden für $text",
   "extraPhotosFound": "Zusätzliche Fotos gefunden",
-  "configuration": "Configuration",
-  "localIndexing": "Local indexing"
+  "configuration": "Konfiguration",
+  "localIndexing": "Lokale Indizierung"
 }

@@ -1,4 +1,4 @@
-import { EnteDrawer } from "@/base/components/EnteDrawer";
+import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
 import { COLLECTION_ROLE, type Collection } from "@/media/collection";
 import { DialogProps, Stack } from "@mui/material";
@@ -87,38 +87,36 @@ export default function AddParticipant({
     };
 
     return (
-        <>
-            <EnteDrawer anchor="right" open={open} onClose={handleDrawerClose}>
-                <Stack spacing={"4px"} py={"12px"}>
-                    <Titlebar
-                        onClose={onClose}
-                        title={
-                            type === COLLECTION_ROLE.VIEWER
-                                ? t("ADD_VIEWERS")
-                                : t("ADD_COLLABORATORS")
-                        }
-                        onRootClose={handleRootClose}
-                        caption={collection.name}
-                    />
-                    <AddParticipantForm
-                        onClose={onClose}
-                        callback={collectionShare}
-                        optionsList={nonSharedEmails}
-                        placeholder={t("ENTER_EMAIL")}
-                        fieldType="email"
-                        buttonText={
-                            type === COLLECTION_ROLE.VIEWER
-                                ? t("ADD_VIEWERS")
-                                : t("ADD_COLLABORATORS")
-                        }
-                        submitButtonProps={{
-                            size: "large",
-                            sx: { mt: 1, mb: 2 },
-                        }}
-                        disableAutoFocus
-                    />
-                </Stack>
-            </EnteDrawer>
-        </>
+        <SidebarDrawer anchor="right" open={open} onClose={handleDrawerClose}>
+            <Stack spacing={"4px"} py={"12px"}>
+                <Titlebar
+                    onClose={onClose}
+                    title={
+                        type === COLLECTION_ROLE.VIEWER
+                            ? t("ADD_VIEWERS")
+                            : t("ADD_COLLABORATORS")
+                    }
+                    onRootClose={handleRootClose}
+                    caption={collection.name}
+                />
+                <AddParticipantForm
+                    onClose={onClose}
+                    callback={collectionShare}
+                    optionsList={nonSharedEmails}
+                    placeholder={t("ENTER_EMAIL")}
+                    fieldType="email"
+                    buttonText={
+                        type === COLLECTION_ROLE.VIEWER
+                            ? t("ADD_VIEWERS")
+                            : t("ADD_COLLABORATORS")
+                    }
+                    submitButtonProps={{
+                        size: "large",
+                        sx: { mt: 1, mb: 2 },
+                    }}
+                    disableAutoFocus
+                />
+            </Stack>
+        </SidebarDrawer>
     );
 }

@@ -227,10 +227,11 @@ export const sidebar = [
         collapsed: true,
         items: [
             { text: "Getting started", link: "/self-hosting/" },
+            { text: "System requirements", link: "/self-hosting/guides/system-requirements", },
             {
                 text: "Guides",
                 items: [
-                    { text: "Introduction", link: "/self-hosting/guides/" },
+                    { text: "Introduction", link: "/self-hosting/guides/" },  
                     {
                         text: "Connect to custom server",
                         link: "/self-hosting/guides/custom-server/",
@@ -249,10 +250,6 @@ export const sidebar = [
                         link: "/self-hosting/guides/mobile-build",
                     },
                     {
-                        text: "System requirements",
-                        link: "/self-hosting/guides/system-requirements",
-                    },
-                    {
                         text: "Configuring S3",
                         link: "/self-hosting/guides/configuring-s3",
                     },
@@ -263,6 +260,10 @@ export const sidebar = [
                     {
                         text: "DB migration",
                         link: "/self-hosting/guides/db-migration",
+                    },
+                    {
+                        text: "Hosting Ente without Docker",
+                        link: "/self-hosting/guides/standalone-ente",
                     },
                 ],
             },
@@ -294,6 +295,10 @@ export const sidebar = [
                     {
                         text: "Yarn",
                         link: "/self-hosting/troubleshooting/yarn",
+                    },
+                    {
+                        text: "Ente CLI Secrets",
+                        link: "/self-hosting/troubleshooting/keyring",
                     },
                 ],
             },

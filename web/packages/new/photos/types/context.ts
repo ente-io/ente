@@ -10,13 +10,14 @@ import type { SetNotificationAttributes } from "./notification";
  */
 export type AppContextT = AccountsContextT & {
     /**
-     * Show the global activity indicator (a green bar at the top of the page).
+     * Show the global activity indicator (a loading bar at the top of the
+     * page).
      */
-    startLoading: () => void;
+    showLoadingBar: () => void;
     /**
-     * Hide the global activity indicator.
+     * Hide the global activity indicator bar.
      */
-    finishLoading: () => void;
+    hideLoadingBar: () => void;
     /**
      * Show a generic error dialog, and log the given error.
      */

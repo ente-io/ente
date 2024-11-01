@@ -1,5 +1,5 @@
-import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { MenuItemGroup, MenuSectionTitle } from "@/base/components/Menu";
+import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
 import type { NestedDrawerVisibilityProps } from "@/base/components/utils/modal";
 import { AppContext } from "@/new/photos/types/context";
@@ -33,7 +33,7 @@ export const AdvancedSettings: React.FC<NestedDrawerVisibilityProps> = ({
     };
 
     return (
-        <EnteDrawer
+        <SidebarDrawer
             transitionDuration={0}
             open={open}
             onClose={handleDrawerClose}
@@ -66,6 +66,6 @@ export const AdvancedSettings: React.FC<NestedDrawerVisibilityProps> = ({
                     </Stack>
                 </Box>
             </Stack>
-        </EnteDrawer>
+        </SidebarDrawer>
     );
 };

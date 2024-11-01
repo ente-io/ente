@@ -1,9 +1,9 @@
 import { RecoveryKey } from "@/accounts/components/RecoveryKey";
 import { openAccountsManagePasskeysPage } from "@/accounts/services/passkey";
 import { isDesktop } from "@/base/app";
-import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { EnteLogo } from "@/base/components/EnteLogo";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import { useModalVisibility } from "@/base/components/utils/modal";
 import log from "@/base/log";
 import { savedLogs } from "@/base/log-web";
@@ -16,6 +16,7 @@ import {
     TRASH_SECTION,
 } from "@/new/photos/services/collection";
 import type { CollectionSummaries } from "@/new/photos/services/collection/ui";
+import { isInternalUser } from "@/new/photos/services/settings";
 import { AppContext, useAppContext } from "@/new/photos/types/context";
 import { initiateEmail, openURL } from "@/new/photos/utils/web";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
@@ -93,7 +94,7 @@ export default function Sidebar({
     closeSidebar,
 }: Iprops) {
     return (
-        <DrawerSidebar open={sidebarView} onClose={closeSidebar}>
+        <RootSidebarDrawer open={sidebarView} onClose={closeSidebar}>
             <HeaderSection closeSidebar={closeSidebar} />
             <Divider />
             <UserDetailsSection sidebarView={sidebarView} />
@@ -110,17 +111,15 @@ export default function Sidebar({
                 <Divider />
                 <DebugSection />
             </Stack>
-        </DrawerSidebar>
+        </RootSidebarDrawer>
     );
 }
 
-const DrawerSidebar = styled(EnteDrawer)(({ theme }) => ({
+const RootSidebarDrawer = styled(SidebarDrawer)(({ theme }) => ({
     "& .MuiPaper-root": {
         padding: theme.spacing(1.5),
     },
 }));
-
-DrawerSidebar.defaultProps = { anchor: "left" };
 
 interface HeaderSectionProps {
     closeSidebar: () => void;
@@ -426,15 +425,13 @@ interface UtilitySectionProps {
 
 const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
     const router = useRouter();
-    const appContext = useContext(AppContext);
     const {
-        startLoading,
         watchFolderView,
         setWatchFolderView,
         themeColor,
         setThemeColor,
         showMiniDialog,
-    } = appContext;
+    } = useAppContext();
 
     const { show: showRecoveryKey, props: recoveryKeyVisibilityProps } =
         useModalVisibility();
@@ -484,7 +481,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
                 onClick={showRecoveryKey}
                 label={t("recovery_key")}
             />
-            {isInternalUserViaEmailCheck() && (
+            {isInternalUser() && (
                 <EnteMenuItem
                     onClick={toggleTheme}
                     variant="secondary"
@@ -536,7 +533,6 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
             <TwoFactorModal
                 {...twoFactorVisibilityProps}
                 closeSidebar={closeSidebar}
-                setLoading={startLoading}
             />
             {isElectron() && (
                 <WatchFolder
@@ -656,7 +652,7 @@ const DebugSection: React.FC = () => {
 
     return (
         <>
-            {isInternalUserViaEmailCheck() && (
+            {isInternalUser() && (
                 <EnteMenuItem
                     variant="secondary"
                     onClick={testUpload}
@@ -676,12 +672,4 @@ const DebugSection: React.FC = () => {
             </Stack>
         </>
     );
-};
-
-// TODO: Legacy synchronous check, use the one for feature-flags.ts instead.
-const isInternalUserViaEmailCheck = () => {
-    const userEmail = getData(LS_KEYS.USER)?.email;
-    if (!userEmail) return false;
-
-    return userEmail.endsWith("@ente.io");
 };

@@ -1,5 +1,5 @@
-import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { MenuItemGroup, MenuSectionTitle } from "@/base/components/Menu";
+import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
 import {
     useModalVisibility,
@@ -13,13 +13,14 @@ import {
 } from "@/base/i18n";
 import { MLSettings } from "@/new/photos/components/MLSettings";
 import { isMLSupported } from "@/new/photos/services/ml";
+import { syncSettings } from "@/new/photos/services/settings";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import ScienceIcon from "@mui/icons-material/Science";
 import { Box, DialogProps, Stack } from "@mui/material";
 import DropdownInput from "components/DropdownInput";
 import { t } from "i18next";
-import React from "react";
+import React, { useEffect } from "react";
 import { AdvancedSettings } from "./AdvancedSettings";
 import { MapSettings } from "./MapSetting";
 
@@ -37,6 +38,10 @@ export const Preferences: React.FC<NestedDrawerVisibilityProps> = ({
     const { show: showMLSettings, props: mlSettingsVisibilityProps } =
         useModalVisibility();
 
+    useEffect(() => {
+        if (open) void syncSettings();
+    }, [open]);
+
     const handleRootClose = () => {
         onClose();
         onRootClose();
@@ -51,7 +56,7 @@ export const Preferences: React.FC<NestedDrawerVisibilityProps> = ({
     };
 
     return (
-        <EnteDrawer
+        <SidebarDrawer
             transitionDuration={0}
             open={open}
             onClose={handleDrawerClose}
@@ -108,7 +113,7 @@ export const Preferences: React.FC<NestedDrawerVisibilityProps> = ({
                 {...mlSettingsVisibilityProps}
                 onRootClose={handleRootClose}
             />
-        </EnteDrawer>
+        </SidebarDrawer>
     );
 };
 
@@ -165,5 +170,7 @@ const localeName = (locale: SupportedLocale) => {
             return "Italiano";
         case "lt-LT":
             return "Lietuvių kalba";
+        case "uk-UA":
+            return "українська";
     }
 };
