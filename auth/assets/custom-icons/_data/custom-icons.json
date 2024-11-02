@@ -508,6 +508,13 @@
     {
       "title": "Kite"
     },
+	{
+      "title": "KnownHost",
+      "altNames": [
+        "Known Host",
+        "KnownHost.com"
+      ]
+    },
     {
       "title": "Koofr"
     },
