@@ -1,4 +1,5 @@
 import { disableTwoFactor } from "@/accounts/api/user";
+import { MenuItemGroup, MenuSectionTitle } from "@/base/components/Menu";
 import {
     NestedSidebarDrawer,
     SidebarDrawerTitlebar,
@@ -6,25 +7,15 @@ import {
 } from "@/base/components/mui/SidebarDrawer";
 import { AppContext } from "@/new/photos/types/context";
 import { VerticallyCentered } from "@ente/shared/components/Container";
+import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { LS_KEYS, getData, setLSUser } from "@ente/shared/storage/localStorage";
 import LockIcon from "@mui/icons-material/Lock";
-import { Button, Grid, Stack, Typography } from "@mui/material";
+import { Button, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import router, { useRouter } from "next/router";
 import { useContext, useEffect, useState } from "react";
 import { getTwoFactorStatus } from "services/userService";
-
-// TODO: Revisit these comments
-// const TwoFactorDialog = styled(Dialog)(({ theme }) => ({
-//     "& .MuiDialogContent-root": {
-//         padding: theme.spacing(2, 4),
-//     },
-// }));
-
-// type TwoFactorModalProps = ModalVisibilityProps & {
-//     closeSidebar: () => void;
-// };
 
 export const TwoFactorSettings: React.FC<
     NestedSidebarDrawerVisibilityProps
@@ -68,9 +59,7 @@ export const TwoFactorSettings: React.FC<
                     onRootClose={handleRootClose}
                     title={t("TWO_FACTOR_AUTHENTICATION")}
                 />
-                {/* {component} */}
 
-                {/* <DialogContent sx={{ px: 4 }}> */}
                 {isTwoFactorEnabled ? (
                     <TwoFactorModalManageSection
                         closeDialog={handleRootClose}
@@ -78,7 +67,6 @@ export const TwoFactorSettings: React.FC<
                 ) : (
                     <TwoFactorModalSetupSection closeDialog={handleRootClose} />
                 )}
-                {/* </DialogContent> */}
             </Stack>
         </NestedSidebarDrawer>
     );
@@ -173,47 +161,27 @@ function TwoFactorModalManageSection(props: TwoFactorModalManageSectionProps) {
     };
 
     return (
-        <>
-            <Grid
-                mb={1.5}
-                rowSpacing={1}
-                container
-                alignItems="center"
-                justifyContent="center"
-            >
-                <Grid item sm={9} xs={12}>
-                    {t("UPDATE_TWO_FACTOR_LABEL")}
-                </Grid>
-                <Grid item sm={3} xs={12}>
-                    <Button
-                        color={"accent"}
-                        onClick={warnTwoFactorReconfigure}
-                        size="large"
-                    >
-                        {t("reconfigure")}
-                    </Button>
-                </Grid>
-            </Grid>
-            <Grid
-                rowSpacing={1}
-                container
-                alignItems="center"
-                justifyContent="center"
-            >
-                <Grid item sm={9} xs={12}>
-                    {t("DISABLE_TWO_FACTOR_LABEL")}{" "}
-                </Grid>
+        <Stack sx={{ px: "16px", py: "20px", gap: "24px" }}>
+            <MenuItemGroup>
+                <EnteMenuItem
+                    onClick={warnTwoFactorDisable}
+                    variant="toggle"
+                    checked={true}
+                    label={t("enabled")}
+                />
+            </MenuItemGroup>
 
-                <Grid item sm={3} xs={12}>
-                    <Button
-                        color="critical"
-                        onClick={warnTwoFactorDisable}
-                        size="large"
-                    >
-                        {t("disable")}
-                    </Button>
-                </Grid>
-            </Grid>
-        </>
+            <div>
+                <MenuItemGroup>
+                    <EnteMenuItem
+                        onClick={warnTwoFactorReconfigure}
+                        variant="primary"
+                        checked={true}
+                        label={t("reconfigure")}
+                    />
+                </MenuItemGroup>
+                <MenuSectionTitle title={t("UPDATE_TWO_FACTOR_LABEL")} />
+            </div>
+        </Stack>
     );
 }
