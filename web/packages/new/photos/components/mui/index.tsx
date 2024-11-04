@@ -19,6 +19,8 @@ export const FilledIconButton = styled(IconButton)(({ theme }) => ({
  * one also sets width: 100%. As such, that one should be considered deprecated
  * and its uses moved to this one when possible (so that we can then see where
  * the width: 100% is essential).
+ *
+ * TODO: Moved to base.
  */
 export const SpaceBetweenFlex = styled(Box)`
     display: flex;

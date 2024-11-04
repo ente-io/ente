@@ -75,11 +75,11 @@ export const NestedSidebarDrawer: React.FC<
     );
 };
 
-import { FlexWrapper } from "@ente/shared/components/Container";
 import ArrowBack from "@mui/icons-material/ArrowBack";
 import Close from "@mui/icons-material/Close";
 import { Box, IconButton, Typography } from "@mui/material";
 import React from "react";
+import { SpaceBetweenFlex } from "./Container";
 
 type SidebarDrawerTitlebarProps = Pick<
     NestedSidebarDrawerVisibilityProps,
@@ -109,11 +109,7 @@ export const SidebarDrawerTitlebar: React.FC<SidebarDrawerTitlebarProps> = ({
 }) => {
     return (
         <Stack sx={{ gap: "4px" }}>
-            <FlexWrapper
-                height={48}
-                alignItems={"center"}
-                justifyContent="space-between"
-            >
+            <SpaceBetweenFlex sx={{ minHeight: "48px" }}>
                 <IconButton onClick={onClose} color={"primary"}>
                     <ArrowBack />
                 </IconButton>
@@ -123,7 +119,7 @@ export const SidebarDrawerTitlebar: React.FC<SidebarDrawerTitlebarProps> = ({
                         <Close />
                     </IconButton>
                 </Box>
-            </FlexWrapper>
+            </SpaceBetweenFlex>
             <Box py={0.5} px={2}>
                 <Typography variant="h3" fontWeight={"bold"}>
                     {title}
