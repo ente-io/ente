@@ -15,3 +15,9 @@ export const SidebarDrawer = styled(Drawer)(({ theme }) => ({
         padding: theme.spacing(1),
     },
 }));
+
+/**
+ * A variant of {@link SidebarDrawer} for second level, nested drawers that are
+ * shown atop an already visible {@link SidebarDrawer}.
+ */
+// export const NestedDrawerVisibilityProps

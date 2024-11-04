@@ -1,4 +1,5 @@
 import { disableTwoFactor } from "@/accounts/api/user";
+import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import type { ModalVisibilityProps, NestedDrawerVisibilityProps } from "@/base/components/utils/modal";
 import { AppContext } from "@/new/photos/types/context";
 import { VerticallyCentered } from "@ente/shared/components/Container";
@@ -63,10 +64,18 @@ export const TwoFactorSettings: React.FC<NestedDrawerVisibilityProps> = ({
     };
 
     return (
-        <TwoFactorDialog
-            maxWidth="xs"
-            open={open}
-            onClose={onClose}
+        <SidebarDrawer
+        // <TwoFactorDialog
+        //     maxWidth="xs"
+        // transitionDuration={0}
+        //     open={open}
+        //     onClose={onClose}
+        transitionDuration={0}
+        open={open}
+        onClose={onClose}
+        BackdropProps={{
+            sx: { "&&&": { backgroundColor: "transparent" } },
+        }}
         >
             <DialogTitleWithCloseButton onClose={onClose}>
                 {t("TWO_FACTOR_AUTHENTICATION")}
@@ -78,7 +87,7 @@ export const TwoFactorSettings: React.FC<NestedDrawerVisibilityProps> = ({
                     <TwoFactorModalSetupSection closeDialog={closeDialog} />
                 )}
             </DialogContent>
-        </TwoFactorDialog>
+        </SidebarDrawer>
     );
 }
 
