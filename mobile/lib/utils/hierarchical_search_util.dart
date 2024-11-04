@@ -163,7 +163,6 @@ Future<void> curateFilters(
     final magicFilters = await curateMagicFilters(files);
     final onlyThemFilter = getOnlyThemFilter(
       searchFilterDataProvider,
-      faceFilters,
     );
 
     searchFilterDataProvider.clearAndAddRecommendations(
@@ -184,7 +183,6 @@ Future<void> curateFilters(
 
 List<OnlyThemFilter> getOnlyThemFilter(
   SearchFilterDataProvider searchFilterDataProvider,
-  List<FaceFilter> recommendedFaceFilters,
 ) {
   if (searchFilterDataProvider.initialGalleryFilter is FaceFilter &&
       searchFilterDataProvider.appliedFilters.isEmpty) {
@@ -198,9 +196,6 @@ List<OnlyThemFilter> getOnlyThemFilter(
     ];
   }
 
-  recommendedFaceFilters.removeWhere(
-    (e) => e.isSameFilter(searchFilterDataProvider.initialGalleryFilter),
-  );
   final appliedFaceFilters =
       searchFilterDataProvider.appliedFilters.whereType<FaceFilter>().toList();
   if (appliedFaceFilters.isEmpty || appliedFaceFilters.length > 4) {
