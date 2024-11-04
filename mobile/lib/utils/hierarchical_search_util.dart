@@ -186,6 +186,18 @@ List<OnlyThemFilter> getOnlyThemFilter(
   SearchFilterDataProvider searchFilterDataProvider,
   List<FaceFilter> recommendedFaceFilters,
 ) {
+  if (searchFilterDataProvider.initialGalleryFilter is FaceFilter &&
+      searchFilterDataProvider.appliedFilters.isEmpty) {
+    return [
+      OnlyThemFilter(
+        faceFilters: [
+          searchFilterDataProvider.initialGalleryFilter as FaceFilter,
+        ],
+        occurrence: kMostRelevantFilter,
+      ),
+    ];
+  }
+
   recommendedFaceFilters.removeWhere(
     (e) => e.isSameFilter(searchFilterDataProvider.initialGalleryFilter),
   );
