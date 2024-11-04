@@ -120,7 +120,7 @@ export const SidebarDrawerTitlebar: React.FC<SidebarDrawerTitlebarProps> = ({
                     </IconButton>
                 </Box>
             </SpaceBetweenFlex>
-            <Box py={0.5} px={2}>
+            <Stack py={0.5} px={2}>
                 <Typography variant="h3" fontWeight={"bold"}>
                     {title}
                 </Typography>
@@ -131,7 +131,7 @@ export const SidebarDrawerTitlebar: React.FC<SidebarDrawerTitlebarProps> = ({
                 >
                     {caption}
                 </Typography>
-            </Box>
+            </Stack>
         </Stack>
     );
 };
