@@ -78,7 +78,7 @@ git clone https://github.com/ente-io/ente
 
 The next step is to setup the Environment `ENTE_DB_USER` to postgres user which we created in the previous step. If needed, you can always add the line `export ENTE_DB_USER=postgres` to your shell's RC file to avoid doing it manually every time. 
 
-```
+```sh
 export ENTE_DB_USER=postgres 
 cd ente/server
 go run cmd/museum/main.go
@@ -86,7 +86,7 @@ go run cmd/museum/main.go
 
 For live reloads, install [air](https://github.com/air-verse/air#installation). Then you can just call air after declaring the required environment variables. For example,
 
-```
+```sh
 ENTE_DB_USER=postgres
 air
 ```

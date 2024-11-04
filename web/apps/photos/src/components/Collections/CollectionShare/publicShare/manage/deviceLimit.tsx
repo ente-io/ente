@@ -1,5 +1,5 @@
-import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { MenuItemDivider, MenuItemGroup } from "@/base/components/Menu";
+import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
 import type {
     Collection,
@@ -68,7 +68,7 @@ export function ManageDeviceLimit({
                 endIcon={<ChevronRight />}
             />
 
-            <EnteDrawer
+            <SidebarDrawer
                 anchor="right"
                 open={isChangeDeviceLimitVisible}
                 onClose={handleDrawerClose}
@@ -100,7 +100,7 @@ export function ManageDeviceLimit({
                         </MenuItemGroup>
                     </Stack>
                 </Stack>
-            </EnteDrawer>
+            </SidebarDrawer>
         </>
     );
 }

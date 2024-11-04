@@ -1,6 +1,6 @@
-import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { MenuItemGroup } from "@/base/components/Menu";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
 import type { NestedDrawerVisibilityProps } from "@/base/components/utils/modal";
 import { disableML, enableML, type MLStatus } from "@/new/photos/services/ml";
@@ -67,7 +67,7 @@ export const MLSettings: React.FC<NestedDrawerVisibilityProps> = ({
 
     return (
         <Box>
-            <EnteDrawer
+            <SidebarDrawer
                 anchor="left"
                 transitionDuration={0}
                 open={open}
@@ -84,7 +84,7 @@ export const MLSettings: React.FC<NestedDrawerVisibilityProps> = ({
                     />
                     {component}
                 </Stack>
-            </EnteDrawer>
+            </SidebarDrawer>
 
             <FaceConsent
                 open={openFaceConsent}
@@ -174,7 +174,7 @@ const FaceConsent: React.FC<FaceConsentProps> = ({
     );
 
     return (
-        <EnteDrawer
+        <SidebarDrawer
             transitionDuration={0}
             open={open}
             onClose={handleDrawerClose}
@@ -233,7 +233,7 @@ const FaceConsent: React.FC<FaceConsentProps> = ({
                     </Stack>
                 </Stack>
             </Stack>
-        </EnteDrawer>
+        </SidebarDrawer>
     );
 };
 

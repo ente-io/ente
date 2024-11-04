@@ -43,6 +43,7 @@ import {
     setSearchCollectionsAndFiles,
 } from "@/new/photos/services/search";
 import type { SearchOption } from "@/new/photos/services/search/types";
+import { initSettings } from "@/new/photos/services/settings";
 import { useAppContext } from "@/new/photos/types/context";
 import { splitByPredicate } from "@/utils/array";
 import { ensure } from "@/utils/ensure";
@@ -341,6 +342,7 @@ export default function Gallery() {
             if (!valid) {
                 return;
             }
+            initSettings();
             await downloadManager.init(token);
             setupSelectAllKeyBoardShortcutHandler();
             dispatch({ type: "showAll" });

@@ -13,9 +13,9 @@
   "feedback": "Atsiliepimai",
   "kindlyHelpUsWithThisInformation": "Maloniai padėkite mums su šia informacija",
   "confirmDeletePrompt": "Taip, noriu negrįžtamai ištrinti šią paskyrą ir jos duomenis per visas programas.",
-  "confirmAccountDeletion": "Patvirtinti paskyros ištrynimą",
+  "confirmAccountDeletion": "Patvirtinkite paskyros ištrynimą",
   "deleteAccountPermanentlyButton": "Ištrinti paskyrą negrįžtamai",
-  "yourAccountHasBeenDeleted": "Jūsų paskyra buvo ištrinta",
+  "yourAccountHasBeenDeleted": "Jūsų paskyra ištrinta",
   "selectReason": "Pasirinkite priežastį",
   "deleteReason1": "Trūksta pagrindinės funkcijos, kurios man reikia",
   "deleteReason2": "Programa arba tam tikra funkcija nesielgia taip, kaip, mano manymu, turėtų elgtis",
@@ -53,7 +53,7 @@
   "checkInboxAndSpamFolder": "Patikrinkite savo gautieją (ir šlamštą), kad užbaigtumėte patvirtinimą",
   "tapToEnterCode": "Palieskite, kad įvestumėte kodą",
   "resendEmail": "Iš naujo siųsti el. laišką",
-  "weHaveSendEmailTo": "Išsiuntėme laišką į <green>{email}</green>",
+  "weHaveSendEmailTo": "Išsiuntėme laišką adresu <green>{email}</green>",
   "@weHaveSendEmailTo": {
     "description": "Text to indicate that we have sent a mail to the user",
     "placeholders": {
@@ -94,7 +94,7 @@
   "sorryWeCouldNotGenerateSecureKeysOnThisDevicennplease": "Atsiprašome, šiame įrenginyje nepavyko sugeneruoti saugių raktų.\n\nRegistruokitės iš kito įrenginio.",
   "howItWorks": "Kaip tai veikia",
   "encryption": "Šifravimas",
-  "ackPasswordLostWarning": "Suprantu, kad jei prarasiu slaptažodį, galiu prarasti savo duomenis, kadangi mano duomenys yra <underline>visapusiškai užšifruota</underline>.",
+  "ackPasswordLostWarning": "Suprantu, kad jei prarasiu slaptažodį, galiu prarasti savo duomenis, kadangi mano duomenys yra <underline>visapusiškai užšifruoti</underline>.",
   "privacyPolicyTitle": "Privatumo politika",
   "termsOfServicesTitle": "Sąlygos",
   "signUpTerms": "Sutinku su <u-terms>paslaugų sąlygomis</u-terms> ir <u-policy> privatumo politika</u-policy>",
@@ -104,7 +104,7 @@
   "enterYourPassword": "Įveskite savo slaptažodį",
   "welcomeBack": "Sveiki sugrįžę!",
   "contactSupport": "Susisiekti su palaikymo komanda",
-  "incorrectPasswordTitle": "Neteisingas slaptažodis.",
+  "incorrectPasswordTitle": "Neteisingas slaptažodis",
   "pleaseTryAgain": "Bandykite dar kartą.",
   "recreatePasswordTitle": "Iš naujo sukurti slaptažodį",
   "useRecoveryKey": "Naudoti atkūrimo raktą",
@@ -129,11 +129,12 @@
     }
   },
   "twofactorSetup": "Dvigubo tapatybės nustatymo sąranka",
-  "enterCode": "Įveskite kodą",
+  "enterCode": "Įvesti kodą",
   "scanCode": "Skenuoti kodą",
   "codeCopiedToClipboard": "Nukopijuotas kodas į iškarpinę",
   "copypasteThisCodentoYourAuthenticatorApp": "Nukopijuokite ir įklijuokite šį kodą\nį autentifikatoriaus programą",
-  "scanThisBarcodeWithnyourAuthenticatorApp": "Skenuokite šį brūkšninį kodą\nsu autentifikatoriaus programa",
+  "tapToCopy": "palieskite, kad nukopijuotumėte",
+  "scanThisBarcodeWithnyourAuthenticatorApp": "Skenuokite šį QR kodą\nsu autentifikatoriaus programa",
   "enterThe6digitCodeFromnyourAuthenticatorApp": "Įveskite 6 skaitmenų kodą\niš autentifikatoriaus programos",
   "confirm": "Patvirtinti",
   "setupComplete": "Sąranka baigta",
@@ -157,25 +158,79 @@
   "orPickAnExistingOne": "Arba pasirinkite esamą",
   "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum": "Bendradarbiai gali pridėti nuotraukų ir vaizdo įrašų į bendrintą albumą.",
   "enterEmail": "Įveskite el. paštą",
+  "addMore": "Pridėti daugiau",
+  "@addMore": {
+    "description": "Button text to add more collaborators/viewers"
+  },
+  "remove": "Šalinti",
+  "removeParticipant": "Šalinti dalyvį",
+  "@removeParticipant": {
+    "description": "menuSectionTitle for removing a participant"
+  },
+  "changePermissions": "Keisti leidimus?",
+  "yesConvertToViewer": "Taip, keisti į žiūrėtoją",
+  "cannotAddMorePhotosAfterBecomingViewer": "{user} negalės pridėti daugiau nuotraukų į šį albumą\n\nJie vis tiek galės pašalinti esamas pridėtas nuotraukas",
+  "allowAddingPhotos": "Leisti pridėti nuotraukų",
+  "@allowAddingPhotos": {
+    "description": "Switch button to enable uploading photos to a public link"
+  },
+  "allowAddPhotosDescription": "Leiskite nuorodą turintiems asmenims taip pat pridėti nuotraukų į bendrinamą albumą.",
+  "passwordLock": "Slaptažodžio užraktas",
+  "disableDownloadWarningTitle": "Atkreipkite dėmesį",
+  "disableDownloadWarningBody": "Žiūrėtojai vis tiek gali daryti ekrano kopijas arba išsaugoti nuotraukų kopijas naudojant išorinius įrankius",
+  "allowDownloads": "Leisti atsisiuntimus",
+  "linkDeviceLimit": "Įrenginių riba",
+  "noDeviceLimit": "Jokio",
+  "@noDeviceLimit": {
+    "description": "Text to indicate that there is limit on number of devices"
+  },
+  "linkExpiry": "Nuorodos galiojimo laikas",
+  "linkEnabled": "Įjungta",
+  "linkNeverExpires": "Niekada",
+  "setAPassword": "Nustatyti slaptažodį",
   "lockButtonLabel": "Užrakinti",
   "enterPassword": "Įveskite slaptažodį",
+  "removeLink": "Šalinti nuorodą",
+  "manageLink": "Tvarkyti nuorodą",
+  "albumUpdated": "Atnaujintas albumas",
+  "never": "Niekada",
   "custom": "Pasirinktinis",
   "@custom": {
     "description": "Label for setting custom value for link expiry"
   },
+  "after1Hour": "Po 1 valandos",
+  "after1Day": "Po 1 dienos",
+  "after1Week": "Po 1 savaitės",
+  "after1Month": "Po 1 mėnesio",
+  "after1Year": "Po 1 metų",
+  "manageParticipants": "Tvarkyti",
+  "collabLinkSectionDescription": "Sukurkite nuorodą, kad asmenys galėtų pridėti ir peržiūrėti nuotraukas bendrinamame albume, nereikalaujant „Ente“ programos ar paskyros. Puikiai tinka renginių nuotraukoms rinkti.",
+  "sendLink": "Siųsti nuorodą",
+  "copyLink": "Kopijuoti nuorodą",
+  "emailNoEnteAccount": "{email} neturi „Ente“ paskyros.\n\nSiųskite jiems kvietimą bendrinti nuotraukas.",
+  "applyCodeTitle": "Taikyti kodą",
+  "apply": "Taikyti",
+  "codeAppliedPageTitle": "Pritaikytas kodas",
   "change": "Keisti",
   "unavailableReferralCode": "Atsiprašome, šis kodas nepasiekiamas.",
   "codeChangeLimitReached": "Atsiprašome, pasiekėte kodo pakeitimų ribą.",
   "storageInGB": "{storageAmountInGB} GB",
   "faq": "DUK",
   "total": "iš viso",
+  "removeFromAlbumTitle": "Pašalinti iš albumo?",
+  "removeFromAlbum": "Šalinti iš albumo",
+  "itemsWillBeRemovedFromAlbum": "Pasirinkti elementai bus pašalinti iš šio albumo",
+  "removeShareItemsWarning": "Kai kuriuos elementus, kuriuos šalinate, pridėjo kiti asmenys, todėl prarasite prieigą prie jų",
+  "sorryCouldNotRemoveFromFavorites": "Atsiprašome, nepavyko pašalinti iš mėgstamų.",
   "subscribeToEnableSharing": "Kad įjungtumėte bendrinimą, reikia aktyvios mokamos prenumeratos.",
   "subscribe": "Prenumeruoti",
+  "canOnlyRemoveFilesOwnedByYou": "Galima pašalinti tik jums priklausančius failus",
   "deleteAlbum": "Ištrinti albumą",
   "deleteAlbumDialog": "Taip pat ištrinti šiame albume esančias nuotraukas (ir vaizdo įrašus) iš <bold>visų</bold> kitų albumų, kuriuose jos yra dalis?",
   "yesRemove": "Taip, šalinti",
   "creatingLink": "Kuriama nuoroda...",
   "removeWithQuestionMark": "Šalinti?",
+  "removeParticipantBody": "{userEmail} bus pašalintas iš šio bendrinamo albumo\n\nVisos jų pridėtos nuotraukos taip pat bus pašalintos iš albumo",
   "keepPhotos": "Palikti nuotraukas",
   "deletePhotos": "Ištrinti nuotraukas",
   "inviteToEnte": "Kviesti į „Ente“",
@@ -254,6 +309,21 @@
   "indexedItems": "Indeksuoti elementai",
   "pendingItems": "Laukiami elementai",
   "skip": "Praleisti",
+  "duplicateItemsGroup": "{count} failai (-ų), kiekvienas {formattedSize}",
+  "@duplicateItemsGroup": {
+    "description": "Display the number of duplicate files and their size",
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "example": "12",
+        "type": "int"
+      },
+      "formattedSize": {
+        "example": "2.3 MB",
+        "type": "String"
+      }
+    }
+  },
   "about": "Apie",
   "weAreOpenSource": "Esame atviro kodo!",
   "privacy": "Privatumas",
@@ -274,6 +344,8 @@
   "authToInitiateAccountDeletion": "Nustatykite tapatybę, kad pradėtumėte paskyros ištrynimą",
   "areYouSureYouWantToLogout": "Ar tikrai norite atsijungti?",
   "yesLogout": "Taip, atsijungti",
+  "removeDuplicates": "Šalinti dublikatus",
+  "youveNoDuplicateFilesThatCanBeCleared": "Neturite dubliuotų failų, kuriuos būtų galima išvalyti",
   "no": "Ne",
   "yes": "Taip",
   "social": "Socialinės",
@@ -294,7 +366,25 @@
   "lightTheme": "Šviesi",
   "darkTheme": "Tamsi",
   "systemTheme": "Sistemos",
+  "freeTrial": "Nemokamas bandomasis laikotarpis",
+  "selectYourPlan": "Pasirinkite planą",
+  "enteSubscriptionPitch": "„Ente“ išsaugo jūsų prisiminimus, todėl jie visada bus pasiekiami, net jei prarasite įrenginį.",
+  "currentUsageIs": "Dabartinis naudojimas – ",
+  "@currentUsageIs": {
+    "description": "This text is followed by storage usage",
+    "examples": {
+      "0": "Current usage is 1.2 GB"
+    },
+    "type": "text"
+  },
   "faqs": "DUK",
+  "freeTrialValidTill": "Nemokamas bandomasis laikotarpis galioja iki {endDate}",
+  "validTill": "Galioja iki {endDate}",
+  "subscription": "Prenumerata",
+  "paymentDetails": "Mokėjimo duomenys",
+  "manageFamily": "Tvarkyti šeimą",
+  "renewSubscription": "Atnaujinti prenumeratą",
+  "cancelSubscription": "Atsisakyti prenumeratos",
   "yesCancel": "Taip, atsisakyti",
   "failedToCancel": "Nepavyko atsisakyti",
   "twoMonthsFreeOnYearlyPlans": "2 mėnesiai nemokamai metiniuose planuose",
@@ -310,11 +400,56 @@
   },
   "confirmPlanChange": "Patvirtinkite plano pakeitimą",
   "areYouSureYouWantToChangeYourPlan": "Ar tikrai norite keisti planą?",
+  "youCannotDowngradeToThisPlan": "Negalite pakeisti į šį planą",
+  "cancelOtherSubscription": "Pirmiausia atsisakykite esamos prenumeratos iš {paymentProvider}",
+  "@cancelOtherSubscription": {
+    "description": "The text to display when the user has an existing subscription from a different payment provider",
+    "type": "text",
+    "placeholders": {
+      "paymentProvider": {
+        "example": "Apple",
+        "type": "String"
+      }
+    }
+  },
+  "optionalAsShortAsYouLike": "Nebūtina, trumpai, kaip jums patinka...",
+  "send": "Siųsti",
   "googlePlayId": "„Google Play“ ID",
   "appleId": "„Apple ID“",
   "playstoreSubscription": "„PlayStore“ prenumerata",
+  "subAlreadyLinkedErrMessage": "Jūsų {id} jau susietas su kita „Ente“ paskyra.\nJei norite naudoti savo {id} su šia paskyra, susisiekite su mūsų palaikymo komanda.",
+  "visitWebToManage": "Aplankykite web.ente.io, kad tvarkytumėte savo prenumeratą",
+  "paymentFailed": "Mokėjimas nepavyko",
+  "paymentFailedTalkToProvider": "Kreipkitės į {providerName} palaikymo komandą, jei jums buvo nuskaičiuota.",
+  "@paymentFailedTalkToProvider": {
+    "description": "The text to display when the payment failed",
+    "type": "text",
+    "placeholders": {
+      "providerName": {
+        "example": "AppStore|PlayStore",
+        "type": "String"
+      }
+    }
+  },
+  "continueOnFreeTrial": "Tęsti nemokame bandomajame laikotarpyje",
+  "areYouSureYouWantToExit": "Ar tikrai norite išeiti?",
+  "thankYou": "Dėkojame",
+  "failedToVerifyPaymentStatus": "Nepavyko patvirtinti mokėjimo būsenos",
+  "paymentFailedMessage": "Deja, jūsų mokėjimas nepavyko. Susisiekite su palaikymo komanda ir mes jums padėsime!",
+  "leaveFamily": "Palikti šeimą",
+  "areYouSureThatYouWantToLeaveTheFamily": "Ar tikrai norite palikti šeimos planą?",
+  "leave": "Palikti",
+  "rateTheApp": "Vertinti programą",
+  "startBackup": "Pradėti kurti atsarginę kopiją",
   "existingUser": "Esamas naudotojas",
+  "available": "Prieinama",
+  "everywhere": "visur",
+  "androidIosWebDesktop": "„Android“, „iOS“, internete ir darbalaukyje",
+  "mobileWebDesktop": "Mobiliuosiuose, internete ir darbalaukyje",
   "newToEnte": "Naujas platformoje „Ente“",
+  "pleaseLoginAgain": "Prisijunkite iš naujo.",
+  "autoLogoutMessage": "Dėl techninio trikdžio buvote atjungti. Atsiprašome už nepatogumus.",
+  "yourSubscriptionHasExpired": "Jūsų prenumerata baigėsi.",
   "storageLimitExceeded": "Viršyta saugyklos riba.",
   "upgrade": "Keisti planą",
   "raiseTicket": "Sukurti paraišką",
@@ -327,6 +462,36 @@
     "type": "text"
   },
   "onDevice": "Įrenginyje",
+  "@onEnte": {
+    "description": "The text displayed above albums backed up to Ente",
+    "type": "text"
+  },
+  "onEnte": "Saugykloje <branding>ente</branding>",
+  "name": "Pavadinimą",
+  "newest": "Naujausią",
+  "lastUpdated": "Paskutinį kartą atnaujintą",
+  "removeFromFavorite": "Šalinti iš mėgstamų",
+  "addToEnte": "Pridėti į „Ente“",
+  "addToAlbum": "Pridėti į albumą",
+  "delete": "Ištrinti",
+  "hide": "Slėpti",
+  "share": "Bendrinti",
+  "restoreToAlbum": "Atkurti į albumą",
+  "moveItem": "{count, plural, one {Perkelti elementą} few {Perkelti elementus} many {Perkelti elemento} other {Perkelti elementų}}",
+  "@moveItem": {
+    "description": "Page title while moving one or more items to an album"
+  },
+  "shareAlbumHint": "Atidarykite albumą ir palieskite bendrinimo mygtuką viršuje dešinėje, kad bendrintumėte.",
+  "setCover": "Nustatyti viršelį",
+  "@setCover": {
+    "description": "Text to set cover photo for an album"
+  },
+  "sortAlbumsBy": "Rikiuoti pagal",
+  "sortNewestFirst": "Naujausią pirmiausiai",
+  "sortOldestFirst": "Seniausią pirmiausiai",
+  "rename": "Pervadinti",
+  "leaveAlbum": "Palikti albumą",
+  "photosAddedByYouWillBeRemovedFromTheAlbum": "Jūsų pridėtos nuotraukos bus pašalintos iš albumo",
   "noExifData": "Nėra EXIF duomenų",
   "thisImageHasNoExifData": "Šis vaizdas neturi Exif duomenų",
   "exif": "EXIF",
@@ -334,7 +499,15 @@
   "close": "Uždaryti",
   "setAs": "Nustatyti kaip",
   "download": "Atsisiųsti",
+  "pressAndHoldToPlayVideo": "Paspauskite ir palaikykite, kad paleistumėte vaizdo įrašą",
+  "downloadFailed": "Atsisiuntimas nepavyko.",
+  "deduplicateFiles": "Atdubliuoti failus",
+  "reviewDeduplicateItems": "Peržiūrėkite ir ištrinkite elementus, kurie, jūsų manymu, yra dublikatai.",
+  "unlock": "Atrakinti",
   "freeUpAmount": "Atlaisvinti {sizeInMBorGB}",
+  "verificationFailedPleaseTryAgain": "Patvirtinimas nepavyko. Bandykite dar kartą.",
+  "pleaseVerifyTheCodeYouHaveEntered": "Patvirtinkite įvestą kodą.",
+  "yourVerificationCodeHasExpired": "Jūsų patvirtinimo kodo laikas nebegaliojantis.",
   "verifying": "Patvirtinama...",
   "loadingGallery": "Įkeliama galerija...",
   "syncing": "Sinchronizuojama...",
@@ -380,6 +553,10 @@
   "addLocationButton": "Pridėti",
   "locationTagFeatureDescription": "Vietos žymė grupuoja visas nuotraukas, kurios buvo padarytos tam tikru spinduliu nuo nuotraukos",
   "centerPoint": "Vidurio taškas",
+  "resetToDefault": "Atkurti numatytąsias reikšmes",
+  "@resetToDefault": {
+    "description": "Button text to reset cover photo to default"
+  },
   "edit": "Redaguoti",
   "deleteLocation": "Ištrinti vietovę",
   "light": "Šviesi",
@@ -403,6 +580,26 @@
   "@setLabel": {
     "description": "Label of confirm button to add a new custom radius to the radius selector of a location tag"
   },
+  "androidBiometricHint": "Patvirtinkite tapatybę",
+  "@androidBiometricHint": {
+    "description": "Hint message advising the user how to authenticate with biometrics. It is used on Android side. Maximum 60 characters."
+  },
+  "androidCancelButton": "Atšaukti",
+  "@androidCancelButton": {
+    "description": "Message showed on a button that the user can click to leave the current dialog. It is used on Android side. Maximum 30 characters."
+  },
+  "androidSignInTitle": "Privalomas tapatybės nustatymas",
+  "@androidSignInTitle": {
+    "description": "Message showed as a title in a dialog which indicates the user that they need to scan biometric to continue. It is used on Android side. Maximum 60 characters."
+  },
+  "goToSettings": "Eiti į nustatymus",
+  "@goToSettings": {
+    "description": "Message showed on a button that the user can click to go to settings pages from the current dialog. It is used on both Android and iOS side. Maximum 30 characters."
+  },
+  "iOSOkButton": "Gerai",
+  "@iOSOkButton": {
+    "description": "Message showed on a button that the user can click to leave the current dialog. It is used on iOS side. Maximum 30 characters."
+  },
   "map": "Žemėlapis",
   "@map": {
     "description": "Label for the map view"
@@ -413,6 +610,8 @@
   "pinAlbum": "Prisegti albumą",
   "create": "Kurti",
   "viewAll": "Peržiūrėti viską",
+  "deleteConfirmDialogBody": "Ši paskyra susieta su kitomis „Ente“ programomis, jei jas naudojate. Jūsų įkelti duomenys per visas „Ente“ programas bus planuojama ištrinti, o jūsų paskyra bus ištrinta negrįžtamai.",
+  "viewAddOnButton": "Peržiūrėti priedus",
   "searchHint4": "Vietovė",
   "searchResultCount": "{count, plural, one{Rastas {count} rezultatas} few {Rasti {count} rezultatai} many {Rasta {count} rezultato} other{Rasta {count} rezultatų}}",
   "@searchResultCount": {
@@ -439,7 +638,7 @@
   "selectALocation": "Pasirinkite vietovę",
   "selectALocationFirst": "Pirmiausia pasirinkite vietovę",
   "changeLocationOfSelectedItems": "Keisti pasirinktų elementų vietovę?",
-  "editsToLocationWillOnlyBeSeenWithinEnte": "Vietovės pakeitimai bus matomi tik platformoje „Ente“",
+  "editsToLocationWillOnlyBeSeenWithinEnte": "Vietovės pakeitimai bus matomi tik per „Ente“",
   "cleanUncategorized": "Valyti nekategorizuotą",
   "cleanUncategorizedDescription": "Pašalinkite iš nekategorizuotą visus failus, esančius kituose albumuose",
   "waitingForVerification": "Laukiama patvirtinimo...",
@@ -460,6 +659,8 @@
   "addAName": "Pridėti vardą",
   "findPeopleByName": "Greitai suraskite žmones pagal vardą",
   "addViewers": "{count, plural, one {Pridėti žiūrėtoją} few {Pridėti žiūrėtojus} many {Pridėti žiūrėtojo} other {Pridėti žiūrėtojų}}",
+  "addCollaborators": "{count, plural, one {Pridėti bendradarbį} few {Pridėti bendradarbius} many {Pridėti bendradarbio} other {Pridėti bendradarbių}}",
+  "longPressAnEmailToVerifyEndToEndEncryption": "Ilgai paspauskite el. paštą, kad patvirtintumėte visapusį šifravimą.",
   "developerSettingsWarning": "Ar tikrai norite modifikuoti kūrėjo nustatymus?",
   "developerSettings": "Kūrėjo nustatymai",
   "serverEndpoint": "Serverio galutinis taškas",
@@ -470,13 +671,16 @@
   "createCollaborativeLink": "Kurti bendradarbiavimo nuorodą",
   "search": "Ieškoti",
   "enterPersonName": "Įveskite asmens vardą",
-  "removePersonLabel": "Pašalinti asmens žymą",
+  "removePersonLabel": "Šalinti asmens žymą",
   "autoPairDesc": "Automatinis susiejimas veikia tik su įrenginiais, kurie palaiko „Chromecast“.",
   "manualPairDesc": "Susieti su PIN kodu veikia bet kuriame ekrane, kuriame norite peržiūrėti albumą.",
   "connectToDevice": "Prijungti prie įrenginio",
+  "autoCastDialogBody": "Čia matysite pasiekiamus perdavimo įrenginius.",
   "noDeviceFound": "Įrenginys nerastas",
   "stopCastingTitle": "Stabdyti perdavimą",
   "stopCastingBody": "Ar norite sustabdyti perdavimą?",
+  "castIPMismatchTitle": "Nepavyko perduoti albumo",
+  "castIPMismatchBody": "Įsitikinkite, kad esate tame pačiame tinkle kaip ir televizorius.",
   "pairingComplete": "Susiejimas baigtas",
   "savingEdits": "Išsaugomi redagavimai...",
   "autoPair": "Automatiškai susieti",
@@ -507,13 +711,13 @@
   "enabled": "Įjungta",
   "moreDetails": "Daugiau išsamios informacijos",
   "enableMLIndexingDesc": "„Ente“ palaiko įrenginyje mašininį mokymąsi, skirtą veidų atpažinimui, magiškai paieškai ir kitoms išplėstinėms paieškos funkcijoms",
-  "magicSearchHint": "Magiška paieška leidžia ieškoti nuotraukų pagal jų turinį, pvz., „\"gėlė“, „raudonas automobilis“, „tapatybės dokumentai“",
+  "magicSearchHint": "Magiška paieška leidžia ieškoti nuotraukų pagal jų turinį, pvz., „gėlė“, „raudonas automobilis“, „tapatybės dokumentai“",
   "panorama": "Panorama",
   "reenterPassword": "Įveskite slaptažodį iš naujo",
   "reenterPin": "Įveskite PIN iš naujo",
   "deviceLock": "Įrenginio užraktas",
   "pinLock": "PIN užrakinimas",
-  "next": "Sekantis",
+  "next": "Toliau",
   "setNewPassword": "Nustatykite naują slaptažodį",
   "enterPin": "Įveskite PIN",
   "setNewPin": "Nustatykite naują PIN",
@@ -531,7 +735,7 @@
   "passwordStrengthInfo": "Slaptažodžio stiprumas apskaičiuojamas atsižvelgiant į slaptažodžio ilgį, naudotus simbolius ir į tai, ar slaptažodis patenka į 10 000 dažniausiai naudojamų slaptažodžių.",
   "noQuickLinksSelected": "Nėra pasirinktų sparčiųjų nuorodų",
   "pleaseSelectQuickLinksToRemove": "Pasirinkite sparčiąsias nuorodas, kad pašalintumėte",
-  "removePublicLinks": "Pašalinti viešąsias nuorodas",
+  "removePublicLinks": "Šalinti viešąsias nuorodas",
   "thisWillRemovePublicLinksOfAllSelectedQuickLinks": "Tai pašalins visų pasirinktų sparčiųjų nuorodų viešąsias nuorodas.",
   "guestView": "Svečio peržiūra",
   "guestViewEnablePreSteps": "Kad įjungtumėte svečio peržiūrą, sistemos nustatymuose nustatykite įrenginio prieigos kodą arba ekrano užraktą.",
