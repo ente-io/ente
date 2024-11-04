@@ -48,6 +48,10 @@ albums**.
     result in the creation of a new album – empty folders (or folders that only
     contain other folders) will be ignored.
 
+-   In separate album mode, only the leafmost folder name is considered. For
+    example, both `A/B/C/D/x.png` and `1/2/3/D/y.png` will get uploaded into the
+    same Ente album named "D".
+
 > [!NOTE]
 >
 > Ente albums cannot be nested currently. That is, in the **separate album**

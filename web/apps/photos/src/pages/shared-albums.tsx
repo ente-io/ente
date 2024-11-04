@@ -17,7 +17,7 @@ import {
 } from "@/new/photos/services/collection";
 import downloadManager from "@/new/photos/services/download";
 import { sortFiles } from "@/new/photos/services/files";
-import { AppContext } from "@/new/photos/types/context";
+import { useAppContext } from "@/new/photos/types/context";
 import {
     CenteredFlex,
     FluidContainer,
@@ -54,7 +54,7 @@ import Uploader from "components/Upload/Uploader";
 import { UploadSelectorInputs } from "components/UploadSelectorInputs";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import {
     getLocalPublicCollection,
@@ -90,7 +90,8 @@ export default function PublicCollectionGallery() {
     const [publicFiles, setPublicFiles] = useState<EnteFile[]>(null);
     const [publicCollection, setPublicCollection] = useState<Collection>(null);
     const [errorMessage, setErrorMessage] = useState<string>(null);
-    const appContext = useContext(AppContext);
+    const { showLoadingBar, hideLoadingBar, setDialogMessage } =
+        useAppContext();
     const [loading, setLoading] = useState(true);
     const router = useRouter();
     const [isPasswordProtected, setIsPasswordProtected] =
@@ -185,7 +186,7 @@ export default function PublicCollectionGallery() {
     };
 
     const showPublicLinkExpiredMessage = () =>
-        appContext.setDialogMessage({
+        setDialogMessage({
             title: t("LINK_EXPIRED"),
             content: t("LINK_EXPIRED_MESSAGE"),
 
@@ -316,7 +317,7 @@ export default function PublicCollectionGallery() {
     const syncWithRemote = async () => {
         const collectionUID = getPublicCollectionUID(token.current);
         try {
-            appContext.startLoading();
+            showLoadingBar();
             setLoading(true);
             const [collection, userReferralCode] = await getPublicCollection(
                 token.current,
@@ -381,7 +382,7 @@ export default function PublicCollectionGallery() {
                 log.error("failed to sync public album with remote", e);
             }
         } finally {
-            appContext.finishLoading();
+            hideLoadingBar();
             setLoading(false);
         }
     };
@@ -427,7 +428,7 @@ export default function PublicCollectionGallery() {
                 throw e;
             }
             await syncWithRemote();
-            appContext.finishLoading();
+            hideLoadingBar();
         } catch (e) {
             log.error("failed to verifyLinkPassword", e);
             setFieldError(`${t("generic_error_retry")} ${e.message}`);

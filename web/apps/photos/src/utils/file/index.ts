@@ -16,7 +16,6 @@ import { ItemVisibility } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import DownloadManager from "@/new/photos/services/download";
-import { updateExifIfNeededAndPossible } from "@/new/photos/services/exif-update";
 import {
     isArchivedFile,
     updateMagicMetadata,
@@ -79,9 +78,6 @@ export async function downloadFile(file: EnteFile) {
             const fileType = await detectFileTypeInfo(
                 new File([fileBlob], file.metadata.title),
             );
-            fileBlob = await new Response(
-                await updateExifIfNeededAndPossible(file, fileBlob.stream()),
-            ).blob();
             fileBlob = new Blob([fileBlob], { type: fileType.mimeType });
             const tempURL = URL.createObjectURL(fileBlob);
             downloadAndRevokeObjectURL(tempURL, file.metadata.title);
@@ -397,10 +393,9 @@ async function downloadFileDesktop(
     const fs = electron.fs;
 
     const stream = await DownloadManager.getFile(file);
-    const updatedStream = await updateExifIfNeededAndPossible(file, stream);
 
     if (file.metadata.fileType === FileType.livePhoto) {
-        const fileBlob = await new Response(updatedStream).blob();
+        const fileBlob = await new Response(stream).blob();
         const { imageFileName, imageData, videoFileName, videoData } =
             await decodeLivePhoto(file.metadata.title, fileBlob);
         const imageExportName = await safeFileName(
@@ -436,11 +431,7 @@ async function downloadFileDesktop(
             file.metadata.title,
             fs.exists,
         );
-        await writeStream(
-            electron,
-            `${downloadDir}/${fileExportName}`,
-            updatedStream,
-        );
+        await writeStream(electron, `${downloadDir}/${fileExportName}`, stream);
     }
 }
 

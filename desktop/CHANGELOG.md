@@ -2,6 +2,7 @@
 
 ## v1.7.7 (Unreleased)
 
+-   Retain JPEG originals even on date modifications.
 -   .
 
 ## v1.7.6
