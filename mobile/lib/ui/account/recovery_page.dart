@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import "package:photos/generated/l10n.dart";
@@ -10,7 +8,7 @@ import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
 class RecoveryPage extends StatefulWidget {
-  const RecoveryPage({Key? key}) : super(key: key);
+  const RecoveryPage({super.key});
 
   @override
   State<RecoveryPage> createState() => _RecoveryPageState();

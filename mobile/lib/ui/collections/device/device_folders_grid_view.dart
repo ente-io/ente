@@ -16,8 +16,8 @@ import "package:photos/utils/debouncer.dart";
 
 class DeviceFoldersGridView extends StatefulWidget {
   const DeviceFoldersGridView({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<DeviceFoldersGridView> createState() => _DeviceFoldersGridViewState();

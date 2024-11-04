@@ -18,7 +18,7 @@ import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 
 class VerifyRecoveryPage extends StatefulWidget {
-  const VerifyRecoveryPage({Key? key}) : super(key: key);
+  const VerifyRecoveryPage({super.key});
 
   @override
   State<VerifyRecoveryPage> createState() => _VerifyRecoveryPageState();

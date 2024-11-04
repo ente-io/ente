@@ -33,8 +33,8 @@ class PeoplePage extends StatefulWidget {
   const PeoplePage({
     this.tagPrefix = "",
     required this.person,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<PeoplePage> createState() => _PeoplePageState();

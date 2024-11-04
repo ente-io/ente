@@ -59,7 +59,7 @@ class FaceDetectionRelative extends Detection {
   List<double> get rightMouth => allKeypoints[4];
 
   FaceDetectionRelative({
-    required double score,
+    required super.score,
     required List<double> box,
     required List<List<double>> allKeypoints,
   })  : assert(
@@ -77,8 +77,7 @@ class FaceDetectionRelative extends Detection {
               (sublist) =>
                   List<double>.from(sublist.map((e) => e.clamp(0.0, 1.0))),
             )
-            .toList(),
-        super(score: score);
+            .toList();
 
   void correctForMaintainedAspectRatio(
     Dimensions originalSize,
@@ -254,10 +253,10 @@ class FaceDetectionAbsolute extends Detection {
   List<double> get rightMouth => allKeypoints[4];
 
   FaceDetectionAbsolute({
-    required double score,
+    required super.score,
     required this.box,
     required this.allKeypoints,
-  }) : super(score: score);
+  });
 
   @override
   String toString() {

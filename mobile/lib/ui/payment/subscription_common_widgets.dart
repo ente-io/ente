@@ -117,7 +117,7 @@ class ValidityWidget extends StatelessWidget {
             ),
           const SizedBox(height: 8),
           if (addOnBonus.isNotEmpty)
-            ...addOnBonus.map((bonus) => AddOnBonusValidity(bonus)).toList(),
+            ...addOnBonus.map((bonus) => AddOnBonusValidity(bonus)),
         ],
       ),
     );
@@ -150,7 +150,7 @@ class AddOnBonusValidity extends StatelessWidget {
 class SubFaqWidget extends StatelessWidget {
   final bool isOnboarding;
 
-  const SubFaqWidget({Key? key, this.isOnboarding = false}) : super(key: key);
+  const SubFaqWidget({super.key, this.isOnboarding = false});
 
   @override
   Widget build(BuildContext context) {

@@ -16,10 +16,10 @@ class SearchResultWidget extends StatelessWidget {
 
   const SearchResultWidget(
     this.searchResult, {
-    Key? key,
+    super.key,
     this.resultCount,
     this.onResultTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

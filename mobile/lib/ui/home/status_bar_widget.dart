@@ -22,7 +22,7 @@ import 'package:photos/utils/navigation_util.dart';
 const double kContainerHeight = 36;
 
 class StatusBarWidget extends StatefulWidget {
-  const StatusBarWidget({Key? key}) : super(key: key);
+  const StatusBarWidget({super.key});
 
   @override
   State<StatusBarWidget> createState() => _StatusBarWidgetState();
@@ -138,7 +138,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
 }
 
 class SyncStatusWidget extends StatefulWidget {
-  const SyncStatusWidget({Key? key}) : super(key: key);
+  const SyncStatusWidget({super.key});
 
   @override
   State<SyncStatusWidget> createState() => _SyncStatusWidgetState();
@@ -195,7 +195,7 @@ class RefreshIndicatorWidget extends StatelessWidget {
 
   final SyncStatusUpdate? event;
 
-  const RefreshIndicatorWidget(this.event, {Key? key}) : super(key: key);
+  const RefreshIndicatorWidget(this.event, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -275,7 +275,7 @@ class RefreshIndicatorWidget extends StatelessWidget {
 }
 
 class SyncStatusCompletedWidget extends StatelessWidget {
-  const SyncStatusCompletedWidget({Key? key}) : super(key: key);
+  const SyncStatusCompletedWidget({super.key});
 
   @override
   Widget build(BuildContext context) {

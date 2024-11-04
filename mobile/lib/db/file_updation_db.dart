@@ -22,7 +22,7 @@ class FileUpdationDB {
   // SQL code to create the database table
   static List<String> _createTable() {
     return [
-      ''' 
+      '''
       CREATE TABLE $tableName (
       $columnLocalID TEXT NOT NULL,
       UNIQUE($columnLocalID)

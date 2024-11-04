@@ -8,7 +8,7 @@ import 'package:photos/utils/date_time_util.dart';
 import 'package:video_player/video_player.dart';
 
 class VideoControls extends StatefulWidget {
-  const VideoControls({Key? key}) : super(key: key);
+  const VideoControls({super.key});
 
   @override
   State<StatefulWidget> createState() {

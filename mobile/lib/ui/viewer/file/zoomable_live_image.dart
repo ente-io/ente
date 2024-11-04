@@ -22,11 +22,11 @@ class ZoomableLiveImage extends StatefulWidget {
 
   const ZoomableLiveImage(
     this.enteFile, {
-    Key? key,
+    super.key,
     this.shouldDisableScroll,
     required this.tagPrefix,
     this.backgroundDecoration,
-  }) : super(key: key);
+  });
 
   @override
   State<ZoomableLiveImage> createState() => _ZoomableLiveImageState();
@@ -45,8 +45,9 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
   @override
   void initState() {
     _enteFile = widget.enteFile;
-    _logger.info('initState for ${_enteFile.generatedID} with tag ${_enteFile
-        .tag} and name ${_enteFile.displayName}');
+    _logger.info(
+      'initState for ${_enteFile.generatedID} with tag ${_enteFile.tag} and name ${_enteFile.displayName}',
+    );
     super.initState();
   }
 
@@ -138,7 +139,8 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
   }
 
   Future<File?> _getLivePhotoVideo() async {
-    if (_enteFile.isRemoteFile && !(await isFileCached(_enteFile, liveVideo: true))) {
+    if (_enteFile.isRemoteFile &&
+        !(await isFileCached(_enteFile, liveVideo: true))) {
       showShortToast(context, S.of(context).downloading);
     }
 
@@ -206,5 +208,4 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
         }
       });
   }
-
 }

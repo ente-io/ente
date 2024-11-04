@@ -7,13 +7,13 @@ class EnteWakeLock {
 
   void enable() {
     WakelockPlus.enabled.then((value) {
-        if (value == false) {
-          WakelockPlus.enable();
-          //wakeLockEnabledHere will not be set to true if wakeLock is already enabled from settings on iOS.
-          //We shouldn't disable when video is not playing if it was enabled manually by the user from ente settings by user.
-          _wakeLockEnabledHere = true;
-        }
-      });
+      if (value == false) {
+        WakelockPlus.enable();
+        //wakeLockEnabledHere will not be set to true if wakeLock is already enabled from settings on iOS.
+        //We shouldn't disable when video is not playing if it was enabled manually by the user from ente settings by user.
+        _wakeLockEnabledHere = true;
+      }
+    });
   }
 
   void disable() {

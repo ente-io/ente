@@ -34,8 +34,8 @@ class VideoWidget extends StatefulWidget {
     this.autoPlay = false,
     this.tagPrefix,
     this.playbackCallback,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<VideoWidget> createState() => _VideoWidgetState();

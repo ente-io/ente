@@ -35,8 +35,8 @@ class ClusterAppBar extends StatefulWidget {
     this.selectedFiles,
     this.clusterID, {
     this.person,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<ClusterAppBar> createState() => _AppBarWidgetState();
@@ -199,8 +199,7 @@ class _AppBarWidgetState extends State<ClusterAppBar> {
           await MLDataDB.instance.deleteClusterSummary(widget.clusterID);
           await MLDataDB.instance
               .clusterSummaryUpdate(breakupResult.newClusterSummaries);
-          await MLDataDB.instance
-              .updateFaceIdToClusterId(newFaceIdToClusterID);
+          await MLDataDB.instance.updateFaceIdToClusterId(newFaceIdToClusterID);
 
           // Find the biggest cluster
           biggestClusterID = '';

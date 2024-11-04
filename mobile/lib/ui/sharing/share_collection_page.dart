@@ -332,8 +332,8 @@ class EmailItemWidget extends StatelessWidget {
   const EmailItemWidget(
     this.collection, {
     this.onTap,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

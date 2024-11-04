@@ -19,7 +19,7 @@ import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/email_util.dart';
 
 class PasswordReentryPage extends StatefulWidget {
-  const PasswordReentryPage({Key? key}) : super(key: key);
+  const PasswordReentryPage({super.key});
 
   @override
   State<PasswordReentryPage> createState() => _PasswordReentryPageState();

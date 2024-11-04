@@ -1,4 +1,3 @@
-
 import "package:flutter/material.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/ui/viewer/file/zoomable_image.dart";

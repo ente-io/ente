@@ -10,9 +10,9 @@ import "package:styled_text/styled_text.dart";
 
 class ChildSubscriptionWidget extends StatelessWidget {
   const ChildSubscriptionWidget({
-    Key? key,
+    super.key,
     required this.userDetails,
-  }) : super(key: key);
+  });
 
   final UserDetails userDetails;
 

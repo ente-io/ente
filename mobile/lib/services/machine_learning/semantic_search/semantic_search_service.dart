@@ -68,7 +68,8 @@ class SemanticSearchService {
 
   bool isMagicSearchEnabledAndReady() {
     return userRemoteFlagService
-        .getCachedBoolValue(UserRemoteFlagService.mlEnabled) && _textModelIsLoaded;
+            .getCachedBoolValue(UserRemoteFlagService.mlEnabled) &&
+        _textModelIsLoaded;
   }
 
   // searchScreenQuery should only be used for the user initiate query on the search screen.
@@ -77,8 +78,7 @@ class SemanticSearchService {
     if (!isMagicSearchEnabledAndReady()) {
       if (flagService.internalUser) {
         _logger.info(
-          "ML global consent: ${userRemoteFlagService
-        .getCachedBoolValue(UserRemoteFlagService.mlEnabled)}, loaded: $_textModelIsLoaded ",
+          "ML global consent: ${userRemoteFlagService.getCachedBoolValue(UserRemoteFlagService.mlEnabled)}, loaded: $_textModelIsLoaded ",
         );
       }
       return (query, <EnteFile>[]);

@@ -38,8 +38,8 @@ class ImageEditorPage extends StatefulWidget {
     this.imageProvider,
     this.originalFile,
     this.detailPageConfig, {
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<ImageEditorPage> createState() => _ImageEditorPageState();

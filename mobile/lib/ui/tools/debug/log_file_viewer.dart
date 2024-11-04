@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
@@ -7,7 +6,7 @@ import 'package:photos/ui/common/loading_widget.dart';
 
 class LogFileViewer extends StatefulWidget {
   final File file;
-  const LogFileViewer(this.file, {Key? key}) : super(key: key);
+  const LogFileViewer(this.file, {super.key});
 
   @override
   State<LogFileViewer> createState() => _LogFileViewerState();

@@ -25,7 +25,7 @@ import "package:photos/ui/viewer/search_tab/moments_section.dart";
 import "package:photos/ui/viewer/search_tab/people_section.dart";
 
 class SearchTab extends StatefulWidget {
-  const SearchTab({Key? key}) : super(key: key);
+  const SearchTab({super.key});
 
   @override
   State<SearchTab> createState() => _SearchTabState();

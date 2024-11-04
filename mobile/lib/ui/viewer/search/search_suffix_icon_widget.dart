@@ -5,7 +5,7 @@ import "package:photos/theme/ente_theme.dart";
 
 class SearchSuffixIcon extends StatefulWidget {
   final bool shouldShowSpinner;
-  const SearchSuffixIcon(this.shouldShowSpinner, {Key? key}) : super(key: key);
+  const SearchSuffixIcon(this.shouldShowSpinner, {super.key});
 
   @override
   State<SearchSuffixIcon> createState() => _SearchSuffixIconState();

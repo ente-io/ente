@@ -24,8 +24,8 @@ import "package:photos/utils/navigation_util.dart";
 ///widgets from the queue at regular intervals.
 class SearchSuggestionsWidget extends StatefulWidget {
   const SearchSuggestionsWidget({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<SearchSuggestionsWidget> createState() =>

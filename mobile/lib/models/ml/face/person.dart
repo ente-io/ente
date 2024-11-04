@@ -79,7 +79,7 @@ class PersonData {
     return PersonData(
       name: name ?? this.name,
       assigned: assigned ?? this.assigned,
-      avatarFaceID: avatarFaceId ?? this.avatarFaceID,
+      avatarFaceID: avatarFaceId ?? avatarFaceID,
       isHidden: isHidden ?? this.isHidden,
       birthDate: birthDate ?? this.birthDate,
     );

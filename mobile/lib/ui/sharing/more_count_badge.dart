@@ -10,7 +10,8 @@ class MoreCountWidget extends StatelessWidget {
   final bool thumbnailView;
   final int count;
 
-  const MoreCountWidget(this.count, {
+  const MoreCountWidget(
+    this.count, {
     super.key,
     this.type = MoreCountType.mini,
     this.thumbnailView = false,
@@ -38,13 +39,13 @@ class MoreCountWidget extends StatelessWidget {
       decoration: thumbnailView
           ? null
           : BoxDecoration(
-        shape: BoxShape.circle,
-        color: decorationColor,
-        border: Border.all(
-          color: strokeBaseDark,
-          width: 1.0,
-        ),
-      ),
+              shape: BoxShape.circle,
+              color: decorationColor,
+              border: Border.all(
+                color: strokeBaseDark,
+                width: 1.0,
+              ),
+            ),
       child: CircleAvatar(
         backgroundColor: decorationColor,
         child: Text(
@@ -56,8 +57,10 @@ class MoreCountWidget extends StatelessWidget {
     );
   }
 
-  Tuple2<double, TextStyle> getAvatarStyle(BuildContext context,
-      MoreCountType type,) {
+  Tuple2<double, TextStyle> getAvatarStyle(
+    BuildContext context,
+    MoreCountType type,
+  ) {
     final enteTextTheme = getEnteTextTheme(context);
     switch (type) {
       case MoreCountType.small:

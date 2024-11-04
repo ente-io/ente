@@ -91,10 +91,9 @@ Future<void> dismissUpdateAppDialog(WidgetTester tester) async {
   await tester.pumpAndSettle();
 }
 
-
 ///Use this widget as floating action buttom in HomeWidget so that frames
-///are built and rendered continuously so that timeline trace has continuous 
-///data. Change the duraiton in `_startTimer()` to control the duraiton of 
+///are built and rendered continuously so that timeline trace has continuous
+///data. Change the duraiton in `_startTimer()` to control the duraiton of
 ///test on app init.
 
 // class TempWidget extends StatefulWidget {

@@ -20,7 +20,7 @@ class PeopleBanner extends StatelessWidget {
   final GestureTapCallback onTap;
 
   const PeopleBanner({
-    Key? key,
+    super.key,
     required this.type,
     this.startIcon,
     this.faceWidget,
@@ -28,7 +28,7 @@ class PeopleBanner extends StatelessWidget {
     required this.text,
     required this.onTap,
     this.subText,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

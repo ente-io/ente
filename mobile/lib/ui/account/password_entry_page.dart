@@ -34,8 +34,8 @@ class PasswordEntryPage extends StatefulWidget {
 
   const PasswordEntryPage({
     required this.mode,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<PasswordEntryPage> createState() => _PasswordEntryPageState();

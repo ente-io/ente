@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/account/two_factor.dart";
@@ -17,8 +15,8 @@ class TwoFactorRecoveryPage extends StatefulWidget {
     this.sessionID,
     this.encryptedSecret,
     this.secretDecryptionNonce, {
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<TwoFactorRecoveryPage> createState() => _TwoFactorRecoveryPageState();

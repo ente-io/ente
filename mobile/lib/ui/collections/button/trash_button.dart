@@ -11,8 +11,8 @@ import 'package:photos/utils/navigation_util.dart';
 class TrashSectionButton extends StatefulWidget {
   const TrashSectionButton(
     this.textStyle, {
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final TextStyle textStyle;
 
@@ -44,7 +44,7 @@ class _TrashSectionButtonState extends State<TrashSectionButton> {
   Widget build(BuildContext context) {
     return OutlinedButton(
       style: OutlinedButton.styleFrom(
-        backgroundColor: Theme.of(context).colorScheme.background,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),

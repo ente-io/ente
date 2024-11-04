@@ -34,8 +34,8 @@ class PeopleAppBar extends StatefulWidget {
     this.title,
     this.selectedFiles,
     this.person, {
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<PeopleAppBar> createState() => _AppBarWidgetState();

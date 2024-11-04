@@ -5,7 +5,7 @@ import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/theme/text_style.dart';
 
 class EmptyHiddenWidget extends StatelessWidget {
-  const EmptyHiddenWidget({Key? key}) : super(key: key);
+  const EmptyHiddenWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -88,8 +88,8 @@ class EmptyHiddenTextWidget extends StatelessWidget {
 
   const EmptyHiddenTextWidget(
     this.text, {
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

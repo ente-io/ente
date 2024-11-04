@@ -7,10 +7,10 @@ class EntePopupMenuItem<T> extends PopupMenuItem<T> {
 
   EntePopupMenuItem(
     this.label, {
-    required T value,
+    required T super.value,
     this.icon,
     this.iconWidget,
-    Key? key,
+    super.key,
   })  : assert(
           icon != null || iconWidget != null,
           'Either icon or iconWidget must be provided.',
@@ -20,8 +20,6 @@ class EntePopupMenuItem<T> extends PopupMenuItem<T> {
           'Only one of icon or iconWidget can be provided.',
         ),
         super(
-          value: value,
-          key: key,
           child: Row(
             children: [
               if (iconWidget != null)

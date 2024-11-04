@@ -40,8 +40,8 @@ class AlbumVerticalListWidget extends StatelessWidget {
     this.sharedFiles,
     this.searchQuery,
     this.shouldShowCreateAlbum, {
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final _logger = Logger("CollectionsListWidgetState");
   final CollectionActions _collectionActions =

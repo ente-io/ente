@@ -30,7 +30,7 @@ import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/toast_util.dart";
 
 class SecuritySectionWidget extends StatefulWidget {
-  const SecuritySectionWidget({Key? key}) : super(key: key);
+  const SecuritySectionWidget({super.key});
 
   @override
   State<SecuritySectionWidget> createState() => _SecuritySectionWidgetState();

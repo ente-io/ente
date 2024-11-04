@@ -20,8 +20,7 @@ class PaymentWebPage extends StatefulWidget {
   final String? planId;
   final String? actionType;
 
-  const PaymentWebPage({Key? key, this.planId, this.actionType})
-      : super(key: key);
+  const PaymentWebPage({super.key, this.planId, this.actionType});
 
   @override
   State<StatefulWidget> createState() => _PaymentWebPageState();

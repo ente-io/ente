@@ -9,7 +9,7 @@ import 'package:photos/utils/navigation_util.dart';
 class FileSearchResultWidget extends StatelessWidget {
   final FileSearchResult matchedFile;
 
-  const FileSearchResultWidget(this.matchedFile, {Key? key}) : super(key: key);
+  const FileSearchResultWidget(this.matchedFile, {super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -20,7 +20,7 @@ import "package:photos/utils/navigation_util.dart";
 import "package:url_launcher/url_launcher_string.dart";
 
 class AccountSectionWidget extends StatelessWidget {
-  const AccountSectionWidget({Key? key}) : super(key: key);
+  const AccountSectionWidget({super.key});
 
   @override
   Widget build(BuildContext context) {

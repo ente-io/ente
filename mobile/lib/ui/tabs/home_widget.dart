@@ -60,8 +60,8 @@ import 'package:uni_links/uni_links.dart';
 
 class HomeWidget extends StatefulWidget {
   const HomeWidget({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<StatefulWidget> createState() => _HomeWidgetState();

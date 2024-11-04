@@ -10,9 +10,9 @@ class CustomAppBar extends PreferredSize {
   const CustomAppBar(
     this.child,
     this.preferredSize, {
-    Key? key,
+    super.key,
     this.height = kToolbarHeight,
-  }) : super(key: key, child: child, preferredSize: preferredSize);
+  }) : super(child: child, preferredSize: preferredSize);
 
   @override
   Widget build(BuildContext context) {

@@ -1,4 +1,3 @@
-import "package:flutter/foundation.dart";
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/models/file/file.dart';
@@ -23,8 +22,8 @@ class FileWidget extends StatelessWidget {
     this.tagPrefix,
     this.backgroundDecoration,
     required this.isFromMemories,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

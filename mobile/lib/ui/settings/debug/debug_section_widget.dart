@@ -13,7 +13,7 @@ import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
 class DebugSectionWidget extends StatelessWidget {
-  const DebugSectionWidget({Key? key}) : super(key: key);
+  const DebugSectionWidget({super.key});
 
   @override
   Widget build(BuildContext context) {

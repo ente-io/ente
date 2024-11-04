@@ -11,7 +11,7 @@ import 'package:photos/ui/settings/common_settings.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class SocialSectionWidget extends StatelessWidget {
-  const SocialSectionWidget({Key? key}) : super(key: key);
+  const SocialSectionWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -85,9 +85,9 @@ class SocialsMenuItemWidget extends StatelessWidget {
   const SocialsMenuItemWidget(
     this.text,
     this.url, {
-    Key? key,
+    super.key,
     this.launchInExternalApp = true,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -96,9 +96,9 @@ class FullScreenMemoryData extends InheritedWidget {
     required this.memories,
     required this.indexNotifier,
     required this.removeCurrentMemory,
-    required Widget child,
-    Key? key,
-  }) : super(child: child, key: key);
+    required super.child,
+    super.key,
+  });
 
   static FullScreenMemoryData? of(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<FullScreenMemoryData>();
