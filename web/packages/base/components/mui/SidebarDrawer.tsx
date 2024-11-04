@@ -1,4 +1,4 @@
-import { Drawer, styled, type DrawerProps } from "@mui/material";
+import { Drawer, Stack, styled, type DrawerProps } from "@mui/material";
 import type { ModalVisibilityProps } from "../utils/modal";
 
 /**
@@ -108,7 +108,7 @@ export const SidebarDrawerTitlebar: React.FC<SidebarDrawerTitlebarProps> = ({
     actionButton,
 }) => {
     return (
-        <>
+        <Stack sx={{ gap: "4px" }}>
             <FlexWrapper
                 height={48}
                 alignItems={"center"}
@@ -136,6 +136,6 @@ export const SidebarDrawerTitlebar: React.FC<SidebarDrawerTitlebarProps> = ({
                     {caption}
                 </Typography>
             </Box>
-        </>
+        </Stack>
     );
 };

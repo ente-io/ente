@@ -1,6 +1,7 @@
 import { MenuItemGroup } from "@/base/components/Menu";
 import {
     NestedSidebarDrawer,
+    SidebarDrawerTitlebar,
     type NestedSidebarDrawerVisibilityProps,
 } from "@/base/components/mui/SidebarDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
@@ -46,7 +47,7 @@ export const MapSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
             onRootClose={handleRootClose}
         >
             <Stack spacing={"4px"} py={"12px"}>
-                <Titlebar
+                <SidebarDrawerTitlebar
                     onClose={onClose}
                     title={t("map")}
                     onRootClose={handleRootClose}
