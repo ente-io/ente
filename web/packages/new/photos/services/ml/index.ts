@@ -41,9 +41,9 @@ import type { CLIPMatches } from "./worker-types";
 /**
  * Internal state of the ML subsystem.
  *
- * This are essentially cached values used by the functions of this module.
+ * These are essentially cached values used by the functions of this module.
  *
- * This should be cleared on logout.
+ * They will be cleared on logout.
  */
 class MLState {
     /**

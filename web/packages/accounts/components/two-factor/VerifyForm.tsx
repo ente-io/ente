@@ -4,10 +4,10 @@ import {
     CenteredFlex,
     VerticallyCentered,
 } from "@ente/shared/components/Container";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, styled } from "@mui/material";
 import { Formik, type FormikHelpers } from "formik";
 import { t } from "i18next";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import OtpInput from "react-otp-input";
 
 interface formValues {
@@ -25,7 +25,7 @@ export type VerifyTwoFactorCallback = (
 
 export default function VerifyTwoFactor(props: Props) {
     const [waiting, setWaiting] = useState(false);
-    const otpInputRef = useRef<OtpInput>(null);
+    const [shouldAutoFocus, setShouldAutoFocus] = useState(true);
 
     const markSuccessful = async () => {
         setWaiting(false);
@@ -40,11 +40,13 @@ export default function VerifyTwoFactor(props: Props) {
             await props.onSubmit(otp, markSuccessful);
         } catch (e) {
             resetForm();
-            for (let i = 0; i < 6; i++) {
-                otpInputRef.current?.focusPrevInput();
-            }
             const message = e instanceof Error ? e.message : "";
             setFieldError("otp", `${t("generic_error_retry")} ${message}`);
+            // Workaround (toggling shouldAutoFocus) to reset the focus back to
+            // the first input field in case of errors.
+            // https://github.com/devfolioco/react-otp-input/issues/420
+            setShouldAutoFocus(false);
+            setTimeout(() => setShouldAutoFocus(true), 100);
         }
         setWaiting(false);
     };
@@ -71,17 +73,17 @@ export default function VerifyTwoFactor(props: Props) {
                         </Typography>
                         <Box my={2}>
                             <OtpInput
-                                ref={otpInputRef}
-                                shouldAutoFocus
+                                shouldAutoFocus={shouldAutoFocus}
                                 value={values.otp}
                                 onChange={onChange(
                                     handleChange("otp"),
                                     submitForm,
                                 )}
                                 numInputs={6}
-                                separator={"-"}
-                                isInputNum
-                                className={"otp-input"}
+                                renderSeparator={<span>-</span>}
+                                renderInput={(props) => (
+                                    <IndividualInput {...props} />
+                                )}
                             />
                             {errors.otp && (
                                 <CenteredFlex sx={{ mt: 1 }}>
@@ -107,3 +109,23 @@ export default function VerifyTwoFactor(props: Props) {
         </Formik>
     );
 }
+
+const IndividualInput = styled("input")(
+    ({ theme }) => `
+    font-size: 1.5rem;
+    padding: 4px;
+    width: 40px !important;
+    aspect-ratio: 1;
+    margin-inline: 8px;
+    border: 1px solid ${theme.colors.accent.A700};
+    border-radius: 1px;
+    outline-color: ${theme.colors.accent.A300};
+    transition: 0.5s;
+
+    ${theme.breakpoints.down("sm")} {
+        font-size: 1rem;
+        padding: 4px;
+        width: 32px !important;
+    }
+`,
+);

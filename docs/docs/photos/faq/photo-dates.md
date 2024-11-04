@@ -64,12 +64,14 @@ videos that you imported. The modifications (e.g. date changes) you make within
 Ente will be written into a separate metadata JSON file during export so as to
 not modify the original.
 
-> There is one exception to this. For JPEG files, the Exif DateTimeOriginal is
-> changed during export from web or desktop apps. This was done on a customer
-> request, but in hindsight this has been an incorrect move. We are going to
-> deprecate this behavior, and will instead provide separate tools (or
-> functionality within the app itself) for customers who intentionally wish to
-> modify their originals to reflect the associated metadata JSON.
+> [!WARNING]
+>
+> There used to be one exception to this - for JPEG files, the Exif
+> DateTimeOriginal was changed during export from web or desktop apps. This was
+> done on a customer request, but in hindsight this was an incorrect change.
+>
+> We have deprecated this behaviour, and the desktop version 1.7.6 is going to
+> be the last version with this exception.
 
 As an example: suppose you have `flower.png`. When you export your library, you
 will end up with:
@@ -81,12 +83,35 @@ metadata/flower.png.json
 
 Ente writes this JSON in the same format as Google Takeout so that if a tool
 supports Google Takeout import, it should be able to read the JSON written by
-Ente too
+Ente too.
 
 > One small difference is that, to avoid clutter, Ente puts the JSON in the
 > `metadata/` subfolder, while Google puts it next to the file.<br>
 >
 > <br>Ente itself will read it from either place.
+
+Here is a sample of how the JSON would look:
+
+```json
+{
+    "description": "This will be imported as the caption",
+    "creationTime": {
+        "timestamp": "1613532136",
+        "formatted": "17 Feb 2021, 03:22:16 UTC"
+    },
+    "modificationTime": {
+        "timestamp": "1640225957",
+        "formatted": "23 Dec 2021, 02:19:17 UTC"
+    },
+    "geoData": {
+        "latitude": 12.004170700000001,
+        "longitude": 79.8013945
+    }
+}
+```
+
+`photoTakenTime` will be considered as an alias for `creationTime`, and
+`geoDataExif` will be considered as a fallback for `geoData`.
 
 ### File creation time.
 
