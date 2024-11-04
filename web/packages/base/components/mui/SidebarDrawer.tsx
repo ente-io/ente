@@ -81,7 +81,7 @@ import Close from "@mui/icons-material/Close";
 import { Box, IconButton, Typography } from "@mui/material";
 import React from "react";
 
-type NestedSidebarDrawerTitlebarProps = Pick<
+type SidebarDrawerTitlebarProps = Pick<
     NestedSidebarDrawerVisibilityProps,
     "onClose" | "onRootClose"
 > & {
@@ -98,11 +98,15 @@ type NestedSidebarDrawerTitlebarProps = Pick<
 
 /**
  * A bar with a title and back / close buttons, suitable for being used in
- * tandem with a {@link SidebarDrawer}.
+ * tandem with a {@link NestedSidebarDrawer}.
  */
-export const NestedSidebarDrawerTitlebar: React.FC<
-    NestedSidebarDrawerTitlebarProps
-> = ({ title, caption, onClose, onRootClose, actionButton }) => {
+export const SidebarDrawerTitlebar: React.FC<SidebarDrawerTitlebarProps> = ({
+    title,
+    caption,
+    onClose,
+    onRootClose,
+    actionButton,
+}) => {
     return (
         <>
             <FlexWrapper

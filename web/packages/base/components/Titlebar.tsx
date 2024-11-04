@@ -13,7 +13,7 @@ interface TitlebarProps {
     actionButton?: JSX.Element;
 }
 
-// TODO: Deprecated in favor of NestedSidebarDrawerTitlebar where possible (will
+// TODO: Deprecated in favor of SidebarDrawerTitlebarProps where possible (will
 // revisit the remaining use cases once those have migrated).
 export const Titlebar: React.FC<TitlebarProps> = ({
     title,
