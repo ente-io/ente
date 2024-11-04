@@ -9,6 +9,7 @@ import "package:photos/models/ml/face/dimension.dart";
 import 'package:photos/services/machine_learning/face_ml/face_detection/detection.dart';
 import "package:photos/services/machine_learning/face_ml/face_detection/face_detection_postprocessing.dart";
 import "package:photos/services/machine_learning/ml_model.dart";
+import "package:photos/src/rust/api/image_processing.dart";
 import "package:photos/utils/image_ml_util.dart";
 
 class YOLOFaceInterpreterRunException implements Exception {}
@@ -46,6 +47,7 @@ class FaceDetectionService extends MlModel {
     ui.Image image,
     Uint8List rawRgbaBytes,
     int sessionAddress,
+    String imagePath,
   ) async {
     assert(
       !MlModel.usePlatformPlugin
@@ -56,10 +58,14 @@ class FaceDetectionService extends MlModel {
 
     final startTime = DateTime.now();
 
-    final (inputImageList, scaledSize) = await preprocessImageYoloFace(
-      image,
-      rawRgbaBytes,
-    );
+    final result = await processYoloFace(imagePath: imagePath);
+    const scaledSize = Dimensions(width: 640, height: 640);
+    final inputImageList = await resizedToPreprocessed(result);
+
+    // final (inputImageList, scaledSize) = await preprocessImageYoloFace(
+    //   image,
+    //   rawRgbaBytes,
+    // );
     final preprocessingTime = DateTime.now();
     final preprocessingMs =
         preprocessingTime.difference(startTime).inMilliseconds;
@@ -82,7 +88,10 @@ class FaceDetectionService extends MlModel {
         'Face detection is finished, in ${inferenceTime.difference(startTime).inMilliseconds} ms (preprocessing: $preprocessingMs ms, inference: $inferenceMs ms)',
       );
     } catch (e, s) {
-      _logger.severe('Error while running inference (PlatformPlugin: ${MlModel.usePlatformPlugin})', e, s);
+      _logger.severe(
+          'Error while running inference (PlatformPlugin: ${MlModel.usePlatformPlugin})',
+          e,
+          s,);
       throw YOLOFaceInterpreterRunException();
     }
     try {

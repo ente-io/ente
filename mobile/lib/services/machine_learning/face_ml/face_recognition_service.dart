@@ -75,6 +75,7 @@ class FaceRecognitionService {
     Uint8List rawRgbaBytes,
     int faceDetectionAddress,
     int faceEmbeddingAddress,
+    String imagePath,
   ) async {
     final faceResults = <FaceResult>[];
     final startTime = DateTime.now();
@@ -87,6 +88,7 @@ class FaceRecognitionService {
       rawRgbaBytes,
       faceDetectionAddress,
       faceResults,
+      imagePath,
     );
     final detectFacesTime = DateTime.now();
     final detectFacesMs = detectFacesTime.difference(startTime).inMilliseconds;
@@ -135,6 +137,7 @@ class FaceRecognitionService {
     Uint8List rawRgbaBytes,
     int interpreterAddress,
     List<FaceResult> faceResults,
+    String imagePath,
   ) async {
     try {
       // Get the bounding boxes of the faces
@@ -143,6 +146,7 @@ class FaceRecognitionService {
         image,
         rawRgbaBytes,
         interpreterAddress,
+        imagePath,
       );
 
       // Add detected faces to the faceResults
