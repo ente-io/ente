@@ -1,6 +1,5 @@
 import { MenuItemGroup, MenuSectionTitle } from "@/base/components/Menu";
 import {
-    NestedSidebarDrawer,
     SidebarDrawer,
     type NestedSidebarDrawerVisibilityProps,
 } from "@/base/components/mui/SidebarDrawer";
