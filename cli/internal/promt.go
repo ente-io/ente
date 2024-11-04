@@ -225,7 +225,7 @@ func ValidateDirForWrite(dir string) (bool, error) {
 }
 
 func ResolvePath(path string) (string, error) {
-	if path[:2] != "~/" {
+	if path[:1] != "~/" {
 		return path, nil
 	}
 	home, err := os.UserHomeDir()
