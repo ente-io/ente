@@ -1,5 +1,6 @@
 import { assertionFailed } from "@/base/assert";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { SpaceBetweenFlex } from "@/base/components/mui/Container";
 import { useModalVisibility } from "@/base/components/utils/modal";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
@@ -8,7 +9,6 @@ import {
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
 } from "@/new/photos/components/gallery/ListHeader";
-import { SpaceBetweenFlex } from "@/new/photos/components/mui";
 import {
     ALL_SECTION,
     HIDDEN_ITEMS_SECTION,

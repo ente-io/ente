@@ -2,7 +2,7 @@ import {
     ActivityIndicator,
     ErrorIndicator,
 } from "@/base/components/mui/ActivityIndicator";
-import { CenteredBox } from "@/base/components/mui/Container";
+import { CenteredBox, SpaceBetweenFlex } from "@/base/components/mui/Container";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import {
@@ -61,7 +61,7 @@ import { t } from "i18next";
 import React, { useEffect, useReducer, useState } from "react";
 import type { FaceCluster } from "../../services/ml/cluster";
 import { useAppContext } from "../../types/context";
-import { SpaceBetweenFlex, type ButtonishProps } from "../mui";
+import { type ButtonishProps } from "../mui";
 import { DialogCloseIconButton } from "../mui/Dialog";
 import { SuggestionFaceList } from "../PeopleList";
 import { SingleInputDialog } from "../SingleInputForm";
