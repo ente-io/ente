@@ -25,11 +25,11 @@ const TwoFactorDialog = styled(Dialog)(({ theme }) => ({
     },
 }));
 
-type Props = ModalVisibilityProps & {
+type TwoFactorModalProps = ModalVisibilityProps & {
     closeSidebar: () => void;
 };
 
-function TwoFactorModal(props: Props) {
+function TwoFactorModal(props: TwoFactorModalProps) {
     const [isTwoFactorEnabled, setTwoFactorStatus] = useState(false);
 
     useEffect(() => {

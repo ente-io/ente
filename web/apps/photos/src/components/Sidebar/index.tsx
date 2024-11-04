@@ -47,7 +47,7 @@ import {
 } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import DeleteAccountModal from "components/DeleteAccountModal";
-import TwoFactorModal from "components/TwoFactor/Modal";
+import TwoFactorModal from "components/Sidebar/TwoFactorModal";
 import { WatchFolder } from "components/WatchFolder";
 import LinkButton from "components/pages/gallery/LinkButton";
 import { t } from "i18next";
