@@ -1,5 +1,5 @@
 import { disableTwoFactor } from "@/accounts/api/user";
-import type { ModalVisibilityProps } from "@/base/components/utils/modal";
+import type { ModalVisibilityProps, NestedDrawerVisibilityProps } from "@/base/components/utils/modal";
 import { AppContext } from "@/new/photos/types/context";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleWithCloseButton";
@@ -25,11 +25,15 @@ const TwoFactorDialog = styled(Dialog)(({ theme }) => ({
     },
 }));
 
-type TwoFactorModalProps = ModalVisibilityProps & {
-    closeSidebar: () => void;
-};
+// type TwoFactorModalProps = ModalVisibilityProps & {
+//     closeSidebar: () => void;
+// };
 
-function TwoFactorModal(props: TwoFactorModalProps) {
+export const TwoFactorSettings: React.FC<NestedDrawerVisibilityProps> = ({
+    open,
+    onClose,
+    onRootClose: closeSidebar,
+}) => {
     const [isTwoFactorEnabled, setTwoFactorStatus] = useState(false);
 
     useEffect(() => {
@@ -39,7 +43,7 @@ function TwoFactorModal(props: TwoFactorModalProps) {
     }, []);
 
     useEffect(() => {
-        if (!props.open) {
+        if (!open) {
             return;
         }
         const main = async () => {
@@ -51,20 +55,20 @@ function TwoFactorModal(props: TwoFactorModalProps) {
             });
         };
         main();
-    }, [props.open]);
+    }, [open]);
 
     const closeDialog = () => {
-        props.onClose();
-        props.closeSidebar();
+        onClose();
+        closeSidebar();
     };
 
     return (
         <TwoFactorDialog
             maxWidth="xs"
-            open={props.open}
-            onClose={props.onClose}
+            open={open}
+            onClose={onClose}
         >
-            <DialogTitleWithCloseButton onClose={props.onClose}>
+            <DialogTitleWithCloseButton onClose={onClose}>
                 {t("TWO_FACTOR_AUTHENTICATION")}
             </DialogTitleWithCloseButton>
             <DialogContent sx={{ px: 4 }}>
@@ -78,7 +82,7 @@ function TwoFactorModal(props: TwoFactorModalProps) {
     );
 }
 
-export default TwoFactorModal;
+export default TwoFactorSettings;
 
 interface TwoFactorModalSetupSectionProps {
     closeDialog: () => void;
