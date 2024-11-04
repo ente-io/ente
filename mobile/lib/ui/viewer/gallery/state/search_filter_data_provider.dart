@@ -91,7 +91,13 @@ class SearchFilterDataProvider {
   }
 
   void _safelyAddToRecommended(List<HierarchicalSearchFilter> filters) {
+    if (_appliedFiltersNotifier.appliedFilters
+        .any((e) => e is OnlyThemFilter)) {
+      filters.removeWhere((e) => e is FaceFilter);
+    }
+
     filters.sort((a, b) => b.relevance().compareTo(a.relevance()));
+
     _recommendedFiltersNotifier.addFilters(
       filters,
       filtersToAvoid: [
