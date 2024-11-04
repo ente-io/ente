@@ -106,31 +106,24 @@ const ModifyMapEnabled = ({ open, onClose, onRootClose, mapEnabled }) => {
     };
 
     return (
-        <Box>
-            <NestedSidebarDrawer
-                {...{ open, onClose }}
-                onRootClose={handleRootClose}
-                slotProps={{
-                    backdrop: {
-                        sx: { "&&&": { backgroundColor: "transparent" } },
-                    },
-                }}
-            >
-                {mapEnabled ? (
-                    <DisableMap
-                        onClose={onClose}
-                        disableMap={disableMap}
-                        onRootClose={handleRootClose}
-                    />
-                ) : (
-                    <EnableMap
-                        onClose={onClose}
-                        enableMap={enableMap}
-                        onRootClose={handleRootClose}
-                    />
-                )}
-            </NestedSidebarDrawer>
-        </Box>
+        <NestedSidebarDrawer
+            {...{ open, onClose }}
+            onRootClose={handleRootClose}
+        >
+            {mapEnabled ? (
+                <DisableMap
+                    onClose={onClose}
+                    disableMap={disableMap}
+                    onRootClose={handleRootClose}
+                />
+            ) : (
+                <EnableMap
+                    onClose={onClose}
+                    enableMap={enableMap}
+                    onRootClose={handleRootClose}
+                />
+            )}
+        </NestedSidebarDrawer>
     );
 };
 

@@ -62,7 +62,7 @@ export const MLSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     }
 
     return (
-        <Box>
+        <>
             <NestedSidebarDrawer
                 {...{ open, onClose }}
                 onRootClose={handleRootClose}
@@ -83,7 +83,7 @@ export const MLSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                 onRootClose={handleRootClose}
                 onConsent={handleConsent}
             />
-        </Box>
+        </>
     );
 };
 
