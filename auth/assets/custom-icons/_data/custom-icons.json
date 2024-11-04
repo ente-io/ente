@@ -190,6 +190,12 @@
     {
       "title": "Capcom"
     },
+	{
+      "title": "Carta",
+      "altNames": [
+        "Carta.com"
+      ]
+    },
     {
       "title": "CERN"
     },
@@ -507,6 +513,13 @@
     },
     {
       "title": "Kite"
+    },
+	{
+      "title": "KnownHost",
+      "altNames": [
+        "Known Host",
+        "KnownHost.com"
+      ]
     },
     {
       "title": "Koofr"
@@ -1028,6 +1041,15 @@
     },
     {
       "title": "Tresorit"
+    },
+	{
+      "title": "TRowePrice",
+      "altNames": [
+        "T Rowe Price",
+        "TRowe Price",
+        "T Rowe Price Group",
+        "T Rowe Price Group, Inc"
+      ]
     },
     {
       "title": "Tweakers"
