@@ -532,7 +532,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
             />
             <TwoFactorModal
                 {...twoFactorVisibilityProps}
-                closeSidebar={closeSidebar}
+                onRootClose={closeSidebar}
             />
             {isElectron() && (
                 <WatchFolder

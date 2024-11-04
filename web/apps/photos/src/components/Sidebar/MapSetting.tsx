@@ -1,24 +1,19 @@
 import { MenuItemGroup } from "@/base/components/Menu";
-import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
+import {
+    NestedSidebarDrawer,
+    type NestedSidebarDrawerVisibilityProps,
+} from "@/base/components/mui/SidebarDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
-import type { NestedDrawerVisibilityProps } from "@/base/components/utils/modal";
 import log from "@/base/log";
 import { AppContext } from "@/new/photos/types/context";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
-import {
-    Box,
-    Button,
-    DialogProps,
-    Link,
-    Stack,
-    Typography,
-} from "@mui/material";
+import { Box, Button, Link, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import React, { useContext, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 import { getMapEnabledStatus } from "services/userService";
 
-export const MapSettings: React.FC<NestedDrawerVisibilityProps> = ({
+export const MapSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     open,
     onClose,
     onRootClose,
@@ -45,22 +40,10 @@ export const MapSettings: React.FC<NestedDrawerVisibilityProps> = ({
         onRootClose();
     };
 
-    const handleDrawerClose: DialogProps["onClose"] = (_, reason) => {
-        if (reason === "backdropClick") {
-            handleRootClose();
-        } else {
-            onClose();
-        }
-    };
-
     return (
-        <SidebarDrawer
-            transitionDuration={0}
-            open={open}
-            onClose={handleDrawerClose}
-            BackdropProps={{
-                sx: { "&&&": { backgroundColor: "transparent" } },
-            }}
+        <NestedSidebarDrawer
+            {...{ open, onClose }}
+            onRootClose={handleRootClose}
         >
             <Stack spacing={"4px"} py={"12px"}>
                 <Titlebar
@@ -90,7 +73,7 @@ export const MapSettings: React.FC<NestedDrawerVisibilityProps> = ({
                 onClose={closeModifyMapEnabled}
                 onRootClose={handleRootClose}
             />
-        </SidebarDrawer>
+        </NestedSidebarDrawer>
     );
 };
 
@@ -122,21 +105,11 @@ const ModifyMapEnabled = ({ open, onClose, onRootClose, mapEnabled }) => {
         onRootClose();
     };
 
-    const handleDrawerClose: DialogProps["onClose"] = (_, reason) => {
-        if (reason === "backdropClick") {
-            handleRootClose();
-        } else {
-            onClose();
-        }
-    };
-
     return (
         <Box>
-            <SidebarDrawer
-                anchor="left"
-                transitionDuration={0}
-                open={open}
-                onClose={handleDrawerClose}
+            <NestedSidebarDrawer
+                {...{ open, onClose }}
+                onRootClose={handleRootClose}
                 slotProps={{
                     backdrop: {
                         sx: { "&&&": { backgroundColor: "transparent" } },
@@ -156,7 +129,7 @@ const ModifyMapEnabled = ({ open, onClose, onRootClose, mapEnabled }) => {
                         onRootClose={handleRootClose}
                     />
                 )}
-            </SidebarDrawer>
+            </NestedSidebarDrawer>
         </Box>
     );
 };

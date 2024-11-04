@@ -1,40 +1,33 @@
 import { disableTwoFactor } from "@/accounts/api/user";
-import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
-import type { ModalVisibilityProps, NestedDrawerVisibilityProps } from "@/base/components/utils/modal";
+import {
+    NestedSidebarDrawer,
+    type NestedSidebarDrawerVisibilityProps,
+} from "@/base/components/mui/SidebarDrawer";
 import { AppContext } from "@/new/photos/types/context";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleWithCloseButton";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { LS_KEYS, getData, setLSUser } from "@ente/shared/storage/localStorage";
 import LockIcon from "@mui/icons-material/Lock";
-import {
-    Button,
-    Dialog,
-    DialogContent,
-    Grid,
-    Typography,
-    styled,
-} from "@mui/material";
+import { Button, DialogContent, Grid, Typography } from "@mui/material";
 import { t } from "i18next";
 import router, { useRouter } from "next/router";
 import { useContext, useEffect, useState } from "react";
 import { getTwoFactorStatus } from "services/userService";
 
-const TwoFactorDialog = styled(Dialog)(({ theme }) => ({
-    "& .MuiDialogContent-root": {
-        padding: theme.spacing(2, 4),
-    },
-}));
+// const TwoFactorDialog = styled(Dialog)(({ theme }) => ({
+//     "& .MuiDialogContent-root": {
+//         padding: theme.spacing(2, 4),
+//     },
+// }));
 
 // type TwoFactorModalProps = ModalVisibilityProps & {
 //     closeSidebar: () => void;
 // };
 
-export const TwoFactorSettings: React.FC<NestedDrawerVisibilityProps> = ({
-    open,
-    onClose,
-    onRootClose: closeSidebar,
-}) => {
+export const TwoFactorSettings: React.FC<
+    NestedSidebarDrawerVisibilityProps
+> = ({ open, onClose, onRootClose }) => {
     const [isTwoFactorEnabled, setTwoFactorStatus] = useState(false);
 
     useEffect(() => {
@@ -58,38 +51,31 @@ export const TwoFactorSettings: React.FC<NestedDrawerVisibilityProps> = ({
         main();
     }, [open]);
 
-    const closeDialog = () => {
+    const handleRootClose = () => {
         onClose();
-        closeSidebar();
+        onRootClose();
     };
 
     return (
-        <SidebarDrawer
-        // <TwoFactorDialog
-        //     maxWidth="xs"
-        // transitionDuration={0}
-        //     open={open}
-        //     onClose={onClose}
-        transitionDuration={0}
-        open={open}
-        onClose={onClose}
-        BackdropProps={{
-            sx: { "&&&": { backgroundColor: "transparent" } },
-        }}
+        <NestedSidebarDrawer
+            {...{ open, onClose }}
+            onRootClose={handleRootClose}
         >
             <DialogTitleWithCloseButton onClose={onClose}>
                 {t("TWO_FACTOR_AUTHENTICATION")}
             </DialogTitleWithCloseButton>
             <DialogContent sx={{ px: 4 }}>
                 {isTwoFactorEnabled ? (
-                    <TwoFactorModalManageSection closeDialog={closeDialog} />
+                    <TwoFactorModalManageSection
+                        closeDialog={handleRootClose}
+                    />
                 ) : (
-                    <TwoFactorModalSetupSection closeDialog={closeDialog} />
+                    <TwoFactorModalSetupSection closeDialog={handleRootClose} />
                 )}
             </DialogContent>
-        </SidebarDrawer>
+        </NestedSidebarDrawer>
     );
-}
+};
 
 export default TwoFactorSettings;
 
