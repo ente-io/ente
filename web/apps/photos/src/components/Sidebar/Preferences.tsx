@@ -1,7 +1,6 @@
 import { MenuItemGroup, MenuSectionTitle } from "@/base/components/Menu";
 import {
     NestedSidebarDrawer,
-    SidebarDrawer,
     type NestedSidebarDrawerVisibilityProps,
 } from "@/base/components/mui/SidebarDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
@@ -18,7 +17,7 @@ import { syncSettings } from "@/new/photos/services/settings";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import ScienceIcon from "@mui/icons-material/Science";
-import { Box, DialogProps, Stack } from "@mui/material";
+import { Box, Stack } from "@mui/material";
 import DropdownInput from "components/DropdownInput";
 import { t } from "i18next";
 import React, { useEffect } from "react";
@@ -48,24 +47,10 @@ export const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
         onRootClose();
     };
 
-    const handleDrawerClose: DialogProps["onClose"] = (_, reason) => {
-        console.log(reason);
-        if (reason === "backdropClick") {
-            handleRootClose();
-        } else {
-            onClose();
-        }
-    };
-
     return (
-        <SidebarDrawer
-            transitionDuration={0}
-            open={open}
-            onClose={handleDrawerClose}
-            // hideBackdrop
-            // BackdropProps={{
-            //     sx: { "&&&": { backgroundColor: "transparent" } },
-            // }}
+        <NestedSidebarDrawer
+            {...{ open, onClose }}
+            onRootClose={handleRootClose}
         >
             <Stack spacing={"4px"} py={"12px"}>
                 <Titlebar
@@ -116,7 +101,7 @@ export const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                 {...mlSettingsVisibilityProps}
                 onRootClose={handleRootClose}
             />
-        </SidebarDrawer>
+        </NestedSidebarDrawer>
     );
 };
 
