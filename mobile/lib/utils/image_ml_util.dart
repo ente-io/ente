@@ -32,6 +32,22 @@ final List<List<double>> gaussianKernel =
 const maxKernelSize = gaussianKernelSize;
 const maxKernelRadius = maxKernelSize ~/ 2;
 
+const List<String> supportedImageFormats = [
+  'bmp',
+  'dds',
+  'gif',
+  'hdr',
+  'ico',
+  'jpeg',
+  'exr',
+  'png',
+  'pnm',
+  'qoi',
+  'tga',
+  'tiff',
+  'webp',
+];
+
 Future<(Image, Uint8List)> decodeImageFromPath(String imagePath) async {
   try {
     final imageData = await File(imagePath).readAsBytes();
@@ -63,6 +79,33 @@ Future<(Image, Uint8List)> decodeImageFromPath(String imagePath) async {
         'InvalidImageFormatException: Error decoding image of format $format',
       );
     }
+  }
+}
+
+Future<String> safePathFromImagepath(String imagePath) async {
+  final format = imagePath.split('.').last;
+  if (supportedImageFormats.contains(format)) {
+    return imagePath;
+  }
+  try {
+    final newPath = imagePath.replaceAll(format, 'jpeg');
+    final File? convertedFile = await FlutterImageCompress.compressAndGetFile(
+      imagePath,
+      newPath,
+      format: CompressFormat.jpeg,
+    );
+    if (convertedFile == null) {
+      throw Exception('Error converting image to jpeg');
+    }
+    return newPath;
+  } catch (e) {
+    _logger.severe(
+      'Error decoding image of format $format on ${Platform.isAndroid ? "Android" : "iOS"}',
+      e,
+    );
+    throw Exception(
+      'InvalidImageFormatException: Error decoding image of format $format',
+    );
   }
 }
 
@@ -215,6 +258,35 @@ Future<(Float32List, Dimensions)> preprocessImageYoloFace(
   }
 
   return (processedBytes, Dimensions(width: scaledWidth, height: scaledHeight));
+}
+
+Future<Float32List> resizedToPreprocessed(
+  Uint8List rgbBytes,
+) async {
+  const requiredWidth = 640;
+  const requiredHeight = 640;
+
+  final processedBytes = Float32List(3 * requiredHeight * requiredWidth);
+  final buffer = Float32List.view(processedBytes.buffer);
+  int pixelIndex = 0;
+  const int channelOffsetGreen = requiredHeight * requiredWidth;
+  const int channelOffsetBlue = 2 * requiredHeight * requiredWidth;
+  for (var h = 0; h < requiredHeight; h++) {
+    for (var w = 0; w < requiredWidth; w++) {
+      final byteIndex = 3 * (requiredWidth * h + w);
+      final pixel = (
+        rgbBytes[byteIndex],
+        rgbBytes[byteIndex + 1],
+        rgbBytes[byteIndex + 2]
+      );
+      buffer[pixelIndex] = pixel.$1 / 255;
+      buffer[pixelIndex + channelOffsetGreen] = pixel.$2 / 255;
+      buffer[pixelIndex + channelOffsetBlue] = pixel.$3 / 255;
+      pixelIndex++;
+    }
+  }
+
+  return processedBytes;
 }
 
 Future<Float32List> preprocessImageClip(

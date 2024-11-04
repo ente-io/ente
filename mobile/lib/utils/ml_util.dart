@@ -23,6 +23,7 @@ import "package:photos/services/machine_learning/ml_exceptions.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import "package:photos/services/search_service.dart";
+import "package:photos/src/rust/custom/init_frb.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/image_ml_util.dart";
 import "package:photos/utils/network_util.dart";
@@ -393,6 +394,9 @@ Future<MLResult> analyzeImageStatic(Map args) async {
     _logger.info(
       "Start analyzeImageStatic for fileID $enteFileID (runFaces: $runFaces, runClip: $runClip)",
     );
+    await initFrb();
+    final safePath = await safePathFromImagepath(imagePath);
+
     final startTime = DateTime.now();
 
     // Decode the image once to use for both face detection and alignment
@@ -413,6 +417,7 @@ Future<MLResult> analyzeImageStatic(Map args) async {
               rawRgbaBytes,
               faceDetectionAddress,
               faceEmbeddingAddress,
+              safePath,
             ).then((result) {
               faceMsString =
                   ", faces: ${DateTime.now().difference(decodeTime).inMilliseconds} ms";
