@@ -74,3 +74,64 @@ export const NestedSidebarDrawer: React.FC<
         />
     );
 };
+
+import { FlexWrapper } from "@ente/shared/components/Container";
+import ArrowBack from "@mui/icons-material/ArrowBack";
+import Close from "@mui/icons-material/Close";
+import { Box, IconButton, Typography } from "@mui/material";
+import React from "react";
+
+type NestedSidebarDrawerTitlebarProps = Pick<
+    NestedSidebarDrawerVisibilityProps,
+    "onClose" | "onRootClose"
+> & {
+    /** Title for the drawer. */
+    title: string;
+    /** An optional secondary caption shown below the title. */
+    caption?: string;
+    /**
+     * An optional action button shown alongwith the close button at the
+     * trailing edge of the sidebar.
+     */
+    actionButton?: React.ReactNode;
+};
+
+/**
+ * A bar with a title and back / close buttons, suitable for being used in
+ * tandem with a {@link SidebarDrawer}.
+ */
+export const NestedSidebarDrawerTitlebar: React.FC<
+    NestedSidebarDrawerTitlebarProps
+> = ({ title, caption, onClose, onRootClose, actionButton }) => {
+    return (
+        <>
+            <FlexWrapper
+                height={48}
+                alignItems={"center"}
+                justifyContent="space-between"
+            >
+                <IconButton onClick={onClose} color={"primary"}>
+                    <ArrowBack />
+                </IconButton>
+                <Box display={"flex"} gap="4px">
+                    {actionButton && actionButton}
+                    <IconButton onClick={onRootClose} color={"secondary"}>
+                        <Close />
+                    </IconButton>
+                </Box>
+            </FlexWrapper>
+            <Box py={0.5} px={2}>
+                <Typography variant="h3" fontWeight={"bold"}>
+                    {title}
+                </Typography>
+                <Typography
+                    variant="small"
+                    color="text.muted"
+                    sx={{ wordBreak: "break-all", minHeight: "17px" }}
+                >
+                    {caption}
+                </Typography>
+            </Box>
+        </>
+    );
+};
