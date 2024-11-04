@@ -1,35 +1,34 @@
 import { disableTwoFactor } from "@/accounts/api/user";
-import type { ModalVisibilityProps } from "@/base/components/utils/modal";
+import {
+    NestedSidebarDrawer,
+    type NestedSidebarDrawerVisibilityProps,
+} from "@/base/components/mui/SidebarDrawer";
+import { Titlebar } from "@/base/components/Titlebar";
 import { AppContext } from "@/new/photos/types/context";
 import { VerticallyCentered } from "@ente/shared/components/Container";
-import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleWithCloseButton";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { LS_KEYS, getData, setLSUser } from "@ente/shared/storage/localStorage";
 import LockIcon from "@mui/icons-material/Lock";
-import {
-    Button,
-    Dialog,
-    DialogContent,
-    Grid,
-    Typography,
-    styled,
-} from "@mui/material";
+import { Button, Grid, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import router, { useRouter } from "next/router";
 import { useContext, useEffect, useState } from "react";
 import { getTwoFactorStatus } from "services/userService";
 
-const TwoFactorDialog = styled(Dialog)(({ theme }) => ({
-    "& .MuiDialogContent-root": {
-        padding: theme.spacing(2, 4),
-    },
-}));
+// TODO: Revisit these comments
+// const TwoFactorDialog = styled(Dialog)(({ theme }) => ({
+//     "& .MuiDialogContent-root": {
+//         padding: theme.spacing(2, 4),
+//     },
+// }));
 
-type Props = ModalVisibilityProps & {
-    closeSidebar: () => void;
-};
+// type TwoFactorModalProps = ModalVisibilityProps & {
+//     closeSidebar: () => void;
+// };
 
-function TwoFactorModal(props: Props) {
+export const TwoFactorSettings: React.FC<
+    NestedSidebarDrawerVisibilityProps
+> = ({ open, onClose, onRootClose }) => {
     const [isTwoFactorEnabled, setTwoFactorStatus] = useState(false);
 
     useEffect(() => {
@@ -39,7 +38,7 @@ function TwoFactorModal(props: Props) {
     }, []);
 
     useEffect(() => {
-        if (!props.open) {
+        if (!open) {
             return;
         }
         const main = async () => {
@@ -51,34 +50,41 @@ function TwoFactorModal(props: Props) {
             });
         };
         main();
-    }, [props.open]);
+    }, [open]);
 
-    const closeDialog = () => {
-        props.onClose();
-        props.closeSidebar();
+    const handleRootClose = () => {
+        onClose();
+        onRootClose();
     };
 
     return (
-        <TwoFactorDialog
-            maxWidth="xs"
-            open={props.open}
-            onClose={props.onClose}
+        <NestedSidebarDrawer
+            {...{ open, onClose }}
+            onRootClose={handleRootClose}
         >
-            <DialogTitleWithCloseButton onClose={props.onClose}>
-                {t("TWO_FACTOR_AUTHENTICATION")}
-            </DialogTitleWithCloseButton>
-            <DialogContent sx={{ px: 4 }}>
-                {isTwoFactorEnabled ? (
-                    <TwoFactorModalManageSection closeDialog={closeDialog} />
-                ) : (
-                    <TwoFactorModalSetupSection closeDialog={closeDialog} />
-                )}
-            </DialogContent>
-        </TwoFactorDialog>
-    );
-}
+            <Stack spacing={"4px"} py={"12px"}>
+                <Titlebar
+                    onClose={onClose}
+                    title={t("TWO_FACTOR_AUTHENTICATION")}
+                    onRootClose={handleRootClose}
+                />
+                {/* {component} */}
 
-export default TwoFactorModal;
+                {/* <DialogContent sx={{ px: 4 }}> */}
+                {isTwoFactorEnabled ? (
+                    <TwoFactorModalManageSection
+                        closeDialog={handleRootClose}
+                    />
+                ) : (
+                    <TwoFactorModalSetupSection closeDialog={handleRootClose} />
+                )}
+                {/* </DialogContent> */}
+            </Stack>
+        </NestedSidebarDrawer>
+    );
+};
+
+export default TwoFactorSettings;
 
 interface TwoFactorModalSetupSectionProps {
     closeDialog: () => void;

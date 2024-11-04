@@ -1,14 +1,16 @@
 import { MenuItemGroup, MenuSectionTitle } from "@/base/components/Menu";
-import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
+import {
+    NestedSidebarDrawer,
+    type NestedSidebarDrawerVisibilityProps,
+} from "@/base/components/mui/SidebarDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
-import type { NestedDrawerVisibilityProps } from "@/base/components/utils/modal";
 import { AppContext } from "@/new/photos/types/context";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
-import { Box, DialogProps, Stack } from "@mui/material";
+import { Box, Stack } from "@mui/material";
 import { t } from "i18next";
 import React, { useContext } from "react";
 
-export const AdvancedSettings: React.FC<NestedDrawerVisibilityProps> = ({
+export const AdvancedSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     open,
     onClose,
     onRootClose,
@@ -20,26 +22,14 @@ export const AdvancedSettings: React.FC<NestedDrawerVisibilityProps> = ({
         onRootClose();
     };
 
-    const handleDrawerClose: DialogProps["onClose"] = (_, reason) => {
-        if (reason === "backdropClick") {
-            handleRootClose();
-        } else {
-            onClose();
-        }
-    };
-
     const toggleCFProxy = () => {
         appContext.setIsCFProxyDisabled(!appContext.isCFProxyDisabled);
     };
 
     return (
-        <SidebarDrawer
-            transitionDuration={0}
-            open={open}
-            onClose={handleDrawerClose}
-            BackdropProps={{
-                sx: { "&&&": { backgroundColor: "transparent" } },
-            }}
+        <NestedSidebarDrawer
+            {...{ open, onClose }}
+            onRootClose={handleRootClose}
         >
             <Stack spacing={"4px"} py={"12px"}>
                 <Titlebar
@@ -66,6 +56,6 @@ export const AdvancedSettings: React.FC<NestedDrawerVisibilityProps> = ({
                     </Stack>
                 </Box>
             </Stack>
-        </SidebarDrawer>
+        </NestedSidebarDrawer>
     );
 };

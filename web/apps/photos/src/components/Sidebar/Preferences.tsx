@@ -1,10 +1,10 @@
 import { MenuItemGroup, MenuSectionTitle } from "@/base/components/Menu";
-import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
-import { Titlebar } from "@/base/components/Titlebar";
 import {
-    useModalVisibility,
-    type NestedDrawerVisibilityProps,
-} from "@/base/components/utils/modal";
+    SidebarDrawer,
+    type NestedSidebarDrawerVisibilityProps,
+} from "@/base/components/mui/SidebarDrawer";
+import { Titlebar } from "@/base/components/Titlebar";
+import { useModalVisibility } from "@/base/components/utils/modal";
 import {
     getLocaleInUse,
     setLocaleInUse,
@@ -24,7 +24,7 @@ import React, { useEffect } from "react";
 import { AdvancedSettings } from "./AdvancedSettings";
 import { MapSettings } from "./MapSetting";
 
-export const Preferences: React.FC<NestedDrawerVisibilityProps> = ({
+export const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     open,
     onClose,
     onRootClose,
@@ -48,6 +48,7 @@ export const Preferences: React.FC<NestedDrawerVisibilityProps> = ({
     };
 
     const handleDrawerClose: DialogProps["onClose"] = (_, reason) => {
+        console.log(reason);
         if (reason === "backdropClick") {
             handleRootClose();
         } else {
@@ -60,9 +61,10 @@ export const Preferences: React.FC<NestedDrawerVisibilityProps> = ({
             transitionDuration={0}
             open={open}
             onClose={handleDrawerClose}
-            BackdropProps={{
-                sx: { "&&&": { backgroundColor: "transparent" } },
-            }}
+            // hideBackdrop
+            // BackdropProps={{
+            //     sx: { "&&&": { backgroundColor: "transparent" } },
+            // }}
         >
             <Stack spacing={"4px"} py={"12px"}>
                 <Titlebar
