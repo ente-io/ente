@@ -5,7 +5,6 @@ import {
     SidebarDrawerTitlebar,
     type NestedSidebarDrawerVisibilityProps,
 } from "@/base/components/mui/SidebarDrawer";
-import { Titlebar } from "@/base/components/Titlebar";
 import { disableML, enableML, type MLStatus } from "@/new/photos/services/ml";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import {
@@ -68,11 +67,11 @@ export const MLSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                 {...{ open, onClose }}
                 onRootClose={handleRootClose}
             >
-                <Stack spacing={"4px"} py={"12px"}>
-                    <Titlebar
+                <Stack sx={{ gap: "4px", py: "12px" }}>
+                    <SidebarDrawerTitlebar
                         onClose={onClose}
-                        title={t("ml_search")}
                         onRootClose={handleRootClose}
+                        title={t("ml_search")}
                     />
                     {component}
                 </Stack>
