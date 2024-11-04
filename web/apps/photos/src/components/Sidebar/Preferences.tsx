@@ -171,6 +171,6 @@ const localeName = (locale: SupportedLocale) => {
         case "lt-LT":
             return "Lietuvių kalba";
         case "uk-UA":
-            return "українська";
+            return "Українська";
     }
 };
