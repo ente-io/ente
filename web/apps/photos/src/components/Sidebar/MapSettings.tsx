@@ -46,11 +46,11 @@ export const MapSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
             {...{ open, onClose }}
             onRootClose={handleRootClose}
         >
-            <Stack spacing={"4px"} py={"12px"}>
+            <Stack sx={{ gap: "4px", py: "12px" }}>
                 <SidebarDrawerTitlebar
                     onClose={onClose}
-                    title={t("map")}
                     onRootClose={handleRootClose}
+                    title={t("map")}
                 />
 
                 <Stack sx={{ px: "16px", py: "20px" }}>

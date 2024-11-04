@@ -2,6 +2,7 @@ import { MenuItemGroup } from "@/base/components/Menu";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import {
     NestedSidebarDrawer,
+    SidebarDrawerTitlebar,
     type NestedSidebarDrawerVisibilityProps,
 } from "@/base/components/mui/SidebarDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
@@ -165,10 +166,10 @@ const FaceConsent: React.FC<FaceConsentProps> = ({
             onRootClose={handleRootClose}
         >
             <Stack spacing={"4px"} py={"12px"}>
-                <Titlebar
+                <SidebarDrawerTitlebar
                     onClose={onClose}
-                    title={t("ml_consent_title")}
                     onRootClose={handleRootClose}
+                    title={t("ml_consent_title")}
                 />
                 <Stack py={"20px"} px={"8px"} spacing={"32px"}>
                     <Typography component="div" color="text.muted" px={"8px"}>

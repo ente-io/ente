@@ -1,9 +1,9 @@
 import { disableTwoFactor } from "@/accounts/api/user";
 import {
     NestedSidebarDrawer,
+    SidebarDrawerTitlebar,
     type NestedSidebarDrawerVisibilityProps,
 } from "@/base/components/mui/SidebarDrawer";
-import { Titlebar } from "@/base/components/Titlebar";
 import { AppContext } from "@/new/photos/types/context";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
@@ -62,11 +62,11 @@ export const TwoFactorSettings: React.FC<
             {...{ open, onClose }}
             onRootClose={handleRootClose}
         >
-            <Stack spacing={"4px"} py={"12px"}>
-                <Titlebar
+            <Stack sx={{ gap: "4px", py: "12px" }}>
+                <SidebarDrawerTitlebar
                     onClose={onClose}
-                    title={t("TWO_FACTOR_AUTHENTICATION")}
                     onRootClose={handleRootClose}
+                    title={t("TWO_FACTOR_AUTHENTICATION")}
                 />
                 {/* {component} */}
 

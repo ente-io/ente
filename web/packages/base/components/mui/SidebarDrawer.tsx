@@ -1,5 +1,17 @@
-import { Drawer, Stack, styled, type DrawerProps } from "@mui/material";
+import ArrowBack from "@mui/icons-material/ArrowBack";
+import Close from "@mui/icons-material/Close";
+import {
+    Box,
+    Drawer,
+    IconButton,
+    Stack,
+    styled,
+    Typography,
+    type DrawerProps,
+} from "@mui/material";
+import React from "react";
 import type { ModalVisibilityProps } from "../utils/modal";
+import { SpaceBetweenFlex } from "./Container";
 
 /**
  * A MUI {@link Drawer} with a standard set of styling that we use for our left
@@ -75,12 +87,6 @@ export const NestedSidebarDrawer: React.FC<
     );
 };
 
-import ArrowBack from "@mui/icons-material/ArrowBack";
-import Close from "@mui/icons-material/Close";
-import { Box, IconButton, Typography } from "@mui/material";
-import React from "react";
-import { SpaceBetweenFlex } from "./Container";
-
 type SidebarDrawerTitlebarProps = Pick<
     NestedSidebarDrawerVisibilityProps,
     "onClose" | "onRootClose"
@@ -106,32 +112,30 @@ export const SidebarDrawerTitlebar: React.FC<SidebarDrawerTitlebarProps> = ({
     onClose,
     onRootClose,
     actionButton,
-}) => {
-    return (
-        <Stack sx={{ gap: "4px" }}>
-            <SpaceBetweenFlex sx={{ minHeight: "48px" }}>
-                <IconButton onClick={onClose} color={"primary"}>
-                    <ArrowBack />
+}) => (
+    <Stack sx={{ gap: "4px" }}>
+        <SpaceBetweenFlex sx={{ minHeight: "48px" }}>
+            <IconButton onClick={onClose} color={"primary"}>
+                <ArrowBack />
+            </IconButton>
+            <Box display={"flex"} gap="4px">
+                {actionButton && actionButton}
+                <IconButton onClick={onRootClose} color={"secondary"}>
+                    <Close />
                 </IconButton>
-                <Box display={"flex"} gap="4px">
-                    {actionButton && actionButton}
-                    <IconButton onClick={onRootClose} color={"secondary"}>
-                        <Close />
-                    </IconButton>
-                </Box>
-            </SpaceBetweenFlex>
-            <Stack py={0.5} px={2}>
-                <Typography variant="h3" fontWeight={"bold"}>
-                    {title}
-                </Typography>
-                <Typography
-                    variant="small"
-                    color="text.muted"
-                    sx={{ wordBreak: "break-all", minHeight: "17px" }}
-                >
-                    {caption}
-                </Typography>
-            </Stack>
-        </Stack>
-    );
-};
+            </Box>
+        </SpaceBetweenFlex>
+        <Box sx={{ px: "16px", py: "4px" }}>
+            <Typography variant="h3" fontWeight={"bold"}>
+                {title}
+            </Typography>
+            <Typography
+                variant="small"
+                color="text.muted"
+                sx={{ wordBreak: "break-all", minHeight: "17px" }}
+            >
+                {caption}
+            </Typography>
+        </Box>
+    </Stack>
+);
