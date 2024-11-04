@@ -52,20 +52,18 @@ export const MapSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                     onRootClose={handleRootClose}
                 />
 
-                <Box px={"8px"}>
-                    <Stack py="20px" spacing="24px">
-                        <Box>
-                            <MenuItemGroup>
-                                <EnteMenuItem
-                                    onClick={openModifyMapEnabled}
-                                    variant="toggle"
-                                    checked={mapEnabled}
-                                    label={t("map_settings")}
-                                />
-                            </MenuItemGroup>
-                        </Box>
-                    </Stack>
-                </Box>
+                <Stack px={"8px"} py="20px" spacing="24px">
+                    <Box>
+                        <MenuItemGroup>
+                            <EnteMenuItem
+                                onClick={openModifyMapEnabled}
+                                variant="toggle"
+                                checked={mapEnabled}
+                                label={t("map_settings")}
+                            />
+                        </MenuItemGroup>
+                    </Box>
+                </Stack>
             </Stack>
             <ModifyMapEnabled
                 open={modifyMapEnabledView}
