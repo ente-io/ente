@@ -254,6 +254,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "allClear": MessageLookupByLibrary.simpleMessage("✨ 全部清除"),
         "allMemoriesPreserved":
             MessageLookupByLibrary.simpleMessage("所有回忆都已保存"),
+        "allPersonGroupingWillReset": MessageLookupByLibrary.simpleMessage(
+            "All groupings for this person will be reset, and you will lose all suggestions made for this person"),
         "allowAddPhotosDescription":
             MessageLookupByLibrary.simpleMessage("允许具有链接的人也将照片添加到共享相册。"),
         "allowAddingPhotos": MessageLookupByLibrary.simpleMessage("允许添加照片"),
@@ -300,6 +302,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("您确定要退出登录吗？"),
         "areYouSureYouWantToRenew":
             MessageLookupByLibrary.simpleMessage("您确定要续费吗？"),
+        "areYouSureYouWantToResetThisPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Are you sure you want to reset this person?"),
         "askCancelReason":
             MessageLookupByLibrary.simpleMessage("您的订阅已取消。您想分享原因吗？"),
         "askDeleteReason":
@@ -431,7 +436,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "collectPhotosDescription":
             MessageLookupByLibrary.simpleMessage("创建一个您的朋友可以上传原图的链接。"),
         "color": MessageLookupByLibrary.simpleMessage("颜色"),
-        "configuration": MessageLookupByLibrary.simpleMessage("Configuration"),
         "confirm": MessageLookupByLibrary.simpleMessage("确认"),
         "confirm2FADisable":
             MessageLookupByLibrary.simpleMessage("您确定要禁用双重认证吗？"),
@@ -821,7 +825,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "loadingYourPhotos":
             MessageLookupByLibrary.simpleMessage("正在加载您的照片..."),
         "localGallery": MessageLookupByLibrary.simpleMessage("本地相册"),
-        "localIndexing": MessageLookupByLibrary.simpleMessage("Local indexing"),
         "localSyncErrorMessage": MessageLookupByLibrary.simpleMessage(
             "似乎出了点问题，因为本地照片同步耗时比预期的要长。请联系我们的支持团队"),
         "location": MessageLookupByLibrary.simpleMessage("地理位置"),
@@ -1101,6 +1104,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "resendEmail": MessageLookupByLibrary.simpleMessage("重新发送电子邮件"),
         "resetIgnoredFiles": MessageLookupByLibrary.simpleMessage("重置忽略的文件"),
         "resetPasswordTitle": MessageLookupByLibrary.simpleMessage("重置密码"),
+        "resetPerson": MessageLookupByLibrary.simpleMessage("Reset person"),
         "resetToDefault": MessageLookupByLibrary.simpleMessage("重置为默认设置"),
         "restore": MessageLookupByLibrary.simpleMessage("恢复"),
         "restoreToAlbum": MessageLookupByLibrary.simpleMessage("恢复到相册"),
@@ -1436,6 +1440,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "yesLogout": MessageLookupByLibrary.simpleMessage("是的，退出登陆"),
         "yesRemove": MessageLookupByLibrary.simpleMessage("是，移除"),
         "yesRenew": MessageLookupByLibrary.simpleMessage("是的，续费"),
+        "yesResetPerson":
+            MessageLookupByLibrary.simpleMessage("Yes, reset person"),
         "you": MessageLookupByLibrary.simpleMessage("您"),
         "youAreOnAFamilyPlan":
             MessageLookupByLibrary.simpleMessage("你在一个家庭计划中！"),

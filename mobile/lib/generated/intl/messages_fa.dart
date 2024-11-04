@@ -62,6 +62,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "addedAs": MessageLookupByLibrary.simpleMessage("اضافه شده به عنوان"),
         "advanced": MessageLookupByLibrary.simpleMessage("پیشرفته"),
         "albumUpdated": MessageLookupByLibrary.simpleMessage("آلبوم به‌روز شد"),
+        "allPersonGroupingWillReset": MessageLookupByLibrary.simpleMessage(
+            "All groupings for this person will be reset, and you will lose all suggestions made for this person"),
         "allowAddPhotosDescription": MessageLookupByLibrary.simpleMessage(
             "به افراد که این پیوند را دارند، اجازه دهید عکس‌ها را به آلبوم اشتراک گذاری شده اضافه کنند."),
         "allowAddingPhotos":
@@ -79,6 +81,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "archive": MessageLookupByLibrary.simpleMessage("بایگانی"),
         "areYouSureYouWantToLogout": MessageLookupByLibrary.simpleMessage(
             "آیا برای خارج شدن مطمئن هستید؟"),
+        "areYouSureYouWantToResetThisPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Are you sure you want to reset this person?"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "دلیل اصلی که حساب کاربری‌تان را حذف می‌کنید، چیست؟"),
         "atAFalloutShelter":
@@ -110,7 +115,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "همکاران می‌توانند عکس‌ها و ویدیوها را به آلبوم اشتراک گذاری شده اضافه کنند."),
         "color": MessageLookupByLibrary.simpleMessage("رنگ"),
-        "configuration": MessageLookupByLibrary.simpleMessage("Configuration"),
         "confirm": MessageLookupByLibrary.simpleMessage("تایید"),
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("تایید حذف حساب کاربری"),
@@ -242,7 +246,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "lightTheme": MessageLookupByLibrary.simpleMessage("روشن"),
         "loadMessage2": MessageLookupByLibrary.simpleMessage(
             "ما تا کنون بیش از ۳۰ میلیون خاطره را حفظ کرده‌ایم"),
-        "localIndexing": MessageLookupByLibrary.simpleMessage("Local indexing"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("قفل"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("ورود"),
         "loggingOut": MessageLookupByLibrary.simpleMessage("در حال خروج..."),
@@ -318,6 +321,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "resendEmail": MessageLookupByLibrary.simpleMessage("ارسال مجدد ایمیل"),
         "resetPasswordTitle":
             MessageLookupByLibrary.simpleMessage("بازنشانی رمز عبور"),
+        "resetPerson": MessageLookupByLibrary.simpleMessage("Reset person"),
         "retry": MessageLookupByLibrary.simpleMessage("سعی مجدد"),
         "reviewSuggestions":
             MessageLookupByLibrary.simpleMessage("مرور پیشنهادها"),
@@ -430,6 +434,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "yesConvertToViewer":
             MessageLookupByLibrary.simpleMessage("بله، تبدیل به بیننده شود"),
         "yesLogout": MessageLookupByLibrary.simpleMessage("بله، خارج می‌شوم"),
+        "yesResetPerson":
+            MessageLookupByLibrary.simpleMessage("Yes, reset person"),
         "you": MessageLookupByLibrary.simpleMessage("شما"),
         "youAreOnAFamilyPlan": MessageLookupByLibrary.simpleMessage(
             "شما در یک برنامه خانوادگی هستید!"),

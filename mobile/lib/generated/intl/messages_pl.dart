@@ -293,6 +293,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("✨ Wszystko wyczyszczone"),
         "allMemoriesPreserved": MessageLookupByLibrary.simpleMessage(
             "Wszystkie wspomnienia zachowane"),
+        "allPersonGroupingWillReset": MessageLookupByLibrary.simpleMessage(
+            "All groupings for this person will be reset, and you will lose all suggestions made for this person"),
         "allowAddPhotosDescription": MessageLookupByLibrary.simpleMessage(
             "Pozwól osobom z linkiem na dodawania zdjęć do udostępnionego albumu."),
         "allowAddingPhotos":
@@ -350,6 +352,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "Czy na pewno chcesz się wylogować?"),
         "areYouSureYouWantToRenew": MessageLookupByLibrary.simpleMessage(
             "Czy na pewno chcesz odnowić?"),
+        "areYouSureYouWantToResetThisPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Are you sure you want to reset this person?"),
         "askCancelReason": MessageLookupByLibrary.simpleMessage(
             "Twoja subskrypcja została anulowana. Czy chcesz podzielić się powodem?"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
@@ -514,7 +519,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "collectPhotosDescription": MessageLookupByLibrary.simpleMessage(
             "Utwórz link, w którym Twoi znajomi mogą przesyłać zdjęcia w oryginalnej jakości."),
         "color": MessageLookupByLibrary.simpleMessage("Kolor"),
-        "configuration": MessageLookupByLibrary.simpleMessage("Configuration"),
+        "configuration": MessageLookupByLibrary.simpleMessage("Konfiguracja"),
         "confirm": MessageLookupByLibrary.simpleMessage("Potwierdź"),
         "confirm2FADisable": MessageLookupByLibrary.simpleMessage(
             "Czy na pewno chcesz wyłączyć uwierzytelnianie dwustopniowe?"),
@@ -1007,7 +1012,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "loadingYourPhotos":
             MessageLookupByLibrary.simpleMessage("Wczytywanie Twoich zdjęć..."),
         "localGallery": MessageLookupByLibrary.simpleMessage("Galeria lokalna"),
-        "localIndexing": MessageLookupByLibrary.simpleMessage("Local indexing"),
+        "localIndexing":
+            MessageLookupByLibrary.simpleMessage("Indeksowanie lokalne"),
         "localSyncErrorMessage": MessageLookupByLibrary.simpleMessage(
             "Wygląda na to, że coś poszło nie tak, ponieważ lokalna synchronizacja zdjęć zajmuje więcej czasu, niż oczekiwano. Skontaktuj się z naszym zespołem pomocy technicznej"),
         "location": MessageLookupByLibrary.simpleMessage("Lokalizacja"),
@@ -1371,6 +1377,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Zresetuj zignorowane pliki"),
         "resetPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Zresetuj hasło"),
+        "resetPerson": MessageLookupByLibrary.simpleMessage("Reset person"),
         "resetToDefault":
             MessageLookupByLibrary.simpleMessage("Przywróć domyślne"),
         "restore": MessageLookupByLibrary.simpleMessage("Przywróć"),
@@ -1795,6 +1802,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "yesLogout": MessageLookupByLibrary.simpleMessage("Tak, wyloguj"),
         "yesRemove": MessageLookupByLibrary.simpleMessage("Tak, usuń"),
         "yesRenew": MessageLookupByLibrary.simpleMessage("Tak, Odnów"),
+        "yesResetPerson":
+            MessageLookupByLibrary.simpleMessage("Yes, reset person"),
         "you": MessageLookupByLibrary.simpleMessage("Ty"),
         "youAreOnAFamilyPlan":
             MessageLookupByLibrary.simpleMessage("Jesteś w planie rodzinnym!"),

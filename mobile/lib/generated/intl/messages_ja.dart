@@ -261,6 +261,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "allClear": MessageLookupByLibrary.simpleMessage("✨ オールクリア"),
         "allMemoriesPreserved":
             MessageLookupByLibrary.simpleMessage("すべての思い出が保存されました"),
+        "allPersonGroupingWillReset": MessageLookupByLibrary.simpleMessage(
+            "All groupings for this person will be reset, and you will lose all suggestions made for this person"),
         "allowAddPhotosDescription": MessageLookupByLibrary.simpleMessage(
             "リンクを持つ人が共有アルバムに写真を追加できるようにします。"),
         "allowAddingPhotos": MessageLookupByLibrary.simpleMessage("写真の追加を許可"),
@@ -307,6 +309,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("本当にログアウトしてよろしいですか？"),
         "areYouSureYouWantToRenew":
             MessageLookupByLibrary.simpleMessage("更新してもよろしいですか？"),
+        "areYouSureYouWantToResetThisPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Are you sure you want to reset this person?"),
         "askCancelReason": MessageLookupByLibrary.simpleMessage(
             "サブスクリプションはキャンセルされました。理由を教えていただけますか？"),
         "askDeleteReason":
@@ -448,7 +453,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "collectPhotosDescription":
             MessageLookupByLibrary.simpleMessage("友達が写真をアップロードできるリンクを作成できます"),
         "color": MessageLookupByLibrary.simpleMessage("色"),
-        "configuration": MessageLookupByLibrary.simpleMessage("Configuration"),
         "confirm": MessageLookupByLibrary.simpleMessage("確認"),
         "confirm2FADisable":
             MessageLookupByLibrary.simpleMessage("2 要素認証を無効にしてよろしいですか。"),
@@ -863,7 +867,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "loadingYourPhotos":
             MessageLookupByLibrary.simpleMessage("写真を読み込んでいます..."),
         "localGallery": MessageLookupByLibrary.simpleMessage("デバイス上のギャラリー"),
-        "localIndexing": MessageLookupByLibrary.simpleMessage("Local indexing"),
         "localSyncErrorMessage": MessageLookupByLibrary.simpleMessage(
             "ローカルの写真の同期には予想以上の時間がかかっています。問題が発生したようです。サポートチームまでご連絡ください。"),
         "location": MessageLookupByLibrary.simpleMessage("場所"),
@@ -1167,6 +1170,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("アップロード時に無視されるファイルをリセット"),
         "resetPasswordTitle":
             MessageLookupByLibrary.simpleMessage("パスワードをリセット"),
+        "resetPerson": MessageLookupByLibrary.simpleMessage("Reset person"),
         "resetToDefault": MessageLookupByLibrary.simpleMessage("初期設定にリセット"),
         "restore": MessageLookupByLibrary.simpleMessage("復元"),
         "restoreToAlbum": MessageLookupByLibrary.simpleMessage("アルバムに戻す"),
@@ -1524,6 +1528,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "yesLogout": MessageLookupByLibrary.simpleMessage("はい、ログアウトします"),
         "yesRemove": MessageLookupByLibrary.simpleMessage("削除"),
         "yesRenew": MessageLookupByLibrary.simpleMessage("はい、更新する"),
+        "yesResetPerson":
+            MessageLookupByLibrary.simpleMessage("Yes, reset person"),
         "you": MessageLookupByLibrary.simpleMessage("あなた"),
         "youAreOnAFamilyPlan":
             MessageLookupByLibrary.simpleMessage("ファミリープランに入会しています！"),

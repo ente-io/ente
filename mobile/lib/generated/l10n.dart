@@ -9855,6 +9855,46 @@ class S {
       args: [],
     );
   }
+
+  /// `Reset person`
+  String get resetPerson {
+    return Intl.message(
+      'Reset person',
+      name: 'resetPerson',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure you want to reset this person?`
+  String get areYouSureYouWantToResetThisPerson {
+    return Intl.message(
+      'Are you sure you want to reset this person?',
+      name: 'areYouSureYouWantToResetThisPerson',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `All groupings for this person will be reset, and you will lose all suggestions made for this person`
+  String get allPersonGroupingWillReset {
+    return Intl.message(
+      'All groupings for this person will be reset, and you will lose all suggestions made for this person',
+      name: 'allPersonGroupingWillReset',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Yes, reset person`
+  String get yesResetPerson {
+    return Intl.message(
+      'Yes, reset person',
+      name: 'yesResetPerson',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

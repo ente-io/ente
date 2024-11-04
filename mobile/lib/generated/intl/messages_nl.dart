@@ -289,6 +289,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "allClear": MessageLookupByLibrary.simpleMessage("✨ Alles in orde"),
         "allMemoriesPreserved":
             MessageLookupByLibrary.simpleMessage("Alle herinneringen bewaard"),
+        "allPersonGroupingWillReset": MessageLookupByLibrary.simpleMessage(
+            "All groupings for this person will be reset, and you will lose all suggestions made for this person"),
         "allowAddPhotosDescription": MessageLookupByLibrary.simpleMessage(
             "Sta toe dat mensen met de link ook foto\'s kunnen toevoegen aan het gedeelde album."),
         "allowAddingPhotos":
@@ -345,6 +347,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "Weet je zeker dat je wilt uitloggen?"),
         "areYouSureYouWantToRenew": MessageLookupByLibrary.simpleMessage(
             "Weet u zeker dat u wilt verlengen?"),
+        "areYouSureYouWantToResetThisPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Are you sure you want to reset this person?"),
         "askCancelReason": MessageLookupByLibrary.simpleMessage(
             "Uw abonnement is opgezegd. Wilt u de reden delen?"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
@@ -507,7 +512,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "collectPhotosDescription": MessageLookupByLibrary.simpleMessage(
             "Maak een link waarin je vrienden foto\'s kunnen uploaden in de originele kwaliteit."),
         "color": MessageLookupByLibrary.simpleMessage("Kleur"),
-        "configuration": MessageLookupByLibrary.simpleMessage("Configuration"),
         "confirm": MessageLookupByLibrary.simpleMessage("Bevestig"),
         "confirm2FADisable": MessageLookupByLibrary.simpleMessage(
             "Weet u zeker dat u tweestapsverificatie wilt uitschakelen?"),
@@ -1004,7 +1008,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "loadingYourPhotos": MessageLookupByLibrary.simpleMessage(
             "Je foto\'s worden geladen..."),
         "localGallery": MessageLookupByLibrary.simpleMessage("Lokale galerij"),
-        "localIndexing": MessageLookupByLibrary.simpleMessage("Local indexing"),
         "localSyncErrorMessage": MessageLookupByLibrary.simpleMessage(
             "Het lijkt erop dat er iets mis is gegaan omdat het synchroniseren van lokale foto\'s meer tijd kost dan verwacht. Neem contact op met ons supportteam"),
         "location": MessageLookupByLibrary.simpleMessage("Locatie"),
@@ -1364,6 +1367,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Reset genegeerde bestanden"),
         "resetPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Wachtwoord resetten"),
+        "resetPerson": MessageLookupByLibrary.simpleMessage("Reset person"),
         "resetToDefault": MessageLookupByLibrary.simpleMessage(
             "Standaardinstellingen herstellen"),
         "restore": MessageLookupByLibrary.simpleMessage("Herstellen"),
@@ -1786,6 +1790,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "yesLogout": MessageLookupByLibrary.simpleMessage("Ja, log uit"),
         "yesRemove": MessageLookupByLibrary.simpleMessage("Ja, verwijderen"),
         "yesRenew": MessageLookupByLibrary.simpleMessage("Ja, verlengen"),
+        "yesResetPerson":
+            MessageLookupByLibrary.simpleMessage("Yes, reset person"),
         "you": MessageLookupByLibrary.simpleMessage("Jij"),
         "youAreOnAFamilyPlan": MessageLookupByLibrary.simpleMessage(
             "U bent onderdeel van een familie abonnement!"),
