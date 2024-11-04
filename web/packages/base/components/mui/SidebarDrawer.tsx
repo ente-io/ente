@@ -39,16 +39,38 @@ export type NestedSidebarDrawerVisibilityProps = ModalVisibilityProps & {
  */
 export const NestedSidebarDrawer: React.FC<
     NestedSidebarDrawerVisibilityProps & DrawerProps
-> = (props) => (
+> = ({ onClose, onRootClose, ...rest }) => {
+    // Intercept backdrop taps and repurpose them to close the entire stack.
+    const handleClose: DrawerProps["onClose"] = (_, reason) => {
+        if (reason == "backdropClick") {
+            onClose();
+            onRootClose();
+        } else {
+            onClose();
+        }
+    };
+
     // MUI doesn't (currently, AFAIK) have support for nested drawers, so we
     // emulate that by showing a drawer atop another. To make it fit, we need to
-    // modify a few knobs:
-    //
-    // 1. Disable the transition (otherwise our nested drawer visibly slides in
-    //    from the wrong direction).
-    //
-    // 2. Disable the backdrop (otherwise we'd end up with two of them - one
-    //    from the original drawer, and one from this nested one).
-    //
-    <SidebarDrawer transitionDuration={0} hideBackdrop {...props} />
-);
+    // modify a few knobs.
+
+    return (
+        <SidebarDrawer
+            // Disable the transition (otherwise our nested drawer visibly
+            // slides in from the wrong direction).
+            transitionDuration={0}
+            // Make the backdrop transparent (otherwise we end up with two of
+            // them - one from the original drawer, and one from this nested
+            // one).
+            //
+            // Note that there is an easy way to hide the backdrop (using the
+            // `hideBackdrop` attribute), but that takes away our ability to
+            // intercept backdrop clicks to close it.
+            slotProps={{
+                backdrop: { sx: { "&&&": { backgroundColor: "transparent" } } },
+            }}
+            onClose={handleClose}
+            {...rest}
+        />
+    );
+};
