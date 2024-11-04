@@ -1,5 +1,17 @@
-import { Drawer, styled, type DrawerProps } from "@mui/material";
+import ArrowBack from "@mui/icons-material/ArrowBack";
+import Close from "@mui/icons-material/Close";
+import {
+    Box,
+    Drawer,
+    IconButton,
+    Stack,
+    styled,
+    Typography,
+    type DrawerProps,
+} from "@mui/material";
+import React from "react";
 import type { ModalVisibilityProps } from "../utils/modal";
+import { SpaceBetweenFlex } from "./Container";
 
 /**
  * A MUI {@link Drawer} with a standard set of styling that we use for our left
@@ -74,3 +86,56 @@ export const NestedSidebarDrawer: React.FC<
         />
     );
 };
+
+type SidebarDrawerTitlebarProps = Pick<
+    NestedSidebarDrawerVisibilityProps,
+    "onClose" | "onRootClose"
+> & {
+    /** Title for the drawer. */
+    title: string;
+    /** An optional secondary caption shown below the title. */
+    caption?: string;
+    /**
+     * An optional action button shown alongwith the close button at the
+     * trailing edge of the sidebar.
+     */
+    actionButton?: React.ReactNode;
+};
+
+/**
+ * A bar with a title and back / close buttons, suitable for being used in
+ * tandem with a {@link NestedSidebarDrawer}.
+ */
+export const SidebarDrawerTitlebar: React.FC<SidebarDrawerTitlebarProps> = ({
+    title,
+    caption,
+    onClose,
+    onRootClose,
+    actionButton,
+}) => (
+    <Stack sx={{ gap: "4px" }}>
+        <SpaceBetweenFlex sx={{ minHeight: "48px" }}>
+            <IconButton onClick={onClose} color={"primary"}>
+                <ArrowBack />
+            </IconButton>
+            <Box display={"flex"} gap="4px">
+                {actionButton && actionButton}
+                <IconButton onClick={onRootClose} color={"secondary"}>
+                    <Close />
+                </IconButton>
+            </Box>
+        </SpaceBetweenFlex>
+        <Box sx={{ px: "16px", py: "4px" }}>
+            <Typography variant="h3" fontWeight={"bold"}>
+                {title}
+            </Typography>
+            <Typography
+                variant="small"
+                color="text.muted"
+                sx={{ wordBreak: "break-all", minHeight: "17px" }}
+            >
+                {caption}
+            </Typography>
+        </Box>
+    </Stack>
+);

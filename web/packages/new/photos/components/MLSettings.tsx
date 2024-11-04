@@ -2,9 +2,9 @@ import { MenuItemGroup } from "@/base/components/Menu";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import {
     NestedSidebarDrawer,
+    SidebarDrawerTitlebar,
     type NestedSidebarDrawerVisibilityProps,
 } from "@/base/components/mui/SidebarDrawer";
-import { Titlebar } from "@/base/components/Titlebar";
 import { disableML, enableML, type MLStatus } from "@/new/photos/services/ml";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import {
@@ -67,11 +67,11 @@ export const MLSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                 {...{ open, onClose }}
                 onRootClose={handleRootClose}
             >
-                <Stack spacing={"4px"} py={"12px"}>
-                    <Titlebar
+                <Stack sx={{ gap: "4px", py: "12px" }}>
+                    <SidebarDrawerTitlebar
                         onClose={onClose}
-                        title={t("ml_search")}
                         onRootClose={handleRootClose}
+                        title={t("ml_search")}
                     />
                     {component}
                 </Stack>
@@ -165,10 +165,10 @@ const FaceConsent: React.FC<FaceConsentProps> = ({
             onRootClose={handleRootClose}
         >
             <Stack spacing={"4px"} py={"12px"}>
-                <Titlebar
+                <SidebarDrawerTitlebar
                     onClose={onClose}
-                    title={t("ml_consent_title")}
                     onRootClose={handleRootClose}
+                    title={t("ml_consent_title")}
                 />
                 <Stack py={"20px"} px={"8px"} spacing={"32px"}>
                     <Typography component="div" color="text.muted" px={"8px"}>
