@@ -290,6 +290,7 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
     String initValue = '',
     required String clusterID,
   }) async {
+    PersonEntity? personEntity;
     final result = await showTextInputDialog(
       context,
       title: S.of(context).newPerson,
@@ -308,15 +309,14 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
         }
         try {
           userAlreadyAssigned = true;
-          final PersonEntity p =
+          personEntity =
               await PersonService.instance.addPerson(text, clusterID);
           final bool extraPhotosFound = await ClusterFeedbackService.instance
-              .checkAndDoAutomaticMerges(p, personClusterID: clusterID);
+              .checkAndDoAutomaticMerges(personEntity!,
+                  personClusterID: clusterID);
           if (extraPhotosFound) {
             showShortToast(context, S.of(context).extraPhotosFound);
           }
-          Bus.instance.fire(PeopleChangedEvent());
-          Navigator.pop(context, p);
         } catch (e, s) {
           Logger("_PersonActionSheetState")
               .severe("Failed to add person", e, s);
@@ -326,6 +326,10 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
     );
     if (result is Exception) {
       await showGenericErrorDialog(context: context, error: result);
+    }
+    if (personEntity != null) {
+      Bus.instance.fire(PeopleChangedEvent());
+      Navigator.pop(context, personEntity);
     }
   }
 
