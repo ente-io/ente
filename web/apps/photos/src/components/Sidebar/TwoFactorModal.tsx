@@ -3,18 +3,19 @@ import {
     NestedSidebarDrawer,
     type NestedSidebarDrawerVisibilityProps,
 } from "@/base/components/mui/SidebarDrawer";
+import { Titlebar } from "@/base/components/Titlebar";
 import { AppContext } from "@/new/photos/types/context";
 import { VerticallyCentered } from "@ente/shared/components/Container";
-import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleWithCloseButton";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { LS_KEYS, getData, setLSUser } from "@ente/shared/storage/localStorage";
 import LockIcon from "@mui/icons-material/Lock";
-import { Button, DialogContent, Grid, Typography } from "@mui/material";
+import { Button, Grid, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import router, { useRouter } from "next/router";
 import { useContext, useEffect, useState } from "react";
 import { getTwoFactorStatus } from "services/userService";
 
+// TODO: Revisit these comments
 // const TwoFactorDialog = styled(Dialog)(({ theme }) => ({
 //     "& .MuiDialogContent-root": {
 //         padding: theme.spacing(2, 4),
@@ -61,10 +62,15 @@ export const TwoFactorSettings: React.FC<
             {...{ open, onClose }}
             onRootClose={handleRootClose}
         >
-            <DialogTitleWithCloseButton onClose={onClose}>
-                {t("TWO_FACTOR_AUTHENTICATION")}
-            </DialogTitleWithCloseButton>
-            <DialogContent sx={{ px: 4 }}>
+            <Stack spacing={"4px"} py={"12px"}>
+                <Titlebar
+                    onClose={onClose}
+                    title={t("TWO_FACTOR_AUTHENTICATION")}
+                    onRootClose={handleRootClose}
+                />
+                {/* {component} */}
+
+                {/* <DialogContent sx={{ px: 4 }}> */}
                 {isTwoFactorEnabled ? (
                     <TwoFactorModalManageSection
                         closeDialog={handleRootClose}
@@ -72,7 +78,8 @@ export const TwoFactorSettings: React.FC<
                 ) : (
                     <TwoFactorModalSetupSection closeDialog={handleRootClose} />
                 )}
-            </DialogContent>
+                {/* </DialogContent> */}
+            </Stack>
         </NestedSidebarDrawer>
     );
 };
