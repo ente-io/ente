@@ -10,6 +10,7 @@ import { FileType } from "@/media/file-type";
 import { potentialFileTypeFromExtension } from "@/media/live-photo";
 import { getLocalFiles } from "@/new/photos/services/files";
 import { indexNewUpload } from "@/new/photos/services/ml";
+import { getDisableCFUploadProxyFlag } from "@/new/photos/services/settings";
 import type { UploadItem } from "@/new/photos/services/upload/types";
 import {
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
@@ -25,7 +26,6 @@ import {
     getLocalPublicFiles,
     getPublicCollectionUID,
 } from "services/publicCollectionService";
-import { getDisableCFUploadProxyFlag } from "services/userService";
 import watcher from "services/watch";
 import { decryptFile, getUserOwnedFiles } from "utils/file";
 import {
