@@ -47,7 +47,7 @@ import {
 } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import DeleteAccountModal from "components/DeleteAccountModal";
-import TwoFactorModal from "components/Sidebar/TwoFactorSettings";
+import { TwoFactorSettings } from "components/Sidebar/TwoFactorSettings";
 import { WatchFolder } from "components/WatchFolder";
 import LinkButton from "components/pages/gallery/LinkButton";
 import { t } from "i18next";
@@ -530,7 +530,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
                 {...recoveryKeyVisibilityProps}
                 {...{ showMiniDialog }}
             />
-            <TwoFactorModal
+            <TwoFactorSettings
                 {...twoFactorVisibilityProps}
                 onRootClose={closeSidebar}
             />

@@ -20,12 +20,12 @@ import { getTwoFactorStatus } from "services/userService";
 export const TwoFactorSettings: React.FC<
     NestedSidebarDrawerVisibilityProps
 > = ({ open, onClose, onRootClose }) => {
-    const [isTwoFactorEnabled, setTwoFactorStatus] = useState(false);
+    const [isTwoFactorEnabled, setIsTwoFactorEnabled] = useState(false);
 
     useEffect(() => {
         const isTwoFactorEnabled =
             getData(LS_KEYS.USER).isTwoFactorEnabled ?? false;
-        setTwoFactorStatus(isTwoFactorEnabled);
+        setIsTwoFactorEnabled(isTwoFactorEnabled);
     }, []);
 
     useEffect(() => {
@@ -34,7 +34,7 @@ export const TwoFactorSettings: React.FC<
         }
         const main = async () => {
             const isTwoFactorEnabled = await getTwoFactorStatus();
-            setTwoFactorStatus(isTwoFactorEnabled);
+            setIsTwoFactorEnabled(isTwoFactorEnabled);
             await setLSUser({
                 ...getData(LS_KEYS.USER),
                 isTwoFactorEnabled,
@@ -63,7 +63,7 @@ export const TwoFactorSettings: React.FC<
                 {isTwoFactorEnabled ? (
                     <ManageDrawerContents onRootClose={handleRootClose} />
                 ) : (
-                    <TwoFactorModalSetupSection closeDialog={handleRootClose} />
+                    <SetupDrawerContents onRootClose={handleRootClose} />
                 )}
             </Stack>
         </NestedSidebarDrawer>
@@ -74,16 +74,11 @@ export default TwoFactorSettings;
 
 type ContentsProps = Pick<NestedSidebarDrawerVisibilityProps, "onRootClose">;
 
-interface TwoFactorModalSetupSectionProps {
-    closeDialog: () => void;
-}
-
-function TwoFactorModalSetupSection({
-    closeDialog,
-}: TwoFactorModalSetupSectionProps) {
+const SetupDrawerContents: React.FC<ContentsProps> = ({ onRootClose }) => {
     const router = useRouter();
-    const redirectToTwoFactorSetup = () => {
-        closeDialog();
+
+    const configure = () => {
+        onRootClose();
         router.push(PAGES.TWO_FACTOR_SETUP);
     };
 
@@ -95,13 +90,13 @@ function TwoFactorModalSetupSection({
                 variant="contained"
                 color="accent"
                 size="large"
-                onClick={redirectToTwoFactorSetup}
+                onClick={configure}
             >
                 {t("ENABLE_TWO_FACTOR")}
             </Button>
         </VerticallyCentered>
     );
-}
+};
 
 const ManageDrawerContents: React.FC<ContentsProps> = ({ onRootClose }) => {
     const { showMiniDialog } = useAppContext();
