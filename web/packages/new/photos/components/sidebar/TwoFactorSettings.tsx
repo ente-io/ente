@@ -57,7 +57,7 @@ export const TwoFactorSettings: React.FC<
                 <SidebarDrawerTitlebar
                     onClose={onClose}
                     onRootClose={handleRootClose}
-                    title={t("TWO_FACTOR_AUTHENTICATION")}
+                    title={t("two_factor_authentication")}
                 />
 
                 {isTwoFactorEnabled ? (
@@ -94,10 +94,10 @@ const SetupDrawerContents: React.FC<ContentsProps> = ({ onRootClose }) => {
                 sx={{ textAlign: "center", marginBlock: "32px 36px" }}
                 color="text.muted"
             >
-                {t("TWO_FACTOR_INFO")}
+                {t("two_factor_info")}
             </Typography>
             <FocusVisibleButton color="accent" size="large" onClick={configure}>
-                {t("ENABLE_TWO_FACTOR")}
+                {t("enable_two_factor")}
             </FocusVisibleButton>
         </Stack>
     );
@@ -108,8 +108,8 @@ const ManageDrawerContents: React.FC<ContentsProps> = ({ onRootClose }) => {
 
     const confirmDisable = () =>
         showMiniDialog({
-            title: t("DISABLE_TWO_FACTOR"),
-            message: t("DISABLE_TWO_FACTOR_MESSAGE"),
+            title: t("disable_two_factor"),
+            message: t("disable_two_factor_message"),
             continue: {
                 text: t("disable"),
                 color: "critical",
@@ -129,10 +129,10 @@ const ManageDrawerContents: React.FC<ContentsProps> = ({ onRootClose }) => {
 
     const confirmReconfigure = () =>
         showMiniDialog({
-            title: t("UPDATE_TWO_FACTOR"),
-            message: t("UPDATE_TWO_FACTOR_MESSAGE"),
+            title: t("update_two_factor"),
+            message: t("update_two_factor_message"),
             continue: {
-                text: t("UPDATE"),
+                text: t("update"),
                 color: "primary",
                 action: reconfigure,
             },
@@ -163,7 +163,7 @@ const ManageDrawerContents: React.FC<ContentsProps> = ({ onRootClose }) => {
                         label={t("reconfigure")}
                     />
                 </MenuItemGroup>
-                <MenuSectionTitle title={t("UPDATE_TWO_FACTOR_LABEL")} />
+                <MenuSectionTitle title={t("reconfigure_two_factor_hint")} />
             </Stack>
         </Stack>
     );

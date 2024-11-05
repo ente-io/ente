@@ -497,7 +497,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
             <EnteMenuItem
                 variant="secondary"
                 onClick={showTwoFactor}
-                label={t("TWO_FACTOR")}
+                label={t("two_factor")}
             />
             <EnteMenuItem
                 variant="secondary"
