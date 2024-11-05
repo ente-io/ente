@@ -70,6 +70,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "after1Week": MessageLookupByLibrary.simpleMessage("หลังจาก 1 สัปดาห์"),
         "after1Year": MessageLookupByLibrary.simpleMessage("หลังจาก 1 ปี"),
         "albumOwner": MessageLookupByLibrary.simpleMessage("เจ้าของ"),
+        "allPersonGroupingWillReset": MessageLookupByLibrary.simpleMessage(
+            "All groupings for this person will be reset, and you will lose all suggestions made for this person"),
         "allowAddingPhotos":
             MessageLookupByLibrary.simpleMessage("อนุญาตให้เพิ่มรูปภาพ"),
         "allowDownloads":
@@ -79,6 +81,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "androidCancelButton": MessageLookupByLibrary.simpleMessage("ยกเลิก"),
         "appVersion": m12,
         "apply": MessageLookupByLibrary.simpleMessage("นำไปใช้"),
+        "areYouSureYouWantToResetThisPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Are you sure you want to reset this person?"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "เหตุผลหลักที่คุณลบบัญชีคืออะไร?"),
         "authToViewYourRecoveryKey": MessageLookupByLibrary.simpleMessage(
@@ -274,6 +279,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "resendEmail": MessageLookupByLibrary.simpleMessage("ส่งอีเมลอีกครั้ง"),
         "resetPasswordTitle":
             MessageLookupByLibrary.simpleMessage("รีเซ็ตรหัสผ่าน"),
+        "resetPerson": MessageLookupByLibrary.simpleMessage("Reset person"),
         "restore": MessageLookupByLibrary.simpleMessage(" กู้คืน"),
         "restoreToAlbum":
             MessageLookupByLibrary.simpleMessage("กู้คืนไปยังอัลบั้ม"),
@@ -351,6 +357,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "weakStrength": MessageLookupByLibrary.simpleMessage("อ่อน"),
         "welcomeBack":
             MessageLookupByLibrary.simpleMessage("ยินดีต้อนรับกลับมา!"),
+        "yesResetPerson":
+            MessageLookupByLibrary.simpleMessage("Yes, reset person"),
         "you": MessageLookupByLibrary.simpleMessage("คุณ"),
         "youCanManageYourLinksInTheShareTab":
             MessageLookupByLibrary.simpleMessage(

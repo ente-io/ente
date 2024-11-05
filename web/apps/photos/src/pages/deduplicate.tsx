@@ -3,7 +3,7 @@ import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { ALL_SECTION } from "@/new/photos/services/collection";
 import { createFileCollectionIDs } from "@/new/photos/services/file";
 import { getLocalFiles } from "@/new/photos/services/files";
-import { AppContext } from "@/new/photos/types/context";
+import { useAppContext } from "@/new/photos/types/context";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { ApiError } from "@ente/shared/error";
@@ -16,7 +16,7 @@ import DeduplicateOptions from "components/pages/dedupe/SelectedFileOptions";
 import PhotoFrame from "components/PhotoFrame";
 import { t } from "i18next";
 import { default as Router, default as router } from "next/router";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import {
     getAllLatestCollections,
     getLocalCollections,
@@ -40,8 +40,8 @@ export const Info = styled("div")`
 `;
 
 export default function Deduplicate() {
-    const { setDialogMessage, startLoading, finishLoading, showNavBar } =
-        useContext(AppContext);
+    const { showNavBar, showLoadingBar, hideLoadingBar, setDialogMessage } =
+        useAppContext();
     const [duplicates, setDuplicates] = useState<Duplicate[]>(null);
     const [collectionNameMap, setCollectionNameMap] = useState(
         new Map<number, string>(),
@@ -70,42 +70,48 @@ export default function Deduplicate() {
     }, []);
 
     const syncWithRemote = async () => {
-        startLoading();
-        const collections = await getLocalCollections();
-        const collectionNameMap = new Map<number, string>();
-        for (const collection of collections) {
-            collectionNameMap.set(collection.id, collection.name);
-        }
-        setCollectionNameMap(collectionNameMap);
-        const files = await getLocalFiles();
-        const duplicateFiles = await getDuplicates(files, collectionNameMap);
-        const currFileSizeMap = new Map<number, number>();
-        let toSelectFileIDs: number[] = [];
-        let count = 0;
-        for (const dupe of duplicateFiles) {
-            // select all except first file
-            toSelectFileIDs = [
-                ...toSelectFileIDs,
-                ...dupe.files.slice(1).map((f) => f.id),
-            ];
-            count += dupe.files.length - 1;
-
-            for (const file of dupe.files) {
-                currFileSizeMap.set(file.id, dupe.size);
+        showLoadingBar();
+        try {
+            const collections = await getLocalCollections();
+            const collectionNameMap = new Map<number, string>();
+            for (const collection of collections) {
+                collectionNameMap.set(collection.id, collection.name);
             }
+            setCollectionNameMap(collectionNameMap);
+            const files = await getLocalFiles();
+            const duplicateFiles = await getDuplicates(
+                files,
+                collectionNameMap,
+            );
+            const currFileSizeMap = new Map<number, number>();
+            let toSelectFileIDs: number[] = [];
+            let count = 0;
+            for (const dupe of duplicateFiles) {
+                // select all except first file
+                toSelectFileIDs = [
+                    ...toSelectFileIDs,
+                    ...dupe.files.slice(1).map((f) => f.id),
+                ];
+                count += dupe.files.length - 1;
+
+                for (const file of dupe.files) {
+                    currFileSizeMap.set(file.id, dupe.size);
+                }
+            }
+            setDuplicates(duplicateFiles);
+            const selectedFiles = {
+                count: count,
+                ownCount: count,
+                collectionID: ALL_SECTION,
+                context: undefined,
+            };
+            for (const fileID of toSelectFileIDs) {
+                selectedFiles[fileID] = true;
+            }
+            setSelected(selectedFiles);
+        } finally {
+            hideLoadingBar();
         }
-        setDuplicates(duplicateFiles);
-        const selectedFiles = {
-            count: count,
-            ownCount: count,
-            collectionID: ALL_SECTION,
-            context: undefined,
-        };
-        for (const fileID of toSelectFileIDs) {
-            selectedFiles[fileID] = true;
-        }
-        setSelected(selectedFiles);
-        finishLoading();
     };
 
     const duplicateFiles = useMemoSingleThreaded(() => {
@@ -120,7 +126,7 @@ export default function Deduplicate() {
 
     const deleteFileHelper = async () => {
         try {
-            startLoading();
+            showLoadingBar();
             const selectedFiles = getSelectedFiles(selected, duplicateFiles);
             await trashFiles(selectedFiles);
 
@@ -160,7 +166,7 @@ export default function Deduplicate() {
             }
         } finally {
             await syncWithRemote();
-            finishLoading();
+            hideLoadingBar();
         }
     };
 

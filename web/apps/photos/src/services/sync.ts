@@ -1,14 +1,12 @@
-import { triggerFeatureFlagsFetchIfNeeded } from "@/new/photos/services/feature-flags";
 import { isMLSupported, mlStatusSync, mlSync } from "@/new/photos/services/ml";
 import { searchDataSync } from "@/new/photos/services/search";
-import { syncMapEnabled } from "services/userService";
+import { syncSettings } from "@/new/photos/services/settings";
 
 /**
  * Part 1 of {@link sync}. See TODO below for why this is split.
  */
 export const preFileInfoSync = async () => {
-    triggerFeatureFlagsFetchIfNeeded();
-    await Promise.all([isMLSupported && mlStatusSync()]);
+    await Promise.all([syncSettings(), isMLSupported && mlStatusSync()]);
 };
 
 /**
@@ -31,7 +29,7 @@ export const preFileInfoSync = async () => {
  * before doing the file sync and thus should run immediately after login.
  */
 export const sync = async () => {
-    await Promise.all([syncMapEnabled(), searchDataSync()]);
+    await Promise.all([searchDataSync()]);
     // ML sync might take a very long time for initial indexing, so don't wait
     // for it to finish.
     void mlSync();

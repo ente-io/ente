@@ -168,6 +168,7 @@ dependencies:
   syncfusion_flutter_core: ^25.2.5
   syncfusion_flutter_sliders: ^25.2.5
   synchronized: ^3.1.0
+  system_info_plus: ^0.0.5
   tuple: ^2.0.0
   ua_client_hints: ^1.4.0
   uni_links: ^0.5.1

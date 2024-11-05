@@ -452,5 +452,12 @@
   "next": "Nästa",
   "guestView": "Gästvy",
   "showPerson": "Visa person",
-  "sort": "Sortera"
+  "sort": "Sortera",
+  "newPerson": "Ny person",
+  "addName": "Lägg till namn",
+  "add": "Lägg till",
+  "resetPerson": "Reset person",
+  "areYouSureYouWantToResetThisPerson": "Are you sure you want to reset this person?",
+  "allPersonGroupingWillReset": "All groupings for this person will be reset, and you will lose all suggestions made for this person",
+  "yesResetPerson": "Yes, reset person"
 }

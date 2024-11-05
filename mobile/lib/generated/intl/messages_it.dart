@@ -287,6 +287,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "allClear": MessageLookupByLibrary.simpleMessage("✨ Tutto pulito"),
         "allMemoriesPreserved":
             MessageLookupByLibrary.simpleMessage("Tutti i ricordi conservati"),
+        "allPersonGroupingWillReset": MessageLookupByLibrary.simpleMessage(
+            "All groupings for this person will be reset, and you will lose all suggestions made for this person"),
         "allowAddPhotosDescription": MessageLookupByLibrary.simpleMessage(
             "Permetti anche alle persone con il link di aggiungere foto all\'album condiviso."),
         "allowAddingPhotos": MessageLookupByLibrary.simpleMessage(
@@ -343,6 +345,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "Sei sicuro di volerti disconnettere?"),
         "areYouSureYouWantToRenew": MessageLookupByLibrary.simpleMessage(
             "Sei sicuro di volere rinnovare?"),
+        "areYouSureYouWantToResetThisPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Are you sure you want to reset this person?"),
         "askCancelReason": MessageLookupByLibrary.simpleMessage(
             "Il tuo abbonamento è stato annullato. Vuoi condividere il motivo?"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
@@ -1353,6 +1358,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Ripristina i file ignorati"),
         "resetPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Reimposta password"),
+        "resetPerson": MessageLookupByLibrary.simpleMessage("Reset person"),
         "resetToDefault":
             MessageLookupByLibrary.simpleMessage("Ripristina predefinita"),
         "restore": MessageLookupByLibrary.simpleMessage("Ripristina"),
@@ -1786,6 +1792,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "yesLogout": MessageLookupByLibrary.simpleMessage("Sì, disconnetti"),
         "yesRemove": MessageLookupByLibrary.simpleMessage("Sì, rimuovi"),
         "yesRenew": MessageLookupByLibrary.simpleMessage("Sì, Rinnova"),
+        "yesResetPerson":
+            MessageLookupByLibrary.simpleMessage("Yes, reset person"),
         "you": MessageLookupByLibrary.simpleMessage("Tu"),
         "youAreOnAFamilyPlan": MessageLookupByLibrary.simpleMessage(
             "Sei un utente con piano famiglia!"),

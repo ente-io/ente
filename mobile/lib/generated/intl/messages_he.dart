@@ -165,6 +165,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "allClear": MessageLookupByLibrary.simpleMessage("✨ הכל נוקה"),
         "allMemoriesPreserved":
             MessageLookupByLibrary.simpleMessage("כל הזכרונות נשמרו"),
+        "allPersonGroupingWillReset": MessageLookupByLibrary.simpleMessage(
+            "All groupings for this person will be reset, and you will lose all suggestions made for this person"),
         "allowAddPhotosDescription": MessageLookupByLibrary.simpleMessage(
             "בנוסף אפשר לאנשים עם הלינק להוסיף תמונות לאלבום המשותף."),
         "allowAddingPhotos":
@@ -197,6 +199,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("אתה בטוח שאתה רוצה להתנתק?"),
         "areYouSureYouWantToRenew":
             MessageLookupByLibrary.simpleMessage("אתה בטוח שאתה רוצה לחדש?"),
+        "areYouSureYouWantToResetThisPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Are you sure you want to reset this person?"),
         "askCancelReason": MessageLookupByLibrary.simpleMessage(
             "המנוי שלך בוטל. תרצה לשתף את הסיבה?"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
@@ -717,6 +722,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "resendEmail": MessageLookupByLibrary.simpleMessage("שלח דוא\"ל מחדש"),
         "resetPasswordTitle":
             MessageLookupByLibrary.simpleMessage("איפוס סיסמה"),
+        "resetPerson": MessageLookupByLibrary.simpleMessage("Reset person"),
         "restore": MessageLookupByLibrary.simpleMessage("שחזר"),
         "restoreToAlbum": MessageLookupByLibrary.simpleMessage("שחזר לאלבום"),
         "restoringFiles":
@@ -932,6 +938,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "yesLogout": MessageLookupByLibrary.simpleMessage("כן, התנתק"),
         "yesRemove": MessageLookupByLibrary.simpleMessage("כן, הסר"),
         "yesRenew": MessageLookupByLibrary.simpleMessage("כן, חדש"),
+        "yesResetPerson":
+            MessageLookupByLibrary.simpleMessage("Yes, reset person"),
         "you": MessageLookupByLibrary.simpleMessage("אתה"),
         "youAreOnAFamilyPlan":
             MessageLookupByLibrary.simpleMessage("אתה על תוכנית משפחתית!"),

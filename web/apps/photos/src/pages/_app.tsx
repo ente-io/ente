@@ -18,6 +18,7 @@ import {
     updateAvailableForDownloadDialogAttributes,
     updateReadyToInstallDialogAttributes,
 } from "@/new/photos/components/utils/download";
+import { useLoadingBar } from "@/new/photos/components/utils/use-loading-bar";
 import { photosDialogZIndex } from "@/new/photos/components/utils/z-index";
 import DownloadManager from "@/new/photos/services/download";
 import { runMigrations } from "@/new/photos/services/migrations";
@@ -34,11 +35,7 @@ import {
     getData,
     migrateKVToken,
 } from "@ente/shared/storage/localStorage";
-import {
-    getLocalMapEnabled,
-    getToken,
-    setLocalMapEnabled,
-} from "@ente/shared/storage/localStorage/helpers";
+import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { getTheme } from "@ente/shared/themes";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import type { User } from "@ente/shared/user/types";
@@ -51,14 +48,11 @@ import isElectron from "is-electron";
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
 import "photoswipe/dist/photoswipe.css";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import LoadingBar from "react-top-loading-bar";
 import { resumeExportsIfNeeded } from "services/export";
 import { photosLogout } from "services/logout";
-import {
-    getFamilyPortalRedirectURL,
-    updateMapEnabledStatus,
-} from "services/userService";
+import { getFamilyPortalRedirectURL } from "services/userService";
 import "styles/global.css";
 import { NotificationAttributes } from "types/Notification";
 
@@ -70,9 +64,6 @@ export default function App({ Component, pageProps }: AppProps) {
         typeof window !== "undefined" && !window.navigator.onLine,
     );
     const [showNavbar, setShowNavBar] = useState(false);
-    const [mapEnabled, setMapEnabled] = useState(false);
-    const isLoadingBarRunning = useRef(false);
-    const loadingBar = useRef(null);
     const [dialogMessage, setDialogMessage] = useState<DialogBoxAttributes>();
     const [messageDialogView, setMessageDialogView] = useState(false);
     const [watchFolderView, setWatchFolderView] = useState(false);
@@ -83,13 +74,10 @@ export default function App({ Component, pageProps }: AppProps) {
         useState<NotificationAttributes>(null);
 
     const { showMiniDialog, miniDialogProps } = useAttributedMiniDialog();
+    const { loadingBarRef, showLoadingBar, hideLoadingBar } = useLoadingBar();
     const [themeColor, setThemeColor] = useLocalState(
         LS_KEYS.THEME,
         THEME_COLOR.DARK,
-    );
-    const [isCFProxyDisabled, setIsCFProxyDisabled] = useLocalState(
-        LS_KEYS.CF_PROXY_DISABLED,
-        false,
     );
 
     useEffect(() => {
@@ -141,10 +129,6 @@ export default function App({ Component, pageProps }: AppProps) {
             electron.onOpenURL(undefined);
             electron.onAppUpdateAvailable(undefined);
         };
-    }, []);
-
-    useEffect(() => {
-        setMapEnabled(getLocalMapEnabled());
     }, []);
 
     useEffect(() => {
@@ -207,23 +191,6 @@ export default function App({ Component, pageProps }: AppProps) {
 
     const showNavBar = (show: boolean) => setShowNavBar(show);
 
-    const updateMapEnabled = async (enabled: boolean) => {
-        await updateMapEnabledStatus(enabled);
-        setLocalMapEnabled(enabled);
-        setMapEnabled(enabled);
-    };
-
-    const startLoading = () => {
-        !isLoadingBarRunning.current && loadingBar.current?.continuousStart();
-        isLoadingBarRunning.current = true;
-    };
-    const finishLoading = () => {
-        setTimeout(() => {
-            isLoadingBarRunning.current && loadingBar.current?.complete();
-            isLoadingBarRunning.current = false;
-        }, 100);
-    };
-
     // Use `onGenericError` instead.
     const somethingWentWrong = useCallback(
         () =>
@@ -236,7 +203,7 @@ export default function App({ Component, pageProps }: AppProps) {
     );
 
     const onGenericError = useCallback((e: unknown) => {
-        log.error("Error", e);
+        log.error(e);
         showMiniDialog(genericErrorDialogAttributes());
     }, []);
 
@@ -246,8 +213,8 @@ export default function App({ Component, pageProps }: AppProps) {
 
     const appContext = {
         showNavBar,
-        startLoading, // <- changes on each render (TODO Fix)
-        finishLoading, // <- changes on each render
+        showLoadingBar,
+        hideLoadingBar,
         setDialogMessage,
         watchFolderView,
         setWatchFolderView,
@@ -259,10 +226,6 @@ export default function App({ Component, pageProps }: AppProps) {
         showMiniDialog,
         somethingWentWrong,
         onGenericError,
-        mapEnabled,
-        updateMapEnabled, // <- changes on each render
-        isCFProxyDisabled,
-        setIsCFProxyDisabled,
         logout,
     };
 
@@ -278,7 +241,7 @@ export default function App({ Component, pageProps }: AppProps) {
                 <MessageContainer>
                     {isI18nReady && offline && t("OFFLINE_MSG")}
                 </MessageContainer>
-                <LoadingBar color="#51cd7c" ref={loadingBar} />
+                <LoadingBar color="#51cd7c" ref={loadingBarRef} />
 
                 <DialogBox
                     sx={{ zIndex: photosDialogZIndex }}

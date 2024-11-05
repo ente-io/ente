@@ -94,6 +94,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "albumParticipantsCount": m11,
         "albumUpdated": MessageLookupByLibrary.simpleMessage("Album oppdatert"),
         "albums": MessageLookupByLibrary.simpleMessage("Album"),
+        "allPersonGroupingWillReset": MessageLookupByLibrary.simpleMessage(
+            "All groupings for this person will be reset, and you will lose all suggestions made for this person"),
         "allowAddPhotosDescription": MessageLookupByLibrary.simpleMessage(
             "Tillat folk med lenken å også legge til bilder til det delte albumet."),
         "allowAddingPhotos":
@@ -101,6 +103,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "allowDownloads":
             MessageLookupByLibrary.simpleMessage("Tillat nedlastinger"),
         "apply": MessageLookupByLibrary.simpleMessage("Anvend"),
+        "areYouSureYouWantToResetThisPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Are you sure you want to reset this person?"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "Hva er hovedårsaken til at du sletter kontoen din?"),
         "authToViewYourHiddenFiles": MessageLookupByLibrary.simpleMessage(
@@ -340,6 +345,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Send e-posten på nytt"),
         "resetPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Tilbakestill passord"),
+        "resetPerson": MessageLookupByLibrary.simpleMessage("Reset person"),
         "saveKey": MessageLookupByLibrary.simpleMessage("Lagre nøkkel"),
         "saveYourRecoveryKeyIfYouHaventAlready":
             MessageLookupByLibrary.simpleMessage(
@@ -450,6 +456,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "yesConvertToViewer":
             MessageLookupByLibrary.simpleMessage("Ja, konverter til seer"),
         "yesDelete": MessageLookupByLibrary.simpleMessage("Ja, slett"),
+        "yesResetPerson":
+            MessageLookupByLibrary.simpleMessage("Yes, reset person"),
         "you": MessageLookupByLibrary.simpleMessage("Deg"),
         "youCannotShareWithYourself": MessageLookupByLibrary.simpleMessage(
             "Du kan ikke dele med deg selv"),

@@ -229,6 +229,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Я розумію, що якщо я втрачу свій пароль, я можу втратити свої дані, тому що вони є захищені <underline>наскрізним шифруванням</underline>."),
         "activeSessions":
             MessageLookupByLibrary.simpleMessage("Активні сеанси"),
+        "add": MessageLookupByLibrary.simpleMessage("Додати"),
         "addAName": MessageLookupByLibrary.simpleMessage("Додати ім\'я"),
         "addANewEmail":
             MessageLookupByLibrary.simpleMessage("Додати нову пошту"),
@@ -242,7 +243,12 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Додати розташування"),
         "addLocationButton": MessageLookupByLibrary.simpleMessage("Додати"),
         "addMore": MessageLookupByLibrary.simpleMessage("Додати більше"),
+        "addName": MessageLookupByLibrary.simpleMessage("Додати ім\'я"),
+        "addNameOrMerge":
+            MessageLookupByLibrary.simpleMessage("Додати назву або об\'єднати"),
         "addNew": MessageLookupByLibrary.simpleMessage("Додати нове"),
+        "addNewPerson":
+            MessageLookupByLibrary.simpleMessage("Додати нову особу"),
         "addOnPageSubtitle":
             MessageLookupByLibrary.simpleMessage("Подробиці доповнень"),
         "addOnValidTill": m7,
@@ -277,6 +283,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "allClear": MessageLookupByLibrary.simpleMessage("✨ Все чисто"),
         "allMemoriesPreserved":
             MessageLookupByLibrary.simpleMessage("Всі спогади збережені"),
+        "allPersonGroupingWillReset": MessageLookupByLibrary.simpleMessage(
+            "All groupings for this person will be reset, and you will lose all suggestions made for this person"),
         "allowAddPhotosDescription": MessageLookupByLibrary.simpleMessage(
             "Дозволити людям з посиланням також додавати фотографії до спільного альбому."),
         "allowAddingPhotos": MessageLookupByLibrary.simpleMessage(
@@ -336,6 +344,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "Ви впевнені, що хочете вийти з облікового запису?"),
         "areYouSureYouWantToRenew": MessageLookupByLibrary.simpleMessage(
             "Ви впевнені, що хочете поновити?"),
+        "areYouSureYouWantToResetThisPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Are you sure you want to reset this person?"),
         "askCancelReason": MessageLookupByLibrary.simpleMessage(
             "Підписку було скасовано. Ви хотіли б поділитися причиною?"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
@@ -501,6 +512,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "collectPhotosDescription": MessageLookupByLibrary.simpleMessage(
             "Створіть посилання, за яким ваші друзі зможуть завантажувати фотографії в оригінальній якості."),
         "color": MessageLookupByLibrary.simpleMessage("Колір"),
+        "configuration": MessageLookupByLibrary.simpleMessage("Налаштування"),
         "confirm": MessageLookupByLibrary.simpleMessage("Підтвердити"),
         "confirm2FADisable": MessageLookupByLibrary.simpleMessage(
             "Ви впевнені, що хочете вимкнути двоетапну перевірку?"),
@@ -778,6 +790,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Експортування журналів"),
         "exportYourData":
             MessageLookupByLibrary.simpleMessage("Експортувати дані"),
+        "extraPhotosFound": MessageLookupByLibrary.simpleMessage(
+            "Знайдено додаткові фотографії"),
+        "extraPhotosFoundFor": MessageLookupByLibrary.simpleMessage(
+            "Знайдено додаткові фотографії для \$text"),
         "faceRecognition":
             MessageLookupByLibrary.simpleMessage("Розпізнавання обличчя"),
         "faces": MessageLookupByLibrary.simpleMessage("Обличчя"),
@@ -991,6 +1007,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Завантажуємо фотографії..."),
         "localGallery":
             MessageLookupByLibrary.simpleMessage("Локальна галерея"),
+        "localIndexing":
+            MessageLookupByLibrary.simpleMessage("Локальне індексування"),
         "localSyncErrorMessage": MessageLookupByLibrary.simpleMessage(
             "Схоже, щось пішло не так, оскільки локальна синхронізація фотографій займає більше часу, ніж очікувалося. Зверніться до нашої служби підтримки"),
         "location": MessageLookupByLibrary.simpleMessage("Розташування"),
@@ -1047,6 +1065,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "matrix": MessageLookupByLibrary.simpleMessage("Matrix"),
         "memoryCount": m2,
         "merchandise": MessageLookupByLibrary.simpleMessage("Товари"),
+        "mergeWithExisting":
+            MessageLookupByLibrary.simpleMessage("Об\'єднати з наявним"),
         "mlConsent":
             MessageLookupByLibrary.simpleMessage("Увімкнути машинне навчання"),
         "mlConsentConfirmation": MessageLookupByLibrary.simpleMessage(
@@ -1088,6 +1108,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Не вдалося під\'єднатися до Ente. Перевірте налаштування мережі. Зверніться до нашої команди підтримки, якщо помилка залишиться."),
         "never": MessageLookupByLibrary.simpleMessage("Ніколи"),
         "newAlbum": MessageLookupByLibrary.simpleMessage("Новий альбом"),
+        "newPerson": MessageLookupByLibrary.simpleMessage("Нова особа"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("Уперше на Ente"),
         "newest": MessageLookupByLibrary.simpleMessage("Найновіші"),
         "next": MessageLookupByLibrary.simpleMessage("Далі"),
@@ -1191,6 +1212,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Остаточно видалити"),
         "permanentlyDeleteFromDevice": MessageLookupByLibrary.simpleMessage(
             "Остаточно видалити з пристрою?"),
+        "personName": MessageLookupByLibrary.simpleMessage("Ім\'я особи"),
         "photoDescriptions":
             MessageLookupByLibrary.simpleMessage("Опис фотографії"),
         "photoGridSize":
@@ -1356,6 +1378,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Скинути ігноровані файли"),
         "resetPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Скинути пароль"),
+        "resetPerson": MessageLookupByLibrary.simpleMessage("Reset person"),
         "resetToDefault":
             MessageLookupByLibrary.simpleMessage("Скинути до типових"),
         "restore": MessageLookupByLibrary.simpleMessage("Відновити"),
@@ -1783,6 +1806,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Так, вийти з облікового запису"),
         "yesRemove": MessageLookupByLibrary.simpleMessage("Так, видалити"),
         "yesRenew": MessageLookupByLibrary.simpleMessage("Так, поновити"),
+        "yesResetPerson":
+            MessageLookupByLibrary.simpleMessage("Yes, reset person"),
         "you": MessageLookupByLibrary.simpleMessage("Ви"),
         "youAreOnAFamilyPlan":
             MessageLookupByLibrary.simpleMessage("Ви на сімейному плані!"),

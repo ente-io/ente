@@ -259,6 +259,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "allClear": MessageLookupByLibrary.simpleMessage("✨ Sudah bersih"),
         "allMemoriesPreserved":
             MessageLookupByLibrary.simpleMessage("Semua kenangan terpelihara"),
+        "allPersonGroupingWillReset": MessageLookupByLibrary.simpleMessage(
+            "All groupings for this person will be reset, and you will lose all suggestions made for this person"),
         "allowAddPhotosDescription": MessageLookupByLibrary.simpleMessage(
             "Izinkan orang yang memiliki link untuk menambahkan foto ke album berbagi ini."),
         "allowAddingPhotos":
@@ -305,6 +307,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "Apakah kamu yakin ingin keluar akun?"),
         "areYouSureYouWantToRenew": MessageLookupByLibrary.simpleMessage(
             "Apakah kamu yakin ingin memperpanjang?"),
+        "areYouSureYouWantToResetThisPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Are you sure you want to reset this person?"),
         "askCancelReason": MessageLookupByLibrary.simpleMessage(
             "Langganan kamu telah dibatalkan. Apakah kamu ingin membagikan alasannya?"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
@@ -1141,6 +1146,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Kirim ulang email"),
         "resetPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Atur ulang sandi"),
+        "resetPerson": MessageLookupByLibrary.simpleMessage("Reset person"),
         "restore": MessageLookupByLibrary.simpleMessage("Pulihkan"),
         "restoringFiles":
             MessageLookupByLibrary.simpleMessage("Memulihkan file..."),
@@ -1496,6 +1502,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "yesLogout": MessageLookupByLibrary.simpleMessage("Ya, keluar"),
         "yesRemove": MessageLookupByLibrary.simpleMessage("Ya, hapus"),
         "yesRenew": MessageLookupByLibrary.simpleMessage("Ya, Perpanjang"),
+        "yesResetPerson":
+            MessageLookupByLibrary.simpleMessage("Yes, reset person"),
         "you": MessageLookupByLibrary.simpleMessage("Kamu"),
         "youAreOnAFamilyPlan": MessageLookupByLibrary.simpleMessage(
             "Kamu menggunakan paket keluarga!"),

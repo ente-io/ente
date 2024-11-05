@@ -1,20 +1,12 @@
 import { putAttributes } from "@/accounts/api/user";
 import log from "@/base/log";
-import { apiURL, customAPIOrigin, familyAppOrigin } from "@/base/origins";
+import { apiURL, familyAppOrigin } from "@/base/origins";
 import { ApiError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
-import {
-    getToken,
-    setLocalMapEnabled,
-} from "@ente/shared/storage/localStorage/helpers";
-import { HttpStatusCode, type AxiosResponse } from "axios";
-import {
-    DeleteChallengeResponse,
-    GetFeatureFlagResponse,
-    GetRemoteStoreValueResponse,
-    UserDetails,
-} from "types/user";
+import { getToken } from "@ente/shared/storage/localStorage/helpers";
+import { HttpStatusCode } from "axios";
+import { DeleteChallengeResponse, UserDetails } from "types/user";
 import { getLocalFamilyData, isPartOfFamily } from "utils/user/family";
 
 const HAS_SET_KEYS = "hasSetKeys";
@@ -103,17 +95,6 @@ export const isTokenValid = async (token: string) => {
     }
 };
 
-export const getTwoFactorStatus = async () => {
-    const resp = await HTTPService.get(
-        await apiURL("/users/two-factor/status"),
-        null,
-        {
-            "X-Auth-Token": getToken(),
-        },
-    );
-    return resp.data["status"];
-};
-
 export const getUserDetailsV2 = async (): Promise<UserDetails> => {
     try {
         const token = getToken();
@@ -187,87 +168,3 @@ export const deleteAccount = async (
         throw e;
     }
 };
-
-export const syncMapEnabled = async () => {
-    try {
-        const status = await getMapEnabledStatus();
-        setLocalMapEnabled(status);
-    } catch (e) {
-        log.error("failed to sync map enabled status", e);
-        throw e;
-    }
-};
-
-export const getMapEnabledStatus = async () => {
-    try {
-        const token = getToken();
-        const resp: AxiosResponse<GetRemoteStoreValueResponse> =
-            await HTTPService.get(
-                await apiURL("/remote-store"),
-                {
-                    key: "mapEnabled",
-                    defaultValue: false,
-                },
-                {
-                    "X-Auth-Token": token,
-                },
-            );
-        return resp.data.value === "true";
-    } catch (e) {
-        log.error("failed to get map enabled status", e);
-        throw e;
-    }
-};
-
-export const updateMapEnabledStatus = async (newStatus: boolean) => {
-    try {
-        const token = getToken();
-        await HTTPService.post(
-            await apiURL("/remote-store/update"),
-            {
-                key: "mapEnabled",
-                value: newStatus.toString(),
-            },
-            null,
-            {
-                "X-Auth-Token": token,
-            },
-        );
-    } catch (e) {
-        log.error("failed to update map enabled status", e);
-        throw e;
-    }
-};
-
-/**
- * Return true to disable the upload of files via Cloudflare Workers.
- *
- * These workers were introduced as a way of make file uploads faster:
- * https://ente.io/blog/tech/making-uploads-faster/
- *
- * By default, that's the route we take. However, during development or when
- * self-hosting it can be convenient to turn this flag on to directly upload to
- * the S3-compatible URLs returned by the ente API.
- *
- * Note the double negative (Enhancement: maybe remove the double negative,
- * rename this to say getUseDirectUpload).
- */
-export async function getDisableCFUploadProxyFlag(): Promise<boolean> {
-    // If a custom origin is set, that means we're not running a production
-    // deployment (maybe we're running locally, or being self-hosted).
-    //
-    // In such cases, disable the Cloudflare upload proxy (which won't work for
-    // self-hosters), and instead just directly use the upload URLs that museum
-    // gives us.
-    if (await customAPIOrigin()) return true;
-
-    try {
-        const featureFlags = (
-            await fetch("https://static.ente.io/feature_flags.json")
-        ).json() as GetFeatureFlagResponse;
-        return featureFlags.disableCFUploadProxy;
-    } catch (e) {
-        log.error("failed to get feature flags", e);
-        return false;
-    }
-}

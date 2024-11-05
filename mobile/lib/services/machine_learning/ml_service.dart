@@ -17,17 +17,15 @@ import "package:photos/services/filedata/filedata_service.dart";
 import "package:photos/services/filedata/model/file_data.dart";
 import 'package:photos/services/machine_learning/face_ml/face_clustering/face_clustering_service.dart';
 import "package:photos/services/machine_learning/face_ml/face_clustering/face_db_info_for_clustering.dart";
-import 'package:photos/services/machine_learning/face_ml/face_detection/face_detection_service.dart';
-import 'package:photos/services/machine_learning/face_ml/face_embedding/face_embedding_service.dart';
 import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
 import 'package:photos/services/machine_learning/ml_result.dart';
-import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
+import "package:photos/services/user_remote_flag_service.dart";
 import "package:photos/utils/ml_util.dart";
 import "package:photos/utils/network_util.dart";
-import "package:synchronized/synchronized.dart";
+import "package:photos/utils/ram_check_util.dart";
 
 class MLService {
   final _logger = Logger("MLService");
@@ -37,11 +35,10 @@ class MLService {
   static final instance = MLService._privateConstructor();
   factory MLService() => instance;
 
-  final _initModelLock = Lock();
-  final _downloadModelLock = Lock();
-
   bool _isInitialized = false;
-  bool areModelsDownloaded = false;
+
+  int? lastRemoteFetch;
+  static const int _kRemoteFetchCooldownOnLite = 1000 * 60 * 5;
 
   late String client;
 
@@ -59,11 +56,14 @@ class MLService {
   static const _kForceClusteringFaceCount = 8000;
 
   /// Only call this function once at app startup, after that you can directly call [runAllML]
-  Future<void> init({bool firstTime = false}) async {
-    if (localSettings.isMLIndexingEnabled == false || _isInitialized) {
-      return;
-    }
+  Future<void> init() async {
+    if (_isInitialized) return;
+    if (!userRemoteFlagService
+        .getCachedBoolValue(UserRemoteFlagService.mlEnabled)) return;
     _logger.info("init called");
+
+    // Check if the device has enough RAM to run local indexing
+    await checkDeviceTotalRAM();
 
     // Get client name
     final packageInfo = ServiceLocator.instance.packageInfo;
@@ -72,9 +72,9 @@ class MLService {
 
     // Listen on MachineLearningController
     Bus.instance.on<MachineLearningControlEvent>().listen((event) {
-      if (localSettings.isMLIndexingEnabled == false) {
-        return;
-      }
+      if (!userRemoteFlagService
+          .getCachedBoolValue(UserRemoteFlagService.mlEnabled)) return;
+
       _mlControllerStatus = event.shouldRun;
       if (_mlControllerStatus) {
         if (_shouldPauseIndexingAndClustering) {
@@ -98,6 +98,20 @@ class MLService {
 
     _isInitialized = true;
     _logger.info('init done');
+  }
+
+  bool canFetch() {
+    if (localSettings.isMLLocalIndexingEnabled) return true;
+    if (lastRemoteFetch == null) {
+      lastRemoteFetch = DateTime.now().millisecondsSinceEpoch;
+      return true;
+    }
+    final intDiff = DateTime.now().millisecondsSinceEpoch - lastRemoteFetch!;
+    final bool canFetch = intDiff > _kRemoteFetchCooldownOnLite;
+    if (canFetch) {
+      lastRemoteFetch = DateTime.now().millisecondsSinceEpoch;
+    }
+    return canFetch;
   }
 
   Future<void> sync() async {
@@ -126,7 +140,9 @@ class MLService {
         // refresh discover section
         magicCacheService.updateCache(forced: force).ignore();
       }
-      await indexAllImages();
+      if (canFetch()) {
+        await fetchAndIndexAllImages();
+      }
       if ((await MLDataDB.instance.getUnclusteredFaceCount()) > 0) {
         await clusterAllImages();
       }
@@ -162,10 +178,11 @@ class MLService {
     MLIndexingIsolate.instance.shouldPauseIndexingAndClustering = false;
   }
 
-  /// Analyzes all the images in the database with the latest ml version and stores the results in the database.
+  /// Analyzes all the images in the user library with the latest ml version and stores the results in the database.
   ///
-  /// This function first checks if the image has already been analyzed with the lastest faceMlVersion and stored in the database. If so, it skips the image.
-  Future<void> indexAllImages() async {
+  /// This function first fetches from remote and checks if the image has already been analyzed
+  /// with the lastest faceMlVersion and stored on remote or local database. If so, it skips the image.
+  Future<void> fetchAndIndexAllImages() async {
     if (_cannotRunMLFunction()) return;
 
     try {
@@ -179,13 +196,16 @@ class MLService {
 
       stream:
       await for (final chunk in instructionStream) {
-        if (!await canUseHighBandwidth()) {
+        if (!localSettings.isMLLocalIndexingEnabled) {
+          await MLIndexingIsolate.instance.cleanupLocalIndexingModels();
+          continue;
+        } else if (!await canUseHighBandwidth()) {
           _logger.info(
             'stopping indexing because user is not connected to wifi',
           );
           break stream;
         } else {
-          await _ensureDownloadedModels();
+          await MLIndexingIsolate.instance.ensureDownloadedModels();
         }
         final futures = <Future<bool>>[];
         for (final instruction in chunk) {
@@ -193,7 +213,7 @@ class MLService {
             _logger.info("indexAllImages() was paused, stopping");
             break stream;
           }
-          await _ensureLoadedModels(instruction);
+          await MLIndexingIsolate.instance.ensureLoadedModels(instruction);
           futures.add(processImage(instruction));
         }
         final awaitedFutures = await Future.wait(futures);
@@ -501,62 +521,6 @@ class MLService {
     }
   }
 
-  void triggerModelsDownload() {
-    if (!areModelsDownloaded && !_downloadModelLock.locked) {
-      _logger.info("Models not downloaded, starting download");
-      unawaited(_ensureDownloadedModels());
-    }
-  }
-
-  Future<void> _ensureDownloadedModels([bool forceRefresh = false]) async {
-    if (_downloadModelLock.locked) {
-      _logger.finest("Download models already in progress");
-    }
-    return _downloadModelLock.synchronized(() async {
-      if (areModelsDownloaded) {
-        _logger.finest("Models already downloaded");
-        return;
-      }
-      final goodInternet = await canUseHighBandwidth();
-      if (!goodInternet) {
-        _logger.info(
-          "Cannot download models because user is not connected to wifi",
-        );
-        return;
-      }
-      _logger.info('Downloading models');
-      await Future.wait([
-        FaceDetectionService.instance.downloadModel(forceRefresh),
-        FaceEmbeddingService.instance.downloadModel(forceRefresh),
-        ClipImageEncoder.instance.downloadModel(forceRefresh),
-      ]);
-      areModelsDownloaded = true;
-    });
-  }
-
-  Future<void> _ensureLoadedModels(FileMLInstruction instruction) async {
-    return _initModelLock.synchronized(() async {
-      final faceDetectionLoaded = FaceDetectionService.instance.isInitialized;
-      final faceEmbeddingLoaded = FaceEmbeddingService.instance.isInitialized;
-      final facesModelsLoaded = faceDetectionLoaded && faceEmbeddingLoaded;
-      final clipModelsLoaded = ClipImageEncoder.instance.isInitialized;
-
-      final shouldLoadFaces = instruction.shouldRunFaces && !facesModelsLoaded;
-      final shouldLoadClip = instruction.shouldRunClip && !clipModelsLoaded;
-      if (!shouldLoadFaces && !shouldLoadClip) {
-        return;
-      }
-
-      _logger.info(
-        'Loading models. faces: $shouldLoadFaces, clip: $shouldLoadClip',
-      );
-      await MLIndexingIsolate.instance
-          .loadModels(loadFaces: shouldLoadFaces, loadClip: shouldLoadClip);
-      _logger.info('Models loaded');
-      _logStatus();
-    });
-  }
-
   bool _cannotRunMLFunction({String function = ""}) {
     if (kDebugMode && Platform.isIOS && !_isIndexingOrClusteringRunning) {
       return false;
@@ -596,7 +560,7 @@ class MLService {
   void _logStatus() {
     final String status = '''
     isInternalUser: ${flagService.internalUser}
-    isMLIndexingEnabled: ${localSettings.isMLIndexingEnabled}
+    Local indexing: ${localSettings.isMLLocalIndexingEnabled}
     canRunMLController: $_mlControllerStatus
     isIndexingOrClusteringRunning: $_isIndexingOrClusteringRunning
     shouldPauseIndexingAndClustering: $_shouldPauseIndexingAndClustering

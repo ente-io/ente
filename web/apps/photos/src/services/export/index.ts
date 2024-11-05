@@ -14,7 +14,6 @@ import {
     getCollectionUserFacingName,
 } from "@/new/photos/services/collection";
 import downloadManager from "@/new/photos/services/download";
-import { updateExifIfNeededAndPossible } from "@/new/photos/services/exif-update";
 import {
     exportMetadataDirectoryName,
     exportTrashDirectoryName,
@@ -939,16 +938,12 @@ class ExportService {
         try {
             const fileUID = getExportRecordFileUID(file);
             const originalFileStream = await downloadManager.getFile(file);
-            const updatedFileStream = await updateExifIfNeededAndPossible(
-                file,
-                originalFileStream,
-            );
             if (file.metadata.fileType === FileType.livePhoto) {
                 await this.exportLivePhoto(
                     exportDir,
                     fileUID,
                     collectionExportPath,
-                    updatedFileStream,
+                    originalFileStream,
                     file,
                 );
             } else {
@@ -965,7 +960,7 @@ class ExportService {
                 await writeStream(
                     electron,
                     `${collectionExportPath}/${fileExportName}`,
-                    updatedFileStream,
+                    originalFileStream,
                 );
                 await this.addFileExportedRecord(
                     exportDir,
