@@ -13,6 +13,7 @@ import {
 import { t } from "i18next";
 import React, { useState } from "react";
 import log from "../log";
+import { InlineErrorIndicator } from "./ErrorIndicator";
 
 /**
  * Customize the contents of an {@link AttributedMiniDialog}.
@@ -161,12 +162,6 @@ export const AttributedMiniDialog: React.FC<
 
     const { PaperProps, ...rest } = props;
 
-    const errorIndicator = phase == "failed" && (
-        <Typography variant="small" color="critical.main">
-            {t("generic_error")}
-        </Typography>
-    );
-
     const loadingButton = attributes.continue && (
         <LoadingButton
             loading={phase == "loading"}
@@ -250,7 +245,7 @@ export const AttributedMiniDialog: React.FC<
                     sx={{ paddingBlockStart: "24px", gap: "8px" }}
                     direction={attributes.buttonDirection ?? "column"}
                 >
-                    {errorIndicator}
+                    {phase == "failed" && <InlineErrorIndicator />}
                     {attributes.buttonDirection == "row" ? (
                         <>
                             {cancelButton}

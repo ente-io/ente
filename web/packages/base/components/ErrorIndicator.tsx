@@ -32,8 +32,8 @@ export const ActivityErrorIndicator: React.FC<React.PropsWithChildren> = ({
 export const InlineErrorIndicator: React.FC<React.PropsWithChildren> = ({
     children,
 }) => (
-    <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-        <ErrorOutline color="secondary" sx={{ color: "critical" }} />
+    <Box sx={{ display: "flex", gap: "5px", alignItems: "center" }}>
+        <ErrorOutline sx={{ fontSize: "16px", color: "critical.main" }} />
         <Typography variant="small" color="critical.main">
             {children ?? t("generic_error")}
         </Typography>

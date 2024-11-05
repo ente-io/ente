@@ -1,3 +1,4 @@
+import { InlineErrorIndicator } from "@/base/components/ErrorIndicator";
 import { MenuItemGroup } from "@/base/components/Menu";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
@@ -176,11 +177,7 @@ const ConfirmEnableMap: React.FC<ConfirmStepProps> = ({
                 </Typography>
             </Box>
             <Stack px={"8px"} spacing={"8px"}>
-                {phase == "failed" && (
-                    <Typography variant="small" color="critical.main">
-                        {t("generic_error")}
-                    </Typography>
-                )}
+                {phase == "failed" && <InlineErrorIndicator />}
                 <LoadingButton
                     loading={phase == "loading"}
                     color={"accent"}
@@ -220,11 +217,7 @@ const ConfirmDisableMap: React.FC<ConfirmStepProps> = ({
                 </Typography>
             </Box>
             <Stack px={"8px"} spacing={"8px"}>
-                {phase == "failed" && (
-                    <Typography variant="small" color="critical.main">
-                        {t("generic_error")}
-                    </Typography>
-                )}
+                {phase == "failed" && <InlineErrorIndicator />}
                 <LoadingButton
                     loading={phase == "loading"}
                     color={"critical"}
