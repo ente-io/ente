@@ -108,8 +108,8 @@ const ManageDrawerContents: React.FC<ContentsProps> = ({ onRootClose }) => {
 
     const confirmDisable = () =>
         showMiniDialog({
-            title: t("DISABLE_TWO_FACTOR"),
-            message: t("DISABLE_TWO_FACTOR_MESSAGE"),
+            title: t("disable_two_factor"),
+            message: t("disable_two_factor_message"),
             continue: {
                 text: t("disable"),
                 color: "critical",
