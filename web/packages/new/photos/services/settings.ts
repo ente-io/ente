@@ -14,6 +14,8 @@ import { fetchFeatureFlags, updateRemoteFlag } from "./remote-store";
 /**
  * In-memory flags that tracks various settings.
  *
+ * Some of these are local only, some of these are synced with remote.
+ *
  * [Note: Remote flag lifecycle]
  *
  * At a high level, this is how the app manages remote flags:
@@ -44,11 +46,21 @@ export interface Settings {
      * `true` if maps are enabled.
      */
     mapEnabled: boolean;
+
+    /**
+     * `true` if the user has saved a preference to disable workers for uploads.
+     *
+     * Unlike {@link shouldDisableCFUploadProxy}, whose value reflects other
+     * factors that are taken into account to determine the effective value of
+     * this setting, this function returns only the saved user preference.
+     */
+    cfUploadProxyDisabled: boolean;
 }
 
 const defaultSettings = (): Settings => ({
     isInternalUser: false,
     mapEnabled: false,
+    cfUploadProxyDisabled: false,
 });
 
 /**
@@ -81,6 +93,11 @@ class SettingsState {
      * function.
      */
     settingsSnapshot: Settings;
+
+    /**
+     * `true` if the workers should be disabled for uploads.
+     */
+    shouldDisableCFUploadProxy = false;
 }
 
 /** State shared by the functions in this module. See {@link SettingsState}. */
@@ -93,7 +110,8 @@ let _state = new SettingsState();
  * This assumes that the user is already logged in.
  */
 export const initSettings = () => {
-    readInMemoryFlagsFromLocalStorage();
+    syncSettingsSnapshotWithLocalStorage();
+    void updateShouldDisableCFUploadProxy();
 };
 
 export const logoutSettings = () => {
@@ -112,7 +130,7 @@ export const syncSettings = async () => {
         return;
     }
     saveRemoteFeatureFlagsJSONString(jsonString);
-    readInMemoryFlagsFromLocalStorage();
+    syncSettingsSnapshotWithLocalStorage();
 };
 
 const saveRemoteFeatureFlagsJSONString = (s: string) =>
@@ -132,11 +150,12 @@ const FeatureFlags = z.object({
 
 type FeatureFlags = z.infer<typeof FeatureFlags>;
 
-const readInMemoryFlagsFromLocalStorage = () => {
+const syncSettingsSnapshotWithLocalStorage = () => {
     const flags = savedRemoteFeatureFlags();
     const settings = defaultSettings();
     settings.isInternalUser = flags?.internalUser || isInternalUserViaEmail();
     settings.mapEnabled = flags?.mapEnabled || false;
+    settings.cfUploadProxyDisabled = savedCFProxyDisabled();
     setSettingsSnapshot(settings);
 };
 
@@ -201,14 +220,31 @@ export const updateMapEnabled = async (isEnabled: boolean) => {
  * These workers were introduced as a way of make file uploads faster:
  * https://ente.io/blog/tech/making-uploads-faster/
  *
- * By default, that's the route we take. However, during development or when
- * self-hosting it can be convenient to turn this flag on to directly upload to
- * the S3-compatible URLs returned by the ente API.
+ * By default, that's the route we take. However, there are multiple reasons why
+ * this might be disabled.
  *
- * Note the double negative (Enhancement: maybe remove the double negative,
- * rename this to say getUseDirectUpload).
+ * 1. During development and when self-hosting it we disable them to directly
+ *    upload to the S3-compatible URLs returned by the ente API.
+ *
+ * 2. In rare cases, the user might have trouble reaching Cloudflare's network
+ *    from their ISP (This is rare, and usually resolves itself, but it does
+ *    happen). In such cases, the user can locally turn this off via settings.
+ *
+ * 3. There is also the original global toggle that was added when this
+ *    feature was introduced.
+ *
+ * This function returns the cached, pre-computed value which is updated when #2
+ * changes. The #3 remote status is obtained once, on app start.
  */
-export async function getDisableCFUploadProxyFlag(): Promise<boolean> {
+export const shouldDisableCFUploadProxy = () =>
+    _state.shouldDisableCFUploadProxy;
+
+const updateShouldDisableCFUploadProxy = async () => {
+    _state.shouldDisableCFUploadProxy =
+        await computeShouldDisableCFUploadProxy();
+};
+
+const computeShouldDisableCFUploadProxy = async () => {
     // If a custom origin is set, that means we're not running a production
     // deployment (maybe we're running locally, or being self-hosted).
     //
@@ -217,17 +253,56 @@ export async function getDisableCFUploadProxyFlag(): Promise<boolean> {
     // gives us.
     if (await customAPIOrigin()) return true;
 
+    // See if the user has expressed a local preference to disable them.
+    if (savedCFProxyDisabled()) return true;
+
+    // See if the global flag to disable this is set.
     try {
-        const featureFlags = (
-            await fetch("https://static.ente.io/feature_flags.json")
-        ).json() as GetFeatureFlagResponse;
-        return featureFlags.disableCFUploadProxy ?? false;
+        const res = await fetch("https://static.ente.io/feature_flags.json");
+        return (
+            StaticFeatureFlags.parse(await res.json()).disableCFUploadProxy ??
+            false
+        );
     } catch (e) {
-        log.error("failed to get feature flags", e);
+        log.warn("Ignoring error when getting feature_flags.json", e);
         return false;
     }
-}
+};
 
-export interface GetFeatureFlagResponse {
-    disableCFUploadProxy?: boolean;
-}
+const StaticFeatureFlags = z.object({
+    disableCFUploadProxy: z.boolean().nullable().transform(nullToUndefined),
+});
+
+const cfProxyDisabledKey = "cfProxyDisabled";
+
+const saveCFProxyDisabled = (v: boolean) =>
+    v
+        ? localStorage.setItem(cfProxyDisabledKey, "1")
+        : localStorage.removeItem(cfProxyDisabledKey);
+
+const savedCFProxyDisabled = () => {
+    const json = localStorage.getItem(cfProxyDisabledKey);
+    if (!json) return false;
+    if (json == "1") return true;
+
+    // Older versions of the app used to store this flag in a different
+    // format, so see if this is one of those, and if so, migrate it too.
+    try {
+        const value = z.object({ value: z.boolean() }).parse(json).value;
+        saveCFProxyDisabled(value);
+        return value;
+    } catch (e) {
+        log.warn(`Ignoring ${cfProxyDisabledKey} value: ${json}`, e);
+        localStorage.removeItem(cfProxyDisabledKey);
+        return false;
+    }
+};
+
+/**
+ * Save the user preference for disabling uploads via Cloudflare Workers.
+ */
+export const updateCFProxyDisabledPreference = async (value: boolean) => {
+    saveCFProxyDisabled(value);
+    await updateShouldDisableCFUploadProxy();
+    syncSettingsSnapshotWithLocalStorage();
+};
