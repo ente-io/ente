@@ -6,7 +6,7 @@
 
 import { localUser } from "@/base/local-user";
 import log from "@/base/log";
-import { customAPIOrigin } from "@/base/origins";
+import { updateShouldDisableCFUploadProxy } from "@/media/upload";
 import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
 import { fetchFeatureFlags, updateRemoteFlag } from "./remote-store";
@@ -93,11 +93,6 @@ class SettingsState {
      * function.
      */
     settingsSnapshot: Settings;
-
-    /**
-     * `true` if the workers should be disabled for uploads.
-     */
-    shouldDisableCFUploadProxy = false;
 }
 
 /** State shared by the functions in this module. See {@link SettingsState}. */
@@ -110,8 +105,8 @@ let _state = new SettingsState();
  * This assumes that the user is already logged in.
  */
 export const initSettings = () => {
+    void updateShouldDisableCFUploadProxy(savedCFProxyDisabled());
     syncSettingsSnapshotWithLocalStorage();
-    void updateShouldDisableCFUploadProxy();
 };
 
 export const logoutSettings = () => {
@@ -214,65 +209,6 @@ export const updateMapEnabled = async (isEnabled: boolean) => {
     return syncSettings();
 };
 
-/**
- * Return true to disable the upload of files via Cloudflare Workers.
- *
- * These workers were introduced as a way of make file uploads faster:
- * https://ente.io/blog/tech/making-uploads-faster/
- *
- * By default, that's the route we take. However, there are multiple reasons why
- * this might be disabled.
- *
- * 1. During development and when self-hosting it we disable them to directly
- *    upload to the S3-compatible URLs returned by the ente API.
- *
- * 2. In rare cases, the user might have trouble reaching Cloudflare's network
- *    from their ISP (This is rare, and usually resolves itself, but it does
- *    happen). In such cases, the user can locally turn this off via settings.
- *
- * 3. There is also the original global toggle that was added when this
- *    feature was introduced.
- *
- * This function returns the cached, pre-computed value which is updated when #2
- * changes. The #3 remote status is obtained once, on app start.
- */
-export const shouldDisableCFUploadProxy = () =>
-    _state.shouldDisableCFUploadProxy;
-
-const updateShouldDisableCFUploadProxy = async () => {
-    _state.shouldDisableCFUploadProxy =
-        await computeShouldDisableCFUploadProxy();
-};
-
-const computeShouldDisableCFUploadProxy = async () => {
-    // If a custom origin is set, that means we're not running a production
-    // deployment (maybe we're running locally, or being self-hosted).
-    //
-    // In such cases, disable the Cloudflare upload proxy (which won't work for
-    // self-hosters), and instead just directly use the upload URLs that museum
-    // gives us.
-    if (await customAPIOrigin()) return true;
-
-    // See if the user has expressed a local preference to disable them.
-    if (savedCFProxyDisabled()) return true;
-
-    // See if the global flag to disable this is set.
-    try {
-        const res = await fetch("https://static.ente.io/feature_flags.json");
-        return (
-            StaticFeatureFlags.parse(await res.json()).disableCFUploadProxy ??
-            false
-        );
-    } catch (e) {
-        log.warn("Ignoring error when getting feature_flags.json", e);
-        return false;
-    }
-};
-
-const StaticFeatureFlags = z.object({
-    disableCFUploadProxy: z.boolean().nullable().transform(nullToUndefined),
-});
-
 const cfProxyDisabledKey = "cfProxyDisabled";
 
 const saveCFProxyDisabled = (v: boolean) =>
@@ -303,6 +239,6 @@ const savedCFProxyDisabled = () => {
  */
 export const updateCFProxyDisabledPreference = async (value: boolean) => {
     saveCFProxyDisabled(value);
-    await updateShouldDisableCFUploadProxy();
+    await updateShouldDisableCFUploadProxy(value);
     syncSettingsSnapshotWithLocalStorage();
 };
