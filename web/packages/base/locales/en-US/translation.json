@@ -270,7 +270,6 @@
     "UPDATE": "Update",
     "disable_two_factor": "Disable two-factor",
     "disable_two_factor_message": "Are you sure you want to disable your two-factor authentication",
-    "TWO_FACTOR_DISABLE_FAILED": "Failed to disable two factor, please try again",
     "EXPORT_DATA": "Export data",
     "select_folder": "Select folder",
     "select_zips": "Select zips",
