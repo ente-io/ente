@@ -7,7 +7,6 @@
  * there.
  */
 
-import { pt } from "@/base/i18n";
 import type { SearchOption } from "@/new/photos/services/search/types";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import { Typography } from "@mui/material";
@@ -49,10 +48,8 @@ export const PeopleEmptyState: React.FC = () => {
 
     const message =
         mlStatus?.phase == "done"
-            ? pt(
-                  "People will be shown here when there are sufficient photos of a person",
-              )
-            : pt("Syncing...");
+            ? t("people_empty_too_few")
+            : t("syncing_wait");
 
     return (
         <VerticallyCentered>

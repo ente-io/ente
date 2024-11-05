@@ -228,6 +228,8 @@
     "indexing_fetching": "Fetching indexes ({{nSyncedFiles, number}} / {{nTotalFiles, number}})",
     "indexing_people": "Indexing people in {{nSyncedFiles, number}} photos...",
     "indexing_done": "Indexed {{nSyncedFiles, number}} photos",
+    "syncing_wait": "Syncing...",
+    "people_empty_too_few": "People will be shown here when there are sufficient photos of a person",
     "INFO": "Info ",
     "INFO_OPTION": "Info (I)",
     "file_name": "File name",
