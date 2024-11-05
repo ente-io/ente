@@ -74,7 +74,7 @@ func (c *Controller) tryReplicate() error {
 			"type":    row.Type,
 			"size":    row.Size,
 			"userID":  row.UserID,
-		}).Errorf("Could not delete file data: %s", err)
+		}).Errorf("Could not replicate file data: %s", err)
 		return err
 	} else {
 		// If the replication was completed without any errors, we can reset the lock time
