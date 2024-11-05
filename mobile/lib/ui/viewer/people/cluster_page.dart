@@ -17,12 +17,13 @@ import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
-import "package:photos/ui/viewer/people/add_person_action_sheet.dart";
 import "package:photos/ui/viewer/people/cluster_app_bar.dart";
 import "package:photos/ui/viewer/people/people_banner.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
+import "package:photos/ui/viewer/people/save_person.dart";
 import "package:photos/ui/viewer/search/result/person_face_widget.dart";
 import "package:photos/ui/viewer/search/result/search_result_page.dart";
+import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/toast_util.dart";
 
@@ -172,26 +173,36 @@ class _ClusterPageState extends State<ClusterPage> {
                       text: S.of(context).addAName,
                       subText: S.of(context).findPeopleByName,
                       onTap: () async {
-                        if (widget.personID == null) {
-                          final result = await showAssignPersonAction(
-                            context,
-                            clusterID: widget.clusterID,
-                          );
-                          if (result != null &&
-                              result is (PersonEntity, EnteFile)) {
-                            Navigator.pop(context);
-                            // ignore: unawaited_futures
-                            routeToPage(
+                        try {
+                          if (widget.personID == null) {
+                            final result = await routeToPage(
                               context,
-                              PeoplePage(person: result.$1),
+                              SavePerson(widget.clusterID),
                             );
-                          } else if (result != null && result is PersonEntity) {
-                            Navigator.pop(context);
-                            // ignore: unawaited_futures
-                            routeToPage(context, PeoplePage(person: result));
+                            // final result = await showAssignPersonAction(
+                            //   context,
+                            //   clusterID: widget.clusterID,
+                            // );
+                            if (result != null &&
+                                result is (PersonEntity, EnteFile)) {
+                              Navigator.pop(context);
+                              // ignore: unawaited_futures
+                              routeToPage(
+                                context,
+                                PeoplePage(person: result.$1),
+                              );
+                            } else if (result != null &&
+                                result is PersonEntity) {
+                              Navigator.pop(context);
+                              // ignore: unawaited_futures
+                              routeToPage(context, PeoplePage(person: result));
+                            }
+                          } else {
+                            showShortToast(context, "No personID or clusterID");
                           }
-                        } else {
-                          showShortToast(context, "No personID or clusterID");
+                        } catch (e) {
+                          showGenericErrorDialog(context: context, error: e)
+                              .ignore();
                         }
                       },
                     ),
