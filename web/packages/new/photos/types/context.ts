@@ -31,8 +31,6 @@ export type AppContextT = AccountsContextT & {
      */
     setDialogMessage: SetDialogBoxAttributes;
     setNotificationAttributes: SetNotificationAttributes;
-    mapEnabled: boolean;
-    updateMapEnabled: (enabled: boolean) => Promise<void>;
     watchFolderView: boolean;
     setWatchFolderView: (isOpen: boolean) => void;
     watchFolderFiles: FileList;

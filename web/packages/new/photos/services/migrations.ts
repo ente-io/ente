@@ -105,6 +105,7 @@ const m3 = () =>
 // // Added: Nov 2025 (v1.7.7-beta). Prunable.
 // const m4 = () => {
 //     // Delete legacy keys for storing individual settings
+//     // LS_KEYS.MAP_ENABLED = "mapEnabled",
 //     localStorage.removeItem("mapEnabled");
 //     localStorage.removeItem("cfProxyDisabled");
 // };

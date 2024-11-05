@@ -13,7 +13,25 @@ import { fetchFeatureFlags, updateRemoteFlag } from "./remote-store";
 /**
  * In-memory flags that tracks various settings.
  *
- * See: [Note: Remote flag lifecycle].
+ * [Note: Remote flag lifecycle]
+ *
+ * At a high level, this is how the app manages remote flags:
+ *
+ * 1.  On app start, the initial are read from local storage in
+ *     {@link initSettings}.
+ *
+ * 2.  During the remote sync, remote flags are fetched and saved in local
+ *     storage, and the in-memory state updated to reflect the latest values
+ *     ({@link syncSettings}).
+ *
+ * 3.  Updating a value also cause an unconditional fetch and update
+ *     ({@link syncSettings}).
+ *
+ * 4.  The individual getter functions for the flags (e.g.
+ *     {@link isInternalUser}) return the in-memory values, and so are suitable
+ *     for frequent use during UI rendering.
+ *
+ * 5.  Everything gets reset to the default state on {@link logoutSettings}.
  */
 export interface Settings {
     /**
@@ -51,12 +69,6 @@ class SettingsState {
     }
 
     /**
-     * True if we have performed a fetch for the logged in user since the app
-     * started.
-     */
-    haveSynced = false;
-
-    /**
      * Subscriptions to {@link Settings} updates.
      *
      * See {@link settingsSubscribe}.
@@ -72,43 +84,6 @@ class SettingsState {
 
 /** State shared by the functions in this module. See {@link SettingsState}. */
 let _state = new SettingsState();
-
-/**
- * Fetch remote flags (feature flags and other user specific preferences) from
- * remote and save them in local storage for subsequent lookup.
- *
- * It fetches only once per app lifetime, and so is safe to call as arbitrarily
- * many times. Remember to call {@link clearFeatureFlagSessionState} on logout
- * to clear any in memory state so that these can be fetched again on the
- * subsequent login.
- *
- * The local cache will also be updated if an individual flag is changed.
- *
- * [Note: Remote flag lifecycle]
- *
- * At a high level, this is how the app manages remote flags:
- *
- * 1.  On app start, the initial are read from local storage in
- *     {@link initSettings}.
- *
- * 2.  On app start, as part of the normal sync with remote, remote flags are
- *     fetched once and saved in local storage, and the in-memory state updated
- *     to reflect the latest values ({@link triggerSettingsSyncIfNeeded}). If
- *     this fetch fails, we try again periodically (on every sync with remote)
- *     until success.
- *
- * 3.  Some operations like opening the preferences panel or updating a value
- *     also cause an unconditional fetch and update ({@link syncSettings}).
- *
- * 4.  The individual getter functions for the flags (e.g.
- *     {@link isInternalUser}) return the in-memory values, and so are suitable
- *     for frequent use during UI rendering.
- *
- * 5.  Everything gets reset to the default state on {@link logoutSettings}.
- */
-export const triggerSettingsSyncIfNeeded = () => {
-    if (!_state.haveSynced) void syncSettings();
-};
 
 /**
  * Read in the locally persisted settings into memory, but otherwise do not
@@ -137,7 +112,6 @@ export const syncSettings = async () => {
     }
     saveRemoteFeatureFlagsJSONString(jsonString);
     readInMemoryFlagsFromLocalStorage();
-    _state.haveSynced = true;
 };
 
 const saveRemoteFeatureFlagsJSONString = (s: string) =>
