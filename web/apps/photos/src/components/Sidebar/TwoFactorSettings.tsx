@@ -1,17 +1,17 @@
 import { disableTwoFactor } from "@/accounts/api/user";
 import { MenuItemGroup, MenuSectionTitle } from "@/base/components/Menu";
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import {
     NestedSidebarDrawer,
     SidebarDrawerTitlebar,
     type NestedSidebarDrawerVisibilityProps,
 } from "@/base/components/mui/SidebarDrawer";
 import { useAppContext } from "@/new/photos/types/context";
-import { VerticallyCentered } from "@ente/shared/components/Container";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { LS_KEYS, getData, setLSUser } from "@ente/shared/storage/localStorage";
 import LockIcon from "@mui/icons-material/Lock";
-import { Button, Stack, Typography } from "@mui/material";
+import { Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import router, { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -83,18 +83,23 @@ const SetupDrawerContents: React.FC<ContentsProps> = ({ onRootClose }) => {
     };
 
     return (
-        <VerticallyCentered sx={{ mb: 2 }}>
-            <LockIcon sx={{ fontSize: (theme) => theme.spacing(5), mb: 2 }} />
-            <Typography mb={4}>{t("TWO_FACTOR_INFO")}</Typography>
-            <Button
-                variant="contained"
-                color="accent"
-                size="large"
-                onClick={configure}
+        <Stack sx={{ px: "16px", py: "20px", alignItems: "center" }}>
+            <LockIcon
+                sx={{
+                    fontSize: "40px",
+                    color: (theme) => theme.colors.text.muted,
+                }}
+            />
+            <Typography
+                sx={{ textAlign: "center", marginBlock: "32px 36px" }}
+                color="text.muted"
             >
+                {t("TWO_FACTOR_INFO")}
+            </Typography>
+            <FocusVisibleButton color="accent" size="large" onClick={configure}>
                 {t("ENABLE_TWO_FACTOR")}
-            </Button>
-        </VerticallyCentered>
+            </FocusVisibleButton>
+        </Stack>
     );
 };
 
