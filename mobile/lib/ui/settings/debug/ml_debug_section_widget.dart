@@ -59,6 +59,23 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
     final colorScheme = getEnteColorScheme(context);
     return Column(
       children: [
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title:
+                "Exclude files of face IDs that are not in any cluster on applying 'only them' filter.",
+          ),
+          trailingWidget: ToggleSwitchWidget(
+            value: () => localSettings
+                .excludeFilesOfFaceIDsThatAreNotInAnyClusterOnOnlyThemFilter,
+            onChanged: () async {
+              await localSettings
+                  .setExcludeFilesOfFaceIDsThatAreNotInAnyClusterOnOnlyThemFilter(
+                !localSettings
+                    .excludeFilesOfFaceIDsThatAreNotInAnyClusterOnOnlyThemFilter,
+              );
+            },
+          ),
+        ),
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: FutureBuilder<IndexStatus>(

@@ -55,7 +55,10 @@ Future<List<EnteFile>> getFilteredFiles(
       } catch (e) {
         logger.severe("Error in filtering face filter: $e");
       }
-    } else if (filter is OnlyThemFilter) {
+    }
+    //TODO: Add result to matchedUploadedIDs to avoid recomputation and check if
+    // it is already computed.
+    else if (filter is OnlyThemFilter) {
       try {
         late Set<int> intersectionOfSelectedFaceFiltersFileIDs;
         final selectedClusterIDs = <String>[];
@@ -91,10 +94,13 @@ Future<List<EnteFile>> getFilteredFiles(
           exceptClusters: selectedClusterIDs,
         );
 
-        final filesOfFaceIDsNotInAnyCluster =
-            await MLDataDB.instance.getAllFileIDsOfFaceIDsNotInAnyCluster();
+        if (localSettings
+            .excludeFilesOfFaceIDsThatAreNotInAnyClusterOnOnlyThemFilter) {
+          final filesOfFaceIDsNotInAnyCluster =
+              await MLDataDB.instance.getAllFileIDsOfFaceIDsNotInAnyCluster();
 
-        fileIDsToAvoid.addAll(filesOfFaceIDsNotInAnyCluster);
+          fileIDsToAvoid.addAll(filesOfFaceIDsNotInAnyCluster);
+        }
 
         final result =
             intersectionOfSelectedFaceFiltersFileIDs.difference(fileIDsToAvoid);

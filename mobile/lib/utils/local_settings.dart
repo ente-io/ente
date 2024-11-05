@@ -16,6 +16,8 @@ class LocalSettings {
   static const kRateUsPromptThreshold = 2;
   static const shouldLoopVideoKey = "video.should_loop";
   static const onGuestViewKey = "on_guest_view";
+  static const kExcludeFilesOfFaceIDsThatAreNotInAnyClusterOnOnlyThemFilter =
+      "excludeFilesOfFaceIDsThatAreNotInAnyClusterOnOnlyThemFilter";
 
   final SharedPreferences _prefs;
 
@@ -65,6 +67,22 @@ class LocalSettings {
 
   bool get userEnabledMultiplePart =>
       _prefs.getBool(kEnableMultiplePart) ?? false;
+
+  bool get excludeFilesOfFaceIDsThatAreNotInAnyClusterOnOnlyThemFilter =>
+      _prefs.getBool(
+        kExcludeFilesOfFaceIDsThatAreNotInAnyClusterOnOnlyThemFilter,
+      ) ??
+      true;
+
+  Future<bool> setExcludeFilesOfFaceIDsThatAreNotInAnyClusterOnOnlyThemFilter(
+    bool value,
+  ) async {
+    await _prefs.setBool(
+      kExcludeFilesOfFaceIDsThatAreNotInAnyClusterOnOnlyThemFilter,
+      value,
+    );
+    return value;
+  }
 
   Future<bool> setUserEnabledMultiplePart(bool value) async {
     await _prefs.setBool(kEnableMultiplePart, value);
