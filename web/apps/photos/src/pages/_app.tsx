@@ -52,9 +52,7 @@ import { useCallback, useEffect, useState } from "react";
 import LoadingBar from "react-top-loading-bar";
 import { resumeExportsIfNeeded } from "services/export";
 import { photosLogout } from "services/logout";
-import {
-    getFamilyPortalRedirectURL,
-} from "services/userService";
+import { getFamilyPortalRedirectURL } from "services/userService";
 import "styles/global.css";
 import { NotificationAttributes } from "types/Notification";
 
