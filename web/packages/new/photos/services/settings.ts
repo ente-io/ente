@@ -2,6 +2,8 @@
  * @file Storage (in-memory, local, remote) and update of various settings.
  */
 
+/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
+
 import { localUser } from "@/base/local-user";
 import log from "@/base/log";
 import { nullToUndefined } from "@/utils/transform";
@@ -150,6 +152,7 @@ const savedRemoteFeatureFlags = () => {
 const FeatureFlags = z.object({
     internalUser: z.boolean().nullish().transform(nullToUndefined),
     betaUser: z.boolean().nullish().transform(nullToUndefined),
+    mapEnabled: z.boolean().nullish().transform(nullToUndefined),
 });
 
 type FeatureFlags = z.infer<typeof FeatureFlags>;
@@ -157,8 +160,8 @@ type FeatureFlags = z.infer<typeof FeatureFlags>;
 const readInMemoryFlagsFromLocalStorage = () => {
     const flags = savedRemoteFeatureFlags();
     const settings = defaultSettings();
-    // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
     settings.isInternalUser = flags?.internalUser || isInternalUserViaEmail();
+    settings.mapEnabled = flags?.mapEnabled || false;
     setSettingsSnapshot(settings);
 };
 
