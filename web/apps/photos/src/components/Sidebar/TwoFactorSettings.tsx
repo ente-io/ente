@@ -109,7 +109,7 @@ interface TwoFactorModalManageSectionProps {
 
 function TwoFactorModalManageSection(props: TwoFactorModalManageSectionProps) {
     const { closeDialog } = props;
-    const { showMiniDialog, setDialogMessage } = useAppContext();
+    const { showMiniDialog } = useAppContext();
 
     const confirmDisable = () =>
         showMiniDialog({
@@ -131,21 +131,17 @@ function TwoFactorModalManageSection(props: TwoFactorModalManageSectionProps) {
         closeDialog();
     };
 
-    const warnTwoFactorReconfigure = async () => {
-        setDialogMessage({
+    const confirmReconfigure = () =>
+        showMiniDialog({
             title: t("UPDATE_TWO_FACTOR"),
-
-            content: t("UPDATE_TWO_FACTOR_MESSAGE"),
-            close: { text: t("cancel") },
-            proceed: {
-                variant: "accent",
+            message: t("UPDATE_TWO_FACTOR_MESSAGE"),
+            continue: {
                 text: t("UPDATE"),
-                action: reconfigureTwoFactor,
+                action: reconfigure,
             },
         });
-    };
 
-    const reconfigureTwoFactor = async () => {
+    const reconfigure = () => {
         closeDialog();
         router.push(PAGES.TWO_FACTOR_SETUP);
     };
@@ -164,7 +160,7 @@ function TwoFactorModalManageSection(props: TwoFactorModalManageSectionProps) {
             <div>
                 <MenuItemGroup>
                     <EnteMenuItem
-                        onClick={warnTwoFactorReconfigure}
+                        onClick={confirmReconfigure}
                         variant="primary"
                         checked={true}
                         label={t("reconfigure")}
