@@ -1,5 +1,6 @@
 import { accountLogout } from "@/accounts/services/logout";
 import log from "@/base/log";
+import { resetUploadState } from "@/media/upload";
 import DownloadManager from "@/new/photos/services/download";
 import { logoutML, terminateMLWorker } from "@/new/photos/services/ml";
 import { logoutSearch } from "@/new/photos/services/search";
@@ -40,6 +41,12 @@ export const photosLogout = async () => {
         logoutSettings();
     } catch (e) {
         ignoreError("settings", e);
+    }
+
+    try {
+        resetUploadState();
+    } catch (e) {
+        ignoreError("upload", e);
     }
 
     try {

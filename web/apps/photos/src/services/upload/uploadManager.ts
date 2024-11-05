@@ -8,9 +8,9 @@ import type { Collection } from "@/media/collection";
 import { EncryptedEnteFile, EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { potentialFileTypeFromExtension } from "@/media/live-photo";
+import { shouldDisableCFUploadProxy } from "@/media/upload";
 import { getLocalFiles } from "@/new/photos/services/files";
 import { indexNewUpload } from "@/new/photos/services/ml";
-import { getDisableCFUploadProxyFlag } from "@/new/photos/services/settings";
 import type { UploadItem } from "@/new/photos/services/upload/types";
 import {
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
@@ -331,7 +331,6 @@ class UploadManager {
     private publicUploadProps: PublicUploadProps;
     private uploaderName: string;
     private uiService: UIService;
-    private isCFUploadProxyDisabled: boolean = false;
 
     constructor() {
         this.uiService = new UIService();
@@ -341,15 +340,8 @@ class UploadManager {
         progressUpdater: ProgressUpdater,
         onUploadFile: (file: EnteFile) => void,
         publicCollectProps: PublicUploadProps,
-        isCFUploadProxyDisabled: boolean,
     ) {
         this.uiService.init(progressUpdater);
-        const remoteIsCFUploadProxyDisabled =
-            await getDisableCFUploadProxyFlag();
-        if (remoteIsCFUploadProxyDisabled) {
-            isCFUploadProxyDisabled = remoteIsCFUploadProxyDisabled;
-        }
-        this.isCFUploadProxyDisabled = isCFUploadProxyDisabled;
         UploadService.init(publicCollectProps);
         this.onUploadFile = onUploadFile;
         this.publicUploadProps = publicCollectProps;
@@ -543,7 +535,7 @@ class UploadManager {
                 this.existingFiles,
                 this.parsedMetadataJSONMap,
                 worker,
-                this.isCFUploadProxyDisabled,
+                shouldDisableCFUploadProxy(),
                 () => {
                     this.abortIfCancelled();
                 },

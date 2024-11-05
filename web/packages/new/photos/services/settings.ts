@@ -235,7 +235,8 @@ const savedCFProxyDisabled = () => {
 };
 
 /**
- * Save the user preference for disabling uploads via Cloudflare Workers.
+ * Save the user preference for disabling uploads via Cloudflare Workers, also
+ * notifying the upload subsystem of the change.
  */
 export const updateCFProxyDisabledPreference = async (value: boolean) => {
     saveCFProxyDisabled(value);

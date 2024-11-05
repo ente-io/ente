@@ -19,6 +19,16 @@ class UploadState {
 let _state = new UploadState();
 
 /**
+ * Reset any internal state maintained by the module.
+ *
+ * This is primarily meant as a way for stateful apps (e.g. photos) to clear any
+ * user specific state on logout.
+ */
+export const resetUploadState = () => {
+    _state = new UploadState();
+};
+
+/**
  * Return true to disable the upload of files via Cloudflare Workers.
  *
  * These workers were introduced as a way of make file uploads faster:

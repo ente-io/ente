@@ -37,8 +37,6 @@ export type AppContextT = AccountsContextT & {
     setWatchFolderFiles: (files: FileList) => void;
     themeColor: THEME_COLOR;
     setThemeColor: (themeColor: THEME_COLOR) => void;
-    isCFProxyDisabled: boolean;
-    setIsCFProxyDisabled: (disabled: boolean) => void;
 };
 
 /**
