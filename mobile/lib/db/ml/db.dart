@@ -1024,36 +1024,6 @@ class MLDataDB {
     return [for (final row in result) row[fileIDColumn]];
   }
 
-  Future<Set<int>> getFileIDsOfClusterIDs(Set<String> clusterIDs) async {
-    final db = await instance.asyncDB;
-    final inParam = clusterIDs.map((e) => "'$e'").join(',');
-
-    final result = await db.getAll(
-      '''
-        SELECT DISTINCT $facesTable.$fileIDColumn
-        FROM $faceClustersTable 
-        JOIN $facesTable ON $faceClustersTable.$faceIDColumn = $facesTable.$faceIDColumn
-        WHERE $faceClustersTable.$clusterIDColumn IN ($inParam)
-    ''',
-    );
-
-    return <int>{for (final row in result) row[fileIDColumn]};
-  }
-
-  Future<Set<String>> getAllClusterIDs({List<String>? exceptClusters}) async {
-    final notInParam = exceptClusters?.map((e) => "'$e'").join(',') ?? '';
-    final db = await instance.asyncDB;
-    final result = await db.getAll(
-      '''
-        SELECT DISTINCT $clusterIDColumn
-        FROM $faceClustersTable 
-        WHERE $clusterIDColumn NOT IN ($notInParam)
-    ''',
-    );
-
-    return <String>{for (final row in result) row[clusterIDColumn]};
-  }
-
   Future<Set<int>> getAllFileIDsOfFaceIDsNotInAnyCluster() async {
     final db = await instance.asyncDB;
     final result = await db.getAll(
@@ -1064,6 +1034,21 @@ class MLDataDB {
         WHERE face_clusters.face_id IS NULL;
     ''',
     );
+    return <int>{for (final row in result) row[fileIDColumn]};
+  }
+
+  Future<Set<int>> getAllFilesAssociatedWithAllClusters({
+    List<String>? exceptClusters,
+  }) async {
+    final notInParam = exceptClusters?.map((e) => "'$e'").join(',') ?? '';
+    final db = await instance.asyncDB;
+    final result = await db.getAll('''
+        SELECT DISTINCT $facesTable.$fileIDColumn 
+        FROM $facesTable 
+        JOIN $faceClustersTable on $faceClustersTable.$faceIDColumn = $facesTable.$faceIDColumn
+        WHERE $faceClustersTable.$clusterIDColumn NOT IN ($notInParam);
+    ''');
+
     return <int>{for (final row in result) row[fileIDColumn]};
   }
 }

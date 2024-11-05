@@ -1,5 +1,3 @@
-import "dart:developer";
-
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/configuration.dart";
@@ -43,74 +41,67 @@ Future<List<EnteFile>> getFilteredFiles(
   for (HierarchicalSearchFilter filter in filters) {
     if (filter is FaceFilter && filter.getMatchedUploadedIDs().isEmpty) {
       try {
-        final stopwatch = Stopwatch()..start();
-
         if (filter.personId != null) {
-          logger.info(
-            "Fetching files for never fetched person ${filter.personId}",
-          );
           final fileIDs = await MLDataDB.instance.getFileIDsOfPersonID(
             filter.personId!,
           );
           filter.matchedUploadedIDs.addAll(fileIDs);
         } else if (filter.clusterId != null) {
-          logger.info(
-            "Fetching files for never fetched cluster ${filter.clusterId}",
-          );
           final fileIDs = await MLDataDB.instance.getFileIDsOfClusterID(
             filter.clusterId!,
           );
           filter.matchedUploadedIDs.addAll(fileIDs);
         }
-
-        stopwatch.stop();
       } catch (e) {
-        log("Error in face filter: $e");
+        logger.severe("Error in filtering face filter: $e");
       }
     } else if (filter is OnlyThemFilter) {
-      late Set<int> intersectionOfSelectedFaceFiltersFileIDs;
-      final selectedClusterIDs = <String>[];
-      final selectedPersonIDs = <String>[];
-      int index = 0;
+      try {
+        late Set<int> intersectionOfSelectedFaceFiltersFileIDs;
+        final selectedClusterIDs = <String>[];
+        final selectedPersonIDs = <String>[];
+        int index = 0;
 
-      for (final faceFilter in filter.faceFilters) {
-        if (index == 0) {
-          intersectionOfSelectedFaceFiltersFileIDs =
-              faceFilter.getMatchedUploadedIDs();
-        } else {
-          intersectionOfSelectedFaceFiltersFileIDs =
-              intersectionOfSelectedFaceFiltersFileIDs
-                  .intersection(faceFilter.getMatchedUploadedIDs());
-        }
-        index++;
+        for (final faceFilter in filter.faceFilters) {
+          if (index == 0) {
+            intersectionOfSelectedFaceFiltersFileIDs =
+                faceFilter.getMatchedUploadedIDs();
+          } else {
+            intersectionOfSelectedFaceFiltersFileIDs =
+                intersectionOfSelectedFaceFiltersFileIDs
+                    .intersection(faceFilter.getMatchedUploadedIDs());
+          }
+          index++;
 
-        if (faceFilter.clusterId != null) {
-          selectedClusterIDs.add(faceFilter.clusterId!);
-        } else {
-          selectedPersonIDs.add(faceFilter.personId!);
+          if (faceFilter.clusterId != null) {
+            selectedClusterIDs.add(faceFilter.clusterId!);
+          } else {
+            selectedPersonIDs.add(faceFilter.personId!);
+          }
         }
+
+        await MLDataDB.instance
+            .getPersonsClusterIDs(selectedPersonIDs)
+            .then((clusterIDs) {
+          selectedClusterIDs.addAll(clusterIDs);
+        });
+
+        final fileIDsToAvoid =
+            await MLDataDB.instance.getAllFilesAssociatedWithAllClusters(
+          exceptClusters: selectedClusterIDs,
+        );
+
+        final filesOfFaceIDsNotInAnyCluster =
+            await MLDataDB.instance.getAllFileIDsOfFaceIDsNotInAnyCluster();
+
+        fileIDsToAvoid.addAll(filesOfFaceIDsNotInAnyCluster);
+
+        final result =
+            intersectionOfSelectedFaceFiltersFileIDs.difference(fileIDsToAvoid);
+        filter.matchedUploadedIDs.addAll(result);
+      } catch (e) {
+        logger.severe("Error in filtering only them filter: $e");
       }
-
-      await MLDataDB.instance
-          .getPersonsClusterIDs(selectedPersonIDs)
-          .then((clusterIDs) {
-        selectedClusterIDs.addAll(clusterIDs);
-      });
-
-      final clusterIDsToAvoid = await MLDataDB.instance
-          .getAllClusterIDs(exceptClusters: selectedClusterIDs);
-
-      final fileIDsToAvoid =
-          await MLDataDB.instance.getFileIDsOfClusterIDs(clusterIDsToAvoid);
-
-      final filesOfFaceIDsNotInAnyCluster =
-          await MLDataDB.instance.getAllFileIDsOfFaceIDsNotInAnyCluster();
-
-      fileIDsToAvoid.addAll(filesOfFaceIDsNotInAnyCluster);
-
-      final result =
-          intersectionOfSelectedFaceFiltersFileIDs.difference(fileIDsToAvoid);
-      filter.matchedUploadedIDs.addAll(result);
     } else if (filter is! FaceFilter &&
         filter.getMatchedUploadedIDs().isEmpty) {
       resultsNeverComputedFilters.add(filter);
