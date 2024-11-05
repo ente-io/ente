@@ -30,7 +30,7 @@ services:
     command: "TCP-LISTEN:3200,fork,reuseaddr TCP:minio:3200"
 
   postgres:
-    image: postgres:15
+    image: postgres:15-alpine
     ports:
       - 5432:5432
     environment:
