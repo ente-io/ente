@@ -225,7 +225,7 @@ export default function App({ Component, pageProps }: AppProps) {
     );
 
     const onGenericError = useCallback((e: unknown) => {
-        log.error("Error", e);
+        log.error(e);
         showMiniDialog(genericErrorDialogAttributes());
     }, []);
 

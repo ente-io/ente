@@ -87,7 +87,7 @@ const ModifyMapSettings = ({ open, onClose, onRootClose, mapEnabled }) => {
             await updateMapEnabled(false);
             handleClose();
         } catch (e) {
-            log.error("Error", e);
+            log.error(e);
             setPhase("failed");
         }
     };
@@ -98,7 +98,7 @@ const ModifyMapSettings = ({ open, onClose, onRootClose, mapEnabled }) => {
             await updateMapEnabled(true);
             handleClose();
         } catch (e) {
-            log.error("Error", e);
+            log.error(e);
             setPhase("failed");
         }
     };

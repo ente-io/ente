@@ -174,7 +174,7 @@ export const AttributedMiniDialog: React.FC<
                     await attributes.continue?.action?.();
                     resetPhaseAndClose();
                 } catch (e) {
-                    log.error("Error", e);
+                    log.error(e);
                     setPhase("failed");
                 }
             }}
