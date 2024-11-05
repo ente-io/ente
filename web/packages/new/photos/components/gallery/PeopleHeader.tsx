@@ -1,7 +1,5 @@
-import {
-    ActivityIndicator,
-    ErrorIndicator,
-} from "@/base/components/mui/ActivityIndicator";
+import { ActivityErrorIndicator } from "@/base/components/ErrorIndicator";
+import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { CenteredBox, SpaceBetweenFlex } from "@/base/components/mui/Container";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
@@ -685,7 +683,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                     </CenteredBox>
                 ) : state.fetchFailed ? (
                     <CenteredBox>
-                        <ErrorIndicator />
+                        <ActivityErrorIndicator />
                     </CenteredBox>
                 ) : state.showChoices ? (
                     <SuggestionOrChoiceList

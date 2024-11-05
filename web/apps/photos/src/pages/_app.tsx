@@ -35,11 +35,7 @@ import {
     getData,
     migrateKVToken,
 } from "@ente/shared/storage/localStorage";
-import {
-    getLocalMapEnabled,
-    getToken,
-    setLocalMapEnabled,
-} from "@ente/shared/storage/localStorage/helpers";
+import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { getTheme } from "@ente/shared/themes";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import type { User } from "@ente/shared/user/types";
@@ -56,10 +52,7 @@ import { useCallback, useEffect, useState } from "react";
 import LoadingBar from "react-top-loading-bar";
 import { resumeExportsIfNeeded } from "services/export";
 import { photosLogout } from "services/logout";
-import {
-    getFamilyPortalRedirectURL,
-    updateMapEnabledStatus,
-} from "services/userService";
+import { getFamilyPortalRedirectURL } from "services/userService";
 import "styles/global.css";
 import { NotificationAttributes } from "types/Notification";
 
@@ -71,7 +64,6 @@ export default function App({ Component, pageProps }: AppProps) {
         typeof window !== "undefined" && !window.navigator.onLine,
     );
     const [showNavbar, setShowNavBar] = useState(false);
-    const [mapEnabled, setMapEnabled] = useState(false);
     const [dialogMessage, setDialogMessage] = useState<DialogBoxAttributes>();
     const [messageDialogView, setMessageDialogView] = useState(false);
     const [watchFolderView, setWatchFolderView] = useState(false);
@@ -144,10 +136,6 @@ export default function App({ Component, pageProps }: AppProps) {
     }, []);
 
     useEffect(() => {
-        setMapEnabled(getLocalMapEnabled());
-    }, []);
-
-    useEffect(() => {
         if (!isElectron()) {
             return;
         }
@@ -207,12 +195,6 @@ export default function App({ Component, pageProps }: AppProps) {
 
     const showNavBar = (show: boolean) => setShowNavBar(show);
 
-    const updateMapEnabled = async (enabled: boolean) => {
-        await updateMapEnabledStatus(enabled);
-        setLocalMapEnabled(enabled);
-        setMapEnabled(enabled);
-    };
-
     // Use `onGenericError` instead.
     const somethingWentWrong = useCallback(
         () =>
@@ -225,7 +207,7 @@ export default function App({ Component, pageProps }: AppProps) {
     );
 
     const onGenericError = useCallback((e: unknown) => {
-        log.error("Error", e);
+        log.error(e);
         showMiniDialog(genericErrorDialogAttributes());
     }, []);
 
@@ -248,8 +230,6 @@ export default function App({ Component, pageProps }: AppProps) {
         showMiniDialog,
         somethingWentWrong,
         onGenericError,
-        mapEnabled,
-        updateMapEnabled, // <- changes on each render
         isCFProxyDisabled,
         setIsCFProxyDisabled,
         logout,
