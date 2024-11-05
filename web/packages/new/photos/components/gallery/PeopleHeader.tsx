@@ -125,10 +125,8 @@ const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({ person }) => {
 
     const handleReset = () =>
         showMiniDialog({
-            title: pt("Reset person?"),
-            message: pt(
-                "The name, face groupings and suggestions for this person will be reset",
-            ),
+            title: t("reset_person_confirm"),
+            message: t("reset_person_confirm_message"),
             continue: {
                 text: t("reset"),
                 color: "primary",
@@ -170,7 +168,7 @@ const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({ person }) => {
                     centerAlign
                     onClick={handleReset}
                 >
-                    {pt("Reset")}
+                    {t("reset")}
                 </OverflowMenuOption>
             </OverflowMenu>
 
@@ -207,7 +205,7 @@ const IgnoredPersonHeader: React.FC<IgnoredPersonHeaderProps> = ({
     return (
         <>
             <GalleryItemsSummary
-                name={pt("Ignored")}
+                name={t("ignored")}
                 nameProps={{ color: "text.muted" }}
                 fileCount={person.fileIDs.length}
             />
@@ -220,7 +218,7 @@ const IgnoredPersonHeader: React.FC<IgnoredPersonHeaderProps> = ({
                     centerAlign
                     onClick={handleUndoIgnore}
                 >
-                    {pt("Show person")}
+                    {t("show_person")}
                 </OverflowMenuOption>
             </OverflowMenu>
         </>
@@ -248,12 +246,10 @@ const ClusterPersonHeader: React.FC<ClusterPersonHeaderProps> = ({
 
     const confirmIgnore = () =>
         showMiniDialog({
-            title: pt("Ignore person?"),
-            message: pt(
-                "This face grouping will not be shown in the people list",
-            ),
+            title: t("ignore_person_confirm"),
+            message: t("ignore_person_confirm_message"),
             continue: {
-                text: pt("Ignore"),
+                text: t("ignore"),
                 color: "primary",
                 action: () => ignoreCluster(cluster),
             },
@@ -290,7 +286,7 @@ const ClusterPersonHeader: React.FC<ClusterPersonHeaderProps> = ({
                         centerAlign
                         onClick={confirmIgnore}
                     >
-                        {pt("Ignore")}
+                        {t("ignore")}
                     </OverflowMenuOption>
                 </OverflowMenu>
             </Stack>
