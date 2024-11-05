@@ -217,18 +217,20 @@ const saveCFProxyDisabled = (v: boolean) =>
         : localStorage.removeItem(cfProxyDisabledKey);
 
 const savedCFProxyDisabled = () => {
-    const json = localStorage.getItem(cfProxyDisabledKey);
-    if (!json) return false;
-    if (json == "1") return true;
+    const v = localStorage.getItem(cfProxyDisabledKey);
+    if (!v) return false;
+    if (v == "1") return true;
 
     // Older versions of the app used to store this flag in a different
     // format, so see if this is one of those, and if so, migrate it too.
     try {
-        const value = z.object({ value: z.boolean() }).parse(json).value;
+        const value = z
+            .object({ value: z.boolean() })
+            .parse(JSON.parse(v)).value;
         saveCFProxyDisabled(value);
         return value;
     } catch (e) {
-        log.warn(`Ignoring ${cfProxyDisabledKey} value: ${json}`, e);
+        log.warn(`Ignoring ${cfProxyDisabledKey} value: ${v}`, e);
         localStorage.removeItem(cfProxyDisabledKey);
         return false;
     }
