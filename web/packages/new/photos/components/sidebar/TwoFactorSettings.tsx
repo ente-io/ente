@@ -22,24 +22,25 @@ export const TwoFactorSettings: React.FC<
     const [isTwoFactorEnabled, setIsTwoFactorEnabled] = useState(false);
 
     useEffect(() => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const isTwoFactorEnabled =
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             getData(LS_KEYS.USER).isTwoFactorEnabled ?? false;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         setIsTwoFactorEnabled(isTwoFactorEnabled);
     }, []);
 
     useEffect(() => {
-        if (!open) {
-            return;
-        }
-        const main = async () => {
+        if (!open) return;
+        void (async () => {
             const isEnabled = await get2FAStatus();
             setIsTwoFactorEnabled(isEnabled);
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             await setLSUser({
                 ...getData(LS_KEYS.USER),
                 isTwoFactorEnabled: isEnabled,
             });
-        };
-        main();
+        })();
     }, [open]);
 
     const handleRootClose = () => {
@@ -78,7 +79,7 @@ const SetupDrawerContents: React.FC<ContentsProps> = ({ onRootClose }) => {
 
     const configure = () => {
         onRootClose();
-        router.push(PAGES.TWO_FACTOR_SETUP);
+        void router.push(PAGES.TWO_FACTOR_SETUP);
     };
 
     return (
@@ -118,6 +119,7 @@ const ManageDrawerContents: React.FC<ContentsProps> = ({ onRootClose }) => {
 
     const disable = async () => {
         await disable2FA();
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         await setLSUser({
             ...getData(LS_KEYS.USER),
             isTwoFactorEnabled: false,
@@ -136,9 +138,9 @@ const ManageDrawerContents: React.FC<ContentsProps> = ({ onRootClose }) => {
             },
         });
 
-    const reconfigure = () => {
+    const reconfigure = async () => {
         onRootClose();
-        router.push(PAGES.TWO_FACTOR_SETUP);
+        await router.push(PAGES.TWO_FACTOR_SETUP);
     };
 
     return (
