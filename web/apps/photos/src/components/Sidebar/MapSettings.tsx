@@ -81,27 +81,23 @@ const ModifyMapSettings = ({ open, onClose, onRootClose, mapEnabled }) => {
     const [phase, setPhase] = useState<"loading" | "failed" | undefined>();
     const { updateMapEnabled } = useContext(AppContext);
 
-    const disableMap = async () => {
-        setPhase("loading");
-        try {
-            await updateMapEnabled(false);
-            handleClose();
-        } catch (e) {
-            log.error(e);
-            setPhase("failed");
-        }
+    const wrap = (op: () => Promise<void>) => {
+        return () => {
+            void (async () => {
+                setPhase("loading");
+                try {
+                    await op();
+                    handleClose();
+                } catch (e) {
+                    log.error(e);
+                    setPhase("failed");
+                }
+            })();
+        };
     };
 
-    const enableMap = async () => {
-        setPhase("loading");
-        try {
-            await updateMapEnabled(true);
-            handleClose();
-        } catch (e) {
-            log.error(e);
-            setPhase("failed");
-        }
-    };
+    const enableMap = wrap(() => updateMapEnabled(true));
+    const disableMap = wrap(() => updateMapEnabled(false));
 
     const handleClose = () => {
         setPhase(undefined);
@@ -160,7 +156,6 @@ const ConfirmEnableMap: React.FC<ConfirmStepProps> = ({
         />
         <Stack py={"20px"} px={"8px"} spacing={"32px"}>
             <Box px={"8px"}>
-                {" "}
                 <Typography color="text.muted">
                     <Trans
                         i18nKey={"enable_maps_confirm_message"}
@@ -221,14 +216,14 @@ const ConfirmDisableMap: React.FC<ConfirmStepProps> = ({
                 <LoadingButton
                     loading={phase == "loading"}
                     color={"critical"}
-                    size="large"
+                    fullWidth
                     onClick={onClick}
                 >
                     {t("disable")}
                 </LoadingButton>
                 <FocusVisibleButton
                     color={"secondary"}
-                    size="large"
+                    fullWidth
                     onClick={onClose}
                 >
                     {t("cancel")}
