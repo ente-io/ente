@@ -275,7 +275,6 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                 />
                 {isMLEnabled() && annotatedFaces.length > 0 && (
                     <InfoItem icon={<FaceRetouchingNaturalIcon />}>
-                        {/*t("UNIDENTIFIED_FACES")  TODO-Cluster remove */}
                         <FilePeopleList
                             file={file}
                             annotatedFaceIDs={annotatedFaces}

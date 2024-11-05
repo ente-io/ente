@@ -176,10 +176,7 @@ const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({ person }) => {
 
             <SingleInputDialog
                 {...nameInputVisibilityProps}
-                title={
-                    pt("Rename person") /* TODO-Cluster pt()'s
-                    also remove "UNIDENTIFIED_FACES": "Unidentified faces" */
-                }
+                title={pt("Rename person")}
                 label={pt("Name")}
                 placeholder={t("enter_name")}
                 autoComplete="name"
