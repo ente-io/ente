@@ -7,37 +7,32 @@ import {
     SidebarDrawerTitlebar,
     type NestedSidebarDrawerVisibilityProps,
 } from "@/base/components/mui/SidebarDrawer";
+import { useModalVisibility } from "@/base/components/utils/modal";
 import log from "@/base/log";
 import type { ButtonishProps } from "@/new/photos/components/mui";
-import { AppContext } from "@/new/photos/types/context";
+import {
+    settingsSnapshot,
+    settingsSubscribe,
+    updateMapEnabled,
+} from "@/new/photos/services/settings";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import { Box, Link, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useState, useSyncExternalStore } from "react";
 import { Trans } from "react-i18next";
-import { getMapEnabledStatus } from "services/userService";
 
 export const MapSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     open,
     onClose,
     onRootClose,
 }) => {
-    const { mapEnabled, updateMapEnabled } = useContext(AppContext);
-    const [modifyMapEnabledView, setModifyMapEnabledView] = useState(false);
+    const { mapEnabled } = useSyncExternalStore(
+        settingsSubscribe,
+        settingsSnapshot,
+    );
 
-    const openModifyMapEnabled = () => setModifyMapEnabledView(true);
-    const closeModifyMapEnabled = () => setModifyMapEnabledView(false);
-
-    useEffect(() => {
-        if (!open) {
-            return;
-        }
-        const main = async () => {
-            const remoteMapValue = await getMapEnabledStatus();
-            updateMapEnabled(remoteMapValue);
-        };
-        main();
-    }, [open]);
+    const { show: showModifyMap, props: modifyMapVisibilityProps } =
+        useModalVisibility();
 
     const handleRootClose = () => {
         onClose();
@@ -59,7 +54,7 @@ export const MapSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                 <Stack sx={{ px: "16px", py: "20px" }}>
                     <MenuItemGroup>
                         <EnteMenuItem
-                            onClick={openModifyMapEnabled}
+                            onClick={showModifyMap}
                             variant="toggle"
                             checked={mapEnabled}
                             label={t("enabled")}
@@ -68,10 +63,9 @@ export const MapSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                 </Stack>
             </Stack>
             <ModifyMapSettings
-                open={modifyMapEnabledView}
-                mapEnabled={mapEnabled}
-                onClose={closeModifyMapEnabled}
+                {...modifyMapVisibilityProps}
                 onRootClose={handleRootClose}
+                mapEnabled={mapEnabled}
             />
         </NestedSidebarDrawer>
     );
@@ -79,7 +73,6 @@ export const MapSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
 
 const ModifyMapSettings = ({ open, onClose, onRootClose, mapEnabled }) => {
     const [phase, setPhase] = useState<"loading" | "failed" | undefined>();
-    const { updateMapEnabled } = useContext(AppContext);
 
     const wrap = (op: () => Promise<void>) => {
         return () => {

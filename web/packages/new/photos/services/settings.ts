@@ -22,12 +22,12 @@ export interface Settings {
     /**
      * `true` if maps are enabled.
      */
-    isMapEnabled: boolean;
+    mapEnabled: boolean;
 }
 
 const defaultSettings = (): Settings => ({
     isInternalUser: false,
-    isMapEnabled: false,
+    mapEnabled: false,
 });
 
 /**
