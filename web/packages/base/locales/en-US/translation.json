@@ -262,7 +262,6 @@
     "LOST_DEVICE": "Lost two-factor device",
     "INCORRECT_CODE": "Incorrect code",
     "TWO_FACTOR_INFO": "Add an additional layer of security by requiring more than your email and password to log in to your account",
-    "DISABLE_TWO_FACTOR_LABEL": "Disable two-factor authentication",
     "UPDATE_TWO_FACTOR_LABEL": "Update your authenticator device",
     "disable": "Disable",
     "reconfigure": "Reconfigure",
