@@ -98,13 +98,18 @@ class SearchFilterDataProvider {
 
     filters.sort((a, b) => b.relevance().compareTo(a.relevance()));
 
+    final List<HierarchicalSearchFilter> filtersToAvoid = [
+      ...appliedFilters,
+      ...recommendations,
+    ];
+
+    if (appliedFilters.isEmpty) {
+      filtersToAvoid.add(initialGalleryFilter);
+    }
+
     _recommendedFiltersNotifier.addFilters(
       filters,
-      filtersToAvoid: [
-        initialGalleryFilter,
-        ...appliedFilters,
-        ...recommendations,
-      ],
+      filtersToAvoid: filtersToAvoid,
     );
   }
 }
