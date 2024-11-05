@@ -55,10 +55,7 @@ Future<List<EnteFile>> getFilteredFiles(
       } catch (e) {
         logger.severe("Error in filtering face filter: $e");
       }
-    }
-    //TODO: Add result to matchedUploadedIDs to avoid recomputation and check if
-    // it is already computed.
-    else if (filter is OnlyThemFilter) {
+    } else if (filter is OnlyThemFilter && filter.matchedUploadedIDs.isEmpty) {
       try {
         late Set<int> intersectionOfSelectedFaceFiltersFileIDs;
         final selectedClusterIDs = <String>[];
