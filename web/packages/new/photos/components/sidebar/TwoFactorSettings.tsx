@@ -57,7 +57,7 @@ export const TwoFactorSettings: React.FC<
                 <SidebarDrawerTitlebar
                     onClose={onClose}
                     onRootClose={handleRootClose}
-                    title={t("TWO_FACTOR_AUTHENTICATION")}
+                    title={t("two_factor_authentication")}
                 />
 
                 {isTwoFactorEnabled ? (
@@ -94,10 +94,10 @@ const SetupDrawerContents: React.FC<ContentsProps> = ({ onRootClose }) => {
                 sx={{ textAlign: "center", marginBlock: "32px 36px" }}
                 color="text.muted"
             >
-                {t("TWO_FACTOR_INFO")}
+                {t("two_factor_info")}
             </Typography>
             <FocusVisibleButton color="accent" size="large" onClick={configure}>
-                {t("ENABLE_TWO_FACTOR")}
+                {t("enable_two_factor")}
             </FocusVisibleButton>
         </Stack>
     );
@@ -132,7 +132,7 @@ const ManageDrawerContents: React.FC<ContentsProps> = ({ onRootClose }) => {
             title: t("update_two_factor"),
             message: t("update_two_factor_message"),
             continue: {
-                text: t("UPDATE"),
+                text: t("update"),
                 color: "primary",
                 action: reconfigure,
             },
