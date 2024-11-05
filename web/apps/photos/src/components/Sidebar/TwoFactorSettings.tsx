@@ -5,7 +5,7 @@ import {
     SidebarDrawerTitlebar,
     type NestedSidebarDrawerVisibilityProps,
 } from "@/base/components/mui/SidebarDrawer";
-import { disable2FA } from "@/new/photos/services/user";
+import { disable2FA, get2FAStatus } from "@/new/photos/services/user";
 import { useAppContext } from "@/new/photos/types/context";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
@@ -15,7 +15,6 @@ import { Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import router, { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { getTwoFactorStatus } from "services/userService";
 
 export const TwoFactorSettings: React.FC<
     NestedSidebarDrawerVisibilityProps
@@ -33,11 +32,11 @@ export const TwoFactorSettings: React.FC<
             return;
         }
         const main = async () => {
-            const isTwoFactorEnabled = await getTwoFactorStatus();
-            setIsTwoFactorEnabled(isTwoFactorEnabled);
+            const isEnabled = await get2FAStatus();
+            setIsTwoFactorEnabled(isEnabled);
             await setLSUser({
                 ...getData(LS_KEYS.USER),
-                isTwoFactorEnabled,
+                isTwoFactorEnabled: isEnabled,
             });
         };
         main();
