@@ -20,7 +20,6 @@ export enum LS_KEYS {
     // LOCALE = 'locale',
     SRP_SETUP_ATTRIBUTES = "srpSetupAttributes",
     SRP_ATTRIBUTES = "srpAttributes",
-    CF_PROXY_DISABLED = "cfProxyDisabled",
     REFERRAL_SOURCE = "referralSource",
 }
 

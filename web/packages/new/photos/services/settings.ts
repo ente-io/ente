@@ -6,12 +6,15 @@
 
 import { localUser } from "@/base/local-user";
 import log from "@/base/log";
+import { updateShouldDisableCFUploadProxy } from "@/media/upload";
 import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
 import { fetchFeatureFlags, updateRemoteFlag } from "./remote-store";
 
 /**
  * In-memory flags that tracks various settings.
+ *
+ * Some of these are local only, some of these are synced with remote.
  *
  * [Note: Remote flag lifecycle]
  *
@@ -43,11 +46,21 @@ export interface Settings {
      * `true` if maps are enabled.
      */
     mapEnabled: boolean;
+
+    /**
+     * `true` if the user has saved a preference to disable workers for uploads.
+     *
+     * Unlike {@link shouldDisableCFUploadProxy}, whose value reflects other
+     * factors that are taken into account to determine the effective value of
+     * this setting, this function returns only the saved user preference.
+     */
+    cfUploadProxyDisabled: boolean;
 }
 
 const defaultSettings = (): Settings => ({
     isInternalUser: false,
     mapEnabled: false,
+    cfUploadProxyDisabled: false,
 });
 
 /**
@@ -92,7 +105,8 @@ let _state = new SettingsState();
  * This assumes that the user is already logged in.
  */
 export const initSettings = () => {
-    readInMemoryFlagsFromLocalStorage();
+    void updateShouldDisableCFUploadProxy(savedCFProxyDisabled());
+    syncSettingsSnapshotWithLocalStorage();
 };
 
 export const logoutSettings = () => {
@@ -111,7 +125,7 @@ export const syncSettings = async () => {
         return;
     }
     saveRemoteFeatureFlagsJSONString(jsonString);
-    readInMemoryFlagsFromLocalStorage();
+    syncSettingsSnapshotWithLocalStorage();
 };
 
 const saveRemoteFeatureFlagsJSONString = (s: string) =>
@@ -131,11 +145,12 @@ const FeatureFlags = z.object({
 
 type FeatureFlags = z.infer<typeof FeatureFlags>;
 
-const readInMemoryFlagsFromLocalStorage = () => {
+const syncSettingsSnapshotWithLocalStorage = () => {
     const flags = savedRemoteFeatureFlags();
     const settings = defaultSettings();
     settings.isInternalUser = flags?.internalUser || isInternalUserViaEmail();
     settings.mapEnabled = flags?.mapEnabled || false;
+    settings.cfUploadProxyDisabled = savedCFProxyDisabled();
     setSettingsSnapshot(settings);
 };
 
@@ -192,4 +207,41 @@ export const isInternalUser = () => settingsSnapshot().isInternalUser;
 export const updateMapEnabled = async (isEnabled: boolean) => {
     await updateRemoteFlag("mapEnabled", isEnabled);
     return syncSettings();
+};
+
+const cfProxyDisabledKey = "cfProxyDisabled";
+
+const saveCFProxyDisabled = (v: boolean) =>
+    v
+        ? localStorage.setItem(cfProxyDisabledKey, "1")
+        : localStorage.removeItem(cfProxyDisabledKey);
+
+const savedCFProxyDisabled = () => {
+    const v = localStorage.getItem(cfProxyDisabledKey);
+    if (!v) return false;
+    if (v == "1") return true;
+
+    // Older versions of the app used to store this flag in a different
+    // format, so see if this is one of those, and if so, migrate it too.
+    try {
+        const value = z
+            .object({ value: z.boolean() })
+            .parse(JSON.parse(v)).value;
+        saveCFProxyDisabled(value);
+        return value;
+    } catch (e) {
+        log.warn(`Ignoring ${cfProxyDisabledKey} value: ${v}`, e);
+        localStorage.removeItem(cfProxyDisabledKey);
+        return false;
+    }
+};
+
+/**
+ * Save the user preference for disabling uploads via Cloudflare Workers, also
+ * notifying the upload subsystem of the change.
+ */
+export const updateCFProxyDisabledPreference = async (value: boolean) => {
+    saveCFProxyDisabled(value);
+    await updateShouldDisableCFUploadProxy(value);
+    syncSettingsSnapshotWithLocalStorage();
 };

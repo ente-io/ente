@@ -79,10 +79,6 @@ export default function App({ Component, pageProps }: AppProps) {
         LS_KEYS.THEME,
         THEME_COLOR.DARK,
     );
-    const [isCFProxyDisabled, setIsCFProxyDisabled] = useLocalState(
-        LS_KEYS.CF_PROXY_DISABLED,
-        false,
-    );
 
     useEffect(() => {
         void setupI18n().finally(() => setIsI18nReady(true));
@@ -230,8 +226,6 @@ export default function App({ Component, pageProps }: AppProps) {
         showMiniDialog,
         somethingWentWrong,
         onGenericError,
-        isCFProxyDisabled,
-        setIsCFProxyDisabled,
         logout,
     };
 

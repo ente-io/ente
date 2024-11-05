@@ -7,6 +7,7 @@ import { useIsSmallWidth, useIsTouchscreen } from "@/base/hooks";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
 import { type EnteFile, mergeMetadata } from "@/media/file";
+import { updateShouldDisableCFUploadProxy } from "@/media/upload";
 import {
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
@@ -240,6 +241,7 @@ export default function PublicCollectionGallery() {
                         : await cryptoWorker.fromHex(ck);
                 token.current = t;
                 downloadManager.updateToken(token.current);
+                await updateShouldDisableCFUploadProxy();
                 collectionKey.current = dck;
                 url.current = window.location.href;
                 const localCollection = await getLocalPublicCollection(
