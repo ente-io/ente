@@ -86,6 +86,10 @@
       ]
     },
     {
+      "title": "Binance TR",
+      "slug": "binance_tr"
+    },
+    {
       "title": "BinanceUS",
       "slug": "binance_us",
       "altNames": [
@@ -214,6 +218,9 @@
       "title": "CloudAMQP"
     },
     {
+      "title": "CloudDNS"
+    },
+    {
       "title": "Cloudflare"
     },
     {
@@ -242,6 +249,9 @@
         "crypto",
         "Crypto com"
       ]
+    },
+    {
+      "title": "CSFloat"
     },
     {
       "title": "DCS",
@@ -1104,13 +1114,16 @@
       ]
     },
     {
+      "title": "WARGAMING.NET",
+      "altNames": [
+        "Wargaming"
+      ]
+    },
+    {
       "title": "VRChat"
     },
     {
       "title": "Vultr"
-    },
-    {
-      "title": "WARGAMING.NET"
     },
     {
       "title": "Warner Bros Games"
