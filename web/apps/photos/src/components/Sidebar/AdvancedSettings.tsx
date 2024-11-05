@@ -45,11 +45,11 @@ export const AdvancedSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                                 variant="toggle"
                                 checked={!appContext.isCFProxyDisabled}
                                 onClick={toggleCFProxy}
-                                label={t("FASTER_UPLOAD")}
+                                label={t("faster_upload")}
                             />
                         </MenuItemGroup>
                         <MenuSectionTitle
-                            title={t("FASTER_UPLOAD_DESCRIPTION")}
+                            title={t("faster_upload_description")}
                         />
                     </Stack>
                 </Stack>
