@@ -154,7 +154,7 @@ const ManageDrawerContents: React.FC<ContentsProps> = ({ onRootClose }) => {
                 />
             </MenuItemGroup>
 
-            <div>
+            <Stack sx={{ gap: "4px" }}>
                 <MenuItemGroup>
                     <EnteMenuItem
                         onClick={confirmReconfigure}
@@ -164,7 +164,7 @@ const ManageDrawerContents: React.FC<ContentsProps> = ({ onRootClose }) => {
                     />
                 </MenuItemGroup>
                 <MenuSectionTitle title={t("UPDATE_TWO_FACTOR_LABEL")} />
-            </div>
+            </Stack>
         </Stack>
     );
 };
