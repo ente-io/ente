@@ -150,7 +150,7 @@
   "tryAgain": "Riprova",
   "viewRecoveryKey": "Visualizza chiave di recupero",
   "confirmRecoveryKey": "Conferma chiave di recupero",
-  "recoveryKeyVerifyReason": "La tua chiave di recupero è l'unico modo per recuperare le foto se ti dimentichi la password. Puoi trovare la tua chiave di recupero in Impostazioni > Account.\n\nInserisci qui la tua chiave di recupero per verificare di averla salvata correttamente.",
+  "recoveryKeyVerifyReason": "Se hai dimenticato la password, la tua chiave di ripristino è l'unico modo per recuperare le tue foto. La puoi trovare in Impostazioni > Account.\n\nInserisci la tua chiave di recupero per verificare di averla salvata correttamente.",
   "confirmYourRecoveryKey": "Conferma la tua chiave di recupero",
   "addViewer": "Aggiungi in sola lettura",
   "addCollaborator": "Aggiungi collaboratore",
@@ -1343,5 +1343,9 @@
   "mostRecent": "Più recenti",
   "mostRelevant": "Più rilevanti",
   "loadingYourPhotos": "Caricando le tue foto...",
-  "processingImport": "Elaborando {folderName}..."
+  "processingImport": "Elaborando {folderName}...",
+  "resetPerson": "Reset person",
+  "areYouSureYouWantToResetThisPerson": "Are you sure you want to reset this person?",
+  "allPersonGroupingWillReset": "All groupings for this person will be reset, and you will lose all suggestions made for this person",
+  "yesResetPerson": "Yes, reset person"
 }

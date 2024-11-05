@@ -1,1 +1,1 @@
-ente - armazenamento criptografado de fotos
+ente - armazenamento de fotos criptografado

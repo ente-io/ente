@@ -4,7 +4,7 @@ import "package:photos/extensions/input_formatter.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/api/storage_bonus/storage_bonus.dart";
 import "package:photos/models/user_details.dart";
-import "package:photos/services/storage_bonus_service.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/theme/ente_theme.dart";
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
@@ -119,9 +119,7 @@ class _ApplyCodeScreenState extends State<ApplyCodeScreen> {
                       isDisabled: code.trim().length < 4,
                       onTap: () async {
                         try {
-                          await StorageBonusService.instance
-                              .getGateway()
-                              .claimReferralCode(code.trim().toUpperCase());
+                          await storageBonusService.applyCode(code);
                           // ignore: unawaited_futures
                           Navigator.of(context).pushReplacement(
                             MaterialPageRoute(

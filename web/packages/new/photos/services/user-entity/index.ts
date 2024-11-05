@@ -173,6 +173,8 @@ const isGzipped = (type: EntityType) => type == "cgroup";
  *
  * @param masterKey The user's masterKey, which is is used to encrypt and
  * decrypt the entity key.
+ *
+ * @returns The ID of the newly created entity.
  */
 export const addUserEntity = async (
     type: EntityType,

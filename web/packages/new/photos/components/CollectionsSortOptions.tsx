@@ -1,4 +1,4 @@
-import type { CollectionsSortBy } from "@/new/photos/types/collection";
+import type { CollectionsSortBy } from "@/new/photos/services/collection/ui";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
 import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
 import TickIcon from "@mui/icons-material/Done";
@@ -59,13 +59,13 @@ export const CollectionsSortOptions: React.FC<CollectionsSortOptionsProps> = ({
         }}
     >
         <SortByOption {...optProps} sortBy="name">
-            {t("sort_by_name")}
+            {t("name")}
         </SortByOption>
         <SortByOption {...optProps} sortBy="creation-time-asc">
-            {t("sort_by_creation_time_ascending")}
+            {t("oldest")}
         </SortByOption>
         <SortByOption {...optProps} sortBy="updation-time-desc">
-            {t("sort_by_updation_time_descending")}
+            {t("last_updated")}
         </SortByOption>
     </OverflowMenu>
 );

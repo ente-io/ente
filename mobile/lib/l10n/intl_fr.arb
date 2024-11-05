@@ -150,7 +150,7 @@
   "tryAgain": "Réessayer",
   "viewRecoveryKey": "Voir la clé de récupération",
   "confirmRecoveryKey": "Confirmer la clé de récupération",
-  "recoveryKeyVerifyReason": "Votre clé de récupération est la seule façon de récupérer vos photos si vous oubliez votre mot de passe. Vous pouvez trouver votre clé de récupération dans Paramètres > Compte.\n\nVeuillez entrer votre clé de récupération ici pour vous assurer que vous l'avez enregistrée correctement.",
+  "recoveryKeyVerifyReason": "Votre clé de récupération est la seule façon de récupérer vos photos si vous oubliez votre mot de passe. Vous pouvez trouver votre clé de récupération dans Paramètres > Compte.\n\nVeuillez saisir votre clé de récupération ici pour vous assurer de l'avoir enregistré correctement.",
   "confirmYourRecoveryKey": "Confirmer la clé de récupération",
   "addViewer": "Ajouter un observateur",
   "addCollaborator": "Ajouter un collaborateur",
@@ -1343,5 +1343,9 @@
   "mostRecent": "Les plus récents",
   "mostRelevant": "Les plus pertinents",
   "loadingYourPhotos": "Chargement de vos photos...",
-  "processingImport": "Traitement de {folderName}..."
+  "processingImport": "Traitement de {folderName}...",
+  "resetPerson": "Reset person",
+  "areYouSureYouWantToResetThisPerson": "Are you sure you want to reset this person?",
+  "allPersonGroupingWillReset": "All groupings for this person will be reset, and you will lose all suggestions made for this person",
+  "yesResetPerson": "Yes, reset person"
 }

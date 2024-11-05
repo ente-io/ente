@@ -1,7 +1,13 @@
 import { EllipsizedTypography } from "@/base/components/Typography";
+import {
+    useModalVisibility,
+    type ModalVisibilityProps,
+} from "@/base/components/utils/modal";
 import { ensureElectron } from "@/base/electron";
 import { basename, dirname } from "@/base/file";
 import type { CollectionMapping, FolderWatch } from "@/base/types/ipc";
+import { CollectionMappingChoiceDialog } from "@/new/photos/components/CollectionMappingChoiceDialog";
+import { AppContext } from "@/new/photos/types/context";
 import { ensure } from "@/utils/ensure";
 import {
     FlexWrapper,
@@ -28,23 +34,19 @@ import {
     Typography,
     styled,
 } from "@mui/material";
-import { CollectionMappingChoiceModal } from "components/Upload/CollectionMappingChoiceModal";
 import { t } from "i18next";
-import { AppContext } from "pages/_app";
 import React, { useContext, useEffect, useState } from "react";
 import watcher from "services/watch";
-
-interface WatchFolderProps {
-    open: boolean;
-    onClose: () => void;
-}
 
 /**
  * View the state of and manage folder watches.
  *
  * This is the screen that controls that "watch folder" feature in the app.
  */
-export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
+export const WatchFolder: React.FC<ModalVisibilityProps> = ({
+    open,
+    onClose,
+}) => {
     // The folders we are watching
     const [watches, setWatches] = useState<FolderWatch[] | undefined>();
     // Temporarily stash the folder path while we show a choice dialog to the
@@ -52,9 +54,8 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
     const [savedFolderPath, setSavedFolderPath] = useState<
         string | undefined
     >();
-    // True when we're showing the choice dialog to ask the user to set the
-    // collection mapping.
-    const [choiceModalOpen, setChoiceModalOpen] = useState(false);
+    const { show: showMappingChoice, props: mappingChoiceVisibilityProps } =
+        useModalVisibility();
 
     const appContext = useContext(AppContext);
 
@@ -88,7 +89,7 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
             addWatch(path, "root");
         } else {
             setSavedFolderPath(path);
-            setChoiceModalOpen(true);
+            showMappingChoice();
         }
     };
 
@@ -105,10 +106,7 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
     const removeWatch = async (watch: FolderWatch) =>
         watcher.removeWatch(watch.folderPath).then((ws) => setWatches(ws));
 
-    const closeChoiceModal = () => setChoiceModalOpen(false);
-
-    const addWatchWithMapping = (mapping: CollectionMapping) => {
-        closeChoiceModal();
+    const handleCollectionMappingSelect = (mapping: CollectionMapping) => {
         setSavedFolderPath(undefined);
         addWatch(ensure(savedFolderPath), mapping);
     };
@@ -141,10 +139,9 @@ export const WatchFolder: React.FC<WatchFolderProps> = ({ open, onClose }) => {
                     </Stack>
                 </DialogContent>
             </Dialog>
-            <CollectionMappingChoiceModal
-                open={choiceModalOpen}
-                onClose={closeChoiceModal}
-                didSelect={addWatchWithMapping}
+            <CollectionMappingChoiceDialog
+                {...mappingChoiceVisibilityProps}
+                didSelect={handleCollectionMappingSelect}
             />
         </>
     );

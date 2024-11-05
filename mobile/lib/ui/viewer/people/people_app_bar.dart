@@ -178,7 +178,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
                 const Padding(
                   padding: EdgeInsets.all(8),
                 ),
-                Text(S.of(context).removePersonLabel),
+                Text(S.of(context).resetPerson),
               ],
             ),
           ),
@@ -239,7 +239,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
             } else if (value == PeoplePopupAction.unignore) {
               await _showPerson(context);
             } else if (value == PeoplePopupAction.removeLabel) {
-              await _removePersonLabel(context);
+              await _resetPerson(context);
             }
           },
         ),
@@ -249,19 +249,18 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
     return actions;
   }
 
-  Future<void> _removePersonLabel(BuildContext context) async {
+  Future<void> _resetPerson(BuildContext context) async {
     await showChoiceDialog(
       context,
-      title: "Are you sure you want to remove this person label?",
-      body:
-          "All groupings for this person will be reset, and you will lose all suggestions made for this person",
-      firstButtonLabel: "Yes, remove person",
+      title: S.of(context).areYouSureYouWantToResetThisPerson,
+      body: S.of(context).allPersonGroupingWillReset,
+      firstButtonLabel: S.of(context).yesResetPerson,
       firstButtonOnTap: () async {
         try {
           await PersonService.instance.deletePerson(widget.person.remoteID);
           Navigator.of(context).pop();
         } catch (e, s) {
-          _logger.severe('Removing person label failed', e, s);
+          _logger.severe('Resetting person failed', e, s);
         }
       },
     );

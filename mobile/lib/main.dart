@@ -11,6 +11,7 @@ import "package:flutter/services.dart";
 import "package:flutter_displaymode/flutter_displaymode.dart";
 import 'package:logging/logging.dart';
 import "package:media_kit/media_kit.dart";
+import "package:package_info_plus/package_info_plus.dart";
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/app.dart';
 import "package:photos/audio_session_handler.dart";
@@ -22,34 +23,26 @@ import 'package:photos/core/network/network.dart';
 import "package:photos/db/ml/db.dart";
 import 'package:photos/db/upload_locks_db.dart';
 import 'package:photos/ente_theme_data.dart';
+import "package:photos/extensions/stop_watch.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
 import 'package:photos/services/app_lifecycle_service.dart';
-import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/collections_service.dart';
-import "package:photos/services/entity_service.dart";
 import 'package:photos/services/favorites_service.dart';
 import "package:photos/services/filedata/filedata_service.dart";
 import 'package:photos/services/home_widget_service.dart';
 import 'package:photos/services/local_file_update_service.dart';
 import 'package:photos/services/local_sync_service.dart';
-import "package:photos/services/location_service.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
-import "package:photos/services/machine_learning/machine_learning_controller.dart";
 import 'package:photos/services/machine_learning/ml_service.dart';
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
-import "package:photos/services/magic_cache_service.dart";
 import 'package:photos/services/memories_service.dart';
 import "package:photos/services/notification_service.dart";
 import 'package:photos/services/push_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/services/search_service.dart';
-import "package:photos/services/storage_bonus_service.dart";
-import 'package:photos/services/sync_service.dart';
-import 'package:photos/services/trash_sync_service.dart';
-import 'package:photos/services/update_service.dart';
-import 'package:photos/services/user_remote_flag_service.dart';
-import 'package:photos/services/user_service.dart';
+import "package:photos/services/sync_service.dart";
+import "package:photos/services/user_service.dart";
 import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/ui/tools/lock_screen.dart';
 import 'package:photos/utils/crypto_util.dart';
@@ -81,6 +74,7 @@ void main() async {
 
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
   await _runInForeground(savedThemeMode);
+
   unawaited(BackgroundFetch.registerHeadlessTask(_headlessTaskHandler));
   if (Platform.isAndroid) FlutterDisplayMode.setHighRefreshRate().ignore();
   SystemChrome.setSystemUIOverlayStyle(
@@ -100,12 +94,7 @@ Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
   return await _runWithLogs(() async {
     _logger.info("Starting app in foreground");
     await _init(false, via: 'mainMethod');
-    final Locale locale = await getLocale();
-    if (Platform.isAndroid) {
-      unawaited(_scheduleFGHomeWidgetSync());
-    }
-    unawaited(_scheduleFGSync('appStart in FG'));
-
+    final Locale? locale = await getLocale(noFallback: true);
     runApp(
       AppLock(
         builder: (args) =>
@@ -119,6 +108,10 @@ Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
         savedThemeMode: _themeMode(savedThemeMode),
       ),
     );
+    if (Platform.isAndroid) {
+      unawaited(_scheduleFGHomeWidgetSync());
+    }
+    unawaited(_scheduleFGSync('appStart in FG'));
   });
 }
 
@@ -144,7 +137,7 @@ Future<void> _runBackgroundTask(String taskId, {String mode = 'normal'}) async {
   if (_isProcessRunning) {
     _logger.info("Background task triggered when process was already running");
     await _sync('bgTaskActiveProcess');
-    BackgroundFetch.finish(taskId);
+    await BackgroundFetch.finish(taskId);
   } else {
     _runWithLogs(
       () async {
@@ -161,7 +154,7 @@ Future<void> _runInBackground(String taskId) async {
   await Future.delayed(const Duration(seconds: 3));
   if (await _isRunningInForeground()) {
     _logger.info("FG task running, skipping BG taskID: $taskId");
-    BackgroundFetch.finish(taskId);
+    await BackgroundFetch.finish(taskId);
     return;
   } else {
     _logger.info("FG task is not running");
@@ -176,12 +169,12 @@ Future<void> _runInBackground(String taskId) async {
     [
       _homeWidgetSync(),
       () async {
-        UpdateService.instance.showUpdateNotification().ignore();
+        updateService.showUpdateNotification().ignore();
         await _sync('bgSync');
       }(),
     ],
   );
-  BackgroundFetch.finish(taskId);
+  await BackgroundFetch.finish(taskId);
 }
 
 // https://stackoverflow.com/a/73796478/546896
@@ -198,6 +191,7 @@ void _headlessTaskHandler(HeadlessTask task) {
 Future<void> _init(bool isBackground, {String via = ''}) async {
   try {
     bool initComplete = false;
+    final TimeLogger tlog = TimeLogger();
     Future.delayed(const Duration(seconds: 15), () {
       if (!initComplete && !isBackground) {
         _logger.severe("Stuck on splash screen for >= 15 seconds");
@@ -210,86 +204,66 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
     });
     if (!isBackground) _heartBeatOnInit(0);
     _isProcessRunning = true;
-    _logger.info("Initializing...  inBG =$isBackground via: $via");
+    _logger.info("Initializing...  inBG =$isBackground via: $via $tlog");
     final SharedPreferences preferences = await SharedPreferences.getInstance();
-    await _logFGHeartBeatInfo();
-    _logger.info("_logFGHeartBeatInfo done");
+    final PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    await _logFGHeartBeatInfo(preferences);
+    _logger.info("_logFGHeartBeatInfo done $tlog");
     unawaited(_scheduleHeartBeat(preferences, isBackground));
     NotificationService.instance.init(preferences);
     AppLifecycleService.instance.init(preferences);
     if (isBackground) {
-      AppLifecycleService.instance.onAppInBackground('init via: $via');
+      AppLifecycleService.instance.onAppInBackground('init via: $via $tlog');
     } else {
-      AppLifecycleService.instance.onAppInForeground('init via: $via');
+      AppLifecycleService.instance.onAppInForeground('init via: $via $tlog');
     }
     // Start workers asynchronously. No need to wait for them to start
     Computer.shared().turnOn(workersCount: 4).ignore();
     CryptoUtil.init();
 
-    _logger.info("Lockscreen init");
-    LockScreenSettings.instance.init(preferences);
+    _logger.info("Lockscreen init $tlog");
+    unawaited(LockScreenSettings.instance.init(preferences));
 
-    _logger.info("Configuration init");
+    _logger.info("Configuration init $tlog");
     await Configuration.instance.init();
-    _logger.info("Configuration done");
+    _logger.info("Configuration done $tlog");
 
-    _logger.info("NetworkClient init");
-    await NetworkClient.instance.init();
-    _logger.info("NetworkClient init done");
+    _logger.info("NetworkClient init $tlog");
+    await NetworkClient.instance.init(packageInfo);
+    _logger.info("NetworkClient init done $tlog");
 
-    ServiceLocator.instance.init(preferences, NetworkClient.instance.enteDio);
+    ServiceLocator.instance
+        .init(preferences, NetworkClient.instance.enteDio, packageInfo);
 
-    _logger.info("UserService init");
+    _logger.info("UserService init $tlog");
     await UserService.instance.init();
-    _logger.info("UserService init done");
+    _logger.info("UserService init done $tlog");
 
-    _logger.info("EntityService init");
-    await EntityService.instance.init();
-    _logger.info("EntityService init done");
-
-    _logger.info("LocationService init");
-    LocationService.instance.init(preferences);
-    _logger.info("LocationService init done");
-
-    _logger.info("UserRemoteFlagService init");
-    await UserRemoteFlagService.instance.init();
-    _logger.info("UserRemoteFlagService init done");
-
-    _logger.info("UpdateService init");
-    await UpdateService.instance.init();
-    _logger.info("UpdateService init done");
-
-    _logger.info("BillingService init");
-    BillingService.instance.init();
-    _logger.info("BillingService init done");
-
-    _logger.info("CollectionsService init");
+    _logger.info("CollectionsService init $tlog");
     await CollectionsService.instance.init(preferences);
-    _logger.info("CollectionsService init done");
+    _logger.info("CollectionsService init done $tlog");
 
     FavoritesService.instance.initFav().ignore();
 
-    _logger.info("FileUploader init");
+    _logger.info("FileUploader init $tlog");
     await FileUploader.instance.init(preferences, isBackground);
-    _logger.info("FileUploader init done");
+    _logger.info("FileUploader init done $tlog");
 
-    _logger.info("LocalSyncService init");
+    _logger.info("LocalSyncService init $tlog");
     await LocalSyncService.instance.init(preferences);
-    _logger.info("LocalSyncService init done");
+    _logger.info("LocalSyncService init done $tlog");
 
-    TrashSyncService.instance.init(preferences);
     RemoteSyncService.instance.init(preferences);
 
-    _logger.info("SyncService init");
+    _logger.info("SyncService init $tlog");
     await SyncService.instance.init(preferences);
-    _logger.info("SyncService init done");
+    _logger.info("SyncService init done $tlog");
 
     MemoriesService.instance.init(preferences);
     LocalFileUpdateService.instance.init(preferences);
     SearchService.instance.init();
-    StorageBonusService.instance.init(preferences);
     FileDataService.instance.init(preferences);
-    _logger.info("RemoteFileMLService done");
+    _logger.info("RemoteFileMLService done $tlog");
     if (!isBackground &&
         Platform.isAndroid &&
         await HomeWidgetService.instance.countHomeWidgets() == 0) {
@@ -304,26 +278,18 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
         );
       });
     }
-    _logger.info("PushService/HomeWidget done");
+    _logger.info("PushService/HomeWidget done $tlog");
     unawaited(SemanticSearchService.instance.init());
-    MachineLearningController.instance.init();
-
-    _logger.info("MachineLearningController done");
     unawaited(MLService.instance.init());
     PersonService.init(
-      EntityService.instance,
+      entityService,
       MLDataDB.instance,
       preferences,
     );
-
-    if (flagService.internalUser) {
-      MagicCacheService.instance.init(preferences);
-    }
-
     initComplete = true;
-    _logger.info("Initialization done");
+    _logger.info("Initialization done $tlog");
   } catch (e, s) {
-    _logger.severe("Error in init", e, s);
+    _logger.severe("Error in init ", e, s);
     rethrow;
   }
 }
@@ -430,7 +396,7 @@ Future<void> _killBGTask([String? taskId]) async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.remove(kLastBGTaskHeartBeatTime);
   if (taskId != null) {
-    BackgroundFetch.finish(taskId);
+    await BackgroundFetch.finish(taskId);
   }
 }
 
@@ -463,9 +429,8 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   }
 }
 
-Future<void> _logFGHeartBeatInfo() async {
+Future<void> _logFGHeartBeatInfo(SharedPreferences prefs) async {
   final bool isRunningInFG = await _isRunningInForeground();
-  final prefs = await SharedPreferences.getInstance();
   await prefs.reload();
   final lastFGTaskHeartBeatTime = prefs.getInt(kLastFGTaskHeartBeatTime) ?? 0;
   final String lastRun = lastFGTaskHeartBeatTime == 0

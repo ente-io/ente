@@ -68,7 +68,7 @@ const Page: React.FC<PageProps> = () => {
                     <VerticallyCentered sx={{ p: 3 }}>
                         <Box mb={4}>
                             <Typography variant="h2">
-                                {t("TWO_FACTOR")}
+                                {t("two_factor")}
                             </Typography>
                         </Box>
                         <TwoFactorSetup twoFactorSecret={twoFactorSecret} />

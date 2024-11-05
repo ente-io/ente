@@ -1,9 +1,10 @@
 import log from "@/base/log";
+import type { LivePhotoSourceURL, SourceURLs } from "@/media/file";
+import { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
-import type { GalleryBarMode } from "@/new/photos/components/Gallery/BarImpl";
+import type { GalleryBarMode } from "@/new/photos/components/gallery/reducer";
+import { TRASH_SECTION } from "@/new/photos/services/collection";
 import DownloadManager from "@/new/photos/services/download";
-import type { LivePhotoSourceURL, SourceURLs } from "@/new/photos/types/file";
-import { EnteFile } from "@/new/photos/types/file";
 import { PHOTOS_PAGES } from "@ente/shared/constants/pages";
 import { CustomError } from "@ente/shared/error";
 import useMemoSingleThreaded from "@ente/shared/hooks/useMemoSingleThreaded";
@@ -19,7 +20,6 @@ import {
     SelectedState,
     SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
-import { TRASH_SECTION } from "utils/collection";
 import {
     handleSelectCreator,
     updateFileMsrcProps,
@@ -44,12 +44,18 @@ const Container = styled("div")`
 
 const PHOTOSWIPE_HASH_SUFFIX = "&opened";
 
-interface Props {
+export interface PhotoFrameProps {
     page:
         | PHOTOS_PAGES.GALLERY
         | PHOTOS_PAGES.DEDUPLICATE
         | PHOTOS_PAGES.SHARED_ALBUMS;
     mode?: GalleryBarMode;
+    /**
+     * This is an experimental prop, to see if we can merge the separate
+     * "isInSearchMode" state kept by the gallery to be instead provided as a
+     * another mode in which the gallery operates.
+     */
+    modePlus?: GalleryBarMode | "search";
     files: EnteFile[];
     duplicates?: Duplicate[];
     syncWithRemote: () => Promise<void>;
@@ -58,8 +64,7 @@ interface Props {
         selected: SelectedState | ((selected: SelectedState) => SelectedState),
     ) => void;
     selected: SelectedState;
-    tempDeletedFileIds?: Set<number>;
-    setTempDeletedFileIds?: (value: Set<number>) => void;
+    markTempDeleted?: (tempDeletedFiles: EnteFile[]) => void;
     /** This will be set if mode is not "people". */
     activeCollectionID: number;
     /** This will be set if mode is "people". */
@@ -79,13 +84,13 @@ const PhotoFrame = ({
     page,
     duplicates,
     mode,
+    modePlus,
     files,
     syncWithRemote,
     favItemIds,
     setSelected,
     selected,
-    tempDeletedFileIds,
-    setTempDeletedFileIds,
+    markTempDeleted,
     activeCollectionID,
     activePersonID,
     enableDownload,
@@ -97,7 +102,7 @@ const PhotoFrame = ({
     setFilesDownloadProgressAttributesCreator,
     selectable,
     onSelectPerson,
-}: Props) => {
+}: PhotoFrameProps) => {
     const [open, setOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
     const [fetching, setFetching] = useState<{ [k: number]: boolean }>({});
@@ -316,6 +321,7 @@ const PhotoFrame = ({
             }
             activeCollectionID={activeCollectionID}
             showPlaceholder={isScrolling}
+            isFav={favItemIds?.has(item.id)}
         />
     );
 
@@ -556,6 +562,7 @@ const PhotoFrame = ({
                             height={height}
                             getThumbnail={getThumbnail}
                             mode={mode}
+                            modePlus={modePlus}
                             displayFiles={displayFiles}
                             activeCollectionID={activeCollectionID}
                             activePersonID={activePersonID}
@@ -572,8 +579,7 @@ const PhotoFrame = ({
                 gettingData={getSlideData}
                 getConvertedItem={getConvertedItem}
                 favItemIds={favItemIds}
-                tempDeletedFileIds={tempDeletedFileIds}
-                setTempDeletedFileIds={setTempDeletedFileIds}
+                markTempDeleted={markTempDeleted}
                 isTrashCollection={activeCollectionID === TRASH_SECTION}
                 isInHiddenSection={isInHiddenSection}
                 enableDownload={enableDownload}

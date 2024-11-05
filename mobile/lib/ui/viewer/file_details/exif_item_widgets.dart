@@ -89,6 +89,7 @@ class _AllExifItemWidgetState extends State<AllExifItemWidget> {
     } else if (exif.isNotEmpty) {
       label = S.of(context).viewAllExifData;
       onTap = () => showDialog(
+            useRootNavigator: false,
             context: context,
             builder: (BuildContext context) {
               return ExifInfoDialog(file);

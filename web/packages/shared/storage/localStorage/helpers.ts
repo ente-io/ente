@@ -19,14 +19,6 @@ export function setJustSignedUp(status: boolean) {
     setData(LS_KEYS.JUST_SIGNED_UP, { status });
 }
 
-export function getLocalMapEnabled(): boolean {
-    return getData(LS_KEYS.MAP_ENABLED)?.value ?? false;
-}
-
-export function setLocalMapEnabled(value: boolean) {
-    setData(LS_KEYS.MAP_ENABLED, { value });
-}
-
 export function getLocalReferralSource() {
     return getData(LS_KEYS.REFERRAL_SOURCE)?.source;
 }

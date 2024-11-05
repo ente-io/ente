@@ -6,15 +6,15 @@ packager: Ente.io Developers
 packagerEmail: auth@ente.io
 license: GPLv3
 url: https://github.com/ente-io/ente
+package_name: enteauth
+include_build_number: false
 
 display_name: Auth
 
-metainfo: linux/packaging/ente_auth.appdata.xml
+metainfo: linux/packaging/enteauth.appdata.xml
 
 requires:
   - libsqlite3x
-  - webkit2gtk4.0
-  - libsodium
   - libsecret
   - libappindicator
 
@@ -22,7 +22,7 @@ keywords:
   - Authentication
   - 2FA
 
-generic_name: Ente Authentication
+generic_name: Ente Authenticator
 
 categories:
   - Utility

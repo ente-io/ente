@@ -32,7 +32,7 @@ import "package:photos/services/location_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
 import 'package:photos/services/machine_learning/semantic_search/semantic_search_service.dart';
-import "package:photos/services/magic_cache_service.dart";
+import "package:photos/services/user_remote_flag_service.dart";
 import "package:photos/states/location_screen_state.dart";
 import "package:photos/ui/viewer/location/add_location_sheet.dart";
 import "package:photos/ui/viewer/location/location_screen.dart";
@@ -180,8 +180,9 @@ class SearchService {
   Future<List<GenericSearchResult>> getMagicSectionResults(
     BuildContext context,
   ) async {
-    if (localSettings.isMLIndexingEnabled) {
-      return MagicCacheService.instance.getMagicGenericSearchResult(context);
+    if (userRemoteFlagService
+        .getCachedBoolValue(UserRemoteFlagService.mlEnabled)) {
+      return magicCacheService.getMagicGenericSearchResult(context);
     } else {
       return <GenericSearchResult>[];
     }
@@ -634,8 +635,7 @@ class SearchService {
   }
 
   Future<List<GenericSearchResult>> getLocationResults(String query) async {
-    final locationTagEntities =
-        (await LocationService.instance.getLocationTags());
+    final locationTagEntities = (await locationService.getLocationTags());
     final Map<LocalEntity<LocationTag>, List<EnteFile>> result = {};
     final bool showNoLocationTag = query.length > 2 &&
         "No Location Tag".toLowerCase().startsWith(query.toLowerCase());
@@ -720,8 +720,7 @@ class SearchService {
     if (allCitiesSearch) {
       query = '';
     }
-    final results =
-        await LocationService.instance.getFilesInCity(allFiles, query);
+    final results = await locationService.getFilesInCity(allFiles, query);
     final List<City> sortedByResultCount = results.keys.toList()
       ..sort((a, b) => results[b]!.length.compareTo(results[a]!.length));
     for (final city in sortedByResultCount) {
@@ -765,7 +764,10 @@ class SearchService {
     return clusterIDToFiles;
   }
 
-  Future<List<GenericSearchResult>> getAllFace(int? limit) async {
+  Future<List<GenericSearchResult>> getAllFace(
+    int? limit, {
+    int minClusterSize = kMinimumClusterSizeSearchResult,
+  }) async {
     try {
       debugPrint("getting faces");
       final Map<int, Set<String>> fileIdToClusterID =
@@ -852,15 +854,12 @@ class SearchService {
         final String clusterName = clusterId;
 
         if (clusterIDToPersonID[clusterId] != null) {
-          // This should not happen, means a faceID is assigned to multiple persons.
+          // This should not happen, means a clusterID is assigned to a personID of a person that no longer exists
           _logger.severe(
             "`getAllFace`: Cluster $clusterId should not have person id ${clusterIDToPersonID[clusterId]}",
           );
         }
-        if (files.length < kMinimumClusterSizeSearchResult &&
-            sortedClusterIds.length > 3) {
-          continue;
-        }
+        if (files.length < minClusterSize) continue;
         facesResult.add(
           GenericSearchResult(
             ResultType.faces,
@@ -883,6 +882,20 @@ class SearchService {
           ),
         );
       }
+      if (facesResult.isEmpty) {
+        int newMinimum = minClusterSize;
+        for (final int minimum in kLowerMinimumClusterSizes) {
+          if (minimum < minClusterSize) {
+            newMinimum = minimum;
+            break;
+          }
+        }
+        if (newMinimum < minClusterSize) {
+          return getAllFace(limit, minClusterSize: newMinimum);
+        } else {
+          return [];
+        }
+      }
       if (limit != null) {
         return facesResult.sublist(0, min(limit, facesResult.length));
       } else {
@@ -898,8 +911,7 @@ class SearchService {
     try {
       final Map<LocalEntity<LocationTag>, List<EnteFile>> tagToItemsMap = {};
       final List<GenericSearchResult> tagSearchResults = [];
-      final locationTagEntities =
-          (await LocationService.instance.getLocationTags());
+      final locationTagEntities = (await locationService.getLocationTags());
       final allFiles = await getAllFiles();
       final List<EnteFile> filesWithNoLocTag = [];
 
@@ -955,8 +967,8 @@ class SearchService {
         }
       }
       if (limit == null || tagSearchResults.length < limit) {
-        final results = await LocationService.instance
-            .getFilesInCity(filesWithNoLocTag, '');
+        final results =
+            await locationService.getFilesInCity(filesWithNoLocTag, '');
         final List<City> sortedByResultCount = results.keys.toList()
           ..sort((a, b) => results[b]!.length.compareTo(results[a]!.length));
         for (final city in sortedByResultCount) {

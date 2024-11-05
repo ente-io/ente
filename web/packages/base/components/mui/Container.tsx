@@ -1,0 +1,26 @@
+import { styled } from "@mui/material";
+
+/**
+ * A flexbox with justify content set to space-between and center alignment.
+ *
+ * There is also another SpaceBetweenFlex in the old shared package, but that
+ * one also sets width: 100%. As such, that one should be considered deprecated
+ * and its uses moved to this one when possible (so that we can then see where
+ * the width: 100% is essential).
+ */
+export const SpaceBetweenFlex = styled("div")`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+`;
+
+/**
+ * A flex child that fills the entire flex direction, and shows its children
+ * after centering them both vertically and horizontally.
+ */
+export const CenteredBox = styled("div")`
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`;

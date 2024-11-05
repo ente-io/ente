@@ -149,7 +149,6 @@
   "tryAgain": "Prøv igjen",
   "viewRecoveryKey": "Vis gjenopprettingsnøkkel",
   "confirmRecoveryKey": "Bekreft gjenopprettingsnøkkel",
-  "recoveryKeyVerifyReason": "Gjenopprettings nøkkelen er den eneste måten å gjenopprette bildene dine hvis du glemmer passordet ditt. Du kan finne gjenopprettingsnøkkelen din i Innstillinger > Sikkerhet.\n\nVennligst skriv inn gjenopprettingsnøkkelen din her for å bekrefte at du har lagret den riktig.",
   "confirmYourRecoveryKey": "Bekreft din gjenopprettingsnøkkel",
   "addViewer": "Legg til seer",
   "addCollaborator": "Legg til samarbeidspartner",
@@ -372,5 +371,9 @@
   "advanced": "Avansert",
   "general": "Generelt",
   "security": "Sikkerhet",
-  "authToViewYourRecoveryKey": "Vennligst autentiser deg for å se gjennopprettingsnøkkelen din"
+  "authToViewYourRecoveryKey": "Vennligst autentiser deg for å se gjennopprettingsnøkkelen din",
+  "resetPerson": "Reset person",
+  "areYouSureYouWantToResetThisPerson": "Are you sure you want to reset this person?",
+  "allPersonGroupingWillReset": "All groupings for this person will be reset, and you will lose all suggestions made for this person",
+  "yesResetPerson": "Yes, reset person"
 }

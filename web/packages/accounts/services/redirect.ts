@@ -17,6 +17,7 @@ let _stashedRedirect: string | undefined;
 /**
  * An in-memory redirect saved during the login flow (mostly).
  */
+export const stashedRedirect = () => _stashedRedirect;
 export const stashRedirect = (r: string) => (_stashedRedirect = r);
 export const unstashRedirect = () => {
     const r = _stashedRedirect;

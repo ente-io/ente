@@ -4,15 +4,11 @@ import { apiURL, customAPIOrigin, familyAppOrigin } from "@/base/origins";
 import { ApiError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
-import {
-    getToken,
-    setLocalMapEnabled,
-} from "@ente/shared/storage/localStorage/helpers";
-import { HttpStatusCode, type AxiosResponse } from "axios";
+import { getToken } from "@ente/shared/storage/localStorage/helpers";
+import { HttpStatusCode } from "axios";
 import {
     DeleteChallengeResponse,
     GetFeatureFlagResponse,
-    GetRemoteStoreValueResponse,
     UserDetails,
 } from "types/user";
 import { getLocalFamilyData, isPartOfFamily } from "utils/user/family";
@@ -103,17 +99,6 @@ export const isTokenValid = async (token: string) => {
     }
 };
 
-export const getTwoFactorStatus = async () => {
-    const resp = await HTTPService.get(
-        await apiURL("/users/two-factor/status"),
-        null,
-        {
-            "X-Auth-Token": getToken(),
-        },
-    );
-    return resp.data["status"];
-};
-
 export const getUserDetailsV2 = async (): Promise<UserDetails> => {
     try {
         const token = getToken();
@@ -184,57 +169,6 @@ export const deleteAccount = async (
         );
     } catch (e) {
         log.error("deleteAccount api call failed", e);
-        throw e;
-    }
-};
-
-export const syncMapEnabled = async () => {
-    try {
-        const status = await getMapEnabledStatus();
-        setLocalMapEnabled(status);
-    } catch (e) {
-        log.error("failed to sync map enabled status", e);
-        throw e;
-    }
-};
-
-export const getMapEnabledStatus = async () => {
-    try {
-        const token = getToken();
-        const resp: AxiosResponse<GetRemoteStoreValueResponse> =
-            await HTTPService.get(
-                await apiURL("/remote-store"),
-                {
-                    key: "mapEnabled",
-                    defaultValue: false,
-                },
-                {
-                    "X-Auth-Token": token,
-                },
-            );
-        return resp.data.value === "true";
-    } catch (e) {
-        log.error("failed to get map enabled status", e);
-        throw e;
-    }
-};
-
-export const updateMapEnabledStatus = async (newStatus: boolean) => {
-    try {
-        const token = getToken();
-        await HTTPService.post(
-            await apiURL("/remote-store/update"),
-            {
-                key: "mapEnabled",
-                value: newStatus.toString(),
-            },
-            null,
-            {
-                "X-Auth-Token": token,
-            },
-        );
-    } catch (e) {
-        log.error("failed to update map enabled status", e);
         throw e;
     }
 };

@@ -3,6 +3,7 @@ import "dart:io";
 import "dart:math";
 
 import "package:computer/computer.dart";
+import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/core/event_bus.dart";
@@ -13,30 +14,32 @@ import "package:photos/models/file/file.dart";
 import "package:photos/models/local_entity_data.dart";
 import "package:photos/models/location/location.dart";
 import 'package:photos/models/location_tag/location_tag.dart';
-import "package:photos/services/entity_service.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/remote_assets_service.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class LocationService {
-  late SharedPreferences prefs;
+  final SharedPreferences prefs;
   final Logger _logger = Logger((LocationService).toString());
   final Computer _computer = Computer.shared();
 
-  LocationService._privateConstructor();
-
-  static final LocationService instance = LocationService._privateConstructor();
+  // If the discovery section is loaded before the cities are loaded, then we
+  // need to refresh the discovery section after the cities are loaded.
+  bool reloadLocationDiscoverySection = false;
 
   static const kCitiesRemotePath = "https://static.ente.io/world_cities.json";
 
   List<City> _cities = [];
 
-  void init(SharedPreferences preferences) {
-    prefs = preferences;
-    _loadCities();
+  LocationService(this.prefs) {
+    debugPrint('LocationService constructor');
+    Future.delayed(const Duration(seconds: 3), () {
+      _loadCities();
+    });
   }
 
   Future<Iterable<LocalEntity<LocationTag>>> _getStoredLocationTags() async {
-    final data = await EntityService.instance.getEntities(EntityType.location);
+    final data = await entityService.getEntities(EntityType.location);
     return data.map(
       (e) => LocalEntity(LocationTag.fromJson(json.decode(e.data)), e.id),
     );
@@ -46,6 +49,9 @@ class LocationService {
     List<EnteFile> allFiles,
     String query,
   ) async {
+    if (allFiles.isEmpty && query.isEmpty) {
+      reloadLocationDiscoverySection = true;
+    }
     final EnteWatch w = EnteWatch("cities_search")..start();
     w.log('start for files ${allFiles.length} and query $query');
     final result = await _computer.compute(
@@ -89,8 +95,10 @@ class LocationService {
         bSquare: b * b,
         centerPoint: centerPoint,
       );
-      await EntityService.instance
-          .addOrUpdate(EntityType.location, locationTag.toJson());
+      await entityService.addOrUpdate(
+        EntityType.location,
+        locationTag.toJson(),
+      );
       Bus.instance.fire(LocationTagUpdatedEvent(LocTagEventType.add));
     } catch (e, s) {
       _logger.severe("Failed to add location tag", e, s);
@@ -177,7 +185,7 @@ class LocationService {
         name: name,
       );
 
-      await EntityService.instance.addOrUpdate(
+      await entityService.addOrUpdate(
         EntityType.location,
         updatedLoationTag.toJson(),
         id: locationTagEntity.id,
@@ -198,7 +206,7 @@ class LocationService {
 
   Future<void> deleteLocationTag(String locTagEntityId) async {
     try {
-      await EntityService.instance.deleteEntry(
+      await entityService.deleteEntry(
         locTagEntityId,
       );
       Bus.instance.fire(
@@ -221,9 +229,13 @@ class LocationService {
           await _computer.compute(parseCities, param: {"filePath": file.path});
       final endTime = DateTime.now();
       _logger.info(
-        "Loaded cities in ${(endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)}ms",
+        "Loaded cities in ${(endTime.millisecondsSinceEpoch - startTime.millisecondsSinceEpoch)}ms, reloadingDiscovery: $reloadLocationDiscoverySection",
       );
-      _logger.info("Loaded cities");
+      if (reloadLocationDiscoverySection) {
+        reloadLocationDiscoverySection = false;
+        Bus.instance
+            .fire(LocationTagUpdatedEvent(LocTagEventType.dataSetLoaded));
+      }
     } catch (e, s) {
       _logger.severe("Failed to load cities", e, s);
     }

@@ -149,7 +149,6 @@
   "tryAgain": "Försök igen",
   "viewRecoveryKey": "Visa återställningsnyckel",
   "confirmRecoveryKey": "Bekräfta återställningsnyckel",
-  "recoveryKeyVerifyReason": "Din återställningsnyckel är det enda sättet att återställa dina foton om du glömmer ditt lösenord. Du hittar din återställningsnyckel i Inställningar > Säkerhet.\n\nAnge din återställningsnyckel här för att verifiera att du har sparat den ordentligt.",
   "confirmYourRecoveryKey": "Bekräfta din återställningsnyckel",
   "addViewer": "Lägg till bildvy",
   "addCollaborator": "Lägg till samarbetspartner",
@@ -453,5 +452,12 @@
   "next": "Nästa",
   "guestView": "Gästvy",
   "showPerson": "Visa person",
-  "sort": "Sortera"
+  "sort": "Sortera",
+  "newPerson": "Ny person",
+  "addName": "Lägg till namn",
+  "add": "Lägg till",
+  "resetPerson": "Reset person",
+  "areYouSureYouWantToResetThisPerson": "Are you sure you want to reset this person?",
+  "allPersonGroupingWillReset": "All groupings for this person will be reset, and you will lose all suggestions made for this person",
+  "yesResetPerson": "Yes, reset person"
 }

@@ -1,9 +1,9 @@
 import { assertionFailed } from "@/base/assert";
 import { newNonSecureID } from "@/base/id-worker";
 import log from "@/base/log";
+import type { EnteFile } from "@/media/file";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
-import type { EnteFile } from "../../types/file";
 import { savedCGroups, updateOrCreateUserEntities } from "../user-entity";
 import { savedFaceClusters, saveFaceClusters } from "./db";
 import {
@@ -45,17 +45,6 @@ export type ClusterFace = Omit<Face, "embedding"> & {
     isBadFace: boolean;
 };
 
-export interface ClusterPreview {
-    clusterSize: number;
-    faces: ClusterPreviewFace[];
-}
-
-export interface ClusterPreviewFace {
-    face: ClusterFace;
-    cosineSimilarity: number;
-    wasMerged: boolean;
-}
-
 /**
  * Generates clusters from the given faces using a batched form of linear
  * clustering, with a bit of lookback (and a dollop of heuristics) to get the
@@ -73,7 +62,7 @@ export interface ClusterPreviewFace {
  * other interactions with the worker (where this code runs) do not get stalled
  * while clustering is in progress.
  */
-export const clusterFaces = async (
+export const _clusterFaces = async (
     faceIndexes: FaceIndex[],
     localFiles: EnteFile[],
     onProgress: (progress: ClusteringProgress) => void,
@@ -164,7 +153,7 @@ export const clusterFaces = async (
     }
 
     const t = `(${Date.now() - startTime} ms)`;
-    log.info(`Generated ${clusters.length} clusters from ${total} faces ${t}`);
+    log.info(`Refreshed ${clusters.length} clusters from ${total} faces ${t}`);
 
     return clusters;
 };

@@ -112,6 +112,9 @@ class _SeekBarState extends State<SeekBar> with SingleTickerProviderStateMixin {
     //Video starts playing after a slight delay. This delay is to ensure that
     //the seek bar animation starts after the video starts playing.
     Future.delayed(const Duration(milliseconds: 700), () {
+      if (!mounted) {
+        return;
+      }
       if (widget.duration != null) {
         unawaited(
           _animationController.animateTo(

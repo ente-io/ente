@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
-import "package:motion_photos/src/xmp_extractor.dart";
 import 'package:path/path.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/configuration.dart';
@@ -185,8 +184,7 @@ class EnteFile {
 
           if (mediaUploadData.isPanorama != true) {
             try {
-              final xmpData = XMPExtractor()
-                  .extract(mediaUploadData.sourceFile!.readAsBytesSync());
+              final xmpData = await getXmp(mediaUploadData.sourceFile!);
               mediaUploadData.isPanorama = checkPanoramaFromXMP(xmpData);
             } catch (_) {}
 

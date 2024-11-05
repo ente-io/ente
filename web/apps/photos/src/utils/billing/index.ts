@@ -239,7 +239,7 @@ export async function updatePaymentMethod(
         setLoading(false);
         setDialogMessage({
             title: t("error"),
-            content: t("UNKNOWN_ERROR"),
+            content: t("generic_error_retry"),
             close: { variant: "critical" },
         });
     }

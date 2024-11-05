@@ -1,6 +1,7 @@
 import { ensureElectron } from "@/base/electron";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
+import { mergeMetadata, type EnteFile } from "@/media/file";
 import {
     fileCreationPhotoDate,
     fileLocation,
@@ -8,15 +9,16 @@ import {
 } from "@/media/file-metadata";
 import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
+import {
+    createCollectionNameByID,
+    getCollectionUserFacingName,
+} from "@/new/photos/services/collection";
 import downloadManager from "@/new/photos/services/download";
-import { updateExifIfNeededAndPossible } from "@/new/photos/services/exif-update";
 import {
     exportMetadataDirectoryName,
     exportTrashDirectoryName,
 } from "@/new/photos/services/export";
 import { getAllLocalFiles } from "@/new/photos/services/files";
-import { EnteFile } from "@/new/photos/types/file";
-import { mergeMetadata } from "@/new/photos/utils/file";
 import { safeDirectoryName, safeFileName } from "@/new/photos/utils/native-fs";
 import { writeStream } from "@/new/photos/utils/native-stream";
 import { wait } from "@/utils/promise";
@@ -35,10 +37,6 @@ import {
     ExportUIUpdaters,
     FileExportNames,
 } from "types/export";
-import {
-    constructCollectionNameMap,
-    getCollectionUserFacingName,
-} from "utils/collection";
 import { getAllLocalCollections } from "../collectionService";
 import { migrateExport } from "./migration";
 
@@ -331,7 +329,7 @@ class ExportService {
                 convertCollectionIDExportNameObjectToMap(
                     exportRecord.collectionExportNames,
                 );
-            const collectionIDNameMap = constructCollectionNameMap(collections);
+            const collectionIDNameMap = createCollectionNameByID(collections);
 
             const renamedCollections = getRenamedExportedCollections(
                 collections,
@@ -940,16 +938,12 @@ class ExportService {
         try {
             const fileUID = getExportRecordFileUID(file);
             const originalFileStream = await downloadManager.getFile(file);
-            const updatedFileStream = await updateExifIfNeededAndPossible(
-                file,
-                originalFileStream,
-            );
             if (file.metadata.fileType === FileType.livePhoto) {
                 await this.exportLivePhoto(
                     exportDir,
                     fileUID,
                     collectionExportPath,
-                    updatedFileStream,
+                    originalFileStream,
                     file,
                 );
             } else {
@@ -966,7 +960,7 @@ class ExportService {
                 await writeStream(
                     electron,
                     `${collectionExportPath}/${fileExportName}`,
-                    updatedFileStream,
+                    originalFileStream,
                 );
                 await this.addFileExportedRecord(
                     exportDir,

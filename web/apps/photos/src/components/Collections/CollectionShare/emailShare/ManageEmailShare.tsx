@@ -1,15 +1,16 @@
-import { EnteDrawer } from "@/base/components/EnteDrawer";
 import {
     MenuItemDivider,
     MenuItemGroup,
     MenuSectionTitle,
 } from "@/base/components/Menu";
+import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
 import {
     COLLECTION_ROLE,
     type Collection,
     type CollectionUser,
 } from "@/media/collection";
+import { AppContext } from "@/new/photos/types/context";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import Add from "@mui/icons-material/Add";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
@@ -19,7 +20,6 @@ import Photo from "@mui/icons-material/Photo";
 import { DialogProps, Stack } from "@mui/material";
 import Avatar from "components/pages/gallery/Avatar";
 import { t } from "i18next";
-import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";
 import { useContext, useRef, useState } from "react";
 import { unshareCollection } from "services/collectionService";
@@ -41,7 +41,7 @@ export default function ManageEmailShare({
     onRootClose,
     peopleCount,
 }: Iprops) {
-    const appContext = useContext(AppContext);
+    const { showLoadingBar, hideLoadingBar } = useContext(AppContext);
     const galleryContext = useContext(GalleryContext);
 
     const [addParticipantView, setAddParticipantView] = useState(false);
@@ -80,11 +80,11 @@ export default function ManageEmailShare({
 
     const collectionUnshare = async (email: string) => {
         try {
-            appContext.startLoading();
+            showLoadingBar();
             await unshareCollection(collection, email);
             await galleryContext.syncWithRemote(false, true);
         } finally {
-            appContext.finishLoading();
+            hideLoadingBar();
         }
     };
 
@@ -116,7 +116,11 @@ export default function ManageEmailShare({
 
     return (
         <>
-            <EnteDrawer anchor="right" open={open} onClose={handleDrawerClose}>
+            <SidebarDrawer
+                anchor="right"
+                open={open}
+                onClose={handleDrawerClose}
+            >
                 <Stack spacing={"4px"} py={"12px"}>
                     <Titlebar
                         onClose={onClose}
@@ -210,7 +214,7 @@ export default function ManageEmailShare({
                         </Stack>
                     </Stack>
                 </Stack>
-            </EnteDrawer>
+            </SidebarDrawer>
             <ManageParticipant
                 collectionUnshare={collectionUnshare}
                 open={manageParticipantView}
