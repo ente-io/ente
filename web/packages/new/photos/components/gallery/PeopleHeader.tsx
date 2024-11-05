@@ -10,7 +10,6 @@ import {
     type ModalVisibilityProps,
 } from "@/base/components/utils/modal";
 import { useIsSmallWidth } from "@/base/hooks";
-import { pt } from "@/base/i18n";
 import log from "@/base/log";
 import {
     addCGroup,
@@ -154,7 +153,7 @@ const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({ person }) => {
                     centerAlign
                     onClick={showSuggestions}
                 >
-                    {pt("Review suggestions")}
+                    {t("review_suggestions")}
                 </OverflowMenuOption>
                 <OverflowMenuOption
                     startIcon={<EditIcon />}
@@ -432,7 +431,7 @@ const PersonButton: React.FC<PersonButtonProps> = ({
 
 const AddPerson: React.FC<ButtonishProps> = ({ onClick }) => (
     <ItemCard TileComponent={LargeTileButton} onClick={onClick}>
-        <LargeTileTextOverlay>{pt("New person")}</LargeTileTextOverlay>
+        <LargeTileTextOverlay>{t("new_person")}</LargeTileTextOverlay>
         <LargeTilePlusOverlay>+</LargeTilePlusOverlay>
     </ItemCard>
 );
@@ -599,11 +598,9 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
     const handleClose = () => {
         if (hasUnsavedChanges) {
             showMiniDialog({
-                message: pt(
-                    "You have unsaved changes. These will be lost if you close without saving",
-                ),
+                message: t("discard_changes_confirm_message"),
                 continue: {
-                    text: pt("Discard changes"),
+                    text: t("discard_changes"),
                     color: "critical",
                     action: resetPersonAndClose,
                 },
@@ -649,8 +646,8 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                 <Stack sx={{ gap: "8px" }}>
                     <DialogTitle sx={{ "&&&": { p: 0 } }}>
                         {state.showChoices
-                            ? pt("Saved choices")
-                            : pt("Review suggestions")}
+                            ? t("saved_choices")
+                            : t("review_suggestions")}
                     </DialogTitle>
                     <Typography color="text.muted">
                         {person.name ?? " "}
@@ -662,8 +659,8 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                         onClick={() => dispatch({ type: "toggleHistory" })}
                         aria-label={
                             !state.showChoices
-                                ? pt("Saved suggestions")
-                                : pt("Review suggestions")
+                                ? t("saved_choices")
+                                : t("review_suggestions")
                         }
                         sx={{
                             backgroundColor: state.showChoices
@@ -683,7 +680,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                 {state.activity == "fetching" ? (
                     <CenteredBox>
                         <ActivityIndicator>
-                            {pt("Finding similar faces...")}
+                            {t("people_suggestions_finding")}
                         </ActivityIndicator>
                     </CenteredBox>
                 ) : state.fetchFailed ? (
@@ -702,7 +699,7 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                             color="text.muted"
                             sx={{ textAlign: "center" }}
                         >
-                            {pt("No more suggestions for now")}
+                            t{"people_suggestions_empty"}
                         </Typography>
                     </CenteredBox>
                 ) : (
@@ -776,7 +773,7 @@ const SuggestionOrChoiceList: React.FC<SuggestionOrChoiceListProps> = ({
                         <ToggleButton value="no" aria-label={t("no")}>
                             <ClearIcon />
                         </ToggleButton>
-                        <ToggleButton value="yes" aria-label={pt("Yes")}>
+                        <ToggleButton value="yes" aria-label={t("yes")}>
                             <CheckIcon />
                         </ToggleButton>
                     </ToggleButtonGroup>
