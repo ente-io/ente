@@ -28,8 +28,8 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   Uint8List dco_decode_list_prim_u_8_strict(dynamic raw);
 
   @protected
-  (Uint8List, String) dco_decode_record_list_prim_u_8_strict_string(
-      dynamic raw);
+  (Uint8List, String, BigInt, BigInt)
+      dco_decode_record_list_prim_u_8_strict_string_usize_usize(dynamic raw);
 
   @protected
   int dco_decode_u_8(dynamic raw);
@@ -38,20 +38,27 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void dco_decode_unit(dynamic raw);
 
   @protected
+  BigInt dco_decode_usize(dynamic raw);
+
+  @protected
   String sse_decode_String(SseDeserializer deserializer);
 
   @protected
   Uint8List sse_decode_list_prim_u_8_strict(SseDeserializer deserializer);
 
   @protected
-  (Uint8List, String) sse_decode_record_list_prim_u_8_strict_string(
-      SseDeserializer deserializer);
+  (Uint8List, String, BigInt, BigInt)
+      sse_decode_record_list_prim_u_8_strict_string_usize_usize(
+          SseDeserializer deserializer);
 
   @protected
   int sse_decode_u_8(SseDeserializer deserializer);
 
   @protected
   void sse_decode_unit(SseDeserializer deserializer);
+
+  @protected
+  BigInt sse_decode_usize(SseDeserializer deserializer);
 
   @protected
   int sse_decode_i_32(SseDeserializer deserializer);
@@ -75,11 +82,19 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   }
 
   @protected
-  void cst_api_fill_to_wire_record_list_prim_u_8_strict_string(
-      (Uint8List, String) apiObj,
-      wire_cst_record_list_prim_u_8_strict_string wireObj) {
+  int cst_encode_usize(BigInt raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return raw.toSigned(64).toInt();
+  }
+
+  @protected
+  void cst_api_fill_to_wire_record_list_prim_u_8_strict_string_usize_usize(
+      (Uint8List, String, BigInt, BigInt) apiObj,
+      wire_cst_record_list_prim_u_8_strict_string_usize_usize wireObj) {
     wireObj.field0 = cst_encode_list_prim_u_8_strict(apiObj.$1);
     wireObj.field1 = cst_encode_String(apiObj.$2);
+    wireObj.field2 = cst_encode_usize(apiObj.$3);
+    wireObj.field3 = cst_encode_usize(apiObj.$4);
   }
 
   @protected
@@ -96,14 +111,17 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
       Uint8List self, SseSerializer serializer);
 
   @protected
-  void sse_encode_record_list_prim_u_8_strict_string(
-      (Uint8List, String) self, SseSerializer serializer);
+  void sse_encode_record_list_prim_u_8_strict_string_usize_usize(
+      (Uint8List, String, BigInt, BigInt) self, SseSerializer serializer);
 
   @protected
   void sse_encode_u_8(int self, SseSerializer serializer);
 
   @protected
   void sse_encode_unit(void self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_usize(BigInt self, SseSerializer serializer);
 
   @protected
   void sse_encode_i_32(int self, SseSerializer serializer);
@@ -246,8 +264,15 @@ final class wire_cst_list_prim_u_8_strict extends ffi.Struct {
   external int len;
 }
 
-final class wire_cst_record_list_prim_u_8_strict_string extends ffi.Struct {
+final class wire_cst_record_list_prim_u_8_strict_string_usize_usize
+    extends ffi.Struct {
   external ffi.Pointer<wire_cst_list_prim_u_8_strict> field0;
 
   external ffi.Pointer<wire_cst_list_prim_u_8_strict> field1;
+
+  @ffi.UintPtr()
+  external int field2;
+
+  @ffi.UintPtr()
+  external int field3;
 }

@@ -114,6 +114,12 @@ impl CstDecode<u8> for u8 {
         self
     }
 }
+impl CstDecode<usize> for usize {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    fn cst_decode(self) -> usize {
+        self
+    }
+}
 impl SseDecode for String {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -134,12 +140,14 @@ impl SseDecode for Vec<u8> {
     }
 }
 
-impl SseDecode for (Vec<u8>, String) {
+impl SseDecode for (Vec<u8>, String, usize, usize) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut var_field0 = <Vec<u8>>::sse_decode(deserializer);
         let mut var_field1 = <String>::sse_decode(deserializer);
-        return (var_field0, var_field1);
+        let mut var_field2 = <usize>::sse_decode(deserializer);
+        let mut var_field3 = <usize>::sse_decode(deserializer);
+        return (var_field0, var_field1, var_field2, var_field3);
     }
 }
 
@@ -153,6 +161,13 @@ impl SseDecode for u8 {
 impl SseDecode for () {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {}
+}
+
+impl SseDecode for usize {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        deserializer.cursor.read_u64::<NativeEndian>().unwrap() as _
+    }
 }
 
 impl SseDecode for i32 {
@@ -213,11 +228,13 @@ impl SseEncode for Vec<u8> {
     }
 }
 
-impl SseEncode for (Vec<u8>, String) {
+impl SseEncode for (Vec<u8>, String, usize, usize) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <Vec<u8>>::sse_encode(self.0, serializer);
         <String>::sse_encode(self.1, serializer);
+        <usize>::sse_encode(self.2, serializer);
+        <usize>::sse_encode(self.3, serializer);
     }
 }
 
@@ -231,6 +248,16 @@ impl SseEncode for u8 {
 impl SseEncode for () {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {}
+}
+
+impl SseEncode for usize {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        serializer
+            .cursor
+            .write_u64::<NativeEndian>(self as _)
+            .unwrap();
+    }
 }
 
 impl SseEncode for i32 {
@@ -283,21 +310,30 @@ mod io {
             }
         }
     }
-    impl CstDecode<(Vec<u8>, String)> for wire_cst_record_list_prim_u_8_strict_string {
+    impl CstDecode<(Vec<u8>, String, usize, usize)>
+        for wire_cst_record_list_prim_u_8_strict_string_usize_usize
+    {
         // Codec=Cst (C-struct based), see doc to use other codecs
-        fn cst_decode(self) -> (Vec<u8>, String) {
-            (self.field0.cst_decode(), self.field1.cst_decode())
+        fn cst_decode(self) -> (Vec<u8>, String, usize, usize) {
+            (
+                self.field0.cst_decode(),
+                self.field1.cst_decode(),
+                self.field2.cst_decode(),
+                self.field3.cst_decode(),
+            )
         }
     }
-    impl NewWithNullPtr for wire_cst_record_list_prim_u_8_strict_string {
+    impl NewWithNullPtr for wire_cst_record_list_prim_u_8_strict_string_usize_usize {
         fn new_with_null_ptr() -> Self {
             Self {
                 field0: core::ptr::null_mut(),
                 field1: core::ptr::null_mut(),
+                field2: Default::default(),
+                field3: Default::default(),
             }
         }
     }
-    impl Default for wire_cst_record_list_prim_u_8_strict_string {
+    impl Default for wire_cst_record_list_prim_u_8_strict_string_usize_usize {
         fn default() -> Self {
             Self::new_with_null_ptr()
         }
@@ -342,9 +378,11 @@ mod io {
     }
     #[repr(C)]
     #[derive(Clone, Copy)]
-    pub struct wire_cst_record_list_prim_u_8_strict_string {
+    pub struct wire_cst_record_list_prim_u_8_strict_string_usize_usize {
         field0: *mut wire_cst_list_prim_u_8_strict,
         field1: *mut wire_cst_list_prim_u_8_strict,
+        field2: usize,
+        field3: usize,
     }
 }
 #[cfg(not(target_family = "wasm"))]

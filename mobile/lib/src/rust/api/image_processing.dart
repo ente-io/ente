@@ -8,6 +8,7 @@
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 import 'package:photos/src/rust/frb_generated.dart';
 
-Future<(Uint8List, String)> processYoloFace({required String imagePath}) =>
+Future<(Uint8List, String, BigInt, BigInt)> processYoloFace(
+        {required String imagePath}) =>
     RustLib.instance.api
         .crateApiImageProcessingProcessYoloFace(imagePath: imagePath);

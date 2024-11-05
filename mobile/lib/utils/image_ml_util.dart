@@ -262,6 +262,8 @@ Future<(Float32List, Dimensions)> preprocessImageYoloFace(
 
 Future<Float32List> resizedToPreprocessed(
   Uint8List rgbBytes,
+  int rgbWidth,
+  int rgbHeight,
 ) async {
   const requiredWidth = 640;
   const requiredHeight = 640;
@@ -273,12 +275,17 @@ Future<Float32List> resizedToPreprocessed(
   const int channelOffsetBlue = 2 * requiredHeight * requiredWidth;
   for (var h = 0; h < requiredHeight; h++) {
     for (var w = 0; w < requiredWidth; w++) {
-      final byteIndex = 3 * (requiredWidth * h + w);
-      final pixel = (
-        rgbBytes[byteIndex],
-        rgbBytes[byteIndex + 1],
-        rgbBytes[byteIndex + 2]
-      );
+      late RGB pixel;
+      if (w >= rgbWidth || h >= rgbHeight) {
+        pixel = const (114, 114, 114);
+      } else {
+        final byteIndex = 3 * (rgbWidth * h + w);
+        pixel = (
+          rgbBytes[byteIndex],
+          rgbBytes[byteIndex + 1],
+          rgbBytes[byteIndex + 2]
+        );
+      }
       buffer[pixelIndex] = pixel.$1 / 255;
       buffer[pixelIndex + channelOffsetGreen] = pixel.$2 / 255;
       buffer[pixelIndex + channelOffsetBlue] = pixel.$3 / 255;
