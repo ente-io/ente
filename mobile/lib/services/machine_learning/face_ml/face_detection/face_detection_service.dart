@@ -58,17 +58,26 @@ class FaceDetectionService extends MlModel {
 
     final startTime = DateTime.now();
 
-    final result = await processYoloFace(imagePath: imagePath);
+    final (result, timing) = await processYoloFace(imagePath: imagePath);
+    _logger.info("Face detection preprocessing: \n $timing");
     const scaledSize = Dimensions(width: 640, height: 640);
+    final preprocessingTime = DateTime.now();
+    final preprocessingMs =
+        preprocessingTime.difference(startTime).inMilliseconds;
+
+    final tempTime = DateTime.now();
     final inputImageList = await resizedToPreprocessed(result);
+    _logger.info(
+      'Face detection remaining dart processing: ${DateTime.now().difference(tempTime).inMilliseconds} ms',
+    );
 
     // final (inputImageList, scaledSize) = await preprocessImageYoloFace(
     //   image,
     //   rawRgbaBytes,
     // );
-    final preprocessingTime = DateTime.now();
-    final preprocessingMs =
-        preprocessingTime.difference(startTime).inMilliseconds;
+    // final preprocessingTime = DateTime.now();
+    // final preprocessingMs =
+    //     preprocessingTime.difference(startTime).inMilliseconds;
 
     // Run inference
     List<List<List<double>>>? nestedResults = [];
@@ -89,9 +98,10 @@ class FaceDetectionService extends MlModel {
       );
     } catch (e, s) {
       _logger.severe(
-          'Error while running inference (PlatformPlugin: ${MlModel.usePlatformPlugin})',
-          e,
-          s,);
+        'Error while running inference (PlatformPlugin: ${MlModel.usePlatformPlugin})',
+        e,
+        s,
+      );
       throw YOLOFaceInterpreterRunException();
     }
     try {
