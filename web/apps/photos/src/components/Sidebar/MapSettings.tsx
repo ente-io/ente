@@ -112,19 +112,12 @@ const ModifyMapSettings = ({ open, onClose, onRootClose, mapEnabled }) => {
         onRootClose();
     };
 
-    const errorIndicator = phase == "failed" && (
-        <Typography variant="small" color="critical.main">
-            {t("generic_error")}
-        </Typography>
-    );
-
     return (
         <NestedSidebarDrawer
             {...{ open }}
             onClose={handleClose}
             onRootClose={handleRootClose}
         >
-            {errorIndicator}
             {mapEnabled ? (
                 <ConfirmDisableMap
                     onClose={handleClose}
@@ -183,6 +176,11 @@ const ConfirmEnableMap: React.FC<ConfirmStepProps> = ({
                 </Typography>
             </Box>
             <Stack px={"8px"} spacing={"8px"}>
+                {phase == "failed" && (
+                    <Typography variant="small" color="critical.main">
+                        {t("generic_error")}
+                    </Typography>
+                )}
                 <LoadingButton
                     loading={phase == "loading"}
                     color={"accent"}
@@ -222,6 +220,11 @@ const ConfirmDisableMap: React.FC<ConfirmStepProps> = ({
                 </Typography>
             </Box>
             <Stack px={"8px"} spacing={"8px"}>
+                {phase == "failed" && (
+                    <Typography variant="small" color="critical.main">
+                        {t("generic_error")}
+                    </Typography>
+                )}
                 <LoadingButton
                     loading={phase == "loading"}
                     color={"critical"}
