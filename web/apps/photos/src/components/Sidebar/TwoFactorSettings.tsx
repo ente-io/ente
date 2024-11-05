@@ -5,7 +5,7 @@ import {
     SidebarDrawerTitlebar,
     type NestedSidebarDrawerVisibilityProps,
 } from "@/base/components/mui/SidebarDrawer";
-import { AppContext } from "@/new/photos/types/context";
+import { useAppContext } from "@/new/photos/types/context";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
@@ -14,7 +14,7 @@ import LockIcon from "@mui/icons-material/Lock";
 import { Button, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import router, { useRouter } from "next/router";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { getTwoFactorStatus } from "services/userService";
 
 export const TwoFactorSettings: React.FC<
@@ -109,36 +109,26 @@ interface TwoFactorModalManageSectionProps {
 
 function TwoFactorModalManageSection(props: TwoFactorModalManageSectionProps) {
     const { closeDialog } = props;
-    const { setDialogMessage } = useContext(AppContext);
+    const { showMiniDialog, setDialogMessage } = useAppContext();
 
-    const warnTwoFactorDisable = async () => {
-        setDialogMessage({
+    const confirmDisable = () =>
+        showMiniDialog({
             title: t("DISABLE_TWO_FACTOR"),
-
-            content: t("DISABLE_TWO_FACTOR_MESSAGE"),
-            close: { text: t("cancel") },
-            proceed: {
-                variant: "critical",
+            message: t("DISABLE_TWO_FACTOR_MESSAGE"),
+            continue: {
                 text: t("disable"),
-                action: twoFactorDisable,
+                color: "critical",
+                action: disable,
             },
         });
-    };
 
-    const twoFactorDisable = async () => {
-        try {
-            await disableTwoFactor();
-            await setLSUser({
-                ...getData(LS_KEYS.USER),
-                isTwoFactorEnabled: false,
-            });
-            closeDialog();
-        } catch (e) {
-            setDialogMessage({
-                title: t("TWO_FACTOR_DISABLE_FAILED"),
-                close: {},
-            });
-        }
+    const disable = async () => {
+        await disableTwoFactor();
+        await setLSUser({
+            ...getData(LS_KEYS.USER),
+            isTwoFactorEnabled: false,
+        });
+        closeDialog();
     };
 
     const warnTwoFactorReconfigure = async () => {
@@ -164,7 +154,7 @@ function TwoFactorModalManageSection(props: TwoFactorModalManageSectionProps) {
         <Stack sx={{ px: "16px", py: "20px", gap: "24px" }}>
             <MenuItemGroup>
                 <EnteMenuItem
-                    onClick={warnTwoFactorDisable}
+                    onClick={confirmDisable}
                     variant="toggle"
                     checked={true}
                     label={t("enabled")}
