@@ -103,17 +103,6 @@ export const isTokenValid = async (token: string) => {
     }
 };
 
-export const getTwoFactorStatus = async () => {
-    const resp = await HTTPService.get(
-        await apiURL("/users/two-factor/status"),
-        null,
-        {
-            "X-Auth-Token": getToken(),
-        },
-    );
-    return resp.data["status"];
-};
-
 export const getUserDetailsV2 = async (): Promise<UserDetails> => {
     try {
         const token = getToken();

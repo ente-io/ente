@@ -11,7 +11,7 @@ import {
     supportedLocales,
     type SupportedLocale,
 } from "@/base/i18n";
-import { MLSettings } from "@/new/photos/components/MLSettings";
+import { MLSettings } from "@/new/photos/components/sidebar/MLSettings";
 import { isMLSupported } from "@/new/photos/services/ml";
 import { syncSettings } from "@/new/photos/services/settings";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";

@@ -9,6 +9,7 @@ import log from "@/base/log";
 import { savedLogs } from "@/base/log-web";
 import { customAPIHost } from "@/base/origins";
 import { downloadString } from "@/base/utils/web";
+import { TwoFactorSettings } from "@/new/photos/components/sidebar/TwoFactorSettings";
 import { downloadAppDialogAttributes } from "@/new/photos/components/utils/download";
 import {
     ARCHIVE_SECTION,
@@ -47,7 +48,6 @@ import {
 } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import DeleteAccountModal from "components/DeleteAccountModal";
-import TwoFactorModal from "components/Sidebar/TwoFactorSettings";
 import { WatchFolder } from "components/WatchFolder";
 import LinkButton from "components/pages/gallery/LinkButton";
 import { t } from "i18next";
@@ -530,7 +530,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
                 {...recoveryKeyVisibilityProps}
                 {...{ showMiniDialog }}
             />
-            <TwoFactorModal
+            <TwoFactorSettings
                 {...twoFactorVisibilityProps}
                 onRootClose={closeSidebar}
             />
