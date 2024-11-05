@@ -1,5 +1,6 @@
 import { MenuItemGroup } from "@/base/components/Menu";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
+import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import {
     NestedSidebarDrawer,
     SidebarDrawerTitlebar,
@@ -9,7 +10,7 @@ import log from "@/base/log";
 import type { ButtonishProps } from "@/new/photos/components/mui";
 import { AppContext } from "@/new/photos/types/context";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
-import { Box, Button, Link, Stack, Typography } from "@mui/material";
+import { Box, Link, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import React, { useContext, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
@@ -76,49 +77,67 @@ export const MapSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
 };
 
 const ModifyMapSettings = ({ open, onClose, onRootClose, mapEnabled }) => {
-    const { somethingWentWrong, updateMapEnabled } = useContext(AppContext);
+    const [phase, setPhase] = useState<"loading" | "failed" | undefined>();
+    const { updateMapEnabled } = useContext(AppContext);
 
     const disableMap = async () => {
+        setPhase("loading");
         try {
             await updateMapEnabled(false);
-            onClose();
+            handleClose();
         } catch (e) {
-            log.error("Disable Map failed", e);
-            somethingWentWrong();
+            log.error("Error", e);
+            setPhase("failed");
         }
     };
 
     const enableMap = async () => {
+        setPhase("loading");
         try {
             await updateMapEnabled(true);
-            onClose();
+            handleClose();
         } catch (e) {
-            log.error("Enable Map failed", e);
-            somethingWentWrong();
+            log.error("Error", e);
+            setPhase("failed");
         }
     };
 
-    const handleRootClose = () => {
+    const handleClose = () => {
+        setPhase(undefined);
         onClose();
+    };
+
+    const handleRootClose = () => {
+        handleClose();
         onRootClose();
     };
 
+    const errorIndicator = phase == "failed" && (
+        <Typography variant="small" color="critical.main">
+            {t("generic_error")}
+        </Typography>
+    );
+
     return (
         <NestedSidebarDrawer
-            {...{ open, onClose }}
+            {...{ open }}
+            onClose={handleClose}
             onRootClose={handleRootClose}
         >
+            {errorIndicator}
             {mapEnabled ? (
                 <ConfirmDisableMap
-                    onClose={onClose}
+                    onClose={handleClose}
                     onRootClose={handleRootClose}
                     onClick={disableMap}
+                    phase={phase}
                 />
             ) : (
                 <ConfirmEnableMap
-                    onClose={onClose}
+                    onClose={handleClose}
                     onRootClose={handleRootClose}
                     onClick={enableMap}
+                    phase={phase}
                 />
             )}
         </NestedSidebarDrawer>
@@ -129,12 +148,15 @@ type ConfirmStepProps = Pick<
     NestedSidebarDrawerVisibilityProps,
     "onClose" | "onRootClose"
 > &
-    ButtonishProps;
+    ButtonishProps & {
+        phase: "loading" | "failed" | undefined;
+    };
 
 const ConfirmEnableMap: React.FC<ConfirmStepProps> = ({
     onClose,
     onRootClose,
     onClick,
+    phase,
 }) => (
     <Stack sx={{ gap: "4px", py: "12px" }}>
         <SidebarDrawerTitlebar
@@ -161,12 +183,21 @@ const ConfirmEnableMap: React.FC<ConfirmStepProps> = ({
                 </Typography>
             </Box>
             <Stack px={"8px"} spacing={"8px"}>
-                <Button color={"accent"} size="large" onClick={onClick}>
+                <LoadingButton
+                    loading={phase == "loading"}
+                    color={"accent"}
+                    fullWidth
+                    onClick={onClick}
+                >
                     {t("enable")}
-                </Button>
-                <Button color={"secondary"} size="large" onClick={onClose}>
+                </LoadingButton>
+                <FocusVisibleButton
+                    color={"secondary"}
+                    fullWidth
+                    onClick={onClose}
+                >
                     {t("cancel")}
-                </Button>
+                </FocusVisibleButton>
             </Stack>
         </Stack>
     </Stack>
@@ -176,6 +207,7 @@ const ConfirmDisableMap: React.FC<ConfirmStepProps> = ({
     onClose,
     onRootClose,
     onClick,
+    phase,
 }) => (
     <Stack sx={{ gap: "4px", py: "12px" }}>
         <SidebarDrawerTitlebar
@@ -190,13 +222,14 @@ const ConfirmDisableMap: React.FC<ConfirmStepProps> = ({
                 </Typography>
             </Box>
             <Stack px={"8px"} spacing={"8px"}>
-                <FocusVisibleButton
+                <LoadingButton
+                    loading={phase == "loading"}
                     color={"critical"}
                     size="large"
                     onClick={onClick}
                 >
                     {t("disable")}
-                </FocusVisibleButton>
+                </LoadingButton>
                 <FocusVisibleButton
                     color={"secondary"}
                     size="large"
