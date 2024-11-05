@@ -1053,4 +1053,17 @@ class MLDataDB {
 
     return <String>{for (final row in result) row[clusterIDColumn]};
   }
+
+  Future<Set<int>> getAllFileIDsOfFaceIDsNotInAnyCluster() async {
+    final db = await instance.asyncDB;
+    final result = await db.getAll(
+      '''
+        SELECT DISTINCT file_id
+        FROM faces
+        LEFT JOIN face_clusters ON faces.face_id = face_clusters.face_id
+        WHERE face_clusters.face_id IS NULL;
+    ''',
+    );
+    return <int>{for (final row in result) row[fileIDColumn]};
+  }
 }

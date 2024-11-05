@@ -103,6 +103,11 @@ Future<List<EnteFile>> getFilteredFiles(
       final fileIDsToAvoid =
           await MLDataDB.instance.getFileIDsOfClusterIDs(clusterIDsToAvoid);
 
+      final filesOfFaceIDsNotInAnyCluster =
+          await MLDataDB.instance.getAllFileIDsOfFaceIDsNotInAnyCluster();
+
+      fileIDsToAvoid.addAll(filesOfFaceIDsNotInAnyCluster);
+
       final result =
           intersectionOfSelectedFaceFiltersFileIDs.difference(fileIDsToAvoid);
       filter.matchedUploadedIDs.addAll(result);
