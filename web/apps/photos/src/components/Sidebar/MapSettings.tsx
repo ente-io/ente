@@ -149,7 +149,7 @@ const ConfirmEnableMap: React.FC<ConfirmStepProps> = ({
         />
         <Stack py={"20px"} px={"8px"} spacing={"32px"}>
             <Box px={"8px"}>
-                <Typography color="text.muted">
+                <Typography component="div" color="text.muted">
                     <Trans
                         i18nKey={"enable_maps_confirm_message"}
                         components={{
