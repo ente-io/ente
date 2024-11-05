@@ -195,7 +195,7 @@ DateTime? parseDateTimeFromFileNameV2(
     }
   } else if (countOfHyphen == 2) {
     valForParser = val.replaceAll(".", ":");
-  } else if (countOfHyphen == 6) {
+  } else if (countOfHyphen == 6 || countOfHyphen == 7) {
     final splits = val.split("-");
     valForParser =
         "${splits[0]}${splits[1]}${splits[2]}T${splits[3]}${splits[4]}${splits[5]}";
