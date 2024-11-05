@@ -176,7 +176,7 @@ const CGroupPersonHeader: React.FC<CGroupPersonHeaderProps> = ({ person }) => {
 
             <SingleInputDialog
                 {...nameInputVisibilityProps}
-                title={pt("Rename person")}
+                title={t("rename_person")}
                 label={pt("Name")}
                 placeholder={t("enter_name")}
                 autoComplete="name"
@@ -262,13 +262,13 @@ const ClusterPersonHeader: React.FC<ClusterPersonHeaderProps> = ({
     return (
         <>
             <GalleryItemsSummary
-                name={pt("Unnamed person") /* TODO-Cluster */}
+                name={t("unnamed_person")}
                 nameProps={{ color: "text.muted" }}
                 fileCount={person.fileIDs.length}
                 onNameClick={showAddPerson}
             />
             <Stack direction="row" sx={{ alignItems: "center", gap: 2 }}>
-                <Tooltip title={pt("Add a name")}>
+                <Tooltip title={t("add_a_name")}>
                     <IconButton onClick={showAddPerson}>
                         <AddIcon />
                     </IconButton>
@@ -283,7 +283,7 @@ const ClusterPersonHeader: React.FC<ClusterPersonHeaderProps> = ({
                         centerAlign
                         onClick={showAddPerson}
                     >
-                        {pt("Add a name")}
+                        {t("add_a_name")}
                     </OverflowMenuOption>
                     <OverflowMenuOption
                         startIcon={<HideImageOutlinedIcon />}
@@ -376,7 +376,7 @@ const AddPersonDialog: React.FC<AddPersonDialogProps> = ({
             >
                 <SpaceBetweenFlex sx={{ padding: "10px 8px 6px 0" }}>
                     <DialogTitle variant="h3" fontWeight={"bold"}>
-                        {pt("Add name")}
+                        {t("add_name")}
                     </DialogTitle>
                     <DialogCloseIconButton {...{ onClose }} />
                 </SpaceBetweenFlex>
@@ -395,8 +395,8 @@ const AddPersonDialog: React.FC<AddPersonDialogProps> = ({
             <SingleInputDialog
                 open={openNameInput}
                 onClose={() => setOpenNameInput(false)}
-                title={pt("New person") /* TODO-Cluster */}
-                label={pt("Add name")}
+                title={t("new_person")}
+                label={t("add_name")}
                 placeholder={t("enter_name")}
                 autoComplete="name"
                 autoFocus
