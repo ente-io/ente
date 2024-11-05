@@ -61,9 +61,7 @@ export const TwoFactorSettings: React.FC<
                 />
 
                 {isTwoFactorEnabled ? (
-                    <TwoFactorModalManageSection
-                        closeDialog={handleRootClose}
-                    />
+                    <ManageDrawerContents onRootClose={handleRootClose} />
                 ) : (
                     <TwoFactorModalSetupSection closeDialog={handleRootClose} />
                 )}
@@ -73,6 +71,8 @@ export const TwoFactorSettings: React.FC<
 };
 
 export default TwoFactorSettings;
+
+type ContentsProps = Pick<NestedSidebarDrawerVisibilityProps, "onRootClose">;
 
 interface TwoFactorModalSetupSectionProps {
     closeDialog: () => void;
@@ -103,12 +103,7 @@ function TwoFactorModalSetupSection({
     );
 }
 
-interface TwoFactorModalManageSectionProps {
-    closeDialog: () => void;
-}
-
-function TwoFactorModalManageSection(props: TwoFactorModalManageSectionProps) {
-    const { closeDialog } = props;
+const ManageDrawerContents: React.FC<ContentsProps> = ({ onRootClose }) => {
     const { showMiniDialog } = useAppContext();
 
     const confirmDisable = () =>
@@ -128,7 +123,7 @@ function TwoFactorModalManageSection(props: TwoFactorModalManageSectionProps) {
             ...getData(LS_KEYS.USER),
             isTwoFactorEnabled: false,
         });
-        closeDialog();
+        onRootClose();
     };
 
     const confirmReconfigure = () =>
@@ -137,12 +132,13 @@ function TwoFactorModalManageSection(props: TwoFactorModalManageSectionProps) {
             message: t("UPDATE_TWO_FACTOR_MESSAGE"),
             continue: {
                 text: t("UPDATE"),
+                color: "primary",
                 action: reconfigure,
             },
         });
 
     const reconfigure = () => {
-        closeDialog();
+        onRootClose();
         router.push(PAGES.TWO_FACTOR_SETUP);
     };
 
@@ -170,4 +166,4 @@ function TwoFactorModalManageSection(props: TwoFactorModalManageSectionProps) {
             </div>
         </Stack>
     );
-}
+};
