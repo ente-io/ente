@@ -6,7 +6,29 @@ import { localUser } from "@/base/local-user";
 import log from "@/base/log";
 import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
-import { fetchFeatureFlags } from "./remote-store";
+import { fetchFeatureFlags, updateRemoteFlag } from "./remote-store";
+
+/**
+ * In-memory flags that tracks various settings.
+ *
+ * See: [Note: Remote flag lifecycle].
+ */
+export interface Settings {
+    /**
+     * `true` if the current user is an internal user.
+     */
+    isInternalUser: boolean;
+
+    /**
+     * `true` if maps are enabled.
+     */
+    isMapEnabled: boolean;
+}
+
+const defaultSettings = (): Settings => ({
+    isInternalUser: false,
+    isMapEnabled: false,
+});
 
 /**
  * Internal in-memory state shared by the functions in this module.
@@ -23,7 +45,7 @@ class SettingsState {
 
     constructor() {
         this.id = Math.random();
-        this.settingsSnapshot = { ...defaultSettings };
+        this.settingsSnapshot = defaultSettings();
     }
 
     /**
@@ -48,28 +70,6 @@ class SettingsState {
 
 /** State shared by the functions in this module. See {@link SettingsState}. */
 let _state = new SettingsState();
-
-/**
- * In-memory flags that tracks various settings.
- *
- * See: [Note: Remote flag lifecycle].
- */
-export interface Settings {
-    /**
-     * `true` if the current user is an internal user.
-     */
-    isInternalUser: boolean;
-
-    /**
-     * `true` if maps are enabled.
-     */
-    isMapEnabled: boolean;
-}
-
-const defaultSettings: Settings = {
-    isInternalUser: false,
-    isMapEnabled: false,
-};
 
 /**
  * Fetch remote flags (feature flags and other user specific preferences) from
@@ -156,7 +156,7 @@ type FeatureFlags = z.infer<typeof FeatureFlags>;
 
 const readInMemoryFlagsFromLocalStorage = () => {
     const flags = savedRemoteFeatureFlags();
-    const settings = { ...defaultSettings };
+    const settings = defaultSettings();
     // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
     settings.isInternalUser = flags?.internalUser || isInternalUserViaEmail();
     setSettingsSnapshot(settings);
@@ -208,3 +208,11 @@ const isInternalUserViaEmail = () => {
  * 3. Otherwise false.
  */
 export const isInternalUser = () => settingsSnapshot().isInternalUser;
+
+/**
+ * Persist the user's map enabled preference both locally and on remote.
+ */
+export const updateMapEnabled = async (isEnabled: boolean) => {
+    await updateRemoteFlag("mapEnabled", isEnabled);
+    return syncSettings();
+};
