@@ -23,6 +23,7 @@ class SettingsState {
 
     constructor() {
         this.id = Math.random();
+        this.settingsSnapshot = { ...defaultSettings };
     }
 
     /**
@@ -32,22 +33,43 @@ class SettingsState {
     haveSynced = false;
 
     /**
-     * In-memory flag that tracks if the current user is an internal user.
+     * Subscriptions to {@link Settings} updates.
      *
-     * See: [Note: Remote flag lifecycle].
+     * See {@link settingsSubscribe}.
      */
-    isInternalUser = false;
+    settingsListeners: (() => void)[] = [];
 
     /**
-     * In-memory flag that tracks if maps are enabled.
-     *
-     * See: [Note: Remote flag lifecycle].
+     * Snapshot of the {@link Settings} returned by the {@link settingsSnapshot}
+     * function.
      */
-    isMapEnabled = false;
+    settingsSnapshot: Settings;
 }
 
 /** State shared by the functions in this module. See {@link SettingsState}. */
 let _state = new SettingsState();
+
+/**
+ * In-memory flags that tracks various settings.
+ *
+ * See: [Note: Remote flag lifecycle].
+ */
+export interface Settings {
+    /**
+     * `true` if the current user is an internal user.
+     */
+    isInternalUser: boolean;
+
+    /**
+     * `true` if maps are enabled.
+     */
+    isMapEnabled: boolean;
+}
+
+const defaultSettings: Settings = {
+    isInternalUser: false,
+    isMapEnabled: false,
+};
 
 /**
  * Fetch remote flags (feature flags and other user specific preferences) from
@@ -134,8 +156,43 @@ type FeatureFlags = z.infer<typeof FeatureFlags>;
 
 const readInMemoryFlagsFromLocalStorage = () => {
     const flags = savedRemoteFeatureFlags();
+    const settings = { ...defaultSettings };
     // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-    _state.isInternalUser = flags?.internalUser || isInternalUserViaEmail();
+    settings.isInternalUser = flags?.internalUser || isInternalUserViaEmail();
+    setSettingsSnapshot(settings);
+};
+
+/**
+ * A function that can be used to subscribe to updates to {@link Settings}.
+ *
+ * This, along with {@link settingsSnapshot}, is meant to be used as arguments
+ * to React's {@link useSyncExternalStore}.
+ *
+ * @param callback A function that will be invoked whenever the result of
+ * {@link settingsSnapshot} changes.
+ *
+ * @returns A function that can be used to clear the subscription.
+ */
+export const settingsSubscribe = (onChange: () => void): (() => void) => {
+    _state.settingsListeners.push(onChange);
+    return () => {
+        _state.settingsListeners = _state.settingsListeners.filter(
+            (l) => l != onChange,
+        );
+    };
+};
+
+/**
+ * Return the last known, cached {@link Settings}.
+ *
+ * This, along with {@link settingsSubscribe}, is meant to be used as
+ * arguments to React's {@link useSyncExternalStore}.
+ */
+export const settingsSnapshot = () => _state.settingsSnapshot;
+
+const setSettingsSnapshot = (snapshot: Settings) => {
+    _state.settingsSnapshot = snapshot;
+    _state.settingsListeners.forEach((l) => l());
 };
 
 const isInternalUserViaEmail = () => {
@@ -150,4 +207,4 @@ const isInternalUserViaEmail = () => {
  * 2. If the "internalUser" remote feature flag is set, the user is internal.
  * 3. Otherwise false.
  */
-export const isInternalUser = () => _state.isInternalUser;
+export const isInternalUser = () => settingsSnapshot().isInternalUser;
