@@ -129,8 +129,8 @@ const ManageDrawerContents: React.FC<ContentsProps> = ({ onRootClose }) => {
 
     const confirmReconfigure = () =>
         showMiniDialog({
-            title: t("UPDATE_TWO_FACTOR"),
-            message: t("UPDATE_TWO_FACTOR_MESSAGE"),
+            title: t("update_two_factor"),
+            message: t("update_two_factor_message"),
             continue: {
                 text: t("UPDATE"),
                 color: "primary",
@@ -163,7 +163,7 @@ const ManageDrawerContents: React.FC<ContentsProps> = ({ onRootClose }) => {
                         label={t("reconfigure")}
                     />
                 </MenuItemGroup>
-                <MenuSectionTitle title={t("UPDATE_TWO_FACTOR_LABEL")} />
+                <MenuSectionTitle title={t("reconfigure_two_factor_hint")} />
             </Stack>
         </Stack>
     );
