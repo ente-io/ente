@@ -1,4 +1,3 @@
-import { disableTwoFactor } from "@/accounts/api/user";
 import { MenuItemGroup, MenuSectionTitle } from "@/base/components/Menu";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import {
@@ -6,6 +5,7 @@ import {
     SidebarDrawerTitlebar,
     type NestedSidebarDrawerVisibilityProps,
 } from "@/base/components/mui/SidebarDrawer";
+import { disable2FA } from "@/new/photos/services/user";
 import { useAppContext } from "@/new/photos/types/context";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
@@ -118,7 +118,7 @@ const ManageDrawerContents: React.FC<ContentsProps> = ({ onRootClose }) => {
         });
 
     const disable = async () => {
-        await disableTwoFactor();
+        await disable2FA();
         await setLSUser({
             ...getData(LS_KEYS.USER),
             isTwoFactorEnabled: false,
