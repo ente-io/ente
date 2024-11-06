@@ -19,26 +19,34 @@ const PlanPeriod = z.enum(["month", "year"]);
  */
 export type PlanPeriod = z.infer<typeof PlanPeriod>;
 
-export interface Subscription {
-    productID: string;
-    storage: number;
-    expiryTime: number;
-    paymentProvider: string;
-    attributes: {
-        isCancelled: boolean;
-    };
-    price: string;
-    period: PlanPeriod;
-}
+const Subscription = z.object({
+    productID: z.string(),
+    storage: z.number(),
+    expiryTime: z.number(),
+    paymentProvider: z.string(),
+    attributes: z
+        .object({
+            isCancelled: z.boolean().nullish().transform(nullToUndefined),
+        })
+        .nullish()
+        .transform(nullToUndefined),
+    price: z.string(),
+    period: PlanPeriod,
+});
+
+/**
+ * Details about the user's subscription.
+ */
+export type Subscription = z.infer<typeof Subscription>;
 
 /**
  * Zod schema for an individual plan received in the list of plans.
  */
 const Plan = z.object({
     id: z.string(),
-    androidID: z.string().nullable().transform(nullToUndefined),
-    iosID: z.string().nullable().transform(nullToUndefined),
-    stripeID: z.string().nullable().transform(nullToUndefined),
+    androidID: z.string().nullish().transform(nullToUndefined),
+    iosID: z.string().nullish().transform(nullToUndefined),
+    stripeID: z.string().nullish().transform(nullToUndefined),
     storage: z.number(),
     price: z.string(),
     period: PlanPeriod,

@@ -91,5 +91,5 @@ const computeShouldDisableCFUploadProxy = async () => {
 };
 
 const StaticFeatureFlags = z.object({
-    disableCFUploadProxy: z.boolean().nullable().transform(nullToUndefined),
+    disableCFUploadProxy: z.boolean().nullish().transform(nullToUndefined),
 });
