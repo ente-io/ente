@@ -81,13 +81,14 @@ import { isFamilyAdmin, isPartOfFamily } from "utils/user/family";
 import { testUpload } from "../../../tests/upload.test";
 import { MemberSubscriptionManage } from "../MemberSubscriptionManage";
 import { Preferences } from "./Preferences";
-import SubscriptionCard from "./SubscriptionCard";
+import { SubscriptionCard } from "./SubscriptionCard";
 
 interface Iprops {
     collectionSummaries: CollectionSummaries;
     sidebarView: boolean;
     closeSidebar: () => void;
 }
+
 export default function Sidebar({
     collectionSummaries,
     sidebarView,
