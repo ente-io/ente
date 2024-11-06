@@ -9,6 +9,7 @@ import "package:photos/models/search/search_result.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/search/result/searchable_item.dart";
+import "package:photos/ui/viewer/search_tab/people_section.dart";
 
 class PeopleAllPage extends StatefulWidget {
   final SectionType sectionType;
@@ -61,6 +62,7 @@ class _PeopleAllPageState extends State<PeopleAllPage> {
           ),
         ),
         title: Text(widget.sectionType.sectionTitle(context)),
+        centerTitle: false,
       ),
       body: Expanded(
         child: Padding(
@@ -76,15 +78,15 @@ class _PeopleAllPageState extends State<PeopleAllPage> {
                   );
                 }
                 return GridView.builder(
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(0),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: MediaQuery.of(context).size.width > 600
                         ? 4
                         : 3, // Dynamically adjust columns based on screen width
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
+                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 0,
                     childAspectRatio:
-                        0.85, // Adjust this value to control item height ratio
+                        0.78, // Adjust this value to control item height ratio
                   ),
                   itemCount: sectionResults.length,
                   physics: const BouncingScrollPhysics(),
@@ -93,13 +95,8 @@ class _PeopleAllPageState extends State<PeopleAllPage> {
                   itemBuilder: (context, index) {
                     Widget resultWidget;
                     if (sectionResults[index] is GenericSearchResult) {
-                      final result =
-                          sectionResults[index] as GenericSearchResult;
-                      resultWidget = SearchableItemWidget(
-                        sectionResults[index],
-                        onResultTap: result.onResultTap != null
-                            ? () => result.onResultTap!(context)
-                            : null,
+                      resultWidget = PeopleRowItem(
+                        searchResult: sectionResults[index],
                       );
                     } else {
                       resultWidget = SearchableItemWidget(
