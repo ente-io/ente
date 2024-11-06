@@ -16,9 +16,6 @@ import { SetLoading } from "types/gallery";
 import { BonusData, UserDetails } from "types/user";
 import { getSubscriptionPurchaseSuccessMessage } from "utils/ui";
 
-const FREE_PLAN = "free";
-const THIRTY_DAYS_IN_MICROSECONDS = 30 * 24 * 60 * 60 * 1000 * 1000;
-
 export type PlanSelectionOutcome =
     | "buyPlan"
     | "updateSubscriptionToPlan"
@@ -68,7 +65,7 @@ export function hasPaidSubscription(subscription: Subscription) {
     return (
         subscription &&
         isSubscriptionActive(subscription) &&
-        subscription.productID !== FREE_PLAN
+        subscription.productID != "free"
     );
 }
 
@@ -86,7 +83,7 @@ export function isOnFreePlan(subscription: Subscription) {
     return (
         subscription &&
         isSubscriptionActive(subscription) &&
-        subscription.productID === FREE_PLAN
+        subscription.productID == "free"
     );
 }
 
@@ -135,11 +132,12 @@ export function hasExceededStorageQuota(userDetails: UserDetails) {
 }
 
 export function isSubscriptionPastDue(subscription: Subscription) {
+    const thirtyDaysMicroseconds = 30 * 24 * 60 * 60 * 1000 * 1000;
     const currentTime = Date.now() * 1000;
     return (
         !isSubscriptionCancelled(subscription) &&
         subscription.expiryTime < currentTime &&
-        subscription.expiryTime >= currentTime - THIRTY_DAYS_IN_MICROSECONDS
+        subscription.expiryTime >= currentTime - thirtyDaysMicroseconds
     );
 }
 
