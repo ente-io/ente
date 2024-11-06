@@ -1,8 +1,8 @@
 import { sharedCryptoWorker } from "@/base/crypto";
 import { generateLoginSubKey } from "@ente/shared/crypto/helpers";
 import type { KeyAttributes } from "@ente/shared/user/types";
+import type { SRPSetupAttributes } from "../api/srp";
 import { generateSRPSetupAttributes } from "../services/srp";
-import type { SRPSetupAttributes } from "../types/srp";
 
 export async function generateKeyAndSRPAttributes(passphrase: string): Promise<{
     keyAttributes: KeyAttributes;

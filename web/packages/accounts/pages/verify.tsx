@@ -29,6 +29,7 @@ import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
+import type { SRPAttributes, SRPSetupAttributes } from "../api/srp";
 import { getSRPAttributes } from "../api/srp";
 import { putAttributes, sendOtt, verifyOtt } from "../api/user";
 import {
@@ -43,7 +44,6 @@ import {
 import { stashedRedirect, unstashRedirect } from "../services/redirect";
 import { configureSRP } from "../services/srp";
 import type { PageProps } from "../types/page";
-import type { SRPAttributes, SRPSetupAttributes } from "../types/srp";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
     const { logout, showNavBar, showMiniDialog } = appContext;
