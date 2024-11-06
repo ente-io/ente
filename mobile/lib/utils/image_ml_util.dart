@@ -35,9 +35,11 @@ const maxKernelRadius = maxKernelSize ~/ 2;
 const List<String> supportedImageFormats = [
   'bmp',
   'dds',
+  'farbfeld',
   'gif',
   'hdr',
   'ico',
+  'jpg',
   'jpeg',
   'exr',
   'png',
@@ -89,10 +91,14 @@ Future<String> safePathFromImagepath(String imagePath) async {
   }
   try {
     final newPath = imagePath.replaceAll(format, 'jpeg');
+    final time = DateTime.now();
     final File? convertedFile = await FlutterImageCompress.compressAndGetFile(
       imagePath,
       newPath,
       format: CompressFormat.jpeg,
+    );
+    _logger.info(
+      'Conversion successful, heic converted in ${DateTime.now().difference(time).inMilliseconds} ms',
     );
     if (convertedFile == null) {
       throw Exception('Error converting image to jpeg');
