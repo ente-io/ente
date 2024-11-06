@@ -69,15 +69,7 @@ const defaultSettings = (): Settings => ({
  * This entire object will be reset on logout.
  */
 class SettingsState {
-    /**
-     * An arbitrary token to identify the current login.
-     *
-     * It is used to discard stale completions.
-     */
-    id: number;
-
     constructor() {
-        this.id = Math.random();
         this.settingsSnapshot = defaultSettings();
     }
 
@@ -117,12 +109,7 @@ export const logoutSettings = () => {
  * lookup. Then use the results to update our in memory state if needed.
  */
 export const syncSettings = async () => {
-    const id = _state.id;
     const jsonString = await fetchFeatureFlags().then((res) => res.text());
-    if (_state.id != id) {
-        log.info("Discarding on logout");
-        return;
-    }
     saveRemoteFeatureFlagsJSONString(jsonString);
     syncSettingsSnapshotWithLocalStorage();
 };

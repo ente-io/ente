@@ -207,9 +207,7 @@ export default function App({ Component, pageProps }: AppProps) {
         showMiniDialog(genericErrorDialogAttributes());
     }, []);
 
-    const logout = useCallback(() => {
-        void photosLogout().then(() => router.push("/"));
-    }, [router]);
+    const logout = useCallback(() => void photosLogout(), []);
 
     const appContext = {
         showNavBar,

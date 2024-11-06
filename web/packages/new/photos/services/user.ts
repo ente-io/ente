@@ -1,6 +1,5 @@
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { getKV, setKV } from "@/base/kv";
-import log from "@/base/log";
 import { apiURL } from "@/base/origins";
 import { z } from "zod";
 import { FamilyData } from "./family";
@@ -43,17 +42,6 @@ export type UserDetails = z.infer<typeof UserDetails>;
  * This entire object will be reset on logout.
  */
 class UserState {
-    /**
-     * An arbitrary token to identify the current login.
-     *
-     * It is used to discard stale completions.
-     */
-    id: number;
-
-    constructor() {
-        this.id = Math.random();
-    }
-
     /**
      * Subscriptions to {@link UserDetails} updates attached using
      * {@link userDetailsSubscribe}.
@@ -129,12 +117,7 @@ const setUserDetailsSnapshot = (snapshot: UserDetails) => {
  * subsequent lookup, and also update our in-memory snapshots.
  */
 export const syncUserDetails = async () => {
-    const id = _state.id;
     const userDetails = await getUserDetailsV2();
-    if (_state.id != id) {
-        log.info("Discarding on logout");
-        return;
-    }
     await setKV("userDetails", userDetails);
     setUserDetailsSnapshot(userDetails);
 };
