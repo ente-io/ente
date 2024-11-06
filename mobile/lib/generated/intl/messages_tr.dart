@@ -430,7 +430,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "collectPhotos":
             MessageLookupByLibrary.simpleMessage("Fotoğrafları topla"),
         "color": MessageLookupByLibrary.simpleMessage("Renk"),
-        "configuration": MessageLookupByLibrary.simpleMessage("Configuration"),
         "confirm": MessageLookupByLibrary.simpleMessage("Onayla"),
         "confirm2FADisable": MessageLookupByLibrary.simpleMessage(
             "İki adımlı kimlik doğrulamasını devre dışı bırakmak istediğinize emin misiniz?"),
@@ -843,7 +842,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "loadingModel":
             MessageLookupByLibrary.simpleMessage("Modeller indiriliyor..."),
         "localGallery": MessageLookupByLibrary.simpleMessage("Yerel galeri"),
-        "localIndexing": MessageLookupByLibrary.simpleMessage("Local indexing"),
         "location": MessageLookupByLibrary.simpleMessage("Konum"),
         "locationName": MessageLookupByLibrary.simpleMessage("Konum Adı"),
         "locationTagFeatureDescription": MessageLookupByLibrary.simpleMessage(

@@ -290,7 +290,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("אסף תמונות מאירוע"),
         "collectPhotos": MessageLookupByLibrary.simpleMessage("אסוף תמונות"),
         "color": MessageLookupByLibrary.simpleMessage("צבע"),
-        "configuration": MessageLookupByLibrary.simpleMessage("Configuration"),
         "confirm": MessageLookupByLibrary.simpleMessage("אשר"),
         "confirm2FADisable": MessageLookupByLibrary.simpleMessage(
             "האם אתה בטוח שאתה רוצה להשבית את האימות הדו-גורמי?"),
@@ -545,7 +544,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "linkHasExpired":
             MessageLookupByLibrary.simpleMessage("הקישור פג תוקף"),
         "linkNeverExpires": MessageLookupByLibrary.simpleMessage("לעולם לא"),
-        "localIndexing": MessageLookupByLibrary.simpleMessage("Local indexing"),
         "location": MessageLookupByLibrary.simpleMessage("מקום"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("נעל"),
         "lockscreen": MessageLookupByLibrary.simpleMessage("מסך נעילה"),

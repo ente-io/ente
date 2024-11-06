@@ -429,7 +429,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Kumpulkan foto acara"),
         "collectPhotos": MessageLookupByLibrary.simpleMessage("Kumpulkan foto"),
         "color": MessageLookupByLibrary.simpleMessage("Warna"),
-        "configuration": MessageLookupByLibrary.simpleMessage("Configuration"),
         "confirm": MessageLookupByLibrary.simpleMessage("Konfirmasi"),
         "confirm2FADisable": MessageLookupByLibrary.simpleMessage(
             "Apakah kamu yakin ingin menonaktifkan autentikasi dua langkah?"),
@@ -851,7 +850,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "loadingModel":
             MessageLookupByLibrary.simpleMessage("Mengunduh model..."),
         "localGallery": MessageLookupByLibrary.simpleMessage("Galeri lokal"),
-        "localIndexing": MessageLookupByLibrary.simpleMessage("Local indexing"),
         "locationName": MessageLookupByLibrary.simpleMessage("Nama tempat"),
         "lockButtonLabel": MessageLookupByLibrary.simpleMessage("Kunci"),
         "lockscreen": MessageLookupByLibrary.simpleMessage("Kunci layar"),

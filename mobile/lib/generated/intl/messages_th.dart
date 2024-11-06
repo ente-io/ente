@@ -96,7 +96,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "คัดลอกรหัสไปยังคลิปบอร์ดแล้ว"),
         "collectPhotos": MessageLookupByLibrary.simpleMessage("รวบรวมรูปภาพ"),
         "color": MessageLookupByLibrary.simpleMessage("สี"),
-        "configuration": MessageLookupByLibrary.simpleMessage("Configuration"),
         "confirm": MessageLookupByLibrary.simpleMessage("ยืนยัน"),
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("ยืนยันการลบบัญชี"),
@@ -207,7 +206,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("ลิงก์หมดอายุแล้ว"),
         "loadMessage9": MessageLookupByLibrary.simpleMessage(
             "เราใช้ Xchacha20Poly1305 เพื่อเข้ารหัสข้อมูลของคุณอย่างปลอดภัย"),
-        "localIndexing": MessageLookupByLibrary.simpleMessage("Local indexing"),
         "logInLabel": MessageLookupByLibrary.simpleMessage("เข้าสู่ระบบ"),
         "loginTerms": MessageLookupByLibrary.simpleMessage(
             "โดยการคลิกเข้าสู่ระบบ ฉันยอมรับ<u-terms>เงื่อนไขการให้บริการ</u-terms>และ<u-policy>นโยบายความเป็นส่วนตัว</u-policy>"),
