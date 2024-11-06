@@ -319,15 +319,3 @@ function handleFailureReason(
             });
     }
 }
-
-export function planForSubscription(subscription: Subscription): Plan {
-    return {
-        id: subscription.productID,
-        storage: subscription.storage,
-        price: subscription.price,
-        period: subscription.period,
-        stripeID: subscription.productID,
-        iosID: subscription.productID,
-        androidID: subscription.productID,
-    };
-}

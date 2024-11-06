@@ -20,11 +20,8 @@ const PlanPeriod = z.enum(["month", "year"]);
 export type PlanPeriod = z.infer<typeof PlanPeriod>;
 
 export interface Subscription {
-    id: number;
-    userID: number;
     productID: string;
     storage: number;
-    originalTransactionID: string;
     expiryTime: number;
     paymentProvider: string;
     attributes: {

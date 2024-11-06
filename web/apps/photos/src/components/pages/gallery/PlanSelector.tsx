@@ -57,7 +57,6 @@ import {
     isSubscriptionActive,
     isSubscriptionCancelled,
     isUserSubscribedPlan,
-    planForSubscription,
     planSelectionOutcome,
     updatePaymentMethod,
 } from "utils/billing";
@@ -152,7 +151,15 @@ function PlanSelectorCard(props: PlanSelectorCardProps) {
                         !isOnFreePlan(subscription) &&
                         planNotListed
                     ) {
-                        plans.push(planForSubscription(subscription));
+                        plans.push({
+                            id: subscription.productID,
+                            storage: subscription.storage,
+                            price: subscription.price,
+                            period: subscription.period,
+                            stripeID: subscription.productID,
+                            iosID: subscription.productID,
+                            androidID: subscription.productID,
+                        });
                     }
                 }
                 setPlansResponse(response);
