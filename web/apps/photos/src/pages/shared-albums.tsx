@@ -5,9 +5,9 @@ import { NavbarBase, SelectionBar } from "@/base/components/Navbar";
 import { sharedCryptoWorker } from "@/base/crypto";
 import { useIsSmallWidth, useIsTouchscreen } from "@/base/hooks";
 import log from "@/base/log";
+import { updateShouldDisableCFUploadProxy } from "@/gallery/upload";
 import type { Collection } from "@/media/collection";
 import { type EnteFile, mergeMetadata } from "@/media/file";
-import { updateShouldDisableCFUploadProxy } from "@/media/upload";
 import {
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,

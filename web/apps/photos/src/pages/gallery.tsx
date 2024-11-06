@@ -1,3 +1,4 @@
+import { sessionExpiredDialogAttributes } from "@/accounts/components/LoginComponents";
 import { stashRedirect } from "@/accounts/services/redirect";
 import { NavbarBase } from "@/base/components/Navbar";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
@@ -44,6 +45,7 @@ import {
 } from "@/new/photos/services/search";
 import type { SearchOption } from "@/new/photos/services/search/types";
 import { initSettings } from "@/new/photos/services/settings";
+import { getLocalFamilyData } from "@/new/photos/services/user";
 import { useAppContext } from "@/new/photos/types/context";
 import { splitByPredicate } from "@/utils/array";
 import { ensure } from "@/utils/ensure";
@@ -129,8 +131,6 @@ import {
     handleCollectionOps,
 } from "utils/collection";
 import { FILE_OPS_TYPE, getSelectedFiles, handleFileOps } from "utils/file";
-import { getSessionExpiredMessage } from "utils/ui";
-import { getLocalFamilyData } from "utils/user/family";
 
 const defaultGalleryContext: GalleryContextType = {
     showPlanSelectorModal: () => null,
@@ -228,6 +228,7 @@ export default function Gallery() {
         showLoadingBar,
         hideLoadingBar,
         setDialogMessage,
+        showMiniDialog,
         logout,
         ...appContext
     } = useAppContext();
@@ -548,9 +549,8 @@ export default function Gallery() {
         };
     }, [selectAll, clearSelection]);
 
-    const showSessionExpiredMessage = () => {
-        setDialogMessage(getSessionExpiredMessage(logout));
-    };
+    const showSessionExpiredDialog = () =>
+        showMiniDialog(sessionExpiredDialogAttributes(logout));
 
     const syncWithRemote = async (force = false, silent = false) => {
         if (!navigator.onLine) return;
@@ -609,7 +609,7 @@ export default function Gallery() {
         } catch (e) {
             switch (e.message) {
                 case CustomError.SESSION_EXPIRED:
-                    showSessionExpiredMessage();
+                    showSessionExpiredDialog();
                     break;
                 case CustomError.KEY_MISSING:
                     clearKeys();
@@ -1026,6 +1026,7 @@ export default function Gallery() {
                     isFirstUpload={areOnlySystemCollections(
                         collectionSummaries,
                     )}
+                    showSessionExpiredMessage={showSessionExpiredDialog}
                     {...{
                         dragAndDropFiles,
                         openFileSelector,
@@ -1036,7 +1037,6 @@ export default function Gallery() {
                         fileSelectorZipFiles,
                         uploadTypeSelectorIntent,
                         uploadTypeSelectorView,
-                        showSessionExpiredMessage,
                     }}
                 />
                 <Sidebar

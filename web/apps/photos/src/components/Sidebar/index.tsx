@@ -18,6 +18,7 @@ import {
 } from "@/new/photos/services/collection";
 import type { CollectionSummaries } from "@/new/photos/services/collection/ui";
 import { isInternalUser } from "@/new/photos/services/settings";
+import { isFamilyAdmin, isPartOfFamily } from "@/new/photos/services/user";
 import { AppContext, useAppContext } from "@/new/photos/types/context";
 import { initiateEmail, openURL } from "@/new/photos/utils/web";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
@@ -77,17 +78,17 @@ import {
     isSubscriptionCancelled,
     isSubscriptionPastDue,
 } from "utils/billing";
-import { isFamilyAdmin, isPartOfFamily } from "utils/user/family";
 import { testUpload } from "../../../tests/upload.test";
 import { MemberSubscriptionManage } from "../MemberSubscriptionManage";
 import { Preferences } from "./Preferences";
-import SubscriptionCard from "./SubscriptionCard";
+import { SubscriptionCard } from "./SubscriptionCard";
 
 interface Iprops {
     collectionSummaries: CollectionSummaries;
     sidebarView: boolean;
     closeSidebar: () => void;
 }
+
 export default function Sidebar({
     collectionSummaries,
     sidebarView,

@@ -1,4 +1,5 @@
 import { useIsSmallWidth } from "@/base/hooks";
+import { getFamilyPlanAdmin } from "@/new/photos/services/user";
 import { AppContext } from "@/new/photos/types/context";
 import {
     FlexWrapper,
@@ -9,7 +10,6 @@ import { Box, Button, Dialog, DialogContent, Typography } from "@mui/material";
 import { t } from "i18next";
 import { useContext } from "react";
 import billingService from "services/billingService";
-import { getFamilyPlanAdmin } from "utils/user/family";
 
 export function MemberSubscriptionManage({ open, userDetails, onClose }) {
     const { setDialogMessage } = useContext(AppContext);
