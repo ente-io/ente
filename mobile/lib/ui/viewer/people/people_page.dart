@@ -162,38 +162,11 @@ class _PeoplePageState extends State<PeoplePage> {
                                         tagPrefix: widget.tagPrefix,
                                         selectedFiles: _selectedFiles,
                                       )
-                                    : Gallery(
-                                        asyncLoader: (
-                                          creationStartTime,
-                                          creationEndTime, {
-                                          limit,
-                                          asc,
-                                        }) async {
-                                          final result =
-                                              await loadPersonFiles();
-                                          return Future.value(
-                                            FileLoadResult(
-                                              result,
-                                              false,
-                                            ),
-                                          );
-                                        },
-                                        reloadEvent: Bus.instance
-                                            .on<LocalPhotosUpdatedEvent>(),
-                                        forceReloadEvents: [
-                                          Bus.instance.on<PeopleChangedEvent>(),
-                                        ],
-                                        removalEventTypes: const {
-                                          EventType.deletedFromRemote,
-                                          EventType.deletedFromEverywhere,
-                                          EventType.hide,
-                                        },
-                                        tagPrefix:
-                                            widget.tagPrefix + widget.tagPrefix,
+                                    : _Gallery(
+                                        tagPrefix: widget.tagPrefix,
                                         selectedFiles: _selectedFiles,
-                                        initialFiles: personFiles.isNotEmpty
-                                            ? [personFiles.first]
-                                            : [],
+                                        personFiles: personFiles,
+                                        loadPersonFiles: loadPersonFiles,
                                       );
                               },
                             ),
@@ -251,6 +224,52 @@ class _PeoplePageState extends State<PeoplePage> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _Gallery extends StatelessWidget {
+  final String tagPrefix;
+  final SelectedFiles selectedFiles;
+  final List<EnteFile> personFiles;
+  final Future<List<EnteFile>> Function() loadPersonFiles;
+
+  const _Gallery({
+    required this.tagPrefix,
+    required this.selectedFiles,
+    required this.personFiles,
+    required this.loadPersonFiles,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Gallery(
+      asyncLoader: (
+        creationStartTime,
+        creationEndTime, {
+        limit,
+        asc,
+      }) async {
+        final result = await loadPersonFiles();
+        return Future.value(
+          FileLoadResult(
+            result,
+            false,
+          ),
+        );
+      },
+      reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
+      forceReloadEvents: [
+        Bus.instance.on<PeopleChangedEvent>(),
+      ],
+      removalEventTypes: const {
+        EventType.deletedFromRemote,
+        EventType.deletedFromEverywhere,
+        EventType.hide,
+      },
+      tagPrefix: tagPrefix + tagPrefix,
+      selectedFiles: selectedFiles,
+      initialFiles: personFiles.isNotEmpty ? [personFiles.first] : [],
     );
   }
 }
