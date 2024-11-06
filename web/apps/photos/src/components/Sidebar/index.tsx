@@ -17,6 +17,7 @@ import {
     TRASH_SECTION,
 } from "@/new/photos/services/collection";
 import type { CollectionSummaries } from "@/new/photos/services/collection/ui";
+import { isFamilyAdmin, isPartOfFamily } from "@/new/photos/services/family";
 import {
     hasAddOnBonus,
     hasExceededStorageQuota,
@@ -30,7 +31,6 @@ import {
 } from "@/new/photos/services/plan";
 import { isInternalUser } from "@/new/photos/services/settings";
 import type { UserDetails } from "@/new/photos/services/user";
-import { isFamilyAdmin, isPartOfFamily } from "@/new/photos/services/user";
 import { AppContext, useAppContext } from "@/new/photos/types/context";
 import { initiateEmail, openURL } from "@/new/photos/utils/web";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";

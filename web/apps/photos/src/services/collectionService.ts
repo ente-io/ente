@@ -32,7 +32,7 @@ import {
 import { groupFilesByCollectionID } from "@/new/photos/services/file";
 import { getLocalFiles, sortFiles } from "@/new/photos/services/files";
 import { updateMagicMetadata } from "@/new/photos/services/magic-metadata";
-import type { FamilyData } from "@/new/photos/services/user";
+import type { FamilyData } from "@/new/photos/services/family";
 import { batch } from "@/utils/array";
 import { CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";

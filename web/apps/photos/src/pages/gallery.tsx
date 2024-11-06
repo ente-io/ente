@@ -49,7 +49,7 @@ import {
 } from "@/new/photos/services/search";
 import type { SearchOption } from "@/new/photos/services/search/types";
 import { initSettings } from "@/new/photos/services/settings";
-import { getLocalFamilyData } from "@/new/photos/services/user";
+import { getLocalFamilyData } from "@/new/photos/services/family";
 import { useAppContext } from "@/new/photos/types/context";
 import { splitByPredicate } from "@/utils/array";
 import { ensure } from "@/utils/ensure";

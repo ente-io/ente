@@ -4,7 +4,7 @@ import type { UserDetails } from "@/new/photos/services/user";
 import {
     hasNonAdminFamilyMembers,
     isPartOfFamily,
-} from "@/new/photos/services/user";
+} from "@/new/photos/services/family";
 import { bytesInGB, formattedStorageByteSize } from "@/new/photos/utils/units";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";

@@ -1,5 +1,9 @@
 import { genericRetriableErrorDialogAttributes } from "@/base/components/utils/dialog";
 import log from "@/base/log";
+import {
+    getTotalFamilyUsage,
+    isPartOfFamily,
+} from "@/new/photos/services/family";
 import type {
     Plan,
     PlanPeriod,
@@ -19,12 +23,7 @@ import {
     redirectToCustomerPortal,
     redirectToPaymentsApp,
 } from "@/new/photos/services/plan";
-import {
-    BonusData,
-    getTotalFamilyUsage,
-    isPartOfFamily,
-    UserDetails,
-} from "@/new/photos/services/user";
+import { BonusData, UserDetails } from "@/new/photos/services/user";
 import { AppContext } from "@/new/photos/types/context";
 import { bytesInGB, formattedStorageByteSize } from "@/new/photos/utils/units";
 import { openURL } from "@/new/photos/utils/web";
@@ -816,6 +815,7 @@ function StripeSubscriptionOptions({
                 close: { variant: "accent" },
             });
         } catch (e) {
+            console.log(e);
             setDialogMessage({
                 title: t("error"),
                 content: t("SUBSCRIPTION_ACTIVATE_FAILED"),
@@ -855,6 +855,7 @@ function StripeSubscriptionOptions({
                 close: { variant: "accent" },
             });
         } catch (e) {
+            console.log(e);
             setDialogMessage({
                 title: t("error"),
                 content: t("SUBSCRIPTION_CANCEL_FAILED"),

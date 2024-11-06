@@ -6,7 +6,7 @@ import { apiURL, paymentsAppOrigin } from "@/base/origins";
 import {
     getTotalFamilyUsage,
     isPartOfFamily,
-} from "@/new/photos/services/user";
+} from "@/new/photos/services/family";
 import { nullToUndefined } from "@/utils/transform";
 import { LS_KEYS, setData } from "@ente/shared/storage/localStorage";
 import isElectron from "is-electron";

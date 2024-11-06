@@ -2,7 +2,7 @@ import { putAttributes } from "@/accounts/api/user";
 import log from "@/base/log";
 import { apiURL, familyAppOrigin } from "@/base/origins";
 import type { UserDetails } from "@/new/photos/services/user";
-import { getLocalFamilyData, isPartOfFamily } from "@/new/photos/services/user";
+import { getLocalFamilyData, isPartOfFamily } from "@/new/photos/services/family";
 import { ApiError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
