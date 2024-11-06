@@ -1,7 +1,6 @@
 import "dart:async" show unawaited;
 import "dart:developer" as dev show log;
 import "dart:math" show min;
-import "dart:ui" show Image;
 
 import "package:computer/computer.dart";
 import "package:flutter/foundation.dart";
@@ -267,16 +266,16 @@ class SemanticSearchService {
 
   static Future<ClipResult> runClipImage(
     int enteFileID,
-    Image image,
-    Uint8List rawRgbaBytes,
+    Uint8List resizedBytes,
+    int resizedHeight,
+    int resizedWidth,
     int clipImageAddress,
-    String imagePath,
   ) async {
     final embedding = await ClipImageEncoder.predict(
-      image,
-      rawRgbaBytes,
+      resizedBytes,
+      resizedHeight,
+      resizedWidth,
       clipImageAddress,
-      imagePath,
       enteFileID,
     );
 

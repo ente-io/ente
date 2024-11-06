@@ -32,6 +32,17 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
       dco_decode_record_list_prim_u_8_strict_string_usize_usize(dynamic raw);
 
   @protected
+  (
+    Uint8List,
+    BigInt,
+    BigInt,
+    Uint8List,
+    BigInt,
+    BigInt
+  ) dco_decode_record_list_prim_u_8_strict_usize_usize_list_prim_u_8_strict_usize_usize(
+      dynamic raw);
+
+  @protected
   int dco_decode_u_8(dynamic raw);
 
   @protected
@@ -50,6 +61,17 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   (Uint8List, String, BigInt, BigInt)
       sse_decode_record_list_prim_u_8_strict_string_usize_usize(
           SseDeserializer deserializer);
+
+  @protected
+  (
+    Uint8List,
+    BigInt,
+    BigInt,
+    Uint8List,
+    BigInt,
+    BigInt
+  ) sse_decode_record_list_prim_u_8_strict_usize_usize_list_prim_u_8_strict_usize_usize(
+      SseDeserializer deserializer);
 
   @protected
   int sse_decode_u_8(SseDeserializer deserializer);
@@ -98,6 +120,19 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   }
 
   @protected
+  void cst_api_fill_to_wire_record_list_prim_u_8_strict_usize_usize_list_prim_u_8_strict_usize_usize(
+      (Uint8List, BigInt, BigInt, Uint8List, BigInt, BigInt) apiObj,
+      wire_cst_record_list_prim_u_8_strict_usize_usize_list_prim_u_8_strict_usize_usize
+          wireObj) {
+    wireObj.field0 = cst_encode_list_prim_u_8_strict(apiObj.$1);
+    wireObj.field1 = cst_encode_usize(apiObj.$2);
+    wireObj.field2 = cst_encode_usize(apiObj.$3);
+    wireObj.field3 = cst_encode_list_prim_u_8_strict(apiObj.$4);
+    wireObj.field4 = cst_encode_usize(apiObj.$5);
+    wireObj.field5 = cst_encode_usize(apiObj.$6);
+  }
+
+  @protected
   int cst_encode_u_8(int raw);
 
   @protected
@@ -113,6 +148,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_record_list_prim_u_8_strict_string_usize_usize(
       (Uint8List, String, BigInt, BigInt) self, SseSerializer serializer);
+
+  @protected
+  void
+      sse_encode_record_list_prim_u_8_strict_usize_usize_list_prim_u_8_strict_usize_usize(
+          (Uint8List, BigInt, BigInt, Uint8List, BigInt, BigInt) self,
+          SseSerializer serializer);
 
   @protected
   void sse_encode_u_8(int self, SseSerializer serializer);
@@ -189,6 +230,27 @@ class RustLibWire implements BaseWire {
   late final _wire__crate__api__image_processing__process_clip =
       _wire__crate__api__image_processing__process_clipPtr.asFunction<
           void Function(int, ffi.Pointer<wire_cst_list_prim_u_8_strict>)>();
+
+  void wire__crate__api__image_processing__process_image_ml_from_path(
+    int port_,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> image_path,
+  ) {
+    return _wire__crate__api__image_processing__process_image_ml_from_path(
+      port_,
+      image_path,
+    );
+  }
+
+  late final _wire__crate__api__image_processing__process_image_ml_from_pathPtr =
+      _lookup<
+              ffi.NativeFunction<
+                  ffi.Void Function(
+                      ffi.Int64, ffi.Pointer<wire_cst_list_prim_u_8_strict>)>>(
+          'frbgen_photos_wire__crate__api__image_processing__process_image_ml_from_path');
+  late final _wire__crate__api__image_processing__process_image_ml_from_path =
+      _wire__crate__api__image_processing__process_image_ml_from_pathPtr
+          .asFunction<
+              void Function(int, ffi.Pointer<wire_cst_list_prim_u_8_strict>)>();
 
   void wire__crate__api__image_processing__process_yolo_face(
     int port_,
@@ -294,4 +356,23 @@ final class wire_cst_record_list_prim_u_8_strict_string_usize_usize
 
   @ffi.UintPtr()
   external int field3;
+}
+
+final class wire_cst_record_list_prim_u_8_strict_usize_usize_list_prim_u_8_strict_usize_usize
+    extends ffi.Struct {
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> field0;
+
+  @ffi.UintPtr()
+  external int field1;
+
+  @ffi.UintPtr()
+  external int field2;
+
+  external ffi.Pointer<wire_cst_list_prim_u_8_strict> field3;
+
+  @ffi.UintPtr()
+  external int field4;
+
+  @ffi.UintPtr()
+  external int field5;
 }

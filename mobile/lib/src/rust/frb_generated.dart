@@ -72,7 +72,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.5.1';
 
   @override
-  int get rustContentHash => -2017876324;
+  int get rustContentHash => -1741400115;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -85,6 +85,10 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
 abstract class RustLibApi extends BaseApi {
   Future<(Uint8List, String, BigInt, BigInt)>
       crateApiImageProcessingProcessClip({required String imagePath});
+
+  Future<(Uint8List, BigInt, BigInt, Uint8List, BigInt, BigInt)>
+      crateApiImageProcessingProcessImageMlFromPath(
+          {required String imagePath});
 
   Future<(Uint8List, String, BigInt, BigInt)>
       crateApiImageProcessingProcessYoloFace({required String imagePath});
@@ -125,6 +129,34 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   TaskConstMeta get kCrateApiImageProcessingProcessClipConstMeta =>
       const TaskConstMeta(
         debugName: "process_clip",
+        argNames: ["imagePath"],
+      );
+
+  @override
+  Future<(Uint8List, BigInt, BigInt, Uint8List, BigInt, BigInt)>
+      crateApiImageProcessingProcessImageMlFromPath(
+          {required String imagePath}) {
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final arg0 = cst_encode_String(imagePath);
+        return wire
+            .wire__crate__api__image_processing__process_image_ml_from_path(
+                port_, arg0);
+      },
+      codec: DcoCodec(
+        decodeSuccessData:
+            dco_decode_record_list_prim_u_8_strict_usize_usize_list_prim_u_8_strict_usize_usize,
+        decodeErrorData: null,
+      ),
+      constMeta: kCrateApiImageProcessingProcessImageMlFromPathConstMeta,
+      argValues: [imagePath],
+      apiImpl: this,
+    ));
+  }
+
+  TaskConstMeta get kCrateApiImageProcessingProcessImageMlFromPathConstMeta =>
+      const TaskConstMeta(
+        debugName: "process_image_ml_from_path",
         argNames: ["imagePath"],
       );
 
@@ -226,6 +258,31 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  (
+    Uint8List,
+    BigInt,
+    BigInt,
+    Uint8List,
+    BigInt,
+    BigInt
+  ) dco_decode_record_list_prim_u_8_strict_usize_usize_list_prim_u_8_strict_usize_usize(
+      dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 6) {
+      throw Exception('Expected 6 elements, got ${arr.length}');
+    }
+    return (
+      dco_decode_list_prim_u_8_strict(arr[0]),
+      dco_decode_usize(arr[1]),
+      dco_decode_usize(arr[2]),
+      dco_decode_list_prim_u_8_strict(arr[3]),
+      dco_decode_usize(arr[4]),
+      dco_decode_usize(arr[5]),
+    );
+  }
+
+  @protected
   int dco_decode_u_8(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw as int;
@@ -267,6 +324,33 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     final var_field2 = sse_decode_usize(deserializer);
     final var_field3 = sse_decode_usize(deserializer);
     return (var_field0, var_field1, var_field2, var_field3);
+  }
+
+  @protected
+  (
+    Uint8List,
+    BigInt,
+    BigInt,
+    Uint8List,
+    BigInt,
+    BigInt
+  ) sse_decode_record_list_prim_u_8_strict_usize_usize_list_prim_u_8_strict_usize_usize(
+      SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    final var_field0 = sse_decode_list_prim_u_8_strict(deserializer);
+    final var_field1 = sse_decode_usize(deserializer);
+    final var_field2 = sse_decode_usize(deserializer);
+    final var_field3 = sse_decode_list_prim_u_8_strict(deserializer);
+    final var_field4 = sse_decode_usize(deserializer);
+    final var_field5 = sse_decode_usize(deserializer);
+    return (
+      var_field0,
+      var_field1,
+      var_field2,
+      var_field3,
+      var_field4,
+      var_field5
+    );
   }
 
   @protected
@@ -332,6 +416,20 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_String(self.$2, serializer);
     sse_encode_usize(self.$3, serializer);
     sse_encode_usize(self.$4, serializer);
+  }
+
+  @protected
+  void
+      sse_encode_record_list_prim_u_8_strict_usize_usize_list_prim_u_8_strict_usize_usize(
+          (Uint8List, BigInt, BigInt, Uint8List, BigInt, BigInt) self,
+          SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_list_prim_u_8_strict(self.$1, serializer);
+    sse_encode_usize(self.$2, serializer);
+    sse_encode_usize(self.$3, serializer);
+    sse_encode_list_prim_u_8_strict(self.$4, serializer);
+    sse_encode_usize(self.$5, serializer);
+    sse_encode_usize(self.$6, serializer);
   }
 
   @protected

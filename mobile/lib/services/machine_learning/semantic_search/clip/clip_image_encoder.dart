@@ -1,11 +1,9 @@
 import "dart:typed_data" show Uint8List, Float32List;
-import "dart:ui" show Image;
 
 import "package:logging/logging.dart";
 import "package:onnx_dart/onnx_dart.dart";
 import "package:onnxruntime/onnxruntime.dart";
 import "package:photos/services/machine_learning/ml_model.dart";
-import "package:photos/src/rust/api/image_processing.dart";
 import "package:photos/utils/image_ml_util.dart";
 import "package:photos/utils/ml_util.dart";
 
@@ -29,17 +27,17 @@ class ClipImageEncoder extends MlModel {
   factory ClipImageEncoder() => instance;
 
   static Future<List<double>> predict(
-    Image image,
-    Uint8List rawRgbaBytes,
-    int sessionAddress,
-    String imagePath, [
+    Uint8List resizedBytes,
+    int resizedHeight,
+    int resizedWidth,
+    int sessionAddress, [
     int? enteFileID,
   ]) async {
     final startTime = DateTime.now();
     // final inputList = await preprocessImageClip(image, rawRgbaBytes);
-    final (resizedBytes, timing, rgbWidth, rgbHeight) =
-        await processClip(imagePath: imagePath);
-    _logger.info("Clip preprocessing: \n $timing");
+    // final (resizedBytes, timing, rgbWidth, rgbHeight) =
+    //     await processClip(imagePath: imagePath);
+    // _logger.info("Clip preprocessing: \n $timing");
     final preprocessingTime = DateTime.now();
     final preprocessingMs =
         preprocessingTime.difference(startTime).inMilliseconds;
@@ -47,8 +45,8 @@ class ClipImageEncoder extends MlModel {
     final tempTime = DateTime.now();
     final inputList = await resizedToPreprocessedClip(
       resizedBytes,
-      rgbWidth.toInt(),
-      rgbHeight.toInt(),
+      resizedWidth,
+      resizedHeight,
     );
     _logger.info(
       'Clip remaining dart processing: ${DateTime.now().difference(tempTime).inMilliseconds} ms',

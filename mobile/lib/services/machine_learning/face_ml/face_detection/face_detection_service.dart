@@ -1,6 +1,5 @@
 import "dart:async";
 import 'dart:typed_data' show Float32List, Uint8List;
-import 'dart:ui' as ui show Image;
 
 import 'package:logging/logging.dart';
 import "package:onnx_dart/onnx_dart.dart";
@@ -9,7 +8,6 @@ import "package:photos/models/ml/face/dimension.dart";
 import 'package:photos/services/machine_learning/face_ml/face_detection/detection.dart';
 import "package:photos/services/machine_learning/face_ml/face_detection/face_detection_postprocessing.dart";
 import "package:photos/services/machine_learning/ml_model.dart";
-import "package:photos/src/rust/api/image_processing.dart";
 import "package:photos/utils/image_ml_util.dart";
 
 class YOLOFaceInterpreterRunException implements Exception {}
@@ -44,10 +42,10 @@ class FaceDetectionService extends MlModel {
 
   /// Detects faces in the given image data.
   static Future<List<FaceDetectionRelative>> predict(
-    ui.Image image,
-    Uint8List rawRgbaBytes,
+    Uint8List resizedBytes,
+    int resizedHeight,
+    int resizedWidth,
     int sessionAddress,
-    String imagePath,
   ) async {
     assert(
       !MlModel.usePlatformPlugin
@@ -58,23 +56,21 @@ class FaceDetectionService extends MlModel {
 
     final startTime = DateTime.now();
 
-    final (result, timing, newWidth, newHeight) =
-        await processYoloFace(imagePath: imagePath);
-    _logger.info("Face detection preprocessing: \n $timing");
-    final scaledSize =
-        Dimensions(width: newWidth.toInt(), height: newHeight.toInt());
-    final preprocessingTime = DateTime.now();
-    final preprocessingMs =
-        preprocessingTime.difference(startTime).inMilliseconds;
+    // final (result, timing, newWidth, newHeight) =
+    //     await processYoloFace(imagePath: imagePath);
+    // _logger.info("Face detection preprocessing: \n $timing");
+    // final scaledSize =
+    //     Dimensions(width: newWidth.toInt(), height: newHeight.toInt());
+    // final preprocessingTime = DateTime.now();
+    // final preprocessingMs =
+    //     preprocessingTime.difference(startTime).inMilliseconds;
 
-    final tempTime = DateTime.now();
+    final preprocessingTime = DateTime.now();
+    final scaledSize = Dimensions(width: resizedWidth, height: resizedHeight);
     final inputImageList = await resizedToPreprocessedYoloFace(
-      result,
+      resizedBytes,
       scaledSize.width,
       scaledSize.height,
-    );
-    _logger.info(
-      'Face detection remaining dart processing: ${DateTime.now().difference(tempTime).inMilliseconds} ms',
     );
 
     // final (inputImageList, scaledSize) = await preprocessImageYoloFace(
@@ -82,8 +78,8 @@ class FaceDetectionService extends MlModel {
     //   rawRgbaBytes,
     // );
     // final preprocessingTime = DateTime.now();
-    // final preprocessingMs =
-    //     preprocessingTime.difference(startTime).inMilliseconds;
+    final preprocessingMs =
+        preprocessingTime.difference(startTime).inMilliseconds;
 
     // Run inference
     List<List<List<double>>>? nestedResults = [];

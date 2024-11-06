@@ -23,6 +23,7 @@ import "package:photos/services/machine_learning/ml_exceptions.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import "package:photos/services/search_service.dart";
+import "package:photos/src/rust/api/image_processing.dart";
 import "package:photos/src/rust/custom/init_frb.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/image_ml_util.dart";
@@ -395,18 +396,23 @@ Future<MLResult> analyzeImageStatic(Map args) async {
       "Start analyzeImageStatic for fileID $enteFileID (runFaces: $runFaces, runClip: $runClip)",
     );
     await initFrb();
-    final safePath = await safePathFromImagepath(imagePath);
-
     final startTime = DateTime.now();
 
     // Decode the image once to use for both face detection and alignment
+    final safePath = await safePathFromImagepath(imagePath);
     final (image, rawRgbaBytes) = await decodeImageFromPath(imagePath);
+    final decodeTime = DateTime.now();
+    final decodeMs = decodeTime.difference(startTime).inMilliseconds;
+
+    final (faceBytes, faceHeight, faceWidth, clipBytes, clipHeight, clipWidth) =
+        await processImageMlFromPath(imagePath: safePath);
+    _logger.info(
+      'ML processing in rust took ${DateTime.now().difference(decodeTime).inMilliseconds} ms',
+    );
     final decodedImageSize =
         Dimensions(height: image.height, width: image.width);
     final result = MLResult.fromEnteFileID(enteFileID);
     result.decodedImageSize = decodedImageSize;
-    final decodeTime = DateTime.now();
-    final decodeMs = decodeTime.difference(startTime).inMilliseconds;
 
     String faceMsString = "", clipMsString = "";
     final pipelines = await Future.wait([
@@ -415,9 +421,11 @@ Future<MLResult> analyzeImageStatic(Map args) async {
               enteFileID,
               image,
               rawRgbaBytes,
+              faceBytes,
+              faceHeight.toInt(),
+              faceWidth.toInt(),
               faceDetectionAddress,
               faceEmbeddingAddress,
-              safePath,
             ).then((result) {
               faceMsString =
                   ", faces: ${DateTime.now().difference(decodeTime).inMilliseconds} ms";
@@ -427,10 +435,10 @@ Future<MLResult> analyzeImageStatic(Map args) async {
       runClip
           ? SemanticSearchService.runClipImage(
               enteFileID,
-              image,
-              rawRgbaBytes,
+              clipBytes,
+              clipHeight.toInt(),
+              clipWidth.toInt(),
               clipImageAddress,
-              safePath,
             ).then((result) {
               clipMsString =
                   ", clip: ${DateTime.now().difference(decodeTime).inMilliseconds} ms";

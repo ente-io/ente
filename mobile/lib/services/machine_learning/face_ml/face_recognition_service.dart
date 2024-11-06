@@ -73,9 +73,11 @@ class FaceRecognitionService {
     int enteFileID,
     Image image,
     Uint8List rawRgbaBytes,
+    Uint8List resizedBytes,
+    int resizedHeight,
+    int resizedWidth,
     int faceDetectionAddress,
     int faceEmbeddingAddress,
-    String imagePath,
   ) async {
     final faceResults = <FaceResult>[];
     final startTime = DateTime.now();
@@ -84,11 +86,11 @@ class FaceRecognitionService {
     final List<FaceDetectionRelative> faceDetectionResult =
         await _detectFacesSync(
       enteFileID,
-      image,
-      rawRgbaBytes,
+      resizedBytes,
+      resizedHeight,
+      resizedWidth,
       faceDetectionAddress,
       faceResults,
-      imagePath,
     );
     final detectFacesTime = DateTime.now();
     final detectFacesMs = detectFacesTime.difference(startTime).inMilliseconds;
@@ -133,20 +135,20 @@ class FaceRecognitionService {
   /// Runs face recognition on the given image data.
   static Future<List<FaceDetectionRelative>> _detectFacesSync(
     int fileID,
-    Image image,
-    Uint8List rawRgbaBytes,
+    Uint8List resizedBytes,
+    int resizedHeight,
+    int resizedWidth,
     int interpreterAddress,
     List<FaceResult> faceResults,
-    String imagePath,
   ) async {
     try {
       // Get the bounding boxes of the faces
       final List<FaceDetectionRelative> faces =
           await FaceDetectionService.predict(
-        image,
-        rawRgbaBytes,
+        resizedBytes,
+        resizedHeight,
+        resizedWidth,
         interpreterAddress,
-        imagePath,
       );
 
       // Add detected faces to the faceResults
