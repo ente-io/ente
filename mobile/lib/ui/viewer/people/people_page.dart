@@ -126,7 +126,8 @@ class _PeoplePageState extends State<PeoplePage> {
             : null,
         child: Scaffold(
           appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(90.0),
+            preferredSize:
+                Size.fromHeight(widget.searchResult != null ? 90.0 : 50.0),
             child: PeopleAppBar(
               GalleryType.peopleTag,
               widget.person.data.name,
@@ -137,6 +138,9 @@ class _PeoplePageState extends State<PeoplePage> {
           body: FutureBuilder<List<EnteFile>>(
             future: filesFuture,
             builder: (context, snapshot) {
+              final inheritedSearchFilterData = InheritedSearchFilterData.of(
+                context,
+              );
               if (snapshot.hasData) {
                 final personFiles = snapshot.data as List<EnteFile>;
                 return Column(
@@ -147,29 +151,35 @@ class _PeoplePageState extends State<PeoplePage> {
                         child: Stack(
                           alignment: Alignment.bottomCenter,
                           children: [
-                            ValueListenableBuilder(
-                              valueListenable:
-                                  InheritedSearchFilterData.of(context)
-                                      .searchFilterDataProvider!
-                                      .isSearchingNotifier,
-                              builder: (
-                                context,
-                                value,
-                                _,
-                              ) {
-                                return value
-                                    ? HierarchicalSearchGallery(
-                                        tagPrefix: widget.tagPrefix,
-                                        selectedFiles: _selectedFiles,
-                                      )
-                                    : _Gallery(
-                                        tagPrefix: widget.tagPrefix,
-                                        selectedFiles: _selectedFiles,
-                                        personFiles: personFiles,
-                                        loadPersonFiles: loadPersonFiles,
-                                      );
-                              },
-                            ),
+                            inheritedSearchFilterData.isHierarchicalSearchable
+                                ? ValueListenableBuilder(
+                                    valueListenable: inheritedSearchFilterData
+                                        .searchFilterDataProvider!
+                                        .isSearchingNotifier,
+                                    builder: (
+                                      context,
+                                      value,
+                                      _,
+                                    ) {
+                                      return value
+                                          ? HierarchicalSearchGallery(
+                                              tagPrefix: widget.tagPrefix,
+                                              selectedFiles: _selectedFiles,
+                                            )
+                                          : _Gallery(
+                                              tagPrefix: widget.tagPrefix,
+                                              selectedFiles: _selectedFiles,
+                                              personFiles: personFiles,
+                                              loadPersonFiles: loadPersonFiles,
+                                            );
+                                    },
+                                  )
+                                : _Gallery(
+                                    tagPrefix: widget.tagPrefix,
+                                    selectedFiles: _selectedFiles,
+                                    personFiles: personFiles,
+                                    loadPersonFiles: loadPersonFiles,
+                                  ),
                             FileSelectionOverlayBar(
                               PeoplePage.overlayType,
                               _selectedFiles,
