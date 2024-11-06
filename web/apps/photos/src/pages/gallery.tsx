@@ -45,6 +45,7 @@ import {
 } from "@/new/photos/services/search";
 import type { SearchOption } from "@/new/photos/services/search/types";
 import { initSettings } from "@/new/photos/services/settings";
+import { getLocalFamilyData } from "@/new/photos/services/user";
 import { useAppContext } from "@/new/photos/types/context";
 import { splitByPredicate } from "@/utils/array";
 import { ensure } from "@/utils/ensure";
@@ -130,7 +131,6 @@ import {
     handleCollectionOps,
 } from "utils/collection";
 import { FILE_OPS_TYPE, getSelectedFiles, handleFileOps } from "utils/file";
-import { getLocalFamilyData } from "utils/user/family";
 
 const defaultGalleryContext: GalleryContextType = {
     showPlanSelectorModal: () => null,

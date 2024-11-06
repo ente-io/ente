@@ -77,7 +77,7 @@ import {
     isSubscriptionCancelled,
     isSubscriptionPastDue,
 } from "utils/billing";
-import { isFamilyAdmin, isPartOfFamily } from "utils/user/family";
+import { isFamilyAdmin, isPartOfFamily } from "@/new/photos/services/user";
 import { testUpload } from "../../../tests/upload.test";
 import { MemberSubscriptionManage } from "../MemberSubscriptionManage";
 import { Preferences } from "./Preferences";

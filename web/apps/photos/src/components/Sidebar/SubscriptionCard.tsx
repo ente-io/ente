@@ -1,5 +1,9 @@
 import { Overlay } from "@/base/components/mui/Container";
 import type { ButtonishProps } from "@/new/photos/components/mui";
+import {
+    hasNonAdminFamilyMembers,
+    isPartOfFamily,
+} from "@/new/photos/services/user";
 import { bytesInGB, formattedStorageByteSize } from "@/new/photos/utils/units";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
@@ -17,7 +21,6 @@ import { t } from "i18next";
 import type React from "react";
 import { useMemo } from "react";
 import type { UserDetails } from "types/user";
-import { hasNonAdminFamilyMembers, isPartOfFamily } from "utils/user/family";
 
 interface SubscriptionCardProps {
     userDetails: UserDetails;

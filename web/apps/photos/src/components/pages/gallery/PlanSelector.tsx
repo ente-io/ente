@@ -1,5 +1,9 @@
 import { genericRetriableErrorDialogAttributes } from "@/base/components/utils/dialog";
 import log from "@/base/log";
+import {
+    getTotalFamilyUsage,
+    isPartOfFamily,
+} from "@/new/photos/services/user";
 import { AppContext } from "@/new/photos/types/context";
 import { bytesInGB, formattedStorageByteSize } from "@/new/photos/utils/units";
 import { openURL } from "@/new/photos/utils/web";
@@ -53,7 +57,6 @@ import {
     updatePaymentMethod,
     updateSubscription,
 } from "utils/billing";
-import { getTotalFamilyUsage, isPartOfFamily } from "utils/user/family";
 
 interface PlanSelectorProps {
     modalView: boolean;
