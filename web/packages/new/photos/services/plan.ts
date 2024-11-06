@@ -76,13 +76,11 @@ export const getPlansData = async (): Promise<PlansData> => {
         headers: await authenticatedRequestHeaders(),
     });
     ensureOk(res);
-    return z.object({ data: PlansData }).parse(await res.json()).data;
+    return PlansData.parse(await res.json());
 };
 
 const SubscriptionResponse = z.object({
-    data: z.object({
-        subscription: Subscription,
-    }),
+    subscription: Subscription,
 });
 
 export const verifySubscription = async (
@@ -98,7 +96,7 @@ export const verifySubscription = async (
         }),
     });
     ensureOk(res);
-    const { subscription } = SubscriptionResponse.parse(await res.json()).data;
+    const { subscription } = SubscriptionResponse.parse(await res.json());
     setData(LS_KEYS.SUBSCRIPTION, subscription);
     return subscription;
 };
@@ -112,7 +110,7 @@ export const activateSubscription = async () => {
         },
     );
     ensureOk(res);
-    const { subscription } = SubscriptionResponse.parse(await res.json()).data;
+    const { subscription } = SubscriptionResponse.parse(await res.json());
     setData(LS_KEYS.SUBSCRIPTION, subscription);
 };
 
@@ -125,7 +123,7 @@ export const cancelSubscription = async () => {
         },
     );
     ensureOk(res);
-    const { subscription } = SubscriptionResponse.parse(await res.json()).data;
+    const { subscription } = SubscriptionResponse.parse(await res.json());
     setData(LS_KEYS.SUBSCRIPTION, subscription);
 };
 
@@ -180,10 +178,8 @@ export const redirectToCustomerPortal = async () => {
         headers: await authenticatedRequestHeaders(),
     });
     ensureOk(res);
-    const data = z
-        .object({ data: z.object({ url: z.string() }) })
-        .parse(await res.json()).data;
-    window.location.href = data.url;
+    const portal = z.object({ url: z.string() }).parse(await res.json());
+    window.location.href = portal.url;
 };
 
 /**
