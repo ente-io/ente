@@ -69,12 +69,8 @@ export const logoutUserDetails = () => {
  * This assumes that the user is already logged in.
  */
 export const initUserDetails = async () => {
-    await syncUserDetailsSnapshotWithLocalDB();
-};
-
-const syncUserDetailsSnapshotWithLocalDB = async () => {
-    const userDetails = UserDetails.parse(await getKV("userDetails"));
-    setUserDetailsSnapshot(userDetails);
+    const saved = await getKV("userDetails");
+    if (saved) setUserDetailsSnapshot(UserDetails.parse(saved));
 };
 
 /**

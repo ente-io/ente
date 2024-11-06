@@ -25,7 +25,7 @@ import {
     useGalleryReducer,
     type GalleryBarMode,
 } from "@/new/photos/components/gallery/reducer";
-import { usePeopleStateSnapshot } from "@/new/photos/components/utils/ml";
+import { usePeopleStateSnapshot } from "@/new/photos/components/utils/use-snapshot";
 import { shouldShowWhatsNew } from "@/new/photos/services/changelog";
 import {
     ALL_SECTION,
@@ -34,6 +34,7 @@ import {
 } from "@/new/photos/services/collection";
 import { areOnlySystemCollections } from "@/new/photos/services/collection/ui";
 import downloadManager from "@/new/photos/services/download";
+import { getLocalFamilyData } from "@/new/photos/services/family";
 import {
     getLocalFiles,
     getLocalTrashedFiles,
@@ -363,7 +364,9 @@ export default function Gallery() {
             }
             setIsFirstLogin(false);
             const user = getData(LS_KEYS.USER);
-            const familyData = userDetailsSnapshot().familyData;
+            // TODO: Temp fallback
+            const familyData =
+                userDetailsSnapshot()?.familyData ?? getLocalFamilyData();
             const files = sortFiles(
                 mergeMetadata(await getLocalFiles("normal")),
             );
