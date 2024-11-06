@@ -8,6 +8,7 @@ import {
     FluidContainer,
     SpaceBetweenFlex,
 } from "@ente/shared/components/Container";
+import { getData, LS_KEYS } from "@ente/shared/storage/localStorage";
 import ArrowForward from "@mui/icons-material/ArrowForward";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import Close from "@mui/icons-material/Close";
@@ -34,7 +35,7 @@ import billingService, { type PlansResponse } from "services/billingService";
 import { getFamilyPortalRedirectURL } from "services/userService";
 import { Plan, PLAN_PERIOD, Subscription } from "types/billing";
 import { SetLoading } from "types/gallery";
-import { BonusData } from "types/user";
+import { BonusData, UserDetails } from "types/user";
 import {
     activateSubscription,
     cancelSubscription,
@@ -52,7 +53,6 @@ import {
     updatePaymentMethod,
     updateSubscription,
 } from "utils/billing";
-import { getLocalUserDetails } from "utils/user";
 import { getTotalFamilyUsage, isPartOfFamily } from "utils/user/family";
 
 interface PlanSelectorProps {
@@ -796,3 +796,7 @@ const ManageSubscriptionButton = ({ children, ...props }: ButtonProps) => (
         <FluidContainer>{children}</FluidContainer>
     </Button>
 );
+
+function getLocalUserDetails(): UserDetails {
+    return getData(LS_KEYS.USER_DETAILS)?.value;
+}
