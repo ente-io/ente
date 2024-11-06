@@ -72,7 +72,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.5.1';
 
   @override
-  int get rustContentHash => 1774582320;
+  int get rustContentHash => -2017876324;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -83,6 +83,9 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
 }
 
 abstract class RustLibApi extends BaseApi {
+  Future<(Uint8List, String, BigInt, BigInt)>
+      crateApiImageProcessingProcessClip({required String imagePath});
+
   Future<(Uint8List, String, BigInt, BigInt)>
       crateApiImageProcessingProcessYoloFace({required String imagePath});
 
@@ -98,6 +101,32 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     required super.generalizedFrbRustBinding,
     required super.portManager,
   });
+
+  @override
+  Future<(Uint8List, String, BigInt, BigInt)>
+      crateApiImageProcessingProcessClip({required String imagePath}) {
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final arg0 = cst_encode_String(imagePath);
+        return wire.wire__crate__api__image_processing__process_clip(
+            port_, arg0);
+      },
+      codec: DcoCodec(
+        decodeSuccessData:
+            dco_decode_record_list_prim_u_8_strict_string_usize_usize,
+        decodeErrorData: null,
+      ),
+      constMeta: kCrateApiImageProcessingProcessClipConstMeta,
+      argValues: [imagePath],
+      apiImpl: this,
+    ));
+  }
+
+  TaskConstMeta get kCrateApiImageProcessingProcessClipConstMeta =>
+      const TaskConstMeta(
+        debugName: "process_clip",
+        argNames: ["imagePath"],
+      );
 
   @override
   Future<(Uint8List, String, BigInt, BigInt)>

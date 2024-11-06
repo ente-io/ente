@@ -270,11 +270,13 @@ class SemanticSearchService {
     Image image,
     Uint8List rawRgbaBytes,
     int clipImageAddress,
+    String imagePath,
   ) async {
     final embedding = await ClipImageEncoder.predict(
       image,
       rawRgbaBytes,
       clipImageAddress,
+      imagePath,
       enteFileID,
     );
 

@@ -58,15 +58,21 @@ class FaceDetectionService extends MlModel {
 
     final startTime = DateTime.now();
 
-    final (result, timing, newWidth, newHeight) = await processYoloFace(imagePath: imagePath);
+    final (result, timing, newWidth, newHeight) =
+        await processYoloFace(imagePath: imagePath);
     _logger.info("Face detection preprocessing: \n $timing");
-    final scaledSize = Dimensions(width: newWidth.toInt(), height: newHeight.toInt());
+    final scaledSize =
+        Dimensions(width: newWidth.toInt(), height: newHeight.toInt());
     final preprocessingTime = DateTime.now();
     final preprocessingMs =
         preprocessingTime.difference(startTime).inMilliseconds;
 
     final tempTime = DateTime.now();
-    final inputImageList = await resizedToPreprocessed(result, scaledSize.width, scaledSize.height);
+    final inputImageList = await resizedToPreprocessedYoloFace(
+      result,
+      scaledSize.width,
+      scaledSize.height,
+    );
     _logger.info(
       'Face detection remaining dart processing: ${DateTime.now().difference(tempTime).inMilliseconds} ms',
     );

@@ -260,7 +260,7 @@ Future<(Float32List, Dimensions)> preprocessImageYoloFace(
   return (processedBytes, Dimensions(width: scaledWidth, height: scaledHeight));
 }
 
-Future<Float32List> resizedToPreprocessed(
+Future<Float32List> resizedToPreprocessedYoloFace(
   Uint8List rgbBytes,
   int rgbWidth,
   int rgbHeight,
@@ -279,13 +279,46 @@ Future<Float32List> resizedToPreprocessed(
       if (w >= rgbWidth || h >= rgbHeight) {
         pixel = const (114, 114, 114);
       } else {
-        final byteIndex = 3 * (rgbWidth * h + w);
+        final int byteIndex = 3 * (rgbWidth * h + w);
         pixel = (
           rgbBytes[byteIndex],
           rgbBytes[byteIndex + 1],
           rgbBytes[byteIndex + 2]
         );
       }
+      buffer[pixelIndex] = pixel.$1 / 255;
+      buffer[pixelIndex + channelOffsetGreen] = pixel.$2 / 255;
+      buffer[pixelIndex + channelOffsetBlue] = pixel.$3 / 255;
+      pixelIndex++;
+    }
+  }
+
+  return processedBytes;
+}
+
+Future<Float32List> resizedToPreprocessedClip(
+  Uint8List rgbBytes,
+  int rgbWidth,
+  int rgbHeight,
+) async {
+  const requiredWidth = 256;
+  const requiredHeight = 256;
+
+  final processedBytes = Float32List(3 * requiredHeight * requiredWidth);
+  final buffer = Float32List.view(processedBytes.buffer);
+  int pixelIndex = 0;
+  const int channelOffsetGreen = requiredHeight * requiredWidth;
+  const int channelOffsetBlue = 2 * requiredHeight * requiredWidth;
+  final widthOffset = max(0, rgbWidth - requiredWidth) ~/ 2;
+  final heightOffset = max(0, rgbHeight - requiredHeight) ~/ 2;
+  for (var h = 0 + heightOffset; h < heightOffset + requiredHeight; h++) {
+    for (var w = 0 + widthOffset; w < widthOffset + requiredWidth; w++) {
+      final int byteIndex = 3 * (rgbWidth * h + w);
+      final RGB pixel = (
+        rgbBytes[byteIndex],
+        rgbBytes[byteIndex + 1],
+        rgbBytes[byteIndex + 2]
+      );
       buffer[pixelIndex] = pixel.$1 / 255;
       buffer[pixelIndex + channelOffsetGreen] = pixel.$2 / 255;
       buffer[pixelIndex + channelOffsetBlue] = pixel.$3 / 255;

@@ -5,6 +5,7 @@ import "package:logging/logging.dart";
 import "package:onnx_dart/onnx_dart.dart";
 import "package:onnxruntime/onnxruntime.dart";
 import "package:photos/services/machine_learning/ml_model.dart";
+import "package:photos/src/rust/api/image_processing.dart";
 import "package:photos/utils/image_ml_util.dart";
 import "package:photos/utils/ml_util.dart";
 
@@ -30,14 +31,29 @@ class ClipImageEncoder extends MlModel {
   static Future<List<double>> predict(
     Image image,
     Uint8List rawRgbaBytes,
-    int sessionAddress, [
+    int sessionAddress,
+    String imagePath, [
     int? enteFileID,
   ]) async {
     final startTime = DateTime.now();
-    final inputList = await preprocessImageClip(image, rawRgbaBytes);
+    // final inputList = await preprocessImageClip(image, rawRgbaBytes);
+    final (resizedBytes, timing, rgbWidth, rgbHeight) =
+        await processClip(imagePath: imagePath);
+    _logger.info("Clip preprocessing: \n $timing");
     final preprocessingTime = DateTime.now();
     final preprocessingMs =
         preprocessingTime.difference(startTime).inMilliseconds;
+
+    final tempTime = DateTime.now();
+    final inputList = await resizedToPreprocessedClip(
+      resizedBytes,
+      rgbWidth.toInt(),
+      rgbHeight.toInt(),
+    );
+    _logger.info(
+      'Clip remaining dart processing: ${DateTime.now().difference(tempTime).inMilliseconds} ms',
+    );
+
     late List<double> result;
     try {
       if (MlModel.usePlatformPlugin) {
@@ -57,7 +73,7 @@ class ClipImageEncoder extends MlModel {
     final inferenceMs = inferTime.difference(preprocessingTime).inMilliseconds;
     final totalMs = inferTime.difference(startTime).inMilliseconds;
     _logger.info(
-      "Clip image predict took $totalMs ms${enteFileID != null ? " with fileID $enteFileID" : ""} (inference: $inferenceMs ms, preprocessing: $preprocessingMs ms)",
+      "Clip image predict took $totalMs ms${enteFileID != null ? " with fileID $enteFileID" : ""} (preprocessing: $preprocessingMs ms, inference: $inferenceMs ms)",
     );
     return result;
   }

@@ -37,7 +37,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueNom,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.5.1";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 1774582320;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -2017876324;
 
 // Section: executor
 
@@ -45,6 +45,29 @@ flutter_rust_bridge::frb_generated_default_handler!();
 
 // Section: wire_funcs
 
+fn wire__crate__api__image_processing__process_clip_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    image_path: impl CstDecode<String>,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::DcoCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "process_clip",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let api_image_path = image_path.cst_decode();
+            move |context| {
+                transform_result_dco::<_, _, ()>((move || {
+                    let output_ok = Result::<_, ()>::Ok(
+                        crate::api::image_processing::process_clip(&api_image_path),
+                    )?;
+                    Ok(output_ok)
+                })())
+            }
+        },
+    )
+}
 fn wire__crate__api__image_processing__process_yolo_face_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     image_path: impl CstDecode<String>,
@@ -337,6 +360,14 @@ mod io {
         fn default() -> Self {
             Self::new_with_null_ptr()
         }
+    }
+
+    #[no_mangle]
+    pub extern "C" fn frbgen_photos_wire__crate__api__image_processing__process_clip(
+        port_: i64,
+        image_path: *mut wire_cst_list_prim_u_8_strict,
+    ) {
+        wire__crate__api__image_processing__process_clip_impl(port_, image_path)
     }
 
     #[no_mangle]

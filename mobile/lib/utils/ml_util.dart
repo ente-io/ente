@@ -430,6 +430,7 @@ Future<MLResult> analyzeImageStatic(Map args) async {
               image,
               rawRgbaBytes,
               clipImageAddress,
+              safePath,
             ).then((result) {
               clipMsString =
                   ", clip: ${DateTime.now().difference(decodeTime).inMilliseconds} ms";

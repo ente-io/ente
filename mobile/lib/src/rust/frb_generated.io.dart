@@ -171,6 +171,25 @@ class RustLibWire implements BaseWire {
   late final _store_dart_post_cobject = _store_dart_post_cobjectPtr
       .asFunction<void Function(DartPostCObjectFnType)>();
 
+  void wire__crate__api__image_processing__process_clip(
+    int port_,
+    ffi.Pointer<wire_cst_list_prim_u_8_strict> image_path,
+  ) {
+    return _wire__crate__api__image_processing__process_clip(
+      port_,
+      image_path,
+    );
+  }
+
+  late final _wire__crate__api__image_processing__process_clipPtr = _lookup<
+          ffi.NativeFunction<
+              ffi.Void Function(
+                  ffi.Int64, ffi.Pointer<wire_cst_list_prim_u_8_strict>)>>(
+      'frbgen_photos_wire__crate__api__image_processing__process_clip');
+  late final _wire__crate__api__image_processing__process_clip =
+      _wire__crate__api__image_processing__process_clipPtr.asFunction<
+          void Function(int, ffi.Pointer<wire_cst_list_prim_u_8_strict>)>();
+
   void wire__crate__api__image_processing__process_yolo_face(
     int port_,
     ffi.Pointer<wire_cst_list_prim_u_8_strict> image_path,
