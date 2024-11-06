@@ -1,10 +1,6 @@
 import type { ButtonishProps } from "@/new/photos/components/mui";
 import { bytesInGB, formattedStorageByteSize } from "@/new/photos/utils/units";
-import {
-    FlexWrapper,
-    Overlay,
-    SpaceBetweenFlex,
-} from "@ente/shared/components/Container";
+import { Overlay, SpaceBetweenFlex } from "@ente/shared/components/Container";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CircleIcon from "@mui/icons-material/Circle";
 import {
@@ -63,19 +59,19 @@ const BackgroundOverlay: React.FC = () => {
     );
 };
 
-const ClickOverlay: React.FC<ButtonishProps> = ({ onClick }) => {
-    return (
-        <Overlay display="flex">
-            <FlexWrapper
-                onClick={onClick}
-                justifyContent={"flex-end"}
-                sx={{ cursor: "pointer" }}
-            >
-                <ChevronRightIcon />
-            </FlexWrapper>
-        </Overlay>
-    );
-};
+const ClickOverlay: React.FC<ButtonishProps> = ({ onClick }) => (
+    <Overlay
+        sx={{
+            display: "flex",
+            justifyContent: "flex-end",
+            alignItems: "center",
+            cursor: "pointer",
+        }}
+        onClick={onClick}
+    >
+        <ChevronRightIcon />
+    </Overlay>
+);
 
 interface SubscriptionCardContentOverlayProps {
     userDetails: UserDetails;
