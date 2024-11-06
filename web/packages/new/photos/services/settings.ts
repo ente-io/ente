@@ -120,7 +120,7 @@ export const syncSettings = async () => {
     const id = _state.id;
     const jsonString = await fetchFeatureFlags().then((res) => res.text());
     if (_state.id != id) {
-        log.info("Discarding stale settings sync not for the current login");
+        log.info("Discarding on logout");
         return;
     }
     saveRemoteFeatureFlagsJSONString(jsonString);

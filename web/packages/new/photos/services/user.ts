@@ -1,5 +1,6 @@
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
-import { getKV } from "@/base/kv";
+import { getKV, setKV } from "@/base/kv";
+import log from "@/base/log";
 import { apiURL } from "@/base/origins";
 import { z } from "zod";
 import { FamilyData } from "./family";
@@ -80,27 +81,12 @@ export const logoutUserDetails = () => {
  * This assumes that the user is already logged in.
  */
 export const initUserDetails = async () => {
-    return syncUserDetailsSnapshotWithLocalDB();
-};
-/**
- * Fetch the user's details from remote and save them in local storage for
- * subsequent lookup, and also update our in-memory snapshots.
- */
-export const syncUserDetails = async () => {};
-
-/**
- * Fetch user details from remote.
- */
-export const getUserDetailsV2 = async () => {
-    const res = await fetch(await apiURL("/users/details/v2"), {
-        headers: await authenticatedRequestHeaders(),
-    });
-    ensureOk(res);
-    return UserDetails.parse(await res.json());
+    await syncUserDetailsSnapshotWithLocalDB();
 };
 
 const syncUserDetailsSnapshotWithLocalDB = async () => {
-    const userDetails = UserDetails.parse(getKV("userDetails"));
+    const userDetails = UserDetails.parse(await getKV("userDetails"));
+    setUserDetailsSnapshot(userDetails);
 };
 
 /**
@@ -112,7 +98,7 @@ const syncUserDetailsSnapshotWithLocalDB = async () => {
  * be used as arguments to React's {@link useSyncExternalStore}.
  *
  * @param callback A function that will be invoked whenever the result of
- * {@link settingsSnapshot} changes.
+ * {@link userDetailsSnapshot} changes.
  *
  * @returns A function that can be used to clear the subscription.
  */
@@ -131,11 +117,37 @@ export const userDetailsSubscribe = (onChange: () => void): (() => void) => {
  * This, along with {@link userDetailsSubscribe}, is meant to be used as
  * arguments to React's {@link useSyncExternalStore}.
  */
-export const settingsSnapshot = () => _state.settingsSnapshot;
+export const userDetailsSnapshot = () => _state.userDetailsSnapshot;
 
-const setSettingsSnapshot = (snapshot: Settings) => {
-    _state.settingsSnapshot = snapshot;
-    _state.settingsListeners.forEach((l) => l());
+const setUserDetailsSnapshot = (snapshot: UserDetails) => {
+    _state.userDetailsSnapshot = snapshot;
+    _state.userDetailsListeners.forEach((l) => l());
+};
+
+/**
+ * Fetch the user's details from remote and save them in local storage for
+ * subsequent lookup, and also update our in-memory snapshots.
+ */
+export const syncUserDetails = async () => {
+    const id = _state.id;
+    const userDetails = await getUserDetailsV2();
+    if (_state.id != id) {
+        log.info("Discarding on logout");
+        return;
+    }
+    await setKV("userDetails", userDetails);
+    setUserDetailsSnapshot(userDetails);
+};
+
+/**
+ * Fetch user details from remote.
+ */
+export const getUserDetailsV2 = async () => {
+    const res = await fetch(await apiURL("/users/details/v2"), {
+        headers: await authenticatedRequestHeaders(),
+    });
+    ensureOk(res);
+    return UserDetails.parse(await res.json());
 };
 
 /**
