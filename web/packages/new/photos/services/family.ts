@@ -20,18 +20,22 @@ const FamilyMember = z.object({
      *
      * This field will not be present for invited members until they accept.
      */
-    usage: z.number().nullable().transform(nullToUndefined),
+    usage: z.number().nullish().transform(nullToUndefined),
     /**
      * `true` if this is the admin.
      *
      * This field will not be sent for invited members until they accept.
      */
-    isAdmin: z.boolean().nullable().transform(nullToUndefined),
+    isAdmin: z.boolean().nullish().transform(nullToUndefined),
 });
 
 type FamilyMember = z.infer<typeof FamilyMember>;
 
-const FamilyData = z.object({
+/**
+ * Zod schema for details about the family plan (if any) that the user is a part
+ * of.
+ */
+export const FamilyData = z.object({
     members: z.array(FamilyMember),
     /**
      * Family admin subscription storage capacity.
@@ -41,6 +45,9 @@ const FamilyData = z.object({
     storage: z.number(),
 });
 
+/**
+ * Details about the family plan (if any) that the user is a part of.
+ */
 export type FamilyData = z.infer<typeof FamilyData>;
 
 export function getLocalFamilyData(): FamilyData {

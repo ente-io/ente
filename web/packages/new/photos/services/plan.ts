@@ -20,7 +20,7 @@ const PlanPeriod = z.enum(["month", "year"]);
  */
 export type PlanPeriod = z.infer<typeof PlanPeriod>;
 
-const Subscription = z.object({
+export const Subscription = z.object({
     productID: z.string(),
     storage: z.number(),
     expiryTime: z.number(),

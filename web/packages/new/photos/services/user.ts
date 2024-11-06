@@ -1,29 +1,61 @@
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { apiURL } from "@/base/origins";
 import { z } from "zod";
-import type { FamilyData } from "./family";
-import type { Subscription } from "./plan";
+import { FamilyData } from "./family";
+import { Subscription } from "./plan";
 
-export interface Bonus {
-    storage: number;
-    type: string;
-    validTill: number;
-    isRevoked: boolean;
-}
+const BonusData = z.object({
+    /**
+     * List of bonuses applied for the user.
+     */
+    storageBonuses: z
+        .object({
+            /**
+             * The type of the bonus.
+             */
+            type: z.string(),
+        })
+        .array(),
+});
 
-export interface BonusData {
-    storageBonuses: Bonus[];
-}
+/**
+ * Information about bonuses applied to the user.
+ */
+export type BonusData = z.infer<typeof BonusData>;
 
-export interface UserDetails {
-    email: string;
-    usage: number;
-    fileCount: number;
-    sharedCollectionCount: number;
-    subscription: Subscription;
-    familyData?: FamilyData;
-    storageBonus?: number;
-    bonusData?: BonusData;
+/**
+ * Zod schema for {@link UserDetails}
+ */
+const UserDetails = z.object({
+    email: z.string(),
+    usage: z.number(),
+    fileCount: z.number().optional(),
+    subscription: Subscription,
+    familyData: FamilyData.optional(),
+    storageBonus: z.number().optional(),
+    bonusData: BonusData.optional(),
+});
+
+export type UserDetails = z.infer<typeof UserDetails>;
+
+/**
+ * Internal in-memory state shared by the functions in this module.
+ *
+ * This entire object will be reset on logout.
+ */
+class UserState {
+    /**
+     * Subscriptions to {@link UserDetails} updates.
+     *
+     * See {@link userDetailsSubscribe}.
+     */
+    userDetailsListeners: (() => void)[] = [];
+
+    /**
+     * Snapshot of the {@link UserDetails} returned by the
+     * {@link userDetailsSnapshot} function.
+     */
+    userDetailsSnapshot: UserDetails | undefined;
 }
 
 /**
