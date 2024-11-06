@@ -16,7 +16,6 @@ import { SetLoading } from "types/gallery";
 import { BonusData, UserDetails } from "types/user";
 import { getSubscriptionPurchaseSuccessMessage } from "utils/ui";
 
-const PAYMENT_PROVIDER_STRIPE = "stripe";
 const FREE_PLAN = "free";
 const THIRTY_DAYS_IN_MICROSECONDS = 30 * 24 * 60 * 60 * 1000 * 1000;
 
@@ -120,10 +119,7 @@ export function isUserSubscribedPlan(plan: Plan, subscription: Subscription) {
     );
 }
 export function hasStripeSubscription(subscription: Subscription) {
-    return (
-        subscription.paymentProvider.length > 0 &&
-        subscription.paymentProvider === PAYMENT_PROVIDER_STRIPE
-    );
+    return subscription.paymentProvider == "stripe";
 }
 
 export function hasExceededStorageQuota(userDetails: UserDetails) {
