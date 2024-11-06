@@ -34,10 +34,9 @@ class FaceFilter extends HierarchicalSearchFilter {
 
   @override
   IconData? icon() {
-    return Icons.face;
-    // throw UnimplementedError(
-    //   "FaceFilter does not need an icon, the face crop should be used instead",
-    // );
+    throw UnimplementedError(
+      "FaceFilter does not use an icon, the face crop should be used instead",
+    );
   }
 
   @override
