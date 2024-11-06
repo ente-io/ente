@@ -14,6 +14,7 @@ import {
     Stack,
     Typography,
     styled,
+    type LinearProgressProps,
 } from "@mui/material";
 import { t } from "i18next";
 import type React from "react";
@@ -194,10 +195,7 @@ const IndividualUsageSection: React.FC<IndividualUsageSectionProps> = ({
     // requirement from the library).
     return (
         <Box width="100%">
-            <ProgressBar
-                variant="determinate"
-                value={Math.min((usage * 100) / storage, 100)}
-            />
+            <UsageBar used={usage} total={storage} />
             <SpaceBetweenFlex
                 sx={{
                     marginTop: 1.5,
@@ -262,7 +260,7 @@ const FamilyUsageSection: React.FC<FamilyUsageSectionProps> = ({
 }) => {
     return (
         <Box width="100%">
-            <FamilyUsageProgressBar
+            <FamilyUsageBar
                 totalUsage={totalUsage}
                 userUsage={userUsage}
                 totalStorage={totalStorage}
@@ -284,58 +282,53 @@ const FamilyUsageSection: React.FC<FamilyUsageSectionProps> = ({
     );
 };
 
-interface FamilyUsageProgressBarProps {
+interface FamilyUsageBarProps {
     userUsage: number;
     totalUsage: number;
     totalStorage: number;
 }
 
-const FamilyUsageProgressBar: React.FC<FamilyUsageProgressBarProps> = ({
+const FamilyUsageBar: React.FC<FamilyUsageBarProps> = ({
     userUsage,
     totalUsage,
     totalStorage,
-}) => {
-    return (
-        <Box position={"relative"} width="100%">
-            <ProgressBar
-                variant="determinate"
-                sx={{ backgroundColor: "transparent" }}
-                value={Math.min((userUsage * 100) / totalStorage, 100)}
-            />
-            <ProgressBar
-                variant="determinate"
-                sx={{
-                    position: "absolute",
-                    top: 0,
-                    zIndex: 1,
-                    ".MuiLinearProgress-bar ": {
-                        backgroundColor: "text.muted",
-                    },
-                    width: "100%",
-                }}
-                value={Math.min((totalUsage * 100) / totalStorage, 100)}
-            />
-        </Box>
-    );
+}) => (
+    <Box sx={{ position: "relative", width: "100%" }}>
+        <UsageBar
+            used={userUsage}
+            total={totalStorage}
+            sx={{ backgroundColor: "transparent" }}
+        />
+        <UsageBar
+            used={totalUsage}
+            total={totalStorage}
+            sx={{
+                position: "absolute",
+                top: 0,
+                zIndex: 1,
+                ".MuiLinearProgress-bar ": {
+                    backgroundColor: "text.muted",
+                },
+                width: "100%",
+            }}
+        />
+    </Box>
+);
+
+type UsageBarProps = Pick<LinearProgressProps, "sx"> & {
+    used: number;
+    total: number;
 };
 
-interface LegendProps {
-    label: string;
-    color: string;
-}
+const UsageBar: React.FC<UsageBarProps> = ({ used, total, sx }) => (
+    <UsageBar_
+        variant="determinate"
+        sx={sx}
+        value={Math.min(used / total, 1) * 100}
+    />
+);
 
-const Legend: React.FC<LegendProps> = ({ label, color }) => {
-    return (
-        <FlexWrapper>
-            <LegendIndicator sx={{ color }} />
-            <Typography variant="mini" fontWeight={"bold"}>
-                {label}
-            </Typography>
-        </FlexWrapper>
-    );
-};
-
-const ProgressBar = styled(LinearProgress)(() => ({
+const UsageBar_ = styled(LinearProgress)(() => ({
     ".MuiLinearProgress-bar": {
         borderRadius: "2px",
     },
@@ -343,7 +336,21 @@ const ProgressBar = styled(LinearProgress)(() => ({
     backgroundColor: "rgba(255, 255, 255, 0.2)",
 }));
 
-const LegendIndicator = styled(CircleIcon)`
+interface LegendProps {
+    label: string;
+    color: string;
+}
+
+const Legend: React.FC<LegendProps> = ({ label, color }) => (
+    <Box sx={{ display: "flex", alignItems: "center" }}>
+        <LegendDot sx={{ color }} />
+        <Typography variant="mini" fontWeight={"bold"}>
+            {label}
+        </Typography>
+    </Box>
+);
+
+const LegendDot = styled(CircleIcon)`
     font-size: 8.71px;
     margin: 0;
     margin-inline-end: 4px;
