@@ -9895,6 +9895,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Only them`
+  String get onlyThem {
+    return Intl.message(
+      'Only them',
+      name: 'onlyThem',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

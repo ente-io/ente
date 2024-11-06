@@ -7,15 +7,20 @@ class OnlyThemFilter extends HierarchicalSearchFilter {
   final List<FaceFilter> faceFilters;
   final int occurrence;
 
+  /// Workaround to avoid passing context to the filter to avoid making context
+  /// a long lived object.
+  final String onlyThemString;
+
   OnlyThemFilter({
     required this.faceFilters,
     required this.occurrence,
+    required this.onlyThemString,
     super.filterTypeName = "onlyThemFilter",
   });
 
   @override
   String name() {
-    return "Only them";
+    return onlyThemString;
   }
 
   @override

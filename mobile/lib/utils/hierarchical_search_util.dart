@@ -161,6 +161,7 @@ Future<void> curateFilters(
     final magicFilters = await curateMagicFilters(files);
     final onlyThemFilter = getOnlyThemFilter(
       searchFilterDataProvider,
+      context,
     );
 
     searchFilterDataProvider.clearAndAddRecommendations(
@@ -181,6 +182,7 @@ Future<void> curateFilters(
 
 List<OnlyThemFilter> getOnlyThemFilter(
   SearchFilterDataProvider searchFilterDataProvider,
+  BuildContext context,
 ) {
   if (searchFilterDataProvider.initialGalleryFilter is FaceFilter &&
       searchFilterDataProvider.appliedFilters.isEmpty) {
@@ -189,6 +191,7 @@ List<OnlyThemFilter> getOnlyThemFilter(
         faceFilters: [
           searchFilterDataProvider.initialGalleryFilter as FaceFilter,
         ],
+        onlyThemString: S.of(context).onlyThem,
         occurrence: kMostRelevantFilter,
       ),
     ];
@@ -201,6 +204,7 @@ List<OnlyThemFilter> getOnlyThemFilter(
   } else {
     final onlyThemFilter = OnlyThemFilter(
       faceFilters: appliedFaceFilters,
+      onlyThemString: S.of(context).onlyThem,
       occurrence: kMostRelevantFilter,
     );
     return [onlyThemFilter];

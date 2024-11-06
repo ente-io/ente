@@ -27,6 +27,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "areYouSureYouWantToResetThisPerson":
             MessageLookupByLibrary.simpleMessage(
                 "Are you sure you want to reset this person?"),
+        "onlyThem": MessageLookupByLibrary.simpleMessage("Only them"),
         "resetPerson": MessageLookupByLibrary.simpleMessage("Reset person"),
         "yesResetPerson":
             MessageLookupByLibrary.simpleMessage("Yes, reset person")
