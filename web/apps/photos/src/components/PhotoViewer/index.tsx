@@ -29,6 +29,7 @@ import {
     Box,
     Button,
     CircularProgress,
+    Paper,
     styled,
     Typography,
     type CircularProgressProps,
@@ -56,7 +57,6 @@ import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import { getTrashFileMessage } from "utils/ui";
 import { FileInfo, type FileInfoExif, type FileInfoProps } from "./FileInfo";
 import ImageEditorOverlay from "./ImageEditorOverlay";
-import { LivePhotoBtnContainer } from "./styledComponents/LivePhotoBtn";
 
 interface PhotoswipeFullscreenAPI {
     enter: () => void;
@@ -1038,3 +1038,11 @@ const ConversionFailedNotification: React.FC<
         />
     );
 };
+
+const LivePhotoBtnContainer = styled(Paper)`
+    border-radius: 4px;
+    position: absolute;
+    bottom: 10vh;
+    right: 6vh;
+    z-index: 10;
+`;
