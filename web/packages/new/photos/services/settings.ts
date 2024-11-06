@@ -82,9 +82,8 @@ class SettingsState {
     }
 
     /**
-     * Subscriptions to {@link Settings} updates.
-     *
-     * See {@link settingsSubscribe}.
+     * Subscriptions to {@link Settings} updates attached using
+     * {@link settingsSubscribe}.
      */
     settingsListeners: (() => void)[] = [];
 
@@ -157,13 +156,7 @@ const syncSettingsSnapshotWithLocalStorage = () => {
 /**
  * A function that can be used to subscribe to updates to {@link Settings}.
  *
- * This, along with {@link settingsSnapshot}, is meant to be used as arguments
- * to React's {@link useSyncExternalStore}.
- *
- * @param callback A function that will be invoked whenever the result of
- * {@link settingsSnapshot} changes.
- *
- * @returns A function that can be used to clear the subscription.
+ * See: [Note: Snapshots and useSyncExternalStore].
  */
 export const settingsSubscribe = (onChange: () => void): (() => void) => {
     _state.settingsListeners.push(onChange);
@@ -177,8 +170,7 @@ export const settingsSubscribe = (onChange: () => void): (() => void) => {
 /**
  * Return the last known, cached {@link Settings}.
  *
- * This, along with {@link settingsSubscribe}, is meant to be used as
- * arguments to React's {@link useSyncExternalStore}.
+ * See also {@link settingsSubscribe}.
  */
 export const settingsSnapshot = () => _state.settingsSnapshot;
 
