@@ -12,8 +12,12 @@ import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import isElectron from "is-electron";
 import { z } from "zod";
 
-/** Validity of the plan. */
-export type PlanPeriod = "month" | "year";
+const PlanPeriod = z.enum(["month", "year"]);
+
+/**
+ * Validity of the plan.
+ */
+export type PlanPeriod = z.infer<typeof PlanPeriod>;
 
 export interface Subscription {
     id: number;
@@ -40,7 +44,7 @@ const Plan = z.object({
     stripeID: z.string().nullable().transform(nullToUndefined),
     storage: z.number(),
     price: z.string(),
-    period: z.enum(["month", "year"]),
+    period: PlanPeriod,
 });
 
 /**
