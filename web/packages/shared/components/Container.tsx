@@ -32,7 +32,6 @@ export const FluidContainer = styled(FlexWrapper)`
     flex: 1;
 `;
 
-
 export const HorizontalFlex = styled(Box)({
     display: "flex",
 });
