@@ -144,8 +144,11 @@ GenericSearchResult? toGenericSearchResult(
             ResultType.magic,
             title,
             enteFilesInMagicCache,
-            hierarchicalSearchFilter:
-                MagicFilter(filterName: title, occurrence: kMostRelevantFilter),
+            hierarchicalSearchFilter: MagicFilter(
+              filterName: title,
+              occurrence: kMostRelevantFilter,
+              matchedUploadedIDs: filesToUploadedFileIDs(enteFilesInMagicCache),
+            ),
           ).heroTag(),
           magicFilter: MagicFilter(
             filterName: title,
@@ -200,8 +203,8 @@ class MagicCacheService {
     return _prefs.getInt(_lastMagicCacheUpdateTime) ?? 0;
   }
 
-  bool get enableDiscover => userRemoteFlagService
-        .getCachedBoolValue(UserRemoteFlagService.mlEnabled);
+  bool get enableDiscover =>
+      userRemoteFlagService.getCachedBoolValue(UserRemoteFlagService.mlEnabled);
 
   void queueUpdate(String reason) {
     _pendingUpdateReason.add(reason);
