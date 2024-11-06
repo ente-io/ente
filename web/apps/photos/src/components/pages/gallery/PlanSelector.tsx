@@ -41,7 +41,7 @@ import type {
     PlansResponse,
     Subscription,
 } from "services/billingService";
-import billingService from "services/billingService";
+import billingService, { redirectToPaymentsApp } from "services/billingService";
 import { getFamilyPortalRedirectURL } from "services/userService";
 import { SetLoading } from "types/gallery";
 import { BonusData, UserDetails } from "types/user";
@@ -60,7 +60,6 @@ import {
     planForSubscription,
     planSelectionOutcome,
     updatePaymentMethod,
-    updateSubscription,
 } from "utils/billing";
 
 interface PlanSelectorProps {
@@ -173,7 +172,7 @@ function PlanSelectorCard(props: PlanSelectorCardProps) {
             case "buyPlan":
                 try {
                     props.setLoading(true);
-                    await billingService.buySubscription(plan.stripeID);
+                    await redirectToPaymentsApp(plan.stripeID, "buy");
                 } catch (e) {
                     props.setLoading(false);
                     setDialogMessage({
@@ -190,14 +189,25 @@ function PlanSelectorCard(props: PlanSelectorCardProps) {
                     content: t("UPDATE_SUBSCRIPTION_MESSAGE"),
                     proceed: {
                         text: t("UPDATE_SUBSCRIPTION"),
-                        action: updateSubscription.bind(
-                            null,
-                            plan,
-                            setDialogMessage,
-                            props.setLoading,
-                            props.closeModal,
-                        ),
                         variant: "accent",
+                        action: async () => {
+                            try {
+                                setLoading(true);
+                                await redirectToPaymentsApp(
+                                    plan.stripeID,
+                                    "update",
+                                );
+                            } catch (err) {
+                                setDialogMessage({
+                                    title: t("error"),
+                                    content: t("SUBSCRIPTION_UPDATE_FAILED"),
+                                    close: { variant: "critical" },
+                                });
+                            } finally {
+                                setLoading(false);
+                                closeModal();
+                            }
+                        },
                     },
                     close: { text: t("cancel") },
                 });

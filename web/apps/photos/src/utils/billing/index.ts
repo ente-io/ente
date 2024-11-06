@@ -159,27 +159,6 @@ export function isSubscriptionPastDue(subscription: Subscription) {
 export const isPopularPlan = (plan: Plan) =>
     plan.storage === 100 * 1024 * 1024 * 1024; /* 100 GB */
 
-export async function updateSubscription(
-    plan: Plan,
-    setDialogMessage: SetDialogBoxAttributes,
-    setLoading: SetLoading,
-    closePlanSelectorModal: () => null,
-) {
-    try {
-        setLoading(true);
-        await billingService.updateSubscription(plan.stripeID);
-    } catch (err) {
-        setDialogMessage({
-            title: t("error"),
-            content: t("SUBSCRIPTION_UPDATE_FAILED"),
-            close: { variant: "critical" },
-        });
-    } finally {
-        setLoading(false);
-        closePlanSelectorModal();
-    }
-}
-
 export async function cancelSubscription(
     setDialogMessage: SetDialogBoxAttributes,
     closePlanSelectorModal: () => void,

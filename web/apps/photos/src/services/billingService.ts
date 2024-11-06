@@ -71,26 +71,6 @@ class billingService {
         }
     }
 
-    public async buySubscription(productID: string) {
-        try {
-            const paymentToken = await getPaymentToken();
-            await this.redirectToPayments(paymentToken, productID, "buy");
-        } catch (e) {
-            log.error("unable to buy subscription", e);
-            throw e;
-        }
-    }
-
-    public async updateSubscription(productID: string) {
-        try {
-            const paymentToken = await getPaymentToken();
-            await this.redirectToPayments(paymentToken, productID, "update");
-        } catch (e) {
-            log.error("subscription update failed", e);
-            throw e;
-        }
-    }
-
     public async cancelSubscription() {
         try {
             const response = await HTTPService.post(
@@ -176,23 +156,9 @@ class billingService {
         }
     }
 
-    public async redirectToPayments(
-        paymentToken: string,
-        productID: string,
-        action: string,
-    ) {
-        try {
-            const redirectURL = this.getRedirectURL();
-            window.location.href = `${paymentsAppOrigin()}?productID=${productID}&paymentToken=${paymentToken}&action=${action}&redirectURL=${redirectURL}`;
-        } catch (e) {
-            log.error("unable to get payments url", e);
-            throw e;
-        }
-    }
-
     public async redirectToCustomerPortal() {
         try {
-            const redirectURL = this.getRedirectURL();
+            const redirectURL = completionRedirectURL();
             const response = await HTTPService.get(
                 await apiURL("/billing/stripe/customer-portal"),
                 { redirectURL },
@@ -206,17 +172,35 @@ class billingService {
             throw e;
         }
     }
-
-    public getRedirectURL() {
-        if (isElectron()) {
-            return `${paymentsAppOrigin()}/desktop-redirect`;
-        } else {
-            return `${window.location.origin}/gallery`;
-        }
-    }
 }
 
 export default new billingService();
+
+/**
+ * Start the flow to purchase or update a subscription by redirecting the user
+ * to the payments app.
+ *
+ * @param productID The Stripe product ID of the plan to purchase.
+ *
+ * @param action buy or update.
+ */
+export const redirectToPaymentsApp = async (
+    productID: string,
+    action: "buy" | "update",
+) => {
+    const paymentToken = await getPaymentToken();
+    const redirectURL = completionRedirectURL();
+    window.location.href = `${paymentsAppOrigin()}?productID=${productID}&paymentToken=${paymentToken}&action=${action}&redirectURL=${redirectURL}`;
+};
+
+/**
+ * Return the URL to which the payments app should redirect back on completion
+ * of the flow.
+ */
+const completionRedirectURL = () =>
+    isElectron()
+        ? `${paymentsAppOrigin()}/desktop-redirect`
+        : `${window.location.origin}/gallery`;
 
 /**
  * Fetch and return a one-time token that can be used to authenticate user's
