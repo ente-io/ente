@@ -7,7 +7,7 @@ import HTTPService from "@ente/shared/network/HTTPService";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { HttpStatusCode } from "axios";
-import { DeleteChallengeResponse, UserDetails } from "types/user";
+import { UserDetails } from "types/user";
 
 const HAS_SET_KEYS = "hasSetKeys";
 
@@ -112,6 +112,11 @@ export const getFamilyPortalRedirectURL = async () => {
         throw e;
     }
 };
+
+export interface DeleteChallengeResponse {
+    allowDelete: boolean;
+    encryptedChallenge: string;
+}
 
 export const getAccountDeleteChallenge = async () => {
     try {

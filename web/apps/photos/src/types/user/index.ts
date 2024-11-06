@@ -22,8 +22,3 @@ export interface UserDetails {
     storageBonus?: number;
     bonusData?: BonusData;
 }
-
-export interface DeleteChallengeResponse {
-    allowDelete: boolean;
-    encryptedChallenge: string;
-}
