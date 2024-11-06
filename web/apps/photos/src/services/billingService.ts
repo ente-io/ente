@@ -1,6 +1,7 @@
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import log from "@/base/log";
 import { apiURL, paymentsAppOrigin } from "@/base/origins";
+import { nullToUndefined } from "@/utils/transform";
 import HTTPService from "@ente/shared/network/HTTPService";
 import {
     LS_KEYS,
@@ -29,15 +30,23 @@ export interface Subscription {
     period: PlanPeriod;
 }
 
-export interface Plan {
-    id: string;
-    androidID: string;
-    iosID: string;
-    storage: number;
-    price: string;
-    period: PlanPeriod;
-    stripeID: string;
-}
+/**
+ * Zod schema for an individual plan received in the list of plans.
+ */
+const Plan = z.object({
+    id: z.string(),
+    androidID: z.string().nullable().transform(nullToUndefined),
+    iosID: z.string().nullable().transform(nullToUndefined),
+    stripeID: z.string().nullable().transform(nullToUndefined),
+    storage: z.number(),
+    price: z.string(),
+    period: z.enum(["month", "year"]),
+});
+
+/**
+ * An individual plan received in the list of plans from remote.
+ */
+export type Plan = z.infer<typeof Plan>;
 
 export interface PlansResponse {
     freePlan: {
