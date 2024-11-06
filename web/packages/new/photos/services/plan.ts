@@ -218,7 +218,7 @@ export const isSubscriptionStripe = (subscription: Subscription) =>
  * Return true if the given {@link Subscription} has the cancelled attribute.
  */
 export const isSubscriptionCancelled = (subscription: Subscription) =>
-    subscription && subscription.attributes.isCancelled;
+    subscription && subscription.attributes?.isCancelled;
 
 export function isSubscriptionPastDue(subscription: Subscription) {
     const thirtyDaysMicroseconds = 30 * 24 * 60 * 60 * 1000 * 1000;
@@ -244,7 +244,7 @@ export function hasAddOnBonus(bonusData?: BonusData) {
 
 export function hasExceededStorageQuota(userDetails: UserDetails) {
     const bonusStorage = userDetails.storageBonus ?? 0;
-    if (isPartOfFamily(userDetails.familyData)) {
+    if (userDetails.familyData && isPartOfFamily(userDetails.familyData)) {
         const usage = getTotalFamilyUsage(userDetails.familyData);
         return usage > userDetails.familyData.storage + bonusStorage;
     } else {
