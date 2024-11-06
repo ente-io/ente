@@ -1,25 +1,47 @@
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
+import { nullToUndefined } from "@/utils/transform";
 import {
     LS_KEYS,
     getData,
     removeData,
 } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";
+import { z } from "zod";
 
-export interface FamilyMember {
-    email: string;
-    usage: number;
-    id: string;
-    isAdmin: boolean;
-}
+const FamilyMember = z.object({
+    /**
+     * Email address of the family member.
+     */
+    email: z.string(),
+    /**
+     * Storage used by the family member.
+     *
+     * This field will not be present for invited members until they accept.
+     */
+    usage: z.number().nullable().transform(nullToUndefined),
+    /**
+     * `true` if this is the admin.
+     *
+     * This field will not be sent for invited members until they accept.
+     */
+    isAdmin: z.boolean().nullable().transform(nullToUndefined),
+});
 
-export interface FamilyData {
-    storage: number;
-    expiry: number;
-    members: FamilyMember[];
-}
+type FamilyMember = z.infer<typeof FamilyMember>;
+
+const FamilyData = z.object({
+    members: z.array(FamilyMember),
+    /**
+     * Family admin subscription storage capacity.
+     *
+     * This excludes add-on and any other bonus storage.
+     */
+    storage: z.number(),
+});
+
+export type FamilyData = z.infer<typeof FamilyData>;
 
 export function getLocalFamilyData(): FamilyData {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
@@ -62,7 +84,7 @@ export function getFamilyPlanAdmin(familyData: FamilyData): FamilyMember {
 
 export function getTotalFamilyUsage(familyData: FamilyData): number {
     return familyData.members.reduce(
-        (sum, currentMember) => sum + currentMember.usage,
+        (sum, currentMember) => sum + (currentMember.usage ?? 0),
         0,
     );
 }
