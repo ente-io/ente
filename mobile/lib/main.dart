@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import "package:adaptive_theme/adaptive_theme.dart";
+import "package:background_fetch/background_fetch.dart";
 import "package:computer/computer.dart";
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -50,6 +51,9 @@ import "package:photos/utils/email_util.dart";
 import 'package:photos/utils/file_uploader.dart';
 import "package:photos/utils/lock_screen_settings.dart";
 import 'package:shared_preferences/shared_preferences.dart';
+import "package:workmanager/workmanager.dart";
+
+bool enableWorkManager = Platform.isAndroid;
 
 final _logger = Logger("main");
 
@@ -75,7 +79,10 @@ void main() async {
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
   await _runInForeground(savedThemeMode);
 
-  unawaited(BackgroundFetch.registerHeadlessTask(_headlessTaskHandler));
+  if (!enableWorkManager) {
+    unawaited(BackgroundFetch.registerHeadlessTask(_headlessTaskHandler));
+  }
+
   if (Platform.isAndroid) FlutterDisplayMode.setHighRefreshRate().ignore();
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
@@ -97,8 +104,7 @@ Future<void> _runInForeground(AdaptiveThemeMode? savedThemeMode) async {
     final Locale? locale = await getLocale(noFallback: true);
     runApp(
       AppLock(
-        builder: (args) =>
-            EnteApp(_runBackgroundTask, _killBGTask, locale, savedThemeMode),
+        builder: (args) => EnteApp(locale, savedThemeMode),
         lockScreen: const LockScreen(),
         enabled: await Configuration.instance.shouldShowLockScreen() ||
             localSettings.isOnGuestView(),
@@ -133,17 +139,16 @@ Future<void> _homeWidgetSync() async {
   }
 }
 
-Future<void> _runBackgroundTask(String taskId, {String mode = 'normal'}) async {
+Future<void> runBackgroundTask(String taskId, {String mode = 'normal'}) async {
   if (_isProcessRunning) {
     _logger.info("Background task triggered when process was already running");
     await _sync('bgTaskActiveProcess');
-    await BackgroundFetch.finish(taskId);
+    if (!enableWorkManager) await BackgroundFetch.finish(taskId);
   } else {
     _runWithLogs(
       () async {
         _logger.info("Starting background task in $mode mode");
-        // ignore: unawaited_futures
-        _runInBackground(taskId);
+        _runInBackground(taskId).ignore();
       },
       prefix: "[bg]",
     ).ignore();
@@ -154,16 +159,18 @@ Future<void> _runInBackground(String taskId) async {
   await Future.delayed(const Duration(seconds: 3));
   if (await _isRunningInForeground()) {
     _logger.info("FG task running, skipping BG taskID: $taskId");
-    await BackgroundFetch.finish(taskId);
+    if (!enableWorkManager) await BackgroundFetch.finish(taskId);
     return;
   } else {
     _logger.info("FG task is not running");
   }
   _logger.info("[BackgroundFetch] Event received: $taskId");
   _scheduleBGTaskKill(taskId);
-  if (Platform.isIOS) {
+
+  if (!enableWorkManager && Platform.isIOS) {
     _scheduleSuicide(kBGTaskTimeout, taskId); // To prevent OS from punishing us
   }
+
   await _init(true, via: 'runViaBackgroundTask');
   await Future.wait(
     [
@@ -174,7 +181,7 @@ Future<void> _runInBackground(String taskId) async {
       }(),
     ],
   );
-  await BackgroundFetch.finish(taskId);
+  if (!enableWorkManager) await BackgroundFetch.finish(taskId);
 }
 
 // https://stackoverflow.com/a/73796478/546896
@@ -184,7 +191,7 @@ void _headlessTaskHandler(HeadlessTask task) {
   if (task.timeout) {
     BackgroundFetch.finish(task.taskId);
   } else {
-    _runBackgroundTask(task.taskId, mode: "headless");
+    runBackgroundTask(task.taskId, mode: "headless");
   }
 }
 
@@ -369,7 +376,7 @@ Future<void> _scheduleFGSync(String caller) async {
 void _scheduleBGTaskKill(String taskId) async {
   if (await _isRunningInForeground()) {
     _logger.info("Found app in FG, committing seppuku. $taskId");
-    await _killBGTask(taskId);
+    await killBGTask(taskId);
     return;
   }
   Future.delayed(kHeartBeatFrequency, () async {
@@ -388,7 +395,7 @@ Future<bool> _isRunningInForeground() async {
       (currentTime - kFGTaskDeathTimeoutInMicroseconds);
 }
 
-Future<void> _killBGTask([String? taskId]) async {
+Future<void> killBGTask([String? taskId]) async {
   await UploadLocksDB.instance.releaseLocksAcquiredByOwnerBefore(
     ProcessType.background.toString(),
     DateTime.now().microsecondsSinceEpoch,
@@ -396,7 +403,11 @@ Future<void> _killBGTask([String? taskId]) async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.remove(kLastBGTaskHeartBeatTime);
   if (taskId != null) {
-    await BackgroundFetch.finish(taskId);
+    if (!enableWorkManager) {
+      await BackgroundFetch.finish(taskId);
+      return;
+    }
+    await Workmanager().cancelByUniqueName(taskId);
   }
 }
 
@@ -444,6 +455,6 @@ void _scheduleSuicide(Duration duration, [String? taskID]) {
   _logger.warning("Schedule seppuku taskID: $taskIDVal");
   Future.delayed(duration, () {
     _logger.warning("TLE, committing seppuku for taskID: $taskIDVal");
-    _killBGTask(taskID);
+    killBGTask(taskID);
   });
 }
