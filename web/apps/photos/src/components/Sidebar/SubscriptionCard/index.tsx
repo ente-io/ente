@@ -6,13 +6,20 @@ import {
     SpaceBetweenFlex,
 } from "@ente/shared/components/Container";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import { Box, Skeleton, Stack, Typography, styled } from "@mui/material";
+import CircleIcon from "@mui/icons-material/Circle";
+import {
+    Box,
+    LinearProgress,
+    Skeleton,
+    Stack,
+    Typography,
+    styled,
+} from "@mui/material";
 import { t } from "i18next";
 import type React from "react";
 import { useMemo } from "react";
 import type { UserDetails } from "types/user";
 import { hasNonAdminFamilyMembers, isPartOfFamily } from "utils/user/family";
-import { LegendIndicator, Progressbar } from "./styledComponents";
 
 interface SubscriptionCardProps {
     userDetails: UserDetails;
@@ -322,3 +329,28 @@ const Legend: React.FC<LegendProps> = ({ label, color }) => {
         </FlexWrapper>
     );
 };
+
+const Progressbar = styled(LinearProgress)(() => ({
+    ".MuiLinearProgress-bar": {
+        borderRadius: "2px",
+    },
+    borderRadius: "2px",
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+}));
+
+Progressbar.defaultProps = {
+    variant: "determinate",
+};
+
+const DotSeparator = styled(CircleIcon)`
+    font-size: 4px;
+    margin: 0 ${({ theme }) => theme.spacing(1)};
+    color: inherit;
+`;
+
+const LegendIndicator = styled(DotSeparator)`
+    font-size: 8.71px;
+    margin: 0;
+    margin-right: 4px;
+    color: inherit;
+`;
