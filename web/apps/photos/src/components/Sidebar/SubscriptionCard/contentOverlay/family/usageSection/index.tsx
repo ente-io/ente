@@ -4,8 +4,7 @@ import {
 } from "@ente/shared/components/Container";
 import { Box, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
-import { LegendIndicator } from "../../../styledComponents";
-import { FamilyUsageProgressBar } from "./progressBar";
+import { LegendIndicator, Progressbar } from "../../../styledComponents";
 
 interface Iprops {
     userUsage: number;
@@ -44,10 +43,44 @@ export function FamilyUsageSection({
     );
 }
 
+interface FamilyUsageProgressBarProps {
+    userUsage: number;
+    totalUsage: number;
+    totalStorage: number;
+}
+
+function FamilyUsageProgressBar({
+    userUsage,
+    totalUsage,
+    totalStorage,
+}: FamilyUsageProgressBarProps) {
+    return (
+        <Box position={"relative"} width="100%">
+            <Progressbar
+                sx={{ backgroundColor: "transparent" }}
+                value={Math.min((userUsage * 100) / totalStorage, 100)}
+            />
+            <Progressbar
+                sx={{
+                    position: "absolute",
+                    top: 0,
+                    zIndex: 1,
+                    ".MuiLinearProgress-bar ": {
+                        backgroundColor: "text.muted",
+                    },
+                    width: "100%",
+                }}
+                value={Math.min((totalUsage * 100) / totalStorage, 100)}
+            />
+        </Box>
+    );
+}
+
 interface LegendProps {
     label: string;
     color: string;
 }
+
 function Legend({ label, color }: LegendProps) {
     return (
         <FlexWrapper>
