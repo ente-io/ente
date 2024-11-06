@@ -144,23 +144,6 @@ export function isSubscriptionPastDue(subscription: Subscription) {
 export const isPopularPlan = (plan: Plan) =>
     plan.storage === 100 * 1024 * 1024 * 1024; /* 100 GB */
 
-export async function updatePaymentMethod(
-    setDialogMessage: SetDialogBoxAttributes,
-    setLoading: SetLoading,
-) {
-    try {
-        setLoading(true);
-        await redirectToCustomerPortal();
-    } catch (error) {
-        setLoading(false);
-        setDialogMessage({
-            title: t("error"),
-            content: t("generic_error_retry"),
-            close: { variant: "critical" },
-        });
-    }
-}
-
 /**
  * When the payments app redirects back to us after a plan purchase or update
  * completes, it sets various query parameters to relay the status of the action
@@ -207,12 +190,19 @@ export async function checkSubscriptionPurchase(
                     proceed: {
                         text: t("UPDATE_PAYMENT_METHOD"),
                         variant: "accent",
-                        action: updatePaymentMethod.bind(
-                            null,
-
-                            setDialogMessage,
-                            setLoading,
-                        ),
+                        action: async () => {
+                            try {
+                                setLoading(true);
+                                await redirectToCustomerPortal();
+                            } catch (error) {
+                                setLoading(false);
+                                setDialogMessage({
+                                    title: t("error"),
+                                    content: t("generic_error_retry"),
+                                    close: { variant: "critical" },
+                                });
+                            }
+                        },
                     },
                     close: { text: t("cancel") },
                 });
@@ -226,12 +216,19 @@ export async function checkSubscriptionPurchase(
                     proceed: {
                         text: t("UPDATE_PAYMENT_METHOD"),
                         variant: "accent",
-                        action: updatePaymentMethod.bind(
-                            null,
-
-                            setDialogMessage,
-                            setLoading,
-                        ),
+                        action: async () => {
+                            try {
+                                setLoading(true);
+                                await redirectToCustomerPortal();
+                            } catch (error) {
+                                setLoading(false);
+                                setDialogMessage({
+                                    title: t("error"),
+                                    content: t("generic_error_retry"),
+                                    close: { variant: "critical" },
+                                });
+                            }
+                        },
                     },
                     close: { text: t("cancel") },
                 });

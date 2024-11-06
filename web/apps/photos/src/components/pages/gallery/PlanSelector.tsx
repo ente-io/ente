@@ -43,6 +43,7 @@ import type {
 } from "services/billingService";
 import billingService, {
     getPlansData,
+    redirectToCustomerPortal,
     redirectToPaymentsApp,
 } from "services/billingService";
 import { getFamilyPortalRedirectURL } from "services/userService";
@@ -59,7 +60,6 @@ import {
     isSubscriptionCancelled,
     isUserSubscribedPlan,
     planSelectionOutcome,
-    updatePaymentMethod,
 } from "utils/billing";
 
 interface PlanSelectorProps {
@@ -816,11 +816,19 @@ function StripeSubscriptionOptions({
         }
     };
 
-    const openManagementPortal = updatePaymentMethod.bind(
-        null,
-        appContext.setDialogMessage,
-        setLoading,
-    );
+    const openManagementPortal = async () => {
+        try {
+            setLoading(true);
+            await redirectToCustomerPortal();
+        } catch (error) {
+            setLoading(false);
+            setDialogMessage({
+                title: t("error"),
+                content: t("generic_error_retry"),
+                close: { variant: "critical" },
+            });
+        }
+    };
 
     return (
         <>
