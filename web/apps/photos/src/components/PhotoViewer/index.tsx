@@ -33,6 +33,7 @@ import {
     Typography,
     type CircularProgressProps,
 } from "@mui/material";
+import Notification from "components/Notification";
 import { t } from "i18next";
 import isElectron from "is-electron";
 import { GalleryContext } from "pages/gallery";
@@ -55,7 +56,6 @@ import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import { getTrashFileMessage } from "utils/ui";
 import { FileInfo, type FileInfoExif, type FileInfoProps } from "./FileInfo";
 import ImageEditorOverlay from "./ImageEditorOverlay";
-import { ConversionFailedNotification } from "./styledComponents/ConversionFailedNotification";
 import { LivePhotoBtnContainer } from "./styledComponents/LivePhotoBtn";
 
 interface PhotoswipeFullscreenAPI {
@@ -1013,3 +1013,28 @@ function CircularProgressWithLabel(
         </>
     );
 }
+
+interface ConversionFailedNotificationProps {
+    open: boolean;
+    onClose: () => void;
+    onClick: () => void;
+}
+
+const ConversionFailedNotification: React.FC<
+    ConversionFailedNotificationProps
+> = ({ open, onClose, onClick }) => {
+    return (
+        <Notification
+            open={open}
+            onClose={onClose}
+            attributes={{
+                variant: "secondary",
+                subtext: t("CONVERSION_FAILED_NOTIFICATION_MESSAGE"),
+                onClick: onClick,
+            }}
+            horizontal="right"
+            vertical="bottom"
+            sx={{ zIndex: 4000 }}
+        />
+    );
+};
