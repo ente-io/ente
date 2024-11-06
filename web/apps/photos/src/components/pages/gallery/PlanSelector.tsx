@@ -41,13 +41,14 @@ import type {
     PlansData,
     Subscription,
 } from "services/billingService";
-import { getPlansData, redirectToPaymentsApp } from "services/billingService";
+import billingService, {
+    getPlansData,
+    redirectToPaymentsApp,
+} from "services/billingService";
 import { getFamilyPortalRedirectURL } from "services/userService";
 import { SetLoading } from "types/gallery";
 import { BonusData, UserDetails } from "types/user";
 import {
-    activateSubscription,
-    cancelSubscription,
     getLocalUserSubscription,
     hasAddOnBonus,
     hasPaidSubscription,
@@ -737,6 +738,7 @@ function StripeSubscriptionOptions({
     closeModal,
 }: ManageSubscriptionProps) {
     const appContext = useContext(AppContext);
+    const { setDialogMessage } = appContext;
 
     const confirmReactivation = () =>
         appContext.setDialogMessage({
@@ -746,18 +748,35 @@ function StripeSubscriptionOptions({
             }),
             proceed: {
                 text: t("REACTIVATE_SUBSCRIPTION"),
-                action: activateSubscription.bind(
-                    null,
-                    appContext.setDialogMessage,
-                    closeModal,
-                    setLoading,
-                ),
+                action: reactivate,
                 variant: "accent",
             },
             close: {
                 text: t("cancel"),
             },
         });
+
+    const reactivate = async () => {
+        try {
+            setLoading(true);
+            await billingService.activateSubscription();
+            setDialogMessage({
+                title: t("success"),
+                content: t("SUBSCRIPTION_ACTIVATE_SUCCESS"),
+                close: { variant: "accent" },
+            });
+        } catch (e) {
+            setDialogMessage({
+                title: t("error"),
+                content: t("SUBSCRIPTION_ACTIVATE_FAILED"),
+                close: { variant: "critical" },
+            });
+        } finally {
+            closeModal();
+            setLoading(false);
+        }
+    };
+
     const confirmCancel = () =>
         appContext.setDialogMessage({
             title: t("CANCEL_SUBSCRIPTION"),
@@ -768,23 +787,41 @@ function StripeSubscriptionOptions({
             ),
             proceed: {
                 text: t("CANCEL_SUBSCRIPTION"),
-                action: cancelSubscription.bind(
-                    null,
-                    appContext.setDialogMessage,
-                    closeModal,
-                    setLoading,
-                ),
+                action: cancel,
                 variant: "critical",
             },
             close: {
                 text: t("NEVERMIND"),
             },
         });
+
+    const cancel = async () => {
+        try {
+            setLoading(true);
+            await billingService.cancelSubscription();
+            setDialogMessage({
+                title: t("success"),
+                content: t("SUBSCRIPTION_CANCEL_SUCCESS"),
+                close: { variant: "accent" },
+            });
+        } catch (e) {
+            setDialogMessage({
+                title: t("error"),
+                content: t("SUBSCRIPTION_CANCEL_FAILED"),
+                close: { variant: "critical" },
+            });
+        } finally {
+            closeModal();
+            setLoading(false);
+        }
+    };
+
     const openManagementPortal = updatePaymentMethod.bind(
         null,
         appContext.setDialogMessage,
         setLoading,
     );
+
     return (
         <>
             {isSubscriptionCancelled(subscription) ? (

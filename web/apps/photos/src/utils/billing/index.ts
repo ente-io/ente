@@ -144,56 +144,6 @@ export function isSubscriptionPastDue(subscription: Subscription) {
 export const isPopularPlan = (plan: Plan) =>
     plan.storage === 100 * 1024 * 1024 * 1024; /* 100 GB */
 
-export async function cancelSubscription(
-    setDialogMessage: SetDialogBoxAttributes,
-    closePlanSelectorModal: () => void,
-    setLoading: SetLoading,
-) {
-    try {
-        setLoading(true);
-        await billingService.cancelSubscription();
-        setDialogMessage({
-            title: t("success"),
-            content: t("SUBSCRIPTION_CANCEL_SUCCESS"),
-            close: { variant: "accent" },
-        });
-    } catch (e) {
-        setDialogMessage({
-            title: t("error"),
-            content: t("SUBSCRIPTION_CANCEL_FAILED"),
-            close: { variant: "critical" },
-        });
-    } finally {
-        closePlanSelectorModal();
-        setLoading(false);
-    }
-}
-
-export async function activateSubscription(
-    setDialogMessage: SetDialogBoxAttributes,
-    closePlanSelectorModal: () => void,
-    setLoading: SetLoading,
-) {
-    try {
-        setLoading(true);
-        await billingService.activateSubscription();
-        setDialogMessage({
-            title: t("success"),
-            content: t("SUBSCRIPTION_ACTIVATE_SUCCESS"),
-            close: { variant: "accent" },
-        });
-    } catch (e) {
-        setDialogMessage({
-            title: t("error"),
-            content: t("SUBSCRIPTION_ACTIVATE_FAILED"),
-            close: { variant: "critical" },
-        });
-    } finally {
-        closePlanSelectorModal();
-        setLoading(false);
-    }
-}
-
 export async function updatePaymentMethod(
     setDialogMessage: SetDialogBoxAttributes,
     setLoading: SetLoading,
