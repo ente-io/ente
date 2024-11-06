@@ -1,5 +1,6 @@
 import { isDesktop } from "@/base/app";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { Overlay } from "@/base/components/mui/Container";
 import { lowercaseExtension } from "@/base/file";
 import log from "@/base/log";
 import type { LoadedLivePhotoSourceURL } from "@/media/file";
@@ -9,7 +10,7 @@ import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
 import downloadManager from "@/new/photos/services/download";
 import { extractRawExif, parseExif } from "@/new/photos/services/exif";
 import { AppContext } from "@/new/photos/types/context";
-import { FlexWrapper, Overlay } from "@ente/shared/components/Container";
+import { FlexWrapper } from "@ente/shared/components/Container";
 import AlbumOutlined from "@mui/icons-material/AlbumOutlined";
 import ChevronLeft from "@mui/icons-material/ChevronLeft";
 import ChevronRight from "@mui/icons-material/ChevronRight";

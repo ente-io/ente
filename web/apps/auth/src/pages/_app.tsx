@@ -4,6 +4,7 @@ import { clientPackageName, staticAppTitle } from "@/base/app";
 import { CustomHead } from "@/base/components/Head";
 import { AttributedMiniDialog } from "@/base/components/MiniDialog";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { Overlay } from "@/base/components/mui/Container";
 import { AppNavbar } from "@/base/components/Navbar";
 import {
     genericErrorDialogAttributes,
@@ -15,7 +16,6 @@ import {
     logUnhandledErrorsAndRejections,
 } from "@/base/log-web";
 import { ensure } from "@/utils/ensure";
-import { Overlay } from "@ente/shared/components/Container";
 import { MessageContainer } from "@ente/shared/components/MessageContainer";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import HTTPService from "@ente/shared/network/HTTPService";

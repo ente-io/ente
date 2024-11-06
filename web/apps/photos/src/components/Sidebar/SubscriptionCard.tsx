@@ -1,6 +1,7 @@
+import { Overlay } from "@/base/components/mui/Container";
 import type { ButtonishProps } from "@/new/photos/components/mui";
 import { bytesInGB, formattedStorageByteSize } from "@/new/photos/utils/units";
-import { Overlay, SpaceBetweenFlex } from "@ente/shared/components/Container";
+import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CircleIcon from "@mui/icons-material/Circle";
 import {
