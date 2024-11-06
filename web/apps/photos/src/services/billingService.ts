@@ -50,22 +50,6 @@ class billingService {
         }
     }
 
-    public async syncSubscription() {
-        try {
-            const response = await HTTPService.get(
-                await apiURL("/billing/subscription"),
-                null,
-                {
-                    "X-Auth-Token": getToken(),
-                },
-            );
-            const { subscription } = response.data;
-            setData(LS_KEYS.SUBSCRIPTION, subscription);
-        } catch (e) {
-            log.error("failed to get user's subscription details", e);
-        }
-    }
-
     public async buySubscription(productID: string) {
         try {
             const paymentToken = await getPaymentToken();
