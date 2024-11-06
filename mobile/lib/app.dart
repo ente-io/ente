@@ -166,32 +166,32 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
       AppLifecycleService.instance.onAppInBackground(stateChangeReason);
     }
   }
-
-  void _configureWorkManager() {
-    workmanager.Workmanager().initialize(
-      callbackDispatcher,
-      isInDebugMode: kDebugMode,
-    );
-    workmanager.Workmanager().registerPeriodicTask(
-      'backgroundFetchTask',
-      'backgroundTaskType',
-      frequency: const Duration(minutes: 15),
-      initialDelay: const Duration(minutes: 1),
-      constraints: workmanager.Constraints(
-        networkType: workmanager.NetworkType.connected,
-        requiresBatteryNotLow: true,
-        requiresCharging: false,
-        requiresStorageNotLow: false,
-        requiresDeviceIdle: false,
-      ),
-      existingWorkPolicy: workmanager.ExistingWorkPolicy.keep,
-      backoffPolicy: workmanager.BackoffPolicy.linear,
-      backoffPolicyDelay: const Duration(minutes: 15),
-    );
-  }
 }
 
 final _logger = Logger("BackgroundInitializer");
+
+void _configureWorkManager() {
+  workmanager.Workmanager().initialize(
+    callbackDispatcher,
+    isInDebugMode: kDebugMode,
+  );
+  workmanager.Workmanager().registerPeriodicTask(
+    'backgroundFetchTask',
+    'syncThings',
+    frequency: const Duration(minutes: 15),
+    initialDelay: const Duration(minutes: 1),
+    constraints: workmanager.Constraints(
+      networkType: workmanager.NetworkType.connected,
+      requiresBatteryNotLow: true,
+      requiresCharging: false,
+      requiresStorageNotLow: false,
+      requiresDeviceIdle: false,
+    ),
+    existingWorkPolicy: workmanager.ExistingWorkPolicy.keep,
+    backoffPolicy: workmanager.BackoffPolicy.linear,
+    backoffPolicyDelay: const Duration(minutes: 15),
+  );
+}
 
 void _configureBackgroundFetch() {
   BackgroundFetch.configure(
