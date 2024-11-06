@@ -51,13 +51,6 @@ export interface SRPVerificationResponse extends UserVerificationResponse {
     srpM2: string;
 }
 
-export interface SRPSetupAttributes {
-    srpSalt: string;
-    srpVerifier: string;
-    srpUserID: string;
-    loginSubKey: string;
-}
-
 export interface UpdateSRPAndKeysRequest {
     srpM1: string;
     setupID: string;

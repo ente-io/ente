@@ -22,6 +22,6 @@
         "**/*.js",
         "../../packages/shared/themes/mui-theme.d.ts",
         "../../packages/base/global-electron.d.ts"
-, "../../packages/new/photos/services/plan.ts"    ],
+    ],
     "exclude": ["node_modules", "out", ".next", "thirdparty"]
 }
