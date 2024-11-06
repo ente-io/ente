@@ -1,3 +1,4 @@
+import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import log from "@/base/log";
 import { apiURL, paymentsAppOrigin } from "@/base/origins";
 import HTTPService from "@ente/shared/network/HTTPService";
@@ -8,7 +9,7 @@ import {
 } from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import isElectron from "is-electron";
-import { getPaymentToken } from "./userService";
+import { z } from "zod";
 
 /** Validity of the plan. */
 export type PlanPeriod = "month" | "year";
@@ -216,3 +217,16 @@ class billingService {
 }
 
 export default new billingService();
+
+/**
+ * Fetch and return a one-time token that can be used to authenticate user's
+ * requests to the payments app.
+ */
+const getPaymentToken = async () => {
+    const res = await fetch(await apiURL("/users/payment-token"), {
+        headers: await authenticatedRequestHeaders(),
+    });
+    ensureOk(res);
+    return z.object({ paymentToken: z.string() }).parse(await res.json())
+        .paymentToken;
+};

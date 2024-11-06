@@ -24,19 +24,6 @@ export const getPublicKey = async (email: string) => {
     return resp.data.publicKey;
 };
 
-export const getPaymentToken = async () => {
-    const token = getToken();
-
-    const resp = await HTTPService.get(
-        await apiURL("/users/payment-token"),
-        null,
-        {
-            "X-Auth-Token": token,
-        },
-    );
-    return resp.data["paymentToken"];
-};
-
 export const getFamiliesToken = async () => {
     try {
         const token = getToken();
