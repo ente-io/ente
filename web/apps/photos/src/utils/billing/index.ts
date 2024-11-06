@@ -4,7 +4,6 @@ import {
     isPartOfFamily,
 } from "@/new/photos/services/user";
 import { SetDialogBoxAttributes } from "@ente/shared/components/DialogBox/types";
-import { getData, LS_KEYS } from "@ente/shared/storage/localStorage";
 import { t } from "i18next";
 import type { NextRouter } from "next/router";
 import billingService, {
@@ -60,6 +59,10 @@ export const planSelectionOutcome = (
     return "contactSupport";
 };
 
+export function isSubscriptionActive(subscription: Subscription): boolean {
+    return subscription && subscription.expiryTime > Date.now() * 1000;
+}
+
 export function hasPaidSubscription(subscription: Subscription) {
     return (
         subscription &&
@@ -68,21 +71,29 @@ export function hasPaidSubscription(subscription: Subscription) {
     );
 }
 
-export function isSubscribed(subscription: Subscription) {
-    return (
-        hasPaidSubscription(subscription) &&
-        !isSubscriptionCancelled(subscription)
-    );
-}
-export function isSubscriptionActive(subscription: Subscription): boolean {
-    return subscription && subscription.expiryTime > Date.now() * 1000;
-}
-
 export function isOnFreePlan(subscription: Subscription) {
     return (
         subscription &&
         isSubscriptionActive(subscription) &&
         subscription.productID == "free"
+    );
+}
+
+export function hasStripeSubscription(subscription: Subscription) {
+    return subscription.paymentProvider == "stripe";
+}
+
+export function isSubscriptionCancelled(subscription: Subscription) {
+    return subscription && subscription.attributes.isCancelled;
+}
+
+export function isSubscriptionPastDue(subscription: Subscription) {
+    const thirtyDaysMicroseconds = 30 * 24 * 60 * 60 * 1000 * 1000;
+    const currentTime = Date.now() * 1000;
+    return (
+        !isSubscriptionCancelled(subscription) &&
+        subscription.expiryTime < currentTime &&
+        subscription.expiryTime >= currentTime - thirtyDaysMicroseconds
     );
 }
 
@@ -98,18 +109,6 @@ export function hasAddOnBonus(bonusData?: BonusData) {
     );
 }
 
-export function isSubscriptionCancelled(subscription: Subscription) {
-    return subscription && subscription.attributes.isCancelled;
-}
-
-export function getLocalUserSubscription(): Subscription {
-    return getData(LS_KEYS.SUBSCRIPTION);
-}
-
-export function hasStripeSubscription(subscription: Subscription) {
-    return subscription.paymentProvider == "stripe";
-}
-
 export function hasExceededStorageQuota(userDetails: UserDetails) {
     const bonusStorage = userDetails.storageBonus ?? 0;
     if (isPartOfFamily(userDetails.familyData)) {
@@ -120,16 +119,6 @@ export function hasExceededStorageQuota(userDetails: UserDetails) {
             userDetails.usage > userDetails.subscription.storage + bonusStorage
         );
     }
-}
-
-export function isSubscriptionPastDue(subscription: Subscription) {
-    const thirtyDaysMicroseconds = 30 * 24 * 60 * 60 * 1000 * 1000;
-    const currentTime = Date.now() * 1000;
-    return (
-        !isSubscriptionCancelled(subscription) &&
-        subscription.expiryTime < currentTime &&
-        subscription.expiryTime >= currentTime - thirtyDaysMicroseconds
-    );
 }
 
 /**

@@ -285,6 +285,10 @@ function PlanSelectorCard(props: PlanSelectorCardProps) {
     );
 }
 
+function getLocalUserSubscription(): Subscription {
+    return getData(LS_KEYS.SUBSCRIPTION);
+}
+
 function FreeSubscriptionPlanSelectorCard({
     children,
     subscription,
