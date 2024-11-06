@@ -1,5 +1,5 @@
 import type { FamilyData } from "@/new/photos/services/user";
-import { Subscription } from "services/billingService";
+import { Subscription } from "services/plan";
 
 export interface Bonus {
     storage: number;

@@ -9,7 +9,7 @@ import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleW
 import { Box, Button, Dialog, DialogContent, Typography } from "@mui/material";
 import { t } from "i18next";
 import { useContext } from "react";
-import billingService from "services/billingService";
+import billingService from "services/plan";
 
 export function MemberSubscriptionManage({ open, userDetails, onClose }) {
     const { setDialogMessage } = useContext(AppContext);

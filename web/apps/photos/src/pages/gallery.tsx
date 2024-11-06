@@ -106,9 +106,6 @@ import { t } from "i18next";
 import { useRouter, type NextRouter } from "next/router";
 import { createContext, useCallback, useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import billingService, {
-    redirectToCustomerPortal,
-} from "services/billingService";
 import {
     constructEmailList,
     constructUserIDToEmailMap,
@@ -118,6 +115,7 @@ import {
     getAllLocalCollections,
 } from "services/collectionService";
 import { syncFiles } from "services/fileService";
+import billingService, { redirectToCustomerPortal } from "services/plan";
 import { preFileInfoSync, sync } from "services/sync";
 import { syncTrash } from "services/trashService";
 import uploadManager from "services/upload/uploadManager";

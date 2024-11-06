@@ -23,8 +23,8 @@ import { t } from "i18next";
 import isElectron from "is-electron";
 import { GalleryContext } from "pages/gallery";
 import { useContext, useEffect, useRef, useState } from "react";
-import { redirectToCustomerPortal } from "services/billingService";
 import { getLatestCollections } from "services/collectionService";
+import { redirectToCustomerPortal } from "services/plan";
 import {
     getPublicCollectionUID,
     getPublicCollectionUploaderName,

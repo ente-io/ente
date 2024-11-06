@@ -35,28 +35,21 @@ import Typography from "@mui/material/Typography";
 import { t } from "i18next";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { Trans } from "react-i18next";
-import type {
-    Plan,
-    PlanPeriod,
-    PlansData,
-    Subscription,
-} from "services/billingService";
+import type { Plan, PlanPeriod, PlansData, Subscription } from "services/plan";
 import billingService, {
     getPlansData,
-    redirectToCustomerPortal,
-    redirectToPaymentsApp,
-} from "services/billingService";
-import { getFamilyPortalRedirectURL } from "services/userService";
-import { SetLoading } from "types/gallery";
-import { BonusData, UserDetails } from "types/user";
-import {
     hasAddOnBonus,
     isSubscriptionActive,
     isSubscriptionActiveFree,
     isSubscriptionActivePaid,
     isSubscriptionCancelled,
     isSubscriptionStripe,
-} from "utils/billing";
+    redirectToCustomerPortal,
+    redirectToPaymentsApp,
+} from "services/plan";
+import { getFamilyPortalRedirectURL } from "services/userService";
+import { SetLoading } from "types/gallery";
+import { BonusData, UserDetails } from "types/user";
 
 interface PlanSelectorProps {
     modalView: boolean;

@@ -63,11 +63,8 @@ import React, {
     useState,
 } from "react";
 import { Trans } from "react-i18next";
-import { redirectToCustomerPortal } from "services/billingService";
 import { getUncategorizedCollection } from "services/collectionService";
 import exportService from "services/export";
-import { getUserDetailsV2 } from "services/userService";
-import { UserDetails } from "types/user";
 import {
     hasAddOnBonus,
     hasExceededStorageQuota,
@@ -77,7 +74,10 @@ import {
     isSubscriptionCancelled,
     isSubscriptionPastDue,
     isSubscriptionStripe,
-} from "utils/billing";
+    redirectToCustomerPortal,
+} from "services/plan";
+import { getUserDetailsV2 } from "services/userService";
+import { UserDetails } from "types/user";
 import { testUpload } from "../../../tests/upload.test";
 import { MemberSubscriptionManage } from "../MemberSubscriptionManage";
 import { Preferences } from "./Preferences";
