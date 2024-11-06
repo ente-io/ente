@@ -27,7 +27,7 @@
         "preview:auth": "yarn build:auth && python3 -m http.server -d apps/auth/out 3000",
         "preview:cast": "yarn build:cast && python3 -m http.server -d apps/accounts/out 3001",
         "preview:payments": "yarn workspace payments preview",
-        "preview:photos": "yarn build:photos && python3 -m http.server -d apps/photos/out 3000",
+        "preview:photos": "yarn build:photos && python3 -m http.server -d apps/photos/out 3000"
     },
     "resolutions": {
         "@emotion/cache": "11.13.1",
