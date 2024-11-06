@@ -5,6 +5,7 @@ import DownloadManager from "@/new/photos/services/download";
 import { logoutML, terminateMLWorker } from "@/new/photos/services/ml";
 import { logoutSearch } from "@/new/photos/services/search";
 import { logoutSettings } from "@/new/photos/services/settings";
+import { logoutUserDetails } from "@/new/photos/services/user";
 import exportService from "./export";
 
 /**
@@ -41,6 +42,12 @@ export const photosLogout = async () => {
         logoutSettings();
     } catch (e) {
         ignoreError("settings", e);
+    }
+
+    try {
+        logoutUserDetails();
+    } catch (e) {
+        ignoreError("userDetails", e);
     }
 
     try {
