@@ -42,13 +42,13 @@ export const planSelectionOutcome = (
 
     // -- The user already has an active subscription to a paid plan.
 
-    // Using stripe
+    // Using Stripe.
     if (subscription.paymentProvider == "stripe") {
         // Update their existing subscription to the new plan.
         return "updateSubscriptionToPlan";
     }
 
-    // Using one of the mobile app stores
+    // Using one of the mobile app stores.
     if (
         subscription.paymentProvider == "appstore" ||
         subscription.paymentProvider == "playstore"
@@ -225,7 +225,7 @@ export async function checkSubscriptionPurchase(
 ) {
     const { session_id: sessionId, status, reason } = router.query ?? {};
 
-    if (status === "success") {
+    if (status == "success") {
         try {
             const subscription = await billingService.verifySubscription(
                 sessionId as string,
