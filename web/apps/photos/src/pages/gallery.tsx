@@ -54,6 +54,7 @@ import {
     FlexWrapper,
     HorizontalFlex,
 } from "@ente/shared/components/Container";
+import type { SetDialogBoxAttributes } from "@ente/shared/components/DialogBox/types";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import { CustomError } from "@ente/shared/error";
@@ -102,9 +103,12 @@ import { UploadSelectorInputs } from "components/UploadSelectorInputs";
 import PlanSelector from "components/pages/gallery/PlanSelector";
 import SelectedFileOptions from "components/pages/gallery/SelectedFileOptions";
 import { t } from "i18next";
-import { useRouter } from "next/router";
+import { useRouter, type NextRouter } from "next/router";
 import { createContext, useCallback, useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
+import billingService, {
+    redirectToCustomerPortal,
+} from "services/billingService";
 import {
     constructEmailList,
     constructUserIDToEmailMap,
@@ -123,14 +127,15 @@ import {
     SelectedState,
     SetFilesDownloadProgressAttributes,
     SetFilesDownloadProgressAttributesCreator,
+    type SetLoading,
 } from "types/gallery";
-import { checkSubscriptionPurchase } from "utils/billing";
 import {
     COLLECTION_OPS_TYPE,
     getSelectedCollection,
     handleCollectionOps,
 } from "utils/collection";
 import { FILE_OPS_TYPE, getSelectedFiles, handleFileOps } from "utils/file";
+import { getSubscriptionPurchaseSuccessMessage } from "utils/ui";
 
 const defaultGalleryContext: GalleryContextType = {
     showPlanSelectorModal: () => null,
@@ -1221,6 +1226,106 @@ const HiddenSectionNavbarContents: React.FC<
         </FlexWrapper>
     </HorizontalFlex>
 );
+
+/**
+ * When the payments app redirects back to us after a plan purchase or update
+ * completes, it sets various query parameters to relay the status of the action
+ * back to us.
+ *
+ * Check if these query parameters exist, and if so, act on them appropriately.
+ */
+export async function checkSubscriptionPurchase(
+    setDialogMessage: SetDialogBoxAttributes,
+    router: NextRouter,
+    setLoading: SetLoading,
+) {
+    const { session_id: sessionId, status, reason } = router.query ?? {};
+
+    if (status == "success") {
+        try {
+            const subscription = await billingService.verifySubscription(
+                sessionId as string,
+            );
+            setDialogMessage(
+                getSubscriptionPurchaseSuccessMessage(subscription),
+            );
+        } catch (e) {
+            setDialogMessage({
+                title: t("error"),
+                content: t("SUBSCRIPTION_VERIFICATION_ERROR"),
+                close: {},
+            });
+        }
+    } else if (status == "fail") {
+        log.error(`subscription purchase failed: ${reason}`);
+        switch (reason) {
+            case "canceled":
+                setDialogMessage({
+                    content: t("SUBSCRIPTION_PURCHASE_CANCELLED"),
+                    close: { variant: "critical" },
+                });
+                break;
+            case "requires_payment_method":
+                setDialogMessage({
+                    title: t("UPDATE_PAYMENT_METHOD"),
+                    content: t("UPDATE_PAYMENT_METHOD_MESSAGE"),
+
+                    proceed: {
+                        text: t("UPDATE_PAYMENT_METHOD"),
+                        variant: "accent",
+                        action: async () => {
+                            try {
+                                setLoading(true);
+                                await redirectToCustomerPortal();
+                            } catch (error) {
+                                setLoading(false);
+                                setDialogMessage({
+                                    title: t("error"),
+                                    content: t("generic_error_retry"),
+                                    close: { variant: "critical" },
+                                });
+                            }
+                        },
+                    },
+                    close: { text: t("cancel") },
+                });
+                break;
+
+            case "authentication_failed":
+                setDialogMessage({
+                    title: t("UPDATE_PAYMENT_METHOD"),
+                    content: t("STRIPE_AUTHENTICATION_FAILED"),
+
+                    proceed: {
+                        text: t("UPDATE_PAYMENT_METHOD"),
+                        variant: "accent",
+                        action: async () => {
+                            try {
+                                setLoading(true);
+                                await redirectToCustomerPortal();
+                            } catch (error) {
+                                setLoading(false);
+                                setDialogMessage({
+                                    title: t("error"),
+                                    content: t("generic_error_retry"),
+                                    close: { variant: "critical" },
+                                });
+                            }
+                        },
+                    },
+                    close: { text: t("cancel") },
+                });
+                break;
+
+            default:
+                setDialogMessage({
+                    title: t("error"),
+                    content: t("SUBSCRIPTION_PURCHASE_FAILED"),
+                    close: { variant: "critical" },
+                });
+        }
+    }
+}
 
 /**
  * Return the {@link Collection} (from amongst {@link collections}) with the

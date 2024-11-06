@@ -1,18 +1,9 @@
-import log from "@/base/log";
 import {
     getTotalFamilyUsage,
     isPartOfFamily,
 } from "@/new/photos/services/user";
-import { SetDialogBoxAttributes } from "@ente/shared/components/DialogBox/types";
-import { t } from "i18next";
-import type { NextRouter } from "next/router";
-import billingService, {
-    redirectToCustomerPortal,
-    Subscription,
-} from "services/billingService";
-import { SetLoading } from "types/gallery";
+import { Subscription } from "services/billingService";
 import { BonusData, UserDetails } from "types/user";
-import { getSubscriptionPurchaseSuccessMessage } from "utils/ui";
 
 /**
  * Return true if the given {@link Subscription} has not expired.
@@ -79,105 +70,5 @@ export function hasExceededStorageQuota(userDetails: UserDetails) {
         return (
             userDetails.usage > userDetails.subscription.storage + bonusStorage
         );
-    }
-}
-
-/**
- * When the payments app redirects back to us after a plan purchase or update
- * completes, it sets various query parameters to relay the status of the action
- * back to us.
- *
- * Check if these query parameters exist, and if so, act on them appropriately.
- */
-export async function checkSubscriptionPurchase(
-    setDialogMessage: SetDialogBoxAttributes,
-    router: NextRouter,
-    setLoading: SetLoading,
-) {
-    const { session_id: sessionId, status, reason } = router.query ?? {};
-
-    if (status == "success") {
-        try {
-            const subscription = await billingService.verifySubscription(
-                sessionId as string,
-            );
-            setDialogMessage(
-                getSubscriptionPurchaseSuccessMessage(subscription),
-            );
-        } catch (e) {
-            setDialogMessage({
-                title: t("error"),
-                content: t("SUBSCRIPTION_VERIFICATION_ERROR"),
-                close: {},
-            });
-        }
-    } else if (status == "fail") {
-        log.error(`subscription purchase failed: ${reason}`);
-        switch (reason) {
-            case "canceled":
-                setDialogMessage({
-                    content: t("SUBSCRIPTION_PURCHASE_CANCELLED"),
-                    close: { variant: "critical" },
-                });
-                break;
-            case "requires_payment_method":
-                setDialogMessage({
-                    title: t("UPDATE_PAYMENT_METHOD"),
-                    content: t("UPDATE_PAYMENT_METHOD_MESSAGE"),
-
-                    proceed: {
-                        text: t("UPDATE_PAYMENT_METHOD"),
-                        variant: "accent",
-                        action: async () => {
-                            try {
-                                setLoading(true);
-                                await redirectToCustomerPortal();
-                            } catch (error) {
-                                setLoading(false);
-                                setDialogMessage({
-                                    title: t("error"),
-                                    content: t("generic_error_retry"),
-                                    close: { variant: "critical" },
-                                });
-                            }
-                        },
-                    },
-                    close: { text: t("cancel") },
-                });
-                break;
-
-            case "authentication_failed":
-                setDialogMessage({
-                    title: t("UPDATE_PAYMENT_METHOD"),
-                    content: t("STRIPE_AUTHENTICATION_FAILED"),
-
-                    proceed: {
-                        text: t("UPDATE_PAYMENT_METHOD"),
-                        variant: "accent",
-                        action: async () => {
-                            try {
-                                setLoading(true);
-                                await redirectToCustomerPortal();
-                            } catch (error) {
-                                setLoading(false);
-                                setDialogMessage({
-                                    title: t("error"),
-                                    content: t("generic_error_retry"),
-                                    close: { variant: "critical" },
-                                });
-                            }
-                        },
-                    },
-                    close: { text: t("cancel") },
-                });
-                break;
-
-            default:
-                setDialogMessage({
-                    title: t("error"),
-                    content: t("SUBSCRIPTION_PURCHASE_FAILED"),
-                    close: { variant: "critical" },
-                });
-        }
     }
 }
