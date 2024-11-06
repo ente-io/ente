@@ -230,10 +230,16 @@ export async function updatePaymentMethod(
     }
 }
 
-export async function checkSubscriptionPurchase(
-    setDialogMessage: SetDialogBoxAttributes,
-    router: NextRouter,
-    setLoading: SetLoading,
+
+/**
+ * When the payments app redirects back to us after a plan purchase or update
+ * completes, it sets various query parameters to relay the status of the action
+ * back to us.
+ *
+ * Check if these query parameters exist, and if so, act on them appropriately.
+ */
+export async function checkSubscriptionPurchase( setDialogMessage:
+    SetDialogBoxAttributes, router: NextRouter, setLoading: SetLoading,
 ) {
     const { session_id: sessionId, status, reason } = router.query ?? {};
 
