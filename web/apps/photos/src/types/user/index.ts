@@ -27,12 +27,3 @@ export interface DeleteChallengeResponse {
     allowDelete: boolean;
     encryptedChallenge: string;
 }
-
-export interface GetRemoteStoreValueResponse {
-    value: string;
-}
-
-export interface UpdateRemoteStoreValueRequest {
-    key: string;
-    value: string;
-}
