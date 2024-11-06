@@ -39,7 +39,7 @@ Future<List<EnteFile>> getFilteredFiles(
 
   logger.info("Getting filtered files for Filters: $filters");
   for (HierarchicalSearchFilter filter in filters) {
-    if (filter is FaceFilter && filter.getMatchedUploadedIDs().isEmpty) {
+    if (filter is FaceFilter && filter.matchedUploadedIDs.isEmpty) {
       try {
         if (filter.personId != null) {
           final fileIDs = await MLDataDB.instance.getFileIDsOfPersonID(
@@ -65,11 +65,11 @@ Future<List<EnteFile>> getFilteredFiles(
         for (final faceFilter in filter.faceFilters) {
           if (index == 0) {
             intersectionOfSelectedFaceFiltersFileIDs =
-                faceFilter.getMatchedUploadedIDs();
+                faceFilter.matchedUploadedIDs;
           } else {
             intersectionOfSelectedFaceFiltersFileIDs =
                 intersectionOfSelectedFaceFiltersFileIDs
-                    .intersection(faceFilter.getMatchedUploadedIDs());
+                    .intersection(faceFilter.matchedUploadedIDs);
           }
           index++;
 
@@ -105,8 +105,7 @@ Future<List<EnteFile>> getFilteredFiles(
       } catch (e) {
         logger.severe("Error in filtering only them filter: $e");
       }
-    } else if (filter is! FaceFilter &&
-        filter.getMatchedUploadedIDs().isEmpty) {
+    } else if (filter is! FaceFilter && filter.matchedUploadedIDs.isEmpty) {
       resultsNeverComputedFilters.add(filter);
     }
   }
@@ -127,10 +126,10 @@ Future<List<EnteFile>> getFilteredFiles(
     for (int i = 0; i < filters.length; i++) {
       if (i == 0) {
         filteredUploadedIDs =
-            filteredUploadedIDs.union(filters[i].getMatchedUploadedIDs());
+            filteredUploadedIDs.union(filters[i].matchedUploadedIDs);
       } else {
-        filteredUploadedIDs = filteredUploadedIDs
-            .intersection(filters[i].getMatchedUploadedIDs());
+        filteredUploadedIDs =
+            filteredUploadedIDs.intersection(filters[i].matchedUploadedIDs);
       }
     }
 

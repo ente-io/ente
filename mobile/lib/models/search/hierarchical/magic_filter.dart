@@ -14,11 +14,6 @@ class MagicFilter extends HierarchicalSearchFilter {
   });
 
   @override
-  Set<int> getMatchedUploadedIDs() {
-    return matchedUploadedIDs;
-  }
-
-  @override
   IconData? icon() {
     return Icons.auto_awesome;
   }

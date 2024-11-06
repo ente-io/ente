@@ -33,11 +33,6 @@ class ContactsFilter extends HierarchicalSearchFilter {
   }
 
   @override
-  Set<int> getMatchedUploadedIDs() {
-    return matchedUploadedIDs;
-  }
-
-  @override
   bool isSameFilter(HierarchicalSearchFilter other) {
     if (other is ContactsFilter) {
       return other.user.id == user.id;

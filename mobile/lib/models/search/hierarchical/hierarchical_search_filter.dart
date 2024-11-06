@@ -18,15 +18,15 @@ enum FilterTypeNames {
 abstract class HierarchicalSearchFilter {
   //These matches should be from list of all files in db and not just all files
   //in gallery since this is used as cache for faster filtering when
-  //adding/removing applied filters. An exception where results can be all files
-  //in gallery is when the filter is the initial filter (top level) of the
-  //gallery.
+  //adding/removing applied filters.
   final String filterTypeName;
   final Set<int> matchedUploadedIDs;
   bool isApplied = false;
 
   HierarchicalSearchFilter({required this.filterTypeName, matchedUploadedIDs})
       : matchedUploadedIDs = matchedUploadedIDs ?? {},
+        //Check to ensure that when a new filter extends HierarchicalSearchFilter,
+        //it's filterTypeName is added to FilterTypeNames enum.
         assert(
           FilterTypeNames.values
               .map((e) => e.toString().split(".").last)
@@ -42,6 +42,5 @@ abstract class HierarchicalSearchFilter {
   /// hierarchical search starts, the album 'A' will be the top level filter.
   int relevance();
   bool isMatch(EnteFile file);
-  Set<int> getMatchedUploadedIDs();
   bool isSameFilter(HierarchicalSearchFilter other);
 }

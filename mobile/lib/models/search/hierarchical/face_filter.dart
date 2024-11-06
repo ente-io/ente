@@ -46,11 +46,6 @@ class FaceFilter extends HierarchicalSearchFilter {
   }
 
   @override
-  Set<int> getMatchedUploadedIDs() {
-    return matchedUploadedIDs;
-  }
-
-  @override
   bool isSameFilter(HierarchicalSearchFilter other) {
     if (other is FaceFilter) {
       return other.personId == personId && other.clusterId == clusterId;

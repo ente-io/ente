@@ -311,9 +311,11 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
           userAlreadyAssigned = true;
           personEntity =
               await PersonService.instance.addPerson(text, clusterID);
-          final bool extraPhotosFound = await ClusterFeedbackService.instance
-              .checkAndDoAutomaticMerges(personEntity!,
-                  personClusterID: clusterID);
+          final bool extraPhotosFound =
+              await ClusterFeedbackService.instance.checkAndDoAutomaticMerges(
+            personEntity!,
+            personClusterID: clusterID,
+          );
           if (extraPhotosFound) {
             showShortToast(context, S.of(context).extraPhotosFound);
           }

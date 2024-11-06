@@ -34,11 +34,6 @@ class OnlyThemFilter extends HierarchicalSearchFilter {
   }
 
   @override
-  Set<int> getMatchedUploadedIDs() {
-    return matchedUploadedIDs;
-  }
-
-  @override
   bool isSameFilter(HierarchicalSearchFilter other) {
     if (other is OnlyThemFilter) {
       return true;

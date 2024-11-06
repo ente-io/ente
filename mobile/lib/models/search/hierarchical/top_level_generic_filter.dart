@@ -36,11 +36,6 @@ class TopLevelGenericFilter extends HierarchicalSearchFilter {
   }
 
   @override
-  Set<int> getMatchedUploadedIDs() {
-    return matchedUploadedIDs;
-  }
-
-  @override
   bool isSameFilter(HierarchicalSearchFilter other) {
     return other.name() == name();
   }

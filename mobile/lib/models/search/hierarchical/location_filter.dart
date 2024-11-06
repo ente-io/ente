@@ -36,11 +36,6 @@ class LocationFilter extends HierarchicalSearchFilter {
   }
 
   @override
-  Set<int> getMatchedUploadedIDs() {
-    return matchedUploadedIDs;
-  }
-
-  @override
   bool isSameFilter(HierarchicalSearchFilter other) {
     if (other is LocationFilter) {
       return other.locationTag.radius.toString() +
