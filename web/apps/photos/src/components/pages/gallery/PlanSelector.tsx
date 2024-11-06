@@ -35,9 +35,13 @@ import Typography from "@mui/material/Typography";
 import { t } from "i18next";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { Trans } from "react-i18next";
-import billingService, { type PlansResponse } from "services/billingService";
+import billingService, {
+    Plan,
+    PLAN_PERIOD,
+    Subscription,
+    type PlansResponse,
+} from "services/billingService";
 import { getFamilyPortalRedirectURL } from "services/userService";
-import { Plan, PLAN_PERIOD, Subscription } from "types/billing";
 import { SetLoading } from "types/gallery";
 import { BonusData, UserDetails } from "types/user";
 import {

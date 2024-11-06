@@ -7,8 +7,7 @@ import { SetDialogBoxAttributes } from "@ente/shared/components/DialogBox/types"
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { t } from "i18next";
 import type { NextRouter } from "next/router";
-import billingService from "services/billingService";
-import { Plan, Subscription } from "types/billing";
+import billingService, { Plan, Subscription } from "services/billingService";
 import { SetLoading } from "types/gallery";
 import { BonusData, UserDetails } from "types/user";
 import { getSubscriptionPurchaseSuccessMessage } from "utils/ui";

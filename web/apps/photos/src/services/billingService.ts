@@ -8,8 +8,37 @@ import {
 } from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import isElectron from "is-electron";
-import { Plan, Subscription } from "types/billing";
 import { getPaymentToken } from "./userService";
+
+export enum PLAN_PERIOD {
+    MONTH = "month",
+    YEAR = "year",
+}
+
+export interface Subscription {
+    id: number;
+    userID: number;
+    productID: string;
+    storage: number;
+    originalTransactionID: string;
+    expiryTime: number;
+    paymentProvider: string;
+    attributes: {
+        isCancelled: boolean;
+    };
+    price: string;
+    period: PLAN_PERIOD;
+}
+
+export interface Plan {
+    id: string;
+    androidID: string;
+    iosID: string;
+    storage: number;
+    price: string;
+    period: PLAN_PERIOD;
+    stripeID: string;
+}
 
 enum PaymentActionType {
     Buy = "buy",

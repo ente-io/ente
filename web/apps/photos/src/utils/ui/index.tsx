@@ -2,7 +2,7 @@ import { DialogBoxAttributes } from "@ente/shared/components/DialogBox/types";
 import InfoOutlined from "@mui/icons-material/InfoRounded";
 import { t } from "i18next";
 import { Trans } from "react-i18next";
-import { Subscription } from "types/billing";
+import { Subscription } from "services/billingService";
 
 export const getTrashFilesMessage = (
     deleteFileHelper,
