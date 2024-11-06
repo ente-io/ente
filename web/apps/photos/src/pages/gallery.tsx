@@ -49,7 +49,10 @@ import {
 } from "@/new/photos/services/search";
 import type { SearchOption } from "@/new/photos/services/search/types";
 import { initSettings } from "@/new/photos/services/settings";
-import { getLocalFamilyData } from "@/new/photos/services/family";
+import {
+    initUserDetails,
+    userDetailsSnapshot,
+} from "@/new/photos/services/user";
 import { useAppContext } from "@/new/photos/types/context";
 import { splitByPredicate } from "@/utils/array";
 import { ensure } from "@/utils/ensure";
@@ -350,6 +353,7 @@ export default function Gallery() {
                 return;
             }
             initSettings();
+            await initUserDetails();
             await downloadManager.init(token);
             setupSelectAllKeyBoardShortcutHandler();
             dispatch({ type: "showAll" });
@@ -359,7 +363,7 @@ export default function Gallery() {
             }
             setIsFirstLogin(false);
             const user = getData(LS_KEYS.USER);
-            const familyData = getLocalFamilyData();
+            const familyData = userDetailsSnapshot().familyData;
             const files = sortFiles(
                 mergeMetadata(await getLocalFiles("normal")),
             );
