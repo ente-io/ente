@@ -4,6 +4,29 @@ import { apiURL } from "@/base/origins";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";
 import { z } from "zod";
+import type { Subscription } from "./plan";
+
+export interface Bonus {
+    storage: number;
+    type: string;
+    validTill: number;
+    isRevoked: boolean;
+}
+
+export interface BonusData {
+    storageBonuses: Bonus[];
+}
+
+export interface UserDetails {
+    email: string;
+    usage: number;
+    fileCount: number;
+    sharedCollectionCount: number;
+    subscription: Subscription;
+    familyData?: FamilyData;
+    storageBonus?: number;
+    bonusData?: BonusData;
+}
 
 export interface FamilyMember {
     email: string;

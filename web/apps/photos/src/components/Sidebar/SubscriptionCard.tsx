@@ -1,5 +1,6 @@
 import { Overlay } from "@/base/components/mui/Container";
 import type { ButtonishProps } from "@/new/photos/components/mui";
+import type { UserDetails } from "@/new/photos/services/user";
 import {
     hasNonAdminFamilyMembers,
     isPartOfFamily,
@@ -20,7 +21,6 @@ import {
 import { t } from "i18next";
 import type React from "react";
 import { useMemo } from "react";
-import type { UserDetails } from "types/user";
 
 interface SubscriptionCardProps {
     userDetails: UserDetails;

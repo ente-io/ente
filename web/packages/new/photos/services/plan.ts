@@ -14,7 +14,7 @@ import {
 } from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import isElectron from "is-electron";
-import { BonusData, UserDetails } from "types/user";
+import type { BonusData, UserDetails } from "./user";
 import { z } from "zod";
 
 const PlanPeriod = z.enum(["month", "year"]);
