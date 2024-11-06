@@ -63,7 +63,7 @@ import React, {
     useState,
 } from "react";
 import { Trans } from "react-i18next";
-import billingService from "services/billingService";
+import { redirectToCustomerPortal } from "services/billingService";
 import { getUncategorizedCollection } from "services/collectionService";
 import exportService from "services/export";
 import { getUserDetailsV2 } from "services/userService";
@@ -195,7 +195,7 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
                 hasStripeSubscription(userDetails.subscription) &&
                 isSubscriptionPastDue(userDetails.subscription)
             ) {
-                billingService.redirectToCustomerPortal();
+                redirectToCustomerPortal();
             } else {
                 galleryContext.showPlanSelectorModal();
             }
@@ -271,7 +271,7 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
                         hasStripeSubscription(userDetails.subscription) &&
                         isSubscriptionPastDue(userDetails.subscription)
                     ) {
-                        billingService.redirectToCustomerPortal();
+                        redirectToCustomerPortal();
                     } else {
                         showPlanSelectorModal();
                     }

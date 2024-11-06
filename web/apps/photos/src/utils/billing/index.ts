@@ -4,10 +4,14 @@ import {
     isPartOfFamily,
 } from "@/new/photos/services/user";
 import { SetDialogBoxAttributes } from "@ente/shared/components/DialogBox/types";
-import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
+import { getData, LS_KEYS } from "@ente/shared/storage/localStorage";
 import { t } from "i18next";
 import type { NextRouter } from "next/router";
-import billingService, { Plan, Subscription } from "services/billingService";
+import billingService, {
+    Plan,
+    redirectToCustomerPortal,
+    Subscription,
+} from "services/billingService";
 import { SetLoading } from "types/gallery";
 import { BonusData, UserDetails } from "types/user";
 import { getSubscriptionPurchaseSuccessMessage } from "utils/ui";
@@ -215,7 +219,7 @@ export async function updatePaymentMethod(
 ) {
     try {
         setLoading(true);
-        await billingService.redirectToCustomerPortal();
+        await redirectToCustomerPortal();
     } catch (error) {
         setLoading(false);
         setDialogMessage({

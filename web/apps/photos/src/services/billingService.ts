@@ -155,23 +155,6 @@ class billingService {
             throw e;
         }
     }
-
-    public async redirectToCustomerPortal() {
-        try {
-            const redirectURL = completionRedirectURL();
-            const response = await HTTPService.get(
-                await apiURL("/billing/stripe/customer-portal"),
-                { redirectURL },
-                {
-                    "X-Auth-Token": getToken(),
-                },
-            );
-            window.location.href = response.data.url;
-        } catch (e) {
-            log.error("unable to get customer portal url", e);
-            throw e;
-        }
-    }
 }
 
 export default new billingService();
@@ -213,4 +196,22 @@ const getPaymentToken = async () => {
     ensureOk(res);
     return z.object({ paymentToken: z.string() }).parse(await res.json())
         .paymentToken;
+};
+
+/**
+ * Redirect to the Stripe customer portal / dashboard where the user can view
+ * details about their subscription and modify their payment method.
+ */
+export const redirectToCustomerPortal = async () => {
+    const redirectURL = completionRedirectURL();
+    const url = await apiURL("/billing/stripe/customer-portal");
+    const params = new URLSearchParams({ redirectURL });
+    const res = await fetch(`${url}?${params.toString()}`, {
+        headers: await authenticatedRequestHeaders(),
+    });
+    ensureOk(res);
+    const data = z
+        .object({ data: z.object({ url: z.string() }) })
+        .parse(await res.json()).data;
+    window.location.href = data.url;
 };
