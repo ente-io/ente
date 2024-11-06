@@ -1,17 +1,16 @@
-import { formattedStorageByteSize } from "@/new/photos/utils/units";
+import { bytesInGB, formattedStorageByteSize } from "@/new/photos/utils/units";
 import {
     FlexWrapper,
     Overlay,
     SpaceBetweenFlex,
 } from "@ente/shared/components/Container";
-import { Box, Stack, Typography } from "@mui/material";
+import { Box, Stack, Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import type React from "react";
 import { useMemo } from "react";
 import { UserDetails } from "types/user";
 import { hasNonAdminFamilyMembers, isPartOfFamily } from "utils/user/family";
 import { LegendIndicator, Progressbar } from "../styledComponents";
-import StorageSection from "./storageSection";
 
 interface SubscriptionCardContentOverlayPprops {
     userDetails: UserDetails;
@@ -57,6 +56,53 @@ const IndividualSubscriptionCardContent: React.FC<
                 storage={totalStorage}
             />
         </>
+    );
+};
+
+const MobileSmallBox = styled(Box)`
+    display: none;
+    @media (max-width: 359px) {
+        display: block;
+    }
+`;
+
+const DefaultBox = styled(Box)`
+    display: none;
+    @media (min-width: 360px) {
+        display: block;
+    }
+`;
+
+interface StorageSectionProps {
+    usage: number;
+    storage: number;
+}
+
+const StorageSection: React.FC<StorageSectionProps> = ({ usage, storage }) => {
+    return (
+        <Box width="100%">
+            <Typography variant="small" color={"text.muted"}>
+                {t("STORAGE")}
+            </Typography>
+            <DefaultBox>
+                <Typography
+                    fontWeight={"bold"}
+                    sx={{ fontSize: "24px", lineHeight: "30px" }}
+                >
+                    {`${formattedStorageByteSize(usage, { round: true })} ${t(
+                        "OF",
+                    )} ${formattedStorageByteSize(storage)} ${t("USED")}`}
+                </Typography>
+            </DefaultBox>
+            <MobileSmallBox>
+                <Typography
+                    fontWeight={"bold"}
+                    sx={{ fontSize: "24px", lineHeight: "30px" }}
+                >
+                    {`${bytesInGB(usage)} /  ${bytesInGB(storage)} ${t("storage_unit.gb")} ${t("USED")}`}
+                </Typography>
+            </MobileSmallBox>
+        </Box>
     );
 };
 
