@@ -52,11 +52,11 @@ import { BonusData, UserDetails } from "types/user";
 import {
     getLocalUserSubscription,
     hasAddOnBonus,
-    hasPaidSubscription,
-    hasStripeSubscription,
-    isOnFreePlan,
     isSubscriptionActive,
+    isSubscriptionActiveFree,
+    isSubscriptionActivePaid,
     isSubscriptionCancelled,
+    isSubscriptionStripe,
     planSelectionOutcome,
 } from "utils/billing";
 
@@ -145,7 +145,7 @@ function PlanSelectorCard(props: PlanSelectorCardProps) {
                         ).length === 0;
                     if (
                         subscription &&
-                        !isOnFreePlan(subscription) &&
+                        !isSubscriptionActiveFree(subscription) &&
                         planNotListed
                     ) {
                         plans.push({
@@ -268,7 +268,7 @@ function PlanSelectorCard(props: PlanSelectorCardProps) {
     return (
         <>
             <Stack spacing={3} p={1.5}>
-                {hasPaidSubscription(subscription) ? (
+                {isSubscriptionActivePaid(subscription) ? (
                     <PaidSubscriptionPlanSelectorCard
                         {...commonCardData}
                         usage={usage}
@@ -498,7 +498,7 @@ const Plans = ({
                         onPlanSelect={onPlanSelect}
                     />
                 ))}
-            {!hasPaidSubscription(subscription) &&
+            {!isSubscriptionActivePaid(subscription) &&
                 !hasAddOnBonus(bonusData) &&
                 freePlan && (
                     <FreePlanRow
@@ -553,7 +553,7 @@ function PlanRow({
                     <Typography variant="h3" color="text.muted">
                         {t("storage_unit.gb")}
                     </Typography>
-                    {popular && !hasPaidSubscription(subscription) && (
+                    {popular && !isSubscriptionActivePaid(subscription) && (
                         <Badge>{t("POPULAR")}</Badge>
                     )}
                 </FlexWrapper>
@@ -727,7 +727,7 @@ function ManageSubscription({
 
     return (
         <Stack spacing={1}>
-            {hasStripeSubscription(subscription) && (
+            {isSubscriptionStripe(subscription) && (
                 <StripeSubscriptionOptions
                     subscription={subscription}
                     bonusData={bonusData}

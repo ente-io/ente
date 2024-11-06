@@ -59,33 +59,39 @@ export const planSelectionOutcome = (
     return "contactSupport";
 };
 
-export function isSubscriptionActive(subscription: Subscription): boolean {
-    return subscription && subscription.expiryTime > Date.now() * 1000;
-}
+/**
+ * Return true if the given {@link Subscription} has not expired.
+ */
+export const isSubscriptionActive = (subscription: Subscription) =>
+    subscription && subscription.expiryTime > Date.now() * 1000;
 
-export function hasPaidSubscription(subscription: Subscription) {
-    return (
-        subscription &&
-        isSubscriptionActive(subscription) &&
-        subscription.productID != "free"
-    );
-}
+/**
+ * Return true if the given active {@link Subscription} is for a paid plan.
+ */
+export const isSubscriptionActivePaid = (subscription: Subscription) =>
+    subscription &&
+    isSubscriptionActive(subscription) &&
+    subscription.productID != "free";
 
-export function isOnFreePlan(subscription: Subscription) {
-    return (
-        subscription &&
-        isSubscriptionActive(subscription) &&
-        subscription.productID == "free"
-    );
-}
+/**
+ * Return true if the given active {@link Subscription} is for a free plan.
+ */
+export const isSubscriptionActiveFree = (subscription: Subscription) =>
+    subscription &&
+    isSubscriptionActive(subscription) &&
+    subscription.productID == "free";
 
-export function hasStripeSubscription(subscription: Subscription) {
-    return subscription.paymentProvider == "stripe";
-}
+/**
+ * Return true if the given {@link Subscription} is using Stripe.
+ */
+export const isSubscriptionStripe = (subscription: Subscription) =>
+    subscription && subscription.paymentProvider == "stripe";
 
-export function isSubscriptionCancelled(subscription: Subscription) {
-    return subscription && subscription.attributes.isCancelled;
-}
+/**
+ * Return true if the given {@link Subscription} has the cancelled attribute.
+ */
+export const isSubscriptionCancelled = (subscription: Subscription) =>
+    subscription && subscription.attributes.isCancelled;
 
 export function isSubscriptionPastDue(subscription: Subscription) {
     const thirtyDaysMicroseconds = 30 * 24 * 60 * 60 * 1000 * 1000;

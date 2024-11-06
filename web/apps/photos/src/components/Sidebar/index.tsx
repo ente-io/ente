@@ -71,12 +71,12 @@ import { UserDetails } from "types/user";
 import {
     hasAddOnBonus,
     hasExceededStorageQuota,
-    hasPaidSubscription,
-    hasStripeSubscription,
-    isOnFreePlan,
     isSubscriptionActive,
+    isSubscriptionActiveFree,
+    isSubscriptionActivePaid,
     isSubscriptionCancelled,
     isSubscriptionPastDue,
+    isSubscriptionStripe,
 } from "utils/billing";
 import { testUpload } from "../../../tests/upload.test";
 import { MemberSubscriptionManage } from "../MemberSubscriptionManage";
@@ -192,7 +192,7 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
         } else {
             if (
                 userDetails &&
-                hasStripeSubscription(userDetails.subscription) &&
+                isSubscriptionStripe(userDetails.subscription) &&
                 isSubscriptionPastDue(userDetails.subscription)
             ) {
                 redirectToCustomerPortal();
@@ -250,7 +250,7 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
             return false;
         }
         if (
-            hasPaidSubscription(userDetails.subscription) &&
+            isSubscriptionActivePaid(userDetails.subscription) &&
             !isSubscriptionCancelled(userDetails.subscription)
         ) {
             return false;
@@ -268,7 +268,7 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
                     }
                 } else {
                     if (
-                        hasStripeSubscription(userDetails.subscription) &&
+                        isSubscriptionStripe(userDetails.subscription) &&
                         isSubscriptionPastDue(userDetails.subscription)
                     ) {
                         redirectToCustomerPortal();
@@ -288,7 +288,7 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
     let message: React.ReactNode;
     if (!hasAddOnBonus(userDetails.bonusData)) {
         if (isSubscriptionActive(userDetails.subscription)) {
-            if (isOnFreePlan(userDetails.subscription)) {
+            if (isSubscriptionActiveFree(userDetails.subscription)) {
                 message = t("subscription_info_free");
             } else if (isSubscriptionCancelled(userDetails.subscription)) {
                 message = t("subscription_info_renewal_cancelled", {
