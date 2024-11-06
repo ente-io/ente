@@ -10,6 +10,7 @@ import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import isElectron from "is-electron";
 import { getPaymentToken } from "./userService";
 
+/** Validity of the plan. */
 export type PlanPeriod = "month" | "year";
 
 export interface Subscription {
@@ -37,18 +38,11 @@ export interface Plan {
     stripeID: string;
 }
 
-enum PaymentActionType {
-    Buy = "buy",
-    Update = "update",
-}
-
-export interface FreePlan {
-    /* Number of bytes available in the free plan */
-    storage: number;
-}
-
 export interface PlansResponse {
-    freePlan: FreePlan;
+    freePlan: {
+        /* Number of bytes available in the free plan */
+        storage: number;
+    };
     plans: Plan[];
 }
 
@@ -79,11 +73,7 @@ class billingService {
     public async buySubscription(productID: string) {
         try {
             const paymentToken = await getPaymentToken();
-            await this.redirectToPayments(
-                paymentToken,
-                productID,
-                PaymentActionType.Buy,
-            );
+            await this.redirectToPayments(paymentToken, productID, "buy");
         } catch (e) {
             log.error("unable to buy subscription", e);
             throw e;
@@ -93,11 +83,7 @@ class billingService {
     public async updateSubscription(productID: string) {
         try {
             const paymentToken = await getPaymentToken();
-            await this.redirectToPayments(
-                paymentToken,
-                productID,
-                PaymentActionType.Update,
-            );
+            await this.redirectToPayments(paymentToken, productID, "update");
         } catch (e) {
             log.error("subscription update failed", e);
             throw e;
