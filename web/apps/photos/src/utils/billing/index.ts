@@ -8,7 +8,6 @@ import { getData, LS_KEYS } from "@ente/shared/storage/localStorage";
 import { t } from "i18next";
 import type { NextRouter } from "next/router";
 import billingService, {
-    Plan,
     redirectToCustomerPortal,
     Subscription,
 } from "services/billingService";
@@ -107,14 +106,6 @@ export function getLocalUserSubscription(): Subscription {
     return getData(LS_KEYS.SUBSCRIPTION);
 }
 
-export function isUserSubscribedPlan(plan: Plan, subscription: Subscription) {
-    return (
-        isSubscriptionActive(subscription) &&
-        (plan.stripeID === subscription.productID ||
-            plan.iosID === subscription.productID ||
-            plan.androidID === subscription.productID)
-    );
-}
 export function hasStripeSubscription(subscription: Subscription) {
     return subscription.paymentProvider == "stripe";
 }
@@ -140,9 +131,6 @@ export function isSubscriptionPastDue(subscription: Subscription) {
         subscription.expiryTime >= currentTime - thirtyDaysMicroseconds
     );
 }
-
-export const isPopularPlan = (plan: Plan) =>
-    plan.storage === 100 * 1024 * 1024 * 1024; /* 100 GB */
 
 /**
  * When the payments app redirects back to us after a plan purchase or update

@@ -55,10 +55,8 @@ import {
     hasPaidSubscription,
     hasStripeSubscription,
     isOnFreePlan,
-    isPopularPlan,
     isSubscriptionActive,
     isSubscriptionCancelled,
-    isUserSubscribedPlan,
     planSelectionOutcome,
 } from "utils/billing";
 
@@ -507,6 +505,18 @@ const Plans = ({
         </Stack>
     );
 };
+
+function isUserSubscribedPlan(plan: Plan, subscription: Subscription) {
+    return (
+        isSubscriptionActive(subscription) &&
+        (plan.stripeID === subscription.productID ||
+            plan.iosID === subscription.productID ||
+            plan.androidID === subscription.productID)
+    );
+}
+
+const isPopularPlan = (plan: Plan) =>
+    plan.storage === 100 * 1024 * 1024 * 1024; /* 100 GB */
 
 interface PlanRowProps {
     plan: Plan;
