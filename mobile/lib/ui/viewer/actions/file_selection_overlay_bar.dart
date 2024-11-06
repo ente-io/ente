@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/gallery_type.dart';
 import "package:photos/models/ml/face/person.dart";
+import "package:photos/models/search/hierarchical/face_filter.dart";
 import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
+import "package:photos/models/search/hierarchical/only_them_filter.dart";
 import 'package:photos/models/selected_files.dart';
 import "package:photos/theme/effects.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -184,6 +186,17 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
       if (filter.isSameFilter(initialFilter)) {
         initalFilterIsInAppliedFiters = true;
         break;
+      }
+      if (initialFilter is FaceFilter) {
+        for (HierarchicalSearchFilter filter in appliedFilters) {
+          if (filter is OnlyThemFilter) {
+            if (filter.faceFilters
+                .any((faceFilter) => faceFilter.isSameFilter(initialFilter))) {
+              initalFilterIsInAppliedFiters = true;
+              break;
+            }
+          }
+        }
       }
     }
 
