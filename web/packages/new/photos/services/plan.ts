@@ -32,7 +32,9 @@ const Subscription = z.object({
         .nullish()
         .transform(nullToUndefined),
     price: z.string(),
-    period: PlanPeriod,
+    // TODO: We get back subscriptions without a period on cancel / reactivate.
+    // Handle them better, or remove this TODO.
+    period: z.enum(["month", "year", ""]).transform((s) => (s ? s : "month")),
 });
 
 /**
