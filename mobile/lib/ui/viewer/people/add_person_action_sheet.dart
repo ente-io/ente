@@ -313,7 +313,7 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
               await PersonService.instance.addPerson(text, clusterID);
           final bool extraPhotosFound = await ClusterFeedbackService.instance
               .checkAndDoAutomaticMerges(personEntity!,
-                  personClusterID: clusterID);
+                  personClusterID: clusterID,);
           if (extraPhotosFound) {
             showShortToast(context, S.of(context).extraPhotosFound);
           }

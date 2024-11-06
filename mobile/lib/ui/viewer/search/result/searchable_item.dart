@@ -15,10 +15,10 @@ class SearchableItemWidget extends StatelessWidget {
   final Function? onResultTap;
   const SearchableItemWidget(
     this.searchResult, {
-    Key? key,
+    super.key,
     this.resultCount,
     this.onResultTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
