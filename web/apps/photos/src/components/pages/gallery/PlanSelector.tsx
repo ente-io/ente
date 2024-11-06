@@ -38,10 +38,10 @@ import { Trans } from "react-i18next";
 import type {
     Plan,
     PlanPeriod,
-    PlansResponse,
+    PlansData,
     Subscription,
 } from "services/billingService";
-import billingService, { redirectToPaymentsApp } from "services/billingService";
+import { getPlansData, redirectToPaymentsApp } from "services/billingService";
 import { getFamilyPortalRedirectURL } from "services/userService";
 import { SetLoading } from "types/gallery";
 import { BonusData, UserDetails } from "types/user";
@@ -104,9 +104,7 @@ interface PlanSelectorCardProps {
 
 function PlanSelectorCard(props: PlanSelectorCardProps) {
     const subscription = useMemo(() => getLocalUserSubscription(), []);
-    const [plansResponse, setPlansResponse] = useState<
-        PlansResponse | undefined
-    >();
+    const [plansData, setPlansData] = useState<PlansData | undefined>();
 
     const [planPeriod, setPlanPeriod] = useState<PlanPeriod>(
         subscription?.period || "month",
@@ -139,8 +137,8 @@ function PlanSelectorCard(props: PlanSelectorCardProps) {
         const main = async () => {
             try {
                 props.setLoading(true);
-                const response = await billingService.getPlans();
-                const { plans } = response;
+                const plansData = await getPlansData();
+                const { plans } = plansData;
                 if (isSubscriptionActive(subscription)) {
                     const planNotListed =
                         plans.filter((plan) =>
@@ -162,7 +160,7 @@ function PlanSelectorCard(props: PlanSelectorCardProps) {
                         });
                     }
                 }
-                setPlansResponse(response);
+                setPlansData(plansData);
             } catch (e) {
                 log.error("plan selector modal open failed", e);
                 props.closeModal();
@@ -259,7 +257,7 @@ function PlanSelectorCard(props: PlanSelectorCardProps) {
 
     const plansList = (
         <Plans
-            plansResponse={plansResponse}
+            plansData={plansData}
             planPeriod={planPeriod}
             onPlanSelect={onPlanSelect}
             subscription={subscription}
@@ -466,7 +464,7 @@ const CustomToggleButton = styled(ToggleButton)(({ theme }) => ({
 }));
 
 interface PlansProps {
-    plansResponse: PlansResponse | undefined;
+    plansData: PlansData | undefined;
     planPeriod: PlanPeriod;
     subscription: Subscription;
     bonusData?: BonusData;
@@ -475,14 +473,14 @@ interface PlansProps {
 }
 
 const Plans = ({
-    plansResponse,
+    plansData,
     planPeriod,
     subscription,
     bonusData,
     onPlanSelect,
     closeModal,
 }: PlansProps) => {
-    const { freePlan, plans } = plansResponse ?? {};
+    const { freePlan, plans } = plansData ?? {};
     return (
         <Stack spacing={2}>
             {plans

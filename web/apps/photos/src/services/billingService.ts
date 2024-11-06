@@ -57,38 +57,17 @@ const Plan = z.object({
  */
 export type Plan = z.infer<typeof Plan>;
 
-export interface PlansResponse {
-    freePlan: {
+const PlansData = z.object({
+    freePlan: z.object({
         /* Number of bytes available in the free plan */
-        storage: number;
-    };
-    plans: Plan[];
-}
+        storage: z.number(),
+    }),
+    plans: z.array(Plan),
+});
+
+export type PlansData = z.infer<typeof PlansData>;
 
 class billingService {
-    public async getPlans(): Promise<PlansResponse> {
-        const token = getToken();
-        try {
-            let response;
-            if (!token) {
-                response = await HTTPService.get(
-                    await apiURL("/billing/plans/v2"),
-                );
-            } else {
-                response = await HTTPService.get(
-                    await apiURL("/billing/user-plans"),
-                    null,
-                    {
-                        "X-Auth-Token": getToken(),
-                    },
-                );
-            }
-            return response.data;
-        } catch (e) {
-            log.error("failed to get plans", e);
-        }
-    }
-
     public async cancelSubscription() {
         try {
             const response = await HTTPService.post(
@@ -176,6 +155,17 @@ class billingService {
 }
 
 export default new billingService();
+
+/**
+ * Fetch the list of plans from remote.
+ */
+export const getPlansData = async (): Promise<PlansData> => {
+    const res = await fetch(await apiURL("/billing/user-plans"), {
+        headers: await authenticatedRequestHeaders(),
+    });
+    ensureOk(res);
+    return z.object({ data: PlansData }).parse(await res.json()).data;
+};
 
 /**
  * Start the flow to purchase or update a subscription by redirecting the user
