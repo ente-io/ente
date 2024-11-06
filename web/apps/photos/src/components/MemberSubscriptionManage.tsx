@@ -1,5 +1,5 @@
 import { useIsSmallWidth } from "@/base/hooks";
-import { getFamilyPlanAdmin } from "@/new/photos/services/user";
+import { getFamilyPlanAdmin, leaveFamily } from "@/new/photos/services/user";
 import { AppContext } from "@/new/photos/types/context";
 import {
     FlexWrapper,
@@ -9,7 +9,6 @@ import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleW
 import { Box, Button, Dialog, DialogContent, Typography } from "@mui/material";
 import { t } from "i18next";
 import { useContext } from "react";
-import billingService from "services/plan";
 
 export function MemberSubscriptionManage({ open, userDetails, onClose }) {
     const { setDialogMessage } = useContext(AppContext);
@@ -17,7 +16,7 @@ export function MemberSubscriptionManage({ open, userDetails, onClose }) {
 
     async function onLeaveFamilyClick() {
         try {
-            await billingService.leaveFamily();
+            await leaveFamily();
         } catch (e) {
             setDialogMessage({
                 title: t("error"),

@@ -39,7 +39,10 @@ import {
     getLocalTrashedFiles,
     sortFiles,
 } from "@/new/photos/services/files";
-import { verifySubscription } from "@/new/photos/services/plan";
+import {
+    redirectToCustomerPortal,
+    verifySubscription,
+} from "@/new/photos/services/plan";
 import {
     filterSearchableFiles,
     setSearchCollectionsAndFiles,
@@ -107,6 +110,7 @@ import { t } from "i18next";
 import { useRouter, type NextRouter } from "next/router";
 import { createContext, useCallback, useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
+import { Trans } from "react-i18next";
 import {
     constructEmailList,
     constructUserIDToEmailMap,
@@ -116,7 +120,6 @@ import {
     getAllLocalCollections,
 } from "services/collectionService";
 import { syncFiles } from "services/fileService";
-import { redirectToCustomerPortal } from "services/plan";
 import { preFileInfoSync, sync } from "services/sync";
 import { syncTrash } from "services/trashService";
 import uploadManager from "services/upload/uploadManager";
@@ -134,7 +137,6 @@ import {
     handleCollectionOps,
 } from "utils/collection";
 import { FILE_OPS_TYPE, getSelectedFiles, handleFileOps } from "utils/file";
-import { getSubscriptionPurchaseSuccessMessage } from "utils/ui";
 
 const defaultGalleryContext: GalleryContextType = {
     showPlanSelectorModal: () => null,
@@ -1243,9 +1245,16 @@ export async function checkSubscriptionPurchase(
     if (status == "success" && typeof sessionID == "string") {
         try {
             const subscription = await verifySubscription(sessionID);
-            setDialogMessage(
-                getSubscriptionPurchaseSuccessMessage(subscription),
-            );
+            setDialogMessage({
+                title: t("SUBSCRIPTION_PURCHASE_SUCCESS_TITLE"),
+                close: { variant: "accent" },
+                content: (
+                    <Trans
+                        i18nKey="SUBSCRIPTION_PURCHASE_SUCCESS"
+                        values={{ date: subscription?.expiryTime }}
+                    />
+                ),
+            });
         } catch (e) {
             setDialogMessage({
                 title: t("error"),

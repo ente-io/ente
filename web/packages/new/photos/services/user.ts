@@ -1,7 +1,11 @@
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
-import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
+import {
+    LS_KEYS,
+    getData,
+    removeData,
+} from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";
 import { z } from "zod";
 import type { Subscription } from "./plan";
@@ -86,6 +90,16 @@ export function getTotalFamilyUsage(familyData: FamilyData): number {
         0,
     );
 }
+
+export const leaveFamily = async () => {
+    ensureOk(
+        await fetch(await apiURL("/family/leave"), {
+            method: "DELETE",
+            headers: await authenticatedRequestHeaders(),
+        }),
+    );
+    removeData(LS_KEYS.FAMILY_DATA);
+};
 
 /**
  * Fetch the two-factor status (whether or not it is enabled) from remote.

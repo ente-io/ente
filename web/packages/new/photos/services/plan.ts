@@ -1,18 +1,14 @@
+// TODO:
+/* eslint-disable @typescript-eslint/prefer-optional-chain */
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
-import log from "@/base/log";
 import { apiURL, paymentsAppOrigin } from "@/base/origins";
 import {
     getTotalFamilyUsage,
     isPartOfFamily,
 } from "@/new/photos/services/user";
 import { nullToUndefined } from "@/utils/transform";
-import HTTPService from "@ente/shared/network/HTTPService";
-import {
-    LS_KEYS,
-    removeData,
-    setData,
-} from "@ente/shared/storage/localStorage";
-import { getToken } from "@ente/shared/storage/localStorage/helpers";
+import { LS_KEYS, setData } from "@ente/shared/storage/localStorage";
 import isElectron from "is-electron";
 import { z } from "zod";
 import type { BonusData, UserDetails } from "./user";
@@ -71,30 +67,6 @@ const PlansData = z.object({
 });
 
 export type PlansData = z.infer<typeof PlansData>;
-
-class billingService {
-    public async leaveFamily() {
-        if (!getToken()) {
-            return;
-        }
-        try {
-            await HTTPService.delete(
-                await apiURL("/family/leave"),
-                null,
-                null,
-                {
-                    "X-Auth-Token": getToken(),
-                },
-            );
-            removeData(LS_KEYS.FAMILY_DATA);
-        } catch (e) {
-            log.error("/family/leave failed", e);
-            throw e;
-        }
-    }
-}
-
-export default new billingService();
 
 /**
  * Fetch the list of plans from remote.

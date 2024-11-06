@@ -7,6 +7,7 @@ import { CollectionMappingChoiceDialog } from "@/new/photos/components/Collectio
 import type { CollectionSelectorAttributes } from "@/new/photos/components/CollectionSelector";
 import { downloadAppDialogAttributes } from "@/new/photos/components/utils/download";
 import { exportMetadataDirectoryName } from "@/new/photos/services/export";
+import { redirectToCustomerPortal } from "@/new/photos/services/plan";
 import type {
     FileAndPath,
     UploadItem,
@@ -24,7 +25,6 @@ import isElectron from "is-electron";
 import { GalleryContext } from "pages/gallery";
 import { useContext, useEffect, useRef, useState } from "react";
 import { getLatestCollections } from "services/collectionService";
-import { redirectToCustomerPortal } from "services/plan";
 import {
     getPublicCollectionUID,
     getPublicCollectionUploaderName,
