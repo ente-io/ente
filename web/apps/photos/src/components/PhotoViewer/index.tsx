@@ -3,13 +3,13 @@ import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { lowercaseExtension } from "@/base/file";
 import log from "@/base/log";
 import type { LoadedLivePhotoSourceURL } from "@/media/file";
-import { type EnteFile, fileLogID } from "@/media/file";
+import { fileLogID, type EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
 import downloadManager from "@/new/photos/services/download";
 import { extractRawExif, parseExif } from "@/new/photos/services/exif";
 import { AppContext } from "@/new/photos/types/context";
-import { FlexWrapper } from "@ente/shared/components/Container";
+import { FlexWrapper, Overlay } from "@ente/shared/components/Container";
 import AlbumOutlined from "@mui/icons-material/AlbumOutlined";
 import ChevronLeft from "@mui/icons-material/ChevronLeft";
 import ChevronRight from "@mui/icons-material/ChevronRight";
@@ -25,7 +25,14 @@ import FullscreenOutlinedIcon from "@mui/icons-material/FullscreenOutlined";
 import InfoIcon from "@mui/icons-material/InfoOutlined";
 import ReplayIcon from "@mui/icons-material/Replay";
 import ZoomInOutlinedIcon from "@mui/icons-material/ZoomInOutlined";
-import { Box, Button, styled } from "@mui/material";
+import {
+    Box,
+    Button,
+    CircularProgress,
+    styled,
+    Typography,
+    type CircularProgressProps,
+} from "@mui/material";
 import { t } from "i18next";
 import isElectron from "is-electron";
 import { GalleryContext } from "pages/gallery";
@@ -48,7 +55,6 @@ import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import { getTrashFileMessage } from "utils/ui";
 import { FileInfo, type FileInfoExif, type FileInfoProps } from "./FileInfo";
 import ImageEditorOverlay from "./ImageEditorOverlay";
-import CircularProgressWithLabel from "./styledComponents/CircularProgressWithLabel";
 import { ConversionFailedNotification } from "./styledComponents/ConversionFailedNotification";
 import { LivePhotoBtnContainer } from "./styledComponents/LivePhotoBtn";
 
@@ -983,3 +989,27 @@ function PhotoViewer(props: PhotoViewerProps) {
 }
 
 export default PhotoViewer;
+
+function CircularProgressWithLabel(
+    props: CircularProgressProps & { value: number },
+) {
+    return (
+        <>
+            <CircularProgress variant="determinate" {...props} color="accent" />
+            <Overlay
+                sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    height: "40px",
+                }}
+            >
+                <Typography
+                    variant="mini"
+                    component="div"
+                    color="text.secondary"
+                >{`${Math.round(props.value)}%`}</Typography>
+            </Overlay>
+        </>
+    );
+}
