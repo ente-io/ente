@@ -14,8 +14,8 @@ import {
 } from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import isElectron from "is-electron";
-import type { BonusData, UserDetails } from "./user";
 import { z } from "zod";
+import type { BonusData, UserDetails } from "./user";
 
 const PlanPeriod = z.enum(["month", "year"]);
 
@@ -73,71 +73,6 @@ const PlansData = z.object({
 export type PlansData = z.infer<typeof PlansData>;
 
 class billingService {
-    public async cancelSubscription() {
-        try {
-            const response = await HTTPService.post(
-                await apiURL("/billing/stripe/cancel-subscription"),
-                null,
-                null,
-                {
-                    "X-Auth-Token": getToken(),
-                },
-            );
-            const { subscription } = response.data;
-            setData(LS_KEYS.SUBSCRIPTION, subscription);
-        } catch (e) {
-            log.error("subscription cancel failed", e);
-            throw e;
-        }
-    }
-
-    public async activateSubscription() {
-        try {
-            const response = await HTTPService.post(
-                await apiURL("/billing/stripe/activate-subscription"),
-                null,
-                null,
-                {
-                    "X-Auth-Token": getToken(),
-                },
-            );
-            const { subscription } = response.data;
-            setData(LS_KEYS.SUBSCRIPTION, subscription);
-        } catch (e) {
-            log.error("failed to activate subscription", e);
-            throw e;
-        }
-    }
-
-    public async verifySubscription(
-        sessionID: string = null,
-    ): Promise<Subscription> {
-        try {
-            const token = getToken();
-            if (!token) {
-                return;
-            }
-            const response = await HTTPService.post(
-                await apiURL("/billing/verify-subscription"),
-                {
-                    paymentProvider: "stripe",
-                    productID: null,
-                    verificationData: sessionID,
-                },
-                null,
-                {
-                    "X-Auth-Token": token,
-                },
-            );
-            const { subscription } = response.data;
-            setData(LS_KEYS.SUBSCRIPTION, subscription);
-            return subscription;
-        } catch (e) {
-            log.error("Error while verifying subscription", e);
-            throw e;
-        }
-    }
-
     public async leaveFamily() {
         if (!getToken()) {
             return;
@@ -170,6 +105,56 @@ export const getPlansData = async (): Promise<PlansData> => {
     });
     ensureOk(res);
     return z.object({ data: PlansData }).parse(await res.json()).data;
+};
+
+const SubscriptionResponse = z.object({
+    data: z.object({
+        subscription: Subscription,
+    }),
+});
+
+export const verifySubscription = async (
+    sessionID: string,
+): Promise<Subscription> => {
+    const res = await fetch(await apiURL("/billing/verify-subscription"), {
+        method: "POST",
+        headers: await authenticatedRequestHeaders(),
+        body: JSON.stringify({
+            paymentProvider: "stripe",
+            productID: null,
+            verificationData: sessionID,
+        }),
+    });
+    ensureOk(res);
+    const { subscription } = SubscriptionResponse.parse(await res.json()).data;
+    setData(LS_KEYS.SUBSCRIPTION, subscription);
+    return subscription;
+};
+
+export const activateSubscription = async () => {
+    const res = await fetch(
+        await apiURL("/billing/stripe/activate-subscription"),
+        {
+            method: "POST",
+            headers: await authenticatedRequestHeaders(),
+        },
+    );
+    ensureOk(res);
+    const { subscription } = SubscriptionResponse.parse(await res.json()).data;
+    setData(LS_KEYS.SUBSCRIPTION, subscription);
+};
+
+export const cancelSubscription = async () => {
+    const res = await fetch(
+        await apiURL("/billing/stripe/cancel-subscription"),
+        {
+            method: "POST",
+            headers: await authenticatedRequestHeaders(),
+        },
+    );
+    ensureOk(res);
+    const { subscription } = SubscriptionResponse.parse(await res.json()).data;
+    setData(LS_KEYS.SUBSCRIPTION, subscription);
 };
 
 /**

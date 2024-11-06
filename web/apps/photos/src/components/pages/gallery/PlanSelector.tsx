@@ -6,7 +6,9 @@ import type {
     PlansData,
     Subscription,
 } from "@/new/photos/services/plan";
-import billingService, {
+import {
+    activateSubscription,
+    cancelSubscription,
     getPlansData,
     hasAddOnBonus,
     isSubscriptionActive,
@@ -807,7 +809,7 @@ function StripeSubscriptionOptions({
     const reactivate = async () => {
         try {
             setLoading(true);
-            await billingService.activateSubscription();
+            await activateSubscription();
             setDialogMessage({
                 title: t("success"),
                 content: t("SUBSCRIPTION_ACTIVATE_SUCCESS"),
@@ -846,7 +848,7 @@ function StripeSubscriptionOptions({
     const cancel = async () => {
         try {
             setLoading(true);
-            await billingService.cancelSubscription();
+            await cancelSubscription();
             setDialogMessage({
                 title: t("success"),
                 content: t("SUBSCRIPTION_CANCEL_SUCCESS"),

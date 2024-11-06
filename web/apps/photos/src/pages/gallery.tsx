@@ -39,6 +39,7 @@ import {
     getLocalTrashedFiles,
     sortFiles,
 } from "@/new/photos/services/files";
+import { verifySubscription } from "@/new/photos/services/plan";
 import {
     filterSearchableFiles,
     setSearchCollectionsAndFiles,
@@ -115,7 +116,7 @@ import {
     getAllLocalCollections,
 } from "services/collectionService";
 import { syncFiles } from "services/fileService";
-import billingService, { redirectToCustomerPortal } from "services/plan";
+import { redirectToCustomerPortal } from "services/plan";
 import { preFileInfoSync, sync } from "services/sync";
 import { syncTrash } from "services/trashService";
 import uploadManager from "services/upload/uploadManager";
@@ -1237,13 +1238,11 @@ export async function checkSubscriptionPurchase(
     router: NextRouter,
     setLoading: SetLoading,
 ) {
-    const { session_id: sessionId, status, reason } = router.query ?? {};
+    const { session_id: sessionID, status, reason } = router.query ?? {};
 
-    if (status == "success") {
+    if (status == "success" && typeof sessionID == "string") {
         try {
-            const subscription = await billingService.verifySubscription(
-                sessionId as string,
-            );
+            const subscription = await verifySubscription(sessionID);
             setDialogMessage(
                 getSubscriptionPurchaseSuccessMessage(subscription),
             );
