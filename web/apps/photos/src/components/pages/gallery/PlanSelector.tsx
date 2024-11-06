@@ -50,14 +50,12 @@ import { getFamilyPortalRedirectURL } from "services/userService";
 import { SetLoading } from "types/gallery";
 import { BonusData, UserDetails } from "types/user";
 import {
-    getLocalUserSubscription,
     hasAddOnBonus,
     isSubscriptionActive,
     isSubscriptionActiveFree,
     isSubscriptionActivePaid,
     isSubscriptionCancelled,
     isSubscriptionStripe,
-    planSelectionOutcome,
 } from "utils/billing";
 
 interface PlanSelectorProps {
@@ -288,6 +286,43 @@ function PlanSelectorCard(props: PlanSelectorCardProps) {
 function getLocalUserSubscription(): Subscription {
     return getData(LS_KEYS.SUBSCRIPTION);
 }
+
+/**
+ * Return the outcome that should happen when the user selects a paid plan on
+ * the plan selection screen.
+ *
+ * @param subscription Their current subscription details.
+ */
+const planSelectionOutcome = (subscription: Subscription | undefined) => {
+    // This shouldn't happen, but we need this case to handle missing types.
+    if (!subscription) return "buyPlan";
+
+    // The user is a on a free plan and can buy the plan they selected.
+    if (subscription.productID == "free") return "buyPlan";
+
+    // Their existing subscription has expired. They can buy a new plan.
+    if (subscription.expiryTime < Date.now() * 1000) return "buyPlan";
+
+    // -- The user already has an active subscription to a paid plan.
+
+    // Using Stripe.
+    if (subscription.paymentProvider == "stripe") {
+        // Update their existing subscription to the new plan.
+        return "updateSubscriptionToPlan";
+    }
+
+    // Using one of the mobile app stores.
+    if (
+        subscription.paymentProvider == "appstore" ||
+        subscription.paymentProvider == "playstore"
+    ) {
+        // They need to cancel first on the mobile app stores.
+        return "cancelOnMobile";
+    }
+
+    // Some other bespoke case. They should contact support.
+    return "contactSupport";
+};
 
 function FreeSubscriptionPlanSelectorCard({
     children,
