@@ -1,6 +1,6 @@
 import { accountLogout } from "@/accounts/services/logout";
 import log from "@/base/log";
-import { resetUploadState } from "@/media/upload";
+import { resetUploadState } from "@/gallery/upload";
 import DownloadManager from "@/new/photos/services/download";
 import { logoutML, terminateMLWorker } from "@/new/photos/services/ml";
 import { logoutSearch } from "@/new/photos/services/search";

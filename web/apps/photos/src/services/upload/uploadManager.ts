@@ -8,7 +8,7 @@ import type { Collection } from "@/media/collection";
 import { EncryptedEnteFile, EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { potentialFileTypeFromExtension } from "@/media/live-photo";
-import { shouldDisableCFUploadProxy } from "@/media/upload";
+import { shouldDisableCFUploadProxy } from "@/gallery/upload";
 import { getLocalFiles } from "@/new/photos/services/files";
 import { indexNewUpload } from "@/new/photos/services/ml";
 import type { UploadItem } from "@/new/photos/services/upload/types";
