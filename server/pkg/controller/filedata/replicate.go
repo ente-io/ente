@@ -57,7 +57,7 @@ func (c *Controller) replicate(i int) {
 }
 
 func (c *Controller) tryReplicate() error {
-	newLockTime := enteTime.MicrosecondsAfterMinutes(60)
+	newLockTime := enteTime.MicrosecondsAfterMinutes(240)
 	ctx, cancelFun := context.WithTimeout(context.Background(), 20*time.Minute)
 	defer cancelFun()
 	row, err := c.Repo.GetPendingSyncDataAndExtendLock(ctx, newLockTime, false)
