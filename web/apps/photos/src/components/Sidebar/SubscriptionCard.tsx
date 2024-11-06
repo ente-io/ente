@@ -194,7 +194,10 @@ const IndividualUsageSection: React.FC<IndividualUsageSectionProps> = ({
     // requirement from the library).
     return (
         <Box width="100%">
-            <Progressbar value={Math.min((usage * 100) / storage, 100)} />
+            <ProgressBar
+                variant="determinate"
+                value={Math.min((usage * 100) / storage, 100)}
+            />
             <SpaceBetweenFlex
                 sx={{
                     marginTop: 1.5,
@@ -294,11 +297,13 @@ const FamilyUsageProgressBar: React.FC<FamilyUsageProgressBarProps> = ({
 }) => {
     return (
         <Box position={"relative"} width="100%">
-            <Progressbar
+            <ProgressBar
+                variant="determinate"
                 sx={{ backgroundColor: "transparent" }}
                 value={Math.min((userUsage * 100) / totalStorage, 100)}
             />
-            <Progressbar
+            <ProgressBar
+                variant="determinate"
                 sx={{
                     position: "absolute",
                     top: 0,
@@ -330,17 +335,13 @@ const Legend: React.FC<LegendProps> = ({ label, color }) => {
     );
 };
 
-const Progressbar = styled(LinearProgress)(() => ({
+const ProgressBar = styled(LinearProgress)(() => ({
     ".MuiLinearProgress-bar": {
         borderRadius: "2px",
     },
     borderRadius: "2px",
     backgroundColor: "rgba(255, 255, 255, 0.2)",
 }));
-
-Progressbar.defaultProps = {
-    variant: "determinate",
-};
 
 const DotSeparator = styled(CircleIcon)`
     font-size: 4px;
