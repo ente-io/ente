@@ -197,7 +197,19 @@ impl SseDecode for (Vec<u8>, String, usize, usize) {
     }
 }
 
-impl SseDecode for (Vec<u8>, usize, usize, Vec<u8>, usize, usize) {
+impl SseDecode
+    for (
+        Vec<u8>,
+        usize,
+        usize,
+        Vec<u8>,
+        usize,
+        usize,
+        Vec<u8>,
+        usize,
+        usize,
+    )
+{
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut var_field0 = <Vec<u8>>::sse_decode(deserializer);
@@ -206,8 +218,12 @@ impl SseDecode for (Vec<u8>, usize, usize, Vec<u8>, usize, usize) {
         let mut var_field3 = <Vec<u8>>::sse_decode(deserializer);
         let mut var_field4 = <usize>::sse_decode(deserializer);
         let mut var_field5 = <usize>::sse_decode(deserializer);
+        let mut var_field6 = <Vec<u8>>::sse_decode(deserializer);
+        let mut var_field7 = <usize>::sse_decode(deserializer);
+        let mut var_field8 = <usize>::sse_decode(deserializer);
         return (
-            var_field0, var_field1, var_field2, var_field3, var_field4, var_field5,
+            var_field0, var_field1, var_field2, var_field3, var_field4, var_field5, var_field6,
+            var_field7, var_field8,
         );
     }
 }
@@ -299,7 +315,19 @@ impl SseEncode for (Vec<u8>, String, usize, usize) {
     }
 }
 
-impl SseEncode for (Vec<u8>, usize, usize, Vec<u8>, usize, usize) {
+impl SseEncode
+    for (
+        Vec<u8>,
+        usize,
+        usize,
+        Vec<u8>,
+        usize,
+        usize,
+        Vec<u8>,
+        usize,
+        usize,
+    )
+{
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <Vec<u8>>::sse_encode(self.0, serializer);
@@ -308,6 +336,9 @@ impl SseEncode for (Vec<u8>, usize, usize, Vec<u8>, usize, usize) {
         <Vec<u8>>::sse_encode(self.3, serializer);
         <usize>::sse_encode(self.4, serializer);
         <usize>::sse_encode(self.5, serializer);
+        <Vec<u8>>::sse_encode(self.6, serializer);
+        <usize>::sse_encode(self.7, serializer);
+        <usize>::sse_encode(self.8, serializer);
     }
 }
 
@@ -396,21 +427,12 @@ mod io {
             )
         }
     }
-    impl CstDecode<(Vec<u8>, usize, usize, Vec<u8>, usize, usize)>
-        for wire_cst_record_list_prim_u_8_strict_usize_usize_list_prim_u_8_strict_usize_usize
-    {
-        // Codec=Cst (C-struct based), see doc to use other codecs
-        fn cst_decode(self) -> (Vec<u8>, usize, usize, Vec<u8>, usize, usize) {
-            (
-                self.field0.cst_decode(),
-                self.field1.cst_decode(),
-                self.field2.cst_decode(),
-                self.field3.cst_decode(),
-                self.field4.cst_decode(),
-                self.field5.cst_decode(),
-            )
+    impl CstDecode<(Vec<u8>,usize,usize,Vec<u8>,usize,usize,Vec<u8>,usize,usize,)> for wire_cst_record_list_prim_u_8_strict_usize_usize_list_prim_u_8_strict_usize_usize_list_prim_u_8_strict_usize_usize {
+            // Codec=Cst (C-struct based), see doc to use other codecs
+            fn cst_decode(self) -> (Vec<u8>,usize,usize,Vec<u8>,usize,usize,Vec<u8>,usize,usize,) {
+                (self.field0.cst_decode(),self.field1.cst_decode(),self.field2.cst_decode(),self.field3.cst_decode(),self.field4.cst_decode(),self.field5.cst_decode(),self.field6.cst_decode(),self.field7.cst_decode(),self.field8.cst_decode(),)
+            }
         }
-    }
     impl NewWithNullPtr for wire_cst_record_list_prim_u_8_strict_string_usize_usize {
         fn new_with_null_ptr() -> Self {
             Self {
@@ -426,25 +448,24 @@ mod io {
             Self::new_with_null_ptr()
         }
     }
-    impl NewWithNullPtr
-        for wire_cst_record_list_prim_u_8_strict_usize_usize_list_prim_u_8_strict_usize_usize
-    {
-        fn new_with_null_ptr() -> Self {
-            Self {
-                field0: core::ptr::null_mut(),
-                field1: Default::default(),
-                field2: Default::default(),
-                field3: core::ptr::null_mut(),
-                field4: Default::default(),
-                field5: Default::default(),
+    impl NewWithNullPtr for wire_cst_record_list_prim_u_8_strict_usize_usize_list_prim_u_8_strict_usize_usize_list_prim_u_8_strict_usize_usize {
+            fn new_with_null_ptr() -> Self {
+                Self { field0: core::ptr::null_mut(),
+field1: Default::default(),
+field2: Default::default(),
+field3: core::ptr::null_mut(),
+field4: Default::default(),
+field5: Default::default(),
+field6: core::ptr::null_mut(),
+field7: Default::default(),
+field8: Default::default(), }
             }
         }
-    }
-    impl Default for wire_cst_record_list_prim_u_8_strict_usize_usize_list_prim_u_8_strict_usize_usize {
-        fn default() -> Self {
-            Self::new_with_null_ptr()
+    impl Default for wire_cst_record_list_prim_u_8_strict_usize_usize_list_prim_u_8_strict_usize_usize_list_prim_u_8_strict_usize_usize {
+            fn default() -> Self {
+                Self::new_with_null_ptr()
+            }
         }
-    }
 
     #[no_mangle]
     pub extern "C" fn frbgen_photos_wire__crate__api__image_processing__process_clip(
@@ -509,13 +530,17 @@ mod io {
     }
     #[repr(C)]
     #[derive(Clone, Copy)]
-    pub struct wire_cst_record_list_prim_u_8_strict_usize_usize_list_prim_u_8_strict_usize_usize {
+    pub struct wire_cst_record_list_prim_u_8_strict_usize_usize_list_prim_u_8_strict_usize_usize_list_prim_u_8_strict_usize_usize
+    {
         field0: *mut wire_cst_list_prim_u_8_strict,
         field1: usize,
         field2: usize,
         field3: *mut wire_cst_list_prim_u_8_strict,
         field4: usize,
         field5: usize,
+        field6: *mut wire_cst_list_prim_u_8_strict,
+        field7: usize,
+        field8: usize,
     }
 }
 #[cfg(not(target_family = "wasm"))]

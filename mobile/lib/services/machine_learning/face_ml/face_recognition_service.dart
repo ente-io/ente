@@ -1,12 +1,12 @@
 import "dart:async" show unawaited;
 import "dart:typed_data" show Uint8List, Float32List;
-import "dart:ui" show Image;
 
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/diff_sync_complete_event.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/models/api/entity/type.dart";
+import "package:photos/models/ml/face/dimension.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/face_ml/face_detection/detection.dart";
 import "package:photos/services/machine_learning/face_ml/face_detection/face_detection_service.dart";
@@ -71,9 +71,9 @@ class FaceRecognitionService {
 
   static Future<List<FaceResult>> runFacesPipeline(
     int enteFileID,
-    Image image,
+    Dimensions imageDimensions,
     Uint8List rawRgbaBytes,
-    Uint8List resizedBytes,
+    Uint8List resizedRgbBytes,
     int resizedHeight,
     int resizedWidth,
     int faceDetectionAddress,
@@ -86,7 +86,7 @@ class FaceRecognitionService {
     final List<FaceDetectionRelative> faceDetectionResult =
         await _detectFacesSync(
       enteFileID,
-      resizedBytes,
+      resizedRgbBytes,
       resizedHeight,
       resizedWidth,
       faceDetectionAddress,
@@ -105,7 +105,7 @@ class FaceRecognitionService {
 
     // Align the faces
     final Float32List faceAlignmentResult = await _alignFacesSync(
-      image,
+      imageDimensions,
       rawRgbaBytes,
       faceDetectionResult,
       faceResults,
@@ -173,7 +173,7 @@ class FaceRecognitionService {
   /// Aligns multiple faces from the given image data.
   /// Returns a list of the aligned faces as image data.
   static Future<Float32List> _alignFacesSync(
-    Image image,
+    Dimensions imageDimensions,
     Uint8List rawRgbaBytes,
     List<FaceDetectionRelative> faces,
     List<FaceResult> faceResults,
@@ -181,7 +181,7 @@ class FaceRecognitionService {
     try {
       final (alignedFaces, alignmentResults, _, blurValues, _) =
           await preprocessToMobileFaceNetFloat32List(
-        image,
+        imageDimensions,
         rawRgbaBytes,
         faces,
       );

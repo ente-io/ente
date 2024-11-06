@@ -228,7 +228,7 @@ Future<List<Uint8List>> generateFaceThumbnailsUsingCanvas(
 }
 
 Future<(Float32List, Dimensions)> preprocessImageYoloFace(
-  Image image,
+  Dimensions image,
   Uint8List rawRgbaBytes,
 ) async {
   const requiredWidth = 640;
@@ -336,7 +336,7 @@ Future<Float32List> resizedToPreprocessedClip(
 }
 
 Future<Float32List> preprocessImageClip(
-  Image image,
+  Dimensions image,
   Uint8List rawRgbaBytes,
 ) async {
   const int requiredWidth = 256;
@@ -375,20 +375,20 @@ Future<Float32List> preprocessImageClip(
 
 Future<(Float32List, List<AlignmentResult>, List<bool>, List<double>, Size)>
     preprocessToMobileFaceNetFloat32List(
-  Image image,
+  Dimensions imageDimensions,
   Uint8List rawRgbaBytes,
   List<FaceDetectionRelative> relativeFaces, {
   int width = 112,
   int height = 112,
 }) async {
   final Size originalSize =
-      Size(image.width.toDouble(), image.height.toDouble());
+      Size(imageDimensions.width.toDouble(), imageDimensions.height.toDouble());
 
   final List<FaceDetectionAbsolute> absoluteFaces =
       relativeToAbsoluteDetections(
     relativeDetections: relativeFaces,
-    imageWidth: image.width,
-    imageHeight: image.height,
+    imageWidth: imageDimensions.width,
+    imageHeight: imageDimensions.height,
   );
 
   final alignedImagesFloat32List =
@@ -412,7 +412,7 @@ Future<(Float32List, List<AlignmentResult>, List<bool>, List<double>, Size)>
     alignmentResults.add(alignmentResult);
 
     _warpAffineFloat32List(
-      image,
+      imageDimensions,
       rawRgbaBytes,
       alignmentResult.affineMatrix,
       alignedImagesFloat32List,
@@ -446,7 +446,7 @@ Future<(Float32List, List<AlignmentResult>, List<bool>, List<double>, Size)>
 RGB _readPixelColor(
   int x,
   int y,
-  Image image,
+  Dimensions image,
   Uint8List rgbaBytes,
 ) {
   if (y < 0 || y >= image.height || x < 0 || x >= image.width) {
@@ -474,7 +474,7 @@ RGB _readPixelColor(
 RGB _getPixelBlurred(
   int x,
   int y,
-  Image image,
+  Dimensions image,
   Uint8List rgbaBytes,
 ) {
   double r = 0, g = 0, b = 0;
@@ -551,7 +551,7 @@ Future<Image> _cropImage(
 }
 
 void _warpAffineFloat32List(
-  Image inputImage,
+  Dimensions inputImageDimensions,
   Uint8List rawRgbaBytes,
   List<List<double>> affineMatrix,
   Float32List outputList,
@@ -606,8 +606,12 @@ void _warpAffineFloat32List(
       final num xOrigin = (xTrans - b00) * a00Prime + (yTrans - b10) * a01Prime;
       final num yOrigin = (xTrans - b00) * a10Prime + (yTrans - b10) * a11Prime;
 
-      final RGB pixel =
-          _getPixelBicubic(xOrigin, yOrigin, inputImage, rawRgbaBytes);
+      final RGB pixel = _getPixelBicubic(
+        xOrigin,
+        yOrigin,
+        inputImageDimensions,
+        rawRgbaBytes,
+      );
 
       // Set the new pixel
       outputList[startIndex + 3 * (yTrans * width + xTrans)] =
@@ -640,7 +644,7 @@ Future<Uint8List> _cropAndEncodeCanvas(
 RGB _getPixelBilinear(
   num fx,
   num fy,
-  Image image,
+  Dimensions image,
   Uint8List rawRgbaBytes, {
   bool antiAlias = false,
 }) {
@@ -659,7 +663,7 @@ RGB _getPixelBilinear(
   final dy1 = 1.0 - dy;
 
   // Get the original pixels (with gaussian blur if antialias)
-  final RGB Function(int, int, Image, Uint8List) readPixel =
+  final RGB Function(int, int, Dimensions, Uint8List) readPixel =
       antiAlias ? _getPixelBlurred : _readPixelColor;
   final RGB pixel1 = readPixel(x0, y0, image, rawRgbaBytes);
   final RGB pixel2 = readPixel(x1, y0, image, rawRgbaBytes);
@@ -684,9 +688,14 @@ RGB _getPixelBilinear(
 }
 
 /// Get the pixel value using Bicubic Interpolation. Code taken mainly from https://github.com/brendan-duncan/image/blob/6e407612752ffdb90b28cd5863c7f65856349348/lib/src/image/image.dart#L697
-RGB _getPixelBicubic(num fx, num fy, Image image, Uint8List rawRgbaBytes) {
-  fx = fx.clamp(0, image.width - 1);
-  fy = fy.clamp(0, image.height - 1);
+RGB _getPixelBicubic(
+  num fx,
+  num fy,
+  Dimensions imageDimensions,
+  Uint8List rawRgbaBytes,
+) {
+  fx = fx.clamp(0, imageDimensions.width - 1);
+  fy = fy.clamp(0, imageDimensions.height - 1);
 
   final x = fx.toInt() - (fx >= 0.0 ? 0 : 1);
   final px = x - 1;
@@ -705,62 +714,69 @@ RGB _getPixelBicubic(num fx, num fy, Image image, Uint8List rawRgbaBytes) {
               dx * dx * (2 * ipp - 5 * icp + 4 * inp - iap) +
               dx * dx * dx * (-ipp + 3 * icp - 3 * inp + iap));
 
-  final icc = _readPixelColor(x, y, image, rawRgbaBytes);
+  final icc = _readPixelColor(x, y, imageDimensions, rawRgbaBytes);
 
-  final ipp =
-      px < 0 || py < 0 ? icc : _readPixelColor(px, py, image, rawRgbaBytes);
-  final icp = px < 0 ? icc : _readPixelColor(x, py, image, rawRgbaBytes);
-  final inp = py < 0 || nx >= image.width
+  final ipp = px < 0 || py < 0
       ? icc
-      : _readPixelColor(nx, py, image, rawRgbaBytes);
-  final iap = ax >= image.width || py < 0
+      : _readPixelColor(px, py, imageDimensions, rawRgbaBytes);
+  final icp =
+      px < 0 ? icc : _readPixelColor(x, py, imageDimensions, rawRgbaBytes);
+  final inp = py < 0 || nx >= imageDimensions.width
       ? icc
-      : _readPixelColor(ax, py, image, rawRgbaBytes);
+      : _readPixelColor(nx, py, imageDimensions, rawRgbaBytes);
+  final iap = ax >= imageDimensions.width || py < 0
+      ? icc
+      : _readPixelColor(ax, py, imageDimensions, rawRgbaBytes);
 
   final ip0 = cubic(dx, ipp.$1, icp.$1, inp.$1, iap.$1);
   final ip1 = cubic(dx, ipp.$2, icp.$2, inp.$2, iap.$2);
   final ip2 = cubic(dx, ipp.$3, icp.$3, inp.$3, iap.$3);
   // final ip3 = cubic(dx, ipp.a, icp.a, inp.a, iap.a);
 
-  final ipc = px < 0 ? icc : _readPixelColor(px, y, image, rawRgbaBytes);
-  final inc =
-      nx >= image.width ? icc : _readPixelColor(nx, y, image, rawRgbaBytes);
-  final iac =
-      ax >= image.width ? icc : _readPixelColor(ax, y, image, rawRgbaBytes);
+  final ipc =
+      px < 0 ? icc : _readPixelColor(px, y, imageDimensions, rawRgbaBytes);
+  final inc = nx >= imageDimensions.width
+      ? icc
+      : _readPixelColor(nx, y, imageDimensions, rawRgbaBytes);
+  final iac = ax >= imageDimensions.width
+      ? icc
+      : _readPixelColor(ax, y, imageDimensions, rawRgbaBytes);
 
   final ic0 = cubic(dx, ipc.$1, icc.$1, inc.$1, iac.$1);
   final ic1 = cubic(dx, ipc.$2, icc.$2, inc.$2, iac.$2);
   final ic2 = cubic(dx, ipc.$3, icc.$3, inc.$3, iac.$3);
   // final ic3 = cubic(dx, ipc.a, icc.a, inc.a, iac.a);
 
-  final ipn = px < 0 || ny >= image.height
+  final ipn = px < 0 || ny >= imageDimensions.height
       ? icc
-      : _readPixelColor(px, ny, image, rawRgbaBytes);
-  final icn =
-      ny >= image.height ? icc : _readPixelColor(x, ny, image, rawRgbaBytes);
-  final inn = nx >= image.width || ny >= image.height
+      : _readPixelColor(px, ny, imageDimensions, rawRgbaBytes);
+  final icn = ny >= imageDimensions.height
       ? icc
-      : _readPixelColor(nx, ny, image, rawRgbaBytes);
-  final ian = ax >= image.width || ny >= image.height
+      : _readPixelColor(x, ny, imageDimensions, rawRgbaBytes);
+  final inn = nx >= imageDimensions.width || ny >= imageDimensions.height
       ? icc
-      : _readPixelColor(ax, ny, image, rawRgbaBytes);
+      : _readPixelColor(nx, ny, imageDimensions, rawRgbaBytes);
+  final ian = ax >= imageDimensions.width || ny >= imageDimensions.height
+      ? icc
+      : _readPixelColor(ax, ny, imageDimensions, rawRgbaBytes);
 
   final in0 = cubic(dx, ipn.$1, icn.$1, inn.$1, ian.$1);
   final in1 = cubic(dx, ipn.$2, icn.$2, inn.$2, ian.$2);
   final in2 = cubic(dx, ipn.$3, icn.$3, inn.$3, ian.$3);
   // final in3 = cubic(dx, ipn.a, icn.a, inn.a, ian.a);
 
-  final ipa = px < 0 || ay >= image.height
+  final ipa = px < 0 || ay >= imageDimensions.height
       ? icc
-      : _readPixelColor(px, ay, image, rawRgbaBytes);
-  final ica =
-      ay >= image.height ? icc : _readPixelColor(x, ay, image, rawRgbaBytes);
-  final ina = nx >= image.width || ay >= image.height
+      : _readPixelColor(px, ay, imageDimensions, rawRgbaBytes);
+  final ica = ay >= imageDimensions.height
       ? icc
-      : _readPixelColor(nx, ay, image, rawRgbaBytes);
-  final iaa = ax >= image.width || ay >= image.height
+      : _readPixelColor(x, ay, imageDimensions, rawRgbaBytes);
+  final ina = nx >= imageDimensions.width || ay >= imageDimensions.height
       ? icc
-      : _readPixelColor(ax, ay, image, rawRgbaBytes);
+      : _readPixelColor(nx, ay, imageDimensions, rawRgbaBytes);
+  final iaa = ax >= imageDimensions.width || ay >= imageDimensions.height
+      ? icc
+      : _readPixelColor(ax, ay, imageDimensions, rawRgbaBytes);
 
   final ia0 = cubic(dx, ipa.$1, ica.$1, ina.$1, iaa.$1);
   final ia1 = cubic(dx, ipa.$2, ica.$2, ina.$2, iaa.$2);

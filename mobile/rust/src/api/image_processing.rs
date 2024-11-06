@@ -3,7 +3,17 @@ use rgb::FromSlice;
 
 pub fn process_image_ml_from_path(
     image_path: &str,
-) -> (Vec<u8>, usize, usize, Vec<u8>, usize, usize) {
+) -> (
+    Vec<u8>,
+    usize,
+    usize,
+    Vec<u8>,
+    usize,
+    usize,
+    Vec<u8>,
+    usize,
+    usize,
+) {
     // Load the image (~200ms)
     let img = image::open(image_path).expect("Failed to open image");
 
@@ -29,6 +39,7 @@ pub fn process_image_ml_from_path(
     }
 
     // Convert image to RGB8 (~150ms)
+    let rgba_decoded = img.to_rgba8().to_vec();
     let rgb_img = img.into_rgb8();
 
     // Convert RGB8 to Vec<RGB> (~30ms)
@@ -80,6 +91,9 @@ pub fn process_image_ml_from_path(
         result_clip.push(pixel.b);
     }
     (
+        rgba_decoded,
+        height,
+        width,
         result_face,
         new_height_face,
         new_width_face,
