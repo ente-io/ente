@@ -20,19 +20,6 @@ const PAYMENT_PROVIDER_STRIPE = "stripe";
 const FREE_PLAN = "free";
 const THIRTY_DAYS_IN_MICROSECONDS = 30 * 24 * 60 * 60 * 1000 * 1000;
 
-enum FAILURE_REASON {
-    AUTHENTICATION_FAILED = "authentication_failed",
-    REQUIRE_PAYMENT_METHOD = "requires_payment_method",
-    STRIPE_ERROR = "stripe_error",
-    CANCELED = "canceled",
-    SERVER_ERROR = "server_error",
-}
-
-enum RESPONSE_STATUS {
-    success = "success",
-    fail = "fail",
-}
-
 export type PlanSelectionOutcome =
     | "buyPlan"
     | "updateSubscriptionToPlan"
@@ -230,7 +217,6 @@ export async function updatePaymentMethod(
     }
 }
 
-
 /**
  * When the payments app redirects back to us after a plan purchase or update
  * completes, it sets various query parameters to relay the status of the action
@@ -238,21 +224,38 @@ export async function updatePaymentMethod(
  *
  * Check if these query parameters exist, and if so, act on them appropriately.
  */
-export async function checkSubscriptionPurchase( setDialogMessage:
-    SetDialogBoxAttributes, router: NextRouter, setLoading: SetLoading,
+export async function checkSubscriptionPurchase(
+    setDialogMessage: SetDialogBoxAttributes,
+    router: NextRouter,
+    setLoading: SetLoading,
 ) {
     const { session_id: sessionId, status, reason } = router.query ?? {};
 
-    if (status === RESPONSE_STATUS.fail) {
+    if (status === "success") {
+        try {
+            const subscription = await billingService.verifySubscription(
+                sessionId as string,
+            );
+            setDialogMessage(
+                getSubscriptionPurchaseSuccessMessage(subscription),
+            );
+        } catch (e) {
+            setDialogMessage({
+                title: t("error"),
+                content: t("SUBSCRIPTION_VERIFICATION_ERROR"),
+                close: {},
+            });
+        }
+    } else if (status == "fail") {
         log.error(`subscription purchase failed: ${reason}`);
         switch (reason) {
-            case FAILURE_REASON.CANCELED:
+            case "canceled":
                 setDialogMessage({
                     content: t("SUBSCRIPTION_PURCHASE_CANCELLED"),
                     close: { variant: "critical" },
                 });
                 break;
-            case FAILURE_REASON.REQUIRE_PAYMENT_METHOD:
+            case "requires_payment_method":
                 setDialogMessage({
                     title: t("UPDATE_PAYMENT_METHOD"),
                     content: t("UPDATE_PAYMENT_METHOD_MESSAGE"),
@@ -271,7 +274,7 @@ export async function checkSubscriptionPurchase( setDialogMessage:
                 });
                 break;
 
-            case FAILURE_REASON.AUTHENTICATION_FAILED:
+            case "authentication_failed":
                 setDialogMessage({
                     title: t("UPDATE_PAYMENT_METHOD"),
                     content: t("STRIPE_AUTHENTICATION_FAILED"),
@@ -296,21 +299,6 @@ export async function checkSubscriptionPurchase( setDialogMessage:
                     content: t("SUBSCRIPTION_PURCHASE_FAILED"),
                     close: { variant: "critical" },
                 });
-        }
-    } else if (status === RESPONSE_STATUS.success) {
-        try {
-            const subscription = await billingService.verifySubscription(
-                sessionId as string,
-            );
-            setDialogMessage(
-                getSubscriptionPurchaseSuccessMessage(subscription),
-            );
-        } catch (e) {
-            setDialogMessage({
-                title: t("error"),
-                content: t("SUBSCRIPTION_VERIFICATION_ERROR"),
-                close: {},
-            });
         }
     }
 }
