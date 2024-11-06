@@ -1,7 +1,10 @@
-import { SpaceBetweenFlex } from "@ente/shared/components/Container";
+import {
+    FlexWrapper,
+    SpaceBetweenFlex,
+} from "@ente/shared/components/Container";
 import { Box, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
-import { Legend } from "./legend";
+import { LegendIndicator } from "../../../styledComponents";
 import { FamilyUsageProgressBar } from "./progressBar";
 
 interface Iprops {
@@ -38,5 +41,20 @@ export function FamilyUsageSection({
                 </Typography>
             </SpaceBetweenFlex>
         </Box>
+    );
+}
+
+interface LegendProps {
+    label: string;
+    color: string;
+}
+function Legend({ label, color }: LegendProps) {
+    return (
+        <FlexWrapper>
+            <LegendIndicator sx={{ color }} />
+            <Typography variant="mini" fontWeight={"bold"}>
+                {label}
+            </Typography>
+        </FlexWrapper>
     );
 }
