@@ -236,86 +236,75 @@ export async function checkSubscriptionPurchase(
     setLoading: SetLoading,
 ) {
     const { session_id: sessionId, status, reason } = router.query ?? {};
-    try {
-        if (status === RESPONSE_STATUS.fail) {
-            handleFailureReason(reason as string, setDialogMessage, setLoading);
-        } else if (status === RESPONSE_STATUS.success) {
-            try {
-                const subscription = await billingService.verifySubscription(
-                    sessionId as string,
-                );
-                setDialogMessage(
-                    getSubscriptionPurchaseSuccessMessage(subscription),
-                );
-            } catch (e) {
+
+    if (status === RESPONSE_STATUS.fail) {
+        log.error(`subscription purchase failed: ${reason}`);
+        switch (reason) {
+            case FAILURE_REASON.CANCELED:
+                setDialogMessage({
+                    content: t("SUBSCRIPTION_PURCHASE_CANCELLED"),
+                    close: { variant: "critical" },
+                });
+                break;
+            case FAILURE_REASON.REQUIRE_PAYMENT_METHOD:
+                setDialogMessage({
+                    title: t("UPDATE_PAYMENT_METHOD"),
+                    content: t("UPDATE_PAYMENT_METHOD_MESSAGE"),
+
+                    proceed: {
+                        text: t("UPDATE_PAYMENT_METHOD"),
+                        variant: "accent",
+                        action: updatePaymentMethod.bind(
+                            null,
+
+                            setDialogMessage,
+                            setLoading,
+                        ),
+                    },
+                    close: { text: t("cancel") },
+                });
+                break;
+
+            case FAILURE_REASON.AUTHENTICATION_FAILED:
+                setDialogMessage({
+                    title: t("UPDATE_PAYMENT_METHOD"),
+                    content: t("STRIPE_AUTHENTICATION_FAILED"),
+
+                    proceed: {
+                        text: t("UPDATE_PAYMENT_METHOD"),
+                        variant: "accent",
+                        action: updatePaymentMethod.bind(
+                            null,
+
+                            setDialogMessage,
+                            setLoading,
+                        ),
+                    },
+                    close: { text: t("cancel") },
+                });
+                break;
+
+            default:
                 setDialogMessage({
                     title: t("error"),
-                    content: t("SUBSCRIPTION_VERIFICATION_ERROR"),
-                    close: {},
+                    content: t("SUBSCRIPTION_PURCHASE_FAILED"),
+                    close: { variant: "critical" },
                 });
-            }
         }
-    } catch (e) {
-        // ignore
-    }
-}
-
-function handleFailureReason(
-    reason: string,
-    setDialogMessage: SetDialogBoxAttributes,
-    setLoading: SetLoading,
-): void {
-    log.error(`subscription purchase failed: ${reason}`);
-    switch (reason) {
-        case FAILURE_REASON.CANCELED:
-            setDialogMessage({
-                content: t("SUBSCRIPTION_PURCHASE_CANCELLED"),
-                close: { variant: "critical" },
-            });
-            break;
-        case FAILURE_REASON.REQUIRE_PAYMENT_METHOD:
-            setDialogMessage({
-                title: t("UPDATE_PAYMENT_METHOD"),
-                content: t("UPDATE_PAYMENT_METHOD_MESSAGE"),
-
-                proceed: {
-                    text: t("UPDATE_PAYMENT_METHOD"),
-                    variant: "accent",
-                    action: updatePaymentMethod.bind(
-                        null,
-
-                        setDialogMessage,
-                        setLoading,
-                    ),
-                },
-                close: { text: t("cancel") },
-            });
-            break;
-
-        case FAILURE_REASON.AUTHENTICATION_FAILED:
-            setDialogMessage({
-                title: t("UPDATE_PAYMENT_METHOD"),
-                content: t("STRIPE_AUTHENTICATION_FAILED"),
-
-                proceed: {
-                    text: t("UPDATE_PAYMENT_METHOD"),
-                    variant: "accent",
-                    action: updatePaymentMethod.bind(
-                        null,
-
-                        setDialogMessage,
-                        setLoading,
-                    ),
-                },
-                close: { text: t("cancel") },
-            });
-            break;
-
-        default:
+    } else if (status === RESPONSE_STATUS.success) {
+        try {
+            const subscription = await billingService.verifySubscription(
+                sessionId as string,
+            );
+            setDialogMessage(
+                getSubscriptionPurchaseSuccessMessage(subscription),
+            );
+        } catch (e) {
             setDialogMessage({
                 title: t("error"),
-                content: t("SUBSCRIPTION_PURCHASE_FAILED"),
-                close: { variant: "critical" },
+                content: t("SUBSCRIPTION_VERIFICATION_ERROR"),
+                close: {},
             });
+        }
     }
 }
