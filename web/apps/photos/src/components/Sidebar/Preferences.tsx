@@ -16,10 +16,9 @@ import {
     confirmDisableMapsDialogAttributes,
     confirmEnableMapsDialogAttributes,
 } from "@/new/photos/components/utils/dialog";
+import { useSettingsSnapshot } from "@/new/photos/components/utils/use-snapshot";
 import { isMLSupported } from "@/new/photos/services/ml";
 import {
-    settingsSnapshot,
-    settingsSubscribe,
     syncSettings,
     updateCFProxyDisabledPreference,
     updateMapEnabled,
@@ -31,7 +30,7 @@ import ScienceIcon from "@mui/icons-material/Science";
 import { Box, Stack } from "@mui/material";
 import DropdownInput from "components/DropdownInput";
 import { t } from "i18next";
-import React, { useCallback, useEffect, useSyncExternalStore } from "react";
+import React, { useCallback, useEffect } from "react";
 
 export const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     open,
@@ -174,10 +173,7 @@ export const MapSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
 }) => {
     const { showMiniDialog } = useAppContext();
 
-    const { mapEnabled } = useSyncExternalStore(
-        settingsSubscribe,
-        settingsSnapshot,
-    );
+    const { mapEnabled } = useSettingsSnapshot();
 
     const confirmToggle = useCallback(
         () =>
@@ -230,10 +226,7 @@ export const AdvancedSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     onClose,
     onRootClose,
 }) => {
-    const { cfUploadProxyDisabled } = useSyncExternalStore(
-        settingsSubscribe,
-        settingsSnapshot,
-    );
+    const { cfUploadProxyDisabled } = useSettingsSnapshot();
 
     const handleRootClose = () => {
         onClose();
