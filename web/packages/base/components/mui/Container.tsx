@@ -24,3 +24,15 @@ export const CenteredBox = styled("div")`
     justify-content: center;
     align-items: center;
 `;
+
+/**
+ * An absolute positioned div that fills the entire nearest relatively
+ * positioned ancestor.
+ */
+export const Overlay = styled("div")`
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+`;

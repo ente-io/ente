@@ -101,11 +101,9 @@ const m3 = () =>
         removeKV("latestUpdatedAt/location"),
     ]);
 
-// TODO: Not enabled yet.
+// TODO: Not enabled yet since it is not critical. Enable with next batch of changes.
 // // Added: Nov 2025 (v1.7.7-beta). Prunable.
 // const m4 = () => {
-//     // Delete legacy keys for storing individual settings
-//     // LS_KEYS.MAP_ENABLED = "mapEnabled",
+//     // Delete the legacy key that used to store the map preference.
 //     localStorage.removeItem("mapEnabled");
-//     localStorage.removeItem("cfProxyDisabled");
 // };

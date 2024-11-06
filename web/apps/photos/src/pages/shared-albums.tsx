@@ -5,6 +5,7 @@ import { NavbarBase, SelectionBar } from "@/base/components/Navbar";
 import { sharedCryptoWorker } from "@/base/crypto";
 import { useIsSmallWidth, useIsTouchscreen } from "@/base/hooks";
 import log from "@/base/log";
+import { updateShouldDisableCFUploadProxy } from "@/gallery/upload";
 import type { Collection } from "@/media/collection";
 import { type EnteFile, mergeMetadata } from "@/media/file";
 import {
@@ -240,6 +241,7 @@ export default function PublicCollectionGallery() {
                         : await cryptoWorker.fromHex(ck);
                 token.current = t;
                 downloadManager.updateToken(token.current);
+                await updateShouldDisableCFUploadProxy();
                 collectionKey.current = dck;
                 url.current = window.location.href;
                 const localCollection = await getLocalPublicCollection(

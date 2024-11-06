@@ -21,21 +21,17 @@ import {
     settingsSnapshot,
     settingsSubscribe,
     syncSettings,
+    updateCFProxyDisabledPreference,
     updateMapEnabled,
 } from "@/new/photos/services/settings";
-import { AppContext, useAppContext } from "@/new/photos/types/context";
+import { useAppContext } from "@/new/photos/types/context";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import ScienceIcon from "@mui/icons-material/Science";
 import { Box, Stack } from "@mui/material";
 import DropdownInput from "components/DropdownInput";
 import { t } from "i18next";
-import React, {
-    useCallback,
-    useContext,
-    useEffect,
-    useSyncExternalStore,
-} from "react";
+import React, { useCallback, useEffect, useSyncExternalStore } from "react";
 
 export const Preferences: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     open,
@@ -234,16 +230,18 @@ export const AdvancedSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     onClose,
     onRootClose,
 }) => {
-    const appContext = useContext(AppContext);
+    const { cfUploadProxyDisabled } = useSyncExternalStore(
+        settingsSubscribe,
+        settingsSnapshot,
+    );
 
     const handleRootClose = () => {
         onClose();
         onRootClose();
     };
 
-    const toggleCFProxy = () => {
-        appContext.setIsCFProxyDisabled(!appContext.isCFProxyDisabled);
-    };
+    const toggle = () =>
+        void updateCFProxyDisabledPreference(!cfUploadProxyDisabled);
 
     return (
         <NestedSidebarDrawer
@@ -262,8 +260,8 @@ export const AdvancedSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
                         <MenuItemGroup>
                             <EnteMenuItem
                                 variant="toggle"
-                                checked={!appContext.isCFProxyDisabled}
-                                onClick={toggleCFProxy}
+                                checked={!cfUploadProxyDisabled}
+                                onClick={toggle}
                                 label={t("faster_upload")}
                             />
                         </MenuItemGroup>

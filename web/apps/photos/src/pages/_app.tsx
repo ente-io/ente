@@ -2,6 +2,7 @@ import { clientPackageName, staticAppTitle } from "@/base/app";
 import { CustomHead } from "@/base/components/Head";
 import { AttributedMiniDialog } from "@/base/components/MiniDialog";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { Overlay } from "@/base/components/mui/Container";
 import { AppNavbar } from "@/base/components/Navbar";
 import {
     genericErrorDialogAttributes,
@@ -24,7 +25,6 @@ import DownloadManager from "@/new/photos/services/download";
 import { runMigrations } from "@/new/photos/services/migrations";
 import { initML, isMLSupported } from "@/new/photos/services/ml";
 import { AppContext } from "@/new/photos/types/context";
-import { Overlay } from "@ente/shared/components/Container";
 import DialogBox from "@ente/shared/components/DialogBox";
 import { DialogBoxAttributes } from "@ente/shared/components/DialogBox/types";
 import { MessageContainer } from "@ente/shared/components/MessageContainer";
@@ -78,10 +78,6 @@ export default function App({ Component, pageProps }: AppProps) {
     const [themeColor, setThemeColor] = useLocalState(
         LS_KEYS.THEME,
         THEME_COLOR.DARK,
-    );
-    const [isCFProxyDisabled, setIsCFProxyDisabled] = useLocalState(
-        LS_KEYS.CF_PROXY_DISABLED,
-        false,
     );
 
     useEffect(() => {
@@ -230,8 +226,6 @@ export default function App({ Component, pageProps }: AppProps) {
         showMiniDialog,
         somethingWentWrong,
         onGenericError,
-        isCFProxyDisabled,
-        setIsCFProxyDisabled,
         logout,
     };
 

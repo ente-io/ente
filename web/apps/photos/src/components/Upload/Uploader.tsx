@@ -244,7 +244,6 @@ export default function Uploader({
             },
             onUploadFile,
             publicCollectionGalleryContext,
-            appContext.isCFProxyDisabled,
         );
 
         if (uploadManager.isUploadRunning()) {
@@ -287,7 +286,6 @@ export default function Uploader({
         publicCollectionGalleryContext.accessedThroughSharedURL,
         publicCollectionGalleryContext.token,
         publicCollectionGalleryContext.passwordToken,
-        appContext.isCFProxyDisabled,
     ]);
 
     // Handle selected files when user selects files for upload through the open
