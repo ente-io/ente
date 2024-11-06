@@ -343,15 +343,9 @@ const ProgressBar = styled(LinearProgress)(() => ({
     backgroundColor: "rgba(255, 255, 255, 0.2)",
 }));
 
-const DotSeparator = styled(CircleIcon)`
-    font-size: 4px;
-    margin: 0 ${({ theme }) => theme.spacing(1)};
-    color: inherit;
-`;
-
-const LegendIndicator = styled(DotSeparator)`
+const LegendIndicator = styled(CircleIcon)`
     font-size: 8.71px;
     margin: 0;
-    margin-right: 4px;
+    margin-inline-end: 4px;
     color: inherit;
 `;
