@@ -10,10 +10,7 @@ import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import isElectron from "is-electron";
 import { getPaymentToken } from "./userService";
 
-export enum PLAN_PERIOD {
-    MONTH = "month",
-    YEAR = "year",
-}
+export type PlanPeriod = "month" | "year";
 
 export interface Subscription {
     id: number;
@@ -27,7 +24,7 @@ export interface Subscription {
         isCancelled: boolean;
     };
     price: string;
-    period: PLAN_PERIOD;
+    period: PlanPeriod;
 }
 
 export interface Plan {
@@ -36,7 +33,7 @@ export interface Plan {
     iosID: string;
     storage: number;
     price: string;
-    period: PLAN_PERIOD;
+    period: PlanPeriod;
     stripeID: string;
 }
 

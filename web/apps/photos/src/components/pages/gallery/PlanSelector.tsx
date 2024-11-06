@@ -35,12 +35,13 @@ import Typography from "@mui/material/Typography";
 import { t } from "i18next";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { Trans } from "react-i18next";
-import billingService, {
+import type {
     Plan,
-    PLAN_PERIOD,
+    PlanPeriod,
+    PlansResponse,
     Subscription,
-    type PlansResponse,
 } from "services/billingService";
+import billingService from "services/billingService";
 import { getFamilyPortalRedirectURL } from "services/userService";
 import { SetLoading } from "types/gallery";
 import { BonusData, UserDetails } from "types/user";
@@ -109,8 +110,8 @@ function PlanSelectorCard(props: PlanSelectorCardProps) {
         PlansResponse | undefined
     >();
 
-    const [planPeriod, setPlanPeriod] = useState<PLAN_PERIOD>(
-        subscription?.period || PLAN_PERIOD.MONTH,
+    const [planPeriod, setPlanPeriod] = useState<PlanPeriod>(
+        subscription?.period || "month",
     );
     const { showMiniDialog, setDialogMessage } = useContext(AppContext);
     const bonusData = useMemo(() => {
@@ -133,9 +134,7 @@ function PlanSelectorCard(props: PlanSelectorCardProps) {
 
     const togglePeriod = () => {
         setPlanPeriod((prevPeriod) =>
-            prevPeriod === PLAN_PERIOD.MONTH
-                ? PLAN_PERIOD.YEAR
-                : PLAN_PERIOD.MONTH,
+            prevPeriod == "month" ? "year" : "month",
         );
     };
     useEffect(() => {
@@ -408,7 +407,7 @@ function PaidSubscriptionPlanSelectorCard({
 }
 
 function PeriodToggler({ planPeriod, togglePeriod }) {
-    const handleChange = (_, newPlanPeriod: PLAN_PERIOD) => {
+    const handleChange = (_, newPlanPeriod: PlanPeriod) => {
         if (newPlanPeriod !== null && newPlanPeriod !== planPeriod) {
             togglePeriod();
         }
@@ -421,10 +420,10 @@ function PeriodToggler({ planPeriod, togglePeriod }) {
             onChange={handleChange}
             color="primary"
         >
-            <CustomToggleButton value={PLAN_PERIOD.MONTH}>
+            <CustomToggleButton value={"month"}>
                 {t("MONTHLY")}
             </CustomToggleButton>
-            <CustomToggleButton value={PLAN_PERIOD.YEAR}>
+            <CustomToggleButton value={"year"}>
                 {t("YEARLY")}
             </CustomToggleButton>
         </ToggleButtonGroup>
@@ -451,7 +450,7 @@ const CustomToggleButton = styled(ToggleButton)(({ theme }) => ({
 
 interface PlansProps {
     plansResponse: PlansResponse | undefined;
-    planPeriod: PLAN_PERIOD;
+    planPeriod: PlanPeriod;
     subscription: Subscription;
     bonusData?: BonusData;
     onPlanSelect: (plan: Plan) => void;
@@ -545,7 +544,7 @@ function PlanRow({
                         </Typography>{" "}
                         <Typography color="text.muted" variant="small">
                             {`/ ${
-                                plan.period === PLAN_PERIOD.MONTH
+                                plan.period === "month"
                                     ? t("MONTH_SHORT")
                                     : t("YEAR")
                             }`}
