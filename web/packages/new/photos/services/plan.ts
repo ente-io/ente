@@ -1,6 +1,3 @@
-// TODO:
-/* eslint-disable @typescript-eslint/prefer-optional-chain */
-/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { apiURL, familyAppOrigin, paymentsAppOrigin } from "@/base/origins";
 import { ensure } from "@/utils/ensure";
@@ -115,7 +112,9 @@ export const BonusData = z.object({
     /**
      * List of bonuses applied for the user.
      */
-    storageBonuses: Bonus.array(),
+    storageBonuses: Bonus.array()
+        .nullish()
+        .transform((v) => v ?? []),
 });
 
 /**
@@ -418,7 +417,7 @@ export const isSubscriptionPastDue = (subscription: Subscription) => {
  * (represented by the given {@link userDetails}).
  */
 export const userDetailsAddOnBonuses = (userDetails: UserDetails) =>
-    userDetails.bonusData?.storageBonuses?.filter((bonus) =>
+    userDetails.bonusData?.storageBonuses.filter((bonus) =>
         bonus.type.startsWith("ADD_ON"),
     ) ?? [];
 

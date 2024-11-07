@@ -28,7 +28,6 @@ import type {
     CollectionSummary,
     CollectionSummaryType,
 } from "../../services/collection/ui";
-import type { FamilyData } from "../../services/family";
 import {
     createFileCollectionIDs,
     getLatestVersionFiles,
@@ -41,6 +40,7 @@ import {
     isPinnedCollection,
 } from "../../services/magic-metadata";
 import type { PeopleState, Person } from "../../services/ml/people";
+import type { FamilyData } from "../../services/plan";
 
 /**
  * Specifies what the bar at the top of the gallery is displaying currently.
