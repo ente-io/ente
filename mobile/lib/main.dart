@@ -405,9 +405,9 @@ Future<void> killBGTask([String? taskId]) async {
   if (taskId != null) {
     if (!enableWorkManager) {
       await BackgroundFetch.finish(taskId);
-      return;
+    } else {
+      await Workmanager().cancelByUniqueName(taskId);
     }
-    await Workmanager().cancelByUniqueName(taskId);
   }
 }
 
