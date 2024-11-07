@@ -360,15 +360,14 @@ Future<List<FaceFilter>> curateFaceFilters(
 
     final Map<String, List<EnteFile>> clusterIdToFiles = {};
     final Map<String, List<EnteFile>> personIdToFiles = {};
-
     for (final f in files) {
       if (!fileIdToClusterID.containsKey(f.uploadedFileID ?? -1)) {
         continue;
       }
       final clusterIds = fileIdToClusterID[f.uploadedFileID ?? -1]!;
-      for (final cluster in clusterIds) {
+      for (final clusterId in clusterIds) {
         final PersonEntity? p =
-            personIdToPerson[clusterIDToPersonID[cluster] ?? ""];
+            personIdToPerson[clusterIDToPersonID[clusterId] ?? ""];
         if (p != null) {
           if (personIdToFiles.containsKey(p.remoteID)) {
             personIdToFiles[p.remoteID]!.add(f);
@@ -376,10 +375,10 @@ Future<List<FaceFilter>> curateFaceFilters(
             personIdToFiles[p.remoteID] = [f];
           }
         } else {
-          if (clusterIdToFiles.containsKey(cluster)) {
-            clusterIdToFiles[cluster]!.add(f);
+          if (clusterIdToFiles.containsKey(clusterId)) {
+            clusterIdToFiles[clusterId]!.add(f);
           } else {
-            clusterIdToFiles[cluster] = [f];
+            clusterIdToFiles[clusterId] = [f];
           }
         }
       }
