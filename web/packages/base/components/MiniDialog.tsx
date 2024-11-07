@@ -46,9 +46,9 @@ export interface MiniDialogAttributes {
     /**
      * Customize the primary action button shown in the dialog.
      *
-     * This is provided by boxes which serve as some sort of confirmation. For
-     * dialogs which are informational notifications, this is usually skipped,
-     * only the {@link close} action button is configured.
+     * This is provided by boxes which serve as some sort of confirmation. If
+     * not provided, only the {@link cancel} button is shown, unless that too is
+     * explicitly disabled.
      */
     continue?: {
         /**

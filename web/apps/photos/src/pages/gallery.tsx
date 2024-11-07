@@ -1,7 +1,9 @@
 import { sessionExpiredDialogAttributes } from "@/accounts/components/LoginComponents";
 import { stashRedirect } from "@/accounts/services/redirect";
+import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
 import { NavbarBase } from "@/base/components/Navbar";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { errorDialogAttributes } from "@/base/components/utils/dialog";
 import { useModalVisibility } from "@/base/components/utils/modal";
 import { useIsSmallWidth } from "@/base/hooks";
 import log from "@/base/log";
@@ -449,6 +451,7 @@ export default function Gallery() {
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         if (router.isReady && key) {
             checkSubscriptionPurchase(
+                showMiniDialog,
                 setDialogMessage,
                 router,
                 setBlockingLoad,
@@ -1239,6 +1242,7 @@ const HiddenSectionNavbarContents: React.FC<
  * Check if these query parameters exist, and if so, act on them appropriately.
  */
 export async function checkSubscriptionPurchase(
+    showMiniDialog: (attributes: MiniDialogAttributes) => void,
     setDialogMessage: SetDialogBoxAttributes,
     router: NextRouter,
     setLoading: SetLoading,
@@ -1248,25 +1252,25 @@ export async function checkSubscriptionPurchase(
     if (status == "success" && typeof sessionID == "string") {
         try {
             const subscription = await verifyStripeSubscription(sessionID);
-            setDialogMessage({
+            showMiniDialog({
                 title: t("SUBSCRIPTION_PURCHASE_SUCCESS_TITLE"),
-                close: { variant: "accent" },
-                content: (
+                message: (
                     <Trans
                         i18nKey="SUBSCRIPTION_PURCHASE_SUCCESS"
                         values={{ date: subscription?.expiryTime }}
                     />
                 ),
+                continue: { text: t("ok") },
+                cancel: false,
             });
         } catch (e) {
-            setDialogMessage({
-                title: t("error"),
-                content: t("SUBSCRIPTION_VERIFICATION_ERROR"),
-                close: {},
-            });
+            log.error(e);
+            showMiniDialog(
+                errorDialogAttributes(t("SUBSCRIPTION_VERIFICATION_ERROR")),
+            );
         }
     } else if (status == "fail") {
-        log.error(`subscription purchase failed: ${reason}`);
+        log.error(`Subscription purchase failed: ${reason}`);
         switch (reason) {
             case "canceled":
                 setDialogMessage({
