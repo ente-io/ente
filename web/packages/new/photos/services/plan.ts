@@ -5,17 +5,12 @@ import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import log from "@/base/log";
 import { apiURL, familyAppOrigin, paymentsAppOrigin } from "@/base/origins";
 import { nullToUndefined } from "@/utils/transform";
-import {
-    LS_KEYS,
-    getData,
-    removeData,
-    setData,
-} from "@ente/shared/storage/localStorage";
+import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";
 import isElectron from "is-electron";
 import { z } from "zod";
 import type { BonusData, UserDetails } from "./user";
-import { userDetailsSnapshot } from "./user";
+import { syncUserDetails, userDetailsSnapshot } from "./user";
 
 const PlanPeriod = z.enum(["month", "year"]);
 
@@ -375,6 +370,10 @@ const getFamiliesToken = async () => {
         .familiesToken;
 };
 
+/**
+ * Update remote to indicate that the user wants to leave the family plan that
+ * they are part of, then our local sync user details with remote.
+ */
 export const leaveFamily = async () => {
     ensureOk(
         await fetch(await apiURL("/family/leave"), {
@@ -382,5 +381,5 @@ export const leaveFamily = async () => {
             headers: await authenticatedRequestHeaders(),
         }),
     );
-    removeData(LS_KEYS.FAMILY_DATA);
+    return syncUserDetails();
 };
