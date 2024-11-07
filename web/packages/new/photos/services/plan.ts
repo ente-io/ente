@@ -2,11 +2,9 @@
 /* eslint-disable @typescript-eslint/prefer-optional-chain */
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
-import log from "@/base/log";
 import { apiURL, familyAppOrigin, paymentsAppOrigin } from "@/base/origins";
 import { nullToUndefined } from "@/utils/transform";
-import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
-import type { User } from "@ente/shared/user/types";
+import { LS_KEYS, setData } from "@ente/shared/storage/localStorage";
 import isElectron from "is-electron";
 import { z } from "zod";
 import type { BonusData, UserDetails } from "./user";
@@ -312,26 +310,19 @@ export const isPartOfFamily = (userDetails: UserDetails) =>
 export const isPartOfFamilyWithOtherMembers = (userDetails: UserDetails) =>
     (userDetails.familyData?.members.length ?? 0) > 1;
 
-export function isFamilyAdmin(userDetails: UserDetails): boolean {
-    const familyAdmin: FamilyMember = getFamilyPlanAdmin(userDetails);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const user: User = getData(LS_KEYS.USER);
-    return familyAdmin.email === user.email;
-}
+/**
+ * Return true if the user (represented by the given {@link userDetails}) is the
+ * admin for the family plan.
+ */
+export const isFamilyAdmin = (userDetails: UserDetails) =>
+    userDetails.email == familyAdminEmail(userDetails);
 
-export function getFamilyPlanAdmin(userDetails: UserDetails): FamilyMember {
-    if (isPartOfFamily(userDetails)) {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-non-null-asserted-optional-chain
-        return userDetails.familyData?.members.find((x) => x.isAdmin)!;
-    } else {
-        log.error(
-            "invalid getFamilyPlanAdmin call - verify user is part of family plan before calling this method",
-        );
-        throw new Error(
-            "invalid getFamilyPlanAdmin call - verify user is part of family plan before calling this method",
-        );
-    }
-}
+/**
+ * Return the email of the admin for the family plan, if any, that the user
+ * (represented by the given {@link userDetails}) is a part of.
+ */
+export const familyAdminEmail = (userDetails: UserDetails) =>
+    userDetails.familyData?.members.find((x) => x.isAdmin)?.email;
 
 /**
  * Return the combined usage of all the family members.

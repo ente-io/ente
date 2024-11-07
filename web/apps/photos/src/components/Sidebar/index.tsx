@@ -18,10 +18,11 @@ import {
     TRASH_SECTION,
 } from "@/new/photos/services/collection";
 import type { CollectionSummaries } from "@/new/photos/services/collection/ui";
-import { isFamilyAdmin, isPartOfFamily } from "@/new/photos/services/family";
 import {
     hasAddOnBonus,
     hasExceededStorageQuota,
+    isFamilyAdmin,
+    isPartOfFamily,
     isSubscriptionActive,
     isSubscriptionActiveFree,
     isSubscriptionActivePaid,
@@ -220,10 +221,7 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
         if (!userDetails) {
             return false;
         }
-        if (
-            isPartOfFamily(userDetails.familyData) &&
-            !isFamilyAdmin(userDetails.familyData)
-        ) {
+        if (isPartOfFamily(userDetails) && !isFamilyAdmin(userDetails)) {
             return false;
         }
         if (

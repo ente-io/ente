@@ -1,5 +1,5 @@
 import { useIsSmallWidth } from "@/base/hooks";
-import { getFamilyPlanAdmin, leaveFamily } from "@/new/photos/services/plan";
+import { familyAdminEmail, leaveFamily } from "@/new/photos/services/plan";
 import { AppContext } from "@/new/photos/types/context";
 import {
     FlexWrapper,
@@ -58,7 +58,7 @@ export function MemberSubscriptionManage({ open, userDetails, onClose }) {
                             {t("subscription_info_family")}
                         </Typography>
                         <Typography>
-                            {getFamilyPlanAdmin(userDetails)?.email}
+                            {familyAdminEmail(userDetails) ?? ""}
                         </Typography>
                     </Box>
 
