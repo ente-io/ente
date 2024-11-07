@@ -111,28 +111,32 @@ class FileDataService {
     );
   }
 
-  Future<void> syncDiff() async {
+  Future<void> syncFDStatus() async {
     try {
-      _logger.info("syncDiff");
-      final lastTime = _prefs.getInt("fd.lastSyncTime") ?? 1;
-      final res = await _dio.post(
-        "/files/data/status-diff",
-        data: {
-          "lastUpdated": lastTime,
-        },
-      );
-      final data = res.data as List;
-      final List<IndexInfo> info = [];
-      int maxUpdatedAt = lastTime;
-      for (var entry in data) {
-        info.add(IndexInfo.fromJson(entry));
-        if (entry["updatedAt"] > maxUpdatedAt) {
-          maxUpdatedAt = entry["updatedAt"];
+      bool hasMoreData = false;
+      do {
+        final lastTime = _prefs.getInt("fd.lastSyncTimex") ?? 0;
+        final res = await _dio.post(
+          "/files/data/status-diff",
+          data: {
+            "lastUpdatedAt": lastTime,
+          },
+        );
+        final r = res.data;
+        final data = (r["diff"] ?? []) as List;
+        final List<FDStatus> result = [];
+        int maxUpdatedAt = lastTime;
+        for (var entry in data) {
+          result.add(FDStatus.fromJson(entry));
+          if (entry["updatedAt"] > maxUpdatedAt) {
+            maxUpdatedAt = entry["updatedAt"];
+          }
         }
-      }
-      await MLDataDB.instance.putIndexStatus(info);
-      await _prefs.setInt("fd.lastSyncTime", maxUpdatedAt);
-      _logger.info('found ${info.length} entries');
+        await MLDataDB.instance.putFDStatus(result);
+        await _prefs.setInt("fd.lastSyncTime", maxUpdatedAt);
+        _logger.info('found ${result.length} fd entries');
+        hasMoreData = result.isNotEmpty;
+      } while (hasMoreData);
     } catch (e) {
       _logger.severe("Failed to syncDiff", e);
       rethrow;

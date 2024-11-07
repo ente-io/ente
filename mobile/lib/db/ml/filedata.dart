@@ -3,23 +3,25 @@ import "package:photos/db/ml/db_fields.dart";
 import "package:photos/services/filedata/model/file_data.dart";
 
 extension FileDataTable on MLDataDB {
-  Future<void> putIndexStatus(List<IndexInfo> embeddings) async {
-    if (embeddings.isEmpty) return;
+  Future<void> putFDStatus(List<FDStatus> fdStatusList) async {
+    if (fdStatusList.isEmpty) return;
     final db = await MLDataDB.instance.asyncDB;
     final inputs = <List<Object?>>[];
-    for (var embedding in embeddings) {
+    for (var status in fdStatusList) {
       inputs.add(
         [
-          embedding.fileID,
-          embedding.userID,
-          embedding.type,
-          embedding.size,
-          embedding.updatedAt,
+          status.fileID,
+          status.userID,
+          status.type,
+          status.size,
+          status.objectID,
+          status.objectNonce,
+          status.updatedAt,
         ],
       );
     }
     await db.executeBatch(
-      'INSERT OR REPLACE INTO $fileDataTable ($fileIDColumn, user_id, type, size, updated_at) values(?, ?, ?, ?, ?)',
+      'INSERT OR REPLACE INTO $fileDataTable ($fileIDColumn, user_id, type, size, obj_id, obj_nonce, updated_at ) values(?, ?, ?, ?, ?, ?, ?)',
       inputs,
     );
   }
