@@ -746,19 +746,25 @@ const StripeSubscriptionOptions: React.FC<StripeSubscriptionOptionsProps> = ({
             }),
             continue: {
                 text: t("REACTIVATE_SUBSCRIPTION"),
-                action: reactivate,
+                action: async () => {
+                    await activateStripeSubscription();
+                    onClose();
+                    // [Note: Chained MiniDialogs]
+                    //
+                    // The MiniDialog will automatically close when we the
+                    // action promise resolves, so if we want to show another
+                    // dialog, schedule it on the next run loop.
+                    setTimeout(() => {
+                        showMiniDialog({
+                            title: t("success"),
+                            message: t("SUBSCRIPTION_ACTIVATE_SUCCESS"),
+                            continue: { action: onClose },
+                            cancel: false,
+                        });
+                    }, 0);
+                },
             },
         });
-
-    const reactivate = async () => {
-        await activateStripeSubscription();
-        showMiniDialog({
-            title: t("success"),
-            message: t("SUBSCRIPTION_ACTIVATE_SUCCESS"),
-            continue: { action: onClose },
-            cancel: false,
-        });
-    };
 
     const confirmCancel = () =>
         showMiniDialog({
@@ -771,23 +777,20 @@ const StripeSubscriptionOptions: React.FC<StripeSubscriptionOptionsProps> = ({
             continue: {
                 text: t("CANCEL_SUBSCRIPTION"),
                 color: "critical",
-                action: cancel,
+                action: async () => {
+                    await cancelStripeSubscription();
+                    onClose();
+                    // See: [Note: Chained MiniDialogs]
+                    setTimeout(() => {
+                        showMiniDialog({
+                            message: t("SUBSCRIPTION_CANCEL_SUCCESS"),
+                            cancel: t("ok"),
+                        });
+                    }, 0);
+                },
             },
             cancel: t("NEVERMIND"),
         });
-
-    const cancel = async () => {
-        await cancelStripeSubscription();
-        showMiniDialog({
-            title: t("success"),
-            message: t("SUBSCRIPTION_CANCEL_SUCCESS"),
-            continue: {
-                color: "secondary",
-                action: onClose,
-            },
-            cancel: false,
-        });
-    };
 
     const handleManageClick = useWrapAsyncOperation(redirectToCustomerPortal);
 
