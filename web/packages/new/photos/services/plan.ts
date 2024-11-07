@@ -171,7 +171,15 @@ export const getPlansData = async (): Promise<PlansData> => {
 export const planUsage = (userDetails: UserDetails) =>
     isPartOfFamily(userDetails) ? familyUsage(userDetails) : userDetails.usage;
 
-export const verifySubscription = async (
+/**
+ * Ask remote to acknowledge a subscription that was completed via Stripe,
+ * updating our local state to reflect the new subscription on successful
+ * verification.
+ *
+ * @param sessionID A token passed on completion of the flow. It is forwarded as
+ * the verification data to remote.
+ */
+export const verifyStripeSubscription = async (
     sessionID: string,
 ): Promise<Subscription> => {
     ensureOk(
@@ -189,7 +197,12 @@ export const verifySubscription = async (
     return ensure(userDetailsSnapshot()?.subscription);
 };
 
-export const activateSubscription = async () => {
+/**
+ * Ask remote to reactivate the user's current Stripe subscription (that user
+ * had previously cancelled), updating our local state to reflect the changes on
+ * success.
+ */
+export const activateStripeSubscription = async () => {
     ensureOk(
         await fetch(await apiURL("/billing/stripe/activate-subscription"), {
             method: "POST",
@@ -199,7 +212,11 @@ export const activateSubscription = async () => {
     return syncUserDetails();
 };
 
-export const cancelSubscription = async () => {
+/**
+ * Ask remote to cancel the user's current Stripe subscription, updating our
+ * local state to reflect the changes on success.
+ */
+export const cancelStripeSubscription = async () => {
     ensureOk(
         await fetch(await apiURL("/billing/stripe/cancel-subscription"), {
             method: "POST",

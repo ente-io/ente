@@ -41,7 +41,7 @@ import {
 } from "@/new/photos/services/files";
 import {
     redirectToCustomerPortal,
-    verifySubscription,
+    verifyStripeSubscription,
 } from "@/new/photos/services/plan";
 import {
     filterSearchableFiles,
@@ -1245,11 +1245,11 @@ export async function checkSubscriptionPurchase(
     router: NextRouter,
     setLoading: SetLoading,
 ) {
-    const { session_id: sessionID, status, reason } = router.query ?? {};
+    const { session_id: sessionID, status, reason } = router.query;
 
     if (status == "success" && typeof sessionID == "string") {
         try {
-            const subscription = await verifySubscription(sessionID);
+            const subscription = await verifyStripeSubscription(sessionID);
             setDialogMessage({
                 title: t("SUBSCRIPTION_PURCHASE_SUCCESS_TITLE"),
                 close: { variant: "accent" },

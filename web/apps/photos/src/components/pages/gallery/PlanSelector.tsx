@@ -9,8 +9,8 @@ import type {
     Subscription,
 } from "@/new/photos/services/plan";
 import {
-    activateSubscription,
-    cancelSubscription,
+    activateStripeSubscription,
+    cancelStripeSubscription,
     getPlansData,
     isSubscriptionActive,
     isSubscriptionActiveFree,
@@ -785,7 +785,7 @@ function StripeSubscriptionOptions({
     const reactivate = async () => {
         try {
             setLoading(true);
-            await activateSubscription();
+            await activateStripeSubscription();
             setDialogMessage({
                 title: t("success"),
                 content: t("SUBSCRIPTION_ACTIVATE_SUCCESS"),
@@ -825,7 +825,7 @@ function StripeSubscriptionOptions({
     const cancel = async () => {
         try {
             setLoading(true);
-            await cancelSubscription();
+            await cancelStripeSubscription();
             setDialogMessage({
                 title: t("success"),
                 content: t("SUBSCRIPTION_CANCEL_SUCCESS"),
