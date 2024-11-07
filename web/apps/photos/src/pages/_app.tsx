@@ -24,7 +24,7 @@ import { photosDialogZIndex } from "@/new/photos/components/utils/z-index";
 import DownloadManager from "@/new/photos/services/download";
 import { runMigrations } from "@/new/photos/services/migrations";
 import { initML, isMLSupported } from "@/new/photos/services/ml";
-import { getFamilyPortalRedirectURL } from "@/new/photos/services/plan";
+import { getFamilyPortalRedirectURL } from "@/new/photos/services/user-details";
 import { AppContext } from "@/new/photos/types/context";
 import DialogBox from "@ente/shared/components/DialogBox";
 import { DialogBoxAttributes } from "@ente/shared/components/DialogBox/types";

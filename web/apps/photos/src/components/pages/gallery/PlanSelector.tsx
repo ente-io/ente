@@ -11,7 +11,7 @@ import type {
     PlanPeriod,
     PlansData,
     Subscription,
-} from "@/new/photos/services/plan";
+} from "@/new/photos/services/user-details";
 import {
     activateStripeSubscription,
     cancelStripeSubscription,
@@ -27,7 +27,7 @@ import {
     redirectToCustomerPortal,
     redirectToPaymentsApp,
     userDetailsAddOnBonuses,
-} from "@/new/photos/services/plan";
+} from "@/new/photos/services/user-details";
 import { AppContext, useAppContext } from "@/new/photos/types/context";
 import { bytesInGB, formattedStorageByteSize } from "@/new/photos/utils/units";
 import { openURL } from "@/new/photos/utils/web";

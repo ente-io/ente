@@ -1,10 +1,10 @@
 import { Overlay } from "@/base/components/mui/Container";
 import type { ButtonishProps } from "@/new/photos/components/mui";
+import type { UserDetails } from "@/new/photos/services/user-details";
 import {
     familyUsage,
     isPartOfFamilyWithOtherMembers,
-} from "@/new/photos/services/plan";
-import type { UserDetails } from "@/new/photos/services/user";
+} from "@/new/photos/services/user-details";
 import { bytesInGB, formattedStorageByteSize } from "@/new/photos/utils/units";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";

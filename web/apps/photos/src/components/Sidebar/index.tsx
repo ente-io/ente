@@ -19,6 +19,8 @@ import {
     TRASH_SECTION,
 } from "@/new/photos/services/collection";
 import type { CollectionSummaries } from "@/new/photos/services/collection/ui";
+import { isInternalUser } from "@/new/photos/services/settings";
+import { syncUserDetails } from "@/new/photos/services/user";
 import {
     familyAdminEmail,
     hasExceededStorageQuota,
@@ -33,9 +35,8 @@ import {
     leaveFamily,
     redirectToCustomerPortal,
     userDetailsAddOnBonuses,
-} from "@/new/photos/services/plan";
-import { isInternalUser } from "@/new/photos/services/settings";
-import { syncUserDetails, type UserDetails } from "@/new/photos/services/user";
+    type UserDetails,
+} from "@/new/photos/services/user-details";
 import { AppContext, useAppContext } from "@/new/photos/types/context";
 import { initiateEmail, openURL } from "@/new/photos/utils/web";
 import {

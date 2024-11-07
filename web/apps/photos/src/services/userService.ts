@@ -1,7 +1,7 @@
 import { putAttributes } from "@/accounts/api/user";
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
-import type { UserDetails } from "@/new/photos/services/user";
+import type { UserDetails } from "@/new/photos/services/user-details";
 import { ApiError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";

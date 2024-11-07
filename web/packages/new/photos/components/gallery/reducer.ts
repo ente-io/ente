@@ -40,7 +40,7 @@ import {
     isPinnedCollection,
 } from "../../services/magic-metadata";
 import type { PeopleState, Person } from "../../services/ml/people";
-import type { FamilyData } from "../../services/plan";
+import type { FamilyData } from "../../services/user-details";
 
 /**
  * Specifies what the bar at the top of the gallery is displaying currently.

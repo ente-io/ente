@@ -7,12 +7,12 @@ import { CollectionMappingChoiceDialog } from "@/new/photos/components/Collectio
 import type { CollectionSelectorAttributes } from "@/new/photos/components/CollectionSelector";
 import { downloadAppDialogAttributes } from "@/new/photos/components/utils/download";
 import { exportMetadataDirectoryName } from "@/new/photos/services/export";
-import { redirectToCustomerPortal } from "@/new/photos/services/plan";
 import type {
     FileAndPath,
     UploadItem,
 } from "@/new/photos/services/upload/types";
 import { UPLOAD_STAGES } from "@/new/photos/services/upload/types";
+import { redirectToCustomerPortal } from "@/new/photos/services/user-details";
 import { AppContext } from "@/new/photos/types/context";
 import { NotificationAttributes } from "@/new/photos/types/notification";
 import { firstNonEmpty } from "@/utils/array";

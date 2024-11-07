@@ -42,10 +42,6 @@ import {
     sortFiles,
 } from "@/new/photos/services/files";
 import {
-    redirectToCustomerPortal,
-    verifyStripeSubscription,
-} from "@/new/photos/services/plan";
-import {
     filterSearchableFiles,
     setSearchCollectionsAndFiles,
 } from "@/new/photos/services/search";
@@ -55,6 +51,10 @@ import {
     initUserDetailsOrTriggerSync,
     userDetailsSnapshot,
 } from "@/new/photos/services/user";
+import {
+    redirectToCustomerPortal,
+    verifyStripeSubscription,
+} from "@/new/photos/services/user-details";
 import { useAppContext } from "@/new/photos/types/context";
 import { splitByPredicate } from "@/utils/array";
 import { ensure } from "@/utils/ensure";
