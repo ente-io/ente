@@ -186,6 +186,7 @@ class _HierarchicalSearchGalleryState extends State<HierarchicalSearchGallery> {
                             );
                             if (result != null &&
                                 result is (PersonEntity, EnteFile)) {
+                              Navigator.of(context).pop();
                               unawaited(
                                 routeToPage(
                                   context,
@@ -197,6 +198,7 @@ class _HierarchicalSearchGalleryState extends State<HierarchicalSearchGallery> {
                               );
                             } else if (result != null &&
                                 result is PersonEntity) {
+                              Navigator.of(context).pop();
                               unawaited(
                                 routeToPage(
                                   context,
