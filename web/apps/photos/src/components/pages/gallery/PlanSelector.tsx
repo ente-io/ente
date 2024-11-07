@@ -108,7 +108,7 @@ const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
 
     const [plansData, setPlansData] = useState<PlansData | undefined>();
     const [planPeriod, setPlanPeriod] = useState<PlanPeriod | undefined>(
-        userDetails?.subscription?.period,
+        userDetails?.subscription?.period ?? "month",
     );
 
     const usage = userDetails ? planUsage(userDetails) : 0;
@@ -775,6 +775,7 @@ function StripeSubscriptionOptions({
             ),
             continue: {
                 text: t("CANCEL_SUBSCRIPTION"),
+                color: "critical",
                 action: cancel,
             },
             cancel: t("NEVERMIND"),
