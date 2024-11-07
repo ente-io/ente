@@ -115,7 +115,7 @@ class FileDataService {
     try {
       bool hasMoreData = false;
       do {
-        final lastTime = _prefs.getInt("fd.lastSyncTimex") ?? 0;
+        final lastTime = _prefs.getInt("fd.lastSyncTime") ?? 0;
         final res = await _dio.post(
           "/files/data/status-diff",
           data: {

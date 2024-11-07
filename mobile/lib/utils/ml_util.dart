@@ -7,6 +7,7 @@ import "package:photos/core/configuration.dart";
 import "package:photos/db/files_db.dart";
 import "package:photos/db/ml/clip_db.dart";
 import "package:photos/db/ml/db.dart";
+import "package:photos/db/ml/filedata.dart";
 import "package:photos/extensions/list.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
@@ -87,6 +88,9 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
       await MLDataDB.instance.clipIndexedFileWithVersion();
   final Set<int> queuedFiledIDs = {};
 
+  final Set<int> filesWithFDStatus =
+      await MLDataDB.instance.getFileIDsWithFDData();
+
   // Get all regular files and all hidden files
   final enteFiles = await SearchService.instance.getAllFiles();
   final hiddenFiles = await SearchService.instance.getHiddenFiles();
@@ -149,10 +153,14 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
     ...filesWithoutLocalID,
     ...hiddenFilesToIndex,
   ];
+  final splitResult = sortedBylocalID.splitMatch(
+    (i) => filesWithFDStatus.contains(i.file.uploadedFileID!),
+  );
+
   _logger.info(
     "Getting list of files to index for ML took ${DateTime.now().difference(time).inMilliseconds} ms",
   );
-  return sortedBylocalID;
+  return [...splitResult.matched, ...splitResult.unmatched];
 }
 
 Stream<List<FileMLInstruction>> fetchEmbeddingsAndInstructions(

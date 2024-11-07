@@ -25,4 +25,10 @@ extension FileDataTable on MLDataDB {
       inputs,
     );
   }
+
+  Future<Set<int>> getFileIDsWithFDData() async {
+    final db = await MLDataDB.instance.asyncDB;
+    final res = await db.execute('SELECT $fileIDColumn FROM $fileDataTable');
+    return res.map((e) => e[fileIDColumn] as int).toSet();
+  }
 }
