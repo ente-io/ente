@@ -33,6 +33,7 @@ class _FilterOptionsBottomSheetState extends State<FilterOptionsBottomSheet> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
+      clipBehavior: Clip.none,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 16),
         child: SizedBox(
