@@ -94,11 +94,6 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
   bool userAlreadyAssigned = false;
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     final isKeyboardUp = bottomInset > 100;

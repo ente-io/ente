@@ -4,15 +4,25 @@ import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/files_updated_event.dart";
 import "package:photos/events/local_photos_updated_event.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file_load_result.dart";
+import "package:photos/models/ml/face/person.dart";
+import "package:photos/models/search/hierarchical/face_filter.dart";
+import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
+import "package:photos/models/search/hierarchical/only_them_filter.dart";
 import "package:photos/models/selected_files.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
+import "package:photos/ui/viewer/people/add_person_action_sheet.dart";
+import "package:photos/ui/viewer/people/people_banner.dart";
+import "package:photos/ui/viewer/people/people_page.dart";
+import "package:photos/ui/viewer/search/result/person_face_widget.dart";
 import "package:photos/utils/hierarchical_search_util.dart";
+import "package:photos/utils/navigation_util.dart";
 
 class HierarchicalSearchGallery extends StatefulWidget {
   final String tagPrefix;
@@ -35,6 +45,7 @@ class _HierarchicalSearchGalleryState extends State<HierarchicalSearchGallery> {
   List<EnteFile> _filterdFiles = <EnteFile>[];
   int _filteredFilesVersion = 0;
   final _isLoading = ValueNotifier<bool>(false);
+  String? _firstUnnamedAppliedClusterID;
 
   @override
   void initState() {
@@ -86,7 +97,32 @@ class _HierarchicalSearchGalleryState extends State<HierarchicalSearchGallery> {
 
     _setFilteredFiles(filterdFiles);
     await curateFilters(_searchFilterDataProvider!, filterdFiles, context);
+    _setUnnamedFaceFilter(filters);
+
     _isLoading.value = false;
+  }
+
+  void _setUnnamedFaceFilter(List<HierarchicalSearchFilter> filters) {
+    bool hasUnnamedFaceFilter = false;
+    for (HierarchicalSearchFilter filter in filters) {
+      if (filter is FaceFilter && filter.clusterId != null) {
+        _firstUnnamedAppliedClusterID = filter.clusterId;
+        hasUnnamedFaceFilter = true;
+        break;
+      }
+      if (filter is OnlyThemFilter) {
+        for (final filter in filter.faceFilters) {
+          if (filter.clusterId != null) {
+            _firstUnnamedAppliedClusterID = filter.clusterId;
+            hasUnnamedFaceFilter = true;
+            break;
+          }
+        }
+      }
+      if (!hasUnnamedFaceFilter) {
+        _firstUnnamedAppliedClusterID = null;
+      }
+    }
   }
 
   void _setFilteredFiles(List<EnteFile> files) {
@@ -142,6 +178,47 @@ class _HierarchicalSearchGalleryState extends State<HierarchicalSearchGallery> {
                     EventType.hide,
                   },
                   selectedFiles: widget.selectedFiles,
+                  header: _firstUnnamedAppliedClusterID != null
+                      ? PeopleBanner(
+                          type: PeopleBannerType.addName,
+                          faceWidget: PersonFaceWidget(
+                            _filterdFiles.first,
+                            clusterID: _firstUnnamedAppliedClusterID,
+                          ),
+                          actionIcon: Icons.add_outlined,
+                          text: S.of(context).addAName,
+                          subText: S.of(context).findPeopleByName,
+                          onTap: () async {
+                            final result = await showAssignPersonAction(
+                              context,
+                              clusterID: _firstUnnamedAppliedClusterID!,
+                            );
+                            if (result != null &&
+                                result is (PersonEntity, EnteFile)) {
+                              unawaited(
+                                routeToPage(
+                                  context,
+                                  PeoplePage(
+                                    person: result.$1,
+                                    searchResult: null,
+                                  ),
+                                ),
+                              );
+                            } else if (result != null &&
+                                result is PersonEntity) {
+                              unawaited(
+                                routeToPage(
+                                  context,
+                                  PeoplePage(
+                                    person: result,
+                                    searchResult: null,
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                        )
+                      : null,
                 ),
         );
       },
