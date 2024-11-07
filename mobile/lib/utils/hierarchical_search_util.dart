@@ -102,7 +102,7 @@ Future<List<EnteFile>> getFilteredFiles(
       } catch (e) {
         logger.severe("Error in filtering only them filter: $e");
       }
-    } else if (filter is! FaceFilter && filter.matchedUploadedIDs.isEmpty) {
+    } else if (filter.matchedUploadedIDs.isEmpty) {
       resultsNeverComputedFilters.add(filter);
     }
   }
