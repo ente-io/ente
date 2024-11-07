@@ -43,7 +43,7 @@ class _HierarchicalSearchGalleryState extends State<HierarchicalSearchGallery> {
   late SearchFilterDataProvider? _searchFilterDataProvider;
   List<EnteFile> _filterdFiles = <EnteFile>[];
   int _filteredFilesVersion = 0;
-  final _isLoading = ValueNotifier<bool>(false);
+  final _isLoading = ValueNotifier<bool>(true);
   FaceFilter? _firstUnnamedAppliedFaceFilter;
 
   @override
