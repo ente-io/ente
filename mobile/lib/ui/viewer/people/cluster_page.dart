@@ -186,20 +186,18 @@ class _ClusterPageState extends State<ClusterPage> {
             key: ValueKey(files.length),
           ),
         ),
-        body: Expanded(
-          child: SelectionState(
-            selectedFiles: _selectedFiles,
-            child: Stack(
-              alignment: Alignment.bottomCenter,
-              children: [
-                gallery,
-                FileSelectionOverlayBar(
-                  ClusterPage.overlayType,
-                  _selectedFiles,
-                  clusterID: widget.clusterID,
-                ),
-              ],
-            ),
+        body: SelectionState(
+          selectedFiles: _selectedFiles,
+          child: Stack(
+            alignment: Alignment.bottomCenter,
+            children: [
+              gallery,
+              FileSelectionOverlayBar(
+                ClusterPage.overlayType,
+                _selectedFiles,
+                clusterID: widget.clusterID,
+              ),
+            ],
           ),
         ),
       ),
