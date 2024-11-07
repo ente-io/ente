@@ -12,11 +12,11 @@ type Entity struct {
 	DecryptionHeader string          `json:"decryptionHeader"`
 }
 
-type IndexDiffRequest struct {
-	LastUpdated int64 `form:"lastUpdated" binding:"required"`
+type FDDiffRequest struct {
+	LastUpdatedAt *int64 `form:"lastUpdated" binding:"required"`
 }
 
-type IndexStatus struct {
+type FDStatus struct {
 	FileID    int64           `json:"fileID" binding:"required"`
 	UserID    int64           `json:"userID" binding:"required"`
 	Type      ente.ObjectType `json:"type" binding:"required"`
