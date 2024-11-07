@@ -1,10 +1,6 @@
 import { genericRetriableErrorDialogAttributes } from "@/base/components/utils/dialog";
 import log from "@/base/log";
 import { useUserDetailsSnapshot } from "@/new/photos/components/utils/use-snapshot";
-import {
-    getTotalFamilyUsage,
-    isPartOfFamily,
-} from "@/new/photos/services/family";
 import type {
     Plan,
     PlanPeriod,
@@ -21,10 +17,11 @@ import {
     isSubscriptionActivePaid,
     isSubscriptionCancelled,
     isSubscriptionStripe,
+    planUsage,
     redirectToCustomerPortal,
     redirectToPaymentsApp,
 } from "@/new/photos/services/plan";
-import { BonusData, UserDetails } from "@/new/photos/services/user";
+import { BonusData } from "@/new/photos/services/user";
 import { AppContext } from "@/new/photos/types/context";
 import { bytesInGB, formattedStorageByteSize } from "@/new/photos/utils/units";
 import { openURL } from "@/new/photos/utils/web";
@@ -33,7 +30,6 @@ import {
     FluidContainer,
     SpaceBetweenFlex,
 } from "@ente/shared/components/Container";
-import { getData, LS_KEYS } from "@ente/shared/storage/localStorage";
 import ArrowForward from "@mui/icons-material/ArrowForward";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import Close from "@mui/icons-material/Close";
@@ -54,7 +50,7 @@ import {
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { t } from "i18next";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 import { getFamilyPortalRedirectURL } from "services/userService";
 import { SetLoading } from "types/gallery";
@@ -100,36 +96,32 @@ interface PlanSelectorCardProps {
     setLoading: SetLoading;
 }
 
-function PlanSelectorCard(props: PlanSelectorCardProps) {
-    const subscription = useMemo(() => getLocalUserSubscription(), []);
-    const [plansData, setPlansData] = useState<PlansData | undefined>();
-
-    const [planPeriod, setPlanPeriod] = useState<PlanPeriod>(
-        subscription?.period || "month",
-    );
+const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
+    closeModal,
+    setLoading,
+}) => {
     const { showMiniDialog, setDialogMessage } = useContext(AppContext);
-    const bonusData = useUserDetailsSnapshot()?.bonusData;
 
+    const userDetails = useUserDetailsSnapshot();
 
-    const usage = useMemo(() => {
-        const userDetails = getLocalUserDetails();
-        if (!userDetails) {
-            return 0;
-        }
-        return isPartOfFamily(userDetails.familyData)
-            ? getTotalFamilyUsage(userDetails.familyData)
-            : userDetails.usage;
-    }, []);
+    const [plansData, setPlansData] = useState<PlansData | undefined>();
+    const [planPeriod, setPlanPeriod] = useState<PlanPeriod>(
+        userDetails?.subscription?.period || "month",
+    );
 
-    const togglePeriod = () => {
-        setPlanPeriod((prevPeriod) =>
-            prevPeriod == "month" ? "year" : "month",
-        );
-    };
+    const usage = userDetails ? planUsage(userDetails) : 0;
+    const subscription = userDetails?.subscription;
+    const bonusData = userDetails?.bonusData;
+
+    const togglePeriod = useCallback(
+        () => setPlanPeriod((prev) => (prev == "month" ? "year" : "month")),
+        [],
+    );
+
     useEffect(() => {
         const main = async () => {
             try {
-                props.setLoading(true);
+                setLoading(true);
                 const plansData = await getPlansData();
                 const { plans } = plansData;
                 if (isSubscriptionActive(subscription)) {
@@ -156,10 +148,10 @@ function PlanSelectorCard(props: PlanSelectorCardProps) {
                 setPlansData(plansData);
             } catch (e) {
                 log.error("plan selector modal open failed", e);
-                props.closeModal();
+                closeModal();
                 showMiniDialog(genericRetriableErrorDialogAttributes());
             } finally {
-                props.setLoading(false);
+                setLoading(false);
             }
         };
         main();
@@ -169,10 +161,10 @@ function PlanSelectorCard(props: PlanSelectorCardProps) {
         switch (planSelectionOutcome(subscription)) {
             case "buyPlan":
                 try {
-                    props.setLoading(true);
+                    setLoading(true);
                     await redirectToPaymentsApp(plan.stripeID, "buy");
                 } catch (e) {
-                    props.setLoading(false);
+                    setLoading(false);
                     setDialogMessage({
                         title: t("error"),
                         content: t("SUBSCRIPTION_PURCHASE_FAILED"),
@@ -237,8 +229,6 @@ function PlanSelectorCard(props: PlanSelectorCardProps) {
         }
     }
 
-    const { closeModal, setLoading } = props;
-
     const commonCardData = {
         subscription,
         bonusData,
@@ -260,28 +250,22 @@ function PlanSelectorCard(props: PlanSelectorCardProps) {
     );
 
     return (
-        <>
-            <Stack spacing={3} p={1.5}>
-                {isSubscriptionActivePaid(subscription) ? (
-                    <PaidSubscriptionPlanSelectorCard
-                        {...commonCardData}
-                        usage={usage}
-                    >
-                        {plansList}
-                    </PaidSubscriptionPlanSelectorCard>
-                ) : (
-                    <FreeSubscriptionPlanSelectorCard {...commonCardData}>
-                        {plansList}
-                    </FreeSubscriptionPlanSelectorCard>
-                )}
-            </Stack>
-        </>
+        <Stack spacing={3} p={1.5}>
+            {isSubscriptionActivePaid(subscription) ? (
+                <PaidSubscriptionPlanSelectorCard
+                    {...commonCardData}
+                    usage={usage}
+                >
+                    {plansList}
+                </PaidSubscriptionPlanSelectorCard>
+            ) : (
+                <FreeSubscriptionPlanSelectorCard {...commonCardData}>
+                    {plansList}
+                </FreeSubscriptionPlanSelectorCard>
+            )}
+        </Stack>
     );
-}
-
-function getLocalUserSubscription(): Subscription {
-    return getData(LS_KEYS.SUBSCRIPTION);
-}
+};
 
 /**
  * Return the outcome that should happen when the user selects a paid plan on
