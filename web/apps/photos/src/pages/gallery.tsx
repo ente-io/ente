@@ -1273,69 +1273,36 @@ export async function checkSubscriptionPurchase(
         log.error(`Subscription purchase failed: ${reason}`);
         switch (reason) {
             case "canceled":
-                setDialogMessage({
-                    content: t("SUBSCRIPTION_PURCHASE_CANCELLED"),
-                    close: { variant: "critical" },
+                showMiniDialog({
+                    message: t("SUBSCRIPTION_PURCHASE_CANCELLED"),
+                    continue: { text: t("ok"), color: "primary" },
+                    cancel: false,
                 });
                 break;
             case "requires_payment_method":
-                setDialogMessage({
+                showMiniDialog({
                     title: t("UPDATE_PAYMENT_METHOD"),
-                    content: t("UPDATE_PAYMENT_METHOD_MESSAGE"),
-
-                    proceed: {
+                    message: t("UPDATE_PAYMENT_METHOD_MESSAGE"),
+                    continue: {
                         text: t("UPDATE_PAYMENT_METHOD"),
-                        variant: "accent",
-                        action: async () => {
-                            try {
-                                setLoading(true);
-                                await redirectToCustomerPortal();
-                            } catch (error) {
-                                setLoading(false);
-                                setDialogMessage({
-                                    title: t("error"),
-                                    content: t("generic_error_retry"),
-                                    close: { variant: "critical" },
-                                });
-                            }
-                        },
+                        action: redirectToCustomerPortal,
                     },
-                    close: { text: t("cancel") },
                 });
                 break;
-
             case "authentication_failed":
-                setDialogMessage({
+                showMiniDialog({
                     title: t("UPDATE_PAYMENT_METHOD"),
-                    content: t("STRIPE_AUTHENTICATION_FAILED"),
-
-                    proceed: {
+                    message: t("STRIPE_AUTHENTICATION_FAILED"),
+                    continue: {
                         text: t("UPDATE_PAYMENT_METHOD"),
-                        variant: "accent",
-                        action: async () => {
-                            try {
-                                setLoading(true);
-                                await redirectToCustomerPortal();
-                            } catch (error) {
-                                setLoading(false);
-                                setDialogMessage({
-                                    title: t("error"),
-                                    content: t("generic_error_retry"),
-                                    close: { variant: "critical" },
-                                });
-                            }
-                        },
+                        action: redirectToCustomerPortal,
                     },
-                    close: { text: t("cancel") },
                 });
                 break;
-
             default:
-                setDialogMessage({
-                    title: t("error"),
-                    content: t("SUBSCRIPTION_PURCHASE_FAILED"),
-                    close: { variant: "critical" },
-                });
+                showMiniDialog(
+                    errorDialogAttributes(t("SUBSCRIPTION_PURCHASE_FAILED")),
+                );
         }
     }
 }
