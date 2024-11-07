@@ -1,6 +1,7 @@
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { getKV, setKV } from "@/base/kv";
 import { apiURL } from "@/base/origins";
+import { getData, LS_KEYS, setLSUser } from "@ente/shared/storage/localStorage";
 import { z } from "zod";
 import { FamilyData } from "./family";
 import { Subscription } from "./plan";
@@ -116,6 +117,32 @@ export const syncUserDetails = async () => {
     const userDetails = await getUserDetailsV2();
     await setKV("userDetails", userDetails);
     setUserDetailsSnapshot(userDetails);
+
+    // TODO: The existing code used to also set the email for the local storage
+    // user whenever it updated the user details. I don't see why this would be
+    // needed though.
+    //
+    // Retaining the existing behaviour for now, except we throw. The intent is
+    // to remove this entire copy-over after a bit.
+    //
+    // Added Nov 2024, and can be removed after a while (tag: Migration).
+
+    const oldLSUser = getData(LS_KEYS.USER) as unknown;
+    const hasMatchingEmail =
+        oldLSUser &&
+        typeof oldLSUser == "object" &&
+        "email" in oldLSUser &&
+        typeof oldLSUser.email == "string" &&
+        oldLSUser.email == userDetails.email;
+
+    if (!hasMatchingEmail) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        await setLSUser({
+            ...getData(LS_KEYS.USER),
+            email: userDetails.email,
+        });
+        throw new Error("Email in local storage did not match user details");
+    }
 };
 
 /**
