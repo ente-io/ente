@@ -693,19 +693,14 @@ function ManageSubscription({
     closeModal,
     setLoading,
 }: ManageSubscriptionProps) {
-    const { setDialogMessage } = useContext(AppContext);
+    const { onGenericError } = useAppContext();
 
     const openFamilyPortal = async () => {
         setLoading(true);
         try {
             openURL(await getFamilyPortalRedirectURL());
         } catch (e) {
-            log.error("Could not redirect to family portal", e);
-            setDialogMessage({
-                title: t("error"),
-                content: t("generic_error_retry"),
-                close: { variant: "critical" },
-            });
+            onGenericError(e);
         }
         setLoading(false);
     };
