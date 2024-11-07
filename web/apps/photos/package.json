@@ -5,6 +5,7 @@
     "dependencies": {
         "@/accounts": "*",
         "@/base": "*",
+        "@/gallery": "*",
         "@/media": "*",
         "@/new": "*",
         "@ente/eslint-config": "*",

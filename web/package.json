@@ -13,7 +13,6 @@
         "build:cast": "yarn workspace cast next build",
         "build:payments": "yarn workspace payments build",
         "build:photos": "yarn workspace photos next build",
-        "build:staff": "yarn workspace staff build",
         "dev": "yarn dev:photos",
         "dev:accounts": "yarn workspace accounts next dev -p 3001",
         "dev:albums": "yarn workspace photos next dev -p 3002",
@@ -21,7 +20,6 @@
         "dev:cast": "yarn workspace cast next dev -p 3001",
         "dev:payments": "yarn workspace payments dev",
         "dev:photos": "yarn workspace photos next dev -p 3000",
-        "dev:staff": "yarn workspace staff dev",
         "lint": "concurrently --names 'prettier,eslint,tsc' \"yarn prettier --check --log-level warn .\" \"yarn workspaces run eslint --report-unused-disable-directives .\" \"yarn workspaces run tsc\"",
         "lint-fix": "concurrently --names 'prettier,eslint,tsc' \"yarn prettier --write --log-level warn .\" \"yarn workspaces run eslint --report-unused-disable-directives --fix .\" \"yarn workspaces run tsc\"",
         "preview": "yarn preview:photos",
@@ -29,8 +27,7 @@
         "preview:auth": "yarn build:auth && python3 -m http.server -d apps/auth/out 3000",
         "preview:cast": "yarn build:cast && python3 -m http.server -d apps/accounts/out 3001",
         "preview:payments": "yarn workspace payments preview",
-        "preview:photos": "yarn build:photos && python3 -m http.server -d apps/photos/out 3000",
-        "preview:staff": "yarn workspace staff preview"
+        "preview:photos": "yarn build:photos && python3 -m http.server -d apps/photos/out 3000"
     },
     "resolutions": {
         "@emotion/cache": "11.13.1",

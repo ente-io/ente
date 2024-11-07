@@ -46,6 +46,7 @@ class MLDataDB {
     createNotPersonFeedbackTable,
     fcClusterIDIndex,
     createClipEmbeddingsTable,
+    createFileDataTable,
   ];
 
   // only have a single app-wide reference to the database
@@ -246,6 +247,7 @@ class MLDataDB {
     await db.execute(deleteClusterSummaryTable);
     await db.execute(deleteNotPersonFeedbackTable);
     await db.execute(deleteClipEmbeddingsTable);
+    await db.execute(deleteFileDataTable);
   }
 
   Future<Iterable<Uint8List>> getFaceEmbeddingsForCluster(
