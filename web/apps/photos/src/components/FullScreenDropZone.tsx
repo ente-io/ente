@@ -1,7 +1,7 @@
+import { AppContext } from "@/new/photos/types/context";
 import CloseIcon from "@mui/icons-material/Close";
 import { styled } from "@mui/material";
 import { t } from "i18next";
-import { AppContext } from "pages/_app";
 import React, { useContext, useEffect, useState } from "react";
 
 const CloseButtonWrapper = styled("div")`

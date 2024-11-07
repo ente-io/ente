@@ -1,6 +1,7 @@
 import "dart:io";
 import "dart:typed_data";
 
+import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/db/ml/db_fields.dart";
@@ -10,15 +11,8 @@ import "package:photos/models/ml/ml_versions.dart";
 import "package:photos/models/ml/vector.dart";
 
 extension ClipDB on MLDataDB {
-  static const databaseName = "ente.embeddings.db";
-
-  Future<List<ClipEmbedding>> getAllClipEmbeddings() async {
-    final db = await MLDataDB.instance.asyncDB;
-    final results = await db.getAll('SELECT * FROM $clipTable');
-    return _convertToEmbeddings(results);
-  }
-
   Future<List<EmbeddingVector>> getAllClipVectors() async {
+    Logger("ClipDB").info("reading all embeddings from DB");
     final db = await MLDataDB.instance.asyncDB;
     final results = await db.getAll('SELECT * FROM $clipTable');
     return _convertToVectors(results);
@@ -80,16 +74,6 @@ extension ClipDB on MLDataDB {
     Bus.instance.fire(EmbeddingUpdatedEvent());
   }
 
-  List<ClipEmbedding> _convertToEmbeddings(List<Map<String, dynamic>> results) {
-    final List<ClipEmbedding> embeddings = [];
-    for (final result in results) {
-      final embedding = _getEmbeddingFromRow(result);
-      if (embedding.isEmpty) continue;
-      embeddings.add(embedding);
-    }
-    return embeddings;
-  }
-
   List<EmbeddingVector> _convertToVectors(List<Map<String, dynamic>> results) {
     final List<EmbeddingVector> embeddings = [];
     for (final result in results) {
@@ -98,14 +82,6 @@ extension ClipDB on MLDataDB {
       embeddings.add(embedding);
     }
     return embeddings;
-  }
-
-  ClipEmbedding _getEmbeddingFromRow(Map<String, dynamic> row) {
-    final fileID = row[fileIDColumn] as int;
-    final bytes = row[embeddingColumn] as Uint8List;
-    final version = row[mlVersionColumn] as int;
-    final list = Float32List.view(bytes.buffer);
-    return ClipEmbedding(fileID: fileID, embedding: list, version: version);
   }
 
   EmbeddingVector _getVectorFromRow(Map<String, dynamic> row) {

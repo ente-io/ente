@@ -64,6 +64,7 @@ class AccountSectionWidget extends StatelessWidget {
             if (hasAuthenticated) {
               // ignore: unawaited_futures
               showDialog(
+                useRootNavigator: false,
                 context: context,
                 builder: (BuildContext context) {
                   return const ChangeEmailDialog();

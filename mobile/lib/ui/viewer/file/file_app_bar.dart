@@ -400,7 +400,13 @@ class FileAppBarState extends State<FileAppBar> {
             } else if (value == 6) {
               await _onTapGuestView();
             } else if (value == 99) {
-              await PreviewVideoStore.instance.chunkAndUploadVideo(widget.file);
+              try {
+                await PreviewVideoStore.instance.chunkAndUploadVideo(
+                  widget.file,
+                );
+              } catch (e) {
+                await showGenericErrorDialog(context: context, error: e);
+              }
             } else if (value == 7) {
               _onToggleLoopVideo();
             }

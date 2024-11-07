@@ -343,6 +343,22 @@ func (h *AdminHandler) AddOtt(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{})
 }
 
+func (h *AdminHandler) TerminateSession(c *gin.Context) {
+	var request ente.LogoutSessionReq
+	if err := c.ShouldBindJSON(&request); err != nil {
+		handler.Error(c, stacktrace.Propagate(ente.ErrBadRequest, "Bad request"))
+		return
+	}
+	go h.DiscordController.NotifyAdminAction(
+		fmt.Sprintf("Admin (%d) terminating session for user %d", auth.GetUserID(c.Request.Header), request.UserID))
+	err := h.UserController.TerminateSession(request.UserID, request.Token)
+	if err != nil {
+		handler.Error(c, stacktrace.Propagate(err, ""))
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{})
+}
+
 func (h *AdminHandler) UpdateFeatureFlag(c *gin.Context) {
 	var request ente.AdminUpdateKeyValueRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -491,11 +507,7 @@ func (h *AdminHandler) UpdateBonus(c *gin.Context) {
 }
 
 func (h *AdminHandler) RecoverAccount(c *gin.Context) {
-	err := h.isFreshAdminToken(c)
-	if err != nil {
-		handler.Error(c, stacktrace.Propagate(err, ""))
-		return
-	}
+
 	var request ente.RecoverAccountRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		handler.Error(c, stacktrace.Propagate(err, "Bad request"))
@@ -516,7 +528,7 @@ func (h *AdminHandler) RecoverAccount(c *gin.Context) {
 		"req_ctx":    "account_recovery",
 	})
 	logger.Info("Initiate account recovery")
-	err = h.UserController.HandleAccountRecovery(c, request)
+	err := h.UserController.HandleAccountRecovery(c, request)
 	if err != nil {
 		logger.WithError(err).Error("Failed to recover account")
 		handler.Error(c, stacktrace.Propagate(err, ""))

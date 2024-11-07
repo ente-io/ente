@@ -30,6 +30,8 @@ class MLDataDB {
 
   static const _databaseName = "ente.ml.db";
 
+  static Logger get logger => _logger;
+
   // static const _databaseVersion = 1;
 
   MLDataDB._privateConstructor();
@@ -44,6 +46,7 @@ class MLDataDB {
     createNotPersonFeedbackTable,
     fcClusterIDIndex,
     createClipEmbeddingsTable,
+    createFileDataTable,
   ];
 
   // only have a single app-wide reference to the database
@@ -235,6 +238,7 @@ class MLDataDB {
     await db.execute(deleteClusterSummaryTable);
     await db.execute(deleteNotPersonFeedbackTable);
     await db.execute(deleteClipEmbeddingsTable);
+    await db.execute(deleteFileDataTable);
   }
 
   Future<Iterable<Uint8List>> getFaceEmbeddingsForCluster(
@@ -449,7 +453,7 @@ class MLDataDB {
     final db = await instance.asyncDB;
     final List<Map<String, dynamic>> maps = await db.getAll(
       'SELECT $personIdColumn, $faceClustersTable.$clusterIDColumn, $faceIDColumn FROM $clusterPersonTable '
-      'LEFT JOIN $faceClustersTable ON $clusterPersonTable.$clusterIDColumn = $faceClustersTable.$clusterIDColumn',
+      'INNER JOIN $faceClustersTable ON $clusterPersonTable.$clusterIDColumn = $faceClustersTable.$clusterIDColumn',
     );
     final Map<String, Map<String, Set<String>>> result = {};
     for (final map in maps) {

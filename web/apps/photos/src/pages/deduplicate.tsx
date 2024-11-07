@@ -1,7 +1,10 @@
 import { stashRedirect } from "@/accounts/services/redirect";
+import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { ALL_SECTION } from "@/new/photos/services/collection";
+import { createFileCollectionIDs } from "@/new/photos/services/file";
 import { getLocalFiles } from "@/new/photos/services/files";
+import { useAppContext } from "@/new/photos/types/context";
 import { VerticallyCentered } from "@ente/shared/components/Container";
-import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { ApiError } from "@ente/shared/error";
 import useMemoSingleThreaded from "@ente/shared/hooks/useMemoSingleThreaded";
@@ -13,8 +16,7 @@ import DeduplicateOptions from "components/pages/dedupe/SelectedFileOptions";
 import PhotoFrame from "components/PhotoFrame";
 import { t } from "i18next";
 import { default as Router, default as router } from "next/router";
-import { AppContext } from "pages/_app";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import {
     getAllLatestCollections,
     getLocalCollections,
@@ -27,8 +29,7 @@ import {
     DefaultDeduplicateContext,
 } from "types/deduplicate";
 import { SelectedState } from "types/gallery";
-import { ALL_SECTION } from "utils/collection";
-import { constructFileToCollectionMap, getSelectedFiles } from "utils/file";
+import { getSelectedFiles } from "utils/file";
 
 export const DeduplicateContext = createContext<DeduplicateContextType>(
     DefaultDeduplicateContext,
@@ -39,8 +40,8 @@ export const Info = styled("div")`
 `;
 
 export default function Deduplicate() {
-    const { setDialogMessage, startLoading, finishLoading, showNavBar } =
-        useContext(AppContext);
+    const { showNavBar, showLoadingBar, hideLoadingBar, setDialogMessage } =
+        useAppContext();
     const [duplicates, setDuplicates] = useState<Duplicate[]>(null);
     const [collectionNameMap, setCollectionNameMap] = useState(
         new Map<number, string>(),
@@ -69,42 +70,48 @@ export default function Deduplicate() {
     }, []);
 
     const syncWithRemote = async () => {
-        startLoading();
-        const collections = await getLocalCollections();
-        const collectionNameMap = new Map<number, string>();
-        for (const collection of collections) {
-            collectionNameMap.set(collection.id, collection.name);
-        }
-        setCollectionNameMap(collectionNameMap);
-        const files = await getLocalFiles();
-        const duplicateFiles = await getDuplicates(files, collectionNameMap);
-        const currFileSizeMap = new Map<number, number>();
-        let toSelectFileIDs: number[] = [];
-        let count = 0;
-        for (const dupe of duplicateFiles) {
-            // select all except first file
-            toSelectFileIDs = [
-                ...toSelectFileIDs,
-                ...dupe.files.slice(1).map((f) => f.id),
-            ];
-            count += dupe.files.length - 1;
-
-            for (const file of dupe.files) {
-                currFileSizeMap.set(file.id, dupe.size);
+        showLoadingBar();
+        try {
+            const collections = await getLocalCollections();
+            const collectionNameMap = new Map<number, string>();
+            for (const collection of collections) {
+                collectionNameMap.set(collection.id, collection.name);
             }
+            setCollectionNameMap(collectionNameMap);
+            const files = await getLocalFiles();
+            const duplicateFiles = await getDuplicates(
+                files,
+                collectionNameMap,
+            );
+            const currFileSizeMap = new Map<number, number>();
+            let toSelectFileIDs: number[] = [];
+            let count = 0;
+            for (const dupe of duplicateFiles) {
+                // select all except first file
+                toSelectFileIDs = [
+                    ...toSelectFileIDs,
+                    ...dupe.files.slice(1).map((f) => f.id),
+                ];
+                count += dupe.files.length - 1;
+
+                for (const file of dupe.files) {
+                    currFileSizeMap.set(file.id, dupe.size);
+                }
+            }
+            setDuplicates(duplicateFiles);
+            const selectedFiles = {
+                count: count,
+                ownCount: count,
+                collectionID: ALL_SECTION,
+                context: undefined,
+            };
+            for (const fileID of toSelectFileIDs) {
+                selectedFiles[fileID] = true;
+            }
+            setSelected(selectedFiles);
+        } finally {
+            hideLoadingBar();
         }
-        setDuplicates(duplicateFiles);
-        const selectedFiles = {
-            count: count,
-            ownCount: count,
-            collectionID: ALL_SECTION,
-            context: undefined,
-        };
-        for (const fileID of toSelectFileIDs) {
-            selectedFiles[fileID] = true;
-        }
-        setSelected(selectedFiles);
-        finishLoading();
     };
 
     const duplicateFiles = useMemoSingleThreaded(() => {
@@ -114,12 +121,12 @@ export default function Deduplicate() {
     }, [duplicates]);
 
     const fileToCollectionsMap = useMemoSingleThreaded(() => {
-        return constructFileToCollectionMap(duplicateFiles);
+        return createFileCollectionIDs(duplicateFiles ?? []);
     }, [duplicateFiles]);
 
     const deleteFileHelper = async () => {
         try {
-            startLoading();
+            showLoadingBar();
             const selectedFiles = getSelectedFiles(selected, duplicateFiles);
             await trashFiles(selectedFiles);
 
@@ -131,7 +138,12 @@ export default function Deduplicate() {
             // there in an ad-hoc manner. For now, this fixes the issue with the
             // UI not updating if the user deletes only some of the duplicates.
             const collections = await getAllLatestCollections();
-            await syncFiles("normal", collections, () => {});
+            await syncFiles(
+                "normal",
+                collections,
+                () => {},
+                () => {},
+            );
             await syncTrash(collections, () => {});
         } catch (e) {
             if (
@@ -149,12 +161,12 @@ export default function Deduplicate() {
                     title: t("error"),
 
                     close: { variant: "critical" },
-                    content: t("UNKNOWN_ERROR"),
+                    content: t("generic_error_retry"),
                 });
             }
         } finally {
             await syncWithRemote();
-            finishLoading();
+            hideLoadingBar();
         }
     };
 
@@ -170,7 +182,7 @@ export default function Deduplicate() {
     if (!duplicates) {
         return (
             <VerticallyCentered>
-                <EnteSpinner />
+                <ActivityIndicator />
             </VerticallyCentered>
         );
     }

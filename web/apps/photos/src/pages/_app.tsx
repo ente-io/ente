@@ -1,7 +1,13 @@
-import type { AccountsContextT } from "@/accounts/types/context";
 import { clientPackageName, staticAppTitle } from "@/base/app";
 import { CustomHead } from "@/base/components/Head";
+import { AttributedMiniDialog } from "@/base/components/MiniDialog";
+import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { Overlay } from "@/base/components/mui/Container";
 import { AppNavbar } from "@/base/components/Navbar";
+import {
+    genericErrorDialogAttributes,
+    useAttributedMiniDialog,
+} from "@/base/components/utils/dialog";
 import { setupI18n } from "@/base/i18n";
 import log from "@/base/log";
 import {
@@ -9,19 +15,18 @@ import {
     logUnhandledErrorsAndRejections,
 } from "@/base/log-web";
 import { AppUpdate } from "@/base/types/ipc";
+import {
+    updateAvailableForDownloadDialogAttributes,
+    updateReadyToInstallDialogAttributes,
+} from "@/new/photos/components/utils/download";
+import { useLoadingBar } from "@/new/photos/components/utils/use-loading-bar";
+import { photosDialogZIndex } from "@/new/photos/components/utils/z-index";
 import DownloadManager from "@/new/photos/services/download";
 import { runMigrations } from "@/new/photos/services/migrations";
 import { initML, isMLSupported } from "@/new/photos/services/ml";
-import { ensure } from "@/utils/ensure";
-import { Overlay } from "@ente/shared/components/Container";
+import { AppContext } from "@/new/photos/types/context";
 import DialogBox from "@ente/shared/components/DialogBox";
-import {
-    DialogBoxAttributes,
-    SetDialogBoxAttributes,
-} from "@ente/shared/components/DialogBox/types";
-import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
-import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
-import EnteSpinner from "@ente/shared/components/EnteSpinner";
+import { DialogBoxAttributes } from "@ente/shared/components/DialogBox/types";
 import { MessageContainer } from "@ente/shared/components/MessageContainer";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import HTTPService from "@ente/shared/network/HTTPService";
@@ -30,11 +35,7 @@ import {
     getData,
     migrateKVToken,
 } from "@ente/shared/storage/localStorage";
-import {
-    getLocalMapEnabled,
-    getToken,
-    setLocalMapEnabled,
-} from "@ente/shared/storage/localStorage/helpers";
+import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { getTheme } from "@ente/shared/themes";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import type { User } from "@ente/shared/user/types";
@@ -47,59 +48,13 @@ import isElectron from "is-electron";
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
 import "photoswipe/dist/photoswipe.css";
-import {
-    createContext,
-    useCallback,
-    useContext,
-    useEffect,
-    useRef,
-    useState,
-} from "react";
+import { useCallback, useEffect, useState } from "react";
 import LoadingBar from "react-top-loading-bar";
 import { resumeExportsIfNeeded } from "services/export";
 import { photosLogout } from "services/logout";
-import {
-    getFamilyPortalRedirectURL,
-    updateMapEnabledStatus,
-} from "services/userService";
+import { getFamilyPortalRedirectURL } from "services/userService";
 import "styles/global.css";
-import {
-    NotificationAttributes,
-    SetNotificationAttributes,
-} from "types/Notification";
-import {
-    getUpdateAvailableForDownloadMessage,
-    getUpdateReadyToInstallMessage,
-} from "utils/ui";
-
-/**
- * Properties available via {@link AppContext} to the Photos app's React tree.
- */
-type AppContextT = AccountsContextT & {
-    mapEnabled: boolean;
-    updateMapEnabled: (enabled: boolean) => Promise<void>;
-    startLoading: () => void;
-    finishLoading: () => void;
-    closeMessageDialog: () => void;
-    setDialogMessage: SetDialogBoxAttributes;
-    setNotificationAttributes: SetNotificationAttributes;
-    watchFolderView: boolean;
-    setWatchFolderView: (isOpen: boolean) => void;
-    watchFolderFiles: FileList;
-    setWatchFolderFiles: (files: FileList) => void;
-    themeColor: THEME_COLOR;
-    setThemeColor: (themeColor: THEME_COLOR) => void;
-    somethingWentWrong: () => void;
-    onGenericError: (error: unknown) => void;
-    isCFProxyDisabled: boolean;
-    setIsCFProxyDisabled: (disabled: boolean) => void;
-};
-
-/** The React {@link Context} available to all pages. */
-export const AppContext = createContext<AppContextT | undefined>(undefined);
-
-/** Utility hook to reduce amount of boilerplate in account related pages. */
-export const useAppContext = () => ensure(useContext(AppContext));
+import { NotificationAttributes } from "types/Notification";
 
 export default function App({ Component, pageProps }: AppProps) {
     const router = useRouter();
@@ -109,29 +64,20 @@ export default function App({ Component, pageProps }: AppProps) {
         typeof window !== "undefined" && !window.navigator.onLine,
     );
     const [showNavbar, setShowNavBar] = useState(false);
-    const [mapEnabled, setMapEnabled] = useState(false);
-    const isLoadingBarRunning = useRef(false);
-    const loadingBar = useRef(null);
     const [dialogMessage, setDialogMessage] = useState<DialogBoxAttributes>();
-    const [dialogBoxAttributeV2, setDialogBoxAttributesV2] = useState<
-        DialogBoxAttributesV2 | undefined
-    >();
-    useState<DialogBoxAttributes>(null);
     const [messageDialogView, setMessageDialogView] = useState(false);
-    const [dialogBoxV2View, setDialogBoxV2View] = useState(false);
     const [watchFolderView, setWatchFolderView] = useState(false);
     const [watchFolderFiles, setWatchFolderFiles] = useState<FileList>(null);
     const [notificationView, setNotificationView] = useState(false);
     const closeNotification = () => setNotificationView(false);
     const [notificationAttributes, setNotificationAttributes] =
         useState<NotificationAttributes>(null);
+
+    const { showMiniDialog, miniDialogProps } = useAttributedMiniDialog();
+    const { loadingBarRef, showLoadingBar, hideLoadingBar } = useLoadingBar();
     const [themeColor, setThemeColor] = useLocalState(
         LS_KEYS.THEME,
         THEME_COLOR.DARK,
-    );
-    const [isCFProxyDisabled, setIsCFProxyDisabled] = useLocalState(
-        LS_KEYS.CF_PROXY_DISABLED,
-        false,
     );
 
     useEffect(() => {
@@ -160,15 +106,15 @@ export default function App({ Component, pageProps }: AppProps) {
 
         const showUpdateDialog = (update: AppUpdate) => {
             if (update.autoUpdatable) {
-                setDialogMessage(getUpdateReadyToInstallMessage(update));
+                showMiniDialog(updateReadyToInstallDialogAttributes(update));
             } else {
                 setNotificationAttributes({
                     endIcon: <ArrowForward />,
                     variant: "secondary",
-                    message: t("UPDATE_AVAILABLE"),
+                    message: t("update_available"),
                     onClick: () =>
-                        setDialogMessage(
-                            getUpdateAvailableForDownloadMessage(update),
+                        showMiniDialog(
+                            updateAvailableForDownloadDialogAttributes(update),
                         ),
                 });
             }
@@ -183,10 +129,6 @@ export default function App({ Component, pageProps }: AppProps) {
             electron.onOpenURL(undefined);
             electron.onAppUpdateAvailable(undefined);
         };
-    }, []);
-
-    useEffect(() => {
-        setMapEnabled(getLocalMapEnabled());
     }, []);
 
     useEffect(() => {
@@ -244,38 +186,10 @@ export default function App({ Component, pageProps }: AppProps) {
     }, [dialogMessage]);
 
     useEffect(() => {
-        setDialogBoxV2View(true);
-    }, [dialogBoxAttributeV2]);
-
-    useEffect(() => {
         setNotificationView(true);
     }, [notificationAttributes]);
 
     const showNavBar = (show: boolean) => setShowNavBar(show);
-
-    const updateMapEnabled = async (enabled: boolean) => {
-        try {
-            await updateMapEnabledStatus(enabled);
-            setLocalMapEnabled(enabled);
-            setMapEnabled(enabled);
-        } catch (e) {
-            log.error("Error while updating mapEnabled", e);
-        }
-    };
-
-    const startLoading = () => {
-        !isLoadingBarRunning.current && loadingBar.current?.continuousStart();
-        isLoadingBarRunning.current = true;
-    };
-    const finishLoading = () => {
-        setTimeout(() => {
-            isLoadingBarRunning.current && loadingBar.current?.complete();
-            isLoadingBarRunning.current = false;
-        }, 100);
-    };
-
-    const closeMessageDialog = () => setMessageDialogView(false);
-    const closeDialogBoxV2 = () => setDialogBoxV2View(false);
 
     // Use `onGenericError` instead.
     const somethingWentWrong = useCallback(
@@ -283,32 +197,24 @@ export default function App({ Component, pageProps }: AppProps) {
             setDialogMessage({
                 title: t("error"),
                 close: { variant: "critical" },
-                content: t("UNKNOWN_ERROR"),
+                content: t("generic_error_retry"),
             }),
-        [setDialogMessage],
+        [],
     );
 
-    const onGenericError = useCallback(
-        (e: unknown) => (
-            log.error("Error", e),
-            setDialogBoxAttributesV2({
-                title: t("error"),
-                content: t("UNKNOWN_ERROR"),
-                close: { variant: "critical" },
-            })
-        ),
-        [setDialogBoxAttributesV2],
-    );
+    const onGenericError = useCallback((e: unknown) => {
+        log.error(e);
+        showMiniDialog(genericErrorDialogAttributes());
+    }, []);
 
-    const logout = () => {
+    const logout = useCallback(() => {
         void photosLogout().then(() => router.push("/"));
-    };
+    }, [router]);
 
     const appContext = {
         showNavBar,
-        startLoading,
-        finishLoading,
-        closeMessageDialog,
+        showLoadingBar,
+        hideLoadingBar,
         setDialogMessage,
         watchFolderView,
         setWatchFolderView,
@@ -317,13 +223,9 @@ export default function App({ Component, pageProps }: AppProps) {
         setNotificationAttributes,
         themeColor,
         setThemeColor,
+        showMiniDialog,
         somethingWentWrong,
         onGenericError,
-        setDialogBoxAttributesV2,
-        mapEnabled,
-        updateMapEnabled,
-        isCFProxyDisabled,
-        setIsCFProxyDisabled,
         logout,
     };
 
@@ -339,20 +241,18 @@ export default function App({ Component, pageProps }: AppProps) {
                 <MessageContainer>
                     {isI18nReady && offline && t("OFFLINE_MSG")}
                 </MessageContainer>
-                <LoadingBar color="#51cd7c" ref={loadingBar} />
+                <LoadingBar color="#51cd7c" ref={loadingBarRef} />
 
                 <DialogBox
-                    sx={{ zIndex: 1600 }}
+                    sx={{ zIndex: photosDialogZIndex }}
                     size="xs"
                     open={messageDialogView}
-                    onClose={closeMessageDialog}
+                    onClose={() => setMessageDialogView(false)}
                     attributes={dialogMessage}
                 />
-                <DialogBoxV2
-                    sx={{ zIndex: 1600 }}
-                    open={dialogBoxV2View}
-                    onClose={closeDialogBoxV2}
-                    attributes={dialogBoxAttributeV2}
+                <AttributedMiniDialog
+                    sx={{ zIndex: photosDialogZIndex }}
+                    {...miniDialogProps}
                 />
 
                 <Notification
@@ -372,7 +272,7 @@ export default function App({ Component, pageProps }: AppProps) {
                                 backgroundColor: theme.colors.background.base,
                             })}
                         >
-                            <EnteSpinner />
+                            <ActivityIndicator />
                         </Overlay>
                     )}
                     {isI18nReady && (

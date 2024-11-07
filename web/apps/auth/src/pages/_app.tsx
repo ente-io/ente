@@ -2,17 +2,20 @@ import { accountLogout } from "@/accounts/services/logout";
 import type { AccountsContextT } from "@/accounts/types/context";
 import { clientPackageName, staticAppTitle } from "@/base/app";
 import { CustomHead } from "@/base/components/Head";
+import { AttributedMiniDialog } from "@/base/components/MiniDialog";
+import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { Overlay } from "@/base/components/mui/Container";
 import { AppNavbar } from "@/base/components/Navbar";
+import {
+    genericErrorDialogAttributes,
+    useAttributedMiniDialog,
+} from "@/base/components/utils/dialog";
 import { setupI18n } from "@/base/i18n";
 import {
     logStartupBanner,
     logUnhandledErrorsAndRejections,
 } from "@/base/log-web";
 import { ensure } from "@/utils/ensure";
-import { Overlay } from "@ente/shared/components/Container";
-import DialogBoxV2 from "@ente/shared/components/DialogBoxV2";
-import type { DialogBoxAttributesV2 } from "@ente/shared/components/DialogBoxV2/types";
-import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import { MessageContainer } from "@ente/shared/components/MessageContainer";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import HTTPService from "@ente/shared/network/HTTPService";
@@ -29,22 +32,14 @@ import { ThemeProvider } from "@mui/material/styles";
 import { t } from "i18next";
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
-import React, {
-    createContext,
-    useContext,
-    useEffect,
-    useRef,
-    useState,
-} from "react";
-import LoadingBar, { type LoadingBarRef } from "react-top-loading-bar";
+import React, { createContext, useContext, useEffect, useState } from "react";
+
 import "../../public/css/global.css";
 
 /**
  * Properties available via {@link AppContext} to the Auth app's React tree.
  */
 type AppContextT = AccountsContextT & {
-    startLoading: () => void;
-    finishLoading: () => void;
     themeColor: THEME_COLOR;
     setThemeColor: (themeColor: THEME_COLOR) => void;
     somethingWentWrong: () => void;
@@ -64,12 +59,8 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         typeof window !== "undefined" && !window.navigator.onLine,
     );
     const [showNavbar, setShowNavBar] = useState(false);
-    const isLoadingBarRunning = useRef<boolean>(false);
-    const loadingBar = useRef<LoadingBarRef>(null);
-    const [dialogBoxAttributeV2, setDialogBoxAttributesV2] = useState<
-        DialogBoxAttributesV2 | undefined
-    >();
-    const [dialogBoxV2View, setDialogBoxV2View] = useState(false);
+
+    const { showMiniDialog, miniDialogProps } = useAttributedMiniDialog();
     const [themeColor, setThemeColor] = useLocalState(
         LS_KEYS.THEME,
         THEME_COLOR.DARK,
@@ -109,31 +100,10 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         };
     }, []);
 
-    useEffect(() => {
-        setDialogBoxV2View(true);
-    }, [dialogBoxAttributeV2]);
-
     const showNavBar = (show: boolean) => setShowNavBar(show);
 
-    const startLoading = () => {
-        !isLoadingBarRunning.current && loadingBar.current?.continuousStart();
-        isLoadingBarRunning.current = true;
-    };
-    const finishLoading = () => {
-        setTimeout(() => {
-            isLoadingBarRunning.current && loadingBar.current?.complete();
-            isLoadingBarRunning.current = false;
-        }, 100);
-    };
-
-    const closeDialogBoxV2 = () => setDialogBoxV2View(false);
-
     const somethingWentWrong = () =>
-        setDialogBoxAttributesV2({
-            title: t("error"),
-            close: { variant: "critical" },
-            content: t("UNKNOWN_ERROR"),
-        });
+        showMiniDialog(genericErrorDialogAttributes());
 
     const logout = () => {
         void accountLogout().then(() => router.push("/"));
@@ -142,9 +112,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     const appContext = {
         logout,
         showNavBar,
-        setDialogBoxAttributesV2,
-        startLoading,
-        finishLoading,
+        showMiniDialog,
         themeColor,
         setThemeColor,
         somethingWentWrong,
@@ -163,14 +131,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                     {isI18nReady && offline && t("OFFLINE_MSG")}
                 </MessageContainer>
 
-                <LoadingBar color="#51cd7c" ref={loadingBar} />
-
-                <DialogBoxV2
-                    sx={{ zIndex: 1600 }}
-                    open={dialogBoxV2View}
-                    onClose={closeDialogBoxV2}
-                    attributes={dialogBoxAttributeV2}
-                />
+                <AttributedMiniDialog {...miniDialogProps} />
 
                 <AppContext.Provider value={appContext}>
                     {(loading || !isI18nReady) && (
@@ -183,7 +144,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
                                 backgroundColor: theme.colors.background.base,
                             })}
                         >
-                            <EnteSpinner />
+                            <ActivityIndicator />
                         </Overlay>
                     )}
                     {isI18nReady && (

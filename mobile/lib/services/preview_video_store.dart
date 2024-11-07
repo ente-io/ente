@@ -10,7 +10,7 @@ import "package:logging/logging.dart";
 import "package:path_provider/path_provider.dart";
 import "package:photos/core/network/network.dart";
 import "package:photos/models/file/file.dart";
-import "package:photos/utils/file_download_util.dart";
+import "package:photos/utils/file_key.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/gzip.dart";
 import "package:video_compress/video_compress.dart";
@@ -64,7 +64,7 @@ class PreviewVideoStore {
 
     if (ReturnCode.isSuccess(returnCode)) {
       final playlistFile = File("$prefix/output.m3u8");
-      final previewFile = File("$prefix/video.ts");
+      final previewFile = File("$prefix/output.ts");
       final result = await _uploadPreviewVideo(enteFile, previewFile);
       final String objectID = result.$1;
       final objectSize = result.$2;
@@ -141,8 +141,8 @@ class PreviewVideoStore {
         ),
       );
       return (objectID, objectSize);
-    } catch (e, s) {
-      _logger.severe(e, s);
+    } catch (e) {
+      _logger.warning("failed to upload previewVideo", e);
       rethrow;
     }
   }
@@ -188,8 +188,7 @@ class PreviewVideoStore {
 
       return playlistFile;
     } catch (e, s) {
-      _logger.severe(e, s);
-      return null;
+      rethrow;
     }
   }
 }

@@ -1250,10 +1250,10 @@ class S {
     );
   }
 
-  /// `Your recovery key is the only way to recover your photos if you forget your password. You can find your recovery key in Settings > Security.\n\nPlease enter your recovery key here to verify that you have saved it correctly.`
+  /// `Your recovery key is the only way to recover your photos if you forget your password. You can find your recovery key in Settings > Account.\n\nPlease enter your recovery key here to verify that you have saved it correctly.`
   String get recoveryKeyVerifyReason {
     return Intl.message(
-      'Your recovery key is the only way to recover your photos if you forget your password. You can find your recovery key in Settings > Security.\n\nPlease enter your recovery key here to verify that you have saved it correctly.',
+      'Your recovery key is the only way to recover your photos if you forget your password. You can find your recovery key in Settings > Account.\n\nPlease enter your recovery key here to verify that you have saved it correctly.',
       name: 'recoveryKeyVerifyReason',
       desc: '',
       args: [],
@@ -9745,6 +9745,156 @@ class S {
       args: [folderName],
     );
   }
+
+  /// `Person name`
+  String get personName {
+    return Intl.message(
+      'Person name',
+      name: 'personName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add new person`
+  String get addNewPerson {
+    return Intl.message(
+      'Add new person',
+      name: 'addNewPerson',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add name or merge`
+  String get addNameOrMerge {
+    return Intl.message(
+      'Add name or merge',
+      name: 'addNameOrMerge',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Merge with existing`
+  String get mergeWithExisting {
+    return Intl.message(
+      'Merge with existing',
+      name: 'mergeWithExisting',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `New person`
+  String get newPerson {
+    return Intl.message(
+      'New person',
+      name: 'newPerson',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add name`
+  String get addName {
+    return Intl.message(
+      'Add name',
+      name: 'addName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add`
+  String get add {
+    return Intl.message(
+      'Add',
+      name: 'add',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Extra photos found for $text`
+  String get extraPhotosFoundFor {
+    return Intl.message(
+      'Extra photos found for \$text',
+      name: 'extraPhotosFoundFor',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Extra photos found`
+  String get extraPhotosFound {
+    return Intl.message(
+      'Extra photos found',
+      name: 'extraPhotosFound',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Configuration`
+  String get configuration {
+    return Intl.message(
+      'Configuration',
+      name: 'configuration',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Local indexing`
+  String get localIndexing {
+    return Intl.message(
+      'Local indexing',
+      name: 'localIndexing',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reset person`
+  String get resetPerson {
+    return Intl.message(
+      'Reset person',
+      name: 'resetPerson',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure you want to reset this person?`
+  String get areYouSureYouWantToResetThisPerson {
+    return Intl.message(
+      'Are you sure you want to reset this person?',
+      name: 'areYouSureYouWantToResetThisPerson',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `All groupings for this person will be reset, and you will lose all suggestions made for this person`
+  String get allPersonGroupingWillReset {
+    return Intl.message(
+      'All groupings for this person will be reset, and you will lose all suggestions made for this person',
+      name: 'allPersonGroupingWillReset',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Yes, reset person`
+  String get yesResetPerson {
+    return Intl.message(
+      'Yes, reset person',
+      name: 'yesResetPerson',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
@@ -9754,6 +9904,7 @@ class AppLocalizationDelegate extends LocalizationsDelegate<S> {
     return const <Locale>[
       Locale.fromSubtags(languageCode: 'en'),
       Locale.fromSubtags(languageCode: 'ar'),
+      Locale.fromSubtags(languageCode: 'be'),
       Locale.fromSubtags(languageCode: 'bg'),
       Locale.fromSubtags(languageCode: 'ca'),
       Locale.fromSubtags(languageCode: 'cs'),
@@ -9772,17 +9923,21 @@ class AppLocalizationDelegate extends LocalizationsDelegate<S> {
       Locale.fromSubtags(languageCode: 'ja'),
       Locale.fromSubtags(languageCode: 'km'),
       Locale.fromSubtags(languageCode: 'ko'),
+      Locale.fromSubtags(languageCode: 'lt'),
       Locale.fromSubtags(languageCode: 'nl'),
       Locale.fromSubtags(languageCode: 'no'),
       Locale.fromSubtags(languageCode: 'pl'),
       Locale.fromSubtags(languageCode: 'pt'),
+      Locale.fromSubtags(languageCode: 'ro'),
       Locale.fromSubtags(languageCode: 'ru'),
+      Locale.fromSubtags(languageCode: 'sl'),
       Locale.fromSubtags(languageCode: 'sv'),
       Locale.fromSubtags(languageCode: 'ta'),
       Locale.fromSubtags(languageCode: 'te'),
       Locale.fromSubtags(languageCode: 'th'),
       Locale.fromSubtags(languageCode: 'ti'),
       Locale.fromSubtags(languageCode: 'tr'),
+      Locale.fromSubtags(languageCode: 'uk'),
       Locale.fromSubtags(languageCode: 'zh'),
     ];
   }

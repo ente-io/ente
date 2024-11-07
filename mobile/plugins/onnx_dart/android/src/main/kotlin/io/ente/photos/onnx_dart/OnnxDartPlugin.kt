@@ -172,18 +172,14 @@ class OnnxDartPlugin: FlutterPlugin, MethodCallHandler {
 
       try {
         val env = OrtEnvironment.getEnvironment()
-        var inputTensorShape = longArrayOf(1, 3, 640, 640)
+        var inputTensorShape: LongArray = longArrayOf(1, 3, 640, 640)
         when (modelType) {
           ModelType.MobileFaceNet -> {
             val totalSize = inputDataFloat!!.size.toLong() / FACENET_SINGLE_INPUT_SIZE
             inputTensorShape = longArrayOf(totalSize, 112, 112, 3)
           }
           ModelType.ClipImageEncoder -> {
-            if (inputShapeArray != null) {
-              inputTensorShape = inputShapeArray.map { it.toLong() }.toLongArray()
-            } else {
-              result.error("INVALID_ARGUMENT", "Input shape is missing for clip image input", null)
-            }
+            inputTensorShape = longArrayOf(1, 3, 256, 256)
           }
           ModelType.ClipTextEncoder -> {
             inputTensorShape = longArrayOf(1, 77)
@@ -206,7 +202,6 @@ class OnnxDartPlugin: FlutterPlugin, MethodCallHandler {
             inputs["input"] = inputTensor
         }
         val outputs = session.run(inputs)
-        // Log.d(TAG, "Output shape: ${outputs.size()}")
         if (modelType == ModelType.YOLOv5Face) {
           val outputTensor = (outputs[0].value as Array<Array<FloatArray>>).get(0)
           val flatList = outputTensor.flattenToFloatArray()
@@ -220,6 +215,7 @@ class OnnxDartPlugin: FlutterPlugin, MethodCallHandler {
             result.success(flatList)
           }
         }
+
         outputs.close()
         inputTensor.close()
       } catch (e: OrtException) {
@@ -236,7 +232,11 @@ class OnnxDartPlugin: FlutterPlugin, MethodCallHandler {
   }
 
   private fun createSession(env: OrtEnvironment, modalPath: String): OrtSession? {
-    return env.createSession(modalPath, OrtSession.SessionOptions())
+    val sessionOptions = OrtSession.SessionOptions()
+    sessionOptions.setInterOpNumThreads(1)
+    sessionOptions.setIntraOpNumThreads(1)
+    sessionOptions.setOptimizationLevel(OrtSession.SessionOptions.OptLevel.ALL_OPT)
+    return env.createSession(modalPath, sessionOptions)
   }
 
   private fun releaseAllSessions() {

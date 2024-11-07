@@ -5,11 +5,13 @@ import "package:flutter/foundation.dart" show Uint8List;
 import "package:logging/logging.dart";
 import "package:photos/core/network/network.dart";
 import "package:photos/db/files_db.dart";
+import "package:photos/db/ml/db.dart";
+import "package:photos/db/ml/filedata.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/services/filedata/model/enc_file_data.dart";
 import "package:photos/services/filedata/model/file_data.dart";
 import "package:photos/services/filedata/model/response.dart";
-import "package:photos/utils/file_download_util.dart";
+import "package:photos/utils/file_key.dart";
 import "package:photos/utils/gzip.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
@@ -20,8 +22,11 @@ class FileDataService {
   static final FileDataService instance = FileDataService._privateConstructor();
   final _logger = Logger("FileDataService");
   final _dio = NetworkClient.instance.enteDio;
+  late final SharedPreferences _prefs;
 
-  void init(SharedPreferences prefs) {}
+  void init(SharedPreferences prefs) {
+    _prefs = prefs;
+  }
 
   Future<void> putFileData(EnteFile file, FileDataEntity data) async {
     data.validate();
@@ -104,6 +109,38 @@ class FileDataService {
         "inputs": inputs,
       },
     );
+  }
+
+  Future<void> syncFDStatus() async {
+    try {
+      bool hasMoreData = false;
+      do {
+        final lastTime = _prefs.getInt("fd.lastSyncTime") ?? 0;
+        final res = await _dio.post(
+          "/files/data/status-diff",
+          data: {
+            "lastUpdatedAt": lastTime,
+          },
+        );
+        final r = res.data;
+        final data = (r["diff"] ?? []) as List;
+        final List<FDStatus> result = [];
+        int maxUpdatedAt = lastTime;
+        for (var entry in data) {
+          result.add(FDStatus.fromJson(entry));
+          if (entry["updatedAt"] > maxUpdatedAt) {
+            maxUpdatedAt = entry["updatedAt"];
+          }
+        }
+        await MLDataDB.instance.putFDStatus(result);
+        await _prefs.setInt("fd.lastSyncTime", maxUpdatedAt);
+        _logger.info('found ${result.length} fd entries');
+        hasMoreData = result.isNotEmpty;
+      } while (hasMoreData);
+    } catch (e) {
+      _logger.severe("Failed to syncDiff", e);
+      rethrow;
+    }
   }
 }
 

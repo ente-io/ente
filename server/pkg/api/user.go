@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/gin-contrib/requestid"
+	"github.com/sirupsen/logrus"
 	"net/http"
 	"strconv"
 	"strings"
@@ -340,6 +342,10 @@ func (h *UserHandler) FinishPasskeyAuthenticationCeremony(c *gin.Context) {
 
 	err = h.UserController.PasskeyRepo.FinishAuthentication(&user, c.Request, uuid.MustParse(request.CeremonySessionID))
 	if err != nil {
+		reqID := requestid.Get(c)
+		logrus.WithField("req_id", reqID).
+			WithField("user_id", userID).
+			WithError(err).Error("Failed to finish passkey authentication ceremony")
 		handler.Error(c, stacktrace.Propagate(err, ""))
 		return
 	}

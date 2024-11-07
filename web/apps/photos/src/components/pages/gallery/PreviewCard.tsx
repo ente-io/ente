@@ -1,4 +1,6 @@
+import { Overlay } from "@/base/components/mui/Container";
 import log from "@/base/log";
+import { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import {
     GAP_BTW_TILES,
@@ -8,19 +10,18 @@ import {
     LoadingThumbnail,
     StaticThumbnail,
 } from "@/new/photos/components/PlaceholderThumbnails";
+import { TRASH_SECTION } from "@/new/photos/services/collection";
 import DownloadManager from "@/new/photos/services/download";
-import { EnteFile } from "@/new/photos/types/file";
-import { Overlay } from "@ente/shared/components/Container";
 import { CustomError } from "@ente/shared/error";
 import useLongPress from "@ente/shared/hooks/useLongPress";
 import AlbumOutlined from "@mui/icons-material/AlbumOutlined";
+import Favorite from "@mui/icons-material/FavoriteRounded";
 import PlayCircleOutlineOutlinedIcon from "@mui/icons-material/PlayCircleOutlineOutlined";
 import { Tooltip, styled } from "@mui/material";
 import i18n from "i18next";
 import { DeduplicateContext } from "pages/deduplicate";
 import { GalleryContext } from "pages/gallery";
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { TRASH_SECTION } from "utils/collection";
 import { shouldShowAvatar } from "utils/file";
 import Avatar from "./Avatar";
 
@@ -38,6 +39,7 @@ interface IProps {
     isInsSelectRange: boolean;
     activeCollectionID: number;
     showPlaceholder: boolean;
+    isFav: boolean;
 }
 
 const Check = styled("input")<{ $active: boolean }>`
@@ -119,6 +121,15 @@ export const AvatarOverlay = styled(Overlay)`
     align-items: flex-start;
     padding-right: 5px;
     padding-top: 5px;
+`;
+
+export const FavOverlay = styled(Overlay)`
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-end;
+    padding-left: 5px;
+    padding-bottom: 5px;
+    opacity: 0.9;
 `;
 
 export const InSelectRangeOverLay = styled("div")<{ $active: boolean }>`
@@ -350,6 +361,11 @@ export default function PreviewCard(props: IProps) {
                 <AvatarOverlay>
                     <Avatar file={file} />
                 </AvatarOverlay>
+            )}
+            {props.isFav && (
+                <FavOverlay>
+                    <Favorite />
+                </FavOverlay>
             )}
 
             <HoverOverlay

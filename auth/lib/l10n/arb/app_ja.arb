@@ -19,6 +19,20 @@
   "pleaseVerifyDetails": "詳細を確認し、もう一度お試しください",
   "codeIssuerHint": "発行者",
   "codeSecretKeyHint": "秘密鍵",
+  "secret": "シークレット",
+  "all": "すべて",
+  "notes": "ノート",
+  "notesLengthLimit": "ノートは {count} 文字までです",
+  "@notesLengthLimit": {
+    "description": "Text to indicate the maximum number of characters allowed for notes",
+    "placeholders": {
+      "count": {
+        "description": "The maximum number of characters allowed for notes",
+        "type": "int",
+        "example": "100"
+      }
+    }
+  },
   "codeAccountHint": "アカウント (you@domain.com)",
   "codeTagHint": "タグ",
   "accountKeyType": "鍵の種類",
@@ -34,6 +48,9 @@
   "nextTotpTitle": "次のコード",
   "deleteCodeTitle": "コードを削除しますか？",
   "deleteCodeMessage": "本当にこのコードを削除してもよろしいですか？この決定は元に戻せません。",
+  "trashCode": "コードを削除しますか？",
+  "trashCodeMessage": "{account} のコードをゴミ箱に入れてもよろしいですか？",
+  "trash": "ゴミ箱",
   "viewLogsAction": "ログの表示",
   "sendLogsDescription": "問題のデバッグに役立つログが送信されます。機密情報が記録されないように予防措置を講じていますが、共有する前にこれらのログを確認することをお勧めします。",
   "preparingLogsTitle": "ログを準備中...",
@@ -100,6 +117,7 @@
   "emailVerificationToggle": "メール認証",
   "emailVerificationEnableWarning": "アカウントから閉め出されるのを防ぐために、メール認証を有効にする前にメール 2FA のコピーが ente Auth 外に保管されていることを確認してください。",
   "authToChangeEmailVerificationSetting": "メール認証を変更するためには認証が必要です",
+  "authenticateGeneric": "認証してください",
   "authToViewYourRecoveryKey": "回復キーを表示するためには認証が必要です",
   "authToChangeYourEmail": "メールアドレスを変更するためには認証が必要です",
   "authToChangeYourPassword": "パスワードを変更するためには認証が必要です",
@@ -127,6 +145,8 @@
   "leaveFamily": "ファミリープランから退会",
   "leaveFamilyMessage": "本当にファミリープランを退会しますか？",
   "inFamilyPlanMessage": "ファミリープランに入会しています！",
+  "hintForMobile": "コードを長押しすると、編集または削除できます。",
+  "hintForDesktop": "コードを右クリックすると、編集または削除できます。",
   "scan": "読み取り",
   "scanACode": "コードを読み取り",
   "verify": "認証",
@@ -182,6 +202,10 @@
   "scanAQrCode": "QRコードを読み取り",
   "enterDetailsManually": "手動で詳細を入力する",
   "edit": "編集",
+  "share": "共有",
+  "shareCodes": "コードを共有",
+  "shareCodesDuration": "コードを共有したい期間を選択してください。",
+  "restore": "復元",
   "copiedToClipboard": "クリップボードにコピーしました",
   "copiedNextToClipboard": "次のコードをクリップボードにコピーしました",
   "error": "エラー",
@@ -335,6 +359,7 @@
   "sigInBackupReminder": "コードをエクスポートして、復元するためのバックアップがあることを確認してください。",
   "offlineModeWarning": "あなたはバックアップなしに続行することを選択しました。コードを安全に保つために手動でのバックアップを行ってください。",
   "showLargeIcons": "大きなアイコンを表示",
+  "compactMode": "コンパクトモード",
   "shouldHideCode": "コードを隠す",
   "doubleTapToViewHiddenCode": "項目をダブルタップしてコードを閲覧できます",
   "focusOnSearchBar": "アプリの起動時、検索欄にフォーカスする",
@@ -455,5 +480,9 @@
   "pinLock": "PIN",
   "enterPin": "PINを入力してください",
   "setNewPin": "新しいPINを設定",
-  "importFailureDescNew": "選択されたファイルを解析できませんでした。"
+  "importFailureDescNew": "選択されたファイルを解析できませんでした。",
+  "appLockNotEnabled": "アプリロックが有効になっていません",
+  "appLockNotEnabledDescription": "セキュリティ > アプリロック からアプリロックを有効化してください",
+  "authToViewPasskey": "パスキーを見るには認証してください",
+  "appLockOfflineModeWarning": "バックアップなしで進むことを選択しました。アプリロックを忘れると、データにアクセスできなくなります。"
 }

@@ -4,7 +4,6 @@ import { CustomErrorMessage } from "@/base/types/ipc";
 import { workerBridge } from "@/base/worker/worker-bridge";
 import { needsJPEGConversion } from "@/media/formats";
 import { heicToJPEG } from "@/media/heic-convert";
-import type { EnteFile } from "../types/file";
 import { detectFileTypeInfo } from "./detect-type";
 
 /**
@@ -15,48 +14,6 @@ import { detectFileTypeInfo } from "./detect-type";
  * That way, we can stop pestering it again and again, saving an IPC round-trip.
  */
 let _isNativeJPEGConversionAvailable = true;
-
-/**
- * @returns a string to use as an identifier when logging information about the
- * given {@link enteFile}. The returned string contains the file name (for ease
- * of debugging) and the file ID (for exactness).
- */
-export const fileLogID = (enteFile: EnteFile) =>
-    // TODO: Remove this when file/metadata types have optionality annotations.
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    `file ${enteFile.metadata.title ?? "-"} (${enteFile.id})`;
-
-/**
- * [Note: File name for local EnteFile objects]
- *
- * The title property in a file's metadata is the original file's name. The
- * metadata of a file cannot be edited. So if later on the file's name is
- * changed, then the edit is stored in the `editedName` property of the public
- * metadata of the file.
- *
- * This function merges these edits onto the file object that we use locally.
- * Effectively, post this step, the file's metadata.title can be used in lieu of
- * its filename.
- */
-export function mergeMetadata(files: EnteFile[]): EnteFile[] {
-    return files.map((file) => mergeMetadata1(file));
-}
-
-export function mergeMetadata1(file: EnteFile): EnteFile {
-    if (file.pubMagicMetadata?.data.editedTime) {
-        file.metadata.creationTime = file.pubMagicMetadata.data.editedTime;
-    }
-    if (file.pubMagicMetadata?.data.editedName) {
-        file.metadata.title = file.pubMagicMetadata.data.editedName;
-    }
-    // In a very rare cases (have found only one so far, a very old file
-    // uploaded by an initial dev version of Ente) the photo has no modification
-    // time. Gracefully handle such cases.
-    if (!file.metadata.modificationTime)
-        file.metadata.modificationTime = file.metadata.creationTime;
-
-    return file;
-}
 
 /**
  * Return a new {@link Blob} containing data in a format that the browser

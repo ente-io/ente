@@ -22,11 +22,13 @@ Future<ButtonResult?> showDialogWidget({
   required List<ButtonWidget> buttons,
   IconData? icon,
   bool isDismissible = true,
+  bool useRootNavigator = false,
 }) {
   return showDialog(
     barrierDismissible: isDismissible,
     barrierColor: backdropFaintDark,
     context: context,
+    useRootNavigator: useRootNavigator,
     builder: (context) {
       final widthOfScreen = MediaQuery.of(context).size.width;
       final isMobileSmall = widthOfScreen <= mobileSmallThreshold;
@@ -178,6 +180,7 @@ class TextInputDialog extends StatefulWidget {
   final TextEditingController? textEditingController;
   final List<TextInputFormatter>? textInputFormatter;
   final TextInputType? textInputType;
+  final bool popnavAfterSubmission;
   const TextInputDialog({
     required this.title,
     this.body,
@@ -198,6 +201,7 @@ class TextInputDialog extends StatefulWidget {
     this.textEditingController,
     this.textInputFormatter,
     this.textInputType,
+    this.popnavAfterSubmission = true,
     super.key,
   });
 
@@ -271,7 +275,7 @@ class _TextInputDialogState extends State<TextInputDialog> {
                 maxLength: widget.maxLength,
                 submitNotifier: _submitNotifier,
                 onSubmit: widget.onSubmit,
-                popNavAfterSubmission: true,
+                popNavAfterSubmission: widget.popnavAfterSubmission,
                 showOnlyLoadingState: widget.showOnlyLoadingState,
                 textCapitalization: widget.textCapitalization,
                 alwaysShowSuccessState: widget.alwaysShowSuccessState,

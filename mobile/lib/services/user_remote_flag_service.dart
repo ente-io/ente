@@ -2,23 +2,19 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
+import "package:dio/dio.dart";
+import "package:flutter/foundation.dart";
 import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/core/network/network.dart';
 import 'package:photos/events/notification_event.dart';
 import "package:photos/service_locator.dart";
 import 'package:photos/services/user_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserRemoteFlagService {
-  final _enteDio = NetworkClient.instance.enteDio;
-  final _logger = Logger((UserRemoteFlagService).toString());
-  late SharedPreferences _prefs;
-
-  UserRemoteFlagService._privateConstructor();
-
-  static final UserRemoteFlagService instance =
-      UserRemoteFlagService._privateConstructor();
+  final Dio _enteDio;
+  late final _logger = Logger((UserRemoteFlagService).toString());
+  final SharedPreferences _prefs;
 
   static const String recoveryVerificationFlag = "recoveryKeyVerified";
   static const String mapEnabled = "mapEnabled";
@@ -26,8 +22,8 @@ class UserRemoteFlagService {
   static const String needRecoveryKeyVerification =
       "needRecoveryKeyVerification";
 
-  Future<void> init() async {
-    _prefs = await SharedPreferences.getInstance();
+  UserRemoteFlagService(this._enteDio, this._prefs) {
+    debugPrint("UserRemoteFlagService constructor");
   }
 
   bool shouldShowRecoveryVerification() {

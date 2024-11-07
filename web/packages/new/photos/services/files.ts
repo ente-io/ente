@@ -1,8 +1,7 @@
 import { blobCache } from "@/base/blob-cache";
+import { mergeMetadata, type EnteFile, type Trash } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import localForage from "@ente/shared/storage/localForage";
-import { type EnteFile, type Trash } from "../types/file";
-import { mergeMetadata } from "../utils/file";
 
 const FILES_TABLE = "files";
 const HIDDEN_FILES_TABLE = "hidden-files";
@@ -36,6 +35,30 @@ export const setLocalFiles = async (
 ) => {
     const tableName = type === "normal" ? FILES_TABLE : HIDDEN_FILES_TABLE;
     await localForage.setItem(tableName, files);
+};
+
+/**
+ * Sort the given list of {@link EnteFile}s.
+ *
+ * By default, files are sorted so that the newest one is first. The optional
+ * {@link sortAsc} flag can be set to `true` to sort them so that the oldest one
+ * is first.
+ */
+export const sortFiles = (files: EnteFile[], sortAsc = false) => {
+    // Sort based on the time of creation time of the file.
+    //
+    // For files with same creation time, sort based on the time of last
+    // modification.
+    const factor = sortAsc ? -1 : 1;
+    return files.sort((a, b) => {
+        if (a.metadata.creationTime === b.metadata.creationTime) {
+            return (
+                factor *
+                (b.metadata.modificationTime - a.metadata.modificationTime)
+            );
+        }
+        return factor * (b.metadata.creationTime - a.metadata.creationTime);
+    });
 };
 
 export const TRASH = "file-trash";

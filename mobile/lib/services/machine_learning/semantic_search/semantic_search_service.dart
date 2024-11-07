@@ -22,6 +22,7 @@ import "package:photos/services/collections_service.dart";
 import "package:photos/services/machine_learning/ml_computer.dart";
 import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
+import "package:photos/services/user_remote_flag_service.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
 class SemanticSearchService {
@@ -43,13 +44,15 @@ class SemanticSearchService {
   String? _latestPendingQuery;
 
   Future<void> init() async {
-    if (!localSettings.isMLIndexingEnabled) {
-      return;
-    }
     if (_hasInitialized) {
       _logger.info("Initialized already");
       return;
     }
+    final hasGivenConsent = userRemoteFlagService
+        .getCachedBoolValue(UserRemoteFlagService.mlEnabled);
+    if (!hasGivenConsent) return;
+
+    _logger.info("init called");
     _hasInitialized = true;
 
     // call getClipEmbeddings after 5 seconds
@@ -64,7 +67,8 @@ class SemanticSearchService {
   }
 
   bool isMagicSearchEnabledAndReady() {
-    return localSettings.isMLIndexingEnabled && _textModelIsLoaded;
+    return userRemoteFlagService
+        .getCachedBoolValue(UserRemoteFlagService.mlEnabled) && _textModelIsLoaded;
   }
 
   // searchScreenQuery should only be used for the user initiate query on the search screen.
@@ -73,7 +77,8 @@ class SemanticSearchService {
     if (!isMagicSearchEnabledAndReady()) {
       if (flagService.internalUser) {
         _logger.info(
-          "Magic search enabled: ${localSettings.isMLIndexingEnabled}, loaded: $_textModelIsLoaded ",
+          "ML global consent: ${userRemoteFlagService
+        .getCachedBoolValue(UserRemoteFlagService.mlEnabled)}, loaded: $_textModelIsLoaded ",
         );
       }
       return (query, <EnteFile>[]);
@@ -108,8 +113,12 @@ class SemanticSearchService {
   }
 
   Future<List<EmbeddingVector>> getClipVectors() async {
-    _logger.info("Pulling cached clip embeddings");
+    if (_cachedImageEmbeddingVectors != null) {
+      return _cachedImageEmbeddingVectors!;
+    }
     _cachedImageEmbeddingVectors ??= MLDataDB.instance.getAllClipVectors();
+    _logger.info("read all embeddings from DB");
+
     return _cachedImageEmbeddingVectors!;
   }
 

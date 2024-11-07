@@ -23,6 +23,8 @@ class LockScreenSettings {
   static const keyAppLockSet = "ls_is_app_lock_set";
   static const keyHasMigratedLockScreenChanges =
       "ls_has_migrated_lock_screen_changes";
+  static const keyShowOfflineModeWarning = "ls_show_offline_mode_warning";
+
   final List<Duration> autoLockDurations = const [
     Duration(milliseconds: 650),
     Duration(seconds: 5),
@@ -45,6 +47,14 @@ class LockScreenSettings {
     /// Function to Check if the migration for lock screen changes has
     /// already been done by checking a stored boolean value.
     await runLockScreenChangesMigration();
+  }
+
+  Future<void> setOfflineModeWarningStatus(bool value) async {
+    await _preferences.setBool(keyShowOfflineModeWarning, value);
+  }
+
+  bool getOfflineModeWarningStatus() {
+    return _preferences.getBool(keyShowOfflineModeWarning) ?? true;
   }
 
   Future<void> runLockScreenChangesMigration() async {

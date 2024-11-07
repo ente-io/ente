@@ -1,18 +1,29 @@
 import { assertionFailed } from "@/base/assert";
+import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { SpaceBetweenFlex } from "@/base/components/mui/Container";
+import { useModalVisibility } from "@/base/components/utils/modal";
 import log from "@/base/log";
 import type { Collection } from "@/media/collection";
 import { ItemVisibility } from "@/media/file-metadata";
 import {
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
-} from "@/new/photos/components/Gallery/ListHeader";
-import { SpaceBetweenFlex } from "@/new/photos/components/mui-custom";
+} from "@/new/photos/components/gallery/ListHeader";
+import {
+    ALL_SECTION,
+    HIDDEN_ITEMS_SECTION,
+    isHiddenCollection,
+} from "@/new/photos/services/collection";
 import type {
     CollectionSummary,
     CollectionSummaryType,
-} from "@/new/photos/types/collection";
+} from "@/new/photos/services/collection/ui";
+import {
+    isArchivedCollection,
+    isPinnedCollection,
+} from "@/new/photos/services/magic-metadata";
+import { AppContext } from "@/new/photos/types/context";
 import { HorizontalFlex } from "@ente/shared/components/Container";
-import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import OverflowMenu, {
     StyledMenu,
 } from "@ente/shared/components/OverflowMenu/menu";
@@ -26,7 +37,8 @@ import LinkIcon from "@mui/icons-material/Link";
 import LogoutIcon from "@mui/icons-material/Logout";
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
 import PeopleIcon from "@mui/icons-material/People";
-import PushPinOutlined from "@mui/icons-material/PushPinOutlined";
+import PushPinIcon from "@mui/icons-material/PushPin";
+import PushPinOutlinedIcon from "@mui/icons-material/PushPinOutlined";
 import SortIcon from "@mui/icons-material/Sort";
 import TvIcon from "@mui/icons-material/Tv";
 import Unarchive from "@mui/icons-material/Unarchive";
@@ -34,26 +46,20 @@ import VisibilityOffOutlined from "@mui/icons-material/VisibilityOffOutlined";
 import VisibilityOutlined from "@mui/icons-material/VisibilityOutlined";
 import { Box, IconButton, Stack, Tooltip } from "@mui/material";
 import { SetCollectionNamerAttributes } from "components/Collections/CollectionNamer";
-import { UnPinIcon } from "components/icons/UnPinIcon";
 import { t } from "i18next";
-import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";
-import React, { useCallback, useContext, useRef, useState } from "react";
+import React, { useCallback, useContext, useRef } from "react";
 import { Trans } from "react-i18next";
 import * as CollectionAPI from "services/collectionService";
 import * as TrashService from "services/trashService";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
 import {
-    ALL_SECTION,
     changeCollectionOrder,
     changeCollectionSortOrder,
     changeCollectionVisibility,
     downloadCollectionHelper,
     downloadDefaultHiddenCollectionHelper,
-    HIDDEN_ITEMS_SECTION,
-    isHiddenCollection,
 } from "utils/collection";
-import { isArchivedCollection, isPinnedCollection } from "utils/magicMetadata";
 
 interface CollectionHeaderProps {
     collectionSummary: CollectionSummary;
@@ -135,18 +141,20 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
     setFilesDownloadProgressAttributesCreator,
     isActiveCollectionDownloadInProgress,
 }) => {
-    const { startLoading, finishLoading, setDialogMessage } =
+    const { showLoadingBar, hideLoadingBar, setDialogMessage } =
         useContext(AppContext);
     const { syncWithRemote } = useContext(GalleryContext);
     const overFlowMenuIconRef = useRef<SVGSVGElement>(null);
-    const [openSortOrderMenu, setOpenSortOrderMenu] = useState(false);
+
+    const { show: showSortOrderMenu, props: sortOrderMenuVisibilityProps } =
+        useModalVisibility();
 
     const handleError = useCallback(
         (e: unknown) => {
             log.error("Collection action failed", e);
             setDialogMessage({
                 title: t("error"),
-                content: t("UNKNOWN_ERROR"),
+                content: t("generic_error_retry"),
                 close: { variant: "critical" },
             });
         },
@@ -161,19 +169,19 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
     const wrap = useCallback(
         (f: () => Promise<void>) => {
             const wrapped = async () => {
-                startLoading();
+                showLoadingBar();
                 try {
                     await f();
                 } catch (e) {
                     handleError(e);
                 } finally {
                     void syncWithRemote(false, true);
-                    finishLoading();
+                    hideLoadingBar();
                 }
             };
             return (): void => void wrapped();
         },
-        [handleError, syncWithRemote, startLoading, finishLoading],
+        [handleError, syncWithRemote, showLoadingBar, hideLoadingBar],
     );
 
     const showRenameCollectionModal = () => {
@@ -323,10 +331,6 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
         setActiveCollectionID(HIDDEN_ITEMS_SECTION);
     });
 
-    const showSortOrderMenu = () => setOpenSortOrderMenu(true);
-
-    const closeSortOrderMenu = () => setOpenSortOrderMenu(false);
-
     const changeSortOrderAsc = wrap(() =>
         changeCollectionSortOrder(activeCollection, true),
     );
@@ -397,8 +401,7 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
                 )}
             </OverflowMenu>
             <CollectionSortOrderMenu
-                open={openSortOrderMenu}
-                onClose={closeSortOrderMenu}
+                {...sortOrderMenuVisibilityProps}
                 overFlowMenuIconRef={overFlowMenuIconRef}
                 onAscClick={changeSortOrderAsc}
                 onDescClick={changeSortOrderDesc}
@@ -433,7 +436,7 @@ const QuickOptions: React.FC<QuickOptionsProps> = ({
         )}
         {showDownloadQuickOption(type) &&
             (isDownloadInProgress() ? (
-                <EnteSpinner size="20px" sx={{ m: "12px" }} />
+                <ActivityIndicator size="20px" sx={{ m: "12px" }} />
             ) : (
                 <DownloadQuickOption
                     onClick={onDownloadClick}
@@ -554,7 +557,7 @@ const DownloadOption: React.FC<
     <OverflowMenuOption
         startIcon={
             isDownloadInProgress && isDownloadInProgress() ? (
-                <EnteSpinner size="20px" sx={{ cursor: "not-allowed" }} />
+                <ActivityIndicator size="20px" sx={{ cursor: "not-allowed" }} />
             ) : (
                 <FileDownloadOutlinedIcon />
             )
@@ -651,14 +654,14 @@ const AlbumCollectionOptions: React.FC<AlbumCollectionOptionsProps> = ({
         {isPinned ? (
             <OverflowMenuOption
                 onClick={onUnpinClick}
-                startIcon={<UnPinIcon />}
+                startIcon={<PushPinOutlinedIcon />}
             >
                 {t("unpin_album")}
             </OverflowMenuOption>
         ) : (
             <OverflowMenuOption
                 onClick={onPinClick}
-                startIcon={<PushPinOutlined />}
+                startIcon={<PushPinIcon />}
             >
                 {t("pin_album")}
             </OverflowMenuOption>

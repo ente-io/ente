@@ -160,8 +160,11 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(EnteFile file) async {
   int? motionPhotoStartingIndex;
   if (Platform.isAndroid && asset.type == AssetType.image) {
     try {
-      motionPhotoStartingIndex =
-          (await MotionPhotos(sourceFile.path).getMotionVideoIndex())?.start;
+      motionPhotoStartingIndex = await Computer.shared().compute(
+        motionVideoIndex,
+        param: {'path': sourceFile.path},
+        taskName: 'motionPhotoIndex',
+      );
     } catch (e) {
       _logger.severe('error while detecthing motion photo start index', e);
     }
@@ -175,6 +178,11 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(EnteFile file) async {
     width: w,
     motionPhotoStartIndex: motionPhotoStartingIndex,
   );
+}
+
+Future<int?> motionVideoIndex(Map<String, dynamic> args) async {
+  final String path = args['path'];
+  return (await MotionPhotos(path).getMotionVideoIndex())?.start;
 }
 
 Future<void> _computeZip(Map<String, dynamic> args) async {

@@ -1,4 +1,8 @@
 import log from "@/base/log";
+import {
+    getTotalFamilyUsage,
+    isPartOfFamily,
+} from "@/new/photos/services/user";
 import { SetDialogBoxAttributes } from "@ente/shared/components/DialogBox/types";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { t } from "i18next";
@@ -8,7 +12,6 @@ import { Plan, Subscription } from "types/billing";
 import { SetLoading } from "types/gallery";
 import { BonusData, UserDetails } from "types/user";
 import { getSubscriptionPurchaseSuccessMessage } from "utils/ui";
-import { getTotalFamilyUsage, isPartOfFamily } from "utils/user/family";
 
 const PAYMENT_PROVIDER_STRIPE = "stripe";
 const FREE_PLAN = "free";
@@ -239,7 +242,7 @@ export async function updatePaymentMethod(
         setLoading(false);
         setDialogMessage({
             title: t("error"),
-            content: t("UNKNOWN_ERROR"),
+            content: t("generic_error_retry"),
             close: { variant: "critical" },
         });
     }

@@ -37,7 +37,7 @@ import 'package:photos/services/file_magic_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/utils/crypto_util.dart';
-import 'package:photos/utils/file_download_util.dart';
+import "package:photos/utils/file_key.dart";
 import "package:photos/utils/local_settings.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 

@@ -19,6 +19,7 @@ export interface ParsedMetadataJSON {
     creationTime?: number;
     modificationTime?: number;
     location?: Location;
+    description?: string;
 }
 
 export const MAX_FILE_NAME_LENGTH_GOOGLE_EXPORT = 46;
@@ -126,6 +127,10 @@ const parseMetadataJSONText = (text: string) => {
         parseGTLocation(metadataJSON["geoData"]) ??
         parseGTLocation(metadataJSON["geoDataExif"]);
 
+    parsedMetadataJSON.description = parseGTNonEmptyString(
+        metadataJSON["description"],
+    );
+
     return parsedMetadataJSON;
 };
 
@@ -171,6 +176,13 @@ const parseGTLocation = (o: unknown): Location | undefined => {
     }
     return undefined;
 };
+
+/**
+ * Parse a string from a field in a Google Takeout JSON, treating empty strings
+ * as undefined.
+ */
+const parseGTNonEmptyString = (o: unknown): string | undefined =>
+    o && typeof o == "string" ? o : undefined;
 
 /**
  * Return the matching entry (if any) from {@link parsedMetadataJSONMap} for the

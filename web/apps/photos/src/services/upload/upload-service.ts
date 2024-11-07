@@ -7,7 +7,16 @@ import { ensureElectron } from "@/base/electron";
 import { basename, nameAndExtension } from "@/base/file";
 import log from "@/base/log";
 import { CustomErrorMessage } from "@/base/types/ipc";
-import { hasFileHash } from "@/media/file";
+import {
+    EncryptedMagicMetadata,
+    EnteFile,
+    hasFileHash,
+    MetadataFileAttributes,
+    S3FileAttributes,
+    type EncryptedEnteFile,
+    type FilePublicMagicMetadata,
+    type FilePublicMagicMetadataProps,
+} from "@/media/file";
 import type {
     Metadata,
     ParsedMetadata,
@@ -17,22 +26,18 @@ import { FileType, type FileTypeInfo } from "@/media/file-type";
 import { encodeLivePhoto } from "@/media/live-photo";
 import { extractExif } from "@/new/photos/services/exif";
 import * as ffmpeg from "@/new/photos/services/ffmpeg";
+import {
+    getNonEmptyMagicMetadataProps,
+    updateMagicMetadata,
+} from "@/new/photos/services/magic-metadata";
 import type { UploadItem } from "@/new/photos/services/upload/types";
 import {
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
     UPLOAD_RESULT,
 } from "@/new/photos/services/upload/types";
-import {
-    EnteFile,
-    MetadataFileAttributes,
-    S3FileAttributes,
-    type EncryptedEnteFile,
-    type FilePublicMagicMetadata,
-    type FilePublicMagicMetadataProps,
-} from "@/new/photos/types/file";
-import { EncryptedMagicMetadata } from "@/new/photos/types/magicMetadata";
 import { detectFileTypeInfoFromChunk } from "@/new/photos/utils/detect-type";
 import { readStream } from "@/new/photos/utils/native-stream";
+import { mergeUint8Arrays } from "@/utils/array";
 import { ensure, ensureInteger, ensureNumber } from "@/utils/ensure";
 import { CustomError, handleUploadError } from "@ente/shared/error";
 import { addToCollection } from "services/collectionService";
@@ -40,10 +45,6 @@ import {
     PublicUploadProps,
     type LivePhotoAssets,
 } from "services/upload/uploadManager";
-import {
-    getNonEmptyMagicMetadataProps,
-    updateMagicMetadata,
-} from "utils/magicMetadata";
 import * as convert from "xml-js";
 import { tryParseEpochMicrosecondsFromFileName } from "./date";
 import publicUploadHttpClient from "./publicUploadHttpClient";
@@ -1014,6 +1015,11 @@ const extractImageOrVideoMetadata = async (
         if (h) publicMagicMetadata.h = ensureInteger(h);
     }
 
+    const caption = parsedMetadataJSON?.description;
+    if (caption) {
+        publicMagicMetadata.caption = caption;
+    }
+
     return { metadata, publicMagicMetadata };
 };
 
@@ -1568,9 +1574,7 @@ async function combineChunksToFormUploadPart(
         if (done) {
             break;
         }
-        for (let index = 0; index < chunk.length; index++) {
-            combinedChunks.push(chunk[index]);
-        }
+        combinedChunks.push(chunk);
     }
-    return Uint8Array.from(combinedChunks);
+    return mergeUint8Arrays(combinedChunks);
 }

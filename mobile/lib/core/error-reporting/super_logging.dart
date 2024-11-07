@@ -228,21 +228,26 @@ class SuperLogging {
     }
   }
 
+  static _shouldSkipSentry(Object error) {
+    if (error is DioError) {
+      return true;
+    }
+    final bool result = error is StorageLimitExceededError ||
+        error is WiFiUnavailableError ||
+        error is InvalidFileError ||
+        error is NoActiveSubscriptionError;
+    if (kDebugMode && result) {
+      $.info('Not sending error to sentry: $error');
+    }
+    return result;
+  }
+
   static Future<void> _sendErrorToSentry(
     Object error,
     StackTrace? stack,
   ) async {
     try {
-      if (error is DioError) {
-        return;
-      }
-      if (error is StorageLimitExceededError ||
-          error is WiFiUnavailableError ||
-          error is InvalidFileError ||
-          error is NoActiveSubscriptionError) {
-        if (kDebugMode) {
-          $.info('Not sending error to sentry: $error');
-        }
+      if (_shouldSkipSentry(error)) {
         return;
       }
       await Sentry.captureException(
@@ -322,6 +327,9 @@ class SuperLogging {
   static Future<void> setupSentry() async {
     await for (final error in sentryQueueControl.stream.asBroadcastStream()) {
       try {
+        if (_shouldSkipSentry(error)) {
+          continue;
+        }
         await Sentry.captureException(
           error,
         );

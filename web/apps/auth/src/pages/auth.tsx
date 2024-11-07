@@ -1,13 +1,13 @@
+import { sessionExpiredDialogAttributes } from "@/accounts/components/LoginComponents";
 import { stashRedirect } from "@/accounts/services/redirect";
+import { EnteLogo } from "@/base/components/EnteLogo";
+import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { NavbarBase } from "@/base/components/Navbar";
 import { ensure } from "@/utils/ensure";
 import {
     HorizontalFlex,
     VerticallyCentered,
 } from "@ente/shared/components/Container";
-import { EnteLogo } from "@ente/shared/components/EnteLogo";
-import EnteSpinner from "@ente/shared/components/EnteSpinner";
-import { sessionExpiredDialogAttributes } from "@ente/shared/components/LoginComponents";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
 import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
 import { AUTH_PAGES as PAGES } from "@ente/shared/constants/pages";
@@ -17,13 +17,13 @@ import MoreHoriz from "@mui/icons-material/MoreHoriz";
 import { Button, ButtonBase, Snackbar, TextField, styled } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import { AppContext } from "pages/_app";
 import React, { useContext, useEffect, useState } from "react";
 import { generateOTPs, type Code } from "services/code";
 import { getAuthCodes } from "services/remote";
+import { AppContext } from "./_app";
 
 const Page: React.FC = () => {
-    const { logout, showNavBar, setDialogBoxAttributesV2 } = ensure(
+    const { logout, showNavBar, showMiniDialog } = ensure(
         useContext(AppContext),
     );
     const router = useRouter();
@@ -32,7 +32,7 @@ const Page: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState("");
 
     const showSessionExpiredDialog = () =>
-        setDialogBoxAttributesV2(sessionExpiredDialogAttributes(logout));
+        showMiniDialog(sessionExpiredDialogAttributes(logout));
 
     useEffect(() => {
         const fetchCodes = async () => {
@@ -68,7 +68,7 @@ const Page: React.FC = () => {
     if (!hasFetched) {
         return (
             <VerticallyCentered>
-                <EnteSpinner />
+                <ActivityIndicator />
             </VerticallyCentered>
         );
     }

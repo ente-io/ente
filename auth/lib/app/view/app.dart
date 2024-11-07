@@ -23,7 +23,7 @@ import 'package:tray_manager/tray_manager.dart';
 import 'package:window_manager/window_manager.dart';
 
 class App extends StatefulWidget {
-  final Locale locale;
+  final Locale? locale;
   const App({super.key, this.locale = const Locale("en")});
 
   static void setLocale(BuildContext context, Locale newLocale) {

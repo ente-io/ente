@@ -29,12 +29,16 @@ class LockScreenSettings {
     Duration(minutes: 5),
     Duration(minutes: 30),
   ];
-  void init(SharedPreferences prefs) async {
+  Future<void> init(SharedPreferences prefs) async {
     _secureStorage = const FlutterSecureStorage();
     _preferences = prefs;
 
-    ///Workaround for privacyScreen not working when app is killed and opened.
-    await setHideAppContent(getShouldHideAppContent());
+    /// Workaround to check if "lateinit property activity has not been
+    ///  initialized" PlatformException goes away.
+    await Future.delayed(const Duration(milliseconds: 500), () {
+      ///Workaround for privacyScreen not working when app is killed and opened.
+      setHideAppContent(getShouldHideAppContent());
+    });
   }
 
   Future<void> setHideAppContent(bool hideContent) async {

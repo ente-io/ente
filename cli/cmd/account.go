@@ -104,7 +104,7 @@ var getTokenCmd = &cobra.Command{
 			App:   api.StringToApp(app),
 		})
 		if err != nil {
-			fmt.Printf("Error updating account: %v\n", err)
+			fmt.Printf("Error getting token for %s (app:%s): %v\n", email, app, err)
 		}
 	},
 }

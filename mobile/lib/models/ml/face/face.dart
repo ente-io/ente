@@ -4,6 +4,7 @@ import "package:photos/models/ml/face/dimension.dart";
 import "package:photos/models/ml/face/landmark.dart";
 import 'package:photos/services/machine_learning/face_ml/face_filtering/face_filtering_constants.dart';
 import "package:photos/services/machine_learning/ml_result.dart";
+import "package:photos/utils/parse.dart";
 
 // FileInfo contains the image width and height of the image the face was detected in.
 class FileInfo {
@@ -98,10 +99,10 @@ class Face {
       faceID,
       fileID,
       parseAsDoubleList(json['embedding'] as List),
-      json['score'] as double,
+      parseIntOrDoubleAsDouble(json['score'])!,
       Detection.fromJson(json['detection'] as Map<String, dynamic>),
       // high value means t
-      (json['blur'] ?? kLapacianDefault) as double,
+      parseIntOrDoubleAsDouble(json['blur']) ?? kLapacianDefault,
     );
   }
 
@@ -114,22 +115,4 @@ class Face {
         'score': score,
         'blur': blur,
       };
-}
-
-List<double> parseAsDoubleList(List<dynamic> inputList) {
-  if (inputList.isEmpty) return const [];
-
-  if (inputList is List<double>) return inputList;
-  return List<double>.generate(
-    inputList.length,
-    (index) {
-      final value = inputList[index];
-      if (value is int) return value.toDouble();
-      if (value is double) return value;
-      throw FormatException(
-        'Invalid type at index $index: ${value.runtimeType}',
-      );
-    },
-    growable: false,
-  );
 }

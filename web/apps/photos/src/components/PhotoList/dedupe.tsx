@@ -1,10 +1,10 @@
+import { EnteFile } from "@/media/file";
 import {
     GAP_BTW_TILES,
     IMAGE_CONTAINER_MAX_HEIGHT,
     IMAGE_CONTAINER_MAX_WIDTH,
     MIN_COLUMNS,
 } from "@/new/photos/components/PhotoList";
-import { EnteFile } from "@/new/photos/types/file";
 import { formattedByteSize } from "@/new/photos/utils/units";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import { Box, styled } from "@mui/material";

@@ -16,7 +16,7 @@ export const handleSharingErrors = (error) => {
             errorMessage = t("USER_DOES_NOT_EXIST");
             break;
         default:
-            errorMessage = `${t("UNKNOWN_ERROR")} ${parsedError.message}`;
+            errorMessage = `${t("generic_error_retry")} ${parsedError.message}`;
     }
     return errorMessage;
 };

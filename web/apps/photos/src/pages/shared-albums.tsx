@@ -1,22 +1,29 @@
+import { EnteLogoSVG } from "@/base/components/EnteLogo";
+import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { SpaceBetweenFlex } from "@/base/components/mui/Container";
 import { NavbarBase, SelectionBar } from "@/base/components/Navbar";
 import { sharedCryptoWorker } from "@/base/crypto";
-import { useIsMobileWidth, useIsTouchscreen } from "@/base/hooks";
+import { useIsSmallWidth, useIsTouchscreen } from "@/base/hooks";
 import log from "@/base/log";
+import { updateShouldDisableCFUploadProxy } from "@/gallery/upload";
 import type { Collection } from "@/media/collection";
+import { type EnteFile, mergeMetadata } from "@/media/file";
 import {
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
-} from "@/new/photos/components/Gallery/ListHeader";
-import { SpaceBetweenFlex } from "@/new/photos/components/mui-custom";
+} from "@/new/photos/components/gallery/ListHeader";
+import {
+    ALL_SECTION,
+    isHiddenCollection,
+} from "@/new/photos/services/collection";
 import downloadManager from "@/new/photos/services/download";
-import { EnteFile } from "@/new/photos/types/file";
-import { mergeMetadata } from "@/new/photos/utils/file";
+import { sortFiles } from "@/new/photos/services/files";
+import { useAppContext } from "@/new/photos/types/context";
 import {
     CenteredFlex,
     FluidContainer,
     VerticallyCentered,
 } from "@ente/shared/components/Container";
-import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
 import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
@@ -33,10 +40,9 @@ import DownloadIcon from "@mui/icons-material/Download";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
 import type { ButtonProps, IconButtonProps } from "@mui/material";
-import { Box, Button, IconButton, Stack, Tooltip } from "@mui/material";
+import { Box, Button, IconButton, Stack, styled, Tooltip } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import bs58 from "bs58";
-import { EnteLogo } from "components/EnteLogo";
 import {
     FilesDownloadProgress,
     FilesDownloadProgressAttributes,
@@ -49,8 +55,7 @@ import Uploader from "components/Upload/Uploader";
 import { UploadSelectorInputs } from "components/UploadSelectorInputs";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import { AppContext } from "pages/_app";
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import {
     getLocalPublicCollection,
@@ -71,12 +76,8 @@ import {
     SetFilesDownloadProgressAttributes,
     SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
-import {
-    ALL_SECTION,
-    downloadCollectionFiles,
-    isHiddenCollection,
-} from "utils/collection";
-import { downloadSelectedFiles, getSelectedFiles, sortFiles } from "utils/file";
+import { downloadCollectionFiles } from "utils/collection";
+import { downloadSelectedFiles, getSelectedFiles } from "utils/file";
 import { formatNumber } from "utils/number/format";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 
@@ -90,7 +91,8 @@ export default function PublicCollectionGallery() {
     const [publicFiles, setPublicFiles] = useState<EnteFile[]>(null);
     const [publicCollection, setPublicCollection] = useState<Collection>(null);
     const [errorMessage, setErrorMessage] = useState<string>(null);
-    const appContext = useContext(AppContext);
+    const { showLoadingBar, hideLoadingBar, setDialogMessage } =
+        useAppContext();
     const [loading, setLoading] = useState(true);
     const router = useRouter();
     const [isPasswordProtected, setIsPasswordProtected] =
@@ -185,7 +187,7 @@ export default function PublicCollectionGallery() {
     };
 
     const showPublicLinkExpiredMessage = () =>
-        appContext.setDialogMessage({
+        setDialogMessage({
             title: t("LINK_EXPIRED"),
             content: t("LINK_EXPIRED_MESSAGE"),
 
@@ -239,6 +241,7 @@ export default function PublicCollectionGallery() {
                         : await cryptoWorker.fromHex(ck);
                 token.current = t;
                 downloadManager.updateToken(token.current);
+                await updateShouldDisableCFUploadProxy();
                 collectionKey.current = dck;
                 url.current = window.location.href;
                 const localCollection = await getLocalPublicCollection(
@@ -316,7 +319,7 @@ export default function PublicCollectionGallery() {
     const syncWithRemote = async () => {
         const collectionUID = getPublicCollectionUID(token.current);
         try {
-            appContext.startLoading();
+            showLoadingBar();
             setLoading(true);
             const [collection, userReferralCode] = await getPublicCollection(
                 token.current,
@@ -381,7 +384,7 @@ export default function PublicCollectionGallery() {
                 log.error("failed to sync public album with remote", e);
             }
         } finally {
-            appContext.finishLoading();
+            hideLoadingBar();
             setLoading(false);
         }
     };
@@ -403,7 +406,7 @@ export default function PublicCollectionGallery() {
                 );
             } catch (e) {
                 log.error("failed to derive key for verifyLinkPassword", e);
-                setFieldError(`${t("UNKNOWN_ERROR")} ${e.message}`);
+                setFieldError(`${t("generic_error_retry")} ${e.message}`);
                 return;
             }
             const collectionUID = getPublicCollectionUID(token.current);
@@ -427,10 +430,10 @@ export default function PublicCollectionGallery() {
                 throw e;
             }
             await syncWithRemote();
-            appContext.finishLoading();
+            hideLoadingBar();
         } catch (e) {
             log.error("failed to verifyLinkPassword", e);
-            setFieldError(`${t("UNKNOWN_ERROR")} ${e.message}`);
+            setFieldError(`${t("generic_error_retry")} ${e.message}`);
         }
     };
 
@@ -438,7 +441,7 @@ export default function PublicCollectionGallery() {
         if (!publicFiles) {
             return (
                 <VerticallyCentered>
-                    <EnteSpinner />
+                    <ActivityIndicator />
                 </VerticallyCentered>
             );
         }
@@ -535,7 +538,7 @@ export default function PublicCollectionGallery() {
                 />
                 {blockingLoad && (
                     <LoadingOverlay>
-                        <EnteSpinner />
+                        <ActivityIndicator />
                     </LoadingOverlay>
                 )}
                 <Uploader
@@ -543,7 +546,7 @@ export default function PublicCollectionGallery() {
                     uploadCollection={publicCollection}
                     setLoading={setBlockingLoad}
                     setShouldDisableDropzone={setShouldDisableDropzone}
-                    setFiles={setPublicFiles}
+                    onUploadFile={(file) => sortFiles([...publicFiles, file])}
                     uploadTypeSelectorView={uploadTypeSelectorView}
                     closeUploadTypeSelector={closeUploadTypeSelectorView}
                     showSessionExpiredMessage={showPublicLinkExpiredMessage}
@@ -580,49 +583,35 @@ interface SharedAlbumNavbarProps {
 }
 const SharedAlbumNavbar: React.FC<SharedAlbumNavbarProps> = ({
     onAddPhotos,
-}) => {
-    return (
-        <NavbarBase>
-            <FluidContainer>
-                <EnteLinkLogo />
-            </FluidContainer>
-            {onAddPhotos ? (
-                <AddPhotosButton onClick={onAddPhotos} />
-            ) : (
-                <GoToEnte />
-            )}
-        </NavbarBase>
-    );
-};
+}) => (
+    <NavbarBase>
+        <FluidContainer>
+            <EnteLogoLink href="https://ente.io">
+                <EnteLogoSVG height={15} />
+            </EnteLogoLink>
+        </FluidContainer>
+        {onAddPhotos ? <AddPhotosButton onClick={onAddPhotos} /> : <GoToEnte />}
+    </NavbarBase>
+);
 
-const EnteLinkLogo: React.FC = () => {
-    return (
-        <a href="https://ente.io">
-            <Box
-                sx={(theme) => ({
-                    ":hover": {
-                        cursor: "pointer",
-                        svg: {
-                            fill: theme.colors.text.faint,
-                        },
-                    },
-                })}
-            >
-                <EnteLogo />
-            </Box>
-        </a>
-    );
-};
+const EnteLogoLink = styled("a")(({ theme }) => ({
+    // Remove the excess space at the top.
+    svg: { verticalAlign: "middle" },
+    color: theme.colors.text.base,
+    ":hover": {
+        color: theme.palette.accent.main,
+    },
+}));
 
 const AddPhotosButton: React.FC<ButtonProps & IconButtonProps> = (props) => {
     const disabled = !uploadManager.shouldAllowNewUpload();
-    const isMobileWidth = useIsMobileWidth();
+    const isSmallWidth = useIsSmallWidth();
 
     const icon = <AddPhotoAlternateOutlined />;
 
     return (
         <Box>
-            {isMobileWidth ? (
+            {isSmallWidth ? (
                 <IconButton {...props} disabled={disabled}>
                     {icon}
                 </IconButton>

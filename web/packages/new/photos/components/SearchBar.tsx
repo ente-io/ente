@@ -1,19 +1,11 @@
 import { assertionFailed } from "@/base/assert";
-import { useIsMobileWidth } from "@/base/hooks";
-import { ItemCard, PreviewItemTile } from "@/new/photos/components/ItemCards";
-import {
-    isMLSupported,
-    mlStatusSnapshot,
-    mlStatusSubscribe,
-    peopleSnapshot,
-    peopleSubscribe,
-} from "@/new/photos/services/ml";
-import type { Person } from "@/new/photos/services/ml/people";
+import { useIsSmallWidth } from "@/base/hooks";
+import { ItemCard, PreviewItemTile } from "@/new/photos/components/Tiles";
+import { isMLSupported, mlStatusSnapshot } from "@/new/photos/services/ml";
 import { searchOptionsForString } from "@/new/photos/services/search";
 import type { SearchOption } from "@/new/photos/services/search/types";
 import { nullToUndefined } from "@/utils/transform";
 import CalendarIcon from "@mui/icons-material/CalendarMonth";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
 import ImageIcon from "@mui/icons-material/Image";
 import LocationIcon from "@mui/icons-material/LocationOn";
@@ -30,7 +22,7 @@ import {
 } from "@mui/material";
 import { t } from "i18next";
 import pDebounce from "p-debounce";
-import React, { useMemo, useRef, useState, useSyncExternalStore } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import {
     components as SelectComponents,
     type ControlProps,
@@ -42,7 +34,9 @@ import {
 } from "react-select";
 import AsyncSelect from "react-select/async";
 import { SearchPeopleList } from "./PeopleList";
-import { UnstyledButton } from "./mui-custom";
+import { UnstyledButton } from "./UnstyledButton";
+import type { ButtonishProps } from "./mui";
+import { useMLStatusSnapshot, usePeopleStateSnapshot } from "./utils/ml";
 
 export interface SearchBarProps {
     /**
@@ -74,13 +68,14 @@ export interface SearchBarProps {
      */
     onSelectSearchOption: (o: SearchOption | undefined) => void;
     /**
-     * Called when the user selects a person shown in the empty state view, or
-     * clicks the people list header itself.
-     *
-     * @param person The selected person, or `undefined` if the user clicked the
-     * generic people header.
+     * Called when the user selects the generic "People" header in the empty
+     * state view.
      */
-    onSelectPerson: (person: Person | undefined) => void;
+    onSelectPeople: () => void;
+    /**
+     * Called when the user selects a person shown in the empty state view.
+     */
+    onSelectPerson: (personID: string | undefined) => void;
 }
 
 /**
@@ -103,11 +98,11 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     onShowSearchInput,
     ...rest
 }) => {
-    const isMobileWidth = useIsMobileWidth();
+    const isSmallWidth = useIsSmallWidth();
 
     return (
         <Box sx={{ flex: 1, px: ["4px", "24px"] }}>
-            {isMobileWidth && !isInSearchMode ? (
+            {isSmallWidth && !isInSearchMode ? (
                 <MobileSearchArea onSearch={onShowSearchInput} />
             ) : (
                 <SearchInput {...{ isInSearchMode }} {...rest} />
@@ -132,6 +127,7 @@ const MobileSearchArea: React.FC<MobileSearchAreaProps> = ({ onSearch }) => (
 const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
     isInSearchMode,
     onSelectSearchOption,
+    onSelectPeople,
     onSelectPerson,
 }) => {
     // A ref to the top level Select.
@@ -190,9 +186,14 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
         onSelectSearchOption(undefined);
     };
 
-    const handleSelectPerson = (person: Person | undefined) => {
+    const handleSelectPeople = () => {
         resetSearch();
-        onSelectPerson(person);
+        onSelectPeople();
+    };
+
+    const handleSelectPerson = (personID: string | undefined) => {
+        resetSearch();
+        onSelectPerson(personID);
     };
 
     const handleFocus = () => {
@@ -224,7 +225,10 @@ const SearchInput: React.FC<Omit<SearchBarProps, "onShowSearchInput">> = ({
                 placeholder={t("search_hint")}
                 noOptionsMessage={({ inputValue }) =>
                     shouldShowEmptyState(inputValue) ? (
-                        <EmptyState onSelectPerson={handleSelectPerson} />
+                        <EmptyState
+                            onSelectPeople={handleSelectPeople}
+                            onSelectPerson={handleSelectPerson}
+                        />
                     ) : null
                 }
             />
@@ -378,11 +382,11 @@ const shouldShowEmptyState = (inputValue: string) => {
  * The view shown in the menu area when the user has not typed anything in the
  * search box.
  */
-const EmptyState: React.FC<Pick<SearchBarProps, "onSelectPerson">> = ({
-    onSelectPerson,
-}) => {
-    const mlStatus = useSyncExternalStore(mlStatusSubscribe, mlStatusSnapshot);
-    const people = useSyncExternalStore(peopleSubscribe, peopleSnapshot);
+const EmptyState: React.FC<
+    Pick<SearchBarProps, "onSelectPeople" | "onSelectPerson">
+> = ({ onSelectPeople, onSelectPerson }) => {
+    const mlStatus = useMLStatusSnapshot();
+    const people = usePeopleStateSnapshot()?.visiblePeople;
 
     if (!mlStatus || mlStatus.phase == "disabled") {
         // The preflight check should've prevented us from coming here.
@@ -402,7 +406,6 @@ const EmptyState: React.FC<Pick<SearchBarProps, "onSelectPerson">> = ({
             label = t("indexing_fetching", mlStatus);
             break;
         case "clustering":
-            // TODO-Cluster
             label = t("indexing_people", mlStatus);
             break;
         case "done":
@@ -414,7 +417,7 @@ const EmptyState: React.FC<Pick<SearchBarProps, "onSelectPerson">> = ({
         <Box sx={{ textAlign: "left" }}>
             {people && people.length > 0 && (
                 <>
-                    <PeopleHeader onClick={() => onSelectPerson(undefined)} />
+                    <SearchPeopleHeader onClick={onSelectPeople} />
                     <SearchPeopleList {...{ people, onSelectPerson }} />
                 </>
             )}
@@ -425,22 +428,13 @@ const EmptyState: React.FC<Pick<SearchBarProps, "onSelectPerson">> = ({
     );
 };
 
-interface PeopleHeaderProps {
-    onClick: () => void;
-}
-
-const PeopleHeader: React.FC<PeopleHeaderProps> = ({ onClick }) => (
-    <PeopleHeaderButton {...{ onClick }}>
-        <Stack direction="row" color="text.muted">
-            <Typography color="text.base" variant="large">
-                {t("people")}
-            </Typography>
-            <ChevronRightIcon />
-        </Stack>
-    </PeopleHeaderButton>
+const SearchPeopleHeader: React.FC<ButtonishProps> = ({ onClick }) => (
+    <SearchPeopleHeaderButton {...{ onClick }}>
+        <Typography color="text.muted">{t("people")}</Typography>
+    </SearchPeopleHeaderButton>
 );
 
-const PeopleHeaderButton = styled(UnstyledButton)(
+const SearchPeopleHeaderButton = styled(UnstyledButton)(
     ({ theme }) => `
     /* The color for the chevron */
     color: ${theme.colors.stroke.muted};
