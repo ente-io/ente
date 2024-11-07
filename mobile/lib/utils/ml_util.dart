@@ -160,6 +160,9 @@ Future<List<FileMLInstruction>> getFilesForMlIndexing() async {
   _logger.info(
     "Getting list of files to index for ML took ${DateTime.now().difference(time).inMilliseconds} ms",
   );
+  if (!localSettings.isMLLocalIndexingEnabled) {
+    return splitResult.matched;
+  }
   return [...splitResult.matched, ...splitResult.unmatched];
 }
 
