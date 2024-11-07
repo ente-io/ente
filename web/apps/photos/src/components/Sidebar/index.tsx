@@ -11,6 +11,7 @@ import { customAPIHost } from "@/base/origins";
 import { downloadString } from "@/base/utils/web";
 import { TwoFactorSettings } from "@/new/photos/components/sidebar/TwoFactorSettings";
 import { downloadAppDialogAttributes } from "@/new/photos/components/utils/download";
+import { useUserDetailsSnapshot } from "@/new/photos/components/utils/use-snapshot";
 import {
     ARCHIVE_SECTION,
     DUMMY_UNCATEGORIZED_COLLECTION,
@@ -30,20 +31,13 @@ import {
     redirectToCustomerPortal,
 } from "@/new/photos/services/plan";
 import { isInternalUser } from "@/new/photos/services/settings";
-import type { UserDetails } from "@/new/photos/services/user";
+import { syncUserDetails, type UserDetails } from "@/new/photos/services/user";
 import { AppContext, useAppContext } from "@/new/photos/types/context";
 import { initiateEmail, openURL } from "@/new/photos/utils/web";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ThemeSwitcher from "@ente/shared/components/ThemeSwitcher";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
-import { useLocalState } from "@ente/shared/hooks/useLocalState";
-import {
-    LS_KEYS,
-    getData,
-    setData,
-    setLSUser,
-} from "@ente/shared/storage/localStorage";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import ArchiveOutlined from "@mui/icons-material/ArchiveOutlined";
 import CategoryIcon from "@mui/icons-material/Category";
@@ -77,7 +71,6 @@ import React, {
 import { Trans } from "react-i18next";
 import { getUncategorizedCollection } from "services/collectionService";
 import exportService from "services/export";
-import { getUserDetailsV2 } from "services/userService";
 import { testUpload } from "../../../tests/upload.test";
 import { MemberSubscriptionManage } from "../MemberSubscriptionManage";
 import { Preferences } from "./Preferences";
@@ -149,10 +142,7 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
     sidebarView,
 }) => {
     const galleryContext = useContext(GalleryContext);
-
-    const [userDetails, setUserDetails] = useLocalState<
-        UserDetails | undefined
-    >(LS_KEYS.USER_DETAILS, undefined);
+    const userDetails = useUserDetailsSnapshot();
     const [memberSubscriptionManageView, setMemberSubscriptionManageView] =
         useState(false);
 
@@ -162,20 +152,7 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
         setMemberSubscriptionManageView(false);
 
     useEffect(() => {
-        if (!sidebarView) {
-            return;
-        }
-        const main = async () => {
-            const userDetails = await getUserDetailsV2();
-            setUserDetails(userDetails);
-            setData(LS_KEYS.SUBSCRIPTION, userDetails.subscription);
-            setData(LS_KEYS.FAMILY_DATA, userDetails.familyData);
-            await setLSUser({
-                ...getData(LS_KEYS.USER),
-                email: userDetails.email,
-            });
-        };
-        main();
+        if (sidebarView) void syncUserDetails();
     }, [sidebarView]);
 
     const isMemberSubscription = useMemo(
