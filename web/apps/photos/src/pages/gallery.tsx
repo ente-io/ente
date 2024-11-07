@@ -1240,7 +1240,7 @@ export async function handleSubscriptionCompletionRedirectIfNeeded(
 ) {
     const { session_id: sessionID, status, reason } = router.query;
 
-    if (status == "success" && typeof sessionID == "string") {
+    if (status == "success") {
         try {
             const subscription = await verifyStripeSubscription(sessionID);
             showMiniDialog({

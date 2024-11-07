@@ -316,11 +316,11 @@ export const planUsage = (userDetails: UserDetails) =>
  * updating our local state to reflect the new subscription on successful
  * verification.
  *
- * @param sessionID A token passed on completion of the flow. It is forwarded as
- * the verification data to remote.
+ * @param sessionID Arbitrary and optional string passed on completion of the
+ * flow. It is forwarded as the verification data to remote.
  */
 export const verifyStripeSubscription = async (
-    sessionID: string,
+    sessionID: unknown,
 ): Promise<Subscription> => {
     ensureOk(
         await fetch(await apiURL("/billing/verify-subscription"), {
