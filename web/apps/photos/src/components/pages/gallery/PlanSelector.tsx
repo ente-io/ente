@@ -28,7 +28,7 @@ import {
     redirectToPaymentsApp,
     userDetailsAddOnBonuses,
 } from "@/new/photos/services/plan";
-import { AppContext } from "@/new/photos/types/context";
+import { AppContext, useAppContext } from "@/new/photos/types/context";
 import { bytesInGB, formattedStorageByteSize } from "@/new/photos/utils/units";
 import { openURL } from "@/new/photos/utils/web";
 import {
@@ -736,22 +736,17 @@ function StripeSubscriptionOptions({
     setLoading,
     closeModal,
 }: ManageSubscriptionProps) {
-    const appContext = useContext(AppContext);
-    const { setDialogMessage } = appContext;
+    const { showMiniDialog, onGenericError } = useAppContext();
 
     const confirmReactivation = () =>
-        appContext.setDialogMessage({
+        showMiniDialog({
             title: t("REACTIVATE_SUBSCRIPTION"),
-            content: t("REACTIVATE_SUBSCRIPTION_MESSAGE", {
+            message: t("REACTIVATE_SUBSCRIPTION_MESSAGE", {
                 date: subscription.expiryTime,
             }),
-            proceed: {
+            continue: {
                 text: t("REACTIVATE_SUBSCRIPTION"),
                 action: reactivate,
-                variant: "accent",
-            },
-            close: {
-                text: t("cancel"),
             },
         });
 
@@ -759,18 +754,16 @@ function StripeSubscriptionOptions({
         try {
             setLoading(true);
             await activateStripeSubscription();
-            setDialogMessage({
+            showMiniDialog({
                 title: t("success"),
-                content: t("SUBSCRIPTION_ACTIVATE_SUCCESS"),
-                close: { variant: "accent" },
+                message: t("SUBSCRIPTION_ACTIVATE_SUCCESS"),
+                cancel: t("ok"),
             });
         } catch (e) {
-            console.log(e);
-            setDialogMessage({
-                title: t("error"),
-                content: t("SUBSCRIPTION_ACTIVATE_FAILED"),
-                close: { variant: "critical" },
-            });
+            log.error("Subscription activation failed", e);
+            showMiniDialog(
+                errorDialogAttributes(t("SUBSCRIPTION_ACTIVATE_FAILED")),
+            );
         } finally {
             closeModal();
             setLoading(false);
@@ -778,56 +771,47 @@ function StripeSubscriptionOptions({
     };
 
     const confirmCancel = () =>
-        appContext.setDialogMessage({
+        showMiniDialog({
             title: t("CANCEL_SUBSCRIPTION"),
-            content: hasAddOnBonus ? (
+            message: hasAddOnBonus ? (
                 <Trans i18nKey={"CANCEL_SUBSCRIPTION_WITH_ADDON_MESSAGE"} />
             ) : (
                 <Trans i18nKey={"CANCEL_SUBSCRIPTION_MESSAGE"} />
             ),
-            proceed: {
+            continue: {
                 text: t("CANCEL_SUBSCRIPTION"),
                 action: cancel,
-                variant: "critical",
             },
-            close: {
-                text: t("NEVERMIND"),
-            },
+            cancel: t("NEVERMIND"),
         });
 
     const cancel = async () => {
         try {
             setLoading(true);
             await cancelStripeSubscription();
-            setDialogMessage({
+            showMiniDialog({
                 title: t("success"),
-                content: t("SUBSCRIPTION_CANCEL_SUCCESS"),
-                close: { variant: "accent" },
+                message: t("SUBSCRIPTION_CANCEL_SUCCESS"),
+                cancel: t("ok"),
             });
         } catch (e) {
-            console.log(e);
-            setDialogMessage({
-                title: t("error"),
-                content: t("SUBSCRIPTION_CANCEL_FAILED"),
-                close: { variant: "critical" },
-            });
+            log.error("Subscription cancel failed", e);
+            showMiniDialog(
+                errorDialogAttributes(t("SUBSCRIPTION_CANCEL_FAILED")),
+            );
         } finally {
             closeModal();
             setLoading(false);
         }
     };
 
-    const openManagementPortal = async () => {
+    const handleManageClick = async () => {
         try {
             setLoading(true);
             await redirectToCustomerPortal();
-        } catch (error) {
+        } catch (e) {
             setLoading(false);
-            setDialogMessage({
-                title: t("error"),
-                content: t("generic_error_retry"),
-                close: { variant: "critical" },
-            });
+            onGenericError(e);
         }
     };
 
@@ -850,7 +834,7 @@ function StripeSubscriptionOptions({
             )}
             <ManageSubscriptionButton
                 color="secondary"
-                onClick={openManagementPortal}
+                onClick={handleManageClick}
             >
                 {t("MANAGEMENT_PORTAL")}
             </ManageSubscriptionButton>
