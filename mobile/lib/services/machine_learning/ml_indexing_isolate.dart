@@ -193,21 +193,23 @@ class MLIndexingIsolate extends SuperIsolate {
     }
   }
 
-  Future<void> cleanupLocalIndexingModels() async {
+  Future<void> cleanupLocalIndexingModels({bool delete = false}) async {
     if (!areModelsDownloaded) return;
     await _releaseModels();
 
-    final List<String> remoteModelPaths = [];
+    if (delete) {
+      final List<String> remoteModelPaths = [];
 
-    for (final model in MLModels.values) {
-      if (!model.isIndexingModel) continue;
-      final mlModel = model.model;
-      remoteModelPaths.add(mlModel.modelRemotePath);
+      for (final model in MLModels.values) {
+        if (!model.isIndexingModel) continue;
+        final mlModel = model.model;
+        remoteModelPaths.add(mlModel.modelRemotePath);
+      }
+      await RemoteAssetsService.instance
+          .cleanupSelectedModels(remoteModelPaths);
+
+      areModelsDownloaded = false;
     }
-
-    await RemoteAssetsService.instance.cleanupSelectedModels(remoteModelPaths);
-
-    areModelsDownloaded = false;
   }
 
   Future<void> _releaseModels() async {
