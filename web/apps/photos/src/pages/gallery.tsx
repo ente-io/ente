@@ -63,7 +63,6 @@ import {
     FlexWrapper,
     HorizontalFlex,
 } from "@ente/shared/components/Container";
-import type { SetDialogBoxAttributes } from "@ente/shared/components/DialogBox/types";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import { CustomError } from "@ente/shared/error";
@@ -134,7 +133,6 @@ import {
     SelectedState,
     SetFilesDownloadProgressAttributes,
     SetFilesDownloadProgressAttributesCreator,
-    type SetLoading,
 } from "types/gallery";
 import {
     COLLECTION_OPS_TYPE,
@@ -448,13 +446,10 @@ export default function Gallery() {
     }, [activeCollectionID, router.isReady]);
 
     useEffect(() => {
-        const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
-        if (router.isReady && key) {
-            checkSubscriptionPurchase(
+        if (router.isReady && getKey(SESSION_KEYS.ENCRYPTION_KEY)) {
+            handleSubscriptionCompletionRedirectIfNeeded(
                 showMiniDialog,
-                setDialogMessage,
                 router,
-                setBlockingLoad,
             );
         }
     }, [router.isReady]);
@@ -1241,11 +1236,9 @@ const HiddenSectionNavbarContents: React.FC<
  *
  * Check if these query parameters exist, and if so, act on them appropriately.
  */
-export async function checkSubscriptionPurchase(
+export async function handleSubscriptionCompletionRedirectIfNeeded(
     showMiniDialog: (attributes: MiniDialogAttributes) => void,
-    setDialogMessage: SetDialogBoxAttributes,
     router: NextRouter,
-    setLoading: SetLoading,
 ) {
     const { session_id: sessionID, status, reason } = router.query;
 
