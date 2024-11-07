@@ -1,5 +1,5 @@
 import { useIsSmallWidth } from "@/base/hooks";
-import { getFamilyPlanAdmin, leaveFamily } from "@/new/photos/services/family";
+import { getFamilyPlanAdmin, leaveFamily } from "@/new/photos/services/plan";
 import { AppContext } from "@/new/photos/types/context";
 import {
     FlexWrapper,

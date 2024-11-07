@@ -34,7 +34,6 @@ import {
 } from "@/new/photos/services/collection";
 import { areOnlySystemCollections } from "@/new/photos/services/collection/ui";
 import downloadManager from "@/new/photos/services/download";
-import { getLocalFamilyData } from "@/new/photos/services/family";
 import {
     getLocalFiles,
     getLocalTrashedFiles,
@@ -364,9 +363,8 @@ export default function Gallery() {
             }
             setIsFirstLogin(false);
             const user = getData(LS_KEYS.USER);
-            // TODO: Temp fallback
-            const familyData =
-                userDetailsSnapshot()?.familyData ?? getLocalFamilyData();
+            // TODO: Pass entire snapshot to reducer?
+            const familyData = userDetailsSnapshot()?.familyData;
             const files = sortFiles(
                 mergeMetadata(await getLocalFiles("normal")),
             );
