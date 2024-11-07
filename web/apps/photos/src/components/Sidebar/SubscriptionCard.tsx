@@ -111,7 +111,7 @@ const IndividualSubscriptionCardContent: React.FC<
     IndividualSubscriptionCardContentProps
 > = ({ userDetails }) => {
     const totalStorage =
-        userDetails.subscription.storage + (userDetails.storageBonus ?? 0);
+        userDetails.subscription.storage + userDetails.storageBonus;
     return (
         <>
             <StorageSection storage={totalStorage} usage={userDetails.usage} />
@@ -230,7 +230,7 @@ const FamilySubscriptionCardContent: React.FC<
         }
     }, [userDetails]);
     const totalStorage =
-        userDetails.familyData.storage + (userDetails.storageBonus ?? 0);
+        userDetails.familyData.storage + userDetails.storageBonus;
 
     return (
         <>

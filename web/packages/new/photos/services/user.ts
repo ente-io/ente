@@ -1,9 +1,10 @@
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { getKV, setKV } from "@/base/kv";
 import { apiURL } from "@/base/origins";
+import { nullishToZero, nullToUndefined } from "@/utils/transform";
 import { getData, LS_KEYS, setLSUser } from "@ente/shared/storage/localStorage";
 import { z } from "zod";
-import { FamilyData, Subscription, BonusData } from "./plan";
+import { BonusData, FamilyData, Subscription } from "./plan";
 
 /**
  * Zod schema for {@link UserDetails}
@@ -11,11 +12,11 @@ import { FamilyData, Subscription, BonusData } from "./plan";
 const UserDetails = z.object({
     email: z.string(),
     usage: z.number(),
-    fileCount: z.number().optional(),
+    fileCount: z.number().nullish().transform(nullishToZero),
     subscription: Subscription,
-    familyData: FamilyData.optional(),
-    storageBonus: z.number().optional(),
-    bonusData: BonusData.optional(),
+    familyData: FamilyData.nullish().transform(nullToUndefined),
+    storageBonus: z.number().nullish().transform(nullishToZero),
+    bonusData: BonusData.nullish().transform(nullToUndefined),
 });
 
 export type UserDetails = z.infer<typeof UserDetails>;

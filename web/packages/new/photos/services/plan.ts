@@ -10,28 +10,40 @@ import { z } from "zod";
 import type { UserDetails } from "./user";
 import { syncUserDetails, userDetailsSnapshot } from "./user";
 
-const PlanPeriod = z.enum(["month", "year"]);
-
 /**
  * Validity of the plan.
  */
-export type PlanPeriod = z.infer<typeof PlanPeriod>;
+export type PlanPeriod = "month" | "year";
 
 export const Subscription = z.object({
+    /**
+     * Store-specific ID of the product ("plan") that the user has subscribed
+     * to. e.g. if the user has subscribed to a plan using Stripe, then this
+     * will be the stripeID of the corresponding {@link Plan}.
+     *
+     * For free plans, the productID will be the constant "free".
+     */
     productID: z.string(),
+    /**
+     * Storage (in bytes) that the user can use.
+     */
     storage: z.number(),
+    /**
+     * Epoch microseconds indicating the time until which the user's
+     * subscription is valid.
+     */
     expiryTime: z.number(),
     paymentProvider: z.string(),
+    price: z.string(),
+    period: z
+        .string()
+        .transform((p) => (p == "month" || p == "year" ? p : undefined)),
     attributes: z
         .object({
             isCancelled: z.boolean().nullish().transform(nullToUndefined),
         })
         .nullish()
         .transform(nullToUndefined),
-    price: z.string(),
-    // TODO: We get back subscriptions without a period on cancel / reactivate.
-    // Handle them better, or remove this TODO.
-    period: z.enum(["month", "year", ""]).transform((s) => (s ? s : "month")),
 });
 
 /**
@@ -121,7 +133,9 @@ const Plan = z.object({
     stripeID: z.string().nullish().transform(nullToUndefined),
     storage: z.number(),
     price: z.string(),
-    period: PlanPeriod,
+    period: z
+        .string()
+        .transform((p) => (p == "month" || p == "year" ? p : undefined)),
 });
 
 /**
@@ -131,7 +145,7 @@ export type Plan = z.infer<typeof Plan>;
 
 const PlansData = z.object({
     freePlan: z.object({
-        /* Number of bytes available in the free plan */
+        /* Number of bytes available in the free plan. */
         storage: z.number(),
     }),
     plans: z.array(Plan),
@@ -399,9 +413,8 @@ export const hasExceededStorageQuota = (userDetails: UserDetails) => {
         storage = userDetails.familyData?.storage ?? 0;
     } else {
         usage = userDetails.usage;
-        storage = userDetails.subscription?.storage ?? 0;
+        storage = userDetails.subscription.storage;
     }
 
-    const bonusStorage = userDetails.storageBonus ?? 0;
-    return usage > storage + bonusStorage;
+    return usage > storage + userDetails.storageBonus;
 };

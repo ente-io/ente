@@ -105,8 +105,8 @@ const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
     const userDetails = useUserDetailsSnapshot();
 
     const [plansData, setPlansData] = useState<PlansData | undefined>();
-    const [planPeriod, setPlanPeriod] = useState<PlanPeriod>(
-        userDetails?.subscription?.period || "month",
+    const [planPeriod, setPlanPeriod] = useState<PlanPeriod | undefined>(
+        userDetails?.subscription?.period,
     );
 
     const usage = userDetails ? planUsage(userDetails) : 0;
@@ -443,9 +443,7 @@ function PaidSubscriptionPlanSelectorCard({
 
 function PeriodToggler({ planPeriod, togglePeriod }) {
     const handleChange = (_, newPlanPeriod: PlanPeriod) => {
-        if (newPlanPeriod !== null && newPlanPeriod !== planPeriod) {
-            togglePeriod();
-        }
+        if (newPlanPeriod !== planPeriod) togglePeriod();
     };
 
     return (
