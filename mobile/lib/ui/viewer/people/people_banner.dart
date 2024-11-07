@@ -1,6 +1,5 @@
 import "package:flutter/material.dart";
 import "package:flutter_animate/flutter_animate.dart";
-import "package:photos/ente_theme_data.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/viewer/search/result/person_face_widget.dart";
@@ -74,7 +73,13 @@ class PeopleBanner extends StatelessWidget {
         onTap: onTap,
         child: Container(
           decoration: BoxDecoration(
-            boxShadow: Theme.of(context).colorScheme.enteTheme.shadowMenu,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                offset: const Offset(0, 2),
+                blurRadius: 4,
+              ),
+            ],
             color: backgroundColor,
           ),
           child: Padding(
