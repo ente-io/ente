@@ -54,10 +54,6 @@ class SearchFilterDataProvider {
     _safelyAddToRecommended(filters);
   }
 
-  void clearRecommendations() {
-    _recommendedFiltersNotifier.clearFilters();
-  }
-
   void addListener({
     bool toApplied = false,
     bool toRecommended = false,
