@@ -97,7 +97,7 @@ class _SearchResultPageState extends State<SearchResultPage> {
     );
 
     return GalleryFilesState(
-      child: InheritedSearchFilterData(
+      child: InheritedSearchFilterDataWrapper(
         searchFilterDataProvider: SearchFilterDataProvider(
           initialGalleryFilter:
               widget.searchResult.getHierarchicalSearchFilter(),

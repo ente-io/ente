@@ -163,7 +163,7 @@ class _MagicResultScreenState extends State<MagicResultScreen> {
       initialFiles: [files.first],
     );
     return GalleryFilesState(
-      child: InheritedSearchFilterData(
+      child: InheritedSearchFilterDataWrapper(
         searchFilterDataProvider: SearchFilterDataProvider(
           initialGalleryFilter: widget.magicFilter,
         ),

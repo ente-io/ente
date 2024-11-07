@@ -47,7 +47,7 @@ class _LocationScreenState extends State<LocationScreen> {
         InheritedLocationScreenState.of(context).locationTagEntity.item;
 
     return GalleryFilesState(
-      child: InheritedSearchFilterData(
+      child: InheritedSearchFilterDataWrapper(
         searchFilterDataProvider: SearchFilterDataProvider(
           initialGalleryFilter: LocationFilter(
             locationTag: locationTag,

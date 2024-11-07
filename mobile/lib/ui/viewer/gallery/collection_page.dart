@@ -106,7 +106,7 @@ class CollectionPage extends StatelessWidget {
     );
 
     return GalleryFilesState(
-      child: InheritedSearchFilterData(
+      child: InheritedSearchFilterDataWrapper(
         searchFilterDataProvider: SearchFilterDataProvider(
           initialGalleryFilter: AlbumFilter(
             collectionID: c.collection.id,

@@ -112,6 +112,12 @@ class SearchFilterDataProvider {
       filtersToAvoid: filtersToAvoid,
     );
   }
+
+  void dispose() {
+    _appliedFiltersNotifier.dispose();
+    _recommendedFiltersNotifier.dispose();
+    isSearchingNotifier.dispose();
+  }
 }
 
 class _AppliedFiltersNotifier extends ChangeNotifier {

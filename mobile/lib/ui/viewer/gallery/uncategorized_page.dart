@@ -80,7 +80,7 @@ class UnCategorizedPage extends StatelessWidget {
       albumName: S.of(context).uncategorized,
     );
     return GalleryFilesState(
-      child: InheritedSearchFilterData(
+      child: InheritedSearchFilterDataWrapper(
         searchFilterDataProvider: SearchFilterDataProvider(
           initialGalleryFilter: AlbumFilter(
             collectionID: collection.id,

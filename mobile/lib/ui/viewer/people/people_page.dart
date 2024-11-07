@@ -117,7 +117,7 @@ class _PeoplePageState extends State<PeoplePage> {
   Widget build(BuildContext context) {
     _logger.info("Building for ${widget.person.data.name}");
     return GalleryFilesState(
-      child: InheritedSearchFilterData(
+      child: InheritedSearchFilterDataWrapper(
         searchFilterDataProvider: widget.searchResult != null
             ? SearchFilterDataProvider(
                 initialGalleryFilter:
