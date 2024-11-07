@@ -109,6 +109,10 @@ class SearchFilterDataProvider {
     );
   }
 
+  /// [InheritedSearchFilterDataWrapper] calls this method in its [dispose] so
+  /// if [InheritedSearchFilterDataWrapper] is an ancestor on the widget where
+  /// [SearchFilterDataProvider] is used, it's not necessary to call this method
+  /// explicitly
   void dispose() {
     _appliedFiltersNotifier.dispose();
     _recommendedFiltersNotifier.dispose();
