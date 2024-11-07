@@ -285,29 +285,34 @@ export const redirectToCustomerPortal = async () => {
  * Return true if the given {@link Subscription} has not expired.
  */
 export const isSubscriptionActive = (subscription: Subscription) =>
-    subscription && subscription.expiryTime > Date.now() * 1000;
+    subscription.expiryTime > Date.now() * 1000;
 
 /**
- * Return true if the given active {@link Subscription} is for a paid plan.
+ * Return true if the given {@link Subscription} is active and for a paid plan.
  */
 export const isSubscriptionActivePaid = (subscription: Subscription) =>
-    subscription &&
-    isSubscriptionActive(subscription) &&
-    subscription.productID != "free";
+    isSubscriptionActive(subscription) && subscription.productID != "free";
 
 /**
- * Return true if the given active {@link Subscription} is for a free plan.
+ * Return true if the given {@link Subscription} is for a free plan.
  */
-export const isSubscriptionActiveFree = (subscription: Subscription) =>
-    subscription &&
-    isSubscriptionActive(subscription) &&
+export const isSubscriptionFree = (subscription: Subscription) =>
     subscription.productID == "free";
+
+/**
+ * Return true if the given {@link Subscription} is active and for the given
+ * {@link Plan}.
+ */
+export const isSubscriptionForPlan = (subscription: Subscription, plan: Plan) =>
+    plan.stripeID === subscription.productID ||
+    plan.iosID === subscription.productID ||
+    plan.androidID === subscription.productID;
 
 /**
  * Return true if the given {@link Subscription} is using Stripe.
  */
 export const isSubscriptionStripe = (subscription: Subscription) =>
-    subscription && subscription.paymentProvider == "stripe";
+    subscription.paymentProvider == "stripe";
 
 /**
  * Return true if the given {@link Subscription} has the cancelled attribute.

@@ -1,4 +1,5 @@
 import { genericRetriableErrorDialogAttributes } from "@/base/components/utils/dialog";
+import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import log from "@/base/log";
 import { useUserDetailsSnapshot } from "@/new/photos/components/utils/use-snapshot";
 import type {
@@ -13,9 +14,10 @@ import {
     cancelStripeSubscription,
     getPlansData,
     isSubscriptionActive,
-    isSubscriptionActiveFree,
     isSubscriptionActivePaid,
     isSubscriptionCancelled,
+    isSubscriptionForPlan,
+    isSubscriptionFree,
     isSubscriptionStripe,
     planUsage,
     redirectToCustomerPortal,
@@ -55,24 +57,24 @@ import { Trans } from "react-i18next";
 import { getFamilyPortalRedirectURL } from "services/userService";
 import { SetLoading } from "types/gallery";
 
-interface PlanSelectorProps {
-    modalView: boolean;
-    closeModal: any;
+type PlanSelectorProps = ModalVisibilityProps & {
     setLoading: SetLoading;
-}
+};
 
-function PlanSelector(props: PlanSelectorProps) {
+const PlanSelector: React.FC<PlanSelectorProps> = ({
+    open,
+    onClose,
+    setLoading,
+}: PlanSelectorProps) => {
     const fullScreen = useMediaQuery(useTheme().breakpoints.down("sm"));
 
-    if (!props.modalView) {
+    if (!open) {
         return <></>;
     }
 
     return (
         <Dialog
-            {...{ fullScreen }}
-            open={props.modalView}
-            onClose={props.closeModal}
+            {...{ open, onClose, fullScreen }}
             PaperProps={{
                 sx: (theme) => ({
                     width: { sm: "391px" },
@@ -81,23 +83,20 @@ function PlanSelector(props: PlanSelectorProps) {
                 }),
             }}
         >
-            <PlanSelectorCard
-                closeModal={props.closeModal}
-                setLoading={props.setLoading}
-            />
+            <PlanSelectorCard {...{ onClose, setLoading }} />
         </Dialog>
     );
-}
+};
 
 export default PlanSelector;
 
 interface PlanSelectorCardProps {
-    closeModal: any;
+    onClose: () => void;
     setLoading: SetLoading;
 }
 
 const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
-    closeModal,
+    onClose,
     setLoading,
 }) => {
     const { showMiniDialog, setDialogMessage } = useContext(AppContext);
@@ -126,16 +125,11 @@ const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
                 setLoading(true);
                 const plansData = await getPlansData();
                 const { plans } = plansData;
-                if (isSubscriptionActive(subscription)) {
-                    const planNotListed =
-                        plans.filter((plan) =>
-                            isUserSubscribedPlan(plan, subscription),
-                        ).length === 0;
-                    if (
-                        subscription &&
-                        !isSubscriptionActiveFree(subscription) &&
-                        planNotListed
-                    ) {
+                if (subscription && isSubscriptionActive(subscription)) {
+                    const activePlan = plans.find((plan) =>
+                        isSubscriptionForPlan(subscription, plan),
+                    );
+                    if (!isSubscriptionFree(subscription) && !activePlan) {
                         plans.push({
                             id: subscription.productID,
                             storage: subscription.storage,
@@ -150,7 +144,7 @@ const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
                 setPlansData(plansData);
             } catch (e) {
                 log.error("plan selector modal open failed", e);
-                closeModal();
+                onClose();
                 showMiniDialog(genericRetriableErrorDialogAttributes());
             } finally {
                 setLoading(false);
@@ -197,7 +191,7 @@ const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
                                 });
                             } finally {
                                 setLoading(false);
-                                closeModal();
+                                onClose();
                             }
                         },
                     },
@@ -234,7 +228,7 @@ const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
     const commonCardData = {
         subscription,
         addOnBonuses,
-        closeModal,
+        closeModal: onClose,
         planPeriod,
         togglePeriod,
         setLoading,
@@ -247,7 +241,7 @@ const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
             onPlanSelect={onPlanSelect}
             subscription={subscription}
             hasAddOnBonus={addOnBonuses.length > 0}
-            closeModal={closeModal}
+            closeModal={onClose}
         />
     );
 
@@ -524,15 +518,6 @@ const Plans = ({
         </Stack>
     );
 };
-
-function isUserSubscribedPlan(plan: Plan, subscription: Subscription) {
-    return (
-        isSubscriptionActive(subscription) &&
-        (plan.stripeID === subscription.productID ||
-            plan.iosID === subscription.productID ||
-            plan.androidID === subscription.productID)
-    );
-}
 
 const isPopularPlan = (plan: Plan) =>
     plan.storage === 100 * 1024 * 1024 * 1024; /* 100 GB */

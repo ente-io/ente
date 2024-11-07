@@ -48,14 +48,19 @@ export const logoutUserDetails = () => {
 };
 
 /**
- * Read in the locally persisted settings into memory, but otherwise do not
- * initate any network requests to fetch the latest values.
+ * Read in the locally persisted settings into memory, otherwise initate a
+ * network requests to fetch the latest values (but don't wait for it to
+ * complete).
  *
  * This assumes that the user is already logged in.
  */
-export const initUserDetails = async () => {
+export const initUserDetailsOrTriggerSync = async () => {
     const saved = await getKV("userDetails");
-    if (saved) setUserDetailsSnapshot(UserDetails.parse(saved));
+    if (saved) {
+        setUserDetailsSnapshot(UserDetails.parse(saved));
+    } else {
+        void syncUserDetails();
+    }
 };
 
 /**

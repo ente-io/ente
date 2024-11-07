@@ -238,20 +238,19 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
     const handleClick = useMemo(() => {
         const eventHandler: MouseEventHandler<HTMLSpanElement> = (e) => {
             e.stopPropagation();
-            if (userDetails) {
-                if (isSubscriptionActive(userDetails.subscription)) {
-                    if (hasExceededStorageQuota(userDetails)) {
-                        showPlanSelectorModal();
-                    }
+
+            if (isSubscriptionActive(userDetails.subscription)) {
+                if (hasExceededStorageQuota(userDetails)) {
+                    showPlanSelectorModal();
+                }
+            } else {
+                if (
+                    isSubscriptionStripe(userDetails.subscription) &&
+                    isSubscriptionPastDue(userDetails.subscription)
+                ) {
+                    redirectToCustomerPortal();
                 } else {
-                    if (
-                        isSubscriptionStripe(userDetails.subscription) &&
-                        isSubscriptionPastDue(userDetails.subscription)
-                    ) {
-                        redirectToCustomerPortal();
-                    } else {
-                        showPlanSelectorModal();
-                    }
+                    showPlanSelectorModal();
                 }
             }
         };

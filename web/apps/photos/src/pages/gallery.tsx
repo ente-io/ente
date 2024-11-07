@@ -50,7 +50,7 @@ import {
 import type { SearchOption } from "@/new/photos/services/search/types";
 import { initSettings } from "@/new/photos/services/settings";
 import {
-    initUserDetails,
+    initUserDetailsOrTriggerSync,
     userDetailsSnapshot,
 } from "@/new/photos/services/user";
 import { useAppContext } from "@/new/photos/types/context";
@@ -186,7 +186,6 @@ export default function Gallery() {
         collectionID: 0,
         context: { mode: "albums", collectionID: ALL_SECTION },
     });
-    const [planModalView, setPlanModalView] = useState(false);
     const [blockingLoad, setBlockingLoad] = useState(false);
     const [collectionNamerAttributes, setCollectionNamerAttributes] =
         useState<CollectionNamerAttributes>(null);
@@ -248,8 +247,6 @@ export default function Gallery() {
     const [fixCreationTimeAttributes, setFixCreationTimeAttributes] =
         useState<FixCreationTimeAttributes>(null);
 
-    const showPlanSelectorModal = () => setPlanModalView(true);
-
     const [uploadTypeSelectorView, setUploadTypeSelectorView] = useState(false);
     const [uploadTypeSelectorIntent, setUploadTypeSelectorIntent] =
         useState<UploadTypeSelectorIntent>("upload");
@@ -296,6 +293,8 @@ export default function Gallery() {
     const [collectionSelectorAttributes, setCollectionSelectorAttributes] =
         useState<CollectionSelectorAttributes | undefined>();
 
+    const { show: showPlanSelector, props: planSelectorVisibilityProps } =
+        useModalVisibility();
     const { show: showWhatsNew, props: whatsNewVisibilityProps } =
         useModalVisibility();
 
@@ -353,13 +352,13 @@ export default function Gallery() {
                 return;
             }
             initSettings();
-            await initUserDetails();
+            await initUserDetailsOrTriggerSync();
             await downloadManager.init(token);
             setupSelectAllKeyBoardShortcutHandler();
             dispatch({ type: "showAll" });
             setIsFirstLoad(isFirstLogin());
             if (justSignedUp()) {
-                setPlanModalView(true);
+                showPlanSelector();
             }
             setIsFirstLogin(false);
             const user = getData(LS_KEYS.USER);
@@ -500,7 +499,7 @@ export default function Gallery() {
             openCollectionSelector ||
             collectionNamerView ||
             fixCreationTimeView ||
-            planModalView ||
+            planSelectorVisibilityProps.open ||
             exportModalView ||
             authenticateUserModalView ||
             isPhotoSwipeOpen ||
@@ -886,7 +885,7 @@ export default function Gallery() {
         <GalleryContext.Provider
             value={{
                 ...defaultGalleryContext,
-                showPlanSelectorModal,
+                showPlanSelectorModal: showPlanSelector,
                 setActiveCollectionID: handleSetActiveCollectionID,
                 onShowCollection: (id) =>
                     dispatch({
@@ -929,8 +928,7 @@ export default function Gallery() {
                     </CenteredFlex>
                 )}
                 <PlanSelector
-                    modalView={planModalView}
-                    closeModal={() => setPlanModalView(false)}
+                    {...planSelectorVisibilityProps}
                     setLoading={setBlockingLoad}
                 />
                 <CollectionNamer
