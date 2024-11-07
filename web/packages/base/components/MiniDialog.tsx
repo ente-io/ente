@@ -1,6 +1,6 @@
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
-import type { ButtonProps } from "@mui/material";
+import type { ButtonProps, ModalProps } from "@mui/material";
 import {
     Box,
     Dialog,
@@ -140,8 +140,10 @@ export const AttributedMiniDialog: React.FC<
         onClose();
     };
 
-    const handleClose = () => {
+    const handleClose: ModalProps["onClose"] = (_, reason) => {
         if (attributes.nonClosable) return;
+        // Ignore backdrop clicks when we're processing the user request.
+        if (reason == "backdropClick" && phase == "loading") return;
         resetPhaseAndClose();
     };
 
@@ -184,7 +186,12 @@ export const AttributedMiniDialog: React.FC<
     );
 
     const cancelButton = cancelTitle && (
-        <FocusVisibleButton fullWidth color="secondary" onClick={handleCancel}>
+        <FocusVisibleButton
+            fullWidth
+            color="secondary"
+            disabled={phase == "loading"}
+            onClick={handleCancel}
+        >
             {cancelTitle}
         </FocusVisibleButton>
     );
