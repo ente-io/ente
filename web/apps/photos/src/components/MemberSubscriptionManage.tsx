@@ -1,6 +1,6 @@
 import { useIsSmallWidth } from "@/base/hooks";
 import { familyAdminEmail, leaveFamily } from "@/new/photos/services/plan";
-import { AppContext } from "@/new/photos/types/context";
+import { useAppContext } from "@/new/photos/types/context";
 import {
     FlexWrapper,
     VerticallyCentered,
@@ -8,34 +8,19 @@ import {
 import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleWithCloseButton";
 import { Box, Button, Dialog, DialogContent, Typography } from "@mui/material";
 import { t } from "i18next";
-import { useContext } from "react";
 
 export function MemberSubscriptionManage({ open, userDetails, onClose }) {
-    const { setDialogMessage } = useContext(AppContext);
+    const { showMiniDialog } = useAppContext();
     const fullScreen = useIsSmallWidth();
 
-    async function onLeaveFamilyClick() {
-        try {
-            await leaveFamily();
-        } catch (e) {
-            setDialogMessage({
-                title: t("error"),
-                close: { variant: "critical" },
-                content: t("generic_error_retry"),
-            });
-        }
-    }
     const confirmLeaveFamily = () =>
-        setDialogMessage({
+        showMiniDialog({
             title: t("LEAVE_FAMILY_PLAN}"),
-            content: t("LEAVE_FAMILY_CONFIRM"),
-            proceed: {
+            message: t("LEAVE_FAMILY_CONFIRM"),
+            continue: {
                 text: t("LEAVE"),
-                action: onLeaveFamilyClick,
-                variant: "critical",
-            },
-            close: {
-                text: t("cancel"),
+                color: "critical",
+                action: leaveFamily,
             },
         });
 
