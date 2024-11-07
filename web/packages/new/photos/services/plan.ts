@@ -3,8 +3,8 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { apiURL, familyAppOrigin, paymentsAppOrigin } from "@/base/origins";
+import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";
-import { LS_KEYS, setData } from "@ente/shared/storage/localStorage";
 import isElectron from "is-electron";
 import { z } from "zod";
 import type { UserDetails } from "./user";
@@ -157,52 +157,42 @@ export const getPlansData = async (): Promise<PlansData> => {
 export const planUsage = (userDetails: UserDetails) =>
     isPartOfFamily(userDetails) ? familyUsage(userDetails) : userDetails.usage;
 
-const SubscriptionResponse = z.object({
-    subscription: Subscription,
-});
-
 export const verifySubscription = async (
     sessionID: string,
 ): Promise<Subscription> => {
-    const res = await fetch(await apiURL("/billing/verify-subscription"), {
-        method: "POST",
-        headers: await authenticatedRequestHeaders(),
-        body: JSON.stringify({
-            paymentProvider: "stripe",
-            productID: null,
-            verificationData: sessionID,
+    ensureOk(
+        await fetch(await apiURL("/billing/verify-subscription"), {
+            method: "POST",
+            headers: await authenticatedRequestHeaders(),
+            body: JSON.stringify({
+                paymentProvider: "stripe",
+                productID: null,
+                verificationData: sessionID,
+            }),
         }),
-    });
-    ensureOk(res);
-    const { subscription } = SubscriptionResponse.parse(await res.json());
-    setData(LS_KEYS.SUBSCRIPTION, subscription);
-    return subscription;
+    );
+    await syncUserDetails();
+    return ensure(userDetailsSnapshot()?.subscription);
 };
 
 export const activateSubscription = async () => {
-    const res = await fetch(
-        await apiURL("/billing/stripe/activate-subscription"),
-        {
+    ensureOk(
+        await fetch(await apiURL("/billing/stripe/activate-subscription"), {
             method: "POST",
             headers: await authenticatedRequestHeaders(),
-        },
+        }),
     );
-    ensureOk(res);
-    const { subscription } = SubscriptionResponse.parse(await res.json());
-    setData(LS_KEYS.SUBSCRIPTION, subscription);
+    return syncUserDetails();
 };
 
 export const cancelSubscription = async () => {
-    const res = await fetch(
-        await apiURL("/billing/stripe/cancel-subscription"),
-        {
+    ensureOk(
+        await fetch(await apiURL("/billing/stripe/cancel-subscription"), {
             method: "POST",
             headers: await authenticatedRequestHeaders(),
-        },
+        }),
     );
-    ensureOk(res);
-    const { subscription } = SubscriptionResponse.parse(await res.json());
-    setData(LS_KEYS.SUBSCRIPTION, subscription);
+    return syncUserDetails();
 };
 
 /**
