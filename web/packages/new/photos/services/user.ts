@@ -3,23 +3,7 @@ import { getKV, setKV } from "@/base/kv";
 import { apiURL } from "@/base/origins";
 import { getData, LS_KEYS, setLSUser } from "@ente/shared/storage/localStorage";
 import { z } from "zod";
-import { FamilyData, Subscription } from "./plan";
-
-const BonusData = z.object({
-    /**
-     * List of bonuses applied for the user.
-     */
-    storageBonuses: z
-        .object({
-            type: z.string() /** The type of the bonus. */,
-        })
-        .array(),
-});
-
-/**
- * Information about bonuses applied to the user.
- */
-export type BonusData = z.infer<typeof BonusData>;
+import { FamilyData, Subscription, BonusData } from "./plan";
 
 /**
  * Zod schema for {@link UserDetails}

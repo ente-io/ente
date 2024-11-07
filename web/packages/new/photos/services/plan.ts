@@ -7,7 +7,7 @@ import { nullToUndefined } from "@/utils/transform";
 import { LS_KEYS, setData } from "@ente/shared/storage/localStorage";
 import isElectron from "is-electron";
 import { z } from "zod";
-import type { BonusData, UserDetails } from "./user";
+import type { UserDetails } from "./user";
 import { syncUserDetails, userDetailsSnapshot } from "./user";
 
 const PlanPeriod = z.enum(["month", "year"]);
@@ -78,6 +78,38 @@ export const FamilyData = z.object({
  * Details about the family plan (if any) that the user is a part of.
  */
 export type FamilyData = z.infer<typeof FamilyData>;
+
+const Bonus = z.object({
+    /**
+     * The type of the bonus.
+     */
+    type: z.string(),
+    /**
+     * Amount of storage bonus (in bytes) added to the account.
+     */
+    storage: z.number(),
+    /**
+     * Validity of the storage bonus. If it is 0, it is valid forever.
+     */
+    validTill: z.number(),
+});
+
+/**
+ * Details about an individual bonus applied for the user.
+ */
+export type Bonus = z.infer<typeof Bonus>;
+
+export const BonusData = z.object({
+    /**
+     * List of bonuses applied for the user.
+     */
+    storageBonuses: Bonus.array(),
+});
+
+/**
+ * Information about bonuses applied for the user.
+ */
+export type BonusData = z.infer<typeof BonusData>;
 
 /**
  * Zod schema for an individual plan received in the list of plans.
@@ -262,40 +294,6 @@ export const isSubscriptionStripe = (subscription: Subscription) =>
 export const isSubscriptionCancelled = (subscription: Subscription) =>
     subscription && subscription.attributes?.isCancelled;
 
-export function isSubscriptionPastDue(subscription: Subscription) {
-    const thirtyDaysMicroseconds = 30 * 24 * 60 * 60 * 1000 * 1000;
-    const currentTime = Date.now() * 1000;
-    return (
-        !isSubscriptionCancelled(subscription) &&
-        subscription.expiryTime < currentTime &&
-        subscription.expiryTime >= currentTime - thirtyDaysMicroseconds
-    );
-}
-
-// Checks if the bonus data contain any bonus whose type starts with 'ADD_ON'
-export function hasAddOnBonus(bonusData?: BonusData) {
-    return (
-        bonusData &&
-        bonusData.storageBonuses &&
-        bonusData.storageBonuses.length > 0 &&
-        bonusData.storageBonuses.some((bonus) =>
-            bonus.type.startsWith("ADD_ON"),
-        )
-    );
-}
-
-export function hasExceededStorageQuota(userDetails: UserDetails) {
-    const bonusStorage = userDetails.storageBonus ?? 0;
-    if (userDetails.familyData && isPartOfFamily(userDetails.familyData)) {
-        const usage = getTotalFamilyUsage(userDetails.familyData);
-        return usage > userDetails.familyData.storage + bonusStorage;
-    } else {
-        return (
-            userDetails.usage > userDetails.subscription.storage + bonusStorage
-        );
-    }
-}
-
 /**
  * Return true if the user (represented by the given {@link userDetails}) is
  * part of a family plan.
@@ -373,4 +371,47 @@ export const leaveFamily = async () => {
         }),
     );
     return syncUserDetails();
+};
+
+/**
+ * Return true if the given {@link Subscription} has expired, and is also beyond
+ * the grace period.
+ */
+export const isSubscriptionPastDue = (subscription: Subscription) => {
+    const thirtyDaysMicroseconds = 30 * 24 * 60 * 60 * 1000 * 1000;
+    const currentTime = Date.now() * 1000;
+    return (
+        !isSubscriptionCancelled(subscription) &&
+        subscription.expiryTime < currentTime &&
+        subscription.expiryTime >= currentTime - thirtyDaysMicroseconds
+    );
+};
+
+/**
+ * Return the bonuses whose type starts with "ADD_ON" applicable for the user
+ * (represented by the given {@link userDetails}).
+ */
+export const userDetailsAddOnBonuses = (userDetails: UserDetails) =>
+    userDetails.bonusData?.storageBonuses?.filter((bonus) =>
+        bonus.type.startsWith("ADD_ON"),
+    ) ?? [];
+
+/**
+ * Return true if the user (represented by the given {@link userDetails}) has a
+ * exceeded their storage quota (individual or of the family plan they are a
+ * part of).
+ */
+export const hasExceededStorageQuota = (userDetails: UserDetails) => {
+    let usage: number;
+    let storage: number;
+    if (isPartOfFamily(userDetails)) {
+        usage = familyUsage(userDetails);
+        storage = userDetails.familyData?.storage ?? 0;
+    } else {
+        usage = userDetails.usage;
+        storage = userDetails.subscription?.storage ?? 0;
+    }
+
+    const bonusStorage = userDetails.storageBonus ?? 0;
+    return usage > storage + bonusStorage;
 };

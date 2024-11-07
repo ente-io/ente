@@ -104,6 +104,8 @@ const m3 = () =>
 // TODO: Not enabled yet since it is not critical. Enable with next batch of changes.
 // // Added: Nov 2025 (v1.7.7-beta). Prunable.
 // const m4 = () => {
-//     // Delete the legacy key that used to store the map preference.
+//     // Delete old local storage keys that have been subsumed elsewhere.
 //     localStorage.removeItem("mapEnabled");
+//     localStorage.removeItem("userDetails");
+//     localStorage.removeItem("familyData");
 // };

@@ -19,7 +19,6 @@ import {
 } from "@/new/photos/services/collection";
 import type { CollectionSummaries } from "@/new/photos/services/collection/ui";
 import {
-    hasAddOnBonus,
     hasExceededStorageQuota,
     isFamilyAdmin,
     isPartOfFamily,
@@ -30,6 +29,7 @@ import {
     isSubscriptionPastDue,
     isSubscriptionStripe,
     redirectToCustomerPortal,
+    userDetailsAddOnBonuses,
 } from "@/new/photos/services/plan";
 import { isInternalUser } from "@/new/photos/services/settings";
 import { syncUserDetails, type UserDetails } from "@/new/photos/services/user";
@@ -195,7 +195,9 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
                     userDetails={userDetails}
                     onClick={handleSubscriptionCardClick}
                 />
-                <SubscriptionStatus userDetails={userDetails} />
+                {userDetails && (
+                    <SubscriptionStatus userDetails={userDetails} />
+                )}
             </Box>
             {isMemberSubscription && (
                 <MemberSubscriptionManage
@@ -260,8 +262,10 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
         return <></>;
     }
 
+    const hasAddOnBonus = userDetailsAddOnBonuses(userDetails).length > 0;
+
     let message: React.ReactNode;
-    if (!hasAddOnBonus(userDetails.bonusData)) {
+    if (!hasAddOnBonus) {
         if (isSubscriptionActive(userDetails.subscription)) {
             if (isSubscriptionActiveFree(userDetails.subscription)) {
                 message = t("subscription_info_free");
