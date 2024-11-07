@@ -98,7 +98,7 @@ brew install go
 ### Install other packages
 
 ```sh
-brew install postgresql@12
+brew install postgresql@15
 brew install libsodium
 brew install pkg-config
 ```
@@ -112,7 +112,7 @@ brew install pkg-config
 On M1 macs, we additionally need to link the postgres keg.
 
 ```
-brew link postgresql@12
+brew link postgresql@15
 ```
 
 ### Init Postgres database
@@ -128,7 +128,7 @@ initdb /usr/local/var/postgres
 ```
 
 On M1 macs, the path to the database cluster is
-`/opt/homebrew/var/postgresql@12` (instead of `/usr/local/var/postgres`).
+`/opt/homebrew/var/postgresql@15` (instead of `/usr/local/var/postgres`).
 
 ### Start Postgres
 

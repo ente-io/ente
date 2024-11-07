@@ -4,7 +4,9 @@ import { lowercaseExtension, nameAndExtension } from "@/base/file";
 import log from "@/base/log";
 import type { Electron } from "@/base/types/ipc";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
+import { shouldDisableCFUploadProxy } from "@/gallery/upload";
 import type { Collection } from "@/media/collection";
+import { EncryptedEnteFile, EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { potentialFileTypeFromExtension } from "@/media/live-photo";
 import { getLocalFiles } from "@/new/photos/services/files";
@@ -15,7 +17,6 @@ import {
     UPLOAD_RESULT,
     UPLOAD_STAGES,
 } from "@/new/photos/services/upload/types";
-import { EncryptedEnteFile, EnteFile } from "@/new/photos/types/file";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import { CustomError } from "@ente/shared/error";
@@ -25,10 +26,8 @@ import {
     getLocalPublicFiles,
     getPublicCollectionUID,
 } from "services/publicCollectionService";
-import { getDisableCFUploadProxyFlag } from "services/userService";
 import watcher from "services/watch";
-import { SetFiles } from "types/gallery";
-import { decryptFile, getUserOwnedFiles, sortFiles } from "utils/file";
+import { decryptFile, getUserOwnedFiles } from "utils/file";
 import {
     getMetadataJSONMapKeyForJSON,
     tryParseTakeoutMetadataJSON,
@@ -326,13 +325,12 @@ class UploadManager {
     private itemsToBeUploaded: ClusteredUploadItem[];
     private failedItems: ClusteredUploadItem[];
     private existingFiles: EnteFile[];
-    private setFiles: SetFiles;
+    private onUploadFile: (file: EnteFile) => void;
     private collections: Map<number, Collection>;
     private uploadInProgress: boolean;
     private publicUploadProps: PublicUploadProps;
     private uploaderName: string;
     private uiService: UIService;
-    private isCFUploadProxyDisabled: boolean = false;
 
     constructor() {
         this.uiService = new UIService();
@@ -340,19 +338,12 @@ class UploadManager {
 
     public async init(
         progressUpdater: ProgressUpdater,
-        setFiles: SetFiles,
+        onUploadFile: (file: EnteFile) => void,
         publicCollectProps: PublicUploadProps,
-        isCFUploadProxyDisabled: boolean,
     ) {
         this.uiService.init(progressUpdater);
-        const remoteIsCFUploadProxyDisabled =
-            await getDisableCFUploadProxyFlag();
-        if (remoteIsCFUploadProxyDisabled) {
-            isCFUploadProxyDisabled = remoteIsCFUploadProxyDisabled;
-        }
-        this.isCFUploadProxyDisabled = isCFUploadProxyDisabled;
         UploadService.init(publicCollectProps);
-        this.setFiles = setFiles;
+        this.onUploadFile = onUploadFile;
         this.publicUploadProps = publicCollectProps;
     }
 
@@ -544,7 +535,7 @@ class UploadManager {
                 this.existingFiles,
                 this.parsedMetadataJSONMap,
                 worker,
-                this.isCFUploadProxyDisabled,
+                shouldDisableCFUploadProxy(),
                 () => {
                     this.abortIfCancelled();
                 },
@@ -682,11 +673,7 @@ class UploadManager {
             throw Error("decrypted file can't be undefined");
         }
         this.existingFiles.push(decryptedFile);
-        this.updateUIFiles(decryptedFile);
-    }
-
-    private updateUIFiles(decryptedFile: EnteFile) {
-        this.setFiles((files) => sortFiles([...files, decryptedFile]));
+        this.onUploadFile(decryptedFile);
     }
 
     public shouldAllowNewUpload = () => {
@@ -902,25 +889,8 @@ const clusterLivePhotos = async (
 };
 
 /**
- * [Note: Memory pressure when uploading video files]
- *
- * A user (Fedora 39 VM on Qubes OS with 32 GB RAM, both AppImage and RPM) has
- * reported that their app runs out of memory when the app tries to upload
- * multiple large videos simultaneously. For example, 4 parallel uploads of 4
- * 700 MB videos.
- *
- * I am unable to reproduce this: tested on macOS and Linux, with videos up to
- * 3.8 G x 1 + 3 x 700 M uploaded in parallel. The memory usage remains constant
- * as expected (hovering around 2 G), since we don't pull the entire videos in
- * memory and instead do a streaming disk read + encryption + upload.
- *
- * The JavaScript heap for the renderer process (when we're running in the
- * context of our desktop app) is limited to 4 GB. See
- * https://www.electronjs.org/blog/v8-memory-cage.
- *
- * For now, add logs if our usage increases some high water mark. This is solely
- * so we can better understand the issue if it arises again (and can deal with
- * it in an informed manner).
+ * Add logs if our usage increases some high water mark. This is solely so that
+ * we have some indication in the logs if we get a user report of OOM crashes.
  */
 const logAboutMemoryPressureIfNeeded = () => {
     if (!globalThis.electron) return;

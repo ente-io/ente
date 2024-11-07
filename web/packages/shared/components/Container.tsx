@@ -20,20 +20,16 @@ export const SpaceBetweenFlex = styled(FlexWrapper)`
     justify-content: space-between;
 `;
 
+/**
+ * Deprecated, use {@link CenteredFlex} from @/base/components/mui/container
+ * instead
+ */
 export const CenteredFlex = styled(FlexWrapper)`
     justify-content: center;
 `;
 
 export const FluidContainer = styled(FlexWrapper)`
     flex: 1;
-`;
-
-export const Overlay = styled(Box)`
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
 `;
 
 export const HorizontalFlex = styled(Box)({

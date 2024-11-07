@@ -72,6 +72,7 @@ Future<void> sendLogs(
         onTap: () async {
           // ignore: unawaited_futures
           showDialog(
+            useRootNavigator: false,
             context: context,
             builder: (BuildContext context) {
               return LogFileViewer(SuperLogging.logFile!);
@@ -118,7 +119,7 @@ Future<void> _sendLogs(
     await FlutterEmailSender.send(email);
   } catch (e, s) {
     _logger.severe('email sender failed', e, s);
-    Navigator.of(context, rootNavigator: true).pop();
+    Navigator.of(context).pop();
     await shareLogs(context, toEmail, zipFilePath);
   }
 }
@@ -274,14 +275,14 @@ Future<void> sendEmail(
                       emailContent: content,
                     );
 
-                    Navigator.of(context, rootNavigator: true).pop();
+                    Navigator.of(context).pop();
                   },
                 ),
             ],
             cancelButton: CupertinoActionSheetAction(
               child: Text(S.of(context).cancel),
               onPressed: () {
-                Navigator.of(context, rootNavigator: true).pop();
+                Navigator.of(context).pop();
               },
             ),
           ),

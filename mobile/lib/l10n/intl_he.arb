@@ -149,7 +149,6 @@
   "tryAgain": "נסה שוב",
   "viewRecoveryKey": "צפה במפתח השחזור",
   "confirmRecoveryKey": "אמת את מפתח השחזור",
-  "recoveryKeyVerifyReason": "מפתח השחזור שלך הוא הדרך היחידה לשחזר את התמונות שלך במקרה ותשכח את הסיסמא שלך. אתה יכול למצוא את מפתח השחזור שלך ב-הגדרות > אבטחה.\n\nאנא הכנס את מפתח השחזור שלך כאן על מנת לוודא ששמרת אותו כשורה.",
   "confirmYourRecoveryKey": "אמת את מפתח השחזור",
   "addViewer": "הוסף צופה",
   "addCollaborator": "הוסף משתף פעולה",
@@ -817,5 +816,9 @@
   "addPhotos": "הוסף תמונות",
   "create": "צור",
   "viewAll": "הצג הכל",
-  "hiding": "מחביא..."
+  "hiding": "מחביא...",
+  "resetPerson": "Reset person",
+  "areYouSureYouWantToResetThisPerson": "Are you sure you want to reset this person?",
+  "allPersonGroupingWillReset": "All groupings for this person will be reset, and you will lose all suggestions made for this person",
+  "yesResetPerson": "Yes, reset person"
 }

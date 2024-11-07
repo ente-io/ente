@@ -1,6 +1,7 @@
 import "dart:io";
 import "dart:typed_data";
 
+import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/db/ml/db_fields.dart";
@@ -19,6 +20,7 @@ extension ClipDB on MLDataDB {
   }
 
   Future<List<EmbeddingVector>> getAllClipVectors() async {
+    Logger("ClipDB").info("reading all embeddings from DB");
     final db = await MLDataDB.instance.asyncDB;
     final results = await db.getAll('SELECT * FROM $clipTable');
     return _convertToVectors(results);

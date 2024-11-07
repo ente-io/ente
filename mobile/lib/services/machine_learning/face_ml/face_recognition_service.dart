@@ -7,7 +7,7 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/events/diff_sync_complete_event.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/models/api/entity/type.dart";
-import "package:photos/services/entity_service.dart";
+import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/face_ml/face_detection/detection.dart";
 import "package:photos/services/machine_learning/face_ml/face_detection/face_detection_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_embedding/face_embedding_service.dart";
@@ -19,16 +19,14 @@ import "package:photos/utils/image_ml_util.dart";
 class FaceRecognitionService {
   static final _logger = Logger("FaceRecognitionService");
 
-  // Singleton pattern
-  FaceRecognitionService._privateConstructor();
-  static final instance = FaceRecognitionService._privateConstructor();
-  factory FaceRecognitionService() => instance;
+  FaceRecognitionService() {
+    _logger.finest("FaceRecognitionService constructor");
+    init();
+  }
 
   bool _isInitialized = false;
 
-  bool get isInitialized => _isInitialized;
-
-  bool _shouldSyncPeople = false;
+  bool _shouldReconcilePeople = false;
   bool _isSyncing = false;
 
   Future<void> init() async {
@@ -45,7 +43,7 @@ class FaceRecognitionService {
     // Listen on PeopleChanged
     Bus.instance.on<PeopleChangedEvent>().listen((event) {
       if (event.type == PeopleEventType.syncDone) return;
-      _shouldSyncPeople = true;
+      _shouldReconcilePeople = true;
     });
 
     _isInitialized = true;
@@ -61,11 +59,12 @@ class FaceRecognitionService {
       return;
     }
     _isSyncing = true;
-    await EntityService.instance.syncEntity(EntityType.cgroup);
-    if (_shouldSyncPeople) {
+    if (_shouldReconcilePeople) {
       await PersonService.instance.reconcileClusters();
       Bus.instance.fire(PeopleChangedEvent(type: PeopleEventType.syncDone));
-      _shouldSyncPeople = false;
+      _shouldReconcilePeople = false;
+    } else {
+      await entityService.syncEntity(EntityType.cgroup);
     }
     _isSyncing = false;
   }

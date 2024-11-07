@@ -1,16 +1,17 @@
 import { useMediaQuery, useTheme } from "@mui/material";
 
 /**
- * Return true if the screen width is classified as a "mobile" size.
+ * Return true if the screen width is classified as a small size. This is often
+ * treated as an (rather arbitrary) cutoff for "mobile" sized screens.
  *
  * We use the MUI "sm" (small, 600px) breakpoint as the cutoff. This hook will
  * return true if the size of the window's width is less than 600px.
  */
-export const useIsMobileWidth = () =>
+export const useIsSmallWidth = () =>
     useMediaQuery(useTheme().breakpoints.down("sm"));
 
 /**
- * Heuristic "isMobileOrTablet" check using a pointer media query.
+ * Heuristic "isMobileOrTablet"-ish check using a pointer media query.
  *
  * The absence of fine-resolution pointing device can be taken a quick and proxy
  * for detecting if the user is using a mobile or tablet.

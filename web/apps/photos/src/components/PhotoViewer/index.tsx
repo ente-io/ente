@@ -1,28 +1,16 @@
-import log from "@/base/log";
-import { EnteFile } from "@/new/photos/types/file";
-import Photoswipe from "photoswipe";
-import PhotoswipeUIDefault from "photoswipe/dist/photoswipe-ui-default";
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
-import {
-    addToFavorites,
-    removeFromFavorites,
-} from "services/collectionService";
-import {
-    copyFileToClipboard,
-    downloadSingleFile,
-    getFileFromURL,
-} from "utils/file";
-
 import { isDesktop } from "@/base/app";
+import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { Overlay } from "@/base/components/mui/Container";
 import { lowercaseExtension } from "@/base/file";
+import log from "@/base/log";
+import type { LoadedLivePhotoSourceURL } from "@/media/file";
+import { fileLogID, type EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
 import downloadManager from "@/new/photos/services/download";
 import { extractRawExif, parseExif } from "@/new/photos/services/exif";
-import type { LoadedLivePhotoSourceURL } from "@/new/photos/types/file";
-import { fileLogID } from "@/new/photos/utils/file";
+import { AppContext } from "@/new/photos/types/context";
 import { FlexWrapper } from "@ente/shared/components/Container";
-import EnteSpinner from "@ente/shared/components/EnteSpinner";
 import AlbumOutlined from "@mui/icons-material/AlbumOutlined";
 import ChevronLeft from "@mui/icons-material/ChevronLeft";
 import ChevronRight from "@mui/icons-material/ChevronRight";
@@ -38,21 +26,38 @@ import FullscreenOutlinedIcon from "@mui/icons-material/FullscreenOutlined";
 import InfoIcon from "@mui/icons-material/InfoOutlined";
 import ReplayIcon from "@mui/icons-material/Replay";
 import ZoomInOutlinedIcon from "@mui/icons-material/ZoomInOutlined";
-import { Box, Button, styled } from "@mui/material";
+import {
+    Box,
+    Button,
+    CircularProgress,
+    Paper,
+    styled,
+    Typography,
+    type CircularProgressProps,
+} from "@mui/material";
+import Notification from "components/Notification";
 import { t } from "i18next";
 import isElectron from "is-electron";
-import { AppContext } from "pages/_app";
 import { GalleryContext } from "pages/gallery";
+import Photoswipe from "photoswipe";
+import PhotoswipeUIDefault from "photoswipe/dist/photoswipe-ui-default";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import {
+    addToFavorites,
+    removeFromFavorites,
+} from "services/collectionService";
 import { trashFiles } from "services/fileService";
 import { SetFilesDownloadProgressAttributesCreator } from "types/gallery";
+import {
+    copyFileToClipboard,
+    downloadSingleFile,
+    getFileFromURL,
+} from "utils/file";
 import { pauseVideo, playVideo } from "utils/photoFrame";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import { getTrashFileMessage } from "utils/ui";
 import { FileInfo, type FileInfoExif, type FileInfoProps } from "./FileInfo";
 import ImageEditorOverlay from "./ImageEditorOverlay";
-import CircularProgressWithLabel from "./styledComponents/CircularProgressWithLabel";
-import { ConversionFailedNotification } from "./styledComponents/ConversionFailedNotification";
-import { LivePhotoBtnContainer } from "./styledComponents/LivePhotoBtn";
 
 interface PhotoswipeFullscreenAPI {
     enter: () => void;
@@ -108,8 +113,7 @@ export interface PhotoViewerProps {
     getConvertedItem: (instance: any, index: number, item: EnteFile) => void;
     id?: string;
     favItemIds: Set<number>;
-    tempDeletedFileIds: Set<number>;
-    setTempDeletedFileIds?: (value: Set<number>) => void;
+    markTempDeleted?: (tempDeletedFiles: EnteFile[]) => void;
     isTrashCollection: boolean;
     isInHiddenSection: boolean;
     enableDownload: boolean;
@@ -121,12 +125,13 @@ export interface PhotoViewerProps {
 
 function PhotoViewer(props: PhotoViewerProps) {
     const galleryContext = useContext(GalleryContext);
-    const appContext = useContext(AppContext);
+    const { showLoadingBar, hideLoadingBar, setDialogMessage } =
+        useContext(AppContext);
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext,
     );
 
-    const { isOpen, items } = props;
+    const { isOpen, items, markTempDeleted } = props;
 
     const pswpElement = useRef<HTMLDivElement>();
     const [photoSwipe, setPhotoSwipe] =
@@ -539,13 +544,14 @@ function PhotoViewer(props: PhotoViewerProps) {
     };
 
     const trashFile = async (file: EnteFile) => {
-        const { tempDeletedFileIds, setTempDeletedFileIds } = props;
         try {
-            appContext.startLoading();
-            await trashFiles([file]);
-            appContext.finishLoading();
-            tempDeletedFileIds.add(file.id);
-            setTempDeletedFileIds(new Set(tempDeletedFileIds));
+            showLoadingBar();
+            try {
+                await trashFiles([file]);
+            } finally {
+                hideLoadingBar();
+            }
+            markTempDeleted?.([file]);
             updateItems(props.items.filter((item) => item.id !== file.id));
             needUpdate.current = true;
         } catch (e) {
@@ -557,7 +563,7 @@ function PhotoViewer(props: PhotoViewerProps) {
         if (!file || !isOwnFile || props.isTrashCollection) {
             return;
         }
-        appContext.setDialogMessage(getTrashFileMessage(() => trashFile(file)));
+        setDialogMessage(getTrashFileMessage(() => trashFile(file)));
     };
 
     const handleArrowClick = (
@@ -688,9 +694,9 @@ function PhotoViewer(props: PhotoViewerProps) {
 
     const copyToClipboardHelper = async (file: EnteFile) => {
         if (file && props.enableDownload && shouldShowCopyOption) {
-            appContext.startLoading();
+            showLoadingBar();
             await copyFileToClipboard(file.src);
-            appContext.finishLoading();
+            hideLoadingBar();
         }
     };
 
@@ -799,7 +805,7 @@ function PhotoViewer(props: PhotoViewerProps) {
                                 )}
                             />
                         ) : (
-                            !isSourceLoaded && <EnteSpinner />
+                            !isSourceLoaded && <ActivityIndicator />
                         )}
                     </Box>
 
@@ -849,7 +855,7 @@ function PhotoViewer(props: PhotoViewerProps) {
                             {isOwnFile && !props.isTrashCollection && (
                                 <button
                                     className="pswp__button pswp__button--custom"
-                                    title={t("DELETE_OPTION")}
+                                    title={t("delete_key")}
                                     onClick={() => {
                                         confirmTrashFile(
                                             photoSwipe?.currItem as EnteFile,
@@ -908,8 +914,8 @@ function PhotoViewer(props: PhotoViewerProps) {
                                         <button
                                             title={
                                                 isFav
-                                                    ? t("UNFAVORITE_OPTION")
-                                                    : t("FAVORITE_OPTION")
+                                                    ? t("unfavorite_key")
+                                                    : t("favorite_key")
                                             }
                                             className="pswp__button pswp__button--custom"
                                             onClick={() => {
@@ -984,3 +990,60 @@ function PhotoViewer(props: PhotoViewerProps) {
 }
 
 export default PhotoViewer;
+
+function CircularProgressWithLabel(
+    props: CircularProgressProps & { value: number },
+) {
+    return (
+        <>
+            <CircularProgress variant="determinate" {...props} color="accent" />
+            <Overlay
+                sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    height: "40px",
+                }}
+            >
+                <Typography
+                    variant="mini"
+                    component="div"
+                    color="text.secondary"
+                >{`${Math.round(props.value)}%`}</Typography>
+            </Overlay>
+        </>
+    );
+}
+
+interface ConversionFailedNotificationProps {
+    open: boolean;
+    onClose: () => void;
+    onClick: () => void;
+}
+
+const ConversionFailedNotification: React.FC<
+    ConversionFailedNotificationProps
+> = ({ open, onClose, onClick }) => {
+    return (
+        <Notification
+            open={open}
+            onClose={onClose}
+            attributes={{
+                variant: "secondary",
+                subtext: t("CONVERSION_FAILED_NOTIFICATION_MESSAGE"),
+                onClick: onClick,
+            }}
+            horizontal="right"
+            vertical="bottom"
+            sx={{ zIndex: 4000 }}
+        />
+    );
+};
+
+const LivePhotoBtnContainer = styled(Paper)`
+    border-radius: 4px;
+    position: absolute;
+    bottom: 10vh;
+    right: 6vh;
+    z-index: 10;
+`;

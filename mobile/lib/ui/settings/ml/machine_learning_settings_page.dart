@@ -5,7 +5,9 @@ import "package:intl/intl.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/service_locator.dart";
-import "package:photos/services/machine_learning/machine_learning_controller.dart";
+import "package:photos/services/machine_learning/face_ml/face_detection/face_detection_service.dart";
+import "package:photos/services/machine_learning/face_ml/face_embedding/face_embedding_service.dart";
+import "package:photos/services/machine_learning/ml_indexing_isolate.dart";
 import "package:photos/services/machine_learning/ml_service.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_image_encoder.dart";
 import "package:photos/services/machine_learning/semantic_search/clip/clip_text_encoder.dart";
@@ -18,6 +20,7 @@ import "package:photos/ui/common/web_page.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/buttons/icon_button_widget.dart";
 import "package:photos/ui/components/captioned_text_widget.dart";
+import "package:photos/ui/components/expandable_menu_item_widget.dart";
 import "package:photos/ui/components/menu_item_widget/menu_item_widget.dart";
 import "package:photos/ui/components/menu_section_description_widget.dart";
 import "package:photos/ui/components/menu_section_title.dart";
@@ -25,6 +28,7 @@ import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/components/title_bar_widget.dart";
 import "package:photos/ui/components/toggle_switch_widget.dart";
+import "package:photos/ui/settings/common_settings.dart";
 import "package:photos/ui/settings/ml/enable_ml_consent.dart";
 import "package:photos/ui/settings/ml/ml_user_dev_screen.dart";
 import "package:photos/utils/ml_util.dart";
@@ -50,8 +54,8 @@ class _MachineLearningSettingsPageState
   void initState() {
     super.initState();
     _wakeLock.enable();
-    MachineLearningController.instance.forceOverrideML(turnOn: true);
-    if (!MLService.instance.areModelsDownloaded) {
+    machineLearningController.forceOverrideML(turnOn: true);
+    if (!MLIndexingIsolate.instance.areModelsDownloaded) {
       _timer = Timer.periodic(const Duration(seconds: 10), (timer) {
         if (mounted) {
           setState(() {});
@@ -67,14 +71,15 @@ class _MachineLearningSettingsPageState
   void dispose() {
     super.dispose();
     _wakeLock.disable();
-    MachineLearningController.instance.forceOverrideML(turnOn: false);
+    machineLearningController.forceOverrideML(turnOn: false);
     _timer?.cancel();
     _advancedOptionsTimer?.cancel();
   }
 
   @override
   Widget build(BuildContext context) {
-    final hasEnabled = localSettings.isMLIndexingEnabled;
+    final hasEnabled = userRemoteFlagService
+        .getCachedBoolValue(UserRemoteFlagService.mlEnabled);
     return Scaffold(
       body: CustomScrollView(
         primary: false,
@@ -89,7 +94,6 @@ class _MachineLearningSettingsPageState
                   _titleTapCount++;
                   if (_titleTapCount >= 7) {
                     _titleTapCount = 0;
-                    // showShortToast(context, "Advanced options enabled");
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (BuildContext context) {
@@ -167,7 +171,7 @@ class _MachineLearningSettingsPageState
                           buttonType: ButtonType.primary,
                           labelText: context.l10n.enable,
                           onTap: () async {
-                            await toggleIndexingState();
+                            await toggleMlConsent();
                           },
                         ),
                         const SizedBox(height: 12),
@@ -207,10 +211,11 @@ class _MachineLearningSettingsPageState
     );
   }
 
-  Future<void> toggleIndexingState() async {
-    final hasGivenConsent = UserRemoteFlagService.instance
+  Future<void> toggleMlConsent() async {
+    final oldMlConsent = userRemoteFlagService
         .getCachedBoolValue(UserRemoteFlagService.mlEnabled);
-    if (!localSettings.isMLIndexingEnabled && !hasGivenConsent) {
+    // Go to consent page first if not enabled
+    if (!oldMlConsent) {
       final result = await Navigator.push(
         context,
         MaterialPageRoute(
@@ -223,15 +228,20 @@ class _MachineLearningSettingsPageState
         return;
       }
     }
-    final isEnabled = await localSettings.toggleMLIndexing();
-    if (isEnabled) {
-      await MLService.instance.init(firstTime: true);
+    final mlConsent = !oldMlConsent;
+    await userRemoteFlagService.setBoolValue(
+      UserRemoteFlagService.mlEnabled,
+      mlConsent,
+    );
+    if (!mlConsent) {
+      MLService.instance.pauseIndexingAndClustering();
+      unawaited(
+        MLIndexingIsolate.instance.cleanupLocalIndexingModels(),
+      );
+    } else {
+      await MLService.instance.init();
       await SemanticSearchService.instance.init();
       unawaited(MLService.instance.runAllML(force: true));
-    } else {
-      MLService.instance.pauseIndexingAndClustering();
-      await UserRemoteFlagService.instance
-          .setBoolValue(UserRemoteFlagService.mlEnabled, false);
     }
     if (mounted) {
       setState(() {});
@@ -239,34 +249,69 @@ class _MachineLearningSettingsPageState
   }
 
   Widget _getMlSettings(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final hasEnabled = localSettings.isMLIndexingEnabled;
+    final hasEnabled = userRemoteFlagService
+        .getCachedBoolValue(UserRemoteFlagService.mlEnabled);
+    if (!hasEnabled) {
+      return const SizedBox.shrink();
+    }
     return Column(
       children: [
-        if (hasEnabled)
-          MenuItemWidget(
-            captionedTextWidget: CaptionedTextWidget(
-              title: S.of(context).enabled,
-            ),
-            menuItemColor: colorScheme.fillFaint,
-            trailingWidget: ToggleSwitchWidget(
-              value: () => localSettings.isMLIndexingEnabled,
-              onChanged: () async {
-                await toggleIndexingState();
-              },
-            ),
-            singleBorderRadius: 8,
-            alignCaptionedTextToLeft: true,
-            isGestureDetectorDisabled: true,
+        ExpandableMenuItemWidget(
+          title: S.of(context).configuration,
+          selectionOptionsWidget: Column(
+            children: [
+              sectionOptionSpacing,
+              MenuItemWidget(
+                captionedTextWidget: CaptionedTextWidget(
+                  title: S.of(context).enabled,
+                ),
+                trailingWidget: ToggleSwitchWidget(
+                  value: () => hasEnabled,
+                  onChanged: () async {
+                    await toggleMlConsent();
+                  },
+                ),
+                singleBorderRadius: 8,
+                isGestureDetectorDisabled: true,
+              ),
+              sectionOptionSpacing,
+              MenuItemWidget(
+                captionedTextWidget: CaptionedTextWidget(
+                  title: S.of(context).localIndexing,
+                ),
+                trailingWidget: ToggleSwitchWidget(
+                  value: () => localSettings.isMLLocalIndexingEnabled,
+                  onChanged: () async {
+                    final localIndexing =
+                        await localSettings.toggleLocalMLIndexing();
+                    if (localIndexing) {
+                      unawaited(MLService.instance.runAllML(force: true));
+                    } else {
+                      MLService.instance.pauseIndexingAndClustering();
+                      unawaited(
+                        MLIndexingIsolate.instance.cleanupLocalIndexingModels(),
+                      );
+                    }
+
+                    if (mounted) {
+                      setState(() {});
+                    }
+                  },
+                ),
+                singleBorderRadius: 8,
+                isGestureDetectorDisabled: true,
+              ),
+            ],
           ),
+          leadingIcon: Icons.settings_outlined,
+        ),
         const SizedBox(
           height: 12,
         ),
-        hasEnabled
-            ? MLService.instance.areModelsDownloaded
-                ? const MLStatusWidget()
-                : const ModelLoadingState()
-            : const SizedBox.shrink(),
+        MLIndexingIsolate.instance.areModelsDownloaded ||
+                !localSettings.isMLLocalIndexingEnabled
+            ? const MLStatusWidget()
+            : const ModelLoadingState(),
       ],
     );
   }
@@ -296,9 +341,9 @@ class _ModelLoadingStateState extends State<ModelLoadingState> {
         title = "Image Model";
       } else if (url.contains(ClipTextEncoder.kRemoteBucketModelPath)) {
         title = "Text Model";
-      } else if (url.contains("yolov5s_face")) {
+      } else if (url.contains(FaceDetectionService.kRemoteBucketModelPath)) {
         title = "Face Detection Model";
-      } else if (url.contains("mobilefacenet")) {
+      } else if (url.contains(FaceEmbeddingService.kRemoteBucketModelPath)) {
         title = "Face Embedding Model";
       }
       if (title.isNotEmpty) {
@@ -330,7 +375,7 @@ class _ModelLoadingStateState extends State<ModelLoadingState> {
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 if (snapshot.data!) {
-                  MLService.instance.triggerModelsDownload();
+                  MLIndexingIsolate.instance.triggerModelsDownload();
                   return CaptionedTextWidget(
                     title: S.of(context).loadingModel,
                     key: const ValueKey("loading_model"),
@@ -420,7 +465,7 @@ class MLStatusWidgetState extends State<MLStatusWidget> {
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               final bool isDeviceHealthy =
-                  MachineLearningController.instance.isDeviceHealthy;
+                  machineLearningController.isDeviceHealthy;
               final int indexedFiles = snapshot.data!.indexedItems;
               final int pendingFiles = snapshot.data!.pendingItems;
               final bool hasWifi = snapshot.data!.hasWifiEnabled!;

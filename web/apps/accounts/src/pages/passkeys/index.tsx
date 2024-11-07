@@ -1,11 +1,11 @@
-import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { MenuItemDivider, MenuItemGroup } from "@/base/components/Menu";
+import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
+import { errorDialogAttributes } from "@/base/components/utils/dialog";
 import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
 import { CenteredFlex } from "@ente/shared/components/Container";
 import FormPaper from "@ente/shared/components/Form/FormPaper";
-import InfoItem from "@ente/shared/components/Info/InfoItem";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import SingleInputForm from "@ente/shared/components/SingleInputForm";
 import { formatDateTimeFull } from "@ente/shared/time/format";
@@ -35,7 +35,7 @@ import {
 import { useAppContext } from "../../types/context";
 
 const Page: React.FC = () => {
-    const { showNavBar, setDialogBoxAttributesV2 } = useAppContext();
+    const { showNavBar, showMiniDialog } = useAppContext();
 
     const [token, setToken] = useState<string | undefined>();
     const [passkeys, setPasskeys] = useState<Passkey[]>([]);
@@ -45,12 +45,8 @@ const Page: React.FC = () => {
     >();
 
     const showPasskeyFetchFailedErrorDialog = useCallback(() => {
-        setDialogBoxAttributesV2({
-            title: t("error"),
-            content: t("passkey_fetch_failed"),
-            close: {},
-        });
-    }, [setDialogBoxAttributesV2]);
+        showMiniDialog(errorDialogAttributes(t("passkey_fetch_failed")));
+    }, [showMiniDialog]);
 
     useEffect(() => {
         showNavBar(true);
@@ -264,38 +260,30 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
     passkey,
     onUpdateOrDeletePasskey,
 }) => {
-    const { setDialogBoxAttributesV2 } = useAppContext();
+    const { showMiniDialog } = useAppContext();
 
     const [showRenameDialog, setShowRenameDialog] = useState(false);
 
-    const showDeleteConfirmationDialog = useCallback(() => {
-        const handleDelete = async (setLoading: (value: boolean) => void) => {
-            setLoading(true);
-            try {
-                await deletePasskey(ensure(token), ensure(passkey).id);
-                onUpdateOrDeletePasskey();
-            } catch (e) {
-                log.error("Failed to delete passkey", e);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        setDialogBoxAttributesV2({
-            title: t("delete_passkey"),
-            content: t("delete_passkey_confirmation"),
-            proceed: {
-                text: t("DELETE"),
-                action: handleDelete,
-                variant: "critical",
-            },
-            close: { text: t("cancel") },
-        });
-    }, [token, passkey, onUpdateOrDeletePasskey, setDialogBoxAttributesV2]);
+    const showDeleteConfirmationDialog = useCallback(
+        () =>
+            showMiniDialog({
+                title: t("delete_passkey"),
+                message: t("delete_passkey_confirmation"),
+                continue: {
+                    text: t("delete"),
+                    color: "critical",
+                    action: async () => {
+                        await deletePasskey(ensure(token), ensure(passkey).id);
+                        onUpdateOrDeletePasskey();
+                    },
+                },
+            }),
+        [showMiniDialog, token, passkey, onUpdateOrDeletePasskey],
+    );
 
     return (
         <>
-            <EnteDrawer anchor="right" {...{ open, onClose }}>
+            <SidebarDrawer anchor="right" {...{ open, onClose }}>
                 {token && passkey && (
                     <Stack spacing={"4px"} py={"12px"}>
                         <Titlebar
@@ -303,15 +291,9 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
                             title={t("manage_passkey")}
                             onRootClose={onClose}
                         />
-                        <InfoItem
-                            icon={<CalendarTodayIcon />}
-                            title={t("CREATED_AT")}
-                            caption={formatDateTimeFull(
-                                passkey.createdAt / 1000,
-                            )}
-                            loading={false}
-                            hideEditOption
-                        />
+                        <CreatedAtEntry>
+                            {formatDateTimeFull(passkey.createdAt / 1000)}
+                        </CreatedAtEntry>
                         <MenuItemGroup>
                             <EnteMenuItem
                                 onClick={() => {
@@ -330,7 +312,7 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
                         </MenuItemGroup>
                     </Stack>
                 )}
-            </EnteDrawer>
+            </SidebarDrawer>
 
             {token && passkey && (
                 <RenamePasskeyDialog
@@ -347,6 +329,18 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
         </>
     );
 };
+
+const CreatedAtEntry: React.FC<React.PropsWithChildren> = ({ children }) => (
+    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, pb: 1 }}>
+        <CalendarTodayIcon color="secondary" sx={{ m: "16px" }} />
+        <Box py={0.5}>
+            <Typography>{t("created_at")}</Typography>
+            <Typography variant="small" color="text.muted">
+                {children}
+            </Typography>
+        </Box>
+    </Box>
+);
 
 interface RenamePasskeyDialogProps {
     /** If `true`, then the dialog is shown. */

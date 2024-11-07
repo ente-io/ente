@@ -97,9 +97,9 @@ class _ExpandableMenuItemWidgetState extends State<ExpandableMenuItemWidget> {
   void _expandableControllerListener() {
     setState(() {
       if (expandableController.expanded) {
-        InheritedSettingsState.of(context).increment();
+        InheritedSettingsState.maybeOf(context)?.increment();
       } else {
-        InheritedSettingsState.of(context).decrement();
+        InheritedSettingsState.maybeOf(context)?.decrement();
       }
     });
   }

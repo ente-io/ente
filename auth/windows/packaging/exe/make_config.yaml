@@ -1,4 +1,5 @@
 app_id: 9E5F0C93-96A3-4DA9-AE52-1AA6339851FC
+package_name: enteauth
 publisher: ente.io
 publisher_url: https://github.com/ente-io/ente
 display_name: Ente Auth

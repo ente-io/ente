@@ -8,7 +8,6 @@ import "package:photos/models/duplicate_files.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/deduplication_service.dart";
 import "package:photos/services/sync_service.dart";
-import "package:photos/services/update_service.dart";
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/buttons/icon_button_widget.dart';
@@ -238,7 +237,7 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
             S.of(context).youHaveSuccessfullyFreedUp(formatBytes(status.size)),
         firstButtonLabel: S.of(context).rateUs,
         firstButtonOnTap: () async {
-          await UpdateService.instance.launchReviewUrl();
+          await updateService.launchReviewUrl();
         },
         firstButtonType: ButtonType.primary,
         secondButtonLabel: S.of(context).ok,
@@ -282,7 +281,7 @@ class _FreeUpSpaceOptionsScreenState extends State<FreeUpSpaceOptionsScreen> {
           ),
       firstButtonLabel: S.of(context).rateUs,
       firstButtonOnTap: () async {
-        await UpdateService.instance.launchReviewUrl();
+        await updateService.launchReviewUrl();
       },
       firstButtonType: ButtonType.primary,
       secondButtonLabel: S.of(context).ok,

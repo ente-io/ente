@@ -88,7 +88,7 @@ jobs:
               if: startsWith(matrix.os, 'ubuntu')
               # See:
               # https://github.com/electron-userland/electron-builder/issues/4181
-              run: sudo apt-get install libarchive-tools
+              run: sudo apt-get update && sudo apt-get install libarchive-tools
 
             - name: Build
               uses: ente-io/action-electron-builder@eff78a1d33bdab4c54ede0e5cdc71e0c2cf803e2

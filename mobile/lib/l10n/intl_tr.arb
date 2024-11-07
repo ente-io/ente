@@ -150,7 +150,6 @@
   "tryAgain": "Tekrar deneyiniz",
   "viewRecoveryKey": "Kurtarma anahtarını görüntüle",
   "confirmRecoveryKey": "Kurtarma anahtarını doğrula",
-  "recoveryKeyVerifyReason": "Eğer şifrenizi unutursanız, fotoğraflarınızı kurtarmanın tek yolu kurtarma anahtarınızdır. Kurtarma anahtarınızı Ayarlar > Güvenlik bölümünde bulabilirsiniz.\n\nLütfen kurtarma anahtarınızı buraya girerek doğru bir şekilde kaydettiğinizi doğrulayın.",
   "confirmYourRecoveryKey": "Kurtarma anahtarını doğrulayın",
   "addViewer": "Görüntüleyici ekle",
   "addCollaborator": "Düzenleyici ekle",
@@ -1170,5 +1169,9 @@
   "invalidEndpoint": "Geçersiz uç nokta",
   "invalidEndpointMessage": "Üzgünüz, girdiğiniz uç nokta geçersiz. Lütfen geçerli bir uç nokta girin ve tekrar deneyin.",
   "endpointUpdatedMessage": "Fatura başarıyla güncellendi",
-  "customEndpoint": "{endpoint}'e bağlanıldı"
+  "customEndpoint": "{endpoint}'e bağlanıldı",
+  "resetPerson": "Reset person",
+  "areYouSureYouWantToResetThisPerson": "Are you sure you want to reset this person?",
+  "allPersonGroupingWillReset": "All groupings for this person will be reset, and you will lose all suggestions made for this person",
+  "yesResetPerson": "Yes, reset person"
 }

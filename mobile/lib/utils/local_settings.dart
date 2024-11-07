@@ -1,4 +1,5 @@
 import 'package:photos/core/constants.dart';
+import "package:photos/utils/ram_check_util.dart";
 import 'package:shared_preferences/shared_preferences.dart';
 
 enum AlbumSortKey {
@@ -10,7 +11,7 @@ enum AlbumSortKey {
 class LocalSettings {
   static const kCollectionSortPref = "collection_sort_pref";
   static const kPhotoGridSize = "photo_grid_size";
-  static const _kisMLIndexingEnabled = "ls.enable_ml_idx";
+  static const _kisMLLocalIndexingEnabled = "ls.ml_local_indexing";
   static const kRateUsShownCount = "rate_us_shown_count";
   static const kEnableMultiplePart = "ls.enable_multiple_part";
   static const kRateUsPromptThreshold = 2;
@@ -57,11 +58,8 @@ class LocalSettings {
     return getRateUsShownCount() < kRateUsPromptThreshold;
   }
 
-  //  remove `enable_face_indexing`fallback after sometime, affects internal users only
-  bool get isMLIndexingEnabled =>
-      _prefs.getBool(_kisMLIndexingEnabled) ??
-      _prefs.getBool('enable_face_indexing') ??
-      false;
+  bool get isMLLocalIndexingEnabled =>
+      _prefs.getBool(_kisMLLocalIndexingEnabled) ?? enoughRamForLocalIndexing;
 
   bool get userEnabledMultiplePart =>
       _prefs.getBool(kEnableMultiplePart) ?? false;
@@ -72,9 +70,9 @@ class LocalSettings {
   }
 
   /// toggleFaceIndexing toggles the face indexing setting and returns the new value
-  Future<bool> toggleMLIndexing() async {
-    await _prefs.setBool(_kisMLIndexingEnabled, !isMLIndexingEnabled);
-    return isMLIndexingEnabled;
+  Future<bool> toggleLocalMLIndexing() async {
+    await _prefs.setBool(_kisMLLocalIndexingEnabled, !isMLLocalIndexingEnabled);
+    return isMLLocalIndexingEnabled;
   }
 
   //#region todo:(NG) remove this section, only needed for internal testing to see

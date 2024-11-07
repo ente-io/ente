@@ -5,6 +5,7 @@
     "dependencies": {
         "@/base": "*",
         "@ente/eslint-config": "*",
-        "@ente/shared": "*"
+        "@ente/shared": "*",
+        "react-otp-input": "^3.1.1"
     }
 }

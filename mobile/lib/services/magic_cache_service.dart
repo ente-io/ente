@@ -21,6 +21,7 @@ import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import "package:photos/services/remote_assets_service.dart";
 import "package:photos/services/search_service.dart";
+import "package:photos/services/user_remote_flag_service.dart";
 import "package:photos/ui/viewer/search/result/magic_result_screen.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
@@ -155,28 +156,25 @@ class MagicCacheService {
   /// lot of other things are happening.
   static const _kCacheUpdateDelay = Duration(seconds: 10);
 
-  late SharedPreferences _prefs;
-  final Logger _logger = Logger((MagicCacheService).toString());
-  MagicCacheService._privateConstructor();
+  final SharedPreferences _prefs;
+  late final Logger _logger = Logger((MagicCacheService).toString());
 
   Future<List<MagicCache>>? _magicCacheFuture;
   Future<List<Prompt>>? _promptFuture;
   final Set<String> _pendingUpdateReason = {};
   bool _isUpdateInProgress = false;
 
-  static final MagicCacheService instance =
-      MagicCacheService._privateConstructor();
-
-  void init(SharedPreferences preferences) {
-    _logger.info("Initializing MagicCacheService");
-    _prefs = preferences;
-    Future.delayed(_kCacheUpdateDelay, () {
-      _updateCacheIfTheTimeHasCome();
-    });
+  MagicCacheService(this._prefs) {
+    _logger.fine("MagicCacheService constructor");
     Bus.instance.on<FileUploadedEvent>().listen((event) {
       queueUpdate("File uploaded");
     });
+    Future.delayed(_kCacheUpdateDelay, () {
+      _updateCacheIfTheTimeHasCome();
+    });
   }
+
+
 
   Future<void> _resetLastMagicCacheUpdateTime() async {
     await _prefs.setInt(
@@ -189,7 +187,8 @@ class MagicCacheService {
     return _prefs.getInt(_lastMagicCacheUpdateTime) ?? 0;
   }
 
-  bool get enableDiscover => localSettings.isMLIndexingEnabled;
+  bool get enableDiscover => userRemoteFlagService
+        .getCachedBoolValue(UserRemoteFlagService.mlEnabled);
 
   void queueUpdate(String reason) {
     _pendingUpdateReason.add(reason);

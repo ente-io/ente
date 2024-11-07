@@ -425,6 +425,7 @@ func main() {
 
 	privateAPI.PUT("/files/data", fileHandler.PutFileData)
 	privateAPI.PUT("/files/video-data", fileHandler.PutVideoData)
+	privateAPI.POST("/files/data/status-diff", fileHandler.FileDataStatusDiff)
 	privateAPI.POST("/files/data/fetch", fileHandler.GetFilesData)
 	privateAPI.GET("/files/data/fetch", fileHandler.GetFileData)
 	privateAPI.GET("/files/data/preview-upload-url", fileHandler.GetPreviewUploadURL)
@@ -652,6 +653,7 @@ func main() {
 	adminAPI.POST("/user/disable-passkeys", adminHandler.RemovePasskeys)
 	adminAPI.POST("/user/update-email-mfa", adminHandler.UpdateEmailMFA)
 	adminAPI.POST("/user/add-ott", adminHandler.AddOtt)
+	adminAPI.POST("/user/terminate-session", adminHandler.TerminateSession)
 	adminAPI.POST("/user/close-family", adminHandler.CloseFamily)
 	adminAPI.PUT("/user/change-email", adminHandler.ChangeEmail)
 	adminAPI.DELETE("/user/delete", adminHandler.DeleteUser)

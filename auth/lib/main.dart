@@ -7,7 +7,6 @@ import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/constants.dart';
 import 'package:ente_auth/core/logging/super_logging.dart';
 import 'package:ente_auth/core/network.dart';
-import 'package:ente_auth/core/win_http_client.dart';
 import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/locale.dart';
 import 'package:ente_auth/services/authenticator_service.dart';
@@ -23,6 +22,7 @@ import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/tools/app_lock.dart';
 import 'package:ente_auth/ui/tools/lock_screen.dart';
 import 'package:ente_auth/ui/utils/icon_utils.dart';
+import 'package:ente_auth/utils/directory_utils.dart';
 import 'package:ente_auth/utils/lock_screen_settings.dart';
 import 'package:ente_auth/utils/platform_util.dart';
 import 'package:ente_auth/utils/window_protocol_handler.dart';
@@ -65,9 +65,6 @@ Future<void> initSystemTray() async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  if (Platform.isWindows) {
-    HttpOverrides.global = WindowsHttpOverrides();
-  }
 
   if (PlatformUtil.isDesktop()) {
     await windowManager.ensureInitialized();
@@ -76,6 +73,7 @@ void main() async {
       size: WindowListenerService.instance.getWindowSize(),
     );
     await windowManager.waitUntilReadyToShow(windowOptions, () async {
+      await DirectoryUtils.migrateNamingChanges();
       await windowManager.show();
       await windowManager.focus();
       initSystemTray().ignore();
@@ -106,7 +104,7 @@ Future<void> _runInForeground() async {
   return await _runWithLogs(() async {
     _logger.info("Starting app in foreground");
     await _init(false, via: 'mainMethod');
-    final Locale locale = await getLocale();
+    final Locale? locale = await getLocale(noFallback: true);
     unawaited(UpdateService.instance.showUpdateNotification());
     runApp(
       AppLock(

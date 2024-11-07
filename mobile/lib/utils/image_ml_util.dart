@@ -1,11 +1,11 @@
 import "dart:async";
 import "dart:io" show File, Platform;
-import "dart:math" show exp, min, pi;
+import "dart:math" show exp, max, min, pi;
 import "dart:typed_data" show Float32List, Uint8List;
 import "dart:ui";
 
 import 'package:flutter/painting.dart' as paint show decodeImageFromList;
-import "package:heif_converter/heif_converter.dart";
+import "package:flutter_image_compress/flutter_image_compress.dart";
 import "package:logging/logging.dart";
 import 'package:ml_linalg/linalg.dart';
 import "package:photos/models/ml/face/box.dart";
@@ -40,27 +40,29 @@ Future<(Image, Uint8List)> decodeImageFromPath(String imagePath) async {
     return (image, rawRgbaBytes);
   } catch (e, s) {
     final format = imagePath.split('.').last;
-    if (Platform.isAndroid) {
-      _logger.info('Cannot decode $format, converting to JPG on Android');
-      final String? jpgPath =
-          await HeifConverter.convert(imagePath, format: 'jpg');
-      if (jpgPath != null) {
-        _logger.info('Conversion successful, decoding JPG');
-        final imageData = await File(jpgPath).readAsBytes();
-        final image = await decodeImageFromData(imageData);
-        final rawRgbaBytes = await _getRawRgbaBytes(image);
-        return (image, rawRgbaBytes);
-      }
-      _logger.info('Unable to convert $format to JPG');
+    _logger.info(
+      'Cannot decode $format on ${Platform.isAndroid ? "Android" : "iOS"}, converting to jpeg',
+    );
+    try {
+      final Uint8List? convertedData =
+          await FlutterImageCompress.compressWithFile(
+        imagePath,
+        format: CompressFormat.jpeg,
+      );
+      final image = await decodeImageFromData(convertedData!);
+      final rawRgbaBytes = await _getRawRgbaBytes(image);
+      _logger.info('Conversion successful, jpeg decoded');
+      return (image, rawRgbaBytes);
+    } catch (e) {
+      _logger.severe(
+        'Error decoding image of format $format on ${Platform.isAndroid ? "Android" : "iOS"}',
+        e,
+        s,
+      );
+      throw Exception(
+        'InvalidImageFormatException: Error decoding image of format $format',
+      );
     }
-    _logger.severe(
-      'Error decoding image of format $format (Android: ${Platform.isAndroid})',
-      e,
-      s,
-    );
-    throw Exception(
-      'InvalidImageFormatException: Error decoding image of format $format',
-    );
   }
 }
 
@@ -176,59 +178,81 @@ Future<List<Uint8List>> generateFaceThumbnailsUsingCanvas(
   }
 }
 
-Future<(Float32List, Dimensions)> preprocessImageToFloat32ChannelsFirst(
+Future<(Float32List, Dimensions)> preprocessImageYoloFace(
   Image image,
-  Uint8List rawRgbaBytes, {
-  required int normalization,
-  required int requiredWidth,
-  required int requiredHeight,
-  RGB Function(num, num, Image, Uint8List) getPixel = _getPixelBilinear,
-  maintainAspectRatio = true,
-}) async {
-  final normFunction = normalization == 2
-      ? _normalizePixelRange2
-      : normalization == 1
-          ? _normalizePixelRange1
-          : _normalizePixelNoRange;
-
-  double scaleW = requiredWidth / image.width;
-  double scaleH = requiredHeight / image.height;
-  if (maintainAspectRatio) {
-    final scale =
-        min(requiredWidth / image.width, requiredHeight / image.height);
-    scaleW = scale;
-    scaleH = scale;
-  }
-  final scaledWidth = (image.width * scaleW).round().clamp(0, requiredWidth);
-  final scaledHeight = (image.height * scaleH).round().clamp(0, requiredHeight);
+  Uint8List rawRgbaBytes,
+) async {
+  const requiredWidth = 640;
+  const requiredHeight = 640;
+  final scale = min(requiredWidth / image.width, requiredHeight / image.height);
+  final scaledWidth = (image.width * scale).round().clamp(0, requiredWidth);
+  final scaledHeight = (image.height * scale).round().clamp(0, requiredHeight);
 
   final processedBytes = Float32List(3 * requiredHeight * requiredWidth);
 
   final buffer = Float32List.view(processedBytes.buffer);
   int pixelIndex = 0;
-  final int channelOffsetGreen = requiredHeight * requiredWidth;
-  final int channelOffsetBlue = 2 * requiredHeight * requiredWidth;
+  const int channelOffsetGreen = requiredHeight * requiredWidth;
+  const int channelOffsetBlue = 2 * requiredHeight * requiredWidth;
   for (var h = 0; h < requiredHeight; h++) {
     for (var w = 0; w < requiredWidth; w++) {
       late RGB pixel;
       if (w >= scaledWidth || h >= scaledHeight) {
         pixel = const (114, 114, 114);
       } else {
-        pixel = getPixel(
-          w / scaleW,
-          h / scaleH,
+        pixel = _getPixelBilinear(
+          w / scale,
+          h / scale,
           image,
           rawRgbaBytes,
         );
       }
-      buffer[pixelIndex] = normFunction(pixel.$1);
-      buffer[pixelIndex + channelOffsetGreen] = normFunction(pixel.$2);
-      buffer[pixelIndex + channelOffsetBlue] = normFunction(pixel.$3);
+      buffer[pixelIndex] = pixel.$1 / 255;
+      buffer[pixelIndex + channelOffsetGreen] = pixel.$2 / 255;
+      buffer[pixelIndex + channelOffsetBlue] = pixel.$3 / 255;
       pixelIndex++;
     }
   }
 
   return (processedBytes, Dimensions(width: scaledWidth, height: scaledHeight));
+}
+
+Future<Float32List> preprocessImageClip(
+  Image image,
+  Uint8List rawRgbaBytes,
+) async {
+  const int requiredWidth = 256;
+  const int requiredHeight = 256;
+  const int requiredSize = 3 * requiredWidth * requiredHeight;
+  final scale = max(requiredWidth / image.width, requiredHeight / image.height);
+  final bool useAntiAlias = scale < 0.8;
+  final scaledWidth = (image.width * scale).round();
+  final scaledHeight = (image.height * scale).round();
+  final widthOffset = max(0, scaledWidth - requiredWidth) / 2;
+  final heightOffset = max(0, scaledHeight - requiredHeight) / 2;
+
+  final processedBytes = Float32List(requiredSize);
+  final buffer = Float32List.view(processedBytes.buffer);
+  int pixelIndex = 0;
+  const int greenOff = requiredHeight * requiredWidth;
+  const int blueOff = 2 * requiredHeight * requiredWidth;
+  for (var h = 0 + heightOffset; h < scaledHeight - heightOffset; h++) {
+    for (var w = 0 + widthOffset; w < scaledWidth - widthOffset; w++) {
+      final RGB pixel = _getPixelBilinear(
+        w / scale,
+        h / scale,
+        image,
+        rawRgbaBytes,
+        antiAlias: useAntiAlias,
+      );
+      buffer[pixelIndex] = pixel.$1 / 255;
+      buffer[pixelIndex + greenOff] = pixel.$2 / 255;
+      buffer[pixelIndex + blueOff] = pixel.$3 / 255;
+      pixelIndex++;
+    }
+  }
+
+  return processedBytes;
 }
 
 Future<(Float32List, List<AlignmentResult>, List<bool>, List<double>, Size)>
@@ -365,44 +389,14 @@ List<List<int>> _createGrayscaleIntMatrixFromNormalized2List(
       (x) {
         // 0.299 ∙ Red + 0.587 ∙ Green + 0.114 ∙ Blue
         final pixelIndex = startIndex + 3 * (y * width + x);
-        return (0.299 * _unnormalizePixelRange2(imageList[pixelIndex]) +
-                0.587 * _unnormalizePixelRange2(imageList[pixelIndex + 1]) +
-                0.114 * _unnormalizePixelRange2(imageList[pixelIndex + 2]))
+        return (0.299 * ((imageList[pixelIndex] + 1) * 127.5) +
+                0.587 * ((imageList[pixelIndex + 1] + 1) * 127.5) +
+                0.114 * ((imageList[pixelIndex + 2] + 1) * 127.5))
             .round()
             .clamp(0, 255);
-        // return unnormalizePixelRange2(
-        //   (0.299 * imageList[pixelIndex] +
-        //       0.587 * imageList[pixelIndex + 1] +
-        //       0.114 * imageList[pixelIndex + 2]),
-        // ).round().clamp(0, 255);
       },
     ),
   );
-}
-
-/// Function normalizes the pixel value to be in range [-1, 1].
-///
-/// It assumes that the pixel value is originally in range [0, 255]
-double _normalizePixelRange2(num pixelValue) {
-  return (pixelValue / 127.5) - 1;
-}
-
-/// Function unnormalizes the pixel value to be in range [0, 255].
-///
-/// It assumes that the pixel value is originally in range [-1, 1]
-int _unnormalizePixelRange2(double pixelValue) {
-  return ((pixelValue + 1) * 127.5).round().clamp(0, 255);
-}
-
-/// Function normalizes the pixel value to be in range [0, 1].
-///
-/// It assumes that the pixel value is originally in range [0, 255]
-double _normalizePixelRange1(num pixelValue) {
-  return (pixelValue / 255);
-}
-
-double _normalizePixelNoRange(num pixelValue) {
-  return pixelValue.toDouble();
 }
 
 Future<Image> _cropImage(
@@ -499,11 +493,11 @@ void _warpAffineFloat32List(
 
       // Set the new pixel
       outputList[startIndex + 3 * (yTrans * width + xTrans)] =
-          _normalizePixelRange2(pixel.$1);
+          (pixel.$1 / 127.5) - 1;
       outputList[startIndex + 3 * (yTrans * width + xTrans) + 1] =
-          _normalizePixelRange2(pixel.$2);
+          (pixel.$2 / 127.5) - 1;
       outputList[startIndex + 3 * (yTrans * width + xTrans) + 2] =
-          _normalizePixelRange2(pixel.$3);
+          (pixel.$3 / 127.5) - 1;
     }
   }
 }

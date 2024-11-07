@@ -173,19 +173,17 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                               singleBorderRadius: 8,
                               alignCaptionedTextToLeft: true,
                               trailingWidget: ToggleSwitchWidget(
-                                value: () => UserRemoteFlagService.instance
-                                    .getCachedBoolValue(
+                                value: () =>
+                                    userRemoteFlagService.getCachedBoolValue(
                                   UserRemoteFlagService.mapEnabled,
                                 ),
                                 onChanged: () async {
-                                  final isEnabled = UserRemoteFlagService
-                                      .instance
-                                      .getCachedBoolValue(
+                                  final isEnabled =
+                                      userRemoteFlagService.getCachedBoolValue(
                                     UserRemoteFlagService.mapEnabled,
                                   );
 
-                                  await UserRemoteFlagService.instance
-                                      .setBoolValue(
+                                  await userRemoteFlagService.setBoolValue(
                                     UserRemoteFlagService.mapEnabled,
                                     !isEnabled,
                                   );
