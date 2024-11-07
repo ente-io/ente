@@ -12,6 +12,7 @@ import type {
 import {
     activateStripeSubscription,
     cancelStripeSubscription,
+    getFamilyPortalRedirectURL,
     getPlansData,
     isSubscriptionActive,
     isSubscriptionActivePaid,
@@ -54,7 +55,6 @@ import Typography from "@mui/material/Typography";
 import { t } from "i18next";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
-import { getFamilyPortalRedirectURL } from "services/userService";
 import { SetLoading } from "types/gallery";
 
 type PlanSelectorProps = ModalVisibilityProps & {
@@ -247,7 +247,7 @@ const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
 
     return (
         <Stack spacing={3} p={1.5}>
-            {isSubscriptionActivePaid(subscription) ? (
+            {subscription && isSubscriptionActivePaid(subscription) ? (
                 <PaidSubscriptionPlanSelectorCard
                     {...commonCardData}
                     usage={usage}
@@ -327,7 +327,7 @@ function FreeSubscriptionPlanSelectorCard({
                         </Typography>
                     </Box>
                     {children}
-                    {addOnBonuses.length > 0 && (
+                    {subscription && addOnBonuses.length > 0 && (
                         <>
                             <AddOnBonusRows
                                 addOnBonuses={addOnBonuses}
@@ -499,7 +499,10 @@ const Plans = ({
                 ?.filter((plan) => plan.period === planPeriod)
                 ?.map((plan) => (
                     <PlanRow
-                        disabled={isUserSubscribedPlan(plan, subscription)}
+                        disabled={
+                            subscription &&
+                            isSubscriptionForPlan(subscription, plan)
+                        }
                         popular={isPopularPlan(plan)}
                         key={plan.stripeID}
                         plan={plan}
@@ -507,7 +510,7 @@ const Plans = ({
                         onPlanSelect={onPlanSelect}
                     />
                 ))}
-            {!isSubscriptionActivePaid(subscription) &&
+            {!(subscription && isSubscriptionActivePaid(subscription)) &&
                 !hasAddOnBonus &&
                 freePlan && (
                     <FreePlanRow
@@ -537,9 +540,7 @@ function PlanRow({
     disabled,
     popular,
 }: PlanRowProps) {
-    const handleClick = () => {
-        !isUserSubscribedPlan(plan, subscription) && onPlanSelect(plan);
-    };
+    const handleClick = () => !disabled && onPlanSelect(plan);
 
     const PlanButton = disabled ? DisabledPlanButton : ActivePlanButton;
 
@@ -553,9 +554,11 @@ function PlanRow({
                     <Typography variant="h3" color="text.muted">
                         {t("storage_unit.gb")}
                     </Typography>
-                    {popular && !isSubscriptionActivePaid(subscription) && (
-                        <Badge>{t("POPULAR")}</Badge>
-                    )}
+                    {popular &&
+                        !(
+                            subscription &&
+                            isSubscriptionActivePaid(subscription)
+                        ) && <Badge>{t("POPULAR")}</Badge>}
                 </FlexWrapper>
             </TopAlignedFluidContainer>
             <Box width="136px">

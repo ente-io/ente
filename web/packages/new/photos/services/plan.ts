@@ -318,7 +318,7 @@ export const isSubscriptionStripe = (subscription: Subscription) =>
  * Return true if the given {@link Subscription} has the cancelled attribute.
  */
 export const isSubscriptionCancelled = (subscription: Subscription) =>
-    subscription && subscription.attributes?.isCancelled;
+    subscription.attributes?.isCancelled;
 
 /**
  * Return true if the user (represented by the given {@link userDetails}) is
@@ -437,6 +437,5 @@ export const hasExceededStorageQuota = (userDetails: UserDetails) => {
         usage = userDetails.usage;
         storage = userDetails.subscription.storage;
     }
-
     return usage > storage + userDetails.storageBonus;
 };

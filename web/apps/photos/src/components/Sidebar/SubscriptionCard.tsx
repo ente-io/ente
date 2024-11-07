@@ -1,9 +1,9 @@
 import { Overlay } from "@/base/components/mui/Container";
 import type { ButtonishProps } from "@/new/photos/components/mui";
 import {
-    isPartOfFamily,
+    familyUsage,
     isPartOfFamilyWithOtherMembers,
-} from "@/new/photos/services/family";
+} from "@/new/photos/services/plan";
 import type { UserDetails } from "@/new/photos/services/user";
 import { bytesInGB, formattedStorageByteSize } from "@/new/photos/utils/units";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
@@ -20,7 +20,6 @@ import {
 } from "@mui/material";
 import { t } from "i18next";
 import type React from "react";
-import { useMemo } from "react";
 
 interface SubscriptionCardProps {
     userDetails: UserDetails;
@@ -219,18 +218,9 @@ interface FamilySubscriptionCardContentProps {
 const FamilySubscriptionCardContent: React.FC<
     FamilySubscriptionCardContentProps
 > = ({ userDetails }) => {
-    const totalUsage = useMemo(() => {
-        if (isPartOfFamily(userDetails.familyData)) {
-            return userDetails.familyData.members.reduce(
-                (sum, currentMember) => sum + currentMember.usage,
-                0,
-            );
-        } else {
-            return userDetails.usage;
-        }
-    }, [userDetails]);
+    const totalUsage = familyUsage(userDetails);
     const totalStorage =
-        userDetails.familyData.storage + userDetails.storageBonus;
+        (userDetails.familyData?.storage ?? 0) + userDetails.storageBonus;
 
     return (
         <>

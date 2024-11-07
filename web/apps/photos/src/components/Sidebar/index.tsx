@@ -23,9 +23,9 @@ import {
     isFamilyAdmin,
     isPartOfFamily,
     isSubscriptionActive,
-    isSubscriptionActiveFree,
     isSubscriptionActivePaid,
     isSubscriptionCancelled,
+    isSubscriptionFree,
     isSubscriptionPastDue,
     isSubscriptionStripe,
     redirectToCustomerPortal,
@@ -156,7 +156,7 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
         if (sidebarView) void syncUserDetails();
     }, [sidebarView]);
 
-    const isMemberSubscription = useMemo(
+    const isNonAdminFamilyMember = useMemo(
         () =>
             userDetails &&
             isPartOfFamily(userDetails) &&
@@ -165,7 +165,7 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
     );
 
     const handleSubscriptionCardClick = () => {
-        if (isMemberSubscription) {
+        if (isNonAdminFamilyMember) {
             openMemberSubscriptionManage();
         } else {
             if (
@@ -199,7 +199,7 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
                     <SubscriptionStatus userDetails={userDetails} />
                 )}
             </Box>
-            {isMemberSubscription && (
+            {isNonAdminFamilyMember && (
                 <MemberSubscriptionManage
                     userDetails={userDetails}
                     open={memberSubscriptionManageView}
@@ -220,9 +220,6 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
     const { showPlanSelectorModal } = useContext(GalleryContext);
 
     const hasAMessage = useMemo(() => {
-        if (!userDetails) {
-            return false;
-        }
         if (isPartOfFamily(userDetails) && !isFamilyAdmin(userDetails)) {
             return false;
         }
@@ -266,7 +263,7 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
     let message: React.ReactNode;
     if (!hasAddOnBonus) {
         if (isSubscriptionActive(userDetails.subscription)) {
-            if (isSubscriptionActiveFree(userDetails.subscription)) {
+            if (isSubscriptionFree(userDetails.subscription)) {
                 message = t("subscription_info_free");
             } else if (isSubscriptionCancelled(userDetails.subscription)) {
                 message = t("subscription_info_renewal_cancelled", {
