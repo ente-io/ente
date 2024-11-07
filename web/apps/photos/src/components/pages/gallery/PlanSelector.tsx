@@ -1,4 +1,7 @@
-import { genericRetriableErrorDialogAttributes } from "@/base/components/utils/dialog";
+import {
+    errorDialogAttributes,
+    genericRetriableErrorDialogAttributes,
+} from "@/base/components/utils/dialog";
 import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import log from "@/base/log";
 import { useUserDetailsSnapshot } from "@/new/photos/components/utils/use-snapshot";
@@ -99,7 +102,7 @@ const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
     onClose,
     setLoading,
 }) => {
-    const { showMiniDialog, setDialogMessage } = useContext(AppContext);
+    const { showMiniDialog } = useContext(AppContext);
 
     const userDetails = useUserDetailsSnapshot();
 
@@ -143,7 +146,7 @@ const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
                 }
                 setPlansData(plansData);
             } catch (e) {
-                log.error("plan selector modal open failed", e);
+                log.error("Failed to get plans", e);
                 onClose();
                 showMiniDialog(genericRetriableErrorDialogAttributes());
             } finally {
@@ -153,7 +156,7 @@ const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
         main();
     }, []);
 
-    async function onPlanSelect(plan: Plan) {
+    const handlePlanSelect = async (plan: Plan) => {
         switch (planSelectionOutcome(subscription)) {
             case "buyPlan":
                 try {
@@ -161,56 +164,38 @@ const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
                     await redirectToPaymentsApp(plan.stripeID, "buy");
                 } catch (e) {
                     setLoading(false);
-                    setDialogMessage({
-                        title: t("error"),
-                        content: t("SUBSCRIPTION_PURCHASE_FAILED"),
-                        close: { variant: "critical" },
-                    });
+                    showMiniDialog(
+                        errorDialogAttributes(
+                            t("SUBSCRIPTION_PURCHASE_FAILED"),
+                        ),
+                    );
                 }
                 break;
 
             case "updateSubscriptionToPlan":
-                setDialogMessage({
+                showMiniDialog({
                     title: t("update_subscription_title"),
-                    content: t("UPDATE_SUBSCRIPTION_MESSAGE"),
-                    proceed: {
+                    message: t("UPDATE_SUBSCRIPTION_MESSAGE"),
+                    continue: {
                         text: t("UPDATE_SUBSCRIPTION"),
-                        variant: "accent",
-                        action: async () => {
-                            try {
-                                setLoading(true);
-                                await redirectToPaymentsApp(
-                                    plan.stripeID,
-                                    "update",
-                                );
-                            } catch (err) {
-                                setDialogMessage({
-                                    title: t("error"),
-                                    content: t("SUBSCRIPTION_UPDATE_FAILED"),
-                                    close: { variant: "critical" },
-                                });
-                            } finally {
-                                setLoading(false);
-                                onClose();
-                            }
-                        },
+                        action: () =>
+                            redirectToPaymentsApp(plan.stripeID, "update"),
                     },
-                    close: { text: t("cancel") },
                 });
                 break;
 
             case "cancelOnMobile":
-                setDialogMessage({
+                showMiniDialog({
                     title: t("CANCEL_SUBSCRIPTION_ON_MOBILE"),
-                    content: t("CANCEL_SUBSCRIPTION_ON_MOBILE_MESSAGE"),
-                    close: { variant: "secondary" },
+                    message: t("CANCEL_SUBSCRIPTION_ON_MOBILE_MESSAGE"),
+                    cancel: t("ok"),
                 });
                 break;
 
             case "contactSupport":
-                setDialogMessage({
+                showMiniDialog({
                     title: t("MANAGE_PLAN"),
-                    content: (
+                    message: (
                         <Trans
                             i18nKey={"MAIL_TO_MANAGE_SUBSCRIPTION"}
                             components={{
@@ -219,11 +204,11 @@ const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
                             values={{ emailID: "support@ente.io" }}
                         />
                     ),
-                    close: { variant: "secondary" },
+                    cancel: t("ok"),
                 });
                 break;
         }
-    }
+    };
 
     const commonCardData = {
         subscription,
@@ -238,7 +223,7 @@ const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
         <Plans
             plansData={plansData}
             planPeriod={planPeriod}
-            onPlanSelect={onPlanSelect}
+            onPlanSelect={handlePlanSelect}
             subscription={subscription}
             hasAddOnBonus={addOnBonuses.length > 0}
             closeModal={onClose}

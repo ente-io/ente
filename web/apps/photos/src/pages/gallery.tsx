@@ -1257,7 +1257,7 @@ export async function handleSubscriptionCompletionRedirectIfNeeded(
                 cancel: false,
             });
         } catch (e) {
-            log.error(e);
+            log.error("Subscription verification failed", e);
             showMiniDialog(
                 errorDialogAttributes(t("SUBSCRIPTION_VERIFICATION_ERROR")),
             );
