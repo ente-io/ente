@@ -10,7 +10,6 @@ import "package:photos/models/file_load_result.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/models/search/hierarchical/face_filter.dart";
 import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
-import "package:photos/models/search/hierarchical/only_them_filter.dart";
 import "package:photos/models/selected_files.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
@@ -45,7 +44,7 @@ class _HierarchicalSearchGalleryState extends State<HierarchicalSearchGallery> {
   List<EnteFile> _filterdFiles = <EnteFile>[];
   int _filteredFilesVersion = 0;
   final _isLoading = ValueNotifier<bool>(false);
-  String? _firstUnnamedAppliedClusterID;
+  FaceFilter? _firstUnnamedAppliedFaceFilter;
 
   @override
   void initState() {
@@ -103,25 +102,14 @@ class _HierarchicalSearchGalleryState extends State<HierarchicalSearchGallery> {
   }
 
   void _setUnnamedFaceFilter(List<HierarchicalSearchFilter> filters) {
-    bool hasUnnamedFaceFilter = false;
     for (HierarchicalSearchFilter filter in filters) {
       if (filter is FaceFilter && filter.clusterId != null) {
-        _firstUnnamedAppliedClusterID = filter.clusterId;
-        hasUnnamedFaceFilter = true;
+        if (filters.last == filter) {
+          _firstUnnamedAppliedFaceFilter = filter;
+        }
         break;
       }
-      if (filter is OnlyThemFilter) {
-        for (final filter in filter.faceFilters) {
-          if (filter.clusterId != null) {
-            _firstUnnamedAppliedClusterID = filter.clusterId;
-            hasUnnamedFaceFilter = true;
-            break;
-          }
-        }
-      }
-      if (!hasUnnamedFaceFilter) {
-        _firstUnnamedAppliedClusterID = null;
-      }
+      _firstUnnamedAppliedFaceFilter = null;
     }
   }
 
@@ -178,12 +166,14 @@ class _HierarchicalSearchGalleryState extends State<HierarchicalSearchGallery> {
                     EventType.hide,
                   },
                   selectedFiles: widget.selectedFiles,
-                  header: _firstUnnamedAppliedClusterID != null
+                  header: _firstUnnamedAppliedFaceFilter != null
                       ? PeopleBanner(
                           type: PeopleBannerType.addName,
                           faceWidget: PersonFaceWidget(
-                            _filterdFiles.first,
-                            clusterID: _firstUnnamedAppliedClusterID,
+                            _firstUnnamedAppliedFaceFilter!.faceFile,
+                            clusterID:
+                                _firstUnnamedAppliedFaceFilter!.clusterId,
+                            thumbnailFallback: false,
                           ),
                           actionIcon: Icons.add_outlined,
                           text: S.of(context).addAName,
@@ -191,7 +181,8 @@ class _HierarchicalSearchGalleryState extends State<HierarchicalSearchGallery> {
                           onTap: () async {
                             final result = await showAssignPersonAction(
                               context,
-                              clusterID: _firstUnnamedAppliedClusterID!,
+                              clusterID:
+                                  _firstUnnamedAppliedFaceFilter!.clusterId!,
                             );
                             if (result != null &&
                                 result is (PersonEntity, EnteFile)) {
