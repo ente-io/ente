@@ -86,9 +86,9 @@ class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {
     if (mediaExtentionAction.action == IntentAction.main) {
       if (!enableWorkManager) {
         _configureBackgroundFetch();
-        return;
+      } else {
+        _configureWorkManager();
       }
-      _configureWorkManager();
     }
   }
 
