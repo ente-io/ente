@@ -1,5 +1,6 @@
 import { genericRetriableErrorDialogAttributes } from "@/base/components/utils/dialog";
 import log from "@/base/log";
+import { useUserDetailsSnapshot } from "@/new/photos/components/utils/use-snapshot";
 import {
     getTotalFamilyUsage,
     isPartOfFamily,
@@ -107,13 +108,8 @@ function PlanSelectorCard(props: PlanSelectorCardProps) {
         subscription?.period || "month",
     );
     const { showMiniDialog, setDialogMessage } = useContext(AppContext);
-    const bonusData = useMemo(() => {
-        const userDetails = getLocalUserDetails();
-        if (!userDetails) {
-            return null;
-        }
-        return userDetails.bonusData;
-    }, []);
+    const bonusData = useUserDetailsSnapshot()?.bonusData;
+
 
     const usage = useMemo(() => {
         const userDetails = getLocalUserDetails();
@@ -913,7 +909,3 @@ const ManageSubscriptionButton = ({ children, ...props }: ButtonProps) => (
         <FluidContainer>{children}</FluidContainer>
     </Button>
 );
-
-function getLocalUserDetails(): UserDetails {
-    return getData(LS_KEYS.USER_DETAILS)?.value;
-}

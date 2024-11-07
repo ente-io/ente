@@ -58,7 +58,7 @@ export function MemberSubscriptionManage({ open, userDetails, onClose }) {
                             {t("subscription_info_family")}
                         </Typography>
                         <Typography>
-                            {getFamilyPlanAdmin(userDetails.familyData)?.email}
+                            {getFamilyPlanAdmin(userDetails)?.email}
                         </Typography>
                     </Box>
 

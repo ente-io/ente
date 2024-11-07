@@ -4,6 +4,7 @@
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { apiURL, paymentsAppOrigin } from "@/base/origins";
 import {
+    familyUsage,
     getTotalFamilyUsage,
     isPartOfFamily,
 } from "@/new/photos/services/family";
@@ -80,6 +81,13 @@ export const getPlansData = async (): Promise<PlansData> => {
     ensureOk(res);
     return PlansData.parse(await res.json());
 };
+
+/**
+ * Derive the total usage for the user both when they are on an individual plan,
+ * or on a family plan.
+ */
+export const planUsage = (userDetails: UserDetails) =>
+    isPartOfFamily(userDetails) ? familyUsage(userDetails) : userDetails.usage;
 
 const SubscriptionResponse = z.object({
     subscription: Subscription,

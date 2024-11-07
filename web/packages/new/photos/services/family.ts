@@ -9,6 +9,7 @@ import {
 } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";
 import { z } from "zod";
+import type { UserDetails } from "./user";
 
 const FamilyMember = z.object({
     /**
@@ -55,30 +56,31 @@ export function getLocalFamilyData(): FamilyData {
     return getData(LS_KEYS.FAMILY_DATA);
 }
 
-// isPartOfFamily return true if the current user is part of some family plan
-export function isPartOfFamily(familyData: FamilyData): boolean {
-    return Boolean(
-        // eslint-disable-next-line @typescript-eslint/prefer-optional-chain, @typescript-eslint/no-unnecessary-condition
-        familyData && familyData.members && familyData.members.length > 0,
-    );
-}
+/**
+ * Return true if the user (represented by the given {@link userDetails}) is
+ * part of a family plan.
+ */
+export const isPartOfFamily = (userDetails: UserDetails) =>
+    (userDetails.familyData?.members.length ?? 0) > 0;
 
-// hasNonAdminFamilyMembers return true if the admin user has members in his family
-export function hasNonAdminFamilyMembers(familyData: FamilyData): boolean {
-    return Boolean(isPartOfFamily(familyData) && familyData.members.length > 1);
-}
+/**
+ * Return true if the user (represented by the given {@link userDetails}) is
+ * part of a family plan which has members in the family.
+ */
+export const isPartOfFamilyWithOtherMembers = (userDetails: UserDetails) =>
+    (userDetails.familyData?.members.length ?? 0) > 1;
 
-export function isFamilyAdmin(familyData: FamilyData): boolean {
-    const familyAdmin: FamilyMember = getFamilyPlanAdmin(familyData);
+export function isFamilyAdmin(userDetails: UserDetails): boolean {
+    const familyAdmin: FamilyMember = getFamilyPlanAdmin(userDetails);
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const user: User = getData(LS_KEYS.USER);
     return familyAdmin.email === user.email;
 }
 
-export function getFamilyPlanAdmin(familyData: FamilyData): FamilyMember {
-    if (isPartOfFamily(familyData)) {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        return familyData.members.find((x) => x.isAdmin)!;
+export function getFamilyPlanAdmin(userDetails: UserDetails): FamilyMember {
+    if (isPartOfFamily(userDetails)) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-non-null-asserted-optional-chain
+        return userDetails.familyData?.members.find((x) => x.isAdmin)!;
     } else {
         log.error(
             "invalid getFamilyPlanAdmin call - verify user is part of family plan before calling this method",
@@ -89,12 +91,14 @@ export function getFamilyPlanAdmin(familyData: FamilyData): FamilyMember {
     }
 }
 
-export function getTotalFamilyUsage(familyData: FamilyData): number {
-    return familyData.members.reduce(
-        (sum, currentMember) => sum + (currentMember.usage ?? 0),
+/**
+ * Return the combined usage of all the family members.
+ */
+export const familyUsage = (userDetails: UserDetails) =>
+    (userDetails.familyData?.members ?? []).reduce(
+        (sum, { usage }) => sum + (usage ?? 0),
         0,
     );
-}
 
 export const leaveFamily = async () => {
     ensureOk(

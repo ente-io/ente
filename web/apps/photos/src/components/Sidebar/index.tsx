@@ -158,8 +158,8 @@ const UserDetailsSection: React.FC<UserDetailsSectionProps> = ({
     const isMemberSubscription = useMemo(
         () =>
             userDetails &&
-            isPartOfFamily(userDetails.familyData) &&
-            !isFamilyAdmin(userDetails.familyData),
+            isPartOfFamily(userDetails) &&
+            !isFamilyAdmin(userDetails),
         [userDetails],
     );
 

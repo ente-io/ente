@@ -1,10 +1,10 @@
 import { Overlay } from "@/base/components/mui/Container";
 import type { ButtonishProps } from "@/new/photos/components/mui";
-import type { UserDetails } from "@/new/photos/services/user";
 import {
-    hasNonAdminFamilyMembers,
     isPartOfFamily,
+    isPartOfFamilyWithOtherMembers,
 } from "@/new/photos/services/family";
+import type { UserDetails } from "@/new/photos/services/user";
 import { bytesInGB, formattedStorageByteSize } from "@/new/photos/utils/units";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
@@ -91,7 +91,7 @@ export const SubscriptionCardContentOverlay: React.FC<
                 flexDirection={"column"}
                 padding={"20px 16px"}
             >
-                {hasNonAdminFamilyMembers(userDetails.familyData) ? (
+                {userDetails && isPartOfFamilyWithOtherMembers(userDetails) ? (
                     <FamilySubscriptionCardContent userDetails={userDetails} />
                 ) : (
                     <IndividualSubscriptionCardContent
