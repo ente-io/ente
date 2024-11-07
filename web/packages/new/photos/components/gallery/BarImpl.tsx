@@ -1,3 +1,4 @@
+import { Overlay } from "@/base/components/mui/Container";
 import { useIsSmallWidth } from "@/base/hooks";
 import { CollectionsSortOptions } from "@/new/photos/components/CollectionsSortOptions";
 import { FilledIconButton } from "@/new/photos/components/mui";
@@ -18,7 +19,6 @@ import type {
 } from "@/new/photos/services/collection/ui";
 import type { Person } from "@/new/photos/services/ml/people";
 import { ensure } from "@/utils/ensure";
-import { Overlay } from "@ente/shared/components/Container";
 import ArchiveIcon from "@mui/icons-material/Archive";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import Favorite from "@mui/icons-material/FavoriteRounded";

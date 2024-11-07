@@ -1,3 +1,4 @@
+import { SpaceBetweenFlex } from "@/base/components/mui/Container";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import type { CollectionMapping } from "@/base/types/ipc";
@@ -12,7 +13,6 @@ import {
 } from "@mui/material";
 import { t } from "i18next";
 import React from "react";
-import { SpaceBetweenFlex } from "./mui";
 import { DialogCloseIconButton } from "./mui/Dialog";
 
 type CollectionMappingChoiceModalProps = ModalVisibilityProps & {

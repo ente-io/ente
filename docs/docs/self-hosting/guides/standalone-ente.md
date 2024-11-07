@@ -70,18 +70,33 @@ createuser -s postgres
 
 ## Start Museum 
 
+Start by cloning ente to your system. 
+
+```sh 
+git clone https://github.com/ente-io/ente
 ```
-export ENTE_DB_USER=postgres 
+
+```sh
+export ENTE_DB_USER=postgres
 cd ente/server
 go run cmd/museum/main.go
 ```
 
+You can also add the export line to your shell's RC file, to avoid exporting the environment variable every time. 
+
 For live reloads, install [air](https://github.com/air-verse/air#installation). Then you can just call air after declaring the required environment variables. For example,
 
-```
-ENTE_DB_USER=ente_user
+```sh
+ENTE_DB_USER=postgres
 air
 ```
+
+## Museum as a background service 
+
+Please check the below links if you want to run Museum as a service, both of them are battle tested.
+
+1. [How to run museum as a systemd service](https://gist.github.com/mngshm/a0edb097c91d1dc45aeed755af310323)
+2. [Museum.service](https://github.com/ente-io/ente/blob/23e678889189157ecc389c258267685934b83631/server/scripts/deploy/museum.service#L4)
 
 Once you are done with setting and running Museum, all you are left to do is run the web app and reverse_proxy it with a webserver. You can check the following resources for Deploying your web app. 
 

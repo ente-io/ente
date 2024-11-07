@@ -9,6 +9,7 @@ import log from "@/base/log";
 import { savedLogs } from "@/base/log-web";
 import { customAPIHost } from "@/base/origins";
 import { downloadString } from "@/base/utils/web";
+import { TwoFactorSettings } from "@/new/photos/components/sidebar/TwoFactorSettings";
 import { downloadAppDialogAttributes } from "@/new/photos/components/utils/download";
 import {
     ARCHIVE_SECTION,
@@ -17,6 +18,7 @@ import {
 } from "@/new/photos/services/collection";
 import type { CollectionSummaries } from "@/new/photos/services/collection/ui";
 import { isInternalUser } from "@/new/photos/services/settings";
+import { isFamilyAdmin, isPartOfFamily } from "@/new/photos/services/user";
 import { AppContext, useAppContext } from "@/new/photos/types/context";
 import { initiateEmail, openURL } from "@/new/photos/utils/web";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
@@ -47,7 +49,6 @@ import {
 } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import DeleteAccountModal from "components/DeleteAccountModal";
-import TwoFactorModal from "components/TwoFactor/Modal";
 import { WatchFolder } from "components/WatchFolder";
 import LinkButton from "components/pages/gallery/LinkButton";
 import { t } from "i18next";
@@ -77,17 +78,17 @@ import {
     isSubscriptionCancelled,
     isSubscriptionPastDue,
 } from "utils/billing";
-import { isFamilyAdmin, isPartOfFamily } from "utils/user/family";
 import { testUpload } from "../../../tests/upload.test";
 import { MemberSubscriptionManage } from "../MemberSubscriptionManage";
 import { Preferences } from "./Preferences";
-import SubscriptionCard from "./SubscriptionCard";
+import { SubscriptionCard } from "./SubscriptionCard";
 
 interface Iprops {
     collectionSummaries: CollectionSummaries;
     sidebarView: boolean;
     closeSidebar: () => void;
 }
+
 export default function Sidebar({
     collectionSummaries,
     sidebarView,
@@ -497,7 +498,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
             <EnteMenuItem
                 variant="secondary"
                 onClick={showTwoFactor}
-                label={t("TWO_FACTOR")}
+                label={t("two_factor")}
             />
             <EnteMenuItem
                 variant="secondary"
@@ -530,9 +531,9 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
                 {...recoveryKeyVisibilityProps}
                 {...{ showMiniDialog }}
             />
-            <TwoFactorModal
+            <TwoFactorSettings
                 {...twoFactorVisibilityProps}
-                closeSidebar={closeSidebar}
+                onRootClose={closeSidebar}
             />
             {isElectron() && (
                 <WatchFolder

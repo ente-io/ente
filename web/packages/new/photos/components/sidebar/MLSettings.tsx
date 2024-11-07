@@ -1,8 +1,10 @@
 import { MenuItemGroup } from "@/base/components/Menu";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
-import { Titlebar } from "@/base/components/Titlebar";
-import type { NestedDrawerVisibilityProps } from "@/base/components/utils/modal";
+import {
+    NestedSidebarDrawer,
+    SidebarDrawerTitlebar,
+    type NestedSidebarDrawerVisibilityProps,
+} from "@/base/components/mui/SidebarDrawer";
 import { disableML, enableML, type MLStatus } from "@/new/photos/services/ml";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import {
@@ -16,17 +18,16 @@ import {
     Paper,
     Stack,
     Typography,
-    type DialogProps,
 } from "@mui/material";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
-import { useAppContext } from "../types/context";
-import { openURL } from "../utils/web";
-import { useMLStatusSnapshot } from "./utils/ml";
-import { useWrapAsyncOperation } from "./utils/use-wrap-async";
+import { useAppContext } from "../../types/context";
+import { openURL } from "../../utils/web";
+import { useMLStatusSnapshot } from "../utils/ml";
+import { useWrapAsyncOperation } from "../utils/use-wrap-async";
 
-export const MLSettings: React.FC<NestedDrawerVisibilityProps> = ({
+export const MLSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     open,
     onClose,
     onRootClose,
@@ -37,11 +38,6 @@ export const MLSettings: React.FC<NestedDrawerVisibilityProps> = ({
     const handleRootClose = () => {
         onClose();
         onRootClose();
-    };
-
-    const handleDrawerClose: DialogProps["onClose"] = (_, reason) => {
-        if (reason == "backdropClick") handleRootClose();
-        else onClose();
     };
 
     const handleEnableML = () => setOpenFaceConsent(true);
@@ -66,25 +62,20 @@ export const MLSettings: React.FC<NestedDrawerVisibilityProps> = ({
     }
 
     return (
-        <Box>
-            <SidebarDrawer
-                anchor="left"
-                transitionDuration={0}
-                open={open}
-                onClose={handleDrawerClose}
-                BackdropProps={{
-                    sx: { "&&&": { backgroundColor: "transparent" } },
-                }}
+        <>
+            <NestedSidebarDrawer
+                {...{ open, onClose }}
+                onRootClose={handleRootClose}
             >
-                <Stack spacing={"4px"} py={"12px"}>
-                    <Titlebar
+                <Stack sx={{ gap: "4px", py: "12px" }}>
+                    <SidebarDrawerTitlebar
                         onClose={onClose}
+                        onRootClose={handleRootClose}
                         title={t("ml_search")}
-                        onRootClose={onRootClose}
                     />
                     {component}
                 </Stack>
-            </SidebarDrawer>
+            </NestedSidebarDrawer>
 
             <FaceConsent
                 open={openFaceConsent}
@@ -92,7 +83,7 @@ export const MLSettings: React.FC<NestedDrawerVisibilityProps> = ({
                 onRootClose={handleRootClose}
                 onConsent={handleConsent}
             />
-        </Box>
+        </>
     );
 };
 
@@ -134,7 +125,7 @@ const EnableML: React.FC<EnableMLProps> = ({ onEnable }) => {
     );
 };
 
-type FaceConsentProps = NestedDrawerVisibilityProps & {
+type FaceConsentProps = NestedSidebarDrawerVisibilityProps & {
     /** Called when the user provides their consent. */
     onConsent: () => void;
 };
@@ -156,11 +147,6 @@ const FaceConsent: React.FC<FaceConsentProps> = ({
         onRootClose();
     };
 
-    const handleDrawerClose: DialogProps["onClose"] = (_, reason) => {
-        if (reason == "backdropClick") handleRootClose();
-        else onClose();
-    };
-
     const privacyPolicyLink = (
         <Link
             target="_blank"
@@ -174,19 +160,15 @@ const FaceConsent: React.FC<FaceConsentProps> = ({
     );
 
     return (
-        <SidebarDrawer
-            transitionDuration={0}
-            open={open}
-            onClose={handleDrawerClose}
-            BackdropProps={{
-                sx: { "&&&": { backgroundColor: "transparent" } },
-            }}
+        <NestedSidebarDrawer
+            {...{ open, onClose }}
+            onRootClose={handleRootClose}
         >
             <Stack spacing={"4px"} py={"12px"}>
-                <Titlebar
+                <SidebarDrawerTitlebar
                     onClose={onClose}
-                    title={t("ml_consent_title")}
                     onRootClose={handleRootClose}
+                    title={t("ml_consent_title")}
                 />
                 <Stack py={"20px"} px={"8px"} spacing={"32px"}>
                     <Typography component="div" color="text.muted" px={"8px"}>
@@ -233,7 +215,7 @@ const FaceConsent: React.FC<FaceConsentProps> = ({
                     </Stack>
                 </Stack>
             </Stack>
-        </SidebarDrawer>
+        </NestedSidebarDrawer>
     );
 };
 

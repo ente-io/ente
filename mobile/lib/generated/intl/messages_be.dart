@@ -34,6 +34,11 @@ class MessageLookup extends MessageLookupByLibrary {
             "Я ўсведамляю, што калі я страчу свой пароль, то я магу згубіць свае даныя, бо мае даныя абаронены <underline>скразным шыфраваннем</underline>."),
         "activeSessions":
             MessageLookupByLibrary.simpleMessage("Актыўныя сеансы"),
+        "allPersonGroupingWillReset": MessageLookupByLibrary.simpleMessage(
+            "All groupings for this person will be reset, and you will lose all suggestions made for this person"),
+        "areYouSureYouWantToResetThisPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Are you sure you want to reset this person?"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "Якая асноўная прычына выдалення вашага ўліковага запісу?"),
         "cancel": MessageLookupByLibrary.simpleMessage("Скасаваць"),
@@ -155,6 +160,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Адправіць ліст яшчэ раз"),
         "resetPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Скінуць пароль"),
+        "resetPerson": MessageLookupByLibrary.simpleMessage("Reset person"),
         "saveKey": MessageLookupByLibrary.simpleMessage("Захаваць ключ"),
         "selectReason":
             MessageLookupByLibrary.simpleMessage("Выберыце прычыну"),
@@ -195,6 +201,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "weHaveSendEmailTo": m1,
         "weakStrength": MessageLookupByLibrary.simpleMessage("Ненадзейны"),
         "welcomeBack": MessageLookupByLibrary.simpleMessage("З вяртаннем!"),
+        "yesResetPerson":
+            MessageLookupByLibrary.simpleMessage("Yes, reset person"),
         "yourAccountHasBeenDeleted": MessageLookupByLibrary.simpleMessage(
             "Ваш уліковы запіс быў выдалены")
       };

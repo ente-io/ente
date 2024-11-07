@@ -31,16 +31,12 @@ export type AppContextT = AccountsContextT & {
      */
     setDialogMessage: SetDialogBoxAttributes;
     setNotificationAttributes: SetNotificationAttributes;
-    mapEnabled: boolean;
-    updateMapEnabled: (enabled: boolean) => Promise<void>;
     watchFolderView: boolean;
     setWatchFolderView: (isOpen: boolean) => void;
     watchFolderFiles: FileList;
     setWatchFolderFiles: (files: FileList) => void;
     themeColor: THEME_COLOR;
     setThemeColor: (themeColor: THEME_COLOR) => void;
-    isCFProxyDisabled: boolean;
-    setIsCFProxyDisabled: (disabled: boolean) => void;
 };
 
 /**

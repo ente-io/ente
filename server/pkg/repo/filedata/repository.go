@@ -24,11 +24,13 @@ const (
 )
 
 func (r *Repository) InsertOrUpdate(ctx context.Context, data filedata.Row) error {
+	// During insert, we set the sync_locked_till to 5 minutes in the future. This is to prevent
+	// immediate replication of the file data row, that can result in failure of update/retry requests
 	query := `
         INSERT INTO file_data 
-            (file_id, user_id, data_type, size, latest_bucket) 
+            (file_id, user_id, data_type, size, latest_bucket, sync_locked_till) 
         VALUES 
-            ($1, $2, $3, $4, $5)
+            ($1, $2, $3, $4, $5, now_utc_micro_seconds() + 5 * 60 * 1000*1000)
         ON CONFLICT (file_id, data_type)
         DO UPDATE SET 
             size = EXCLUDED.size,

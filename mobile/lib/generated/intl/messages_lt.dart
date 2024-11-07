@@ -90,6 +90,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "advancedSettings":
             MessageLookupByLibrary.simpleMessage("Išplėstiniai"),
         "albums": MessageLookupByLibrary.simpleMessage("Albumai"),
+        "allPersonGroupingWillReset": MessageLookupByLibrary.simpleMessage(
+            "All groupings for this person will be reset, and you will lose all suggestions made for this person"),
         "appLock": MessageLookupByLibrary.simpleMessage("Programos užraktas"),
         "appLockDescriptions": MessageLookupByLibrary.simpleMessage(
             "Pasirinkite tarp numatytojo įrenginio užrakinimo ekrano ir pasirinktinio užrakinimo ekrano su PIN kodu arba slaptažodžiu."),
@@ -101,6 +103,9 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Ar tikrai norite keisti planą?"),
         "areYouSureYouWantToLogout": MessageLookupByLibrary.simpleMessage(
             "Ar tikrai norite atsijungti?"),
+        "areYouSureYouWantToResetThisPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Are you sure you want to reset this person?"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "Kokia yra pagrindinė priežastis, dėl kurios ištrinate savo paskyrą?"),
         "authToChangeEmailVerificationSetting":
@@ -590,6 +595,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Iš naujo siųsti el. laišką"),
         "resetPasswordTitle": MessageLookupByLibrary.simpleMessage(
             "Nustatyti slaptažodį iš naujo"),
+        "resetPerson": MessageLookupByLibrary.simpleMessage("Reset person"),
         "reviewSuggestions":
             MessageLookupByLibrary.simpleMessage("Peržiūrėti pasiūlymus"),
         "right": MessageLookupByLibrary.simpleMessage("Dešinė"),
@@ -761,6 +767,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "yesDelete": MessageLookupByLibrary.simpleMessage("Taip, ištrinti"),
         "yesLogout": MessageLookupByLibrary.simpleMessage("Taip, atsijungti"),
         "yesRemove": MessageLookupByLibrary.simpleMessage("Taip, šalinti"),
+        "yesResetPerson":
+            MessageLookupByLibrary.simpleMessage("Yes, reset person"),
         "youAreOnTheLatestVersion":
             MessageLookupByLibrary.simpleMessage("Esate naujausioje versijoje"),
         "yourAccountHasBeenDeleted":

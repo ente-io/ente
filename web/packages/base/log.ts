@@ -65,8 +65,11 @@ const messageWithError = (message: string, e?: unknown) => {
     return `${message}: ${es}`;
 };
 
-const logError = (message: string, e?: unknown) => {
-    const m = `[error] ${messageWithError(message, e)}`;
+const logError = (message: unknown, e?: unknown) => {
+    const m =
+        typeof message == "string"
+            ? `[error] ${messageWithError(message, e)}`
+            : `[error] ${messageWithError("Error", message)}`;
     console.error(m);
     if (shouldLogToDisk) logToDisk(m);
 };
@@ -127,6 +130,9 @@ export default {
      * {@link e} is generally expected to be an `instanceof Error` but it can be
      * any arbitrary object that we obtain, say, when in a try-catch handler (in
      * JavaScript any arbitrary value can be thrown).
+     *
+     * If only one argument is specified, and it is not a string, then it is
+     * taken as the error to be printed, paired with a generic message.
      *
      * The log is written to disk and printed to the browser console.
      */

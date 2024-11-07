@@ -57,7 +57,7 @@ func (c *Controller) replicate(i int) {
 }
 
 func (c *Controller) tryReplicate() error {
-	newLockTime := enteTime.MicrosecondsAfterMinutes(60)
+	newLockTime := enteTime.MicrosecondsAfterMinutes(240)
 	ctx, cancelFun := context.WithTimeout(context.Background(), 20*time.Minute)
 	defer cancelFun()
 	row, err := c.Repo.GetPendingSyncDataAndExtendLock(ctx, newLockTime, false)
@@ -69,7 +69,12 @@ func (c *Controller) tryReplicate() error {
 	}
 	err = c.replicateRowData(ctx, *row)
 	if err != nil {
-		log.Errorf("Could not delete file data: %s", err)
+		log.WithFields(log.Fields{
+			"file_id": row.FileID,
+			"type":    row.Type,
+			"size":    row.Size,
+			"userID":  row.UserID,
+		}).Errorf("Could not replicate file data: %s", err)
 		return err
 	} else {
 		// If the replication was completed without any errors, we can reset the lock time
