@@ -5,6 +5,7 @@ import { EnteLogo } from "@/base/components/EnteLogo";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import { useModalVisibility } from "@/base/components/utils/modal";
+import { useIsSmallWidth } from "@/base/hooks";
 import log from "@/base/log";
 import { savedLogs } from "@/base/log-web";
 import { customAPIHost } from "@/base/origins";
@@ -19,6 +20,7 @@ import {
 } from "@/new/photos/services/collection";
 import type { CollectionSummaries } from "@/new/photos/services/collection/ui";
 import {
+    familyAdminEmail,
     hasExceededStorageQuota,
     isFamilyAdmin,
     isPartOfFamily,
@@ -28,6 +30,7 @@ import {
     isSubscriptionFree,
     isSubscriptionPastDue,
     isSubscriptionStripe,
+    leaveFamily,
     redirectToCustomerPortal,
     userDetailsAddOnBonuses,
 } from "@/new/photos/services/plan";
@@ -35,7 +38,12 @@ import { isInternalUser } from "@/new/photos/services/settings";
 import { syncUserDetails, type UserDetails } from "@/new/photos/services/user";
 import { AppContext, useAppContext } from "@/new/photos/types/context";
 import { initiateEmail, openURL } from "@/new/photos/utils/web";
-import { SpaceBetweenFlex } from "@ente/shared/components/Container";
+import {
+    FlexWrapper,
+    SpaceBetweenFlex,
+    VerticallyCentered,
+} from "@ente/shared/components/Container";
+import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleWithCloseButton";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ThemeSwitcher from "@ente/shared/components/ThemeSwitcher";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
@@ -48,6 +56,9 @@ import LockOutlined from "@mui/icons-material/LockOutlined";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import {
     Box,
+    Button,
+    Dialog,
+    DialogContent,
     Divider,
     IconButton,
     Skeleton,
@@ -73,7 +84,6 @@ import { Trans } from "react-i18next";
 import { getUncategorizedCollection } from "services/collectionService";
 import exportService from "services/export";
 import { testUpload } from "../../../tests/upload.test";
-import { MemberSubscriptionManage } from "../MemberSubscriptionManage";
 import { Preferences } from "./Preferences";
 import { SubscriptionCard } from "./SubscriptionCard";
 
@@ -308,6 +318,66 @@ const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({
         </Box>
     );
 };
+
+function MemberSubscriptionManage({ open, userDetails, onClose }) {
+    const { showMiniDialog } = useAppContext();
+    const fullScreen = useIsSmallWidth();
+
+    const confirmLeaveFamily = () =>
+        showMiniDialog({
+            title: t("LEAVE_FAMILY_PLAN}"),
+            message: t("LEAVE_FAMILY_CONFIRM"),
+            continue: {
+                text: t("LEAVE"),
+                color: "critical",
+                action: leaveFamily,
+            },
+        });
+
+    if (!userDetails) {
+        return <></>;
+    }
+
+    return (
+        <Dialog {...{ open, onClose, fullScreen }} maxWidth="xs" fullWidth>
+            <DialogTitleWithCloseButton onClose={onClose}>
+                <Typography variant="h3" fontWeight={"bold"}>
+                    {t("SUBSCRIPTION")}
+                </Typography>
+                <Typography color={"text.muted"}>{t("FAMILY_PLAN")}</Typography>
+            </DialogTitleWithCloseButton>
+            <DialogContent>
+                <VerticallyCentered>
+                    <Box mb={4}>
+                        <Typography color="text.muted">
+                            {t("subscription_info_family")}
+                        </Typography>
+                        <Typography>
+                            {familyAdminEmail(userDetails) ?? ""}
+                        </Typography>
+                    </Box>
+
+                    <img
+                        height={256}
+                        src="/images/family-plan/1x.png"
+                        srcSet="/images/family-plan/2x.png 2x,
+                                /images/family-plan/3x.png 3x"
+                    />
+                    <FlexWrapper px={2}>
+                        <Button
+                            size="large"
+                            variant="outlined"
+                            color="critical"
+                            onClick={confirmLeaveFamily}
+                        >
+                            {t("LEAVE_FAMILY_PLAN")}
+                        </Button>
+                    </FlexWrapper>
+                </VerticallyCentered>
+            </DialogContent>
+        </Dialog>
+    );
+}
 
 interface ShortcutSectionProps {
     closeSidebar: () => void;
