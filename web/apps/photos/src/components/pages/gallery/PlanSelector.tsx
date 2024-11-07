@@ -5,6 +5,7 @@ import {
 import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import log from "@/base/log";
 import { useUserDetailsSnapshot } from "@/new/photos/components/utils/use-snapshot";
+import { useWrapAsyncOperation } from "@/new/photos/components/utils/use-wrap-async";
 import type {
     Bonus,
     Plan,
@@ -56,7 +57,7 @@ import {
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { t } from "i18next";
-import { useCallback, useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 import { SetLoading } from "types/gallery";
 
@@ -709,10 +710,9 @@ function ManageSubscription({
         <Stack spacing={1}>
             {isSubscriptionStripe(subscription) && (
                 <StripeSubscriptionOptions
+                    onClose={closeModal}
                     subscription={subscription}
                     hasAddOnBonus={hasAddOnBonus}
-                    closeModal={closeModal}
-                    setLoading={setLoading}
                 />
             )}
             <ManageSubscriptionButton
@@ -725,13 +725,18 @@ function ManageSubscription({
     );
 }
 
-function StripeSubscriptionOptions({
+interface StripeSubscriptionOptionsProps {
+    onClose: () => void;
+    subscription: Subscription;
+    hasAddOnBonus: boolean;
+}
+
+const StripeSubscriptionOptions: React.FC<StripeSubscriptionOptionsProps> = ({
+    onClose,
     subscription,
     hasAddOnBonus,
-    setLoading,
-    closeModal,
-}: ManageSubscriptionProps) {
-    const { showMiniDialog, onGenericError } = useAppContext();
+}) => {
+    const { showMiniDialog } = useAppContext();
 
     const confirmReactivation = () =>
         showMiniDialog({
@@ -746,23 +751,13 @@ function StripeSubscriptionOptions({
         });
 
     const reactivate = async () => {
-        try {
-            setLoading(true);
-            await activateStripeSubscription();
-            showMiniDialog({
-                title: t("success"),
-                message: t("SUBSCRIPTION_ACTIVATE_SUCCESS"),
-                cancel: t("ok"),
-            });
-        } catch (e) {
-            log.error("Subscription activation failed", e);
-            showMiniDialog(
-                errorDialogAttributes(t("SUBSCRIPTION_ACTIVATE_FAILED")),
-            );
-        } finally {
-            closeModal();
-            setLoading(false);
-        }
+        await activateStripeSubscription();
+        showMiniDialog({
+            title: t("success"),
+            message: t("SUBSCRIPTION_ACTIVATE_SUCCESS"),
+            continue: { action: onClose },
+            cancel: false,
+        });
     };
 
     const confirmCancel = () =>
@@ -782,34 +777,19 @@ function StripeSubscriptionOptions({
         });
 
     const cancel = async () => {
-        try {
-            setLoading(true);
-            await cancelStripeSubscription();
-            showMiniDialog({
-                title: t("success"),
-                message: t("SUBSCRIPTION_CANCEL_SUCCESS"),
-                cancel: t("ok"),
-            });
-        } catch (e) {
-            log.error("Subscription cancel failed", e);
-            showMiniDialog(
-                errorDialogAttributes(t("SUBSCRIPTION_CANCEL_FAILED")),
-            );
-        } finally {
-            closeModal();
-            setLoading(false);
-        }
+        await cancelStripeSubscription();
+        showMiniDialog({
+            title: t("success"),
+            message: t("SUBSCRIPTION_CANCEL_SUCCESS"),
+            continue: {
+                color: "secondary",
+                action: onClose,
+            },
+            cancel: false,
+        });
     };
 
-    const handleManageClick = async () => {
-        try {
-            setLoading(true);
-            await redirectToCustomerPortal();
-        } catch (e) {
-            setLoading(false);
-            onGenericError(e);
-        }
-    };
+    const handleManageClick = useWrapAsyncOperation(redirectToCustomerPortal);
 
     return (
         <>
@@ -836,7 +816,7 @@ function StripeSubscriptionOptions({
             </ManageSubscriptionButton>
         </>
     );
-}
+};
 
 const ManageSubscriptionButton = ({ children, ...props }: ButtonProps) => (
     <Button size="large" endIcon={<ChevronRight />} {...props}>
