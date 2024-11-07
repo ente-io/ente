@@ -9,14 +9,15 @@ import "package:photos/ui/viewer/hierarchicial_search/chip_widgets/face_filter_c
 import "package:photos/ui/viewer/hierarchicial_search/chip_widgets/generic_filter_chip.dart";
 import "package:photos/ui/viewer/hierarchicial_search/chip_widgets/only_them_filter_chip.dart";
 
-class AppliedFilters extends StatefulWidget {
-  const AppliedFilters({super.key});
+class AppliedFiltersForAppbar extends StatefulWidget {
+  const AppliedFiltersForAppbar({super.key});
 
   @override
-  State<AppliedFilters> createState() => _AppliedFiltersState();
+  State<AppliedFiltersForAppbar> createState() =>
+      _AppliedFiltersForAppbarState();
 }
 
-class _AppliedFiltersState extends State<AppliedFilters> {
+class _AppliedFiltersForAppbarState extends State<AppliedFiltersForAppbar> {
   late SearchFilterDataProvider _searchFilterDataProvider;
   late List<HierarchicalSearchFilter> _appliedFilters;
 

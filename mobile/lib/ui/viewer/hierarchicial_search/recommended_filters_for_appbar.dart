@@ -13,14 +13,16 @@ import "package:photos/ui/viewer/hierarchicial_search/chip_widgets/only_them_fil
 import "package:photos/ui/viewer/hierarchicial_search/filter_options_bottom_sheet.dart";
 import "package:photos/utils/hierarchical_search_util.dart";
 
-class RecommendedFilters extends StatefulWidget {
-  const RecommendedFilters({super.key});
+class RecommendedFiltersForAppbar extends StatefulWidget {
+  const RecommendedFiltersForAppbar({super.key});
 
   @override
-  State<RecommendedFilters> createState() => _RecommendedFiltersState();
+  State<RecommendedFiltersForAppbar> createState() =>
+      _RecommendedFiltersForAppbarState();
 }
 
-class _RecommendedFiltersState extends State<RecommendedFilters> {
+class _RecommendedFiltersForAppbarState
+    extends State<RecommendedFiltersForAppbar> {
   late SearchFilterDataProvider _searchFilterDataProvider;
   late List<HierarchicalSearchFilter> _recommendations;
   int _filtersUpdateCount = 0;

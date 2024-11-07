@@ -43,8 +43,8 @@ import 'package:photos/ui/tools/free_space_page.dart';
 import "package:photos/ui/viewer/gallery/hooks/add_photos_sheet.dart";
 import 'package:photos/ui/viewer/gallery/hooks/pick_cover_photo.dart';
 import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
-import "package:photos/ui/viewer/hierarchicial_search/applied_filters.dart";
-import "package:photos/ui/viewer/hierarchicial_search/recommended_filters.dart";
+import "package:photos/ui/viewer/hierarchicial_search/applied_filters_for_appbar.dart";
+import "package:photos/ui/viewer/hierarchicial_search/recommended_filters_for_appbar.dart";
 import "package:photos/ui/viewer/location/edit_location_sheet.dart";
 import 'package:photos/utils/data_util.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -145,7 +145,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                     .searchFilterDataProvider!.isSearchingNotifier,
                 child: const PreferredSize(
                   preferredSize: Size.fromHeight(0),
-                  child: Flexible(child: RecommendedFilters()),
+                  child: Flexible(child: RecommendedFiltersForAppbar()),
                 ),
                 builder: (context, isSearching, child) {
                   return AppBar(
@@ -155,7 +155,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                         ? const SizedBox(
                             // +1 to account for the filter's outer stroke width
                             height: kFilterChipHeight + 1,
-                            child: AppliedFilters(),
+                            child: AppliedFiltersForAppbar(),
                           )
                         : Text(
                             _appBarTitle!,
