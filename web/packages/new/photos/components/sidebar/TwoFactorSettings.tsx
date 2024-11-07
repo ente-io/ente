@@ -5,7 +5,7 @@ import {
     SidebarDrawerTitlebar,
     type NestedSidebarDrawerVisibilityProps,
 } from "@/base/components/mui/SidebarDrawer";
-import { disable2FA, get2FAStatus } from "@/new/photos/services/user";
+import { disable2FA, get2FAStatus } from "@/new/photos/services/user-details";
 import { useAppContext } from "@/new/photos/types/context";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";

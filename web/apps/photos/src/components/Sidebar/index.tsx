@@ -20,7 +20,6 @@ import {
 } from "@/new/photos/services/collection";
 import type { CollectionSummaries } from "@/new/photos/services/collection/ui";
 import { isInternalUser } from "@/new/photos/services/settings";
-import { syncUserDetails } from "@/new/photos/services/user";
 import {
     familyAdminEmail,
     hasExceededStorageQuota,
@@ -34,6 +33,7 @@ import {
     isSubscriptionStripe,
     leaveFamily,
     redirectToCustomerPortal,
+    syncUserDetails,
     userDetailsAddOnBonuses,
     type UserDetails,
 } from "@/new/photos/services/user-details";

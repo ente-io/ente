@@ -6,7 +6,10 @@ import {
     peopleStateSubscribe,
 } from "../../services/ml";
 import { settingsSnapshot, settingsSubscribe } from "../../services/settings";
-import { userDetailsSnapshot, userDetailsSubscribe } from "../../services/user";
+import {
+    userDetailsSnapshot,
+    userDetailsSubscribe,
+} from "../../services/user-details";
 
 /**
  * A convenience hook that returns {@link settingsSnapshot}, and also

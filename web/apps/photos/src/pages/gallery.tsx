@@ -49,10 +49,8 @@ import type { SearchOption } from "@/new/photos/services/search/types";
 import { initSettings } from "@/new/photos/services/settings";
 import {
     initUserDetailsOrTriggerSync,
-    userDetailsSnapshot,
-} from "@/new/photos/services/user";
-import {
     redirectToCustomerPortal,
+    userDetailsSnapshot,
     verifyStripeSubscription,
 } from "@/new/photos/services/user-details";
 import { useAppContext } from "@/new/photos/types/context";

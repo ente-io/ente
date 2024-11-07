@@ -8,7 +8,7 @@ import DownloadManager from "@/new/photos/services/download";
 import { logoutML, terminateMLWorker } from "@/new/photos/services/ml";
 import { logoutSearch } from "@/new/photos/services/search";
 import { logoutSettings } from "@/new/photos/services/settings";
-import { logoutUserDetails } from "@/new/photos/services/user";
+import { logoutUserDetails } from "@/new/photos/services/user-details";
 import exportService from "./export";
 
 /**
