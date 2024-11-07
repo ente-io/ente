@@ -91,13 +91,10 @@ Future<List<EnteFile>> getFilteredFiles(
           exceptClusters: selectedClusterIDs,
         );
 
-        if (localSettings
-            .excludeFilesOfFaceIDsThatAreNotInAnyClusterOnOnlyThemFilter) {
-          final filesOfFaceIDsNotInAnyCluster =
-              await MLDataDB.instance.getAllFileIDsOfFaceIDsNotInAnyCluster();
+        final filesOfFaceIDsNotInAnyCluster =
+            await MLDataDB.instance.getAllFileIDsOfFaceIDsNotInAnyCluster();
 
-          fileIDsToAvoid.addAll(filesOfFaceIDsNotInAnyCluster);
-        }
+        fileIDsToAvoid.addAll(filesOfFaceIDsNotInAnyCluster);
 
         final result =
             intersectionOfSelectedFaceFiltersFileIDs.difference(fileIDsToAvoid);
