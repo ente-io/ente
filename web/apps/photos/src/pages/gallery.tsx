@@ -1246,10 +1246,10 @@ export async function handleSubscriptionCompletionRedirectIfNeeded(
         try {
             const subscription = await verifyStripeSubscription(sessionID);
             showMiniDialog({
-                title: t("SUBSCRIPTION_PURCHASE_SUCCESS_TITLE"),
+                title: t("thank_you"),
                 message: (
                     <Trans
-                        i18nKey="SUBSCRIPTION_PURCHASE_SUCCESS"
+                        i18nKey="subscription_purchase_success"
                         values={{ date: subscription?.expiryTime }}
                     />
                 ),
@@ -1259,7 +1259,7 @@ export async function handleSubscriptionCompletionRedirectIfNeeded(
         } catch (e) {
             log.error("Subscription verification failed", e);
             showMiniDialog(
-                errorDialogAttributes(t("SUBSCRIPTION_VERIFICATION_ERROR")),
+                errorDialogAttributes(t("subscription_verification_error")),
             );
         }
     } else if (status == "fail") {
@@ -1267,17 +1267,17 @@ export async function handleSubscriptionCompletionRedirectIfNeeded(
         switch (reason) {
             case "canceled":
                 showMiniDialog({
-                    message: t("SUBSCRIPTION_PURCHASE_CANCELLED"),
+                    message: t("subscription_purchase_cancelled"),
                     continue: { text: t("ok"), color: "primary" },
                     cancel: false,
                 });
                 break;
             case "requires_payment_method":
                 showMiniDialog({
-                    title: t("UPDATE_PAYMENT_METHOD"),
-                    message: t("UPDATE_PAYMENT_METHOD_MESSAGE"),
+                    title: t("update_payment_method"),
+                    message: t("update_payment_method_message"),
                     continue: {
-                        text: t("UPDATE_PAYMENT_METHOD"),
+                        text: t("update_payment_method"),
                         action: () => {
                             showLoadingBar();
                             return redirectToCustomerPortal();
@@ -1287,10 +1287,10 @@ export async function handleSubscriptionCompletionRedirectIfNeeded(
                 break;
             case "authentication_failed":
                 showMiniDialog({
-                    title: t("UPDATE_PAYMENT_METHOD"),
-                    message: t("STRIPE_AUTHENTICATION_FAILED"),
+                    title: t("update_payment_method"),
+                    message: t("payment_method_authentication_failed"),
                     continue: {
-                        text: t("UPDATE_PAYMENT_METHOD"),
+                        text: t("update_payment_method"),
                         action: () => {
                             showLoadingBar();
                             return redirectToCustomerPortal();
@@ -1300,7 +1300,7 @@ export async function handleSubscriptionCompletionRedirectIfNeeded(
                 break;
             default:
                 showMiniDialog(
-                    errorDialogAttributes(t("SUBSCRIPTION_PURCHASE_FAILED")),
+                    errorDialogAttributes(t("subscription_purchase_failed")),
                 );
         }
     }

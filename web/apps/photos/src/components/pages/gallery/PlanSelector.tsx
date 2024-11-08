@@ -167,7 +167,7 @@ const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
                     setLoading(false);
                     showMiniDialog(
                         errorDialogAttributes(
-                            t("SUBSCRIPTION_PURCHASE_FAILED"),
+                            t("subscription_purchase_failed"),
                         ),
                     );
                 }
@@ -176,9 +176,9 @@ const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
             case "updateSubscriptionToPlan":
                 showMiniDialog({
                     title: t("update_subscription_title"),
-                    message: t("UPDATE_SUBSCRIPTION_MESSAGE"),
+                    message: t("update_subscription_message"),
                     continue: {
-                        text: t("UPDATE_SUBSCRIPTION"),
+                        text: t("update_subscription"),
                         action: () =>
                             redirectToPaymentsApp(plan.stripeID, "update"),
                     },
@@ -187,8 +187,8 @@ const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
 
             case "cancelOnMobile":
                 showMiniDialog({
-                    title: t("CANCEL_SUBSCRIPTION_ON_MOBILE"),
-                    message: t("CANCEL_SUBSCRIPTION_ON_MOBILE_MESSAGE"),
+                    title: t("cancel_subscription_on_mobile"),
+                    message: t("cancel_subscription_on_mobile_message"),
                     continue: {},
                     cancel: false,
                 });
@@ -196,10 +196,10 @@ const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
 
             case "contactSupport":
                 showMiniDialog({
-                    title: t("MANAGE_PLAN"),
+                    title: t("manage_plan"),
                     message: (
                         <Trans
-                            i18nKey={"MAIL_TO_MANAGE_SUBSCRIPTION"}
+                            i18nKey={"mail_to_manage_subscription"}
                             components={{
                                 a: <Link href="mailto:support@ente.io" />,
                             }}
@@ -300,7 +300,7 @@ function FreeSubscriptionPlanSelectorCard({
     return (
         <>
             <Typography variant="h3" fontWeight={"bold"}>
-                {t("CHOOSE_PLAN")}
+                {t("choose_plan")}
             </Typography>
 
             <Box>
@@ -311,7 +311,7 @@ function FreeSubscriptionPlanSelectorCard({
                             togglePeriod={togglePeriod}
                         />
                         <Typography variant="small" mt={0.5} color="text.muted">
-                            {t("TWO_MONTHS_FREE")}
+                            {t("two_months_free")}
                         </Typography>
                     </Box>
                     {children}
@@ -348,7 +348,7 @@ function PaidSubscriptionPlanSelectorCard({
                 <SpaceBetweenFlex>
                     <Box>
                         <Typography variant="h3" fontWeight={"bold"}>
-                            {t("SUBSCRIPTION")}
+                            {t("subscription")}
                         </Typography>
                         <Typography variant="small" color={"text.muted"}>
                             {bytesInGB(subscription.storage, 2)}{" "}
@@ -364,7 +364,7 @@ function PaidSubscriptionPlanSelectorCard({
             <Box px={1.5}>
                 <Typography color={"text.muted"} fontWeight={"bold"}>
                     <Trans
-                        i18nKey="CURRENT_USAGE"
+                        i18nKey="current_usage"
                         values={{
                             usage: `${bytesInGB(usage, 2)} ${t("storage_unit.gb")}`,
                         }}
@@ -385,7 +385,7 @@ function PaidSubscriptionPlanSelectorCard({
                             togglePeriod={togglePeriod}
                         />
                         <Typography variant="small" mt={0.5} color="text.muted">
-                            {t("TWO_MONTHS_FREE")}
+                            {t("two_months_free")}
                         </Typography>
                     </Box>
                     {children}
@@ -430,10 +430,10 @@ function PeriodToggler({ planPeriod, togglePeriod }) {
             color="primary"
         >
             <CustomToggleButton value={"month"}>
-                {t("MONTHLY")}
+                {t("monthly")}
             </CustomToggleButton>
             <CustomToggleButton value={"year"}>
-                {t("YEARLY")}
+                {t("yearly")}
             </CustomToggleButton>
         </ToggleButtonGroup>
     );
@@ -560,8 +560,8 @@ function PlanRow({
                         <Typography color="text.muted" variant="small">
                             {`/ ${
                                 plan.period === "month"
-                                    ? t("MONTH_SHORT")
-                                    : t("YEAR")
+                                    ? t("month_short")
+                                    : t("year")
                             }`}
                         </Typography>
                     </Box>
@@ -700,7 +700,7 @@ function ManageSubscription({
                 color="secondary"
                 onClick={openFamilyPortal}
             >
-                {t("MANAGE_FAMILY_PORTAL")}
+                {t("manage_family")}
             </ManageSubscriptionButton>
         </Stack>
     );
@@ -721,12 +721,12 @@ const StripeSubscriptionOptions: React.FC<StripeSubscriptionOptionsProps> = ({
 
     const confirmReactivation = () =>
         showMiniDialog({
-            title: t("REACTIVATE_SUBSCRIPTION"),
-            message: t("REACTIVATE_SUBSCRIPTION_MESSAGE", {
+            title: t("reactivate_subscription"),
+            message: t("reactivate_subscription_message", {
                 date: subscription.expiryTime,
             }),
             continue: {
-                text: t("REACTIVATE_SUBSCRIPTION"),
+                text: t("reactivate_subscription"),
                 action: async () => {
                     await activateStripeSubscription();
                     onClose();
@@ -738,7 +738,7 @@ const StripeSubscriptionOptions: React.FC<StripeSubscriptionOptionsProps> = ({
                     setTimeout(() => {
                         showMiniDialog({
                             title: t("success"),
-                            message: t("SUBSCRIPTION_ACTIVATE_SUCCESS"),
+                            message: t("subscription_activate_success"),
                             continue: { action: onClose },
                             cancel: false,
                         });
@@ -749,14 +749,14 @@ const StripeSubscriptionOptions: React.FC<StripeSubscriptionOptionsProps> = ({
 
     const confirmCancel = () =>
         showMiniDialog({
-            title: t("CANCEL_SUBSCRIPTION"),
+            title: t("cancel_subscription"),
             message: hasAddOnBonus ? (
-                <Trans i18nKey={"CANCEL_SUBSCRIPTION_WITH_ADDON_MESSAGE"} />
+                <Trans i18nKey={"cancel_subscription_with_addon_message"} />
             ) : (
-                <Trans i18nKey={"CANCEL_SUBSCRIPTION_MESSAGE"} />
+                <Trans i18nKey={"cancel_subscription_message"} />
             ),
             continue: {
-                text: t("CANCEL_SUBSCRIPTION"),
+                text: t("cancel_subscription"),
                 color: "critical",
                 action: async () => {
                     await cancelStripeSubscription();
@@ -764,13 +764,13 @@ const StripeSubscriptionOptions: React.FC<StripeSubscriptionOptionsProps> = ({
                     // See: [Note: Chained MiniDialogs]
                     setTimeout(() => {
                         showMiniDialog({
-                            message: t("SUBSCRIPTION_CANCEL_SUCCESS"),
+                            message: t("subscription_cancel_success"),
                             cancel: t("ok"),
                         });
                     }, 0);
                 },
             },
-            cancel: t("NEVERMIND"),
+            cancel: t("nevermind"),
         });
 
     const handleManageClick = useWrapAsyncOperation(redirectToCustomerPortal);
@@ -782,21 +782,21 @@ const StripeSubscriptionOptions: React.FC<StripeSubscriptionOptionsProps> = ({
                     color="secondary"
                     onClick={confirmReactivation}
                 >
-                    {t("REACTIVATE_SUBSCRIPTION")}
+                    {t("reactivate_subscription")}
                 </ManageSubscriptionButton>
             ) : (
                 <ManageSubscriptionButton
                     color="secondary"
                     onClick={confirmCancel}
                 >
-                    {t("CANCEL_SUBSCRIPTION")}
+                    {t("cancel_subscription")}
                 </ManageSubscriptionButton>
             )}
             <ManageSubscriptionButton
                 color="secondary"
                 onClick={handleManageClick}
             >
-                {t("MANAGEMENT_PORTAL")}
+                {t("manage_payment_method")}
             </ManageSubscriptionButton>
         </>
     );
