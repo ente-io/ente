@@ -3,10 +3,9 @@ import type {
     PublicURL,
     UpdatePublicURL,
 } from "@/media/collection";
-import { AppContext } from "@/new/photos/types/context";
+import { useAppContext } from "@/new/photos/types/context";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import { t } from "i18next";
-import { useContext } from "react";
 import { Trans } from "react-i18next";
 interface Iprops {
     publicShareProp: PublicURL;
@@ -19,7 +18,7 @@ export function ManageDownloadAccess({
     updatePublicShareURLHelper,
     collection,
 }: Iprops) {
-    const appContext = useContext(AppContext);
+    const { showMiniDialog } = useAppContext();
 
     const handleFileDownloadSetting = () => {
         if (publicShareProp.enableDownload) {
@@ -33,18 +32,17 @@ export function ManageDownloadAccess({
     };
 
     const disableFileDownload = () => {
-        appContext.setDialogMessage({
+        showMiniDialog({
             title: t("DISABLE_FILE_DOWNLOAD"),
-            content: <Trans i18nKey={"DISABLE_FILE_DOWNLOAD_MESSAGE"} />,
-            close: { text: t("cancel") },
-            proceed: {
+            message: <Trans i18nKey={"DISABLE_FILE_DOWNLOAD_MESSAGE"} />,
+            continue: {
                 text: t("disable"),
+                color: "critical",
                 action: () =>
                     updatePublicShareURLHelper({
                         collectionID: collection.id,
                         enableDownload: false,
                     }),
-                variant: "critical",
             },
         });
     };
