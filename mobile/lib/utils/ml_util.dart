@@ -437,9 +437,6 @@ Future<MLResult> analyzeImageStatic(Map args) async {
         Dimensions(height: imageHeight.toInt(), width: imageWidth.toInt());
     final decodeTime = DateTime.now();
     final decodeMs = decodeTime.difference(startTime).inMilliseconds;
-    _logger.info(
-      'ML total image processing (in rust) took ${DateTime.now().difference(decodeTime).inMilliseconds} ms',
-    );
 
     final result = MLResult.fromEnteFileID(enteFileID);
     result.decodedImageSize = decodedImageSize;
