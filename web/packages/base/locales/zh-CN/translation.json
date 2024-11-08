@@ -512,7 +512,7 @@
     "advanced": "高级设置",
     "EXPORT_DIRECTORY_DOES_NOT_EXIST": "无效的导出目录",
     "EXPORT_DIRECTORY_DOES_NOT_EXIST_MESSAGE": "<p>您选择的导出目录不存在。</p><p>请选择一个有效的目录。</p>",
-    "SUBSCRIPTION_VERIFICATION_ERROR": "订阅验证失败",
+    "subscription_verification_error": "订阅验证失败",
     "storage_unit": {
         "b": "B",
         "kb": "KB",

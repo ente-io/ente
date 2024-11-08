@@ -512,7 +512,7 @@
     "advanced": "Додатково",
     "EXPORT_DIRECTORY_DOES_NOT_EXIST": "Неправильна тека для експортування",
     "EXPORT_DIRECTORY_DOES_NOT_EXIST_MESSAGE": "<p>Вибраний каталог експорту, якого не існує.</p><p>Оберіть вірний каталог.</p>",
-    "SUBSCRIPTION_VERIFICATION_ERROR": "Не вдалося перевірити підписку",
+    "subscription_verification_error": "Не вдалося перевірити підписку",
     "storage_unit": {
         "b": "Б",
         "kb": "КБ",

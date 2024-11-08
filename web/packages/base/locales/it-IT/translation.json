@@ -512,7 +512,7 @@
     "advanced": "Avanzate",
     "EXPORT_DIRECTORY_DOES_NOT_EXIST": "Directory di esportazione non valida",
     "EXPORT_DIRECTORY_DOES_NOT_EXIST_MESSAGE": "<p>La directory di esportazione selezionata non esiste.</p><p>Si prega di selezionare una directory valida.</p>",
-    "SUBSCRIPTION_VERIFICATION_ERROR": "Verifica dell'abbonamento non riuscita",
+    "subscription_verification_error": "Verifica dell'abbonamento non riuscita",
     "storage_unit": {
         "b": "B",
         "kb": "KB",

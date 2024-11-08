@@ -512,7 +512,7 @@
     "advanced": "Geavanceerd",
     "EXPORT_DIRECTORY_DOES_NOT_EXIST": "Ongeldige export map",
     "EXPORT_DIRECTORY_DOES_NOT_EXIST_MESSAGE": "<p>De export map die u heeft geselecteerd bestaat niet.</p><p>Selecteer een geldige map.</p>",
-    "SUBSCRIPTION_VERIFICATION_ERROR": "Abonnementsverificatie mislukt",
+    "subscription_verification_error": "Abonnementsverificatie mislukt",
     "storage_unit": {
         "b": "B",
         "kb": "KB",

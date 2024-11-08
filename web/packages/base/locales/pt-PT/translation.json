@@ -512,7 +512,7 @@
     "advanced": "Avançado",
     "EXPORT_DIRECTORY_DOES_NOT_EXIST": "Diretório de exportação inválido",
     "EXPORT_DIRECTORY_DOES_NOT_EXIST_MESSAGE": "<p>O diretório de exportação que selecionou não existe.</p><p>Por favor, selecione um diretório válido.</p>",
-    "SUBSCRIPTION_VERIFICATION_ERROR": "Falha na verificação da subscrição",
+    "subscription_verification_error": "Falha na verificação da subscrição",
     "storage_unit": {
         "b": "B",
         "kb": "KB",

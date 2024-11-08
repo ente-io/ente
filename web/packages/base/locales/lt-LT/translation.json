@@ -512,7 +512,7 @@
     "advanced": "Išplėstiniai",
     "EXPORT_DIRECTORY_DOES_NOT_EXIST": "Netinkamas eksporto katalogas",
     "EXPORT_DIRECTORY_DOES_NOT_EXIST_MESSAGE": "<p>Pasirinktas eksporto katalogas neegzistuoja.</p><p>Pasirinkite tinkamą katalogą.</p>",
-    "SUBSCRIPTION_VERIFICATION_ERROR": "Nepavyko prenumeratos patvirtinimas",
+    "subscription_verification_error": "Nepavyko prenumeratos patvirtinimas",
     "storage_unit": {
         "b": "B",
         "kb": "KB",

@@ -512,7 +512,7 @@
     "advanced": "Erweitert",
     "EXPORT_DIRECTORY_DOES_NOT_EXIST": "Ungültiges Exportverzeichnis",
     "EXPORT_DIRECTORY_DOES_NOT_EXIST_MESSAGE": "<p>Das von dir gewählte Exportverzeichnis existiert nicht.</p><p>Bitte wähle einen gültigen Ordner.</p>",
-    "SUBSCRIPTION_VERIFICATION_ERROR": "Verifizierung des Abonnements fehlgeschlagen",
+    "subscription_verification_error": "Verifizierung des Abonnements fehlgeschlagen",
     "storage_unit": {
         "b": "B",
         "kb": "KB",

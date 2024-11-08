@@ -512,7 +512,7 @@
     "advanced": "Avancé",
     "EXPORT_DIRECTORY_DOES_NOT_EXIST": "Dossier d'export invalide",
     "EXPORT_DIRECTORY_DOES_NOT_EXIST_MESSAGE": "<p>Le dossier d'export que vous avez sélectionné n'existe pas </p><p>Veuillez sélectionner un dossier valide</p>",
-    "SUBSCRIPTION_VERIFICATION_ERROR": "Échec de la vérification de l'abonnement",
+    "subscription_verification_error": "Échec de la vérification de l'abonnement",
     "storage_unit": {
         "b": "o",
         "kb": "Ko",

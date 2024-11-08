@@ -512,7 +512,7 @@
     "advanced": "",
     "EXPORT_DIRECTORY_DOES_NOT_EXIST": "",
     "EXPORT_DIRECTORY_DOES_NOT_EXIST_MESSAGE": "",
-    "SUBSCRIPTION_VERIFICATION_ERROR": "",
+    "subscription_verification_error": "",
     "storage_unit": {
         "b": "B",
         "kb": "",

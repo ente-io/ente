@@ -512,7 +512,7 @@
     "advanced": "",
     "EXPORT_DIRECTORY_DOES_NOT_EXIST": "Μη έγκυρος κατάλογος εξαγωγής",
     "EXPORT_DIRECTORY_DOES_NOT_EXIST_MESSAGE": "",
-    "SUBSCRIPTION_VERIFICATION_ERROR": "Η επαλήθευση της συνδρομής απέτυχε",
+    "subscription_verification_error": "Η επαλήθευση της συνδρομής απέτυχε",
     "storage_unit": {
         "b": "Β",
         "kb": "ΚΒ",

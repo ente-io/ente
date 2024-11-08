@@ -1259,7 +1259,7 @@ export async function handleSubscriptionCompletionRedirectIfNeeded(
         } catch (e) {
             log.error("Subscription verification failed", e);
             showMiniDialog(
-                errorDialogAttributes(t("SUBSCRIPTION_VERIFICATION_ERROR")),
+                errorDialogAttributes(t("subscription_verification_error")),
             );
         }
     } else if (status == "fail") {
