@@ -14,16 +14,18 @@ type Entity struct {
 }
 
 type FDDiffRequest struct {
-	LastUpdatedAt *int64 `form:"lastUpdated" binding:"required"`
+	LastUpdatedAt *int64 `form:"lastUpdatedAt"`
 }
 
 type FDStatus struct {
-	FileID    int64           `json:"fileID" binding:"required"`
-	UserID    int64           `json:"userID" binding:"required"`
-	Type      ente.ObjectType `json:"type" binding:"required"`
-	IsDeleted bool            `json:"isDeleted" binding:"required"`
-	Size      int64           `json:"size"  binding:"required"`
-	UpdatedAt int64           `json:"updatedAt"  binding:"required"`
+	FileID      int64           `json:"fileID" binding:"required"`
+	UserID      int64           `json:"userID" binding:"required"`
+	Type        ente.ObjectType `json:"type" binding:"required"`
+	IsDeleted   bool            `json:"isDeleted" binding:"required"`
+	ObjectID    *string         `json:"objectID"`
+	ObjectNonce *string         `json:"objectNonce"`
+	Size        int64           `json:"size"  binding:"required"`
+	UpdatedAt   int64           `json:"updatedAt"  binding:"required"`
 }
 
 // GetFilesData should only be used for getting the preview video playlist and derived metadata.

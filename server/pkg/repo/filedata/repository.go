@@ -169,7 +169,7 @@ func (r *Repository) RemoveBucket(row filedata.Row, bucketID string, columnName 
 }
 
 func (r *Repository) GetFDForUser(ctx context.Context, userID int64, lastUpdatedAt int64, limit int64) ([]filedata.FDStatus, error) {
-	rows, err := r.DB.QueryContext(ctx, `SELECT file_id, user_id, data_type, size, is_deleted, updated_at
+	rows, err := r.DB.QueryContext(ctx, `SELECT file_id, user_id, data_type, size, is_deleted, obj_id, obj_nonce, updated_at
 										FROM file_data
 										WHERE user_id = $1 AND updated_at > $2 ORDER BY updated_at  
 										LIMIT $3`, userID, lastUpdatedAt, limit)
@@ -179,7 +179,7 @@ func (r *Repository) GetFDForUser(ctx context.Context, userID int64, lastUpdated
 	var fdStatuses []filedata.FDStatus
 	for rows.Next() {
 		var status filedata.FDStatus
-		scanErr := rows.Scan(&status.FileID, &status.UserID, &status.Type, &status.Size, &status.IsDeleted, &status.UpdatedAt)
+		scanErr := rows.Scan(&status.FileID, &status.UserID, &status.Type, &status.Size, &status.IsDeleted, &status.ObjectID, &status.ObjectNonce, &status.UpdatedAt)
 		if scanErr != nil {
 			return nil, stacktrace.Propagate(scanErr, "")
 		}
