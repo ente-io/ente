@@ -516,12 +516,12 @@
         "gb": "",
         "tb": ""
     },
-    "AFTER_TIME": {
-        "HOUR": "",
-        "DAY": "",
-        "WEEK": "",
-        "MONTH": "",
-        "YEAR": ""
+    "after_time": {
+        "hour": "",
+        "day": "",
+        "week": "",
+        "month": "",
+        "year": ""
     },
     "COPY_LINK": "",
     "DONE": "",

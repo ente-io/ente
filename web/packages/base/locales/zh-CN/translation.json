@@ -516,12 +516,12 @@
         "gb": "GB",
         "tb": "TB"
     },
-    "AFTER_TIME": {
-        "HOUR": "1小时后",
-        "DAY": "一天后",
-        "WEEK": "一周后",
-        "MONTH": "一个月后",
-        "YEAR": "一年后"
+    "after_time": {
+        "hour": "1小时后",
+        "day": "一天后",
+        "week": "一周后",
+        "month": "一个月后",
+        "year": "一年后"
     },
     "COPY_LINK": "复制链接",
     "DONE": "已完成",

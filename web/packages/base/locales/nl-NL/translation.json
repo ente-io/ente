@@ -516,12 +516,12 @@
         "gb": "GB",
         "tb": "TB"
     },
-    "AFTER_TIME": {
-        "HOUR": "na één uur",
-        "DAY": "na één dag",
-        "WEEK": "na één week",
-        "MONTH": "na één maand",
-        "YEAR": "na één jaar"
+    "after_time": {
+        "hour": "na één uur",
+        "day": "na één dag",
+        "week": "na één week",
+        "month": "na één maand",
+        "year": "na één jaar"
     },
     "COPY_LINK": "Link kopiëren",
     "DONE": "Voltooid",

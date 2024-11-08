@@ -516,12 +516,12 @@
         "gb": "GB",
         "tb": "TB"
     },
-    "AFTER_TIME": {
-        "HOUR": "nach einer Stunde",
-        "DAY": "nach einem Tag",
-        "WEEK": "nach 1 Woche",
-        "MONTH": "nach einem Monat",
-        "YEAR": "nach einem Jahr"
+    "after_time": {
+        "hour": "nach einer Stunde",
+        "day": "nach einem Tag",
+        "week": "nach 1 Woche",
+        "month": "nach einem Monat",
+        "year": "nach einem Jahr"
     },
     "COPY_LINK": "Link kopieren",
     "DONE": "Fertig",

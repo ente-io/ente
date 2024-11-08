@@ -516,12 +516,12 @@
         "gb": "GB",
         "tb": "TB"
     },
-    "AFTER_TIME": {
-        "HOUR": "po valandos",
-        "DAY": "po dienos",
-        "WEEK": "po savaitės",
-        "MONTH": "po mėnesio",
-        "YEAR": "po metų"
+    "after_time": {
+        "hour": "po valandos",
+        "day": "po dienos",
+        "week": "po savaitės",
+        "month": "po mėnesio",
+        "year": "po metų"
     },
     "COPY_LINK": "Kopijuoti nuorodą",
     "DONE": "Atlikta",

@@ -516,12 +516,12 @@
         "gb": "Go",
         "tb": "To"
     },
-    "AFTER_TIME": {
-        "HOUR": "dans une heure",
-        "DAY": "dans un jour",
-        "WEEK": "dans une semaine",
-        "MONTH": "dans un mois",
-        "YEAR": "dans un an"
+    "after_time": {
+        "hour": "dans une heure",
+        "day": "dans un jour",
+        "week": "dans une semaine",
+        "month": "dans un mois",
+        "year": "dans un an"
     },
     "COPY_LINK": "Copier le lien",
     "DONE": "Terminé",

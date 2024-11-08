@@ -513,12 +513,12 @@
         "gb": "GB",
         "tb": "TB"
     },
-    "AFTER_TIME": {
-        "HOUR": "after an hour",
-        "DAY": "after a day",
-        "WEEK": "after a week",
-        "MONTH": "after a month",
-        "YEAR": "after a year"
+    "after_time": {
+        "hour": "after an hour",
+        "day": "after a day",
+        "week": "after a week",
+        "month": "after a month",
+        "year": "after a year"
     },
     "COPY_LINK": "Copy link",
     "DONE": "Done",
