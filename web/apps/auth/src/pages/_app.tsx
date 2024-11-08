@@ -6,10 +6,7 @@ import { AttributedMiniDialog } from "@/base/components/MiniDialog";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { Overlay } from "@/base/components/mui/Container";
 import { AppNavbar } from "@/base/components/Navbar";
-import {
-    genericErrorDialogAttributes,
-    useAttributedMiniDialog,
-} from "@/base/components/utils/dialog";
+import { useAttributedMiniDialog } from "@/base/components/utils/dialog";
 import { setupI18n } from "@/base/i18n";
 import {
     logStartupBanner,
@@ -48,7 +45,6 @@ import "../../public/css/global.css";
 type AppContextT = AccountsContextT & {
     themeColor: THEME_COLOR;
     setThemeColor: (themeColor: THEME_COLOR) => void;
-    somethingWentWrong: () => void;
 };
 
 /** The React {@link Context} available to all pages. */
@@ -108,9 +104,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
 
     const showNavBar = (show: boolean) => setShowNavBar(show);
 
-    const somethingWentWrong = () =>
-        showMiniDialog(genericErrorDialogAttributes());
-
     const logout = useCallback(() => {
         void accountLogout().then(() => window.location.replace("/"));
     }, []);
@@ -121,7 +114,6 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
         showMiniDialog,
         themeColor,
         setThemeColor,
-        somethingWentWrong,
     };
 
     const title = isI18nReady ? t("title_auth") : staticAppTitle;

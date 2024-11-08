@@ -23,10 +23,6 @@ export type AppContextT = AccountsContextT & {
      */
     onGenericError: (error: unknown) => void;
     /**
-     * Deprecated, use onGenericError instead.
-     */
-    somethingWentWrong: () => void;
-    /**
      * Deprecated, use showMiniDialog instead.
      */
     setDialogMessage: SetDialogBoxAttributes;

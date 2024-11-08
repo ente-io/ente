@@ -191,17 +191,6 @@ export default function App({ Component, pageProps }: AppProps) {
 
     const showNavBar = (show: boolean) => setShowNavBar(show);
 
-    // Use `onGenericError` instead.
-    const somethingWentWrong = useCallback(
-        () =>
-            setDialogMessage({
-                title: t("error"),
-                close: { variant: "critical" },
-                content: t("generic_error_retry"),
-            }),
-        [],
-    );
-
     const onGenericError = useCallback((e: unknown) => {
         log.error(e);
         showMiniDialog(genericErrorDialogAttributes());
@@ -222,7 +211,6 @@ export default function App({ Component, pageProps }: AppProps) {
         themeColor,
         setThemeColor,
         showMiniDialog,
-        somethingWentWrong,
         onGenericError,
         logout,
     };
