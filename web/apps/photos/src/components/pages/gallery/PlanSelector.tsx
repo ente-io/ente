@@ -430,10 +430,10 @@ function PeriodToggler({ planPeriod, togglePeriod }) {
             color="primary"
         >
             <CustomToggleButton value={"month"}>
-                {t("MONTHLY")}
+                {t("monthly")}
             </CustomToggleButton>
             <CustomToggleButton value={"year"}>
-                {t("YEARLY")}
+                {t("yearly")}
             </CustomToggleButton>
         </ToggleButtonGroup>
     );
@@ -560,8 +560,8 @@ function PlanRow({
                         <Typography color="text.muted" variant="small">
                             {`/ ${
                                 plan.period === "month"
-                                    ? t("MONTH_SHORT")
-                                    : t("YEAR")
+                                    ? t("month_short")
+                                    : t("year")
                             }`}
                         </Typography>
                     </Box>
