@@ -1300,5 +1300,10 @@
   "removePublicLinks": "Удалить публичные ссылки",
   "thisWillRemovePublicLinksOfAllSelectedQuickLinks": "Это удалит публичные ссылки на все выбранные быстрые ссылки.",
   "guestView": "Гостевой вид",
-  "guestViewEnablePreSteps": "Чтобы включить гостевой вид, настройте пароль устройства или блокировку экрана в настройках системы."
+  "guestViewEnablePreSteps": "Чтобы включить гостевой вид, настройте пароль устройства или блокировку экрана в настройках системы.",
+  "resetPerson": "Reset person",
+  "areYouSureYouWantToResetThisPerson": "Are you sure you want to reset this person?",
+  "allPersonGroupingWillReset": "All groupings for this person will be reset, and you will lose all suggestions made for this person",
+  "yesResetPerson": "Yes, reset person",
+  "onlyThem": "Only them"
 }

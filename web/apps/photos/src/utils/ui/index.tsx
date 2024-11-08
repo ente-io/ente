@@ -13,7 +13,6 @@ export const getTrashFilesMessage = (
         action: deleteFileHelper,
         text: t("MOVE_TO_TRASH"),
         variant: "critical",
-        autoFocus: true,
     },
     close: { text: t("cancel") },
 });
@@ -60,18 +59,4 @@ export const getSubscriptionPurchaseSuccessMessage = (
             values={{ date: subscription?.expiryTime }}
         />
     ),
-});
-
-export const getSessionExpiredMessage = (
-    action: () => void,
-): DialogBoxAttributes => ({
-    title: t("session_expired"),
-    content: t("session_expired_message"),
-
-    nonClosable: true,
-    proceed: {
-        text: t("login"),
-        action,
-        variant: "accent",
-    },
 });

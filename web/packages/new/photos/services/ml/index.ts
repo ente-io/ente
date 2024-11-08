@@ -41,9 +41,9 @@ import type { CLIPMatches } from "./worker-types";
 /**
  * Internal state of the ML subsystem.
  *
- * This are essentially cached values used by the functions of this module.
+ * These are essentially cached values used by the functions of this module.
  *
- * This should be cleared on logout.
+ * They will be cleared on logout.
  */
 class MLState {
     /**
@@ -704,10 +704,12 @@ const regenerateFaceCropsIfNeeded = async (file: EnteFile) => {
  * @param name Name of the new cgroup user entity.
  *
  * @param cluster The underlying cluster to use to populate the cgroup.
+ *
+ * @returns The entity ID of the newly created cgroup.
  */
 export const addCGroup = async (name: string, cluster: FaceCluster) => {
     const masterKey = await masterKeyFromSession();
-    await addUserEntity(
+    const id = await addUserEntity(
         "cgroup",
         {
             name,
@@ -716,7 +718,8 @@ export const addCGroup = async (name: string, cluster: FaceCluster) => {
         },
         masterKey,
     );
-    return mlSync();
+    await mlSync();
+    return id;
 };
 
 /**

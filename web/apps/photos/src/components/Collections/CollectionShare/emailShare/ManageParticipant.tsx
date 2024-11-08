@@ -1,5 +1,5 @@
-import { EnteDrawer } from "@/base/components/EnteDrawer";
 import { MenuItemDivider, MenuItemGroup } from "@/base/components/Menu";
+import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
 import log from "@/base/log";
 import type { Collection, CollectionUser } from "@/media/collection";
@@ -129,82 +129,81 @@ export default function ManageParticipant({
     }
 
     return (
-        <>
-            <EnteDrawer anchor="right" open={open} onClose={handleDrawerClose}>
-                <Stack spacing={"4px"} py={"12px"}>
-                    <Titlebar
-                        onClose={onClose}
-                        title={t("MANAGE")}
-                        onRootClose={onRootClose}
-                        caption={selectedParticipant.email}
-                    />
+        <SidebarDrawer anchor="right" open={open} onClose={handleDrawerClose}>
+            <Stack spacing={"4px"} py={"12px"}>
+                <Titlebar
+                    onClose={onClose}
+                    title={t("MANAGE")}
+                    onRootClose={onRootClose}
+                    caption={selectedParticipant.email}
+                />
 
-                    <Stack py={"20px"} px={"8px"} spacing={"32px"}>
-                        <Stack>
+                <Stack py={"20px"} px={"8px"} spacing={"32px"}>
+                    <Stack>
+                        <Typography
+                            color="text.muted"
+                            variant="small"
+                            padding={1}
+                        >
+                            {t("ADDED_AS")}
+                        </Typography>
+
+                        <MenuItemGroup>
+                            <EnteMenuItem
+                                fontWeight="normal"
+                                onClick={handleRoleChange("COLLABORATOR")}
+                                label={"Collaborator"}
+                                startIcon={<ModeEditIcon />}
+                                endIcon={
+                                    selectedParticipant.role ===
+                                        "COLLABORATOR" && <DoneIcon />
+                                }
+                            />
+                            <MenuItemDivider hasIcon />
+
+                            <EnteMenuItem
+                                fontWeight="normal"
+                                onClick={handleRoleChange("VIEWER")}
+                                label={"Viewer"}
+                                startIcon={<PhotoIcon />}
+                                endIcon={
+                                    selectedParticipant.role === "VIEWER" && (
+                                        <DoneIcon />
+                                    )
+                                }
+                            />
+                        </MenuItemGroup>
+
+                        <Typography
+                            color="text.muted"
+                            variant="small"
+                            padding={1}
+                        >
+                            {t("COLLABORATOR_RIGHTS")}
+                        </Typography>
+
+                        <Stack py={"30px"}>
                             <Typography
                                 color="text.muted"
                                 variant="small"
                                 padding={1}
                             >
-                                {t("ADDED_AS")}
+                                {t("REMOVE_PARTICIPANT_HEAD")}
                             </Typography>
 
                             <MenuItemGroup>
                                 <EnteMenuItem
+                                    color="critical"
                                     fontWeight="normal"
-                                    onClick={handleRoleChange("COLLABORATOR")}
-                                    label={"Collaborator"}
-                                    startIcon={<ModeEditIcon />}
-                                    endIcon={
-                                        selectedParticipant.role ===
-                                            "COLLABORATOR" && <DoneIcon />
-                                    }
-                                />
-                                <MenuItemDivider hasIcon />
-
-                                <EnteMenuItem
-                                    fontWeight="normal"
-                                    onClick={handleRoleChange("VIEWER")}
-                                    label={"Viewer"}
-                                    startIcon={<PhotoIcon />}
-                                    endIcon={
-                                        selectedParticipant.role ===
-                                            "VIEWER" && <DoneIcon />
-                                    }
+                                    onClick={removeParticipant}
+                                    label={"Remove"}
+                                    startIcon={<BlockIcon />}
                                 />
                             </MenuItemGroup>
-
-                            <Typography
-                                color="text.muted"
-                                variant="small"
-                                padding={1}
-                            >
-                                {t("COLLABORATOR_RIGHTS")}
-                            </Typography>
-
-                            <Stack py={"30px"}>
-                                <Typography
-                                    color="text.muted"
-                                    variant="small"
-                                    padding={1}
-                                >
-                                    {t("REMOVE_PARTICIPANT_HEAD")}
-                                </Typography>
-
-                                <MenuItemGroup>
-                                    <EnteMenuItem
-                                        color="critical"
-                                        fontWeight="normal"
-                                        onClick={removeParticipant}
-                                        label={"Remove"}
-                                        startIcon={<BlockIcon />}
-                                    />
-                                </MenuItemGroup>
-                            </Stack>
                         </Stack>
                     </Stack>
                 </Stack>
-            </EnteDrawer>
-        </>
+            </Stack>
+        </SidebarDrawer>
     );
 }

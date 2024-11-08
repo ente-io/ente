@@ -41,6 +41,9 @@ func shouldSkipBodyLog(method string, path string) bool {
 	if path == "/files/data" && method == "PUT" {
 		return true
 	}
+	if path == "/admin/user/terminate-session" {
+		return true
+	}
 	return false
 }
 

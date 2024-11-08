@@ -35,7 +35,7 @@ class _BackupStatusScreenState extends State<BackupStatusScreen> {
   }
 
   Future<void> getAllFiles() async {
-    result = (await SearchService.instance.getAllFiles())
+    result = (await SearchService.instance.getAllFilesForSearch())
         .where(
           (e) => e.uploadedFileID != null && e.isOwner,
         )

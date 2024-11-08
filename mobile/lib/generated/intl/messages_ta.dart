@@ -24,11 +24,11 @@ class MessageLookup extends MessageLookupByLibrary {
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "accountWelcomeBack":
             MessageLookupByLibrary.simpleMessage("மீண்டும் வருக!"),
-        "add": MessageLookupByLibrary.simpleMessage("Add"),
-        "addName": MessageLookupByLibrary.simpleMessage("Add name"),
-        "addNameOrMerge":
-            MessageLookupByLibrary.simpleMessage("Add name or merge"),
-        "addNewPerson": MessageLookupByLibrary.simpleMessage("Add new person"),
+        "allPersonGroupingWillReset": MessageLookupByLibrary.simpleMessage(
+            "All groupings for this person will be reset, and you will lose all suggestions made for this person"),
+        "areYouSureYouWantToResetThisPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Are you sure you want to reset this person?"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "உங்கள் கணக்கை நீக்குவதற்கான முக்கிய காரணம் என்ன?"),
         "cancel": MessageLookupByLibrary.simpleMessage("ரத்து செய்"),
@@ -48,19 +48,15 @@ class MessageLookup extends MessageLookupByLibrary {
             "சரியான மின்னஞ்சல் முகவரியை உள்ளிடவும்."),
         "enterYourEmailAddress": MessageLookupByLibrary.simpleMessage(
             "உங்கள் மின்னஞ்சல் முகவரியை உள்ளிடவும்"),
-        "extraPhotosFound":
-            MessageLookupByLibrary.simpleMessage("Extra photos found"),
-        "extraPhotosFoundFor": MessageLookupByLibrary.simpleMessage(
-            "Extra photos found for \$text"),
         "feedback": MessageLookupByLibrary.simpleMessage("பின்னூட்டம்"),
         "invalidEmailAddress":
             MessageLookupByLibrary.simpleMessage("தவறான மின்னஞ்சல் முகவரி"),
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
             "இந்த தகவலுடன் தயவுசெய்து எங்களுக்கு உதவுங்கள்"),
-        "mergeWithExisting":
-            MessageLookupByLibrary.simpleMessage("Merge with existing"),
-        "newPerson": MessageLookupByLibrary.simpleMessage("New person"),
-        "personName": MessageLookupByLibrary.simpleMessage("Person name"),
-        "verify": MessageLookupByLibrary.simpleMessage("சரிபார்க்கவும்")
+        "onlyThem": MessageLookupByLibrary.simpleMessage("Only them"),
+        "resetPerson": MessageLookupByLibrary.simpleMessage("Reset person"),
+        "verify": MessageLookupByLibrary.simpleMessage("சரிபார்க்கவும்"),
+        "yesResetPerson":
+            MessageLookupByLibrary.simpleMessage("Yes, reset person")
       };
 }

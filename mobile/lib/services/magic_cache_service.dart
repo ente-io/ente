@@ -16,12 +16,16 @@ import "package:photos/models/file/extensions/file_props.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/discover/prompt.dart";
 import "package:photos/models/search/generic_search_result.dart";
+import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
+import "package:photos/models/search/hierarchical/magic_filter.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/semantic_search/semantic_search_service.dart";
 import "package:photos/services/remote_assets_service.dart";
 import "package:photos/services/search_service.dart";
+import "package:photos/services/user_remote_flag_service.dart";
 import "package:photos/ui/viewer/search/result/magic_result_screen.dart";
+import "package:photos/utils/file_util.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:shared_preferences/shared_preferences.dart";
 
@@ -140,10 +144,25 @@ GenericSearchResult? toGenericSearchResult(
             ResultType.magic,
             title,
             enteFilesInMagicCache,
+            hierarchicalSearchFilter: MagicFilter(
+              filterName: title,
+              occurrence: kMostRelevantFilter,
+              matchedUploadedIDs: filesToUploadedFileIDs(enteFilesInMagicCache),
+            ),
           ).heroTag(),
+          magicFilter: MagicFilter(
+            filterName: title,
+            occurrence: kMostRelevantFilter,
+            matchedUploadedIDs: filesToUploadedFileIDs(enteFilesInMagicCache),
+          ),
         ),
       );
     },
+    hierarchicalSearchFilter: MagicFilter(
+      filterName: title,
+      occurrence: kMostRelevantFilter,
+      matchedUploadedIDs: filesToUploadedFileIDs(enteFilesInMagicCache),
+    ),
   );
 }
 
@@ -173,8 +192,6 @@ class MagicCacheService {
     });
   }
 
-
-
   Future<void> _resetLastMagicCacheUpdateTime() async {
     await _prefs.setInt(
       _lastMagicCacheUpdateTime,
@@ -186,7 +203,8 @@ class MagicCacheService {
     return _prefs.getInt(_lastMagicCacheUpdateTime) ?? 0;
   }
 
-  bool get enableDiscover => localSettings.isMLIndexingEnabled;
+  bool get enableDiscover =>
+      userRemoteFlagService.getCachedBoolValue(UserRemoteFlagService.mlEnabled);
 
   void queueUpdate(String reason) {
     _pendingUpdateReason.add(reason);
@@ -263,7 +281,7 @@ class MagicCacheService {
     return _promptFuture!;
   }
 
-  Future<List<MagicCache>> _getMagicCache() async {
+  Future<List<MagicCache>> getMagicCache() async {
     if (_magicCacheFuture != null) {
       return _magicCacheFuture!;
     }
@@ -304,7 +322,7 @@ class MagicCacheService {
       final EnteWatch? w =
           kDebugMode ? EnteWatch("magicGenericSearchResult") : null;
       w?.start();
-      final magicCaches = await _getMagicCache();
+      final magicCaches = await getMagicCache();
       final List<Prompt> prompts = await getPrompts();
       if (magicCaches.isEmpty) {
         w?.log("No magic cache found");
@@ -324,7 +342,8 @@ class MagicCacheService {
         promptMap[p.title] = p;
       }
       final List<GenericSearchResult> genericSearchResults = [];
-      final List<EnteFile> files = await SearchService.instance.getAllFiles();
+      final List<EnteFile> files =
+          await SearchService.instance.getAllFilesForSearch();
       for (EnteFile file in files) {
         if (!file.isUploaded) continue;
         for (MagicCache magicCache in magicCaches) {

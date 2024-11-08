@@ -313,3 +313,8 @@ func (c *Controller) _validatePermission(ctx *gin.Context, fileID int64, actorID
 	}
 	return nil
 }
+
+func (c *Controller) FileDataStatusDiff(ctx *gin.Context, req fileData.FDDiffRequest) ([]fileData.FDStatus, error) {
+	userID := auth.GetUserID(ctx.Request.Header)
+	return c.Repo.GetFDForUser(ctx, userID, *req.LastUpdatedAt, 5000)
+}

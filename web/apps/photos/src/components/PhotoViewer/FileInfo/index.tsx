@@ -1,6 +1,5 @@
-import { EnteDrawer } from "@/base/components/EnteDrawer";
-import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
 import { EllipsizedTypography } from "@/base/components/Typography";
 import { useModalVisibility } from "@/base/components/utils/modal";
@@ -20,6 +19,10 @@ import { type ButtonishProps } from "@/new/photos/components/mui";
 import { ChipButton } from "@/new/photos/components/mui/ChipButton";
 import { FilePeopleList } from "@/new/photos/components/PeopleList";
 import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker";
+import {
+    confirmDisableMapsDialogAttributes,
+    confirmEnableMapsDialogAttributes,
+} from "@/new/photos/components/utils/dialog";
 import { fileInfoDrawerZIndex } from "@/new/photos/components/utils/z-index";
 import { tagNumericValue, type RawExifTags } from "@/new/photos/services/exif";
 import {
@@ -27,6 +30,11 @@ import {
     isMLEnabled,
     type AnnotatedFaceID,
 } from "@/new/photos/services/ml";
+import {
+    settingsSnapshot,
+    settingsSubscribe,
+    updateMapEnabled,
+} from "@/new/photos/services/settings";
 import { AppContext } from "@/new/photos/types/context";
 import { formattedByteSize } from "@/new/photos/utils/units";
 import CopyButton from "@ente/shared/components/CodeBlock/CopyButton";
@@ -55,8 +63,13 @@ import {
 import LinkButton from "components/pages/gallery/LinkButton";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
-import React, { useContext, useEffect, useMemo, useState } from "react";
-import { Trans } from "react-i18next";
+import React, {
+    useContext,
+    useEffect,
+    useMemo,
+    useState,
+    useSyncExternalStore,
+} from "react";
 import { changeFileName, updateExistingFilePubMetadata } from "utils/file";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import { FileNameEditDialog } from "./FileNameEditDialog";
@@ -100,8 +113,12 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     closePhotoViewer,
     onSelectPerson,
 }) => {
-    const { mapEnabled, updateMapEnabled, showMiniDialog } =
-        useContext(AppContext);
+    const { mapEnabled } = useSyncExternalStore(
+        settingsSubscribe,
+        settingsSnapshot,
+    );
+
+    const { showMiniDialog } = useContext(AppContext);
     const galleryContext = useContext(GalleryContext);
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext,
@@ -275,7 +292,6 @@ export const FileInfo: React.FC<FileInfoProps> = ({
                 />
                 {isMLEnabled() && annotatedFaces.length > 0 && (
                     <InfoItem icon={<FaceRetouchingNaturalIcon />}>
-                        {/*t("UNIDENTIFIED_FACES")  TODO-Cluster remove */}
                         <FilePeopleList
                             file={file}
                             annotatedFaceIDs={annotatedFaces}
@@ -370,37 +386,8 @@ const parseExifInfo = (
     return info;
 };
 
-const confirmEnableMapsDialogAttributes = (
-    onConfirm: () => void,
-): MiniDialogAttributes => ({
-    title: t("enable_maps_confirm"),
-    message: (
-        <Trans
-            i18nKey={"enable_maps_confirm_message"}
-            components={{
-                a: (
-                    <Link
-                        target="_blank"
-                        rel="noopener"
-                        href="https://www.openstreetmap.org/"
-                    />
-                ),
-            }}
-        />
-    ),
-    continue: { text: t("enable"), action: onConfirm },
-});
-
-const confirmDisableMapsDialogAttributes = (
-    onConfirm: () => void,
-): MiniDialogAttributes => ({
-    title: t("disable_maps_confirm"),
-    message: <Trans i18nKey={"disable_maps_confirm_message"} />,
-    continue: { text: t("disable"), color: "critical", action: onConfirm },
-});
-
 const FileInfoSidebar = styled((props: DialogProps) => (
-    <EnteDrawer {...props} anchor="right" />
+    <SidebarDrawer {...props} anchor="right" />
 ))({
     zIndex: fileInfoDrawerZIndex,
     "& .MuiPaper-root": {

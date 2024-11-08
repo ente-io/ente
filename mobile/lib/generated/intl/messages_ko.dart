@@ -24,11 +24,11 @@ class MessageLookup extends MessageLookupByLibrary {
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "accountWelcomeBack":
             MessageLookupByLibrary.simpleMessage("다시 오신 것을 환영합니다!"),
-        "add": MessageLookupByLibrary.simpleMessage("Add"),
-        "addName": MessageLookupByLibrary.simpleMessage("Add name"),
-        "addNameOrMerge":
-            MessageLookupByLibrary.simpleMessage("Add name or merge"),
-        "addNewPerson": MessageLookupByLibrary.simpleMessage("Add new person"),
+        "allPersonGroupingWillReset": MessageLookupByLibrary.simpleMessage(
+            "All groupings for this person will be reset, and you will lose all suggestions made for this person"),
+        "areYouSureYouWantToResetThisPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Are you sure you want to reset this person?"),
         "askDeleteReason":
             MessageLookupByLibrary.simpleMessage("계정을 삭제하는 가장 큰 이유가 무엇인가요?"),
         "cancel": MessageLookupByLibrary.simpleMessage("닫기"),
@@ -42,18 +42,14 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("올바른 이메일 주소를 입력하세요."),
         "enterYourEmailAddress":
             MessageLookupByLibrary.simpleMessage("이메일을 입력하세요"),
-        "extraPhotosFound":
-            MessageLookupByLibrary.simpleMessage("Extra photos found"),
-        "extraPhotosFoundFor": MessageLookupByLibrary.simpleMessage(
-            "Extra photos found for \$text"),
         "feedback": MessageLookupByLibrary.simpleMessage("피드백"),
         "invalidEmailAddress":
             MessageLookupByLibrary.simpleMessage("잘못된 이메일 주소"),
-        "mergeWithExisting":
-            MessageLookupByLibrary.simpleMessage("Merge with existing"),
-        "newPerson": MessageLookupByLibrary.simpleMessage("New person"),
-        "personName": MessageLookupByLibrary.simpleMessage("Person name"),
+        "onlyThem": MessageLookupByLibrary.simpleMessage("Only them"),
+        "resetPerson": MessageLookupByLibrary.simpleMessage("Reset person"),
         "verify": MessageLookupByLibrary.simpleMessage("인증"),
+        "yesResetPerson":
+            MessageLookupByLibrary.simpleMessage("Yes, reset person"),
         "yourAccountHasBeenDeleted":
             MessageLookupByLibrary.simpleMessage("계정이 삭제되었습니다.")
       };

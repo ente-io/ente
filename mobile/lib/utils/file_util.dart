@@ -377,3 +377,13 @@ class _LivePhoto {
 
   _LivePhoto(this.image, this.video);
 }
+
+Set<int> filesToUploadedFileIDs(List<EnteFile> files) {
+  final uploadedFileIDs = <int>{};
+  for (final file in files) {
+    if (file.isUploaded) {
+      uploadedFileIDs.add(file.uploadedFileID!);
+    }
+  }
+  return uploadedFileIDs;
+}
