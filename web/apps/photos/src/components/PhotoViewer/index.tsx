@@ -564,9 +564,9 @@ function PhotoViewer(props: PhotoViewerProps) {
         }
         showMiniDialog({
             title: t("trash_file_title"),
-            message: t("TRASH_FILE_MESSAGE"),
+            message: t("trash_file_message"),
             continue: {
-                text: t("MOVE_TO_TRASH"),
+                text: t("move_to_trash"),
                 color: "critical",
                 action: () => trashFile(file),
                 autoFocus: true,

@@ -90,9 +90,9 @@ const SelectedFileOptions = ({
     const trashHandler = () =>
         showMiniDialog({
             title: t("trash_files_title"),
-            message: t("TRASH_FILES_MESSAGE"),
+            message: t("trash_files_message"),
             continue: {
-                text: t("MOVE_TO_TRASH"),
+                text: t("move_to_trash"),
                 color: "critical",
                 action: handleFileOps(FILE_OPS_TYPE.TRASH),
             },
@@ -123,10 +123,10 @@ const SelectedFileOptions = ({
     const removeFromCollectionHandler = () => {
         if (ownCount === count) {
             showMiniDialog({
-                title: t("REMOVE_FROM_COLLECTION"),
-                message: t("CONFIRM_SELF_REMOVE_MESSAGE"),
+                title: t("remove_from_album"),
+                message: t("confirm_remove_message"),
                 continue: {
-                    text: t("YES_REMOVE"),
+                    text: t("yes_remove"),
                     color: "primary",
 
                     action: () =>
@@ -137,10 +137,10 @@ const SelectedFileOptions = ({
             });
         } else {
             showMiniDialog({
-                title: t("REMOVE_FROM_COLLECTION"),
-                message: t("CONFIRM_SELF_AND_OTHER_REMOVE_MESSAGE"),
+                title: t("remove_from_album"),
+                message: t("confirm_remove_incl_others_message"),
                 continue: {
-                    text: t("YES_REMOVE"),
+                    text: t("yes_remove"),
                     color: "critical",
                     action: () =>
                         handleCollectionOps(COLLECTION_OPS_TYPE.REMOVE)(
@@ -266,12 +266,12 @@ const SelectedFileOptions = ({
                     </>
                 ) : activeCollectionID === TRASH_SECTION ? (
                     <>
-                        <Tooltip title={t("RESTORE")}>
+                        <Tooltip title={t("restore")}>
                             <IconButton onClick={restoreHandler}>
                                 <RestoreIcon />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title={t("DELETE_PERMANENTLY")}>
+                        <Tooltip title={t("delete_permanently")}>
                             <IconButton onClick={permanentlyDeleteHandler}>
                                 <DeleteIcon />
                             </IconButton>
@@ -286,7 +286,7 @@ const SelectedFileOptions = ({
                                 <DownloadIcon />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title={t("MOVE")}>
+                        <Tooltip title={t("move")}>
                             <IconButton onClick={moveToCollection}>
                                 <MoveIcon />
                             </IconButton>
@@ -385,13 +385,13 @@ const SelectedFileOptions = ({
                             activeCollectionID !== ARCHIVE_SECTION &&
                             !isFavoriteCollection && (
                                 <>
-                                    <Tooltip title={t("MOVE")}>
+                                    <Tooltip title={t("move")}>
                                         <IconButton onClick={moveToCollection}>
                                             <MoveIcon />
                                         </IconButton>
                                     </Tooltip>
 
-                                    <Tooltip title={t("REMOVE")}>
+                                    <Tooltip title={t("remove")}>
                                         <IconButton
                                             onClick={
                                                 removeFromCollectionHandler

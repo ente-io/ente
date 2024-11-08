@@ -157,7 +157,7 @@ export default function Deduplicate() {
                     errorDialogAttributes(
                         e instanceof ApiError &&
                             e.httpStatusCode == HttpStatusCode.Forbidden
-                            ? t("NOT_FILE_OWNER")
+                            ? t("not_file_owner_delete_error")
                             : t("generic_error"),
                     ),
                 );
