@@ -790,6 +790,12 @@
       "title": "pCloud"
     },
     {
+      "title": "PebbleHost",
+      "altNames": [
+        "Pebble Host"
+      ]
+    },
+    {
       "title": "Peerberry"
     },
     {
@@ -880,6 +886,12 @@
     },
     {
       "title": "Restorecord"
+    },
+    {
+      "title": "Restream",
+      "altNames": [
+        "restream.io"
+      ]
     },
     {
       "title": "Revolt",
@@ -1026,6 +1038,13 @@
       "altNames": [
         "腾讯云",
         "tencentcloud"
+      ]
+    },
+    {
+      "title": "Terabit",
+      "altNames": [
+        "Terabit Hosting",
+        "terabit.io"
       ]
     },
     {
