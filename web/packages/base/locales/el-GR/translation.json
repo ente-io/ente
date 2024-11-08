@@ -94,6 +94,8 @@
     "TRASH_FILE_TITLE": "Διαγραφή αρχείου;",
     "DELETE_FILES_TITLE": "Διαγραφή άμεσα;",
     "DELETE_FILES_MESSAGE": "Τα επιλεγμένα αρχεία θα διαγραφούν οριστικά από τον Ente λογαριασμό σας.",
+    "selected_count": "",
+    "selected_and_yours_count": "",
     "delete": "Διαγραφή",
     "delete_key": "Διαγραφή (DEL)",
     "favorite": "Αγαπημένο",
