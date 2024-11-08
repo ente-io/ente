@@ -10,7 +10,7 @@ import (
 	"github.com/ente-io/museum/pkg/controller/usercache"
 
 	"github.com/ente-io/museum/ente"
-	storeageBonusEntity "github.com/ente-io/museum/ente/storagebonus"
+	storageBonusEntity "github.com/ente-io/museum/ente/storagebonus"
 	"github.com/ente-io/museum/pkg/controller/discord"
 	"github.com/ente-io/museum/pkg/repo"
 	"github.com/ente-io/museum/pkg/repo/storagebonus"
@@ -87,10 +87,12 @@ func (c *OfferController) ApplyOffer(email string, productID string) error {
 		return stacktrace.Propagate(ente.ErrNotFound, "Could not find an offer for  "+productID)
 	}
 	var validTill int64
-	if offerToBeApplied.Period == ente.Period3Years {
+	if offerToBeApplied.PeriodInYears == ente.Period3Years {
 		validTill = time.NDaysFromNow(3 * 365)
-	} else if offerToBeApplied.Period == ente.Period5Years {
+	} else if offerToBeApplied.PeriodInYears == ente.Period5Years {
 		validTill = time.NDaysFromNow(5 * 365)
+	} else if offerToBeApplied.PeriodInYears == ente.Period10Years {
+		validTill = time.NDaysFromNow(10 * 365)
 	} else {
 		return stacktrace.Propagate(ente.ErrNotFound, "Could not find a valid time period for  "+productID)
 	}
@@ -106,7 +108,7 @@ func (c *OfferController) ApplyOffer(email string, productID string) error {
 		}
 	}
 
-	err = c.StorageBonusRepo.InsertAddOnBonus(context.Background(), storeageBonusEntity.AddOnBf2023, userID, validTill, offerToBeApplied.Storage)
+	err = c.StorageBonusRepo.InsertAddOnBonus(context.Background(), storageBonusEntity.AddOnBf2024, userID, validTill, offerToBeApplied.Storage)
 	if err != nil {
 		c.DiscordController.Notify("Error inserting bonus")
 		return stacktrace.Propagate(err, "")
