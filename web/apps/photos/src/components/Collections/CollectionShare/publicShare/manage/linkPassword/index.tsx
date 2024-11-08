@@ -35,8 +35,8 @@ export function ManageLinkPassword({
 
     const confirmDisablePublicUrlPassword = async () => {
         showMiniDialog({
-            title: t("DISABLE_PASSWORD"),
-            message: t("DISABLE_PASSWORD_MESSAGE"),
+            title: t("disable_password"),
+            message: t("disable_password_message"),
             continue: {
                 text: t("disable"),
                 color: "critical",

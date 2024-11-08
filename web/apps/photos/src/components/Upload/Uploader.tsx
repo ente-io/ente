@@ -763,11 +763,11 @@ export default function Uploader({
                 if (importSuggestion.hasRootLevelFileWithFolder) {
                     showMiniDialog({
                         icon: <InfoOutlined />,
-                        title: t("ROOT_LEVEL_FILE_WITH_FOLDER_NOT_ALLOWED"),
+                        title: t("root_level_file_with_folder_not_allowed"),
                         message: (
                             <Trans
                                 i18nKey={
-                                    "ROOT_LEVEL_FILE_WITH_FOLDER_NOT_ALLOWED_MESSAGE"
+                                    "root_level_file_with_folder_not_allowed_message"
                                 }
                             />
                         ),

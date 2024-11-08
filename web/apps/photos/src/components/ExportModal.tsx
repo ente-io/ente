@@ -89,10 +89,10 @@ export default function ExportModal(props: ExportModalProps) {
     const verifyExportFolderExists = async () => {
         if (!(await exportService.exportFolderExists(exportFolder))) {
             showMiniDialog({
-                title: t("EXPORT_DIRECTORY_DOES_NOT_EXIST"),
+                title: t("export_directory_does_not_exist"),
                 message: (
                     <Trans
-                        i18nKey={"EXPORT_DIRECTORY_DOES_NOT_EXIST_MESSAGE"}
+                        i18nKey={"export_directory_does_not_exist_message"}
                     />
                 ),
                 cancel: t("ok"),

@@ -238,8 +238,8 @@ const WatchEntry: React.FC<WatchEntryProps> = ({ watch, removeWatch }) => {
 
     const confirmStopWatching = () => {
         showMiniDialog({
-            title: t("STOP_WATCHING_FOLDER"),
-            message: t("STOP_WATCHING_DIALOG_MESSAGE"),
+            title: t("stop_watching_folder_title"),
+            message: t("stop_watching_folder_message"),
             continue: {
                 text: t("YES_STOP"),
                 color: "critical",
@@ -325,7 +325,7 @@ const EntryOptions: React.FC<EntryOptionsProps> = ({ confirmStopWatching }) => {
                 onClick={confirmStopWatching}
                 startIcon={<DoNotDisturbOutlinedIcon />}
             >
-                {t("STOP_WATCHING")}
+                {t("stop_watching")}
             </OverflowMenuOption>
         </OverflowMenu>
     );
