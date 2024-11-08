@@ -195,9 +195,9 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
         wrap(() => _renameCollection(newName))();
 
     const confirmDeleteCollection = () => {
-        setDialogMessage({
+        showMiniDialog({
             title: t("delete_album_title"),
-            content: (
+            message: (
                 <Trans
                     i18nKey={"delete_album_message"}
                     components={{
@@ -205,18 +205,14 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
                     }}
                 />
             ),
-            proceed: {
+            continue: {
                 text: t("delete_photos"),
+                color: "critical",
                 action: deleteCollectionAlongWithFiles,
-                variant: "critical",
             },
             secondary: {
                 text: t("keep_photos"),
                 action: deleteCollectionButKeepFiles,
-                variant: "primary",
-            },
-            close: {
-                text: t("cancel"),
             },
         });
     };

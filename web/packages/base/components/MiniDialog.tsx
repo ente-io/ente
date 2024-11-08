@@ -93,6 +93,36 @@ export interface MiniDialogAttributes {
         action?: () => void | Promise<void>;
     };
     /**
+     * Customize the secondary action button shown in the dialog.
+     *
+     * This is rarely needed. When provided, these attributes behave similar to
+     * the {@link continue} attributes, except this button is shown below the
+     * primary button.
+     *
+     * This is not supported when button direction is "row".
+     */
+    secondary?: {
+        /**
+         * The string to use as the label for the secondary action button.
+         *
+         * Must be provided.
+         */
+        text: string;
+        /**
+         * The color of the button.
+         *
+         * Default is "primary".
+         */
+        color?: ButtonProps["color"];
+        /**
+         * The function to call when the user activates the button.
+         *
+         * The behaviour of this function is exactly the same as that of the
+         * primary {@link action} provided via the {@link continue} attributes.
+         */
+        action?: () => void | Promise<void>;
+    };
+    /**
      * The string to use as the label for the cancel button.
      *
      * Default is `t("cancel")`.
@@ -129,7 +159,9 @@ type MiniDialogProps = Omit<DialogProps, "onClose"> & {
 export const AttributedMiniDialog: React.FC<
     React.PropsWithChildren<MiniDialogProps>
 > = ({ open, onClose, attributes, children, ...props }) => {
-    const [phase, setPhase] = useState<"loading" | "failed" | undefined>();
+    const [phase, setPhase] = useState<
+        "loading" | "secondary-loading" | "failed" | undefined
+    >();
 
     if (!attributes) {
         return <></>;
@@ -143,7 +175,12 @@ export const AttributedMiniDialog: React.FC<
     const handleClose: ModalProps["onClose"] = (_, reason) => {
         if (attributes.nonClosable) return;
         // Ignore backdrop clicks when we're processing the user request.
-        if (reason == "backdropClick" && phase == "loading") return;
+        if (
+            reason == "backdropClick" &&
+            (phase == "loading" || phase == "secondary-loading")
+        ) {
+            return;
+        }
         resetPhaseAndClose();
     };
 
@@ -167,6 +204,7 @@ export const AttributedMiniDialog: React.FC<
     const loadingButton = attributes.continue && (
         <LoadingButton
             loading={phase == "loading"}
+            disabled={phase == "secondary-loading"}
             fullWidth
             color={attributes.continue.color ?? "accent"}
             autoFocus={attributes.continue.autoFocus}
@@ -184,6 +222,30 @@ export const AttributedMiniDialog: React.FC<
             {attributes.continue.text ?? t("ok")}
         </LoadingButton>
     );
+
+    const secondaryLoadingButton = attributes.secondary?.text && (
+        <LoadingButton
+            disabled={phase == "loading"}
+            loading={phase == "secondary-loading"}
+            fullWidth
+            color={attributes.secondary.color ?? "primary"}
+            onClick={async () => {
+                setPhase("secondary-loading");
+                try {
+                    await attributes.secondary?.action?.();
+                    resetPhaseAndClose();
+                } catch (e) {
+                    log.error(e);
+                    setPhase("failed");
+                }
+            }}
+        >
+            {attributes.secondary.text}
+        </LoadingButton>
+    );
+
+    if (secondaryLoadingButton && attributes.buttonDirection == "row")
+        throw new Error("Unsupported combination");
 
     const cancelButton = cancelTitle && (
         <FocusVisibleButton
@@ -268,6 +330,7 @@ export const AttributedMiniDialog: React.FC<
                     ) : (
                         <>
                             {loadingButton}
+                            {secondaryLoadingButton}
                             {cancelButton}
                         </>
                     )}
