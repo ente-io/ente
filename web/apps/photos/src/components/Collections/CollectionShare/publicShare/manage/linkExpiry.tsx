@@ -80,7 +80,7 @@ export function ManageLinkExpiry({
                               ? formatDateTime(
                                     publicShareProp?.validTill / 1000,
                                 )
-                              : t("NEVER")
+                              : t("never")
                     }
                 />
             </MenuItemGroup>

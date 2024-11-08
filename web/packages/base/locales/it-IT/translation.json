@@ -407,7 +407,7 @@
     "LINK_DEVICE_LIMIT": "Limite dispositivi",
     "NO_DEVICE_LIMIT": "Nessuno",
     "LINK_EXPIRY": "Scadenza link",
-    "NEVER": "Mai",
+    "never": "Mai",
     "disable_file_download": "Disabilita download",
     "disable_file_download_message": "<p>Sei sicuro di voler disattivare il pulsante di download per i file?</p><p>I visualizzatori possono ancora fare screenshot o salvare una copia delle foto utilizzando strumenti esterni.</p>",
     "SHARED_USING": "Condiviso utilizzando",

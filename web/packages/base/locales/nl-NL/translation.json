@@ -407,7 +407,7 @@
     "LINK_DEVICE_LIMIT": "Apparaat limiet",
     "NO_DEVICE_LIMIT": "Geen",
     "LINK_EXPIRY": "Vervaldatum link",
-    "NEVER": "Nooit",
+    "never": "Nooit",
     "disable_file_download": "Download uitschakelen",
     "disable_file_download_message": "<p>Weet u zeker dat u de downloadknop voor bestanden wilt uitschakelen?</p><p>Kijkers kunnen nog steeds screenshots maken of een kopie van uw foto's opslaan met behulp van externe hulpmiddelen.</p>",
     "SHARED_USING": "Gedeeld via ",

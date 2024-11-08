@@ -407,7 +407,7 @@
     "LINK_DEVICE_LIMIT": "Όριο συσκευών",
     "NO_DEVICE_LIMIT": "Κανένα",
     "LINK_EXPIRY": "",
-    "NEVER": "Ποτέ",
+    "never": "Ποτέ",
     "disable_file_download": "Απενεργοποίηση λήψεων",
     "disable_file_download_message": "",
     "SHARED_USING": "Κοινοποίηση μέσω ",

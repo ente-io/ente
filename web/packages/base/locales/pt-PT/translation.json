@@ -407,7 +407,7 @@
     "LINK_DEVICE_LIMIT": "Limite de dispositivos",
     "NO_DEVICE_LIMIT": "Nenhum",
     "LINK_EXPIRY": "Link expirado",
-    "NEVER": "Nunca",
+    "never": "Nunca",
     "disable_file_download": "Desativar download",
     "disable_file_download_message": "<p>Tem a certeza de que pretende desativar o botão de transferência de ficheiros? </p><p>Os espectadores podem ainda tirar capturas de ecrã ou guardar uma cópia das suas fotografias utilizando ferramentas externas.</p>",
     "SHARED_USING": "Partilhado utilizando ",

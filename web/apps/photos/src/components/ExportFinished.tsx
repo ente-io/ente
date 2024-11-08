@@ -59,7 +59,7 @@ export default function ExportFinished(props: Props) {
                         <Typography>
                             {props.lastExportTime
                                 ? formatDateTime(props.lastExportTime)
-                                : t("NEVER")}
+                                : t("never")}
                         </Typography>
                     </SpaceBetweenFlex>
                 </Stack>

@@ -407,7 +407,7 @@
     "LINK_DEVICE_LIMIT": "设备限制",
     "NO_DEVICE_LIMIT": "无",
     "LINK_EXPIRY": "链接过期",
-    "NEVER": "永不",
+    "never": "永不",
     "disable_file_download": "禁止下载",
     "disable_file_download_message": "<p>您确定要禁用文件下载按钮吗？</p><p>观看者仍然可以使用外部工具进行屏幕截图或保存您的照片副本。</p>",
     "SHARED_USING": "分享方式 ",

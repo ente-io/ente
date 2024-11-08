@@ -407,7 +407,7 @@
     "LINK_DEVICE_LIMIT": "Limite d'appareil",
     "NO_DEVICE_LIMIT": "Aucune",
     "LINK_EXPIRY": "Expiration du lien",
-    "NEVER": "Jamais",
+    "never": "Jamais",
     "disable_file_download": "Désactiver le téléchargement",
     "disable_file_download_message": "<p>Êtes-vous certains de vouloir désactiver le bouton de téléchargement pour les fichiers?</p><p>Ceux qui les visualisent pourront tout de même faire des captures d'écrans ou sauvegarder une copie de vos photos en utilisant des outils externes.</p>",
     "SHARED_USING": "Partagé en utilisant ",

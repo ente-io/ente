@@ -407,7 +407,7 @@
     "LINK_DEVICE_LIMIT": "Batas perangkat",
     "NO_DEVICE_LIMIT": "Tidak ada",
     "LINK_EXPIRY": "Waktu kedaluwarsa link",
-    "NEVER": "Tidak pernah",
+    "never": "Tidak pernah",
     "disable_file_download": "",
     "disable_file_download_message": "",
     "SHARED_USING": "",

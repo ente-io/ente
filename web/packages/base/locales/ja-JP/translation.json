@@ -407,7 +407,7 @@
     "LINK_DEVICE_LIMIT": "",
     "NO_DEVICE_LIMIT": "",
     "LINK_EXPIRY": "",
-    "NEVER": "",
+    "never": "",
     "disable_file_download": "",
     "disable_file_download_message": "",
     "SHARED_USING": "",

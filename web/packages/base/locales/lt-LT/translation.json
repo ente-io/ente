@@ -407,7 +407,7 @@
     "LINK_DEVICE_LIMIT": "Įrenginių riba",
     "NO_DEVICE_LIMIT": "Jokio",
     "LINK_EXPIRY": "Nuorodos galiojimo laikas",
-    "NEVER": "Niekada",
+    "never": "Niekada",
     "disable_file_download": "Išjungti atsisiuntimą",
     "disable_file_download_message": "<p>Ar tikrai norite išjungti failų atsisiuntimo mygtuką?</p><p>Žiūrėtojai vis tiek gali daryti ekrano kopijas arba išsaugoti nuotraukų kopijas naudojant išorinius įrankius.</p>",
     "SHARED_USING": "Bendrinta naudojant ",

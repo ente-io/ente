@@ -200,7 +200,7 @@ export function getDeviceLimitOptions() {
 }
 
 export const shareExpiryOptions = () => [
-    { label: t("NEVER"), value: () => 0 },
+    { label: t("never"), value: () => 0 },
     {
         label: t("AFTER_TIME.HOUR"),
         value: () => getUnixTimeInMicroSecondsWithDelta({ hours: 1 }),
