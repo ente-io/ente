@@ -463,7 +463,7 @@
     "STOP_WATCHING_DIALOG_MESSAGE": "您现有的文件不会被删除，但 Ente 将停止自动更新链接的 Ente 相册在此文件夹中的更改。",
     "YES_STOP": "是的，停止",
     "CHANGE_FOLDER": "更改文件夹",
-    "FAMILY_PLAN": "家庭计划",
+    "family_plan": "家庭计划",
     "debug_logs": "调试日志",
     "download_logs": "下载日志",
     "download_logs_message": "<p>这将下载调试日志，您可以发送电子邮件给我们来帮助调试您的问题。</p><p>请注意文件名将被包含，以帮助跟踪特定文件中的问题。</p>",

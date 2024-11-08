@@ -463,7 +463,7 @@
     "STOP_WATCHING_DIALOG_MESSAGE": "I tuoi file esistenti non verranno eliminati, ma Ente smetterà di aggiornare automaticamente l'album Ente collegato a questa cartella.",
     "YES_STOP": "Sì, interrompi",
     "CHANGE_FOLDER": "Cambia Cartella",
-    "FAMILY_PLAN": "Piano famiglia",
+    "family_plan": "Piano famiglia",
     "debug_logs": "Log di debug",
     "download_logs": "Scarica i log",
     "download_logs_message": "<p>Questo scaricherà il log di debug che puoi inviare via email a noi per aiutare a capire il tuo problema.</p><p>Nota che i nomi dei file saranno inclusi per aiutare a tenere traccia dei problemi con i file specifici.</p>",

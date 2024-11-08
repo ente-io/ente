@@ -463,7 +463,7 @@
     "STOP_WATCHING_DIALOG_MESSAGE": "Os seus ficheiros existentes não serão eliminados, mas o Ente deixará de atualizar automaticamente o álbum Ente associado às alterações nesta pasta.",
     "YES_STOP": "Sim, parar",
     "CHANGE_FOLDER": "Alterar pasta",
-    "FAMILY_PLAN": "Plano familiar",
+    "family_plan": "Plano familiar",
     "debug_logs": "Logs de depuração",
     "download_logs": "Descarregar logs",
     "download_logs_message": "<p>Isto irá descarregar registos de depuração, que pode enviar-nos por correio eletrónico para ajudar a depurar o seu problema.</p><p>Por favor, note que os nomes dos ficheiros serão incluídos para ajudar a localizar problemas com ficheiros específicos.</p>",

@@ -345,7 +345,7 @@ function MemberSubscriptionManage({ open, userDetails, onClose }) {
                 <Typography variant="h3" fontWeight={"bold"}>
                     {t("subscription")}
                 </Typography>
-                <Typography color={"text.muted"}>{t("FAMILY_PLAN")}</Typography>
+                <Typography color={"text.muted"}>{t("family_plan")}</Typography>
             </DialogTitleWithCloseButton>
             <DialogContent>
                 <VerticallyCentered>

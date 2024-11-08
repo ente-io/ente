@@ -463,7 +463,7 @@
     "STOP_WATCHING_DIALOG_MESSAGE": "Tus archivos existentes no serán eliminados, pero ente dejará de actualizar automáticamente el álbum enlazado en caso de cambios en esta carpeta.",
     "YES_STOP": "Sí, detener",
     "CHANGE_FOLDER": "Cambiar carpeta",
-    "FAMILY_PLAN": "Plan familiar",
+    "family_plan": "Plan familiar",
     "debug_logs": "Logs de depuración",
     "download_logs": "Descargar logs",
     "download_logs_message": "<p>Esto descargará los registros de depuración, que puede enviarnos por correo electrónico para ayudarnos a depurar su problema.</p><p>Tenga en cuenta que los nombres de los archivos se incluirán para ayudar al seguimiento de problemas con archivos específicos.</p>",

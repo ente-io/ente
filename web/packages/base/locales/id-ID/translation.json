@@ -463,7 +463,7 @@
     "STOP_WATCHING_DIALOG_MESSAGE": "",
     "YES_STOP": "",
     "CHANGE_FOLDER": "Ubah Folder",
-    "FAMILY_PLAN": "Paket keluarga",
+    "family_plan": "Paket keluarga",
     "debug_logs": "Log debug",
     "download_logs": "Unduh log",
     "download_logs_message": "",

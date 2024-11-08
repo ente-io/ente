@@ -463,7 +463,7 @@
     "STOP_WATCHING_DIALOG_MESSAGE": "Deine bestehenden Dateien werden nicht gelöscht, aber das verknüpfte Ente-Album wird bei Änderungen in diesem Ordner nicht mehr aktualisiert.",
     "YES_STOP": "Ja, Stopp",
     "CHANGE_FOLDER": "Ordner ändern",
-    "FAMILY_PLAN": "Familientarif",
+    "family_plan": "Familientarif",
     "debug_logs": "Debug-Logs",
     "download_logs": "Logs herunterladen",
     "download_logs_message": "<p>Hier kannst du Debug-Logs herunterladen, die du uns zur Fehleranalyse zusenden kannst.</p><p>Beachte bitte, dass die Logs Dateinamen enthalten, um Probleme mit bestimmten Dateien nachvollziehen zu können.</p>",

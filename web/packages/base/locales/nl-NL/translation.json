@@ -463,7 +463,7 @@
     "STOP_WATCHING_DIALOG_MESSAGE": "Uw bestaande bestanden zullen niet worden verwijderd, maar Ente stopt met het automatisch bijwerken van het gekoppelde Ente album bij wijzigingen in deze map.",
     "YES_STOP": "Ja, stop",
     "CHANGE_FOLDER": "Map wijzigen",
-    "FAMILY_PLAN": "Familie abonnement",
+    "family_plan": "Familie abonnement",
     "debug_logs": "Logboeken voor foutmeldingen",
     "download_logs": "Logboek downloaden",
     "download_logs_message": "<p>Dit zal logboeken downloaden, die u ons kunt e-mailen om te helpen bij het debuggen van uw probleem.</p><p>Houd er rekening mee dat bestandsnamen worden opgenomen om problemen met specifieke bestanden bij te houden.</p>",

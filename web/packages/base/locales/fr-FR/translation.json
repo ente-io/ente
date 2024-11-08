@@ -463,7 +463,7 @@
     "STOP_WATCHING_DIALOG_MESSAGE": "Vos fichiers existants ne seront pas supprimés, mais Ente arrêtera automatiquement de mettre à jour le lien de l'album à chaque changements sur ce dossier.",
     "YES_STOP": "Oui, arrêter",
     "CHANGE_FOLDER": "Modifier le dossier",
-    "FAMILY_PLAN": "Plan famille",
+    "family_plan": "Plan famille",
     "debug_logs": "Journaux de débugs",
     "download_logs": "Télécharger les logs",
     "download_logs_message": "<p>Cela va télécharger les journaux de débug, que vous pourrez nosu envoyer par e-mail pour nous aider à résoudre votre problàme .</p><p>Veuillez noter que les noms de fichiers seront inclus .</p>",
