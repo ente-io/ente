@@ -39,10 +39,3 @@ export const getRootLevelFileWithFolderNotAllowMessage =
         ),
         close: {},
     });
-
-export const getExportDirectoryDoesNotExistMessage =
-    (): DialogBoxAttributes => ({
-        title: t("EXPORT_DIRECTORY_DOES_NOT_EXIST"),
-        content: <Trans i18nKey={"EXPORT_DIRECTORY_DOES_NOT_EXIST_MESSAGE"} />,
-        close: {},
-    });

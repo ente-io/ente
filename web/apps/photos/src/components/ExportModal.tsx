@@ -1,7 +1,7 @@
 import { EnteSwitch } from "@/base/components/EnteSwitch";
 import log from "@/base/log";
 import { EnteFile } from "@/media/file";
-import { AppContext } from "@/new/photos/types/context";
+import { useAppContext } from "@/new/photos/types/context";
 import ChangeDirectoryOption from "@ente/shared/components/ChangeDirectoryOption";
 import {
     SpaceBetweenFlex,
@@ -19,26 +19,27 @@ import {
 } from "@mui/material";
 import { t } from "i18next";
 import isElectron from "is-electron";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { Trans } from "react-i18next";
 import exportService, {
     ExportStage,
     selectAndPrepareExportDirectory,
     type ExportOpts,
 } from "services/export";
 import { ExportProgress, ExportSettings } from "types/export";
-import { getExportDirectoryDoesNotExistMessage } from "utils/ui";
 import { DirectoryPath } from "./Directory";
 import ExportFinished from "./ExportFinished";
 import ExportInProgress from "./ExportInProgress";
 import ExportInit from "./ExportInit";
 
-interface Props {
+interface ExportModalProps {
     show: boolean;
     onHide: () => void;
     collectionNameMap: Map<number, string>;
 }
-export default function ExportModal(props: Props) {
-    const appContext = useContext(AppContext);
+
+export default function ExportModal(props: ExportModalProps) {
+    const { showMiniDialog } = useAppContext();
     const [exportStage, setExportStage] = useState(ExportStage.INIT);
     const [exportFolder, setExportFolder] = useState("");
     const [continuousExport, setContinuousExport] = useState(false);
@@ -87,9 +88,15 @@ export default function ExportModal(props: Props) {
 
     const verifyExportFolderExists = async () => {
         if (!(await exportService.exportFolderExists(exportFolder))) {
-            appContext.setDialogMessage(
-                getExportDirectoryDoesNotExistMessage(),
-            );
+            showMiniDialog({
+                title: t("EXPORT_DIRECTORY_DOES_NOT_EXIST"),
+                message: (
+                    <Trans
+                        i18nKey={"EXPORT_DIRECTORY_DOES_NOT_EXIST_MESSAGE"}
+                    />
+                ),
+                cancel: t("ok"),
+            });
             return false;
         }
         return true;
