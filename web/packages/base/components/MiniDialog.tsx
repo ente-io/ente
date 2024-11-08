@@ -215,15 +215,15 @@ export const AttributedMiniDialog: React.FC<
                     sx={{
                         display: "flex",
                         justifyContent: "space-between",
-                        alignItems: "center",
+                        alignItems: "flex-end",
                         "& > svg": {
                             fontSize: "32px",
-                            color: "text.faint",
+                            color: (theme) => theme.colors.stroke.faint,
                         },
                         padding:
                             attributes.icon && attributes.title
-                                ? "20px 16px 16px 16px"
-                                : "24px 16px 16px 16px",
+                                ? "16px 18px 8px 16px"
+                                : "24px 16px 4px 16px",
                     }}
                 >
                     {attributes.title && (
