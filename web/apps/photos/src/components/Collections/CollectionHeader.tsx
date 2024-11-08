@@ -2,7 +2,6 @@ import { assertionFailed } from "@/base/assert";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { SpaceBetweenFlex } from "@/base/components/mui/Container";
 import { useModalVisibility } from "@/base/components/utils/modal";
-import log from "@/base/log";
 import type { Collection } from "@/media/collection";
 import { ItemVisibility } from "@/media/file-metadata";
 import {
@@ -141,25 +140,18 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
     setFilesDownloadProgressAttributesCreator,
     isActiveCollectionDownloadInProgress,
 }) => {
-    const { showLoadingBar, hideLoadingBar, setDialogMessage, showMiniDialog } =
-        useAppContext();
+    const {
+        showLoadingBar,
+        hideLoadingBar,
+        onGenericError,
+        setDialogMessage,
+        showMiniDialog,
+    } = useAppContext();
     const { syncWithRemote } = useContext(GalleryContext);
     const overFlowMenuIconRef = useRef<SVGSVGElement>(null);
 
     const { show: showSortOrderMenu, props: sortOrderMenuVisibilityProps } =
         useModalVisibility();
-
-    const handleError = useCallback(
-        (e: unknown) => {
-            log.error("Collection action failed", e);
-            setDialogMessage({
-                title: t("error"),
-                content: t("generic_error_retry"),
-                close: { variant: "critical" },
-            });
-        },
-        [setDialogMessage],
-    );
 
     /**
      * Return a new function by wrapping an async function in an error handler,
@@ -173,7 +165,7 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
                 try {
                     await f();
                 } catch (e) {
-                    handleError(e);
+                    onGenericError(e);
                 } finally {
                     void syncWithRemote(false, true);
                     hideLoadingBar();
@@ -181,7 +173,7 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
             };
             return (): void => void wrapped();
         },
-        [handleError, syncWithRemote, showLoadingBar, hideLoadingBar],
+        [showLoadingBar, hideLoadingBar, onGenericError, syncWithRemote],
     );
 
     const showRenameCollectionModal = () => {
@@ -240,15 +232,14 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
     });
 
     const confirmEmptyTrash = () =>
-        setDialogMessage({
+        showMiniDialog({
             title: t("empty_trash_title"),
-            content: t("empty_trash_message"),
-            proceed: {
-                action: emptyTrash,
+            message: t("empty_trash_message"),
+            continue: {
                 text: t("empty_trash"),
-                variant: "critical",
+                color: "critical",
+                action: emptyTrash,
             },
-            close: { text: t("cancel") },
         });
 
     const emptyTrash = wrap(async () => {
@@ -281,7 +272,7 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
     };
 
     const downloadCollection = () =>
-        void _downloadCollection().catch(handleError);
+        void _downloadCollection().catch(onGenericError);
 
     const archiveAlbum = wrap(() =>
         changeCollectionVisibility(activeCollection, ItemVisibility.archived),
