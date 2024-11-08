@@ -288,6 +288,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Grunnet vår type ente-til-ende-krypteringsprotokoll kan ikke dine data dekrypteres uten passordet ditt eller gjenopprettingsnøkkelen din"),
         "notifications": MessageLookupByLibrary.simpleMessage("Varslinger"),
         "ok": MessageLookupByLibrary.simpleMessage("Ok"),
+        "onlyThem": MessageLookupByLibrary.simpleMessage("Only them"),
         "oops": MessageLookupByLibrary.simpleMessage("Oisann"),
         "orPickAnExistingOne":
             MessageLookupByLibrary.simpleMessage("Eller velg en eksisterende"),

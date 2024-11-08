@@ -45,6 +45,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "feedback": MessageLookupByLibrary.simpleMessage("피드백"),
         "invalidEmailAddress":
             MessageLookupByLibrary.simpleMessage("잘못된 이메일 주소"),
+        "onlyThem": MessageLookupByLibrary.simpleMessage("Only them"),
         "resetPerson": MessageLookupByLibrary.simpleMessage("Reset person"),
         "verify": MessageLookupByLibrary.simpleMessage("인증"),
         "yesResetPerson":

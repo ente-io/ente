@@ -94,11 +94,6 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
   bool userAlreadyAssigned = false;
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     final isKeyboardUp = bottomInset > 100;
@@ -311,9 +306,11 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
           userAlreadyAssigned = true;
           personEntity =
               await PersonService.instance.addPerson(text, clusterID);
-          final bool extraPhotosFound = await ClusterFeedbackService.instance
-              .checkAndDoAutomaticMerges(personEntity!,
-                  personClusterID: clusterID,);
+          final bool extraPhotosFound =
+              await ClusterFeedbackService.instance.checkAndDoAutomaticMerges(
+            personEntity!,
+            personClusterID: clusterID,
+          );
           if (extraPhotosFound) {
             showShortToast(context, S.of(context).extraPhotosFound);
           }

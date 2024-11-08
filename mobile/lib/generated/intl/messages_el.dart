@@ -29,6 +29,7 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Are you sure you want to reset this person?"),
         "enterYourEmailAddress": MessageLookupByLibrary.simpleMessage(
             "Εισάγετε την διεύθυνση ηλ. ταχυδρομείου σας"),
+        "onlyThem": MessageLookupByLibrary.simpleMessage("Only them"),
         "resetPerson": MessageLookupByLibrary.simpleMessage("Reset person"),
         "yesResetPerson":
             MessageLookupByLibrary.simpleMessage("Yes, reset person")

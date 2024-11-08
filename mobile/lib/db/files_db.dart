@@ -1492,7 +1492,7 @@ class FilesDB {
     return rows.isNotEmpty;
   }
 
-  Future<Map<int, EnteFile>> getFilesFromIDs(List<int> ids) async {
+  Future<Map<int, EnteFile>> getFileIDToFileFromIDs(List<int> ids) async {
     final result = <int, EnteFile>{};
     if (ids.isEmpty) {
       return result;
@@ -1510,6 +1510,34 @@ class FilesDB {
     for (final file in files) {
       result[file.uploadedFileID!] = file;
     }
+    return result;
+  }
+
+  Future<List<EnteFile>> getFilesFromIDs(
+    List<int> ids, {
+    bool asc = false,
+    bool dedupeByUploadId = false,
+    Set<int> collectionsToIgnore = const {},
+  }) async {
+    final order = (asc ? 'ASC' : 'DESC');
+    if (ids.isEmpty) {
+      return [];
+    }
+
+    final inParam = ids.map((id) => "'$id'").join(',');
+    final db = await instance.sqliteAsyncDB;
+    final results = await db.getAll(
+      'SELECT * FROM $filesTable WHERE $columnUploadedFileID IN ($inParam) ORDER BY $columnCreationTime $order',
+    );
+    final files = convertToFiles(results);
+    final result = await applyDBFilters(
+      files,
+      DBFilterOptions(
+        ignoredCollectionIDs: collectionsToIgnore,
+        dedupeUploadID: dedupeByUploadId,
+      ),
+    );
+
     return result;
   }
 
@@ -1576,6 +1604,26 @@ class FilesDB {
       collectionIDsOfFile.add(result['collection_id'] as int);
     }
     return collectionIDsOfFile;
+  }
+
+  ///Each collectionIDs in list aren't necessarily unique
+  Future<List<int>> getAllCollectionIDsOfFiles(
+    List<int> uploadedFileIDs,
+  ) async {
+    final db = await instance.sqliteAsyncDB;
+    final inParam = uploadedFileIDs.join(',');
+
+    final results = await db.getAll(
+      '''
+      SELECT $columnCollectionID FROM $filesTable
+      WHERE $columnUploadedFileID IN ($inParam) AND $columnCollectionID != -1
+    ''',
+    );
+    final collectionIDsOfFiles = <int>[];
+    for (var result in results) {
+      collectionIDsOfFiles.add(result['collection_id'] as int);
+    }
+    return collectionIDsOfFiles;
   }
 
   List<EnteFile> convertToFilesForIsolate(Map args) {

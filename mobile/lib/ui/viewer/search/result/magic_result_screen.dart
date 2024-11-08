@@ -9,11 +9,15 @@ import "package:photos/events/magic_sort_change_event.dart";
 import 'package:photos/models/file/file.dart';
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/gallery_type.dart';
+import "package:photos/models/search/hierarchical/magic_filter.dart";
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
+import "package:photos/ui/viewer/gallery/hierarchical_search_gallery.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
+import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
+import "package:photos/ui/viewer/gallery/state/search_filter_data_provider.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
 
 class MagicResultScreen extends StatefulWidget {
@@ -24,6 +28,7 @@ class MagicResultScreen extends StatefulWidget {
   final String heroTag;
   final bool enableGrouping;
   final Map<int, int> fileIdToPosMap;
+  final MagicFilter magicFilter;
 
   static const GalleryType appBarType = GalleryType.magic;
   static const GalleryType overlayType = GalleryType.magic;
@@ -31,6 +36,7 @@ class MagicResultScreen extends StatefulWidget {
   const MagicResultScreen(
     this.files, {
     required this.name,
+    required this.magicFilter,
     this.enableGrouping = false,
     this.fileIdToPosMap = const {},
     this.heroTag = "",
@@ -157,31 +163,52 @@ class _MagicResultScreenState extends State<MagicResultScreen> {
       initialFiles: [files.first],
     );
     return GalleryFilesState(
-      child: Scaffold(
-        appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(50.0),
-          child: GalleryAppBarWidget(
-            MagicResultScreen.appBarType,
-            widget.name,
-            _selectedFiles,
-          ),
+      child: InheritedSearchFilterDataWrapper(
+        searchFilterDataProvider: SearchFilterDataProvider(
+          initialGalleryFilter: widget.magicFilter,
         ),
-        body: SelectionState(
-          selectedFiles: _selectedFiles,
-          child: Stack(
-            alignment: Alignment.bottomCenter,
-            children: [
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 250),
-                switchInCurve: Curves.easeInOutQuad,
-                switchOutCurve: Curves.easeInOutQuad,
-                child: gallery,
-              ),
-              FileSelectionOverlayBar(
-                MagicResultScreen.overlayType,
-                _selectedFiles,
-              ),
-            ],
+        child: Scaffold(
+          appBar: PreferredSize(
+            preferredSize: const Size.fromHeight(90.0),
+            child: GalleryAppBarWidget(
+              MagicResultScreen.appBarType,
+              widget.name,
+              _selectedFiles,
+            ),
+          ),
+          body: SelectionState(
+            selectedFiles: _selectedFiles,
+            child: Stack(
+              alignment: Alignment.bottomCenter,
+              children: [
+                Builder(
+                  builder: (context) {
+                    return ValueListenableBuilder(
+                      valueListenable: InheritedSearchFilterData.of(context)
+                          .searchFilterDataProvider!
+                          .isSearchingNotifier,
+                      builder: (context, value, _) {
+                        return value
+                            ? HierarchicalSearchGallery(
+                                tagPrefix: widget.heroTag,
+                                selectedFiles: _selectedFiles,
+                              )
+                            : AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 250),
+                                switchInCurve: Curves.easeInOutQuad,
+                                switchOutCurve: Curves.easeInOutQuad,
+                                child: gallery,
+                              );
+                      },
+                    );
+                  },
+                ),
+                FileSelectionOverlayBar(
+                  MagicResultScreen.overlayType,
+                  _selectedFiles,
+                ),
+              ],
+            ),
           ),
         ),
       ),

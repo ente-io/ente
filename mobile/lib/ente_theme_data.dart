@@ -16,7 +16,6 @@ final lightThemeData = ThemeData(
     primary: Colors.black,
     secondary: Color.fromARGB(255, 163, 163, 163),
     background: Colors.white,
-    surfaceTint: Colors.transparent,
   ),
   outlinedButtonTheme: buildOutlinedButtonThemeData(
     bgDisabled: const Color.fromRGBO(158, 158, 158, 1),
@@ -95,7 +94,6 @@ final darkThemeData = ThemeData(
     primary: Colors.white,
     background: Color.fromRGBO(0, 0, 0, 1),
     secondary: Color.fromARGB(255, 163, 163, 163),
-    surfaceTint: Colors.transparent,
   ),
   buttonTheme: const ButtonThemeData().copyWith(
     buttonColor: const Color.fromRGBO(45, 194, 98, 1.0),

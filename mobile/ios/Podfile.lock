@@ -223,8 +223,6 @@ PODS:
     - sqlite3/fts5
     - sqlite3/perf-threadsafe
     - sqlite3/rtree
-  - system_info_plus (0.0.1):
-    - Flutter
   - Toast (4.1.1)
   - ua_client_hints (1.4.0):
     - Flutter
@@ -292,7 +290,6 @@ DEPENDENCIES:
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
   - sqflite_darwin (from `.symlinks/plugins/sqflite_darwin/darwin`)
   - sqlite3_flutter_libs (from `.symlinks/plugins/sqlite3_flutter_libs/ios`)
-  - system_info_plus (from `.symlinks/plugins/system_info_plus/ios`)
   - ua_client_hints (from `.symlinks/plugins/ua_client_hints/ios`)
   - uni_links (from `.symlinks/plugins/uni_links/ios`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
@@ -421,8 +418,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/sqflite_darwin/darwin"
   sqlite3_flutter_libs:
     :path: ".symlinks/plugins/sqlite3_flutter_libs/ios"
-  system_info_plus:
-    :path: ".symlinks/plugins/system_info_plus/ios"
   ua_client_hints:
     :path: ".symlinks/plugins/ua_client_hints/ios"
   uni_links:
@@ -506,7 +501,6 @@ SPEC CHECKSUMS:
   sqflite_darwin: a553b1fd6fe66f53bbb0fe5b4f5bab93f08d7a13
   sqlite3: 0bb0e6389d824e40296f531b858a2a0b71c0d2fb
   sqlite3_flutter_libs: c00457ebd31e59fa6bb830380ddba24d44fbcd3b
-  system_info_plus: 5393c8da281d899950d751713575fbf91c7709aa
   Toast: 1f5ea13423a1e6674c4abdac5be53587ae481c4e
   ua_client_hints: 46bb5817a868f9e397c0ba7e3f2f5c5d90c35156
   uni_links: d97da20c7701486ba192624d99bffaaffcfc298a

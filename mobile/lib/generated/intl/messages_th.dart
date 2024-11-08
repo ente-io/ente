@@ -229,6 +229,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "ok": MessageLookupByLibrary.simpleMessage("ตกลง"),
         "onEnte": MessageLookupByLibrary.simpleMessage(
             "บน <branding>ente</branding>"),
+        "onlyThem": MessageLookupByLibrary.simpleMessage("Only them"),
         "oops": MessageLookupByLibrary.simpleMessage("อ๊ะ"),
         "oopsSomethingWentWrong":
             MessageLookupByLibrary.simpleMessage("อ๊ะ มีบางอย่างผิดพลาด"),

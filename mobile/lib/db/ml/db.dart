@@ -229,6 +229,15 @@ class MLDataDB {
     return maps.map((e) => e[clusterIDColumn] as String).toSet();
   }
 
+  Future<Set<String>> getPersonsClusterIDs(List<String> personID) async {
+    final db = await instance.asyncDB;
+    final inParam = personID.map((e) => "'$e'").join(',');
+    final List<Map<String, dynamic>> maps = await db.getAll(
+      'SELECT $clusterIDColumn FROM $clusterPersonTable WHERE $personIdColumn IN ($inParam)',
+    );
+    return maps.map((e) => e[clusterIDColumn] as String).toSet();
+  }
+
   Future<void> clearTable() async {
     final db = await instance.asyncDB;
 
@@ -984,5 +993,64 @@ class MLDataDB {
     } catch (e) {
       _logger.severe('Error dropping feedback tables', e);
     }
+  }
+
+  Future<List<int>> getFileIDsOfPersonID(String personID) async {
+    final db = await instance.asyncDB;
+    final result = await db.getAll(
+      '''
+        SELECT DISTINCT $facesTable.$fileIDColumn
+        FROM $clusterPersonTable
+        JOIN $faceClustersTable ON $clusterPersonTable.$clusterIDColumn = $faceClustersTable.$clusterIDColumn
+        JOIN $facesTable ON $faceClustersTable.$faceIDColumn = $facesTable.$faceIDColumn
+        WHERE $clusterPersonTable.$personIdColumn = ?
+    ''',
+      [personID],
+    );
+
+    return [for (final row in result) row[fileIDColumn]];
+  }
+
+  Future<List<int>> getFileIDsOfClusterID(String clusterID) async {
+    final db = await instance.asyncDB;
+    final result = await db.getAll(
+      '''
+        SELECT DISTINCT $facesTable.$fileIDColumn
+        FROM $faceClustersTable 
+        JOIN $facesTable ON $faceClustersTable.$faceIDColumn = $facesTable.$faceIDColumn
+        WHERE $faceClustersTable.$clusterIDColumn = ?
+    ''',
+      [clusterID],
+    );
+
+    return [for (final row in result) row[fileIDColumn]];
+  }
+
+  Future<Set<int>> getAllFileIDsOfFaceIDsNotInAnyCluster() async {
+    final db = await instance.asyncDB;
+    final result = await db.getAll(
+      '''
+        SELECT DISTINCT file_id
+        FROM faces
+        LEFT JOIN face_clusters ON faces.face_id = face_clusters.face_id
+        WHERE face_clusters.face_id IS NULL;
+    ''',
+    );
+    return <int>{for (final row in result) row[fileIDColumn]};
+  }
+
+  Future<Set<int>> getAllFilesAssociatedWithAllClusters({
+    List<String>? exceptClusters,
+  }) async {
+    final notInParam = exceptClusters?.map((e) => "'$e'").join(',') ?? '';
+    final db = await instance.asyncDB;
+    final result = await db.getAll('''
+        SELECT DISTINCT $facesTable.$fileIDColumn 
+        FROM $facesTable 
+        JOIN $faceClustersTable on $faceClustersTable.$faceIDColumn = $facesTable.$faceIDColumn
+        WHERE $faceClustersTable.$clusterIDColumn NOT IN ($notInParam);
+    ''');
+
+    return <int>{for (final row in result) row[fileIDColumn]};
   }
 }

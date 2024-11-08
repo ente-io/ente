@@ -605,6 +605,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "onDevice": MessageLookupByLibrary.simpleMessage("על המכשיר"),
         "onEnte":
             MessageLookupByLibrary.simpleMessage("ב<branding>אנטע</branding>"),
+        "onlyThem": MessageLookupByLibrary.simpleMessage("Only them"),
         "oops": MessageLookupByLibrary.simpleMessage("אופס"),
         "oopsSomethingWentWrong":
             MessageLookupByLibrary.simpleMessage("אופס, משהו השתבש"),

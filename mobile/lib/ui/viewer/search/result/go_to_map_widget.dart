@@ -19,7 +19,7 @@ class GoToMap extends StatelessWidget {
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => MapScreen(
-                filesFutureFn: SearchService.instance.getAllFiles,
+                filesFutureFn: SearchService.instance.getAllFilesForSearch,
               ),
             ),
           );
