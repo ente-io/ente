@@ -1,5 +1,6 @@
 import { stashRedirect } from "@/accounts/services/redirect";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { errorDialogAttributes } from "@/base/components/utils/dialog";
 import { ALL_SECTION } from "@/new/photos/services/collection";
 import { createFileCollectionIDs } from "@/new/photos/services/file";
 import { getLocalFiles } from "@/new/photos/services/files";
@@ -40,7 +41,7 @@ export const Info = styled("div")`
 `;
 
 export default function Deduplicate() {
-    const { showNavBar, showLoadingBar, hideLoadingBar, setDialogMessage } =
+    const { showNavBar, showLoadingBar, hideLoadingBar, showMiniDialog } =
         useAppContext();
     const [duplicates, setDuplicates] = useState<Duplicate[]>(null);
     const [collectionNameMap, setCollectionNameMap] = useState(
@@ -146,24 +147,14 @@ export default function Deduplicate() {
             );
             await syncTrash(collections, () => {});
         } catch (e) {
-            if (
-                e instanceof ApiError &&
-                e.httpStatusCode === HttpStatusCode.Forbidden
-            ) {
-                setDialogMessage({
-                    title: t("error"),
-
-                    close: { variant: "critical" },
-                    content: t("NOT_FILE_OWNER"),
-                });
-            } else {
-                setDialogMessage({
-                    title: t("error"),
-
-                    close: { variant: "critical" },
-                    content: t("generic_error_retry"),
-                });
-            }
+            showMiniDialog(
+                errorDialogAttributes(
+                    e instanceof ApiError &&
+                        e.httpStatusCode == HttpStatusCode.Forbidden
+                        ? t("NOT_FILE_OWNER")
+                        : t("generic_error"),
+                ),
+            );
         } finally {
             await syncWithRemote();
             hideLoadingBar();
