@@ -873,6 +873,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       if (result == null) {
         return;
       }
+      // wait to allow the dialog to close
       await Future.delayed(const Duration(milliseconds: 100));
       if (result.action == ButtonAction.first) {
         await showDialog(
