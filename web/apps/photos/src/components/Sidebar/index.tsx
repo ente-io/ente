@@ -326,7 +326,7 @@ function MemberSubscriptionManage({ open, userDetails, onClose }) {
 
     const confirmLeaveFamily = () =>
         showMiniDialog({
-            title: t("LEAVE_FAMILY_PLAN}"),
+            title: t("LEAVE_FAMILY_PLAN"),
             message: t("LEAVE_FAMILY_CONFIRM"),
             continue: {
                 text: t("LEAVE"),
