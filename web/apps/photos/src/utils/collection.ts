@@ -200,25 +200,25 @@ export function getDeviceLimitOptions() {
 }
 
 export const shareExpiryOptions = () => [
-    { label: t("NEVER"), value: () => 0 },
+    { label: t("never"), value: () => 0 },
     {
-        label: t("AFTER_TIME.HOUR"),
+        label: t("after_time.hour"),
         value: () => getUnixTimeInMicroSecondsWithDelta({ hours: 1 }),
     },
     {
-        label: t("AFTER_TIME.DAY"),
+        label: t("after_time.day"),
         value: () => getUnixTimeInMicroSecondsWithDelta({ days: 1 }),
     },
     {
-        label: t("AFTER_TIME.WEEK"),
+        label: t("after_time.week"),
         value: () => getUnixTimeInMicroSecondsWithDelta({ days: 7 }),
     },
     {
-        label: t("AFTER_TIME.MONTH"),
+        label: t("after_time.month"),
         value: () => getUnixTimeInMicroSecondsWithDelta({ months: 1 }),
     },
     {
-        label: t("AFTER_TIME.YEAR"),
+        label: t("after_time.year"),
         value: () => getUnixTimeInMicroSecondsWithDelta({ years: 1 }),
     },
 ];

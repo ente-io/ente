@@ -52,12 +52,12 @@ export function PublicLinkSetPassword({
         >
             <Stack spacing={3} p={1.5}>
                 <Typography variant="h3" px={1} py={0.5} fontWeight={"bold"}>
-                    {t("PASSWORD_LOCK")}
+                    {t("password_lock")}
                 </Typography>
                 <SingleInputForm
                     callback={savePassword}
                     placeholder={t("password")}
-                    buttonText={t("LOCK")}
+                    buttonText={t("lock")}
                     fieldType="password"
                     secondaryButtonAction={onClose}
                     submitButtonProps={{ sx: { mt: 1, mb: 2 } }}

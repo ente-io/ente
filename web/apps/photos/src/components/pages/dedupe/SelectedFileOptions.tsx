@@ -25,10 +25,10 @@ export default function DeduplicateOptions({
 
     const trashHandler = () =>
         showMiniDialog({
-            title: t("TRASH_FILES_TITLE"),
-            message: t("TRASH_FILES_MESSAGE"),
+            title: t("trash_files_title"),
+            message: t("trash_files_message"),
             continue: {
-                text: t("MOVE_TO_TRASH"),
+                text: t("move_to_trash"),
                 color: "critical",
                 action: deleteFileHelper,
             },

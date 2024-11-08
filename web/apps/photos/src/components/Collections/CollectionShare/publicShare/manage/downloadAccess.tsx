@@ -33,8 +33,8 @@ export function ManageDownloadAccess({
 
     const disableFileDownload = () => {
         showMiniDialog({
-            title: t("DISABLE_FILE_DOWNLOAD"),
-            message: <Trans i18nKey={"DISABLE_FILE_DOWNLOAD_MESSAGE"} />,
+            title: t("disable_file_download"),
+            message: <Trans i18nKey={"disable_file_download_message"} />,
             continue: {
                 text: t("disable"),
                 color: "critical",

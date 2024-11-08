@@ -50,10 +50,10 @@ export default function UploadProgress({
 
     function confirmCancelUpload() {
         showMiniDialog({
-            title: t("STOP_UPLOADS_HEADER"),
-            message: t("STOP_ALL_UPLOADS_MESSAGE"),
+            title: t("stop_uploads_title"),
+            message: t("stop_uploads_message"),
             continue: {
-                text: t("YES_STOP_UPLOADS"),
+                text: t("yes_stop_uploads"),
                 color: "critical",
                 action: cancelUploads,
             },

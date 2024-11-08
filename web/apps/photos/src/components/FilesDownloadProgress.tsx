@@ -72,10 +72,10 @@ export const FilesDownloadProgress: React.FC<FilesDownloadProgressProps> = ({
         attributes: FilesDownloadProgressAttributes,
     ) => {
         showMiniDialog({
-            title: t("STOP_DOWNLOADS_HEADER"),
-            message: t("STOP_ALL_DOWNLOADS_MESSAGE"),
+            title: t("stop_downloads_title"),
+            message: t("stop_downloads_message"),
             continue: {
-                text: t("YES_STOP_DOWNLOADS"),
+                text: t("yes_stop_downloads"),
                 color: "critical",
                 action: () => {
                     attributes?.canceller.abort();
