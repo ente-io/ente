@@ -75,7 +75,7 @@ export function ManageLinkExpiry({
                     }
                     subText={
                         isLinkExpired(publicShareProp?.validTill)
-                            ? t("LINK_EXPIRED")
+                            ? t("link_expired")
                             : publicShareProp?.validTill
                               ? formatDateTime(
                                     publicShareProp?.validTill / 1000,

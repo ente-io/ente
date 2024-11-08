@@ -186,8 +186,8 @@ export default function PublicCollectionGallery() {
 
     const showPublicLinkExpiredMessage = () =>
         showMiniDialog({
-            title: t("LINK_EXPIRED"),
-            message: t("LINK_EXPIRED_MESSAGE"),
+            title: t("link_expired"),
+            message: t("link_expired_message"),
             nonClosable: true,
             continue: {
                 text: t("login"),
@@ -369,7 +369,7 @@ export default function PublicCollectionGallery() {
                 setErrorMessage(
                     parsedError.message === CustomError.TOO_MANY_REQUESTS
                         ? t("LINK_TOO_MANY_REQUESTS")
-                        : t("LINK_EXPIRED_MESSAGE"),
+                        : t("link_expired_message"),
                 );
                 // share has been disabled
                 // local cache should be cleared

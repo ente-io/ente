@@ -49,7 +49,7 @@ export default function ManagePublicShare({
                             startIcon={<ErrorOutlineIcon />}
                             color="critical"
                             onClick={openManageShare}
-                            label={t("LINK_EXPIRED")}
+                            label={t("link_expired")}
                         />
                     ) : (
                         <EnteMenuItem

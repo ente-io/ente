@@ -68,7 +68,7 @@ const ChangeEmailForm: React.FC = () => {
             //     ottInputRef.current?.focus();
             // }, 250);
         } catch (e) {
-            setFieldError("email", t("EMAIl_ALREADY_OWNED"));
+            setFieldError("email", t("email_already_taken"));
         }
         setLoading(false);
     };
