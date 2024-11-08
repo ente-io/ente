@@ -1,7 +1,5 @@
 import { DialogBoxAttributes } from "@ente/shared/components/DialogBox/types";
-import InfoOutlined from "@mui/icons-material/InfoRounded";
 import { t } from "i18next";
-import { Trans } from "react-i18next";
 
 export const getTrashFilesMessage = (
     deleteFileHelper,
@@ -27,15 +25,3 @@ export const getTrashFileMessage = (deleteFileHelper): DialogBoxAttributes => ({
     },
     close: { text: t("cancel") },
 });
-
-export const getRootLevelFileWithFolderNotAllowMessage =
-    (): DialogBoxAttributes => ({
-        icon: <InfoOutlined />,
-        title: t("ROOT_LEVEL_FILE_WITH_FOLDER_NOT_ALLOWED"),
-        content: (
-            <Trans
-                i18nKey={"ROOT_LEVEL_FILE_WITH_FOLDER_NOT_ALLOWED_MESSAGE"}
-            />
-        ),
-        close: {},
-    });
