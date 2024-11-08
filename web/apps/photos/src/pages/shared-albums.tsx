@@ -78,7 +78,6 @@ import {
 } from "types/gallery";
 import { downloadCollectionFiles } from "utils/collection";
 import { downloadSelectedFiles, getSelectedFiles } from "utils/file";
-import { formatNumber } from "utils/number/format";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 
 export default function PublicCollectionGallery() {
@@ -677,9 +676,7 @@ const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                 <IconButton onClick={clearSelection}>
                     <CloseIcon />
                 </IconButton>
-                <Box ml={1.5}>
-                    {formatNumber(count)} {t("SELECTED")}{" "}
-                </Box>
+                <Box ml={1.5}>{t("selected_count", { selected: count })}</Box>
             </FluidContainer>
             <Stack spacing={2} direction="row" mr={2}>
                 <Tooltip title={t("download")}>
