@@ -1275,7 +1275,7 @@ export async function handleSubscriptionCompletionRedirectIfNeeded(
             case "requires_payment_method":
                 showMiniDialog({
                     title: t("update_payment_method"),
-                    message: t("UPDATE_PAYMENT_METHOD_MESSAGE"),
+                    message: t("update_payment_method_message"),
                     continue: {
                         text: t("update_payment_method"),
                         action: () => {
@@ -1288,7 +1288,7 @@ export async function handleSubscriptionCompletionRedirectIfNeeded(
             case "authentication_failed":
                 showMiniDialog({
                     title: t("update_payment_method"),
-                    message: t("STRIPE_AUTHENTICATION_FAILED"),
+                    message: t("payment_method_authentication_failed"),
                     continue: {
                         text: t("update_payment_method"),
                         action: () => {
