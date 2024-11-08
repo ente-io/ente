@@ -10,6 +10,7 @@ import "package:logging/logging.dart";
 import "package:path_provider/path_provider.dart";
 import "package:photos/core/network/network.dart";
 import "package:photos/models/file/file.dart";
+import "package:photos/models/file/file_type.dart";
 import "package:photos/utils/file_key.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/gzip.dart";
@@ -31,6 +32,8 @@ class PreviewVideoStore {
     try {
       // check if playlist already exist
       await getPlaylist(enteFile);
+      final resultUrl = await getPreviewUrl(enteFile);
+      debugPrint("previewUrl $resultUrl");
       return;
     } catch (e) {
       _logger.warning("Failed to get playlist for $enteFile", e);
@@ -188,6 +191,23 @@ class PreviewVideoStore {
 
       return playlistFile;
     } catch (e, s) {
+      rethrow;
+    }
+  }
+
+  Future<String> getPreviewUrl(EnteFile file) async {
+    try {
+      final response = await _dio.get(
+        "/files/data/preview",
+        queryParameters: {
+          "fileID": file.uploadedFileID,
+          "type":
+              file.fileType == FileType.video ? "vid_preview" : "img_preview",
+        },
+      );
+      return response.data["url"];
+    } catch (e) {
+      _logger.warning("Failed to get preview url", e);
       rethrow;
     }
   }
