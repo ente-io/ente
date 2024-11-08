@@ -415,9 +415,9 @@ Future<MLResult> analyzeImageStatic(Map args) async {
     if (decodeInRust) {
       rustResults = await processImageMlFromPath(imagePath: imagePath);
     } else {
-      final (image, rawRgbaBytes) = await decodeImageFromPath(imagePath);
+      final (image, decodedRgbaBytes) = await decodeImageFromPath(imagePath);
       rustResults = await processImageMlFromData(
-        rgbaData: rawRgbaBytes,
+        rgbaData: decodedRgbaBytes,
         width: image.width,
         height: image.height,
       );
