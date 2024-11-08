@@ -447,6 +447,7 @@ export default function Gallery() {
         if (router.isReady && getKey(SESSION_KEYS.ENCRYPTION_KEY)) {
             handleSubscriptionCompletionRedirectIfNeeded(
                 showMiniDialog,
+                showLoadingBar,
                 router,
             );
         }
@@ -1236,6 +1237,7 @@ const HiddenSectionNavbarContents: React.FC<
  */
 export async function handleSubscriptionCompletionRedirectIfNeeded(
     showMiniDialog: (attributes: MiniDialogAttributes) => void,
+    showLoadingBar: () => void,
     router: NextRouter,
 ) {
     const { session_id: sessionID, status, reason } = router.query;
@@ -1276,7 +1278,10 @@ export async function handleSubscriptionCompletionRedirectIfNeeded(
                     message: t("UPDATE_PAYMENT_METHOD_MESSAGE"),
                     continue: {
                         text: t("UPDATE_PAYMENT_METHOD"),
-                        action: redirectToCustomerPortal,
+                        action: () => {
+                            showLoadingBar();
+                            return redirectToCustomerPortal();
+                        },
                     },
                 });
                 break;
@@ -1286,7 +1291,10 @@ export async function handleSubscriptionCompletionRedirectIfNeeded(
                     message: t("STRIPE_AUTHENTICATION_FAILED"),
                     continue: {
                         text: t("UPDATE_PAYMENT_METHOD"),
-                        action: redirectToCustomerPortal,
+                        action: () => {
+                            showLoadingBar();
+                            return redirectToCustomerPortal();
+                        },
                     },
                 });
                 break;
