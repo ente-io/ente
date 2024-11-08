@@ -27,7 +27,6 @@ import { t } from "i18next";
 import { useContext } from "react";
 import { COLLECTION_OPS_TYPE } from "utils/collection";
 import { FILE_OPS_TYPE } from "utils/file";
-import { formatNumber } from "utils/number/format";
 import { getTrashFilesMessage } from "utils/ui";
 
 interface Props {
@@ -181,9 +180,12 @@ const SelectedFileOptions = ({
                     <CloseIcon />
                 </IconButton>
                 <Box ml={1.5}>
-                    {formatNumber(count)} {t("SELECTED")}{" "}
-                    {ownCount !== count &&
-                        `(${formatNumber(ownCount)} ${t("YOURS")})`}
+                    {ownCount === count
+                        ? t("selected_count", { selected: count })
+                        : t("selected_and_yours_count", {
+                              selected: count,
+                              yours: ownCount,
+                          })}
                 </Box>
             </FluidContainer>
             <Stack spacing={2} direction="row" mr={2}>

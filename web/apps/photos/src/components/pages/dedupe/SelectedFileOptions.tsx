@@ -7,7 +7,6 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { Box, IconButton, Tooltip } from "@mui/material";
 import { t } from "i18next";
 import { useContext } from "react";
-import { formatNumber } from "utils/number/format";
 import { getTrashFilesMessage } from "utils/ui";
 
 interface IProps {
@@ -40,9 +39,7 @@ export default function DeduplicateOptions({
                         <BackButton />
                     </IconButton>
                 )}
-                <Box ml={1.5}>
-                    {formatNumber(count)} {t("SELECTED")}
-                </Box>
+                <Box ml={1.5}>{t("selected_count", { selected: count })}</Box>
             </FluidContainer>
             <Tooltip title={t("delete")}>
                 <IconButton onClick={trashHandler}>
