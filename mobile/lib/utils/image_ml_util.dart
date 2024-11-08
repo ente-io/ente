@@ -48,6 +48,8 @@ const List<String> supportedImageFormats = [
   'tga',
   'tiff',
   'webp',
+  'heic',
+  'heif',
 ];
 
 Future<(Image, Uint8List)> decodeImageFromPath(String imagePath) async {

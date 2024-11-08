@@ -1,3 +1,5 @@
+use image::ImageBuffer;
+use libheif_rs::{ColorSpace, HeifContext, LibHeif, RgbChroma};
 use resize::{px::RGB, Pixel::RGB8, Type::Lanczos3, Type::Mitchell};
 use rgb::FromSlice;
 
@@ -14,8 +16,35 @@ pub fn process_image_ml_from_path(
     usize,
     usize,
 ) {
+    // Check the image format by checking the file extension in the image_path string (~0ms)
+    let format = image_path.split('.').last().unwrap().to_lowercase();
+
+    let img = if format == "heic" || format == "heif" {
+        let lib_heif = LibHeif::new();
+        let ctx = HeifContext::read_from_file(image_path).expect("Failed to read HEIF file");
+        let handle = ctx
+            .primary_image_handle()
+            .expect("Failed to get primary image handle");
+        let decoded = lib_heif
+            .decode(&handle, ColorSpace::Rgb(RgbChroma::Rgb), None)
+            .expect("Failed to decode image");
+        let plane = decoded
+            .planes()
+            .interleaved
+            .expect("Failed to get interleaved plane");
+        let rgb_data = plane.data.to_vec();
+        let img = image::DynamicImage::from(
+            ImageBuffer::<image::Rgb<u8>, _>::from_raw(decoded.width(), decoded.height(), rgb_data)
+                .expect("Failed to create image buffer"),
+        );
+        img
+    } else {
+        let img = image::open(image_path).expect("Failed to open image");
+        img
+    };
+
     // Load the image (~200ms)
-    let img = image::open(image_path).expect("Failed to open image");
+    // let img = image::open(image_path).expect("Failed to open image");
 
     // Get dimensions for resized images (0ms)
     let (width, height) = (img.width() as usize, img.height() as usize);

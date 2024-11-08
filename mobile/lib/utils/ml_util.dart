@@ -400,6 +400,7 @@ Future<MLResult> analyzeImageStatic(Map args) async {
 
     // Decode the image once to use for both face detection and alignment
     final safePath = await safePathFromImagepath(imagePath);
+    final format = safePath.split('.').last;
     // final (image, rawRgbaBytes) = await decodeImageFromPath(imagePath);
 
     final (
@@ -416,7 +417,7 @@ Future<MLResult> analyzeImageStatic(Map args) async {
     final decodeTime = DateTime.now();
     final decodeMs = decodeTime.difference(startTime).inMilliseconds;
     _logger.info(
-      'ML processing in rust took ${DateTime.now().difference(decodeTime).inMilliseconds} ms',
+      'ML processing in rust took ${DateTime.now().difference(decodeTime).inMilliseconds} ms for format $format',
     );
     final decodedImageSize =
         Dimensions(height: imageHeight.toInt(), width: imageWidth.toInt());
