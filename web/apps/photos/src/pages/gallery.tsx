@@ -233,8 +233,8 @@ export default function Gallery() {
     const {
         showLoadingBar,
         hideLoadingBar,
-        setDialogMessage,
         showMiniDialog,
+        onGenericError,
         logout,
         ...appContext
     } = useAppContext();
@@ -713,13 +713,7 @@ export default function Gallery() {
                 clearSelection();
                 await syncWithRemote(false, true);
             } catch (e) {
-                log.error(`collection ops (${ops}) failed`, e);
-                setDialogMessage({
-                    title: t("error"),
-
-                    close: { variant: "critical" },
-                    content: t("generic_error_retry"),
-                });
+                onGenericError(e);
             } finally {
                 hideLoadingBar();
             }
@@ -752,13 +746,7 @@ export default function Gallery() {
             clearSelection();
             await syncWithRemote(false, true);
         } catch (e) {
-            log.error(`file ops (${ops}) failed`, e);
-            setDialogMessage({
-                title: t("error"),
-
-                close: { variant: "critical" },
-                content: t("generic_error_retry"),
-            });
+            onGenericError(e);
         } finally {
             hideLoadingBar();
         }
@@ -771,13 +759,7 @@ export default function Gallery() {
                 const collection = await createAlbum(collectionName);
                 await collectionOpsHelper(ops)(collection);
             } catch (e) {
-                log.error(`create and collection ops (${ops}) failed`, e);
-                setDialogMessage({
-                    title: t("error"),
-
-                    close: { variant: "critical" },
-                    content: t("generic_error_retry"),
-                });
+                onGenericError(e);
             } finally {
                 hideLoadingBar();
             }
