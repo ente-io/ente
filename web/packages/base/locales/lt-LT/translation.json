@@ -517,11 +517,11 @@
         "tb": "TB"
     },
     "after_time": {
-        "hour": "po valandos",
-        "day": "po dienos",
-        "week": "po savaitės",
-        "month": "po mėnesio",
-        "year": "po metų"
+        "hour": "Po valandos",
+        "day": "Po dienos",
+        "week": "Po savaitės",
+        "month": "Po mėnesio",
+        "year": "Po metų"
     },
     "COPY_LINK": "Kopijuoti nuorodą",
     "DONE": "Atlikta",

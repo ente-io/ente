@@ -517,11 +517,11 @@
         "tb": "To"
     },
     "after_time": {
-        "hour": "dans une heure",
-        "day": "dans un jour",
-        "week": "dans une semaine",
-        "month": "dans un mois",
-        "year": "dans un an"
+        "hour": "Dans une heure",
+        "day": "Dans un jour",
+        "week": "Dans une semaine",
+        "month": "Dans un mois",
+        "year": "Dans un an"
     },
     "COPY_LINK": "Copier le lien",
     "DONE": "Terminé",

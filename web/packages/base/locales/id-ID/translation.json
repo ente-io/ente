@@ -517,11 +517,11 @@
         "tb": "TB"
     },
     "after_time": {
-        "hour": "setelah satu jam",
-        "day": "setelah satu hari",
-        "week": "setelah satu minggu",
-        "month": "setelah satu bulan",
-        "year": "setelah satu tahun"
+        "hour": "Setelah satu jam",
+        "day": "Setelah satu hari",
+        "week": "Setelah satu minggu",
+        "month": "Setelah satu bulan",
+        "year": "Setelah satu tahun"
     },
     "COPY_LINK": "Salin link",
     "DONE": "Selesai",

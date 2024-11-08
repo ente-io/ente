@@ -517,11 +517,11 @@
         "tb": "TB"
     },
     "after_time": {
-        "hour": "na één uur",
-        "day": "na één dag",
-        "week": "na één week",
-        "month": "na één maand",
-        "year": "na één jaar"
+        "hour": "Na één uur",
+        "day": "Na één dag",
+        "week": "Na één week",
+        "month": "Na één maand",
+        "year": "Na één jaar"
     },
     "COPY_LINK": "Link kopiëren",
     "DONE": "Voltooid",

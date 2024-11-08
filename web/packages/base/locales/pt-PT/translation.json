@@ -517,11 +517,11 @@
         "tb": "TB"
     },
     "after_time": {
-        "hour": "após uma hora",
-        "day": "após um dia",
-        "week": "após uma semana",
-        "month": "após um mês",
-        "year": "após um ano"
+        "hour": "Após uma hora",
+        "day": "Após um dia",
+        "week": "Após uma semana",
+        "month": "Após um mês",
+        "year": "Após um ano"
     },
     "COPY_LINK": "Copiar link",
     "DONE": "Concluído",
