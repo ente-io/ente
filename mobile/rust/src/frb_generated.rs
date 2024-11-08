@@ -37,7 +37,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueNom,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.5.1";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -804230794;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 1140226238;
 
 // Section: executor
 
@@ -45,29 +45,6 @@ flutter_rust_bridge::frb_generated_default_handler!();
 
 // Section: wire_funcs
 
-fn wire__crate__api__image_processing__process_clip_impl(
-    port_: flutter_rust_bridge::for_generated::MessagePort,
-    image_path: impl CstDecode<String>,
-) {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::DcoCodec, _, _>(
-        flutter_rust_bridge::for_generated::TaskInfo {
-            debug_name: "process_clip",
-            port: Some(port_),
-            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
-        },
-        move || {
-            let api_image_path = image_path.cst_decode();
-            move |context| {
-                transform_result_dco::<_, _, ()>((move || {
-                    let output_ok = Result::<_, ()>::Ok(
-                        crate::api::image_processing::process_clip(&api_image_path),
-                    )?;
-                    Ok(output_ok)
-                })())
-            }
-        },
-    )
-}
 fn wire__crate__api__image_processing__process_image_ml_from_data_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     rgba_data: impl CstDecode<Vec<u8>>,
@@ -115,29 +92,6 @@ fn wire__crate__api__image_processing__process_image_ml_from_path_impl(
                 transform_result_dco::<_, _, ()>((move || {
                     let output_ok = Result::<_, ()>::Ok(
                         crate::api::image_processing::process_image_ml_from_path(&api_image_path),
-                    )?;
-                    Ok(output_ok)
-                })())
-            }
-        },
-    )
-}
-fn wire__crate__api__image_processing__process_yolo_face_impl(
-    port_: flutter_rust_bridge::for_generated::MessagePort,
-    image_path: impl CstDecode<String>,
-) {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::DcoCodec, _, _>(
-        flutter_rust_bridge::for_generated::TaskInfo {
-            debug_name: "process_yolo_face",
-            port: Some(port_),
-            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
-        },
-        move || {
-            let api_image_path = image_path.cst_decode();
-            move |context| {
-                transform_result_dco::<_, _, ()>((move || {
-                    let output_ok = Result::<_, ()>::Ok(
-                        crate::api::image_processing::process_yolo_face(&api_image_path),
                     )?;
                     Ok(output_ok)
                 })())
@@ -220,17 +174,6 @@ impl SseDecode for Vec<u8> {
             ans_.push(<u8>::sse_decode(deserializer));
         }
         return ans_;
-    }
-}
-
-impl SseDecode for (Vec<u8>, String, usize, usize) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        let mut var_field0 = <Vec<u8>>::sse_decode(deserializer);
-        let mut var_field1 = <String>::sse_decode(deserializer);
-        let mut var_field2 = <usize>::sse_decode(deserializer);
-        let mut var_field3 = <usize>::sse_decode(deserializer);
-        return (var_field0, var_field1, var_field2, var_field3);
     }
 }
 
@@ -349,16 +292,6 @@ impl SseEncode for Vec<u8> {
     }
 }
 
-impl SseEncode for (Vec<u8>, String, usize, usize) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        <Vec<u8>>::sse_encode(self.0, serializer);
-        <String>::sse_encode(self.1, serializer);
-        <usize>::sse_encode(self.2, serializer);
-        <usize>::sse_encode(self.3, serializer);
-    }
-}
-
 impl SseEncode
     for (
         Vec<u8>,
@@ -474,40 +407,12 @@ mod io {
             }
         }
     }
-    impl CstDecode<(Vec<u8>, String, usize, usize)>
-        for wire_cst_record_list_prim_u_8_strict_string_usize_usize
-    {
-        // Codec=Cst (C-struct based), see doc to use other codecs
-        fn cst_decode(self) -> (Vec<u8>, String, usize, usize) {
-            (
-                self.field0.cst_decode(),
-                self.field1.cst_decode(),
-                self.field2.cst_decode(),
-                self.field3.cst_decode(),
-            )
-        }
-    }
     impl CstDecode<(Vec<u8>,usize,usize,Vec<u8>,usize,usize,Vec<u8>,usize,usize,)> for wire_cst_record_list_prim_u_8_strict_usize_usize_list_prim_u_8_strict_usize_usize_list_prim_u_8_strict_usize_usize {
             // Codec=Cst (C-struct based), see doc to use other codecs
             fn cst_decode(self) -> (Vec<u8>,usize,usize,Vec<u8>,usize,usize,Vec<u8>,usize,usize,) {
                 (self.field0.cst_decode(),self.field1.cst_decode(),self.field2.cst_decode(),self.field3.cst_decode(),self.field4.cst_decode(),self.field5.cst_decode(),self.field6.cst_decode(),self.field7.cst_decode(),self.field8.cst_decode(),)
             }
         }
-    impl NewWithNullPtr for wire_cst_record_list_prim_u_8_strict_string_usize_usize {
-        fn new_with_null_ptr() -> Self {
-            Self {
-                field0: core::ptr::null_mut(),
-                field1: core::ptr::null_mut(),
-                field2: Default::default(),
-                field3: Default::default(),
-            }
-        }
-    }
-    impl Default for wire_cst_record_list_prim_u_8_strict_string_usize_usize {
-        fn default() -> Self {
-            Self::new_with_null_ptr()
-        }
-    }
     impl NewWithNullPtr for wire_cst_record_list_prim_u_8_strict_usize_usize_list_prim_u_8_strict_usize_usize_list_prim_u_8_strict_usize_usize {
             fn new_with_null_ptr() -> Self {
                 Self { field0: core::ptr::null_mut(),
@@ -528,14 +433,6 @@ field8: Default::default(), }
         }
 
     #[no_mangle]
-    pub extern "C" fn frbgen_photos_wire__crate__api__image_processing__process_clip(
-        port_: i64,
-        image_path: *mut wire_cst_list_prim_u_8_strict,
-    ) {
-        wire__crate__api__image_processing__process_clip_impl(port_, image_path)
-    }
-
-    #[no_mangle]
     pub extern "C" fn frbgen_photos_wire__crate__api__image_processing__process_image_ml_from_data(
         port_: i64,
         rgba_data: *mut wire_cst_list_prim_u_8_loose,
@@ -553,14 +450,6 @@ field8: Default::default(), }
         image_path: *mut wire_cst_list_prim_u_8_strict,
     ) {
         wire__crate__api__image_processing__process_image_ml_from_path_impl(port_, image_path)
-    }
-
-    #[no_mangle]
-    pub extern "C" fn frbgen_photos_wire__crate__api__image_processing__process_yolo_face(
-        port_: i64,
-        image_path: *mut wire_cst_list_prim_u_8_strict,
-    ) {
-        wire__crate__api__image_processing__process_yolo_face_impl(port_, image_path)
     }
 
     #[no_mangle]
@@ -608,14 +497,6 @@ field8: Default::default(), }
     pub struct wire_cst_list_prim_u_8_strict {
         ptr: *mut u8,
         len: i32,
-    }
-    #[repr(C)]
-    #[derive(Clone, Copy)]
-    pub struct wire_cst_record_list_prim_u_8_strict_string_usize_usize {
-        field0: *mut wire_cst_list_prim_u_8_strict,
-        field1: *mut wire_cst_list_prim_u_8_strict,
-        field2: usize,
-        field3: usize,
     }
     #[repr(C)]
     #[derive(Clone, Copy)]

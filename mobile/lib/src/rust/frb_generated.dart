@@ -72,7 +72,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.5.1';
 
   @override
-  int get rustContentHash => -804230794;
+  int get rustContentHash => 1140226238;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -83,9 +83,6 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
 }
 
 abstract class RustLibApi extends BaseApi {
-  Future<(Uint8List, String, BigInt, BigInt)>
-      crateApiImageProcessingProcessClip({required String imagePath});
-
   Future<
           (
             Uint8List,
@@ -118,9 +115,6 @@ abstract class RustLibApi extends BaseApi {
       crateApiImageProcessingProcessImageMlFromPath(
           {required String imagePath});
 
-  Future<(Uint8List, String, BigInt, BigInt)>
-      crateApiImageProcessingProcessYoloFace({required String imagePath});
-
   String crateApiSimpleGreet({required String name});
 
   Future<void> crateApiSimpleInitApp();
@@ -133,32 +127,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     required super.generalizedFrbRustBinding,
     required super.portManager,
   });
-
-  @override
-  Future<(Uint8List, String, BigInt, BigInt)>
-      crateApiImageProcessingProcessClip({required String imagePath}) {
-    return handler.executeNormal(NormalTask(
-      callFfi: (port_) {
-        final arg0 = cst_encode_String(imagePath);
-        return wire.wire__crate__api__image_processing__process_clip(
-            port_, arg0);
-      },
-      codec: DcoCodec(
-        decodeSuccessData:
-            dco_decode_record_list_prim_u_8_strict_string_usize_usize,
-        decodeErrorData: null,
-      ),
-      constMeta: kCrateApiImageProcessingProcessClipConstMeta,
-      argValues: [imagePath],
-      apiImpl: this,
-    ));
-  }
-
-  TaskConstMeta get kCrateApiImageProcessingProcessClipConstMeta =>
-      const TaskConstMeta(
-        debugName: "process_clip",
-        argNames: ["imagePath"],
-      );
 
   @override
   Future<
@@ -243,32 +211,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
-  Future<(Uint8List, String, BigInt, BigInt)>
-      crateApiImageProcessingProcessYoloFace({required String imagePath}) {
-    return handler.executeNormal(NormalTask(
-      callFfi: (port_) {
-        final arg0 = cst_encode_String(imagePath);
-        return wire.wire__crate__api__image_processing__process_yolo_face(
-            port_, arg0);
-      },
-      codec: DcoCodec(
-        decodeSuccessData:
-            dco_decode_record_list_prim_u_8_strict_string_usize_usize,
-        decodeErrorData: null,
-      ),
-      constMeta: kCrateApiImageProcessingProcessYoloFaceConstMeta,
-      argValues: [imagePath],
-      apiImpl: this,
-    ));
-  }
-
-  TaskConstMeta get kCrateApiImageProcessingProcessYoloFaceConstMeta =>
-      const TaskConstMeta(
-        debugName: "process_yolo_face",
-        argNames: ["imagePath"],
-      );
-
-  @override
   String crateApiSimpleGreet({required String name}) {
     return handler.executeSync(SyncTask(
       callFfi: () {
@@ -327,22 +269,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   Uint8List dco_decode_list_prim_u_8_strict(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw as Uint8List;
-  }
-
-  @protected
-  (Uint8List, String, BigInt, BigInt)
-      dco_decode_record_list_prim_u_8_strict_string_usize_usize(dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    final arr = raw as List<dynamic>;
-    if (arr.length != 4) {
-      throw Exception('Expected 4 elements, got ${arr.length}');
-    }
-    return (
-      dco_decode_list_prim_u_8_strict(arr[0]),
-      dco_decode_String(arr[1]),
-      dco_decode_usize(arr[2]),
-      dco_decode_usize(arr[3]),
-    );
   }
 
   @protected
@@ -419,18 +345,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     final len_ = sse_decode_i_32(deserializer);
     return deserializer.buffer.getUint8List(len_);
-  }
-
-  @protected
-  (Uint8List, String, BigInt, BigInt)
-      sse_decode_record_list_prim_u_8_strict_string_usize_usize(
-          SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    final var_field0 = sse_decode_list_prim_u_8_strict(deserializer);
-    final var_field1 = sse_decode_String(deserializer);
-    final var_field2 = sse_decode_usize(deserializer);
-    final var_field3 = sse_decode_usize(deserializer);
-    return (var_field0, var_field1, var_field2, var_field3);
   }
 
   @protected
@@ -543,16 +457,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_i_32(self.length, serializer);
     serializer.buffer.putUint8List(self);
-  }
-
-  @protected
-  void sse_encode_record_list_prim_u_8_strict_string_usize_usize(
-      (Uint8List, String, BigInt, BigInt) self, SseSerializer serializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_list_prim_u_8_strict(self.$1, serializer);
-    sse_encode_String(self.$2, serializer);
-    sse_encode_usize(self.$3, serializer);
-    sse_encode_usize(self.$4, serializer);
   }
 
   @protected

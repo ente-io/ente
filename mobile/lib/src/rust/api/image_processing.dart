@@ -43,13 +43,3 @@ Future<
         required int height}) =>
     RustLib.instance.api.crateApiImageProcessingProcessImageMlFromData(
         rgbaData: rgbaData, width: width, height: height);
-
-Future<(Uint8List, String, BigInt, BigInt)> processYoloFace(
-        {required String imagePath}) =>
-    RustLib.instance.api
-        .crateApiImageProcessingProcessYoloFace(imagePath: imagePath);
-
-Future<(Uint8List, String, BigInt, BigInt)> processClip(
-        {required String imagePath}) =>
-    RustLib.instance.api
-        .crateApiImageProcessingProcessClip(imagePath: imagePath);

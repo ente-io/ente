@@ -31,10 +31,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   Uint8List dco_decode_list_prim_u_8_strict(dynamic raw);
 
   @protected
-  (Uint8List, String, BigInt, BigInt)
-      dco_decode_record_list_prim_u_8_strict_string_usize_usize(dynamic raw);
-
-  @protected
   (
     Uint8List,
     BigInt,
@@ -68,11 +64,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   Uint8List sse_decode_list_prim_u_8_strict(SseDeserializer deserializer);
-
-  @protected
-  (Uint8List, String, BigInt, BigInt)
-      sse_decode_record_list_prim_u_8_strict_string_usize_usize(
-          SseDeserializer deserializer);
 
   @protected
   (
@@ -137,16 +128,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   }
 
   @protected
-  void cst_api_fill_to_wire_record_list_prim_u_8_strict_string_usize_usize(
-      (Uint8List, String, BigInt, BigInt) apiObj,
-      wire_cst_record_list_prim_u_8_strict_string_usize_usize wireObj) {
-    wireObj.field0 = cst_encode_list_prim_u_8_strict(apiObj.$1);
-    wireObj.field1 = cst_encode_String(apiObj.$2);
-    wireObj.field2 = cst_encode_usize(apiObj.$3);
-    wireObj.field3 = cst_encode_usize(apiObj.$4);
-  }
-
-  @protected
   void cst_api_fill_to_wire_record_list_prim_u_8_strict_usize_usize_list_prim_u_8_strict_usize_usize_list_prim_u_8_strict_usize_usize(
       (
         Uint8List,
@@ -190,10 +171,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_list_prim_u_8_strict(
       Uint8List self, SseSerializer serializer);
-
-  @protected
-  void sse_encode_record_list_prim_u_8_strict_string_usize_usize(
-      (Uint8List, String, BigInt, BigInt) self, SseSerializer serializer);
 
   @protected
   void
@@ -271,25 +248,6 @@ class RustLibWire implements BaseWire {
   late final _store_dart_post_cobject = _store_dart_post_cobjectPtr
       .asFunction<void Function(DartPostCObjectFnType)>();
 
-  void wire__crate__api__image_processing__process_clip(
-    int port_,
-    ffi.Pointer<wire_cst_list_prim_u_8_strict> image_path,
-  ) {
-    return _wire__crate__api__image_processing__process_clip(
-      port_,
-      image_path,
-    );
-  }
-
-  late final _wire__crate__api__image_processing__process_clipPtr = _lookup<
-          ffi.NativeFunction<
-              ffi.Void Function(
-                  ffi.Int64, ffi.Pointer<wire_cst_list_prim_u_8_strict>)>>(
-      'frbgen_photos_wire__crate__api__image_processing__process_clip');
-  late final _wire__crate__api__image_processing__process_clip =
-      _wire__crate__api__image_processing__process_clipPtr.asFunction<
-          void Function(int, ffi.Pointer<wire_cst_list_prim_u_8_strict>)>();
-
   void wire__crate__api__image_processing__process_image_ml_from_data(
     int port_,
     ffi.Pointer<wire_cst_list_prim_u_8_loose> rgba_data,
@@ -339,25 +297,6 @@ class RustLibWire implements BaseWire {
       _wire__crate__api__image_processing__process_image_ml_from_pathPtr
           .asFunction<
               void Function(int, ffi.Pointer<wire_cst_list_prim_u_8_strict>)>();
-
-  void wire__crate__api__image_processing__process_yolo_face(
-    int port_,
-    ffi.Pointer<wire_cst_list_prim_u_8_strict> image_path,
-  ) {
-    return _wire__crate__api__image_processing__process_yolo_face(
-      port_,
-      image_path,
-    );
-  }
-
-  late final _wire__crate__api__image_processing__process_yolo_facePtr = _lookup<
-          ffi.NativeFunction<
-              ffi.Void Function(
-                  ffi.Int64, ffi.Pointer<wire_cst_list_prim_u_8_strict>)>>(
-      'frbgen_photos_wire__crate__api__image_processing__process_yolo_face');
-  late final _wire__crate__api__image_processing__process_yolo_face =
-      _wire__crate__api__image_processing__process_yolo_facePtr.asFunction<
-          void Function(int, ffi.Pointer<wire_cst_list_prim_u_8_strict>)>();
 
   WireSyncRust2DartDco wire__crate__api__simple__greet(
     ffi.Pointer<wire_cst_list_prim_u_8_strict> name,
@@ -441,13 +380,6 @@ typedef DartDartPostCObjectFnTypeFunction = bool Function(
 typedef DartPort = ffi.Int64;
 typedef DartDartPort = int;
 
-final class wire_cst_list_prim_u_8_strict extends ffi.Struct {
-  external ffi.Pointer<ffi.Uint8> ptr;
-
-  @ffi.Int32()
-  external int len;
-}
-
 final class wire_cst_list_prim_u_8_loose extends ffi.Struct {
   external ffi.Pointer<ffi.Uint8> ptr;
 
@@ -455,17 +387,11 @@ final class wire_cst_list_prim_u_8_loose extends ffi.Struct {
   external int len;
 }
 
-final class wire_cst_record_list_prim_u_8_strict_string_usize_usize
-    extends ffi.Struct {
-  external ffi.Pointer<wire_cst_list_prim_u_8_strict> field0;
+final class wire_cst_list_prim_u_8_strict extends ffi.Struct {
+  external ffi.Pointer<ffi.Uint8> ptr;
 
-  external ffi.Pointer<wire_cst_list_prim_u_8_strict> field1;
-
-  @ffi.UintPtr()
-  external int field2;
-
-  @ffi.UintPtr()
-  external int field3;
+  @ffi.Int32()
+  external int len;
 }
 
 final class wire_cst_record_list_prim_u_8_strict_usize_usize_list_prim_u_8_strict_usize_usize_list_prim_u_8_strict_usize_usize
