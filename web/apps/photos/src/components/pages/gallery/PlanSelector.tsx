@@ -317,10 +317,7 @@ function FreeSubscriptionPlanSelectorCard({
                     {children}
                     {subscription && addOnBonuses.length > 0 && (
                         <>
-                            <AddOnBonusRows
-                                addOnBonuses={addOnBonuses}
-                                closeModal={closeModal}
-                            />
+                            <AddOnBonusRows addOnBonuses={addOnBonuses} />
                             <ManageSubscription
                                 subscription={subscription}
                                 hasAddOnBonus={true}
@@ -405,10 +402,7 @@ function PaidSubscriptionPlanSelectorCard({
                               })}
                     </Typography>
                     {addOnBonuses.length > 0 && (
-                        <AddOnBonusRows
-                            addOnBonuses={addOnBonuses}
-                            closeModal={closeModal}
-                        />
+                        <AddOnBonusRows addOnBonuses={addOnBonuses} />
                     )}
                 </Box>
             </Box>
@@ -650,38 +644,23 @@ const FreePlanRow_ = styled(SpaceBetweenFlex)(({ theme }) => ({
 
 interface AddOnBonusRowsProps {
     addOnBonuses: Bonus[];
-    closeModal: () => void;
 }
 
-const AddOnBonusRows: React.FC<AddOnBonusRowsProps> = ({
-    addOnBonuses,
-    closeModal,
-}) => (
+const AddOnBonusRows: React.FC<AddOnBonusRowsProps> = ({ addOnBonuses }) => (
     <>
         {addOnBonuses.map((bonus, i) => (
-            <AddOnRowContainer key={i} onClick={closeModal}>
-                <Typography color="text.muted">
-                    <Trans
-                        i18nKey={"add_on_valid_till"}
-                        values={{
-                            storage: formattedStorageByteSize(bonus.storage),
-                            date: bonus.validTill,
-                        }}
-                    />
-                </Typography>
-            </AddOnRowContainer>
+            <Typography color="text.muted" key={i} sx={{ pt: 1 }}>
+                <Trans
+                    i18nKey={"add_on_valid_till"}
+                    values={{
+                        storage: formattedStorageByteSize(bonus.storage),
+                        date: bonus.validTill,
+                    }}
+                />
+            </Typography>
         ))}
     </>
 );
-
-const AddOnRowContainer = styled(SpaceBetweenFlex)(({ theme }) => ({
-    // gap: theme.spacing(1.5),
-    padding: theme.spacing(1, 0),
-    cursor: "pointer",
-    "&:hover .endIcon": {
-        backgroundColor: "rgba(255,255,255,0.08)",
-    },
-}));
 
 interface ManageSubscriptionProps {
     subscription: Subscription;
