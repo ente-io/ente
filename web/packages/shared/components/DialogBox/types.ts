@@ -34,7 +34,3 @@ export interface DialogBoxAttributes {
         disabled?: boolean;
     };
 }
-
-export type SetDialogBoxAttributes = React.Dispatch<
-    React.SetStateAction<DialogBoxAttributes>
->;

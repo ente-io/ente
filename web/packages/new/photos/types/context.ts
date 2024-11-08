@@ -1,6 +1,5 @@
 import type { AccountsContextT } from "@/accounts/types/context";
 import { ensure } from "@/utils/ensure";
-import type { SetDialogBoxAttributes } from "@ente/shared/components/DialogBox/types";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import { createContext, useContext } from "react";
 import type { SetNotificationAttributes } from "./notification";
@@ -22,10 +21,6 @@ export type AppContextT = AccountsContextT & {
      * Show a generic error dialog, and log the given error.
      */
     onGenericError: (error: unknown) => void;
-    /**
-     * Deprecated, use showMiniDialog instead.
-     */
-    setDialogMessage: SetDialogBoxAttributes;
     setNotificationAttributes: SetNotificationAttributes;
     watchFolderView: boolean;
     setWatchFolderView: (isOpen: boolean) => void;

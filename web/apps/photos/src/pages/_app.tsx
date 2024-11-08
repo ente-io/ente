@@ -26,8 +26,6 @@ import { runMigrations } from "@/new/photos/services/migrations";
 import { initML, isMLSupported } from "@/new/photos/services/ml";
 import { getFamilyPortalRedirectURL } from "@/new/photos/services/user-details";
 import { AppContext } from "@/new/photos/types/context";
-import DialogBox from "@ente/shared/components/DialogBox";
-import { DialogBoxAttributes } from "@ente/shared/components/DialogBox/types";
 import { MessageContainer } from "@ente/shared/components/MessageContainer";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import HTTPService from "@ente/shared/network/HTTPService";
@@ -64,8 +62,6 @@ export default function App({ Component, pageProps }: AppProps) {
         typeof window !== "undefined" && !window.navigator.onLine,
     );
     const [showNavbar, setShowNavBar] = useState(false);
-    const [dialogMessage, setDialogMessage] = useState<DialogBoxAttributes>();
-    const [messageDialogView, setMessageDialogView] = useState(false);
     const [watchFolderView, setWatchFolderView] = useState(false);
     const [watchFolderFiles, setWatchFolderFiles] = useState<FileList>(null);
     const [notificationView, setNotificationView] = useState(false);
@@ -182,10 +178,6 @@ export default function App({ Component, pageProps }: AppProps) {
     }, []);
 
     useEffect(() => {
-        setMessageDialogView(true);
-    }, [dialogMessage]);
-
-    useEffect(() => {
         setNotificationView(true);
     }, [notificationAttributes]);
 
@@ -209,7 +201,6 @@ export default function App({ Component, pageProps }: AppProps) {
         showNavBar,
         showLoadingBar,
         hideLoadingBar,
-        setDialogMessage,
         watchFolderView,
         setWatchFolderView,
         watchFolderFiles,
@@ -236,13 +227,6 @@ export default function App({ Component, pageProps }: AppProps) {
                 </MessageContainer>
                 <LoadingBar color="#51cd7c" ref={loadingBarRef} />
 
-                <DialogBox
-                    sx={{ zIndex: photosDialogZIndex }}
-                    size="xs"
-                    open={messageDialogView}
-                    onClose={() => setMessageDialogView(false)}
-                    attributes={dialogMessage}
-                />
                 <AttributedMiniDialog
                     sx={{ zIndex: photosDialogZIndex }}
                     {...miniDialogProps}
