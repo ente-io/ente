@@ -326,10 +326,10 @@ function MemberSubscriptionManage({ open, userDetails, onClose }) {
 
     const confirmLeaveFamily = () =>
         showMiniDialog({
-            title: t("LEAVE_FAMILY_PLAN"),
-            message: t("LEAVE_FAMILY_CONFIRM"),
+            title: t("leave_family_plan"),
+            message: t("leave_family_plan_confirm"),
             continue: {
-                text: t("LEAVE"),
+                text: t("leave"),
                 color: "critical",
                 action: leaveFamily,
             },
@@ -343,7 +343,7 @@ function MemberSubscriptionManage({ open, userDetails, onClose }) {
         <Dialog {...{ open, onClose, fullScreen }} maxWidth="xs" fullWidth>
             <DialogTitleWithCloseButton onClose={onClose}>
                 <Typography variant="h3" fontWeight={"bold"}>
-                    {t("SUBSCRIPTION")}
+                    {t("subscription")}
                 </Typography>
                 <Typography color={"text.muted"}>{t("FAMILY_PLAN")}</Typography>
             </DialogTitleWithCloseButton>
@@ -371,7 +371,7 @@ function MemberSubscriptionManage({ open, userDetails, onClose }) {
                             color="critical"
                             onClick={confirmLeaveFamily}
                         >
-                            {t("LEAVE_FAMILY_PLAN")}
+                            {t("leave_family_plan")}
                         </Button>
                     </FlexWrapper>
                 </VerticallyCentered>

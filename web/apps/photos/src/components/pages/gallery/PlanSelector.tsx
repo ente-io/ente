@@ -196,7 +196,7 @@ const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
 
             case "contactSupport":
                 showMiniDialog({
-                    title: t("MANAGE_PLAN"),
+                    title: t("manage_plan"),
                     message: (
                         <Trans
                             i18nKey={"mail_to_manage_subscription"}
@@ -300,7 +300,7 @@ function FreeSubscriptionPlanSelectorCard({
     return (
         <>
             <Typography variant="h3" fontWeight={"bold"}>
-                {t("CHOOSE_PLAN")}
+                {t("choose_plan")}
             </Typography>
 
             <Box>
@@ -311,7 +311,7 @@ function FreeSubscriptionPlanSelectorCard({
                             togglePeriod={togglePeriod}
                         />
                         <Typography variant="small" mt={0.5} color="text.muted">
-                            {t("TWO_MONTHS_FREE")}
+                            {t("two_months_free")}
                         </Typography>
                     </Box>
                     {children}
@@ -348,7 +348,7 @@ function PaidSubscriptionPlanSelectorCard({
                 <SpaceBetweenFlex>
                     <Box>
                         <Typography variant="h3" fontWeight={"bold"}>
-                            {t("SUBSCRIPTION")}
+                            {t("subscription")}
                         </Typography>
                         <Typography variant="small" color={"text.muted"}>
                             {bytesInGB(subscription.storage, 2)}{" "}
@@ -364,7 +364,7 @@ function PaidSubscriptionPlanSelectorCard({
             <Box px={1.5}>
                 <Typography color={"text.muted"} fontWeight={"bold"}>
                     <Trans
-                        i18nKey="CURRENT_USAGE"
+                        i18nKey="current_usage"
                         values={{
                             usage: `${bytesInGB(usage, 2)} ${t("storage_unit.gb")}`,
                         }}
@@ -385,7 +385,7 @@ function PaidSubscriptionPlanSelectorCard({
                             togglePeriod={togglePeriod}
                         />
                         <Typography variant="small" mt={0.5} color="text.muted">
-                            {t("TWO_MONTHS_FREE")}
+                            {t("two_months_free")}
                         </Typography>
                     </Box>
                     {children}
@@ -700,7 +700,7 @@ function ManageSubscription({
                 color="secondary"
                 onClick={openFamilyPortal}
             >
-                {t("MANAGE_FAMILY_PORTAL")}
+                {t("manage_family")}
             </ManageSubscriptionButton>
         </Stack>
     );
@@ -796,7 +796,7 @@ const StripeSubscriptionOptions: React.FC<StripeSubscriptionOptionsProps> = ({
                 color="secondary"
                 onClick={handleManageClick}
             >
-                {t("MANAGEMENT_PORTAL")}
+                {t("manage_payment_method")}
             </ManageSubscriptionButton>
         </>
     );
