@@ -173,6 +173,7 @@
     "subscription_purchase_success": "<p>We've received your payment</p><p>Your subscription is valid till <strong>{{date, date}}</strong></p>",
     "subscription_purchase_cancelled": "Your purchase was canceled, please try again if you want to subscribe",
     "subscription_purchase_failed": "Subscription purchase failed, please try again",
+    "subscription_verification_error": "Subscription verification failed",
     "update_payment_method_message": "We are sorry, payment failed when we tried to charge your card, please update your payment method and try again",
     "payment_method_authentication_failed": "We are unable to authenticate your payment method. Please choose a different payment method and try again",
     "update_payment_method": "Update payment method",
@@ -505,7 +506,6 @@
     "advanced": "Advanced",
     "export_directory_does_not_exist": "Invalid export directory",
     "export_directory_does_not_exist_message": "<p>The export directory you have selected does not exist.</p><p>Please select a valid directory.</p>",
-    "subscription_verification_error": "Subscription verification failed",
     "storage_unit": {
         "b": "B",
         "kb": "KB",
