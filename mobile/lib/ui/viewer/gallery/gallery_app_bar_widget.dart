@@ -17,6 +17,7 @@ import "package:photos/gateways/cast_gw.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import 'package:photos/models/backup_status.dart';
+import "package:photos/models/button_result.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/gallery_type.dart';
@@ -861,7 +862,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     if (!Platform.isAndroid && !kDebugMode) {
       await _pairWithPin(gw, '');
     } else {
-      final result = await showDialog<ButtonAction?>(
+      final result = await showDialog<ButtonResult?>(
         context: context,
         barrierDismissible: true,
         useRootNavigator: false,
@@ -872,9 +873,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       if (result == null) {
         return;
       }
-      // wait to allow the dialog to close
       await Future.delayed(const Duration(milliseconds: 100));
-      if (result == ButtonAction.first) {
+      if (result.action == ButtonAction.first) {
         await showDialog(
           useRootNavigator: false,
           context: context,
@@ -889,7 +889,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           },
         );
       }
-      if (result == ButtonAction.second) {
+      if (result.action == ButtonAction.second) {
         await _pairWithPin(gw, '');
       }
     }
