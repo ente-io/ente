@@ -94,6 +94,8 @@
     "TRASH_FILE_TITLE": "",
     "DELETE_FILES_TITLE": "",
     "DELETE_FILES_MESSAGE": "",
+    "selected_count": "",
+    "selected_and_yours_count": "",
     "delete": "Eyða",
     "delete_key": "",
     "favorite": "",
