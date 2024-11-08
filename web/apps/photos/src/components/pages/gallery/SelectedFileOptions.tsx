@@ -27,7 +27,6 @@ import { t } from "i18next";
 import { useContext } from "react";
 import { COLLECTION_OPS_TYPE } from "utils/collection";
 import { FILE_OPS_TYPE } from "utils/file";
-import { getTrashFilesMessage } from "utils/ui";
 
 interface Props {
     handleCollectionOps: (
@@ -74,7 +73,7 @@ const SelectedFileOptions = ({
     isInSearchMode,
     isInHiddenSection,
 }: Props) => {
-    const { setDialogMessage } = useContext(AppContext);
+    const { setDialogMessage, showMiniDialog } = useContext(AppContext);
 
     const peopleMode = barMode == "people";
 
@@ -90,9 +89,15 @@ const SelectedFileOptions = ({
         });
 
     const trashHandler = () =>
-        setDialogMessage(
-            getTrashFilesMessage(handleFileOps(FILE_OPS_TYPE.TRASH)),
-        );
+        showMiniDialog({
+            title: t("TRASH_FILES_TITLE"),
+            message: t("TRASH_FILES_MESSAGE"),
+            continue: {
+                text: t("MOVE_TO_TRASH"),
+                color: "critical",
+                action: handleFileOps(FILE_OPS_TYPE.TRASH),
+            },
+        });
 
     const permanentlyDeleteHandler = () =>
         setDialogMessage({

@@ -124,7 +124,7 @@ export interface PhotoViewerProps {
 
 function PhotoViewer(props: PhotoViewerProps) {
     const galleryContext = useContext(GalleryContext);
-    const { showLoadingBar, hideLoadingBar, setDialogMessage, showMiniDialog } =
+    const { showLoadingBar, hideLoadingBar, showMiniDialog } =
         useContext(AppContext);
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext,
