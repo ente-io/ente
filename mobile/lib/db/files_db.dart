@@ -1541,27 +1541,6 @@ class FilesDB {
     return result;
   }
 
-  Future<Map<int, EnteFile>> getFilesFromGeneratedIDs(List<int> ids) async {
-    final result = <int, EnteFile>{};
-    if (ids.isEmpty) {
-      return result;
-    }
-    String inParam = "";
-    for (final id in ids) {
-      inParam += "'" + id.toString() + "',";
-    }
-    inParam = inParam.substring(0, inParam.length - 1);
-    final db = await instance.sqliteAsyncDB;
-    final results = await db.getAll(
-      'SELECT * FROM $filesTable WHERE $columnGeneratedID IN ($inParam)',
-    );
-    final files = convertToFiles(results);
-    for (final file in files) {
-      result[file.generatedID as int] = file;
-    }
-    return result;
-  }
-
   Future<Map<int, List<EnteFile>>> getAllFilesGroupByCollectionID(
     List<int> ids,
   ) async {
@@ -1854,28 +1833,6 @@ class FilesDB {
       ids.add(result[columnUploadedFileID] as int);
     }
     return ids;
-  }
-
-  Future<List<EnteFile>> getUploadedFiles(List<int> uploadedIDs) async {
-    if (uploadedIDs.isEmpty) {
-      return <EnteFile>[];
-    }
-    final db = await instance.sqliteAsyncDB;
-    String inParam = "";
-    for (final id in uploadedIDs) {
-      inParam += "'" + id.toString() + "',";
-    }
-    inParam = inParam.substring(0, inParam.length - 1);
-    final results = await db.getAll(
-      '''
-      SELECT * FROM $filesTable WHERE $columnUploadedFileID IN ($inParam)
-      GROUP BY $columnUploadedFileID
-''',
-    );
-    if (results.isEmpty) {
-      return <EnteFile>[];
-    }
-    return convertToFiles(results);
   }
 
   ///Returns "columnName1 = ?, columnName2 = ?, ..."
