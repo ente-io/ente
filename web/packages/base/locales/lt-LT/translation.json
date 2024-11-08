@@ -295,7 +295,7 @@
     "last_export_time": "Paskutinis eksporto laikas",
     "export_again": "Sinchronizuoti iš naujo",
     "LOCAL_STORAGE_NOT_ACCESSIBLE": "Vietinė saugykla nepasiekiama",
-    "LOCAL_STORAGE_NOT_ACCESSIBLE_MESSAGE": "Jūsų naršyklė arba priedas blokuoja „Ente“ duomenų išsaugojimą vietinėje saugykloje. Bandykite įkelti šį puslapį perjungus naršymo režimą.",
+    "LOCAL_STORAGE_NOT_ACCESSIBLE_MESSAGE": "Jūsų naršyklė arba priedas blokuoja „Ente“ duomenų išsaugojimą vietinėje saugykloje",
     "SEND_OTT": "Siųsti OTP",
     "email_already_taken": "El. paštas jau paimtas.",
     "ETAGS_BLOCKED": "<p>Mums nepavyko įkelti toliau esančių failų dėl jūsų naršyklės konfigūracijos.</p><p>Išjunkite visus priedus, kurie gali trukdyti „Ente“ naudoti <code>„eTags“</code> dideliems failams įkelti, arba naudokite mūsų <a>darbalaukio programą</a>, kad galėtumėte patikimiau importuoti.</p>",

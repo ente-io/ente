@@ -295,7 +295,7 @@
     "last_export_time": "最后一次导出时间",
     "export_again": "重新同步",
     "LOCAL_STORAGE_NOT_ACCESSIBLE": "无法访问本地存储",
-    "LOCAL_STORAGE_NOT_ACCESSIBLE_MESSAGE": "您的浏览器或插件阻止 Ente 将数据保存到本地存储。 请在切换浏览模式后再尝试加载此页面。",
+    "LOCAL_STORAGE_NOT_ACCESSIBLE_MESSAGE": "您的浏览器或插件阻止 Ente 将数据保存到本地存储。",
     "SEND_OTT": "发送 OTP",
     "email_already_taken": "电子邮箱已被注册",
     "ETAGS_BLOCKED": "<p>由于您的浏览器配置，我们无法上传以下文件。</p><p>请禁用任何可能阻止Ente 使用 <code>eTags</code> 上传大文件的附加组件， 或者使用我们的 <a>桌面应用程序</a> 获取更可靠的导入体验。</p>",

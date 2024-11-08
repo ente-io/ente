@@ -295,7 +295,7 @@
     "last_export_time": "Czas ostatniego eksportu",
     "export_again": "Synchronizuj ponownie",
     "LOCAL_STORAGE_NOT_ACCESSIBLE": "Pamięć lokalna niedostępna",
-    "LOCAL_STORAGE_NOT_ACCESSIBLE_MESSAGE": "Twoja przeglądarka lub dodatek blokuje Ente przed zapisywaniem danych w pamięci lokalnej. Spróbuj załadować tę stronę po przełączeniu trybu przeglądania.",
+    "LOCAL_STORAGE_NOT_ACCESSIBLE_MESSAGE": "Twoja przeglądarka lub dodatek blokuje Ente przed zapisywaniem danych w pamięci lokalnej",
     "SEND_OTT": "Wyślij OTP",
     "email_already_taken": "E-mail jest już zajęty",
     "ETAGS_BLOCKED": "<p>Nie mogliśmy przesłać następujących plików ze względu na konfigurację przeglądarki.</p><p>Prosimy wyłączyć wszelkie dodatki, które mogą uniemożliwiać Ente od użycia <code>eTags</code> do przesyłania dużych plików, lub użyj naszej <a>aplikacji komputerowej</a>, aby uzyskać bardziej wiarygodny import.</p>",

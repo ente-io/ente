@@ -295,7 +295,7 @@
     "last_export_time": "Horaire du dernier export",
     "export_again": "Resynchro",
     "LOCAL_STORAGE_NOT_ACCESSIBLE": "Stockage local non accessible",
-    "LOCAL_STORAGE_NOT_ACCESSIBLE_MESSAGE": "Votre navigateur ou un complément bloque Ente qui ne peut sauvegarder les données sur votre stockage local. Veuillez relancer cette page après avoir changé de mode de navigation.",
+    "LOCAL_STORAGE_NOT_ACCESSIBLE_MESSAGE": "Votre navigateur ou un complément bloque Ente qui ne peut sauvegarder les données sur votre stockage local",
     "SEND_OTT": "Envoyer l'OTP",
     "email_already_taken": "Cet e-mail est déjà pris",
     "ETAGS_BLOCKED": "<p>Nosu n'avons pas pu charger les fichiers suivants à cause de la configuration de votre navigateur.</p><p>Veuillez désactiver tous les compléments qui pourraient empêcher Ente d'utiliser les <code>eTags</code> pour charger de larges fichiers, ou bien utilisez notre <a>appli pour ordinateur</a>pour une meilleure expérience lors des chargements.</p>",

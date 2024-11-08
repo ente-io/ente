@@ -295,7 +295,7 @@
     "last_export_time": "Tempo ultima esportazione",
     "export_again": "Risincronizza",
     "LOCAL_STORAGE_NOT_ACCESSIBLE": "Archivio locale non accessibile",
-    "LOCAL_STORAGE_NOT_ACCESSIBLE_MESSAGE": "Il tuo browser o una estensione sta bloccando Ente dal salvataggio dei dati nella memoria locale. Prova a ricaricare questa pagina dopo aver cambiato la modalità di navigazione.",
+    "LOCAL_STORAGE_NOT_ACCESSIBLE_MESSAGE": "Il tuo browser o una estensione sta bloccando Ente dal salvataggio dei dati nella memoria locale",
     "SEND_OTT": "Invia OTP",
     "email_already_taken": "Email già in uso",
     "ETAGS_BLOCKED": "<p>Non siamo riusciti a caricare i seguenti file a causa della configurazione del tuo browser.</p><p>Si prega di disabilitare qualsiasi addon che potrebbe impedire a Ente di utilizzare <code>eTags</code> per caricare file di grandi dimensioni, o usa la nostra app <a>per desktop</a> per un'esperienza di importazione più affidabile.</p>",

@@ -295,7 +295,7 @@
     "last_export_time": "Letztes Exportdatum",
     "export_again": "Neusynchronisation",
     "LOCAL_STORAGE_NOT_ACCESSIBLE": "Lokaler Speicher nicht zugänglich",
-    "LOCAL_STORAGE_NOT_ACCESSIBLE_MESSAGE": "Ihr Browser oder ein Addon blockiert Ente vor der Speicherung von Daten im lokalen Speicher. Bitte versuchen Sie, den Browser-Modus zu wechseln und die Seite neu zu laden.",
+    "LOCAL_STORAGE_NOT_ACCESSIBLE_MESSAGE": "Ihr Browser oder ein Addon blockiert Ente vor der Speicherung von Daten im lokalen Speicher",
     "SEND_OTT": "OTP senden",
     "email_already_taken": "Diese E-Mail wird bereits verwendet",
     "ETAGS_BLOCKED": "<p>Die folgenden Dateien konnten aufgrund deiner Browser-Konfiguration nicht hochgeladen werden.</p><p>Bitte deaktiviere alle Add-ons, die Ente daran hindern könnten, <code>eTags</code> zum Hochladen großer Dateien zu verwenden oder verwende unsere <a>Desktop-App</a> für ein zuverlässigeres Import-Erlebnis.</p>",

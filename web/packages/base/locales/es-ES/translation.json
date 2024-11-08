@@ -295,7 +295,7 @@
     "last_export_time": "Fecha de la última exportación",
     "export_again": "Resinc",
     "LOCAL_STORAGE_NOT_ACCESSIBLE": "Almacenamiento local inaccesible",
-    "LOCAL_STORAGE_NOT_ACCESSIBLE_MESSAGE": "Su navegador o un addon está bloqueando a ente de guardar datos en almacenamiento local. Por favor, intente cargar esta página después de cambiar su modo de navegación.",
+    "LOCAL_STORAGE_NOT_ACCESSIBLE_MESSAGE": "Su navegador o un addon está bloqueando a ente de guardar datos en almacenamiento local",
     "SEND_OTT": "Enviar OTP",
     "email_already_taken": "Email ya tomado",
     "ETAGS_BLOCKED": "<p>No hemos podido subir los siguientes archivos debido a la configuración de tu navegador.</p><p>Por favor, deshabilite cualquier complemento que pueda estar impidiendo que ente utilice <code>eTags</code> para subir archivos grandes, o utilice nuestra <a>aplicación de escritorio</a> para una experiencia de importación más fiable.</p>",

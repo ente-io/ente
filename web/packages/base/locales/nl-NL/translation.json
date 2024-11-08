@@ -295,7 +295,7 @@
     "last_export_time": "Tijd laatste export",
     "export_again": "Opnieuw synchroniseren",
     "LOCAL_STORAGE_NOT_ACCESSIBLE": "Lokale opslag niet toegankelijk",
-    "LOCAL_STORAGE_NOT_ACCESSIBLE_MESSAGE": "Je browser of een extensie blokkeert Ente om gegevens op te slaan in de lokale opslag. Probeer deze pagina te laden na het aanpassen van de browser surfmodus.",
+    "LOCAL_STORAGE_NOT_ACCESSIBLE_MESSAGE": "Je browser of een extensie blokkeert Ente om gegevens op te slaan in de lokale opslag",
     "SEND_OTT": "Stuur OTP",
     "email_already_taken": "E-mail al in gebruik",
     "ETAGS_BLOCKED": "<p>We kunnen de volgende bestanden niet uploaden vanwege uw browserconfiguratie.</p><p>Schakel alle extensies uit die mogelijk voorkomen dat Ente <code>eTags</code> kan gebruiken om grote bestanden te uploaden, of gebruik onze <a>desktop app</a> voor een betrouwbaardere import ervaring.</p>",
