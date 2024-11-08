@@ -167,7 +167,7 @@ const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
                     setLoading(false);
                     showMiniDialog(
                         errorDialogAttributes(
-                            t("SUBSCRIPTION_PURCHASE_FAILED"),
+                            t("subscription_purchase_failed"),
                         ),
                     );
                 }
