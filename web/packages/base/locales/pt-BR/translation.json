@@ -472,7 +472,7 @@
     "AUTHENTICATE": "Autenticar",
     "UPLOADED_TO_SINGLE_COLLECTION": "Enviado para coleção única",
     "UPLOADED_TO_SEPARATE_COLLECTIONS": "Enviada para separar coleções",
-    "NEVERMIND": "Esquecer",
+    "nevermind": "Esquecer",
     "update_available": "Atualização disponível",
     "update_installable_message": "Uma nova versão do ente está pronta para ser instalada.",
     "install_now": "Instalar agora",

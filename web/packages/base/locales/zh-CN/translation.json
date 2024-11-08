@@ -472,7 +472,7 @@
     "AUTHENTICATE": "身份认证",
     "UPLOADED_TO_SINGLE_COLLECTION": "已上传到单个收藏",
     "UPLOADED_TO_SEPARATE_COLLECTIONS": "已上传到单独收藏",
-    "NEVERMIND": "没关系",
+    "nevermind": "没关系",
     "update_available": "有可用的更新",
     "update_installable_message": "新版本的 Ente 已准备好安装。",
     "install_now": "立即安装",

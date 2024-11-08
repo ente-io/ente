@@ -468,7 +468,7 @@
     "AUTHENTICATE": "Authenticate",
     "UPLOADED_TO_SINGLE_COLLECTION": "Uploaded to single collection",
     "UPLOADED_TO_SEPARATE_COLLECTIONS": "Uploaded to separate collections",
-    "NEVERMIND": "Nevermind",
+    "nevermind": "Nevermind",
     "update_available": "Update available",
     "update_installable_message": "A new version of Ente is ready to be installed.",
     "install_now": "Install now",

@@ -770,7 +770,7 @@ const StripeSubscriptionOptions: React.FC<StripeSubscriptionOptionsProps> = ({
                     }, 0);
                 },
             },
-            cancel: t("NEVERMIND"),
+            cancel: t("nevermind"),
         });
 
     const handleManageClick = useWrapAsyncOperation(redirectToCustomerPortal);

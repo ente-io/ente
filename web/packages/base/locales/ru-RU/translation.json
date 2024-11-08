@@ -472,7 +472,7 @@
     "AUTHENTICATE": "Проверка подлинности",
     "UPLOADED_TO_SINGLE_COLLECTION": "Загружено в единую коллекцию",
     "UPLOADED_TO_SEPARATE_COLLECTIONS": "Загружено в отдельные коллекции",
-    "NEVERMIND": "Не берите в голову",
+    "nevermind": "Не берите в голову",
     "update_available": "Доступно обновление",
     "update_installable_message": "Новая версия Ente готова к установке.",
     "install_now": "Установите сейчас",

@@ -472,7 +472,7 @@
     "AUTHENTICATE": "Nustatyti tapatybę",
     "UPLOADED_TO_SINGLE_COLLECTION": "Įkelta į vieną kolekciją",
     "UPLOADED_TO_SEPARATE_COLLECTIONS": "Įkelta į atskiras kolekcijas",
-    "NEVERMIND": "Nesvarbu",
+    "nevermind": "Nesvarbu",
     "update_available": "Yra naujinimas",
     "update_installable_message": "Nauja „Ente“ versija jau paruošta įdiegti.",
     "install_now": "Diegti dabar",

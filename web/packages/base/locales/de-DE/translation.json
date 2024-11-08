@@ -472,7 +472,7 @@
     "AUTHENTICATE": "Authentifizieren",
     "UPLOADED_TO_SINGLE_COLLECTION": "In einzelnes Album hochgeladen",
     "UPLOADED_TO_SEPARATE_COLLECTIONS": "In separate Alben hochgeladen",
-    "NEVERMIND": "Egal",
+    "nevermind": "Egal",
     "update_available": "Neue Version verfügbar",
     "update_installable_message": "Eine neue Version von Ente ist für die Installation bereit.",
     "install_now": "Jetzt installieren",

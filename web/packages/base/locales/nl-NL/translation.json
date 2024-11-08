@@ -472,7 +472,7 @@
     "AUTHENTICATE": "Verifiëren",
     "UPLOADED_TO_SINGLE_COLLECTION": "Geüpload naar enkele collectie",
     "UPLOADED_TO_SEPARATE_COLLECTIONS": "Geüpload naar verschillende collecties",
-    "NEVERMIND": "Laat maar",
+    "nevermind": "Laat maar",
     "update_available": "Update beschikbaar",
     "update_installable_message": "Er staat een nieuwe versie van Ente klaar om te worden geïnstalleerd.",
     "install_now": "Nu installeren",

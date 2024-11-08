@@ -472,7 +472,7 @@
     "AUTHENTICATE": "Authentification",
     "UPLOADED_TO_SINGLE_COLLECTION": "Chargé dans une seule collection",
     "UPLOADED_TO_SEPARATE_COLLECTIONS": "Chargé dans des collections séparées",
-    "NEVERMIND": "Peu-importe",
+    "nevermind": "Peu-importe",
     "update_available": "Une mise à jour est disponible",
     "update_installable_message": "Une nouvelle version de Ente est prête à être installée.",
     "install_now": "Installer maintenant",

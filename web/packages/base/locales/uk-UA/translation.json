@@ -472,7 +472,7 @@
     "AUTHENTICATE": "Підтвердити",
     "UPLOADED_TO_SINGLE_COLLECTION": "Завантажено до однієї колекції",
     "UPLOADED_TO_SEPARATE_COLLECTIONS": "Завантажено в окремі колекції",
-    "NEVERMIND": "Неважливо",
+    "nevermind": "Неважливо",
     "update_available": "Доступне оновлення",
     "update_installable_message": "Нова версія Ente готова до встановлення.",
     "install_now": "Встановити зараз",
