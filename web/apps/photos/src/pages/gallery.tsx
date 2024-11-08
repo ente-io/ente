@@ -1246,7 +1246,7 @@ export async function handleSubscriptionCompletionRedirectIfNeeded(
         try {
             const subscription = await verifyStripeSubscription(sessionID);
             showMiniDialog({
-                title: t("SUBSCRIPTION_PURCHASE_SUCCESS_TITLE"),
+                title: t("thank_you"),
                 message: (
                     <Trans
                         i18nKey="SUBSCRIPTION_PURCHASE_SUCCESS"

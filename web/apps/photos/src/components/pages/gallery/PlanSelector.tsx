@@ -176,9 +176,9 @@ const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
             case "updateSubscriptionToPlan":
                 showMiniDialog({
                     title: t("update_subscription_title"),
-                    message: t("UPDATE_SUBSCRIPTION_MESSAGE"),
+                    message: t("update_subscription_message"),
                     continue: {
-                        text: t("UPDATE_SUBSCRIPTION"),
+                        text: t("update_subscription"),
                         action: () =>
                             redirectToPaymentsApp(plan.stripeID, "update"),
                     },
@@ -187,8 +187,8 @@ const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
 
             case "cancelOnMobile":
                 showMiniDialog({
-                    title: t("CANCEL_SUBSCRIPTION_ON_MOBILE"),
-                    message: t("CANCEL_SUBSCRIPTION_ON_MOBILE_MESSAGE"),
+                    title: t("cancel_subscription_on_mobile"),
+                    message: t("cancel_subscription_on_mobile_message"),
                     continue: {},
                     cancel: false,
                 });
@@ -199,7 +199,7 @@ const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
                     title: t("MANAGE_PLAN"),
                     message: (
                         <Trans
-                            i18nKey={"MAIL_TO_MANAGE_SUBSCRIPTION"}
+                            i18nKey={"mail_to_manage_subscription"}
                             components={{
                                 a: <Link href="mailto:support@ente.io" />,
                             }}
@@ -738,7 +738,7 @@ const StripeSubscriptionOptions: React.FC<StripeSubscriptionOptionsProps> = ({
                     setTimeout(() => {
                         showMiniDialog({
                             title: t("success"),
-                            message: t("SUBSCRIPTION_ACTIVATE_SUCCESS"),
+                            message: t("subscription_activate_success"),
                             continue: { action: onClose },
                             cancel: false,
                         });
@@ -749,14 +749,14 @@ const StripeSubscriptionOptions: React.FC<StripeSubscriptionOptionsProps> = ({
 
     const confirmCancel = () =>
         showMiniDialog({
-            title: t("CANCEL_SUBSCRIPTION"),
+            title: t("cancel_subscription"),
             message: hasAddOnBonus ? (
-                <Trans i18nKey={"CANCEL_SUBSCRIPTION_WITH_ADDON_MESSAGE"} />
+                <Trans i18nKey={"cancel_subscription_with_addon_message"} />
             ) : (
-                <Trans i18nKey={"CANCEL_SUBSCRIPTION_MESSAGE"} />
+                <Trans i18nKey={"cancel_subscription_message"} />
             ),
             continue: {
-                text: t("CANCEL_SUBSCRIPTION"),
+                text: t("cancel_subscription"),
                 color: "critical",
                 action: async () => {
                     await cancelStripeSubscription();
@@ -764,7 +764,7 @@ const StripeSubscriptionOptions: React.FC<StripeSubscriptionOptionsProps> = ({
                     // See: [Note: Chained MiniDialogs]
                     setTimeout(() => {
                         showMiniDialog({
-                            message: t("SUBSCRIPTION_CANCEL_SUCCESS"),
+                            message: t("subscription_cancel_success"),
                             cancel: t("ok"),
                         });
                     }, 0);
@@ -789,7 +789,7 @@ const StripeSubscriptionOptions: React.FC<StripeSubscriptionOptionsProps> = ({
                     color="secondary"
                     onClick={confirmCancel}
                 >
-                    {t("CANCEL_SUBSCRIPTION")}
+                    {t("cancel_subscription")}
                 </ManageSubscriptionButton>
             )}
             <ManageSubscriptionButton
