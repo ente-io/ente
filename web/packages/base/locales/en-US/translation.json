@@ -173,7 +173,7 @@
     "subscription_purchase_failed": "Subscription purchase failed, please try again",
     "SUBSCRIPTION_UPDATE_FAILED": "Subscription updated failed, please try again",
     "update_payment_method_message": "We are sorry, payment failed when we tried to charge your card, please update your payment method and try again",
-    "payment_method_authentication_failed": "We are unable to authenticate your payment method. please choose a different payment method and try again",
+    "payment_method_authentication_failed": "We are unable to authenticate your payment method. Please choose a different payment method and try again",
     "update_payment_method": "Update payment method",
     "monthly": "Monthly",
     "yearly": "Yearly",
