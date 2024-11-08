@@ -32,7 +32,7 @@ final List<List<double>> gaussianKernel =
 const maxKernelSize = gaussianKernelSize;
 const maxKernelRadius = maxKernelSize ~/ 2;
 
-const List<String> supportedImageFormats = [
+const List<String> supportedRustImageFormats = [
   'bmp',
   'dds',
   'farbfeld',
@@ -48,8 +48,6 @@ const List<String> supportedImageFormats = [
   'tga',
   'tiff',
   'webp',
-  'heic',
-  'heif',
 ];
 
 Future<(Image, Uint8List)> decodeImageFromPath(String imagePath) async {
@@ -86,35 +84,9 @@ Future<(Image, Uint8List)> decodeImageFromPath(String imagePath) async {
   }
 }
 
-Future<String> safePathFromImagepath(String imagePath) async {
+bool canRustDecodeImage(String imagePath) {
   final format = imagePath.split('.').last;
-  if (supportedImageFormats.contains(format)) {
-    return imagePath;
-  }
-  try {
-    final newPath = imagePath.replaceAll(format, 'jpeg');
-    final time = DateTime.now();
-    final File? convertedFile = await FlutterImageCompress.compressAndGetFile(
-      imagePath,
-      newPath,
-      format: CompressFormat.jpeg,
-    );
-    _logger.info(
-      'Conversion successful, heic converted in ${DateTime.now().difference(time).inMilliseconds} ms',
-    );
-    if (convertedFile == null) {
-      throw Exception('Error converting image to jpeg');
-    }
-    return newPath;
-  } catch (e) {
-    _logger.severe(
-      'Error decoding image of format $format on ${Platform.isAndroid ? "Android" : "iOS"}',
-      e,
-    );
-    throw Exception(
-      'InvalidImageFormatException: Error decoding image of format $format',
-    );
-  }
+  return supportedRustImageFormats.contains(format);
 }
 
 /// Decodes [Uint8List] image data to an ui.[Image] object.

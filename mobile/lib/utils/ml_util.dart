@@ -1,5 +1,6 @@
 import "dart:io" show File;
 import "dart:math" as math show sqrt, min, max;
+import "dart:typed_data" show Uint8List;
 
 import "package:flutter/services.dart" show PlatformException;
 import "package:logging/logging.dart";
@@ -399,10 +400,28 @@ Future<MLResult> analyzeImageStatic(Map args) async {
     final startTime = DateTime.now();
 
     // Decode the image once to use for both face detection and alignment
-    final safePath = await safePathFromImagepath(imagePath);
-    final format = safePath.split('.').last;
-    // final (image, rawRgbaBytes) = await decodeImageFromPath(imagePath);
-
+    final bool decodeInRust = canRustDecodeImage(imagePath);
+    late (
+      Uint8List,
+      BigInt,
+      BigInt,
+      Uint8List,
+      BigInt,
+      BigInt,
+      Uint8List,
+      BigInt,
+      BigInt
+    ) rustResults;
+    if (decodeInRust) {
+      rustResults = await processImageMlFromPath(imagePath: imagePath);
+    } else {
+      final (image, rawRgbaBytes) = await decodeImageFromPath(imagePath);
+      rustResults = await processImageMlFromData(
+        rgbaData: rawRgbaBytes,
+        width: image.width,
+        height: image.height,
+      );
+    }
     final (
       rawRgbaBytes,
       imageHeight,
@@ -413,17 +432,17 @@ Future<MLResult> analyzeImageStatic(Map args) async {
       clipBytes,
       clipHeight,
       clipWidth
-    ) = await processImageMlFromPath(imagePath: safePath);
+    ) = rustResults;
+    final decodedImageSize =
+        Dimensions(height: imageHeight.toInt(), width: imageWidth.toInt());
     final decodeTime = DateTime.now();
     final decodeMs = decodeTime.difference(startTime).inMilliseconds;
     _logger.info(
-      'ML processing in rust took ${DateTime.now().difference(decodeTime).inMilliseconds} ms for format $format',
+      'ML total image processing (in rust) took ${DateTime.now().difference(decodeTime).inMilliseconds} ms',
     );
-    final decodedImageSize =
-        Dimensions(height: imageHeight.toInt(), width: imageWidth.toInt());
+
     final result = MLResult.fromEnteFileID(enteFileID);
     result.decodedImageSize = decodedImageSize;
-
     String faceMsString = "", clipMsString = "";
     final pipelines = await Future.wait([
       runFaces

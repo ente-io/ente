@@ -1,5 +1,4 @@
 use image::ImageBuffer;
-use libheif_rs::{ColorSpace, HeifContext, LibHeif, RgbChroma};
 use resize::{px::RGB, Pixel::RGB8, Type::Lanczos3, Type::Mitchell};
 use rgb::FromSlice;
 
@@ -16,36 +15,55 @@ pub fn process_image_ml_from_path(
     usize,
     usize,
 ) {
-    // Check the image format by checking the file extension in the image_path string (~0ms)
-    let format = image_path.split('.').last().unwrap().to_lowercase();
+    // Load the image from the path (~200ms)
+    let img: image::DynamicImage = image::open(image_path).expect("Failed to open image");
 
-    let img = if format == "heic" || format == "heif" {
-        let lib_heif = LibHeif::new();
-        let ctx = HeifContext::read_from_file(image_path).expect("Failed to read HEIF file");
-        let handle = ctx
-            .primary_image_handle()
-            .expect("Failed to get primary image handle");
-        let decoded = lib_heif
-            .decode(&handle, ColorSpace::Rgb(RgbChroma::Rgb), None)
-            .expect("Failed to decode image");
-        let plane = decoded
-            .planes()
-            .interleaved
-            .expect("Failed to get interleaved plane");
-        let rgb_data = plane.data.to_vec();
-        let img = image::DynamicImage::from(
-            ImageBuffer::<image::Rgb<u8>, _>::from_raw(decoded.width(), decoded.height(), rgb_data)
-                .expect("Failed to create image buffer"),
-        );
-        img
-    } else {
-        let img = image::open(image_path).expect("Failed to open image");
-        img
-    };
+    // Process the image
+    let results = process_image_ml(img);
 
-    // Load the image (~200ms)
-    // let img = image::open(image_path).expect("Failed to open image");
+    results
+}
 
+pub fn process_image_ml_from_data(
+    rgba_data: Vec<u8>,
+    width: u32,
+    height: u32,
+) -> (
+    Vec<u8>,
+    usize,
+    usize,
+    Vec<u8>,
+    usize,
+    usize,
+    Vec<u8>,
+    usize,
+    usize,
+) {
+    // Load the image from the data
+    let img = image::DynamicImage::from(
+        ImageBuffer::<image::Rgb<u8>, _>::from_raw(width, height, rgba_data)
+            .expect("Failed to create image buffer"),
+    );
+
+    // Process the image
+    let results = process_image_ml(img);
+
+    results
+}
+
+fn process_image_ml(
+    img: image::DynamicImage,
+) -> (
+    Vec<u8>,
+    usize,
+    usize,
+    Vec<u8>,
+    usize,
+    usize,
+    Vec<u8>,
+    usize,
+    usize,
+) {
     // Get dimensions for resized images (0ms)
     let (width, height) = (img.width() as usize, img.height() as usize);
     let scale_face = f32::min(640.0 / width as f32, 640.0 / height as f32);

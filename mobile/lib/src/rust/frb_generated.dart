@@ -72,7 +72,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.5.1';
 
   @override
-  int get rustContentHash => -1741400115;
+  int get rustContentHash => -804230794;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -85,6 +85,23 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
 abstract class RustLibApi extends BaseApi {
   Future<(Uint8List, String, BigInt, BigInt)>
       crateApiImageProcessingProcessClip({required String imagePath});
+
+  Future<
+          (
+            Uint8List,
+            BigInt,
+            BigInt,
+            Uint8List,
+            BigInt,
+            BigInt,
+            Uint8List,
+            BigInt,
+            BigInt
+          )>
+      crateApiImageProcessingProcessImageMlFromData(
+          {required List<int> rgbaData,
+          required int width,
+          required int height});
 
   Future<
           (
@@ -141,6 +158,49 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(
         debugName: "process_clip",
         argNames: ["imagePath"],
+      );
+
+  @override
+  Future<
+          (
+            Uint8List,
+            BigInt,
+            BigInt,
+            Uint8List,
+            BigInt,
+            BigInt,
+            Uint8List,
+            BigInt,
+            BigInt
+          )>
+      crateApiImageProcessingProcessImageMlFromData(
+          {required List<int> rgbaData,
+          required int width,
+          required int height}) {
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final arg0 = cst_encode_list_prim_u_8_loose(rgbaData);
+        final arg1 = cst_encode_u_32(width);
+        final arg2 = cst_encode_u_32(height);
+        return wire
+            .wire__crate__api__image_processing__process_image_ml_from_data(
+                port_, arg0, arg1, arg2);
+      },
+      codec: DcoCodec(
+        decodeSuccessData:
+            dco_decode_record_list_prim_u_8_strict_usize_usize_list_prim_u_8_strict_usize_usize_list_prim_u_8_strict_usize_usize,
+        decodeErrorData: null,
+      ),
+      constMeta: kCrateApiImageProcessingProcessImageMlFromDataConstMeta,
+      argValues: [rgbaData, width, height],
+      apiImpl: this,
+    ));
+  }
+
+  TaskConstMeta get kCrateApiImageProcessingProcessImageMlFromDataConstMeta =>
+      const TaskConstMeta(
+        debugName: "process_image_ml_from_data",
+        argNames: ["rgbaData", "width", "height"],
       );
 
   @override
@@ -258,6 +318,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  List<int> dco_decode_list_prim_u_8_loose(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw as List<int>;
+  }
+
+  @protected
   Uint8List dco_decode_list_prim_u_8_strict(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw as Uint8List;
@@ -311,6 +377,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  int dco_decode_u_32(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw as int;
+  }
+
+  @protected
   int dco_decode_u_8(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw as int;
@@ -333,6 +405,13 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     final inner = sse_decode_list_prim_u_8_strict(deserializer);
     return utf8.decoder.convert(inner);
+  }
+
+  @protected
+  List<int> sse_decode_list_prim_u_8_loose(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    final len_ = sse_decode_i_32(deserializer);
+    return deserializer.buffer.getUint8List(len_);
   }
 
   @protected
@@ -391,6 +470,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  int sse_decode_u_32(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return deserializer.buffer.getUint32();
+  }
+
+  @protected
   int sse_decode_u_8(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return deserializer.buffer.getUint8();
@@ -420,6 +505,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  int cst_encode_u_32(int raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    return raw;
+  }
+
+  @protected
   int cst_encode_u_8(int raw) {
     // Codec=Cst (C-struct based), see doc to use other codecs
     return raw;
@@ -435,6 +526,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   void sse_encode_String(String self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_list_prim_u_8_strict(utf8.encoder.convert(self), serializer);
+  }
+
+  @protected
+  void sse_encode_list_prim_u_8_loose(
+      List<int> self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.length, serializer);
+    serializer.buffer
+        .putUint8List(self is Uint8List ? self : Uint8List.fromList(self));
   }
 
   @protected
@@ -480,6 +580,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_list_prim_u_8_strict(self.$7, serializer);
     sse_encode_usize(self.$8, serializer);
     sse_encode_usize(self.$9, serializer);
+  }
+
+  @protected
+  void sse_encode_u_32(int self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    serializer.buffer.putUint32(self);
   }
 
   @protected

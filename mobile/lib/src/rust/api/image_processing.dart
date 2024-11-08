@@ -8,6 +8,8 @@
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 import 'package:photos/src/rust/frb_generated.dart';
 
+// These functions are ignored because they are not marked as `pub`: `process_image_ml`
+
 Future<
     (
       Uint8List,
@@ -23,6 +25,24 @@ Future<
         {required String imagePath}) =>
     RustLib.instance.api
         .crateApiImageProcessingProcessImageMlFromPath(imagePath: imagePath);
+
+Future<
+    (
+      Uint8List,
+      BigInt,
+      BigInt,
+      Uint8List,
+      BigInt,
+      BigInt,
+      Uint8List,
+      BigInt,
+      BigInt
+    )> processImageMlFromData(
+        {required List<int> rgbaData,
+        required int width,
+        required int height}) =>
+    RustLib.instance.api.crateApiImageProcessingProcessImageMlFromData(
+        rgbaData: rgbaData, width: width, height: height);
 
 Future<(Uint8List, String, BigInt, BigInt)> processYoloFace(
         {required String imagePath}) =>

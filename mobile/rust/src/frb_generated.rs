@@ -37,7 +37,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueNom,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.5.1";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -1741400115;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -804230794;
 
 // Section: executor
 
@@ -61,6 +61,37 @@ fn wire__crate__api__image_processing__process_clip_impl(
                 transform_result_dco::<_, _, ()>((move || {
                     let output_ok = Result::<_, ()>::Ok(
                         crate::api::image_processing::process_clip(&api_image_path),
+                    )?;
+                    Ok(output_ok)
+                })())
+            }
+        },
+    )
+}
+fn wire__crate__api__image_processing__process_image_ml_from_data_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    rgba_data: impl CstDecode<Vec<u8>>,
+    width: impl CstDecode<u32>,
+    height: impl CstDecode<u32>,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::DcoCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "process_image_ml_from_data",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let api_rgba_data = rgba_data.cst_decode();
+            let api_width = width.cst_decode();
+            let api_height = height.cst_decode();
+            move |context| {
+                transform_result_dco::<_, _, ()>((move || {
+                    let output_ok = Result::<_, ()>::Ok(
+                        crate::api::image_processing::process_image_ml_from_data(
+                            api_rgba_data,
+                            api_width,
+                            api_height,
+                        ),
                     )?;
                     Ok(output_ok)
                 })())
@@ -154,6 +185,12 @@ fn wire__crate__api__simple__init_app_impl(port_: flutter_rust_bridge::for_gener
 
 // Section: dart2rust
 
+impl CstDecode<u32> for u32 {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    fn cst_decode(self) -> u32 {
+        self
+    }
+}
 impl CstDecode<u8> for u8 {
     // Codec=Cst (C-struct based), see doc to use other codecs
     fn cst_decode(self) -> u8 {
@@ -225,6 +262,13 @@ impl SseDecode
             var_field0, var_field1, var_field2, var_field3, var_field4, var_field5, var_field6,
             var_field7, var_field8,
         );
+    }
+}
+
+impl SseDecode for u32 {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        deserializer.cursor.read_u32::<NativeEndian>().unwrap()
     }
 }
 
@@ -342,6 +386,13 @@ impl SseEncode
     }
 }
 
+impl SseEncode for u32 {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        serializer.cursor.write_u32::<NativeEndian>(self).unwrap();
+    }
+}
+
 impl SseEncode for u8 {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -403,6 +454,15 @@ mod io {
         fn cst_decode(self) -> String {
             let vec: Vec<u8> = self.cst_decode();
             String::from_utf8(vec).unwrap()
+        }
+    }
+    impl CstDecode<Vec<u8>> for *mut wire_cst_list_prim_u_8_loose {
+        // Codec=Cst (C-struct based), see doc to use other codecs
+        fn cst_decode(self) -> Vec<u8> {
+            unsafe {
+                let wrap = flutter_rust_bridge::for_generated::box_from_leak_ptr(self);
+                flutter_rust_bridge::for_generated::vec_from_leak_ptr(wrap.ptr, wrap.len)
+            }
         }
     }
     impl CstDecode<Vec<u8>> for *mut wire_cst_list_prim_u_8_strict {
@@ -476,6 +536,18 @@ field8: Default::default(), }
     }
 
     #[no_mangle]
+    pub extern "C" fn frbgen_photos_wire__crate__api__image_processing__process_image_ml_from_data(
+        port_: i64,
+        rgba_data: *mut wire_cst_list_prim_u_8_loose,
+        width: u32,
+        height: u32,
+    ) {
+        wire__crate__api__image_processing__process_image_ml_from_data_impl(
+            port_, rgba_data, width, height,
+        )
+    }
+
+    #[no_mangle]
     pub extern "C" fn frbgen_photos_wire__crate__api__image_processing__process_image_ml_from_path(
         port_: i64,
         image_path: *mut wire_cst_list_prim_u_8_strict,
@@ -504,6 +576,17 @@ field8: Default::default(), }
     }
 
     #[no_mangle]
+    pub extern "C" fn frbgen_photos_cst_new_list_prim_u_8_loose(
+        len: i32,
+    ) -> *mut wire_cst_list_prim_u_8_loose {
+        let ans = wire_cst_list_prim_u_8_loose {
+            ptr: flutter_rust_bridge::for_generated::new_leak_vec_ptr(Default::default(), len),
+            len,
+        };
+        flutter_rust_bridge::for_generated::new_leak_box_ptr(ans)
+    }
+
+    #[no_mangle]
     pub extern "C" fn frbgen_photos_cst_new_list_prim_u_8_strict(
         len: i32,
     ) -> *mut wire_cst_list_prim_u_8_strict {
@@ -514,6 +597,12 @@ field8: Default::default(), }
         flutter_rust_bridge::for_generated::new_leak_box_ptr(ans)
     }
 
+    #[repr(C)]
+    #[derive(Clone, Copy)]
+    pub struct wire_cst_list_prim_u_8_loose {
+        ptr: *mut u8,
+        len: i32,
+    }
     #[repr(C)]
     #[derive(Clone, Copy)]
     pub struct wire_cst_list_prim_u_8_strict {

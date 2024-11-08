@@ -25,6 +25,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   String dco_decode_String(dynamic raw);
 
   @protected
+  List<int> dco_decode_list_prim_u_8_loose(dynamic raw);
+
+  @protected
   Uint8List dco_decode_list_prim_u_8_strict(dynamic raw);
 
   @protected
@@ -46,6 +49,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
       dynamic raw);
 
   @protected
+  int dco_decode_u_32(dynamic raw);
+
+  @protected
   int dco_decode_u_8(dynamic raw);
 
   @protected
@@ -56,6 +62,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   String sse_decode_String(SseDeserializer deserializer);
+
+  @protected
+  List<int> sse_decode_list_prim_u_8_loose(SseDeserializer deserializer);
 
   @protected
   Uint8List sse_decode_list_prim_u_8_strict(SseDeserializer deserializer);
@@ -80,6 +89,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
       SseDeserializer deserializer);
 
   @protected
+  int sse_decode_u_32(SseDeserializer deserializer);
+
+  @protected
   int sse_decode_u_8(SseDeserializer deserializer);
 
   @protected
@@ -98,6 +110,15 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   ffi.Pointer<wire_cst_list_prim_u_8_strict> cst_encode_String(String raw) {
     // Codec=Cst (C-struct based), see doc to use other codecs
     return cst_encode_list_prim_u_8_strict(utf8.encoder.convert(raw));
+  }
+
+  @protected
+  ffi.Pointer<wire_cst_list_prim_u_8_loose> cst_encode_list_prim_u_8_loose(
+      List<int> raw) {
+    // Codec=Cst (C-struct based), see doc to use other codecs
+    final ans = wire.cst_new_list_prim_u_8_loose(raw.length);
+    ans.ref.ptr.asTypedList(raw.length).setAll(0, raw);
+    return ans;
   }
 
   @protected
@@ -152,6 +173,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   }
 
   @protected
+  int cst_encode_u_32(int raw);
+
+  @protected
   int cst_encode_u_8(int raw);
 
   @protected
@@ -159,6 +183,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_String(String self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_list_prim_u_8_loose(List<int> self, SseSerializer serializer);
 
   @protected
   void sse_encode_list_prim_u_8_strict(
@@ -183,6 +210,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
             BigInt
           ) self,
           SseSerializer serializer);
+
+  @protected
+  void sse_encode_u_32(int self, SseSerializer serializer);
 
   @protected
   void sse_encode_u_8(int self, SseSerializer serializer);
@@ -260,6 +290,35 @@ class RustLibWire implements BaseWire {
       _wire__crate__api__image_processing__process_clipPtr.asFunction<
           void Function(int, ffi.Pointer<wire_cst_list_prim_u_8_strict>)>();
 
+  void wire__crate__api__image_processing__process_image_ml_from_data(
+    int port_,
+    ffi.Pointer<wire_cst_list_prim_u_8_loose> rgba_data,
+    int width,
+    int height,
+  ) {
+    return _wire__crate__api__image_processing__process_image_ml_from_data(
+      port_,
+      rgba_data,
+      width,
+      height,
+    );
+  }
+
+  late final _wire__crate__api__image_processing__process_image_ml_from_dataPtr =
+      _lookup<
+              ffi.NativeFunction<
+                  ffi.Void Function(
+                      ffi.Int64,
+                      ffi.Pointer<wire_cst_list_prim_u_8_loose>,
+                      ffi.Uint32,
+                      ffi.Uint32)>>(
+          'frbgen_photos_wire__crate__api__image_processing__process_image_ml_from_data');
+  late final _wire__crate__api__image_processing__process_image_ml_from_data =
+      _wire__crate__api__image_processing__process_image_ml_from_dataPtr
+          .asFunction<
+              void Function(
+                  int, ffi.Pointer<wire_cst_list_prim_u_8_loose>, int, int)>();
+
   void wire__crate__api__image_processing__process_image_ml_from_path(
     int port_,
     ffi.Pointer<wire_cst_list_prim_u_8_strict> image_path,
@@ -332,6 +391,21 @@ class RustLibWire implements BaseWire {
   late final _wire__crate__api__simple__init_app =
       _wire__crate__api__simple__init_appPtr.asFunction<void Function(int)>();
 
+  ffi.Pointer<wire_cst_list_prim_u_8_loose> cst_new_list_prim_u_8_loose(
+    int len,
+  ) {
+    return _cst_new_list_prim_u_8_loose(
+      len,
+    );
+  }
+
+  late final _cst_new_list_prim_u_8_loosePtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Pointer<wire_cst_list_prim_u_8_loose> Function(
+              ffi.Int32)>>('frbgen_photos_cst_new_list_prim_u_8_loose');
+  late final _cst_new_list_prim_u_8_loose = _cst_new_list_prim_u_8_loosePtr
+      .asFunction<ffi.Pointer<wire_cst_list_prim_u_8_loose> Function(int)>();
+
   ffi.Pointer<wire_cst_list_prim_u_8_strict> cst_new_list_prim_u_8_strict(
     int len,
   ) {
@@ -368,6 +442,13 @@ typedef DartPort = ffi.Int64;
 typedef DartDartPort = int;
 
 final class wire_cst_list_prim_u_8_strict extends ffi.Struct {
+  external ffi.Pointer<ffi.Uint8> ptr;
+
+  @ffi.Int32()
+  external int len;
+}
+
+final class wire_cst_list_prim_u_8_loose extends ffi.Struct {
   external ffi.Pointer<ffi.Uint8> ptr;
 
   @ffi.Int32()
