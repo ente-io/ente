@@ -563,7 +563,7 @@ function PhotoViewer(props: PhotoViewerProps) {
             return;
         }
         showMiniDialog({
-            title: t("TRASH_FILE_TITLE"),
+            title: t("trash_file_title"),
             message: t("TRASH_FILE_MESSAGE"),
             continue: {
                 text: t("MOVE_TO_TRASH"),

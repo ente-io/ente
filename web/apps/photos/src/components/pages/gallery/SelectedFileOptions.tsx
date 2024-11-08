@@ -89,7 +89,7 @@ const SelectedFileOptions = ({
 
     const trashHandler = () =>
         showMiniDialog({
-            title: t("TRASH_FILES_TITLE"),
+            title: t("trash_files_title"),
             message: t("TRASH_FILES_MESSAGE"),
             continue: {
                 text: t("MOVE_TO_TRASH"),
@@ -100,8 +100,8 @@ const SelectedFileOptions = ({
 
     const permanentlyDeleteHandler = () =>
         showMiniDialog({
-            title: t("DELETE_FILES_TITLE"),
-            message: t("DELETE_FILES_MESSAGE"),
+            title: t("delete_files_title"),
+            message: t("delete_files_message"),
             continue: {
                 text: t("delete"),
                 color: "critical",
