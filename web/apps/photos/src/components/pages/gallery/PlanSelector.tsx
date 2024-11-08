@@ -721,12 +721,12 @@ const StripeSubscriptionOptions: React.FC<StripeSubscriptionOptionsProps> = ({
 
     const confirmReactivation = () =>
         showMiniDialog({
-            title: t("REACTIVATE_SUBSCRIPTION"),
-            message: t("REACTIVATE_SUBSCRIPTION_MESSAGE", {
+            title: t("reactivate_subscription"),
+            message: t("reactivate_subscription_message", {
                 date: subscription.expiryTime,
             }),
             continue: {
-                text: t("REACTIVATE_SUBSCRIPTION"),
+                text: t("reactivate_subscription"),
                 action: async () => {
                     await activateStripeSubscription();
                     onClose();
@@ -782,7 +782,7 @@ const StripeSubscriptionOptions: React.FC<StripeSubscriptionOptionsProps> = ({
                     color="secondary"
                     onClick={confirmReactivation}
                 >
-                    {t("REACTIVATE_SUBSCRIPTION")}
+                    {t("reactivate_subscription")}
                 </ManageSubscriptionButton>
             ) : (
                 <ManageSubscriptionButton
