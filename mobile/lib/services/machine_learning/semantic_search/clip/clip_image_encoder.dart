@@ -34,23 +34,15 @@ class ClipImageEncoder extends MlModel {
     int? enteFileID,
   ]) async {
     final startTime = DateTime.now();
-    // final inputList = await preprocessImageClip(image, rawRgbaBytes);
-    // final (resizedBytes, timing, rgbWidth, rgbHeight) =
-    //     await processClip(imagePath: imagePath);
-    // _logger.info("Clip preprocessing: \n $timing");
-    final preprocessingTime = DateTime.now();
-    final preprocessingMs =
-        preprocessingTime.difference(startTime).inMilliseconds;
 
-    final tempTime = DateTime.now();
     final inputList = await resizedToPreprocessedClip(
       resizedBytes,
       resizedWidth,
       resizedHeight,
     );
-    _logger.info(
-      'Clip remaining dart processing: ${DateTime.now().difference(tempTime).inMilliseconds} ms',
-    );
+    final preprocessingTime = DateTime.now();
+    final preprocessingMs =
+        preprocessingTime.difference(startTime).inMilliseconds;
 
     late List<double> result;
     try {

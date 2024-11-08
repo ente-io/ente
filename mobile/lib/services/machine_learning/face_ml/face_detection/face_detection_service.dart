@@ -56,28 +56,13 @@ class FaceDetectionService extends MlModel {
 
     final startTime = DateTime.now();
 
-    // final (result, timing, newWidth, newHeight) =
-    //     await processYoloFace(imagePath: imagePath);
-    // _logger.info("Face detection preprocessing: \n $timing");
-    // final scaledSize =
-    //     Dimensions(width: newWidth.toInt(), height: newHeight.toInt());
-    // final preprocessingTime = DateTime.now();
-    // final preprocessingMs =
-    //     preprocessingTime.difference(startTime).inMilliseconds;
-
-    final preprocessingTime = DateTime.now();
     final scaledSize = Dimensions(width: resizedWidth, height: resizedHeight);
     final inputImageList = await resizedToPreprocessedYoloFace(
       resizedBytes,
       scaledSize.width,
       scaledSize.height,
     );
-
-    // final (inputImageList, scaledSize) = await preprocessImageYoloFace(
-    //   image,
-    //   rawRgbaBytes,
-    // );
-    // final preprocessingTime = DateTime.now();
+    final preprocessingTime = DateTime.now();
     final preprocessingMs =
         preprocessingTime.difference(startTime).inMilliseconds;
 

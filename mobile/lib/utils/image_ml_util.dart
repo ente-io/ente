@@ -1,6 +1,6 @@
 import "dart:async";
 import "dart:io" show File, Platform;
-import "dart:math" show exp, max, min, pi;
+import "dart:math" show max, min;
 import "dart:typed_data" show Float32List, Uint8List;
 import "dart:ui";
 
@@ -338,10 +338,7 @@ RGB _readPixelColor(
   Uint8List rgbaBytes,
 ) {
   if (y < 0 || y >= image.height || x < 0 || x >= image.width) {
-    if (y < -2 ||
-        y >= image.height + 2 ||
-        x < -2 ||
-        x >= image.width + 2) {
+    if (y < -2 || y >= image.height + 2 || x < -2 || x >= image.width + 2) {
       _logger.severe(
         '`readPixelColor`: Invalid pixel coordinates, out of bounds. x: $x, y: $y',
       );
