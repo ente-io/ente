@@ -108,8 +108,12 @@ export default function Uploader({
     onUploadFile,
     ...props
 }: Props) {
-    const appContext = useAppContext();
-    const { showMiniDialog } = appContext;
+    const {
+        showMiniDialog,
+        onGenericError,
+        watchFolderView,
+        setNotificationAttributes,
+    } = useAppContext();
     const galleryContext = useContext(GalleryContext);
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext,
@@ -293,7 +297,7 @@ export default function Uploader({
     // Handle selected files when user selects files for upload through the open
     // file / open folder selection dialog, or drag-and-drops them.
     useEffect(() => {
-        if (appContext.watchFolderView) {
+        if (watchFolderView) {
             // if watch folder dialog is open don't catch the dropped file
             // as they are folder being dropped for watching
             return;
@@ -546,13 +550,8 @@ export default function Uploader({
             }
         } catch (e) {
             closeUploadProgress();
-            log.error("Failed to create album", e);
-            appContext.setDialogMessage({
-                title: t("error"),
-                close: { variant: "critical" },
-                content: t("CREATE_ALBUM_FAILED"),
-            });
-            throw e;
+            onGenericError(e);
+            return;
         }
         await waitInQueueAndUploadFiles(uploadItemsWithCollection, collections);
         uploadItemsAndPaths.current = null;
@@ -680,7 +679,7 @@ export default function Uploader({
                     onClick: () => null,
                 };
         }
-        appContext.setNotificationAttributes(notification);
+        setNotificationAttributes(notification);
     }
 
     const uploadToSingleNewCollection = (collectionName: string) => {
