@@ -94,6 +94,9 @@ var ErrLockUnavailable = errors.New("could not acquire lock")
 // ErrActiveLinkAlreadyExists is thrown when the collection already has active public link
 var ErrActiveLinkAlreadyExists = errors.New("Collection already has active public link")
 
+// ErrStorageBonusAlreadyApplied is thrown when a storage bonus has already been applied
+var ErrStorageBonusAlreadyApplied = errors.New("bonus has already been applied")
+
 // ErrNotImplemented indicates that the action that we tried to perform is not
 // available at this museum instance. e.g. this could be something that is not
 // enabled on this particular instance of museum.

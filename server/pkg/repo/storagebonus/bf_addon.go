@@ -3,6 +3,8 @@ package storagebonus
 import (
 	"context"
 	"fmt"
+
+	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/ente/storagebonus"
 )
 
@@ -13,6 +15,9 @@ func (r *Repository) InsertAddOnBonus(ctx context.Context, bonusType storagebonu
 	bonusID := fmt.Sprintf("%s-%d", bonusType, userID)
 	_, err := r.DB.ExecContext(ctx, "INSERT INTO storage_bonus (bonus_id, user_id, storage, type, valid_till) VALUES ($1, $2, $3, $4, $5)", bonusID, userID, storage, bonusType, validTill)
 	if err != nil {
+		if err.Error() == "pq: duplicate key value violates unique constraint \"storage_bonus_pkey\"" {
+			return ente.ErrStorageBonusAlreadyApplied
+		}
 		return err
 	}
 	return nil

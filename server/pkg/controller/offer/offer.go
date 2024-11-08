@@ -110,6 +110,9 @@ func (c *OfferController) ApplyOffer(email string, productID string) error {
 
 	err = c.StorageBonusRepo.InsertAddOnBonus(context.Background(), storageBonusEntity.AddOnBf2024, userID, validTill, offerToBeApplied.Storage)
 	if err != nil {
+		if err == ente.ErrStorageBonusAlreadyApplied {
+			return nil
+		}
 		c.DiscordController.Notify("Error inserting bonus")
 		return stacktrace.Propagate(err, "")
 	}
