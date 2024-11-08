@@ -29,12 +29,13 @@ import { deleteDB } from "idb";
  */
 export const runMigrations = async () => {
     const m = (await getKVN("migrationLevel")) ?? 0;
-    const latest = 3;
+    const latest = 4;
     if (m < latest) {
         log.info(`Running migrations ${m} => ${latest}`);
         if (m < 1 && isDesktop) await m1();
         if (m < 2) await m2();
         if (m < 3) await m3();
+        if (m < 4) m4();
         await setKV("migrationLevel", latest);
     }
 };
@@ -101,9 +102,11 @@ const m3 = () =>
         removeKV("latestUpdatedAt/location"),
     ]);
 
-// TODO: Not enabled yet since it is not critical. Enable with next batch of changes.
-// // Added: Nov 2025 (v1.7.7-beta). Prunable.
-// const m4 = () => {
-//     // Delete the legacy key that used to store the map preference.
-//     localStorage.removeItem("mapEnabled");
-// };
+// Added: Nov 2025 (v1.7.7-beta). Prunable.
+const m4 = () => {
+    // Delete old local storage keys that have been subsumed elsewhere.
+    localStorage.removeItem("mapEnabled");
+    localStorage.removeItem("userDetails");
+    localStorage.removeItem("subscription");
+    localStorage.removeItem("familyData");
+};

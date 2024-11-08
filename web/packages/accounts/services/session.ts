@@ -4,8 +4,8 @@ import { apiURL } from "@/base/origins";
 import { ensure } from "@/utils/ensure";
 import { getData, LS_KEYS } from "@ente/shared/storage/localStorage";
 import type { KeyAttributes } from "@ente/shared/user/types";
+import type { SRPAttributes } from "../api/srp";
 import { getSRPAttributes } from "../api/srp";
-import type { SRPAttributes } from "../types/srp";
 
 type SessionValidity =
     | { status: "invalid" }

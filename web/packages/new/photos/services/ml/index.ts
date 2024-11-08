@@ -71,9 +71,8 @@ class MLState {
     isSyncing = false;
 
     /**
-     * Subscriptions to {@link MLStatus} updates.
-     *
-     * See {@link mlStatusSubscribe}.
+     * Subscriptions to {@link MLStatus} updates attached using
+     * {@link mlStatusSubscribe}.
      */
     mlStatusListeners: (() => void)[] = [];
 
@@ -84,15 +83,14 @@ class MLState {
     mlStatusSnapshot: MLStatus | undefined;
 
     /**
-     * Subscriptions to updates to the {@link PeopleState}.
-     *
-     * See {@link peopleStateSubscribe}.
+     * Subscriptions to updates to the {@link PeopleState} attached using
+     * {@link peopleStateSubscribe}.
      */
     peopleStateListeners: (() => void)[] = [];
 
     /**
-     * Snapshot of the {@link PeopleState}s. Use the {@link peopleStateSnapshot}
-     * function to access this data.
+     * Snapshot of the {@link PeopleState} return by the
+     * {@link peopleStateSnapshot} function.
      *
      * It will be `undefined` only if ML is disabled. Otherwise, it will be an
      * empty array even if the snapshot is pending its first sync.
@@ -416,13 +414,7 @@ export type MLStatus =
 /**
  * A function that can be used to subscribe to updates in the ML status.
  *
- * This, along with {@link mlStatusSnapshot}, is meant to be used as arguments
- * to React's {@link useSyncExternalStore}.
- *
- * @param callback A function that will be invoked whenever the result of
- * {@link mlStatusSnapshot} changes.
- *
- * @returns A function that can be used to clear the subscription.
+ * See: [Note: Snapshots and useSyncExternalStore].
  */
 export const mlStatusSubscribe = (onChange: () => void): (() => void) => {
     _state.mlStatusListeners.push(onChange);
@@ -436,8 +428,7 @@ export const mlStatusSubscribe = (onChange: () => void): (() => void) => {
 /**
  * Return the last known, cached {@link MLStatus}.
  *
- * This, along with {@link mlStatusSnapshot}, is meant to be used as arguments
- * to React's {@link useSyncExternalStore}.
+ * See also {@link mlStatusSubscribe}.
  *
  * A return value of `undefined` indicates that we're still performing the
  * asynchronous tasks that are needed to get the status.
@@ -537,13 +528,7 @@ const workerDidUpdateStatus = throttled(updateMLStatusSnapshot, 2000);
 /**
  * A function that can be used to subscribe to updates to {@link Person}s.
  *
- * This, along with {@link peopleStateSnapshot}, is meant to be used as
- * arguments to React's {@link useSyncExternalStore}.
- *
- * @param callback A function that will be invoked whenever the result of
- * {@link peopleStateSnapshot} changes.
- *
- * @returns A function that can be used to clear the subscription.
+ * See: [Note: Snapshots and useSyncExternalStore].
  */
 export const peopleStateSubscribe = (onChange: () => void): (() => void) => {
     _state.peopleStateListeners.push(onChange);
@@ -570,8 +555,7 @@ const resetPeopleStateSnapshot = () =>
 /**
  * Return the last known, cached {@link PeopleState}.
  *
- * This, along with {@link peopleStateSubscribe}, is meant to be used as
- * arguments to React's {@link useSyncExternalStore}.
+ * See also {@link peopleStateSubscribe}.
  *
  * A return value of `undefined` indicates that ML is disabled. In all other
  * cases, the list of people will be either empty (if we're either still loading

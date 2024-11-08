@@ -1,13 +1,12 @@
 import { putAttributes } from "@/accounts/api/user";
 import log from "@/base/log";
-import { apiURL, familyAppOrigin } from "@/base/origins";
-import { getLocalFamilyData, isPartOfFamily } from "@/new/photos/services/user";
+import { apiURL } from "@/base/origins";
+import type { UserDetails } from "@/new/photos/services/user-details";
 import { ApiError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { HttpStatusCode } from "axios";
-import { DeleteChallengeResponse, UserDetails } from "types/user";
 
 const HAS_SET_KEYS = "hasSetKeys";
 
@@ -22,37 +21,6 @@ export const getPublicKey = async (email: string) => {
         },
     );
     return resp.data.publicKey;
-};
-
-export const getPaymentToken = async () => {
-    const token = getToken();
-
-    const resp = await HTTPService.get(
-        await apiURL("/users/payment-token"),
-        null,
-        {
-            "X-Auth-Token": token,
-        },
-    );
-    return resp.data["paymentToken"];
-};
-
-export const getFamiliesToken = async () => {
-    try {
-        const token = getToken();
-
-        const resp = await HTTPService.get(
-            await apiURL("/users/families-token"),
-            null,
-            {
-                "X-Auth-Token": token,
-            },
-        );
-        return resp.data["familiesToken"];
-    } catch (e) {
-        log.error("failed to get family token", e);
-        throw e;
-    }
 };
 
 export const isTokenValid = async (token: string) => {
@@ -113,18 +81,10 @@ export const getUserDetailsV2 = async (): Promise<UserDetails> => {
     }
 };
 
-export const getFamilyPortalRedirectURL = async () => {
-    try {
-        const jwtToken = await getFamiliesToken();
-        const isFamilyCreated = isPartOfFamily(getLocalFamilyData());
-        return `${familyAppOrigin()}?token=${jwtToken}&isFamilyCreated=${isFamilyCreated}&redirectURL=${
-            window.location.origin
-        }/gallery`;
-    } catch (e) {
-        log.error("unable to generate to family portal URL", e);
-        throw e;
-    }
-};
+export interface DeleteChallengeResponse {
+    allowDelete: boolean;
+    encryptedChallenge: string;
+}
 
 export const getAccountDeleteChallenge = async () => {
     try {

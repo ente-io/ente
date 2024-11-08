@@ -1,6 +1,6 @@
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
-import type { ButtonProps } from "@mui/material";
+import type { ButtonProps, ModalProps } from "@mui/material";
 import {
     Box,
     Dialog,
@@ -46,9 +46,9 @@ export interface MiniDialogAttributes {
     /**
      * Customize the primary action button shown in the dialog.
      *
-     * This is provided by boxes which serve as some sort of confirmation. For
-     * dialogs which are informational notifications, this is usually skipped,
-     * only the {@link close} action button is configured.
+     * This is provided by boxes which serve as some sort of confirmation. If
+     * not provided, only the {@link cancel} button is shown, unless that too is
+     * explicitly disabled.
      */
     continue?: {
         /**
@@ -140,8 +140,10 @@ export const AttributedMiniDialog: React.FC<
         onClose();
     };
 
-    const handleClose = () => {
+    const handleClose: ModalProps["onClose"] = (_, reason) => {
         if (attributes.nonClosable) return;
+        // Ignore backdrop clicks when we're processing the user request.
+        if (reason == "backdropClick" && phase == "loading") return;
         resetPhaseAndClose();
     };
 
@@ -184,7 +186,12 @@ export const AttributedMiniDialog: React.FC<
     );
 
     const cancelButton = cancelTitle && (
-        <FocusVisibleButton fullWidth color="secondary" onClick={handleCancel}>
+        <FocusVisibleButton
+            fullWidth
+            color="secondary"
+            disabled={phase == "loading"}
+            onClick={handleCancel}
+        >
             {cancelTitle}
         </FocusVisibleButton>
     );
@@ -211,12 +218,12 @@ export const AttributedMiniDialog: React.FC<
                         alignItems: "center",
                         "& > svg": {
                             fontSize: "32px",
-                            color: "text.faint",
+                            color: (theme) => theme.colors.stroke.faint,
                         },
                         padding:
                             attributes.icon && attributes.title
-                                ? "20px 16px 16px 16px"
-                                : "24px 16px 16px 16px",
+                                ? "20px 16px 0px 16px"
+                                : "24px 16px 4px 16px",
                     }}
                 >
                     {attributes.title && (

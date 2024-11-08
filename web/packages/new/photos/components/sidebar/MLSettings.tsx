@@ -24,7 +24,7 @@ import React, { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 import { useAppContext } from "../../types/context";
 import { openURL } from "../../utils/web";
-import { useMLStatusSnapshot } from "../utils/ml";
+import { useMLStatusSnapshot } from "../utils/use-snapshot";
 import { useWrapAsyncOperation } from "../utils/use-wrap-async";
 
 export const MLSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({

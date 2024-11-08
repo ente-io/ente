@@ -12,6 +12,7 @@ import type {
     UploadItem,
 } from "@/new/photos/services/upload/types";
 import { UPLOAD_STAGES } from "@/new/photos/services/upload/types";
+import { redirectToCustomerPortal } from "@/new/photos/services/user-details";
 import { AppContext } from "@/new/photos/types/context";
 import { NotificationAttributes } from "@/new/photos/types/notification";
 import { firstNonEmpty } from "@/utils/array";
@@ -23,7 +24,6 @@ import { t } from "i18next";
 import isElectron from "is-electron";
 import { GalleryContext } from "pages/gallery";
 import { useContext, useEffect, useRef, useState } from "react";
-import billingService from "services/billingService";
 import { getLatestCollections } from "services/collectionService";
 import {
     getPublicCollectionUID,
@@ -659,7 +659,7 @@ export default function Uploader({
                     variant: "critical",
                     subtext: t("subscription_expired"),
                     message: t("renew_now"),
-                    onClick: () => billingService.redirectToCustomerPortal(),
+                    onClick: redirectToCustomerPortal,
                 };
                 break;
             case CustomError.STORAGE_QUOTA_EXCEEDED:

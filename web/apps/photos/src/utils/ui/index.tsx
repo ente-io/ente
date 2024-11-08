@@ -2,7 +2,6 @@ import { DialogBoxAttributes } from "@ente/shared/components/DialogBox/types";
 import InfoOutlined from "@mui/icons-material/InfoRounded";
 import { t } from "i18next";
 import { Trans } from "react-i18next";
-import { Subscription } from "types/billing";
 
 export const getTrashFilesMessage = (
     deleteFileHelper,
@@ -47,16 +46,3 @@ export const getExportDirectoryDoesNotExistMessage =
         content: <Trans i18nKey={"EXPORT_DIRECTORY_DOES_NOT_EXIST_MESSAGE"} />,
         close: {},
     });
-
-export const getSubscriptionPurchaseSuccessMessage = (
-    subscription: Subscription,
-): DialogBoxAttributes => ({
-    title: t("SUBSCRIPTION_PURCHASE_SUCCESS_TITLE"),
-    close: { variant: "accent" },
-    content: (
-        <Trans
-            i18nKey="SUBSCRIPTION_PURCHASE_SUCCESS"
-            values={{ date: subscription?.expiryTime }}
-        />
-    ),
-});

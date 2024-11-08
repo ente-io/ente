@@ -39,6 +39,7 @@ import { Stack } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
+import type { SRPAttributes } from "../api/srp";
 import { getSRPAttributes } from "../api/srp";
 import {
     LoginFlowFormFooter,
@@ -63,7 +64,6 @@ import {
     loginViaSRP,
 } from "../services/srp";
 import type { PageProps } from "../types/page";
-import type { SRPAttributes } from "../types/srp";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
     const { logout, showNavBar, showMiniDialog } = appContext;

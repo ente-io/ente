@@ -24,6 +24,7 @@ import { photosDialogZIndex } from "@/new/photos/components/utils/z-index";
 import DownloadManager from "@/new/photos/services/download";
 import { runMigrations } from "@/new/photos/services/migrations";
 import { initML, isMLSupported } from "@/new/photos/services/ml";
+import { getFamilyPortalRedirectURL } from "@/new/photos/services/user-details";
 import { AppContext } from "@/new/photos/types/context";
 import DialogBox from "@ente/shared/components/DialogBox";
 import { DialogBoxAttributes } from "@ente/shared/components/DialogBox/types";
@@ -52,7 +53,6 @@ import { useCallback, useEffect, useState } from "react";
 import LoadingBar from "react-top-loading-bar";
 import { resumeExportsIfNeeded } from "services/export";
 import { photosLogout } from "services/logout";
-import { getFamilyPortalRedirectURL } from "services/userService";
 import "styles/global.css";
 import { NotificationAttributes } from "types/Notification";
 
@@ -207,9 +207,7 @@ export default function App({ Component, pageProps }: AppProps) {
         showMiniDialog(genericErrorDialogAttributes());
     }, []);
 
-    const logout = useCallback(() => {
-        void photosLogout().then(() => router.push("/"));
-    }, [router]);
+    const logout = useCallback(() => void photosLogout(), []);
 
     const appContext = {
         showNavBar,

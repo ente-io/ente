@@ -1,9 +1,10 @@
 import { Overlay } from "@/base/components/mui/Container";
 import type { ButtonishProps } from "@/new/photos/components/mui";
+import type { UserDetails } from "@/new/photos/services/user-details";
 import {
-    hasNonAdminFamilyMembers,
-    isPartOfFamily,
-} from "@/new/photos/services/user";
+    familyUsage,
+    isPartOfFamilyWithOtherMembers,
+} from "@/new/photos/services/user-details";
 import { bytesInGB, formattedStorageByteSize } from "@/new/photos/utils/units";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
@@ -19,8 +20,6 @@ import {
 } from "@mui/material";
 import { t } from "i18next";
 import type React from "react";
-import { useMemo } from "react";
-import type { UserDetails } from "types/user";
 
 interface SubscriptionCardProps {
     userDetails: UserDetails;
@@ -91,7 +90,7 @@ export const SubscriptionCardContentOverlay: React.FC<
                 flexDirection={"column"}
                 padding={"20px 16px"}
             >
-                {hasNonAdminFamilyMembers(userDetails.familyData) ? (
+                {userDetails && isPartOfFamilyWithOtherMembers(userDetails) ? (
                     <FamilySubscriptionCardContent userDetails={userDetails} />
                 ) : (
                     <IndividualSubscriptionCardContent
@@ -111,7 +110,7 @@ const IndividualSubscriptionCardContent: React.FC<
     IndividualSubscriptionCardContentProps
 > = ({ userDetails }) => {
     const totalStorage =
-        userDetails.subscription.storage + (userDetails.storageBonus ?? 0);
+        userDetails.subscription.storage + userDetails.storageBonus;
     return (
         <>
             <StorageSection storage={totalStorage} usage={userDetails.usage} />
@@ -219,18 +218,9 @@ interface FamilySubscriptionCardContentProps {
 const FamilySubscriptionCardContent: React.FC<
     FamilySubscriptionCardContentProps
 > = ({ userDetails }) => {
-    const totalUsage = useMemo(() => {
-        if (isPartOfFamily(userDetails.familyData)) {
-            return userDetails.familyData.members.reduce(
-                (sum, currentMember) => sum + currentMember.usage,
-                0,
-            );
-        } else {
-            return userDetails.usage;
-        }
-    }, [userDetails]);
+    const totalUsage = familyUsage(userDetails);
     const totalStorage =
-        userDetails.familyData.storage + (userDetails.storageBonus ?? 0);
+        (userDetails.familyData?.storage ?? 0) + userDetails.storageBonus;
 
     return (
         <>

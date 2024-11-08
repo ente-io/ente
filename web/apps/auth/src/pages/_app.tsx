@@ -32,7 +32,13 @@ import { ThemeProvider } from "@mui/material/styles";
 import { t } from "i18next";
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, {
+    createContext,
+    useCallback,
+    useContext,
+    useEffect,
+    useState,
+} from "react";
 
 import "../../public/css/global.css";
 
@@ -105,9 +111,9 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     const somethingWentWrong = () =>
         showMiniDialog(genericErrorDialogAttributes());
 
-    const logout = () => {
-        void accountLogout().then(() => router.push("/"));
-    };
+    const logout = useCallback(() => {
+        void accountLogout().then(() => window.location.replace("/"));
+    }, []);
 
     const appContext = {
         logout,

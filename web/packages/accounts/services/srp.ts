@@ -5,13 +5,13 @@ import { generateLoginSubKey } from "@ente/shared/crypto/helpers";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { SRP, SrpClient } from "fast-srp-hap";
 import { v4 as uuidv4 } from "uuid";
+import type { SRPAttributes, SRPSetupAttributes } from "../api/srp";
 import {
     completeSRPSetup,
     createSRPSession,
     startSRPSetup,
     verifySRPSession,
 } from "../api/srp";
-import type { SRPAttributes, SRPSetupAttributes } from "../types/srp";
 import { convertBase64ToBuffer, convertBufferToBase64 } from "../utils";
 
 const SRP_PARAMS = SRP.params["4096"];

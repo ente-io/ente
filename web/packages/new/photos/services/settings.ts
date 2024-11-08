@@ -69,22 +69,13 @@ const defaultSettings = (): Settings => ({
  * This entire object will be reset on logout.
  */
 class SettingsState {
-    /**
-     * An arbitrary token to identify the current login.
-     *
-     * It is used to discard stale completions.
-     */
-    id: number;
-
     constructor() {
-        this.id = Math.random();
         this.settingsSnapshot = defaultSettings();
     }
 
     /**
-     * Subscriptions to {@link Settings} updates.
-     *
-     * See {@link settingsSubscribe}.
+     * Subscriptions to {@link Settings} updates attached using
+     * {@link settingsSubscribe}.
      */
     settingsListeners: (() => void)[] = [];
 
@@ -118,12 +109,7 @@ export const logoutSettings = () => {
  * lookup. Then use the results to update our in memory state if needed.
  */
 export const syncSettings = async () => {
-    const id = _state.id;
     const jsonString = await fetchFeatureFlags().then((res) => res.text());
-    if (_state.id != id) {
-        log.info("Discarding stale settings sync not for the current login");
-        return;
-    }
     saveRemoteFeatureFlagsJSONString(jsonString);
     syncSettingsSnapshotWithLocalStorage();
 };
@@ -157,13 +143,7 @@ const syncSettingsSnapshotWithLocalStorage = () => {
 /**
  * A function that can be used to subscribe to updates to {@link Settings}.
  *
- * This, along with {@link settingsSnapshot}, is meant to be used as arguments
- * to React's {@link useSyncExternalStore}.
- *
- * @param callback A function that will be invoked whenever the result of
- * {@link settingsSnapshot} changes.
- *
- * @returns A function that can be used to clear the subscription.
+ * See: [Note: Snapshots and useSyncExternalStore].
  */
 export const settingsSubscribe = (onChange: () => void): (() => void) => {
     _state.settingsListeners.push(onChange);
@@ -177,8 +157,7 @@ export const settingsSubscribe = (onChange: () => void): (() => void) => {
 /**
  * Return the last known, cached {@link Settings}.
  *
- * This, along with {@link settingsSubscribe}, is meant to be used as
- * arguments to React's {@link useSyncExternalStore}.
+ * See also {@link settingsSubscribe}.
  */
 export const settingsSnapshot = () => _state.settingsSnapshot;
 
