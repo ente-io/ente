@@ -193,7 +193,14 @@ export default function App({ Component, pageProps }: AppProps) {
 
     const onGenericError = useCallback((e: unknown) => {
         log.error(e);
-        showMiniDialog(genericErrorDialogAttributes());
+        // The generic error handler is sometimes called in the context of
+        // actions that were initiated by a confirmation dialog action handler
+        // themselves, then we need to let the current one close.
+        //
+        // See: [Note: Chained MiniDialogs]
+        setTimeout(() => {
+            showMiniDialog(genericErrorDialogAttributes());
+        }, 0);
     }, []);
 
     const logout = useCallback(() => void photosLogout(), []);
