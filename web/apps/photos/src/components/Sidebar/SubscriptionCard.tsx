@@ -146,7 +146,7 @@ const StorageSection: React.FC<StorageSectionProps> = ({ usage, storage }) => {
     return (
         <Box width="100%">
             <Typography variant="small" color={"text.muted"}>
-                {t("STORAGE")}
+                {t("storage")}
             </Typography>
             <DefaultBox>
                 <Typography
@@ -154,8 +154,8 @@ const StorageSection: React.FC<StorageSectionProps> = ({ usage, storage }) => {
                     sx={{ fontSize: "24px", lineHeight: "30px" }}
                 >
                     {`${formattedStorageByteSize(usage, { round: true })} ${t(
-                        "OF",
-                    )} ${formattedStorageByteSize(storage)} ${t("USED")}`}
+                        "of",
+                    )} ${formattedStorageByteSize(storage)} ${t("used")}`}
                 </Typography>
             </DefaultBox>
             <MobileSmallBox>
@@ -163,7 +163,7 @@ const StorageSection: React.FC<StorageSectionProps> = ({ usage, storage }) => {
                     fontWeight={"bold"}
                     sx={{ fontSize: "24px", lineHeight: "30px" }}
                 >
-                    {`${bytesInGB(usage)} /  ${bytesInGB(storage)} ${t("storage_unit.gb")} ${t("USED")}`}
+                    {`${bytesInGB(usage)} /  ${bytesInGB(storage)} ${t("storage_unit.gb")} ${t("used")}`}
                 </Typography>
             </MobileSmallBox>
         </Box>
@@ -202,7 +202,7 @@ const IndividualUsageSection: React.FC<IndividualUsageSectionProps> = ({
             >
                 <Typography variant="mini">{`${formattedStorageByteSize(
                     storage - usage,
-                )} ${t("FREE")}`}</Typography>
+                )} ${t("free")}`}</Typography>
                 <Typography variant="mini" fontWeight={"bold"}>
                     {t("photos_count", { count: fileCount ?? 0 })}
                 </Typography>
@@ -261,8 +261,8 @@ const FamilyUsageSection: React.FC<FamilyUsageSectionProps> = ({
                 }}
             >
                 <Stack direction={"row"} spacing={1.5}>
-                    <Legend label={t("YOU")} color="text.base" />
-                    <Legend label={t("FAMILY")} color="text.muted" />
+                    <Legend label={t("you")} color="text.base" />
+                    <Legend label={t("family")} color="text.muted" />
                 </Stack>
                 <Typography variant="mini" fontWeight={"bold"}>
                     {t("photos_count", { count: fileCount ?? 0 })}

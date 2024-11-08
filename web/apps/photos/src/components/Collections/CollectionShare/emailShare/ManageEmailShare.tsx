@@ -140,7 +140,7 @@ export default function ManageEmailShare({
                                 <EnteMenuItem
                                     fontWeight="normal"
                                     onClick={() => {}}
-                                    label={isOwner ? t("YOU") : ownerEmail}
+                                    label={isOwner ? t("you") : ownerEmail}
                                     startIcon={<Avatar email={ownerEmail} />}
                                 />
                             </MenuItemGroup>

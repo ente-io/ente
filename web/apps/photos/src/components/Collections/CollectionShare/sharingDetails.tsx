@@ -46,7 +46,7 @@ export default function SharingDetails({ collection, type }) {
                     <EnteMenuItem
                         fontWeight="normal"
                         onClick={() => {}}
-                        label={isOwner ? t("YOU") : ownerEmail}
+                        label={isOwner ? t("you") : ownerEmail}
                         startIcon={<Avatar email={ownerEmail} />}
                     />
                 </MenuItemGroup>
@@ -65,7 +65,7 @@ export default function SharingDetails({ collection, type }) {
                                         fontWeight="normal"
                                         key={item}
                                         onClick={() => {}}
-                                        label={isMe(item) ? t("YOU") : item}
+                                        label={isMe(item) ? t("you") : item}
                                         startIcon={<Avatar email={item} />}
                                     />
                                     {index !== collaborators.length - 1 && (
@@ -86,7 +86,7 @@ export default function SharingDetails({ collection, type }) {
                                     fontWeight="normal"
                                     key={item}
                                     onClick={() => {}}
-                                    label={isMe(item) ? t("YOU") : item}
+                                    label={isMe(item) ? t("you") : item}
                                     startIcon={<Avatar email={item} />}
                                 />
                                 {index !== viewers.length - 1 && (
