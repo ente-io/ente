@@ -7,7 +7,6 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { Box, IconButton, Tooltip } from "@mui/material";
 import { t } from "i18next";
 import { useContext } from "react";
-import { getTrashFilesMessage } from "utils/ui";
 
 interface IProps {
     deleteFileHelper: () => void;
@@ -22,10 +21,18 @@ export default function DeduplicateOptions({
     count,
     clearSelection,
 }: IProps) {
-    const { setDialogMessage } = useContext(AppContext);
+    const { showMiniDialog } = useContext(AppContext);
 
     const trashHandler = () =>
-        setDialogMessage(getTrashFilesMessage(deleteFileHelper));
+        showMiniDialog({
+            title: t("TRASH_FILES_TITLE"),
+            message: t("TRASH_FILES_MESSAGE"),
+            continue: {
+                text: t("MOVE_TO_TRASH"),
+                color: "critical",
+                action: deleteFileHelper,
+            },
+        });
 
     return (
         <SelectionBar>

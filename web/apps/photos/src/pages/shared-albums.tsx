@@ -90,8 +90,7 @@ export default function PublicCollectionGallery() {
     const [publicFiles, setPublicFiles] = useState<EnteFile[]>(null);
     const [publicCollection, setPublicCollection] = useState<Collection>(null);
     const [errorMessage, setErrorMessage] = useState<string>(null);
-    const { showLoadingBar, hideLoadingBar, setDialogMessage } =
-        useAppContext();
+    const { showLoadingBar, hideLoadingBar, showMiniDialog } = useAppContext();
     const [loading, setLoading] = useState(true);
     const router = useRouter();
     const [isPasswordProtected, setIsPasswordProtected] =
@@ -186,16 +185,17 @@ export default function PublicCollectionGallery() {
     };
 
     const showPublicLinkExpiredMessage = () =>
-        setDialogMessage({
+        showMiniDialog({
             title: t("LINK_EXPIRED"),
-            content: t("LINK_EXPIRED_MESSAGE"),
-
+            message: t("LINK_EXPIRED_MESSAGE"),
             nonClosable: true,
-            proceed: {
+            continue: {
                 text: t("login"),
-                action: () => router.push("/"),
-                variant: "accent",
+                action: async () => {
+                    await router.push("/");
+                },
             },
+            cancel: false,
         });
 
     useEffect(() => {

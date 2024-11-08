@@ -13,17 +13,19 @@ import type {
 } from "@/new/photos/services/upload/types";
 import { UPLOAD_STAGES } from "@/new/photos/services/upload/types";
 import { redirectToCustomerPortal } from "@/new/photos/services/user-details";
-import { AppContext } from "@/new/photos/types/context";
+import { useAppContext } from "@/new/photos/types/context";
 import { NotificationAttributes } from "@/new/photos/types/notification";
 import { firstNonEmpty } from "@/utils/array";
 import { ensure } from "@/utils/ensure";
 import { CustomError } from "@ente/shared/error";
 import DiscFullIcon from "@mui/icons-material/DiscFull";
+import InfoOutlined from "@mui/icons-material/InfoRounded";
 import UserNameInputDialog from "components/UserNameInputDialog";
 import { t } from "i18next";
 import isElectron from "is-electron";
 import { GalleryContext } from "pages/gallery";
 import { useContext, useEffect, useRef, useState } from "react";
+import { Trans } from "react-i18next";
 import { getLatestCollections } from "services/collectionService";
 import {
     getPublicCollectionUID,
@@ -42,7 +44,6 @@ import watcher from "services/watch";
 import { SetLoading } from "types/gallery";
 import { getOrCreateAlbum } from "utils/collection";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
-import { getRootLevelFileWithFolderNotAllowMessage } from "utils/ui";
 import { SetCollectionNamerAttributes } from "../Collections/CollectionNamer";
 import UploadProgress from "./UploadProgress";
 import {
@@ -107,7 +108,12 @@ export default function Uploader({
     onUploadFile,
     ...props
 }: Props) {
-    const appContext = useContext(AppContext);
+    const {
+        showMiniDialog,
+        onGenericError,
+        watchFolderView,
+        setNotificationAttributes,
+    } = useAppContext();
     const galleryContext = useContext(GalleryContext);
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext,
@@ -291,7 +297,7 @@ export default function Uploader({
     // Handle selected files when user selects files for upload through the open
     // file / open folder selection dialog, or drag-and-drops them.
     useEffect(() => {
-        if (appContext.watchFolderView) {
+        if (watchFolderView) {
             // if watch folder dialog is open don't catch the dropped file
             // as they are folder being dropped for watching
             return;
@@ -544,13 +550,8 @@ export default function Uploader({
             }
         } catch (e) {
             closeUploadProgress();
-            log.error("Failed to create album", e);
-            appContext.setDialogMessage({
-                title: t("error"),
-                close: { variant: "critical" },
-                content: t("CREATE_ALBUM_FAILED"),
-            });
-            throw e;
+            onGenericError(e);
+            return;
         }
         await waitInQueueAndUploadFiles(uploadItemsWithCollection, collections);
         uploadItemsAndPaths.current = null;
@@ -678,7 +679,7 @@ export default function Uploader({
                     onClick: () => null,
                 };
         }
-        appContext.setNotificationAttributes(notification);
+        setNotificationAttributes(notification);
     }
 
     const uploadToSingleNewCollection = (collectionName: string) => {
@@ -708,7 +709,7 @@ export default function Uploader({
             if (openZipFileSelector && electron) {
                 openZipFileSelector();
             } else {
-                appContext.showMiniDialog(downloadAppDialogAttributes());
+                showMiniDialog(downloadAppDialogAttributes());
             }
         }
     };
@@ -760,9 +761,18 @@ export default function Uploader({
                 break;
             case "parent":
                 if (importSuggestion.hasRootLevelFileWithFolder) {
-                    appContext.setDialogMessage(
-                        getRootLevelFileWithFolderNotAllowMessage(),
-                    );
+                    showMiniDialog({
+                        icon: <InfoOutlined />,
+                        title: t("ROOT_LEVEL_FILE_WITH_FOLDER_NOT_ALLOWED"),
+                        message: (
+                            <Trans
+                                i18nKey={
+                                    "ROOT_LEVEL_FILE_WITH_FOLDER_NOT_ALLOWED_MESSAGE"
+                                }
+                            />
+                        ),
+                        cancel: t("ok"),
+                    });
                 } else {
                     uploadFilesToNewCollections("parent");
                 }

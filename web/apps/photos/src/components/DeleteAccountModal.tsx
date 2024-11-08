@@ -1,8 +1,11 @@
 import { TitledMiniDialog } from "@/base/components/MiniDialog";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
+import { sharedCryptoWorker } from "@/base/crypto";
 import { AppContext } from "@/new/photos/types/context";
 import { initiateEmail } from "@/new/photos/utils/web";
+import { getData, LS_KEYS } from "@ente/shared/storage/localStorage";
+import { getActualKey } from "@ente/shared/user";
 import {
     Checkbox,
     FormControlLabel,
@@ -19,7 +22,6 @@ import { GalleryContext } from "pages/gallery";
 import { useContext, useRef, useState } from "react";
 import { Trans } from "react-i18next";
 import { deleteAccount, getAccountDeleteChallenge } from "services/userService";
-import { decryptDeleteAccountChallenge } from "utils/crypto";
 import * as Yup from "yup";
 import DropdownInput, { DropdownOption } from "./DropdownInput";
 
@@ -311,4 +313,22 @@ function CheckboxInput({
             />
         </FormGroup>
     );
+}
+
+async function decryptDeleteAccountChallenge(encryptedChallenge: string) {
+    const cryptoWorker = await sharedCryptoWorker();
+    const masterKey = await getActualKey();
+    const keyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
+    const secretKey = await cryptoWorker.decryptB64(
+        keyAttributes.encryptedSecretKey,
+        keyAttributes.secretKeyDecryptionNonce,
+        masterKey,
+    );
+    const b64DecryptedChallenge = await cryptoWorker.boxSealOpen(
+        encryptedChallenge,
+        keyAttributes.publicKey,
+        secretKey,
+    );
+    const utf8DecryptedChallenge = atob(b64DecryptedChallenge);
+    return utf8DecryptedChallenge;
 }

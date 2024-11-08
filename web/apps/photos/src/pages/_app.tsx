@@ -26,8 +26,6 @@ import { runMigrations } from "@/new/photos/services/migrations";
 import { initML, isMLSupported } from "@/new/photos/services/ml";
 import { getFamilyPortalRedirectURL } from "@/new/photos/services/user-details";
 import { AppContext } from "@/new/photos/types/context";
-import DialogBox from "@ente/shared/components/DialogBox";
-import { DialogBoxAttributes } from "@ente/shared/components/DialogBox/types";
 import { MessageContainer } from "@ente/shared/components/MessageContainer";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import HTTPService from "@ente/shared/network/HTTPService";
@@ -64,8 +62,6 @@ export default function App({ Component, pageProps }: AppProps) {
         typeof window !== "undefined" && !window.navigator.onLine,
     );
     const [showNavbar, setShowNavBar] = useState(false);
-    const [dialogMessage, setDialogMessage] = useState<DialogBoxAttributes>();
-    const [messageDialogView, setMessageDialogView] = useState(false);
     const [watchFolderView, setWatchFolderView] = useState(false);
     const [watchFolderFiles, setWatchFolderFiles] = useState<FileList>(null);
     const [notificationView, setNotificationView] = useState(false);
@@ -182,29 +178,21 @@ export default function App({ Component, pageProps }: AppProps) {
     }, []);
 
     useEffect(() => {
-        setMessageDialogView(true);
-    }, [dialogMessage]);
-
-    useEffect(() => {
         setNotificationView(true);
     }, [notificationAttributes]);
 
     const showNavBar = (show: boolean) => setShowNavBar(show);
 
-    // Use `onGenericError` instead.
-    const somethingWentWrong = useCallback(
-        () =>
-            setDialogMessage({
-                title: t("error"),
-                close: { variant: "critical" },
-                content: t("generic_error_retry"),
-            }),
-        [],
-    );
-
     const onGenericError = useCallback((e: unknown) => {
         log.error(e);
-        showMiniDialog(genericErrorDialogAttributes());
+        // The generic error handler is sometimes called in the context of
+        // actions that were initiated by a confirmation dialog action handler
+        // themselves, then we need to let the current one close.
+        //
+        // See: [Note: Chained MiniDialogs]
+        setTimeout(() => {
+            showMiniDialog(genericErrorDialogAttributes());
+        }, 0);
     }, []);
 
     const logout = useCallback(() => void photosLogout(), []);
@@ -213,7 +201,6 @@ export default function App({ Component, pageProps }: AppProps) {
         showNavBar,
         showLoadingBar,
         hideLoadingBar,
-        setDialogMessage,
         watchFolderView,
         setWatchFolderView,
         watchFolderFiles,
@@ -222,7 +209,6 @@ export default function App({ Component, pageProps }: AppProps) {
         themeColor,
         setThemeColor,
         showMiniDialog,
-        somethingWentWrong,
         onGenericError,
         logout,
     };
@@ -241,13 +227,6 @@ export default function App({ Component, pageProps }: AppProps) {
                 </MessageContainer>
                 <LoadingBar color="#51cd7c" ref={loadingBarRef} />
 
-                <DialogBox
-                    sx={{ zIndex: photosDialogZIndex }}
-                    size="xs"
-                    open={messageDialogView}
-                    onClose={() => setMessageDialogView(false)}
-                    attributes={dialogMessage}
-                />
                 <AttributedMiniDialog
                     sx={{ zIndex: photosDialogZIndex }}
                     {...miniDialogProps}

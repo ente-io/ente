@@ -27,7 +27,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 
 export default function LandingPage() {
-    const { showNavBar, setDialogMessage } = useAppContext();
+    const { showNavBar, showMiniDialog } = useAppContext();
 
     const [loading, setLoading] = useState(true);
     const [showLogin, setShowLogin] = useState(true);
@@ -99,12 +99,12 @@ export default function LandingPage() {
         try {
             await localForage.ready();
         } catch (e) {
-            log.error("usage in incognito mode tried", e);
-            setDialogMessage({
-                title: t("LOCAL_STORAGE_NOT_ACCESSIBLE"),
-
+            log.error("Local storage is not accessible", e);
+            showMiniDialog({
+                title: t("error"),
+                message: t("LOCAL_STORAGE_NOT_ACCESSIBLE_MESSAGE"),
                 nonClosable: true,
-                content: t("LOCAL_STORAGE_NOT_ACCESSIBLE_MESSAGE"),
+                cancel: false,
             });
         } finally {
             setLoading(false);

@@ -7,7 +7,7 @@ import {
     ARCHIVE_SECTION,
     TRASH_SECTION,
 } from "@/new/photos/services/collection";
-import { AppContext } from "@/new/photos/types/context";
+import { useAppContext } from "@/new/photos/types/context";
 import { FluidContainer } from "@ente/shared/components/Container";
 import ClockIcon from "@mui/icons-material/AccessTime";
 import AddIcon from "@mui/icons-material/Add";
@@ -24,10 +24,8 @@ import VisibilityOffOutlined from "@mui/icons-material/VisibilityOffOutlined";
 import VisibilityOutlined from "@mui/icons-material/VisibilityOutlined";
 import { Box, IconButton, Stack, Tooltip } from "@mui/material";
 import { t } from "i18next";
-import { useContext } from "react";
 import { COLLECTION_OPS_TYPE } from "utils/collection";
 import { FILE_OPS_TYPE } from "utils/file";
-import { getTrashFilesMessage } from "utils/ui";
 
 interface Props {
     handleCollectionOps: (
@@ -74,7 +72,7 @@ const SelectedFileOptions = ({
     isInSearchMode,
     isInHiddenSection,
 }: Props) => {
-    const { setDialogMessage } = useContext(AppContext);
+    const { showMiniDialog } = useAppContext();
 
     const peopleMode = barMode == "people";
 
@@ -90,20 +88,25 @@ const SelectedFileOptions = ({
         });
 
     const trashHandler = () =>
-        setDialogMessage(
-            getTrashFilesMessage(handleFileOps(FILE_OPS_TYPE.TRASH)),
-        );
+        showMiniDialog({
+            title: t("TRASH_FILES_TITLE"),
+            message: t("TRASH_FILES_MESSAGE"),
+            continue: {
+                text: t("MOVE_TO_TRASH"),
+                color: "critical",
+                action: handleFileOps(FILE_OPS_TYPE.TRASH),
+            },
+        });
 
     const permanentlyDeleteHandler = () =>
-        setDialogMessage({
+        showMiniDialog({
             title: t("DELETE_FILES_TITLE"),
-            content: t("DELETE_FILES_MESSAGE"),
-            proceed: {
-                action: handleFileOps(FILE_OPS_TYPE.DELETE_PERMANENTLY),
+            message: t("DELETE_FILES_MESSAGE"),
+            continue: {
                 text: t("delete"),
-                variant: "critical",
+                color: "critical",
+                action: handleFileOps(FILE_OPS_TYPE.DELETE_PERMANENTLY),
             },
-            close: { text: t("cancel") },
         });
 
     const restoreHandler = () =>
@@ -119,34 +122,31 @@ const SelectedFileOptions = ({
 
     const removeFromCollectionHandler = () => {
         if (ownCount === count) {
-            setDialogMessage({
+            showMiniDialog({
                 title: t("REMOVE_FROM_COLLECTION"),
-                content: t("CONFIRM_SELF_REMOVE_MESSAGE"),
+                message: t("CONFIRM_SELF_REMOVE_MESSAGE"),
+                continue: {
+                    text: t("YES_REMOVE"),
+                    color: "primary",
 
-                proceed: {
                     action: () =>
                         handleCollectionOps(COLLECTION_OPS_TYPE.REMOVE)(
                             selectedCollection,
                         ),
-                    text: t("YES_REMOVE"),
-                    variant: "primary",
                 },
-                close: { text: t("cancel") },
             });
         } else {
-            setDialogMessage({
+            showMiniDialog({
                 title: t("REMOVE_FROM_COLLECTION"),
-                content: t("CONFIRM_SELF_AND_OTHER_REMOVE_MESSAGE"),
-
-                proceed: {
+                message: t("CONFIRM_SELF_AND_OTHER_REMOVE_MESSAGE"),
+                continue: {
+                    text: t("YES_REMOVE"),
+                    color: "critical",
                     action: () =>
                         handleCollectionOps(COLLECTION_OPS_TYPE.REMOVE)(
                             selectedCollection,
                         ),
-                    text: t("YES_REMOVE"),
-                    variant: "critical",
                 },
-                close: { text: t("cancel") },
             });
         }
     };

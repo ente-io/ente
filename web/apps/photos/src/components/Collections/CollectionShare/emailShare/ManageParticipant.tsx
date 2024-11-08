@@ -3,7 +3,7 @@ import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
 import log from "@/base/log";
 import type { Collection, CollectionUser } from "@/media/collection";
-import { AppContext } from "@/new/photos/types/context";
+import { useAppContext } from "@/new/photos/types/context";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import BlockIcon from "@mui/icons-material/Block";
 import DoneIcon from "@mui/icons-material/Done";
@@ -34,8 +34,8 @@ export default function ManageParticipant({
     selectedParticipant,
     collectionUnshare,
 }: Iprops) {
+    const { showMiniDialog } = useAppContext();
     const galleryContext = useContext(GalleryContext);
-    const appContext = useContext(AppContext);
 
     const handleDrawerClose: DialogProps["onClose"] = (_, reason) => {
         if (reason === "backdropClick") {
@@ -45,7 +45,7 @@ export default function ManageParticipant({
         }
     };
 
-    const handleClick = () => {
+    const handleRemove = () => {
         collectionUnshare(selectedParticipant.email);
         onClose();
     };
@@ -88,24 +88,21 @@ export default function ManageParticipant({
             buttonText = t("CONVERT_TO_COLLABORATOR");
         }
 
-        appContext.setDialogMessage({
+        showMiniDialog({
             title: t("CHANGE_PERMISSION"),
-            content: contentText,
-            close: { text: t("cancel") },
-            proceed: {
+            message: contentText,
+            continue: {
                 text: buttonText,
-                action: () => {
-                    updateCollectionRole(selectedEmail, newRole);
-                },
-                variant: "critical",
+                color: "critical",
+                action: () => updateCollectionRole(selectedEmail, newRole),
             },
         });
     };
 
     const removeParticipant = () => {
-        appContext.setDialogMessage({
+        showMiniDialog({
             title: t("REMOVE_PARTICIPANT"),
-            content: (
+            message: (
                 <Trans
                     i18nKey="REMOVE_PARTICIPANT_MESSAGE"
                     values={{
@@ -113,13 +110,10 @@ export default function ManageParticipant({
                     }}
                 />
             ),
-            close: { text: t("cancel") },
-            proceed: {
+            continue: {
                 text: t("CONFIRM_REMOVE"),
-                action: () => {
-                    handleClick();
-                },
-                variant: "critical",
+                color: "critical",
+                action: handleRemove,
             },
         });
     };

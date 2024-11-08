@@ -1,7 +1,7 @@
 import { UPLOAD_STAGES } from "@/new/photos/services/upload/types";
-import { AppContext } from "@/new/photos/types/context";
+import { useAppContext } from "@/new/photos/types/context";
 import { t } from "i18next";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import type {
     InProgressUpload,
     SegregatedFinishedUploads,
@@ -36,9 +36,10 @@ export default function UploadProgress({
     hasLivePhotos,
     inProgressUploads,
     finishedUploads,
+    cancelUploads,
     ...props
 }: Props) {
-    const appContext = useContext(AppContext);
+    const { showMiniDialog } = useAppContext();
     const [expanded, setExpanded] = useState(false);
 
     useEffect(() => {
@@ -48,19 +49,15 @@ export default function UploadProgress({
     }, [open]);
 
     function confirmCancelUpload() {
-        appContext.setDialogMessage({
+        showMiniDialog({
             title: t("STOP_UPLOADS_HEADER"),
-            content: t("STOP_ALL_UPLOADS_MESSAGE"),
-            proceed: {
+            message: t("STOP_ALL_UPLOADS_MESSAGE"),
+            continue: {
                 text: t("YES_STOP_UPLOADS"),
-                variant: "critical",
-                action: props.cancelUploads,
+                color: "critical",
+                action: cancelUploads,
             },
-            close: {
-                text: t("no"),
-                variant: "secondary",
-                action: () => {},
-            },
+            cancel: t("no"),
         });
     }
 
