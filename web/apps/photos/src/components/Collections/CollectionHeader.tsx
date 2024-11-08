@@ -22,7 +22,7 @@ import {
     isArchivedCollection,
     isPinnedCollection,
 } from "@/new/photos/services/magic-metadata";
-import { AppContext } from "@/new/photos/types/context";
+import { useAppContext } from "@/new/photos/types/context";
 import { HorizontalFlex } from "@ente/shared/components/Container";
 import OverflowMenu, {
     StyledMenu,
@@ -141,8 +141,8 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
     setFilesDownloadProgressAttributesCreator,
     isActiveCollectionDownloadInProgress,
 }) => {
-    const { showLoadingBar, hideLoadingBar, setDialogMessage } =
-        useContext(AppContext);
+    const { showLoadingBar, hideLoadingBar, setDialogMessage, showMiniDialog } =
+        useAppContext();
     const { syncWithRemote } = useContext(GalleryContext);
     const overFlowMenuIconRef = useRef<SVGSVGElement>(null);
 
@@ -292,16 +292,13 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
     );
 
     const confirmLeaveSharedAlbum = () => {
-        setDialogMessage({
+        showMiniDialog({
             title: t("leave_shared_album_title"),
-            content: t("leave_shared_album_message"),
-            proceed: {
+            message: t("leave_shared_album_message"),
+            continue: {
                 text: t("leave_shared_album"),
+                color: "critical",
                 action: leaveSharedAlbum,
-                variant: "critical",
-            },
-            close: {
-                text: t("cancel"),
             },
         });
     };
