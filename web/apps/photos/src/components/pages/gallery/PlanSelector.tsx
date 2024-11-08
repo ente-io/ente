@@ -189,7 +189,8 @@ const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
                 showMiniDialog({
                     title: t("CANCEL_SUBSCRIPTION_ON_MOBILE"),
                     message: t("CANCEL_SUBSCRIPTION_ON_MOBILE_MESSAGE"),
-                    cancel: t("ok"),
+                    continue: {},
+                    cancel: false,
                 });
                 break;
 
@@ -205,7 +206,8 @@ const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
                             values={{ emailID: "support@ente.io" }}
                         />
                     ),
-                    cancel: t("ok"),
+                    continue: {},
+                    cancel: false,
                 });
                 break;
         }
