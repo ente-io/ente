@@ -227,7 +227,14 @@ export const AttributedMiniDialog: React.FC<
                     }}
                 >
                     {attributes.title && (
-                        <DialogTitle sx={{ "&&&": { padding: 0 } }}>
+                        <DialogTitle
+                            sx={{
+                                "&&&": { padding: 0 },
+                                // Wrap the title to the next line if there
+                                // isn't sufficient space to make it fit in one.
+                                flexShrink: 1,
+                            }}
+                        >
                             {attributes.title}
                         </DialogTitle>
                     )}
