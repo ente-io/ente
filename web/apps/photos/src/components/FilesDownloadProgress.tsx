@@ -1,5 +1,5 @@
 import { photosDialogZIndex } from "@/new/photos/components/utils/z-index";
-import { AppContext } from "@/new/photos/types/context";
+import { useAppContext } from "@/new/photos/types/context";
 import Notification from "components/Notification";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
@@ -57,7 +57,7 @@ export const FilesDownloadProgress: React.FC<FilesDownloadProgressProps> = ({
     attributesList,
     setAttributesList,
 }) => {
-    const appContext = useContext(AppContext);
+    const { showMiniDialog } = useAppContext();
     const galleryContext = useContext(GalleryContext);
 
     if (!attributesList) {
@@ -68,25 +68,21 @@ export const FilesDownloadProgress: React.FC<FilesDownloadProgressProps> = ({
         setAttributesList(attributesList.filter((attr) => attr.id !== id));
     };
 
-    const confirmCancelUpload = (
+    const confirmCancelDownload = (
         attributes: FilesDownloadProgressAttributes,
     ) => {
-        appContext.setDialogMessage({
+        showMiniDialog({
             title: t("STOP_DOWNLOADS_HEADER"),
-            content: t("STOP_ALL_DOWNLOADS_MESSAGE"),
-            proceed: {
+            message: t("STOP_ALL_DOWNLOADS_MESSAGE"),
+            continue: {
                 text: t("YES_STOP_DOWNLOADS"),
-                variant: "critical",
+                color: "critical",
                 action: () => {
                     attributes?.canceller.abort();
                     onClose(attributes.id);
                 },
             },
-            close: {
-                text: t("no"),
-                variant: "secondary",
-                action: () => {},
-            },
+            cancel: t("no"),
         });
     };
 
@@ -94,7 +90,7 @@ export const FilesDownloadProgress: React.FC<FilesDownloadProgressProps> = ({
         if (isFilesDownloadCompleted(attributes)) {
             onClose(attributes.id);
         } else {
-            confirmCancelUpload(attributes);
+            confirmCancelDownload(attributes);
         }
     };
 
