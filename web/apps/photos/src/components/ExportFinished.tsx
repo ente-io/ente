@@ -54,7 +54,7 @@ export default function ExportFinished(props: Props) {
                     </SpaceBetweenFlex>
                     <SpaceBetweenFlex minHeight={"48px"}>
                         <Typography color="text.muted">
-                            {t("LAST_EXPORT_TIME")}
+                            {t("last_export_time")}
                         </Typography>
                         <Typography>
                             {props.lastExportTime
@@ -69,7 +69,7 @@ export default function ExportFinished(props: Props) {
                     {t("close")}
                 </Button>
                 <Button size="large" color="primary" onClick={props.onResync}>
-                    {t("EXPORT_AGAIN")}
+                    {t("export_again")}
                 </Button>
             </DialogActions>
             <ExportPendingList

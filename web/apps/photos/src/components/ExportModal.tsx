@@ -170,7 +170,7 @@ export default function ExportModal(props: ExportModalProps) {
             fullWidth
         >
             <DialogTitleWithCloseButton onClose={props.onHide}>
-                {t("EXPORT_DATA")}
+                {t("export_data")}
             </DialogTitleWithCloseButton>
             <DialogContent>
                 <ExportDirectory
@@ -202,7 +202,7 @@ function ExportDirectory({ exportFolder, changeExportDirectory, exportStage }) {
     return (
         <SpaceBetweenFlex minHeight={"48px"}>
             <Typography color="text.muted" mr={"16px"}>
-                {t("DESTINATION")}
+                {t("destination")}
             </Typography>
             <>
                 {!exportFolder ? (
