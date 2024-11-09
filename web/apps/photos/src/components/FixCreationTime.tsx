@@ -24,7 +24,6 @@ import {
     RadioGroup,
     Typography,
 } from "@mui/material";
-import { ComfySpan } from "components/ExportInProgress";
 import { useFormik } from "formik";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
@@ -38,12 +37,6 @@ export type FixOption =
     | "date-time-digitized"
     | "metadata-date"
     | "custom";
-
-interface FormValues {
-    option: FixOption;
-    /* Only valid when {@link option} is "custom-time". */
-    customDate: ParsedMetadataDate | undefined;
-}
 
 export interface FixCreationTimeAttributes {
     files: EnteFile[];
@@ -61,10 +54,7 @@ const FixCreationTime: React.FC<FixCreationTimeProps> = ({
     attributes,
 }) => {
     const [status, setStatus] = useState<Status | undefined>();
-    const [progressTracker, setProgressTracker] = useState({
-        current: 0,
-        total: 0,
-    });
+    const [progress, setProgress] = useState({ completed: 0, total: 0 });
 
     const galleryContext = useContext(GalleryContext);
 
@@ -79,7 +69,7 @@ const FixCreationTime: React.FC<FixCreationTimeProps> = ({
             attributes.files,
             values.option,
             values.customDate,
-            setProgressTracker,
+            setProgress,
         );
         setStatus(completedWithErrors ? "completed-with-errors" : "completed");
         await galleryContext.syncWithRemote();
@@ -114,7 +104,7 @@ const FixCreationTime: React.FC<FixCreationTimeProps> = ({
                 }}
             >
                 {message && <Typography>{message}</Typography>}
-                {status === "running" && <Progress {...{ progressTracker }} />}
+                {status === "running" && <Progress {...progress} />}
                 <OptionsForm {...{ step: status, onSubmit }} hide={hide} />
             </DialogContent>
         </Dialog>
@@ -122,6 +112,17 @@ const FixCreationTime: React.FC<FixCreationTimeProps> = ({
 };
 
 export default FixCreationTime;
+
+interface FormValues {
+    option: FixOption;
+    /* Only valid when {@link option} is "custom-time". */
+    customDate: ParsedMetadataDate | undefined;
+}
+
+interface FixProgress {
+    completed: number;
+    total: number;
+}
 
 const messageForStatus = (step?: Status) => {
     switch (step) {
@@ -136,17 +137,14 @@ const messageForStatus = (step?: Status) => {
     }
 };
 
-const Progress = ({ progressTracker }) => {
-    const progress = Math.round(
-        (progressTracker.current * 100) / progressTracker.total,
-    );
+const Progress: React.FC<FixProgress> = ({ completed, total }) => {
+    const percent = Math.round((completed * 100) / total);
     return (
         <>
             <div style={{ marginBottom: "10px" }}>
-                <ComfySpan>
-                    {" "}
-                    {progressTracker.current} / {progressTracker.total}{" "}
-                </ComfySpan>{" "}
+                <span>
+                    {completed} / {total}
+                </span>
                 <span style={{ marginLeft: "10px" }}>
                     {" "}
                     {t("CREATION_TIME_UPDATED")}
@@ -159,11 +157,17 @@ const Progress = ({ progressTracker }) => {
                     marginBottom: "20px",
                 }}
             >
-                <LinearProgress variant="determinate" value={progress} />
+                <LinearProgress variant="determinate" value={percent} />
             </div>
         </>
     );
 };
+
+// export const ComfySpan = styled("span")`
+//     padding: 0 0.5rem;
+//     word-spacing: 1rem;
+//     color: #ddd;
+// `;
 
 interface OptionsFormProps {
     step?: Status;
@@ -273,20 +277,13 @@ const Footer = ({ step, startFix, ...props }) => {
     );
 };
 
-type SetProgressTracker = React.Dispatch<
-    React.SetStateAction<{
-        current: number;
-        total: number;
-    }>
->;
-
 const updateFiles = async (
     files: EnteFile[],
     fixOption: FixOption,
     customDate: ParsedMetadataDate | undefined,
-    setProgressTracker: SetProgressTracker,
+    setProgress: (progress: FixProgress) => void,
 ) => {
-    setProgressTracker({ current: 0, total: files.length });
+    setProgress({ completed: 0, total: files.length });
     let hadErrors = false;
     for (const [i, file] of files.entries()) {
         try {
@@ -295,7 +292,7 @@ const updateFiles = async (
             log.error(`Failed to update date of ${fileLogID(file)}`, e);
             hadErrors = true;
         } finally {
-            setProgressTracker({ current: i + 1, total: files.length });
+            setProgress({ completed: i + 1, total: files.length });
         }
     }
     return hadErrors;
