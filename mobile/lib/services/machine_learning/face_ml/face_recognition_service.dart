@@ -37,7 +37,7 @@ class FaceRecognitionService {
 
     // Listen on DiffSync
     Bus.instance.on<DiffSyncCompleteEvent>().listen((event) async {
-      unawaited(_syncPersonFeedback());
+      unawaited(syncPersonFeedback());
     });
 
     // Listen on PeopleChanged
@@ -50,23 +50,22 @@ class FaceRecognitionService {
     _logger.info('init done');
   }
 
-  Future<void> sync() async {
-    await _syncPersonFeedback();
-  }
-
-  Future<void> _syncPersonFeedback() async {
+  Future<void> syncPersonFeedback() async {
     if (_isSyncing) {
       return;
     }
     _isSyncing = true;
-    if (_shouldReconcilePeople) {
-      await PersonService.instance.reconcileClusters();
-      Bus.instance.fire(PeopleChangedEvent(type: PeopleEventType.syncDone));
-      _shouldReconcilePeople = false;
-    } else {
-      await entityService.syncEntity(EntityType.cgroup);
+    try {
+      if (_shouldReconcilePeople) {
+        await PersonService.instance.reconcileClusters();
+        Bus.instance.fire(PeopleChangedEvent(type: PeopleEventType.syncDone));
+        _shouldReconcilePeople = false;
+      } else {
+        await entityService.syncEntity(EntityType.cgroup);
+      }
+    } finally {
+      _isSyncing = false;
     }
-    _isSyncing = false;
   }
 
   static Future<List<FaceResult>> runFacesPipeline(
