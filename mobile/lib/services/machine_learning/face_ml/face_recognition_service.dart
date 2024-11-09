@@ -62,6 +62,7 @@ class FaceRecognitionService {
         final bool didChange =
             await PersonService.instance.fetchRemoteClusterFeedback();
         if (didChange) {
+          _logger.info("people: got remote data update ");
           Bus.instance.fire(PeopleChangedEvent(type: PeopleEventType.syncDone));
         }
       }
