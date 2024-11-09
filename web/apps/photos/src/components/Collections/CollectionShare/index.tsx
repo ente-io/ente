@@ -24,6 +24,7 @@ import { formatDateTime } from "@ente/shared/time/format";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ContentCopyIcon from "@mui/icons-material/ContentCopyOutlined";
+import DownloadSharp from "@mui/icons-material/DownloadSharp";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import LinkIcon from "@mui/icons-material/Link";
 import ModeEditIcon from "@mui/icons-material/ModeEdit";
@@ -34,9 +35,10 @@ import { Dialog, DialogProps, Stack, Typography } from "@mui/material";
 import Avatar from "components/pages/gallery/Avatar";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
-import { useContext, useEffect, useMemo, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import { Trans } from "react-i18next";
 import {
+    createShareableURL,
     deleteShareableURL,
     updateShareableURL,
 } from "services/collectionService";
@@ -48,7 +50,6 @@ import {
 } from "utils/collection";
 import { handleSharingErrors } from "utils/error/ui";
 import EmailShare from "./emailShare";
-import EnablePublicShareOptions from "./publicShare/EnablePublicShareOptions";
 
 interface CollectionShareProps {
     open: boolean;
@@ -210,6 +211,91 @@ function SharingDetails({ collection, type }) {
         </>
     );
 }
+
+interface EnablePublicShareOptionsProps {
+    collection: Collection;
+    setPublicShareProp: (value: PublicURL) => void;
+    onLinkCreated: () => void;
+}
+
+const EnablePublicShareOptions: React.FC<EnablePublicShareOptionsProps> = ({
+    collection,
+    setPublicShareProp,
+    onLinkCreated,
+}) => {
+    const galleryContext = useContext(GalleryContext);
+    const [sharableLinkError, setSharableLinkError] = useState(null);
+
+    const createSharableURLHelper = async () => {
+        try {
+            setSharableLinkError(null);
+            galleryContext.setBlockingLoad(true);
+            const publicURL = await createShareableURL(collection);
+            setPublicShareProp(publicURL);
+            onLinkCreated();
+            galleryContext.syncWithRemote(false, true);
+        } catch (e) {
+            const errorMessage = handleSharingErrors(e);
+            setSharableLinkError(errorMessage);
+        } finally {
+            galleryContext.setBlockingLoad(false);
+        }
+    };
+
+    const createCollectPhotoShareableURLHelper = async () => {
+        try {
+            setSharableLinkError(null);
+            galleryContext.setBlockingLoad(true);
+            const publicURL = await createShareableURL(collection);
+            await updateShareableURL({
+                collectionID: collection.id,
+                enableCollect: true,
+            });
+            setPublicShareProp(publicURL);
+            onLinkCreated();
+            galleryContext.syncWithRemote(false, true);
+        } catch (e) {
+            const errorMessage = handleSharingErrors(e);
+            setSharableLinkError(errorMessage);
+        } finally {
+            galleryContext.setBlockingLoad(false);
+        }
+    };
+
+    return (
+        <Stack>
+            <MenuSectionTitle
+                title={t("LINK_SHARE_TITLE")}
+                icon={<PublicIcon />}
+            />
+            <MenuItemGroup>
+                <EnteMenuItem
+                    label={t("CREATE_PUBLIC_SHARING")}
+                    startIcon={<LinkIcon />}
+                    onClick={createSharableURLHelper}
+                />
+                <MenuItemDivider hasIcon />
+                <EnteMenuItem
+                    label={t("COLLECT_PHOTOS")}
+                    startIcon={<DownloadSharp />}
+                    onClick={createCollectPhotoShareableURLHelper}
+                />
+            </MenuItemGroup>
+            {sharableLinkError && (
+                <Typography
+                    textAlign={"center"}
+                    variant="small"
+                    sx={{
+                        color: (theme) => theme.colors.danger.A700,
+                        mt: 0.5,
+                    }}
+                >
+                    {sharableLinkError}
+                </Typography>
+            )}
+        </Stack>
+    );
+};
 
 interface PublicShareProps {
     collection: Collection;
@@ -776,7 +862,7 @@ interface ManageLinkPasswordProps {
     updatePublicShareURLHelper: (req: UpdatePublicURL) => Promise<void>;
 }
 
-export const ManageLinkPassword: React.FC<ManageLinkPasswordProps> = ({
+const ManageLinkPassword: React.FC<ManageLinkPasswordProps> = ({
     collection,
     publicShareProp,
     updatePublicShareURLHelper,
