@@ -6,6 +6,7 @@ import {
 import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
 import { useModalVisibility } from "@/base/components/utils/modal";
+import { sharedCryptoWorker } from "@/base/crypto";
 import type {
     Collection,
     PublicURL,
@@ -15,17 +16,17 @@ import { PublicLinkCreated } from "@/new/photos/components/share/PublicLinkCreat
 import type { CollectionSummary } from "@/new/photos/services/collection/ui";
 import { useAppContext } from "@/new/photos/types/context";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
+import SingleInputForm, {
+    type SingleInputFormProps,
+} from "@ente/shared/components/SingleInputForm";
 import { formatDateTime } from "@ente/shared/time/format";
-import {
-    default as ChevronRight,
-    default as ChevronRightIcon,
-} from "@mui/icons-material/ChevronRight";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ContentCopyIcon from "@mui/icons-material/ContentCopyOutlined";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import LinkIcon from "@mui/icons-material/Link";
 import PublicIcon from "@mui/icons-material/Public";
 import RemoveCircleOutline from "@mui/icons-material/RemoveCircleOutline";
-import { DialogProps, Stack, Typography } from "@mui/material";
+import { Dialog, DialogProps, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
 import { useContext, useEffect, useMemo, useState } from "react";
@@ -43,7 +44,6 @@ import {
 import { handleSharingErrors } from "utils/error/ui";
 import EmailShare from "./emailShare";
 import EnablePublicShareOptions from "./publicShare/EnablePublicShareOptions";
-import { ManageLinkPassword } from "./publicShare/manage/linkPassword";
 import SharingDetails from "./sharingDetails";
 
 interface CollectionShareProps {
@@ -400,6 +400,144 @@ const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
     );
 };
 
+interface ManagePublicCollectProps {
+    publicShareProp: PublicURL;
+    collection: Collection;
+    updatePublicShareURLHelper: (req: UpdatePublicURL) => Promise<void>;
+}
+
+const ManagePublicCollect: React.FC<ManagePublicCollectProps> = ({
+    publicShareProp,
+    updatePublicShareURLHelper,
+    collection,
+}) => {
+    const handleFileDownloadSetting = () => {
+        updatePublicShareURLHelper({
+            collectionID: collection.id,
+            enableCollect: !publicShareProp.enableCollect,
+        });
+    };
+
+    return (
+        <Stack>
+            <MenuItemGroup>
+                <EnteMenuItem
+                    onClick={handleFileDownloadSetting}
+                    variant="toggle"
+                    checked={publicShareProp?.enableCollect}
+                    label={t("PUBLIC_COLLECT")}
+                />
+            </MenuItemGroup>
+            <MenuSectionTitle title={t("PUBLIC_COLLECT_SUBTEXT")} />
+        </Stack>
+    );
+};
+
+interface ManageLinkExpiryProps {
+    publicShareProp: PublicURL;
+    collection: Collection;
+    updatePublicShareURLHelper: (req: UpdatePublicURL) => Promise<void>;
+    onRootClose: () => void;
+}
+
+const ManageLinkExpiry: React.FC<ManageLinkExpiryProps> = ({
+    publicShareProp,
+    collection,
+    updatePublicShareURLHelper,
+    onRootClose,
+}) => {
+    const updateDeviceExpiry = async (optionFn) => {
+        return updatePublicShareURLHelper({
+            collectionID: collection.id,
+            validTill: optionFn,
+        });
+    };
+
+    const [shareExpiryOptionsModalView, setShareExpiryOptionsModalView] =
+        useState(false);
+
+    const shareExpireOption = useMemo(() => shareExpiryOptions(), []);
+
+    const closeShareExpiryOptionsModalView = () =>
+        setShareExpiryOptionsModalView(false);
+
+    const openShareExpiryOptionsModalView = () =>
+        setShareExpiryOptionsModalView(true);
+
+    const changeShareExpiryValue = (value: number) => async () => {
+        await updateDeviceExpiry(value);
+        publicShareProp.validTill = value;
+        setShareExpiryOptionsModalView(false);
+    };
+
+    const handleDrawerClose: DialogProps["onClose"] = (_, reason) => {
+        if (reason === "backdropClick") {
+            onRootClose();
+        } else {
+            closeShareExpiryOptionsModalView();
+        }
+    };
+
+    return (
+        <>
+            <MenuItemGroup>
+                <EnteMenuItem
+                    onClick={openShareExpiryOptionsModalView}
+                    endIcon={<ChevronRightIcon />}
+                    variant="captioned"
+                    label={t("LINK_EXPIRY")}
+                    color={
+                        isLinkExpired(publicShareProp?.validTill)
+                            ? "critical"
+                            : "primary"
+                    }
+                    subText={
+                        isLinkExpired(publicShareProp?.validTill)
+                            ? t("link_expired")
+                            : publicShareProp?.validTill
+                              ? formatDateTime(
+                                    publicShareProp?.validTill / 1000,
+                                )
+                              : t("never")
+                    }
+                />
+            </MenuItemGroup>
+            <SidebarDrawer
+                anchor="right"
+                open={shareExpiryOptionsModalView}
+                onClose={handleDrawerClose}
+            >
+                <Stack spacing={"4px"} py={"12px"}>
+                    <Titlebar
+                        onClose={closeShareExpiryOptionsModalView}
+                        title={t("LINK_EXPIRY")}
+                        onRootClose={onRootClose}
+                    />
+                    <Stack py={"20px"} px={"8px"} spacing={"32px"}>
+                        <MenuItemGroup>
+                            {shareExpireOption.map((item, index) => (
+                                <>
+                                    <EnteMenuItem
+                                        fontWeight="normal"
+                                        key={item.value()}
+                                        onClick={changeShareExpiryValue(
+                                            item.value(),
+                                        )}
+                                        label={item.label}
+                                    />
+                                    {index !== shareExpireOption.length - 1 && (
+                                        <MenuItemDivider />
+                                    )}
+                                </>
+                            ))}
+                        </MenuItemGroup>
+                    </Stack>
+                </Stack>
+            </SidebarDrawer>
+        </>
+    );
+};
+
 interface ManageDeviceLimitProps {
     publicShareProp: PublicURL;
     collection: Collection;
@@ -452,7 +590,7 @@ const ManageDeviceLimit: React.FC<ManageDeviceLimitProps> = ({
                         : publicShareProp.deviceLimit.toString()
                 }
                 onClick={openDeviceLimitChangeModalView}
-                endIcon={<ChevronRight />}
+                endIcon={<ChevronRightIcon />}
             />
 
             <SidebarDrawer
@@ -541,140 +679,124 @@ const ManageDownloadAccess: React.FC<ManageDownloadAccessProps> = ({
     );
 };
 
-interface ManagePublicCollectProps {
+interface ManageLinkPasswordProps {
     publicShareProp: PublicURL;
     collection: Collection;
     updatePublicShareURLHelper: (req: UpdatePublicURL) => Promise<void>;
 }
 
-const ManagePublicCollect: React.FC<ManagePublicCollectProps> = ({
+export const ManageLinkPassword: React.FC<ManageLinkPasswordProps> = ({
+    collection,
     publicShareProp,
     updatePublicShareURLHelper,
-    collection,
 }) => {
-    const handleFileDownloadSetting = () => {
-        updatePublicShareURLHelper({
-            collectionID: collection.id,
-            enableCollect: !publicShareProp.enableCollect,
-        });
-    };
+    const { showMiniDialog } = useAppContext();
+    const [changePasswordView, setChangePasswordView] = useState(false);
 
-    return (
-        <Stack>
-            <MenuItemGroup>
-                <EnteMenuItem
-                    onClick={handleFileDownloadSetting}
-                    variant="toggle"
-                    checked={publicShareProp?.enableCollect}
-                    label={t("PUBLIC_COLLECT")}
-                />
-            </MenuItemGroup>
-            <MenuSectionTitle title={t("PUBLIC_COLLECT_SUBTEXT")} />
-        </Stack>
-    );
-};
+    const closeConfigurePassword = () => setChangePasswordView(false);
 
-interface ManageLinkExpiryProps {
-    publicShareProp: PublicURL;
-    collection: Collection;
-    updatePublicShareURLHelper: (req: UpdatePublicURL) => Promise<void>;
-    onRootClose: () => void;
-}
-
-const ManageLinkExpiry: React.FC<ManageLinkExpiryProps> = ({
-    publicShareProp,
-    collection,
-    updatePublicShareURLHelper,
-    onRootClose,
-}) => {
-    const updateDeviceExpiry = async (optionFn) => {
-        return updatePublicShareURLHelper({
-            collectionID: collection.id,
-            validTill: optionFn,
-        });
-    };
-
-    const [shareExpiryOptionsModalView, setShareExpiryOptionsModalView] =
-        useState(false);
-
-    const shareExpireOption = useMemo(() => shareExpiryOptions(), []);
-
-    const closeShareExpiryOptionsModalView = () =>
-        setShareExpiryOptionsModalView(false);
-
-    const openShareExpiryOptionsModalView = () =>
-        setShareExpiryOptionsModalView(true);
-
-    const changeShareExpiryValue = (value: number) => async () => {
-        await updateDeviceExpiry(value);
-        publicShareProp.validTill = value;
-        setShareExpiryOptionsModalView(false);
-    };
-
-    const handleDrawerClose: DialogProps["onClose"] = (_, reason) => {
-        if (reason === "backdropClick") {
-            onRootClose();
+    const handlePasswordChangeSetting = async () => {
+        if (publicShareProp.passwordEnabled) {
+            await confirmDisablePublicUrlPassword();
         } else {
-            closeShareExpiryOptionsModalView();
+            setChangePasswordView(true);
         }
+    };
+
+    const confirmDisablePublicUrlPassword = async () => {
+        showMiniDialog({
+            title: t("disable_password"),
+            message: t("disable_password_message"),
+            continue: {
+                text: t("disable"),
+                color: "critical",
+                action: () =>
+                    updatePublicShareURLHelper({
+                        collectionID: collection.id,
+                        disablePassword: true,
+                    }),
+            },
+        });
     };
 
     return (
         <>
-            <MenuItemGroup>
-                <EnteMenuItem
-                    onClick={openShareExpiryOptionsModalView}
-                    endIcon={<ChevronRight />}
-                    variant="captioned"
-                    label={t("LINK_EXPIRY")}
-                    color={
-                        isLinkExpired(publicShareProp?.validTill)
-                            ? "critical"
-                            : "primary"
-                    }
-                    subText={
-                        isLinkExpired(publicShareProp?.validTill)
-                            ? t("link_expired")
-                            : publicShareProp?.validTill
-                              ? formatDateTime(
-                                    publicShareProp?.validTill / 1000,
-                                )
-                              : t("never")
-                    }
-                />
-            </MenuItemGroup>
-            <SidebarDrawer
-                anchor="right"
-                open={shareExpiryOptionsModalView}
-                onClose={handleDrawerClose}
-            >
-                <Stack spacing={"4px"} py={"12px"}>
-                    <Titlebar
-                        onClose={closeShareExpiryOptionsModalView}
-                        title={t("LINK_EXPIRY")}
-                        onRootClose={onRootClose}
-                    />
-                    <Stack py={"20px"} px={"8px"} spacing={"32px"}>
-                        <MenuItemGroup>
-                            {shareExpireOption.map((item, index) => (
-                                <>
-                                    <EnteMenuItem
-                                        fontWeight="normal"
-                                        key={item.value()}
-                                        onClick={changeShareExpiryValue(
-                                            item.value(),
-                                        )}
-                                        label={item.label}
-                                    />
-                                    {index !== shareExpireOption.length - 1 && (
-                                        <MenuItemDivider />
-                                    )}
-                                </>
-                            ))}
-                        </MenuItemGroup>
-                    </Stack>
-                </Stack>
-            </SidebarDrawer>
+            <EnteMenuItem
+                label={t("password_lock")}
+                onClick={handlePasswordChangeSetting}
+                checked={!!publicShareProp?.passwordEnabled}
+                variant="toggle"
+            />
+            <PublicLinkSetPassword
+                open={changePasswordView}
+                onClose={closeConfigurePassword}
+                collection={collection}
+                publicShareProp={publicShareProp}
+                updatePublicShareURLHelper={updatePublicShareURLHelper}
+                setChangePasswordView={setChangePasswordView}
+            />
         </>
     );
 };
+
+function PublicLinkSetPassword({
+    open,
+    onClose,
+    collection,
+    publicShareProp,
+    updatePublicShareURLHelper,
+    setChangePasswordView,
+}) {
+    const savePassword: SingleInputFormProps["callback"] = async (
+        passphrase,
+        setFieldError,
+    ) => {
+        if (passphrase && passphrase.trim().length >= 1) {
+            await enablePublicUrlPassword(passphrase);
+            setChangePasswordView(false);
+            publicShareProp.passwordEnabled = true;
+        } else {
+            setFieldError("can not be empty");
+        }
+    };
+
+    const enablePublicUrlPassword = async (password: string) => {
+        const cryptoWorker = await sharedCryptoWorker();
+        const kekSalt = await cryptoWorker.generateSaltToDeriveKey();
+        const kek = await cryptoWorker.deriveInteractiveKey(password, kekSalt);
+
+        return updatePublicShareURLHelper({
+            collectionID: collection.id,
+            passHash: kek.key,
+            nonce: kekSalt,
+            opsLimit: kek.opsLimit,
+            memLimit: kek.memLimit,
+        });
+    };
+    return (
+        <Dialog
+            open={open}
+            onClose={onClose}
+            disablePortal
+            BackdropProps={{ sx: { position: "absolute" } }}
+            sx={{ position: "absolute" }}
+            PaperProps={{ sx: { p: 1 } }}
+            maxWidth={"sm"}
+            fullWidth
+        >
+            <Stack spacing={3} p={1.5}>
+                <Typography variant="h3" px={1} py={0.5} fontWeight={"bold"}>
+                    {t("password_lock")}
+                </Typography>
+                <SingleInputForm
+                    callback={savePassword}
+                    placeholder={t("password")}
+                    buttonText={t("lock")}
+                    fieldType="password"
+                    secondaryButtonAction={onClose}
+                    submitButtonProps={{ sx: { mt: 1, mb: 2 } }}
+                />
+            </Stack>
+        </Dialog>
+    );
+}
