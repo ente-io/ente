@@ -4,7 +4,7 @@ import { PublicLinkCreated } from "@/new/photos/components/share/PublicLinkCreat
 import { useEffect, useState } from "react";
 import { appendCollectionKeyToShareURL } from "utils/collection";
 import EnablePublicShareOptions from "./EnablePublicShareOptions";
-import ManagePublicShare from "./managePublicShare";
+import { ManagePublicShare } from "./managePublicShare";
 
 export default function PublicShare({
     collection,
