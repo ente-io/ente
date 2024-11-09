@@ -397,7 +397,7 @@
     "REMOVE_PARTICIPANT_MESSAGE": "<p>{{selectedEmail}} akan dikeluarkan dari album ini</p><p>Semua foto yang ia tambahkan juga akan dihapus dari album ini</p>",
     "NOT_FOUND": "404 - tidak ditemukan",
     "link_expired": "Link telah kedaluwarsa",
-    "link_expired_message": "Link ini telah kedaluwarsa atau sudah dinonaktifkan!",
+    "link_expired_message": "",
     "MANAGE_LINK": "Atur link",
     "LINK_TOO_MANY_REQUESTS": "",
     "FILE_DOWNLOAD": "Izinkan pengunduhan",

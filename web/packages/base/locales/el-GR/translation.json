@@ -397,7 +397,7 @@
     "REMOVE_PARTICIPANT_MESSAGE": "",
     "NOT_FOUND": "",
     "link_expired": "Ο σύνδεσμος έληξε",
-    "link_expired_message": "Αυτός ο σύνδεσμος έχει λήξει ή έχει απενεργοποιηθεί!",
+    "link_expired_message": "",
     "MANAGE_LINK": "Διαχείριση συνδέσμου",
     "LINK_TOO_MANY_REQUESTS": "",
     "FILE_DOWNLOAD": "Επιτρέπονται λήψεις",
