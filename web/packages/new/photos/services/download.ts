@@ -14,7 +14,6 @@ import * as ffmpeg from "@/new/photos/services/ffmpeg";
 import { renderableImageBlob } from "@/new/photos/utils/file";
 import { ensure } from "@/utils/ensure";
 import { CustomError } from "@ente/shared/error";
-import { isPlaybackPossible } from "@ente/shared/media/video-playback";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { retryAsyncFunction } from "@ente/shared/utils";
 
@@ -594,6 +593,36 @@ async function getPlayableVideo(
         }
     }
 }
+
+const WAIT_FOR_VIDEO_PLAYBACK = 1 * 1000;
+
+async function isPlaybackPossible(url: string): Promise<boolean> {
+    return await new Promise((resolve) => {
+        const t = setTimeout(() => {
+            resolve(false);
+        }, WAIT_FOR_VIDEO_PLAYBACK);
+
+        const video = document.createElement("video");
+        video.addEventListener("canplay", function () {
+            clearTimeout(t);
+            video.remove(); // Clean up the video element
+            // also check for duration > 0 to make sure it is not a broken video
+            if (video.duration > 0) {
+                resolve(true);
+            } else {
+                resolve(false);
+            }
+        });
+        video.addEventListener("error", function () {
+            clearTimeout(t);
+            video.remove();
+            resolve(false);
+        });
+
+        video.src = url;
+    });
+}
+
 
 class PhotosDownloadClient implements DownloadClient {
     constructor(
