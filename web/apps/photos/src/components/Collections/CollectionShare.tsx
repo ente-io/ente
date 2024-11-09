@@ -65,7 +65,6 @@ import {
     unshareCollection,
     updateShareableURL,
 } from "services/collectionService";
-import { SetPublicShareProp } from "types/publicCollection";
 import {
     appendCollectionKeyToShareURL,
     getDeviceLimitOptions,
@@ -233,6 +232,8 @@ function SharingDetails({ collection, type }) {
         </>
     );
 }
+
+type SetPublicShareProp = React.Dispatch<React.SetStateAction<PublicURL>>;
 
 interface EnablePublicShareOptionsProps {
     collection: Collection;
