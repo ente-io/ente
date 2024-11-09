@@ -7,6 +7,7 @@ import {
     DialogContent,
     DialogTitle,
     Typography,
+    useMediaQuery,
 } from "@mui/material";
 import { t } from "i18next";
 
@@ -36,6 +37,9 @@ export const UploaderNameInput: React.FC<UploaderNameInput> = ({
     uploadFileCount,
     onSubmit,
 }) => {
+    // Make the dialog fullscreen if it starts to get too squished.
+    const fullScreen = useMediaQuery("(width < 400px)");
+
     const handleSubmit = async (inputValue: string) => {
         onClose();
         await onSubmit(inputValue);
@@ -43,10 +47,11 @@ export const UploaderNameInput: React.FC<UploaderNameInput> = ({
 
     return (
         <Dialog
-            fullWidth
-            PaperProps={{ sx: { maxWidth: "346px" } }}
             open={open}
             onClose={onClose}
+            PaperProps={{ sx: fullScreen ? {} : { maxWidth: "346px" } }}
+            fullScreen={fullScreen}
+            fullWidth
         >
             <Box
                 sx={{
