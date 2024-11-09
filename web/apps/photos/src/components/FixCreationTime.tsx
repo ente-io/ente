@@ -1,3 +1,5 @@
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
+import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import log from "@/base/log";
 import { fileLogID, type EnteFile } from "@/media/file";
 import {
@@ -10,7 +12,6 @@ import { FileType } from "@/media/file-type";
 import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker";
 import downloadManager from "@/new/photos/services/download";
 import { extractExifDates } from "@/new/photos/services/exif";
-import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { ensure } from "@/utils/ensure";
 import {
     Box,
@@ -29,71 +30,47 @@ import {
 import { useFormik } from "formik";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 
-/** The current state of the fixing process. */
-type Status = "running" | "completed" | "completed-with-errors";
-
-export type FixOption =
-    | "date-time-original"
-    | "date-time-digitized"
-    | "metadata-date"
-    | "custom";
-
-export interface FixCreationTimeAttributes {
+type FixCreationTimeProps = ModalVisibilityProps & {
     files: EnteFile[];
-}
+};
 
-interface FixCreationTimeProps {
-    isOpen: boolean;
-    hide: () => void;
-    attributes: FixCreationTimeAttributes;
-}
-
-const FixCreationTime: React.FC<FixCreationTimeProps> = ({
-    isOpen,
-    hide,
-    attributes,
+export const FixCreationTime: React.FC<FixCreationTimeProps> = ({
+    open,
+    onClose,
+    files,
 }) => {
-    const [status, setStatus] = useState<Status | undefined>();
+    const [step, setStep] = useState<Step | undefined>();
     const [progress, setProgress] = useState({ completed: 0, total: 0 });
 
     const galleryContext = useContext(GalleryContext);
 
-    useEffect(() => {
-        // TODO (MR): Not sure why this is needed
-        if (attributes && isOpen && status !== "running") setStatus(undefined);
-    }, [isOpen]);
-
     const onSubmit = async (values: FormValues) => {
-        setStatus("running");
+        setStep("running");
         const completedWithErrors = await updateFiles(
-            attributes.files,
+            files,
             values.option,
             values.customDate,
             setProgress,
         );
-        setStatus(completedWithErrors ? "completed-with-errors" : "completed");
+        setStep(completedWithErrors ? "completed-with-errors" : "completed");
         await galleryContext.syncWithRemote();
     };
 
     const title =
-        status == "running"
+        step == "running"
             ? t("FIX_CREATION_TIME_IN_PROGRESS")
             : t("FIX_CREATION_TIME");
 
-    const message = messageForStatus(status);
-
-    if (!attributes) {
-        return <></>;
-    }
+    const message = messageForStatus(step);
 
     return (
         <Dialog
-            open={isOpen}
+            open={open}
             onClose={(_, reason) => {
                 if (reason == "backdropClick") return;
-                hide();
+                onClose();
             }}
         >
             <DialogTitle>{title}</DialogTitle>
@@ -102,18 +79,25 @@ const FixCreationTime: React.FC<FixCreationTimeProps> = ({
                     minWidth: "310px",
                     display: "flex",
                     flexDirection: "column",
-                    ...(status == "running" ? { alignItems: "center" } : {}),
+                    ...(step == "running" ? { alignItems: "center" } : {}),
                 }}
             >
                 {message && <Typography>{message}</Typography>}
-                {status === "running" && <Progress {...progress} />}
-                <OptionsForm {...{ step: status, onSubmit }} hide={hide} />
+                {step === "running" && <Progress {...progress} />}
+                <OptionsForm {...{ step: step, onSubmit, onClose }} />
             </DialogContent>
         </Dialog>
     );
 };
 
-export default FixCreationTime;
+/** The current state of the fixing process. */
+type Step = "running" | "completed" | "completed-with-errors";
+
+type FixOption =
+    | "date-time-original"
+    | "date-time-digitized"
+    | "metadata-date"
+    | "custom";
 
 interface FormValues {
     option: FixOption;
@@ -126,7 +110,7 @@ interface FixProgress {
     total: number;
 }
 
-const messageForStatus = (step?: Status) => {
+const messageForStatus = (step?: Step) => {
     switch (step) {
         case undefined:
             return undefined;
@@ -156,12 +140,16 @@ const Progress: React.FC<FixProgress> = ({ completed, total }) => (
 );
 
 interface OptionsFormProps {
-    step?: Status;
+    step: Step;
     onSubmit: (values: FormValues) => Promise<void>;
-    hide: () => void;
+    onClose: () => void;
 }
 
-const OptionsForm: React.FC<OptionsFormProps> = ({ step, onSubmit, hide }) => {
+const OptionsForm: React.FC<OptionsFormProps> = ({
+    step,
+    onSubmit,
+    onClose,
+}) => {
     const { values, handleChange, setValues, handleSubmit } =
         useFormik<FormValues>({
             initialValues: {
@@ -217,12 +205,22 @@ const OptionsForm: React.FC<OptionsFormProps> = ({ step, onSubmit, hide }) => {
                     )}
                 </form>
             )}
-            <Footer step={step} startFix={handleSubmit} hide={hide} />
+            <Footer
+                step={step}
+                onSubmit={() => void handleSubmit()}
+                onClose={onClose}
+            />
         </>
     );
 };
 
-const Footer = ({ step, startFix, ...props }) =>
+interface FooterProps {
+    step: Step;
+    onSubmit: () => void;
+    onClose: () => void;
+}
+
+const Footer: React.FC<FooterProps> = ({ step, onSubmit, onClose }) =>
     step != "running" && (
         <div
             style={{
@@ -236,19 +234,13 @@ const Footer = ({ step, startFix, ...props }) =>
                 <FocusVisibleButton
                     color="secondary"
                     fullWidth
-                    onClick={() => {
-                        props.hide();
-                    }}
+                    onClick={onClose}
                 >
                     {t("cancel")}
                 </FocusVisibleButton>
             )}
             {step == "completed" && (
-                <FocusVisibleButton
-                    color="primary"
-                    fullWidth
-                    onClick={props.hide}
-                >
+                <FocusVisibleButton color="primary" fullWidth onClick={onClose}>
                     {t("close")}
                 </FocusVisibleButton>
             )}
@@ -259,7 +251,7 @@ const Footer = ({ step, startFix, ...props }) =>
                     <FocusVisibleButton
                         color="accent"
                         fullWidth
-                        onClick={startFix}
+                        onClick={onSubmit}
                     >
                         {t("FIX_CREATION_TIME")}
                     </FocusVisibleButton>
