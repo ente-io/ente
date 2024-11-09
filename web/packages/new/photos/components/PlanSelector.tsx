@@ -215,7 +215,6 @@ const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
     const commonCardData = {
         onClose,
         setLoading,
-        subscription,
         addOnBonuses,
         planPeriod,
         togglePeriod,
@@ -237,12 +236,15 @@ const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
             {subscription && isSubscriptionActivePaid(subscription) ? (
                 <PaidSubscriptionPlanSelectorCard
                     {...commonCardData}
-                    usage={usage}
+                    {...{ usage, subscription }}
                 >
                     {plansList}
                 </PaidSubscriptionPlanSelectorCard>
             ) : (
-                <FreeSubscriptionPlanSelectorCard {...commonCardData}>
+                <FreeSubscriptionPlanSelectorCard
+                    {...commonCardData}
+                    {...{ subscription }}
+                >
                     {plansList}
                 </FreeSubscriptionPlanSelectorCard>
             )}
@@ -291,7 +293,7 @@ type FreeSubscriptionPlanSelectorCardProps = Pick<
     PlanSelectorProps,
     "onClose" | "setLoading"
 > & {
-    subscription: Subscription;
+    subscription: Subscription | undefined;
     addOnBonuses: Bonus[];
     planPeriod: PlanPeriod;
     togglePeriod: () => void;
@@ -338,10 +340,13 @@ const FreeSubscriptionPlanSelectorCard: React.FC<
     </>
 );
 
-type PaidSubscriptionPlanSelectorCardProps =
-    FreeSubscriptionPlanSelectorCardProps & {
-        usage: number;
-    };
+type PaidSubscriptionPlanSelectorCardProps = Omit<
+    FreeSubscriptionPlanSelectorCardProps,
+    "subscription"
+> & {
+    subscription: Subscription;
+    usage: number;
+};
 
 const PaidSubscriptionPlanSelectorCard: React.FC<
     React.PropsWithChildren<PaidSubscriptionPlanSelectorCardProps>
@@ -472,7 +477,7 @@ interface PlansProps {
     onClose: () => void;
     plansData: PlansData | undefined;
     planPeriod: PlanPeriod;
-    subscription: Subscription;
+    subscription: Subscription | undefined;
     hasAddOnBonus: boolean;
     onPlanSelect: (plan: Plan) => void;
 }
@@ -484,40 +489,42 @@ const Plans: React.FC<PlansProps> = ({
     subscription,
     hasAddOnBonus,
     onPlanSelect,
-}) => {
-    const { freePlan, plans } = plansData ?? {};
-    return (
-        <Stack spacing={2}>
-            {plans
-                ?.filter((plan) => plan.period === planPeriod)
-                ?.map((plan) => (
-                    <PlanRow
-                        disabled={
+}) => (
+    <Stack spacing={2}>
+        {plansData?.plans
+            .filter((plan) => plan.period === planPeriod)
+            .map((plan) => (
+                <PlanRow
+                    disabled={
+                        !!(
                             subscription &&
                             isSubscriptionForPlan(subscription, plan)
-                        }
-                        popular={isPopularPlan(plan)}
-                        key={plan.stripeID}
-                        plan={plan}
-                        subscription={subscription}
-                        onPlanSelect={onPlanSelect}
-                    />
-                ))}
-            {!(subscription && isSubscriptionActivePaid(subscription)) &&
-                !hasAddOnBonus &&
-                freePlan && (
-                    <FreePlanRow onClose={onClose} storage={freePlan.storage} />
-                )}
-        </Stack>
-    );
-};
+                        )
+                    }
+                    popular={isPopularPlan(plan)}
+                    key={plan.stripeID}
+                    plan={plan}
+                    subscription={subscription}
+                    onPlanSelect={onPlanSelect}
+                />
+            ))}
+        {!(subscription && isSubscriptionActivePaid(subscription)) &&
+            !hasAddOnBonus &&
+            plansData?.freePlan && (
+                <FreePlanRow
+                    onClose={onClose}
+                    storage={plansData.freePlan.storage}
+                />
+            )}
+    </Stack>
+);
 
 const isPopularPlan = (plan: Plan) =>
     plan.storage === 100 * 1024 * 1024 * 1024; /* 100 GB */
 
 interface PlanRowProps {
     plan: Plan;
-    subscription: Subscription;
+    subscription: Subscription | undefined;
     onPlanSelect: (plan: Plan) => void;
     disabled: boolean;
     popular: boolean;
