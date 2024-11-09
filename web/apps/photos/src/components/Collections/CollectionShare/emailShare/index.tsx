@@ -10,8 +10,9 @@ import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import AddIcon from "@mui/icons-material/Add";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import Workspaces from "@mui/icons-material/Workspaces";
-import { Stack } from "@mui/material";
-import AvatarGroup from "components/pages/gallery/AvatarGroup";
+import { Stack, styled } from "@mui/material";
+import NumberAvatar from "@mui/material/Avatar";
+import Avatar from "components/pages/gallery/Avatar";
 import { t } from "i18next";
 import AddParticipant from "./AddParticipant";
 import ManageEmailShare from "./ManageEmailShare";
@@ -104,3 +105,49 @@ export default function EmailShare({
         </>
     );
 }
+
+const AvatarContainer = styled("div")({
+    position: "relative",
+    display: "flex",
+    alignItems: "center",
+    marginLeft: -5,
+});
+
+const AvatarContainerOuter = styled("div")({
+    position: "relative",
+    display: "flex",
+    alignItems: "center",
+    marginLeft: 8,
+});
+const AvatarCounter = styled(NumberAvatar)({
+    height: 20,
+    width: 20,
+    fontSize: 10,
+    color: "#fff",
+});
+
+const SHAREE_AVATAR_LIMIT = 6;
+
+const AvatarGroup = ({ sharees }: { sharees: Collection["sharees"] }) => {
+    const hasShareesOverLimit = sharees?.length > SHAREE_AVATAR_LIMIT;
+    const countOfShareesOverLimit = sharees?.length - SHAREE_AVATAR_LIMIT;
+
+    return (
+        <AvatarContainerOuter>
+            {sharees?.slice(0, 6).map((sharee) => (
+                <AvatarContainer key={sharee.email}>
+                    <Avatar
+                        key={sharee.email}
+                        email={sharee.email}
+                        opacity={100}
+                    />
+                </AvatarContainer>
+            ))}
+            {hasShareesOverLimit && (
+                <AvatarContainer key="extra-count">
+                    <AvatarCounter>+{countOfShareesOverLimit}</AvatarCounter>
+                </AvatarContainer>
+            )}
+        </AvatarContainerOuter>
+    );
+};
