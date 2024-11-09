@@ -199,6 +199,10 @@ Future<Float32List> resizedToPreprocessedYoloFace(
 ) async {
   const requiredWidth = 640;
   const requiredHeight = 640;
+  final int letterboxWidth = requiredWidth - rgbWidth;
+  final int letterboxHeight = requiredHeight - rgbHeight;
+  final int letterboxWidthHalf = letterboxWidth ~/ 2;
+  final int letterboxHeightHalf = letterboxHeight ~/ 2;
 
   final processedBytes = Float32List(3 * requiredHeight * requiredWidth);
   final buffer = Float32List.view(processedBytes.buffer);
@@ -208,10 +212,14 @@ Future<Float32List> resizedToPreprocessedYoloFace(
   for (var h = 0; h < requiredHeight; h++) {
     for (var w = 0; w < requiredWidth; w++) {
       late RGB pixel;
-      if (w >= rgbWidth || h >= rgbHeight) {
+      if (w < letterboxWidthHalf ||
+          w >= rgbWidth + letterboxWidthHalf ||
+          h < letterboxHeightHalf ||
+          h >= rgbHeight + letterboxHeightHalf) {
         pixel = const (114, 114, 114);
       } else {
-        final int byteIndex = 3 * (rgbWidth * h + w);
+        final int byteIndex = 3 *
+            (rgbWidth * (h - letterboxHeightHalf) + (w - letterboxWidthHalf));
         pixel = (
           rgbBytes[byteIndex],
           rgbBytes[byteIndex + 1],
