@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import { t } from "i18next";
 
-export default function UserNameInputDialog({
+export default function UploaderNameInputDialog({
     open,
     onClose,
     onNameSubmit,
