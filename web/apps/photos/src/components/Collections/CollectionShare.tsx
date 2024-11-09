@@ -24,6 +24,7 @@ import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
+import { CustomError, parseSharingErrorCodes } from "@ente/shared/error";
 import { formatDateTime } from "@ente/shared/time/format";
 import { default as Add, default as AddIcon } from "@mui/icons-material/Add";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
@@ -70,7 +71,6 @@ import {
     getDeviceLimitOptions,
     shareExpiryOptions,
 } from "utils/collection";
-import { handleSharingErrors } from "utils/error/ui";
 import * as Yup from "yup";
 
 interface CollectionShareProps {
@@ -317,6 +317,25 @@ const EnablePublicShareOptions: React.FC<EnablePublicShareOptionsProps> = ({
             )}
         </Stack>
     );
+};
+
+const handleSharingErrors = (error) => {
+    const parsedError = parseSharingErrorCodes(error);
+    let errorMessage = "";
+    switch (parsedError.message) {
+        case CustomError.BAD_REQUEST:
+            errorMessage = t("SHARING_BAD_REQUEST_ERROR");
+            break;
+        case CustomError.SUBSCRIPTION_NEEDED:
+            errorMessage = t("SHARING_DISABLED_FOR_FREE_ACCOUNTS");
+            break;
+        case CustomError.NOT_FOUND:
+            errorMessage = t("USER_DOES_NOT_EXIST");
+            break;
+        default:
+            errorMessage = `${t("generic_error_retry")} ${parsedError.message}`;
+    }
+    return errorMessage;
 };
 
 interface EmailShareProps {
