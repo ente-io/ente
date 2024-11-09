@@ -1,14 +1,7 @@
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import type { ModalVisibilityProps } from "@/base/components/utils/modal";
-import { VerticallyCentered } from "@ente/shared/components/Container";
-import DialogBoxBase from "@ente/shared/components/DialogBox/base";
 import Check from "@mui/icons-material/Check";
-import {
-    Box,
-    Button,
-    DialogActions,
-    DialogContent,
-    Typography,
-} from "@mui/material";
+import { Box, Dialog, DialogContent, DialogTitle, Stack } from "@mui/material";
 import { t } from "i18next";
 
 type PublicLinkCreatedProps = ModalVisibilityProps & {
@@ -27,44 +20,39 @@ export const PublicLinkCreated: React.FC<PublicLinkCreatedProps> = ({
     open,
     onClose,
     onCopyLink,
-}) => {
-    return (
-        <DialogBoxBase
-            open={open}
-            onClose={onClose}
-            disablePortal
-            BackdropProps={{ sx: { position: "absolute" } }}
-            sx={{ position: "absolute" }}
-            PaperProps={{
-                sx: { p: 1 },
-            }}
-        >
-            <DialogContent>
-                <VerticallyCentered>
-                    <Typography fontWeight={"bold"}>
-                        {t("PUBLIC_LINK_CREATED")}
-                    </Typography>
-                    <Box pt={2}>
-                        <Check sx={{ fontSize: "48px" }} />
-                    </Box>
-                </VerticallyCentered>
-            </DialogContent>
-            <DialogActions>
-                <Button onClick={onClose} color="secondary" size={"large"}>
-                    {t("DONE")}
-                </Button>
-                <Button
+}) => (
+    <Dialog
+        {...{ open, onClose }}
+        disablePortal
+        componentsProps={{ backdrop: { sx: { position: "absolute" } } }}
+        sx={{ position: "absolute" }}
+    >
+        <DialogTitle sx={{ textAlign: "center" }}>
+            {t("PUBLIC_LINK_CREATED")}
+        </DialogTitle>
+        <DialogContent>
+            <Box sx={{ textAlign: "center" }}>
+                <Check sx={{ fontSize: "48px" }} />
+            </Box>
+            <Stack sx={{ pt: 3, gap: 1 }}>
+                <FocusVisibleButton
                     onClick={() => {
                         onCopyLink();
                         onClose();
                     }}
-                    size={"large"}
                     color="primary"
-                    autoFocus
+                    fullWidth
                 >
                     {t("COPY_LINK")}
-                </Button>
-            </DialogActions>
-        </DialogBoxBase>
-    );
-};
+                </FocusVisibleButton>
+                <FocusVisibleButton
+                    onClick={onClose}
+                    color="secondary"
+                    fullWidth
+                >
+                    {t("DONE")}
+                </FocusVisibleButton>
+            </Stack>
+        </DialogContent>
+    </Dialog>
+);
