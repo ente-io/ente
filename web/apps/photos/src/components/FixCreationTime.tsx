@@ -11,15 +11,18 @@ import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker
 import downloadManager from "@/new/photos/services/download";
 import { extractExifDates } from "@/new/photos/services/exif";
 import { ensure } from "@/utils/ensure";
-import DialogBox from "@ente/shared/components/DialogBox/";
 import {
     Button,
+    Dialog,
+    DialogContent,
+    DialogTitle,
     FormControl,
     FormControlLabel,
     FormLabel,
     LinearProgress,
     Radio,
     RadioGroup,
+    Typography,
 } from "@mui/material";
 import { ComfySpan } from "components/ExportInProgress";
 import { useFormik } from "formik";
@@ -94,24 +97,27 @@ const FixCreationTime: React.FC<FixCreationTimeProps> = ({
     }
 
     return (
-        <DialogBox
+        <Dialog
             open={isOpen}
-            onClose={hide}
-            attributes={{ title, nonClosable: true }}
+            onClose={(_, reason) => {
+                if (reason == "backdropClick") return;
+                hide();
+            }}
         >
-            <div
+            <DialogTitle>{title}</DialogTitle>
+            <DialogContent
                 style={{
-                    marginBottom: "10px",
+                    minWidth: "310px",
                     display: "flex",
                     flexDirection: "column",
                     ...(status == "running" ? { alignItems: "center" } : {}),
                 }}
             >
-                {message && <div>{message}</div>}
+                {message && <Typography>{message}</Typography>}
                 {status === "running" && <Progress {...{ progressTracker }} />}
                 <OptionsForm {...{ step: status, onSubmit }} hide={hide} />
-            </div>
-        </DialogBox>
+            </DialogContent>
+        </Dialog>
     );
 };
 
@@ -179,48 +185,47 @@ const OptionsForm: React.FC<OptionsFormProps> = ({ step, onSubmit, hide }) => {
     return (
         <>
             {(step === undefined || step === "completed-with-errors") && (
-                <div style={{ marginTop: "10px" }}>
-                    <form onSubmit={handleSubmit}>
-                        <FormControl>
-                            <FormLabel>
-                                {t("UPDATE_CREATION_TIME_NOT_STARTED")}
-                            </FormLabel>
-                        </FormControl>
-                        <RadioGroup
-                            name={"option"}
-                            value={values.option}
-                            onChange={handleChange}
-                        >
-                            <FormControlLabel
-                                value={"date-time-original"}
-                                control={<Radio size="small" />}
-                                label={t("DATE_TIME_ORIGINAL")}
-                            />
-                            <FormControlLabel
-                                value={"date-time-digitized"}
-                                control={<Radio size="small" />}
-                                label={t("DATE_TIME_DIGITIZED")}
-                            />
-                            <FormControlLabel
-                                value={"metadata-date"}
-                                control={<Radio size="small" />}
-                                label={t("METADATA_DATE")}
-                            />
-                            <FormControlLabel
-                                value={"custom"}
-                                control={<Radio size="small" />}
-                                label={t("CUSTOM_TIME")}
-                            />
-                        </RadioGroup>
-                        {values.option == "custom" && (
-                            <PhotoDateTimePicker
-                                onAccept={(customDate) =>
-                                    setValues({ option: "custom", customDate })
-                                }
-                            />
-                        )}
-                    </form>
-                </div>
+                <form onSubmit={handleSubmit}>
+                    <FormControl>
+                        <FormLabel>
+                            {t("UPDATE_CREATION_TIME_NOT_STARTED")}
+                        </FormLabel>
+                    </FormControl>
+                    <RadioGroup
+                        name={"option"}
+                        value={values.option}
+                        onChange={handleChange}
+                        sx={{ paddingBlockStart: 1 }}
+                    >
+                        <FormControlLabel
+                            value={"date-time-original"}
+                            control={<Radio size="small" />}
+                            label={t("DATE_TIME_ORIGINAL")}
+                        />
+                        <FormControlLabel
+                            value={"date-time-digitized"}
+                            control={<Radio size="small" />}
+                            label={t("DATE_TIME_DIGITIZED")}
+                        />
+                        <FormControlLabel
+                            value={"metadata-date"}
+                            control={<Radio size="small" />}
+                            label={t("METADATA_DATE")}
+                        />
+                        <FormControlLabel
+                            value={"custom"}
+                            control={<Radio size="small" />}
+                            label={t("CUSTOM_TIME")}
+                        />
+                    </RadioGroup>
+                    {values.option == "custom" && (
+                        <PhotoDateTimePicker
+                            onAccept={(customDate) =>
+                                setValues({ option: "custom", customDate })
+                            }
+                        />
+                    )}
+                </form>
             )}
             <Footer step={step} startFix={handleSubmit} hide={hide} />
         </>
