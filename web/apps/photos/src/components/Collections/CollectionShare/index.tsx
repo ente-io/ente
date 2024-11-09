@@ -1,4 +1,8 @@
-import { MenuItemDivider, MenuItemGroup } from "@/base/components/Menu";
+import {
+    MenuItemDivider,
+    MenuItemGroup,
+    MenuSectionTitle,
+} from "@/base/components/Menu";
 import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
 import { useModalVisibility } from "@/base/components/utils/modal";
@@ -9,6 +13,7 @@ import type {
 } from "@/media/collection";
 import { PublicLinkCreated } from "@/new/photos/components/share/PublicLinkCreated";
 import type { CollectionSummary } from "@/new/photos/services/collection/ui";
+import { useAppContext } from "@/new/photos/types/context";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import {
     default as ChevronRight,
@@ -23,6 +28,7 @@ import { DialogProps, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
 import { useContext, useEffect, useMemo, useState } from "react";
+import { Trans } from "react-i18next";
 import {
     deleteShareableURL,
     updateShareableURL,
@@ -35,10 +41,8 @@ import {
 import { handleSharingErrors } from "utils/error/ui";
 import EmailShare from "./emailShare";
 import EnablePublicShareOptions from "./publicShare/EnablePublicShareOptions";
-import { ManageDownloadAccess } from "./publicShare/manage/downloadAccess";
 import { ManageLinkExpiry } from "./publicShare/manage/linkExpiry";
 import { ManageLinkPassword } from "./publicShare/manage/linkPassword";
-import { ManagePublicCollect } from "./publicShare/manage/publicCollect";
 import SharingDetails from "./sharingDetails";
 
 interface CollectionShareProps {
@@ -260,9 +264,7 @@ interface ManagePublicShareOptionsProps {
     publicShareUrl: string;
 }
 
-const ManagePublicShareOptions: React.FC<
-    ManagePublicShareOptionsProps
-> = ({
+const ManagePublicShareOptions: React.FC<ManagePublicShareOptionsProps> = ({
     publicShareProp,
     collection,
     setPublicShareProp,
@@ -486,5 +488,87 @@ const ManageDeviceLimit: React.FC<ManageDeviceLimitProps> = ({
                 </Stack>
             </SidebarDrawer>
         </>
+    );
+};
+
+interface ManageDownloadAccessProps {
+    publicShareProp: PublicURL;
+    collection: Collection;
+    updatePublicShareURLHelper: (req: UpdatePublicURL) => Promise<void>;
+}
+
+const ManageDownloadAccess: React.FC<ManageDownloadAccessProps> = ({
+    publicShareProp,
+    updatePublicShareURLHelper,
+    collection,
+}) => {
+    const { showMiniDialog } = useAppContext();
+
+    const handleFileDownloadSetting = () => {
+        if (publicShareProp.enableDownload) {
+            disableFileDownload();
+        } else {
+            updatePublicShareURLHelper({
+                collectionID: collection.id,
+                enableDownload: true,
+            });
+        }
+    };
+
+    const disableFileDownload = () => {
+        showMiniDialog({
+            title: t("disable_file_download"),
+            message: <Trans i18nKey={"disable_file_download_message"} />,
+            continue: {
+                text: t("disable"),
+                color: "critical",
+                action: () =>
+                    updatePublicShareURLHelper({
+                        collectionID: collection.id,
+                        enableDownload: false,
+                    }),
+            },
+        });
+    };
+    return (
+        <EnteMenuItem
+            checked={publicShareProp?.enableDownload ?? true}
+            onClick={handleFileDownloadSetting}
+            variant="toggle"
+            label={t("FILE_DOWNLOAD")}
+        />
+    );
+};
+
+interface ManagePublicCollectProps {
+    publicShareProp: PublicURL;
+    collection: Collection;
+    updatePublicShareURLHelper: (req: UpdatePublicURL) => Promise<void>;
+}
+
+const ManagePublicCollect: React.FC<ManagePublicCollectProps> = ({
+    publicShareProp,
+    updatePublicShareURLHelper,
+    collection,
+}) => {
+    const handleFileDownloadSetting = () => {
+        updatePublicShareURLHelper({
+            collectionID: collection.id,
+            enableCollect: !publicShareProp.enableCollect,
+        });
+    };
+
+    return (
+        <Stack>
+            <MenuItemGroup>
+                <EnteMenuItem
+                    onClick={handleFileDownloadSetting}
+                    variant="toggle"
+                    checked={publicShareProp?.enableCollect}
+                    label={t("PUBLIC_COLLECT")}
+                />
+            </MenuItemGroup>
+            <MenuSectionTitle title={t("PUBLIC_COLLECT_SUBTEXT")} />
+        </Stack>
     );
 };
