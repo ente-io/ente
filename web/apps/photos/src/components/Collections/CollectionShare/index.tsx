@@ -8,14 +8,17 @@ import EmailShare from "./emailShare";
 import PublicShare from "./publicShare";
 import SharingDetails from "./sharingDetails";
 
-interface Props {
+interface CollectionShareProps {
     open: boolean;
     onClose: () => void;
     collection: Collection;
     collectionSummary: CollectionSummary;
 }
 
-function CollectionShare({ collectionSummary, ...props }: Props) {
+export const CollectionShare: React.FC<CollectionShareProps> = ({
+    collectionSummary,
+    ...props
+}) => {
     const handleRootClose = () => {
         props.onClose();
     };
@@ -77,5 +80,4 @@ function CollectionShare({ collectionSummary, ...props }: Props) {
             </Stack>
         </SidebarDrawer>
     );
-}
-export default CollectionShare;
+};
