@@ -191,7 +191,7 @@ const SelectedFileOptions = ({
             <Stack spacing={2} direction="row" mr={2}>
                 {isInSearchMode ? (
                     <>
-                        <Tooltip title={t("FIX_CREATION_TIME")}>
+                        <Tooltip title={t("fix_creation_time")}>
                             <IconButton
                                 onClick={handleFileOps(FILE_OPS_TYPE.FIX_TIME)}
                             >
@@ -328,7 +328,7 @@ const SelectedFileOptions = ({
                     </>
                 ) : (
                     <>
-                        <Tooltip title={t("FIX_CREATION_TIME")}>
+                        <Tooltip title={t("fix_creation_time")}>
                             <IconButton
                                 onClick={handleFileOps(FILE_OPS_TYPE.FIX_TIME)}
                             >

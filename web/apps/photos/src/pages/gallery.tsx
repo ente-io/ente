@@ -94,9 +94,7 @@ import {
     FilesDownloadProgress,
     FilesDownloadProgressAttributes,
 } from "components/FilesDownloadProgress";
-import FixCreationTime, {
-    FixCreationTimeAttributes,
-} from "components/FixCreationTime";
+import { FixCreationTime } from "components/FixCreationTime";
 import FullScreenDropZone from "components/FullScreenDropZone";
 import GalleryEmptyState from "components/GalleryEmptyState";
 import { LoadingOverlay } from "components/LoadingOverlay";
@@ -241,9 +239,6 @@ export default function Gallery() {
     const [userIDToEmailMap, setUserIDToEmailMap] =
         useState<Map<number, string>>(null);
     const [emailList, setEmailList] = useState<string[]>(null);
-    const [fixCreationTimeView, setFixCreationTimeView] = useState(false);
-    const [fixCreationTimeAttributes, setFixCreationTimeAttributes] =
-        useState<FixCreationTimeAttributes>(null);
 
     const [uploadTypeSelectorView, setUploadTypeSelectorView] = useState(false);
     const [uploadTypeSelectorIntent, setUploadTypeSelectorIntent] =
@@ -272,6 +267,11 @@ export default function Gallery() {
     const [selectedSearchOption, setSelectedSearchOption] = useState<
         SearchOption | undefined
     >();
+    // If the fix creation time dialog is being shown, then the list of files on
+    // which it should act.
+    const [fixCreationTimeFiles, setFixCreationTimeFiles] = useState<
+        EnteFile[]
+    >([]);
 
     const peopleState = usePeopleStateSnapshot();
 
@@ -294,6 +294,8 @@ export default function Gallery() {
     const { show: showPlanSelector, props: planSelectorVisibilityProps } =
         useModalVisibility();
     const { show: showWhatsNew, props: whatsNewVisibilityProps } =
+        useModalVisibility();
+    const { show: showFixCreationTime, props: fixCreationTimeVisibilityProps } =
         useModalVisibility();
 
     // TODO: Temp
@@ -426,9 +428,6 @@ export default function Gallery() {
     useEffect(() => {
         collectionNamerAttributes && setCollectionNamerView(true);
     }, [collectionNamerAttributes]);
-    useEffect(() => {
-        fixCreationTimeAttributes && setFixCreationTimeView(true);
-    }, [fixCreationTimeAttributes]);
 
     useEffect(() => {
         if (typeof activeCollectionID === "undefined" || !router.isReady) {
@@ -495,8 +494,8 @@ export default function Gallery() {
             uploadTypeSelectorView ||
             openCollectionSelector ||
             collectionNamerView ||
-            fixCreationTimeView ||
             planSelectorVisibilityProps.open ||
+            fixCreationTimeVisibilityProps.open ||
             exportModalView ||
             authenticateUserModalView ||
             isPhotoSwipeOpen ||
@@ -739,7 +738,10 @@ export default function Gallery() {
                     () => dispatch({ type: "clearTempDeleted" }),
                     (files) => dispatch({ type: "markTempHidden", files }),
                     () => dispatch({ type: "clearTempHidden" }),
-                    setFixCreationTimeAttributes,
+                    (files) => {
+                        setFixCreationTimeFiles(files);
+                        showFixCreationTime();
+                    },
                     setFilesDownloadProgressAttributesCreator,
                 );
             }
@@ -932,9 +934,8 @@ export default function Gallery() {
                     setAttributesList={setFilesDownloadProgressAttributesList}
                 />
                 <FixCreationTime
-                    isOpen={fixCreationTimeView}
-                    hide={() => setFixCreationTimeView(false)}
-                    attributes={fixCreationTimeAttributes}
+                    {...fixCreationTimeVisibilityProps}
+                    files={fixCreationTimeFiles}
                 />
 
                 <NavbarBase
