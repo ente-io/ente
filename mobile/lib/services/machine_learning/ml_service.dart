@@ -116,7 +116,7 @@ class MLService {
 
   Future<void> sync() async {
     await FileDataService.instance.syncFDStatus();
-    await faceRecognitionService.sync();
+    await faceRecognitionService.syncPersonFeedback();
   }
 
   Future<void> runAllML({bool force = false}) async {

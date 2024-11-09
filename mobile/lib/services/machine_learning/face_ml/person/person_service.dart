@@ -74,7 +74,7 @@ class PersonService {
   Future<void> reconcileClusters() async {
     final EnteWatch? w = kDebugMode ? EnteWatch("reconcileClusters") : null;
     w?.start();
-    await fetchRemoteClusterFeedback();
+    await fetchRemoteClusterFeedback(skipClusterUpdateIfNoChange: false);
     w?.log("Stored remote feedback");
     final dbPersonClusterInfo =
         await faceMLDataDB.getPersonToClusterIdToFaceIds();
@@ -251,8 +251,17 @@ class PersonService {
     Bus.instance.fire(PeopleChangedEvent());
   }
 
-  Future<void> fetchRemoteClusterFeedback() async {
-    await entityService.syncEntity(EntityType.cgroup);
+  // fetchRemoteClusterFeedback returns true if remote data has changed
+  Future<bool> fetchRemoteClusterFeedback({
+    bool skipClusterUpdateIfNoChange = true,
+  }) async {
+    final int changedEntities =
+        await entityService.syncEntity(EntityType.cgroup);
+    final bool changed = changedEntities > 0;
+    if (changed == false && skipClusterUpdateIfNoChange) {
+      return false;
+    }
+
     final entities = await entityService.getEntities(EntityType.cgroup);
     // todo: (neerajg) perf change, this can be expensive to do on every sync
     // especially when we have a lot of people. We should only do this when the
@@ -294,6 +303,7 @@ class PersonService {
     logger.info("Storing feedback for ${faceIdToClusterID.length} faces");
     await faceMLDataDB.updateFaceIdToClusterId(faceIdToClusterID);
     await faceMLDataDB.bulkAssignClusterToPersonID(clusterToPersonID);
+    return changed;
   }
 
   Future<void> updateAvatar(PersonEntity p, EnteFile file) async {

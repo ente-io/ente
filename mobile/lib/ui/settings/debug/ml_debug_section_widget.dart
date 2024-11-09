@@ -288,7 +288,7 @@ class _MLDebugSectionWidgetState extends State<MLDebugSectionWidget> {
           trailingIconIsMuted: true,
           onTap: () async {
             try {
-              await faceRecognitionService.sync();
+              await faceRecognitionService.syncPersonFeedback();
               showShortToast(context, "Done");
             } catch (e, s) {
               logger.warning('sync person mappings failed ', e, s);
