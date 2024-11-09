@@ -10,7 +10,7 @@ import { Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import { useState } from "react";
 import { SetPublicShareProp } from "types/publicCollection";
-import ManagePublicShareOptions from "./manage";
+import {ManagePublicShareOptions} from "./manage";
 
 export const isLinkExpired = (validTill: number) => {
     return validTill && validTill < Date.now() * 1000;

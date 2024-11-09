@@ -26,7 +26,7 @@ import { ManageLinkExpiry } from "./linkExpiry";
 import { ManageLinkPassword } from "./linkPassword";
 import { ManagePublicCollect } from "./publicCollect";
 
-interface Iprops {
+interface ManagePublicShareOptionsProps {
     publicShareProp: PublicURL;
     collection: Collection;
     setPublicShareProp: SetPublicShareProp;
@@ -36,7 +36,9 @@ interface Iprops {
     publicShareUrl: string;
 }
 
-export default function ManagePublicShareOptions({
+export const ManagePublicShareOptions: React.FC<
+    ManagePublicShareOptionsProps
+> = ({
     publicShareProp,
     collection,
     setPublicShareProp,
@@ -44,7 +46,7 @@ export default function ManagePublicShareOptions({
     onClose,
     onRootClose,
     publicShareUrl,
-}: Iprops) {
+}) => {
     const handleDrawerClose: DialogProps["onClose"] = (_, reason) => {
         if (reason === "backdropClick") {
             onRootClose();
@@ -169,7 +171,7 @@ export default function ManagePublicShareOptions({
             </Stack>
         </SidebarDrawer>
     );
-}
+};
 
 interface ManageDeviceLimitProps {
     publicShareProp: PublicURL;
