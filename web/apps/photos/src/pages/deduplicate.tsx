@@ -26,16 +26,19 @@ import {
 import { Duplicate, getDuplicates } from "services/deduplicationService";
 import { syncFiles, trashFiles } from "services/fileService";
 import { syncTrash } from "services/trashService";
-import {
-    DeduplicateContextType,
-    DefaultDeduplicateContext,
-} from "types/deduplicate";
 import { SelectedState } from "types/gallery";
 import { getSelectedFiles } from "utils/file";
 
-export const DeduplicateContext = createContext<DeduplicateContextType>(
-    DefaultDeduplicateContext,
-);
+export type DeduplicateContextType = {
+    isOnDeduplicatePage: boolean;
+    collectionNameMap: Map<number, string>;
+};
+
+export const DeduplicateContext = createContext<DeduplicateContextType>({
+    isOnDeduplicatePage: false,
+    collectionNameMap: new Map<number, string>(),
+});
+
 export const Info = styled("div")`
     padding: 24px;
     font-size: 18px;
@@ -187,7 +190,6 @@ export default function Deduplicate() {
     return (
         <DeduplicateContext.Provider
             value={{
-                ...DefaultDeduplicateContext,
                 collectionNameMap,
                 isOnDeduplicatePage: true,
             }}
