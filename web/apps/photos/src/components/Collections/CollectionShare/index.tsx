@@ -15,6 +15,7 @@ import { PublicLinkCreated } from "@/new/photos/components/share/PublicLinkCreat
 import type { CollectionSummary } from "@/new/photos/services/collection/ui";
 import { useAppContext } from "@/new/photos/types/context";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
+import { formatDateTime } from "@ente/shared/time/format";
 import {
     default as ChevronRight,
     default as ChevronRightIcon,
@@ -37,11 +38,11 @@ import { SetPublicShareProp } from "types/publicCollection";
 import {
     appendCollectionKeyToShareURL,
     getDeviceLimitOptions,
+    shareExpiryOptions,
 } from "utils/collection";
 import { handleSharingErrors } from "utils/error/ui";
 import EmailShare from "./emailShare";
 import EnablePublicShareOptions from "./publicShare/EnablePublicShareOptions";
-import { ManageLinkExpiry } from "./publicShare/manage/linkExpiry";
 import { ManageLinkPassword } from "./publicShare/manage/linkPassword";
 import SharingDetails from "./sharingDetails";
 
@@ -183,10 +184,6 @@ const PublicShare: React.FC<PublicShareProps> = ({
     );
 };
 
-export const isLinkExpired = (validTill: number) => {
-    return validTill && validTill < Date.now() * 1000;
-};
-
 interface ManagePublicShareProps {
     publicShareProp: PublicURL;
     collection: Collection;
@@ -252,6 +249,10 @@ const ManagePublicShare: React.FC<ManagePublicShareProps> = ({
             />
         </>
     );
+};
+
+const isLinkExpired = (validTill: number) => {
+    return validTill && validTill < Date.now() * 1000;
 };
 
 interface ManagePublicShareOptionsProps {
@@ -570,5 +571,110 @@ const ManagePublicCollect: React.FC<ManagePublicCollectProps> = ({
             </MenuItemGroup>
             <MenuSectionTitle title={t("PUBLIC_COLLECT_SUBTEXT")} />
         </Stack>
+    );
+};
+
+interface ManageLinkExpiryProps {
+    publicShareProp: PublicURL;
+    collection: Collection;
+    updatePublicShareURLHelper: (req: UpdatePublicURL) => Promise<void>;
+    onRootClose: () => void;
+}
+
+const ManageLinkExpiry: React.FC<ManageLinkExpiryProps> = ({
+    publicShareProp,
+    collection,
+    updatePublicShareURLHelper,
+    onRootClose,
+}) => {
+    const updateDeviceExpiry = async (optionFn) => {
+        return updatePublicShareURLHelper({
+            collectionID: collection.id,
+            validTill: optionFn,
+        });
+    };
+
+    const [shareExpiryOptionsModalView, setShareExpiryOptionsModalView] =
+        useState(false);
+
+    const shareExpireOption = useMemo(() => shareExpiryOptions(), []);
+
+    const closeShareExpiryOptionsModalView = () =>
+        setShareExpiryOptionsModalView(false);
+
+    const openShareExpiryOptionsModalView = () =>
+        setShareExpiryOptionsModalView(true);
+
+    const changeShareExpiryValue = (value: number) => async () => {
+        await updateDeviceExpiry(value);
+        publicShareProp.validTill = value;
+        setShareExpiryOptionsModalView(false);
+    };
+
+    const handleDrawerClose: DialogProps["onClose"] = (_, reason) => {
+        if (reason === "backdropClick") {
+            onRootClose();
+        } else {
+            closeShareExpiryOptionsModalView();
+        }
+    };
+
+    return (
+        <>
+            <MenuItemGroup>
+                <EnteMenuItem
+                    onClick={openShareExpiryOptionsModalView}
+                    endIcon={<ChevronRight />}
+                    variant="captioned"
+                    label={t("LINK_EXPIRY")}
+                    color={
+                        isLinkExpired(publicShareProp?.validTill)
+                            ? "critical"
+                            : "primary"
+                    }
+                    subText={
+                        isLinkExpired(publicShareProp?.validTill)
+                            ? t("link_expired")
+                            : publicShareProp?.validTill
+                              ? formatDateTime(
+                                    publicShareProp?.validTill / 1000,
+                                )
+                              : t("never")
+                    }
+                />
+            </MenuItemGroup>
+            <SidebarDrawer
+                anchor="right"
+                open={shareExpiryOptionsModalView}
+                onClose={handleDrawerClose}
+            >
+                <Stack spacing={"4px"} py={"12px"}>
+                    <Titlebar
+                        onClose={closeShareExpiryOptionsModalView}
+                        title={t("LINK_EXPIRY")}
+                        onRootClose={onRootClose}
+                    />
+                    <Stack py={"20px"} px={"8px"} spacing={"32px"}>
+                        <MenuItemGroup>
+                            {shareExpireOption.map((item, index) => (
+                                <>
+                                    <EnteMenuItem
+                                        fontWeight="normal"
+                                        key={item.value()}
+                                        onClick={changeShareExpiryValue(
+                                            item.value(),
+                                        )}
+                                        label={item.label}
+                                    />
+                                    {index !== shareExpireOption.length - 1 && (
+                                        <MenuItemDivider />
+                                    )}
+                                </>
+                            ))}
+                        </MenuItemGroup>
+                    </Stack>
+                </Stack>
+            </SidebarDrawer>
+        </>
     );
 };
