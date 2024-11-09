@@ -428,9 +428,6 @@ export default function Gallery() {
     useEffect(() => {
         collectionNamerAttributes && setCollectionNamerView(true);
     }, [collectionNamerAttributes]);
-    useEffect(() => {
-        fixCreationTimeAttributes && setFixCreationTimeView(true);
-    }, [fixCreationTimeAttributes]);
 
     useEffect(() => {
         if (typeof activeCollectionID === "undefined" || !router.isReady) {
@@ -741,7 +738,10 @@ export default function Gallery() {
                     () => dispatch({ type: "clearTempDeleted" }),
                     (files) => dispatch({ type: "markTempHidden", files }),
                     () => dispatch({ type: "clearTempHidden" }),
-                    setFixCreationTimeAttributes,
+                    (files) => {
+                        setFixCreationTimeFiles(files);
+                        showFixCreationTime();
+                    },
                     setFilesDownloadProgressAttributesCreator,
                 );
             }

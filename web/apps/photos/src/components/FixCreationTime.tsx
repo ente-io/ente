@@ -30,12 +30,18 @@ import {
 import { useFormik } from "formik";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 
 type FixCreationTimeProps = ModalVisibilityProps & {
+    /**
+     * The {@link EnteFile}s whose creation time the user wishes to modify.
+     */
     files: EnteFile[];
 };
 
+/**
+ * A dialog allowing the user to modify the creation time of selected files.
+ */
 export const FixCreationTime: React.FC<FixCreationTimeProps> = ({
     open,
     onClose,
@@ -45,6 +51,11 @@ export const FixCreationTime: React.FC<FixCreationTimeProps> = ({
     const [progress, setProgress] = useState({ completed: 0, total: 0 });
 
     const galleryContext = useContext(GalleryContext);
+
+    useEffect(() => {
+        // Reset the step whenever the dialog is reopened.
+        if (open) setStep(undefined);
+    }, [open]);
 
     const onSubmit = async (values: FormValues) => {
         setStep("running");
