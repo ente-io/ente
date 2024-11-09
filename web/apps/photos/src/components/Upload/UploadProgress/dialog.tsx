@@ -2,7 +2,7 @@ import {
     UPLOAD_RESULT,
     UPLOAD_STAGES,
 } from "@/new/photos/services/upload/types";
-import { dialogCloseHandler } from "@ente/shared/components/DialogBox/TitleWithCloseButton";
+import { dialogCloseHandler } from "@ente/shared/components/TitleWithCloseButton";
 import { Dialog, DialogContent } from "@mui/material";
 import { t } from "i18next";
 import { useContext, useEffect, useState } from "react";

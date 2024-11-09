@@ -2,10 +2,10 @@ import { SpaceBetweenFlex } from "@/base/components/mui/Container";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { useIsTouchscreen } from "@/base/hooks";
 import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";
+import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import DialogTitleWithCloseButton, {
     dialogCloseHandler,
-} from "@ente/shared/components/DialogBox/TitleWithCloseButton";
-import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
+} from "@ente/shared/components/TitleWithCloseButton";
 import ChevronRight from "@mui/icons-material/ChevronRight";
 import GoogleIcon from "@mui/icons-material/Google";
 import { default as FileUploadIcon } from "@mui/icons-material/ImageOutlined";

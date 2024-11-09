@@ -7,7 +7,7 @@ import log from "@/base/log";
 import { downloadString } from "@/base/utils/web";
 import { ensure } from "@/utils/ensure";
 import CodeBlock from "@ente/shared/components/CodeBlock";
-import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleWithCloseButton";
+import DialogTitleWithCloseButton from "@ente/shared/components/TitleWithCloseButton";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import {
     Box,

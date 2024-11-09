@@ -1,8 +1,10 @@
+import { useModalVisibility } from "@/base/components/utils/modal";
 import { basename } from "@/base/file";
 import log from "@/base/log";
 import type { CollectionMapping, Electron, ZipItem } from "@/base/types/ipc";
 import type { Collection } from "@/media/collection";
 import type { EnteFile } from "@/media/file";
+import { UploaderNameInput } from "@/new/albums/components/UploaderNameInput";
 import { CollectionMappingChoiceDialog } from "@/new/photos/components/CollectionMappingChoiceDialog";
 import type { CollectionSelectorAttributes } from "@/new/photos/components/CollectionSelector";
 import { downloadAppDialogAttributes } from "@/new/photos/components/utils/download";
@@ -20,7 +22,6 @@ import { ensure } from "@/utils/ensure";
 import { CustomError } from "@ente/shared/error";
 import DiscFullIcon from "@mui/icons-material/DiscFull";
 import InfoOutlined from "@mui/icons-material/InfoRounded";
-import UserNameInputDialog from "components/UserNameInputDialog";
 import { t } from "i18next";
 import isElectron from "is-electron";
 import { GalleryContext } from "pages/gallery";
@@ -137,11 +138,13 @@ export default function Uploader({
     const [hasLivePhotos, setHasLivePhotos] = useState(false);
 
     const [openChoiceDialog, setOpenChoiceDialog] = useState(false);
-    const [userNameInputDialogView, setUserNameInputDialogView] =
-        useState(false);
     const [importSuggestion, setImportSuggestion] = useState<ImportSuggestion>(
         DEFAULT_IMPORT_SUGGESTION,
     );
+    const {
+        show: showUploaderNameInput,
+        props: uploaderNameInputVisibilityProps,
+    } = useModalVisibility();
 
     /**
      * {@link File}s that the user drag-dropped or selected for uploads (web).
@@ -220,7 +223,6 @@ export default function Uploader({
     const electron = globalThis.electron;
 
     const closeUploadProgress = () => setUploadProgressView(false);
-    const showUserNameInputDialog = () => setUserNameInputDialogView(true);
 
     const handleChoiceModalClose = () => {
         setOpenChoiceDialog(false);
@@ -231,8 +233,8 @@ export default function Uploader({
         uploadRunning.current = false;
     };
 
-    const handleUserNameInputDialogClose = () => {
-        setUserNameInputDialogView(false);
+    const handleUploaderNameInputClose = () => {
+        uploaderNameInputVisibilityProps.onClose();
         uploadRunning.current = false;
     };
 
@@ -424,7 +426,7 @@ export default function Uploader({
                     ),
                 );
                 uploaderNameRef.current = uploaderName;
-                showUserNameInputDialog();
+                showUploaderNameInput();
                 return;
             }
 
@@ -807,12 +809,12 @@ export default function Uploader({
                 finishedUploads={finishedUploads}
                 cancelUploads={cancelUploads}
             />
-            <UserNameInputDialog
-                open={userNameInputDialogView}
-                onClose={handleUserNameInputDialogClose}
-                onNameSubmit={handlePublicUpload}
-                toUploadFilesCount={uploadItemsAndPaths.current?.length}
+            <UploaderNameInput
+                open={uploaderNameInputVisibilityProps.open}
+                onClose={handleUploaderNameInputClose}
                 uploaderName={uploaderNameRef.current}
+                uploadFileCount={uploadItemsAndPaths.current?.length ?? 0}
+                onSubmit={handlePublicUpload}
             />
         </>
     );

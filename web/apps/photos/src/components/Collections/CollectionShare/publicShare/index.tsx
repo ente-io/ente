@@ -1,8 +1,9 @@
+import { useModalVisibility } from "@/base/components/utils/modal";
 import type { Collection, PublicURL } from "@/media/collection";
+import { PublicLinkCreated } from "@/new/photos/components/share/PublicLinkCreated";
 import { useEffect, useState } from "react";
 import { appendCollectionKeyToShareURL } from "utils/collection";
 import EnablePublicShareOptions from "./EnablePublicShareOptions";
-import CopyLinkModal from "./copyLinkModal";
 import ManagePublicShare from "./managePublicShare";
 
 export default function PublicShare({
@@ -14,7 +15,10 @@ export default function PublicShare({
 }) {
     const [publicShareUrl, setPublicShareUrl] = useState<string>(null);
     const [publicShareProp, setPublicShareProp] = useState<PublicURL>(null);
-    const [copyLinkModalView, setCopyLinkModalView] = useState(false);
+    const {
+        show: showPublicLinkCreated,
+        props: publicLinkCreatedVisibilityProps,
+    } = useModalVisibility();
 
     useEffect(() => {
         if (collection.publicURLs?.length) {
@@ -36,10 +40,6 @@ export default function PublicShare({
 
     const copyToClipboardHelper = () => {
         navigator.clipboard.writeText(publicShareUrl);
-        handleCancel();
-    };
-    const handleCancel = () => {
-        setCopyLinkModalView(false);
     };
 
     return (
@@ -57,14 +57,12 @@ export default function PublicShare({
                 <EnablePublicShareOptions
                     setPublicShareProp={setPublicShareProp}
                     collection={collection}
-                    setCopyLinkModalView={setCopyLinkModalView}
+                    onLinkCreated={showPublicLinkCreated}
                 />
             )}
-            <CopyLinkModal
-                open={copyLinkModalView}
-                onClose={handleCancel}
-                handleCancel={handleCancel}
-                copyToClipboardHelper={copyToClipboardHelper}
+            <PublicLinkCreated
+                {...publicLinkCreatedVisibilityProps}
+                onCopyLink={copyToClipboardHelper}
             />
         </>
     );

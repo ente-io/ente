@@ -140,7 +140,7 @@ export default function ManagePublicShareOptions({
                             <EnteMenuItem
                                 startIcon={<ContentCopyIcon />}
                                 onClick={copyToClipboardHelper(publicShareUrl)}
-                                label={t("COPY_LINK")}
+                                label={t("copy_link")}
                             />
                         </MenuItemGroup>
                         <MenuItemGroup>
