@@ -1,5 +1,4 @@
 import type { PublicURL } from "@/media/collection";
-import { EnteFile } from "@/media/file";
 import { TimeStampListItem } from "components/PhotoList";
 
 export interface PublicCollectionGalleryContextType {
@@ -9,11 +8,6 @@ export interface PublicCollectionGalleryContextType {
     accessedThroughSharedURL: boolean;
     photoListHeader: TimeStampListItem;
     photoListFooter: TimeStampListItem;
-}
-
-export interface LocalSavedPublicCollectionFiles {
-    collectionUID: string;
-    files: EnteFile[];
 }
 
 export type SetPublicShareProp = React.Dispatch<
