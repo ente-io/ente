@@ -440,7 +440,9 @@ const PeriodToggler: React.FC<PeriodTogglerProps> = ({
     <ToggleButtonGroup
         value={planPeriod}
         exclusive
-        onChange={(_, newPeriod) => newPeriod == planPeriod || togglePeriod()}
+        onChange={(_, newPeriod) => {
+            if (newPeriod && newPeriod != planPeriod) togglePeriod();
+        }}
         color="primary"
     >
         <CustomToggleButton value={"month"}>{t("monthly")}</CustomToggleButton>
