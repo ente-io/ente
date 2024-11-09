@@ -8,7 +8,7 @@ export interface TimeDelta {
 export function getUnixTimeInMicroSecondsWithDelta(delta: TimeDelta): number {
     let date = new Date();
     if (delta?.hours) {
-        date = _addHours(date, delta.hours);
+        date = new Date(date.getTime() + delta.hours * 60 * 60 * 1000);
     }
     if (delta?.days) {
         date.setDate(date.getDate() + delta.days);
@@ -20,10 +20,4 @@ export function getUnixTimeInMicroSecondsWithDelta(delta: TimeDelta): number {
         date.setFullYear(date.getFullYear() + delta.years);
     }
     return date.getTime() * 1000;
-}
-
-function _addHours(date: Date, hours: number): Date {
-    const result = new Date(date);
-    result.setHours(date.getHours() + hours);
-    return result;
 }
