@@ -29,9 +29,10 @@ import {
     redirectToPaymentsApp,
     userDetailsAddOnBonuses,
 } from "@/new/photos/services/user-details";
-import { AppContext, useAppContext } from "@/new/photos/types/context";
+import { useAppContext } from "@/new/photos/types/context";
 import { bytesInGB, formattedStorageByteSize } from "@/new/photos/utils/units";
 import { openURL } from "@/new/photos/utils/web";
+import { ensure } from "@/utils/ensure";
 import {
     FlexWrapper,
     FluidContainer,
@@ -43,7 +44,7 @@ import Close from "@mui/icons-material/Close";
 import Done from "@mui/icons-material/Done";
 import {
     Button,
-    ButtonProps,
+    type ButtonProps,
     Dialog,
     IconButton,
     Link,
@@ -57,7 +58,7 @@ import {
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { t } from "i18next";
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 
 type PlanSelectorProps = ModalVisibilityProps & {
@@ -97,13 +98,13 @@ const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
     onClose,
     setLoading,
 }) => {
-    const { showMiniDialog } = useContext(AppContext);
+    const { showMiniDialog } = useAppContext();
 
     const userDetails = useUserDetailsSnapshot();
 
     const [plansData, setPlansData] = useState<PlansData | undefined>();
-    const [planPeriod, setPlanPeriod] = useState<PlanPeriod | undefined>(
-        userDetails?.subscription?.period ?? "month",
+    const [planPeriod, setPlanPeriod] = useState<PlanPeriod>(
+        userDetails?.subscription.period ?? "month",
     );
 
     const usage = userDetails ? planUsage(userDetails) : 0;
@@ -118,7 +119,7 @@ const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
     );
 
     useEffect(() => {
-        const main = async () => {
+        void (async () => {
             try {
                 setLoading(true);
                 const plansData = await getPlansData();
@@ -147,8 +148,9 @@ const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
             } finally {
                 setLoading(false);
             }
-        };
-        main();
+        })();
+        // TODO
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const handlePlanSelect = async (plan: Plan) => {
@@ -156,7 +158,7 @@ const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
             case "buyPlan":
                 try {
                     setLoading(true);
-                    await redirectToPaymentsApp(plan.stripeID, "buy");
+                    await redirectToPaymentsApp(ensure(plan.stripeID), "buy");
                 } catch (e) {
                     setLoading(false);
                     showMiniDialog(
@@ -174,7 +176,10 @@ const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
                     continue: {
                         text: t("update_subscription"),
                         action: () =>
-                            redirectToPaymentsApp(plan.stripeID, "update"),
+                            redirectToPaymentsApp(
+                                ensure(plan.stripeID),
+                                "update",
+                            ),
                     },
                 });
                 break;
@@ -431,27 +436,17 @@ interface PeriodTogglerProps {
 const PeriodToggler: React.FC<PeriodTogglerProps> = ({
     planPeriod,
     togglePeriod,
-}) => {
-    const handleChange = (_, newPlanPeriod: PlanPeriod) => {
-        if (newPlanPeriod !== planPeriod) togglePeriod();
-    };
-
-    return (
-        <ToggleButtonGroup
-            value={planPeriod}
-            exclusive
-            onChange={handleChange}
-            color="primary"
-        >
-            <CustomToggleButton value={"month"}>
-                {t("monthly")}
-            </CustomToggleButton>
-            <CustomToggleButton value={"year"}>
-                {t("yearly")}
-            </CustomToggleButton>
-        </ToggleButtonGroup>
-    );
-};
+}) => (
+    <ToggleButtonGroup
+        value={planPeriod}
+        exclusive
+        onChange={(_, newPeriod) => newPeriod == planPeriod || togglePeriod()}
+        color="primary"
+    >
+        <CustomToggleButton value={"month"}>{t("monthly")}</CustomToggleButton>
+        <CustomToggleButton value={"year"}>{t("yearly")}</CustomToggleButton>
+    </ToggleButtonGroup>
+);
 
 const CustomToggleButton = styled(ToggleButton)(({ theme }) => ({
     textTransform: "none",
