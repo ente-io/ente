@@ -44,9 +44,9 @@ import {
     SpaceBetweenFlex,
     VerticallyCentered,
 } from "@ente/shared/components/Container";
-import DialogTitleWithCloseButton from "@ente/shared/components/TitleWithCloseButton";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ThemeSwitcher from "@ente/shared/components/ThemeSwitcher";
+import DialogTitleWithCloseButton from "@ente/shared/components/TitleWithCloseButton";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import ArchiveOutlined from "@mui/icons-material/ArchiveOutlined";

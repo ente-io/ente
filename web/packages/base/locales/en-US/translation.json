@@ -403,7 +403,7 @@
     "LINK_DEVICE_LIMIT": "Device limit",
     "NO_DEVICE_LIMIT": "None",
     "LINK_EXPIRY": "Link expiry",
-    "never": "never",
+    "never": "Never",
     "disable_file_download": "Disable download",
     "disable_file_download_message": "<p>Are you sure that you want to disable the download button for files?</p><p>Viewers can still take screenshots or save a copy of your photos using external tools.</p>",
     "SHARED_USING": "Shared using ",
