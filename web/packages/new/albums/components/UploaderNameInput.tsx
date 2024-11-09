@@ -1,3 +1,4 @@
+import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import SingleInputForm from "@ente/shared/components/SingleInputForm";
 import AutoAwesomeOutlinedIcon from "@mui/icons-material/AutoAwesomeOutlined";
 import {
@@ -9,16 +10,35 @@ import {
 } from "@mui/material";
 import { t } from "i18next";
 
-export default function UploaderNameInputDialog({
+type UploaderNameInput = ModalVisibilityProps & {
+    /**
+     * The existing uploader name to prefill.
+     */
+    uploaderName: string;
+    /**
+     * Count of the number of files that the uploader is trying to upload.
+     */
+    uploadFileCount: number;
+    /**
+     * Callback invoked when the user presses submit after entering a name.
+     */
+    onSubmit: (name: string) => Promise<void>;
+};
+
+/**
+ * A dialog asking the uploader to a public album to provide their name so that
+ * other folks can know who uploaded a given photo in the shared album.
+ */
+export const UploaderNameInput: React.FC<UploaderNameInput> = ({
     open,
     onClose,
-    onNameSubmit,
-    toUploadFilesCount,
     uploaderName,
-}) {
+    uploadFileCount,
+    onSubmit,
+}) => {
     const handleSubmit = async (inputValue: string) => {
         onClose();
-        await onNameSubmit(inputValue);
+        await onSubmit(inputValue);
     };
 
     return (
@@ -52,7 +72,7 @@ export default function UploaderNameInputDialog({
                     callback={handleSubmit}
                     placeholder={t("NAME_PLACEHOLDER")}
                     buttonText={t("add_photos_count", {
-                        count: toUploadFilesCount ?? 0,
+                        count: uploadFileCount,
                     })}
                     fieldType="text"
                     blockButton
@@ -61,4 +81,4 @@ export default function UploaderNameInputDialog({
             </DialogContent>
         </Dialog>
     );
-}
+};
