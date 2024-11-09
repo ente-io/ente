@@ -1,8 +1,8 @@
 import type { Collection, PublicURL } from "@/media/collection";
+import CopyLinkModal from "@/new/photos/components/share/PublicLinkCreated";
 import { useEffect, useState } from "react";
 import { appendCollectionKeyToShareURL } from "utils/collection";
 import EnablePublicShareOptions from "./EnablePublicShareOptions";
-import CopyLinkModal from "./copyLinkModal";
 import ManagePublicShare from "./managePublicShare";
 
 export default function PublicShare({
