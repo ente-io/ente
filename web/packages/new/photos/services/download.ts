@@ -623,7 +623,6 @@ async function isPlaybackPossible(url: string): Promise<boolean> {
     });
 }
 
-
 class PhotosDownloadClient implements DownloadClient {
     constructor(
         private token: string,
