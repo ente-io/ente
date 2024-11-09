@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 
 	"github.com/ente-io/museum/pkg/controller/usercache"
@@ -17,6 +18,7 @@ import (
 	"github.com/ente-io/museum/pkg/utils/array"
 	"github.com/ente-io/museum/pkg/utils/billing"
 	"github.com/ente-io/museum/pkg/utils/config"
+	emailUtil "github.com/ente-io/museum/pkg/utils/email"
 	"github.com/ente-io/museum/pkg/utils/time"
 	"github.com/ente-io/stacktrace"
 	log "github.com/sirupsen/logrus"
@@ -114,6 +116,15 @@ func (c *OfferController) ApplyOffer(email string, productID string) error {
 		return stacktrace.Propagate(err, "")
 	}
 	go c.UserCacheCtrl.GetActiveStorageBonus(context.Background(), userID)
+	go emailUtil.SendTemplatedEmail([]string{email}, "Ente", "team@ente.io",
+		ente.BF2024EmailSubject,
+		ente.BF2024EmailTemplate, map[string]interface{}{
+			"Storage": c.readableStorage(offerToBeApplied.Storage),
+		}, nil)
 	c.DiscordController.NotifyBlackFridayUser(userID, offerToBeApplied.Price)
 	return nil
+}
+
+func (c *OfferController) readableStorage(storage int64) string {
+	return fmt.Sprintf("%d GB", storage/(1<<30))
 }

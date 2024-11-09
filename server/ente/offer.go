@@ -11,3 +11,8 @@ type BlackFridayOffer struct {
 }
 
 type BlackFridayOfferPerCountry map[string][]BlackFridayOffer
+
+const (
+	BF2024EmailTemplate = "bf_2024.html"
+	BF2024EmailSubject  = "Black Friday deal confirmation"
+)
