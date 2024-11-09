@@ -62,14 +62,14 @@ import { Trans } from "react-i18next";
 import { SetLoading } from "types/gallery";
 
 type PlanSelectorProps = ModalVisibilityProps & {
-    setLoading: SetLoading;
+    setLoading: (loading: boolean) => void;
 };
 
-const PlanSelector: React.FC<PlanSelectorProps> = ({
+export const PlanSelector: React.FC<PlanSelectorProps> = ({
     open,
     onClose,
     setLoading,
-}: PlanSelectorProps) => {
+}) => {
     const fullScreen = useMediaQuery(useTheme().breakpoints.down("sm"));
 
     if (!open) {
@@ -92,12 +92,7 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
     );
 };
 
-export default PlanSelector;
-
-interface PlanSelectorCardProps {
-    onClose: () => void;
-    setLoading: SetLoading;
-}
+type PlanSelectorCardProps = Pick<PlanSelectorProps, "onClose" | "setLoading">;
 
 const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
     onClose,

@@ -104,7 +104,7 @@ import Sidebar from "components/Sidebar";
 import { type UploadTypeSelectorIntent } from "components/Upload/UploadTypeSelector";
 import Uploader from "components/Upload/Uploader";
 import { UploadSelectorInputs } from "components/UploadSelectorInputs";
-import PlanSelector from "components/pages/gallery/PlanSelector";
+import { PlanSelector } from "components/pages/gallery/PlanSelector";
 import SelectedFileOptions from "components/pages/gallery/SelectedFileOptions";
 import { t } from "i18next";
 import { useRouter, type NextRouter } from "next/router";
@@ -910,7 +910,7 @@ export default function Gallery() {
                 )}
                 <PlanSelector
                     {...planSelectorVisibilityProps}
-                    setLoading={setBlockingLoad}
+                    setLoading={(v) => setBlockingLoad(v)}
                 />
                 <CollectionNamer
                     show={collectionNamerView}
