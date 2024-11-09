@@ -6,8 +6,6 @@ import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/diff_sync_complete_event.dart";
 import "package:photos/events/people_changed_event.dart";
-import "package:photos/models/api/entity/type.dart";
-import "package:photos/service_locator.dart";
 import "package:photos/services/machine_learning/face_ml/face_detection/detection.dart";
 import "package:photos/services/machine_learning/face_ml/face_detection/face_detection_service.dart";
 import "package:photos/services/machine_learning/face_ml/face_embedding/face_embedding_service.dart";
@@ -61,7 +59,11 @@ class FaceRecognitionService {
         Bus.instance.fire(PeopleChangedEvent(type: PeopleEventType.syncDone));
         _shouldReconcilePeople = false;
       } else {
-        await entityService.syncEntity(EntityType.cgroup);
+        final bool didChange =
+            await PersonService.instance.fetchRemoteClusterFeedback();
+        if (didChange) {
+          Bus.instance.fire(PeopleChangedEvent(type: PeopleEventType.syncDone));
+        }
       }
     } finally {
       _isSyncing = false;
