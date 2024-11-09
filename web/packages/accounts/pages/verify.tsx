@@ -1,10 +1,9 @@
 import type { UserVerificationResponse } from "@/accounts/types/user";
+import { FormPaper, FormPaperTitle } from "@/base/components/FormPaper";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
-import FormPaper from "@ente/shared/components/Form/FormPaper";
-import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
 import LinkButton from "@ente/shared/components/LinkButton";
 import SingleInputForm, {
     type SingleInputFormProps,

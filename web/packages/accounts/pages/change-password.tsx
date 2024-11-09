@@ -13,12 +13,14 @@ import {
 } from "@/accounts/services/srp";
 import type { UpdatedKey } from "@/accounts/types/user";
 import { convertBase64ToBuffer, convertBufferToBase64 } from "@/accounts/utils";
+import {
+    FormPaper,
+    FormPaperFooter,
+    FormPaperTitle,
+} from "@/base/components/FormPaper";
 import { sharedCryptoWorker } from "@/base/crypto";
 import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
-import FormPaper from "@ente/shared/components/Form/FormPaper";
-import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
-import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
 import LinkButton from "@ente/shared/components/LinkButton";
 import {
     generateAndSaveIntermediateKeyAttributes,

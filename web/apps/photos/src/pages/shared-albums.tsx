@@ -1,4 +1,5 @@
 import { EnteLogoSVG } from "@/base/components/EnteLogo";
+import { FormPaper, FormPaperTitle } from "@/base/components/FormPaper";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { SpaceBetweenFlex } from "@/base/components/mui/Container";
 import { NavbarBase, SelectionBar } from "@/base/components/Navbar";
@@ -24,8 +25,6 @@ import {
     FluidContainer,
     VerticallyCentered,
 } from "@ente/shared/components/Container";
-import FormPaper from "@ente/shared/components/Form/FormPaper";
-import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
 import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
 import SingleInputForm, {

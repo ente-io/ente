@@ -1,12 +1,14 @@
 import { sendOtt } from "@/accounts/api/user";
 import { PAGES } from "@/accounts/constants/pages";
+import {
+    FormPaper,
+    FormPaperFooter,
+    FormPaperTitle,
+} from "@/base/components/FormPaper";
 import { sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
-import FormPaper from "@ente/shared/components/Form/FormPaper";
-import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
-import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
 import LinkButton from "@ente/shared/components/LinkButton";
 import SingleInputForm, {
     type SingleInputFormProps,
