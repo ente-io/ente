@@ -1,8 +1,12 @@
-import DialogBox from "@ente/shared/components/DialogBox/base";
-import DialogIcon from "@ente/shared/components/DialogBox/DialogIcon";
 import SingleInputForm from "@ente/shared/components/SingleInputForm";
 import AutoAwesomeOutlinedIcon from "@mui/icons-material/AutoAwesomeOutlined";
-import { DialogContent, DialogTitle, Typography } from "@mui/material";
+import {
+    Box,
+    Dialog,
+    DialogContent,
+    DialogTitle,
+    Typography,
+} from "@mui/material";
 import { t } from "i18next";
 
 export default function UserNameInputDialog({
@@ -18,13 +22,28 @@ export default function UserNameInputDialog({
     };
 
     return (
-        <DialogBox maxWidth="xs" open={open} onClose={onClose}>
-            <DialogIcon icon={<AutoAwesomeOutlinedIcon />} />
-
+        <Dialog
+            fullWidth
+            PaperProps={{ sx: { maxWidth: "346px" } }}
+            open={open}
+            onClose={onClose}
+        >
+            <Box
+                sx={{
+                    padding: "24px 16px 0px 16px",
+                    svg: {
+                        width: "44px",
+                        height: "44px",
+                    },
+                    color: (theme) => theme.colors.stroke.muted,
+                }}
+            >
+                {<AutoAwesomeOutlinedIcon />}
+            </Box>
             <DialogTitle>{t("enter_name")}</DialogTitle>
 
             <DialogContent>
-                <Typography color={"text.muted"} pb={1}>
+                <Typography color={"text.muted"} sx={{ pb: 1 }}>
                     {t("PUBLIC_UPLOADER_NAME_MESSAGE")}
                 </Typography>
                 <SingleInputForm
@@ -40,6 +59,6 @@ export default function UserNameInputDialog({
                     secondaryButtonAction={onClose}
                 />
             </DialogContent>
-        </DialogBox>
+        </Dialog>
     );
 }
