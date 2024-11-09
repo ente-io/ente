@@ -1,3 +1,4 @@
+import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import DialogBoxBase from "@ente/shared/components/DialogBox/base";
 import Check from "@mui/icons-material/Check";
@@ -9,18 +10,24 @@ import {
     Typography,
 } from "@mui/material";
 import { t } from "i18next";
-interface Iprops {
-    open: boolean;
-    onClose: () => void;
-    handleCancel: () => void;
-    copyToClipboardHelper: () => void;
-}
-export default function CopyLinkModal({
+
+type PublicLinkCreatedProps = ModalVisibilityProps & {
+    /**
+     * Callback invoked when the user presses the button to copy the newly
+     * created link. The dialog also closes when this happens.
+     */
+    onCopyLink: () => void;
+};
+
+/**
+ * A Dialog acknowledging the creation of a link to a public album, and offering
+ * the user a choice to copy the newly created link.
+ */
+export const PublicLinkCreated: React.FC<PublicLinkCreatedProps> = ({
     open,
     onClose,
-    handleCancel,
-    copyToClipboardHelper,
-}: Iprops) {
+    onCopyLink,
+}) => {
     return (
         <DialogBoxBase
             open={open}
@@ -43,11 +50,14 @@ export default function CopyLinkModal({
                 </VerticallyCentered>
             </DialogContent>
             <DialogActions>
-                <Button onClick={handleCancel} color="secondary" size={"large"}>
+                <Button onClick={onClose} color="secondary" size={"large"}>
                     {t("DONE")}
                 </Button>
                 <Button
-                    onClick={copyToClipboardHelper}
+                    onClick={() => {
+                        onCopyLink();
+                        onClose();
+                    }}
                     size={"large"}
                     color="primary"
                     autoFocus
@@ -57,4 +67,4 @@ export default function CopyLinkModal({
             </DialogActions>
         </DialogBoxBase>
     );
-}
+};

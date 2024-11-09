@@ -20,13 +20,13 @@ import { handleSharingErrors } from "utils/error/ui";
 interface Iprops {
     collection: Collection;
     setPublicShareProp: (value: PublicURL) => void;
-    setCopyLinkModalView: (value: boolean) => void;
+    onLinkCreated: () => void;
 }
 
 export default function EnablePublicShareOptions({
     collection,
     setPublicShareProp,
-    setCopyLinkModalView,
+    onLinkCreated,
 }: Iprops) {
     const galleryContext = useContext(GalleryContext);
     const [sharableLinkError, setSharableLinkError] = useState(null);
@@ -37,7 +37,7 @@ export default function EnablePublicShareOptions({
             galleryContext.setBlockingLoad(true);
             const publicURL = await createShareableURL(collection);
             setPublicShareProp(publicURL);
-            setCopyLinkModalView(true);
+            onLinkCreated();
             galleryContext.syncWithRemote(false, true);
         } catch (e) {
             const errorMessage = handleSharingErrors(e);
@@ -57,7 +57,7 @@ export default function EnablePublicShareOptions({
                 enableCollect: true,
             });
             setPublicShareProp(publicURL);
-            setCopyLinkModalView(true);
+            onLinkCreated();
             galleryContext.syncWithRemote(false, true);
         } catch (e) {
             const errorMessage = handleSharingErrors(e);
