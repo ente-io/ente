@@ -7,19 +7,20 @@ import type {
     UpdatePublicURL,
 } from "@/media/collection";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
+import ChevronRight from "@mui/icons-material/ChevronRight";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import RemoveCircleOutline from "@mui/icons-material/RemoveCircleOutline";
 import { DialogProps, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
-import { useContext, useState } from "react";
+import { useContext, useMemo, useState } from "react";
 import {
     deleteShareableURL,
     updateShareableURL,
 } from "services/collectionService";
 import { SetPublicShareProp } from "types/publicCollection";
+import { getDeviceLimitOptions } from "utils/collection";
 import { handleSharingErrors } from "utils/error/ui";
-import { ManageDeviceLimit } from "./deviceLimit";
 import { ManageDownloadAccess } from "./downloadAccess";
 import { ManageLinkExpiry } from "./linkExpiry";
 import { ManageLinkPassword } from "./linkPassword";
@@ -169,3 +170,95 @@ export default function ManagePublicShareOptions({
         </SidebarDrawer>
     );
 }
+
+interface ManageDeviceLimitProps {
+    publicShareProp: PublicURL;
+    collection: Collection;
+    updatePublicShareURLHelper: (req: UpdatePublicURL) => Promise<void>;
+    onRootClose: () => void;
+}
+
+export const ManageDeviceLimit: React.FC<ManageDeviceLimitProps> = ({
+    collection,
+    publicShareProp,
+    updatePublicShareURLHelper,
+    onRootClose,
+}) => {
+    const updateDeviceLimit = async (newLimit: number) => {
+        return updatePublicShareURLHelper({
+            collectionID: collection.id,
+            deviceLimit: newLimit,
+        });
+    };
+    const [isChangeDeviceLimitVisible, setIsChangeDeviceLimitVisible] =
+        useState(false);
+    const deviceLimitOptions = useMemo(() => getDeviceLimitOptions(), []);
+
+    const closeDeviceLimitChangeModal = () =>
+        setIsChangeDeviceLimitVisible(false);
+    const openDeviceLimitChangeModalView = () =>
+        setIsChangeDeviceLimitVisible(true);
+
+    const changeDeviceLimitValue = (value: number) => async () => {
+        await updateDeviceLimit(value);
+        setIsChangeDeviceLimitVisible(false);
+    };
+
+    const handleDrawerClose: DialogProps["onClose"] = (_, reason) => {
+        if (reason === "backdropClick") {
+            onRootClose();
+        } else {
+            closeDeviceLimitChangeModal();
+        }
+    };
+
+    return (
+        <>
+            <EnteMenuItem
+                label={t("LINK_DEVICE_LIMIT")}
+                variant="captioned"
+                subText={
+                    publicShareProp.deviceLimit === 0
+                        ? t("NO_DEVICE_LIMIT")
+                        : publicShareProp.deviceLimit.toString()
+                }
+                onClick={openDeviceLimitChangeModalView}
+                endIcon={<ChevronRight />}
+            />
+
+            <SidebarDrawer
+                anchor="right"
+                open={isChangeDeviceLimitVisible}
+                onClose={handleDrawerClose}
+            >
+                <Stack spacing={"4px"} py={"12px"}>
+                    <Titlebar
+                        onClose={closeDeviceLimitChangeModal}
+                        title={t("LINK_DEVICE_LIMIT")}
+                        onRootClose={onRootClose}
+                    />
+                    <Stack py={"20px"} px={"8px"} spacing={"32px"}>
+                        <MenuItemGroup>
+                            {deviceLimitOptions.map((item, index) => (
+                                <>
+                                    <EnteMenuItem
+                                        fontWeight="normal"
+                                        key={item.label}
+                                        onClick={changeDeviceLimitValue(
+                                            item.value,
+                                        )}
+                                        label={item.label}
+                                    />
+                                    {index !==
+                                        deviceLimitOptions.length - 1 && (
+                                        <MenuItemDivider />
+                                    )}
+                                </>
+                            ))}
+                        </MenuItemGroup>
+                    </Stack>
+                </Stack>
+            </SidebarDrawer>
+        </>
+    );
+};
