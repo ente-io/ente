@@ -319,13 +319,12 @@ const EnablePublicShareOptions: React.FC<EnablePublicShareOptionsProps> = ({
     );
 };
 
-export default function EmailShare({
-    collection,
-    onRootClose,
-}: {
+interface EmailShareProps {
     collection: Collection;
     onRootClose: () => void;
-}) {
+}
+
+const EmailShare: React.FC<EmailShareProps> = ({ collection, onRootClose }) => {
     const [addParticipantView, setAddParticipantView] = useState(false);
     const [manageEmailShareView, setManageEmailShareView] = useState(false);
 
@@ -406,7 +405,7 @@ export default function EmailShare({
             />
         </>
     );
-}
+};
 
 const AvatarContainer = styled("div")({
     position: "relative",
@@ -568,7 +567,7 @@ interface AddParticipantFormValues {
     selectedOptions: string[];
 }
 
-export interface AddParticipantFormProps {
+interface AddParticipantFormProps {
     callback: (props: { email?: string; emails?: string[] }) => Promise<void>;
     fieldType: "text" | "email" | "password";
     placeholder: string;
