@@ -71,8 +71,8 @@ export const FixCreationTime: React.FC<FixCreationTimeProps> = ({
 
     const title =
         step == "running"
-            ? t("FIX_CREATION_TIME_IN_PROGRESS")
-            : t("FIX_CREATION_TIME");
+            ? t("fix_creation_time_in_progress")
+            : t("fix_creation_time");
 
     const message = messageForStatus(step);
 
@@ -128,9 +128,9 @@ const messageForStatus = (step?: Step) => {
         case "running":
             return undefined;
         case "completed":
-            return t("UPDATE_CREATION_TIME_COMPLETED");
+            return t("fix_creation_time_completed");
         case "completed-with-errors":
-            return t("UPDATE_CREATION_TIME_COMPLETED_WITH_ERROR");
+            return t("fix_creation_time_completed_with_errors");
     }
 };
 
@@ -140,7 +140,7 @@ const Progress: React.FC<FixProgress> = ({ completed, total }) => (
             <Typography sx={{ wordSpacing: "1rem" }}>
                 {completed} / {total}
             </Typography>
-            <Typography>{t("CREATION_TIME_UPDATED")}</Typography>
+            <Typography>{t("fix_creation_time_file_updated")}</Typography>
         </Box>
 
         <LinearProgress
@@ -176,9 +176,7 @@ const OptionsForm: React.FC<OptionsFormProps> = ({
             {(step === undefined || step === "completed-with-errors") && (
                 <form onSubmit={handleSubmit}>
                     <FormControl>
-                        <FormLabel>
-                            {t("UPDATE_CREATION_TIME_NOT_STARTED")}
-                        </FormLabel>
+                        <FormLabel>{t("fix_creation_time_options")}</FormLabel>
                     </FormControl>
                     <RadioGroup
                         name={"option"}
@@ -189,22 +187,22 @@ const OptionsForm: React.FC<OptionsFormProps> = ({
                         <FormControlLabel
                             value={"date-time-original"}
                             control={<Radio size="small" />}
-                            label={t("DATE_TIME_ORIGINAL")}
+                            label={t("exif_date_time_original")}
                         />
                         <FormControlLabel
                             value={"date-time-digitized"}
                             control={<Radio size="small" />}
-                            label={t("DATE_TIME_DIGITIZED")}
+                            label={t("exif_date_time_digitized")}
                         />
                         <FormControlLabel
                             value={"metadata-date"}
                             control={<Radio size="small" />}
-                            label={t("METADATA_DATE")}
+                            label={t("exif_metadata_date")}
                         />
                         <FormControlLabel
                             value={"custom"}
                             control={<Radio size="small" />}
-                            label={t("CUSTOM_TIME")}
+                            label={t("custom_time")}
                         />
                     </RadioGroup>
                     {values.option == "custom" && (
@@ -264,7 +262,7 @@ const Footer: React.FC<FooterProps> = ({ step, onSubmit, onClose }) =>
                         fullWidth
                         onClick={onSubmit}
                     >
-                        {t("FIX_CREATION_TIME")}
+                        {t("fix_creation_time")}
                     </FocusVisibleButton>
                 </>
             )}
