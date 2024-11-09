@@ -21,7 +21,6 @@ import { updateMagicMetadata } from "@/new/photos/services/magic-metadata";
 import { safeDirectoryName } from "@/new/photos/utils/native-fs";
 import { CustomError } from "@ente/shared/error";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
-import { getUnixTimeInMicroSecondsWithDelta } from "@ente/shared/time";
 import type { User } from "@ente/shared/user/types";
 import bs58 from "bs58";
 import { t } from "i18next";
@@ -198,30 +197,6 @@ const _intSelectOption = (i: number) => {
 export function getDeviceLimitOptions() {
     return [0, 2, 5, 10, 25, 50].map((i) => _intSelectOption(i));
 }
-
-export const shareExpiryOptions = () => [
-    { label: t("never"), value: () => 0 },
-    {
-        label: t("after_time.hour"),
-        value: () => getUnixTimeInMicroSecondsWithDelta({ hours: 1 }),
-    },
-    {
-        label: t("after_time.day"),
-        value: () => getUnixTimeInMicroSecondsWithDelta({ days: 1 }),
-    },
-    {
-        label: t("after_time.week"),
-        value: () => getUnixTimeInMicroSecondsWithDelta({ days: 7 }),
-    },
-    {
-        label: t("after_time.month"),
-        value: () => getUnixTimeInMicroSecondsWithDelta({ months: 1 }),
-    },
-    {
-        label: t("after_time.year"),
-        value: () => getUnixTimeInMicroSecondsWithDelta({ years: 1 }),
-    },
-];
 
 export const changeCollectionVisibility = async (
     collection: Collection,

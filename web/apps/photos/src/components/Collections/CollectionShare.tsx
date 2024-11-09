@@ -68,7 +68,6 @@ import {
 import {
     appendCollectionKeyToShareURL,
     getDeviceLimitOptions,
-    shareExpiryOptions,
 } from "utils/collection";
 import * as Yup from "yup";
 
@@ -1618,6 +1617,37 @@ const ManageLinkExpiry: React.FC<ManageLinkExpiryProps> = ({
             </SidebarDrawer>
         </>
     );
+};
+
+export const shareExpiryOptions = () => [
+    { label: t("never"), value: () => 0 },
+    { label: t("after_time.hour"), value: () => microsecsAfter("hour") },
+    { label: t("after_time.day"), value: () => microsecsAfter("day") },
+    { label: t("after_time.week"), value: () => microsecsAfter("week") },
+    { label: t("after_time.month"), value: () => microsecsAfter("month") },
+    { label: t("after_time.year"), value: () => microsecsAfter("year") },
+];
+
+const microsecsAfter = (after: "hour" | "day" | "week" | "month" | "year") => {
+    let date = new Date();
+    switch (after) {
+        case "hour":
+            date = new Date(date.getTime() + 60 * 60 * 1000);
+            break;
+        case "day":
+            date.setDate(date.getDate() + 1);
+            break;
+        case "week":
+            date.setDate(date.getDate() + 7);
+            break;
+        case "month":
+            date.setMonth(date.getMonth() + 1);
+            break;
+        case "year":
+            date.setFullYear(date.getFullYear() + 1);
+            break;
+    }
+    return date.getTime() * 1000;
 };
 
 interface ManageDeviceLimitProps {
