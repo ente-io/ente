@@ -29,9 +29,10 @@ import {
     redirectToPaymentsApp,
     userDetailsAddOnBonuses,
 } from "@/new/photos/services/user-details";
-import { AppContext, useAppContext } from "@/new/photos/types/context";
+import { useAppContext } from "@/new/photos/types/context";
 import { bytesInGB, formattedStorageByteSize } from "@/new/photos/utils/units";
 import { openURL } from "@/new/photos/utils/web";
+import { ensure } from "@/utils/ensure";
 import {
     FlexWrapper,
     FluidContainer,
@@ -43,7 +44,7 @@ import Close from "@mui/icons-material/Close";
 import Done from "@mui/icons-material/Done";
 import {
     Button,
-    ButtonProps,
+    type ButtonProps,
     Dialog,
     IconButton,
     Link,
@@ -57,19 +58,18 @@ import {
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { t } from "i18next";
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
-import { SetLoading } from "types/gallery";
 
 type PlanSelectorProps = ModalVisibilityProps & {
-    setLoading: SetLoading;
+    setLoading: (loading: boolean) => void;
 };
 
-const PlanSelector: React.FC<PlanSelectorProps> = ({
+export const PlanSelector: React.FC<PlanSelectorProps> = ({
     open,
     onClose,
     setLoading,
-}: PlanSelectorProps) => {
+}) => {
     const fullScreen = useMediaQuery(useTheme().breakpoints.down("sm"));
 
     if (!open) {
@@ -92,24 +92,19 @@ const PlanSelector: React.FC<PlanSelectorProps> = ({
     );
 };
 
-export default PlanSelector;
-
-interface PlanSelectorCardProps {
-    onClose: () => void;
-    setLoading: SetLoading;
-}
+type PlanSelectorCardProps = Pick<PlanSelectorProps, "onClose" | "setLoading">;
 
 const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
     onClose,
     setLoading,
 }) => {
-    const { showMiniDialog } = useContext(AppContext);
+    const { showMiniDialog } = useAppContext();
 
     const userDetails = useUserDetailsSnapshot();
 
     const [plansData, setPlansData] = useState<PlansData | undefined>();
-    const [planPeriod, setPlanPeriod] = useState<PlanPeriod | undefined>(
-        userDetails?.subscription?.period ?? "month",
+    const [planPeriod, setPlanPeriod] = useState<PlanPeriod>(
+        userDetails?.subscription.period ?? "month",
     );
 
     const usage = userDetails ? planUsage(userDetails) : 0;
@@ -124,7 +119,7 @@ const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
     );
 
     useEffect(() => {
-        const main = async () => {
+        void (async () => {
             try {
                 setLoading(true);
                 const plansData = await getPlansData();
@@ -153,8 +148,9 @@ const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
             } finally {
                 setLoading(false);
             }
-        };
-        main();
+        })();
+        // TODO
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const handlePlanSelect = async (plan: Plan) => {
@@ -162,7 +158,7 @@ const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
             case "buyPlan":
                 try {
                     setLoading(true);
-                    await redirectToPaymentsApp(plan.stripeID, "buy");
+                    await redirectToPaymentsApp(ensure(plan.stripeID), "buy");
                 } catch (e) {
                     setLoading(false);
                     showMiniDialog(
@@ -180,7 +176,10 @@ const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
                     continue: {
                         text: t("update_subscription"),
                         action: () =>
-                            redirectToPaymentsApp(plan.stripeID, "update"),
+                            redirectToPaymentsApp(
+                                ensure(plan.stripeID),
+                                "update",
+                            ),
                     },
                 });
                 break;
@@ -214,22 +213,21 @@ const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
     };
 
     const commonCardData = {
-        subscription,
+        onClose,
+        setLoading,
         addOnBonuses,
-        closeModal: onClose,
         planPeriod,
         togglePeriod,
-        setLoading,
     };
 
     const plansList = (
         <Plans
+            onClose={onClose}
             plansData={plansData}
             planPeriod={planPeriod}
             onPlanSelect={handlePlanSelect}
             subscription={subscription}
             hasAddOnBonus={addOnBonuses.length > 0}
-            closeModal={onClose}
         />
     );
 
@@ -238,12 +236,15 @@ const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
             {subscription && isSubscriptionActivePaid(subscription) ? (
                 <PaidSubscriptionPlanSelectorCard
                     {...commonCardData}
-                    usage={usage}
+                    {...{ usage, subscription }}
                 >
                     {plansList}
                 </PaidSubscriptionPlanSelectorCard>
             ) : (
-                <FreeSubscriptionPlanSelectorCard {...commonCardData}>
+                <FreeSubscriptionPlanSelectorCard
+                    {...commonCardData}
+                    {...{ subscription }}
+                >
                     {plansList}
                 </FreeSubscriptionPlanSelectorCard>
             )}
@@ -288,156 +289,171 @@ const planSelectionOutcome = (subscription: Subscription | undefined) => {
     return "contactSupport";
 };
 
-function FreeSubscriptionPlanSelectorCard({
-    children,
+type FreeSubscriptionPlanSelectorCardProps = Pick<
+    PlanSelectorProps,
+    "onClose" | "setLoading"
+> & {
+    subscription: Subscription | undefined;
+    addOnBonuses: Bonus[];
+    planPeriod: PlanPeriod;
+    togglePeriod: () => void;
+};
+
+const FreeSubscriptionPlanSelectorCard: React.FC<
+    React.PropsWithChildren<FreeSubscriptionPlanSelectorCardProps>
+> = ({
+    onClose,
+    setLoading,
     subscription,
     addOnBonuses,
-    closeModal,
-    setLoading,
     planPeriod,
     togglePeriod,
-}) {
-    return (
-        <>
-            <Typography variant="h3" fontWeight={"bold"}>
-                {t("choose_plan")}
-            </Typography>
-
-            <Box>
-                <Stack spacing={3}>
-                    <Box>
-                        <PeriodToggler
-                            planPeriod={planPeriod}
-                            togglePeriod={togglePeriod}
-                        />
-                        <Typography variant="small" mt={0.5} color="text.muted">
-                            {t("two_months_free")}
-                        </Typography>
-                    </Box>
-                    {children}
-                    {subscription && addOnBonuses.length > 0 && (
-                        <>
-                            <AddOnBonusRows addOnBonuses={addOnBonuses} />
-                            <ManageSubscription
-                                subscription={subscription}
-                                hasAddOnBonus={true}
-                                closeModal={closeModal}
-                                setLoading={setLoading}
-                            />
-                        </>
-                    )}
-                </Stack>
-            </Box>
-        </>
-    );
-}
-
-function PaidSubscriptionPlanSelectorCard({
     children,
-    subscription,
-    addOnBonuses,
-    closeModal,
-    usage,
-    planPeriod,
-    togglePeriod,
-    setLoading,
-}) {
-    return (
-        <>
-            <Box pl={1.5} py={0.5}>
-                <SpaceBetweenFlex>
-                    <Box>
-                        <Typography variant="h3" fontWeight={"bold"}>
-                            {t("subscription")}
-                        </Typography>
-                        <Typography variant="small" color={"text.muted"}>
-                            {bytesInGB(subscription.storage, 2)}{" "}
-                            {t("storage_unit.gb")}
-                        </Typography>
-                    </Box>
-                    <IconButton onClick={closeModal} color="secondary">
-                        <Close />
-                    </IconButton>
-                </SpaceBetweenFlex>
-            </Box>
-
-            <Box px={1.5}>
-                <Typography color={"text.muted"} fontWeight={"bold"}>
-                    <Trans
-                        i18nKey="current_usage"
-                        values={{
-                            usage: `${bytesInGB(usage, 2)} ${t("storage_unit.gb")}`,
-                        }}
+}) => (
+    <>
+        <Typography variant="h3" fontWeight={"bold"}>
+            {t("choose_plan")}
+        </Typography>
+        <Box>
+            <Stack spacing={3}>
+                <Box>
+                    <PeriodToggler
+                        planPeriod={planPeriod}
+                        togglePeriod={togglePeriod}
                     />
-                </Typography>
-            </Box>
-
-            <Box>
-                <Stack
-                    spacing={3}
-                    border={(theme) => `1px solid ${theme.palette.divider}`}
-                    p={1.5}
-                    borderRadius={(theme) => `${theme.shape.borderRadius}px`}
-                >
-                    <Box>
-                        <PeriodToggler
-                            planPeriod={planPeriod}
-                            togglePeriod={togglePeriod}
-                        />
-                        <Typography variant="small" mt={0.5} color="text.muted">
-                            {t("two_months_free")}
-                        </Typography>
-                    </Box>
-                    {children}
-                </Stack>
-
-                <Box py={1} px={1.5}>
-                    <Typography color={"text.muted"}>
-                        {!isSubscriptionCancelled(subscription)
-                            ? t("subscription_status_renewal_active", {
-                                  date: subscription.expiryTime,
-                              })
-                            : t("subscription_status_renewal_cancelled", {
-                                  date: subscription.expiryTime,
-                              })}
+                    <Typography variant="small" mt={0.5} color="text.muted">
+                        {t("two_months_free")}
                     </Typography>
-                    {addOnBonuses.length > 0 && (
-                        <AddOnBonusRows addOnBonuses={addOnBonuses} />
-                    )}
                 </Box>
+                {children}
+                {subscription && addOnBonuses.length > 0 && (
+                    <>
+                        <AddOnBonusRows addOnBonuses={addOnBonuses} />
+                        <ManageSubscription
+                            {...{ onClose, setLoading, subscription }}
+                            hasAddOnBonus={true}
+                        />
+                    </>
+                )}
+            </Stack>
+        </Box>
+    </>
+);
+
+type PaidSubscriptionPlanSelectorCardProps = Omit<
+    FreeSubscriptionPlanSelectorCardProps,
+    "subscription"
+> & {
+    subscription: Subscription;
+    usage: number;
+};
+
+const PaidSubscriptionPlanSelectorCard: React.FC<
+    React.PropsWithChildren<PaidSubscriptionPlanSelectorCardProps>
+> = ({
+    onClose,
+    setLoading,
+    subscription,
+    addOnBonuses,
+    planPeriod,
+    togglePeriod,
+    usage,
+    children,
+}) => (
+    <>
+        <Box pl={1.5} py={0.5}>
+            <SpaceBetweenFlex>
+                <Box>
+                    <Typography variant="h3" fontWeight={"bold"}>
+                        {t("subscription")}
+                    </Typography>
+                    <Typography variant="small" color={"text.muted"}>
+                        {bytesInGB(subscription.storage, 2)}{" "}
+                        {t("storage_unit.gb")}
+                    </Typography>
+                </Box>
+                <IconButton onClick={onClose} color="secondary">
+                    <Close />
+                </IconButton>
+            </SpaceBetweenFlex>
+        </Box>
+
+        <Box px={1.5}>
+            <Typography color={"text.muted"} fontWeight={"bold"}>
+                <Trans
+                    i18nKey="current_usage"
+                    values={{
+                        usage: `${bytesInGB(usage, 2)} ${t("storage_unit.gb")}`,
+                    }}
+                />
+            </Typography>
+        </Box>
+
+        <Box>
+            <Stack
+                spacing={3}
+                border={(theme) => `1px solid ${theme.palette.divider}`}
+                p={1.5}
+                borderRadius={(theme) => `${theme.shape.borderRadius}px`}
+            >
+                <Box>
+                    <PeriodToggler
+                        planPeriod={planPeriod}
+                        togglePeriod={togglePeriod}
+                    />
+                    <Typography variant="small" mt={0.5} color="text.muted">
+                        {t("two_months_free")}
+                    </Typography>
+                </Box>
+                {children}
+            </Stack>
+
+            <Box py={1} px={1.5}>
+                <Typography color={"text.muted"}>
+                    {!isSubscriptionCancelled(subscription)
+                        ? t("subscription_status_renewal_active", {
+                              date: subscription.expiryTime,
+                          })
+                        : t("subscription_status_renewal_cancelled", {
+                              date: subscription.expiryTime,
+                          })}
+                </Typography>
+                {addOnBonuses.length > 0 && (
+                    <AddOnBonusRows addOnBonuses={addOnBonuses} />
+                )}
             </Box>
+        </Box>
 
-            <ManageSubscription
-                subscription={subscription}
-                hasAddOnBonus={addOnBonuses.length > 0}
-                closeModal={closeModal}
-                setLoading={setLoading}
-            />
-        </>
-    );
+        <ManageSubscription
+            onClose={onClose}
+            setLoading={setLoading}
+            subscription={subscription}
+            hasAddOnBonus={addOnBonuses.length > 0}
+        />
+    </>
+);
+
+interface PeriodTogglerProps {
+    planPeriod: PlanPeriod;
+    togglePeriod: () => void;
 }
 
-function PeriodToggler({ planPeriod, togglePeriod }) {
-    const handleChange = (_, newPlanPeriod: PlanPeriod) => {
-        if (newPlanPeriod !== planPeriod) togglePeriod();
-    };
-
-    return (
-        <ToggleButtonGroup
-            value={planPeriod}
-            exclusive
-            onChange={handleChange}
-            color="primary"
-        >
-            <CustomToggleButton value={"month"}>
-                {t("monthly")}
-            </CustomToggleButton>
-            <CustomToggleButton value={"year"}>
-                {t("yearly")}
-            </CustomToggleButton>
-        </ToggleButtonGroup>
-    );
-}
+const PeriodToggler: React.FC<PeriodTogglerProps> = ({
+    planPeriod,
+    togglePeriod,
+}) => (
+    <ToggleButtonGroup
+        value={planPeriod}
+        exclusive
+        onChange={(_, newPeriod) => {
+            if (newPeriod && newPeriod != planPeriod) togglePeriod();
+        }}
+        color="primary"
+    >
+        <CustomToggleButton value={"month"}>{t("monthly")}</CustomToggleButton>
+        <CustomToggleButton value={"year"}>{t("yearly")}</CustomToggleButton>
+    </ToggleButtonGroup>
+);
 
 const CustomToggleButton = styled(ToggleButton)(({ theme }) => ({
     textTransform: "none",
@@ -458,70 +474,69 @@ const CustomToggleButton = styled(ToggleButton)(({ theme }) => ({
 }));
 
 interface PlansProps {
+    onClose: () => void;
     plansData: PlansData | undefined;
     planPeriod: PlanPeriod;
-    subscription: Subscription;
+    subscription: Subscription | undefined;
     hasAddOnBonus: boolean;
     onPlanSelect: (plan: Plan) => void;
-    closeModal: () => void;
 }
 
-const Plans = ({
+const Plans: React.FC<PlansProps> = ({
+    onClose,
     plansData,
     planPeriod,
     subscription,
     hasAddOnBonus,
     onPlanSelect,
-    closeModal,
-}: PlansProps) => {
-    const { freePlan, plans } = plansData ?? {};
-    return (
-        <Stack spacing={2}>
-            {plans
-                ?.filter((plan) => plan.period === planPeriod)
-                ?.map((plan) => (
-                    <PlanRow
-                        disabled={
+}) => (
+    <Stack spacing={2}>
+        {plansData?.plans
+            .filter((plan) => plan.period === planPeriod)
+            .map((plan) => (
+                <PlanRow
+                    disabled={
+                        !!(
                             subscription &&
                             isSubscriptionForPlan(subscription, plan)
-                        }
-                        popular={isPopularPlan(plan)}
-                        key={plan.stripeID}
-                        plan={plan}
-                        subscription={subscription}
-                        onPlanSelect={onPlanSelect}
-                    />
-                ))}
-            {!(subscription && isSubscriptionActivePaid(subscription)) &&
-                !hasAddOnBonus &&
-                freePlan && (
-                    <FreePlanRow
-                        storage={freePlan.storage}
-                        closeModal={closeModal}
-                    />
-                )}
-        </Stack>
-    );
-};
+                        )
+                    }
+                    popular={isPopularPlan(plan)}
+                    key={plan.stripeID}
+                    plan={plan}
+                    subscription={subscription}
+                    onPlanSelect={onPlanSelect}
+                />
+            ))}
+        {!(subscription && isSubscriptionActivePaid(subscription)) &&
+            !hasAddOnBonus &&
+            plansData?.freePlan && (
+                <FreePlanRow
+                    onClose={onClose}
+                    storage={plansData.freePlan.storage}
+                />
+            )}
+    </Stack>
+);
 
 const isPopularPlan = (plan: Plan) =>
     plan.storage === 100 * 1024 * 1024 * 1024; /* 100 GB */
 
 interface PlanRowProps {
     plan: Plan;
-    subscription: Subscription;
+    subscription: Subscription | undefined;
     onPlanSelect: (plan: Plan) => void;
     disabled: boolean;
     popular: boolean;
 }
 
-function PlanRow({
+const PlanRow: React.FC<PlanRowProps> = ({
     plan,
     subscription,
     onPlanSelect,
     disabled,
     popular,
-}: PlanRowProps) {
+}) => {
     const handleClick = () => !disabled && onPlanSelect(plan);
 
     const PlanButton = disabled ? DisabledPlanButton : ActivePlanButton;
@@ -569,7 +584,7 @@ function PlanRow({
             </Box>
         </PlanRowContainer>
     );
-}
+};
 
 const PlanRowContainer = styled(FlexWrapper)(() => ({
     background:
@@ -611,27 +626,25 @@ const Badge = styled(Box)(({ theme }) => ({
 }));
 
 interface FreePlanRowProps {
+    onClose: () => void;
     storage: number;
-    closeModal: () => void;
 }
 
-const FreePlanRow: React.FC<FreePlanRowProps> = ({ closeModal, storage }) => {
-    return (
-        <FreePlanRow_ onClick={closeModal}>
-            <Box>
-                <Typography>{t("free_plan_option")}</Typography>
-                <Typography variant="small" color="text.muted">
-                    {t("free_plan_description", {
-                        storage: formattedStorageByteSize(storage),
-                    })}
-                </Typography>
-            </Box>
-            <IconButton className={"endIcon"}>
-                <ArrowForward />
-            </IconButton>
-        </FreePlanRow_>
-    );
-};
+const FreePlanRow: React.FC<FreePlanRowProps> = ({ onClose, storage }) => (
+    <FreePlanRow_ onClick={onClose}>
+        <Box>
+            <Typography>{t("free_plan_option")}</Typography>
+            <Typography variant="small" color="text.muted">
+                {t("free_plan_description", {
+                    storage: formattedStorageByteSize(storage),
+                })}
+            </Typography>
+        </Box>
+        <IconButton className={"endIcon"}>
+            <ArrowForward />
+        </IconButton>
+    </FreePlanRow_>
+);
 
 const FreePlanRow_ = styled(SpaceBetweenFlex)(({ theme }) => ({
     gap: theme.spacing(1.5),
@@ -662,18 +675,19 @@ const AddOnBonusRows: React.FC<AddOnBonusRowsProps> = ({ addOnBonuses }) => (
     </>
 );
 
-interface ManageSubscriptionProps {
+type ManageSubscriptionProps = Pick<
+    PlanSelectorProps,
+    "onClose" | "setLoading"
+> & {
     subscription: Subscription;
     hasAddOnBonus: boolean;
-    closeModal: () => void;
-    setLoading: SetLoading;
-}
+};
 
 function ManageSubscription({
+    onClose,
+    setLoading,
     subscription,
     hasAddOnBonus,
-    closeModal,
-    setLoading,
 }: ManageSubscriptionProps) {
     const { onGenericError } = useAppContext();
 
@@ -691,9 +705,7 @@ function ManageSubscription({
         <Stack spacing={1}>
             {isSubscriptionStripe(subscription) && (
                 <StripeSubscriptionOptions
-                    onClose={closeModal}
-                    subscription={subscription}
-                    hasAddOnBonus={hasAddOnBonus}
+                    {...{ onClose, subscription, hasAddOnBonus }}
                 />
             )}
             <ManageSubscriptionButton
@@ -706,11 +718,10 @@ function ManageSubscription({
     );
 }
 
-interface StripeSubscriptionOptionsProps {
-    onClose: () => void;
+type StripeSubscriptionOptionsProps = Pick<PlanSelectorProps, "onClose"> & {
     subscription: Subscription;
     hasAddOnBonus: boolean;
-}
+};
 
 const StripeSubscriptionOptions: React.FC<StripeSubscriptionOptionsProps> = ({
     onClose,
@@ -802,7 +813,10 @@ const StripeSubscriptionOptions: React.FC<StripeSubscriptionOptionsProps> = ({
     );
 };
 
-const ManageSubscriptionButton = ({ children, ...props }: ButtonProps) => (
+const ManageSubscriptionButton: React.FC<ButtonProps> = ({
+    children,
+    ...props
+}) => (
     <Button size="large" endIcon={<ChevronRight />} {...props}>
         <FluidContainer>{children}</FluidContainer>
     </Button>

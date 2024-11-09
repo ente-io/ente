@@ -1,7 +1,7 @@
+import { FormPaper } from "@/base/components/FormPaper";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { customAPIHost } from "@/base/origins";
 import { VerticallyCentered } from "@ente/shared/components/Container";
-import FormPaper from "@ente/shared/components/Form/FormPaper";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";

@@ -22,7 +22,7 @@ import {
 } from "@ente/shared/storage/localStorage";
 import AllCollections from "components/Collections/AllCollections";
 import { SetCollectionNamerAttributes } from "components/Collections/CollectionNamer";
-import CollectionShare from "components/Collections/CollectionShare";
+import { CollectionShare } from "components/Collections/CollectionShare";
 import { ITEM_TYPE, TimeStampListItem } from "components/PhotoList";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { sortCollectionSummaries } from "services/collectionService";

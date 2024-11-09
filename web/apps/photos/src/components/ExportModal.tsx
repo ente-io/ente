@@ -1,4 +1,5 @@
 import { EnteSwitch } from "@/base/components/EnteSwitch";
+import { ensureElectron } from "@/base/electron";
 import log from "@/base/log";
 import { EnteFile } from "@/media/file";
 import { useAppContext } from "@/new/photos/types/context";
@@ -7,6 +8,7 @@ import {
     SpaceBetweenFlex,
     VerticallyCenteredFlex,
 } from "@ente/shared/components/Container";
+import LinkButton from "@ente/shared/components/LinkButton";
 import DialogTitleWithCloseButton from "@ente/shared/components/TitleWithCloseButton";
 import { CustomError } from "@ente/shared/error";
 import {
@@ -15,7 +17,9 @@ import {
     Dialog,
     DialogContent,
     Divider,
+    Tooltip,
     Typography,
+    styled,
 } from "@mui/material";
 import { t } from "i18next";
 import isElectron from "is-electron";
@@ -27,7 +31,6 @@ import exportService, {
     type ExportOpts,
 } from "services/export";
 import { ExportProgress, ExportSettings } from "types/export";
-import { DirectoryPath } from "./Directory";
 import ExportFinished from "./ExportFinished";
 import ExportInProgress from "./ExportInProgress";
 import ExportInit from "./ExportInit";
@@ -226,6 +229,35 @@ function ExportDirectory({ exportFolder, changeExportDirectory, exportStage }) {
         </SpaceBetweenFlex>
     );
 }
+
+const DirectoryPath = ({ width, path }) => {
+    const handleClick = async () => {
+        try {
+            await ensureElectron().openDirectory(path);
+        } catch (e) {
+            log.error("openDirectory failed", e);
+        }
+    };
+    return (
+        <DirectoryPathContainer width={width} onClick={handleClick}>
+            <Tooltip title={path}>
+                <span>{path}</span>
+            </Tooltip>
+        </DirectoryPathContainer>
+    );
+};
+
+const DirectoryPathContainer = styled(LinkButton)(
+    ({ width }) => `
+    width: ${width}px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* Beginning of string */
+    direction: rtl;
+    text-align: left;
+`,
+);
 
 function ContinuousExport({ continuousExport, toggleContinuousExport }) {
     return (

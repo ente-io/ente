@@ -6,13 +6,15 @@ import SetPasswordForm, {
 import { PAGES } from "@/accounts/constants/pages";
 import { configureSRP } from "@/accounts/services/srp";
 import { generateKeyAndSRPAttributes } from "@/accounts/utils/srp";
+import {
+    FormPaper,
+    FormPaperFooter,
+    FormPaperTitle,
+} from "@/base/components/FormPaper";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
-import FormPaper from "@ente/shared/components/Form/FormPaper";
-import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
-import FormTitle from "@ente/shared/components/Form/FormPaper/Title";
 import LinkButton from "@ente/shared/components/LinkButton";
 import {
     generateAndSaveIntermediateKeyAttributes,
@@ -112,7 +114,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             ) : (
                 <VerticallyCentered>
                     <FormPaper>
-                        <FormTitle>{t("SET_PASSPHRASE")}</FormTitle>
+                        <FormPaperTitle>{t("SET_PASSPHRASE")}</FormPaperTitle>
                         <SetPasswordForm
                             userEmail={user.email}
                             callback={onSubmit}
