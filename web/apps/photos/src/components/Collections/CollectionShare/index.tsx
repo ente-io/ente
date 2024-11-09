@@ -12,6 +12,7 @@ import type {
     PublicURL,
     UpdatePublicURL,
 } from "@/media/collection";
+import { COLLECTION_ROLE } from "@/media/collection";
 import { PublicLinkCreated } from "@/new/photos/components/share/PublicLinkCreated";
 import type { CollectionSummary } from "@/new/photos/services/collection/ui";
 import { useAppContext } from "@/new/photos/types/context";
@@ -20,13 +21,17 @@ import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
 import { formatDateTime } from "@ente/shared/time/format";
+import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ContentCopyIcon from "@mui/icons-material/ContentCopyOutlined";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import LinkIcon from "@mui/icons-material/Link";
+import ModeEditIcon from "@mui/icons-material/ModeEdit";
+import Photo from "@mui/icons-material/Photo";
 import PublicIcon from "@mui/icons-material/Public";
 import RemoveCircleOutline from "@mui/icons-material/RemoveCircleOutline";
 import { Dialog, DialogProps, Stack, Typography } from "@mui/material";
+import Avatar from "components/pages/gallery/Avatar";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
 import { useContext, useEffect, useMemo, useState } from "react";
@@ -44,7 +49,6 @@ import {
 import { handleSharingErrors } from "utils/error/ui";
 import EmailShare from "./emailShare";
 import EnablePublicShareOptions from "./publicShare/EnablePublicShareOptions";
-import SharingDetails from "./sharingDetails";
 
 interface CollectionShareProps {
     open: boolean;
@@ -119,6 +123,93 @@ export const CollectionShare: React.FC<CollectionShareProps> = ({
         </SidebarDrawer>
     );
 };
+
+function SharingDetails({ collection, type }) {
+    const galleryContext = useContext(GalleryContext);
+
+    const ownerEmail =
+        galleryContext.user.id === collection.owner?.id
+            ? galleryContext.user?.email
+            : collection.owner?.email;
+
+    const collaborators = collection.sharees
+        ?.filter((sharee) => sharee.role === COLLECTION_ROLE.COLLABORATOR)
+        .map((sharee) => sharee.email);
+
+    const viewers =
+        collection.sharees
+            ?.filter((sharee) => sharee.role === COLLECTION_ROLE.VIEWER)
+            .map((sharee) => sharee.email) || [];
+
+    const isOwner = galleryContext.user?.id === collection.owner?.id;
+
+    const isMe = (email: string) => email === galleryContext.user?.email;
+
+    return (
+        <>
+            <Stack>
+                <MenuSectionTitle
+                    title={t("OWNER")}
+                    icon={<AdminPanelSettingsIcon />}
+                />
+                <MenuItemGroup>
+                    <EnteMenuItem
+                        fontWeight="normal"
+                        onClick={() => {}}
+                        label={isOwner ? t("you") : ownerEmail}
+                        startIcon={<Avatar email={ownerEmail} />}
+                    />
+                </MenuItemGroup>
+            </Stack>
+            {type == "incomingShareCollaborator" &&
+                collaborators?.length > 0 && (
+                    <Stack>
+                        <MenuSectionTitle
+                            title={t("COLLABORATORS")}
+                            icon={<ModeEditIcon />}
+                        />
+                        <MenuItemGroup>
+                            {collaborators.map((item, index) => (
+                                <>
+                                    <EnteMenuItem
+                                        fontWeight="normal"
+                                        key={item}
+                                        onClick={() => {}}
+                                        label={isMe(item) ? t("you") : item}
+                                        startIcon={<Avatar email={item} />}
+                                    />
+                                    {index !== collaborators.length - 1 && (
+                                        <MenuItemDivider />
+                                    )}
+                                </>
+                            ))}
+                        </MenuItemGroup>
+                    </Stack>
+                )}
+            {viewers?.length > 0 && (
+                <Stack>
+                    <MenuSectionTitle title={t("VIEWERS")} icon={<Photo />} />
+                    <MenuItemGroup>
+                        {viewers.map((item, index) => (
+                            <>
+                                <EnteMenuItem
+                                    fontWeight="normal"
+                                    key={item}
+                                    onClick={() => {}}
+                                    label={isMe(item) ? t("you") : item}
+                                    startIcon={<Avatar email={item} />}
+                                />
+                                {index !== viewers.length - 1 && (
+                                    <MenuItemDivider />
+                                )}
+                            </>
+                        ))}
+                    </MenuItemGroup>
+                </Stack>
+            )}
+        </>
+    );
+}
 
 interface PublicShareProps {
     collection: Collection;
