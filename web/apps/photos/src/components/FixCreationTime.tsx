@@ -10,9 +10,10 @@ import { FileType } from "@/media/file-type";
 import { PhotoDateTimePicker } from "@/new/photos/components/PhotoDateTimePicker";
 import downloadManager from "@/new/photos/services/download";
 import { extractExifDates } from "@/new/photos/services/exif";
+import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { ensure } from "@/utils/ensure";
 import {
-    Button,
+    Box,
     Dialog,
     DialogContent,
     DialogTitle,
@@ -22,6 +23,7 @@ import {
     LinearProgress,
     Radio,
     RadioGroup,
+    Stack,
     Typography,
 } from "@mui/material";
 import { useFormik } from "formik";
@@ -137,37 +139,21 @@ const messageForStatus = (step?: Status) => {
     }
 };
 
-const Progress: React.FC<FixProgress> = ({ completed, total }) => {
-    const percent = Math.round((completed * 100) / total);
-    return (
-        <>
-            <div style={{ marginBottom: "10px" }}>
-                <span>
-                    {completed} / {total}
-                </span>
-                <span style={{ marginLeft: "10px" }}>
-                    {" "}
-                    {t("CREATION_TIME_UPDATED")}
-                </span>
-            </div>
-            <div
-                style={{
-                    width: "100%",
-                    marginTop: "10px",
-                    marginBottom: "20px",
-                }}
-            >
-                <LinearProgress variant="determinate" value={percent} />
-            </div>
-        </>
-    );
-};
+const Progress: React.FC<FixProgress> = ({ completed, total }) => (
+    <Stack sx={{ width: "100%", gap: "2rem", marginBlockEnd: "20px" }}>
+        <Box sx={{ display: "flex", justifyContent: "center", gap: "2rem" }}>
+            <Typography sx={{ wordSpacing: "1rem" }}>
+                {completed} / {total}
+            </Typography>
+            <Typography>{t("CREATION_TIME_UPDATED")}</Typography>
+        </Box>
 
-// export const ComfySpan = styled("span")`
-//     padding: 0 0.5rem;
-//     word-spacing: 1rem;
-//     color: #ddd;
-// `;
+        <LinearProgress
+            variant="determinate"
+            value={Math.round((completed * 100) / total)}
+        />
+    </Stack>
+);
 
 interface OptionsFormProps {
     step?: Status;
@@ -236,46 +222,51 @@ const OptionsForm: React.FC<OptionsFormProps> = ({ step, onSubmit, hide }) => {
     );
 };
 
-const Footer = ({ step, startFix, ...props }) => {
-    return (
-        step != "running" && (
-            <div
-                style={{
-                    width: "100%",
-                    display: "flex",
-                    marginTop: "30px",
-                    justifyContent: "space-around",
-                }}
-            >
-                {(!step || step == "completed-with-errors") && (
-                    <Button
-                        color="secondary"
-                        size="large"
-                        onClick={() => {
-                            props.hide();
-                        }}
-                    >
-                        {t("cancel")}
-                    </Button>
-                )}
-                {step == "completed" && (
-                    <Button color="primary" size="large" onClick={props.hide}>
-                        {t("close")}
-                    </Button>
-                )}
-                {(!step || step == "completed-with-errors") && (
-                    <>
-                        <div style={{ width: "30px" }} />
+const Footer = ({ step, startFix, ...props }) =>
+    step != "running" && (
+        <div
+            style={{
+                width: "100%",
+                display: "flex",
+                marginTop: "30px",
+                justifyContent: "space-around",
+            }}
+        >
+            {(!step || step == "completed-with-errors") && (
+                <FocusVisibleButton
+                    color="secondary"
+                    fullWidth
+                    onClick={() => {
+                        props.hide();
+                    }}
+                >
+                    {t("cancel")}
+                </FocusVisibleButton>
+            )}
+            {step == "completed" && (
+                <FocusVisibleButton
+                    color="primary"
+                    fullWidth
+                    onClick={props.hide}
+                >
+                    {t("close")}
+                </FocusVisibleButton>
+            )}
+            {(!step || step == "completed-with-errors") && (
+                <>
+                    <div style={{ width: "30px" }} />
 
-                        <Button color="accent" size="large" onClick={startFix}>
-                            {t("FIX_CREATION_TIME")}
-                        </Button>
-                    </>
-                )}
-            </div>
-        )
+                    <FocusVisibleButton
+                        color="accent"
+                        fullWidth
+                        onClick={startFix}
+                    >
+                        {t("FIX_CREATION_TIME")}
+                    </FocusVisibleButton>
+                </>
+            )}
+        </div>
     );
-};
 
 const updateFiles = async (
     files: EnteFile[],
