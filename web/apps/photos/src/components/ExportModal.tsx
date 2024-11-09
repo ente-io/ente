@@ -7,7 +7,7 @@ import {
     SpaceBetweenFlex,
     VerticallyCenteredFlex,
 } from "@ente/shared/components/Container";
-import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleWithCloseButton";
+import DialogTitleWithCloseButton from "@ente/shared/components/TitleWithCloseButton";
 import { CustomError } from "@ente/shared/error";
 import {
     Box,
