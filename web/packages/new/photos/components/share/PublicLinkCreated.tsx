@@ -28,7 +28,7 @@ export const PublicLinkCreated: React.FC<PublicLinkCreatedProps> = ({
         sx={{ position: "absolute" }}
     >
         <DialogTitle sx={{ textAlign: "center" }}>
-            {t("PUBLIC_LINK_CREATED")}
+            {t("public_link_created")}
         </DialogTitle>
         <DialogContent>
             <Box sx={{ textAlign: "center" }}>
@@ -43,14 +43,14 @@ export const PublicLinkCreated: React.FC<PublicLinkCreatedProps> = ({
                     color="primary"
                     fullWidth
                 >
-                    {t("COPY_LINK")}
+                    {t("copy_link")}
                 </FocusVisibleButton>
                 <FocusVisibleButton
                     onClick={onClose}
                     color="secondary"
                     fullWidth
                 >
-                    {t("DONE")}
+                    {t("done")}
                 </FocusVisibleButton>
             </Stack>
         </DialogContent>

@@ -56,7 +56,7 @@ export default function ManagePublicShare({
                             startIcon={<ContentCopyIcon />}
                             onClick={copyToClipboardHelper}
                             disabled={isLinkExpired(publicShareProp.validTill)}
-                            label={t("COPY_LINK")}
+                            label={t("copy_link")}
                         />
                     )}
 

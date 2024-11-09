@@ -69,13 +69,13 @@ export const UploaderNameInput: React.FC<UploaderNameInput> = ({
 
             <DialogContent>
                 <Typography color={"text.muted"} sx={{ pb: 1 }}>
-                    {t("PUBLIC_UPLOADER_NAME_MESSAGE")}
+                    {t("uploader_name_hint")}
                 </Typography>
                 <SingleInputForm
                     hiddenLabel
                     initialValue={uploaderName}
                     callback={handleSubmit}
-                    placeholder={t("NAME_PLACEHOLDER")}
+                    placeholder={t("name_placeholder")}
                     buttonText={t("add_photos_count", {
                         count: uploadFileCount,
                     })}
