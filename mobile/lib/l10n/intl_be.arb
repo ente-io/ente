@@ -118,10 +118,6 @@
   "recoveryKeyCopiedToClipboard": "Ключ аднаўлення скапіяваны ў буфер абмену",
   "recoverAccount": "Аднавіць уліковы запіс",
   "recover": "Аднавіць",
-  "resetPerson": "Reset person",
-  "areYouSureYouWantToResetThisPerson": "Are you sure you want to reset this person?",
-  "allPersonGroupingWillReset": "All groupings for this person will be reset, and you will lose all suggestions made for this person",
-  "yesResetPerson": "Yes, reset person",
   "enterCode": "Увядзіце код",
   "scanCode": "Сканіраваць код",
   "confirm": "Пацвердзіць",
@@ -203,6 +199,5 @@
   "darkTheme": "Цёмная",
   "systemTheme": "Сістэма",
   "freeTrial": "Бясплатная пробная версія",
-  "faqs": "Частыя пытанні",
-  "onlyThem": "Only them"
+  "faqs": "Частыя пытанні"
 }

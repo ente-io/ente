@@ -1343,10 +1343,5 @@
   "mostRecent": "Meest recent",
   "mostRelevant": "Meest relevant",
   "loadingYourPhotos": "Je foto's worden geladen...",
-  "processingImport": "Verwerken van {folderName}...",
-  "resetPerson": "Reset person",
-  "areYouSureYouWantToResetThisPerson": "Are you sure you want to reset this person?",
-  "allPersonGroupingWillReset": "All groupings for this person will be reset, and you will lose all suggestions made for this person",
-  "yesResetPerson": "Yes, reset person",
-  "onlyThem": "Only them"
+  "processingImport": "Verwerken van {folderName}..."
 }
