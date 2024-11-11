@@ -2,8 +2,8 @@ import {
     UPLOAD_RESULT,
     UPLOAD_STAGES,
 } from "@/new/photos/services/upload/types";
-import { dialogCloseHandler } from "@ente/shared/components/DialogBox/TitleWithCloseButton";
-import { Dialog, DialogContent, Link } from "@mui/material";
+import { dialogCloseHandler } from "@ente/shared/components/TitleWithCloseButton";
+import { Dialog, DialogContent } from "@mui/material";
 import { t } from "i18next";
 import { useContext, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
@@ -78,17 +78,7 @@ export function UploadProgressDialog() {
                                 uploadResult={UPLOAD_RESULT.BLOCKED}
                                 sectionTitle={t("BLOCKED_UPLOADS")}
                                 sectionInfo={
-                                    <Trans
-                                        i18nKey={"ETAGS_BLOCKED"}
-                                        components={{
-                                            a: (
-                                                <Link
-                                                    href="https://ente.io/download/desktop"
-                                                    target="_blank"
-                                                />
-                                            ),
-                                        }}
-                                    />
+                                    <Trans i18nKey={"ETAGS_BLOCKED"} />
                                 }
                             />
                             <ResultSection

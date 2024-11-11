@@ -1,13 +1,15 @@
 import { EnteSwitch } from "@/base/components/EnteSwitch";
+import { ensureElectron } from "@/base/electron";
 import log from "@/base/log";
 import { EnteFile } from "@/media/file";
-import { AppContext } from "@/new/photos/types/context";
+import { useAppContext } from "@/new/photos/types/context";
 import ChangeDirectoryOption from "@ente/shared/components/ChangeDirectoryOption";
 import {
     SpaceBetweenFlex,
     VerticallyCenteredFlex,
 } from "@ente/shared/components/Container";
-import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleWithCloseButton";
+import LinkButton from "@ente/shared/components/LinkButton";
+import DialogTitleWithCloseButton from "@ente/shared/components/TitleWithCloseButton";
 import { CustomError } from "@ente/shared/error";
 import {
     Box,
@@ -15,30 +17,32 @@ import {
     Dialog,
     DialogContent,
     Divider,
+    Tooltip,
     Typography,
+    styled,
 } from "@mui/material";
 import { t } from "i18next";
 import isElectron from "is-electron";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { Trans } from "react-i18next";
 import exportService, {
     ExportStage,
     selectAndPrepareExportDirectory,
     type ExportOpts,
 } from "services/export";
 import { ExportProgress, ExportSettings } from "types/export";
-import { getExportDirectoryDoesNotExistMessage } from "utils/ui";
-import { DirectoryPath } from "./Directory";
 import ExportFinished from "./ExportFinished";
 import ExportInProgress from "./ExportInProgress";
 import ExportInit from "./ExportInit";
 
-interface Props {
+interface ExportModalProps {
     show: boolean;
     onHide: () => void;
     collectionNameMap: Map<number, string>;
 }
-export default function ExportModal(props: Props) {
-    const appContext = useContext(AppContext);
+
+export default function ExportModal(props: ExportModalProps) {
+    const { showMiniDialog } = useAppContext();
     const [exportStage, setExportStage] = useState(ExportStage.INIT);
     const [exportFolder, setExportFolder] = useState("");
     const [continuousExport, setContinuousExport] = useState(false);
@@ -87,9 +91,15 @@ export default function ExportModal(props: Props) {
 
     const verifyExportFolderExists = async () => {
         if (!(await exportService.exportFolderExists(exportFolder))) {
-            appContext.setDialogMessage(
-                getExportDirectoryDoesNotExistMessage(),
-            );
+            showMiniDialog({
+                title: t("export_directory_does_not_exist"),
+                message: (
+                    <Trans
+                        i18nKey={"export_directory_does_not_exist_message"}
+                    />
+                ),
+                cancel: t("ok"),
+            });
             return false;
         }
         return true;
@@ -163,7 +173,7 @@ export default function ExportModal(props: Props) {
             fullWidth
         >
             <DialogTitleWithCloseButton onClose={props.onHide}>
-                {t("EXPORT_DATA")}
+                {t("export_data")}
             </DialogTitleWithCloseButton>
             <DialogContent>
                 <ExportDirectory
@@ -195,7 +205,7 @@ function ExportDirectory({ exportFolder, changeExportDirectory, exportStage }) {
     return (
         <SpaceBetweenFlex minHeight={"48px"}>
             <Typography color="text.muted" mr={"16px"}>
-                {t("DESTINATION")}
+                {t("destination")}
             </Typography>
             <>
                 {!exportFolder ? (
@@ -219,6 +229,35 @@ function ExportDirectory({ exportFolder, changeExportDirectory, exportStage }) {
         </SpaceBetweenFlex>
     );
 }
+
+const DirectoryPath = ({ width, path }) => {
+    const handleClick = async () => {
+        try {
+            await ensureElectron().openDirectory(path);
+        } catch (e) {
+            log.error("openDirectory failed", e);
+        }
+    };
+    return (
+        <DirectoryPathContainer width={width} onClick={handleClick}>
+            <Tooltip title={path}>
+                <span>{path}</span>
+            </Tooltip>
+        </DirectoryPathContainer>
+    );
+};
+
+const DirectoryPathContainer = styled(LinkButton)(
+    ({ width }) => `
+    width: ${width}px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* Beginning of string */
+    direction: rtl;
+    text-align: left;
+`,
+);
 
 function ContinuousExport({ continuousExport, toggleContinuousExport }) {
     return (

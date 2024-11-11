@@ -224,6 +224,18 @@ export const setLocaleInUse = async (locale: SupportedLocale) => {
     return i18n.changeLanguage(locale);
 };
 
+const numberFormatter = new Intl.NumberFormat(i18n.language);
+
+/**
+ * Return the given {@link value} formatted for the current language and locale.
+ *
+ * In most cases, when a number needs to be displayed, it can be formatted as
+ * part of the surrounding string using the {{count, number}} interpolation.
+ * However, in some rare cases, we need to format a standalone number. For such
+ * scenarios, this function can be used.
+ */
+export const formattedNumber = (value: number) => numberFormatter.format(value);
+
 /**
  * A no-op marker for strings that, for various reasons, pending addition to the
  * translation dataset.

@@ -7,7 +7,7 @@ class PeopleChangedEvent extends Event {
   final String source;
 
   PeopleChangedEvent({
-    this.relevantFiles, 
+    this.relevantFiles,
     this.type = PeopleEventType.defaultType,
     this.source = "",
   });

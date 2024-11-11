@@ -84,9 +84,5 @@
   "longPressAnEmailToVerifyEndToEndEncryption": "Langt tryk på en e-mail for at bekræfte slutningen af krypteringen.",
   "developerSettingsWarning": "Er du sikker på, at du vil ændre udviklerindstillingerne?",
   "next": "Næste",
-  "enterPin": "Indtast PIN",
-  "resetPerson": "Reset person",
-  "areYouSureYouWantToResetThisPerson": "Are you sure you want to reset this person?",
-  "allPersonGroupingWillReset": "All groupings for this person will be reset, and you will lose all suggestions made for this person",
-  "yesResetPerson": "Yes, reset person"
+  "enterPin": "Indtast PIN"
 }

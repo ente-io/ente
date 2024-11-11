@@ -55,7 +55,6 @@ import {
 } from "utils/file";
 import { pauseVideo, playVideo } from "utils/photoFrame";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
-import { getTrashFileMessage } from "utils/ui";
 import { FileInfo, type FileInfoExif, type FileInfoProps } from "./FileInfo";
 import ImageEditorOverlay from "./ImageEditorOverlay";
 
@@ -125,7 +124,7 @@ export interface PhotoViewerProps {
 
 function PhotoViewer(props: PhotoViewerProps) {
     const galleryContext = useContext(GalleryContext);
-    const { showLoadingBar, hideLoadingBar, setDialogMessage } =
+    const { showLoadingBar, hideLoadingBar, showMiniDialog } =
         useContext(AppContext);
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext,
@@ -563,7 +562,16 @@ function PhotoViewer(props: PhotoViewerProps) {
         if (!file || !isOwnFile || props.isTrashCollection) {
             return;
         }
-        setDialogMessage(getTrashFileMessage(() => trashFile(file)));
+        showMiniDialog({
+            title: t("trash_file_title"),
+            message: t("trash_file_message"),
+            continue: {
+                text: t("move_to_trash"),
+                color: "critical",
+                action: () => trashFile(file),
+                autoFocus: true,
+            },
+        });
     };
 
     const handleArrowClick = (

@@ -44,9 +44,6 @@ class _CastChooseDialogState extends State<CastChooseDialog> {
             buttonAction: ButtonAction.first,
             shouldSurfaceExecutionStates: false,
             isInAlert: true,
-            onTap: () async {
-              Navigator.of(context).pop(ButtonAction.first);
-            },
           ),
           const SizedBox(height: 36),
           Text(
@@ -61,9 +58,7 @@ class _CastChooseDialogState extends State<CastChooseDialog> {
             icon: Icons.tv_outlined,
             buttonSize: ButtonSize.large,
             isInAlert: true,
-            onTap: () async {
-              Navigator.of(context).pop(ButtonAction.second);
-            },
+
             shouldStickToDarkTheme: true,
             buttonAction: ButtonAction.second,
             shouldSurfaceExecutionStates: false,

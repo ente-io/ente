@@ -1,3 +1,4 @@
+import { FormPaper } from "@/base/components/FormPaper";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { sharedCryptoWorker } from "@/base/crypto";
 import type { B64EncryptionResult } from "@/base/crypto/libsodium";
@@ -5,7 +6,6 @@ import { clearLocalStorage } from "@/base/local-storage";
 import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
-import FormPaper from "@ente/shared/components/Form/FormPaper";
 import LinkButton from "@ente/shared/components/LinkButton";
 import VerifyMasterPasswordForm, {
     type VerifyMasterPasswordFormProps,
@@ -39,6 +39,7 @@ import { Stack } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
+import type { SRPAttributes } from "../api/srp";
 import { getSRPAttributes } from "../api/srp";
 import {
     LoginFlowFormFooter,
@@ -63,7 +64,6 @@ import {
     loginViaSRP,
 } from "../services/srp";
 import type { PageProps } from "../types/page";
-import type { SRPAttributes } from "../types/srp";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
     const { logout, showNavBar, showMiniDialog } = appContext;

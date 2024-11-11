@@ -832,11 +832,8 @@ class FilesDB {
     if (collectionIDs.isEmpty) {
       return FileLoadResult(<EnteFile>[], false);
     }
-    String inParam = "";
-    for (final id in collectionIDs) {
-      inParam += "'" + id.toString() + "',";
-    }
-    inParam = inParam.substring(0, inParam.length - 1);
+    final inParam = collectionIDs.map((id) => "'$id'").join(',');
+
     final db = await instance.sqliteAsyncDB;
     final order = (asc ?? false ? 'ASC' : 'DESC');
     final String whereClause =
@@ -871,18 +868,14 @@ class FilesDB {
       return <EnteFile>[];
     }
     final db = await instance.sqliteAsyncDB;
-    String whereClause = "( ";
-    for (int index = 0; index < durations.length; index++) {
-      whereClause += "($columnCreationTime >= " +
-          durations[index][0].toString() +
-          " AND $columnCreationTime < " +
-          durations[index][1].toString() +
-          ")";
-      if (index != durations.length - 1) {
-        whereClause += " OR ";
-      }
-    }
-    whereClause += ")";
+    String whereClause = durations
+        .map(
+          (duration) =>
+              "($columnCreationTime >= ${duration[0]} AND $columnCreationTime < ${duration[1]})",
+        )
+        .join(" OR ");
+
+    whereClause = "( $whereClause )";
     if (visibility != null) {
       whereClause += ' AND $columnMMdVisibility = $visibility';
     }
@@ -1015,11 +1008,7 @@ class FilesDB {
     Set<String> localIDs,
   ) async {
     final db = await instance.sqliteAsyncDB;
-    String inParam = "";
-    for (final localID in localIDs) {
-      inParam += "'" + localID + "',";
-    }
-    inParam = inParam.substring(0, inParam.length - 1);
+    final inParam = localIDs.map((id) => "'$id'").join(',');
     await db.execute(
       '''
       UPDATE $filesTable
@@ -1244,11 +1233,7 @@ class FilesDB {
   }
 
   Future<void> deleteLocalFiles(List<String> localIDs) async {
-    String inParam = "";
-    for (final localID in localIDs) {
-      inParam += "'" + localID + "',";
-    }
-    inParam = inParam.substring(0, inParam.length - 1);
+    final inParam = localIDs.map((id) => "'$id'").join(',');
     final db = await instance.sqliteAsyncDB;
     await db.execute(
       '''
@@ -1260,11 +1245,7 @@ class FilesDB {
   }
 
   Future<List<EnteFile>> getLocalFiles(List<String> localIDs) async {
-    String inParam = "";
-    for (final localID in localIDs) {
-      inParam += "'" + localID + "',";
-    }
-    inParam = inParam.substring(0, inParam.length - 1);
+    final inParam = localIDs.map((id) => "'$id'").join(',');
     final db = await instance.sqliteAsyncDB;
     final results = await db.getAll(
       '''
@@ -1276,11 +1257,7 @@ class FilesDB {
   }
 
   Future<void> deleteUnSyncedLocalFiles(List<String> localIDs) async {
-    String inParam = "";
-    for (final localID in localIDs) {
-      inParam += "'" + localID + "',";
-    }
-    inParam = inParam.substring(0, inParam.length - 1);
+    final inParam = localIDs.map((id) => "'$id'").join(',');
     final db = await instance.sqliteAsyncDB;
     unawaited(
       db.execute(
@@ -1371,13 +1348,10 @@ class FilesDB {
     List<EnteFile> existingFiles,
     int collectionID,
   ) async {
-    String inParam = "";
-    for (final existingFile in existingFiles) {
-      if (existingFile.localID != null) {
-        inParam += "'" + existingFile.localID! + "',";
-      }
-    }
-    inParam = inParam.substring(0, inParam.length - 1);
+    final inParam = existingFiles
+        .where((file) => file.localID != null)
+        .map((file) => "'${file.localID}'")
+        .join(',');
     final db = await instance.sqliteAsyncDB;
     final rows = await db.getAll(
       '''
@@ -1463,11 +1437,7 @@ class FilesDB {
     if (localIDs.isEmpty) {
       return;
     }
-    String inParam = "";
-    for (final localID in localIDs) {
-      inParam += "'" + localID + "',";
-    }
-    inParam = inParam.substring(0, inParam.length - 1);
+    final inParam = localIDs.map((id) => "'$id'").join(',');
     final db = await instance.sqliteAsyncDB;
     await db.execute(
       '''
@@ -1492,16 +1462,12 @@ class FilesDB {
     return rows.isNotEmpty;
   }
 
-  Future<Map<int, EnteFile>> getFilesFromIDs(List<int> ids) async {
+  Future<Map<int, EnteFile>> getFileIDToFileFromIDs(List<int> ids) async {
     final result = <int, EnteFile>{};
     if (ids.isEmpty) {
       return result;
     }
-    String inParam = "";
-    for (final id in ids) {
-      inParam += "'" + id.toString() + "',";
-    }
-    inParam = inParam.substring(0, inParam.length - 1);
+    final inParam = ids.map((id) => "'$id'").join(',');
     final db = await instance.sqliteAsyncDB;
     final results = await db.getAll(
       'SELECT * FROM $filesTable WHERE $columnUploadedFileID IN ($inParam)',
@@ -1513,24 +1479,31 @@ class FilesDB {
     return result;
   }
 
-  Future<Map<int, EnteFile>> getFilesFromGeneratedIDs(List<int> ids) async {
-    final result = <int, EnteFile>{};
+  Future<List<EnteFile>> getFilesFromIDs(
+    List<int> ids, {
+    bool asc = false,
+    bool dedupeByUploadId = false,
+    Set<int> collectionsToIgnore = const {},
+  }) async {
+    final order = (asc ? 'ASC' : 'DESC');
     if (ids.isEmpty) {
-      return result;
+      return [];
     }
-    String inParam = "";
-    for (final id in ids) {
-      inParam += "'" + id.toString() + "',";
-    }
-    inParam = inParam.substring(0, inParam.length - 1);
+
+    final inParam = ids.map((id) => "'$id'").join(',');
     final db = await instance.sqliteAsyncDB;
     final results = await db.getAll(
-      'SELECT * FROM $filesTable WHERE $columnGeneratedID IN ($inParam)',
+      'SELECT * FROM $filesTable WHERE $columnUploadedFileID IN ($inParam) ORDER BY $columnCreationTime $order',
     );
     final files = convertToFiles(results);
-    for (final file in files) {
-      result[file.generatedID as int] = file;
-    }
+    final result = await applyDBFilters(
+      files,
+      DBFilterOptions(
+        ignoredCollectionIDs: collectionsToIgnore,
+        dedupeUploadID: dedupeByUploadId,
+      ),
+    );
+
     return result;
   }
 
@@ -1541,11 +1514,7 @@ class FilesDB {
     if (ids.isEmpty) {
       return result;
     }
-    String inParam = "";
-    for (final id in ids) {
-      inParam += "'" + id.toString() + "',";
-    }
-    inParam = inParam.substring(0, inParam.length - 1);
+    final inParam = ids.map((id) => "'$id'").join(',');
     final db = await instance.sqliteAsyncDB;
     final results = await db.getAll(
       'SELECT * FROM $filesTable WHERE $columnUploadedFileID IN ($inParam)',
@@ -1576,6 +1545,26 @@ class FilesDB {
       collectionIDsOfFile.add(result['collection_id'] as int);
     }
     return collectionIDsOfFile;
+  }
+
+  ///Each collectionIDs in list aren't necessarily unique
+  Future<List<int>> getAllCollectionIDsOfFiles(
+    List<int> uploadedFileIDs,
+  ) async {
+    final db = await instance.sqliteAsyncDB;
+    final inParam = uploadedFileIDs.join(',');
+
+    final results = await db.getAll(
+      '''
+      SELECT $columnCollectionID FROM $filesTable
+      WHERE $columnUploadedFileID IN ($inParam) AND $columnCollectionID != -1
+    ''',
+    );
+    final collectionIDsOfFiles = <int>[];
+    for (var result in results) {
+      collectionIDsOfFiles.add(result['collection_id'] as int);
+    }
+    return collectionIDsOfFiles;
   }
 
   List<EnteFile> convertToFilesForIsolate(Map args) {
@@ -1806,28 +1795,6 @@ class FilesDB {
       ids.add(result[columnUploadedFileID] as int);
     }
     return ids;
-  }
-
-  Future<List<EnteFile>> getUploadedFiles(List<int> uploadedIDs) async {
-    if (uploadedIDs.isEmpty) {
-      return <EnteFile>[];
-    }
-    final db = await instance.sqliteAsyncDB;
-    String inParam = "";
-    for (final id in uploadedIDs) {
-      inParam += "'" + id.toString() + "',";
-    }
-    inParam = inParam.substring(0, inParam.length - 1);
-    final results = await db.getAll(
-      '''
-      SELECT * FROM $filesTable WHERE $columnUploadedFileID IN ($inParam)
-      GROUP BY $columnUploadedFileID
-''',
-    );
-    if (results.isEmpty) {
-      return <EnteFile>[];
-    }
-    return convertToFiles(results);
   }
 
   ///Returns "columnName1 = ?, columnName2 = ?, ..."

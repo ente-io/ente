@@ -1,3 +1,4 @@
+import { FormPaper } from "@/base/components/FormPaper";
 import { MenuItemDivider, MenuItemGroup } from "@/base/components/Menu";
 import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
@@ -5,7 +6,6 @@ import { errorDialogAttributes } from "@/base/components/utils/dialog";
 import log from "@/base/log";
 import { ensure } from "@/utils/ensure";
 import { CenteredFlex } from "@ente/shared/components/Container";
-import FormPaper from "@ente/shared/components/Form/FormPaper";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import SingleInputForm from "@ente/shared/components/SingleInputForm";
 import { formatDateTimeFull } from "@ente/shared/time/format";

@@ -1355,8 +1355,8 @@
   "extraPhotosFound": "Znaleziono dodatkowe zdjęcia",
   "configuration": "Konfiguracja",
   "localIndexing": "Indeksowanie lokalne",
-  "resetPerson": "Reset person",
-  "areYouSureYouWantToResetThisPerson": "Are you sure you want to reset this person?",
-  "allPersonGroupingWillReset": "All groupings for this person will be reset, and you will lose all suggestions made for this person",
-  "yesResetPerson": "Yes, reset person"
+  "resetPerson": "Zresetuj osobę",
+  "areYouSureYouWantToResetThisPerson": "Czy na pewno chcesz zresetować tę osobę?",
+  "allPersonGroupingWillReset": "Wszystkie grupy dla tej osoby zostaną zresetowane i stracisz wszystkie sugestie dla tej osoby",
+  "yesResetPerson": "Tak, zresetuj osobę"
 }

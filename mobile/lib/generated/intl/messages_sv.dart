@@ -383,6 +383,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "notPersonLabel": m42,
         "ok": MessageLookupByLibrary.simpleMessage("OK"),
         "onlyFamilyAdminCanChangeCode": m43,
+        "onlyThem": MessageLookupByLibrary.simpleMessage("Only them"),
         "oops": MessageLookupByLibrary.simpleMessage("Hoppsan"),
         "orPickAnExistingOne":
             MessageLookupByLibrary.simpleMessage("Eller välj en befintlig"),

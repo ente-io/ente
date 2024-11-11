@@ -143,7 +143,6 @@ export const getRecoveryKey = async () => {
         recoveryKey = await cryptoWorker.toHex(recoveryKey);
         return recoveryKey;
     } catch (e) {
-        console.log(e);
         log.error("getRecoveryKey failed", e);
         throw e;
     }

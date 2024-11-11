@@ -1158,6 +1158,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "onEnte":
             MessageLookupByLibrary.simpleMessage("В <branding>Ente</branding>"),
         "onlyFamilyAdminCanChangeCode": m43,
+        "onlyThem": MessageLookupByLibrary.simpleMessage("Only them"),
         "oops": MessageLookupByLibrary.simpleMessage("От халепа"),
         "oopsCouldNotSaveEdits": MessageLookupByLibrary.simpleMessage(
             "Ой, не вдалося зберегти зміни"),

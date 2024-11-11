@@ -50,6 +50,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("ما من مفتاح استرداد؟"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
             "لا يمكن فك تشفير بياناتك دون كلمة المرور أو مفتاح الاسترداد بسبب طبيعة بروتوكول التشفير الخاص بنا من النهاية إلى النهاية"),
+        "onlyThem": MessageLookupByLibrary.simpleMessage("Only them"),
         "recoverButton": MessageLookupByLibrary.simpleMessage("استرداد"),
         "recoverySuccessful":
             MessageLookupByLibrary.simpleMessage("نجح الاسترداد!"),

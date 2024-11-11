@@ -312,7 +312,7 @@ class RemoteSyncService {
         await _db.deleteFilesFromCollection(collectionID, fileIDs);
     if (localDeleteCount > 0) {
       final collectionFiles =
-          (await _db.getFilesFromIDs(fileIDs)).values.toList();
+          (await _db.getFileIDToFileFromIDs(fileIDs)).values.toList();
       collectionFiles.removeWhere((f) => f.collectionID != collectionID);
       Bus.instance.fire(
         CollectionUpdatedEvent(

@@ -179,6 +179,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Вашы даныя не могуць быць расшыфраваны без пароля або ключа аднаўлення па прычыне архітэктуры наша пратакола скразнога шыфравання"),
         "notifications": MessageLookupByLibrary.simpleMessage("Апавяшчэнні"),
         "ok": MessageLookupByLibrary.simpleMessage("Добра"),
+        "onlyThem": MessageLookupByLibrary.simpleMessage("Only them"),
         "oops": MessageLookupByLibrary.simpleMessage("Вой"),
         "password": MessageLookupByLibrary.simpleMessage("Пароль"),
         "passwordChangedSuccessfully":

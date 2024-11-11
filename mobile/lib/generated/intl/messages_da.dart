@@ -110,6 +110,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "moments": MessageLookupByLibrary.simpleMessage("Øjeblikke"),
         "next": MessageLookupByLibrary.simpleMessage("Næste"),
         "ok": MessageLookupByLibrary.simpleMessage("Ok"),
+        "onlyThem": MessageLookupByLibrary.simpleMessage("Only them"),
         "oops": MessageLookupByLibrary.simpleMessage("Ups"),
         "password": MessageLookupByLibrary.simpleMessage("Adgangskode"),
         "pleaseContactSupportAndWeWillBeHappyToHelp":

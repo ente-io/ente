@@ -1151,6 +1151,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "onEnte": MessageLookupByLibrary.simpleMessage(
             "Op <branding>ente</branding>"),
         "onlyFamilyAdminCanChangeCode": m43,
+        "onlyThem": MessageLookupByLibrary.simpleMessage("Only them"),
         "oops": MessageLookupByLibrary.simpleMessage("Oeps"),
         "oopsCouldNotSaveEdits": MessageLookupByLibrary.simpleMessage(
             "Oeps, kon bewerkingen niet opslaan"),

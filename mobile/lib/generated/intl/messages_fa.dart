@@ -271,6 +271,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "با توجه به ماهیت پروتکل رمزگذاری سرتاسر ما، اطلاعات شما بدون رمز عبور یا کلید بازیابی شما قابل رمزگشایی نیست"),
         "notifications": MessageLookupByLibrary.simpleMessage("آگاه‌سازی‌ها"),
         "ok": MessageLookupByLibrary.simpleMessage("تایید"),
+        "onlyThem": MessageLookupByLibrary.simpleMessage("Only them"),
         "oops": MessageLookupByLibrary.simpleMessage("اوه"),
         "password": MessageLookupByLibrary.simpleMessage("رمز عبور"),
         "passwordChangedSuccessfully": MessageLookupByLibrary.simpleMessage(

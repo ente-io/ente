@@ -1,4 +1,5 @@
 import { EnteLogoSVG } from "@/base/components/EnteLogo";
+import { FormPaper, FormPaperTitle } from "@/base/components/FormPaper";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { SpaceBetweenFlex } from "@/base/components/mui/Container";
 import { NavbarBase, SelectionBar } from "@/base/components/Navbar";
@@ -24,8 +25,6 @@ import {
     FluidContainer,
     VerticallyCentered,
 } from "@ente/shared/components/Container";
-import FormPaper from "@ente/shared/components/Form/FormPaper";
-import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
 import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
 import SingleInputForm, {
@@ -78,7 +77,6 @@ import {
 } from "types/gallery";
 import { downloadCollectionFiles } from "utils/collection";
 import { downloadSelectedFiles, getSelectedFiles } from "utils/file";
-import { formatNumber } from "utils/number/format";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 
 export default function PublicCollectionGallery() {
@@ -91,8 +89,7 @@ export default function PublicCollectionGallery() {
     const [publicFiles, setPublicFiles] = useState<EnteFile[]>(null);
     const [publicCollection, setPublicCollection] = useState<Collection>(null);
     const [errorMessage, setErrorMessage] = useState<string>(null);
-    const { showLoadingBar, hideLoadingBar, setDialogMessage } =
-        useAppContext();
+    const { showLoadingBar, hideLoadingBar, showMiniDialog } = useAppContext();
     const [loading, setLoading] = useState(true);
     const router = useRouter();
     const [isPasswordProtected, setIsPasswordProtected] =
@@ -187,16 +184,17 @@ export default function PublicCollectionGallery() {
     };
 
     const showPublicLinkExpiredMessage = () =>
-        setDialogMessage({
-            title: t("LINK_EXPIRED"),
-            content: t("LINK_EXPIRED_MESSAGE"),
-
+        showMiniDialog({
+            title: t("link_expired"),
+            message: t("link_expired_message"),
             nonClosable: true,
-            proceed: {
+            continue: {
                 text: t("login"),
-                action: () => router.push("/"),
-                variant: "accent",
+                action: async () => {
+                    await router.push("/");
+                },
             },
+            cancel: false,
         });
 
     useEffect(() => {
@@ -370,7 +368,7 @@ export default function PublicCollectionGallery() {
                 setErrorMessage(
                     parsedError.message === CustomError.TOO_MANY_REQUESTS
                         ? t("LINK_TOO_MANY_REQUESTS")
-                        : t("LINK_EXPIRED_MESSAGE"),
+                        : t("link_expired_message"),
                 );
                 // share has been disabled
                 // local cache should be cleared
@@ -677,9 +675,7 @@ const SelectedFileOptions: React.FC<SelectedFileOptionsProps> = ({
                 <IconButton onClick={clearSelection}>
                     <CloseIcon />
                 </IconButton>
-                <Box ml={1.5}>
-                    {formatNumber(count)} {t("SELECTED")}{" "}
-                </Box>
+                <Box ml={1.5}>{t("selected_count", { selected: count })}</Box>
             </FluidContainer>
             <Stack spacing={2} direction="row" mr={2}>
                 <Tooltip title={t("download")}>

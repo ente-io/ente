@@ -158,15 +158,24 @@
   "orPickAnExistingOne": "Arba pasirinkite esamą",
   "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum": "Bendradarbiai gali pridėti nuotraukų ir vaizdo įrašų į bendrintą albumą.",
   "enterEmail": "Įveskite el. paštą",
+  "albumOwner": "Savininkas",
+  "@albumOwner": {
+    "description": "Role of the album owner"
+  },
+  "you": "Jūs",
+  "collaborator": "Bendradarbis",
   "addMore": "Pridėti daugiau",
   "@addMore": {
     "description": "Button text to add more collaborators/viewers"
   },
+  "viewer": "Žiūrėtojas",
   "remove": "Šalinti",
   "removeParticipant": "Šalinti dalyvį",
   "@removeParticipant": {
     "description": "menuSectionTitle for removing a participant"
   },
+  "manage": "Tvarkyti",
+  "addedAs": "Pridėta kaip",
   "changePermissions": "Keisti leidimus?",
   "yesConvertToViewer": "Taip, keisti į žiūrėtoją",
   "cannotAddMorePhotosAfterBecomingViewer": "{user} negalės pridėti daugiau nuotraukų į šį albumą\n\nJie vis tiek galės pašalinti esamas pridėtas nuotraukas",
@@ -185,8 +194,10 @@
     "description": "Text to indicate that there is limit on number of devices"
   },
   "linkExpiry": "Nuorodos galiojimo laikas",
+  "linkExpired": "Nebegalioja",
   "linkEnabled": "Įjungta",
   "linkNeverExpires": "Niekada",
+  "expiredLinkInfo": "Ši nuoroda nebegalioja. Pasirinkite naują galiojimo laiką arba išjunkite nuorodos galiojimo laiką.",
   "setAPassword": "Nustatyti slaptažodį",
   "lockButtonLabel": "Užrakinti",
   "enterPassword": "Įveskite slaptažodį",
@@ -205,9 +216,29 @@
   "after1Year": "Po 1 metų",
   "manageParticipants": "Tvarkyti",
   "collabLinkSectionDescription": "Sukurkite nuorodą, kad asmenys galėtų pridėti ir peržiūrėti nuotraukas bendrinamame albume, nereikalaujant „Ente“ programos ar paskyros. Puikiai tinka renginių nuotraukoms rinkti.",
+  "collectPhotos": "Rinkti nuotraukas",
   "sendLink": "Siųsti nuorodą",
   "copyLink": "Kopijuoti nuorodą",
+  "thisIsYourVerificationId": "Tai – jūsų patvirtinimo ID",
+  "someoneSharingAlbumsWithYouShouldSeeTheSameId": "Asmuo, kuris bendrina albumus su jumis, savo įrenginyje turėtų matyti tą patį ID.",
+  "howToViewShareeVerificationID": "Paprašykite jų ilgai paspausti savo el. pašto adresą nustatymų ekrane ir patvirtinkite, kad abiejų įrenginių ID sutampa.",
+  "thisIsPersonVerificationId": "Tai – {email} patvirtinimo ID",
+  "@thisIsPersonVerificationId": {
+    "placeholders": {
+      "email": {
+        "type": "String",
+        "example": "someone@ente.io"
+      }
+    }
+  },
+  "verificationId": "Patvirtinimo ID",
+  "verifyEmailID": "Patvirtinti {email}",
   "emailNoEnteAccount": "{email} neturi „Ente“ paskyros.\n\nSiųskite jiems kvietimą bendrinti nuotraukas.",
+  "shareMyVerificationID": "Štai mano patvirtinimo ID: {verificationID}, skirta ente.io.",
+  "shareTextConfirmOthersVerificationID": "Ei, ar galite patvirtinti, kad tai yra jūsų ente.io patvirtinimo ID: {verificationID}",
+  "somethingWentWrong": "Kažkas nutiko ne taip",
+  "sendInvite": "Siųsti kvietimą",
+  "done": "Atlikta",
   "applyCodeTitle": "Taikyti kodą",
   "apply": "Taikyti",
   "codeAppliedPageTitle": "Pritaikytas kodas",
@@ -765,8 +796,9 @@
   "extraPhotosFound": "Rastos papildomos nuotraukos",
   "configuration": "Konfiguracija",
   "localIndexing": "Vietinis indeksavimas",
-  "resetPerson": "Reset person",
-  "areYouSureYouWantToResetThisPerson": "Are you sure you want to reset this person?",
-  "allPersonGroupingWillReset": "All groupings for this person will be reset, and you will lose all suggestions made for this person",
-  "yesResetPerson": "Yes, reset person"
+  "resetPerson": "Nustatyti asmenį iš naujo",
+  "areYouSureYouWantToResetThisPerson": "Ar tikrai norite iš naujo nustatyti šį asmenį?",
+  "allPersonGroupingWillReset": "Visi šio asmens grupavimai bus iš naujo nustatyti, o jūs neteksite visų šiam asmeniui pateiktų pasiūlymų",
+  "yesResetPerson": "Taip, nustatyti asmenį iš naujo",
+  "onlyThem": "Tik jiems"
 }

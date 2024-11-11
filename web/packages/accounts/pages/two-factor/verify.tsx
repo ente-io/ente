@@ -3,11 +3,13 @@ import VerifyTwoFactor, {
     type VerifyTwoFactorCallback,
 } from "@/accounts/components/two-factor/VerifyForm";
 import { PAGES } from "@/accounts/constants/pages";
+import {
+    FormPaper,
+    FormPaperFooter,
+    FormPaperTitle,
+} from "@/base/components/FormPaper";
 import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
-import FormPaper from "@ente/shared/components/Form/FormPaper";
-import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
-import FormTitle from "@ente/shared/components/Form/FormPaper/Title";
 import LinkButton from "@ente/shared/components/LinkButton";
 import { ApiError } from "@ente/shared/error";
 import {
@@ -75,7 +77,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
     return (
         <VerticallyCentered>
             <FormPaper sx={{ maxWidth: "410px" }}>
-                <FormTitle>{t("two_factor")}</FormTitle>
+                <FormPaperTitle>{t("two_factor")}</FormPaperTitle>
                 <VerifyTwoFactor onSubmit={onSubmit} buttonText={t("VERIFY")} />
 
                 <FormPaperFooter style={{ justifyContent: "space-between" }}>

@@ -35,7 +35,7 @@ class LargeFilesPagePage extends StatelessWidget {
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
         final List<EnteFile> allFiles =
-            await SearchService.instance.getAllFiles();
+            await SearchService.instance.getAllFilesForSearch();
         final Set<int> alreadyTracked = <int>{};
 
         final filesWithSize = <EnteFile>[];

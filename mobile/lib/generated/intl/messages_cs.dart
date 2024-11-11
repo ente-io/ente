@@ -32,6 +32,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "checkInboxAndSpamFolder": MessageLookupByLibrary.simpleMessage(
             "Zkontrolujte prosím svou doručenou poštu (a spam) pro dokončení ověření"),
         "incorrectRecoveryKeyBody": MessageLookupByLibrary.simpleMessage(""),
+        "onlyThem": MessageLookupByLibrary.simpleMessage("Only them"),
         "resetPerson": MessageLookupByLibrary.simpleMessage("Reset person"),
         "yesResetPerson":
             MessageLookupByLibrary.simpleMessage("Yes, reset person")

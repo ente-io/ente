@@ -1093,6 +1093,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "onDevice": MessageLookupByLibrary.simpleMessage("На устройстве"),
         "onEnte":
             MessageLookupByLibrary.simpleMessage("В <branding>ente</branding>"),
+        "onlyThem": MessageLookupByLibrary.simpleMessage("Only them"),
         "oops": MessageLookupByLibrary.simpleMessage("Ой"),
         "oopsCouldNotSaveEdits": MessageLookupByLibrary.simpleMessage(
             "К сожалению, изменения не сохранены"),

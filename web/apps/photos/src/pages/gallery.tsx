@@ -1,7 +1,9 @@
 import { sessionExpiredDialogAttributes } from "@/accounts/components/LoginComponents";
 import { stashRedirect } from "@/accounts/services/redirect";
+import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
 import { NavbarBase } from "@/base/components/Navbar";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { errorDialogAttributes } from "@/base/components/utils/dialog";
 import { useModalVisibility } from "@/base/components/utils/modal";
 import { useIsSmallWidth } from "@/base/hooks";
 import log from "@/base/log";
@@ -11,6 +13,7 @@ import {
     CollectionSelector,
     type CollectionSelectorAttributes,
 } from "@/new/photos/components/CollectionSelector";
+import { PlanSelector } from "@/new/photos/components/PlanSelector";
 import {
     SearchBar,
     type SearchBarProps,
@@ -25,7 +28,7 @@ import {
     useGalleryReducer,
     type GalleryBarMode,
 } from "@/new/photos/components/gallery/reducer";
-import { usePeopleStateSnapshot } from "@/new/photos/components/utils/ml";
+import { usePeopleStateSnapshot } from "@/new/photos/components/utils/use-snapshot";
 import { shouldShowWhatsNew } from "@/new/photos/services/changelog";
 import {
     ALL_SECTION,
@@ -45,7 +48,12 @@ import {
 } from "@/new/photos/services/search";
 import type { SearchOption } from "@/new/photos/services/search/types";
 import { initSettings } from "@/new/photos/services/settings";
-import { getLocalFamilyData } from "@/new/photos/services/user";
+import {
+    initUserDetailsOrTriggerSync,
+    redirectToCustomerPortal,
+    userDetailsSnapshot,
+    verifyStripeSubscription,
+} from "@/new/photos/services/user-details";
 import { useAppContext } from "@/new/photos/types/context";
 import { splitByPredicate } from "@/utils/array";
 import { ensure } from "@/utils/ensure";
@@ -87,9 +95,7 @@ import {
     FilesDownloadProgress,
     FilesDownloadProgressAttributes,
 } from "components/FilesDownloadProgress";
-import FixCreationTime, {
-    FixCreationTimeAttributes,
-} from "components/FixCreationTime";
+import { FixCreationTime } from "components/FixCreationTime";
 import FullScreenDropZone from "components/FullScreenDropZone";
 import GalleryEmptyState from "components/GalleryEmptyState";
 import { LoadingOverlay } from "components/LoadingOverlay";
@@ -99,12 +105,12 @@ import Sidebar from "components/Sidebar";
 import { type UploadTypeSelectorIntent } from "components/Upload/UploadTypeSelector";
 import Uploader from "components/Upload/Uploader";
 import { UploadSelectorInputs } from "components/UploadSelectorInputs";
-import PlanSelector from "components/pages/gallery/PlanSelector";
 import SelectedFileOptions from "components/pages/gallery/SelectedFileOptions";
 import { t } from "i18next";
-import { useRouter } from "next/router";
+import { useRouter, type NextRouter } from "next/router";
 import { createContext, useCallback, useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
+import { Trans } from "react-i18next";
 import {
     constructEmailList,
     constructUserIDToEmailMap,
@@ -124,7 +130,6 @@ import {
     SetFilesDownloadProgressAttributes,
     SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
-import { checkSubscriptionPurchase } from "utils/billing";
 import {
     COLLECTION_OPS_TYPE,
     getSelectedCollection,
@@ -177,7 +182,6 @@ export default function Gallery() {
         collectionID: 0,
         context: { mode: "albums", collectionID: ALL_SECTION },
     });
-    const [planModalView, setPlanModalView] = useState(false);
     const [blockingLoad, setBlockingLoad] = useState(false);
     const [collectionNamerAttributes, setCollectionNamerAttributes] =
         useState<CollectionNamerAttributes>(null);
@@ -227,19 +231,14 @@ export default function Gallery() {
     const {
         showLoadingBar,
         hideLoadingBar,
-        setDialogMessage,
         showMiniDialog,
+        onGenericError,
         logout,
         ...appContext
     } = useAppContext();
     const [userIDToEmailMap, setUserIDToEmailMap] =
         useState<Map<number, string>>(null);
     const [emailList, setEmailList] = useState<string[]>(null);
-    const [fixCreationTimeView, setFixCreationTimeView] = useState(false);
-    const [fixCreationTimeAttributes, setFixCreationTimeAttributes] =
-        useState<FixCreationTimeAttributes>(null);
-
-    const showPlanSelectorModal = () => setPlanModalView(true);
 
     const [uploadTypeSelectorView, setUploadTypeSelectorView] = useState(false);
     const [uploadTypeSelectorIntent, setUploadTypeSelectorIntent] =
@@ -268,6 +267,11 @@ export default function Gallery() {
     const [selectedSearchOption, setSelectedSearchOption] = useState<
         SearchOption | undefined
     >();
+    // If the fix creation time dialog is being shown, then the list of files on
+    // which it should act.
+    const [fixCreationTimeFiles, setFixCreationTimeFiles] = useState<
+        EnteFile[]
+    >([]);
 
     const peopleState = usePeopleStateSnapshot();
 
@@ -287,7 +291,11 @@ export default function Gallery() {
     const [collectionSelectorAttributes, setCollectionSelectorAttributes] =
         useState<CollectionSelectorAttributes | undefined>();
 
+    const { show: showPlanSelector, props: planSelectorVisibilityProps } =
+        useModalVisibility();
     const { show: showWhatsNew, props: whatsNewVisibilityProps } =
+        useModalVisibility();
+    const { show: showFixCreationTime, props: fixCreationTimeVisibilityProps } =
         useModalVisibility();
 
     // TODO: Temp
@@ -344,16 +352,18 @@ export default function Gallery() {
                 return;
             }
             initSettings();
+            await initUserDetailsOrTriggerSync();
             await downloadManager.init(token);
             setupSelectAllKeyBoardShortcutHandler();
             dispatch({ type: "showAll" });
             setIsFirstLoad(isFirstLogin());
             if (justSignedUp()) {
-                setPlanModalView(true);
+                showPlanSelector();
             }
             setIsFirstLogin(false);
             const user = getData(LS_KEYS.USER);
-            const familyData = getLocalFamilyData();
+            // TODO: Pass entire snapshot to reducer?
+            const familyData = userDetailsSnapshot()?.familyData;
             const files = sortFiles(
                 mergeMetadata(await getLocalFiles("normal")),
             );
@@ -418,9 +428,6 @@ export default function Gallery() {
     useEffect(() => {
         collectionNamerAttributes && setCollectionNamerView(true);
     }, [collectionNamerAttributes]);
-    useEffect(() => {
-        fixCreationTimeAttributes && setFixCreationTimeView(true);
-    }, [fixCreationTimeAttributes]);
 
     useEffect(() => {
         if (typeof activeCollectionID === "undefined" || !router.isReady) {
@@ -436,12 +443,11 @@ export default function Gallery() {
     }, [activeCollectionID, router.isReady]);
 
     useEffect(() => {
-        const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
-        if (router.isReady && key) {
-            checkSubscriptionPurchase(
-                setDialogMessage,
+        if (router.isReady && getKey(SESSION_KEYS.ENCRYPTION_KEY)) {
+            handleSubscriptionCompletionRedirectIfNeeded(
+                showMiniDialog,
+                showLoadingBar,
                 router,
-                setBlockingLoad,
             );
         }
     }, [router.isReady]);
@@ -488,8 +494,8 @@ export default function Gallery() {
             uploadTypeSelectorView ||
             openCollectionSelector ||
             collectionNamerView ||
-            fixCreationTimeView ||
-            planModalView ||
+            planSelectorVisibilityProps.open ||
+            fixCreationTimeVisibilityProps.open ||
             exportModalView ||
             authenticateUserModalView ||
             isPhotoSwipeOpen ||
@@ -706,13 +712,7 @@ export default function Gallery() {
                 clearSelection();
                 await syncWithRemote(false, true);
             } catch (e) {
-                log.error(`collection ops (${ops}) failed`, e);
-                setDialogMessage({
-                    title: t("error"),
-
-                    close: { variant: "critical" },
-                    content: t("generic_error_retry"),
-                });
+                onGenericError(e);
             } finally {
                 hideLoadingBar();
             }
@@ -738,20 +738,17 @@ export default function Gallery() {
                     () => dispatch({ type: "clearTempDeleted" }),
                     (files) => dispatch({ type: "markTempHidden", files }),
                     () => dispatch({ type: "clearTempHidden" }),
-                    setFixCreationTimeAttributes,
+                    (files) => {
+                        setFixCreationTimeFiles(files);
+                        showFixCreationTime();
+                    },
                     setFilesDownloadProgressAttributesCreator,
                 );
             }
             clearSelection();
             await syncWithRemote(false, true);
         } catch (e) {
-            log.error(`file ops (${ops}) failed`, e);
-            setDialogMessage({
-                title: t("error"),
-
-                close: { variant: "critical" },
-                content: t("generic_error_retry"),
-            });
+            onGenericError(e);
         } finally {
             hideLoadingBar();
         }
@@ -764,13 +761,7 @@ export default function Gallery() {
                 const collection = await createAlbum(collectionName);
                 await collectionOpsHelper(ops)(collection);
             } catch (e) {
-                log.error(`create and collection ops (${ops}) failed`, e);
-                setDialogMessage({
-                    title: t("error"),
-
-                    close: { variant: "critical" },
-                    content: t("generic_error_retry"),
-                });
+                onGenericError(e);
             } finally {
                 hideLoadingBar();
             }
@@ -875,7 +866,7 @@ export default function Gallery() {
         <GalleryContext.Provider
             value={{
                 ...defaultGalleryContext,
-                showPlanSelectorModal,
+                showPlanSelectorModal: showPlanSelector,
                 setActiveCollectionID: handleSetActiveCollectionID,
                 onShowCollection: (id) =>
                     dispatch({
@@ -918,9 +909,8 @@ export default function Gallery() {
                     </CenteredFlex>
                 )}
                 <PlanSelector
-                    modalView={planModalView}
-                    closeModal={() => setPlanModalView(false)}
-                    setLoading={setBlockingLoad}
+                    {...planSelectorVisibilityProps}
+                    setLoading={(v) => setBlockingLoad(v)}
                 />
                 <CollectionNamer
                     show={collectionNamerView}
@@ -944,9 +934,8 @@ export default function Gallery() {
                     setAttributesList={setFilesDownloadProgressAttributesList}
                 />
                 <FixCreationTime
-                    isOpen={fixCreationTimeView}
-                    hide={() => setFixCreationTimeView(false)}
-                    attributes={fixCreationTimeAttributes}
+                    {...fixCreationTimeVisibilityProps}
+                    files={fixCreationTimeFiles}
                 />
 
                 <NavbarBase
@@ -1221,6 +1210,84 @@ const HiddenSectionNavbarContents: React.FC<
         </FlexWrapper>
     </HorizontalFlex>
 );
+
+/**
+ * When the payments app redirects back to us after a plan purchase or update
+ * completes, it sets various query parameters to relay the status of the action
+ * back to us.
+ *
+ * Check if these query parameters exist, and if so, act on them appropriately.
+ */
+export async function handleSubscriptionCompletionRedirectIfNeeded(
+    showMiniDialog: (attributes: MiniDialogAttributes) => void,
+    showLoadingBar: () => void,
+    router: NextRouter,
+) {
+    const { session_id: sessionID, status, reason } = router.query;
+
+    if (status == "success") {
+        try {
+            const subscription = await verifyStripeSubscription(sessionID);
+            showMiniDialog({
+                title: t("thank_you"),
+                message: (
+                    <Trans
+                        i18nKey="subscription_purchase_success"
+                        values={{ date: subscription?.expiryTime }}
+                    />
+                ),
+                continue: { text: t("ok") },
+                cancel: false,
+            });
+        } catch (e) {
+            log.error("Subscription verification failed", e);
+            showMiniDialog(
+                errorDialogAttributes(t("subscription_verification_error")),
+            );
+        }
+    } else if (status == "fail") {
+        log.error(`Subscription purchase failed: ${reason}`);
+        switch (reason) {
+            case "canceled":
+                showMiniDialog({
+                    message: t("subscription_purchase_cancelled"),
+                    continue: { text: t("ok"), color: "primary" },
+                    cancel: false,
+                });
+                break;
+            case "requires_payment_method":
+                showMiniDialog({
+                    title: t("update_payment_method"),
+                    message: t("update_payment_method_message"),
+                    continue: {
+                        text: t("update_payment_method"),
+                        action: () => {
+                            showLoadingBar();
+                            return redirectToCustomerPortal();
+                        },
+                    },
+                });
+                break;
+            case "authentication_failed":
+                showMiniDialog({
+                    title: t("update_payment_method"),
+                    message: t("payment_method_authentication_failed"),
+                    continue: {
+                        text: t("update_payment_method"),
+                        action: () => {
+                            showLoadingBar();
+                            return redirectToCustomerPortal();
+                        },
+                    },
+                });
+                break;
+            default:
+                showMiniDialog(
+                    errorDialogAttributes(t("subscription_purchase_failed")),
+                );
+        }
+    }
+}
 
 /**
  * Return the {@link Collection} (from amongst {@link collections}) with the

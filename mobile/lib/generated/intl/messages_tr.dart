@@ -948,6 +948,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "onDevice": MessageLookupByLibrary.simpleMessage("Bu cihaz"),
         "onEnte": MessageLookupByLibrary.simpleMessage(
             "<branding>ente</branding> üzerinde"),
+        "onlyThem": MessageLookupByLibrary.simpleMessage("Only them"),
         "oops": MessageLookupByLibrary.simpleMessage("Hay aksi"),
         "oopsCouldNotSaveEdits": MessageLookupByLibrary.simpleMessage(
             "Hata! Düzenlemeler kaydedilemedi"),

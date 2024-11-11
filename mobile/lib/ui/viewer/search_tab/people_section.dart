@@ -6,7 +6,6 @@ import "package:photos/core/constants.dart";
 import "package:photos/events/event.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/person.dart";
-import "package:photos/models/search/album_search_result.dart";
 import "package:photos/models/search/generic_search_result.dart";
 import "package:photos/models/search/recent_searches.dart";
 import "package:photos/models/search/search_constants.dart";
@@ -19,8 +18,8 @@ import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/people/add_person_action_sheet.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
 import 'package:photos/ui/viewer/search/result/person_face_widget.dart';
-import "package:photos/ui/viewer/search/result/search_people_all_page.dart";
 import "package:photos/ui/viewer/search/result/search_result_page.dart";
+import 'package:photos/ui/viewer/search/result/search_section_all_page.dart';
 import "package:photos/ui/viewer/search/search_section_cta.dart";
 import "package:photos/utils/navigation_util.dart";
 
@@ -88,7 +87,7 @@ class _PeopleSectionState extends State<PeopleSection> {
               if (shouldShowMore) {
                 routeToPage(
                   context,
-                  PeopleAllPage(
+                  SearchSectionAllPage(
                     sectionType: widget.sectionType,
                   ),
                 );
@@ -119,7 +118,7 @@ class _PeopleSectionState extends State<PeopleSection> {
                   ],
                 ),
                 const SizedBox(height: 2),
-                PeopleRow(_examples, widget.sectionType),
+                SearchExampleRow(_examples, widget.sectionType),
               ],
             ),
           )
@@ -163,11 +162,11 @@ class _PeopleSectionState extends State<PeopleSection> {
   }
 }
 
-class PeopleRow extends StatelessWidget {
+class SearchExampleRow extends StatelessWidget {
   final SectionType sectionType;
   final List<SearchResult> examples;
 
-  const PeopleRow(this.examples, this.sectionType, {super.key});
+  const SearchExampleRow(this.examples, this.sectionType, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -175,7 +174,7 @@ class PeopleRow extends StatelessWidget {
     final scrollableExamples = <Widget>[];
     examples.forEachIndexed((index, element) {
       scrollableExamples.add(
-        PeopleRowItem(
+        SearchExample(
           searchResult: examples.elementAt(index),
         ),
       );
@@ -193,9 +192,9 @@ class PeopleRow extends StatelessWidget {
   }
 }
 
-class PeopleRowItem extends StatelessWidget {
+class SearchExample extends StatelessWidget {
   final SearchResult searchResult;
-  const PeopleRowItem({required this.searchResult, super.key});
+  const SearchExample({required this.searchResult, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -204,54 +203,41 @@ class PeopleRowItem extends StatelessWidget {
         int.tryParse(searchResult.name()) != null);
     late final double width;
     if (textScaleFactor <= 1.0) {
-      width = 120.0;
+      width = 85.0;
     } else {
-      width = 120.0 + ((textScaleFactor - 1.0) * 64);
+      width = 85.0 + ((textScaleFactor - 1.0) * 64);
     }
     final heroTag =
         searchResult.heroTag() + (searchResult.previewThumbnail()?.tag ?? "");
     return GestureDetector(
       onTap: () {
         RecentSearches().add(searchResult.name());
-
-        if (searchResult is GenericSearchResult) {
-          final genericSearchResult = searchResult as GenericSearchResult;
-          if (genericSearchResult.onResultTap != null) {
-            genericSearchResult.onResultTap!(context);
-          } else {
-            routeToPage(
-              context,
-              SearchResultPage(searchResult),
-            );
-          }
-        } else if (searchResult is AlbumSearchResult) {
-          final albumSearchResult = searchResult as GenericSearchResult;
+        final genericSearchResult = searchResult as GenericSearchResult;
+        if (genericSearchResult.onResultTap != null) {
+          genericSearchResult.onResultTap!(context);
+        } else {
           routeToPage(
             context,
-            SearchResultPage(
-              albumSearchResult,
-              tagPrefix: albumSearchResult.heroTag(),
-            ),
+            SearchResultPage(searchResult),
           );
         }
       },
       child: SizedBox(
         width: width,
         child: Padding(
-          padding: const EdgeInsets.only(left: 4, right: 4, top: 8),
+          padding: const EdgeInsets.only(left: 6, right: 6, top: 8),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               SizedBox(
-                width: 100,
-                height: 100,
+                width: 64,
+                height: 64,
                 child: searchResult.previewThumbnail() != null
                     ? Hero(
                         tag: heroTag,
                         child: ClipRRect(
-                          borderRadius: const BorderRadius.all(
-                            Radius.elliptical(16, 12),
-                          ),
+                          borderRadius:
+                              const BorderRadius.all(Radius.elliptical(16, 12)),
                           child: searchResult.type() != ResultType.faces
                               ? ThumbnailWidget(
                                   searchResult.previewThumbnail()!,
@@ -279,14 +265,26 @@ class PeopleRowItem extends StatelessWidget {
                         if (result != null &&
                             result is (PersonEntity, EnteFile)) {
                           // ignore: unawaited_futures
-                          routeToPage(context, PeoplePage(person: result.$1));
+                          routeToPage(
+                            context,
+                            PeoplePage(
+                              person: result.$1,
+                              searchResult: null,
+                            ),
+                          );
                         } else if (result != null && result is PersonEntity) {
                           // ignore: unawaited_futures
-                          routeToPage(context, PeoplePage(person: result));
+                          routeToPage(
+                            context,
+                            PeoplePage(
+                              person: result,
+                              searchResult: null,
+                            ),
+                          );
                         }
                       },
                       child: Padding(
-                        padding: const EdgeInsets.only(top: 10, bottom: 10),
+                        padding: const EdgeInsets.only(top: 10, bottom: 16),
                         child: Text(
                           "Add name",
                           maxLines: 1,
@@ -297,7 +295,7 @@ class PeopleRowItem extends StatelessWidget {
                       ),
                     )
                   : Padding(
-                      padding: const EdgeInsets.only(top: 10, bottom: 10),
+                      padding: const EdgeInsets.only(top: 10, bottom: 16),
                       child: Text(
                         searchResult.name(),
                         maxLines: 2,

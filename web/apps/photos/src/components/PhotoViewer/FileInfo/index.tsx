@@ -23,6 +23,7 @@ import {
     confirmDisableMapsDialogAttributes,
     confirmEnableMapsDialogAttributes,
 } from "@/new/photos/components/utils/dialog";
+import { useSettingsSnapshot } from "@/new/photos/components/utils/use-snapshot";
 import { fileInfoDrawerZIndex } from "@/new/photos/components/utils/z-index";
 import { tagNumericValue, type RawExifTags } from "@/new/photos/services/exif";
 import {
@@ -30,15 +31,11 @@ import {
     isMLEnabled,
     type AnnotatedFaceID,
 } from "@/new/photos/services/ml";
-import {
-    settingsSnapshot,
-    settingsSubscribe,
-    updateMapEnabled,
-} from "@/new/photos/services/settings";
+import { updateMapEnabled } from "@/new/photos/services/settings";
 import { AppContext } from "@/new/photos/types/context";
 import { formattedByteSize } from "@/new/photos/utils/units";
-import CopyButton from "@ente/shared/components/CodeBlock/CopyButton";
 import { FlexWrapper } from "@ente/shared/components/Container";
+import CopyButton from "@ente/shared/components/CopyButton";
 import { getPublicMagicMetadataSync } from "@ente/shared/file-metadata";
 import { formatDate, formatTime } from "@ente/shared/time/format";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
@@ -63,13 +60,7 @@ import {
 import LinkButton from "components/pages/gallery/LinkButton";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
-import React, {
-    useContext,
-    useEffect,
-    useMemo,
-    useState,
-    useSyncExternalStore,
-} from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import { changeFileName, updateExistingFilePubMetadata } from "utils/file";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import { FileNameEditDialog } from "./FileNameEditDialog";
@@ -113,10 +104,7 @@ export const FileInfo: React.FC<FileInfoProps> = ({
     closePhotoViewer,
     onSelectPerson,
 }) => {
-    const { mapEnabled } = useSyncExternalStore(
-        settingsSubscribe,
-        settingsSnapshot,
-    );
+    const { mapEnabled } = useSettingsSnapshot();
 
     const { showMiniDialog } = useContext(AppContext);
     const galleryContext = useContext(GalleryContext);

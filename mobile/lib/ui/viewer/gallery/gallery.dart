@@ -17,7 +17,9 @@ import "package:photos/ui/viewer/gallery/component/multiple_groups_gallery_view.
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import "package:photos/ui/viewer/gallery/state/gallery_context_state.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
+import "package:photos/ui/viewer/gallery/state/inherited_search_filter_data.dart";
 import "package:photos/utils/debouncer.dart";
+import "package:photos/utils/hierarchical_search_util.dart";
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 typedef GalleryLoader = Future<FileLoadResult> Function(
@@ -110,7 +112,7 @@ class GalleryState extends State<Gallery> {
   final _forceReloadEventSubscriptions = <StreamSubscription<Event>>[];
   late String _logTag;
   bool _sortOrderAsc = false;
-  List<EnteFile> _allFiles = [];
+  List<EnteFile> _allGalleryFiles = [];
 
   @override
   void initState() {
@@ -189,36 +191,10 @@ class GalleryState extends State<Gallery> {
     }
   }
 
-  Future<FileLoadResult> _loadFiles({int? limit}) async {
-    _logger.info("Loading ${limit ?? "all"} files");
-    try {
-      final startTime = DateTime.now().microsecondsSinceEpoch;
-      final result = await widget.asyncLoader(
-        galleryLoadStartTime,
-        galleryLoadEndTime,
-        limit: limit,
-        asc: _sortOrderAsc,
-      );
-      final endTime = DateTime.now().microsecondsSinceEpoch;
-      final duration = Duration(microseconds: endTime - startTime);
-      _logger.info(
-        "Time taken to load " +
-            result.files.length.toString() +
-            " files :" +
-            duration.inMilliseconds.toString() +
-            "ms",
-      );
-      return result;
-    } catch (e, s) {
-      _logger.severe("failed to load files", e, s);
-      rethrow;
-    }
-  }
-
   // group files into multiple groups and returns `true` if it resulted in a
   // gallery reload
   bool _onFilesLoaded(List<EnteFile> files) {
-    _allFiles = files;
+    _allGalleryFiles = files;
 
     final updatedGroupedFiles =
         widget.enableFileGrouping && widget.groupType.timeGrouping()
@@ -239,6 +215,46 @@ class GalleryState extends State<Gallery> {
     }
   }
 
+  Future<FileLoadResult> _loadFiles({int? limit}) async {
+    _logger.info("Loading ${limit ?? "all"} files");
+    try {
+      final startTime = DateTime.now().microsecondsSinceEpoch;
+      final result = await widget.asyncLoader(
+        galleryLoadStartTime,
+        galleryLoadEndTime,
+        limit: limit,
+        asc: _sortOrderAsc,
+      );
+      final endTime = DateTime.now().microsecondsSinceEpoch;
+      final duration = Duration(microseconds: endTime - startTime);
+      _logger.info(
+        "Time taken to load " +
+            result.files.length.toString() +
+            " files :" +
+            duration.inMilliseconds.toString() +
+            "ms",
+      );
+
+      /// To curate filters when a gallery is first opened.
+      if (!result.hasMore) {
+        final searchFilterDataProvider =
+            InheritedSearchFilterData.maybeOf(context)
+                ?.searchFilterDataProvider;
+        if (searchFilterDataProvider != null &&
+            !searchFilterDataProvider.isSearchingNotifier.value) {
+          unawaited(
+            curateFilters(searchFilterDataProvider, result.files, context),
+          );
+        }
+      }
+
+      return result;
+    } catch (e, s) {
+      _logger.severe("failed to load files", e, s);
+      rethrow;
+    }
+  }
+
   @override
   void dispose() {
     _reloadEventSubscription?.cancel();
@@ -253,7 +269,7 @@ class GalleryState extends State<Gallery> {
   @override
   Widget build(BuildContext context) {
     _logger.finest("Building Gallery  ${widget.tagPrefix}");
-    GalleryFilesState.of(context).setGalleryFiles = _allFiles;
+    GalleryFilesState.of(context).setGalleryFiles = _allGalleryFiles;
     if (!_hasLoadedFiles) {
       return widget.loadingWidget;
     }

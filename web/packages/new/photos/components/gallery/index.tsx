@@ -12,7 +12,7 @@ import { VerticallyCentered } from "@ente/shared/components/Container";
 import { Typography } from "@mui/material";
 import { t } from "i18next";
 import React from "react";
-import { useMLStatusSnapshot } from "../utils/ml";
+import { useMLStatusSnapshot } from "../utils/use-snapshot";
 import { GalleryItemsHeaderAdapter, GalleryItemsSummary } from "./ListHeader";
 
 /**

@@ -11,7 +11,7 @@ func (r *Repository) InsertAddOnBonus(ctx context.Context, bonusType storagebonu
 		return err
 	}
 	bonusID := fmt.Sprintf("%s-%d", bonusType, userID)
-	_, err := r.DB.ExecContext(ctx, "INSERT INTO storage_bonus (bonus_id, user_id, storage, type, valid_till) VALUES ($1, $2, $3, $4, $5)", bonusID, userID, storage, storagebonus.AddOnBf2023, validTill)
+	_, err := r.DB.ExecContext(ctx, "INSERT INTO storage_bonus (bonus_id, user_id, storage, type, valid_till) VALUES ($1, $2, $3, $4, $5)", bonusID, userID, storage, bonusType, validTill)
 	if err != nil {
 		return err
 	}
@@ -43,7 +43,7 @@ func (r *Repository) UpdateAddOnBonus(ctx context.Context, bonusType storagebonu
 }
 
 func _validate(bonusType storagebonus.BonusType) error {
-	if bonusType == storagebonus.AddOnBf2023 || bonusType == storagebonus.AddOnSupport {
+	if bonusType == storagebonus.AddOnBf2023 || bonusType == storagebonus.AddOnBf2024 || bonusType == storagebonus.AddOnSupport {
 		return nil
 	}
 	return fmt.Errorf("invalid bonus type: %s", bonusType)

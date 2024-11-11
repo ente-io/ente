@@ -1343,9 +1343,5 @@
   "mostRecent": "最近",
   "mostRelevant": "最相关",
   "loadingYourPhotos": "正在加载您的照片...",
-  "processingImport": "正在处理 {folderName}...",
-  "resetPerson": "Reset person",
-  "areYouSureYouWantToResetThisPerson": "Are you sure you want to reset this person?",
-  "allPersonGroupingWillReset": "All groupings for this person will be reset, and you will lose all suggestions made for this person",
-  "yesResetPerson": "Yes, reset person"
+  "processingImport": "正在处理 {folderName}..."
 }
