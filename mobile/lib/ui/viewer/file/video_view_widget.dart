@@ -13,6 +13,7 @@ import "package:photos/core/event_bus.dart";
 import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/service_locator.dart";
+import "package:photos/services/preview_video_store.dart";
 import "package:photos/ui/actions/file/file_actions.dart";
 import "package:photos/ui/viewer/file/preview_video_widget.dart";
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
@@ -56,9 +57,7 @@ class _VideoViewWidgetState extends State<VideoViewWidget> {
 
   void _checkForPreview() {
     if (!flagService.internalUser) return;
-    getPreviewFileFromServer(
-      widget.file,
-    ).then((file) {
+    PreviewVideoStore.instance.getPlaylist(widget.file).then((file) {
       if (!mounted) return;
       if (file != null) {
         isCheckingForPreview = false;
@@ -96,6 +95,7 @@ class _VideoViewWidgetState extends State<VideoViewWidget> {
       if (previewFile != null) {
         return PreviewVideoWidget(
           widget.file,
+          preview: previewFile!,
           tagPrefix: widget.tagPrefix,
           playbackCallback: widget.playbackCallback,
         );

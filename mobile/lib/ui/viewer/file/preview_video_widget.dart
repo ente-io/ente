@@ -28,14 +28,16 @@ class PreviewVideoWidget extends StatefulWidget {
   final bool? autoPlay;
   final String? tagPrefix;
   final Function(bool)? playbackCallback;
+  final File preview;
 
   const PreviewVideoWidget(
     this.file, {
+    required this.preview,
     this.autoPlay = false,
     this.tagPrefix,
     this.playbackCallback,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<PreviewVideoWidget> createState() => _PreviewVideoWidgetState();
@@ -54,31 +56,8 @@ class _PreviewVideoWidgetState extends State<PreviewVideoWidget> {
   @override
   void initState() {
     super.initState();
-    if (widget.file.isRemoteFile) {
-      _loadNetworkVideo();
-      _setFileSizeIfNull();
-    } else if (widget.file.isSharedMediaToAppSandbox) {
-      final localFile = File(getSharedMediaFilePath(widget.file));
-      if (localFile.existsSync()) {
-        _logger.fine("loading from app cache");
-        _setVideoPlayerController(file: localFile);
-      } else if (widget.file.uploadedFileID != null) {
-        _loadNetworkVideo();
-      }
-    } else {
-      widget.file.getAsset.then((asset) async {
-        if (asset == null || !(await asset.exists)) {
-          if (widget.file.uploadedFileID != null) {
-            _loadNetworkVideo();
-          }
-        } else {
-          // ignore: unawaited_futures
-          asset.getMediaUrl().then((url) {
-            _setVideoPlayerController(url: url);
-          });
-        }
-      });
-    }
+
+    _setVideoPlayerController();
     _fileSwipeLockEventSubscription =
         Bus.instance.on<GuestViewEvent>().listen((event) {
       setState(() {
@@ -141,7 +120,6 @@ class _PreviewVideoWidgetState extends State<PreviewVideoWidget> {
   }
 
   void _setVideoPlayerController({
-    String? url,
     File? file,
   }) {
     if (!mounted) {
@@ -151,11 +129,7 @@ class _PreviewVideoWidgetState extends State<PreviewVideoWidget> {
       return;
     }
     VideoPlayerController videoPlayerController;
-    if (url != null) {
-      videoPlayerController = VideoPlayerController.networkUrl(Uri.parse(url));
-    } else {
-      videoPlayerController = VideoPlayerController.file(file!);
-    }
+    videoPlayerController = VideoPlayerController.file(file ?? widget.preview);
 
     debugPrint("videoPlayerController: $videoPlayerController");
     _videoPlayerController = videoPlayerController
