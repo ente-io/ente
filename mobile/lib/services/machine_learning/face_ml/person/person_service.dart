@@ -201,6 +201,8 @@ class PersonService {
     required Set<String> faceIDs,
   }) async {
     final personData = person.data;
+
+    // Remove faces from clusters
     final List<String> emptiedClusters = [];
     for (final cluster in personData.assigned!) {
       cluster.faces.removeWhere((faceID) => faceIDs.contains(faceID));
@@ -218,6 +220,10 @@ class PersonService {
         clusterID: emptyClusterID,
       );
     }
+
+    // Add removed faces to rejected faces
+    personData.rejectedFaceIDs ??= [];
+    personData.rejectedFaceIDs!.addAll(faceIDs);
 
     await entityService.addOrUpdate(
       EntityType.cgroup,
