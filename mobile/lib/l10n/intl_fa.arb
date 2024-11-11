@@ -307,10 +307,5 @@
   "developerSettings": "تنظیمات توسعه‌دهنده",
   "search": "جستجو",
   "whatsNew": "تغییرات جدید",
-  "reviewSuggestions": "مرور پیشنهادها",
-  "resetPerson": "Reset person",
-  "areYouSureYouWantToResetThisPerson": "Are you sure you want to reset this person?",
-  "allPersonGroupingWillReset": "All groupings for this person will be reset, and you will lose all suggestions made for this person",
-  "yesResetPerson": "Yes, reset person",
-  "onlyThem": "Only them"
+  "reviewSuggestions": "مرور پیشنهادها"
 }
