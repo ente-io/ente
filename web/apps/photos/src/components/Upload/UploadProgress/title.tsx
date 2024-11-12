@@ -1,5 +1,5 @@
 import { FilledIconButton } from "@/new/photos/components/mui";
-import { UPLOAD_STAGES } from "@/new/photos/services/upload/types";
+import { type UploadPhase } from "@/new/photos/services/upload/types";
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import Close from "@mui/icons-material/Close";
 import UnfoldLessIcon from "@mui/icons-material/UnfoldLess";
@@ -7,6 +7,7 @@ import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import { Box, DialogTitle, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import { useContext } from "react";
+import type { UploadCounter } from "services/upload/uploadManager";
 import UploadProgressContext from "./context";
 
 const UploadProgressTitleText = ({ expanded }) => {
@@ -18,7 +19,7 @@ const UploadProgressTitleText = ({ expanded }) => {
 };
 
 function UploadProgressSubtitleText() {
-    const { uploadStage, uploadCounter } = useContext(UploadProgressContext);
+    const { uploadPhase, uploadCounter } = useContext(UploadProgressContext);
 
     return (
         <Typography
@@ -27,14 +28,30 @@ function UploadProgressSubtitleText() {
             color="text.muted"
             marginTop={"4px"}
         >
-            {uploadStage === UPLOAD_STAGES.UPLOADING
-                ? t(`UPLOAD_STAGE_MESSAGE.${uploadStage}`, { uploadCounter })
-                : uploadStage === UPLOAD_STAGES.EXTRACTING_METADATA
-                  ? t(`UPLOAD_STAGE_MESSAGE.${uploadStage}`, { uploadCounter })
-                  : t(`UPLOAD_STAGE_MESSAGE.${uploadStage}`)}
+            {subtitleText(uploadPhase, uploadCounter)}
         </Typography>
     );
 }
+
+const subtitleText = (
+    uploadPhase: UploadPhase,
+    uploadCounter: UploadCounter,
+) => {
+    switch (uploadPhase) {
+        case "preparing":
+            return t("UPLOAD_STAGE_MESSAGE.0");
+        case "readingMetadata":
+            return t("UPLOAD_STAGE_MESSAGE.1");
+        case "extractingMetadata":
+            return t("UPLOAD_STAGE_MESSAGE.2", { uploadCounter });
+        case "uploading":
+            return t("UPLOAD_STAGE_MESSAGE.3", { uploadCounter });
+        case "cancelling":
+            return t("UPLOAD_STAGE_MESSAGE.4");
+        case "done":
+            return t("UPLOAD_STAGE_MESSAGE.5");
+    }
+};
 
 export function UploadProgressTitle() {
     const { setExpanded, onClose, expanded } = useContext(

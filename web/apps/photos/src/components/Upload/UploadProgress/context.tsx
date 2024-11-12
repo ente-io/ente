@@ -1,4 +1,4 @@
-import { UPLOAD_STAGES } from "@/new/photos/services/upload/types";
+import { type UploadPhase } from "@/new/photos/services/upload/types";
 import { createContext } from "react";
 import type {
     InProgressUpload,
@@ -11,7 +11,7 @@ interface UploadProgressContextType {
     open: boolean;
     onClose: () => void;
     uploadCounter: UploadCounter;
-    uploadStage: UPLOAD_STAGES;
+    uploadPhase: UploadPhase;
     percentComplete: number;
     retryFailed: () => void;
     inProgressUploads: InProgressUpload[];
@@ -25,7 +25,7 @@ const defaultUploadProgressContext: UploadProgressContextType = {
     open: null,
     onClose: () => null,
     uploadCounter: null,
-    uploadStage: null,
+    uploadPhase: undefined,
     percentComplete: null,
     retryFailed: () => null,
     inProgressUploads: null,

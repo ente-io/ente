@@ -11,11 +11,10 @@ import {
 } from "./section";
 import { InProgressItemContainer } from "./styledComponents";
 
-import { UPLOAD_STAGES } from "@/new/photos/services/upload/types";
 import { CaptionedText } from "components/CaptionedText";
 
 export const InProgressSection = () => {
-    const { inProgressUploads, hasLivePhotos, uploadFileNames, uploadStage } =
+    const { inProgressUploads, hasLivePhotos, uploadFileNames, uploadPhase } =
         useContext(UploadProgressContext);
     const fileList = inProgressUploads ?? [];
 
@@ -23,7 +22,7 @@ export const InProgressSection = () => {
         return (
             <InProgressItemContainer key={localFileID}>
                 <span>{uploadFileNames.get(localFileID)}</span>
-                {uploadStage === UPLOAD_STAGES.UPLOADING && (
+                {uploadPhase == "uploading" && (
                     <>
                         {" "}
                         <span className="separator">{`-`}</span>
@@ -47,7 +46,7 @@ export const InProgressSection = () => {
             <UploadProgressSectionTitle expandIcon={<ExpandMoreIcon />}>
                 <CaptionedText
                     mainText={
-                        uploadStage === UPLOAD_STAGES.EXTRACTING_METADATA
+                        uploadPhase == "extractingMetadata"
                             ? t("INPROGRESS_METADATA_EXTRACTION")
                             : t("INPROGRESS_UPLOADS")
                     }

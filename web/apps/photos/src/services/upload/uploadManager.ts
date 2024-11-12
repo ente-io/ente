@@ -15,7 +15,7 @@ import type { UploadItem } from "@/new/photos/services/upload/types";
 import {
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
     UPLOAD_RESULT,
-    UPLOAD_STAGES,
+    type UploadPhase,
 } from "@/new/photos/services/upload/types";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
@@ -70,7 +70,7 @@ export type SegregatedFinishedUploads = Map<UPLOAD_RESULT, FileID[]>;
 export interface ProgressUpdater {
     setPercentComplete: React.Dispatch<React.SetStateAction<number>>;
     setUploadCounter: React.Dispatch<React.SetStateAction<UploadCounter>>;
-    setUploadStage: React.Dispatch<React.SetStateAction<UPLOAD_STAGES>>;
+    setUploadPhase: (phase: UploadPhase) => void;
     setInProgressUploads: React.Dispatch<
         React.SetStateAction<InProgressUpload[]>
     >;
@@ -132,7 +132,7 @@ class UIService {
     private progressUpdater: ProgressUpdater;
 
     // UPLOAD LEVEL STATES
-    private uploadStage: UPLOAD_STAGES = UPLOAD_STAGES.START;
+    private uploadPhase: UploadPhase = "preparing";
     private filenames: Map<number, string> = new Map();
     private hasLivePhoto: boolean = false;
     private uploadProgressView: boolean = false;
@@ -146,7 +146,7 @@ class UIService {
 
     init(progressUpdater: ProgressUpdater) {
         this.progressUpdater = progressUpdater;
-        this.progressUpdater.setUploadStage(this.uploadStage);
+        this.progressUpdater.setUploadPhase(this.uploadPhase);
         this.progressUpdater.setUploadFilenames(this.filenames);
         this.progressUpdater.setHasLivePhotos(this.hasLivePhoto);
         this.progressUpdater.setUploadProgressView(this.uploadProgressView);
@@ -184,9 +184,9 @@ class UIService {
         this.updateProgressBarUI();
     }
 
-    setUploadStage(stage: UPLOAD_STAGES) {
-        this.uploadStage = stage;
-        this.progressUpdater.setUploadStage(stage);
+    setUploadPhase(phase: UploadPhase) {
+        this.uploadPhase = phase;
+        this.progressUpdater.setUploadPhase(phase);
     }
 
     setFiles(files: { localID: number; fileName: string }[]) {
@@ -363,7 +363,7 @@ class UploadManager {
         this.resetState();
         this.uiService.reset();
         uploadCancelService.reset();
-        this.uiService.setUploadStage(UPLOAD_STAGES.START);
+        this.uiService.setUploadPhase("preparing");
     }
 
     showUploadProgressDialog() {
@@ -411,10 +411,7 @@ class UploadManager {
                 splitMetadataAndMediaItems(namedItems);
 
             if (metadataItems.length) {
-                this.uiService.setUploadStage(
-                    UPLOAD_STAGES.READING_GOOGLE_METADATA_FILES,
-                );
-
+                this.uiService.setUploadPhase("readingMetadata");
                 await this.parseMetadataJSONFiles(metadataItems);
             }
 
@@ -442,7 +439,7 @@ class UploadManager {
                 throw e;
             }
         } finally {
-            this.uiService.setUploadStage(UPLOAD_STAGES.FINISH);
+            this.uiService.setUploadPhase("done");
             void globalThis.electron?.clearPendingUploads();
             for (let i = 0; i < maxConcurrentUploads; i++) {
                 this.comlinkCryptoWorkers[i]?.terminate();
@@ -499,7 +496,7 @@ class UploadManager {
         this.itemsToBeUploaded = [...this.itemsToBeUploaded, ...mediaItems];
         this.uiService.reset(mediaItems.length);
         await UploadService.setFileCount(mediaItems.length);
-        this.uiService.setUploadStage(UPLOAD_STAGES.UPLOADING);
+        this.uiService.setUploadPhase("uploading");
 
         const uploadProcesses = [];
         for (
@@ -653,7 +650,7 @@ class UploadManager {
 
     public cancelRunningUpload() {
         log.info("User cancelled running upload");
-        this.uiService.setUploadStage(UPLOAD_STAGES.CANCELLING);
+        this.uiService.setUploadPhase("cancelling");
         uploadCancelService.requestUploadCancelation();
     }
 

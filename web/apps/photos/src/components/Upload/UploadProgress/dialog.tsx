@@ -1,7 +1,4 @@
-import {
-    UPLOAD_RESULT,
-    UPLOAD_STAGES,
-} from "@/new/photos/services/upload/types";
+import { UPLOAD_RESULT } from "@/new/photos/services/upload/types";
 import { Dialog, DialogContent, type DialogProps } from "@mui/material";
 import { t } from "i18next";
 import { useContext, useEffect, useState } from "react";
@@ -14,7 +11,7 @@ import { ResultSection } from "./resultSection";
 import { NotUploadSectionHeader } from "./styledComponents";
 
 export function UploadProgressDialog() {
-    const { open, onClose, uploadStage, finishedUploads } = useContext(
+    const { open, onClose, uploadPhase, finishedUploads } = useContext(
         UploadProgressContext,
     );
 
@@ -43,16 +40,13 @@ export function UploadProgressDialog() {
     return (
         <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
             <UploadProgressHeader />
-            {(uploadStage === UPLOAD_STAGES.UPLOADING ||
-                uploadStage === UPLOAD_STAGES.FINISH ||
-                uploadStage === UPLOAD_STAGES.EXTRACTING_METADATA) && (
+            {(uploadPhase == "extractingMetadata" ||
+                uploadPhase == "uploading" ||
+                uploadPhase == "done") && (
                 <DialogContent sx={{ "&&&": { px: 0 } }}>
-                    {(uploadStage === UPLOAD_STAGES.UPLOADING ||
-                        uploadStage === UPLOAD_STAGES.EXTRACTING_METADATA) && (
-                        <InProgressSection />
-                    )}
-                    {(uploadStage === UPLOAD_STAGES.UPLOADING ||
-                        uploadStage === UPLOAD_STAGES.FINISH) && (
+                    {(uploadPhase == "extractingMetadata" ||
+                        uploadPhase === "uploading") && <InProgressSection />}
+                    {(uploadPhase == "uploading" || uploadPhase == "done") && (
                         <>
                             <ResultSection
                                 uploadResult={UPLOAD_RESULT.UPLOADED}
@@ -69,12 +63,11 @@ export function UploadProgressDialog() {
                                     "THUMBNAIL_GENERATION_FAILED_INFO",
                                 )}
                             />
-                            {uploadStage === UPLOAD_STAGES.FINISH &&
-                                hasUnUploadedFiles && (
-                                    <NotUploadSectionHeader>
-                                        {t("FILE_NOT_UPLOADED_LIST")}
-                                    </NotUploadSectionHeader>
-                                )}
+                            {uploadPhase == "done" && hasUnUploadedFiles && (
+                                <NotUploadSectionHeader>
+                                    {t("FILE_NOT_UPLOADED_LIST")}
+                                </NotUploadSectionHeader>
+                            )}
                             <ResultSection
                                 uploadResult={UPLOAD_RESULT.BLOCKED}
                                 sectionTitle={t("BLOCKED_UPLOADS")}
@@ -86,7 +79,7 @@ export function UploadProgressDialog() {
                                 uploadResult={UPLOAD_RESULT.FAILED}
                                 sectionTitle={t("FAILED_UPLOADS")}
                                 sectionInfo={
-                                    uploadStage === UPLOAD_STAGES.FINISH
+                                    uploadPhase == "done"
                                         ? undefined
                                         : t("failed_uploads_hint")
                                 }
@@ -121,7 +114,7 @@ export function UploadProgressDialog() {
                     )}
                 </DialogContent>
             )}
-            {uploadStage === UPLOAD_STAGES.FINISH && <UploadProgressFooter />}
+            {uploadPhase == "done" && <UploadProgressFooter />}
         </Dialog>
     );
 }
