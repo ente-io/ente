@@ -151,6 +151,8 @@ const localeName = (locale: SupportedLocale) => {
             return "Nederlands";
         case "es-ES":
             return "Español";
+        case "pt-PT":
+            return "Português";
         case "pt-BR":
             return "Português Brasileiro";
         case "ru-RU":

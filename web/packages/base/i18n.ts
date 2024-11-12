@@ -25,6 +25,7 @@ export const supportedLocales = [
     "zh-CN" /* Simplified Chinese */,
     "nl-NL" /* Dutch */,
     "es-ES" /* Spanish */,
+    "pt-PT" /* Portuguese */,
     "pt-BR" /* Portuguese, Brazilian */,
     "ru-RU" /* Russian */,
     "pl-PL" /* Polish */,
@@ -176,6 +177,8 @@ const closestSupportedLocale = (
             // We'll never get here (it'd already be an exact match), just kept
             // to keep this list consistent.
             return "pt-BR";
+        } else if (ls.startsWith("pt")) {
+            return "pt-PT";
         } else if (ls.startsWith("ru")) {
             return "ru-RU";
         } else if (ls.startsWith("pl")) {
