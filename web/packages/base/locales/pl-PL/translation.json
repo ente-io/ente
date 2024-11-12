@@ -59,7 +59,6 @@
     "UPLOAD_STAGE_MESSAGE": {
         "0": "Przygotowywanie do przesłania",
         "1": "Czytanie plików metadanych google",
-        "2": "{{uploadCounter.finished, number}} / {{uploadCounter.total, number}} plików metadanych wypakowanych",
         "3": "{{uploadCounter.finished, number}} / {{uploadCounter.total, number}} plików przetworzonych",
         "4": "Anulowanie pozostałych przesłań",
         "5": "Kopia zapasowa zakończona"
@@ -307,7 +306,6 @@
     "SKIPPED_INFO": "Pominięto te pliki, ponieważ są pliki z pasującymi nazwami i zawartością w tym samym albumie",
     "UNSUPPORTED_INFO": "Ente nie obsługuje jeszcze tych formatów plików",
     "BLOCKED_UPLOADS": "Zablokowane przesłania",
-    "INPROGRESS_METADATA_EXTRACTION": "W toku",
     "INPROGRESS_UPLOADS": "Przesyłanie w toku",
     "TOO_LARGE_UPLOADS": "Duże pliki",
     "LARGER_THAN_AVAILABLE_STORAGE_UPLOADS": "Niewystarczająca ilość miejsca",

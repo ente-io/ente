@@ -59,7 +59,6 @@
     "UPLOAD_STAGE_MESSAGE": {
         "0": "Preparando para enviar",
         "1": "Lendo arquivos de metadados do google",
-        "2": "{{uploadCounter.finished, number}} / {{uploadCounter.total, number}} metadados dos arquivos extraídos",
         "3": "{{uploadCounter.finished, number}} / {{uploadCounter.total, number}} arquivos processados",
         "4": "Cancelando envios restantes",
         "5": "Backup concluído"
@@ -307,7 +306,6 @@
     "SKIPPED_INFO": "Estes foram pulados, pois há arquivos com nome e conteúdo correspondentes no mesmo álbum",
     "UNSUPPORTED_INFO": "ente ainda não suporta estes formatos de arquivo",
     "BLOCKED_UPLOADS": "Envios bloqueados",
-    "INPROGRESS_METADATA_EXTRACTION": "Em andamento",
     "INPROGRESS_UPLOADS": "Envios em andamento",
     "TOO_LARGE_UPLOADS": "Arquivos grandes",
     "LARGER_THAN_AVAILABLE_STORAGE_UPLOADS": "Armazenamento insuficiente",
