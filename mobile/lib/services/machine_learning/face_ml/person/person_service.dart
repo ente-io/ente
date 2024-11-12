@@ -319,19 +319,20 @@ class PersonService {
           logger.info(
             "Person ${e.id} ${personData.name} has ${remotelyRejectedFaceIDs.length} rejected faces",
           );
-          // Assign rejected faces to new clusters
-          for (final faceId in remotelyRejectedFaceIDs) {
-            faceIdToClusterID[faceId] = newClusterID();
-          }
+
           // Check that we don't have any empty clusters now
           final dbPersonClusterInfo =
               await faceMLDataDB.getClusterIdToFaceIdsForPerson(e.id);
           for (final clusterIdToFaceIDs in dbPersonClusterInfo.entries) {
             final clusterID = clusterIdToFaceIDs.key;
             final faceIDs = clusterIdToFaceIDs.value;
-            faceIDs.removeWhere(
-              (faceID) => remotelyRejectedFaceIDs.contains(faceID),
-            );
+            final foundRejectedFaces = <String>[];
+            for (final faceID in faceIDs) {
+              if (remotelyRejectedFaceIDs.contains(faceID)) {
+                faceIDs.remove(faceID);
+                foundRejectedFaces.add(faceID);
+              }
+            }
             if (faceIDs.isEmpty) {
               logger.info(
                 "Cluster $clusterID for person ${e.id} ${personData.name} is empty due to rejected faces from remote, removing the cluster from person",
@@ -340,7 +341,16 @@ class PersonService {
                 personID: e.id,
                 clusterID: clusterID,
               );
+              await faceMLDataDB.captureNotPersonFeedback(
+                personID: e.id,
+                clusterID: clusterID,
+              );
+              remotelyRejectedFaceIDs.removeAll(foundRejectedFaces);
             }
+          }
+          // Assign rejected faces to new clusters
+          for (final faceId in remotelyRejectedFaceIDs) {
+            faceIdToClusterID[faceId] = newClusterID();
           }
         }
       }
