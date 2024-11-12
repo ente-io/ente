@@ -3,9 +3,7 @@ import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { useIsTouchscreen } from "@/base/hooks";
 import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
-import DialogTitleWithCloseButton, {
-    dialogCloseHandler,
-} from "@ente/shared/components/TitleWithCloseButton";
+import { dialogCloseHandler } from "@ente/shared/components/TitleWithCloseButton";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import GoogleIcon from "@mui/icons-material/Google";
 import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
@@ -128,15 +126,13 @@ export const Options: React.FC<OptionsProps> = ({
     // Keep dialog content specific state here, in a separate component, so that
     // this state is not tied to the lifetime of the dialog.
     //
-    // If we don't do this, then the dialog retains whatever it was doing when
+    // If we don't do this, then a MUI dialog retains whatever it was doing when
     // it was last closed. Sometimes that is desirable, but sometimes not, and
     // in the latter cases moving the instance specific state to a child works.
 
     const [showTakeoutOptions, setShowTakeoutOptions] = useState(false);
 
-    const handleTakeoutClose = () => {
-        setShowTakeoutOptions(false);
-    };
+    const handleTakeoutClose = () => setShowTakeoutOptions(false);
 
     const handleSelect = (option: OptionType) => {
         switch (option) {
@@ -168,15 +164,18 @@ const DefaultOptions: React.FC<OptionsProps> = ({
 }) => {
     return (
         <>
-            <DialogTitleWithCloseButton onClose={onClose}>
-                {intent == "collect"
-                    ? t("select_photos")
-                    : intent == "import"
-                      ? t("import")
-                      : t("upload")}
-            </DialogTitleWithCloseButton>
+            <SpaceBetweenFlex>
+                <DialogTitle variant="h5">
+                    {intent == "collect"
+                        ? t("select_photos")
+                        : intent == "import"
+                          ? t("import")
+                          : t("upload")}
+                </DialogTitle>
+                <DialogCloseIconButton {...{ onClose }} />
+            </SpaceBetweenFlex>
 
-            <Box p={1.5} pt={0.5}>
+            <Box sx={{ p: "12px", pt: "16px" }}>
                 <Stack spacing={0.5}>
                     {intent != "import" && (
                         <EnteMenuItem
@@ -202,10 +201,8 @@ const DefaultOptions: React.FC<OptionsProps> = ({
                     )}
                 </Stack>
                 <Typography
-                    p={1.5}
-                    pt={4}
                     color="text.muted"
-                    sx={{ textAlign: "center" }}
+                    sx={{ p: "12px", pt: "24px", textAlign: "center" }}
                 >
                     {t("drag_and_drop_hint")}
                 </Typography>
@@ -220,13 +217,13 @@ const TakeoutOptions: React.FC<Omit<OptionsProps, "intent">> = ({
 }) => {
     return (
         <>
-            <SpaceBetweenFlex sx={{ padding: "8px 8px 0px 0" }}>
+            <SpaceBetweenFlex>
                 <DialogTitle variant="h5">{t("google_takeout")}</DialogTitle>
                 <DialogCloseIconButton {...{ onClose }} />
             </SpaceBetweenFlex>
 
-            <Stack sx={{ padding: "12px", gap: "20px" }}>
-                <Stack gap={1}>
+            <Stack sx={{ padding: "18px 12px 20px 12px", gap: "16px" }}>
+                <Stack sx={{ gap: "8px" }}>
                     <FocusVisibleButton
                         color="accent"
                         fullWidth
@@ -252,7 +249,7 @@ const TakeoutOptions: React.FC<Omit<OptionsProps, "intent">> = ({
                     </Link>
                 </Stack>
 
-                <Typography variant="small" color="text.muted" pb={1}>
+                <Typography variant="small" color="text.muted">
                     {t("takeout_hint")}
                 </Typography>
             </Stack>
