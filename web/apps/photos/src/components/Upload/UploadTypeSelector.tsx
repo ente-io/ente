@@ -6,10 +6,10 @@ import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import DialogTitleWithCloseButton, {
     dialogCloseHandler,
 } from "@ente/shared/components/TitleWithCloseButton";
-import ChevronRight from "@mui/icons-material/ChevronRight";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import GoogleIcon from "@mui/icons-material/Google";
-import { default as FileUploadIcon } from "@mui/icons-material/ImageOutlined";
-import { default as FolderUploadIcon } from "@mui/icons-material/PermMediaOutlined";
+import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
+import PermMediaOutlinedIcon from "@mui/icons-material/PermMediaOutlined";
 import {
     Box,
     Dialog,
@@ -181,22 +181,22 @@ const DefaultOptions: React.FC<OptionsProps> = ({
                     {intent != "import" && (
                         <EnteMenuItem
                             onClick={() => onSelect("files")}
-                            startIcon={<FileUploadIcon />}
-                            endIcon={<ChevronRight />}
+                            startIcon={<ImageOutlinedIcon />}
+                            endIcon={<ChevronRightIcon />}
                             label={t("file")}
                         />
                     )}
                     <EnteMenuItem
                         onClick={() => onSelect("folders")}
-                        startIcon={<FolderUploadIcon />}
-                        endIcon={<ChevronRight />}
+                        startIcon={<PermMediaOutlinedIcon />}
+                        endIcon={<ChevronRightIcon />}
                         label={t("folder")}
                     />
                     {intent !== "collect" && (
                         <EnteMenuItem
                             onClick={() => onSelect("zips")}
                             startIcon={<GoogleIcon />}
-                            endIcon={<ChevronRight />}
+                            endIcon={<ChevronRightIcon />}
                             label={t("google_takeout")}
                         />
                     )}
