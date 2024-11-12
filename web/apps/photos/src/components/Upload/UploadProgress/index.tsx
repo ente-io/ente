@@ -1,4 +1,4 @@
-import { UPLOAD_STAGES } from "@/new/photos/services/upload/types";
+import { type UploadPhase } from "@/new/photos/services/upload/types";
 import { useAppContext } from "@/new/photos/types/context";
 import { t } from "i18next";
 import { useEffect, useState } from "react";
@@ -16,7 +16,7 @@ interface Props {
     open: boolean;
     onClose: () => void;
     uploadCounter: UploadCounter;
-    uploadStage: UPLOAD_STAGES;
+    uploadPhase: UploadPhase;
     percentComplete: number;
     retryFailed: () => void;
     inProgressUploads: InProgressUpload[];
@@ -29,7 +29,7 @@ interface Props {
 export default function UploadProgress({
     open,
     uploadCounter,
-    uploadStage,
+    uploadPhase,
     percentComplete,
     retryFailed,
     uploadFileNames,
@@ -62,7 +62,7 @@ export default function UploadProgress({
     }
 
     function onClose() {
-        if (uploadStage !== UPLOAD_STAGES.FINISH) {
+        if (uploadPhase != "done") {
             confirmCancelUpload();
         } else {
             props.onClose();
@@ -79,7 +79,7 @@ export default function UploadProgress({
                 open,
                 onClose,
                 uploadCounter,
-                uploadStage,
+                uploadPhase,
                 percentComplete,
                 retryFailed,
                 inProgressUploads,

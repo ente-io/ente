@@ -1,7 +1,9 @@
 import { EnteSwitch } from "@/base/components/EnteSwitch";
+import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import { ensureElectron } from "@/base/electron";
 import log from "@/base/log";
 import { EnteFile } from "@/media/file";
+import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";
 import { useAppContext } from "@/new/photos/types/context";
 import ChangeDirectoryOption from "@ente/shared/components/ChangeDirectoryOption";
 import {
@@ -9,13 +11,13 @@ import {
     VerticallyCenteredFlex,
 } from "@ente/shared/components/Container";
 import LinkButton from "@ente/shared/components/LinkButton";
-import DialogTitleWithCloseButton from "@ente/shared/components/TitleWithCloseButton";
 import { CustomError } from "@ente/shared/error";
 import {
     Box,
     Button,
     Dialog,
     DialogContent,
+    DialogTitle,
     Divider,
     Tooltip,
     Typography,
@@ -35,13 +37,15 @@ import ExportFinished from "./ExportFinished";
 import ExportInProgress from "./ExportInProgress";
 import ExportInit from "./ExportInit";
 
-interface ExportModalProps {
-    show: boolean;
-    onHide: () => void;
+type ExportProps = ModalVisibilityProps & {
     collectionNameMap: Map<number, string>;
-}
+};
 
-export default function ExportModal(props: ExportModalProps) {
+export const Export: React.FC<ExportProps> = ({
+    open,
+    onClose,
+    collectionNameMap,
+}) => {
     const { showMiniDialog } = useAppContext();
     const [exportStage, setExportStage] = useState(ExportStage.INIT);
     const [exportFolder, setExportFolder] = useState("");
@@ -79,11 +83,11 @@ export default function ExportModal(props: ExportModalProps) {
     }, []);
 
     useEffect(() => {
-        if (!props.show) {
+        if (!open) {
             return;
         }
         void syncExportRecord(exportFolder);
-    }, [props.show]);
+    }, [open]);
 
     // ======================
     // HELPER FUNCTIONS
@@ -166,15 +170,14 @@ export default function ExportModal(props: ExportModalProps) {
     };
 
     return (
-        <Dialog
-            open={props.show}
-            onClose={props.onHide}
-            maxWidth="xs"
-            fullWidth
-        >
-            <DialogTitleWithCloseButton onClose={props.onHide}>
-                {t("export_data")}
-            </DialogTitleWithCloseButton>
+        <Dialog {...{ open, onClose }} maxWidth="xs" fullWidth>
+            <SpaceBetweenFlex sx={{ p: "12px 4px 0px 0px" }}>
+                <DialogTitle variant="h3" fontWeight={"bold"}>
+                    {t("export_data")}
+                </DialogTitle>
+                <DialogCloseIconButton {...{ onClose }} />
+            </SpaceBetweenFlex>
+
             <DialogContent>
                 <ExportDirectory
                     exportFolder={exportFolder}
@@ -191,15 +194,15 @@ export default function ExportModal(props: ExportModalProps) {
                 exportStage={exportStage}
                 startExport={startExport}
                 stopExport={stopExport}
-                onHide={props.onHide}
+                onHide={onClose}
                 lastExportTime={lastExportTime}
                 exportProgress={exportProgress}
                 pendingExports={pendingExports}
-                collectionNameMap={props.collectionNameMap}
+                collectionNameMap={collectionNameMap}
             />
         </Dialog>
     );
-}
+};
 
 function ExportDirectory({ exportFolder, changeExportDirectory, exportStage }) {
     return (

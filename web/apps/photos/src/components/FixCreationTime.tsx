@@ -84,10 +84,11 @@ export const FixCreationTime: React.FC<FixCreationTimeProps> = ({
                 onClose();
             }}
         >
-            <DialogTitle>{title}</DialogTitle>
+            <DialogTitle sx={{ marginBlockStart: "4px" }}>{title}</DialogTitle>
             <DialogContent
                 style={{
                     minWidth: "310px",
+                    paddingBlockStart: "6px",
                     display: "flex",
                     flexDirection: "column",
                     ...(step == "running" ? { alignItems: "center" } : {}),
@@ -235,7 +236,7 @@ const Footer: React.FC<FooterProps> = ({ step, onSubmit, onClose }) =>
             style={{
                 width: "100%",
                 display: "flex",
-                marginTop: "30px",
+                marginTop: "24px",
                 justifyContent: "space-around",
             }}
         >

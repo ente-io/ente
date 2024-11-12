@@ -1,19 +1,21 @@
 import { type MiniDialogAttributes } from "@/base/components/MiniDialog";
+import { SpaceBetweenFlex } from "@/base/components/mui/Container";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { errorDialogAttributes } from "@/base/components/utils/dialog";
 import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import { useIsSmallWidth } from "@/base/hooks";
 import log from "@/base/log";
 import { downloadString } from "@/base/utils/web";
+import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";
 import { ensure } from "@/utils/ensure";
 import CodeBlock from "@ente/shared/components/CodeBlock";
-import DialogTitleWithCloseButton from "@ente/shared/components/TitleWithCloseButton";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import {
     Box,
     Dialog,
     DialogActions,
     DialogContent,
+    DialogTitle,
     Typography,
     styled,
 } from "@mui/material";
@@ -74,9 +76,13 @@ export const RecoveryKey: React.FC<RecoveryKeyProps> = ({
             maxWidth="xs"
             fullWidth
         >
-            <DialogTitleWithCloseButton onClose={onClose}>
-                {t("recovery_key")}
-            </DialogTitleWithCloseButton>
+            <SpaceBetweenFlex sx={{ p: "8px 4px 8px 0" }}>
+                <DialogTitle variant="h3" fontWeight={"bold"}>
+                    {t("recovery_key")}
+                </DialogTitle>
+                <DialogCloseIconButton {...{ onClose }} />
+            </SpaceBetweenFlex>
+
             <DialogContent>
                 <Typography mb={3}>{t("recovery_key_description")}</Typography>
                 <DashedBorderWrapper>
