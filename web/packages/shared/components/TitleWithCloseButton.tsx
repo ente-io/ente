@@ -1,11 +1,6 @@
 import { SpaceBetweenFlex } from "@ente/shared/components/Container";
 import CloseIcon from "@mui/icons-material/Close";
-import {
-    DialogTitle,
-    IconButton,
-    Typography,
-    type DialogProps,
-} from "@mui/material";
+import { DialogTitle, IconButton, Typography } from "@mui/material";
 import React from "react";
 
 interface DialogTitleWithCloseButtonProps {
@@ -36,23 +31,3 @@ const DialogTitleWithCloseButton: React.FC<
     );
 };
 export default DialogTitleWithCloseButton;
-
-export const dialogCloseHandler =
-    ({
-        staticBackdrop,
-        nonClosable,
-        onClose,
-    }: {
-        staticBackdrop?: boolean;
-        nonClosable?: boolean;
-        onClose: () => void;
-    }): DialogProps["onClose"] =>
-    (_, reason) => {
-        if (nonClosable) {
-            // no-op
-        } else if (staticBackdrop && reason === "backdropClick") {
-            // no-op
-        } else {
-            onClose();
-        }
-    };

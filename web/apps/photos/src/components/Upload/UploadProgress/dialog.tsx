@@ -2,8 +2,7 @@ import {
     UPLOAD_RESULT,
     UPLOAD_STAGES,
 } from "@/new/photos/services/upload/types";
-import { dialogCloseHandler } from "@ente/shared/components/TitleWithCloseButton";
-import { Dialog, DialogContent } from "@mui/material";
+import { Dialog, DialogContent, type DialogProps } from "@mui/material";
 import { t } from "i18next";
 import { useContext, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
@@ -37,7 +36,9 @@ export function UploadProgressDialog() {
         }
     }, [finishedUploads]);
 
-    const handleClose = dialogCloseHandler({ staticBackdrop: true, onClose });
+    const handleClose: DialogProps["onClose"] = (_, reason) => {
+        if (reason != "backdropClick") onClose();
+    };
 
     return (
         <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
