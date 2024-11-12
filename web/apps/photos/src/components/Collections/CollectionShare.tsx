@@ -1897,7 +1897,7 @@ function PublicLinkSetPassword({
             fullWidth
         >
             <Stack spacing={3} p={1.5}>
-                <Typography variant="h3" px={1} py={0.5} fontWeight={"bold"}>
+                <Typography variant="h3" fontWeight={"bold"} px={1} py={0.5}>
                     {t("password_lock")}
                 </Typography>
                 <SingleInputForm
