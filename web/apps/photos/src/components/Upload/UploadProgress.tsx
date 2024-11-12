@@ -1,5 +1,6 @@
 import { type UploadPhase } from "@/new/photos/services/upload/types";
 import { useAppContext } from "@/new/photos/types/context";
+import { Paper, Snackbar } from "@mui/material";
 import { t } from "i18next";
 import { useEffect, useState } from "react";
 import type {
@@ -8,9 +9,9 @@ import type {
     UploadCounter,
     UploadFileNames,
 } from "services/upload/uploadManager";
-import UploadProgressContext from "./context";
-import { UploadProgressDialog } from "./dialog";
-import { MinimizedUploadProgress } from "./minimized";
+import UploadProgressContext from "./UploadProgress/context";
+import { UploadProgressDialog } from "./UploadProgress/dialog";
+import { UploadProgressHeader } from "./UploadProgress/header";
 
 interface Props {
     open: boolean;
@@ -94,3 +95,21 @@ export default function UploadProgress({
         </UploadProgressContext.Provider>
     );
 }
+
+const MinimizedUploadProgress: React.FC = () => (
+    <Snackbar
+        open
+        anchorOrigin={{
+            horizontal: "right",
+            vertical: "bottom",
+        }}
+    >
+        <Paper
+            sx={{
+                width: "360px",
+            }}
+        >
+            <UploadProgressHeader />
+        </Paper>
+    </Snackbar>
+);
