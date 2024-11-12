@@ -2,6 +2,7 @@ import { EnteSwitch } from "@/base/components/EnteSwitch";
 import { ensureElectron } from "@/base/electron";
 import log from "@/base/log";
 import { EnteFile } from "@/media/file";
+import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";
 import { useAppContext } from "@/new/photos/types/context";
 import ChangeDirectoryOption from "@ente/shared/components/ChangeDirectoryOption";
 import {
@@ -9,13 +10,13 @@ import {
     VerticallyCenteredFlex,
 } from "@ente/shared/components/Container";
 import LinkButton from "@ente/shared/components/LinkButton";
-import DialogTitleWithCloseButton from "@ente/shared/components/TitleWithCloseButton";
 import { CustomError } from "@ente/shared/error";
 import {
     Box,
     Button,
     Dialog,
     DialogContent,
+    DialogTitle,
     Divider,
     Tooltip,
     Typography,
@@ -41,7 +42,11 @@ interface ExportModalProps {
     collectionNameMap: Map<number, string>;
 }
 
-export default function ExportModal(props: ExportModalProps) {
+export default function ExportModal({
+    show,
+    onHide,
+    collectionNameMap,
+}: ExportModalProps) {
     const { showMiniDialog } = useAppContext();
     const [exportStage, setExportStage] = useState(ExportStage.INIT);
     const [exportFolder, setExportFolder] = useState("");
@@ -79,11 +84,11 @@ export default function ExportModal(props: ExportModalProps) {
     }, []);
 
     useEffect(() => {
-        if (!props.show) {
+        if (!show) {
             return;
         }
         void syncExportRecord(exportFolder);
-    }, [props.show]);
+    }, [show]);
 
     // ======================
     // HELPER FUNCTIONS
@@ -166,15 +171,14 @@ export default function ExportModal(props: ExportModalProps) {
     };
 
     return (
-        <Dialog
-            open={props.show}
-            onClose={props.onHide}
-            maxWidth="xs"
-            fullWidth
-        >
-            <DialogTitleWithCloseButton onClose={props.onHide}>
-                {t("export_data")}
-            </DialogTitleWithCloseButton>
+        <Dialog open={show} onClose={onHide} maxWidth="xs" fullWidth>
+            <SpaceBetweenFlex sx={{ p: "12px 4px 0px 0px" }}>
+                <DialogTitle variant="h3" fontWeight={"bold"}>
+                    {t("export_data")}
+                </DialogTitle>
+                <DialogCloseIconButton {...{ onClose: onHide }} />
+            </SpaceBetweenFlex>
+
             <DialogContent>
                 <ExportDirectory
                     exportFolder={exportFolder}
@@ -191,11 +195,11 @@ export default function ExportModal(props: ExportModalProps) {
                 exportStage={exportStage}
                 startExport={startExport}
                 stopExport={stopExport}
-                onHide={props.onHide}
+                onHide={onHide}
                 lastExportTime={lastExportTime}
                 exportProgress={exportProgress}
                 pendingExports={pendingExports}
-                collectionNameMap={props.collectionNameMap}
+                collectionNameMap={collectionNameMap}
             />
         </Dialog>
     );
