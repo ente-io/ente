@@ -90,7 +90,7 @@ import CollectionNamer, {
     CollectionNamerAttributes,
 } from "components/Collections/CollectionNamer";
 import { GalleryBarAndListHeader } from "components/Collections/GalleryBarAndListHeader";
-import ExportModal from "components/ExportModal";
+import { Export } from "components/Export";
 import {
     FilesDownloadProgress,
     FilesDownloadProgressAttributes,
@@ -249,8 +249,6 @@ export default function Gallery() {
     const closeSidebar = () => setSidebarView(false);
     const openSidebar = () => setSidebarView(true);
 
-    const [exportModalView, setExportModalView] = useState(false);
-
     const [authenticateUserModalView, setAuthenticateUserModalView] =
         useState(false);
 
@@ -296,6 +294,8 @@ export default function Gallery() {
     const { show: showWhatsNew, props: whatsNewVisibilityProps } =
         useModalVisibility();
     const { show: showFixCreationTime, props: fixCreationTimeVisibilityProps } =
+        useModalVisibility();
+    const { show: showExport, props: exportVisibilityProps } =
         useModalVisibility();
 
     // TODO: Temp
@@ -496,7 +496,7 @@ export default function Gallery() {
             collectionNamerView ||
             planSelectorVisibilityProps.open ||
             fixCreationTimeVisibilityProps.open ||
-            exportModalView ||
+            exportVisibilityProps.open ||
             authenticateUserModalView ||
             isPhotoSwipeOpen ||
             !filteredFiles?.length ||
@@ -810,14 +810,6 @@ export default function Gallery() {
         setUploadTypeSelectorIntent(intent ?? "upload");
     };
 
-    const openExportModal = () => {
-        setExportModalView(true);
-    };
-
-    const closeExportModal = () => {
-        setExportModalView(false);
-    };
-
     const handleSetActiveCollectionID = (
         collectionSummaryID: number | undefined,
     ) =>
@@ -876,7 +868,7 @@ export default function Gallery() {
                 syncWithRemote,
                 setBlockingLoad,
                 photoListHeader,
-                openExportModal,
+                openExportModal: showExport,
                 authenticateUser,
                 userIDToEmailMap,
                 user,
@@ -1115,9 +1107,8 @@ export default function Gallery() {
                             isInHiddenSection={barMode == "hidden-albums"}
                         />
                     )}
-                <ExportModal
-                    show={exportModalView}
-                    onHide={closeExportModal}
+                <Export
+                    {...exportVisibilityProps}
                     collectionNameMap={state.allCollectionNameByID}
                 />
                 <AuthenticateUserModal

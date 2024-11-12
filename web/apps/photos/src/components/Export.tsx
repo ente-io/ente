@@ -1,4 +1,5 @@
 import { EnteSwitch } from "@/base/components/EnteSwitch";
+import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import { ensureElectron } from "@/base/electron";
 import log from "@/base/log";
 import { EnteFile } from "@/media/file";
@@ -36,17 +37,15 @@ import ExportFinished from "./ExportFinished";
 import ExportInProgress from "./ExportInProgress";
 import ExportInit from "./ExportInit";
 
-interface ExportModalProps {
-    show: boolean;
-    onHide: () => void;
+type ExportProps = ModalVisibilityProps & {
     collectionNameMap: Map<number, string>;
-}
+};
 
-export default function ExportModal({
-    show,
-    onHide,
+export const Export: React.FC<ExportProps> = ({
+    open,
+    onClose,
     collectionNameMap,
-}: ExportModalProps) {
+}) => {
     const { showMiniDialog } = useAppContext();
     const [exportStage, setExportStage] = useState(ExportStage.INIT);
     const [exportFolder, setExportFolder] = useState("");
@@ -84,11 +83,11 @@ export default function ExportModal({
     }, []);
 
     useEffect(() => {
-        if (!show) {
+        if (!open) {
             return;
         }
         void syncExportRecord(exportFolder);
-    }, [show]);
+    }, [open]);
 
     // ======================
     // HELPER FUNCTIONS
@@ -171,12 +170,12 @@ export default function ExportModal({
     };
 
     return (
-        <Dialog open={show} onClose={onHide} maxWidth="xs" fullWidth>
+        <Dialog {...{ open, onClose }} maxWidth="xs" fullWidth>
             <SpaceBetweenFlex sx={{ p: "12px 4px 0px 0px" }}>
                 <DialogTitle variant="h3" fontWeight={"bold"}>
                     {t("export_data")}
                 </DialogTitle>
-                <DialogCloseIconButton {...{ onClose: onHide }} />
+                <DialogCloseIconButton {...{ onClose }} />
             </SpaceBetweenFlex>
 
             <DialogContent>
@@ -195,7 +194,7 @@ export default function ExportModal({
                 exportStage={exportStage}
                 startExport={startExport}
                 stopExport={stopExport}
-                onHide={onHide}
+                onHide={onClose}
                 lastExportTime={lastExportTime}
                 exportProgress={exportProgress}
                 pendingExports={pendingExports}
@@ -203,7 +202,7 @@ export default function ExportModal({
             />
         </Dialog>
     );
-}
+};
 
 function ExportDirectory({ exportFolder, changeExportDirectory, exportStage }) {
     return (
