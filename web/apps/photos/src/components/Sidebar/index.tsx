@@ -137,11 +137,11 @@ interface HeaderSectionProps {
 const HeaderSection: React.FC<HeaderSectionProps> = ({ closeSidebar }) => {
     return (
         <SpaceBetweenFlex
-            sx={{ marginBlock: "4px 8px", paddingInlineStart: "12px" }}
+            sx={{ marginBlock: "4px 4px", paddingInlineStart: "12px" }}
         >
             <EnteLogo />
             <IconButton
-                aria-label="close"
+                aria-label={t("close")}
                 onClick={closeSidebar}
                 color="secondary"
             >
