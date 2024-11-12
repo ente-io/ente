@@ -59,7 +59,6 @@
     "UPLOAD_STAGE_MESSAGE": {
         "0": "Préparation du chargement",
         "1": "Lecture des fichiers de métadonnées de Google",
-        "2": "Métadonnées des fichiers {{uploadCounter.finished}} / {{uploadCounter.total}} extraites",
         "3": "{{uploadCounter.finished}} / {{uploadCounter.total}} fichiers sauvegardés",
         "4": "Annulation des chargements restants",
         "5": "Sauvegarde terminée"
@@ -307,7 +306,6 @@
     "SKIPPED_INFO": "Ignorés car il y a des fichiers avec un nom et contenu identiques dans le même album",
     "UNSUPPORTED_INFO": "Ente ne supporte pas encore ces formats de fichiers",
     "BLOCKED_UPLOADS": "Chargements bloqués",
-    "INPROGRESS_METADATA_EXTRACTION": "En cours",
     "INPROGRESS_UPLOADS": "Chargements en cours",
     "TOO_LARGE_UPLOADS": "Gros fichiers",
     "LARGER_THAN_AVAILABLE_STORAGE_UPLOADS": "Stockage insuffisant",

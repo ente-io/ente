@@ -59,7 +59,6 @@
     "UPLOAD_STAGE_MESSAGE": {
         "0": "正在准备上传",
         "1": "正在读取 Google 元数据文件",
-        "2": "{{uploadCounter.finished, number}} / {{uploadCounter.total, number}} 个文件的元数据已提取",
         "3": "已处理 {{uploadCounter.finished, number}} / {{uploadCounter.total, number}} 个文件",
         "4": "正在取消剩余的上传内容",
         "5": "备份完成"
@@ -307,7 +306,6 @@
     "SKIPPED_INFO": "跳过这些文件，因为同一相册中有名称和内容相匹配的文件",
     "UNSUPPORTED_INFO": "Ente 尚不支持这些文件格式",
     "BLOCKED_UPLOADS": "已阻止上传",
-    "INPROGRESS_METADATA_EXTRACTION": "进行中",
     "INPROGRESS_UPLOADS": "上传进行中",
     "TOO_LARGE_UPLOADS": "大文件",
     "LARGER_THAN_AVAILABLE_STORAGE_UPLOADS": "存储空间不足",

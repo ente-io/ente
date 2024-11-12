@@ -59,7 +59,6 @@
     "UPLOAD_STAGE_MESSAGE": {
         "0": "Ruošima įkelti",
         "1": "Skaitomi „Google“ metaduomenų failai",
-        "2": "{{uploadCounter.finished, number}} / {{{uploadCounter.total, number}} išskleisti failų metaduomenys",
         "3": "{{uploadCounter.finished, number}} / {{{uploadCounter.total, number}} apdoroti failai",
         "4": "Atšaukiami likę įkėlimai",
         "5": "Atsarginės kopijos kūrimas baigtas"
@@ -307,7 +306,6 @@
     "SKIPPED_INFO": "Praleisti šie failai, nes tame pačiame albume yra failų, kurių pavadinimas ir turinys sutampa",
     "UNSUPPORTED_INFO": "„Ente“ dar nepalaiko šių failų formatų.",
     "BLOCKED_UPLOADS": "Užblokuoti įkėlimai",
-    "INPROGRESS_METADATA_EXTRACTION": "Vykdoma",
     "INPROGRESS_UPLOADS": "Vykdomi įkėlimai",
     "TOO_LARGE_UPLOADS": "Dideli failai",
     "LARGER_THAN_AVAILABLE_STORAGE_UPLOADS": "Nepakankama saugykla",
