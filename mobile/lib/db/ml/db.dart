@@ -17,14 +17,17 @@ import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/utils/ml_util.dart";
 import 'package:sqlite_async/sqlite_async.dart';
 
-/// Stores all data for the FacesML-related features. The database can be accessed by `MLDataDB.instance.database`.
+/// Stores all data for the ML related features. The database can be accessed by `MLDataDB.instance.database`.
 ///
 /// This includes:
 /// [facesTable] - Stores all the detected faces and its embeddings in the images.
-/// [createFaceClustersTable] - Stores all the mappings from the faces (faceID) to the clusters (clusterID).
+/// [faceClustersTable] - Stores all the mappings from the faces (faceID) to the clusters (clusterID).
 /// [clusterPersonTable] - Stores all the clusters that are mapped to a certain person.
 /// [clusterSummaryTable] - Stores a summary of each cluster, containg the mean embedding and the number of faces in the cluster.
 /// [notPersonFeedback] - Stores the clusters that are confirmed not to belong to a certain person by the user
+///
+/// [clipTable] - Stores the embeddings of the CLIP model
+/// [fileDataTable] - Stores data about the files that are already processed by the ML models
 class MLDataDB {
   static final Logger _logger = Logger("MLDataDB");
 
@@ -566,6 +569,19 @@ class MLDataDB {
       INSERT INTO $faceClustersTable ($faceIDColumn, $clusterIDColumn)
       VALUES (?, ?)
       ON CONFLICT($faceIDColumn) DO UPDATE SET $clusterIDColumn = excluded.$clusterIDColumn
+    ''';
+    final parameterSets =
+        faceIDToClusterID.entries.map((e) => [e.key, e.value]).toList();
+    await db.executeBatch(sql, parameterSets);
+  }
+
+  Future<void> removeFaceIdToClusterId(
+    Map<String, String> faceIDToClusterID,
+  ) async {
+    final db = await instance.asyncDB;
+    const String sql = '''
+      DELETE FROM $faceClustersTable
+      WHERE $faceIDColumn = ? AND $clusterIDColumn = ?
     ''';
     final parameterSets =
         faceIDToClusterID.entries.map((e) => [e.key, e.value]).toList();
