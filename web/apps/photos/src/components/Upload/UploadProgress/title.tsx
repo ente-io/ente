@@ -42,8 +42,6 @@ const subtitleText = (
             return t("UPLOAD_STAGE_MESSAGE.0");
         case "readingMetadata":
             return t("UPLOAD_STAGE_MESSAGE.1");
-        case "extractingMetadata":
-            return t("UPLOAD_STAGE_MESSAGE.2", { uploadCounter });
         case "uploading":
             return t("UPLOAD_STAGE_MESSAGE.3", { uploadCounter });
         case "cancelling":

@@ -7,7 +7,6 @@ export function UploadProgressBar() {
     return (
         <Box>
             {(uploadPhase == "readingMetadata" ||
-                uploadPhase == "extractingMetadata" ||
                 uploadPhase == "uploading") && (
                 <>
                     <LinearProgress

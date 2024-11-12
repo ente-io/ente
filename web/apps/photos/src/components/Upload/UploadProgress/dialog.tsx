@@ -40,78 +40,63 @@ export function UploadProgressDialog() {
     return (
         <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
             <UploadProgressHeader />
-            {(uploadPhase == "extractingMetadata" ||
-                uploadPhase == "uploading" ||
-                uploadPhase == "done") && (
+            {(uploadPhase == "uploading" || uploadPhase == "done") && (
                 <DialogContent sx={{ "&&&": { px: 0 } }}>
-                    {(uploadPhase == "extractingMetadata" ||
-                        uploadPhase === "uploading") && <InProgressSection />}
-                    {(uploadPhase == "uploading" || uploadPhase == "done") && (
-                        <>
-                            <ResultSection
-                                uploadResult={UPLOAD_RESULT.UPLOADED}
-                                sectionTitle={t("SUCCESSFUL_UPLOADS")}
-                            />
-                            <ResultSection
-                                uploadResult={
-                                    UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL
-                                }
-                                sectionTitle={t(
-                                    "THUMBNAIL_GENERATION_FAILED_UPLOADS",
-                                )}
-                                sectionInfo={t(
-                                    "THUMBNAIL_GENERATION_FAILED_INFO",
-                                )}
-                            />
-                            {uploadPhase == "done" && hasUnUploadedFiles && (
-                                <NotUploadSectionHeader>
-                                    {t("FILE_NOT_UPLOADED_LIST")}
-                                </NotUploadSectionHeader>
-                            )}
-                            <ResultSection
-                                uploadResult={UPLOAD_RESULT.BLOCKED}
-                                sectionTitle={t("BLOCKED_UPLOADS")}
-                                sectionInfo={
-                                    <Trans i18nKey={"ETAGS_BLOCKED"} />
-                                }
-                            />
-                            <ResultSection
-                                uploadResult={UPLOAD_RESULT.FAILED}
-                                sectionTitle={t("FAILED_UPLOADS")}
-                                sectionInfo={
-                                    uploadPhase == "done"
-                                        ? undefined
-                                        : t("failed_uploads_hint")
-                                }
-                            />
-                            <ResultSection
-                                uploadResult={UPLOAD_RESULT.ALREADY_UPLOADED}
-                                sectionTitle={t("SKIPPED_FILES")}
-                                sectionInfo={t("SKIPPED_INFO")}
-                            />
-                            <ResultSection
-                                uploadResult={
-                                    UPLOAD_RESULT.LARGER_THAN_AVAILABLE_STORAGE
-                                }
-                                sectionTitle={t(
-                                    "LARGER_THAN_AVAILABLE_STORAGE_UPLOADS",
-                                )}
-                                sectionInfo={t(
-                                    "LARGER_THAN_AVAILABLE_STORAGE_INFO",
-                                )}
-                            />
-                            <ResultSection
-                                uploadResult={UPLOAD_RESULT.UNSUPPORTED}
-                                sectionTitle={t("UNSUPPORTED_FILES")}
-                                sectionInfo={t("UNSUPPORTED_INFO")}
-                            />
-                            <ResultSection
-                                uploadResult={UPLOAD_RESULT.TOO_LARGE}
-                                sectionTitle={t("TOO_LARGE_UPLOADS")}
-                                sectionInfo={t("TOO_LARGE_INFO")}
-                            />
-                        </>
+                    {uploadPhase === "uploading" && <InProgressSection />}
+                    <ResultSection
+                        uploadResult={UPLOAD_RESULT.UPLOADED}
+                        sectionTitle={t("SUCCESSFUL_UPLOADS")}
+                    />
+                    <ResultSection
+                        uploadResult={
+                            UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL
+                        }
+                        sectionTitle={t("THUMBNAIL_GENERATION_FAILED_UPLOADS")}
+                        sectionInfo={t("THUMBNAIL_GENERATION_FAILED_INFO")}
+                    />
+                    {uploadPhase == "done" && hasUnUploadedFiles && (
+                        <NotUploadSectionHeader>
+                            {t("FILE_NOT_UPLOADED_LIST")}
+                        </NotUploadSectionHeader>
                     )}
+                    <ResultSection
+                        uploadResult={UPLOAD_RESULT.BLOCKED}
+                        sectionTitle={t("BLOCKED_UPLOADS")}
+                        sectionInfo={<Trans i18nKey={"ETAGS_BLOCKED"} />}
+                    />
+                    <ResultSection
+                        uploadResult={UPLOAD_RESULT.FAILED}
+                        sectionTitle={t("FAILED_UPLOADS")}
+                        sectionInfo={
+                            uploadPhase == "done"
+                                ? undefined
+                                : t("failed_uploads_hint")
+                        }
+                    />
+                    <ResultSection
+                        uploadResult={UPLOAD_RESULT.ALREADY_UPLOADED}
+                        sectionTitle={t("SKIPPED_FILES")}
+                        sectionInfo={t("SKIPPED_INFO")}
+                    />
+                    <ResultSection
+                        uploadResult={
+                            UPLOAD_RESULT.LARGER_THAN_AVAILABLE_STORAGE
+                        }
+                        sectionTitle={t(
+                            "LARGER_THAN_AVAILABLE_STORAGE_UPLOADS",
+                        )}
+                        sectionInfo={t("LARGER_THAN_AVAILABLE_STORAGE_INFO")}
+                    />
+                    <ResultSection
+                        uploadResult={UPLOAD_RESULT.UNSUPPORTED}
+                        sectionTitle={t("UNSUPPORTED_FILES")}
+                        sectionInfo={t("UNSUPPORTED_INFO")}
+                    />
+                    <ResultSection
+                        uploadResult={UPLOAD_RESULT.TOO_LARGE}
+                        sectionTitle={t("TOO_LARGE_UPLOADS")}
+                        sectionInfo={t("TOO_LARGE_INFO")}
+                    />
                 </DialogContent>
             )}
             {uploadPhase == "done" && <UploadProgressFooter />}

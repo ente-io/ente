@@ -61,7 +61,6 @@ export const RANDOM_PERCENTAGE_PROGRESS_FOR_PUT = () => 90 + 10 * Math.random();
 export type UploadPhase =
     | "preparing"
     | "readingMetadata"
-    | "extractingMetadata"
     | "uploading"
     | "cancelling"
     | "done";

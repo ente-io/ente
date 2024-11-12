@@ -45,11 +45,7 @@ export const InProgressSection = () => {
         <UploadProgressSection>
             <UploadProgressSectionTitle expandIcon={<ExpandMoreIcon />}>
                 <CaptionedText
-                    mainText={
-                        uploadPhase == "extractingMetadata"
-                            ? t("INPROGRESS_METADATA_EXTRACTION")
-                            : t("INPROGRESS_UPLOADS")
-                    }
+                    mainText={t("INPROGRESS_UPLOADS")}
                     subText={String(inProgressUploads?.length ?? 0)}
                 />
             </UploadProgressSectionTitle>
