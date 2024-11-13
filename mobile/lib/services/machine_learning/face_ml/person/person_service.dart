@@ -285,7 +285,10 @@ class PersonService {
     bool shouldCheckRejectedFaces = false;
     for (var e in entities) {
       final personData = PersonData.fromJson(json.decode(e.data));
-      if (personData.rejectedFaceIDs != null) shouldCheckRejectedFaces = true;
+      if (personData.rejectedFaceIDs != null &&
+          personData.rejectedFaceIDs!.isNotEmpty) {
+        shouldCheckRejectedFaces = true;
+      }
       int faceCount = 0;
 
       // Locally store the assignment of faces to clusters and people
@@ -324,7 +327,8 @@ class PersonService {
           await faceMLDataDB.getPersonToClusterIdToFaceIds();
       for (var e in entities) {
         final personData = PersonData.fromJson(json.decode(e.data));
-        if (personData.rejectedFaceIDs != null) {
+        if (personData.rejectedFaceIDs != null &&
+            personData.rejectedFaceIDs!.isNotEmpty) {
           final personFaceIDs =
               dbPeopleClusterInfo[e.id]!.values.expand((e) => e).toSet();
           final rejectedFaceIDsSet = personData.rejectedFaceIDs!.toSet();
