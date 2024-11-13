@@ -261,8 +261,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "allClear": MessageLookupByLibrary.simpleMessage("✨ オールクリア"),
         "allMemoriesPreserved":
             MessageLookupByLibrary.simpleMessage("すべての思い出が保存されました"),
-        "allPersonGroupingWillReset": MessageLookupByLibrary.simpleMessage(
-            "All groupings for this person will be reset, and you will lose all suggestions made for this person"),
         "allowAddPhotosDescription": MessageLookupByLibrary.simpleMessage(
             "リンクを持つ人が共有アルバムに写真を追加できるようにします。"),
         "allowAddingPhotos": MessageLookupByLibrary.simpleMessage("写真の追加を許可"),
@@ -309,9 +307,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("本当にログアウトしてよろしいですか？"),
         "areYouSureYouWantToRenew":
             MessageLookupByLibrary.simpleMessage("更新してもよろしいですか？"),
-        "areYouSureYouWantToResetThisPerson":
-            MessageLookupByLibrary.simpleMessage(
-                "Are you sure you want to reset this person?"),
         "askCancelReason": MessageLookupByLibrary.simpleMessage(
             "サブスクリプションはキャンセルされました。理由を教えていただけますか？"),
         "askDeleteReason":
@@ -409,6 +404,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "メールボックスを確認してEメールの所有を証明してください(見つからない場合は、スパムの中も確認してください)"),
         "checkStatus": MessageLookupByLibrary.simpleMessage("ステータスの確認"),
         "checking": MessageLookupByLibrary.simpleMessage("確認中…"),
+        "checkingModels":
+            MessageLookupByLibrary.simpleMessage("Checking models..."),
         "claimFreeStorage":
             MessageLookupByLibrary.simpleMessage("無料のストレージを受け取る"),
         "claimMore": MessageLookupByLibrary.simpleMessage("もっと！"),
@@ -991,7 +988,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "onEnte": MessageLookupByLibrary.simpleMessage(
             "<branding>Ente</branding>で保管"),
         "onlyFamilyAdminCanChangeCode": m43,
-        "onlyThem": MessageLookupByLibrary.simpleMessage("Only them"),
         "oops": MessageLookupByLibrary.simpleMessage("Oops"),
         "oopsCouldNotSaveEdits":
             MessageLookupByLibrary.simpleMessage("編集を保存できませんでした"),
@@ -1171,7 +1167,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("アップロード時に無視されるファイルをリセット"),
         "resetPasswordTitle":
             MessageLookupByLibrary.simpleMessage("パスワードをリセット"),
-        "resetPerson": MessageLookupByLibrary.simpleMessage("Reset person"),
         "resetToDefault": MessageLookupByLibrary.simpleMessage("初期設定にリセット"),
         "restore": MessageLookupByLibrary.simpleMessage("復元"),
         "restoreToAlbum": MessageLookupByLibrary.simpleMessage("アルバムに戻す"),
@@ -1529,8 +1524,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "yesLogout": MessageLookupByLibrary.simpleMessage("はい、ログアウトします"),
         "yesRemove": MessageLookupByLibrary.simpleMessage("削除"),
         "yesRenew": MessageLookupByLibrary.simpleMessage("はい、更新する"),
-        "yesResetPerson":
-            MessageLookupByLibrary.simpleMessage("Yes, reset person"),
         "you": MessageLookupByLibrary.simpleMessage("あなた"),
         "youAreOnAFamilyPlan":
             MessageLookupByLibrary.simpleMessage("ファミリープランに入会しています！"),

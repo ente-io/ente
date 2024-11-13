@@ -9905,6 +9905,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Checking models...`
+  String get checkingModels {
+    return Intl.message(
+      'Checking models...',
+      name: 'checkingModels',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

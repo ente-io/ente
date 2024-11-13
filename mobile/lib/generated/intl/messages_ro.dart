@@ -249,8 +249,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Album actualizat"),
         "albums": MessageLookupByLibrary.simpleMessage("Albume"),
         "allClear": MessageLookupByLibrary.simpleMessage("✨ Totul e curat"),
-        "allPersonGroupingWillReset": MessageLookupByLibrary.simpleMessage(
-            "All groupings for this person will be reset, and you will lose all suggestions made for this person"),
         "allowAddPhotosDescription": MessageLookupByLibrary.simpleMessage(
             "Permiteți persoanelor care au linkul să adauge și fotografii la albumul distribuit."),
         "allowAddingPhotos": MessageLookupByLibrary.simpleMessage(
@@ -283,9 +281,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Sunteți sigur că doriți să vă deconectați?"),
         "areYouSureYouWantToRenew": MessageLookupByLibrary.simpleMessage(
             "Sunteți sigur că doriți să reînnoiți?"),
-        "areYouSureYouWantToResetThisPerson":
-            MessageLookupByLibrary.simpleMessage(
-                "Are you sure you want to reset this person?"),
         "askCancelReason": MessageLookupByLibrary.simpleMessage(
             "Abonamentul dvs. a fost anulat. Doriți să ne comunicați motivul?"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
@@ -383,6 +378,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "checkStatus":
             MessageLookupByLibrary.simpleMessage("Verificați starea"),
         "checking": MessageLookupByLibrary.simpleMessage("Se verifică..."),
+        "checkingModels":
+            MessageLookupByLibrary.simpleMessage("Checking models..."),
         "claimFreeStorage":
             MessageLookupByLibrary.simpleMessage("Revendică spațiul gratuit"),
         "claimMore":
@@ -939,7 +936,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "onEnte": MessageLookupByLibrary.simpleMessage(
             "Pe <branding>ente</branding>"),
         "onlyFamilyAdminCanChangeCode": m43,
-        "onlyThem": MessageLookupByLibrary.simpleMessage("Only them"),
         "oops": MessageLookupByLibrary.simpleMessage("Ups"),
         "oopsCouldNotSaveEdits": MessageLookupByLibrary.simpleMessage(
             "Hopa, nu s-au putut salva editările"),
@@ -1121,7 +1117,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Resetare fișiere ignorate"),
         "resetPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Resetați parola"),
-        "resetPerson": MessageLookupByLibrary.simpleMessage("Reset person"),
         "resetToDefault": MessageLookupByLibrary.simpleMessage(
             "Resetare la valori implicite"),
         "restore": MessageLookupByLibrary.simpleMessage("Restaurare"),
@@ -1479,8 +1474,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "yesLogout": MessageLookupByLibrary.simpleMessage("Da, mă deconectez"),
         "yesRemove": MessageLookupByLibrary.simpleMessage("Da, elimină"),
         "yesRenew": MessageLookupByLibrary.simpleMessage("Da, reînnoiește"),
-        "yesResetPerson":
-            MessageLookupByLibrary.simpleMessage("Yes, reset person"),
         "you": MessageLookupByLibrary.simpleMessage("Dvs."),
         "youAreOnAFamilyPlan": MessageLookupByLibrary.simpleMessage(
             "Sunteți pe un plan de familie!"),
