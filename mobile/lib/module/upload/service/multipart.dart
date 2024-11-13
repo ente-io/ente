@@ -148,6 +148,12 @@ class MultiPartUploader {
           );
           await _db.deleteMultipartTrack(localId);
         }
+        if (e.response?.statusCode == 401) {
+          _logger.severe(
+            "Multipart upload not authorized ${multipartInfo.urls.objectKey}",
+          );
+          await _db.deleteMultipartTrack(localId);
+        }
         rethrow;
       }
     }
