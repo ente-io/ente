@@ -7,8 +7,6 @@ import HTTPService from "@ente/shared/network/HTTPService";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { MultipartUploadURLs, UploadFile, UploadURL } from "./upload-service";
 
-const MAX_URL_REQUESTS = 50;
-
 class UploadHttpClient {
     private uploadURLFetchInProgress = null;
 
@@ -44,7 +42,7 @@ class UploadHttpClient {
                     this.uploadURLFetchInProgress = HTTPService.get(
                         await apiURL("/files/upload-urls"),
                         {
-                            count: Math.min(MAX_URL_REQUESTS, count * 2),
+                            count: Math.min(50, count * 2),
                         },
                         { "X-Auth-Token": token },
                     );
