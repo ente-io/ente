@@ -49,6 +49,13 @@
       "title": "Aternos"
     },
     {
+      "title": "authentik",
+      "altNames": [
+        "goauthentik"
+      ],
+      "hex": "fd4b2d"
+    },
+    {
       "title": "BaiduCloud",
       "altNames": [
         "百度云",
