@@ -1,4 +1,5 @@
 import { UPLOAD_RESULT } from "@/new/photos/services/upload/types";
+import { VerticallyCenteredFlex } from "@ente/shared/components/Container";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
     Button,
@@ -6,9 +7,9 @@ import {
     DialogActions,
     DialogContent,
     styled,
+    Typography,
     type DialogProps,
 } from "@mui/material";
-import { CaptionedText } from "components/CaptionedText";
 import ItemList from "components/ItemList";
 import { t } from "i18next";
 import React, { useContext, useEffect, useState } from "react";
@@ -147,9 +148,9 @@ const InProgressSection: React.FC = () => {
     return (
         <UploadProgressSection>
             <UploadProgressSectionTitle expandIcon={<ExpandMoreIcon />}>
-                <CaptionedText
-                    mainText={t("INPROGRESS_UPLOADS")}
-                    subText={String(inProgressUploads?.length ?? 0)}
+                <TitleText
+                    title={t("INPROGRESS_UPLOADS")}
+                    count={inProgressUploads?.length}
                 />
             </UploadProgressSectionTitle>
             <UploadProgressSectionContent>
@@ -220,15 +221,19 @@ const UploadProgressFooter: React.FC = () => {
 
 interface ResultSectionProps {
     uploadResult: UPLOAD_RESULT;
-    sectionTitle: any;
-    sectionInfo?: any;
+    sectionTitle: string;
+    sectionInfo?: React.ReactNode;
 }
 
-const ResultSection = (props: ResultSectionProps) => {
+const ResultSection: React.FC<ResultSectionProps> = ({
+    uploadResult,
+    sectionTitle,
+    sectionInfo,
+}) => {
     const { finishedUploads, uploadFileNames } = useContext(
         UploadProgressContext,
     );
-    const fileList = finishedUploads.get(props.uploadResult);
+    const fileList = finishedUploads.get(uploadResult);
 
     if (!fileList?.length) {
         return <></>;
@@ -253,15 +258,10 @@ const ResultSection = (props: ResultSectionProps) => {
     return (
         <UploadProgressSection>
             <UploadProgressSectionTitle expandIcon={<ExpandMoreIcon />}>
-                <CaptionedText
-                    mainText={props.sectionTitle}
-                    subText={String(fileList?.length ?? 0)}
-                />
+                <TitleText title={sectionTitle} count={fileList?.length} />
             </UploadProgressSectionTitle>
             <UploadProgressSectionContent>
-                {props.sectionInfo && (
-                    <SectionInfo>{props.sectionInfo}</SectionInfo>
-                )}
+                {sectionInfo && <SectionInfo>{sectionInfo}</SectionInfo>}
                 <ItemList
                     items={fileList}
                     generateItemKey={generateItemKey}
@@ -284,3 +284,20 @@ const ResultItemContainer = styled("div")`
     white-space: nowrap;
     text-overflow: ellipsis;
 `;
+
+interface TitleTextProps {
+    title: string;
+    count: number | undefined;
+}
+
+const TitleText: React.FC<TitleTextProps> = ({ title, count }) => (
+    <VerticallyCenteredFlex gap={"4px"}>
+        <Typography>{title}</Typography>
+        <Typography variant="small" color="text.faint">
+            {"•"}
+        </Typography>
+        <Typography variant="small" color="text.faint">
+            {count ?? 0}
+        </Typography>
+    </VerticallyCenteredFlex>
+);
