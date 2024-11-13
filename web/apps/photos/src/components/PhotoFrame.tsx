@@ -226,7 +226,7 @@ const PhotoFrame = ({
             throw Error(CustomError.URL_ALREADY_SET);
         } else if (file.conversionFailed) {
             log.info(`[${id}]PhotoSwipe: updateSrcURL: conversion failed`);
-            throw Error(CustomError.FILE_CONVERSION_FAILED);
+            throw Error("file conversion failed");
         }
 
         await updateFileSrcProps(file, srcURLs, enableDownload);
