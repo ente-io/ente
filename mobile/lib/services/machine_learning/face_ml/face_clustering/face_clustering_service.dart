@@ -22,6 +22,7 @@ class FaceInfo {
   final bool? badFace;
   final Vector? vEmbedding;
   String? clusterId;
+  final List<String>? rejectedClusterIds;
   String? closestFaceId;
   int? closestDist;
   int? fileCreationTime;
@@ -32,6 +33,7 @@ class FaceInfo {
     this.badFace,
     this.vEmbedding,
     this.clusterId,
+    this.rejectedClusterIds,
     this.fileCreationTime,
   });
 }
@@ -328,6 +330,7 @@ ClusteringResult runLinearClustering(Map args) {
           dtype: DType.float32,
         ),
         clusterId: face.clusterId,
+        rejectedClusterIds: face.rejectedClusterIds,
         fileCreationTime:
             fileIDToCreationTime?[getFileIdFromFaceId(face.faceID)],
       ),
@@ -372,7 +375,6 @@ ClusteringResult runLinearClustering(Map args) {
   _logger.info(
     "[ClusterIsolate] ${DateTime.now()} Processing $totalFaces faces ($newToClusterCount new, $alreadyClusteredCount already done) in total in this round ${offset != null ? "on top of ${offset + facesWithClusterID.length} earlier processed faces" : ""}",
   );
-  // set current epoch time as clusterID
   String clusterID = newClusterID();
   if (facesWithClusterID.isEmpty) {
     // assign a clusterID to the first face
@@ -398,6 +400,7 @@ ClusteringResult runLinearClustering(Map args) {
     } else {
       thresholdValue = distanceThreshold;
     }
+    final bool faceHasBeenRejectedBefore = sortedFaceInfos[i].rejectedClusterIds != null; 
     if (i % 250 == 0) {
       _logger.info("Processed ${offset != null ? i + offset : i} faces");
     }
@@ -408,6 +411,13 @@ ClusteringResult runLinearClustering(Map args) {
       if (distance < closestDistance) {
         if (sortedFaceInfos[j].badFace! &&
             distance > conservativeDistanceThreshold) {
+          continue;
+        }
+        if (faceHasBeenRejectedBefore &&
+            sortedFaceInfos[j].clusterId != null &&
+            sortedFaceInfos[i].rejectedClusterIds!.contains(
+              sortedFaceInfos[j].clusterId!,
+            )) {
           continue;
         }
         closestDistance = distance;
