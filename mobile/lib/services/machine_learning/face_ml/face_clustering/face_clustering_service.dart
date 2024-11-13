@@ -163,7 +163,7 @@ class FaceClusteringService extends SuperIsolate {
         _logger.info(
           'Running complete clustering on ${input.length} faces with distance threshold $mergeThreshold',
         );
-        final ClusteringResult clusterResult = await predictCompleteComputer(
+        final ClusteringResult clusterResult = await _predictCompleteComputer(
           input,
           fileIDToCreationTime: fileIDToCreationTime,
           oldClusterSummaries: oldClusterSummaries,
@@ -175,7 +175,7 @@ class FaceClusteringService extends SuperIsolate {
         _logger.info(
           'Running linear clustering on ${input.length} faces with distance threshold $distanceThreshold',
         );
-        final ClusteringResult clusterResult = await predictLinearComputer(
+        final ClusteringResult clusterResult = await _predictLinearComputer(
           input,
           fileIDToCreationTime: fileIDToCreationTime,
           oldClusterSummaries: oldClusterSummaries,
@@ -190,7 +190,7 @@ class FaceClusteringService extends SuperIsolate {
   }
 
   /// Runs the clustering algorithm [runLinearClustering] on the given [input], in computer, without any dynamic thresholding
-  Future<ClusteringResult> predictLinearComputer(
+  Future<ClusteringResult> _predictLinearComputer(
     Map<String, Uint8List> input, {
     Map<int, int>? fileIDToCreationTime,
     required Map<String, (Uint8List, int)> oldClusterSummaries,
@@ -250,7 +250,7 @@ class FaceClusteringService extends SuperIsolate {
   /// Runs the clustering algorithm [_runCompleteClustering] on the given [input], in computer.
   ///
   /// WARNING: Only use on small datasets, as it is not optimized for large datasets.
-  Future<ClusteringResult> predictCompleteComputer(
+  Future<ClusteringResult> _predictCompleteComputer(
     Map<String, Uint8List> input, {
     Map<int, int>? fileIDToCreationTime,
     required Map<String, (Uint8List, int)> oldClusterSummaries,
