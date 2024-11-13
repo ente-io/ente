@@ -49,14 +49,28 @@ func main() {
 			panic(err)
 		}
 	}
+
+	// Define a set of commands that do not require KeyHolder initialisation.
+	skipKeyHolderCommands := map[string]struct{}{"version": {}, "docs": {}, "help": {}}
+
+	var keyHolder *secrets.KeyHolder
+
+	// Only initialise KeyHolder if the command isn't in the skip list.
+	if len(os.Args) > 1 {
+		if _, skip := skipKeyHolderCommands[os.Args[1]]; !skip {
+			keyHolder = secrets.NewKeyHolder(secrets.GetOrCreateClISecret())
+		}
+	}
+
 	ctrl := pkg.ClICtrl{
 		Client: api.NewClient(api.Params{
 			Debug: viper.GetBool("log.http"),
 			Host:  viper.GetString("endpoint.api"),
 		}),
 		DB:        db,
-		KeyHolder: secrets.NewKeyHolder(secrets.GetOrCreateClISecret()),
+		KeyHolder: keyHolder,
 	}
+
 	err = ctrl.Init()
 	if err != nil {
 		panic(err)
