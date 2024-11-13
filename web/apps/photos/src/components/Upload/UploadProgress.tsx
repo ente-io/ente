@@ -29,6 +29,7 @@ interface Props {
 
 export default function UploadProgress({
     open,
+    onClose,
     uploadCounter,
     uploadPhase,
     percentComplete,
@@ -38,7 +39,6 @@ export default function UploadProgress({
     inProgressUploads,
     finishedUploads,
     cancelUploads,
-    ...props
 }: Props) {
     const { showMiniDialog } = useAppContext();
     const [expanded, setExpanded] = useState(false);
@@ -49,24 +49,20 @@ export default function UploadProgress({
         }
     }, [open]);
 
-    function confirmCancelUpload() {
-        showMiniDialog({
-            title: t("stop_uploads_title"),
-            message: t("stop_uploads_message"),
-            continue: {
-                text: t("yes_stop_uploads"),
-                color: "critical",
-                action: cancelUploads,
-            },
-            cancel: t("no"),
-        });
-    }
-
-    function onClose() {
-        if (uploadPhase != "done") {
-            confirmCancelUpload();
+    const handleClose = () => {
+        if (uploadPhase == "done") {
+            onClose()
         } else {
-            props.onClose();
+            showMiniDialog({
+                title: t("stop_uploads_title"),
+                message: t("stop_uploads_message"),
+                continue: {
+                    text: t("yes_stop_uploads"),
+                    color: "critical",
+                    action: cancelUploads,
+                },
+                cancel: t("no"),
+            });
         }
     }
 
@@ -78,7 +74,7 @@ export default function UploadProgress({
         <UploadProgressContext.Provider
             value={{
                 open,
-                onClose,
+                onClose: handleClose,
                 uploadCounter,
                 uploadPhase,
                 percentComplete,
@@ -97,18 +93,8 @@ export default function UploadProgress({
 }
 
 const MinimizedUploadProgress: React.FC = () => (
-    <Snackbar
-        open
-        anchorOrigin={{
-            horizontal: "right",
-            vertical: "bottom",
-        }}
-    >
-        <Paper
-            sx={{
-                width: "360px",
-            }}
-        >
+    <Snackbar open anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
+        <Paper sx={{ width: "min(360px, 100svw)" }}>
             <UploadProgressHeader />
         </Paper>
     </Snackbar>
