@@ -1347,5 +1347,6 @@
   "resetPerson": "Réinitialiser la personne",
   "areYouSureYouWantToResetThisPerson": "Êtes-vous certain de vouloir réinitialiser cette personne ?",
   "allPersonGroupingWillReset": "Tous les groupements pour cette personne seront réinitialisés, et vous perdrez toutes les suggestions faites pour cette personne",
-  "yesResetPerson": "Oui, réinitialiser la personne"
+  "yesResetPerson": "Oui, réinitialiser la personne",
+  "checkingModels": "Checking models..."
 }

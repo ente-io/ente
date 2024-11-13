@@ -126,8 +126,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "albumUpdated":
             MessageLookupByLibrary.simpleMessage("Album uppdaterat"),
         "albums": MessageLookupByLibrary.simpleMessage("Album"),
-        "allPersonGroupingWillReset": MessageLookupByLibrary.simpleMessage(
-            "All groupings for this person will be reset, and you will lose all suggestions made for this person"),
         "allowAddPhotosDescription": MessageLookupByLibrary.simpleMessage(
             "Tillåt personer med länken att även lägga till foton i det delade albumet."),
         "allowAddingPhotos":
@@ -140,9 +138,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "applyCodeTitle": MessageLookupByLibrary.simpleMessage("Använd kod"),
         "areYouSureYouWantToLogout": MessageLookupByLibrary.simpleMessage(
             "Är du säker på att du vill logga ut?"),
-        "areYouSureYouWantToResetThisPerson":
-            MessageLookupByLibrary.simpleMessage(
-                "Are you sure you want to reset this person?"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "Vad är den främsta anledningen till att du raderar ditt konto?"),
         "authenticationFailedPleaseTryAgain":
@@ -163,6 +158,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Ändra behörighet?"),
         "checkInboxAndSpamFolder": MessageLookupByLibrary.simpleMessage(
             "Kontrollera din inkorg (och skräppost) för att slutföra verifieringen"),
+        "checkingModels":
+            MessageLookupByLibrary.simpleMessage("Checking models..."),
         "claimed": MessageLookupByLibrary.simpleMessage("Nyttjad"),
         "close": MessageLookupByLibrary.simpleMessage("Stäng"),
         "codeAppliedPageTitle":
@@ -383,7 +380,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "notPersonLabel": m42,
         "ok": MessageLookupByLibrary.simpleMessage("OK"),
         "onlyFamilyAdminCanChangeCode": m43,
-        "onlyThem": MessageLookupByLibrary.simpleMessage("Only them"),
         "oops": MessageLookupByLibrary.simpleMessage("Hoppsan"),
         "orPickAnExistingOne":
             MessageLookupByLibrary.simpleMessage("Eller välj en befintlig"),
@@ -441,7 +437,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Skicka e-postmeddelandet igen"),
         "resetPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Återställ lösenord"),
-        "resetPerson": MessageLookupByLibrary.simpleMessage("Reset person"),
         "resetToDefault":
             MessageLookupByLibrary.simpleMessage("Återställ till standard"),
         "retry": MessageLookupByLibrary.simpleMessage("Försök igen"),
@@ -595,8 +590,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "yesDelete": MessageLookupByLibrary.simpleMessage("Ja, radera"),
         "yesLogout": MessageLookupByLibrary.simpleMessage("Ja, logga ut"),
         "yesRenew": MessageLookupByLibrary.simpleMessage("Ja, förnya"),
-        "yesResetPerson":
-            MessageLookupByLibrary.simpleMessage("Yes, reset person"),
         "you": MessageLookupByLibrary.simpleMessage("Du"),
         "yourAccountHasBeenDeleted":
             MessageLookupByLibrary.simpleMessage("Ditt konto har raderats")

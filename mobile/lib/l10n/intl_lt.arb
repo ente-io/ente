@@ -800,5 +800,6 @@
   "areYouSureYouWantToResetThisPerson": "Ar tikrai norite iš naujo nustatyti šį asmenį?",
   "allPersonGroupingWillReset": "Visi šio asmens grupavimai bus iš naujo nustatyti, o jūs neteksite visų šiam asmeniui pateiktų pasiūlymų",
   "yesResetPerson": "Taip, nustatyti asmenį iš naujo",
-  "onlyThem": "Tik jiems"
+  "onlyThem": "Tik jiems",
+  "checkingModels": "Checking models..."
 }

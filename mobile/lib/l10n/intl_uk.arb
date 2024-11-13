@@ -1358,5 +1358,6 @@
   "resetPerson": "Скинути особу",
   "areYouSureYouWantToResetThisPerson": "Ви впевнені, що хочете скинути цю особу?",
   "allPersonGroupingWillReset": "Усі групи для цієї особи будуть скинуті, і ви втратите всі пропозиції, зроблені для неї",
-  "yesResetPerson": "Так, скинути особу"
+  "yesResetPerson": "Так, скинути особу",
+  "checkingModels": "Checking models..."
 }

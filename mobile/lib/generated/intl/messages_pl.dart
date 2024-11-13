@@ -294,7 +294,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "allMemoriesPreserved": MessageLookupByLibrary.simpleMessage(
             "Wszystkie wspomnienia zachowane"),
         "allPersonGroupingWillReset": MessageLookupByLibrary.simpleMessage(
-            "All groupings for this person will be reset, and you will lose all suggestions made for this person"),
+            "Wszystkie grupy dla tej osoby zostaną zresetowane i stracisz wszystkie sugestie dla tej osoby"),
         "allowAddPhotosDescription": MessageLookupByLibrary.simpleMessage(
             "Pozwól osobom z linkiem na dodawania zdjęć do udostępnionego albumu."),
         "allowAddingPhotos":
@@ -354,7 +354,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Czy na pewno chcesz odnowić?"),
         "areYouSureYouWantToResetThisPerson":
             MessageLookupByLibrary.simpleMessage(
-                "Are you sure you want to reset this person?"),
+                "Czy na pewno chcesz zresetować tę osobę?"),
         "askCancelReason": MessageLookupByLibrary.simpleMessage(
             "Twoja subskrypcja została anulowana. Czy chcesz podzielić się powodem?"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
@@ -470,6 +470,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Sprawdź swoją skrzynkę odbiorczą (i spam), aby zakończyć weryfikację"),
         "checkStatus": MessageLookupByLibrary.simpleMessage("Sprawdź stan"),
         "checking": MessageLookupByLibrary.simpleMessage("Sprawdzanie..."),
+        "checkingModels":
+            MessageLookupByLibrary.simpleMessage("Checking models..."),
         "claimFreeStorage": MessageLookupByLibrary.simpleMessage(
             "Odbierz bezpłatną przestrzeń dyskową"),
         "claimMore": MessageLookupByLibrary.simpleMessage("Zdobądź więcej!"),
@@ -1163,7 +1165,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "onEnte":
             MessageLookupByLibrary.simpleMessage("W <branding>ente</branding>"),
         "onlyFamilyAdminCanChangeCode": m43,
-        "onlyThem": MessageLookupByLibrary.simpleMessage("Only them"),
         "oops": MessageLookupByLibrary.simpleMessage("Ups"),
         "oopsCouldNotSaveEdits": MessageLookupByLibrary.simpleMessage(
             "Ups, nie udało się zapisać zmian"),
@@ -1378,7 +1379,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Zresetuj zignorowane pliki"),
         "resetPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Zresetuj hasło"),
-        "resetPerson": MessageLookupByLibrary.simpleMessage("Reset person"),
+        "resetPerson": MessageLookupByLibrary.simpleMessage("Zresetuj osobę"),
         "resetToDefault":
             MessageLookupByLibrary.simpleMessage("Przywróć domyślne"),
         "restore": MessageLookupByLibrary.simpleMessage("Przywróć"),
@@ -1804,7 +1805,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "yesRemove": MessageLookupByLibrary.simpleMessage("Tak, usuń"),
         "yesRenew": MessageLookupByLibrary.simpleMessage("Tak, Odnów"),
         "yesResetPerson":
-            MessageLookupByLibrary.simpleMessage("Yes, reset person"),
+            MessageLookupByLibrary.simpleMessage("Tak, zresetuj osobę"),
         "you": MessageLookupByLibrary.simpleMessage("Ty"),
         "youAreOnAFamilyPlan":
             MessageLookupByLibrary.simpleMessage("Jesteś w planie rodzinnym!"),

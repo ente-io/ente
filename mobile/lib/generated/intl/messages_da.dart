@@ -36,16 +36,13 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Aktive sessioner"),
         "addOnPageSubtitle":
             MessageLookupByLibrary.simpleMessage("Oplysninger om tilføjelser"),
-        "allPersonGroupingWillReset": MessageLookupByLibrary.simpleMessage(
-            "All groupings for this person will be reset, and you will lose all suggestions made for this person"),
-        "areYouSureYouWantToResetThisPerson":
-            MessageLookupByLibrary.simpleMessage(
-                "Are you sure you want to reset this person?"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "Hvad er hovedårsagen til, at du sletter din konto?"),
         "backedUpFolders":
             MessageLookupByLibrary.simpleMessage("Sikkerhedskopierede mapper"),
         "cancel": MessageLookupByLibrary.simpleMessage("Annuller"),
+        "checkingModels":
+            MessageLookupByLibrary.simpleMessage("Checking models..."),
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("Bekræft Sletning Af Konto"),
         "confirmPassword":
@@ -110,14 +107,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "moments": MessageLookupByLibrary.simpleMessage("Øjeblikke"),
         "next": MessageLookupByLibrary.simpleMessage("Næste"),
         "ok": MessageLookupByLibrary.simpleMessage("Ok"),
-        "onlyThem": MessageLookupByLibrary.simpleMessage("Only them"),
         "oops": MessageLookupByLibrary.simpleMessage("Ups"),
         "password": MessageLookupByLibrary.simpleMessage("Adgangskode"),
         "pleaseContactSupportAndWeWillBeHappyToHelp":
             MessageLookupByLibrary.simpleMessage(
                 "Kontakt support@ente.io og vi vil være glade for at hjælpe!"),
         "renameFile": MessageLookupByLibrary.simpleMessage("Omdøb fil"),
-        "resetPerson": MessageLookupByLibrary.simpleMessage("Reset person"),
         "scanThisBarcodeWithnyourAuthenticatorApp":
             MessageLookupByLibrary.simpleMessage(
                 "Skan denne QR-kode med godkendelses-appen"),
@@ -141,8 +136,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "verify": MessageLookupByLibrary.simpleMessage("Bekræft"),
         "viewAddOnButton":
             MessageLookupByLibrary.simpleMessage("Vis tilføjelser"),
-        "yesResetPerson":
-            MessageLookupByLibrary.simpleMessage("Yes, reset person"),
         "yourAccountHasBeenDeleted":
             MessageLookupByLibrary.simpleMessage("Din konto er blevet slettet")
       };

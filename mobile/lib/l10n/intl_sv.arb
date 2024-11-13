@@ -455,5 +455,6 @@
   "sort": "Sortera",
   "newPerson": "Ny person",
   "addName": "Lägg till namn",
-  "add": "Lägg till"
+  "add": "Lägg till",
+  "checkingModels": "Checking models..."
 }

@@ -249,8 +249,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "allClear": MessageLookupByLibrary.simpleMessage("✨ Tamamen temizle"),
         "allMemoriesPreserved":
             MessageLookupByLibrary.simpleMessage("Tüm anılar saklandı"),
-        "allPersonGroupingWillReset": MessageLookupByLibrary.simpleMessage(
-            "All groupings for this person will be reset, and you will lose all suggestions made for this person"),
         "allowAddPhotosDescription": MessageLookupByLibrary.simpleMessage(
             "Bağlantıya sahip olan kişilere, paylaşılan albüme fotoğraf eklemelerine izin ver."),
         "allowAddingPhotos":
@@ -303,9 +301,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Çıkış yapmak istediğinize emin misiniz?"),
         "areYouSureYouWantToRenew": MessageLookupByLibrary.simpleMessage(
             "Yenilemek istediğinize emin misiniz?"),
-        "areYouSureYouWantToResetThisPerson":
-            MessageLookupByLibrary.simpleMessage(
-                "Are you sure you want to reset this person?"),
         "askCancelReason": MessageLookupByLibrary.simpleMessage(
             "Aboneliğiniz iptal edilmiştir. Bunun sebebini paylaşmak ister misiniz?"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
@@ -394,6 +389,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "checkInboxAndSpamFolder": MessageLookupByLibrary.simpleMessage(
             "Lütfen doğrulama işlemini tamamlamak için gelen kutunuzu (ve spam klasörünüzü) kontrol edin"),
         "checking": MessageLookupByLibrary.simpleMessage("Kontrol ediliyor..."),
+        "checkingModels":
+            MessageLookupByLibrary.simpleMessage("Checking models..."),
         "claimFreeStorage":
             MessageLookupByLibrary.simpleMessage("Bedava alan talep edin"),
         "claimMore": MessageLookupByLibrary.simpleMessage("Arttır!"),
@@ -948,7 +945,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "onDevice": MessageLookupByLibrary.simpleMessage("Bu cihaz"),
         "onEnte": MessageLookupByLibrary.simpleMessage(
             "<branding>ente</branding> üzerinde"),
-        "onlyThem": MessageLookupByLibrary.simpleMessage("Only them"),
         "oops": MessageLookupByLibrary.simpleMessage("Hay aksi"),
         "oopsCouldNotSaveEdits": MessageLookupByLibrary.simpleMessage(
             "Hata! Düzenlemeler kaydedilemedi"),
@@ -1134,7 +1130,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Yok sayılan dosyaları sıfırla"),
         "resetPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Parolanızı sıfırlayın"),
-        "resetPerson": MessageLookupByLibrary.simpleMessage("Reset person"),
         "resetToDefault":
             MessageLookupByLibrary.simpleMessage("Varsayılana sıfırla"),
         "restore": MessageLookupByLibrary.simpleMessage("Yenile"),
@@ -1495,8 +1490,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Evet, oturumu kapat"),
         "yesRemove": MessageLookupByLibrary.simpleMessage("Evet, sil"),
         "yesRenew": MessageLookupByLibrary.simpleMessage("Evet, yenile"),
-        "yesResetPerson":
-            MessageLookupByLibrary.simpleMessage("Yes, reset person"),
         "you": MessageLookupByLibrary.simpleMessage("Sen"),
         "youAreOnAFamilyPlan":
             MessageLookupByLibrary.simpleMessage("Aile planı kullanıyorsunuz!"),

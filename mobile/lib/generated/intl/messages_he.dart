@@ -165,8 +165,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "allClear": MessageLookupByLibrary.simpleMessage("✨ הכל נוקה"),
         "allMemoriesPreserved":
             MessageLookupByLibrary.simpleMessage("כל הזכרונות נשמרו"),
-        "allPersonGroupingWillReset": MessageLookupByLibrary.simpleMessage(
-            "All groupings for this person will be reset, and you will lose all suggestions made for this person"),
         "allowAddPhotosDescription": MessageLookupByLibrary.simpleMessage(
             "בנוסף אפשר לאנשים עם הלינק להוסיף תמונות לאלבום המשותף."),
         "allowAddingPhotos":
@@ -199,9 +197,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("אתה בטוח שאתה רוצה להתנתק?"),
         "areYouSureYouWantToRenew":
             MessageLookupByLibrary.simpleMessage("אתה בטוח שאתה רוצה לחדש?"),
-        "areYouSureYouWantToResetThisPerson":
-            MessageLookupByLibrary.simpleMessage(
-                "Are you sure you want to reset this person?"),
         "askCancelReason": MessageLookupByLibrary.simpleMessage(
             "המנוי שלך בוטל. תרצה לשתף את הסיבה?"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
@@ -263,6 +258,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "checkInboxAndSpamFolder": MessageLookupByLibrary.simpleMessage(
             "אנא בדוק את תיבת הדואר שלך (והספאם) כדי להשלים את האימות"),
         "checking": MessageLookupByLibrary.simpleMessage("בודק..."),
+        "checkingModels":
+            MessageLookupByLibrary.simpleMessage("Checking models..."),
         "claimFreeStorage":
             MessageLookupByLibrary.simpleMessage("תבע מקום אחסון בחינם"),
         "claimMore": MessageLookupByLibrary.simpleMessage("תבע עוד!"),
@@ -605,7 +602,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "onDevice": MessageLookupByLibrary.simpleMessage("על המכשיר"),
         "onEnte":
             MessageLookupByLibrary.simpleMessage("ב<branding>אנטע</branding>"),
-        "onlyThem": MessageLookupByLibrary.simpleMessage("Only them"),
         "oops": MessageLookupByLibrary.simpleMessage("אופס"),
         "oopsSomethingWentWrong":
             MessageLookupByLibrary.simpleMessage("אופס, משהו השתבש"),
@@ -723,7 +719,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "resendEmail": MessageLookupByLibrary.simpleMessage("שלח דוא\"ל מחדש"),
         "resetPasswordTitle":
             MessageLookupByLibrary.simpleMessage("איפוס סיסמה"),
-        "resetPerson": MessageLookupByLibrary.simpleMessage("Reset person"),
         "restore": MessageLookupByLibrary.simpleMessage("שחזר"),
         "restoreToAlbum": MessageLookupByLibrary.simpleMessage("שחזר לאלבום"),
         "restoringFiles":
@@ -939,8 +934,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "yesLogout": MessageLookupByLibrary.simpleMessage("כן, התנתק"),
         "yesRemove": MessageLookupByLibrary.simpleMessage("כן, הסר"),
         "yesRenew": MessageLookupByLibrary.simpleMessage("כן, חדש"),
-        "yesResetPerson":
-            MessageLookupByLibrary.simpleMessage("Yes, reset person"),
         "you": MessageLookupByLibrary.simpleMessage("אתה"),
         "youAreOnAFamilyPlan":
             MessageLookupByLibrary.simpleMessage("אתה על תוכנית משפחתית!"),

@@ -291,7 +291,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "allMemoriesPreserved": MessageLookupByLibrary.simpleMessage(
             "Tous les souvenirs conservés"),
         "allPersonGroupingWillReset": MessageLookupByLibrary.simpleMessage(
-            "All groupings for this person will be reset, and you will lose all suggestions made for this person"),
+            "Tous les groupements pour cette personne seront réinitialisés, et vous perdrez toutes les suggestions faites pour cette personne"),
         "allowAddPhotosDescription": MessageLookupByLibrary.simpleMessage(
             "Autoriser les personnes avec le lien à ajouter des photos à l\'album partagé."),
         "allowAddingPhotos": MessageLookupByLibrary.simpleMessage(
@@ -351,7 +351,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Êtes-vous sûr de vouloir renouveler ?"),
         "areYouSureYouWantToResetThisPerson":
             MessageLookupByLibrary.simpleMessage(
-                "Are you sure you want to reset this person?"),
+                "Êtes-vous certain de vouloir réinitialiser cette personne ?"),
         "askCancelReason": MessageLookupByLibrary.simpleMessage(
             "Votre abonnement a été annulé. Souhaitez-vous partager la raison ?"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
@@ -470,6 +470,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "checkStatus":
             MessageLookupByLibrary.simpleMessage("Vérifier le statut"),
         "checking": MessageLookupByLibrary.simpleMessage("Vérification..."),
+        "checkingModels":
+            MessageLookupByLibrary.simpleMessage("Checking models..."),
         "claimFreeStorage": MessageLookupByLibrary.simpleMessage(
             "Réclamer le stockage gratuit"),
         "claimMore": MessageLookupByLibrary.simpleMessage("Réclamez plus !"),
@@ -1171,7 +1173,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "onEnte": MessageLookupByLibrary.simpleMessage(
             "Sur <branding>ente</branding>"),
         "onlyFamilyAdminCanChangeCode": m43,
-        "onlyThem": MessageLookupByLibrary.simpleMessage("Only them"),
         "oops": MessageLookupByLibrary.simpleMessage("Oups"),
         "oopsCouldNotSaveEdits": MessageLookupByLibrary.simpleMessage(
             "Oups, impossible d\'enregistrer les modifications"),
@@ -1392,7 +1393,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Réinitialiser les fichiers ignorés"),
         "resetPasswordTitle": MessageLookupByLibrary.simpleMessage(
             "Réinitialiser le mot de passe"),
-        "resetPerson": MessageLookupByLibrary.simpleMessage("Reset person"),
+        "resetPerson":
+            MessageLookupByLibrary.simpleMessage("Réinitialiser la personne"),
         "resetToDefault": MessageLookupByLibrary.simpleMessage(
             "Réinitialiser aux valeurs par défaut"),
         "restore": MessageLookupByLibrary.simpleMessage("Restaurer"),
@@ -1834,8 +1836,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Oui, se déconnecter"),
         "yesRemove": MessageLookupByLibrary.simpleMessage("Oui, supprimer"),
         "yesRenew": MessageLookupByLibrary.simpleMessage("Oui, renouveler"),
-        "yesResetPerson":
-            MessageLookupByLibrary.simpleMessage("Yes, reset person"),
+        "yesResetPerson": MessageLookupByLibrary.simpleMessage(
+            "Oui, réinitialiser la personne"),
         "you": MessageLookupByLibrary.simpleMessage("Vous"),
         "youAreOnAFamilyPlan": MessageLookupByLibrary.simpleMessage(
             "Vous êtes sur un plan familial !"),
