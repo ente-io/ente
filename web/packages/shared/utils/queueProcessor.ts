@@ -1,5 +1,4 @@
 import { ensure } from "@/utils/ensure";
-import { CustomError } from "@ente/shared/error";
 
 interface RequestQueueItem {
     request: (canceller?: RequestCanceller) => Promise<any>;

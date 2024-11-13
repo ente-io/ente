@@ -22,21 +22,15 @@ export function isApiErrorResponse(object: any): object is ApiErrorResponse {
 }
 
 export const CustomError = {
-    VIDEO_PLAYBACK_FAILED: "video playback failed",
     ETAG_MISSING: "no header/etag present in response body",
     KEY_MISSING: "encrypted key missing from localStorage",
-    FAILED_TO_LOAD_WEB_WORKER: "failed to load web worker",
     UNSUPPORTED_FILE_FORMAT: "unsupported file format",
     FILE_TOO_LARGE: "file too large",
     SUBSCRIPTION_EXPIRED: "subscription expired",
     STORAGE_QUOTA_EXCEEDED: "storage quota exceeded",
     SESSION_EXPIRED: "session expired",
-    INVALID_MIME_TYPE: (type: string) => `invalid mime type -${type}`,
-    SIGNUP_FAILED: "signup failed",
     FAV_COLLECTION_MISSING: "favorite collection missing",
     INVALID_COLLECTION_OPERATION: "invalid collection operation",
-    TO_MOVE_FILES_FROM_MULTIPLE_COLLECTIONS:
-        "to move files from multiple collections",
     REQUEST_FAILED: "request failed",
     TOKEN_EXPIRED: "token expired",
     TOKEN_MISSING: "token missing",
@@ -53,10 +47,7 @@ export const CustomError = {
     HIDDEN_COLLECTION_SYNC_FILE_ATTEMPTED:
         "hidden collection sync file attempted",
     UNKNOWN_ERROR: "Something went wrong, please try again",
-    WINDOWS_NATIVE_IMAGE_PROCESSING_NOT_SUPPORTED:
-        "Windows native image processing is not supported",
     NETWORK_ERROR: "Network Error",
-    NOT_FILE_OWNER: "not file owner",
     UPDATE_EXPORTED_RECORD_FAILED: "update file exported record failed",
     EXPORT_STOPPED: "export stopped",
     NO_EXPORT_FOLDER_SELECTED: "no export folder selected",
