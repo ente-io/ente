@@ -46,7 +46,7 @@ import { SetLoading } from "types/gallery";
 import { getOrCreateAlbum } from "utils/collection";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import { SetCollectionNamerAttributes } from "../Collections/CollectionNamer";
-import UploadProgress from "./UploadProgress";
+import { UploadProgress } from "./UploadProgress";
 import {
     UploadTypeSelector,
     type UploadTypeSelectorIntent,

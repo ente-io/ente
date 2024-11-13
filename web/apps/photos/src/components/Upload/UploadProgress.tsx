@@ -13,7 +13,7 @@ import UploadProgressContext from "./UploadProgress/context";
 import { UploadProgressDialog } from "./UploadProgress/dialog";
 import { UploadProgressHeader } from "./UploadProgress/header";
 
-interface Props {
+interface UploadProgressProps {
     open: boolean;
     onClose: () => void;
     uploadCounter: UploadCounter;
@@ -27,7 +27,7 @@ interface Props {
     cancelUploads: () => void;
 }
 
-export default function UploadProgress({
+export const UploadProgress: React.FC<UploadProgressProps> = ({
     open,
     onClose,
     uploadCounter,
@@ -39,19 +39,17 @@ export default function UploadProgress({
     inProgressUploads,
     finishedUploads,
     cancelUploads,
-}: Props) {
+}) => {
     const { showMiniDialog } = useAppContext();
     const [expanded, setExpanded] = useState(false);
 
     useEffect(() => {
-        if (open) {
-            setExpanded(false);
-        }
+        if (open) setExpanded(false);
     }, [open]);
 
     const handleClose = () => {
         if (uploadPhase == "done") {
-            onClose()
+            onClose();
         } else {
             showMiniDialog({
                 title: t("stop_uploads_title"),
@@ -64,7 +62,7 @@ export default function UploadProgress({
                 cancel: t("no"),
             });
         }
-    }
+    };
 
     if (!open) {
         return <></>;
@@ -90,7 +88,7 @@ export default function UploadProgress({
             {expanded ? <UploadProgressDialog /> : <MinimizedUploadProgress />}
         </UploadProgressContext.Provider>
     );
-}
+};
 
 const MinimizedUploadProgress: React.FC = () => (
     <Snackbar open anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
