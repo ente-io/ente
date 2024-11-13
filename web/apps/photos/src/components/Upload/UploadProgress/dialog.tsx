@@ -1,14 +1,26 @@
 import { UPLOAD_RESULT } from "@/new/photos/services/upload/types";
-import { Dialog, DialogContent, type DialogProps } from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import {
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    styled,
+    type DialogProps,
+} from "@mui/material";
+import { CaptionedText } from "components/CaptionedText";
+import ItemList from "components/ItemList";
 import { t } from "i18next";
-import { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 import UploadProgressContext from "./context";
-import { UploadProgressFooter } from "./footer";
 import { UploadProgressHeader } from "./header";
-import { InProgressSection } from "./inProgressSection";
-import { ResultSection } from "./resultSection";
-import { NotUploadSectionHeader } from "./styledComponents";
+import {
+    SectionInfo,
+    UploadProgressSection,
+    UploadProgressSectionContent,
+    UploadProgressSectionTitle,
+} from "./section";
 
 export function UploadProgressDialog() {
     const { open, onClose, uploadPhase, finishedUploads } = useContext(
@@ -103,3 +115,172 @@ export function UploadProgressDialog() {
         </Dialog>
     );
 }
+
+const InProgressSection: React.FC = () => {
+    const { inProgressUploads, hasLivePhotos, uploadFileNames, uploadPhase } =
+        useContext(UploadProgressContext);
+    const fileList = inProgressUploads ?? [];
+
+    const renderListItem = ({ localFileID, progress }) => {
+        return (
+            <InProgressItemContainer key={localFileID}>
+                <span>{uploadFileNames.get(localFileID)}</span>
+                {uploadPhase == "uploading" && (
+                    <>
+                        {" "}
+                        <span className="separator">{`-`}</span>
+                        <span>{`${progress}%`}</span>
+                    </>
+                )}
+            </InProgressItemContainer>
+        );
+    };
+
+    const getItemTitle = ({ localFileID, progress }) => {
+        return `${uploadFileNames.get(localFileID)} - ${progress}%`;
+    };
+
+    const generateItemKey = ({ localFileID, progress }) => {
+        return `${localFileID}-${progress}`;
+    };
+
+    return (
+        <UploadProgressSection>
+            <UploadProgressSectionTitle expandIcon={<ExpandMoreIcon />}>
+                <CaptionedText
+                    mainText={t("INPROGRESS_UPLOADS")}
+                    subText={String(inProgressUploads?.length ?? 0)}
+                />
+            </UploadProgressSectionTitle>
+            <UploadProgressSectionContent>
+                {hasLivePhotos && (
+                    <SectionInfo>{t("LIVE_PHOTOS_DETECTED")}</SectionInfo>
+                )}
+                <ItemList
+                    items={fileList}
+                    generateItemKey={generateItemKey}
+                    getItemTitle={getItemTitle}
+                    renderListItem={renderListItem}
+                    maxHeight={160}
+                    itemSize={35}
+                />
+            </UploadProgressSectionContent>
+        </UploadProgressSection>
+    );
+};
+
+const InProgressItemContainer = styled("div")`
+    display: inline-block;
+    & > span {
+        display: inline-block;
+    }
+    & > span:first-of-type {
+        position: relative;
+        top: 5px;
+        max-width: 340px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+    & > .separator {
+        margin: 0 5px;
+    }
+`;
+
+const NotUploadSectionHeader = styled("div")(
+    ({ theme }) => `
+    text-align: center;
+    color: ${theme.colors.danger.A700};
+    border-bottom: 1px solid ${theme.colors.danger.A700};
+    margin:${theme.spacing(3, 2, 1)}
+`,
+);
+
+const UploadProgressFooter: React.FC = () => {
+    const { uploadPhase, finishedUploads, retryFailed, onClose } = useContext(
+        UploadProgressContext,
+    );
+
+    return (
+        <DialogActions>
+            {uploadPhase == "done" &&
+                (finishedUploads?.get(UPLOAD_RESULT.FAILED)?.length > 0 ||
+                finishedUploads?.get(UPLOAD_RESULT.BLOCKED)?.length > 0 ? (
+                    <Button variant="contained" fullWidth onClick={retryFailed}>
+                        {t("RETRY_FAILED")}
+                    </Button>
+                ) : (
+                    <Button variant="contained" fullWidth onClick={onClose}>
+                        {t("close")}
+                    </Button>
+                ))}
+        </DialogActions>
+    );
+};
+
+interface ResultSectionProps {
+    uploadResult: UPLOAD_RESULT;
+    sectionTitle: any;
+    sectionInfo?: any;
+}
+
+const ResultSection = (props: ResultSectionProps) => {
+    const { finishedUploads, uploadFileNames } = useContext(
+        UploadProgressContext,
+    );
+    const fileList = finishedUploads.get(props.uploadResult);
+
+    if (!fileList?.length) {
+        return <></>;
+    }
+
+    const renderListItem = (fileID) => {
+        return (
+            <ResultItemContainer key={fileID}>
+                {uploadFileNames.get(fileID)}
+            </ResultItemContainer>
+        );
+    };
+
+    const getItemTitle = (fileID) => {
+        return uploadFileNames.get(fileID);
+    };
+
+    const generateItemKey = (fileID) => {
+        return fileID;
+    };
+
+    return (
+        <UploadProgressSection>
+            <UploadProgressSectionTitle expandIcon={<ExpandMoreIcon />}>
+                <CaptionedText
+                    mainText={props.sectionTitle}
+                    subText={String(fileList?.length ?? 0)}
+                />
+            </UploadProgressSectionTitle>
+            <UploadProgressSectionContent>
+                {props.sectionInfo && (
+                    <SectionInfo>{props.sectionInfo}</SectionInfo>
+                )}
+                <ItemList
+                    items={fileList}
+                    generateItemKey={generateItemKey}
+                    getItemTitle={getItemTitle}
+                    renderListItem={renderListItem}
+                    maxHeight={160}
+                    itemSize={35}
+                />
+            </UploadProgressSectionContent>
+        </UploadProgressSection>
+    );
+};
+
+const ResultItemContainer = styled("div")`
+    position: relative;
+    top: 5px;
+    display: inline-block;
+    max-width: 394px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+`;
