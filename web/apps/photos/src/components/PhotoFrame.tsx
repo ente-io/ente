@@ -200,7 +200,7 @@ const PhotoFrame = ({
                 log.info(
                     `[${id}]PhotoSwipe: updateURL: file id mismatch: ${file.id} !== ${id}`,
                 );
-                throw Error(CustomError.UPDATE_URL_FILE_ID_MISMATCH);
+                throw Error("update url file id mismatch");
             }
             if (file.msrc && !forceUpdate) {
                 throw Error(CustomError.URL_ALREADY_SET);
@@ -220,7 +220,7 @@ const PhotoFrame = ({
             log.info(
                 `[${id}]PhotoSwipe: updateSrcURL: file id mismatch: ${file.id}`,
             );
-            throw Error(CustomError.UPDATE_URL_FILE_ID_MISMATCH);
+            throw Error("update url file id mismatch");
         }
         if (file.isSourceLoaded && !forceUpdate) {
             throw Error(CustomError.URL_ALREADY_SET);
