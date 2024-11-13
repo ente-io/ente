@@ -55,7 +55,7 @@ export default class QueueProcessor<T> {
             let response = null;
 
             if (queueItem.isCanceled.status) {
-                queueItem.failureCallback(Error(CustomError.REQUEST_CANCELLED));
+                queueItem.failureCallback(new Error("Request canceled"));
             } else {
                 try {
                     response = await queueItem.request(queueItem.canceller);

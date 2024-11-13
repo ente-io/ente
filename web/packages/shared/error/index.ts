@@ -37,7 +37,6 @@ export const CustomError = {
     INVALID_COLLECTION_OPERATION: "invalid collection operation",
     TO_MOVE_FILES_FROM_MULTIPLE_COLLECTIONS:
         "to move files from multiple collections",
-    REQUEST_CANCELLED: "request canceled",
     REQUEST_FAILED: "request failed",
     TOKEN_EXPIRED: "token expired",
     TOKEN_MISSING: "token missing",
@@ -68,8 +67,6 @@ export const CustomError = {
     PROCESSING_FAILED: "processing failed",
     EXPORT_RECORD_JSON_PARSING_FAILED: "export record json parsing failed",
     TWO_FACTOR_ENABLED: "two factor enabled",
-    CLIENT_ERROR: "client error",
-    ServerError: "server error",
     URL_ALREADY_SET: "url already set",
 };
 
