@@ -24,7 +24,6 @@ import {
     SearchResultsHeader,
 } from "@/new/photos/components/gallery";
 import {
-    uniqueFilesByID,
     useGalleryReducer,
     type GalleryBarMode,
 } from "@/new/photos/components/gallery/reducer";
@@ -401,11 +400,7 @@ export default function Gallery() {
     }, []);
 
     useEffect(
-        () =>
-            setSearchCollectionsAndFiles({
-                collections: collections ?? [],
-                files: uniqueFilesByID(files ?? []),
-            }),
+        () => setSearchCollectionsAndFiles({ collections, files }),
         [collections, files],
     );
 
