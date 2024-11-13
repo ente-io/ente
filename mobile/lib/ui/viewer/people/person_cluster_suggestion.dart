@@ -199,8 +199,8 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
     );
     if (yesOrNo) {
       canGiveFeedback = false;
-      await MLDataDB.instance.assignClusterToPerson(
-        personID: widget.person.remoteID,
+      await ClusterFeedbackService.instance.addClusterToExistingPerson(
+        person: widget.person,
         clusterID: clusterID,
       );
       Bus.instance.fire(PeopleChangedEvent());

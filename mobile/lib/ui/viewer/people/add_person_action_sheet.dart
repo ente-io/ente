@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import "package:logging/logging.dart";
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import "package:photos/core/event_bus.dart";
-import "package:photos/db/ml/db.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
@@ -255,8 +254,9 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
                             return;
                           }
                           userAlreadyAssigned = true;
-                          await MLDataDB.instance.assignClusterToPerson(
-                            personID: person.$1.remoteID,
+                          await ClusterFeedbackService.instance
+                              .addClusterToExistingPerson(
+                            person: person.$1,
                             clusterID: widget.cluserID,
                           );
                           Bus.instance.fire(PeopleChangedEvent());

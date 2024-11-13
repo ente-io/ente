@@ -381,7 +381,7 @@ class PersonService {
     final updatedPerson = person.copyWith(
       data: person.data.copyWith(avatarFaceId: face.faceID),
     );
-    await _updatePerson(updatedPerson);
+    await updatePerson(updatedPerson);
   }
 
   Future<void> updateAttributes(
@@ -402,10 +402,10 @@ class PersonService {
         birthDate: birthDate,
       ),
     );
-    await _updatePerson(updatedPerson);
+    await updatePerson(updatedPerson);
   }
 
-  Future<void> _updatePerson(PersonEntity updatePerson) async {
+  Future<void> updatePerson(PersonEntity updatePerson) async {
     await entityService.addOrUpdate(
       EntityType.cgroup,
       updatePerson.data.toJson(),
