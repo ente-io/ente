@@ -183,6 +183,11 @@ class PersonService {
   }) async {
     final person = (await getPerson(personID))!;
     final personData = person.data;
+    final clusterInfo = personData.assigned!.firstWhere(
+      (element) => element.id == clusterID,
+    );
+    personData.rejectedFaceIDs ??= [];
+    personData.rejectedFaceIDs!.addAll(clusterInfo.faces);
     personData.assigned!.removeWhere((element) => element.id != clusterID);
     await entityService.addOrUpdate(
       EntityType.cgroup,
