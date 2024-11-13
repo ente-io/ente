@@ -2,13 +2,18 @@ import { UPLOAD_RESULT } from "@/new/photos/services/upload/types";
 import { VerticallyCenteredFlex } from "@ente/shared/components/Container";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
+    Accordion,
+    AccordionDetails,
+    AccordionSummary,
     Button,
     Dialog,
     DialogActions,
     DialogContent,
     styled,
     Typography,
+    type AccordionProps,
     type DialogProps,
+    type TypographyProps,
 } from "@mui/material";
 import ItemList from "components/ItemList";
 import { t } from "i18next";
@@ -16,12 +21,6 @@ import React, { useContext, useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 import UploadProgressContext from "./context";
 import { UploadProgressHeader } from "./header";
-import {
-    SectionInfo,
-    UploadProgressSection,
-    UploadProgressSectionContent,
-    UploadProgressSectionTitle,
-} from "./section";
 
 export function UploadProgressDialog() {
     const { open, onClose, uploadPhase, finishedUploads } = useContext(
@@ -112,7 +111,7 @@ export function UploadProgressDialog() {
                     />
                 </DialogContent>
             )}
-            {uploadPhase == "done" && <UploadProgressFooter />}
+            {uploadPhase == "done" && <DoneFooter />}
         </Dialog>
     );
 }
@@ -188,6 +187,35 @@ const InProgressItemContainer = styled("div")`
     }
 `;
 
+const UploadProgressSection = styled((props: AccordionProps) => (
+    <Accordion disableGutters elevation={0} square {...props} />
+))(({ theme }) => ({
+    borderTop: `1px solid ${theme.palette.divider}`,
+    "&:last-child": {
+        borderBottom: `1px solid ${theme.palette.divider}`,
+    },
+    "&:before": {
+        display: "none",
+    },
+}));
+
+const UploadProgressSectionTitle = styled(AccordionSummary)(() => ({
+    backgroundColor: "rgba(255, 255, 255, .05)",
+}));
+
+const UploadProgressSectionContent = styled(AccordionDetails)(({ theme }) => ({
+    padding: theme.spacing(2),
+}));
+
+const SectionInfo = (props: TypographyProps) => (
+    <Typography
+        color={"text.muted"}
+        variant="small"
+        {...props}
+        sx={{ mb: 1 }}
+    />
+);
+
 const NotUploadSectionHeader = styled("div")(
     ({ theme }) => `
     text-align: center;
@@ -196,28 +224,6 @@ const NotUploadSectionHeader = styled("div")(
     margin:${theme.spacing(3, 2, 1)}
 `,
 );
-
-const UploadProgressFooter: React.FC = () => {
-    const { uploadPhase, finishedUploads, retryFailed, onClose } = useContext(
-        UploadProgressContext,
-    );
-
-    return (
-        <DialogActions>
-            {uploadPhase == "done" &&
-                (finishedUploads?.get(UPLOAD_RESULT.FAILED)?.length > 0 ||
-                finishedUploads?.get(UPLOAD_RESULT.BLOCKED)?.length > 0 ? (
-                    <Button variant="contained" fullWidth onClick={retryFailed}>
-                        {t("RETRY_FAILED")}
-                    </Button>
-                ) : (
-                    <Button variant="contained" fullWidth onClick={onClose}>
-                        {t("close")}
-                    </Button>
-                ))}
-        </DialogActions>
-    );
-};
 
 interface ResultSectionProps {
     uploadResult: UPLOAD_RESULT;
@@ -301,3 +307,25 @@ const TitleText: React.FC<TitleTextProps> = ({ title, count }) => (
         </Typography>
     </VerticallyCenteredFlex>
 );
+
+const DoneFooter: React.FC = () => {
+    const { uploadPhase, finishedUploads, retryFailed, onClose } = useContext(
+        UploadProgressContext,
+    );
+
+    return (
+        <DialogActions>
+            {uploadPhase == "done" &&
+                (finishedUploads?.get(UPLOAD_RESULT.FAILED)?.length > 0 ||
+                finishedUploads?.get(UPLOAD_RESULT.BLOCKED)?.length > 0 ? (
+                    <Button variant="contained" fullWidth onClick={retryFailed}>
+                        {t("RETRY_FAILED")}
+                    </Button>
+                ) : (
+                    <Button variant="contained" fullWidth onClick={onClose}>
+                        {t("close")}
+                    </Button>
+                ))}
+        </DialogActions>
+    );
+};
