@@ -382,14 +382,14 @@ const InProgressSection: React.FC = () => {
     };
 
     return (
-        <UploadProgressSection>
-            <UploadProgressSectionTitle expandIcon={<ExpandMoreIcon />}>
+        <SectionAccordion>
+            <SectionAccordionSummary expandIcon={<ExpandMoreIcon />}>
                 <TitleText
                     title={t("INPROGRESS_UPLOADS")}
                     count={inProgressUploads?.length}
                 />
-            </UploadProgressSectionTitle>
-            <UploadProgressSectionContent>
+            </SectionAccordionSummary>
+            <SectionAccordionDetails>
                 {hasLivePhotos && (
                     <SectionInfo>{t("LIVE_PHOTOS_DETECTED")}</SectionInfo>
                 )}
@@ -401,8 +401,8 @@ const InProgressSection: React.FC = () => {
                     maxHeight={160}
                     itemSize={35}
                 />
-            </UploadProgressSectionContent>
-        </UploadProgressSection>
+            </SectionAccordionDetails>
+        </SectionAccordion>
     );
 };
 
@@ -424,33 +424,24 @@ const InProgressItemContainer = styled("div")`
     }
 `;
 
-const UploadProgressSection = styled((props: AccordionProps) => (
+const SectionAccordion = styled((props: AccordionProps) => (
     <Accordion disableGutters elevation={0} square {...props} />
 ))(({ theme }) => ({
     borderTop: `1px solid ${theme.palette.divider}`,
-    "&:last-child": {
-        borderBottom: `1px solid ${theme.palette.divider}`,
-    },
-    "&:before": {
-        display: "none",
-    },
+    "&:before": { display: "none" },
+    "&:last-child": { borderBottom: `1px solid ${theme.palette.divider}` },
 }));
 
-const UploadProgressSectionTitle = styled(AccordionSummary)(() => ({
+const SectionAccordionSummary = styled(AccordionSummary)(() => ({
     backgroundColor: "rgba(255, 255, 255, .05)",
 }));
 
-const UploadProgressSectionContent = styled(AccordionDetails)(({ theme }) => ({
+const SectionAccordionDetails = styled(AccordionDetails)(({ theme }) => ({
     padding: theme.spacing(2),
 }));
 
 const SectionInfo = (props: TypographyProps) => (
-    <Typography
-        color={"text.muted"}
-        variant="small"
-        {...props}
-        sx={{ mb: 1 }}
-    />
+    <Typography color="text.muted" variant="small" sx={{ mb: 1 }} {...props} />
 );
 
 const NotUploadSectionHeader = styled("div")(
@@ -499,11 +490,11 @@ const ResultSection: React.FC<ResultSectionProps> = ({
     };
 
     return (
-        <UploadProgressSection>
-            <UploadProgressSectionTitle expandIcon={<ExpandMoreIcon />}>
+        <SectionAccordion>
+            <SectionAccordionSummary expandIcon={<ExpandMoreIcon />}>
                 <TitleText title={sectionTitle} count={fileList?.length} />
-            </UploadProgressSectionTitle>
-            <UploadProgressSectionContent>
+            </SectionAccordionSummary>
+            <SectionAccordionDetails>
                 {sectionInfo && <SectionInfo>{sectionInfo}</SectionInfo>}
                 <ItemList
                     items={fileList}
@@ -513,8 +504,8 @@ const ResultSection: React.FC<ResultSectionProps> = ({
                     maxHeight={160}
                     itemSize={35}
                 />
-            </UploadProgressSectionContent>
-        </UploadProgressSection>
+            </SectionAccordionDetails>
+        </SectionAccordion>
     );
 };
 
