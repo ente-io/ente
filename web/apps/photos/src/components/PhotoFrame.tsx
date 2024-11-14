@@ -192,6 +192,8 @@ const PhotoFrame = ({
         return <div />;
     }
 
+    // Return a function which will return true if the URL was updated (for the
+    // given params), and false otherwise.
     const updateURL =
         (index: number) => (id: number, url: string, forceUpdate?: boolean) => {
             const file = displayFiles[index];
@@ -203,9 +205,10 @@ const PhotoFrame = ({
                 throw Error("update url file id mismatch");
             }
             if (file.msrc && !forceUpdate) {
-                throw Error(CustomError.URL_ALREADY_SET);
+                return false;
             }
             updateFileMsrcProps(file, url);
+            return true;
         };
 
     const updateSrcURL = async (
@@ -344,21 +347,20 @@ const PhotoFrame = ({
                 thumbFetching[item.id] = true;
                 const url = await DownloadManager.getThumbnailForPreview(item);
                 try {
-                    updateURL(index)(item.id, url);
-                    log.info(
-                        `[${item.id}] calling invalidateCurrItems for thumbnail msrc: ${!!item.msrc}`,
-                    );
-                    instance.invalidateCurrItems();
-                    if ((instance as any).isOpen()) {
-                        instance.updateSize(true);
+                    if (updateURL(index)(item.id, url)) {
+                        log.info(
+                            `[${item.id}] calling invalidateCurrItems for thumbnail msrc: ${!!item.msrc}`,
+                        );
+                        instance.invalidateCurrItems();
+                        if ((instance as any).isOpen()) {
+                            instance.updateSize(true);
+                        }
                     }
                 } catch (e) {
-                    if (e.message !== CustomError.URL_ALREADY_SET) {
-                        log.error(
-                            "updating photoswipe after msrc url update failed",
-                            e,
-                        );
-                    }
+                    log.error(
+                        "updating photoswipe after msrc url update failed",
+                        e,
+                    );
                     // ignore
                 }
             } catch (e) {
@@ -491,13 +493,14 @@ const PhotoFrame = ({
             return;
         }
         try {
-            updateURL(index)(item.id, item.msrc, true);
-            log.info(
-                `[${item.id}] calling invalidateCurrItems for thumbnail msrc: ${!!item.msrc}`,
-            );
-            instance.invalidateCurrItems();
-            if ((instance as any).isOpen()) {
-                instance.updateSize(true);
+            if (updateURL(index)(item.id, item.msrc, true)) {
+                log.info(
+                    `[${item.id}] calling invalidateCurrItems for thumbnail msrc: ${!!item.msrc}`,
+                );
+                instance.invalidateCurrItems();
+                if ((instance as any).isOpen()) {
+                    instance.updateSize(true);
+                }
             }
         } catch (e) {
             if (e.message !== CustomError.URL_ALREADY_SET) {
