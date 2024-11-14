@@ -53,10 +53,10 @@ const Disable2FA: React.FC<Disable2FAProps> = ({
             const userUrl = `${apiOrigin}/admin/user?email=${encodedEmail}`;
             const userResponse = await fetch(userUrl, {
                 method: "GET",
-                headers: { 
+                headers: {
                     "Content-Type": "application/json",
                     "X-Auth-Token": encodedToken,
-                 },
+                },
             });
             if (!userResponse.ok) {
                 throw new Error("Failed to fetch user data");
@@ -73,10 +73,10 @@ const Disable2FA: React.FC<Disable2FAProps> = ({
             const body = JSON.stringify({ userID });
             const disableResponse = await fetch(disableUrl, {
                 method: "POST",
-                headers: { 
+                headers: {
                     "Content-Type": "application/json",
                     "X-Auth-Token": encodedToken,
-                 },
+                },
                 body: body,
             });
 
