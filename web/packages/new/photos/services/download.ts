@@ -661,7 +661,7 @@ class PhotosDownloadClient implements DownloadClient {
         };
 
         const resp = await retryAsyncFunction(getThumbnail);
-        if (resp.data === undefined) throw Error(CustomError.REQUEST_FAILED);
+        if (resp.data === undefined) throw Error("request failed");
         // TODO: Remove this cast (it won't be needed when we migrate this from
         // axios to fetch).
         return new Uint8Array(resp.data as ArrayBuffer);
@@ -703,7 +703,7 @@ class PhotosDownloadClient implements DownloadClient {
         };
 
         const resp = await retryAsyncFunction(getFile);
-        if (resp.data === undefined) throw Error(CustomError.REQUEST_FAILED);
+        if (resp.data === undefined) throw Error("request failed");
         // TODO: Remove this cast (it won't be needed when we migrate this from
         // axios to fetch).
         return new Uint8Array(resp.data as ArrayBuffer);
@@ -820,7 +820,7 @@ class PublicAlbumsDownloadClient implements DownloadClient {
         };
 
         const resp = await getThumbnail();
-        if (resp.data === undefined) throw Error(CustomError.REQUEST_FAILED);
+        if (resp.data === undefined) throw Error("request failed");
         // TODO: Remove this cast (it won't be needed when we migrate this from
         // axios to fetch).
         return new Uint8Array(resp.data as ArrayBuffer);
@@ -871,7 +871,7 @@ class PublicAlbumsDownloadClient implements DownloadClient {
         };
 
         const resp = await retryAsyncFunction(getFile);
-        if (resp.data === undefined) throw Error(CustomError.REQUEST_FAILED);
+        if (resp.data === undefined) throw Error("request failed");
         // TODO: Remove this cast (it won't be needed when we migrate this from
         // axios to fetch).
         return new Uint8Array(resp.data as ArrayBuffer);

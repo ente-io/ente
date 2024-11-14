@@ -259,7 +259,7 @@ class UIService {
     ) {
         const cancel: { exec: Canceler } = { exec: () => {} };
         const cancelTimedOutRequest = () =>
-            cancel.exec(CustomError.REQUEST_TIMEOUT);
+            cancel.exec("Request timed out");
 
         const cancelCancelledUploadRequest = () =>
             cancel.exec(CustomError.UPLOAD_CANCELLED);

@@ -7,7 +7,6 @@ import { accountsAppOrigin, apiURL } from "@/base/origins";
 import { TwoFactorAuthorizationResponse } from "@/base/types/credentials";
 import { ensure } from "@/utils/ensure";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
-import { CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import {
     getData,
@@ -141,7 +140,7 @@ export const isPasskeyRecoveryEnabled = async () => {
         );
 
         if (typeof resp.data === "undefined") {
-            throw Error(CustomError.REQUEST_FAILED);
+            throw Error("request failed");
         }
 
         return resp.data["isPasskeyRecoveryEnabled"] as boolean;
@@ -173,7 +172,7 @@ const configurePasskeyRecovery = async (
         );
 
         if (typeof resp.data === "undefined") {
-            throw Error(CustomError.REQUEST_FAILED);
+            throw Error("request failed");
         }
     } catch (e) {
         log.error("failed to configure passkey recovery", e);
