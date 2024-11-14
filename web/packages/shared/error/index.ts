@@ -46,7 +46,6 @@ export const CustomError = {
     PROCESSING_FAILED: "processing failed",
     EXPORT_RECORD_JSON_PARSING_FAILED: "export record json parsing failed",
     TWO_FACTOR_ENABLED: "two factor enabled",
-    URL_ALREADY_SET: "url already set",
 };
 
 export function handleUploadError(error: any): Error {

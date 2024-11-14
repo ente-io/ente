@@ -6,7 +6,6 @@ import type { GalleryBarMode } from "@/new/photos/components/gallery/reducer";
 import { TRASH_SECTION } from "@/new/photos/services/collection";
 import DownloadManager from "@/new/photos/services/download";
 import { PHOTOS_PAGES } from "@ente/shared/constants/pages";
-import { CustomError } from "@ente/shared/error";
 import useMemoSingleThreaded from "@ente/shared/hooks/useMemoSingleThreaded";
 import { styled } from "@mui/material";
 import PhotoViewer, { type PhotoViewerProps } from "components/PhotoViewer";
@@ -211,6 +210,8 @@ const PhotoFrame = ({
             return true;
         };
 
+    // Return true if the URL was updated (for the given params), and false
+    // otherwise.
     const updateSrcURL = async (
         index: number,
         id: number,
@@ -226,13 +227,14 @@ const PhotoFrame = ({
             throw Error("update url file id mismatch");
         }
         if (file.isSourceLoaded && !forceUpdate) {
-            throw Error(CustomError.URL_ALREADY_SET);
+            return false;
         } else if (file.conversionFailed) {
             log.info(`[${id}]PhotoSwipe: updateSrcURL: conversion failed`);
             throw Error("file conversion failed");
         }
 
         await updateFileSrcProps(file, srcURLs, enableDownload);
+        return true;
     };
 
     const handleClose = (needUpdate) => {
@@ -398,21 +400,20 @@ const PhotoFrame = ({
                     type: "normal",
                 };
                 try {
-                    await updateSrcURL(index, item.id, dummyImgSrcUrl);
-                    log.info(
-                        `[${item.id}] calling invalidateCurrItems for live photo imgSrc, source loaded: ${item.isSourceLoaded}`,
-                    );
-                    instance.invalidateCurrItems();
-                    if ((instance as any).isOpen()) {
-                        instance.updateSize(true);
+                    if (await updateSrcURL(index, item.id, dummyImgSrcUrl)) {
+                        log.info(
+                            `[${item.id}] calling invalidateCurrItems for live photo imgSrc, source loaded: ${item.isSourceLoaded}`,
+                        );
+                        instance.invalidateCurrItems();
+                        if ((instance as any).isOpen()) {
+                            instance.updateSize(true);
+                        }
                     }
                 } catch (e) {
-                    if (e.message !== CustomError.URL_ALREADY_SET) {
-                        log.error(
-                            "updating photoswipe after for live photo imgSrc update failed",
-                            e,
-                        );
-                    }
+                    log.error(
+                        "updating photoswipe after for live photo imgSrc update failed",
+                        e,
+                    );
                 }
                 if (!imageURL) {
                     // no image url, no need to load video
@@ -427,44 +428,43 @@ const PhotoFrame = ({
                     type: "livePhoto",
                 };
                 try {
-                    await updateSrcURL(
+                    const updated = await updateSrcURL(
                         index,
                         item.id,
                         loadedLivePhotoSrcURL,
                         true,
                     );
-                    log.info(
-                        `[${item.id}] calling invalidateCurrItems for live photo complete, source loaded: ${item.isSourceLoaded}`,
-                    );
-                    instance.invalidateCurrItems();
-                    if ((instance as any).isOpen()) {
-                        instance.updateSize(true);
+                    if (updated) {
+                        log.info(
+                            `[${item.id}] calling invalidateCurrItems for live photo complete, source loaded: ${item.isSourceLoaded}`,
+                        );
+                        instance.invalidateCurrItems();
+                        if ((instance as any).isOpen()) {
+                            instance.updateSize(true);
+                        }
                     }
                 } catch (e) {
-                    if (e.message !== CustomError.URL_ALREADY_SET) {
-                        log.error(
-                            "updating photoswipe for live photo complete update failed",
-                            e,
-                        );
-                    }
+                    log.error(
+                        "updating photoswipe for live photo complete update failed",
+                        e,
+                    );
                 }
             } else {
                 try {
-                    await updateSrcURL(index, item.id, srcURLs);
-                    log.info(
-                        `[${item.id}] calling invalidateCurrItems for src, source loaded: ${item.isSourceLoaded}`,
-                    );
-                    instance.invalidateCurrItems();
-                    if ((instance as any).isOpen()) {
-                        instance.updateSize(true);
+                    if (await updateSrcURL(index, item.id, srcURLs)) {
+                        log.info(
+                            `[${item.id}] calling invalidateCurrItems for src, source loaded: ${item.isSourceLoaded}`,
+                        );
+                        instance.invalidateCurrItems();
+                        if ((instance as any).isOpen()) {
+                            instance.updateSize(true);
+                        }
                     }
                 } catch (e) {
-                    if (e.message !== CustomError.URL_ALREADY_SET) {
-                        log.error(
-                            "updating photoswipe after src url update failed",
-                            e,
-                        );
-                    }
+                    log.error(
+                        "updating photoswipe after src url update failed",
+                        e,
+                    );
                 }
             }
         } catch (e) {
@@ -503,12 +503,7 @@ const PhotoFrame = ({
                 }
             }
         } catch (e) {
-            if (e.message !== CustomError.URL_ALREADY_SET) {
-                log.error(
-                    "updating photoswipe after msrc url update failed",
-                    e,
-                );
-            }
+            log.error("updating photoswipe after msrc url update failed", e);
             // ignore
         }
         try {
@@ -522,21 +517,17 @@ const PhotoFrame = ({
             });
 
             try {
-                await updateSrcURL(index, item.id, srcURL, true);
-                log.info(
-                    `[${item.id}] calling invalidateCurrItems for src, source loaded: ${item.isSourceLoaded}`,
-                );
-                instance.invalidateCurrItems();
-                if ((instance as any).isOpen()) {
-                    instance.updateSize(true);
+                if (await updateSrcURL(index, item.id, srcURL, true)) {
+                    log.info(
+                        `[${item.id}] calling invalidateCurrItems for src, source loaded: ${item.isSourceLoaded}`,
+                    );
+                    instance.invalidateCurrItems();
+                    if ((instance as any).isOpen()) {
+                        instance.updateSize(true);
+                    }
                 }
             } catch (e) {
-                if (e.message !== CustomError.URL_ALREADY_SET) {
-                    log.error(
-                        "updating photoswipe after src url update failed",
-                        e,
-                    );
-                }
+                log.error("updating photoswipe after src url update failed", e);
                 throw e;
             }
         } catch (e) {
