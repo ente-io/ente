@@ -377,8 +377,8 @@ class _ModelLoadingStateState extends State<ModelLoadingState> {
                 if (snapshot.data!) {
                   MLIndexingIsolate.instance.triggerModelsDownload();
                   return CaptionedTextWidget(
-                    title: S.of(context).loadingModel,
-                    key: const ValueKey("loading_model"),
+                    title: S.of(context).checkingModels,
+                    key: const ValueKey("checking_model"),
                   );
                 } else {
                   return CaptionedTextWidget(

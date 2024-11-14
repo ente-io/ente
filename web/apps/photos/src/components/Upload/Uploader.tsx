@@ -12,8 +12,8 @@ import { exportMetadataDirectoryName } from "@/new/photos/services/export";
 import type {
     FileAndPath,
     UploadItem,
+    UploadPhase,
 } from "@/new/photos/services/upload/types";
-import { UPLOAD_STAGES } from "@/new/photos/services/upload/types";
 import { redirectToCustomerPortal } from "@/new/photos/services/user-details";
 import { useAppContext } from "@/new/photos/types/context";
 import { NotificationAttributes } from "@/new/photos/types/notification";
@@ -46,7 +46,7 @@ import { SetLoading } from "types/gallery";
 import { getOrCreateAlbum } from "utils/collection";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import { SetCollectionNamerAttributes } from "../Collections/CollectionNamer";
-import UploadProgress from "./UploadProgress";
+import { UploadProgress } from "./UploadProgress";
 import {
     UploadTypeSelector,
     type UploadTypeSelectorIntent,
@@ -121,9 +121,7 @@ export default function Uploader({
     );
 
     const [uploadProgressView, setUploadProgressView] = useState(false);
-    const [uploadStage, setUploadStage] = useState<UPLOAD_STAGES>(
-        UPLOAD_STAGES.START,
-    );
+    const [uploadPhase, setUploadPhase] = useState<UploadPhase>("preparing");
     const [uploadFileNames, setUploadFileNames] = useState<UploadFileNames>();
     const [uploadCounter, setUploadCounter] = useState<UploadCounter>({
         finished: 0,
@@ -245,7 +243,7 @@ export default function Uploader({
                 setUploadCounter,
                 setInProgressUploads,
                 setFinishedUploads,
-                setUploadStage,
+                setUploadPhase,
                 setUploadFilenames: setUploadFileNames,
                 setHasLivePhotos,
                 setUploadProgressView,
@@ -486,7 +484,7 @@ export default function Uploader({
     const preCollectionCreationAction = async () => {
         props.onCloseCollectionSelector?.();
         props.setShouldDisableDropzone(!uploadManager.shouldAllowNewUpload());
-        setUploadStage(UPLOAD_STAGES.START);
+        setUploadPhase("preparing");
         setUploadProgressView(true);
     };
 
@@ -802,7 +800,7 @@ export default function Uploader({
                 percentComplete={percentComplete}
                 uploadFileNames={uploadFileNames}
                 uploadCounter={uploadCounter}
-                uploadStage={uploadStage}
+                uploadPhase={uploadPhase}
                 inProgressUploads={inProgressUploads}
                 hasLivePhotos={hasLivePhotos}
                 retryFailed={retryFailed}

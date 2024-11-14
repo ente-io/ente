@@ -63,10 +63,12 @@ const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
                 const email = getEmail();
                 const token = getToken();
                 const encodedEmail = encodeURIComponent(email);
-                const encodedToken = encodeURIComponent(token);
-                const url = `${apiOrigin}/admin/user?email=${encodedEmail}&token=${encodedToken}`;
-
-                const response = await fetch(url);
+                const url = `${apiOrigin}/admin/user?email=${encodedEmail}`;
+                const response = await fetch(url, {
+                    headers: {
+                        "X-AUTH-TOKEN": token,
+                    },
+                });
                 if (!response.ok) {
                     throw new Error("Network response was not ok");
                 }
@@ -172,7 +174,11 @@ const UpdateSubscription: React.FC<UpdateSubscriptionProps> = ({
                 console.log("Subscription updated successfully");
                 onClose();
             } catch (error) {
-                console.error("Error updating subscription:", error);
+                if (error instanceof Error) {
+                    alert(`Failed to update subscription: ${error.message}`);
+                } else {
+                    alert("Failed to update subscription");
+                }
             }
         })().catch((error: unknown) => {
             console.error("Unhandled promise rejection:", error);

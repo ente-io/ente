@@ -34,7 +34,6 @@ import { getLocalFiles, sortFiles } from "@/new/photos/services/files";
 import { updateMagicMetadata } from "@/new/photos/services/magic-metadata";
 import type { FamilyData } from "@/new/photos/services/user-details";
 import { batch } from "@/utils/array";
-import { CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import localForage from "@ente/shared/storage/localForage";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
@@ -423,7 +422,7 @@ export const removeFromFavorites = async (file: EnteFile) => {
     try {
         const favCollection = await getFavCollection();
         if (!favCollection) {
-            throw Error(CustomError.FAV_COLLECTION_MISSING);
+            throw Error("favorite collection missing");
         }
         await removeFromCollection(favCollection.id, [file]);
     } catch (e) {

@@ -240,6 +240,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Patikrinkite savo gautieją (ir šlamštą), kad užbaigtumėte patvirtinimą"),
         "checkStatus": MessageLookupByLibrary.simpleMessage("Tikrinti būseną"),
         "checking": MessageLookupByLibrary.simpleMessage("Tikrinama..."),
+        "checkingModels":
+            MessageLookupByLibrary.simpleMessage("Checking models..."),
         "cleanUncategorized":
             MessageLookupByLibrary.simpleMessage("Valyti nekategorizuotą"),
         "cleanUncategorizedDescription": MessageLookupByLibrary.simpleMessage(

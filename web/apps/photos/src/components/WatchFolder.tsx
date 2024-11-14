@@ -7,6 +7,7 @@ import { ensureElectron } from "@/base/electron";
 import { basename, dirname } from "@/base/file";
 import type { CollectionMapping, FolderWatch } from "@/base/types/ipc";
 import { CollectionMappingChoiceDialog } from "@/new/photos/components/CollectionMappingChoiceDialog";
+import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";
 import { AppContext, useAppContext } from "@/new/photos/types/context";
 import { ensure } from "@/utils/ensure";
 import {
@@ -17,7 +18,6 @@ import {
 } from "@ente/shared/components/Container";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
 import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
-import DialogTitleWithCloseButton from "@ente/shared/components/TitleWithCloseButton";
 import CheckIcon from "@mui/icons-material/Check";
 import DoNotDisturbOutlinedIcon from "@mui/icons-material/DoNotDisturbOutlined";
 import FolderCopyOutlinedIcon from "@mui/icons-material/FolderCopyOutlined";
@@ -29,6 +29,7 @@ import {
     CircularProgress,
     Dialog,
     DialogContent,
+    DialogTitle,
     Stack,
     Tooltip,
     Typography,
@@ -119,11 +120,12 @@ export const WatchFolder: React.FC<ModalVisibilityProps> = ({
                 fullWidth
                 PaperProps={{ sx: { height: "448px", maxWidth: "414px" } }}
             >
-                <Title_>
-                    <DialogTitleWithCloseButton onClose={onClose}>
+                <SpaceBetweenFlex sx={{ p: "16px 8px 8px 8px" }}>
+                    <DialogTitle variant="h3" fontWeight={"bold"}>
                         {t("WATCHED_FOLDERS")}
-                    </DialogTitleWithCloseButton>
-                </Title_>
+                    </DialogTitle>
+                    <DialogCloseIconButton {...{ onClose }} />
+                </SpaceBetweenFlex>
                 <DialogContent sx={{ flex: 1 }}>
                     <Stack spacing={1} p={1.5} height={"100%"}>
                         <WatchList {...{ watches, removeWatch }} />
@@ -146,10 +148,6 @@ export const WatchFolder: React.FC<ModalVisibilityProps> = ({
         </>
     );
 };
-
-const Title_ = styled("div")`
-    padding: 16px 12px 16px 16px;
-`;
 
 interface WatchList {
     watches: FolderWatch[] | undefined;

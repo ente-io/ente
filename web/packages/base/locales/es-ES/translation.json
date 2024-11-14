@@ -59,7 +59,6 @@
     "UPLOAD_STAGE_MESSAGE": {
         "0": "Preparando la subida",
         "1": "Leyendo archivos de metadatos de google",
-        "2": "{{uploadCounter.finished}} / {{uploadCounter.total}} archivos metadatos extraídos",
         "3": "{{uploadCounter.finished}} / {{uploadCounter.total}} archivos metadatos extraídos",
         "4": "Cancelar subidas restantes",
         "5": "Copia de seguridad completa"
@@ -307,7 +306,6 @@
     "SKIPPED_INFO": "",
     "UNSUPPORTED_INFO": "ente no soporta estos formatos de archivo aún",
     "BLOCKED_UPLOADS": "Subidas bloqueadas",
-    "INPROGRESS_METADATA_EXTRACTION": "En proceso",
     "INPROGRESS_UPLOADS": "Subidas en progreso",
     "TOO_LARGE_UPLOADS": "Archivos grandes",
     "LARGER_THAN_AVAILABLE_STORAGE_UPLOADS": "Espacio insuficiente",

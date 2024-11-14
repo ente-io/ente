@@ -22,57 +22,28 @@ export function isApiErrorResponse(object: any): object is ApiErrorResponse {
 }
 
 export const CustomError = {
-    VIDEO_PLAYBACK_FAILED: "video playback failed",
     ETAG_MISSING: "no header/etag present in response body",
     KEY_MISSING: "encrypted key missing from localStorage",
-    FAILED_TO_LOAD_WEB_WORKER: "failed to load web worker",
     UNSUPPORTED_FILE_FORMAT: "unsupported file format",
     FILE_TOO_LARGE: "file too large",
     SUBSCRIPTION_EXPIRED: "subscription expired",
     STORAGE_QUOTA_EXCEEDED: "storage quota exceeded",
     SESSION_EXPIRED: "session expired",
-    INVALID_MIME_TYPE: (type: string) => `invalid mime type -${type}`,
-    SIGNUP_FAILED: "signup failed",
-    FAV_COLLECTION_MISSING: "favorite collection missing",
-    INVALID_COLLECTION_OPERATION: "invalid collection operation",
-    TO_MOVE_FILES_FROM_MULTIPLE_COLLECTIONS:
-        "to move files from multiple collections",
-    REQUEST_CANCELLED: "request canceled",
-    REQUEST_FAILED: "request failed",
     TOKEN_EXPIRED: "token expired",
     TOKEN_MISSING: "token missing",
     TOO_MANY_REQUESTS: "too many requests",
     BAD_REQUEST: "bad request",
     SUBSCRIPTION_NEEDED: "subscription not present",
     NOT_FOUND: "not found ",
-    NO_METADATA: "no metadata",
-    FILE_ID_NOT_FOUND: "file with id not found",
     WEAK_DEVICE: "password decryption failed on the device",
     INCORRECT_PASSWORD: "incorrect password",
     UPLOAD_CANCELLED: "upload cancelled",
-    REQUEST_TIMEOUT: "request taking too long",
-    HIDDEN_COLLECTION_SYNC_FILE_ATTEMPTED:
-        "hidden collection sync file attempted",
-    UNKNOWN_ERROR: "Something went wrong, please try again",
-    WINDOWS_NATIVE_IMAGE_PROCESSING_NOT_SUPPORTED:
-        "Windows native image processing is not supported",
-    NETWORK_ERROR: "Network Error",
-    NOT_FILE_OWNER: "not file owner",
     UPDATE_EXPORTED_RECORD_FAILED: "update file exported record failed",
     EXPORT_STOPPED: "export stopped",
-    NO_EXPORT_FOLDER_SELECTED: "no export folder selected",
     EXPORT_FOLDER_DOES_NOT_EXIST: "export folder does not exist",
     AUTH_KEY_NOT_FOUND: "auth key not found",
-    EXIF_DATA_NOT_FOUND: "exif data not found",
-    SELECT_FOLDER_ABORTED: "select folder aborted",
     PROCESSING_FAILED: "processing failed",
-    EXPORT_RECORD_JSON_PARSING_FAILED: "export record json parsing failed",
     TWO_FACTOR_ENABLED: "two factor enabled",
-    CLIENT_ERROR: "client error",
-    ServerError: "server error",
-    UPDATE_URL_FILE_ID_MISMATCH: "update url file id mismatch",
-    URL_ALREADY_SET: "url already set",
-    FILE_CONVERSION_FAILED: "file conversion failed",
 };
 
 export function handleUploadError(error: any): Error {
@@ -106,7 +77,7 @@ export function parseUploadErrorCodes(error: any) {
                 parsedMessage = CustomError.FILE_TOO_LARGE;
                 break;
             default:
-                parsedMessage = `${CustomError.UNKNOWN_ERROR} statusCode:${error.httpStatusCode}`;
+                parsedMessage = `Something went wrong (statusCode:${error.httpStatusCode})`;
         }
     } else {
         parsedMessage = error.message;
@@ -135,7 +106,7 @@ export const parseSharingErrorCodes = (error: any) => {
                 parsedMessage = CustomError.TOO_MANY_REQUESTS;
                 break;
             default:
-                parsedMessage = `${CustomError.UNKNOWN_ERROR} statusCode:${error.httpStatusCode}`;
+                parsedMessage = `Something went wrong (statusCode:${error.httpStatusCode})`;
         }
     } else {
         parsedMessage = error.message;

@@ -36,6 +36,7 @@ export class SearchWorker {
     private collectionsAndFiles: SearchCollectionsAndFiles = {
         collections: [],
         files: [],
+        collectionFiles: [],
     };
     private people: NamedPerson[] = [];
 
@@ -94,19 +95,16 @@ export class SearchWorker {
      * Return {@link EnteFile}s that satisfy the given {@link suggestion}.
      */
     filterSearchableFiles(suggestion: SearchSuggestion) {
-        return filterSearchableFiles(
-            this.collectionsAndFiles.files,
-            suggestion,
-        );
+        return filterSearchableFiles(this.collectionsAndFiles, suggestion);
     }
 
     /**
      * Batched variant of {@link filterSearchableFiles}.
      */
     filterSearchableFilesMulti(suggestions: SearchSuggestion[]) {
-        const files = this.collectionsAndFiles.files;
+        const cf = this.collectionsAndFiles;
         return suggestions
-            .map((sg) => [filterSearchableFiles(files, sg), sg] as const)
+            .map((sg) => [filterSearchableFiles(cf, sg), sg] as const)
             .filter(([files]) => files.length);
     }
 }
@@ -350,11 +348,13 @@ const locationSuggestions = (
 };
 
 const filterSearchableFiles = (
-    files: EnteFile[],
+    { files, collectionFiles }: SearchCollectionsAndFiles,
     suggestion: SearchSuggestion,
 ) =>
     sortMatchesIfNeeded(
-        files.filter((f) => isMatchingFile(f, suggestion)),
+        (suggestion.type == "collection" ? collectionFiles : files).filter(
+            (f) => isMatchingFile(f, suggestion),
+        ),
         suggestion,
     );
 

@@ -59,7 +59,7 @@ func (t BonusType) RestrictToDoublingStorage() bool {
 	switch t {
 	case Referral, SignUp:
 		return true
-	case AddOnSupport, AddOnBf2023:
+	case AddOnSupport, AddOnBf2023, AddOnBf2024:
 		return false
 	default:
 		return true

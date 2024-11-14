@@ -286,7 +286,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "allMemoriesPreserved":
             MessageLookupByLibrary.simpleMessage("Всі спогади збережені"),
         "allPersonGroupingWillReset": MessageLookupByLibrary.simpleMessage(
-            "All groupings for this person will be reset, and you will lose all suggestions made for this person"),
+            "Усі групи для цієї особи будуть скинуті, і ви втратите всі пропозиції, зроблені для неї"),
         "allowAddPhotosDescription": MessageLookupByLibrary.simpleMessage(
             "Дозволити людям з посиланням також додавати фотографії до спільного альбому."),
         "allowAddingPhotos": MessageLookupByLibrary.simpleMessage(
@@ -348,7 +348,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Ви впевнені, що хочете поновити?"),
         "areYouSureYouWantToResetThisPerson":
             MessageLookupByLibrary.simpleMessage(
-                "Are you sure you want to reset this person?"),
+                "Ви впевнені, що хочете скинути цю особу?"),
         "askCancelReason": MessageLookupByLibrary.simpleMessage(
             "Передплату було скасовано. Ви хотіли б поділитися причиною?"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
@@ -464,6 +464,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Перевірте вашу поштову скриньку (та спам), щоб завершити перевірку"),
         "checkStatus": MessageLookupByLibrary.simpleMessage("Перевірити стан"),
         "checking": MessageLookupByLibrary.simpleMessage("Перевірка..."),
+        "checkingModels":
+            MessageLookupByLibrary.simpleMessage("Checking models..."),
         "claimFreeStorage":
             MessageLookupByLibrary.simpleMessage("Отримайте безплатне сховище"),
         "claimMore": MessageLookupByLibrary.simpleMessage("Отримайте більше!"),
@@ -1158,7 +1160,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "onEnte":
             MessageLookupByLibrary.simpleMessage("В <branding>Ente</branding>"),
         "onlyFamilyAdminCanChangeCode": m43,
-        "onlyThem": MessageLookupByLibrary.simpleMessage("Only them"),
         "oops": MessageLookupByLibrary.simpleMessage("От халепа"),
         "oopsCouldNotSaveEdits": MessageLookupByLibrary.simpleMessage(
             "Ой, не вдалося зберегти зміни"),
@@ -1381,7 +1382,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Скинути ігноровані файли"),
         "resetPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Скинути пароль"),
-        "resetPerson": MessageLookupByLibrary.simpleMessage("Reset person"),
+        "resetPerson": MessageLookupByLibrary.simpleMessage("Скинути особу"),
         "resetToDefault":
             MessageLookupByLibrary.simpleMessage("Скинути до типових"),
         "restore": MessageLookupByLibrary.simpleMessage("Відновити"),
@@ -1811,7 +1812,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "yesRemove": MessageLookupByLibrary.simpleMessage("Так, видалити"),
         "yesRenew": MessageLookupByLibrary.simpleMessage("Так, поновити"),
         "yesResetPerson":
-            MessageLookupByLibrary.simpleMessage("Yes, reset person"),
+            MessageLookupByLibrary.simpleMessage("Так, скинути особу"),
         "you": MessageLookupByLibrary.simpleMessage("Ви"),
         "youAreOnAFamilyPlan":
             MessageLookupByLibrary.simpleMessage("Ви на сімейному плані!"),

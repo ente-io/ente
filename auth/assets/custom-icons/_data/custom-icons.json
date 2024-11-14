@@ -49,6 +49,13 @@
       "title": "Aternos"
     },
     {
+      "title": "authentik",
+      "altNames": [
+        "goauthentik"
+      ],
+      "hex": "fd4b2d"
+    },
+    {
       "title": "BaiduCloud",
       "altNames": [
         "百度云",
@@ -194,7 +201,7 @@
     {
       "title": "Capcom"
     },
-	{
+    {
       "title": "Carta",
       "altNames": [
         "Carta.com"
@@ -524,7 +531,7 @@
     {
       "title": "Kite"
     },
-	{
+    {
       "title": "KnownHost",
       "altNames": [
         "Known Host",
@@ -532,7 +539,7 @@
       ]
     },
     {
-        "title": "Ko-fi",
+      "title": "Ko-fi",
       "altNames": [
         "Ko fi",
         "Kofi"
@@ -628,6 +635,10 @@
     },
     {
       "title": "Microsoft"
+    },
+    {
+      "title": "Microsoft 365",
+      "slug": "microsoft365"
     },
     {
       "title": "Microsoft Azure"
@@ -860,6 +871,13 @@
       "title": "Railway"
     },
     {
+      "title": "Raindrop.io",
+      "slug": "raindrop_io",
+      "altNames": [
+        "Raindrop"
+      ]
+    },
+    {
       "title": "Rapidgator"
     },
     {
@@ -1075,7 +1093,7 @@
     {
       "title": "Tresorit"
     },
-	{
+    {
       "title": "TRowePrice",
       "altNames": [
         "T Rowe Price",
@@ -1156,6 +1174,10 @@
     },
     {
       "title": "Wealthsimple"
+    },
+    {
+      "title": "WEB.DE",
+      "slug": "web_de"
     },
     {
       "title": "Wetransfer"

@@ -59,7 +59,6 @@
     "UPLOAD_STAGE_MESSAGE": {
         "0": "Upload wordt voorbereid",
         "1": "Lezen van Google metadata bestanden",
-        "2": "{{uploadCounter.finished, number}} / {{uploadCounter.total, number}} bestanden metadata uitgepakt",
         "3": "{{uploadCounter.finished, number}} / {{uploadCounter.total, number}} bestanden geback-upt",
         "4": "Resterende uploads worden geannuleerd",
         "5": "Back-up voltooid"
@@ -307,7 +306,6 @@
     "SKIPPED_INFO": "Deze zijn overgeslagen omdat er bestanden met dezelfde naam en inhoud in hetzelfde album staan",
     "UNSUPPORTED_INFO": "Ente ondersteunt deze bestandsformaten nog niet",
     "BLOCKED_UPLOADS": "Geblokkeerde uploads",
-    "INPROGRESS_METADATA_EXTRACTION": "In behandeling",
     "INPROGRESS_UPLOADS": "Bezig met uploaden",
     "TOO_LARGE_UPLOADS": "Grote bestanden",
     "LARGER_THAN_AVAILABLE_STORAGE_UPLOADS": "Onvoldoende opslagruimte",

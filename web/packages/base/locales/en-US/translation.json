@@ -59,7 +59,6 @@
     "UPLOAD_STAGE_MESSAGE": {
         "0": "Preparing to upload",
         "1": "Reading google metadata files",
-        "2": "{{uploadCounter.finished, number}} / {{uploadCounter.total, number}} files metadata extracted",
         "3": "{{uploadCounter.finished, number}} / {{uploadCounter.total, number}} files processed",
         "4": "Cancelling remaining uploads",
         "5": "Backup complete"
@@ -307,7 +306,6 @@
     "SKIPPED_INFO": "Skipped these as there are files with matching name and content in the same album",
     "UNSUPPORTED_INFO": "Ente does not support these file formats yet",
     "BLOCKED_UPLOADS": "Blocked uploads",
-    "INPROGRESS_METADATA_EXTRACTION": "In progress",
     "INPROGRESS_UPLOADS": "Uploads in progress",
     "TOO_LARGE_UPLOADS": "Large files",
     "LARGER_THAN_AVAILABLE_STORAGE_UPLOADS": "Insufficient storage",

@@ -235,6 +235,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Comprendo che se perdo la password potrei perdere l\'accesso ai miei dati poiché sono <underline>criptati end-to-end</underline>."),
         "activeSessions":
             MessageLookupByLibrary.simpleMessage("Sessioni attive"),
+        "add": MessageLookupByLibrary.simpleMessage("Aggiungi"),
         "addAName": MessageLookupByLibrary.simpleMessage("Aggiungi un nome"),
         "addANewEmail":
             MessageLookupByLibrary.simpleMessage("Aggiungi una nuova email"),
@@ -247,7 +248,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "addLocation": MessageLookupByLibrary.simpleMessage("Aggiungi luogo"),
         "addLocationButton": MessageLookupByLibrary.simpleMessage("Aggiungi"),
         "addMore": MessageLookupByLibrary.simpleMessage("Aggiungi altri"),
+        "addName": MessageLookupByLibrary.simpleMessage("Aggiungi nome"),
+        "addNameOrMerge":
+            MessageLookupByLibrary.simpleMessage("Aggiungi nome o unisci"),
         "addNew": MessageLookupByLibrary.simpleMessage("Aggiungi nuovo"),
+        "addNewPerson":
+            MessageLookupByLibrary.simpleMessage("Aggiungi nuova persona"),
         "addOnPageSubtitle": MessageLookupByLibrary.simpleMessage(
             "Dettagli dei componenti aggiuntivi"),
         "addOnValidTill": m8,
@@ -288,7 +294,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "allMemoriesPreserved":
             MessageLookupByLibrary.simpleMessage("Tutti i ricordi conservati"),
         "allPersonGroupingWillReset": MessageLookupByLibrary.simpleMessage(
-            "All groupings for this person will be reset, and you will lose all suggestions made for this person"),
+            "Tutti i raggruppamenti per questa persona saranno resettati e perderai tutti i suggerimenti fatti per questa persona"),
         "allowAddPhotosDescription": MessageLookupByLibrary.simpleMessage(
             "Permetti anche alle persone con il link di aggiungere foto all\'album condiviso."),
         "allowAddingPhotos": MessageLookupByLibrary.simpleMessage(
@@ -347,7 +353,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Sei sicuro di volere rinnovare?"),
         "areYouSureYouWantToResetThisPerson":
             MessageLookupByLibrary.simpleMessage(
-                "Are you sure you want to reset this person?"),
+                "Sei sicuro di voler resettare questa persona?"),
         "askCancelReason": MessageLookupByLibrary.simpleMessage(
             "Il tuo abbonamento è stato annullato. Vuoi condividere il motivo?"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
@@ -461,6 +467,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "checkStatus": MessageLookupByLibrary.simpleMessage("Verifica stato"),
         "checking":
             MessageLookupByLibrary.simpleMessage("Controllo in corso..."),
+        "checkingModels":
+            MessageLookupByLibrary.simpleMessage("Checking models..."),
         "claimFreeStorage":
             MessageLookupByLibrary.simpleMessage("Richiedi spazio gratuito"),
         "claimMore": MessageLookupByLibrary.simpleMessage("Richiedine di più!"),
@@ -510,6 +518,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "collectPhotosDescription": MessageLookupByLibrary.simpleMessage(
             "Crea un link dove i tuoi amici possono caricare le foto in qualità originale."),
         "color": MessageLookupByLibrary.simpleMessage("Colore"),
+        "configuration": MessageLookupByLibrary.simpleMessage("Configurazione"),
         "confirm": MessageLookupByLibrary.simpleMessage("Conferma"),
         "confirm2FADisable": MessageLookupByLibrary.simpleMessage(
             "Sei sicuro di voler disattivare l\'autenticazione a due fattori?"),
@@ -785,6 +794,10 @@ class MessageLookup extends MessageLookupByLibrary {
             "Questo link è scaduto. Si prega di selezionare un nuovo orario di scadenza o disabilitare la scadenza del link."),
         "exportLogs": MessageLookupByLibrary.simpleMessage("Esporta log"),
         "exportYourData": MessageLookupByLibrary.simpleMessage("Esporta dati"),
+        "extraPhotosFound":
+            MessageLookupByLibrary.simpleMessage("Trovate foto aggiuntive"),
+        "extraPhotosFoundFor": MessageLookupByLibrary.simpleMessage(
+            "Trovate foto aggiuntive per \$text"),
         "faceRecognition":
             MessageLookupByLibrary.simpleMessage("Riconoscimento facciale"),
         "faces": MessageLookupByLibrary.simpleMessage("Volti"),
@@ -1000,6 +1013,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "loadingYourPhotos":
             MessageLookupByLibrary.simpleMessage("Caricando le tue foto..."),
         "localGallery": MessageLookupByLibrary.simpleMessage("Galleria locale"),
+        "localIndexing":
+            MessageLookupByLibrary.simpleMessage("Indicizzazione locale"),
         "localSyncErrorMessage": MessageLookupByLibrary.simpleMessage(
             "Sembra che qualcosa sia andato storto dal momento che la sincronizzazione delle foto locali richiede più tempo del previsto. Si prega di contattare il nostro team di supporto"),
         "location": MessageLookupByLibrary.simpleMessage("Luogo"),
@@ -1056,6 +1071,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "matrix": MessageLookupByLibrary.simpleMessage("Matrix"),
         "memoryCount": m3,
         "merchandise": MessageLookupByLibrary.simpleMessage("Merchandise"),
+        "mergeWithExisting":
+            MessageLookupByLibrary.simpleMessage("Unisci con esistente"),
         "mlConsent": MessageLookupByLibrary.simpleMessage(
             "Abilita l\'apprendimento automatico"),
         "mlConsentConfirmation": MessageLookupByLibrary.simpleMessage(
@@ -1098,6 +1115,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Impossibile connettersi a Ente, controlla le impostazioni di rete e contatta l\'assistenza se l\'errore persiste."),
         "never": MessageLookupByLibrary.simpleMessage("Mai"),
         "newAlbum": MessageLookupByLibrary.simpleMessage("Nuovo album"),
+        "newPerson": MessageLookupByLibrary.simpleMessage("Nuova persona"),
         "newToEnte":
             MessageLookupByLibrary.simpleMessage("Prima volta con Ente"),
         "newest": MessageLookupByLibrary.simpleMessage("Più recenti"),
@@ -1146,7 +1164,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "onEnte": MessageLookupByLibrary.simpleMessage(
             "Su <branding>ente</branding>"),
         "onlyFamilyAdminCanChangeCode": m43,
-        "onlyThem": MessageLookupByLibrary.simpleMessage("Only them"),
+        "onlyThem": MessageLookupByLibrary.simpleMessage("Solo loro"),
         "oops": MessageLookupByLibrary.simpleMessage("Oops"),
         "oopsCouldNotSaveEdits": MessageLookupByLibrary.simpleMessage(
             "Ops, impossibile salvare le modifiche"),
@@ -1202,6 +1220,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Elimina definitivamente"),
         "permanentlyDeleteFromDevice": MessageLookupByLibrary.simpleMessage(
             "Eliminare definitivamente dal dispositivo?"),
+        "personName":
+            MessageLookupByLibrary.simpleMessage("Nome della persona"),
         "photoDescriptions":
             MessageLookupByLibrary.simpleMessage("Descrizioni delle foto"),
         "photoGridSize":
@@ -1359,7 +1379,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Ripristina i file ignorati"),
         "resetPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Reimposta password"),
-        "resetPerson": MessageLookupByLibrary.simpleMessage("Reset person"),
+        "resetPerson": MessageLookupByLibrary.simpleMessage("Resetta persona"),
         "resetToDefault":
             MessageLookupByLibrary.simpleMessage("Ripristina predefinita"),
         "restore": MessageLookupByLibrary.simpleMessage("Ripristina"),
@@ -1794,7 +1814,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "yesRemove": MessageLookupByLibrary.simpleMessage("Sì, rimuovi"),
         "yesRenew": MessageLookupByLibrary.simpleMessage("Sì, Rinnova"),
         "yesResetPerson":
-            MessageLookupByLibrary.simpleMessage("Yes, reset person"),
+            MessageLookupByLibrary.simpleMessage("Sì, resetta persona"),
         "you": MessageLookupByLibrary.simpleMessage("Tu"),
         "youAreOnAFamilyPlan": MessageLookupByLibrary.simpleMessage(
             "Sei un utente con piano famiglia!"),

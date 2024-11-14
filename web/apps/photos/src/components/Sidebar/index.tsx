@@ -3,6 +3,7 @@ import { openAccountsManagePasskeysPage } from "@/accounts/services/passkey";
 import { isDesktop } from "@/base/app";
 import { EnteLogo } from "@/base/components/EnteLogo";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { SpaceBetweenFlex } from "@/base/components/mui/Container";
 import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import { useModalVisibility } from "@/base/components/utils/modal";
 import { useIsSmallWidth } from "@/base/hooks";
@@ -10,6 +11,7 @@ import log from "@/base/log";
 import { savedLogs } from "@/base/log-web";
 import { customAPIHost } from "@/base/origins";
 import { downloadString } from "@/base/utils/web";
+import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";
 import { TwoFactorSettings } from "@/new/photos/components/sidebar/TwoFactorSettings";
 import { downloadAppDialogAttributes } from "@/new/photos/components/utils/download";
 import { useUserDetailsSnapshot } from "@/new/photos/components/utils/use-snapshot";
@@ -41,11 +43,9 @@ import { AppContext, useAppContext } from "@/new/photos/types/context";
 import { initiateEmail, openURL } from "@/new/photos/utils/web";
 import {
     FlexWrapper,
-    SpaceBetweenFlex,
     VerticallyCentered,
 } from "@ente/shared/components/Container";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
-import DialogTitleWithCloseButton from "@ente/shared/components/TitleWithCloseButton";
 import { PHOTOS_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import ArchiveOutlined from "@mui/icons-material/ArchiveOutlined";
@@ -136,10 +136,12 @@ interface HeaderSectionProps {
 
 const HeaderSection: React.FC<HeaderSectionProps> = ({ closeSidebar }) => {
     return (
-        <SpaceBetweenFlex mt={0.5} mb={1} pl={1.5}>
+        <SpaceBetweenFlex
+            sx={{ marginBlock: "4px 4px", paddingInlineStart: "12px" }}
+        >
             <EnteLogo />
             <IconButton
-                aria-label="close"
+                aria-label={t("close")}
                 onClick={closeSidebar}
                 color="secondary"
             >
@@ -344,12 +346,17 @@ function MemberSubscriptionManage({ open, userDetails, onClose }) {
 
     return (
         <Dialog {...{ open, onClose, fullScreen }} maxWidth="xs" fullWidth>
-            <DialogTitleWithCloseButton onClose={onClose}>
-                <Typography variant="h3" fontWeight={"bold"}>
-                    {t("subscription")}
-                </Typography>
-                <Typography color={"text.muted"}>{t("family_plan")}</Typography>
-            </DialogTitleWithCloseButton>
+            <SpaceBetweenFlex sx={{ p: "20px 8px 12px 16px" }}>
+                <Stack>
+                    <Typography variant="h3" fontWeight={"bold"}>
+                        {t("subscription")}
+                    </Typography>
+                    <Typography color={"text.muted"}>
+                        {t("family_plan")}
+                    </Typography>
+                </Stack>
+                <DialogCloseIconButton {...{ onClose }} />
+            </SpaceBetweenFlex>
             <DialogContent>
                 <VerticallyCentered>
                     <Box mb={4}>

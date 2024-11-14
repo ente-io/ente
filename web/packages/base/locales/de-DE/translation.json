@@ -59,7 +59,6 @@
     "UPLOAD_STAGE_MESSAGE": {
         "0": "Hochladen wird vorbereitet",
         "1": "Lese Google-Metadaten",
-        "2": "Metadaten von {{uploadCounter.finished, number}} / {{uploadCounter.total, number}} Dateien extrahiert",
         "3": "{{uploadCounter.finished, number}} / {{uploadCounter.total, number}} Dateien verarbeitet",
         "4": "Verbleibende Uploads werden abgebrochen",
         "5": "Sicherung abgeschlossen"
@@ -307,7 +306,6 @@
     "SKIPPED_INFO": "Diese wurden übersprungen, da es Dateien mit gleichem Namen und Inhalt im selben Album gibt",
     "UNSUPPORTED_INFO": "Ente unterstützt diese Dateiformate noch nicht",
     "BLOCKED_UPLOADS": "Blockierte Uploads",
-    "INPROGRESS_METADATA_EXTRACTION": "In Bearbeitung",
     "INPROGRESS_UPLOADS": "Upload läuft",
     "TOO_LARGE_UPLOADS": "Große Dateien",
     "LARGER_THAN_AVAILABLE_STORAGE_UPLOADS": "Zu wenig Speicher",
