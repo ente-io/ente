@@ -44,7 +44,6 @@ export const CustomError = {
     EXPORT_FOLDER_DOES_NOT_EXIST: "export folder does not exist",
     AUTH_KEY_NOT_FOUND: "auth key not found",
     PROCESSING_FAILED: "processing failed",
-    EXPORT_RECORD_JSON_PARSING_FAILED: "export record json parsing failed",
     TWO_FACTOR_ENABLED: "two factor enabled",
 };
 

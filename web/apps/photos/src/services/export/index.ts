@@ -21,7 +21,6 @@ import {
 import { getAllLocalFiles } from "@/new/photos/services/files";
 import { safeDirectoryName, safeFileName } from "@/new/photos/utils/native-fs";
 import { writeStream } from "@/new/photos/utils/native-stream";
-import { wait } from "@/utils/promise";
 import { CustomError } from "@ente/shared/error";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
 import QueueProcessor, {
@@ -877,7 +876,7 @@ class ExportService {
         }
     }
 
-    async getExportRecord(folder: string, retry = true): Promise<ExportRecord> {
+    async getExportRecord(folder: string): Promise<ExportRecord> {
         const electron = ensureElectron();
         const fs = electron.fs;
         try {
@@ -887,19 +886,8 @@ class ExportService {
                 return this.createEmptyExportRecord(exportRecordJSONPath);
             }
             const recordFile = await fs.readTextFile(exportRecordJSONPath);
-            try {
-                return JSON.parse(recordFile);
-            } catch (e) {
-                throw Error(CustomError.EXPORT_RECORD_JSON_PARSING_FAILED);
-            }
+            return JSON.parse(recordFile);
         } catch (e) {
-            if (
-                e.message === CustomError.EXPORT_RECORD_JSON_PARSING_FAILED &&
-                retry
-            ) {
-                await wait(1000);
-                return await this.getExportRecord(folder, false);
-            }
             if (e.message !== CustomError.EXPORT_FOLDER_DOES_NOT_EXIST) {
                 log.error("export Record JSON parsing failed", e);
             }
