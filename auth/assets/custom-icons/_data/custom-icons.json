@@ -630,6 +630,10 @@
       "title": "Microsoft"
     },
     {
+      "title": "Microsoft 365",
+      "slug": "microsoft365"
+    },
+    {
       "title": "Microsoft Azure"
     },
     {
@@ -858,6 +862,13 @@
     },
     {
       "title": "Railway"
+    },
+    {
+      "title": "Raindrop.io",
+      "slug": "raindrop_io",
+      "altNames": [
+        "Raindrop"
+      ]
     },
     {
       "title": "Rapidgator"
@@ -1156,6 +1167,10 @@
     },
     {
       "title": "Wealthsimple"
+    },
+    {
+      "title": "WEB.DE",
+      "slug": "web_de"
     },
     {
       "title": "Wetransfer"
