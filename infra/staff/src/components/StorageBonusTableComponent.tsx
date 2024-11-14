@@ -37,9 +37,15 @@ const StorageBonusTableComponent: React.FC = () => {
         const fetchData = async () => {
             try {
                 const encodedEmail = encodeURIComponent(getEmail());
-                const encodedToken = encodeURIComponent(getToken());
-                const url = `${apiOrigin}/admin/user?email=${encodedEmail}&token=${encodedToken}`;
-                const response = await fetch(url);
+                const token = getToken();
+                const url = `${apiOrigin}/admin/user?email=${encodedEmail}`;
+                const response = await fetch(url, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-Auth-Token": token,
+                    },
+                });
                 if (!response.ok) {
                     throw new Error("Failed to fetch bonus data");
                 }
