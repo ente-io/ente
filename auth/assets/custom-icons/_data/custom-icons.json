@@ -49,6 +49,13 @@
       "title": "Aternos"
     },
     {
+      "title": "authentik",
+      "altNames": [
+        "goauthentik"
+      ],
+      "hex": "fd4b2d"
+    },
+    {
       "title": "BaiduCloud",
       "altNames": [
         "百度云",
@@ -194,7 +201,7 @@
     {
       "title": "Capcom"
     },
-	{
+    {
       "title": "Carta",
       "altNames": [
         "Carta.com"
@@ -524,7 +531,7 @@
     {
       "title": "Kite"
     },
-	{
+    {
       "title": "KnownHost",
       "altNames": [
         "Known Host",
@@ -532,7 +539,7 @@
       ]
     },
     {
-        "title": "Ko-fi",
+      "title": "Ko-fi",
       "altNames": [
         "Ko fi",
         "Kofi"
@@ -1086,7 +1093,7 @@
     {
       "title": "Tresorit"
     },
-	{
+    {
       "title": "TRowePrice",
       "altNames": [
         "T Rowe Price",
