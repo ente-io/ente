@@ -1354,5 +1354,10 @@
   "extraPhotosFoundFor": "Znaleziono dodatkowe zdjęcia dla $text",
   "extraPhotosFound": "Znaleziono dodatkowe zdjęcia",
   "configuration": "Konfiguracja",
-  "localIndexing": "Indeksowanie lokalne"
+  "localIndexing": "Indeksowanie lokalne",
+  "resetPerson": "Zresetuj osobę",
+  "areYouSureYouWantToResetThisPerson": "Czy na pewno chcesz zresetować tę osobę?",
+  "allPersonGroupingWillReset": "Wszystkie grupy dla tej osoby zostaną zresetowane i stracisz wszystkie sugestie dla tej osoby",
+  "yesResetPerson": "Tak, zresetuj osobę",
+  "checkingModels": "Checking models..."
 }

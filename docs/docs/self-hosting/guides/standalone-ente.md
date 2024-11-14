@@ -70,16 +70,24 @@ createuser -s postgres
 
 ## Start Museum 
 
+Start by cloning ente to your system. 
+
+```sh 
+git clone https://github.com/ente-io/ente
+```
+
 ```sh
-export ENTE_DB_USER=postgres 
+export ENTE_DB_USER=postgres
 cd ente/server
 go run cmd/museum/main.go
 ```
 
+You can also add the export line to your shell's RC file, to avoid exporting the environment variable every time. 
+
 For live reloads, install [air](https://github.com/air-verse/air#installation). Then you can just call air after declaring the required environment variables. For example,
 
 ```sh
-ENTE_DB_USER=ente_user
+ENTE_DB_USER=postgres
 air
 ```
 

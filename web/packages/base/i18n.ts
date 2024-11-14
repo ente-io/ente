@@ -25,6 +25,7 @@ export const supportedLocales = [
     "zh-CN" /* Simplified Chinese */,
     "nl-NL" /* Dutch */,
     "es-ES" /* Spanish */,
+    "pt-PT" /* Portuguese */,
     "pt-BR" /* Portuguese, Brazilian */,
     "ru-RU" /* Russian */,
     "pl-PL" /* Polish */,
@@ -176,6 +177,8 @@ const closestSupportedLocale = (
             // We'll never get here (it'd already be an exact match), just kept
             // to keep this list consistent.
             return "pt-BR";
+        } else if (ls.startsWith("pt")) {
+            return "pt-PT";
         } else if (ls.startsWith("ru")) {
             return "ru-RU";
         } else if (ls.startsWith("pl")) {
@@ -223,6 +226,18 @@ export const setLocaleInUse = async (locale: SupportedLocale) => {
     localStorage.setItem("locale", locale);
     return i18n.changeLanguage(locale);
 };
+
+const numberFormatter = new Intl.NumberFormat(i18n.language);
+
+/**
+ * Return the given {@link value} formatted for the current language and locale.
+ *
+ * In most cases, when a number needs to be displayed, it can be formatted as
+ * part of the surrounding string using the {{count, number}} interpolation.
+ * However, in some rare cases, we need to format a standalone number. For such
+ * scenarios, this function can be used.
+ */
+export const formattedNumber = (value: number) => numberFormatter.format(value);
 
 /**
  * A no-op marker for strings that, for various reasons, pending addition to the

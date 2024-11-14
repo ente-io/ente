@@ -176,14 +176,3 @@ export const setRecoveryKey = async (token: string, recoveryKey: RecoveryKey) =>
             "X-Auth-Token": token,
         },
     );
-
-export const disableTwoFactor = async () => {
-    await HTTPService.post(
-        await apiURL("/users/two-factor/disable"),
-        null,
-        undefined,
-        {
-            "X-Auth-Token": getToken(),
-        },
-    );
-};

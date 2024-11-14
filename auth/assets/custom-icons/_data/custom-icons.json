@@ -86,6 +86,10 @@
       ]
     },
     {
+      "title": "Binance TR",
+      "slug": "binance_tr"
+    },
+    {
       "title": "BinanceUS",
       "slug": "binance_us",
       "altNames": [
@@ -190,6 +194,12 @@
     {
       "title": "Capcom"
     },
+	{
+      "title": "Carta",
+      "altNames": [
+        "Carta.com"
+      ]
+    },
     {
       "title": "CERN"
     },
@@ -206,6 +216,9 @@
     },
     {
       "title": "CloudAMQP"
+    },
+    {
+      "title": "ClouDNS"
     },
     {
       "title": "Cloudflare"
@@ -236,6 +249,9 @@
         "crypto",
         "Crypto com"
       ]
+    },
+    {
+      "title": "CSFloat"
     },
     {
       "title": "DCS",
@@ -508,6 +524,20 @@
     {
       "title": "Kite"
     },
+	{
+      "title": "KnownHost",
+      "altNames": [
+        "Known Host",
+        "KnownHost.com"
+      ]
+    },
+    {
+        "title": "Ko-fi",
+      "altNames": [
+        "Ko fi",
+        "Kofi"
+      ]
+    },
     {
       "title": "Koofr"
     },
@@ -760,6 +790,12 @@
       "title": "pCloud"
     },
     {
+      "title": "PebbleHost",
+      "altNames": [
+        "Pebble Host"
+      ]
+    },
+    {
       "title": "Peerberry"
     },
     {
@@ -846,10 +882,13 @@
       ]
     },
     {
-      "title": "Render"
+      "title": "Restorecord"
     },
     {
-      "title": "Restorecord"
+      "title": "Restream",
+      "altNames": [
+        "restream.io"
+      ]
     },
     {
       "title": "Revolt",
@@ -999,6 +1038,13 @@
       ]
     },
     {
+      "title": "Terabit",
+      "altNames": [
+        "Terabit Hosting",
+        "terabit.io"
+      ]
+    },
+    {
       "title": "Termius",
       "hex": "858585"
     },
@@ -1029,6 +1075,15 @@
     {
       "title": "Tresorit"
     },
+	{
+      "title": "TRowePrice",
+      "altNames": [
+        "T Rowe Price",
+        "TRowe Price",
+        "T Rowe Price Group",
+        "T Rowe Price Group, Inc"
+      ]
+    },
     {
       "title": "Tweakers"
     },
@@ -1049,7 +1104,7 @@
       "altNames": [
         "Unifi SSO",
         "Unifi",
-        "Ubiquti SSO"
+        "Ubiquiti SSO"
       ]
     },
     {
@@ -1082,13 +1137,16 @@
       ]
     },
     {
+      "title": "WARGAMING.NET",
+      "altNames": [
+        "Wargaming"
+      ]
+    },
+    {
       "title": "VRChat"
     },
     {
       "title": "Vultr"
-    },
-    {
-      "title": "WARGAMING.NET"
     },
     {
       "title": "Warner Bros Games"

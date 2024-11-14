@@ -115,7 +115,8 @@ class MLService {
   }
 
   Future<void> sync() async {
-    await faceRecognitionService.sync();
+    await FileDataService.instance.syncFDStatus();
+    await faceRecognitionService.syncPersonFeedback();
   }
 
   Future<void> runAllML({bool force = false}) async {
@@ -125,7 +126,6 @@ class MLService {
       }
       if (_cannotRunMLFunction() && !force) return;
       _isRunningML = true;
-
       await sync();
 
       final int unclusteredFacesCount =

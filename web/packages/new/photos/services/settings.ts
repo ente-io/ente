@@ -2,63 +2,19 @@
  * @file Storage (in-memory, local, remote) and update of various settings.
  */
 
+/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
+
 import { localUser } from "@/base/local-user";
 import log from "@/base/log";
+import { updateShouldDisableCFUploadProxy } from "@/gallery/upload";
 import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
-import { fetchFeatureFlags } from "./remote-store";
+import { fetchFeatureFlags, updateRemoteFlag } from "./remote-store";
 
 /**
- * Internal in-memory state shared by the functions in this module.
+ * In-memory flags that tracks various settings.
  *
- * This entire object will be reset on logout.
- */
-class SettingsState {
-    /**
-     * An arbitrary token to identify the current login.
-     *
-     * It is used to discard stale completions.
-     */
-    id: number;
-
-    constructor() {
-        this.id = Math.random();
-    }
-
-    /**
-     * True if we have performed a fetch for the logged in user since the app
-     * started.
-     */
-    haveSynced = false;
-
-    /**
-     * In-memory flag that tracks if the current user is an internal user.
-     *
-     * See: [Note: Remote flag lifecycle].
-     */
-    isInternalUser = false;
-
-    /**
-     * In-memory flag that tracks if maps are enabled.
-     *
-     * See: [Note: Remote flag lifecycle].
-     */
-    isMapEnabled = false;
-}
-
-/** State shared by the functions in this module. See {@link SettingsState}. */
-let _state = new SettingsState();
-
-/**
- * Fetch remote flags (feature flags and other user specific preferences) from
- * remote and save them in local storage for subsequent lookup.
- *
- * It fetches only once per app lifetime, and so is safe to call as arbitrarily
- * many times. Remember to call {@link clearFeatureFlagSessionState} on logout
- * to clear any in memory state so that these can be fetched again on the
- * subsequent login.
- *
- * The local cache will also be updated if an individual flag is changed.
+ * Some of these are local only, some of these are synced with remote.
  *
  * [Note: Remote flag lifecycle]
  *
@@ -67,14 +23,12 @@ let _state = new SettingsState();
  * 1.  On app start, the initial are read from local storage in
  *     {@link initSettings}.
  *
- * 2.  On app start, as part of the normal sync with remote, remote flags are
- *     fetched once and saved in local storage, and the in-memory state updated
- *     to reflect the latest values ({@link triggerSettingsSyncIfNeeded}). If
- *     this fetch fails, we try again periodically (on every sync with remote)
- *     until success.
+ * 2.  During the remote sync, remote flags are fetched and saved in local
+ *     storage, and the in-memory state updated to reflect the latest values
+ *     ({@link syncSettings}).
  *
- * 3.  Some operations like opening the preferences panel or updating a value
- *     also cause an unconditional fetch and update ({@link syncSettings}).
+ * 3.  Updating a value also cause an unconditional fetch and update
+ *     ({@link syncSettings}).
  *
  * 4.  The individual getter functions for the flags (e.g.
  *     {@link isInternalUser}) return the in-memory values, and so are suitable
@@ -82,9 +36,58 @@ let _state = new SettingsState();
  *
  * 5.  Everything gets reset to the default state on {@link logoutSettings}.
  */
-export const triggerSettingsSyncIfNeeded = () => {
-    if (!_state.haveSynced) void syncSettings();
-};
+export interface Settings {
+    /**
+     * `true` if the current user is an internal user.
+     */
+    isInternalUser: boolean;
+
+    /**
+     * `true` if maps are enabled.
+     */
+    mapEnabled: boolean;
+
+    /**
+     * `true` if the user has saved a preference to disable workers for uploads.
+     *
+     * Unlike {@link shouldDisableCFUploadProxy}, whose value reflects other
+     * factors that are taken into account to determine the effective value of
+     * this setting, this function returns only the saved user preference.
+     */
+    cfUploadProxyDisabled: boolean;
+}
+
+const defaultSettings = (): Settings => ({
+    isInternalUser: false,
+    mapEnabled: false,
+    cfUploadProxyDisabled: false,
+});
+
+/**
+ * Internal in-memory state shared by the functions in this module.
+ *
+ * This entire object will be reset on logout.
+ */
+class SettingsState {
+    constructor() {
+        this.settingsSnapshot = defaultSettings();
+    }
+
+    /**
+     * Subscriptions to {@link Settings} updates attached using
+     * {@link settingsSubscribe}.
+     */
+    settingsListeners: (() => void)[] = [];
+
+    /**
+     * Snapshot of the {@link Settings} returned by the {@link settingsSnapshot}
+     * function.
+     */
+    settingsSnapshot: Settings;
+}
+
+/** State shared by the functions in this module. See {@link SettingsState}. */
+let _state = new SettingsState();
 
 /**
  * Read in the locally persisted settings into memory, but otherwise do not
@@ -93,7 +96,8 @@ export const triggerSettingsSyncIfNeeded = () => {
  * This assumes that the user is already logged in.
  */
 export const initSettings = () => {
-    readInMemoryFlagsFromLocalStorage();
+    void updateShouldDisableCFUploadProxy(savedCFProxyDisabled());
+    syncSettingsSnapshotWithLocalStorage();
 };
 
 export const logoutSettings = () => {
@@ -105,15 +109,9 @@ export const logoutSettings = () => {
  * lookup. Then use the results to update our in memory state if needed.
  */
 export const syncSettings = async () => {
-    const id = _state.id;
     const jsonString = await fetchFeatureFlags().then((res) => res.text());
-    if (_state.id != id) {
-        log.info("Discarding stale settings sync not for the current login");
-        return;
-    }
     saveRemoteFeatureFlagsJSONString(jsonString);
-    readInMemoryFlagsFromLocalStorage();
-    _state.haveSynced = true;
+    syncSettingsSnapshotWithLocalStorage();
 };
 
 const saveRemoteFeatureFlagsJSONString = (s: string) =>
@@ -128,14 +126,44 @@ const savedRemoteFeatureFlags = () => {
 const FeatureFlags = z.object({
     internalUser: z.boolean().nullish().transform(nullToUndefined),
     betaUser: z.boolean().nullish().transform(nullToUndefined),
+    mapEnabled: z.boolean().nullish().transform(nullToUndefined),
 });
 
 type FeatureFlags = z.infer<typeof FeatureFlags>;
 
-const readInMemoryFlagsFromLocalStorage = () => {
+const syncSettingsSnapshotWithLocalStorage = () => {
     const flags = savedRemoteFeatureFlags();
-    // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-    _state.isInternalUser = flags?.internalUser || isInternalUserViaEmail();
+    const settings = defaultSettings();
+    settings.isInternalUser = flags?.internalUser || isInternalUserViaEmail();
+    settings.mapEnabled = flags?.mapEnabled || false;
+    settings.cfUploadProxyDisabled = savedCFProxyDisabled();
+    setSettingsSnapshot(settings);
+};
+
+/**
+ * A function that can be used to subscribe to updates to {@link Settings}.
+ *
+ * See: [Note: Snapshots and useSyncExternalStore].
+ */
+export const settingsSubscribe = (onChange: () => void): (() => void) => {
+    _state.settingsListeners.push(onChange);
+    return () => {
+        _state.settingsListeners = _state.settingsListeners.filter(
+            (l) => l != onChange,
+        );
+    };
+};
+
+/**
+ * Return the last known, cached {@link Settings}.
+ *
+ * See also {@link settingsSubscribe}.
+ */
+export const settingsSnapshot = () => _state.settingsSnapshot;
+
+const setSettingsSnapshot = (snapshot: Settings) => {
+    _state.settingsSnapshot = snapshot;
+    _state.settingsListeners.forEach((l) => l());
 };
 
 const isInternalUserViaEmail = () => {
@@ -150,4 +178,49 @@ const isInternalUserViaEmail = () => {
  * 2. If the "internalUser" remote feature flag is set, the user is internal.
  * 3. Otherwise false.
  */
-export const isInternalUser = () => _state.isInternalUser;
+export const isInternalUser = () => settingsSnapshot().isInternalUser;
+
+/**
+ * Persist the user's map enabled preference both locally and on remote.
+ */
+export const updateMapEnabled = async (isEnabled: boolean) => {
+    await updateRemoteFlag("mapEnabled", isEnabled);
+    return syncSettings();
+};
+
+const cfProxyDisabledKey = "cfProxyDisabled";
+
+const saveCFProxyDisabled = (v: boolean) =>
+    v
+        ? localStorage.setItem(cfProxyDisabledKey, "1")
+        : localStorage.removeItem(cfProxyDisabledKey);
+
+const savedCFProxyDisabled = () => {
+    const v = localStorage.getItem(cfProxyDisabledKey);
+    if (!v) return false;
+    if (v == "1") return true;
+
+    // Older versions of the app used to store this flag in a different
+    // format, so see if this is one of those, and if so, migrate it too.
+    try {
+        const value = z
+            .object({ value: z.boolean() })
+            .parse(JSON.parse(v)).value;
+        saveCFProxyDisabled(value);
+        return value;
+    } catch (e) {
+        log.warn(`Ignoring ${cfProxyDisabledKey} value: ${v}`, e);
+        localStorage.removeItem(cfProxyDisabledKey);
+        return false;
+    }
+};
+
+/**
+ * Save the user preference for disabling uploads via Cloudflare Workers, also
+ * notifying the upload subsystem of the change.
+ */
+export const updateCFProxyDisabledPreference = async (value: boolean) => {
+    saveCFProxyDisabled(value);
+    await updateShouldDisableCFUploadProxy(value);
+    syncSettingsSnapshotWithLocalStorage();
+};

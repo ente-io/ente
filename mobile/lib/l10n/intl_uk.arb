@@ -1354,5 +1354,10 @@
   "extraPhotosFoundFor": "Знайдено додаткові фотографії для $text",
   "extraPhotosFound": "Знайдено додаткові фотографії",
   "configuration": "Налаштування",
-  "localIndexing": "Локальне індексування"
+  "localIndexing": "Локальне індексування",
+  "resetPerson": "Скинути особу",
+  "areYouSureYouWantToResetThisPerson": "Ви впевнені, що хочете скинути цю особу?",
+  "allPersonGroupingWillReset": "Усі групи для цієї особи будуть скинуті, і ви втратите всі пропозиції, зроблені для неї",
+  "yesResetPerson": "Так, скинути особу",
+  "checkingModels": "Checking models..."
 }

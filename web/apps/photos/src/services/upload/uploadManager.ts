@@ -4,6 +4,7 @@ import { lowercaseExtension, nameAndExtension } from "@/base/file";
 import log from "@/base/log";
 import type { Electron } from "@/base/types/ipc";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
+import { shouldDisableCFUploadProxy } from "@/gallery/upload";
 import type { Collection } from "@/media/collection";
 import { EncryptedEnteFile, EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
@@ -14,7 +15,7 @@ import type { UploadItem } from "@/new/photos/services/upload/types";
 import {
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
     UPLOAD_RESULT,
-    UPLOAD_STAGES,
+    type UploadPhase,
 } from "@/new/photos/services/upload/types";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
@@ -25,7 +26,6 @@ import {
     getLocalPublicFiles,
     getPublicCollectionUID,
 } from "services/publicCollectionService";
-import { getDisableCFUploadProxyFlag } from "services/userService";
 import watcher from "services/watch";
 import { decryptFile, getUserOwnedFiles } from "utils/file";
 import {
@@ -70,7 +70,7 @@ export type SegregatedFinishedUploads = Map<UPLOAD_RESULT, FileID[]>;
 export interface ProgressUpdater {
     setPercentComplete: React.Dispatch<React.SetStateAction<number>>;
     setUploadCounter: React.Dispatch<React.SetStateAction<UploadCounter>>;
-    setUploadStage: React.Dispatch<React.SetStateAction<UPLOAD_STAGES>>;
+    setUploadPhase: (phase: UploadPhase) => void;
     setInProgressUploads: React.Dispatch<
         React.SetStateAction<InProgressUpload[]>
     >;
@@ -132,7 +132,7 @@ class UIService {
     private progressUpdater: ProgressUpdater;
 
     // UPLOAD LEVEL STATES
-    private uploadStage: UPLOAD_STAGES = UPLOAD_STAGES.START;
+    private uploadPhase: UploadPhase = "preparing";
     private filenames: Map<number, string> = new Map();
     private hasLivePhoto: boolean = false;
     private uploadProgressView: boolean = false;
@@ -146,7 +146,7 @@ class UIService {
 
     init(progressUpdater: ProgressUpdater) {
         this.progressUpdater = progressUpdater;
-        this.progressUpdater.setUploadStage(this.uploadStage);
+        this.progressUpdater.setUploadPhase(this.uploadPhase);
         this.progressUpdater.setUploadFilenames(this.filenames);
         this.progressUpdater.setHasLivePhotos(this.hasLivePhoto);
         this.progressUpdater.setUploadProgressView(this.uploadProgressView);
@@ -184,9 +184,9 @@ class UIService {
         this.updateProgressBarUI();
     }
 
-    setUploadStage(stage: UPLOAD_STAGES) {
-        this.uploadStage = stage;
-        this.progressUpdater.setUploadStage(stage);
+    setUploadPhase(phase: UploadPhase) {
+        this.uploadPhase = phase;
+        this.progressUpdater.setUploadPhase(phase);
     }
 
     setFiles(files: { localID: number; fileName: string }[]) {
@@ -258,8 +258,7 @@ class UIService {
         index = 0,
     ) {
         const cancel: { exec: Canceler } = { exec: () => {} };
-        const cancelTimedOutRequest = () =>
-            cancel.exec(CustomError.REQUEST_TIMEOUT);
+        const cancelTimedOutRequest = () => cancel.exec("Request timed out");
 
         const cancelCancelledUploadRequest = () =>
             cancel.exec(CustomError.UPLOAD_CANCELLED);
@@ -331,7 +330,6 @@ class UploadManager {
     private publicUploadProps: PublicUploadProps;
     private uploaderName: string;
     private uiService: UIService;
-    private isCFUploadProxyDisabled: boolean = false;
 
     constructor() {
         this.uiService = new UIService();
@@ -341,15 +339,8 @@ class UploadManager {
         progressUpdater: ProgressUpdater,
         onUploadFile: (file: EnteFile) => void,
         publicCollectProps: PublicUploadProps,
-        isCFUploadProxyDisabled: boolean,
     ) {
         this.uiService.init(progressUpdater);
-        const remoteIsCFUploadProxyDisabled =
-            await getDisableCFUploadProxyFlag();
-        if (remoteIsCFUploadProxyDisabled) {
-            isCFUploadProxyDisabled = remoteIsCFUploadProxyDisabled;
-        }
-        this.isCFUploadProxyDisabled = isCFUploadProxyDisabled;
         UploadService.init(publicCollectProps);
         this.onUploadFile = onUploadFile;
         this.publicUploadProps = publicCollectProps;
@@ -371,7 +362,7 @@ class UploadManager {
         this.resetState();
         this.uiService.reset();
         uploadCancelService.reset();
-        this.uiService.setUploadStage(UPLOAD_STAGES.START);
+        this.uiService.setUploadPhase("preparing");
     }
 
     showUploadProgressDialog() {
@@ -419,10 +410,7 @@ class UploadManager {
                 splitMetadataAndMediaItems(namedItems);
 
             if (metadataItems.length) {
-                this.uiService.setUploadStage(
-                    UPLOAD_STAGES.READING_GOOGLE_METADATA_FILES,
-                );
-
+                this.uiService.setUploadPhase("readingMetadata");
                 await this.parseMetadataJSONFiles(metadataItems);
             }
 
@@ -450,7 +438,7 @@ class UploadManager {
                 throw e;
             }
         } finally {
-            this.uiService.setUploadStage(UPLOAD_STAGES.FINISH);
+            this.uiService.setUploadPhase("done");
             void globalThis.electron?.clearPendingUploads();
             for (let i = 0; i < maxConcurrentUploads; i++) {
                 this.comlinkCryptoWorkers[i]?.terminate();
@@ -507,7 +495,7 @@ class UploadManager {
         this.itemsToBeUploaded = [...this.itemsToBeUploaded, ...mediaItems];
         this.uiService.reset(mediaItems.length);
         await UploadService.setFileCount(mediaItems.length);
-        this.uiService.setUploadStage(UPLOAD_STAGES.UPLOADING);
+        this.uiService.setUploadPhase("uploading");
 
         const uploadProcesses = [];
         for (
@@ -543,7 +531,7 @@ class UploadManager {
                 this.existingFiles,
                 this.parsedMetadataJSONMap,
                 worker,
-                this.isCFUploadProxyDisabled,
+                shouldDisableCFUploadProxy(),
                 () => {
                     this.abortIfCancelled();
                 },
@@ -661,7 +649,7 @@ class UploadManager {
 
     public cancelRunningUpload() {
         log.info("User cancelled running upload");
-        this.uiService.setUploadStage(UPLOAD_STAGES.CANCELLING);
+        this.uiService.setUploadPhase("cancelling");
         uploadCancelService.requestUploadCancelation();
     }
 
@@ -897,25 +885,8 @@ const clusterLivePhotos = async (
 };
 
 /**
- * [Note: Memory pressure when uploading video files]
- *
- * A user (Fedora 39 VM on Qubes OS with 32 GB RAM, both AppImage and RPM) has
- * reported that their app runs out of memory when the app tries to upload
- * multiple large videos simultaneously. For example, 4 parallel uploads of 4
- * 700 MB videos.
- *
- * I am unable to reproduce this: tested on macOS and Linux, with videos up to
- * 3.8 G x 1 + 3 x 700 M uploaded in parallel. The memory usage remains constant
- * as expected (hovering around 2 G), since we don't pull the entire videos in
- * memory and instead do a streaming disk read + encryption + upload.
- *
- * The JavaScript heap for the renderer process (when we're running in the
- * context of our desktop app) is limited to 4 GB. See
- * https://www.electronjs.org/blog/v8-memory-cage.
- *
- * For now, add logs if our usage increases some high water mark. This is solely
- * so we can better understand the issue if it arises again (and can deal with
- * it in an informed manner).
+ * Add logs if our usage increases some high water mark. This is solely so that
+ * we have some indication in the logs if we get a user report of OOM crashes.
  */
 const logAboutMemoryPressureIfNeeded = () => {
     if (!globalThis.electron) return;

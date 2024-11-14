@@ -162,19 +162,25 @@ class _Price extends StatelessWidget {
       final priceWithoutCurrency = price.substring(1);
       final priceDouble = double.parse(priceWithoutCurrency);
       final pricePerMonth = priceDouble / 12;
-      final pricePerMonthString = pricePerMonth.toStringAsFixed(2);
+      String pricePerMonthString = pricePerMonth.toStringAsFixed(2);
+
+      if (pricePerMonthString.endsWith(".00")) {
+        pricePerMonthString =
+            pricePerMonthString.substring(0, pricePerMonthString.length - 3);
+      }
+
       final bool isPlayStore = updateService.isPlayStoreFlavor();
       return Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (isPlayStore)
             Text(
-              price + " / " + "yr",
+              currencySymbol + pricePerMonthString + ' / ' + 'month',
               style: textTheme.largeBold.copyWith(color: textBaseLight),
             ),
           if (isPlayStore)
             Text(
-              currencySymbol + pricePerMonthString + ' / ' + 'month',
+              price + " / " + "yr",
               style: textTheme.small.copyWith(color: textFaintLight),
             ),
           if (!isPlayStore)

@@ -36,7 +36,10 @@ import AsyncSelect from "react-select/async";
 import { SearchPeopleList } from "./PeopleList";
 import { UnstyledButton } from "./UnstyledButton";
 import type { ButtonishProps } from "./mui";
-import { useMLStatusSnapshot, usePeopleStateSnapshot } from "./utils/ml";
+import {
+    useMLStatusSnapshot,
+    usePeopleStateSnapshot,
+} from "./utils/use-snapshot";
 
 export interface SearchBarProps {
     /**

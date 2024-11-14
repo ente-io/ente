@@ -1343,5 +1343,22 @@
   "mostRecent": "Più recenti",
   "mostRelevant": "Più rilevanti",
   "loadingYourPhotos": "Caricando le tue foto...",
-  "processingImport": "Elaborando {folderName}..."
+  "processingImport": "Elaborando {folderName}...",
+  "personName": "Nome della persona",
+  "addNewPerson": "Aggiungi nuova persona",
+  "addNameOrMerge": "Aggiungi nome o unisci",
+  "mergeWithExisting": "Unisci con esistente",
+  "newPerson": "Nuova persona",
+  "addName": "Aggiungi nome",
+  "add": "Aggiungi",
+  "extraPhotosFoundFor": "Trovate foto aggiuntive per $text",
+  "extraPhotosFound": "Trovate foto aggiuntive",
+  "configuration": "Configurazione",
+  "localIndexing": "Indicizzazione locale",
+  "resetPerson": "Resetta persona",
+  "areYouSureYouWantToResetThisPerson": "Sei sicuro di voler resettare questa persona?",
+  "allPersonGroupingWillReset": "Tutti i raggruppamenti per questa persona saranno resettati e perderai tutti i suggerimenti fatti per questa persona",
+  "yesResetPerson": "Sì, resetta persona",
+  "onlyThem": "Solo loro",
+  "checkingModels": "Checking models..."
 }

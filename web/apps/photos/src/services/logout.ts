@@ -1,9 +1,14 @@
-import { accountLogout } from "@/accounts/services/logout";
+import {
+    accountLogout,
+    logoutClearStateAgain,
+} from "@/accounts/services/logout";
 import log from "@/base/log";
+import { resetUploadState } from "@/gallery/upload";
 import DownloadManager from "@/new/photos/services/download";
 import { logoutML, terminateMLWorker } from "@/new/photos/services/ml";
 import { logoutSearch } from "@/new/photos/services/search";
 import { logoutSettings } from "@/new/photos/services/settings";
+import { logoutUserDetails } from "@/new/photos/services/user-details";
 import exportService from "./export";
 
 /**
@@ -43,6 +48,18 @@ export const photosLogout = async () => {
     }
 
     try {
+        logoutUserDetails();
+    } catch (e) {
+        ignoreError("userDetails", e);
+    }
+
+    try {
+        resetUploadState();
+    } catch (e) {
+        ignoreError("upload", e);
+    }
+
+    try {
         DownloadManager.logout();
     } catch (e) {
         ignoreError("download", e);
@@ -76,4 +93,14 @@ export const photosLogout = async () => {
             ignoreError("electron", e);
         }
     }
+
+    // Clear the DB again to discard any in-flight completions that might've
+    // happened since we started.
+
+    await logoutClearStateAgain();
+
+    // Do a full reload to discard any in-flight requests that might still
+    // remain.
+
+    window.location.replace("/");
 };

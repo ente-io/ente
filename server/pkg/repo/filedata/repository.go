@@ -24,11 +24,13 @@ const (
 )
 
 func (r *Repository) InsertOrUpdate(ctx context.Context, data filedata.Row) error {
+	// During insert, we set the sync_locked_till to 5 minutes in the future. This is to prevent
+	// immediate replication of the file data row, that can result in failure of update/retry requests
 	query := `
         INSERT INTO file_data 
-            (file_id, user_id, data_type, size, latest_bucket) 
+            (file_id, user_id, data_type, size, latest_bucket, sync_locked_till) 
         VALUES 
-            ($1, $2, $3, $4, $5)
+            ($1, $2, $3, $4, $5, now_utc_micro_seconds() + 5 * 60 * 1000*1000)
         ON CONFLICT (file_id, data_type)
         DO UPDATE SET 
             size = EXCLUDED.size,
@@ -124,7 +126,7 @@ func (r *Repository) RemoveBucket(row filedata.Row, bucketID string, columnName 
 	return nil
 }
 
-func (r *Repository) GetIndexStatusForUser(ctx context.Context, userID int64, lastUpdatedAt int64, limit int64) ([]filedata.IndexStatus, error) {
+func (r *Repository) GetFDForUser(ctx context.Context, userID int64, lastUpdatedAt int64, limit int64) ([]filedata.FDStatus, error) {
 	rows, err := r.DB.QueryContext(ctx, `SELECT file_id, user_id, data_type, size, is_deleted, updated_at
 										FROM file_data
 										WHERE user_id = $1 AND updated_at > $2 ORDER BY updated_at  
@@ -132,16 +134,16 @@ func (r *Repository) GetIndexStatusForUser(ctx context.Context, userID int64, la
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "")
 	}
-	var indexStatuses []filedata.IndexStatus
+	var fdStatuses []filedata.FDStatus
 	for rows.Next() {
-		var indexStatus filedata.IndexStatus
-		scanErr := rows.Scan(&indexStatus.FileID, &indexStatus.UserID, &indexStatus.Type, &indexStatus.Size, &indexStatus.IsDeleted, &indexStatus.UpdatedAt)
+		var status filedata.FDStatus
+		scanErr := rows.Scan(&status.FileID, &status.UserID, &status.Type, &status.Size, &status.IsDeleted, &status.UpdatedAt)
 		if scanErr != nil {
 			return nil, stacktrace.Propagate(scanErr, "")
 		}
-		indexStatuses = append(indexStatuses, indexStatus)
+		fdStatuses = append(fdStatuses, status)
 	}
-	return indexStatuses, nil
+	return fdStatuses, nil
 }
 
 func (r *Repository) MoveBetweenBuckets(row filedata.Row, bucketID string, sourceColumn string, destColumn string) error {

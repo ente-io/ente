@@ -17,13 +17,12 @@ import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 import "package:photos/ui/viewer/gallery/state/selection_state.dart";
+import "package:photos/ui/viewer/people/add_person_action_sheet.dart";
 import "package:photos/ui/viewer/people/cluster_app_bar.dart";
 import "package:photos/ui/viewer/people/people_banner.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
-import "package:photos/ui/viewer/people/save_person.dart";
 import "package:photos/ui/viewer/search/result/person_face_widget.dart";
 import "package:photos/ui/viewer/search/result/search_result_page.dart";
-import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/toast_util.dart";
 
@@ -59,11 +58,6 @@ class _ClusterPageState extends State<ClusterPage> {
   late final List<EnteFile> files;
   late final StreamSubscription<LocalPhotosUpdatedEvent> _filesUpdatedEvent;
   late final StreamSubscription<PeopleChangedEvent> _peopleChangedEvent;
-
-  bool get showNamingBanner =>
-      (!userDismissedNamingBanner && widget.showNamingBanner);
-
-  bool userDismissedNamingBanner = false;
 
   @override
   void initState() {
@@ -139,6 +133,46 @@ class _ClusterPageState extends State<ClusterPage> {
       selectedFiles: _selectedFiles,
       enableFileGrouping: widget.enableGrouping,
       initialFiles: [widget.searchResult.first],
+      header: widget.showNamingBanner
+          ? PeopleBanner(
+              type: PeopleBannerType.addName,
+              faceWidget: PersonFaceWidget(
+                files.first,
+                clusterID: widget.clusterID,
+              ),
+              actionIcon: Icons.add_outlined,
+              text: S.of(context).addAName,
+              subText: S.of(context).findPeopleByName,
+              onTap: () async {
+                if (widget.personID == null) {
+                  final result = await showAssignPersonAction(
+                    context,
+                    clusterID: widget.clusterID,
+                  );
+                  if (result != null && result is (PersonEntity, EnteFile)) {
+                    Navigator.pop(context);
+                    // ignore: unawaited_futures
+                    routeToPage(
+                      context,
+                      PeoplePage(person: result.$1, searchResult: null),
+                    );
+                  } else if (result != null && result is PersonEntity) {
+                    Navigator.pop(context);
+                    // ignore: unawaited_futures
+                    routeToPage(
+                      context,
+                      PeoplePage(
+                        person: result,
+                        searchResult: null,
+                      ),
+                    );
+                  }
+                } else {
+                  showShortToast(context, "No personID or clusterID");
+                }
+              },
+            )
+          : null,
     );
     return GalleryFilesState(
       child: Scaffold(
@@ -152,79 +186,19 @@ class _ClusterPageState extends State<ClusterPage> {
             key: ValueKey(files.length),
           ),
         ),
-        body: Column(
-          children: [
-            showNamingBanner
-                ? Dismissible(
-                    key: const Key("namingBanner"),
-                    direction: DismissDirection.horizontal,
-                    onDismissed: (direction) {
-                      setState(() {
-                        userDismissedNamingBanner = true;
-                      });
-                    },
-                    child: PeopleBanner(
-                      type: PeopleBannerType.addName,
-                      faceWidget: PersonFaceWidget(
-                        files.first,
-                        clusterID: widget.clusterID,
-                      ),
-                      actionIcon: Icons.add_outlined,
-                      text: S.of(context).addAName,
-                      subText: S.of(context).findPeopleByName,
-                      onTap: () async {
-                        try {
-                          if (widget.personID == null) {
-                            final result = await routeToPage(
-                              context,
-                              SavePerson(widget.clusterID),
-                            );
-                            // final result = await showAssignPersonAction(
-                            //   context,
-                            //   clusterID: widget.clusterID,
-                            // );
-                            if (result != null &&
-                                result is (PersonEntity, EnteFile)) {
-                              Navigator.pop(context);
-                              // ignore: unawaited_futures
-                              routeToPage(
-                                context,
-                                PeoplePage(person: result.$1),
-                              );
-                            } else if (result != null &&
-                                result is PersonEntity) {
-                              Navigator.pop(context);
-                              // ignore: unawaited_futures
-                              routeToPage(context, PeoplePage(person: result));
-                            }
-                          } else {
-                            showShortToast(context, "No personID or clusterID");
-                          }
-                        } catch (e) {
-                          showGenericErrorDialog(context: context, error: e)
-                              .ignore();
-                        }
-                      },
-                    ),
-                  )
-                : const SizedBox.shrink(),
-            Expanded(
-              child: SelectionState(
-                selectedFiles: _selectedFiles,
-                child: Stack(
-                  alignment: Alignment.bottomCenter,
-                  children: [
-                    gallery,
-                    FileSelectionOverlayBar(
-                      ClusterPage.overlayType,
-                      _selectedFiles,
-                      clusterID: widget.clusterID,
-                    ),
-                  ],
-                ),
+        body: SelectionState(
+          selectedFiles: _selectedFiles,
+          child: Stack(
+            alignment: Alignment.bottomCenter,
+            children: [
+              gallery,
+              FileSelectionOverlayBar(
+                ClusterPage.overlayType,
+                _selectedFiles,
+                clusterID: widget.clusterID,
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

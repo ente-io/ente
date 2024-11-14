@@ -3,12 +3,11 @@ import { PasswordStrengthHint } from "@/accounts/components/PasswordStrength";
 import { PAGES } from "@/accounts/constants/pages";
 import { isWeakPassword } from "@/accounts/utils";
 import { generateKeyAndSRPAttributes } from "@/accounts/utils/srp";
+import { FormPaperFooter, FormPaperTitle } from "@/base/components/FormPaper";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import log from "@/base/log";
 import { LS_KEYS, setLSUser } from "@ente/shared//storage/localStorage";
 import { VerticallyCentered } from "@ente/shared/components/Container";
-import FormPaperFooter from "@ente/shared/components/Form/FormPaper/Footer";
-import FormPaperTitle from "@ente/shared/components/Form/FormPaper/Title";
 import ShowHidePassword from "@ente/shared/components/Form/ShowHidePassword";
 import LinkButton from "@ente/shared/components/LinkButton";
 import {

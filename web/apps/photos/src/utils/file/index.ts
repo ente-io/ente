@@ -534,13 +534,7 @@ export const handleFileOps = async (
     clearTempDeleted: () => void,
     markTempHidden: (tempHiddenFiles: EnteFile[]) => void,
     clearTempHidden: () => void,
-    setFixCreationTimeAttributes: (
-        fixCreationTimeAttributes:
-            | {
-                  files: EnteFile[];
-              }
-            | ((prev: { files: EnteFile[] }) => { files: EnteFile[] }),
-    ) => void,
+    fixCreationTime: (files: EnteFile[]) => void,
     setFilesDownloadProgressAttributesCreator: SetFilesDownloadProgressAttributesCreator,
 ) => {
     switch (ops) {
@@ -583,7 +577,7 @@ export const handleFileOps = async (
             break;
         }
         case FILE_OPS_TYPE.FIX_TIME:
-            fixTimeHelper(files, setFixCreationTimeAttributes);
+            fixCreationTime(files);
             break;
         case FILE_OPS_TYPE.ARCHIVE:
             await changeFilesVisibility(files, ItemVisibility.archived);
@@ -595,13 +589,4 @@ export const handleFileOps = async (
             await addMultipleToFavorites(files);
             break;
     }
-};
-
-const fixTimeHelper = async (
-    selectedFiles: EnteFile[],
-    setFixCreationTimeAttributes: (fixCreationTimeAttributes: {
-        files: EnteFile[];
-    }) => void,
-) => {
-    setFixCreationTimeAttributes({ files: selectedFiles });
 };

@@ -27,9 +27,11 @@ const (
 	// PeriodMonth is the unit for the duration of the monthly plan
 	PeriodMonth = "month"
 
-	Period3Years = "3years"
+	Period3Years = "3"
 
-	Period5Years = "5years"
+	Period5Years = "5"
+	
+	Period10Years = "10"
 
 	// FamilyPlanProductID is the product ID of family (internal employees & their friends & family) plan
 	FamilyPlanProductID = "family"

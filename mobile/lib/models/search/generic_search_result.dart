@@ -1,5 +1,6 @@
 import "package:flutter/cupertino.dart";
 import 'package:photos/models/file/file.dart';
+import "package:photos/models/search/hierarchical/hierarchical_search_filter.dart";
 import 'package:photos/models/search/search_result.dart';
 import "package:photos/models/search/search_types.dart";
 
@@ -9,11 +10,13 @@ class GenericSearchResult extends SearchResult {
   final ResultType _type;
   final Function(BuildContext context)? onResultTap;
   final Map<String, dynamic> params;
+  final HierarchicalSearchFilter hierarchicalSearchFilter;
 
   GenericSearchResult(
     this._type,
     this._name,
     this._files, {
+    required this.hierarchicalSearchFilter,
     this.onResultTap,
     this.params = const {},
   });
@@ -36,5 +39,10 @@ class GenericSearchResult extends SearchResult {
   @override
   List<EnteFile> resultFiles() {
     return _files;
+  }
+
+  @override
+  HierarchicalSearchFilter getHierarchicalSearchFilter() {
+    return hierarchicalSearchFilter;
   }
 }

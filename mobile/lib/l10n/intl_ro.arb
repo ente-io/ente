@@ -1092,5 +1092,6 @@
   },
   "enable": "Activare",
   "enabled": "Activat",
-  "moreDetails": "Mai multe detalii"
+  "moreDetails": "Mai multe detalii",
+  "checkingModels": "Checking models..."
 }

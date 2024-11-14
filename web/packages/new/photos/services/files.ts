@@ -61,6 +61,29 @@ export const sortFiles = (files: EnteFile[], sortAsc = false) => {
     });
 };
 
+/**
+ * File IDs themselves are unique across all the files for the user (in fact,
+ * they're unique across all the files in an Ente instance). However, we still
+ * can have multiple entries for the same file ID in our local database because
+ * the unit of account is not actually a file, but a "Collection File": a
+ * collection and file pair.
+ *
+ * For example, if the same file is symlinked into two collections, then we will
+ * have two "Collection File" entries for it, both with the same file ID, but
+ * with different collection IDs.
+ *
+ * This function returns files such that only one of these entries (the newer
+ * one in case of dupes) is returned.
+ */
+export const uniqueFilesByID = (files: EnteFile[]) => {
+    const seen = new Set<number>();
+    return files.filter(({ id }) => {
+        if (seen.has(id)) return false;
+        seen.add(id);
+        return true;
+    });
+};
+
 export const TRASH = "file-trash";
 
 export async function getLocalTrash() {
