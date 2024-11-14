@@ -19,7 +19,6 @@ import {
 import { getAllLocalFiles, getLocalFiles } from "@/new/photos/services/files";
 import { updateMagicMetadata } from "@/new/photos/services/magic-metadata";
 import { safeDirectoryName } from "@/new/photos/utils/native-fs";
-import { CustomError } from "@ente/shared/error";
 import { LS_KEYS, getData } from "@ente/shared/storage/localStorage";
 import type { User } from "@ente/shared/user/types";
 import bs58 from "bs58";
@@ -74,7 +73,7 @@ export async function handleCollectionOps(
             await unhideToCollection(collection, selectedFiles);
             break;
         default:
-            throw Error(CustomError.INVALID_COLLECTION_OPERATION);
+            throw Error("Invalid collection operation");
     }
 }
 

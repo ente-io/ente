@@ -1,5 +1,4 @@
 import { ensure } from "@/utils/ensure";
-import { CustomError } from "@ente/shared/error";
 
 interface RequestQueueItem {
     request: (canceller?: RequestCanceller) => Promise<any>;
@@ -55,7 +54,7 @@ export default class QueueProcessor<T> {
             let response = null;
 
             if (queueItem.isCanceled.status) {
-                queueItem.failureCallback(Error(CustomError.REQUEST_CANCELLED));
+                queueItem.failureCallback(new Error("Request canceled"));
             } else {
                 try {
                     response = await queueItem.request(queueItem.canceller);
