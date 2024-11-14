@@ -50,24 +50,33 @@ const Disable2FA: React.FC<Disable2FAProps> = ({
             const encodedToken = encodeURIComponent(token);
 
             // Fetch user data
-            const userUrl = `${apiOrigin}/admin/user?email=${encodedEmail}&token=${encodedToken}`;
-            const userResponse = await fetch(userUrl);
+            const userUrl = `${apiOrigin}/admin/user?email=${encodedEmail}`;
+            const userResponse = await fetch(userUrl, {
+                method: "GET",
+                headers: { 
+                    "Content-Type": "application/json",
+                    "X-Auth-Token": encodedToken,
+                 },
+            });
             if (!userResponse.ok) {
                 throw new Error("Failed to fetch user data");
             }
             const userData = (await userResponse.json()) as UserData;
-            const userId = userData.subscription?.userID;
+            const userID = userData.subscription?.userID;
 
-            if (!userId) {
+            if (!userID) {
                 throw new Error("User ID not found");
             }
 
             // Disable 2FA
-            const disableUrl = `${apiOrigin}/admin/user/disable-2fa?token=${encodedToken}`;
-            const body = JSON.stringify({ userId });
+            const disableUrl = `${apiOrigin}/admin/user/disable-2fa`;
+            const body = JSON.stringify({ userID });
             const disableResponse = await fetch(disableUrl, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { 
+                    "Content-Type": "application/json",
+                    "X-Auth-Token": encodedToken,
+                 },
                 body: body,
             });
 
