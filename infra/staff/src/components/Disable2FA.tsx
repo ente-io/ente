@@ -47,7 +47,6 @@ const Disable2FA: React.FC<Disable2FAProps> = ({
             }
 
             const encodedEmail = encodeURIComponent(email);
-            const encodedToken = encodeURIComponent(token);
 
             // Fetch user data
             const userUrl = `${apiOrigin}/admin/user?email=${encodedEmail}`;
@@ -55,7 +54,7 @@ const Disable2FA: React.FC<Disable2FAProps> = ({
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
-                    "X-Auth-Token": encodedToken,
+                    "X-Auth-Token": token,
                 },
             });
             if (!userResponse.ok) {
@@ -75,7 +74,7 @@ const Disable2FA: React.FC<Disable2FAProps> = ({
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "X-Auth-Token": encodedToken,
+                    "X-Auth-Token": token,
                 },
                 body: body,
             });
@@ -84,12 +83,15 @@ const Disable2FA: React.FC<Disable2FAProps> = ({
                 const errorResponse = await disableResponse.text();
                 throw new Error(`Failed to disable 2FA: ${errorResponse}`);
             }
-
             handleDisable2FA(); // Notify parent component of successful disable
             handleClose(); // Close dialog on successful disable
             console.log("2FA disabled successfully");
         } catch (error) {
-            console.error("Error disabling 2FA:", error);
+            if (error instanceof Error) {
+                alert(error.message);
+            } else {
+                alert("Failed to disable 2FA");
+            }
         } finally {
             setLoading(false);
         }
