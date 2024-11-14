@@ -38,7 +38,6 @@ export const CustomError = {
     WEAK_DEVICE: "password decryption failed on the device",
     INCORRECT_PASSWORD: "incorrect password",
     UPLOAD_CANCELLED: "upload cancelled",
-    UNKNOWN_ERROR: "Something went wrong, please try again",
     UPDATE_EXPORTED_RECORD_FAILED: "update file exported record failed",
     EXPORT_STOPPED: "export stopped",
     EXPORT_FOLDER_DOES_NOT_EXIST: "export folder does not exist",
@@ -78,7 +77,7 @@ export function parseUploadErrorCodes(error: any) {
                 parsedMessage = CustomError.FILE_TOO_LARGE;
                 break;
             default:
-                parsedMessage = `${CustomError.UNKNOWN_ERROR} statusCode:${error.httpStatusCode}`;
+                parsedMessage = `Something went wrong (statusCode:${error.httpStatusCode})`;
         }
     } else {
         parsedMessage = error.message;
@@ -107,7 +106,7 @@ export const parseSharingErrorCodes = (error: any) => {
                 parsedMessage = CustomError.TOO_MANY_REQUESTS;
                 break;
             default:
-                parsedMessage = `${CustomError.UNKNOWN_ERROR} statusCode:${error.httpStatusCode}`;
+                parsedMessage = `Something went wrong (statusCode:${error.httpStatusCode})`;
         }
     } else {
         parsedMessage = error.message;
