@@ -1,6 +1,5 @@
 import "dart:async";
 
-import "package:collection/collection.dart";
 import "package:flutter/material.dart";
 import "package:photos/core/constants.dart";
 import "package:photos/events/event.dart";
@@ -170,43 +169,32 @@ class SearchExampleRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    //Cannot use listView.builder here
-    final scrollableExamples = <Widget>[];
-    examples.forEachIndexed((index, element) {
-      scrollableExamples.add(
-        SearchExample(
-          searchResult: examples.elementAt(index),
-        ),
-      );
-    });
     return SizedBox(
-      child: SingleChildScrollView(
+      height: 128,
+      child: ListView.separated(
+        padding: const EdgeInsets.symmetric(horizontal: 7),
         physics: const BouncingScrollPhysics(),
         scrollDirection: Axis.horizontal,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: scrollableExamples,
-        ),
+        itemCount: examples.length,
+        itemBuilder: (context, index) {
+          return PersonSearchExample(
+            searchResult: examples[index],
+          );
+        },
+        separatorBuilder: (context, index) => const SizedBox(width: 5),
       ),
     );
   }
 }
 
-class SearchExample extends StatelessWidget {
+class PersonSearchExample extends StatelessWidget {
   final SearchResult searchResult;
-  const SearchExample({required this.searchResult, super.key});
+  const PersonSearchExample({super.key, required this.searchResult});
 
   @override
   Widget build(BuildContext context) {
-    final textScaleFactor = MediaQuery.textScaleFactorOf(context);
     final bool isCluster = (searchResult.type() == ResultType.faces &&
         int.tryParse(searchResult.name()) != null);
-    late final double width;
-    if (textScaleFactor <= 1.0) {
-      width = 85.0;
-    } else {
-      width = 85.0 + ((textScaleFactor - 1.0) * 64);
-    }
     final heroTag =
         searchResult.heroTag() + (searchResult.previewThumbnail()?.tag ?? "");
     return GestureDetector(
@@ -222,22 +210,38 @@ class SearchExample extends StatelessWidget {
           );
         }
       },
-      child: SizedBox(
-        width: width,
-        child: Padding(
-          padding: const EdgeInsets.only(left: 6, right: 6, top: 8),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Stack(
+            alignment: Alignment.center,
             children: [
+              ClipPath(
+                clipper: ShapeBorderClipper(
+                  shape: ContinuousRectangleBorder(
+                    borderRadius: BorderRadius.circular(82),
+                  ),
+                ),
+                child: Container(
+                  width: 102,
+                  height: 102,
+                  decoration: BoxDecoration(
+                    color: getEnteColorScheme(context).strokeFaint,
+                  ),
+                ),
+              ),
               SizedBox(
-                width: 64,
-                height: 64,
+                width: 100,
+                height: 100,
                 child: searchResult.previewThumbnail() != null
                     ? Hero(
                         tag: heroTag,
-                        child: ClipRRect(
-                          borderRadius:
-                              const BorderRadius.all(Radius.elliptical(16, 12)),
+                        child: ClipPath(
+                          clipper: ShapeBorderClipper(
+                            shape: ContinuousRectangleBorder(
+                              borderRadius: BorderRadius.circular(80),
+                            ),
+                          ),
                           child: searchResult.type() != ResultType.faces
                               ? ThumbnailWidget(
                                   searchResult.previewThumbnail()!,
@@ -246,67 +250,69 @@ class SearchExample extends StatelessWidget {
                               : FaceSearchResult(searchResult, heroTag),
                         ),
                       )
-                    : const ClipRRect(
-                        borderRadius:
-                            BorderRadius.all(Radius.elliptical(16, 12)),
-                        child: NoThumbnailWidget(
+                    : ClipPath(
+                        clipper: ShapeBorderClipper(
+                          shape: ContinuousRectangleBorder(
+                            borderRadius: BorderRadius.circular(80),
+                          ),
+                        ),
+                        child: const NoThumbnailWidget(
                           addBorder: false,
                         ),
                       ),
               ),
-              isCluster
-                  ? GestureDetector(
-                      behavior: HitTestBehavior.translucent,
-                      onTap: () async {
-                        final result = await showAssignPersonAction(
-                          context,
-                          clusterID: searchResult.name(),
-                        );
-                        if (result != null &&
-                            result is (PersonEntity, EnteFile)) {
-                          // ignore: unawaited_futures
-                          routeToPage(
-                            context,
-                            PeoplePage(
-                              person: result.$1,
-                              searchResult: null,
-                            ),
-                          );
-                        } else if (result != null && result is PersonEntity) {
-                          // ignore: unawaited_futures
-                          routeToPage(
-                            context,
-                            PeoplePage(
-                              person: result,
-                              searchResult: null,
-                            ),
-                          );
-                        }
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 10, bottom: 16),
-                        child: Text(
-                          "Add name",
-                          maxLines: 1,
-                          textAlign: TextAlign.center,
-                          overflow: TextOverflow.ellipsis,
-                          style: getEnteTextTheme(context).mini,
-                        ),
-                      ),
-                    )
-                  : Padding(
-                      padding: const EdgeInsets.only(top: 10, bottom: 16),
-                      child: Text(
-                        searchResult.name(),
-                        maxLines: 2,
-                        textAlign: TextAlign.center,
-                        overflow: TextOverflow.ellipsis,
-                        style: getEnteTextTheme(context).mini,
-                      ),
-                    ),
             ],
           ),
-        ),
+          isCluster
+              ? GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onTap: () async {
+                    final result = await showAssignPersonAction(
+                      context,
+                      clusterID: searchResult.name(),
+                    );
+                    if (result != null && result is (PersonEntity, EnteFile)) {
+                      // ignore: unawaited_futures
+                      routeToPage(
+                        context,
+                        PeoplePage(
+                          person: result.$1,
+                          searchResult: null,
+                        ),
+                      );
+                    } else if (result != null && result is PersonEntity) {
+                      // ignore: unawaited_futures
+                      routeToPage(
+                        context,
+                        PeoplePage(
+                          person: result,
+                          searchResult: null,
+                        ),
+                      );
+                    }
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 6, bottom: 0),
+                    child: Text(
+                      "Add name",
+                      maxLines: 1,
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                      style: getEnteTextTheme(context).small,
+                    ),
+                  ),
+                )
+              : Padding(
+                  padding: const EdgeInsets.only(top: 6, bottom: 0),
+                  child: Text(
+                    searchResult.name(),
+                    maxLines: 2,
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis,
+                    style: getEnteTextTheme(context).small,
+                  ),
+                ),
+        ],
       ),
     );
   }
