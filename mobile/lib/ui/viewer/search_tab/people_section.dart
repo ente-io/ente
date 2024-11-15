@@ -170,7 +170,7 @@ class SearchExampleRow extends StatelessWidget {
     return SizedBox(
       height: 128,
       child: ListView.separated(
-        padding: const EdgeInsets.symmetric(horizontal: 7),
+        padding: const EdgeInsets.symmetric(horizontal: 6),
         physics: const BouncingScrollPhysics(),
         scrollDirection: Axis.horizontal,
         itemCount: examples.length,
@@ -179,7 +179,7 @@ class SearchExampleRow extends StatelessWidget {
             searchResult: examples[index],
           );
         },
-        separatorBuilder: (context, index) => const SizedBox(width: 5),
+        separatorBuilder: (context, index) => const SizedBox(width: 3),
       ),
     );
   }
