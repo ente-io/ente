@@ -198,8 +198,9 @@ class PersonSearchExample extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool isCluster = (searchResult.type() == ResultType.faces &&
         int.tryParse(searchResult.name()) != null);
-    final heroTag =
-        searchResult.heroTag() + (searchResult.previewThumbnail()?.tag ?? "");
+    final heroTag = searchResult.heroTag() +
+        (searchResult.previewThumbnail()?.tag ?? "") +
+        searchResult.resultFiles().length.toString();
     return GestureDetector(
       onTap: () {
         RecentSearches().add(searchResult.name());
