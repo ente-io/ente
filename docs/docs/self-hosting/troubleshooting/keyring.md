@@ -11,7 +11,7 @@ box might give you some errors related to keyrings in some case.
 
 Follow the below steps to run Ente CLI and also avoid keyrings errors. 
 
-- Create a secrets.txt file and save your user password inside it.
+Run:
 
 ```sh 
 # export the secrets path
@@ -20,11 +20,15 @@ export ENTE_CLI_SECRETS_PATH=./<path-to-secrets.txt>
 
 ./ente-cli
 ```
+You can also add the above line to your shell's rc file, to not 
+having to export it manually every time.
+
+Then one of the following:
+
+1. If the file doesn't exist, Ente CLI will create it and fill it with a random 32 character encryption key.
+2. If you do create the file, please fill it with a cryptographically generated 32 byte string.
 
 And you are good to go.
-
-- You can also add the above line to your shell's rc file, to not 
-having to export it manually every time. 
 
 ## Ref 
 
