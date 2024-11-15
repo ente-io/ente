@@ -9925,6 +9925,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Images will be shown here once processing is complete`
+  String get searchDiscoverEmptySection {
+    return Intl.message(
+      'Images will be shown here once processing is complete',
+      name: 'searchDiscoverEmptySection',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

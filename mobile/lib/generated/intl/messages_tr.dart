@@ -1167,6 +1167,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Fotoğraf bilgilerini burada hızlı bir şekilde bulmak için \"#trip\" gibi açıklamalar ekleyin"),
         "searchDatesEmptySection": MessageLookupByLibrary.simpleMessage(
             "Tarihe, aya veya yıla göre arama yapın"),
+        "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
+            "Images will be shown here once processing is complete"),
         "searchFileTypesAndNamesEmptySection":
             MessageLookupByLibrary.simpleMessage("Dosya türleri ve adları"),
         "searchHint1":

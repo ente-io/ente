@@ -25,6 +25,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "checkingModels":
             MessageLookupByLibrary.simpleMessage("Checking models..."),
         "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
-            "Enable machine learning for magic search and face recognition")
+            "Enable machine learning for magic search and face recognition"),
+        "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
+            "Images will be shown here once processing is complete"),
+        "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
+            "People will be shown here once processing is complete")
       };
 }

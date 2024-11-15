@@ -1345,5 +1345,6 @@
   "loadingYourPhotos": "Cargando tus fotos...",
   "processingImport": "Procesando {folderName}...",
   "checkingModels": "Checking models...",
-  "enableMachineLearningBanner": "Enable machine learning for magic search and face recognition"
+  "enableMachineLearningBanner": "Enable machine learning for magic search and face recognition",
+  "searchDiscoverEmptySection": "Images will be shown here once processing is complete"
 }

@@ -1204,6 +1204,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "写真情報に \"#trip\" のように説明を追加すれば、ここで簡単に見つけることができます"),
         "searchDatesEmptySection":
             MessageLookupByLibrary.simpleMessage("日付、月または年で検索"),
+        "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
+            "Images will be shown here once processing is complete"),
         "searchFaceEmptySection":
             MessageLookupByLibrary.simpleMessage("学習が完了すると、ここに人が表示されます"),
         "searchFileTypesAndNamesEmptySection":

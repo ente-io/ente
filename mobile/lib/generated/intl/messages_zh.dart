@@ -1137,6 +1137,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "在照片信息中添加“#旅游”等描述，以便在此处快速找到它们"),
         "searchDatesEmptySection":
             MessageLookupByLibrary.simpleMessage("按日期搜索，月份或年份"),
+        "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
+            "Images will be shown here once processing is complete"),
         "searchFaceEmptySection":
             MessageLookupByLibrary.simpleMessage("待索引完成后，人物将显示在此处"),
         "searchFileTypesAndNamesEmptySection":

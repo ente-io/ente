@@ -1162,6 +1162,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Adăugați descrieri precum „#excursie” în informațiile fotografiilor pentru a le găsi ușor aici"),
         "searchDatesEmptySection": MessageLookupByLibrary.simpleMessage(
             "Căutare după o dată, o lună sau un an"),
+        "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
+            "Images will be shown here once processing is complete"),
         "searchFaceEmptySection": MessageLookupByLibrary.simpleMessage(
             "Persoanele vor fi afișate aici odată ce indexarea este finalizată"),
         "searchFileTypesAndNamesEmptySection":

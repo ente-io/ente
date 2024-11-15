@@ -288,6 +288,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "บันทึกคีย์การกู้คืนของคุณหากคุณยังไม่ได้ทำ"),
         "scanCode": MessageLookupByLibrary.simpleMessage("สแกนรหัส"),
+        "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
+            "Images will be shown here once processing is complete"),
+        "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
+            "People will be shown here once processing is complete"),
         "selectAll": MessageLookupByLibrary.simpleMessage("เลือกทั้งหมด"),
         "selectReason": MessageLookupByLibrary.simpleMessage("เลือกเหตุผล"),
         "sendEmail": MessageLookupByLibrary.simpleMessage("ส่งอีเมล"),

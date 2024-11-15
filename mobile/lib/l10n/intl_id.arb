@@ -1145,5 +1145,7 @@
   "right": "Kanan",
   "whatsNew": "Hal yang baru",
   "checkingModels": "Checking models...",
-  "enableMachineLearningBanner": "Enable machine learning for magic search and face recognition"
+  "enableMachineLearningBanner": "Enable machine learning for magic search and face recognition",
+  "searchPeopleEmptySection": "People will be shown here once processing is complete",
+  "searchDiscoverEmptySection": "Images will be shown here once processing is complete"
 }

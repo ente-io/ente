@@ -1371,6 +1371,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Add descriptions like \"#trip\" in photo info to quickly find them here"),
         "searchDatesEmptySection": MessageLookupByLibrary.simpleMessage(
             "Search by a date, month or year"),
+        "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
+            "Images will be shown here once processing is complete"),
         "searchFaceEmptySection": MessageLookupByLibrary.simpleMessage(
             "People will be shown here once indexing is done"),
         "searchFileTypesAndNamesEmptySection":

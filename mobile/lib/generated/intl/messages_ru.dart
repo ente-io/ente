@@ -1353,6 +1353,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Добавьте описания типа \"#поездка\" в информацию о фото и быстро найдите их здесь"),
         "searchDatesEmptySection": MessageLookupByLibrary.simpleMessage(
             "Поиск по дате, месяцу или году"),
+        "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
+            "Images will be shown here once processing is complete"),
         "searchFaceEmptySection": MessageLookupByLibrary.simpleMessage(
             "Люди будут показаны здесь, как только будет выполнено индексирование"),
         "searchFileTypesAndNamesEmptySection":

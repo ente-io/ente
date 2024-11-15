@@ -207,6 +207,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "scanThisBarcodeWithnyourAuthenticatorApp":
             MessageLookupByLibrary.simpleMessage(
                 "Skaneeri seda QR koodi\noma autentimisrakendusega"),
+        "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
+            "Images will be shown here once processing is complete"),
+        "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
+            "People will be shown here once processing is complete"),
         "security": MessageLookupByLibrary.simpleMessage("Turvalisus"),
         "selectAll": MessageLookupByLibrary.simpleMessage("Vali kõik"),
         "selectLanguage": MessageLookupByLibrary.simpleMessage("Vali keel"),

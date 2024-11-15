@@ -1179,6 +1179,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Tambah keterangan seperti \"#trip\" pada info foto agar mudah ditemukan di sini"),
         "searchDatesEmptySection": MessageLookupByLibrary.simpleMessage(
             "Telusuri dengan tanggal, bulan, atau tahun"),
+        "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
+            "Images will be shown here once processing is complete"),
         "searchFaceEmptySection": MessageLookupByLibrary.simpleMessage(
             "Orang akan ditampilkan di sini setelah pengindeksan selesai"),
         "searchFileTypesAndNamesEmptySection":
@@ -1189,6 +1191,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Album, nama dan jenis file"),
         "searchHint5": MessageLookupByLibrary.simpleMessage(
             "Segera tiba: Penelusuran wajah & ajaib ✨"),
+        "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
+            "People will be shown here once processing is complete"),
         "searchResultCount": m53,
         "security": MessageLookupByLibrary.simpleMessage("Keamanan"),
         "selectALocation": MessageLookupByLibrary.simpleMessage("Pilih lokasi"),

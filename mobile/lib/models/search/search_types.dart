@@ -77,9 +77,9 @@ extension SectionTypeExtensions on SectionType {
   String getEmptyStateText(BuildContext context) {
     switch (this) {
       case SectionType.face:
-        return S.of(context).searchFaceEmptySection;
+        return S.of(context).searchPeopleEmptySection;
       case SectionType.magic:
-        return "Discover";
+        return S.of(context).searchDiscoverEmptySection;
       case SectionType.moment:
         return S.of(context).searchDatesEmptySection;
       case SectionType.location:

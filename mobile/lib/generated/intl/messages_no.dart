@@ -352,6 +352,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "scanThisBarcodeWithnyourAuthenticatorApp":
             MessageLookupByLibrary.simpleMessage(
                 "Skann denne strekkoden med\nautentiseringsappen din"),
+        "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
+            "Images will be shown here once processing is complete"),
+        "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
+            "People will be shown here once processing is complete"),
         "security": MessageLookupByLibrary.simpleMessage("Sikkerhet"),
         "selectAll": MessageLookupByLibrary.simpleMessage("Velg alle"),
         "selectFoldersForBackup": MessageLookupByLibrary.simpleMessage(

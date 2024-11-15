@@ -27,6 +27,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
             "Enable machine learning for magic search and face recognition"),
         "enterYourEmailAddress": MessageLookupByLibrary.simpleMessage(
-            "Εισάγετε την διεύθυνση ηλ. ταχυδρομείου σας")
+            "Εισάγετε την διεύθυνση ηλ. ταχυδρομείου σας"),
+        "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
+            "Images will be shown here once processing is complete"),
+        "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
+            "People will be shown here once processing is complete")
       };
 }

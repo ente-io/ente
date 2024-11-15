@@ -826,9 +826,13 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Skenuokite šį QR kodą\nsu autentifikatoriaus programa"),
         "search": MessageLookupByLibrary.simpleMessage("Ieškoti"),
+        "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
+            "Images will be shown here once processing is complete"),
         "searchHint4": MessageLookupByLibrary.simpleMessage("Vietovė"),
         "searchLocationEmptySection": MessageLookupByLibrary.simpleMessage(
             "Grupės nuotraukos, kurios padarytos tam tikru spinduliu nuo nuotraukos"),
+        "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
+            "People will be shown here once processing is complete"),
         "searchResultCount": m53,
         "selectALocation":
             MessageLookupByLibrary.simpleMessage("Pasirinkite vietovę"),

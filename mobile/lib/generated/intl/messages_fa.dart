@@ -326,6 +326,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "safelyStored": MessageLookupByLibrary.simpleMessage("به طور ایمن"),
         "saveKey": MessageLookupByLibrary.simpleMessage("ذخیره کلید"),
         "search": MessageLookupByLibrary.simpleMessage("جستجو"),
+        "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
+            "Images will be shown here once processing is complete"),
+        "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
+            "People will be shown here once processing is complete"),
         "security": MessageLookupByLibrary.simpleMessage("امنیت"),
         "selectAll": MessageLookupByLibrary.simpleMessage("انتخاب همه"),
         "selectFoldersForBackup": MessageLookupByLibrary.simpleMessage(

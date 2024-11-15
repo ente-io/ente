@@ -1431,6 +1431,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Додавайте такі описи як «#подорож» в інформацію про фотографію, щоб швидко знайти їх тут"),
         "searchDatesEmptySection": MessageLookupByLibrary.simpleMessage(
             "Шукати за датою, місяцем або роком"),
+        "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
+            "Images will be shown here once processing is complete"),
         "searchFaceEmptySection": MessageLookupByLibrary.simpleMessage(
             "Люди будуть показані тут після завершення індексації"),
         "searchFileTypesAndNamesEmptySection":

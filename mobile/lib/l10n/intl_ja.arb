@@ -1345,5 +1345,6 @@
   "loadingYourPhotos": "写真を読み込んでいます...",
   "processingImport": "{folderName} を処理中...",
   "checkingModels": "Checking models...",
-  "enableMachineLearningBanner": "Enable machine learning for magic search and face recognition"
+  "enableMachineLearningBanner": "Enable machine learning for magic search and face recognition",
+  "searchDiscoverEmptySection": "Images will be shown here once processing is complete"
 }

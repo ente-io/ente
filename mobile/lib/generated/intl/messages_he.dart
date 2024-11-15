@@ -744,6 +744,10 @@ class MessageLookup extends MessageLookupByLibrary {
                 "סרוק את הברקוד הזה\nבעזרת אפליקציית האימות שלך"),
         "searchByAlbumNameHint":
             MessageLookupByLibrary.simpleMessage("שם האלבום"),
+        "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
+            "Images will be shown here once processing is complete"),
+        "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
+            "People will be shown here once processing is complete"),
         "security": MessageLookupByLibrary.simpleMessage("אבטחה"),
         "selectAlbum": MessageLookupByLibrary.simpleMessage("בחר אלבום"),
         "selectAll": MessageLookupByLibrary.simpleMessage("בחר הכל"),
