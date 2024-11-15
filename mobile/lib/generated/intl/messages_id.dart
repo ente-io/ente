@@ -1193,6 +1193,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Segera tiba: Penelusuran wajah & ajaib ✨"),
         "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
             "People will be shown here once processing is complete"),
+        "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
+            "People will be shown here once processing is complete"),
         "searchResultCount": m53,
         "security": MessageLookupByLibrary.simpleMessage("Keamanan"),
         "selectALocation": MessageLookupByLibrary.simpleMessage("Pilih lokasi"),

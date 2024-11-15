@@ -1152,6 +1152,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("在照片的一定半径内拍摄的几组照片"),
         "searchPeopleEmptySection":
             MessageLookupByLibrary.simpleMessage("邀请他人，您将在此看到他们分享的所有照片"),
+        "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
+            "People will be shown here once processing is complete"),
         "searchResultCount": m53,
         "security": MessageLookupByLibrary.simpleMessage("安全"),
         "selectALocation": MessageLookupByLibrary.simpleMessage("选择一个位置"),

@@ -1346,5 +1346,6 @@
   "processingImport": "Verwerken van {folderName}...",
   "checkingModels": "Checking models...",
   "enableMachineLearningBanner": "Enable machine learning for magic search and face recognition",
-  "searchDiscoverEmptySection": "Images will be shown here once processing is complete"
+  "searchDiscoverEmptySection": "Images will be shown here once processing is complete",
+  "searchPersonsEmptySection": "People will be shown here once processing is complete"
 }

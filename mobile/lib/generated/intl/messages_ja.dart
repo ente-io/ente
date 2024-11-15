@@ -1220,6 +1220,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("当時の直近で撮影された写真をグループ化"),
         "searchPeopleEmptySection":
             MessageLookupByLibrary.simpleMessage("友達を招待すると、共有される写真はここから閲覧できます"),
+        "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
+            "People will be shown here once processing is complete"),
         "searchResultCount": m53,
         "security": MessageLookupByLibrary.simpleMessage("セキュリティ"),
         "selectALocation": MessageLookupByLibrary.simpleMessage("場所を選択"),

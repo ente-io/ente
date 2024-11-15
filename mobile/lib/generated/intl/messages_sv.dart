@@ -463,6 +463,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Filtyper och namn"),
         "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
             "People will be shown here once processing is complete"),
+        "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
+            "People will be shown here once processing is complete"),
         "searchResultCount": m53,
         "selectAlbum": MessageLookupByLibrary.simpleMessage("Välj album"),
         "selectLanguage": MessageLookupByLibrary.simpleMessage("Välj språk"),

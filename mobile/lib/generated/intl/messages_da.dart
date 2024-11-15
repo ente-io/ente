@@ -124,6 +124,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Hurtig, søgning på enheden"),
         "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
             "People will be shown here once processing is complete"),
+        "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
+            "People will be shown here once processing is complete"),
         "selectReason": MessageLookupByLibrary.simpleMessage("Vælg årsag"),
         "selectedPhotos": m4,
         "sendEmail": MessageLookupByLibrary.simpleMessage("Send email"),

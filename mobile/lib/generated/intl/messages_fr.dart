@@ -1464,6 +1464,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Grouper les photos qui sont prises dans un certain angle d\'une photo"),
         "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
             "Invitez des gens, et vous verrez ici toutes les photos qu\'ils partagent"),
+        "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
+            "People will be shown here once processing is complete"),
         "searchResultCount": m53,
         "security": MessageLookupByLibrary.simpleMessage("Sécurité"),
         "selectALocation":

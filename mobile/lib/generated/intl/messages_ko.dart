@@ -48,6 +48,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Images will be shown here once processing is complete"),
         "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
             "People will be shown here once processing is complete"),
+        "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
+            "People will be shown here once processing is complete"),
         "verify": MessageLookupByLibrary.simpleMessage("인증"),
         "yourAccountHasBeenDeleted":
             MessageLookupByLibrary.simpleMessage("계정이 삭제되었습니다.")

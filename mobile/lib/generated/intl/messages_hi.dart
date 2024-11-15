@@ -93,6 +93,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Images will be shown here once processing is complete"),
         "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
             "People will be shown here once processing is complete"),
+        "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
+            "People will be shown here once processing is complete"),
         "selectReason": MessageLookupByLibrary.simpleMessage("कारण चुनें"),
         "sendEmail": MessageLookupByLibrary.simpleMessage("ईमेल भेजें"),
         "somethingWentWrongPleaseTryAgain":

@@ -833,6 +833,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Grupės nuotraukos, kurios padarytos tam tikru spinduliu nuo nuotraukos"),
         "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
             "People will be shown here once processing is complete"),
+        "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
+            "People will be shown here once processing is complete"),
         "searchResultCount": m53,
         "selectALocation":
             MessageLookupByLibrary.simpleMessage("Pasirinkite vietovę"),

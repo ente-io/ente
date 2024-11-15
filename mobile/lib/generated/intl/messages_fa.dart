@@ -330,6 +330,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Images will be shown here once processing is complete"),
         "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
             "People will be shown here once processing is complete"),
+        "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
+            "People will be shown here once processing is complete"),
         "security": MessageLookupByLibrary.simpleMessage("امنیت"),
         "selectAll": MessageLookupByLibrary.simpleMessage("انتخاب همه"),
         "selectFoldersForBackup": MessageLookupByLibrary.simpleMessage(

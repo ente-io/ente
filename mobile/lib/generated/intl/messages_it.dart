@@ -1446,6 +1446,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Raggruppa foto scattate entro un certo raggio da una foto"),
         "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
             "Invita persone e vedrai qui tutte le foto condivise da loro"),
+        "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
+            "People will be shown here once processing is complete"),
         "searchResultCount": m53,
         "security": MessageLookupByLibrary.simpleMessage("Sicurezza"),
         "selectALocation":

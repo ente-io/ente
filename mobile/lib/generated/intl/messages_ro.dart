@@ -1182,6 +1182,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Grupare fotografii realizate în raza unei fotografii"),
         "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
             "Invitați persoane și veți vedea aici toate fotografiile distribuite de acestea"),
+        "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
+            "People will be shown here once processing is complete"),
         "searchResultCount": m53,
         "security": MessageLookupByLibrary.simpleMessage("Securitate"),
         "selectALocation":

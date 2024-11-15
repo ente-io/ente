@@ -56,6 +56,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Images will be shown here once processing is complete"),
         "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
             "People will be shown here once processing is complete"),
+        "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
+            "People will be shown here once processing is complete"),
         "sorry": MessageLookupByLibrary.simpleMessage("المعذرة"),
         "terminate": MessageLookupByLibrary.simpleMessage("إنهاء"),
         "terminateSession":

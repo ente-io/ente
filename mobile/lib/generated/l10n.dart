@@ -9935,6 +9935,16 @@ class S {
       args: [],
     );
   }
+
+  /// `People will be shown here once processing is complete`
+  String get searchPersonsEmptySection {
+    return Intl.message(
+      'People will be shown here once processing is complete',
+      name: 'searchPersonsEmptySection',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

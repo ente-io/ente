@@ -31,6 +31,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
             "Images will be shown here once processing is complete"),
         "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
+            "People will be shown here once processing is complete"),
+        "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
             "People will be shown here once processing is complete")
       };
 }

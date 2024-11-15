@@ -1390,6 +1390,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Group photos that are taken within some radius of a photo"),
         "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
             "Invite people, and you\'ll see all photos shared by them here"),
+        "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
+            "People will be shown here once processing is complete"),
         "searchResultCount": m53,
         "security": MessageLookupByLibrary.simpleMessage("Security"),
         "selectALocation":
