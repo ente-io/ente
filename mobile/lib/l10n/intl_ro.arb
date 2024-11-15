@@ -1093,5 +1093,8 @@
   "enable": "Activare",
   "enabled": "Activat",
   "moreDetails": "Mai multe detalii",
-  "checkingModels": "Checking models..."
+  "checkingModels": "Checking models...",
+  "enableMachineLearningBanner": "Enable machine learning for magic search and face recognition",
+  "searchDiscoverEmptySection": "Images will be shown here once processing is complete",
+  "searchPersonsEmptySection": "People will be shown here once processing is complete"
 }

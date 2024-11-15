@@ -606,6 +606,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "empty": MessageLookupByLibrary.simpleMessage("Boşalt"),
         "emptyTrash":
             MessageLookupByLibrary.simpleMessage("Çöp kutusu boşaltılsın mı?"),
+        "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
+            "Enable machine learning for magic search and face recognition"),
         "enableMaps":
             MessageLookupByLibrary.simpleMessage("Haritaları Etkinleştir"),
         "enableMapsDesc": MessageLookupByLibrary.simpleMessage(
@@ -1165,6 +1167,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Fotoğraf bilgilerini burada hızlı bir şekilde bulmak için \"#trip\" gibi açıklamalar ekleyin"),
         "searchDatesEmptySection": MessageLookupByLibrary.simpleMessage(
             "Tarihe, aya veya yıla göre arama yapın"),
+        "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
+            "Images will be shown here once processing is complete"),
         "searchFileTypesAndNamesEmptySection":
             MessageLookupByLibrary.simpleMessage("Dosya türleri ve adları"),
         "searchHint1":
@@ -1180,6 +1184,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Bir fotoğrafın belli bir yarıçapında çekilen fotoğrafları gruplandırın"),
         "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
             "İnsanları davet ettiğinizde onların paylaştığı tüm fotoğrafları burada göreceksiniz"),
+        "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
+            "People will be shown here once processing is complete"),
         "searchResultCount": m53,
         "security": MessageLookupByLibrary.simpleMessage("Güvenlik"),
         "selectALocation":

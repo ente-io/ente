@@ -189,6 +189,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "dropSupportEmail": m25,
         "duplicateItemsGroup": m27,
         "email": MessageLookupByLibrary.simpleMessage("E-post"),
+        "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
+            "Enable machine learning for magic search and face recognition"),
         "encryption": MessageLookupByLibrary.simpleMessage("Kryptering"),
         "encryptionKeys":
             MessageLookupByLibrary.simpleMessage("Krypteringsnøkkel"),
@@ -350,6 +352,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "scanThisBarcodeWithnyourAuthenticatorApp":
             MessageLookupByLibrary.simpleMessage(
                 "Skann denne strekkoden med\nautentiseringsappen din"),
+        "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
+            "Images will be shown here once processing is complete"),
+        "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
+            "People will be shown here once processing is complete"),
+        "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
+            "People will be shown here once processing is complete"),
         "security": MessageLookupByLibrary.simpleMessage("Sikkerhet"),
         "selectAll": MessageLookupByLibrary.simpleMessage("Velg alle"),
         "selectFoldersForBackup": MessageLookupByLibrary.simpleMessage(

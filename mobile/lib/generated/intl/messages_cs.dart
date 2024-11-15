@@ -28,6 +28,14 @@ class MessageLookup extends MessageLookupByLibrary {
             "Zkontrolujte prosím svou doručenou poštu (a spam) pro dokončení ověření"),
         "checkingModels":
             MessageLookupByLibrary.simpleMessage("Checking models..."),
-        "incorrectRecoveryKeyBody": MessageLookupByLibrary.simpleMessage("")
+        "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
+            "Enable machine learning for magic search and face recognition"),
+        "incorrectRecoveryKeyBody": MessageLookupByLibrary.simpleMessage(""),
+        "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
+            "Images will be shown here once processing is complete"),
+        "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
+            "People will be shown here once processing is complete"),
+        "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
+            "People will be shown here once processing is complete")
       };
 }

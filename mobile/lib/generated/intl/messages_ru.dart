@@ -681,6 +681,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "enable": MessageLookupByLibrary.simpleMessage("Включить"),
         "enableMLIndexingDesc": MessageLookupByLibrary.simpleMessage(
             "Ente поддерживает машинное обучение на устройстве для распознавания лиц, умного поиска и других расширенных функций поиска"),
+        "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
+            "Enable machine learning for magic search and face recognition"),
         "enableMaps": MessageLookupByLibrary.simpleMessage("Включить карты"),
         "enableMapsDesc": MessageLookupByLibrary.simpleMessage(
             "Ваши фотографии будут показаны на карте мира.\n\nЭта карта размещена на Open Street Map, и точное местоположение ваших фотографий никогда не разглашается.\n\nВы можете отключить эту функцию в любое время в настройках."),
@@ -1351,6 +1353,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Добавьте описания типа \"#поездка\" в информацию о фото и быстро найдите их здесь"),
         "searchDatesEmptySection": MessageLookupByLibrary.simpleMessage(
             "Поиск по дате, месяцу или году"),
+        "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
+            "Images will be shown here once processing is complete"),
         "searchFaceEmptySection": MessageLookupByLibrary.simpleMessage(
             "Люди будут показаны здесь, как только будет выполнено индексирование"),
         "searchFileTypesAndNamesEmptySection":
@@ -1368,6 +1372,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Групповые фотографии, сделанные в некотором радиусе от фотографии"),
         "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
             "Пригласите людей, и вы увидите все фотографии, которыми они поделились здесь"),
+        "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
+            "People will be shown here once processing is complete"),
         "searchResultCount": m53,
         "security": MessageLookupByLibrary.simpleMessage("Безопасность"),
         "selectALocation":

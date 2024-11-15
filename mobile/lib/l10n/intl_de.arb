@@ -1360,5 +1360,8 @@
   "allPersonGroupingWillReset": "Alle Gruppierungen für diese Person werden zurückgesetzt und du wirst alle Vorschläge für diese Person verlieren",
   "yesResetPerson": "Ja, Person zurücksetzen",
   "onlyThem": "Nur diese",
-  "checkingModels": "Checking models..."
+  "checkingModels": "Checking models...",
+  "enableMachineLearningBanner": "Enable machine learning for magic search and face recognition",
+  "searchDiscoverEmptySection": "Images will be shown here once processing is complete",
+  "searchPersonsEmptySection": "People will be shown here once processing is complete"
 }

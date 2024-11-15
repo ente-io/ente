@@ -24,5 +24,9 @@
   "verifyEmail": "التحقق من البريد الإلكتروني",
   "toResetVerifyEmail": "لإعادة تعيين كلمة المرور، يرجى التحقق من بريدك الإلكتروني أولاً.",
   "ackPasswordLostWarning": "أُدركُ أنّني فقدتُ كلمة مروري، فقد أفقد بياناتي لأن بياناتي <underline>مشفرة تشفيرًا تامًّا من النهاية إلى النهاية</underline>.",
-  "checkingModels": "Checking models..."
+  "checkingModels": "Checking models...",
+  "enableMachineLearningBanner": "Enable machine learning for magic search and face recognition",
+  "searchPeopleEmptySection": "People will be shown here once processing is complete",
+  "searchDiscoverEmptySection": "Images will be shown here once processing is complete",
+  "searchPersonsEmptySection": "People will be shown here once processing is complete"
 }

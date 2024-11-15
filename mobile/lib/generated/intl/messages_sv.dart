@@ -244,6 +244,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "edit": MessageLookupByLibrary.simpleMessage("Redigera"),
         "email": MessageLookupByLibrary.simpleMessage("E-post"),
         "emailNoEnteAccount": m29,
+        "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
+            "Enable machine learning for magic search and face recognition"),
         "encryption": MessageLookupByLibrary.simpleMessage("Kryptering"),
         "encryptionKeys":
             MessageLookupByLibrary.simpleMessage("Krypteringsnycklar"),
@@ -455,8 +457,14 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Album"),
         "searchByAlbumNameHint":
             MessageLookupByLibrary.simpleMessage("Albumnamn"),
+        "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
+            "Images will be shown here once processing is complete"),
         "searchFileTypesAndNamesEmptySection":
             MessageLookupByLibrary.simpleMessage("Filtyper och namn"),
+        "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
+            "People will be shown here once processing is complete"),
+        "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
+            "People will be shown here once processing is complete"),
         "searchResultCount": m53,
         "selectAlbum": MessageLookupByLibrary.simpleMessage("Välj album"),
         "selectLanguage": MessageLookupByLibrary.simpleMessage("Välj språk"),
