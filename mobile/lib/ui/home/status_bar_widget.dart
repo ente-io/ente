@@ -37,7 +37,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
   late StreamSubscription<NotificationEvent> _notificationSubscription;
   bool _showStatus = false;
   bool _showErrorBanner = false;
-  final bool _showMlBanner = !userRemoteFlagService
+  bool _showMlBanner = !userRemoteFlagService
           .getCachedBoolValue(UserRemoteFlagService.mlEnabled) &&
       !localSettings.hasSeenMLEnablingBanner;
   Error? _syncError;
@@ -75,6 +75,9 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
     _notificationSubscription =
         Bus.instance.on<NotificationEvent>().listen((event) {
       if (mounted) {
+        _showMlBanner = !userRemoteFlagService
+                .getCachedBoolValue(UserRemoteFlagService.mlEnabled) &&
+            !localSettings.hasSeenMLEnablingBanner;
         setState(() {});
       }
     });

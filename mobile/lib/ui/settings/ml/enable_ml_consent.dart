@@ -149,6 +149,7 @@ class _EnableMachineLearningConsentState
         UserRemoteFlagService.mlEnabled,
         true,
       );
+      Bus.instance.fire(NotificationEvent());
       Navigator.of(context).pop(true);
     } catch (e) {
       // ignore: unawaited_futures
