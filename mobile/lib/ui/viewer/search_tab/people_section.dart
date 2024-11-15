@@ -198,9 +198,7 @@ class PersonSearchExample extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool isCluster = (searchResult.type() == ResultType.faces &&
         int.tryParse(searchResult.name()) != null);
-    final heroTag = searchResult.heroTag() +
-        (searchResult.previewThumbnail()?.tag ?? "") +
-        searchResult.resultFiles().length.toString();
+
     return GestureDetector(
       onTap: () {
         RecentSearches().add(searchResult.name());
@@ -238,21 +236,18 @@ class PersonSearchExample extends StatelessWidget {
                 width: size - 2,
                 height: size - 2,
                 child: searchResult.previewThumbnail() != null
-                    ? Hero(
-                        tag: heroTag,
-                        child: ClipPath(
-                          clipper: ShapeBorderClipper(
-                            shape: ContinuousRectangleBorder(
-                              borderRadius: BorderRadius.circular(80),
-                            ),
+                    ? ClipPath(
+                        clipper: ShapeBorderClipper(
+                          shape: ContinuousRectangleBorder(
+                            borderRadius: BorderRadius.circular(80),
                           ),
-                          child: searchResult.type() != ResultType.faces
-                              ? ThumbnailWidget(
-                                  searchResult.previewThumbnail()!,
-                                  shouldShowSyncStatus: false,
-                                )
-                              : FaceSearchResult(searchResult, heroTag),
                         ),
+                        child: searchResult.type() != ResultType.faces
+                            ? ThumbnailWidget(
+                                searchResult.previewThumbnail()!,
+                                shouldShowSyncStatus: false,
+                              )
+                            : FaceSearchResult(searchResult),
                       )
                     : ClipPath(
                         clipper: ShapeBorderClipper(
@@ -324,8 +319,8 @@ class PersonSearchExample extends StatelessWidget {
 
 class FaceSearchResult extends StatelessWidget {
   final SearchResult searchResult;
-  final String heroTagPrefix;
-  const FaceSearchResult(this.searchResult, this.heroTagPrefix, {super.key});
+
+  const FaceSearchResult(this.searchResult, {super.key});
 
   @override
   Widget build(BuildContext context) {
