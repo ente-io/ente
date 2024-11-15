@@ -1,4 +1,6 @@
 import "package:flutter/material.dart";
+import "package:photos/core/event_bus.dart";
+import "package:photos/events/notification_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/service_locator.dart";
 import "package:photos/services/user_remote_flag_service.dart";
@@ -120,6 +122,8 @@ class _EnableMachineLearningConsentState
                       buttonType: ButtonType.secondary,
                       labelText: S.of(context).cancel,
                       onTap: () async {
+                        await localSettings.setHasSeenMLEnablingBanner();
+                        Bus.instance.fire(NotificationEvent());
                         Navigator.of(context).pop();
                       },
                     ),
