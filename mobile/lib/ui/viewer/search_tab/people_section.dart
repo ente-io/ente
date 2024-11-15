@@ -16,9 +16,9 @@ import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/ui/viewer/people/add_person_action_sheet.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
+import "package:photos/ui/viewer/search/result/people_section_all_page.dart";
 import 'package:photos/ui/viewer/search/result/person_face_widget.dart';
 import "package:photos/ui/viewer/search/result/search_result_page.dart";
-import 'package:photos/ui/viewer/search/result/search_section_all_page.dart';
 import "package:photos/ui/viewer/search/search_section_cta.dart";
 import "package:photos/utils/navigation_util.dart";
 
@@ -86,8 +86,8 @@ class _PeopleSectionState extends State<PeopleSection> {
               if (shouldShowMore) {
                 routeToPage(
                   context,
-                  SearchSectionAllPage(
-                    sectionType: widget.sectionType,
+                  PeopleSectionAllPage(
+                    searchResults: Future.value(widget.examples),
                   ),
                 );
               }
@@ -189,7 +189,12 @@ class SearchExampleRow extends StatelessWidget {
 
 class PersonSearchExample extends StatelessWidget {
   final SearchResult searchResult;
-  const PersonSearchExample({super.key, required this.searchResult});
+  final double size;
+  const PersonSearchExample({
+    super.key,
+    required this.searchResult,
+    this.size = 102,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -223,16 +228,16 @@ class PersonSearchExample extends StatelessWidget {
                   ),
                 ),
                 child: Container(
-                  width: 102,
-                  height: 102,
+                  width: size,
+                  height: size,
                   decoration: BoxDecoration(
                     color: getEnteColorScheme(context).strokeFaint,
                   ),
                 ),
               ),
               SizedBox(
-                width: 100,
-                height: 100,
+                width: size - 2,
+                height: size - 2,
                 child: searchResult.previewThumbnail() != null
                     ? Hero(
                         tag: heroTag,
@@ -306,7 +311,7 @@ class PersonSearchExample extends StatelessWidget {
                   padding: const EdgeInsets.only(top: 6, bottom: 0),
                   child: Text(
                     searchResult.name(),
-                    maxLines: 2,
+                    maxLines: 1,
                     textAlign: TextAlign.center,
                     overflow: TextOverflow.ellipsis,
                     style: getEnteTextTheme(context).small,
