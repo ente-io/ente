@@ -319,26 +319,6 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
             ],
           ),
         ),
-        // const SizedBox(
-        //   height: 24.0,
-        // ),
-        // ButtonWidget(
-        //   shouldSurfaceExecutionStates: false,
-        //   buttonType: ButtonType.neutral,
-        //   labelText: 'Assign different person',
-        //   buttonSize: ButtonSize.small,
-        //   onTap: () async {
-        //     final result = await showAssignPersonAction(
-        //       context,
-        //       clusterID: clusterID,
-        //     );
-        //     if (result != null &&
-        //         (result is (PersonEntity, EnteFile) ||
-        //             result is PersonEntity)) {
-        //       await _rejectSuggestion(clusterID, numberOfSuggestions);
-        //     }
-        //   },
-        // ),
       ],
     );
     // Precompute face thumbnails for next suggestions, in case there are
