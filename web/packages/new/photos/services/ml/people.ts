@@ -58,12 +58,17 @@ export interface CGroupUserEntityData {
      */
     name?: string | undefined;
     /**
-     * An unordered set ofe clusters that have been assigned to this group.
+     * An unordered set of clusters that have been assigned to this group.
      *
      * For ease of transportation and persistence this is an array, but it
      * should conceptually be thought of as a set.
      */
     assigned: FaceCluster[];
+    /**
+     * An unordered set of faces (IDs) that the user has manually marked as not
+     * belonging to this group.
+     */
+    rejectedFaceIDs: string[];
     /**
      * True if this cluster group should be hidden.
      *

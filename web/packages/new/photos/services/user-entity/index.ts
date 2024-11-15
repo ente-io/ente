@@ -85,8 +85,7 @@ const RemoteFaceCluster = z.object({
 const RemoteCGroupData = z.object({
     name: z.string().nullish().transform(nullToUndefined),
     assigned: z.array(RemoteFaceCluster),
-    // The remote cgroup also has a "rejected" property, but that is not
-    // currently used by any of the clients.
+    rejectedFaceIDs: z.array(z.string()).nullish().transform(nullToUndefined),
     isHidden: z.boolean(),
     avatarFaceID: z.string().nullish().transform(nullToUndefined),
 });
