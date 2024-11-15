@@ -163,6 +163,10 @@ export interface FilePublicMagicMetadataProps {
      * Epoch microseconds.
      */
     editedTime?: number;
+    /** See {@link PublicMagicMetadata} in file-metadata.ts */
+    dateTime?: string;
+    /** See {@link PublicMagicMetadata} in file-metadata.ts */
+    offsetTime?: string;
     /**
      * Edited name of the {@link EnteFile}.
      *
