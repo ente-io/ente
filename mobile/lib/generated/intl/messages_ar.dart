@@ -31,6 +31,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Checking models..."),
         "decrypting": MessageLookupByLibrary.simpleMessage("فك التشفير..."),
         "email": MessageLookupByLibrary.simpleMessage("البريد الإلكتروني"),
+        "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
+            "Enable machine learning for magic search and face recognition"),
         "enterYourEmailAddress":
             MessageLookupByLibrary.simpleMessage("أدخل عنوان بريدك الإلكتروني"),
         "enterYourRecoveryKey":

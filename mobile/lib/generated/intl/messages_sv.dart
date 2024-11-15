@@ -244,6 +244,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "edit": MessageLookupByLibrary.simpleMessage("Redigera"),
         "email": MessageLookupByLibrary.simpleMessage("E-post"),
         "emailNoEnteAccount": m29,
+        "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
+            "Enable machine learning for magic search and face recognition"),
         "encryption": MessageLookupByLibrary.simpleMessage("Kryptering"),
         "encryptionKeys":
             MessageLookupByLibrary.simpleMessage("Krypteringsnycklar"),

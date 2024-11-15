@@ -1359,5 +1359,6 @@
   "areYouSureYouWantToResetThisPerson": "Ви впевнені, що хочете скинути цю особу?",
   "allPersonGroupingWillReset": "Усі групи для цієї особи будуть скинуті, і ви втратите всі пропозиції, зроблені для неї",
   "yesResetPerson": "Так, скинути особу",
-  "checkingModels": "Checking models..."
+  "checkingModels": "Checking models...",
+  "enableMachineLearningBanner": "Enable machine learning for magic search and face recognition"
 }

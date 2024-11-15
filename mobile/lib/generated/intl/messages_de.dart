@@ -738,6 +738,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "enable": MessageLookupByLibrary.simpleMessage("Aktivieren"),
         "enableMLIndexingDesc": MessageLookupByLibrary.simpleMessage(
             "Ente unterstützt maschinelles Lernen für Gesichtserkennung, magische Suche und andere erweiterte Suchfunktionen auf dem Gerät"),
+        "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
+            "Enable machine learning for magic search and face recognition"),
         "enableMaps": MessageLookupByLibrary.simpleMessage("Karten aktivieren"),
         "enableMapsDesc": MessageLookupByLibrary.simpleMessage(
             "Dies zeigt Ihre Fotos auf einer Weltkarte.\n\nDiese Karte wird von OpenStreetMap gehostet und die genauen Standorte Ihrer Fotos werden niemals geteilt.\n\nSie können diese Funktion jederzeit in den Einstellungen deaktivieren."),

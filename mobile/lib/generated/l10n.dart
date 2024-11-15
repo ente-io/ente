@@ -9915,6 +9915,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Enable machine learning for magic search and face recognition`
+  String get enableMachineLearningBanner {
+    return Intl.message(
+      'Enable machine learning for magic search and face recognition',
+      name: 'enableMachineLearningBanner',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

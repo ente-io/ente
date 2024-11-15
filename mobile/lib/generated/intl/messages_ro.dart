@@ -605,6 +605,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "emptyTrash":
             MessageLookupByLibrary.simpleMessage("Goliți coșul de gunoi?"),
         "enable": MessageLookupByLibrary.simpleMessage("Activare"),
+        "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
+            "Enable machine learning for magic search and face recognition"),
         "enabled": MessageLookupByLibrary.simpleMessage("Activat"),
         "encryption": MessageLookupByLibrary.simpleMessage("Criptarea"),
         "encryptionKeys":

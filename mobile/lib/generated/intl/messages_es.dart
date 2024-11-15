@@ -730,6 +730,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "enable": MessageLookupByLibrary.simpleMessage("Habilitar"),
         "enableMLIndexingDesc": MessageLookupByLibrary.simpleMessage(
             "Ente soporta aprendizaje automático en el dispositivo para la detección de caras, búsqueda mágica y otras características de búsqueda avanzada"),
+        "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
+            "Enable machine learning for magic search and face recognition"),
         "enableMaps": MessageLookupByLibrary.simpleMessage("Activar Mapas"),
         "enableMapsDesc": MessageLookupByLibrary.simpleMessage(
             "Esto mostrará tus fotos en el mapa mundial.\n\nEste mapa está gestionado por Open Street Map, y la ubicación exacta de tus fotos nunca se comparte.\n\nPuedes deshabilitar esta función en cualquier momento en Ajustes."),

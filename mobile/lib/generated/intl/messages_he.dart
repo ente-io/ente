@@ -412,6 +412,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "emailVerificationToggle":
             MessageLookupByLibrary.simpleMessage("אימות מייל"),
         "empty": MessageLookupByLibrary.simpleMessage("ריק"),
+        "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
+            "Enable machine learning for magic search and face recognition"),
         "encryption": MessageLookupByLibrary.simpleMessage("הצפנה"),
         "encryptionKeys": MessageLookupByLibrary.simpleMessage("מפתחות ההצפנה"),
         "endtoendEncryptedByDefault": MessageLookupByLibrary.simpleMessage(

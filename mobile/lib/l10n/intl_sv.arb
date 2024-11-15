@@ -456,5 +456,6 @@
   "newPerson": "Ny person",
   "addName": "Lägg till namn",
   "add": "Lägg till",
-  "checkingModels": "Checking models..."
+  "checkingModels": "Checking models...",
+  "enableMachineLearningBanner": "Enable machine learning for magic search and face recognition"
 }

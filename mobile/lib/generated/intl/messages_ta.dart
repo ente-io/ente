@@ -41,6 +41,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteReason1": MessageLookupByLibrary.simpleMessage(
             "எனக்கு தேவையான ஒரு முக்கிய அம்சம் இதில் இல்லை"),
         "email": MessageLookupByLibrary.simpleMessage("மின்னஞ்சல்"),
+        "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
+            "Enable machine learning for magic search and face recognition"),
         "enterValidEmail": MessageLookupByLibrary.simpleMessage(
             "சரியான மின்னஞ்சல் முகவரியை உள்ளிடவும்."),
         "enterYourEmailAddress": MessageLookupByLibrary.simpleMessage(

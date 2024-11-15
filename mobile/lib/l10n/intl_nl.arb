@@ -1344,5 +1344,6 @@
   "mostRelevant": "Meest relevant",
   "loadingYourPhotos": "Je foto's worden geladen...",
   "processingImport": "Verwerken van {folderName}...",
-  "checkingModels": "Checking models..."
+  "checkingModels": "Checking models...",
+  "enableMachineLearningBanner": "Enable machine learning for magic search and face recognition"
 }

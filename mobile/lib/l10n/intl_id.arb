@@ -1144,5 +1144,6 @@
   "left": "Kiri",
   "right": "Kanan",
   "whatsNew": "Hal yang baru",
-  "checkingModels": "Checking models..."
+  "checkingModels": "Checking models...",
+  "enableMachineLearningBanner": "Enable machine learning for magic search and face recognition"
 }

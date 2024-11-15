@@ -23,6 +23,8 @@ class MessageLookup extends MessageLookupByLibrary {
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "checkingModels":
-            MessageLookupByLibrary.simpleMessage("Checking models...")
+            MessageLookupByLibrary.simpleMessage("Checking models..."),
+        "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
+            "Enable machine learning for magic search and face recognition")
       };
 }

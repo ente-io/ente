@@ -1360,5 +1360,6 @@
   "allPersonGroupingWillReset": "All groupings for this person will be reset, and you will lose all suggestions made for this person",
   "yesResetPerson": "Yes, reset person",
   "onlyThem": "Only them",
-  "checkingModels": "Checking models..."
+  "checkingModels": "Checking models...",
+  "enableMachineLearningBanner": "Enable machine learning for magic search and face recognition"
 }

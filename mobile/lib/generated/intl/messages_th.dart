@@ -151,6 +151,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("แก้ไขตำแหน่ง"),
         "eligible": MessageLookupByLibrary.simpleMessage("มีสิทธิ์"),
         "email": MessageLookupByLibrary.simpleMessage("อีเมล"),
+        "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
+            "Enable machine learning for magic search and face recognition"),
         "enableMaps": MessageLookupByLibrary.simpleMessage("เปิดใช้งานแผนที่"),
         "encryption": MessageLookupByLibrary.simpleMessage("การเข้ารหัส"),
         "enterCode": MessageLookupByLibrary.simpleMessage("ป้อนรหัส"),

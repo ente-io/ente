@@ -112,6 +112,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Зрабіць гэта пазней"),
         "done": MessageLookupByLibrary.simpleMessage("Гатова"),
         "email": MessageLookupByLibrary.simpleMessage("Электронная пошта"),
+        "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
+            "Enable machine learning for magic search and face recognition"),
         "encryption": MessageLookupByLibrary.simpleMessage("Шыфраванне"),
         "encryptionKeys":
             MessageLookupByLibrary.simpleMessage("Ключы шыфравання"),

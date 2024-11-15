@@ -308,5 +308,6 @@
   "search": "جستجو",
   "whatsNew": "تغییرات جدید",
   "reviewSuggestions": "مرور پیشنهادها",
-  "checkingModels": "Checking models..."
+  "checkingModels": "Checking models...",
+  "enableMachineLearningBanner": "Enable machine learning for magic search and face recognition"
 }

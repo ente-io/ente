@@ -189,6 +189,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "dropSupportEmail": m25,
         "duplicateItemsGroup": m27,
         "email": MessageLookupByLibrary.simpleMessage("E-post"),
+        "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
+            "Enable machine learning for magic search and face recognition"),
         "encryption": MessageLookupByLibrary.simpleMessage("Kryptering"),
         "encryptionKeys":
             MessageLookupByLibrary.simpleMessage("Krypteringsnøkkel"),

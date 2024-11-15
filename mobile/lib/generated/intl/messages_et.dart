@@ -100,6 +100,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "done": MessageLookupByLibrary.simpleMessage("Valmis"),
         "edit": MessageLookupByLibrary.simpleMessage("Muuda"),
         "email": MessageLookupByLibrary.simpleMessage("E-post"),
+        "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
+            "Enable machine learning for magic search and face recognition"),
         "encryption": MessageLookupByLibrary.simpleMessage("Krüpteerimine"),
         "enterCode": MessageLookupByLibrary.simpleMessage("Sisesta kood"),
         "enterEmail": MessageLookupByLibrary.simpleMessage("Sisesta e-post"),

@@ -1360,5 +1360,6 @@
   "allPersonGroupingWillReset": "Todos os agrupamentos dessa pessoa serão redefinidos, e você perderá todas as sugestões feitas por essa pessoa.",
   "yesResetPerson": "Sim, redefinir pessoa",
   "onlyThem": "Apenas eles",
-  "checkingModels": "Checking models..."
+  "checkingModels": "Checking models...",
+  "enableMachineLearningBanner": "Enable machine learning for magic search and face recognition"
 }

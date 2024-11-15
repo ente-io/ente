@@ -681,6 +681,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "enable": MessageLookupByLibrary.simpleMessage("Включить"),
         "enableMLIndexingDesc": MessageLookupByLibrary.simpleMessage(
             "Ente поддерживает машинное обучение на устройстве для распознавания лиц, умного поиска и других расширенных функций поиска"),
+        "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
+            "Enable machine learning for magic search and face recognition"),
         "enableMaps": MessageLookupByLibrary.simpleMessage("Включить карты"),
         "enableMapsDesc": MessageLookupByLibrary.simpleMessage(
             "Ваши фотографии будут показаны на карте мира.\n\nЭта карта размещена на Open Street Map, и точное местоположение ваших фотографий никогда не разглашается.\n\nВы можете отключить эту функцию в любое время в настройках."),

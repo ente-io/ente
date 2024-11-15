@@ -170,6 +170,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "editLocationTagTitle":
             MessageLookupByLibrary.simpleMessage("ویرایش مکان"),
         "email": MessageLookupByLibrary.simpleMessage("ایمیل"),
+        "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
+            "Enable machine learning for magic search and face recognition"),
         "encryption": MessageLookupByLibrary.simpleMessage("رمزگذاری"),
         "encryptionKeys":
             MessageLookupByLibrary.simpleMessage("کلیدهای رمزنگاری"),

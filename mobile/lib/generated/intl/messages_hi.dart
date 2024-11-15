@@ -58,6 +58,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteRequestSLAText": MessageLookupByLibrary.simpleMessage(
             "आपका अनुरोध 72 घंटों के भीतर संसाधित किया जाएगा।"),
         "email": MessageLookupByLibrary.simpleMessage("ईमेल"),
+        "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
+            "Enable machine learning for magic search and face recognition"),
         "entePhotosPerm": MessageLookupByLibrary.simpleMessage(
             "Ente को आपकी तस्वीरों को संरक्षित करने के लिए <i>अनुमति की आवश्यकता है</i>"),
         "enterValidEmail": MessageLookupByLibrary.simpleMessage(

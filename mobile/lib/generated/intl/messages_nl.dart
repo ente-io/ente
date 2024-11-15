@@ -726,6 +726,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "enable": MessageLookupByLibrary.simpleMessage("Inschakelen"),
         "enableMLIndexingDesc": MessageLookupByLibrary.simpleMessage(
             "Ente ondersteunt on-device machine learning voor gezichtsherkenning, magisch zoeken en andere geavanceerde zoekfuncties"),
+        "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
+            "Enable machine learning for magic search and face recognition"),
         "enableMaps":
             MessageLookupByLibrary.simpleMessage("Kaarten inschakelen"),
         "enableMapsDesc": MessageLookupByLibrary.simpleMessage(

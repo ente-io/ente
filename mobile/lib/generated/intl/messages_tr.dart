@@ -606,6 +606,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "empty": MessageLookupByLibrary.simpleMessage("Boşalt"),
         "emptyTrash":
             MessageLookupByLibrary.simpleMessage("Çöp kutusu boşaltılsın mı?"),
+        "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
+            "Enable machine learning for magic search and face recognition"),
         "enableMaps":
             MessageLookupByLibrary.simpleMessage("Haritaları Etkinleştir"),
         "enableMapsDesc": MessageLookupByLibrary.simpleMessage(

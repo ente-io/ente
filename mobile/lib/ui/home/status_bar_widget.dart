@@ -128,7 +128,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
                   startIcon: Icons.offline_bolt,
                   actionIcon: Icons.arrow_forward,
                   text:
-                      "Enable machine learning for magic search and face recognition",
+                      S.of(context).enableMachineLearningBanner,
                   type: NotificationType.greenBanner,
                   onTap: () async => {
                     await routeToPage(

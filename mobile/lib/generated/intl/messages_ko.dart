@@ -35,6 +35,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteAccountPermanentlyButton":
             MessageLookupByLibrary.simpleMessage("계정을 영구적으로 삭제"),
         "email": MessageLookupByLibrary.simpleMessage("이메일"),
+        "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
+            "Enable machine learning for magic search and face recognition"),
         "enterValidEmail":
             MessageLookupByLibrary.simpleMessage("올바른 이메일 주소를 입력하세요."),
         "enterYourEmailAddress":

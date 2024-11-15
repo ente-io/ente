@@ -219,5 +219,6 @@
   "@storageBreakupYou": {
     "description": "Label to indicate how much storage you are using when you are part of a family plan"
   },
-  "checkingModels": "Checking models..."
+  "checkingModels": "Checking models...",
+  "enableMachineLearningBanner": "Enable machine learning for magic search and face recognition"
 }

@@ -614,6 +614,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Verifikasi email"),
         "empty": MessageLookupByLibrary.simpleMessage("Kosongkan"),
         "emptyTrash": MessageLookupByLibrary.simpleMessage("Kosongkan sampah?"),
+        "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
+            "Enable machine learning for magic search and face recognition"),
         "enableMaps": MessageLookupByLibrary.simpleMessage("Aktifkan Peta"),
         "encryptingBackup":
             MessageLookupByLibrary.simpleMessage("Mengenkripsi cadangan..."),

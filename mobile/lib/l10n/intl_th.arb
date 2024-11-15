@@ -296,5 +296,6 @@
   },
   "maps": "แผนที่",
   "enableMaps": "เปิดใช้งานแผนที่",
-  "checkingModels": "Checking models..."
+  "checkingModels": "Checking models...",
+  "enableMachineLearningBanner": "Enable machine learning for magic search and face recognition"
 }

@@ -623,6 +623,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "enable": MessageLookupByLibrary.simpleMessage("有効化"),
         "enableMLIndexingDesc": MessageLookupByLibrary.simpleMessage(
             "Enteは顔認識、マジック検索、その他の高度な検索機能のため、あなたのデバイス上で機械学習をしています"),
+        "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
+            "Enable machine learning for magic search and face recognition"),
         "enableMaps": MessageLookupByLibrary.simpleMessage("マップを有効にする"),
         "enableMapsDesc": MessageLookupByLibrary.simpleMessage(
             "世界地図上にあなたの写真を表示します。\n\n地図はOpenStreetMapを利用しており、あなたの写真の位置情報が外部に共有されることはありません。\n\nこの機能は設定から無効にすることができます"),

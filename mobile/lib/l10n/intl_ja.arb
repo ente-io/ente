@@ -1344,5 +1344,6 @@
   "mostRelevant": "関連度順",
   "loadingYourPhotos": "写真を読み込んでいます...",
   "processingImport": "{folderName} を処理中...",
-  "checkingModels": "Checking models..."
+  "checkingModels": "Checking models...",
+  "enableMachineLearningBanner": "Enable machine learning for magic search and face recognition"
 }
