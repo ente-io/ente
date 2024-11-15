@@ -446,7 +446,12 @@ export const _suggestionsAndChoicesForPerson = async (
 ): Promise<PersonSuggestionsAndChoices> => {
     const startTime = Date.now();
 
-    const personClusters = person.cgroup.data.assigned;
+    const rejectedFaceIDs = new Set(person.cgroup.data.rejectedFaceIDs);
+    const personClusters = person.cgroup.data.assigned.map((cluster) => ({
+        ...cluster,
+        faces: cluster.faces.filter((id) => !rejectedFaceIDs.has(id)),
+    }));
+
     const rejectedClusterIDs = new Set(
         await savedRejectedClustersForCGroup(person.cgroup.id),
     );
