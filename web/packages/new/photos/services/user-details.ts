@@ -2,7 +2,11 @@ import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { getKV, setKV } from "@/base/kv";
 import { apiURL, familyAppOrigin, paymentsAppOrigin } from "@/base/origins";
 import { ensure } from "@/utils/ensure";
-import { nullishToZero, nullToUndefined } from "@/utils/transform";
+import {
+    nullishToEmpty,
+    nullishToZero,
+    nullToUndefined,
+} from "@/utils/transform";
 import { getData, LS_KEYS, setLSUser } from "@ente/shared/storage/localStorage";
 import isElectron from "is-electron";
 import { z } from "zod";
@@ -112,9 +116,7 @@ const BonusData = z.object({
     /**
      * List of bonuses applied for the user.
      */
-    storageBonuses: Bonus.array()
-        .nullish()
-        .transform((v) => v ?? []),
+    storageBonuses: Bonus.array().nullish().transform(nullishToEmpty),
 });
 
 /**

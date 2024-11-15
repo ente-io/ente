@@ -67,6 +67,9 @@ export interface CGroupUserEntityData {
     /**
      * An unordered set of faces (IDs) that the user has manually marked as not
      * belonging to this group.
+     *
+     * For ease of transportation and persistence this is an array, but it
+     * should conceptually be thought of as a set.
      */
     rejectedFaceIDs: string[];
     /**
@@ -265,11 +268,20 @@ export const reconstructPeopleState = async (): Promise<PeopleState> => {
         // their name to an empty string.
         if (!name) isHidden = true;
 
+        let assignedFaceIDs: string[][];
+        if (data.rejectedFaceIDs.length == 0) {
+            // Fast path for when there are no rejected faces.
+            assignedFaceIDs = assigned.map(({ faces }) => faces);
+        } else {
+            const rejectedFaceIDs = new Set(data.rejectedFaceIDs);
+            assignedFaceIDs = assigned.map(({ faces }) =>
+                faces.filter((id) => !rejectedFaceIDs.has(id)),
+            );
+        }
+
         // Person faces from all the clusters assigned to this cgroup, sorted by
         // recency (then score).
-        const faces = personFacesSortedNewestFirst(
-            assigned.map(({ faces }) => faces).flat(),
-        );
+        const faces = personFacesSortedNewestFirst(assignedFaceIDs.flat());
 
         // Ignore this cgroup if we don't have visible faces left in it.
         const mostRecentFace = faces[0];
