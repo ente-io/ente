@@ -621,18 +621,18 @@ const randomSample = <T>(items: T[], n: number) => {
  *
  * Each entry is a (clusterID, update) pair.
  *
- * * Entries with "assign" should be assigned to the cgroup,
- * * Entries with "reject-local" should be rejected from the cgroup locally.
- *   These correspond to suggestions which the user did not accept.
- * * Entries with "reject-remote" should be rejected from the cgroup both
+ * * Clusters with "assign" should be assigned to the cgroup,
+ * * Clusters with "rejectSuggestion" should be rejected from the cgroup
+ *   locally. These correspond to suggestions which the user did not accept.
+ * * Clusters with "rejectSavedChoice" should be rejected from the cgroup both
  *   locally and on remote. These correspond to saved choices which the user
  *   went on to explicitly reject.
- * * Entries with "reset" should be reset - i.e. should be removed from both the
- *   assigned and rejected choices associated with the cgroup (if needed).
+ * * Clusters with "reset" should be reset - i.e. should be removed from both
+ *   the assigned and rejected choices associated with the cgroup (if needed).
  */
 export type PersonSuggestionUpdates = Map<
     string,
-    "assign" | "reject-local" | "reject-remote" | "reset"
+    "assign" | "rejectSuggestion" | "rejectSavedChoice" | "reset"
 >;
 
 /**
@@ -700,18 +700,15 @@ export const _applyPersonSuggestionUpdates = async (
     };
 
     // Add `clusterID` to the list of rejected clusters locally.
-    const rejectLocal = (clusterID: string) => {
+    const rejectClusterLocal = (clusterID: string) => {
         rejectedClusterIDs.push(clusterID);
         rejectUpdateCount += 1;
     };
 
-    // Add `clusterID` to the list of rejected clusters locally, and mark the
-    // faces in that cluster as rejected on remote.
-    const rejectRemote = (clusterID: string) => {
+    // Mark the faces in `clusterID` as rejected on remote.
+    const rejectFacesRemote = (clusterID: string) => {
         const cluster = clusterWithID(clusterID);
-        rejectedClusterIDs.push(clusterID);
         newlyRejectedFaceIDs = newlyRejectedFaceIDs.concat(cluster.faces);
-        rejectUpdateCount += 1;
     };
 
     // Remove `clusterID` from the list of rejected clusters (if needed).
@@ -731,14 +728,15 @@ export const _applyPersonSuggestionUpdates = async (
                 unrejectIfNeeded(clusterID);
                 break;
 
-            case "reject-local":
+            case "rejectSuggestion":
                 unassignIfNeeded(clusterID);
-                rejectLocal(clusterID);
+                rejectClusterLocal(clusterID);
                 break;
 
-            case "reject-remote":
+            case "rejectSavedChoice":
                 unassignIfNeeded(clusterID);
-                rejectRemote(clusterID);
+                rejectClusterLocal(clusterID);
+                rejectFacesRemote(clusterID);
                 break;
 
             case "reset":

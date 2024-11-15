@@ -528,7 +528,23 @@ const suggestionsDialogReducer: React.Reducer<
                 // original assigned state.
                 updates.delete(item.id);
             } else {
-                updates.set(item.id, value);
+                const update = (() => {
+                    switch (value) {
+                        case true:
+                            // true corresponds to update "assign".
+                            return "assign";
+                        case false:
+                            // false maps to different updates for suggestions
+                            // vs choices.
+                            return item.assigned === undefined
+                                ? "rejectSuggestion"
+                                : "rejectSavedChoice";
+                        case undefined:
+                            // undefined means reset.
+                            return "reset";
+                    }
+                })();
+                updates.set(item.id, update);
             }
             return { ...state, updates };
         }
@@ -764,7 +780,7 @@ const SuggestionOrChoiceList: React.FC<SuggestionOrChoiceListProps> = ({
                 </Stack>
                 {!item.fixed && (
                     <ToggleButtonGroup
-                        value={fromItemValue(item, updates)}
+                        value={itemValueFromUpdate(item, updates)}
                         exclusive
                         onChange={(_, v) => onUpdateItem(item, toItemValue(v))}
                     >
@@ -781,12 +797,25 @@ const SuggestionOrChoiceList: React.FC<SuggestionOrChoiceListProps> = ({
     </List>
 );
 
-const fromItemValue = (item: SCItem, updates: PersonSuggestionUpdates) => {
+const itemValueFromUpdate = (
+    item: SCItem,
+    updates: PersonSuggestionUpdates,
+) => {
     // Use the in-memory state if available. For choices, fallback to their
     // original state.
-    const resolved = updates.has(item.id)
-        ? updates.get(item.id)
-        : item.assigned;
+    const resolveUpdate = () => {
+        switch (updates.get(item.id)) {
+            case "assign":
+                return true;
+            case "rejectSavedChoice":
+                return false;
+            case "rejectSuggestion":
+                return false;
+            default:
+                return undefined;
+        }
+    };
+    const resolved = updates.has(item.id) ? resolveUpdate() : item.assigned;
     return resolved ? "yes" : resolved === false ? "no" : undefined;
 };
 
