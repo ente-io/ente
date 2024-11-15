@@ -262,22 +262,15 @@ class SearchExample extends StatelessWidget {
                           context,
                           clusterID: searchResult.name(),
                         );
-                        if (result != null &&
-                            result is (PersonEntity, EnteFile)) {
+                        if (result != null) {
+                          final person = result is (PersonEntity, EnteFile)
+                              ? result.$1
+                              : result;
                           // ignore: unawaited_futures
                           routeToPage(
                             context,
                             PeoplePage(
-                              person: result.$1,
-                              searchResult: null,
-                            ),
-                          );
-                        } else if (result != null && result is PersonEntity) {
-                          // ignore: unawaited_futures
-                          routeToPage(
-                            context,
-                            PeoplePage(
-                              person: result,
+                              person: person,
                               searchResult: null,
                             ),
                           );
