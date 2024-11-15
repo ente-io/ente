@@ -709,6 +709,10 @@ export const addCGroup = async (name: string, cluster: FaceCluster) => {
 /**
  * Add a new cluster to an existing named person.
  *
+ * If this cluster contains any faces that had previously been marked as not
+ * belonging to the person, then they will be removed from the rejected list and
+ * will get reassociated to the person.
+ *
  * @param cgroup The existing cgroup underlying the person. This is the (remote)
  * user entity that will get updated.
  *
@@ -717,28 +721,17 @@ export const addCGroup = async (name: string, cluster: FaceCluster) => {
 export const addClusterToCGroup = async (
     cgroup: CGroup,
     cluster: FaceCluster,
-) =>
-    updateAssignedClustersForCGroup(
-        cgroup,
-        cgroup.data.assigned.concat([cluster]),
+) => {
+    const clusterFaceIDs = new Set(cluster.faces);
+    const assigned = cgroup.data.assigned.concat([cluster]);
+    const rejectedFaceIDs = cgroup.data.rejectedFaceIDs.filter(
+        (id) => !clusterFaceIDs.has(id),
     );
 
-/**
- * Update the clusters assigned to an existing named person.
- *
- * @param cgroup The existing cgroup underlying the person. This is the (remote)
- * user entity that will get updated.
- *
- * @param cluster The new value of the face clusters assigned to this person.
- */
-export const updateAssignedClustersForCGroup = async (
-    cgroup: CGroup,
-    assigned: FaceCluster[],
-) => {
     const masterKey = await masterKeyFromSession();
     await updateOrCreateUserEntities(
         "cgroup",
-        [{ ...cgroup, data: { ...cgroup.data, assigned } }],
+        [{ ...cgroup, data: { ...cgroup.data, assigned, rejectedFaceIDs } }],
         masterKey,
     );
     return mlSync();
