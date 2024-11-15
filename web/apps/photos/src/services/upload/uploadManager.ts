@@ -450,6 +450,33 @@ class UploadManager {
         return this.uiService.hasFilesInResultList();
     }
 
+    /**
+     * Upload a single file to the given collection.
+     *
+     * @param file A web {@link File} object representing the file to upload.
+     *
+     * @param collection The {@link Collection} in which the file should be added.
+     *
+     * @param creationTime The timestamp (unix epoch microseconds) to use as the
+     * `creationTime` of the newly created {@link EnteFile}.
+     */
+    public async uploadFile(
+        file: File,
+        collection: Collection,
+        creationTime: number,
+    ) {
+        const item = {
+            uploadItem: file,
+            localID: 1,
+            collectionID: collection.id,
+        };
+        this.parsedMetadataJSONMap.set(
+            getMetadataJSONMapKeyForJSON(collection.id, file.name),
+            { creationTime },
+        );
+        return this.uploadItems([item], [collection]);
+    }
+
     private abortIfCancelled = () => {
         if (uploadCancelService.isUploadCancelationRequested()) {
             throw Error(CustomError.UPLOAD_CANCELLED);

@@ -475,15 +475,14 @@ const ImageEditorOverlay = (props: IProps) => {
             );
 
             const editedFile = await getEditedFile();
-            const file = {
-                uploadItem: editedFile,
-                localID: 1,
-                collectionID: props.file.collectionID,
-            };
 
             uploadManager.prepareForNewUpload();
             uploadManager.showUploadProgressDialog();
-            uploadManager.uploadItems([file], [collection]);
+            uploadManager.uploadFile(
+                editedFile,
+                collection,
+                props.file.metadata.creationTime,
+            );
             setFileURL(null);
             props.onClose();
             props.closePhotoViewer();
