@@ -86,9 +86,7 @@ class _PeopleSectionState extends State<PeopleSection> {
               if (shouldShowMore) {
                 routeToPage(
                   context,
-                  PeopleSectionAllPage(
-                    searchResults: Future.value(widget.examples),
-                  ),
+                  const PeopleSectionAllPage(),
                 );
               }
             },
