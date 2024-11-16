@@ -97,6 +97,26 @@ export const _clusterFaces = async (
 
     const sortedCGroups = cgroups.sort((a, b) => b.updatedAt - a.updatedAt);
 
+    const rejectedClusterIDsForFaceID = new Map<string, Set<string>>();
+    for (const cgroup of sortedCGroups) {
+        if (cgroup.data.rejectedFaceIDs.length == 0) {
+            clusters = clusters.concat(cgroup.data.assigned);
+        } else {
+            const rejectedFaceIDs = new Set(cgroup.data.rejectedFaceIDs);
+            clusters = clusters.concat(
+                cgroup.data.assigned.map((cluster) => ({
+                    ...cluster,
+                    faces: cluster.faces.filter((f) => !rejectedFaceIDs.has(f)),
+                })),
+            );
+            for (const faceID of rejectedFaceIDs) {
+                const s = rejectedClusterIDsForFaceID.get(faceID) ?? new Set();
+                cgroup.data.assigned.forEach(({ id }) => s.add(id));
+                rejectedClusterIDsForFaceID.set(faceID, s);
+            }
+        }
+    }
+
     // Extract the remote clusters.
     clusters = clusters.concat(
         // See: [Note: strict mode migration]
