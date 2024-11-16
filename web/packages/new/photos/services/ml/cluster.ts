@@ -142,10 +142,15 @@ export const _clusterFaces = async (
         }
     }
 
+    // IDs of the clusters which were modified. We use this information to
+    // determine which cgroups need to be updated on remote.
+    const modifiedClusterIDs = new Set<string>();
+
     const state = {
         faceIDToClusterID,
         faceIDToClusterIndex,
         clusters,
+        modifiedClusterIDs,
     };
 
     // Process the faces in batches, but keep an overlap between batches to
@@ -168,7 +173,7 @@ export const _clusterFaces = async (
     const t = `(${Date.now() - startTime} ms)`;
     log.info(`Refreshed ${clusters.length} clusters from ${total} faces ${t}`);
 
-    return clusters;
+    return { clusters, modifiedClusterIDs };
 };
 
 /**
@@ -248,6 +253,7 @@ interface ClusteringState {
     faceIDToClusterID: Map<string, string>;
     faceIDToClusterIndex: Map<string, number>;
     clusters: FaceCluster[];
+    modifiedClusterIDs: Set<string>;
 }
 
 const clusterBatchLinear = async (
@@ -333,6 +339,7 @@ const clusterBatchLinear = async (
             state.faceIDToClusterID.set(fi.faceID, nnCluster.id);
             state.faceIDToClusterIndex.set(fi.faceID, nnClusterIndex);
             nnCluster.faces.push(fi.faceID);
+            state.modifiedClusterIDs.add(nnCluster.id);
         } else {
             // No neighbour within the threshold. Create a new cluster.
             const clusterID = newClusterID();
@@ -342,6 +349,7 @@ const clusterBatchLinear = async (
             state.faceIDToClusterID.set(fi.faceID, cluster.id);
             state.faceIDToClusterIndex.set(fi.faceID, clusterIndex);
             state.clusters.push(cluster);
+            state.modifiedClusterIDs.add(cluster.id);
         }
     }
 };
@@ -355,6 +363,7 @@ const clusterBatchLinear = async (
  */
 export const reconcileClusters = async (
     clusters: FaceCluster[],
+    modifiedClusterIDs: Set<string>,
     masterKey: Uint8Array,
 ) => {
     // Index clusters by their ID for fast lookup.
@@ -366,12 +375,8 @@ export const reconcileClusters = async (
     // Find the cgroups that have changed since we started.
     const changedCGroups = cgroups
         .map((cgroup) => {
-            for (const oldCluster of cgroup.data.assigned) {
-                // The clustering algorithm does not remove any existing faces, it
-                // can only add new ones to the cluster. So we can use the count as
-                // an indication if something changed.
-                const newCluster = ensure(clusterByID.get(oldCluster.id));
-                if (oldCluster.faces.length != newCluster.faces.length) {
+            for (const cluster of cgroup.data.assigned) {
+                if (modifiedClusterIDs.has(cluster.id)) {
                     return {
                         ...cgroup,
                         data: {
