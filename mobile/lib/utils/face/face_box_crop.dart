@@ -3,6 +3,8 @@ import "dart:io" show File;
 import "package:flutter/foundation.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/cache/lru_map.dart";
+import "package:photos/db/files_db.dart";
+import "package:photos/db/ml/db.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/file/file_type.dart";
 import "package:photos/models/ml/face/box.dart";
@@ -125,6 +127,46 @@ Future<Map<String, Uint8List>?> getCachedFaceCrops(
     return null;
   }
 }
+
+Future<Uint8List?> precomputeNextFaceCrops(
+    file,
+    clusterID, {
+    required bool useFullFile,
+  }) async {
+    try {
+      final Face? face = await MLDataDB.instance.getCoverFaceForPerson(
+        recentFileID: file.uploadedFileID!,
+        clusterID: clusterID,
+      );
+      if (face == null) {
+        debugPrint(
+          "No cover face for cluster $clusterID and recentFile ${file.uploadedFileID}",
+        );
+        return null;
+      }
+      EnteFile? fileForFaceCrop = file;
+      if (face.fileID != file.uploadedFileID!) {
+        fileForFaceCrop =
+            await FilesDB.instance.getAnyUploadedFile(face.fileID);
+      }
+      if (fileForFaceCrop == null) {
+        return null;
+      }
+      final cropMap = await getCachedFaceCrops(
+        fileForFaceCrop,
+        [face],
+        useFullFile: useFullFile,
+      );
+      return cropMap?[face.faceID];
+    } catch (e, s) {
+      _logger.severe(
+        "Error getting cover face for cluster $clusterID",
+        e,
+        s,
+      );
+      return null;
+    }
+  }
 
 Future<Map<String, Uint8List>?> _getFaceCrops(
   EnteFile file,

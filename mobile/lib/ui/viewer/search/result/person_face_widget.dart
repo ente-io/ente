@@ -123,43 +123,4 @@ class PersonFaceWidget extends StatelessWidget {
     }
   }
 
-  static Future<Uint8List?> precomputeNextFaceCrops(
-    file,
-    clusterID, {
-    required bool useFullFile,
-  }) async {
-    try {
-      final Face? face = await MLDataDB.instance.getCoverFaceForPerson(
-        recentFileID: file.uploadedFileID!,
-        clusterID: clusterID,
-      );
-      if (face == null) {
-        debugPrint(
-          "No cover face for cluster $clusterID and recentFile ${file.uploadedFileID}",
-        );
-        return null;
-      }
-      EnteFile? fileForFaceCrop = file;
-      if (face.fileID != file.uploadedFileID!) {
-        fileForFaceCrop =
-            await FilesDB.instance.getAnyUploadedFile(face.fileID);
-      }
-      if (fileForFaceCrop == null) {
-        return null;
-      }
-      final cropMap = await getCachedFaceCrops(
-        fileForFaceCrop,
-        [face],
-        useFullFile: useFullFile,
-      );
-      return cropMap?[face.faceID];
-    } catch (e, s) {
-      log(
-        "Error getting cover face for cluster $clusterID",
-        error: e,
-        stackTrace: s,
-      );
-      return null;
-    }
-  }
 }

@@ -19,6 +19,7 @@ import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/viewer/people/cluster_page.dart";
 import "package:photos/ui/viewer/people/person_clusters_page.dart";
 import "package:photos/ui/viewer/search/result/person_face_widget.dart";
+import "package:photos/utils/face/face_box_crop.dart";
 
 class SuggestionUserFeedback {
   final bool accepted;
@@ -358,7 +359,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
         final clusterID = suggestion.clusterIDToMerge;
         for (final file in files.sublist(0, min(files.length, 8))) {
           unawaited(
-            PersonFaceWidget.precomputeNextFaceCrops(
+            precomputeNextFaceCrops(
               file,
               clusterID,
               useFullFile: false,
@@ -465,7 +466,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
     final futures = <Future<Uint8List?>>[];
     for (final file in files) {
       futures.add(
-        PersonFaceWidget.precomputeNextFaceCrops(
+        precomputeNextFaceCrops(
           file,
           clusterID,
           useFullFile: false,
