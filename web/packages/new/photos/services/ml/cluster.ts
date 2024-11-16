@@ -97,6 +97,7 @@ export const _clusterFaces = async (
 
     const sortedCGroups = cgroups.sort((a, b) => b.updatedAt - a.updatedAt);
 
+    // Fill in clusters from remote cgroups, and also construct rejected lookup.
     const rejectedClusterIDsForFaceID = new Map<string, Set<string>>();
     for (const cgroup of sortedCGroups) {
         if (cgroup.data.rejectedFaceIDs.length == 0) {
@@ -116,15 +117,6 @@ export const _clusterFaces = async (
             }
         }
     }
-
-    // Extract the remote clusters.
-    clusters = clusters.concat(
-        // See: [Note: strict mode migration]
-        //
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        sortedCGroups.map((cg) => cg.data.assigned).flat(),
-    );
 
     // Add on the clusters we have available locally.
     clusters = clusters.concat(await savedFaceClusters());
@@ -167,6 +159,7 @@ export const _clusterFaces = async (
         await clusterBatchLinear(
             faces.slice(offset, offset + batchSize),
             state,
+            rejectedClusterIDsForFaceID,
             ({ completed }) =>
                 onProgress({ completed: offset + completed, total }),
         );
@@ -260,6 +253,7 @@ interface ClusteringState {
 const clusterBatchLinear = async (
     batch: ClusterFace[],
     state: ClusteringState,
+    rejectedClusterIDsForFaceID: Map<string, Set<string>>,
     onProgress: (progress: ClusteringProgress) => void,
 ) => {
     const [clusteredFaces, unclusteredFaces] = batch.reduce<
@@ -294,6 +288,8 @@ const clusterBatchLinear = async (
         // If the face is already part of a cluster, then skip it.
         if (state.faceIDToClusterID.has(fi.faceID)) continue;
 
+        const rejectedClusters = rejectedClusterIDsForFaceID.get(fi.faceID);
+
         // Find the nearest neighbour among the previous faces in this batch.
         let nnIndex: number | undefined;
         let nnCosineSimilarity = 0;
@@ -306,11 +302,24 @@ const clusterBatchLinear = async (
             // The vectors are already normalized, so we can directly use their
             // dot product as their cosine similarity.
             const csim = dotProduct(fi.embedding, fj.embedding);
+            if (csim <= nnCosineSimilarity) continue;
+
             const threshold = fj.isBadFace ? 0.84 : 0.76;
-            if (csim > nnCosineSimilarity && csim >= threshold) {
-                nnIndex = j;
-                nnCosineSimilarity = csim;
+            if (csim < threshold) continue;
+
+            // Don't add the face back to a cluster it has been rejected from.
+            if (rejectedClusters) {
+                const cjx = state.faceIDToClusterIndex.get(fj.faceID);
+                if (cjx) {
+                    const cj = ensure(state.clusters[cjx]);
+                    if (rejectedClusters.has(cj.id)) {
+                        continue;
+                    }
+                }
             }
+
+            nnIndex = j;
+            nnCosineSimilarity = csim;
         }
 
         if (nnIndex !== undefined) {
