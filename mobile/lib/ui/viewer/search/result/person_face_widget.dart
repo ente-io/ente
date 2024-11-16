@@ -12,8 +12,6 @@ import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/utils/face/face_box_crop.dart";
-import "package:photos/utils/thumbnail_util.dart";
-import "package:pool/pool.dart";
 
 class PersonFaceWidget extends StatelessWidget {
   final EnteFile file;
@@ -52,7 +50,7 @@ class PersonFaceWidget extends StatelessWidget {
       );
     }
     return FutureBuilder<Uint8List?>(
-      future: getFaceCrop(),
+      future: _getFaceCrop(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           final ImageProvider imageProvider = MemoryImage(snapshot.data!);
@@ -79,48 +77,27 @@ class PersonFaceWidget extends StatelessWidget {
     );
   }
 
-  Future<Face?> _getFace() async {
-    String? personAvatarFaceID;
-    if (personId != null) {
-      final PersonEntity? personEntity =
-          await PersonService.instance.getPerson(personId!);
-      if (personEntity != null) {
-        personAvatarFaceID = personEntity.data.avatarFaceID;
-      }
-    }
-    return await MLDataDB.instance.getCoverFaceForPerson(
-      recentFileID: file.uploadedFileID!,
-      avatarFaceId: personAvatarFaceID,
-      personID: personId,
-      clusterID: clusterID,
-    );
-  }
-
-  Future<Uint8List?> getFaceCrop({int fetchAttempt = 1}) async {
+  Future<Uint8List?> _getFaceCrop() async {
     try {
-      final Face? face = await _getFace();
+      String? personAvatarFaceID;
+      if (personId != null) {
+        final PersonEntity? personEntity =
+            await PersonService.instance.getPerson(personId!);
+        if (personEntity != null) {
+          personAvatarFaceID = personEntity.data.avatarFaceID;
+        }
+      }
+      final Face? face = await MLDataDB.instance.getCoverFaceForPerson(
+        recentFileID: file.uploadedFileID!,
+        avatarFaceId: personAvatarFaceID,
+        personID: personId,
+        clusterID: clusterID,
+      );
       if (face == null) {
         debugPrint(
           "No cover face for person: $personId and cluster $clusterID and recentFile ${file.uploadedFileID}",
         );
         return null;
-      }
-      final Uint8List? cachedFace = faceCropCache.get(face.faceID);
-      if (cachedFace != null) {
-        return cachedFace;
-      }
-      final faceCropCacheFile = cachedFaceCropPath(face.faceID);
-      if ((await faceCropCacheFile.exists())) {
-        final data = await faceCropCacheFile.readAsBytes();
-        faceCropCache.put(face.faceID, data);
-        return data;
-      }
-      if (!useFullFile) {
-        final Uint8List? cachedFaceThumbnail =
-            faceCropThumbnailCache.get(face.faceID);
-        if (cachedFaceThumbnail != null) {
-          return cachedFaceThumbnail;
-        }
       }
       EnteFile? fileForFaceCrop = file;
       if (face.fileID != file.uploadedFileID!) {
@@ -130,42 +107,18 @@ class PersonFaceWidget extends StatelessWidget {
       if (fileForFaceCrop == null) {
         return null;
       }
-
-      late final Pool relevantResourcePool;
-      if (useFullFile) {
-        relevantResourcePool = poolFullFileFaceGenerations;
-      } else {
-        relevantResourcePool = poolThumbnailFaceGenerations;
-      }
-      final result = await relevantResourcePool.withResource(
-        () async => await getFaceCrops(
-          fileForFaceCrop!,
-          {
-            face.faceID: face.detection.box,
-          },
-          useFullFile: useFullFile,
-        ),
+      final cropMap = await getCachedFaceCrops(
+        fileForFaceCrop,
+        [face],
+        useFullFile: useFullFile,
       );
-      final Uint8List? computedCrop = result?[face.faceID];
-      if (computedCrop != null) {
-        if (useFullFile) {
-          faceCropCache.put(face.faceID, computedCrop);
-          faceCropCacheFile.writeAsBytes(computedCrop).ignore();
-        } else {
-          faceCropThumbnailCache.put(face.faceID, computedCrop);
-        }
-      }
-      return computedCrop;
+      return cropMap?[face.faceID];
     } catch (e, s) {
       log(
         "Error getting cover face for person: $personId and cluster $clusterID",
         error: e,
         stackTrace: s,
       );
-      resetPool(fullFile: useFullFile);
-      if (fetchAttempt <= retryLimit) {
-        return getFaceCrop(fetchAttempt: fetchAttempt + 1);
-      }
       return null;
     }
   }
@@ -186,23 +139,6 @@ class PersonFaceWidget extends StatelessWidget {
         );
         return null;
       }
-      final Uint8List? cachedFace = faceCropCache.get(face.faceID);
-      if (cachedFace != null) {
-        return cachedFace;
-      }
-      final faceCropCacheFile = cachedFaceCropPath(face.faceID);
-      if ((await faceCropCacheFile.exists())) {
-        final data = await faceCropCacheFile.readAsBytes();
-        faceCropCache.put(face.faceID, data);
-        return data;
-      }
-      if (!useFullFile) {
-        final Uint8List? cachedFaceThumbnail =
-            faceCropThumbnailCache.get(face.faceID);
-        if (cachedFaceThumbnail != null) {
-          return cachedFaceThumbnail;
-        }
-      }
       EnteFile? fileForFaceCrop = file;
       if (face.fileID != file.uploadedFileID!) {
         fileForFaceCrop =
@@ -211,32 +147,12 @@ class PersonFaceWidget extends StatelessWidget {
       if (fileForFaceCrop == null) {
         return null;
       }
-
-      late final Pool relevantResourcePool;
-      if (useFullFile) {
-        relevantResourcePool = poolFullFileFaceGenerations;
-      } else {
-        relevantResourcePool = poolThumbnailFaceGenerations;
-      }
-      final result = await relevantResourcePool.withResource(
-        () async => await getFaceCrops(
-          fileForFaceCrop!,
-          {
-            face.faceID: face.detection.box,
-          },
-          useFullFile: useFullFile,
-        ),
+      final cropMap = await getCachedFaceCrops(
+        fileForFaceCrop,
+        [face],
+        useFullFile: useFullFile,
       );
-      final Uint8List? computedCrop = result?[face.faceID];
-      if (computedCrop != null) {
-        if (useFullFile) {
-          faceCropCache.put(face.faceID, computedCrop);
-          faceCropCacheFile.writeAsBytes(computedCrop).ignore();
-        } else {
-          faceCropThumbnailCache.put(face.faceID, computedCrop);
-        }
-      }
-      return computedCrop;
+      return cropMap?[face.faceID];
     } catch (e, s) {
       log(
         "Error getting cover face for cluster $clusterID",
