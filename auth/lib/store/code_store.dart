@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:collection/collection.dart';
@@ -16,16 +17,54 @@ class CodeStore {
   CodeStore._privateConstructor();
 
   late AuthenticatorService _authenticatorService;
+  final Map<int, Code> _cacheCodes = {};
   final _logger = Logger("CodeStore");
 
   Future<void> init() async {
     _authenticatorService = AuthenticatorService.instance;
   }
 
+  Future<bool> saveUpadedIndexes(List<Code> codes) async {
+    for (final code in codes) {
+      if (code.hasError || code.isTrashed) {
+        continue;
+      }
+      Code? c = _cacheCodes[code.generatedID];
+      if (c == null) {
+        continue;
+      }
+      int oldIndex = c.display.position;
+      int newIndex = codes.indexOf(code);
+      if (oldIndex != newIndex) {
+        Code updatedCode =
+            c.copyWith(display: c.display.copyWith(position: newIndex));
+        await addCode(updatedCode);
+      }
+    }
+    return true;
+  }
+
+  Future<void> updateCodeIndex(Code code) async {
+    final key = code.generatedID!;
+
+    _cacheCodes.remove(key);
+    int deletedIndex = code.display.position;
+
+    _cacheCodes.forEach((key, c) async {
+      if (c.display.position > deletedIndex) {
+        Code updatedCode = c.copyWith(
+          display: c.display.copyWith(position: c.display.position - 1),
+        );
+        await addCode(updatedCode);
+      }
+    });
+  }
+
   Future<List<Code>> getAllCodes({
     AccountMode? accountMode,
     bool sortCodes = true,
   }) async {
+    _cacheCodes.clear();
     final mode = accountMode ?? _authenticatorService.getAccountMode();
     final List<EntityResult> entities =
         await _authenticatorService.getEntities(mode);
@@ -48,6 +87,7 @@ class CodeStore {
       code.generatedID = entity.generatedID;
       code.hasSynced = entity.hasSynced;
       codes.add(code);
+      _cacheCodes[code.generatedID!] = code;
     }
 
     if (sortCodes) {
@@ -118,6 +158,7 @@ class CodeStore {
   Future<void> removeCode(Code code, {AccountMode? accountMode}) async {
     final mode = accountMode ?? _authenticatorService.getAccountMode();
     await _authenticatorService.deleteEntry(code.generatedID!, mode);
+    await updateCodeIndex(code);
     Bus.instance.fire(CodesUpdatedEvent());
   }
 
