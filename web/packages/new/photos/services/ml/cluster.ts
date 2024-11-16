@@ -4,7 +4,11 @@ import log from "@/base/log";
 import type { EnteFile } from "@/media/file";
 import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
-import { savedCGroups, updateOrCreateUserEntities } from "../user-entity";
+import {
+    pullUserEntities,
+    savedCGroups,
+    updateOrCreateUserEntities,
+} from "../user-entity";
 import { savedFaceClusters, saveFaceClusters } from "./db";
 import {
     faceDirection,
@@ -409,4 +413,7 @@ export const reconcileClusters = async (
     await saveFaceClusters(
         clusters.filter(({ id }) => !isRemoteClusterID.has(id)),
     );
+
+    // Refresh our local state if we'd updated remote.
+    if (changedCGroups.length) await pullUserEntities("cgroup", masterKey);
 };
