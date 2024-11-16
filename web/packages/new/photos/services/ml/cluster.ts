@@ -310,7 +310,7 @@ const clusterBatchLinear = async (
             // Don't add the face back to a cluster it has been rejected from.
             if (rejectedClusters) {
                 const cjx = state.faceIDToClusterIndex.get(fj.faceID);
-                if (cjx) {
+                if (cjx !== undefined) {
                     const cj = ensure(state.clusters[cjx]);
                     if (rejectedClusters.has(cj.id)) {
                         continue;
