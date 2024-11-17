@@ -20,8 +20,7 @@ export ENTE_CLI_SECRETS_PATH=./<path-to-secrets.txt>
 
 ./ente-cli
 ```
-You can also add the above line to your shell's rc file, to not 
-having to export it manually every time.
+You can also add the above line to your shell's rc file, to prevent the need to export manually every time.
 
 Then one of the following:
 
