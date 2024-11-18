@@ -41,13 +41,10 @@ import {
     type ListChildComponentProps,
     areEqual,
 } from "react-window";
+import { isMLSupported } from "../../services/ml";
 import type { GalleryBarMode } from "./reducer";
 
 export interface GalleryBarImplProps {
-    /**
-     * When `true`, the bar shows a button to switch to the people section.
-     */
-    showPeopleSectionButton: boolean;
     /**
      * What are we displaying currently.
      */
@@ -100,7 +97,6 @@ export interface GalleryBarImplProps {
 }
 
 export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
-    showPeopleSectionButton,
     mode,
     onChangeMode,
     collectionSummaries,
@@ -255,9 +251,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
             sx={people.length ? {} : { borderBlockEndColor: "transparent" }}
         >
             <Row1>
-                <ModeIndicator
-                    {...{ showPeopleSectionButton, mode, onChangeMode }}
-                />
+                <ModeIndicator {...{ mode, onChangeMode }} />
                 {controls1}
             </Row1>
             <Row2>
@@ -314,20 +308,17 @@ export const Row2 = styled(Box)`
 `;
 
 const ModeIndicator: React.FC<
-    Pick<
-        GalleryBarImplProps,
-        "showPeopleSectionButton" | "mode" | "onChangeMode"
-    >
-> = ({ showPeopleSectionButton, mode, onChangeMode }) => {
+    Pick<GalleryBarImplProps, "mode" | "onChangeMode">
+> = ({ mode, onChangeMode }) => {
     // Mode switcher is not shown in the hidden albums section.
     if (mode == "hidden-albums") {
         return <Typography>{t("hidden_albums")}</Typography>;
     }
 
-    // Show the static mode indicator with only the "Albums" title if we have
-    // not been asked to show the people button (there are no other sections to
-    // switch to in such a case).
-    if (!showPeopleSectionButton) {
+    // Show the static mode indicator with only the "Albums" title if ML is not
+    // supported on this client (web), since there are no other sections to
+    // switch to in such a case.
+    if (!isMLSupported) {
         return <Typography>{t("albums")}</Typography>;
     }
 

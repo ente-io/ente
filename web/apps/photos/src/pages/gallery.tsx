@@ -844,10 +844,6 @@ export default function Gallery() {
         return <div></div>;
     }
 
-    // `peopleState` will be undefined only when ML is disabled, otherwise it'll
-    // be present, with empty arrays, even if people data is still syncing.
-    const showPeopleSectionButton = peopleState !== undefined;
-
     return (
         <GalleryContext.Provider
             value={{
@@ -965,7 +961,6 @@ export default function Gallery() {
                         setActiveCollectionID: handleSetActiveCollectionID,
                         hiddenCollectionSummaries:
                             state.hiddenCollectionSummaries,
-                        showPeopleSectionButton,
                         people:
                             (state.view.type == "people"
                                 ? state.view.visiblePeople
