@@ -30,7 +30,9 @@ export const logToDisk = (message: string) => {
 };
 
 const workerLogToDisk = (message: string) => {
-    workerBridge.logToDisk(message).catch((e: unknown) => {
+    // We checked that we're `inWorker` prior to calling this function.
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    workerBridge!.logToDisk(message).catch((e: unknown) => {
         console.error(
             "Failed to log a message from worker",
             e,
