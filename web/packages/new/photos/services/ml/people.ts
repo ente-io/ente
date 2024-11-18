@@ -656,7 +656,6 @@ export const _applyPersonSuggestionUpdates = async (
     const localClusters = await savedFaceClusters();
 
     let assignedClusters = [...cgroup.data.assigned];
-    const newlyAssignedFaceIDs = new Set();
     let rejectedClusterIDs = await savedRejectedClustersForCGroup(cgroup.id);
     let newlyRejectedFaceIDs: string[] = [];
 
@@ -670,7 +669,6 @@ export const _applyPersonSuggestionUpdates = async (
     const assign = (clusterID: string) => {
         const cluster = clusterWithID(clusterID);
         assignedClusters.push(cluster);
-        cluster.faces.forEach((id) => newlyAssignedFaceIDs.add(id));
         assignUpdateCount += 1;
     };
 
@@ -748,9 +746,8 @@ export const _applyPersonSuggestionUpdates = async (
 
     if (assignUpdateCount > 0 || newlyRejectedFaceIDs.length > 0) {
         const assigned = assignedClusters;
-        const rejectedFaceIDs = cgroup.data.rejectedFaceIDs
-            .concat(newlyRejectedFaceIDs)
-            .filter((id) => !newlyAssignedFaceIDs.has(id));
+        const rejectedFaceIDs =
+            cgroup.data.rejectedFaceIDs.concat(newlyRejectedFaceIDs);
         await updateOrCreateUserEntities(
             "cgroup",
             [
