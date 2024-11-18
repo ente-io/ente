@@ -9,7 +9,6 @@ import type { CollectionMapping, FolderWatch } from "@/base/types/ipc";
 import { CollectionMappingChoiceDialog } from "@/new/photos/components/CollectionMappingChoiceDialog";
 import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";
 import { AppContext, useAppContext } from "@/new/photos/types/context";
-import { ensure } from "@/utils/ensure";
 import {
     FlexWrapper,
     HorizontalFlex,
@@ -109,7 +108,7 @@ export const WatchFolder: React.FC<ModalVisibilityProps> = ({
 
     const handleCollectionMappingSelect = (mapping: CollectionMapping) => {
         setSavedFolderPath(undefined);
-        addWatch(ensure(savedFolderPath), mapping);
+        addWatch(savedFolderPath!, mapping);
     };
 
     return (

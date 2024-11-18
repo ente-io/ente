@@ -1,7 +1,6 @@
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { getKV, setKV } from "@/base/kv";
 import { apiURL, familyAppOrigin, paymentsAppOrigin } from "@/base/origins";
-import { ensure } from "@/utils/ensure";
 import {
     nullishToEmpty,
     nullishToZero,
@@ -336,7 +335,7 @@ export const verifyStripeSubscription = async (
         }),
     );
     await syncUserDetails();
-    return ensure(userDetailsSnapshot()?.subscription);
+    return userDetailsSnapshot()!.subscription;
 };
 
 /**

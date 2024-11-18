@@ -2,7 +2,6 @@ import type { UserVerificationResponse } from "@/accounts/types/user";
 import { FormPaper, FormPaperTitle } from "@/base/components/FormPaper";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import log from "@/base/log";
-import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import LinkButton from "@ente/shared/components/LinkButton";
 import SingleInputForm, {
@@ -124,7 +123,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 } else {
                     if (getData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES)) {
                         await putAttributes(
-                            ensure(token),
+                            token!,
                             getData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES),
                         );
                     }

@@ -12,7 +12,6 @@ import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import * as ffmpeg from "@/new/photos/services/ffmpeg";
 import { renderableImageBlob } from "@/new/photos/utils/file";
-import { ensure } from "@/utils/ensure";
 import { CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { retryAsyncFunction } from "@ente/shared/utils";
@@ -90,8 +89,8 @@ class DownloadManagerImpl {
             );
 
         return {
-            downloadClient: ensure(this.downloadClient),
-            cryptoWorker: ensure(this.cryptoWorker),
+            downloadClient: this.downloadClient!,
+            cryptoWorker: this.cryptoWorker!,
         };
     }
 
@@ -200,9 +199,8 @@ class DownloadManagerImpl {
                 // TODO: Is this ensure valid?
                 // The existing code was already dereferencing, so it shouldn't
                 // affect behaviour.
-                const { url: originalFileURL } = ensure(
-                    await this.fileObjectURLPromises.get(file.id),
-                );
+                const { url: originalFileURL } =
+                    (await this.fileObjectURLPromises.get(file.id))!;
 
                 const converted = await getRenderableFileURL(
                     file,
@@ -255,9 +253,7 @@ class DownloadManagerImpl {
             // TODO: Is this ensure valid?
             // The existing code was already dereferencing, so it shouldn't
             // affect behaviour.
-            const fileURLs = ensure(
-                await this.fileObjectURLPromises.get(file.id),
-            );
+            const fileURLs = (await this.fileObjectURLPromises.get(file.id))!;
             if (fileURLs.isOriginal) {
                 const fileStream = (await fetch(fileURLs.url as string)).body;
                 return fileStream;
@@ -515,8 +511,8 @@ async function getRenderableFileURL(
         }
     }
 
-    // TODO: Can we remove this ensure and reflect it in the types?
-    return { url: ensure(url), isOriginal, isRenderable, type, mimeType };
+    // TODO: Can we remove this non-null assertion and reflect it in the types?
+    return { url: url!, isOriginal, isRenderable, type, mimeType };
 }
 
 async function getRenderableLivePhotoURL(

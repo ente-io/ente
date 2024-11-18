@@ -55,7 +55,6 @@ import {
 } from "@/new/photos/services/user-details";
 import { useAppContext } from "@/new/photos/types/context";
 import { splitByPredicate } from "@/utils/array";
-import { ensure } from "@/utils/ensure";
 import {
     CenteredFlex,
     FlexWrapper,
@@ -512,7 +511,7 @@ export default function Gallery() {
                       }
                     : {
                           mode: barMode as "albums" | "hidden-albums",
-                          collectionID: ensure(activeCollectionID),
+                          collectionID: activeCollectionID!,
                       },
         };
 

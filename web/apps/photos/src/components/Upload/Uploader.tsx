@@ -18,7 +18,6 @@ import { redirectToCustomerPortal } from "@/new/photos/services/user-details";
 import { useAppContext } from "@/new/photos/types/context";
 import { NotificationAttributes } from "@/new/photos/types/notification";
 import { firstNonEmpty } from "@/utils/array";
-import { ensure } from "@/utils/ensure";
 import { CustomError } from "@ente/shared/error";
 import DiscFullIcon from "@mui/icons-material/DiscFull";
 import InfoOutlined from "@mui/icons-material/InfoRounded";
@@ -853,17 +852,13 @@ const desktopFilesAndZipItems = async (electron: Electron, files: File[]) => {
  *    https://github.com/react-dropzone/file-selector/blob/master/src/file.ts#L1214
  */
 const pathLikeForWebFile = (file: File): string =>
-    ensure(
-        firstNonEmpty([
-            // We need to check first, since path is not a property of
-            // the standard File objects.
-            "path" in file && typeof file.path == "string"
-                ? file.path
-                : undefined,
-            file.webkitRelativePath,
-            file.name,
-        ]),
-    );
+    firstNonEmpty([
+        // We need to check first, since path is not a property of
+        // the standard File objects.
+        "path" in file && typeof file.path == "string" ? file.path : undefined,
+        file.webkitRelativePath,
+        file.name,
+    ])!;
 
 // This is used to prompt the user the make upload strategy choice
 interface ImportSuggestion {
@@ -889,7 +884,7 @@ function getImportSuggestion(
     const separatorCounts = new Map(
         paths.map((s) => [s, s.match(/\//g)?.length ?? 0]),
     );
-    const separatorCount = (s: string) => ensure(separatorCounts.get(s));
+    const separatorCount = (s: string) => separatorCounts.get(s)!;
     paths.sort((path1, path2) => separatorCount(path1) - separatorCount(path2));
     const firstPath = paths[0];
     const lastPath = paths[paths.length - 1];

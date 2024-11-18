@@ -18,7 +18,6 @@ import type {
     CollectionsSortBy,
 } from "@/new/photos/services/collection/ui";
 import type { Person } from "@/new/photos/services/ml/people";
-import { ensure } from "@/utils/ensure";
 import ArchiveIcon from "@mui/icons-material/Archive";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import Favorite from "@mui/icons-material/FavoriteRounded";
@@ -201,7 +200,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                 ? {
                       type: "collections",
                       collectionSummaries,
-                      activeCollectionID: ensure(activeCollectionID),
+                      activeCollectionID: activeCollectionID!,
                       onSelectCollectionID,
                   }
                 : {
@@ -439,11 +438,11 @@ const getItemCount = (data: ItemData) => {
 const getItemKey = (index: number, data: ItemData) => {
     switch (data.type) {
         case "collections": {
-            const collectionSummary = ensure(data.collectionSummaries[index]);
+            const collectionSummary = data.collectionSummaries[index]!;
             return `${data.type}-${collectionSummary.id}-${collectionSummary.coverFile?.id}`;
         }
         case "people": {
-            const person = ensure(data.people[index]);
+            const person = data.people[index]!;
             return `${data.type}-${person.id}-${person.displayFaceID}`;
         }
     }
@@ -461,7 +460,7 @@ const ListItem = memo((props: ListChildComponentProps<ItemData>) => {
                 activeCollectionID,
                 onSelectCollectionID,
             } = data;
-            const collectionSummary = ensure(collectionSummaries[index]);
+            const collectionSummary = collectionSummaries[index]!;
             card = (
                 <CollectionBarCard
                     key={collectionSummary.id}
@@ -477,7 +476,7 @@ const ListItem = memo((props: ListChildComponentProps<ItemData>) => {
 
         case "people": {
             const { people, activePerson, onSelectPerson } = data;
-            const person = ensure(people[index]);
+            const person = people[index]!;
             card = (
                 <PersonCard
                     key={person.id}

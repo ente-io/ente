@@ -1,4 +1,3 @@
-import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 
 export async function retryAsyncFunction<T>(
@@ -25,7 +24,7 @@ export async function retryAsyncFunction<T>(
             if (attemptNumber === waitTimeBeforeNextTry.length) {
                 throw e;
             }
-            await wait(ensure(waitTimeBeforeNextTry[attemptNumber]));
+            await wait(waitTimeBeforeNextTry[attemptNumber]!);
         }
     }
 }

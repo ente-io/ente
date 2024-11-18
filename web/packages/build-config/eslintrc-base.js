@@ -41,5 +41,18 @@ module.exports = {
                 },
             },
         ],
+        /* Allow force unwrapping potentially optional values.
+
+           It is best if these can be avoided by restructuring the code, but
+           there do arise legitimate scenarios where we know from code logic
+           that the value should be present. Of course, the surrounding code
+           might change causing that expectation to be falsified, but in certain
+           cases there isn't much we can do other than throwing an exception.
+
+           Instead of rolling our own such exception (which we in fact used to
+           do at one point), rely on the JS's native undefined property access
+           exception since that conveys more information in the logs.
+         */
+        "@typescript-eslint/no-non-null-assertion": "off",
     },
 };

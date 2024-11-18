@@ -7,7 +7,6 @@ import {
 } from "@/base/components/FormPaper";
 import { sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
-import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import LinkButton from "@ente/shared/components/LinkButton";
 import SingleInputForm, {
@@ -82,7 +81,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 recoveryKey = bip39.mnemonicToEntropy(recoveryKey);
             }
             const cryptoWorker = await sharedCryptoWorker();
-            const keyAttr = ensure(keyAttributes);
+            const keyAttr = keyAttributes!;
             const masterKey = await cryptoWorker.decryptB64(
                 keyAttr.masterKeyEncryptedWithRecoveryKey,
                 keyAttr.masterKeyDecryptionNonce,
