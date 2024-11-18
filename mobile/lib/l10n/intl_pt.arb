@@ -1360,8 +1360,8 @@
   "allPersonGroupingWillReset": "Todos os agrupamentos dessa pessoa serão redefinidos, e você perderá todas as sugestões feitas por essa pessoa.",
   "yesResetPerson": "Sim, redefinir pessoa",
   "onlyThem": "Apenas eles",
-  "checkingModels": "Checking models...",
-  "enableMachineLearningBanner": "Enable machine learning for magic search and face recognition",
-  "searchDiscoverEmptySection": "Images will be shown here once processing is complete",
-  "searchPersonsEmptySection": "People will be shown here once processing is complete"
+  "checkingModels": "Verificando modelos...",
+  "enableMachineLearningBanner": "Ativar aprendizagem de máquina para busca mágica e reconhecimento facial",
+  "searchDiscoverEmptySection": "As imagens serão exibidas aqui quando o processamento for concluído",
+  "searchPersonsEmptySection": "As pessoas serão exibidas aqui quando o processamento for concluído"
 }
