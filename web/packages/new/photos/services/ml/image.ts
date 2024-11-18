@@ -1,6 +1,3 @@
-// See: [Note: Allowing non-null assertions selectively]
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-
 import { ensure } from "@/utils/ensure";
 import { Matrix, inverse } from "ml-matrix";
 import { clamp } from "./math";

@@ -64,7 +64,7 @@ const Page: React.FC = () => {
 
     const refreshPasskeys = useCallback(async () => {
         try {
-            setPasskeys(await getPasskeys(ensure(token)));
+            setPasskeys(await getPasskeys(token!));
         } catch (e) {
             log.error("Failed to fetch passkeys", e);
             showPasskeyFetchFailedErrorDialog();

@@ -306,7 +306,6 @@ const clusterBatchLinear = async (
         for (let j = i - 1; j >= 0; j--) {
             // ! This is an O(n^2) loop, be careful when adding more code here.
 
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             const fj = faces[j]!;
 
             // The vectors are already normalized, so we can directly use their

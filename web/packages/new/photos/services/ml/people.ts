@@ -611,7 +611,6 @@ const randomSample = <T>(items: T[], n: number) => {
     while (ix.size < n) {
         ix.add(Math.floor(Math.random() * items.length));
     }
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return [...ix].map((i) => items[i]!);
 };
 

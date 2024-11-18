@@ -127,8 +127,7 @@ const nativeConvertToJPEG = async (imageBlob: Blob) => {
     // thus, to the `window.electron`) object.
     const jpegData = electron
         ? await electron.convertToJPEG(imageData)
-        : // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          await workerBridge!.convertToJPEG(imageData);
+        : await workerBridge!.convertToJPEG(imageData);
     log.debug(() => `Native JPEG conversion took ${Date.now() - startTime} ms`);
     return new Blob([jpegData], { type: "image/jpeg" });
 };
