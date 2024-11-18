@@ -100,7 +100,7 @@ interface EnableMLProps {
     onEnable: () => void;
 }
 
-const EnableML: React.FC<EnableMLProps> = ({ onEnable }) => {
+export const EnableML: React.FC<EnableMLProps> = ({ onEnable }) => {
     const moreDetails = () =>
         openURL("https://help.ente.io/photos/features/machine-learning");
 

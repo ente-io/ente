@@ -7,8 +7,8 @@
  * there.
  */
 
+import { CenteredBox } from "@/base/components/mui/Container";
 import type { SearchOption } from "@/new/photos/services/search/types";
-import { VerticallyCentered } from "@ente/shared/components/Container";
 import { Typography } from "@mui/material";
 import { t } from "i18next";
 import React from "react";
@@ -46,25 +46,56 @@ export const SearchResultsHeader: React.FC<SearchResultsHeaderProps> = ({
 export const PeopleEmptyState: React.FC = () => {
     const mlStatus = useMLStatusSnapshot();
 
-    const message =
-        mlStatus?.phase == "done"
-            ? t("people_empty_too_few")
-            : t("syncing_wait");
-
-    return (
-        <VerticallyCentered>
-            <Typography
-                color="text.muted"
-                sx={{
-                    mx: 1,
-                    // Approximately compensate for the hidden section bar (86px),
-                    // and then add a bit extra padding so that the message appears
-                    // visually off the center, towards the top.
-                    paddingBlockEnd: "126px",
-                }}
-            >
-                {message}
-            </Typography>
-        </VerticallyCentered>
-    );
+    switch (mlStatus?.phase) {
+        case "disabled":
+            return <PeopleEmptyStateDisabled />;
+        case "done":
+            return (
+                <PeopleEmptyStateMessage>
+                    {t("people_empty_too_few")}
+                </PeopleEmptyStateMessage>
+            );
+        default:
+            return (
+                <PeopleEmptyStateMessage>
+                    {t("syncing_wait")}
+                </PeopleEmptyStateMessage>
+            );
+    }
 };
+
+export const PeopleEmptyStateDisabled: React.FC = () => (
+    <CenteredBox>
+        <Typography
+            color="text.muted"
+            sx={{
+                mx: 1,
+                // Approximately compensate for the hidden section bar (86px),
+                // and then add a bit extra padding so that the message appears
+                // visually off the center, towards the top.
+                paddingBlockEnd: "126px",
+            }}
+        >
+            {"disabeld"}
+        </Typography>
+    </CenteredBox>
+);
+
+export const PeopleEmptyStateMessage: React.FC<React.PropsWithChildren> = ({
+    children,
+}) => (
+    <CenteredBox>
+        <Typography
+            color="text.muted"
+            sx={{
+                mx: 1,
+                // Approximately compensate for the hidden section bar (86px),
+                // and then add a bit extra padding so that the message appears
+                // visually off the center, towards the top.
+                paddingBlockEnd: "126px",
+            }}
+        >
+            {children}
+        </Typography>
+    </CenteredBox>
+);
