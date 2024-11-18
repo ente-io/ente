@@ -168,7 +168,7 @@ export const handleSelectCreator =
                                 collectionID: 0,
                                 context: {
                                     mode: selected.context?.mode,
-                                    personID: ensure(activePersonID),
+                                    personID: activePersonID!,
                                 },
                             };
                         }
@@ -183,7 +183,7 @@ export const handleSelectCreator =
                                 collectionID: 0,
                                 context: {
                                     mode: selected.context?.mode,
-                                    collectionID: ensure(activeCollectionID),
+                                    collectionID: activeCollectionID!,
                                 },
                             };
                         }
@@ -194,8 +194,8 @@ export const handleSelectCreator =
             const newContext: SelectionContext | undefined = !mode
                 ? undefined
                 : mode == "people"
-                  ? { mode, personID: ensure(activePersonID) }
-                  : { mode, collectionID: ensure(activeCollectionID) };
+                  ? { mode, personID: activePersonID! }
+                  : { mode, collectionID: activeCollectionID! };
 
             const handleCounterChange = (count: number) => {
                 if (selected[id] === checked) {
