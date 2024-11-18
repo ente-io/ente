@@ -326,12 +326,12 @@ export class MLWorker {
      * cgroups if needed.
      */
     async clusterFaces(masterKey: Uint8Array) {
-        const clusters = await _clusterFaces(
+        const { clusters, modifiedClusterIDs } = await _clusterFaces(
             await savedFaceIndexes(),
             await getAllLocalFiles(),
             (progress) => this.updateClusteringProgress(progress),
         );
-        await reconcileClusters(clusters, masterKey);
+        await reconcileClusters(clusters, modifiedClusterIDs, masterKey);
         this.updateClusteringProgress(undefined);
     }
 

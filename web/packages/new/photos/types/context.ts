@@ -1,6 +1,5 @@
 import type { AccountsContextT } from "@/accounts/types/context";
 import { ensure } from "@/utils/ensure";
-import type { SetDialogBoxAttributes } from "@ente/shared/components/DialogBox/types";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import { createContext, useContext } from "react";
 import type { SetNotificationAttributes } from "./notification";
@@ -10,36 +9,25 @@ import type { SetNotificationAttributes } from "./notification";
  */
 export type AppContextT = AccountsContextT & {
     /**
-     * Show the global activity indicator (a green bar at the top of the page).
+     * Show the global activity indicator (a loading bar at the top of the
+     * page).
      */
-    startLoading: () => void;
+    showLoadingBar: () => void;
     /**
-     * Hide the global activity indicator.
+     * Hide the global activity indicator bar.
      */
-    finishLoading: () => void;
+    hideLoadingBar: () => void;
     /**
      * Show a generic error dialog, and log the given error.
      */
     onGenericError: (error: unknown) => void;
-    /**
-     * Deprecated, use onGenericError instead.
-     */
-    somethingWentWrong: () => void;
-    /**
-     * Deprecated, use showMiniDialog instead.
-     */
-    setDialogMessage: SetDialogBoxAttributes;
     setNotificationAttributes: SetNotificationAttributes;
-    mapEnabled: boolean;
-    updateMapEnabled: (enabled: boolean) => Promise<void>;
     watchFolderView: boolean;
     setWatchFolderView: (isOpen: boolean) => void;
     watchFolderFiles: FileList;
     setWatchFolderFiles: (files: FileList) => void;
     themeColor: THEME_COLOR;
     setThemeColor: (themeColor: THEME_COLOR) => void;
-    isCFProxyDisabled: boolean;
-    setIsCFProxyDisabled: (disabled: boolean) => void;
 };
 
 /**

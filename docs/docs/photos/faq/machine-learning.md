@@ -24,8 +24,10 @@ De-merging a certain grouping can be done by going to the person, pressing
 
 ### Desktop
 
-Note that while desktop supports naming a person, it currently does not yet
-support merging persons. This will be added soon.
+Similarly, on desktop you can use the "Add a name" button to merge people by
+selecting an existing person, and use the "Review suggestions" sheet to de-merge
+previously merged persons (click the top right history icon on the suggestion
+sheet to see the previous merges, and if necessary, undo them).
 
 ## How do I change the cover for a recognized person?
 
@@ -56,7 +58,10 @@ person**. This will take you to the grouping of this person. Here you can press
 
 ### Desktop
 
-This is currently not yet supported on desktop, but will be added soon.
+Similarly, on desktop, you use the "Ignore" option from the top right menu to
+ignore a particular face group (If you already give them a name, "Reset person"
+first). And to undo this action, open that person (via the file info of a photo
+containing that person), and select "Show person".
 
 ## How well does the app handle photos of babies?
 
@@ -70,4 +75,4 @@ If you find a mixed grouping of several different babies, you can use the
 option will make the model re-evaluate the grouping with stricter settings,
 hopefully separating the different babies in different new groupings.
 
-Please note this functionality is currently only available on mobile. 
+Please note this functionality is currently only available on mobile.

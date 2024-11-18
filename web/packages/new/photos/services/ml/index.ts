@@ -41,9 +41,9 @@ import type { CLIPMatches } from "./worker-types";
 /**
  * Internal state of the ML subsystem.
  *
- * This are essentially cached values used by the functions of this module.
+ * These are essentially cached values used by the functions of this module.
  *
- * This should be cleared on logout.
+ * They will be cleared on logout.
  */
 class MLState {
     /**
@@ -71,9 +71,8 @@ class MLState {
     isSyncing = false;
 
     /**
-     * Subscriptions to {@link MLStatus} updates.
-     *
-     * See {@link mlStatusSubscribe}.
+     * Subscriptions to {@link MLStatus} updates attached using
+     * {@link mlStatusSubscribe}.
      */
     mlStatusListeners: (() => void)[] = [];
 
@@ -84,15 +83,14 @@ class MLState {
     mlStatusSnapshot: MLStatus | undefined;
 
     /**
-     * Subscriptions to updates to the {@link PeopleState}.
-     *
-     * See {@link peopleStateSubscribe}.
+     * Subscriptions to updates to the {@link PeopleState} attached using
+     * {@link peopleStateSubscribe}.
      */
     peopleStateListeners: (() => void)[] = [];
 
     /**
-     * Snapshot of the {@link PeopleState}s. Use the {@link peopleStateSnapshot}
-     * function to access this data.
+     * Snapshot of the {@link PeopleState} return by the
+     * {@link peopleStateSnapshot} function.
      *
      * It will be `undefined` only if ML is disabled. Otherwise, it will be an
      * empty array even if the snapshot is pending its first sync.
@@ -416,13 +414,7 @@ export type MLStatus =
 /**
  * A function that can be used to subscribe to updates in the ML status.
  *
- * This, along with {@link mlStatusSnapshot}, is meant to be used as arguments
- * to React's {@link useSyncExternalStore}.
- *
- * @param callback A function that will be invoked whenever the result of
- * {@link mlStatusSnapshot} changes.
- *
- * @returns A function that can be used to clear the subscription.
+ * See: [Note: Snapshots and useSyncExternalStore].
  */
 export const mlStatusSubscribe = (onChange: () => void): (() => void) => {
     _state.mlStatusListeners.push(onChange);
@@ -436,8 +428,7 @@ export const mlStatusSubscribe = (onChange: () => void): (() => void) => {
 /**
  * Return the last known, cached {@link MLStatus}.
  *
- * This, along with {@link mlStatusSnapshot}, is meant to be used as arguments
- * to React's {@link useSyncExternalStore}.
+ * See also {@link mlStatusSubscribe}.
  *
  * A return value of `undefined` indicates that we're still performing the
  * asynchronous tasks that are needed to get the status.
@@ -537,13 +528,7 @@ const workerDidUpdateStatus = throttled(updateMLStatusSnapshot, 2000);
 /**
  * A function that can be used to subscribe to updates to {@link Person}s.
  *
- * This, along with {@link peopleStateSnapshot}, is meant to be used as
- * arguments to React's {@link useSyncExternalStore}.
- *
- * @param callback A function that will be invoked whenever the result of
- * {@link peopleStateSnapshot} changes.
- *
- * @returns A function that can be used to clear the subscription.
+ * See: [Note: Snapshots and useSyncExternalStore].
  */
 export const peopleStateSubscribe = (onChange: () => void): (() => void) => {
     _state.peopleStateListeners.push(onChange);
@@ -570,8 +555,7 @@ const resetPeopleStateSnapshot = () =>
 /**
  * Return the last known, cached {@link PeopleState}.
  *
- * This, along with {@link peopleStateSubscribe}, is meant to be used as
- * arguments to React's {@link useSyncExternalStore}.
+ * See also {@link peopleStateSubscribe}.
  *
  * A return value of `undefined` indicates that ML is disabled. In all other
  * cases, the list of people will be either empty (if we're either still loading
@@ -725,6 +709,10 @@ export const addCGroup = async (name: string, cluster: FaceCluster) => {
 /**
  * Add a new cluster to an existing named person.
  *
+ * If this cluster contains any faces that had previously been marked as not
+ * belonging to the person, then they will be removed from the rejected list and
+ * will get reassociated to the person.
+ *
  * @param cgroup The existing cgroup underlying the person. This is the (remote)
  * user entity that will get updated.
  *
@@ -733,28 +721,17 @@ export const addCGroup = async (name: string, cluster: FaceCluster) => {
 export const addClusterToCGroup = async (
     cgroup: CGroup,
     cluster: FaceCluster,
-) =>
-    updateAssignedClustersForCGroup(
-        cgroup,
-        cgroup.data.assigned.concat([cluster]),
+) => {
+    const clusterFaceIDs = new Set(cluster.faces);
+    const assigned = cgroup.data.assigned.concat([cluster]);
+    const rejectedFaceIDs = cgroup.data.rejectedFaceIDs.filter(
+        (id) => !clusterFaceIDs.has(id),
     );
 
-/**
- * Update the clusters assigned to an existing named person.
- *
- * @param cgroup The existing cgroup underlying the person. This is the (remote)
- * user entity that will get updated.
- *
- * @param cluster The new value of the face clusters assigned to this person.
- */
-export const updateAssignedClustersForCGroup = async (
-    cgroup: CGroup,
-    assigned: FaceCluster[],
-) => {
     const masterKey = await masterKeyFromSession();
     await updateOrCreateUserEntities(
         "cgroup",
-        [{ ...cgroup, data: { ...cgroup.data, assigned } }],
+        [{ ...cgroup, data: { ...cgroup.data, assigned, rejectedFaceIDs } }],
         masterKey,
     );
     return mlSync();

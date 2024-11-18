@@ -3,6 +3,7 @@ import { masterKeyFromSession } from "@/base/session-store";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
 import { FileType } from "@/media/file-type";
 import i18n, { t } from "i18next";
+import { uniqueFilesByID } from "../files";
 import { clipMatches, isMLEnabled, isMLSupported } from "../ml";
 import type { NamedPerson } from "../ml/people";
 import type {
@@ -54,8 +55,17 @@ export const searchDataSync = () =>
 /**
  * Set the collections and files over which we should search.
  */
-export const setSearchCollectionsAndFiles = (cf: SearchCollectionsAndFiles) =>
-    void worker().then((w) => w.setCollectionsAndFiles(cf));
+export const setSearchCollectionsAndFiles = ({
+    collections,
+    files,
+}: Omit<SearchCollectionsAndFiles, "collectionFiles">) =>
+    void worker().then((w) =>
+        w.setCollectionsAndFiles({
+            collections: collections,
+            files: uniqueFilesByID(files),
+            collectionFiles: files,
+        }),
+    );
 
 /**
  * Set the (named) people that we should search across.

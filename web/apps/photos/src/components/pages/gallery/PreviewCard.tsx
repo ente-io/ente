@@ -1,3 +1,4 @@
+import { Overlay } from "@/base/components/mui/Container";
 import log from "@/base/log";
 import { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
@@ -11,8 +12,6 @@ import {
 } from "@/new/photos/components/PlaceholderThumbnails";
 import { TRASH_SECTION } from "@/new/photos/services/collection";
 import DownloadManager from "@/new/photos/services/download";
-import { Overlay } from "@ente/shared/components/Container";
-import { CustomError } from "@ente/shared/error";
 import useLongPress from "@ente/shared/hooks/useLongPress";
 import AlbumOutlined from "@mui/icons-material/AlbumOutlined";
 import Favorite from "@mui/icons-material/FavoriteRounded";
@@ -286,9 +285,7 @@ export default function PreviewCard(props: IProps) {
                 setImgSrc(url);
                 updateURL(file.id, url);
             } catch (e) {
-                if (e.message !== CustomError.URL_ALREADY_SET) {
-                    log.error("preview card useEffect failed", e);
-                }
+                log.error("preview card useEffect failed", e);
                 // no-op
             }
         };

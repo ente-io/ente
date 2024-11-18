@@ -7,7 +7,8 @@ import { ensureElectron } from "@/base/electron";
 import { basename, dirname } from "@/base/file";
 import type { CollectionMapping, FolderWatch } from "@/base/types/ipc";
 import { CollectionMappingChoiceDialog } from "@/new/photos/components/CollectionMappingChoiceDialog";
-import { AppContext } from "@/new/photos/types/context";
+import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";
+import { AppContext, useAppContext } from "@/new/photos/types/context";
 import { ensure } from "@/utils/ensure";
 import {
     FlexWrapper,
@@ -15,7 +16,6 @@ import {
     SpaceBetweenFlex,
     VerticallyCentered,
 } from "@ente/shared/components/Container";
-import DialogTitleWithCloseButton from "@ente/shared/components/DialogBox/TitleWithCloseButton";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
 import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
 import CheckIcon from "@mui/icons-material/Check";
@@ -29,6 +29,7 @@ import {
     CircularProgress,
     Dialog,
     DialogContent,
+    DialogTitle,
     Stack,
     Tooltip,
     Typography,
@@ -119,11 +120,12 @@ export const WatchFolder: React.FC<ModalVisibilityProps> = ({
                 fullWidth
                 PaperProps={{ sx: { height: "448px", maxWidth: "414px" } }}
             >
-                <Title_>
-                    <DialogTitleWithCloseButton onClose={onClose}>
+                <SpaceBetweenFlex sx={{ p: "16px 8px 8px 8px" }}>
+                    <DialogTitle variant="h3" fontWeight={"bold"}>
                         {t("WATCHED_FOLDERS")}
-                    </DialogTitleWithCloseButton>
-                </Title_>
+                    </DialogTitle>
+                    <DialogCloseIconButton {...{ onClose }} />
+                </SpaceBetweenFlex>
                 <DialogContent sx={{ flex: 1 }}>
                     <Stack spacing={1} p={1.5} height={"100%"}>
                         <WatchList {...{ watches, removeWatch }} />
@@ -146,10 +148,6 @@ export const WatchFolder: React.FC<ModalVisibilityProps> = ({
         </>
     );
 };
-
-const Title_ = styled("div")`
-    padding: 16px 12px 16px 16px;
-`;
 
 interface WatchList {
     watches: FolderWatch[] | undefined;
@@ -234,20 +232,16 @@ interface WatchEntryProps {
 }
 
 const WatchEntry: React.FC<WatchEntryProps> = ({ watch, removeWatch }) => {
-    const appContext = React.useContext(AppContext);
+    const { showMiniDialog } = useAppContext();
 
     const confirmStopWatching = () => {
-        appContext.setDialogMessage({
-            title: t("STOP_WATCHING_FOLDER"),
-            content: t("STOP_WATCHING_DIALOG_MESSAGE"),
-            close: {
-                text: t("cancel"),
-                variant: "secondary",
-            },
-            proceed: {
-                action: () => removeWatch(watch),
+        showMiniDialog({
+            title: t("stop_watching_folder_title"),
+            message: t("stop_watching_folder_message"),
+            continue: {
                 text: t("YES_STOP"),
-                variant: "critical",
+                color: "critical",
+                action: () => removeWatch(watch),
             },
         });
     };
@@ -329,7 +323,7 @@ const EntryOptions: React.FC<EntryOptionsProps> = ({ confirmStopWatching }) => {
                 onClick={confirmStopWatching}
                 startIcon={<DoNotDisturbOutlinedIcon />}
             >
-                {t("STOP_WATCHING")}
+                {t("stop_watching")}
             </OverflowMenuOption>
         </OverflowMenu>
     );

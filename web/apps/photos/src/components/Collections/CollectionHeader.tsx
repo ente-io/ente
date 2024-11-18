@@ -1,14 +1,13 @@
 import { assertionFailed } from "@/base/assert";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { SpaceBetweenFlex } from "@/base/components/mui/Container";
 import { useModalVisibility } from "@/base/components/utils/modal";
-import log from "@/base/log";
 import type { Collection } from "@/media/collection";
 import { ItemVisibility } from "@/media/file-metadata";
 import {
     GalleryItemsHeaderAdapter,
     GalleryItemsSummary,
 } from "@/new/photos/components/gallery/ListHeader";
-import { SpaceBetweenFlex } from "@/new/photos/components/mui";
 import {
     ALL_SECTION,
     HIDDEN_ITEMS_SECTION,
@@ -22,7 +21,7 @@ import {
     isArchivedCollection,
     isPinnedCollection,
 } from "@/new/photos/services/magic-metadata";
-import { AppContext } from "@/new/photos/types/context";
+import { useAppContext } from "@/new/photos/types/context";
 import { HorizontalFlex } from "@ente/shared/components/Container";
 import OverflowMenu, {
     StyledMenu,
@@ -37,7 +36,8 @@ import LinkIcon from "@mui/icons-material/Link";
 import LogoutIcon from "@mui/icons-material/Logout";
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
 import PeopleIcon from "@mui/icons-material/People";
-import PushPinOutlined from "@mui/icons-material/PushPinOutlined";
+import PushPinIcon from "@mui/icons-material/PushPin";
+import PushPinOutlinedIcon from "@mui/icons-material/PushPinOutlined";
 import SortIcon from "@mui/icons-material/Sort";
 import TvIcon from "@mui/icons-material/Tv";
 import Unarchive from "@mui/icons-material/Unarchive";
@@ -45,7 +45,6 @@ import VisibilityOffOutlined from "@mui/icons-material/VisibilityOffOutlined";
 import VisibilityOutlined from "@mui/icons-material/VisibilityOutlined";
 import { Box, IconButton, Stack, Tooltip } from "@mui/material";
 import { SetCollectionNamerAttributes } from "components/Collections/CollectionNamer";
-import { UnPinIcon } from "components/icons/UnPinIcon";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
 import React, { useCallback, useContext, useRef } from "react";
@@ -141,25 +140,13 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
     setFilesDownloadProgressAttributesCreator,
     isActiveCollectionDownloadInProgress,
 }) => {
-    const { startLoading, finishLoading, setDialogMessage } =
-        useContext(AppContext);
+    const { showLoadingBar, hideLoadingBar, onGenericError, showMiniDialog } =
+        useAppContext();
     const { syncWithRemote } = useContext(GalleryContext);
     const overFlowMenuIconRef = useRef<SVGSVGElement>(null);
 
     const { show: showSortOrderMenu, props: sortOrderMenuVisibilityProps } =
         useModalVisibility();
-
-    const handleError = useCallback(
-        (e: unknown) => {
-            log.error("Collection action failed", e);
-            setDialogMessage({
-                title: t("error"),
-                content: t("generic_error_retry"),
-                close: { variant: "critical" },
-            });
-        },
-        [setDialogMessage],
-    );
 
     /**
      * Return a new function by wrapping an async function in an error handler,
@@ -169,19 +156,19 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
     const wrap = useCallback(
         (f: () => Promise<void>) => {
             const wrapped = async () => {
-                startLoading();
+                showLoadingBar();
                 try {
                     await f();
                 } catch (e) {
-                    handleError(e);
+                    onGenericError(e);
                 } finally {
                     void syncWithRemote(false, true);
-                    finishLoading();
+                    hideLoadingBar();
                 }
             };
             return (): void => void wrapped();
         },
-        [handleError, syncWithRemote, startLoading, finishLoading],
+        [showLoadingBar, hideLoadingBar, onGenericError, syncWithRemote],
     );
 
     const showRenameCollectionModal = () => {
@@ -203,9 +190,9 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
         wrap(() => _renameCollection(newName))();
 
     const confirmDeleteCollection = () => {
-        setDialogMessage({
+        showMiniDialog({
             title: t("delete_album_title"),
-            content: (
+            message: (
                 <Trans
                     i18nKey={"delete_album_message"}
                     components={{
@@ -213,18 +200,14 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
                     }}
                 />
             ),
-            proceed: {
+            continue: {
                 text: t("delete_photos"),
+                color: "critical",
                 action: deleteCollectionAlongWithFiles,
-                variant: "critical",
             },
             secondary: {
                 text: t("keep_photos"),
                 action: deleteCollectionButKeepFiles,
-                variant: "primary",
-            },
-            close: {
-                text: t("cancel"),
             },
         });
     };
@@ -240,15 +223,14 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
     });
 
     const confirmEmptyTrash = () =>
-        setDialogMessage({
+        showMiniDialog({
             title: t("empty_trash_title"),
-            content: t("empty_trash_message"),
-            proceed: {
-                action: emptyTrash,
+            message: t("empty_trash_message"),
+            continue: {
                 text: t("empty_trash"),
-                variant: "critical",
+                color: "critical",
+                action: emptyTrash,
             },
-            close: { text: t("cancel") },
         });
 
     const emptyTrash = wrap(async () => {
@@ -281,7 +263,7 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
     };
 
     const downloadCollection = () =>
-        void _downloadCollection().catch(handleError);
+        void _downloadCollection().catch(onGenericError);
 
     const archiveAlbum = wrap(() =>
         changeCollectionVisibility(activeCollection, ItemVisibility.archived),
@@ -292,16 +274,13 @@ const CollectionOptions: React.FC<CollectionOptionsProps> = ({
     );
 
     const confirmLeaveSharedAlbum = () => {
-        setDialogMessage({
+        showMiniDialog({
             title: t("leave_shared_album_title"),
-            content: t("leave_shared_album_message"),
-            proceed: {
+            message: t("leave_shared_album_message"),
+            continue: {
                 text: t("leave_shared_album"),
+                color: "critical",
                 action: leaveSharedAlbum,
-                variant: "critical",
-            },
-            close: {
-                text: t("cancel"),
             },
         });
     };
@@ -654,14 +633,14 @@ const AlbumCollectionOptions: React.FC<AlbumCollectionOptionsProps> = ({
         {isPinned ? (
             <OverflowMenuOption
                 onClick={onUnpinClick}
-                startIcon={<UnPinIcon />}
+                startIcon={<PushPinOutlinedIcon />}
             >
                 {t("unpin_album")}
             </OverflowMenuOption>
         ) : (
             <OverflowMenuOption
                 onClick={onPinClick}
-                startIcon={<PushPinOutlined />}
+                startIcon={<PushPinIcon />}
             >
                 {t("pin_album")}
             </OverflowMenuOption>

@@ -27,12 +27,16 @@ class MessageLookup extends MessageLookupByLibrary {
         "askDeleteReason":
             MessageLookupByLibrary.simpleMessage("계정을 삭제하는 가장 큰 이유가 무엇인가요?"),
         "cancel": MessageLookupByLibrary.simpleMessage("닫기"),
+        "checkingModels":
+            MessageLookupByLibrary.simpleMessage("Checking models..."),
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("계정 삭제 확인"),
         "deleteAccount": MessageLookupByLibrary.simpleMessage("계정 삭제"),
         "deleteAccountPermanentlyButton":
             MessageLookupByLibrary.simpleMessage("계정을 영구적으로 삭제"),
         "email": MessageLookupByLibrary.simpleMessage("이메일"),
+        "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
+            "Enable machine learning for magic search and face recognition"),
         "enterValidEmail":
             MessageLookupByLibrary.simpleMessage("올바른 이메일 주소를 입력하세요."),
         "enterYourEmailAddress":
@@ -40,6 +44,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "feedback": MessageLookupByLibrary.simpleMessage("피드백"),
         "invalidEmailAddress":
             MessageLookupByLibrary.simpleMessage("잘못된 이메일 주소"),
+        "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
+            "Images will be shown here once processing is complete"),
+        "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
+            "People will be shown here once processing is complete"),
+        "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
+            "People will be shown here once processing is complete"),
         "verify": MessageLookupByLibrary.simpleMessage("인증"),
         "yourAccountHasBeenDeleted":
             MessageLookupByLibrary.simpleMessage("계정이 삭제되었습니다.")

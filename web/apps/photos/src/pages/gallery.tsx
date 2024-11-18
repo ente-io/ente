@@ -1,6 +1,9 @@
+import { sessionExpiredDialogAttributes } from "@/accounts/components/LoginComponents";
 import { stashRedirect } from "@/accounts/services/redirect";
+import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
 import { NavbarBase } from "@/base/components/Navbar";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
+import { errorDialogAttributes } from "@/base/components/utils/dialog";
 import { useModalVisibility } from "@/base/components/utils/modal";
 import { useIsSmallWidth } from "@/base/hooks";
 import log from "@/base/log";
@@ -10,6 +13,7 @@ import {
     CollectionSelector,
     type CollectionSelectorAttributes,
 } from "@/new/photos/components/CollectionSelector";
+import { PlanSelector } from "@/new/photos/components/PlanSelector";
 import {
     SearchBar,
     type SearchBarProps,
@@ -20,11 +24,10 @@ import {
     SearchResultsHeader,
 } from "@/new/photos/components/gallery";
 import {
-    uniqueFilesByID,
     useGalleryReducer,
     type GalleryBarMode,
 } from "@/new/photos/components/gallery/reducer";
-import { usePeopleStateSnapshot } from "@/new/photos/components/utils/ml";
+import { usePeopleStateSnapshot } from "@/new/photos/components/utils/use-snapshot";
 import { shouldShowWhatsNew } from "@/new/photos/services/changelog";
 import {
     ALL_SECTION,
@@ -43,7 +46,14 @@ import {
     setSearchCollectionsAndFiles,
 } from "@/new/photos/services/search";
 import type { SearchOption } from "@/new/photos/services/search/types";
-import { AppContext } from "@/new/photos/types/context";
+import { initSettings } from "@/new/photos/services/settings";
+import {
+    initUserDetailsOrTriggerSync,
+    redirectToCustomerPortal,
+    userDetailsSnapshot,
+    verifyStripeSubscription,
+} from "@/new/photos/services/user-details";
+import { useAppContext } from "@/new/photos/types/context";
 import { splitByPredicate } from "@/utils/array";
 import { ensure } from "@/utils/ensure";
 import {
@@ -79,14 +89,12 @@ import CollectionNamer, {
     CollectionNamerAttributes,
 } from "components/Collections/CollectionNamer";
 import { GalleryBarAndListHeader } from "components/Collections/GalleryBarAndListHeader";
-import ExportModal from "components/ExportModal";
+import { Export } from "components/Export";
 import {
     FilesDownloadProgress,
     FilesDownloadProgressAttributes,
 } from "components/FilesDownloadProgress";
-import FixCreationTime, {
-    FixCreationTimeAttributes,
-} from "components/FixCreationTime";
+import { FixCreationTime } from "components/FixCreationTime";
 import FullScreenDropZone from "components/FullScreenDropZone";
 import GalleryEmptyState from "components/GalleryEmptyState";
 import { LoadingOverlay } from "components/LoadingOverlay";
@@ -96,19 +104,12 @@ import Sidebar from "components/Sidebar";
 import { type UploadTypeSelectorIntent } from "components/Upload/UploadTypeSelector";
 import Uploader from "components/Upload/Uploader";
 import { UploadSelectorInputs } from "components/UploadSelectorInputs";
-import PlanSelector from "components/pages/gallery/PlanSelector";
 import SelectedFileOptions from "components/pages/gallery/SelectedFileOptions";
 import { t } from "i18next";
-import { useRouter } from "next/router";
-import {
-    createContext,
-    useCallback,
-    useContext,
-    useEffect,
-    useRef,
-    useState,
-} from "react";
+import { useRouter, type NextRouter } from "next/router";
+import { createContext, useCallback, useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
+import { Trans } from "react-i18next";
 import {
     constructEmailList,
     constructUserIDToEmailMap,
@@ -128,15 +129,12 @@ import {
     SetFilesDownloadProgressAttributes,
     SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
-import { checkSubscriptionPurchase } from "utils/billing";
 import {
     COLLECTION_OPS_TYPE,
     getSelectedCollection,
     handleCollectionOps,
 } from "utils/collection";
 import { FILE_OPS_TYPE, getSelectedFiles, handleFileOps } from "utils/file";
-import { getSessionExpiredMessage } from "utils/ui";
-import { getLocalFamilyData } from "utils/user/family";
 
 const defaultGalleryContext: GalleryContextType = {
     showPlanSelectorModal: () => null,
@@ -183,7 +181,6 @@ export default function Gallery() {
         collectionID: 0,
         context: { mode: "albums", collectionID: ALL_SECTION },
     });
-    const [planModalView, setPlanModalView] = useState(false);
     const [blockingLoad, setBlockingLoad] = useState(false);
     const [collectionNamerAttributes, setCollectionNamerAttributes] =
         useState<CollectionNamerAttributes>(null);
@@ -231,20 +228,16 @@ export default function Gallery() {
     const resync = useRef<{ force: boolean; silent: boolean }>();
 
     const {
-        startLoading,
-        finishLoading,
-        setDialogMessage,
+        showLoadingBar,
+        hideLoadingBar,
+        showMiniDialog,
+        onGenericError,
         logout,
         ...appContext
-    } = useContext(AppContext);
+    } = useAppContext();
     const [userIDToEmailMap, setUserIDToEmailMap] =
         useState<Map<number, string>>(null);
     const [emailList, setEmailList] = useState<string[]>(null);
-    const [fixCreationTimeView, setFixCreationTimeView] = useState(false);
-    const [fixCreationTimeAttributes, setFixCreationTimeAttributes] =
-        useState<FixCreationTimeAttributes>(null);
-
-    const showPlanSelectorModal = () => setPlanModalView(true);
 
     const [uploadTypeSelectorView, setUploadTypeSelectorView] = useState(false);
     const [uploadTypeSelectorIntent, setUploadTypeSelectorIntent] =
@@ -254,8 +247,6 @@ export default function Gallery() {
 
     const closeSidebar = () => setSidebarView(false);
     const openSidebar = () => setSidebarView(true);
-
-    const [exportModalView, setExportModalView] = useState(false);
 
     const [authenticateUserModalView, setAuthenticateUserModalView] =
         useState(false);
@@ -273,6 +264,11 @@ export default function Gallery() {
     const [selectedSearchOption, setSelectedSearchOption] = useState<
         SearchOption | undefined
     >();
+    // If the fix creation time dialog is being shown, then the list of files on
+    // which it should act.
+    const [fixCreationTimeFiles, setFixCreationTimeFiles] = useState<
+        EnteFile[]
+    >([]);
 
     const peopleState = usePeopleStateSnapshot();
 
@@ -292,7 +288,13 @@ export default function Gallery() {
     const [collectionSelectorAttributes, setCollectionSelectorAttributes] =
         useState<CollectionSelectorAttributes | undefined>();
 
+    const { show: showPlanSelector, props: planSelectorVisibilityProps } =
+        useModalVisibility();
     const { show: showWhatsNew, props: whatsNewVisibilityProps } =
+        useModalVisibility();
+    const { show: showFixCreationTime, props: fixCreationTimeVisibilityProps } =
+        useModalVisibility();
+    const { show: showExport, props: exportVisibilityProps } =
         useModalVisibility();
 
     // TODO: Temp
@@ -348,16 +350,19 @@ export default function Gallery() {
             if (!valid) {
                 return;
             }
+            initSettings();
+            await initUserDetailsOrTriggerSync();
             await downloadManager.init(token);
             setupSelectAllKeyBoardShortcutHandler();
             dispatch({ type: "showAll" });
             setIsFirstLoad(isFirstLogin());
             if (justSignedUp()) {
-                setPlanModalView(true);
+                showPlanSelector();
             }
             setIsFirstLogin(false);
             const user = getData(LS_KEYS.USER);
-            const familyData = getLocalFamilyData();
+            // TODO: Pass entire snapshot to reducer?
+            const familyData = userDetailsSnapshot()?.familyData;
             const files = sortFiles(
                 mergeMetadata(await getLocalFiles("normal")),
             );
@@ -395,11 +400,7 @@ export default function Gallery() {
     }, []);
 
     useEffect(
-        () =>
-            setSearchCollectionsAndFiles({
-                collections: collections ?? [],
-                files: uniqueFilesByID(files ?? []),
-            }),
+        () => setSearchCollectionsAndFiles({ collections, files }),
         [collections, files],
     );
 
@@ -422,9 +423,6 @@ export default function Gallery() {
     useEffect(() => {
         collectionNamerAttributes && setCollectionNamerView(true);
     }, [collectionNamerAttributes]);
-    useEffect(() => {
-        fixCreationTimeAttributes && setFixCreationTimeView(true);
-    }, [fixCreationTimeAttributes]);
 
     useEffect(() => {
         if (typeof activeCollectionID === "undefined" || !router.isReady) {
@@ -440,12 +438,11 @@ export default function Gallery() {
     }, [activeCollectionID, router.isReady]);
 
     useEffect(() => {
-        const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
-        if (router.isReady && key) {
-            checkSubscriptionPurchase(
-                setDialogMessage,
+        if (router.isReady && getKey(SESSION_KEYS.ENCRYPTION_KEY)) {
+            handleSubscriptionCompletionRedirectIfNeeded(
+                showMiniDialog,
+                showLoadingBar,
                 router,
-                setBlockingLoad,
             );
         }
     }, [router.isReady]);
@@ -492,9 +489,9 @@ export default function Gallery() {
             uploadTypeSelectorView ||
             openCollectionSelector ||
             collectionNamerView ||
-            fixCreationTimeView ||
-            planModalView ||
-            exportModalView ||
+            planSelectorVisibilityProps.open ||
+            fixCreationTimeVisibilityProps.open ||
+            exportVisibilityProps.open ||
             authenticateUserModalView ||
             isPhotoSwipeOpen ||
             !filteredFiles?.length ||
@@ -553,9 +550,8 @@ export default function Gallery() {
         };
     }, [selectAll, clearSelection]);
 
-    const showSessionExpiredMessage = () => {
-        setDialogMessage(getSessionExpiredMessage(logout));
-    };
+    const showSessionExpiredDialog = () =>
+        showMiniDialog(sessionExpiredDialogAttributes(logout));
 
     const syncWithRemote = async (force = false, silent = false) => {
         if (!navigator.onLine) return;
@@ -574,7 +570,7 @@ export default function Gallery() {
             if (!tokenValid) {
                 throw new Error(CustomError.SESSION_EXPIRED);
             }
-            !silent && startLoading();
+            !silent && showLoadingBar();
             await preFileInfoSync();
             const allCollections = await getAllLatestCollections();
             const [hiddenCollections, collections] = splitByPredicate(
@@ -614,7 +610,7 @@ export default function Gallery() {
         } catch (e) {
             switch (e.message) {
                 case CustomError.SESSION_EXPIRED:
-                    showSessionExpiredMessage();
+                    showSessionExpiredDialog();
                     break;
                 case CustomError.KEY_MISSING:
                     clearKeys();
@@ -626,7 +622,7 @@ export default function Gallery() {
         } finally {
             dispatch({ type: "clearTempDeleted" });
             dispatch({ type: "clearTempHidden" });
-            !silent && finishLoading();
+            !silent && hideLoadingBar();
         }
         syncInProgress.current = false;
         if (resync.current) {
@@ -690,7 +686,7 @@ export default function Gallery() {
 
     const collectionOpsHelper =
         (ops: COLLECTION_OPS_TYPE) => async (collection: Collection) => {
-            startLoading();
+            showLoadingBar();
             try {
                 setOpenCollectionSelector(false);
                 const selectedFiles = getSelectedFiles(selected, filteredFiles);
@@ -711,20 +707,14 @@ export default function Gallery() {
                 clearSelection();
                 await syncWithRemote(false, true);
             } catch (e) {
-                log.error(`collection ops (${ops}) failed`, e);
-                setDialogMessage({
-                    title: t("error"),
-
-                    close: { variant: "critical" },
-                    content: t("generic_error_retry"),
-                });
+                onGenericError(e);
             } finally {
-                finishLoading();
+                hideLoadingBar();
             }
         };
 
     const fileOpsHelper = (ops: FILE_OPS_TYPE) => async () => {
-        startLoading();
+        showLoadingBar();
         try {
             // passing files here instead of filteredData for hide ops because we want to move all files copies to hidden collection
             const selectedFiles = getSelectedFiles(
@@ -743,41 +733,32 @@ export default function Gallery() {
                     () => dispatch({ type: "clearTempDeleted" }),
                     (files) => dispatch({ type: "markTempHidden", files }),
                     () => dispatch({ type: "clearTempHidden" }),
-                    setFixCreationTimeAttributes,
+                    (files) => {
+                        setFixCreationTimeFiles(files);
+                        showFixCreationTime();
+                    },
                     setFilesDownloadProgressAttributesCreator,
                 );
             }
             clearSelection();
             await syncWithRemote(false, true);
         } catch (e) {
-            log.error(`file ops (${ops}) failed`, e);
-            setDialogMessage({
-                title: t("error"),
-
-                close: { variant: "critical" },
-                content: t("generic_error_retry"),
-            });
+            onGenericError(e);
         } finally {
-            finishLoading();
+            hideLoadingBar();
         }
     };
 
     const showCreateCollectionModal = (ops: COLLECTION_OPS_TYPE) => {
         const callback = async (collectionName: string) => {
             try {
-                startLoading();
+                showLoadingBar();
                 const collection = await createAlbum(collectionName);
                 await collectionOpsHelper(ops)(collection);
             } catch (e) {
-                log.error(`create and collection ops (${ops}) failed`, e);
-                setDialogMessage({
-                    title: t("error"),
-
-                    close: { variant: "critical" },
-                    content: t("generic_error_retry"),
-                });
+                onGenericError(e);
             } finally {
-                finishLoading();
+                hideLoadingBar();
             }
         };
         return () =>
@@ -822,14 +803,6 @@ export default function Gallery() {
         }
         setUploadTypeSelectorView(true);
         setUploadTypeSelectorIntent(intent ?? "upload");
-    };
-
-    const openExportModal = () => {
-        setExportModalView(true);
-    };
-
-    const closeExportModal = () => {
-        setExportModalView(false);
     };
 
     const handleSetActiveCollectionID = (
@@ -880,7 +853,7 @@ export default function Gallery() {
         <GalleryContext.Provider
             value={{
                 ...defaultGalleryContext,
-                showPlanSelectorModal,
+                showPlanSelectorModal: showPlanSelector,
                 setActiveCollectionID: handleSetActiveCollectionID,
                 onShowCollection: (id) =>
                     dispatch({
@@ -890,7 +863,7 @@ export default function Gallery() {
                 syncWithRemote,
                 setBlockingLoad,
                 photoListHeader,
-                openExportModal,
+                openExportModal: showExport,
                 authenticateUser,
                 userIDToEmailMap,
                 user,
@@ -923,9 +896,8 @@ export default function Gallery() {
                     </CenteredFlex>
                 )}
                 <PlanSelector
-                    modalView={planModalView}
-                    closeModal={() => setPlanModalView(false)}
-                    setLoading={setBlockingLoad}
+                    {...planSelectorVisibilityProps}
+                    setLoading={(v) => setBlockingLoad(v)}
                 />
                 <CollectionNamer
                     show={collectionNamerView}
@@ -949,9 +921,8 @@ export default function Gallery() {
                     setAttributesList={setFilesDownloadProgressAttributesList}
                 />
                 <FixCreationTime
-                    isOpen={fixCreationTimeView}
-                    hide={() => setFixCreationTimeView(false)}
-                    attributes={fixCreationTimeAttributes}
+                    {...fixCreationTimeVisibilityProps}
+                    files={fixCreationTimeFiles}
                 />
 
                 <NavbarBase
@@ -1031,6 +1002,7 @@ export default function Gallery() {
                     isFirstUpload={areOnlySystemCollections(
                         collectionSummaries,
                     )}
+                    showSessionExpiredMessage={showSessionExpiredDialog}
                     {...{
                         dragAndDropFiles,
                         openFileSelector,
@@ -1041,7 +1013,6 @@ export default function Gallery() {
                         fileSelectorZipFiles,
                         uploadTypeSelectorIntent,
                         uploadTypeSelectorView,
-                        showSessionExpiredMessage,
                     }}
                 />
                 <Sidebar
@@ -1131,9 +1102,8 @@ export default function Gallery() {
                             isInHiddenSection={barMode == "hidden-albums"}
                         />
                     )}
-                <ExportModal
-                    show={exportModalView}
-                    onHide={closeExportModal}
+                <Export
+                    {...exportVisibilityProps}
                     collectionNameMap={state.allCollectionNameByID}
                 />
                 <AuthenticateUserModal
@@ -1226,6 +1196,84 @@ const HiddenSectionNavbarContents: React.FC<
         </FlexWrapper>
     </HorizontalFlex>
 );
+
+/**
+ * When the payments app redirects back to us after a plan purchase or update
+ * completes, it sets various query parameters to relay the status of the action
+ * back to us.
+ *
+ * Check if these query parameters exist, and if so, act on them appropriately.
+ */
+export async function handleSubscriptionCompletionRedirectIfNeeded(
+    showMiniDialog: (attributes: MiniDialogAttributes) => void,
+    showLoadingBar: () => void,
+    router: NextRouter,
+) {
+    const { session_id: sessionID, status, reason } = router.query;
+
+    if (status == "success") {
+        try {
+            const subscription = await verifyStripeSubscription(sessionID);
+            showMiniDialog({
+                title: t("thank_you"),
+                message: (
+                    <Trans
+                        i18nKey="subscription_purchase_success"
+                        values={{ date: subscription?.expiryTime }}
+                    />
+                ),
+                continue: { text: t("ok") },
+                cancel: false,
+            });
+        } catch (e) {
+            log.error("Subscription verification failed", e);
+            showMiniDialog(
+                errorDialogAttributes(t("subscription_verification_error")),
+            );
+        }
+    } else if (status == "fail") {
+        log.error(`Subscription purchase failed: ${reason}`);
+        switch (reason) {
+            case "canceled":
+                showMiniDialog({
+                    message: t("subscription_purchase_cancelled"),
+                    continue: { text: t("ok"), color: "primary" },
+                    cancel: false,
+                });
+                break;
+            case "requires_payment_method":
+                showMiniDialog({
+                    title: t("update_payment_method"),
+                    message: t("update_payment_method_message"),
+                    continue: {
+                        text: t("update_payment_method"),
+                        action: () => {
+                            showLoadingBar();
+                            return redirectToCustomerPortal();
+                        },
+                    },
+                });
+                break;
+            case "authentication_failed":
+                showMiniDialog({
+                    title: t("update_payment_method"),
+                    message: t("payment_method_authentication_failed"),
+                    continue: {
+                        text: t("update_payment_method"),
+                        action: () => {
+                            showLoadingBar();
+                            return redirectToCustomerPortal();
+                        },
+                    },
+                });
+                break;
+            default:
+                showMiniDialog(
+                    errorDialogAttributes(t("subscription_purchase_failed")),
+                );
+        }
+    }
+}
 
 /**
  * Return the {@link Collection} (from amongst {@link collections}) with the

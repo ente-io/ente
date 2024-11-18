@@ -1343,5 +1343,22 @@
   "mostRecent": "Meest recent",
   "mostRelevant": "Meest relevant",
   "loadingYourPhotos": "Je foto's worden geladen...",
-  "processingImport": "Verwerken van {folderName}..."
+  "processingImport": "Verwerken van {folderName}...",
+  "personName": "Naam van persoon",
+  "addNewPerson": "Nieuw persoon toevoegen",
+  "addNameOrMerge": "Naam toevoegen of samenvoegen",
+  "mergeWithExisting": "Samenvoegen met bestaand",
+  "newPerson": "Nieuw persoon",
+  "addName": "Naam toevoegen",
+  "add": "Toevoegen",
+  "extraPhotosFoundFor": "Extra foto's gevonden voor $text",
+  "extraPhotosFound": "Extra foto's gevonden",
+  "configuration": "Configuratie",
+  "localIndexing": "Lokaal indexeren",
+  "resetPerson": "Reset persoon",
+  "areYouSureYouWantToResetThisPerson": "Weet u zeker dat u deze persoon wilt resetten?",
+  "allPersonGroupingWillReset": "Alle groepen voor deze persoon worden gereset, en je verliest alle suggesties die voor deze persoon zijn gedaan",
+  "yesResetPerson": "Ja, reset persoon",
+  "onlyThem": "Alleen hen",
+  "checkingModels": "Modellen controleren..."
 }

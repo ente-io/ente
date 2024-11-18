@@ -37,6 +37,7 @@ import {
 } from "@/new/photos/services/upload/types";
 import { detectFileTypeInfoFromChunk } from "@/new/photos/utils/detect-type";
 import { readStream } from "@/new/photos/utils/native-stream";
+import { mergeUint8Arrays } from "@/utils/array";
 import { ensure, ensureInteger, ensureNumber } from "@/utils/ensure";
 import { CustomError, handleUploadError } from "@ente/shared/error";
 import { addToCollection } from "services/collectionService";
@@ -196,10 +197,25 @@ export const uploadItemFileName = (uploadItem: UploadItem) => {
 
 /* -- Various intermediate type used during upload -- */
 
-interface UploadAsset {
+export interface UploadAsset {
+    /** `true` if this is a live photo. */
     isLivePhoto?: boolean;
-    uploadItem?: UploadItem;
+    /* Valid for live photos */
     livePhotoAssets?: LivePhotoAssets;
+    /* Valid for non-live photos */
+    uploadItem?: UploadItem;
+    /**
+     * Metadata we know about a file externally. Valid for non-live photos.
+     *
+     * This is metadata that is not present within the file, but we have
+     * available from external sources. There is also a parsed metadata we
+     * obtain from JSON files. So together with the metadata present within the
+     * file itself, there are three places where the file's initial metadata can
+     * be filled in from.
+     *
+     * This will not be present for live photos.
+     */
+    externalParsedMetadata?: ParsedMetadata;
 }
 
 interface ThumbnailedFile {
@@ -870,7 +886,12 @@ interface ExtractAssetMetadataResult {
  * {@link parsedMetadataJSONMap} for the assets. Return the resultant metadatum.
  */
 const extractAssetMetadata = async (
-    { isLivePhoto, uploadItem, livePhotoAssets }: UploadAsset,
+    {
+        isLivePhoto,
+        uploadItem,
+        externalParsedMetadata,
+        livePhotoAssets,
+    }: UploadAsset,
     fileTypeInfo: FileTypeInfo,
     lastModifiedMs: number,
     collectionID: number,
@@ -888,6 +909,7 @@ const extractAssetMetadata = async (
           )
         : await extractImageOrVideoMetadata(
               uploadItem,
+              externalParsedMetadata,
               fileTypeInfo,
               lastModifiedMs,
               collectionID,
@@ -910,6 +932,7 @@ const extractLivePhotoMetadata = async (
     const { metadata: imageMetadata, publicMagicMetadata } =
         await extractImageOrVideoMetadata(
             livePhotoAssets.image,
+            undefined,
             imageFileTypeInfo,
             lastModifiedMs,
             collectionID,
@@ -934,6 +957,7 @@ const extractLivePhotoMetadata = async (
 
 const extractImageOrVideoMetadata = async (
     uploadItem: UploadItem,
+    externalParsedMetadata: ParsedMetadata | undefined,
     fileTypeInfo: FileTypeInfo,
     lastModifiedMs: number,
     collectionID: number,
@@ -953,6 +977,12 @@ const extractImageOrVideoMetadata = async (
         parsedMetadata = await tryExtractVideoMetadata(uploadItem);
     } else {
         throw new Error(`Unexpected file type ${fileType} for ${uploadItem}`);
+    }
+
+    // The `UploadAsset` itself might have metadata associated with a-priori, if
+    // so, merge the data we read from the file's contents into it.
+    if (externalParsedMetadata) {
+        parsedMetadata = { ...externalParsedMetadata, ...parsedMetadata };
     }
 
     const hash = await computeHash(uploadItem, worker);
@@ -1573,9 +1603,7 @@ async function combineChunksToFormUploadPart(
         if (done) {
             break;
         }
-        for (let index = 0; index < chunk.length; index++) {
-            combinedChunks.push(chunk[index]);
-        }
+        combinedChunks.push(chunk);
     }
-    return Uint8Array.from(combinedChunks);
+    return mergeUint8Arrays(combinedChunks);
 }

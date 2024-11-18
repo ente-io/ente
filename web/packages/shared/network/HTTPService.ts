@@ -1,6 +1,6 @@
 import log from "@/base/log";
 import axios, { type AxiosRequestConfig, type AxiosResponse } from "axios";
-import { ApiError, CustomError, isApiErrorResponse } from "../error";
+import { ApiError, isApiErrorResponse } from "../error";
 
 interface IHTTPHeaders {
     [headerKey: string]: any;
@@ -45,13 +45,13 @@ class HTTPService {
                     } else {
                         if (response.status >= 400 && response.status < 500) {
                             apiError = new ApiError(
-                                CustomError.CLIENT_ERROR,
+                                "client error",
                                 "",
                                 response.status,
                             );
                         } else {
                             apiError = new ApiError(
-                                CustomError.ServerError,
+                                "server error",
                                 "",
                                 response.status,
                             );

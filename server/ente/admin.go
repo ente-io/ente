@@ -112,7 +112,7 @@ func (u SupportUpdateBonus) UpdateLog() string {
 
 func (u SupportUpdateBonus) Validate() error {
 	isSupportBonus := u.BonusType == "ADD_ON_SUPPORT"
-	if u.BonusType != "ADD_ON_SUPPORT" && u.BonusType != "ADD_ON_BF_2023" {
+	if u.BonusType != "ADD_ON_SUPPORT" && u.BonusType != "ADD_ON_BF_2023" && u.BonusType != "ADD_ON_BF_2024" {
 		return errors.New("invalid bonus type")
 	}
 	if u.Action == ADD || u.Action == UPDATE {
@@ -121,7 +121,6 @@ func (u SupportUpdateBonus) Validate() error {
 				return errors.New("invalid input, set in MB and minute for test")
 			}
 		} else {
-
 			if isSupportBonus {
 				if u.Year == 0 || u.Year > 100 {
 					return errors.New("invalid input for year, only 1-100")
@@ -130,11 +129,11 @@ func (u SupportUpdateBonus) Validate() error {
 					return errors.New("invalid GB storage, only 1-2000")
 				}
 			} else {
-				if u.StorageInGB != 200 && u.StorageInGB != 2000 && u.StorageInGB != 1000 && u.StorageInGB != 50 {
-					return errors.New("invalid input for deal, only 50, 200, 1000, 2000 allowed")
+				if u.StorageInGB != 50 && u.StorageInGB != 200 && u.StorageInGB != 500 && u.StorageInGB != 1000 && u.StorageInGB != 2000 {
+					return errors.New("invalid input for deal, only 50, 200, 500, 1000, 2000 allowed")
 				}
-				if u.Year != 3 && u.Year != 5 {
-					return errors.New("invalid input for year, only 3 or 5")
+				if u.Year != 3 && u.Year != 5 && u.Year != 10 {
+					return errors.New("invalid input for year, only 3 or 5 or 10")
 				}
 			}
 		}

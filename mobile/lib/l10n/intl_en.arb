@@ -1352,5 +1352,16 @@
   "addName": "Add name",
   "add": "Add",
   "extraPhotosFoundFor": "Extra photos found for $text",
-  "extraPhotosFound": "Extra photos found"
+  "extraPhotosFound": "Extra photos found",
+  "configuration": "Configuration",
+  "localIndexing": "Local indexing",
+  "resetPerson": "Reset person",
+  "areYouSureYouWantToResetThisPerson": "Are you sure you want to reset this person?",
+  "allPersonGroupingWillReset": "All groupings for this person will be reset, and you will lose all suggestions made for this person",
+  "yesResetPerson": "Yes, reset person",
+  "onlyThem": "Only them",
+  "checkingModels": "Checking models...",
+  "enableMachineLearningBanner": "Enable machine learning for magic search and face recognition",
+  "searchDiscoverEmptySection": "Images will be shown here once processing is complete",
+  "searchPersonsEmptySection": "People will be shown here once processing is complete"
 }

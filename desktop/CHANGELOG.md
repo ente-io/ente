@@ -1,10 +1,17 @@
 # CHANGELOG
 
-## v1.7.6 (Unreleased)
+## v1.7.7 (Unreleased)
 
--   Parse description from metadata JSON.
--   Support Italian and Lithuanian translations.
+-   Retain JPEG originals even on date modifications.
+-   Support Portuguese translations.
 -   .
+
+## v1.7.6
+
+-   Face merging and suggestions (beta).
+-   Parse description from metadata JSON.
+-   Support Italian, Ukrainian and Lithuanian translations.
+-   Fix an out of memory crash on uploading large libraries.
 
 ## v1.7.5
 

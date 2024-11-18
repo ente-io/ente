@@ -27,6 +27,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "உங்கள் கணக்கை நீக்குவதற்கான முக்கிய காரணம் என்ன?"),
         "cancel": MessageLookupByLibrary.simpleMessage("ரத்து செய்"),
+        "checkingModels":
+            MessageLookupByLibrary.simpleMessage("Checking models..."),
         "confirmAccountDeletion": MessageLookupByLibrary.simpleMessage(
             "கணக்கு நீக்குதலை உறுதிப்படுத்தவும்"),
         "confirmDeletePrompt": MessageLookupByLibrary.simpleMessage(
@@ -39,6 +41,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteReason1": MessageLookupByLibrary.simpleMessage(
             "எனக்கு தேவையான ஒரு முக்கிய அம்சம் இதில் இல்லை"),
         "email": MessageLookupByLibrary.simpleMessage("மின்னஞ்சல்"),
+        "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
+            "Enable machine learning for magic search and face recognition"),
         "enterValidEmail": MessageLookupByLibrary.simpleMessage(
             "சரியான மின்னஞ்சல் முகவரியை உள்ளிடவும்."),
         "enterYourEmailAddress": MessageLookupByLibrary.simpleMessage(
@@ -48,6 +52,12 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("தவறான மின்னஞ்சல் முகவரி"),
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
             "இந்த தகவலுடன் தயவுசெய்து எங்களுக்கு உதவுங்கள்"),
+        "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
+            "Images will be shown here once processing is complete"),
+        "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
+            "People will be shown here once processing is complete"),
+        "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
+            "People will be shown here once processing is complete"),
         "verify": MessageLookupByLibrary.simpleMessage("சரிபார்க்கவும்")
       };
 }

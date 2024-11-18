@@ -8,6 +8,7 @@ import 'package:photos/models/file/file.dart';
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
+import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/utils/face/face_box_crop.dart";
@@ -31,12 +32,11 @@ class PersonFaceWidget extends StatelessWidget {
     this.useFullFile = true,
     this.thumbnailFallback = true,
     this.faceCrop,
-    Key? key,
-  })  : assert(
+    super.key,
+  }) : assert(
           personId != null || clusterID != null,
           "PersonFaceWidget requires either personId or clusterID to be non-null",
-        ),
-        super(key: key);
+        );
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +71,9 @@ class PersonFaceWidget extends StatelessWidget {
           }
           return thumbnailFallback
               ? ThumbnailWidget(file)
-              : const EnteLoadingWidget();
+              : EnteLoadingWidget(
+                  color: getEnteColorScheme(context).fillMuted,
+                );
         }
       },
     );

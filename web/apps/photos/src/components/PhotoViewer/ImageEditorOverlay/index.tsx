@@ -1,10 +1,10 @@
-import { EnteDrawer } from "@/base/components/EnteDrawer";
 import {
     MenuItemDivider,
     MenuItemGroup,
     MenuSectionTitle,
 } from "@/base/components/Menu";
 import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
+import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import { nameAndExtension } from "@/base/file";
 import log from "@/base/log";
 import { downloadAndRevokeObjectURL } from "@/base/utils/web";
@@ -475,15 +475,10 @@ const ImageEditorOverlay = (props: IProps) => {
             );
 
             const editedFile = await getEditedFile();
-            const file = {
-                uploadItem: editedFile,
-                localID: 1,
-                collectionID: props.file.collectionID,
-            };
 
             uploadManager.prepareForNewUpload();
             uploadManager.showUploadProgressDialog();
-            uploadManager.uploadItems([file], [collection]);
+            uploadManager.uploadFile(editedFile, collection, props.file);
             setFileURL(null);
             props.onClose();
             props.closePhotoViewer();
@@ -614,7 +609,7 @@ const ImageEditorOverlay = (props: IProps) => {
                         </Box>
                     </Box>
                 </Box>
-                <EnteDrawer
+                <SidebarDrawer
                     variant="persistent"
                     anchor="right"
                     open={showControlsDrawer}
@@ -722,7 +717,7 @@ const ImageEditorOverlay = (props: IProps) => {
                             title={t("PHOTO_EDIT_REQUIRED_TO_SAVE")}
                         />
                     )}
-                </EnteDrawer>
+                </SidebarDrawer>
             </Backdrop>
         </>
     );

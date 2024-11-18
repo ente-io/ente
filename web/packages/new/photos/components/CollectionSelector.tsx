@@ -1,3 +1,4 @@
+import { SpaceBetweenFlex } from "@/base/components/mui/Container";
 import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import type { Collection } from "@/media/collection";
 import {
@@ -24,7 +25,7 @@ import {
 } from "@mui/material";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
-import { SpaceBetweenFlex, type ButtonishProps } from "./mui";
+import { type ButtonishProps } from "./mui";
 import { DialogCloseIconButton } from "./mui/Dialog";
 
 export type CollectionSelectorAction =

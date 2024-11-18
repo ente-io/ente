@@ -24,16 +24,9 @@ export default function AuthenticateUserModal({
     onClose,
     onAuthenticate,
 }: Iprops) {
-    const { setDialogMessage, showMiniDialog, logout } = useContext(AppContext);
+    const { showMiniDialog, onGenericError, logout } = useContext(AppContext);
     const [user, setUser] = useState<User>();
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
-
-    const somethingWentWrong = () =>
-        setDialogMessage({
-            title: t("error"),
-            close: { variant: "critical" },
-            content: t("generic_error_retry"),
-        });
 
     // This is a altered version of the check we do on the password verification
     // screen, except here it don't try to overwrite local state and instead
@@ -76,9 +69,8 @@ export default function AuthenticateUserModal({
                     setKeyAttributes(keyAttributes);
                 }
             } catch (e) {
-                log.error("AuthenticateUserModal initialization failed", e);
                 onClose();
-                somethingWentWrong();
+                onGenericError(e);
             }
         };
         main();

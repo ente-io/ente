@@ -40,8 +40,8 @@ explicit whitelist of admins.
 
 > [!NOTE]
 >
-> The first user is only treated as the admin if there are the list of admins in
-> the configuration is empty.
+> The first user is only treated as the admin if the list of admins in the
+> configuration is empty.
 >
 > Also, if at some point you delete the first user, then you will need to define
 > a whitelist to make some other user as the admin if you wish (since the first

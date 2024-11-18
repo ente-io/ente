@@ -90,6 +90,15 @@ body {
 
 .pswp__img {
     object-fit: contain;
+    /* For reasons I don't understand, Chrome shows black grid lines on images
+       when we zoom into them, unless we set a background color.
+       https://github.com/ente-io/ente/issues/4067
+
+       Even after setting the background color, the black lines are visible for
+       a split second when an image is zoomed on to for the first time (this can
+       be used as a test to see when this workaround is no longer required).
+     */
+    background-color: black;
 }
 
 .pswp__button--arrow--left,
@@ -123,48 +132,4 @@ body {
 
 .pswp__caption--empty {
     display: none;
-}
-
-.bg-upload-progress-bar {
-    background-color: #51cd7c;
-}
-
-.carousel-inner {
-    padding-bottom: 50px !important;
-}
-
-.carousel-indicators li {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    margin-right: 12px;
-}
-
-.carousel-indicators .active {
-    background-color: #51cd7c;
-}
-
-div.otp-input input {
-    width: 36px !important;
-    height: 36px;
-    margin: 0 10px;
-}
-
-div.otp-input input::placeholder {
-    opacity: 0;
-}
-
-div.otp-input input:not(:placeholder-shown),
-div.otp-input input:focus {
-    border: 2px solid #51cd7c;
-    border-radius: 1px;
-    -webkit-transition: 0.5s;
-    transition: 0.5s;
-    outline: none;
-}
-
-.flash-message {
-    padding: 16px;
-    display: flex;
-    align-items: center;
 }

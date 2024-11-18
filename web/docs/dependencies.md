@@ -132,13 +132,16 @@ with Next.js.
 
 For more details, see [translations.md](translations.md).
 
-### Others
+### Other UI components
 
 -   [formik](https://github.com/jaredpalmer/formik) provides an easier to use
     abstraction for dealing with form state, validation and submission states
     when using React.
 
 -   [react-select](https://react-select.com/) is used for search dropdowns.
+
+-   [react-otp-input](https://github.com/devfolioco/react-otp-input) is used to
+    render a segmented OTP input field for 2FA authentication.
 
 ## Utilities
 
@@ -164,8 +167,7 @@ For more details, see [translations.md](translations.md).
 ## Media
 
 -   [ExifReader](https://github.com/mattiasw/ExifReader) is used for Exif
-    parsing. [piexifjs](https://github.com/hMatoba/piexifjs) is used for writing
-    back Exif (only supports JPEG).
+    parsing.
 
 -   [jszip](https://github.com/Stuk/jszip) is used for reading zip files in the
     web code (Live photos are zip files under the hood). Note that the desktop
@@ -181,8 +183,6 @@ For more details, see [translations.md](translations.md).
 
 ## Photos app specific
 
-### General
-
 -   [react-dropzone](https://github.com/react-dropzone/react-dropzone/) is a
     React hook to create a drag-and-drop input zone.
 
@@ -193,12 +193,20 @@ For more details, see [translations.md](translations.md).
 -   [chrono-node](https://github.com/wanasit/chrono) is used for parsing natural
     language queries into dates for showing search results.
 
-### Face search
-
--   [matrix](https://github.com/mljs/matrix) is mathematical matrix abstraction.
-    It is used alongwith
+-   [matrix](https://github.com/mljs/matrix) is mathematical matrix abstraction
+    by the machine learning code. It is used alongwith
     [similarity-transformation](https://github.com/shaileshpandit/similarity-transformation-js)
     during face alignment.
+
+### UI
+
+-   [react-top-loading-bar](https://github.com/klendi/react-top-loading-bar) is
+    used for showing a progress indicator for global actions (This shouldn't be
+    used always, it is only meant as a fallback when there isn't an otherwise
+    suitable place for showing a local activity indicator).
+
+-   [pure-react-carousel](https://github.com/express-labs/pure-react-carousel)
+    is used for the feature carousel on the welcome (login / signup) screen.
 
 ## Auth app specific
 

@@ -11,7 +11,6 @@ import { sortFiles } from "@/new/photos/services/files";
 import { CustomError, parseSharingErrorCodes } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import localForage from "@ente/shared/storage/localForage";
-import { LocalSavedPublicCollectionFiles } from "types/publicCollection";
 import { decryptFile } from "utils/file";
 
 const PUBLIC_COLLECTION_FILES_TABLE = "public-collection-files";
@@ -42,6 +41,11 @@ export const savePublicCollectionUploaderName = async (
         getPublicCollectionUploaderNameKey(collectionUID),
         uploaderName,
     );
+
+export interface LocalSavedPublicCollectionFiles {
+    collectionUID: string;
+    files: EnteFile[];
+}
 
 export const getLocalPublicFiles = async (collectionUID: string) => {
     const localSavedPublicCollectionFiles =

@@ -1352,5 +1352,16 @@
   "addName": "Name hinzufügen",
   "add": "Hinzufügen",
   "extraPhotosFoundFor": "Zusätzliche Fotos gefunden für $text",
-  "extraPhotosFound": "Zusätzliche Fotos gefunden"
+  "extraPhotosFound": "Zusätzliche Fotos gefunden",
+  "configuration": "Konfiguration",
+  "localIndexing": "Lokale Indizierung",
+  "resetPerson": "Person zurücksetzen",
+  "areYouSureYouWantToResetThisPerson": "Bist du sicher, dass du diese Person zurücksetzen möchtest?",
+  "allPersonGroupingWillReset": "Alle Gruppierungen für diese Person werden zurückgesetzt und du wirst alle Vorschläge für diese Person verlieren",
+  "yesResetPerson": "Ja, Person zurücksetzen",
+  "onlyThem": "Nur diese",
+  "checkingModels": "Prüfe Modelle...",
+  "enableMachineLearningBanner": "Aktiviere maschinelles Lernen für die magische Suche und Gesichtserkennung",
+  "searchDiscoverEmptySection": "Bilder werden hier angezeigt, sobald die Verarbeitung abgeschlossen ist",
+  "searchPersonsEmptySection": "Personen werden hier angezeigt, sobald die Verarbeitung abgeschlossen ist"
 }

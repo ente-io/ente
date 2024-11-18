@@ -116,7 +116,7 @@
   "selectFile": "Selecionar arquivo",
   "emailVerificationToggle": "Verificação por e-mail",
   "emailVerificationEnableWarning": "Para evitar ser bloqueado da sua conta, certifique-se de guardar uma cópia do seu e-mail 2FA fora do Ente Auth antes de ativar a verificação de e-mail.",
-  "authToChangeEmailVerificationSetting": "Autentique-se para altere o e-mail de verificação",
+  "authToChangeEmailVerificationSetting": "Autentique-se para alterar a verificação de e-mail",
   "authenticateGeneric": "Autentique",
   "authToViewYourRecoveryKey": "Autentique para ver sua chave de recuperação",
   "authToChangeYourEmail": "Autentique para alterar o seu e-mail",

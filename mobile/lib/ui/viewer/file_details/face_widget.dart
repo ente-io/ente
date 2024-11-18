@@ -37,8 +37,8 @@ class FaceWidget extends StatefulWidget {
     this.clusterID,
     this.highlight = false,
     this.editMode = false,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<FaceWidget> createState() => _FaceWidgetState();
@@ -79,7 +79,8 @@ class _FaceWidgetState extends State<FaceWidget> {
                 if (existingClusterID != null) {
                   final fileIdsToClusterIds =
                       await MLDataDB.instance.getFileIdToClusterIds();
-                  final files = await SearchService.instance.getAllFiles();
+                  final files =
+                      await SearchService.instance.getAllFilesForSearch();
                   final clusterFiles = files
                       .where(
                         (file) =>
@@ -119,13 +120,15 @@ class _FaceWidgetState extends State<FaceWidget> {
                   MaterialPageRoute(
                     builder: (context) => PeoplePage(
                       person: widget.person!,
+                      searchResult: null,
                     ),
                   ),
                 );
               } else if (widget.clusterID != null) {
                 final fileIdsToClusterIds =
                     await MLDataDB.instance.getFileIdToClusterIds();
-                final files = await SearchService.instance.getAllFiles();
+                final files =
+                    await SearchService.instance.getAllFilesForSearch();
                 final clusterFiles = files
                     .where(
                       (file) =>

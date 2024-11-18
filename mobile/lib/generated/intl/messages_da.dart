@@ -20,12 +20,12 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'da';
 
-  static String m2(count, formattedCount) =>
+  static String m3(count, formattedCount) =>
       "${Intl.plural(count, zero: 'ingen minder', one: '${formattedCount} minde', other: '${formattedCount} minder')}";
 
-  static String m3(count) => "${count} valgt";
+  static String m4(count) => "${count} valgt";
 
-  static String m4(verificationID) =>
+  static String m5(verificationID) =>
       "Hey, kan du bekræfte, at dette er dit ente.io verifikation ID: ${verificationID}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -41,6 +41,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "backedUpFolders":
             MessageLookupByLibrary.simpleMessage("Sikkerhedskopierede mapper"),
         "cancel": MessageLookupByLibrary.simpleMessage("Annuller"),
+        "checkingModels":
+            MessageLookupByLibrary.simpleMessage("Checking models..."),
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("Bekræft Sletning Af Konto"),
         "confirmPassword":
@@ -71,6 +73,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "developerSettingsWarning": MessageLookupByLibrary.simpleMessage(
             "Er du sikker på, at du vil ændre udviklerindstillingerne?"),
         "email": MessageLookupByLibrary.simpleMessage("Email"),
+        "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
+            "Enable machine learning for magic search and face recognition"),
         "enterPin": MessageLookupByLibrary.simpleMessage("Indtast PIN"),
         "enterValidEmail": MessageLookupByLibrary.simpleMessage(
             "Indtast venligst en gyldig email adresse."),
@@ -99,7 +103,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Langt tryk på en e-mail for at bekræfte slutningen af krypteringen."),
         "manage": MessageLookupByLibrary.simpleMessage("Administrér"),
-        "memoryCount": m2,
+        "memoryCount": m3,
         "mlIndexingDescription": MessageLookupByLibrary.simpleMessage(
             "Bemærk venligst, at maskinindlæring vil resultere i en højere båndbredde og batteriforbrug, indtil alle elementer er indekseret. Overvej at bruge desktop app til hurtigere indeksering, vil alle resultater blive synkroniseret automatisk."),
         "moments": MessageLookupByLibrary.simpleMessage("Øjeblikke"),
@@ -114,12 +118,18 @@ class MessageLookup extends MessageLookupByLibrary {
         "scanThisBarcodeWithnyourAuthenticatorApp":
             MessageLookupByLibrary.simpleMessage(
                 "Skan denne QR-kode med godkendelses-appen"),
+        "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
+            "Images will be shown here once processing is complete"),
         "searchHint1":
             MessageLookupByLibrary.simpleMessage("Hurtig, søgning på enheden"),
+        "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
+            "People will be shown here once processing is complete"),
+        "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
+            "People will be shown here once processing is complete"),
         "selectReason": MessageLookupByLibrary.simpleMessage("Vælg årsag"),
-        "selectedPhotos": m3,
+        "selectedPhotos": m4,
         "sendEmail": MessageLookupByLibrary.simpleMessage("Send email"),
-        "shareTextConfirmOthersVerificationID": m4,
+        "shareTextConfirmOthersVerificationID": m5,
         "somethingWentWrongPleaseTryAgain":
             MessageLookupByLibrary.simpleMessage(
                 "Noget gik galt, prøv venligst igen"),

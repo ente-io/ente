@@ -7,13 +7,12 @@
  * there.
  */
 
-import { pt } from "@/base/i18n";
 import type { SearchOption } from "@/new/photos/services/search/types";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import { Typography } from "@mui/material";
 import { t } from "i18next";
 import React from "react";
-import { useMLStatusSnapshot } from "../utils/ml";
+import { useMLStatusSnapshot } from "../utils/use-snapshot";
 import { GalleryItemsHeaderAdapter, GalleryItemsSummary } from "./ListHeader";
 
 /**
@@ -49,10 +48,8 @@ export const PeopleEmptyState: React.FC = () => {
 
     const message =
         mlStatus?.phase == "done"
-            ? pt(
-                  "People will be shown here when there are sufficient photos of a person",
-              )
-            : pt("Syncing...");
+            ? t("people_empty_too_few")
+            : t("syncing_wait");
 
     return (
         <VerticallyCentered>

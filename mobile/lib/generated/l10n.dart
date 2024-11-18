@@ -9835,6 +9835,116 @@ class S {
       args: [],
     );
   }
+
+  /// `Configuration`
+  String get configuration {
+    return Intl.message(
+      'Configuration',
+      name: 'configuration',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Local indexing`
+  String get localIndexing {
+    return Intl.message(
+      'Local indexing',
+      name: 'localIndexing',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reset person`
+  String get resetPerson {
+    return Intl.message(
+      'Reset person',
+      name: 'resetPerson',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure you want to reset this person?`
+  String get areYouSureYouWantToResetThisPerson {
+    return Intl.message(
+      'Are you sure you want to reset this person?',
+      name: 'areYouSureYouWantToResetThisPerson',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `All groupings for this person will be reset, and you will lose all suggestions made for this person`
+  String get allPersonGroupingWillReset {
+    return Intl.message(
+      'All groupings for this person will be reset, and you will lose all suggestions made for this person',
+      name: 'allPersonGroupingWillReset',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Yes, reset person`
+  String get yesResetPerson {
+    return Intl.message(
+      'Yes, reset person',
+      name: 'yesResetPerson',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Only them`
+  String get onlyThem {
+    return Intl.message(
+      'Only them',
+      name: 'onlyThem',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Checking models...`
+  String get checkingModels {
+    return Intl.message(
+      'Checking models...',
+      name: 'checkingModels',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enable machine learning for magic search and face recognition`
+  String get enableMachineLearningBanner {
+    return Intl.message(
+      'Enable machine learning for magic search and face recognition',
+      name: 'enableMachineLearningBanner',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Images will be shown here once processing is complete`
+  String get searchDiscoverEmptySection {
+    return Intl.message(
+      'Images will be shown here once processing is complete',
+      name: 'searchDiscoverEmptySection',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `People will be shown here once processing is complete`
+  String get searchPersonsEmptySection {
+    return Intl.message(
+      'People will be shown here once processing is complete',
+      name: 'searchPersonsEmptySection',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
