@@ -12,6 +12,7 @@ import type { SearchOption } from "@/new/photos/services/search/types";
 import { Paper, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import React, { useState } from "react";
+import { enableML } from "../../services/ml";
 import { EnableML, FaceConsent } from "../sidebar/MLSettings";
 import { useMLStatusSnapshot } from "../utils/use-snapshot";
 import { useWrapAsyncOperation } from "../utils/use-wrap-async";
@@ -66,40 +67,6 @@ export const PeopleEmptyState: React.FC = () => {
     }
 };
 
-// import { FormPaper } from "@/base/components/FormPaper";
-
-export const PeopleEmptyStateDisabled: React.FC = () => {
-    const [openFaceConsent, setOpenFaceConsent] = useState(false);
-
-    const handleEnableML = () => setOpenFaceConsent(true);
-
-    const handleConsent = useWrapAsyncOperation(async () => {
-        await enableML();
-        // Close the FaceConsent drawer, come back to ourselves.
-        setOpenFaceConsent(false);
-    });
-
-    return (
-        <Stack sx={{ alignItems: "center" }}>
-            <Paper
-                sx={{
-                    maxWidth: "360px",
-                    padding: "4px",
-                }}
-            >
-                <EnableML onEnable={handleEnableML} />
-            </Paper>
-
-            <FaceConsent
-                open={openFaceConsent}
-                onClose={() => setOpenFaceConsent(false)}
-                onRootClose={() => {}}
-                onConsent={handleConsent}
-            />
-        </Stack>
-    );
-};
-
 export const PeopleEmptyStateMessage: React.FC<React.PropsWithChildren> = ({
     children,
 }) => (
@@ -118,3 +85,26 @@ export const PeopleEmptyStateMessage: React.FC<React.PropsWithChildren> = ({
         </Typography>
     </CenteredBox>
 );
+
+export const PeopleEmptyStateDisabled: React.FC = () => {
+    const [showConsent, setShowConsent] = useState(false);
+
+    const handleConsent = useWrapAsyncOperation(async () => {
+        await enableML();
+    });
+
+    return (
+        <Stack sx={{ alignItems: "center" }}>
+            <Paper sx={{ maxWidth: "390px", padding: "4px", mb: "2rem" }}>
+                {!showConsent ? (
+                    <EnableML onEnable={() => setShowConsent(true)} />
+                ) : (
+                    <FaceConsent
+                        onConsent={handleConsent}
+                        onCancel={() => setShowConsent(false)}
+                    />
+                )}
+            </Paper>
+        </Stack>
+    );
+};
