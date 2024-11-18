@@ -336,6 +336,7 @@
   "discover_sunset": "Saulėlydis",
   "discover_hills": "Kalvos",
   "discover_greenery": "Žaluma",
+  "loadingModel": "Atsisiunčiami modeliai...",
   "status": "Būsena",
   "indexedItems": "Indeksuoti elementai",
   "pendingItems": "Laukiami elementai",
@@ -801,9 +802,5 @@
   "allPersonGroupingWillReset": "Visi šio asmens grupavimai bus iš naujo nustatyti, o jūs neteksite visų šiam asmeniui pateiktų pasiūlymų",
   "yesResetPerson": "Taip, nustatyti asmenį iš naujo",
   "onlyThem": "Tik jiems",
-  "checkingModels": "Checking models...",
-  "enableMachineLearningBanner": "Enable machine learning for magic search and face recognition",
-  "searchPeopleEmptySection": "People will be shown here once processing is complete",
-  "searchDiscoverEmptySection": "Images will be shown here once processing is complete",
-  "searchPersonsEmptySection": "People will be shown here once processing is complete"
+  "checkingModels": "Tikrinami modeliai..."
 }

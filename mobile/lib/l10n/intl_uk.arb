@@ -1359,8 +1359,9 @@
   "areYouSureYouWantToResetThisPerson": "Ви впевнені, що хочете скинути цю особу?",
   "allPersonGroupingWillReset": "Усі групи для цієї особи будуть скинуті, і ви втратите всі пропозиції, зроблені для неї",
   "yesResetPerson": "Так, скинути особу",
-  "checkingModels": "Checking models...",
-  "enableMachineLearningBanner": "Enable machine learning for magic search and face recognition",
-  "searchDiscoverEmptySection": "Images will be shown here once processing is complete",
-  "searchPersonsEmptySection": "People will be shown here once processing is complete"
+  "onlyThem": "Тільки вони",
+  "checkingModels": "Перевірка моделей...",
+  "enableMachineLearningBanner": "Увімкніть машинне навчання для магічного пошуку та розпізнавання облич",
+  "searchDiscoverEmptySection": "Зображення будуть показані тут після завершення обробки",
+  "searchPersonsEmptySection": "Люди будуть показані тут після завершення обробки"
 }

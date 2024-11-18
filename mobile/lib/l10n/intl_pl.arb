@@ -1359,8 +1359,5 @@
   "areYouSureYouWantToResetThisPerson": "Czy na pewno chcesz zresetować tę osobę?",
   "allPersonGroupingWillReset": "Wszystkie grupy dla tej osoby zostaną zresetowane i stracisz wszystkie sugestie dla tej osoby",
   "yesResetPerson": "Tak, zresetuj osobę",
-  "checkingModels": "Checking models...",
-  "enableMachineLearningBanner": "Enable machine learning for magic search and face recognition",
-  "searchDiscoverEmptySection": "Images will be shown here once processing is complete",
-  "searchPersonsEmptySection": "People will be shown here once processing is complete"
+  "onlyThem": "Tylko te"
 }

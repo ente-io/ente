@@ -371,10 +371,5 @@
   "advanced": "Avansert",
   "general": "Generelt",
   "security": "Sikkerhet",
-  "authToViewYourRecoveryKey": "Vennligst autentiser deg for å se gjennopprettingsnøkkelen din",
-  "checkingModels": "Checking models...",
-  "enableMachineLearningBanner": "Enable machine learning for magic search and face recognition",
-  "searchPeopleEmptySection": "People will be shown here once processing is complete",
-  "searchDiscoverEmptySection": "Images will be shown here once processing is complete",
-  "searchPersonsEmptySection": "People will be shown here once processing is complete"
+  "authToViewYourRecoveryKey": "Vennligst autentiser deg for å se gjennopprettingsnøkkelen din"
 }
