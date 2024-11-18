@@ -90,6 +90,15 @@ body {
 
 .pswp__img {
     object-fit: contain;
+    /* For reasons I don't understand, Chrome shows black grid lines on images
+       when we zoom into them, unless we set a background color.
+       https://github.com/ente-io/ente/issues/4067
+
+       Even after setting the background color, the black lines are visible for
+       a split second when an image is zoomed on to for the first time (this can
+       be used as a test to see when this workaround is no longer required).
+     */
+    background-color: black;
 }
 
 .pswp__button--arrow--left,
