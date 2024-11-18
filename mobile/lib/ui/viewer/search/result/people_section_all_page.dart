@@ -6,6 +6,7 @@ import "package:photos/events/event.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/theme/ente_theme.dart";
+import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/search_tab/people_section.dart";
 
 class PeopleSectionAllPage extends StatefulWidget {
@@ -62,9 +63,9 @@ class _PeopleSectionAllPageState extends State<PeopleSectionAllPage> {
         future: sectionData,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: EnteLoadingWidget());
           } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
+            return const Center(child: Icon(Icons.error_outline_rounded));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text('No results found.'));
           } else {
