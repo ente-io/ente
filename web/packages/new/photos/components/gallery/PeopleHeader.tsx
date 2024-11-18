@@ -26,7 +26,6 @@ import {
     type PersonSuggestionUpdates,
     type PreviewableCluster,
 } from "@/new/photos/services/ml/people";
-import { ensure } from "@/utils/ensure";
 import OverflowMenu from "@ente/shared/components/OverflowMenu/menu";
 import { OverflowMenuOption } from "@ente/shared/components/OverflowMenu/option";
 import AddIcon from "@mui/icons-material/Add";
@@ -329,7 +328,7 @@ const AddPersonDialog: React.FC<AddPersonDialogProps> = ({
     const handleAddPersonBySelect = useWrapAsyncOperation(
         async (personID: string) => {
             onClose();
-            const person = ensure(cgroupPeople.find((p) => p.id == personID));
+            const person = cgroupPeople.find((p) => p.id == personID)!;
             await addClusterToCGroup(person.cgroup, cluster);
             onSelectPerson(personID);
         },

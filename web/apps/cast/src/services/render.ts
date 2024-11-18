@@ -21,7 +21,6 @@ import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
 import { heicToJPEG } from "@/media/heic-convert";
 import { decodeLivePhoto } from "@/media/live-photo";
 import { shuffled } from "@/utils/array";
-import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import { ApiError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
@@ -134,7 +133,7 @@ export const imageURLGenerator = async function* (castData: CastData) {
             // The last to last element is the one that was shown prior to that,
             // and now can be safely revoked.
             if (previousURLs.length > 1)
-                URL.revokeObjectURL(ensure(previousURLs.shift()));
+                URL.revokeObjectURL(previousURLs.shift()!);
 
             previousURLs.push(url);
 

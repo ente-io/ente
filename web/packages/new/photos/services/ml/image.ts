@@ -1,4 +1,3 @@
-import { ensure } from "@/utils/ensure";
 import { Matrix, inverse } from "ml-matrix";
 import { clamp } from "./math";
 
@@ -14,10 +13,10 @@ const pixelRGBA = (
     }
     const index = (y * width + x) * 4;
     return {
-        r: ensure(imageData[index]),
-        g: ensure(imageData[index + 1]),
-        b: ensure(imageData[index + 2]),
-        a: ensure(imageData[index + 3]),
+        r: imageData[index]!,
+        g: imageData[index + 1]!,
+        b: imageData[index + 2]!,
+        a: imageData[index + 3]!,
     };
 };
 

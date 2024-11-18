@@ -11,7 +11,6 @@ import type { Electron } from "@/base/types/ipc";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
 import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
-import { ensure } from "@/utils/ensure";
 import { throttled } from "@/utils/promise";
 import { proxy, transfer } from "comlink";
 import { getRemoteFlag, updateRemoteFlag } from "../remote-store";
@@ -170,7 +169,7 @@ const createMLWorker = (electron: Electron): Promise<MessagePort> => {
             // preload script. The data is the message that was posted.
             if (source == window && data == "createMLWorker/port") {
                 window.removeEventListener("message", l);
-                resolve(ensure(ports[0]));
+                resolve(ports[0]!);
             }
         };
         window.addEventListener("message", l);

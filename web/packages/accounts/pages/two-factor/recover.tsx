@@ -14,7 +14,6 @@ import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
 import { sharedCryptoWorker } from "@/base/crypto";
 import type { B64EncryptionResult } from "@/base/crypto/libsodium";
 import log from "@/base/log";
-import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import LinkButton from "@ente/shared/components/LinkButton";
 import SingleInputForm, {
@@ -114,14 +113,14 @@ const Page: React.FC<RecoverPageProps> = ({ appContext, twoFactorType }) => {
                 recoveryKey = bip39.mnemonicToEntropy(recoveryKey);
             }
             const cryptoWorker = await sharedCryptoWorker();
-            const { encryptedData, nonce } = ensure(encryptedTwoFactorSecret);
+            const { encryptedData, nonce } = encryptedTwoFactorSecret!;
             const twoFactorSecret = await cryptoWorker.decryptB64(
                 encryptedData,
                 nonce,
                 await cryptoWorker.fromHex(recoveryKey),
             );
             const resp = await removeTwoFactor(
-                ensure(sessionID),
+                sessionID!,
                 twoFactorSecret,
                 twoFactorType,
             );

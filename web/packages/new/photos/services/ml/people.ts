@@ -2,7 +2,6 @@ import { assertionFailed } from "@/base/assert";
 import log from "@/base/log";
 import type { EnteFile } from "@/media/file";
 import { shuffled } from "@/utils/array";
-import { ensure } from "@/utils/ensure";
 import { getLocalFiles } from "../files";
 import {
     savedCGroups,
@@ -509,7 +508,7 @@ export const _suggestionsAndChoicesForPerson = async (
 
         if (csims.length == 0) continue;
 
-        const medianSim = ensure(csims[Math.floor(csims.length / 2)]);
+        const medianSim = csims[Math.floor(csims.length / 2)]!;
         if (medianSim > 0.48) {
             candidateClustersAndSimilarity.push([cluster, medianSim]);
         }
@@ -572,7 +571,7 @@ export const _suggestionsAndChoicesForPerson = async (
     // Ensure that the first item in the choices is not an ignored one, even if
     // that is what we'd have ended up with if we sorted by size.
 
-    const firstChoice = { ...ensure(assignedChoices[0]), fixed: true };
+    const firstChoice = { ...assignedChoices[0]!, fixed: true };
     const restChoices = assignedChoices.slice(1).concat(rejectedChoices);
     sortBySize(restChoices);
 
@@ -662,7 +661,7 @@ export const _applyPersonSuggestionUpdates = async (
     let rejectUpdateCount = 0;
 
     const clusterWithID = (clusterID: string) =>
-        ensure(localClusters.find((c) => c.id == clusterID));
+        localClusters.find((c) => c.id == clusterID)!;
 
     // Add cluster with `clusterID` to the list of assigned clusters.
     const assign = (clusterID: string) => {
@@ -692,7 +691,7 @@ export const _applyPersonSuggestionUpdates = async (
             // part of the remote data. Since we're removing it from the remote
             // state, add it to the local state instead so that the user can see
             // it in their saved choices (local only).
-            localClusters.push(ensure(cluster));
+            localClusters.push(cluster!);
         }
     };
 

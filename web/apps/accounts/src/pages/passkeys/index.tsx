@@ -4,7 +4,6 @@ import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
 import { errorDialogAttributes } from "@/base/components/utils/dialog";
 import log from "@/base/log";
-import { ensure } from "@/utils/ensure";
 import { CenteredFlex } from "@ente/shared/components/Container";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import SingleInputForm from "@ente/shared/components/SingleInputForm";
@@ -103,7 +102,7 @@ const Page: React.FC = () => {
         resetForm: () => void,
     ) => {
         try {
-            await registerPasskey(ensure(token), inputValue);
+            await registerPasskey(token!, inputValue);
         } catch (e) {
             log.error("Failed to register a new passkey", e);
             // If the user cancels the operation, then an error with name
@@ -273,7 +272,7 @@ const ManagePasskeyDrawer: React.FC<ManagePasskeyDrawerProps> = ({
                     text: t("delete"),
                     color: "critical",
                     action: async () => {
-                        await deletePasskey(ensure(token), ensure(passkey).id);
+                        await deletePasskey(token!, passkey!.id);
                         onUpdateOrDeletePasskey();
                     },
                 },
