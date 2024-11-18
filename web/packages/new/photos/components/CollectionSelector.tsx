@@ -14,7 +14,6 @@ import {
     type CollectionSummaries,
     type CollectionSummary,
 } from "@/new/photos/services/collection/ui";
-import { ensure } from "@/utils/ensure";
 import {
     Dialog,
     DialogContent,
@@ -126,8 +125,8 @@ export const CollectionSelector: React.FC<CollectionSelectorProps> = ({
             })
             .sort((a, b) => {
                 return (
-                    ensure(CollectionSummaryOrder.get(a.type)) -
-                    ensure(CollectionSummaryOrder.get(b.type))
+                    CollectionSummaryOrder.get(a.type)! -
+                    CollectionSummaryOrder.get(b.type)!
                 );
             });
 

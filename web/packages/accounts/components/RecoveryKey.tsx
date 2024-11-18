@@ -7,7 +7,6 @@ import { useIsSmallWidth } from "@/base/hooks";
 import log from "@/base/log";
 import { downloadString } from "@/base/utils/web";
 import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";
-import { ensure } from "@/utils/ensure";
 import CodeBlock from "@ente/shared/components/CodeBlock";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import {
@@ -58,7 +57,7 @@ export const RecoveryKey: React.FC<RecoveryKeyProps> = ({
     }, [open, handleLoadError]);
 
     const handleSaveClick = () => {
-        downloadRecoveryKeyMnemonic(ensure(recoveryKey));
+        downloadRecoveryKeyMnemonic(recoveryKey!);
         onClose();
     };
 

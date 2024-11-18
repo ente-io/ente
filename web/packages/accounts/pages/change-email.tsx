@@ -5,7 +5,6 @@ import {
     FormPaperTitle,
 } from "@/base/components/FormPaper";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
-import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import LinkButton from "@ente/shared/components/LinkButton";
 import { LS_KEYS, getData, setLSUser } from "@ente/shared/storage/localStorage";
@@ -81,7 +80,7 @@ const ChangeEmailForm: React.FC = () => {
     ) => {
         try {
             setLoading(true);
-            await changeEmail(email, ensure(ott));
+            await changeEmail(email, ott!);
             await setLSUser({ ...getData(LS_KEYS.USER), email });
             setLoading(false);
             goToApp();

@@ -18,7 +18,6 @@ import {
     UPLOAD_RESULT,
     type UploadPhase,
 } from "@/new/photos/services/upload/types";
-import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import { CustomError } from "@ente/shared/error";
 import { Canceler } from "axios";
@@ -514,9 +513,7 @@ class UploadManager {
             this.abortIfCancelled();
 
             log.info(`Parsing metadata JSON ${fileName}`);
-            const metadataJSON = await tryParseTakeoutMetadataJSON(
-                ensure(uploadItem),
-            );
+            const metadataJSON = await tryParseTakeoutMetadataJSON(uploadItem!);
             if (metadataJSON) {
                 this.parsedMetadataJSONMap.set(
                     getMetadataJSONMapKeyForJSON(collectionID, fileName),
@@ -757,13 +754,11 @@ type UploadItemWithCollectionIDAndName = UploadAsset & {
 const makeUploadItemWithCollectionIDAndName = (
     f: UploadItemWithCollection,
 ): UploadItemWithCollectionIDAndName => ({
-    localID: ensure(f.localID),
-    collectionID: ensure(f.collectionID),
-    fileName: ensure(
-        f.isLivePhoto
-            ? uploadItemFileName(f.livePhotoAssets.image)
-            : uploadItemFileName(f.uploadItem),
-    ),
+    localID: f.localID!,
+    collectionID: f.collectionID!,
+    fileName: (f.isLivePhoto
+        ? uploadItemFileName(f.livePhotoAssets.image)
+        : uploadItemFileName(f.uploadItem))!,
     isLivePhoto: f.isLivePhoto,
     uploadItem: f.uploadItem,
     livePhotoAssets: f.livePhotoAssets,
@@ -835,7 +830,7 @@ const markUploaded = async (electron: Electron, item: ClusteredUploadItem) => {
             );
         }
     } else {
-        const p = ensure(item.uploadItem);
+        const p = item.uploadItem!;
         if (Array.isArray(p)) {
             electron.markUploadedZipItems([p]);
         } else if (typeof p == "string") {

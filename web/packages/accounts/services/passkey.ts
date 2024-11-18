@@ -5,7 +5,6 @@ import { clientPackageHeader, HTTPError } from "@/base/http";
 import log from "@/base/log";
 import { accountsAppOrigin, apiURL } from "@/base/origins";
 import { TwoFactorAuthorizationResponse } from "@/base/types/credentials";
-import { ensure } from "@/utils/ensure";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import HTTPService from "@ente/shared/network/HTTPService";
 import {
@@ -263,7 +262,7 @@ export const saveCredentialsAndNavigateTo = async (
         encryptedToken,
         id,
     });
-    setData(LS_KEYS.KEY_ATTRIBUTES, ensure(keyAttributes));
+    setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes!);
 
     return unstashRedirect() ?? "/credentials";
 };
