@@ -7,7 +7,7 @@
         "@emotion/styled": "^11.13.0",
         "@mui/icons-material": "^5.16.6",
         "@mui/material": "^5.16.6",
-        "comlink": "^4.4.1",
+        "comlink": "^4.4.2",
         "get-user-locale": "^2.3.2",
         "i18next": "^23.15.1",
         "i18next-resources-to-backend": "^1.2.1",
