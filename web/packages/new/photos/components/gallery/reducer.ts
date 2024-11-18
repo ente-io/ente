@@ -1190,19 +1190,24 @@ const deriveAlbumsFilteredFiles = (
         if (hiddenFileIDs.has(file.id)) return false;
         if (tempHiddenFileIDs.has(file.id)) return false;
 
-        // Files in archived collections can only be seen in their respective
-        // collection.
-        if (archivedCollectionIDs.has(file.collectionID)) {
-            return activeCollectionSummaryID === file.collectionID;
-        }
-
         // Archived files can only be seen in the archive section, or in their
         // respective collection.
+        //
+        // Note that a file may both be archived, AND be part of an archived
+        // collection. Such files should be shown in both the archive section
+        // and in their respective collection. Thus this (archived file) case
+        // needs to be before the following (archived collection) case.
         if (isArchivedFile(file)) {
             return (
                 activeCollectionSummaryID === ARCHIVE_SECTION ||
                 activeCollectionSummaryID === file.collectionID
             );
+        }
+
+        // Files in archived collections can only be seen in their respective
+        // collection.
+        if (archivedCollectionIDs.has(file.collectionID)) {
+            return activeCollectionSummaryID === file.collectionID;
         }
 
         // Show all remaining (non-hidden, non-archived) files in "All".

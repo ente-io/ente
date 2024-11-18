@@ -25,7 +25,7 @@ class NotificationWidget extends StatelessWidget {
   final bool isBlackFriday;
 
   const NotificationWidget({
-    Key? key,
+    super.key,
     required this.startIcon,
     required this.actionIcon,
     required this.text,
@@ -33,7 +33,7 @@ class NotificationWidget extends StatelessWidget {
     this.isBlackFriday = false,
     this.subText,
     this.type = NotificationType.warning,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

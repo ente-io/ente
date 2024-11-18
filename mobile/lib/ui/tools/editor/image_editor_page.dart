@@ -387,6 +387,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
         files.add(newFile);
         selectionIndex = files.length - 1;
       }
+      await dialog.hide();
       replacePage(
         context,
         DetailPage(
@@ -397,12 +398,12 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
         ),
       );
     } catch (e, s) {
+      await dialog.hide();
       showToast(context, S.of(context).oopsCouldNotSaveEdits);
       _logger.severe(e, s);
     } finally {
       await PhotoManager.startChangeNotify();
     }
-    await dialog.hide();
   }
 
   void flip() {

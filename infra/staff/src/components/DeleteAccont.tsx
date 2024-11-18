@@ -21,17 +21,24 @@ const DeleteAccount: React.FC<DeleteAccountProps> = ({ open, handleClose }) => {
         try {
             const encodedEmail = encodeURIComponent(getEmail());
             console.log(encodedEmail);
-            const encodedToken = encodeURIComponent(getToken());
-            console.log(encodedToken);
-            const deleteUrl = `${apiOrigin}/admin/user/delete?email=${encodedEmail}&token=${encodedToken}`;
-            const response = await fetch(deleteUrl, { method: "DELETE" });
+            const token = getToken();
+
+            const deleteUrl = `${apiOrigin}/admin/user/delete?email=${encodedEmail}`;
+            const response = await fetch(deleteUrl, {
+                method: "DELETE",
+                headers: { "X-Auth-Token": token },
+            });
             if (!response.ok) {
                 throw new Error("Failed to delete user account");
             }
             handleClose(); // Close dialog on successful delete
             console.log("Account deleted successfully");
         } catch (error) {
-            console.error("Error deleting user account:", error);
+            if (error instanceof Error) {
+                alert("Failed to delete the account: " + error.message);
+            } else {
+                alert("An error occurred while deleting the account");
+            }
         }
     };
 

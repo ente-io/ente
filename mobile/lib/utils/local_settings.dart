@@ -12,6 +12,7 @@ class LocalSettings {
   static const kCollectionSortPref = "collection_sort_pref";
   static const kPhotoGridSize = "photo_grid_size";
   static const _kisMLLocalIndexingEnabled = "ls.ml_local_indexing";
+  static const _kHasSeenMLEnablingBanner = "ls.has_seen_ml_enabling_banner";
   static const kRateUsShownCount = "rate_us_shown_count";
   static const kEnableMultiplePart = "ls.enable_multiple_part";
   static const kRateUsPromptThreshold = 2;
@@ -73,6 +74,12 @@ class LocalSettings {
   Future<bool> toggleLocalMLIndexing() async {
     await _prefs.setBool(_kisMLLocalIndexingEnabled, !isMLLocalIndexingEnabled);
     return isMLLocalIndexingEnabled;
+  }
+
+  bool get hasSeenMLEnablingBanner =>
+      _prefs.getBool(_kHasSeenMLEnablingBanner) ?? false;
+  Future<void> setHasSeenMLEnablingBanner() async {
+    await _prefs.setBool(_kHasSeenMLEnablingBanner, true);
   }
 
   //#region todo:(NG) remove this section, only needed for internal testing to see
