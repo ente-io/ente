@@ -54,7 +54,7 @@ export const MLSettings: React.FC<NestedSidebarDrawerVisibilityProps> = ({
     if (!mlStatus) {
         component = <Loading />;
     } else if (mlStatus.phase == "disabled") {
-        component = <EnableML onEnable={handleEnableML} />;
+        component = <EnableML onEnable={handleEnableML} showMagicSearchHint />;
     } else {
         component = (
             <ManageML {...{ mlStatus }} onDisableML={handleDisableML} />
@@ -98,9 +98,16 @@ const Loading: React.FC = () => {
 interface EnableMLProps {
     /** Called when the user enables ML. */
     onEnable: () => void;
+    /**
+     *  If true, a footnote describing the magic search feature will be shown.
+     */
+    showMagicSearchHint?: boolean;
 }
 
-export const EnableML: React.FC<EnableMLProps> = ({ onEnable }) => {
+export const EnableML: React.FC<EnableMLProps> = ({
+    onEnable,
+    showMagicSearchHint,
+}) => {
     const moreDetails = () =>
         openURL("https://help.ente.io/photos/features/machine-learning");
 
@@ -118,9 +125,11 @@ export const EnableML: React.FC<EnableMLProps> = ({ onEnable }) => {
                     {t("more_details")}
                 </Button>
             </Stack>
-            <Typography color="text.faint" variant="small">
-                {t("ml_search_footnote")}
-            </Typography>
+            {showMagicSearchHint && (
+                <Typography color="text.faint" variant="small">
+                    {t("ml_search_footnote")}
+                </Typography>
+            )}
         </Stack>
     );
 };
@@ -130,7 +139,7 @@ type FaceConsentProps = NestedSidebarDrawerVisibilityProps & {
     onConsent: () => void;
 };
 
-const FaceConsent: React.FC<FaceConsentProps> = ({
+export const FaceConsent: React.FC<FaceConsentProps> = ({
     open,
     onClose,
     onRootClose,

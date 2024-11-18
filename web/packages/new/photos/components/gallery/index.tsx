@@ -9,10 +9,12 @@
 
 import { CenteredBox } from "@/base/components/mui/Container";
 import type { SearchOption } from "@/new/photos/services/search/types";
-import { Typography } from "@mui/material";
+import { Paper, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
-import React from "react";
+import React, { useState } from "react";
+import { EnableML, FaceConsent } from "../sidebar/MLSettings";
 import { useMLStatusSnapshot } from "../utils/use-snapshot";
+import { useWrapAsyncOperation } from "../utils/use-wrap-async";
 import { GalleryItemsHeaderAdapter, GalleryItemsSummary } from "./ListHeader";
 
 /**
@@ -64,22 +66,39 @@ export const PeopleEmptyState: React.FC = () => {
     }
 };
 
-export const PeopleEmptyStateDisabled: React.FC = () => (
-    <CenteredBox>
-        <Typography
-            color="text.muted"
-            sx={{
-                mx: 1,
-                // Approximately compensate for the hidden section bar (86px),
-                // and then add a bit extra padding so that the message appears
-                // visually off the center, towards the top.
-                paddingBlockEnd: "126px",
-            }}
-        >
-            {"disabeld"}
-        </Typography>
-    </CenteredBox>
-);
+// import { FormPaper } from "@/base/components/FormPaper";
+
+export const PeopleEmptyStateDisabled: React.FC = () => {
+    const [openFaceConsent, setOpenFaceConsent] = useState(false);
+
+    const handleEnableML = () => setOpenFaceConsent(true);
+
+    const handleConsent = useWrapAsyncOperation(async () => {
+        await enableML();
+        // Close the FaceConsent drawer, come back to ourselves.
+        setOpenFaceConsent(false);
+    });
+
+    return (
+        <Stack sx={{ alignItems: "center" }}>
+            <Paper
+                sx={{
+                    maxWidth: "360px",
+                    padding: "4px",
+                }}
+            >
+                <EnableML onEnable={handleEnableML} />
+            </Paper>
+
+            <FaceConsent
+                open={openFaceConsent}
+                onClose={() => setOpenFaceConsent(false)}
+                onRootClose={() => {}}
+                onConsent={handleConsent}
+            />
+        </Stack>
+    );
+};
 
 export const PeopleEmptyStateMessage: React.FC<React.PropsWithChildren> = ({
     children,
