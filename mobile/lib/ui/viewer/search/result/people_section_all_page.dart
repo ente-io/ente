@@ -97,13 +97,13 @@ class _PeopleSectionAllPageState extends State<PeopleSectionAllPage> {
                   searchResult: results[index],
                   size: itemSize,
                 )
-                    .animate(delay: Duration(milliseconds: index * 12))
+                    .animate(delay: Duration(milliseconds: index * 13))
                     .fadeIn(
                       duration: const Duration(milliseconds: 225),
                       curve: Curves.easeIn,
                     )
                     .slide(
-                      begin: const Offset(0, -0.05),
+                      begin: const Offset(0, -0.06),
                       curve: Curves.easeInOut,
                       duration: const Duration(
                         milliseconds: 225,
