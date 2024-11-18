@@ -57,48 +57,49 @@ class _PeopleSectionAllPageState extends State<PeopleSectionAllPage> {
       appBar: AppBar(
         title: Text(S.of(context).people),
       ),
-      body: SafeArea(
-        child: FutureBuilder<List<SearchResult>>(
-          future: sectionData,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}'));
-            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return const Center(child: Text('No results found.'));
-            } else {
-              final results = snapshot.data!;
-              final screenWidth = MediaQuery.of(context).size.width;
-              final crossAxisCount = (screenWidth / 100).floor();
+      body: FutureBuilder<List<SearchResult>>(
+        future: sectionData,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(child: Text('No results found.'));
+          } else {
+            final results = snapshot.data!;
+            final screenWidth = MediaQuery.of(context).size.width;
+            final crossAxisCount = (screenWidth / 100).floor();
 
-              final itemSize = (screenWidth -
-                      ((horizontalEdgePadding * 2) +
-                          ((crossAxisCount - 1) * gridPadding))) /
-                  crossAxisCount;
+            final itemSize = (screenWidth -
+                    ((horizontalEdgePadding * 2) +
+                        ((crossAxisCount - 1) * gridPadding))) /
+                crossAxisCount;
 
-              return GridView.builder(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: horizontalEdgePadding,
-                ),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  mainAxisSpacing: gridPadding,
-                  crossAxisSpacing: gridPadding,
-                  crossAxisCount: crossAxisCount,
-                  childAspectRatio:
-                      itemSize / (itemSize + (24 * textScaleFactor)),
-                ),
-                itemCount: results.length,
-                itemBuilder: (context, index) {
-                  return PersonSearchExample(
-                    searchResult: results[index],
-                    size: itemSize,
-                  );
-                },
-              );
-            }
-          },
-        ),
+            return GridView.builder(
+              padding: const EdgeInsets.fromLTRB(
+                horizontalEdgePadding,
+                0,
+                horizontalEdgePadding,
+                96,
+              ),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                mainAxisSpacing: gridPadding,
+                crossAxisSpacing: gridPadding,
+                crossAxisCount: crossAxisCount,
+                childAspectRatio:
+                    itemSize / (itemSize + (24 * textScaleFactor)),
+              ),
+              itemCount: results.length,
+              itemBuilder: (context, index) {
+                return PersonSearchExample(
+                  searchResult: results[index],
+                  size: itemSize,
+                );
+              },
+            );
+          }
+        },
       ),
     );
   }
