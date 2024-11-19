@@ -2,9 +2,11 @@
     /* A minimal tsconfig so that we can run tsc on the build-config package
        itself */
     "compilerOptions": {
+        "module": "ESNext",
+        "moduleResolution": "bundler",
         "noEmit": true,
         "checkJs": true,
         "esModuleInterop": true
     },
-    "include": ["*.js", "eslintrc-base.mjs", "eslintrc-react.mjs", "eslintrc-vite.mjs"]
+    "include": ["*.js", "eslintrc-*.mjs"]
 }
