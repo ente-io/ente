@@ -30,7 +30,7 @@ export const logToDisk = (message: string) => {
 };
 
 const workerLogToDisk = (message: string) => {
-    workerBridge.logToDisk(message).catch((e: unknown) => {
+    workerBridge!.logToDisk(message).catch((e: unknown) => {
         console.error(
             "Failed to log a message from worker",
             e,

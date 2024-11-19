@@ -465,7 +465,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "checkStatus": MessageLookupByLibrary.simpleMessage("Verificar estado"),
         "checking": MessageLookupByLibrary.simpleMessage("Verificando..."),
         "checkingModels":
-            MessageLookupByLibrary.simpleMessage("Checking models..."),
+            MessageLookupByLibrary.simpleMessage("Verificando modelos..."),
         "claimFreeStorage": MessageLookupByLibrary.simpleMessage(
             "Reivindicar armazenamento grátis"),
         "claimMore": MessageLookupByLibrary.simpleMessage("Reivindique mais!"),
@@ -729,6 +729,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "enable": MessageLookupByLibrary.simpleMessage("Ativar"),
         "enableMLIndexingDesc": MessageLookupByLibrary.simpleMessage(
             "Ente suporta aprendizagem de máquina para reconhecimento facial, busca mágica e outros recursos de busca avançados"),
+        "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
+            "Ativar aprendizagem de máquina para busca mágica e reconhecimento facial"),
         "enableMaps": MessageLookupByLibrary.simpleMessage("Ativar mapas"),
         "enableMapsDesc": MessageLookupByLibrary.simpleMessage(
             "Isso exibirá suas fotos em um mapa mundial.\n\nEste mapa é hospedado por Open Street Map, e as exatas localizações das fotos nunca serão compartilhadas.\n\nVocê pode desativar esta função a qualquer momento em Opções."),
@@ -1419,6 +1421,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Adicione marcações como \"#viagem\" nas informações das fotos para encontrá-las aqui com facilidade"),
         "searchDatesEmptySection":
             MessageLookupByLibrary.simpleMessage("Buscar por data, mês ou ano"),
+        "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
+            "As imagens serão exibidas aqui quando o processamento for concluído"),
         "searchFaceEmptySection": MessageLookupByLibrary.simpleMessage(
             "As pessoas apareceram aqui quando a indexação for concluída"),
         "searchFileTypesAndNamesEmptySection":
@@ -1436,6 +1440,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Fotos de grupo que estão sendo tiradas em algum raio da foto"),
         "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
             "Convide pessoas e você verá todas as fotos compartilhadas por elas aqui"),
+        "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
+            "As pessoas serão exibidas aqui quando o processamento for concluído"),
         "searchResultCount": m53,
         "security": MessageLookupByLibrary.simpleMessage("Segurança"),
         "selectALocation":

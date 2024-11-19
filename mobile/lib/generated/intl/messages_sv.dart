@@ -158,8 +158,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Ändra behörighet?"),
         "checkInboxAndSpamFolder": MessageLookupByLibrary.simpleMessage(
             "Kontrollera din inkorg (och skräppost) för att slutföra verifieringen"),
-        "checkingModels":
-            MessageLookupByLibrary.simpleMessage("Checking models..."),
         "claimed": MessageLookupByLibrary.simpleMessage("Nyttjad"),
         "close": MessageLookupByLibrary.simpleMessage("Stäng"),
         "codeAppliedPageTitle":

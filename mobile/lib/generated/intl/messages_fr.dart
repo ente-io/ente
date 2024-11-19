@@ -21,7 +21,7 @@ class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'fr';
 
   static String m6(count) =>
-      "${Intl.plural(count, zero: 'Ajouter un coauteur', one: 'Ajouter un coauteur', other: 'Ajouter des coauteurs')}";
+      "${Intl.plural(count, zero: 'Ajouter un collaborateur', one: 'Ajouter un collaborateur', other: 'Ajouter des collaborateurs')}";
 
   static String m7(count) =>
       "${Intl.plural(count, one: 'Ajoutez un objet', other: 'Ajoutez des objets')}";
@@ -30,7 +30,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Votre extension de ${storageAmount} est valable jusqu\'au ${endDate}";
 
   static String m9(count) =>
-      "${Intl.plural(count, zero: 'Ajouter un lecteur', one: 'Ajouter un lecteur', other: 'Ajouter des lecteurs')}";
+      "${Intl.plural(count, zero: 'Ajouter un observateur', one: 'Ajouter un observateur', other: 'Ajouter des observateurs')}";
 
   static String m10(emailOrName) => "Ajouté par ${emailOrName}";
 
@@ -176,7 +176,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Code de parrainage Ente : ${referralCode} \n\nValidez le dans Paramètres → Général → Références pour obtenir ${referralStorageInGB} Go gratuitement après votre inscription à un plan payant\n\nhttps://ente.io";
 
   static String m57(numberOfPeople) =>
-      "${Intl.plural(numberOfPeople, zero: 'Partagez avec des personnes spécifiques', one: 'Partagé avec 1 personne', other: 'Partagé avec ${numberOfPeople} des gens')}";
+      "${Intl.plural(numberOfPeople, zero: 'Partagez avec des personnes spécifiques', one: 'Partagé avec 1 personne', other: 'Partagé avec ${numberOfPeople} personnes')}";
 
   static String m58(emailIDs) => "Partagé avec ${emailIDs}";
 
@@ -237,6 +237,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Je comprends que si je perds mon mot de passe, je perdrai mes données puisque mes données sont <underline>chiffrées de bout en bout</underline>."),
         "activeSessions":
             MessageLookupByLibrary.simpleMessage("Sessions actives"),
+        "add": MessageLookupByLibrary.simpleMessage("Ajouter"),
         "addAName": MessageLookupByLibrary.simpleMessage("Ajouter un nom"),
         "addANewEmail":
             MessageLookupByLibrary.simpleMessage("Ajouter un nouvel email"),
@@ -250,7 +251,12 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Ajouter la localisation"),
         "addLocationButton": MessageLookupByLibrary.simpleMessage("Ajouter"),
         "addMore": MessageLookupByLibrary.simpleMessage("Ajouter"),
+        "addName": MessageLookupByLibrary.simpleMessage("Ajouter un nom"),
+        "addNameOrMerge":
+            MessageLookupByLibrary.simpleMessage("Ajouter un nom ou fusionner"),
         "addNew": MessageLookupByLibrary.simpleMessage("Ajouter un nouveau"),
+        "addNewPerson": MessageLookupByLibrary.simpleMessage(
+            "Ajouter une nouvelle personne"),
         "addOnPageSubtitle": MessageLookupByLibrary.simpleMessage(
             "Détails des modules complémentaires"),
         "addOnValidTill": m8,
@@ -471,7 +477,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Vérifier le statut"),
         "checking": MessageLookupByLibrary.simpleMessage("Vérification..."),
         "checkingModels":
-            MessageLookupByLibrary.simpleMessage("Checking models..."),
+            MessageLookupByLibrary.simpleMessage("Vérification des modèles..."),
         "claimFreeStorage": MessageLookupByLibrary.simpleMessage(
             "Réclamer le stockage gratuit"),
         "claimMore": MessageLookupByLibrary.simpleMessage("Réclamez plus !"),
@@ -504,7 +510,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "codeUsedByYou":
             MessageLookupByLibrary.simpleMessage("Code utilisé par vous"),
         "collabLinkSectionDescription": MessageLookupByLibrary.simpleMessage(
-            "Créez un lien pour permettre aux gens d\'ajouter et de voir des photos dans votre album partagé sans avoir besoin d\'une application ente ou d\'un compte. Idéal pour récupérer des photos d\'événement."),
+            "Créez un lien pour permettre aux personnes d\'ajouter et de voir des photos dans votre album partagé sans avoir besoin d\'une application Ente ou d\'un compte. Idéal pour récupérer des photos d\'événement."),
         "collaborativeLink":
             MessageLookupByLibrary.simpleMessage("Lien collaboratif"),
         "collaborativeLinkCreatedFor": m18,
@@ -523,6 +529,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "collectPhotosDescription": MessageLookupByLibrary.simpleMessage(
             "Créez un lien où vos amis peuvent ajouter des photos en qualité originale."),
         "color": MessageLookupByLibrary.simpleMessage("Couleur "),
+        "configuration": MessageLookupByLibrary.simpleMessage("Paramètres"),
         "confirm": MessageLookupByLibrary.simpleMessage("Confirmer"),
         "confirm2FADisable": MessageLookupByLibrary.simpleMessage(
             "Voulez-vous vraiment désactiver l\'authentification à deux facteurs ?"),
@@ -746,6 +753,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "enable": MessageLookupByLibrary.simpleMessage("Activer"),
         "enableMLIndexingDesc": MessageLookupByLibrary.simpleMessage(
             "Ente prend en charge l\'apprentissage automatique sur l\'appareil pour la reconnaissance faciale, la recherche magique et d\'autres fonctionnalités de recherche avancée"),
+        "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
+            "Activer l\'apprentissage automatique pour la recherche magique et la reconnaissance faciale"),
         "enableMaps": MessageLookupByLibrary.simpleMessage("Activer la carte"),
         "enableMapsDesc": MessageLookupByLibrary.simpleMessage(
             "Vos photos seront affichées sur une carte du monde.\n\nCette carte est hébergée par Open Street Map, et les emplacements exacts de vos photos ne sont jamais partagés.\n\nVous pouvez désactiver cette fonction à tout moment dans les Paramètres."),
@@ -808,6 +817,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "exportLogs": MessageLookupByLibrary.simpleMessage("Exporter les logs"),
         "exportYourData":
             MessageLookupByLibrary.simpleMessage("Exportez vos données"),
+        "extraPhotosFound": MessageLookupByLibrary.simpleMessage(
+            "Photos supplémentaires trouvées"),
+        "extraPhotosFoundFor": MessageLookupByLibrary.simpleMessage(
+            "Photos supplémentaires trouvées pour \$text"),
         "faceRecognition":
             MessageLookupByLibrary.simpleMessage("Reconnaissance faciale"),
         "faces": MessageLookupByLibrary.simpleMessage("Visages"),
@@ -1029,6 +1042,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "loadingYourPhotos":
             MessageLookupByLibrary.simpleMessage("Chargement de vos photos..."),
         "localGallery": MessageLookupByLibrary.simpleMessage("Galerie locale"),
+        "localIndexing":
+            MessageLookupByLibrary.simpleMessage("Indexation locale"),
         "localSyncErrorMessage": MessageLookupByLibrary.simpleMessage(
             "Il semble que quelque chose s\'est mal passé car la synchronisation des photos locales prend plus de temps que prévu. Veuillez contacter notre équipe d\'assistance"),
         "location": MessageLookupByLibrary.simpleMessage("Emplacement"),
@@ -1084,6 +1099,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "matrix": MessageLookupByLibrary.simpleMessage("Matrix"),
         "memoryCount": m3,
         "merchandise": MessageLookupByLibrary.simpleMessage("Marchandise"),
+        "mergeWithExisting":
+            MessageLookupByLibrary.simpleMessage("Fusionner avec existant"),
         "mlConsent": MessageLookupByLibrary.simpleMessage(
             "Activer l\'apprentissage automatique"),
         "mlConsentConfirmation": MessageLookupByLibrary.simpleMessage(
@@ -1126,6 +1143,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Impossible de se connecter à Ente, veuillez vérifier vos paramètres réseau et contacter le support si l\'erreur persiste."),
         "never": MessageLookupByLibrary.simpleMessage("Jamais"),
         "newAlbum": MessageLookupByLibrary.simpleMessage("Nouvel album"),
+        "newPerson": MessageLookupByLibrary.simpleMessage("Nouvelle personne"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("Nouveau à Ente"),
         "newest": MessageLookupByLibrary.simpleMessage("Le plus récent"),
         "next": MessageLookupByLibrary.simpleMessage("Suivant"),
@@ -1173,6 +1191,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "onEnte": MessageLookupByLibrary.simpleMessage(
             "Sur <branding>ente</branding>"),
         "onlyFamilyAdminCanChangeCode": m43,
+        "onlyThem": MessageLookupByLibrary.simpleMessage("Seulement eux"),
         "oops": MessageLookupByLibrary.simpleMessage("Oups"),
         "oopsCouldNotSaveEdits": MessageLookupByLibrary.simpleMessage(
             "Oups, impossible d\'enregistrer les modifications"),
@@ -1187,7 +1206,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "optionalAsShortAsYouLike": MessageLookupByLibrary.simpleMessage(
             "Optionnel, aussi court que vous le souhaitez..."),
         "orPickAnExistingOne": MessageLookupByLibrary.simpleMessage(
-            "Sélectionner un fichier existant"),
+            "Ou sélectionner un email existant"),
         "pair": MessageLookupByLibrary.simpleMessage("Associer"),
         "pairWithPin":
             MessageLookupByLibrary.simpleMessage("Appairer avec le code PIN"),
@@ -1229,6 +1248,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Supprimer définitivement"),
         "permanentlyDeleteFromDevice": MessageLookupByLibrary.simpleMessage(
             "Supprimer définitivement de l\'appareil ?"),
+        "personName":
+            MessageLookupByLibrary.simpleMessage("Nom de la personne"),
         "photoDescriptions":
             MessageLookupByLibrary.simpleMessage("Descriptions de la photo"),
         "photoGridSize":
@@ -1443,6 +1464,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Ajoutez des descriptions comme \"#trip\" dans les infos photo pour les retrouver ici plus rapidement"),
         "searchDatesEmptySection": MessageLookupByLibrary.simpleMessage(
             "Recherche par date, mois ou année"),
+        "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
+            "Les images seront affichées ici une fois le traitement terminé"),
         "searchFaceEmptySection": MessageLookupByLibrary.simpleMessage(
             "Les personnes seront affichées ici une fois l\'indexation terminée"),
         "searchFileTypesAndNamesEmptySection":
@@ -1459,7 +1482,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchLocationEmptySection": MessageLookupByLibrary.simpleMessage(
             "Grouper les photos qui sont prises dans un certain angle d\'une photo"),
         "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
-            "Invitez des gens, et vous verrez ici toutes les photos qu\'ils partagent"),
+            "Invitez des personnes, et vous verrez ici toutes les photos qu\'elles partagent"),
+        "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
+            "Les personnes seront affichées ici une fois le traitement terminé"),
         "searchResultCount": m53,
         "security": MessageLookupByLibrary.simpleMessage("Sécurité"),
         "selectALocation":

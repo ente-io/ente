@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import "package:photos/l10n/l10n.dart";
 import "package:photos/theme/ente_theme.dart";
 
 class DatePickerField extends StatefulWidget {
@@ -34,11 +35,11 @@ class _DatePickerFieldState extends State<DatePickerField> {
     super.initState();
     if (widget.initialValue != null) {
       _controller.text = widget.initialValue!;
-      _tryParseDate(widget.initialValue!);
+      _tryParseDate(widget.initialValue!).ignore();
     }
   }
 
-  void _tryParseDate(String value) {
+  Future<void> _tryParseDate(String value) async {
     // If the field is empty and not required, reset error state and clear date
     if (value.isEmpty && !widget.isRequired) {
       setState(() {
@@ -55,9 +56,22 @@ class _DatePickerFieldState extends State<DatePickerField> {
     }
 
     try {
+      Locale? locale = await getLocale();
+      locale ??= const Locale('en', 'US');
       // Try parsing different date formats
       DateTime? parsed;
-      final List<String> formats = ['MM/dd/yyyy', 'MM-dd-yyyy', 'yyyy-MM-dd'];
+      final List<String> formats =
+          (locale.toString().toLowerCase().contains('us'))
+              ? [
+                  'MM/dd/yyyy',
+                  'MM-dd-yyyy',
+                  'YYYY-MM-dd',
+                ]
+              : [
+                  'dd/MM/yyyy',
+                  'dd-MM-yyyy',
+                  'yyyy-dd-MM',
+                ];
 
       for (String format in formats) {
         try {
@@ -143,15 +157,6 @@ class _DatePickerFieldState extends State<DatePickerField> {
           borderSide: BorderSide.none,
           borderRadius: BorderRadius.circular(8),
         ),
-        error: _hasError
-            ? Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Use format (MM-dd-YYYY or MM/dd/YYYY)',
-                  style: getEnteTextTheme(context).miniMuted,
-                ),
-              )
-            : null,
         suffixIcon: IconButton(
           icon: const Icon(Icons.calendar_today),
           onPressed: _showDatePicker,

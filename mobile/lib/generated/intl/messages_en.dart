@@ -713,6 +713,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "enable": MessageLookupByLibrary.simpleMessage("Enable"),
         "enableMLIndexingDesc": MessageLookupByLibrary.simpleMessage(
             "Ente supports on-device machine learning for face recognition, magic search and other advanced search features"),
+        "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
+            "Enable machine learning for magic search and face recognition"),
         "enableMaps": MessageLookupByLibrary.simpleMessage("Enable Maps"),
         "enableMapsDesc": MessageLookupByLibrary.simpleMessage(
             "This will show your photos on a world map.\n\nThis map is hosted by Open Street Map, and the exact locations of your photos are never shared.\n\nYou can disable this feature anytime from Settings."),
@@ -1135,8 +1137,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("OpenStreetMap contributors"),
         "optionalAsShortAsYouLike": MessageLookupByLibrary.simpleMessage(
             "Optional, as short as you like..."),
-        "orMergeWithExistingPerson": MessageLookupByLibrary.simpleMessage(
-            "Or merge with existing person"),
+        "orMergeWithExistingPerson":
+            MessageLookupByLibrary.simpleMessage("Or merge with existing"),
         "orPickAnExistingOne":
             MessageLookupByLibrary.simpleMessage("Or pick an existing one"),
         "pair": MessageLookupByLibrary.simpleMessage("Pair"),
@@ -1376,6 +1378,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Add descriptions like \"#trip\" in photo info to quickly find them here"),
         "searchDatesEmptySection": MessageLookupByLibrary.simpleMessage(
             "Search by a date, month or year"),
+        "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
+            "Images will be shown here once processing is complete"),
         "searchFaceEmptySection": MessageLookupByLibrary.simpleMessage(
             "People will be shown here once indexing is done"),
         "searchFileTypesAndNamesEmptySection":
@@ -1393,6 +1397,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Group photos that are taken within some radius of a photo"),
         "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
             "Invite people, and you\'ll see all photos shared by them here"),
+        "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
+            "People will be shown here once processing is complete"),
         "searchResultCount": m53,
         "security": MessageLookupByLibrary.simpleMessage("Security"),
         "selectALocation":

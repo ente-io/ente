@@ -238,6 +238,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Ik begrijp dat als ik mijn wachtwoord verlies, ik mijn gegevens kan verliezen omdat mijn gegevens <underline>end-to-end versleuteld</underline> zijn."),
         "activeSessions":
             MessageLookupByLibrary.simpleMessage("Actieve sessies"),
+        "add": MessageLookupByLibrary.simpleMessage("Toevoegen"),
         "addAName": MessageLookupByLibrary.simpleMessage("Een naam toevoegen"),
         "addANewEmail":
             MessageLookupByLibrary.simpleMessage("Nieuw e-mailadres toevoegen"),
@@ -251,7 +252,12 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Locatie toevoegen"),
         "addLocationButton": MessageLookupByLibrary.simpleMessage("Toevoegen"),
         "addMore": MessageLookupByLibrary.simpleMessage("Meer toevoegen"),
+        "addName": MessageLookupByLibrary.simpleMessage("Naam toevoegen"),
+        "addNameOrMerge": MessageLookupByLibrary.simpleMessage(
+            "Naam toevoegen of samenvoegen"),
         "addNew": MessageLookupByLibrary.simpleMessage("Nieuwe toevoegen"),
+        "addNewPerson":
+            MessageLookupByLibrary.simpleMessage("Nieuw persoon toevoegen"),
         "addOnPageSubtitle":
             MessageLookupByLibrary.simpleMessage("Details van add-ons"),
         "addOnValidTill": m8,
@@ -289,6 +295,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "allClear": MessageLookupByLibrary.simpleMessage("✨ Alles in orde"),
         "allMemoriesPreserved":
             MessageLookupByLibrary.simpleMessage("Alle herinneringen bewaard"),
+        "allPersonGroupingWillReset": MessageLookupByLibrary.simpleMessage(
+            "Alle groepen voor deze persoon worden gereset, en je verliest alle suggesties die voor deze persoon zijn gedaan"),
         "allowAddPhotosDescription": MessageLookupByLibrary.simpleMessage(
             "Sta toe dat mensen met de link ook foto\'s kunnen toevoegen aan het gedeelde album."),
         "allowAddingPhotos":
@@ -345,6 +353,9 @@ class MessageLookup extends MessageLookupByLibrary {
             "Weet je zeker dat je wilt uitloggen?"),
         "areYouSureYouWantToRenew": MessageLookupByLibrary.simpleMessage(
             "Weet u zeker dat u wilt verlengen?"),
+        "areYouSureYouWantToResetThisPerson":
+            MessageLookupByLibrary.simpleMessage(
+                "Weet u zeker dat u deze persoon wilt resetten?"),
         "askCancelReason": MessageLookupByLibrary.simpleMessage(
             "Uw abonnement is opgezegd. Wilt u de reden delen?"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
@@ -459,7 +470,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Status controleren"),
         "checking": MessageLookupByLibrary.simpleMessage("Controleren..."),
         "checkingModels":
-            MessageLookupByLibrary.simpleMessage("Checking models..."),
+            MessageLookupByLibrary.simpleMessage("Modellen controleren..."),
         "claimFreeStorage":
             MessageLookupByLibrary.simpleMessage("Claim gratis opslag"),
         "claimMore": MessageLookupByLibrary.simpleMessage("Claim meer!"),
@@ -509,6 +520,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "collectPhotosDescription": MessageLookupByLibrary.simpleMessage(
             "Maak een link waarin je vrienden foto\'s kunnen uploaden in de originele kwaliteit."),
         "color": MessageLookupByLibrary.simpleMessage("Kleur"),
+        "configuration": MessageLookupByLibrary.simpleMessage("Configuratie"),
         "confirm": MessageLookupByLibrary.simpleMessage("Bevestig"),
         "confirm2FADisable": MessageLookupByLibrary.simpleMessage(
             "Weet u zeker dat u tweestapsverificatie wilt uitschakelen?"),
@@ -791,6 +803,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Logboek exporteren"),
         "exportYourData":
             MessageLookupByLibrary.simpleMessage("Exporteer je gegevens"),
+        "extraPhotosFound":
+            MessageLookupByLibrary.simpleMessage("Extra foto\'s gevonden"),
+        "extraPhotosFoundFor": MessageLookupByLibrary.simpleMessage(
+            "Extra foto\'s gevonden voor \$text"),
         "faceRecognition":
             MessageLookupByLibrary.simpleMessage("Gezichtsherkenning"),
         "faces": MessageLookupByLibrary.simpleMessage("Gezichten"),
@@ -1005,6 +1021,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "loadingYourPhotos": MessageLookupByLibrary.simpleMessage(
             "Je foto\'s worden geladen..."),
         "localGallery": MessageLookupByLibrary.simpleMessage("Lokale galerij"),
+        "localIndexing":
+            MessageLookupByLibrary.simpleMessage("Lokaal indexeren"),
         "localSyncErrorMessage": MessageLookupByLibrary.simpleMessage(
             "Het lijkt erop dat er iets mis is gegaan omdat het synchroniseren van lokale foto\'s meer tijd kost dan verwacht. Neem contact op met ons supportteam"),
         "location": MessageLookupByLibrary.simpleMessage("Locatie"),
@@ -1059,6 +1077,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "matrix": MessageLookupByLibrary.simpleMessage("Matrix"),
         "memoryCount": m3,
         "merchandise": MessageLookupByLibrary.simpleMessage("Merchandise"),
+        "mergeWithExisting":
+            MessageLookupByLibrary.simpleMessage("Samenvoegen met bestaand"),
         "mlConsent":
             MessageLookupByLibrary.simpleMessage("Schakel machine learning in"),
         "mlConsentConfirmation": MessageLookupByLibrary.simpleMessage(
@@ -1100,6 +1120,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Kan geen verbinding maken met Ente, controleer uw netwerkinstellingen en neem contact op met ondersteuning als de fout zich blijft voordoen."),
         "never": MessageLookupByLibrary.simpleMessage("Nooit"),
         "newAlbum": MessageLookupByLibrary.simpleMessage("Nieuw album"),
+        "newPerson": MessageLookupByLibrary.simpleMessage("Nieuw persoon"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("Nieuw bij Ente"),
         "newest": MessageLookupByLibrary.simpleMessage("Nieuwste"),
         "next": MessageLookupByLibrary.simpleMessage("Volgende"),
@@ -1148,6 +1169,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "onEnte": MessageLookupByLibrary.simpleMessage(
             "Op <branding>ente</branding>"),
         "onlyFamilyAdminCanChangeCode": m43,
+        "onlyThem": MessageLookupByLibrary.simpleMessage("Alleen hen"),
         "oops": MessageLookupByLibrary.simpleMessage("Oeps"),
         "oopsCouldNotSaveEdits": MessageLookupByLibrary.simpleMessage(
             "Oeps, kon bewerkingen niet opslaan"),
@@ -1201,6 +1223,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Permanent verwijderen"),
         "permanentlyDeleteFromDevice": MessageLookupByLibrary.simpleMessage(
             "Permanent verwijderen van apparaat?"),
+        "personName": MessageLookupByLibrary.simpleMessage("Naam van persoon"),
         "photoDescriptions":
             MessageLookupByLibrary.simpleMessage("Foto beschrijvingen"),
         "photoGridSize":
@@ -1364,6 +1387,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Reset genegeerde bestanden"),
         "resetPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Wachtwoord resetten"),
+        "resetPerson": MessageLookupByLibrary.simpleMessage("Reset persoon"),
         "resetToDefault": MessageLookupByLibrary.simpleMessage(
             "Standaardinstellingen herstellen"),
         "restore": MessageLookupByLibrary.simpleMessage("Herstellen"),
@@ -1786,6 +1810,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "yesLogout": MessageLookupByLibrary.simpleMessage("Ja, log uit"),
         "yesRemove": MessageLookupByLibrary.simpleMessage("Ja, verwijderen"),
         "yesRenew": MessageLookupByLibrary.simpleMessage("Ja, verlengen"),
+        "yesResetPerson":
+            MessageLookupByLibrary.simpleMessage("Ja, reset persoon"),
         "you": MessageLookupByLibrary.simpleMessage("Jij"),
         "youAreOnAFamilyPlan": MessageLookupByLibrary.simpleMessage(
             "U bent onderdeel van een familie abonnement!"),

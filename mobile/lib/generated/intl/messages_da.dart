@@ -41,8 +41,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "backedUpFolders":
             MessageLookupByLibrary.simpleMessage("Sikkerhedskopierede mapper"),
         "cancel": MessageLookupByLibrary.simpleMessage("Annuller"),
-        "checkingModels":
-            MessageLookupByLibrary.simpleMessage("Checking models..."),
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("Bekræft Sletning Af Konto"),
         "confirmPassword":

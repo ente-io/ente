@@ -241,7 +241,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "checkStatus": MessageLookupByLibrary.simpleMessage("Tikrinti būseną"),
         "checking": MessageLookupByLibrary.simpleMessage("Tikrinama..."),
         "checkingModels":
-            MessageLookupByLibrary.simpleMessage("Checking models..."),
+            MessageLookupByLibrary.simpleMessage("Tikrinami modeliai..."),
         "cleanUncategorized":
             MessageLookupByLibrary.simpleMessage("Valyti nekategorizuotą"),
         "cleanUncategorizedDescription": MessageLookupByLibrary.simpleMessage(
@@ -551,6 +551,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "linkNeverExpires": MessageLookupByLibrary.simpleMessage("Niekada"),
         "loadingGallery":
             MessageLookupByLibrary.simpleMessage("Įkeliama galerija..."),
+        "loadingModel":
+            MessageLookupByLibrary.simpleMessage("Atsisiunčiami modeliai..."),
         "loadingYourPhotos":
             MessageLookupByLibrary.simpleMessage("Įkeliamos nuotraukos..."),
         "localGallery":

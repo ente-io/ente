@@ -103,8 +103,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "لطفا صندوق ورودی (و هرزنامه) خود را برای تایید کامل بررسی کنید"),
         "checkStatus": MessageLookupByLibrary.simpleMessage("بررسی وضعیت"),
         "checking": MessageLookupByLibrary.simpleMessage("در حال بررسی..."),
-        "checkingModels":
-            MessageLookupByLibrary.simpleMessage("Checking models..."),
         "collabLinkSectionDescription": MessageLookupByLibrary.simpleMessage(
             "پیوندی ایجاد کنید تا به افراد اجازه دهید بدون نیاز به برنامه یا حساب کاربری Ente عکس‌ها را در آلبوم اشتراک گذاشته شده شما اضافه و مشاهده کنند. برای جمع‌آوری عکس‌های رویداد عالی است."),
         "collaborator": MessageLookupByLibrary.simpleMessage("همکار"),

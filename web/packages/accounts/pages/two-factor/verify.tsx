@@ -8,7 +8,6 @@ import {
     FormPaperFooter,
     FormPaperTitle,
 } from "@/base/components/FormPaper";
-import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import LinkButton from "@ente/shared/components/LinkButton";
 import { ApiError } from "@ente/shared/error";
@@ -60,7 +59,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 encryptedToken,
                 id,
             });
-            setData(LS_KEYS.KEY_ATTRIBUTES, ensure(keyAttributes));
+            setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes!);
             router.push(unstashRedirect() ?? PAGES.CREDENTIALS);
         } catch (e) {
             if (

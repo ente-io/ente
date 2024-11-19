@@ -389,8 +389,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "checkInboxAndSpamFolder": MessageLookupByLibrary.simpleMessage(
             "Lütfen doğrulama işlemini tamamlamak için gelen kutunuzu (ve spam klasörünüzü) kontrol edin"),
         "checking": MessageLookupByLibrary.simpleMessage("Kontrol ediliyor..."),
-        "checkingModels":
-            MessageLookupByLibrary.simpleMessage("Checking models..."),
         "claimFreeStorage":
             MessageLookupByLibrary.simpleMessage("Bedava alan talep edin"),
         "claimMore": MessageLookupByLibrary.simpleMessage("Arttır!"),

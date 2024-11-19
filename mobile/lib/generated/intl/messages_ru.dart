@@ -442,8 +442,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Пожалуйста, проверьте свой почтовый ящик (и спам) для завершения верификации"),
         "checkStatus": MessageLookupByLibrary.simpleMessage("Проверить статус"),
         "checking": MessageLookupByLibrary.simpleMessage("Проверка..."),
-        "checkingModels":
-            MessageLookupByLibrary.simpleMessage("Checking models..."),
         "claimFreeStorage": MessageLookupByLibrary.simpleMessage(
             "Получить бесплатное хранилище"),
         "claimMore": MessageLookupByLibrary.simpleMessage("Получите больше!"),

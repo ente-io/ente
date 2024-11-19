@@ -1,5 +1,3 @@
-import { ensure } from "@/utils/ensure";
-
 interface RequestQueueItem {
     request: (canceller?: RequestCanceller) => Promise<any>;
     successCallback: (response: any) => void;
@@ -50,7 +48,7 @@ export default class QueueProcessor<T> {
         this.isProcessingRequest = true;
 
         while (this.requestQueue.length > 0) {
-            const queueItem = ensure(this.requestQueue.shift());
+            const queueItem = this.requestQueue.shift()!;
             let response = null;
 
             if (queueItem.isCanceled.status) {

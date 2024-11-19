@@ -258,8 +258,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "checkInboxAndSpamFolder": MessageLookupByLibrary.simpleMessage(
             "אנא בדוק את תיבת הדואר שלך (והספאם) כדי להשלים את האימות"),
         "checking": MessageLookupByLibrary.simpleMessage("בודק..."),
-        "checkingModels":
-            MessageLookupByLibrary.simpleMessage("Checking models..."),
         "claimFreeStorage":
             MessageLookupByLibrary.simpleMessage("תבע מקום אחסון בחינם"),
         "claimMore": MessageLookupByLibrary.simpleMessage("תבע עוד!"),

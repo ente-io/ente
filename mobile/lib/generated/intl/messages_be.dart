@@ -56,8 +56,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Змяніць пароль"),
         "checkInboxAndSpamFolder": MessageLookupByLibrary.simpleMessage(
             "Праверце свае ўваходныя лісты (і спам) для завяршэння праверкі"),
-        "checkingModels":
-            MessageLookupByLibrary.simpleMessage("Checking models..."),
         "codeAppliedPageTitle":
             MessageLookupByLibrary.simpleMessage("Код ужыты"),
         "confirm": MessageLookupByLibrary.simpleMessage("Пацвердзіць"),

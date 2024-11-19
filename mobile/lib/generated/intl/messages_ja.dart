@@ -404,8 +404,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "メールボックスを確認してEメールの所有を証明してください(見つからない場合は、スパムの中も確認してください)"),
         "checkStatus": MessageLookupByLibrary.simpleMessage("ステータスの確認"),
         "checking": MessageLookupByLibrary.simpleMessage("確認中…"),
-        "checkingModels":
-            MessageLookupByLibrary.simpleMessage("Checking models..."),
         "claimFreeStorage":
             MessageLookupByLibrary.simpleMessage("無料のストレージを受け取る"),
         "claimMore": MessageLookupByLibrary.simpleMessage("もっと！"),

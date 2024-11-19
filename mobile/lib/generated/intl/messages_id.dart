@@ -399,8 +399,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Silakan periksa kotak masuk (serta kotak spam) untuk menyelesaikan verifikasi"),
         "checkStatus": MessageLookupByLibrary.simpleMessage("Periksa status"),
         "checking": MessageLookupByLibrary.simpleMessage("Memeriksa..."),
-        "checkingModels":
-            MessageLookupByLibrary.simpleMessage("Checking models..."),
         "claimFreeStorage":
             MessageLookupByLibrary.simpleMessage("Peroleh kuota gratis"),
         "claimMore":

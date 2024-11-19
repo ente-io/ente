@@ -394,8 +394,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "请检查您的收件箱 (或者是在您的“垃圾邮件”列表内) 以完成验证"),
         "checkStatus": MessageLookupByLibrary.simpleMessage("检查状态"),
         "checking": MessageLookupByLibrary.simpleMessage("正在检查..."),
-        "checkingModels":
-            MessageLookupByLibrary.simpleMessage("Checking models..."),
         "claimFreeStorage": MessageLookupByLibrary.simpleMessage("领取免费存储"),
         "claimMore": MessageLookupByLibrary.simpleMessage("领取更多！"),
         "claimed": MessageLookupByLibrary.simpleMessage("已领取"),

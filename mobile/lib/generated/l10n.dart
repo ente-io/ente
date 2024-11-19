@@ -9015,10 +9015,10 @@ class S {
     );
   }
 
-  /// `Or merge with existing person`
+  /// `Or merge with existing`
   String get orMergeWithExistingPerson {
     return Intl.message(
-      'Or merge with existing person',
+      'Or merge with existing',
       name: 'orMergeWithExistingPerson',
       desc: '',
       args: [],
@@ -9961,6 +9961,36 @@ class S {
     return Intl.message(
       'Checking models...',
       name: 'checkingModels',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enable machine learning for magic search and face recognition`
+  String get enableMachineLearningBanner {
+    return Intl.message(
+      'Enable machine learning for magic search and face recognition',
+      name: 'enableMachineLearningBanner',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Images will be shown here once processing is complete`
+  String get searchDiscoverEmptySection {
+    return Intl.message(
+      'Images will be shown here once processing is complete',
+      name: 'searchDiscoverEmptySection',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `People will be shown here once processing is complete`
+  String get searchPersonsEmptySection {
+    return Intl.message(
+      'People will be shown here once processing is complete',
+      name: 'searchPersonsEmptySection',
       desc: '',
       args: [],
     );

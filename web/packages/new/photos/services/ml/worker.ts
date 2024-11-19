@@ -6,7 +6,6 @@ import { ensureAuthToken } from "@/base/local-user";
 import log from "@/base/log";
 import type { ElectronMLWorker } from "@/base/types/ipc";
 import { fileLogID, type EnteFile } from "@/media/file";
-import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import { expose, wrap } from "comlink";
 import downloadManager from "../download";
@@ -207,7 +206,7 @@ export class MLWorker {
      * Find {@link CLIPMatches} for a given normalized {@link searchPhrase}.
      */
     async clipMatches(searchPhrase: string): Promise<CLIPMatches | undefined> {
-        return _clipMatches(searchPhrase, ensure(this.electron));
+        return _clipMatches(searchPhrase, this.electron!);
     }
 
     private async tick() {
@@ -241,7 +240,7 @@ export class MLWorker {
             // Index them.
             const allSuccess = await indexNextBatch(
                 items,
-                ensure(this.electron),
+                this.electron!,
                 this.delegate,
             );
             if (allSuccess) {
@@ -284,7 +283,7 @@ export class MLWorker {
 
     /** Return the next batch of items to backfill (if any). */
     private async backfillQ() {
-        const userID = ensure(await getKVN("userID"));
+        const userID = (await getKVN("userID"))!;
         // Find files that our local DB thinks need syncing.
         const fileByID = await syncWithLocalFilesAndGetFilesToIndex(
             userID,
@@ -326,12 +325,12 @@ export class MLWorker {
      * cgroups if needed.
      */
     async clusterFaces(masterKey: Uint8Array) {
-        const clusters = await _clusterFaces(
+        const { clusters, modifiedClusterIDs } = await _clusterFaces(
             await savedFaceIndexes(),
             await getAllLocalFiles(),
             (progress) => this.updateClusteringProgress(progress),
         );
-        await reconcileClusters(clusters, masterKey);
+        await reconcileClusters(clusters, modifiedClusterIDs, masterKey);
         this.updateClusteringProgress(undefined);
     }
 
@@ -392,7 +391,7 @@ const indexNextBatch = async (
                         .catch(() => {
                             allSuccess = false;
                             tasks[j] = undefined;
-                        }))(ensure(items[i++]), j);
+                        }))(items[i++]!, j);
             }
         }
 
@@ -450,9 +449,7 @@ const syncWithLocalFilesAndGetFilesToIndex = async (
     );
 
     const fileIDsToIndex = await getIndexableFileIDs(count);
-    return new Map(
-        fileIDsToIndex.map((id) => [id, ensure(localFileByID.get(id))]),
-    );
+    return new Map(fileIDsToIndex.map((id) => [id, localFileByID.get(id)!]));
 };
 
 /**

@@ -470,8 +470,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Sprawdź swoją skrzynkę odbiorczą (i spam), aby zakończyć weryfikację"),
         "checkStatus": MessageLookupByLibrary.simpleMessage("Sprawdź stan"),
         "checking": MessageLookupByLibrary.simpleMessage("Sprawdzanie..."),
-        "checkingModels":
-            MessageLookupByLibrary.simpleMessage("Checking models..."),
         "claimFreeStorage": MessageLookupByLibrary.simpleMessage(
             "Odbierz bezpłatną przestrzeń dyskową"),
         "claimMore": MessageLookupByLibrary.simpleMessage("Zdobądź więcej!"),
@@ -1165,6 +1163,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "onEnte":
             MessageLookupByLibrary.simpleMessage("W <branding>ente</branding>"),
         "onlyFamilyAdminCanChangeCode": m43,
+        "onlyThem": MessageLookupByLibrary.simpleMessage("Tylko te"),
         "oops": MessageLookupByLibrary.simpleMessage("Ups"),
         "oopsCouldNotSaveEdits": MessageLookupByLibrary.simpleMessage(
             "Ups, nie udało się zapisać zmian"),

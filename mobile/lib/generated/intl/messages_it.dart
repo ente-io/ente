@@ -468,7 +468,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "checking":
             MessageLookupByLibrary.simpleMessage("Controllo in corso..."),
         "checkingModels":
-            MessageLookupByLibrary.simpleMessage("Checking models..."),
+            MessageLookupByLibrary.simpleMessage("Verifica dei modelli..."),
         "claimFreeStorage":
             MessageLookupByLibrary.simpleMessage("Richiedi spazio gratuito"),
         "claimMore": MessageLookupByLibrary.simpleMessage("Richiedine di più!"),
@@ -1090,7 +1090,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Mediocre"),
         "modifyYourQueryOrTrySearchingFor":
             MessageLookupByLibrary.simpleMessage(
-                "Modifica la tua interrogazione o prova a cercare"),
+                "Modifica la tua ricerca o prova con"),
         "moments": MessageLookupByLibrary.simpleMessage("Momenti"),
         "monthly": MessageLookupByLibrary.simpleMessage("Mensile"),
         "moreDetails": MessageLookupByLibrary.simpleMessage("Più dettagli"),

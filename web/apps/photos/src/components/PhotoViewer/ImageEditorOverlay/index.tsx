@@ -12,7 +12,6 @@ import { EnteFile } from "@/media/file";
 import { photosDialogZIndex } from "@/new/photos/components/utils/z-index";
 import downloadManager from "@/new/photos/services/download";
 import { AppContext } from "@/new/photos/types/context";
-import { ensure } from "@/utils/ensure";
 import {
     CenteredFlex,
     HorizontalFlex,
@@ -453,7 +452,7 @@ const ImageEditorOverlay = (props: IProps) => {
     }
 
     const getEditedFile = async () => {
-        const originalSizeCanvas = ensure(originalSizeCanvasRef.current);
+        const originalSizeCanvas = originalSizeCanvasRef.current!;
         const originalFileName = props.file.metadata.title;
         return canvasToFile(originalSizeCanvas, originalFileName, mimeType);
     };
@@ -475,15 +474,10 @@ const ImageEditorOverlay = (props: IProps) => {
             );
 
             const editedFile = await getEditedFile();
-            const file = {
-                uploadItem: editedFile,
-                localID: 1,
-                collectionID: props.file.collectionID,
-            };
 
             uploadManager.prepareForNewUpload();
             uploadManager.showUploadProgressDialog();
-            uploadManager.uploadItems([file], [collection]);
+            uploadManager.uploadFile(editedFile, collection, props.file);
             setFileURL(null);
             props.onClose();
             props.closePhotoViewer();
@@ -782,9 +776,9 @@ const canvasToFile = async (
             break;
     }
 
-    const blob = ensure(
-        await new Promise<Blob>((resolve) => canvas.toBlob(resolve, mimeType)),
-    );
+    const blob = (await new Promise<Blob>((resolve) =>
+        canvas.toBlob(resolve, mimeType),
+    ))!;
 
     const [originalName] = nameAndExtension(originalFileName);
     const fileName = `${originalName}-edited.${extension}`;

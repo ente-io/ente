@@ -461,8 +461,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Revisa tu bandeja de entrada (y spam) para completar la verificación"),
         "checkStatus": MessageLookupByLibrary.simpleMessage("Comprobar estado"),
         "checking": MessageLookupByLibrary.simpleMessage("Comprobando..."),
-        "checkingModels":
-            MessageLookupByLibrary.simpleMessage("Checking models..."),
         "claimFreeStorage": MessageLookupByLibrary.simpleMessage(
             "Reclamar almacenamiento gratis"),
         "claimMore": MessageLookupByLibrary.simpleMessage("¡Reclama más!"),

@@ -378,8 +378,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "checkStatus":
             MessageLookupByLibrary.simpleMessage("Verificați starea"),
         "checking": MessageLookupByLibrary.simpleMessage("Se verifică..."),
-        "checkingModels":
-            MessageLookupByLibrary.simpleMessage("Checking models..."),
         "claimFreeStorage":
             MessageLookupByLibrary.simpleMessage("Revendică spațiul gratuit"),
         "claimMore":

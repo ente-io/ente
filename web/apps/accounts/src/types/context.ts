@@ -1,5 +1,4 @@
 import type { AccountsContextT } from "@/accounts/types/context";
-import { ensure } from "@/utils/ensure";
 import { createContext, useContext } from "react";
 
 /**
@@ -16,4 +15,4 @@ export const AppContext = createContext<AppContextT | undefined>(undefined);
  * Utility hook to get the {@link AppContextT}, throwing an exception if it is
  * not defined.
  */
-export const useAppContext = (): AppContextT => ensure(useContext(AppContext));
+export const useAppContext = (): AppContextT => useContext(AppContext)!;

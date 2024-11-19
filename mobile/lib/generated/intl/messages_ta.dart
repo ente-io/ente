@@ -27,8 +27,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "உங்கள் கணக்கை நீக்குவதற்கான முக்கிய காரணம் என்ன?"),
         "cancel": MessageLookupByLibrary.simpleMessage("ரத்து செய்"),
-        "checkingModels":
-            MessageLookupByLibrary.simpleMessage("Checking models..."),
         "confirmAccountDeletion": MessageLookupByLibrary.simpleMessage(
             "கணக்கு நீக்குதலை உறுதிப்படுத்தவும்"),
         "confirmDeletePrompt": MessageLookupByLibrary.simpleMessage(

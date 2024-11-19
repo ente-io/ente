@@ -66,24 +66,19 @@ class _SavePersonState extends State<SavePerson> {
             SizedBox(
               height: 110,
               width: 110,
-              child: widget.file != null
-                  ? ClipRRect(
-                      borderRadius: const BorderRadius.all(
-                        Radius.elliptical(16, 12),
-                      ),
-                      child: PersonFaceWidget(
-                        widget.file!,
-                        clusterID: widget.clusterID,
-                      ),
-                    )
-                  : const ClipRRect(
-                      borderRadius: BorderRadius.all(
-                        Radius.elliptical(16, 12),
-                      ),
-                      child: NoThumbnailWidget(
+              child: ClipPath(
+                clipper: ShapeBorderClipper(
+                  shape: ContinuousRectangleBorder(
+                    borderRadius: BorderRadius.circular(80),
+                  ),
+                ),
+                child: widget.file != null
+                    ? PersonFaceWidget(widget.file!,
+                        clusterID: widget.clusterID)
+                    : const NoThumbnailWidget(
                         addBorder: false,
                       ),
-                    ),
+              ),
             ),
             const SizedBox(height: 36),
             TextFormField(
@@ -116,7 +111,7 @@ class _SavePersonState extends State<SavePerson> {
             const SizedBox(height: 16),
             DatePickerField(
               hintText: context.l10n.enterDateOfBirth,
-              firstDate: DateTime(1900),
+              firstDate: DateTime(100),
               lastDate: DateTime.now(),
               isRequired: false,
             ),

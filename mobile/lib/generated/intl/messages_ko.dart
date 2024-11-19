@@ -27,8 +27,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "askDeleteReason":
             MessageLookupByLibrary.simpleMessage("계정을 삭제하는 가장 큰 이유가 무엇인가요?"),
         "cancel": MessageLookupByLibrary.simpleMessage("닫기"),
-        "checkingModels":
-            MessageLookupByLibrary.simpleMessage("Checking models..."),
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("계정 삭제 확인"),
         "deleteAccount": MessageLookupByLibrary.simpleMessage("계정 삭제"),

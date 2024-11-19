@@ -49,8 +49,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "checkStatus":
             MessageLookupByLibrary.simpleMessage("Kontrolli staatust"),
         "checking": MessageLookupByLibrary.simpleMessage("Kontrollimine..."),
-        "checkingModels":
-            MessageLookupByLibrary.simpleMessage("Checking models..."),
         "collaborator": MessageLookupByLibrary.simpleMessage("Kaastööline"),
         "collectPhotos": MessageLookupByLibrary.simpleMessage("Kogu fotod"),
         "color": MessageLookupByLibrary.simpleMessage("Värv"),

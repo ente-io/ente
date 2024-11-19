@@ -92,8 +92,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("เปลี่ยนรหัสผ่าน"),
         "checkInboxAndSpamFolder": MessageLookupByLibrary.simpleMessage(
             "โปรดตรวจสอบกล่องจดหมาย (และสแปม) ของคุณ เพื่อยืนยันให้เสร็จสิ้น"),
-        "checkingModels":
-            MessageLookupByLibrary.simpleMessage("Checking models..."),
         "codeCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
             "คัดลอกรหัสไปยังคลิปบอร์ดแล้ว"),
         "collectPhotos": MessageLookupByLibrary.simpleMessage("รวบรวมรูปภาพ"),

@@ -4,7 +4,6 @@ import { sharedCryptoWorker } from "@/base/crypto";
 import type { B64EncryptionResult } from "@/base/crypto/libsodium";
 import { clearLocalStorage } from "@/base/local-storage";
 import log from "@/base/log";
-import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import LinkButton from "@ente/shared/components/LinkButton";
 import VerifyMasterPasswordForm, {
@@ -218,7 +217,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     id,
                     twoFactorSessionID,
                     passkeySessionID,
-                } = await loginViaSRP(ensure(srpAttributes), kek);
+                } = await loginViaSRP(srpAttributes!, kek);
                 setIsFirstLogin(true);
                 if (passkeySessionID) {
                     const sessionKeyAttributes =

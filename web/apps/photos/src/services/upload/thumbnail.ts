@@ -8,7 +8,6 @@ import {
     toDataOrPathOrZipEntry,
     type DesktopUploadItem,
 } from "@/new/photos/services/upload/types";
-import { ensure } from "@/utils/ensure";
 import { withTimeout } from "@/utils/promise";
 
 /** Maximum width or height of the generated thumbnail */
@@ -70,7 +69,7 @@ const generateImageThumbnailWeb = async (
 
 const generateImageThumbnailUsingCanvas = async (blob: Blob) => {
     const canvas = document.createElement("canvas");
-    const canvasCtx = ensure(canvas.getContext("2d"));
+    const canvasCtx = canvas.getContext("2d")!;
 
     const imageURL = URL.createObjectURL(blob);
     await withTimeout(
@@ -118,7 +117,7 @@ const compressedJPEGData = async (canvas: HTMLCanvasElement) => {
         percentageSizeDiff(blob.size, prevSize) >= 10
     );
 
-    return new Uint8Array(await ensure(blob).arrayBuffer());
+    return new Uint8Array(await blob!.arrayBuffer());
 };
 
 const percentageSizeDiff = (
@@ -140,7 +139,7 @@ const generateVideoThumbnailWeb = async (blob: Blob) => {
 
 export const generateVideoThumbnailUsingCanvas = async (blob: Blob) => {
     const canvas = document.createElement("canvas");
-    const canvasCtx = ensure(canvas.getContext("2d"));
+    const canvasCtx = canvas.getContext("2d")!;
 
     const videoURL = URL.createObjectURL(blob);
     await withTimeout(

@@ -27,8 +27,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "ackPasswordLostWarning": MessageLookupByLibrary.simpleMessage(
             "أُدركُ أنّني فقدتُ كلمة مروري، فقد أفقد بياناتي لأن بياناتي <underline>مشفرة تشفيرًا تامًّا من النهاية إلى النهاية</underline>."),
         "cancel": MessageLookupByLibrary.simpleMessage("إلغاء"),
-        "checkingModels":
-            MessageLookupByLibrary.simpleMessage("Checking models..."),
         "decrypting": MessageLookupByLibrary.simpleMessage("فك التشفير..."),
         "email": MessageLookupByLibrary.simpleMessage("البريد الإلكتروني"),
         "enterYourEmailAddress":

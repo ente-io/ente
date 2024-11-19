@@ -17,7 +17,7 @@ class PeopleBanner extends StatelessWidget {
   final String? subText;
   final GestureTapCallback onTap;
 
-  const PeopleBanner({
+const PeopleBanner({
     super.key,
     required this.type,
     this.startIcon,

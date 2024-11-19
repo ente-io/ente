@@ -1,6 +1,5 @@
 // TODO: This file belongs to the accounts package
 
-import { ensure } from "@/utils/ensure";
 import { z } from "zod";
 import { getKVS } from "./kv";
 
@@ -57,4 +56,8 @@ export const ensureLocalUser = (): LocalUser => {
  * The underlying data is stored in IndexedDB, and can be accessed from web
  * workers.
  */
-export const ensureAuthToken = async () => ensure(await getKVS("token"));
+export const ensureAuthToken = async () => {
+    const token = await getKVS("token");
+    if (!token) throw new Error("Not logged in");
+    return token;
+};

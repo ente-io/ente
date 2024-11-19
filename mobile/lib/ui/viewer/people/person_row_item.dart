@@ -61,9 +61,11 @@ class PersonGridItem extends StatelessWidget {
             SizedBox(
               width: 112,
               height: 112,
-              child: ClipRRect(
-                borderRadius: const BorderRadius.all(
-                  Radius.elliptical(16, 12),
+              child: ClipPath(
+                clipper: ShapeBorderClipper(
+                  shape: ContinuousRectangleBorder(
+                    borderRadius: BorderRadius.circular(80),
+                  ),
                 ),
                 child: PersonFaceWidget(personFile, personId: person.remoteID),
               ),

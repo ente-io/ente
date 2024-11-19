@@ -117,8 +117,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Endre tillatelser?"),
         "checkInboxAndSpamFolder": MessageLookupByLibrary.simpleMessage(
             "Sjekk innboksen din (og spam) for å fullføre verifikasjonen"),
-        "checkingModels":
-            MessageLookupByLibrary.simpleMessage("Checking models..."),
         "clearIndexes": MessageLookupByLibrary.simpleMessage("Tøm indekser"),
         "codeCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
             "Kode kopiert til utklippstavlen"),

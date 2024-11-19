@@ -2,7 +2,6 @@ import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import log from "@/base/log";
 import type { TwoFactorAuthorizationResponse } from "@/base/types/credentials";
-import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import InfoIcon from "@mui/icons-material/Info";
@@ -212,7 +211,7 @@ const Page = () => {
         if (successRedirectURL) redirectToURL(successRedirectURL);
     }, [successRedirectURL]);
 
-    const handleVerify = () => void authenticateContinue(ensure(continuation));
+    const handleVerify = () => void authenticateContinue(continuation!);
 
     const handleRetry = () => void authenticate();
 
@@ -232,7 +231,7 @@ const Page = () => {
         return () => redirectToPasskeyRecoverPage(new URL(recover));
     })();
 
-    const handleRedirectAgain = () => redirectToURL(ensure(successRedirectURL));
+    const handleRedirectAgain = () => redirectToURL(successRedirectURL!);
 
     const components: Record<Status, React.ReactNode> = {
         loading: <Loading />,

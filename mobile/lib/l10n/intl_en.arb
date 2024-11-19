@@ -1262,7 +1262,7 @@
   "enterPersonName": "Enter person name",
   "enterName": "Enter name",
   "savePerson": "Save person",
-  "orMergeWithExistingPerson" : "Or merge with existing person",
+  "orMergeWithExistingPerson" : "Or merge with existing",
   "enterDateOfBirth": "Birthday (optional)",
   "birthday": "Birthday",
   "removePersonLabel": "Remove person label",
@@ -1365,5 +1365,8 @@
   "allPersonGroupingWillReset": "All groupings for this person will be reset, and you will lose all suggestions made for this person",
   "yesResetPerson": "Yes, reset person",
   "onlyThem": "Only them",
-  "checkingModels": "Checking models..."
+  "checkingModels": "Checking models...",
+  "enableMachineLearningBanner": "Enable machine learning for magic search and face recognition",
+  "searchDiscoverEmptySection": "Images will be shown here once processing is complete",
+  "searchPersonsEmptySection": "People will be shown here once processing is complete"
 }
