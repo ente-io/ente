@@ -1,4 +1,5 @@
 import "dart:developer";
+import 'dart:async';
 
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
@@ -45,6 +46,14 @@ class _SavePersonState extends State<SavePerson> {
   String _inputName = "";
   bool userAlreadyAssigned = false;
   late final Logger _logger = Logger("_SavePersonState");
+  Timer? _debounce;
+  List<(PersonEntity, EnteFile)> _cachedPersons = [];
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -85,8 +94,11 @@ class _SavePersonState extends State<SavePerson> {
             const SizedBox(height: 36),
             TextFormField(
               onChanged: (value) {
-                setState(() {
-                  _inputName = value;
+                if (_debounce?.isActive ?? false) _debounce?.cancel();
+                _debounce = Timer(const Duration(milliseconds: 300), () {
+                  setState(() {
+                    _inputName = value;
+                  });
                 });
               },
               decoration: InputDecoration(
@@ -141,8 +153,8 @@ class _SavePersonState extends State<SavePerson> {
   Widget _getPersonItems() {
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 12, 4, 0),
-      child: FutureBuilder<List<(PersonEntity, EnteFile)>>(
-        future: _getPersonsWithRecentFile(),
+      child: StreamBuilder<List<(PersonEntity, EnteFile)>>(
+        stream: _getPersonsWithRecentFileStream(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             log("Error: ${snapshot.error} ${snapshot.stackTrace}}");
@@ -230,6 +242,14 @@ class _SavePersonState extends State<SavePerson> {
         },
       ),
     );
+  }
+
+  Stream<List<(PersonEntity, EnteFile)>>
+      _getPersonsWithRecentFileStream() async* {
+    if (_cachedPersons.isEmpty) {
+      _cachedPersons = await _getPersonsWithRecentFile();
+    }
+    yield _cachedPersons;
   }
 
   Future<void> addNewPerson(
