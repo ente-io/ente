@@ -17,7 +17,7 @@ class PeopleBanner extends StatelessWidget {
   final String? subText;
   final GestureTapCallback onTap;
 
-const PeopleBanner({
+  const PeopleBanner({
     super.key,
     required this.type,
     this.startIcon,
@@ -54,14 +54,19 @@ const PeopleBanner({
       case PeopleBannerType.addName:
         assert(faceWidget != null);
         backgroundColor = colorScheme.backgroundElevated;
-        startWidget = SizedBox(
-          width: 56,
-          height: 56,
-          child: ClipRRect(
-            borderRadius: const BorderRadius.all(
-              Radius.circular(4),
+        startWidget = Padding(
+          padding: const EdgeInsets.all(4.0),
+          child: SizedBox(
+            width: 56,
+            height: 56,
+            child: ClipPath(
+              clipper: ShapeBorderClipper(
+                shape: ContinuousRectangleBorder(
+                  borderRadius: BorderRadius.circular(40),
+                ),
+              ),
+              child: faceWidget!,
             ),
-            child: faceWidget!,
           ),
         );
         roundedActionIcon = false;

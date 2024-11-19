@@ -177,8 +177,8 @@ class _HierarchicalSearchGalleryState extends State<HierarchicalSearchGallery> {
                             thumbnailFallback: false,
                           ),
                           actionIcon: Icons.add_outlined,
-                          text: S.of(context).addAName,
-                          subText: S.of(context).findPeopleByName,
+                          text: S.of(context).savePerson,
+                          subText: S.of(context).findThemQuickly,
                           onTap: () async {
                             final result = await showAssignPersonAction(
                               context,

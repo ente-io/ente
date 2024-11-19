@@ -1246,6 +1246,10 @@
   "locations": "Locations",
   "descriptions": "Descriptions",
   "addAName": "Add a name",
+  "findThemQuickly": "Find them quickly",
+  "@findThemQuickly": {
+    "description": "Subtitle to indicate that the user can find people quickly by name"
+  },
   "findPeopleByName": "Find people quickly by name",
   "addViewers": "{count, plural, zero {Add viewer} one {Add viewer} other {Add viewers}}",
   "addCollaborators": "{count, plural, zero {Add collaborator} one {Add collaborator} other {Add collaborators}}",

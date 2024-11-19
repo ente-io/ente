@@ -825,6 +825,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Files saved to gallery"),
         "findPeopleByName":
             MessageLookupByLibrary.simpleMessage("Find people quickly by name"),
+        "findThemQuickly":
+            MessageLookupByLibrary.simpleMessage("Find them quickly"),
         "flip": MessageLookupByLibrary.simpleMessage("Flip"),
         "forYourMemories":
             MessageLookupByLibrary.simpleMessage("for your memories"),

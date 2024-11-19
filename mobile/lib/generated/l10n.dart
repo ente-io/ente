@@ -8849,6 +8849,17 @@ class S {
     );
   }
 
+  /// `Find them quickly`
+  String get findThemQuickly {
+    return Intl.message(
+      'Find them quickly',
+      name: 'findThemQuickly',
+      desc:
+          'Subtitle to indicate that the user can find people quickly by name',
+      args: [],
+    );
+  }
+
   /// `Find people quickly by name`
   String get findPeopleByName {
     return Intl.message(
