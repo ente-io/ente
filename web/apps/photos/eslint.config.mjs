@@ -49,6 +49,12 @@ export default [
             "react-hooks/exhaustive-deps": "off",
             "react-hooks/rules-of-hooks": "off",
             "react-refresh/only-export-components": "off",
+            /** TODO: New during eslint 8=>9 migration */
+            "@typescript-eslint/no-unused-expressions": "off",
+            // "@typescript-eslint/no-unused-vars": "off",
+            "@typescript-eslint/return-await": "off",
+            "@typescript-eslint/prefer-regexp-exec": "off",
+            "@typescript-eslint/no-require-imports": "off",
         },
     },
 ];
