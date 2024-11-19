@@ -4,7 +4,7 @@
     "private": true,
     "dependencies": {
         "@/base": "*",
-        "@ente/eslint-config": "*",
+        "@/build-config": "*",
         "axios": "^1.6.7"
     }
 }
