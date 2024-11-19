@@ -5,6 +5,7 @@ import tseslint from "typescript-eslint";
 
 export default tseslint.config(
     eslint.configs.recommended,
+    tseslint.configs.strictTypeChecked,
     tseslint.configs.recommendedTypeChecked,
     {
         languageOptions: {
@@ -13,6 +14,9 @@ export default tseslint.config(
                 tsconfigRootDir: import.meta.dirname,
             },
         },
+    },
+    {
+        ignores: ["eslint.config.mjs"],
     },
 );
 // /* eslint-env node */
