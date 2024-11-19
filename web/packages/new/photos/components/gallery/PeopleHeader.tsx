@@ -1,6 +1,9 @@
 import { ActivityErrorIndicator } from "@/base/components/ErrorIndicator";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
-import { CenteredBox, SpaceBetweenFlex } from "@/base/components/mui/Container";
+import {
+    CenteredFill,
+    SpaceBetweenFlex,
+} from "@/base/components/mui/Container";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import {
@@ -691,15 +694,15 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                 sx={{ display: "flex", "&&&": { pt: 0 } }}
             >
                 {state.activity == "fetching" ? (
-                    <CenteredBox>
+                    <CenteredFill>
                         <ActivityIndicator>
                             {t("people_suggestions_finding")}
                         </ActivityIndicator>
-                    </CenteredBox>
+                    </CenteredFill>
                 ) : state.fetchFailed ? (
-                    <CenteredBox>
+                    <CenteredFill>
                         <ActivityErrorIndicator />
-                    </CenteredBox>
+                    </CenteredFill>
                 ) : state.showChoices ? (
                     <SuggestionOrChoiceList
                         items={state.choices}
@@ -707,14 +710,14 @@ const SuggestionsDialog: React.FC<SuggestionsDialogProps> = ({
                         onUpdateItem={handleUpdateItem}
                     />
                 ) : state.suggestions.length == 0 ? (
-                    <CenteredBox>
+                    <CenteredFill>
                         <Typography
                             color="text.muted"
                             sx={{ textAlign: "center" }}
                         >
                             t{"people_suggestions_empty"}
                         </Typography>
-                    </CenteredBox>
+                    </CenteredFill>
                 ) : (
                     <SuggestionOrChoiceList
                         items={state.suggestions}

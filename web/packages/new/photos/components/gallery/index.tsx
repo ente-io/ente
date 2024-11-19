@@ -7,7 +7,7 @@
  * there.
  */
 
-import { CenteredBox } from "@/base/components/mui/Container";
+import { CenteredFill } from "@/base/components/mui/Container";
 import type { SearchOption } from "@/new/photos/services/search/types";
 import { Paper, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
@@ -70,7 +70,7 @@ export const PeopleEmptyState: React.FC = () => {
 export const PeopleEmptyStateMessage: React.FC<React.PropsWithChildren> = ({
     children,
 }) => (
-    <CenteredBox>
+    <CenteredFill>
         <Typography
             color="text.muted"
             sx={{
@@ -83,7 +83,7 @@ export const PeopleEmptyStateMessage: React.FC<React.PropsWithChildren> = ({
         >
             {children}
         </Typography>
-    </CenteredBox>
+    </CenteredFill>
 );
 
 export const PeopleEmptyStateDisabled: React.FC = () => {
