@@ -1,6 +1,11 @@
+import reactPlugin from "eslint-plugin-react";
 import config from "./eslintrc-base.mjs";
 
-export default config;
+export default [
+    ...config,
+    reactPlugin.configs.recommended,
+    reactPlugin.configs["jsx-runtime"],
+];
 
 // /* eslint-env node */
 // module.exports = {
