@@ -45,7 +45,6 @@ module.exports = {
         "@typescript-eslint/prefer-for-of": "off",
         "@typescript-eslint/no-confusing-void-expression": "off",
         "@typescript-eslint/use-unknown-in-catch-callback-variable": "off",
-        "@typescript-eslint/only-throw-error": "off",
         "@typescript-eslint/restrict-plus-operands": "off",
         "@typescript-eslint/no-meaningless-void-operator": "off",
         "react-hooks/exhaustive-deps": "off",

@@ -159,7 +159,7 @@ export default function App({ Component, pageProps }: AppProps) {
                 redirectToFamilyPortal();
 
                 // https://github.com/vercel/next.js/issues/2476#issuecomment-573460710
-                // eslint-disable-next-line no-throw-literal
+                // eslint-disable-next-line @typescript-eslint/only-throw-error
                 throw "Aborting route change, redirection in process....";
             }
         });
