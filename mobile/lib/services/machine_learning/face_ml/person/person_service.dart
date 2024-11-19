@@ -343,13 +343,14 @@ class PersonService {
               final clusterID = clusterIdToFaceIDs.key;
               final faceIDs = clusterIdToFaceIDs.value;
               final foundRejectedFacesToCluster = <String, String>{};
+              final removeFaceIDs = <String>{};
               for (final faceID in faceIDs) {
                 if (assignedAndRejectedFaceIDs.contains(faceID)) {
-                  faceIDs.remove(faceID);
+                  removeFaceIDs.add(faceID);
                   foundRejectedFacesToCluster[faceID] = clusterID;
                 }
               }
-              if (faceIDs.isEmpty) {
+              if (faceIDs.length == removeFaceIDs.length) {
                 logger.info(
                   "Cluster $clusterID for person ${e.id} ${personData.name} is empty due to rejected faces from remote, removing the cluster from person",
                 );
