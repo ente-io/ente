@@ -10,7 +10,7 @@ interface TitlebarProps {
     onClose: () => void;
     backIsClose?: boolean;
     onRootClose?: () => void;
-    actionButton?: JSX.Element;
+    actionButton?: React.JSX.Element;
 }
 
 // TODO: Deprecated in favor of SidebarDrawerTitlebarProps where possible (will
