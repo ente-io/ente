@@ -1,5 +1,6 @@
 import reactPlugin from "eslint-plugin-react";
 import hooksPlugin from "eslint-plugin-react-hooks";
+import reactRefreshPlugin from "eslint-plugin-react-refresh";
 import config from "./eslintrc-base.mjs";
 
 export default [
@@ -21,6 +22,22 @@ export default [
         },
         rules: {
             ...hooksPlugin.configs.recommended.rules,
+        },
+    },
+    {
+        files: ["**/*.{jsx,tsx}"],
+        plugins: {
+            "react-refresh": reactRefreshPlugin,
+        },
+        rules: {
+            // Apparently Fast refresh only works if a file only exports components,
+            // and this rule warns about that.
+            //
+            // Constants are okay though (otherwise we'll need to create unnecessary helper files).
+            "react-refresh/only-export-components": [
+                "warn",
+                { allowConstantExport: true },
+            ],
         },
     },
 ];
