@@ -114,7 +114,6 @@ export const getNonEmptyMagicMetadataProps = <T>(magicMetadataProps: T): T => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         Object.entries(magicMetadataProps).filter(
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             ([_, v]) => v !== null && v !== undefined,
         ),
     ) as T;

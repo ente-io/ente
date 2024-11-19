@@ -9,4 +9,11 @@ export default [
         // that possibly arise from it not being able to locate ffmpeg-wasm.
         ignores: ["**/ffmpeg/worker.ts"],
     },
+    {
+        rules: {
+            /** TODO: New during eslint 8=>9 migration */
+            "@typescript-eslint/no-unused-vars": "off",
+            "@typescript-eslint/no-unused-expressions": "off",
+        },
+    },
 ];
