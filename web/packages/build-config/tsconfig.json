@@ -6,5 +6,5 @@
         "checkJs": true,
         "esModuleInterop": true
     },
-    "include": ["*.js", "eslintrc-base.mjs"]
+    "include": ["*.js", "eslintrc-base.mjs", "eslintrc-react.mjs", "eslintrc-vite.mjs"]
 }
