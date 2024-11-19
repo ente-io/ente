@@ -1,3 +1,4 @@
+import 'dart:developer' show log;
 import 'dart:typed_data' show Float32List;
 
 import 'package:logging/logging.dart';
@@ -73,6 +74,7 @@ class FaceEmbeddingService extends MlModel {
 
     for (final embedding in embeddings) {
       normalizeEmbedding(embedding);
+      log('Face embedding: $embedding');
     }
     inputOrt.release();
     runOptions.release();

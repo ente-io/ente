@@ -1,3 +1,4 @@
+import "dart:developer" show log;
 import "dart:typed_data" show Uint8List, Float32List;
 
 import "package:logging/logging.dart";
@@ -51,6 +52,7 @@ class ClipImageEncoder extends MlModel {
       } else {
         result = _runFFIBasedPredict(inputList, sessionAddress);
       }
+      log('Clip image embedding: $result');
     } catch (e, stackTrace) {
       _logger.severe(
         "Clip image inference failed${enteFileID != null ? " with fileID $enteFileID" : ""}  (PlatformPlugin: ${MlModel.usePlatformPlugin})",
