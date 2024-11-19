@@ -327,7 +327,7 @@ export default function Gallery() {
         try {
             await getRecoveryKey();
             return true;
-        } catch (e) {
+        } catch {
             logout();
             return false;
         }

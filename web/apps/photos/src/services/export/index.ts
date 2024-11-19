@@ -1407,7 +1407,7 @@ export const isLivePhotoExportName = (exportName: string) => {
     try {
         JSON.parse(exportName);
         return true;
-    } catch (e) {
+    } catch {
         return false;
     }
 };

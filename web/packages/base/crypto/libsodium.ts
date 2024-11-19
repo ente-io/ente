@@ -617,7 +617,7 @@ export async function deriveSensitiveKey(passphrase: string, salt: string) {
                 opsLimit,
                 memLimit,
             };
-        } catch (e) {
+        } catch {
             opsLimit *= 2;
             memLimit /= 2;
         }
