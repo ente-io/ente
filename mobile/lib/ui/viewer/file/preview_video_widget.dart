@@ -8,7 +8,6 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/guest_view_event.dart";
-import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/extensions/file_props.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/service_locator.dart";
@@ -79,35 +78,6 @@ class _PreviewVideoWidgetState extends State<PreviewVideoWidget> {
     }
   }
 
-  void _loadNetworkVideo() {
-    getFileFromServer(
-      widget.file,
-      progressCallback: (count, total) {
-        if (!mounted) {
-          return;
-        }
-        _progressNotifier.value = count / (widget.file.fileSize ?? total);
-        if (_progressNotifier.value == 1) {
-          if (mounted) {
-            showShortToast(context, S.of(context).decryptingVideo);
-          }
-        }
-      },
-    ).then((file) {
-      if (file != null && mounted) {
-        _setVideoPlayerController(file: file);
-      }
-    }).onError((error, stackTrace) {
-      if (mounted) {
-        showErrorDialog(
-          context,
-          "Error",
-          S.of(context).failedToDownloadVideo,
-        );
-      }
-    });
-  }
-
   @override
   void dispose() {
     _fileSwipeLockEventSubscription.cancel();
@@ -119,9 +89,7 @@ class _PreviewVideoWidgetState extends State<PreviewVideoWidget> {
     super.dispose();
   }
 
-  void _setVideoPlayerController({
-    File? file,
-  }) {
+  void _setVideoPlayerController() {
     if (!mounted) {
       // Note: Do not initiale video player if widget is not mounted.
       // On Android, if multiple instance of ExoPlayer is created, it will start
@@ -129,7 +97,7 @@ class _PreviewVideoWidgetState extends State<PreviewVideoWidget> {
       return;
     }
     VideoPlayerController videoPlayerController;
-    videoPlayerController = VideoPlayerController.file(file ?? widget.preview);
+    videoPlayerController = VideoPlayerController.file(widget.preview);
 
     debugPrint("videoPlayerController: $videoPlayerController");
     _videoPlayerController = videoPlayerController
