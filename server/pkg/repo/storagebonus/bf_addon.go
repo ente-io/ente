@@ -3,6 +3,8 @@ package storagebonus
 import (
 	"context"
 	"fmt"
+
+	"github.com/ente-io/museum/ente"
 	"github.com/ente-io/museum/ente/storagebonus"
 )
 
@@ -27,7 +29,15 @@ func (r *Repository) RemoveAddOnBonus(ctx context.Context, bonusType storagebonu
 	if err != nil {
 		return 0, err
 	}
-	return res.RowsAffected()
+	// verify if the bonus was removed
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+	if rowsAffected == int64(0) {
+		return 0, ente.NewBadRequestWithMessage(fmt.Sprintf("bonus not found for user %d with bonusID %s", userID, bonusID))
+	}
+	return rowsAffected, nil
 }
 
 func (r *Repository) UpdateAddOnBonus(ctx context.Context, bonusType storagebonus.BonusType, userID int64, validTill int64, storage int64) error {
