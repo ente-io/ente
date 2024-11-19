@@ -3,7 +3,6 @@ import type { Location } from "@/base/types";
 import type { Collection } from "@/media/collection";
 import type { EnteFile } from "@/media/file";
 import { fileCreationPhotoDate, fileLocation } from "@/media/file-metadata";
-import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";
 import { getPublicMagicMetadataSync } from "@ente/shared/file-metadata";
 import type { Component } from "chrono-node";
@@ -470,7 +469,6 @@ const sortMatchesIfNeeded = (
 ) => {
     if (suggestion.type != "clip") return files;
     // Sort CLIP matches by their corresponding scores.
-    const score = ({ id }: EnteFile) =>
-        ensure(suggestion.clipScoreForFileID.get(id));
+    const score = ({ id }: EnteFile) => suggestion.clipScoreForFileID.get(id)!;
     return files.sort((a, b) => score(b) - score(a));
 };

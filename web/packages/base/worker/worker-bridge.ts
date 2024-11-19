@@ -1,4 +1,5 @@
 import { wrap } from "comlink";
+import { inWorker } from "../env";
 import type { WorkerBridge } from "./comlink-worker";
 
 /**
@@ -9,4 +10,6 @@ import type { WorkerBridge } from "./comlink-worker";
  * this object will be transparently (but asynchrorously) relayed to the
  * implementation of the {@link WorkerBridge} in `comlink-worker.ts`.
  */
-export const workerBridge = wrap<WorkerBridge>(globalThis);
+export const workerBridge = inWorker()
+    ? wrap<WorkerBridge>(globalThis)
+    : undefined;

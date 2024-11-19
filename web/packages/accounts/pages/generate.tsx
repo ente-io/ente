@@ -13,7 +13,6 @@ import {
 } from "@/base/components/FormPaper";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import log from "@/base/log";
-import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import LinkButton from "@ente/shared/components/LinkButton";
 import {
@@ -80,7 +79,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 await generateKeyAndSRPAttributes(passphrase);
 
             // TODO: Refactor the code to not require this ensure
-            await putAttributes(ensure(token), keyAttributes);
+            await putAttributes(token!, keyAttributes);
             await configureSRP(srpSetupAttributes);
             await generateAndSaveIntermediateKeyAttributes(
                 passphrase,

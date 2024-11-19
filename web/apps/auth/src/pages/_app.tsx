@@ -12,7 +12,6 @@ import {
     logStartupBanner,
     logUnhandledErrorsAndRejections,
 } from "@/base/log-web";
-import { ensure } from "@/utils/ensure";
 import { MessageContainer } from "@ente/shared/components/MessageContainer";
 import { useLocalState } from "@ente/shared/hooks/useLocalState";
 import HTTPService from "@ente/shared/network/HTTPService";
@@ -51,7 +50,7 @@ type AppContextT = AccountsContextT & {
 export const AppContext = createContext<AppContextT | undefined>(undefined);
 
 /** Utility hook to reduce amount of boilerplate in account related pages. */
-export const useAppContext = () => ensure(useContext(AppContext));
+export const useAppContext = () => useContext(AppContext)!;
 
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     const router = useRouter();

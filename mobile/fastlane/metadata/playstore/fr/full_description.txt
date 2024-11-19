@@ -1,4 +1,4 @@
-Entre est une application simple qui sauvegarde et organise vos photos et vidéos.
+Ente est une application simple qui sauvegarde et organise vos photos et vidéos.
 
 Si vous recherchez une alternative respectueuse de votre vie privée pour préserver vos souvenirs, vous êtes au bon endroit. Avec Ente, ils sont stockés chiffrés de bout-en-bout (e2ee). Cela signifie que vous-seul pouvez les voir.
 

@@ -2,7 +2,6 @@ import { decryptBlob } from "@/base/crypto";
 import type { EncryptedBlobB64 } from "@/base/crypto/types";
 import { authenticatedRequestHeaders, ensureOk, HTTPError } from "@/base/http";
 import { apiURL } from "@/base/origins";
-import { ensure } from "@/utils/ensure";
 import { z } from "zod";
 import type { EntityType } from ".";
 
@@ -140,7 +139,7 @@ export const userEntityDiff = async (
             async ({ id, encryptedData, header, isDeleted, updatedAt }) => ({
                 id,
                 data: !isDeleted
-                    ? await decrypt(ensure(encryptedData), ensure(header))
+                    ? await decrypt(encryptedData!, header!)
                     : undefined,
                 updatedAt,
             }),

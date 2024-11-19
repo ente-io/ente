@@ -37,8 +37,8 @@ class FaceWidget extends StatefulWidget {
     this.clusterID,
     this.highlight = false,
     this.editMode = false,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<FaceWidget> createState() => _FaceWidgetState();

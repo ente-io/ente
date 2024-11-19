@@ -1,5 +1,4 @@
 import log from "@/base/log";
-import { ensure } from "@/utils/ensure";
 import QueueProcessor from "@ente/shared/utils/queueProcessor";
 import { expose } from "comlink";
 import {
@@ -107,7 +106,7 @@ const randomPrefix = () => {
 
     let result = "";
     for (let i = 0; i < 10; i++)
-        result += ensure(alphabet[Math.floor(Math.random() * alphabet.length)]);
+        result += alphabet[Math.floor(Math.random() * alphabet.length)]!;
     return result;
 };
 

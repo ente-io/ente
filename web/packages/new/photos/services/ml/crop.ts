@@ -1,6 +1,5 @@
 import { blobCache } from "@/base/blob-cache";
 import type { EnteFile } from "@/media/file";
-import { ensure } from "@/utils/ensure";
 import { fetchRenderableEnteFileBlob } from "./blob";
 import { type Box, type FaceIndex } from "./face";
 import { clamp } from "./math";
@@ -106,7 +105,7 @@ export const extractFaceCrop = (imageBitmap: ImageBitmap, faceBox: Box) => {
     const height = clamp(heightCrop, 0, imageHeight - y);
 
     const canvas = new OffscreenCanvas(width, height);
-    const ctx = ensure(canvas.getContext("2d"));
+    const ctx = canvas.getContext("2d")!;
     ctx.imageSmoothingQuality = "high";
 
     ctx.drawImage(imageBitmap, x, y, width, height, 0, 0, width, height);

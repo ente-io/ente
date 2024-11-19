@@ -3,7 +3,6 @@ import { stashRedirect } from "@/accounts/services/redirect";
 import { EnteLogo } from "@/base/components/EnteLogo";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { NavbarBase } from "@/base/components/Navbar";
-import { ensure } from "@/utils/ensure";
 import {
     HorizontalFlex,
     VerticallyCentered,
@@ -17,15 +16,14 @@ import MoreHoriz from "@mui/icons-material/MoreHoriz";
 import { Button, ButtonBase, Snackbar, TextField, styled } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { generateOTPs, type Code } from "services/code";
 import { getAuthCodes } from "services/remote";
-import { AppContext } from "./_app";
+import { useAppContext } from "./_app";
 
 const Page: React.FC = () => {
-    const { logout, showNavBar, showMiniDialog } = ensure(
-        useContext(AppContext),
-    );
+    const { logout, showNavBar, showMiniDialog } = useAppContext();
+
     const router = useRouter();
     const [codes, setCodes] = useState<Code[]>([]);
     const [hasFetched, setHasFetched] = useState(false);
@@ -141,7 +139,7 @@ const Page: React.FC = () => {
 export default Page;
 
 const AuthNavbar: React.FC = () => {
-    const { logout } = ensure(useContext(AppContext));
+    const { logout } = useAppContext();
 
     return (
         <NavbarBase>
