@@ -5,7 +5,6 @@
     "dependencies": {
         "@/accounts": "*",
         "@/base": "*",
-        "@/build-config": "*",
         "@/gallery": "*",
         "@/media": "*",
         "@/new": "*",
@@ -38,7 +37,7 @@
         "zxcvbn": "^4.4.2"
     },
     "devDependencies": {
-        "@ente/eslint-config": "*",
+        "@/build-config": "*",
         "@next/bundle-analyzer": "^14.1",
         "@types/bs58": "^4.0.1",
         "@types/leaflet": "^1.9",
