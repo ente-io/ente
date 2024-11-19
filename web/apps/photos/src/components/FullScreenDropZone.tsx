@@ -14,6 +14,7 @@ const DropDiv = styled("div")`
     flex: 1;
     display: flex;
     flex-direction: column;
+    height: 100%;
 `;
 const Overlay = styled("div")`
     border-width: 8px;

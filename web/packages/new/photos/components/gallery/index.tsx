@@ -94,7 +94,7 @@ export const PeopleEmptyStateDisabled: React.FC = () => {
     });
 
     return (
-        <Stack sx={{ alignItems: "center" }}>
+        <Stack sx={{ alignItems: "center", flex: 1, overflow: "auto" }}>
             <Paper sx={{ maxWidth: "390px", padding: "4px", mb: "2rem" }}>
                 {!showConsent ? (
                     <EnableML onEnable={() => setShowConsent(true)} />
