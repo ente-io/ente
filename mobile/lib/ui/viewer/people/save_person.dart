@@ -73,8 +73,10 @@ class _SavePersonState extends State<SavePerson> {
                   ),
                 ),
                 child: widget.file != null
-                    ? PersonFaceWidget(widget.file!,
-                        clusterID: widget.clusterID)
+                    ? PersonFaceWidget(
+                        widget.file!,
+                        clusterID: widget.clusterID,
+                      )
                     : const NoThumbnailWidget(
                         addBorder: false,
                       ),
@@ -169,6 +171,9 @@ class _SavePersonState extends State<SavePerson> {
             searchResults.sort(
               (a, b) => a.$1.data.name.compareTo(b.$1.data.name),
             );
+            if (searchResults.isEmpty) {
+              return const SizedBox.shrink();
+            }
 
             return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
