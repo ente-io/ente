@@ -1,6 +1,25 @@
 {
-    "extends": "../../tsconfig.base.json",
     "compilerOptions": {
+        "allowJs": true,
+        "allowSyntheticDefaultImports": true,
+        "baseUrl": ".",
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "incremental": true,
+        "isolatedModules": true,
+        // "jsx": "react-jsx",
+        // "lib": ["dom", "dom.iterable", "esnext"],
+        "module": "esnext",
+        "moduleResolution": "node",
+        "noEmit": true,
+        "noFallthroughCasesInSwitch": true,
+        // "noImplicitAny": true,
+        // "noUnusedLocals": true,
+        // "noUnusedParameters": true,
+        "resolveJsonModule": true,
+        "skipLibCheck": true,
+        "strict": true,
+        "target": "es5",
         "downlevelIteration": true,
         "jsx": "preserve",
         "lib": ["dom", "dom.iterable", "esnext", "webworker"],
@@ -8,8 +27,11 @@
         "noUnusedLocals": false,
         "noUnusedParameters": false,
         "strictNullChecks": false,
-        "target": "es5",
         "useUnknownInCatchVariables": false
+        // "paths": {
+        // "@ente/eslint-config/*": ["./packages/eslint-config/*"],
+        // "@ente/shared/*": ["./packages/shared/*"]
+        // }
     },
     "include": [
         "**/*.ts",
@@ -18,5 +40,6 @@
         "themes/mui-theme.d.ts",
         "../base/log-web.ts",
         "../base/global-electron.d.ts"
-    ]
+    ],
+    "exclude": ["**/node_modules", "**/.*/"]
 }
