@@ -1,1 +1,1 @@
-export { default } from "@/build-config/eslintrc-vite.mjs";
+export { default } from "@/build-config/eslintrc-react.mjs";
