@@ -9,11 +9,11 @@ class PersonRowItem extends StatelessWidget {
   final VoidCallback onTap;
 
   const PersonRowItem({
-    Key? key,
+    super.key,
     required this.person,
     required this.personFile,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
