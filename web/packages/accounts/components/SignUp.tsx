@@ -146,7 +146,7 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
                     errors,
                     handleChange,
                     handleSubmit,
-                }): JSX.Element => (
+                }): React.JSX.Element => (
                     <form noValidate onSubmit={handleSubmit}>
                         <VerticallyCentered sx={{ mb: 1 }}>
                             <TextField
