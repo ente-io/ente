@@ -5,10 +5,10 @@
     "dependencies": {
         "@/accounts": "*",
         "@/base": "*",
+        "@/build-config": "*",
         "@/gallery": "*",
         "@/media": "*",
         "@/new": "*",
-        "@ente/eslint-config": "*",
         "@ente/shared": "*",
         "@stripe/stripe-js": "^1.13.2",
         "bip39": "^3.0.4",
