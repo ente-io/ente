@@ -1,3 +1,5 @@
+// @ts-check
+
 import reactPlugin from "eslint-plugin-react";
 import hooksPlugin from "eslint-plugin-react-hooks";
 import reactRefreshPlugin from "eslint-plugin-react-refresh";
@@ -14,26 +16,17 @@ export default [
                 version: "detect",
             },
         },
-    },
-    {
-        files: ["**/*.{jsx,tsx}"],
         plugins: {
             "react-hooks": hooksPlugin,
-        },
-        rules: {
-            ...hooksPlugin.configs.recommended.rules,
-        },
-    },
-    {
-        files: ["**/*.{jsx,tsx}"],
-        plugins: {
             "react-refresh": reactRefreshPlugin,
         },
         rules: {
-            // Apparently Fast refresh only works if a file only exports components,
-            // and this rule warns about that.
+            ...hooksPlugin.configs.recommended.rules,
+            // Apparently Fast refresh only works if a file only exports
+            // components, and this rule warns about that.
             //
-            // Constants are okay though (otherwise we'll need to create unnecessary helper files).
+            // Constants are okay though (otherwise we'll need to create
+            // unnecessary helper files).
             "react-refresh/only-export-components": [
                 "warn",
                 { allowConstantExport: true },
@@ -57,13 +50,6 @@ export default [
 //         "react/jsx-no-target-blank": ["warn", { allowReferrer: true }],
 //         /* Otherwise we need to do unnecessary boilerplating when using memo. */
 //         "react/display-name": "off",
-//         /* Apparently Fast refresh only works if a file only exports components,
-//            and this rule warns about that. Constants are okay though (otherwise
-//            we'll need to create unnecessary helper files). */
-//         "react-refresh/only-export-components": [
-//             "warn",
-//             { allowConstantExport: true },
-//         ],
 //         /* Next.js supports the JSX transform introduced in React 17 */
 //         "react/react-in-jsx-scope": "off",
 //         /* Without React in scope, this rule starts causing false positives (We
