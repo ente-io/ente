@@ -1,4 +1,5 @@
 import reactPlugin from "eslint-plugin-react";
+import hooksPlugin from "eslint-plugin-react-hooks";
 import config from "./eslintrc-base.mjs";
 
 export default [
@@ -10,6 +11,14 @@ export default [
             react: {
                 version: "detect",
             },
+        },
+    },
+    {
+        plugins: {
+            "react-hooks": hooksPlugin,
+        },
+        rules: {
+            ...hooksPlugin.configs.recommended.rules,
         },
     },
 ];
