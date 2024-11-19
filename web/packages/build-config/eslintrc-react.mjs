@@ -4,9 +4,10 @@ import config from "./eslintrc-base.mjs";
 
 export default [
     ...config,
-    reactPlugin.configs.flat.recommended,
-    reactPlugin.configs.flat["jsx-runtime"],
     {
+        files: ["**/*.{jsx,tsx}"],
+        ...reactPlugin.configs.flat.recommended,
+        ...reactPlugin.configs.flat["jsx-runtime"],
         settings: {
             react: {
                 version: "detect",
@@ -14,6 +15,7 @@ export default [
         },
     },
     {
+        files: ["**/*.{jsx,tsx}"],
         plugins: {
             "react-hooks": hooksPlugin,
         },
