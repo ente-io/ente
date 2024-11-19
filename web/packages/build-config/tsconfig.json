@@ -3,7 +3,8 @@
        itself */
     "compilerOptions": {
         "noEmit": true,
-        "checkJs": true
+        "checkJs": true,
+        "esModuleInterop": true
     },
-    "include": ["*.js"]
+    "include": ["*.js", "eslintrc-base.mjs"]
 }
