@@ -408,6 +408,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "backupStatusDescription": MessageLookupByLibrary.simpleMessage(
             "Items that have been backed up will show up here"),
         "backupVideos": MessageLookupByLibrary.simpleMessage("Backup videos"),
+        "birthday": MessageLookupByLibrary.simpleMessage("Birthday"),
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Black Friday Sale"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
@@ -739,9 +740,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "enterCode": MessageLookupByLibrary.simpleMessage("Enter code"),
         "enterCodeDescription": MessageLookupByLibrary.simpleMessage(
             "Enter the code provided by your friend to claim free storage for both of you"),
+        "enterDateOfBirth":
+            MessageLookupByLibrary.simpleMessage("Birthday (optional)"),
         "enterEmail": MessageLookupByLibrary.simpleMessage("Enter email"),
         "enterFileName":
             MessageLookupByLibrary.simpleMessage("Enter file name"),
+        "enterName": MessageLookupByLibrary.simpleMessage("Enter name"),
         "enterNewPasswordToEncrypt": MessageLookupByLibrary.simpleMessage(
             "Enter a new password we can use to encrypt your data"),
         "enterPassword": MessageLookupByLibrary.simpleMessage("Enter password"),
@@ -1131,6 +1135,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("OpenStreetMap contributors"),
         "optionalAsShortAsYouLike": MessageLookupByLibrary.simpleMessage(
             "Optional, as short as you like..."),
+        "orMergeWithExistingPerson": MessageLookupByLibrary.simpleMessage(
+            "Or merge with existing person"),
         "orPickAnExistingOne":
             MessageLookupByLibrary.simpleMessage("Or pick an existing one"),
         "pair": MessageLookupByLibrary.simpleMessage("Pair"),
@@ -1349,6 +1355,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "saveCollage": MessageLookupByLibrary.simpleMessage("Save collage"),
         "saveCopy": MessageLookupByLibrary.simpleMessage("Save copy"),
         "saveKey": MessageLookupByLibrary.simpleMessage("Save key"),
+        "savePerson": MessageLookupByLibrary.simpleMessage("Save person"),
         "saveYourRecoveryKeyIfYouHaventAlready":
             MessageLookupByLibrary.simpleMessage(
                 "Save your recovery key if you haven\'t already"),

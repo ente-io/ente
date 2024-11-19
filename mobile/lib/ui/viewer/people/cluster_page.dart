@@ -148,6 +148,7 @@ class _ClusterPageState extends State<ClusterPage> {
                   final result = await showAssignPersonAction(
                     context,
                     clusterID: widget.clusterID,
+                    file: files.isEmpty ? null : files.first,
                   );
                   if (result != null) {
                     Navigator.pop(context);

@@ -23,9 +23,10 @@ import 'package:photos/ui/components/buttons/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import "package:photos/ui/components/text_input_widget.dart";
 import 'package:photos/ui/components/title_bar_title_widget.dart';
-import "package:photos/ui/viewer/people/new_person_item_widget.dart";
 import "package:photos/ui/viewer/people/person_row_item.dart";
+import "package:photos/ui/viewer/people/save_person.dart";
 import "package:photos/utils/dialog_util.dart";
+import "package:photos/utils/navigation_util.dart";
 import "package:photos/utils/toast_util.dart";
 
 enum PersonActionType {
@@ -48,29 +49,37 @@ String _actionName(
 Future<dynamic> showAssignPersonAction(
   BuildContext context, {
   required String clusterID,
+  EnteFile? file,
   PersonActionType actionType = PersonActionType.assignPerson,
   bool showOptionToAddNewPerson = true,
-}) {
-  return showBarModalBottomSheet(
-    context: context,
-    builder: (context) {
-      return PersonActionSheet(
-        actionType: actionType,
-        showOptionToCreateNewPerson: showOptionToAddNewPerson,
-        cluserID: clusterID,
-      );
-    },
-    shape: const RoundedRectangleBorder(
-      side: BorderSide(width: 0),
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(5),
-      ),
+}) async {
+  return routeToPage(
+    context,
+    SavePerson(
+      clusterID,
+      file: file,
     ),
-    topControl: const SizedBox.shrink(),
-    backgroundColor: getEnteColorScheme(context).backgroundElevated,
-    barrierColor: backdropFaintDark,
-    enableDrag: false,
   );
+  // return showBarModalBottomSheet(
+  //   context: context,
+  //   builder: (context) {
+  //     return PersonActionSheet(
+  //       actionType: actionType,
+  //       showOptionToCreateNewPerson: showOptionToAddNewPerson,
+  //       cluserID: clusterID,
+  //     );
+  //   },
+  //   shape: const RoundedRectangleBorder(
+  //     side: BorderSide(width: 0),
+  //     borderRadius: BorderRadius.vertical(
+  //       top: Radius.circular(5),
+  //     ),
+  //   ),
+  //   topControl: const SizedBox.shrink(),
+  //   backgroundColor: getEnteColorScheme(context).backgroundElevated,
+  //   barrierColor: backdropFaintDark,
+  //   enableDrag: false,
+  // );
 }
 
 class PersonActionSheet extends StatefulWidget {
@@ -176,7 +185,7 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
   Flexible _getPersonItems() {
     return Flexible(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 24, 4, 0),
+        padding: const EdgeInsets.symmetric(vertical: 16),
         child: FutureBuilder<List<(PersonEntity, EnteFile)>>(
           future: _getPersonsWithRecentFile(),
           builder: (context, snapshot) {
@@ -208,8 +217,6 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
               searchResults.sort(
                 (a, b) => a.$1.data.name.compareTo(b.$1.data.name),
               );
-              final shouldShowAddPerson = widget.showOptionToCreateNewPerson &&
-                  (_searchQuery.isEmpty || searchResults.isEmpty);
 
               return Scrollbar(
                 thumbVisibility: true,
@@ -219,34 +226,8 @@ class _PersonActionSheetState extends State<PersonActionSheet> {
                   child: ListView.separated(
                     itemCount: searchResults.length + 1,
                     itemBuilder: (context, index) {
-                      if (index == 0 && shouldShowAddPerson) {
-                        return GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          child: const NewPersonItemWidget(),
-                          onTap: () async => {
-                            addNewPerson(
-                              context,
-                              initValue: _searchQuery.trim(),
-                              clusterID: widget.cluserID,
-                            ),
-                          },
-                        );
-                      }
-                      if (index == 0 && !shouldShowAddPerson) {
-                        return Padding(
-                          padding: const EdgeInsets.fromLTRB(0, 8, 0, 16),
-                          child: Center(
-                            child: Text(
-                              S.of(context).mergeWithExisting,
-                              style: getEnteTextTheme(context).body.copyWith(
-                                    color:
-                                        getEnteColorScheme(context).textMuted,
-                                  ),
-                            ),
-                          ),
-                        );
-                      }
                       final person = searchResults[index - 1];
+
                       return PersonRowItem(
                         person: person.$1,
                         personFile: person.$2,

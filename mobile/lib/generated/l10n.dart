@@ -8995,6 +8995,56 @@ class S {
     );
   }
 
+  /// `Enter name`
+  String get enterName {
+    return Intl.message(
+      'Enter name',
+      name: 'enterName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Save person`
+  String get savePerson {
+    return Intl.message(
+      'Save person',
+      name: 'savePerson',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Or merge with existing person`
+  String get orMergeWithExistingPerson {
+    return Intl.message(
+      'Or merge with existing person',
+      name: 'orMergeWithExistingPerson',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Birthday (optional)`
+  String get enterDateOfBirth {
+    return Intl.message(
+      'Birthday (optional)',
+      name: 'enterDateOfBirth',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Birthday`
+  String get birthday {
+    return Intl.message(
+      'Birthday',
+      name: 'birthday',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Remove person label`
   String get removePersonLabel {
     return Intl.message(

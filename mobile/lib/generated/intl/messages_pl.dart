@@ -21,7 +21,7 @@ class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'pl';
 
   static String m6(count) =>
-      "${Intl.plural(count, one: 'Dodaj współuczestnika', few: 'Dodaj współuczestników', many: 'Dodaj współuczestników', other: 'Dodaj współuczestników')}";
+      "${Intl.plural(count, one: 'Dodaj współuczestnika', few: 'Dodaj współuczestników', other: 'Dodaj współuczestników')}";
 
   static String m7(count) =>
       "${Intl.plural(count, one: 'Dodaj element', few: 'Dodaj elementy', other: 'Dodaj elementów')}";
@@ -30,7 +30,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Twój dodatek ${storageAmount} jest ważny do ${endDate}";
 
   static String m9(count) =>
-      "${Intl.plural(count, one: 'Dodaj widza', few: 'Dodaj widzów', many: 'Dodaj widzów', other: 'Dodaj widzów')}";
+      "${Intl.plural(count, one: 'Dodaj widza', few: 'Dodaj widzów', other: 'Dodaj widzów')}";
 
   static String m10(emailOrName) => "Dodane przez ${emailOrName}";
 
