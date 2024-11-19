@@ -1,13 +1,28 @@
 module.exports = {
-    // When root is set to true, ESLint will stop looking for configuration files in parent directories.
-    // This is required here to ensure desktop picks the right eslint config, where this app is
-    // packaged as a submodule.
-    root: true,
-    extends: ["@ente/eslint-config"],
-    parser: "@typescript-eslint/parser",
-    parserOptions: {
-        tsconfigRootDir: __dirname,
-        project: "./tsconfig.json",
+    extends: ["@/build-config/eslintrc-next"],
+    rules: {
+        /* TODO:
+         * "This rule requires the `strictNullChecks` compiler option to be
+         * turned on to function correctly"
+         */
+        "@typescript-eslint/prefer-nullish-coalescing": "off",
+        "@typescript-eslint/no-unnecessary-condition": "off",
+        "@typescript-eslint/no-unsafe-assignment": "off",
+        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/no-unsafe-return": "off",
+        "@typescript-eslint/no-unsafe-member-access": "off",
+        "@typescript-eslint/no-unsafe-argument": "off",
+        /** TODO: Disabled as we migrate, try to prune these again */
+        "@typescript-eslint/no-floating-promises": "off",
+        "@typescript-eslint/no-unsafe-enum-comparison": "off",
+        "@typescript-eslint/no-unnecessary-type-assertion": "off",
+        "@typescript-eslint/array-type": "off",
+        "@typescript-eslint/no-empty-function": "off",
+        "@typescript-eslint/no-unnecessary-template-expression": "off",
+        "@typescript-eslint/consistent-indexed-object-style": "off",
+        "@typescript-eslint/prefer-promise-reject-errors": "off",
+        "@typescript-eslint/no-useless-constructor": "off",
+        "react-hooks/exhaustive-deps": "off",
+        "react-refresh/only-export-components": "off",
     },
-    ignorePatterns: [".eslintrc.js", "next.config.js", "out"],
 };
