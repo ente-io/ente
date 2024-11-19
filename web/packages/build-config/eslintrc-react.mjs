@@ -33,14 +33,6 @@ export default [
             ],
         },
     },
-    {
-        ignores: [
-            // Next.js
-            "out",
-            // Vite
-            "dist",
-        ],
-    },
 ];
 
 // module.exports = {
