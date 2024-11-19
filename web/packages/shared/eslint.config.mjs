@@ -29,6 +29,9 @@ export default [
             "@typescript-eslint/prefer-promise-reject-errors": "off",
             "@typescript-eslint/no-useless-constructor": "off",
             "react-hooks/exhaustive-deps": "off",
+            /** TODO: New during eslint 8=>9 migration */
+            "@typescript-eslint/no-unused-expressions": "off",
+            "@typescript-eslint/no-unused-vars": "off",
         },
     },
 ];
