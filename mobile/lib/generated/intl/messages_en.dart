@@ -1333,7 +1333,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Reset ignored files"),
         "resetPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Reset password"),
-        "resetPerson": MessageLookupByLibrary.simpleMessage("Reset person"),
+        "resetPerson": MessageLookupByLibrary.simpleMessage("Remove"),
         "resetToDefault":
             MessageLookupByLibrary.simpleMessage("Reset to default"),
         "restore": MessageLookupByLibrary.simpleMessage("Restore"),
@@ -1344,6 +1344,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "resumableUploads":
             MessageLookupByLibrary.simpleMessage("Resumable uploads"),
         "retry": MessageLookupByLibrary.simpleMessage("Retry"),
+        "review": MessageLookupByLibrary.simpleMessage("Review"),
         "reviewDeduplicateItems": MessageLookupByLibrary.simpleMessage(
             "Please review and delete the items you believe are duplicates."),
         "reviewSuggestions":

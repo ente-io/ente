@@ -198,44 +198,31 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
                 const Padding(
                   padding: EdgeInsets.all(8),
                 ),
-                Text(S.of(context).rename),
+                Text(S.of(context).edit),
               ],
             ),
           ),
-          // PopupMenuItem(
-          //   value: PeoplPopupAction.setCover,
-          //   child: Row(
-          //     children: [
-          //       const Icon(Icons.image_outlined),
-          //       const Padding(
-          //         padding: EdgeInsets.all(8),
-          //       ),
-          //       Text(S.of(context).setCover),
-          //     ],
-          //   ),
-          // ),
-
+          PopupMenuItem(
+            value: PeoplePopupAction.reviewSuggestions,
+            child: Row(
+              children: [
+                const Icon(Icons.search_outlined),
+                const Padding(
+                  padding: EdgeInsets.all(8),
+                ),
+                Text(S.of(context).review),
+              ],
+            ),
+          ),
           PopupMenuItem(
             value: PeoplePopupAction.removeLabel,
             child: Row(
               children: [
-                const Icon(Icons.remove_circle_outline),
+                const Icon(Icons.delete_outline),
                 const Padding(
                   padding: EdgeInsets.all(8),
                 ),
-                Text(S.of(context).resetPerson),
-              ],
-            ),
-          ),
-          const PopupMenuItem(
-            value: PeoplePopupAction.reviewSuggestions,
-            child: Row(
-              children: [
-                Icon(CupertinoIcons.square_stack_3d_down_right),
-                Padding(
-                  padding: EdgeInsets.all(8),
-                ),
-                Text('Review suggestions'),
+                Text(S.of(context).remove),
               ],
             ),
           ),

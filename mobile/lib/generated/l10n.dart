@@ -9305,6 +9305,16 @@ class S {
     );
   }
 
+  /// `Review`
+  String get review {
+    return Intl.message(
+      'Review',
+      name: 'review',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Use as cover`
   String get useAsCover {
     return Intl.message(
@@ -9906,10 +9916,10 @@ class S {
     );
   }
 
-  /// `Reset person`
+  /// `Remove`
   String get resetPerson {
     return Intl.message(
-      'Reset person',
+      'Remove',
       name: 'resetPerson',
       desc: '',
       args: [],

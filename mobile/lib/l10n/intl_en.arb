@@ -1291,6 +1291,7 @@
   "right": "Right",
   "whatsNew": "What's new",
   "reviewSuggestions": "Review suggestions",
+  "review": "Review",
   "useAsCover": "Use as cover",
   "notPersonLabel": "Not {name}?",
   "@notPersonLabel": {
@@ -1360,7 +1361,7 @@
   "extraPhotosFound": "Extra photos found",
   "configuration": "Configuration",
   "localIndexing": "Local indexing",
-  "resetPerson": "Reset person",
+  "resetPerson": "Remove",
   "areYouSureYouWantToResetThisPerson": "Are you sure you want to reset this person?",
   "allPersonGroupingWillReset": "All groupings for this person will be reset, and you will lose all suggestions made for this person",
   "yesResetPerson": "Yes, reset person",
