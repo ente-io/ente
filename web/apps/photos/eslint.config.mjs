@@ -24,7 +24,6 @@ export default [
             "@typescript-eslint/no-unsafe-enum-comparison": "off",
             "@typescript-eslint/no-unnecessary-type-assertion": "off",
             "@typescript-eslint/no-empty-function": "off",
-            "@typescript-eslint/consistent-indexed-object-style": "off",
             "@typescript-eslint/prefer-promise-reject-errors": "off",
             "@typescript-eslint/no-useless-constructor": "off",
             "@typescript-eslint/dot-notation": "off",
