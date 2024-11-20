@@ -42,13 +42,11 @@ export default [
             "@typescript-eslint/no-base-to-string": "off",
             "@typescript-eslint/no-unnecessary-type-arguments": "off",
             "@typescript-eslint/prefer-for-of": "off",
-            "@typescript-eslint/no-confusing-void-expression": "off",
             "@typescript-eslint/use-unknown-in-catch-callback-variable": "off",
             "@typescript-eslint/restrict-plus-operands": "off",
+            "@typescript-eslint/no-unused-expressions": "off",
             "react-hooks/exhaustive-deps": "off",
             "react-refresh/only-export-components": "off",
-            /** TODO: New during eslint 8=>9 migration */
-            "@typescript-eslint/no-unused-expressions": "off",
         },
     },
 ];
