@@ -16,12 +16,7 @@ export default [
             "@typescript-eslint/no-unsafe-member-access": "off",
             "@typescript-eslint/no-unsafe-argument": "off",
             /** TODO: Disabled as we migrate, try to prune these again */
-            "@typescript-eslint/no-unnecessary-type-assertion": "off",
-            "@typescript-eslint/consistent-indexed-object-style": "off",
-            "@typescript-eslint/prefer-promise-reject-errors": "off",
-            "@typescript-eslint/no-useless-constructor": "off",
             "react-hooks/exhaustive-deps": "off",
-            "react-refresh/only-export-components": "off",
         },
     },
 ];

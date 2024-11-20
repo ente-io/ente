@@ -19,7 +19,7 @@ import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { generateOTPs, type Code } from "services/code";
 import { getAuthCodes } from "services/remote";
-import { useAppContext } from "./_app";
+import { useAppContext } from "types/context";
 
 const Page: React.FC = () => {
     const { logout, showNavBar, showMiniDialog } = useAppContext();

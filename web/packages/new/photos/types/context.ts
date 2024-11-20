@@ -35,8 +35,7 @@ export type AppContextT = AccountsContextT & {
 export const AppContext = createContext<AppContextT | undefined>(undefined);
 
 /**
- * Utility hook to get the photos {@link AppContextT}, throwing an exception if
- * it is not defined.
+ * Utility hook to get the photos {@link AppContextT}.
  *
  * This context is provided at the top level _app component for the photos app,
  * and thus is available to all React components in the Photos app's React tree.
