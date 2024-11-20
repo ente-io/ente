@@ -40,10 +40,10 @@ export default [
         rules: {
             ...hooksPlugin.configs.recommended.rules,
             // Apparently Fast refresh only works if a file only exports
-            // components, and this rule warns about that.
+            // components, and this rule warns if we break that that.
             //
-            // Constants are okay though (otherwise we'll need to create
-            // unnecessary helper files).
+            // Constants are okay though practically (otherwise we'll need to
+            // create unnecessary helper files).
             "react-refresh/only-export-components": [
                 "warn",
                 { allowConstantExport: true },

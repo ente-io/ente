@@ -42,7 +42,9 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
     useEffect(() => {
         castGateway.revokeAllTokens();
 
-        setBrowserCanCast(typeof window.chrome !== "undefined");
+        // Otherwise tsc complains about unknown property chrome.
+        // eslint-disable-next-line @typescript-eslint/dot-notation
+        setBrowserCanCast(typeof window["chrome"] !== "undefined");
     }, []);
 
     const onSubmit: SingleInputFormProps["callback"] = async (
