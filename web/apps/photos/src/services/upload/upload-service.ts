@@ -2,6 +2,7 @@ import {
     streamEncryptionChunkSize,
     type B64EncryptionResult,
 } from "@/base/crypto/libsodium";
+import type { BytesOrB64 } from "@/base/crypto/types";
 import { type CryptoWorker } from "@/base/crypto/worker";
 import { ensureElectron } from "@/base/electron";
 import { basename, nameAndExtension } from "@/base/file";
@@ -259,28 +260,20 @@ interface EncryptedFileStream {
     chunkCount: number;
 }
 
-interface LocalFileAttributes<
-    T extends string | Uint8Array | EncryptedFileStream,
-> {
-    encryptedData: T;
-    decryptionHeader: string;
-}
-
 interface EncryptedMetadata {
     encryptedDataB64: string;
     decryptionHeaderB64: string;
 }
 
-interface EncryptionResult<
-    T extends string | Uint8Array | EncryptedFileStream,
-> {
-    file: LocalFileAttributes<T>;
-    key: string;
-}
-
 interface ProcessedFile {
-    file: LocalFileAttributes<Uint8Array | EncryptedFileStream>;
-    thumbnail: LocalFileAttributes<Uint8Array>;
+    file: {
+        encryptedData: Uint8Array | EncryptedFileStream;
+        decryptionHeader: string;
+    };
+    thumbnail: {
+        encryptedData: Uint8Array;
+        decryptionHeader: string;
+    };
     metadata: EncryptedMetadata;
     pubMagicMetadata: EncryptedMagicMetadata;
     localID: number;
@@ -1354,30 +1347,35 @@ const encryptFile = async (
     encryptionKey: string,
     worker: CryptoWorker,
 ): Promise<EncryptedFile> => {
-    const { key: fileKey, file: encryptedFiledata } = await encryptFiledata(
-        file.fileStreamOrData,
-        worker,
-    );
+    const fileKey = await worker.generateBlobOrStreamKey();
+
+    const { fileStreamOrData, thumbnail, metadata, pubMagicMetadata, localID } =
+        file;
+
+    const encryptedFiledata =
+        fileStreamOrData instanceof Uint8Array
+            ? await worker.encryptStreamBytes(fileStreamOrData, fileKey)
+            : await encryptFileStream(fileStreamOrData, fileKey, worker);
 
     const encryptedThumbnail = await worker.encryptThumbnail(
-        file.thumbnail,
+        thumbnail,
         fileKey,
     );
 
     const encryptedMetadata = await worker.encryptMetadataJSON({
-        jsonValue: file.metadata,
+        jsonValue: metadata,
         keyB64: fileKey,
     });
 
     let encryptedPubMagicMetadata: EncryptedMagicMetadata;
-    if (file.pubMagicMetadata) {
+    if (pubMagicMetadata) {
         const encryptedPubMagicMetadataData = await worker.encryptMetadataJSON({
-            jsonValue: file.pubMagicMetadata.data,
+            jsonValue: pubMagicMetadata.data,
             keyB64: fileKey,
         });
         encryptedPubMagicMetadata = {
-            version: file.pubMagicMetadata.version,
-            count: file.pubMagicMetadata.count,
+            version: pubMagicMetadata.version,
+            count: pubMagicMetadata.count,
             data: encryptedPubMagicMetadataData.encryptedDataB64,
             header: encryptedPubMagicMetadataData.decryptionHeaderB64,
         };
@@ -1391,34 +1389,26 @@ const encryptFile = async (
             thumbnail: encryptedThumbnail,
             metadata: encryptedMetadata,
             pubMagicMetadata: encryptedPubMagicMetadata,
-            localID: file.localID,
+            localID: localID,
         },
         fileKey: encryptedKey,
     };
     return result;
 };
 
-const encryptFiledata = async (
-    fileStreamOrData: FileStream | Uint8Array,
-    worker: CryptoWorker,
-): Promise<EncryptionResult<Uint8Array | EncryptedFileStream>> =>
-    fileStreamOrData instanceof Uint8Array
-        ? await worker.encryptFile(fileStreamOrData)
-        : await encryptFileStream(fileStreamOrData, worker);
-
 const encryptFileStream = async (
-    fileData: FileStream,
+    { stream, chunkCount }: FileStream,
+    fileKey: BytesOrB64,
     worker: CryptoWorker,
 ) => {
-    const { stream, chunkCount } = fileData;
     const fileStreamReader = stream.getReader();
-    const { key, decryptionHeader, pushState } =
-        await worker.initChunkEncryption();
+    const { decryptionHeader, pushState } =
+        await worker.initChunkEncryption(fileKey);
     const ref = { pullCount: 1 };
     const encryptedFileStream = new ReadableStream({
         async pull(controller) {
             const { value } = await fileStreamReader.read();
-            const encryptedFileChunk = await worker.encryptFileChunk(
+            const encryptedFileChunk = await worker.encryptStreamChunk(
                 value,
                 pushState,
                 ref.pullCount === chunkCount,
@@ -1431,11 +1421,8 @@ const encryptFileStream = async (
         },
     });
     return {
-        key,
-        file: {
-            decryptionHeader,
-            encryptedData: { stream: encryptedFileStream, chunkCount },
-        },
+        decryptionHeader,
+        encryptedData: { stream: encryptedFileStream, chunkCount },
     };
 };
 

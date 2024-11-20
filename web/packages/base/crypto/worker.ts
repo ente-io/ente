@@ -13,9 +13,14 @@ import * as libsodium from "./libsodium";
  * Note: Keep these methods logic free. They are meant to be trivial proxies.
  */
 export class CryptoWorker {
+    generateBoxKey = ei._generateBoxKey;
+    generateBlobOrStreamKey = ei._generateBlobOrStreamKey;
     encryptBoxB64 = ei._encryptBoxB64;
     encryptThumbnail = ei._encryptThumbnail;
     _encryptBlobB64 = ei._encryptBlobB64;
+    encryptStreamBytes = ei._encryptStreamBytes;
+    initChunkEncryption = ei._initChunkEncryption;
+    encryptStreamChunk = ei._encryptStreamChunk;
     encryptMetadataJSON_New = ei._encryptMetadataJSON_New;
     encryptMetadataJSON = ei._encryptMetadataJSON;
     decryptBox = ei._decryptBox;
@@ -30,22 +35,6 @@ export class CryptoWorker {
 
     async decryptFile(fileData: Uint8Array, header: Uint8Array, key: string) {
         return libsodium.decryptChaCha(fileData, header, key);
-    }
-
-    async encryptFile(fileData: Uint8Array) {
-        return libsodium.encryptChaCha(fileData);
-    }
-
-    async encryptFileChunk(
-        data: Uint8Array,
-        pushState: StateAddress,
-        isFinalChunk: boolean,
-    ) {
-        return libsodium.encryptFileChunk(data, pushState, isFinalChunk);
-    }
-
-    async initChunkEncryption() {
-        return libsodium.initChunkEncryption();
     }
 
     async initChunkDecryption(header: Uint8Array, key: Uint8Array) {

@@ -2,6 +2,10 @@
 import * as libsodium from "./libsodium";
 import type { BytesOrB64, EncryptedBlob, EncryptedFile } from "./types";
 
+export const _generateBoxKey = libsodium.generateBoxKey;
+
+export const _generateBlobOrStreamKey = libsodium.generateBlobOrStreamKey;
+
 export const _encryptBoxB64 = libsodium.encryptBoxB64;
 
 export const _encryptBlob = libsodium.encryptBlob;
@@ -18,6 +22,12 @@ export const _encryptThumbnail = async (
         decryptionHeader: await libsodium.toB64(decryptionHeader),
     };
 };
+
+export const _encryptStreamBytes = libsodium.encryptStreamBytes;
+
+export const _initChunkEncryption = libsodium.initChunkEncryption;
+
+export const _encryptStreamChunk = libsodium.encryptStreamChunk;
 
 export const _encryptMetadataJSON_New = (jsonValue: unknown, key: BytesOrB64) =>
     _encryptBlobB64(new TextEncoder().encode(JSON.stringify(jsonValue)), key);

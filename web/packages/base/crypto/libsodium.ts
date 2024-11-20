@@ -17,6 +17,7 @@ import type {
     EncryptedBlobBytes,
     EncryptedBox,
     EncryptedBoxB64,
+    EncryptedFile,
 } from "./types";
 
 /**
@@ -128,23 +129,25 @@ const bytes = async (bob: BytesOrB64) =>
     typeof bob == "string" ? fromB64(bob) : bob;
 
 /**
- * Generate a key for use with the *Box encryption functions.
+ * Generate a new key for use with the *Box encryption functions, and return its
+ * base64 string representation.
  *
  * This returns a new randomly generated 256-bit key suitable for being used
  * with libsodium's secretbox APIs.
  */
-export const generateNewBoxKey = async () => {
+export const generateBoxKey = async () => {
     await sodium.ready;
     return toB64(sodium.crypto_secretbox_keygen());
 };
 
 /**
- * Generate a key for use with the *Blob or *Stream encryption functions.
+ * Generate a new key for use with the *Blob or *Stream encryption functions,
+ * and return its base64 string representation.
  *
  * This returns a new randomly generated 256-bit key suitable for being used
  * with libsodium's secretstream APIs.
  */
-export const generateNewBlobOrStreamKey = async () => {
+export const generateBlobOrStreamKey = async () => {
     await sodium.ready;
     return toB64(sodium.crypto_secretstream_xchacha20poly1305_keygen());
 };
@@ -284,9 +287,9 @@ export const encryptBlob = async (
 ): Promise<EncryptedBlobBytes> => {
     await sodium.ready;
 
-    const uintkey = await bytes(key);
+    const keyBytes = await bytes(key);
     const initPushResult =
-        sodium.crypto_secretstream_xchacha20poly1305_init_push(uintkey);
+        sodium.crypto_secretstream_xchacha20poly1305_init_push(keyBytes);
     const [pushState, header] = [initPushResult.state, initPushResult.header];
 
     const pushResult = sodium.crypto_secretstream_xchacha20poly1305_push(
@@ -340,21 +343,22 @@ export const streamEncryptionChunkSize = 4 * 1024 * 1024;
  *
  * @param data The data to encrypt.
  *
- * @returns The encrypted data, the decryption header as {@link Uint8Array}s,
- * and the newly generated key that was used for encryption.
+ * @returns The encrypted bytes ({@link Uint8Array}) and the decryption header
+ * (as a base64 string).
  *
  * -   See: [Note: 3 forms of encryption (Box | Blob | Stream)].
  *
  * -   See: https://doc.libsodium.org/secret-key_cryptography/secretstream
  */
-export const encryptChaCha = async (data: Uint8Array) => {
+export const encryptStreamBytes = async (
+    data: Uint8Array,
+    key: BytesOrB64,
+): Promise<EncryptedFile> => {
     await sodium.ready;
 
-    const uintkey: Uint8Array =
-        sodium.crypto_secretstream_xchacha20poly1305_keygen();
-
+    const keyBytes = await bytes(key);
     const initPushResult =
-        sodium.crypto_secretstream_xchacha20poly1305_init_push(uintkey);
+        sodium.crypto_secretstream_xchacha20poly1305_init_push(keyBytes);
     const [pushState, header] = [initPushResult.state, initPushResult.header];
     let bytesRead = 0;
     let tag = sodium.crypto_secretstream_xchacha20poly1305_TAG_MESSAGE;
@@ -379,45 +383,74 @@ export const encryptChaCha = async (data: Uint8Array) => {
         encryptedChunks.push(pushResult);
     }
     return {
-        key: await toB64(uintkey),
-        file: {
-            encryptedData: mergeUint8Arrays(encryptedChunks),
-            decryptionHeader: await toB64(header),
-        },
+        encryptedData: mergeUint8Arrays(encryptedChunks),
+        decryptionHeader: await toB64(header),
     };
 };
 
-export async function initChunkEncryption() {
+/**
+ * Initialize libsodium's secretstream APIs for encrypting
+ * {@link streamEncryptionChunkSize} chunks. Subsequently, each chunk can be
+ * encrypted using {@link encryptStreamChunk}.
+ *
+ * Use {@link initChunkDecryption} to initialize the decryption routine, and
+ * {@link decryptStreamChunk} to decrypt the individual chunks.
+ *
+ * See also: {@link encryptStreamBytes} which also does chunked encryption but
+ * encrypts all the chunks in a single call.
+ *
+ * @param key The key to use for encryption.
+ *
+ * @returns The decryption header (as a base64 string) which should be preserved
+ * and used during decryption, and an opaque "push state" that should be passed
+ * to subsequent calls to {@link encryptStreamChunk} along with the chunks's
+ * contents.
+ */
+export const initChunkEncryption = async (key: BytesOrB64) => {
     await sodium.ready;
-    const key = sodium.crypto_secretstream_xchacha20poly1305_keygen();
-    const initPushResult =
-        sodium.crypto_secretstream_xchacha20poly1305_init_push(key);
-    const [pushState, header] = [initPushResult.state, initPushResult.header];
+    const keyBytes = await bytes(key);
+    const { state, header } =
+        sodium.crypto_secretstream_xchacha20poly1305_init_push(keyBytes);
     return {
-        key: await toB64(key),
         decryptionHeader: await toB64(header),
-        pushState,
+        pushState: state,
     };
-}
+};
 
-export async function encryptFileChunk(
+/**
+ * Encrypt an individual chunk using libsodium's secretstream APIs.
+ *
+ * This function is not meant to be standalone, but is instead called in tandem
+ * with {@link initChunkEncryption} for encrypting data after breaking it into
+ * chunks.
+ *
+ * @param data The chunk's data as bytes ({@link Uint8Array}).
+ *
+ * @param pushState The state for this instantiation of chunked encryption. This
+ * should be treated as opaque libsodium state that should be passed to all
+ * calls to {@link encryptStreamChunk} that are paired with a particular
+ * {@link initChunkEncryption}.
+ *
+ * @param isFinalChunk `true` if this is the last chunk in the sequence.
+ *
+ * @returns The encrypted chunk.
+ */
+export const encryptStreamChunk = async (
     data: Uint8Array,
     pushState: sodium.StateAddress,
     isFinalChunk: boolean,
-) {
+) => {
     await sodium.ready;
     const tag = isFinalChunk
         ? sodium.crypto_secretstream_xchacha20poly1305_TAG_FINAL
         : sodium.crypto_secretstream_xchacha20poly1305_TAG_MESSAGE;
-    const pushResult = sodium.crypto_secretstream_xchacha20poly1305_push(
+    return sodium.crypto_secretstream_xchacha20poly1305_push(
         pushState,
         data,
         null,
         tag,
     );
-
-    return pushResult;
-}
+};
 
 /**
  * Decrypt the result of {@link encryptBoxB64} and return the decrypted bytes.
