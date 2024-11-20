@@ -503,16 +503,17 @@ export const decryptBlobB64 = (
     key: BytesOrB64,
 ): Promise<string> => decryptBlob(blob, key).then(toB64);
 
-/** Decrypt Stream, but merge the results. */
-export const decryptChaCha = async (
-    data: Uint8Array,
-    header: Uint8Array,
-    key: string,
+/**
+ * Decrypt the result of {@link encryptStreamBytes}.
+ */
+export const decryptStreamBytes = async (
+    { encryptedData, decryptionHeader }: EncryptedFile,
+    key: BytesOrB64,
 ) => {
     await sodium.ready;
     const pullState = sodium.crypto_secretstream_xchacha20poly1305_init_pull(
-        header,
-        await fromB64(key),
+        await fromB64(decryptionHeader),
+        await bytes(key),
     );
     const decryptionChunkSize =
         streamEncryptionChunkSize +
@@ -522,19 +523,14 @@ export const decryptChaCha = async (
     let tag = sodium.crypto_secretstream_xchacha20poly1305_TAG_MESSAGE;
     while (tag !== sodium.crypto_secretstream_xchacha20poly1305_TAG_FINAL) {
         let chunkSize = decryptionChunkSize;
-        if (bytesRead + chunkSize > data.length) {
-            chunkSize = data.length - bytesRead;
+        if (bytesRead + chunkSize > encryptedData.length) {
+            chunkSize = encryptedData.length - bytesRead;
         }
-        const buffer = data.slice(bytesRead, bytesRead + chunkSize);
+        const buffer = encryptedData.slice(bytesRead, bytesRead + chunkSize);
         const pullResult = sodium.crypto_secretstream_xchacha20poly1305_pull(
             pullState,
             buffer,
         );
-        // TODO:
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        if (!pullResult.message) {
-            throw new Error("processing failed");
-        }
         decryptedChunks.push(pullResult.message);
         tag = pullResult.tag;
         bytesRead += chunkSize;
@@ -542,36 +538,55 @@ export const decryptChaCha = async (
     return mergeUint8Arrays(decryptedChunks);
 };
 
-export async function initChunkDecryption(header: Uint8Array, key: Uint8Array) {
+/**
+ * Prepare to decrypt the result of {@link initChunkEncryption} and
+ * {@link encryptStreamChunk}.
+ *
+ * @param decryptionHeader The header (as a base64 string) that was produced
+ * during encryption by {@link initChunkEncryption}.
+ *
+ * @param key The encryption key.
+ *
+ * @returns The pull state, which should be treated as opaque libsodium specific
+ * state that should be passed along to each subsequent call to
+ * {@link decryptStreamChunk}, and the size of each (decrypted) chunk that will
+ * be produced by subsequent calls to {@link decryptStreamChunk}.
+ */
+export const initChunkDecryption = async (
+    decryptionHeader: string,
+    key: BytesOrB64,
+) => {
     await sodium.ready;
     const pullState = sodium.crypto_secretstream_xchacha20poly1305_init_pull(
-        header,
-        key,
+        await fromB64(decryptionHeader),
+        await bytes(key),
     );
     const decryptionChunkSize =
         streamEncryptionChunkSize +
         sodium.crypto_secretstream_xchacha20poly1305_ABYTES;
-    const tag = sodium.crypto_secretstream_xchacha20poly1305_TAG_MESSAGE;
-    return { pullState, decryptionChunkSize, tag };
-}
+    return { pullState, decryptionChunkSize };
+};
 
-export async function decryptFileChunk(
+/**
+ * Decrypt an individual chunk of the data encrypted using
+ * {@link initChunkEncryption} and {@link encryptStreamChunk}.
+ *
+ * This is meant to be used in tandem with {@link initChunkDecryption}. During
+ * each invocation, it should be passed the encrypted chunk, and the
+ * {@link pullState} returned by {@link initChunkDecryption}. It will then
+ * return the corresponding decrypted chunk's bytes.
+ */
+export const decryptStreamChunk = async (
     data: Uint8Array,
     pullState: StateAddress,
-) {
+) => {
     await sodium.ready;
     const pullResult = sodium.crypto_secretstream_xchacha20poly1305_pull(
         pullState,
         data,
     );
-    // TODO:
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    if (!pullResult.message) {
-        throw new Error("processing failed");
-    }
-    const newTag = pullResult.tag;
-    return { decryptedData: pullResult.message, newTag };
-}
+    return pullResult.message;
+};
 
 export interface B64EncryptionResult {
     encryptedData: string;

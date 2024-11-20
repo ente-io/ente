@@ -28,22 +28,13 @@ export class CryptoWorker {
     decryptBlob = ei._decryptBlob;
     decryptBlobB64 = ei._decryptBlobB64;
     decryptThumbnail = ei._decryptThumbnail;
+    decryptStreamBytes = ei._decryptStreamBytes;
+    initChunkDecryption = ei._initChunkDecryption;
+    decryptStreamChunk = ei._decryptStreamChunk;
     decryptMetadataJSON_New = ei._decryptMetadataJSON_New;
     decryptMetadataJSON = ei._decryptMetadataJSON;
 
     // TODO: -- AUDIT BELOW --
-
-    async decryptFile(fileData: Uint8Array, header: Uint8Array, key: string) {
-        return libsodium.decryptChaCha(fileData, header, key);
-    }
-
-    async initChunkDecryption(header: Uint8Array, key: Uint8Array) {
-        return libsodium.initChunkDecryption(header, key);
-    }
-
-    async decryptFileChunk(fileData: Uint8Array, pullState: StateAddress) {
-        return libsodium.decryptFileChunk(fileData, pullState);
-    }
 
     async initChunkHashing() {
         return libsodium.initChunkHashing();

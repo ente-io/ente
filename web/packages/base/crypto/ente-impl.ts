@@ -57,6 +57,12 @@ export const _decryptBlobB64 = libsodium.decryptBlobB64;
 
 export const _decryptThumbnail = _decryptBlob;
 
+export const _decryptStreamBytes = libsodium.decryptStreamBytes;
+
+export const _initChunkDecryption = libsodium.initChunkDecryption;
+
+export const _decryptStreamChunk = libsodium.decryptStreamChunk;
+
 export const _decryptMetadataJSON_New = async (
     blob: EncryptedBlob,
     key: BytesOrB64,

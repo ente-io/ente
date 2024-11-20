@@ -301,9 +301,11 @@ class DownloadManagerImpl {
             }
             this.clearDownloadProgress(file.id);
 
-            const decrypted = await cryptoWorker.decryptFile(
-                new Uint8Array(encryptedArrayBuffer),
-                await cryptoWorker.fromB64(file.file.decryptionHeader),
+            const decrypted = await cryptoWorker.decryptStreamBytes(
+                {
+                    encryptedData: new Uint8Array(encryptedArrayBuffer),
+                    decryptionHeader: file.file.decryptionHeader,
+                },
                 file.key,
             );
             return new Response(decrypted).body;
@@ -329,12 +331,11 @@ class DownloadManagerImpl {
             parseInt(res.headers.get("Content-Length") ?? "") || 0;
         let downloadedBytes = 0;
 
-        const decryptionHeader = await cryptoWorker.fromB64(
-            file.file.decryptionHeader,
-        );
-        const fileKey = await cryptoWorker.fromB64(file.key);
         const { pullState, decryptionChunkSize } =
-            await cryptoWorker.initChunkDecryption(decryptionHeader, fileKey);
+            await cryptoWorker.initChunkDecryption(
+                file.file.decryptionHeader,
+                file.key,
+            );
 
         let leftoverBytes = new Uint8Array();
 
@@ -367,8 +368,8 @@ class DownloadManagerImpl {
                     // data.length might be a multiple of decryptionChunkSize,
                     // and we might need multiple iterations to drain it all.
                     while (data.length >= decryptionChunkSize) {
-                        const { decryptedData } =
-                            await cryptoWorker.decryptFileChunk(
+                        const decryptedData =
+                            await cryptoWorker.decryptStreamChunk(
                                 data.slice(0, decryptionChunkSize),
                                 pullState,
                             );
@@ -381,8 +382,8 @@ class DownloadManagerImpl {
                         // Send off the remaining bytes without waiting for a
                         // full chunk, no more bytes are going to come.
                         if (data.length) {
-                            const { decryptedData } =
-                                await cryptoWorker.decryptFileChunk(
+                            const decryptedData =
+                                await cryptoWorker.decryptStreamChunk(
                                     data,
                                     pullState,
                                 );
