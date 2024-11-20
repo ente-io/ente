@@ -5,8 +5,6 @@ import { getToken } from "../storage/localStorage/helpers";
 import HTTPService from "./HTTPService";
 
 class CastGateway {
-    constructor() {}
-
     public async getCastData(code: string): Promise<string | null> {
         let resp;
         try {
@@ -78,6 +76,7 @@ class CastGateway {
         await HTTPService.post(
             await apiURL("/cast/cast-data/"),
             {
+                // eslint-disable-next-line @typescript-eslint/no-unnecessary-template-expression
                 deviceCode: `${code}`,
                 encPayload: castPayload,
                 collectionID: collectionID,
