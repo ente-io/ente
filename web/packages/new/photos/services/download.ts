@@ -300,25 +300,13 @@ class DownloadManagerImpl {
                 );
             }
             this.clearDownloadProgress(file.id);
-            try {
-                const decrypted = await cryptoWorker.decryptFile(
-                    new Uint8Array(encryptedArrayBuffer),
-                    await cryptoWorker.fromB64(file.file.decryptionHeader),
-                    file.key,
-                );
-                return new Response(decrypted).body;
-            } catch (e) {
-                if (
-                    e instanceof Error &&
-                    e.message == CustomError.PROCESSING_FAILED
-                ) {
-                    log.error(
-                        `Failed to process file with fileID:${file.id}, localID: ${file.metadata.localID}, version: ${file.metadata.version}, deviceFolder:${file.metadata.deviceFolder}`,
-                        e,
-                    );
-                }
-                throw e;
-            }
+
+            const decrypted = await cryptoWorker.decryptFile(
+                new Uint8Array(encryptedArrayBuffer),
+                await cryptoWorker.fromB64(file.file.decryptionHeader),
+                file.key,
+            );
+            return new Response(decrypted).body;
         }
 
         const cachedBlob = await this.fileCache?.get(cacheKey);

@@ -470,7 +470,7 @@ export const decryptChaCha = async (
         // TODO:
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (!pullResult.message) {
-            throw new Error(CustomError.PROCESSING_FAILED);
+            throw new Error("processing failed");
         }
         decryptedChunks.push(pullResult.message);
         tag = pullResult.tag;
@@ -504,7 +504,7 @@ export async function decryptFileChunk(
     // TODO:
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (!pullResult.message) {
-        throw new Error(CustomError.PROCESSING_FAILED);
+        throw new Error("processing failed");
     }
     const newTag = pullResult.tag;
     return { decryptedData: pullResult.message, newTag };
