@@ -51,22 +51,22 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             const user: User = getData(LS_KEYS.USER);
             setUser(user);
             if (!user?.token) {
-                router.push("/");
+                void router.push("/");
             } else if (key) {
                 if (justSignedUp()) {
                     setOpenRecoveryKey(true);
                     setLoading(false);
                 } else {
-                    router.push(appHomeRoute);
+                    void router.push(appHomeRoute);
                 }
             } else if (keyAttributes?.encryptedKey) {
-                router.push(PAGES.CREDENTIALS);
+                void router.push(PAGES.CREDENTIALS);
             } else {
                 setToken(user.token);
                 setLoading(false);
             }
         };
-        main();
+        void main();
         appContext.showNavBar(true);
     }, []);
 
@@ -106,7 +106,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     open={openRecoveryKey}
                     onClose={() => {
                         setOpenRecoveryKey(false);
-                        router.push(appHomeRoute);
+                        void router.push(appHomeRoute);
                     }}
                     showMiniDialog={showMiniDialog}
                 />

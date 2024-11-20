@@ -166,6 +166,7 @@ export const verifySRPSession = async (
         log.error("verifySRPSession failed", e);
         if (
             e instanceof ApiError &&
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
             e.httpStatusCode === HttpStatusCode.Unauthorized
         ) {
             throw Error(CustomError.INCORRECT_PASSWORD);

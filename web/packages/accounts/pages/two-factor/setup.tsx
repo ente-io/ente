@@ -41,7 +41,7 @@ const Page: React.FC<PageProps> = () => {
                 log.error("failed to get two factor setup code", e);
             }
         };
-        main();
+        void main();
     }, []);
 
     const onSubmit: VerifyTwoFactorCallback = async (
@@ -57,7 +57,7 @@ const Page: React.FC<PageProps> = () => {
             ...getData(LS_KEYS.USER),
             isTwoFactorEnabled: true,
         });
-        router.push(appHomeRoute);
+        void router.push(appHomeRoute);
     };
 
     return (

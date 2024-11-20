@@ -24,7 +24,7 @@ const Page: React.FC<PageProps> = () => {
     useEffect(() => {
         const user = getData(LS_KEYS.USER);
         if (!user?.token) {
-            router.push("/");
+            void router.push("/");
         }
     }, []);
 
@@ -83,7 +83,7 @@ const ChangeEmailForm: React.FC = () => {
             await changeEmail(email, ott!);
             await setLSUser({ ...getData(LS_KEYS.USER), email });
             setLoading(false);
-            goToApp();
+            void goToApp();
         } catch (e) {
             setLoading(false);
             setFieldError("ott", t("INCORRECT_CODE"));

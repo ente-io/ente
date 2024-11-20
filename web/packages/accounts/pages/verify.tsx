@@ -60,12 +60,12 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
 
             const redirect = await redirectionIfNeeded(user);
             if (redirect) {
-                router.push(redirect);
+                void router.push(redirect);
             } else {
                 setEmail(user.email);
             }
         };
-        main();
+        void main();
         showNavBar(true);
     }, []);
 
@@ -108,7 +108,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     isTwoFactorEnabled: true,
                 });
                 setIsFirstLogin(true);
-                router.push(PAGES.TWO_FACTOR_VERIFY);
+                void router.push(PAGES.TWO_FACTOR_VERIFY);
             } else {
                 await setLSUser({
                     email,
@@ -134,20 +134,22 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                         await configureSRP(srpSetupAttributes);
                     }
                 }
-                localForage.clear();
+                await localForage.clear();
                 setIsFirstLogin(true);
                 const redirectURL = unstashRedirect();
                 if (keyAttributes?.encryptedKey) {
                     clearKeys();
-                    router.push(redirectURL ?? PAGES.CREDENTIALS);
+                    void router.push(redirectURL ?? PAGES.CREDENTIALS);
                 } else {
-                    router.push(redirectURL ?? PAGES.GENERATE);
+                    void router.push(redirectURL ?? PAGES.GENERATE);
                 }
             }
         } catch (e) {
             if (e instanceof ApiError) {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
                 if (e?.httpStatusCode === HttpStatusCode.Unauthorized) {
                     setFieldError(t("INVALID_CODE"));
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
                 } else if (e?.httpStatusCode === HttpStatusCode.Gone) {
                     setFieldError(t("EXPIRED_CODE"));
                 }

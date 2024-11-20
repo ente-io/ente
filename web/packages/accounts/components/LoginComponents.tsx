@@ -101,7 +101,7 @@ export const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
             const response =
                 await checkPasskeyVerificationStatus(passkeySessionID);
             if (!response) setVerificationStatus("pending");
-            else router.push(await saveCredentialsAndNavigateTo(response));
+            else void router.push(await saveCredentialsAndNavigateTo(response));
         } catch (e) {
             log.error("Passkey verification status check failed", e);
             showMiniDialog(
@@ -115,7 +115,7 @@ export const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
     };
 
     const handleRecover = () => {
-        router.push("/passkeys/recover");
+        void router.push("/passkeys/recover");
     };
 
     return (

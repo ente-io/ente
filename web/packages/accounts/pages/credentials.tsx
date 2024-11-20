@@ -119,7 +119,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         const main = async () => {
             const user: User = getData(LS_KEYS.USER);
             if (!user?.email) {
-                router.push("/");
+                void router.push("/");
                 return;
             }
             setUser(user);
@@ -141,7 +141,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             }
             const token = getToken();
             if (key && token) {
-                router.push(appHomeRoute);
+                void router.push(appHomeRoute);
                 return;
             }
             const kekEncryptedAttributes: B64EncryptionResult = getKey(
@@ -180,7 +180,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     (keyAttributes && !keyAttributes.memLimit)
                 ) {
                     clearLocalStorage();
-                    router.push("/");
+                    void router.push("/");
                     return;
                 }
                 setKeyAttributes(keyAttributes);
@@ -190,10 +190,10 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             if (srpAttributes) {
                 setSrpAttributes(srpAttributes);
             } else {
-                router.push("/");
+                void router.push("/");
             }
         };
-        main();
+        void main();
         showNavBar(true);
     }, []);
     // TODO: ^ validateSession is a dependency, but add that only after we've
@@ -252,7 +252,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                         twoFactorSessionID,
                         isTwoFactorEnabled: true,
                     });
-                    router.push(PAGES.TWO_FACTOR_VERIFY);
+                    void router.push(PAGES.TWO_FACTOR_VERIFY);
                     throw Error(CustomError.TWO_FACTOR_ENABLED);
                 } else {
                     const user = getData(LS_KEYS.USER);
@@ -314,7 +314,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             } catch (e) {
                 log.error("migrate to srp failed", e);
             }
-            router.push(unstashRedirect() ?? appHomeRoute);
+            void router.push(unstashRedirect() ?? appHomeRoute);
         } catch (e) {
             log.error("useMasterPassword failed", e);
         }

@@ -43,19 +43,19 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         const keyAttributes: KeyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         if (!user?.email) {
-            router.push("/");
+            void router.push("/");
             return;
         }
         if (!user?.encryptedToken && !user?.token) {
-            sendOtt(user.email);
+            void sendOtt(user.email);
             stashRedirect(PAGES.RECOVER);
-            router.push(PAGES.VERIFY);
+            void router.push(PAGES.VERIFY);
             return;
         }
         if (!keyAttributes) {
-            router.push(PAGES.GENERATE);
+            void router.push(PAGES.GENERATE);
         } else if (key) {
-            router.push(appHomeRoute);
+            void router.push(appHomeRoute);
         } else {
             setKeyAttributes(keyAttributes);
         }
@@ -91,7 +91,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             await decryptAndStoreToken(keyAttr, masterKey);
 
             setData(LS_KEYS.SHOW_BACK_BUTTON, { value: false });
-            router.push(PAGES.CHANGE_PASSWORD);
+            void router.push(PAGES.CHANGE_PASSWORD);
         } catch (e) {
             log.error("password recovery failed", e);
             setFieldError(t("INCORRECT_RECOVERY_KEY"));
