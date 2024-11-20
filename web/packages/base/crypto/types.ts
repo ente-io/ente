@@ -42,7 +42,7 @@ export interface EncryptedBoxB64 {
 }
 
 /**
- * The result of encryption using the secretstream APIs in one-shot mode.
+ * The result of encryption using the secretstream APIs without chunking.
  *
  * It contains an encrypted data and a header that should be provided during
  * decryption. The header does not need to be secret.

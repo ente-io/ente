@@ -128,7 +128,7 @@ export const encryptBoxB64 = (data: BytesOrB64, key: BytesOrB64) =>
  * Use {@link decryptBlob} to decrypt the result.
  *
  * > The suffix "Blob" comes from our convention of naming functions that use
- * > the secretstream APIs in one-shot mode.
+ * > the secretstream APIs without breaking the data into chunks.
  * >
  * > See: [Note: 3 forms of encryption (Box | Blob | Stream)]
  */

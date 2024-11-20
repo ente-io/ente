@@ -193,35 +193,32 @@ export const generateNewBlobOrStreamKey = async () => {
  *     secretstream APIs are more appropriate.
  *
  * However, in our code we have evolved two different use cases for the 2nd
- * option.
- *
- * Say we have an Ente object, specifically an {@link EnteFile}. This holds the
- * encryption keys for encrypting the contents of the file that a user wishes to
- * upload. The secretstream APIs are the obvious fit, and indeed that's what we
- * use, chunking the file if the contents are bigger than some threshold. But if
- * the file is small enough, there is no need to chunk, so we also expose a
- * function that does streaming encryption, but in "one-shot" mode.
- *
- * Later on, say we have to encrypt the public magic metadata associated with
- * the {@link EnteFile}. Instead of using the secretbox APIs, we just us the
- * same streaming encryption that the rest of the file uses, but since such
- * metadata is well below the threshold for chunking, it invariably uses the
- * "one-shot" mode.
+ * option. The data to encrypt might be smaller than our streaming encryption
+ * chunk size (e.g. the public magic metadata associated with the
+ * {@link EnteFile}), so we do not chunk it and instead encrypt / decrypt it in
+ * a single go. In contrast, the actual file that the user wishes to upload may
+ * be arbitrarily big, and there we first break in into chunks before using the
+ * streaming encryption.
  *
  * Thus, we have three scenarios:
  *
  * 1.  Box: Using secretbox APIs to encrypt some independent blob of data.
  *
- * 2.  Blob: Using secretstream APIs in one-shot mode. This is used to encrypt
+ * 2.  Blob: Using secretstream APIs without chunking. This is used to encrypt
  *     data associated to an Ente object (file, collection, entity, etc), when
  *     the data is small-ish (less than a few MBs).
  *
  * 3.  Stream/Chunks: Using secretstream APIs for encrypting chunks. This is
  *     used to encrypt the actual content of the files associated with an
- *     EnteFile object.
+ *     EnteFile object. This itself happens in two ways:
+ *
+ *     3a. One shot mode - where we do break the data into chunks, but a single
+ *         function processes all the chunks in one go.
+ *
+ *     3b. Streaming - where all the chunks are processed one by one.
  *
  * "Blob" is not a prior term of art in this context, it is just something we
- * use to abbreviate "data encrypted using secretstream APIs in one-shot mode".
+ * use to abbreviate "data encrypted using secretstream APIs without chunking".
  *
  * The distinction between Box and Blob is also handy since not only does the
  * underlying algorithm differ, but also the terminology that libsodium use for
@@ -239,14 +236,14 @@ export const generateNewBlobOrStreamKey = async () => {
  *
  * 1.  Box uses secretbox APIs (Salsa), Blob uses secretstream APIs (ChaCha).
  *
- * 2.  While both are one-shot, Blob should generally be used for data
- *     associated with an Ente object, and Box for the other cases.
+ * 2.  Blob should generally be used for data associated with an Ente object,
+ *     and Box for the other cases.
  *
  * 3.  Box returns a "nonce", while Blob returns a "header".
  *
  * The difference between case 2 and 3 (Blob vs Stream) is that while both use
  * the same algorithms, in case of Blob the entire data is encrypted / decrypted
- * in one go, whilst the *Stream routines first break it into
+ * without chunking, whilst the *Stream routines first break it into
  * {@link streamEncryptionChunkSize} chunks.
  */
 export const encryptBoxB64 = async (
@@ -267,7 +264,7 @@ export const encryptBoxB64 = async (
 };
 
 /**
- * Encrypt the given data using libsodium's secretstream APIs in one-shot mode.
+ * Encrypt the given data using libsodium's secretstream APIs without chunking.
  *
  * Use {@link decryptBlob} to decrypt the result.
  *
@@ -332,6 +329,24 @@ export const encryptBlobB64 = async (
  */
 export const streamEncryptionChunkSize = 4 * 1024 * 1024;
 
+/**
+ * Encrypt the given data using libsodium's secretstream APIs after breaking it
+ * into {@link streamEncryptionChunkSize} chunks.
+ *
+ * Use {@link decryptStreamBytes} to decrypt the result.
+ *
+ * Unlike {@link initChunkDecryption} / {@link encryptFileChunk}, this function
+ * processes all the chunks at once in a single call to this function.
+ *
+ * @param data The data to encrypt.
+ *
+ * @returns The encrypted data, the decryption header as {@link Uint8Array}s,
+ * and the newly generated key that was used for encryption.
+ *
+ * -   See: [Note: 3 forms of encryption (Box | Blob | Stream)].
+ *
+ * -   See: https://doc.libsodium.org/secret-key_cryptography/secretstream
+ */
 export const encryptChaCha = async (data: Uint8Array) => {
     await sodium.ready;
 
