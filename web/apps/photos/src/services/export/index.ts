@@ -1181,7 +1181,7 @@ const getRenamedExportedCollections = (
             if (currentExportName === collectionExportName) {
                 return false;
             }
-            const hasNumberedSuffix = currentExportName.match(/\(\d+\)$/);
+            const hasNumberedSuffix = /\(\d+\)$/.exec(currentExportName);
             const currentExportNameWithoutNumberedSuffix = hasNumberedSuffix
                 ? currentExportName.replace(/\(\d+\)$/, "")
                 : currentExportName;

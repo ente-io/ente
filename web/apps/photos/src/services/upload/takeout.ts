@@ -29,7 +29,7 @@ export const getMetadataJSONMapKeyForJSON = (
     jsonFileName: string,
 ) => {
     let title = jsonFileName.slice(0, -1 * ".json".length);
-    const endsWithNumberedSuffixWithBrackets = title.match(/\(\d+\)$/);
+    const endsWithNumberedSuffixWithBrackets = /\(\d+\)$/.exec(title);
     if (endsWithNumberedSuffixWithBrackets) {
         title = title.slice(
             0,

@@ -51,7 +51,7 @@ export default [
             "react-refresh/only-export-components": "off",
             /** TODO: New during eslint 8=>9 migration */
             "@typescript-eslint/no-unused-expressions": "off",
-            "@typescript-eslint/prefer-regexp-exec": "off",
+
         },
     },
 ];
