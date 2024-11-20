@@ -131,7 +131,7 @@ class UIService {
 
     // UPLOAD LEVEL STATES
     private uploadPhase: UploadPhase = "preparing";
-    private filenames: Map<number, string> = new Map();
+    private filenames = new Map<number, string>();
     private hasLivePhoto: boolean = false;
     private uploadProgressView: boolean = false;
 
@@ -770,14 +770,14 @@ const makeUploadItemWithCollectionIDAndName = (
  *
  * See: [Note: Intermediate file types during upload].
  */
-type ClusteredUploadItem = {
+interface ClusteredUploadItem {
     localID: number;
     collectionID: number;
     fileName: string;
     isLivePhoto: boolean;
     uploadItem?: UploadItem;
     livePhotoAssets?: LivePhotoAssets;
-};
+}
 
 /**
  * The file that we hand off to the uploader. Essentially

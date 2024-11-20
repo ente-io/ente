@@ -107,7 +107,7 @@ export const UploadTypeSelector: React.FC<UploadTypeSelectorProps> = ({
 
 type OptionType = "files" | "folders" | "zips";
 
-type OptionsProps = {
+interface OptionsProps {
     intent: UploadTypeSelectorIntent;
     /** Called when the user selects one of the provided options. */
     onSelect: (option: OptionType) => void;

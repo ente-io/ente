@@ -966,7 +966,7 @@ class ExportService {
         exportDir: string,
         fileUID: string,
         collectionExportPath: string,
-        fileStream: ReadableStream<any>,
+        fileStream: ReadableStream,
         file: EnteFile,
     ) {
         const fs = ensureElectron().fs;
