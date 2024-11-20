@@ -106,6 +106,8 @@ class _HomeWidgetState extends State<HomeWidget> {
   late StreamSubscription<BackupFoldersUpdatedEvent> _backupFoldersUpdatedEvent;
   late StreamSubscription<AccountConfiguredEvent> _accountConfiguredEvent;
   late StreamSubscription<CollectionUpdatedEvent> _collectionUpdatedEvent;
+  late StreamSubscription _publicAlbumLinkSubscription;
+
   final DiffFetcher _diffFetcher = DiffFetcher();
 
   @override
@@ -218,6 +220,8 @@ class _HomeWidgetState extends State<HomeWidget> {
         }
       });
     });
+
+    Platform.isIOS ? _initDeepLinkSubscriptionForPublicAlbums() : null;
 
     // For sharing images coming from outside the app
     _initMediaShareSubscription();
@@ -351,6 +355,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     _collectionUpdatedEvent.cancel();
     isOnSearchTabNotifier.dispose();
     _pageController.dispose();
+    _publicAlbumLinkSubscription.cancel();
     super.dispose();
   }
 
@@ -391,6 +396,49 @@ class _HomeWidgetState extends State<HomeWidget> {
         });
       }
     });
+  }
+
+  Future<void> _initDeepLinkSubscriptionForPublicAlbums() async {
+    // ... check initialUri
+    try {
+      final initialUri = await getInitialUri();
+      if (initialUri != null) {
+        if (initialUri.toString().contains("albums.ente.sh")) {
+          await _handlePublicAlbumLink(initialUri);
+        } else {
+          _logger.info(
+            "uri doesn't contain 'albums.ente.io' in initial public album deep link",
+          );
+        }
+      } else {
+        _logger.info(
+          "No initial link received in public album link subscription.",
+        );
+      }
+    } catch (e) {
+      _logger.severe("Error while getting initial public album deep link: $e");
+    }
+
+    // Attach a listener to the stream
+    _publicAlbumLinkSubscription = uriLinkStream.listen(
+      (Uri? uri) {
+        if (uri != null) {
+          if (uri.toString().contains("albums.ente.sh")) {
+            _handlePublicAlbumLink(uri);
+          } else {
+            _logger.info(
+              "uri doesn't contain 'albums.ente.io' in public album link subscription",
+            );
+          }
+        } else {
+          _logger.info("No link received in public album link subscription.");
+        }
+      },
+      onError: (err) {
+        // Handle exception by warning the user their action did not succeed
+        _logger.severe("Error while getting public album deep link: $err");
+      },
+    );
   }
 
   @override
