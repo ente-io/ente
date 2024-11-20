@@ -171,6 +171,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     keyAttributes.keyDecryptionNonce,
                     kek,
                 );
+                // eslint-disable-next-line react-hooks/rules-of-hooks
                 useMasterPassword(key, kek, keyAttributes);
                 return;
             }
