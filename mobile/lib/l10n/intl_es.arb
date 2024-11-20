@@ -1343,6 +1343,5 @@
   "mostRecent": "Más reciente",
   "mostRelevant": "Más relevante",
   "loadingYourPhotos": "Cargando tus fotos...",
-  "processingImport": "Procesando {folderName}...",
-  "checkingModels": "Checking models..."
+  "processingImport": "Procesando {folderName}..."
 }

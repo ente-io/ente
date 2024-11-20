@@ -112,6 +112,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Зрабіць гэта пазней"),
         "done": MessageLookupByLibrary.simpleMessage("Гатова"),
         "email": MessageLookupByLibrary.simpleMessage("Электронная пошта"),
+        "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
+            "Enable machine learning for magic search and face recognition"),
         "encryption": MessageLookupByLibrary.simpleMessage("Шыфраванне"),
         "encryptionKeys":
             MessageLookupByLibrary.simpleMessage("Ключы шыфравання"),
@@ -221,6 +223,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "retry": MessageLookupByLibrary.simpleMessage("Паўтарыць"),
         "saveKey": MessageLookupByLibrary.simpleMessage("Захаваць ключ"),
         "scanCode": MessageLookupByLibrary.simpleMessage("Сканіраваць код"),
+        "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
+            "Images will be shown here once processing is complete"),
+        "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
+            "People will be shown here once processing is complete"),
+        "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
+            "People will be shown here once processing is complete"),
         "security": MessageLookupByLibrary.simpleMessage("Бяспека"),
         "selectAll": MessageLookupByLibrary.simpleMessage("Абраць усё"),
         "selectReason":

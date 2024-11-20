@@ -30,7 +30,7 @@ export const logToDisk = (message: string) => {
 };
 
 const workerLogToDisk = (message: string) => {
-    workerBridge.logToDisk(message).catch((e: unknown) => {
+    workerBridge!.logToDisk(message).catch((e: unknown) => {
         console.error(
             "Failed to log a message from worker",
             e,
@@ -59,6 +59,7 @@ const messageWithError = (message: string, e?: unknown) => {
         }
     } else {
         // For the rest rare cases, use the default string serialization of e.
+        // eslint-disable-next-line @typescript-eslint/no-base-to-string
         es = String(e);
     }
 

@@ -1,4 +1,5 @@
 import { TitledMiniDialog } from "@/base/components/MiniDialog";
+import log from "@/base/log";
 import SingleInputForm, {
     type SingleInputFormProps,
 } from "@ente/shared/components/SingleInputForm";
@@ -34,6 +35,7 @@ export default function CollectionNamer({ attributes, ...props }: Props) {
             attributes.callback(albumName);
             props.onHide();
         } catch (e) {
+            log.error(e);
             setFieldError(t("generic_error_retry"));
         }
     };

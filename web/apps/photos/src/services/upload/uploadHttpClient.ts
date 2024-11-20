@@ -47,7 +47,7 @@ class UploadHttpClient {
                         { "X-Auth-Token": token },
                     );
                     const response = await this.uploadURLFetchInProgress;
-                    for (const url of response.data["urls"]) {
+                    for (const url of response.data.urls) {
                         urlStore.push(url);
                     }
                 } finally {
@@ -77,7 +77,7 @@ class UploadHttpClient {
                 { "X-Auth-Token": token },
             );
 
-            return response.data["urls"];
+            return response.data.urls;
         } catch (e) {
             log.error("fetch multipart-upload-url failed", e);
             throw e;

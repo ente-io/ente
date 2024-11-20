@@ -126,6 +126,8 @@ class _ItemsWidgetState extends State<ItemsWidget> {
     switch (locale.languageCode) {
       case 'ar':
         return 'العربية';
+      case 'ca':
+        return 'Català';
       case 'en':
         return 'English';
       case 'bg':

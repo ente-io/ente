@@ -730,6 +730,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "enable": MessageLookupByLibrary.simpleMessage("Habilitar"),
         "enableMLIndexingDesc": MessageLookupByLibrary.simpleMessage(
             "Ente soporta aprendizaje automático en el dispositivo para la detección de caras, búsqueda mágica y otras características de búsqueda avanzada"),
+        "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
+            "Enable machine learning for magic search and face recognition"),
         "enableMaps": MessageLookupByLibrary.simpleMessage("Activar Mapas"),
         "enableMapsDesc": MessageLookupByLibrary.simpleMessage(
             "Esto mostrará tus fotos en el mapa mundial.\n\nEste mapa está gestionado por Open Street Map, y la ubicación exacta de tus fotos nunca se comparte.\n\nPuedes deshabilitar esta función en cualquier momento en Ajustes."),
@@ -1419,6 +1421,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Agrega descripciones como \"#viaje\" en la información de la foto para encontrarlas aquí rápidamente"),
         "searchDatesEmptySection":
             MessageLookupByLibrary.simpleMessage("Buscar por fecha, mes o año"),
+        "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
+            "Images will be shown here once processing is complete"),
         "searchFaceEmptySection": MessageLookupByLibrary.simpleMessage(
             "Las personas se mostrarán aquí una vez que se haya hecho la indexación"),
         "searchFileTypesAndNamesEmptySection":
@@ -1436,6 +1440,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Agrupar las fotos que se tomaron cerca de la localización de una foto"),
         "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
             "Invita a gente y verás todas las fotos compartidas aquí"),
+        "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
+            "People will be shown here once processing is complete"),
         "searchResultCount": m53,
         "security": MessageLookupByLibrary.simpleMessage("Seguridad"),
         "selectALocation":

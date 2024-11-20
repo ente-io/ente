@@ -4,7 +4,7 @@ import {
     encryptBoxB64,
     generateNewBlobOrStreamKey,
 } from "@/base/crypto";
-import { nullToUndefined } from "@/utils/transform";
+import { nullishToEmpty, nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
 import { gunzip, gzip } from "../../utils/gzip";
 import type { CGroupUserEntityData } from "../ml/people";
@@ -85,8 +85,7 @@ const RemoteFaceCluster = z.object({
 const RemoteCGroupData = z.object({
     name: z.string().nullish().transform(nullToUndefined),
     assigned: z.array(RemoteFaceCluster),
-    // The remote cgroup also has a "rejected" property, but that is not
-    // currently used by any of the clients.
+    rejectedFaceIDs: z.array(z.string()).nullish().transform(nullishToEmpty),
     isHidden: z.boolean(),
     avatarFaceID: z.string().nullish().transform(nullToUndefined),
 });
@@ -135,7 +134,6 @@ export const pullUserEntities = async (
     const entityKeyB64 = await getOrCreateEntityKeyB64(type, masterKey);
 
     let sinceTime = (await savedLatestUpdatedAt(type)) ?? 0;
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, no-constant-condition
     while (true) {
         const diff = await userEntityDiff(type, sinceTime, entityKeyB64);
         if (diff.length == 0) break;

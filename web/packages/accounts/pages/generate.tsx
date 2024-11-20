@@ -13,7 +13,6 @@ import {
 } from "@/base/components/FormPaper";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import log from "@/base/log";
-import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import LinkButton from "@ente/shared/components/LinkButton";
 import {
@@ -44,30 +43,27 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
     const router = useRouter();
 
     useEffect(() => {
-        const main = async () => {
-            const key: string = getKey(SESSION_KEYS.ENCRYPTION_KEY);
-            const keyAttributes: KeyAttributes = getData(
-                LS_KEYS.ORIGINAL_KEY_ATTRIBUTES,
-            );
-            const user: User = getData(LS_KEYS.USER);
-            setUser(user);
-            if (!user?.token) {
-                router.push("/");
-            } else if (key) {
-                if (justSignedUp()) {
-                    setOpenRecoveryKey(true);
-                    setLoading(false);
-                } else {
-                    router.push(appHomeRoute);
-                }
-            } else if (keyAttributes?.encryptedKey) {
-                router.push(PAGES.CREDENTIALS);
-            } else {
-                setToken(user.token);
+        const key: string = getKey(SESSION_KEYS.ENCRYPTION_KEY);
+        const keyAttributes: KeyAttributes = getData(
+            LS_KEYS.ORIGINAL_KEY_ATTRIBUTES,
+        );
+        const user: User = getData(LS_KEYS.USER);
+        setUser(user);
+        if (!user?.token) {
+            void router.push("/");
+        } else if (key) {
+            if (justSignedUp()) {
+                setOpenRecoveryKey(true);
                 setLoading(false);
+            } else {
+                void router.push(appHomeRoute);
             }
-        };
-        main();
+        } else if (keyAttributes?.encryptedKey) {
+            void router.push(PAGES.CREDENTIALS);
+        } else {
+            setToken(user.token);
+            setLoading(false);
+        }
         appContext.showNavBar(true);
     }, []);
 
@@ -80,7 +76,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 await generateKeyAndSRPAttributes(passphrase);
 
             // TODO: Refactor the code to not require this ensure
-            await putAttributes(ensure(token), keyAttributes);
+            await putAttributes(token!, keyAttributes);
             await configureSRP(srpSetupAttributes);
             await generateAndSaveIntermediateKeyAttributes(
                 passphrase,
@@ -107,7 +103,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                     open={openRecoveryKey}
                     onClose={() => {
                         setOpenRecoveryKey(false);
-                        router.push(appHomeRoute);
+                        void router.push(appHomeRoute);
                     }}
                     showMiniDialog={showMiniDialog}
                 />

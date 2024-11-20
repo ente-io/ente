@@ -14,7 +14,6 @@ import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
 import { sharedCryptoWorker } from "@/base/crypto";
 import type { B64EncryptionResult } from "@/base/crypto/libsodium";
 import log from "@/base/log";
-import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import LinkButton from "@ente/shared/components/LinkButton";
 import SingleInputForm, {
@@ -34,6 +33,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const bip39 = require("bip39");
 // mobile client library only supports english.
 bip39.setDefaultWordlist("english");
@@ -57,13 +57,13 @@ const Page: React.FC<RecoverPageProps> = ({ appContext, twoFactorType }) => {
     useEffect(() => {
         const user = getData(LS_KEYS.USER);
         const sid = user.passkeySessionID || user.twoFactorSessionID;
-        if (!user || !user.email || !sid) {
-            router.push("/");
+        if (!user?.email || !sid) {
+            void router.push("/");
         } else if (
             !(user.isTwoFactorEnabled || user.isTwoFactorEnabledPasskey) &&
             (user.encryptedToken || user.token)
         ) {
-            router.push(PAGES.GENERATE);
+            void router.push(PAGES.GENERATE);
         } else {
             setSessionID(sid);
         }
@@ -82,6 +82,7 @@ const Page: React.FC<RecoverPageProps> = ({ appContext, twoFactorType }) => {
             } catch (e) {
                 if (
                     e instanceof ApiError &&
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
                     e.httpStatusCode === HttpStatusCode.NotFound
                 ) {
                     logout();
@@ -92,7 +93,7 @@ const Page: React.FC<RecoverPageProps> = ({ appContext, twoFactorType }) => {
                 }
             }
         };
-        main();
+        void main();
     }, []);
 
     const recover: SingleInputFormProps["callback"] = async (
@@ -114,14 +115,14 @@ const Page: React.FC<RecoverPageProps> = ({ appContext, twoFactorType }) => {
                 recoveryKey = bip39.mnemonicToEntropy(recoveryKey);
             }
             const cryptoWorker = await sharedCryptoWorker();
-            const { encryptedData, nonce } = ensure(encryptedTwoFactorSecret);
+            const { encryptedData, nonce } = encryptedTwoFactorSecret!;
             const twoFactorSecret = await cryptoWorker.decryptB64(
                 encryptedData,
                 nonce,
                 await cryptoWorker.fromHex(recoveryKey),
             );
             const resp = await removeTwoFactor(
-                ensure(sessionID),
+                sessionID!,
                 twoFactorSecret,
                 twoFactorType,
             );
@@ -134,7 +135,7 @@ const Page: React.FC<RecoverPageProps> = ({ appContext, twoFactorType }) => {
                 isTwoFactorEnabled: false,
             });
             setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
-            router.push(PAGES.CREDENTIALS);
+            void router.push(PAGES.CREDENTIALS);
         } catch (e) {
             log.error("two factor recovery failed", e);
             setFieldError(t("INCORRECT_RECOVERY_KEY"));

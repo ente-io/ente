@@ -623,6 +623,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "enable": MessageLookupByLibrary.simpleMessage("有効化"),
         "enableMLIndexingDesc": MessageLookupByLibrary.simpleMessage(
             "Enteは顔認識、マジック検索、その他の高度な検索機能のため、あなたのデバイス上で機械学習をしています"),
+        "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
+            "Enable machine learning for magic search and face recognition"),
         "enableMaps": MessageLookupByLibrary.simpleMessage("マップを有効にする"),
         "enableMapsDesc": MessageLookupByLibrary.simpleMessage(
             "世界地図上にあなたの写真を表示します。\n\n地図はOpenStreetMapを利用しており、あなたの写真の位置情報が外部に共有されることはありません。\n\nこの機能は設定から無効にすることができます"),
@@ -1202,6 +1204,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "写真情報に \"#trip\" のように説明を追加すれば、ここで簡単に見つけることができます"),
         "searchDatesEmptySection":
             MessageLookupByLibrary.simpleMessage("日付、月または年で検索"),
+        "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
+            "Images will be shown here once processing is complete"),
         "searchFaceEmptySection":
             MessageLookupByLibrary.simpleMessage("学習が完了すると、ここに人が表示されます"),
         "searchFileTypesAndNamesEmptySection":
@@ -1216,6 +1220,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("当時の直近で撮影された写真をグループ化"),
         "searchPeopleEmptySection":
             MessageLookupByLibrary.simpleMessage("友達を招待すると、共有される写真はここから閲覧できます"),
+        "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
+            "People will be shown here once processing is complete"),
         "searchResultCount": m53,
         "security": MessageLookupByLibrary.simpleMessage("セキュリティ"),
         "selectALocation": MessageLookupByLibrary.simpleMessage("場所を選択"),

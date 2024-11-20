@@ -1,4 +1,4 @@
-import { sessionExpiredDialogAttributes } from "@/accounts/components/LoginComponents";
+import { sessionExpiredDialogAttributes } from "@/accounts/components/utils/dialog";
 import { stashRedirect } from "@/accounts/services/redirect";
 import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
 import { NavbarBase } from "@/base/components/Navbar";
@@ -55,7 +55,6 @@ import {
 } from "@/new/photos/services/user-details";
 import { useAppContext } from "@/new/photos/types/context";
 import { splitByPredicate } from "@/utils/array";
-import { ensure } from "@/utils/ensure";
 import {
     CenteredFlex,
     FlexWrapper,
@@ -328,7 +327,7 @@ export default function Gallery() {
         try {
             await getRecoveryKey();
             return true;
-        } catch (e) {
+        } catch {
             logout();
             return false;
         }
@@ -512,7 +511,7 @@ export default function Gallery() {
                       }
                     : {
                           mode: barMode as "albums" | "hidden-albums",
-                          collectionID: ensure(activeCollectionID),
+                          collectionID: activeCollectionID!,
                       },
         };
 
@@ -845,10 +844,6 @@ export default function Gallery() {
         return <div></div>;
     }
 
-    // `peopleState` will be undefined only when ML is disabled, otherwise it'll
-    // be present, with empty arrays, even if people data is still syncing.
-    const showPeopleSectionButton = peopleState !== undefined;
-
     return (
         <GalleryContext.Provider
             value={{
@@ -966,7 +961,6 @@ export default function Gallery() {
                         setActiveCollectionID: handleSetActiveCollectionID,
                         hiddenCollectionSummaries:
                             state.hiddenCollectionSummaries,
-                        showPeopleSectionButton,
                         people:
                             (state.view.type == "people"
                                 ? state.view.visiblePeople

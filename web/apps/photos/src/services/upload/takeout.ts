@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/dot-notation */
 /** @file Dealing with the JSON metadata sidecar files */
 
 import { ensureElectron } from "@/base/electron";
@@ -29,7 +30,7 @@ export const getMetadataJSONMapKeyForJSON = (
     jsonFileName: string,
 ) => {
     let title = jsonFileName.slice(0, -1 * ".json".length);
-    const endsWithNumberedSuffixWithBrackets = title.match(/\(\d+\)$/);
+    const endsWithNumberedSuffixWithBrackets = /\(\d+\)$/.exec(title);
     if (endsWithNumberedSuffixWithBrackets) {
         title = title.slice(
             0,

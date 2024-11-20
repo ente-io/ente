@@ -8,7 +8,6 @@ import {
     FormPaperFooter,
     FormPaperTitle,
 } from "@/base/components/FormPaper";
-import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import LinkButton from "@ente/shared/components/LinkButton";
 import { ApiError } from "@ente/shared/error";
@@ -34,20 +33,17 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
     const router = useRouter();
 
     useEffect(() => {
-        const main = async () => {
-            const user: User = getData(LS_KEYS.USER);
-            if (!user?.email || !user.twoFactorSessionID) {
-                router.push("/");
-            } else if (
-                !user.isTwoFactorEnabled &&
-                (user.encryptedToken || user.token)
-            ) {
-                router.push(PAGES.CREDENTIALS);
-            } else {
-                setSessionID(user.twoFactorSessionID);
-            }
-        };
-        main();
+        const user: User = getData(LS_KEYS.USER);
+        if (!user?.email || !user.twoFactorSessionID) {
+            void router.push("/");
+        } else if (
+            !user.isTwoFactorEnabled &&
+            (user.encryptedToken || user.token)
+        ) {
+            void router.push(PAGES.CREDENTIALS);
+        } else {
+            setSessionID(user.twoFactorSessionID);
+        }
     }, []);
 
     const onSubmit: VerifyTwoFactorCallback = async (otp) => {
@@ -60,11 +56,12 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 encryptedToken,
                 id,
             });
-            setData(LS_KEYS.KEY_ATTRIBUTES, ensure(keyAttributes));
-            router.push(unstashRedirect() ?? PAGES.CREDENTIALS);
+            setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes!);
+            void router.push(unstashRedirect() ?? PAGES.CREDENTIALS);
         } catch (e) {
             if (
                 e instanceof ApiError &&
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
                 e.httpStatusCode === HttpStatusCode.NotFound
             ) {
                 logout();

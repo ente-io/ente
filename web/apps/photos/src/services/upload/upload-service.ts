@@ -38,7 +38,7 @@ import {
 import { detectFileTypeInfoFromChunk } from "@/new/photos/utils/detect-type";
 import { readStream } from "@/new/photos/utils/native-stream";
 import { mergeUint8Arrays } from "@/utils/array";
-import { ensure, ensureInteger, ensureNumber } from "@/utils/ensure";
+import { ensureInteger, ensureNumber } from "@/utils/ensure";
 import { CustomError, handleUploadError } from "@ente/shared/error";
 import { addToCollection } from "services/collectionService";
 import {
@@ -857,7 +857,7 @@ const readImageOrVideoDetails = async (uploadItem: UploadItem) => {
 
     const fileTypeInfo = await detectFileTypeInfoFromChunk(async () => {
         const reader = stream.getReader();
-        const chunk = ensure((await reader.read()).value);
+        const chunk = (await reader.read())!.value;
         await reader.cancel();
         return chunk;
     }, uploadItemFileName(uploadItem));
@@ -1072,7 +1072,7 @@ const tryExtractImageMetadata = async (
     }
 
     try {
-        return extractExif(file);
+        return await extractExif(file);
     } catch (e) {
         log.error(`Failed to extract image metadata for ${uploadItem}`, e);
         return undefined;

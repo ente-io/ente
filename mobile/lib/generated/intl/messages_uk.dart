@@ -731,6 +731,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "enable": MessageLookupByLibrary.simpleMessage("Увімкнути"),
         "enableMLIndexingDesc": MessageLookupByLibrary.simpleMessage(
             "Ente підтримує машинне навчання для розпізнавання обличчя, магічний пошук та інші розширені функції пошуку"),
+        "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
+            "Enable machine learning for magic search and face recognition"),
         "enableMaps": MessageLookupByLibrary.simpleMessage("Увімкнути мапи"),
         "enableMapsDesc": MessageLookupByLibrary.simpleMessage(
             "Це покаже ваші фотографії на мапі світу.\n\nЦя мапа розміщена на OpenStreetMap, і точне розташування ваших фотографій ніколи не розголошується.\n\nВи можете будь-коли вимкнути цю функцію в налаштуваннях."),
@@ -1429,6 +1431,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Додавайте такі описи як «#подорож» в інформацію про фотографію, щоб швидко знайти їх тут"),
         "searchDatesEmptySection": MessageLookupByLibrary.simpleMessage(
             "Шукати за датою, місяцем або роком"),
+        "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
+            "Images will be shown here once processing is complete"),
         "searchFaceEmptySection": MessageLookupByLibrary.simpleMessage(
             "Люди будуть показані тут після завершення індексації"),
         "searchFileTypesAndNamesEmptySection":
@@ -1445,6 +1449,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Групові фотографії, які зроблені в певному радіусі від фотографії"),
         "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
             "Запросіть людей, і ви побачите всі фотографії, якими вони поділилися, тут"),
+        "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
+            "People will be shown here once processing is complete"),
         "searchResultCount": m53,
         "security": MessageLookupByLibrary.simpleMessage("Безпека"),
         "selectALocation":

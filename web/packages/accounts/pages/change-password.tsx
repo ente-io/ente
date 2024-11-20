@@ -19,7 +19,6 @@ import {
     FormPaperTitle,
 } from "@/base/components/FormPaper";
 import { sharedCryptoWorker } from "@/base/crypto";
-import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import LinkButton from "@ente/shared/components/LinkButton";
 import {
@@ -48,7 +47,7 @@ const Page: React.FC<PageProps> = () => {
         setUser(user);
         if (!user?.token) {
             stashRedirect(PAGES.CHANGE_PASSWORD);
-            router.push("/");
+            void router.push("/");
         } else {
             setToken(user.token);
         }
@@ -65,7 +64,7 @@ const Page: React.FC<PageProps> = () => {
         let kek: KEK;
         try {
             kek = await cryptoWorker.deriveSensitiveKey(passphrase, kekSalt);
-        } catch (e) {
+        } catch {
             setFieldError("confirm", t("PASSWORD_GENERATION_FAILED"));
             return;
         }
@@ -94,7 +93,7 @@ const Page: React.FC<PageProps> = () => {
 
         const srpA = convertBufferToBase64(srpClient.computeA());
 
-        const { setupID, srpB } = await startSRPSetup(ensure(token), {
+        const { setupID, srpB } = await startSRPSetup(token!, {
             srpUserID,
             srpSalt,
             srpVerifier,
@@ -105,7 +104,7 @@ const Page: React.FC<PageProps> = () => {
 
         const srpM1 = convertBufferToBase64(srpClient.computeM1());
 
-        await updateSRPAndKeys(ensure(token), {
+        await updateSRPAndKeys(token!, {
             setupID,
             srpM1,
             updatedKeyAttr: updatedKey,
@@ -133,7 +132,7 @@ const Page: React.FC<PageProps> = () => {
 
     const redirectToAppHome = () => {
         setData(LS_KEYS.SHOW_BACK_BUTTON, { value: true });
-        router.push(appHomeRoute);
+        void router.push(appHomeRoute);
     };
 
     // TODO: Handle the case where user is not loaded yet.

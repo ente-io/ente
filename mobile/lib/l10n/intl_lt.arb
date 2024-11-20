@@ -336,6 +336,7 @@
   "discover_sunset": "Saulėlydis",
   "discover_hills": "Kalvos",
   "discover_greenery": "Žaluma",
+  "loadingModel": "Atsisiunčiami modeliai...",
   "status": "Būsena",
   "indexedItems": "Indeksuoti elementai",
   "pendingItems": "Laukiami elementai",
@@ -801,5 +802,5 @@
   "allPersonGroupingWillReset": "Visi šio asmens grupavimai bus iš naujo nustatyti, o jūs neteksite visų šiam asmeniui pateiktų pasiūlymų",
   "yesResetPerson": "Taip, nustatyti asmenį iš naujo",
   "onlyThem": "Tik jiems",
-  "checkingModels": "Checking models..."
+  "checkingModels": "Tikrinami modeliai..."
 }

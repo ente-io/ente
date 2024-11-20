@@ -139,6 +139,22 @@
       ]
     },
     {
+      "title": "Bloom Host",
+      "slug": "bloom_host",
+      "altNames": [
+        "Bloom Host Billing"
+      ]
+    },
+    {
+      "title": "Bluesky"
+    },
+    {
+      "title": "Booking",
+      "altNames": [
+        "Booking.com"
+      ]
+    },
+    {
       "title": "BorgBase",
       "altNames": [
         "borg"
