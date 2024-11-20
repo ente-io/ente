@@ -24,6 +24,11 @@ export default [
             // The rule is misguided - only the opener should be omitted, not
             // the referrer.
             "react/jsx-no-target-blank": ["warn", { allowReferrer: true }],
+            // Otherwise we need to do unnecessary boilerplating when using memo.
+            "react/display-name": "off",
+            // Without React in scope, this rule starts causing false positives
+            // (We  don't use prop types in our own code anyways).
+            "react/prop-types": "off",
         },
     },
     {
@@ -46,15 +51,3 @@ export default [
         },
     },
 ];
-
-// module.exports = {
-//     rules: {
-//         /* Otherwise we need to do unnecessary boilerplating when using memo. */
-//         "react/display-name": "off",
-//         /* Next.js supports the JSX transform introduced in React 17 */
-//         "react/react-in-jsx-scope": "off",
-//         /* Without React in scope, this rule starts causing false positives (We
-//            don't use prop types in our own code anyways). */
-//         "react/prop-types": "off",
-//     },
-// };
