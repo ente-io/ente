@@ -50,6 +50,7 @@ export default function VerifyTwoFactor(props: Props) {
     };
 
     const onChange =
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
         (callback: Function, triggerSubmit: Function) => (otp: string) => {
             callback(otp);
             if (otp.length === 6) {

@@ -21,14 +21,14 @@ export default [
             "@typescript-eslint/array-type": "off",
             "@typescript-eslint/no-empty-function": "off",
             "@typescript-eslint/prefer-optional-chain": "off",
-            "@typescript-eslint/ban-types": "off",
-            "@typescript-eslint/no-misused-promises": "off",
+
+
             "react-hooks/exhaustive-deps": "off",
             "react-hooks/rules-of-hooks": "off",
             "react-refresh/only-export-components": "off",
             /** TODO: New during eslint 8=>9 migration */
             "@typescript-eslint/no-unused-vars": "off",
-            "@typescript-eslint/no-unsafe-function-type": "off",
+
         },
     },
 ];

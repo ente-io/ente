@@ -278,6 +278,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             }
         };
 
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     const useMasterPassword: VerifyMasterPasswordFormProps["callback"] = async (
         key,
         kek,
