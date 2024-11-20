@@ -1,3 +1,4 @@
+import { sessionExpiredDialogAttributes } from "@/accounts/components/utils/dialog";
 import { FormPaper } from "@/base/components/FormPaper";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { sharedCryptoWorker } from "@/base/crypto";
@@ -44,7 +45,6 @@ import {
     LoginFlowFormFooter,
     PasswordHeader,
     VerifyingPasskey,
-    sessionExpiredDialogAttributes,
 } from "../components/LoginComponents";
 import { PAGES } from "../constants/pages";
 import {

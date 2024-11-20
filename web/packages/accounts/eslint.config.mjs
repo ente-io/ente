@@ -18,7 +18,6 @@ export default [
             "@typescript-eslint/no-unsafe-call": "off",
             /** TODO: Disabled as we migrate, try to prune these again */
             "react-hooks/exhaustive-deps": "off",
-            "react-refresh/only-export-components": "off",
         },
     },
 ];

@@ -15,6 +15,7 @@ import { CircularProgress, Stack, Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
+import { sessionExpiredDialogAttributes } from "@/accounts/components/utils/dialog";
 
 export const PasswordHeader: React.FC<React.PropsWithChildren> = ({
     children,
@@ -192,25 +193,3 @@ const ButtonStack = styled("div")`
     flex-direction: column;
     gap: 1rem;
 `;
-
-/**
- * {@link MiniDialogAttributes} for showing asking the user to login again when
- * their session has expired.
- *
- * There is one button, which allows them to logout.
- *
- * @param onLogin Called when the user presses the "Login" button on the error
- * dialog.
- */
-export const sessionExpiredDialogAttributes = (
-    onLogin: () => void,
-): MiniDialogAttributes => ({
-    title: t("session_expired"),
-    message: t("session_expired_message"),
-    nonClosable: true,
-    continue: {
-        text: t("login"),
-        action: onLogin,
-    },
-    cancel: false,
-});

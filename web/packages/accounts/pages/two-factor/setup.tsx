@@ -17,10 +17,7 @@ import { useEffect, useState } from "react";
 import { appHomeRoute } from "../../services/redirect";
 import type { PageProps } from "../../types/page";
 
-export enum SetupMode {
-    QR_CODE,
-    MANUAL_CODE,
-}
+export type SetupMode = "qrCode" | "manualCode";
 
 const Page: React.FC<PageProps> = () => {
     const [twoFactorSecret, setTwoFactorSecret] = useState<

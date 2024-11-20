@@ -1,4 +1,4 @@
-import { sessionExpiredDialogAttributes } from "@/accounts/components/LoginComponents";
+import { sessionExpiredDialogAttributes } from "@/accounts/components/utils/dialog";
 import { stashRedirect } from "@/accounts/services/redirect";
 import { EnteLogo } from "@/base/components/EnteLogo";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
