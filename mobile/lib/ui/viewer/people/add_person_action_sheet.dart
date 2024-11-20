@@ -2,7 +2,7 @@ import "dart:async";
 
 import 'package:flutter/material.dart';
 import "package:photos/models/file/file.dart";
-import "package:photos/ui/viewer/people/save_person.dart";
+import "package:photos/ui/viewer/people/save_or_edit_person.dart";
 import "package:photos/utils/navigation_util.dart";
 
 Future<dynamic> showAssignPersonAction(
@@ -13,7 +13,7 @@ Future<dynamic> showAssignPersonAction(
 }) async {
   return routeToPage(
     context,
-    SavePerson(
+    SaveOrEditPerson(
       clusterID,
       file: file,
     ),

@@ -324,7 +324,7 @@ class PersonService {
     await _updatePerson(updatedPerson);
   }
 
-  Future<void> updateAttributes(
+  Future<PersonEntity> updateAttributes(
     String id, {
     String? name,
     String? avatarFaceId,
@@ -343,6 +343,7 @@ class PersonService {
       ),
     );
     await _updatePerson(updatedPerson);
+    return updatedPerson;
   }
 
   Future<void> _updatePerson(PersonEntity updatePerson) async {

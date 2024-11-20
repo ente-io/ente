@@ -22,6 +22,7 @@ import "package:photos/ui/viewer/hierarchicial_search/recommended_filters_for_ap
 import "package:photos/ui/viewer/people/add_person_action_sheet.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
 import "package:photos/ui/viewer/people/person_cluster_suggestion.dart";
+import "package:photos/ui/viewer/people/save_or_edit_person.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/navigation_util.dart";
 
@@ -62,6 +63,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
   final GlobalKey shareButtonKey = GlobalKey();
   bool isQuickLink = false;
   late GalleryType galleryType;
+  late PersonEntity person;
 
   @override
   void initState() {
@@ -75,6 +77,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
         Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
       setState(() {});
     });
+    person = widget.person;
     _appBarTitle = widget.title;
     galleryType = widget.type;
   }
@@ -143,37 +146,19 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
           );
   }
 
-  Future<dynamic> _renamePerson(BuildContext context) async {
-    final result = await showTextInputDialog(
+  Future<dynamic> _editPerson(BuildContext context) async {
+    final result = await routeToPage(
       context,
-      title: S.of(context).rename,
-      submitButtonLabel: S.of(context).done,
-      hintText: S.of(context).enterPersonName,
-      alwaysShowSuccessState: true,
-      initialValue: widget.person.data.name,
-      textCapitalization: TextCapitalization.words,
-      onSubmit: (String text) async {
-        // indicates user cancelled the rename request
-        if (text == "" || text == _appBarTitle!) {
-          return;
-        }
-
-        try {
-          await PersonService.instance
-              .updateAttributes(widget.person.remoteID, name: text);
-          if (mounted) {
-            _appBarTitle = text;
-            setState(() {});
-          }
-          Bus.instance.fire(PeopleChangedEvent());
-        } catch (e, s) {
-          _logger.severe("Failed to rename album", e, s);
-          rethrow;
-        }
-      },
+      SaveOrEditPerson(
+        person.data.assigned?.first.id ?? "",
+        person: person,
+        isEditing: true,
+      ),
     );
-    if (result is Exception) {
-      await showGenericErrorDialog(context: context, error: result);
+    if (result is PersonEntity) {
+      _appBarTitle = result.data.name;
+      person = result;
+      setState(() {});
     }
   }
 
@@ -259,13 +244,12 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
               unawaited(
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) =>
-                        PersonReviewClusterSuggestion(widget.person),
+                    builder: (context) => PersonReviewClusterSuggestion(person),
                   ),
                 ),
               );
             } else if (value == PeoplePopupAction.rename) {
-              await _renamePerson(context);
+              await _editPerson(context);
             } else if (value == PeoplePopupAction.setCover) {
               await setCoverPhoto(context);
             } else if (value == PeoplePopupAction.unignore) {
@@ -289,7 +273,7 @@ class _AppBarWidgetState extends State<PeopleAppBar> {
       firstButtonLabel: S.of(context).yesResetPerson,
       firstButtonOnTap: () async {
         try {
-          await PersonService.instance.deletePerson(widget.person.remoteID);
+          await PersonService.instance.deletePerson(person.remoteID);
           Navigator.of(context).pop();
         } catch (e, s) {
           _logger.severe('Resetting person failed', e, s);

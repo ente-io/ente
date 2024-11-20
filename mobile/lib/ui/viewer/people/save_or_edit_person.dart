@@ -25,29 +25,40 @@ import "package:photos/ui/viewer/search/result/person_face_widget.dart";
 import "package:photos/utils/dialog_util.dart";
 import "package:photos/utils/toast_util.dart";
 
-class SavePerson extends StatefulWidget {
-  final String clusterID;
+class SaveOrEditPerson extends StatefulWidget {
+  final String? clusterID;
   final EnteFile? file;
   final bool isEditing;
+  final PersonEntity? person;
 
-  const SavePerson(
+  const SaveOrEditPerson(
     this.clusterID, {
     super.key,
     this.file,
+    this.person,
     this.isEditing = false,
-  });
+  }) : assert(
+            !isEditing || person != null, 'Person cannot be null when editing');
 
   @override
-  State<SavePerson> createState() => _SavePersonState();
+  State<SaveOrEditPerson> createState() => _SaveOrEditPersonState();
 }
 
-class _SavePersonState extends State<SavePerson> {
+class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
   bool isKeypadOpen = false;
   String _inputName = "";
+  String? _selectedDate;
   bool userAlreadyAssigned = false;
   late final Logger _logger = Logger("_SavePersonState");
   Timer? _debounce;
   List<(PersonEntity, EnteFile)> _cachedPersons = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _inputName = widget.person?.data.name ?? "";
+    _selectedDate = widget.person?.data.birthDate;
+  }
 
   @override
   void dispose() {
@@ -101,6 +112,7 @@ class _SavePersonState extends State<SavePerson> {
                   });
                 });
               },
+              initialValue: _inputName,
               decoration: InputDecoration(
                 focusedBorder: OutlineInputBorder(
                   borderRadius: const BorderRadius.all(Radius.circular(8.0)),
@@ -127,23 +139,34 @@ class _SavePersonState extends State<SavePerson> {
               hintText: context.l10n.enterDateOfBirth,
               firstDate: DateTime(100),
               lastDate: DateTime.now(),
+              initialValue: _selectedDate,
               isRequired: false,
+              onChanged: (date) {
+                setState(() {
+                  // format date to yyyy-MM-dd
+                  _selectedDate = date?.toIso8601String().split("T").first;
+                });
+              },
             ),
             const SizedBox(height: 32),
             ButtonWidget(
               buttonType: ButtonType.primary,
               labelText: context.l10n.save,
-              isDisabled: _inputName.isEmpty,
+              isDisabled: !changed,
               onTap: () async {
-                await addNewPerson(
-                  context,
-                  text: _inputName,
-                  clusterID: widget.clusterID,
-                );
+                if (widget.isEditing) {
+                  await updatePerson(context);
+                } else {
+                  await addNewPerson(
+                    context,
+                    text: _inputName,
+                    clusterID: widget.clusterID!,
+                  );
+                }
               },
             ),
             const SizedBox(height: 32),
-            _getPersonItems(),
+            if (!widget.isEditing) _getPersonItems(),
           ],
         ),
       ),
@@ -221,7 +244,7 @@ class _SavePersonState extends State<SavePerson> {
                             userAlreadyAssigned = true;
                             await MLDataDB.instance.assignClusterToPerson(
                               personID: person.$1.remoteID,
-                              clusterID: widget.clusterID,
+                              clusterID: widget.clusterID!,
                             );
                             Bus.instance.fire(PeopleChangedEvent());
 
@@ -281,6 +304,29 @@ class _SavePersonState extends State<SavePerson> {
     } catch (e) {
       _logger.severe("Error adding new person", e);
       userAlreadyAssigned = false;
+      await showGenericErrorDialog(context: context, error: e);
+    }
+  }
+
+  bool get changed => widget.isEditing
+      ? (_inputName.trim() != widget.person!.data.name ||
+          _selectedDate != widget.person!.data.birthDate)
+      : _inputName.trim().isNotEmpty;
+
+  Future<void> updatePerson(BuildContext context) async {
+    try {
+      final String name = _inputName.trim();
+      final String? birthDate = _selectedDate;
+      final personEntity = await PersonService.instance.updateAttributes(
+        widget.person!.remoteID,
+        name: name,
+        birthDate: birthDate,
+      );
+
+      Bus.instance.fire(PeopleChangedEvent());
+      Navigator.pop(context, personEntity);
+    } catch (e) {
+      _logger.severe("Error adding updating person", e);
       await showGenericErrorDialog(context: context, error: e);
     }
   }

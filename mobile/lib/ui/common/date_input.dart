@@ -29,17 +29,21 @@ class _DatePickerFieldState extends State<DatePickerField> {
   final TextEditingController _controller = TextEditingController();
   DateTime? _selectedDate;
   bool _hasError = false;
+  bool isUSLocale = false;
 
   @override
   void initState() {
     super.initState();
     if (widget.initialValue != null) {
       _controller.text = widget.initialValue!;
-      _tryParseDate(widget.initialValue!).ignore();
+      _tryParseDate(widget.initialValue!, initialParse: true).ignore();
     }
   }
 
-  Future<void> _tryParseDate(String value) async {
+  Future<void> _tryParseDate(String value, {bool initialParse = false}) async {
+    Locale? locale = await getLocale();
+    locale ??= const Locale('en', 'US');
+    isUSLocale = locale.toString().toLowerCase().contains('us');
     // If the field is empty and not required, reset error state and clear date
     if (value.isEmpty && !widget.isRequired) {
       setState(() {
@@ -56,22 +60,19 @@ class _DatePickerFieldState extends State<DatePickerField> {
     }
 
     try {
-      Locale? locale = await getLocale();
-      locale ??= const Locale('en', 'US');
       // Try parsing different date formats
       DateTime? parsed;
-      final List<String> formats =
-          (locale.toString().toLowerCase().contains('us'))
-              ? [
-                  'MM/dd/yyyy',
-                  'MM-dd-yyyy',
-                  'YYYY-MM-dd',
-                ]
-              : [
-                  'dd/MM/yyyy',
-                  'dd-MM-yyyy',
-                  'yyyy-dd-MM',
-                ];
+      final List<String> formats = isUSLocale
+          ? [
+              'MM/dd/yyyy',
+              'MM-dd-yyyy',
+              'yyyy-MM-dd', // Corrected format
+            ]
+          : [
+              'dd/MM/yyyy',
+              'dd-MM-yyyy',
+              'yyyy-MM-dd', // Corrected format
+            ];
 
       for (String format in formats) {
         try {
@@ -98,6 +99,11 @@ class _DatePickerFieldState extends State<DatePickerField> {
         });
 
         if (isValid) {
+          if (initialParse) {
+            _controller.text = isUSLocale
+                ? DateFormat('MM-dd-yyyy').format(parsed)
+                : DateFormat('dd-MM-yyyy').format(parsed);
+          }
           widget.onChanged?.call(parsed);
         }
       } else {
@@ -126,7 +132,9 @@ class _DatePickerFieldState extends State<DatePickerField> {
       setState(() {
         _selectedDate = picked;
         _hasError = false;
-        _controller.text = DateFormat('MM/dd/yyyy').format(picked);
+        _controller.text = isUSLocale
+            ? DateFormat('MM-dd-yyyy').format(picked)
+            : DateFormat('dd-MM-yyyy').format(picked);
       });
       widget.onChanged?.call(picked);
     }
