@@ -43,30 +43,27 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
     const router = useRouter();
 
     useEffect(() => {
-        const main = async () => {
-            const key: string = getKey(SESSION_KEYS.ENCRYPTION_KEY);
-            const keyAttributes: KeyAttributes = getData(
-                LS_KEYS.ORIGINAL_KEY_ATTRIBUTES,
-            );
-            const user: User = getData(LS_KEYS.USER);
-            setUser(user);
-            if (!user?.token) {
-                void router.push("/");
-            } else if (key) {
-                if (justSignedUp()) {
-                    setOpenRecoveryKey(true);
-                    setLoading(false);
-                } else {
-                    void router.push(appHomeRoute);
-                }
-            } else if (keyAttributes?.encryptedKey) {
-                void router.push(PAGES.CREDENTIALS);
-            } else {
-                setToken(user.token);
+        const key: string = getKey(SESSION_KEYS.ENCRYPTION_KEY);
+        const keyAttributes: KeyAttributes = getData(
+            LS_KEYS.ORIGINAL_KEY_ATTRIBUTES,
+        );
+        const user: User = getData(LS_KEYS.USER);
+        setUser(user);
+        if (!user?.token) {
+            void router.push("/");
+        } else if (key) {
+            if (justSignedUp()) {
+                setOpenRecoveryKey(true);
                 setLoading(false);
+            } else {
+                void router.push(appHomeRoute);
             }
-        };
-        void main();
+        } else if (keyAttributes?.encryptedKey) {
+            void router.push(PAGES.CREDENTIALS);
+        } else {
+            setToken(user.token);
+            setLoading(false);
+        }
         appContext.showNavBar(true);
     }, []);
 
