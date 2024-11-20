@@ -46,6 +46,7 @@
  * of going through this file.
  */
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
+import { type StateAddress } from "libsodium-wrappers-sumo";
 import { assertionFailed } from "../assert";
 import { inWorker } from "../env";
 import * as ei from "./ente-impl";
@@ -162,6 +163,43 @@ export const encryptThumbnail = (data: BytesOrB64, key: BytesOrB64) =>
     inWorker()
         ? ei._encryptThumbnail(data, key)
         : sharedCryptoWorker().then((w) => w.encryptThumbnail(data, key));
+
+/**
+ * Encrypt the given data using chunked streaming encryption, but process all
+ * the chunks in one go.
+ *
+ * For more details, see {@link encryptStreamBytes} in `libsodium.ts`.
+ */
+export const encryptStreamBytes = async (data: Uint8Array, key: BytesOrB64) =>
+    inWorker()
+        ? ei._encryptStreamBytes(data, key)
+        : sharedCryptoWorker().then((w) => w.encryptStreamBytes(data, key));
+
+/**
+ * Prepare for chunked streaming encryption using {@link encryptStreamChunk}.
+ *
+ * For more details, see {@link initChunkEncryption} in `libsodium.ts`.
+ */
+export const initChunkEncryption = async (key: BytesOrB64) =>
+    inWorker()
+        ? ei._initChunkEncryption(key)
+        : sharedCryptoWorker().then((w) => w.initChunkEncryption(key));
+
+/**
+ * Encrypt a chunk as part of a chunked streaming encryption.
+ *
+ * For more details, see {@link encryptStreamChunk} in `libsodium.ts`.
+ */
+export const encryptStreamChunk = async (
+    data: Uint8Array,
+    pushState: StateAddress,
+    isFinalChunk: boolean,
+) =>
+    inWorker()
+        ? ei._encryptStreamChunk(data, pushState, isFinalChunk)
+        : sharedCryptoWorker().then((w) =>
+              w.encryptStreamChunk(data, pushState, isFinalChunk),
+          );
 
 /**
  * Encrypt the JSON metadata associated with an Ente object (file, collection or
