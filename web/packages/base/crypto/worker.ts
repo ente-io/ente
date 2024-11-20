@@ -17,7 +17,7 @@ export class CryptoWorker {
     generateBlobOrStreamKey = ei._generateBlobOrStreamKey;
     encryptBoxB64 = ei._encryptBoxB64;
     encryptThumbnail = ei._encryptThumbnail;
-    _encryptBlobB64 = ei._encryptBlobB64;
+    encryptBlobB64 = ei._encryptBlobB64;
     encryptStreamBytes = ei._encryptStreamBytes;
     initChunkEncryption = ei._initChunkEncryption;
     encryptStreamChunk = ei._encryptStreamChunk;

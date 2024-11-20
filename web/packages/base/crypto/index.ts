@@ -147,7 +147,21 @@ export const encryptBlob = (data: BytesOrB64, key: BytesOrB64) =>
 export const encryptBlobB64 = (data: BytesOrB64, key: BytesOrB64) =>
     inWorker()
         ? ei._encryptBlobB64(data, key)
-        : sharedCryptoWorker().then((w) => w._encryptBlobB64(data, key));
+        : sharedCryptoWorker().then((w) => w.encryptBlobB64(data, key));
+
+/**
+ * Encrypt the thumbnail for a file.
+ *
+ * This is midway variant of {@link encryptBlob} and {@link encryptBlobB64} that
+ * returns the decryption header as a base64 string, but leaves the data
+ * unchanged.
+ *
+ * Use {@link decryptThumbnail} to decrypt the result.
+ */
+export const encryptThumbnail = (data: BytesOrB64, key: BytesOrB64) =>
+    inWorker()
+        ? ei._encryptThumbnail(data, key)
+        : sharedCryptoWorker().then((w) => w.encryptThumbnail(data, key));
 
 /**
  * Encrypt the JSON metadata associated with an Ente object (file, collection or
@@ -220,6 +234,14 @@ export const decryptBlobB64 = (blob: EncryptedBlob, key: BytesOrB64) =>
     inWorker()
         ? ei._decryptBlobB64(blob, key)
         : sharedCryptoWorker().then((w) => w.decryptBlobB64(blob, key));
+
+/**
+ * Decrypt the thumbnail encrypted using {@link encryptThumbnail}.
+ */
+export const decryptThumbnail = (blob: EncryptedBlob, key: BytesOrB64) =>
+    inWorker()
+        ? ei._decryptThumbnail(blob, key)
+        : sharedCryptoWorker().then((w) => w.decryptThumbnail(blob, key));
 
 /**
  * Decrypt the metadata JSON encrypted using {@link encryptMetadataJSON}.
