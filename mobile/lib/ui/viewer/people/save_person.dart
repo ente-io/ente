@@ -1,5 +1,5 @@
-import "dart:developer";
 import 'dart:async';
+import "dart:developer";
 
 import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
@@ -188,54 +188,55 @@ class _SavePersonState extends State<SavePerson> {
             }
 
             return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // left align
-                  Padding(
-                    padding: const EdgeInsets.only(top: 12, bottom: 12),
-                    child: Text(
-                      context.l10n.orMergeWithExistingPerson,
-                      style: getEnteTextTheme(context).largeBold,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // left align
+                Padding(
+                  padding: const EdgeInsets.only(top: 12, bottom: 12),
+                  child: Text(
+                    context.l10n.orMergeWithExistingPerson,
+                    style: getEnteTextTheme(context).largeBold,
+                  ),
+                ),
+
+                SizedBox(
+                  height: 160, // Adjust this height based on your needs
+                  child: ScrollConfiguration(
+                    behavior: ScrollConfiguration.of(context).copyWith(
+                      scrollbars: true,
+                    ),
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.only(right: 8),
+                      itemCount: searchResults.length,
+                      itemBuilder: (context, index) {
+                        final person = searchResults[index];
+                        return PersonGridItem(
+                          person: person.$1,
+                          personFile: person.$2,
+                          onTap: () async {
+                            if (userAlreadyAssigned) {
+                              return;
+                            }
+                            userAlreadyAssigned = true;
+                            await MLDataDB.instance.assignClusterToPerson(
+                              personID: person.$1.remoteID,
+                              clusterID: widget.clusterID,
+                            );
+                            Bus.instance.fire(PeopleChangedEvent());
+
+                            Navigator.pop(context, person);
+                          },
+                        );
+                      },
+                      separatorBuilder: (context, index) {
+                        return const SizedBox(width: 6);
+                      },
                     ),
                   ),
-
-                  SizedBox(
-                    height: 160, // Adjust this height based on your needs
-                    child: ScrollConfiguration(
-                      behavior: ScrollConfiguration.of(context).copyWith(
-                        scrollbars: true,
-                      ),
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.only(right: 8),
-                        itemCount: searchResults.length,
-                        itemBuilder: (context, index) {
-                          final person = searchResults[index];
-                          return PersonGridItem(
-                            person: person.$1,
-                            personFile: person.$2,
-                            onTap: () async {
-                              if (userAlreadyAssigned) {
-                                return;
-                              }
-                              userAlreadyAssigned = true;
-                              await MLDataDB.instance.assignClusterToPerson(
-                                personID: person.$1.remoteID,
-                                clusterID: widget.clusterID,
-                              );
-                              Bus.instance.fire(PeopleChangedEvent());
-
-                              Navigator.pop(context, person);
-                            },
-                          );
-                        },
-                        separatorBuilder: (context, index) {
-                          return const SizedBox(width: 6);
-                        },
-                      ),
-                    ),
-                  ),
-                ]);
+                ),
+              ],
+            );
           } else {
             return const EnteLoadingWidget();
           }
