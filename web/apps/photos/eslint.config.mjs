@@ -3,7 +3,7 @@ import config from "@/build-config/eslintrc-next-app.mjs";
 export default [
     ...config,
     {
-        ignores: ["thirdparty", "public"],
+        ignores: ["thirdparty"],
     },
     {
         rules: {

@@ -27,6 +27,7 @@ export default [
         },
     },
     {
+        files: ["**/*.{jsx,tsx}"],
         plugins: {
             "react-hooks": hooksPlugin,
             "react-refresh": reactRefreshPlugin,
