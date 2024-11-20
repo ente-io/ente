@@ -9,7 +9,7 @@
         "@mui/material": "^5.16.6",
         "comlink": "^4.4.2",
         "get-user-locale": "^2.3.2",
-        "i18next": "^23.16.5",
+        "i18next": "^23.16.6",
         "i18next-resources-to-backend": "^1.2.1",
         "is-electron": "^2.2.2",
         "libsodium-wrappers-sumo": "^0.7.15",
