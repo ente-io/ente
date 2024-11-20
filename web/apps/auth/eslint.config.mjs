@@ -16,12 +16,7 @@ export default [
             "@typescript-eslint/no-unsafe-member-access": "off",
             "@typescript-eslint/no-unsafe-argument": "off",
             /** TODO: Disabled as we migrate, try to prune these again */
-
-            "@typescript-eslint/no-unsafe-enum-comparison": "off",
             "@typescript-eslint/no-unnecessary-type-assertion": "off",
-            "@typescript-eslint/array-type": "off",
-            "@typescript-eslint/no-empty-function": "off",
-            "@typescript-eslint/no-unnecessary-template-expression": "off",
             "@typescript-eslint/consistent-indexed-object-style": "off",
             "@typescript-eslint/prefer-promise-reject-errors": "off",
             "@typescript-eslint/no-useless-constructor": "off",
