@@ -1,7 +1,4 @@
-import {
-    streamEncryptionChunkSize,
-    type B64EncryptionResult,
-} from "@/base/crypto/libsodium";
+import { streamEncryptionChunkSize } from "@/base/crypto/libsodium";
 import type { BytesOrB64 } from "@/base/crypto/types";
 import { type CryptoWorker } from "@/base/crypto/worker";
 import { ensureElectron } from "@/base/electron";
@@ -238,11 +235,6 @@ interface FileWithMetadata extends Omit<ThumbnailedFile, "hasStaticThumbnail"> {
     pubMagicMetadata: FilePublicMagicMetadata;
 }
 
-interface EncryptedFile {
-    file: ProcessedFile;
-    fileKey: B64EncryptionResult;
-}
-
 interface EncryptedFileStream {
     /**
      * A stream of the file's encrypted contents
@@ -260,12 +252,7 @@ interface EncryptedFileStream {
     chunkCount: number;
 }
 
-interface EncryptedMetadata {
-    encryptedDataB64: string;
-    decryptionHeaderB64: string;
-}
-
-interface ProcessedFile {
+interface EncryptedFilePieces {
     file: {
         encryptedData: Uint8Array | EncryptedFileStream;
         decryptionHeader: string;
@@ -274,7 +261,10 @@ interface ProcessedFile {
         encryptedData: Uint8Array;
         decryptionHeader: string;
     };
-    metadata: EncryptedMetadata;
+    metadata: {
+        encryptedDataB64: string;
+        decryptionHeaderB64: string;
+    };
     pubMagicMetadata: EncryptedMagicMetadata;
     localID: number;
 }
@@ -616,7 +606,7 @@ export const uploader = async (
             pubMagicMetadata,
         };
 
-        const encryptedFile = await encryptFile(
+        const { encryptedFilePieces, encryptedFileKey } = await encryptFile(
             fileWithMetadata,
             collection.key,
             worker,
@@ -625,7 +615,7 @@ export const uploader = async (
         abortIfCancelled();
 
         const backupedFile = await uploadToBucket(
-            encryptedFile.file,
+            encryptedFilePieces,
             makeProgessTracker,
             isCFUploadProxyDisabled,
             abortIfCancelled,
@@ -633,8 +623,8 @@ export const uploader = async (
 
         const uploadedFile = await uploadService.uploadFile({
             collectionID: collection.id,
-            encryptedKey: encryptedFile.fileKey.encryptedData,
-            keyDecryptionNonce: encryptedFile.fileKey.nonce,
+            encryptedKey: encryptedFileKey.encryptedData,
+            keyDecryptionNonce: encryptedFileKey.nonce,
             ...backupedFile,
         });
 
@@ -1346,7 +1336,7 @@ const encryptFile = async (
     file: FileWithMetadata,
     encryptionKey: string,
     worker: CryptoWorker,
-): Promise<EncryptedFile> => {
+) => {
     const fileKey = await worker.generateBlobOrStreamKey();
 
     const { fileStreamOrData, thumbnail, metadata, pubMagicMetadata, localID } =
@@ -1383,17 +1373,19 @@ const encryptFile = async (
 
     const encryptedKey = await worker.encryptToB64(fileKey, encryptionKey);
 
-    const result: EncryptedFile = {
-        file: {
+    return {
+        encryptedFilePieces: {
             file: encryptedFiledata,
             thumbnail: encryptedThumbnail,
             metadata: encryptedMetadata,
             pubMagicMetadata: encryptedPubMagicMetadata,
             localID: localID,
         },
-        fileKey: encryptedKey,
+        encryptedFileKey: {
+            encryptedData: encryptedKey.encryptedData,
+            nonce: encryptedKey.nonce,
+        },
     };
-    return result;
 };
 
 const encryptFileStream = async (
@@ -1427,15 +1419,17 @@ const encryptFileStream = async (
 };
 
 const uploadToBucket = async (
-    file: ProcessedFile,
+    encryptedFilePieces: EncryptedFilePieces,
     makeProgessTracker: MakeProgressTracker,
     isCFUploadProxyDisabled: boolean,
     abortIfCancelled: () => void,
 ): Promise<BackupedFile> => {
+    const { localID, file, thumbnail, metadata, pubMagicMetadata } =
+        encryptedFilePieces;
     try {
         let fileObjectKey: string = null;
 
-        const encryptedData = file.file.encryptedData;
+        const encryptedData = file.encryptedData;
         if (
             !(encryptedData instanceof Uint8Array) &&
             encryptedData.chunkCount >= multipartChunksPerPart
@@ -1443,7 +1437,7 @@ const uploadToBucket = async (
             // We have a stream, and it is more than multipartChunksPerPart
             // chunks long, so use a multipart upload to upload it.
             fileObjectKey = await uploadStreamUsingMultipart(
-                file.localID,
+                localID,
                 encryptedData,
                 makeProgessTracker,
                 isCFUploadProxyDisabled,
@@ -1455,7 +1449,7 @@ const uploadToBucket = async (
                     ? encryptedData
                     : await readEntireStream(encryptedData.stream);
 
-            const progressTracker = makeProgessTracker(file.localID);
+            const progressTracker = makeProgessTracker(localID);
             const fileUploadURL = await uploadService.getUploadURL();
             if (!isCFUploadProxyDisabled) {
                 fileObjectKey = await UploadHttpClient.putFileV2(
@@ -1476,31 +1470,31 @@ const uploadToBucket = async (
         if (!isCFUploadProxyDisabled) {
             thumbnailObjectKey = await UploadHttpClient.putFileV2(
                 thumbnailUploadURL,
-                file.thumbnail.encryptedData,
+                thumbnail.encryptedData,
                 null,
             );
         } else {
             thumbnailObjectKey = await UploadHttpClient.putFile(
                 thumbnailUploadURL,
-                file.thumbnail.encryptedData,
+                thumbnail.encryptedData,
                 null,
             );
         }
 
         const backupedFile: BackupedFile = {
             file: {
-                decryptionHeader: file.file.decryptionHeader,
+                decryptionHeader: file.decryptionHeader,
                 objectKey: fileObjectKey,
             },
             thumbnail: {
-                decryptionHeader: file.thumbnail.decryptionHeader,
+                decryptionHeader: thumbnail.decryptionHeader,
                 objectKey: thumbnailObjectKey,
             },
             metadata: {
-                encryptedData: file.metadata.encryptedDataB64,
-                decryptionHeader: file.metadata.decryptionHeaderB64,
+                encryptedData: metadata.encryptedDataB64,
+                decryptionHeader: metadata.decryptionHeaderB64,
             },
-            pubMagicMetadata: file.pubMagicMetadata,
+            pubMagicMetadata: pubMagicMetadata,
         };
         return backupedFile;
     } catch (e) {
