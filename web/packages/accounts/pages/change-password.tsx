@@ -64,7 +64,7 @@ const Page: React.FC<PageProps> = () => {
         let kek: KEK;
         try {
             kek = await cryptoWorker.deriveSensitiveKey(passphrase, kekSalt);
-        } catch (e) {
+        } catch {
             setFieldError("confirm", t("PASSWORD_GENERATION_FAILED"));
             return;
         }

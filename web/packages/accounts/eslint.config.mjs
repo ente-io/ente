@@ -20,9 +20,6 @@ export default [
             "react-hooks/exhaustive-deps": "off",
             "react-hooks/rules-of-hooks": "off",
             "react-refresh/only-export-components": "off",
-            /** TODO: New during eslint 8=>9 migration */
-            "@typescript-eslint/no-unused-vars": "off",
-
         },
     },
 ];

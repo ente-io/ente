@@ -5,6 +5,7 @@ import {
     FormPaperTitle,
 } from "@/base/components/FormPaper";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
+import log from "@/base/log";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import LinkButton from "@ente/shared/components/LinkButton";
 import { LS_KEYS, getData, setLSUser } from "@ente/shared/storage/localStorage";
@@ -69,6 +70,7 @@ const ChangeEmailForm: React.FC = () => {
             //     ottInputRef.current?.focus();
             // }, 250);
         } catch (e) {
+            log.error(e);
             setFieldError("email", t("email_already_taken"));
         }
         setLoading(false);
@@ -85,6 +87,7 @@ const ChangeEmailForm: React.FC = () => {
             setLoading(false);
             void goToApp();
         } catch (e) {
+            log.error(e);
             setLoading(false);
             setFieldError("ott", t("INCORRECT_CODE"));
         }
