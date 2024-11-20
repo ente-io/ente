@@ -13,6 +13,11 @@ export default [
                 version: "detect",
             },
         },
+        rules: {
+            // The rule is misguided - only the opener should be omitted, not
+            // the referrer.
+            "react/jsx-no-target-blank": ["warn", { allowReferrer: true }],
+        },
     },
     {
         plugins: {
@@ -36,9 +41,6 @@ export default [
 
 // module.exports = {
 //     rules: {
-//         /* The rule is misguided - only the opener should be omitted, not the
-//            referrer. */
-//         "react/jsx-no-target-blank": ["warn", { allowReferrer: true }],
 //         /* Otherwise we need to do unnecessary boilerplating when using memo. */
 //         "react/display-name": "off",
 //         /* Next.js supports the JSX transform introduced in React 17 */
