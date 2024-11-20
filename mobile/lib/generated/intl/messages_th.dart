@@ -20,37 +20,47 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'th';
 
-  static String m7(count) => "${Intl.plural(count, other: 'เพิ่มรายการ')}";
+  static String m10(count) => "${Intl.plural(count, other: 'เพิ่มรายการ')}";
 
-  static String m13(versionValue) => "รุ่น: ${versionValue}";
+  static String m16(versionValue) => "รุ่น: ${versionValue}";
 
-  static String m22(count) =>
+  static String m25(count) =>
       "${Intl.plural(count, one: 'ลบ ${count} รายการ', other: 'ลบ ${count} รายการ')}";
 
-  static String m23(currentlyDeleting, totalCount) =>
+  static String m26(currentlyDeleting, totalCount) =>
       "กำลังลบ ${currentlyDeleting} / ${totalCount}";
 
-  static String m25(supportEmail) =>
+  static String m28(supportEmail) =>
       "กรุณาส่งอีเมลไปที่ ${supportEmail} จากที่อยู่อีเมลที่คุณลงทะเบียนไว้";
 
-  static String m37(currentlyProcessing, totalCount) =>
+  static String m41(currentlyProcessing, totalCount) =>
       "กำลังประมวลผล ${currentlyProcessing} / ${totalCount}";
 
-  static String m38(count) => "${Intl.plural(count, other: '${count} รายการ')}";
+  static String m42(count) => "${Intl.plural(count, other: '${count} รายการ')}";
 
-  static String m40(count) => "${Intl.plural(count, other: 'ย้ายรายการ')}";
+  static String m44(count) => "${Intl.plural(count, other: 'ย้ายรายการ')}";
 
-  static String m0(passwordStrengthValue) =>
+  static String m3(passwordStrengthValue) =>
       "ความแข็งแรงของรหัสผ่าน: ${passwordStrengthValue}";
 
-  static String m62(
+  static String m66(
           usedAmount, usedStorageUnit, totalAmount, totalStorageUnit) =>
       "ใช้ไป ${usedAmount} ${usedStorageUnit} จาก ${totalAmount} ${totalStorageUnit}";
 
-  static String m2(email) => "เราได้ส่งจดหมายไปยัง <green>${email}</green>";
+  static String m0(ignoreReason) =>
+      "Tap to upload, upload is currently ignored due to ${ignoreReason}";
+
+  static String m1(galleryType) =>
+      "Type of gallery ${galleryType} is not supported for rename";
+
+  static String m2(ignoreReason) => "Upload is ignored due to ${ignoreReason}";
+
+  static String m5(email) => "เราได้ส่งจดหมายไปยัง <green>${email}</green>";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
+        "accountIsAlreadyConfigured": MessageLookupByLibrary.simpleMessage(
+            "Account is already configured."),
         "accountWelcomeBack":
             MessageLookupByLibrary.simpleMessage("ยินดีต้อนรับกลับมา!"),
         "ackPasswordLostWarning": MessageLookupByLibrary.simpleMessage(
@@ -60,7 +70,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "addANewEmail": MessageLookupByLibrary.simpleMessage("เพิ่มอีเมลใหม่"),
         "addCollaborator":
             MessageLookupByLibrary.simpleMessage("เพิ่มผู้ทำงานร่วมกัน"),
-        "addItem": m7,
+        "addFiles": MessageLookupByLibrary.simpleMessage("Add Files"),
+        "addItem": m10,
         "addMore": MessageLookupByLibrary.simpleMessage("เพิ่มอีก"),
         "addToAlbum": MessageLookupByLibrary.simpleMessage("เพิ่มไปยังอัลบั้ม"),
         "addViewer": MessageLookupByLibrary.simpleMessage("เพิ่มผู้ชม"),
@@ -77,7 +88,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "androidBiometricSuccess":
             MessageLookupByLibrary.simpleMessage("สำเร็จ"),
         "androidCancelButton": MessageLookupByLibrary.simpleMessage("ยกเลิก"),
-        "appVersion": m13,
+        "appVersion": m16,
         "apply": MessageLookupByLibrary.simpleMessage("นำไปใช้"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "เหตุผลหลักที่คุณลบบัญชีคืออะไร?"),
@@ -87,13 +98,12 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "สามารถสร้างลิงก์ได้เฉพาะไฟล์ที่คุณเป็นเจ้าของ"),
         "cancel": MessageLookupByLibrary.simpleMessage("ยกเลิก"),
+        "castAlbum": MessageLookupByLibrary.simpleMessage("Cast album"),
         "changeEmail": MessageLookupByLibrary.simpleMessage("เปลี่ยนอีเมล"),
         "changePasswordTitle":
             MessageLookupByLibrary.simpleMessage("เปลี่ยนรหัสผ่าน"),
         "checkInboxAndSpamFolder": MessageLookupByLibrary.simpleMessage(
             "โปรดตรวจสอบกล่องจดหมาย (และสแปม) ของคุณ เพื่อยืนยันให้เสร็จสิ้น"),
-        "checkingModels":
-            MessageLookupByLibrary.simpleMessage("Checking models..."),
         "codeCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
             "คัดลอกรหัสไปยังคลิปบอร์ดแล้ว"),
         "collectPhotos": MessageLookupByLibrary.simpleMessage("รวบรวมรูปภาพ"),
@@ -132,8 +142,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteEmptyAlbumsWithQuestionMark":
             MessageLookupByLibrary.simpleMessage(
                 "ลบอัลบั้มที่ว่างเปล่าหรือไม่?"),
-        "deleteItemCount": m22,
-        "deleteProgress": m23,
+        "deleteItemCount": m25,
+        "deleteProgress": m26,
         "deleteReason1": MessageLookupByLibrary.simpleMessage(
             "ขาดคุณสมบัติสำคัญที่ฉันต้องการ"),
         "deleteReason2": MessageLookupByLibrary.simpleMessage(
@@ -145,14 +155,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteRequestSLAText": MessageLookupByLibrary.simpleMessage(
             "คำขอของคุณจะได้รับการดำเนินการภายใน 72 ชั่วโมง"),
         "doThisLater": MessageLookupByLibrary.simpleMessage("ทำในภายหลัง"),
-        "dropSupportEmail": m25,
+        "dropSupportEmail": m28,
         "edit": MessageLookupByLibrary.simpleMessage("แก้ไข"),
         "editLocationTagTitle":
             MessageLookupByLibrary.simpleMessage("แก้ไขตำแหน่ง"),
         "eligible": MessageLookupByLibrary.simpleMessage("มีสิทธิ์"),
         "email": MessageLookupByLibrary.simpleMessage("อีเมล"),
-        "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
-            "Enable machine learning for magic search and face recognition"),
         "enableMaps": MessageLookupByLibrary.simpleMessage("เปิดใช้งานแผนที่"),
         "encryption": MessageLookupByLibrary.simpleMessage("การเข้ารหัส"),
         "enterCode": MessageLookupByLibrary.simpleMessage("ป้อนรหัส"),
@@ -169,20 +177,32 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("ใส่รหัสผ่านของคุณ"),
         "enterYourRecoveryKey":
             MessageLookupByLibrary.simpleMessage("ป้อนคีย์การกู้คืน"),
+        "error": MessageLookupByLibrary.simpleMessage("Error"),
+        "failedToFetchActiveSessions": MessageLookupByLibrary.simpleMessage(
+            "Failed to fetch active sessions"),
+        "failedToPlayVideo":
+            MessageLookupByLibrary.simpleMessage("Failed to play video"),
+        "failedToRefreshStripeSubscription":
+            MessageLookupByLibrary.simpleMessage(
+                "Failed to refresh subscription"),
         "faq": MessageLookupByLibrary.simpleMessage("คำถามที่พบบ่อย"),
         "favorite": MessageLookupByLibrary.simpleMessage("ชื่นชอบ"),
         "feedback": MessageLookupByLibrary.simpleMessage("ความคิดเห็น"),
         "fileInfoAddDescHint":
             MessageLookupByLibrary.simpleMessage("เพิ่มคำอธิบาย..."),
+        "fileNotUploadedYet":
+            MessageLookupByLibrary.simpleMessage("File not uploaded yet"),
         "forgotPassword": MessageLookupByLibrary.simpleMessage("ลืมรหัสผ่าน"),
         "freeTrial": MessageLookupByLibrary.simpleMessage("ทดลองใช้ฟรี"),
-        "genericProgress": m37,
+        "genericProgress": m41,
         "goToSettings": MessageLookupByLibrary.simpleMessage("ไปที่การตั้งค่า"),
         "hide": MessageLookupByLibrary.simpleMessage("ซ่อน"),
         "hostedAtOsmFrance":
             MessageLookupByLibrary.simpleMessage("โฮสต์ที่ OSM ฝรั่งเศส"),
         "howItWorks": MessageLookupByLibrary.simpleMessage("วิธีการทำงาน"),
         "iOSOkButton": MessageLookupByLibrary.simpleMessage("ตกลง"),
+        "imageNotAnalyzed":
+            MessageLookupByLibrary.simpleMessage("Image not analyzed"),
         "importing": MessageLookupByLibrary.simpleMessage("กำลังนำเข้า...."),
         "incorrectPasswordTitle":
             MessageLookupByLibrary.simpleMessage("รหัสผ่านไม่ถูกต้อง"),
@@ -192,6 +212,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "คีย์การกู้คืนที่คุณป้อนไม่ถูกต้อง"),
         "incorrectRecoveryKeyTitle":
             MessageLookupByLibrary.simpleMessage("คีย์การกู้คืนไม่ถูกต้อง"),
+        "info": MessageLookupByLibrary.simpleMessage("Info"),
         "insecureDevice":
             MessageLookupByLibrary.simpleMessage("อุปกรณ์ไม่ปลอดภัย"),
         "invalidEmailAddress":
@@ -199,7 +220,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "invalidKey": MessageLookupByLibrary.simpleMessage("รหัสไม่ถูกต้อง"),
         "invalidRecoveryKey": MessageLookupByLibrary.simpleMessage(
             "คีย์การกู้คืนที่คุณป้อนไม่ถูกต้อง โปรดตรวจสอบให้แน่ใจว่ามี 24 คำ และตรวจสอบการสะกดของแต่ละคำ\n\nหากคุณป้อนรหัสกู้คืนที่เก่ากว่า ตรวจสอบให้แน่ใจว่ามีความยาว 64 ตัวอักษร และตรวจสอบแต่ละตัวอักษร"),
-        "itemCount": m38,
+        "itemCount": m42,
         "kindlyHelpUsWithThisInformation":
             MessageLookupByLibrary.simpleMessage("กรุณาช่วยเราด้วยข้อมูลนี้"),
         "lastUpdated": MessageLookupByLibrary.simpleMessage("อัปเดตล่าสุด"),
@@ -217,10 +238,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "map": MessageLookupByLibrary.simpleMessage("แผนที่"),
         "maps": MessageLookupByLibrary.simpleMessage("แผนที่"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("ปานกลาง"),
-        "moveItem": m40,
+        "moveItem": m44,
         "moveToAlbum": MessageLookupByLibrary.simpleMessage("ย้ายไปยังอัลบั้ม"),
         "name": MessageLookupByLibrary.simpleMessage("ชื่อ"),
         "newest": MessageLookupByLibrary.simpleMessage("ใหม่สุด"),
+        "noFacesFound": MessageLookupByLibrary.simpleMessage("No faces found"),
+        "noInternetConnection":
+            MessageLookupByLibrary.simpleMessage("No internet connection"),
         "noRecoveryKey":
             MessageLookupByLibrary.simpleMessage("ไม่มีคีย์การกู้คืน?"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
@@ -238,7 +262,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "password": MessageLookupByLibrary.simpleMessage("รหัสผ่าน"),
         "passwordChangedSuccessfully":
             MessageLookupByLibrary.simpleMessage("เปลี่ยนรหัสผ่านสำเร็จ"),
-        "passwordStrength": m0,
+        "passwordStrength": m3,
         "passwordWarning": MessageLookupByLibrary.simpleMessage(
             "เราไม่จัดเก็บรหัสผ่านนี้ ดังนั้นหากคุณลืม <underline>เราจะไม่สามารถถอดรหัสข้อมูลของคุณ</underline>"),
         "peopleUsingYourCode":
@@ -246,6 +270,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "permanentlyDelete":
             MessageLookupByLibrary.simpleMessage("ลบอย่างถาวร"),
         "photoSmallCase": MessageLookupByLibrary.simpleMessage("รูปภาพ"),
+        "pleaseCheckYourInternetConnectionAndTryAgain":
+            MessageLookupByLibrary.simpleMessage(
+                "Please check your internet connection and try again."),
         "pleaseTryAgain":
             MessageLookupByLibrary.simpleMessage("กรุณาลองอีกครั้ง"),
         "pleaseWait": MessageLookupByLibrary.simpleMessage("กรุณารอสักครู่..."),
@@ -288,16 +315,14 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "บันทึกคีย์การกู้คืนของคุณหากคุณยังไม่ได้ทำ"),
         "scanCode": MessageLookupByLibrary.simpleMessage("สแกนรหัส"),
-        "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
-            "Images will be shown here once processing is complete"),
-        "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
-            "People will be shown here once processing is complete"),
-        "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
-            "People will be shown here once processing is complete"),
         "selectAll": MessageLookupByLibrary.simpleMessage("เลือกทั้งหมด"),
         "selectReason": MessageLookupByLibrary.simpleMessage("เลือกเหตุผล"),
         "sendEmail": MessageLookupByLibrary.simpleMessage("ส่งอีเมล"),
         "sendLink": MessageLookupByLibrary.simpleMessage("ส่งลิงก์"),
+        "sessionExpired":
+            MessageLookupByLibrary.simpleMessage("Session expired"),
+        "sessionIdMismatch":
+            MessageLookupByLibrary.simpleMessage("Session ID mismatch"),
         "setPasswordTitle":
             MessageLookupByLibrary.simpleMessage("ตั้งรหัสผ่าน"),
         "setupComplete":
@@ -316,7 +341,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "storageBreakupFamily":
             MessageLookupByLibrary.simpleMessage("ครอบครัว"),
         "storageBreakupYou": MessageLookupByLibrary.simpleMessage("คุณ"),
-        "storageUsageInfo": m62,
+        "storageUsageInfo": m66,
         "strongStrength": MessageLookupByLibrary.simpleMessage("แข็งแรง"),
         "syncStopped": MessageLookupByLibrary.simpleMessage("หยุดการซิงค์แล้ว"),
         "syncing": MessageLookupByLibrary.simpleMessage("กำลังซิงค์..."),
@@ -324,6 +349,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "tapToCopy": MessageLookupByLibrary.simpleMessage("แตะเพื่อคัดลอก"),
         "tapToEnterCode":
             MessageLookupByLibrary.simpleMessage("แตะเพื่อป้อนรหัส"),
+        "tapToUpload": MessageLookupByLibrary.simpleMessage("Tap to upload"),
+        "tapToUploadIsIgnoredDue": m0,
         "termsOfServicesTitle":
             MessageLookupByLibrary.simpleMessage("เงื่อนไข"),
         "theRecoveryKeyYouEnteredIsIncorrect":
@@ -337,12 +364,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "tryAgain": MessageLookupByLibrary.simpleMessage("ลองอีกครั้ง"),
         "twofactorSetup":
             MessageLookupByLibrary.simpleMessage("การตั้งค่าสองปัจจัย"),
+        "typeOfGallerGallerytypeIsNotSupportedForRename": m1,
         "unarchive": MessageLookupByLibrary.simpleMessage("เลิกเก็บถาวร"),
         "uncategorized": MessageLookupByLibrary.simpleMessage("ไม่มีหมวดหมู่"),
         "unhide": MessageLookupByLibrary.simpleMessage("เลิกซ่อน"),
         "unhideToAlbum":
             MessageLookupByLibrary.simpleMessage("เลิกซ่อนไปยังอัลบั้ม"),
         "unselectAll": MessageLookupByLibrary.simpleMessage("ไม่เลือกทั้งหมด"),
+        "uploadIsIgnoredDueToIgnorereason": m2,
         "useRecoveryKey":
             MessageLookupByLibrary.simpleMessage("ใช้คีย์การกู้คืน"),
         "verify": MessageLookupByLibrary.simpleMessage("ยืนยัน"),
@@ -357,7 +386,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("ดูคีย์การกู้คืน"),
         "waitingForWifi":
             MessageLookupByLibrary.simpleMessage("กำลังรอ WiFi..."),
-        "weHaveSendEmailTo": m2,
+        "weHaveSendEmailTo": m5,
         "weakStrength": MessageLookupByLibrary.simpleMessage("อ่อน"),
         "welcomeBack":
             MessageLookupByLibrary.simpleMessage("ยินดีต้อนรับกลับมา!"),

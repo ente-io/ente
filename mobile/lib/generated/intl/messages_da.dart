@@ -20,20 +20,31 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'da';
 
-  static String m3(count, formattedCount) =>
+  static String m6(count, formattedCount) =>
       "${Intl.plural(count, zero: 'ingen minder', one: '${formattedCount} minde', other: '${formattedCount} minder')}";
 
-  static String m4(count) => "${count} valgt";
+  static String m7(count) => "${count} valgt";
 
-  static String m5(verificationID) =>
+  static String m8(verificationID) =>
       "Hey, kan du bekræfte, at dette er dit ente.io verifikation ID: ${verificationID}";
+
+  static String m0(ignoreReason) =>
+      "Tap to upload, upload is currently ignored due to ${ignoreReason}";
+
+  static String m1(galleryType) =>
+      "Type of gallery ${galleryType} is not supported for rename";
+
+  static String m2(ignoreReason) => "Upload is ignored due to ${ignoreReason}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
+        "accountIsAlreadyConfigured": MessageLookupByLibrary.simpleMessage(
+            "Account is already configured."),
         "accountWelcomeBack":
             MessageLookupByLibrary.simpleMessage("Velkommen tilbage!"),
         "activeSessions":
             MessageLookupByLibrary.simpleMessage("Aktive sessioner"),
+        "addFiles": MessageLookupByLibrary.simpleMessage("Add Files"),
         "addOnPageSubtitle":
             MessageLookupByLibrary.simpleMessage("Oplysninger om tilføjelser"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
@@ -41,8 +52,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "backedUpFolders":
             MessageLookupByLibrary.simpleMessage("Sikkerhedskopierede mapper"),
         "cancel": MessageLookupByLibrary.simpleMessage("Annuller"),
-        "checkingModels":
-            MessageLookupByLibrary.simpleMessage("Checking models..."),
+        "castAlbum": MessageLookupByLibrary.simpleMessage("Cast album"),
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("Bekræft Sletning Af Konto"),
         "confirmPassword":
@@ -72,27 +82,39 @@ class MessageLookup extends MessageLookupByLibrary {
             "Din anmodning vil blive behandlet inden for 72 timer."),
         "developerSettingsWarning": MessageLookupByLibrary.simpleMessage(
             "Er du sikker på, at du vil ændre udviklerindstillingerne?"),
+        "edit": MessageLookupByLibrary.simpleMessage("Edit"),
         "email": MessageLookupByLibrary.simpleMessage("Email"),
-        "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
-            "Enable machine learning for magic search and face recognition"),
         "enterPin": MessageLookupByLibrary.simpleMessage("Indtast PIN"),
         "enterValidEmail": MessageLookupByLibrary.simpleMessage(
             "Indtast venligst en gyldig email adresse."),
         "enterYourEmailAddress":
             MessageLookupByLibrary.simpleMessage("Indtast din email adresse"),
+        "error": MessageLookupByLibrary.simpleMessage("Error"),
+        "failedToFetchActiveSessions": MessageLookupByLibrary.simpleMessage(
+            "Failed to fetch active sessions"),
+        "failedToPlayVideo":
+            MessageLookupByLibrary.simpleMessage("Failed to play video"),
+        "failedToRefreshStripeSubscription":
+            MessageLookupByLibrary.simpleMessage(
+                "Failed to refresh subscription"),
         "familyPlanPortalTitle":
             MessageLookupByLibrary.simpleMessage("Familie"),
         "feedback": MessageLookupByLibrary.simpleMessage("Feedback"),
+        "fileNotUploadedYet":
+            MessageLookupByLibrary.simpleMessage("File not uploaded yet"),
         "fileSavedToGallery":
             MessageLookupByLibrary.simpleMessage("Fil gemt i galleri"),
         "findPeopleByName":
             MessageLookupByLibrary.simpleMessage("Find folk hurtigt ved navn"),
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("Glemt adgangskode"),
+        "imageNotAnalyzed":
+            MessageLookupByLibrary.simpleMessage("Image not analyzed"),
         "incorrectPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Forkert adgangskode"),
         "incorrectRecoveryKeyBody": MessageLookupByLibrary.simpleMessage(
             "Den gendannelsesnøgle du indtastede er forkert"),
+        "info": MessageLookupByLibrary.simpleMessage("Info"),
         "invalidEmailAddress":
             MessageLookupByLibrary.simpleMessage("Ugyldig email adresse"),
         "invite": MessageLookupByLibrary.simpleMessage("Inviter"),
@@ -103,14 +125,20 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "Langt tryk på en e-mail for at bekræfte slutningen af krypteringen."),
         "manage": MessageLookupByLibrary.simpleMessage("Administrér"),
-        "memoryCount": m3,
+        "memoryCount": m6,
         "mlIndexingDescription": MessageLookupByLibrary.simpleMessage(
             "Bemærk venligst, at maskinindlæring vil resultere i en højere båndbredde og batteriforbrug, indtil alle elementer er indekseret. Overvej at bruge desktop app til hurtigere indeksering, vil alle resultater blive synkroniseret automatisk."),
         "moments": MessageLookupByLibrary.simpleMessage("Øjeblikke"),
         "next": MessageLookupByLibrary.simpleMessage("Næste"),
+        "noFacesFound": MessageLookupByLibrary.simpleMessage("No faces found"),
+        "noInternetConnection":
+            MessageLookupByLibrary.simpleMessage("No internet connection"),
         "ok": MessageLookupByLibrary.simpleMessage("Ok"),
         "oops": MessageLookupByLibrary.simpleMessage("Ups"),
         "password": MessageLookupByLibrary.simpleMessage("Adgangskode"),
+        "pleaseCheckYourInternetConnectionAndTryAgain":
+            MessageLookupByLibrary.simpleMessage(
+                "Please check your internet connection and try again."),
         "pleaseContactSupportAndWeWillBeHappyToHelp":
             MessageLookupByLibrary.simpleMessage(
                 "Kontakt support@ente.io og vi vil være glade for at hjælpe!"),
@@ -118,22 +146,23 @@ class MessageLookup extends MessageLookupByLibrary {
         "scanThisBarcodeWithnyourAuthenticatorApp":
             MessageLookupByLibrary.simpleMessage(
                 "Skan denne QR-kode med godkendelses-appen"),
-        "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
-            "Images will be shown here once processing is complete"),
         "searchHint1":
             MessageLookupByLibrary.simpleMessage("Hurtig, søgning på enheden"),
-        "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
-            "People will be shown here once processing is complete"),
-        "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
-            "People will be shown here once processing is complete"),
         "selectReason": MessageLookupByLibrary.simpleMessage("Vælg årsag"),
-        "selectedPhotos": m4,
+        "selectedPhotos": m7,
         "sendEmail": MessageLookupByLibrary.simpleMessage("Send email"),
-        "shareTextConfirmOthersVerificationID": m5,
+        "sessionExpired":
+            MessageLookupByLibrary.simpleMessage("Session expired"),
+        "sessionIdMismatch":
+            MessageLookupByLibrary.simpleMessage("Session ID mismatch"),
+        "share": MessageLookupByLibrary.simpleMessage("Share"),
+        "shareTextConfirmOthersVerificationID": m8,
         "somethingWentWrongPleaseTryAgain":
             MessageLookupByLibrary.simpleMessage(
                 "Noget gik galt, prøv venligst igen"),
         "subscribe": MessageLookupByLibrary.simpleMessage("Abonner"),
+        "tapToUpload": MessageLookupByLibrary.simpleMessage("Tap to upload"),
+        "tapToUploadIsIgnoredDue": m0,
         "terminateSession":
             MessageLookupByLibrary.simpleMessage("Afslut session?"),
         "thisWillLogYouOutOfTheFollowingDevice":
@@ -141,6 +170,8 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Dette vil logge dig ud af følgende enhed:"),
         "thisWillLogYouOutOfThisDevice": MessageLookupByLibrary.simpleMessage(
             "Dette vil logge dig ud af denne enhed!"),
+        "typeOfGallerGallerytypeIsNotSupportedForRename": m1,
+        "uploadIsIgnoredDueToIgnorereason": m2,
         "verify": MessageLookupByLibrary.simpleMessage("Bekræft"),
         "viewAddOnButton":
             MessageLookupByLibrary.simpleMessage("Vis tilføjelser"),

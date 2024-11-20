@@ -1343,5 +1343,20 @@
   "mostRecent": "新しい順",
   "mostRelevant": "関連度順",
   "loadingYourPhotos": "写真を読み込んでいます...",
-  "processingImport": "{folderName} を処理中..."
+  "processingImport": "{folderName} を処理中...",
+  "accountIsAlreadyConfigured": "Account is already configured.",
+  "sessionIdMismatch": "Session ID mismatch",
+  "failedToFetchActiveSessions": "Failed to fetch active sessions",
+  "failedToRefreshStripeSubscription": "Failed to refresh subscription",
+  "failedToPlayVideo": "Failed to play video",
+  "uploadIsIgnoredDueToIgnorereason": "Upload is ignored due to {ignoreReason}",
+  "typeOfGallerGallerytypeIsNotSupportedForRename": "Type of gallery {galleryType} is not supported for rename",
+  "tapToUploadIsIgnoredDue": "Tap to upload, upload is currently ignored due to {ignoreReason}",
+  "tapToUpload": "Tap to upload",
+  "info": "Info",
+  "addFiles": "Add Files",
+  "castAlbum": "Cast album",
+  "imageNotAnalyzed": "Image not analyzed",
+  "noFacesFound": "No faces found",
+  "fileNotUploadedYet": "File not uploaded yet"
 }

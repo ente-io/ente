@@ -25,7 +25,7 @@ class _SessionsPageState extends State<SessionsPage> {
   @override
   void initState() {
     _fetchActiveSessions().onError((error, stackTrace) {
-      showToast(context, "Failed to fetch active sessions");
+      showToast(context, S.of(context).failedToFetchActiveSessions);
     });
     super.initState();
   }

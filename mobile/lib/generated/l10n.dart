@@ -9816,13 +9816,13 @@ class S {
     );
   }
 
-  /// `Extra photos found for $text`
-  String get extraPhotosFoundFor {
+  /// `Extra photos found for {text}`
+  String extraPhotosFoundFor(String text) {
     return Intl.message(
-      'Extra photos found for \$text',
+      'Extra photos found for $text',
       name: 'extraPhotosFoundFor',
       desc: '',
-      args: [],
+      args: [text],
     );
   }
 
@@ -9969,6 +9969,158 @@ class S {
       name: 'collaboratorsSuccessfullyAdded',
       desc: 'Number of collaborators that were successfully added to an album.',
       args: [count],
+    );
+  }
+
+  /// `Account is already configured.`
+  String get accountIsAlreadyConfigured {
+    return Intl.message(
+      'Account is already configured.',
+      name: 'accountIsAlreadyConfigured',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Session ID mismatch`
+  String get sessionIdMismatch {
+    return Intl.message(
+      'Session ID mismatch',
+      name: 'sessionIdMismatch',
+      desc:
+          'In passkey page, deeplink is ignored because of session ID mismatch.',
+      args: [],
+    );
+  }
+
+  /// `Failed to fetch active sessions`
+  String get failedToFetchActiveSessions {
+    return Intl.message(
+      'Failed to fetch active sessions',
+      name: 'failedToFetchActiveSessions',
+      desc:
+          'In session page, warn user (in toast) that active sessions could not be fetched.',
+      args: [],
+    );
+  }
+
+  /// `Failed to refresh subscription`
+  String get failedToRefreshStripeSubscription {
+    return Intl.message(
+      'Failed to refresh subscription',
+      name: 'failedToRefreshStripeSubscription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Failed to play video`
+  String get failedToPlayVideo {
+    return Intl.message(
+      'Failed to play video',
+      name: 'failedToPlayVideo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Upload is ignored due to {ignoreReason}`
+  String uploadIsIgnoredDueToIgnorereason(String ignoreReason) {
+    return Intl.message(
+      'Upload is ignored due to $ignoreReason',
+      name: 'uploadIsIgnoredDueToIgnorereason',
+      desc: '',
+      args: [ignoreReason],
+    );
+  }
+
+  /// `Type of gallery {galleryType} is not supported for rename`
+  String typeOfGallerGallerytypeIsNotSupportedForRename(String galleryType) {
+    return Intl.message(
+      'Type of gallery $galleryType is not supported for rename',
+      name: 'typeOfGallerGallerytypeIsNotSupportedForRename',
+      desc: '',
+      args: [galleryType],
+    );
+  }
+
+  /// `Tap to upload, upload is currently ignored due to {ignoreReason}`
+  String tapToUploadIsIgnoredDue(String ignoreReason) {
+    return Intl.message(
+      'Tap to upload, upload is currently ignored due to $ignoreReason',
+      name: 'tapToUploadIsIgnoredDue',
+      desc: 'Shown in upload icon widet, inside a tooltip.',
+      args: [ignoreReason],
+    );
+  }
+
+  /// `Tap to upload`
+  String get tapToUpload {
+    return Intl.message(
+      'Tap to upload',
+      name: 'tapToUpload',
+      desc: 'Shown in upload icon widet, inside a tooltip.',
+      args: [],
+    );
+  }
+
+  /// `Info`
+  String get info {
+    return Intl.message(
+      'Info',
+      name: 'info',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add Files`
+  String get addFiles {
+    return Intl.message(
+      'Add Files',
+      name: 'addFiles',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Cast album`
+  String get castAlbum {
+    return Intl.message(
+      'Cast album',
+      name: 'castAlbum',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Image not analyzed`
+  String get imageNotAnalyzed {
+    return Intl.message(
+      'Image not analyzed',
+      name: 'imageNotAnalyzed',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No faces found`
+  String get noFacesFound {
+    return Intl.message(
+      'No faces found',
+      name: 'noFacesFound',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `File not uploaded yet`
+  String get fileNotUploadedYet {
+    return Intl.message(
+      'File not uploaded yet',
+      name: 'fileNotUploadedYet',
+      desc: '',
+      args: [],
     );
   }
 }

@@ -1351,7 +1351,14 @@
   "newPerson": "New person",
   "addName": "Add name",
   "add": "Add",
-  "extraPhotosFoundFor": "Extra photos found for $text",
+  "extraPhotosFoundFor": "Extra photos found for {text}",
+  "@extraPhotosFoundFor": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
   "extraPhotosFound": "Extra photos found",
   "configuration": "Configuration",
   "localIndexing": "Local indexing",
@@ -1383,5 +1390,54 @@
       }
     },
     "description": "Number of collaborators that were successfully added to an album."
-  }
+  },
+  "accountIsAlreadyConfigured": "Account is already configured.",
+  "sessionIdMismatch": "Session ID mismatch",
+  "@sessionIdMismatch": {
+    "description": "In passkey page, deeplink is ignored because of session ID mismatch."
+  },
+  "failedToFetchActiveSessions": "Failed to fetch active sessions",
+  "@failedToFetchActiveSessions": {
+    "description": "In session page, warn user (in toast) that active sessions could not be fetched."
+  },
+  "failedToRefreshStripeSubscription": "Failed to refresh subscription",
+  "failedToPlayVideo": "Failed to play video",
+  "uploadIsIgnoredDueToIgnorereason": "Upload is ignored due to {ignoreReason}",
+  "@uploadIsIgnoredDueToIgnorereason": {
+    "placeholders": {
+      "ignoreReason": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "typeOfGallerGallerytypeIsNotSupportedForRename": "Type of gallery {galleryType} is not supported for rename",
+  "@typeOfGallerGallerytypeIsNotSupportedForRename": {
+    "placeholders": {
+      "galleryType": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "tapToUploadIsIgnoredDue": "Tap to upload, upload is currently ignored due to {ignoreReason}",
+  "@tapToUploadIsIgnoredDue": {
+    "description": "Shown in upload icon widet, inside a tooltip.",
+    "placeholders": {
+      "ignoreReason": {
+        "type": "String",
+        "example": "no network"
+      }
+    }
+  },
+  "tapToUpload": "Tap to upload",
+  "@tapToUpload": {
+    "description": "Shown in upload icon widet, inside a tooltip."
+  },
+  "info": "Info",
+  "addFiles": "Add Files",
+  "castAlbum": "Cast album",
+  "imageNotAnalyzed": "Image not analyzed",
+  "noFacesFound": "No faces found",
+  "fileNotUploadedYet": "File not uploaded yet"
 }
