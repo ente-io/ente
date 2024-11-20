@@ -9,7 +9,6 @@
  * To see where this code fits, see [Note: Crypto code hierarchy].
  */
 import { mergeUint8Arrays } from "@/utils/array";
-import { CustomError } from "@ente/shared/error";
 import sodium, { type StateAddress } from "libsodium-wrappers-sumo";
 import type {
     BytesOrB64,
@@ -244,6 +243,11 @@ export const generateNewBlobOrStreamKey = async () => {
  *     associated with an Ente object, and Box for the other cases.
  *
  * 3.  Box returns a "nonce", while Blob returns a "header".
+ *
+ * The difference between case 2 and 3 (Blob vs Stream) is that while both use
+ * the same algorithms, in case of Blob the entire data is encrypted / decrypted
+ * in one go, whilst the *Stream routines first break it into
+ * {@link streamEncryptionChunkSize} chunks.
  */
 export const encryptBoxB64 = async (
     data: BytesOrB64,
@@ -315,7 +319,18 @@ export const encryptBlobB64 = async (
     };
 };
 
-export const ENCRYPTION_CHUNK_SIZE = 4 * 1024 * 1024;
+/**
+ * The various *Stream encryption functions break up the input into chunks of
+ * {@link streamEncryptionChunkSize} bytes during encryption (except the last
+ * chunk which can be smaller since a file would rarely align exactly to a
+ * {@link streamEncryptionChunkSize} multiple).
+ *
+ * The various *Stream decryption functions also assume that each potential
+ * chunk is {@link streamEncryptionChunkSize} long.
+ *
+ * This value of this constant is 4 MB (and is unlikely to change).
+ */
+export const streamEncryptionChunkSize = 4 * 1024 * 1024;
 
 export const encryptChaCha = async (data: Uint8Array) => {
     await sodium.ready;
@@ -332,7 +347,7 @@ export const encryptChaCha = async (data: Uint8Array) => {
     const encryptedChunks = [];
 
     while (tag !== sodium.crypto_secretstream_xchacha20poly1305_TAG_FINAL) {
-        let chunkSize = ENCRYPTION_CHUNK_SIZE;
+        let chunkSize = streamEncryptionChunkSize;
         if (bytesRead + chunkSize >= data.length) {
             chunkSize = data.length - bytesRead;
             tag = sodium.crypto_secretstream_xchacha20poly1305_TAG_FINAL;
@@ -452,7 +467,7 @@ export const decryptChaCha = async (
         await fromB64(key),
     );
     const decryptionChunkSize =
-        ENCRYPTION_CHUNK_SIZE +
+        streamEncryptionChunkSize +
         sodium.crypto_secretstream_xchacha20poly1305_ABYTES;
     let bytesRead = 0;
     const decryptedChunks = [];
@@ -486,7 +501,7 @@ export async function initChunkDecryption(header: Uint8Array, key: Uint8Array) {
         key,
     );
     const decryptionChunkSize =
-        ENCRYPTION_CHUNK_SIZE +
+        streamEncryptionChunkSize +
         sodium.crypto_secretstream_xchacha20poly1305_ABYTES;
     const tag = sodium.crypto_secretstream_xchacha20poly1305_TAG_MESSAGE;
     return { pullState, decryptionChunkSize, tag };
