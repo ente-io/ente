@@ -1,4 +1,4 @@
-import { sessionExpiredDialogAttributes } from "@/accounts/components/LoginComponents";
+import { sessionExpiredDialogAttributes } from "@/accounts/components/utils/dialog";
 import { stashRedirect } from "@/accounts/services/redirect";
 import { EnteLogo } from "@/base/components/EnteLogo";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
@@ -19,7 +19,7 @@ import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { generateOTPs, type Code } from "services/code";
 import { getAuthCodes } from "services/remote";
-import { useAppContext } from "./_app";
+import { useAppContext } from "types/context";
 
 const Page: React.FC = () => {
     const { logout, showNavBar, showMiniDialog } = useAppContext();
@@ -42,7 +42,7 @@ const Page: React.FC = () => {
                     e.message == CustomError.KEY_MISSING
                 ) {
                     stashRedirect(PAGES.AUTH);
-                    router.push("/");
+                    void router.push("/");
                 } else if (e instanceof ApiError && e.httpStatusCode == 401) {
                     // We get back a 401 Unauthorized if the token is not valid.
                     showSessionExpiredDialog();
@@ -184,11 +184,11 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({ code }) => {
         }
     };
 
-    const copyCode = () => {
-        navigator.clipboard.writeText(otp);
-        setHasCopied(true);
-        setTimeout(() => setHasCopied(false), 2000);
-    };
+    const copyCode = () =>
+        void navigator.clipboard.writeText(otp).then(() => {
+            setHasCopied(true);
+            setTimeout(() => setHasCopied(false), 2000);
+        });
 
     useEffect(() => {
         // Generate to set the initial otp and nextOTP on component mount.

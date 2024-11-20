@@ -666,7 +666,7 @@ function PhotoViewer(props: PhotoViewerProps) {
         if (isInFullScreenMode) {
             const fullScreenApi: PhotoswipeFullscreenAPI =
                 photoSwipe?.ui?.getFullscreenAPI();
-            if (fullScreenApi && fullScreenApi.isFullscreen()) {
+            if (fullScreenApi?.isFullscreen()) {
                 fullScreenApi.exit();
                 setIsInFullScreenMode(false);
             }

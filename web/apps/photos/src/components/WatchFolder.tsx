@@ -74,6 +74,7 @@ export const WatchFolder: React.FC<ModalVisibilityProps> = ({
     }, [appContext.watchFolderFiles]);
 
     const handleFolderDrop = async (folders: FileList) => {
+        // eslint-disable-next-line @typescript-eslint/prefer-for-of
         for (let i = 0; i < folders.length; i++) {
             const folder: any = folders[i];
             const path = (folder.path as string).replace(/\\/g, "/");

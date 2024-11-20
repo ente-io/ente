@@ -1,4 +1,4 @@
-import { sessionExpiredDialogAttributes } from "@/accounts/components/LoginComponents";
+import { sessionExpiredDialogAttributes } from "@/accounts/components/utils/dialog";
 import { stashRedirect } from "@/accounts/services/redirect";
 import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
 import { NavbarBase } from "@/base/components/Navbar";

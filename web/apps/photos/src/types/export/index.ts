@@ -6,17 +6,11 @@ export interface ExportProgress {
     failed: number;
     total: number;
 }
-export interface ExportedCollectionPaths {
-    [collectionID: number]: string;
-}
+export type ExportedCollectionPaths = Record<number, string>;
 
-export interface CollectionExportNames {
-    [ID: number]: string;
-}
+export type CollectionExportNames = Record<number, string>;
 
-export interface FileExportNames {
-    [ID: string]: string;
-}
+export type FileExportNames = Record<string, string>;
 
 export interface ExportRecordV0 {
     stage: ExportStage;

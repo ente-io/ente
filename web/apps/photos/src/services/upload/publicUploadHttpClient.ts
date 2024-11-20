@@ -63,7 +63,7 @@ class PublicUploadHttpClient {
                         },
                     );
                     const response = await this.uploadURLFetchInProgress;
-                    for (const url of response.data["urls"]) {
+                    for (const url of response.data.urls) {
                         urlStore.push(url);
                     }
                 } finally {
@@ -99,7 +99,7 @@ class PublicUploadHttpClient {
                 },
             );
 
-            return response.data["urls"];
+            return response.data.urls;
         } catch (e) {
             log.error("fetch public multipart-upload-url failed", e);
             throw e;

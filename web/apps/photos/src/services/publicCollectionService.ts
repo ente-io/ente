@@ -17,6 +17,8 @@ const PUBLIC_COLLECTION_FILES_TABLE = "public-collection-files";
 const PUBLIC_COLLECTIONS_TABLE = "public-collections";
 const PUBLIC_REFERRAL_CODE = "public-referral-code";
 
+// Fix this once we can trust the types.
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-template-expression
 export const getPublicCollectionUID = (token: string) => `${token}`;
 
 const getPublicCollectionLastSyncTimeKey = (collectionUID: string) =>

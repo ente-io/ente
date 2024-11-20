@@ -7,10 +7,10 @@ import HTTPService from "@ente/shared/network/HTTPService";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 
 interface DuplicatesResponse {
-    duplicates: Array<{
+    duplicates: {
         fileIDs: number[];
         size: number;
-    }>;
+    }[];
 }
 
 export interface Duplicate {

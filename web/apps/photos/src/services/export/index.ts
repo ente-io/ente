@@ -883,7 +883,7 @@ class ExportService {
             await this.verifyExportFolderExists(folder);
             const exportRecordJSONPath = `${folder}/${exportRecordFileName}`;
             if (!(await fs.exists(exportRecordJSONPath))) {
-                return this.createEmptyExportRecord(exportRecordJSONPath);
+                return await this.createEmptyExportRecord(exportRecordJSONPath);
             }
             const recordFile = await fs.readTextFile(exportRecordJSONPath);
             return JSON.parse(recordFile);
@@ -966,7 +966,7 @@ class ExportService {
         exportDir: string,
         fileUID: string,
         collectionExportPath: string,
-        fileStream: ReadableStream<any>,
+        fileStream: ReadableStream,
         file: EnteFile,
     ) {
         const fs = ensureElectron().fs;
@@ -1181,7 +1181,7 @@ const getRenamedExportedCollections = (
             if (currentExportName === collectionExportName) {
                 return false;
             }
-            const hasNumberedSuffix = currentExportName.match(/\(\d+\)$/);
+            const hasNumberedSuffix = /\(\d+\)$/.exec(currentExportName);
             const currentExportNameWithoutNumberedSuffix = hasNumberedSuffix
                 ? currentExportName.replace(/\(\d+\)$/, "")
                 : currentExportName;

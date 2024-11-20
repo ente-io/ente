@@ -1072,7 +1072,7 @@ const tryExtractImageMetadata = async (
     }
 
     try {
-        return extractExif(file);
+        return await extractExif(file);
     } catch (e) {
         log.error(`Failed to extract image metadata for ${uploadItem}`, e);
         return undefined;

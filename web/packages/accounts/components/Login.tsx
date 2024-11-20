@@ -31,10 +31,10 @@ export const Login: React.FC<LoginProps> = ({ signUp, host }) => {
             log.debug(() => ["srpAttributes", JSON.stringify(srpAttributes)]);
             if (!srpAttributes || srpAttributes.isEmailMFAEnabled) {
                 await sendOtt(email);
-                router.push(PAGES.VERIFY);
+                void router.push(PAGES.VERIFY);
             } else {
                 setData(LS_KEYS.SRP_ATTRIBUTES, srpAttributes);
-                router.push(PAGES.CREDENTIALS);
+                void router.push(PAGES.CREDENTIALS);
             }
         } catch (e) {
             if (e instanceof Error) {

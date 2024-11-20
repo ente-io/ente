@@ -64,6 +64,11 @@ export default tseslint.config(
             // to do at one point), rely on the JS's native undefined property
             // access exception since that conveys more information in the logs.
             "@typescript-eslint/no-non-null-assertion": "off",
+            // Allow `while(true)` etc.
+            "@typescript-eslint/no-unnecessary-condition": [
+                "error",
+                { allowConstantLoopConditions: true },
+            ],
         },
     },
 );

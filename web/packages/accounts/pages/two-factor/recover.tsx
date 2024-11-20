@@ -33,6 +33,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const bip39 = require("bip39");
 // mobile client library only supports english.
 bip39.setDefaultWordlist("english");
@@ -56,13 +57,13 @@ const Page: React.FC<RecoverPageProps> = ({ appContext, twoFactorType }) => {
     useEffect(() => {
         const user = getData(LS_KEYS.USER);
         const sid = user.passkeySessionID || user.twoFactorSessionID;
-        if (!user || !user.email || !sid) {
-            router.push("/");
+        if (!user?.email || !sid) {
+            void router.push("/");
         } else if (
             !(user.isTwoFactorEnabled || user.isTwoFactorEnabledPasskey) &&
             (user.encryptedToken || user.token)
         ) {
-            router.push(PAGES.GENERATE);
+            void router.push(PAGES.GENERATE);
         } else {
             setSessionID(sid);
         }
@@ -81,6 +82,7 @@ const Page: React.FC<RecoverPageProps> = ({ appContext, twoFactorType }) => {
             } catch (e) {
                 if (
                     e instanceof ApiError &&
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
                     e.httpStatusCode === HttpStatusCode.NotFound
                 ) {
                     logout();
@@ -91,7 +93,7 @@ const Page: React.FC<RecoverPageProps> = ({ appContext, twoFactorType }) => {
                 }
             }
         };
-        main();
+        void main();
     }, []);
 
     const recover: SingleInputFormProps["callback"] = async (
@@ -133,7 +135,7 @@ const Page: React.FC<RecoverPageProps> = ({ appContext, twoFactorType }) => {
                 isTwoFactorEnabled: false,
             });
             setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
-            router.push(PAGES.CREDENTIALS);
+            void router.push(PAGES.CREDENTIALS);
         } catch (e) {
             log.error("two factor recovery failed", e);
             setFieldError(t("INCORRECT_RECOVERY_KEY"));

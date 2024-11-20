@@ -134,7 +134,6 @@ export const pullUserEntities = async (
     const entityKeyB64 = await getOrCreateEntityKeyB64(type, masterKey);
 
     let sinceTime = (await savedLatestUpdatedAt(type)) ?? 0;
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     while (true) {
         const diff = await userEntityDiff(type, sinceTime, entityKeyB64);
         if (diff.length == 0) break;

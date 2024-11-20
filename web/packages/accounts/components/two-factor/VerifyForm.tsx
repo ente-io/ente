@@ -20,16 +20,14 @@ interface Props {
 
 export type VerifyTwoFactorCallback = (
     otp: string,
-    markSuccessful: () => Promise<void>,
+    markSuccessful: () => void,
 ) => Promise<void>;
 
 export default function VerifyTwoFactor(props: Props) {
     const [waiting, setWaiting] = useState(false);
     const [shouldAutoFocus, setShouldAutoFocus] = useState(true);
 
-    const markSuccessful = async () => {
-        setWaiting(false);
-    };
+    const markSuccessful = () => setWaiting(false);
 
     const submitForm = async (
         { otp }: formValues,
@@ -52,6 +50,7 @@ export default function VerifyTwoFactor(props: Props) {
     };
 
     const onChange =
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
         (callback: Function, triggerSubmit: Function) => (otp: string) => {
             callback(otp);
             if (otp.length === 6) {

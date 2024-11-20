@@ -61,6 +61,7 @@ export const logout = async () => {
         // ignore if unauthorized, can be triggered during on token expiry.
         else if (
             e instanceof ApiError &&
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
             e.httpStatusCode === HttpStatusCode.Unauthorized
         ) {
             return;

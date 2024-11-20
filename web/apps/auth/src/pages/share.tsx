@@ -89,7 +89,7 @@ const Share: React.FC = () => {
                 );
             }
         };
-        decryptCode();
+        void decryptCode();
     }, []);
 
     useEffect(() => {

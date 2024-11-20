@@ -527,7 +527,7 @@ async function getRenderableLivePhotoURL(
             return URL.createObjectURL(
                 await renderableImageBlob(livePhoto.imageFileName, imageBlob),
             );
-        } catch (e) {
+        } catch {
             //ignore and return null
             return undefined;
         }
@@ -543,7 +543,7 @@ async function getRenderableLivePhotoURL(
             );
             if (!convertedVideoBlob) return undefined;
             return URL.createObjectURL(convertedVideoBlob);
-        } catch (e) {
+        } catch {
             //ignore and return null
             return undefined;
         }

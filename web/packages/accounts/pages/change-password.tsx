@@ -47,7 +47,7 @@ const Page: React.FC<PageProps> = () => {
         setUser(user);
         if (!user?.token) {
             stashRedirect(PAGES.CHANGE_PASSWORD);
-            router.push("/");
+            void router.push("/");
         } else {
             setToken(user.token);
         }
@@ -64,7 +64,7 @@ const Page: React.FC<PageProps> = () => {
         let kek: KEK;
         try {
             kek = await cryptoWorker.deriveSensitiveKey(passphrase, kekSalt);
-        } catch (e) {
+        } catch {
             setFieldError("confirm", t("PASSWORD_GENERATION_FAILED"));
             return;
         }
@@ -132,7 +132,7 @@ const Page: React.FC<PageProps> = () => {
 
     const redirectToAppHome = () => {
         setData(LS_KEYS.SHOW_BACK_BUTTON, { value: true });
-        router.push(appHomeRoute);
+        void router.push(appHomeRoute);
     };
 
     // TODO: Handle the case where user is not loaded yet.
