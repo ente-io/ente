@@ -16,7 +16,7 @@ export default [
             "@typescript-eslint/no-unsafe-member-access": "off",
             "@typescript-eslint/no-unsafe-argument": "off",
             /** TODO: Disabled as we migrate, try to prune these again */
-            "@typescript-eslint/no-floating-promises": "off",
+
             "@typescript-eslint/no-unsafe-enum-comparison": "off",
             "@typescript-eslint/no-unnecessary-type-assertion": "off",
             "@typescript-eslint/array-type": "off",

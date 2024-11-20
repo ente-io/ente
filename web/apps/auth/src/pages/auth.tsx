@@ -42,7 +42,7 @@ const Page: React.FC = () => {
                     e.message == CustomError.KEY_MISSING
                 ) {
                     stashRedirect(PAGES.AUTH);
-                    router.push("/");
+                    void router.push("/");
                 } else if (e instanceof ApiError && e.httpStatusCode == 401) {
                     // We get back a 401 Unauthorized if the token is not valid.
                     showSessionExpiredDialog();
@@ -184,11 +184,11 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({ code }) => {
         }
     };
 
-    const copyCode = () => {
-        navigator.clipboard.writeText(otp);
-        setHasCopied(true);
-        setTimeout(() => setHasCopied(false), 2000);
-    };
+    const copyCode = () =>
+        void navigator.clipboard.writeText(otp).then(() => {
+            setHasCopied(true);
+            setTimeout(() => setHasCopied(false), 2000);
+        });
 
     useEffect(() => {
         // Generate to set the initial otp and nextOTP on component mount.
