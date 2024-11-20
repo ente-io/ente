@@ -149,7 +149,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
                 if (e?.httpStatusCode === HttpStatusCode.Unauthorized) {
                     setFieldError(t("INVALID_CODE"));
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
                 } else if (e?.httpStatusCode === HttpStatusCode.Gone) {
                     setFieldError(t("EXPIRED_CODE"));
                 }

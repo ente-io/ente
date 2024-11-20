@@ -159,6 +159,7 @@ const PlanSelectorCard: React.FC<PlanSelectorCardProps> = ({
                     setLoading(true);
                     await redirectToPaymentsApp(plan.stripeID!, "buy");
                 } catch (e) {
+                    log.error(e);
                     setLoading(false);
                     showMiniDialog(
                         errorDialogAttributes(

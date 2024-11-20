@@ -10,8 +10,8 @@ import "leaflet/dist/leaflet.css";
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 haveWindow() && require("leaflet-defaulticon-compatibility");
 const L = haveWindow()
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    ? (require("leaflet") as typeof import("leaflet"))
+    ? // eslint-disable-next-line @typescript-eslint/no-require-imports
+      (require("leaflet") as typeof import("leaflet"))
     : null;
 
 const LAYER_TILE_URL = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";

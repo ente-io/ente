@@ -1,3 +1,4 @@
+import { sessionExpiredDialogAttributes } from "@/accounts/components/utils/dialog";
 import {
     checkPasskeyVerificationStatus,
     passkeySessionExpiredErrorMessage,
@@ -15,7 +16,6 @@ import { CircularProgress, Stack, Typography, styled } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
-import { sessionExpiredDialogAttributes } from "@/accounts/components/utils/dialog";
 
 export const PasswordHeader: React.FC<React.PropsWithChildren> = ({
     children,

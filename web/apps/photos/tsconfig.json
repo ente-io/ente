@@ -14,7 +14,8 @@
         "noUnusedParameters": false,
         "noImplicitReturns": false,
         "noUncheckedIndexedAccess": false,
-        "strictNullChecks": false
+        "strictNullChecks": false,
+        "useUnknownInCatchVariables": false
     },
     "include": [
         "next-env.d.ts",

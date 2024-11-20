@@ -113,7 +113,7 @@ interface OptionsProps {
     onSelect: (option: OptionType) => void;
     /** Called when the dialog should be closed. */
     onClose: () => void;
-};
+}
 
 export const Options: React.FC<OptionsProps> = ({
     intent,

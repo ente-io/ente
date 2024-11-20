@@ -105,7 +105,9 @@ const PhotoFrame = ({
     const [open, setOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
     const [fetching, setFetching] = useState<Record<number, boolean>>({});
-    const [thumbFetching, setThumbFetching] = useState<Record<number, boolean>>({});
+    const [thumbFetching, setThumbFetching] = useState<Record<number, boolean>>(
+        {},
+    );
     const galleryContext = useContext(GalleryContext);
     const [rangeStart, setRangeStart] = useState(null);
     const [currentHover, setCurrentHover] = useState(null);

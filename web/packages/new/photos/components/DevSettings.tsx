@@ -93,6 +93,8 @@ const Form: React.FC<FormProps> = ({ initialAPIOrigin, onClose }) => {
         },
         validate: ({ apiOrigin }) => {
             try {
+                // The expression is not unused, it is used to validate the URL.
+                // eslint-disable-next-line @typescript-eslint/no-unused-expressions
                 apiOrigin && new URL(apiOrigin);
             } catch {
                 return { apiOrigin: "Invalid endpoint" };

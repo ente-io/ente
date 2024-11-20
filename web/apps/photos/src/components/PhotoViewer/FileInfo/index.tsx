@@ -359,8 +359,7 @@ const parseExifInfo = (
 
     if (exif) {
         if (exif.Make && exif.Model)
-            info.takenOnDevice =
-                `${exif.Make.description} ${exif.Model.description}`;
+            info.takenOnDevice = `${exif.Make.description} ${exif.Model.description}`;
 
         if (exif.FNumber)
             info.fNumber = exif.FNumber.description; /* e.g. "f/16" */
