@@ -33,20 +33,17 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
     const router = useRouter();
 
     useEffect(() => {
-        const main = async () => {
-            const user: User = getData(LS_KEYS.USER);
-            if (!user?.email || !user.twoFactorSessionID) {
-                void router.push("/");
-            } else if (
-                !user.isTwoFactorEnabled &&
-                (user.encryptedToken || user.token)
-            ) {
-                void router.push(PAGES.CREDENTIALS);
-            } else {
-                setSessionID(user.twoFactorSessionID);
-            }
-        };
-        void main();
+        const user: User = getData(LS_KEYS.USER);
+        if (!user?.email || !user.twoFactorSessionID) {
+            void router.push("/");
+        } else if (
+            !user.isTwoFactorEnabled &&
+            (user.encryptedToken || user.token)
+        ) {
+            void router.push(PAGES.CREDENTIALS);
+        } else {
+            setSessionID(user.twoFactorSessionID);
+        }
     }, []);
 
     const onSubmit: VerifyTwoFactorCallback = async (otp) => {

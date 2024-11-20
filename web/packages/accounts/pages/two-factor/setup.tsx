@@ -52,7 +52,7 @@ const Page: React.FC<PageProps> = () => {
             twoFactorSecret!.secretCode,
         );
         await enableTwoFactor(otp, recoveryEncryptedTwoFactorSecret);
-        await markSuccessful();
+        markSuccessful();
         await setLSUser({
             ...getData(LS_KEYS.USER),
             isTwoFactorEnabled: true,
