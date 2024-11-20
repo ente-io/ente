@@ -45,13 +45,10 @@ export default [
             "@typescript-eslint/no-confusing-void-expression": "off",
             "@typescript-eslint/use-unknown-in-catch-callback-variable": "off",
             "@typescript-eslint/restrict-plus-operands": "off",
-            "@typescript-eslint/no-meaningless-void-operator": "off",
             "react-hooks/exhaustive-deps": "off",
-
             "react-refresh/only-export-components": "off",
             /** TODO: New during eslint 8=>9 migration */
             "@typescript-eslint/no-unused-expressions": "off",
-
         },
     },
 ];

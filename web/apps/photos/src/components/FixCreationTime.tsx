@@ -216,7 +216,7 @@ const OptionsForm: React.FC<OptionsFormProps> = ({
             )}
             <Footer
                 step={step}
-                onSubmit={() => void handleSubmit()}
+                onSubmit={() => handleSubmit()}
                 onClose={onClose}
             />
         </>
