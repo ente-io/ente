@@ -106,7 +106,6 @@ class _HomeWidgetState extends State<HomeWidget> {
   late StreamSubscription<BackupFoldersUpdatedEvent> _backupFoldersUpdatedEvent;
   late StreamSubscription<AccountConfiguredEvent> _accountConfiguredEvent;
   late StreamSubscription<CollectionUpdatedEvent> _collectionUpdatedEvent;
-  late StreamSubscription<Uri?> _uriLinkEventSubscription;
   final DiffFetcher _diffFetcher = DiffFetcher();
 
   @override
@@ -352,7 +351,6 @@ class _HomeWidgetState extends State<HomeWidget> {
     _collectionUpdatedEvent.cancel();
     isOnSearchTabNotifier.dispose();
     _pageController.dispose();
-    _uriLinkEventSubscription.cancel();
     super.dispose();
   }
 
