@@ -42,7 +42,7 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
     useEffect(() => {
         castGateway.revokeAllTokens();
 
-        setBrowserCanCast(typeof window["chrome"] !== "undefined");
+        setBrowserCanCast(typeof window.chrome !== "undefined");
     }, []);
 
     const onSubmit: SingleInputFormProps["callback"] = async (

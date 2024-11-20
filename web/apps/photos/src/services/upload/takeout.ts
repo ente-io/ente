@@ -116,19 +116,19 @@ const parseMetadataJSONText = (text: string) => {
     const parsedMetadataJSON: ParsedMetadataJSON = {};
 
     parsedMetadataJSON.creationTime =
-        parseGTTimestamp(metadataJSON["photoTakenTime"]) ??
-        parseGTTimestamp(metadataJSON["creationTime"]);
+        parseGTTimestamp(metadataJSON.photoTakenTime) ??
+        parseGTTimestamp(metadataJSON.creationTime);
 
     parsedMetadataJSON.modificationTime = parseGTTimestamp(
-        metadataJSON["modificationTime"],
+        metadataJSON.modificationTime,
     );
 
     parsedMetadataJSON.location =
-        parseGTLocation(metadataJSON["geoData"]) ??
-        parseGTLocation(metadataJSON["geoDataExif"]);
+        parseGTLocation(metadataJSON.geoData) ??
+        parseGTLocation(metadataJSON.geoDataExif);
 
     parsedMetadataJSON.description = parseGTNonEmptyString(
-        metadataJSON["description"],
+        metadataJSON.description,
     );
 
     return parsedMetadataJSON;

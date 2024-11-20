@@ -26,7 +26,6 @@ export default [
             "@typescript-eslint/no-empty-function": "off",
             "@typescript-eslint/prefer-promise-reject-errors": "off",
             "@typescript-eslint/no-useless-constructor": "off",
-            "@typescript-eslint/dot-notation": "off",
             "@typescript-eslint/require-await": "off",
             "@typescript-eslint/no-var-requires": "off",
             "@typescript-eslint/prefer-optional-chain": "off",
