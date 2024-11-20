@@ -18,11 +18,11 @@
  * ensure that sodium.ready has been called before accessing libsodium's APIs,
  * thus all the functions it exposes are async.
  *
- * The highest layer is this file, `crypto/index.ts`, and the one that our own
- * code should use. These are usually simple compositions of functionality
- * exposed by `crypto/libsodium.ts`, the primary difference being that these
- * functions try to talk in terms of higher-level Ente specific goal we are
- * trying to accomplish instead of the specific underlying crypto algorithms.
+ * The highest layer is this file, `crypto/index.ts`. These are usually simple
+ * compositions of functionality exposed by `crypto/libsodium.ts`, the primary
+ * difference being that these functions try to talk in terms of higher-level
+ * Ente specific goal we are trying to accomplish instead of the specific
+ * underlying crypto algorithms.
  *
  * There is an additional actor in play. Cryptographic operations like
  * encryption are CPU intensive and would cause the UI to stutter if used
@@ -49,7 +49,6 @@ import { ComlinkWorker } from "@/base/worker/comlink-worker";
 import { assertionFailed } from "../assert";
 import { inWorker } from "../env";
 import * as ei from "./ente-impl";
-import * as libsodium from "./libsodium";
 import type { BytesOrB64, EncryptedBlob, EncryptedBox } from "./types";
 import type { CryptoWorker } from "./worker";
 
@@ -89,16 +88,22 @@ const assertInWorker = <T>(x: T): T => {
 };
 
 /**
- * Return a new randomly generated 256-bit key suitable for use with the *Box
- * encryption functions.
+ * Return a new randomly generated 256-bit key (as a base64 string) suitable for
+ * use with the *Box encryption functions.
  */
-export const generateNewBoxKey = libsodium.generateNewBoxKey;
+export const generateBoxKey = () =>
+    inWorker()
+        ? ei._generateBoxKey()
+        : sharedCryptoWorker().then((w) => w.generateBoxKey());
 
 /**
- * Return a new randomly generated 256-bit key suitable for use with the *Blob
- * or *Stream encryption functions.
+ * Return a new randomly generated 256-bit key (as a base64 string) suitable for
+ * use with the *Blob or *Stream encryption functions.
  */
-export const generateNewBlobOrStreamKey = libsodium.generateNewBlobOrStreamKey;
+export const generateBlobOrStreamKey = () =>
+    inWorker()
+        ? ei._generateBlobOrStreamKey()
+        : sharedCryptoWorker().then((w) => w.generateBlobOrStreamKey());
 
 /**
  * Encrypt the given data, returning a box containing the encrypted data and a
@@ -128,7 +133,7 @@ export const encryptBoxB64 = (data: BytesOrB64, key: BytesOrB64) =>
  * Use {@link decryptBlob} to decrypt the result.
  *
  * > The suffix "Blob" comes from our convention of naming functions that use
- * > the secretstream APIs in one-shot mode.
+ * > the secretstream APIs without breaking the data into chunks.
  * >
  * > See: [Note: 3 forms of encryption (Box | Blob | Stream)]
  */
@@ -143,18 +148,6 @@ export const encryptBlobB64 = (data: BytesOrB64, key: BytesOrB64) =>
     inWorker()
         ? ei._encryptBlobB64(data, key)
         : sharedCryptoWorker().then((w) => w._encryptBlobB64(data, key));
-
-/**
- * Encrypt the thumbnail for a file.
- *
- * This is midway variant of {@link encryptBlob} and {@link encryptBlobB64} that
- * returns the decryption header as a base64 string, but leaves the data
- * unchanged.
- *
- * Use {@link decryptThumbnail} to decrypt the result.
- */
-export const encryptThumbnail = (data: BytesOrB64, key: BytesOrB64) =>
-    assertInWorker(ei._encryptThumbnail(data, key));
 
 /**
  * Encrypt the JSON metadata associated with an Ente object (file, collection or
@@ -227,12 +220,6 @@ export const decryptBlobB64 = (blob: EncryptedBlob, key: BytesOrB64) =>
     inWorker()
         ? ei._decryptBlobB64(blob, key)
         : sharedCryptoWorker().then((w) => w.decryptBlobB64(blob, key));
-
-/**
- * Decrypt the thumbnail encrypted using {@link encryptThumbnail}.
- */
-export const decryptThumbnail = (blob: EncryptedBlob, key: BytesOrB64) =>
-    assertInWorker(ei._decryptThumbnail(blob, key));
 
 /**
  * Decrypt the metadata JSON encrypted using {@link encryptMetadataJSON}.

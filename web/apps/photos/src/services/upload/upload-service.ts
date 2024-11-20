@@ -1,7 +1,8 @@
 import {
-    ENCRYPTION_CHUNK_SIZE,
+    streamEncryptionChunkSize,
     type B64EncryptionResult,
 } from "@/base/crypto/libsodium";
+import type { BytesOrB64 } from "@/base/crypto/types";
 import { type CryptoWorker } from "@/base/crypto/worker";
 import { ensureElectron } from "@/base/electron";
 import { basename, nameAndExtension } from "@/base/file";
@@ -68,16 +69,17 @@ interface FileStream {
     /**
      * A stream of the file's contents
      *
-     * This stream is guaranteed to emit data in ENCRYPTION_CHUNK_SIZE chunks
-     * (except the last chunk which can be smaller since a file would rarely
-     * align exactly to a ENCRYPTION_CHUNK_SIZE multiple).
+     * This stream is guaranteed to emit data in
+     * {@link streamEncryptionChunkSize} sized chunks (except the last chunk
+     * which can be smaller since a file would rarely align exactly to a
+     * {@link streamEncryptionChunkSize} multiple).
      *
      * Note: A stream can only be read once!
      */
     stream: ReadableStream<Uint8Array>;
     /**
-     * Number of chunks {@link stream} will emit, each ENCRYPTION_CHUNK_SIZE
-     * sized (except the last one).
+     * Number of chunks {@link stream} will emit, each
+     * {@link streamEncryptionChunkSize} sized (except the last one).
      */
     chunkCount: number;
     /**
@@ -95,11 +97,12 @@ interface FileStream {
 }
 
 /**
- * If the stream we have is more than 5 ENCRYPTION_CHUNK_SIZE chunks, then use
- * multipart uploads for it, with each multipart-part containing 5 chunks.
+ * If the stream we have is more than 5 {@link streamEncryptionChunkSize}
+ * chunks, then use multipart uploads for it, with each multipart-part
+ * containing 5 chunks.
  *
- * ENCRYPTION_CHUNK_SIZE is 4 MB, and the number of chunks in a single upload
- * part is 5, so each part is (up to) 20 MB.
+ * {@link streamEncryptionChunkSize} is 4 MB, and the number of chunks in a
+ * single upload part is 5, so each part is (up to) 20 MB.
  */
 const multipartChunksPerPart = 5;
 
@@ -244,23 +247,17 @@ interface EncryptedFileStream {
     /**
      * A stream of the file's encrypted contents
      *
-     * This stream is guaranteed to emit data in ENCRYPTION_CHUNK_SIZE chunks
-     * (except the last chunk which can be smaller since a file would rarely
-     * align exactly to a ENCRYPTION_CHUNK_SIZE multiple).
+     * This stream is guaranteed to emit data in
+     * {@link streamEncryptionChunkSize} chunks (except the last chunk which can
+     * be smaller since a file would rarely align exactly to a
+     * {@link streamEncryptionChunkSize} multiple).
      */
     stream: ReadableStream<Uint8Array>;
     /**
-     * Number of chunks {@link stream} will emit, each ENCRYPTION_CHUNK_SIZE
-     * sized (except the last one).
+     * Number of chunks {@link stream} will emit, each
+     * {@link streamEncryptionChunkSize} sized (except the last one).
      */
     chunkCount: number;
-}
-
-interface LocalFileAttributes<
-    T extends string | Uint8Array | EncryptedFileStream,
-> {
-    encryptedData: T;
-    decryptionHeader: string;
 }
 
 interface EncryptedMetadata {
@@ -268,16 +265,15 @@ interface EncryptedMetadata {
     decryptionHeaderB64: string;
 }
 
-interface EncryptionResult<
-    T extends string | Uint8Array | EncryptedFileStream,
-> {
-    file: LocalFileAttributes<T>;
-    key: string;
-}
-
 interface ProcessedFile {
-    file: LocalFileAttributes<Uint8Array | EncryptedFileStream>;
-    thumbnail: LocalFileAttributes<Uint8Array>;
+    file: {
+        encryptedData: Uint8Array | EncryptedFileStream;
+        decryptionHeader: string;
+    };
+    thumbnail: {
+        encryptedData: Uint8Array;
+        decryptionHeader: string;
+    };
     metadata: EncryptedMetadata;
     pubMagicMetadata: EncryptedMagicMetadata;
     localID: number;
@@ -769,11 +765,11 @@ const readUploadItem = async (uploadItem: UploadItem): Promise<FileStream> => {
         lastModifiedMs = file.lastModified;
     }
 
-    const N = ENCRYPTION_CHUNK_SIZE;
-    const chunkCount = Math.ceil(fileSize / ENCRYPTION_CHUNK_SIZE);
+    const N = streamEncryptionChunkSize;
+    const chunkCount = Math.ceil(fileSize / streamEncryptionChunkSize);
 
     // Pipe the underlying stream through a transformer that emits
-    // ENCRYPTION_CHUNK_SIZE-ed chunks (except the last one, which can be
+    // streamEncryptionChunkSize-ed chunks (except the last one, which can be
     // smaller).
     let pending: Uint8Array | undefined;
     const transformer = new TransformStream<Uint8Array, Uint8Array>({
@@ -1351,34 +1347,35 @@ const encryptFile = async (
     encryptionKey: string,
     worker: CryptoWorker,
 ): Promise<EncryptedFile> => {
-    const { key: fileKey, file: encryptedFiledata } = await encryptFiledata(
-        file.fileStreamOrData,
-        worker,
+    const fileKey = await worker.generateBlobOrStreamKey();
+
+    const { fileStreamOrData, thumbnail, metadata, pubMagicMetadata, localID } =
+        file;
+
+    const encryptedFiledata =
+        fileStreamOrData instanceof Uint8Array
+            ? await worker.encryptStreamBytes(fileStreamOrData, fileKey)
+            : await encryptFileStream(fileStreamOrData, fileKey, worker);
+
+    const encryptedThumbnail = await worker.encryptThumbnail(
+        thumbnail,
+        fileKey,
     );
 
-    const {
-        encryptedData: thumbEncryptedData,
-        decryptionHeader: thumbDecryptionHeader,
-    } = await worker.encryptThumbnail(file.thumbnail, fileKey);
-    const encryptedThumbnail = {
-        encryptedData: thumbEncryptedData,
-        decryptionHeader: thumbDecryptionHeader,
-    };
-
     const encryptedMetadata = await worker.encryptMetadataJSON({
-        jsonValue: file.metadata,
+        jsonValue: metadata,
         keyB64: fileKey,
     });
 
     let encryptedPubMagicMetadata: EncryptedMagicMetadata;
-    if (file.pubMagicMetadata) {
+    if (pubMagicMetadata) {
         const encryptedPubMagicMetadataData = await worker.encryptMetadataJSON({
-            jsonValue: file.pubMagicMetadata.data,
+            jsonValue: pubMagicMetadata.data,
             keyB64: fileKey,
         });
         encryptedPubMagicMetadata = {
-            version: file.pubMagicMetadata.version,
-            count: file.pubMagicMetadata.count,
+            version: pubMagicMetadata.version,
+            count: pubMagicMetadata.count,
             data: encryptedPubMagicMetadataData.encryptedDataB64,
             header: encryptedPubMagicMetadataData.decryptionHeaderB64,
         };
@@ -1392,34 +1389,26 @@ const encryptFile = async (
             thumbnail: encryptedThumbnail,
             metadata: encryptedMetadata,
             pubMagicMetadata: encryptedPubMagicMetadata,
-            localID: file.localID,
+            localID: localID,
         },
         fileKey: encryptedKey,
     };
     return result;
 };
 
-const encryptFiledata = async (
-    fileStreamOrData: FileStream | Uint8Array,
-    worker: CryptoWorker,
-): Promise<EncryptionResult<Uint8Array | EncryptedFileStream>> =>
-    fileStreamOrData instanceof Uint8Array
-        ? await worker.encryptFile(fileStreamOrData)
-        : await encryptFileStream(fileStreamOrData, worker);
-
 const encryptFileStream = async (
-    fileData: FileStream,
+    { stream, chunkCount }: FileStream,
+    fileKey: BytesOrB64,
     worker: CryptoWorker,
 ) => {
-    const { stream, chunkCount } = fileData;
     const fileStreamReader = stream.getReader();
-    const { key, decryptionHeader, pushState } =
-        await worker.initChunkEncryption();
+    const { decryptionHeader, pushState } =
+        await worker.initChunkEncryption(fileKey);
     const ref = { pullCount: 1 };
     const encryptedFileStream = new ReadableStream({
         async pull(controller) {
             const { value } = await fileStreamReader.read();
-            const encryptedFileChunk = await worker.encryptFileChunk(
+            const encryptedFileChunk = await worker.encryptStreamChunk(
                 value,
                 pushState,
                 ref.pullCount === chunkCount,
@@ -1432,11 +1421,8 @@ const encryptFileStream = async (
         },
     });
     return {
-        key,
-        file: {
-            decryptionHeader,
-            encryptedData: { stream: encryptedFileStream, chunkCount },
-        },
+        decryptionHeader,
+        encryptedData: { stream: encryptedFileStream, chunkCount },
     };
 };
 
