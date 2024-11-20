@@ -59,7 +59,7 @@ const MapBox: React.FC<MapBoxProps> = ({
                 L.marker(position).addTo(map).openPopup();
             }
         } else {
-            if (mapContainer && mapContainer.hasChildNodes()) {
+            if (mapContainer?.hasChildNodes()) {
                 if (mapContainer.firstChild) {
                     mapContainer.removeChild(mapContainer.firstChild);
                 }

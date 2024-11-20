@@ -50,7 +50,7 @@ export const isFilesDownloadCompletedWithErrors = (
 export const isFilesDownloadCancelled = (
     attributes: FilesDownloadProgressAttributes,
 ) => {
-    return attributes && attributes.canceller?.signal?.aborted;
+    return attributes?.canceller?.signal?.aborted;
 };
 
 export const FilesDownloadProgress: React.FC<FilesDownloadProgressProps> = ({
