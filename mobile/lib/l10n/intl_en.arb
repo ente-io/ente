@@ -1363,5 +1363,25 @@
   "checkingModels": "Checking models...",
   "enableMachineLearningBanner": "Enable machine learning for magic search and face recognition",
   "searchDiscoverEmptySection": "Images will be shown here once processing is complete",
-  "searchPersonsEmptySection": "People will be shown here once processing is complete"
+  "searchPersonsEmptySection": "People will be shown here once processing is complete",
+  "viewersSuccessfullyAdded": "{count, plural, =0 {Added 0 viewer} =1 {Added 1 viewer} other {Added {count} viewers}}",
+  "@viewersSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of viewers that were successfully added to an album."
+  },
+  "collaboratorsSuccessfullyAdded": "{count, plural, =0 {Added 0 collaborator} =1 {Added 1 collaborator} other {Added {count} collaborators}}",
+  "@collaboratorsSuccessfullyAdded": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "2"
+      }
+    },
+    "description": "Number of collaborators that were successfully added to an album."
+  }
 }
