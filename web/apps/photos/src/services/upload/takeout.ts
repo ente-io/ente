@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/dot-notation */
 /** @file Dealing with the JSON metadata sidecar files */
 
 import { ensureElectron } from "@/base/electron";
@@ -116,19 +117,19 @@ const parseMetadataJSONText = (text: string) => {
     const parsedMetadataJSON: ParsedMetadataJSON = {};
 
     parsedMetadataJSON.creationTime =
-        parseGTTimestamp(metadataJSON.photoTakenTime) ??
-        parseGTTimestamp(metadataJSON.creationTime);
+        parseGTTimestamp(metadataJSON["photoTakenTime"]) ??
+        parseGTTimestamp(metadataJSON["creationTime"]);
 
     parsedMetadataJSON.modificationTime = parseGTTimestamp(
-        metadataJSON.modificationTime,
+        metadataJSON["modificationTime"],
     );
 
     parsedMetadataJSON.location =
-        parseGTLocation(metadataJSON.geoData) ??
-        parseGTLocation(metadataJSON.geoDataExif);
+        parseGTLocation(metadataJSON["geoData"]) ??
+        parseGTLocation(metadataJSON["geoDataExif"]);
 
     parsedMetadataJSON.description = parseGTNonEmptyString(
-        metadataJSON.description,
+        metadataJSON["description"],
     );
 
     return parsedMetadataJSON;

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/dot-notation */
 import { FileType } from "@/media/file-type";
 import { groupFilesByCollectionID } from "@/new/photos/services/file";
 import { getLocalFiles } from "@/new/photos/services/files";
@@ -211,9 +212,7 @@ async function thumbnailGenerationFailedFilesCheck(expectedState) {
     }
     fileNamesWithStaticThumbnail.forEach((fileName) => {
         if (
-            !expectedState.thumbnail_generation_failure.files.includes(
-                fileName,
-            )
+            !expectedState.thumbnail_generation_failure.files.includes(fileName)
         ) {
             throw Error(
                 `thumbnailGenerationFailedFiles Check failed ❌
@@ -271,27 +270,27 @@ async function exifDataParsingCheck(expectedState) {
             throw Error(`exifDataParsingCheck failed , ${fileName} missing`);
         }
         if (
-            exifValues.creation_time &&
-            exifValues.creation_time !== matchingFile.metadata.creationTime
+            exifValues["creation_time"] &&
+            exifValues["creation_time"] !== matchingFile.metadata.creationTime
         ) {
             throw Error(`exifDataParsingCheck failed ❌ ,
                             for ${fileName}
-                            expected: ${exifValues.creation_time} got: ${matchingFile.metadata.creationTime}`);
+                            expected: ${exifValues["creation_time"]} got: ${matchingFile.metadata.creationTime}`);
         }
         if (
-            exifValues.location &&
+            exifValues["location"] &&
             (Math.abs(
-                exifValues.location.latitude -
+                exifValues["location"].latitude -
                     matchingFile.metadata.latitude,
             ) > 1 ||
                 Math.abs(
-                    exifValues.location.longitude -
+                    exifValues["location"].longitude -
                         matchingFile.metadata.longitude,
                 ) > 1)
         ) {
             throw Error(`exifDataParsingCheck failed ❌  ,
                             for ${fileName}
-                            expected: ${JSON.stringify(exifValues.location)}
+                            expected: ${JSON.stringify(exifValues["location"])}
                             got: [${matchingFile.metadata.latitude},${
                                 matchingFile.metadata.longitude
                             }]`);
@@ -313,14 +312,14 @@ async function fileDimensionExtractionCheck(expectedState) {
                 );
             }
             if (
-                dimensions.width &&
-                dimensions.width !== matchingFile.pubMagicMetadata.data.w &&
-                dimensions.height &&
-                dimensions.height !== matchingFile.pubMagicMetadata.data.h
+                dimensions["width"] &&
+                dimensions["width"] !== matchingFile.pubMagicMetadata.data.w &&
+                dimensions["height"] &&
+                dimensions["height"] !== matchingFile.pubMagicMetadata.data.h
             ) {
                 throw Error(`fileDimensionExtractionCheck failed ❌ ,
                                 for ${fileName}
-                                expected: ${dimensions.width} x ${dimensions.height} got: ${matchingFile.pubMagicMetadata.data.w} x ${matchingFile.pubMagicMetadata.data.h}`);
+                                expected: ${dimensions["width"]} x ${dimensions["height"]} got: ${matchingFile.pubMagicMetadata.data.w} x ${matchingFile.pubMagicMetadata.data.h}`);
             }
         },
     );
@@ -329,46 +328,41 @@ async function fileDimensionExtractionCheck(expectedState) {
 
 async function googleMetadataReadingCheck(expectedState) {
     const files = await getLocalFiles();
-    Object.entries(expectedState.google_import).map(
-        ([fileName, metadata]) => {
-            const matchingFile = files.find(
-                (file) => file.metadata.title === fileName,
-            );
-            if (!matchingFile) {
-                throw Error(
-                    `exifDataParsingCheck failed , ${fileName} missing`,
-                );
-            }
-            if (
-                metadata.creation_time &&
-                metadata.creation_time !== matchingFile.metadata.creationTime
-            ) {
-                throw Error(`googleMetadataJSON reading check failed ❌ ,
+    Object.entries(expectedState.google_import).map(([fileName, metadata]) => {
+        const matchingFile = files.find(
+            (file) => file.metadata.title === fileName,
+        );
+        if (!matchingFile) {
+            throw Error(`exifDataParsingCheck failed , ${fileName} missing`);
+        }
+        if (
+            metadata["creation_time"] &&
+            metadata["creation_time"] !== matchingFile.metadata.creationTime
+        ) {
+            throw Error(`googleMetadataJSON reading check failed ❌ ,
                 for ${fileName}
-                expected: ${metadata.creation_time} got: ${matchingFile.metadata.creationTime}`);
-            }
-            if (
-                metadata.location &&
-                (Math.abs(
-                    metadata.location.latitude -
-                        matchingFile.metadata.latitude,
-                ) > 1 ||
-                    Math.abs(
-                        metadata.location.longitude -
-                            matchingFile.metadata.longitude,
-                    ) > 1)
-            ) {
-                throw Error(`googleMetadataJSON reading check failed ❌  ,
+                expected: ${metadata["creation_time"]} got: ${matchingFile.metadata.creationTime}`);
+        }
+        if (
+            metadata["location"] &&
+            (Math.abs(
+                metadata["location"].latitude - matchingFile.metadata.latitude,
+            ) > 1 ||
+                Math.abs(
+                    metadata["location"].longitude -
+                        matchingFile.metadata.longitude,
+                ) > 1)
+        ) {
+            throw Error(`googleMetadataJSON reading check failed ❌  ,
                                 for ${fileName}
                                 expected: ${JSON.stringify(
-                                    metadata.location,
+                                    metadata["location"],
                                 )}
                                 got: [${matchingFile.metadata.latitude},${
                                     matchingFile.metadata.longitude
                                 }]`);
-            }
-        },
-    );
+        }
+    });
     console.log("googleMetadataJSON reading check passed ✅");
 }
 

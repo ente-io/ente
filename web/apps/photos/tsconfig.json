@@ -1,42 +1,20 @@
 {
+    "extends": "@/build-config/tsconfig-next.json",
     "compilerOptions": {
-        "allowJs": true,
-        "allowSyntheticDefaultImports": true,
-        // "baseUrl": ".",
-        "esModuleInterop": true,
-        "forceConsistentCasingInFileNames": true,
-        "incremental": true,
-        "isolatedModules": true,
-        // "jsx": "react-jsx",
-        // "lib": ["dom", "dom.iterable", "esnext"],
-        "module": "esnext",
-        // "moduleResolution": "node",
-        "noEmit": true,
-        "noFallthroughCasesInSwitch": true,
-        // "noImplicitAny": true,
-        // "noUnusedLocals": true,
-        // "noUnusedParameters": true,
-        "resolveJsonModule": true,
-        "skipLibCheck": true,
-        "strict": true,
-        // "target": "es2021",
+        /* Set the base directory from which to resolve bare module names. */
         "baseUrl": "./src",
-        "downlevelIteration": true,
-        "jsx": "preserve",
-        "lib": ["dom", "dom.iterable", "esnext", "webworker"],
+        /* MUI doesn't work with exactOptionalPropertyTypes yet. */
+        "exactOptionalPropertyTypes": false,
+
+        /* Override tsconfig-next.json (TODO: Remove me) */
+        "verbatimModuleSyntax": false,
+        /* Override tsconfig-next.json (TODO: Remove me) */
         "noImplicitAny": false,
         "noUnusedLocals": false,
         "noUnusedParameters": false,
-        "strictNullChecks": false,
-        "target": "es5",
-        "useUnknownInCatchVariables": false,
-        /* TODO(MR): Add to auth */
-        "moduleResolution": "bundler"
-
-        // "paths": {
-        //     "@ente/eslint-config/*": ["./packages/eslint-config/*"],
-        //     "@ente/shared/*": ["./packages/shared/*"]
-        // }
+        "noImplicitReturns": false,
+        "noUncheckedIndexedAccess": false,
+        "strictNullChecks": false
     },
     "include": [
         "next-env.d.ts",
