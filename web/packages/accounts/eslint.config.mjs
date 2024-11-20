@@ -17,12 +17,6 @@ export default [
             "@typescript-eslint/no-unsafe-argument": "off",
             "@typescript-eslint/no-unsafe-call": "off",
             /** TODO: Disabled as we migrate, try to prune these again */
-            "@typescript-eslint/no-unnecessary-type-assertion": "off",
-            "@typescript-eslint/array-type": "off",
-            "@typescript-eslint/no-empty-function": "off",
-            "@typescript-eslint/prefer-optional-chain": "off",
-
-
             "react-hooks/exhaustive-deps": "off",
             "react-hooks/rules-of-hooks": "off",
             "react-refresh/only-export-components": "off",

@@ -57,7 +57,7 @@ const Page: React.FC<RecoverPageProps> = ({ appContext, twoFactorType }) => {
     useEffect(() => {
         const user = getData(LS_KEYS.USER);
         const sid = user.passkeySessionID || user.twoFactorSessionID;
-        if (!user || !user.email || !sid) {
+        if (!user?.email || !sid) {
             void router.push("/");
         } else if (
             !(user.isTwoFactorEnabled || user.isTwoFactorEnabledPasskey) &&
