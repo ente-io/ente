@@ -113,7 +113,7 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
                                     setView("choose");
                                     onClose();
                                 })
-                                .catch((e) => {
+                                .catch((e: unknown) => {
                                     log.error("Error casting to TV", e);
                                     setView("auto-cast-error");
                                 });

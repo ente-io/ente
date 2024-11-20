@@ -263,7 +263,7 @@ export default function Uploader({
             };
 
             const requestSyncWithRemote = () => {
-                props.syncWithRemote().catch((e) => {
+                props.syncWithRemote().catch((e: unknown) => {
                     log.error(
                         "Ignoring error when syncing trash changes with remote",
                         e,
