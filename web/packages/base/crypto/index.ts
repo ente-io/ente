@@ -46,10 +46,16 @@
  * of going through this file.
  */
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
+import { type StateAddress } from "libsodium-wrappers-sumo";
 import { assertionFailed } from "../assert";
 import { inWorker } from "../env";
 import * as ei from "./ente-impl";
-import type { BytesOrB64, EncryptedBlob, EncryptedBox } from "./types";
+import type {
+    BytesOrB64,
+    EncryptedBlob,
+    EncryptedBox,
+    EncryptedFile,
+} from "./types";
 import type { CryptoWorker } from "./worker";
 
 /**
@@ -147,7 +153,58 @@ export const encryptBlob = (data: BytesOrB64, key: BytesOrB64) =>
 export const encryptBlobB64 = (data: BytesOrB64, key: BytesOrB64) =>
     inWorker()
         ? ei._encryptBlobB64(data, key)
-        : sharedCryptoWorker().then((w) => w._encryptBlobB64(data, key));
+        : sharedCryptoWorker().then((w) => w.encryptBlobB64(data, key));
+
+/**
+ * Encrypt the thumbnail for a file.
+ *
+ * This is midway variant of {@link encryptBlob} and {@link encryptBlobB64} that
+ * returns the decryption header as a base64 string, but leaves the data
+ * unchanged.
+ *
+ * Use {@link decryptThumbnail} to decrypt the result.
+ */
+export const encryptThumbnail = (data: BytesOrB64, key: BytesOrB64) =>
+    inWorker()
+        ? ei._encryptThumbnail(data, key)
+        : sharedCryptoWorker().then((w) => w.encryptThumbnail(data, key));
+
+/**
+ * Encrypt the given data using chunked streaming encryption, but process all
+ * the chunks in one go.
+ *
+ * For more details, see {@link encryptStreamBytes} in `libsodium.ts`.
+ */
+export const encryptStreamBytes = async (data: Uint8Array, key: BytesOrB64) =>
+    inWorker()
+        ? ei._encryptStreamBytes(data, key)
+        : sharedCryptoWorker().then((w) => w.encryptStreamBytes(data, key));
+
+/**
+ * Prepare for chunked streaming encryption using {@link encryptStreamChunk}.
+ *
+ * For more details, see {@link initChunkEncryption} in `libsodium.ts`.
+ */
+export const initChunkEncryption = async (key: BytesOrB64) =>
+    inWorker()
+        ? ei._initChunkEncryption(key)
+        : sharedCryptoWorker().then((w) => w.initChunkEncryption(key));
+
+/**
+ * Encrypt a chunk as part of a chunked streaming encryption.
+ *
+ * For more details, see {@link encryptStreamChunk} in `libsodium.ts`.
+ */
+export const encryptStreamChunk = async (
+    data: Uint8Array,
+    state: StateAddress,
+    isFinalChunk: boolean,
+) =>
+    inWorker()
+        ? ei._encryptStreamChunk(data, state, isFinalChunk)
+        : sharedCryptoWorker().then((w) =>
+              w.encryptStreamChunk(data, state, isFinalChunk),
+          );
 
 /**
  * Encrypt the JSON metadata associated with an Ente object (file, collection or
@@ -220,6 +277,47 @@ export const decryptBlobB64 = (blob: EncryptedBlob, key: BytesOrB64) =>
     inWorker()
         ? ei._decryptBlobB64(blob, key)
         : sharedCryptoWorker().then((w) => w.decryptBlobB64(blob, key));
+
+/**
+ * Decrypt the thumbnail encrypted using {@link encryptThumbnail}.
+ */
+export const decryptThumbnail = (blob: EncryptedBlob, key: BytesOrB64) =>
+    inWorker()
+        ? ei._decryptThumbnail(blob, key)
+        : sharedCryptoWorker().then((w) => w.decryptThumbnail(blob, key));
+
+/**
+ * Decrypt the result of {@link encryptStreamBytes}.
+ */
+export const decryptStreamBytes = async (
+    file: EncryptedFile,
+    key: BytesOrB64,
+) =>
+    inWorker()
+        ? ei._decryptStreamBytes(file, key)
+        : sharedCryptoWorker().then((w) => w.decryptStreamBytes(file, key));
+
+/**
+ * Prepare to decrypt the encrypted result produced using {@link initChunkEncryption} and
+ * {@link encryptStreamChunk}.
+ */
+export const initChunkDecryption = async (header: string, key: BytesOrB64) =>
+    inWorker()
+        ? ei._initChunkDecryption(header, key)
+        : sharedCryptoWorker().then((w) => w.initChunkDecryption(header, key));
+
+/**
+ * Decrypt an individual chunk produced by {@link encryptStreamChunk}.
+ *
+ * This function is used in tandem with {@link initChunkDecryption}.
+ */
+export const decryptStreamChunk = async (
+    data: Uint8Array,
+    state: StateAddress,
+) =>
+    inWorker()
+        ? ei._decryptStreamChunk(data, state)
+        : sharedCryptoWorker().then((w) => w.decryptStreamChunk(data, state));
 
 /**
  * Decrypt the metadata JSON encrypted using {@link encryptMetadataJSON}.
