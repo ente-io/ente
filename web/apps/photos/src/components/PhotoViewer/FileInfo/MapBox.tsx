@@ -7,8 +7,10 @@ import { useEffect, useRef } from "react";
 
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css"; // Re-uses images from ~leaflet package
 import "leaflet/dist/leaflet.css";
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 haveWindow() && require("leaflet-defaulticon-compatibility");
 const L = haveWindow()
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     ? (require("leaflet") as typeof import("leaflet"))
     : null;
 

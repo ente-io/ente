@@ -47,14 +47,11 @@ export default [
             "@typescript-eslint/restrict-plus-operands": "off",
             "@typescript-eslint/no-meaningless-void-operator": "off",
             "react-hooks/exhaustive-deps": "off",
-            "react-hooks/rules-of-hooks": "off",
+
             "react-refresh/only-export-components": "off",
             /** TODO: New during eslint 8=>9 migration */
             "@typescript-eslint/no-unused-expressions": "off",
-            // "@typescript-eslint/no-unused-vars": "off",
-
             "@typescript-eslint/prefer-regexp-exec": "off",
-            "@typescript-eslint/no-require-imports": "off",
         },
     },
 ];
