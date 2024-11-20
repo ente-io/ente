@@ -33,6 +33,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const bip39 = require("bip39");
 // mobile client library only supports english.
 bip39.setDefaultWordlist("english");

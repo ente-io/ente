@@ -25,6 +25,7 @@ import { useEffect, useState } from "react";
 import { appHomeRoute, stashRedirect } from "../services/redirect";
 import type { PageProps } from "../types/page";
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const bip39 = require("bip39");
 // mobile client library only supports english.
 bip39.setDefaultWordlist("english");
