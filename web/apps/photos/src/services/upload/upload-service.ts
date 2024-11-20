@@ -1359,14 +1359,10 @@ const encryptFile = async (
         worker,
     );
 
-    const {
-        encryptedData: thumbEncryptedData,
-        decryptionHeader: thumbDecryptionHeader,
-    } = await worker.encryptThumbnail(file.thumbnail, fileKey);
-    const encryptedThumbnail = {
-        encryptedData: thumbEncryptedData,
-        decryptionHeader: thumbDecryptionHeader,
-    };
+    const encryptedThumbnail = await worker.encryptThumbnail(
+        file.thumbnail,
+        fileKey,
+    );
 
     const encryptedMetadata = await worker.encryptMetadataJSON({
         jsonValue: file.metadata,
