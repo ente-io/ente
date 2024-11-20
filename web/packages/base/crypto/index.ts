@@ -18,11 +18,11 @@
  * ensure that sodium.ready has been called before accessing libsodium's APIs,
  * thus all the functions it exposes are async.
  *
- * The highest layer is this file, `crypto/index.ts`, and the one that our own
- * code should use. These are usually simple compositions of functionality
- * exposed by `crypto/libsodium.ts`, the primary difference being that these
- * functions try to talk in terms of higher-level Ente specific goal we are
- * trying to accomplish instead of the specific underlying crypto algorithms.
+ * The highest layer is this file, `crypto/index.ts`. These are usually simple
+ * compositions of functionality exposed by `crypto/libsodium.ts`, the primary
+ * difference being that these functions try to talk in terms of higher-level
+ * Ente specific goal we are trying to accomplish instead of the specific
+ * underlying crypto algorithms.
  *
  * There is an additional actor in play. Cryptographic operations like
  * encryption are CPU intensive and would cause the UI to stutter if used
