@@ -3,8 +3,12 @@
 
 import { isDesktop } from "@/base/app";
 import { blobCache, type BlobCache } from "@/base/blob-cache";
-import { sharedCryptoWorker } from "@/base/crypto";
-import { type CryptoWorker } from "@/base/crypto/worker";
+import {
+    decryptStreamBytes,
+    decryptStreamChunk,
+    decryptThumbnail,
+    initChunkDecryption,
+} from "@/base/crypto";
 import log from "@/base/log";
 import { customAPIOrigin } from "@/base/origins";
 import type { EnteFile, LivePhotoSourceURL, SourceURLs } from "@/media/file";
@@ -45,7 +49,6 @@ class DownloadManagerImpl {
      * Only available when we're running in the desktop app.
      */
     private fileCache?: BlobCache;
-    private cryptoWorker: CryptoWorker | undefined;
 
     private fileObjectURLPromises = new Map<number, Promise<SourceURLs>>();
     private fileConversionPromises = new Map<number, Promise<SourceURLs>>();
@@ -78,7 +81,7 @@ class DownloadManagerImpl {
         // } catch (e) {
         //     log.error("Failed to open file cache, will continue without it", e);
         // }
-        this.cryptoWorker = await sharedCryptoWorker();
+
         this.ready = true;
     }
 
@@ -88,15 +91,11 @@ class DownloadManagerImpl {
                 "Attempting to use an uninitialized download manager",
             );
 
-        return {
-            downloadClient: this.downloadClient!,
-            cryptoWorker: this.cryptoWorker!,
-        };
+        return { downloadClient: this.downloadClient! };
     }
 
     logout() {
         this.ready = false;
-        this.cryptoWorker = undefined;
         this.downloadClient = undefined;
         this.fileObjectURLPromises.clear();
         this.fileConversionPromises.clear();
@@ -115,14 +114,11 @@ class DownloadManagerImpl {
     }
 
     private downloadThumb = async (file: EnteFile) => {
-        const { downloadClient, cryptoWorker } = this.ensureInitialized();
+        const { downloadClient } = this.ensureInitialized();
 
         const encryptedData = await downloadClient.downloadThumbnail(file);
         const decryptionHeader = file.thumbnail.decryptionHeader;
-        return cryptoWorker.decryptThumbnail(
-            { encryptedData, decryptionHeader },
-            file.key,
-        );
+        return decryptThumbnail({ encryptedData, decryptionHeader }, file.key);
     };
 
     async getThumbnail(file: EnteFile, localOnly = false) {
@@ -270,7 +266,7 @@ class DownloadManagerImpl {
     private async downloadFile(
         file: EnteFile,
     ): Promise<ReadableStream<Uint8Array> | null> {
-        const { downloadClient, cryptoWorker } = this.ensureInitialized();
+        const { downloadClient } = this.ensureInitialized();
 
         log.info(`download attempted for file id ${file.id}`);
 
@@ -301,7 +297,7 @@ class DownloadManagerImpl {
             }
             this.clearDownloadProgress(file.id);
 
-            const decrypted = await cryptoWorker.decryptStreamBytes(
+            const decrypted = await decryptStreamBytes(
                 {
                     encryptedData: new Uint8Array(encryptedArrayBuffer),
                     decryptionHeader: file.file.decryptionHeader,
@@ -331,11 +327,10 @@ class DownloadManagerImpl {
             parseInt(res.headers.get("Content-Length") ?? "") || 0;
         let downloadedBytes = 0;
 
-        const { pullState, decryptionChunkSize } =
-            await cryptoWorker.initChunkDecryption(
-                file.file.decryptionHeader,
-                file.key,
-            );
+        const { pullState, decryptionChunkSize } = await initChunkDecryption(
+            file.file.decryptionHeader,
+            file.key,
+        );
 
         let leftoverBytes = new Uint8Array();
 
@@ -368,11 +363,10 @@ class DownloadManagerImpl {
                     // data.length might be a multiple of decryptionChunkSize,
                     // and we might need multiple iterations to drain it all.
                     while (data.length >= decryptionChunkSize) {
-                        const decryptedData =
-                            await cryptoWorker.decryptStreamChunk(
-                                data.slice(0, decryptionChunkSize),
-                                pullState,
-                            );
+                        const decryptedData = await decryptStreamChunk(
+                            data.slice(0, decryptionChunkSize),
+                            pullState,
+                        );
                         controller.enqueue(decryptedData);
                         didEnqueue = true;
                         data = data.slice(decryptionChunkSize);
@@ -382,11 +376,10 @@ class DownloadManagerImpl {
                         // Send off the remaining bytes without waiting for a
                         // full chunk, no more bytes are going to come.
                         if (data.length) {
-                            const decryptedData =
-                                await cryptoWorker.decryptStreamChunk(
-                                    data,
-                                    pullState,
-                                );
+                            const decryptedData = await decryptStreamChunk(
+                                data,
+                                pullState,
+                            );
                             controller.enqueue(decryptedData);
                         }
                         // Don't loop again even if we didn't enqueue.
