@@ -883,7 +883,7 @@ class ExportService {
             await this.verifyExportFolderExists(folder);
             const exportRecordJSONPath = `${folder}/${exportRecordFileName}`;
             if (!(await fs.exists(exportRecordJSONPath))) {
-                return this.createEmptyExportRecord(exportRecordJSONPath);
+                return await this.createEmptyExportRecord(exportRecordJSONPath);
             }
             const recordFile = await fs.readTextFile(exportRecordJSONPath);
             return JSON.parse(recordFile);

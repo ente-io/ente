@@ -52,7 +52,7 @@ export default [
             /** TODO: New during eslint 8=>9 migration */
             "@typescript-eslint/no-unused-expressions": "off",
             // "@typescript-eslint/no-unused-vars": "off",
-            "@typescript-eslint/return-await": "off",
+
             "@typescript-eslint/prefer-regexp-exec": "off",
             "@typescript-eslint/no-require-imports": "off",
         },
