@@ -197,6 +197,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "error": MessageLookupByLibrary.simpleMessage("خطا"),
         "everywhere": MessageLookupByLibrary.simpleMessage("همه جا"),
         "existingUser": MessageLookupByLibrary.simpleMessage("کاربر موجود"),
+        "faceNotClusteredYet": MessageLookupByLibrary.simpleMessage(
+            "Face not clustered yet, please come back later"),
         "familyPlanPortalTitle":
             MessageLookupByLibrary.simpleMessage("خانوادگی"),
         "familyPlans":

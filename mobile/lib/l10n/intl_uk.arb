@@ -1363,5 +1363,6 @@
   "checkingModels": "Перевірка моделей...",
   "enableMachineLearningBanner": "Увімкніть машинне навчання для магічного пошуку та розпізнавання облич",
   "searchDiscoverEmptySection": "Зображення будуть показані тут після завершення обробки",
-  "searchPersonsEmptySection": "Люди будуть показані тут після завершення обробки"
+  "searchPersonsEmptySection": "Люди будуть показані тут після завершення обробки",
+  "faceNotClusteredYet": "Face not clustered yet, please come back later"
 }

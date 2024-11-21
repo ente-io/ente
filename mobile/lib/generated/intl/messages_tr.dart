@@ -660,6 +660,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Günlüğü dışa aktar"),
         "exportYourData":
             MessageLookupByLibrary.simpleMessage("Veriyi dışarı aktar"),
+        "faceNotClusteredYet": MessageLookupByLibrary.simpleMessage(
+            "Face not clustered yet, please come back later"),
         "faces": MessageLookupByLibrary.simpleMessage("Yüzler"),
         "failedToApplyCode":
             MessageLookupByLibrary.simpleMessage("Uygulanırken hata oluştu"),

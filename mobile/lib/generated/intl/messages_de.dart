@@ -806,6 +806,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Zusätzliche Fotos gefunden"),
         "extraPhotosFoundFor": MessageLookupByLibrary.simpleMessage(
             "Zusätzliche Fotos gefunden für \$text"),
+        "faceNotClusteredYet": MessageLookupByLibrary.simpleMessage(
+            "Face not clustered yet, please come back later"),
         "faceRecognition":
             MessageLookupByLibrary.simpleMessage("Gesichtserkennung"),
         "faces": MessageLookupByLibrary.simpleMessage("Gesichter"),

@@ -165,6 +165,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("ใส่รหัสผ่านของคุณ"),
         "enterYourRecoveryKey":
             MessageLookupByLibrary.simpleMessage("ป้อนคีย์การกู้คืน"),
+        "faceNotClusteredYet": MessageLookupByLibrary.simpleMessage(
+            "Face not clustered yet, please come back later"),
         "faq": MessageLookupByLibrary.simpleMessage("คำถามที่พบบ่อย"),
         "favorite": MessageLookupByLibrary.simpleMessage("ชื่นชอบ"),
         "feedback": MessageLookupByLibrary.simpleMessage("ความคิดเห็น"),

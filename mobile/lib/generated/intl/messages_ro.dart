@@ -655,6 +655,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Exportați jurnalele"),
         "exportYourData":
             MessageLookupByLibrary.simpleMessage("Export de date"),
+        "faceNotClusteredYet": MessageLookupByLibrary.simpleMessage(
+            "Face not clustered yet, please come back later"),
         "faces": MessageLookupByLibrary.simpleMessage("Fețe"),
         "failedToApplyCode":
             MessageLookupByLibrary.simpleMessage("Codul nu a putut fi aplicat"),

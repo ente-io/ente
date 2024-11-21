@@ -1092,5 +1092,6 @@
   },
   "enable": "Activare",
   "enabled": "Activat",
-  "moreDetails": "Mai multe detalii"
+  "moreDetails": "Mai multe detalii",
+  "faceNotClusteredYet": "Face not clustered yet, please come back later"
 }

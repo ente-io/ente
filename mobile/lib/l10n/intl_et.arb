@@ -218,5 +218,6 @@
   "storageBreakupYou": "Sina",
   "@storageBreakupYou": {
     "description": "Label to indicate how much storage you are using when you are part of a family plan"
-  }
+  },
+  "faceNotClusteredYet": "Face not clustered yet, please come back later"
 }

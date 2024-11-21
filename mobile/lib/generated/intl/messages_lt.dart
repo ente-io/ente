@@ -460,6 +460,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Rastos papildomos nuotraukos"),
         "extraPhotosFoundFor": MessageLookupByLibrary.simpleMessage(
             "Rastos papildomos nuotraukos, skirtos \$text"),
+        "faceNotClusteredYet": MessageLookupByLibrary.simpleMessage(
+            "Face not clustered yet, please come back later"),
         "faceRecognition":
             MessageLookupByLibrary.simpleMessage("Veido atpažinimas"),
         "faces": MessageLookupByLibrary.simpleMessage("Veidai"),

@@ -1268,7 +1268,7 @@
   "savePerson": "Save person",
   "editPerson": "Edit person",
   "mergedPhotos": "Merged photos",
-  "orMergeWithExistingPerson" : "Or merge with existing",
+  "orMergeWithExistingPerson": "Or merge with existing",
   "enterDateOfBirth": "Birthday (optional)",
   "birthday": "Birthday",
   "removePersonLabel": "Remove person label",
@@ -1395,5 +1395,6 @@
       }
     },
     "description": "Number of collaborators that were successfully added to an album."
-  }
+  },
+  "faceNotClusteredYet": "Face not clustered yet, please come back later"
 }

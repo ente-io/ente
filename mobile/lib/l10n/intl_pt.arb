@@ -1363,5 +1363,6 @@
   "checkingModels": "Verificando modelos...",
   "enableMachineLearningBanner": "Ativar aprendizagem de máquina para busca mágica e reconhecimento facial",
   "searchDiscoverEmptySection": "As imagens serão exibidas aqui quando o processamento for concluído",
-  "searchPersonsEmptySection": "As pessoas serão exibidas aqui quando o processamento for concluído"
+  "searchPersonsEmptySection": "As pessoas serão exibidas aqui quando o processamento for concluído",
+  "faceNotClusteredYet": "Face not clustered yet, please come back later"
 }

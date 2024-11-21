@@ -675,6 +675,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "このリンクは期限切れです。新たな期限を設定するか、期限設定そのものを無くすか、選択してください"),
         "exportLogs": MessageLookupByLibrary.simpleMessage("ログのエクスポート"),
         "exportYourData": MessageLookupByLibrary.simpleMessage("データをエクスポート"),
+        "faceNotClusteredYet": MessageLookupByLibrary.simpleMessage(
+            "Face not clustered yet, please come back later"),
         "faceRecognition": MessageLookupByLibrary.simpleMessage("顔認識"),
         "faces": MessageLookupByLibrary.simpleMessage("顔"),
         "failedToApplyCode":

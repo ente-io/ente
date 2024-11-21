@@ -1360,5 +1360,6 @@
   "allPersonGroupingWillReset": "Alle groepen voor deze persoon worden gereset, en je verliest alle suggesties die voor deze persoon zijn gedaan",
   "yesResetPerson": "Ja, reset persoon",
   "onlyThem": "Alleen hen",
-  "checkingModels": "Modellen controleren..."
+  "checkingModels": "Modellen controleren...",
+  "faceNotClusteredYet": "Face not clustered yet, please come back later"
 }

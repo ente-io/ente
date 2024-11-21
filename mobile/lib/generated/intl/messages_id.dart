@@ -668,6 +668,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "exportLogs": MessageLookupByLibrary.simpleMessage("Ekspor log"),
         "exportYourData":
             MessageLookupByLibrary.simpleMessage("Ekspor data kamu"),
+        "faceNotClusteredYet": MessageLookupByLibrary.simpleMessage(
+            "Face not clustered yet, please come back later"),
         "faceRecognition":
             MessageLookupByLibrary.simpleMessage("Pengenalan wajah"),
         "faces": MessageLookupByLibrary.simpleMessage("Wajah"),

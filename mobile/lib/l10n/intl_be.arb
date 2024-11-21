@@ -199,5 +199,6 @@
   "darkTheme": "Цёмная",
   "systemTheme": "Сістэма",
   "freeTrial": "Бясплатная пробная версія",
-  "faqs": "Частыя пытанні"
+  "faqs": "Частыя пытанні",
+  "faceNotClusteredYet": "Face not clustered yet, please come back later"
 }

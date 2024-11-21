@@ -802,5 +802,6 @@
   "allPersonGroupingWillReset": "Visi šio asmens grupavimai bus iš naujo nustatyti, o jūs neteksite visų šiam asmeniui pateiktų pasiūlymų",
   "yesResetPerson": "Taip, nustatyti asmenį iš naujo",
   "onlyThem": "Tik jiems",
-  "checkingModels": "Tikrinami modeliai..."
+  "checkingModels": "Tikrinami modeliai...",
+  "faceNotClusteredYet": "Face not clustered yet, please come back later"
 }

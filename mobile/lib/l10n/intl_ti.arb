@@ -1,3 +1,4 @@
 {
-  "@@locale ": "en"
+  "@@locale ": "en",
+  "faceNotClusteredYet": "Face not clustered yet, please come back later"
 }

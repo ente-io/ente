@@ -43,6 +43,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "சரியான மின்னஞ்சல் முகவரியை உள்ளிடவும்."),
         "enterYourEmailAddress": MessageLookupByLibrary.simpleMessage(
             "உங்கள் மின்னஞ்சல் முகவரியை உள்ளிடவும்"),
+        "faceNotClusteredYet": MessageLookupByLibrary.simpleMessage(
+            "Face not clustered yet, please come back later"),
         "feedback": MessageLookupByLibrary.simpleMessage("பின்னூட்டம்"),
         "invalidEmailAddress":
             MessageLookupByLibrary.simpleMessage("தவறான மின்னஞ்சல் முகவரி"),

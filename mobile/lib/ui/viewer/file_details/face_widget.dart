@@ -6,7 +6,7 @@ import "package:flutter/foundation.dart" show kDebugMode;
 import "package:flutter/material.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/extensions/stop_watch.dart";
-import "package:photos/models/base/id.dart";
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/file/file.dart';
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/face/person.dart";
@@ -18,6 +18,7 @@ import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
 import "package:photos/ui/viewer/people/cluster_page.dart";
 import "package:photos/ui/viewer/people/people_page.dart";
 import "package:photos/utils/face/face_box_crop.dart";
+import "package:photos/utils/toast_util.dart";
 
 class FaceWidget extends StatefulWidget {
   final EnteFile file;
@@ -100,21 +101,11 @@ class _FaceWidgetState extends State<FaceWidget> {
                   );
                 }
 
-                // Create new clusterID for the faceID and update DB to assign the faceID to the new clusterID
-                final String clusterID = newClusterID();
-                await MLDataDB.instance.updateFaceIdToClusterId(
-                  {widget.face.faceID: clusterID},
+                showShortToast(
+                  context,
+                  S.of(context).faceNotClusteredYet,
                 );
-
-                // Push page for the new cluster
-                await Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => ClusterPage(
-                      [widget.file],
-                      clusterID: clusterID,
-                    ),
-                  ),
-                );
+                return;
               }
               if (widget.person != null) {
                 await Navigator.of(context).push(
