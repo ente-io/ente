@@ -131,38 +131,42 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                 setState(() {});
               }
             });
-            return GestureDetector(
-              onTap: () {
-                final List<EnteFile> sortedFiles =
-                    List<EnteFile>.from(currentSuggestion.filesInCluster);
-                sortedFiles.sort(
-                  (a, b) => b.creationTime!.compareTo(a.creationTime!),
-                );
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => ClusterPage(
-                      sortedFiles,
-                      personID: widget.person,
-                      clusterID: clusterID,
-                      showNamingBanner: false,
+            return Expanded(
+              child: SingleChildScrollView(
+                child: GestureDetector(
+                  onTap: () {
+                    final List<EnteFile> sortedFiles =
+                        List<EnteFile>.from(currentSuggestion.filesInCluster);
+                    sortedFiles.sort(
+                      (a, b) => b.creationTime!.compareTo(a.creationTime!),
+                    );
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => ClusterPage(
+                          sortedFiles,
+                          personID: widget.person,
+                          clusterID: clusterID,
+                          showNamingBanner: false,
+                        ),
+                      ),
+                    );
+                  },
+                  behavior: HitTestBehavior.opaque,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8.0,
+                      vertical: 20,
+                    ),
+                    child: _buildSuggestionView(
+                      clusterID,
+                      distance,
+                      usingMean,
+                      files,
+                      numberOfDifferentSuggestions,
+                      allSuggestions,
+                      generateFacedThumbnails,
                     ),
                   ),
-                );
-              },
-              behavior: HitTestBehavior.opaque,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8.0,
-                  vertical: 20,
-                ),
-                child: _buildSuggestionView(
-                  clusterID,
-                  distance,
-                  usingMean,
-                  files,
-                  numberOfDifferentSuggestions,
-                  allSuggestions,
-                  generateFacedThumbnails,
                 ),
               ),
             );
@@ -265,11 +269,12 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
     final widgetToReturn = Column(
       key: ValueKey("cluster_id-$clusterID-files-${files.length}"),
       children: <Widget>[
-        if (kDebugMode)
-          Text(
-            "ClusterID: $clusterID, Distance: ${distance.toStringAsFixed(3)}, usingMean: $usingMean",
-            style: getEnteTextTheme(context).smallMuted,
-          ),
+        // if (kDebugMode)
+        //   Text(
+        //     "ClusterID: $clusterID, Distance: ${distance.toStringAsFixed(3)}, usingMean: $usingMean",
+        //     style: getEnteTextTheme(context).smallMuted,
+        //   ),
+
         Text(
           "${widget.person.data.name}?",
           style: getEnteTextTheme(context).largeMuted,
@@ -336,7 +341,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
       )) {
         final files = suggestion.filesInCluster;
         final clusterID = suggestion.clusterIDToMerge;
-        for (final file in files.sublist(0, min(files.length, 8))) {
+        for (final file in files.sublist(0, min(files.length, 9))) {
           unawaited(
             PersonFaceWidget.precomputeNextFaceCrops(
               file,
@@ -362,52 +367,59 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
     String clusterID,
     Future<Map<int, Uint8List?>> generateFaceThumbnails,
   ) {
-    return SizedBox(
-      height: MediaQuery.of(context).size.height * 0.4,
-      child: FutureBuilder<Map<int, Uint8List?>>(
-        key: futureBuilderKeyFaceThumbnails,
-        future: generateFaceThumbnails,
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            final faceThumbnails = snapshot.data!;
-            canGiveFeedback = true;
-            return Column(
-              children: <Widget>[
+    return FutureBuilder<Map<int, Uint8List?>>(
+      key: futureBuilderKeyFaceThumbnails,
+      future: generateFaceThumbnails,
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          final faceThumbnails = snapshot.data!;
+          canGiveFeedback = true;
+          return Column(
+            children: <Widget>[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: _buildThumbnailWidgetsRow(
+                  files,
+                  clusterID,
+                  faceThumbnails,
+                ),
+              ),
+              if (files.length > 3) const SizedBox(height: 12),
+              if (files.length > 3)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: _buildThumbnailWidgetsRow(
                     files,
                     clusterID,
                     faceThumbnails,
+                    start: 3,
                   ),
                 ),
-                if (files.length > 4) const SizedBox(height: 24),
-                if (files.length > 4)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: _buildThumbnailWidgetsRow(
-                      files,
-                      clusterID,
-                      faceThumbnails,
-                      start: 4,
-                    ),
+              if (files.length > 6)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: _buildThumbnailWidgetsRow(
+                    files,
+                    clusterID,
+                    faceThumbnails,
+                    start: 6,
                   ),
-                const SizedBox(height: 24.0),
-                Text(
-                  "${files.length} photos",
-                  style: getEnteTextTheme(context).body,
                 ),
-              ],
-            );
-          } else if (snapshot.hasError) {
-            // log the error
-            return const Center(child: Text("Error"));
-          } else {
-            canGiveFeedback = false;
-            return const Center(child: CircularProgressIndicator());
-          }
-        },
-      ),
+              if (files.length > 6) const SizedBox(height: 12.0),
+              Text(
+                "${files.length} photos",
+                style: getEnteTextTheme(context).body,
+              ),
+            ],
+          );
+        } else if (snapshot.hasError) {
+          // log the error
+          return const Center(child: Text("Error"));
+        } else {
+          canGiveFeedback = false;
+          return const Center(child: CircularProgressIndicator());
+        }
+      },
     );
   }
 
@@ -418,13 +430,18 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
     int start = 0,
   }) {
     return List<Widget>.generate(
-      min(4, max(0, files.length - start)),
+      min(3, max(0, files.length - start)),
       (index) => Padding(
         padding: const EdgeInsets.all(8.0),
         child: SizedBox(
-          width: 72,
-          height: 72,
-          child: ClipOval(
+          width: 100,
+          height: 100,
+          child: ClipPath(
+            clipper: ShapeBorderClipper(
+              shape: ContinuousRectangleBorder(
+                borderRadius: BorderRadius.circular(72),
+              ),
+            ),
             child: PersonFaceWidget(
               files[start + index],
               clusterID: cluserId,
@@ -474,10 +491,6 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
           clusterID: lastFeedback.suggestion.clusterIDToMerge,
         );
       }
-
-      // futureClusterSuggestions =
-      //     pastUserFeedback.map((element) => element.suggestion)
-      //         as Future<List<ClusterSuggestion>>;
 
       fetch = false;
       futureClusterSuggestions = futureClusterSuggestions.then((list) {
