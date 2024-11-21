@@ -1,12 +1,12 @@
 import { newID } from "@/base/id";
 import log from "@/base/log";
+import QueueProcessor from "@ente/shared/utils/queueProcessor";
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import {
     ffmpegPathPlaceholder,
     inputPathPlaceholder,
     outputPathPlaceholder,
 } from "./constants";
-import QueueProcessor from "@ente/shared/utils/queueProcessor";
 
 /** Lazily initialized and loaded FFmpeg instance. */
 let _ffmpeg: Promise<FFmpeg> | undefined;
