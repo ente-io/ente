@@ -37,7 +37,6 @@ import {
 } from "@mui/material";
 import Notification from "components/Notification";
 import { t } from "i18next";
-import isElectron from "is-electron";
 import { GalleryContext } from "pages/gallery";
 import Photoswipe from "photoswipe";
 import PhotoswipeUIDefault from "photoswipe/dist/photoswipe-ui-default";
@@ -365,7 +364,7 @@ function PhotoViewer(props: PhotoViewerProps) {
 
     function updateShowConvertBtn(file: EnteFile) {
         const shouldShowConvertBtn =
-            isElectron() &&
+            isDesktop &&
             (file.metadata.fileType === FileType.video ||
                 file.metadata.fileType === FileType.livePhoto) &&
             !file.isConverted &&

@@ -74,7 +74,6 @@ import DeleteAccountModal from "components/DeleteAccountModal";
 import { WatchFolder } from "components/WatchFolder";
 import LinkButton from "components/pages/gallery/LinkButton";
 import { t } from "i18next";
-import isElectron from "is-electron";
 import { useRouter } from "next/router";
 import { GalleryContext } from "pages/gallery";
 import React, {
@@ -526,7 +525,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
 
     return (
         <>
-            {isElectron() && (
+            {isDesktop && (
                 <EnteMenuItem
                     onClick={showWatchFolder}
                     variant="secondary"
@@ -591,7 +590,7 @@ const UtilitySection: React.FC<UtilitySectionProps> = ({ closeSidebar }) => {
                 {...twoFactorVisibilityProps}
                 onRootClose={closeSidebar}
             />
-            {isElectron() && (
+            {isDesktop && (
                 <WatchFolder
                     open={watchFolderView}
                     onClose={handleCloseWatchFolder}
