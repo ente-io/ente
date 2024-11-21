@@ -1,3 +1,4 @@
+import { newID } from "@/base/id";
 import log from "@/base/log";
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import {
@@ -54,9 +55,9 @@ const ffmpegExec = async (
     outputFileExtension: string,
     blob: Blob,
 ) => {
-    const inputPath = randomPrefix();
+    const inputPath = newID("in_");
     const outputSuffix = outputFileExtension ? "." + outputFileExtension : "";
-    const outputPath = randomPrefix() + outputSuffix;
+    const outputPath = newID("out_") + outputSuffix;
 
     const cmd = substitutePlaceholders(command, inputPath, outputPath);
 
@@ -86,17 +87,6 @@ const ffmpegExec = async (
             log.error(`Failed to remove output ${outputPath}`, e);
         }
     }
-};
-
-/** Generate a random string suitable for being used as a file name prefix */
-const randomPrefix = () => {
-    const alphabet =
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-    let result = "";
-    for (let i = 0; i < 10; i++)
-        result += alphabet[Math.floor(Math.random() * alphabet.length)]!;
-    return result;
 };
 
 const substitutePlaceholders = (
