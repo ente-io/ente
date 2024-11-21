@@ -11,6 +11,7 @@ import 'package:logging/logging.dart';
 import "package:media_extension/media_extension_action_types.dart";
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import "package:move_to_background/move_to_background.dart";
+import "package:package_info_plus/package_info_plus.dart";
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/ente_theme_data.dart';
@@ -35,6 +36,7 @@ import 'package:photos/services/collections_service.dart';
 import "package:photos/services/deeplink_service.dart";
 import 'package:photos/services/local_sync_service.dart';
 import "package:photos/services/notification_service.dart";
+import "package:photos/services/remote_sync_service.dart";
 import 'package:photos/services/user_service.dart';
 import 'package:photos/states/user_details_state.dart';
 import 'package:photos/theme/colors.dart';
@@ -233,15 +235,27 @@ class _HomeWidgetState extends State<HomeWidget> {
         },
       ),
     );
+
     NotificationService.instance
         .initialize(_onDidReceiveNotificationResponse)
         .ignore();
 
-    Platform.isAndroid
-        ? WidgetsBinding.instance.addPostFrameCallback((_) {
-            DeeplinkService.instance.requestDeeplinkPermissions(context);
-          })
-        : null;
+    if (Platform.isAndroid &&
+        !DeeplinkService.instance.hasConfiguredDeeplinkPermissions() &&
+        RemoteSyncService.instance.isFirstRemoteSyncDone()) {
+      PackageInfo.fromPlatform().then((packageInfo) {
+        final packageName = packageInfo.packageName;
+        if (packageName == 'io.ente.photos.independent' ||
+            packageName == 'io.ente.photos.fdroid') {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              DeeplinkService.instance
+                  .requestDeeplinkPermissions(context, packageName);
+            }
+          });
+        }
+      });
+    }
   }
 
   Future<void> _handlePublicAlbumLink(Uri uri) async {
