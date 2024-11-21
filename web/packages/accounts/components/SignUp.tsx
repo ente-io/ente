@@ -2,7 +2,7 @@ import { sendOtt } from "@/accounts/api/user";
 import { PasswordStrengthHint } from "@/accounts/components/PasswordStrength";
 import { PAGES } from "@/accounts/constants/pages";
 import { generateKeyAndSRPAttributes } from "@/accounts/services/srp";
-import { isWeakPassword } from "@/accounts/utils";
+import { isWeakPassword } from "@/accounts/utils/password";
 import { FormPaperFooter, FormPaperTitle } from "@/base/components/FormPaper";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import log from "@/base/log";

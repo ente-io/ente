@@ -1,8 +1,8 @@
-import { estimatePasswordStrength } from "@/accounts/utils";
 import { FlexWrapper } from "@ente/shared/components/Container";
 import { Typography } from "@mui/material";
 import { t } from "i18next";
 import React, { useMemo } from "react";
+import { estimatePasswordStrength } from "../utils/password";
 
 interface PasswordStrengthHintProps {
     password: string;

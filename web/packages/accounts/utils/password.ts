@@ -2,8 +2,9 @@ import zxcvbn from "zxcvbn";
 
 export type PasswordStrength = "weak" | "moderate" | "strong";
 
-
-export function estimatePasswordStrength(password: string): PasswordStrength {
+export const estimatePasswordStrength = (
+    password: string,
+): PasswordStrength => {
     if (!password) {
         return "weak";
     }
@@ -16,8 +17,7 @@ export function estimatePasswordStrength(password: string): PasswordStrength {
     } else {
         return "strong";
     }
-}
-
-export const isWeakPassword = (password: string) => {
-    return estimatePasswordStrength(password) == "weak";
 };
+
+export const isWeakPassword = (password: string) =>
+    estimatePasswordStrength(password) == "weak";
