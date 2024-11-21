@@ -1,5 +1,5 @@
 import { assertionFailed } from "@/base/assert";
-import { useIsSmallWidth } from "@/base/hooks";
+import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { ItemCard, PreviewItemTile } from "@/new/photos/components/Tiles";
 import { isMLSupported, mlStatusSnapshot } from "@/new/photos/services/ml";
 import { searchOptionsForString } from "@/new/photos/services/search";

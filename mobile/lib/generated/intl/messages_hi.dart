@@ -28,8 +28,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "आपका अकाउंट हटाने का मुख्य कारण क्या है?"),
         "cancel": MessageLookupByLibrary.simpleMessage("रद्द करें"),
-        "checkingModels":
-            MessageLookupByLibrary.simpleMessage("Checking models..."),
         "confirmAccountDeletion": MessageLookupByLibrary.simpleMessage(
             "अकाउंट डिलीट करने की पुष्टि करें"),
         "confirmPassword":
@@ -58,8 +56,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteRequestSLAText": MessageLookupByLibrary.simpleMessage(
             "आपका अनुरोध 72 घंटों के भीतर संसाधित किया जाएगा।"),
         "email": MessageLookupByLibrary.simpleMessage("ईमेल"),
-        "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
-            "Enable machine learning for magic search and face recognition"),
         "entePhotosPerm": MessageLookupByLibrary.simpleMessage(
             "Ente को आपकी तस्वीरों को संरक्षित करने के लिए <i>अनुमति की आवश्यकता है</i>"),
         "enterValidEmail": MessageLookupByLibrary.simpleMessage(
@@ -89,12 +85,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "recoverButton": MessageLookupByLibrary.simpleMessage("पुनः प्राप्त"),
         "recoverySuccessful":
             MessageLookupByLibrary.simpleMessage("रिकवरी सफल हुई!"),
-        "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
-            "Images will be shown here once processing is complete"),
-        "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
-            "People will be shown here once processing is complete"),
-        "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
-            "People will be shown here once processing is complete"),
         "selectReason": MessageLookupByLibrary.simpleMessage("कारण चुनें"),
         "sendEmail": MessageLookupByLibrary.simpleMessage("ईमेल भेजें"),
         "somethingWentWrongPleaseTryAgain":

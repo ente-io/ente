@@ -8,8 +8,8 @@ export type NotificationAttributes =
 interface MessageSubTextNotificationAttributes {
     startIcon?: ReactNode;
     variant: ButtonProps["color"];
-    message?: JSX.Element | string;
-    subtext?: JSX.Element | string;
+    message?: React.JSX.Element | string;
+    subtext?: React.JSX.Element | string;
     title?: never;
     caption?: never;
     onClick: () => void;
@@ -19,8 +19,8 @@ interface MessageSubTextNotificationAttributes {
 interface TitleCaptionNotificationAttributes {
     startIcon?: ReactNode;
     variant: ButtonProps["color"];
-    title?: JSX.Element | string;
-    caption?: JSX.Element | string;
+    title?: React.JSX.Element | string;
+    caption?: React.JSX.Element | string;
     message?: never;
     subtext?: never;
     onClick: () => void;

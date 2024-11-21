@@ -1,11 +1,10 @@
-import { basename } from "@/base/file";
+import { basename } from "@/base/file-name";
 import type { ElectronMLWorker } from "@/base/types/ipc";
+import { renderableImageBlob } from "@/gallery/utils/convert";
+import { readStream } from "@/gallery/utils/native-stream";
 import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
-import { ensure } from "@/utils/ensure";
-import { renderableImageBlob } from "../../utils/file";
-import { readStream } from "../../utils/native-stream";
 import DownloadManager from "../download";
 import type { UploadItem } from "../upload/types";
 
@@ -44,7 +43,7 @@ export const createImageBitmapAndData = async (
 
     // Use an OffscreenCanvas to get the bitmap's data.
     const offscreenCanvas = new OffscreenCanvas(width, height);
-    const ctx = ensure(offscreenCanvas.getContext("2d"));
+    const ctx = offscreenCanvas.getContext("2d")!;
     ctx.drawImage(imageBitmap, 0, 0, width, height);
     const imageData = ctx.getImageData(0, 0, width, height);
 
@@ -93,7 +92,7 @@ const fetchRenderableUploadItemBlob = async (
     const fileType = file.metadata.fileType;
     if (fileType == FileType.video) {
         const thumbnailData = await DownloadManager.getThumbnail(file);
-        return new Blob([ensure(thumbnailData)]);
+        return new Blob([thumbnailData!]);
     } else {
         const blob = await readNonVideoUploadItem(uploadItem, electron);
         return renderableImageBlob(file.metadata.title, blob);
@@ -148,7 +147,7 @@ export const fetchRenderableEnteFileBlob = async (
     const fileType = file.metadata.fileType;
     if (fileType == FileType.video) {
         const thumbnailData = await DownloadManager.getThumbnail(file);
-        return new Blob([ensure(thumbnailData)]);
+        return new Blob([thumbnailData!]);
     }
 
     const fileStream = await DownloadManager.getFile(file);

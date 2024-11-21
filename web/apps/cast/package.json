@@ -5,11 +5,11 @@
     "dependencies": {
         "@/accounts": "*",
         "@/base": "*",
-        "@/build-config": "*",
         "@/media": "*",
         "@ente/shared": "*"
     },
     "devDependencies": {
+        "@/build-config": "*",
         "@types/chromecast-caf-receiver": "^6.0.17"
     }
 }

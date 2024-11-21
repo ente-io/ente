@@ -1,4 +1,5 @@
 import { TitledMiniDialog } from "@/base/components/MiniDialog";
+import log from "@/base/log";
 import { photosDialogZIndex } from "@/new/photos/components/utils/z-index";
 import SingleInputForm, {
     type SingleInputFormProps,
@@ -20,6 +21,7 @@ export const FileNameEditDialog = ({
             await saveEdits(filename);
             closeEditMode();
         } catch (e) {
+            log.error(e);
             setFieldError(t("generic_error_retry"));
         }
     };

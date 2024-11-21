@@ -30,8 +30,6 @@ export const logToDisk = (message: string) => {
 };
 
 const workerLogToDisk = (message: string) => {
-    // We checked that we're `inWorker` prior to calling this function.
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     workerBridge!.logToDisk(message).catch((e: unknown) => {
         console.error(
             "Failed to log a message from worker",
@@ -61,6 +59,7 @@ const messageWithError = (message: string, e?: unknown) => {
         }
     } else {
         // For the rest rare cases, use the default string serialization of e.
+        // eslint-disable-next-line @typescript-eslint/no-base-to-string
         es = String(e);
     }
 

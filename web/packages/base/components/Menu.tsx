@@ -4,7 +4,7 @@ import React from "react";
 
 interface MenuSectionTitleProps {
     title: string;
-    icon?: JSX.Element;
+    icon?: React.JSX.Element;
 }
 
 export const MenuSectionTitle: React.FC<MenuSectionTitleProps> = ({

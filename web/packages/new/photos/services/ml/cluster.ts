@@ -2,7 +2,6 @@ import { assertionFailed } from "@/base/assert";
 import { newNonSecureID } from "@/base/id-worker";
 import log from "@/base/log";
 import type { EnteFile } from "@/media/file";
-import { ensure } from "@/utils/ensure";
 import { wait } from "@/utils/promise";
 import {
     pullUserEntities,
@@ -216,7 +215,7 @@ const sortFacesNewestOnesFirst = (
     const fileForFaceID = new Map(
         faces.map(({ faceID }) => [
             faceID,
-            localFileByID.get(ensure(fileIDFromFaceID(faceID))),
+            localFileByID.get(fileIDFromFaceID(faceID)!),
         ]),
     );
 
@@ -306,7 +305,6 @@ const clusterBatchLinear = async (
         for (let j = i - 1; j >= 0; j--) {
             // ! This is an O(n^2) loop, be careful when adding more code here.
 
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             const fj = faces[j]!;
 
             // The vectors are already normalized, so we can directly use their
@@ -321,7 +319,7 @@ const clusterBatchLinear = async (
             if (rejectedClusters) {
                 const cjx = state.faceIDToClusterIndex.get(fj.faceID);
                 if (cjx !== undefined) {
-                    const cj = ensure(state.clusters[cjx]);
+                    const cj = state.clusters[cjx]!;
                     if (rejectedClusters.has(cj.id)) {
                         continue;
                     }
@@ -334,11 +332,11 @@ const clusterBatchLinear = async (
 
         if (nnIndex !== undefined) {
             // Found a neighbour close enough, add ourselves to its cluster.
-            const nnFace = ensure(faces[nnIndex]);
-            const nnClusterIndex = ensure(
-                state.faceIDToClusterIndex.get(nnFace.faceID),
-            );
-            const nnCluster = ensure(state.clusters[nnClusterIndex]);
+            const nnFace = faces[nnIndex]!;
+            const nnClusterIndex = state.faceIDToClusterIndex.get(
+                nnFace.faceID,
+            )!;
+            const nnCluster = state.clusters[nnClusterIndex]!;
 
             state.faceIDToClusterID.set(fi.faceID, nnCluster.id);
             state.faceIDToClusterIndex.set(fi.faceID, nnClusterIndex);
@@ -385,8 +383,8 @@ export const reconcileClusters = async (
                         ...cgroup,
                         data: {
                             ...cgroup.data,
-                            assigned: cgroup.data.assigned.map(({ id }) =>
-                                ensure(clusterByID.get(id)),
+                            assigned: cgroup.data.assigned.map(
+                                ({ id }) => clusterByID.get(id)!,
                             ),
                         },
                     };

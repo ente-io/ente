@@ -1,9 +1,8 @@
-import { sessionExpiredDialogAttributes } from "@/accounts/components/LoginComponents";
+import { sessionExpiredDialogAttributes } from "@/accounts/components/utils/dialog";
 import { stashRedirect } from "@/accounts/services/redirect";
 import { EnteLogo } from "@/base/components/EnteLogo";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { NavbarBase } from "@/base/components/Navbar";
-import { ensure } from "@/utils/ensure";
 import {
     HorizontalFlex,
     VerticallyCentered,
@@ -17,15 +16,14 @@ import MoreHoriz from "@mui/icons-material/MoreHoriz";
 import { Button, ButtonBase, Snackbar, TextField, styled } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { generateOTPs, type Code } from "services/code";
 import { getAuthCodes } from "services/remote";
-import { AppContext } from "./_app";
+import { useAppContext } from "types/context";
 
 const Page: React.FC = () => {
-    const { logout, showNavBar, showMiniDialog } = ensure(
-        useContext(AppContext),
-    );
+    const { logout, showNavBar, showMiniDialog } = useAppContext();
+
     const router = useRouter();
     const [codes, setCodes] = useState<Code[]>([]);
     const [hasFetched, setHasFetched] = useState(false);
@@ -44,7 +42,7 @@ const Page: React.FC = () => {
                     e.message == CustomError.KEY_MISSING
                 ) {
                     stashRedirect(PAGES.AUTH);
-                    router.push("/");
+                    void router.push("/");
                 } else if (e instanceof ApiError && e.httpStatusCode == 401) {
                     // We get back a 401 Unauthorized if the token is not valid.
                     showSessionExpiredDialog();
@@ -141,7 +139,7 @@ const Page: React.FC = () => {
 export default Page;
 
 const AuthNavbar: React.FC = () => {
-    const { logout } = ensure(useContext(AppContext));
+    const { logout } = useAppContext();
 
     return (
         <NavbarBase>
@@ -186,11 +184,11 @@ const CodeDisplay: React.FC<CodeDisplayProps> = ({ code }) => {
         }
     };
 
-    const copyCode = () => {
-        navigator.clipboard.writeText(otp);
-        setHasCopied(true);
-        setTimeout(() => setHasCopied(false), 2000);
-    };
+    const copyCode = () =>
+        void navigator.clipboard.writeText(otp).then(() => {
+            setHasCopied(true);
+            setTimeout(() => setHasCopied(false), 2000);
+        });
 
     useEffect(() => {
         // Generate to set the initial otp and nextOTP on component mount.

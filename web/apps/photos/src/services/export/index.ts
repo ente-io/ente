@@ -1,5 +1,6 @@
 import { ensureElectron } from "@/base/electron";
 import log from "@/base/log";
+import { writeStream } from "@/gallery/utils/native-stream";
 import type { Collection } from "@/media/collection";
 import { mergeMetadata, type EnteFile } from "@/media/file";
 import {
@@ -20,7 +21,6 @@ import {
 } from "@/new/photos/services/export";
 import { getAllLocalFiles } from "@/new/photos/services/files";
 import { safeDirectoryName, safeFileName } from "@/new/photos/utils/native-fs";
-import { writeStream } from "@/new/photos/utils/native-stream";
 import { CustomError } from "@ente/shared/error";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
 import QueueProcessor, {
@@ -883,7 +883,7 @@ class ExportService {
             await this.verifyExportFolderExists(folder);
             const exportRecordJSONPath = `${folder}/${exportRecordFileName}`;
             if (!(await fs.exists(exportRecordJSONPath))) {
-                return this.createEmptyExportRecord(exportRecordJSONPath);
+                return await this.createEmptyExportRecord(exportRecordJSONPath);
             }
             const recordFile = await fs.readTextFile(exportRecordJSONPath);
             return JSON.parse(recordFile);
@@ -966,7 +966,7 @@ class ExportService {
         exportDir: string,
         fileUID: string,
         collectionExportPath: string,
-        fileStream: ReadableStream<any>,
+        fileStream: ReadableStream,
         file: EnteFile,
     ) {
         const fs = ensureElectron().fs;
@@ -1181,7 +1181,7 @@ const getRenamedExportedCollections = (
             if (currentExportName === collectionExportName) {
                 return false;
             }
-            const hasNumberedSuffix = currentExportName.match(/\(\d+\)$/);
+            const hasNumberedSuffix = /\(\d+\)$/.exec(currentExportName);
             const currentExportNameWithoutNumberedSuffix = hasNumberedSuffix
                 ? currentExportName.replace(/\(\d+\)$/, "")
                 : currentExportName;
@@ -1407,7 +1407,7 @@ export const isLivePhotoExportName = (exportName: string) => {
     try {
         JSON.parse(exportName);
         return true;
-    } catch (e) {
+    } catch {
         return false;
     }
 };

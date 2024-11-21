@@ -41,8 +41,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "backedUpFolders":
             MessageLookupByLibrary.simpleMessage("Sikkerhedskopierede mapper"),
         "cancel": MessageLookupByLibrary.simpleMessage("Annuller"),
-        "checkingModels":
-            MessageLookupByLibrary.simpleMessage("Checking models..."),
         "confirmAccountDeletion":
             MessageLookupByLibrary.simpleMessage("Bekræft Sletning Af Konto"),
         "confirmPassword":
@@ -73,8 +71,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "developerSettingsWarning": MessageLookupByLibrary.simpleMessage(
             "Er du sikker på, at du vil ændre udviklerindstillingerne?"),
         "email": MessageLookupByLibrary.simpleMessage("Email"),
-        "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
-            "Enable machine learning for magic search and face recognition"),
         "enterPin": MessageLookupByLibrary.simpleMessage("Indtast PIN"),
         "enterValidEmail": MessageLookupByLibrary.simpleMessage(
             "Indtast venligst en gyldig email adresse."),
@@ -118,14 +114,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "scanThisBarcodeWithnyourAuthenticatorApp":
             MessageLookupByLibrary.simpleMessage(
                 "Skan denne QR-kode med godkendelses-appen"),
-        "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
-            "Images will be shown here once processing is complete"),
         "searchHint1":
             MessageLookupByLibrary.simpleMessage("Hurtig, søgning på enheden"),
-        "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
-            "People will be shown here once processing is complete"),
-        "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
-            "People will be shown here once processing is complete"),
         "selectReason": MessageLookupByLibrary.simpleMessage("Vælg årsag"),
         "selectedPhotos": m4,
         "sendEmail": MessageLookupByLibrary.simpleMessage("Send email"),

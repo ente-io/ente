@@ -1,6 +1,7 @@
 import log from "@/base/log";
 import { type Electron } from "@/base/types/ipc";
 import { FileType, type FileTypeInfo } from "@/media/file-type";
+import { isHEICExtension } from "@/media/formats";
 import { heicToJPEG } from "@/media/heic-convert";
 import { scaledImageDimensions } from "@/media/image";
 import * as ffmpeg from "@/new/photos/services/ffmpeg";
@@ -8,7 +9,6 @@ import {
     toDataOrPathOrZipEntry,
     type DesktopUploadItem,
 } from "@/new/photos/services/upload/types";
-import { ensure } from "@/utils/ensure";
 import { withTimeout } from "@/utils/promise";
 
 /** Maximum width or height of the generated thumbnail */
@@ -60,7 +60,7 @@ const generateImageThumbnailWeb = async (
     blob: Blob,
     { extension }: FileTypeInfo,
 ) => {
-    if (extension == "heic" || extension == "heif") {
+    if (isHEICExtension(extension)) {
         log.debug(() => `Pre-converting HEIC to JPEG for thumbnail generation`);
         blob = await heicToJPEG(blob);
     }
@@ -70,7 +70,7 @@ const generateImageThumbnailWeb = async (
 
 const generateImageThumbnailUsingCanvas = async (blob: Blob) => {
     const canvas = document.createElement("canvas");
-    const canvasCtx = ensure(canvas.getContext("2d"));
+    const canvasCtx = canvas.getContext("2d")!;
 
     const imageURL = URL.createObjectURL(blob);
     await withTimeout(
@@ -118,7 +118,7 @@ const compressedJPEGData = async (canvas: HTMLCanvasElement) => {
         percentageSizeDiff(blob.size, prevSize) >= 10
     );
 
-    return new Uint8Array(await ensure(blob).arrayBuffer());
+    return new Uint8Array(await blob!.arrayBuffer());
 };
 
 const percentageSizeDiff = (
@@ -140,7 +140,7 @@ const generateVideoThumbnailWeb = async (blob: Blob) => {
 
 export const generateVideoThumbnailUsingCanvas = async (blob: Blob) => {
     const canvas = document.createElement("canvas");
-    const canvasCtx = ensure(canvas.getContext("2d"));
+    const canvasCtx = canvas.getContext("2d")!;
 
     const videoURL = URL.createObjectURL(blob);
     await withTimeout(

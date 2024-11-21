@@ -75,6 +75,7 @@ export const migrateKVToken = async (user: unknown) => {
         typeof oldLSUser.token == "string" &&
         !(await getKVS("token"));
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     user &&
     typeof user == "object" &&
     "id" in user &&
@@ -82,6 +83,7 @@ export const migrateKVToken = async (user: unknown) => {
         ? await setKV("userID", user.id)
         : await removeKV("userID");
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     user &&
     typeof user == "object" &&
     "token" in user &&

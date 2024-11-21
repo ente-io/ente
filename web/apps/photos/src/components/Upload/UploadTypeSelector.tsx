@@ -1,6 +1,6 @@
 import { SpaceBetweenFlex } from "@/base/components/mui/Container";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import { useIsTouchscreen } from "@/base/hooks";
+import { useIsTouchscreen } from "@/base/components/utils/hooks";
 import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";
 import { EnteMenuItem } from "@ente/shared/components/Menu/EnteMenuItem";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
@@ -107,13 +107,13 @@ export const UploadTypeSelector: React.FC<UploadTypeSelectorProps> = ({
 
 type OptionType = "files" | "folders" | "zips";
 
-type OptionsProps = {
+interface OptionsProps {
     intent: UploadTypeSelectorIntent;
     /** Called when the user selects one of the provided options. */
     onSelect: (option: OptionType) => void;
     /** Called when the dialog should be closed. */
     onClose: () => void;
-};
+}
 
 export const Options: React.FC<OptionsProps> = ({
     intent,

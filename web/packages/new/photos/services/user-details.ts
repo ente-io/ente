@@ -1,14 +1,13 @@
+import { isDesktop } from "@/base/app";
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { getKV, setKV } from "@/base/kv";
 import { apiURL, familyAppOrigin, paymentsAppOrigin } from "@/base/origins";
-import { ensure } from "@/utils/ensure";
 import {
     nullishToEmpty,
     nullishToZero,
     nullToUndefined,
 } from "@/utils/transform";
 import { getData, LS_KEYS, setLSUser } from "@ente/shared/storage/localStorage";
-import isElectron from "is-electron";
 import { z } from "zod";
 
 /**
@@ -336,7 +335,7 @@ export const verifyStripeSubscription = async (
         }),
     );
     await syncUserDetails();
-    return ensure(userDetailsSnapshot()?.subscription);
+    return userDetailsSnapshot()!.subscription;
 };
 
 /**
@@ -390,7 +389,7 @@ export const redirectToPaymentsApp = async (
  * of the flow.
  */
 const paymentCompletionRedirectURL = () =>
-    isElectron()
+    isDesktop
         ? `${paymentsAppOrigin()}/desktop-redirect`
         : `${window.location.origin}/gallery`;
 

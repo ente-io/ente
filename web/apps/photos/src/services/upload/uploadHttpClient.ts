@@ -1,7 +1,7 @@
 import log from "@/base/log";
 import { apiURL, uploaderOrigin } from "@/base/origins";
+import { retryAsyncOperation } from "@/gallery/utils/retry-async";
 import { EnteFile } from "@/media/file";
-import { wait } from "@/utils/promise";
 import { CustomError, handleUploadError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
@@ -17,7 +17,7 @@ class UploadHttpClient {
                 return;
             }
             const url = await apiURL("/files");
-            const response = await retryHTTPCall(
+            const response = await retryAsyncOperation(
                 () =>
                     HTTPService.post(url, uploadFile, null, {
                         "X-Auth-Token": token,
@@ -47,7 +47,7 @@ class UploadHttpClient {
                         { "X-Auth-Token": token },
                     );
                     const response = await this.uploadURLFetchInProgress;
-                    for (const url of response.data["urls"]) {
+                    for (const url of response.data.urls) {
                         urlStore.push(url);
                     }
                 } finally {
@@ -77,7 +77,7 @@ class UploadHttpClient {
                 { "X-Auth-Token": token },
             );
 
-            return response.data["urls"];
+            return response.data.urls;
         } catch (e) {
             log.error("fetch multipart-upload-url failed", e);
             throw e;
@@ -90,7 +90,7 @@ class UploadHttpClient {
         progressTracker,
     ): Promise<string> {
         try {
-            await retryHTTPCall(
+            await retryAsyncOperation(
                 () =>
                     HTTPService.put(
                         fileUploadURL.url,
@@ -117,7 +117,7 @@ class UploadHttpClient {
     ): Promise<string> {
         try {
             const origin = await uploaderOrigin();
-            await retryHTTPCall(() =>
+            await retryAsyncOperation(() =>
                 HTTPService.put(
                     `${origin}/file-upload`,
                     file,
@@ -143,7 +143,7 @@ class UploadHttpClient {
         progressTracker,
     ) {
         try {
-            const response = await retryHTTPCall(async () => {
+            const response = await retryAsyncOperation(async () => {
                 const resp = await HTTPService.put(
                     partUploadURL,
                     filePart,
@@ -174,7 +174,7 @@ class UploadHttpClient {
     ) {
         try {
             const origin = await uploaderOrigin();
-            const response = await retryHTTPCall(async () => {
+            const response = await retryAsyncOperation(async () => {
                 const resp = await HTTPService.put(
                     `${origin}/multipart-upload`,
                     filePart,
@@ -202,7 +202,7 @@ class UploadHttpClient {
 
     async completeMultipartUpload(completeURL: string, reqBody: any) {
         try {
-            await retryHTTPCall(() =>
+            await retryAsyncOperation(() =>
                 HTTPService.post(completeURL, reqBody, null, {
                     "content-type": "text/xml",
                 }),
@@ -216,7 +216,7 @@ class UploadHttpClient {
     async completeMultipartUploadV2(completeURL: string, reqBody: any) {
         try {
             const origin = await uploaderOrigin();
-            await retryHTTPCall(() =>
+            await retryAsyncOperation(() =>
                 HTTPService.post(
                     `${origin}/multipart-complete`,
                     reqBody,
@@ -235,31 +235,3 @@ class UploadHttpClient {
 }
 
 export default new UploadHttpClient();
-
-const retrySleepTimeInMilliSeconds = [2000, 5000, 10000];
-
-export async function retryHTTPCall(
-    func: () => Promise<any>,
-    checkForBreakingError?: (error) => void,
-): Promise<any> {
-    const retrier = async (
-        func: () => Promise<any>,
-        attemptNumber: number = 0,
-    ) => {
-        try {
-            const resp = await func();
-            return resp;
-        } catch (e) {
-            if (checkForBreakingError) {
-                checkForBreakingError(e);
-            }
-            if (attemptNumber < retrySleepTimeInMilliSeconds.length) {
-                await wait(retrySleepTimeInMilliSeconds[attemptNumber]);
-                return await retrier(func, attemptNumber + 1);
-            } else {
-                throw e;
-            }
-        }
-    };
-    return await retrier(func);
-}

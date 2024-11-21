@@ -2,5 +2,10 @@
     "name": "@/gallery",
     "version": "0.0.0",
     "private": true,
-    "dependencies": {}
+    "dependencies": {
+        "@ffmpeg/ffmpeg": "^0.12.10"
+    },
+    "devDependencies": {
+        "@/build-config": "*"
+    }
 }

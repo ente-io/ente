@@ -4,7 +4,6 @@ import { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import type { SelectionContext } from "@/new/photos/components/gallery";
 import type { GalleryBarMode } from "@/new/photos/components/gallery/reducer";
-import { ensure } from "@/utils/ensure";
 import { SetSelectedState } from "types/gallery";
 
 export async function playVideo(livePhotoVideo, livePhotoImage) {
@@ -137,10 +136,10 @@ export const handleSelectCreator =
                     ...selected,
                     context:
                         mode == "people"
-                            ? { mode, personID: ensure(activePersonID) }
+                            ? { mode, personID: activePersonID! }
                             : {
                                   mode,
-                                  collectionID: ensure(activeCollectionID),
+                                  collectionID: activeCollectionID!,
                               },
                 };
             } else {
@@ -153,10 +152,10 @@ export const handleSelectCreator =
                         collectionID: 0,
                         context:
                             mode == "people"
-                                ? { mode, personID: ensure(activePersonID) }
+                                ? { mode, personID: activePersonID! }
                                 : {
                                       mode,
-                                      collectionID: ensure(activeCollectionID),
+                                      collectionID: activeCollectionID!,
                                   },
                     };
                 } else {
@@ -169,7 +168,7 @@ export const handleSelectCreator =
                                 collectionID: 0,
                                 context: {
                                     mode: selected.context?.mode,
-                                    personID: ensure(activePersonID),
+                                    personID: activePersonID!,
                                 },
                             };
                         }
@@ -184,7 +183,7 @@ export const handleSelectCreator =
                                 collectionID: 0,
                                 context: {
                                     mode: selected.context?.mode,
-                                    collectionID: ensure(activeCollectionID),
+                                    collectionID: activeCollectionID!,
                                 },
                             };
                         }
@@ -195,8 +194,8 @@ export const handleSelectCreator =
             const newContext: SelectionContext | undefined = !mode
                 ? undefined
                 : mode == "people"
-                  ? { mode, personID: ensure(activePersonID) }
-                  : { mode, collectionID: ensure(activeCollectionID) };
+                  ? { mode, personID: activePersonID! }
+                  : { mode, collectionID: activeCollectionID! };
 
             const handleCounterChange = (count: number) => {
                 if (selected[id] === checked) {

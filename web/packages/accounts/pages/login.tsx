@@ -21,14 +21,14 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         void customAPIHost().then(setHost);
         const user = getData(LS_KEYS.USER);
         if (user?.email) {
-            router.push(PAGES.VERIFY);
+            void router.push(PAGES.VERIFY);
         }
         setLoading(false);
         showNavBar(true);
     }, []);
 
     const signUp = () => {
-        router.push(PAGES.SIGNUP);
+        void router.push(PAGES.SIGNUP);
     };
 
     return loading ? (

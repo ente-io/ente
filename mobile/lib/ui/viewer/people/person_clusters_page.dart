@@ -1,8 +1,10 @@
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
+import "package:intl/intl.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/people_changed_event.dart";
+import "package:photos/l10n/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
@@ -66,26 +68,23 @@ class _PersonClustersPageState extends State<PersonClustersPage> {
                     child: Row(
                       children: <Widget>[
                         SizedBox(
-                          width: 64,
-                          height: 64,
-                          child: files.isNotEmpty
-                              ? ClipRRect(
-                                  borderRadius: const BorderRadius.all(
-                                    Radius.elliptical(16, 12),
-                                  ),
-                                  child: PersonFaceWidget(
+                          width: 100,
+                          height: 100,
+                          child: ClipPath(
+                            clipper: ShapeBorderClipper(
+                              shape: ContinuousRectangleBorder(
+                                borderRadius: BorderRadius.circular(75),
+                              ),
+                            ),
+                            child: files.isNotEmpty
+                                ? PersonFaceWidget(
                                     files.first,
                                     clusterID: clusterID,
-                                  ),
-                                )
-                              : const ClipRRect(
-                                  borderRadius: BorderRadius.all(
-                                    Radius.elliptical(16, 12),
-                                  ),
-                                  child: NoThumbnailWidget(
+                                  )
+                                : const NoThumbnailWidget(
                                     addBorder: false,
                                   ),
-                                ),
+                          ),
                         ),
                         const SizedBox(
                           width: 8.0,
@@ -147,6 +146,132 @@ class _PersonClustersPageState extends State<PersonClustersPage> {
           }
         },
       ),
+    );
+  }
+}
+
+class PersonClustersWidget extends StatefulWidget {
+  final PersonEntity person;
+  final double? height;
+
+  const PersonClustersWidget(
+    this.person, {
+    super.key,
+    this.height,
+  });
+
+  @override
+  State<PersonClustersWidget> createState() => _PersonClustersWidgetState();
+}
+
+class _PersonClustersWidgetState extends State<PersonClustersWidget> {
+  final Logger _logger = Logger("_PersonClustersWidgetState");
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<Map<String, List<EnteFile>>>(
+      future: SearchService.instance
+          .getClusterFilesForPersonID(widget.person.remoteID),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          final clusters = snapshot.data!;
+          final List<String> keys = clusters.keys.toList();
+          // Sort the clusters by the number of files in each cluster, largest first
+          keys.sort(
+            (b, a) => clusters[a]!.length.compareTo(clusters[b]!.length),
+          );
+
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              // Determine number of columns based on available width
+              // Minimum column width of 150, maximum of 250
+              final double columnWidth =
+                  MediaQuery.of(context).size.width > 600 ? 250 : 150;
+              final int crossAxisCount =
+                  (constraints.maxWidth / columnWidth).floor().clamp(2, 5);
+
+              // Calculate expected height based on number of rows
+              final int rowCount = (keys.length / crossAxisCount).ceil();
+              // Thumbnail height + text height + spacing
+              final double expectedHeight =
+                  widget.height ?? (rowCount * (110 + 30 + 8));
+
+              return SizedBox(
+                height: expectedHeight,
+                child: GridView.builder(
+                  physics:
+                      const NeverScrollableScrollPhysics(), // Disable scrolling
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: crossAxisCount,
+                    childAspectRatio:
+                        1, // Adjust this to control height vs width
+                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 8,
+                  ),
+                  itemCount: keys.length,
+                  itemBuilder: (context, index) {
+                    final String clusterID = keys[index];
+                    final List<EnteFile> files = clusters[clusterID]!;
+
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => ClusterPage(
+                              files,
+                              personID: widget.person,
+                              clusterID: clusterID,
+                              showNamingBanner: false,
+                            ),
+                          ),
+                        );
+                      },
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            width: 100,
+                            height: 100,
+                            child: ClipPath(
+                              clipper: ShapeBorderClipper(
+                                shape: ContinuousRectangleBorder(
+                                  borderRadius: BorderRadius.circular(75),
+                                ),
+                              ),
+                              child: files.isNotEmpty
+                                  ? PersonFaceWidget(
+                                      files.first,
+                                      clusterID: clusterID,
+                                    )
+                                  : const NoThumbnailWidget(
+                                      addBorder: false,
+                                    ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            context.l10n.memoryCount(
+                              files.length,
+                              NumberFormat().format(files.length),
+                            ),
+                            style: getEnteTextTheme(context).small,
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+          );
+        } else if (snapshot.hasError) {
+          _logger.warning("Failed to get cluster", snapshot.error);
+          return const Center(child: Text("Error"));
+        } else {
+          return const Center(child: CircularProgressIndicator());
+        }
+      },
     );
   }
 }

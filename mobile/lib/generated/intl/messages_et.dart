@@ -49,8 +49,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "checkStatus":
             MessageLookupByLibrary.simpleMessage("Kontrolli staatust"),
         "checking": MessageLookupByLibrary.simpleMessage("Kontrollimine..."),
-        "checkingModels":
-            MessageLookupByLibrary.simpleMessage("Checking models..."),
         "collaborator": MessageLookupByLibrary.simpleMessage("Kaastööline"),
         "collectPhotos": MessageLookupByLibrary.simpleMessage("Kogu fotod"),
         "color": MessageLookupByLibrary.simpleMessage("Värv"),
@@ -100,8 +98,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "done": MessageLookupByLibrary.simpleMessage("Valmis"),
         "edit": MessageLookupByLibrary.simpleMessage("Muuda"),
         "email": MessageLookupByLibrary.simpleMessage("E-post"),
-        "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
-            "Enable machine learning for magic search and face recognition"),
         "encryption": MessageLookupByLibrary.simpleMessage("Krüpteerimine"),
         "enterCode": MessageLookupByLibrary.simpleMessage("Sisesta kood"),
         "enterEmail": MessageLookupByLibrary.simpleMessage("Sisesta e-post"),
@@ -207,12 +203,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "scanThisBarcodeWithnyourAuthenticatorApp":
             MessageLookupByLibrary.simpleMessage(
                 "Skaneeri seda QR koodi\noma autentimisrakendusega"),
-        "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
-            "Images will be shown here once processing is complete"),
-        "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
-            "People will be shown here once processing is complete"),
-        "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
-            "People will be shown here once processing is complete"),
         "security": MessageLookupByLibrary.simpleMessage("Turvalisus"),
         "selectAll": MessageLookupByLibrary.simpleMessage("Vali kõik"),
         "selectLanguage": MessageLookupByLibrary.simpleMessage("Vali keel"),

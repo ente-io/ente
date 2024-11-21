@@ -394,8 +394,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "请检查您的收件箱 (或者是在您的“垃圾邮件”列表内) 以完成验证"),
         "checkStatus": MessageLookupByLibrary.simpleMessage("检查状态"),
         "checking": MessageLookupByLibrary.simpleMessage("正在检查..."),
-        "checkingModels":
-            MessageLookupByLibrary.simpleMessage("Checking models..."),
         "claimFreeStorage": MessageLookupByLibrary.simpleMessage("领取免费存储"),
         "claimMore": MessageLookupByLibrary.simpleMessage("领取更多！"),
         "claimed": MessageLookupByLibrary.simpleMessage("已领取"),
@@ -599,8 +597,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "enable": MessageLookupByLibrary.simpleMessage("启用"),
         "enableMLIndexingDesc": MessageLookupByLibrary.simpleMessage(
             "Ente 支持设备上的机器学习，实现人脸识别、魔法搜索和其他高级搜索功能"),
-        "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
-            "Enable machine learning for magic search and face recognition"),
         "enableMaps": MessageLookupByLibrary.simpleMessage("启用地图"),
         "enableMapsDesc": MessageLookupByLibrary.simpleMessage(
             "这将在世界地图上显示您的照片。\n\n该地图由 Open Street Map 托管，并且您的照片的确切位置永远不会共享。\n\n您可以随时从“设置”中禁用此功能。"),
@@ -1137,8 +1133,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "在照片信息中添加“#旅游”等描述，以便在此处快速找到它们"),
         "searchDatesEmptySection":
             MessageLookupByLibrary.simpleMessage("按日期搜索，月份或年份"),
-        "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
-            "Images will be shown here once processing is complete"),
         "searchFaceEmptySection":
             MessageLookupByLibrary.simpleMessage("待索引完成后，人物将显示在此处"),
         "searchFileTypesAndNamesEmptySection":
@@ -1152,8 +1146,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("在照片的一定半径内拍摄的几组照片"),
         "searchPeopleEmptySection":
             MessageLookupByLibrary.simpleMessage("邀请他人，您将在此看到他们分享的所有照片"),
-        "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
-            "People will be shown here once processing is complete"),
         "searchResultCount": m53,
         "security": MessageLookupByLibrary.simpleMessage("安全"),
         "selectALocation": MessageLookupByLibrary.simpleMessage("选择一个位置"),
