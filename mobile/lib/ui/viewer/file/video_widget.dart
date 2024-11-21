@@ -122,7 +122,7 @@ class _VideoWidgetState extends State<VideoWidget> {
       if (mounted) {
         showErrorDialog(
           context,
-          "Error",
+          S.of(context).error,
           S.of(context).failedToDownloadVideo,
         );
       }
@@ -170,10 +170,10 @@ class _VideoWidgetState extends State<VideoWidget> {
               showErrorDialogForException(
                 context: context,
                 exception: error,
-                message: "Failed to play video\n ${error.toString()}",
+                message: S.of(context).failedToPlayVideo + "\n" + error.toString(),
               );
             } else {
-              showToast(context, "Failed to play video");
+              showToast(context, S.of(context).failedToPlayVideo);
             }
           }
         },

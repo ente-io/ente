@@ -4,6 +4,7 @@ import "package:flutter/foundation.dart" show Uint8List, kDebugMode;
 import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/db/ml/db.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/box.dart";
 import "package:photos/models/ml/face/face.dart";
@@ -59,8 +60,8 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
     try {
       if (file.uploadedFileID == null) {
         return [
-          const ChipButtonWidget(
-            "File not uploaded yet",
+          ChipButtonWidget(
+            S.of(context).fileNotUploadedYet,
             noChips: true,
           ),
         ];
@@ -70,8 +71,8 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
           await MLDataDB.instance.getFacesForGivenFileID(file.uploadedFileID!);
       if (faces == null) {
         return [
-          const ChipButtonWidget(
-            "Image not analyzed",
+          ChipButtonWidget(
+            S.of(context).imageNotAnalyzed,
             noChips: true,
           ),
         ];
@@ -86,8 +87,8 @@ class _FacesItemWidgetState extends State<FacesItemWidget> {
 
       if (faces.isEmpty) {
         return [
-          const ChipButtonWidget(
-            "No faces found",
+          ChipButtonWidget(
+            S.of(context).noFacesFound,
             noChips: true,
           ),
         ];

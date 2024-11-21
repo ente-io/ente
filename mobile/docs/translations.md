@@ -28,22 +28,68 @@ from Crowdin, but these two should be no-ops.
 
 ## Adding a new string
 
--   Add a new entry in `lib/l10n/intl_en.arb` (the
-    **source `intl_en.arb`**).
--   Use the new key in code with the `S` class
-    (`import "package:photos/generated/l10n.dart"`).
--   During the next sync, the workflow will upload this source item to Crowdin's
-    dashboard, allowing translators to translate it.
+While it is technically possible to perform the following actions using command lines, it is recommended to use Visual Studio Code with the [Flutter](https://marketplace.visualstudio.com/items?itemName=localizely.flutter-intl) extension, for ease of use.
+
+1. Open Visual Studio Code, with the Flutter Intl extension installed, in 
+the `mobile` directory
+1. Select the string you want to extract, including the quotation marks
+1. Press '`Ctrl + .`' (or '`command + .`' on Mac) to open quick actions, and press "Extract to ARB" (if it is 
+not showing, check that you have not opened the full `ente` repository instead of the `mobile` folder).
+    <div align="center">
+
+    ![Free up space screen](assets/translations_1.png)
+
+    </div>
+
+    That should replace the string..
+
+    <div align="center">
+
+    ![Free up space screen](assets/translations_2.png)
+
+    </div>
+
+    .. and generate/modify the arb files.
+
+    <div align="center">
+
+    ![Free up space screen](assets/translations_3.png)
+
+    </div>
+
+1. (optional) You might want to add more context to the extracted string in the
+source `intl_en.arb` file
+
+    <div align="center">
+
+    ![Free up space screen](assets/translations_4.png)
+
+    </div>
+
+1. Make sure the file in which you have extracted the string has the following 
+import:
+
+    `import "package:photos/generated/l10n.dart"`
+
+1. Commit the changes and create a PR in which it is advised to tag at least one 
+of the developers (i.e. [laurenspriem](https://github.com/laurenspriem))
+
+1. During the next sync, the workflow will upload new source strings to Crowdin's 
+dashboard, allowing translators to translate it.
 
 ## Updating an existing string
 
--   Update the existing value for the key in the source `intl_en.arb`.
--   During the next sync, the workflow will clear out all the existing
-    translations so that they can be translated afresh.
+1. Update the existing value for the key in the source `intl_en.arb`.
+1. Commit the changes and create a PR in which it is advised to tag at least one of 
+the developers (i.e. [laurenspriem](https://github.com/laurenspriem))
+1. During the next sync, the workflow will upload new source strings to Crowdin's 
+dashboard, allowing translators to translate it.
 
 ## Deleting an existing string
 
--   Remove the key value pair from the source `intl_en.arb`.
--   During the next sync, the workflow will delete that source item from all
+1. Remove the key value pair from the source `intl_en.arb`.
+1. Commit the changes and create a PR in which it is advised to tag at least one of 
+the developers (i.e. [laurenspriem](https://github.com/laurenspriem))
+1. During the next sync, the workflow will delete that source item from all
     existing translations (both in the Crowdin project and also from the
     other `intl_XX.arb` files in the repository).

@@ -20,26 +20,34 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'fa';
 
-  static String m13(versionValue) => "نسخه: ${versionValue}";
+  static String m16(versionValue) => "نسخه: ${versionValue}";
 
-  static String m14(freeAmount, storageUnit) =>
+  static String m17(freeAmount, storageUnit) =>
       "${freeAmount} ${storageUnit} رایگان";
 
-  static String m25(supportEmail) =>
+  static String m28(supportEmail) =>
       "لطفا یک ایمیل از آدرس ایمیلی که ثبت نام کردید به ${supportEmail} ارسال کنید";
 
-  static String m0(passwordStrengthValue) =>
+  static String m3(passwordStrengthValue) =>
       "قدرت رمز عبور: ${passwordStrengthValue}";
 
-  static String m49(storeName) => "به ما در ${storeName} امتیاز دهید";
+  static String m53(storeName) => "به ما در ${storeName} امتیاز دهید";
 
-  static String m62(
+  static String m66(
           usedAmount, usedStorageUnit, totalAmount, totalStorageUnit) =>
       "${usedAmount} ${usedStorageUnit} از ${totalAmount} ${totalStorageUnit} استفاده شده";
 
-  static String m71(email) => "تایید ${email}";
+  static String m0(ignoreReason) =>
+      "Tap to upload, upload is currently ignored due to ${ignoreReason}";
 
-  static String m2(email) =>
+  static String m1(galleryType) =>
+      "Type of gallery ${galleryType} is not supported for rename";
+
+  static String m2(ignoreReason) => "Upload is ignored due to ${ignoreReason}";
+
+  static String m75(email) => "تایید ${email}";
+
+  static String m5(email) =>
       "ما یک ایمیل به <green>${email}</green> ارسال کرده‌ایم";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
@@ -48,6 +56,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "نسخه جدید Ente در دسترس است."),
         "about": MessageLookupByLibrary.simpleMessage("درباره ما"),
         "account": MessageLookupByLibrary.simpleMessage("حساب کاربری"),
+        "accountIsAlreadyConfigured": MessageLookupByLibrary.simpleMessage(
+            "Account is already configured."),
         "accountWelcomeBack":
             MessageLookupByLibrary.simpleMessage("خوش آمدید!"),
         "ackPasswordLostWarning": MessageLookupByLibrary.simpleMessage(
@@ -57,6 +67,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "addANewEmail":
             MessageLookupByLibrary.simpleMessage("افزودن ایمیل جدید"),
         "addCollaborator": MessageLookupByLibrary.simpleMessage("افزودن همکار"),
+        "addFiles": MessageLookupByLibrary.simpleMessage("Add Files"),
         "addMore": MessageLookupByLibrary.simpleMessage("افزودن بیشتر"),
         "addViewer": MessageLookupByLibrary.simpleMessage("افزودن بیننده"),
         "addedAs": MessageLookupByLibrary.simpleMessage("اضافه شده به عنوان"),
@@ -75,7 +86,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "androidCancelButton": MessageLookupByLibrary.simpleMessage("لغو"),
         "androidIosWebDesktop": MessageLookupByLibrary.simpleMessage(
             "اندروید، آی‌اواس، وب، رایانه رومیزی"),
-        "appVersion": m13,
+        "appVersion": m16,
         "archive": MessageLookupByLibrary.simpleMessage("بایگانی"),
         "areYouSureYouWantToLogout": MessageLookupByLibrary.simpleMessage(
             "آیا برای خارج شدن مطمئن هستید؟"),
@@ -86,7 +97,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "authToViewYourActiveSessions": MessageLookupByLibrary.simpleMessage(
             "لطفاً برای مشاهده دستگاه‌های فعال خود احراز هویت کنید"),
         "available": MessageLookupByLibrary.simpleMessage("در دسترس"),
-        "availableStorageSpace": m14,
+        "availableStorageSpace": m17,
         "backedUpFolders":
             MessageLookupByLibrary.simpleMessage("پوشه‌های پشتیبان گیری شده"),
         "backup": MessageLookupByLibrary.simpleMessage("پشتیبان گیری"),
@@ -94,6 +105,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "cancel": MessageLookupByLibrary.simpleMessage("لغو"),
         "cannotDeleteSharedFiles": MessageLookupByLibrary.simpleMessage(
             "پرونده‌های به اشتراک گذاشته شده را نمی‌توان حذف کرد"),
+        "castAlbum": MessageLookupByLibrary.simpleMessage("Cast album"),
         "changeEmail": MessageLookupByLibrary.simpleMessage("تغییر ایمیل"),
         "changePasswordTitle":
             MessageLookupByLibrary.simpleMessage("تغییر رمز عبور"),
@@ -164,7 +176,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "discord": MessageLookupByLibrary.simpleMessage("دیسکورد"),
         "doThisLater": MessageLookupByLibrary.simpleMessage("بعداً انجام شود"),
         "downloading": MessageLookupByLibrary.simpleMessage("در حال دانلود..."),
-        "dropSupportEmail": m25,
+        "dropSupportEmail": m28,
+        "edit": MessageLookupByLibrary.simpleMessage("Edit"),
         "editLocationTagTitle":
             MessageLookupByLibrary.simpleMessage("ویرایش مکان"),
         "email": MessageLookupByLibrary.simpleMessage("ایمیل"),
@@ -197,6 +210,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "error": MessageLookupByLibrary.simpleMessage("خطا"),
         "everywhere": MessageLookupByLibrary.simpleMessage("همه جا"),
         "existingUser": MessageLookupByLibrary.simpleMessage("کاربر موجود"),
+        "failedToFetchActiveSessions": MessageLookupByLibrary.simpleMessage(
+            "Failed to fetch active sessions"),
+        "failedToPlayVideo":
+            MessageLookupByLibrary.simpleMessage("Failed to play video"),
+        "failedToRefreshStripeSubscription":
+            MessageLookupByLibrary.simpleMessage(
+                "Failed to refresh subscription"),
         "familyPlanPortalTitle":
             MessageLookupByLibrary.simpleMessage("خانوادگی"),
         "familyPlans":
@@ -205,6 +225,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "feedback": MessageLookupByLibrary.simpleMessage("بازخورد"),
         "fileInfoAddDescHint":
             MessageLookupByLibrary.simpleMessage("افزودن توضیحات..."),
+        "fileNotUploadedYet":
+            MessageLookupByLibrary.simpleMessage("File not uploaded yet"),
         "fileTypes": MessageLookupByLibrary.simpleMessage("انواع پرونده"),
         "forYourMemories":
             MessageLookupByLibrary.simpleMessage("برای خاطرات شما"),
@@ -222,12 +244,15 @@ class MessageLookup extends MessageLookupByLibrary {
             "از کجا در مورد Ente شنیدی؟ (اختیاری)"),
         "howItWorks": MessageLookupByLibrary.simpleMessage("چگونه کار می‌کند"),
         "ignoreUpdate": MessageLookupByLibrary.simpleMessage("نادیده گرفتن"),
+        "imageNotAnalyzed":
+            MessageLookupByLibrary.simpleMessage("Image not analyzed"),
         "incorrectPasswordTitle":
             MessageLookupByLibrary.simpleMessage("رمز عبور درست نیست"),
         "incorrectRecoveryKeyBody": MessageLookupByLibrary.simpleMessage(
             "کلید بازیابی که وارد کردید درست نیست"),
         "incorrectRecoveryKeyTitle":
             MessageLookupByLibrary.simpleMessage("کلید بازیابی درست نیست"),
+        "info": MessageLookupByLibrary.simpleMessage("Info"),
         "insecureDevice": MessageLookupByLibrary.simpleMessage("دستگاه ناامن"),
         "installManually": MessageLookupByLibrary.simpleMessage("نصب دستی"),
         "invalidEmailAddress":
@@ -260,6 +285,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "never": MessageLookupByLibrary.simpleMessage("هرگز"),
         "newToEnte": MessageLookupByLibrary.simpleMessage("کاربر جدید Ente"),
         "no": MessageLookupByLibrary.simpleMessage("خیر"),
+        "noFacesFound": MessageLookupByLibrary.simpleMessage("No faces found"),
+        "noInternetConnection":
+            MessageLookupByLibrary.simpleMessage("No internet connection"),
         "noRecoveryKey":
             MessageLookupByLibrary.simpleMessage("کلید بازیابی ندارید؟"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
@@ -270,10 +298,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "password": MessageLookupByLibrary.simpleMessage("رمز عبور"),
         "passwordChangedSuccessfully": MessageLookupByLibrary.simpleMessage(
             "رمز عبور با موفقیت تغییر کرد"),
-        "passwordStrength": m0,
+        "passwordStrength": m3,
         "passwordWarning": MessageLookupByLibrary.simpleMessage(
             "ما این رمز عبور را ذخیره نمی‌کنیم، بنابراین اگر فراموش کنید، <underline>نمی‌توانیم اطلاعات شما را رمزگشایی کنیم</underline>"),
         "photoSmallCase": MessageLookupByLibrary.simpleMessage("عکس"),
+        "pleaseCheckYourInternetConnectionAndTryAgain":
+            MessageLookupByLibrary.simpleMessage(
+                "Please check your internet connection and try again."),
         "pleaseGrantPermissions":
             MessageLookupByLibrary.simpleMessage("لطفا دسترسی بدهید"),
         "pleaseLoginAgain":
@@ -290,7 +321,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("پشتیبان گیری خصوصی"),
         "privateSharing":
             MessageLookupByLibrary.simpleMessage("اشتراک گذاری خصوصی"),
-        "rateUsOnStore": m49,
+        "rateUsOnStore": m53,
         "recover": MessageLookupByLibrary.simpleMessage("بازیابی"),
         "recoverAccount":
             MessageLookupByLibrary.simpleMessage("بازیابی حساب کاربری"),
@@ -332,8 +363,13 @@ class MessageLookup extends MessageLookupByLibrary {
                 "پوشه‌های انتخاب شده، رمزگذاری شده و از آنها نسخه پشتیبان تهیه می‌شود"),
         "send": MessageLookupByLibrary.simpleMessage("ارسال"),
         "sendEmail": MessageLookupByLibrary.simpleMessage("ارسال ایمیل"),
+        "sessionExpired":
+            MessageLookupByLibrary.simpleMessage("Session expired"),
+        "sessionIdMismatch":
+            MessageLookupByLibrary.simpleMessage("Session ID mismatch"),
         "setPasswordTitle":
             MessageLookupByLibrary.simpleMessage("تنظیم رمز عبور"),
+        "share": MessageLookupByLibrary.simpleMessage("Share"),
         "shareOnlyWithThePeopleYouWant": MessageLookupByLibrary.simpleMessage(
             "فقط با افرادی که می‌خواهید به اشتراک بگذارید"),
         "shareTextRecommendUsingEnte": MessageLookupByLibrary.simpleMessage(
@@ -366,12 +402,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "storageBreakupFamily":
             MessageLookupByLibrary.simpleMessage("خانوادگی"),
         "storageBreakupYou": MessageLookupByLibrary.simpleMessage("شما"),
-        "storageUsageInfo": m62,
+        "storageUsageInfo": m66,
         "strongStrength": MessageLookupByLibrary.simpleMessage("قوی"),
         "support": MessageLookupByLibrary.simpleMessage("پشتیبانی"),
         "systemTheme": MessageLookupByLibrary.simpleMessage("سیستم"),
         "tapToEnterCode": MessageLookupByLibrary.simpleMessage(
             "برای وارد کردن کد ضربه بزنید"),
+        "tapToUpload": MessageLookupByLibrary.simpleMessage("Tap to upload"),
+        "tapToUploadIsIgnoredDue": m0,
         "tempErrorContactSupportIfPersists": MessageLookupByLibrary.simpleMessage(
             "به نظر می‌رسد مشکلی وجود دارد. لطفا بعد از مدتی دوباره تلاش کنید. اگر همچنان با خطا مواجه می‌شوید، لطفا با تیم پشتیبانی ما ارتباط برقرار کنید."),
         "terminate": MessageLookupByLibrary.simpleMessage("خروج"),
@@ -393,6 +431,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "برای تنظیم مجدد رمز عبور، لطفا ابتدا ایمیل خود را تایید کنید."),
         "tryAgain": MessageLookupByLibrary.simpleMessage("دوباره امتحان کنید"),
         "twitter": MessageLookupByLibrary.simpleMessage("توییتر"),
+        "typeOfGallerGallerytypeIsNotSupportedForRename": m1,
         "uncategorized": MessageLookupByLibrary.simpleMessage("دسته‌بندی نشده"),
         "unselectAll": MessageLookupByLibrary.simpleMessage("لغو انتخاب همه"),
         "update": MessageLookupByLibrary.simpleMessage("به‌روزرسانی"),
@@ -400,6 +439,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("به‌رورزرسانی در دسترس است"),
         "updatingFolderSelection": MessageLookupByLibrary.simpleMessage(
             "در حال به‌روزرسانی گزینش پوشه..."),
+        "uploadIsIgnoredDueToIgnorereason": m2,
         "usePublicLinksForPeopleNotOnEnte":
             MessageLookupByLibrary.simpleMessage(
                 "استفاده از پیوندهای عمومی برای افرادی که در Ente نیستند"),
@@ -407,7 +447,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "از کلید بازیابی استفاده کنید"),
         "verify": MessageLookupByLibrary.simpleMessage("تایید"),
         "verifyEmail": MessageLookupByLibrary.simpleMessage("تایید ایمیل"),
-        "verifyEmailID": m71,
+        "verifyEmailID": m75,
         "verifyIDLabel": MessageLookupByLibrary.simpleMessage("تایید"),
         "verifyPassword":
             MessageLookupByLibrary.simpleMessage("تایید رمز عبور"),
@@ -420,7 +460,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "viewer": MessageLookupByLibrary.simpleMessage("بیننده"),
         "weAreOpenSource":
             MessageLookupByLibrary.simpleMessage("ما متن‌باز هستیم!"),
-        "weHaveSendEmailTo": m2,
+        "weHaveSendEmailTo": m5,
         "weakStrength": MessageLookupByLibrary.simpleMessage("ضعیف"),
         "welcomeBack": MessageLookupByLibrary.simpleMessage("خوش آمدید!"),
         "whatsNew": MessageLookupByLibrary.simpleMessage("تغییرات جدید"),

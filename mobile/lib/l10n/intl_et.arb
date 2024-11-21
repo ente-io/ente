@@ -218,5 +218,24 @@
   "storageBreakupYou": "Sina",
   "@storageBreakupYou": {
     "description": "Label to indicate how much storage you are using when you are part of a family plan"
-  }
+  },
+  "accountIsAlreadyConfigured": "Account is already configured.",
+  "sessionIdMismatch": "Session ID mismatch",
+  "sessionExpired": "Session expired",
+  "failedToFetchActiveSessions": "Failed to fetch active sessions",
+  "failedToRefreshStripeSubscription": "Failed to refresh subscription",
+  "failedToPlayVideo": "Failed to play video",
+  "uploadIsIgnoredDueToIgnorereason": "Upload is ignored due to {ignoreReason}",
+  "typeOfGallerGallerytypeIsNotSupportedForRename": "Type of gallery {galleryType} is not supported for rename",
+  "tapToUploadIsIgnoredDue": "Tap to upload, upload is currently ignored due to {ignoreReason}",
+  "tapToUpload": "Tap to upload",
+  "info": "Info",
+  "addFiles": "Add Files",
+  "castAlbum": "Cast album",
+  "noInternetConnection": "No internet connection",
+  "pleaseCheckYourInternetConnectionAndTryAgain": "Please check your internet connection and try again.",
+  "error": "Error",
+  "imageNotAnalyzed": "Image not analyzed",
+  "noFacesFound": "No faces found",
+  "fileNotUploadedYet": "File not uploaded yet"
 }

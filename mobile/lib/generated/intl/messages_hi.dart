@@ -20,14 +20,26 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'hi';
 
+  static String m0(ignoreReason) =>
+      "Tap to upload, upload is currently ignored due to ${ignoreReason}";
+
+  static String m1(galleryType) =>
+      "Type of gallery ${galleryType} is not supported for rename";
+
+  static String m2(ignoreReason) => "Upload is ignored due to ${ignoreReason}";
+
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
+        "accountIsAlreadyConfigured": MessageLookupByLibrary.simpleMessage(
+            "Account is already configured."),
         "accountWelcomeBack":
             MessageLookupByLibrary.simpleMessage("आपका पुनः स्वागत है"),
         "activeSessions": MessageLookupByLibrary.simpleMessage("एक्टिव सेशन"),
+        "addFiles": MessageLookupByLibrary.simpleMessage("Add Files"),
         "askDeleteReason": MessageLookupByLibrary.simpleMessage(
             "आपका अकाउंट हटाने का मुख्य कारण क्या है?"),
         "cancel": MessageLookupByLibrary.simpleMessage("रद्द करें"),
+        "castAlbum": MessageLookupByLibrary.simpleMessage("Cast album"),
         "confirmAccountDeletion": MessageLookupByLibrary.simpleMessage(
             "अकाउंट डिलीट करने की पुष्टि करें"),
         "confirmPassword":
@@ -55,6 +67,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "मेरा कारण इस लिस्ट में नहीं है"),
         "deleteRequestSLAText": MessageLookupByLibrary.simpleMessage(
             "आपका अनुरोध 72 घंटों के भीतर संसाधित किया जाएगा।"),
+        "edit": MessageLookupByLibrary.simpleMessage("Edit"),
         "email": MessageLookupByLibrary.simpleMessage("ईमेल"),
         "entePhotosPerm": MessageLookupByLibrary.simpleMessage(
             "Ente को आपकी तस्वीरों को संरक्षित करने के लिए <i>अनुमति की आवश्यकता है</i>"),
@@ -64,17 +77,33 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("अपना ईमेल ऐड्रेस डालें"),
         "enterYourRecoveryKey":
             MessageLookupByLibrary.simpleMessage("अपनी रिकवरी कुंजी दर्ज करें"),
+        "error": MessageLookupByLibrary.simpleMessage("Error"),
+        "failedToFetchActiveSessions": MessageLookupByLibrary.simpleMessage(
+            "Failed to fetch active sessions"),
+        "failedToPlayVideo":
+            MessageLookupByLibrary.simpleMessage("Failed to play video"),
+        "failedToRefreshStripeSubscription":
+            MessageLookupByLibrary.simpleMessage(
+                "Failed to refresh subscription"),
         "feedback": MessageLookupByLibrary.simpleMessage("प्रतिपुष्टि"),
+        "fileNotUploadedYet":
+            MessageLookupByLibrary.simpleMessage("File not uploaded yet"),
         "forgotPassword":
             MessageLookupByLibrary.simpleMessage("पासवर्ड भूल गए"),
+        "imageNotAnalyzed":
+            MessageLookupByLibrary.simpleMessage("Image not analyzed"),
         "incorrectRecoveryKeyBody": MessageLookupByLibrary.simpleMessage(
             "आपके द्वारा दर्ज रिकवरी कुंजी ग़लत है"),
         "incorrectRecoveryKeyTitle":
             MessageLookupByLibrary.simpleMessage("रिकवरी कुंजी ग़लत है"),
+        "info": MessageLookupByLibrary.simpleMessage("Info"),
         "invalidEmailAddress":
             MessageLookupByLibrary.simpleMessage("अमान्य ईमेल ऐड्रेस"),
         "kindlyHelpUsWithThisInformation": MessageLookupByLibrary.simpleMessage(
             "कृपया हमें इस जानकारी के लिए सहायता करें"),
+        "noFacesFound": MessageLookupByLibrary.simpleMessage("No faces found"),
+        "noInternetConnection":
+            MessageLookupByLibrary.simpleMessage("No internet connection"),
         "noRecoveryKey":
             MessageLookupByLibrary.simpleMessage("रिकवरी कुंजी नहीं है?"),
         "noRecoveryKeyNoDecryption": MessageLookupByLibrary.simpleMessage(
@@ -82,15 +111,25 @@ class MessageLookup extends MessageLookupByLibrary {
         "ok": MessageLookupByLibrary.simpleMessage("ठीक है"),
         "oops": MessageLookupByLibrary.simpleMessage("ओह!"),
         "password": MessageLookupByLibrary.simpleMessage("पासवर्ड"),
+        "pleaseCheckYourInternetConnectionAndTryAgain":
+            MessageLookupByLibrary.simpleMessage(
+                "Please check your internet connection and try again."),
         "recoverButton": MessageLookupByLibrary.simpleMessage("पुनः प्राप्त"),
         "recoverySuccessful":
             MessageLookupByLibrary.simpleMessage("रिकवरी सफल हुई!"),
         "selectReason": MessageLookupByLibrary.simpleMessage("कारण चुनें"),
         "sendEmail": MessageLookupByLibrary.simpleMessage("ईमेल भेजें"),
+        "sessionExpired":
+            MessageLookupByLibrary.simpleMessage("Session expired"),
+        "sessionIdMismatch":
+            MessageLookupByLibrary.simpleMessage("Session ID mismatch"),
+        "share": MessageLookupByLibrary.simpleMessage("Share"),
         "somethingWentWrongPleaseTryAgain":
             MessageLookupByLibrary.simpleMessage(
                 "कुछ गड़बड़ हुई है। कृपया दोबारा प्रयास करें।"),
         "sorry": MessageLookupByLibrary.simpleMessage("क्षमा करें!"),
+        "tapToUpload": MessageLookupByLibrary.simpleMessage("Tap to upload"),
+        "tapToUploadIsIgnoredDue": m0,
         "terminate": MessageLookupByLibrary.simpleMessage("रद्द करें"),
         "terminateSession":
             MessageLookupByLibrary.simpleMessage("सेशन रद्द करें?"),
@@ -102,6 +141,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "इससे आप इस डिवाइस से लॉग आउट हो जाएँगे!"),
         "toResetVerifyEmail": MessageLookupByLibrary.simpleMessage(
             "अपना पासवर्ड रीसेट करने के लिए, कृपया पहले अपना ईमेल सत्यापित करें।"),
+        "typeOfGallerGallerytypeIsNotSupportedForRename": m1,
+        "uploadIsIgnoredDueToIgnorereason": m2,
         "verify": MessageLookupByLibrary.simpleMessage("सत्यापित करें"),
         "verifyEmail":
             MessageLookupByLibrary.simpleMessage("ईमेल सत्यापित करें"),

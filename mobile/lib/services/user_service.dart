@@ -828,7 +828,7 @@ class UserService {
       await dialog.hide();
       _logger.severe(e);
       if (e.response != null && e.response!.statusCode == 404) {
-        showToast(context, "Session expired");
+        showToast(context, S.of(context).sessionExpired);
         await Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
@@ -989,7 +989,7 @@ class UserService {
       await dialog.hide();
       _logger.severe("error during recovery", e);
       if (e.response != null && e.response!.statusCode == 404) {
-        showToast(context, "Session expired");
+        showToast(context, S.of(context).sessionExpired);
         // ignore: unawaited_futures
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(

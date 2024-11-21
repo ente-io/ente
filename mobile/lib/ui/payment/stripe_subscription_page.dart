@@ -107,7 +107,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     try {
       await _fetchSub();
     } catch (e) {
-      showToast(context, "Failed to refresh subscription");
+      showToast(context, S.of(context).failedToRefreshStripeSubscription);
     }
     await _dialog.hide();
 

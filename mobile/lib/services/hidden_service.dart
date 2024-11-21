@@ -10,6 +10,7 @@ import 'package:photos/core/event_bus.dart';
 import "package:photos/db/files_db.dart";
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/api/collection/create_request.dart';
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/file/file.dart';
@@ -165,7 +166,7 @@ extension HiddenService on CollectionsService {
       await dialog.hide();
     } on AssertionError catch (e) {
       await dialog.hide();
-      unawaited(showErrorDialog(context, "Oops", e.message as String));
+      unawaited(showErrorDialog(context, S.of(context).oops, e.message as String));
       return false;
     } catch (e, s) {
       _logger.severe("Could not hide", e, s);
