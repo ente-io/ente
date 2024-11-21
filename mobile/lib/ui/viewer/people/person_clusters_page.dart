@@ -11,7 +11,6 @@ import "package:photos/services/machine_learning/face_ml/person/person_service.d
 import "package:photos/services/search_service.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
-import "package:photos/ui/viewer/gallery/hooks/add_photos_sheet.dart";
 import "package:photos/ui/viewer/people/cluster_page.dart";
 import "package:photos/ui/viewer/search/result/person_face_widget.dart";
 

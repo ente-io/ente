@@ -140,7 +140,8 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                     child: GestureDetector(
                       onTap: () {
                         final List<EnteFile> sortedFiles = List<EnteFile>.from(
-                            currentSuggestion.filesInCluster);
+                          currentSuggestion.filesInCluster,
+                        );
                         sortedFiles.sort(
                           (a, b) => b.creationTime!.compareTo(a.creationTime!),
                         );

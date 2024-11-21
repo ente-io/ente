@@ -41,7 +41,7 @@ class SaveOrEditPerson extends StatefulWidget {
     this.person,
     this.isEditing = false,
   }) : assert(
-            !isEditing || person != null, 'Person cannot be null when editing');
+            !isEditing || person != null, 'Person cannot be null when editing',);
 
   @override
   State<SaveOrEditPerson> createState() => _SaveOrEditPersonState();
@@ -459,7 +459,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
   }
 
   Future<(String, EnteFile)> _getRecentFileWithClusterID(
-      PersonEntity person) async {
+      PersonEntity person,) async {
     final clustersToFiles =
         await SearchService.instance.getClusterFilesForPersonID(
       person.remoteID,
