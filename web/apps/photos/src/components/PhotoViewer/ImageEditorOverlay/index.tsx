@@ -5,7 +5,7 @@ import {
 } from "@/base/components/Menu";
 import type { MiniDialogAttributes } from "@/base/components/MiniDialog";
 import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
-import { nameAndExtension } from "@/base/file";
+import { nameAndExtension } from "@/base/file-name";
 import log from "@/base/log";
 import { downloadAndRevokeObjectURL } from "@/base/utils/web";
 import { EnteFile } from "@/media/file";

@@ -1,5 +1,5 @@
 import { useModalVisibility } from "@/base/components/utils/modal";
-import { basename } from "@/base/file";
+import { basename } from "@/base/file-name";
 import log from "@/base/log";
 import type { CollectionMapping, Electron, ZipItem } from "@/base/types/ipc";
 import type { Collection } from "@/media/collection";

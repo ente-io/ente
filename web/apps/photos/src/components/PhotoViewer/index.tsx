@@ -1,7 +1,7 @@
 import { isDesktop } from "@/base/app";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { Overlay } from "@/base/components/mui/Container";
-import { lowercaseExtension } from "@/base/file";
+import { lowercaseExtension } from "@/base/file-name";
 import log from "@/base/log";
 import type { LoadedLivePhotoSourceURL } from "@/media/file";
 import { fileLogID, type EnteFile } from "@/media/file";

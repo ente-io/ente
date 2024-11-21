@@ -1,6 +1,6 @@
 import { createComlinkCryptoWorker } from "@/base/crypto";
 import { type CryptoWorker } from "@/base/crypto/worker";
-import { lowercaseExtension, nameAndExtension } from "@/base/file";
+import { lowercaseExtension, nameAndExtension } from "@/base/file-name";
 import log from "@/base/log";
 import type { Electron } from "@/base/types/ipc";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";

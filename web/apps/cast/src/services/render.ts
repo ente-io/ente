@@ -6,7 +6,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
 import { sharedCryptoWorker } from "@/base/crypto";
-import { nameAndExtension } from "@/base/file";
+import { nameAndExtension } from "@/base/file-name";
 import log from "@/base/log";
 import { apiURL, customAPIOrigin } from "@/base/origins";
 import type {

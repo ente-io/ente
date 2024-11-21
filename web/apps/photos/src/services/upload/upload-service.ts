@@ -2,7 +2,7 @@ import { streamEncryptionChunkSize } from "@/base/crypto/libsodium";
 import type { BytesOrB64 } from "@/base/crypto/types";
 import { type CryptoWorker } from "@/base/crypto/worker";
 import { ensureElectron } from "@/base/electron";
-import { basename, nameAndExtension } from "@/base/file";
+import { basename, nameAndExtension } from "@/base/file-name";
 import log from "@/base/log";
 import { CustomErrorMessage } from "@/base/types/ipc";
 import {
