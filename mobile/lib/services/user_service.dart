@@ -89,13 +89,17 @@ class UserService {
     bool isChangeEmail = false,
     bool isCreateAccountScreen = false,
     bool isResetPasswordScreen = false,
+    String? purpose,
   }) async {
     final dialog = createProgressDialog(context, S.of(context).pleaseWait);
     await dialog.show();
     try {
       final response = await _dio.post(
         _config.getHttpEndpoint() + "/users/ott",
-        data: {"email": email, "purpose": isChangeEmail ? "change" : ""},
+        data: {
+          "email": email,
+          "purpose": isChangeEmail ? "change" : purpose ?? "",
+        },
       );
       await dialog.hide();
       if (response.statusCode == 200) {
