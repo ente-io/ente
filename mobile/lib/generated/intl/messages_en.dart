@@ -59,6 +59,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m18(albumName) => "Collaborative link created for ${albumName}";
 
+  static String m74(count) =>
+      "${Intl.plural(count, zero: 'Added 0 collaborator', one: 'Added 1 collaborator', other: 'Added ${count} collaborators')}";
+
   static String m19(familyAdminEmail) =>
       "Please contact <green>${familyAdminEmail}</green> to manage your subscription";
 
@@ -213,6 +216,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m70(endDate) => "Valid till ${endDate}";
 
   static String m71(email) => "Verify ${email}";
+
+  static String m75(count) =>
+      "${Intl.plural(count, zero: 'Added 0 viewer', one: 'Added 1 viewer', other: 'Added ${count} viewers')}";
 
   static String m2(email) => "We have sent a mail to <green>${email}</green>";
 
@@ -494,6 +500,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum":
             MessageLookupByLibrary.simpleMessage(
                 "Collaborators can add photos and videos to the shared album."),
+        "collaboratorsSuccessfullyAdded": m74,
         "collageLayout": MessageLookupByLibrary.simpleMessage("Layout"),
         "collageSaved":
             MessageLookupByLibrary.simpleMessage("Collage saved to gallery"),
@@ -1042,6 +1049,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "merchandise": MessageLookupByLibrary.simpleMessage("Merchandise"),
         "mergeWithExisting":
             MessageLookupByLibrary.simpleMessage("Merge with existing"),
+        "mergedPhotos": MessageLookupByLibrary.simpleMessage("Merged photos"),
         "mlConsent":
             MessageLookupByLibrary.simpleMessage("Enable machine learning"),
         "mlConsentConfirmation": MessageLookupByLibrary.simpleMessage(
@@ -1721,6 +1729,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "viewRecoveryKey":
             MessageLookupByLibrary.simpleMessage("View recovery key"),
         "viewer": MessageLookupByLibrary.simpleMessage("Viewer"),
+        "viewersSuccessfullyAdded": m75,
         "visitWebToManage": MessageLookupByLibrary.simpleMessage(
             "Please visit web.ente.io to manage your subscription"),
         "waitingForVerification":

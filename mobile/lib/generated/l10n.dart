@@ -9036,6 +9036,16 @@ class S {
     );
   }
 
+  /// `Merged photos`
+  String get mergedPhotos {
+    return Intl.message(
+      'Merged photos',
+      name: 'mergedPhotos',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Or merge with existing`
   String get orMergeWithExistingPerson {
     return Intl.message(

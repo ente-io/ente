@@ -1267,6 +1267,7 @@
   "enterName": "Enter name",
   "savePerson": "Save person",
   "editPerson": "Edit person",
+  "mergedPhotos": "Merged photos",
   "orMergeWithExistingPerson" : "Or merge with existing",
   "enterDateOfBirth": "Birthday (optional)",
   "birthday": "Birthday",

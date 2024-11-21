@@ -186,7 +186,7 @@ class _PersonClustersWidgetState extends State<PersonClustersWidget> {
             builder: (context, constraints) {
               // Determine number of columns based on available width
               // Minimum column width of 150, maximum of 250
-              double columnWidth =
+              final double columnWidth =
                   MediaQuery.of(context).size.width > 600 ? 250 : 150;
               final int crossAxisCount =
                   (constraints.maxWidth / columnWidth).floor().clamp(2, 5);

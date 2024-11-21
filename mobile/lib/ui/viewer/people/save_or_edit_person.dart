@@ -256,7 +256,7 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          "Merged photos",
+                          context.l10n.mergedPhotos,
                           style: getEnteTextTheme(context).body,
                         ),
                       ),
