@@ -6,9 +6,13 @@ import {
     inputPathPlaceholder,
     outputPathPlaceholder,
 } from "./constants";
+import QueueProcessor from "@ente/shared/utils/queueProcessor";
 
 /** Lazily initialized and loaded FFmpeg instance. */
 let _ffmpeg: Promise<FFmpeg> | undefined;
+
+/** Queue of in-flight requests. */
+const _ffmpegTaskQueue = new QueueProcessor<Uint8Array>();
 
 /**
  * Return the shared {@link FFmpeg} instance, lazily creating and loading it if
@@ -46,8 +50,18 @@ export const ffmpegExecWeb = async (
     command: string[],
     blob: Blob,
     outputFileExtension: string,
-): Promise<Uint8Array> =>
-    ffmpegExec(await ffmpegLazy(), command, outputFileExtension, blob);
+): Promise<Uint8Array> => {
+    const ffmpeg = await ffmpegLazy();
+    // Interleaving multiple ffmpeg.execs causes errors like
+    //
+    // >  "Out of bounds memory access (evaluating 'Module["_malloc"](len)')"
+    //
+    // So serialize them using a promise queue.
+    const request = _ffmpegTaskQueue.queueUpRequest(() =>
+        ffmpegExec(ffmpeg, command, outputFileExtension, blob),
+    );
+    return await request.promise;
+};
 
 const ffmpegExec = async (
     ffmpeg: FFmpeg,
