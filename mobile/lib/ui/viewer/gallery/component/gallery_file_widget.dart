@@ -38,8 +38,11 @@ class GalleryFileWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isFileSelected = selectedFiles?.isFileSelected(file) ?? false;
-    final isPublicFile =
-        CollectionsService.instance.isPublicCollection(file.collectionID!);
+    bool isPublicFile = false;
+    if (file.collectionID != null) {
+      isPublicFile =
+          CollectionsService.instance.isPublicCollection(file.collectionID!);
+    }
     Color selectionColor = Colors.white;
     if (isFileSelected && file.isUploaded && file.ownerID != currentUserID) {
       final avatarColors = getEnteColorScheme(context).avatarColors;
