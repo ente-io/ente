@@ -1,4 +1,4 @@
-import { lowercaseExtension } from "@/base/file";
+import { lowercaseExtension } from "@/base/file-name";
 import {
     FileType,
     KnownFileTypeInfos,

@@ -1,6 +1,7 @@
+import { isDesktop } from "@/base/app";
 import { createComlinkCryptoWorker } from "@/base/crypto";
 import { type CryptoWorker } from "@/base/crypto/worker";
-import { lowercaseExtension, nameAndExtension } from "@/base/file";
+import { lowercaseExtension, nameAndExtension } from "@/base/file-name";
 import log from "@/base/log";
 import type { Electron } from "@/base/types/ipc";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
@@ -21,7 +22,6 @@ import {
 import { wait } from "@/utils/promise";
 import { CustomError } from "@ente/shared/error";
 import { Canceler } from "axios";
-import isElectron from "is-electron";
 import {
     getLocalPublicFiles,
     getPublicCollectionUID,
@@ -669,7 +669,7 @@ class UploadManager {
         fileWithCollection: ClusteredUploadItem,
         uploadedFile: EncryptedEnteFile,
     ) {
-        if (isElectron()) {
+        if (isDesktop) {
             if (watcher.isUploadRunning()) {
                 await watcher.onFileUpload(
                     fileUploadResult,

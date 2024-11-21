@@ -1,6 +1,7 @@
 import log from "@/base/log";
 import { type Electron } from "@/base/types/ipc";
 import { FileType, type FileTypeInfo } from "@/media/file-type";
+import { isHEICExtension } from "@/media/formats";
 import { heicToJPEG } from "@/media/heic-convert";
 import { scaledImageDimensions } from "@/media/image";
 import * as ffmpeg from "@/new/photos/services/ffmpeg";
@@ -59,7 +60,7 @@ const generateImageThumbnailWeb = async (
     blob: Blob,
     { extension }: FileTypeInfo,
 ) => {
-    if (extension == "heic" || extension == "heif") {
+    if (isHEICExtension(extension)) {
         log.debug(() => `Pre-converting HEIC to JPEG for thumbnail generation`);
         blob = await heicToJPEG(blob);
     }

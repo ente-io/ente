@@ -1,3 +1,4 @@
+import { isDesktop } from "@/base/app";
 import { EnteSwitch } from "@/base/components/EnteSwitch";
 import type { ModalVisibilityProps } from "@/base/components/utils/modal";
 import { ensureElectron } from "@/base/electron";
@@ -24,7 +25,6 @@ import {
     styled,
 } from "@mui/material";
 import { t } from "i18next";
-import isElectron from "is-electron";
 import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 import exportService, {
@@ -62,7 +62,7 @@ export const Export: React.FC<ExportProps> = ({
     // SIDE EFFECTS
     // ====================
     useEffect(() => {
-        if (!isElectron()) {
+        if (!isDesktop) {
             return;
         }
         try {

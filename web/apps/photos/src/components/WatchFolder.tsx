@@ -4,7 +4,7 @@ import {
     type ModalVisibilityProps,
 } from "@/base/components/utils/modal";
 import { ensureElectron } from "@/base/electron";
-import { basename, dirname } from "@/base/file";
+import { basename, dirname } from "@/base/file-name";
 import type { CollectionMapping, FolderWatch } from "@/base/types/ipc";
 import { CollectionMappingChoiceDialog } from "@/new/photos/components/CollectionMappingChoiceDialog";
 import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";

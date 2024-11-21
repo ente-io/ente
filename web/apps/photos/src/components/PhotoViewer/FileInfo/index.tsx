@@ -3,7 +3,7 @@ import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
 import { EllipsizedTypography } from "@/base/components/Typography";
 import { useModalVisibility } from "@/base/components/utils/modal";
-import { nameAndExtension } from "@/base/file";
+import { nameAndExtension } from "@/base/file-name";
 import log from "@/base/log";
 import type { Location } from "@/base/types";
 import { EnteFile } from "@/media/file";

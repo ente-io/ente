@@ -2,8 +2,8 @@
 
 A package for sharing code between our apps that show media (photos, videos).
 
-Specifically, this is the intersection of code required by both the photos and
-cast apps.
+Specifically, this is the intersection of code required by both the photos app
+(or the public albums app) and cast apps.
 
 ### Packaging
 

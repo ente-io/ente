@@ -1,4 +1,4 @@
-import { basename } from "@/base/file";
+import { basename } from "@/base/file-name";
 import type { ElectronMLWorker } from "@/base/types/ipc";
 import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";

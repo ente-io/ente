@@ -5,7 +5,7 @@
  * written for use by the code that runs in our desktop app.
  */
 
-import { nameAndExtension } from "@/base/file";
+import { nameAndExtension } from "@/base/file-name";
 import {
     exportMetadataDirectoryName,
     exportTrashDirectoryName,
