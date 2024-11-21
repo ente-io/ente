@@ -2,11 +2,9 @@ import { appName } from "@/base/app";
 import type { B64EncryptionResult } from "@/base/crypto/libsodium";
 import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { apiURL } from "@/base/origins";
-import { ApiError, CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import type { KeyAttributes } from "@ente/shared/user/types";
-import { HttpStatusCode } from "axios";
 
 export interface UserVerificationResponse {
     id: number;

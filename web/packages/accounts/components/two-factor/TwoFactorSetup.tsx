@@ -93,7 +93,7 @@ const QRCode = styled("img")(
 
 const LoadingQRCode = styled(VerticallyCentered)(
     ({ theme }) => `
-    width:200px;
+    width: 200px;
     aspect-ratio:1;
     border: 1px solid ${theme.palette.grey.A200};
     margin: ${theme.spacing(2)};
