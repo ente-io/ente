@@ -1,4 +1,4 @@
-import { clientPackageName, staticAppTitle } from "@/base/app";
+import { clientPackageName, isDesktop, staticAppTitle } from "@/base/app";
 import { CustomHead } from "@/base/components/Head";
 import { AttributedMiniDialog } from "@/base/components/MiniDialog";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
@@ -43,7 +43,6 @@ import { CssBaseline } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import Notification from "components/Notification";
 import { t } from "i18next";
-import isElectron from "is-electron";
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
 import "photoswipe/dist/photoswipe.css";
@@ -128,7 +127,7 @@ export default function App({ Component, pageProps }: AppProps) {
     }, []);
 
     useEffect(() => {
-        if (!isElectron()) {
+        if (!isDesktop) {
             return;
         }
         const initExport = async () => {

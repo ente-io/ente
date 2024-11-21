@@ -4,7 +4,7 @@
  */
 
 import { ensureElectron } from "@/base/electron";
-import { basename, dirname } from "@/base/file";
+import { basename, dirname } from "@/base/file-name";
 import log from "@/base/log";
 import type {
     CollectionMapping,

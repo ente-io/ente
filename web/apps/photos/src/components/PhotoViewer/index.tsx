@@ -1,7 +1,7 @@
 import { isDesktop } from "@/base/app";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { Overlay } from "@/base/components/mui/Container";
-import { lowercaseExtension } from "@/base/file";
+import { lowercaseExtension } from "@/base/file-name";
 import log from "@/base/log";
 import type { LoadedLivePhotoSourceURL } from "@/media/file";
 import { fileLogID, type EnteFile } from "@/media/file";
@@ -37,7 +37,6 @@ import {
 } from "@mui/material";
 import Notification from "components/Notification";
 import { t } from "i18next";
-import isElectron from "is-electron";
 import { GalleryContext } from "pages/gallery";
 import Photoswipe from "photoswipe";
 import PhotoswipeUIDefault from "photoswipe/dist/photoswipe-ui-default";
@@ -365,7 +364,7 @@ function PhotoViewer(props: PhotoViewerProps) {
 
     function updateShowConvertBtn(file: EnteFile) {
         const shouldShowConvertBtn =
-            isElectron() &&
+            isDesktop &&
             (file.metadata.fileType === FileType.video ||
                 file.metadata.fileType === FileType.livePhoto) &&
             !file.isConverted &&

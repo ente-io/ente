@@ -1,8 +1,5 @@
-import { verifyTwoFactor } from "@/accounts/api/user";
-import VerifyTwoFactor, {
-    type VerifyTwoFactorCallback,
-} from "@/accounts/components/two-factor/VerifyForm";
 import { PAGES } from "@/accounts/constants/pages";
+import { verifyTwoFactor } from "@/accounts/services/user";
 import {
     FormPaper,
     FormPaperFooter,
@@ -22,6 +19,10 @@ import { HttpStatusCode } from "axios";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import {
+    VerifyTwoFactor,
+    type VerifyTwoFactorCallback,
+} from "../../components/two-factor/VerifyTwoFactor";
 import { unstashRedirect } from "../../services/redirect";
 import type { PageProps } from "../../types/page";
 

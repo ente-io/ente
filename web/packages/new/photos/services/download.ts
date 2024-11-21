@@ -11,14 +11,14 @@ import {
 } from "@/base/crypto";
 import log from "@/base/log";
 import { customAPIOrigin } from "@/base/origins";
+import { renderableImageBlob } from "@/gallery/utils/convert";
+import { retryAsyncOperation } from "@/gallery/utils/retry-async";
 import type { EnteFile, LivePhotoSourceURL, SourceURLs } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
-import * as ffmpeg from "@/new/photos/services/ffmpeg";
-import { renderableImageBlob } from "@/new/photos/utils/file";
 import { CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { retryAsyncFunction } from "@ente/shared/utils";
+import { convertToMP4 } from "./ffmpeg";
 
 export type OnDownloadProgress = (event: {
     loaded: number;
@@ -545,7 +545,7 @@ async function getPlayableVideo(
     const converted = async () => {
         try {
             log.info(`Converting video ${videoNameTitle} to mp4`);
-            const convertedVideoData = await ffmpeg.convertToMP4(videoBlob);
+            const convertedVideoData = await convertToMP4(videoBlob);
             return new Blob([convertedVideoData], { type: "video/mp4" });
         } catch (e) {
             log.error("Video conversion failed", e);
@@ -638,7 +638,7 @@ class PhotosDownloadClient implements DownloadClient {
             }
         };
 
-        const resp = await retryAsyncFunction(getThumbnail);
+        const resp = await retryAsyncOperation(getThumbnail);
         if (resp.data === undefined) throw Error("request failed");
         // TODO: Remove this cast (it won't be needed when we migrate this from
         // axios to fetch).
@@ -680,7 +680,7 @@ class PhotosDownloadClient implements DownloadClient {
             }
         };
 
-        const resp = await retryAsyncFunction(getFile);
+        const resp = await retryAsyncOperation(getFile);
         if (resp.data === undefined) throw Error("request failed");
         // TODO: Remove this cast (it won't be needed when we migrate this from
         // axios to fetch).
@@ -744,7 +744,7 @@ class PhotosDownloadClient implements DownloadClient {
             }
         };
 
-        return retryAsyncFunction(getFile);
+        return retryAsyncOperation(getFile);
     }
 }
 
@@ -848,7 +848,7 @@ class PublicAlbumsDownloadClient implements DownloadClient {
             }
         };
 
-        const resp = await retryAsyncFunction(getFile);
+        const resp = await retryAsyncOperation(getFile);
         if (resp.data === undefined) throw Error("request failed");
         // TODO: Remove this cast (it won't be needed when we migrate this from
         // axios to fetch).
@@ -887,6 +887,6 @@ class PublicAlbumsDownloadClient implements DownloadClient {
             }
         };
 
-        return retryAsyncFunction(getFile);
+        return retryAsyncOperation(getFile);
     }
 }

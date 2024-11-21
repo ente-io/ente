@@ -1,18 +1,52 @@
-import type {
-    RecoveryKey,
-    TwoFactorRecoveryResponse,
-    TwoFactorSecret,
-    TwoFactorVerificationResponse,
-    UserVerificationResponse,
-} from "@/accounts/types/user";
 import { appName } from "@/base/app";
 import type { B64EncryptionResult } from "@/base/crypto/libsodium";
+import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { apiURL } from "@/base/origins";
-import { ApiError, CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import type { KeyAttributes } from "@ente/shared/user/types";
-import { HttpStatusCode } from "axios";
+
+export interface UserVerificationResponse {
+    id: number;
+    keyAttributes?: KeyAttributes;
+    encryptedToken?: string;
+    token?: string;
+    twoFactorSessionID: string;
+    passkeySessionID: string;
+    srpM2?: string;
+}
+
+export interface TwoFactorVerificationResponse {
+    id: number;
+    keyAttributes: KeyAttributes;
+    encryptedToken?: string;
+    token?: string;
+}
+
+export interface TwoFactorSecret {
+    secretCode: string;
+    qrCode: string;
+}
+
+export interface TwoFactorRecoveryResponse {
+    encryptedSecret: string;
+    secretDecryptionNonce: string;
+}
+
+export interface UpdatedKey {
+    kekSalt: string;
+    encryptedKey: string;
+    keyDecryptionNonce: string;
+    memLimit: number;
+    opsLimit: number;
+}
+
+export interface RecoveryKey {
+    masterKeyEncryptedWithRecoveryKey: string;
+    masterKeyDecryptionNonce: string;
+    recoveryKeyEncryptedWithMasterKey: string;
+    recoveryKeyDecryptionNonce: string;
+}
 
 export const sendOtt = async (email: string) => {
     return HTTPService.post(await apiURL("/users/ott"), {
@@ -47,27 +81,30 @@ export const putAttributes = async (
         },
     );
 
-export const logout = async () => {
+/**
+ * Log the user out on remote, if possible and needed.
+ */
+export const remoteLogoutIfNeeded = async () => {
+    let headers: HeadersInit;
     try {
-        const token = getToken();
-        await HTTPService.post(await apiURL("/users/logout"), null, undefined, {
-            "X-Auth-Token": token,
-        });
-    } catch (e) {
-        // ignore if token missing can be triggered during sign up.
-        if (e instanceof Error && e.message === CustomError.TOKEN_MISSING) {
-            return;
-        }
-        // ignore if unauthorized, can be triggered during on token expiry.
-        else if (
-            e instanceof ApiError &&
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
-            e.httpStatusCode === HttpStatusCode.Unauthorized
-        ) {
-            return;
-        }
-        throw e;
+        headers = await authenticatedRequestHeaders();
+    } catch {
+        // If the logout is attempted during the signup flow itself, then we
+        // won't have an auth token.
+        return;
     }
+
+    const res = await fetch(await apiURL("/users/logout"), {
+        method: "POST",
+        headers,
+    });
+    if (res.status == 401) {
+        // Ignore if we get a 401 Unauthorized, this is expected to happen on
+        // token expiry.
+        return;
+    }
+
+    ensureOk(res);
 };
 
 export const verifyTwoFactor = async (code: string, sessionID: string) => {

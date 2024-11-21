@@ -2,9 +2,14 @@ import { streamEncryptionChunkSize } from "@/base/crypto/libsodium";
 import type { BytesOrB64 } from "@/base/crypto/types";
 import { type CryptoWorker } from "@/base/crypto/worker";
 import { ensureElectron } from "@/base/electron";
-import { basename, nameAndExtension } from "@/base/file";
+import { basename, nameAndExtension } from "@/base/file-name";
 import log from "@/base/log";
 import { CustomErrorMessage } from "@/base/types/ipc";
+import {
+    detectFileTypeInfoFromChunk,
+    isFileTypeNotSupportedError,
+} from "@/gallery/utils/detect-type";
+import { readStream } from "@/gallery/utils/native-stream";
 import {
     EncryptedMagicMetadata,
     EnteFile,
@@ -33,8 +38,6 @@ import {
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
     UPLOAD_RESULT,
 } from "@/new/photos/services/upload/types";
-import { detectFileTypeInfoFromChunk } from "@/new/photos/utils/detect-type";
-import { readStream } from "@/new/photos/utils/native-stream";
 import { mergeUint8Arrays } from "@/utils/array";
 import { ensureInteger, ensureNumber } from "@/utils/ensure";
 import { CustomError, handleUploadError } from "@ente/shared/error";
@@ -539,8 +542,19 @@ export const uploader = async (
          * (tee will not work for strictly sequential reads of large streams).
          */
 
-        const { fileTypeInfo, fileSize, lastModifiedMs } =
-            await readAssetDetails(uploadAsset);
+        let assetDetails: ReadAssetDetailsResult;
+
+        try {
+            assetDetails = await readAssetDetails(uploadAsset);
+        } catch (e) {
+            if (isFileTypeNotSupportedError(e)) {
+                log.error(`Not uploading ${fileName}`, e);
+                return { uploadResult: UPLOAD_RESULT.UNSUPPORTED };
+            }
+            throw e;
+        }
+
+        const { fileTypeInfo, fileSize, lastModifiedMs } = assetDetails;
 
         const maxFileSize = 4 * 1024 * 1024 * 1024; /* 4 GB */
         if (fileSize >= maxFileSize)
@@ -637,8 +651,6 @@ export const uploader = async (
     } catch (e) {
         if (e.message == CustomError.UPLOAD_CANCELLED) {
             log.info(`Upload for ${fileName} cancelled`);
-        } else if (e.message == CustomError.UNSUPPORTED_FILE_FORMAT) {
-            log.info(`Not uploading ${fileName}: unsupported file format`);
         } else {
             log.error(`Upload failed for ${fileName}`, e);
         }
@@ -647,8 +659,6 @@ export const uploader = async (
         switch (error.message) {
             case CustomError.ETAG_MISSING:
                 return { uploadResult: UPLOAD_RESULT.BLOCKED };
-            case CustomError.UNSUPPORTED_FILE_FORMAT:
-                return { uploadResult: UPLOAD_RESULT.UNSUPPORTED };
             case CustomError.FILE_TOO_LARGE:
                 return {
                     uploadResult: UPLOAD_RESULT.LARGER_THAN_AVAILABLE_STORAGE,

@@ -8849,6 +8849,17 @@ class S {
     );
   }
 
+  /// `Find them quickly`
+  String get findThemQuickly {
+    return Intl.message(
+      'Find them quickly',
+      name: 'findThemQuickly',
+      desc:
+          'Subtitle to indicate that the user can find people quickly by name',
+      args: [],
+    );
+  }
+
   /// `Find people quickly by name`
   String get findPeopleByName {
     return Intl.message(
@@ -8990,6 +9001,76 @@ class S {
     return Intl.message(
       'Enter person name',
       name: 'enterPersonName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter name`
+  String get enterName {
+    return Intl.message(
+      'Enter name',
+      name: 'enterName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Save person`
+  String get savePerson {
+    return Intl.message(
+      'Save person',
+      name: 'savePerson',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Edit person`
+  String get editPerson {
+    return Intl.message(
+      'Edit person',
+      name: 'editPerson',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Merged photos`
+  String get mergedPhotos {
+    return Intl.message(
+      'Merged photos',
+      name: 'mergedPhotos',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Or merge with existing`
+  String get orMergeWithExistingPerson {
+    return Intl.message(
+      'Or merge with existing',
+      name: 'orMergeWithExistingPerson',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Birthday (optional)`
+  String get enterDateOfBirth {
+    return Intl.message(
+      'Birthday (optional)',
+      name: 'enterDateOfBirth',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Birthday`
+  String get birthday {
+    return Intl.message(
+      'Birthday',
+      name: 'birthday',
       desc: '',
       args: [],
     );
@@ -9250,6 +9331,16 @@ class S {
     return Intl.message(
       'Review suggestions',
       name: 'reviewSuggestions',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Review`
+  String get review {
+    return Intl.message(
+      'Review',
+      name: 'review',
       desc: '',
       args: [],
     );
@@ -9856,10 +9947,10 @@ class S {
     );
   }
 
-  /// `Reset person`
+  /// `Remove`
   String get resetPerson {
     return Intl.message(
-      'Reset person',
+      'Remove',
       name: 'resetPerson',
       desc: '',
       args: [],

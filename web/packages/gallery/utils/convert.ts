@@ -2,7 +2,7 @@ import { isDesktop } from "@/base/app";
 import log from "@/base/log";
 import { CustomErrorMessage } from "@/base/types/ipc";
 import { workerBridge } from "@/base/worker/worker-bridge";
-import { needsJPEGConversion } from "@/media/formats";
+import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
 import { heicToJPEG } from "@/media/heic-convert";
 import { detectFileTypeInfo } from "./detect-type";
 
@@ -80,7 +80,7 @@ export const renderableImageBlob = async (
             // available on this platform, for HEIC/HEIF files we can fallback
             // to our web HEIC converter.
 
-            if (extension == "heic" || extension == "heif") {
+            if (isHEICExtension(extension)) {
                 return await heicToJPEG(imageBlob);
             }
         }

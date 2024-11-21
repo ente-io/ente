@@ -6,11 +6,11 @@ import {
 } from "@/base/components/mui/Container";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
+import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import {
     useModalVisibility,
     type ModalVisibilityProps,
 } from "@/base/components/utils/modal";
-import { useIsSmallWidth } from "@/base/hooks";
 import log from "@/base/log";
 import {
     addCGroup,

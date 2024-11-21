@@ -1,10 +1,10 @@
-import { basename } from "@/base/file";
+import { basename } from "@/base/file-name";
 import type { ElectronMLWorker } from "@/base/types/ipc";
+import { renderableImageBlob } from "@/gallery/utils/convert";
+import { readStream } from "@/gallery/utils/native-stream";
 import type { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
-import { renderableImageBlob } from "../../utils/file";
-import { readStream } from "../../utils/native-stream";
 import DownloadManager from "../download";
 import type { UploadItem } from "../upload/types";
 

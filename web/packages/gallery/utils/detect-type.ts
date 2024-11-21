@@ -1,25 +1,18 @@
-import { lowercaseExtension } from "@/base/file";
+import { lowercaseExtension } from "@/base/file-name";
 import {
     FileType,
     KnownFileTypeInfos,
     KnownNonMediaFileExtensions,
     type FileTypeInfo,
 } from "@/media/file-type";
-import { CustomError } from "@ente/shared/error";
 import FileTypeDetect from "file-type";
 
 /**
  * Read the file's initial contents or use the file's name to detect its type.
  *
- * This function first reads an initial chunk of the file and tries to detect
- * the file's {@link FileTypeInfo} from it. If that doesn't work, it then falls
- * back to using the file's name to detect it.
- *
- * If neither of these two approaches work, it throws an exception.
- *
- * If we were able to detect the file type, but it is explicitly not a media
- * (image or video) format that we support, this function throws an error with
- * the message `CustomError.UNSUPPORTED_FILE_FORMAT`.
+ * This is a more convenient to use abstraction over
+ * {@link detectFileTypeInfoFromChunk} for use when we already have a
+ * {@link File} object. See that method's documentation for more details.
  *
  * @param file A {@link File} object
  *
@@ -37,7 +30,18 @@ export const detectFileTypeInfo = async (file: File): Promise<FileTypeInfo> =>
  * However, this lower level function is also exposed for use in cases like
  * during upload where we might not have a File object and would like to provide
  * the initial chunk of the file's contents in a different way.
+
+ * This function first reads an initial chunk of the file and tries to detect
+ * the file's {@link FileTypeInfo} from it. If that doesn't work, it then falls
+ * back to using the file's name to detect it.
  *
+ * If neither of these two approaches work, it throws an exception.
+ *
+ * If we were able to detect the file type, but it is explicitly not a media
+ * (image or video) format that we support, then also this function will throw
+ * an exception. Such exceptions can be identified using the
+ * {@link isFileTypeNotSupportedError} predicate.
+*
  * @param readInitialChunk A function to call to read the initial chunk of the
  * file's data. There is no strict requirement for the size of the chunk this
  * function should return, generally the first few KBs should be good.
@@ -63,7 +67,8 @@ export const detectFileTypeInfoFromChunk = async (
         } else if (mimeType.startsWith("video/")) {
             fileType = FileType.video;
         } else {
-            throw new Error(CustomError.UNSUPPORTED_FILE_FORMAT);
+            // This string should satisfy `isFileTypeNotSupportedError`.
+            throw new Error(`Unsupported file format (MIME type ${mimeType})`);
         }
 
         return {
@@ -78,12 +83,17 @@ export const detectFileTypeInfoFromChunk = async (
         const known = KnownFileTypeInfos.find((f) => f.extension == extension);
         if (known) return known;
 
-        if (extension && KnownNonMediaFileExtensions.includes(extension))
-            throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
+        if (extension && KnownNonMediaFileExtensions.includes(extension)) {
+            // This string should satisfy `isFileTypeNotSupportedError`.
+            throw new Error(`Unsupported file format (extension ${extension})`);
+        }
 
         throw e;
     }
 };
+
+export const isFileTypeNotSupportedError = (e: unknown) =>
+    e instanceof Error && e.message.startsWith("Unsupported file format");
 
 const readInitialChunkOfFile = async (file: File) => {
     const chunkSizeForTypeDetection = 4100;

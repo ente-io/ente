@@ -53,6 +53,10 @@ class PersonData {
   List<ClusterInfo>? assigned = List<ClusterInfo>.empty();
   List<String>? rejectedFaceIDs = List<String>.empty();
   final String? birthDate;
+  // email should be always looked via userID as user might have changed
+  // their email ids.
+  final String? email;
+  final int? userID;
 
   bool hasAvatar() => avatarFaceID != null;
 
@@ -66,6 +70,8 @@ class PersonData {
     this.avatarFaceID,
     this.isHidden = false,
     this.birthDate,
+    this.email,
+    this.userID,
   });
   // copyWith
   PersonData copyWith({
@@ -75,6 +81,8 @@ class PersonData {
     bool? isHidden,
     int? version,
     String? birthDate,
+    String? email,
+    int? userID,
   }) {
     return PersonData(
       name: name ?? this.name,
@@ -82,6 +90,8 @@ class PersonData {
       avatarFaceID: avatarFaceId ?? avatarFaceID,
       isHidden: isHidden ?? this.isHidden,
       birthDate: birthDate ?? this.birthDate,
+      email: email ?? this.email,
+      userID: userID ?? this.userID,
     );
   }
 
@@ -112,6 +122,8 @@ class PersonData {
         'avatarFaceID': avatarFaceID,
         'isHidden': isHidden,
         'birthDate': birthDate,
+        'email': email,
+        'userID': userID,
       };
 
   // fromJson
@@ -135,6 +147,8 @@ class PersonData {
       avatarFaceID: json['avatarFaceID'] as String?,
       isHidden: json['isHidden'] as bool? ?? false,
       birthDate: json['birthDate'] as String?,
+      userID: json['userID'] as int?,
+      email: json['email'] as String?,
     );
   }
 }

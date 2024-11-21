@@ -376,7 +376,7 @@ class PersonService {
     return changed;
   }
 
-  Future<void> updateAvatar(PersonEntity p, EnteFile file) async {
+  Future<PersonEntity> updateAvatar(PersonEntity p, EnteFile file) async {
     final Face? face = await MLDataDB.instance.getCoverFaceForPerson(
       recentFileID: file.uploadedFileID!,
       personID: p.remoteID,
@@ -392,9 +392,10 @@ class PersonService {
       data: person.data.copyWith(avatarFaceId: face.faceID),
     );
     await updatePerson(updatedPerson);
+    return updatedPerson;
   }
 
-  Future<void> updateAttributes(
+  Future<PersonEntity> updateAttributes(
     String id, {
     String? name,
     String? avatarFaceId,
@@ -413,6 +414,7 @@ class PersonService {
       ),
     );
     await updatePerson(updatedPerson);
+    return updatedPerson;
   }
 
   Future<void> updatePerson(PersonEntity updatePerson) async {

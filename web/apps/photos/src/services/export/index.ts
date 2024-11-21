@@ -1,5 +1,6 @@
 import { ensureElectron } from "@/base/electron";
 import log from "@/base/log";
+import { writeStream } from "@/gallery/utils/native-stream";
 import type { Collection } from "@/media/collection";
 import { mergeMetadata, type EnteFile } from "@/media/file";
 import {
@@ -20,7 +21,6 @@ import {
 } from "@/new/photos/services/export";
 import { getAllLocalFiles } from "@/new/photos/services/files";
 import { safeDirectoryName, safeFileName } from "@/new/photos/utils/native-fs";
-import { writeStream } from "@/new/photos/utils/native-stream";
 import { CustomError } from "@ente/shared/error";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
 import QueueProcessor, {

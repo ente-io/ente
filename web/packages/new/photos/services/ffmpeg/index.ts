@@ -1,7 +1,11 @@
 import { ensureElectron } from "@/base/electron";
 import log from "@/base/log";
 import type { Electron } from "@/base/types/ipc";
-import { ComlinkWorker } from "@/base/worker/comlink-worker";
+import {
+    readConvertToMP4Done,
+    readConvertToMP4Stream,
+    writeConvertToMP4Stream,
+} from "@/gallery/utils/native-stream";
 import { parseMetadataDate, type ParsedMetadata } from "@/media/file-metadata";
 import {
     toDataOrPathOrZipEntry,
@@ -9,17 +13,11 @@ import {
     type UploadItem,
 } from "@/new/photos/services/upload/types";
 import {
-    readConvertToMP4Done,
-    readConvertToMP4Stream,
-    writeConvertToMP4Stream,
-} from "@/new/photos/utils/native-stream";
-import type { Remote } from "comlink";
-import {
     ffmpegPathPlaceholder,
     inputPathPlaceholder,
     outputPathPlaceholder,
 } from "./constants";
-import type { DedicatedFFmpegWorker } from "./worker";
+import { ffmpegExecWeb } from "./web";
 
 /**
  * Generate a thumbnail for the given video using a wasm FFmpeg running in a web
@@ -237,21 +235,6 @@ const parseFFMetadataDate = (s: string | undefined) => {
 };
 
 /**
- * Run the given FFmpeg command using a wasm FFmpeg running in a web worker.
- *
- * As a rough ballpark, currently the native FFmpeg integration in the desktop
- * app is 10-20x faster than the wasm one. See: [Note: FFmpeg in Electron].
- */
-const ffmpegExecWeb = async (
-    command: string[],
-    blob: Blob,
-    outputFileExtension: string,
-) => {
-    const worker = await workerFactory.lazy();
-    return await worker.exec(command, blob, outputFileExtension);
-};
-
-/**
  * Convert a video from a format that is not supported in the browser to MP4.
  *
  * This function is called when the user views a video or a live photo, and we
@@ -285,21 +268,3 @@ const convertToMP4Native = async (electron: Electron, blob: Blob) => {
     await readConvertToMP4Done(electron, token);
     return mp4Blob;
 };
-
-/** Lazily create a singleton instance of our worker */
-class WorkerFactory {
-    private instance: Promise<Remote<DedicatedFFmpegWorker>> | undefined;
-
-    private createComlinkWorker = () =>
-        new ComlinkWorker<typeof DedicatedFFmpegWorker>(
-            "ffmpeg-worker",
-            new Worker(new URL("worker.ts", import.meta.url)),
-        );
-
-    async lazy() {
-        if (!this.instance) this.instance = this.createComlinkWorker().remote;
-        return this.instance;
-    }
-}
-
-const workerFactory = new WorkerFactory();
