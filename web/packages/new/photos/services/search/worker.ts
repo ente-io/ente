@@ -306,7 +306,7 @@ const RemoteWorldCities = z.object({
 });
 
 const fetchCities = async () => {
-    const res = await fetch("https://static.ente.io/world_cities.json");
+    const res = await fetch("https://assets.ente.io/world_cities.json");
     if (!res.ok) throw new HTTPError(res);
     return RemoteWorldCities.parse(await res.json()).data.map(
         ({ city, lat, lng }) => ({ name: city, latitude: lat, longitude: lng }),
