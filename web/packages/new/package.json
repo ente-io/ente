@@ -4,6 +4,7 @@
     "private": true,
     "dependencies": {
         "@/base": "*",
+        "@/gallery": "*",
         "@/utils": "*",
         "@ente/shared": "*",
         "@mui/x-date-pickers": "^7.16.0",

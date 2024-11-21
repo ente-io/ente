@@ -18,7 +18,7 @@ import * as ffmpeg from "@/new/photos/services/ffmpeg";
 import { renderableImageBlob } from "@/new/photos/utils/file";
 import { CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { retryAsyncFunction } from "@ente/shared/utils";
+import { retryAsyncOperation } from "@/gallery/retry-async";
 
 export type OnDownloadProgress = (event: {
     loaded: number;
@@ -638,7 +638,7 @@ class PhotosDownloadClient implements DownloadClient {
             }
         };
 
-        const resp = await retryAsyncFunction(getThumbnail);
+        const resp = await retryAsyncOperation(getThumbnail);
         if (resp.data === undefined) throw Error("request failed");
         // TODO: Remove this cast (it won't be needed when we migrate this from
         // axios to fetch).
@@ -680,7 +680,7 @@ class PhotosDownloadClient implements DownloadClient {
             }
         };
 
-        const resp = await retryAsyncFunction(getFile);
+        const resp = await retryAsyncOperation(getFile);
         if (resp.data === undefined) throw Error("request failed");
         // TODO: Remove this cast (it won't be needed when we migrate this from
         // axios to fetch).
@@ -744,7 +744,7 @@ class PhotosDownloadClient implements DownloadClient {
             }
         };
 
-        return retryAsyncFunction(getFile);
+        return retryAsyncOperation(getFile);
     }
 }
 
@@ -848,7 +848,7 @@ class PublicAlbumsDownloadClient implements DownloadClient {
             }
         };
 
-        const resp = await retryAsyncFunction(getFile);
+        const resp = await retryAsyncOperation(getFile);
         if (resp.data === undefined) throw Error("request failed");
         // TODO: Remove this cast (it won't be needed when we migrate this from
         // axios to fetch).
@@ -887,6 +887,6 @@ class PublicAlbumsDownloadClient implements DownloadClient {
             }
         };
 
-        return retryAsyncFunction(getFile);
+        return retryAsyncOperation(getFile);
     }
 }

@@ -1,6 +1,6 @@
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
-import { retryHTTPCall } from "@/gallery/retry-async";
+import { retryAsyncOperation } from "@/gallery/retry-async";
 import { EnteFile } from "@/media/file";
 import { CustomError, handleUploadError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
@@ -21,7 +21,7 @@ class PublicUploadHttpClient {
                 throw Error(CustomError.TOKEN_MISSING);
             }
             const url = await apiURL("/public-collection/file");
-            const response = await retryHTTPCall(
+            const response = await retryAsyncOperation(
                 () =>
                     HTTPService.post(url, uploadFile, null, {
                         "X-Auth-Access-Token": token,
