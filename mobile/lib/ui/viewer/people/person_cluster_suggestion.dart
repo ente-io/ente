@@ -131,44 +131,92 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                 setState(() {});
               }
             });
-            return Expanded(
-              child: SingleChildScrollView(
-                child: GestureDetector(
-                  onTap: () {
-                    final List<EnteFile> sortedFiles =
-                        List<EnteFile>.from(currentSuggestion.filesInCluster);
-                    sortedFiles.sort(
-                      (a, b) => b.creationTime!.compareTo(a.creationTime!),
-                    );
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => ClusterPage(
-                          sortedFiles,
-                          personID: widget.person,
-                          clusterID: clusterID,
-                          showNamingBanner: false,
+
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: GestureDetector(
+                      onTap: () {
+                        final List<EnteFile> sortedFiles = List<EnteFile>.from(
+                            currentSuggestion.filesInCluster);
+                        sortedFiles.sort(
+                          (a, b) => b.creationTime!.compareTo(a.creationTime!),
+                        );
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => ClusterPage(
+                              sortedFiles,
+                              personID: widget.person,
+                              clusterID: clusterID,
+                              showNamingBanner: false,
+                            ),
+                          ),
+                        );
+                      },
+                      behavior: HitTestBehavior.opaque,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8.0,
+                          vertical: 20,
+                        ),
+                        child: _buildSuggestionView(
+                          clusterID,
+                          distance,
+                          usingMean,
+                          files,
+                          numberOfDifferentSuggestions,
+                          allSuggestions,
+                          generateFacedThumbnails,
                         ),
                       ),
-                    );
-                  },
-                  behavior: HitTestBehavior.opaque,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8.0,
-                      vertical: 20,
-                    ),
-                    child: _buildSuggestionView(
-                      clusterID,
-                      distance,
-                      usingMean,
-                      files,
-                      numberOfDifferentSuggestions,
-                      allSuggestions,
-                      generateFacedThumbnails,
                     ),
                   ),
                 ),
-              ),
+                SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                      left: 12.0,
+                      right: 12.0,
+                      bottom: 48,
+                    ),
+                    child: Row(
+                      children: <Widget>[
+                        Expanded(
+                          child: ButtonWidget(
+                            buttonType: ButtonType.critical,
+                            labelText: 'No',
+                            buttonSize: ButtonSize.large,
+                            onTap: () async => {
+                              await _handleUserClusterChoice(
+                                clusterID,
+                                false,
+                                numberOfDifferentSuggestions,
+                              ),
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 12.0),
+                        Expanded(
+                          child: ButtonWidget(
+                            buttonType: ButtonType.primary,
+                            labelText: context.l10n.yes,
+                            buttonSize: ButtonSize.large,
+                            onTap: () async => {
+                              await _handleUserClusterChoice(
+                                clusterID,
+                                true,
+                                numberOfDifferentSuggestions,
+                              ),
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             );
           } else if (snapshot.hasError) {
             _logger.severe(
@@ -269,12 +317,11 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
     final widgetToReturn = Column(
       key: ValueKey("cluster_id-$clusterID-files-${files.length}"),
       children: <Widget>[
-        // if (kDebugMode)
-        //   Text(
-        //     "ClusterID: $clusterID, Distance: ${distance.toStringAsFixed(3)}, usingMean: $usingMean",
-        //     style: getEnteTextTheme(context).smallMuted,
-        //   ),
-
+        if (kDebugMode)
+          Text(
+            "ClusterID: $clusterID, Distance: ${distance.toStringAsFixed(3)}, usingMean: $usingMean",
+            style: getEnteTextTheme(context).smallMuted,
+          ),
         Text(
           "${widget.person.data.name}?",
           style: getEnteTextTheme(context).largeMuted,
@@ -287,42 +334,6 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
         ),
         const SizedBox(
           height: 24.0,
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Row(
-            children: <Widget>[
-              Expanded(
-                child: ButtonWidget(
-                  buttonType: ButtonType.critical,
-                  labelText: 'No',
-                  buttonSize: ButtonSize.large,
-                  onTap: () async => {
-                    await _handleUserClusterChoice(
-                      clusterID,
-                      false,
-                      numberOfSuggestions,
-                    ),
-                  },
-                ),
-              ),
-              const SizedBox(width: 12.0),
-              Expanded(
-                child: ButtonWidget(
-                  buttonType: ButtonType.primary,
-                  labelText: context.l10n.yes,
-                  buttonSize: ButtonSize.large,
-                  onTap: () async => {
-                    await _handleUserClusterChoice(
-                      clusterID,
-                      true,
-                      numberOfSuggestions,
-                    ),
-                  },
-                ),
-              ),
-            ],
-          ),
         ),
       ],
     );
