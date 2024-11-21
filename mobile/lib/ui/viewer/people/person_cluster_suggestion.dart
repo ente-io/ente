@@ -185,8 +185,9 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                       children: <Widget>[
                         Expanded(
                           child: ButtonWidget(
-                            buttonType: ButtonType.critical,
-                            labelText: 'No',
+                            buttonType: ButtonType.tertiaryCritical,
+                            icon: Icons.close,
+                            labelText: context.l10n.no,
                             buttonSize: ButtonSize.large,
                             onTap: () async => {
                               await _handleUserClusterChoice(
@@ -416,11 +417,6 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
                     start: 6,
                   ),
                 ),
-              if (files.length > 6) const SizedBox(height: 12.0),
-              Text(
-                "${files.length} photos",
-                style: getEnteTextTheme(context).body,
-              ),
             ],
           );
         } else if (snapshot.hasError) {
@@ -447,19 +443,43 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
         child: SizedBox(
           width: 100,
           height: 100,
-          child: ClipPath(
-            clipper: ShapeBorderClipper(
-              shape: ContinuousRectangleBorder(
-                borderRadius: BorderRadius.circular(72),
+          child: Stack(
+            children: [
+              ClipPath(
+                clipper: ShapeBorderClipper(
+                  shape: ContinuousRectangleBorder(
+                    borderRadius: BorderRadius.circular(80),
+                  ),
+                ),
+                child: PersonFaceWidget(
+                  files[start + index],
+                  clusterID: cluserId,
+                  useFullFile: false,
+                  thumbnailFallback: false,
+                  faceCrop:
+                      faceThumbnails[files[start + index].uploadedFileID!],
+                ),
               ),
-            ),
-            child: PersonFaceWidget(
-              files[start + index],
-              clusterID: cluserId,
-              useFullFile: false,
-              thumbnailFallback: false,
-              faceCrop: faceThumbnails[files[start + index].uploadedFileID!],
-            ),
+              if (start + index == 8 && files.length > 9)
+                ClipPath(
+                  clipper: ShapeBorderClipper(
+                    shape: ContinuousRectangleBorder(
+                      borderRadius: BorderRadius.circular(72),
+                    ),
+                  ),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.7),
+                    ),
+                    child: Center(
+                      child: Text(
+                        '+${files.length - 8}',
+                        style: darkTheme.textTheme.h3Bold,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
           ),
         ),
       ),
