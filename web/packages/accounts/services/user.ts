@@ -1,5 +1,6 @@
 import { appName } from "@/base/app";
 import type { B64EncryptionResult } from "@/base/crypto/libsodium";
+import { authenticatedRequestHeaders, ensureOk } from "@/base/http";
 import { apiURL } from "@/base/origins";
 import { ApiError, CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
@@ -81,6 +82,31 @@ export const putAttributes = async (
             "X-Auth-Token": token,
         },
     );
+
+/**
+ * Log the user out on remote, if possible and needed.
+ */
+export const remoteLogoutIfNeeded = async () => {
+    let headers: HeadersInit;
+    try {
+        headers = await authenticatedRequestHeaders();
+    } catch {
+        // If the logout is attempted during the signup flow itself, then we
+        // won't have an auth token.
+        return;
+    }
+
+    const res = await fetch(await apiURL("/users/logout"), {
+        method: "POST",
+        headers,
+    });
+    if (!res.ok && res.status == 401) {
+        // Ignore if we get a 401 Unauthorized, this is expected to happen on
+        // token expiry.
+        return;
+    }
+    ensureOk(res);
+};
 
 export const logout = async () => {
     try {
