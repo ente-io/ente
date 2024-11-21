@@ -236,6 +236,12 @@ class _HomeWidgetState extends State<HomeWidget> {
     NotificationService.instance
         .initialize(_onDidReceiveNotificationResponse)
         .ignore();
+
+    Platform.isAndroid
+        ? WidgetsBinding.instance.addPostFrameCallback((_) {
+            DeeplinkService.instance.requestDeeplinkPermissions(context);
+          })
+        : null;
   }
 
   Future<void> _handlePublicAlbumLink(Uri uri) async {
@@ -519,7 +525,6 @@ class _HomeWidgetState extends State<HomeWidget> {
     if (!LocalSyncService.instance.hasCompletedFirstImport()) {
       return const LoadingPhotosWidget();
     }
-    DeeplinkService.instance.requestDeeplinkPermissions(context).ignore();
     if (_sharedFiles != null &&
         _sharedFiles!.isNotEmpty &&
         _shouldRenderCreateCollectionSheet) {

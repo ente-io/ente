@@ -23,41 +23,45 @@ class DeeplinkService {
   }
 
   Future<void> requestDeeplinkPermissions(BuildContext context) async {
-    if (!hasConfiguredDeeplinkPermissions() &&
-        RemoteSyncService.instance.isFirstRemoteSyncDone()) {
-      final choice = await showChoiceActionSheet(
-        isDismissible: false,
-        context,
-        title: "",
-        body: "Allow app to open album links",
-        firstButtonLabel: "Allow",
-      );
-      if (choice!.action == ButtonAction.first) {
-        if (Platform.isAndroid) {
-          final AndroidIntent intent;
-          final PackageInfo packageInfo = await PackageInfo.fromPlatform();
-          if (packageInfo.packageName == 'io.ente.photos.independent') {
-            intent = const AndroidIntent(
-              action: 'android.settings.APP_OPEN_BY_DEFAULT_SETTINGS',
-              package: 'io.ente.photos.independent',
-              data: 'package:io.ente.photos.independent',
-            );
-            await intent.launch();
-          } else if (packageInfo.packageName == 'io.ente.photos.fdroid') {
-            intent = const AndroidIntent(
-              action: 'android.settings.APP_OPEN_BY_DEFAULT_SETTINGS',
-              package: 'io.ente.photos.fdroid',
-              data: 'package:io.ente.photos.fdroid',
-            );
-            await intent.launch();
+    _logger.info("Requesting to allow opening public links in-app");
+    try {
+      if (!hasConfiguredDeeplinkPermissions() &&
+          RemoteSyncService.instance.isFirstRemoteSyncDone()) {
+        final choice = await showChoiceActionSheet(
+          isDismissible: false,
+          context,
+          title: "",
+          body: "Allow app to open album links",
+          firstButtonLabel: "Allow",
+        );
+        if (choice!.action == ButtonAction.first) {
+          if (Platform.isAndroid) {
+            final AndroidIntent intent;
+            final PackageInfo packageInfo = await PackageInfo.fromPlatform();
+            if (packageInfo.packageName == 'io.ente.photos.independent') {
+              intent = const AndroidIntent(
+                action: 'android.settings.APP_OPEN_BY_DEFAULT_SETTINGS',
+                package: 'io.ente.photos.independent',
+                data: 'package:io.ente.photos.independent',
+              );
+              await intent.launch();
+            } else if (packageInfo.packageName == 'io.ente.photos.fdroid') {
+              intent = const AndroidIntent(
+                action: 'android.settings.APP_OPEN_BY_DEFAULT_SETTINGS',
+                package: 'io.ente.photos.fdroid',
+                data: 'package:io.ente.photos.fdroid',
+              );
+              await intent.launch();
+            }
+            await setConfiguredDeeplinkPermissions(true);
+            _logger.info("Deeplink permissions granted");
           }
-          await setConfiguredDeeplinkPermissions(true);
-          _logger.info("Deeplink permissions granted");
+        } else {
+          _logger.info("Deeplink permissions not granted");
         }
-      } else {
-        _logger.info("Deeplink permissions not granted");
-        Navigator.of(context).pop();
       }
+    } catch (e) {
+      _logger.severe("Failed to req deeplink permission for album links", e);
     }
   }
 
