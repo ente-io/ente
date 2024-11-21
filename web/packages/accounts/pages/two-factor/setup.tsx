@@ -9,9 +9,10 @@ import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { TwoFactorSetup } from "../../components/two-factor/TwoFactorSetup";
-import VerifyTwoFactor, {
+import {
+    VerifyTwoFactor,
     type VerifyTwoFactorCallback,
-} from "../../components/two-factor/VerifyForm";
+} from "../../components/two-factor/VerifyTwoFactor";
 import { appHomeRoute } from "../../services/redirect";
 import type { TwoFactorSecret } from "../../services/user";
 import { enableTwoFactor, setupTwoFactor } from "../../services/user";
