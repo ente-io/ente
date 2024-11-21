@@ -46,12 +46,11 @@ export class SearchWorker {
      * session storage so this key needs to be passed to us explicitly.
      */
     async sync(masterKey: Uint8Array) {
-        return Promise.all([
-            pullUserEntities("location", masterKey)
-                .then(() => savedLocationTags())
-                .then((ts) => (this.locationTags = ts)),
-            fetchCities().then((cs) => (this.cities = cs)),
-        ]);
+        // Let the cities fetch complete async.
+        void fetchCities().then((cs) => (this.cities = cs));
+        return pullUserEntities("location", masterKey)
+            .then(() => savedLocationTags())
+            .then((ts) => (this.locationTags = ts));
     }
 
     /**
