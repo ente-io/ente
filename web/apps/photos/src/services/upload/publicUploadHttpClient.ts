@@ -1,10 +1,10 @@
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
+import { retryHTTPCall } from "@/gallery/retry-async";
 import { EnteFile } from "@/media/file";
 import { CustomError, handleUploadError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { MultipartUploadURLs, UploadFile, UploadURL } from "./upload-service";
-import { retryHTTPCall } from "./uploadHttpClient";
 
 const MAX_URL_REQUESTS = 50;
 
