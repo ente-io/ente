@@ -8,6 +8,7 @@ const (
 	EmailChangedSubject    = "Email address updated"
 
 	ChangeEmailOTTPurpose = "change"
+	SignUpOTTPurpose      = "signup"
 )
 
 // User represents a user in the system

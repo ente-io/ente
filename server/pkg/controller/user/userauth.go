@@ -81,14 +81,17 @@ func hardcodedOTTForEmail(hardCodedOTT HardCodedOTT, email string) string {
 // SendEmailOTT generates and sends an OTT to the provided email address
 func (c *UserController) SendEmailOTT(context *gin.Context, email string, purpose string) error {
 	if purpose == ente.ChangeEmailOTTPurpose {
-		_, err := c.UserRepo.GetUserIDWithEmail(email)
-		if err == nil {
-			// email already owned by a user
-			return stacktrace.Propagate(ente.ErrPermissionDenied, "")
+		if err := c.isEmailAlreadyUsed(email); err != nil {
+			return err
 		}
-		if !errors.Is(err, sql.ErrNoRows) {
-			// unknown error, rethrow
+	}
+	if purpose == ente.SignUpOTTPurpose {
+		isComplete, err := c.isSignedUpComplete(email)
+		if err != nil {
 			return stacktrace.Propagate(err, "")
+		}
+		if isComplete {
+			return stacktrace.Propagate(ente.ErrUserAlreadyRegistered, "user has already completed sign up process")
 		}
 	}
 	ott, err := random.GenerateSixDigitOtp()
@@ -132,6 +135,39 @@ func (c *UserController) SendEmailOTT(context *gin.Context, email string, purpos
 		log.Info("Added hard coded ott for " + email + " : " + ott)
 	}
 	return nil
+}
+
+func (c *UserController) isEmailAlreadyUsed(email string) error {
+	_, err := c.UserRepo.GetUserIDWithEmail(email)
+	if err == nil {
+		// email already owned by a user
+		return stacktrace.Propagate(ente.ErrPermissionDenied, "email already belongs to a user")
+	}
+	if !errors.Is(err, sql.ErrNoRows) {
+		// unknown error, rethrow
+		return stacktrace.Propagate(err, "")
+	}
+	return nil
+}
+
+// isSignedUpComplete checks if the user has completed the entire sign up process.
+// Sign up is considered complete if the user has verified their email address and their key attributes are set.
+func (c *UserController) isSignedUpComplete(email string) (bool, error) {
+	userID, err := c.UserRepo.GetUserIDWithEmail(email)
+	if err != nil && errors.Is(err, sql.ErrNoRows) {
+		return false, nil
+	}
+	if err != nil {
+		return false, stacktrace.Propagate(err, "")
+	}
+	_, keyErr := c.UserRepo.GetKeyAttributes(userID)
+	if keyErr != nil && errors.Is(keyErr, sql.ErrNoRows) {
+		return false, nil
+	}
+	if keyErr != nil {
+		return false, stacktrace.Propagate(keyErr, "")
+	}
+	return true, nil
 }
 
 func (c *UserController) AddAdminOtt(req ente.AdminOttReq) error {
