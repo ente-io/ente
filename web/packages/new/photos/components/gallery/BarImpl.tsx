@@ -1,5 +1,5 @@
 import { Overlay } from "@/base/components/mui/Container";
-import { useIsSmallWidth } from "@/base/hooks";
+import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { CollectionsSortOptions } from "@/new/photos/components/CollectionsSortOptions";
 import { FilledIconButton } from "@/new/photos/components/mui";
 import {
