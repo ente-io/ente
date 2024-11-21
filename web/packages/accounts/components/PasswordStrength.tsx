@@ -19,8 +19,9 @@ export const PasswordStrengthHint: React.FC<PasswordStrengthHintProps> = ({
         <Typography
             variant="small"
             sx={(theme) => ({
-                marginBlock: "8px 4px",
+                mt: "8px",
                 alignSelf: "flex-start",
+                whiteSpace: "pre",
                 color:
                     passwordStrength == "weak"
                         ? theme.colors.danger.A700
@@ -31,7 +32,8 @@ export const PasswordStrengthHint: React.FC<PasswordStrengthHintProps> = ({
         >
             {password
                 ? t("passphrase_strength", { context: passwordStrength })
-                : ""}
+                : /* empty space + white-space: pre to prevent layout shift. */
+                  " "}
         </Typography>
     );
 };
