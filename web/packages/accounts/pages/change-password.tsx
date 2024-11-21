@@ -8,11 +8,12 @@ import SetPasswordForm, {
 } from "@/accounts/components/SetPasswordForm";
 import { PAGES } from "@/accounts/constants/pages";
 import {
+    convertBase64ToBuffer,
+    convertBufferToBase64,
     generateSRPClient,
     generateSRPSetupAttributes,
 } from "@/accounts/services/srp";
 import type { UpdatedKey } from "@/accounts/types/user";
-import { convertBase64ToBuffer, convertBufferToBase64 } from "@/accounts/utils";
 import {
     FormPaper,
     FormPaperFooter,

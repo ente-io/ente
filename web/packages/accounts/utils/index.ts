@@ -2,13 +2,6 @@ import zxcvbn from "zxcvbn";
 
 export type PasswordStrength = "weak" | "moderate" | "strong";
 
-export const convertBufferToBase64 = (buffer: Buffer) => {
-    return buffer.toString("base64");
-};
-
-export const convertBase64ToBuffer = (base64: string) => {
-    return Buffer.from(base64, "base64");
-};
 
 export function estimatePasswordStrength(password: string): PasswordStrength {
     if (!password) {
