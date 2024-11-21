@@ -1,4 +1,4 @@
-import { putAttributes } from "@/accounts/api/user";
+import { putAttributes } from "@/accounts/services/user";
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
 import type { UserDetails } from "@/new/photos/services/user-details";

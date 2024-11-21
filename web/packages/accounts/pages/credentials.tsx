@@ -39,8 +39,6 @@ import { Stack } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
-import type { SRPAttributes } from "../api/srp";
-import { getSRPAttributes } from "../api/srp";
 import {
     LoginFlowFormFooter,
     PasswordHeader,
@@ -62,6 +60,8 @@ import {
     generateSRPSetupAttributes,
     loginViaSRP,
 } from "../services/srp";
+import type { SRPAttributes } from "../services/srp-remote";
+import { getSRPAttributes } from "../services/srp-remote";
 import type { PageProps } from "../types/page";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {

@@ -3,8 +3,11 @@ import { FormPaper, FormPaperTitle } from "@/base/components/FormPaper";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { SpaceBetweenFlex } from "@/base/components/mui/Container";
 import { NavbarBase, SelectionBar } from "@/base/components/Navbar";
+import {
+    useIsSmallWidth,
+    useIsTouchscreen,
+} from "@/base/components/utils/hooks";
 import { sharedCryptoWorker } from "@/base/crypto";
-import { useIsSmallWidth, useIsTouchscreen } from "@/base/hooks";
 import log from "@/base/log";
 import { updateShouldDisableCFUploadProxy } from "@/gallery/upload";
 import type { Collection } from "@/media/collection";

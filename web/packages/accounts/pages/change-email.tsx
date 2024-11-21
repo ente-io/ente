@@ -1,4 +1,3 @@
-import { changeEmail, sendOTTForEmailChange } from "@/accounts/api/user";
 import {
     FormPaper,
     FormPaperFooter,
@@ -17,6 +16,7 @@ import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 import * as Yup from "yup";
 import { appHomeRoute } from "../services/redirect";
+import { changeEmail, sendOTTForEmailChange } from "../services/user";
 import type { PageProps } from "../types/page";
 
 const Page: React.FC<PageProps> = () => {

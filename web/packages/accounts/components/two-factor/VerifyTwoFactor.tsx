@@ -1,13 +1,12 @@
-import InvalidInputMessage from "@/accounts/components/two-factor/InvalidInputMessage";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import {
     CenteredFlex,
     VerticallyCentered,
 } from "@ente/shared/components/Container";
-import { Box, Typography, styled } from "@mui/material";
+import { Box, Typography, styled, type TypographyProps } from "@mui/material";
 import { Formik, type FormikHelpers } from "formik";
 import { t } from "i18next";
-import { useState } from "react";
+import React, { useState } from "react";
 import OtpInput from "react-otp-input";
 
 interface formValues {
@@ -23,7 +22,7 @@ export type VerifyTwoFactorCallback = (
     markSuccessful: () => void,
 ) => Promise<void>;
 
-export default function VerifyTwoFactor(props: Props) {
+export function VerifyTwoFactor(props: Props) {
     const [waiting, setWaiting] = useState(false);
     const [shouldAutoFocus, setShouldAutoFocus] = useState(true);
 
@@ -128,3 +127,17 @@ const IndividualInput = styled("input")(
     }
 `,
 );
+
+const InvalidInputMessage: React.FC<TypographyProps> = (props) => {
+    return (
+        <Typography
+            variant="mini"
+            sx={{
+                color: (theme) => theme.colors.danger.A700,
+            }}
+            {...props}
+        >
+            {props.children}
+        </Typography>
+    );
+};

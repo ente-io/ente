@@ -1,11 +1,13 @@
-import { putAttributes } from "@/accounts/api/user";
 import { RecoveryKey } from "@/accounts/components/RecoveryKey";
 import SetPasswordForm, {
     type SetPasswordFormProps,
 } from "@/accounts/components/SetPasswordForm";
 import { PAGES } from "@/accounts/constants/pages";
-import { configureSRP } from "@/accounts/services/srp";
-import { generateKeyAndSRPAttributes } from "@/accounts/utils/srp";
+import {
+    configureSRP,
+    generateKeyAndSRPAttributes,
+} from "@/accounts/services/srp";
+import { putAttributes } from "@/accounts/services/user";
 import {
     FormPaper,
     FormPaperFooter,

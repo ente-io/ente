@@ -1,5 +1,5 @@
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
-import { useIsSmallWidth } from "@/base/hooks";
+import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { ensureOk } from "@/base/http";
 import { getKVS, removeKV, setKV } from "@/base/kv";
 import log from "@/base/log";

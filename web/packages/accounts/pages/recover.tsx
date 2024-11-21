@@ -1,5 +1,5 @@
-import { sendOtt } from "@/accounts/api/user";
 import { PAGES } from "@/accounts/constants/pages";
+import { sendOtt } from "@/accounts/services/user";
 import {
     FormPaper,
     FormPaperFooter,

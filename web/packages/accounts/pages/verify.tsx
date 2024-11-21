@@ -1,4 +1,3 @@
-import type { UserVerificationResponse } from "@/accounts/types/user";
 import { FormPaper, FormPaperTitle } from "@/base/components/FormPaper";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import log from "@/base/log";
@@ -27,9 +26,6 @@ import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
-import type { SRPAttributes, SRPSetupAttributes } from "../api/srp";
-import { getSRPAttributes } from "../api/srp";
-import { putAttributes, sendOtt, verifyOtt } from "../api/user";
 import {
     LoginFlowFormFooter,
     VerifyingPasskey,
@@ -41,6 +37,10 @@ import {
 } from "../services/passkey";
 import { stashedRedirect, unstashRedirect } from "../services/redirect";
 import { configureSRP } from "../services/srp";
+import type { SRPAttributes, SRPSetupAttributes } from "../services/srp-remote";
+import { getSRPAttributes } from "../services/srp-remote";
+import type { UserVerificationResponse } from "../services/user";
+import { putAttributes, sendOtt, verifyOtt } from "../services/user";
 import type { PageProps } from "../types/page";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {
