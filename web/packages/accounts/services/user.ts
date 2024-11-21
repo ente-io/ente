@@ -100,35 +100,13 @@ export const remoteLogoutIfNeeded = async () => {
         method: "POST",
         headers,
     });
-    if (!res.ok && res.status == 401) {
+    if (res.status == 401) {
         // Ignore if we get a 401 Unauthorized, this is expected to happen on
         // token expiry.
         return;
     }
-    ensureOk(res);
-};
 
-export const logout = async () => {
-    try {
-        const token = getToken();
-        await HTTPService.post(await apiURL("/users/logout"), null, undefined, {
-            "X-Auth-Token": token,
-        });
-    } catch (e) {
-        // ignore if token missing can be triggered during sign up.
-        if (e instanceof Error && e.message === CustomError.TOKEN_MISSING) {
-            return;
-        }
-        // ignore if unauthorized, can be triggered during on token expiry.
-        else if (
-            e instanceof ApiError &&
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
-            e.httpStatusCode === HttpStatusCode.Unauthorized
-        ) {
-            return;
-        }
-        throw e;
-    }
+    ensureOk(res);
 };
 
 export const verifyTwoFactor = async (code: string, sessionID: string) => {

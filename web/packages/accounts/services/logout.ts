@@ -5,7 +5,7 @@ import log from "@/base/log";
 import localForage from "@ente/shared/storage/localForage";
 import { clearKeys } from "@ente/shared/storage/sessionStorage";
 import { clearStashedRedirect } from "./redirect";
-import { logout as remoteLogout } from "./user";
+import { remoteLogoutIfNeeded } from "./user";
 
 /**
  * Logout sequence common to all apps that rely on the accounts package.
@@ -24,7 +24,7 @@ export const accountLogout = async () => {
     log.info("logout (account)");
 
     try {
-        await remoteLogout();
+        await remoteLogoutIfNeeded();
     } catch (e) {
         ignoreError("Remote", e);
     }
