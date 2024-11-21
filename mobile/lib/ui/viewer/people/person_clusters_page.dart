@@ -66,26 +66,23 @@ class _PersonClustersPageState extends State<PersonClustersPage> {
                     child: Row(
                       children: <Widget>[
                         SizedBox(
-                          width: 64,
-                          height: 64,
-                          child: files.isNotEmpty
-                              ? ClipRRect(
-                                  borderRadius: const BorderRadius.all(
-                                    Radius.elliptical(16, 12),
-                                  ),
-                                  child: PersonFaceWidget(
+                          width: 100,
+                          height: 100,
+                          child: ClipPath(
+                            clipper: ShapeBorderClipper(
+                              shape: ContinuousRectangleBorder(
+                                borderRadius: BorderRadius.circular(75),
+                              ),
+                            ),
+                            child: files.isNotEmpty
+                                ? PersonFaceWidget(
                                     files.first,
                                     clusterID: clusterID,
-                                  ),
-                                )
-                              : const ClipRRect(
-                                  borderRadius: BorderRadius.all(
-                                    Radius.elliptical(16, 12),
-                                  ),
-                                  child: NoThumbnailWidget(
+                                  )
+                                : const NoThumbnailWidget(
                                     addBorder: false,
                                   ),
-                                ),
+                          ),
                         ),
                         const SizedBox(
                           width: 8.0,

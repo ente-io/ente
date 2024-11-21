@@ -448,7 +448,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
               ClipPath(
                 clipper: ShapeBorderClipper(
                   shape: ContinuousRectangleBorder(
-                    borderRadius: BorderRadius.circular(80),
+                    borderRadius: BorderRadius.circular(75),
                   ),
                 ),
                 child: PersonFaceWidget(
