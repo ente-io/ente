@@ -15,7 +15,7 @@ import { retryAsyncOperation } from "@/gallery/utils/retry-async";
 import type { EnteFile, LivePhotoSourceURL, SourceURLs } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
-import * as ffmpeg from "@/new/photos/services/ffmpeg";
+import { convertToMP4 } from "./ffmpeg";
 import { renderableImageBlob } from "@/new/photos/utils/file";
 import { CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
@@ -545,7 +545,7 @@ async function getPlayableVideo(
     const converted = async () => {
         try {
             log.info(`Converting video ${videoNameTitle} to mp4`);
-            const convertedVideoData = await ffmpeg.convertToMP4(videoBlob);
+            const convertedVideoData = await convertToMP4(videoBlob);
             return new Blob([convertedVideoData], { type: "video/mp4" });
         } catch (e) {
             log.error("Video conversion failed", e);
