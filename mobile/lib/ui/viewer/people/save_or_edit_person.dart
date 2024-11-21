@@ -6,6 +6,7 @@ import "package:flutter/material.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/ml/db.dart";
+import "package:photos/ente_theme_data.dart";
 import "package:photos/events/people_changed_event.dart";
 import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
@@ -20,6 +21,7 @@ import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/components/buttons/button_widget.dart";
 import "package:photos/ui/components/models/button_type.dart";
 import "package:photos/ui/viewer/file/no_thumbnail_widget.dart";
+import "package:photos/ui/viewer/gallery/hooks/pick_person_avatar.dart";
 import "package:photos/ui/viewer/people/person_row_item.dart";
 import "package:photos/ui/viewer/search/result/person_face_widget.dart";
 import "package:photos/utils/dialog_util.dart";
@@ -74,7 +76,9 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
         title: Align(
           alignment: Alignment.centerLeft,
           child: Text(
-            context.l10n.savePerson,
+            widget.isEditing
+                ? context.l10n.editPerson
+                : context.l10n.savePerson,
           ),
         ),
       ),
@@ -83,25 +87,92 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
         child: Column(
           children: [
             const SizedBox(height: 48),
-            SizedBox(
-              height: 110,
-              width: 110,
-              child: ClipPath(
-                clipper: ShapeBorderClipper(
-                  shape: ContinuousRectangleBorder(
-                    borderRadius: BorderRadius.circular(80),
-                  ),
-                ),
-                child: widget.file != null
-                    ? PersonFaceWidget(
-                        widget.file!,
-                        clusterID: widget.clusterID,
-                      )
-                    : const NoThumbnailWidget(
-                        addBorder: false,
-                      ),
+            if (widget.person != null)
+              FutureBuilder<(String, EnteFile)>(
+                future: _getRecentFileWithClusterID(widget.person!),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    final String personClusterID = snapshot.data!.$1;
+                    final personFile = snapshot.data!.$2;
+                    return Stack(
+                      children: [
+                        SizedBox(
+                          height: 110,
+                          width: 110,
+                          child: ClipPath(
+                            clipper: ShapeBorderClipper(
+                              shape: ContinuousRectangleBorder(
+                                borderRadius: BorderRadius.circular(80),
+                              ),
+                            ),
+                            child: snapshot.hasData
+                                ? PersonFaceWidget(
+                                    personFile,
+                                    clusterID: personClusterID,
+                                    personId: widget.person!.remoteID,
+                                  )
+                                : const NoThumbnailWidget(
+                                    addBorder: false,
+                                  ),
+                          ),
+                        ),
+                        if (widget.person != null)
+                          Positioned(
+                            right: 0,
+                            bottom: 0,
+                            child: Container(
+                              width: 28,
+                              height: 28,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8.0),
+                                boxShadow: Theme.of(context)
+                                    .colorScheme
+                                    .enteTheme
+                                    .shadowMenu,
+                                color: getEnteColorScheme(context)
+                                    .backgroundElevated2,
+                              ),
+                              child: IconButton(
+                                icon: const Icon(Icons.edit),
+                                iconSize: 16, // specify the size of the icon
+                                onPressed: () async {
+                                  await showPersonAvatarPhotoSheet(
+                                    context,
+                                    widget.person!,
+                                  );
+                                  // if (person != null) {
+                                  Navigator.pop(context);
+                                },
+                              ),
+                            ),
+                          ),
+                      ],
+                    );
+                  } else {
+                    return const SizedBox.shrink();
+                  }
+                },
               ),
-            ),
+            if (widget.person == null)
+              SizedBox(
+                height: 110,
+                width: 110,
+                child: ClipPath(
+                  clipper: ShapeBorderClipper(
+                    shape: ContinuousRectangleBorder(
+                      borderRadius: BorderRadius.circular(80),
+                    ),
+                  ),
+                  child: widget.file != null
+                      ? PersonFaceWidget(
+                          widget.file!,
+                          clusterID: widget.clusterID,
+                        )
+                      : const NoThumbnailWidget(
+                          addBorder: false,
+                        ),
+                ),
+              ),
             const SizedBox(height: 36),
             TextFormField(
               onChanged: (value) {
@@ -354,5 +425,21 @@ class _SaveOrEditPersonState extends State<SaveOrEditPerson> {
       personAndFileID.add((person, files.first));
     }
     return personAndFileID;
+  }
+
+  Future<(String, EnteFile)> _getRecentFileWithClusterID(
+      PersonEntity person) async {
+    final clustersToFiles =
+        await SearchService.instance.getClusterFilesForPersonID(
+      person.remoteID,
+    );
+    final files = clustersToFiles.values.expand((e) => e).toList();
+    if (files.isEmpty) {
+      debugPrint(
+        "Person ${kDebugMode ? person.data.name : person.remoteID} has no files",
+      );
+      return ("", EnteFile());
+    }
+    return (person.remoteID, files.first);
   }
 }

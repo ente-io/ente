@@ -696,6 +696,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "editLocation": MessageLookupByLibrary.simpleMessage("Edit location"),
         "editLocationTagTitle":
             MessageLookupByLibrary.simpleMessage("Edit location"),
+        "editPerson": MessageLookupByLibrary.simpleMessage("Edit person"),
         "editsSaved": MessageLookupByLibrary.simpleMessage("Edits saved"),
         "editsToLocationWillOnlyBeSeenWithinEnte":
             MessageLookupByLibrary.simpleMessage(

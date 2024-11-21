@@ -9026,6 +9026,16 @@ class S {
     );
   }
 
+  /// `Edit person`
+  String get editPerson {
+    return Intl.message(
+      'Edit person',
+      name: 'editPerson',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Or merge with existing`
   String get orMergeWithExistingPerson {
     return Intl.message(
