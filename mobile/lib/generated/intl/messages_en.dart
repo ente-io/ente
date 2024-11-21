@@ -59,6 +59,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m18(albumName) => "Collaborative link created for ${albumName}";
 
+  static String m74(count) =>
+      "${Intl.plural(count, zero: 'Added 0 collaborator', one: 'Added 1 collaborator', other: 'Added ${count} collaborators')}";
+
   static String m19(familyAdminEmail) =>
       "Please contact <green>${familyAdminEmail}</green> to manage your subscription";
 
@@ -213,6 +216,9 @@ class MessageLookup extends MessageLookupByLibrary {
   static String m70(endDate) => "Valid till ${endDate}";
 
   static String m71(email) => "Verify ${email}";
+
+  static String m75(count) =>
+      "${Intl.plural(count, zero: 'Added 0 viewer', one: 'Added 1 viewer', other: 'Added ${count} viewers')}";
 
   static String m2(email) => "We have sent a mail to <green>${email}</green>";
 
@@ -408,6 +414,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "backupStatusDescription": MessageLookupByLibrary.simpleMessage(
             "Items that have been backed up will show up here"),
         "backupVideos": MessageLookupByLibrary.simpleMessage("Backup videos"),
+        "birthday": MessageLookupByLibrary.simpleMessage("Birthday"),
         "blackFridaySale":
             MessageLookupByLibrary.simpleMessage("Black Friday Sale"),
         "blog": MessageLookupByLibrary.simpleMessage("Blog"),
@@ -493,6 +500,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "collaboratorsCanAddPhotosAndVideosToTheSharedAlbum":
             MessageLookupByLibrary.simpleMessage(
                 "Collaborators can add photos and videos to the shared album."),
+        "collaboratorsSuccessfullyAdded": m74,
         "collageLayout": MessageLookupByLibrary.simpleMessage("Layout"),
         "collageSaved":
             MessageLookupByLibrary.simpleMessage("Collage saved to gallery"),
@@ -695,6 +703,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "editLocation": MessageLookupByLibrary.simpleMessage("Edit location"),
         "editLocationTagTitle":
             MessageLookupByLibrary.simpleMessage("Edit location"),
+        "editPerson": MessageLookupByLibrary.simpleMessage("Edit person"),
         "editsSaved": MessageLookupByLibrary.simpleMessage("Edits saved"),
         "editsToLocationWillOnlyBeSeenWithinEnte":
             MessageLookupByLibrary.simpleMessage(
@@ -741,9 +750,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "enterCode": MessageLookupByLibrary.simpleMessage("Enter code"),
         "enterCodeDescription": MessageLookupByLibrary.simpleMessage(
             "Enter the code provided by your friend to claim free storage for both of you"),
+        "enterDateOfBirth":
+            MessageLookupByLibrary.simpleMessage("Birthday (optional)"),
         "enterEmail": MessageLookupByLibrary.simpleMessage("Enter email"),
         "enterFileName":
             MessageLookupByLibrary.simpleMessage("Enter file name"),
+        "enterName": MessageLookupByLibrary.simpleMessage("Enter name"),
         "enterNewPasswordToEncrypt": MessageLookupByLibrary.simpleMessage(
             "Enter a new password we can use to encrypt your data"),
         "enterPassword": MessageLookupByLibrary.simpleMessage("Enter password"),
@@ -821,6 +833,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Files saved to gallery"),
         "findPeopleByName":
             MessageLookupByLibrary.simpleMessage("Find people quickly by name"),
+        "findThemQuickly":
+            MessageLookupByLibrary.simpleMessage("Find them quickly"),
         "flip": MessageLookupByLibrary.simpleMessage("Flip"),
         "forYourMemories":
             MessageLookupByLibrary.simpleMessage("for your memories"),
@@ -1035,6 +1049,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "merchandise": MessageLookupByLibrary.simpleMessage("Merchandise"),
         "mergeWithExisting":
             MessageLookupByLibrary.simpleMessage("Merge with existing"),
+        "mergedPhotos": MessageLookupByLibrary.simpleMessage("Merged photos"),
         "mlConsent":
             MessageLookupByLibrary.simpleMessage("Enable machine learning"),
         "mlConsentConfirmation": MessageLookupByLibrary.simpleMessage(
@@ -1133,6 +1148,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("OpenStreetMap contributors"),
         "optionalAsShortAsYouLike": MessageLookupByLibrary.simpleMessage(
             "Optional, as short as you like..."),
+        "orMergeWithExistingPerson":
+            MessageLookupByLibrary.simpleMessage("Or merge with existing"),
         "orPickAnExistingOne":
             MessageLookupByLibrary.simpleMessage("Or pick an existing one"),
         "pair": MessageLookupByLibrary.simpleMessage("Pair"),
@@ -1327,7 +1344,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Reset ignored files"),
         "resetPasswordTitle":
             MessageLookupByLibrary.simpleMessage("Reset password"),
-        "resetPerson": MessageLookupByLibrary.simpleMessage("Reset person"),
+        "resetPerson": MessageLookupByLibrary.simpleMessage("Remove"),
         "resetToDefault":
             MessageLookupByLibrary.simpleMessage("Reset to default"),
         "restore": MessageLookupByLibrary.simpleMessage("Restore"),
@@ -1338,6 +1355,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "resumableUploads":
             MessageLookupByLibrary.simpleMessage("Resumable uploads"),
         "retry": MessageLookupByLibrary.simpleMessage("Retry"),
+        "review": MessageLookupByLibrary.simpleMessage("Review"),
         "reviewDeduplicateItems": MessageLookupByLibrary.simpleMessage(
             "Please review and delete the items you believe are duplicates."),
         "reviewSuggestions":
@@ -1351,6 +1369,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "saveCollage": MessageLookupByLibrary.simpleMessage("Save collage"),
         "saveCopy": MessageLookupByLibrary.simpleMessage("Save copy"),
         "saveKey": MessageLookupByLibrary.simpleMessage("Save key"),
+        "savePerson": MessageLookupByLibrary.simpleMessage("Save person"),
         "saveYourRecoveryKeyIfYouHaventAlready":
             MessageLookupByLibrary.simpleMessage(
                 "Save your recovery key if you haven\'t already"),
@@ -1710,6 +1729,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "viewRecoveryKey":
             MessageLookupByLibrary.simpleMessage("View recovery key"),
         "viewer": MessageLookupByLibrary.simpleMessage("Viewer"),
+        "viewersSuccessfullyAdded": m75,
         "visitWebToManage": MessageLookupByLibrary.simpleMessage(
             "Please visit web.ente.io to manage your subscription"),
         "waitingForVerification":

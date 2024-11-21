@@ -468,7 +468,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "checking":
             MessageLookupByLibrary.simpleMessage("Controllo in corso..."),
         "checkingModels":
-            MessageLookupByLibrary.simpleMessage("Checking models..."),
+            MessageLookupByLibrary.simpleMessage("Verifica dei modelli..."),
         "claimFreeStorage":
             MessageLookupByLibrary.simpleMessage("Richiedi spazio gratuito"),
         "claimMore": MessageLookupByLibrary.simpleMessage("Richiedine di più!"),
@@ -734,8 +734,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "enable": MessageLookupByLibrary.simpleMessage("Abilita"),
         "enableMLIndexingDesc": MessageLookupByLibrary.simpleMessage(
             "Ente supporta l\'apprendimento automatico eseguito sul dispositivo per il riconoscimento dei volti, la ricerca magica e altre funzioni di ricerca avanzata"),
-        "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
-            "Enable machine learning for magic search and face recognition"),
         "enableMaps": MessageLookupByLibrary.simpleMessage("Abilita le Mappe"),
         "enableMapsDesc": MessageLookupByLibrary.simpleMessage(
             "Questo mostrerà le tue foto su una mappa del mondo.\n\nQuesta mappa è ospitata da Open Street Map e le posizioni esatte delle tue foto non sono mai condivise.\n\nPuoi disabilitare questa funzionalità in qualsiasi momento, dalle Impostazioni."),
@@ -1092,7 +1090,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Mediocre"),
         "modifyYourQueryOrTrySearchingFor":
             MessageLookupByLibrary.simpleMessage(
-                "Modifica la tua interrogazione o prova a cercare"),
+                "Modifica la tua ricerca o prova con"),
         "moments": MessageLookupByLibrary.simpleMessage("Momenti"),
         "monthly": MessageLookupByLibrary.simpleMessage("Mensile"),
         "moreDetails": MessageLookupByLibrary.simpleMessage("Più dettagli"),
@@ -1427,8 +1425,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Aggiungi descrizioni come \"#viaggio\" nelle informazioni delle foto per trovarle rapidamente qui"),
         "searchDatesEmptySection": MessageLookupByLibrary.simpleMessage(
             "Ricerca per data, mese o anno"),
-        "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
-            "Images will be shown here once processing is complete"),
         "searchFaceEmptySection": MessageLookupByLibrary.simpleMessage(
             "Le persone saranno mostrate qui una volta completata l\'indicizzazione"),
         "searchFileTypesAndNamesEmptySection":
@@ -1446,8 +1442,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Raggruppa foto scattate entro un certo raggio da una foto"),
         "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
             "Invita persone e vedrai qui tutte le foto condivise da loro"),
-        "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
-            "People will be shown here once processing is complete"),
         "searchResultCount": m53,
         "security": MessageLookupByLibrary.simpleMessage("Sicurezza"),
         "selectALocation":

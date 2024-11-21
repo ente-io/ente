@@ -92,8 +92,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("เปลี่ยนรหัสผ่าน"),
         "checkInboxAndSpamFolder": MessageLookupByLibrary.simpleMessage(
             "โปรดตรวจสอบกล่องจดหมาย (และสแปม) ของคุณ เพื่อยืนยันให้เสร็จสิ้น"),
-        "checkingModels":
-            MessageLookupByLibrary.simpleMessage("Checking models..."),
         "codeCopiedToClipboard": MessageLookupByLibrary.simpleMessage(
             "คัดลอกรหัสไปยังคลิปบอร์ดแล้ว"),
         "collectPhotos": MessageLookupByLibrary.simpleMessage("รวบรวมรูปภาพ"),
@@ -151,8 +149,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("แก้ไขตำแหน่ง"),
         "eligible": MessageLookupByLibrary.simpleMessage("มีสิทธิ์"),
         "email": MessageLookupByLibrary.simpleMessage("อีเมล"),
-        "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
-            "Enable machine learning for magic search and face recognition"),
         "enableMaps": MessageLookupByLibrary.simpleMessage("เปิดใช้งานแผนที่"),
         "encryption": MessageLookupByLibrary.simpleMessage("การเข้ารหัส"),
         "enterCode": MessageLookupByLibrary.simpleMessage("ป้อนรหัส"),
@@ -288,12 +284,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage(
                 "บันทึกคีย์การกู้คืนของคุณหากคุณยังไม่ได้ทำ"),
         "scanCode": MessageLookupByLibrary.simpleMessage("สแกนรหัส"),
-        "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
-            "Images will be shown here once processing is complete"),
-        "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
-            "People will be shown here once processing is complete"),
-        "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
-            "People will be shown here once processing is complete"),
         "selectAll": MessageLookupByLibrary.simpleMessage("เลือกทั้งหมด"),
         "selectReason": MessageLookupByLibrary.simpleMessage("เลือกเหตุผล"),
         "sendEmail": MessageLookupByLibrary.simpleMessage("ส่งอีเมล"),

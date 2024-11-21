@@ -27,12 +27,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "ackPasswordLostWarning": MessageLookupByLibrary.simpleMessage(
             "أُدركُ أنّني فقدتُ كلمة مروري، فقد أفقد بياناتي لأن بياناتي <underline>مشفرة تشفيرًا تامًّا من النهاية إلى النهاية</underline>."),
         "cancel": MessageLookupByLibrary.simpleMessage("إلغاء"),
-        "checkingModels":
-            MessageLookupByLibrary.simpleMessage("Checking models..."),
         "decrypting": MessageLookupByLibrary.simpleMessage("فك التشفير..."),
         "email": MessageLookupByLibrary.simpleMessage("البريد الإلكتروني"),
-        "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
-            "Enable machine learning for magic search and face recognition"),
         "enterYourEmailAddress":
             MessageLookupByLibrary.simpleMessage("أدخل عنوان بريدك الإلكتروني"),
         "enterYourRecoveryKey":
@@ -52,12 +48,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "recoverButton": MessageLookupByLibrary.simpleMessage("استرداد"),
         "recoverySuccessful":
             MessageLookupByLibrary.simpleMessage("نجح الاسترداد!"),
-        "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
-            "Images will be shown here once processing is complete"),
-        "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
-            "People will be shown here once processing is complete"),
-        "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
-            "People will be shown here once processing is complete"),
         "sorry": MessageLookupByLibrary.simpleMessage("المعذرة"),
         "terminate": MessageLookupByLibrary.simpleMessage("إنهاء"),
         "terminateSession":

@@ -26,16 +26,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Jaký je váš hlavní důvod, proč mažete svůj účet?"),
         "checkInboxAndSpamFolder": MessageLookupByLibrary.simpleMessage(
             "Zkontrolujte prosím svou doručenou poštu (a spam) pro dokončení ověření"),
-        "checkingModels":
-            MessageLookupByLibrary.simpleMessage("Checking models..."),
-        "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
-            "Enable machine learning for magic search and face recognition"),
-        "incorrectRecoveryKeyBody": MessageLookupByLibrary.simpleMessage(""),
-        "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
-            "Images will be shown here once processing is complete"),
-        "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
-            "People will be shown here once processing is complete"),
-        "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
-            "People will be shown here once processing is complete")
+        "incorrectRecoveryKeyBody": MessageLookupByLibrary.simpleMessage("")
       };
 }
