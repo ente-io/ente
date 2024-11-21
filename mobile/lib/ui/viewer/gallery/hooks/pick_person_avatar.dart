@@ -18,7 +18,7 @@ import "package:photos/ui/components/title_bar_title_widget.dart";
 import "package:photos/ui/viewer/gallery/gallery.dart";
 import "package:photos/ui/viewer/gallery/state/gallery_files_inherited_widget.dart";
 
-Future<dynamic?> showPersonAvatarPhotoSheet(
+Future<dynamic> showPersonAvatarPhotoSheet(
   BuildContext context,
   PersonEntity person,
 ) async {
