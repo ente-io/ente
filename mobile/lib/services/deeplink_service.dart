@@ -27,8 +27,8 @@ class DeeplinkService {
       final choice = await showChoiceActionSheet(
         isDismissible: false,
         context,
-        title: "",
-        body: "Allow app to open album links",
+        title: "See public album links in app",
+        body: "Allow app to open shared album links",
         firstButtonLabel: "Allow",
       );
       if (choice!.action == ButtonAction.first) {
