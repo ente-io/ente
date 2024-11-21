@@ -2,17 +2,17 @@ import { ensureElectron } from "@/base/electron";
 import log from "@/base/log";
 import type { Electron } from "@/base/types/ipc";
 import { ComlinkWorker } from "@/base/worker/comlink-worker";
+import {
+    readConvertToMP4Done,
+    readConvertToMP4Stream,
+    writeConvertToMP4Stream,
+} from "@/gallery/utils/native-stream";
 import { parseMetadataDate, type ParsedMetadata } from "@/media/file-metadata";
 import {
     toDataOrPathOrZipEntry,
     type DesktopUploadItem,
     type UploadItem,
 } from "@/new/photos/services/upload/types";
-import {
-    readConvertToMP4Done,
-    readConvertToMP4Stream,
-    writeConvertToMP4Stream,
-} from "@/new/photos/utils/native-stream";
 import type { Remote } from "comlink";
 import {
     ffmpegPathPlaceholder,

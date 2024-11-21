@@ -16,7 +16,7 @@ import type { EnteFile, LivePhotoSourceURL, SourceURLs } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import { convertToMP4 } from "./ffmpeg";
-import { renderableImageBlob } from "@/new/photos/utils/file";
+import { renderableImageBlob } from "@/gallery/utils/convert";
 import { CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 

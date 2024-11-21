@@ -6,6 +6,7 @@ import { basename, nameAndExtension } from "@/base/file-name";
 import log from "@/base/log";
 import { CustomErrorMessage } from "@/base/types/ipc";
 import { detectFileTypeInfoFromChunk } from "@/gallery/utils/detect-type";
+import { readStream } from "@/gallery/utils/native-stream";
 import {
     EncryptedMagicMetadata,
     EnteFile,
@@ -34,7 +35,6 @@ import {
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
     UPLOAD_RESULT,
 } from "@/new/photos/services/upload/types";
-import { readStream } from "@/new/photos/utils/native-stream";
 import { mergeUint8Arrays } from "@/utils/array";
 import { ensureInteger, ensureNumber } from "@/utils/ensure";
 import { CustomError, handleUploadError } from "@ente/shared/error";

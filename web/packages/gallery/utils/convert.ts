@@ -2,9 +2,9 @@ import { isDesktop } from "@/base/app";
 import log from "@/base/log";
 import { CustomErrorMessage } from "@/base/types/ipc";
 import { workerBridge } from "@/base/worker/worker-bridge";
-import { detectFileTypeInfo } from "@/gallery/utils/detect-type";
 import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
 import { heicToJPEG } from "@/media/heic-convert";
+import { detectFileTypeInfo } from "./detect-type";
 
 /**
  * This will be set to false if we get an error from the Node.js side of our
