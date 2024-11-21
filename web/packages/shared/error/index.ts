@@ -24,7 +24,6 @@ export function isApiErrorResponse(object: any): object is ApiErrorResponse {
 export const CustomError = {
     ETAG_MISSING: "no header/etag present in response body",
     KEY_MISSING: "encrypted key missing from localStorage",
-    UNSUPPORTED_FILE_FORMAT: "unsupported file format",
     FILE_TOO_LARGE: "file too large",
     SUBSCRIPTION_EXPIRED: "subscription expired",
     STORAGE_QUOTA_EXCEEDED: "storage quota exceeded",
