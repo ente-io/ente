@@ -1,4 +1,3 @@
-import type { UserVerificationResponse } from "@/accounts/types/user";
 import { FormPaper, FormPaperTitle } from "@/base/components/FormPaper";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import log from "@/base/log";
@@ -40,6 +39,7 @@ import { stashedRedirect, unstashRedirect } from "../services/redirect";
 import { configureSRP } from "../services/srp";
 import type { SRPAttributes, SRPSetupAttributes } from "../services/srp-remote";
 import { getSRPAttributes } from "../services/srp-remote";
+import type { UserVerificationResponse } from "../services/user";
 import { putAttributes, sendOtt, verifyOtt } from "../services/user";
 import type { PageProps } from "../types/page";
 

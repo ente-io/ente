@@ -1,9 +1,3 @@
-import VerifyTwoFactor, {
-    type VerifyTwoFactorCallback,
-} from "@/accounts/components/two-factor/VerifyForm";
-import { TwoFactorSetup } from "@/accounts/components/two-factor/setup";
-import { enableTwoFactor, setupTwoFactor } from "@/accounts/services/user";
-import type { TwoFactorSecret } from "@/accounts/types/user";
 import log from "@/base/log";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import LinkButton from "@ente/shared/components/LinkButton";
@@ -14,7 +8,13 @@ import Card from "@mui/material/Card";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { TwoFactorSetup } from "../../components/two-factor/TwoFactorSetup";
+import VerifyTwoFactor, {
+    type VerifyTwoFactorCallback,
+} from "../../components/two-factor/VerifyForm";
 import { appHomeRoute } from "../../services/redirect";
+import type { TwoFactorSecret } from "../../services/user";
+import { enableTwoFactor, setupTwoFactor } from "../../services/user";
 import type { PageProps } from "../../types/page";
 
 export type SetupMode = "qrCode" | "manualCode";

@@ -1,10 +1,3 @@
-import type {
-    RecoveryKey,
-    TwoFactorRecoveryResponse,
-    TwoFactorSecret,
-    TwoFactorVerificationResponse,
-    UserVerificationResponse,
-} from "@/accounts/types/user";
 import { appName } from "@/base/app";
 import type { B64EncryptionResult } from "@/base/crypto/libsodium";
 import { apiURL } from "@/base/origins";
@@ -13,6 +6,48 @@ import HTTPService from "@ente/shared/network/HTTPService";
 import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import type { KeyAttributes } from "@ente/shared/user/types";
 import { HttpStatusCode } from "axios";
+
+export interface UserVerificationResponse {
+    id: number;
+    keyAttributes?: KeyAttributes;
+    encryptedToken?: string;
+    token?: string;
+    twoFactorSessionID: string;
+    passkeySessionID: string;
+    srpM2?: string;
+}
+
+export interface TwoFactorVerificationResponse {
+    id: number;
+    keyAttributes: KeyAttributes;
+    encryptedToken?: string;
+    token?: string;
+}
+
+export interface TwoFactorSecret {
+    secretCode: string;
+    qrCode: string;
+}
+
+export interface TwoFactorRecoveryResponse {
+    encryptedSecret: string;
+    secretDecryptionNonce: string;
+}
+
+export interface UpdatedKey {
+    kekSalt: string;
+    encryptedKey: string;
+    keyDecryptionNonce: string;
+    memLimit: number;
+    opsLimit: number;
+}
+
+export interface RecoveryKey {
+    masterKeyEncryptedWithRecoveryKey: string;
+    masterKeyDecryptionNonce: string;
+    recoveryKeyEncryptedWithMasterKey: string;
+    recoveryKeyDecryptionNonce: string;
+}
 
 export const sendOtt = async (email: string) => {
     return HTTPService.post(await apiURL("/users/ott"), {

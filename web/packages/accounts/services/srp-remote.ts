@@ -3,7 +3,7 @@ import { apiURL } from "@/base/origins";
 import { ApiError, CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
 import { HttpStatusCode } from "axios";
-import type { UpdatedKey, UserVerificationResponse } from "../types/user";
+import type { UpdatedKey, UserVerificationResponse } from "./user";
 
 export interface SRPAttributes {
     srpUserID: string;

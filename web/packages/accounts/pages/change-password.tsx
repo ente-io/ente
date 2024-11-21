@@ -34,8 +34,8 @@ import SetPasswordForm, {
 } from "../components/SetPasswordForm";
 import { PAGES } from "../constants/pages";
 import { appHomeRoute, stashRedirect } from "../services/redirect";
+import type { UpdatedKey } from "../services/user";
 import type { PageProps } from "../types/page";
-import type { UpdatedKey } from "../types/user";
 
 const Page: React.FC<PageProps> = () => {
     const [token, setToken] = useState<string>();
