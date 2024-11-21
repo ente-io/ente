@@ -10026,6 +10026,32 @@ class S {
       args: [],
     );
   }
+
+  /// `{count, plural, =0 {Added 0 viewer} =1 {Added 1 viewer} other {Added {count} viewers}}`
+  String viewersSuccessfullyAdded(int count) {
+    return Intl.plural(
+      count,
+      zero: 'Added 0 viewer',
+      one: 'Added 1 viewer',
+      other: 'Added $count viewers',
+      name: 'viewersSuccessfullyAdded',
+      desc: 'Number of viewers that were successfully added to an album.',
+      args: [count],
+    );
+  }
+
+  /// `{count, plural, =0 {Added 0 collaborator} =1 {Added 1 collaborator} other {Added {count} collaborators}}`
+  String collaboratorsSuccessfullyAdded(int count) {
+    return Intl.plural(
+      count,
+      zero: 'Added 0 collaborator',
+      one: 'Added 1 collaborator',
+      other: 'Added $count collaborators',
+      name: 'collaboratorsSuccessfullyAdded',
+      desc: 'Number of collaborators that were successfully added to an album.',
+      args: [count],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

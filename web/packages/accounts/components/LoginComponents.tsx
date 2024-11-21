@@ -1,3 +1,4 @@
+import { sessionExpiredDialogAttributes } from "@/accounts/components/utils/dialog";
 import {
     checkPasskeyVerificationStatus,
     passkeySessionExpiredErrorMessage,
@@ -101,7 +102,7 @@ export const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
             const response =
                 await checkPasskeyVerificationStatus(passkeySessionID);
             if (!response) setVerificationStatus("pending");
-            else router.push(await saveCredentialsAndNavigateTo(response));
+            else void router.push(await saveCredentialsAndNavigateTo(response));
         } catch (e) {
             log.error("Passkey verification status check failed", e);
             showMiniDialog(
@@ -115,7 +116,7 @@ export const VerifyingPasskey: React.FC<VerifyingPasskeyProps> = ({
     };
 
     const handleRecover = () => {
-        router.push("/passkeys/recover");
+        void router.push("/passkeys/recover");
     };
 
     return (
@@ -192,25 +193,3 @@ const ButtonStack = styled("div")`
     flex-direction: column;
     gap: 1rem;
 `;
-
-/**
- * {@link MiniDialogAttributes} for showing asking the user to login again when
- * their session has expired.
- *
- * There is one button, which allows them to logout.
- *
- * @param onLogin Called when the user presses the "Login" button on the error
- * dialog.
- */
-export const sessionExpiredDialogAttributes = (
-    onLogin: () => void,
-): MiniDialogAttributes => ({
-    title: t("session_expired"),
-    message: t("session_expired_message"),
-    nonClosable: true,
-    continue: {
-        text: t("login"),
-        action: onLogin,
-    },
-    cancel: false,
-});

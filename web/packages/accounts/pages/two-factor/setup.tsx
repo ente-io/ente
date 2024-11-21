@@ -17,10 +17,7 @@ import { useEffect, useState } from "react";
 import { appHomeRoute } from "../../services/redirect";
 import type { PageProps } from "../../types/page";
 
-export enum SetupMode {
-    QR_CODE,
-    MANUAL_CODE,
-}
+export type SetupMode = "qrCode" | "manualCode";
 
 const Page: React.FC<PageProps> = () => {
     const [twoFactorSecret, setTwoFactorSecret] = useState<
@@ -41,7 +38,7 @@ const Page: React.FC<PageProps> = () => {
                 log.error("failed to get two factor setup code", e);
             }
         };
-        main();
+        void main();
     }, []);
 
     const onSubmit: VerifyTwoFactorCallback = async (
@@ -52,12 +49,12 @@ const Page: React.FC<PageProps> = () => {
             twoFactorSecret!.secretCode,
         );
         await enableTwoFactor(otp, recoveryEncryptedTwoFactorSecret);
-        await markSuccessful();
+        markSuccessful();
         await setLSUser({
             ...getData(LS_KEYS.USER),
             isTwoFactorEnabled: true,
         });
-        router.push(appHomeRoute);
+        void router.push(appHomeRoute);
     };
 
     return (

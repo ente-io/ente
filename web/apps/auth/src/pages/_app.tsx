@@ -1,5 +1,4 @@
 import { accountLogout } from "@/accounts/services/logout";
-import type { AccountsContextT } from "@/accounts/types/context";
 import { clientPackageName, staticAppTitle } from "@/base/app";
 import { CustomHead } from "@/base/components/Head";
 import { AttributedMiniDialog } from "@/base/components/MiniDialog";
@@ -28,29 +27,10 @@ import { ThemeProvider } from "@mui/material/styles";
 import { t } from "i18next";
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
-import React, {
-    createContext,
-    useCallback,
-    useContext,
-    useEffect,
-    useState,
-} from "react";
+import React, { useCallback, useEffect, useState } from "react";
+import { AppContext } from "types/context";
 
 import "../../public/css/global.css";
-
-/**
- * Properties available via {@link AppContext} to the Auth app's React tree.
- */
-type AppContextT = AccountsContextT & {
-    themeColor: THEME_COLOR;
-    setThemeColor: (themeColor: THEME_COLOR) => void;
-};
-
-/** The React {@link Context} available to all pages. */
-export const AppContext = createContext<AppContextT | undefined>(undefined);
-
-/** Utility hook to reduce amount of boilerplate in account related pages. */
-export const useAppContext = () => useContext(AppContext)!;
 
 const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     const router = useRouter();
@@ -70,7 +50,7 @@ const App: React.FC<AppProps> = ({ Component, pageProps }) => {
     useEffect(() => {
         void setupI18n().finally(() => setIsI18nReady(true));
         const user = getData(LS_KEYS.USER) as User | undefined | null;
-        migrateKVToken(user);
+        void migrateKVToken(user);
         logStartupBanner(user?.id);
         HTTPService.setHeaders({ "X-Client-Package": clientPackageName });
         logUnhandledErrorsAndRejections(true);

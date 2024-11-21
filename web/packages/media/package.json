@@ -9,6 +9,7 @@
         "jszip": "^3.10.1"
     },
     "devDependencies": {
+        "@/build-config": "*",
         "@types/heic-convert": "^2.1.0"
     }
 }

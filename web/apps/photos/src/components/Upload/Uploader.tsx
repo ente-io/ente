@@ -1,5 +1,6 @@
+import { isDesktop } from "@/base/app";
 import { useModalVisibility } from "@/base/components/utils/modal";
-import { basename } from "@/base/file";
+import { basename } from "@/base/file-name";
 import log from "@/base/log";
 import type { CollectionMapping, Electron, ZipItem } from "@/base/types/ipc";
 import type { Collection } from "@/media/collection";
@@ -22,7 +23,6 @@ import { CustomError } from "@ente/shared/error";
 import DiscFullIcon from "@mui/icons-material/DiscFull";
 import InfoOutlined from "@mui/icons-material/InfoRounded";
 import { t } from "i18next";
-import isElectron from "is-electron";
 import { GalleryContext } from "pages/gallery";
 import { useContext, useEffect, useRef, useState } from "react";
 import { Trans } from "react-i18next";
@@ -263,7 +263,7 @@ export default function Uploader({
             };
 
             const requestSyncWithRemote = () => {
-                props.syncWithRemote().catch((e) => {
+                props.syncWithRemote().catch((e: unknown) => {
                     log.error(
                         "Ignoring error when syncing trash changes with remote",
                         e,
@@ -611,7 +611,7 @@ export default function Uploader({
                 uploaderName,
             );
             if (!wereFilesProcessed) closeUploadProgress();
-            if (isElectron()) {
+            if (isDesktop) {
                 if (watcher.isUploadRunning()) {
                     await watcher.allFileUploadsDone(
                         uploadItemsWithCollection,
@@ -653,7 +653,8 @@ export default function Uploader({
         let notification: NotificationAttributes;
         switch (err) {
             case CustomError.SESSION_EXPIRED:
-                return props.showSessionExpiredMessage();
+                props.showSessionExpiredMessage();
+                return;
             case CustomError.SUBSCRIPTION_EXPIRED:
                 notification = {
                     variant: "critical",
@@ -877,7 +878,7 @@ function getImportSuggestion(
     uploadType: PICKED_UPLOAD_TYPE,
     paths: string[],
 ): ImportSuggestion {
-    if (isElectron() && uploadType === PICKED_UPLOAD_TYPE.FILES) {
+    if (isDesktop && uploadType === PICKED_UPLOAD_TYPE.FILES) {
         return DEFAULT_IMPORT_SUGGESTION;
     }
 

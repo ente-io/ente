@@ -142,7 +142,7 @@ export const isPasskeyRecoveryEnabled = async () => {
             throw Error("request failed");
         }
 
-        return resp.data["isPasskeyRecoveryEnabled"] as boolean;
+        return resp.data.isPasskeyRecoveryEnabled as boolean;
     } catch (e) {
         log.error("failed to get passkey recovery status", e);
         throw e;
@@ -194,7 +194,7 @@ const getAccountsToken = async () => {
             "X-Auth-Token": token,
         },
     );
-    return resp.data["accountsToken"];
+    return resp.data.accountsToken;
 };
 
 /**

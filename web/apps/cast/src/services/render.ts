@@ -6,7 +6,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
 import { sharedCryptoWorker } from "@/base/crypto";
-import { nameAndExtension } from "@/base/file";
+import { nameAndExtension } from "@/base/file-name";
 import log from "@/base/log";
 import { apiURL, customAPIOrigin } from "@/base/origins";
 import type {
@@ -343,13 +343,13 @@ const downloadFile = async (
         );
 
     const cryptoWorker = await sharedCryptoWorker();
-    const decrypted = await cryptoWorker.decryptFile(
-        new Uint8Array(await res.arrayBuffer()),
-        await cryptoWorker.fromB64(
-            shouldUseThumbnail
+    const decrypted = await cryptoWorker.decryptStreamBytes(
+        {
+            encryptedData: new Uint8Array(await res.arrayBuffer()),
+            decryptionHeader: shouldUseThumbnail
                 ? file.thumbnail.decryptionHeader
                 : file.file.decryptionHeader,
-        ),
+        },
         file.key,
     );
     return new Response(decrypted).blob();

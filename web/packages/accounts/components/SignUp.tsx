@@ -109,7 +109,7 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
                     masterKey,
                 );
                 setJustSignedUp(true);
-                router.push(PAGES.VERIFY);
+                void router.push(PAGES.VERIFY);
             } catch (e) {
                 setFieldError("confirm", t("PASSWORD_GENERATION_FAILED"));
                 throw e;
@@ -146,7 +146,7 @@ export const SignUp: React.FC<SignUpProps> = ({ router, login, host }) => {
                     errors,
                     handleChange,
                     handleSubmit,
-                }): JSX.Element => (
+                }): React.JSX.Element => (
                     <form noValidate onSubmit={handleSubmit}>
                         <VerticallyCentered sx={{ mb: 1 }}>
                             <TextField

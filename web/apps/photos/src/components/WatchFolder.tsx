@@ -4,7 +4,7 @@ import {
     type ModalVisibilityProps,
 } from "@/base/components/utils/modal";
 import { ensureElectron } from "@/base/electron";
-import { basename, dirname } from "@/base/file";
+import { basename, dirname } from "@/base/file-name";
 import type { CollectionMapping, FolderWatch } from "@/base/types/ipc";
 import { CollectionMappingChoiceDialog } from "@/new/photos/components/CollectionMappingChoiceDialog";
 import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";
@@ -74,6 +74,7 @@ export const WatchFolder: React.FC<ModalVisibilityProps> = ({
     }, [appContext.watchFolderFiles]);
 
     const handleFolderDrop = async (folders: FileList) => {
+        // eslint-disable-next-line @typescript-eslint/prefer-for-of
         for (let i = 0; i < folders.length; i++) {
             const folder: any = folders[i];
             const path = (folder.path as string).replace(/\\/g, "/");

@@ -2,9 +2,9 @@ import { isDesktop } from "@/base/app";
 import log from "@/base/log";
 import { CustomErrorMessage } from "@/base/types/ipc";
 import { workerBridge } from "@/base/worker/worker-bridge";
-import { needsJPEGConversion } from "@/media/formats";
+import { detectFileTypeInfo } from "@/gallery/utils/detect-type";
+import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
 import { heicToJPEG } from "@/media/heic-convert";
-import { detectFileTypeInfo } from "./detect-type";
 
 /**
  * This will be set to false if we get an error from the Node.js side of our
@@ -80,7 +80,7 @@ export const renderableImageBlob = async (
             // available on this platform, for HEIC/HEIF files we can fallback
             // to our web HEIC converter.
 
-            if (extension == "heic" || extension == "heif") {
+            if (isHEICExtension(extension)) {
                 return await heicToJPEG(imageBlob);
             }
         }

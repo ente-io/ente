@@ -3,10 +3,15 @@
 
 import { isDesktop } from "@/base/app";
 import { blobCache, type BlobCache } from "@/base/blob-cache";
-import { sharedCryptoWorker } from "@/base/crypto";
-import { type CryptoWorker } from "@/base/crypto/worker";
+import {
+    decryptStreamBytes,
+    decryptStreamChunk,
+    decryptThumbnail,
+    initChunkDecryption,
+} from "@/base/crypto";
 import log from "@/base/log";
 import { customAPIOrigin } from "@/base/origins";
+import { retryAsyncOperation } from "@/gallery/utils/retry-async";
 import type { EnteFile, LivePhotoSourceURL, SourceURLs } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
@@ -14,7 +19,6 @@ import * as ffmpeg from "@/new/photos/services/ffmpeg";
 import { renderableImageBlob } from "@/new/photos/utils/file";
 import { CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { retryAsyncFunction } from "@ente/shared/utils";
 
 export type OnDownloadProgress = (event: {
     loaded: number;
@@ -45,7 +49,6 @@ class DownloadManagerImpl {
      * Only available when we're running in the desktop app.
      */
     private fileCache?: BlobCache;
-    private cryptoWorker: CryptoWorker | undefined;
 
     private fileObjectURLPromises = new Map<number, Promise<SourceURLs>>();
     private fileConversionPromises = new Map<number, Promise<SourceURLs>>();
@@ -78,7 +81,7 @@ class DownloadManagerImpl {
         // } catch (e) {
         //     log.error("Failed to open file cache, will continue without it", e);
         // }
-        this.cryptoWorker = await sharedCryptoWorker();
+
         this.ready = true;
     }
 
@@ -88,15 +91,11 @@ class DownloadManagerImpl {
                 "Attempting to use an uninitialized download manager",
             );
 
-        return {
-            downloadClient: this.downloadClient!,
-            cryptoWorker: this.cryptoWorker!,
-        };
+        return { downloadClient: this.downloadClient! };
     }
 
     logout() {
         this.ready = false;
-        this.cryptoWorker = undefined;
         this.downloadClient = undefined;
         this.fileObjectURLPromises.clear();
         this.fileConversionPromises.clear();
@@ -115,14 +114,11 @@ class DownloadManagerImpl {
     }
 
     private downloadThumb = async (file: EnteFile) => {
-        const { downloadClient, cryptoWorker } = this.ensureInitialized();
+        const { downloadClient } = this.ensureInitialized();
 
         const encryptedData = await downloadClient.downloadThumbnail(file);
         const decryptionHeader = file.thumbnail.decryptionHeader;
-        return cryptoWorker.decryptThumbnail(
-            { encryptedData, decryptionHeader },
-            file.key,
-        );
+        return decryptThumbnail({ encryptedData, decryptionHeader }, file.key);
     };
 
     async getThumbnail(file: EnteFile, localOnly = false) {
@@ -270,7 +266,7 @@ class DownloadManagerImpl {
     private async downloadFile(
         file: EnteFile,
     ): Promise<ReadableStream<Uint8Array> | null> {
-        const { downloadClient, cryptoWorker } = this.ensureInitialized();
+        const { downloadClient } = this.ensureInitialized();
 
         log.info(`download attempted for file id ${file.id}`);
 
@@ -300,25 +296,15 @@ class DownloadManagerImpl {
                 );
             }
             this.clearDownloadProgress(file.id);
-            try {
-                const decrypted = await cryptoWorker.decryptFile(
-                    new Uint8Array(encryptedArrayBuffer),
-                    await cryptoWorker.fromB64(file.file.decryptionHeader),
-                    file.key,
-                );
-                return new Response(decrypted).body;
-            } catch (e) {
-                if (
-                    e instanceof Error &&
-                    e.message == CustomError.PROCESSING_FAILED
-                ) {
-                    log.error(
-                        `Failed to process file with fileID:${file.id}, localID: ${file.metadata.localID}, version: ${file.metadata.version}, deviceFolder:${file.metadata.deviceFolder}`,
-                        e,
-                    );
-                }
-                throw e;
-            }
+
+            const decrypted = await decryptStreamBytes(
+                {
+                    encryptedData: new Uint8Array(encryptedArrayBuffer),
+                    decryptionHeader: file.file.decryptionHeader,
+                },
+                file.key,
+            );
+            return new Response(decrypted).body;
         }
 
         const cachedBlob = await this.fileCache?.get(cacheKey);
@@ -341,12 +327,10 @@ class DownloadManagerImpl {
             parseInt(res.headers.get("Content-Length") ?? "") || 0;
         let downloadedBytes = 0;
 
-        const decryptionHeader = await cryptoWorker.fromB64(
+        const { pullState, decryptionChunkSize } = await initChunkDecryption(
             file.file.decryptionHeader,
+            file.key,
         );
-        const fileKey = await cryptoWorker.fromB64(file.key);
-        const { pullState, decryptionChunkSize } =
-            await cryptoWorker.initChunkDecryption(decryptionHeader, fileKey);
 
         let leftoverBytes = new Uint8Array();
 
@@ -379,11 +363,10 @@ class DownloadManagerImpl {
                     // data.length might be a multiple of decryptionChunkSize,
                     // and we might need multiple iterations to drain it all.
                     while (data.length >= decryptionChunkSize) {
-                        const { decryptedData } =
-                            await cryptoWorker.decryptFileChunk(
-                                data.slice(0, decryptionChunkSize),
-                                pullState,
-                            );
+                        const decryptedData = await decryptStreamChunk(
+                            data.slice(0, decryptionChunkSize),
+                            pullState,
+                        );
                         controller.enqueue(decryptedData);
                         didEnqueue = true;
                         data = data.slice(decryptionChunkSize);
@@ -393,11 +376,10 @@ class DownloadManagerImpl {
                         // Send off the remaining bytes without waiting for a
                         // full chunk, no more bytes are going to come.
                         if (data.length) {
-                            const { decryptedData } =
-                                await cryptoWorker.decryptFileChunk(
-                                    data,
-                                    pullState,
-                                );
+                            const decryptedData = await decryptStreamChunk(
+                                data,
+                                pullState,
+                            );
                             controller.enqueue(decryptedData);
                         }
                         // Don't loop again even if we didn't enqueue.
@@ -527,7 +509,7 @@ async function getRenderableLivePhotoURL(
             return URL.createObjectURL(
                 await renderableImageBlob(livePhoto.imageFileName, imageBlob),
             );
-        } catch (e) {
+        } catch {
             //ignore and return null
             return undefined;
         }
@@ -543,7 +525,7 @@ async function getRenderableLivePhotoURL(
             );
             if (!convertedVideoBlob) return undefined;
             return URL.createObjectURL(convertedVideoBlob);
-        } catch (e) {
+        } catch {
             //ignore and return null
             return undefined;
         }
@@ -656,7 +638,7 @@ class PhotosDownloadClient implements DownloadClient {
             }
         };
 
-        const resp = await retryAsyncFunction(getThumbnail);
+        const resp = await retryAsyncOperation(getThumbnail);
         if (resp.data === undefined) throw Error("request failed");
         // TODO: Remove this cast (it won't be needed when we migrate this from
         // axios to fetch).
@@ -698,7 +680,7 @@ class PhotosDownloadClient implements DownloadClient {
             }
         };
 
-        const resp = await retryAsyncFunction(getFile);
+        const resp = await retryAsyncOperation(getFile);
         if (resp.data === undefined) throw Error("request failed");
         // TODO: Remove this cast (it won't be needed when we migrate this from
         // axios to fetch).
@@ -762,7 +744,7 @@ class PhotosDownloadClient implements DownloadClient {
             }
         };
 
-        return retryAsyncFunction(getFile);
+        return retryAsyncOperation(getFile);
     }
 }
 
@@ -866,7 +848,7 @@ class PublicAlbumsDownloadClient implements DownloadClient {
             }
         };
 
-        const resp = await retryAsyncFunction(getFile);
+        const resp = await retryAsyncOperation(getFile);
         if (resp.data === undefined) throw Error("request failed");
         // TODO: Remove this cast (it won't be needed when we migrate this from
         // axios to fetch).
@@ -905,6 +887,6 @@ class PublicAlbumsDownloadClient implements DownloadClient {
             }
         };
 
-        return retryAsyncFunction(getFile);
+        return retryAsyncOperation(getFile);
     }
 }

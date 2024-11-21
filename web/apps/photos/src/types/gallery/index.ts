@@ -3,7 +3,7 @@ import type { User } from "@ente/shared/user/types";
 import { FilesDownloadProgressAttributes } from "components/FilesDownloadProgress";
 import { TimeStampListItem } from "components/PhotoList";
 
-export type SelectedState = {
+export interface SelectedState {
     [k: number]: boolean;
     ownCount: number;
     count: number;
@@ -14,7 +14,7 @@ export type SelectedState = {
      * {@link collectionID} logic).
      */
     context: SelectionContext | undefined;
-};
+}
 export type SetSelectedState = React.Dispatch<
     React.SetStateAction<SelectedState>
 >;
@@ -33,12 +33,12 @@ export type SetFilesDownloadProgressAttributesCreator = (
     isHidden?: boolean,
 ) => SetFilesDownloadProgressAttributes;
 
-export type MergedSourceURL = {
+export interface MergedSourceURL {
     original: string;
     converted: string;
-};
+}
 
-export type GalleryContextType = {
+export interface GalleryContextType {
     showPlanSelectorModal: () => void;
     setActiveCollectionID: (collectionID: number) => void;
     /** Newer and almost equivalent alternative to setActiveCollectionID. */
@@ -55,4 +55,4 @@ export type GalleryContextType = {
     isClipSearchResult: boolean;
     setSelectedFiles: (value) => void;
     selectedFile: SelectedState;
-};
+}

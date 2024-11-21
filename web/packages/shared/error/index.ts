@@ -42,7 +42,6 @@ export const CustomError = {
     EXPORT_STOPPED: "export stopped",
     EXPORT_FOLDER_DOES_NOT_EXIST: "export folder does not exist",
     AUTH_KEY_NOT_FOUND: "auth key not found",
-    PROCESSING_FAILED: "processing failed",
     TWO_FACTOR_ENABLED: "two factor enabled",
 };
 

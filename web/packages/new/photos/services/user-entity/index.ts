@@ -2,7 +2,7 @@ import {
     decryptBoxB64,
     encryptBlobB64,
     encryptBoxB64,
-    generateNewBlobOrStreamKey,
+    generateBlobOrStreamKey,
 } from "@/base/crypto";
 import { nullishToEmpty, nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
@@ -134,7 +134,6 @@ export const pullUserEntities = async (
     const entityKeyB64 = await getOrCreateEntityKeyB64(type, masterKey);
 
     let sinceTime = (await savedLatestUpdatedAt(type)) ?? 0;
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, no-constant-condition
     while (true) {
         const diff = await userEntityDiff(type, sinceTime, entityKeyB64);
         if (diff.length == 0) break;
@@ -259,16 +258,16 @@ const getOrCreateEntityKeyB64 = async (
     // As a sanity check, genarate the key but immediately encrypt it as if it
     // were fetched from remote and then try to decrypt it before doing anything
     // with it.
-    const generated = await generateNewEncryptedEntityKey(masterKey);
+    const generated = await generateEncryptedEntityKey(masterKey);
     const result = decryptEntityKey(generated, masterKey);
     await postUserEntityKey(type, generated);
     await saveRemoteUserEntityKey(type, generated);
     return result;
 };
 
-const generateNewEncryptedEntityKey = async (masterKey: Uint8Array) => {
+const generateEncryptedEntityKey = async (masterKey: Uint8Array) => {
     const { encryptedData, nonce } = await encryptBoxB64(
-        await generateNewBlobOrStreamKey(),
+        await generateBlobOrStreamKey(),
         masterKey,
     );
     // Remote calls it the header, but it really is the nonce.
