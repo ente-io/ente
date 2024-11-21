@@ -1187,7 +1187,7 @@
   "addOns": "Componenti aggiuntivi",
   "addOnPageSubtitle": "Dettagli dei componenti aggiuntivi",
   "yourMap": "La tua mappa",
-  "modifyYourQueryOrTrySearchingFor": "Modifica la tua interrogazione o prova a cercare",
+  "modifyYourQueryOrTrySearchingFor": "Modifica la tua ricerca o prova con",
   "blackFridaySale": "Offerta del Black Friday",
   "upto50OffUntil4thDec": "Sconto del 50%, fino al 4 dicembre.",
   "photos": "Foto",
@@ -1360,8 +1360,5 @@
   "allPersonGroupingWillReset": "Tutti i raggruppamenti per questa persona saranno resettati e perderai tutti i suggerimenti fatti per questa persona",
   "yesResetPerson": "Sì, resetta persona",
   "onlyThem": "Solo loro",
-  "checkingModels": "Checking models...",
-  "enableMachineLearningBanner": "Enable machine learning for magic search and face recognition",
-  "searchDiscoverEmptySection": "Images will be shown here once processing is complete",
-  "searchPersonsEmptySection": "People will be shown here once processing is complete"
+  "checkingModels": "Verifica dei modelli..."
 }

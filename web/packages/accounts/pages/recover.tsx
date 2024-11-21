@@ -1,5 +1,5 @@
-import { sendOtt } from "@/accounts/api/user";
 import { PAGES } from "@/accounts/constants/pages";
+import { sendOtt } from "@/accounts/services/user";
 import {
     FormPaper,
     FormPaperFooter,
@@ -7,7 +7,6 @@ import {
 } from "@/base/components/FormPaper";
 import { sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
-import { ensure } from "@/utils/ensure";
 import { VerticallyCentered } from "@ente/shared/components/Container";
 import LinkButton from "@ente/shared/components/LinkButton";
 import SingleInputForm, {
@@ -26,6 +25,7 @@ import { useEffect, useState } from "react";
 import { appHomeRoute, stashRedirect } from "../services/redirect";
 import type { PageProps } from "../types/page";
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const bip39 = require("bip39");
 // mobile client library only supports english.
 bip39.setDefaultWordlist("english");
@@ -44,19 +44,19 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
         const keyAttributes: KeyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         if (!user?.email) {
-            router.push("/");
+            void router.push("/");
             return;
         }
         if (!user?.encryptedToken && !user?.token) {
-            sendOtt(user.email);
+            void sendOtt(user.email);
             stashRedirect(PAGES.RECOVER);
-            router.push(PAGES.VERIFY);
+            void router.push(PAGES.VERIFY);
             return;
         }
         if (!keyAttributes) {
-            router.push(PAGES.GENERATE);
+            void router.push(PAGES.GENERATE);
         } else if (key) {
-            router.push(appHomeRoute);
+            void router.push(appHomeRoute);
         } else {
             setKeyAttributes(keyAttributes);
         }
@@ -82,7 +82,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
                 recoveryKey = bip39.mnemonicToEntropy(recoveryKey);
             }
             const cryptoWorker = await sharedCryptoWorker();
-            const keyAttr = ensure(keyAttributes);
+            const keyAttr = keyAttributes!;
             const masterKey = await cryptoWorker.decryptB64(
                 keyAttr.masterKeyEncryptedWithRecoveryKey,
                 keyAttr.masterKeyDecryptionNonce,
@@ -92,7 +92,7 @@ const Page: React.FC<PageProps> = ({ appContext }) => {
             await decryptAndStoreToken(keyAttr, masterKey);
 
             setData(LS_KEYS.SHOW_BACK_BUTTON, { value: false });
-            router.push(PAGES.CHANGE_PASSWORD);
+            void router.push(PAGES.CHANGE_PASSWORD);
         } catch (e) {
             log.error("password recovery failed", e);
             setFieldError(t("INCORRECT_RECOVERY_KEY"));

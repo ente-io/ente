@@ -1,4 +1,4 @@
-import { putAttributes } from "@/accounts/api/user";
+import { putAttributes } from "@/accounts/services/user";
 import log from "@/base/log";
 import { apiURL } from "@/base/origins";
 import type { UserDetails } from "@/new/photos/services/user-details";
@@ -36,7 +36,7 @@ export const isTokenValid = async (token: string) => {
             if (resp.data[HAS_SET_KEYS] === undefined) {
                 throw Error("resp.data.hasSetKey undefined");
             }
-            if (!resp.data["hasSetKeys"]) {
+            if (!resp.data.hasSetKeys) {
                 try {
                     await putAttributes(
                         token,

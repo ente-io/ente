@@ -1,6 +1,6 @@
 import log from "@/base/log";
-import { ensure } from "@/utils/ensure";
 import QueueProcessor from "@ente/shared/utils/queueProcessor";
+import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { expose } from "comlink";
 import {
     ffmpegPathPlaceholder,
@@ -25,17 +25,13 @@ import {
 //
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment, @typescript-eslint/prefer-ts-expect-error
 // @ts-ignore
-import { createFFmpeg, type FFmpeg } from "ffmpeg-wasm";
 
 export class DedicatedFFmpegWorker {
     private ffmpeg: FFmpeg;
     private ffmpegTaskQueue = new QueueProcessor<Uint8Array>();
 
     constructor() {
-        this.ffmpeg = createFFmpeg({
-            corePath: "/js/ffmpeg/ffmpeg-core.js",
-            mt: false,
-        });
+        this.ffmpeg = new FFmpeg();
     }
 
     /**
@@ -49,7 +45,12 @@ export class DedicatedFFmpegWorker {
         blob: Blob,
         outputFileExtension: string,
     ): Promise<Uint8Array> {
-        if (!this.ffmpeg.isLoaded()) await this.ffmpeg.load();
+        if (!this.ffmpeg.loaded) {
+            // This loads @ffmpeg/core from its CDN:
+            // https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.js
+            // https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.wasm
+            await this.ffmpeg.load();
+        }
 
         const request = this.ffmpegTaskQueue.queueUpRequest(() =>
             ffmpegExec(this.ffmpeg, command, outputFileExtension, blob),
@@ -78,22 +79,23 @@ const ffmpegExec = async (
     try {
         const startTime = Date.now();
 
-        ffmpeg.FS("writeFile", inputPath, inputData);
-        await ffmpeg.run(...cmd);
+        await ffmpeg.writeFile(inputPath, inputData);
+        await ffmpeg.exec(cmd);
 
-        const result = ffmpeg.FS("readFile", outputPath);
+        const result = await ffmpeg.readFile(outputPath);
+        if (typeof result == "string") throw new Error("Expected binary data");
 
         const ms = Date.now() - startTime;
         log.debug(() => `[wasm] ffmpeg ${cmd.join(" ")} (${ms} ms)`);
         return result;
     } finally {
         try {
-            ffmpeg.FS("unlink", inputPath);
+            ffmpeg.deleteFile(inputPath);
         } catch (e) {
             log.error(`Failed to remove input ${inputPath}`, e);
         }
         try {
-            ffmpeg.FS("unlink", outputPath);
+            ffmpeg.deleteFile(outputPath);
         } catch (e) {
             log.error(`Failed to remove output ${outputPath}`, e);
         }
@@ -107,7 +109,7 @@ const randomPrefix = () => {
 
     let result = "";
     for (let i = 0; i < 10; i++)
-        result += ensure(alphabet[Math.floor(Math.random() * alphabet.length)]);
+        result += alphabet[Math.floor(Math.random() * alphabet.length)]!;
     return result;
 };
 

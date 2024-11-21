@@ -9,7 +9,7 @@ import {
     makeTempFilePath,
 } from "../utils/temp";
 
-/* Duplicated in the web app's code (used by the WASM FFmpeg implementation). */
+/* Ditto in the web app's code (used by the WASM FFmpeg invocation). */
 const ffmpegPathPlaceholder = "FFMPEG";
 const inputPathPlaceholder = "INPUT";
 const outputPathPlaceholder = "OUTPUT";

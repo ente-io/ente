@@ -8,7 +8,6 @@ import { isDevBuild } from "@/base/env";
 import { clientPackageHeader, ensureOk, HTTPError } from "@/base/http";
 import { apiURL } from "@/base/origins";
 import { TwoFactorAuthorizationResponse } from "@/base/types/credentials";
-import { ensure } from "@/utils/ensure";
 import { nullToUndefined } from "@/utils/transform";
 import { z } from "zod";
 
@@ -116,7 +115,7 @@ export const registerPasskey = async (token: string, name: string) => {
     const { sessionID, options } = await beginPasskeyRegistration(token);
 
     // Ask the browser to new (public key) credentials using these options.
-    const credential = ensure(await navigator.credentials.create(options));
+    const credential = (await navigator.credentials.create(options))!;
 
     // Finish by letting the backend know about these credentials so that it can
     // save the public key for future authentication.

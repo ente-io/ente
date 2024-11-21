@@ -29,10 +29,10 @@ import { syncTrash } from "services/trashService";
 import { SelectedState } from "types/gallery";
 import { getSelectedFiles } from "utils/file";
 
-export type DeduplicateContextType = {
+export interface DeduplicateContextType {
     isOnDeduplicatePage: boolean;
     collectionNameMap: Map<number, string>;
-};
+}
 
 export const DeduplicateContext = createContext<DeduplicateContextType>({
     isOnDeduplicatePage: false,

@@ -1,4 +1,4 @@
-import { setRecoveryKey } from "@/accounts/api/user";
+import { setRecoveryKey } from "@/accounts/services/user";
 import { sharedCryptoWorker } from "@/base/crypto";
 import log from "@/base/log";
 import {

@@ -2,12 +2,11 @@ import { type MiniDialogAttributes } from "@/base/components/MiniDialog";
 import { SpaceBetweenFlex } from "@/base/components/mui/Container";
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
 import { errorDialogAttributes } from "@/base/components/utils/dialog";
+import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import type { ModalVisibilityProps } from "@/base/components/utils/modal";
-import { useIsSmallWidth } from "@/base/hooks";
 import log from "@/base/log";
 import { downloadString } from "@/base/utils/web";
 import { DialogCloseIconButton } from "@/new/photos/components/mui/Dialog";
-import { ensure } from "@/utils/ensure";
 import CodeBlock from "@ente/shared/components/CodeBlock";
 import { getRecoveryKey } from "@ente/shared/crypto/helpers";
 import {
@@ -58,7 +57,7 @@ export const RecoveryKey: React.FC<RecoveryKeyProps> = ({
     }, [open, handleLoadError]);
 
     const handleSaveClick = () => {
-        downloadRecoveryKeyMnemonic(ensure(recoveryKey));
+        downloadRecoveryKeyMnemonic(recoveryKey!);
         onClose();
     };
 

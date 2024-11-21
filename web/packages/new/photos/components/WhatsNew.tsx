@@ -1,6 +1,6 @@
 import { FocusVisibleButton } from "@/base/components/mui/FocusVisibleButton";
+import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { ensureElectron } from "@/base/electron";
-import { useIsSmallWidth } from "@/base/hooks";
 import { ut } from "@/base/i18n";
 import ArrowForward from "@mui/icons-material/ArrowForward";
 import {

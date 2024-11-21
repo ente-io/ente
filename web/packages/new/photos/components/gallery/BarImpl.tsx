@@ -1,5 +1,5 @@
 import { Overlay } from "@/base/components/mui/Container";
-import { useIsSmallWidth } from "@/base/hooks";
+import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { CollectionsSortOptions } from "@/new/photos/components/CollectionsSortOptions";
 import { FilledIconButton } from "@/new/photos/components/mui";
 import {
@@ -18,7 +18,6 @@ import type {
     CollectionsSortBy,
 } from "@/new/photos/services/collection/ui";
 import type { Person } from "@/new/photos/services/ml/people";
-import { ensure } from "@/utils/ensure";
 import ArchiveIcon from "@mui/icons-material/Archive";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import Favorite from "@mui/icons-material/FavoriteRounded";
@@ -42,13 +41,10 @@ import {
     type ListChildComponentProps,
     areEqual,
 } from "react-window";
+import { isMLSupported } from "../../services/ml";
 import type { GalleryBarMode } from "./reducer";
 
 export interface GalleryBarImplProps {
-    /**
-     * When `true`, the bar shows a button to switch to the people section.
-     */
-    showPeopleSectionButton: boolean;
     /**
      * What are we displaying currently.
      */
@@ -101,7 +97,6 @@ export interface GalleryBarImplProps {
 }
 
 export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
-    showPeopleSectionButton,
     mode,
     onChangeMode,
     collectionSummaries,
@@ -201,7 +196,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
                 ? {
                       type: "collections",
                       collectionSummaries,
-                      activeCollectionID: ensure(activeCollectionID),
+                      activeCollectionID: activeCollectionID!,
                       onSelectCollectionID,
                   }
                 : {
@@ -256,9 +251,7 @@ export const GalleryBarImpl: React.FC<GalleryBarImplProps> = ({
             sx={people.length ? {} : { borderBlockEndColor: "transparent" }}
         >
             <Row1>
-                <ModeIndicator
-                    {...{ showPeopleSectionButton, mode, onChangeMode }}
-                />
+                <ModeIndicator {...{ mode, onChangeMode }} />
                 {controls1}
             </Row1>
             <Row2>
@@ -315,20 +308,17 @@ export const Row2 = styled(Box)`
 `;
 
 const ModeIndicator: React.FC<
-    Pick<
-        GalleryBarImplProps,
-        "showPeopleSectionButton" | "mode" | "onChangeMode"
-    >
-> = ({ showPeopleSectionButton, mode, onChangeMode }) => {
+    Pick<GalleryBarImplProps, "mode" | "onChangeMode">
+> = ({ mode, onChangeMode }) => {
     // Mode switcher is not shown in the hidden albums section.
     if (mode == "hidden-albums") {
         return <Typography>{t("hidden_albums")}</Typography>;
     }
 
-    // Show the static mode indicator with only the "Albums" title if we have
-    // not been asked to show the people button (there are no other sections to
-    // switch to in such a case).
-    if (!showPeopleSectionButton) {
+    // Show the static mode indicator with only the "Albums" title if ML is not
+    // supported on this client (web), since there are no other sections to
+    // switch to in such a case.
+    if (!isMLSupported) {
         return <Typography>{t("albums")}</Typography>;
     }
 
@@ -439,11 +429,11 @@ const getItemCount = (data: ItemData) => {
 const getItemKey = (index: number, data: ItemData) => {
     switch (data.type) {
         case "collections": {
-            const collectionSummary = ensure(data.collectionSummaries[index]);
+            const collectionSummary = data.collectionSummaries[index]!;
             return `${data.type}-${collectionSummary.id}-${collectionSummary.coverFile?.id}`;
         }
         case "people": {
-            const person = ensure(data.people[index]);
+            const person = data.people[index]!;
             return `${data.type}-${person.id}-${person.displayFaceID}`;
         }
     }
@@ -461,7 +451,7 @@ const ListItem = memo((props: ListChildComponentProps<ItemData>) => {
                 activeCollectionID,
                 onSelectCollectionID,
             } = data;
-            const collectionSummary = ensure(collectionSummaries[index]);
+            const collectionSummary = collectionSummaries[index]!;
             card = (
                 <CollectionBarCard
                     key={collectionSummary.id}
@@ -477,7 +467,7 @@ const ListItem = memo((props: ListChildComponentProps<ItemData>) => {
 
         case "people": {
             const { people, activePerson, onSelectPerson } = data;
-            const person = ensure(people[index]);
+            const person = people[index]!;
             card = (
                 <PersonCard
                     key={person.id}

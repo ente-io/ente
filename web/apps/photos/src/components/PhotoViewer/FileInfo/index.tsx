@@ -3,7 +3,7 @@ import { SidebarDrawer } from "@/base/components/mui/SidebarDrawer";
 import { Titlebar } from "@/base/components/Titlebar";
 import { EllipsizedTypography } from "@/base/components/Typography";
 import { useModalVisibility } from "@/base/components/utils/modal";
-import { nameAndExtension } from "@/base/file";
+import { nameAndExtension } from "@/base/file-name";
 import log from "@/base/log";
 import type { Location } from "@/base/types";
 import { EnteFile } from "@/media/file";
@@ -359,14 +359,13 @@ const parseExifInfo = (
 
     if (exif) {
         if (exif.Make && exif.Model)
-            info["takenOnDevice"] =
-                `${exif.Make.description} ${exif.Model.description}`;
+            info.takenOnDevice = `${exif.Make.description} ${exif.Model.description}`;
 
         if (exif.FNumber)
             info.fNumber = exif.FNumber.description; /* e.g. "f/16" */
 
         if (exif.ExposureTime)
-            info["exposureTime"] = exif.ExposureTime.description; /* "1/10" */
+            info.exposureTime = exif.ExposureTime.description; /* "1/10" */
 
         if (exif.ISOSpeedRatings)
             info.iso = `ISO${tagNumericValue(exif.ISOSpeedRatings)}`;

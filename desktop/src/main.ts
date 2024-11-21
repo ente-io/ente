@@ -187,13 +187,13 @@ const logStartupBanner = () => {
  *
  * It uses protocol handlers to serve files from the "ente://" protocol.
  *
- * - In development this is proxied to http://localhost:3000
+ * - In development this is proxied to http://localhost:3008
  * - In production it serves files from the `/out` directory
  *
  * For more details, see this comparison:
  * https://github.com/HaNdTriX/next-electron-server/issues/5
  */
-const setupRendererServer = () => serveNextAt(rendererURL);
+const setupRendererServer = () => serveNextAt(rendererURL, { port: 3008 });
 
 /**
  * Register privileged schemes.

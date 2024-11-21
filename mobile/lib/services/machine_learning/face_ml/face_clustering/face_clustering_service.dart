@@ -22,6 +22,7 @@ class FaceInfo {
   final bool? badFace;
   final Vector? vEmbedding;
   String? clusterId;
+  final List<String>? rejectedClusterIds;
   String? closestFaceId;
   int? closestDist;
   int? fileCreationTime;
@@ -32,6 +33,7 @@ class FaceInfo {
     this.badFace,
     this.vEmbedding,
     this.clusterId,
+    this.rejectedClusterIds,
     this.fileCreationTime,
   });
 }
@@ -161,7 +163,7 @@ class FaceClusteringService extends SuperIsolate {
         _logger.info(
           'Running complete clustering on ${input.length} faces with distance threshold $mergeThreshold',
         );
-        final ClusteringResult clusterResult = await predictCompleteComputer(
+        final ClusteringResult clusterResult = await _predictCompleteComputer(
           input,
           fileIDToCreationTime: fileIDToCreationTime,
           oldClusterSummaries: oldClusterSummaries,
@@ -173,7 +175,7 @@ class FaceClusteringService extends SuperIsolate {
         _logger.info(
           'Running linear clustering on ${input.length} faces with distance threshold $distanceThreshold',
         );
-        final ClusteringResult clusterResult = await predictLinearComputer(
+        final ClusteringResult clusterResult = await _predictLinearComputer(
           input,
           fileIDToCreationTime: fileIDToCreationTime,
           oldClusterSummaries: oldClusterSummaries,
@@ -188,7 +190,7 @@ class FaceClusteringService extends SuperIsolate {
   }
 
   /// Runs the clustering algorithm [runLinearClustering] on the given [input], in computer, without any dynamic thresholding
-  Future<ClusteringResult> predictLinearComputer(
+  Future<ClusteringResult> _predictLinearComputer(
     Map<String, Uint8List> input, {
     Map<int, int>? fileIDToCreationTime,
     required Map<String, (Uint8List, int)> oldClusterSummaries,
@@ -248,7 +250,7 @@ class FaceClusteringService extends SuperIsolate {
   /// Runs the clustering algorithm [_runCompleteClustering] on the given [input], in computer.
   ///
   /// WARNING: Only use on small datasets, as it is not optimized for large datasets.
-  Future<ClusteringResult> predictCompleteComputer(
+  Future<ClusteringResult> _predictCompleteComputer(
     Map<String, Uint8List> input, {
     Map<int, int>? fileIDToCreationTime,
     required Map<String, (Uint8List, int)> oldClusterSummaries,
@@ -328,6 +330,7 @@ ClusteringResult runLinearClustering(Map args) {
           dtype: DType.float32,
         ),
         clusterId: face.clusterId,
+        rejectedClusterIds: face.rejectedClusterIds,
         fileCreationTime:
             fileIDToCreationTime?[getFileIdFromFaceId(face.faceID)],
       ),
@@ -372,7 +375,6 @@ ClusteringResult runLinearClustering(Map args) {
   _logger.info(
     "[ClusterIsolate] ${DateTime.now()} Processing $totalFaces faces ($newToClusterCount new, $alreadyClusteredCount already done) in total in this round ${offset != null ? "on top of ${offset + facesWithClusterID.length} earlier processed faces" : ""}",
   );
-  // set current epoch time as clusterID
   String clusterID = newClusterID();
   if (facesWithClusterID.isEmpty) {
     // assign a clusterID to the first face
@@ -398,6 +400,7 @@ ClusteringResult runLinearClustering(Map args) {
     } else {
       thresholdValue = distanceThreshold;
     }
+    final bool faceHasBeenRejectedBefore = sortedFaceInfos[i].rejectedClusterIds != null; 
     if (i % 250 == 0) {
       _logger.info("Processed ${offset != null ? i + offset : i} faces");
     }
@@ -408,6 +411,13 @@ ClusteringResult runLinearClustering(Map args) {
       if (distance < closestDistance) {
         if (sortedFaceInfos[j].badFace! &&
             distance > conservativeDistanceThreshold) {
+          continue;
+        }
+        if (faceHasBeenRejectedBefore &&
+            sortedFaceInfos[j].clusterId != null &&
+            sortedFaceInfos[i].rejectedClusterIds!.contains(
+              sortedFaceInfos[j].clusterId!,
+            )) {
           continue;
         }
         closestDistance = distance;

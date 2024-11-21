@@ -42,6 +42,8 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
     useEffect(() => {
         castGateway.revokeAllTokens();
 
+        // Otherwise tsc complains about unknown property chrome.
+        // eslint-disable-next-line @typescript-eslint/dot-notation
         setBrowserCanCast(typeof window["chrome"] !== "undefined");
     }, []);
 
@@ -113,7 +115,7 @@ export const AlbumCastDialog: React.FC<AlbumCastDialogProps> = ({
                                     setView("choose");
                                     onClose();
                                 })
-                                .catch((e) => {
+                                .catch((e: unknown) => {
                                     log.error("Error casting to TV", e);
                                     setView("auto-cast-error");
                                 });

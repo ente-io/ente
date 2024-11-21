@@ -1,5 +1,4 @@
 import log from "@/base/log";
-import { ensure } from "@/utils/ensure";
 import { styled } from "@mui/material";
 import { FilledCircleCheck } from "components/FilledCircleCheck";
 import { useRouter } from "next/router";
@@ -22,7 +21,7 @@ export default function Slideshow() {
 
         const loop = async () => {
             try {
-                const urlGenerator = imageURLGenerator(ensure(readCastData()));
+                const urlGenerator = imageURLGenerator(readCastData()!);
                 while (!stop) {
                     const { value: url, done } = await urlGenerator.next();
                     if (done == true || !url) {

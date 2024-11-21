@@ -1247,8 +1247,8 @@
   "descriptions": "Opisy",
   "addAName": "Dodaj nazwę",
   "findPeopleByName": "Szybko szukaj osób po imieniu",
-  "addViewers": "{count, plural, one {Dodaj widza} few {Dodaj widzów} many {Dodaj widzów} other {Dodaj widzów}}",
-  "addCollaborators": "{count, plural, one {Dodaj współuczestnika} few {Dodaj współuczestników} many {Dodaj współuczestników} other {Dodaj współuczestników}}",
+  "addViewers": "{count, plural, one {Dodaj widza} few {Dodaj widzów} other {Dodaj widzów}}",
+  "addCollaborators": "{count, plural, one {Dodaj współuczestnika} few {Dodaj współuczestników} other {Dodaj współuczestników}}",
   "longPressAnEmailToVerifyEndToEndEncryption": "Naciśnij i przytrzymaj e-mail, aby zweryfikować szyfrowanie end-to-end.",
   "developerSettingsWarning": "Czy na pewno chcesz zmodyfikować ustawienia programisty?",
   "developerSettings": "Ustawienia dla programistów",
@@ -1359,8 +1359,5 @@
   "areYouSureYouWantToResetThisPerson": "Czy na pewno chcesz zresetować tę osobę?",
   "allPersonGroupingWillReset": "Wszystkie grupy dla tej osoby zostaną zresetowane i stracisz wszystkie sugestie dla tej osoby",
   "yesResetPerson": "Tak, zresetuj osobę",
-  "checkingModels": "Checking models...",
-  "enableMachineLearningBanner": "Enable machine learning for magic search and face recognition",
-  "searchDiscoverEmptySection": "Images will be shown here once processing is complete",
-  "searchPersonsEmptySection": "People will be shown here once processing is complete"
+  "onlyThem": "Tylko te"
 }

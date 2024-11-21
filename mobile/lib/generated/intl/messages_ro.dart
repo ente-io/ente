@@ -378,8 +378,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "checkStatus":
             MessageLookupByLibrary.simpleMessage("Verificați starea"),
         "checking": MessageLookupByLibrary.simpleMessage("Se verifică..."),
-        "checkingModels":
-            MessageLookupByLibrary.simpleMessage("Checking models..."),
         "claimFreeStorage":
             MessageLookupByLibrary.simpleMessage("Revendică spațiul gratuit"),
         "claimMore":
@@ -605,8 +603,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "emptyTrash":
             MessageLookupByLibrary.simpleMessage("Goliți coșul de gunoi?"),
         "enable": MessageLookupByLibrary.simpleMessage("Activare"),
-        "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
-            "Enable machine learning for magic search and face recognition"),
         "enabled": MessageLookupByLibrary.simpleMessage("Activat"),
         "encryption": MessageLookupByLibrary.simpleMessage("Criptarea"),
         "encryptionKeys":
@@ -1162,8 +1158,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Adăugați descrieri precum „#excursie” în informațiile fotografiilor pentru a le găsi ușor aici"),
         "searchDatesEmptySection": MessageLookupByLibrary.simpleMessage(
             "Căutare după o dată, o lună sau un an"),
-        "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
-            "Images will be shown here once processing is complete"),
         "searchFaceEmptySection": MessageLookupByLibrary.simpleMessage(
             "Persoanele vor fi afișate aici odată ce indexarea este finalizată"),
         "searchFileTypesAndNamesEmptySection":
@@ -1182,8 +1176,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "Grupare fotografii realizate în raza unei fotografii"),
         "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
             "Invitați persoane și veți vedea aici toate fotografiile distribuite de acestea"),
-        "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
-            "People will be shown here once processing is complete"),
         "searchResultCount": m53,
         "security": MessageLookupByLibrary.simpleMessage("Securitate"),
         "selectALocation":

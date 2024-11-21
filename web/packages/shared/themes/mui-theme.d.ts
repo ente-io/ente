@@ -200,6 +200,6 @@ declare module "@mui/material/styles" {
         faint: number;
     }
 
-    type AvatarColors = Array<string>;
+    type AvatarColors = string[];
 }
 export {};

@@ -103,8 +103,6 @@ class MessageLookup extends MessageLookupByLibrary {
             "لطفا صندوق ورودی (و هرزنامه) خود را برای تایید کامل بررسی کنید"),
         "checkStatus": MessageLookupByLibrary.simpleMessage("بررسی وضعیت"),
         "checking": MessageLookupByLibrary.simpleMessage("در حال بررسی..."),
-        "checkingModels":
-            MessageLookupByLibrary.simpleMessage("Checking models..."),
         "collabLinkSectionDescription": MessageLookupByLibrary.simpleMessage(
             "پیوندی ایجاد کنید تا به افراد اجازه دهید بدون نیاز به برنامه یا حساب کاربری Ente عکس‌ها را در آلبوم اشتراک گذاشته شده شما اضافه و مشاهده کنند. برای جمع‌آوری عکس‌های رویداد عالی است."),
         "collaborator": MessageLookupByLibrary.simpleMessage("همکار"),
@@ -170,8 +168,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "editLocationTagTitle":
             MessageLookupByLibrary.simpleMessage("ویرایش مکان"),
         "email": MessageLookupByLibrary.simpleMessage("ایمیل"),
-        "enableMachineLearningBanner": MessageLookupByLibrary.simpleMessage(
-            "Enable machine learning for magic search and face recognition"),
         "encryption": MessageLookupByLibrary.simpleMessage("رمزگذاری"),
         "encryptionKeys":
             MessageLookupByLibrary.simpleMessage("کلیدهای رمزنگاری"),
@@ -326,12 +322,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "safelyStored": MessageLookupByLibrary.simpleMessage("به طور ایمن"),
         "saveKey": MessageLookupByLibrary.simpleMessage("ذخیره کلید"),
         "search": MessageLookupByLibrary.simpleMessage("جستجو"),
-        "searchDiscoverEmptySection": MessageLookupByLibrary.simpleMessage(
-            "Images will be shown here once processing is complete"),
-        "searchPeopleEmptySection": MessageLookupByLibrary.simpleMessage(
-            "People will be shown here once processing is complete"),
-        "searchPersonsEmptySection": MessageLookupByLibrary.simpleMessage(
-            "People will be shown here once processing is complete"),
         "security": MessageLookupByLibrary.simpleMessage("امنیت"),
         "selectAll": MessageLookupByLibrary.simpleMessage("انتخاب همه"),
         "selectFoldersForBackup": MessageLookupByLibrary.simpleMessage(
