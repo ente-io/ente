@@ -6,13 +6,13 @@ import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import type { KeyAttributes } from "@ente/shared/user/types";
 import { SRP, SrpClient } from "fast-srp-hap";
 import { v4 as uuidv4 } from "uuid";
-import type { SRPAttributes, SRPSetupAttributes } from "../api/srp";
+import type { SRPAttributes, SRPSetupAttributes } from "./srp-remote";
 import {
     completeSRPSetup,
     createSRPSession,
     startSRPSetup,
     verifySRPSession,
-} from "../api/srp";
+} from "./srp-remote";
 
 const SRP_PARAMS = SRP.params["4096"];
 

@@ -27,8 +27,6 @@ import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
-import type { SRPAttributes, SRPSetupAttributes } from "../api/srp";
-import { getSRPAttributes } from "../api/srp";
 import {
     LoginFlowFormFooter,
     VerifyingPasskey,
@@ -40,6 +38,8 @@ import {
 } from "../services/passkey";
 import { stashedRedirect, unstashRedirect } from "../services/redirect";
 import { configureSRP } from "../services/srp";
+import type { SRPAttributes, SRPSetupAttributes } from "../services/srp-remote";
+import { getSRPAttributes } from "../services/srp-remote";
 import { putAttributes, sendOtt, verifyOtt } from "../services/user";
 import type { PageProps } from "../types/page";
 

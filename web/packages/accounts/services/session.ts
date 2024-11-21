@@ -3,8 +3,8 @@ import { ensureLocalUser } from "@/base/local-user";
 import { apiURL } from "@/base/origins";
 import { getData, LS_KEYS } from "@ente/shared/storage/localStorage";
 import type { KeyAttributes } from "@ente/shared/user/types";
-import type { SRPAttributes } from "../api/srp";
-import { getSRPAttributes } from "../api/srp";
+import type { SRPAttributes } from "./srp-remote";
+import { getSRPAttributes } from "./srp-remote";
 
 type SessionValidity =
     | { status: "invalid" }

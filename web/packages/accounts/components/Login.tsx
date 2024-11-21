@@ -8,8 +8,8 @@ import { LS_KEYS, setData, setLSUser } from "@ente/shared/storage/localStorage";
 import { Input, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import { getSRPAttributes } from "../api/srp";
 import { PAGES } from "../constants/pages";
+import { getSRPAttributes } from "../services/srp-remote";
 import { sendOtt } from "../services/user";
 
 interface LoginProps {

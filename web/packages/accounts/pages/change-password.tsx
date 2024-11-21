@@ -1,14 +1,14 @@
 import {
-    getSRPAttributes,
-    startSRPSetup,
-    updateSRPAndKeys,
-} from "@/accounts/api/srp";
-import {
     convertBase64ToBuffer,
     convertBufferToBase64,
     generateSRPClient,
     generateSRPSetupAttributes,
 } from "@/accounts/services/srp";
+import {
+    getSRPAttributes,
+    startSRPSetup,
+    updateSRPAndKeys,
+} from "@/accounts/services/srp-remote";
 import {
     FormPaper,
     FormPaperFooter,
