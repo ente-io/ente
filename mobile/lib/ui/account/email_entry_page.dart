@@ -116,8 +116,12 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
           _config.setVolatilePassword(_passwordController1.text);
           UserService.instance.setEmail(_email!);
           UserService.instance.setRefSource(_referralSource);
-          UserService.instance
-              .sendOtt(context, _email!, isCreateAccountScreen: true);
+          UserService.instance.sendOtt(
+            context,
+            _email!,
+            isCreateAccountScreen: true,
+            purpose: "signup",
+          );
           FocusScope.of(context).unfocus();
         },
       ),
