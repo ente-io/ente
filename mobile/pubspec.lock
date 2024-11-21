@@ -1510,8 +1510,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: HEAD
-      resolved-ref: "4bcd4cf45ea213feef8cf5e2814ea16d61f1d69e"
+      ref: handle_incoming_links
+      resolved-ref: ca5c4960e05cd5dcf0eb16ad1bab72febffc6676
       url: "https://github.com/AmanRajSinghMourya/media_extension.git"
     source: git
     version: "1.0.2"
