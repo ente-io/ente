@@ -3,17 +3,12 @@ import {
     startSRPSetup,
     updateSRPAndKeys,
 } from "@/accounts/api/srp";
-import SetPasswordForm, {
-    type SetPasswordFormProps,
-} from "@/accounts/components/SetPasswordForm";
-import { PAGES } from "@/accounts/constants/pages";
 import {
     convertBase64ToBuffer,
     convertBufferToBase64,
     generateSRPClient,
     generateSRPSetupAttributes,
 } from "@/accounts/services/srp";
-import type { UpdatedKey } from "@/accounts/types/user";
 import {
     FormPaper,
     FormPaperFooter,
@@ -34,8 +29,13 @@ import type { KEK, KeyAttributes, User } from "@ente/shared/user/types";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import SetPasswordForm, {
+    type SetPasswordFormProps,
+} from "../components/SetPasswordForm";
+import { PAGES } from "../constants/pages";
 import { appHomeRoute, stashRedirect } from "../services/redirect";
 import type { PageProps } from "../types/page";
+import type { UpdatedKey } from "../types/user";
 
 const Page: React.FC<PageProps> = () => {
     const [token, setToken] = useState<string>();

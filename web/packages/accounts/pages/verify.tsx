@@ -29,7 +29,6 @@ import { useEffect, useState } from "react";
 import { Trans } from "react-i18next";
 import type { SRPAttributes, SRPSetupAttributes } from "../api/srp";
 import { getSRPAttributes } from "../api/srp";
-import { putAttributes, sendOtt, verifyOtt } from "../api/user";
 import {
     LoginFlowFormFooter,
     VerifyingPasskey,
@@ -41,6 +40,7 @@ import {
 } from "../services/passkey";
 import { stashedRedirect, unstashRedirect } from "../services/redirect";
 import { configureSRP } from "../services/srp";
+import { putAttributes, sendOtt, verifyOtt } from "../services/user";
 import type { PageProps } from "../types/page";
 
 const Page: React.FC<PageProps> = ({ appContext }) => {

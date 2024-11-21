@@ -1,8 +1,8 @@
-import { enableTwoFactor, setupTwoFactor } from "@/accounts/api/user";
 import VerifyTwoFactor, {
     type VerifyTwoFactorCallback,
 } from "@/accounts/components/two-factor/VerifyForm";
 import { TwoFactorSetup } from "@/accounts/components/two-factor/setup";
+import { enableTwoFactor, setupTwoFactor } from "@/accounts/services/user";
 import type { TwoFactorSecret } from "@/accounts/types/user";
 import log from "@/base/log";
 import { VerticallyCentered } from "@ente/shared/components/Container";

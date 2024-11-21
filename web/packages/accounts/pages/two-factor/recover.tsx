@@ -1,9 +1,9 @@
+import { PAGES } from "@/accounts/constants/pages";
 import {
     recoverTwoFactor,
     removeTwoFactor,
     type TwoFactorType,
-} from "@/accounts/api/user";
-import { PAGES } from "@/accounts/constants/pages";
+} from "@/accounts/services/user";
 import type { AccountsContextT } from "@/accounts/types/context";
 import {
     FormPaper,

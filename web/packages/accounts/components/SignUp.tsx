@@ -1,8 +1,3 @@
-import { sendOtt } from "@/accounts/api/user";
-import { PasswordStrengthHint } from "@/accounts/components/PasswordStrength";
-import { PAGES } from "@/accounts/constants/pages";
-import { generateKeyAndSRPAttributes } from "@/accounts/services/srp";
-import { isWeakPassword } from "@/accounts/utils/password";
 import { FormPaperFooter, FormPaperTitle } from "@/base/components/FormPaper";
 import { LoadingButton } from "@/base/components/mui/LoadingButton";
 import log from "@/base/log";
@@ -40,6 +35,11 @@ import type { NextRouter } from "next/router";
 import React, { useState } from "react";
 import { Trans } from "react-i18next";
 import * as Yup from "yup";
+import { PAGES } from "../constants/pages";
+import { generateKeyAndSRPAttributes } from "../services/srp";
+import { sendOtt } from "../services/user";
+import { isWeakPassword } from "../utils/password";
+import { PasswordStrengthHint } from "./PasswordStrength";
 
 interface FormValues {
     email: string;

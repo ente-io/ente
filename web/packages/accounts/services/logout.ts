@@ -4,8 +4,8 @@ import { clearLocalStorage } from "@/base/local-storage";
 import log from "@/base/log";
 import localForage from "@ente/shared/storage/localForage";
 import { clearKeys } from "@ente/shared/storage/sessionStorage";
-import { logout as remoteLogout } from "../api/user";
 import { clearStashedRedirect } from "./redirect";
+import { logout as remoteLogout } from "./user";
 
 /**
  * Logout sequence common to all apps that rely on the accounts package.

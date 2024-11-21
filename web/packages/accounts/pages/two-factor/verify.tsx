@@ -1,8 +1,8 @@
-import { verifyTwoFactor } from "@/accounts/api/user";
 import VerifyTwoFactor, {
     type VerifyTwoFactorCallback,
 } from "@/accounts/components/two-factor/VerifyForm";
 import { PAGES } from "@/accounts/constants/pages";
+import { verifyTwoFactor } from "@/accounts/services/user";
 import {
     FormPaper,
     FormPaperFooter,
