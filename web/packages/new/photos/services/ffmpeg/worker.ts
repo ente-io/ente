@@ -46,14 +46,10 @@ export class DedicatedFFmpegWorker {
         outputFileExtension: string,
     ): Promise<Uint8Array> {
         if (!this.ffmpeg.loaded) {
+            // This loads @ffmpeg/core from its CDN:
+            // https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.js
+            // https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.wasm
             await this.ffmpeg.load();
-
-            // this.ffmpeg = createFFmpeg({
-            //     corePath: "/js/ffmpeg/ffmpeg-core.js",
-            //     mt: false,
-            // });
-
-            // await this.ffmpeg.load();
         }
 
         const request = this.ffmpegTaskQueue.queueUpRequest(() =>
