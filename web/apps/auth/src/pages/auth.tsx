@@ -13,7 +13,14 @@ import { AUTH_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { ApiError, CustomError } from "@ente/shared/error";
 import LogoutOutlined from "@mui/icons-material/LogoutOutlined";
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
-import { Button, ButtonBase, Snackbar, TextField, styled } from "@mui/material";
+import {
+    Button,
+    ButtonBase,
+    Snackbar,
+    TextField,
+    Typography,
+    styled,
+} from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
@@ -121,7 +128,9 @@ const Page: React.FC = () => {
                             {searchTerm.length > 0 ? (
                                 <p>{t("no_results")}</p>
                             ) : (
-                                <></>
+                                <Typography color="text.muted">
+                                    {t("no_codes_added_yet")}
+                                </Typography>
                             )}
                         </div>
                     ) : (
