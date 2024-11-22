@@ -88,8 +88,8 @@ export const throttled = (underlying: () => Promise<void>, period: number) => {
  * does not resolve within {@link timeoutMS}, then reject with a timeout error.
  *
  * Note that this does not abort {@link promise} itself - it will still get
- * resolved to completion, just its result will be ignored if it gets resolved
- * after we've already timed out.
+ * settled, just its eventual state will be ignored if it gets fullfilled or
+ * rejected after we've already timed out.
  */
 export const withTimeout = async <T>(promise: Promise<T>, ms: number) => {
     let timeoutId: ReturnType<typeof setTimeout>;
