@@ -324,7 +324,7 @@ const OTPDisplay: React.FC<OTPDisplayProps> = ({ code, otp, nextOTP }) => {
                             color: "grey",
                         }}
                     >
-                        {t("AUTH_NEXT")}
+                        {t("auth_next")}
                     </p>
                     <p
                         style={{
@@ -409,7 +409,7 @@ const UnparseableCode: React.FC<UnparseableCodeProps> = ({
 const Footer: React.FC = () => {
     return (
         <Footer_>
-            <Typography>{t("AUTH_DOWNLOAD_MOBILE_APP")}</Typography>
+            <Typography>{t("auth_download_mobile_app")}</Typography>
             <a
                 href="https://github.com/ente-io/ente/tree/main/auth#-download"
                 download
