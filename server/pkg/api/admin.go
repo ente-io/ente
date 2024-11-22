@@ -115,7 +115,7 @@ func (h *AdminHandler) GetUsers(c *gin.Context) {
 }
 
 func (h *AdminHandler) GetUser(c *gin.Context) {
-	e := c.Query("email")
+	e := strings.ToLower(strings.TrimSpace(c.Query("email")))
 	if e == "" {
 		id, err := strconv.ParseInt(c.Query("id"), 10, 64)
 		if err != nil {
