@@ -1043,7 +1043,6 @@ const ConversionFailedNotification1: React.FC<
     );
 };
 
-import { EllipsizedTypography } from "@/base/components/Typography";
 import { type ModalVisibilityProps } from "@/base/components/utils/modal";
 import {
     FilledIconButton,
@@ -1100,9 +1099,9 @@ const ConversionFailedNotification: React.FC<
                         // text in children.
                         overflow="hidden"
                     >
-                        <EllipsizedTypography variant="small">
+                        <Typography variant="small">
                             {t("CONVERSION_FAILED_NOTIFICATION_MESSAGE")}
-                        </EllipsizedTypography>
+                        </Typography>
                     </Stack>
 
                     <FilledIconButton onClick={handleClose}>
