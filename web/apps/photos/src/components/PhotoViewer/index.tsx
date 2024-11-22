@@ -1045,29 +1045,31 @@ const ConversionFailedNotification: React.FC<
         <Snackbar
             open={open}
             anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-            sx={{ width: "320px", backgroundColor: "#000" }}
         >
-            <Button
-                color={"secondary"}
-                onClick={handleClick}
-                sx={{
-                    borderRadius: "8px",
-                    flex: 1,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "16px",
-                }}
-            >
-                <InfoIcon />
-
-                <Typography variant="small" sx={{ flex: 1, textAlign: "left" }}>
-                    {t("CONVERSION_FAILED_NOTIFICATION_MESSAGE")}
-                </Typography>
-
-                <FilledIconButton onClick={handleClose}>
-                    <CloseIcon />
-                </FilledIconButton>
-            </Button>
+            <Paper sx={{ width: "320px" }}>
+                <Button
+                    color={"secondary"}
+                    onClick={handleClick}
+                    sx={{
+                        borderRadius: "8px",
+                        flex: 1,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "16px",
+                    }}
+                >
+                    <InfoIcon />
+                    <Typography
+                        variant="small"
+                        sx={{ flex: 1, textAlign: "left" }}
+                    >
+                        {t("CONVERSION_FAILED_NOTIFICATION_MESSAGE")}
+                    </Typography>
+                    <FilledIconButton onClick={handleClose}>
+                        <CloseIcon />
+                    </FilledIconButton>
+                </Button>
+            </Paper>
         </Snackbar>
     );
 };
