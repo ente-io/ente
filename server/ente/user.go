@@ -195,9 +195,10 @@ type TwoFactorRemovalRequest struct {
 
 type ProfileData struct {
 	// CanDisableEmailMFA is used to decide if client should show disable email MFA option
-	CanDisableEmailMFA bool `json:"canDisableEmailMFA"`
-	IsEmailMFAEnabled  bool `json:"isEmailMFAEnabled"`
-	IsTwoFactorEnabled bool `json:"isTwoFactorEnabled"`
+	CanDisableEmailMFA bool  `json:"canDisableEmailMFA"`
+	IsEmailMFAEnabled  bool  `json:"isEmailMFAEnabled"`
+	IsTwoFactorEnabled bool  `json:"isTwoFactorEnabled"`
+	PasskeyCount       int64 `json:"passkeyCount"`
 }
 
 type Session struct {
