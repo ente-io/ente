@@ -40,7 +40,7 @@ import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
 import Photoswipe from "photoswipe";
 import PhotoswipeUIDefault from "photoswipe/dist/photoswipe-ui-default";
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
     addToFavorites,
     removeFromFavorites,
@@ -1023,13 +1023,9 @@ function CircularProgressWithLabel(
     );
 }
 
-interface ConversionFailedNotificationProps {
-    open: boolean;
-    onClose: () => void;
-    onClick: () => void;
-}
+type ConversionFailedNotificationProps = ModalVisibilityProps & ButtonishProps;
 
-const ConversionFailedNotification: React.FC<
+const ConversionFailedNotification1: React.FC<
     ConversionFailedNotificationProps
 > = ({ open, onClose, onClick }) => {
     return (
@@ -1044,6 +1040,77 @@ const ConversionFailedNotification: React.FC<
             horizontal="right"
             vertical="bottom"
         />
+    );
+};
+
+import { EllipsizedTypography } from "@/base/components/Typography";
+import { type ModalVisibilityProps } from "@/base/components/utils/modal";
+import {
+    FilledIconButton,
+    type ButtonishProps,
+} from "@/new/photos/components/mui";
+import { Snackbar, Stack, type ButtonProps } from "@mui/material";
+
+const ConversionFailedNotification: React.FC<
+    ConversionFailedNotificationProps
+> = ({ open, onClose, onClick }) => {
+    const handleClose: ButtonProps["onClick"] = (event) => {
+        onClose();
+        event.stopPropagation();
+    };
+
+    const handleClick = () => {
+        onClick();
+        onClose();
+    };
+
+    return (
+        <Snackbar
+            open={open}
+            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+            sx={{ width: "320px", backgroundColor: "#000" }}
+        >
+            <Button
+                color={"secondary"}
+                onClick={handleClick}
+                sx={{
+                    textAlign: "left",
+                    flex: "1",
+                    padding: (theme) => theme.spacing(1.5, 2),
+                    borderRadius: "8px",
+                }}
+            >
+                <Stack
+                    flex={"1"}
+                    spacing={2}
+                    direction="row"
+                    alignItems={"center"}
+                    width={"100%"}
+                >
+                    <Box sx={{ svg: { fontSize: "36px" } }}>
+                        <InfoIcon />
+                    </Box>
+
+                    <Stack
+                        direction={"column"}
+                        spacing={0.5}
+                        flex={1}
+                        textAlign="left"
+                        // This is necessary to trigger the ellipsizing of the
+                        // text in children.
+                        overflow="hidden"
+                    >
+                        <EllipsizedTypography variant="small">
+                            {t("CONVERSION_FAILED_NOTIFICATION_MESSAGE")}
+                        </EllipsizedTypography>
+                    </Stack>
+
+                    <FilledIconButton onClick={handleClose}>
+                        <CloseIcon />
+                    </FilledIconButton>
+                </Stack>
+            </Button>
+        </Snackbar>
     );
 };
 
