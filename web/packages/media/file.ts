@@ -92,7 +92,6 @@ export interface EnteFile
     deleteBy?: number;
     isSourceLoaded?: boolean;
     conversionFailed?: boolean;
-    isConverted?: boolean;
     canForceConvert?: boolean;
 }
 

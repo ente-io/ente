@@ -570,7 +570,6 @@ function updateFileMsrcProps(file: EnteFile, url: string) {
     file.canForceConvert = false;
     file.isSourceLoaded = false;
     file.conversionFailed = false;
-    file.isConverted = false;
     if (file.metadata.fileType === FileType.image) {
         file.src = url;
     } else {
@@ -587,7 +586,7 @@ async function updateFileSrcProps(
     srcURLs: SourceURLs,
     enableDownload: boolean,
 ) {
-    const { url, isRenderable, isOriginal } = srcURLs;
+    const { url, isRenderable } = srcURLs;
     file.w = window.innerWidth;
     file.h = window.innerHeight;
     file.isSourceLoaded =
@@ -595,7 +594,6 @@ async function updateFileSrcProps(
             ? srcURLs.type === "livePhoto"
             : true;
     file.canForceConvert = srcURLs.canForceConvert;
-    file.isConverted = !isOriginal;
     file.conversionFailed = !isRenderable;
     file.srcURLs = srcURLs;
     if (!isRenderable) {
