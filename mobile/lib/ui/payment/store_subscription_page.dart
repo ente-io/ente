@@ -174,7 +174,7 @@ class _StoreSubscriptionPageState extends State<StoreSubscriptionPage> {
               children: [
                 TitleBarTitleWidget(
                   title: widget.isOnboarding
-                      ? "Select your plan"
+                      ? S.of(context).selectYourPlan
                       : "${S.of(context).subscription}${kDebugMode ? ' Store' : ''}",
                 ),
                 _isFreePlanUser() || !_hasLoadedData

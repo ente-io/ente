@@ -165,7 +165,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
               children: [
                 TitleBarTitleWidget(
                   title:
-                      widget.isOnboarding ? "Select your plan" : "Subscription",
+                      widget.isOnboarding ? S.of(context).selectYourPlan : S.of(context).subscription,
                 ),
                 _isFreePlanUser() || !_hasLoadedData
                     ? const SizedBox.shrink()

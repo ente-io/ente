@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import "package:photos/generated/l10n.dart";
 import 'package:photos/models/collection/collection.dart';
 import 'package:photos/models/gallery_type.dart';
 import "package:photos/models/ml/face/person.dart";
@@ -263,7 +264,7 @@ class _SelectAllButtonState extends State<SelectAllButton> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                "All",
+                S.of(context).selectAllShort,
                 style: getEnteTextTheme(context).miniMuted,
               ),
               const SizedBox(width: 4),
