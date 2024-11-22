@@ -1,12 +1,17 @@
 import { isDesktop } from "@/base/app";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { Overlay } from "@/base/components/mui/Container";
+import { type ModalVisibilityProps } from "@/base/components/utils/modal";
 import { lowercaseExtension } from "@/base/file-name";
 import log from "@/base/log";
 import type { LoadedLivePhotoSourceURL } from "@/media/file";
 import { fileLogID, type EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
+import {
+    FilledIconButton,
+    type ButtonishProps,
+} from "@/new/photos/components/mui";
 import downloadManager from "@/new/photos/services/download";
 import { extractRawExif, parseExif } from "@/new/photos/services/exif";
 import { AppContext } from "@/new/photos/types/context";
@@ -31,11 +36,12 @@ import {
     Button,
     CircularProgress,
     Paper,
+    Snackbar,
     styled,
     Typography,
+    type ButtonProps,
     type CircularProgressProps,
 } from "@mui/material";
-import Notification from "components/Notification";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
 import Photoswipe from "photoswipe";
@@ -1025,31 +1031,6 @@ function CircularProgressWithLabel(
 
 type ConversionFailedNotificationProps = ModalVisibilityProps & ButtonishProps;
 
-const ConversionFailedNotification1: React.FC<
-    ConversionFailedNotificationProps
-> = ({ open, onClose, onClick }) => {
-    return (
-        <Notification
-            open={open}
-            onClose={onClose}
-            attributes={{
-                variant: "secondary",
-                subtext: t("CONVERSION_FAILED_NOTIFICATION_MESSAGE"),
-                onClick: onClick,
-            }}
-            horizontal="right"
-            vertical="bottom"
-        />
-    );
-};
-
-import { type ModalVisibilityProps } from "@/base/components/utils/modal";
-import {
-    FilledIconButton,
-    type ButtonishProps,
-} from "@/new/photos/components/mui";
-import { Snackbar, type ButtonProps } from "@mui/material";
-
 const ConversionFailedNotification: React.FC<
     ConversionFailedNotificationProps
 > = ({ open, onClose, onClick }) => {
@@ -1080,9 +1061,7 @@ const ConversionFailedNotification: React.FC<
                     gap: "16px",
                 }}
             >
-                <Box sx={{ svg: { fontSize: "36px" } }}>
-                    <InfoIcon />
-                </Box>
+                <InfoIcon />
 
                 <Typography variant="small" sx={{ flex: 1, textAlign: "left" }}>
                     {t("CONVERSION_FAILED_NOTIFICATION_MESSAGE")}
