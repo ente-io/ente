@@ -28,7 +28,7 @@ import type {
 import { FileType, type FileTypeInfo } from "@/media/file-type";
 import { encodeLivePhoto } from "@/media/live-photo";
 import { extractExif } from "@/new/photos/services/exif";
-import * as ffmpeg from "@/new/photos/services/ffmpeg";
+import { extractVideoMetadata } from "@/new/photos/services/ffmpeg";
 import {
     getNonEmptyMagicMetadataProps,
     updateMagicMetadata,
@@ -1077,7 +1077,7 @@ const tryExtractImageMetadata = async (
 
 const tryExtractVideoMetadata = async (uploadItem: UploadItem) => {
     try {
-        return await ffmpeg.extractVideoMetadata(uploadItem);
+        return await extractVideoMetadata(uploadItem);
     } catch (e) {
         log.error(`Failed to extract video metadata for ${uploadItem}`, e);
         return undefined;
