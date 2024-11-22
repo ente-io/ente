@@ -111,7 +111,7 @@ export interface PhotoViewerProps {
     currentIndex?: number;
     onClose?: (needUpdate: boolean) => void;
     gettingData: (instance: any, index: number, item: EnteFile) => void;
-    getConvertedItem: (instance: any, index: number, item: EnteFile) => void;
+    forceConvertItem: (instance: any, index: number, item: EnteFile) => void;
     id?: string;
     favItemIds: Set<number>;
     markTempDeleted?: (tempDeletedFiles: EnteFile[]) => void;
@@ -125,6 +125,8 @@ export interface PhotoViewerProps {
 }
 
 function PhotoViewer(props: PhotoViewerProps) {
+    const { id, forceConvertItem } = props;
+
     const galleryContext = useContext(GalleryContext);
     const { showLoadingBar, hideLoadingBar, showMiniDialog } =
         useContext(AppContext);
@@ -151,7 +153,7 @@ function PhotoViewer(props: PhotoViewerProps) {
         defaultLivePhotoDefaultOptions,
     );
     const [isOwnFile, setIsOwnFile] = useState(false);
-    const [showConvertBtn, setShowConvertBtn] = useState(false);
+    const [showConvertButton, setShowConvertButton] = useState(false);
     const [isSourceLoaded, setIsSourceLoaded] = useState(false);
     const [isInFullScreenMode, setIsInFullScreenMode] = useState(false);
 
@@ -366,14 +368,7 @@ function PhotoViewer(props: PhotoViewerProps) {
     }
 
     function updateShowConvertBtn(file: EnteFile) {
-        const shouldShowConvertBtn =
-            isDesktop &&
-            (file.metadata.fileType === FileType.video ||
-                file.metadata.fileType === FileType.livePhoto) &&
-            !file.isConverted &&
-            file.isSourceLoaded &&
-            !file.conversionFailed;
-        setShowConvertBtn(shouldShowConvertBtn);
+        setShowConvertButton(!!file.canForceConvert);
     }
 
     function updateConversionFailedNotification(file: EnteFile) {
@@ -752,16 +747,14 @@ function PhotoViewer(props: PhotoViewerProps) {
         }
     };
 
-    const triggerManualConvert = () => {
-        props.getConvertedItem(
+    const handleForceConvert = () =>
+        forceConvertItem(
             photoSwipe,
             photoSwipe.getCurrentIndex(),
             photoSwipe.currItem as EnteFile,
         );
-    };
 
     const scheduleUpdate = () => (needUpdate.current = true);
-    const { id } = props;
     return (
         <>
             <div
@@ -943,11 +936,11 @@ function PhotoViewer(props: PhotoViewerProps) {
                                         </button>
                                     </>
                                 )}
-                            {showConvertBtn && (
+                            {showConvertButton && (
                                 <button
                                     title={t("CONVERT")}
                                     className="pswp__button pswp__button--custom"
-                                    onClick={triggerManualConvert}
+                                    onClick={handleForceConvert}
                                 >
                                     <ReplayIcon fontSize="small" />
                                 </button>

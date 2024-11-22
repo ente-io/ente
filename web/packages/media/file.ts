@@ -93,6 +93,7 @@ export interface EnteFile
     isSourceLoaded?: boolean;
     conversionFailed?: boolean;
     isConverted?: boolean;
+    canForceConvert?: boolean;
 }
 
 export interface LivePhotoSourceURL {
@@ -110,6 +111,12 @@ export interface SourceURLs {
     isOriginal: boolean;
     isRenderable: boolean;
     type: "normal" | "livePhoto";
+    /**
+     * `true` if there is potential conversion that can still be applied.
+     *
+     * See: [Note: Forcing conversion of playable videos]
+     */
+    canForceConvert?: boolean;
     /**
      * Best effort attempt at obtaining the MIME type.
      *

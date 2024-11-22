@@ -1,6 +1,7 @@
 // TODO: Remove this override
 /* eslint-disable @typescript-eslint/no-empty-function */
 
+import { isDesktop } from "@/base/app";
 import { blobCache, type BlobCache } from "@/base/blob-cache";
 import {
     decryptStreamBytes,
@@ -177,18 +178,16 @@ class DownloadManagerImpl {
     }
 
     /**
-     * The `forceConvertVideos` option is true when the user presses the
-     * "Convert" button. It bypasses the preflight check we use to see if the
-     * browser can already play the video, and instead always does the
-     * transcoding.
+     * The `forceConvert` option is true when the user presses the "Convert"
+     * button. See: [Note: Forcing conversion of playable videos].
      */
     getFileForPreview = async (
         file: EnteFile,
-        opts?: { forceConvertVideos?: boolean },
+        opts?: { forceConvert?: boolean },
     ): Promise<SourceURLs | undefined> => {
         this.ensureInitialized();
         try {
-            const forceConvertVideos = opts?.forceConvertVideos ?? false;
+            const forceConvert = opts?.forceConvert ?? false;
             const getFileForPreviewPromise = async () => {
                 const fileBlob = await new Response(
                     await this.getFile(file, true),
@@ -203,14 +202,11 @@ class DownloadManagerImpl {
                     file,
                     fileBlob,
                     originalFileURL as string,
-                    forceConvertVideos,
+                    forceConvert,
                 );
                 return converted;
             };
-            if (
-                forceConvertVideos ||
-                !this.fileConversionPromises.has(file.id)
-            ) {
+            if (forceConvert || !this.fileConversionPromises.has(file.id)) {
                 this.fileConversionPromises.set(
                     file.id,
                     getFileForPreviewPromise(),
@@ -438,7 +434,7 @@ async function getRenderableFileURL(
     file: EnteFile,
     fileBlob: Blob,
     originalFileURL: string,
-    forceConvertVideos: boolean,
+    forceConvert: boolean,
 ): Promise<SourceURLs> {
     const existingOrNewObjectURL = (convertedBlob: Blob | null | undefined) =>
         convertedBlob
@@ -452,6 +448,7 @@ async function getRenderableFileURL(
     let isRenderable: boolean;
     let type: SourceURLs["type"] = "normal";
     let mimeType: string | undefined;
+    let canForceConvert = false;
 
     const fileName = file.metadata.title;
     switch (file.metadata.fileType) {
@@ -475,13 +472,17 @@ async function getRenderableFileURL(
             const convertedBlob = await playableVideoBlob(
                 fileName,
                 fileBlob,
-                forceConvertVideos,
+                forceConvert,
             );
             const convertedURL = existingOrNewObjectURL(convertedBlob);
             url = convertedURL;
             isOriginal = convertedURL === originalFileURL;
             isRenderable = !!convertedURL;
             mimeType = convertedBlob?.type;
+
+            canForceConvert =
+                isDesktop && !forceConvert && isOriginal && isRenderable;
+
             break;
         }
         default: {
@@ -493,7 +494,14 @@ async function getRenderableFileURL(
     }
 
     // TODO: Can we remove this non-null assertion and reflect it in the types?
-    return { url: url!, isOriginal, isRenderable, type, mimeType };
+    return {
+        url: url!,
+        isOriginal,
+        isRenderable,
+        type,
+        mimeType,
+        canForceConvert,
+    };
 }
 
 async function getRenderableLivePhotoURL(

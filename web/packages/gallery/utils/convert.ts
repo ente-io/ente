@@ -181,8 +181,9 @@ export const playableVideoBlob = async (
 
 /**
  * Try to see if the browser thinks it can play the video pointed to by the
- * given {@link url} by creating a <video>
- * element and initiating playback.
+ * given {@link url} by creating a <video> element and initiating playback.
+ *
+ * [Note: Forcing conversion of playable videos]
  *
  * Note that this can sometimes cause false positives if the browser can play
  * some of the streams in the video, but not all. For example, the browser may
@@ -193,7 +194,8 @@ export const playableVideoBlob = async (
  *
  * As an escape hatch, we provide a force convert button in the UI for such
  * cases, which'll cause the {@link forceConvert} flag in our caller function to
- * be set (and force a conversion)
+ * be set. If so, it'll bypasses this preflight check we use to see if the
+ * browser can already play the video, and instead will always be transcoded.
  */
 const isPlaybackPossible = async (url: string) =>
     new Promise((resolve) => {

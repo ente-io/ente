@@ -348,23 +348,7 @@ const PhotoFrame = ({
                 log.info(`[${item.id}] doesn't have thumbnail`);
                 thumbFetching[item.id] = true;
                 const url = await DownloadManager.getThumbnailForPreview(item);
-                try {
-                    if (updateURL(index)(item.id, url)) {
-                        log.info(
-                            `[${item.id}] calling invalidateCurrItems for thumbnail msrc: ${!!item.msrc}`,
-                        );
-                        instance.invalidateCurrItems();
-                        if ((instance as any).isOpen()) {
-                            instance.updateSize(true);
-                        }
-                    }
-                } catch (e) {
-                    log.error(
-                        "updating photoswipe after msrc url update failed",
-                        e,
-                    );
-                    // ignore
-                }
+                updateThumb(instance, index, item, url, false);
             } catch (e) {
                 log.error("getSlideData failed get msrc url failed", e);
                 thumbFetching[item.id] = false;
@@ -450,22 +434,7 @@ const PhotoFrame = ({
                     );
                 }
             } else {
-                try {
-                    if (await updateSrcURL(index, item.id, srcURLs)) {
-                        log.info(
-                            `[${item.id}] calling invalidateCurrItems for src, source loaded: ${item.isSourceLoaded}`,
-                        );
-                        instance.invalidateCurrItems();
-                        if ((instance as any).isOpen()) {
-                            instance.updateSize(true);
-                        }
-                    }
-                } catch (e) {
-                    log.error(
-                        "updating photoswipe after src url update failed",
-                        e,
-                    );
-                }
+                await updateOrig(instance, index, item, srcURLs, false);
             }
         } catch (e) {
             log.error("getSlideData failed get src url failed", e);
@@ -474,26 +443,15 @@ const PhotoFrame = ({
         }
     };
 
-    const getConvertedItem = async (
+    const updateThumb = (
         instance: PhotoSwipe<PhotoSwipe.Options>,
         index: number,
         item: EnteFile,
+        url: string,
+        forceUpdate?: boolean,
     ) => {
-        if (
-            item.metadata.fileType !== FileType.video &&
-            item.metadata.fileType !== FileType.livePhoto
-        ) {
-            log.error("getConvertedVideo called for non video file");
-            return;
-        }
-        if (item.conversionFailed) {
-            log.error(
-                "getConvertedVideo called for file that conversion failed",
-            );
-            return;
-        }
         try {
-            if (updateURL(index)(item.id, item.msrc, true)) {
+            if (updateURL(index)(item.id, url, forceUpdate)) {
                 log.info(
                     `[${item.id}] calling invalidateCurrItems for thumbnail msrc: ${!!item.msrc}`,
                 );
@@ -506,6 +464,38 @@ const PhotoFrame = ({
             log.error("updating photoswipe after msrc url update failed", e);
             // ignore
         }
+    };
+
+    const updateOrig = async (
+        instance: PhotoSwipe<PhotoSwipe.Options>,
+        index: number,
+        item: EnteFile,
+        srcURL: SourceURLs,
+        forceUpdate?: boolean,
+    ) => {
+        try {
+            if (await updateSrcURL(index, item.id, srcURL, forceUpdate)) {
+                log.info(
+                    `[${item.id}] calling invalidateCurrItems for src, source loaded: ${item.isSourceLoaded}`,
+                );
+                instance.invalidateCurrItems();
+                if ((instance as any).isOpen()) {
+                    instance.updateSize(true);
+                }
+            }
+        } catch (e) {
+            log.error("updating photoswipe after src url update failed", e);
+            throw e;
+        }
+    };
+
+    const forceConvertItem = async (
+        instance: PhotoSwipe<PhotoSwipe.Options>,
+        index: number,
+        item: EnteFile,
+    ) => {
+        updateThumb(instance, index, item, item.msrc, true);
+
         try {
             log.info(
                 `[${item.id}] new file getConvertedVideo request ${item.metadata.title}}`,
@@ -513,23 +503,10 @@ const PhotoFrame = ({
             fetching[item.id] = true;
 
             const srcURL = await DownloadManager.getFileForPreview(item, {
-                forceConvertVideos: true,
+                forceConvert: true,
             });
 
-            try {
-                if (await updateSrcURL(index, item.id, srcURL, true)) {
-                    log.info(
-                        `[${item.id}] calling invalidateCurrItems for src, source loaded: ${item.isSourceLoaded}`,
-                    );
-                    instance.invalidateCurrItems();
-                    if ((instance as any).isOpen()) {
-                        instance.updateSize(true);
-                    }
-                }
-            } catch (e) {
-                log.error("updating photoswipe after src url update failed", e);
-                throw e;
-            }
+            await updateOrig(instance, index, item, srcURL, true);
         } catch (e) {
             log.error("getConvertedVideo failed get src url failed", e);
             fetching[item.id] = false;
@@ -571,7 +548,7 @@ const PhotoFrame = ({
                 currentIndex={currentIndex}
                 onClose={handleClose}
                 gettingData={getSlideData}
-                getConvertedItem={getConvertedItem}
+                forceConvertItem={forceConvertItem}
                 favItemIds={favItemIds}
                 markTempDeleted={markTempDeleted}
                 isTrashCollection={activeCollectionID === TRASH_SECTION}
