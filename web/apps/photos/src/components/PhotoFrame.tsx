@@ -19,11 +19,7 @@ import {
     SelectedState,
     SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
-import {
-    handleSelectCreator,
-    updateFileMsrcProps,
-    updateFileSrcProps,
-} from "utils/photoFrame";
+import { handleSelectCreator } from "utils/photoFrame";
 import { PhotoList } from "./PhotoList";
 import { DedupePhotoList } from "./PhotoList/dedupe";
 import PreviewCard from "./pages/gallery/PreviewCard";
@@ -566,3 +562,81 @@ const PhotoFrame = ({
 };
 
 export default PhotoFrame;
+
+function updateFileMsrcProps(file: EnteFile, url: string) {
+    file.w = window.innerWidth;
+    file.h = window.innerHeight;
+    file.msrc = url;
+    file.canForceConvert = false;
+    file.isSourceLoaded = false;
+    file.conversionFailed = false;
+    file.isConverted = false;
+    if (file.metadata.fileType === FileType.image) {
+        file.src = url;
+    } else {
+        file.html = `
+            <div class = 'pswp-item-container'>
+                <img src="${url}"/>
+            </div>
+            `;
+    }
+}
+
+async function updateFileSrcProps(
+    file: EnteFile,
+    srcURLs: SourceURLs,
+    enableDownload: boolean,
+) {
+    const { url, isRenderable, isOriginal } = srcURLs;
+    file.w = window.innerWidth;
+    file.h = window.innerHeight;
+    file.isSourceLoaded =
+        file.metadata.fileType === FileType.livePhoto
+            ? srcURLs.type === "livePhoto"
+            : true;
+    file.canForceConvert = srcURLs.canForceConvert;
+    file.isConverted = !isOriginal;
+    file.conversionFailed = !isRenderable;
+    file.srcURLs = srcURLs;
+    if (!isRenderable) {
+        file.isSourceLoaded = true;
+        return;
+    }
+
+    if (file.metadata.fileType === FileType.video) {
+        file.html = `
+                <video controls ${
+                    !enableDownload && 'controlsList="nodownload"'
+                } onContextMenu="return false;">
+                    <source src="${url}" />
+                    Your browser does not support the video tag.
+                </video>
+                `;
+    } else if (file.metadata.fileType === FileType.livePhoto) {
+        if (srcURLs.type === "normal") {
+            file.html = `
+                <div class = 'pswp-item-container'>
+                    <img id = "live-photo-image-${file.id}" src="${url}" onContextMenu="return false;"/>
+                </div>
+                `;
+        } else {
+            const { image: imageURL, video: videoURL } =
+                url as LivePhotoSourceURL;
+
+            file.html = `
+            <div class = 'pswp-item-container'>
+                <img id = "live-photo-image-${file.id}" src="${imageURL}" onContextMenu="return false;"/>
+                <video id = "live-photo-video-${file.id}" loop muted onContextMenu="return false;">
+                    <source src="${videoURL}" />
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+            `;
+        }
+    } else if (file.metadata.fileType === FileType.image) {
+        file.src = url as string;
+    } else {
+        log.error(`unknown file type - ${file.metadata.fileType}`);
+        file.src = url as string;
+    }
+}

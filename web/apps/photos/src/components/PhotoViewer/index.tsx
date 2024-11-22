@@ -55,7 +55,6 @@ import {
     downloadSingleFile,
     getFileFromURL,
 } from "utils/file";
-import { pauseVideo, playVideo } from "utils/photoFrame";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import { FileInfo, type FileInfoExif, type FileInfoProps } from "./FileInfo";
 import ImageEditorOverlay from "./ImageEditorOverlay";
@@ -1074,3 +1073,22 @@ const LivePhotoBtnContainer = styled(Paper)`
     right: 6vh;
     z-index: 10;
 `;
+
+export async function playVideo(livePhotoVideo, livePhotoImage) {
+    const videoPlaying = !livePhotoVideo.paused;
+    if (videoPlaying) return;
+    livePhotoVideo.style.opacity = 1;
+    livePhotoImage.style.opacity = 0;
+    livePhotoVideo.load();
+    livePhotoVideo.play().catch(() => {
+        pauseVideo(livePhotoVideo, livePhotoImage);
+    });
+}
+
+export async function pauseVideo(livePhotoVideo, livePhotoImage) {
+    const videoPlaying = !livePhotoVideo.paused;
+    if (!videoPlaying) return;
+    livePhotoVideo.pause();
+    livePhotoVideo.style.opacity = 0;
+    livePhotoImage.style.opacity = 1;
+}
