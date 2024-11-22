@@ -11,6 +11,7 @@ import {
 } from "@/base/crypto";
 import log from "@/base/log";
 import { customAPIOrigin } from "@/base/origins";
+import { convertToMP4 } from "@/gallery/services/ffmpeg";
 import { renderableImageBlob } from "@/gallery/utils/convert";
 import { retryAsyncOperation } from "@/gallery/utils/retry-async";
 import type { EnteFile, LivePhotoSourceURL, SourceURLs } from "@/media/file";
@@ -18,7 +19,6 @@ import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import { CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { convertToMP4 } from "./ffmpeg";
 
 export type OnDownloadProgress = (event: {
     loaded: number;

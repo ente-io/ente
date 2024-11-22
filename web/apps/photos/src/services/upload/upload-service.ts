@@ -5,6 +5,7 @@ import { ensureElectron } from "@/base/electron";
 import { basename, nameAndExtension } from "@/base/file-name";
 import log from "@/base/log";
 import { CustomErrorMessage } from "@/base/types/ipc";
+import { extractVideoMetadata } from "@/gallery/services/ffmpeg";
 import {
     detectFileTypeInfoFromChunk,
     isFileTypeNotSupportedError,
@@ -28,7 +29,6 @@ import type {
 import { FileType, type FileTypeInfo } from "@/media/file-type";
 import { encodeLivePhoto } from "@/media/live-photo";
 import { extractExif } from "@/new/photos/services/exif";
-import { extractVideoMetadata } from "@/new/photos/services/ffmpeg";
 import {
     getNonEmptyMagicMetadataProps,
     updateMagicMetadata,
