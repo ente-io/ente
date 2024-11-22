@@ -10214,6 +10214,190 @@ class S {
       args: [],
     );
   }
+
+  /// `No suggestions for {personName}`
+  String noSuggestionsForPerson(String personName) {
+    return Intl.message(
+      'No suggestions for $personName',
+      name: 'noSuggestionsForPerson',
+      desc: '',
+      args: [personName],
+    );
+  }
+
+  /// `month`
+  String get month {
+    return Intl.message(
+      'month',
+      name: 'month',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `yr`
+  String get yearShort {
+    return Intl.message(
+      'yr',
+      name: 'yearShort',
+      desc: 'Appears in pricing page (/yr)',
+      args: [],
+    );
+  }
+
+  /// `currently running`
+  String get currentlyRunning {
+    return Intl.message(
+      'currently running',
+      name: 'currentlyRunning',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `ignored`
+  String get ignored {
+    return Intl.message(
+      'ignored',
+      name: 'ignored',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count, plural, =0 {0 photo} =1 {1 photo} other {{count} photos}}`
+  String photosCount(int count) {
+    return Intl.plural(
+      count,
+      zero: '0 photo',
+      one: '1 photo',
+      other: '$count photos',
+      name: 'photosCount',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `File`
+  String get file {
+    return Intl.message(
+      'File',
+      name: 'file',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sections length mismatch: {snapshotLenght} != {searchLenght}`
+  String searchSectionsLengthMismatch(int snapshotLenght, int searchLenght) {
+    return Intl.message(
+      'Sections length mismatch: $snapshotLenght != $searchLenght',
+      name: 'searchSectionsLengthMismatch',
+      desc: 'Appears in search tab page',
+      args: [snapshotLenght, searchLenght],
+    );
+  }
+
+  /// `Select mail app`
+  String get selectMailApp {
+    return Intl.message(
+      'Select mail app',
+      name: 'selectMailApp',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `All`
+  String get selectAllShort {
+    return Intl.message(
+      'All',
+      name: 'selectAllShort',
+      desc:
+          'Text that appears in bottom right when you start to select multiple photos. When clicked, it selects all photos.',
+      args: [],
+    );
+  }
+
+  /// `Magic Search Improvement`
+  String get changeLogMagicSearchImprovementTitle {
+    return Intl.message(
+      'Magic Search Improvement',
+      name: 'changeLogMagicSearchImprovementTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `We have improved magic search to become much faster, so you don\'t have to wait to find what you\'re looking for.`
+  String get changeLogMagicSearchImprovementContent {
+    return Intl.message(
+      'We have improved magic search to become much faster, so you don\\\'t have to wait to find what you\\\'re looking for.',
+      name: 'changeLogMagicSearchImprovementContent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Backup Status`
+  String get changeLogBackupStatusTitle {
+    return Intl.message(
+      'Backup Status',
+      name: 'changeLogBackupStatusTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `We\'ve added a log of all the files that have been uploaded to Ente, including failures and queued.`
+  String get changeLogBackupStatusContent {
+    return Intl.message(
+      'We\\\'ve added a log of all the files that have been uploaded to Ente, including failures and queued.',
+      name: 'changeLogBackupStatusContent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Discover`
+  String get changeLogDiscoverTitle {
+    return Intl.message(
+      'Discover',
+      name: 'changeLogDiscoverTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Looking for photos of your id cards, notes, or even memes? Go to the search tab and check out Discover. Based on our semantic search, it\'s a place to find photos that might be important for you.\n\nOnly available if you have enabled Machine Learning.`
+  String get changeLogDiscoverContent {
+    return Intl.message(
+      'Looking for photos of your id cards, notes, or even memes? Go to the search tab and check out Discover. Based on our semantic search, it\\\'s a place to find photos that might be important for you.\\n\\nOnly available if you have enabled Machine Learning.',
+      name: 'changeLogDiscoverContent',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select cover photo`
+  String get selectCoverPhoto {
+    return Intl.message(
+      'Select cover photo',
+      name: 'selectCoverPhoto',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `New location`
+  String get newLocation {
+    return Intl.message(
+      'New location',
+      name: 'newLocation',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

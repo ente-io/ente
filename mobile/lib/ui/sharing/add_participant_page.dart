@@ -320,7 +320,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
         ButtonWidget(
           buttonType: ButtonType.secondary,
           buttonSize: ButtonSize.small,
-          labelText: "Add",
+          labelText: S.of(context).add,
           isDisabled: !_emailIsValid,
           onTap: () async {
             if (_emailIsValid) {

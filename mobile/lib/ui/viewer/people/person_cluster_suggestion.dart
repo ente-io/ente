@@ -8,6 +8,7 @@ import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/db/ml/db.dart";
 import "package:photos/events/people_changed_event.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/person.dart";
@@ -100,7 +101,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
             if (snapshot.data!.isEmpty) {
               return Center(
                 child: Text(
-                  "No suggestions for ${widget.person.data.name}",
+                  S.of(context).noSuggestionsForPerson(widget.person.data.name),
                   style: getEnteTextTheme(context).largeMuted,
                 ),
               );
@@ -422,7 +423,7 @@ class _PersonClustersState extends State<PersonReviewClusterSuggestion> {
           );
         } else if (snapshot.hasError) {
           // log the error
-          return const Center(child: Text("Error"));
+          return Center(child: Text(S.of(context).error));
         } else {
           canGiveFeedback = false;
           return const Center(child: CircularProgressIndicator());

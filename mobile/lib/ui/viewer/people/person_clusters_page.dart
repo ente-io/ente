@@ -4,6 +4,7 @@ import "package:intl/intl.dart";
 import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/people_changed_event.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/l10n/l10n.dart";
 import "package:photos/models/file/file.dart";
 import "package:photos/models/ml/face/person.dart";
@@ -97,7 +98,7 @@ class _PersonClustersPageState extends State<PersonClustersPage> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: <Widget>[
                                 Text(
-                                  "${files.length} photos",
+                                  S.of(context).photosCount(files.length),
                                   style: getEnteTextTheme(context).body,
                                 ),
                                 (index != 0)
@@ -140,7 +141,7 @@ class _PersonClustersPageState extends State<PersonClustersPage> {
             );
           } else if (snapshot.hasError) {
             _logger.warning("Failed to get cluster", snapshot.error);
-            return const Center(child: Text("Error"));
+            return Center(child: Text(S.of(context).error));
           } else {
             return const Center(child: CircularProgressIndicator());
           }
@@ -267,7 +268,7 @@ class _PersonClustersWidgetState extends State<PersonClustersWidget> {
           );
         } else if (snapshot.hasError) {
           _logger.warning("Failed to get cluster", snapshot.error);
-          return const Center(child: Text("Error"));
+          return Center(child: Text(S.of(context).error));
         } else {
           return const Center(child: CircularProgressIndicator());
         }

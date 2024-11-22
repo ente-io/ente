@@ -20,13 +20,20 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'et';
 
-  static String m0(ignoreReason) =>
+  static String m0(personName) => "No suggestions for ${personName}";
+
+  static String m1(count) => "${count} photos";
+
+  static String m2(snapshotLenght, searchLenght) =>
+      "Sections length mismatch: ${snapshotLenght} != ${searchLenght}";
+
+  static String m3(ignoreReason) =>
       "Tap to upload, upload is currently ignored due to ${ignoreReason}";
 
-  static String m1(galleryType) =>
+  static String m4(galleryType) =>
       "Type of gallery ${galleryType} is not supported for rename";
 
-  static String m2(ignoreReason) => "Upload is ignored due to ${ignoreReason}";
+  static String m5(ignoreReason) => "Upload is ignored due to ${ignoreReason}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -38,10 +45,12 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Tere tulemast tagasi!"),
         "activeSessions":
             MessageLookupByLibrary.simpleMessage("Aktiivsed sessioonid"),
+        "add": MessageLookupByLibrary.simpleMessage("Add"),
         "addFiles": MessageLookupByLibrary.simpleMessage("Add Files"),
         "addLocation": MessageLookupByLibrary.simpleMessage("Lisa asukoht"),
         "addLocationButton": MessageLookupByLibrary.simpleMessage("Lisa"),
         "addMore": MessageLookupByLibrary.simpleMessage("Lisa veel"),
+        "addNew": MessageLookupByLibrary.simpleMessage("Add new"),
         "addedAs": MessageLookupByLibrary.simpleMessage("Lisatud kui"),
         "albumOwner": MessageLookupByLibrary.simpleMessage("Omanik"),
         "albumUpdated":
@@ -54,6 +63,19 @@ class MessageLookup extends MessageLookupByLibrary {
         "cancel": MessageLookupByLibrary.simpleMessage("Loobu"),
         "castAlbum": MessageLookupByLibrary.simpleMessage("Cast album"),
         "changeEmail": MessageLookupByLibrary.simpleMessage("Muuda e-posti"),
+        "changeLogBackupStatusContent": MessageLookupByLibrary.simpleMessage(
+            "We\\\'ve added a log of all the files that have been uploaded to Ente, including failures and queued."),
+        "changeLogBackupStatusTitle":
+            MessageLookupByLibrary.simpleMessage("Backup Status"),
+        "changeLogDiscoverContent": MessageLookupByLibrary.simpleMessage(
+            "Looking for photos of your id cards, notes, or even memes? Go to the search tab and check out Discover. Based on our semantic search, it\\\'s a place to find photos that might be important for you.\\n\\nOnly available if you have enabled Machine Learning."),
+        "changeLogDiscoverTitle":
+            MessageLookupByLibrary.simpleMessage("Discover"),
+        "changeLogMagicSearchImprovementContent":
+            MessageLookupByLibrary.simpleMessage(
+                "We have improved magic search to become much faster, so you don\\\'t have to wait to find what you\\\'re looking for."),
+        "changeLogMagicSearchImprovementTitle":
+            MessageLookupByLibrary.simpleMessage("Magic Search Improvement"),
         "changePermissions":
             MessageLookupByLibrary.simpleMessage("Muuta õiguseid?"),
         "checkForUpdates":
@@ -78,6 +100,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Loo uus konto"),
         "creatingLink":
             MessageLookupByLibrary.simpleMessage("Lingi loomine..."),
+        "currentlyRunning":
+            MessageLookupByLibrary.simpleMessage("currently running"),
         "custom": MessageLookupByLibrary.simpleMessage("Kohandatud"),
         "darkTheme": MessageLookupByLibrary.simpleMessage("Tume"),
         "dayToday": MessageLookupByLibrary.simpleMessage("Täna"),
@@ -133,6 +157,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "faq": MessageLookupByLibrary.simpleMessage("KKK"),
         "faqs": MessageLookupByLibrary.simpleMessage("KKK"),
         "feedback": MessageLookupByLibrary.simpleMessage("Tagasiside"),
+        "file": MessageLookupByLibrary.simpleMessage("File"),
         "fileNotUploadedYet":
             MessageLookupByLibrary.simpleMessage("File not uploaded yet"),
         "flip": MessageLookupByLibrary.simpleMessage("Pööra ümber"),
@@ -144,6 +169,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "help": MessageLookupByLibrary.simpleMessage("Abiinfo"),
         "hidden": MessageLookupByLibrary.simpleMessage("Peidetud"),
         "hide": MessageLookupByLibrary.simpleMessage("Peida"),
+        "ignored": MessageLookupByLibrary.simpleMessage("ignored"),
         "imageNotAnalyzed":
             MessageLookupByLibrary.simpleMessage("Image not analyzed"),
         "importing": MessageLookupByLibrary.simpleMessage("Importimine...."),
@@ -183,22 +209,30 @@ class MessageLookup extends MessageLookupByLibrary {
         "matrix": MessageLookupByLibrary.simpleMessage("Matrix"),
         "merchandise": MessageLookupByLibrary.simpleMessage("Kaup"),
         "moderateStrength": MessageLookupByLibrary.simpleMessage("Keskmine"),
+        "month": MessageLookupByLibrary.simpleMessage("month"),
+        "monthly": MessageLookupByLibrary.simpleMessage("Monthly"),
         "movedToTrash":
             MessageLookupByLibrary.simpleMessage("Liigutatud prügikasti"),
         "name": MessageLookupByLibrary.simpleMessage("Nimi"),
         "never": MessageLookupByLibrary.simpleMessage("Mitte kunagi"),
+        "newLocation": MessageLookupByLibrary.simpleMessage("New location"),
         "newest": MessageLookupByLibrary.simpleMessage("Uusimad"),
         "no": MessageLookupByLibrary.simpleMessage("Ei"),
         "noDeviceLimit": MessageLookupByLibrary.simpleMessage("Puudub"),
         "noFacesFound": MessageLookupByLibrary.simpleMessage("No faces found"),
         "noInternetConnection":
             MessageLookupByLibrary.simpleMessage("No internet connection"),
+        "noResultsFound":
+            MessageLookupByLibrary.simpleMessage("No results found"),
+        "noSuggestionsForPerson": m0,
         "ok": MessageLookupByLibrary.simpleMessage("OK"),
+        "onlyThem": MessageLookupByLibrary.simpleMessage("Only them"),
         "oops": MessageLookupByLibrary.simpleMessage("Oih"),
         "oopsSomethingWentWrong":
             MessageLookupByLibrary.simpleMessage("Oih, midagi läks valesti"),
         "password": MessageLookupByLibrary.simpleMessage("Parool"),
         "photoSmallCase": MessageLookupByLibrary.simpleMessage("foto"),
+        "photosCount": m1,
         "pleaseCheckYourInternetConnectionAndTryAgain":
             MessageLookupByLibrary.simpleMessage(
                 "Please check your internet connection and try again."),
@@ -234,9 +268,15 @@ class MessageLookup extends MessageLookupByLibrary {
         "scanThisBarcodeWithnyourAuthenticatorApp":
             MessageLookupByLibrary.simpleMessage(
                 "Skaneeri seda QR koodi\noma autentimisrakendusega"),
+        "searchSectionsLengthMismatch": m2,
         "security": MessageLookupByLibrary.simpleMessage("Turvalisus"),
         "selectAll": MessageLookupByLibrary.simpleMessage("Vali kõik"),
+        "selectAllShort": MessageLookupByLibrary.simpleMessage("All"),
+        "selectCoverPhoto":
+            MessageLookupByLibrary.simpleMessage("Select cover photo"),
         "selectLanguage": MessageLookupByLibrary.simpleMessage("Vali keel"),
+        "selectMailApp":
+            MessageLookupByLibrary.simpleMessage("Select mail app"),
         "selectReason": MessageLookupByLibrary.simpleMessage("Vali põhjus"),
         "selectYourPlan": MessageLookupByLibrary.simpleMessage("Vali pakett"),
         "sendLink": MessageLookupByLibrary.simpleMessage("Saada link"),
@@ -267,12 +307,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "storageBreakupYou": MessageLookupByLibrary.simpleMessage("Sina"),
         "strongStrength": MessageLookupByLibrary.simpleMessage("Tugev"),
         "subscribe": MessageLookupByLibrary.simpleMessage("Telli"),
+        "subscription": MessageLookupByLibrary.simpleMessage("Subscription"),
         "support": MessageLookupByLibrary.simpleMessage("Kasutajatugi"),
         "systemTheme": MessageLookupByLibrary.simpleMessage("Süsteem"),
         "tapToCopy":
             MessageLookupByLibrary.simpleMessage("kopeerimiseks vajuta"),
         "tapToUpload": MessageLookupByLibrary.simpleMessage("Tap to upload"),
-        "tapToUploadIsIgnoredDue": m0,
+        "tapToUploadIsIgnoredDue": m3,
         "terminate": MessageLookupByLibrary.simpleMessage("Lõpeta"),
         "terms": MessageLookupByLibrary.simpleMessage("Tingimused"),
         "termsOfServicesTitle":
@@ -282,9 +323,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "trash": MessageLookupByLibrary.simpleMessage("Prügikast"),
         "tryAgain": MessageLookupByLibrary.simpleMessage("Proovi uuesti"),
         "twitter": MessageLookupByLibrary.simpleMessage("Twitter"),
-        "typeOfGallerGallerytypeIsNotSupportedForRename": m1,
+        "typeOfGallerGallerytypeIsNotSupportedForRename": m4,
         "uncategorized": MessageLookupByLibrary.simpleMessage("Liigitamata"),
-        "uploadIsIgnoredDueToIgnorereason": m2,
+        "uploadIsIgnoredDueToIgnorereason": m5,
         "useRecoveryKey":
             MessageLookupByLibrary.simpleMessage("Kasuta taastevõtit"),
         "usedSpace":
@@ -297,6 +338,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "weakStrength": MessageLookupByLibrary.simpleMessage("Nõrk"),
         "welcomeBack":
             MessageLookupByLibrary.simpleMessage("Tere tulemast tagasi!"),
+        "yearShort": MessageLookupByLibrary.simpleMessage("yr"),
+        "yearly": MessageLookupByLibrary.simpleMessage("Yearly"),
         "yes": MessageLookupByLibrary.simpleMessage("Jah"),
         "yesConvertToViewer":
             MessageLookupByLibrary.simpleMessage("Jah, muuda vaatajaks"),
@@ -308,6 +351,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "youAreOnTheLatestVersion":
             MessageLookupByLibrary.simpleMessage("Kasutad viimast versiooni"),
         "youCannotShareWithYourself":
-            MessageLookupByLibrary.simpleMessage("Sa ei saa iseendaga jagada")
+            MessageLookupByLibrary.simpleMessage("Sa ei saa iseendaga jagada"),
+        "yourMap": MessageLookupByLibrary.simpleMessage("Your Map")
       };
 }

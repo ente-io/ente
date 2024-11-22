@@ -3,6 +3,7 @@ import "dart:async";
 import 'package:flutter/material.dart';
 import "package:flutter_animate/flutter_animate.dart";
 import "package:photos/events/event.dart";
+import "package:photos/generated/l10n.dart";
 import "package:photos/models/search/search_result.dart";
 import "package:photos/models/search/search_types.dart";
 import "package:photos/theme/ente_theme.dart";
@@ -67,7 +68,7 @@ class _PeopleSectionAllPageState extends State<PeopleSectionAllPage> {
           } else if (snapshot.hasError) {
             return const Center(child: Icon(Icons.error_outline_rounded));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No results found.'));
+            return Center(child: Text(S.of(context).noResultsFound + '.'));
           } else {
             final results = snapshot.data!;
             final screenWidth = MediaQuery.of(context).size.width;
