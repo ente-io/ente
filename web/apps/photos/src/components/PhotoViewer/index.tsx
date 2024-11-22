@@ -1,4 +1,5 @@
 import { isDesktop } from "@/base/app";
+import { FilledIconButton, type ButtonishProps } from "@/base/components/mui";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import { Overlay } from "@/base/components/mui/Container";
 import { type ModalVisibilityProps } from "@/base/components/utils/modal";
@@ -8,10 +9,6 @@ import type { LoadedLivePhotoSourceURL } from "@/media/file";
 import { fileLogID, type EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
-import {
-    FilledIconButton,
-    type ButtonishProps,
-} from "@/new/photos/components/mui";
 import downloadManager from "@/new/photos/services/download";
 import { extractRawExif, parseExif } from "@/new/photos/services/exif";
 import { AppContext } from "@/new/photos/types/context";
