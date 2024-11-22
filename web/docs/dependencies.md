@@ -166,6 +166,11 @@ For more details, see [translations.md](translations.md).
 
 ## Media
 
+-   [ffmpeg.wasm](https://github.com/ffmpegwasm/ffmpeg.wasm) is used to run
+    FFmpeg in the browser using WASM. Note that this is substantially slower
+    than native ffmpeg, which is why we still recommend customers to use the
+    desktop app (since it can bundle a native ffmpeg implementation too).
+
 -   [ExifReader](https://github.com/mattiasw/ExifReader) is used for Exif
     parsing.
 
