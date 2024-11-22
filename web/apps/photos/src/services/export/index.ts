@@ -21,12 +21,9 @@ import {
 } from "@/new/photos/services/export";
 import { getAllLocalFiles } from "@/new/photos/services/files";
 import { safeDirectoryName, safeFileName } from "@/new/photos/utils/native-fs";
+import { PromiseQueue } from "@/utils/promise";
 import { CustomError } from "@ente/shared/error";
 import { LS_KEYS, getData, setData } from "@ente/shared/storage/localStorage";
-import QueueProcessor, {
-    CancellationStatus,
-    RequestCanceller,
-} from "@ente/shared/utils/queueProcessor";
 import i18n from "i18next";
 import {
     CollectionExportNames,
@@ -79,13 +76,20 @@ export interface ExportOpts {
     resync?: boolean;
 }
 
+interface RequestCanceller {
+    exec: () => void;
+}
+
+interface CancellationStatus {
+    status: boolean;
+}
+
 class ExportService {
     private exportSettings: ExportSettings;
     private exportInProgress: RequestCanceller = null;
     private resync = true;
     private reRunNeeded = false;
-    private exportRecordUpdater = new QueueProcessor<ExportRecord>();
-    private fileReader: FileReader = null;
+    private exportRecordUpdater = new PromiseQueue<ExportRecord>();
     private continuousExportEventHandler: () => void;
     private uiUpdater: ExportUIUpdaters = {
         setExportProgress: () => {},
@@ -849,10 +853,9 @@ class ExportService {
     }
 
     async updateExportRecord(folder: string, newData: Partial<ExportRecord>) {
-        const response = this.exportRecordUpdater.queueUpRequest(() =>
+        return this.exportRecordUpdater.add(() =>
             this.updateExportRecordHelper(folder, newData),
         );
-        return response.promise;
     }
 
     async updateExportRecordHelper(
