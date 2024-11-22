@@ -106,3 +106,49 @@ export const withTimeout = async <T>(promise: Promise<T>, ms: number) => {
     };
     return Promise.race([promiseAndCancelTimeout(), rejectOnTimeout]);
 };
+
+/**
+ * A promise queue to serialize execution of bunch of promises.
+ *
+ * Promises can be added to the queue with the {@link add} function, which
+ * returns a new promise that'll settle when the original promise settles.
+ *
+ * The queue will ensure that promises run sequentially one after the other, in
+ * the order which they are added.
+ */
+export class PromiseQueue<T> {
+    private q: {
+        task: () => Promise<T>;
+        handlers: unknown;
+    }[] = [];
+
+    /**
+     * Add a promise to the queue, and return a new promise that will resolve to
+     * the provided promise when it gets a chance to run (after all previous
+     * promises in the queue have settled).
+     *
+     * @param task To avoid starting the promise resolution when adding them,
+     * instead of the promise itself, {@link add} takes a function that should
+     * return the promise that we wish to await.
+     */
+    async add(task: () => Promise<T>) {
+        let handlers;
+        const p = new Promise((...args) => (handlers = args));
+        this.q.push({ task, handlers });
+        if (this.q.length == 1) this.next();
+        return p;
+    }
+
+    private next() {
+        const item = this.q[0];
+        if (!item) return;
+        const { task, handlers } = item;
+        void task()
+            // @ts-expect-error Can't think of an easy way to satisfy tsc.
+            .then(...handlers)
+            .finally(() => {
+                this.q.shift();
+                this.next();
+            });
+    }
+}
