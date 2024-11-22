@@ -115,6 +115,7 @@ type DeleteChallengeResponse struct {
 	// AllowDelete indicates whether the user is allowed to delete their account via app
 	AllowDelete        bool    `json:"allowDelete"`
 	EncryptedChallenge *string `json:"encryptedChallenge,omitempty"`
+	Apps               []App   `json:"apps"`
 }
 
 type DeleteAccountRequest struct {
