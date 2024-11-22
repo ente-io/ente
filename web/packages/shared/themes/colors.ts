@@ -95,13 +95,11 @@ const lightThemeColors: Omit<ThemeColorsOptions, keyof FixedColors> = {
         faint: "rgba(0, 0, 0, 0.04)",
         basePressed: "rgba(0, 0, 0, 0.87))",
         faintPressed: "rgba(0, 0, 0, 0.08)",
-        strong: "rgba(0, 0, 0, 0.24)",
     },
     stroke: {
         base: "#000",
         muted: "rgba(0, 0, 0, 0.24)",
         faint: "rgba(0, 0, 0, 0.12)",
-        fainter: "rgba(0, 0, 0, 0.06)",
     },
 
     shadows: {
@@ -178,13 +176,11 @@ const darkThemeColors: Omit<ThemeColorsOptions, keyof FixedColors> = {
         faint: "rgba(255, 255, 255, 0.12)",
         basePressed: "rgba(255, 255, 255, 0.90)",
         faintPressed: "rgba(255, 255, 255, 0.06)",
-        strong: "rgba(255, 255, 255, 0.32)",
     },
     stroke: {
         base: "#ffffff",
         muted: "rgba(255,255,255,0.24)",
         faint: "rgba(255,255,255,0.16)",
-        fainter: "rgba(255,255,255,0.08)",
     },
 
     shadows: {
