@@ -1048,19 +1048,19 @@ import {
     FilledIconButton,
     type ButtonishProps,
 } from "@/new/photos/components/mui";
-import { Snackbar, Stack, type ButtonProps } from "@mui/material";
+import { Snackbar, type ButtonProps } from "@mui/material";
 
 const ConversionFailedNotification: React.FC<
     ConversionFailedNotificationProps
 > = ({ open, onClose, onClick }) => {
-    const handleClose: ButtonProps["onClick"] = (event) => {
-        onClose();
-        event.stopPropagation();
-    };
-
     const handleClick = () => {
         onClick();
         onClose();
+    };
+
+    const handleClose: ButtonProps["onClick"] = (event) => {
+        onClose();
+        event.stopPropagation();
     };
 
     return (
@@ -1073,41 +1073,24 @@ const ConversionFailedNotification: React.FC<
                 color={"secondary"}
                 onClick={handleClick}
                 sx={{
-                    textAlign: "left",
-                    flex: "1",
-                    padding: (theme) => theme.spacing(1.5, 2),
                     borderRadius: "8px",
+                    flex: 1,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "16px",
                 }}
             >
-                <Stack
-                    flex={"1"}
-                    spacing={2}
-                    direction="row"
-                    alignItems={"center"}
-                    width={"100%"}
-                >
-                    <Box sx={{ svg: { fontSize: "36px" } }}>
-                        <InfoIcon />
-                    </Box>
+                <Box sx={{ svg: { fontSize: "36px" } }}>
+                    <InfoIcon />
+                </Box>
 
-                    <Stack
-                        direction={"column"}
-                        spacing={0.5}
-                        flex={1}
-                        textAlign="left"
-                        // This is necessary to trigger the ellipsizing of the
-                        // text in children.
-                        overflow="hidden"
-                    >
-                        <Typography variant="small">
-                            {t("CONVERSION_FAILED_NOTIFICATION_MESSAGE")}
-                        </Typography>
-                    </Stack>
+                <Typography variant="small" sx={{ flex: 1, textAlign: "left" }}>
+                    {t("CONVERSION_FAILED_NOTIFICATION_MESSAGE")}
+                </Typography>
 
-                    <FilledIconButton onClick={handleClose}>
-                        <CloseIcon />
-                    </FilledIconButton>
-                </Stack>
+                <FilledIconButton onClick={handleClose}>
+                    <CloseIcon />
+                </FilledIconButton>
             </Button>
         </Snackbar>
     );
