@@ -131,9 +131,9 @@ export class PromiseQueue<T> {
      * instead of the promise itself, {@link add} takes a function that should
      * return the promise that we wish to await.
      */
-    async add(task: () => Promise<T>) {
+    async add(task: () => Promise<T>): Promise<T> {
         let handlers;
-        const p = new Promise((...args) => (handlers = args));
+        const p = new Promise<T>((...args) => (handlers = args));
         this.q.push({ task, handlers });
         if (this.q.length == 1) this.next();
         return p;

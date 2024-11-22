@@ -1,6 +1,6 @@
 import { newID } from "@/base/id";
 import log from "@/base/log";
-import QueueProcessor from "@ente/shared/utils/queueProcessor";
+import { PromiseQueue } from "@/utils/promise";
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import {
     ffmpegPathPlaceholder,
@@ -12,7 +12,7 @@ import {
 let _ffmpeg: Promise<FFmpeg> | undefined;
 
 /** Queue of in-flight requests. */
-const _ffmpegTaskQueue = new QueueProcessor<Uint8Array>();
+const _ffmpegTaskQueue = new PromiseQueue<Uint8Array>();
 
 /**
  * Return the shared {@link FFmpeg} instance, lazily creating and loading it if
@@ -57,10 +57,9 @@ export const ffmpegExecWeb = async (
     // >  "Out of bounds memory access (evaluating 'Module["_malloc"](len)')"
     //
     // So serialize them using a promise queue.
-    const request = _ffmpegTaskQueue.queueUpRequest(() =>
+    return _ffmpegTaskQueue.add(() =>
         ffmpegExec(ffmpeg, command, outputFileExtension, blob),
     );
-    return await request.promise;
 };
 
 const ffmpegExec = async (
