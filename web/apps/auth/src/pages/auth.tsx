@@ -13,7 +13,14 @@ import { AUTH_PAGES as PAGES } from "@ente/shared/constants/pages";
 import { ApiError, CustomError } from "@ente/shared/error";
 import LogoutOutlined from "@mui/icons-material/LogoutOutlined";
 import MoreHoriz from "@mui/icons-material/MoreHoriz";
-import { Button, ButtonBase, Snackbar, TextField, styled } from "@mui/material";
+import {
+    Button,
+    ButtonBase,
+    Snackbar,
+    TextField,
+    Typography,
+    styled,
+} from "@mui/material";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
@@ -119,9 +126,11 @@ const Page: React.FC = () => {
                             }}
                         >
                             {searchTerm.length > 0 ? (
-                                <p>{t("no_results")}</p>
+                                <Typography>{t("no_results")}</Typography>
                             ) : (
-                                <></>
+                                <Typography color="text.muted">
+                                    {t("no_codes_added_yet")}
+                                </Typography>
                             )}
                         </div>
                     ) : (
@@ -400,7 +409,7 @@ const UnparseableCode: React.FC<UnparseableCodeProps> = ({
 const Footer: React.FC = () => {
     return (
         <Footer_>
-            <p>{t("AUTH_DOWNLOAD_MOBILE_APP")}</p>
+            <Typography>{t("AUTH_DOWNLOAD_MOBILE_APP")}</Typography>
             <a
                 href="https://github.com/ente-io/ente/tree/main/auth#-download"
                 download
@@ -412,9 +421,9 @@ const Footer: React.FC = () => {
 };
 
 const Footer_ = styled("div")`
-    margin-block-start: 2rem;
-    margin-block-end: 4rem;
+    margin-block: 4rem;
     display: flex;
+    gap: 1rem;
     flex-direction: column;
     align-items: center;
     justify-content: center;
