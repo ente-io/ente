@@ -46,8 +46,12 @@ export class SearchWorker {
      * session storage so this key needs to be passed to us explicitly.
      */
     async sync(masterKey: Uint8Array) {
-        // Let the cities fetch complete async.
-        void fetchCities().then((cs) => (this.cities = cs));
+        // Let the cities fetch complete async. And do it only once per app
+        // startup (this list is static and doesn't change).
+        if (this.cities.length == 0) {
+            void fetchCities().then((cs) => (this.cities = cs));
+        }
+
         return pullUserEntities("location", masterKey)
             .then(() => savedLocationTags())
             .then((ts) => (this.locationTags = ts));
