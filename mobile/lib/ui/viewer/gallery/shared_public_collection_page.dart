@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:logging/logging.dart";
 import "package:photos/core/event_bus.dart";
 import "package:photos/events/collection_meta_event.dart";
 import "package:photos/events/collection_updated_event.dart";
@@ -34,6 +35,8 @@ class SharedPublicCollectionPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final logger = Logger("SharedPublicCollectionPage");
+    logger.info("Building SharedPublicCollectionPage");
     final bool isPublicDownload = c.collection.isPublicDownload();
     final bool isisEnableCollect = c.collection.isEnableCollect();
     final List<EnteFile>? initialFiles =

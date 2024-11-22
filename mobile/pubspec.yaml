@@ -114,8 +114,8 @@ dependencies:
   maps_launcher: ^2.2.1
   media_extension:
     git:
-      url: "https://github.com/AmanRajSinghMourya/media_extension.git"
-      ref: handle_incoming_links
+      url: "https://github.com/ente-io/media_extension.git"
+      ref: deeplink_fixes
   media_kit: ^1.1.10+1
   media_kit_libs_video: ^1.0.4
   media_kit_video: ^1.2.4

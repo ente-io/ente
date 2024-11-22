@@ -1510,9 +1510,9 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: handle_incoming_links
-      resolved-ref: ca5c4960e05cd5dcf0eb16ad1bab72febffc6676
-      url: "https://github.com/AmanRajSinghMourya/media_extension.git"
+      ref: deeplink_fixes
+      resolved-ref: "520a200a6f76dece843f3e0eedb9b1f89c805cdf"
+      url: "https://github.com/ente-io/media_extension.git"
     source: git
     version: "1.0.2"
   media_kit:

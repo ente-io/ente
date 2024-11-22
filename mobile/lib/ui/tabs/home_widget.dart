@@ -259,71 +259,75 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   Future<void> _handlePublicAlbumLink(Uri uri) async {
-    bool result = true;
-    final Collection collection =
-        await CollectionsService.instance.getPublicCollection(context, uri);
+    try {
+      bool result = true;
+      final Collection collection =
+          await CollectionsService.instance.getPublicCollection(context, uri);
 
-    if (collection.owner!.id! == Configuration.instance.getUserID()) {
-      await routeToPage(
-        context,
-        CollectionPage(
-          CollectionWithThumbnail(collection, null),
-        ),
-      );
-      return;
-    }
-
-    final publicUrl = collection.publicURLs![0];
-    if (publicUrl!.passwordEnabled) {
-      await showTextInputDialog(
-        context,
-        title: S.of(context).enterPassword,
-        submitButtonLabel: S.of(context).ok,
-        alwaysShowSuccessState: false,
-        onSubmit: (String text) async {
-          if (text.trim() == "") {
-            return;
-          }
-          try {
-            final hashedPassword = await CryptoUtil.deriveKey(
-              utf8.encode(text),
-              CryptoUtil.base642bin(publicUrl.nonce!),
-              publicUrl.memLimit!,
-              publicUrl.opsLimit!,
-            );
-
-            result = await CollectionsService.instance
-                .verifyPublicCollectionPassword(
-              context,
-              CryptoUtil.bin2base64(hashedPassword),
-              collection.id,
-            );
-          } catch (e, s) {
-            _logger.severe("Failed to decrypt password for album", e, s);
-            await showGenericErrorDialog(context: context, error: e);
-          }
-        },
-      );
-    }
-
-    if (result) {
-      final dialog = createProgressDialog(context, "Loading...");
-      await dialog.show();
-
-      final List<EnteFile> sharedFiles =
-          await _diffFetcher.getPublicFiles(context, collection.id);
-      await dialog.hide();
-
-      await routeToPage(
-        context,
-        SharedPublicCollectionPage(
-          files: sharedFiles,
-          CollectionWithThumbnail(
-            collection,
-            null,
+      if (collection.owner!.id! == Configuration.instance.getUserID()) {
+        await routeToPage(
+          context,
+          CollectionPage(
+            CollectionWithThumbnail(collection, null),
           ),
-        ),
-      );
+        );
+        return;
+      }
+
+      final publicUrl = collection.publicURLs![0];
+      if (publicUrl!.passwordEnabled) {
+        await showTextInputDialog(
+          context,
+          title: S.of(context).enterPassword,
+          submitButtonLabel: S.of(context).ok,
+          alwaysShowSuccessState: false,
+          onSubmit: (String text) async {
+            if (text.trim() == "") {
+              return;
+            }
+            try {
+              final hashedPassword = await CryptoUtil.deriveKey(
+                utf8.encode(text),
+                CryptoUtil.base642bin(publicUrl.nonce!),
+                publicUrl.memLimit!,
+                publicUrl.opsLimit!,
+              );
+
+              result = await CollectionsService.instance
+                  .verifyPublicCollectionPassword(
+                context,
+                CryptoUtil.bin2base64(hashedPassword),
+                collection.id,
+              );
+            } catch (e, s) {
+              _logger.severe("Failed to decrypt password for album", e, s);
+              await showGenericErrorDialog(context: context, error: e);
+            }
+          },
+        );
+      }
+
+      if (result) {
+        final dialog = createProgressDialog(context, "Loading...");
+        await dialog.show();
+
+        final List<EnteFile> sharedFiles =
+            await _diffFetcher.getPublicFiles(context, collection.id);
+        await dialog.hide();
+
+        await routeToPage(
+          context,
+          SharedPublicCollectionPage(
+            files: sharedFiles,
+            CollectionWithThumbnail(
+              collection,
+              null,
+            ),
+          ),
+        );
+      }
+    } catch (e, s) {
+      _logger.severe("Failed to handle public album link", e, s);
     }
   }
 
