@@ -1,4 +1,5 @@
 import { ActivityErrorIndicator } from "@/base/components/ErrorIndicator";
+import { type ButtonishProps } from "@/base/components/mui";
 import { ActivityIndicator } from "@/base/components/mui/ActivityIndicator";
 import {
     CenteredFill,
@@ -60,7 +61,6 @@ import { t } from "i18next";
 import React, { useEffect, useReducer, useState } from "react";
 import type { FaceCluster } from "../../services/ml/cluster";
 import { useAppContext } from "../../types/context";
-import { type ButtonishProps } from "../mui";
 import { DialogCloseIconButton } from "../mui/Dialog";
 import { SuggestionFaceList } from "../PeopleList";
 import { SingleInputDialog } from "../SingleInputForm";

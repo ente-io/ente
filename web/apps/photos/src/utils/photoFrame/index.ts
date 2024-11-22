@@ -29,6 +29,7 @@ export function updateFileMsrcProps(file: EnteFile, url: string) {
     file.w = window.innerWidth;
     file.h = window.innerHeight;
     file.msrc = url;
+    file.canForceConvert = false;
     file.isSourceLoaded = false;
     file.conversionFailed = false;
     file.isConverted = false;
@@ -55,6 +56,7 @@ export async function updateFileSrcProps(
         file.metadata.fileType === FileType.livePhoto
             ? srcURLs.type === "livePhoto"
             : true;
+    file.canForceConvert = srcURLs.canForceConvert;
     file.isConverted = !isOriginal;
     file.conversionFailed = !isRenderable;
     file.srcURLs = srcURLs;

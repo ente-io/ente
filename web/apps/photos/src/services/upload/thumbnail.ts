@@ -1,10 +1,10 @@
 import log from "@/base/log";
 import { type Electron } from "@/base/types/ipc";
+import * as ffmpeg from "@/gallery/services/ffmpeg";
 import { FileType, type FileTypeInfo } from "@/media/file-type";
 import { isHEICExtension } from "@/media/formats";
 import { heicToJPEG } from "@/media/heic-convert";
 import { scaledImageDimensions } from "@/media/image";
-import * as ffmpeg from "@/new/photos/services/ffmpeg";
 import {
     toDataOrPathOrZipEntry,
     type DesktopUploadItem,

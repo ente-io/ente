@@ -1,5 +1,5 @@
 import { EllipsizedTypography } from "@/base/components/Typography";
-import { FilledIconButton } from "@/new/photos/components/mui";
+import { FilledIconButton } from "@/base/components/mui";
 import { NotificationAttributes } from "@/new/photos/types/notification";
 import CloseIcon from "@mui/icons-material/Close";
 import InfoIcon from "@mui/icons-material/InfoOutlined";

@@ -11,14 +11,16 @@ import {
 } from "@/base/crypto";
 import log from "@/base/log";
 import { customAPIOrigin } from "@/base/origins";
-import { renderableImageBlob } from "@/gallery/utils/convert";
+import {
+    playableVideoBlob,
+    renderableImageBlob,
+} from "@/gallery/utils/convert";
 import { retryAsyncOperation } from "@/gallery/utils/retry-async";
 import type { EnteFile, LivePhotoSourceURL, SourceURLs } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { decodeLivePhoto } from "@/media/live-photo";
 import { CustomError } from "@ente/shared/error";
 import HTTPService from "@ente/shared/network/HTTPService";
-import { convertToMP4 } from "./ffmpeg";
 
 export type OnDownloadProgress = (event: {
     loaded: number;
@@ -176,18 +178,16 @@ class DownloadManagerImpl {
     }
 
     /**
-     * The `forceConvertVideos` option is true when the user presses the
-     * "Convert" button. It bypasses the preflight check we use to see if the
-     * browser can already play the video, and instead always does the
-     * transcoding.
+     * The `forceConvert` option is true when the user presses the "Convert"
+     * button. See: [Note: Forcing conversion of playable videos].
      */
     getFileForPreview = async (
         file: EnteFile,
-        opts?: { forceConvertVideos?: boolean },
+        opts?: { forceConvert?: boolean },
     ): Promise<SourceURLs | undefined> => {
         this.ensureInitialized();
         try {
-            const forceConvertVideos = opts?.forceConvertVideos ?? false;
+            const forceConvert = opts?.forceConvert ?? false;
             const getFileForPreviewPromise = async () => {
                 const fileBlob = await new Response(
                     await this.getFile(file, true),
@@ -202,14 +202,11 @@ class DownloadManagerImpl {
                     file,
                     fileBlob,
                     originalFileURL as string,
-                    forceConvertVideos,
+                    forceConvert,
                 );
                 return converted;
             };
-            if (
-                forceConvertVideos ||
-                !this.fileConversionPromises.has(file.id)
-            ) {
+            if (forceConvert || !this.fileConversionPromises.has(file.id)) {
                 this.fileConversionPromises.set(
                     file.id,
                     getFileForPreviewPromise(),
@@ -437,7 +434,7 @@ async function getRenderableFileURL(
     file: EnteFile,
     fileBlob: Blob,
     originalFileURL: string,
-    forceConvertVideos: boolean,
+    forceConvert: boolean,
 ): Promise<SourceURLs> {
     const existingOrNewObjectURL = (convertedBlob: Blob | null | undefined) =>
         convertedBlob
@@ -451,13 +448,12 @@ async function getRenderableFileURL(
     let isRenderable: boolean;
     let type: SourceURLs["type"] = "normal";
     let mimeType: string | undefined;
+    let canForceConvert = false;
 
+    const fileName = file.metadata.title;
     switch (file.metadata.fileType) {
         case FileType.image: {
-            const convertedBlob = await renderableImageBlob(
-                file.metadata.title,
-                fileBlob,
-            );
+            const convertedBlob = await renderableImageBlob(fileName, fileBlob);
             const convertedURL = existingOrNewObjectURL(convertedBlob);
             url = convertedURL;
             isOriginal = convertedURL === originalFileURL;
@@ -473,16 +469,20 @@ async function getRenderableFileURL(
             break;
         }
         case FileType.video: {
-            const convertedBlob = await getPlayableVideo(
-                file.metadata.title,
+            const convertedBlob = await playableVideoBlob(
+                fileName,
                 fileBlob,
-                forceConvertVideos,
+                forceConvert,
             );
             const convertedURL = existingOrNewObjectURL(convertedBlob);
             url = convertedURL;
             isOriginal = convertedURL === originalFileURL;
             isRenderable = !!convertedURL;
             mimeType = convertedBlob?.type;
+
+            canForceConvert =
+                isDesktop && !forceConvert && isOriginal && isRenderable;
+
             break;
         }
         default: {
@@ -494,7 +494,14 @@ async function getRenderableFileURL(
     }
 
     // TODO: Can we remove this non-null assertion and reflect it in the types?
-    return { url: url!, isOriginal, isRenderable, type, mimeType };
+    return {
+        url: url!,
+        isOriginal,
+        isRenderable,
+        type,
+        mimeType,
+        canForceConvert,
+    };
 }
 
 async function getRenderableLivePhotoURL(
@@ -518,7 +525,7 @@ async function getRenderableLivePhotoURL(
     const getRenderableLivePhotoVideoURL = async () => {
         try {
             const videoBlob = new Blob([livePhoto.videoData]);
-            const convertedVideoBlob = await getPlayableVideo(
+            const convertedVideoBlob = await playableVideoBlob(
                 livePhoto.videoFileName,
                 videoBlob,
                 false,
@@ -535,70 +542,6 @@ async function getRenderableLivePhotoURL(
         image: getRenderableLivePhotoImageURL,
         video: getRenderableLivePhotoVideoURL,
     };
-}
-
-async function getPlayableVideo(
-    videoNameTitle: string,
-    videoBlob: Blob,
-    forceConvert: boolean,
-) {
-    const converted = async () => {
-        try {
-            log.info(`Converting video ${videoNameTitle} to mp4`);
-            const convertedVideoData = await convertToMP4(videoBlob);
-            return new Blob([convertedVideoData], { type: "video/mp4" });
-        } catch (e) {
-            log.error("Video conversion failed", e);
-            return null;
-        }
-    };
-
-    // If we've been asked to force convert, do it regardless of anything else.
-    if (forceConvert) return converted();
-
-    const isPlayable = await isPlaybackPossible(URL.createObjectURL(videoBlob));
-    if (isPlayable) return videoBlob;
-
-    // The browser doesn't think it can play this video, try transcoding.
-    if (isDesktop) {
-        return converted();
-    } else {
-        // Don't try to transcode on the web if the file is too big.
-        if (videoBlob.size > 100 * 1024 * 1024 /* 100 MB */) {
-            return null;
-        } else {
-            return converted();
-        }
-    }
-}
-
-const WAIT_FOR_VIDEO_PLAYBACK = 1 * 1000;
-
-async function isPlaybackPossible(url: string): Promise<boolean> {
-    return await new Promise((resolve) => {
-        const t = setTimeout(() => {
-            resolve(false);
-        }, WAIT_FOR_VIDEO_PLAYBACK);
-
-        const video = document.createElement("video");
-        video.addEventListener("canplay", function () {
-            clearTimeout(t);
-            video.remove(); // Clean up the video element
-            // also check for duration > 0 to make sure it is not a broken video
-            if (video.duration > 0) {
-                resolve(true);
-            } else {
-                resolve(false);
-            }
-        });
-        video.addEventListener("error", function () {
-            clearTimeout(t);
-            video.remove();
-            resolve(false);
-        });
-
-        video.src = url;
-    });
 }
 
 class PhotosDownloadClient implements DownloadClient {
