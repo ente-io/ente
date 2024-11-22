@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/ente-io/museum/pkg/controller/remotestore"
+	"github.com/ente-io/museum/pkg/repo/authenticator"
 	"net/http"
 	"strconv"
 	"strings"
@@ -39,6 +40,7 @@ type AdminHandler struct {
 	QueueRepo               *repo.QueueRepository
 	UserRepo                *repo.UserRepository
 	CollectionRepo          *repo.CollectionRepository
+	AuthenticatorRepo       *authenticator.Repository
 	UserAuthRepo            *repo.UserAuthRepository
 	FileRepo                *repo.FileRepository
 	BillingRepo             *repo.BillingRepository
@@ -570,6 +572,14 @@ func (h *AdminHandler) attachSubscription(ctx *gin.Context, userID int64, respon
 	details, err := h.UserController.GetDetailsV2(ctx, userID, false, ente.Photos)
 	if err == nil {
 		response["details"] = details
+	}
+	tokenInfos, err := h.UserAuthRepo.GetUserTokenInfo(userID)
+	if err == nil {
+		response["tokens"] = tokenInfos
+	}
+	authEntryCount, err := h.AuthenticatorRepo.GetAuthCodeCount(ctx, userID)
+	if err == nil {
+		response["authCodes"] = authEntryCount
 	}
 }
 
