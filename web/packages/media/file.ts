@@ -113,11 +113,13 @@ export interface SourceURLs {
     /**
      * Best effort attempt at obtaining the MIME type.
      *
+     * It will only be present for images generally, which is also the only
+     * scenario where it is needed currently (by the image editor).
+     *
      * Known cases where it is missing:
      *
      * - Live photos (these have a different code path for obtaining the URL).
      * - A video that is passes the isPlayable test in the browser.
-     *
      */
     mimeType?: string;
 }

@@ -372,9 +372,9 @@ const ImageEditorOverlay = (props: IProps) => {
                 );
                 img.src = srcURLs.url as string;
                 setFileURL(srcURLs.url as string);
-                // We're casting the srcURLs.url to string above, i.e. this code
-                // is not meant to run for the live photos scenario. For images,
-                // we usually will have the mime type.
+                // The image editing works for images (not live photos or
+                // video), where we should generally also get the MIME type from
+                // our lower layers.
                 setMIMEType(srcURLs.mimeType);
             } else {
                 img.src = fileURL;
