@@ -1,7 +1,7 @@
+import { FilledIconButton } from "@/base/components/mui";
 import { Overlay } from "@/base/components/mui/Container";
 import { useIsSmallWidth } from "@/base/components/utils/hooks";
 import { CollectionsSortOptions } from "@/new/photos/components/CollectionsSortOptions";
-import { FilledIconButton } from "@/new/photos/components/mui";
 import {
     IMAGE_CONTAINER_MAX_WIDTH,
     MIN_COLUMNS,

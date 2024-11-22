@@ -75,8 +75,8 @@ class PickCoverPhotoWidget extends StatelessWidget {
                     child: Column(
                       children: [
                         BottomOfTitleBarWidget(
-                          title: const TitleBarTitleWidget(
-                            title: "Select cover photo",
+                          title: TitleBarTitleWidget(
+                            title: S.of(context).selectCoverPhoto,
                           ),
                           caption: collection.displayName,
                           showCloseButton: true,

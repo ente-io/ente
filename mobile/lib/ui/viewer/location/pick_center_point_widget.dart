@@ -81,7 +81,7 @@ class PickCenterPointWidget extends StatelessWidget {
                           title: TitleBarTitleWidget(
                             title: S.of(context).pickCenterPoint,
                           ),
-                          caption: locationTagName ?? "New location",
+                          caption: locationTagName ?? S.of(context).newLocation,
                         ),
                         Expanded(
                           child: GalleryFilesState(

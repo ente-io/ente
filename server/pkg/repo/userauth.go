@@ -48,6 +48,42 @@ func (repo *UserAuthRepository) GetTokenCreationTime(token string) (int64, error
 	return result, nil
 }
 
+func (repo *UserAuthRepository) GetUserTokenInfo(userID int64) ([]ente.TokenInfo, error) {
+	rows, err := repo.DB.Query(`SELECT creation_time, last_used_at, user_agent, is_deleted, app FROM tokens WHERE user_id = $1 AND is_deleted = false`, userID)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	defer rows.Close()
+	tokenInfos := make([]ente.TokenInfo, 0)
+	for rows.Next() {
+		var tokenInfo ente.TokenInfo
+		err := rows.Scan(&tokenInfo.CreationTime, &tokenInfo.LastUsedTime, &tokenInfo.UA, &tokenInfo.IsDeleted, &tokenInfo.App)
+		if err != nil {
+			return nil, stacktrace.Propagate(err, "")
+		}
+		tokenInfos = append(tokenInfos, tokenInfo)
+	}
+	return tokenInfos, nil
+}
+
+func (repo *UserAuthRepository) GetAppsForUser(userID int64) ([]ente.App, error) {
+	rows, err := repo.DB.Query(`SELECT DISTINCT app FROM tokens WHERE user_id = $1`, userID)
+	if err != nil {
+		return nil, stacktrace.Propagate(err, "")
+	}
+	defer rows.Close()
+	apps := make([]ente.App, 0)
+	for rows.Next() {
+		var app ente.App
+		err := rows.Scan(&app)
+		if err != nil {
+			return nil, stacktrace.Propagate(err, "")
+		}
+		apps = append(apps, app)
+	}
+	return apps, nil
+}
+
 // GetValidOTTs returns the list of OTTs that haven't expired for a given user
 func (repo *UserAuthRepository) GetValidOTTs(emailHash string, app ente.App) ([]string, error) {
 	rows, err := repo.DB.Query(`SELECT ott FROM otts WHERE email_hash = $1 AND app = $2 AND expiration_time > $3`,
