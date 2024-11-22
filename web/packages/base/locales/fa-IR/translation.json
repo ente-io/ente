@@ -1,6 +1,6 @@
 {
-    "intro_slide_1_title": "",
-    "intro_slide_1": "",
+    "intro_slide_1_title": "<div>پشتیبان گیری خصوصی</div><div>برای خاطرات شما</div>",
+    "intro_slide_1": "به صورت پیش‌فرض رمزگذاری سرتاسر",
     "intro_slide_2_title": "",
     "intro_slide_2": "",
     "intro_slide_3_title": "",
@@ -555,6 +555,7 @@
     "at": "",
     "AUTH_NEXT": "",
     "AUTH_DOWNLOAD_MOBILE_APP": "",
+    "no_codes_added_yet": "",
     "HIDE": "",
     "UNHIDE": "",
     "sort_by": "",
