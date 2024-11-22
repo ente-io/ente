@@ -1043,7 +1043,6 @@ const ConversionFailedNotification: React.FC<
             }}
             horizontal="right"
             vertical="bottom"
-            sx={{ zIndex: 4000 }}
         />
     );
 };
