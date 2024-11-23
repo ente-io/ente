@@ -21,7 +21,6 @@ import {
 } from "@/new/photos/components/utils/download";
 import { useLoadingBar } from "@/new/photos/components/utils/use-loading-bar";
 import { photosDialogZIndex } from "@/new/photos/components/utils/z-index";
-import DownloadManager from "@/new/photos/services/download";
 import { runMigrations } from "@/new/photos/services/migrations";
 import { initML, isMLSupported } from "@/new/photos/services/ml";
 import { getFamilyPortalRedirectURL } from "@/new/photos/services/user-details";
@@ -34,7 +33,6 @@ import {
     getData,
     migrateKVToken,
 } from "@ente/shared/storage/localStorage";
-import { getToken } from "@ente/shared/storage/localStorage/helpers";
 import { getTheme } from "@ente/shared/themes";
 import { THEME_COLOR } from "@ente/shared/themes/constants";
 import type { User } from "@ente/shared/user/types";
@@ -127,16 +125,7 @@ export default function App({ Component, pageProps }: AppProps) {
     }, []);
 
     useEffect(() => {
-        if (!isDesktop) {
-            return;
-        }
-        const initExport = async () => {
-            const token = getToken();
-            if (!token) return;
-            await DownloadManager.init(token);
-            await resumeExportsIfNeeded();
-        };
-        initExport();
+        if (isDesktop) void resumeExportsIfNeeded();
     }, []);
 
     const setUserOnline = () => setOffline(false);

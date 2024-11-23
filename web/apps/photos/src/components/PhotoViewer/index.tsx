@@ -45,7 +45,14 @@ import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
 import Photoswipe from "photoswipe";
 import PhotoswipeUIDefault from "photoswipe/dist/photoswipe-ui-default";
-import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+    useContext,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+    useSyncExternalStore,
+} from "react";
 import {
     addToFavorites,
     removeFromFavorites,
@@ -172,17 +179,14 @@ function PhotoViewer(props: PhotoViewerProps) {
         setConversionFailedNotificationOpen,
     ] = useState(false);
 
-    const [fileDownloadProgress, setFileDownloadProgress] = useState<
-        Map<number, number>
-    >(new Map());
-
     const [showEditButton, setShowEditButton] = useState(false);
 
     const [showZoomButton, setShowZoomButton] = useState(false);
 
-    useEffect(() => {
-        downloadManager.setProgressUpdater(setFileDownloadProgress);
-    }, []);
+    const fileDownloadProgress = useSyncExternalStore(
+        (onChange) => downloadManager.fileDownloadProgressSubscribe(onChange),
+        () => downloadManager.fileDownloadProgressSnapshot(),
+    );
 
     useEffect(() => {
         if (!pswpElement) return;
