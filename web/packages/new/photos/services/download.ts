@@ -53,8 +53,13 @@ export interface SourceURLs {
 }
 
 class DownloadManagerImpl {
-    private ready = false;
-    private downloadClient: DownloadClient | undefined;
+    // TODO: Temporary
+    private token: string | undefined;
+    /**
+     * Credentials that should be used to download files when we're in the
+     * context of the public albums app.
+     */
+    private publicAlbumsCredentials: PublicAlbumsCredentials | undefined;
     /**
      * Local cache for thumbnail blobs.
      *
@@ -102,13 +107,8 @@ class DownloadManagerImpl {
     private fileDownloadProgressListeners: (() => void)[] = [];
 
     async init(token?: string) {
-        if (this.ready) {
-            log.info("DownloadManager already initialized");
-            return;
-        }
+        this.token = token;
         await this.initThumbnailCacheIfNeeded();
-        this.downloadClient = createDownloadClient(token);
-        this.ready = true;
     }
 
     private async initThumbnailCacheIfNeeded() {
@@ -124,19 +124,10 @@ class DownloadManagerImpl {
             }
         }
     }
-    private ensureInitialized() {
-        if (!this.ready)
-            throw new Error(
-                "Attempting to use an uninitialized download manager",
-            );
-
-        return { downloadClient: this.downloadClient! };
-    }
 
     logout() {
-        this.ready = false;
-        this.downloadClient = undefined;
-        this.thumbnailCache = undefined;
+        this.token = undefined;
+        this.publicAlbumsCredentials = undefined;
         this.thumbnailURLPromises.clear();
         this.fileURLPromises.clear();
         this.fileConversionPromises.clear();
@@ -144,9 +135,18 @@ class DownloadManagerImpl {
         this.fileDownloadProgressListeners = [];
     }
 
-    updateToken(token: string, passwordToken?: string) {
-        const { downloadClient } = this.ensureInitialized();
-        downloadClient.updateTokens(token, passwordToken);
+    /**
+     * Set the credentials that should be used for download files when we're
+     * running in the context of the public albums app.
+     */
+    setPublicAlbumsCredentials(
+        token: string,
+        passwordToken: string | undefined,
+    ) {
+        this.publicAlbumsCredentials = {
+            accessToken: token,
+            accessTokenJWT: passwordToken,
+        };
     }
 
     /**
@@ -191,8 +191,6 @@ class DownloadManagerImpl {
         file: EnteFile,
         cachedOnly = false,
     ): Promise<string | undefined> {
-        this.ensureInitialized();
-
         if (!this.thumbnailURLPromises.has(file.id)) {
             const url = this.thumbnailData(file, cachedOnly).then((data) =>
                 data ? URL.createObjectURL(new Blob([data])) : undefined,
@@ -225,7 +223,6 @@ class DownloadManagerImpl {
      * {@link cachedOnly} is set to `true`.
      */
     async thumbnailData(file: EnteFile, cachedOnly = false) {
-        this.ensureInitialized();
         await this.initThumbnailCacheIfNeeded();
 
         const key = file.id.toString();
@@ -233,18 +230,27 @@ class DownloadManagerImpl {
         if (cached) return new Uint8Array(await cached.arrayBuffer());
         if (cachedOnly) return undefined;
 
-        const thumb = await this.downloadThumb(file);
+        const thumb = await this.downloadThumbnail(file);
         await this.thumbnailCache?.put(key, new Blob([thumb]));
         return thumb;
     }
 
-    private downloadThumb = async (file: EnteFile) => {
-        const { downloadClient } = this.ensureInitialized();
-
-        const encryptedData = await downloadClient.downloadThumbnail(file);
+    private downloadThumbnail = async (file: EnteFile) => {
+        const encryptedData = await this._downloadThumbnail(file);
         const decryptionHeader = file.thumbnail.decryptionHeader;
         return decryptThumbnail({ encryptedData, decryptionHeader }, file.key);
     };
+
+    private async _downloadThumbnail(file: EnteFile) {
+        if (this.publicAlbumsCredentials) {
+            return publicAlbums_downloadThumbnail(
+                file,
+                this.publicAlbumsCredentials,
+            );
+        } else {
+            return photos_downloadThumbnail(file, this.token);
+        }
+    }
 
     /**
      * The `forceConvert` option is true when the user presses the "Convert"
@@ -254,7 +260,6 @@ class DownloadManagerImpl {
         file: EnteFile,
         opts?: { forceConvert?: boolean },
     ): Promise<SourceURLs | undefined> => {
-        this.ensureInitialized();
         try {
             const forceConvert = opts?.forceConvert ?? false;
             const getFileForPreviewPromise = async () => {
@@ -308,8 +313,6 @@ class DownloadManagerImpl {
     async fileStream(
         file: EnteFile,
     ): Promise<ReadableStream<Uint8Array> | null> {
-        this.ensureInitialized();
-
         const cachedURL = this.fileURLPromises.get(file.id);
         if (cachedURL) {
             try {
@@ -329,8 +332,6 @@ class DownloadManagerImpl {
      * A private variant of {@link fileStream} that also caches the results.
      */
     private async fileURLDownloadAndCacheIfNeeded(file: EnteFile) {
-        this.ensureInitialized();
-
         const cachedURL = this.fileURLPromises.get(file.id);
         if (cachedURL) return cachedURL;
 
@@ -350,8 +351,6 @@ class DownloadManagerImpl {
     private async downloadFile(
         file: EnteFile,
     ): Promise<ReadableStream<Uint8Array> | null> {
-        const { downloadClient } = this.ensureInitialized();
-
         log.info(`download attempted for file id ${file.id}`);
 
         const onDownloadProgress = this.trackDownloadProgress(
@@ -364,10 +363,7 @@ class DownloadManagerImpl {
             file.metadata.fileType === FileType.image ||
             file.metadata.fileType === FileType.livePhoto
         ) {
-            const array = await downloadClient.downloadFile(
-                file,
-                onDownloadProgress,
-            );
+            const array = await this._downloadFile(file, onDownloadProgress);
             const encryptedArrayBuffer = array.buffer;
             this.clearDownloadProgress(file.id);
 
@@ -381,7 +377,7 @@ class DownloadManagerImpl {
             return new Response(decrypted).body;
         }
 
-        const res = await downloadClient.downloadFileStream(file);
+        const res = await this._downloadFileStream(file);
         const body = res.body;
         if (!body) return null;
         const reader = body.getReader();
@@ -457,6 +453,32 @@ class DownloadManagerImpl {
         });
     }
 
+    private async _downloadFile(
+        file: EnteFile,
+        onDownloadProgress: OnDownloadProgress,
+    ) {
+        if (this.publicAlbumsCredentials) {
+            return publicAlbums_downloadFile(
+                file,
+                this.publicAlbumsCredentials,
+                onDownloadProgress,
+            );
+        } else {
+            return photos_downloadFile(file, this.token, onDownloadProgress);
+        }
+    }
+
+    private async _downloadFileStream(file: EnteFile) {
+        if (this.publicAlbumsCredentials) {
+            return publicAlbums_downloadFileStream(
+                file,
+                this.publicAlbumsCredentials,
+            );
+        } else {
+            return photos_downloadFileStream(file, this.token);
+        }
+    }
+
     private trackDownloadProgress(fileID: number, fileSize: number) {
         return (event: { loaded: number; total: number }) => {
             if (isNaN(event.total) || event.total === 0) {
@@ -488,15 +510,6 @@ class DownloadManagerImpl {
 const DownloadManager = new DownloadManagerImpl();
 
 export default DownloadManager;
-
-const createDownloadClient = (token: string | undefined): DownloadClient => {
-    const timeout = 300000; // 5 minute
-    if (token) {
-        return new PhotosDownloadClient(token, timeout);
-    } else {
-        return new PublicAlbumsDownloadClient(timeout);
-    }
-};
 
 async function getRenderableFileURL(
     file: EnteFile,
@@ -604,313 +617,282 @@ async function getRenderableLivePhotoURL(
 
 type OnDownloadProgress = (event: { loaded: number; total: number }) => void;
 
-interface DownloadClient {
-    updateTokens: (token: string, passwordToken?: string) => void;
-    downloadThumbnail: (
-        file: EnteFile,
-        timeout?: number,
-    ) => Promise<Uint8Array>;
-    downloadFile: (
-        file: EnteFile,
-        onDownloadProgress: OnDownloadProgress,
-    ) => Promise<Uint8Array>;
-    downloadFileStream: (file: EnteFile) => Promise<Response>;
+/**
+ * The various photos_* functions are used for the actual downloads when
+ * we're running in the context of the the photos app.
+ */
+const photos_downloadThumbnail = async (
+    file: EnteFile,
+    token: string | undefined,
+) => {
+    if (!token) throw Error(CustomError.TOKEN_MISSING);
+
+    const customOrigin = await customAPIOrigin();
+
+    // See: [Note: Passing credentials for self-hosted file fetches]
+    const getThumbnail = () => {
+        const opts = { responseType: "arraybuffer" /*timeout: this.timeout */ };
+        if (customOrigin) {
+            const params = new URLSearchParams({ token });
+            return HTTPService.get(
+                `${customOrigin}/files/preview/${file.id}?${params.toString()}`,
+                undefined,
+                undefined,
+                opts,
+            );
+        } else {
+            return HTTPService.get(
+                `https://thumbnails.ente.io/?fileID=${file.id}`,
+                undefined,
+                { "X-Auth-Token": token },
+                opts,
+            );
+        }
+    };
+
+    const resp = await retryAsyncOperation(getThumbnail);
+    if (resp.data === undefined) throw Error("request failed");
+    // TODO: Remove this cast (it won't be needed when we migrate this from
+    // axios to fetch).
+    return new Uint8Array(resp.data as ArrayBuffer);
+};
+
+const photos_downloadFile = async (
+    file: EnteFile,
+    token: string | undefined,
+    onDownloadProgress: (event: { loaded: number; total: number }) => void,
+): Promise<Uint8Array> => {
+    if (!token) throw Error(CustomError.TOKEN_MISSING);
+
+    const customOrigin = await customAPIOrigin();
+
+    // See: [Note: Passing credentials for self-hosted file fetches]
+    const getFile = () => {
+        const opts = {
+            responseType: "arraybuffer",
+            // timeout: this.timeout,
+            onDownloadProgress,
+        };
+
+        if (customOrigin) {
+            const params = new URLSearchParams({ token });
+            return HTTPService.get(
+                `${customOrigin}/files/download/${file.id}?${params.toString()}`,
+                undefined,
+                undefined,
+                opts,
+            );
+        } else {
+            return HTTPService.get(
+                `https://files.ente.io/?fileID=${file.id}`,
+                undefined,
+                { "X-Auth-Token": token },
+                opts,
+            );
+        }
+    };
+
+    const resp = await retryAsyncOperation(getFile);
+    if (resp.data === undefined) throw Error("request failed");
+    // TODO: Remove this cast (it won't be needed when we migrate this from
+    // axios to fetch).
+    return new Uint8Array(resp.data as ArrayBuffer);
+};
+
+const photos_downloadFileStream = async (
+    file: EnteFile,
+    token: string | undefined,
+): Promise<Response> => {
+    if (!token) throw Error(CustomError.TOKEN_MISSING);
+
+    const customOrigin = await customAPIOrigin();
+
+    // [Note: Passing credentials for self-hosted file fetches]
+    //
+    // Fetching files (or thumbnails) in the default self-hosted Ente
+    // configuration involves a redirection:
+    //
+    // 1. The browser makes a HTTP GET to a museum with credentials. Museum
+    //    inspects the credentials, in this case the auth token, and if
+    //    they're valid, returns a HTTP 307 redirect to the pre-signed S3
+    //    URL that to the file in the configured S3 bucket.
+    //
+    // 2. The browser follows the redirect to get the actual file. The URL
+    //    is pre-signed, i.e. already has all credentials needed to prove to
+    //    the S3 object storage that it should serve this response.
+    //
+    // For the first step normally we'd pass the auth the token via the
+    // "X-Auth-Token" HTTP header. In this case though, that would be
+    // problematic because the browser preserves the request headers when it
+    // follows the HTTP 307 redirect, and the "X-Auth-Token" header also
+    // gets sent to the redirected S3 request made in second step.
+    //
+    // To avoid this, we pass the token as a query parameter. Generally this
+    // is not a good idea, but in this case (a) the URL is not a user
+    // visible one and (b) even if it gets logged, it'll be in the
+    // self-hosters own service.
+    //
+    // Note that Ente's own servers don't have these concerns because we use
+    // a slightly different flow involving a proxy instead of directly
+    // connecting to the S3 storage.
+    //
+    // 1. The web browser makes a HTTP GET request to a proxy passing it the
+    //    credentials in the "X-Auth-Token".
+    //
+    // 2. The proxy then does both the original steps: (a). Use the
+    //    credentials to get the pre signed URL, and (b) fetch that pre
+    //    signed URL and stream back the response.
+
+    const getFile = () => {
+        if (customOrigin) {
+            const params = new URLSearchParams({ token });
+            return fetch(
+                `${customOrigin}/files/download/${file.id}?${params.toString()}`,
+            );
+        } else {
+            return fetch(`https://files.ente.io/?fileID=${file.id}`, {
+                headers: {
+                    "X-Auth-Token": token,
+                },
+            });
+        }
+    };
+
+    return retryAsyncOperation(getFile);
+};
+
+interface PublicAlbumsCredentials {
+    accessToken: string;
+    accessTokenJWT: string | undefined;
 }
 
 /**
- * A class used for the actual downloads when we're running in the context of
- * the photos app.
+ * The various publicAlbums_* functions are used for the actual downloads when
+ * we're running in the context of the the public albums app.
  */
-class PhotosDownloadClient implements DownloadClient {
-    constructor(
-        private token: string,
-        private timeout: number,
-    ) {}
+const publicAlbums_downloadThumbnail = async (
+    file: EnteFile,
+    { accessToken, accessTokenJWT }: PublicAlbumsCredentials,
+) => {
+    const customOrigin = await customAPIOrigin();
 
-    updateTokens(token: string) {
-        this.token = token;
-    }
-
-    async downloadThumbnail(file: EnteFile): Promise<Uint8Array> {
-        const token = this.token;
-        if (!token) throw Error(CustomError.TOKEN_MISSING);
-
-        const customOrigin = await customAPIOrigin();
-
-        // See: [Note: Passing credentials for self-hosted file fetches]
-        const getThumbnail = () => {
-            const opts = { responseType: "arraybuffer", timeout: this.timeout };
-            if (customOrigin) {
-                const params = new URLSearchParams({ token });
-                return HTTPService.get(
-                    `${customOrigin}/files/preview/${file.id}?${params.toString()}`,
-                    undefined,
-                    undefined,
-                    opts,
-                );
-            } else {
-                return HTTPService.get(
-                    `https://thumbnails.ente.io/?fileID=${file.id}`,
-                    undefined,
-                    { "X-Auth-Token": token },
-                    opts,
-                );
-            }
+    // See: [Note: Passing credentials for self-hosted file fetches]
+    const getThumbnail = () => {
+        const opts = {
+            responseType: "arraybuffer",
         };
 
-        const resp = await retryAsyncOperation(getThumbnail);
-        if (resp.data === undefined) throw Error("request failed");
-        // TODO: Remove this cast (it won't be needed when we migrate this from
-        // axios to fetch).
-        return new Uint8Array(resp.data as ArrayBuffer);
-    }
+        if (customOrigin) {
+            const params = new URLSearchParams({
+                accessToken,
+                ...(accessTokenJWT && { accessTokenJWT }),
+            });
+            return HTTPService.get(
+                `${customOrigin}/public-collection/files/preview/${file.id}?${params.toString()}`,
+                undefined,
+                undefined,
+                opts,
+            );
+        } else {
+            return HTTPService.get(
+                `https://public-albums.ente.io/preview/?fileID=${file.id}`,
+                undefined,
+                {
+                    "X-Auth-Access-Token": accessToken,
+                    ...(accessTokenJWT && {
+                        "X-Auth-Access-Token-JWT": accessTokenJWT,
+                    }),
+                },
+                opts,
+            );
+        }
+    };
 
-    async downloadFile(
-        file: EnteFile,
-        onDownloadProgress: (event: { loaded: number; total: number }) => void,
-    ): Promise<Uint8Array> {
-        const token = this.token;
-        if (!token) throw Error(CustomError.TOKEN_MISSING);
+    const resp = await getThumbnail();
+    if (resp.data === undefined) throw Error("request failed");
+    // TODO: Remove this cast (it won't be needed when we migrate this from
+    // axios to fetch).
+    return new Uint8Array(resp.data as ArrayBuffer);
+};
 
-        const customOrigin = await customAPIOrigin();
+const publicAlbums_downloadFile = async (
+    file: EnteFile,
+    { accessToken, accessTokenJWT }: PublicAlbumsCredentials,
+    onDownloadProgress: (event: { loaded: number; total: number }) => void,
+) => {
+    const customOrigin = await customAPIOrigin();
 
-        // See: [Note: Passing credentials for self-hosted file fetches]
-        const getFile = () => {
-            const opts = {
-                responseType: "arraybuffer",
-                timeout: this.timeout,
-                onDownloadProgress,
-            };
-
-            if (customOrigin) {
-                const params = new URLSearchParams({ token });
-                return HTTPService.get(
-                    `${customOrigin}/files/download/${file.id}?${params.toString()}`,
-                    undefined,
-                    undefined,
-                    opts,
-                );
-            } else {
-                return HTTPService.get(
-                    `https://files.ente.io/?fileID=${file.id}`,
-                    undefined,
-                    { "X-Auth-Token": token },
-                    opts,
-                );
-            }
+    // See: [Note: Passing credentials for self-hosted file fetches]
+    const getFile = () => {
+        const opts = {
+            responseType: "arraybuffer",
+            // timeout: this.timeout,
+            onDownloadProgress,
         };
 
-        const resp = await retryAsyncOperation(getFile);
-        if (resp.data === undefined) throw Error("request failed");
-        // TODO: Remove this cast (it won't be needed when we migrate this from
-        // axios to fetch).
-        return new Uint8Array(resp.data as ArrayBuffer);
-    }
+        if (customOrigin) {
+            const params = new URLSearchParams({
+                accessToken,
+                ...(accessTokenJWT && { accessTokenJWT }),
+            });
+            return HTTPService.get(
+                `${customOrigin}/public-collection/files/download/${file.id}?${params.toString()}`,
+                undefined,
+                undefined,
+                opts,
+            );
+        } else {
+            return HTTPService.get(
+                `https://public-albums.ente.io/download/?fileID=${file.id}`,
+                undefined,
+                {
+                    "X-Auth-Access-Token": accessToken,
+                    ...(accessTokenJWT && {
+                        "X-Auth-Access-Token-JWT": accessTokenJWT,
+                    }),
+                },
+                opts,
+            );
+        }
+    };
 
-    async downloadFileStream(file: EnteFile): Promise<Response> {
-        const token = this.token;
-        if (!token) throw Error(CustomError.TOKEN_MISSING);
+    const resp = await retryAsyncOperation(getFile);
+    if (resp.data === undefined) throw Error("request failed");
+    // TODO: Remove this cast (it won't be needed when we migrate this from
+    // axios to fetch).
+    return new Uint8Array(resp.data as ArrayBuffer);
+};
 
-        const customOrigin = await customAPIOrigin();
+const publicAlbums_downloadFileStream = async (
+    file: EnteFile,
+    { accessToken, accessTokenJWT }: PublicAlbumsCredentials,
+) => {
+    const customOrigin = await customAPIOrigin();
 
-        // [Note: Passing credentials for self-hosted file fetches]
-        //
-        // Fetching files (or thumbnails) in the default self-hosted Ente
-        // configuration involves a redirection:
-        //
-        // 1. The browser makes a HTTP GET to a museum with credentials. Museum
-        //    inspects the credentials, in this case the auth token, and if
-        //    they're valid, returns a HTTP 307 redirect to the pre-signed S3
-        //    URL that to the file in the configured S3 bucket.
-        //
-        // 2. The browser follows the redirect to get the actual file. The URL
-        //    is pre-signed, i.e. already has all credentials needed to prove to
-        //    the S3 object storage that it should serve this response.
-        //
-        // For the first step normally we'd pass the auth the token via the
-        // "X-Auth-Token" HTTP header. In this case though, that would be
-        // problematic because the browser preserves the request headers when it
-        // follows the HTTP 307 redirect, and the "X-Auth-Token" header also
-        // gets sent to the redirected S3 request made in second step.
-        //
-        // To avoid this, we pass the token as a query parameter. Generally this
-        // is not a good idea, but in this case (a) the URL is not a user
-        // visible one and (b) even if it gets logged, it'll be in the
-        // self-hosters own service.
-        //
-        // Note that Ente's own servers don't have these concerns because we use
-        // a slightly different flow involving a proxy instead of directly
-        // connecting to the S3 storage.
-        //
-        // 1. The web browser makes a HTTP GET request to a proxy passing it the
-        //    credentials in the "X-Auth-Token".
-        //
-        // 2. The proxy then does both the original steps: (a). Use the
-        //    credentials to get the pre signed URL, and (b) fetch that pre
-        //    signed URL and stream back the response.
-
-        const getFile = () => {
-            if (customOrigin) {
-                const params = new URLSearchParams({ token });
-                return fetch(
-                    `${customOrigin}/files/download/${file.id}?${params.toString()}`,
-                );
-            } else {
-                return fetch(`https://files.ente.io/?fileID=${file.id}`, {
+    // See: [Note: Passing credentials for self-hosted file fetches]
+    const getFile = () => {
+        if (customOrigin) {
+            const params = new URLSearchParams({
+                accessToken,
+                ...(accessTokenJWT && { accessTokenJWT }),
+            });
+            return fetch(
+                `${customOrigin}/public-collection/files/download/${file.id}?${params.toString()}`,
+            );
+        } else {
+            return fetch(
+                `https://public-albums.ente.io/download/?fileID=${file.id}`,
+                {
                     headers: {
-                        "X-Auth-Token": token,
-                    },
-                });
-            }
-        };
-
-        return retryAsyncOperation(getFile);
-    }
-}
-
-/**
- * A class used for the actual downloads when we're running in the context of
- * the the public albums app.
- */
-class PublicAlbumsDownloadClient implements DownloadClient {
-    private token: string | undefined;
-    private passwordToken: string | undefined;
-
-    constructor(private timeout: number) {}
-
-    updateTokens(token: string, passwordToken?: string) {
-        this.token = token;
-        this.passwordToken = passwordToken;
-    }
-
-    downloadThumbnail = async (file: EnteFile) => {
-        const accessToken = this.token;
-        const accessTokenJWT = this.passwordToken;
-        if (!accessToken) throw Error(CustomError.TOKEN_MISSING);
-        const customOrigin = await customAPIOrigin();
-
-        // See: [Note: Passing credentials for self-hosted file fetches]
-        const getThumbnail = () => {
-            const opts = {
-                responseType: "arraybuffer",
-            };
-
-            if (customOrigin) {
-                const params = new URLSearchParams({
-                    accessToken,
-                    ...(accessTokenJWT && { accessTokenJWT }),
-                });
-                return HTTPService.get(
-                    `${customOrigin}/public-collection/files/preview/${file.id}?${params.toString()}`,
-                    undefined,
-                    undefined,
-                    opts,
-                );
-            } else {
-                return HTTPService.get(
-                    `https://public-albums.ente.io/preview/?fileID=${file.id}`,
-                    undefined,
-                    {
                         "X-Auth-Access-Token": accessToken,
                         ...(accessTokenJWT && {
                             "X-Auth-Access-Token-JWT": accessTokenJWT,
                         }),
                     },
-                    opts,
-                );
-            }
-        };
-
-        const resp = await getThumbnail();
-        if (resp.data === undefined) throw Error("request failed");
-        // TODO: Remove this cast (it won't be needed when we migrate this from
-        // axios to fetch).
-        return new Uint8Array(resp.data as ArrayBuffer);
+                },
+            );
+        }
     };
 
-    downloadFile = async (
-        file: EnteFile,
-        onDownloadProgress: (event: { loaded: number; total: number }) => void,
-    ) => {
-        const accessToken = this.token;
-        const accessTokenJWT = this.passwordToken;
-        if (!accessToken) throw Error(CustomError.TOKEN_MISSING);
-
-        const customOrigin = await customAPIOrigin();
-
-        // See: [Note: Passing credentials for self-hosted file fetches]
-        const getFile = () => {
-            const opts = {
-                responseType: "arraybuffer",
-                timeout: this.timeout,
-                onDownloadProgress,
-            };
-
-            if (customOrigin) {
-                const params = new URLSearchParams({
-                    accessToken,
-                    ...(accessTokenJWT && { accessTokenJWT }),
-                });
-                return HTTPService.get(
-                    `${customOrigin}/public-collection/files/download/${file.id}?${params.toString()}`,
-                    undefined,
-                    undefined,
-                    opts,
-                );
-            } else {
-                return HTTPService.get(
-                    `https://public-albums.ente.io/download/?fileID=${file.id}`,
-                    undefined,
-                    {
-                        "X-Auth-Access-Token": accessToken,
-                        ...(accessTokenJWT && {
-                            "X-Auth-Access-Token-JWT": accessTokenJWT,
-                        }),
-                    },
-                    opts,
-                );
-            }
-        };
-
-        const resp = await retryAsyncOperation(getFile);
-        if (resp.data === undefined) throw Error("request failed");
-        // TODO: Remove this cast (it won't be needed when we migrate this from
-        // axios to fetch).
-        return new Uint8Array(resp.data as ArrayBuffer);
-    };
-
-    async downloadFileStream(file: EnteFile): Promise<Response> {
-        const accessToken = this.token;
-        const accessTokenJWT = this.passwordToken;
-        if (!accessToken) throw Error(CustomError.TOKEN_MISSING);
-
-        const customOrigin = await customAPIOrigin();
-
-        // See: [Note: Passing credentials for self-hosted file fetches]
-        const getFile = () => {
-            if (customOrigin) {
-                const params = new URLSearchParams({
-                    accessToken,
-                    ...(accessTokenJWT && { accessTokenJWT }),
-                });
-                return fetch(
-                    `${customOrigin}/public-collection/files/download/${file.id}?${params.toString()}`,
-                );
-            } else {
-                return fetch(
-                    `https://public-albums.ente.io/download/?fileID=${file.id}`,
-                    {
-                        headers: {
-                            "X-Auth-Access-Token": accessToken,
-                            ...(accessTokenJWT && {
-                                "X-Auth-Access-Token-JWT": accessTokenJWT,
-                            }),
-                        },
-                    },
-                );
-            }
-        };
-
-        return retryAsyncOperation(getFile);
-    }
-}
+    return retryAsyncOperation(getFile);
+};
