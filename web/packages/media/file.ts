@@ -75,6 +75,7 @@ export interface EnteFile
      */
     pubMagicMetadata?: FilePublicMagicMetadata;
     isTrashed?: boolean;
+    deleteBy?: number;
     /**
      * The base64 encoded encryption key associated with this file.
      *
@@ -82,53 +83,6 @@ export interface EnteFile
      * data (e.g., metadatum, thumbnail) for the file.
      */
     key: string;
-    src?: string;
-    srcURLs?: SourceURLs;
-    msrc?: string;
-    html?: string;
-    w?: number;
-    h?: number;
-    title?: string;
-    deleteBy?: number;
-    isSourceLoaded?: boolean;
-    conversionFailed?: boolean;
-    isConverted?: boolean;
-    canForceConvert?: boolean;
-}
-
-export interface LivePhotoSourceURL {
-    image: () => Promise<string | undefined>;
-    video: () => Promise<string | undefined>;
-}
-
-export interface LoadedLivePhotoSourceURL {
-    image: string;
-    video: string;
-}
-
-export interface SourceURLs {
-    url: string | LivePhotoSourceURL | LoadedLivePhotoSourceURL;
-    isOriginal: boolean;
-    isRenderable: boolean;
-    type: "normal" | "livePhoto";
-    /**
-     * `true` if there is potential conversion that can still be applied.
-     *
-     * See: [Note: Forcing conversion of playable videos]
-     */
-    canForceConvert?: boolean;
-    /**
-     * Best effort attempt at obtaining the MIME type.
-     *
-     * It will only be present for images generally, which is also the only
-     * scenario where it is needed currently (by the image editor).
-     *
-     * Known cases where it is missing:
-     *
-     * - Live photos (these have a different code path for obtaining the URL).
-     * - A video that is passes the isPlayable test in the browser.
-     */
-    mimeType?: string;
 }
 
 export interface TrashRequest {

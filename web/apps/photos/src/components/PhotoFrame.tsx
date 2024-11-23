@@ -1,10 +1,12 @@
 import log from "@/base/log";
-import type { LivePhotoSourceURL, SourceURLs } from "@/media/file";
 import { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import type { GalleryBarMode } from "@/new/photos/components/gallery/reducer";
 import { TRASH_SECTION } from "@/new/photos/services/collection";
-import DownloadManager from "@/new/photos/services/download";
+import DownloadManager, {
+    type LivePhotoSourceURL,
+    type SourceURLs,
+} from "@/new/photos/services/download";
 import { PHOTOS_PAGES } from "@ente/shared/constants/pages";
 import useMemoSingleThreaded from "@ente/shared/hooks/useMemoSingleThreaded";
 import { styled } from "@mui/material";
@@ -19,11 +21,7 @@ import {
     SelectedState,
     SetFilesDownloadProgressAttributesCreator,
 } from "types/gallery";
-import {
-    handleSelectCreator,
-    updateFileMsrcProps,
-    updateFileSrcProps,
-} from "utils/photoFrame";
+import { handleSelectCreator } from "utils/photoFrame";
 import { PhotoList } from "./PhotoList";
 import { DedupePhotoList } from "./PhotoList/dedupe";
 import PreviewCard from "./pages/gallery/PreviewCard";
@@ -42,6 +40,23 @@ const Container = styled("div")`
 `;
 
 const PHOTOSWIPE_HASH_SUFFIX = "&opened";
+
+/**
+ * An {@link EnteFile} augmented with various in-memory state used for
+ * displaying it in the photo viewer.
+ */
+export type DisplayFile = EnteFile & {
+    src?: string;
+    srcURLs?: SourceURLs;
+    msrc?: string;
+    html?: string;
+    w?: number;
+    h?: number;
+    title?: string;
+    isSourceLoaded?: boolean;
+    conversionFailed?: boolean;
+    canForceConvert?: boolean;
+};
 
 export interface PhotoFrameProps {
     page:
@@ -122,7 +137,7 @@ const PhotoFrame = ({
                 h: window.innerHeight,
                 title: item.pubMagicMetadata?.data.caption,
             };
-            return filteredItem;
+            return filteredItem as DisplayFile;
         });
     }, [files]);
 
@@ -292,7 +307,7 @@ const PhotoFrame = ({
     };
 
     const getThumbnail = (
-        item: EnteFile,
+        item: DisplayFile,
         index: number,
         isScrolling: boolean,
     ) => (
@@ -333,7 +348,7 @@ const PhotoFrame = ({
     const getSlideData = async (
         instance: PhotoSwipe<PhotoSwipe.Options>,
         index: number,
-        item: EnteFile,
+        item: DisplayFile,
     ) => {
         log.info(
             `[${item.id}] getSlideData called for thumbnail: ${!!item.msrc} sourceLoaded: ${!!item.isSourceLoaded} fetching: ${!!fetching[item.id]}`,
@@ -446,7 +461,7 @@ const PhotoFrame = ({
     const updateThumb = (
         instance: PhotoSwipe<PhotoSwipe.Options>,
         index: number,
-        item: EnteFile,
+        item: DisplayFile,
         url: string,
         forceUpdate?: boolean,
     ) => {
@@ -469,7 +484,7 @@ const PhotoFrame = ({
     const updateOrig = async (
         instance: PhotoSwipe<PhotoSwipe.Options>,
         index: number,
-        item: EnteFile,
+        item: DisplayFile,
         srcURL: SourceURLs,
         forceUpdate?: boolean,
     ) => {
@@ -492,7 +507,7 @@ const PhotoFrame = ({
     const forceConvertItem = async (
         instance: PhotoSwipe<PhotoSwipe.Options>,
         index: number,
-        item: EnteFile,
+        item: DisplayFile,
     ) => {
         updateThumb(instance, index, item, item.msrc, true);
 
@@ -566,3 +581,79 @@ const PhotoFrame = ({
 };
 
 export default PhotoFrame;
+
+function updateFileMsrcProps(file: DisplayFile, url: string) {
+    file.w = window.innerWidth;
+    file.h = window.innerHeight;
+    file.msrc = url;
+    file.canForceConvert = false;
+    file.isSourceLoaded = false;
+    file.conversionFailed = false;
+    if (file.metadata.fileType === FileType.image) {
+        file.src = url;
+    } else {
+        file.html = `
+            <div class = 'pswp-item-container'>
+                <img src="${url}"/>
+            </div>
+            `;
+    }
+}
+
+async function updateFileSrcProps(
+    file: DisplayFile,
+    srcURLs: SourceURLs,
+    enableDownload: boolean,
+) {
+    const { url, isRenderable } = srcURLs;
+    file.w = window.innerWidth;
+    file.h = window.innerHeight;
+    file.isSourceLoaded =
+        file.metadata.fileType === FileType.livePhoto
+            ? srcURLs.type === "livePhoto"
+            : true;
+    file.canForceConvert = srcURLs.canForceConvert;
+    file.conversionFailed = !isRenderable;
+    file.srcURLs = srcURLs;
+    if (!isRenderable) {
+        file.isSourceLoaded = true;
+        return;
+    }
+
+    if (file.metadata.fileType === FileType.video) {
+        file.html = `
+                <video controls ${
+                    !enableDownload && 'controlsList="nodownload"'
+                } onContextMenu="return false;">
+                    <source src="${url}" />
+                    Your browser does not support the video tag.
+                </video>
+                `;
+    } else if (file.metadata.fileType === FileType.livePhoto) {
+        if (srcURLs.type === "normal") {
+            file.html = `
+                <div class = 'pswp-item-container'>
+                    <img id = "live-photo-image-${file.id}" src="${url}" onContextMenu="return false;"/>
+                </div>
+                `;
+        } else {
+            const { image: imageURL, video: videoURL } =
+                url as LivePhotoSourceURL;
+
+            file.html = `
+            <div class = 'pswp-item-container'>
+                <img id = "live-photo-image-${file.id}" src="${imageURL}" onContextMenu="return false;"/>
+                <video id = "live-photo-video-${file.id}" loop muted onContextMenu="return false;">
+                    <source src="${videoURL}" />
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+            `;
+        }
+    } else if (file.metadata.fileType === FileType.image) {
+        file.src = url as string;
+    } else {
+        log.error(`unknown file type - ${file.metadata.fileType}`);
+        file.src = url as string;
+    }
+}

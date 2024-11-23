@@ -21,37 +21,48 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CloseIcon from "@mui/icons-material/Close";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import CropIcon from "@mui/icons-material/Crop";
+import Crop169Icon from "@mui/icons-material/Crop169";
+import Crop32Icon from "@mui/icons-material/Crop32";
 import CropOriginalIcon from "@mui/icons-material/CropOriginal";
+import CropSquareIcon from "@mui/icons-material/CropSquare";
 import DownloadIcon from "@mui/icons-material/Download";
+import FlipIcon from "@mui/icons-material/Flip";
 import MenuIcon from "@mui/icons-material/Menu";
+import RotateLeftIcon from "@mui/icons-material/RotateLeft";
+import RotateRightIcon from "@mui/icons-material/RotateRight";
 import {
     Backdrop,
     Box,
     Button,
     CircularProgress,
     IconButton,
+    Slider,
     Tab,
     Tabs,
     Typography,
 } from "@mui/material";
 import { t } from "i18next";
-import type { Dispatch, MutableRefObject, SetStateAction } from "react";
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import React, {
+    forwardRef,
+    Fragment,
+    useContext,
+    useEffect,
+    useRef,
+    useState,
+    type MutableRefObject,
+    type Ref,
+} from "react";
 import { getLocalCollections } from "services/collectionService";
 import uploadManager from "services/upload/uploadManager";
-import ColoursMenu from "./ColoursMenu";
-import CropMenu, { cropRegionOfCanvas, getCropRegionArgs } from "./CropMenu";
-import FreehandCropRegion from "./FreehandCropRegion";
-import TransformMenu from "./TransformMenu";
 
-interface IProps {
+interface ImageEditorOverlayProps {
     file: EnteFile;
     show: boolean;
     onClose: () => void;
     closePhotoViewer: () => void;
 }
 
-const FILTER_DEFAULT_VALUES = {
+const filterDefaultValues = {
     brightness: 100,
     contrast: 100,
     blur: 0,
@@ -59,30 +70,18 @@ const FILTER_DEFAULT_VALUES = {
     invert: false,
 };
 
-// CORNER_THRESHOLD defines the threshold near the corners of the crop box in which dragging is assumed as not the intention
-const CORNER_THRESHOLD = 20;
+type OperationTab = "crop" | "transform" | "colors";
 
-export const ImageEditorOverlayContext = createContext(
-    {} as {
-        canvasRef: MutableRefObject<HTMLCanvasElement>;
-        originalSizeCanvasRef: MutableRefObject<HTMLCanvasElement>;
-        setTransformationPerformed: Dispatch<SetStateAction<boolean>>;
-        setCanvasLoading: Dispatch<SetStateAction<boolean>>;
-        canvasLoading: boolean;
-        setCurrentTab: Dispatch<SetStateAction<OperationTab>>;
-    },
-);
-
-type OperationTab = "crop" | "transform" | "colours";
-
-export interface CropBoxProps {
+interface CropBoxProps {
     x: number;
     y: number;
     width: number;
     height: number;
 }
 
-const ImageEditorOverlay = (props: IProps) => {
+export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
+    props,
+) => {
     const { showMiniDialog } = useContext(AppContext);
 
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -92,7 +91,7 @@ const ImageEditorOverlay = (props: IProps) => {
     const [fileURL, setFileURL] = useState<string>("");
     // The MIME type of the original file that we are editing.
     //
-    // It _should_ generally be present, but it is not guaranteed to be.
+    // It should generally be present, but it is not guaranteed to be.
     const [mimeType, setMIMEType] = useState<string | undefined>();
 
     const [currentRotationAngle, setCurrentRotationAngle] = useState(0);
@@ -100,14 +99,14 @@ const ImageEditorOverlay = (props: IProps) => {
     const [currentTab, setCurrentTab] = useState<OperationTab>("transform");
 
     const [brightness, setBrightness] = useState(
-        FILTER_DEFAULT_VALUES.brightness,
+        filterDefaultValues.brightness,
     );
-    const [contrast, setContrast] = useState(FILTER_DEFAULT_VALUES.contrast);
-    const [blur, setBlur] = useState(FILTER_DEFAULT_VALUES.blur);
+    const [contrast, setContrast] = useState(filterDefaultValues.contrast);
+    const [blur, setBlur] = useState(filterDefaultValues.blur);
     const [saturation, setSaturation] = useState(
-        FILTER_DEFAULT_VALUES.saturation,
+        filterDefaultValues.saturation,
     );
-    const [invert, setInvert] = useState(FILTER_DEFAULT_VALUES.invert);
+    const [invert, setInvert] = useState(filterDefaultValues.invert);
 
     const [transformationPerformed, setTransformationPerformed] =
         useState(false);
@@ -163,13 +162,17 @@ const ImageEditorOverlay = (props: IProps) => {
         const offsetX = e.pageX - rect.left - rect.width / 2;
         const offsetY = e.pageY - rect.top - rect.height / 2;
 
+        // The threshold near the corners of the crop box in which dragging is
+        // assumed as not the intention.
+        const cornerThreshold = 20;
+
         // check if the cursor is near the corners of the box
         const isNearLeftOrRightEdge =
-            e.pageX < rect.left + CORNER_THRESHOLD ||
-            e.pageX > rect.right - CORNER_THRESHOLD;
+            e.pageX < rect.left + cornerThreshold ||
+            e.pageX > rect.right - cornerThreshold;
         const isNearTopOrBottomEdge =
-            e.pageY < rect.top + CORNER_THRESHOLD ||
-            e.pageY > rect.bottom - CORNER_THRESHOLD;
+            e.pageY < rect.top + cornerThreshold ||
+            e.pageY > rect.bottom - cornerThreshold;
 
         if (isNearLeftOrRightEdge && isNearTopOrBottomEdge) {
             // cursor is near a corner, do not initiate dragging
@@ -267,11 +270,11 @@ const ImageEditorOverlay = (props: IProps) => {
         try {
             applyFilters([canvasRef.current, originalSizeCanvasRef.current]);
             setColoursAdjusted(
-                brightness !== FILTER_DEFAULT_VALUES.brightness ||
-                    contrast !== FILTER_DEFAULT_VALUES.contrast ||
-                    blur !== FILTER_DEFAULT_VALUES.blur ||
-                    saturation !== FILTER_DEFAULT_VALUES.saturation ||
-                    invert !== FILTER_DEFAULT_VALUES.invert,
+                brightness !== filterDefaultValues.brightness ||
+                    contrast !== filterDefaultValues.contrast ||
+                    blur !== filterDefaultValues.blur ||
+                    saturation !== filterDefaultValues.saturation ||
+                    invert !== filterDefaultValues.invert,
             );
         } catch (e) {
             log.error("Error applying filters", e);
@@ -509,6 +512,15 @@ const ImageEditorOverlay = (props: IProps) => {
         setCurrentTab("transform");
     };
 
+    const menuProps = {
+        originalSizeCanvasRef,
+        canvasRef,
+        setCanvasLoading,
+        canvasLoading,
+        setTransformationPerformed,
+        setCurrentTab,
+    };
+
     return (
         <>
             <Backdrop
@@ -637,7 +649,7 @@ const ImageEditorOverlay = (props: IProps) => {
                             <Tab label={t("TRANSFORM")} value="transform" />
                             <Tab
                                 label={t("COLORS")}
-                                value="colours"
+                                value="colors"
                                 disabled={transformationPerformed}
                             />
                         </Tabs>
@@ -657,27 +669,19 @@ const ImageEditorOverlay = (props: IProps) => {
                             label={t("RESTORE_ORIGINAL")}
                         />
                     </MenuItemGroup>
-                    <ImageEditorOverlayContext.Provider
-                        value={{
-                            originalSizeCanvasRef,
-                            canvasRef,
-                            setCanvasLoading,
-                            canvasLoading,
-                            setTransformationPerformed,
-                            setCurrentTab,
-                        }}
-                    >
-                        {currentTab === "crop" && (
-                            <CropMenu
-                                previewScale={previewCanvasScale}
-                                cropBoxProps={cropBox}
-                                cropBoxRef={cropBoxRef}
-                                resetCropBox={resetCropBox}
-                            />
-                        )}
-                        {currentTab === "transform" && <TransformMenu />}
-                    </ImageEditorOverlayContext.Provider>
-                    {currentTab === "colours" && (
+                    {currentTab === "crop" && (
+                        <CropMenu
+                            {...menuProps}
+                            previewScale={previewCanvasScale}
+                            cropBoxProps={cropBox}
+                            cropBoxRef={cropBoxRef}
+                            resetCropBox={resetCropBox}
+                        />
+                    )}
+                    {currentTab === "transform" && (
+                        <TransformMenu {...menuProps} />
+                    )}
+                    {currentTab === "colors" && (
                         <ColoursMenu
                             brightness={brightness}
                             contrast={contrast}
@@ -721,8 +725,6 @@ const ImageEditorOverlay = (props: IProps) => {
         </>
     );
 };
-
-export default ImageEditorOverlay;
 
 const confirmEditorCloseDialogAttributes = (
     onConfirm: () => void,
@@ -787,3 +789,648 @@ const canvasToFile = async (
 
     return new File([blob], fileName);
 };
+
+interface CommonMenuProps {
+    canvasRef: MutableRefObject<HTMLCanvasElement>;
+    originalSizeCanvasRef: MutableRefObject<HTMLCanvasElement>;
+    setTransformationPerformed: (v: boolean) => void;
+    canvasLoading: boolean;
+    setCanvasLoading: (v: boolean) => void;
+    setCurrentTab: (tab: OperationTab) => void;
+}
+
+type CropMenuProps = CommonMenuProps & {
+    previewScale: number;
+    cropBoxProps: CropBoxProps;
+    cropBoxRef: MutableRefObject<HTMLDivElement>;
+    resetCropBox: () => void;
+};
+
+const CropMenu: React.FC<CropMenuProps> = (props) => {
+    const {
+        canvasRef,
+        originalSizeCanvasRef,
+        canvasLoading,
+        setCanvasLoading,
+        setTransformationPerformed,
+        setCurrentTab,
+    } = props;
+
+    return (
+        <>
+            <MenuSectionTitle title={t("FREEHAND")} />
+            <MenuItemGroup
+                style={{
+                    marginBottom: "0.5rem",
+                }}
+            >
+                <EnteMenuItem
+                    disabled={canvasLoading}
+                    startIcon={<CropIcon />}
+                    onClick={() => {
+                        if (!props.cropBoxRef.current || !canvasRef.current)
+                            return;
+
+                        const { x1, x2, y1, y2 } = getCropRegionArgs(
+                            props.cropBoxRef.current,
+                            canvasRef.current,
+                        );
+                        setCanvasLoading(true);
+                        setTransformationPerformed(true);
+                        cropRegionOfCanvas(canvasRef.current, x1, y1, x2, y2);
+                        cropRegionOfCanvas(
+                            originalSizeCanvasRef.current,
+                            x1 / props.previewScale,
+                            y1 / props.previewScale,
+                            x2 / props.previewScale,
+                            y2 / props.previewScale,
+                        );
+                        props.resetCropBox();
+                        setCanvasLoading(false);
+
+                        setCurrentTab("transform");
+                    }}
+                    label={t("APPLY_CROP")}
+                />
+            </MenuItemGroup>
+        </>
+    );
+};
+
+const cropRegionOfCanvas = (
+    canvas: HTMLCanvasElement,
+    topLeftX: number,
+    topLeftY: number,
+    bottomRightX: number,
+    bottomRightY: number,
+    scale: number = 1,
+) => {
+    const context = canvas.getContext("2d");
+    if (!context || !canvas) return;
+    context.imageSmoothingEnabled = false;
+
+    const width = (bottomRightX - topLeftX) * scale;
+    const height = (bottomRightY - topLeftY) * scale;
+
+    const img = new Image();
+    img.src = canvas.toDataURL();
+    img.onload = () => {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+
+        canvas.width = width;
+        canvas.height = height;
+
+        context.drawImage(
+            img,
+            topLeftX,
+            topLeftY,
+            width,
+            height,
+            0,
+            0,
+            width,
+            height,
+        );
+    };
+};
+
+const getCropRegionArgs = (
+    cropBoxEle: HTMLDivElement,
+    canvasEle: HTMLCanvasElement,
+) => {
+    // get the bounding rectangle of the crop box
+    const cropBoxRect = cropBoxEle.getBoundingClientRect();
+    // Get the bounding rectangle of the canvas
+    const canvasRect = canvasEle.getBoundingClientRect();
+
+    // calculate the scale of the canvas display relative to its actual dimensions
+    const displayScale = canvasEle.width / canvasRect.width;
+
+    // calculate the coordinates of the crop box relative to the canvas and adjust for any scrolling by adding scroll offsets
+    const x1 =
+        (cropBoxRect.left - canvasRect.left + window.scrollX) * displayScale;
+    const y1 =
+        (cropBoxRect.top - canvasRect.top + window.scrollY) * displayScale;
+    const x2 = x1 + cropBoxRect.width * displayScale;
+    const y2 = y1 + cropBoxRect.height * displayScale;
+
+    return {
+        x1,
+        x2,
+        y1,
+        y2,
+    };
+};
+
+interface FreehandCropRegionProps {
+    cropBox: CropBoxProps;
+    setIsDragging: (v: boolean) => void;
+}
+
+const FreehandCropRegion = forwardRef(
+    (
+        { cropBox, setIsDragging }: FreehandCropRegionProps,
+        ref: Ref<HTMLDivElement>,
+    ) => {
+        return (
+            <>
+                {/* Top overlay */}
+                <div
+                    style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        height: cropBox.y + "px", // height up to the top of the crop box
+                        backgroundColor: "rgba(0,0,0,0.5)",
+                        pointerEvents: "none",
+                    }}
+                ></div>
+
+                {/* Bottom overlay */}
+                <div
+                    style={{
+                        position: "absolute",
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        height: `calc(100% - ${cropBox.y + cropBox.height}px)`, // height from the bottom of the crop box to the bottom of the canvas
+                        backgroundColor: "rgba(0,0,0,0.5)",
+                        pointerEvents: "none",
+                    }}
+                ></div>
+
+                {/* Left overlay */}
+                <div
+                    style={{
+                        position: "absolute",
+                        top: cropBox.y + "px",
+                        left: 0,
+                        width: cropBox.x + "px", // width up to the left side of the crop box
+                        height: cropBox.height + "px", // same height as the crop box
+                        backgroundColor: "rgba(0,0,0,0.5)",
+                        pointerEvents: "none",
+                    }}
+                ></div>
+
+                {/* Right overlay */}
+                <div
+                    style={{
+                        position: "absolute",
+                        top: cropBox.y + "px",
+                        right: 0,
+                        width: `calc(100% - ${cropBox.x + cropBox.width}px)`, // width from the right side of the crop box to the right side of the canvas
+                        height: cropBox.height + "px", // same height as the crop box
+                        backgroundColor: "rgba(0,0,0,0.5)",
+                        pointerEvents: "none",
+                    }}
+                ></div>
+
+                <div
+                    style={{
+                        display: "grid",
+                        position: "absolute",
+                        left: cropBox.x + "px",
+                        top: cropBox.y + "px",
+                        width: cropBox.width + "px",
+                        height: cropBox.height + "px",
+                        border: "1px solid white",
+                        gridTemplateColumns: "1fr 1fr 1fr",
+                        gridTemplateRows: "1fr 1fr 1fr",
+                        gap: "0px",
+                        zIndex: 30, // make sure the crop box is above the overlays
+                    }}
+                    ref={ref}
+                >
+                    {Array.from({ length: 9 }).map((_, index) => (
+                        <div
+                            key={index}
+                            style={{
+                                border: "1px solid white",
+                                boxSizing: "border-box",
+                                pointerEvents: "none",
+                            }}
+                        ></div>
+                    ))}
+
+                    <div
+                        style={{
+                            position: "absolute",
+                            height: "10px",
+                            width: "10px",
+                            backgroundColor: "white",
+                            border: "1px solid black",
+                            right: "-5px",
+                            bottom: "-5px",
+                            cursor: "se-resize",
+                        }}
+                        onMouseDown={(e) => {
+                            e.preventDefault();
+                            setIsDragging(true);
+                        }}
+                    ></div>
+                </div>
+            </>
+        );
+    },
+);
+
+const PRESET_ASPECT_RATIOS = [
+    {
+        width: 16,
+        height: 9,
+        icon: <CropSquareIcon />,
+    },
+    {
+        width: 3,
+        height: 2,
+        icon: <Crop32Icon />,
+    },
+    {
+        width: 16,
+        height: 10,
+        icon: <Crop169Icon />,
+    },
+];
+
+const TransformMenu: React.FC<CommonMenuProps> = ({
+    canvasRef,
+    originalSizeCanvasRef,
+    canvasLoading,
+    setCanvasLoading,
+    setTransformationPerformed,
+}) => {
+    // Crops the canvas according to originalHeight and originalWidth without compounding
+    const cropCanvas = (
+        canvas: HTMLCanvasElement,
+        widthRatio: number,
+        heightRatio: number,
+    ) => {
+        const context = canvas.getContext("2d");
+
+        const aspectRatio = widthRatio / heightRatio;
+
+        if (!context || !canvas) return;
+        context.imageSmoothingEnabled = false;
+
+        const img = new Image();
+        img.src = canvas.toDataURL();
+        img.onload = () => {
+            const sourceWidth = img.width;
+            const sourceHeight = img.height;
+
+            let sourceX = 0;
+            let sourceY = 0;
+
+            if (sourceWidth / sourceHeight > aspectRatio) {
+                sourceX = (sourceWidth - sourceHeight * aspectRatio) / 2;
+            } else {
+                sourceY = (sourceHeight - sourceWidth / aspectRatio) / 2;
+            }
+
+            const newWidth = sourceWidth - 2 * sourceX;
+            const newHeight = sourceHeight - 2 * sourceY;
+
+            context.clearRect(0, 0, canvas.width, canvas.height);
+
+            canvas.width = newWidth;
+            canvas.height = newHeight;
+
+            context.drawImage(
+                img,
+                sourceX,
+                sourceY,
+                newWidth,
+                newHeight,
+                0,
+                0,
+                newWidth,
+                newHeight,
+            );
+        };
+    };
+
+    const flipCanvas = (
+        canvas: HTMLCanvasElement,
+        direction: "vertical" | "horizontal",
+    ) => {
+        const context = canvas.getContext("2d");
+        if (!context || !canvas) return;
+        context.resetTransform();
+        context.imageSmoothingEnabled = false;
+        const img = new Image();
+        img.src = canvas.toDataURL();
+
+        img.onload = () => {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+
+            context.save();
+
+            if (direction === "horizontal") {
+                context.translate(canvas.width, 0);
+                context.scale(-1, 1);
+            } else {
+                context.translate(0, canvas.height);
+                context.scale(1, -1);
+            }
+
+            context.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+            context.restore();
+        };
+    };
+
+    const rotateCanvas = (canvas: HTMLCanvasElement, angle: number) => {
+        const context = canvas?.getContext("2d");
+        if (!context || !canvas) return;
+        context.imageSmoothingEnabled = false;
+
+        const image = new Image();
+        image.src = canvas.toDataURL();
+
+        image.onload = () => {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+
+            context.save();
+
+            const radians = (angle * Math.PI) / 180;
+            const sin = Math.sin(radians);
+            const cos = Math.cos(radians);
+            const newWidth =
+                Math.abs(image.width * cos) + Math.abs(image.height * sin);
+            const newHeight =
+                Math.abs(image.width * sin) + Math.abs(image.height * cos);
+
+            canvas.width = newWidth;
+            canvas.height = newHeight;
+
+            context.translate(canvas.width / 2, canvas.height / 2);
+            context.rotate(radians);
+
+            context.drawImage(
+                image,
+                -image.width / 2,
+                -image.height / 2,
+                image.width,
+                image.height,
+            );
+
+            context.restore();
+        };
+    };
+
+    const createCropHandler =
+        (widthRatio: number, heightRatio: number) => () => {
+            try {
+                setCanvasLoading(true);
+                cropCanvas(canvasRef.current, widthRatio, heightRatio);
+                cropCanvas(
+                    originalSizeCanvasRef.current,
+                    widthRatio,
+                    heightRatio,
+                );
+                setCanvasLoading(false);
+                setTransformationPerformed(true);
+            } catch (e) {
+                log.error(
+                    `crop handler failed - ${JSON.stringify({
+                        widthRatio,
+                        heightRatio,
+                    })}`,
+                    e,
+                );
+            }
+        };
+    const createRotationHandler = (rotation: "left" | "right") => () => {
+        try {
+            setCanvasLoading(true);
+            rotateCanvas(canvasRef.current, rotation === "left" ? -90 : 90);
+            rotateCanvas(
+                originalSizeCanvasRef.current,
+                rotation === "left" ? -90 : 90,
+            );
+            setCanvasLoading(false);
+            setTransformationPerformed(true);
+        } catch (e) {
+            log.error(`rotation handler (${rotation}) failed`, e);
+        }
+    };
+
+    const createFlipCanvasHandler =
+        (direction: "vertical" | "horizontal") => () => {
+            try {
+                setCanvasLoading(true);
+                flipCanvas(canvasRef.current, direction);
+                flipCanvas(originalSizeCanvasRef.current, direction);
+                setCanvasLoading(false);
+                setTransformationPerformed(true);
+            } catch (e) {
+                log.error(`flip handler ${direction} failed`, e);
+            }
+        };
+
+    return (
+        <>
+            <MenuSectionTitle title={t("ASPECT_RATIO")} />
+            <MenuItemGroup
+                style={{
+                    marginBottom: "0.5rem",
+                }}
+            >
+                <EnteMenuItem
+                    disabled={canvasLoading}
+                    startIcon={<CropSquareIcon />}
+                    onClick={createCropHandler(1, 1)}
+                    label={t("SQUARE") + " (1:1)"}
+                />
+            </MenuItemGroup>
+            <MenuItemGroup
+                style={{
+                    marginBottom: "1rem",
+                }}
+            >
+                {PRESET_ASPECT_RATIOS.map((ratio, index) => (
+                    <Fragment key={index}>
+                        <EnteMenuItem
+                            disabled={canvasLoading}
+                            startIcon={ratio.icon}
+                            onClick={createCropHandler(
+                                ratio.width,
+                                ratio.height,
+                            )}
+                            label={`${ratio.width}:${ratio.height}`}
+                        />
+                        {index !== PRESET_ASPECT_RATIOS.length - 1 && (
+                            <MenuItemDivider />
+                        )}
+                    </Fragment>
+                ))}
+            </MenuItemGroup>
+            <MenuItemGroup
+                style={{
+                    marginBottom: "1rem",
+                }}
+            >
+                {PRESET_ASPECT_RATIOS.map((ratio, index) => (
+                    <Fragment key={index}>
+                        <EnteMenuItem
+                            disabled={canvasLoading}
+                            key={index}
+                            startIcon={ratio.icon}
+                            onClick={createCropHandler(
+                                ratio.height,
+                                ratio.width,
+                            )}
+                            label={`${ratio.height}:${ratio.width}`}
+                        />
+                        {index !== PRESET_ASPECT_RATIOS.length - 1 && (
+                            <MenuItemDivider />
+                        )}
+                    </Fragment>
+                ))}
+            </MenuItemGroup>
+            <MenuSectionTitle title={t("ROTATION")} />
+            <MenuItemGroup
+                style={{
+                    marginBottom: "1rem",
+                }}
+            >
+                <EnteMenuItem
+                    disabled={canvasLoading}
+                    startIcon={<RotateLeftIcon />}
+                    onClick={createRotationHandler("left")}
+                    label={t("ROTATE_LEFT") + " 90˚"}
+                />
+                <MenuItemDivider />
+                <EnteMenuItem
+                    disabled={canvasLoading}
+                    startIcon={<RotateRightIcon />}
+                    onClick={createRotationHandler("right")}
+                    label={t("ROTATE_RIGHT") + " 90˚"}
+                />
+            </MenuItemGroup>
+            <MenuSectionTitle title={t("FLIP")} />
+            <MenuItemGroup
+                style={{
+                    marginBottom: "1rem",
+                }}
+            >
+                <EnteMenuItem
+                    disabled={canvasLoading}
+                    startIcon={
+                        <FlipIcon style={{ transform: "rotateZ(90deg)" }} />
+                    }
+                    onClick={createFlipCanvasHandler("vertical")}
+                    label={t("FLIP_VERTICALLY")}
+                />
+                <MenuItemDivider />
+                <EnteMenuItem
+                    disabled={canvasLoading}
+                    startIcon={<FlipIcon />}
+                    onClick={createFlipCanvasHandler("horizontal")}
+                    label={t("FLIP_HORIZONTALLY")}
+                />
+            </MenuItemGroup>
+        </>
+    );
+};
+
+interface ColoursMenuProps {
+    brightness: number;
+    contrast: number;
+    saturation: number;
+    blur: number;
+    invert: boolean;
+    setBrightness: (v: number) => void;
+    setContrast: (v: number) => void;
+    setSaturation: (v: number) => void;
+    setBlur: (v: number) => void;
+    setInvert: (v: boolean) => void;
+}
+
+const ColoursMenu: React.FC<ColoursMenuProps> = (props) => (
+    <>
+        <Box px={"8px"}>
+            <MenuSectionTitle title={t("BRIGHTNESS")} />
+            <Slider
+                min={0}
+                max={200}
+                defaultValue={100}
+                step={10}
+                valueLabelDisplay="auto"
+                value={props.brightness}
+                marks={[
+                    {
+                        value: 100,
+                        label: "100%",
+                    },
+                ]}
+                onChange={(_, value) => {
+                    props.setBrightness(value as number);
+                }}
+            />
+            <MenuSectionTitle title={t("CONTRAST")} />
+            <Slider
+                min={0}
+                max={200}
+                defaultValue={100}
+                step={10}
+                valueLabelDisplay="auto"
+                value={props.contrast}
+                onChange={(_, value) => {
+                    props.setContrast(value as number);
+                }}
+                marks={[
+                    {
+                        value: 100,
+                        label: "100%",
+                    },
+                ]}
+            />
+            <MenuSectionTitle title={t("BLUR")} />
+            <Slider
+                min={0}
+                max={10}
+                defaultValue={0}
+                step={1}
+                valueLabelDisplay="auto"
+                value={props.blur}
+                onChange={(_, value) => {
+                    props.setBlur(value as number);
+                }}
+            />
+            <MenuSectionTitle title={t("SATURATION")} />
+            <Slider
+                min={0}
+                max={200}
+                defaultValue={100}
+                step={10}
+                valueLabelDisplay="auto"
+                value={props.saturation}
+                onChange={(_, value) => {
+                    props.setSaturation(value as number);
+                }}
+                marks={[
+                    {
+                        value: 100,
+                        label: "100%",
+                    },
+                ]}
+            />
+        </Box>
+        <MenuItemGroup
+            style={{
+                marginBottom: "0.5rem",
+            }}
+        >
+            <EnteMenuItem
+                variant="toggle"
+                checked={props.invert}
+                label={t("INVERT_COLORS")}
+                onClick={() => {
+                    props.setInvert(!props.invert);
+                }}
+            />
+        </MenuItemGroup>
+    </>
+);
