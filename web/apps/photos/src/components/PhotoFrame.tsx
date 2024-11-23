@@ -1,10 +1,12 @@
 import log from "@/base/log";
-import type { LivePhotoSourceURL, SourceURLs } from "@/media/file";
 import { EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import type { GalleryBarMode } from "@/new/photos/components/gallery/reducer";
 import { TRASH_SECTION } from "@/new/photos/services/collection";
-import DownloadManager from "@/new/photos/services/download";
+import DownloadManager, {
+    type LivePhotoSourceURL,
+    type SourceURLs,
+} from "@/new/photos/services/download";
 import { PHOTOS_PAGES } from "@ente/shared/constants/pages";
 import useMemoSingleThreaded from "@ente/shared/hooks/useMemoSingleThreaded";
 import { styled } from "@mui/material";
@@ -38,6 +40,23 @@ const Container = styled("div")`
 `;
 
 const PHOTOSWIPE_HASH_SUFFIX = "&opened";
+
+/**
+ * An {@link EnteFile} augmented with various in-memory state used for
+ * displaying it in the photo viewer.
+ */
+export type DisplayFile = EnteFile & {
+    src?: string;
+    srcURLs?: SourceURLs;
+    msrc?: string;
+    html?: string;
+    w?: number;
+    h?: number;
+    title?: string;
+    isSourceLoaded?: boolean;
+    conversionFailed?: boolean;
+    canForceConvert?: boolean;
+};
 
 export interface PhotoFrameProps {
     page:
@@ -118,7 +137,7 @@ const PhotoFrame = ({
                 h: window.innerHeight,
                 title: item.pubMagicMetadata?.data.caption,
             };
-            return filteredItem;
+            return filteredItem as DisplayFile;
         });
     }, [files]);
 
@@ -288,7 +307,7 @@ const PhotoFrame = ({
     };
 
     const getThumbnail = (
-        item: EnteFile,
+        item: DisplayFile,
         index: number,
         isScrolling: boolean,
     ) => (
@@ -329,7 +348,7 @@ const PhotoFrame = ({
     const getSlideData = async (
         instance: PhotoSwipe<PhotoSwipe.Options>,
         index: number,
-        item: EnteFile,
+        item: DisplayFile,
     ) => {
         log.info(
             `[${item.id}] getSlideData called for thumbnail: ${!!item.msrc} sourceLoaded: ${!!item.isSourceLoaded} fetching: ${!!fetching[item.id]}`,
@@ -442,7 +461,7 @@ const PhotoFrame = ({
     const updateThumb = (
         instance: PhotoSwipe<PhotoSwipe.Options>,
         index: number,
-        item: EnteFile,
+        item: DisplayFile,
         url: string,
         forceUpdate?: boolean,
     ) => {
@@ -465,7 +484,7 @@ const PhotoFrame = ({
     const updateOrig = async (
         instance: PhotoSwipe<PhotoSwipe.Options>,
         index: number,
-        item: EnteFile,
+        item: DisplayFile,
         srcURL: SourceURLs,
         forceUpdate?: boolean,
     ) => {
@@ -488,7 +507,7 @@ const PhotoFrame = ({
     const forceConvertItem = async (
         instance: PhotoSwipe<PhotoSwipe.Options>,
         index: number,
-        item: EnteFile,
+        item: DisplayFile,
     ) => {
         updateThumb(instance, index, item, item.msrc, true);
 
@@ -563,7 +582,7 @@ const PhotoFrame = ({
 
 export default PhotoFrame;
 
-function updateFileMsrcProps(file: EnteFile, url: string) {
+function updateFileMsrcProps(file: DisplayFile, url: string) {
     file.w = window.innerWidth;
     file.h = window.innerHeight;
     file.msrc = url;
@@ -582,7 +601,7 @@ function updateFileMsrcProps(file: EnteFile, url: string) {
 }
 
 async function updateFileSrcProps(
-    file: EnteFile,
+    file: DisplayFile,
     srcURLs: SourceURLs,
     enableDownload: boolean,
 ) {

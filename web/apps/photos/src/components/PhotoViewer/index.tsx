@@ -5,11 +5,12 @@ import { Overlay } from "@/base/components/mui/Container";
 import { type ModalVisibilityProps } from "@/base/components/utils/modal";
 import { lowercaseExtension } from "@/base/file-name";
 import log from "@/base/log";
-import type { LoadedLivePhotoSourceURL } from "@/media/file";
 import { fileLogID, type EnteFile } from "@/media/file";
 import { FileType } from "@/media/file-type";
 import { isHEICExtension, needsJPEGConversion } from "@/media/formats";
-import downloadManager from "@/new/photos/services/download";
+import downloadManager, {
+    type LoadedLivePhotoSourceURL,
+} from "@/new/photos/services/download";
 import { extractRawExif, parseExif } from "@/new/photos/services/exif";
 import { AppContext } from "@/new/photos/types/context";
 import { FlexWrapper } from "@ente/shared/components/Container";
@@ -39,6 +40,7 @@ import {
     type ButtonProps,
     type CircularProgressProps,
 } from "@mui/material";
+import type { DisplayFile } from "components/PhotoFrame";
 import { t } from "i18next";
 import { GalleryContext } from "pages/gallery";
 import Photoswipe from "photoswipe";
@@ -343,7 +345,7 @@ function PhotoViewer(props: PhotoViewerProps) {
         setIsOwnFile(isOwnFile);
     }
 
-    function updateExif(file: EnteFile) {
+    function updateExif(file: DisplayFile) {
         if (file.metadata.fileType === FileType.video) {
             setExif({
                 key: file.src,
@@ -366,15 +368,15 @@ function PhotoViewer(props: PhotoViewerProps) {
         checkExifAvailable(file);
     }
 
-    function updateShowConvertBtn(file: EnteFile) {
+    function updateShowConvertBtn(file: DisplayFile) {
         setShowConvertButton(!!file.canForceConvert);
     }
 
-    function updateConversionFailedNotification(file: EnteFile) {
+    function updateConversionFailedNotification(file: DisplayFile) {
         setConversionFailedNotificationOpen(file.conversionFailed);
     }
 
-    function updateIsSourceLoaded(file: EnteFile) {
+    function updateIsSourceLoaded(file: DisplayFile) {
         setIsSourceLoaded(file.isSourceLoaded);
     }
 
@@ -505,7 +507,7 @@ function PhotoViewer(props: PhotoViewerProps) {
         }
         handleCloseInfo();
     };
-    const isInFav = (file: EnteFile) => {
+    const isInFav = (file: DisplayFile) => {
         const { favItemIds } = props;
         if (favItemIds && file) {
             return favItemIds.has(file.id);
@@ -513,7 +515,7 @@ function PhotoViewer(props: PhotoViewerProps) {
         return false;
     };
 
-    const onFavClick = async (file: EnteFile) => {
+    const onFavClick = async (file: DisplayFile) => {
         try {
             if (
                 !file ||
@@ -539,7 +541,7 @@ function PhotoViewer(props: PhotoViewerProps) {
         }
     };
 
-    const trashFile = async (file: EnteFile) => {
+    const trashFile = async (file: DisplayFile) => {
         try {
             showLoadingBar();
             try {
@@ -589,7 +591,7 @@ function PhotoViewer(props: PhotoViewerProps) {
         }
     };
 
-    const updateItems = (items: EnteFile[]) => {
+    const updateItems = (items: DisplayFile[]) => {
         try {
             if (photoSwipe) {
                 if (items.length === 0) {
@@ -626,7 +628,7 @@ function PhotoViewer(props: PhotoViewerProps) {
         }
     };
 
-    const checkExifAvailable = async (enteFile: EnteFile) => {
+    const checkExifAvailable = async (enteFile: DisplayFile) => {
         if (exifExtractionInProgress.current === enteFile.src) return;
 
         try {
@@ -697,7 +699,7 @@ function PhotoViewer(props: PhotoViewerProps) {
         }
     };
 
-    const copyToClipboardHelper = async (file: EnteFile) => {
+    const copyToClipboardHelper = async (file: DisplayFile) => {
         if (file && props.enableDownload && shouldShowCopyOption) {
             showLoadingBar();
             await copyFileToClipboard(file.src);
