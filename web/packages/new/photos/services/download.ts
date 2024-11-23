@@ -6,6 +6,12 @@ import {
     decryptThumbnail,
     initChunkDecryption,
 } from "@/base/crypto";
+import {
+    authenticatedRequestHeaders,
+    clientPackageHeader,
+    ensureOk,
+} from "@/base/http";
+import { ensureAuthToken } from "@/base/local-user";
 import log from "@/base/log";
 import { customAPIOrigin } from "@/base/origins";
 import {
@@ -248,7 +254,7 @@ class DownloadManagerImpl {
                 this.publicAlbumsCredentials,
             );
         } else {
-            return photos_downloadThumbnail(file, this.token);
+            return photos_downloadThumbnail(file);
         }
     }
 
@@ -618,43 +624,42 @@ async function getRenderableLivePhotoURL(
 type OnDownloadProgress = (event: { loaded: number; total: number }) => void;
 
 /**
+ * A helper function to adapt {@link retryAsyncOperation} for HTTP fetches.
+ */
+const retryEnsuringHTTPOk = (request: () => Promise<Response>) =>
+    retryAsyncOperation(async () => {
+        const r = await request();
+        ensureOk(r);
+        return r;
+    });
+
+/**
  * The various photos_* functions are used for the actual downloads when
  * we're running in the context of the the photos app.
  */
-const photos_downloadThumbnail = async (
-    file: EnteFile,
-    token: string | undefined,
-) => {
-    if (!token) throw Error(CustomError.TOKEN_MISSING);
-
+const photos_downloadThumbnail = async (file: EnteFile) => {
     const customOrigin = await customAPIOrigin();
 
-    // See: [Note: Passing credentials for self-hosted file fetches]
-    const getThumbnail = () => {
-        const opts = { responseType: "arraybuffer" /*timeout: this.timeout */ };
+    const getThumbnail = async () => {
         if (customOrigin) {
+            // See: [Note: Passing credentials for self-hosted file fetches]
+            const token = await ensureAuthToken();
             const params = new URLSearchParams({ token });
-            return HTTPService.get(
+            return fetch(
                 `${customOrigin}/files/preview/${file.id}?${params.toString()}`,
-                undefined,
-                undefined,
-                opts,
+                {
+                    headers: clientPackageHeader(),
+                },
             );
         } else {
-            return HTTPService.get(
-                `https://thumbnails.ente.io/?fileID=${file.id}`,
-                undefined,
-                { "X-Auth-Token": token },
-                opts,
-            );
+            return fetch(`https://thumbnails.ente.io/?fileID=${file.id}`, {
+                headers: await authenticatedRequestHeaders(),
+            });
         }
     };
 
-    const resp = await retryAsyncOperation(getThumbnail);
-    if (resp.data === undefined) throw Error("request failed");
-    // TODO: Remove this cast (it won't be needed when we migrate this from
-    // axios to fetch).
-    return new Uint8Array(resp.data as ArrayBuffer);
+    const res = await retryEnsuringHTTPOk(getThumbnail);
+    return new Uint8Array(await res.arrayBuffer());
 };
 
 const photos_downloadFile = async (
