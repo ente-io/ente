@@ -396,7 +396,6 @@ const PhotoFrame = ({
 
                 const dummyImgSrcUrl: SourceURLs = {
                     url: imageURL,
-                    isRenderable: !!imageURL,
                     type: "normal",
                 };
                 try {
@@ -423,7 +422,6 @@ const PhotoFrame = ({
                 const videoURL = await srcImgURL.video();
                 const loadedLivePhotoSrcURL: SourceURLs = {
                     url: { video: videoURL, image: imageURL },
-                    isRenderable: !!videoURL,
                     type: "livePhoto",
                 };
                 try {
@@ -605,7 +603,8 @@ async function updateFileSrcProps(
     srcURLs: SourceURLs,
     enableDownload: boolean,
 ) {
-    const { url, isRenderable } = srcURLs;
+    const { url } = srcURLs;
+    const isRenderable = !!url;
     file.w = window.innerWidth;
     file.h = window.innerHeight;
     file.isSourceLoaded =

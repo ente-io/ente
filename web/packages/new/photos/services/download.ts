@@ -31,7 +31,6 @@ export interface LoadedLivePhotoSourceURL {
 
 export interface SourceURLs {
     url: string | LivePhotoSourceURL | LoadedLivePhotoSourceURL;
-    isRenderable: boolean;
     type: "normal" | "livePhoto";
     /**
      * `true` if there is potential conversion that can still be applied.
@@ -521,7 +520,6 @@ async function getRenderableFileURL(
             : undefined;
 
     let url: SourceURLs["url"] | undefined;
-    let isRenderable: boolean;
     let type: SourceURLs["type"] = "normal";
     let mimeType: string | undefined;
     let canForceConvert = false;
@@ -532,13 +530,11 @@ async function getRenderableFileURL(
             const convertedBlob = await renderableImageBlob(fileName, fileBlob);
             const convertedURL = existingOrNewObjectURL(convertedBlob);
             url = convertedURL;
-            isRenderable = !!convertedURL;
             mimeType = convertedBlob.type;
             break;
         }
         case FileType.livePhoto: {
             url = await getRenderableLivePhotoURL(file, fileBlob);
-            isRenderable = false;
             type = "livePhoto";
             break;
         }
@@ -550,10 +546,10 @@ async function getRenderableFileURL(
             );
             const convertedURL = existingOrNewObjectURL(convertedBlob);
             url = convertedURL;
-            const isOriginal = convertedURL === originalFileURL;
-            isRenderable = !!convertedURL;
             mimeType = convertedBlob?.type;
 
+            const isOriginal = convertedURL === originalFileURL;
+            const isRenderable = !!convertedURL;
             canForceConvert =
                 isDesktop && !forceConvert && isOriginal && isRenderable;
 
@@ -561,7 +557,6 @@ async function getRenderableFileURL(
         }
         default: {
             url = originalFileURL;
-            isRenderable = false;
             break;
         }
     }
@@ -569,7 +564,6 @@ async function getRenderableFileURL(
     // TODO: Can we remove this non-null assertion and reflect it in the types?
     return {
         url: url!,
-        isRenderable,
         type,
         mimeType,
         canForceConvert,
