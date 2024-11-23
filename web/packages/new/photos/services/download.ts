@@ -80,13 +80,6 @@ class DownloadManagerImpl {
     private downloadClient: DownloadClient | undefined;
     /** Local cache for thumbnails. Might not be available. */
     private thumbnailCache?: BlobCache;
-    /**
-     * Local cache for the files themselves.
-     *
-     * Only available when we're running in the desktop app.
-     */
-    private fileCache?: BlobCache;
-
     private fileObjectURLPromises = new Map<number, Promise<SourceURLs>>();
     private fileConversionPromises = new Map<number, Promise<SourceURLs>>();
     private thumbnailObjectURLPromises = new Map<
@@ -112,13 +105,6 @@ class DownloadManagerImpl {
                 e,
             );
         }
-        // TODO (MR): Revisit full file caching cf disk space usage
-        // try {
-        //     if (isElectron()) this.fileCache = await cache("files");
-        // } catch (e) {
-        //     log.error("Failed to open file cache, will continue without it", e);
-        // }
-
         this.ready = true;
     }
 
@@ -308,25 +294,15 @@ class DownloadManagerImpl {
             file.info?.fileSize ?? 0,
         );
 
-        const cacheKey = file.id.toString();
-
         if (
             file.metadata.fileType === FileType.image ||
             file.metadata.fileType === FileType.livePhoto
         ) {
-            const cachedBlob = await this.fileCache?.get(cacheKey);
-            let encryptedArrayBuffer = await cachedBlob?.arrayBuffer();
-            if (!encryptedArrayBuffer) {
-                const array = await downloadClient.downloadFile(
-                    file,
-                    onDownloadProgress,
-                );
-                encryptedArrayBuffer = array.buffer;
-                await this.fileCache?.put(
-                    cacheKey,
-                    new Blob([encryptedArrayBuffer]),
-                );
-            }
+            const array = await downloadClient.downloadFile(
+                file,
+                onDownloadProgress,
+            );
+            const encryptedArrayBuffer = array.buffer;
             this.clearDownloadProgress(file.id);
 
             const decrypted = await decryptStreamBytes(
@@ -339,18 +315,7 @@ class DownloadManagerImpl {
             return new Response(decrypted).body;
         }
 
-        const cachedBlob = await this.fileCache?.get(cacheKey);
-        let res: Response;
-        if (cachedBlob) res = new Response(cachedBlob);
-        else {
-            res = await downloadClient.downloadFileStream(file);
-            // We don't have a files cache currently, so this was already a
-            // no-op. But even if we had a cache, this seems sus, because
-            // res.blob() will read the stream and I'd think then trying to do
-            // the subsequent read of the stream again below won't work.
-
-            // this.fileCache?.put(cacheKey, await res.blob());
-        }
+        const res = await downloadClient.downloadFileStream(file);
         const body = res.body;
         if (!body) return null;
         const reader = body.getReader();
