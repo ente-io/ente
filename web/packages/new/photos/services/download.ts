@@ -58,9 +58,11 @@ class DownloadManagerImpl {
     /**
      * Local cache for thumbnail blobs.
      *
-     * Might not be available.
+     * `undefined` indicates that the cache has not yet been initialized. It is
+     * also possible that the cache might not be available, in which case it'd
+     * be set to `null`.
      */
-    private thumbnailCache: BlobCache | undefined;
+    private thumbnailCache: BlobCache | null | undefined;
     /**
      * An in-memory cache for an object URL to a file's thumbnail.
      *
@@ -104,18 +106,24 @@ class DownloadManagerImpl {
             log.info("DownloadManager already initialized");
             return;
         }
+        await this.initThumbnailCacheIfNeeded();
         this.downloadClient = createDownloadClient(token);
-        try {
-            this.thumbnailCache = await blobCache("thumbs");
-        } catch (e) {
-            log.error(
-                "Failed to open thumbnail cache, will continue without it",
-                e,
-            );
-        }
         this.ready = true;
     }
 
+    private async initThumbnailCacheIfNeeded() {
+        if (this.thumbnailCache === undefined) {
+            try {
+                this.thumbnailCache = await blobCache("thumbs");
+            } catch (e) {
+                this.thumbnailCache = null;
+                log.error(
+                    "Failed to open thumbnail cache, will continue without it",
+                    e,
+                );
+            }
+        }
+    }
     private ensureInitialized() {
         if (!this.ready)
             throw new Error(
@@ -128,6 +136,7 @@ class DownloadManagerImpl {
     logout() {
         this.ready = false;
         this.downloadClient = undefined;
+        this.thumbnailCache = undefined;
         this.thumbnailURLPromises.clear();
         this.fileURLPromises.clear();
         this.fileConversionPromises.clear();
@@ -217,6 +226,7 @@ class DownloadManagerImpl {
      */
     async thumbnailData(file: EnteFile, cachedOnly = false) {
         this.ensureInitialized();
+        await this.initThumbnailCacheIfNeeded();
 
         const key = file.id.toString();
         const cached = await this.thumbnailCache?.get(key);
