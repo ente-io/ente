@@ -2,9 +2,11 @@ import "dart:async";
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
+import 'dart:ui' as ui show Image;
 
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart' show decodeImageFromList;
 import "package:flutter_image_compress/flutter_image_compress.dart";
 import 'package:image_editor/image_editor.dart';
 import 'package:logging/logging.dart';
@@ -336,8 +338,10 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       showToast(context, S.of(context).somethingWentWrong);
       return;
     }
-    _logger.info('Size before compression = ${result.length}');
-    result = await FlutterImageCompress.compressWithList(result);
+    _logger.info('Size before compression = ${result.length}');    
+    
+    final ui.Image decodedResult = await decodeImageFromList(result);
+    result = await FlutterImageCompress.compressWithList(result, minWidth: decodedResult.width, minHeight: decodedResult.height);
     _logger.info('Size after compression = ${result.length}');
     final Duration diff = DateTime.now().difference(start);
     _logger.info('image_editor time : $diff');
