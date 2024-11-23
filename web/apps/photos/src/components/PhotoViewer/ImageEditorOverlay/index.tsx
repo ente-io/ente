@@ -62,7 +62,7 @@ interface IProps {
     closePhotoViewer: () => void;
 }
 
-const FILTER_DEFAULT_VALUES = {
+const filterDefaultValues = {
     brightness: 100,
     contrast: 100,
     blur: 0,
@@ -70,10 +70,7 @@ const FILTER_DEFAULT_VALUES = {
     invert: false,
 };
 
-// CORNER_THRESHOLD defines the threshold near the corners of the crop box in which dragging is assumed as not the intention
-const CORNER_THRESHOLD = 20;
-
-export const ImageEditorOverlayContext = createContext(
+const ImageEditorOverlayContext = createContext(
     {} as {
         canvasRef: MutableRefObject<HTMLCanvasElement>;
         originalSizeCanvasRef: MutableRefObject<HTMLCanvasElement>;
@@ -86,7 +83,7 @@ export const ImageEditorOverlayContext = createContext(
 
 type OperationTab = "crop" | "transform" | "colours";
 
-export interface CropBoxProps {
+interface CropBoxProps {
     x: number;
     y: number;
     width: number;
@@ -111,14 +108,14 @@ const ImageEditorOverlay = (props: IProps) => {
     const [currentTab, setCurrentTab] = useState<OperationTab>("transform");
 
     const [brightness, setBrightness] = useState(
-        FILTER_DEFAULT_VALUES.brightness,
+        filterDefaultValues.brightness,
     );
-    const [contrast, setContrast] = useState(FILTER_DEFAULT_VALUES.contrast);
-    const [blur, setBlur] = useState(FILTER_DEFAULT_VALUES.blur);
+    const [contrast, setContrast] = useState(filterDefaultValues.contrast);
+    const [blur, setBlur] = useState(filterDefaultValues.blur);
     const [saturation, setSaturation] = useState(
-        FILTER_DEFAULT_VALUES.saturation,
+        filterDefaultValues.saturation,
     );
-    const [invert, setInvert] = useState(FILTER_DEFAULT_VALUES.invert);
+    const [invert, setInvert] = useState(filterDefaultValues.invert);
 
     const [transformationPerformed, setTransformationPerformed] =
         useState(false);
@@ -174,13 +171,17 @@ const ImageEditorOverlay = (props: IProps) => {
         const offsetX = e.pageX - rect.left - rect.width / 2;
         const offsetY = e.pageY - rect.top - rect.height / 2;
 
+        // The threshold near the corners of the crop box in which dragging is
+        // assumed as not the intention.
+        const cornerThreshold = 20;
+
         // check if the cursor is near the corners of the box
         const isNearLeftOrRightEdge =
-            e.pageX < rect.left + CORNER_THRESHOLD ||
-            e.pageX > rect.right - CORNER_THRESHOLD;
+            e.pageX < rect.left + cornerThreshold ||
+            e.pageX > rect.right - cornerThreshold;
         const isNearTopOrBottomEdge =
-            e.pageY < rect.top + CORNER_THRESHOLD ||
-            e.pageY > rect.bottom - CORNER_THRESHOLD;
+            e.pageY < rect.top + cornerThreshold ||
+            e.pageY > rect.bottom - cornerThreshold;
 
         if (isNearLeftOrRightEdge && isNearTopOrBottomEdge) {
             // cursor is near a corner, do not initiate dragging
@@ -278,11 +279,11 @@ const ImageEditorOverlay = (props: IProps) => {
         try {
             applyFilters([canvasRef.current, originalSizeCanvasRef.current]);
             setColoursAdjusted(
-                brightness !== FILTER_DEFAULT_VALUES.brightness ||
-                    contrast !== FILTER_DEFAULT_VALUES.contrast ||
-                    blur !== FILTER_DEFAULT_VALUES.blur ||
-                    saturation !== FILTER_DEFAULT_VALUES.saturation ||
-                    invert !== FILTER_DEFAULT_VALUES.invert,
+                brightness !== filterDefaultValues.brightness ||
+                    contrast !== filterDefaultValues.contrast ||
+                    blur !== filterDefaultValues.blur ||
+                    saturation !== filterDefaultValues.saturation ||
+                    invert !== filterDefaultValues.invert,
             );
         } catch (e) {
             log.error("Error applying filters", e);
