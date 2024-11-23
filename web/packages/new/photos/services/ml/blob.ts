@@ -150,20 +150,16 @@ export const fetchRenderableEnteFileBlob = async (
         return new Blob([thumbnailData!]);
     }
 
-    const fileStream = await DownloadManager.getFile(file);
-    const originalImageBlob = await new Response(fileStream).blob();
+    const originalFileBlob = await DownloadManager.fileBlob(file);
 
     if (fileType == FileType.livePhoto) {
         const { imageFileName, imageData } = await decodeLivePhoto(
             file.metadata.title,
-            originalImageBlob,
+            originalFileBlob,
         );
         return renderableImageBlob(imageFileName, new Blob([imageData]));
     } else if (fileType == FileType.image) {
-        return await renderableImageBlob(
-            file.metadata.title,
-            originalImageBlob,
-        );
+        return await renderableImageBlob(file.metadata.title, originalFileBlob);
     } else {
         // A layer above us should've already filtered these out.
         throw new Error(`Cannot index unsupported file type ${fileType}`);

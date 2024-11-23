@@ -90,8 +90,21 @@ class DownloadManagerImpl {
      * This object URL can be directly used to render the thumbnail (e.g. in an
      * img tag). The entries are keyed by the file ID.
      */
-    private thumbnailURLs = new Map<number, Promise<string | undefined>>();
-    private fileObjectURLPromises = new Map<number, Promise<SourceURLs>>();
+    private thumbnailURLPromises = new Map<
+        number,
+        Promise<string | undefined>
+    >();
+    /**
+     * An in-memory cache for an object URL to a file's original data.
+     *
+     * Unlike {@link thumbnailURLPromises}, there is no guarantee that the
+     * browser will be able to render the original file (e.g. it might be in an
+     * unsupported format). If a renderable URL is needed for the file,
+     * {@link renderableFileData} should be used instead.
+     *
+     * The entries are keyed by the file ID.
+     */
+    private fileURLPromises = new Map<number, Promise<string>>();
     private fileConversionPromises = new Map<number, Promise<SourceURLs>>();
 
     private fileDownloadProgress = new Map<number, number>();
@@ -127,9 +140,9 @@ class DownloadManagerImpl {
     logout() {
         this.ready = false;
         this.downloadClient = undefined;
-        this.fileObjectURLPromises.clear();
+        this.thumbnailURLPromises.clear();
+        this.fileURLPromises.clear();
         this.fileConversionPromises.clear();
-        this.thumbnailURLs.clear();
         this.fileDownloadProgress.clear();
         this.progressUpdater = () => {};
     }
@@ -143,13 +156,43 @@ class DownloadManagerImpl {
         this.progressUpdater = progressUpdater;
     }
 
-    private downloadThumb = async (file: EnteFile) => {
-        const { downloadClient } = this.ensureInitialized();
+    /**
+     * Resolves with an URL that points to the file's thumbnail.
+     *
+     * The thumbnail will be downloaded if needed (unless {@link cachedOnly} is
+     * true). It will also be cached for subsequent fetches.
+     *
+     * The optional {@link cachedOnly} parameter can be set to indicate that
+     * this is being called as part of a scroll, so the downloader should not
+     * attempt to download the file but should instead fulfill the request from
+     * the disk cache. This avoids an unbounded flurry of requests on scroll,
+     * only downloading when the position has quiescized.
+     *
+     * The returned URL is actually an object URL, but it should not be revoked
+     * since the download manager caches it for future use.
+     */
+    async renderableThumbnailURL(
+        file: EnteFile,
+        cachedOnly = false,
+    ): Promise<string | undefined> {
+        this.ensureInitialized();
 
-        const encryptedData = await downloadClient.downloadThumbnail(file);
-        const decryptionHeader = file.thumbnail.decryptionHeader;
-        return decryptThumbnail({ encryptedData, decryptionHeader }, file.key);
-    };
+        if (!this.thumbnailURLPromises.has(file.id)) {
+            const url = this.thumbnailBytes(file, cachedOnly).then((bytes) =>
+                bytes ? URL.createObjectURL(new Blob([bytes])) : undefined,
+            );
+            this.thumbnailURLPromises.set(file.id, url);
+        }
+
+        let thumb = await this.thumbnailURLPromises.get(file.id);
+        if (cachedOnly) return thumb;
+
+        if (!thumb) {
+            this.thumbnailURLPromises.delete(file.id);
+            thumb = await this.renderableThumbnailURL(file);
+        }
+        return thumb;
+    }
 
     /**
      * Returns the thumbnail data for a file, downloading it if needed.
@@ -178,43 +221,13 @@ class DownloadManagerImpl {
         return thumb;
     }
 
-    /**
-     * Resolves with an URL that points to the file's thumbnail.
-     *
-     * The thumbnail will be downloaded if needed (unless {@link cachedOnly} is
-     * true). It will also be cached for subsequent fetches.
-     *
-     * The optional {@link cachedOnly} parameter can be set to indicate that
-     * this is being called as part of a scroll, so the downloader should not
-     * attempt to download the file but should instead fulfill the request from
-     * the disk cache. This avoids an unbounded flurry of requests on scroll,
-     * only downloading when the position has quiescized.
-     *
-     * The returned URL is actually an object URL, but it should not be revoked
-     * since the download manager caches it for future use.
-     */
-    async renderableThumbnailURL(
-        file: EnteFile,
-        cachedOnly = false,
-    ): Promise<string | undefined> {
-        this.ensureInitialized();
+    private downloadThumb = async (file: EnteFile) => {
+        const { downloadClient } = this.ensureInitialized();
 
-        if (!this.thumbnailURLs.has(file.id)) {
-            const url = this.thumbnailBytes(file, cachedOnly).then((bytes) =>
-                bytes ? URL.createObjectURL(new Blob([bytes])) : undefined,
-            );
-            this.thumbnailURLs.set(file.id, url);
-        }
-
-        let thumb = await this.thumbnailURLs.get(file.id);
-        if (cachedOnly) return thumb;
-
-        if (!thumb) {
-            this.thumbnailURLs.delete(file.id);
-            thumb = await this.renderableThumbnailURL(file);
-        }
-        return thumb;
-    }
+        const encryptedData = await downloadClient.downloadThumbnail(file);
+        const decryptionHeader = file.thumbnail.decryptionHeader;
+        return decryptThumbnail({ encryptedData, decryptionHeader }, file.key);
+    };
 
     /**
      * The `forceConvert` option is true when the user presses the "Convert"
@@ -228,19 +241,14 @@ class DownloadManagerImpl {
         try {
             const forceConvert = opts?.forceConvert ?? false;
             const getFileForPreviewPromise = async () => {
-                const fileBlob = await new Response(
-                    await this.getFile(file, true),
-                ).blob();
-                // TODO: Is this ensure valid?
-                // The existing code was already dereferencing, so it shouldn't
-                // affect behaviour.
-                const { url: originalFileURL } =
-                    (await this.fileObjectURLPromises.get(file.id))!;
-
+                const originalFileURL =
+                    await this.fileURLDownloadAndCacheIfNeeded(file);
+                const res = await fetch(originalFileURL!);
+                const fileBlob = await res.blob();
                 const converted = await getRenderableFileURL(
                     file,
                     fileBlob,
-                    originalFileURL as string,
+                    originalFileURL!,
                     forceConvert,
                 );
                 return converted;
@@ -260,43 +268,73 @@ class DownloadManagerImpl {
         }
     };
 
-    async getFile(
+    /**
+     * Return a blob to the file's contents, downloading it needed.
+     *
+     * This is a convenience abstraction over {@link fileStream} that converts
+     * it into a {@link Blob}.
+     */
+    async fileBlob(file: EnteFile) {
+        return this.fileStream(file).then((s) => new Response(s).blob());
+    }
+
+    /**
+     * Return an stream to the file's contents, downloading it needed.
+     *
+     * Note that the results are not cached in-memory. That is, while the
+     * request may be served from the existing item in the in-memory cache, if
+     * it is not found and a download is required, that result will not be
+     * cached for subsequent use.
+     *
+     * @param file The {@link EnteFile} whose data we want.
+     *
+     * @returns
+     */
+    async fileStream(
         file: EnteFile,
-        cacheInMemory = false,
     ): Promise<ReadableStream<Uint8Array> | null> {
         this.ensureInitialized();
-        try {
-            const getFilePromise = async (): Promise<SourceURLs> => {
-                const fileStream = await this.downloadFile(file);
-                const fileBlob = await new Response(fileStream).blob();
-                return {
-                    url: URL.createObjectURL(fileBlob),
-                    isOriginal: true,
-                    isRenderable: false,
-                    type: "normal",
-                };
-            };
-            if (!this.fileObjectURLPromises.has(file.id)) {
-                if (!cacheInMemory) {
-                    return await this.downloadFile(file);
-                }
-                this.fileObjectURLPromises.set(file.id, getFilePromise());
+
+        const cached = await this.fileStreamFromCachedURL(file);
+        if (cached) return cached;
+
+        return this.downloadFile(file);
+    }
+
+    private async fileStreamFromCachedURL(file: EnteFile) {
+        const cachedURL = this.fileURLPromises.get(file.id);
+        if (cachedURL) {
+            try {
+                const url = await cachedURL;
+                const res = await fetch(url);
+                return res.body;
+            } catch (e) {
+                log.warn("Failed to use cached object URL", e);
+                this.fileURLPromises.delete(file.id);
+                throw e;
             }
-            // TODO: Is this ensure valid?
-            // The existing code was already dereferencing, so it shouldn't
-            // affect behaviour.
-            const fileURLs = (await this.fileObjectURLPromises.get(file.id))!;
-            if (fileURLs.isOriginal) {
-                const fileStream = (await fetch(fileURLs.url as string)).body;
-                return fileStream;
-            } else {
-                return await this.downloadFile(file);
-            }
-        } catch (e) {
-            this.fileObjectURLPromises.delete(file.id);
-            log.error("download manager getFile Failed", e);
-            throw e;
         }
+        return null;
+    }
+
+    /**
+     * A private variant of {@link fileStream} that also caches the results.
+     */
+    private async fileURLDownloadAndCacheIfNeeded(file: EnteFile) {
+        this.ensureInitialized();
+
+        if (!this.fileURLPromises.has(file.id)) {
+            this.fileURLPromises.set(
+                file.id,
+                (async () => {
+                    const fileStream = await this.downloadFile(file);
+                    const fileBlob = await new Response(fileStream).blob();
+                    return URL.createObjectURL(fileBlob);
+                })(),
+            );
+        }
+
+        return this.fileURLPromises.get(file.id);
     }
 
     private async downloadFile(
