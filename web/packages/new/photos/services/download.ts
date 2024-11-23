@@ -243,12 +243,12 @@ class DownloadManagerImpl {
             const getFileForPreviewPromise = async () => {
                 const originalFileURL =
                     await this.fileURLDownloadAndCacheIfNeeded(file);
-                const res = await fetch(originalFileURL!);
+                const res = await fetch(originalFileURL);
                 const fileBlob = await res.blob();
                 const converted = await getRenderableFileURL(
                     file,
                     fileBlob,
-                    originalFileURL!,
+                    originalFileURL,
                     forceConvert,
                 );
                 return converted;
@@ -323,18 +323,15 @@ class DownloadManagerImpl {
     private async fileURLDownloadAndCacheIfNeeded(file: EnteFile) {
         this.ensureInitialized();
 
-        if (!this.fileURLPromises.has(file.id)) {
-            this.fileURLPromises.set(
-                file.id,
-                (async () => {
-                    const fileStream = await this.downloadFile(file);
-                    const fileBlob = await new Response(fileStream).blob();
-                    return URL.createObjectURL(fileBlob);
-                })(),
-            );
+        let url = this.fileURLPromises.get(file.id);
+        if (!url) {
+            url = this.downloadFile(file)
+                .then((stream) => new Response(stream).blob())
+                .then((blob) => URL.createObjectURL(blob));
+            this.fileURLPromises.set(file.id, url);
         }
 
-        return this.fileURLPromises.get(file.id);
+        return url;
     }
 
     private async downloadFile(
