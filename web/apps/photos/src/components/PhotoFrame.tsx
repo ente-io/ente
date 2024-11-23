@@ -396,7 +396,6 @@ const PhotoFrame = ({
 
                 const dummyImgSrcUrl: SourceURLs = {
                     url: imageURL,
-                    isOriginal: false,
                     isRenderable: !!imageURL,
                     type: "normal",
                 };
@@ -424,7 +423,6 @@ const PhotoFrame = ({
                 const videoURL = await srcImgURL.video();
                 const loadedLivePhotoSrcURL: SourceURLs = {
                     url: { video: videoURL, image: imageURL },
-                    isOriginal: false,
                     isRenderable: !!videoURL,
                     type: "livePhoto",
                 };

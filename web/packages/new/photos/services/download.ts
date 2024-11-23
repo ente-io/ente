@@ -31,7 +31,6 @@ export interface LoadedLivePhotoSourceURL {
 
 export interface SourceURLs {
     url: string | LivePhotoSourceURL | LoadedLivePhotoSourceURL;
-    isOriginal: boolean;
     isRenderable: boolean;
     type: "normal" | "livePhoto";
     /**
@@ -522,7 +521,6 @@ async function getRenderableFileURL(
             : undefined;
 
     let url: SourceURLs["url"] | undefined;
-    let isOriginal: boolean;
     let isRenderable: boolean;
     let type: SourceURLs["type"] = "normal";
     let mimeType: string | undefined;
@@ -534,14 +532,12 @@ async function getRenderableFileURL(
             const convertedBlob = await renderableImageBlob(fileName, fileBlob);
             const convertedURL = existingOrNewObjectURL(convertedBlob);
             url = convertedURL;
-            isOriginal = convertedURL === originalFileURL;
             isRenderable = !!convertedURL;
             mimeType = convertedBlob.type;
             break;
         }
         case FileType.livePhoto: {
             url = await getRenderableLivePhotoURL(file, fileBlob);
-            isOriginal = false;
             isRenderable = false;
             type = "livePhoto";
             break;
@@ -554,7 +550,7 @@ async function getRenderableFileURL(
             );
             const convertedURL = existingOrNewObjectURL(convertedBlob);
             url = convertedURL;
-            isOriginal = convertedURL === originalFileURL;
+            const isOriginal = convertedURL === originalFileURL;
             isRenderable = !!convertedURL;
             mimeType = convertedBlob?.type;
 
@@ -565,7 +561,6 @@ async function getRenderableFileURL(
         }
         default: {
             url = originalFileURL;
-            isOriginal = true;
             isRenderable = false;
             break;
         }
@@ -574,7 +569,6 @@ async function getRenderableFileURL(
     // TODO: Can we remove this non-null assertion and reflect it in the types?
     return {
         url: url!,
-        isOriginal,
         isRenderable,
         type,
         mimeType,
