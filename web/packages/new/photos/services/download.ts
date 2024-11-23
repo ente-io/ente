@@ -178,8 +178,8 @@ class DownloadManagerImpl {
         this.ensureInitialized();
 
         if (!this.thumbnailURLPromises.has(file.id)) {
-            const url = this.thumbnailBytes(file, cachedOnly).then((bytes) =>
-                bytes ? URL.createObjectURL(new Blob([bytes])) : undefined,
+            const url = this.thumbnailData(file, cachedOnly).then((data) =>
+                data ? URL.createObjectURL(new Blob([data])) : undefined,
             );
             this.thumbnailURLPromises.set(file.id, url);
         }
@@ -204,11 +204,11 @@ class DownloadManagerImpl {
      * @param cachedOnly If true, then the thumbnail is not downloaded if it is
      * not already present in the disk cache.
      *
-     * @returns The bytes of the thumbnail. This method can return `undefined`
-     * iff the thumbnail is not already cached, and {@link cachedOnly} is set to
-     * `true`.
+     * @returns The bytes of the thumbnail, as a {@link Uint8Array}. This method
+     * can return `undefined` iff the thumbnail is not already cached, and
+     * {@link cachedOnly} is set to `true`.
      */
-    async thumbnailBytes(file: EnteFile, cachedOnly = false) {
+    async thumbnailData(file: EnteFile, cachedOnly = false) {
         this.ensureInitialized();
 
         const key = file.id.toString();
@@ -287,8 +287,6 @@ class DownloadManagerImpl {
      * cached for subsequent use.
      *
      * @param file The {@link EnteFile} whose data we want.
-     *
-     * @returns
      */
     async fileStream(
         file: EnteFile,

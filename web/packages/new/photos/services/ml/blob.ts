@@ -91,8 +91,8 @@ const fetchRenderableUploadItemBlob = async (
 ) => {
     const fileType = file.metadata.fileType;
     if (fileType == FileType.video) {
-        const data = await DownloadManager.thumbnailBytes(file);
-        return new Blob([data!]);
+        const thumbnailData = await DownloadManager.thumbnailData(file);
+        return new Blob([thumbnailData!]);
     } else {
         const blob = await readNonVideoUploadItem(uploadItem, electron);
         return renderableImageBlob(file.metadata.title, blob);
@@ -146,7 +146,7 @@ export const fetchRenderableEnteFileBlob = async (
 ): Promise<Blob> => {
     const fileType = file.metadata.fileType;
     if (fileType == FileType.video) {
-        const thumbnailData = await DownloadManager.thumbnailBytes(file);
+        const thumbnailData = await DownloadManager.thumbnailData(file);
         return new Blob([thumbnailData!]);
     }
 
