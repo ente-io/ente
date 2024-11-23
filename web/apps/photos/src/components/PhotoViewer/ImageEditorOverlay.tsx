@@ -69,7 +69,7 @@ const filterDefaultValues = {
     invert: false,
 };
 
-type OperationTab = "crop" | "transform" | "colours";
+type OperationTab = "crop" | "transform" | "colors";
 
 interface CropBoxProps {
     x: number;
@@ -90,7 +90,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
     const [fileURL, setFileURL] = useState<string>("");
     // The MIME type of the original file that we are editing.
     //
-    // It _should_ generally be present, but it is not guaranteed to be.
+    // It should generally be present, but it is not guaranteed to be.
     const [mimeType, setMIMEType] = useState<string | undefined>();
 
     const [currentRotationAngle, setCurrentRotationAngle] = useState(0);
@@ -648,7 +648,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                             <Tab label={t("TRANSFORM")} value="transform" />
                             <Tab
                                 label={t("COLORS")}
-                                value="colours"
+                                value="colors"
                                 disabled={transformationPerformed}
                             />
                         </Tabs>
@@ -680,7 +680,7 @@ export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
                     {currentTab === "transform" && (
                         <TransformMenu {...menuProps} />
                     )}
-                    {currentTab === "colours" && (
+                    {currentTab === "colors" && (
                         <ColoursMenu
                             brightness={brightness}
                             contrast={contrast}
