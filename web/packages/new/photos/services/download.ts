@@ -52,24 +52,6 @@ export interface SourceURLs {
     mimeType?: string;
 }
 
-export type OnDownloadProgress = (event: {
-    loaded: number;
-    total: number;
-}) => void;
-
-interface DownloadClient {
-    updateTokens: (token: string, passwordToken?: string) => void;
-    downloadThumbnail: (
-        file: EnteFile,
-        timeout?: number,
-    ) => Promise<Uint8Array>;
-    downloadFile: (
-        file: EnteFile,
-        onDownloadProgress: OnDownloadProgress,
-    ) => Promise<Uint8Array>;
-    downloadFileStream: (file: EnteFile) => Promise<Response>;
-}
-
 class DownloadManagerImpl {
     private ready = false;
     private downloadClient: DownloadClient | undefined;
@@ -610,6 +592,25 @@ async function getRenderableLivePhotoURL(
     };
 }
 
+type OnDownloadProgress = (event: { loaded: number; total: number }) => void;
+
+interface DownloadClient {
+    updateTokens: (token: string, passwordToken?: string) => void;
+    downloadThumbnail: (
+        file: EnteFile,
+        timeout?: number,
+    ) => Promise<Uint8Array>;
+    downloadFile: (
+        file: EnteFile,
+        onDownloadProgress: OnDownloadProgress,
+    ) => Promise<Uint8Array>;
+    downloadFileStream: (file: EnteFile) => Promise<Response>;
+}
+
+/**
+ * A class used for the actual downloads when we're running in the context of
+ * the photos app.
+ */
 class PhotosDownloadClient implements DownloadClient {
     constructor(
         private token: string,
@@ -757,6 +758,10 @@ class PhotosDownloadClient implements DownloadClient {
     }
 }
 
+/**
+ * A class used for the actual downloads when we're running in the context of
+ * the the public albums app.
+ */
 class PublicAlbumsDownloadClient implements DownloadClient {
     private token: string | undefined;
     private passwordToken: string | undefined;
