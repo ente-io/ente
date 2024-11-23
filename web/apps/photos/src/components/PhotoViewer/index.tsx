@@ -59,7 +59,7 @@ import {
 } from "utils/file";
 import { PublicCollectionGalleryContext } from "utils/publicCollectionGallery";
 import { FileInfo, type FileInfoExif, type FileInfoProps } from "./FileInfo";
-import ImageEditorOverlay from "./ImageEditorOverlay";
+import { ImageEditorOverlay } from "./ImageEditorOverlay";
 
 interface PhotoswipeFullscreenAPI {
     enter: () => void;

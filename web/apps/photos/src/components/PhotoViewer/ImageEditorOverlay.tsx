@@ -54,7 +54,7 @@ import {
 import { getLocalCollections } from "services/collectionService";
 import uploadManager from "services/upload/uploadManager";
 
-interface IProps {
+interface ImageEditorOverlayProps {
     file: EnteFile;
     show: boolean;
     onClose: () => void;
@@ -78,7 +78,9 @@ interface CropBoxProps {
     height: number;
 }
 
-const ImageEditorOverlay = (props: IProps) => {
+export const ImageEditorOverlay: React.FC<ImageEditorOverlayProps> = (
+    props,
+) => {
     const { showMiniDialog } = useContext(AppContext);
 
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -722,8 +724,6 @@ const ImageEditorOverlay = (props: IProps) => {
         </>
     );
 };
-
-export default ImageEditorOverlay;
 
 const confirmEditorCloseDialogAttributes = (
     onConfirm: () => void,
