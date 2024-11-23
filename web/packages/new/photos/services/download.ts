@@ -751,43 +751,37 @@ const publicAlbums_downloadThumbnail = async (
 ) => {
     const customOrigin = await customAPIOrigin();
 
-    // See: [Note: Passing credentials for self-hosted file fetches]
-    const getThumbnail = () => {
-        const opts = {
-            responseType: "arraybuffer",
-        };
-
+    const getThumbnail = async () => {
         if (customOrigin) {
+            // See: [Note: Passing credentials for self-hosted file fetches]
             const params = new URLSearchParams({
                 accessToken,
-                ...(accessTokenJWT && { accessTokenJWT }),
+                ...(accessTokenJWT ? { accessTokenJWT } : {}),
             });
-            return HTTPService.get(
+            return fetch(
                 `${customOrigin}/public-collection/files/preview/${file.id}?${params.toString()}`,
-                undefined,
-                undefined,
-                opts,
+                {
+                    headers: clientPackageHeader(),
+                },
             );
         } else {
-            return HTTPService.get(
+            return fetch(
                 `https://public-albums.ente.io/preview/?fileID=${file.id}`,
-                undefined,
                 {
-                    "X-Auth-Access-Token": accessToken,
-                    ...(accessTokenJWT && {
-                        "X-Auth-Access-Token-JWT": accessTokenJWT,
-                    }),
+                    headers: {
+                        ...clientPackageHeader(),
+                        "X-Auth-Access-Token": accessToken,
+                        ...(accessTokenJWT
+                            ? { "X-Auth-Access-Token-JWT": accessTokenJWT }
+                            : {}),
+                    },
                 },
-                opts,
             );
         }
     };
 
-    const resp = await getThumbnail();
-    if (resp.data === undefined) throw Error("request failed");
-    // TODO: Remove this cast (it won't be needed when we migrate this from
-    // axios to fetch).
-    return new Uint8Array(resp.data as ArrayBuffer);
+    const res = await retryEnsuringHTTPOk(getThumbnail);
+    return new Uint8Array(await res.arrayBuffer());
 };
 
 const publicAlbums_downloadFile = async (
