@@ -77,6 +77,7 @@ class _FaceFilterChipState extends State<FaceFilterChip> {
                       clusterID: widget.clusterId,
                       thumbnailFallback: false,
                       useFullFile: false,
+                      cannotTrustFile: true,
                     ),
                   ),
                 ),

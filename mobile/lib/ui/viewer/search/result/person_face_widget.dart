@@ -8,6 +8,7 @@ import 'package:photos/models/file/file.dart';
 import "package:photos/models/ml/face/face.dart";
 import "package:photos/models/ml/face/person.dart";
 import "package:photos/services/machine_learning/face_ml/person/person_service.dart";
+import "package:photos/services/machine_learning/ml_result.dart";
 import "package:photos/theme/ente_theme.dart";
 import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
@@ -19,6 +20,7 @@ class PersonFaceWidget extends StatelessWidget {
   final String? clusterID;
   final bool useFullFile;
   final bool thumbnailFallback;
+  final bool cannotTrustFile;
   final Uint8List? faceCrop;
 
   // PersonFaceWidget constructor checks that both personId and clusterID are not null
@@ -29,6 +31,7 @@ class PersonFaceWidget extends StatelessWidget {
     this.clusterID,
     this.useFullFile = true,
     this.thumbnailFallback = true,
+    this.cannotTrustFile = false,
     this.faceCrop,
     super.key,
   }) : assert(
@@ -79,16 +82,42 @@ class PersonFaceWidget extends StatelessWidget {
 
   Future<Uint8List?> _getFaceCrop() async {
     try {
+      EnteFile? fileForFaceCrop = file;
       String? personAvatarFaceID;
       if (personId != null) {
         final PersonEntity? personEntity =
             await PersonService.instance.getPerson(personId!);
         if (personEntity != null) {
           personAvatarFaceID = personEntity.data.avatarFaceID;
+          if (personAvatarFaceID == null && cannotTrustFile) {
+            final allFaces =
+                await MLDataDB.instance.getFaceIDsForPerson(personId!);
+            final allFileIDs = allFaces.map((e) => getFileIdFromFaceId(e));
+            final fileIDToCreationTime =
+                await FilesDB.instance.getFileIDToCreationTime();
+            // Get the file with the most recent creation time
+            final recentFileID = allFileIDs.reduce((a, b) {
+              final aTime = fileIDToCreationTime[a];
+              final bTime = fileIDToCreationTime[b];
+              if (aTime == null) {
+                return b;
+              }
+              if (bTime == null) {
+                return a;
+              }
+              return (aTime >= bTime) ? a : b;
+            });
+            if (fileForFaceCrop.uploadedFileID != recentFileID) {
+              fileForFaceCrop =
+                  await FilesDB.instance.getAnyUploadedFile(recentFileID);
+              if (fileForFaceCrop == null) return null;
+            }
+          }
         }
       }
+
       final Face? face = await MLDataDB.instance.getCoverFaceForPerson(
-        recentFileID: file.uploadedFileID!,
+        recentFileID: fileForFaceCrop.uploadedFileID!,
         avatarFaceId: personAvatarFaceID,
         personID: personId,
         clusterID: clusterID,
@@ -99,13 +128,10 @@ class PersonFaceWidget extends StatelessWidget {
         );
         return null;
       }
-      EnteFile? fileForFaceCrop = file;
-      if (face.fileID != file.uploadedFileID!) {
+      if (face.fileID != fileForFaceCrop.uploadedFileID!) {
         fileForFaceCrop =
             await FilesDB.instance.getAnyUploadedFile(face.fileID);
-      }
-      if (fileForFaceCrop == null) {
-        return null;
+        if (fileForFaceCrop == null) return null;
       }
       final cropMap = await getCachedFaceCrops(
         fileForFaceCrop,
@@ -122,5 +148,4 @@ class PersonFaceWidget extends StatelessWidget {
       return null;
     }
   }
-
 }
