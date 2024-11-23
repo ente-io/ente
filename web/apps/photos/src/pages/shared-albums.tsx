@@ -223,7 +223,6 @@ export default function PublicCollectionGallery() {
             let redirectingToWebsite = false;
             try {
                 const cryptoWorker = await sharedCryptoWorker();
-                await downloadManager.init();
 
                 url.current = window.location.href;
                 const currentURL = new URL(url.current);

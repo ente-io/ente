@@ -58,8 +58,6 @@ export interface SourceURLs {
 }
 
 class DownloadManagerImpl {
-    // TODO: Temporary
-    private token: string | undefined;
     /**
      * Credentials that should be used to download files when we're in the
      * context of the public albums app.
@@ -110,10 +108,6 @@ class DownloadManagerImpl {
      */
     private fileDownloadProgress = new Map<number, number>();
     private fileDownloadProgressListeners: (() => void)[] = [];
-
-    async init(token?: string) {
-        await this.initThumbnailCacheIfNeeded();
-    }
 
     private async initThumbnailCacheIfNeeded() {
         if (this.thumbnailCache === undefined) {

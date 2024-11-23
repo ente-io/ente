@@ -35,7 +35,6 @@ import {
     isHiddenCollection,
 } from "@/new/photos/services/collection";
 import { areOnlySystemCollections } from "@/new/photos/services/collection/ui";
-import downloadManager from "@/new/photos/services/download";
 import {
     getLocalFiles,
     getLocalTrashedFiles,
@@ -351,7 +350,6 @@ export default function Gallery() {
             }
             initSettings();
             await initUserDetailsOrTriggerSync();
-            await downloadManager.init(token);
             setupSelectAllKeyBoardShortcutHandler();
             dispatch({ type: "showAll" });
             setIsFirstLoad(isFirstLogin());
