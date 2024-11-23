@@ -1,6 +1,3 @@
-// TODO: Remove this override
-/* eslint-disable @typescript-eslint/no-empty-function */
-
 import { isDesktop } from "@/base/app";
 import { blobCache, type BlobCache } from "@/base/blob-cache";
 import {
@@ -107,9 +104,20 @@ class DownloadManagerImpl {
     private fileURLPromises = new Map<number, Promise<string>>();
     private fileConversionPromises = new Map<number, Promise<SourceURLs>>();
 
+    /**
+     * A map from file ID to the progress (0-100%) of its active download (if
+     * any).
+     *
+     * [Note: Tracking active file download progress in the UI]
+     *
+     * The download manager maintains a map of download progress for all files
+     * which are being downloaded in a streaming manner (which is currently only
+     * videos). The UI can observe this by using {@link useSyncExternalStore} in
+     * combination with the {@link fileDownloadProgressSubscribe} and
+     * {@link fileDownloadProgressSnapshot} methods of the download manager.
+     */
     private fileDownloadProgress = new Map<number, number>();
-
-    private progressUpdater: (value: Map<number, number>) => void = () => {};
+    private fileDownloadProgressListeners: (() => void)[] = [];
 
     async init(token?: string) {
         if (this.ready) {
@@ -144,7 +152,7 @@ class DownloadManagerImpl {
         this.fileURLPromises.clear();
         this.fileConversionPromises.clear();
         this.fileDownloadProgress.clear();
-        this.progressUpdater = () => {};
+        this.fileDownloadProgressListeners = [];
     }
 
     updateToken(token: string, passwordToken?: string) {
@@ -152,8 +160,27 @@ class DownloadManagerImpl {
         downloadClient.updateTokens(token, passwordToken);
     }
 
-    setProgressUpdater(progressUpdater: (value: Map<number, number>) => void) {
-        this.progressUpdater = progressUpdater;
+    /**
+     * See: [Note: Tracking active file download progress in the UI]
+     */
+    fileDownloadProgressSubscribe(onChange: () => void) {
+        this.fileDownloadProgressListeners.push(onChange);
+        return () => {
+            this.fileDownloadProgressListeners =
+                this.fileDownloadProgressListeners.filter((l) => l != onChange);
+        };
+    }
+
+    /**
+     * See: [Note: Tracking active file download progress in the UI]
+     */
+    fileDownloadProgressSnapshot() {
+        return this.fileDownloadProgress;
+    }
+
+    private setFileDownloadProgress(progress: Map<number, number>) {
+        this.fileDownloadProgress = progress;
+        this.fileDownloadProgressListeners.forEach((l) => l());
     }
 
     /**
@@ -448,21 +475,23 @@ class DownloadManagerImpl {
                 }
                 event.total = fileSize;
             }
+            const progress = new Map(this.fileDownloadProgress);
             if (event.loaded === event.total) {
-                this.fileDownloadProgress.delete(fileID);
+                progress.delete(fileID);
             } else {
-                this.fileDownloadProgress.set(
+                progress.set(
                     fileID,
                     Math.round((event.loaded * 100) / event.total),
                 );
             }
-            this.progressUpdater(new Map(this.fileDownloadProgress));
+            this.setFileDownloadProgress(progress);
         };
     }
 
     private clearDownloadProgress(fileID: number) {
-        this.fileDownloadProgress.delete(fileID);
-        this.progressUpdater(new Map(this.fileDownloadProgress));
+        const progress = new Map(this.fileDownloadProgress);
+        progress.delete(fileID);
+        this.setFileDownloadProgress(progress);
     }
 }
 
