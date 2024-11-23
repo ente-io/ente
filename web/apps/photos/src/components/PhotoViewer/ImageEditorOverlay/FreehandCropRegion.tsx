@@ -1,29 +1,14 @@
-import type { CSSProperties, Dispatch, Ref, SetStateAction } from "react";
+import type { Dispatch, Ref, SetStateAction } from "react";
 import { forwardRef } from "react";
 import { CropBoxProps } from "./";
 
-const handleStyle: CSSProperties = {
-    position: "absolute",
-    height: "10px",
-    width: "10px",
-    backgroundColor: "white",
-    border: "1px solid black",
-};
-
-const seHandleStyle: CSSProperties = {
-    ...handleStyle,
-    right: "-5px",
-    bottom: "-5px",
-    cursor: "se-resize",
-};
-
-interface IProps {
+interface FreehandCropRegionProps {
     cropBox: CropBoxProps;
     setIsDragging: Dispatch<SetStateAction<boolean>>;
 }
 
 const FreehandCropRegion = forwardRef(
-    (props: IProps, ref: Ref<HTMLDivElement>) => {
+    (props: FreehandCropRegionProps, ref: Ref<HTMLDivElement>) => {
         return (
             <>
                 {/* Top overlay */}
@@ -110,7 +95,16 @@ const FreehandCropRegion = forwardRef(
                     ))}
 
                     <div
-                        style={seHandleStyle}
+                        style={{
+                            position: "absolute",
+                            height: "10px",
+                            width: "10px",
+                            backgroundColor: "white",
+                            border: "1px solid black",
+                            right: "-5px",
+                            bottom: "-5px",
+                            cursor: "se-resize",
+                        }}
                         onMouseDown={(e) => {
                             e.preventDefault();
                             props.setIsDragging(true);
