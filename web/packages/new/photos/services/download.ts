@@ -662,46 +662,29 @@ const photos_downloadThumbnail = async (file: EnteFile) => {
     return new Uint8Array(await res.arrayBuffer());
 };
 
-const photos_downloadFile = async (
-    file: EnteFile,
-    token: string | undefined,
-    onDownloadProgress: (event: { loaded: number; total: number }) => void,
-): Promise<Uint8Array> => {
-    if (!token) throw Error(CustomError.TOKEN_MISSING);
-
+const photos_downloadFile = async (file: EnteFile): Promise<Uint8Array> => {
     const customOrigin = await customAPIOrigin();
 
-    // See: [Note: Passing credentials for self-hosted file fetches]
-    const getFile = () => {
-        const opts = {
-            responseType: "arraybuffer",
-            // timeout: this.timeout,
-            onDownloadProgress,
-        };
-
+    const getFile = async () => {
         if (customOrigin) {
+            // See: [Note: Passing credentials for self-hosted file fetches]
+            const token = await ensureAuthToken();
             const params = new URLSearchParams({ token });
-            return HTTPService.get(
+            return fetch(
                 `${customOrigin}/files/download/${file.id}?${params.toString()}`,
-                undefined,
-                undefined,
-                opts,
+                {
+                    headers: clientPackageHeader(),
+                },
             );
         } else {
-            return HTTPService.get(
-                `https://files.ente.io/?fileID=${file.id}`,
-                undefined,
-                { "X-Auth-Token": token },
-                opts,
-            );
+            return fetch(`https://files.ente.io/?fileID=${file.id}`, {
+                headers: await authenticatedRequestHeaders(),
+            });
         }
     };
 
-    const resp = await retryAsyncOperation(getFile);
-    if (resp.data === undefined) throw Error("request failed");
-    // TODO: Remove this cast (it won't be needed when we migrate this from
-    // axios to fetch).
-    return new Uint8Array(resp.data as ArrayBuffer);
+    const res = await retryEnsuringHTTPOk(getFile);
+    return new Uint8Array(await res.arrayBuffer());
 };
 
 const photos_downloadFileStream = async (
