@@ -440,7 +440,7 @@ class DownloadManagerImpl {
         });
     }
 
-    trackDownloadProgress = (fileID: number, fileSize: number) => {
+    private trackDownloadProgress(fileID: number, fileSize: number) {
         return (event: { loaded: number; total: number }) => {
             if (isNaN(event.total) || event.total === 0) {
                 if (!fileSize) {
@@ -458,12 +458,12 @@ class DownloadManagerImpl {
             }
             this.progressUpdater(new Map(this.fileDownloadProgress));
         };
-    };
+    }
 
-    clearDownloadProgress = (fileID: number) => {
+    private clearDownloadProgress(fileID: number) {
         this.fileDownloadProgress.delete(fileID);
         this.progressUpdater(new Map(this.fileDownloadProgress));
-    };
+    }
 }
 
 const DownloadManager = new DownloadManagerImpl();
