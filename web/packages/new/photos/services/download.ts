@@ -295,13 +295,6 @@ class DownloadManagerImpl {
     ): Promise<ReadableStream<Uint8Array> | null> {
         this.ensureInitialized();
 
-        const cached = await this.fileStreamFromCachedURL(file);
-        if (cached) return cached;
-
-        return this.downloadFile(file);
-    }
-
-    private async fileStreamFromCachedURL(file: EnteFile) {
         const cachedURL = this.fileURLPromises.get(file.id);
         if (cachedURL) {
             try {
@@ -311,10 +304,10 @@ class DownloadManagerImpl {
             } catch (e) {
                 log.warn("Failed to use cached object URL", e);
                 this.fileURLPromises.delete(file.id);
-                throw e;
             }
         }
-        return null;
+
+        return this.downloadFile(file);
     }
 
     /**
@@ -323,15 +316,20 @@ class DownloadManagerImpl {
     private async fileURLDownloadAndCacheIfNeeded(file: EnteFile) {
         this.ensureInitialized();
 
-        let url = this.fileURLPromises.get(file.id);
-        if (!url) {
-            url = this.downloadFile(file)
-                .then((stream) => new Response(stream).blob())
-                .then((blob) => URL.createObjectURL(blob));
-            this.fileURLPromises.set(file.id, url);
-        }
+        const cachedURL = this.fileURLPromises.get(file.id);
+        if (cachedURL) return cachedURL;
 
-        return url;
+        const url = this.downloadFile(file)
+            .then((stream) => new Response(stream).blob())
+            .then((blob) => URL.createObjectURL(blob));
+        this.fileURLPromises.set(file.id, url);
+
+        try {
+            return await url;
+        } catch (e) {
+            this.fileURLPromises.delete(file.id);
+            throw e;
+        }
     }
 
     private async downloadFile(
