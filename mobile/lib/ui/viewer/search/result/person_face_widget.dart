@@ -14,7 +14,7 @@ import "package:photos/ui/common/loading_widget.dart";
 import "package:photos/ui/viewer/file/thumbnail_widget.dart";
 import "package:photos/utils/face/face_box_crop.dart";
 
-class PersonFaceWidget extends StatelessWidget {
+class PersonFaceWidget extends StatefulWidget {
   final EnteFile file;
   final String? personId;
   final String? clusterID;
@@ -40,20 +40,24 @@ class PersonFaceWidget extends StatelessWidget {
         );
 
   @override
+  State<PersonFaceWidget> createState() => _PersonFaceWidgetState();
+}
+
+class _PersonFaceWidgetState extends State<PersonFaceWidget> {
+  Future<Uint8List?>? faceCropFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    faceCropFuture = widget.faceCrop != null
+        ? Future.value(widget.faceCrop)
+        : _getFaceCrop();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (faceCrop != null) {
-      return Stack(
-        fit: StackFit.expand,
-        children: [
-          Image(
-            image: MemoryImage(faceCrop!),
-            fit: BoxFit.cover,
-          ),
-        ],
-      );
-    }
     return FutureBuilder<Uint8List?>(
-      future: _getFaceCrop(),
+      future: faceCropFuture,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           final ImageProvider imageProvider = MemoryImage(snapshot.data!);
@@ -70,8 +74,8 @@ class PersonFaceWidget extends StatelessWidget {
           if (snapshot.hasError) {
             log('Error getting cover face for person: ${snapshot.error}');
           }
-          return thumbnailFallback
-              ? ThumbnailWidget(file)
+          return widget.thumbnailFallback
+              ? ThumbnailWidget(widget.file)
               : EnteLoadingWidget(
                   color: getEnteColorScheme(context).fillMuted,
                 );
@@ -82,11 +86,11 @@ class PersonFaceWidget extends StatelessWidget {
 
   Future<Uint8List?> _getFaceCrop() async {
     try {
-      EnteFile? fileForFaceCrop = file;
+      EnteFile? fileForFaceCrop = widget.file;
       String? personAvatarFaceID;
-      if (personId != null) {
+      if (widget.personId != null) {
         final PersonEntity? personEntity =
-            await PersonService.instance.getPerson(personId!);
+            await PersonService.instance.getPerson(widget.personId!);
         if (personEntity != null) {
           personAvatarFaceID = personEntity.data.avatarFaceID;
           if (personAvatarFaceID != null) {
@@ -94,9 +98,9 @@ class PersonFaceWidget extends StatelessWidget {
                 await checkGetCachedCropForFaceID(personAvatarFaceID);
             if (tryCache != null) return tryCache;
           }
-          if (personAvatarFaceID == null && cannotTrustFile) {
+          if (personAvatarFaceID == null && widget.cannotTrustFile) {
             final allFaces =
-                await MLDataDB.instance.getFaceIDsForPerson(personId!);
+                await MLDataDB.instance.getFaceIDsForPerson(widget.personId!);
             final allFileIDs = allFaces.map((e) => getFileIdFromFaceId(e));
             final fileIDToCreationTime =
                 await FilesDB.instance.getFileIDToCreationTime();
@@ -124,12 +128,12 @@ class PersonFaceWidget extends StatelessWidget {
       final Face? face = await MLDataDB.instance.getCoverFaceForPerson(
         recentFileID: fileForFaceCrop.uploadedFileID!,
         avatarFaceId: personAvatarFaceID,
-        personID: personId,
-        clusterID: clusterID,
+        personID: widget.personId,
+        clusterID: widget.clusterID,
       );
       if (face == null) {
         debugPrint(
-          "No cover face for person: $personId and cluster $clusterID and recentFile ${file.uploadedFileID}",
+          "No cover face for person: ${widget.personId} and cluster ${widget.clusterID} and recentFile ${widget.file.uploadedFileID}",
         );
         return null;
       }
@@ -141,12 +145,12 @@ class PersonFaceWidget extends StatelessWidget {
       final cropMap = await getCachedFaceCrops(
         fileForFaceCrop,
         [face],
-        useFullFile: useFullFile,
+        useFullFile: widget.useFullFile,
       );
       return cropMap?[face.faceID];
     } catch (e, s) {
       log(
-        "Error getting cover face for person: $personId and cluster $clusterID",
+        "Error getting cover face for person: ${widget.personId} and cluster ${widget.clusterID}",
         error: e,
         stackTrace: s,
       );
