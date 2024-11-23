@@ -349,12 +349,6 @@ class DownloadManagerImpl {
     ): Promise<ReadableStream<Uint8Array> | null> {
         log.info(`download attempted for file id ${file.id}`);
 
-        const onDownloadProgress = this.trackDownloadProgress(
-            file.id,
-            // TODO: Is info supposed to be optional though?
-            file.info?.fileSize ?? 0,
-        );
-
         const res = await this._downloadFile(file);
 
         if (
@@ -362,7 +356,6 @@ class DownloadManagerImpl {
             file.metadata.fileType === FileType.livePhoto
         ) {
             const encryptedData = new Uint8Array(await res.arrayBuffer());
-            this.clearDownloadProgress(file.id);
 
             const decrypted = await decryptStreamBytes(
                 {
@@ -377,6 +370,12 @@ class DownloadManagerImpl {
         const body = res.body;
         if (!body) return null;
         const reader = body.getReader();
+
+        const onDownloadProgress = this.trackDownloadProgress(
+            file.id,
+            // TODO: Is info supposed to be optional though?
+            file.info?.fileSize ?? 0,
+        );
 
         const contentLength =
             parseInt(res.headers.get("Content-Length") ?? "") || 0;
@@ -479,12 +478,6 @@ class DownloadManagerImpl {
             }
             this.setFileDownloadProgress(progress);
         };
-    }
-
-    private clearDownloadProgress(fileID: number) {
-        const progress = new Map(this.fileDownloadProgress);
-        progress.delete(fileID);
-        this.setFileDownloadProgress(progress);
     }
 }
 
