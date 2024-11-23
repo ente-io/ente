@@ -30,7 +30,7 @@ class PersonFaceWidget extends StatelessWidget {
     this.personId,
     this.clusterID,
     this.useFullFile = true,
-    this.thumbnailFallback = true,
+    this.thumbnailFallback = false,
     this.cannotTrustFile = false,
     this.faceCrop,
     super.key,
