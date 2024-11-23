@@ -30,6 +30,7 @@ import {
     Button,
     CircularProgress,
     IconButton,
+    Slider,
     Tab,
     Tabs,
     Typography,
@@ -46,7 +47,6 @@ import {
 } from "react";
 import { getLocalCollections } from "services/collectionService";
 import uploadManager from "services/upload/uploadManager";
-import ColoursMenu from "./ColoursMenu";
 import TransformMenu from "./TransformMenu";
 
 interface IProps {
@@ -729,6 +729,70 @@ const ImageEditorOverlay = (props: IProps) => {
 
 export default ImageEditorOverlay;
 
+const confirmEditorCloseDialogAttributes = (
+    onConfirm: () => void,
+): MiniDialogAttributes => ({
+    title: t("confirm_editor_close"),
+    message: t("confirm_editor_close_message"),
+    continue: {
+        text: t("close"),
+        color: "critical",
+        action: onConfirm,
+    },
+});
+
+/**
+ * Create a new {@link File} with the contents of the given canvas.
+ *
+ * @param canvas A {@link HTMLCanvasElement} whose contents we want to download
+ * as a file.
+ *
+ * @param originalFileName The name of the original file which was used to seed
+ * the canvas. This will be used as a base name for the generated file (with an
+ * "-edited" suffix).
+ *
+ * @param originalMIMEType The MIME type of the original file which was used to
+ * seed the canvas. When possible, we try to download a file in the same format,
+ * but this is not guaranteed and depends on browser support. If the original
+ * MIME type can not be preserved, a PNG file will be downloaded.
+ */
+const canvasToFile = async (
+    canvas: HTMLCanvasElement,
+    originalFileName: string,
+    originalMIMEType?: string,
+): Promise<File> => {
+    const image = new Image();
+    image.src = canvas.toDataURL();
+
+    // Browsers are required to support "image/png". They may also support
+    // "image/jpeg" and "image/webp". Potentially they may even support more
+    // formats, but to keep this scoped we limit to these three.
+    let [mimeType, extension] = ["image/png", "png"];
+    switch (originalMIMEType) {
+        case "image/jpeg":
+            mimeType = originalMIMEType;
+            extension = "jpeg";
+            break;
+        case "image/webp":
+            mimeType = originalMIMEType;
+            extension = "webp";
+            break;
+        default:
+            break;
+    }
+
+    const blob = (await new Promise<Blob>((resolve) =>
+        canvas.toBlob(resolve, mimeType),
+    ))!;
+
+    const [originalName] = nameAndExtension(originalFileName);
+    const fileName = `${originalName}-edited.${extension}`;
+
+    log.debug(() => ["canvas => file", { blob, type: blob.type, mimeType }]);
+
+    return new File([blob], fileName);
+};
+
 interface CropMenuProps {
     previewScale: number;
     cropBoxProps: CropBoxProps;
@@ -966,66 +1030,102 @@ const FreehandCropRegion = forwardRef(
     },
 );
 
-const confirmEditorCloseDialogAttributes = (
-    onConfirm: () => void,
-): MiniDialogAttributes => ({
-    title: t("confirm_editor_close"),
-    message: t("confirm_editor_close_message"),
-    continue: {
-        text: t("close"),
-        color: "critical",
-        action: onConfirm,
-    },
-});
+interface ColoursMenuProps {
+    brightness: number;
+    contrast: number;
+    saturation: number;
+    blur: number;
+    invert: boolean;
+    setBrightness: Dispatch<SetStateAction<number>>;
+    setContrast: Dispatch<SetStateAction<number>>;
+    setSaturation: Dispatch<SetStateAction<number>>;
+    setBlur: Dispatch<SetStateAction<number>>;
+    setInvert: Dispatch<SetStateAction<boolean>>;
+}
 
-/**
- * Create a new {@link File} with the contents of the given canvas.
- *
- * @param canvas A {@link HTMLCanvasElement} whose contents we want to download
- * as a file.
- *
- * @param originalFileName The name of the original file which was used to seed
- * the canvas. This will be used as a base name for the generated file (with an
- * "-edited" suffix).
- *
- * @param originalMIMEType The MIME type of the original file which was used to
- * seed the canvas. When possible, we try to download a file in the same format,
- * but this is not guaranteed and depends on browser support. If the original
- * MIME type can not be preserved, a PNG file will be downloaded.
- */
-const canvasToFile = async (
-    canvas: HTMLCanvasElement,
-    originalFileName: string,
-    originalMIMEType?: string,
-): Promise<File> => {
-    const image = new Image();
-    image.src = canvas.toDataURL();
-
-    // Browsers are required to support "image/png". They may also support
-    // "image/jpeg" and "image/webp". Potentially they may even support more
-    // formats, but to keep this scoped we limit to these three.
-    let [mimeType, extension] = ["image/png", "png"];
-    switch (originalMIMEType) {
-        case "image/jpeg":
-            mimeType = originalMIMEType;
-            extension = "jpeg";
-            break;
-        case "image/webp":
-            mimeType = originalMIMEType;
-            extension = "webp";
-            break;
-        default:
-            break;
-    }
-
-    const blob = (await new Promise<Blob>((resolve) =>
-        canvas.toBlob(resolve, mimeType),
-    ))!;
-
-    const [originalName] = nameAndExtension(originalFileName);
-    const fileName = `${originalName}-edited.${extension}`;
-
-    log.debug(() => ["canvas => file", { blob, type: blob.type, mimeType }]);
-
-    return new File([blob], fileName);
-};
+const ColoursMenu: React.FC<ColoursMenuProps> = (props) => (
+    <>
+        <Box px={"8px"}>
+            <MenuSectionTitle title={t("BRIGHTNESS")} />
+            <Slider
+                min={0}
+                max={200}
+                defaultValue={100}
+                step={10}
+                valueLabelDisplay="auto"
+                value={props.brightness}
+                marks={[
+                    {
+                        value: 100,
+                        label: "100%",
+                    },
+                ]}
+                onChange={(_, value) => {
+                    props.setBrightness(value as number);
+                }}
+            />
+            <MenuSectionTitle title={t("CONTRAST")} />
+            <Slider
+                min={0}
+                max={200}
+                defaultValue={100}
+                step={10}
+                valueLabelDisplay="auto"
+                value={props.contrast}
+                onChange={(_, value) => {
+                    props.setContrast(value as number);
+                }}
+                marks={[
+                    {
+                        value: 100,
+                        label: "100%",
+                    },
+                ]}
+            />
+            <MenuSectionTitle title={t("BLUR")} />
+            <Slider
+                min={0}
+                max={10}
+                defaultValue={0}
+                step={1}
+                valueLabelDisplay="auto"
+                value={props.blur}
+                onChange={(_, value) => {
+                    props.setBlur(value as number);
+                }}
+            />
+            <MenuSectionTitle title={t("SATURATION")} />
+            <Slider
+                min={0}
+                max={200}
+                defaultValue={100}
+                step={10}
+                valueLabelDisplay="auto"
+                value={props.saturation}
+                onChange={(_, value) => {
+                    props.setSaturation(value as number);
+                }}
+                marks={[
+                    {
+                        value: 100,
+                        label: "100%",
+                    },
+                ]}
+            />
+        </Box>
+        <MenuItemGroup
+            style={{
+                marginBottom: "0.5rem",
+            }}
+        >
+            <EnteMenuItem
+                variant="toggle"
+                checked={props.invert}
+                label={t("INVERT_COLORS")}
+                onClick={() => {
+                    props.setInvert(!props.invert);
+                }}
+            />
+        </MenuItemGroup>
+    </>
+);
